@@ -8,7 +8,7 @@ import com.tencent.supersonic.headless.api.pojo.request.PageDimensionReq;
 import com.tencent.supersonic.headless.api.pojo.request.PageMetricReq;
 import com.tencent.supersonic.headless.api.pojo.request.SchemaFilterReq;
 import com.tencent.supersonic.headless.api.pojo.request.SchemaItemQueryReq;
-import com.tencent.supersonic.headless.api.pojo.request.ViewFilterReq;
+import com.tencent.supersonic.headless.api.pojo.request.DataSetFilterReq;
 import com.tencent.supersonic.headless.api.pojo.response.DimensionResp;
 import com.tencent.supersonic.headless.api.pojo.response.DomainResp;
 import com.tencent.supersonic.headless.api.pojo.response.ItemResp;
@@ -17,15 +17,15 @@ import com.tencent.supersonic.headless.api.pojo.response.MetricResp;
 import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
 import com.tencent.supersonic.headless.api.pojo.response.ModelSchemaResp;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticSchemaResp;
-import com.tencent.supersonic.headless.api.pojo.response.ViewResp;
-import com.tencent.supersonic.headless.api.pojo.response.ViewSchemaResp;
+import com.tencent.supersonic.headless.api.pojo.response.DataSetResp;
+import com.tencent.supersonic.headless.api.pojo.response.DataSetSchemaResp;
 
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 public interface SchemaService {
 
-    List<ViewSchemaResp> fetchViewSchema(ViewFilterReq filter);
+    List<DataSetSchemaResp> fetchDataSetSchema(DataSetFilterReq filter);
 
     List<ModelSchemaResp> fetchModelSchemaResps(List<Long> modelIds);
 
@@ -39,11 +39,11 @@ public interface SchemaService {
 
     List<ModelResp> getModelList(User user, AuthType authType, Long domainId);
 
-    List<ViewResp> getViewList(Long domainId);
+    List<DataSetResp> getDataSetList(Long domainId);
 
     SemanticSchemaResp fetchSemanticSchema(SchemaFilterReq schemaFilterReq);
 
     List<ItemUseResp> getStatInfo(ItemUseReq itemUseReq) throws ExecutionException;
 
-    List<ItemResp> getDomainViewTree();
+    List<ItemResp> getDomainDataSetTree();
 }

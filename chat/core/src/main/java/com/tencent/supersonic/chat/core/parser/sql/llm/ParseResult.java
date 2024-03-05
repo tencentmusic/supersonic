@@ -18,7 +18,7 @@ import java.util.List;
 @NoArgsConstructor
 public class ParseResult {
 
-    private Long viewId;
+    private Long dataSetId;
 
     private LLMReq llmReq;
 

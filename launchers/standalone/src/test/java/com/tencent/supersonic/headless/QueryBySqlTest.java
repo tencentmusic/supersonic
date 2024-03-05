@@ -112,7 +112,7 @@ public class QueryBySqlTest extends BaseTest {
         SemanticQueryResp semanticQueryResp =
                 queryBySql("SELECT SUM(stay_hours) FROM 停留时长统计  WHERE department ='HR'", tom);
         Assertions.assertNotNull(semanticQueryResp.getQueryAuthorization().getMessage());
-        Assertions.assertTrue(semanticQueryResp.getSql().contains("`user_name` = 'tom'"));
+        Assertions.assertTrue(semanticQueryResp.getSql().contains("user_name = 'tom'"));
     }
 
 }

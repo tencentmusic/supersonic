@@ -5,14 +5,12 @@ MERGE INTO s2_user (id, `name`, password, display_name, email) values (3, 'tom',
 MERGE INTO s2_user (id, `name`, password, display_name, email, is_admin) values (4, 'lucy','123456','lucy','lucy@xx.com', 1);
 MERGE INTO s2_user (id, `name`, password, display_name, email) values (5, 'alice','123456','alice','alice@xx.com');
 
-
 MERGE INTO s2_available_date_info(`id`,`item_id` ,`type`    ,`date_format` ,`start_date`  ,`end_date` ,`unavailable_date` ,`created_at`  ,`created_by`  ,`updated_at`  ,`updated_by` )
 values (1 , 1, 'dimension', 'yyyy-MM-dd', DATEADD('DAY', -28, CURRENT_DATE()), DATEADD('DAY', -1, CURRENT_DATE()), '[]', '2023-06-01', 'admin', '2023-06-01', 'admin');
 MERGE INTO s2_available_date_info(`id`,`item_id` ,`type`    ,`date_format` ,`start_date`  ,`end_date` ,`unavailable_date` ,`created_at`  ,`created_by`  ,`updated_at`  ,`updated_by` )
 values (2 , 2, 'dimension', 'yyyy-MM-dd', DATEADD('DAY', -28, CURRENT_DATE()), DATEADD('DAY', -1, CURRENT_DATE()), '[]', '2023-06-01', 'admin', '2023-06-01', 'admin');
 MERGE INTO s2_available_date_info(`id`,`item_id` ,`type`    ,`date_format` ,`start_date`  ,`end_date` ,`unavailable_date` ,`created_at`  ,`created_by`  ,`updated_at`  ,`updated_by` )
 values (3 , 3, 'dimension', 'yyyy-MM-dd', DATEADD('DAY', -28, CURRENT_DATE()), DATEADD('DAY', -1, CURRENT_DATE()), '[]', '2023-06-01', 'admin', '2023-06-01', 'admin');
-
 
 MERGE INTO s2_canvas(`id`, `domain_id`, `type`, `config` ,`created_at`  ,`created_by`  ,`updated_at`  ,`updated_by` )
 values (1, 1, 'modelEdgeRelation', '[{"source":"datasource-1","target":"datasource-3","type":"polyline","id":"edge-0.305251275235679741702883718912","style":{"active":{"stroke":"rgb(95, 149, 255)","lineWidth":1},"selected":{"stroke":"rgb(95, 149, 255)","lineWidth":2,"shadowColor":"rgb(95, 149, 255)","shadowBlur":10,"text-shape":{"fontWeight":500}},"highlight":{"stroke":"rgb(95, 149, 255)","lineWidth":2,"text-shape":{"fontWeight":500}},"inactive":{"stroke":"rgb(234, 234, 234)","lineWidth":1},"disable":{"stroke":"rgb(245, 245, 245)","lineWidth":1},"stroke":"#296df3","endArrow":true},"startPoint":{"x":-94,"y":-137.5,"anchorIndex":0,"id":"-94|||-137.5"},"endPoint":{"x":-234,"y":-45,"anchorIndex":1,"id":"-234|||-45"},"sourceAnchor":2,"targetAnchor":1,"label":"模型关系编辑"},{"source":"datasource-1","target":"datasource-2","type":"polyline","id":"edge-0.466237264629309141702883756359","style":{"active":{"stroke":"rgb(95, 149, 255)","lineWidth":1},"selected":{"stroke":"rgb(95, 149, 255)","lineWidth":2,"shadowColor":"rgb(95, 149, 255)","shadowBlur":10,"text-shape":{"fontWeight":500}},"highlight":{"stroke":"rgb(95, 149, 255)","lineWidth":2,"text-shape":{"fontWeight":500}},"inactive":{"stroke":"rgb(234, 234, 234)","lineWidth":1},"disable":{"stroke":"rgb(245, 245, 245)","lineWidth":1},"stroke":"#296df3","endArrow":true},"startPoint":{"x":-12,"y":-137.5,"anchorIndex":1,"id":"-12|||-137.5"},"endPoint":{"x":85,"y":31.5,"anchorIndex":0,"id":"85|||31.5"},"sourceAnchor":1,"targetAnchor":2,"label":"模型关系编辑"}]', '2023-06-01', 'admin', '2023-06-01', 'admin');
@@ -1112,5 +1110,30 @@ MERGE INTO song(imp_date,song_name,artist_name,country,f_id,g_name,rating,langua
 MERGE INTO song(imp_date,song_name,artist_name,country,f_id,g_name,rating,languages,releasedate,resolution) VALUES (DATEADD('DAY', 0, CURRENT_DATE()),'我的爱','Enrique','美国',4,'蓝调',6,'英文','24-JAN-2007',1080);
 MERGE INTO song(imp_date,song_name,artist_name,country,f_id,g_name,rating,languages,releasedate,resolution) VALUES (DATEADD('DAY', 0, CURRENT_DATE()),'打败它','Michel','英国',5,'流行',8,'英文','17-MAR-2002',720);
 MERGE INTO song(imp_date,song_name,artist_name,country,f_id,g_name,rating,languages,releasedate,resolution) VALUES (DATEADD('DAY', 0, CURRENT_DATE()),'阿杰伊阿卡什','Topu','印度',6,'现代',10,'孟加拉语','27-MAR-2004',320);
+
+
+MERGE into company(imp_date,company_id,company_name,headquarter_address,company_established_time,founder,ceo,annual_turnover,employee_count) VALUES (DATEADD('DAY', -1, CURRENT_DATE()),'item_enterprise_13_131','百度集团','北京','2000','李彦宏','李彦宏',102300000000,40000);
+MERGE into company(imp_date,company_id,company_name,headquarter_address,company_established_time,founder,ceo,annual_turnover,employee_count) VALUES (DATEADD('DAY', -1, CURRENT_DATE()),'item_enterprise_13_132','阿里巴巴集团','杭州','1999年','马云','张勇',376800000000,103699);
+MERGE into company(imp_date,company_id,company_name,headquarter_address,company_established_time,founder,ceo,annual_turnover,employee_count) VALUES (DATEADD('DAY', -1, CURRENT_DATE()),'item_enterprise_13_133','深圳市腾讯计算机系统有限公司','深圳','1998','马化腾','刘炽平',321600000000,56310);
+MERGE into company(imp_date,company_id,company_name,headquarter_address,company_established_time,founder,ceo,annual_turnover,employee_count) VALUES (DATEADD('DAY', -1, CURRENT_DATE()),'item_enterprise_13_134','北京京东世纪贸易有限公司','北京','1998','刘强东','刘强东',28800000000,179000);
+MERGE into company(imp_date,company_id,company_name,headquarter_address,company_established_time,founder,ceo,annual_turnover,employee_count) VALUES (DATEADD('DAY', -1, CURRENT_DATE()),'item_enterprise_13_135','网易公司','杭州','1997','丁磊','丁磊',67500000000,20000);
+
+MERGE into brand(imp_date,brand_id,brand_name,brand_established_time,company_id,legal_representative,registered_capital) VALUES (DATEADD('DAY', -1, CURRENT_DATE()),'item_enterprise_13_136','阿里云','2009年9月10日','item_enterprise_13_132','张勇',50000000);
+MERGE into brand(imp_date,brand_id,brand_name,brand_established_time,company_id,legal_representative,registered_capital) VALUES (DATEADD('DAY', -1, CURRENT_DATE()),'item_enterprise_13_137','天猫','2012年1月11日','item_enterprise_13_132','张勇',100000000);
+MERGE into brand(imp_date,brand_id,brand_name,brand_established_time,company_id,legal_representative,registered_capital) VALUES (DATEADD('DAY', -1, CURRENT_DATE()),'item_enterprise_13_138','腾讯游戏','2003','item_enterprise_13_133','马化腾',50000000);
+MERGE into brand(imp_date,brand_id,brand_name,brand_established_time,company_id,legal_representative,registered_capital) VALUES (DATEADD('DAY', -1, CURRENT_DATE()),'item_enterprise_13_139','度小满','2018','item_enterprise_13_131','朱光',100000000);
+MERGE into brand(imp_date,brand_id,brand_name,brand_established_time,company_id,legal_representative,registered_capital) VALUES (DATEADD('DAY', -1, CURRENT_DATE()),'item_enterprise_13_140','京东金融','2017','item_enterprise_13_134','刘强东',100000000);
+
+insert into company_revenue(imp_date,company_id,brand_id,revenue_proportion,profit_proportion,expenditure_proportion) VALUES ( DATEADD('DAY', -1, CURRENT_DATE()),'item_enterprise_13_131','item_enterprise_13_139',10,10,30);
+insert into company_revenue(imp_date,company_id,brand_id,revenue_proportion,profit_proportion,expenditure_proportion) VALUES ( DATEADD('DAY', -1, CURRENT_DATE()),'item_enterprise_13_133','item_enterprise_13_138',80,80,60);
+insert into company_revenue(imp_date,company_id,brand_id,revenue_proportion,profit_proportion,expenditure_proportion) VALUES ( DATEADD('DAY', -1, CURRENT_DATE()),'item_enterprise_13_134','item_enterprise_13_140',80,80,60);
+insert into company_revenue(imp_date,company_id,brand_id,revenue_proportion,profit_proportion,expenditure_proportion) VALUES ( DATEADD('DAY', -1, CURRENT_DATE()),'item_enterprise_13_132','item_enterprise_13_137',80,80,60);
+insert into company_revenue(imp_date,company_id,brand_id,revenue_proportion,profit_proportion,expenditure_proportion) VALUES ( DATEADD('DAY', -1, CURRENT_DATE()),'item_enterprise_13_132','item_enterprise_13_136',10,10,30);
+
+insert into company_brand_revenue(imp_date,year_time,brand_id,revenue,profit,revenue_growth_year_on_year,profit_growth_year_on_year) VALUES (DATEADD('DAY', -1, CURRENT_DATE()), '2018','item_enterprise_13_138',500000000,-300000000,10,-10);
+insert into company_brand_revenue(imp_date,year_time,brand_id,revenue,profit,revenue_growth_year_on_year,profit_growth_year_on_year) VALUES (DATEADD('DAY', -1, CURRENT_DATE()), '2019','item_enterprise_13_136',100000000000,50000000000,100,50);
+insert into company_brand_revenue(imp_date,year_time,brand_id,revenue,profit,revenue_growth_year_on_year,profit_growth_year_on_year) VALUES ( DATEADD('DAY', -1, CURRENT_DATE()),'2018','item_enterprise_13_137',100000000000,50000000000,100,-10);
+insert into company_brand_revenue(imp_date,year_time,brand_id,revenue,profit,revenue_growth_year_on_year,profit_growth_year_on_year) VALUES (DATEADD('DAY', -1, CURRENT_DATE()), '2018','item_enterprise_13_139',500000000,50000000000,10,50);
+insert into company_brand_revenue(imp_date,year_time,brand_id,revenue,profit,revenue_growth_year_on_year,profit_growth_year_on_year) VALUES ( DATEADD('DAY', -1, CURRENT_DATE()),'2018','item_enterprise_13_140',100000000000,-300000000,10,50);
 
 -- benchmark

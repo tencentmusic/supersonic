@@ -5,7 +5,7 @@ import com.tencent.supersonic.chat.api.pojo.SchemaElementMatch;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
 import com.tencent.supersonic.chat.api.pojo.SchemaMapInfo;
 import com.tencent.supersonic.chat.api.pojo.SemanticSchema;
-import com.tencent.supersonic.chat.api.pojo.ViewSchema;
+import com.tencent.supersonic.chat.api.pojo.DataSetSchema;
 import com.tencent.supersonic.chat.core.pojo.QueryContext;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -26,7 +26,7 @@ public abstract class BaseMapper implements SchemaMapper {
 
         String simpleName = this.getClass().getSimpleName();
         long startTime = System.currentTimeMillis();
-        log.debug("before {},mapInfo:{}", simpleName, queryContext.getMapInfo().getViewElementMatches());
+        log.debug("before {},mapInfo:{}", simpleName, queryContext.getMapInfo().getDataSetElementMatches());
 
         try {
             doMap(queryContext);
@@ -35,13 +35,14 @@ public abstract class BaseMapper implements SchemaMapper {
         }
 
         long cost = System.currentTimeMillis() - startTime;
-        log.debug("after {},cost:{},mapInfo:{}", simpleName, cost, queryContext.getMapInfo().getViewElementMatches());
+        log.debug("after {},cost:{},mapInfo:{}", simpleName, cost,
+                queryContext.getMapInfo().getDataSetElementMatches());
     }
 
     public abstract void doMap(QueryContext queryContext);
 
     public void addToSchemaMap(SchemaMapInfo schemaMap, Long modelId, SchemaElementMatch newElementMatch) {
-        Map<Long, List<SchemaElementMatch>> modelElementMatches = schemaMap.getViewElementMatches();
+        Map<Long, List<SchemaElementMatch>> modelElementMatches = schemaMap.getDataSetElementMatches();
         List<SchemaElementMatch> schemaElementMatches = modelElementMatches.putIfAbsent(modelId, new ArrayList<>());
         if (schemaElementMatches == null) {
             schemaElementMatches = modelElementMatches.get(modelId);
@@ -67,14 +68,14 @@ public abstract class BaseMapper implements SchemaMapper {
         }
     }
 
-    public SchemaElement getSchemaElement(Long viewId, SchemaElementType elementType, Long elementID,
+    public SchemaElement getSchemaElement(Long dataSetId, SchemaElementType elementType, Long elementID,
             SemanticSchema semanticSchema) {
         SchemaElement element = new SchemaElement();
-        ViewSchema viewSchema = semanticSchema.getViewSchemaMap().get(viewId);
-        if (Objects.isNull(viewSchema)) {
+        DataSetSchema dataSetSchema = semanticSchema.getDataSetSchemaMap().get(dataSetId);
+        if (Objects.isNull(dataSetSchema)) {
             return null;
         }
-        SchemaElement elementDb = viewSchema.getElement(elementType, elementID);
+        SchemaElement elementDb = dataSetSchema.getElement(elementType, elementID);
         if (Objects.isNull(elementDb)) {
             log.info("element is null, elementType:{},elementID:{}", elementType, elementID);
             return null;

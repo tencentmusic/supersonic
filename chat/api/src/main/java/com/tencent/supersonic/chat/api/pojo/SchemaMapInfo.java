@@ -9,25 +9,25 @@ import java.util.Set;
 
 public class SchemaMapInfo {
 
-    private Map<Long, List<SchemaElementMatch>> viewElementMatches = new HashMap<>();
+    private Map<Long, List<SchemaElementMatch>> dataSetElementMatches = new HashMap<>();
 
-    public Set<Long> getMatchedViewInfos() {
-        return viewElementMatches.keySet();
+    public Set<Long> getMatchedDataSetInfos() {
+        return dataSetElementMatches.keySet();
     }
 
-    public List<SchemaElementMatch> getMatchedElements(Long view) {
-        return viewElementMatches.getOrDefault(view, Lists.newArrayList());
+    public List<SchemaElementMatch> getMatchedElements(Long dataSet) {
+        return dataSetElementMatches.getOrDefault(dataSet, Lists.newArrayList());
     }
 
-    public Map<Long, List<SchemaElementMatch>> getViewElementMatches() {
-        return viewElementMatches;
+    public Map<Long, List<SchemaElementMatch>> getDataSetElementMatches() {
+        return dataSetElementMatches;
     }
 
-    public void setViewElementMatches(Map<Long, List<SchemaElementMatch>> viewElementMatches) {
-        this.viewElementMatches = viewElementMatches;
+    public void setDataSetElementMatches(Map<Long, List<SchemaElementMatch>> dataSetElementMatches) {
+        this.dataSetElementMatches = dataSetElementMatches;
     }
 
-    public void setMatchedElements(Long view, List<SchemaElementMatch> elementMatches) {
-        viewElementMatches.put(view, elementMatches);
+    public void setMatchedElements(Long dataSet, List<SchemaElementMatch> elementMatches) {
+        dataSetElementMatches.put(dataSet, elementMatches);
     }
 }

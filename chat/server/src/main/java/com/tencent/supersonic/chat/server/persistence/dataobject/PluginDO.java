@@ -15,7 +15,7 @@ public class PluginDO {
 
     private String type;
 
-    private String view;
+    private String dataSet;
 
     private String pattern;
 

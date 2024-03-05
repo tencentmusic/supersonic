@@ -2,6 +2,8 @@ package com.tencent.supersonic.chat.api.pojo;
 
 import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
+import org.springframework.util.CollectionUtils;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -9,18 +11,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import org.springframework.util.CollectionUtils;
 
 public class SemanticSchema implements Serializable {
 
-    private List<ViewSchema> viewSchemaList;
+    private List<DataSetSchema> dataSetSchemaList;
 
-    public SemanticSchema(List<ViewSchema> viewSchemaList) {
-        this.viewSchemaList = viewSchemaList;
+    public SemanticSchema(List<DataSetSchema> dataSetSchemaList) {
+        this.dataSetSchemaList = dataSetSchemaList;
     }
 
-    public void add(ViewSchema schema) {
-        viewSchemaList.add(schema);
+    public void add(DataSetSchema schema) {
+        dataSetSchemaList.add(schema);
     }
 
     public SchemaElement getElement(SchemaElementType elementType, long elementID) {
@@ -30,8 +31,8 @@ public class SemanticSchema implements Serializable {
             case ENTITY:
                 element = getElementsById(elementID, getEntities());
                 break;
-            case VIEW:
-                element = getElementsById(elementID, getViews());
+            case DATASET:
+                element = getElementsById(elementID, getDataSets());
                 break;
             case METRIC:
                 element = getElementsById(elementID, getMetrics());
@@ -52,26 +53,26 @@ public class SemanticSchema implements Serializable {
         }
     }
 
-    public Map<Long, String> getViewIdToName() {
-        return viewSchemaList.stream()
-                .collect(Collectors.toMap(a -> a.getView().getId(), a -> a.getView().getName(), (k1, k2) -> k1));
+    public Map<Long, String> getDataSetIdToName() {
+        return dataSetSchemaList.stream()
+                .collect(Collectors.toMap(a -> a.getDataSet().getId(), a -> a.getDataSet().getName(), (k1, k2) -> k1));
     }
 
     public List<SchemaElement> getDimensionValues() {
         List<SchemaElement> dimensionValues = new ArrayList<>();
-        viewSchemaList.stream().forEach(d -> dimensionValues.addAll(d.getDimensionValues()));
+        dataSetSchemaList.stream().forEach(d -> dimensionValues.addAll(d.getDimensionValues()));
         return dimensionValues;
     }
 
     public List<SchemaElement> getDimensions() {
         List<SchemaElement> dimensions = new ArrayList<>();
-        viewSchemaList.stream().forEach(d -> dimensions.addAll(d.getDimensions()));
+        dataSetSchemaList.stream().forEach(d -> dimensions.addAll(d.getDimensions()));
         return dimensions;
     }
 
-    public List<SchemaElement> getDimensions(Long viewId) {
+    public List<SchemaElement> getDimensions(Long dataSetId) {
         List<SchemaElement> dimensions = getDimensions();
-        return getElementsByViewId(viewId, dimensions);
+        return getElementsByDataSetId(dataSetId, dimensions);
     }
 
     public SchemaElement getDimension(Long id) {
@@ -82,43 +83,43 @@ public class SemanticSchema implements Serializable {
 
     public List<SchemaElement> getTags() {
         List<SchemaElement> tags = new ArrayList<>();
-        viewSchemaList.stream().forEach(d -> tags.addAll(d.getTags()));
+        dataSetSchemaList.stream().forEach(d -> tags.addAll(d.getTags()));
         return tags;
     }
 
-    public List<SchemaElement> getTags(Long viewId) {
+    public List<SchemaElement> getTags(Long dataSetId) {
         List<SchemaElement> tags = new ArrayList<>();
-        viewSchemaList.stream().filter(schemaElement ->
-                        viewId.equals(schemaElement.getView().getView()))
+        dataSetSchemaList.stream().filter(schemaElement ->
+                        dataSetId.equals(schemaElement.getDataSet().getDataSet()))
                 .forEach(d -> tags.addAll(d.getTags()));
         return tags;
     }
 
     public List<SchemaElement> getMetrics() {
         List<SchemaElement> metrics = new ArrayList<>();
-        viewSchemaList.stream().forEach(d -> metrics.addAll(d.getMetrics()));
+        dataSetSchemaList.stream().forEach(d -> metrics.addAll(d.getMetrics()));
         return metrics;
     }
 
-    public List<SchemaElement> getMetrics(Long viewId) {
+    public List<SchemaElement> getMetrics(Long dataSetId) {
         List<SchemaElement> metrics = getMetrics();
-        return getElementsByViewId(viewId, metrics);
+        return getElementsByDataSetId(dataSetId, metrics);
     }
 
     public List<SchemaElement> getEntities() {
         List<SchemaElement> entities = new ArrayList<>();
-        viewSchemaList.stream().forEach(d -> entities.add(d.getEntity()));
+        dataSetSchemaList.stream().forEach(d -> entities.add(d.getEntity()));
         return entities;
     }
 
-    public List<SchemaElement> getEntities(Long viewId) {
+    public List<SchemaElement> getEntities(Long dataSetId) {
         List<SchemaElement> entities = getEntities();
-        return getElementsByViewId(viewId, entities);
+        return getElementsByDataSetId(dataSetId, entities);
     }
 
-    private List<SchemaElement> getElementsByViewId(Long viewId, List<SchemaElement> elements) {
+    private List<SchemaElement> getElementsByDataSetId(Long dataSetId, List<SchemaElement> elements) {
         return elements.stream()
-                .filter(schemaElement -> viewId.equals(schemaElement.getView()))
+                .filter(schemaElement -> dataSetId.equals(schemaElement.getDataSet()))
                 .collect(Collectors.toList());
     }
 
@@ -128,30 +129,30 @@ public class SemanticSchema implements Serializable {
                 .findFirst();
     }
 
-    public SchemaElement getView(Long viewId) {
-        List<SchemaElement> views = getViews();
-        return getElementsById(viewId, views).orElse(null);
+    public SchemaElement getDataSet(Long dataSetId) {
+        List<SchemaElement> dataSets = getDataSets();
+        return getElementsById(dataSetId, dataSets).orElse(null);
     }
 
-    public List<SchemaElement> getViews() {
-        List<SchemaElement> views = new ArrayList<>();
-        viewSchemaList.stream().forEach(d -> views.add(d.getView()));
-        return views;
+    public List<SchemaElement> getDataSets() {
+        List<SchemaElement> dataSets = new ArrayList<>();
+        dataSetSchemaList.stream().forEach(d -> dataSets.add(d.getDataSet()));
+        return dataSets;
     }
 
-    public Map<String, String> getBizNameToName(Long viewId) {
+    public Map<String, String> getBizNameToName(Long dataSetId) {
         List<SchemaElement> allElements = new ArrayList<>();
-        allElements.addAll(getDimensions(viewId));
-        allElements.addAll(getMetrics(viewId));
+        allElements.addAll(getDimensions(dataSetId));
+        allElements.addAll(getMetrics(dataSetId));
         return allElements.stream()
                 .collect(Collectors.toMap(SchemaElement::getBizName, SchemaElement::getName, (k1, k2) -> k1));
     }
 
-    public Map<Long, ViewSchema> getViewSchemaMap() {
-        if (CollectionUtils.isEmpty(viewSchemaList)) {
+    public Map<Long, DataSetSchema> getDataSetSchemaMap() {
+        if (CollectionUtils.isEmpty(dataSetSchemaList)) {
             return new HashMap<>();
         }
-        return viewSchemaList.stream().collect(Collectors.toMap(viewSchema
-                -> viewSchema.getView().getView(), viewSchema -> viewSchema));
+        return dataSetSchemaList.stream().collect(Collectors.toMap(dataSetSchema
+                -> dataSetSchema.getDataSet().getDataSet(), dataSetSchema -> dataSetSchema));
     }
 }

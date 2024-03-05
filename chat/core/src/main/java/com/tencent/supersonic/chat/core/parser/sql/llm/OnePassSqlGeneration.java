@@ -41,9 +41,9 @@ public class OnePassSqlGeneration implements SqlGeneration, InitializingBean {
     private SqlPromptGenerator sqlPromptGenerator;
 
     @Override
-    public LLMResp generation(LLMReq llmReq, Long viewId) {
+    public LLMResp generation(LLMReq llmReq, Long dataSetId) {
         //1.retriever sqlExamples
-        keyPipelineLog.info("viewId:{},llmReq:{}", viewId, llmReq);
+        keyPipelineLog.info("dataSetId:{},llmReq:{}", dataSetId, llmReq);
         List<Map<String, String>> sqlExamples = sqlExampleLoader.retrieverSqlExamples(llmReq.getQueryText(),
                 optimizationConfig.getText2sqlExampleNum());
 

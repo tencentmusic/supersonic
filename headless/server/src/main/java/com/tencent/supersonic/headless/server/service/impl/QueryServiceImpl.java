@@ -51,17 +51,18 @@ import com.tencent.supersonic.headless.server.utils.QueryReqConverter;
 import com.tencent.supersonic.headless.server.utils.QueryUtils;
 import com.tencent.supersonic.headless.server.utils.StatUtils;
 import com.tencent.supersonic.headless.server.utils.TagReqConverter;
+import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
+import org.springframework.stereotype.Service;
+
+import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
-import javax.servlet.http.HttpServletRequest;
-import lombok.SneakyThrows;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections.CollectionUtils;
-import org.springframework.stereotype.Service;
 
 
 @Service
@@ -176,7 +177,7 @@ public class QueryServiceImpl implements QueryService {
         queryStatement.setQueryParam(queryParam);
         queryStatement.setIsS2SQL(false);
         queryStatement.setEnableOptimize(queryUtils.enableOptimize());
-        queryStatement.setViewId(queryStructReq.getViewId());
+        queryStatement.setDataSetId(queryStructReq.getDataSetId());
         queryStatement.setSemanticSchemaResp(semanticSchemaResp);
         SemanticModel semanticModel = semanticSchemaManager.getSemanticModel(semanticSchemaResp);
         queryStatement.setSemanticModel(semanticModel);
@@ -216,7 +217,7 @@ public class QueryServiceImpl implements QueryService {
 
     private SchemaFilterReq buildSchemaFilterReq(SemanticQueryReq semanticQueryReq) {
         SchemaFilterReq schemaFilterReq = new SchemaFilterReq();
-        schemaFilterReq.setViewId(semanticQueryReq.getViewId());
+        schemaFilterReq.setDataSetId(semanticQueryReq.getDataSetId());
         schemaFilterReq.setModelIds(semanticQueryReq.getModelIds());
         return schemaFilterReq;
     }

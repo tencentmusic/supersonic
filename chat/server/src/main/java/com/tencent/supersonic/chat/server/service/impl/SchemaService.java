@@ -4,7 +4,7 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.tencent.supersonic.chat.api.pojo.SemanticSchema;
-import com.tencent.supersonic.chat.api.pojo.ViewSchema;
+import com.tencent.supersonic.chat.api.pojo.DataSetSchema;
 import com.tencent.supersonic.chat.core.query.semantic.SemanticInterpreter;
 import com.tencent.supersonic.chat.core.utils.ComponentFactory;
 import lombok.extern.slf4j.Slf4j;
@@ -28,13 +28,13 @@ public class SchemaService {
                         @Override
                         public SemanticSchema load(String key) {
                             log.info("load getDomainSchemaInfo cache [{}]", key);
-                            return new SemanticSchema(semanticInterpreter.getViewSchema());
+                            return new SemanticSchema(semanticInterpreter.getDataSetSchema());
                         }
                     }
             );
 
-    public ViewSchema getViewSchema(Long id) {
-        return semanticInterpreter.getViewSchema(id, true);
+    public DataSetSchema getDataSetSchema(Long id) {
+        return semanticInterpreter.getDataSetSchema(id, true);
     }
 
     public SemanticSchema getSemanticSchema() {

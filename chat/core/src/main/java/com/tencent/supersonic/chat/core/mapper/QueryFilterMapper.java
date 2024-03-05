@@ -27,13 +27,13 @@ public class QueryFilterMapper implements SchemaMapper {
     @Override
     public void map(QueryContext queryContext) {
         Agent agent = queryContext.getAgent();
-        if (agent == null || CollectionUtils.isEmpty(agent.getViewIds())) {
+        if (agent == null || CollectionUtils.isEmpty(agent.getDataSetIds())) {
             return;
         }
-        if (Agent.containsAllModel(agent.getViewIds())) {
+        if (Agent.containsAllModel(agent.getDataSetIds())) {
             return;
         }
-        Set<Long> viewIds = agent.getViewIds();
+        Set<Long> viewIds = agent.getDataSetIds();
         SchemaMapInfo schemaMapInfo = queryContext.getMapInfo();
         clearOtherSchemaElementMatch(viewIds, schemaMapInfo);
         for (Long viewId : viewIds) {
@@ -47,7 +47,7 @@ public class QueryFilterMapper implements SchemaMapper {
     }
 
     private void clearOtherSchemaElementMatch(Set<Long> viewIds, SchemaMapInfo schemaMapInfo) {
-        for (Map.Entry<Long, List<SchemaElementMatch>> entry : schemaMapInfo.getViewElementMatches().entrySet()) {
+        for (Map.Entry<Long, List<SchemaElementMatch>> entry : schemaMapInfo.getDataSetElementMatches().entrySet()) {
             if (!viewIds.contains(entry.getKey())) {
                 entry.getValue().clear();
             }
@@ -69,7 +69,7 @@ public class QueryFilterMapper implements SchemaMapper {
                     .name(String.valueOf(filter.getValue()))
                     .type(SchemaElementType.VALUE)
                     .bizName(filter.getBizName())
-                    .view(viewId)
+                    .dataSet(viewId)
                     .build();
             SchemaElementMatch schemaElementMatch = SchemaElementMatch.builder()
                     .element(element)

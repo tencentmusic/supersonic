@@ -15,7 +15,7 @@ public interface LLMProxy {
 
     boolean isSkip(QueryContext queryContext);
 
-    LLMResp query2sql(LLMReq llmReq, Long viewId);
+    LLMResp query2sql(LLMReq llmReq, Long dataSetId);
 
     FunctionResp requestFunction(FunctionReq functionReq);
 

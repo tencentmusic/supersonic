@@ -39,7 +39,7 @@ public class ContextInheritParser implements SemanticParser {
                     SchemaElementType.VALUE, Arrays.asList(SchemaElementType.VALUE, SchemaElementType.DIMENSION)),
             new AbstractMap.SimpleEntry<>(SchemaElementType.ENTITY, Arrays.asList(SchemaElementType.ENTITY)),
             new AbstractMap.SimpleEntry<>(SchemaElementType.TAG, Arrays.asList(SchemaElementType.TAG)),
-            new AbstractMap.SimpleEntry<>(SchemaElementType.VIEW, Arrays.asList(SchemaElementType.VIEW)),
+            new AbstractMap.SimpleEntry<>(SchemaElementType.DATASET, Arrays.asList(SchemaElementType.DATASET)),
             new AbstractMap.SimpleEntry<>(SchemaElementType.ID, Arrays.asList(SchemaElementType.ID))
     ).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
@@ -48,12 +48,12 @@ public class ContextInheritParser implements SemanticParser {
         if (!shouldInherit(queryContext)) {
             return;
         }
-        Long viewId = getMatchedView(queryContext, chatContext);
-        if (viewId == null) {
+        Long dataSetId = getMatchedDataSet(queryContext, chatContext);
+        if (dataSetId == null) {
             return;
         }
 
-        List<SchemaElementMatch> elementMatches = queryContext.getMapInfo().getMatchedElements(viewId);
+        List<SchemaElementMatch> elementMatches = queryContext.getMapInfo().getMatchedElements(dataSetId);
 
         List<SchemaElementMatch> matchesToInherit = new ArrayList<>();
         for (SchemaElementMatch match : chatContext.getParseInfo().getElementMatches()) {
@@ -70,17 +70,17 @@ public class ContextInheritParser implements SemanticParser {
         List<RuleSemanticQuery> queries = RuleSemanticQuery.resolve(elementMatches, queryContext);
         for (RuleSemanticQuery query : queries) {
             query.fillParseInfo(queryContext, chatContext);
-            if (existSameQuery(query.getParseInfo().getViewId(), query.getQueryMode(), queryContext)) {
+            if (existSameQuery(query.getParseInfo().getDataSetId(), query.getQueryMode(), queryContext)) {
                 continue;
             }
             queryContext.getCandidateQueries().add(query);
         }
     }
 
-    private boolean existSameQuery(Long viewId, String queryMode, QueryContext queryContext) {
+    private boolean existSameQuery(Long dataSetId, String queryMode, QueryContext queryContext) {
         for (SemanticQuery semanticQuery : queryContext.getCandidateQueries()) {
             if (semanticQuery.getQueryMode().equals(queryMode)
-                    && semanticQuery.getParseInfo().getViewId().equals(viewId)) {
+                    && semanticQuery.getParseInfo().getDataSetId().equals(dataSetId)) {
                 return true;
             }
         }
@@ -109,16 +109,16 @@ public class ContextInheritParser implements SemanticParser {
         return metricModelQueries.size() == queryContext.getCandidateQueries().size();
     }
 
-    protected Long getMatchedView(QueryContext queryContext, ChatContext chatContext) {
-        Long viewId = chatContext.getParseInfo().getViewId();
-        if (viewId == null) {
+    protected Long getMatchedDataSet(QueryContext queryContext, ChatContext chatContext) {
+        Long dataSetId = chatContext.getParseInfo().getDataSetId();
+        if (dataSetId == null) {
             return null;
         }
-        Set<Long> queryViews = queryContext.getMapInfo().getMatchedViewInfos();
-        if (queryViews.contains(viewId)) {
-            return viewId;
+        Set<Long> queryDataSets = queryContext.getMapInfo().getMatchedDataSetInfos();
+        if (queryDataSets.contains(dataSetId)) {
+            return dataSetId;
         }
-        return viewId;
+        return dataSetId;
     }
 
 }

@@ -3,7 +3,7 @@ package com.tencent.supersonic.chat.core.query.rule.tag;
 import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
-import com.tencent.supersonic.chat.api.pojo.ViewSchema;
+import com.tencent.supersonic.chat.api.pojo.DataSetSchema;
 import com.tencent.supersonic.chat.core.pojo.ChatContext;
 import com.tencent.supersonic.chat.core.pojo.QueryContext;
 import com.tencent.supersonic.common.pojo.Constants;
@@ -25,19 +25,19 @@ public abstract class TagListQuery extends TagSemanticQuery {
     }
 
     private void addEntityDetailAndOrderByMetric(QueryContext queryContext, SemanticParseInfo parseInfo) {
-        Long viewId = parseInfo.getViewId();
-        if (Objects.nonNull(viewId) && viewId > 0L) {
-            ViewSchema viewSchema = queryContext.getSemanticSchema().getViewSchemaMap().get(viewId);
-            if (viewSchema != null && Objects.nonNull(viewSchema.getEntity())) {
+        Long dataSetId = parseInfo.getDataSetId();
+        if (Objects.nonNull(dataSetId) && dataSetId > 0L) {
+            DataSetSchema dataSetSchema = queryContext.getSemanticSchema().getDataSetSchemaMap().get(dataSetId);
+            if (dataSetSchema != null && Objects.nonNull(dataSetSchema.getEntity())) {
                 Set<SchemaElement> dimensions = new LinkedHashSet<>();
                 Set<SchemaElement> metrics = new LinkedHashSet<>();
                 Set<Order> orders = new LinkedHashSet<>();
-                TagTypeDefaultConfig tagTypeDefaultConfig = viewSchema.getTagTypeDefaultConfig();
+                TagTypeDefaultConfig tagTypeDefaultConfig = dataSetSchema.getTagTypeDefaultConfig();
                 if (tagTypeDefaultConfig != null && tagTypeDefaultConfig.getDefaultDisplayInfo() != null) {
                     if (CollectionUtils.isNotEmpty(tagTypeDefaultConfig.getDefaultDisplayInfo().getMetricIds())) {
                         metrics = tagTypeDefaultConfig.getDefaultDisplayInfo().getMetricIds()
                                 .stream().map(id -> {
-                                    SchemaElement metric = viewSchema.getElement(SchemaElementType.METRIC, id);
+                                    SchemaElement metric = dataSetSchema.getElement(SchemaElementType.METRIC, id);
                                     if (metric != null) {
                                         orders.add(new Order(metric.getBizName(), Constants.DESC_UPPER));
                                     }
@@ -46,7 +46,7 @@ public abstract class TagListQuery extends TagSemanticQuery {
                     }
                     if (CollectionUtils.isNotEmpty(tagTypeDefaultConfig.getDefaultDisplayInfo().getDimensionIds())) {
                         dimensions = tagTypeDefaultConfig.getDefaultDisplayInfo().getDimensionIds().stream()
-                                .map(id -> viewSchema.getElement(SchemaElementType.DIMENSION, id))
+                                .map(id -> dataSetSchema.getElement(SchemaElementType.DIMENSION, id))
                                 .filter(Objects::nonNull).collect(Collectors.toSet());
                     }
                 }

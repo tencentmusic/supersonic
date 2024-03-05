@@ -39,11 +39,11 @@ public class HavingCorrector extends BaseSemanticCorrector {
     }
 
     private void addHaving(QueryContext queryContext, SemanticParseInfo semanticParseInfo) {
-        Long viewId = semanticParseInfo.getView().getView();
+        Long dataSet = semanticParseInfo.getDataSet().getDataSet();
 
         SemanticSchema semanticSchema = queryContext.getSemanticSchema();
 
-        Set<String> metrics = semanticSchema.getMetrics(viewId).stream()
+        Set<String> metrics = semanticSchema.getMetrics(dataSet).stream()
                 .map(schemaElement -> schemaElement.getName()).collect(Collectors.toSet());
 
         if (CollectionUtils.isEmpty(metrics)) {

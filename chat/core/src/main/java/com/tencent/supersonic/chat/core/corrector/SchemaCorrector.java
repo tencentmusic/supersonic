@@ -16,15 +16,16 @@ import com.tencent.supersonic.common.util.jsqlparser.FieldExpression;
 import com.tencent.supersonic.common.util.jsqlparser.SqlRemoveHelper;
 import com.tencent.supersonic.common.util.jsqlparser.SqlReplaceHelper;
 import com.tencent.supersonic.common.util.jsqlparser.SqlSelectHelper;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.util.CollectionUtils;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.util.CollectionUtils;
 
 /**
  * Perform schema corrections on the Schema information in S2SQL.
@@ -62,7 +63,7 @@ public class SchemaCorrector extends BaseSemanticCorrector {
     }
 
     private void correctFieldName(QueryContext queryContext, SemanticParseInfo semanticParseInfo) {
-        Map<String, String> fieldNameMap = getFieldNameMap(queryContext, semanticParseInfo.getViewId());
+        Map<String, String> fieldNameMap = getFieldNameMap(queryContext, semanticParseInfo.getDataSetId());
         SqlInfo sqlInfo = semanticParseInfo.getSqlInfo();
         String sql = SqlReplaceHelper.replaceFields(sqlInfo.getCorrectS2SQL(), fieldNameMap);
         sqlInfo.setCorrectS2SQL(sql);
@@ -125,7 +126,7 @@ public class SchemaCorrector extends BaseSemanticCorrector {
         }
         List<ElementValue> linkingValues = getLinkingValues(semanticParseInfo);
         SemanticSchema semanticSchema = queryContext.getSemanticSchema();
-        Set<String> dimensions = getDimensions(semanticParseInfo.getViewId(), semanticSchema);
+        Set<String> dimensions = getDimensions(semanticParseInfo.getDataSetId(), semanticSchema);
 
         if (CollectionUtils.isEmpty(linkingValues)) {
             linkingValues = new ArrayList<>();

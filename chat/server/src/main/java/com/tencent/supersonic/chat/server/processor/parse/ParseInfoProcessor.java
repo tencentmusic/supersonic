@@ -74,9 +74,9 @@ public class ParseInfoProcessor implements ParseResultProcessor {
         }
 
         //set filter
-        Long viewId = parseInfo.getViewId();
+        Long dataSetId = parseInfo.getDataSetId();
         try {
-            Map<String, SchemaElement> fieldNameToElement = getNameToElement(viewId);
+            Map<String, SchemaElement> fieldNameToElement = getNameToElement(dataSetId);
             List<QueryFilter> result = getDimensionFilter(fieldNameToElement, expressions);
             parseInfo.getDimensionFilters().addAll(result);
         } catch (Exception e) {
@@ -88,31 +88,31 @@ public class ParseInfoProcessor implements ParseResultProcessor {
             return;
         }
         List<String> allFields = getFieldsExceptDate(SqlSelectHelper.getAllFields(sqlInfo.getCorrectS2SQL()));
-        Set<SchemaElement> metrics = getElements(viewId, allFields, semanticSchema.getMetrics());
+        Set<SchemaElement> metrics = getElements(dataSetId, allFields, semanticSchema.getMetrics());
         parseInfo.setMetrics(metrics);
         if (QueryType.METRIC.equals(parseInfo.getQueryType())) {
             List<String> groupByFields = SqlSelectHelper.getGroupByFields(sqlInfo.getCorrectS2SQL());
             List<String> groupByDimensions = getFieldsExceptDate(groupByFields);
-            parseInfo.setDimensions(getElements(viewId, groupByDimensions, semanticSchema.getDimensions()));
+            parseInfo.setDimensions(getElements(dataSetId, groupByDimensions, semanticSchema.getDimensions()));
         } else if (QueryType.TAG.equals(parseInfo.getQueryType())) {
             List<String> selectFields = SqlSelectHelper.getSelectFields(sqlInfo.getCorrectS2SQL());
             List<String> selectDimensions = getFieldsExceptDate(selectFields);
-            parseInfo.setDimensions(getElements(viewId, selectDimensions, semanticSchema.getDimensions()));
+            parseInfo.setDimensions(getElements(dataSetId, selectDimensions, semanticSchema.getDimensions()));
         }
     }
 
-    private Set<SchemaElement> getElements(Long viewId, List<String> allFields, List<SchemaElement> elements) {
+    private Set<SchemaElement> getElements(Long dataSetId, List<String> allFields, List<SchemaElement> elements) {
         return elements.stream()
                 .filter(schemaElement -> {
                             if (CollectionUtils.isEmpty(schemaElement.getAlias())) {
-                                return viewId.equals(schemaElement.getView()) && allFields.contains(
+                                return dataSetId.equals(schemaElement.getDataSet()) && allFields.contains(
                                         schemaElement.getName());
                             }
                             Set<String> allFieldsSet = new HashSet<>(allFields);
                             Set<String> aliasSet = new HashSet<>(schemaElement.getAlias());
                             List<String> intersection = allFieldsSet.stream()
                                     .filter(aliasSet::contains).collect(Collectors.toList());
-                            return viewId.equals(schemaElement.getView()) && (allFields.contains(
+                            return dataSetId.equals(schemaElement.getDataSet()) && (allFields.contains(
                                     schemaElement.getName()) || !CollectionUtils.isEmpty(intersection));
                         }
                 ).collect(Collectors.toSet());
@@ -194,10 +194,10 @@ public class ParseInfoProcessor implements ParseResultProcessor {
         return dateExpressions.size() > 1 && Objects.nonNull(dateExpressions.get(1).getFieldValue());
     }
 
-    protected Map<String, SchemaElement> getNameToElement(Long viewId) {
+    protected Map<String, SchemaElement> getNameToElement(Long dataSetId) {
         SemanticSchema semanticSchema = ContextUtils.getBean(SchemaService.class).getSemanticSchema();
-        List<SchemaElement> dimensions = semanticSchema.getDimensions(viewId);
-        List<SchemaElement> metrics = semanticSchema.getMetrics(viewId);
+        List<SchemaElement> dimensions = semanticSchema.getDimensions(dataSetId);
+        List<SchemaElement> metrics = semanticSchema.getMetrics(dataSetId);
 
         List<SchemaElement> allElements = Lists.newArrayList();
         allElements.addAll(dimensions);

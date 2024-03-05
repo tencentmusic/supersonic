@@ -37,9 +37,9 @@ public class DatabaseMatchStrategy extends BaseMatchStrategy<DatabaseMapResult> 
 
     @Override
     public Map<MatchText, List<DatabaseMapResult>> match(QueryContext queryContext, List<S2Term> terms,
-            Set<Long> detectViewIds) {
+            Set<Long> detectDataSetIds) {
         this.allElements = getSchemaElements(queryContext);
-        return super.match(queryContext, terms, detectViewIds);
+        return super.match(queryContext, terms, detectDataSetIds);
     }
 
     @Override
@@ -54,7 +54,7 @@ public class DatabaseMatchStrategy extends BaseMatchStrategy<DatabaseMapResult> 
                 + Constants.UNDERLINE + a.getSchemaElement().getName();
     }
 
-    public void detectByStep(QueryContext queryContext, Set<DatabaseMapResult> existResults, Set<Long> detectViewIds,
+    public void detectByStep(QueryContext queryContext, Set<DatabaseMapResult> existResults, Set<Long> detectDataSetIds,
             String detectSegment, int offset) {
         if (StringUtils.isBlank(detectSegment)) {
             return;
@@ -70,9 +70,9 @@ public class DatabaseMatchStrategy extends BaseMatchStrategy<DatabaseMapResult> 
                 continue;
             }
             Set<SchemaElement> schemaElements = entry.getValue();
-            if (!CollectionUtils.isEmpty(detectViewIds)) {
+            if (!CollectionUtils.isEmpty(detectDataSetIds)) {
                 schemaElements = schemaElements.stream()
-                        .filter(schemaElement -> detectViewIds.contains(schemaElement.getView()))
+                        .filter(schemaElement -> detectDataSetIds.contains(schemaElement.getDataSet()))
                         .collect(Collectors.toSet());
             }
             for (SchemaElement schemaElement : schemaElements) {
@@ -96,7 +96,7 @@ public class DatabaseMatchStrategy extends BaseMatchStrategy<DatabaseMapResult> 
         Double metricDimensionThresholdConfig = optimizationConfig.getMetricDimensionThresholdConfig();
         Double metricDimensionMinThresholdConfig = optimizationConfig.getMetricDimensionMinThresholdConfig();
 
-        Map<Long, List<SchemaElementMatch>> modelElementMatches = queryContext.getMapInfo().getViewElementMatches();
+        Map<Long, List<SchemaElementMatch>> modelElementMatches = queryContext.getMapInfo().getDataSetElementMatches();
 
         boolean existElement = modelElementMatches.entrySet().stream().anyMatch(entry -> entry.getValue().size() >= 1);
 

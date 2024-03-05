@@ -25,7 +25,7 @@ import com.tencent.supersonic.headless.api.pojo.response.DomainResp;
 import com.tencent.supersonic.headless.api.pojo.response.MetricResp;
 import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
 import com.tencent.supersonic.headless.api.pojo.response.UnAvailableItemResp;
-import com.tencent.supersonic.headless.api.pojo.response.ViewResp;
+import com.tencent.supersonic.headless.api.pojo.response.DataSetResp;
 import com.tencent.supersonic.headless.server.persistence.dataobject.DateInfoDO;
 import com.tencent.supersonic.headless.server.persistence.dataobject.ModelDO;
 import com.tencent.supersonic.headless.server.persistence.repository.DateInfoRepository;
@@ -37,7 +37,7 @@ import com.tencent.supersonic.headless.server.service.DimensionService;
 import com.tencent.supersonic.headless.server.service.DomainService;
 import com.tencent.supersonic.headless.server.service.MetricService;
 import com.tencent.supersonic.headless.server.service.ModelService;
-import com.tencent.supersonic.headless.server.service.ViewService;
+import com.tencent.supersonic.headless.server.service.DataSetService;
 import com.tencent.supersonic.headless.server.utils.ModelConverter;
 import com.tencent.supersonic.headless.server.utils.NameCheckUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -76,7 +76,7 @@ public class ModelServiceImpl implements ModelService {
 
     private UserService userService;
 
-    private ViewService viewService;
+    private DataSetService dataSetService;
 
     private DateInfoRepository dateInfoRepository;
 
@@ -86,7 +86,7 @@ public class ModelServiceImpl implements ModelService {
             @Lazy MetricService metricService,
             DomainService domainService,
             UserService userService,
-            ViewService viewService,
+            DataSetService dataSetService,
             DateInfoRepository dateInfoRepository) {
         this.modelRepository = modelRepository;
         this.databaseService = databaseService;
@@ -94,7 +94,7 @@ public class ModelServiceImpl implements ModelService {
         this.metricService = metricService;
         this.domainService = domainService;
         this.userService = userService;
-        this.viewService = viewService;
+        this.dataSetService = dataSetService;
         this.dateInfoRepository = dateInfoRepository;
     }
 
@@ -145,9 +145,9 @@ public class ModelServiceImpl implements ModelService {
         ModelFilter modelFilter = new ModelFilter();
         BeanUtils.copyProperties(metaFilter, modelFilter);
         List<ModelResp> modelResps = ModelConverter.convertList(modelRepository.getModelList(modelFilter));
-        if (modelFilter.getViewId() != null) {
-            ViewResp viewResp = viewService.getView(modelFilter.getViewId());
-            return modelResps.stream().filter(modelResp -> viewResp.getAllModels().contains(modelResp.getId()))
+        if (modelFilter.getDataSetId() != null) {
+            DataSetResp dataSetResp = dataSetService.getDataSet(modelFilter.getDataSetId());
+            return modelResps.stream().filter(modelResp -> dataSetResp.getAllModels().contains(modelResp.getId()))
                     .collect(Collectors.toList());
         }
         return modelResps;
@@ -329,7 +329,7 @@ public class ModelServiceImpl implements ModelService {
         }
         if (authTypeEnum.equals(AuthType.VISIBLE)) {
             modelWithAuth = modelResps.stream()
-                    .filter(domainResp -> checkViewerPermission(orgIds, user, domainResp))
+                    .filter(domainResp -> checkDataSeterPermission(orgIds, user, domainResp))
                     .collect(Collectors.toList());
         }
         return modelWithAuth;
@@ -456,7 +456,7 @@ public class ModelServiceImpl implements ModelService {
         return false;
     }
 
-    public static boolean checkViewerPermission(Set<String> orgIds, User user, ModelResp modelResp) {
+    public static boolean checkDataSeterPermission(Set<String> orgIds, User user, ModelResp modelResp) {
         if (checkAdminPermission(orgIds, user, modelResp)) {
             return true;
         }

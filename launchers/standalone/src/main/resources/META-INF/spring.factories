@@ -28,8 +28,8 @@ com.tencent.supersonic.chat.server.processor.parse.ParseResultProcessor=\
 com.tencent.supersonic.chat.core.query.semantic.SemanticInterpreter=\
     com.tencent.supersonic.chat.core.query.semantic.LocalSemanticInterpreter
 
-com.tencent.supersonic.chat.core.parser.sql.llm.ViewResolver=\
-  com.tencent.supersonic.chat.core.parser.sql.llm.HeuristicViewResolver
+com.tencent.supersonic.chat.core.parser.sql.llm.DataSetResolver=\
+  com.tencent.supersonic.chat.core.parser.sql.llm.HeuristicDataSetResolver
 
 com.tencent.supersonic.auth.authentication.interceptor.AuthenticationInterceptor=\
     com.tencent.supersonic.auth.authentication.interceptor.DefaultAuthenticationInterceptor

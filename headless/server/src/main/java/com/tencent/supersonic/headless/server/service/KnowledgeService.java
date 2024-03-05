@@ -12,9 +12,9 @@ public interface KnowledgeService {
 
     List<S2Term> getTerms(String text);
 
-    List<HanlpMapResult> prefixSearch(String key, int limit, Set<Long> viewIds);
+    List<HanlpMapResult> prefixSearch(String key, int limit, Set<Long> dataSetIds);
 
-    List<HanlpMapResult> suffixSearch(String key, int limit, Set<Long> viewIds);
+    List<HanlpMapResult> suffixSearch(String key, int limit, Set<Long> dataSetIds);
 
     void updateSemanticKnowledge(List<DictWord> natures);
 

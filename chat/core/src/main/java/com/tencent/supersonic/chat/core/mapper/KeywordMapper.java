@@ -59,8 +59,8 @@ public class KeywordMapper extends BaseMapper {
 
         for (HanlpMapResult hanlpMapResult : mapResults) {
             for (String nature : hanlpMapResult.getNatures()) {
-                Long viewId = NatureHelper.getViewId(nature);
-                if (Objects.isNull(viewId)) {
+                Long dataSetId = NatureHelper.getDataSetId(nature);
+                if (Objects.isNull(dataSetId)) {
                     continue;
                 }
                 SchemaElementType elementType = NatureHelper.convertToElementType(nature);
@@ -68,7 +68,7 @@ public class KeywordMapper extends BaseMapper {
                     continue;
                 }
                 Long elementID = NatureHelper.getElementID(nature);
-                SchemaElement element = getSchemaElement(viewId, elementType,
+                SchemaElement element = getSchemaElement(dataSetId, elementType,
                         elementID, queryContext.getSemanticSchema());
                 if (element == null) {
                     continue;
@@ -85,7 +85,7 @@ public class KeywordMapper extends BaseMapper {
                         .detectWord(hanlpMapResult.getDetectWord())
                         .build();
 
-                addToSchemaMap(queryContext.getMapInfo(), viewId, schemaElementMatch);
+                addToSchemaMap(queryContext.getMapInfo(), dataSetId, schemaElementMatch);
             }
         }
     }
@@ -106,12 +106,12 @@ public class KeywordMapper extends BaseMapper {
                     .similarity(mapperHelper.getSimilarity(match.getDetectWord(), schemaElement.getName()))
                     .build();
             log.info("add to schema, elementMatch {}", schemaElementMatch);
-            addToSchemaMap(queryContext.getMapInfo(), schemaElement.getView(), schemaElementMatch);
+            addToSchemaMap(queryContext.getMapInfo(), schemaElement.getDataSet(), schemaElementMatch);
         }
     }
 
     private Set<Long> getRegElementSet(SchemaMapInfo schemaMap, SchemaElement schemaElement) {
-        List<SchemaElementMatch> elements = schemaMap.getMatchedElements(schemaElement.getView());
+        List<SchemaElementMatch> elements = schemaMap.getMatchedElements(schemaElement.getDataSet());
         if (CollectionUtils.isEmpty(elements)) {
             return new HashSet<>();
         }

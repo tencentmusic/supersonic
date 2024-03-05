@@ -53,16 +53,16 @@ public class SchemaBuilder {
                 .withRowCount(1)
                 .build();
         schema.add(MATERIALIZATION_SYS_SOURCE, srcTable);
-        DataSourceTable viewTable = DataSourceTable.newBuilder(MATERIALIZATION_SYS_VIEW)
+        DataSourceTable dataSetTable = DataSourceTable.newBuilder(MATERIALIZATION_SYS_VIEW)
                 .addField(MATERIALIZATION_SYS_FIELD_DATE, SqlTypeName.DATE)
                 .addField(MATERIALIZATION_SYS_FIELD_DATA, SqlTypeName.BIGINT)
                 .withRowCount(1)
                 .build();
-        schema.add(MATERIALIZATION_SYS_VIEW, viewTable);
+        schema.add(MATERIALIZATION_SYS_VIEW, dataSetTable);
         return rootSchema;
     }
 
-    public static void addSourceView(CalciteSchema viewSchema, String dbSrc, String tbSrc, Set<String> dates,
+    public static void addSourceView(CalciteSchema dataSetSchema, String dbSrc, String tbSrc, Set<String> dates,
             Set<String> dimensions, Set<String> metrics) {
         String tb = tbSrc.toLowerCase();
         String db = dbSrc.toLowerCase();
@@ -80,14 +80,14 @@ public class SchemaBuilder {
                 .withRowCount(1)
                 .build();
         if (Objects.nonNull(db) && !db.isEmpty()) {
-            SchemaPlus schemaPlus = viewSchema.plus().getSubSchema(db);
+            SchemaPlus schemaPlus = dataSetSchema.plus().getSubSchema(db);
             if (Objects.isNull(schemaPlus)) {
-                viewSchema.plus().add(db, new AbstractSchema());
-                schemaPlus = viewSchema.plus().getSubSchema(db);
+                dataSetSchema.plus().add(db, new AbstractSchema());
+                schemaPlus = dataSetSchema.plus().getSubSchema(db);
             }
             schemaPlus.add(tb, srcTable);
         } else {
-            viewSchema.add(tb, srcTable);
+            dataSetSchema.add(tb, srcTable);
         }
     }
 }

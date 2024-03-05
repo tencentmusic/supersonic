@@ -3,7 +3,7 @@ package com.tencent.supersonic.chat.server.util;
 import static com.tencent.supersonic.common.pojo.Constants.ADMIN_LOWER;
 
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
-import com.tencent.supersonic.chat.api.pojo.ViewSchema;
+import com.tencent.supersonic.chat.api.pojo.DataSetSchema;
 import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.chat.api.pojo.request.ChatAggConfigReq;
 import com.tencent.supersonic.chat.api.pojo.request.ChatConfigBaseReq;
@@ -56,7 +56,7 @@ public class ChatConfigHelper {
         return chatConfig;
     }
 
-    public List<Long> generateAllDimIdList(ViewSchema modelSchema) {
+    public List<Long> generateAllDimIdList(DataSetSchema modelSchema) {
         if (Objects.isNull(modelSchema) || CollectionUtils.isEmpty(modelSchema.getDimensions())) {
             return new ArrayList<>();
         }
@@ -65,7 +65,7 @@ public class ChatConfigHelper {
         return new ArrayList<>(dimIdAndDescPair.keySet());
     }
 
-    public List<Long> generateAllMetricIdList(ViewSchema modelSchema) {
+    public List<Long> generateAllMetricIdList(DataSetSchema modelSchema) {
         if (Objects.isNull(modelSchema) || CollectionUtils.isEmpty(modelSchema.getMetrics())) {
             return new ArrayList<>();
         }

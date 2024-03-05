@@ -45,7 +45,7 @@ public abstract class BaseSemanticCorrector implements SemanticCorrector {
 
     public abstract void doCorrect(QueryContext queryContext, SemanticParseInfo semanticParseInfo);
 
-    protected Map<String, String> getFieldNameMap(QueryContext queryContext, Long viewId) {
+    protected Map<String, String> getFieldNameMap(QueryContext queryContext, Long dataSetId) {
 
         SemanticSchema semanticSchema = queryContext.getSemanticSchema();
 
@@ -55,7 +55,7 @@ public abstract class BaseSemanticCorrector implements SemanticCorrector {
 
         // support fieldName and field alias
         Map<String, String> result = dbAllFields.stream()
-                .filter(entry -> viewId.equals(entry.getView()))
+                .filter(entry -> dataSetId.equals(entry.getDataSet()))
                 .flatMap(schemaElement -> {
                     Set<String> elements = new HashSet<>();
                     elements.add(schemaElement.getName());
@@ -109,8 +109,8 @@ public abstract class BaseSemanticCorrector implements SemanticCorrector {
     protected void addAggregateToMetric(QueryContext queryContext, SemanticParseInfo semanticParseInfo) {
         //add aggregate to all metric
         String correctS2SQL = semanticParseInfo.getSqlInfo().getCorrectS2SQL();
-        Long viewId = semanticParseInfo.getView().getView();
-        List<SchemaElement> metrics = getMetricElements(queryContext, viewId);
+        Long dataSetId = semanticParseInfo.getDataSet().getDataSet();
+        List<SchemaElement> metrics = getMetricElements(queryContext, dataSetId);
 
         Map<String, String> metricToAggregate = metrics.stream()
                 .map(schemaElement -> {
@@ -135,13 +135,13 @@ public abstract class BaseSemanticCorrector implements SemanticCorrector {
         semanticParseInfo.getSqlInfo().setCorrectS2SQL(aggregateSql);
     }
 
-    protected List<SchemaElement> getMetricElements(QueryContext queryContext, Long viewId) {
+    protected List<SchemaElement> getMetricElements(QueryContext queryContext, Long dataSetId) {
         SemanticSchema semanticSchema = queryContext.getSemanticSchema();
-        return semanticSchema.getMetrics(viewId);
+        return semanticSchema.getMetrics(dataSetId);
     }
 
-    protected Set<String> getDimensions(Long viewId, SemanticSchema semanticSchema) {
-        Set<String> dimensions = semanticSchema.getDimensions(viewId).stream()
+    protected Set<String> getDimensions(Long dataSetId, SemanticSchema semanticSchema) {
+        Set<String> dimensions = semanticSchema.getDimensions(dataSetId).stream()
                 .flatMap(
                         schemaElement -> {
                             Set<String> elements = new HashSet<>();

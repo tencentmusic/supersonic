@@ -5,10 +5,10 @@ import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.common.pojo.enums.AuthType;
 import com.tencent.supersonic.headless.api.pojo.response.DomainResp;
 import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
-import com.tencent.supersonic.headless.api.pojo.response.ViewResp;
+import com.tencent.supersonic.headless.api.pojo.response.DataSetResp;
 import com.tencent.supersonic.headless.server.service.DomainService;
 import com.tencent.supersonic.headless.server.service.ModelService;
-import com.tencent.supersonic.headless.server.service.ViewService;
+import com.tencent.supersonic.headless.server.service.DataSetService;
 import com.tencent.supersonic.util.DataUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -22,7 +22,7 @@ public class SchemaAuthTest extends BaseTest {
     private DomainService domainService;
 
     @Autowired
-    private ViewService viewService;
+    private DataSetService viewService;
 
     @Autowired
     private ModelService modelService;
@@ -57,10 +57,10 @@ public class SchemaAuthTest extends BaseTest {
     @Test
     public void test_getViewList_alice() {
         User user = DataUtils.getUserAlice();
-        List<ViewResp> modelResps = viewService.getViewsInheritAuth(user, 0L);
+        List<DataSetResp> modelResps = viewService.getDataSetsInheritAuth(user, 0L);
         List<Long> expectedViewIds = Lists.newArrayList(2L);
         Assertions.assertEquals(expectedViewIds,
-                modelResps.stream().map(ViewResp::getId).collect(Collectors.toList()));
+                modelResps.stream().map(DataSetResp::getId).collect(Collectors.toList()));
     }
 
     @Test
@@ -84,10 +84,10 @@ public class SchemaAuthTest extends BaseTest {
     @Test
     public void test_getViewList_jack() {
         User user = DataUtils.getUserJack();
-        List<ViewResp> modelResps = viewService.getViewsInheritAuth(user, 0L);
+        List<DataSetResp> modelResps = viewService.getDataSetsInheritAuth(user, 0L);
         List<Long> expectedViewIds = Lists.newArrayList(1L, 2L);
         Assertions.assertEquals(expectedViewIds,
-                modelResps.stream().map(ViewResp::getId).collect(Collectors.toList()));
+                modelResps.stream().map(DataSetResp::getId).collect(Collectors.toList()));
     }
 
 }

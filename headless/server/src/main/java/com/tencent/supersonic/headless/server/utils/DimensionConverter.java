@@ -10,7 +10,7 @@ import com.tencent.supersonic.headless.api.pojo.DimValueMap;
 import com.tencent.supersonic.headless.api.pojo.request.DimensionReq;
 import com.tencent.supersonic.headless.api.pojo.response.DimensionResp;
 import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
-import com.tencent.supersonic.headless.api.pojo.response.ViewResp;
+import com.tencent.supersonic.headless.api.pojo.response.DataSetResp;
 import com.tencent.supersonic.headless.server.persistence.dataobject.DimensionDO;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.BeanUtils;
@@ -79,10 +79,10 @@ public class DimensionConverter {
         return dimensionResp;
     }
 
-    public static List<DimensionResp> filterByView(List<DimensionResp> dimensionResps, ViewResp viewResp) {
+    public static List<DimensionResp> filterByDataSet(List<DimensionResp> dimensionResps, DataSetResp dataSetResp) {
         return dimensionResps.stream().filter(dimensionResp ->
-                        viewResp.getAllDimensions().contains(dimensionResp.getId())
-                                || viewResp.getAllIncludeAllModels().contains(dimensionResp.getModelId()))
+                        dataSetResp.getAllDimensions().contains(dimensionResp.getId())
+                                || dataSetResp.getAllIncludeAllModels().contains(dimensionResp.getModelId()))
                 .collect(Collectors.toList());
     }
 

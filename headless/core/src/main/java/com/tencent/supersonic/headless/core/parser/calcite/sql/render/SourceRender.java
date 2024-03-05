@@ -34,7 +34,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
- * process the table view from the defined data model schema
+ * process the table dataSet from the defined data model schema
  */
 @Slf4j
 public class SourceRender extends Renderer {

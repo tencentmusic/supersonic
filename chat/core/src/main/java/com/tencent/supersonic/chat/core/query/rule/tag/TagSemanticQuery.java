@@ -1,7 +1,7 @@
 package com.tencent.supersonic.chat.core.query.rule.tag;
 
 import com.tencent.supersonic.chat.api.pojo.SchemaElementMatch;
-import com.tencent.supersonic.chat.api.pojo.ViewSchema;
+import com.tencent.supersonic.chat.api.pojo.DataSetSchema;
 import com.tencent.supersonic.chat.core.pojo.ChatContext;
 import com.tencent.supersonic.chat.core.pojo.QueryContext;
 import com.tencent.supersonic.chat.core.query.rule.RuleSemanticQuery;
@@ -42,8 +42,9 @@ public abstract class TagSemanticQuery extends RuleSemanticQuery {
         parseInfo.setQueryType(QueryType.TAG);
         parseInfo.setLimit(TAG_MAX_RESULTS);
         if (parseInfo.getDateInfo() == null) {
-            ViewSchema viewSchema = queryContext.getSemanticSchema().getViewSchemaMap().get(parseInfo.getViewId());
-            TimeDefaultConfig timeDefaultConfig = viewSchema.getTagTypeTimeDefaultConfig();
+            DataSetSchema dataSetSchema =
+                    queryContext.getSemanticSchema().getDataSetSchemaMap().get(parseInfo.getDataSetId());
+            TimeDefaultConfig timeDefaultConfig = dataSetSchema.getTagTypeTimeDefaultConfig();
             DateConf dateInfo = new DateConf();
             if (Objects.nonNull(timeDefaultConfig) && Objects.nonNull(timeDefaultConfig.getUnit())) {
                 int unit = timeDefaultConfig.getUnit();

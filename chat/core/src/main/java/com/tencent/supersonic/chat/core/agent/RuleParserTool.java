@@ -15,7 +15,7 @@ public class RuleParserTool extends NL2SQLTool {
     private List<String> queryTypes;
 
     public boolean isContainsAllModel() {
-        return CollectionUtils.isNotEmpty(viewIds) && viewIds.contains(-1L);
+        return CollectionUtils.isNotEmpty(dataSetIds) && dataSetIds.contains(-1L);
     }
 
 }
