@@ -50,7 +50,7 @@ import com.tencent.supersonic.headless.server.service.QueryService;
 import com.tencent.supersonic.headless.server.utils.QueryReqConverter;
 import com.tencent.supersonic.headless.server.utils.QueryUtils;
 import com.tencent.supersonic.headless.server.utils.StatUtils;
-import com.tencent.supersonic.headless.server.utils.TagReqConverter;
+import com.tencent.supersonic.headless.server.utils.TagConverter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
@@ -72,7 +72,7 @@ public class QueryServiceImpl implements QueryService {
     private StatUtils statUtils;
     private final QueryUtils queryUtils;
     private final QueryReqConverter queryReqConverter;
-    private final TagReqConverter tagReqConverter;
+    private final TagConverter tagConverter;
     private final Catalog catalog;
     private final AppService appService;
     private final QueryCache queryCache;
@@ -84,7 +84,7 @@ public class QueryServiceImpl implements QueryService {
             StatUtils statUtils,
             QueryUtils queryUtils,
             QueryReqConverter queryReqConverter,
-            TagReqConverter tagReqConverter, Catalog catalog,
+            TagConverter tagConverter, Catalog catalog,
             AppService appService,
             QueryCache queryCache,
             SemanticSchemaManager semanticSchemaManager,
@@ -93,7 +93,7 @@ public class QueryServiceImpl implements QueryService {
         this.statUtils = statUtils;
         this.queryUtils = queryUtils;
         this.queryReqConverter = queryReqConverter;
-        this.tagReqConverter = tagReqConverter;
+        this.tagConverter = tagConverter;
         this.catalog = catalog;
         this.appService = appService;
         this.queryCache = queryCache;
@@ -206,7 +206,7 @@ public class QueryServiceImpl implements QueryService {
         SchemaFilterReq filter = buildSchemaFilterReq(queryTagReq);
         schemaFilterReq.setModelIds(queryTagReq.getModelIds());
         SemanticSchemaResp semanticSchemaResp = catalog.fetchSemanticSchema(filter);
-        QueryStatement queryStatement = tagReqConverter.convert(queryTagReq, semanticSchemaResp);
+        QueryStatement queryStatement = tagConverter.convert(queryTagReq, semanticSchemaResp);
         queryStatement.setModelIds(queryTagReq.getModelIds());
         queryStatement.setEnableOptimize(queryUtils.enableOptimize());
         queryStatement.setSemanticSchemaResp(semanticSchemaResp);

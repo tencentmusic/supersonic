@@ -9,11 +9,17 @@ import com.tencent.supersonic.headless.api.pojo.enums.EngineType;
 import com.tencent.supersonic.headless.api.pojo.request.QuerySqlReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryTagReq;
+import com.tencent.supersonic.headless.api.pojo.response.DataSetResp;
 import com.tencent.supersonic.headless.api.pojo.response.DatabaseResp;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticSchemaResp;
-import com.tencent.supersonic.headless.core.pojo.QueryStatement;
+import com.tencent.supersonic.headless.api.pojo.response.TagResp;
 import com.tencent.supersonic.headless.core.pojo.DataSetQueryParam;
+import com.tencent.supersonic.headless.core.pojo.QueryStatement;
 import com.tencent.supersonic.headless.core.utils.SqlGenerateUtils;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.BeanUtils;
@@ -21,13 +27,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-
 @Component
 @Slf4j
-public class TagReqConverter {
+public class TagConverter {
 
     @Value("${query.sql.limitWrapper:true}")
     private Boolean limitWrapper;
@@ -94,5 +96,10 @@ public class TagReqConverter {
         queryParam.setGroups(queryTagReq.getGroups());
         queryParam.setDimensionFilters(queryTagReq.getTagFilters());
         queryParam.setQueryType(QueryType.TAG);
+    }
+
+    public static List<TagResp> filterByDataSet(List<TagResp> tagResps, DataSetResp dataSetResp) {
+        return tagResps.stream().filter(tagResp -> dataSetResp.getAllTags().contains(tagResp.getId())
+                || dataSetResp.getAllIncludeAllModels().contains(tagResp.getModelId())).collect(Collectors.toList());
     }
 }

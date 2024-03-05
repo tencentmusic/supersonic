@@ -45,6 +45,11 @@ public class DataSetResp extends SchemaItem {
                 .collect(Collectors.toList());
     }
 
+    public List<Long> getAllTags() {
+        return getDataSetModelConfigs().stream().map(DataSetModelConfig::getTagIds)
+                .flatMap(Collection::stream).collect(Collectors.toList());
+    }
+
     public List<Long> getAllIncludeAllModels() {
         return getDataSetModelConfigs().stream().filter(DataSetModelConfig::isIncludesAll)
                 .map(DataSetModelConfig::getId)

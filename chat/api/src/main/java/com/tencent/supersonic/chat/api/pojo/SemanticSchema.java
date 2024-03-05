@@ -43,6 +43,9 @@ public class SemanticSchema implements Serializable {
             case VALUE:
                 element = getElementsById(elementID, getDimensionValues());
                 break;
+            case TAG:
+                element = getElementsById(elementID, getTags());
+                break;
             default:
         }
 

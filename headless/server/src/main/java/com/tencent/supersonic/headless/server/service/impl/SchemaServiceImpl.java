@@ -1,5 +1,7 @@
 package com.tencent.supersonic.headless.server.service.impl;
 
+import static com.tencent.supersonic.common.pojo.Constants.AT_SYMBOL;
+
 import com.github.pagehelper.PageInfo;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
@@ -12,12 +14,14 @@ import com.tencent.supersonic.common.pojo.enums.TypeEnums;
 import com.tencent.supersonic.common.pojo.exception.InvalidArgumentException;
 import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.headless.api.pojo.enums.SchemaType;
+import com.tencent.supersonic.headless.api.pojo.request.DataSetFilterReq;
 import com.tencent.supersonic.headless.api.pojo.request.ItemUseReq;
 import com.tencent.supersonic.headless.api.pojo.request.PageDimensionReq;
 import com.tencent.supersonic.headless.api.pojo.request.PageMetricReq;
 import com.tencent.supersonic.headless.api.pojo.request.SchemaFilterReq;
 import com.tencent.supersonic.headless.api.pojo.request.SchemaItemQueryReq;
-import com.tencent.supersonic.headless.api.pojo.request.DataSetFilterReq;
+import com.tencent.supersonic.headless.api.pojo.response.DataSetResp;
+import com.tencent.supersonic.headless.api.pojo.response.DataSetSchemaResp;
 import com.tencent.supersonic.headless.api.pojo.response.DatabaseResp;
 import com.tencent.supersonic.headless.api.pojo.response.DimSchemaResp;
 import com.tencent.supersonic.headless.api.pojo.response.DimensionResp;
@@ -30,10 +34,9 @@ import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
 import com.tencent.supersonic.headless.api.pojo.response.ModelSchemaResp;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticSchemaResp;
 import com.tencent.supersonic.headless.api.pojo.response.TagResp;
-import com.tencent.supersonic.headless.api.pojo.response.DataSetResp;
-import com.tencent.supersonic.headless.api.pojo.response.DataSetSchemaResp;
 import com.tencent.supersonic.headless.server.pojo.MetaFilter;
 import com.tencent.supersonic.headless.server.pojo.TagFilter;
+import com.tencent.supersonic.headless.server.service.DataSetService;
 import com.tencent.supersonic.headless.server.service.DimensionService;
 import com.tencent.supersonic.headless.server.service.DomainService;
 import com.tencent.supersonic.headless.server.service.MetricService;
@@ -41,16 +44,10 @@ import com.tencent.supersonic.headless.server.service.ModelRelaService;
 import com.tencent.supersonic.headless.server.service.ModelService;
 import com.tencent.supersonic.headless.server.service.SchemaService;
 import com.tencent.supersonic.headless.server.service.TagService;
-import com.tencent.supersonic.headless.server.service.DataSetService;
 import com.tencent.supersonic.headless.server.utils.DimensionConverter;
 import com.tencent.supersonic.headless.server.utils.MetricConverter;
 import com.tencent.supersonic.headless.server.utils.StatUtils;
-import lombok.SneakyThrows;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeanUtils;
-import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
-
+import com.tencent.supersonic.headless.server.utils.TagConverter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -58,8 +55,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-
-import static com.tencent.supersonic.common.pojo.Constants.AT_SYMBOL;
+import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
+import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 @Slf4j
 @Service
@@ -119,21 +119,31 @@ public class SchemaServiceImpl implements SchemaService {
     }
 
     public List<DataSetSchemaResp> buildDataSetSchema(DataSetFilterReq filter) {
-        List<DataSetSchemaResp> dataSetSchemaResps = new ArrayList<>();
-        List<Long> dataSetIds = filter.getDataSetIds();
+
         MetaFilter metaFilter = new MetaFilter();
         metaFilter.setStatus(StatusEnum.ONLINE.getCode());
-        metaFilter.setIds(dataSetIds);
+        metaFilter.setIds(filter.getDataSetIds());
         List<DataSetResp> dataSetResps = dataSetService.getDataSetList(metaFilter);
-        List<Long> modelIds = dataSetResps.stream().map(DataSetResp::getAllModels)
+        Map<Long, DataSetResp> dataSetRespMap = getDataSetMap(dataSetResps);
+
+        List<Long> modelIds = dataSetRespMap.values().stream().map(DataSetResp::getAllModels)
                 .flatMap(Collection::stream).collect(Collectors.toList());
+
         metaFilter.setModelIds(modelIds);
         metaFilter.setIds(Lists.newArrayList());
+
         List<MetricResp> metricResps = metricService.getMetrics(metaFilter);
+
         List<DimensionResp> dimensionResps = dimensionService.getDimensions(metaFilter);
+
         metaFilter.setIds(modelIds);
         List<ModelResp> modelResps = modelService.getModelList(metaFilter);
-        Map<Long, DataSetResp> dataSetRespMap = getDataSetMap(dataSetResps);
+
+        TagFilter tagFilter = new TagFilter();
+        tagFilter.setModelIds(modelIds);
+        List<TagResp> tagResps = tagService.getTags(tagFilter);
+
+        List<DataSetSchemaResp> dataSetSchemaResps = new ArrayList<>();
         for (Long dataSetId : dataSetRespMap.keySet()) {
             DataSetResp dataSetResp = dataSetRespMap.get(dataSetId);
             if (dataSetResp == null || !StatusEnum.ONLINE.getCode().equals(dataSetResp.getStatus())) {
@@ -149,6 +159,9 @@ public class SchemaServiceImpl implements SchemaService {
             dataSetSchemaResp.setMetrics(metricSchemaResps);
             dataSetSchemaResp.setModelResps(modelResps.stream().filter(modelResp ->
                     dataSetResp.getAllModels().contains(modelResp.getId())).collect(Collectors.toList()));
+
+            tagResps = TagConverter.filterByDataSet(tagResps, dataSetResp);
+            dataSetSchemaResp.setTags(tagResps);
             dataSetSchemaResps.add(dataSetSchemaResp);
         }
         fillStaticInfo(dataSetSchemaResps);
@@ -309,7 +322,7 @@ public class SchemaServiceImpl implements SchemaService {
             // add tag info
             TagFilter tagFilter = new TagFilter();
             tagFilter.setModelIds(schemaFilterReq.getModelIds());
-            List<TagResp> tagResps = tagService.query(tagFilter);
+            List<TagResp> tagResps = tagService.getTags(tagFilter);
             semanticSchemaResp.setTags(tagResps);
         }
         if (!CollectionUtils.isEmpty(semanticSchemaResp.getModelIds())) {
