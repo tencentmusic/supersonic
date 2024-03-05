@@ -9,6 +9,6 @@ public enum TypeEnums {
     ENTITY,
     DATASET,
     MODEL,
-    UNKNOWN;
+    UNKNOWN
 
 }

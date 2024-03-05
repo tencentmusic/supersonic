@@ -67,7 +67,12 @@ public class TagServiceImpl implements TagService {
         tagDO.setCreatedAt(date);
         tagDO.setUpdatedBy(user.getName());
         tagDO.setUpdatedAt(date);
-        tagDO.setStatus(StatusEnum.ONLINE.getCode());
+        if (Objects.nonNull(tagReq.getStatus())) {
+            tagDO.setStatus(tagReq.getStatus());
+        } else {
+            tagDO.setStatus(StatusEnum.ONLINE.getCode());
+        }
+
         tagRepository.create(tagDO);
         return convert(tagDO);
     }
