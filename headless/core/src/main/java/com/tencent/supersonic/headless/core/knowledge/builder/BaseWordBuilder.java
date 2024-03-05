@@ -35,4 +35,5 @@ public abstract class BaseWordBuilder {
     }
 
     protected abstract List<DictWord> doGet(String word, SchemaElement schemaElement);
+
 }
