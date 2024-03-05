@@ -4,5 +4,5 @@ public enum TagDefineType {
 
     FIELD,
     DIMENSION,
-    Tag
+    TAG
 }
