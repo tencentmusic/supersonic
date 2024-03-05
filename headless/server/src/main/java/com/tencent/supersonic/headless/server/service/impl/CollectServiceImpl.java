@@ -36,7 +36,7 @@ public class CollectServiceImpl implements CollectService {
     public Boolean deleteCollectionIndicators(User user, Long id) {
         QueryWrapper<CollectDO> collectDOQueryWrapper = new QueryWrapper<>();
         collectDOQueryWrapper.lambda().eq(CollectDO::getUsername, user.getName());
-        collectDOQueryWrapper.lambda().eq(CollectDO::getCollectId, id);
+        collectDOQueryWrapper.lambda().eq(CollectDO::getId, id);
         collectDOQueryWrapper.lambda().eq(CollectDO::getType, type);
         collectMapper.delete(collectDOQueryWrapper);
         return true;
