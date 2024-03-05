@@ -32,11 +32,6 @@ public class SqlSelectFunctionHelper {
         return SqlSelectHelper.hasGroupBy(sql);
     }
 
-    public static void main(String[] args) {
-        String sql = "select a from table";
-        System.out.println(hasAggregateFunction(sql));
-    }
-
     public static boolean hasFunction(String sql, String functionName) {
         Set<String> functions = getFunctions(sql);
         if (!CollectionUtils.isEmpty(functions)) {

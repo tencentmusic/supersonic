@@ -107,7 +107,7 @@ public class KnowledgeController {
     }
 
     /**
-     * dailyDictTask-手动离线更新所以字典
+     * dailyDictTask-手动离线更新所有字典
      */
     @PutMapping("/task/all")
     public Boolean dailyDictTask(

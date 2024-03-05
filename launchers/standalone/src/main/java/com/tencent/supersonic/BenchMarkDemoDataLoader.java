@@ -221,10 +221,11 @@ public class BenchMarkDemoDataLoader {
         viewReq.setDescription("包含cspider数据集相关标签和指标信息");
         viewReq.setAdmins(Lists.newArrayList("admin"));
         List<DataSetModelConfig> viewModelConfigs = Lists.newArrayList(
-                new DataSetModelConfig(5L, Lists.newArrayList(8L), Lists.newArrayList()),
-                new DataSetModelConfig(6L, Lists.newArrayList(9L, 10L), Lists.newArrayList()),
-                new DataSetModelConfig(7L, Lists.newArrayList(11L, 12L), Lists.newArrayList()),
-                new DataSetModelConfig(8L, Lists.newArrayList(13L, 14L), Lists.newArrayList(8L, 9L))
+                new DataSetModelConfig(5L, Lists.newArrayList(8L), Lists.newArrayList(), Lists.newArrayList()),
+                new DataSetModelConfig(6L, Lists.newArrayList(9L, 10L), Lists.newArrayList(), Lists.newArrayList()),
+                new DataSetModelConfig(7L, Lists.newArrayList(11L, 12L), Lists.newArrayList(), Lists.newArrayList()),
+                new DataSetModelConfig(8L, Lists.newArrayList(13L, 14L), Lists.newArrayList(8L, 9L),
+                        Lists.newArrayList())
         );
         DataSetDetail viewDetail = new DataSetDetail();
         viewDetail.setDataSetModelConfigs(viewModelConfigs);

@@ -1,41 +1,32 @@
 package com.tencent.supersonic.headless.core.knowledge.builder;
 
 import com.google.common.collect.Lists;
+import com.tencent.supersonic.common.pojo.enums.DictWordType;
 import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.headless.core.knowledge.DictWord;
-import com.tencent.supersonic.common.pojo.enums.DictWordType;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
-
-import java.util.ArrayList;
 import java.util.List;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Service;
 
 /**
  * Metric DictWord
  */
 @Service
-public class MetricWordBuilder extends BaseWordBuilder {
-
-    @Value("${nlp.metric.use.suffix:true}")
-    private boolean nlpMetricUseSuffix = true;
+public class MetricWordBuilder extends BaseWordWithAliasBuilder {
 
     @Override
     public List<DictWord> doGet(String word, SchemaElement schemaElement) {
         List<DictWord> result = Lists.newArrayList();
-        result.add(getOnwWordNature(word, schemaElement, false));
-        result.addAll(getOnwWordNatureAlias(schemaElement, false));
-        if (nlpMetricUseSuffix) {
-            String reverseWord = StringUtils.reverse(word);
-            if (!word.equalsIgnoreCase(reverseWord)) {
-                result.add(getOnwWordNature(reverseWord, schemaElement, true));
-            }
+        result.add(getOneWordNature(word, schemaElement, false));
+        result.addAll(getOneWordNatureAlias(schemaElement, false));
+        String reverseWord = StringUtils.reverse(word);
+        if (!word.equalsIgnoreCase(reverseWord)) {
+            result.add(getOneWordNature(reverseWord, schemaElement, true));
         }
         return result;
     }
 
-    private DictWord getOnwWordNature(String word, SchemaElement schemaElement, boolean isSuffix) {
+    public DictWord getOneWordNature(String word, SchemaElement schemaElement, boolean isSuffix) {
         DictWord dictWord = new DictWord();
         dictWord.setWord(word);
         Long modelId = schemaElement.getModel();
@@ -47,18 +38,6 @@ public class MetricWordBuilder extends BaseWordBuilder {
         }
         dictWord.setNatureWithFrequency(String.format("%s " + DEFAULT_FREQUENCY, nature));
         return dictWord;
-    }
-
-    private List<DictWord> getOnwWordNatureAlias(SchemaElement schemaElement, boolean isSuffix) {
-        List<DictWord> dictWords = new ArrayList<>();
-        if (CollectionUtils.isEmpty(schemaElement.getAlias())) {
-            return dictWords;
-        }
-
-        for (String alias : schemaElement.getAlias()) {
-            dictWords.add(getOnwWordNature(alias, schemaElement, false));
-        }
-        return dictWords;
     }
 
 }

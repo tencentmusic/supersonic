@@ -123,7 +123,7 @@ public class TagServiceImpl implements TagService {
     }
 
     @Override
-    public List<TagResp> query(TagFilter tagFilter) {
+    public List<TagResp> getTags(TagFilter tagFilter) {
         List<TagDO> tagDOS = tagRepository.query(tagFilter);
         if (!CollectionUtils.isEmpty(tagDOS)) {
             return tagDOS.stream().map(tagDO -> convert(tagDO)).collect(Collectors.toList());
@@ -154,7 +154,7 @@ public class TagServiceImpl implements TagService {
 
         PageInfo<TagDO> tagDOPageInfo = PageHelper.startPage(tagFilterPage.getCurrent(),
                 tagFilterPage.getPageSize())
-                .doSelectPageInfo(() -> query(tagFilter));
+                .doSelectPageInfo(() -> getTags(tagFilter));
         PageInfo<TagResp> pageInfo = new PageInfo<>();
         BeanUtils.copyProperties(tagDOPageInfo, pageInfo);
         List<TagResp> tagRespList = convertList(tagDOPageInfo.getList(), collectIds);
@@ -223,7 +223,7 @@ public class TagServiceImpl implements TagService {
         TagFilter tagFilter = new TagFilter();
         tagFilter.setModelIds(Arrays.asList(tagReq.getModelId()));
 
-        List<TagResp> tagResps = query(tagFilter);
+        List<TagResp> tagResps = getTags(tagFilter);
         if (!CollectionUtils.isEmpty(tagResps)) {
             Long bizNameSameCount = tagResps.stream().filter(tagResp -> !tagResp.getId().equals(tagReq.getId()))
                     .filter(tagResp -> tagResp.getBizName().equalsIgnoreCase(tagReq.getBizName())).count();
