@@ -50,7 +50,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
-public class DataSetImpl
+public class DataSetServiceImpl
         extends ServiceImpl<DataSetDOMapper, DataSetDO> implements DataSetService {
 
     protected final Cache<MetaFilter, List<DataSetResp>> dataSetSchemaCache =
