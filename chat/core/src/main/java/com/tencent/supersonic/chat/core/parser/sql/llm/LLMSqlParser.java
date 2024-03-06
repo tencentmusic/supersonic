@@ -28,7 +28,7 @@ public class LLMSqlParser implements SemanticParser {
             return;
         }
         try {
-            //2.get modelId from queryCtx and chatCtx.
+            //2.get dataSetId from queryCtx and chatCtx.
             Long dataSetId = requestService.getDataSetId(queryCtx);
             if (dataSetId == null) {
                 return;

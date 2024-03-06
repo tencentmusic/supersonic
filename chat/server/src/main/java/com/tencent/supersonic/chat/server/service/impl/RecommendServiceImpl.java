@@ -43,7 +43,6 @@ public class RecommendServiceImpl implements RecommendService {
         if (Objects.isNull(limit) || limit <= 0) {
             limit = Long.MAX_VALUE;
         }
-        log.debug("limit:{}", limit);
         Long modelId = recommendReq.getModelId();
         if (Objects.isNull(modelId)) {
             return new RecommendResp();

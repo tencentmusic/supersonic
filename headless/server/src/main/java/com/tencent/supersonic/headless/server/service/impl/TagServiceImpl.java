@@ -5,7 +5,11 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
+import com.tencent.supersonic.common.pojo.Constants;
+import com.tencent.supersonic.common.pojo.DataEvent;
+import com.tencent.supersonic.common.pojo.DataItem;
 import com.tencent.supersonic.common.pojo.enums.AuthType;
+import com.tencent.supersonic.common.pojo.enums.EventType;
 import com.tencent.supersonic.common.pojo.enums.StatusEnum;
 import com.tencent.supersonic.common.pojo.enums.TypeEnums;
 import com.tencent.supersonic.common.pojo.exception.InvalidArgumentException;
@@ -13,7 +17,6 @@ import com.tencent.supersonic.headless.api.pojo.TagDefineParams;
 import com.tencent.supersonic.headless.api.pojo.enums.TagDefineType;
 import com.tencent.supersonic.headless.api.pojo.request.MetaBatchReq;
 import com.tencent.supersonic.headless.api.pojo.request.TagReq;
-
 import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
 import com.tencent.supersonic.headless.api.pojo.response.TagResp;
 import com.tencent.supersonic.headless.server.persistence.dataobject.CollectDO;
@@ -25,7 +28,6 @@ import com.tencent.supersonic.headless.server.service.CollectService;
 import com.tencent.supersonic.headless.server.service.ModelService;
 import com.tencent.supersonic.headless.server.service.TagService;
 import com.tencent.supersonic.headless.server.utils.NameCheckUtils;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -34,12 +36,12 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
-
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.BeanUtils;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -49,12 +51,14 @@ public class TagServiceImpl implements TagService {
     private final TagRepository tagRepository;
     private final ModelService modelService;
     private final CollectService collectService;
+    private ApplicationEventPublisher eventPublisher;
 
     public TagServiceImpl(TagRepository tagRepository, ModelService modelService,
-                          CollectService collectService) {
+            CollectService collectService, ApplicationEventPublisher eventPublisher) {
         this.tagRepository = tagRepository;
         this.modelService = modelService;
         this.collectService = collectService;
+        this.eventPublisher = eventPublisher;
     }
 
     @Override
@@ -72,9 +76,26 @@ public class TagServiceImpl implements TagService {
         } else {
             tagDO.setStatus(StatusEnum.ONLINE.getCode());
         }
-
         tagRepository.create(tagDO);
+        sendEventBatch(Lists.newArrayList(tagDO), EventType.ADD);
         return convert(tagDO);
+    }
+
+    private void sendEventBatch(List<TagDO> tagDOS, EventType eventType) {
+        List<DataItem> dataItems = tagDOS.stream().map(this::getDataItem)
+                .collect(Collectors.toList());
+        eventPublisher.publishEvent(new DataEvent(this, dataItems, eventType));
+    }
+
+    private void sendEvent(DataItem dataItem, EventType eventType) {
+        eventPublisher.publishEvent(new DataEvent(this,
+                Lists.newArrayList(dataItem), eventType));
+    }
+
+    private DataItem getDataItem(TagDO tagDO) {
+        return DataItem.builder().id(tagDO.getId() + Constants.UNDERLINE).name(tagDO.getName())
+                .bizName(tagDO.getBizName()).modelId(tagDO.getModelId() + Constants.UNDERLINE)
+                .type(TypeEnums.TAG).build();
     }
 
     @Override
@@ -83,10 +104,17 @@ public class TagServiceImpl implements TagService {
             throw new RuntimeException("id is empty");
         }
         TagDO tagDO = tagRepository.getTagById(tagReq.getId());
+        String oldName = tagDO.getName();
         tagDO = fillUpdateInfo(tagReq, tagDO);
         tagDO.setUpdatedBy(user.getName());
         tagDO.setUpdatedAt(new Date());
         tagRepository.update(tagDO);
+        if (!oldName.equals(tagReq.getName())) {
+            DataItem dataItem = getDataItem(tagDO);
+            dataItem.setName(oldName);
+            dataItem.setNewName(tagReq.getName());
+            sendEvent(getDataItem(tagDO), EventType.UPDATE);
+        }
         return convert(tagDO);
     }
 
@@ -100,6 +128,7 @@ public class TagServiceImpl implements TagService {
         tagDO.setUpdatedBy(user.getName());
         tagDO.setUpdatedAt(new Date());
         tagRepository.update(tagDO);
+        sendEventBatch(Lists.newArrayList(tagDO), EventType.DELETE);
     }
 
     @Override
@@ -142,7 +171,7 @@ public class TagServiceImpl implements TagService {
         }
 
         PageInfo<TagDO> tagDOPageInfo = PageHelper.startPage(tagFilterPage.getCurrent(),
-                tagFilterPage.getPageSize())
+                        tagFilterPage.getPageSize())
                 .doSelectPageInfo(() -> getTags(tagFilter));
         PageInfo<TagResp> pageInfo = new PageInfo<>();
         BeanUtils.copyProperties(tagDOPageInfo, pageInfo);
@@ -173,8 +202,12 @@ public class TagServiceImpl implements TagService {
         });
 
         tagRepository.batchUpdateStatus(tagDOList);
-        // todo  sendEventBatch
-
+        if (StatusEnum.OFFLINE.getCode().equals(metaBatchReq.getStatus())
+                || StatusEnum.DELETED.getCode().equals(metaBatchReq.getStatus())) {
+            sendEventBatch(tagDOList, EventType.DELETE);
+        } else if (StatusEnum.ONLINE.getCode().equals(metaBatchReq.getStatus())) {
+            sendEventBatch(tagDOList, EventType.ADD);
+        }
         return true;
     }
 

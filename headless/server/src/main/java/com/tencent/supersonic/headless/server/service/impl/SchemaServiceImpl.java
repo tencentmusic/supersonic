@@ -119,7 +119,6 @@ public class SchemaServiceImpl implements SchemaService {
     }
 
     public List<DataSetSchemaResp> buildDataSetSchema(DataSetFilterReq filter) {
-
         MetaFilter metaFilter = new MetaFilter();
         metaFilter.setStatus(StatusEnum.ONLINE.getCode());
         metaFilter.setIds(filter.getDataSetIds());
@@ -141,7 +140,7 @@ public class SchemaServiceImpl implements SchemaService {
 
         TagFilter tagFilter = new TagFilter();
         tagFilter.setModelIds(modelIds);
-        List<TagResp> tagResps = tagService.getTags(tagFilter);
+        List<TagResp> tagRespList = tagService.getTags(tagFilter);
 
         List<DataSetSchemaResp> dataSetSchemaResps = new ArrayList<>();
         for (Long dataSetId : dataSetRespMap.keySet()) {
@@ -160,8 +159,8 @@ public class SchemaServiceImpl implements SchemaService {
             dataSetSchemaResp.setModelResps(modelResps.stream().filter(modelResp ->
                     dataSetResp.getAllModels().contains(modelResp.getId())).collect(Collectors.toList()));
 
-            tagResps = TagConverter.filterByDataSet(tagResps, dataSetResp);
-            dataSetSchemaResp.setTags(tagResps);
+            tagRespList = TagConverter.filterByDataSet(tagRespList, dataSetResp);
+            dataSetSchemaResp.setTags(tagRespList);
             dataSetSchemaResps.add(dataSetSchemaResp);
         }
         fillStaticInfo(dataSetSchemaResps);
