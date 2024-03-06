@@ -46,7 +46,7 @@ public class TagReqConverter {
         if (!CollectionUtils.isEmpty(queryTagReq.getTagFilters())) {
             queryStructReq.setDimensionFilters(queryTagReq.getTagFilters());
         }
-        QuerySqlReq querySqlReq = queryStructReq.convert(queryStructReq);
+        QuerySqlReq querySqlReq = queryStructReq.convert();
         if (Objects.nonNull(querySqlReq)) {
             log.info("convert to QuerySqlReq {}", querySqlReq);
             String tableName = SqlSelectHelper.getTableName(querySqlReq.getSql());
