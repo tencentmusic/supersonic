@@ -12,7 +12,7 @@ public enum DictWordType {
 
     DIMENSION("dimension"),
 
-    VALUE("value"),
+    VALUE("v"),
 
     VIEW("view"),
 
@@ -20,7 +20,7 @@ public enum DictWordType {
 
     NUMBER("m"),
 
-    TAG("tag"),
+    TAG("t"),
 
     SUFFIX("suffix");
 
@@ -45,7 +45,7 @@ public enum DictWordType {
                 return dictWordType;
             }
         }
-        //domain
+        //view
         String[] natures = nature.split(DictWordType.NATURE_SPILT);
         if (natures.length == 2 && StringUtils.isNumeric(natures[1])) {
             return VIEW;
