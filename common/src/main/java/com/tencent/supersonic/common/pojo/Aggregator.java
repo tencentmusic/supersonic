@@ -19,6 +19,8 @@ public class Aggregator {
 
     private List<String> args;
 
+    private String alias;
+
     public Aggregator() {
     }
 

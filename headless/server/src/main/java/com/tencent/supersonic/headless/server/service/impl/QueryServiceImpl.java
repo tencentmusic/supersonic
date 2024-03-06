@@ -23,6 +23,7 @@ import com.tencent.supersonic.headless.api.pojo.request.QueryMetricReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryMultiStructReq;
 import com.tencent.supersonic.headless.api.pojo.request.QuerySqlReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
+import com.tencent.supersonic.headless.api.pojo.request.QueryTagReq;
 import com.tencent.supersonic.headless.api.pojo.request.SchemaFilterReq;
 import com.tencent.supersonic.headless.api.pojo.request.SemanticQueryReq;
 import com.tencent.supersonic.headless.api.pojo.response.AppDetailResp;
@@ -58,6 +59,7 @@ import com.tencent.supersonic.headless.server.utils.ModelClusterBuilder;
 import com.tencent.supersonic.headless.server.utils.QueryReqConverter;
 import com.tencent.supersonic.headless.server.utils.QueryUtils;
 import com.tencent.supersonic.headless.server.utils.StatUtils;
+import com.tencent.supersonic.headless.server.utils.TagReqConverter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -83,6 +85,7 @@ public class QueryServiceImpl implements QueryService {
     private StatUtils statUtils;
     private final QueryUtils queryUtils;
     private final QueryReqConverter queryReqConverter;
+    private final TagReqConverter tagReqConverter;
     private final Catalog catalog;
     private final AppService appService;
     private final QueryCache queryCache;
@@ -102,7 +105,7 @@ public class QueryServiceImpl implements QueryService {
             StatUtils statUtils,
             QueryUtils queryUtils,
             QueryReqConverter queryReqConverter,
-            Catalog catalog,
+            TagReqConverter tagReqConverter, Catalog catalog,
             AppService appService,
             QueryCache queryCache,
             SemanticSchemaManager semanticSchemaManager,
@@ -114,6 +117,7 @@ public class QueryServiceImpl implements QueryService {
         this.statUtils = statUtils;
         this.queryUtils = queryUtils;
         this.queryReqConverter = queryReqConverter;
+        this.tagReqConverter = tagReqConverter;
         this.catalog = catalog;
         this.appService = appService;
         this.queryCache = queryCache;
@@ -185,6 +189,9 @@ public class QueryServiceImpl implements QueryService {
         if (semanticQueryReq instanceof QueryMultiStructReq) {
             return buildMultiStructQueryStatement((QueryMultiStructReq) semanticQueryReq);
         }
+        if (semanticQueryReq instanceof QueryTagReq) {
+            return buildTagQueryStatement((QueryTagReq) semanticQueryReq);
+        }
         return null;
     }
 
@@ -218,6 +225,21 @@ public class QueryServiceImpl implements QueryService {
         }
         log.info("multi sqlParser:{}", sqlParsers);
         return queryUtils.sqlParserUnion(queryMultiStructReq, sqlParsers);
+    }
+
+    private QueryStatement buildTagQueryStatement(QueryTagReq queryTagReq)
+            throws Exception {
+        SchemaFilterReq schemaFilterReq = new SchemaFilterReq();
+        SchemaFilterReq filter = buildSchemaFilterReq(queryTagReq);
+        schemaFilterReq.setModelIds(queryTagReq.getModelIds());
+        SemanticSchemaResp semanticSchemaResp = catalog.fetchSemanticSchema(filter);
+        QueryStatement queryStatement = tagReqConverter.convert(queryTagReq, semanticSchemaResp);
+        queryStatement.setModelIds(queryTagReq.getModelIds());
+        queryStatement.setEnableOptimize(queryUtils.enableOptimize());
+        queryStatement.setSemanticSchemaResp(semanticSchemaResp);
+        SemanticModel semanticModel = semanticSchemaManager.getTagSemanticModel(semanticSchemaResp);
+        queryStatement.setSemanticModel(semanticModel);
+        return queryStatement;
     }
 
     private SchemaFilterReq buildSchemaFilterReq(SemanticQueryReq semanticQueryReq) {
