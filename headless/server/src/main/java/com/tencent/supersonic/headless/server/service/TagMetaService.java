@@ -9,7 +9,7 @@ import com.tencent.supersonic.headless.server.pojo.TagFilter;
 import com.tencent.supersonic.headless.server.pojo.TagFilterPage;
 import java.util.List;
 
-public interface TagService {
+public interface TagMetaService {
 
     TagResp create(TagReq tagReq, User user);
 

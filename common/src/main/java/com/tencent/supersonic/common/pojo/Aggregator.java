@@ -35,6 +35,12 @@ public class Aggregator {
         this.args = args;
     }
 
+    public Aggregator(String column, AggOperatorEnum func, String alias) {
+        this.column = column;
+        this.func = func;
+        this.alias = alias;
+    }
+
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("{");
@@ -46,6 +52,8 @@ public class Aggregator {
                 .append(nameCh).append('\"');
         sb.append(",\"args\":")
                 .append(args);
+        sb.append(",\"alias\":")
+                .append(alias);
         sb.append('}');
         return sb.toString();
     }
