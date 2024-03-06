@@ -65,7 +65,7 @@ public class DuSQLDemoDataLoader {
             addModel_2();
             addModel_3();
             addModel_4();
-            addView_1();
+            addDataSet_1();
             addModelRela_1();
             addModelRela_2();
             addModelRela_3();
@@ -254,7 +254,7 @@ public class DuSQLDemoDataLoader {
 
     }
 
-    public void addView_1() {
+    public void addDataSet_1() {
         DataSetReq viewReq = new DataSetReq();
         viewReq.setName("DuSQL 互联网企业");
         viewReq.setBizName("internet");
