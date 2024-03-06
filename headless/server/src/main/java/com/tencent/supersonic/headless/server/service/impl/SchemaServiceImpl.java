@@ -43,7 +43,7 @@ import com.tencent.supersonic.headless.server.service.MetricService;
 import com.tencent.supersonic.headless.server.service.ModelRelaService;
 import com.tencent.supersonic.headless.server.service.ModelService;
 import com.tencent.supersonic.headless.server.service.SchemaService;
-import com.tencent.supersonic.headless.server.service.TagService;
+import com.tencent.supersonic.headless.server.service.TagMetaService;
 import com.tencent.supersonic.headless.server.utils.DimensionConverter;
 import com.tencent.supersonic.headless.server.utils.MetricConverter;
 import com.tencent.supersonic.headless.server.utils.StatUtils;
@@ -81,7 +81,7 @@ public class SchemaServiceImpl implements SchemaService {
     private final DomainService domainService;
     private final DataSetService dataSetService;
     private final ModelRelaService modelRelaService;
-    private final TagService tagService;
+    private final TagMetaService tagService;
 
     public SchemaServiceImpl(ModelService modelService,
             DimensionService dimensionService,
@@ -89,7 +89,7 @@ public class SchemaServiceImpl implements SchemaService {
             DomainService domainService,
             DataSetService dataSetService,
             ModelRelaService modelRelaService,
-            StatUtils statUtils, TagService tagService) {
+            StatUtils statUtils, TagMetaService tagService) {
         this.modelService = modelService;
         this.dimensionService = dimensionService;
         this.metricService = metricService;

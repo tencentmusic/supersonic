@@ -239,6 +239,8 @@ public class DictUtils {
     }
 
     private QuerySqlReq constructQuerySqlReq(DictItemResp dictItemResp) {
+        // todo tag
+
         String sqlPattern = "select %s,count(1) from tbl %s group by %s order by count(1) desc limit %d";
         String bizName = dictItemResp.getBizName();
         String whereStr = generateWhereStr(dictItemResp);

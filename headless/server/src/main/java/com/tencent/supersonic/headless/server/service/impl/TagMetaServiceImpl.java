@@ -26,7 +26,7 @@ import com.tencent.supersonic.headless.server.pojo.TagFilter;
 import com.tencent.supersonic.headless.server.pojo.TagFilterPage;
 import com.tencent.supersonic.headless.server.service.CollectService;
 import com.tencent.supersonic.headless.server.service.ModelService;
-import com.tencent.supersonic.headless.server.service.TagService;
+import com.tencent.supersonic.headless.server.service.TagMetaService;
 import com.tencent.supersonic.headless.server.utils.NameCheckUtils;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -46,15 +46,15 @@ import org.springframework.stereotype.Service;
 
 @Service
 @Slf4j
-public class TagServiceImpl implements TagService {
+public class TagMetaServiceImpl implements TagMetaService {
 
     private final TagRepository tagRepository;
     private final ModelService modelService;
     private final CollectService collectService;
     private ApplicationEventPublisher eventPublisher;
 
-    public TagServiceImpl(TagRepository tagRepository, ModelService modelService,
-            CollectService collectService, ApplicationEventPublisher eventPublisher) {
+    public TagMetaServiceImpl(TagRepository tagRepository, ModelService modelService,
+                              CollectService collectService, ApplicationEventPublisher eventPublisher) {
         this.tagRepository = tagRepository;
         this.modelService = modelService;
         this.collectService = collectService;
