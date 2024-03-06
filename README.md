@@ -29,10 +29,8 @@ With these ideas in mind, we develop SuperSonic as a practical reference impleme
 ## Out-of-the-box Features
 
 - Built-in Chat BI interface for *business users* to enter natural language queries
-- Built-in Headless BI interface for *analytics engineers* to build semantic models
-- Built-in GUI for *system administrators* to manage chat agents and third-party plugins
+- Built-in Headless BI interface for *analytics engineers* to build semantic data models
 - Support input auto-completion as well as query recommendation
-- Support multi-turn conversation and history context management 
 - Support four-level permission control: domain-level, model-level, column-level and row-level
 
 ## Extensible Components
