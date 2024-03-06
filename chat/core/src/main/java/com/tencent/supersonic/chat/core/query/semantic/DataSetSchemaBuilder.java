@@ -77,9 +77,7 @@ public class DataSetSchemaBuilder {
 
     private static Set<SchemaElement> getTags(DataSetSchemaResp resp) {
         Set<SchemaElement> tags = new HashSet<>();
-        List<TagResp> tagResps = resp.getTags();
-
-        for (TagResp tagResp : tagResps) {
+        for (TagResp tagResp : resp.getTags()) {
             SchemaElement element = SchemaElement.builder()
                     .dataSet(resp.getId())
                     .model(tagResp.getModelId())
