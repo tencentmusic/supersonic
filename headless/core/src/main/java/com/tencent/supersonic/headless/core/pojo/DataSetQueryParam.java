@@ -6,7 +6,7 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-public class ViewQueryParam {
+public class DataSetQueryParam {
     private String sql = "";
     private List<MetricTable> tables;
     private boolean supportWith = true;

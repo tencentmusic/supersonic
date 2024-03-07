@@ -21,35 +21,36 @@ import com.tencent.supersonic.headless.api.pojo.ModelDetail;
 import com.tencent.supersonic.headless.api.pojo.request.DimensionReq;
 import com.tencent.supersonic.headless.api.pojo.request.MetaBatchReq;
 import com.tencent.supersonic.headless.api.pojo.request.PageDimensionReq;
+import com.tencent.supersonic.headless.api.pojo.response.DataSetResp;
 import com.tencent.supersonic.headless.api.pojo.response.DatabaseResp;
 import com.tencent.supersonic.headless.api.pojo.response.DimensionResp;
 import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
-import com.tencent.supersonic.headless.api.pojo.response.ViewResp;
 import com.tencent.supersonic.headless.server.persistence.dataobject.DimensionDO;
 import com.tencent.supersonic.headless.server.persistence.repository.DimensionRepository;
 import com.tencent.supersonic.headless.server.pojo.DimensionFilter;
 import com.tencent.supersonic.headless.server.pojo.DimensionsFilter;
 import com.tencent.supersonic.headless.server.pojo.MetaFilter;
+import com.tencent.supersonic.headless.server.service.DataSetService;
 import com.tencent.supersonic.headless.server.service.DatabaseService;
 import com.tencent.supersonic.headless.server.service.DimensionService;
 import com.tencent.supersonic.headless.server.service.ModelRelaService;
 import com.tencent.supersonic.headless.server.service.ModelService;
-import com.tencent.supersonic.headless.server.service.ViewService;
 import com.tencent.supersonic.headless.server.utils.DimensionConverter;
 import com.tencent.supersonic.headless.server.utils.NameCheckUtils;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -66,7 +67,7 @@ public class DimensionServiceImpl implements DimensionService {
 
     private ModelRelaService modelRelaService;
 
-    private ViewService viewService;
+    private DataSetService dataSetService;
 
     @Autowired
     private ApplicationEventPublisher eventPublisher;
@@ -77,13 +78,13 @@ public class DimensionServiceImpl implements DimensionService {
             ChatGptHelper chatGptHelper,
             DatabaseService databaseService,
             ModelRelaService modelRelaService,
-            ViewService viewService) {
+            DataSetService dataSetService) {
         this.modelService = modelService;
         this.dimensionRepository = dimensionRepository;
         this.chatGptHelper = chatGptHelper;
         this.databaseService = databaseService;
         this.modelRelaService = modelRelaService;
-        this.viewService = viewService;
+        this.dataSetService = dataSetService;
     }
 
     @Override
@@ -232,9 +233,9 @@ public class DimensionServiceImpl implements DimensionService {
         if (!CollectionUtils.isEmpty(metaFilter.getFieldsDepend())) {
             return filterByField(dimensionResps, metaFilter.getFieldsDepend());
         }
-        if (metaFilter.getViewId() != null) {
-            ViewResp viewResp = viewService.getView(metaFilter.getViewId());
-            return DimensionConverter.filterByView(dimensionResps, viewResp);
+        if (metaFilter.getDataSetId() != null) {
+            DataSetResp dataSetResp = dataSetService.getDataSet(metaFilter.getDataSetId());
+            return DimensionConverter.filterByDataSet(dimensionResps, dataSetResp);
         }
         return dimensionResps;
     }

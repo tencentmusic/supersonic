@@ -55,13 +55,13 @@ public abstract class PluginParser implements SemanticParser {
 
     public void buildQuery(QueryContext queryContext, PluginRecallResult pluginRecallResult) {
         Plugin plugin = pluginRecallResult.getPlugin();
-        Set<Long> viewIds = pluginRecallResult.getViewIds();
+        Set<Long> dataSetIds = pluginRecallResult.getDataSetIds();
         if (plugin.isContainsAllModel()) {
-            viewIds = Sets.newHashSet(-1L);
+            dataSetIds = Sets.newHashSet(-1L);
         }
-        for (Long viewId : viewIds) {
+        for (Long dataSetId : dataSetIds) {
             PluginSemanticQuery pluginQuery = QueryManager.createPluginQuery(plugin.getType());
-            SemanticParseInfo semanticParseInfo = buildSemanticParseInfo(viewId, plugin,
+            SemanticParseInfo semanticParseInfo = buildSemanticParseInfo(dataSetId, plugin,
                     queryContext, pluginRecallResult.getDistance());
             semanticParseInfo.setQueryMode(pluginQuery.getQueryMode());
             semanticParseInfo.setScore(pluginRecallResult.getScore());
@@ -74,19 +74,19 @@ public abstract class PluginParser implements SemanticParser {
         return PluginManager.getPluginAgentCanSupport(queryContext);
     }
 
-    protected SemanticParseInfo buildSemanticParseInfo(Long viewId, Plugin plugin,
+    protected SemanticParseInfo buildSemanticParseInfo(Long dataSetId, Plugin plugin,
                                                        QueryContext queryContext, double distance) {
-        List<SchemaElementMatch> schemaElementMatches = queryContext.getMapInfo().getMatchedElements(viewId);
+        List<SchemaElementMatch> schemaElementMatches = queryContext.getMapInfo().getMatchedElements(dataSetId);
         QueryFilters queryFilters = queryContext.getQueryFilters();
-        if (viewId == null && !CollectionUtils.isEmpty(plugin.getViewList())) {
-            viewId = plugin.getViewList().get(0);
+        if (dataSetId == null && !CollectionUtils.isEmpty(plugin.getDataSetList())) {
+            dataSetId = plugin.getDataSetList().get(0);
         }
         if (schemaElementMatches == null) {
             schemaElementMatches = Lists.newArrayList();
         }
         SemanticParseInfo semanticParseInfo = new SemanticParseInfo();
         semanticParseInfo.setElementMatches(schemaElementMatches);
-        semanticParseInfo.setView(queryContext.getSemanticSchema().getView(viewId));
+        semanticParseInfo.setDataSet(queryContext.getSemanticSchema().getDataSet(dataSetId));
         Map<String, Object> properties = new HashMap<>();
         PluginParseResult pluginParseResult = new PluginParseResult();
         pluginParseResult.setPlugin(plugin);

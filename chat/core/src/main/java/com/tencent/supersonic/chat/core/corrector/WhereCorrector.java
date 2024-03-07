@@ -67,7 +67,7 @@ public class WhereCorrector extends BaseSemanticCorrector {
         List<String> whereFields = SqlSelectHelper.getWhereFields(correctS2SQL);
         if (CollectionUtils.isEmpty(whereFields) || !TimeDimensionEnum.containsZhTimeDimension(whereFields)) {
             Pair<String, String> startEndDate = S2SqlDateHelper.getStartEndDate(queryContext,
-                    semanticParseInfo.getViewId(), semanticParseInfo.getQueryType());
+                    semanticParseInfo.getDataSetId(), semanticParseInfo.getQueryType());
             if (StringUtils.isNotBlank(startEndDate.getLeft())
                     && StringUtils.isNotBlank(startEndDate.getRight())) {
                 correctS2SQL = SqlAddHelper.addParenthesisToWhere(correctS2SQL);
@@ -101,8 +101,8 @@ public class WhereCorrector extends BaseSemanticCorrector {
 
     private void updateFieldValueByTechName(QueryContext queryContext, SemanticParseInfo semanticParseInfo) {
         SemanticSchema semanticSchema = queryContext.getSemanticSchema();
-        Long viewId = semanticParseInfo.getViewId();
-        List<SchemaElement> dimensions = semanticSchema.getDimensions(viewId);
+        Long dataSetId = semanticParseInfo.getDataSetId();
+        List<SchemaElement> dimensions = semanticSchema.getDimensions(dataSetId);
 
         if (CollectionUtils.isEmpty(dimensions)) {
             return;

@@ -12,11 +12,11 @@ import org.apache.calcite.sql.SqlOperator;
 import org.apache.calcite.sql.SqlWriter;
 
 /**
- * extend node to handle lateral explode view
+ * extend node to handle lateral explode dataSet
  */
 public class LateralViewExplodeNode extends ExtendNode {
 
-    public final String sqlNameView = "view";
+    public final String sqlNameView = "dataSet";
     public final String sqlNameExplode = "explode";
 
     public LateralViewExplodeNode() {

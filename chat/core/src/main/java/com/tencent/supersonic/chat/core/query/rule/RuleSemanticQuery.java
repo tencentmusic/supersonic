@@ -102,9 +102,9 @@ public abstract class RuleSemanticQuery extends BaseSemanticQuery {
     }
 
     private void fillSchemaElement(SemanticParseInfo parseInfo, SemanticSchema semanticSchema) {
-        Set<Long> viewIds = parseInfo.getElementMatches().stream().map(SchemaElementMatch::getElement)
-                .map(SchemaElement::getView).collect(Collectors.toSet());
-        parseInfo.setView(semanticSchema.getView(viewIds.iterator().next()));
+        Set<Long> dataSetIds = parseInfo.getElementMatches().stream().map(SchemaElementMatch::getElement)
+                .map(SchemaElement::getDataSet).collect(Collectors.toSet());
+        parseInfo.setDataSet(semanticSchema.getDataSet(dataSetIds.iterator().next()));
         Map<Long, List<SchemaElementMatch>> dim2Values = new HashMap<>();
         Map<Long, List<SchemaElementMatch>> id2Values = new HashMap<>();
 
@@ -189,7 +189,7 @@ public abstract class RuleSemanticQuery extends BaseSemanticQuery {
     public QueryResult execute(User user) {
         String queryMode = parseInfo.getQueryMode();
 
-        if (parseInfo.getViewId() == null || StringUtils.isEmpty(queryMode)
+        if (parseInfo.getDataSetId() == null || StringUtils.isEmpty(queryMode)
                 || !QueryManager.containsRuleQuery(queryMode)) {
             // reach here some error may happen
             log.error("not find QueryMode");
@@ -230,7 +230,7 @@ public abstract class RuleSemanticQuery extends BaseSemanticQuery {
     public QueryResult multiStructExecute(User user) {
         String queryMode = parseInfo.getQueryMode();
 
-        if (parseInfo.getViewId() != null || StringUtils.isEmpty(queryMode)
+        if (parseInfo.getDataSetId() != null || StringUtils.isEmpty(queryMode)
                 || !QueryManager.containsRuleQuery(queryMode)) {
             // reach here some error may happen
             log.error("not find QueryMode");

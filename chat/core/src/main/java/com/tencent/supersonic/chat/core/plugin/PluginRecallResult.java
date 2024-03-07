@@ -15,7 +15,7 @@ public class PluginRecallResult {
 
     private Plugin plugin;
 
-    private Set<Long> viewIds;
+    private Set<Long> dataSetIds;
 
     private double score;
 

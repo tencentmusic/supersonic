@@ -15,21 +15,21 @@ import com.tencent.supersonic.headless.api.pojo.DimensionTimeTypeParams;
 import com.tencent.supersonic.headless.api.pojo.Identify;
 import com.tencent.supersonic.headless.api.pojo.Measure;
 import com.tencent.supersonic.headless.api.pojo.ModelDetail;
-import com.tencent.supersonic.headless.api.pojo.ViewDetail;
-import com.tencent.supersonic.headless.api.pojo.ViewModelConfig;
+import com.tencent.supersonic.headless.api.pojo.DataSetDetail;
+import com.tencent.supersonic.headless.api.pojo.DataSetModelConfig;
 import com.tencent.supersonic.headless.api.pojo.QueryConfig;
 import com.tencent.supersonic.headless.api.pojo.MetricTypeDefaultConfig;
 import com.tencent.supersonic.headless.api.pojo.TimeDefaultConfig;
 import com.tencent.supersonic.headless.api.pojo.request.DomainReq;
 import com.tencent.supersonic.headless.api.pojo.request.MetricReq;
 import com.tencent.supersonic.headless.api.pojo.request.ModelReq;
-import com.tencent.supersonic.headless.api.pojo.request.ViewReq;
+import com.tencent.supersonic.headless.api.pojo.request.DataSetReq;
 import com.tencent.supersonic.headless.api.pojo.response.MetricResp;
 import com.tencent.supersonic.headless.server.service.DomainService;
 import com.tencent.supersonic.headless.server.service.MetricService;
 import com.tencent.supersonic.headless.server.service.ModelRelaService;
 import com.tencent.supersonic.headless.server.service.ModelService;
-import com.tencent.supersonic.headless.server.service.ViewService;
+import com.tencent.supersonic.headless.server.service.DataSetService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,7 +56,7 @@ public class DuSQLDemoDataLoader {
     private MetricService metricService;
 
     @Autowired
-    private ViewService viewService;
+    private DataSetService viewService;
 
     public void doRun() {
         try {
@@ -65,7 +65,7 @@ public class DuSQLDemoDataLoader {
             addModel_2();
             addModel_3();
             addModel_4();
-            addView_1();
+            addDataSet_1();
             addModelRela_1();
             addModelRela_2();
             addModelRela_3();
@@ -254,23 +254,27 @@ public class DuSQLDemoDataLoader {
 
     }
 
-    public void addView_1() {
-        ViewReq viewReq = new ViewReq();
+    public void addDataSet_1() {
+        DataSetReq viewReq = new DataSetReq();
         viewReq.setName("DuSQL 互联网企业");
         viewReq.setBizName("internet");
         viewReq.setDomainId(4L);
         viewReq.setDescription("DuSQL互联网企业数据源相关的指标和维度等");
         viewReq.setAdmins(Lists.newArrayList("admin"));
-        List<ViewModelConfig> viewModelConfigs = Lists.newArrayList(
-                new ViewModelConfig(9L, Lists.newArrayList(16L, 17L, 18L, 19L, 20L), Lists.newArrayList(10L, 11L)),
-                new ViewModelConfig(10L, Lists.newArrayList(21L, 22L, 23L), Lists.newArrayList(12L)),
-                new ViewModelConfig(11L, Lists.newArrayList(), Lists.newArrayList(13L, 14L, 15L)),
-                new ViewModelConfig(12L, Lists.newArrayList(24L), Lists.newArrayList(16L, 17L, 18L, 19L)));
+        List<DataSetModelConfig> viewModelConfigs = Lists.newArrayList(
+                new DataSetModelConfig(9L, Lists.newArrayList(16L, 17L, 18L, 19L, 20L), Lists.newArrayList(10L, 11L),
+                        Lists.newArrayList()),
+                new DataSetModelConfig(10L, Lists.newArrayList(21L, 22L, 23L), Lists.newArrayList(12L),
+                        Lists.newArrayList()),
+                new DataSetModelConfig(11L, Lists.newArrayList(), Lists.newArrayList(13L, 14L, 15L),
+                        Lists.newArrayList()),
+                new DataSetModelConfig(12L, Lists.newArrayList(24L), Lists.newArrayList(16L, 17L, 18L, 19L),
+                        Lists.newArrayList()));
 
-        ViewDetail viewDetail = new ViewDetail();
-        viewDetail.setViewModelConfigs(viewModelConfigs);
-        viewReq.setViewDetail(viewDetail);
-        viewReq.setTypeEnum(TypeEnums.VIEW);
+        DataSetDetail viewDetail = new DataSetDetail();
+        viewDetail.setDataSetModelConfigs(viewModelConfigs);
+        viewReq.setDataSetDetail(viewDetail);
+        viewReq.setTypeEnum(TypeEnums.DATASET);
         QueryConfig queryConfig = new QueryConfig();
         MetricTypeDefaultConfig metricTypeDefaultConfig = new MetricTypeDefaultConfig();
         TimeDefaultConfig timeDefaultConfig = new TimeDefaultConfig();

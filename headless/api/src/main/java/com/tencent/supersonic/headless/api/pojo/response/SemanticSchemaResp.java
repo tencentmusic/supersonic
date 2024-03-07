@@ -17,7 +17,7 @@ import static com.tencent.supersonic.common.pojo.Constants.UNDERLINE;
 @NoArgsConstructor
 public class SemanticSchemaResp {
 
-    private Long viewId;
+    private Long dataSetId;
     private List<Long> modelIds;
     private SchemaType schemaType;
     private List<MetricSchemaResp> metrics = Lists.newArrayList();
@@ -25,14 +25,14 @@ public class SemanticSchemaResp {
     private List<TagResp> tags = Lists.newArrayList();
     private List<ModelRela> modelRelas = Lists.newArrayList();
     private List<ModelResp> modelResps = Lists.newArrayList();
-    private ViewResp viewResp;
+    private DataSetResp dataSetResp;
     private DatabaseResp databaseResp;
 
     public String getSchemaKey() {
-        if (viewId == null) {
+        if (dataSetId == null) {
             return String.format("%s_%s", schemaType, StringUtils.join(modelIds, UNDERLINE));
         }
-        return String.format("%s_%s", schemaType, viewId);
+        return String.format("%s_%s", schemaType, dataSetId);
 
     }
 

@@ -12,9 +12,19 @@ import lombok.ToString;
 @ToString(callSuper = true)
 public class TagResp extends SchemaItem {
 
+    private Long domainId;
+
+    private String domainName;
+
     private Long modelId;
 
+    private String modelName;
+
     private String type;
+
+    private Boolean isCollect;
+
+    private boolean hasAdminRes;
 
     private Map<String, Object> ext = new HashMap<>();
 

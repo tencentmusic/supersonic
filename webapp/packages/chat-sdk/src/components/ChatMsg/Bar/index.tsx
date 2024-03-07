@@ -163,7 +163,7 @@ const BarChart: React.FC<Props> = ({ data, triggerResize, loading, metricField, 
   if (metricColumn && !metricColumn?.authorized) {
     return (
       <NoPermissionChart
-        model={entityInfo?.viewInfo.name || ''}
+        model={entityInfo?.dataSetInfo.name || ''}
         chartType="barChart"
         onApplyAuth={onApplyAuth}
       />

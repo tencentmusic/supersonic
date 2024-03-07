@@ -22,7 +22,7 @@ export function deletePlugin(id: number) {
 }
 
 export function getModelList() {
-  return request<Result<ModelType[]>>('/api/chat/conf/getDomainViewTree', {
+  return request<Result<ModelType[]>>('/api/chat/conf/getDomainDataSetTree', {
     method: 'GET',
   });
 }

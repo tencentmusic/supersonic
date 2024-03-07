@@ -25,9 +25,6 @@ public class HeadlessDemoLoader implements CommandLineRunner {
     @Autowired
     private BenchMarkDemoDataLoader benchMarkDemoLoader;
 
-    @Autowired
-    private DuSQLDemoDataLoader duSQLDemoDataLoader;
-
     @Value("${demo.enabled:false}")
     private boolean demoEnabled;
 
@@ -39,7 +36,6 @@ public class HeadlessDemoLoader implements CommandLineRunner {
         }
         modelDataDemoLoader.doRun();
         benchMarkDemoLoader.doRun();
-        //duSQLDemoDataLoader.doRun();
         isLoad = true;
     }
 

@@ -23,20 +23,22 @@ public class AgentCheckParser implements SemanticParser {
     @Override
     public void parse(QueryContext queryContext, ChatContext chatContext) {
         List<SemanticQuery> queries = queryContext.getCandidateQueries();
-        agentCanSupport(queryContext, queries);
+        log.info("query size before agent filter:{}", queryContext.getCandidateQueries().size());
+        filterQueries(queryContext, queries);
+        log.info("query size after agent filter: {}", queryContext.getCandidateQueries().size());
     }
 
-    private void agentCanSupport(QueryContext queryContext, List<SemanticQuery> queries) {
+    private void filterQueries(QueryContext queryContext, List<SemanticQuery> queries) {
         Agent agent = queryContext.getAgent();
         if (agent == null) {
             return;
         }
         List<RuleParserTool> queryTools = getRuleTools(agent);
         if (CollectionUtils.isEmpty(queryTools)) {
-            queries.clear();
+            queryContext.setCandidateQueries(Lists.newArrayList());
             return;
         }
-        log.info("queries resolved:{} {}", agent.getName(),
+        log.info("agent name :{}, queries resolved: {}", agent.getName(),
                 queries.stream().map(SemanticQuery::getQueryMode).collect(Collectors.toList()));
         queries.removeIf(query -> {
             for (RuleParserTool tool : queryTools) {
@@ -46,23 +48,28 @@ public class AgentCheckParser implements SemanticParser {
                 }
                 if (CollectionUtils.isNotEmpty(tool.getQueryTypes())) {
                     if (QueryManager.isTagQuery(query.getQueryMode())) {
-                        return !tool.getQueryTypes().contains(QueryType.TAG.name());
+                        if (!tool.getQueryTypes().contains(QueryType.TAG.name())) {
+                            return true;
+                        }
                     }
                     if (QueryManager.isMetricQuery(query.getQueryMode())) {
-                        return !tool.getQueryTypes().contains(QueryType.METRIC.name());
+                        if (!tool.getQueryTypes().contains(QueryType.METRIC.name())) {
+                            return true;
+                        }
                     }
                 }
-                if (CollectionUtils.isEmpty(tool.getViewIds())) {
+                if (CollectionUtils.isEmpty(tool.getDataSetIds())) {
                     return true;
                 }
                 if (tool.isContainsAllModel()) {
                     return false;
                 }
-                return !tool.getViewIds().contains(query.getParseInfo().getViewId());
+                return !tool.getDataSetIds().contains(query.getParseInfo().getDataSetId());
             }
             return true;
         });
-        log.info("rule queries witch can be supported by agent :{} {}", agent.getName(),
+        queryContext.setCandidateQueries(queries);
+        log.info("agent name :{}, rule queries witch can be supported by agent :{}", agent.getName(),
                 queries.stream().map(SemanticQuery::getQueryMode).collect(Collectors.toList()));
     }
 

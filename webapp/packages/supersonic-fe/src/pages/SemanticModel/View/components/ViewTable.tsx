@@ -69,7 +69,7 @@ const ViewTable: React.FC<Props> = ({ disabledEdit = false, modelList, domainMan
     },
     {
       dataIndex: 'name',
-      title: '视图名称',
+      title: '数据集名称',
       search: false,
     },
     {
@@ -212,7 +212,7 @@ const ViewTable: React.FC<Props> = ({ disabledEdit = false, modelList, domainMan
                     setCreateDataSourceModalOpen(true);
                   }}
                 >
-                  创建视图
+                  创建数据集
                 </Button>,
               ]
         }

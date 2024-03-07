@@ -24,7 +24,7 @@ public class WordService {
 
     public List<DictWord> getAllDictWords() {
         SemanticInterpreter semanticInterpreter = ComponentFactory.getSemanticLayer();
-        SemanticSchema semanticSchema = new SemanticSchema(semanticInterpreter.getViewSchema());
+        SemanticSchema semanticSchema = new SemanticSchema(semanticInterpreter.getDataSetSchema());
 
         List<DictWord> words = new ArrayList<>();
 
@@ -32,6 +32,7 @@ public class WordService {
         addWordsByType(DictWordType.METRIC, semanticSchema.getMetrics(), words);
         addWordsByType(DictWordType.ENTITY, semanticSchema.getEntities(), words);
         addWordsByType(DictWordType.VALUE, semanticSchema.getDimensionValues(), words);
+        addWordsByType(DictWordType.TAG, semanticSchema.getTags(), words);
 
         return words;
     }

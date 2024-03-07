@@ -10,7 +10,7 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ViewModelConfig {
+public class DataSetModelConfig {
 
     private Long id;
 
@@ -20,9 +20,12 @@ public class ViewModelConfig {
 
     private List<Long> dimensions = Lists.newArrayList();
 
-    public ViewModelConfig(Long id, List<Long> dimensions, List<Long> metrics) {
+    private List<Long> tagIds = Lists.newArrayList();
+
+    public DataSetModelConfig(Long id, List<Long> dimensions, List<Long> metrics, List<Long> tagIds) {
         this.id = id;
         this.metrics = metrics;
         this.dimensions = dimensions;
+        this.tagIds = tagIds;
     }
 }

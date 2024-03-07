@@ -28,22 +28,22 @@ public abstract class BaseMatchStrategy<T> implements MatchStrategy<T> {
 
     @Override
     public Map<MatchText, List<T>> match(QueryContext queryContext, List<S2Term> terms,
-            Set<Long> detectViewIds) {
+            Set<Long> detectDataSetIds) {
         String text = queryContext.getQueryText();
         if (Objects.isNull(terms) || StringUtils.isEmpty(text)) {
             return null;
         }
 
-        log.debug("terms:{},,detectViewIds:{}", terms, detectViewIds);
+        log.debug("terms:{},,detectDataSetIds:{}", terms, detectDataSetIds);
 
-        List<T> detects = detect(queryContext, terms, detectViewIds);
+        List<T> detects = detect(queryContext, terms, detectDataSetIds);
         Map<MatchText, List<T>> result = new HashMap<>();
 
         result.put(MatchText.builder().regText(text).detectSegment(text).build(), detects);
         return result;
     }
 
-    public List<T> detect(QueryContext queryContext, List<S2Term> terms, Set<Long> detectViewIds) {
+    public List<T> detect(QueryContext queryContext, List<S2Term> terms, Set<Long> detectDataSetIds) {
         Map<Integer, Integer> regOffsetToLength = getRegOffsetToLength(terms);
         String text = queryContext.getQueryText();
         Set<T> results = new HashSet<>();
@@ -58,16 +58,16 @@ public abstract class BaseMatchStrategy<T> implements MatchStrategy<T> {
                 if (index <= text.length()) {
                     String detectSegment = text.substring(startIndex, index).trim();
                     detectSegments.add(detectSegment);
-                    detectByStep(queryContext, results, detectViewIds, detectSegment, offset);
+                    detectByStep(queryContext, results, detectDataSetIds, detectSegment, offset);
                 }
             }
             startIndex = mapperHelper.getStepIndex(regOffsetToLength, startIndex);
         }
-        detectByBatch(queryContext, results, detectViewIds, detectSegments);
+        detectByBatch(queryContext, results, detectDataSetIds, detectSegments);
         return new ArrayList<>(results);
     }
 
-    protected void detectByBatch(QueryContext queryContext, Set<T> results, Set<Long> detectViewIds,
+    protected void detectByBatch(QueryContext queryContext, Set<T> results, Set<Long> detectDataSetIds,
             Set<String> detectSegments) {
         return;
     }
@@ -104,9 +104,9 @@ public abstract class BaseMatchStrategy<T> implements MatchStrategy<T> {
     }
 
     public List<T> getMatches(QueryContext queryContext, List<S2Term> terms) {
-        Set<Long> viewIds = mapperHelper.getViewIds(queryContext.getViewId(), queryContext.getAgent());
-        terms = filterByViewId(terms, viewIds);
-        Map<MatchText, List<T>> matchResult = match(queryContext, terms, viewIds);
+        Set<Long> dataSetIds = mapperHelper.getDataSetIds(queryContext.getDataSetId(), queryContext.getAgent());
+        terms = filterByDataSetId(terms, dataSetIds);
+        Map<MatchText, List<T>> matchResult = match(queryContext, terms, dataSetIds);
         List<T> matches = new ArrayList<>();
         if (Objects.isNull(matchResult)) {
             return matches;
@@ -121,17 +121,17 @@ public abstract class BaseMatchStrategy<T> implements MatchStrategy<T> {
         return matches;
     }
 
-    public List<S2Term> filterByViewId(List<S2Term> terms, Set<Long> viewIds) {
+    public List<S2Term> filterByDataSetId(List<S2Term> terms, Set<Long> dataSetIds) {
         logTerms(terms);
-        if (CollectionUtils.isNotEmpty(viewIds)) {
+        if (CollectionUtils.isNotEmpty(dataSetIds)) {
             terms = terms.stream().filter(term -> {
-                Long viewId = NatureHelper.getViewId(term.getNature().toString());
-                if (Objects.nonNull(viewId)) {
-                    return viewIds.contains(viewId);
+                Long dataSetId = NatureHelper.getDataSetId(term.getNature().toString());
+                if (Objects.nonNull(dataSetId)) {
+                    return dataSetIds.contains(dataSetId);
                 }
                 return false;
             }).collect(Collectors.toList());
-            log.info("terms filter by viewId:{}", viewIds);
+            log.info("terms filter by dataSetId:{}", dataSetIds);
             logTerms(terms);
         }
         return terms;
@@ -150,7 +150,7 @@ public abstract class BaseMatchStrategy<T> implements MatchStrategy<T> {
 
     public abstract String getMapKey(T a);
 
-    public abstract void detectByStep(QueryContext queryContext, Set<T> existResults, Set<Long> detectViewIds,
+    public abstract void detectByStep(QueryContext queryContext, Set<T> existResults, Set<Long> detectDataSetIds,
             String detectSegment, int offset);
 
 }

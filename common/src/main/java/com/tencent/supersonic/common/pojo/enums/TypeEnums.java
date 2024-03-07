@@ -4,10 +4,11 @@ public enum TypeEnums {
 
     METRIC,
     DIMENSION,
+    TAG,
     DOMAIN,
     ENTITY,
-    VIEW,
+    DATASET,
     MODEL,
-    UNKNOWN;
+    UNKNOWN
 
 }

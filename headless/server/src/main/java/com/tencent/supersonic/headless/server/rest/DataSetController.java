@@ -2,10 +2,10 @@ package com.tencent.supersonic.headless.server.rest;
 
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
-import com.tencent.supersonic.headless.api.pojo.request.ViewReq;
-import com.tencent.supersonic.headless.api.pojo.response.ViewResp;
+import com.tencent.supersonic.headless.api.pojo.request.DataSetReq;
+import com.tencent.supersonic.headless.api.pojo.response.DataSetResp;
 import com.tencent.supersonic.headless.server.pojo.MetaFilter;
-import com.tencent.supersonic.headless.server.service.ViewService;
+import com.tencent.supersonic.headless.server.service.DataSetService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,43 +21,43 @@ import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/semantic/view")
-public class ViewController {
+@RequestMapping("/api/semantic/dataSet")
+public class DataSetController {
 
     @Autowired
-    private ViewService viewService;
+    private DataSetService dataSetService;
 
     @PostMapping
-    public ViewResp save(@RequestBody ViewReq viewReq,
-                     HttpServletRequest request, HttpServletResponse response) {
+    public DataSetResp save(@RequestBody DataSetReq dataSetReq,
+                            HttpServletRequest request, HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
-        return viewService.save(viewReq, user);
+        return dataSetService.save(dataSetReq, user);
     }
 
     @PutMapping
-    public ViewResp update(@RequestBody ViewReq viewReq,
-                           HttpServletRequest request, HttpServletResponse response) {
+    public DataSetResp update(@RequestBody DataSetReq dataSetReq,
+                              HttpServletRequest request, HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
-        return viewService.update(viewReq, user);
+        return dataSetService.update(dataSetReq, user);
     }
 
     @GetMapping("/{id}")
-    public ViewResp getView(@PathVariable("id") Long id) {
-        return viewService.getView(id);
+    public DataSetResp getDataSet(@PathVariable("id") Long id) {
+        return dataSetService.getDataSet(id);
     }
 
-    @GetMapping("/getViewList")
-    public List<ViewResp> getViewList(@RequestParam("domainId") Long domainId) {
+    @GetMapping("/getDataSetList")
+    public List<DataSetResp> getDataSetList(@RequestParam("domainId") Long domainId) {
         MetaFilter metaFilter = new MetaFilter();
         metaFilter.setDomainId(domainId);
-        return viewService.getViewList(metaFilter);
+        return dataSetService.getDataSetList(metaFilter);
     }
 
     @DeleteMapping("/{id}")
     public Boolean delete(@PathVariable("id") Long id,
                        HttpServletRequest request, HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
-        viewService.delete(id, user);
+        dataSetService.delete(id, user);
         return true;
     }
 

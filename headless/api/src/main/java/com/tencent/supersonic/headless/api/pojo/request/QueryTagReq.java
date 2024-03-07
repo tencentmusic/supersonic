@@ -5,13 +5,14 @@ import com.tencent.supersonic.common.pojo.Aggregator;
 import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.common.pojo.Filter;
 import com.tencent.supersonic.common.pojo.Order;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
 import lombok.Data;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.CollectionUtils;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Data
 @Slf4j
@@ -32,8 +33,8 @@ public class QueryTagReq extends SemanticQueryReq {
     @Override
     public String toCustomizedString() {
         StringBuilder stringBuilder = new StringBuilder("{");
-        stringBuilder.append("\"viewId\":")
-                .append(viewId);
+        stringBuilder.append("\"dataSetId\":")
+                .append(dataSetId);
         stringBuilder.append("\"modelIds\":")
                 .append(modelIds);
         stringBuilder.append(",\"groups\":")

@@ -18,7 +18,7 @@ public class SimilarQueryReq {
 
     private String queryText;
 
-    private Long viewId;
+    private Long dataSetId;
 
     private Integer agentId;
 

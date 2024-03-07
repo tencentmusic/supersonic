@@ -48,13 +48,13 @@ public class EmbeddingMatchStrategy extends BaseMatchStrategy<EmbeddingResult> {
     }
 
     @Override
-    public void detectByStep(QueryContext queryContext, Set<EmbeddingResult> existResults, Set<Long> detectViewIds,
+    public void detectByStep(QueryContext queryContext, Set<EmbeddingResult> existResults, Set<Long> detectDataSetIds,
             String detectSegment, int offset) {
 
     }
 
     @Override
-    protected void detectByBatch(QueryContext queryContext, Set<EmbeddingResult> results, Set<Long> detectViewIds,
+    protected void detectByBatch(QueryContext queryContext, Set<EmbeddingResult> results, Set<Long> detectDataSetIds,
             Set<String> detectSegments) {
 
         List<String> queryTextsList = detectSegments.stream()
@@ -68,11 +68,11 @@ public class EmbeddingMatchStrategy extends BaseMatchStrategy<EmbeddingResult> {
                 optimizationConfig.getEmbeddingMapperBatch());
 
         for (List<String> queryTextsSub : queryTextsSubList) {
-            detectByQueryTextsSub(results, detectViewIds, queryTextsSub);
+            detectByQueryTextsSub(results, detectDataSetIds, queryTextsSub);
         }
     }
 
-    private void detectByQueryTextsSub(Set<EmbeddingResult> results, Set<Long> detectViewIds,
+    private void detectByQueryTextsSub(Set<EmbeddingResult> results, Set<Long> detectDataSetIds,
             List<String> queryTextsSub) {
         int embeddingNumber = optimizationConfig.getEmbeddingMapperNumber();
         Double distance = optimizationConfig.getEmbeddingMapperDistanceThreshold();
@@ -80,7 +80,7 @@ public class EmbeddingMatchStrategy extends BaseMatchStrategy<EmbeddingResult> {
         RetrieveQuery retrieveQuery = RetrieveQuery.builder().queryTextsList(queryTextsSub).build();
         // step2. retrieveQuery by detectSegment
         List<RetrieveQueryResult> retrieveQueryResults = metaEmbeddingService.retrieveQuery(
-                new ArrayList<>(detectViewIds), retrieveQuery, embeddingNumber);
+                new ArrayList<>(detectDataSetIds), retrieveQuery, embeddingNumber);
 
         if (CollectionUtils.isEmpty(retrieveQueryResults)) {
             return;

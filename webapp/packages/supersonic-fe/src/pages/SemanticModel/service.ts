@@ -586,27 +586,27 @@ export function getDatabaseDetail(id: number): Promise<any> {
 }
 
 export function getViewList(domainId: number): Promise<any> {
-  return request(`${process.env.API_BASE_URL}view/getViewList`, {
+  return request(`${process.env.API_BASE_URL}dataSet/getDataSetList`, {
     method: 'GET',
     params: { domainId },
   });
 }
 
 export function createView(data: any): Promise<any> {
-  return request(`${process.env.API_BASE_URL}view`, {
+  return request(`${process.env.API_BASE_URL}dataSet`, {
     method: 'POST',
     data,
   });
 }
 export function updateView(data: any): Promise<any> {
-  return request(`${process.env.API_BASE_URL}view`, {
+  return request(`${process.env.API_BASE_URL}dataSet`, {
     method: 'PUT',
     data,
   });
 }
 
 export function deleteView(viewId: number): Promise<any> {
-  return request(`${process.env.API_BASE_URL}view/${viewId}`, {
+  return request(`${process.env.API_BASE_URL}dataSet/${viewId}`, {
     method: 'DELETE',
   });
 }

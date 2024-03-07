@@ -48,10 +48,10 @@ public class PythonLLMProxy implements LLMProxy {
         return false;
     }
 
-    public LLMResp query2sql(LLMReq llmReq, Long viewId) {
+    public LLMResp query2sql(LLMReq llmReq, Long dataSetId) {
         long startTime = System.currentTimeMillis();
-        log.info("requestLLM request, viewId:{},llmReq:{}", viewId, llmReq);
-        keyPipelineLog.info("viewId:{},llmReq:{}", viewId, llmReq);
+        log.info("requestLLM request, dataSetId:{},llmReq:{}", dataSetId, llmReq);
+        keyPipelineLog.info("dataSetId:{},llmReq:{}", dataSetId, llmReq);
         try {
             LLMParserConfig llmParserConfig = ContextUtils.getBean(LLMParserConfig.class);
 

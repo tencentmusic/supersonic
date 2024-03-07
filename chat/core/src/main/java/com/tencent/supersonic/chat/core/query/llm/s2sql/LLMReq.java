@@ -36,7 +36,7 @@ public class LLMReq {
 
         private String domainName;
 
-        private String viewName;
+        private String dataSetName;
 
         private List<String> fieldNameList;
 

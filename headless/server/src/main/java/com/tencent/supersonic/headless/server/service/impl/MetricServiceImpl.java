@@ -29,10 +29,10 @@ import com.tencent.supersonic.headless.api.pojo.request.MetricReq;
 import com.tencent.supersonic.headless.api.pojo.request.PageMetricReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryMetricReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
+import com.tencent.supersonic.headless.api.pojo.response.DataSetResp;
 import com.tencent.supersonic.headless.api.pojo.response.DimensionResp;
 import com.tencent.supersonic.headless.api.pojo.response.MetricResp;
 import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
-import com.tencent.supersonic.headless.api.pojo.response.ViewResp;
 import com.tencent.supersonic.headless.server.persistence.dataobject.CollectDO;
 import com.tencent.supersonic.headless.server.persistence.dataobject.MetricDO;
 import com.tencent.supersonic.headless.server.persistence.dataobject.MetricQueryDefaultConfigDO;
@@ -43,13 +43,19 @@ import com.tencent.supersonic.headless.server.pojo.MetricFilter;
 import com.tencent.supersonic.headless.server.pojo.MetricsFilter;
 import com.tencent.supersonic.headless.server.pojo.ModelCluster;
 import com.tencent.supersonic.headless.server.service.CollectService;
+import com.tencent.supersonic.headless.server.service.DataSetService;
 import com.tencent.supersonic.headless.server.service.DimensionService;
 import com.tencent.supersonic.headless.server.service.MetricService;
 import com.tencent.supersonic.headless.server.service.ModelService;
-import com.tencent.supersonic.headless.server.service.ViewService;
 import com.tencent.supersonic.headless.server.utils.MetricCheckUtils;
 import com.tencent.supersonic.headless.server.utils.MetricConverter;
 import com.tencent.supersonic.headless.server.utils.ModelClusterBuilder;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -60,11 +66,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeanUtils;
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 
 @Service
 @Slf4j
@@ -80,7 +81,7 @@ public class MetricServiceImpl implements MetricService {
 
     private CollectService collectService;
 
-    private ViewService viewService;
+    private DataSetService dataSetService;
 
     private ApplicationEventPublisher eventPublisher;
 
@@ -88,7 +89,7 @@ public class MetricServiceImpl implements MetricService {
             ModelService modelService,
             ChatGptHelper chatGptHelper,
             CollectService collectService,
-            ViewService viewService,
+            DataSetService dataSetService,
             ApplicationEventPublisher eventPublisher,
             DimensionService dimensionService) {
         this.metricRepository = metricRepository;
@@ -96,7 +97,7 @@ public class MetricServiceImpl implements MetricService {
         this.chatGptHelper = chatGptHelper;
         this.eventPublisher = eventPublisher;
         this.collectService = collectService;
-        this.viewService = viewService;
+        this.dataSetService = dataSetService;
         this.dimensionService = dimensionService;
     }
 
@@ -232,9 +233,9 @@ public class MetricServiceImpl implements MetricService {
         if (!CollectionUtils.isEmpty(metaFilter.getFieldsDepend())) {
             return filterByField(metricResps, metaFilter.getFieldsDepend());
         }
-        if (metaFilter.getViewId() != null) {
-            ViewResp viewResp = viewService.getView(metaFilter.getViewId());
-            return MetricConverter.filterByView(metricResps, viewResp);
+        if (metaFilter.getDataSetId() != null) {
+            DataSetResp dataSetResp = dataSetService.getDataSet(metaFilter.getDataSetId());
+            return MetricConverter.filterByDataSet(metricResps, dataSetResp);
         }
         return metricResps;
     }

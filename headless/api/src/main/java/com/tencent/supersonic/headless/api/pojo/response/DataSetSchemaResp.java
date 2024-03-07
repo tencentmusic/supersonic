@@ -11,10 +11,12 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ViewSchemaResp extends ViewResp {
+public class DataSetSchemaResp extends DataSetResp {
 
     private List<MetricSchemaResp> metrics = Lists.newArrayList();
     private List<DimSchemaResp> dimensions = Lists.newArrayList();
+
+    private List<TagResp> tags = Lists.newArrayList();
     private List<ModelResp> modelResps = Lists.newArrayList();
 
     public DimSchemaResp getPrimaryKey() {

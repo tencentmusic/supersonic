@@ -26,7 +26,7 @@ public class SemanticParseInfo {
 
     private Integer id;
     private String queryMode;
-    private SchemaElement view;
+    private SchemaElement dataSet;
     private Set<SchemaElement> metrics = new TreeSet<>(new SchemaNameLengthComparator());
     private Set<SchemaElement> dimensions = new LinkedHashSet();
     private SchemaElement entity;
@@ -72,15 +72,11 @@ public class SemanticParseInfo {
         return metrics;
     }
 
-    public Long getViewId() {
-        if (view == null) {
+    public Long getDataSetId() {
+        if (dataSet == null) {
             return null;
         }
-        return view.getView();
-    }
-
-    public SchemaElement getModel() {
-        return view;
+        return dataSet.getDataSet();
     }
 
 }

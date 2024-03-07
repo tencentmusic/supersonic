@@ -12,9 +12,9 @@ import java.util.Optional;
 import java.util.Set;
 
 @Data
-public class ViewSchema {
+public class DataSetSchema {
 
-    private SchemaElement view;
+    private SchemaElement dataSet;
     private Set<SchemaElement> metrics = new HashSet<>();
     private Set<SchemaElement> dimensions = new HashSet<>();
     private Set<SchemaElement> dimensionValues = new HashSet<>();
@@ -29,8 +29,8 @@ public class ViewSchema {
             case ENTITY:
                 element = Optional.ofNullable(entity);
                 break;
-            case VIEW:
-                element = Optional.of(view);
+            case DATASET:
+                element = Optional.of(dataSet);
                 break;
             case METRIC:
                 element = metrics.stream().filter(e -> e.getId() == elementID).findFirst();
@@ -61,8 +61,8 @@ public class ViewSchema {
             case ENTITY:
                 element = Optional.ofNullable(entity);
                 break;
-            case VIEW:
-                element = Optional.of(view);
+            case DATASET:
+                element = Optional.of(dataSet);
                 break;
             case METRIC:
                 element = metrics.stream().filter(e -> name.equals(e.getName())).findFirst();
