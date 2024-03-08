@@ -35,6 +35,14 @@ public class TagController {
         this.tagQueryService = tagQueryService;
     }
 
+    /**
+     * 新建标签
+     * @param tagReq
+     * @param request
+     * @param response
+     * @return
+     * @throws Exception
+     */
     @PostMapping("/create")
     public TagResp create(@RequestBody TagReq tagReq,
             HttpServletRequest request,
@@ -43,6 +51,14 @@ public class TagController {
         return tagMetaService.create(tagReq, user);
     }
 
+    /**
+     * 编辑标签信息
+     * @param tagReq
+     * @param request
+     * @param response
+     * @return
+     * @throws Exception
+     */
     @PostMapping("/update")
     public TagResp update(@RequestBody TagReq tagReq,
             HttpServletRequest request,
@@ -51,6 +67,13 @@ public class TagController {
         return tagMetaService.update(tagReq, user);
     }
 
+    /**
+     * 批量更新标签状态
+     * @param metaBatchReq
+     * @param request
+     * @param response
+     * @return
+     */
     @PostMapping("/batchUpdateStatus")
     public Boolean batchUpdateStatus(@RequestBody MetaBatchReq metaBatchReq,
                                      HttpServletRequest request,
@@ -59,6 +82,14 @@ public class TagController {
         return tagMetaService.batchUpdateStatus(metaBatchReq, user);
     }
 
+    /**
+     * 标签删除
+     * @param id
+     * @param request
+     * @param response
+     * @return
+     * @throws Exception
+     */
     @DeleteMapping("delete/{id}")
     public Boolean delete(@PathVariable("id") Long id,
             HttpServletRequest request,
@@ -68,6 +99,13 @@ public class TagController {
         return true;
     }
 
+    /**
+     * 标签详情获取
+     * @param id
+     * @param request
+     * @param response
+     * @return
+     */
     @GetMapping("getTag/{id}")
     public TagResp getTag(@PathVariable("id") Long id,
             HttpServletRequest request,
@@ -76,6 +114,14 @@ public class TagController {
         return tagMetaService.getTag(id, user);
     }
 
+    /**
+     * 标签市场-分页查询
+     * @param tagFilterPage
+     * @param request
+     * @param response
+     * @return
+     * @throws Exception
+     */
     @PostMapping("/queryTag")
     public PageInfo<TagResp> queryPage(@RequestBody TagFilterPage tagFilterPage,
                                          HttpServletRequest request,
