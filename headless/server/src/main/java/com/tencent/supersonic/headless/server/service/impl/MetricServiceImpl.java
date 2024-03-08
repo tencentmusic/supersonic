@@ -23,6 +23,7 @@ import com.tencent.supersonic.headless.api.pojo.MetricParam;
 import com.tencent.supersonic.headless.api.pojo.MetricQueryDefaultConfig;
 import com.tencent.supersonic.headless.api.pojo.SchemaItem;
 import com.tencent.supersonic.headless.api.pojo.enums.MetricDefineType;
+import com.tencent.supersonic.headless.api.pojo.enums.TagDefineType;
 import com.tencent.supersonic.headless.api.pojo.request.MetaBatchReq;
 import com.tencent.supersonic.headless.api.pojo.request.MetricBaseReq;
 import com.tencent.supersonic.headless.api.pojo.request.MetricReq;
@@ -33,6 +34,7 @@ import com.tencent.supersonic.headless.api.pojo.response.DataSetResp;
 import com.tencent.supersonic.headless.api.pojo.response.DimensionResp;
 import com.tencent.supersonic.headless.api.pojo.response.MetricResp;
 import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
+import com.tencent.supersonic.headless.api.pojo.response.TagResp;
 import com.tencent.supersonic.headless.server.persistence.dataobject.CollectDO;
 import com.tencent.supersonic.headless.server.persistence.dataobject.MetricDO;
 import com.tencent.supersonic.headless.server.persistence.dataobject.MetricQueryDefaultConfigDO;
@@ -42,11 +44,13 @@ import com.tencent.supersonic.headless.server.pojo.MetaFilter;
 import com.tencent.supersonic.headless.server.pojo.MetricFilter;
 import com.tencent.supersonic.headless.server.pojo.MetricsFilter;
 import com.tencent.supersonic.headless.server.pojo.ModelCluster;
+import com.tencent.supersonic.headless.server.pojo.TagFilter;
 import com.tencent.supersonic.headless.server.service.CollectService;
 import com.tencent.supersonic.headless.server.service.DataSetService;
 import com.tencent.supersonic.headless.server.service.DimensionService;
 import com.tencent.supersonic.headless.server.service.MetricService;
 import com.tencent.supersonic.headless.server.service.ModelService;
+import com.tencent.supersonic.headless.server.service.TagMetaService;
 import com.tencent.supersonic.headless.server.utils.MetricCheckUtils;
 import com.tencent.supersonic.headless.server.utils.MetricConverter;
 import com.tencent.supersonic.headless.server.utils.ModelClusterBuilder;
@@ -64,6 +68,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -85,13 +90,16 @@ public class MetricServiceImpl implements MetricService {
 
     private ApplicationEventPublisher eventPublisher;
 
+    private TagMetaService tagMetaService;
+
     public MetricServiceImpl(MetricRepository metricRepository,
-            ModelService modelService,
-            ChatGptHelper chatGptHelper,
-            CollectService collectService,
-            DataSetService dataSetService,
-            ApplicationEventPublisher eventPublisher,
-            DimensionService dimensionService) {
+                             ModelService modelService,
+                             ChatGptHelper chatGptHelper,
+                             CollectService collectService,
+                             DataSetService dataSetService,
+                             ApplicationEventPublisher eventPublisher,
+                             DimensionService dimensionService,
+                             TagMetaService tagMetaService) {
         this.metricRepository = metricRepository;
         this.modelService = modelService;
         this.chatGptHelper = chatGptHelper;
@@ -99,6 +107,7 @@ public class MetricServiceImpl implements MetricService {
         this.collectService = collectService;
         this.dataSetService = dataSetService;
         this.dimensionService = dimensionService;
+        this.tagMetaService = tagMetaService;
     }
 
     @Override
@@ -211,12 +220,13 @@ public class MetricServiceImpl implements MetricService {
             }
         }
         PageInfo<MetricDO> metricDOPageInfo = PageHelper.startPage(pageMetricReq.getCurrent(),
-                        pageMetricReq.getPageSize())
+                pageMetricReq.getPageSize())
                 .doSelectPageInfo(() -> queryMetric(metricFilter));
         PageInfo<MetricResp> pageInfo = new PageInfo<>();
         BeanUtils.copyProperties(metricDOPageInfo, pageInfo);
         List<MetricResp> metricResps = convertList(metricDOPageInfo.getList(), collectIds);
         fillAdminRes(metricResps, user);
+        fillTagInfo(metricResps);
         pageInfo.setList(metricResps);
         return pageInfo;
     }
@@ -240,6 +250,24 @@ public class MetricServiceImpl implements MetricService {
         return metricResps;
     }
 
+    private void fillTagInfo(List<MetricResp> metricRespList) {
+        if (CollectionUtils.isEmpty(metricRespList)) {
+            return;
+        }
+        TagFilter tagFilter = new TagFilter();
+        tagFilter.setTagDefineType(TagDefineType.METRIC);
+        Map<String, TagResp> keyAndTagMap = tagMetaService.getTags(tagFilter).stream()
+                .collect(Collectors.toMap(tag -> tag.getModelId() + "_" + tag.getBizName(), tag -> tag));
+        if (Objects.nonNull(keyAndTagMap)) {
+            metricRespList.stream().forEach(metric -> {
+                String key = metric.getModelId() + "_" + metric.getBizName();
+                if (keyAndTagMap.containsKey(key)) {
+                    metric.setIsTag(1);
+                }
+            });
+        }
+    }
+
     private List<MetricResp> filterByField(List<MetricResp> metricResps, List<String> fields) {
         Set<MetricResp> metricRespFiltered = Sets.newHashSet();
         for (MetricResp metricResp : metricResps) {
@@ -249,7 +277,7 @@ public class MetricServiceImpl implements MetricService {
     }
 
     private boolean filterByField(List<MetricResp> metricResps, MetricResp metricResp,
-            List<String> fields, Set<MetricResp> metricRespFiltered) {
+                                  List<String> fields, Set<MetricResp> metricRespFiltered) {
         if (MetricDefineType.METRIC.equals(metricResp.getMetricDefineType())) {
             List<Long> ids = metricResp.getMetricDefineByMetricParams().getMetrics()
                     .stream().map(MetricParam::getId).collect(Collectors.toList());
@@ -287,8 +315,8 @@ public class MetricServiceImpl implements MetricService {
         metricFilter.setModelIds(Lists.newArrayList(modelId));
         List<MetricResp> metricResps = getMetrics(metricFilter);
         return metricResps.stream().filter(metricResp ->
-                        MetricDefineType.FIELD.equals(metricResp.getMetricDefineType())
-                                || MetricDefineType.MEASURE.equals(metricResp.getMetricDefineType()))
+                MetricDefineType.FIELD.equals(metricResp.getMetricDefineType())
+                        || MetricDefineType.MEASURE.equals(metricResp.getMetricDefineType()))
                 .collect(Collectors.toList());
     }
 
@@ -450,6 +478,7 @@ public class MetricServiceImpl implements MetricService {
 
     private List<MetricResp> convertList(List<MetricDO> metricDOS, List<Long> collect) {
         List<MetricResp> metricResps = Lists.newArrayList();
+
         Map<Long, ModelResp> modelMap = modelService.getModelMap();
         if (!CollectionUtils.isEmpty(metricDOS)) {
             metricResps = metricDOS.stream()
@@ -560,7 +589,7 @@ public class MetricServiceImpl implements MetricService {
     }
 
     private Set<Long> getModelIds(Set<Long> modelIdsByDomainId, List<MetricResp> metricResps,
-            List<DimensionResp> dimensionResps) {
+                                  List<DimensionResp> dimensionResps) {
         Set<Long> result = new HashSet<>();
         if (org.apache.commons.collections.CollectionUtils.isNotEmpty(modelIdsByDomainId)) {
             result.addAll(modelIdsByDomainId);
