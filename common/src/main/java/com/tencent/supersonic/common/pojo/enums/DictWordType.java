@@ -1,5 +1,6 @@
 package com.tencent.supersonic.common.pojo.enums;
 
+import java.util.Objects;
 import org.apache.commons.lang3.StringUtils;
 
 /***
@@ -12,15 +13,17 @@ public enum DictWordType {
 
     DIMENSION("dimension"),
 
-    VALUE("v"),
+    VALUE("dv"),
 
-    VIEW("view"),
+    DATASET("dataset"),
 
     ENTITY("entity"),
 
     NUMBER("m"),
 
-    TAG("t"),
+    TAG("tag"),
+
+    TAG_VALUE("tv"),
 
     SUFFIX("suffix");
 
@@ -32,7 +35,7 @@ public enum DictWordType {
         this.type = type;
     }
 
-    public String getType() {
+    public String getTypeWithSpilt() {
         return NATURE_SPILT + type;
     }
 
@@ -41,19 +44,36 @@ public enum DictWordType {
             return null;
         }
         for (DictWordType dictWordType : values()) {
-            if (nature.endsWith(dictWordType.getType())) {
+            if (nature.endsWith(dictWordType.getTypeWithSpilt())) {
                 return dictWordType;
             }
         }
-        //view
+        //dataSet
         String[] natures = nature.split(DictWordType.NATURE_SPILT);
         if (natures.length == 2 && StringUtils.isNumeric(natures[1])) {
-            return VIEW;
+            return DATASET;
         }
         //dimension value
-        if (natures.length == 3 && StringUtils.isNumeric(natures[1]) && StringUtils.isNumeric(natures[2])) {
+        if (natures.length >= 3 && StringUtils.isNumeric(natures[1]) && StringUtils.isNumeric(natures[2])) {
             return VALUE;
         }
         return null;
+    }
+
+    public static DictWordType of(TypeEnums type) {
+        for (DictWordType wordType : DictWordType.values()) {
+            if (wordType.name().equalsIgnoreCase(type.name())) {
+                return wordType;
+            }
+        }
+        return null;
+    }
+
+    public static String getSuffixNature(TypeEnums type) {
+        DictWordType wordType = of(type);
+        if (Objects.nonNull(wordType)) {
+            return wordType.type;
+        }
+        return "";
     }
 }

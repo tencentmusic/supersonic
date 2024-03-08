@@ -15,7 +15,7 @@ public class WordBuilderFactory {
     static {
         wordNatures.put(DictWordType.DIMENSION, new DimensionWordBuilder());
         wordNatures.put(DictWordType.METRIC, new MetricWordBuilder());
-        wordNatures.put(DictWordType.VIEW, new ModelWordBuilder());
+        wordNatures.put(DictWordType.DATASET, new ModelWordBuilder());
         wordNatures.put(DictWordType.ENTITY, new EntityWordBuilder());
         wordNatures.put(DictWordType.VALUE, new ValueWordBuilder());
         wordNatures.put(DictWordType.TAG, new TagWordBuilder());

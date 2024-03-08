@@ -29,7 +29,7 @@ public class EntityWordBuilder extends BaseWordWithAliasBuilder {
     @Override
     public DictWord getOneWordNature(String word, SchemaElement schemaElement, boolean isSuffix) {
         String nature = DictWordType.NATURE_SPILT + schemaElement.getModel()
-                + DictWordType.NATURE_SPILT + schemaElement.getId() + DictWordType.ENTITY.getType();
+                + DictWordType.NATURE_SPILT + schemaElement.getId() + DictWordType.ENTITY.getTypeWithSpilt();
         DictWord dictWord = new DictWord();
         dictWord.setWord(word);
         dictWord.setNatureWithFrequency(String.format("%s " + DEFAULT_FREQUENCY * 2, nature));

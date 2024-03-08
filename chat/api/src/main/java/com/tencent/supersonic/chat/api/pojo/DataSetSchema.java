@@ -19,6 +19,7 @@ public class DataSetSchema {
     private Set<SchemaElement> dimensions = new HashSet<>();
     private Set<SchemaElement> dimensionValues = new HashSet<>();
     private Set<SchemaElement> tags = new HashSet<>();
+    private Set<SchemaElement> tagValues = new HashSet<>();
     private SchemaElement entity = new SchemaElement();
     private QueryConfig queryConfig;
 
@@ -44,34 +45,8 @@ public class DataSetSchema {
             case TAG:
                 element = tags.stream().filter(e -> e.getId() == elementID).findFirst();
                 break;
-            default:
-        }
-
-        if (element.isPresent()) {
-            return element.get();
-        } else {
-            return null;
-        }
-    }
-
-    public SchemaElement getElement(SchemaElementType elementType, String name) {
-        Optional<SchemaElement> element = Optional.empty();
-
-        switch (elementType) {
-            case ENTITY:
-                element = Optional.ofNullable(entity);
-                break;
-            case DATASET:
-                element = Optional.of(dataSet);
-                break;
-            case METRIC:
-                element = metrics.stream().filter(e -> name.equals(e.getName())).findFirst();
-                break;
-            case DIMENSION:
-                element = dimensions.stream().filter(e -> name.equals(e.getName())).findFirst();
-                break;
-            case VALUE:
-                element = dimensionValues.stream().filter(e -> name.equals(e.getName())).findFirst();
+            case TAG_VALUE:
+                element = tagValues.stream().filter(e -> e.getId() == elementID).findFirst();
                 break;
             default:
         }
