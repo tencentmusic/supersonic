@@ -90,7 +90,12 @@ public class EmbeddingMatchStrategy extends BaseMatchStrategy<EmbeddingResult> {
                 .map(retrieveQueryResult -> {
                     List<Retrieval> retrievals = retrieveQueryResult.getRetrieval();
                     if (CollectionUtils.isNotEmpty(retrievals)) {
-                        retrievals.removeIf(retrieval -> retrieval.getDistance() > distance.doubleValue());
+                        retrievals.removeIf(retrieval -> {
+                            if (!retrieveQueryResult.getQuery().contains(retrieval.getQuery())) {
+                                return retrieval.getDistance() > distance.doubleValue();
+                            }
+                            return false;
+                        });
                     }
                     return retrieveQueryResult;
                 })
