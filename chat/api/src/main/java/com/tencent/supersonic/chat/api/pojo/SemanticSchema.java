@@ -46,6 +46,9 @@ public class SemanticSchema implements Serializable {
             case TAG:
                 element = getElementsById(elementID, getTags());
                 break;
+            case TAG_VALUE:
+                element = getElementsById(elementID, getTagValues());
+                break;
             default:
         }
 
@@ -91,11 +94,19 @@ public class SemanticSchema implements Serializable {
     }
 
     public List<SchemaElement> getTags(Long dataSetId) {
+        List<SchemaElement> tags = getTags();
+        return getElementsByDataSetId(dataSetId, tags);
+    }
+
+    public List<SchemaElement> getTagValues() {
         List<SchemaElement> tags = new ArrayList<>();
-        dataSetSchemaList.stream().filter(schemaElement ->
-                        dataSetId.equals(schemaElement.getDataSet().getDataSet()))
-                .forEach(d -> tags.addAll(d.getTags()));
+        dataSetSchemaList.stream().forEach(d -> tags.addAll(d.getTagValues()));
         return tags;
+    }
+
+    public List<SchemaElement> getTagValues(Long dataSetId) {
+        List<SchemaElement> tags = getTagValues();
+        return getElementsByDataSetId(dataSetId, tags);
     }
 
     public List<SchemaElement> getMetrics() {

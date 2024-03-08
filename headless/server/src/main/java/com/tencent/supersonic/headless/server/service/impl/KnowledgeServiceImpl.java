@@ -31,7 +31,7 @@ public class KnowledgeServiceImpl implements KnowledgeService {
     public void updateSemanticKnowledge(List<DictWord> natures) {
 
         List<DictWord> prefixes = natures.stream()
-                .filter(entry -> !entry.getNatureWithFrequency().contains(DictWordType.SUFFIX.getType()))
+                .filter(entry -> !entry.getNatureWithFrequency().contains(DictWordType.SUFFIX.getTypeWithSpilt()))
                 .collect(Collectors.toList());
 
         for (DictWord nature : prefixes) {
@@ -39,7 +39,7 @@ public class KnowledgeServiceImpl implements KnowledgeService {
         }
 
         List<DictWord> suffixes = natures.stream()
-                .filter(entry -> entry.getNatureWithFrequency().contains(DictWordType.SUFFIX.getType()))
+                .filter(entry -> entry.getNatureWithFrequency().contains(DictWordType.SUFFIX.getTypeWithSpilt()))
                 .collect(Collectors.toList());
 
         SearchService.loadSuffix(suffixes);
@@ -80,7 +80,7 @@ public class KnowledgeServiceImpl implements KnowledgeService {
     }
 
     public List<HanlpMapResult> prefixSearchByModel(String key, int limit,
-                                                    Map<Long, List<Long>> modelIdToDataSetIds) {
+            Map<Long, List<Long>> modelIdToDataSetIds) {
         return SearchService.prefixSearch(key, limit, modelIdToDataSetIds);
     }
 

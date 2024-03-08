@@ -73,7 +73,8 @@ public class KeywordMapper extends BaseMapper {
                 if (element == null) {
                     continue;
                 }
-                if (element.getType().equals(SchemaElementType.VALUE)) {
+                if (element.getType().equals(SchemaElementType.VALUE) || element.getType()
+                        .equals(SchemaElementType.TAG_VALUE)) {
                     element.setName(hanlpMapResult.getName());
                 }
                 Long frequency = wordNatureToFrequency.get(hanlpMapResult.getName() + nature);

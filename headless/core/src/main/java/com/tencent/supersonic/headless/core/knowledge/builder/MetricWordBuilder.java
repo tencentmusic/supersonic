@@ -31,10 +31,10 @@ public class MetricWordBuilder extends BaseWordWithAliasBuilder {
         dictWord.setWord(word);
         Long modelId = schemaElement.getModel();
         String nature = DictWordType.NATURE_SPILT + modelId + DictWordType.NATURE_SPILT + schemaElement.getId()
-                + DictWordType.METRIC.getType();
+                + DictWordType.METRIC.getTypeWithSpilt();
         if (isSuffix) {
             nature = DictWordType.NATURE_SPILT + modelId + DictWordType.NATURE_SPILT + schemaElement.getId()
-                    + DictWordType.SUFFIX.getType() + DictWordType.METRIC.getType();
+                    + DictWordType.SUFFIX.getTypeWithSpilt() + DictWordType.METRIC.getTypeWithSpilt();
         }
         dictWord.setNatureWithFrequency(String.format("%s " + DEFAULT_FREQUENCY, nature));
         return dictWord;
