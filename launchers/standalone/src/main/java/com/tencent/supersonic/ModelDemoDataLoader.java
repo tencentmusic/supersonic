@@ -14,16 +14,9 @@ import com.tencent.supersonic.common.pojo.enums.SensitiveLevelEnum;
 import com.tencent.supersonic.common.pojo.enums.StatusEnum;
 import com.tencent.supersonic.common.pojo.enums.TimeMode;
 import com.tencent.supersonic.common.pojo.enums.TypeEnums;
+import com.tencent.supersonic.headless.api.pojo.DataSetDetail;
+import com.tencent.supersonic.headless.api.pojo.DataSetModelConfig;
 import com.tencent.supersonic.headless.api.pojo.DefaultDisplayInfo;
-import com.tencent.supersonic.headless.api.pojo.MetricTypeDefaultConfig;
-import com.tencent.supersonic.headless.api.pojo.QueryConfig;
-import com.tencent.supersonic.headless.api.pojo.TagTypeDefaultConfig;
-import com.tencent.supersonic.headless.api.pojo.TimeDefaultConfig;
-import com.tencent.supersonic.headless.api.pojo.enums.DataType;
-import com.tencent.supersonic.headless.api.pojo.enums.DimensionType;
-import com.tencent.supersonic.headless.api.pojo.enums.IdentifyType;
-import com.tencent.supersonic.headless.api.pojo.enums.MetricDefineType;
-import com.tencent.supersonic.headless.api.pojo.enums.SemanticType;
 import com.tencent.supersonic.headless.api.pojo.Dim;
 import com.tencent.supersonic.headless.api.pojo.DimensionTimeTypeParams;
 import com.tencent.supersonic.headless.api.pojo.DrillDownDimension;
@@ -36,33 +29,43 @@ import com.tencent.supersonic.headless.api.pojo.MetricDefineByFieldParams;
 import com.tencent.supersonic.headless.api.pojo.MetricDefineByMeasureParams;
 import com.tencent.supersonic.headless.api.pojo.MetricDefineByMetricParams;
 import com.tencent.supersonic.headless.api.pojo.MetricParam;
+import com.tencent.supersonic.headless.api.pojo.MetricTypeDefaultConfig;
 import com.tencent.supersonic.headless.api.pojo.ModelDetail;
+import com.tencent.supersonic.headless.api.pojo.QueryConfig;
 import com.tencent.supersonic.headless.api.pojo.RelateDimension;
-import com.tencent.supersonic.headless.api.pojo.DataSetDetail;
-import com.tencent.supersonic.headless.api.pojo.DataSetModelConfig;
+import com.tencent.supersonic.headless.api.pojo.TagDefineParams;
+import com.tencent.supersonic.headless.api.pojo.TagTypeDefaultConfig;
+import com.tencent.supersonic.headless.api.pojo.TimeDefaultConfig;
+import com.tencent.supersonic.headless.api.pojo.enums.DataType;
+import com.tencent.supersonic.headless.api.pojo.enums.DimensionType;
+import com.tencent.supersonic.headless.api.pojo.enums.IdentifyType;
+import com.tencent.supersonic.headless.api.pojo.enums.MetricDefineType;
+import com.tencent.supersonic.headless.api.pojo.enums.SemanticType;
+import com.tencent.supersonic.headless.api.pojo.enums.TagDefineType;
+import com.tencent.supersonic.headless.api.pojo.request.DataSetReq;
 import com.tencent.supersonic.headless.api.pojo.request.DatabaseReq;
 import com.tencent.supersonic.headless.api.pojo.request.DimensionReq;
 import com.tencent.supersonic.headless.api.pojo.request.DomainReq;
 import com.tencent.supersonic.headless.api.pojo.request.MetricReq;
 import com.tencent.supersonic.headless.api.pojo.request.ModelReq;
-import com.tencent.supersonic.headless.api.pojo.request.DataSetReq;
+import com.tencent.supersonic.headless.api.pojo.request.TagReq;
+import com.tencent.supersonic.headless.server.service.DataSetService;
 import com.tencent.supersonic.headless.server.service.DatabaseService;
 import com.tencent.supersonic.headless.server.service.DimensionService;
 import com.tencent.supersonic.headless.server.service.DomainService;
 import com.tencent.supersonic.headless.server.service.MetricService;
 import com.tencent.supersonic.headless.server.service.ModelRelaService;
 import com.tencent.supersonic.headless.server.service.ModelService;
-import com.tencent.supersonic.headless.server.service.DataSetService;
+import com.tencent.supersonic.headless.server.service.TagMetaService;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.stereotype.Component;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 
 @Component
 @Slf4j
@@ -88,6 +91,9 @@ public class ModelDemoDataLoader {
     @Autowired
     private DataSourceProperties dataSourceProperties;
 
+    @Autowired
+    private TagMetaService tagMetaService;
+
     public void doRun() {
         try {
             addDatabase();
@@ -104,8 +110,9 @@ public class ModelDemoDataLoader {
             updateDimension();
             updateMetric();
             updateMetric_pv();
-            addView_1();
-            addView_2();
+            addTags();
+            addDataSet_1();
+            addDataSet_2();
             addAuthGroup_1();
             addAuthGroup_2();
         } catch (Exception e) {
@@ -399,6 +406,47 @@ public class ModelDemoDataLoader {
         metricService.updateMetric(metricReq, user);
     }
 
+    private void addTags() {
+        TagReq tagReq = new TagReq();
+        tagReq.setModelId(4L);
+        tagReq.setName("活跃区域");
+        tagReq.setBizName("act_area");
+        tagReq.setStatus(StatusEnum.ONLINE.getCode());
+        tagReq.setTypeEnum(TypeEnums.TAG);
+        tagReq.setTagDefineType(TagDefineType.DIMENSION);
+        TagDefineParams tagDefineParams = new TagDefineParams();
+        tagDefineParams.setExpr("act_area");
+        tagDefineParams.setDependencies(new ArrayList<>(Arrays.asList(4)));
+        tagReq.setTagDefineParams(tagDefineParams);
+        tagMetaService.create(tagReq, user);
+
+        TagReq tagReq2 = new TagReq();
+        tagReq2.setModelId(4L);
+        tagReq2.setName("风格");
+        tagReq2.setBizName("genre");
+        tagReq2.setStatus(StatusEnum.ONLINE.getCode());
+        tagReq2.setTypeEnum(TypeEnums.TAG);
+        tagReq2.setTagDefineType(TagDefineType.DIMENSION);
+        TagDefineParams tagDefineParam2s = new TagDefineParams();
+        tagDefineParam2s.setExpr("genre");
+        tagDefineParam2s.setDependencies(new ArrayList<>(Arrays.asList(6)));
+        tagReq2.setTagDefineParams(tagDefineParam2s);
+        tagMetaService.create(tagReq2, user);
+
+        TagReq tagReq3 = new TagReq();
+        tagReq3.setModelId(4L);
+        tagReq3.setName("播放量");
+        tagReq3.setBizName("js_play_cnt");
+        tagReq3.setStatus(StatusEnum.ONLINE.getCode());
+        tagReq3.setTypeEnum(TypeEnums.TAG);
+        tagReq3.setTagDefineType(TagDefineType.METRIC);
+        TagDefineParams tagDefineParam3s = new TagDefineParams();
+        tagDefineParam3s.setExpr("js_play_cnt");
+        tagDefineParam3s.setDependencies(new ArrayList<>(Arrays.asList(5)));
+        tagReq3.setTagDefineParams(tagDefineParam3s);
+        tagMetaService.create(tagReq3, user);
+    }
+
     public void addMetric_uv() throws Exception {
         MetricReq metricReq = new MetricReq();
         metricReq.setModelId(2L);
@@ -445,7 +493,7 @@ public class ModelDemoDataLoader {
         metricService.createMetric(metricReq, user);
     }
 
-    public void addView_1() {
+    public void addDataSet_1() {
         DataSetReq dataSetReq = new DataSetReq();
         dataSetReq.setName("超音数");
         dataSetReq.setBizName("s2");
@@ -472,7 +520,7 @@ public class ModelDemoDataLoader {
         dataSetService.save(dataSetReq, User.getFakeUser());
     }
 
-    public void addView_2() {
+    public void addDataSet_2() {
         DataSetReq dataSetReq = new DataSetReq();
         dataSetReq.setName("艺人库");
         dataSetReq.setBizName("singer");
@@ -481,7 +529,7 @@ public class ModelDemoDataLoader {
         dataSetReq.setAdmins(Lists.newArrayList("admin", "jack"));
         List<DataSetModelConfig> dataSetModelConfigs = Lists.newArrayList(
                 new DataSetModelConfig(4L, Lists.newArrayList(4L, 5L, 6L, 7L),
-                        Lists.newArrayList(5L, 6L, 7L), Lists.newArrayList())
+                        Lists.newArrayList(5L, 6L, 7L), Lists.newArrayList(1L, 2L, 3L))
         );
         DataSetDetail dataSetDetail = new DataSetDetail();
         dataSetDetail.setDataSetModelConfigs(dataSetModelConfigs);

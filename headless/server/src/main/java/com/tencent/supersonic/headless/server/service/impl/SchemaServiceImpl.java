@@ -159,8 +159,8 @@ public class SchemaServiceImpl implements SchemaService {
             dataSetSchemaResp.setModelResps(modelResps.stream().filter(modelResp ->
                     dataSetResp.getAllModels().contains(modelResp.getId())).collect(Collectors.toList()));
 
-            tagRespList = TagConverter.filterByDataSet(tagRespList, dataSetResp);
-            dataSetSchemaResp.setTags(tagRespList);
+            List<TagResp> tagResps = TagConverter.filterByDataSet(tagRespList, dataSetResp);
+            dataSetSchemaResp.setTags(tagResps);
             dataSetSchemaResps.add(dataSetSchemaResp);
         }
         fillStaticInfo(dataSetSchemaResps);
