@@ -61,6 +61,8 @@ public class MetricResp extends SchemaItem {
 
     private MetricDefineByMetricParams metricDefineByMetricParams;
 
+    private int isTag;
+
     public void setTag(String tag) {
         if (StringUtils.isBlank(tag)) {
             tags = Lists.newArrayList();
