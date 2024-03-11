@@ -17,12 +17,14 @@ SuperSonic provides a chat interface that empowers users to query data using nat
 
 ## Motivation
 
-The emergence of Large Language Model (LLM) like ChatGPT is reshaping the way information is retrieved. In the field of data analytics, both academia and industry are primarily focused on leveraging LLM to convert natural language into SQL (so called Text2SQL or NL2SQL). While some approaches exhibit promising results, their **reliability** and **efficiency** are insufficient for real-world applications.  
+The emergence of Large Language Model (LLM) like ChatGPT is reshaping the way information is retrieved, leading to a new paradigm in the field of data analytics known as Chat BI. To implement Chat BI, both academia and industry are primarily focused on harnessing the power of LLMs to convert natural language into SQL, commonly referred to as Text2SQL or NL2SQL. While some approaches show promising results, their **reliability** falls short for large-scale real-world applications.
 
-From our perspective, the key to filling the real-world gap lies in three aspects: 
+Meanwhile, another emerging paradigm called Headless BI, which focuses on constructing unified semantic data models, has garnered significant attention. Headless BI is implemented through a universal semantic layer that exposes consistent data semantics via an open API.
+
+From our perspective, Headless BI revolves around a unified architecture, while Chat BI centers around an intelligent interface. It is necessary to integrate these two paradigms to ensure seamless connectivity between traditional BI and Chat BI, enabling them to access the same curated and governed semantic models. Equally importantly, this approach would enhance Chat BI's Text2SQL capability in two dimensions:
+
 1. Incorporate data semantics (such as business terms, column values, etc.) into the prompt, enabling LLM to better understand the semantics and **reduce hallucination**.
 2. Offload the generation of advanced SQL syntax (such as join, formula, etc.) from LLM to the semantic layer to **reduce complexity**. 
-3. Utilize rule-based semantic parsers when necessary to **improve efficiency**(in terms of latency and cost).
 
 With these ideas in mind, we develop SuperSonic as a practical reference implementation and use it to power our real-world products. Additionally, to facilitate further development we decide to open source SuperSonic as an extensible framework.
 
@@ -30,6 +32,7 @@ With these ideas in mind, we develop SuperSonic as a practical reference impleme
 
 - Built-in Chat BI interface for *business users* to enter natural language queries
 - Built-in Headless BI interface for *analytics engineers* to build semantic data models
+- Built-in rule-based semantic parser to improve efficiency in certain scenarios
 - Support input auto-completion as well as query recommendation
 - Support four-level permission control: domain-level, model-level, column-level and row-level
 
