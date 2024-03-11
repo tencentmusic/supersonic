@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+<mapper namespace="com.tencent.supersonic.headless.server.persistence.mapper.StatisticsMapper">
+
+    <resultMap id="Statistics" type="com.tencent.supersonic.headless.server.persistence.dataobject.StatisticsDO">
+        <id column="question_id" property="questionId"/>
+        <result column="chat_id" property="chatId"/>
+        <result column="user_name" property="userName"/>
+        <result column="query_text" property="queryText"/>
+        <result column="interface_name" property="interfaceName"/>
+        <result column="cost" property="cost"/>
+        <result column="type" property="type"/>
+        <result column="create_time" property="createTime"/>
+    </resultMap>
+
+    <insert id="batchSaveStatistics" parameterType="com.tencent.supersonic.headless.server.persistence.dataobject.StatisticsDO">
+        insert into s2_chat_statistics
+               (question_id,chat_id, user_name, query_text, interface_name,cost,type ,create_time)
+        values
+        <foreach collection="list" item="item" index="index" separator=",">
+            (#{item.questionId}, #{item.chatId}, #{item.userName}, #{item.queryText}, #{item.interfaceName}, #{item.cost}, #{item.type},#{item.createTime})
+        </foreach>
+    </insert>
+
+</mapper>

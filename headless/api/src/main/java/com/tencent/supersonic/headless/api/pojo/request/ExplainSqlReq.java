@@ -1,6 +1,6 @@
 package com.tencent.supersonic.headless.api.pojo.request;
 
-import com.tencent.supersonic.headless.api.pojo.enums.QueryType;
+import com.tencent.supersonic.headless.api.pojo.enums.QueryMethod;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,7 +14,7 @@ import lombok.ToString;
 @NoArgsConstructor
 public class ExplainSqlReq<T> {
 
-    private QueryType queryTypeEnum;
+    private QueryMethod queryTypeEnum;
 
     private T queryReq;
 }

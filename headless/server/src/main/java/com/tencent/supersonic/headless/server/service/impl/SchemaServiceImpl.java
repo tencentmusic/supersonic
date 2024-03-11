@@ -1,7 +1,5 @@
 package com.tencent.supersonic.headless.server.service.impl;
 
-import static com.tencent.supersonic.common.pojo.Constants.AT_SYMBOL;
-
 import com.github.pagehelper.PageInfo;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
@@ -13,6 +11,7 @@ import com.tencent.supersonic.common.pojo.enums.StatusEnum;
 import com.tencent.supersonic.common.pojo.enums.TypeEnums;
 import com.tencent.supersonic.common.pojo.exception.InvalidArgumentException;
 import com.tencent.supersonic.common.util.JsonUtil;
+import com.tencent.supersonic.headless.api.pojo.DataSetSchema;
 import com.tencent.supersonic.headless.api.pojo.enums.SchemaType;
 import com.tencent.supersonic.headless.api.pojo.request.DataSetFilterReq;
 import com.tencent.supersonic.headless.api.pojo.request.ItemUseReq;
@@ -44,22 +43,27 @@ import com.tencent.supersonic.headless.server.service.ModelRelaService;
 import com.tencent.supersonic.headless.server.service.ModelService;
 import com.tencent.supersonic.headless.server.service.SchemaService;
 import com.tencent.supersonic.headless.server.service.TagMetaService;
+import com.tencent.supersonic.headless.server.utils.DataSetSchemaBuilder;
 import com.tencent.supersonic.headless.server.utils.DimensionConverter;
 import com.tencent.supersonic.headless.server.utils.MetricConverter;
 import com.tencent.supersonic.headless.server.utils.StatUtils;
 import com.tencent.supersonic.headless.server.utils.TagConverter;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+
+import static com.tencent.supersonic.common.pojo.Constants.AT_SYMBOL;
 
 @Slf4j
 @Service
@@ -116,6 +120,43 @@ public class SchemaServiceImpl implements SchemaService {
             return null;
         }
         return fetchDataSetSchema(new DataSetFilterReq(dataSetId)).stream().findFirst().orElse(null);
+    }
+
+    private List<DataSetSchemaResp> fetchDataSetSchema(List<Long> ids) {
+        DataSetFilterReq dataSetFilterReq = new DataSetFilterReq();
+        dataSetFilterReq.setDataSetIds(ids);
+        return fetchDataSetSchema(dataSetFilterReq);
+    }
+
+    @Override
+    public DataSetSchema getDataSetSchema(Long dataSetId) {
+        List<Long> ids = new ArrayList<>();
+        ids.add(dataSetId);
+        List<DataSetSchemaResp> dataSetSchemaResps = fetchDataSetSchema(ids);
+        if (!CollectionUtils.isEmpty(dataSetSchemaResps)) {
+            Optional<DataSetSchemaResp> dataSetSchemaResp = dataSetSchemaResps.stream()
+                    .filter(d -> d.getId().equals(dataSetId)).findFirst();
+            if (dataSetSchemaResp.isPresent()) {
+                DataSetSchemaResp dataSetSchema = dataSetSchemaResp.get();
+                return DataSetSchemaBuilder.build(dataSetSchema);
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public List<DataSetSchema> getDataSetSchema() {
+        return getDataSetSchema(new ArrayList<>());
+    }
+
+    public List<DataSetSchema> getDataSetSchema(List<Long> ids) {
+        List<DataSetSchema> domainSchemaList = new ArrayList<>();
+
+        for (DataSetSchemaResp resp : fetchDataSetSchema(ids)) {
+            domainSchemaList.add(DataSetSchemaBuilder.build(resp));
+        }
+
+        return domainSchemaList;
     }
 
     public List<DataSetSchemaResp> buildDataSetSchema(DataSetFilterReq filter) {
@@ -282,13 +323,6 @@ public class SchemaServiceImpl implements SchemaService {
     @Override
     public List<ModelResp> getModelList(User user, AuthType authTypeEnum, Long domainId) {
         return modelService.getModelListWithAuth(user, domainId, authTypeEnum);
-    }
-
-    @Override
-    public List<DataSetResp> getDataSetList(Long domainId) {
-        MetaFilter metaFilter = new MetaFilter();
-        metaFilter.setDomainId(domainId);
-        return dataSetService.getDataSetList(metaFilter);
     }
 
     public SemanticSchemaResp buildSemanticSchema(SchemaFilterReq schemaFilterReq) {

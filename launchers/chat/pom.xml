@@ -26,12 +26,6 @@
 
         <dependency>
             <groupId>com.tencent.supersonic</groupId>
-            <artifactId>chat-core</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.tencent.supersonic</groupId>
             <artifactId>auth-authorization</artifactId>
             <version>${project.version}</version>
         </dependency>

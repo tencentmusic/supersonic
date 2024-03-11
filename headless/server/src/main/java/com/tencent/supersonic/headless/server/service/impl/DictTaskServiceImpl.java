@@ -9,11 +9,11 @@ import com.tencent.supersonic.headless.api.pojo.request.DictSingleTaskReq;
 import com.tencent.supersonic.headless.api.pojo.response.DictItemResp;
 import com.tencent.supersonic.headless.api.pojo.response.DictTaskResp;
 import com.tencent.supersonic.headless.core.file.FileHandler;
+import com.tencent.supersonic.headless.core.knowledge.KnowledgeService;
 import com.tencent.supersonic.headless.core.knowledge.helper.HanlpHelper;
 import com.tencent.supersonic.headless.server.persistence.dataobject.DictTaskDO;
 import com.tencent.supersonic.headless.server.persistence.repository.DictRepository;
 import com.tencent.supersonic.headless.server.service.DictTaskService;
-import com.tencent.supersonic.headless.server.service.KnowledgeService;
 import com.tencent.supersonic.headless.server.utils.DictUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -41,7 +41,6 @@ public class DictTaskServiceImpl implements DictTaskService {
     private final DictUtils dictConverter;
     private final DictUtils dictUtils;
     private final FileHandler fileHandler;
-    private final KnowledgeService knowledgeService;
 
     public DictTaskServiceImpl(DictRepository dictRepository,
                                DictUtils dictConverter,
@@ -52,7 +51,6 @@ public class DictTaskServiceImpl implements DictTaskService {
         this.dictConverter = dictConverter;
         this.dictUtils = dictUtils;
         this.fileHandler = fileHandler;
-        this.knowledgeService = knowledgeService;
     }
 
     @Override
