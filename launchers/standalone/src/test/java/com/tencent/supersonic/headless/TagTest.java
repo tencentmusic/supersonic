@@ -2,13 +2,19 @@ package com.tencent.supersonic.headless;
 
 
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
+import com.tencent.supersonic.common.pojo.enums.StatusEnum;
 import com.tencent.supersonic.common.pojo.enums.TypeEnums;
+import com.tencent.supersonic.headless.api.pojo.ItemValueConfig;
 import com.tencent.supersonic.headless.api.pojo.TagDefineParams;
 import com.tencent.supersonic.headless.api.pojo.enums.TagDefineType;
+import com.tencent.supersonic.headless.api.pojo.request.DictItemReq;
+import com.tencent.supersonic.headless.api.pojo.request.DictSingleTaskReq;
 import com.tencent.supersonic.headless.api.pojo.request.ItemValueReq;
 import com.tencent.supersonic.headless.api.pojo.request.TagReq;
 import com.tencent.supersonic.headless.api.pojo.response.TagResp;
 import com.tencent.supersonic.headless.server.pojo.TagFilter;
+import com.tencent.supersonic.headless.server.service.DictConfService;
+import com.tencent.supersonic.headless.server.service.DictTaskService;
 import com.tencent.supersonic.headless.server.service.TagMetaService;
 import com.tencent.supersonic.headless.server.service.TagQueryService;
 import org.junit.Assert;
@@ -28,6 +34,10 @@ public class TagTest extends BaseTest {
     private TagMetaService tagMetaService;
     @Autowired
     private TagQueryService tagQueryService;
+    @Autowired
+    private DictConfService dictConfService;
+    @Autowired
+    private DictTaskService dictTaskService;
 
     @Test
     void testCreateTag() {
@@ -93,6 +103,29 @@ public class TagTest extends BaseTest {
         ItemValueReq itemValueReq = new ItemValueReq();
         itemValueReq.setItemId(tag.getId());
         tagMetaService.delete(tag.getId(), User.getFakeUser());
+    }
+
+    @Test
+    void testTagDict() {
+        User user = User.getFakeUser();
+        TagReq tagReq = newTagReq();
+        TagResp tagResp = tagMetaService.create(tagReq, user);
+        // add conf
+        DictItemReq itemValueReq = new DictItemReq();
+        itemValueReq.setType(TypeEnums.TAG);
+        itemValueReq.setItemId(tagResp.getId());
+        itemValueReq.setStatus(StatusEnum.ONLINE);
+        ItemValueConfig config = new ItemValueConfig();
+        config.setMetricId(4L);
+        config.setWhiteList(Arrays.asList("p10", "p20"));
+        config.setBlackList(Arrays.asList("p1", "p2"));
+        itemValueReq.setConfig(config);
+        dictConfService.addDictConf(itemValueReq, user);
+        // run Task
+        DictSingleTaskReq taskReq = DictSingleTaskReq.builder().type(TypeEnums.TAG).itemId(tagResp.getId()).build();
+        dictTaskService.addDictTask(taskReq, user);
+
+        tagMetaService.delete(tagResp.getId(), user);
     }
 
 }

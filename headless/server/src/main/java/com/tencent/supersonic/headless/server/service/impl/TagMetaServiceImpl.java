@@ -231,14 +231,16 @@ public class TagMetaServiceImpl implements TagMetaService {
     public Integer createBatch(TagBatchCreateReq tagLoadReq, User user) {
         Long modelId = tagLoadReq.getModelId();
         int num = 0;
+        MetaFilter metaFilter = new MetaFilter();
+        List<Long> modelIds = new ArrayList<>();
+        modelIds.add(modelId);
+        metaFilter.setModelIds(modelIds);
         if (Objects.isNull(tagLoadReq.getType()) || SchemaElementType.DIMENSION.equals(tagLoadReq.getType())) {
-            List<DimensionResp> dimensions = dimensionService.getDimensionInModelCluster(modelId);
+            List<DimensionResp> dimensions = dimensionService.getDimensions(metaFilter);
             num += loadDimTagBatch(tagLoadReq, dimensions, user);
         }
         if (Objects.isNull(tagLoadReq.getType()) || SchemaElementType.METRIC.equals(tagLoadReq.getType())) {
-            MetaFilter metaFilter = new MetaFilter();
-            List<Long> modelIds = new ArrayList<>();
-            modelIds.add(modelId);
+
             List<MetricResp> metrics = metricService.getMetrics(metaFilter);
             num += loadMetricTagBatch(tagLoadReq, metrics, user);
         }
@@ -369,6 +371,7 @@ public class TagMetaServiceImpl implements TagMetaService {
         if (CollectionUtils.isNotEmpty(tagDOList)) {
             tagDOList.stream().forEach(tagDO -> {
                 TagResp tagResp = convert(tagDO);
+                tagResp.setTypeEnum(TypeEnums.TAG);
                 if (CollectionUtils.isNotEmpty(collectIds) && collectIds.contains(tagDO.getId())) {
                     tagResp.setIsCollect(true);
                 } else {
