@@ -2,6 +2,7 @@ package com.tencent.supersonic.chat.core.pojo;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
+import com.tencent.supersonic.chat.api.pojo.DataSetSchema;
 import com.tencent.supersonic.chat.api.pojo.SchemaMapInfo;
 import com.tencent.supersonic.chat.api.pojo.SemanticSchema;
 import com.tencent.supersonic.chat.api.pojo.request.QueryFilters;
@@ -10,17 +11,17 @@ import com.tencent.supersonic.chat.core.agent.Agent;
 import com.tencent.supersonic.chat.core.config.OptimizationConfig;
 import com.tencent.supersonic.chat.core.plugin.Plugin;
 import com.tencent.supersonic.chat.core.query.SemanticQuery;
+import com.tencent.supersonic.common.pojo.enums.QueryType;
 import com.tencent.supersonic.common.util.ContextUtils;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @Builder
@@ -57,5 +58,11 @@ public class QueryContext {
                 .limit(parseShowCount)
                 .collect(Collectors.toList());
         return candidateQueries;
+    }
+
+    public QueryType getQueryType(Long dataSetId) {
+        SemanticSchema semanticSchema = this.semanticSchema;
+        DataSetSchema dataSetSchema = semanticSchema.getDataSetSchemaMap().get(dataSetId);
+        return dataSetSchema.getQueryType();
     }
 }

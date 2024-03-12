@@ -58,7 +58,7 @@ public class TagTest extends BaseTest {
         List<String> list = new ArrayList<>();
         list.add("流行");
         QueryFilter dimensionFilter = DataUtils.getFilter("genre", FilterOperatorEnum.EQUALS,
-                "流行", "风格", 6L);
+                "流行", "风格", 2L);
         expectedParseInfo.getDimensionFilters().add(dimensionFilter);
 
         SchemaElement metric = SchemaElement.builder().name("播放量").build();

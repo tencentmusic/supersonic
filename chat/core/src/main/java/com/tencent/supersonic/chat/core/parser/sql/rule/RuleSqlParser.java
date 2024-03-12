@@ -1,15 +1,15 @@
 package com.tencent.supersonic.chat.core.parser.sql.rule;
 
+import com.tencent.supersonic.chat.api.pojo.SchemaElementMatch;
 import com.tencent.supersonic.chat.api.pojo.SchemaMapInfo;
+import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.chat.core.parser.SemanticParser;
 import com.tencent.supersonic.chat.core.pojo.ChatContext;
 import com.tencent.supersonic.chat.core.pojo.QueryContext;
-import com.tencent.supersonic.chat.api.pojo.SchemaElementMatch;
 import com.tencent.supersonic.chat.core.query.rule.RuleSemanticQuery;
-import lombok.extern.slf4j.Slf4j;
-
 import java.util.Arrays;
 import java.util.List;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * RuleSqlParser resolves a specific SemanticQuery according to co-appearance
@@ -34,7 +34,11 @@ public class RuleSqlParser implements SemanticParser {
             List<RuleSemanticQuery> queries = RuleSemanticQuery.resolve(elementMatches, queryContext);
             for (RuleSemanticQuery query : queries) {
                 query.fillParseInfo(queryContext, chatContext);
-                queryContext.getCandidateQueries().add(query);
+                //filter by dataset queryType
+                SemanticParseInfo parseInfo = query.getParseInfo();
+                if (parseInfo.getQueryType().equals(queryContext.getQueryType(parseInfo.getDataSetId()))) {
+                    queryContext.getCandidateQueries().add(query);
+                }
             }
         }
 
