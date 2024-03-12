@@ -1,6 +1,7 @@
 package com.tencent.supersonic.headless.api.pojo.request;
 
 import com.google.common.collect.Lists;
+import com.tencent.supersonic.common.pojo.enums.QueryType;
 import com.tencent.supersonic.headless.api.pojo.Cache;
 import com.tencent.supersonic.headless.api.pojo.Param;
 import lombok.Data;
@@ -22,6 +23,8 @@ public abstract class SemanticQueryReq {
     protected Long dataSetId;
 
     protected String dataSetName;
+
+    protected QueryType queryType;
 
     protected Set<Long> modelIds = new HashSet<>();
 
