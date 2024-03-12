@@ -12,7 +12,7 @@ type Props = {
   knowledgeInfosMap?: IChatConfig.IKnowledgeInfosItemMap;
   sourceList: any[];
   targetList: React.Key[];
-  titles?: string[];
+  titles?: (React.ReactNode | string)[];
   onKnowledgeInfosMapChange?: (knowledgeInfosMap: IChatConfig.IKnowledgeInfosItemMap) => void;
   onChange?: (params?: any) => void;
   [key: string]: any;
