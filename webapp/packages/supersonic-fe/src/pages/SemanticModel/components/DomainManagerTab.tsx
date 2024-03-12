@@ -5,7 +5,7 @@ import { connect, history } from 'umi';
 import ClassDimensionTable from './ClassDimensionTable';
 import ClassMetricTable from './ClassMetricTable';
 import PermissionSection from './Permission/PermissionSection';
-import ChatSettingSection from '../ChatSetting/ChatSettingSection';
+import ClassTagTable from '../Insights/components/ClassTagTable';
 import OverView from './OverView';
 import styles from './style.less';
 import type { StateType } from '../model';
@@ -14,7 +14,6 @@ import { ISemantic } from '../data';
 import SemanticGraphCanvas from '../SemanticGraphCanvas';
 import RecommendedQuestionsSection from '../components/Entity/RecommendedQuestionsSection';
 import View from '../View';
-// import CommonDimensionTable from './CommonDimension/CommonDimensionTable';
 // import DatabaseTable from '../components/Database/DatabaseTable';
 
 import type { Dispatch } from 'umi';
@@ -86,11 +85,6 @@ const DomainManagerTab: React.FC<Props> = ({
     //   key: 'database',
     //   children: <DatabaseTable />,
     // },
-    // {
-    //   label: '公共维度',
-    //   key: 'commonDimension',
-    //   children: <CommonDimensionTable />,
-    // },
   ].filter((item) => {
     const target = domainList.find((domain) => domain.id === selectDomainId);
     if (target?.hasEditPermission) {
@@ -109,6 +103,11 @@ const DomainManagerTab: React.FC<Props> = ({
       label: '维度管理',
       key: 'dimenstion',
       children: <ClassDimensionTable />,
+    },
+    {
+      label: '标签管理',
+      key: 'tag',
+      children: <ClassTagTable />,
     },
 
     {

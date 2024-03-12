@@ -8,15 +8,15 @@ import styles from './style.less';
 import { ISemantic } from '../data';
 
 type Props = {
-  typeParams: ISemantic.IMetricTypeParams;
-  metricList: ISemantic.IMetricItem[];
+  typeParams: ISemantic.ITagDefineParams;
+  dimensionList: ISemantic.IDimensionItem[];
   onFieldChange: (metrics: ISemantic.IMetricTypeParamsItem[]) => void;
   onSqlChange: (sql: string) => void;
 };
 
-const MetricMetricFormTable: React.FC<Props> = ({
+const TagDimensionFormTable: React.FC<Props> = ({
   typeParams,
-  metricList,
+  dimensionList,
   onFieldChange,
   onSqlChange,
 }) => {
@@ -25,19 +25,17 @@ const MetricMetricFormTable: React.FC<Props> = ({
   const [tableData, setTableData] = useState<any[]>([]);
 
   useEffect(() => {
-    if (!Array.isArray(metricList)) {
+    if (!Array.isArray(dimensionList)) {
       setTableData([]);
       return;
     }
-    setTableData(metricList);
-  }, [metricList]);
+    setTableData(dimensionList);
+  }, [dimensionList]);
 
-  const [defineTypeParams, setDefineTypeParams] = useState(
-    typeParams || {
-      expr: '',
-      metrics: [],
-    },
-  );
+  const [defineTypeParams, setDefineTypeParams] = useState<ISemantic.ITagDefineParams>({
+    expr: typeParams?.expr || '',
+    dependencies: typeParams?.dependencies || [],
+  });
 
   useEffect(() => {
     setDefineTypeParams({ ...typeParams });
@@ -45,26 +43,24 @@ const MetricMetricFormTable: React.FC<Props> = ({
 
   const [exprString, setExprString] = useState(typeParams?.expr || '');
 
-  // const [selectMeasuresList, setSelectMeasuresList] = useState<IDataSource.IMeasuresItem[]>([]);
-
-  const [selectedKeys, setSelectedKeys] = useState<string[]>(() => {
-    // return [];
-    return defineTypeParams.metrics.map((item: any) => {
-      return item.bizName;
-    });
+  const [selectedKeys, setSelectedKeys] = useState<any[]>(() => {
+    return defineTypeParams.dependencies;
   });
 
   const [selectedKeysMap, setSelectedKeysMap] = useState<Record<string, boolean>>(() => {
-    return defineTypeParams.metrics.reduce((keyMap, item: any) => {
-      keyMap[item.bizName] = true;
-      return keyMap;
-    }, {});
+    return defineTypeParams.dependencies.reduce(
+      (keyMap: Record<string, boolean>, dimensionId: string | number) => {
+        keyMap[`${dimensionId}`] = true;
+        return keyMap;
+      },
+      {},
+    );
   });
 
   const columns = [
     {
       dataIndex: 'name',
-      title: '指标名称',
+      title: '维度名称',
     },
     {
       dataIndex: 'bizName',
@@ -74,11 +70,11 @@ const MetricMetricFormTable: React.FC<Props> = ({
 
   const handleUpdateKeys = (updateKeys: Record<string, boolean>) => {
     setSelectedKeysMap(updateKeys);
-    const selectedKeys: string[] = [];
-    const metrics = metricList.reduce((list: any[], item) => {
+    const selectedKeys: number[] = [];
+    const dimenisons = dimensionList.reduce((list: any[], item) => {
       const { bizName, id } = item;
-      if (updateKeys[bizName] === true) {
-        selectedKeys.push(bizName);
+      if (updateKeys[id] === true) {
+        selectedKeys.push(id);
         list.push({
           bizName,
           id,
@@ -87,23 +83,23 @@ const MetricMetricFormTable: React.FC<Props> = ({
       return list;
     }, []);
     setSelectedKeys(selectedKeys);
-    onFieldChange(metrics);
+    onFieldChange(dimenisons);
   };
 
   const rowSelection = {
     selectedRowKeys: selectedKeys,
-    onSelect: (record: ISemantic.IMeasure, selected: boolean) => {
-      const updateKeys = { ...selectedKeysMap, [record.bizName]: selected };
+    onSelect: (record: ISemantic.IDimensionItem, selected: boolean) => {
+      const updateKeys = { ...selectedKeysMap, [record.id]: selected };
       handleUpdateKeys(updateKeys);
     },
     onSelectAll: (
       selected: boolean,
-      selectedRows: ISemantic.IMetricItem[],
-      changeRows: ISemantic.IMetricItem[],
+      selectedRows: ISemantic.IDimensionItem[],
+      changeRows: ISemantic.IDimensionItem[],
     ) => {
       const updateKeys = changeRows.reduce(
-        (keyMap: Record<string, boolean>, item: ISemantic.IMetricItem) => {
-          keyMap[item.bizName] = selected;
+        (keyMap: Record<string, boolean>, item: ISemantic.IDimensionItem) => {
+          keyMap[item.id] = selected;
           return keyMap;
         },
         {},
@@ -117,19 +113,19 @@ const MetricMetricFormTable: React.FC<Props> = ({
       <Space direction="vertical" style={{ width: '100%' }}>
         <ProTable
           actionRef={actionRef}
-          headerTitle={<FormLabelRequire title="指标列表" />}
-          rowKey="bizName"
+          headerTitle={<FormLabelRequire title="维度列表" />}
+          rowKey="id"
           columns={columns}
           dataSource={tableData}
           // pagination={false}
           search={false}
           toolbar={{
             search: {
-              placeholder: '请输入指标名称',
+              placeholder: '请输入维度名称',
               onSearch: (value: string) => {
                 setTableData(
-                  metricList.reduce(
-                    (data: ISemantic.IMetricItem[], item: ISemantic.IMetricItem) => {
+                  dimensionList.reduce(
+                    (data: ISemantic.IDimensionItem[], item: ISemantic.IDimensionItem) => {
                       if (item.name.includes(value)) {
                         data.push(item);
                       }
@@ -153,11 +149,11 @@ const MetricMetricFormTable: React.FC<Props> = ({
             className={styles.desc}
             style={{ border: 'unset', padding: 0, marginBottom: 20, marginLeft: 2 }}
           >
-            已创建的指标已经过聚合，因此通过这些指标来创建新的指标无需指定
+            已创建的维度已经过聚合，因此通过这些维度来创建新的维度无需指定
             <Tag color="#2499ef14" className={styles.markerTag}>
               聚合函数
             </Tag>
-            ，如根据指标c和指标d来创建新的指标，因为指标本身带有聚合函数，因此表达式可以写成:
+            ，如根据维度c和维度d来创建新的维度，因为维度本身带有聚合函数，因此表达式可以写成:
             c+d-100
           </p>
           <SqlEditor
@@ -175,4 +171,4 @@ const MetricMetricFormTable: React.FC<Props> = ({
   );
 };
 
-export default MetricMetricFormTable;
+export default TagDimensionFormTable;

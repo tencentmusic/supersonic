@@ -1,21 +1,14 @@
 import type { ActionType, ProColumns } from '@ant-design/pro-table';
 import ProTable from '@ant-design/pro-table';
-import { message, Space, Popconfirm, Tag, Spin, Tooltip } from 'antd';
+import { message, Space, Popconfirm } from 'antd';
 import React, { useRef, useState, useEffect } from 'react';
 import type { Dispatch } from 'umi';
-import { connect, history, useModel } from 'umi';
+import { connect, useModel } from 'umi';
 import type { StateType } from '../model';
 import { SENSITIVE_LEVEL_ENUM } from '../constant';
-import {
-  queryMetric,
-  deleteMetric,
-  batchUpdateMetricStatus,
-  batchDownloadMetric,
-} from '../service';
-import MetricFilter from './components/MetricFilter';
-import MetricInfoCreateForm from '../components/MetricInfoCreateForm';
-import MetricCardList from './components/MetricCardList';
-import NodeInfoDrawer from '../SemanticGraph/components/NodeInfoDrawer';
+import { getTagList, deleteTag, batchUpdateTagStatus } from '../service';
+import TagFilter from './components/TagFilter';
+import TagInfoCreateForm from './components/TagInfoCreateForm';
 import { SemanticNodeType, StatusEnum } from '../enum';
 import moment from 'moment';
 import styles from './style.less';
@@ -50,13 +43,12 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
   };
   const [pagination, setPagination] = useState(defaultPagination);
   const [loading, setLoading] = useState<boolean>(false);
-  const [dataSource, setDataSource] = useState<ISemantic.IMetricItem[]>([]);
-  const [metricItem, setMetricItem] = useState<ISemantic.IMetricItem>();
+  const [dataSource, setDataSource] = useState<ISemantic.ITagItem[]>([]);
+  const [tagItem, setTagItem] = useState<ISemantic.ITagItem>();
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const [filterParams, setFilterParams] = useState<Record<string, any>>({
     showType: localStorage.getItem('metricMarketShowType') === '1' ? true : false,
   });
-  const [infoDrawerVisible, setInfoDrawerVisible] = useState<boolean>(false);
 
   const [downloadLoading, setDownloadLoading] = useState<boolean>(false);
 
@@ -65,29 +57,29 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
   const actionRef = useRef<ActionType>();
 
   useEffect(() => {
-    queryMetricList(filterParams);
+    queryTagList(filterParams);
   }, []);
 
   const queryBatchUpdateStatus = async (ids: React.Key[], status: StatusEnum) => {
     if (Array.isArray(ids) && ids.length === 0) {
       return;
     }
-    const { code, msg } = await batchUpdateMetricStatus({
+    const { code, msg } = await batchUpdateTagStatus({
       ids,
       status,
     });
     if (code === 200) {
-      queryMetricList(filterParams);
+      queryTagList(filterParams);
       return;
     }
     message.error(msg);
   };
 
-  const queryMetricList = async (params: QueryMetricListParams = {}, disabledLoading = false) => {
+  const queryTagList = async (params: QueryMetricListParams = {}, disabledLoading = false) => {
     if (!disabledLoading) {
       setLoading(true);
     }
-    const { code, data, msg } = await queryMetric({
+    const { code, data, msg } = await getTagList({
       ...pagination,
       ...params,
       createdBy: params.onlyShowMe ? currentUser.name : null,
@@ -124,42 +116,26 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
   };
 
   const deleteMetricQuery = async (id: number) => {
-    const { code, msg } = await deleteMetric(id);
+    const { code, msg } = await deleteTag(id);
     if (code === 200) {
-      setMetricItem(undefined);
-      queryMetricList(filterParams);
+      setTagItem(undefined);
+      queryTagList(filterParams);
     } else {
       message.error(msg);
     }
   };
 
-  const downloadMetricQuery = async (
-    ids: React.Key[],
-    dateStringList: string[],
-    pickerType: string,
-  ) => {
-    if (Array.isArray(ids) && ids.length > 0) {
-      setDownloadLoading(true);
-      const [startDate, endDate] = dateStringList;
-      await batchDownloadMetric({
-        metricIds: ids,
-        dateInfo: {
-          dateMode: 'BETWEEN',
-          startDate,
-          endDate,
-          period: pickerType.toUpperCase(),
-        },
-      });
-      setDownloadLoading(false);
-    }
-  };
-
-  const handleMetricEdit = (metricItem: ISemantic.IMetricItem) => {
-    setMetricItem(metricItem);
+  const handleMetricEdit = (tagItem: ISemantic.ITagItem) => {
+    setTagItem(tagItem);
     setCreateModalVisible(true);
   };
 
-  const columnsConfig = ColumnsConfig();
+  const columnsConfig = ColumnsConfig({
+    indicatorInfo: {
+      url: '/tag/detail/',
+      starType: 'tag',
+    },
+  });
 
   const columns: ProColumns[] = [
     {
@@ -171,32 +147,11 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
     },
     {
       dataIndex: 'name',
-      title: '指标',
-      // width: '20%',
+      title: '标签',
       width: 280,
       fixed: 'left',
       render: columnsConfig.indicatorInfo.render,
     },
-    // {
-    //   dataIndex: 'modelName',
-    //   title: '所属模型',
-    //   render: (_, record: any) => {
-    //     if (record.hasAdminRes) {
-    //       return (
-    //         <a
-    //           target="blank"
-    //           href={`/webapp/model/${record.domainId}/${record.modelId}/metric`}
-    //           // onClick={() => {
-    //           //   history.push(`/model/${record.domainId}/${record.modelId}/metric`);
-    //           // }}
-    //         >
-    //           {record.modelName}
-    //         </a>
-    //       );
-    //     }
-    //     return <> {record.modelName}</>;
-    //   },
-    // },
     {
       dataIndex: 'sensitiveLevel',
       title: '敏感度',
@@ -262,7 +217,7 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
                 <a
                   key="metricDeleteBtn"
                   onClick={() => {
-                    setMetricItem(record);
+                    setTagItem(record);
                   }}
                 >
                   删除
@@ -292,7 +247,7 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
     params.sensitiveLevel = sensitiveLevelValue;
     params.type = typeValue;
     setFilterParams(params);
-    await queryMetricList(
+    await queryTagList(
       {
         ...params,
         ...defaultPagination,
@@ -319,7 +274,7 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
       }
       setSelectedRowKeys(selectedRowKeys);
     },
-    // getCheckboxProps: (record: ISemantic.IMetricItem) => ({
+    // getCheckboxProps: (record: ISemantic.ITagItem) => ({
     //   disabled: !record.hasAdminRes,
     // }),
   };
@@ -339,8 +294,8 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
 
   return (
     <>
-      <div className={styles.metricFilterWrapper}>
-        <MetricFilter
+      <div className={styles.TagFilterWrapper}>
+        <TagFilter
           initFilterValues={filterParams}
           onFiltersChange={(_, values) => {
             if (_.showType !== undefined) {
@@ -352,110 +307,63 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
         />
       </div>
       <>
-        {filterParams.showType ? (
-          <Spin spinning={loading} style={{ minHeight: 500 }}>
-            <MetricCardList
-              metricList={dataSource}
-              disabledEdit={true}
-              onMetricChange={(metricItem: ISemantic.IMetricItem) => {
-                history.push(`/metric/detail/${metricItem.id}`);
+        <ProTable
+          className={`${styles.tagTable}`}
+          actionRef={actionRef}
+          rowKey="id"
+          search={false}
+          dataSource={dataSource}
+          columns={columns}
+          pagination={pagination}
+          size="large"
+          scroll={{ x: 1500 }}
+          tableAlertRender={() => {
+            return false;
+          }}
+          sticky={{ offsetHeader: 0 }}
+          rowSelection={{
+            type: 'checkbox',
+            ...rowSelection,
+          }}
+          toolBarRender={() => [
+            <BatchCtrlDropDownButton
+              key="ctrlBtnList"
+              downloadLoading={downloadLoading}
+              onDeleteConfirm={() => {
+                queryBatchUpdateStatus(selectedRowKeys, StatusEnum.DELETED);
               }}
-              onDeleteBtnClick={(metricItem: ISemantic.IMetricItem) => {
-                deleteMetricQuery(metricItem.id);
-              }}
-              onEditBtnClick={(metricItem: ISemantic.IMetricItem) => {
-                setMetricItem(metricItem);
-                setCreateModalVisible(true);
-              }}
-            />
-          </Spin>
-        ) : (
-          <ProTable
-            className={`${styles.metricTable}`}
-            actionRef={actionRef}
-            rowKey="id"
-            search={false}
-            dataSource={dataSource}
-            columns={columns}
-            pagination={pagination}
-            size="large"
-            scroll={{ x: 1500 }}
-            tableAlertRender={() => {
-              return false;
-            }}
-            sticky={{ offsetHeader: 0 }}
-            rowSelection={{
-              type: 'checkbox',
-              ...rowSelection,
-            }}
-            toolBarRender={() => [
-              <BatchCtrlDropDownButton
-                key="ctrlBtnList"
-                downloadLoading={downloadLoading}
-                onDeleteConfirm={() => {
-                  queryBatchUpdateStatus(selectedRowKeys, StatusEnum.DELETED);
-                }}
-                disabledList={hasAllPermission ? [] : ['batchStart', 'batchStop', 'batchDelete']}
-                onMenuClick={onMenuClick}
-                onDownloadDateRangeChange={(searchDateRange, pickerType) => {
-                  downloadMetricQuery(selectedRowKeys, searchDateRange, pickerType);
-                }}
-              />,
-            ]}
-            loading={loading}
-            onChange={(data: any) => {
-              const { current, pageSize, total } = data;
-              const pagin = {
-                current,
-                pageSize,
-                total,
-              };
-              setPagination(pagin);
-              queryMetricList({ ...pagin, ...filterParams });
-            }}
-            options={{ reload: false, density: false, fullScreen: false }}
-          />
-        )}
+              hiddenList={['batchDownload']}
+              disabledList={hasAllPermission ? [] : ['batchStart', 'batchStop', 'batchDelete']}
+              onMenuClick={onMenuClick}
+            />,
+          ]}
+          loading={loading}
+          onChange={(data: any) => {
+            const { current, pageSize, total } = data;
+            const pagin = {
+              current,
+              pageSize,
+              total,
+            };
+            setPagination(pagin);
+            queryTagList({ ...pagin, ...filterParams });
+          }}
+          options={{ reload: false, density: false, fullScreen: false }}
+        />
       </>
 
       {createModalVisible && (
-        <MetricInfoCreateForm
-          domainId={Number(selectDomainId)}
+        <TagInfoCreateForm
+          domainId={selectDomainId}
+          modelId={Number(modelId)}
           createModalVisible={createModalVisible}
-          modelId={modelId}
-          metricItem={metricItem}
+          tagItem={tagItem}
           onSubmit={() => {
             setCreateModalVisible(false);
-            queryMetricList(filterParams);
-            dispatch({
-              type: 'domainManger/queryMetricList',
-              payload: {
-                domainId: selectDomainId,
-              },
-            });
+            queryTagList({ ...filterParams, ...defaultPagination });
           }}
           onCancel={() => {
             setCreateModalVisible(false);
-          }}
-        />
-      )}
-      {infoDrawerVisible && (
-        <NodeInfoDrawer
-          nodeData={{ ...metricItem, nodeType: SemanticNodeType.METRIC }}
-          placement="right"
-          onClose={() => {
-            setInfoDrawerVisible(false);
-          }}
-          width="100%"
-          open={infoDrawerVisible}
-          mask={true}
-          getContainer={false}
-          onEditBtnClick={(nodeData: any) => {
-            handleMetricEdit(nodeData);
-          }}
-          maskClosable={true}
-          onNodeChange={({ eventName }: { eventName: string }) => {
-            setInfoDrawerVisible(false);
           }}
         />
       )}

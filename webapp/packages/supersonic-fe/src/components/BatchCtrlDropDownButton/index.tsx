@@ -5,6 +5,7 @@ import {
   StopOutlined,
   CloudDownloadOutlined,
   DeleteOutlined,
+  ExportOutlined,
 } from '@ant-design/icons';
 
 export type BatchCtrlDropDownButtonProps = {
@@ -14,6 +15,7 @@ export type BatchCtrlDropDownButtonProps = {
   downloadLoading?: boolean;
   disabledList?: string[];
   hiddenList?: string[];
+  extenderEnable?: boolean;
 };
 const { RangePicker } = DatePicker;
 
@@ -24,10 +26,21 @@ const BatchCtrlDropDownButton: FC<BatchCtrlDropDownButtonProps> = ({
   downloadLoading,
   disabledList = [],
   hiddenList = [],
+  extenderEnable = false,
 }) => {
   const [popoverOpenState, setPopoverOpenState] = useState<boolean>(false);
   const [pickerType, setPickerType] = useState<string>('day');
   const dateRangeRef = useRef<any>([]);
+
+  const exportTagButton = {
+    key: 'exportTagButton',
+    label: '导出为标签',
+    icon: <ExportOutlined />,
+    disabled: disabledList?.includes('exportTagButton'),
+  };
+
+  const extenderList: any[] = extenderEnable ? [exportTagButton] : [];
+
   const dropdownButtonItems: any[] = [
     {
       key: 'batchStart',
@@ -55,6 +68,11 @@ const BatchCtrlDropDownButton: FC<BatchCtrlDropDownButtonProps> = ({
       icon: <CloudDownloadOutlined />,
       disabled: disabledList?.includes('batchDownload'),
     },
+    {
+      key: 'divider',
+      type: 'divider',
+    },
+    ...extenderList,
     {
       key: 'batchDeleteDivider',
       type: 'divider',
