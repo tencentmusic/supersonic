@@ -3,6 +3,7 @@ package com.tencent.supersonic.headless.server.service;
 import com.github.pagehelper.PageInfo;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.headless.api.pojo.request.MetaBatchReq;
+import com.tencent.supersonic.headless.api.pojo.request.TagBatchCreateReq;
 import com.tencent.supersonic.headless.api.pojo.request.TagReq;
 import com.tencent.supersonic.headless.api.pojo.response.TagResp;
 import com.tencent.supersonic.headless.server.pojo.TagFilter;
@@ -24,4 +25,6 @@ public interface TagMetaService {
     PageInfo<TagResp> queryPage(TagFilterPage tagFilterPage, User user);
 
     Boolean batchUpdateStatus(MetaBatchReq metaBatchReq, User user);
+
+    Integer createBatch(TagBatchCreateReq tagBatchReq, User user);
 }

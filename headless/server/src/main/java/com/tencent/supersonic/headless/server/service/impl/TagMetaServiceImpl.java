@@ -13,21 +13,29 @@ import com.tencent.supersonic.common.pojo.enums.EventType;
 import com.tencent.supersonic.common.pojo.enums.StatusEnum;
 import com.tencent.supersonic.common.pojo.enums.TypeEnums;
 import com.tencent.supersonic.common.pojo.exception.InvalidArgumentException;
+import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
 import com.tencent.supersonic.headless.api.pojo.TagDefineParams;
 import com.tencent.supersonic.headless.api.pojo.enums.TagDefineType;
 import com.tencent.supersonic.headless.api.pojo.request.MetaBatchReq;
+import com.tencent.supersonic.headless.api.pojo.request.TagBatchCreateReq;
 import com.tencent.supersonic.headless.api.pojo.request.TagReq;
+import com.tencent.supersonic.headless.api.pojo.response.DimensionResp;
+import com.tencent.supersonic.headless.api.pojo.response.MetricResp;
 import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
 import com.tencent.supersonic.headless.api.pojo.response.TagResp;
 import com.tencent.supersonic.headless.server.persistence.dataobject.CollectDO;
 import com.tencent.supersonic.headless.server.persistence.dataobject.TagDO;
 import com.tencent.supersonic.headless.server.persistence.repository.TagRepository;
+import com.tencent.supersonic.headless.server.pojo.MetaFilter;
 import com.tencent.supersonic.headless.server.pojo.TagFilter;
 import com.tencent.supersonic.headless.server.pojo.TagFilterPage;
 import com.tencent.supersonic.headless.server.service.CollectService;
+import com.tencent.supersonic.headless.server.service.DimensionService;
+import com.tencent.supersonic.headless.server.service.MetricService;
 import com.tencent.supersonic.headless.server.service.ModelService;
 import com.tencent.supersonic.headless.server.service.TagMetaService;
 import com.tencent.supersonic.headless.server.utils.NameCheckUtils;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -36,12 +44,14 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.BeanUtils;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -52,13 +62,18 @@ public class TagMetaServiceImpl implements TagMetaService {
     private final ModelService modelService;
     private final CollectService collectService;
     private ApplicationEventPublisher eventPublisher;
+    private final DimensionService dimensionService;
+    private final MetricService metricService;
 
     public TagMetaServiceImpl(TagRepository tagRepository, ModelService modelService,
-                              CollectService collectService, ApplicationEventPublisher eventPublisher) {
+                              CollectService collectService, ApplicationEventPublisher eventPublisher,
+                              @Lazy DimensionService dimensionService, @Lazy MetricService metricService) {
         this.tagRepository = tagRepository;
         this.modelService = modelService;
         this.collectService = collectService;
         this.eventPublisher = eventPublisher;
+        this.dimensionService = dimensionService;
+        this.metricService = metricService;
     }
 
     @Override
@@ -171,7 +186,7 @@ public class TagMetaServiceImpl implements TagMetaService {
         }
 
         PageInfo<TagDO> tagDOPageInfo = PageHelper.startPage(tagFilterPage.getCurrent(),
-                        tagFilterPage.getPageSize())
+                tagFilterPage.getPageSize())
                 .doSelectPageInfo(() -> getTags(tagFilter));
         PageInfo<TagResp> pageInfo = new PageInfo<>();
         BeanUtils.copyProperties(tagDOPageInfo, pageInfo);
@@ -185,13 +200,14 @@ public class TagMetaServiceImpl implements TagMetaService {
 
     @Override
     public Boolean batchUpdateStatus(MetaBatchReq metaBatchReq, User user) {
-        if (Objects.isNull(metaBatchReq) || CollectionUtils.isEmpty(metaBatchReq.getIds())
-                || Objects.isNull(metaBatchReq.getStatus())) {
+        if (Objects.isNull(metaBatchReq)) {
             return false;
         }
         TagFilter tagFilter = new TagFilter();
-        tagFilter.setIds(metaBatchReq.getIds());
+        BeanUtils.copyProperties(metaBatchReq, tagFilter);
+        tagFilter.setStatus(null);
         List<TagDO> tagDOList = tagRepository.query(tagFilter);
+        log.info("tagFilter:{},{}", tagFilter.getModelIds(), tagFilter.getBizNames());
         if (CollectionUtils.isEmpty(tagDOList)) {
             return true;
         }
@@ -209,6 +225,72 @@ public class TagMetaServiceImpl implements TagMetaService {
             sendEventBatch(tagDOList, EventType.ADD);
         }
         return true;
+    }
+
+    @Override
+    public Integer createBatch(TagBatchCreateReq tagLoadReq, User user) {
+        Long modelId = tagLoadReq.getModelId();
+        int num = 0;
+        if (Objects.isNull(tagLoadReq.getType()) || SchemaElementType.DIMENSION.equals(tagLoadReq.getType())) {
+            List<DimensionResp> dimensions = dimensionService.getDimensionInModelCluster(modelId);
+            num += loadDimTagBatch(tagLoadReq, dimensions, user);
+        }
+        if (Objects.isNull(tagLoadReq.getType()) || SchemaElementType.METRIC.equals(tagLoadReq.getType())) {
+            MetaFilter metaFilter = new MetaFilter();
+            List<Long> modelIds = new ArrayList<>();
+            modelIds.add(modelId);
+            List<MetricResp> metrics = metricService.getMetrics(metaFilter);
+            num += loadMetricTagBatch(tagLoadReq, metrics, user);
+        }
+        log.info("loadTagBatch finished ,tag num:{}", num);
+        return num;
+    }
+
+    private int loadMetricTagBatch(TagBatchCreateReq tagLoadReq, List<MetricResp> metrics, User user) {
+        if (!CollectionUtils.isEmpty(tagLoadReq.getItemIds())) {
+            metrics = metrics.stream().filter(metric -> tagLoadReq.getItemIds().contains(metric.getId()))
+                    .collect(Collectors.toList());
+        }
+        metrics.stream().forEach(metric -> {
+            TagReq tagReq = new TagReq();
+            BeanUtils.copyProperties(metric, tagReq);
+            tagReq.setId(null);
+            tagReq.setBizName(metric.getBizName());
+            tagReq.setTagDefineType(TagDefineType.METRIC);
+            TagDefineParams tagDefineParams = new TagDefineParams();
+            tagDefineParams.setExpr(metric.getBizName());
+            tagDefineParams.setDependencies(new ArrayList<>(Arrays.asList(metric.getId())));
+            // tagReq.setSensitiveLevel(metric.getSensitiveLevel());
+            tagReq.setTagDefineParams(tagDefineParams);
+            create(tagReq, user);
+        });
+        return metrics.size();
+    }
+
+    private Integer loadDimTagBatch(TagBatchCreateReq tagLoadReq, List<DimensionResp> dimensions, User user) {
+        if (!CollectionUtils.isEmpty(tagLoadReq.getItemIds())) {
+            dimensions = dimensions.stream().filter(dim -> tagLoadReq.getItemIds().contains(dim.getId()))
+                    .collect(Collectors.toList());
+        }
+        dimensions.stream().forEach(dim -> {
+            TagReq tagReq = new TagReq();
+            BeanUtils.copyProperties(dim, tagReq);
+            tagReq.setId(null);
+            tagReq.setBizName(dim.getBizName());
+            tagReq.setTagDefineType(TagDefineType.DIMENSION);
+            TagDefineParams tagDefineParams = new TagDefineParams();
+            tagDefineParams.setExpr(dim.getBizName());
+            tagDefineParams.setDependencies(new ArrayList<>(Arrays.asList(dim.getId())));
+            // tagReq.setSensitiveLevel(dim.getSensitiveLevel());
+            tagReq.setTagDefineParams(tagDefineParams);
+            try {
+                create(tagReq, user);
+            } catch (Exception e) {
+                log.info("loadDimTagBatch, e:{}", e);
+            }
+
+        });
+        return dimensions.size();
     }
 
     private TagDO fillUpdateInfo(TagReq tagReq, TagDO tagDO) {
