@@ -40,7 +40,7 @@ public class NatureHelper {
             case ENTITY:
                 result = SchemaElementType.ENTITY;
                 break;
-            case VIEW:
+            case DATASET:
                 result = SchemaElementType.DATASET;
                 break;
             case VALUE:
@@ -48,6 +48,9 @@ public class NatureHelper {
                 break;
             case TAG:
                 result = SchemaElementType.TAG;
+                break;
+            case TAG_VALUE:
+                result = SchemaElementType.TAG_VALUE;
                 break;
             default:
                 break;
@@ -57,7 +60,7 @@ public class NatureHelper {
 
     private static boolean isDataSetOrEntity(S2Term term, Integer model) {
         return (DictWordType.NATURE_SPILT + model).equals(term.nature.toString()) || term.nature.toString()
-                .endsWith(DictWordType.ENTITY.getType());
+                .endsWith(DictWordType.ENTITY.getTypeWithSpilt());
     }
 
     public static Integer getDataSetByNature(Nature nature) {
@@ -131,7 +134,8 @@ public class NatureHelper {
         if (split.length <= 1) {
             return false;
         }
-        return !nature.endsWith(DictWordType.METRIC.getType()) && !nature.endsWith(DictWordType.DIMENSION.getType())
+        return !nature.endsWith(DictWordType.METRIC.getTypeWithSpilt()) && !nature.endsWith(
+                DictWordType.DIMENSION.getTypeWithSpilt())
                 && StringUtils.isNumeric(split[1]);
     }
 
@@ -154,12 +158,12 @@ public class NatureHelper {
 
     private static long getDimensionCount(List<S2Term> terms) {
         return terms.stream().filter(term -> term.nature.startsWith(DictWordType.NATURE_SPILT) && term.nature.toString()
-                .endsWith(DictWordType.DIMENSION.getType())).count();
+                .endsWith(DictWordType.DIMENSION.getTypeWithSpilt())).count();
     }
 
     private static long getMetricCount(List<S2Term> terms) {
         return terms.stream().filter(term -> term.nature.startsWith(DictWordType.NATURE_SPILT) && term.nature.toString()
-                .endsWith(DictWordType.METRIC.getType())).count();
+                .endsWith(DictWordType.METRIC.getTypeWithSpilt())).count();
     }
 
     /**

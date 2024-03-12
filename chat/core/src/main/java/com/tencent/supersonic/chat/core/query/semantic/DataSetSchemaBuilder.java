@@ -51,6 +51,9 @@ public class DataSetSchemaBuilder {
         Set<SchemaElement> tags = getTags(resp);
         dataSetSchema.getTags().addAll(tags);
 
+        Set<SchemaElement> tagValues = getTagValues(resp);
+        dataSetSchema.getTagValues().addAll(tagValues);
+
         SchemaElement entity = getEntity(resp);
         if (Objects.nonNull(entity)) {
             dataSetSchema.setEntity(entity);
@@ -89,6 +92,22 @@ public class DataSetSchemaBuilder {
             tags.add(element);
         }
         return tags;
+    }
+
+    private static Set<SchemaElement> getTagValues(DataSetSchemaResp resp) {
+        Set<SchemaElement> dimensionValues = new HashSet<>();
+        for (TagResp tagResp : resp.getTags()) {
+            SchemaElement element = SchemaElement.builder()
+                    .dataSet(resp.getId())
+                    .model(tagResp.getModelId())
+                    .id(tagResp.getId())
+                    .name(tagResp.getName())
+                    .bizName(tagResp.getBizName())
+                    .type(SchemaElementType.TAG_VALUE)
+                    .build();
+            dimensionValues.add(element);
+        }
+        return dimensionValues;
     }
 
     private static Set<SchemaElement> getDimensions(DataSetSchemaResp resp) {

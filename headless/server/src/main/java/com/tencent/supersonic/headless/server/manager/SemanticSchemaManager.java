@@ -3,6 +3,7 @@ package com.tencent.supersonic.headless.server.manager;
 import com.tencent.supersonic.common.pojo.ModelRela;
 import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
 import com.tencent.supersonic.headless.api.pojo.Field;
+import com.tencent.supersonic.headless.api.pojo.enums.TagDefineType;
 import com.tencent.supersonic.headless.api.pojo.response.DatabaseResp;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticSchemaResp;
 import com.tencent.supersonic.headless.api.pojo.response.TagResp;
@@ -103,37 +104,62 @@ public class SemanticSchemaManager {
         }
         if (Objects.nonNull(semanticModel.getDatasourceMap()) && !semanticModel.getDatasourceMap().isEmpty()) {
             for (Map.Entry<String, DataSource> entry : semanticModel.getDatasourceMap().entrySet()) {
-                List<Dimension> dimensions = new ArrayList<>();
-                List<String> tagNames = new ArrayList<>();
+                List<Dimension> modelDimensions = new ArrayList<>();
+                if (!semanticModel.getDimensionMap().containsKey(entry.getKey())) {
+                    semanticModel.getDimensionMap().put(entry.getKey(), modelDimensions);
+                } else {
+                    modelDimensions = semanticModel.getDimensionMap().get(entry.getKey());
+                }
                 if (tagMap.containsKey(entry.getValue().getId())) {
                     for (TagResp tagResp : tagMap.get(entry.getValue().getId())) {
-                        tagNames.add(tagResp.getBizName());
-                        Dimension dimension = Dimension.builder().build();
-                        dimension.setType("");
-                        dimension.setExpr(tagResp.getExpr());
-                        dimension.setName(tagResp.getBizName());
-                        dimension.setOwners("");
-                        dimension.setBizName(tagResp.getBizName());
-                        if (Objects.isNull(dimension.getDataType())) {
-                            dimension.setDataType(DataType.UNKNOWN);
-                        }
-                        DimensionTimeTypeParams dimensionTimeTypeParams = new DimensionTimeTypeParams();
-                        dimension.setDimensionTimeTypeParams(dimensionTimeTypeParams);
-                        dimensions.add(dimension);
+                        addTagModel(tagResp, modelDimensions, semanticModel.getMetrics());
                     }
                 }
-                if (semanticModel.getDimensionMap().containsKey(entry.getKey())) {
-                    semanticModel.getDimensionMap().get(entry.getKey()).stream()
-                            .filter(d -> !tagNames.contains(d.getBizName())).forEach(d -> {
-                                dimensions.add(d);
-                            });
-                }
-                semanticModel.getDimensionMap().put(entry.getKey(), dimensions);
             }
         }
-        // metric ignored
-        semanticModel.setMetrics(new ArrayList<>());
+
         return semanticModel;
+    }
+
+    private void addTagModel(TagResp tagResp, List<Dimension> modelDimensions, List<Metric> modelMetrics)
+            throws Exception {
+        switch (tagResp.getTagDefineType()) {
+            case FIELD:
+            case DIMENSION:
+                if (TagDefineType.DIMENSION.equals(tagResp.getTagDefineType())) {
+                    Optional<Dimension> modelDimension = modelDimensions.stream()
+                            .filter(d -> d.getBizName().equals(tagResp.getExpr())).findFirst();
+                    if (modelDimension.isPresent()) {
+                        modelDimension.get().setName(tagResp.getBizName());
+                        return;
+                    }
+                }
+                Dimension dimension = Dimension.builder().build();
+                dimension.setType("");
+                dimension.setExpr(tagResp.getExpr());
+                dimension.setName(tagResp.getBizName());
+                dimension.setOwners("");
+                dimension.setBizName(tagResp.getBizName());
+                if (Objects.isNull(dimension.getDataType())) {
+                    dimension.setDataType(DataType.UNKNOWN);
+                }
+
+                DimensionTimeTypeParams dimensionTimeTypeParams = new DimensionTimeTypeParams();
+                dimension.setDimensionTimeTypeParams(dimensionTimeTypeParams);
+                modelDimensions.add(dimension);
+                return;
+            case METRIC:
+                Optional<Metric> modelMetric = modelMetrics.stream()
+                        .filter(m -> m.getName().equalsIgnoreCase(tagResp.getExpr())).findFirst();
+                if (modelMetric.isPresent()) {
+                    modelMetric.get().setName(tagResp.getBizName());
+                } else {
+                    throw new Exception(String.format("tag [{}] cant find the metric [{}]", tagResp.getBizName(),
+                            tagResp.getExpr()));
+                }
+                return;
+            default:
+        }
     }
 
     public static List<Metric> getMetrics(final List<MetricYamlTpl> t) {
