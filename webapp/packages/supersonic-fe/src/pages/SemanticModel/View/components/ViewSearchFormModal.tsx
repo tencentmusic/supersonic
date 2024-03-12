@@ -135,7 +135,7 @@ const ViewSearchFormModal: React.FC<ModelCreateFormModalProps> = ({
     <Modal
       width={800}
       destroyOnClose
-      title={'数据集信息'}
+      title={'查询设置'}
       open={true}
       maskClosable={false}
       footer={renderFooter()}

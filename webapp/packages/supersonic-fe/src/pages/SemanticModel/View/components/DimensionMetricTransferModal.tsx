@@ -11,7 +11,7 @@ export type ModelCreateFormModalProps = {
   metricList?: ISemantic.IMetricItem[];
   modelId?: number;
   selectedTransferKeys: React.Key[];
-  toolbarSolt?: ReactNode;
+  toolbarSolt?: React.ReactNode;
   onCancel: () => void;
   onSubmit: (values: any, selectedKeys: React.Key[]) => void;
 };

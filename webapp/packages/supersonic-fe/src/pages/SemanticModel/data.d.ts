@@ -157,6 +157,7 @@ export declare namespace ISemantic {
     includesAll: boolean;
     metrics: number[];
     dimensions: number[];
+    tagIds: number[];
   }
 
   interface IViewItem {

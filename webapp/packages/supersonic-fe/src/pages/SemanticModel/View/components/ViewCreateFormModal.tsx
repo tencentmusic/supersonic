@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Form, Button, Modal, Input, Select, Steps, Tabs, Space } from 'antd';
+import { Form, Button, Modal, Input, Select, Steps, Radio, Space } from 'antd';
 import styles from '../../components/style.less';
 import { message } from 'antd';
 import { formLayout } from '@/components/FormHelper/utils';
-import { createView, updateView, getDimensionList, queryMetric } from '../../service';
+import { createView, updateView, getDimensionList, queryMetric, getTagList } from '../../service';
 import { ISemantic } from '../../data';
 import { isString } from 'lodash';
 import FormItemTitle from '@/components/FormHelper/FormItemTitle';
@@ -34,6 +34,8 @@ const ViewCreateFormModal: React.FC<ModelCreateFormModalProps> = ({
     currentModel: modelList[0]?.id,
   });
 
+  const [queryType, setQueryType] = useState<string>('METRIC');
+
   const [saveLoading, setSaveLoading] = useState<boolean>(false);
   const [modalWidth, setModalWidth] = useState<number>(800);
   const [selectedModelItem, setSelectedModelItem] = useState<ISemantic.IModelItem | undefined>(
@@ -46,19 +48,22 @@ const ViewCreateFormModal: React.FC<ModelCreateFormModalProps> = ({
     form.setFieldsValue({
       ...viewItem,
     });
+    setQueryType(viewItem?.queryType);
   }, [viewItem]);
 
   const [dimensionList, setDimensionList] = useState<ISemantic.IDimensionItem[]>();
   const [metricList, setMetricList] = useState<ISemantic.IMetricItem[]>();
+  const [tagList, setTagList] = useState<ISemantic.ITagItem[]>();
 
   useEffect(() => {
     if (selectedModelItem?.id) {
       queryDimensionList(selectedModelItem.id);
       queryMetricList(selectedModelItem.id);
+      queryTagList(selectedModelItem.id);
     }
   }, [selectedModelItem]);
 
-  const queryDimensionList = async (modelId) => {
+  const queryDimensionList = async (modelId: number) => {
     const { code, data, msg } = await getDimensionList({ modelId });
     if (code === 200 && Array.isArray(data?.list)) {
       setDimensionList(data.list);
@@ -67,12 +72,26 @@ const ViewCreateFormModal: React.FC<ModelCreateFormModalProps> = ({
     }
   };
 
-  const queryMetricList = async (modelId) => {
+  const queryMetricList = async (modelId: number) => {
     const { code, data, msg } = await queryMetric({ modelId });
     if (code === 200 && Array.isArray(data?.list)) {
       setMetricList(data.list);
     } else {
       message.error(msg);
+    }
+  };
+
+  const queryTagList = async (modelId: number) => {
+    const { code, data, msg } = await getTagList({
+      modelIds: [modelId],
+    });
+
+    const { list } = data || {};
+    if (code === 200) {
+      setTagList(list);
+    } else {
+      message.error(msg);
+      setTagList([]);
     }
   };
 
@@ -83,6 +102,7 @@ const ViewCreateFormModal: React.FC<ModelCreateFormModalProps> = ({
     const queryData: ISemantic.IModelItem = {
       ...formVals,
       ...fieldsValue,
+      queryType,
       dataSetDetail: {
         dataSetModelConfigs: Object.values(viewModelConfigsMap),
       },
@@ -99,7 +119,7 @@ const ViewCreateFormModal: React.FC<ModelCreateFormModalProps> = ({
     }
   };
 
-  const stepWidth = {
+  const stepWidth: any = {
     '0': 800,
     '1': 1200,
     '2': 800,
@@ -140,23 +160,6 @@ const ViewCreateFormModal: React.FC<ModelCreateFormModalProps> = ({
         </>
       );
     }
-    // if (currentStep === 2) {
-    //   return (
-    //     <>
-    //       <Button style={{ float: 'left' }} onClick={backward}>
-    //         上一步
-    //       </Button>
-    //       <Button
-    //         type="primary"
-    //         onClick={() => {
-    //           handleConfirm();
-    //         }}
-    //       >
-    //         保 存
-    //       </Button>
-    //     </>
-    //   );
-    // }
     return (
       <>
         <Button onClick={onCancel}>取消</Button>
@@ -179,27 +182,29 @@ const ViewCreateFormModal: React.FC<ModelCreateFormModalProps> = ({
     return (
       <>
         <div style={{ display: currentStep === 1 ? 'block' : 'none' }}>
-          {/* <FormItem
-            name="currentModel"
-            label="选择模型"
-            rules={[{ required: true, message: '请选择模型！' }]}
-          >
-            <Select
-              placeholder="请选择模型，获取当前模型下指标维度信息"
-              onChange={(val) => {
-                const modelItem = modelList.find((item) => item.id === val);
-                setSelectedModelItem(modelItem);
+          <div style={{ marginBottom: 10, paddingLeft: 12 }}>
+            <Radio.Group
+              buttonStyle="solid"
+              value={queryType}
+              onChange={(e) => {
+                setQueryType(e.target.value);
               }}
-              options={modelList.map((item) => {
-                return { label: item.name, value: item.id };
-              })}
-            />
-          </FormItem> */}
+            >
+              <Radio.Button value="METRIC">指标模式</Radio.Button>
+              <Radio.Button value="TAG">标签模式</Radio.Button>
+            </Radio.Group>
+          </div>
+
           <ViewModelConfigTransfer
+            key={queryType}
+            queryType={queryType}
             toolbarSolt={
               <Space>
                 <span>切换模型: </span>
                 <Select
+                  style={{
+                    minWidth: 100,
+                  }}
                   value={selectedModelItem?.id}
                   placeholder="请选择模型，获取当前模型下指标维度信息"
                   onChange={(val) => {
@@ -216,6 +221,7 @@ const ViewCreateFormModal: React.FC<ModelCreateFormModalProps> = ({
             }
             dimensionList={dimensionList}
             metricList={metricList}
+            tagList={tagList}
             modelItem={selectedModelItem}
             viewItem={viewItem}
             ref={configTableRef}

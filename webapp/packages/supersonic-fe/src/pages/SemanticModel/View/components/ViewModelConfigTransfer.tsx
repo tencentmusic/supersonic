@@ -2,33 +2,75 @@ import { message } from 'antd';
 import React, { forwardRef, useImperativeHandle, useState, useEffect } from 'react';
 import type { ReactNode, Ref } from 'react';
 import DimensionMetricTransferModal from './DimensionMetricTransferModal';
+import TagTransferModal from './TagTransferModal';
 import { TransType } from '../../enum';
-import { getDimensionList, queryMetric } from '../../service';
+import { getDimensionList, queryMetric, getTagList } from '../../service';
 import { wrapperTransTypeAndId } from '../../utils';
 import { ISemantic } from '../../data';
 import { isArrayOfValues } from '@/utils/utils';
 
 type Props = {
+  queryType?: string;
   viewItem: ISemantic.IViewItem;
   modelItem?: ISemantic.IModelItem;
   dimensionList?: ISemantic.IDimensionItem[];
   metricList?: ISemantic.IMetricItem[];
+  tagList?: ISemantic.ITagItem[];
   toolbarSolt?: ReactNode;
 };
 const ViewModelConfigTransfer: React.FC<Props> = forwardRef(
-  ({ viewItem, modelItem, dimensionList, metricList, toolbarSolt }: Props, ref: Ref<any>) => {
+  (
+    {
+      queryType = 'METRIC',
+      viewItem,
+      modelItem,
+      dimensionList,
+      metricList,
+      tagList,
+      toolbarSolt,
+    }: Props,
+    ref: Ref<any>,
+  ) => {
     const [selectedTransferKeys, setSelectedTransferKeys] = useState<React.Key[]>([]);
 
     const [viewModelConfigsMap, setViewModelConfigsMap] = useState({});
 
     const [mergeDimensionList, setDimensionList] = useState<ISemantic.IDimensionItem[]>();
     const [mergeMetricList, setMetricList] = useState<ISemantic.IMetricItem[]>();
+    const [mergeTagList, setTagList] = useState<ISemantic.ITagItem[]>();
 
     useImperativeHandle(ref, () => ({
       getViewModelConfigs: () => {
         return viewModelConfigsMap;
       },
     }));
+
+    const queryTagListByIds = async (ids: number[]) => {
+      if (!isArrayOfValues(ids)) {
+        setTagList(tagList);
+        return;
+      }
+      const { code, data, msg } = await getTagList({ ids });
+      if (code === 200 && Array.isArray(data?.list)) {
+        const mergeList = data?.list.reduce(
+          (modelTagList: ISemantic.ITagItem[], item: ISemantic.ITagItem) => {
+            const hasItem = Array.isArray(tagList)
+              ? tagList.find((dataListItem: ISemantic.ITagItem) => {
+                  return dataListItem.id === item.id;
+                })
+              : [];
+            if (!hasItem) {
+              return [item, ...modelTagList];
+            }
+            return modelTagList;
+          },
+          tagList,
+        );
+        setTagList(mergeList);
+      } else {
+        message.error(msg);
+      }
+    };
 
     const queryDimensionListByIds = async (ids: number[]) => {
       if (!isArrayOfValues(ids)) {
@@ -38,7 +80,7 @@ const ViewModelConfigTransfer: React.FC<Props> = forwardRef(
       const { code, data, msg } = await getDimensionList({ ids });
       if (code === 200 && Array.isArray(data?.list)) {
         const mergeList = data?.list.reduce(
-          (modelDimensionList: ISemantic.IDimensionItem[], item) => {
+          (modelDimensionList: ISemantic.IDimensionItem[], item: ISemantic.IDimensionItem) => {
             const hasItem = Array.isArray(dimensionList)
               ? dimensionList.find((dataListItem: ISemantic.IDimensionItem) => {
                   return dataListItem.id === item.id;
@@ -64,17 +106,20 @@ const ViewModelConfigTransfer: React.FC<Props> = forwardRef(
       }
       const { code, data, msg } = await queryMetric({ ids });
       if (code === 200 && Array.isArray(data?.list)) {
-        const mergeList = data.list.reduce((modelMetricList: ISemantic.IMetricItem[], item) => {
-          const hasItem = Array.isArray(metricList)
-            ? metricList.find((dataListItem: ISemantic.IMetricItem) => {
-                return dataListItem.id === item.id;
-              })
-            : [];
-          if (!hasItem) {
-            return [item, ...modelMetricList];
-          }
-          return modelMetricList;
-        }, metricList);
+        const mergeList = data.list.reduce(
+          (modelMetricList: ISemantic.IMetricItem[], item: ISemantic.IMetricItem) => {
+            const hasItem = Array.isArray(metricList)
+              ? metricList.find((dataListItem: ISemantic.IMetricItem) => {
+                  return dataListItem.id === item.id;
+                })
+              : [];
+            if (!hasItem) {
+              return [item, ...modelMetricList];
+            }
+            return modelMetricList;
+          },
+          metricList,
+        );
         setMetricList(mergeList);
       } else {
         message.error(msg);
@@ -83,35 +128,45 @@ const ViewModelConfigTransfer: React.FC<Props> = forwardRef(
 
     useEffect(() => {
       const dataSetModelConfigs = viewItem?.dataSetDetail?.dataSetModelConfigs;
+
       if (Array.isArray(dataSetModelConfigs)) {
         const idList: number[] = [];
         const transferKeys: React.Key[] = [];
-        const viewConfigMap = {};
-        const allMetrics: number[] = [];
-        const allDimensions: number[] = [];
+        const viewConfigMap: any = {};
         dataSetModelConfigs.forEach((item: ISemantic.IViewModelConfigItem) => {
-          const { id, metrics, dimensions } = item;
+          const { id, metrics, dimensions, tagIds } = item;
           idList.push(id);
-          allMetrics.push(...metrics);
-          allDimensions.push(...dimensions);
           viewConfigMap[id] = { ...item };
-          if (Array.isArray(metrics)) {
-            metrics.forEach((metricId: number) => {
-              transferKeys.push(wrapperTransTypeAndId(TransType.METRIC, metricId));
-            });
+
+          if (queryType === 'METRIC') {
+            if (Array.isArray(metrics)) {
+              metrics.forEach((metricId: number) => {
+                transferKeys.push(wrapperTransTypeAndId(TransType.METRIC, metricId));
+              });
+            }
+            if (Array.isArray(dimensions)) {
+              dimensions.forEach((dimensionId: number) => {
+                transferKeys.push(wrapperTransTypeAndId(TransType.DIMENSION, dimensionId));
+              });
+            }
           }
-          if (Array.isArray(dimensions)) {
-            dimensions.forEach((dimensionId: number) => {
-              transferKeys.push(wrapperTransTypeAndId(TransType.DIMENSION, dimensionId));
-            });
+          if (queryType === 'TAG') {
+            if (Array.isArray(tagIds)) {
+              tagIds.forEach((tagId: number) => {
+                transferKeys.push(wrapperTransTypeAndId(TransType.TAG, tagId));
+              });
+            }
           }
         });
         setSelectedTransferKeys(transferKeys);
         setViewModelConfigsMap(viewConfigMap);
       }
-    }, []);
+    }, [queryType]);
 
     useEffect(() => {
+      if (queryType !== 'METRIC') {
+        return;
+      }
       if (!dimensionList || !metricList) {
         return;
       }
@@ -132,40 +187,92 @@ const ViewModelConfigTransfer: React.FC<Props> = forwardRef(
         setDimensionList(dimensionList);
         setMetricList(metricList);
       }
-    }, [modelItem, dimensionList, metricList]);
+    }, [queryType, modelItem, dimensionList, metricList]);
+
+    useEffect(() => {
+      if (queryType !== 'TAG') {
+        return;
+      }
+      if (!tagList) {
+        return;
+      }
+      const dataSetModelConfigs = isArrayOfValues(Object.values(viewModelConfigsMap))
+        ? (Object.values(viewModelConfigsMap) as ISemantic.IViewModelConfigItem[])
+        : viewItem?.dataSetDetail?.dataSetModelConfigs;
+      if (isArrayOfValues(dataSetModelConfigs)) {
+        const allTags: number[] = [];
+        dataSetModelConfigs.forEach((item: ISemantic.IViewModelConfigItem) => {
+          const { tagIds } = item;
+          allTags.push(...tagIds);
+        });
+        queryTagListByIds(allTags);
+      } else {
+        setTagList(tagList);
+      }
+    }, [queryType, modelItem, tagList]);
 
     return (
       <>
-        <DimensionMetricTransferModal
-          toolbarSolt={toolbarSolt}
-          modelId={modelItem?.id}
-          dimensionList={mergeDimensionList}
-          metricList={mergeMetricList}
-          selectedTransferKeys={selectedTransferKeys}
-          onSubmit={(
-            submitData: Record<string, ISemantic.IViewModelConfigItem>,
-            selectedKeys: React.Key[],
-          ) => {
-            const dataSetModelConfigs = Object.values(
-              submitData,
-            ) as ISemantic.IViewModelConfigItem[];
+        <div style={{ display: queryType === 'TAG' ? 'none' : 'block' }}>
+          <DimensionMetricTransferModal
+            toolbarSolt={toolbarSolt}
+            modelId={modelItem?.id}
+            dimensionList={mergeDimensionList}
+            metricList={mergeMetricList}
+            selectedTransferKeys={selectedTransferKeys}
+            onSubmit={(
+              submitData: Record<string, ISemantic.IViewModelConfigItem>,
+              selectedKeys: React.Key[],
+            ) => {
+              const dataSetModelConfigs = Object.values(
+                submitData,
+              ) as ISemantic.IViewModelConfigItem[];
 
-            if (isArrayOfValues(dataSetModelConfigs)) {
-              const allMetrics: number[] = [];
-              const allDimensions: number[] = [];
-              dataSetModelConfigs.forEach((item: ISemantic.IViewModelConfigItem) => {
-                const { metrics, dimensions } = item;
-                allMetrics.push(...metrics);
-                allDimensions.push(...dimensions);
-              });
-              queryDimensionListByIds(allDimensions);
-              queryMetricListByIds(allMetrics);
-            }
-            setViewModelConfigsMap(submitData);
-            setSelectedTransferKeys(selectedKeys);
-          }}
-          onCancel={() => {}}
-        />
+              if (isArrayOfValues(dataSetModelConfigs)) {
+                const allMetrics: number[] = [];
+                const allDimensions: number[] = [];
+                dataSetModelConfigs.forEach((item: ISemantic.IViewModelConfigItem) => {
+                  const { metrics, dimensions } = item;
+                  allMetrics.push(...metrics);
+                  allDimensions.push(...dimensions);
+                });
+                queryDimensionListByIds(allDimensions);
+                queryMetricListByIds(allMetrics);
+              }
+              setViewModelConfigsMap(submitData);
+              setSelectedTransferKeys(selectedKeys);
+            }}
+            onCancel={() => {}}
+          />
+        </div>
+        <div style={{ display: queryType !== 'TAG' ? 'none' : 'block' }}>
+          <TagTransferModal
+            toolbarSolt={toolbarSolt}
+            modelId={modelItem?.id}
+            tagList={mergeTagList}
+            selectedTransferKeys={selectedTransferKeys}
+            onSubmit={(
+              submitData: Record<string, ISemantic.IViewModelConfigItem>,
+              selectedKeys: React.Key[],
+            ) => {
+              const dataSetModelConfigs = Object.values(
+                submitData,
+              ) as ISemantic.IViewModelConfigItem[];
+
+              if (isArrayOfValues(dataSetModelConfigs)) {
+                const allTags: number[] = [];
+                dataSetModelConfigs.forEach((item: ISemantic.IViewModelConfigItem) => {
+                  const { tagIds } = item;
+                  allTags.push(...tagIds);
+                });
+                queryTagListByIds(allTags);
+              }
+              setViewModelConfigsMap(submitData);
+              setSelectedTransferKeys(selectedKeys);
+            }}
+            onCancel={() => {}}
+          />
+        </div>
       </>
     );
   },
