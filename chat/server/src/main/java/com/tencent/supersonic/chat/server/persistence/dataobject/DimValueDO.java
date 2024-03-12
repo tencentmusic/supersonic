@@ -1,13 +1,13 @@
 package com.tencent.supersonic.chat.server.persistence.dataobject;
 
 
-import com.tencent.supersonic.chat.core.config.DefaultMetric;
-import com.tencent.supersonic.chat.core.config.Dim4Dict;
-import java.util.ArrayList;
-import java.util.List;
-
+import com.tencent.supersonic.headless.core.config.DefaultMetric;
+import com.tencent.supersonic.headless.core.config.Dim4Dict;
 import lombok.Data;
 import lombok.ToString;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 @Data
