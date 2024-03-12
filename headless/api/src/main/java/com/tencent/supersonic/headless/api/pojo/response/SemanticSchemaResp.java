@@ -2,6 +2,7 @@ package com.tencent.supersonic.headless.api.pojo.response;
 
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.common.pojo.ModelRela;
+import com.tencent.supersonic.common.pojo.enums.QueryType;
 import com.tencent.supersonic.headless.api.pojo.enums.SchemaType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -27,6 +28,7 @@ public class SemanticSchemaResp {
     private List<ModelResp> modelResps = Lists.newArrayList();
     private DataSetResp dataSetResp;
     private DatabaseResp databaseResp;
+    private QueryType queryType;
 
     public String getSchemaKey() {
         if (dataSetId == null) {
