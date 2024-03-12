@@ -66,6 +66,33 @@ const ROUTES = [
       },
     ],
   },
+
+  {
+    path: '/tag',
+    name: 'tag',
+    component: './SemanticModel/Insights',
+    envEnableList: [ENV_KEY.SEMANTIC],
+    routes: [
+      {
+        path: '/tag',
+        redirect: '/tag/market',
+      },
+      {
+        path: '/tag/market',
+        component: './SemanticModel/Insights/Market',
+        hideInMenu: true,
+        envEnableList: [ENV_KEY.SEMANTIC],
+      },
+      {
+        path: '/tag/detail/:tagId',
+        name: 'tagDetail',
+        hideInMenu: true,
+        component: './SemanticModel/Insights/Detail',
+        envEnableList: [ENV_KEY.SEMANTIC],
+      },
+    ],
+  },
+
   {
     path: '/plugin',
     name: 'plugin',

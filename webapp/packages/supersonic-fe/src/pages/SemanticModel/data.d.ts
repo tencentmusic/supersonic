@@ -1,5 +1,6 @@
 import { TreeGraphData } from '@antv/g6-core';
 import { StatusEnum } from './enum';
+import { SENSITIVE_LEVEL, TAG_DEFINE_TYPE } from './constant';
 
 export type ISODateString =
   `${number}-${number}-${number}T${number}:${number}:${number}.${number}+${number}:${number}`;
@@ -230,6 +231,11 @@ export declare namespace ISemantic {
     bizName: string;
   }
 
+  interface IDimensionTypeParamsItem {
+    id: number;
+    bizName: string;
+  }
+
   interface IMeasureTypeParams {
     measures: IMeasure[];
     expr: string;
@@ -265,7 +271,7 @@ export declare namespace ISemantic {
     description: string;
     status: StatusEnum;
     typeEnum: string;
-    sensitiveLevel: number;
+    sensitiveLevel: SENSITIVE_LEVEL;
     domainId: number;
     domainName: string;
     modelName: string;
@@ -376,6 +382,33 @@ export declare namespace ISemantic {
     createdBy: string;
     elapsedMs: number | null;
     nature: string;
+  }
+
+  interface ITagDefineParams {
+    expr: string;
+    dependencies: (number | string)[];
+  }
+  interface ITagItem {
+    createdBy: string;
+    updatedBy: string;
+    createdAt: string;
+    updatedAt: string;
+    id: number;
+    name: string;
+    modelName: string;
+    bizName: string;
+    description: string;
+    status: number;
+    typeEnum: null;
+    sensitiveLevel: SENSITIVE_LEVEL;
+    modelId: number;
+    type: string;
+    isCollect: boolean;
+    hasAdminRes: boolean;
+    ext: any;
+    tagDefineType: TAG_DEFINE_TYPE;
+    tagDefineParams: ITagDefineParams;
+    expr: string;
   }
 }
 

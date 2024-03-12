@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Button, Form, Input, Modal, Select, Row, Col, Space, Tooltip, Switch } from 'antd';
-import { SENSITIVE_LEVEL_OPTIONS } from '../constant';
+import { SENSITIVE_LEVEL_OPTIONS, TAG_DEFINE_TYPE } from '../constant';
+import { StatusEnum } from '../enum';
 import { formLayout } from '@/components/FormHelper/utils';
 import SqlEditor from '@/components/SqlEditor';
 import InfoTagList from './InfoTagList';
@@ -10,7 +11,8 @@ import {
   createDimension,
   updateDimension,
   mockDimensionAlias,
-  getCommonDimensionList,
+  batchCreateTag,
+  batchUpdateTagStatus,
 } from '../service';
 import FormItemTitle from '@/components/FormHelper/FormItemTitle';
 
@@ -47,7 +49,6 @@ const DimensionInfoModal: React.FC<CreateFormProps> = ({
   const [form] = Form.useForm();
   const { setFieldsValue, resetFields } = form;
   const [llmLoading, setLlmLoading] = useState<boolean>(false);
-  const [commonDimensionOptions, setCommonDimensionOptions] = useState([]);
 
   const handleSubmit = async (
     isSilenceSubmit = false,
@@ -64,26 +65,6 @@ const DimensionInfoModal: React.FC<CreateFormProps> = ({
     );
   };
 
-  useEffect(() => {
-    queryCommonDimensionList();
-  }, [domainId]);
-
-  const queryCommonDimensionList = async () => {
-    const { code, data, msg } = await getCommonDimensionList(domainId);
-    // const { list, pageSize, pageNum, total } = data || {};
-    if (code === 200) {
-      const options = data.map((item) => {
-        return {
-          value: item.id,
-          label: item.name,
-        };
-      });
-      setCommonDimensionOptions(options);
-    } else {
-      message.error(msg);
-    }
-  };
-
   const saveDimension = async (fieldsValue: any, isSilenceSubmit = false) => {
     const queryParams = {
       modelId: isEdit ? dimensionItem.modelId : modelId,
@@ -94,12 +75,43 @@ const DimensionInfoModal: React.FC<CreateFormProps> = ({
     if (queryParams.id) {
       saveDimensionQuery = updateDimension;
     }
-    const { code, msg } = await saveDimensionQuery(queryParams);
+    const { code, msg, data } = await saveDimensionQuery(queryParams);
     if (code === 200) {
+      if (!queryParams.id && queryParams.isTag) {
+        queryBatchExportTag(data.id);
+      }
+      if (dimensionItem?.id && !queryParams.isTag) {
+        queryBatchUpdateStatus(dimensionItem.bizName, StatusEnum.DELETED);
+      }
       if (!isSilenceSubmit) {
         message.success('编辑维度成功');
         handleUpdate(fieldsValue);
       }
+      return;
+    }
+    message.error(msg);
+  };
+
+  const queryBatchUpdateStatus = async (bizName: string, status: StatusEnum) => {
+    const { code, msg } = await batchUpdateTagStatus({
+      bizNames: [bizName],
+      modelId: [modelId],
+      status,
+    });
+    if (code === 200) {
+      return;
+    }
+    message.error(msg);
+  };
+
+  const queryBatchExportTag = async (id: number) => {
+    const { code, msg } = await batchCreateTag({
+      itemIds: [id],
+      type: TAG_DEFINE_TYPE.DIMENSION,
+      modelId,
+    });
+
+    if (code === 200) {
       return;
     }
     message.error(msg);

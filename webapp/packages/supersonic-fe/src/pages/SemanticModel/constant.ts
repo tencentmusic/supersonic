@@ -79,3 +79,15 @@ export enum METRIC_DEFINE_TYPE {
   MEASURE = 'MEASURE',
   METRIC = 'METRIC',
 }
+
+export enum TAG_DEFINE_TYPE {
+  FIELD = 'FIELD',
+  DIMENSION = 'DIMENSION',
+  METRIC = 'METRIC',
+}
+
+export const TagDefineTypeMap = {
+  [TAG_DEFINE_TYPE.FIELD]: '字段',
+  [TAG_DEFINE_TYPE.DIMENSION]: '维度',
+  [TAG_DEFINE_TYPE.METRIC]: '指标',
+};

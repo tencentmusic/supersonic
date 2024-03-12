@@ -11,7 +11,7 @@ import ViewCreateFormModal from './ViewCreateFormModal';
 import moment from 'moment';
 import styles from '../../components/style.less';
 import { ISemantic } from '../../data';
-import { ColumnsConfig } from '../../components/MetricTableColumnRender';
+import { ColumnsConfig } from '../../components/TableColumnRender';
 import ViewSearchFormModal from './ViewSearchFormModal';
 
 type Props = {
@@ -59,6 +59,7 @@ const ViewTable: React.FC<Props> = ({ disabledEdit = false, modelList, domainMan
       message.error(msg);
     }
   };
+  const columnsConfig = ColumnsConfig();
 
   const columns: ProColumns[] = [
     {
@@ -88,7 +89,7 @@ const ViewTable: React.FC<Props> = ({ disabledEdit = false, modelList, domainMan
       dataIndex: 'status',
       title: '状态',
       search: false,
-      render: ColumnsConfig.state.render,
+      render: columnsConfig.state.render,
     },
     {
       dataIndex: 'createdBy',

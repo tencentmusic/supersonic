@@ -196,7 +196,7 @@ const MetricMeasuresFormTable: React.FC<Props> = ({
           rowSelection={rowSelection}
         />
         <ProCard
-          title={<FormLabelRequire title="度量表达式" />}
+          title={<FormLabelRequire title="表达式" />}
           // tooltip="由于度量已自带聚合函数，因此通过度量创建指标时，表达式中无需再写聚合函数，如
           // 通过度量a和度量b来创建指标，由于建模的时候度量a和度量b被指定了聚合函数SUM，因此创建指标时表达式只需要写成 a+b, 而不需要带聚合函数"
         >

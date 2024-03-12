@@ -6,12 +6,13 @@ import type { Dispatch } from 'umi';
 import { connect } from 'umi';
 import type { StateType } from '../model';
 import { StatusEnum } from '../enum';
-import { SENSITIVE_LEVEL_ENUM, SENSITIVE_LEVEL_OPTIONS } from '../constant';
+import { SENSITIVE_LEVEL_ENUM, SENSITIVE_LEVEL_OPTIONS, TAG_DEFINE_TYPE } from '../constant';
 import {
   getModelList,
   getDimensionList,
   deleteDimension,
   batchUpdateDimensionStatus,
+  batchCreateTag,
 } from '../service';
 import DimensionInfoModal from './DimensionInfoModal';
 import DimensionValueSettingModal from './DimensionValueSettingModal';
@@ -19,7 +20,7 @@ import { ISemantic, IDataSource } from '../data';
 import TableHeaderFilter from './TableHeaderFilter';
 import moment from 'moment';
 import BatchCtrlDropDownButton from '@/components/BatchCtrlDropDownButton';
-import { ColumnsConfig } from './MetricTableColumnRender';
+import { ColumnsConfig } from './TableColumnRender';
 import styles from './style.less';
 
 type Props = {
@@ -114,6 +115,32 @@ const ClassDimensionTable: React.FC<Props> = ({ domainManger, dispatch }) => {
     message.error(msg);
   };
 
+  const queryBatchExportTag = async (ids: React.Key[]) => {
+    if (Array.isArray(ids) && ids.length === 0) {
+      return;
+    }
+    setLoading(true);
+    const { code, msg } = await batchCreateTag({
+      itemIds: ids,
+      type: TAG_DEFINE_TYPE.DIMENSION,
+      modelId,
+    });
+    setLoading(false);
+    if (code === 200) {
+      queryDimensionList({ ...filterParams, ...defaultPagination });
+      dispatch({
+        type: 'domainManger/queryDimensionList',
+        payload: {
+          modelId,
+        },
+      });
+      return;
+    }
+    message.error(msg);
+  };
+
+  const columnsConfig = ColumnsConfig();
+
   const columns: ProColumns[] = [
     {
       dataIndex: 'id',
@@ -133,7 +160,7 @@ const ClassDimensionTable: React.FC<Props> = ({ domainManger, dispatch }) => {
       title: '维度',
       fixed: 'left',
       width: 280,
-      render: ColumnsConfig.dimensionInfo.render,
+      render: columnsConfig.dimensionInfo.render,
       search: false,
     },
     {
@@ -141,7 +168,7 @@ const ClassDimensionTable: React.FC<Props> = ({ domainManger, dispatch }) => {
       title: '敏感度',
       width: 150,
       valueEnum: SENSITIVE_LEVEL_ENUM,
-      render: ColumnsConfig.sensitiveLevel.render,
+      render: columnsConfig.sensitiveLevel.render,
     },
     {
       dataIndex: 'isTag',
@@ -163,7 +190,7 @@ const ClassDimensionTable: React.FC<Props> = ({ domainManger, dispatch }) => {
       title: '状态',
       width: 150,
       search: false,
-      render: ColumnsConfig.state.render,
+      render: columnsConfig.state.render,
     },
     {
       dataIndex: 'createdBy',
@@ -176,7 +203,7 @@ const ClassDimensionTable: React.FC<Props> = ({ domainManger, dispatch }) => {
       dataIndex: 'description',
       title: '描述',
       search: false,
-      render: ColumnsConfig.description.render,
+      render: columnsConfig.description.render,
     },
 
     {
@@ -287,6 +314,9 @@ const ClassDimensionTable: React.FC<Props> = ({ domainManger, dispatch }) => {
         break;
       case 'batchStop':
         queryBatchUpdateStatus(selectedRowKeys, StatusEnum.OFFLINE);
+        break;
+      case 'exportTagButton':
+        queryBatchExportTag(selectedRowKeys);
         break;
       default:
         break;
@@ -405,6 +435,7 @@ const ClassDimensionTable: React.FC<Props> = ({ domainManger, dispatch }) => {
           </Button>,
           <BatchCtrlDropDownButton
             key="ctrlBtnList"
+            extenderEnable={true}
             onDeleteConfirm={() => {
               queryBatchUpdateStatus(selectedRowKeys, StatusEnum.DELETED);
             }}
