@@ -30,6 +30,7 @@ public class DataSetSchemaBuilder {
     public static DataSetSchema build(DataSetSchemaResp resp) {
         DataSetSchema dataSetSchema = new DataSetSchema();
         dataSetSchema.setQueryConfig(resp.getQueryConfig());
+        dataSetSchema.setQueryType(resp.getQueryType());
         SchemaElement dataSet = SchemaElement.builder()
                 .dataSet(resp.getId())
                 .id(resp.getId())

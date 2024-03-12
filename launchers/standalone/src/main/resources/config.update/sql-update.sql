@@ -249,3 +249,6 @@ alter table s2_view rename to s2_data_set;
 alter table s2_query_stat_info change view_id data_set_id bigint;
 alter table s2_plugin change `view` data_set varchar(200);
 alter table s2_data_set change view_detail data_set_detail text;
+
+--20240311
+alter table s2_data_set add column query_type varchar(100) DEFAULT NULL;

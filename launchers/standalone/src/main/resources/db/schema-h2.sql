@@ -571,7 +571,8 @@ CREATE TABLE IF NOT EXISTS `s2_data_set` (
     updated_by  VARCHAR(255),
     query_config VARCHAR(3000),
     `admin` varchar(3000) DEFAULT NULL,
-    `admin_org` varchar(3000) DEFAULT NULL
+    `admin_org` varchar(3000) DEFAULT NULL,
+    `query_type` varchar(100) DEFAULT NULL
 );
 
 CREATE TABLE IF NOT EXISTS `s2_tag` (
