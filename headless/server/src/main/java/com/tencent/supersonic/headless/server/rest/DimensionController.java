@@ -43,12 +43,11 @@ public class DimensionController {
      * @param dimensionReq
      */
     @PostMapping("/createDimension")
-    public Boolean createDimension(@RequestBody DimensionReq dimensionReq,
+    public DimensionResp createDimension(@RequestBody DimensionReq dimensionReq,
                                    HttpServletRequest request,
                                    HttpServletResponse response) throws Exception {
         User user = UserHolder.findUser(request, response);
-        dimensionService.createDimension(dimensionReq, user);
-        return true;
+        return dimensionService.createDimension(dimensionReq, user);
     }
 
     @PostMapping("/updateDimension")

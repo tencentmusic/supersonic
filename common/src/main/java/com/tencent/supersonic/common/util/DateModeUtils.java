@@ -12,6 +12,7 @@ import static com.tencent.supersonic.common.pojo.Constants.YEAR;
 import com.google.common.base.Strings;
 import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.common.pojo.ItemDateResp;
+
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
@@ -22,6 +23,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.StringJoiner;
 import java.util.regex.Pattern;
+
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -328,6 +330,9 @@ public class DateModeUtils {
     }
 
     public String getDateWhereStr(DateConf dateInfo, ItemDateResp dateDate) {
+        if (Objects.isNull(dateInfo)) {
+            return "";
+        }
         String dateStr = "";
         switch (dateInfo.getDateMode()) {
             case BETWEEN:
