@@ -268,16 +268,18 @@ public class DictUtils {
                 dictItemResp.getConfig().getLimit();
 
         // todo 自定义指标
+        Set<Long> modelIds = new HashSet<>();
         String metric = "count(1)";
         if (Objects.nonNull(dictItemResp.getConfig()) && Objects.nonNull(dictItemResp.getConfig().getMetricId())) {
             Long metricId = dictItemResp.getConfig().getMetricId();
             MetricResp metricResp = metricService.getMetric(metricId);
             String metricBizName = metricResp.getBizName();
             metric = String.format("sum(%s)", metricBizName);
+            modelIds.add(metricResp.getModelId());
         }
 
         String sql = String.format(sqlPattern, bizName, metric, where, bizName, metric, limit);
-        Set<Long> modelIds = new HashSet<>();
+
         modelIds.add(dictItemResp.getModelId());
         QuerySqlReq querySqlReq = new QuerySqlReq();
         querySqlReq.setSql(sql);
@@ -321,8 +323,6 @@ public class DictUtils {
         QueryStructReq queryStructReq = new QueryStructReq();
 
         Set<Long> modelIds = new HashSet<>(Arrays.asList(dictItemResp.getModelId()));
-        queryStructReq.setModelIds(modelIds);
-
         List<String> groups = new ArrayList<>(Arrays.asList(dictItemResp.getBizName()));
         queryStructReq.setGroups(groups);
 
@@ -335,6 +335,8 @@ public class DictUtils {
         String metricBizName = metric.getBizName();
         aggregators.add(new Aggregator(metricBizName, AggOperatorEnum.SUM));
         queryStructReq.setAggregators(aggregators);
+        modelIds.add(metric.getModelId());
+        queryStructReq.setModelIds(modelIds);
 
         List<Order> orders = new ArrayList<>();
         orders.add(new Order(metricBizName, Constants.DESC_UPPER));
