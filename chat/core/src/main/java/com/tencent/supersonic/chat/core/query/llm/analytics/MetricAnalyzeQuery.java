@@ -2,23 +2,21 @@ package com.tencent.supersonic.chat.core.query.llm.analytics;
 
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
-import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.chat.api.pojo.SchemaElementMatch;
-import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
 import com.tencent.supersonic.chat.api.pojo.SemanticSchema;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.chat.api.pojo.response.QueryState;
-import com.tencent.supersonic.chat.core.config.OptimizationConfig;
-import com.tencent.supersonic.chat.core.query.semantic.SemanticInterpreter;
 import com.tencent.supersonic.chat.core.query.QueryManager;
 import com.tencent.supersonic.chat.core.query.llm.LLMSemanticQuery;
+import com.tencent.supersonic.chat.core.query.semantic.SemanticInterpreter;
 import com.tencent.supersonic.chat.core.utils.ComponentFactory;
 import com.tencent.supersonic.chat.core.utils.QueryReqBuilder;
 import com.tencent.supersonic.common.pojo.Aggregator;
 import com.tencent.supersonic.common.pojo.QueryColumn;
 import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
 import com.tencent.supersonic.common.pojo.enums.QueryType;
-import com.tencent.supersonic.common.util.ContextUtils;
+import com.tencent.supersonic.headless.api.pojo.SchemaElement;
+import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
 import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
 import java.util.HashMap;
@@ -52,12 +50,6 @@ public class MetricAnalyzeQuery extends LLMSemanticQuery {
     public QueryResult execute(User user) throws SqlParseException {
         QueryStructReq queryStructReq = convertQueryStruct();
         SemanticInterpreter semanticInterpreter = ComponentFactory.getSemanticLayer();
-
-        OptimizationConfig optimizationConfig = ContextUtils.getBean(OptimizationConfig.class);
-        if (optimizationConfig.isUseS2SqlSwitch()) {
-            queryStructReq.setS2SQL(parseInfo.getSqlInfo().getS2SQL());
-            queryStructReq.setS2SQL(parseInfo.getSqlInfo().getQuerySQL());
-        }
 
         SemanticQueryResp semanticQueryResp = semanticInterpreter.queryByStruct(queryStructReq, user);
         String text = generateTableText(semanticQueryResp);

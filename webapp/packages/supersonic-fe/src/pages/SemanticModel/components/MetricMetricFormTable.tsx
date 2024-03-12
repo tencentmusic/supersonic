@@ -10,14 +10,12 @@ import { ISemantic } from '../data';
 type Props = {
   typeParams: ISemantic.IMetricTypeParams;
   metricList: ISemantic.IMetricItem[];
-  // selectedMeasuresList: any;
   onFieldChange: (metrics: ISemantic.IMetricTypeParamsItem[]) => void;
   onSqlChange: (sql: string) => void;
 };
 
 const MetricMetricFormTable: React.FC<Props> = ({
   typeParams,
-  // selectedMeasuresList = [],
   metricList,
   onFieldChange,
   onSqlChange,
@@ -150,7 +148,7 @@ const MetricMetricFormTable: React.FC<Props> = ({
           scroll={{ y: 500 }}
           rowSelection={rowSelection}
         />
-        <ProCard title={<FormLabelRequire title="指标表达式" />} tooltip="">
+        <ProCard title={<FormLabelRequire title="表达式" />} tooltip="">
           <p
             className={styles.desc}
             style={{ border: 'unset', padding: 0, marginBottom: 20, marginLeft: 2 }}

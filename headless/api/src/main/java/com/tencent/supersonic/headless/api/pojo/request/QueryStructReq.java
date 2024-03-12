@@ -53,16 +53,7 @@ public class QueryStructReq extends SemanticQueryReq {
     private DateConf dateInfo;
     private Long limit = 2000L;
     private QueryType queryType = QueryType.ID;
-
-
-    /**
-     * Later deleted for compatibility only
-     */
-    private String s2SQL;
-    /**
-     * Later deleted for compatibility only
-     */
-    private String correctS2SQL;
+    private boolean convertToSql = true;
 
     public List<String> getGroups() {
         if (!CollectionUtils.isEmpty(this.groups)) {

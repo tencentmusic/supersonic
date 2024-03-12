@@ -21,7 +21,7 @@ import moment from 'moment';
 import styles from './style.less';
 import { ISemantic } from '../data';
 import BatchCtrlDropDownButton from '@/components/BatchCtrlDropDownButton';
-import { ColumnsConfig } from '../components/MetricTableColumnRender';
+import { ColumnsConfig } from '../components/TableColumnRender';
 
 type Props = {
   dispatch: Dispatch;
@@ -159,6 +159,8 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
     setCreateModalVisible(true);
   };
 
+  const columnsConfig = ColumnsConfig();
+
   const columns: ProColumns[] = [
     {
       dataIndex: 'id',
@@ -173,7 +175,7 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
       // width: '20%',
       width: 280,
       fixed: 'left',
-      render: ColumnsConfig.metricInfo.render,
+      render: columnsConfig.indicatorInfo.render,
     },
     // {
     //   dataIndex: 'modelName',
@@ -200,7 +202,7 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
       title: '敏感度',
       width: 150,
       valueEnum: SENSITIVE_LEVEL_ENUM,
-      render: ColumnsConfig.sensitiveLevel.render,
+      render: columnsConfig.sensitiveLevel.render,
     },
 
     {
@@ -208,14 +210,14 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
       title: '描述',
       search: false,
       width: 300,
-      render: ColumnsConfig.description.render,
+      render: columnsConfig.description.render,
     },
     {
       dataIndex: 'status',
       title: '状态',
       width: 180,
       search: false,
-      render: ColumnsConfig.state.render,
+      render: columnsConfig.state.render,
     },
     {
       dataIndex: 'createdBy',

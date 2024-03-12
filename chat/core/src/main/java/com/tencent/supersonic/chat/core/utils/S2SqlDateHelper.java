@@ -26,8 +26,8 @@ public class S2SqlDateHelper {
         return getDefaultDate(defaultDate, tagTypeTimeDefaultConfig).getLeft();
     }
 
-    public static Pair<String, String> getStartEndDate(QueryContext queryContext,
-            Long dataSetId, QueryType queryType) {
+    public static Pair<String, String> getStartEndDate(QueryContext queryContext, Long dataSetId,
+            QueryType queryType) {
         String defaultDate = DateUtils.getBeforeDate(0);
         if (Objects.isNull(dataSetId)) {
             return Pair.of(defaultDate, defaultDate);

@@ -16,7 +16,7 @@ import styles from './style.less';
 import { isString } from 'lodash';
 import { SENSITIVE_LEVEL_ENUM, SENSITIVE_LEVEL_COLOR } from '../constant';
 import { ISemantic } from '../data';
-import MetricStar from './components/MetricStar';
+import IndicatorStar from '../components/IndicatorStar';
 
 const { Text } = Typography;
 
@@ -40,7 +40,7 @@ const MetricInfoSider: React.FC<Props> = ({
       <div className={styles.title}>
         <div className={styles.name}>
           <Space>
-            <MetricStar metricId={metircData?.id} initState={metircData?.isCollect} />
+            <IndicatorStar indicatorId={metircData?.id} initState={metircData?.isCollect} />
             {metircData?.name}
             {metircData?.hasAdminRes && (
               <span

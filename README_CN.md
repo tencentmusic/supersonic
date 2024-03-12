@@ -1,6 +1,6 @@
 # SuperSonic (超音数)
 
-**SuperSonic融合Chat BI（powered by LLM）和Headless BI（powered by 语义层）打造新一代的BI平台**。两种BI新范式都从融合中获得收益：
+**SuperSonic融合Chat BI（powered by LLM）和Headless BI（powered by 语义层）打造新一代的BI平台**。这种融合确保了Chat BI能够与传统BI一样访问统一化治理的语义数据模型。此外，两种BI新范式都从中获得收益：
 
 - Chat BI的Text2SQL能力通过语义数据模型得到增强。
 - Headless BI的查询接口通过支持自然语言得到拓展。
@@ -17,7 +17,7 @@
 
 与此同时，另一种新兴范式被称为Headless BI，它专注于构建统一的语义数据模型，并引起了广泛的关注。Headless BI通过一个通用的语义层来实现，通过开放的API公开一致的数据语义。
 
-从我们的角度来看，Headless BI围绕着一个统一的架构展开，而Chat BI则以智能化交互界面为核心。将这两种范式整合起来是必要的，以确保传统BI和Chat BI之间的无缝连接，使它们能够访问相同的经过策划和管理的语义模型。同样重要的是，这种方法将从两个方面增强Chat BI的Text2SQL能力：
+从我们的角度来看，Chat BI和Headless BI的融合有潜力在两个方面增强Text2SQL的能力：
 
 1. 将数据语义（如业务术语、列值等）纳入提示词中，使LLM能够更好地理解语义，以**减少幻觉**。
 2. 将高级SQL语法（如连接、公式等）的生成从LLM卸载到语义层，以**减少复杂度**。

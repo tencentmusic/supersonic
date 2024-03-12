@@ -131,6 +131,7 @@ public class MetricRatioProcessor implements ExecuteResultProcessor {
         String dateField = QueryReqBuilder.getDateField(semanticParseInfo.getDateInfo());
         queryStructReq.setGroups(new ArrayList<>(Arrays.asList(dateField)));
         queryStructReq.setDateInfo(getRatioDateConf(aggOperatorEnum, semanticParseInfo, queryResult));
+        queryStructReq.setConvertToSql(false);
 
         SemanticQueryResp queryResp = semanticInterpreter.queryByStruct(queryStructReq, user);
         MetricInfo metricInfo = new MetricInfo();

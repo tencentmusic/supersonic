@@ -17,13 +17,20 @@ import {
   Tooltip,
   Tag,
 } from 'antd';
+import { StatusEnum } from '../enum';
 import { InfoCircleOutlined } from '@ant-design/icons';
 import MetricMeasuresFormTable from './MetricMeasuresFormTable';
-import { SENSITIVE_LEVEL_OPTIONS, METRIC_DEFINE_TYPE } from '../constant';
+import { SENSITIVE_LEVEL_OPTIONS, METRIC_DEFINE_TYPE, TAG_DEFINE_TYPE } from '../constant';
 import { formLayout } from '@/components/FormHelper/utils';
 import FormItemTitle from '@/components/FormHelper/FormItemTitle';
 import styles from './style.less';
-import { getMetricsToCreateNewMetric, getModelDetail, getDrillDownDimension } from '../service';
+import {
+  getMetricsToCreateNewMetric,
+  getModelDetail,
+  getDrillDownDimension,
+  batchCreateTag,
+  batchUpdateTagStatus,
+} from '../service';
 import MetricMetricFormTable from './MetricMetricFormTable';
 import MetricFieldFormTable from './MetricFieldFormTable';
 import DimensionAndMetricRelationModal from './DimensionAndMetricRelationModal';
@@ -239,6 +246,7 @@ const MetricInfoCreateForm: React.FC<CreateFormProps> = ({
       description,
       sensitiveLevel,
       typeParams,
+      isTag,
       dataFormat,
       dataFormatType,
       alias,
@@ -257,6 +265,7 @@ const MetricInfoCreateForm: React.FC<CreateFormProps> = ({
       sensitiveLevel,
       description,
       tags,
+      isTag,
       // isPercent,
       dataFormatType: dataFormatType || '',
       alias: alias && alias.trim() ? alias.split(',') : [],
@@ -370,10 +379,41 @@ const MetricInfoCreateForm: React.FC<CreateFormProps> = ({
     if (queryParams.id) {
       saveMetricQuery = updateMetric;
     }
-    const { code, msg } = await saveMetricQuery(queryParams);
+    const { code, msg, data } = await saveMetricQuery(queryParams);
     if (code === 200) {
+      if (!queryParams.id && queryParams.isTag) {
+        queryBatchExportTag(data.id);
+      }
+      if (metricItem?.id && !queryParams.isTag) {
+        queryBatchUpdateStatus(metricItem.bizName, StatusEnum.DELETED);
+      }
       message.success('编辑指标成功');
       onSubmit?.(queryParams);
+      return;
+    }
+    message.error(msg);
+  };
+
+  const queryBatchUpdateStatus = async (bizName: string, status: StatusEnum) => {
+    const { code, msg } = await batchUpdateTagStatus({
+      bizNames: [bizName],
+      modelId: [modelId],
+      status,
+    });
+    if (code === 200) {
+      return;
+    }
+    message.error(msg);
+  };
+
+  const queryBatchExportTag = async (id: number) => {
+    const { code, msg } = await batchCreateTag({
+      itemIds: [id],
+      type: TAG_DEFINE_TYPE.METRIC,
+      modelId,
+    });
+
+    if (code === 200) {
       return;
     }
     message.error(msg);
@@ -440,7 +480,6 @@ const MetricInfoCreateForm: React.FC<CreateFormProps> = ({
       } else {
         setCreateNewMetricList(data);
       }
-      // setCreateNewMetricList(data);
     } else {
       message.error('获取指标标签失败');
     }
@@ -672,6 +711,28 @@ const MetricInfoCreateForm: React.FC<CreateFormProps> = ({
         >
           <TextArea placeholder="请输入业务口径" />
         </FormItem>
+
+        <Form.Item
+          label={
+            <FormItemTitle
+              title={`设为标签`}
+              subTitle={`如果勾选，代表取值都是一种'标签'，可用作对实体的圈选`}
+            />
+          }
+          name="isTag"
+          valuePropName="checked"
+          getValueFromEvent={(value) => {
+            return value === true ? 1 : 0;
+          }}
+          getValueProps={(value) => {
+            return {
+              checked: value === 1,
+            };
+          }}
+        >
+          <Switch />
+        </Form.Item>
+
         <FormItem
           label={
             <FormItemTitle

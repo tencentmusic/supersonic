@@ -1,15 +1,15 @@
 package com.tencent.supersonic.chat.api.pojo;
 
+import com.tencent.supersonic.common.pojo.enums.QueryType;
 import com.tencent.supersonic.headless.api.pojo.QueryConfig;
 import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
 import com.tencent.supersonic.headless.api.pojo.TagTypeDefaultConfig;
 import com.tencent.supersonic.headless.api.pojo.TimeDefaultConfig;
-import lombok.Data;
-
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
+import lombok.Data;
 
 @Data
 public class DataSetSchema {
@@ -22,6 +22,7 @@ public class DataSetSchema {
     private Set<SchemaElement> tagValues = new HashSet<>();
     private SchemaElement entity = new SchemaElement();
     private QueryConfig queryConfig;
+    private QueryType queryType;
 
     public SchemaElement getElement(SchemaElementType elementType, long elementID) {
         Optional<SchemaElement> element = Optional.empty();

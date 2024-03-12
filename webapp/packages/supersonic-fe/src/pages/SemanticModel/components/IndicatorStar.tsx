@@ -1,22 +1,25 @@
 import { Tooltip, message } from 'antd';
 import React, { useState, useEffect } from 'react';
-import { metricStarState } from '../../service';
+import { indicatorStarState } from '../service';
 import MStar from '@/components/MStar';
 
+export type StarType = 'tag' | 'metric' | 'dimension';
+
 type Props = {
-  metricId: number;
+  indicatorId: number;
   initState?: boolean;
+  type?: StarType;
   onChange?: (state: boolean) => void;
 };
 
-const MetricStar: React.FC<Props> = ({ metricId, initState = false }) => {
+const IndicatorStar: React.FC<Props> = ({ indicatorId, type = 'metric', initState = false }) => {
   const [star, setStar] = useState<boolean>(initState);
   useEffect(() => {
     setStar(initState);
   }, [initState]);
 
   const starStateChange = async (id: number, state: boolean) => {
-    const { code, msg } = await metricStarState({ id, state });
+    const { code, msg } = await indicatorStarState({ id, type, state });
     if (code === 200) {
       setStar(state);
     } else {
@@ -30,7 +33,7 @@ const MetricStar: React.FC<Props> = ({ metricId, initState = false }) => {
         <MStar
           star={star}
           onToggleCollect={(star: boolean) => {
-            starStateChange(metricId, star);
+            starStateChange(indicatorId, star);
           }}
         />
       </div>
@@ -38,4 +41,4 @@ const MetricStar: React.FC<Props> = ({ metricId, initState = false }) => {
   );
 };
 
-export default MetricStar;
+export default IndicatorStar;

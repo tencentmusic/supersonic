@@ -1,17 +1,18 @@
 import type { ActionType, ProColumns } from '@ant-design/pro-table';
 import ProTable from '@ant-design/pro-table';
-import { message, Button, Space, Popconfirm, Input, Select } from 'antd';
+import { message, Button, Space, Popconfirm, Input, Select, Tag } from 'antd';
 import React, { useRef, useState, useEffect } from 'react';
 import type { Dispatch } from 'umi';
 import { StatusEnum } from '../enum';
 import { connect } from 'umi';
 import type { StateType } from '../model';
-import { SENSITIVE_LEVEL_ENUM, SENSITIVE_LEVEL_OPTIONS } from '../constant';
+import { SENSITIVE_LEVEL_ENUM, SENSITIVE_LEVEL_OPTIONS, TAG_DEFINE_TYPE } from '../constant';
 import {
   queryMetric,
   deleteMetric,
   batchUpdateMetricStatus,
   batchDownloadMetric,
+  batchCreateTag,
 } from '../service';
 import MetricInfoCreateForm from './MetricInfoCreateForm';
 import BatchCtrlDropDownButton from '@/components/BatchCtrlDropDownButton';
@@ -19,7 +20,7 @@ import TableHeaderFilter from './TableHeaderFilter';
 import moment from 'moment';
 import styles from './style.less';
 import { ISemantic } from '../data';
-import { ColumnsConfig } from './MetricTableColumnRender';
+import { ColumnsConfig } from './TableColumnRender';
 
 type Props = {
   dispatch: Dispatch;
@@ -67,6 +68,30 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
     message.error(msg);
   };
 
+  const queryBatchExportTag = async (ids: React.Key[]) => {
+    if (Array.isArray(ids) && ids.length === 0) {
+      return;
+    }
+    setLoading(true);
+    const { code, msg } = await batchCreateTag({
+      itemIds: ids,
+      type: TAG_DEFINE_TYPE.METRIC,
+      modelId,
+    });
+    setLoading(false);
+    if (code === 200) {
+      queryMetricList({ ...filterParams, ...defaultPagination });
+      dispatch({
+        type: 'domainManger/queryMetricList',
+        payload: {
+          modelId,
+        },
+      });
+      return;
+    }
+    message.error(msg);
+  };
+
   useEffect(() => {
     queryMetricList({ ...filterParams, ...defaultPagination });
   }, [filterParams]);
@@ -94,6 +119,8 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
     }
   };
 
+  const columnsConfig = ColumnsConfig();
+
   const columns: ProColumns[] = [
     {
       dataIndex: 'id',
@@ -109,7 +136,7 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
       fixed: 'left',
       // width: '30%',
       search: false,
-      render: ColumnsConfig.metricInfo.render,
+      render: columnsConfig.indicatorInfo.render,
     },
     {
       dataIndex: 'key',
@@ -121,7 +148,23 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
       title: '敏感度',
       width: 160,
       valueEnum: SENSITIVE_LEVEL_ENUM,
-      render: ColumnsConfig.sensitiveLevel.render,
+      render: columnsConfig.sensitiveLevel.render,
+    },
+
+    {
+      dataIndex: 'isTag',
+      title: '是否为标签',
+      width: 120,
+      render: (isTag) => {
+        switch (isTag) {
+          case 0:
+            return '否';
+          case 1:
+            return <span style={{ color: '#1677ff' }}>是</span>;
+          default:
+            return <Tag color="default">未知</Tag>;
+        }
+      },
     },
 
     {
@@ -129,14 +172,14 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
       title: '描述',
       width: 300,
       search: false,
-      render: ColumnsConfig.description.render,
+      render: columnsConfig.description.render,
     },
     {
       dataIndex: 'status',
       title: '状态',
       width: 160,
       search: false,
-      render: ColumnsConfig.state.render,
+      render: columnsConfig.state.render,
     },
     {
       dataIndex: 'createdBy',
@@ -235,6 +278,9 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
         break;
       case 'batchStop':
         queryBatchUpdateStatus(selectedRowKeys, StatusEnum.OFFLINE);
+        break;
+      case 'exportTagButton':
+        queryBatchExportTag(selectedRowKeys);
         break;
       default:
         break;
@@ -351,6 +397,7 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
           <BatchCtrlDropDownButton
             key="ctrlBtnList"
             downloadLoading={downloadLoading}
+            extenderEnable={true}
             onDeleteConfirm={() => {
               queryBatchUpdateStatus(selectedRowKeys, StatusEnum.DELETED);
             }}

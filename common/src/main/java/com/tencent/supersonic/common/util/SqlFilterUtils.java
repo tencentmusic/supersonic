@@ -65,7 +65,7 @@ public class SqlFilterUtils {
                             joiner.add(SPACE + dealFilter(filter, isBizName) + SPACE);
                         }
                     });
-            log.info("getWhereClause, where sql : {}", joiner.toString());
+            log.info("getWhereClause, where sql : {}", joiner);
             return joiner.toString();
         }
 

@@ -4,7 +4,7 @@
 
 # SuperSonic (超音数)
 
-SuperSonic is the next-generation BI platform that integrates **Chat BI** (powered by LLM) and **Headless BI** (powered by semantic layer). Both paradigms benefit from the integration: 
+SuperSonic is the next-generation BI platform that integrates **Chat BI** (powered by LLM) and **Headless BI** (powered by semantic layer). This integration ensures that Chat BI has access to the same curated and governed semantic data models as traditional BI. Furthermore, the implementation of both paradigms benefits from the integration: 
 
 - Chat BI's Text2SQL capability gets enhanced with semantic data models.
 - Headless BI's query interface gets augmented with natural language support.
@@ -21,7 +21,7 @@ The emergence of Large Language Model (LLM) like ChatGPT is reshaping the way in
 
 Meanwhile, another emerging paradigm called Headless BI, which focuses on constructing unified semantic data models, has garnered significant attention. Headless BI is implemented through a universal semantic layer that exposes consistent data semantics via an open API.
 
-From our perspective, Headless BI revolves around a unified architecture, while Chat BI centers around an intelligent interface. It is necessary to integrate these two paradigms to ensure seamless connectivity between traditional BI and Chat BI, enabling them to access the same curated and governed semantic models. Equally importantly, this approach would enhance Chat BI's Text2SQL capability in two dimensions:
+From our perspective, the integration of Chat BI and Headless BI has the potential to enhance the Text2SQL capability in two dimensions:
 
 1. Incorporate data semantics (such as business terms, column values, etc.) into the prompt, enabling LLM to better understand the semantics and **reduce hallucination**.
 2. Offload the generation of advanced SQL syntax (such as join, formula, etc.) from LLM to the semantic layer to **reduce complexity**. 
