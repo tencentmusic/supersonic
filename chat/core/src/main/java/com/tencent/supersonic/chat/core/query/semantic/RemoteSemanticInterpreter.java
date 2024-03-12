@@ -1,5 +1,9 @@
 package com.tencent.supersonic.chat.core.query.semantic;
 
+import static com.tencent.supersonic.common.pojo.Constants.LIST_LOWER;
+import static com.tencent.supersonic.common.pojo.Constants.PAGESIZE_LOWER;
+import static com.tencent.supersonic.common.pojo.Constants.TOTAL_LOWER;
+
 import com.github.pagehelper.PageInfo;
 import com.google.gson.Gson;
 import com.tencent.supersonic.auth.api.authentication.config.AuthenticationConfig;
@@ -18,16 +22,20 @@ import com.tencent.supersonic.headless.api.pojo.request.PageMetricReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryMultiStructReq;
 import com.tencent.supersonic.headless.api.pojo.request.QuerySqlReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
+import com.tencent.supersonic.headless.api.pojo.response.DataSetResp;
+import com.tencent.supersonic.headless.api.pojo.response.DataSetSchemaResp;
 import com.tencent.supersonic.headless.api.pojo.response.DimensionResp;
 import com.tencent.supersonic.headless.api.pojo.response.DomainResp;
 import com.tencent.supersonic.headless.api.pojo.response.ExplainResp;
 import com.tencent.supersonic.headless.api.pojo.response.ItemResp;
 import com.tencent.supersonic.headless.api.pojo.response.MetricResp;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
-import com.tencent.supersonic.headless.api.pojo.response.DataSetResp;
-import com.tencent.supersonic.headless.api.pojo.response.DataSetSchemaResp;
+import java.net.URI;
+import java.net.URL;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.BeanUtils;
 import org.springframework.core.ParameterizedTypeReference;
@@ -38,17 +46,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
-
-import java.net.URI;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Objects;
-
-import static com.tencent.supersonic.common.pojo.Constants.LIST_LOWER;
-import static com.tencent.supersonic.common.pojo.Constants.PAGESIZE_LOWER;
-import static com.tencent.supersonic.common.pojo.Constants.TOTAL_LOWER;
 
 @Slf4j
 public class RemoteSemanticInterpreter extends BaseSemanticInterpreter {
@@ -67,18 +64,7 @@ public class RemoteSemanticInterpreter extends BaseSemanticInterpreter {
 
     @Override
     public SemanticQueryResp queryByStruct(QueryStructReq queryStructReq, User user) {
-        if (StringUtils.isNotBlank(queryStructReq.getCorrectS2SQL())) {
-            QuerySqlReq querySqlReq = new QuerySqlReq();
-            querySqlReq.setSql(queryStructReq.getCorrectS2SQL());
-            querySqlReq.setModelIds(queryStructReq.getModelIdSet());
-            querySqlReq.setParams(new ArrayList<>());
-            return queryByS2SQL(querySqlReq, user);
-        }
-
-        DefaultSemanticConfig defaultSemanticConfig = ContextUtils.getBean(DefaultSemanticConfig.class);
-        return searchByRestTemplate(
-                defaultSemanticConfig.getSemanticUrl() + defaultSemanticConfig.getSearchByStructPath(),
-                new Gson().toJson(queryStructReq));
+        return queryByS2SQL(queryStructReq.convert(), user);
     }
 
     @Override
