@@ -1,6 +1,7 @@
 package com.tencent.supersonic.chat.core.utils;
 
 import com.google.common.collect.Lists;
+import com.tencent.supersonic.chat.api.pojo.request.QueryFilter;
 import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.chat.core.query.QueryManager;
@@ -42,10 +43,7 @@ public class QueryReqBuilder {
         queryStructReq.setQueryType(parseInfo.getQueryType());
         queryStructReq.setDateInfo(rewrite2Between(parseInfo.getDateInfo()));
 
-        List<Filter> dimensionFilters = parseInfo.getDimensionFilters().stream()
-                .filter(chatFilter -> Strings.isNotEmpty(chatFilter.getBizName()))
-                .map(chatFilter -> new Filter(chatFilter.getBizName(), chatFilter.getOperator(), chatFilter.getValue()))
-                .collect(Collectors.toList());
+        List<Filter> dimensionFilters = getFilters(parseInfo.getDimensionFilters());
         queryStructReq.setDimensionFilters(dimensionFilters);
 
         List<Filter> metricFilters = parseInfo.getMetricFilters().stream()
@@ -70,6 +68,14 @@ public class QueryReqBuilder {
         deletionDuplicated(queryStructReq);
 
         return queryStructReq;
+    }
+
+    private static List<Filter> getFilters(Set<QueryFilter> queryFilters) {
+        List<Filter> dimensionFilters = queryFilters.stream()
+                .filter(chatFilter -> Strings.isNotEmpty(chatFilter.getBizName()))
+                .map(chatFilter -> new Filter(chatFilter.getBizName(), chatFilter.getOperator(), chatFilter.getValue()))
+                .collect(Collectors.toList());
+        return dimensionFilters;
     }
 
     private static void deletionDuplicated(QueryStructReq queryStructReq) {

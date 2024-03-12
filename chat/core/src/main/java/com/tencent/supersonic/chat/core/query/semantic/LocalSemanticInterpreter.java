@@ -4,31 +4,28 @@ import com.github.pagehelper.PageInfo;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.JsonUtil;
+import com.tencent.supersonic.headless.api.pojo.request.DataSetFilterReq;
 import com.tencent.supersonic.headless.api.pojo.request.ExplainSqlReq;
 import com.tencent.supersonic.headless.api.pojo.request.PageDimensionReq;
 import com.tencent.supersonic.headless.api.pojo.request.PageMetricReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryMultiStructReq;
 import com.tencent.supersonic.headless.api.pojo.request.QuerySqlReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
-import com.tencent.supersonic.headless.api.pojo.request.DataSetFilterReq;
+import com.tencent.supersonic.headless.api.pojo.response.DataSetResp;
+import com.tencent.supersonic.headless.api.pojo.response.DataSetSchemaResp;
 import com.tencent.supersonic.headless.api.pojo.response.DimensionResp;
 import com.tencent.supersonic.headless.api.pojo.response.DomainResp;
 import com.tencent.supersonic.headless.api.pojo.response.ExplainResp;
 import com.tencent.supersonic.headless.api.pojo.response.ItemResp;
 import com.tencent.supersonic.headless.api.pojo.response.MetricResp;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
-import com.tencent.supersonic.headless.api.pojo.response.DataSetResp;
-import com.tencent.supersonic.headless.api.pojo.response.DataSetSchemaResp;
 import com.tencent.supersonic.headless.server.service.DimensionService;
 import com.tencent.supersonic.headless.server.service.MetricService;
 import com.tencent.supersonic.headless.server.service.QueryService;
 import com.tencent.supersonic.headless.server.service.SchemaService;
+import java.util.List;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Slf4j
 public class LocalSemanticInterpreter extends BaseSemanticInterpreter {
@@ -41,14 +38,10 @@ public class LocalSemanticInterpreter extends BaseSemanticInterpreter {
     @SneakyThrows
     @Override
     public SemanticQueryResp queryByStruct(QueryStructReq queryStructReq, User user) {
-        if (StringUtils.isNotBlank(queryStructReq.getCorrectS2SQL())) {
-            QuerySqlReq querySqlReq = new QuerySqlReq();
-            querySqlReq.setSql(queryStructReq.getCorrectS2SQL());
-            querySqlReq.setDataSetId(queryStructReq.getDataSetId());
-            querySqlReq.setParams(new ArrayList<>());
-            return queryByS2SQL(querySqlReq, user);
-        }
         queryService = ContextUtils.getBean(QueryService.class);
+        if (queryStructReq.isConvertToSql()) {
+            return queryService.queryByReq(queryStructReq.convert(), user);
+        }
         return queryService.queryByReq(queryStructReq, user);
     }
 

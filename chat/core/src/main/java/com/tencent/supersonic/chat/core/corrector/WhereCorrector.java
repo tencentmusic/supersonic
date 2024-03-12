@@ -66,8 +66,10 @@ public class WhereCorrector extends BaseSemanticCorrector {
         String correctS2SQL = semanticParseInfo.getSqlInfo().getCorrectS2SQL();
         List<String> whereFields = SqlSelectHelper.getWhereFields(correctS2SQL);
         if (CollectionUtils.isEmpty(whereFields) || !TimeDimensionEnum.containsZhTimeDimension(whereFields)) {
+
             Pair<String, String> startEndDate = S2SqlDateHelper.getStartEndDate(queryContext,
                     semanticParseInfo.getDataSetId(), semanticParseInfo.getQueryType());
+
             if (StringUtils.isNotBlank(startEndDate.getLeft())
                     && StringUtils.isNotBlank(startEndDate.getRight())) {
                 correctS2SQL = SqlAddHelper.addParenthesisToWhere(correctS2SQL);
