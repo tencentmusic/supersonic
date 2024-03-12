@@ -105,6 +105,13 @@
                 #{id}
             </foreach>
         </if>
+        <if test="bizNames != null and bizNames.size >0">
+            and biz_name in
+            <foreach collection="bizNames" index="index" item="bizName" open="(" close=")"
+                     separator=",">
+                #{bizName}
+            </foreach>
+        </if>
         <if test="createdBy != null">
             and created_by = #{createdBy}
         </if>

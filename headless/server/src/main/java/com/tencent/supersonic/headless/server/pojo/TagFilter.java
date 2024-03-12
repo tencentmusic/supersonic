@@ -12,5 +12,6 @@ public class TagFilter extends MetaFilter {
     private String type;
     private List<Integer> statusList;
     private TagDefineType tagDefineType;
+    private List<String> bizNames;
 
 }

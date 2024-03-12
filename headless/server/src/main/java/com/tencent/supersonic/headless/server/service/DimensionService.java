@@ -22,7 +22,7 @@ public interface DimensionService {
 
     void batchUpdateStatus(MetaBatchReq metaBatchReq, User user);
 
-    void createDimension(DimensionReq dimensionReq, User user) throws Exception;
+    DimensionResp createDimension(DimensionReq dimensionReq, User user) throws Exception;
 
     void createDimensionBatch(List<DimensionReq> dimensionReqs, User user) throws Exception;
 
