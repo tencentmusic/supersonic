@@ -1,16 +1,17 @@
 package com.tencent.supersonic.headless.api.pojo.response;
 
+import static com.tencent.supersonic.common.pojo.Constants.DICT_VALUE;
+import static com.tencent.supersonic.common.pojo.Constants.UNDERLINE;
+
 import com.tencent.supersonic.common.pojo.enums.StatusEnum;
 import com.tencent.supersonic.common.pojo.enums.TypeEnums;
 import com.tencent.supersonic.headless.api.pojo.ItemValueConfig;
-import lombok.Data;
-
 import javax.validation.constraints.NotNull;
-
-import static com.tencent.supersonic.common.pojo.Constants.UNDERLINE;
+import lombok.Data;
 
 @Data
 public class DictItemResp {
+
     private Long id;
 
     private Long modelId;
@@ -32,7 +33,9 @@ public class DictItemResp {
     private StatusEnum status;
 
     public String getNature() {
-        return UNDERLINE + modelId + UNDERLINE + itemId;
+        return UNDERLINE + modelId + UNDERLINE + itemId + UNDERLINE + type.name().toLowerCase().substring(0, 1)
+                + DICT_VALUE;
+
     }
 
     public String fetchDictFileName() {

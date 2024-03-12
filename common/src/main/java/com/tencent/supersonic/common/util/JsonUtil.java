@@ -13,11 +13,6 @@ import com.fasterxml.jackson.databind.type.CollectionType;
 import com.fasterxml.jackson.databind.type.MapType;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.security.InvalidParameterException;
@@ -25,6 +20,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 
 
 @Slf4j
@@ -32,7 +30,6 @@ public class JsonUtil {
 
     public static final JsonUtil INSTANCE = new JsonUtil();
 
-    @Setter
     @Getter
     private final ObjectMapper objectMapper = new ObjectMapper();
 

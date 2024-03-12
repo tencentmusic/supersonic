@@ -12,9 +12,9 @@ public interface SqlGeneration {
     /***
      * generate llmResp (sql, schemaLink, prompt, etc.) through LLMReq.
      * @param llmReq
-     * @param viewId
+     * @param dataSetId
      * @return
      */
-    LLMResp generation(LLMReq llmReq, Long viewId);
+    LLMResp generation(LLMReq llmReq, Long dataSetId);
 
 }

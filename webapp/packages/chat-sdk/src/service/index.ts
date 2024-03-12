@@ -51,7 +51,7 @@ export function chatParse(
   return axios.post<ParseDataType>(`${prefix}/chat/query/parse`, {
     queryText,
     chatId: chatId || DEFAULT_CHAT_ID,
-    modelId,
+    dataSetId: modelId,
     agentId,
     queryFilters: filters
       ? {

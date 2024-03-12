@@ -67,6 +67,9 @@
         <if test="type != null and type != ''">
             and type = #{type}
         </if>
+        <if test="tagDefineType != null">
+            and define_type = #{tagDefineType}
+        </if>
         <if test="key != null and key != ''">
             and ( id like CONCAT('%',#{key , jdbcType=VARCHAR},'%') or
             name like CONCAT('%',#{key , jdbcType=VARCHAR},'%') or

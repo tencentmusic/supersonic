@@ -22,7 +22,7 @@ import com.tencent.supersonic.common.pojo.enums.DataFormatTypeEnum;
 import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import com.tencent.supersonic.common.util.DateUtils;
 import com.tencent.supersonic.headless.api.pojo.SchemaItem;
-import com.tencent.supersonic.headless.api.pojo.response.ViewSchemaResp;
+import com.tencent.supersonic.headless.api.pojo.response.DataSetSchemaResp;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -61,20 +61,20 @@ public class LLMRequestService {
         return false;
     }
 
-    public Long getViewId(QueryContext queryCtx) {
+    public Long getDataSetId(QueryContext queryCtx) {
         Agent agent = queryCtx.getAgent();
-        Set<Long> agentViewIds = new HashSet<>();
+        Set<Long> agentDataSetIds = new HashSet<>();
         if (Objects.nonNull(agent)) {
-            agentViewIds = agent.getViewIds(AgentToolType.NL2SQL_LLM);
+            agentDataSetIds = agent.getDataSetIds(AgentToolType.NL2SQL_LLM);
         }
-        if (Agent.containsAllModel(agentViewIds)) {
-            agentViewIds = new HashSet<>();
+        if (Agent.containsAllModel(agentDataSetIds)) {
+            agentDataSetIds = new HashSet<>();
         }
-        ViewResolver viewResolver = ComponentFactory.getModelResolver();
-        return viewResolver.resolve(queryCtx, agentViewIds);
+        DataSetResolver dataSetResolver = ComponentFactory.getModelResolver();
+        return dataSetResolver.resolve(queryCtx, agentDataSetIds);
     }
 
-    public NL2SQLTool getParserTool(QueryContext queryCtx, Long viewId) {
+    public NL2SQLTool getParserTool(QueryContext queryCtx, Long dataSetId) {
         Agent agent = queryCtx.getAgent();
         if (Objects.isNull(agent)) {
             return null;
@@ -82,19 +82,19 @@ public class LLMRequestService {
         List<NL2SQLTool> commonAgentTools = agent.getParserTools(AgentToolType.NL2SQL_LLM);
         Optional<NL2SQLTool> llmParserTool = commonAgentTools.stream()
                 .filter(tool -> {
-                    List<Long> viewIds = tool.getViewIds();
-                    if (Agent.containsAllModel(new HashSet<>(viewIds))) {
+                    List<Long> dataSetIds = tool.getDataSetIds();
+                    if (Agent.containsAllModel(new HashSet<>(dataSetIds))) {
                         return true;
                     }
-                    return viewIds.contains(viewId);
+                    return dataSetIds.contains(dataSetId);
                 })
                 .findFirst();
         return llmParserTool.orElse(null);
     }
 
-    public LLMReq getLlmReq(QueryContext queryCtx, Long viewId,
+    public LLMReq getLlmReq(QueryContext queryCtx, Long dataSetId,
                             SemanticSchema semanticSchema, List<ElementValue> linkingValues) {
-        Map<Long, String> viewIdToName = semanticSchema.getViewIdToName();
+        Map<Long, String> dataSetIdToName = semanticSchema.getDataSetIdToName();
         String queryText = queryCtx.getQueryText();
 
         LLMReq llmReq = new LLMReq();
@@ -103,12 +103,12 @@ public class LLMRequestService {
         llmReq.setFilterCondition(filterCondition);
 
         LLMReq.LLMSchema llmSchema = new LLMReq.LLMSchema();
-        llmSchema.setViewName(viewIdToName.get(viewId));
-        llmSchema.setDomainName(viewIdToName.get(viewId));
+        llmSchema.setDataSetName(dataSetIdToName.get(dataSetId));
+        llmSchema.setDomainName(dataSetIdToName.get(dataSetId));
 
-        List<String> fieldNameList = getFieldNameList(queryCtx, viewId, llmParserConfig);
+        List<String> fieldNameList = getFieldNameList(queryCtx, dataSetId, llmParserConfig);
 
-        String priorExts = getPriorExts(viewId, fieldNameList);
+        String priorExts = getPriorExts(dataSetId, fieldNameList);
         llmReq.setPriorExts(priorExts);
 
         fieldNameList.add(TimeDimensionEnum.DAY.getChName());
@@ -121,7 +121,7 @@ public class LLMRequestService {
         }
         llmReq.setLinking(linking);
 
-        String currentDate = S2SqlDateHelper.getReferenceDate(queryCtx, viewId);
+        String currentDate = S2SqlDateHelper.getReferenceDate(queryCtx, dataSetId);
         if (StringUtils.isEmpty(currentDate)) {
             currentDate = DateUtils.getBeforeDate(0);
         }
@@ -130,28 +130,28 @@ public class LLMRequestService {
         return llmReq;
     }
 
-    public LLMResp requestLLM(LLMReq llmReq, Long viewId) {
-        return ComponentFactory.getLLMProxy().query2sql(llmReq, viewId);
+    public LLMResp requestLLM(LLMReq llmReq, Long dataSetId) {
+        return ComponentFactory.getLLMProxy().query2sql(llmReq, dataSetId);
     }
 
-    protected List<String> getFieldNameList(QueryContext queryCtx, Long viewId,
+    protected List<String> getFieldNameList(QueryContext queryCtx, Long dataSetId,
             LLMParserConfig llmParserConfig) {
 
-        Set<String> results = getTopNFieldNames(queryCtx, viewId, llmParserConfig);
+        Set<String> results = getTopNFieldNames(queryCtx, dataSetId, llmParserConfig);
 
-        Set<String> fieldNameList = getMatchedFieldNames(queryCtx, viewId);
+        Set<String> fieldNameList = getMatchedFieldNames(queryCtx, dataSetId);
 
         results.addAll(fieldNameList);
         return new ArrayList<>(results);
     }
 
-    private String getPriorExts(Long viewId, List<String> fieldNameList) {
+    private String getPriorExts(Long dataSetId, List<String> fieldNameList) {
         StringBuilder extraInfoSb = new StringBuilder();
-        List<ViewSchemaResp> viewSchemaResps = semanticInterpreter.fetchViewSchema(
-                Lists.newArrayList(viewId), true);
-        if (!CollectionUtils.isEmpty(viewSchemaResps)) {
-            ViewSchemaResp viewSchemaResp = viewSchemaResps.get(0);
-            Map<String, String> fieldNameToDataFormatType = viewSchemaResp.getMetrics()
+        List<DataSetSchemaResp> dataSetSchemaResps = semanticInterpreter.fetchDataSetSchema(
+                Lists.newArrayList(dataSetId), true);
+        if (!CollectionUtils.isEmpty(dataSetSchemaResps)) {
+            DataSetSchemaResp dataSetSchemaResp = dataSetSchemaResps.get(0);
+            Map<String, String> fieldNameToDataFormatType = dataSetSchemaResp.getMetrics()
                     .stream().filter(metricSchemaResp -> Objects.nonNull(metricSchemaResp.getDataFormatType()))
                     .flatMap(metricSchemaResp -> {
                         Set<Pair<String, String>> result = new HashSet<>();
@@ -179,9 +179,9 @@ public class LLMRequestService {
         return extraInfoSb.toString();
     }
 
-    protected List<ElementValue> getValueList(QueryContext queryCtx, Long viewId) {
-        Map<Long, String> itemIdToName = getItemIdToName(queryCtx, viewId);
-        List<SchemaElementMatch> matchedElements = queryCtx.getMapInfo().getMatchedElements(viewId);
+    protected List<ElementValue> getValueList(QueryContext queryCtx, Long dataSetId) {
+        Map<Long, String> itemIdToName = getItemIdToName(queryCtx, dataSetId);
+        List<SchemaElementMatch> matchedElements = queryCtx.getMapInfo().getMatchedElements(dataSetId);
         if (CollectionUtils.isEmpty(matchedElements)) {
             return new ArrayList<>();
         }
@@ -201,21 +201,21 @@ public class LLMRequestService {
         return new ArrayList<>(valueMatches);
     }
 
-    protected Map<Long, String> getItemIdToName(QueryContext queryCtx, Long viewId) {
+    protected Map<Long, String> getItemIdToName(QueryContext queryCtx, Long dataSetId) {
         SemanticSchema semanticSchema = queryCtx.getSemanticSchema();
-        return semanticSchema.getDimensions(viewId).stream()
+        return semanticSchema.getDimensions(dataSetId).stream()
                 .collect(Collectors.toMap(SchemaElement::getId, SchemaElement::getName, (value1, value2) -> value2));
     }
 
-    private Set<String> getTopNFieldNames(QueryContext queryCtx, Long viewId, LLMParserConfig llmParserConfig) {
+    private Set<String> getTopNFieldNames(QueryContext queryCtx, Long dataSetId, LLMParserConfig llmParserConfig) {
         SemanticSchema semanticSchema = queryCtx.getSemanticSchema();
-        Set<String> results = semanticSchema.getDimensions(viewId).stream()
+        Set<String> results = semanticSchema.getDimensions(dataSetId).stream()
                 .sorted(Comparator.comparing(SchemaElement::getUseCnt).reversed())
                 .limit(llmParserConfig.getDimensionTopN())
                 .map(entry -> entry.getName())
                 .collect(Collectors.toSet());
 
-        Set<String> metrics = semanticSchema.getMetrics(viewId).stream()
+        Set<String> metrics = semanticSchema.getMetrics(dataSetId).stream()
                 .sorted(Comparator.comparing(SchemaElement::getUseCnt).reversed())
                 .limit(llmParserConfig.getMetricTopN())
                 .map(entry -> entry.getName())
@@ -225,9 +225,9 @@ public class LLMRequestService {
         return results;
     }
 
-    protected Set<String> getMatchedFieldNames(QueryContext queryCtx, Long viewId) {
-        Map<Long, String> itemIdToName = getItemIdToName(queryCtx, viewId);
-        List<SchemaElementMatch> matchedElements = queryCtx.getMapInfo().getMatchedElements(viewId);
+    protected Set<String> getMatchedFieldNames(QueryContext queryCtx, Long dataSetId) {
+        Map<Long, String> itemIdToName = getItemIdToName(queryCtx, dataSetId);
+        List<SchemaElementMatch> matchedElements = queryCtx.getMapInfo().getMatchedElements(dataSetId);
         if (CollectionUtils.isEmpty(matchedElements)) {
             return new HashSet<>();
         }

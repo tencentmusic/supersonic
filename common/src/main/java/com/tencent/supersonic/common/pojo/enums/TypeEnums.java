@@ -7,8 +7,8 @@ public enum TypeEnums {
     TAG,
     DOMAIN,
     ENTITY,
-    VIEW,
+    DATASET,
     MODEL,
-    UNKNOWN;
+    UNKNOWN
 
 }

@@ -24,8 +24,8 @@ import com.tencent.supersonic.headless.api.pojo.response.ExplainResp;
 import com.tencent.supersonic.headless.api.pojo.response.ItemResp;
 import com.tencent.supersonic.headless.api.pojo.response.MetricResp;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
-import com.tencent.supersonic.headless.api.pojo.response.ViewResp;
-import com.tencent.supersonic.headless.api.pojo.response.ViewSchemaResp;
+import com.tencent.supersonic.headless.api.pojo.response.DataSetResp;
+import com.tencent.supersonic.headless.api.pojo.response.DataSetSchemaResp;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.util.Strings;
@@ -250,17 +250,17 @@ public class RemoteSemanticInterpreter extends BaseSemanticInterpreter {
     }
 
     @Override
-    protected List<ViewSchemaResp> doFetchViewSchema(List<Long> ids) {
+    protected List<DataSetSchemaResp> doFetchDataSetSchema(List<Long> ids) {
         return null;
     }
 
     @Override
-    public List<ItemResp> getDomainViewTree() {
+    public List<ItemResp> getDomainDataSetTree() {
         return null;
     }
 
     @Override
-    public List<ViewResp> getViewList(Long domainId) {
+    public List<DataSetResp> getDataSetList(Long domainId) {
         return null;
     }
 

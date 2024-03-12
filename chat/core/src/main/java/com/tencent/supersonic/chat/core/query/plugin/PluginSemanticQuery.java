@@ -79,7 +79,7 @@ public abstract class PluginSemanticQuery extends BaseSemanticQuery {
         if (!CollectionUtils.isEmpty(webPage.getParamOptions()) && !CollectionUtils.isEmpty(elementValueMap)) {
             for (ParamOption paramOption : webPage.getParamOptions()) {
                 if (paramOption.getModelId() != null
-                        && !parseInfo.getViewId().equals(paramOption.getModelId())) {
+                        && !parseInfo.getDataSetId().equals(paramOption.getModelId())) {
                     continue;
                 }
                 paramOptions.add(paramOption);

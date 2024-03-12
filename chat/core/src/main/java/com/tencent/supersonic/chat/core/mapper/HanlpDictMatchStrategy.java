@@ -39,15 +39,15 @@ public class HanlpDictMatchStrategy extends BaseMatchStrategy<HanlpMapResult> {
 
     @Override
     public Map<MatchText, List<HanlpMapResult>> match(QueryContext queryContext, List<S2Term> terms,
-            Set<Long> detectViewIds) {
+            Set<Long> detectDataSetIds) {
         String text = queryContext.getQueryText();
         if (Objects.isNull(terms) || StringUtils.isEmpty(text)) {
             return null;
         }
 
-        log.debug("retryCount:{},terms:{},,detectModelIds:{}", terms, detectViewIds);
+        log.debug("retryCount:{},terms:{},,detectModelIds:{}", terms, detectDataSetIds);
 
-        List<HanlpMapResult> detects = detect(queryContext, terms, detectViewIds);
+        List<HanlpMapResult> detects = detect(queryContext, terms, detectDataSetIds);
         Map<MatchText, List<HanlpMapResult>> result = new HashMap<>();
 
         result.put(MatchText.builder().regText(text).detectSegment(text).build(), detects);
@@ -60,15 +60,15 @@ public class HanlpDictMatchStrategy extends BaseMatchStrategy<HanlpMapResult> {
                 && existResult.getDetectWord().length() < oneRoundResult.getDetectWord().length();
     }
 
-    public void detectByStep(QueryContext queryContext, Set<HanlpMapResult> existResults, Set<Long> detectViewIds,
+    public void detectByStep(QueryContext queryContext, Set<HanlpMapResult> existResults, Set<Long> detectDataSetIds,
             String detectSegment, int offset) {
         // step1. pre search
         Integer oneDetectionMaxSize = optimizationConfig.getOneDetectionMaxSize();
         LinkedHashSet<HanlpMapResult> hanlpMapResults = knowledgeService.prefixSearch(detectSegment,
-                oneDetectionMaxSize, detectViewIds).stream().collect(Collectors.toCollection(LinkedHashSet::new));
+                oneDetectionMaxSize, detectDataSetIds).stream().collect(Collectors.toCollection(LinkedHashSet::new));
         // step2. suffix search
         LinkedHashSet<HanlpMapResult> suffixHanlpMapResults = knowledgeService.suffixSearch(detectSegment,
-                oneDetectionMaxSize, detectViewIds).stream().collect(Collectors.toCollection(LinkedHashSet::new));
+                oneDetectionMaxSize, detectDataSetIds).stream().collect(Collectors.toCollection(LinkedHashSet::new));
 
         hanlpMapResults.addAll(suffixHanlpMapResults);
 

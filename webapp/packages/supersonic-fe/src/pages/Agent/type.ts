@@ -75,7 +75,7 @@ export type ModelType = {
   parentId: number;
   name: string;
   bizName: string;
-  type: 'DOMAIN' | 'VIEW';
+  type: 'DOMAIN' | 'DATASET';
 };
 
 export type MetricType = {

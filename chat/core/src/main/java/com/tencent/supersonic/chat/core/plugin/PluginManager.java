@@ -266,14 +266,14 @@ public class PluginManager {
     }
 
     private static Set<Long> getPluginMatchedModel(Plugin plugin, QueryContext queryContext) {
-        Set<Long> matchedViews = queryContext.getMapInfo().getMatchedViewInfos();
+        Set<Long> matchedDataSets = queryContext.getMapInfo().getMatchedDataSetInfos();
         if (plugin.isContainsAllModel()) {
             return Sets.newHashSet(plugin.getDefaultMode());
         }
-        List<Long> modelIds = plugin.getViewList();
+        List<Long> modelIds = plugin.getDataSetList();
         Set<Long> pluginMatchedModel = Sets.newHashSet();
         for (Long modelId : modelIds) {
-            if (matchedViews.contains(modelId)) {
+            if (matchedDataSets.contains(modelId)) {
                 pluginMatchedModel.add(modelId);
             }
         }

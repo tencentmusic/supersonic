@@ -77,7 +77,7 @@ public class QueryStructUtils {
     private List<Long> getDimensionIds(QueryStructReq queryStructReq) {
         List<Long> dimensionIds = new ArrayList<>();
         MetaFilter metaFilter = new MetaFilter();
-        metaFilter.setViewId(queryStructReq.getViewId());
+        metaFilter.setDataSetId(queryStructReq.getDataSetId());
         List<DimensionResp> dimensions = catalog.getDimensions(metaFilter);
         Map<String, List<DimensionResp>> pair = dimensions.stream()
                 .collect(Collectors.groupingBy(DimensionResp::getBizName));
@@ -99,7 +99,7 @@ public class QueryStructUtils {
     private List<Long> getMetricIds(QueryStructReq queryStructCmd) {
         List<Long> metricIds = new ArrayList<>();
         MetaFilter metaFilter = new MetaFilter();
-        metaFilter.setViewId(queryStructCmd.getViewId());
+        metaFilter.setDataSetId(queryStructCmd.getDataSetId());
         List<MetricResp> metrics = catalog.getMetrics(metaFilter);
         Map<String, List<MetricResp>> pair = metrics.stream().collect(Collectors.groupingBy(SchemaItem::getBizName));
         for (Aggregator agg : queryStructCmd.getAggregators()) {

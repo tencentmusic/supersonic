@@ -26,5 +26,4 @@ public interface QueryService {
 
     @ApiHeaderCheck
     ItemQueryResultResp queryMetricDataById(QueryItemReq queryApiReq, HttpServletRequest request) throws Exception;
-
 }

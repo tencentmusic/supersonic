@@ -13,6 +13,10 @@ import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.DateModeUtils;
 import com.tencent.supersonic.common.util.SqlFilterUtils;
 import com.tencent.supersonic.common.util.jsqlparser.SqlAddHelper;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.JSQLParserException;
@@ -35,11 +39,6 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.util.CollectionUtils;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 
 @Data
@@ -94,8 +93,8 @@ public class QueryStructReq extends SemanticQueryReq {
 
     public String toCustomizedString() {
         StringBuilder stringBuilder = new StringBuilder("{");
-        stringBuilder.append("\"viewId\":")
-                .append(viewId);
+        stringBuilder.append("\"dataSetId\":")
+                .append(dataSetId);
         stringBuilder.append("\"modelIds\":")
                 .append(modelIds);
         stringBuilder.append(",\"groups\":")
@@ -127,8 +126,8 @@ public class QueryStructReq extends SemanticQueryReq {
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("{");
-        sb.append("\"viewId\":")
-                .append(viewId);
+        sb.append("\"dataSetId\":")
+                .append(dataSetId);
         sb.append("\"modelIds\":")
                 .append(modelIds);
         sb.append(",\"groups\":")
@@ -172,7 +171,7 @@ public class QueryStructReq extends SemanticQueryReq {
 
         QuerySqlReq result = new QuerySqlReq();
         result.setSql(sql);
-        result.setViewId(this.getViewId());
+        result.setDataSetId(this.getDataSetId());
         result.setModelIds(this.getModelIdSet());
         result.setParams(new ArrayList<>());
         return result;
@@ -208,7 +207,8 @@ public class QueryStructReq extends SemanticQueryReq {
                     }
                     sumFunction.setParameters(new ExpressionList(new Column(columnName)));
                     SelectExpressionItem selectExpressionItem = new SelectExpressionItem(sumFunction);
-                    selectExpressionItem.setAlias(new Alias(columnName));
+                    String alias = StringUtils.isNotBlank(aggregator.getAlias()) ? aggregator.getAlias() : columnName;
+                    selectExpressionItem.setAlias(new Alias(alias));
                     selectItems.add(selectExpressionItem);
                 }
             }
@@ -276,11 +276,11 @@ public class QueryStructReq extends SemanticQueryReq {
     }
 
     public String getTableName() {
-        if (StringUtils.isNotBlank(viewName)) {
-            return viewName;
+        if (StringUtils.isNotBlank(dataSetName)) {
+            return dataSetName;
         }
-        if (viewId != null) {
-            return Constants.TABLE_PREFIX + viewId;
+        if (dataSetId != null) {
+            return Constants.TABLE_PREFIX + dataSetId;
         }
         return Constants.TABLE_PREFIX + StringUtils.join(modelIds, "_");
     }

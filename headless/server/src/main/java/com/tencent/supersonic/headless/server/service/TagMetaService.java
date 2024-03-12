@@ -9,17 +9,17 @@ import com.tencent.supersonic.headless.server.pojo.TagFilter;
 import com.tencent.supersonic.headless.server.pojo.TagFilterPage;
 import java.util.List;
 
-public interface TagService {
+public interface TagMetaService {
 
-    TagResp create(TagReq tagReq, User user) throws Exception;
+    TagResp create(TagReq tagReq, User user);
 
-    TagResp update(TagReq tagReq, User user) throws Exception;
+    TagResp update(TagReq tagReq, User user);
 
-    void delete(Long id, User user) throws Exception;
+    void delete(Long id, User user);
 
     TagResp getTag(Long id, User user);
 
-    List<TagResp> query(TagFilter tagFilter);
+    List<TagResp> getTags(TagFilter tagFilter);
 
     PageInfo<TagResp> queryPage(TagFilterPage tagFilterPage, User user);
 

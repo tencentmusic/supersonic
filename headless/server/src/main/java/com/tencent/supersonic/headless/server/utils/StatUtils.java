@@ -20,18 +20,18 @@ import com.tencent.supersonic.headless.api.pojo.request.QueryTagReq;
 import com.tencent.supersonic.headless.api.pojo.request.SemanticQueryReq;
 import com.tencent.supersonic.headless.api.pojo.response.ItemUseResp;
 import com.tencent.supersonic.headless.server.persistence.repository.StatRepository;
-import com.tencent.supersonic.headless.server.service.ModelService;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.logging.log4j.util.Strings;
+import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.logging.log4j.util.Strings;
-import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
 
 
 @Component
@@ -41,17 +41,13 @@ public class StatUtils {
     private static final TransmittableThreadLocal<QueryStat> STATS = new TransmittableThreadLocal<>();
     private final StatRepository statRepository;
     private final SqlFilterUtils sqlFilterUtils;
-
-    private final ModelService modelService;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     public StatUtils(StatRepository statRepository,
-            SqlFilterUtils sqlFilterUtils,
-            ModelService modelService) {
+            SqlFilterUtils sqlFilterUtils) {
 
         this.statRepository = statRepository;
         this.sqlFilterUtils = sqlFilterUtils;
-        this.modelService = modelService;
     }
 
     public static QueryStat get() {
@@ -112,7 +108,7 @@ public class StatUtils {
 
         try {
             queryStatInfo.setTraceId(traceId)
-                    .setViewId(queryTagReq.getViewId())
+                    .setDataSetId(queryTagReq.getDataSetId())
                     .setUser(user)
                     .setQueryType(QueryType.STRUCT.getValue())
                     .setQueryTypeBack(QueryTypeBack.NORMAL.getState())
@@ -150,7 +146,7 @@ public class StatUtils {
         try {
             queryStatInfo.setTraceId("")
                     .setUser(userName)
-                    .setViewId(querySqlReq.getViewId())
+                    .setDataSetId(querySqlReq.getDataSetId())
                     .setQueryType(QueryType.SQL.getValue())
                     .setQueryTypeBack(QueryTypeBack.NORMAL.getState())
                     .setQuerySqlCmd(querySqlReq.toString())
@@ -180,7 +176,7 @@ public class StatUtils {
 
         try {
             queryStatInfo.setTraceId(traceId)
-                    .setViewId(queryStructReq.getViewId())
+                    .setDataSetId(queryStructReq.getDataSetId())
                     .setUser(user)
                     .setQueryType(QueryType.STRUCT.getValue())
                     .setQueryTypeBack(QueryTypeBack.NORMAL.getState())

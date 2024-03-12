@@ -27,7 +27,7 @@ public class QueryMultiStructReq extends SemanticQueryReq {
         if (CollectionUtils.isEmpty(this.getQueryStructReqs())) {
             return null;
         }
-        return this.getQueryStructReqs().get(0).getViewId();
+        return this.getQueryStructReqs().get(0).getDataSetId();
     }
 
     public Cache getCacheInfo() {

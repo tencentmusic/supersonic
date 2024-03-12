@@ -7,8 +7,8 @@ import lombok.Data;
 import java.util.Date;
 
 @Data
-@TableName("s2_view")
-public class ViewDO {
+@TableName("s2_data_set")
+public class DataSetDO {
 
     @TableId(type = IdType.AUTO)
     private Long id;
@@ -25,7 +25,7 @@ public class ViewDO {
 
     private String alias;
 
-    private String viewDetail;
+    private String dataSetDetail;
 
     private Date createdAt;
 

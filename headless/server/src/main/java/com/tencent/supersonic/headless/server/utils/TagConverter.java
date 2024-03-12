@@ -9,14 +9,17 @@ import com.tencent.supersonic.headless.api.pojo.enums.EngineType;
 import com.tencent.supersonic.headless.api.pojo.request.QuerySqlReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryTagReq;
+import com.tencent.supersonic.headless.api.pojo.response.DataSetResp;
 import com.tencent.supersonic.headless.api.pojo.response.DatabaseResp;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticSchemaResp;
+import com.tencent.supersonic.headless.api.pojo.response.TagResp;
+import com.tencent.supersonic.headless.core.pojo.DataSetQueryParam;
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;
-import com.tencent.supersonic.headless.core.pojo.ViewQueryParam;
 import com.tencent.supersonic.headless.core.utils.SqlGenerateUtils;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.BeanUtils;
@@ -26,7 +29,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Slf4j
-public class TagReqConverter {
+public class TagConverter {
 
     @Value("${query.sql.limitWrapper:true}")
     private Boolean limitWrapper;
@@ -61,7 +64,7 @@ public class TagReqConverter {
             List<MetricTable> tables = new ArrayList<>();
             tables.add(metricTable);
             //.build ParseSqlReq
-            ViewQueryParam result = new ViewQueryParam();
+            DataSetQueryParam result = new DataSetQueryParam();
             BeanUtils.copyProperties(querySqlReq, result);
             result.setTables(tables);
             DatabaseResp database = semanticSchemaResp.getDatabaseResp();
@@ -72,15 +75,15 @@ public class TagReqConverter {
             }
             //.physicalSql by ParseSqlReq
             queryStructReq.setDateInfo(queryStructUtils.getDateConfBySql(querySqlReq.getSql()));
-            queryStructReq.setViewId(querySqlReq.getViewId());
+            queryStructReq.setDataSetId(querySqlReq.getDataSetId());
             queryStructReq.setQueryType(QueryType.TAG);
             QueryParam queryParam = new QueryParam();
             convert(queryTagReq, queryParam);
             queryStatement.setQueryParam(queryParam);
-            queryStatement.setViewQueryParam(result);
+            queryStatement.setDataSetQueryParam(result);
             queryStatement.setIsS2SQL(true);
             queryStatement.setMinMaxTime(queryStructUtils.getBeginEndTime(queryStructReq));
-            queryStatement.setViewId(queryTagReq.getViewId());
+            queryStatement.setDataSetId(queryTagReq.getDataSetId());
             queryStatement.setEnableLimitWrapper(limitWrapper);
         }
         return queryStatement;
@@ -93,5 +96,10 @@ public class TagReqConverter {
         queryParam.setGroups(queryTagReq.getGroups());
         queryParam.setDimensionFilters(queryTagReq.getTagFilters());
         queryParam.setQueryType(QueryType.TAG);
+    }
+
+    public static List<TagResp> filterByDataSet(List<TagResp> tagResps, DataSetResp dataSetResp) {
+        return tagResps.stream().filter(tagResp -> dataSetResp.getAllTags().contains(tagResp.getId())
+                || dataSetResp.getAllIncludeAllModels().contains(tagResp.getModelId())).collect(Collectors.toList());
     }
 }

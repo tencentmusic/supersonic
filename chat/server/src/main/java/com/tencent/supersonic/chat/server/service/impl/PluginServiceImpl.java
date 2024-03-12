@@ -93,8 +93,8 @@ public class PluginServiceImpl implements PluginService {
         if (StringUtils.isNotBlank(pluginQueryReq.getType())) {
             queryWrapper.lambda().eq(PluginDO::getType, pluginQueryReq.getType());
         }
-        if (StringUtils.isNotBlank(pluginQueryReq.getView())) {
-            queryWrapper.lambda().like(PluginDO::getView, pluginQueryReq.getView());
+        if (StringUtils.isNotBlank(pluginQueryReq.getDataSet())) {
+            queryWrapper.lambda().like(PluginDO::getDataSet, pluginQueryReq.getDataSet());
         }
         if (StringUtils.isNotBlank(pluginQueryReq.getParseMode())) {
             queryWrapper.lambda().eq(PluginDO::getParseMode, pluginQueryReq.getParseMode());
@@ -180,8 +180,8 @@ public class PluginServiceImpl implements PluginService {
     public Plugin convert(PluginDO pluginDO) {
         Plugin plugin = new Plugin();
         BeanUtils.copyProperties(pluginDO, plugin);
-        if (StringUtils.isNotBlank(pluginDO.getView())) {
-            plugin.setViewList(Arrays.stream(pluginDO.getView().split(","))
+        if (StringUtils.isNotBlank(pluginDO.getDataSet())) {
+            plugin.setDataSetList(Arrays.stream(pluginDO.getDataSet().split(","))
                     .map(Long::parseLong).collect(Collectors.toList()));
         }
         return plugin;
@@ -194,7 +194,7 @@ public class PluginServiceImpl implements PluginService {
         pluginDO.setCreatedBy(user.getName());
         pluginDO.setUpdatedAt(new Date());
         pluginDO.setUpdatedBy(user.getName());
-        pluginDO.setView(StringUtils.join(plugin.getViewList(), ","));
+        pluginDO.setDataSet(StringUtils.join(plugin.getDataSetList(), ","));
         return pluginDO;
     }
 
@@ -202,7 +202,7 @@ public class PluginServiceImpl implements PluginService {
         BeanUtils.copyProperties(plugin, pluginDO);
         pluginDO.setUpdatedAt(new Date());
         pluginDO.setUpdatedBy(user.getName());
-        pluginDO.setView(StringUtils.join(plugin.getViewList(), ","));
+        pluginDO.setDataSet(StringUtils.join(plugin.getDataSetList(), ","));
         return pluginDO;
     }
 

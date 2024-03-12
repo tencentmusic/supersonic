@@ -1,8 +1,5 @@
 package com.tencent.supersonic.headless.server.service;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
-
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.common.pojo.DataFormat;
@@ -22,14 +19,18 @@ import com.tencent.supersonic.headless.api.pojo.response.MetricResp;
 import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
 import com.tencent.supersonic.headless.server.persistence.dataobject.MetricDO;
 import com.tencent.supersonic.headless.server.persistence.repository.MetricRepository;
+import com.tencent.supersonic.headless.server.service.impl.DataSetServiceImpl;
 import com.tencent.supersonic.headless.server.service.impl.MetricServiceImpl;
-import com.tencent.supersonic.headless.server.service.impl.ViewServiceImpl;
 import com.tencent.supersonic.headless.server.utils.MetricConverter;
-import java.util.HashMap;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.context.ApplicationEventPublisher;
+
+import java.util.HashMap;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 public class MetricServiceImplTest {
 
@@ -66,10 +67,11 @@ public class MetricServiceImplTest {
         ChatGptHelper chatGptHelper = Mockito.mock(ChatGptHelper.class);
         CollectService collectService = Mockito.mock(CollectService.class);
         ApplicationEventPublisher eventPublisher = Mockito.mock(ApplicationEventPublisher.class);
-        ViewService viewService = Mockito.mock(ViewServiceImpl.class);
+        DataSetService dataSetService = Mockito.mock(DataSetServiceImpl.class);
         DimensionService dimensionService = Mockito.mock(DimensionService.class);
-        return new MetricServiceImpl(metricRepository, modelService, chatGptHelper, collectService, viewService,
-                eventPublisher, dimensionService);
+        TagMetaService tagMetaService = Mockito.mock(TagMetaService.class);
+        return new MetricServiceImpl(metricRepository, modelService, chatGptHelper, collectService, dataSetService,
+                eventPublisher, dimensionService, tagMetaService);
     }
 
     private MetricReq buildMetricReq() {

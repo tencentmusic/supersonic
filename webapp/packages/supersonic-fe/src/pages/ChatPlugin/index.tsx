@@ -57,9 +57,9 @@ const PluginManage = () => {
       key: 'name',
     },
     {
-      title: '视图',
-      dataIndex: 'viewList',
-      key: 'viewList',
+      title: '数据集',
+      dataIndex: 'dataSetList',
+      key: 'dataSetList',
       width: 200,
       render: (value: number[]) => {
         if (value?.includes(-1)) {

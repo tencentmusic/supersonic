@@ -96,7 +96,7 @@ public class SqlPromptGenerator {
     }
 
     public Pair<String, String> transformQuestionPrompt(LLMReq llmReq) {
-        String modelName = llmReq.getSchema().getViewName();
+        String modelName = llmReq.getSchema().getDataSetName();
         List<String> fieldNameList = llmReq.getSchema().getFieldNameList();
         List<ElementValue> linking = llmReq.getLinking();
         String currentDate = llmReq.getCurrentDate();

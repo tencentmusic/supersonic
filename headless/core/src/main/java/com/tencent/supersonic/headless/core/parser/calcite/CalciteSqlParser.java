@@ -37,14 +37,14 @@ public class CalciteSqlParser implements SqlParser {
         queryStatement.setSql(aggBuilder.getSql(engineType));
         queryStatement.setSourceId(aggBuilder.getSourceId());
         if (Objects.nonNull(queryStatement.getEnableOptimize()) && queryStatement.getEnableOptimize()
-                && Objects.nonNull(queryStatement.getViewAlias()) && !queryStatement.getViewAlias().isEmpty()) {
+                && Objects.nonNull(queryStatement.getDataSetAlias()) && !queryStatement.getDataSetAlias().isEmpty()) {
             // simplify model sql with query sql
             String simplifySql = aggBuilder.simplify(
-                    getSqlByView(aggBuilder.getSql(engineType), queryStatement.getViewSql(),
-                            queryStatement.getViewAlias()), engineType);
+                    getSqlByDataSet(aggBuilder.getSql(engineType), queryStatement.getDataSetSql(),
+                            queryStatement.getDataSetAlias()), engineType);
             if (Objects.nonNull(simplifySql) && !simplifySql.isEmpty()) {
                 log.debug("simplifySql [{}]", simplifySql);
-                queryStatement.setViewSimplifySql(simplifySql);
+                queryStatement.setDataSetSimplifySql(simplifySql);
             }
         }
         return queryStatement;
@@ -62,7 +62,7 @@ public class CalciteSqlParser implements SqlParser {
         return semanticSchema;
     }
 
-    private String getSqlByView(String sql, String viewSql, String viewAlias) {
-        return String.format("with %s as (%s) %s", viewAlias, sql, viewSql);
+    private String getSqlByDataSet(String sql, String dataSetSql, String dataSetAlias) {
+        return String.format("with %s as (%s) %s", dataSetAlias, sql, dataSetSql);
     }
 }

@@ -29,7 +29,7 @@ class LLMSqlParserTest {
         SchemaElement schemaElement = SchemaElement.builder()
                 .bizName("singer_name")
                 .name("歌手名")
-                .view(2L)
+                .dataSet(2L)
                 .schemaValueMaps(schemaValueMaps)
                 .build();
         dimensions.add(schemaElement);
@@ -37,7 +37,7 @@ class LLMSqlParserTest {
         SchemaElement schemaElement2 = SchemaElement.builder()
                 .bizName("publish_time")
                 .name("发布时间")
-                .view(2L)
+                .dataSet(2L)
                 .build();
         dimensions.add(schemaElement2);
 
@@ -47,7 +47,7 @@ class LLMSqlParserTest {
         SchemaElement metric = SchemaElement.builder()
                 .bizName("play_count")
                 .name("播放量")
-                .view(2L)
+                .dataSet(2L)
                 .build();
         metrics.add(metric);
 

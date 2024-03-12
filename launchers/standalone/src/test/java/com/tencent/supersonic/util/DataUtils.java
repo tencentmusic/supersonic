@@ -138,7 +138,7 @@ public class DataUtils {
     private static RuleParserTool getRuleQueryTool() {
         RuleParserTool ruleQueryTool = new RuleParserTool();
         ruleQueryTool.setType(AgentToolType.NL2SQL_RULE);
-        ruleQueryTool.setViewIds(Lists.newArrayList(-1L));
+        ruleQueryTool.setDataSetIds(Lists.newArrayList(-1L));
         ruleQueryTool.setQueryModes(Lists.newArrayList("METRIC_TAG", "METRIC_FILTER", "METRIC_MODEL",
                 "TAG_DETAIL", "TAG_LIST_FILTER", "TAG_ID"));
         return ruleQueryTool;

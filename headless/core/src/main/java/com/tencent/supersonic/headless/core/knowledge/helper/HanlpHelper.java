@@ -224,7 +224,7 @@ public class HanlpHelper {
 
     public static List<S2Term> transform2ApiTerm(Term term, Map<Long, List<Long>> modelIdToViewIds) {
         List<S2Term> s2Terms = Lists.newArrayList();
-        List<String> natures = NatureHelper.changeModel2View(String.valueOf(term.getNature()), modelIdToViewIds);
+        List<String> natures = NatureHelper.changeModel2DataSet(String.valueOf(term.getNature()), modelIdToViewIds);
         for (String nature : natures) {
             S2Term s2Term = new S2Term();
             BeanUtils.copyProperties(term, s2Term);

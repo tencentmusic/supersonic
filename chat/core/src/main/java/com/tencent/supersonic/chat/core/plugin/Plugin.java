@@ -20,7 +20,7 @@ public class Plugin extends RecordInfo {
      */
     private String type;
 
-    private List<Long> viewList = Lists.newArrayList();
+    private List<Long> dataSetList = Lists.newArrayList();
 
     /**
      * description, for parsing
@@ -52,7 +52,7 @@ public class Plugin extends RecordInfo {
     }
 
     public boolean isContainsAllModel() {
-        return CollectionUtils.isNotEmpty(viewList) && viewList.contains(-1L);
+        return CollectionUtils.isNotEmpty(dataSetList) && dataSetList.contains(-1L);
     }
 
     public Long getDefaultMode() {

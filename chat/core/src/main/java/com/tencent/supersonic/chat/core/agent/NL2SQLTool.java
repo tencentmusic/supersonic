@@ -12,6 +12,6 @@ import java.util.List;
 @AllArgsConstructor
 public class NL2SQLTool extends AgentTool {
 
-    protected List<Long> viewIds;
+    protected List<Long> dataSetIds;
 
 }

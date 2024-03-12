@@ -2,7 +2,6 @@ package com.tencent.supersonic.headless.core.parser.calcite.sql.node;
 
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.headless.api.pojo.enums.EngineType;
-import com.tencent.supersonic.headless.core.pojo.MetricQueryParam;
 import com.tencent.supersonic.headless.core.parser.calcite.Configuration;
 import com.tencent.supersonic.headless.core.parser.calcite.s2sql.Constants;
 import com.tencent.supersonic.headless.core.parser.calcite.s2sql.DataSource;
@@ -13,6 +12,18 @@ import com.tencent.supersonic.headless.core.parser.calcite.s2sql.Measure;
 import com.tencent.supersonic.headless.core.parser.calcite.schema.SchemaBuilder;
 import com.tencent.supersonic.headless.core.parser.calcite.schema.SemanticSchema;
 import com.tencent.supersonic.headless.core.parser.calcite.sql.node.extend.LateralViewExplodeNode;
+import com.tencent.supersonic.headless.core.pojo.MetricQueryParam;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.calcite.sql.SqlBasicCall;
+import org.apache.calcite.sql.SqlDataTypeSpec;
+import org.apache.calcite.sql.SqlNode;
+import org.apache.calcite.sql.SqlNodeList;
+import org.apache.calcite.sql.SqlUserDefinedTypeNameSpec;
+import org.apache.calcite.sql.parser.SqlParser;
+import org.apache.calcite.sql.parser.SqlParserPos;
+import org.apache.calcite.sql.validate.SqlValidatorScope;
+import org.springframework.util.CollectionUtils;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -24,16 +35,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.calcite.sql.SqlBasicCall;
-import org.apache.calcite.sql.SqlDataTypeSpec;
-import org.apache.calcite.sql.SqlNode;
-import org.apache.calcite.sql.SqlNodeList;
-import org.apache.calcite.sql.SqlUserDefinedTypeNameSpec;
-import org.apache.calcite.sql.parser.SqlParser;
-import org.apache.calcite.sql.parser.SqlParserPos;
-import org.apache.calcite.sql.validate.SqlValidatorScope;
-import org.springframework.util.CollectionUtils;
 
 @Slf4j
 public class DataSourceNode extends SemanticNode {
@@ -126,9 +127,9 @@ public class DataSourceNode extends SemanticNode {
             return build(datasource, scope);
         }
         EngineType engineType = EngineType.fromString(datasource.getType());
-        SqlNode view = new SqlBasicCall(new LateralViewExplodeNode(), Arrays.asList(build(datasource, scope),
+        SqlNode dataSet = new SqlBasicCall(new LateralViewExplodeNode(), Arrays.asList(build(datasource, scope),
                 new SqlNodeList(getExtendField(exprList, scope, engineType), SqlParserPos.ZERO)), SqlParserPos.ZERO);
-        return buildAs(datasource.getName() + Constants.DIMENSION_ARRAY_SINGLE_SUFFIX, view);
+        return buildAs(datasource.getName() + Constants.DIMENSION_ARRAY_SINGLE_SUFFIX, dataSet);
     }
 
     public static List<SqlNode> getExtendField(Set<String> exprList, SqlValidatorScope scope, EngineType engineType)

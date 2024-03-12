@@ -50,7 +50,7 @@ public class QueryTypeParser implements SemanticParser {
             return QueryType.ID;
         }
         //1. entity queryType
-        Long viewId = parseInfo.getViewId();
+        Long dataSetId = parseInfo.getDataSetId();
         SemanticSchema semanticSchema = queryContext.getSemanticSchema();
         if (semanticQuery instanceof RuleSemanticQuery || semanticQuery instanceof LLMSqlQuery) {
             //If all the fields in the SELECT statement are of tag type.
@@ -59,12 +59,12 @@ public class QueryTypeParser implements SemanticParser {
                     .collect(Collectors.toList());
 
             if (CollectionUtils.isNotEmpty(whereFields)) {
-                Set<String> ids = semanticSchema.getEntities(viewId).stream().map(SchemaElement::getName)
+                Set<String> ids = semanticSchema.getEntities(dataSetId).stream().map(SchemaElement::getName)
                         .collect(Collectors.toSet());
                 if (CollectionUtils.isNotEmpty(ids) && ids.stream().anyMatch(whereFields::contains)) {
                     return QueryType.ID;
                 }
-                Set<String> tags = semanticSchema.getTags(viewId).stream().map(SchemaElement::getName)
+                Set<String> tags = semanticSchema.getTags(dataSetId).stream().map(SchemaElement::getName)
                         .collect(Collectors.toSet());
                 if (CollectionUtils.isNotEmpty(tags) && tags.containsAll(whereFields)) {
                     return QueryType.TAG;
@@ -73,7 +73,7 @@ public class QueryTypeParser implements SemanticParser {
         }
         //2. metric queryType
         List<String> selectFields = SqlSelectHelper.getSelectFields(sqlInfo.getS2SQL());
-        List<SchemaElement> metrics = semanticSchema.getMetrics(viewId);
+        List<SchemaElement> metrics = semanticSchema.getMetrics(dataSetId);
         if (CollectionUtils.isNotEmpty(metrics)) {
             Set<String> metricNameSet = metrics.stream().map(SchemaElement::getName).collect(Collectors.toSet());
             boolean containMetric = selectFields.stream().anyMatch(metricNameSet::contains);
