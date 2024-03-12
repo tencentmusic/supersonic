@@ -180,7 +180,10 @@
             <groupId>dev.langchain4j</groupId>
             <artifactId>langchain4j-chroma</artifactId>
         </dependency>
-
+        <dependency>
+            <groupId>dev.langchain4j</groupId>
+            <artifactId>langchain4j-azure-open-ai</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-api</artifactId>
@@ -195,7 +198,6 @@
             <artifactId>hanlp</artifactId>
             <version>${hanlp.version}</version>
         </dependency>
-
     </dependencies>
 
 </project>

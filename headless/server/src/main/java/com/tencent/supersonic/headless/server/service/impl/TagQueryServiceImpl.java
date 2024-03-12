@@ -1,6 +1,5 @@
 package com.tencent.supersonic.headless.server.service.impl;
 
-
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.common.pojo.Aggregator;
 import com.tencent.supersonic.common.pojo.DateConf;
@@ -10,6 +9,7 @@ import com.tencent.supersonic.headless.api.pojo.Dim;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
 import com.tencent.supersonic.headless.api.pojo.ValueDistribution;
 import com.tencent.supersonic.headless.api.pojo.request.ItemValueReq;
+import com.tencent.supersonic.headless.api.pojo.request.QuerySqlReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryTagReq;
 import com.tencent.supersonic.headless.api.pojo.response.ItemValueResp;
 import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
@@ -19,6 +19,7 @@ import com.tencent.supersonic.headless.server.service.ModelService;
 import com.tencent.supersonic.headless.server.service.QueryService;
 import com.tencent.supersonic.headless.server.service.TagMetaService;
 import com.tencent.supersonic.headless.server.service.TagQueryService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -27,19 +28,23 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 import static com.tencent.supersonic.common.pojo.Constants.DESC_UPPER;
 
 @Service
+@Slf4j
 public class TagQueryServiceImpl implements TagQueryService {
 
-    @Value("${item.value.date.before:1}")
+    @Value("${item.value.date.before:3}")
     private Integer dayBefore;
 
     private final String tagValueAlias = "internalTagCount";
+    private final String maxDateAlias = "internalMaxDate";
     private final TagMetaService tagMetaService;
     private final QueryService queryService;
     private final ModelService modelService;
@@ -59,7 +64,7 @@ public class TagQueryServiceImpl implements TagQueryService {
         TagResp tag = tagMetaService.getTag(itemValueReq.getItemId(), user);
         itemValueResp.setName(tag.getName());
         itemValueResp.setBizName(tag.getBizName());
-        correctDateConf(itemValueReq, tag);
+        correctDateConf(itemValueReq, tag, user);
         // tag total count
         Long totalCount = queryTagTotalCount(tag, itemValueReq, user);
         // tag value
@@ -69,7 +74,7 @@ public class TagQueryServiceImpl implements TagQueryService {
         return itemValueResp;
     }
 
-    private void correctDateConf(ItemValueReq itemValueReq, TagResp tag) {
+    private void correctDateConf(ItemValueReq itemValueReq, TagResp tag, User user) throws Exception {
         if (Objects.nonNull(itemValueReq.getDateConf())) {
             return;
         }
@@ -78,15 +83,67 @@ public class TagQueryServiceImpl implements TagQueryService {
         if (CollectionUtils.isEmpty(timeDimension)) {
             return;
         }
-
-        Dim dim = timeDimension.get(0);
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(dim.getDateFormat());
-        String endDate = LocalDate.now().plusDays(-dayBefore).format(formatter);
+        // query date info from db
+        String endDate = queryTagDateFromDbBySql(timeDimension.get(0), tag, user);
         DateConf dateConf = new DateConf();
         dateConf.setDateMode(DateConf.DateMode.BETWEEN);
         dateConf.setStartDate(endDate);
         dateConf.setEndDate(endDate);
         itemValueReq.setDateConf(dateConf);
+    }
+
+    private String queryTagDate(Dim dim) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(dim.getDateFormat());
+        String endDate = LocalDate.now().plusDays(-dayBefore).format(formatter);
+        return endDate;
+    }
+
+    private String queryTagDateFromDbByStruct(Dim dim, TagResp tag, User user) throws Exception {
+        QueryTagReq queryTagReq = new QueryTagReq();
+        queryTagReq.addModelId(tag.getModelId());
+        queryTagReq.setLimit(1L);
+        List<Aggregator> aggregators = new ArrayList<>();
+        aggregators.add(new Aggregator(dim.getBizName(), AggOperatorEnum.MAX, maxDateAlias));
+        queryTagReq.setAggregators(aggregators);
+        queryTagReq.setDateInfo(null);
+        log.info("queryTagDateFromDb, queryTagReq:{}", queryTagReq.toCustomizedString());
+        SemanticQueryResp semanticQueryResp = queryService.queryByReq(queryTagReq, user);
+        if (!CollectionUtils.isEmpty(semanticQueryResp.getResultList())) {
+            Object date = semanticQueryResp.getResultList().get(0).get(maxDateAlias);
+            if (Objects.nonNull(date)) {
+                return date.toString();
+            }
+        }
+        throw new RuntimeException("queryTagTotalCount error");
+
+    }
+
+    private String queryTagDateFromDbBySql(Dim dim, TagResp tag, User user) throws Exception {
+
+        String sqlPattern = "select max(%s)  as %s from tbl where %s is not null";
+        String sql = String.format(sqlPattern, dim.getBizName(), maxDateAlias, tag.getBizName());
+        Set<Long> modelIds = new HashSet<>();
+        modelIds.add(tag.getModelId());
+        QuerySqlReq querySqlReq = new QuerySqlReq();
+        querySqlReq.setSql(sql);
+        querySqlReq.setNeedAuth(false);
+        querySqlReq.setModelIds(modelIds);
+        log.info("queryTagDateFromDbBySql, QuerySqlReq:{}", querySqlReq.toCustomizedString());
+        try {
+            SemanticQueryResp semanticQueryResp = queryService.queryByReq(querySqlReq, user);
+            if (!CollectionUtils.isEmpty(semanticQueryResp.getResultList())) {
+                Object date = semanticQueryResp.getResultList().get(0).get(maxDateAlias);
+                if (Objects.nonNull(date)) {
+                    return date.toString();
+                }
+            }
+        } catch (Exception e) {
+            log.warn("queryTagDateFromDbBySql date info e, e:{}", e);
+        }
+        String dateDefault = queryTagDate(dim);
+        log.info("queryTagDate by default, dateDefault:{}.", dateDefault);
+        return dateDefault;
+
     }
 
     private Long queryTagTotalCount(TagResp tag, ItemValueReq itemValueReq, User user) throws Exception {
@@ -104,6 +161,8 @@ public class TagQueryServiceImpl implements TagQueryService {
         if (!CollectionUtils.isEmpty(semanticQueryResp.getResultList())) {
             Object total = semanticQueryResp.getResultList().get(0).get(tagValueAlias);
             if (Objects.nonNull(total)) {
+                long tagCount = Long.parseLong(total.toString());
+                log.info("queryTagTotalCount, tagCount:{}, tagId:{}", tagCount, tag.getId());
                 return Long.parseLong(total.toString());
             }
         }

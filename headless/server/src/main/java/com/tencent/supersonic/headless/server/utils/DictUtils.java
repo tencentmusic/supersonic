@@ -15,6 +15,7 @@ import com.tencent.supersonic.common.pojo.Filter;
 import com.tencent.supersonic.common.pojo.Order;
 import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
 import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
+import com.tencent.supersonic.common.pojo.enums.QueryType;
 import com.tencent.supersonic.common.pojo.enums.StatusEnum;
 import com.tencent.supersonic.common.pojo.enums.TaskStatusEnum;
 import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
@@ -25,12 +26,14 @@ import com.tencent.supersonic.headless.api.pojo.ItemValueConfig;
 import com.tencent.supersonic.headless.api.pojo.request.DictItemReq;
 import com.tencent.supersonic.headless.api.pojo.request.QuerySqlReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
+import com.tencent.supersonic.headless.api.pojo.request.SemanticQueryReq;
 import com.tencent.supersonic.headless.api.pojo.response.DictItemResp;
 import com.tencent.supersonic.headless.api.pojo.response.DictTaskResp;
 import com.tencent.supersonic.headless.api.pojo.response.DimensionResp;
 import com.tencent.supersonic.headless.api.pojo.response.MetricResp;
 import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
+import com.tencent.supersonic.headless.api.pojo.response.TagResp;
 import com.tencent.supersonic.headless.server.persistence.dataobject.DictConfDO;
 import com.tencent.supersonic.headless.server.persistence.dataobject.DictTaskDO;
 import com.tencent.supersonic.headless.server.service.DimensionService;
@@ -51,11 +54,15 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.StringJoiner;
 
+import com.tencent.supersonic.headless.server.service.TagMetaService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
+@Slf4j
 @Component
 public class DictUtils {
 
@@ -79,15 +86,18 @@ public class DictUtils {
     private final MetricService metricService;
     private final QueryService queryService;
     private final ModelService modelService;
+    private final TagMetaService tagMetaService;
 
     public DictUtils(DimensionService dimensionService,
                      MetricService metricService,
                      QueryService queryService,
-                     ModelService modelService) {
+                     ModelService modelService,
+                     @Lazy TagMetaService tagMetaService) {
         this.dimensionService = dimensionService;
         this.metricService = metricService;
         this.queryService = queryService;
         this.modelService = modelService;
+        this.tagMetaService = tagMetaService;
     }
 
     public String fetchDictFileName(DictItemResp dictItemResp) {
@@ -140,17 +150,22 @@ public class DictUtils {
             dictItemResp.setModelId(dimension.getModelId());
             dictItemResp.setBizName(dimension.getBizName());
         }
+        if (TypeEnums.TAG.equals(TypeEnums.valueOf(dictConfDO.getType()))) {
+            TagResp tagResp = tagMetaService.getTag(dictConfDO.getItemId(), User.getFakeUser());
+            dictItemResp.setModelId(tagResp.getModelId());
+            dictItemResp.setBizName(tagResp.getBizName());
+        }
 
         return dictItemResp;
     }
 
     public List<String> fetchItemValue(DictItemResp dictItemResp) {
         List<String> lines = new ArrayList<>();
-        QuerySqlReq querySqlReq = constructQueryReq(dictItemResp);
-        querySqlReq.setNeedAuth(false);
+        SemanticQueryReq semanticQueryReq = constructQueryReq(dictItemResp);
+        semanticQueryReq.setNeedAuth(false);
         String bizName = dictItemResp.getBizName();
         try {
-            SemanticQueryResp semanticQueryResp = queryService.queryByReq(querySqlReq, null);
+            SemanticQueryResp semanticQueryResp = queryService.queryByReq(semanticQueryReq, null);
             if (Objects.isNull(semanticQueryResp) || CollectionUtils.isEmpty(semanticQueryResp.getResultList())) {
                 return lines;
             }
@@ -173,7 +188,7 @@ public class DictUtils {
                     mergeMultivaluedValue(valueAndFrequencyPair, dimValue, metric);
                 }
             }
-            String nature = dictItemResp.getNature();
+            String nature = dictItemResp.generateNature();
             constructDictLines(valueAndFrequencyPair, lines, nature);
             addWhiteValueLines(dictItemResp, lines, nature);
         } catch (Exception e) {
@@ -227,7 +242,51 @@ public class DictUtils {
         }
     }
 
-    private QuerySqlReq constructQueryReq(DictItemResp dictItemResp) {
+    private SemanticQueryReq constructQueryReq(DictItemResp dictItemResp) {
+        if (TypeEnums.DIMENSION.equals(dictItemResp.getType())) {
+            QuerySqlReq querySqlReq = constructDimQueryReq(dictItemResp);
+            querySqlReq.setQueryType(QueryType.METRIC);
+            return querySqlReq;
+        }
+        if (TypeEnums.TAG.equals(dictItemResp.getType())) {
+            QuerySqlReq querySqlReq = constructTagQueryReq(dictItemResp);
+            querySqlReq.setQueryType(QueryType.TAG);
+            return querySqlReq;
+        }
+        log.warn("constructQueryReq failed");
+        return null;
+    }
+
+    private QuerySqlReq constructTagQueryReq(DictItemResp dictItemResp) {
+
+        String sqlPattern = "select %s, %s from tbl %s group by %s order by %s desc limit %d";
+        String bizName = dictItemResp.getBizName();
+        String whereStr = generateWhereStr(dictItemResp);
+        String where = Strings.isNullOrEmpty(whereStr) ? "" : "WHERE" + whereStr;
+        ItemValueConfig config = dictItemResp.getConfig();
+        Long limit = (Objects.isNull(config) || Objects.isNull(config.getLimit())) ? itemValueMaxCount :
+                dictItemResp.getConfig().getLimit();
+
+        // todo 自定义指标
+        String metric = "count(1)";
+        if (Objects.nonNull(dictItemResp.getConfig()) && Objects.nonNull(dictItemResp.getConfig().getMetricId())) {
+            Long metricId = dictItemResp.getConfig().getMetricId();
+            MetricResp metricResp = metricService.getMetric(metricId);
+            String metricBizName = metricResp.getBizName();
+            metric = String.format("sum(%s)", metricBizName);
+        }
+
+        String sql = String.format(sqlPattern, bizName, metric, where, bizName, metric, limit);
+        Set<Long> modelIds = new HashSet<>();
+        modelIds.add(dictItemResp.getModelId());
+        QuerySqlReq querySqlReq = new QuerySqlReq();
+        querySqlReq.setSql(sql);
+        querySqlReq.setNeedAuth(false);
+        querySqlReq.setModelIds(modelIds);
+        return querySqlReq;
+    }
+
+    private QuerySqlReq constructDimQueryReq(DictItemResp dictItemResp) {
         if (Objects.nonNull(dictItemResp) && Objects.nonNull(dictItemResp.getConfig())
                 && Objects.nonNull(dictItemResp.getConfig().getMetricId())) {
             // 查询默认指标
@@ -239,7 +298,6 @@ public class DictUtils {
     }
 
     private QuerySqlReq constructQuerySqlReq(DictItemResp dictItemResp) {
-        // todo tag
 
         String sqlPattern = "select %s,count(1) from tbl %s group by %s order by count(1) desc limit %d";
         String bizName = dictItemResp.getBizName();

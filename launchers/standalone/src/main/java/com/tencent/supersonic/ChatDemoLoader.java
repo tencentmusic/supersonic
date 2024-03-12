@@ -20,9 +20,10 @@ import com.tencent.supersonic.chat.server.service.ChatService;
 import com.tencent.supersonic.chat.server.service.PluginService;
 import com.tencent.supersonic.chat.server.service.QueryService;
 import com.tencent.supersonic.common.pojo.SysParameter;
-import com.tencent.supersonic.common.pojo.enums.QueryType;
 import com.tencent.supersonic.common.service.SysParameterService;
 import com.tencent.supersonic.common.util.JsonUtil;
+import java.util.Arrays;
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -31,9 +32,6 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
-
-import java.util.Arrays;
-import java.util.List;
 
 @Component
 @Slf4j
@@ -170,7 +168,6 @@ public class ChatDemoLoader implements CommandLineRunner {
         ruleQueryTool.setType(AgentToolType.NL2SQL_RULE);
         ruleQueryTool.setId("0");
         ruleQueryTool.setDataSetIds(Lists.newArrayList(1L));
-        ruleQueryTool.setQueryTypes(Lists.newArrayList(QueryType.METRIC.name()));
         agentConfig.getTools().add(ruleQueryTool);
         if (demoEnabledNl2SqlLlm) {
             LLMParserTool llmParserTool = new LLMParserTool();
@@ -196,7 +193,6 @@ public class ChatDemoLoader implements CommandLineRunner {
         ruleQueryTool.setId("0");
         ruleQueryTool.setType(AgentToolType.NL2SQL_RULE);
         ruleQueryTool.setDataSetIds(Lists.newArrayList(2L));
-        ruleQueryTool.setQueryTypes(Lists.newArrayList(QueryType.TAG.name()));
         agentConfig.getTools().add(ruleQueryTool);
 
         if (demoEnabledNl2SqlLlm) {

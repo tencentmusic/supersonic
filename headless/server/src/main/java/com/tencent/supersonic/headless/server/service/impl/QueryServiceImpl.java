@@ -7,6 +7,7 @@ import com.tencent.supersonic.common.pojo.Aggregator;
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.common.pojo.enums.ApiItemType;
+import com.tencent.supersonic.common.pojo.enums.QueryType;
 import com.tencent.supersonic.common.pojo.enums.TaskStatusEnum;
 import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import com.tencent.supersonic.common.pojo.exception.InvalidArgumentException;
@@ -51,18 +52,17 @@ import com.tencent.supersonic.headless.server.utils.QueryReqConverter;
 import com.tencent.supersonic.headless.server.utils.QueryUtils;
 import com.tencent.supersonic.headless.server.utils.StatUtils;
 import com.tencent.supersonic.headless.server.utils.TagConverter;
-import lombok.SneakyThrows;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections.CollectionUtils;
-import org.springframework.stereotype.Service;
-
-import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+import javax.servlet.http.HttpServletRequest;
+import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
+import org.springframework.stereotype.Service;
 
 
 @Service
@@ -147,8 +147,11 @@ public class QueryServiceImpl implements QueryService {
         queryStatement.setModelIds(querySqlReq.getModelIds());
         queryStatement.setEnableOptimize(queryUtils.enableOptimize());
         queryStatement.setSemanticSchemaResp(semanticSchemaResp);
-        SemanticModel semanticModel = semanticSchemaManager.getSemanticModel(semanticSchemaResp);
-        queryStatement.setSemanticModel(semanticModel);
+        if (QueryType.TAG.equals(semanticSchemaResp.getQueryType())) {
+            queryStatement.setSemanticModel(semanticSchemaManager.getTagSemanticModel(semanticSchemaResp));
+        } else {
+            queryStatement.setSemanticModel(semanticSchemaManager.getSemanticModel(semanticSchemaResp));
+        }
         return queryStatement;
     }
 
@@ -179,8 +182,12 @@ public class QueryServiceImpl implements QueryService {
         queryStatement.setEnableOptimize(queryUtils.enableOptimize());
         queryStatement.setDataSetId(queryStructReq.getDataSetId());
         queryStatement.setSemanticSchemaResp(semanticSchemaResp);
-        SemanticModel semanticModel = semanticSchemaManager.getSemanticModel(semanticSchemaResp);
-        queryStatement.setSemanticModel(semanticModel);
+        if (QueryType.TAG.equals(semanticSchemaResp.getQueryType())) {
+            queryStatement = tagConverter.convert(queryStructReq, semanticSchemaResp);
+            queryStatement.setSemanticModel(semanticSchemaManager.getTagSemanticModel(semanticSchemaResp));
+        } else {
+            queryStatement.setSemanticModel(semanticSchemaManager.getSemanticModel(semanticSchemaResp));
+        }
         return queryStatement;
     }
 

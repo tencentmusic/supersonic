@@ -5,6 +5,7 @@ import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
 import com.tencent.supersonic.headless.api.pojo.request.ItemValueReq;
 import com.tencent.supersonic.headless.api.pojo.request.MetaBatchReq;
+import com.tencent.supersonic.headless.api.pojo.request.TagBatchCreateReq;
 import com.tencent.supersonic.headless.api.pojo.request.TagReq;
 import com.tencent.supersonic.headless.api.pojo.response.ItemValueResp;
 import com.tencent.supersonic.headless.api.pojo.response.TagResp;
@@ -49,6 +50,22 @@ public class TagController {
             HttpServletResponse response) throws Exception {
         User user = UserHolder.findUser(request, response);
         return tagMetaService.create(tagReq, user);
+    }
+
+    /**
+     * 从现有维度/指标批量新建标签
+     * @param tagBatchReq
+     * @param request
+     * @param response
+     * @return
+     * @throws Exception
+     */
+    @PostMapping("/create/batch")
+    public Integer createBatch(@RequestBody TagBatchCreateReq tagBatchReq,
+                          HttpServletRequest request,
+                          HttpServletResponse response) throws Exception {
+        User user = UserHolder.findUser(request, response);
+        return tagMetaService.createBatch(tagBatchReq, user);
     }
 
     /**

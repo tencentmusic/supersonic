@@ -308,6 +308,7 @@ public class SchemaServiceImpl implements SchemaService {
             semanticSchemaResp.setModelRelas(modelRelas);
             semanticSchemaResp.setModelIds(modelIds);
             semanticSchemaResp.setSchemaType(SchemaType.VIEW);
+            semanticSchemaResp.setQueryType(dataSetSchemaResp.getQueryType());
         } else if (!CollectionUtils.isEmpty(schemaFilterReq.getModelIds())) {
             List<ModelSchemaResp> modelSchemaResps = fetchModelSchemaResps(schemaFilterReq.getModelIds());
             semanticSchemaResp.setMetrics(modelSchemaResps.stream().map(ModelSchemaResp::getMetrics)
@@ -318,9 +319,12 @@ public class SchemaServiceImpl implements SchemaService {
                     .flatMap(Collection::stream).collect(Collectors.toList()));
             semanticSchemaResp.setModelResps(modelSchemaResps.stream().map(this::convert).collect(Collectors.toList()));
             semanticSchemaResp.setSchemaType(SchemaType.MODEL);
+
+        }
+        if (!CollectionUtils.isEmpty(semanticSchemaResp.getModelIds())) {
             // add tag info
             TagFilter tagFilter = new TagFilter();
-            tagFilter.setModelIds(schemaFilterReq.getModelIds());
+            tagFilter.setModelIds(semanticSchemaResp.getModelIds());
             List<TagResp> tagResps = tagService.getTags(tagFilter);
             semanticSchemaResp.setTags(tagResps);
         }

@@ -1,6 +1,5 @@
 package com.tencent.supersonic.chat.core.parser.sql.llm;
 
-import com.tencent.supersonic.chat.api.pojo.SemanticSchema;
 import com.tencent.supersonic.chat.core.agent.NL2SQLTool;
 import com.tencent.supersonic.chat.core.parser.SemanticParser;
 import com.tencent.supersonic.chat.core.pojo.ChatContext;
@@ -10,12 +9,11 @@ import com.tencent.supersonic.chat.core.query.llm.s2sql.LLMReq.ElementValue;
 import com.tencent.supersonic.chat.core.query.llm.s2sql.LLMResp;
 import com.tencent.supersonic.chat.core.query.llm.s2sql.LLMSqlResp;
 import com.tencent.supersonic.common.util.ContextUtils;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.MapUtils;
-
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.MapUtils;
 
 @Slf4j
 public class LLMSqlParser implements SemanticParser {
@@ -41,8 +39,7 @@ public class LLMSqlParser implements SemanticParser {
             }
             //4.construct a request, call the API for the large model, and retrieve the results.
             List<ElementValue> linkingValues = requestService.getValueList(queryCtx, dataSetId);
-            SemanticSchema semanticSchema = queryCtx.getSemanticSchema();
-            LLMReq llmReq = requestService.getLlmReq(queryCtx, dataSetId, semanticSchema, linkingValues);
+            LLMReq llmReq = requestService.getLlmReq(queryCtx, dataSetId, linkingValues);
             LLMResp llmResp = requestService.requestLLM(llmReq, dataSetId);
 
             if (Objects.isNull(llmResp)) {

@@ -17,6 +17,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -79,10 +80,14 @@ public class DimensionConverter {
         return dimensionResp;
     }
 
+    public static DimensionResp convert2DimensionResp(DimensionDO dimensionDO) {
+        return convert2DimensionResp(dimensionDO, new HashMap<>());
+    }
+
     public static List<DimensionResp> filterByDataSet(List<DimensionResp> dimensionResps, DataSetResp dataSetResp) {
         return dimensionResps.stream().filter(dimensionResp ->
-                        dataSetResp.getAllDimensions().contains(dimensionResp.getId())
-                                || dataSetResp.getAllIncludeAllModels().contains(dimensionResp.getModelId()))
+                dataSetResp.getAllDimensions().contains(dimensionResp.getId())
+                        || dataSetResp.getAllIncludeAllModels().contains(dimensionResp.getModelId()))
                 .collect(Collectors.toList());
     }
 

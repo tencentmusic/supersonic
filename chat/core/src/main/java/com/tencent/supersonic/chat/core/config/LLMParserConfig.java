@@ -22,6 +22,9 @@ public class LLMParserConfig {
     @Value("${metric.topn:10}")
     private Integer metricTopN;
 
+    @Value("${tag.topn:20}")
+    private Integer tagTopN;
+
     @Value("${all.model:false}")
     private Boolean allModel;
 }

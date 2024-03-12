@@ -97,12 +97,13 @@ public class DimensionServiceImpl implements DimensionService {
     }
 
     @Override
-    public void createDimension(DimensionReq dimensionReq, User user) {
+    public DimensionResp createDimension(DimensionReq dimensionReq, User user) {
         checkExist(Lists.newArrayList(dimensionReq));
         dimensionReq.createdBy(user.getName());
         DimensionDO dimensionDO = DimensionConverter.convert2DimensionDO(dimensionReq);
         dimensionRepository.createDimension(dimensionDO);
         sendEventBatch(Lists.newArrayList(dimensionDO), EventType.ADD);
+        return DimensionConverter.convert2DimensionResp(dimensionDO);
     }
 
     @Override

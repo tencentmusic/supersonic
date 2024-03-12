@@ -1,9 +1,9 @@
 package com.tencent.supersonic.chat.core.query.rule.tag;
 
-import static com.tencent.supersonic.headless.api.pojo.SchemaElementType.DIMENSION;
-import static com.tencent.supersonic.headless.api.pojo.SchemaElementType.ID;
-import static com.tencent.supersonic.chat.core.query.rule.QueryMatchOption.RequireNumberType.AT_LEAST;
 import static com.tencent.supersonic.chat.core.query.rule.QueryMatchOption.OptionType.REQUIRED;
+import static com.tencent.supersonic.chat.core.query.rule.QueryMatchOption.RequireNumberType.AT_LEAST;
+import static com.tencent.supersonic.headless.api.pojo.SchemaElementType.ID;
+import static com.tencent.supersonic.headless.api.pojo.SchemaElementType.TAG;
 
 import org.springframework.stereotype.Component;
 
@@ -14,7 +14,7 @@ public class TagDetailQuery extends TagSemanticQuery {
 
     public TagDetailQuery() {
         super();
-        queryMatcher.addOption(DIMENSION, REQUIRED, AT_LEAST, 1)
+        queryMatcher.addOption(TAG, REQUIRED, AT_LEAST, 1)
                 .addOption(ID, REQUIRED, AT_LEAST, 1);
     }
 

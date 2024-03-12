@@ -8,10 +8,12 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.common.pojo.enums.AuthType;
+import com.tencent.supersonic.common.pojo.enums.QueryType;
 import com.tencent.supersonic.common.pojo.enums.StatusEnum;
 import com.tencent.supersonic.common.pojo.enums.TypeEnums;
 import com.tencent.supersonic.common.pojo.exception.InvalidArgumentException;
 import com.tencent.supersonic.common.util.BeanMapper;
+import com.tencent.supersonic.headless.api.pojo.DataSetModelConfig;
 import com.tencent.supersonic.headless.api.pojo.QueryConfig;
 import com.tencent.supersonic.headless.api.pojo.DataSetDetail;
 import com.tencent.supersonic.headless.api.pojo.request.QuerySqlReq;
@@ -30,6 +32,7 @@ import com.tencent.supersonic.headless.server.service.DimensionService;
 import com.tencent.supersonic.headless.server.service.DomainService;
 import com.tencent.supersonic.headless.server.service.MetricService;
 import com.tencent.supersonic.headless.server.service.DataSetService;
+import java.util.Objects;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.BeanUtils;
@@ -168,6 +171,7 @@ public class DataSetServiceImpl
         dataSetResp.setAdminOrgs(StringUtils.isBlank(dataSetDO.getAdminOrg())
                 ? Lists.newArrayList() : Arrays.asList(dataSetDO.getAdminOrg().split(",")));
         dataSetResp.setTypeEnum(TypeEnums.DATASET);
+        dataSetResp.setQueryType(QueryType.valueOf(dataSetDO.getQueryType()));
         return dataSetResp;
     }
 
@@ -176,6 +180,8 @@ public class DataSetServiceImpl
         BeanMapper.mapper(dataSetReq, dataSetDO);
         dataSetDO.setDataSetDetail(JSONObject.toJSONString(dataSetReq.getDataSetDetail()));
         dataSetDO.setQueryConfig(JSONObject.toJSONString(dataSetReq.getQueryConfig()));
+        QueryType queryType = getQueryType(dataSetReq);
+        dataSetDO.setQueryType(queryType.name());
         return dataSetDO;
     }
 
@@ -186,6 +192,24 @@ public class DataSetServiceImpl
         }
         BeanUtils.copyProperties(queryDataSetReq, queryReq);
         return queryReq;
+    }
+
+    private QueryType getQueryType(DataSetReq dataSetReq) {
+        QueryType queryType = dataSetReq.getQueryType();
+        if (Objects.nonNull(queryType)) {
+            return queryType;
+        }
+        List<DataSetModelConfig> dataSetModelConfigs = dataSetReq.getDataSetDetail().getDataSetModelConfigs();
+        if (CollectionUtils.isEmpty(dataSetModelConfigs)) {
+            return QueryType.METRIC;
+        }
+
+        Set<DataSetModelConfig> collect = dataSetModelConfigs.stream()
+                .filter(config -> !CollectionUtils.isEmpty(config.getTagIds())).collect(Collectors.toSet());
+        if (CollectionUtils.isEmpty(collect)) {
+            return QueryType.METRIC;
+        }
+        return QueryType.TAG;
     }
 
     public static boolean checkAdminPermission(User user, DataSetResp dataSetResp) {
