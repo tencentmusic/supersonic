@@ -8,14 +8,11 @@ import com.tencent.supersonic.chat.core.agent.RuleParserTool;
 import com.tencent.supersonic.chat.core.parser.SemanticParser;
 import com.tencent.supersonic.chat.core.pojo.ChatContext;
 import com.tencent.supersonic.chat.core.pojo.QueryContext;
-import com.tencent.supersonic.chat.core.query.QueryManager;
 import com.tencent.supersonic.chat.core.query.SemanticQuery;
-import com.tencent.supersonic.common.pojo.enums.QueryType;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections.CollectionUtils;
-
 import java.util.List;
 import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 
 @Slf4j
 public class AgentCheckParser implements SemanticParser {
@@ -45,18 +42,6 @@ public class AgentCheckParser implements SemanticParser {
                 if (CollectionUtils.isNotEmpty(tool.getQueryModes())
                         && !tool.getQueryModes().contains(query.getQueryMode())) {
                     return true;
-                }
-                if (CollectionUtils.isNotEmpty(tool.getQueryTypes())) {
-                    if (QueryManager.isTagQuery(query.getQueryMode())) {
-                        if (!tool.getQueryTypes().contains(QueryType.TAG.name())) {
-                            return true;
-                        }
-                    }
-                    if (QueryManager.isMetricQuery(query.getQueryMode())) {
-                        if (!tool.getQueryTypes().contains(QueryType.METRIC.name())) {
-                            return true;
-                        }
-                    }
                 }
                 if (CollectionUtils.isEmpty(tool.getDataSetIds())) {
                     return true;

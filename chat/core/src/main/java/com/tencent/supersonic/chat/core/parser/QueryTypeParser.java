@@ -1,9 +1,7 @@
 package com.tencent.supersonic.chat.core.parser;
 
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
-import com.tencent.supersonic.chat.api.pojo.DataSetSchema;
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
-import com.tencent.supersonic.chat.api.pojo.SemanticSchema;
 import com.tencent.supersonic.chat.core.pojo.ChatContext;
 import com.tencent.supersonic.chat.core.pojo.QueryContext;
 import com.tencent.supersonic.chat.core.query.SemanticQuery;
@@ -27,10 +25,7 @@ public class QueryTypeParser implements SemanticParser {
             semanticQuery.initS2Sql(queryContext.getSemanticSchema(), user);
             // 2.set queryType
             SemanticParseInfo parseInfo = semanticQuery.getParseInfo();
-            SemanticSchema semanticSchema = queryContext.getSemanticSchema();
-            Long dataSetId = parseInfo.getDataSetId();
-            DataSetSchema dataSetSchema = semanticSchema.getDataSetSchemaMap().get(dataSetId);
-            parseInfo.setQueryType(dataSetSchema.getQueryType());
+            parseInfo.setQueryType(queryContext.getQueryType(parseInfo.getDataSetId()));
         }
     }
 
