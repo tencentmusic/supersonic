@@ -25,7 +25,7 @@ const MetricFieldFormTable: React.FC<Props> = ({
   const [defineTypeParams, setDefineTypeParams] = useState(
     typeParams || {
       expr: '',
-      metrics: [],
+      fields: [],
     },
   );
 
@@ -44,16 +44,19 @@ const MetricFieldFormTable: React.FC<Props> = ({
   const [exprString, setExprString] = useState(typeParams?.expr || '');
 
   const [selectedKeys, setSelectedKeys] = useState<string[]>(() => {
-    return defineTypeParams.fields.map((item: any) => {
+    return defineTypeParams.fields.map((item: ISemantic.IFieldTypeParamsItem) => {
       return item.fieldName;
     });
   });
 
   const [selectedKeysMap, setSelectedKeysMap] = useState<Record<string, boolean>>(() => {
-    return defineTypeParams.fields.reduce((keyMap, item: any) => {
-      keyMap[item.fieldName] = true;
-      return keyMap;
-    }, {});
+    return defineTypeParams.fields.reduce(
+      (keyMap: Record<string, boolean>, item: ISemantic.IFieldTypeParamsItem) => {
+        keyMap[item.fieldName] = true;
+        return keyMap;
+      },
+      {},
+    );
   });
 
   const columns = [
@@ -141,7 +144,7 @@ const MetricFieldFormTable: React.FC<Props> = ({
           rowSelection={rowSelection}
         />
         <ProCard
-          title={<FormLabelRequire title="字段表达式" />}
+          title={<FormLabelRequire title="表达式" />}
           // tooltip="度量表达式由上面选择的度量组成，如选择了度量A和B，则可将表达式写成A+B"
         >
           <div>

@@ -59,10 +59,6 @@ export function getDimensionList(data: any): Promise<any> {
   return request.post(`${process.env.API_BASE_URL}dimension/queryDimension`, queryParams);
 }
 
-export function getCommonDimensionList(domainId: number): Promise<any> {
-  return request.get(`${process.env.API_BASE_URL}commonDimension/getList?domainId=${domainId}`);
-}
-
 export function saveCommonDimension(data: any): Promise<any> {
   if (data.id) {
     return request(`${process.env.API_BASE_URL}commonDimension`, {
@@ -120,9 +116,6 @@ export function queryMetric(data: any): Promise<any> {
       ...(modelId ? { modelIds: [modelId] } : {}),
     },
   };
-  if (getRunningEnv() === 'chat') {
-    return request.post(`${process.env.CHAT_API_BASE_URL}conf/metric/page`, queryParams);
-  }
   return request.post(`${process.env.API_BASE_URL}metric/queryMetric`, queryParams);
 }
 
@@ -563,16 +556,24 @@ export async function queryStruct({
   }
 }
 
-export function metricStarState(data: { id: number; state: boolean }): Promise<any> {
-  const { id, state } = data;
+export function indicatorStarState(data: {
+  id: number;
+  type: string;
+  state: boolean;
+}): Promise<any> {
+  const { id, state, type } = data;
   if (state) {
     return request(`${process.env.API_BASE_URL}collect/createCollectionIndicators`, {
       method: 'POST',
-      data: { id },
+      data: { collectId: id, type },
     });
   } else {
-    return request(`${process.env.API_BASE_URL}collect/deleteCollectionIndicators/${id}`, {
-      method: 'DELETE',
+    // return request(`${process.env.API_BASE_URL}collect/deleteCollectionIndicators/${id}`, {
+    //   method: 'DELETE',
+    // });
+    return request(`${process.env.API_BASE_URL}collect/deleteCollectionIndicators`, {
+      method: 'POST',
+      data: { collectId: id, type },
     });
   }
 }
@@ -608,5 +609,58 @@ export function updateView(data: any): Promise<any> {
 export function deleteView(viewId: number): Promise<any> {
   return request(`${process.env.API_BASE_URL}dataSet/${viewId}`, {
     method: 'DELETE',
+  });
+}
+
+export function getTagList(data: any): Promise<any> {
+  return request(`${process.env.API_BASE_URL}tag/queryTag`, {
+    method: 'POST',
+    data,
+  });
+}
+
+export function deleteTag(tagId: number): Promise<any> {
+  return request(`${process.env.API_BASE_URL}tag/delete/${tagId}`, {
+    method: 'DELETE',
+  });
+}
+
+export function batchUpdateTagStatus(data: any): Promise<any> {
+  return request.post(`${process.env.API_BASE_URL}tag/batchUpdateStatus`, {
+    data,
+  });
+}
+
+export function createTag(data: any): Promise<any> {
+  return request(`${process.env.API_BASE_URL}tag/create`, {
+    method: 'POST',
+    data,
+  });
+}
+
+export function updateTag(data: any): Promise<any> {
+  return request(`${process.env.API_BASE_URL}tag/update`, {
+    method: 'POST',
+    data,
+  });
+}
+
+export function getTagData(tagId: number): Promise<any> {
+  return request(`${process.env.API_BASE_URL}tag/getTag/${tagId}`, {
+    method: 'GET',
+  });
+}
+
+export function getTagValueDistribution(data: any): Promise<any> {
+  return request(`${process.env.API_BASE_URL}tag/value/distribution`, {
+    method: 'POST',
+    data,
+  });
+}
+
+export function batchCreateTag(data: any): Promise<any> {
+  return request(`${process.env.API_BASE_URL}tag/create/batch`, {
+    method: 'POST',
+    data,
   });
 }

@@ -200,7 +200,6 @@ const ClassDataSourceTypeModal: React.FC<Props> = ({
             <DataSource
               initialValues={dataSourceItem}
               onSubmitSuccess={(dataSourceInfo) => {
-                console.log('onSubmitSuccess', dataSourceInfo);
                 const { columns, sql, databaseId, sqlParams } = dataSourceInfo;
                 setSql(sql);
                 setScriptColumns(columns);

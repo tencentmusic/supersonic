@@ -8,7 +8,7 @@ import { connect } from 'umi';
 import type { StateType } from '../model';
 import { deleteModel, updateModel } from '../service';
 import ClassDataSourceTypeModal from './ClassDataSourceTypeModal';
-import { ColumnsConfig } from './MetricTableColumnRender';
+import { ColumnsConfig } from './TableColumnRender';
 
 import moment from 'moment';
 import styles from './style.less';
@@ -40,6 +40,8 @@ const ModelTable: React.FC<Props> = ({ modelList, disabledEdit = false, onModelC
       message.error(msg);
     }
   };
+
+  const columnsConfig = ColumnsConfig();
 
   const columns: ProColumns[] = [
     {
@@ -86,7 +88,7 @@ const ModelTable: React.FC<Props> = ({ modelList, disabledEdit = false, onModelC
       dataIndex: 'status',
       title: '状态',
       search: false,
-      render: ColumnsConfig.state.render,
+      render: columnsConfig.state.render,
     },
     {
       dataIndex: 'createdBy',
