@@ -40,16 +40,23 @@ public class TagConverter {
     @Autowired
     private SqlGenerateUtils sqlGenerateUtils;
 
-    public QueryStatement convert(QueryTagReq queryTagReq,
+    public QueryStatement convert(QueryStructReq queryStructReq,
             SemanticSchemaResp semanticSchemaResp) throws Exception {
         QueryStatement queryStatement = new QueryStatement();
         // covert to QueryReqConverter
-        QueryStructReq queryStructReq = new QueryStructReq();
-        BeanUtils.copyProperties(queryTagReq, queryStructReq);
-        if (!CollectionUtils.isEmpty(queryTagReq.getTagFilters())) {
-            queryStructReq.setDimensionFilters(queryTagReq.getTagFilters());
-        }
+        BeanUtils.copyProperties(queryStructReq.convert(), queryStructReq);
         QuerySqlReq querySqlReq = queryStructReq.convert();
+        convert(querySqlReq, semanticSchemaResp, queryStatement, queryStructReq);
+        QueryParam queryParam = new QueryParam();
+        convert(queryStructReq, queryParam);
+        queryStatement.setQueryParam(queryParam);
+        queryStatement.setDataSetId(queryStructReq.getDataSetId());
+        return queryStatement;
+    }
+
+    public void convert(QuerySqlReq querySqlReq,
+            SemanticSchemaResp semanticSchemaResp, QueryStatement queryStatement, QueryStructReq queryStructReq)
+            throws Exception {
         if (Objects.nonNull(querySqlReq)) {
             log.info("convert to QuerySqlReq {}", querySqlReq);
             String tableName = SqlSelectHelper.getTableName(querySqlReq.getSql());
@@ -77,15 +84,30 @@ public class TagConverter {
             queryStructReq.setDateInfo(queryStructUtils.getDateConfBySql(querySqlReq.getSql()));
             queryStructReq.setDataSetId(querySqlReq.getDataSetId());
             queryStructReq.setQueryType(QueryType.TAG);
-            QueryParam queryParam = new QueryParam();
-            convert(queryTagReq, queryParam);
-            queryStatement.setQueryParam(queryParam);
+
             queryStatement.setDataSetQueryParam(result);
             queryStatement.setIsS2SQL(true);
             queryStatement.setMinMaxTime(queryStructUtils.getBeginEndTime(queryStructReq));
-            queryStatement.setDataSetId(queryTagReq.getDataSetId());
+
             queryStatement.setEnableLimitWrapper(limitWrapper);
         }
+    }
+
+    public QueryStatement convert(QueryTagReq queryTagReq,
+            SemanticSchemaResp semanticSchemaResp) throws Exception {
+        QueryStatement queryStatement = new QueryStatement();
+        // covert to QueryReqConverter
+        QueryStructReq queryStructReq = new QueryStructReq();
+        BeanUtils.copyProperties(queryTagReq, queryStructReq);
+        if (!CollectionUtils.isEmpty(queryTagReq.getTagFilters())) {
+            queryStructReq.setDimensionFilters(queryTagReq.getTagFilters());
+        }
+        QuerySqlReq querySqlReq = queryStructReq.convert();
+        convert(querySqlReq, semanticSchemaResp, queryStatement, queryStructReq);
+        QueryParam queryParam = new QueryParam();
+        convert(queryTagReq, queryParam);
+        queryStatement.setQueryParam(queryParam);
+        queryStatement.setDataSetId(queryTagReq.getDataSetId());
         return queryStatement;
     }
 
@@ -95,6 +117,15 @@ public class TagConverter {
         queryParam.setMetrics(queryTagReq.getMetrics());
         queryParam.setGroups(queryTagReq.getGroups());
         queryParam.setDimensionFilters(queryTagReq.getTagFilters());
+        queryParam.setQueryType(QueryType.TAG);
+    }
+
+    public void convert(QueryStructReq queryTagReq, QueryParam queryParam) {
+        BeanUtils.copyProperties(queryTagReq, queryParam);
+        queryParam.setOrders(queryTagReq.getOrders());
+        queryParam.setMetrics(queryTagReq.getMetrics());
+        queryParam.setGroups(queryTagReq.getGroups());
+        queryParam.setDimensionFilters(queryTagReq.getDimensionFilters());
         queryParam.setQueryType(QueryType.TAG);
     }
 
