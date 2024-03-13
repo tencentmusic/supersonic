@@ -14,12 +14,12 @@ import com.tencent.supersonic.headless.core.chat.mapper.MatchText;
 import com.tencent.supersonic.headless.core.chat.mapper.ModelWithSemanticType;
 import com.tencent.supersonic.headless.core.chat.mapper.SearchMatchStrategy;
 import com.tencent.supersonic.headless.core.pojo.QueryContext;
-import com.tencent.supersonic.headless.core.knowledge.DataSetInfoStat;
-import com.tencent.supersonic.headless.core.knowledge.DictWord;
-import com.tencent.supersonic.headless.core.knowledge.HanlpMapResult;
-import com.tencent.supersonic.headless.core.knowledge.KnowledgeService;
-import com.tencent.supersonic.headless.core.knowledge.helper.HanlpHelper;
-import com.tencent.supersonic.headless.core.knowledge.helper.NatureHelper;
+import com.tencent.supersonic.headless.core.chat.knowledge.DataSetInfoStat;
+import com.tencent.supersonic.headless.core.chat.knowledge.DictWord;
+import com.tencent.supersonic.headless.core.chat.knowledge.HanlpMapResult;
+import com.tencent.supersonic.headless.core.chat.knowledge.KnowledgeService;
+import com.tencent.supersonic.headless.core.chat.knowledge.helper.HanlpHelper;
+import com.tencent.supersonic.headless.core.chat.knowledge.helper.NatureHelper;
 import com.tencent.supersonic.headless.server.service.ChatContextService;
 import com.tencent.supersonic.headless.server.service.DataSetService;
 import com.tencent.supersonic.headless.server.service.SearchService;
@@ -145,10 +145,6 @@ public class SearchServiceImpl implements SearchService {
     private boolean nothingOrOnlyMetric(DataSetInfoStat modelStat) {
         return modelStat.getMetricDataSetCount() >= 0 && modelStat.getDimensionDataSetCount() <= 0
                 && modelStat.getDimensionValueDataSetCount() <= 0 && modelStat.getDataSetCount() <= 0;
-    }
-
-    private boolean effectiveModel(Long contextModel) {
-        return Objects.nonNull(contextModel) && contextModel > 0;
     }
 
     private Set<SearchResult> searchDimensionValue(List<SchemaElement> metricsDb,

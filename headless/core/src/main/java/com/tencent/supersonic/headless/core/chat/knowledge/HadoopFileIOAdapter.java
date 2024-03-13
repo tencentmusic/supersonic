@@ -1,4 +1,4 @@
-package com.tencent.supersonic.headless.core.knowledge;
+package com.tencent.supersonic.headless.core.chat.knowledge;
 
 import com.hankcs.hanlp.corpus.io.IIOAdapter;
 import java.io.IOException;

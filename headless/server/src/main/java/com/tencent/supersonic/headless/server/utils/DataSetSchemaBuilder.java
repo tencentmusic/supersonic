@@ -187,6 +187,7 @@ public class DataSetSchemaBuilder {
                     .alias(alias)
                     .relatedSchemaElements(getRelateSchemaElement(metric))
                     .defaultAgg(metric.getDefaultAgg())
+                    .dataFormatType(metric.getDataFormatType())
                     .build();
             metrics.add(metricToAdd);
 

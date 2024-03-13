@@ -1,18 +1,18 @@
-package com.tencent.supersonic.headless.core.knowledge.builder;
+package com.tencent.supersonic.headless.core.chat.knowledge.builder;
 
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.common.pojo.enums.DictWordType;
 import com.tencent.supersonic.headless.api.pojo.SchemaElement;
-import com.tencent.supersonic.headless.core.knowledge.DictWord;
+import com.tencent.supersonic.headless.core.chat.knowledge.DictWord;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 /**
- * Metric DictWord
+ * dimension word nature
  */
 @Service
-public class MetricWordBuilder extends BaseWordWithAliasBuilder {
+public class DimensionWordBuilder extends BaseWordWithAliasBuilder {
 
     @Override
     public List<DictWord> doGet(String word, SchemaElement schemaElement) {
@@ -20,7 +20,7 @@ public class MetricWordBuilder extends BaseWordWithAliasBuilder {
         result.add(getOneWordNature(word, schemaElement, false));
         result.addAll(getOneWordNatureAlias(schemaElement, false));
         String reverseWord = StringUtils.reverse(word);
-        if (!word.equalsIgnoreCase(reverseWord)) {
+        if (StringUtils.isNotEmpty(word) && !word.equalsIgnoreCase(reverseWord)) {
             result.add(getOneWordNature(reverseWord, schemaElement, true));
         }
         return result;
@@ -31,10 +31,10 @@ public class MetricWordBuilder extends BaseWordWithAliasBuilder {
         dictWord.setWord(word);
         Long modelId = schemaElement.getModel();
         String nature = DictWordType.NATURE_SPILT + modelId + DictWordType.NATURE_SPILT + schemaElement.getId()
-                + DictWordType.METRIC.getTypeWithSpilt();
+                + DictWordType.DIMENSION.getTypeWithSpilt();
         if (isSuffix) {
             nature = DictWordType.NATURE_SPILT + modelId + DictWordType.NATURE_SPILT + schemaElement.getId()
-                    + DictWordType.SUFFIX.getTypeWithSpilt() + DictWordType.METRIC.getTypeWithSpilt();
+                    + DictWordType.SUFFIX.getTypeWithSpilt() + DictWordType.DIMENSION.getTypeWithSpilt();
         }
         dictWord.setNatureWithFrequency(String.format("%s " + DEFAULT_FREQUENCY, nature));
         return dictWord;

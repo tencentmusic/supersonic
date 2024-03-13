@@ -1,4 +1,4 @@
-package com.tencent.supersonic.headless.core.knowledge;
+package com.tencent.supersonic.headless.core.chat.knowledge;
 
 import com.hankcs.hanlp.collection.trie.bintrie.BaseNode;
 import com.hankcs.hanlp.collection.trie.bintrie.BinTrie;
@@ -7,7 +7,7 @@ import com.hankcs.hanlp.dictionary.CoreDictionary;
 import com.hankcs.hanlp.seg.common.Term;
 import com.tencent.supersonic.common.pojo.enums.DictWordType;
 import com.tencent.supersonic.headless.api.pojo.request.DimensionValueReq;
-import com.tencent.supersonic.headless.core.knowledge.helper.NatureHelper;
+import com.tencent.supersonic.headless.core.chat.knowledge.helper.NatureHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.CollectionUtils;

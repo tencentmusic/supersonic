@@ -1,4 +1,4 @@
-package com.tencent.supersonic.headless.core.knowledge;
+package com.tencent.supersonic.headless.core.chat.knowledge;
 
 import static com.hankcs.hanlp.utility.Predefine.logger;
 
@@ -15,7 +15,7 @@ import com.hankcs.hanlp.seg.common.Term;
 import com.hankcs.hanlp.utility.LexiconUtility;
 import com.hankcs.hanlp.utility.Predefine;
 import com.hankcs.hanlp.utility.TextUtility;
-import com.tencent.supersonic.headless.core.knowledge.helper.HanlpHelper;
+import com.tencent.supersonic.headless.core.chat.knowledge.helper.HanlpHelper;
 
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;

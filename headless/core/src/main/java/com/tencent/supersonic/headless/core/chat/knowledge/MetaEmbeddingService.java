@@ -1,4 +1,4 @@
-package com.tencent.supersonic.headless.core.knowledge;
+package com.tencent.supersonic.headless.core.chat.knowledge;
 
 import com.tencent.supersonic.common.config.EmbeddingConfig;
 import com.tencent.supersonic.common.pojo.Constants;

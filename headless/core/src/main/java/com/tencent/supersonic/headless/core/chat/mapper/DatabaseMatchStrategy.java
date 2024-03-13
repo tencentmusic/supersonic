@@ -7,7 +7,7 @@ import com.tencent.supersonic.headless.api.pojo.SchemaElementMatch;
 import com.tencent.supersonic.headless.api.pojo.response.S2Term;
 import com.tencent.supersonic.headless.core.config.OptimizationConfig;
 import com.tencent.supersonic.headless.core.pojo.QueryContext;
-import com.tencent.supersonic.headless.core.knowledge.DatabaseMapResult;
+import com.tencent.supersonic.headless.core.chat.knowledge.DatabaseMapResult;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,10 +1,10 @@
-package com.tencent.supersonic.headless.core.knowledge.builder;
+package com.tencent.supersonic.headless.core.chat.knowledge.builder;
 
 
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.common.pojo.enums.DictWordType;
 import com.tencent.supersonic.headless.api.pojo.SchemaElement;
-import com.tencent.supersonic.headless.core.knowledge.DictWord;
+import com.tencent.supersonic.headless.core.chat.knowledge.DictWord;
 import java.util.List;
 import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;

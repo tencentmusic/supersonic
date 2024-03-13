@@ -3,7 +3,7 @@ package com.tencent.supersonic.headless.core.chat.mapper;
 
 import com.tencent.supersonic.headless.api.pojo.response.S2Term;
 import com.tencent.supersonic.headless.core.pojo.QueryContext;
-import com.tencent.supersonic.headless.core.knowledge.helper.NatureHelper;
+import com.tencent.supersonic.headless.core.chat.knowledge.helper.NatureHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;

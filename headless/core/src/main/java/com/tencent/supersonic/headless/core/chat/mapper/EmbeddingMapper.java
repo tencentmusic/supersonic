@@ -8,9 +8,9 @@ import com.tencent.supersonic.headless.api.pojo.SchemaElementMatch;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
 import com.tencent.supersonic.headless.api.pojo.response.S2Term;
 import com.tencent.supersonic.headless.core.pojo.QueryContext;
-import com.tencent.supersonic.headless.core.knowledge.EmbeddingResult;
-import com.tencent.supersonic.headless.core.knowledge.builder.BaseWordBuilder;
-import com.tencent.supersonic.headless.core.knowledge.helper.HanlpHelper;
+import com.tencent.supersonic.headless.core.chat.knowledge.EmbeddingResult;
+import com.tencent.supersonic.headless.core.chat.knowledge.builder.BaseWordBuilder;
+import com.tencent.supersonic.headless.core.chat.knowledge.helper.HanlpHelper;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;

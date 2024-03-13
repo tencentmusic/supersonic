@@ -1,5 +1,5 @@
 
-package com.tencent.supersonic.headless.core.knowledge;
+package com.tencent.supersonic.headless.core.chat.knowledge;
 
 public enum DictUpdateMode {
 

@@ -27,9 +27,8 @@ public class SchemaElement implements Serializable {
     private List<String> alias;
     private List<SchemaValueMap> schemaValueMaps;
     private List<RelatedSchemaElement> relatedSchemaElements;
-
     private String defaultAgg;
-
+    private String dataFormatType;
     private double order;
 
     @Override

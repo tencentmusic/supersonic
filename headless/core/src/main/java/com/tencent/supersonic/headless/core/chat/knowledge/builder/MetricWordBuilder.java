@@ -1,15 +1,18 @@
-package com.tencent.supersonic.headless.core.knowledge.builder;
+package com.tencent.supersonic.headless.core.chat.knowledge.builder;
 
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.common.pojo.enums.DictWordType;
 import com.tencent.supersonic.headless.api.pojo.SchemaElement;
-import com.tencent.supersonic.headless.core.knowledge.DictWord;
+import com.tencent.supersonic.headless.core.chat.knowledge.DictWord;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
+/**
+ * Metric DictWord
+ */
 @Service
-public class TagWordBuilder extends BaseWordWithAliasBuilder {
+public class MetricWordBuilder extends BaseWordWithAliasBuilder {
 
     @Override
     public List<DictWord> doGet(String word, SchemaElement schemaElement) {
@@ -28,10 +31,10 @@ public class TagWordBuilder extends BaseWordWithAliasBuilder {
         dictWord.setWord(word);
         Long modelId = schemaElement.getModel();
         String nature = DictWordType.NATURE_SPILT + modelId + DictWordType.NATURE_SPILT + schemaElement.getId()
-                + DictWordType.TAG.getTypeWithSpilt();
+                + DictWordType.METRIC.getTypeWithSpilt();
         if (isSuffix) {
             nature = DictWordType.NATURE_SPILT + modelId + DictWordType.NATURE_SPILT + schemaElement.getId()
-                    + DictWordType.SUFFIX.getTypeWithSpilt() + DictWordType.TAG.getTypeWithSpilt();
+                    + DictWordType.SUFFIX.getTypeWithSpilt() + DictWordType.METRIC.getTypeWithSpilt();
         }
         dictWord.setNatureWithFrequency(String.format("%s " + DEFAULT_FREQUENCY, nature));
         return dictWord;
