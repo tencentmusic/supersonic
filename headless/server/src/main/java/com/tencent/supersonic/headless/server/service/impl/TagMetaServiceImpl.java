@@ -252,7 +252,7 @@ public class TagMetaServiceImpl implements TagMetaService {
             metrics = metrics.stream().filter(metric -> tagLoadReq.getItemIds().contains(metric.getId()))
                     .collect(Collectors.toList());
         }
-        metrics.stream().forEach(metric -> {
+        metrics.parallelStream().forEach(metric -> {
             TagReq tagReq = new TagReq();
             BeanUtils.copyProperties(metric, tagReq);
             tagReq.setId(null);
@@ -261,9 +261,12 @@ public class TagMetaServiceImpl implements TagMetaService {
             TagDefineParams tagDefineParams = new TagDefineParams();
             tagDefineParams.setExpr(metric.getBizName());
             tagDefineParams.setDependencies(new ArrayList<>(Arrays.asList(metric.getId())));
-            // tagReq.setSensitiveLevel(metric.getSensitiveLevel());
             tagReq.setTagDefineParams(tagDefineParams);
-            create(tagReq, user);
+            try {
+                create(tagReq, user);
+            } catch (Exception e) {
+                log.info("loadMetricTagBatch, e:{}", e.getMessage());
+            }
         });
         return metrics.size();
     }
@@ -273,7 +276,7 @@ public class TagMetaServiceImpl implements TagMetaService {
             dimensions = dimensions.stream().filter(dim -> tagLoadReq.getItemIds().contains(dim.getId()))
                     .collect(Collectors.toList());
         }
-        dimensions.stream().forEach(dim -> {
+        dimensions.parallelStream().forEach(dim -> {
             TagReq tagReq = new TagReq();
             BeanUtils.copyProperties(dim, tagReq);
             tagReq.setId(null);
@@ -282,12 +285,11 @@ public class TagMetaServiceImpl implements TagMetaService {
             TagDefineParams tagDefineParams = new TagDefineParams();
             tagDefineParams.setExpr(dim.getBizName());
             tagDefineParams.setDependencies(new ArrayList<>(Arrays.asList(dim.getId())));
-            // tagReq.setSensitiveLevel(dim.getSensitiveLevel());
             tagReq.setTagDefineParams(tagDefineParams);
             try {
                 create(tagReq, user);
             } catch (Exception e) {
-                log.info("loadDimTagBatch, e:{}", e);
+                log.info("loadDimTagBatch, e:{}", e.getMessage());
             }
 
         });
