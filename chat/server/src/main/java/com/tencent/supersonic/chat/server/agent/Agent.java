@@ -66,6 +66,10 @@ public class Agent extends RecordInfo {
                 .collect(Collectors.toList());
     }
 
+    public boolean containsLLMParserTool() {
+        return !CollectionUtils.isEmpty(getParserTools(AgentToolType.NL2SQL_LLM));
+    }
+
     public Set<Long> getDataSetIds() {
         Set<Long> dataSetIds = getDataSetIds(null);
         if (containsAllModel(dataSetIds)) {

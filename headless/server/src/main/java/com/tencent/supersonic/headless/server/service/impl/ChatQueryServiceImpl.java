@@ -75,7 +75,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -102,9 +101,6 @@ public class ChatQueryServiceImpl implements ChatQueryService {
     @Autowired
     private DataSetService dataSetService;
 
-    @Value("${time.threshold: 100}")
-    private Integer timeThreshold;
-
     private List<SchemaMapper> schemaMappers = ComponentFactory.getSchemaMappers();
     private List<SemanticParser> semanticParsers = ComponentFactory.getSemanticParsers();
     private List<SemanticCorrector> semanticCorrectors = ComponentFactory.getSemanticCorrectors();
@@ -118,22 +114,15 @@ public class ChatQueryServiceImpl implements ChatQueryService {
 
         // in order to support multi-turn conversation, chat context is needed
         ChatContext chatCtx = chatContextService.getOrCreateContext(queryReq.getChatId());
-        List<StatisticsDO> timeCostDOList = new ArrayList<>();
 
         // 1. mapper
         schemaMappers.forEach(mapper -> {
-            long startTime = System.currentTimeMillis();
             mapper.map(queryCtx);
-            timeCostDOList.add(StatisticsDO.builder().cost((int) (System.currentTimeMillis() - startTime))
-                    .interfaceName(mapper.getClass().getSimpleName()).type(CostType.MAPPER.getType()).build());
         });
 
         // 2. parser
         semanticParsers.forEach(parser -> {
-            long startTime = System.currentTimeMillis();
             parser.parse(queryCtx, chatCtx);
-            timeCostDOList.add(StatisticsDO.builder().cost((int) (System.currentTimeMillis() - startTime))
-                    .interfaceName(parser.getClass().getSimpleName()).type(CostType.PARSER.getType()).build());
             log.debug("{} result:{}", parser.getClass().getSimpleName(), JsonUtil.toString(queryCtx));
         });
 
@@ -168,6 +157,7 @@ public class ChatQueryServiceImpl implements ChatQueryService {
                 .candidateQueries(new ArrayList<>())
                 .mapInfo(new SchemaMapInfo())
                 .modelIdToDataSetIds(modelIdToDataSetIds)
+                .enableLLM(queryReq.isEnableLLM())
                 .build();
         BeanUtils.copyProperties(queryReq, queryCtx);
         return queryCtx;

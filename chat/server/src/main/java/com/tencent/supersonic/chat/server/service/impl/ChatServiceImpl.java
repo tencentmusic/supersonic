@@ -106,6 +106,9 @@ public class ChatServiceImpl implements ChatService {
         if (agent == null) {
             return queryReq;
         }
+        if (agent.containsLLMParserTool()) {
+            queryReq.setEnableLLM(true);
+        }
         queryReq.setDataSetIds(agent.getDataSetIds());
         return queryReq;
     }
