@@ -1,11 +1,5 @@
 package com.tencent.supersonic.headless.server.utils;
 
-import static com.tencent.supersonic.common.pojo.Constants.AND_UPPER;
-import static com.tencent.supersonic.common.pojo.Constants.APOSTROPHE;
-import static com.tencent.supersonic.common.pojo.Constants.COMMA;
-import static com.tencent.supersonic.common.pojo.Constants.POUND;
-import static com.tencent.supersonic.common.pojo.Constants.SPACE;
-
 import com.google.common.base.Strings;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.common.pojo.Aggregator;
@@ -15,6 +9,7 @@ import com.tencent.supersonic.common.pojo.Filter;
 import com.tencent.supersonic.common.pojo.Order;
 import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
 import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
+import com.tencent.supersonic.common.pojo.enums.QueryType;
 import com.tencent.supersonic.common.pojo.enums.StatusEnum;
 import com.tencent.supersonic.common.pojo.enums.TaskStatusEnum;
 import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
@@ -39,7 +34,13 @@ import com.tencent.supersonic.headless.server.service.DimensionService;
 import com.tencent.supersonic.headless.server.service.MetricService;
 import com.tencent.supersonic.headless.server.service.ModelService;
 import com.tencent.supersonic.headless.server.service.QueryService;
-
+import com.tencent.supersonic.headless.server.service.TagMetaService;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -52,6 +53,11 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.StringJoiner;
+import static com.tencent.supersonic.common.pojo.Constants.AND_UPPER;
+import static com.tencent.supersonic.common.pojo.Constants.APOSTROPHE;
+import static com.tencent.supersonic.common.pojo.Constants.COMMA;
+import static com.tencent.supersonic.common.pojo.Constants.POUND;
+import static com.tencent.supersonic.common.pojo.Constants.SPACE;
 
 import com.tencent.supersonic.headless.server.service.TagMetaService;
 import lombok.extern.slf4j.Slf4j;
@@ -276,7 +282,6 @@ public class DictUtils {
         }
 
         String sql = String.format(sqlPattern, bizName, metric, where, bizName, metric, limit);
-
         modelIds.add(dictItemResp.getModelId());
         QuerySqlReq querySqlReq = new QuerySqlReq();
         querySqlReq.setSql(sql);

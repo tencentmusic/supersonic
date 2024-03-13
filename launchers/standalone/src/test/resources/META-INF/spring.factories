@@ -1,35 +1,28 @@
-com.tencent.supersonic.chat.core.mapper.SchemaMapper=\
-    com.tencent.supersonic.chat.core.mapper.EmbeddingMapper, \
-    com.tencent.supersonic.chat.core.mapper.KeywordMapper, \
-    com.tencent.supersonic.chat.core.mapper.QueryFilterMapper, \
-    com.tencent.supersonic.chat.core.mapper.EntityMapper
+com.tencent.supersonic.headless.core.chat.mapper.SchemaMapper=\
+    com.tencent.supersonic.headless.core.chat.mapper.EmbeddingMapper, \
+    com.tencent.supersonic.headless.core.chat.mapper.KeywordMapper, \
+    com.tencent.supersonic.headless.core.chat.mapper.QueryFilterMapper, \
+    com.tencent.supersonic.headless.core.chat.mapper.EntityMapper
 
-com.tencent.supersonic.chat.core.parser.SemanticParser=\
-    com.tencent.supersonic.chat.core.parser.sql.rule.RuleSqlParser, \
-    com.tencent.supersonic.chat.core.parser.sql.llm.LLMSqlParser, \
-    com.tencent.supersonic.chat.core.parser.plugin.embedding.EmbeddingRecallParser, \
-    com.tencent.supersonic.chat.core.parser.plugin.function.FunctionCallParser, \
-    com.tencent.supersonic.chat.core.parser.QueryTypeParser
+com.tencent.supersonic.headless.core.chat.parser.SemanticParser=\
+    com.tencent.supersonic.headless.core.chat.parser.rule.RuleSqlParser, \
+    com.tencent.supersonic.headless.core.chat.parser.llm.LLMSqlParser, \
+    com.tencent.supersonic.headless.core.chat.parser.QueryTypeParser
 
-com.tencent.supersonic.chat.core.corrector.SemanticCorrector=\
-    com.tencent.supersonic.chat.core.corrector.SchemaCorrector, \
-    com.tencent.supersonic.chat.core.corrector.TimeCorrector, \
-    com.tencent.supersonic.chat.core.corrector.GrammarCorrector
+com.tencent.supersonic.headless.core.chat.corrector.SemanticCorrector=\
+    com.tencent.supersonic.headless.core.chat.corrector.SchemaCorrector, \
+    com.tencent.supersonic.headless.core.chat.corrector.TimeCorrector, \
+    com.tencent.supersonic.headless.core.chat.corrector.GrammarCorrector
 
-com.tencent.supersonic.chat.server.processor.parse.ParseResultProcessor=\
-    com.tencent.supersonic.chat.server.processor.parse.ParseInfoProcessor, \
-    com.tencent.supersonic.chat.server.processor.parse.QueryRankProcessor, \
-    com.tencent.supersonic.chat.server.processor.parse.EntityInfoProcessor, \
-    com.tencent.supersonic.chat.server.processor.parse.SqlInfoProcessor, \
-    com.tencent.supersonic.chat.server.processor.parse.TimeCostProcessor, \
-    com.tencent.supersonic.chat.server.processor.parse.RespBuildProcessor, \
-    com.tencent.supersonic.chat.server.processor.parse.QueryRecommendProcessor
+com.tencent.supersonic.headless.server.processor.ResultProcessor=\
+    com.tencent.supersonic.headless.server.processor.ParseInfoProcessor, \
+    com.tencent.supersonic.headless.server.processor.QueryRankProcessor, \
+    com.tencent.supersonic.headless.server.processor.SqlInfoProcessor, \
+    com.tencent.supersonic.headless.server.processor.TimeCostProcessor, \
+    com.tencent.supersonic.headless.server.processor.RespBuildProcessor
 
-com.tencent.supersonic.chat.core.query.semantic.SemanticInterpreter=\
-    com.tencent.supersonic.chat.core.query.semantic.LocalSemanticInterpreter
-
-com.tencent.supersonic.chat.core.parser.sql.llm.ViewResolver=\
-  com.tencent.supersonic.chat.core.parser.sql.llm.HeuristicViewResolver
+com.tencent.supersonic.headless.core.chat.parser.llm.DataSetResolver=\
+  com.tencent.supersonic.headless.core.chat.parser.llm.HeuristicDataSetResolver
 
 com.tencent.supersonic.auth.authentication.interceptor.AuthenticationInterceptor=\
     com.tencent.supersonic.auth.authentication.interceptor.DefaultAuthenticationInterceptor
@@ -39,7 +32,8 @@ com.tencent.supersonic.auth.api.authentication.adaptor.UserAdaptor=\
 
 com.tencent.supersonic.chat.server.processor.execute.ExecuteResultProcessor=\
     com.tencent.supersonic.chat.server.processor.execute.MetricRecommendProcessor,\
-    com.tencent.supersonic.chat.server.processor.execute.DimensionRecommendProcessor
+    com.tencent.supersonic.chat.server.processor.execute.DimensionRecommendProcessor,\
+    com.tencent.supersonic.chat.server.processor.execute.MetricRatioProcessor
 
 com.tencent.supersonic.common.util.embedding.S2EmbeddingStore=\
     com.tencent.supersonic.common.util.embedding.InMemoryS2EmbeddingStore

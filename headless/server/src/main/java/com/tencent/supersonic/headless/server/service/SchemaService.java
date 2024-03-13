@@ -3,12 +3,14 @@ package com.tencent.supersonic.headless.server.service;
 import com.github.pagehelper.PageInfo;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.common.pojo.enums.AuthType;
+import com.tencent.supersonic.headless.api.pojo.DataSetSchema;
+import com.tencent.supersonic.headless.api.pojo.request.DataSetFilterReq;
 import com.tencent.supersonic.headless.api.pojo.request.ItemUseReq;
 import com.tencent.supersonic.headless.api.pojo.request.PageDimensionReq;
 import com.tencent.supersonic.headless.api.pojo.request.PageMetricReq;
 import com.tencent.supersonic.headless.api.pojo.request.SchemaFilterReq;
 import com.tencent.supersonic.headless.api.pojo.request.SchemaItemQueryReq;
-import com.tencent.supersonic.headless.api.pojo.request.DataSetFilterReq;
+import com.tencent.supersonic.headless.api.pojo.response.DataSetSchemaResp;
 import com.tencent.supersonic.headless.api.pojo.response.DimensionResp;
 import com.tencent.supersonic.headless.api.pojo.response.DomainResp;
 import com.tencent.supersonic.headless.api.pojo.response.ItemResp;
@@ -17,8 +19,6 @@ import com.tencent.supersonic.headless.api.pojo.response.MetricResp;
 import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
 import com.tencent.supersonic.headless.api.pojo.response.ModelSchemaResp;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticSchemaResp;
-import com.tencent.supersonic.headless.api.pojo.response.DataSetResp;
-import com.tencent.supersonic.headless.api.pojo.response.DataSetSchemaResp;
 
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -26,6 +26,10 @@ import java.util.concurrent.ExecutionException;
 public interface SchemaService {
 
     List<DataSetSchemaResp> fetchDataSetSchema(DataSetFilterReq filter);
+
+    DataSetSchema getDataSetSchema(Long dataSetId);
+
+    List<DataSetSchema> getDataSetSchema();
 
     List<ModelSchemaResp> fetchModelSchemaResps(List<Long> modelIds);
 
@@ -38,8 +42,6 @@ public interface SchemaService {
     List<DomainResp> getDomainList(User user);
 
     List<ModelResp> getModelList(User user, AuthType authType, Long domainId);
-
-    List<DataSetResp> getDataSetList(Long domainId);
 
     SemanticSchemaResp fetchSemanticSchema(SchemaFilterReq schemaFilterReq);
 

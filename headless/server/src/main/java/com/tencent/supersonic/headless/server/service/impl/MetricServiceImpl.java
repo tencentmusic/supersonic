@@ -458,14 +458,14 @@ public class MetricServiceImpl implements MetricService {
             if (bizNameMap.containsKey(metricReq.getBizName())) {
                 MetricResp metricResp = bizNameMap.get(metricReq.getBizName());
                 if (!metricResp.getId().equals(metricReq.getId())) {
-                    throw new RuntimeException(String.format("该主题域下存在相同的指标字段名:%s 创建人:%s",
+                    throw new RuntimeException(String.format("该模型下存在相同的指标字段名:%s 创建人:%s",
                             metricReq.getBizName(), metricResp.getCreatedBy()));
                 }
             }
             if (nameMap.containsKey(metricReq.getName())) {
                 MetricResp metricResp = nameMap.get(metricReq.getName());
                 if (!metricResp.getId().equals(metricReq.getId())) {
-                    throw new RuntimeException(String.format("该主题域下存在相同的指标名:%s 创建人:%s",
+                    throw new RuntimeException(String.format("该模型下存在相同的指标名:%s 创建人:%s",
                             metricReq.getName(), metricResp.getCreatedBy()));
                 }
             }

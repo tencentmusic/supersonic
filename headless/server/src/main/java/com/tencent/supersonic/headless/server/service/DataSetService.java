@@ -24,9 +24,12 @@ public interface DataSetService {
 
     Map<Long, List<Long>> getModelIdToDataSetIds(List<Long> dataSetIds);
 
+    Map<Long, List<Long>> getModelIdToDataSetIds();
+
     List<DataSetResp> getDataSets(User user);
 
     List<DataSetResp> getDataSetsInheritAuth(User user, Long domainId);
 
     SemanticQueryReq convert(QueryDataSetReq queryDataSetReq);
+
 }

@@ -2,7 +2,7 @@ package com.tencent.supersonic.chat.server.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
-import com.tencent.supersonic.chat.core.agent.Agent;
+import com.tencent.supersonic.chat.server.agent.Agent;
 import com.tencent.supersonic.chat.server.persistence.dataobject.AgentDO;
 import com.tencent.supersonic.chat.server.persistence.repository.AgentRepository;
 import com.tencent.supersonic.chat.server.service.AgentService;

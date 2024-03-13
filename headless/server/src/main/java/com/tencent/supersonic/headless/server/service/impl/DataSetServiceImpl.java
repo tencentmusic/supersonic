@@ -239,6 +239,11 @@ public class DataSetServiceImpl
                         Collectors.mapping(Pair::getRight, Collectors.toList())));
     }
 
+    @Override
+    public Map<Long, List<Long>> getModelIdToDataSetIds() {
+        return getModelIdToDataSetIds(Lists.newArrayList());
+    }
+
     private void conflictCheck(DataSetResp dataSetResp) {
         List<Long> allDimensionIds = dataSetResp.getAllDimensions();
         List<Long> allMetricIds = dataSetResp.getAllMetrics();

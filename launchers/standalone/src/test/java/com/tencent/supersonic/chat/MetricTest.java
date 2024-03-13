@@ -1,27 +1,28 @@
 package com.tencent.supersonic.chat;
 
-import static com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum.NONE;
-import static com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum.SUM;
-
-import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
-import com.tencent.supersonic.chat.api.pojo.request.QueryFilter;
-import com.tencent.supersonic.chat.api.pojo.response.ParseResp;
-import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
-import com.tencent.supersonic.chat.core.query.rule.metric.MetricFilterQuery;
-import com.tencent.supersonic.chat.core.query.rule.metric.MetricGroupByQuery;
-import com.tencent.supersonic.chat.core.query.rule.metric.MetricModelQuery;
-import com.tencent.supersonic.chat.core.query.rule.metric.MetricTopNQuery;
 import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
 import com.tencent.supersonic.common.pojo.enums.QueryType;
+import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
+import com.tencent.supersonic.headless.api.pojo.request.QueryFilter;
+import com.tencent.supersonic.headless.api.pojo.response.ParseResp;
+import com.tencent.supersonic.headless.api.pojo.response.QueryResult;
+import com.tencent.supersonic.headless.core.chat.query.rule.metric.MetricFilterQuery;
+import com.tencent.supersonic.headless.core.chat.query.rule.metric.MetricGroupByQuery;
+import com.tencent.supersonic.headless.core.chat.query.rule.metric.MetricModelQuery;
+import com.tencent.supersonic.headless.core.chat.query.rule.metric.MetricTopNQuery;
 import com.tencent.supersonic.util.DataUtils;
+import org.junit.Assert;
+import org.junit.jupiter.api.Test;
+
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.junit.Assert;
-import org.junit.jupiter.api.Test;
+
+import static com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum.NONE;
+import static com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum.SUM;
 
 
 public class MetricTest extends BaseTest {
