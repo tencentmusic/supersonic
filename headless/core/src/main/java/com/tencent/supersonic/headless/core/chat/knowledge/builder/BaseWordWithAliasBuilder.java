@@ -1,7 +1,8 @@
-package com.tencent.supersonic.headless.core.knowledge.builder;
+package com.tencent.supersonic.headless.core.chat.knowledge.builder;
 
 import com.tencent.supersonic.headless.api.pojo.SchemaElement;
-import com.tencent.supersonic.headless.core.knowledge.DictWord;
+import com.tencent.supersonic.headless.core.chat.knowledge.DictWord;
+
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.util.CollectionUtils;

@@ -7,10 +7,10 @@ import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
 import com.tencent.supersonic.headless.api.pojo.SchemaMapInfo;
 import com.tencent.supersonic.headless.api.pojo.response.S2Term;
 import com.tencent.supersonic.headless.core.pojo.QueryContext;
-import com.tencent.supersonic.headless.core.knowledge.DatabaseMapResult;
-import com.tencent.supersonic.headless.core.knowledge.HanlpMapResult;
-import com.tencent.supersonic.headless.core.knowledge.helper.HanlpHelper;
-import com.tencent.supersonic.headless.core.knowledge.helper.NatureHelper;
+import com.tencent.supersonic.headless.core.chat.knowledge.DatabaseMapResult;
+import com.tencent.supersonic.headless.core.chat.knowledge.HanlpMapResult;
+import com.tencent.supersonic.headless.core.chat.knowledge.helper.HanlpHelper;
+import com.tencent.supersonic.headless.core.chat.knowledge.helper.NatureHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.CollectionUtils;
 

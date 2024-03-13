@@ -1,11 +1,11 @@
-package com.tencent.supersonic.headless.core.knowledge.helper;
+package com.tencent.supersonic.headless.core.chat.knowledge.helper;
 
 import com.google.common.collect.Lists;
 import com.hankcs.hanlp.corpus.tag.Nature;
 import com.tencent.supersonic.common.pojo.enums.DictWordType;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
 import com.tencent.supersonic.headless.api.pojo.response.S2Term;
-import com.tencent.supersonic.headless.core.knowledge.DataSetInfoStat;
+import com.tencent.supersonic.headless.core.chat.knowledge.DataSetInfoStat;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.CollectionUtils;
