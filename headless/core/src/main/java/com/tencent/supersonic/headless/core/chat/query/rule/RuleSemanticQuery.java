@@ -3,6 +3,7 @@ package com.tencent.supersonic.headless.core.chat.query.rule;
 
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
+import com.tencent.supersonic.common.pojo.enums.QueryType;
 import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementMatch;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
@@ -96,7 +97,8 @@ public abstract class RuleSemanticQuery extends BaseSemanticQuery {
     private void fillSchemaElement(SemanticParseInfo parseInfo, SemanticSchema semanticSchema) {
         Set<Long> dataSetIds = parseInfo.getElementMatches().stream().map(SchemaElementMatch::getElement)
                 .map(SchemaElement::getDataSet).collect(Collectors.toSet());
-        parseInfo.setDataSet(semanticSchema.getDataSet(dataSetIds.iterator().next()));
+        Long dataSetId = dataSetIds.iterator().next();
+        parseInfo.setDataSet(semanticSchema.getDataSet(dataSetId));
         Map<Long, List<SchemaElementMatch>> dim2Values = new HashMap<>();
         Map<Long, List<SchemaElementMatch>> id2Values = new HashMap<>();
         Map<Long, List<SchemaElementMatch>> tag2Values = new HashMap<>();
@@ -114,6 +116,7 @@ public abstract class RuleSemanticQuery extends BaseSemanticQuery {
                 case VALUE:
                     addToValues(semanticSchema, SchemaElementType.DIMENSION, dim2Values, schemaMatch);
                     break;
+                case TAG:
                 case DIMENSION:
                     parseInfo.getDimensions().add(element);
                     break;
@@ -214,9 +217,10 @@ public abstract class RuleSemanticQuery extends BaseSemanticQuery {
         this.parseInfo = parseInfo;
     }
 
-    public static List<RuleSemanticQuery> resolve(List<SchemaElementMatch> candidateElementMatches,
+    public static List<RuleSemanticQuery> resolve(Long dataSetId, List<SchemaElementMatch> candidateElementMatches,
             QueryContext queryContext) {
         List<RuleSemanticQuery> matchedQueries = new ArrayList<>();
+        candidateElementMatches = filterByQueryType(dataSetId, candidateElementMatches, queryContext);
 
         for (RuleSemanticQuery semanticQuery : QueryManager.getRuleQueries()) {
             List<SchemaElementMatch> matches = semanticQuery.match(candidateElementMatches, queryContext);
@@ -229,6 +233,26 @@ public abstract class RuleSemanticQuery extends BaseSemanticQuery {
         }
 
         return matchedQueries;
+    }
+
+    private static List<SchemaElementMatch> filterByQueryType(Long dataSetId,
+            List<SchemaElementMatch> candidateElementMatches, QueryContext queryContext) {
+        QueryType queryType = queryContext.getQueryType(dataSetId);
+        if (QueryType.TAG.equals(queryType)) {
+            candidateElementMatches = candidateElementMatches.stream()
+                    .filter(elementMatch -> !(SchemaElementType.METRIC.equals(elementMatch.getElement().getType())
+                            || SchemaElementType.DIMENSION.equals(elementMatch.getElement().getType())
+                            || SchemaElementType.VALUE.equals(elementMatch.getElement().getType()))
+                    )
+                    .collect(Collectors.toList());
+        }
+        if (QueryType.METRIC.equals(queryType)) {
+            candidateElementMatches = candidateElementMatches.stream()
+                    .filter(elementMatch -> !(SchemaElementType.TAG.equals(elementMatch.getElement().getType())
+                            || SchemaElementType.TAG_VALUE.equals(elementMatch.getElement().getType())))
+                    .collect(Collectors.toList());
+        }
+        return candidateElementMatches;
     }
 
     protected QueryStructReq convertQueryStruct() {

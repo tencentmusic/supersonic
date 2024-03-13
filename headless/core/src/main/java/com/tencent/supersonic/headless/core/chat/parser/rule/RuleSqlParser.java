@@ -1,14 +1,17 @@
 package com.tencent.supersonic.headless.core.chat.parser.rule;
 
+import com.tencent.supersonic.common.pojo.enums.QueryType;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementMatch;
 import com.tencent.supersonic.headless.api.pojo.SchemaMapInfo;
+import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.core.chat.parser.SemanticParser;
+import com.tencent.supersonic.headless.core.chat.query.QueryManager;
+import com.tencent.supersonic.headless.core.chat.query.rule.RuleSemanticQuery;
 import com.tencent.supersonic.headless.core.pojo.ChatContext;
 import com.tencent.supersonic.headless.core.pojo.QueryContext;
-import com.tencent.supersonic.headless.core.chat.query.rule.RuleSemanticQuery;
-import lombok.extern.slf4j.Slf4j;
 import java.util.Arrays;
 import java.util.List;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * RuleSqlParser resolves a specific SemanticQuery according to co-appearance
@@ -29,13 +32,27 @@ public class RuleSqlParser implements SemanticParser {
         // iterate all schemaElementMatches to resolve query mode
         for (Long dataSetId : mapInfo.getMatchedDataSetInfos()) {
             List<SchemaElementMatch> elementMatches = mapInfo.getMatchedElements(dataSetId);
-            List<RuleSemanticQuery> queries = RuleSemanticQuery.resolve(elementMatches, queryContext);
+            List<RuleSemanticQuery> queries = RuleSemanticQuery.resolve(dataSetId, elementMatches, queryContext);
             for (RuleSemanticQuery query : queries) {
                 query.fillParseInfo(queryContext, chatContext);
-                queryContext.getCandidateQueries().add(query);
+                SemanticParseInfo parseInfo = query.getParseInfo();
+                QueryType queryType = queryContext.getQueryType(parseInfo.getDataSetId());
+                if (isRightQuery(parseInfo, queryType)) {
+                    queryContext.getCandidateQueries().add(query);
+                }
             }
         }
 
         auxiliaryParsers.stream().forEach(p -> p.parse(queryContext, chatContext));
+    }
+
+    private boolean isRightQuery(SemanticParseInfo parseInfo, QueryType queryType) {
+        if (QueryType.TAG.equals(queryType) && QueryManager.isTagQuery(parseInfo.getQueryMode())) {
+            return true;
+        }
+        if (QueryType.METRIC.equals(queryType) && QueryManager.isMetricQuery(parseInfo.getQueryMode())) {
+            return true;
+        }
+        return false;
     }
 }
