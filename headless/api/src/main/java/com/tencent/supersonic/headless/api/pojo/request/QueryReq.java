@@ -14,4 +14,5 @@ public class QueryReq {
     private User user;
     private QueryFilters queryFilters;
     private boolean saveAnswer = true;
+    private boolean enableLLM;
 }
