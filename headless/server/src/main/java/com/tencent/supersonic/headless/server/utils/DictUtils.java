@@ -9,7 +9,6 @@ import com.tencent.supersonic.common.pojo.Filter;
 import com.tencent.supersonic.common.pojo.Order;
 import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
 import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
-import com.tencent.supersonic.common.pojo.enums.QueryType;
 import com.tencent.supersonic.common.pojo.enums.StatusEnum;
 import com.tencent.supersonic.common.pojo.enums.TaskStatusEnum;
 import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
@@ -58,14 +57,6 @@ import static com.tencent.supersonic.common.pojo.Constants.APOSTROPHE;
 import static com.tencent.supersonic.common.pojo.Constants.COMMA;
 import static com.tencent.supersonic.common.pojo.Constants.POUND;
 import static com.tencent.supersonic.common.pojo.Constants.SPACE;
-
-import com.tencent.supersonic.headless.server.service.TagMetaService;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
 
 @Slf4j
 @Component
