@@ -59,6 +59,14 @@ import static com.tencent.supersonic.common.pojo.Constants.COMMA;
 import static com.tencent.supersonic.common.pojo.Constants.POUND;
 import static com.tencent.supersonic.common.pojo.Constants.SPACE;
 
+import com.tencent.supersonic.headless.server.service.TagMetaService;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
+
 @Slf4j
 @Component
 public class DictUtils {
@@ -242,12 +250,10 @@ public class DictUtils {
     private SemanticQueryReq constructQueryReq(DictItemResp dictItemResp) {
         if (TypeEnums.DIMENSION.equals(dictItemResp.getType())) {
             QuerySqlReq querySqlReq = constructDimQueryReq(dictItemResp);
-            querySqlReq.setQueryType(QueryType.METRIC);
             return querySqlReq;
         }
         if (TypeEnums.TAG.equals(dictItemResp.getType())) {
             QuerySqlReq querySqlReq = constructTagQueryReq(dictItemResp);
-            querySqlReq.setQueryType(QueryType.TAG);
             return querySqlReq;
         }
         log.warn("constructQueryReq failed");
@@ -265,16 +271,17 @@ public class DictUtils {
                 dictItemResp.getConfig().getLimit();
 
         // todo 自定义指标
+        Set<Long> modelIds = new HashSet<>();
         String metric = "count(1)";
         if (Objects.nonNull(dictItemResp.getConfig()) && Objects.nonNull(dictItemResp.getConfig().getMetricId())) {
             Long metricId = dictItemResp.getConfig().getMetricId();
             MetricResp metricResp = metricService.getMetric(metricId);
             String metricBizName = metricResp.getBizName();
             metric = String.format("sum(%s)", metricBizName);
+            modelIds.add(metricResp.getModelId());
         }
 
         String sql = String.format(sqlPattern, bizName, metric, where, bizName, metric, limit);
-        Set<Long> modelIds = new HashSet<>();
         modelIds.add(dictItemResp.getModelId());
         QuerySqlReq querySqlReq = new QuerySqlReq();
         querySqlReq.setSql(sql);
@@ -295,7 +302,6 @@ public class DictUtils {
     }
 
     private QuerySqlReq constructQuerySqlReq(DictItemResp dictItemResp) {
-        // todo tag
 
         String sqlPattern = "select %s,count(1) from tbl %s group by %s order by count(1) desc limit %d";
         String bizName = dictItemResp.getBizName();
@@ -319,8 +325,6 @@ public class DictUtils {
         QueryStructReq queryStructReq = new QueryStructReq();
 
         Set<Long> modelIds = new HashSet<>(Arrays.asList(dictItemResp.getModelId()));
-        queryStructReq.setModelIds(modelIds);
-
         List<String> groups = new ArrayList<>(Arrays.asList(dictItemResp.getBizName()));
         queryStructReq.setGroups(groups);
 
@@ -333,6 +337,8 @@ public class DictUtils {
         String metricBizName = metric.getBizName();
         aggregators.add(new Aggregator(metricBizName, AggOperatorEnum.SUM));
         queryStructReq.setAggregators(aggregators);
+        modelIds.add(metric.getModelId());
+        queryStructReq.setModelIds(modelIds);
 
         List<Order> orders = new ArrayList<>();
         orders.add(new Order(metricBizName, Constants.DESC_UPPER));
