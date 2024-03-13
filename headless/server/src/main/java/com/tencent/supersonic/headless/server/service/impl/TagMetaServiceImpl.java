@@ -240,7 +240,6 @@ public class TagMetaServiceImpl implements TagMetaService {
             num += loadDimTagBatch(tagLoadReq, dimensions, user);
         }
         if (Objects.isNull(tagLoadReq.getType()) || SchemaElementType.METRIC.equals(tagLoadReq.getType())) {
-
             List<MetricResp> metrics = metricService.getMetrics(metaFilter);
             num += loadMetricTagBatch(tagLoadReq, metrics, user);
         }

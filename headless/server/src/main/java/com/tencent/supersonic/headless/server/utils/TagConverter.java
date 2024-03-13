@@ -101,6 +101,7 @@ public class TagConverter {
         // covert to QueryReqConverter
         QueryStructReq queryStructReq = new QueryStructReq();
         BeanUtils.copyProperties(queryTagReq, queryStructReq);
+        queryStructReq.setModelIds(queryTagReq.getModelIdSet());
         if (!CollectionUtils.isEmpty(queryTagReq.getTagFilters())) {
             queryStructReq.setDimensionFilters(queryTagReq.getTagFilters());
         }

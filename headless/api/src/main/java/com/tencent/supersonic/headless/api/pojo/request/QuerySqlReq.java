@@ -1,12 +1,13 @@
 package com.tencent.supersonic.headless.api.pojo.request;
 
+import com.tencent.supersonic.common.pojo.enums.QueryType;
 import lombok.Data;
 import lombok.ToString;
 
 @Data
 @ToString
 public class QuerySqlReq extends SemanticQueryReq {
-
+    private QueryType queryType;
     private String sql;
 
     @Override
