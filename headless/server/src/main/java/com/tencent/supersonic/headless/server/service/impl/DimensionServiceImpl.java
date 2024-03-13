@@ -301,7 +301,8 @@ public class DimensionServiceImpl implements DimensionService {
         TagFilter tagFilter = new TagFilter();
         tagFilter.setTagDefineType(TagDefineType.DIMENSION);
         Map<String, TagResp> keyAndTagMap = tagMetaService.getTags(tagFilter).stream()
-                .collect(Collectors.toMap(tag -> tag.getModelId() + "_" + tag.getBizName(), tag -> tag));
+                .collect(Collectors.toMap(tag -> tag.getModelId() + "_" + tag.getBizName(), tag -> tag,
+                        (newTag, oldTag) -> newTag));
         if (Objects.nonNull(keyAndTagMap)) {
             dimensionResps.stream().forEach(dim -> {
                 String key = dim.getModelId() + "_" + dim.getBizName();
