@@ -171,7 +171,11 @@ public class DataSetServiceImpl
         dataSetResp.setAdminOrgs(StringUtils.isBlank(dataSetDO.getAdminOrg())
                 ? Lists.newArrayList() : Arrays.asList(dataSetDO.getAdminOrg().split(",")));
         dataSetResp.setTypeEnum(TypeEnums.DATASET);
-        dataSetResp.setQueryType(QueryType.valueOf(dataSetDO.getQueryType()));
+        String queryType = dataSetDO.getQueryType();
+        if (Objects.isNull(queryType)) {
+            queryType = QueryType.METRIC.name();
+        }
+        dataSetResp.setQueryType(QueryType.valueOf(queryType));
         return dataSetResp;
     }
 

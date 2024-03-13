@@ -67,7 +67,7 @@ public class ContextInheritParser implements SemanticParser {
         }
         elementMatches.addAll(matchesToInherit);
 
-        List<RuleSemanticQuery> queries = RuleSemanticQuery.resolve(elementMatches, queryContext);
+        List<RuleSemanticQuery> queries = RuleSemanticQuery.resolve(dataSetId, elementMatches, queryContext);
         for (RuleSemanticQuery query : queries) {
             query.fillParseInfo(queryContext, chatContext);
             if (existSameQuery(query.getParseInfo().getDataSetId(), query.getQueryMode(), queryContext)) {
