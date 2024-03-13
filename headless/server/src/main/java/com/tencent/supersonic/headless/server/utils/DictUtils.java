@@ -15,7 +15,6 @@ import com.tencent.supersonic.common.pojo.Filter;
 import com.tencent.supersonic.common.pojo.Order;
 import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
 import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
-import com.tencent.supersonic.common.pojo.enums.QueryType;
 import com.tencent.supersonic.common.pojo.enums.StatusEnum;
 import com.tencent.supersonic.common.pojo.enums.TaskStatusEnum;
 import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
@@ -245,12 +244,10 @@ public class DictUtils {
     private SemanticQueryReq constructQueryReq(DictItemResp dictItemResp) {
         if (TypeEnums.DIMENSION.equals(dictItemResp.getType())) {
             QuerySqlReq querySqlReq = constructDimQueryReq(dictItemResp);
-            querySqlReq.setQueryType(QueryType.METRIC);
             return querySqlReq;
         }
         if (TypeEnums.TAG.equals(dictItemResp.getType())) {
             QuerySqlReq querySqlReq = constructTagQueryReq(dictItemResp);
-            querySqlReq.setQueryType(QueryType.TAG);
             return querySqlReq;
         }
         log.warn("constructQueryReq failed");

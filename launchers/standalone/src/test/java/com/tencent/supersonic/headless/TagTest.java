@@ -102,6 +102,7 @@ public class TagTest extends BaseTest {
         TagResp tag = queryTagRespByBizName(bizName);
         ItemValueReq itemValueReq = new ItemValueReq();
         itemValueReq.setItemId(tag.getId());
+        // tagQueryService.queryTagValue(itemValueReq, User.getFakeUser());
         tagMetaService.delete(tag.getId(), User.getFakeUser());
     }
 
