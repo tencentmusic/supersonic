@@ -1,4 +1,4 @@
-package com.tencent.supersonic.headless.core.knowledge.helper;
+package com.tencent.supersonic.headless.core.chat.knowledge.helper;
 
 import static com.hankcs.hanlp.HanLP.Config.CustomDictionaryPath;
 

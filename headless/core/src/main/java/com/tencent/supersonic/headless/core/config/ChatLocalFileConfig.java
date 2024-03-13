@@ -1,6 +1,6 @@
 package com.tencent.supersonic.headless.core.config;
 
-import com.tencent.supersonic.headless.core.knowledge.helper.HanlpHelper;
+import com.tencent.supersonic.headless.core.chat.knowledge.helper.HanlpHelper;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;

@@ -1,4 +1,4 @@
-package com.tencent.supersonic.headless.core.knowledge.builder;
+package com.tencent.supersonic.headless.core.chat.knowledge.builder;
 
 
 import com.tencent.supersonic.common.pojo.enums.DictWordType;

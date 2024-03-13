@@ -1,4 +1,4 @@
-package com.tencent.supersonic.headless.core.knowledge.helper;
+package com.tencent.supersonic.headless.core.chat.knowledge.helper;
 
 import com.google.common.collect.Lists;
 import com.hankcs.hanlp.HanLP;
@@ -9,11 +9,11 @@ import com.hankcs.hanlp.seg.Segment;
 import com.hankcs.hanlp.seg.common.Term;
 import com.tencent.supersonic.common.pojo.enums.DictWordType;
 import com.tencent.supersonic.headless.api.pojo.response.S2Term;
-import com.tencent.supersonic.headless.core.knowledge.DictWord;
-import com.tencent.supersonic.headless.core.knowledge.HadoopFileIOAdapter;
-import com.tencent.supersonic.headless.core.knowledge.MapResult;
-import com.tencent.supersonic.headless.core.knowledge.MultiCustomDictionary;
-import com.tencent.supersonic.headless.core.knowledge.SearchService;
+import com.tencent.supersonic.headless.core.chat.knowledge.DictWord;
+import com.tencent.supersonic.headless.core.chat.knowledge.HadoopFileIOAdapter;
+import com.tencent.supersonic.headless.core.chat.knowledge.MapResult;
+import com.tencent.supersonic.headless.core.chat.knowledge.MultiCustomDictionary;
+import com.tencent.supersonic.headless.core.chat.knowledge.SearchService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;

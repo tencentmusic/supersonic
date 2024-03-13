@@ -1,6 +1,5 @@
 package com.tencent.supersonic.headless.core.chat.parser.llm;
 
-import com.google.common.collect.Lists;
 import com.tencent.supersonic.common.pojo.enums.DataFormatTypeEnum;
 import com.tencent.supersonic.common.pojo.enums.QueryType;
 import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
@@ -8,9 +7,7 @@ import com.tencent.supersonic.common.util.DateUtils;
 import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementMatch;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
-import com.tencent.supersonic.headless.api.pojo.SchemaItem;
 import com.tencent.supersonic.headless.api.pojo.SemanticSchema;
-import com.tencent.supersonic.headless.api.pojo.response.DataSetSchemaResp;
 import com.tencent.supersonic.headless.core.chat.parser.SatisfactionChecker;
 import com.tencent.supersonic.headless.core.chat.query.llm.s2sql.LLMReq;
 import com.tencent.supersonic.headless.core.chat.query.llm.s2sql.LLMReq.ElementValue;
@@ -80,7 +77,7 @@ public class LLMRequestService {
 
         List<String> fieldNameList = getFieldNameList(queryCtx, dataSetId, llmParserConfig);
 
-        String priorExts = getPriorExts(dataSetId, fieldNameList);
+        String priorExts = getPriorExts(queryCtx, fieldNameList);
         llmReq.setPriorExts(priorExts);
 
         fieldNameList.add(TimeDimensionEnum.DAY.getChName());
@@ -117,34 +114,30 @@ public class LLMRequestService {
         return new ArrayList<>(results);
     }
 
-    private String getPriorExts(Long dataSetId, List<String> fieldNameList) {
+    private String getPriorExts(QueryContext queryContext, List<String> fieldNameList) {
         StringBuilder extraInfoSb = new StringBuilder();
-        //todo
-        List<DataSetSchemaResp> dataSetSchemaResps = Lists.newArrayList();
-        if (!CollectionUtils.isEmpty(dataSetSchemaResps)) {
-            DataSetSchemaResp dataSetSchemaResp = dataSetSchemaResps.get(0);
-            Map<String, String> fieldNameToDataFormatType = dataSetSchemaResp.getMetrics()
-                    .stream().filter(metricSchemaResp -> Objects.nonNull(metricSchemaResp.getDataFormatType()))
-                    .flatMap(metricSchemaResp -> {
-                        Set<Pair<String, String>> result = new HashSet<>();
-                        String dataFormatType = metricSchemaResp.getDataFormatType();
-                        result.add(Pair.of(metricSchemaResp.getName(), dataFormatType));
-                        List<String> aliasList = SchemaItem.getAliasList(metricSchemaResp.getAlias());
-                        if (!CollectionUtils.isEmpty(aliasList)) {
-                            for (String alias : aliasList) {
-                                result.add(Pair.of(alias, dataFormatType));
-                            }
+        SemanticSchema semanticSchema = queryContext.getSemanticSchema();
+        Map<String, String> fieldNameToDataFormatType = semanticSchema.getMetrics()
+                .stream().filter(metricSchemaResp -> Objects.nonNull(metricSchemaResp.getDataFormatType()))
+                .flatMap(metricSchemaResp -> {
+                    Set<Pair<String, String>> result = new HashSet<>();
+                    String dataFormatType = metricSchemaResp.getDataFormatType();
+                    result.add(Pair.of(metricSchemaResp.getName(), dataFormatType));
+                    List<String> aliasList = metricSchemaResp.getAlias();
+                    if (!CollectionUtils.isEmpty(aliasList)) {
+                        for (String alias : aliasList) {
+                            result.add(Pair.of(alias, dataFormatType));
                         }
-                        return result.stream();
-                    }).collect(Collectors.toMap(Pair::getLeft, Pair::getRight, (k1, k2) -> k1));
+                    }
+                    return result.stream();
+                }).collect(Collectors.toMap(Pair::getLeft, Pair::getRight, (k1, k2) -> k1));
 
-            for (String fieldName : fieldNameList) {
-                String dataFormatType = fieldNameToDataFormatType.get(fieldName);
-                if (DataFormatTypeEnum.DECIMAL.getName().equalsIgnoreCase(dataFormatType)
-                        || DataFormatTypeEnum.PERCENT.getName().equalsIgnoreCase(dataFormatType)) {
-                    String format = String.format("%s的计量单位是%s", fieldName, "小数; ");
-                    extraInfoSb.append(format);
-                }
+        for (String fieldName : fieldNameList) {
+            String dataFormatType = fieldNameToDataFormatType.get(fieldName);
+            if (DataFormatTypeEnum.DECIMAL.getName().equalsIgnoreCase(dataFormatType)
+                    || DataFormatTypeEnum.PERCENT.getName().equalsIgnoreCase(dataFormatType)) {
+                String format = String.format("%s的计量单位是%s", fieldName, "小数; ");
+                extraInfoSb.append(format);
             }
         }
         return extraInfoSb.toString();

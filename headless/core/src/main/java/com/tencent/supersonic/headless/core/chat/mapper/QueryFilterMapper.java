@@ -9,7 +9,7 @@ import com.tencent.supersonic.headless.api.pojo.SchemaMapInfo;
 import com.tencent.supersonic.headless.api.pojo.request.QueryFilter;
 import com.tencent.supersonic.headless.api.pojo.request.QueryFilters;
 import com.tencent.supersonic.headless.core.pojo.QueryContext;
-import com.tencent.supersonic.headless.core.knowledge.builder.BaseWordBuilder;
+import com.tencent.supersonic.headless.core.chat.knowledge.builder.BaseWordBuilder;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.CollectionUtils;
 

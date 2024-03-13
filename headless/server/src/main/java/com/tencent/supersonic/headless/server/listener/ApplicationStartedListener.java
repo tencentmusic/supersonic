@@ -1,8 +1,8 @@
 package com.tencent.supersonic.headless.server.listener;
 
 
-import com.tencent.supersonic.headless.core.knowledge.DictWord;
-import com.tencent.supersonic.headless.core.knowledge.KnowledgeService;
+import com.tencent.supersonic.headless.core.chat.knowledge.DictWord;
+import com.tencent.supersonic.headless.core.chat.knowledge.KnowledgeService;
 import com.tencent.supersonic.headless.server.service.impl.WordService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
