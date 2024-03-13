@@ -41,11 +41,11 @@ public abstract class BaseMapper implements SchemaMapper {
 
     public abstract void doMap(QueryContext queryContext);
 
-    public void addToSchemaMap(SchemaMapInfo schemaMap, Long modelId, SchemaElementMatch newElementMatch) {
-        Map<Long, List<SchemaElementMatch>> modelElementMatches = schemaMap.getDataSetElementMatches();
-        List<SchemaElementMatch> schemaElementMatches = modelElementMatches.putIfAbsent(modelId, new ArrayList<>());
+    public void addToSchemaMap(SchemaMapInfo schemaMap, Long dataSetId, SchemaElementMatch newElementMatch) {
+        Map<Long, List<SchemaElementMatch>> dataSetElementMatches = schemaMap.getDataSetElementMatches();
+        List<SchemaElementMatch> schemaElementMatches = dataSetElementMatches.putIfAbsent(dataSetId, new ArrayList<>());
         if (schemaElementMatches == null) {
-            schemaElementMatches = modelElementMatches.get(modelId);
+            schemaElementMatches = dataSetElementMatches.get(dataSetId);
         }
         //remove duplication
         AtomicBoolean needAddNew = new AtomicBoolean(true);
