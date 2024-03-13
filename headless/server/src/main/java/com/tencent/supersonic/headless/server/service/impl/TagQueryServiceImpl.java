@@ -8,6 +8,7 @@ import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
 import com.tencent.supersonic.headless.api.pojo.Dim;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
 import com.tencent.supersonic.headless.api.pojo.ValueDistribution;
+import com.tencent.supersonic.headless.api.pojo.enums.TagDefineType;
 import com.tencent.supersonic.headless.api.pojo.request.ItemValueReq;
 import com.tencent.supersonic.headless.api.pojo.request.QuerySqlReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryTagReq;
@@ -62,6 +63,7 @@ public class TagQueryServiceImpl implements TagQueryService {
         itemValueResp.setItemId(itemValueReq.getItemId());
         itemValueResp.setType(SchemaElementType.TAG);
         TagResp tag = tagMetaService.getTag(itemValueReq.getItemId(), user);
+        checkTag(tag);
         itemValueResp.setName(tag.getName());
         itemValueResp.setBizName(tag.getBizName());
         correctDateConf(itemValueReq, tag, user);
@@ -72,6 +74,12 @@ public class TagQueryServiceImpl implements TagQueryService {
         SemanticQueryResp semanticQueryResp = queryService.queryByReq(queryTagReq, user);
         fillTagValueInfo(itemValueResp, semanticQueryResp, totalCount);
         return itemValueResp;
+    }
+
+    private void checkTag(TagResp tag) throws Exception {
+        if (Objects.nonNull(tag) && TagDefineType.METRIC.equals(tag.getTagDefineType())) {
+            throw new Exception("do not support value distribution query for tag: " + tag.getBizName());
+        }
     }
 
     private void correctDateConf(ItemValueReq itemValueReq, TagResp tag, User user) throws Exception {
