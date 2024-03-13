@@ -44,12 +44,7 @@ public class TagConverter {
             SemanticSchemaResp semanticSchemaResp) throws Exception {
         QueryStatement queryStatement = new QueryStatement();
         // covert to QueryReqConverter
-        QueryStructReq queryStructReq = new QueryStructReq();
-        BeanUtils.copyProperties(queryTagReq, queryStructReq);
-        // queryStructReq.setModelIds(queryTagReq.getModelIdSet());
-        if (!CollectionUtils.isEmpty(queryTagReq.getTagFilters())) {
-            queryStructReq.setDimensionFilters(queryTagReq.getTagFilters());
-        }
+        BeanUtils.copyProperties(queryStructReq.convert(), queryStructReq);
         QuerySqlReq querySqlReq = queryStructReq.convert();
         convert(querySqlReq, semanticSchemaResp, queryStatement, queryStructReq);
         QueryParam queryParam = new QueryParam();
@@ -57,6 +52,8 @@ public class TagConverter {
         queryStatement.setQueryParam(queryParam);
         queryStatement.setDataSetId(queryStructReq.getDataSetId());
         return queryStatement;
+
+
     }
 
     public void convert(QuerySqlReq querySqlReq,
