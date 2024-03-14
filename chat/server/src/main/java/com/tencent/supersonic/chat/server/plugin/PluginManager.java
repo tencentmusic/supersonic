@@ -3,7 +3,6 @@ package com.tencent.supersonic.chat.server.plugin;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.tencent.supersonic.chat.api.pojo.request.ChatParseReq;
 import com.tencent.supersonic.chat.server.agent.Agent;
 import com.tencent.supersonic.chat.server.agent.AgentToolType;
 import com.tencent.supersonic.chat.server.agent.PluginTool;
@@ -12,6 +11,7 @@ import com.tencent.supersonic.chat.server.plugin.build.WebBase;
 import com.tencent.supersonic.chat.server.plugin.event.PluginAddEvent;
 import com.tencent.supersonic.chat.server.plugin.event.PluginDelEvent;
 import com.tencent.supersonic.chat.server.plugin.event.PluginUpdateEvent;
+import com.tencent.supersonic.chat.server.pojo.ChatParseContext;
 import com.tencent.supersonic.chat.server.service.AgentService;
 import com.tencent.supersonic.chat.server.service.PluginService;
 import com.tencent.supersonic.common.config.EmbeddingConfig;
@@ -26,7 +26,6 @@ import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementMatch;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
 import com.tencent.supersonic.headless.api.pojo.SchemaMapInfo;
-import com.tencent.supersonic.headless.core.pojo.QueryContext;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -53,10 +52,10 @@ public class PluginManager {
 
     private S2EmbeddingStore s2EmbeddingStore = ComponentFactory.getS2EmbeddingStore();
 
-    public static List<Plugin> getPluginAgentCanSupport(ChatParseReq chatParseReq) {
+    public static List<Plugin> getPluginAgentCanSupport(ChatParseContext chatParseContext) {
         PluginService pluginService = ContextUtils.getBean(PluginService.class);
         AgentService agentService = ContextUtils.getBean(AgentService.class);
-        Agent agent = agentService.getAgent(chatParseReq.getAgentId());
+        Agent agent = agentService.getAgent(chatParseContext.getAgentId());
 
         List<Plugin> plugins = pluginService.getPluginList();
         if (Objects.isNull(agent)) {
@@ -199,9 +198,9 @@ public class PluginManager {
         return String.valueOf(Integer.parseInt(id) / 1000);
     }
 
-    public static Pair<Boolean, Set<Long>> resolve(Plugin plugin, QueryContext queryContext) {
-        SchemaMapInfo schemaMapInfo = queryContext.getMapInfo();
-        Set<Long> pluginMatchedModel = getPluginMatchedModel(plugin, queryContext);
+    public static Pair<Boolean, Set<Long>> resolve(Plugin plugin, ChatParseContext chatParseContext) {
+        SchemaMapInfo schemaMapInfo = chatParseContext.getMapInfo();
+        Set<Long> pluginMatchedModel = getPluginMatchedModel(plugin, chatParseContext);
         if (CollectionUtils.isEmpty(pluginMatchedModel) && !plugin.isContainsAllModel()) {
             return Pair.of(false, Sets.newHashSet());
         }
@@ -267,8 +266,8 @@ public class PluginManager {
                 .collect(Collectors.toList());
     }
 
-    private static Set<Long> getPluginMatchedModel(Plugin plugin, QueryContext queryContext) {
-        Set<Long> matchedDataSets = queryContext.getMapInfo().getMatchedDataSetInfos();
+    private static Set<Long> getPluginMatchedModel(Plugin plugin, ChatParseContext chatParseContext) {
+        Set<Long> matchedDataSets = chatParseContext.getMapInfo().getMatchedDataSetInfos();
         if (plugin.isContainsAllModel()) {
             return Sets.newHashSet(plugin.getDefaultMode());
         }

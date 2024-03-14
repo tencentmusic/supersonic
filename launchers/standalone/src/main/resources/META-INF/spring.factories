@@ -9,6 +9,14 @@ com.tencent.supersonic.headless.core.chat.parser.SemanticParser=\
     com.tencent.supersonic.headless.core.chat.parser.llm.LLMSqlParser, \
     com.tencent.supersonic.headless.core.chat.parser.QueryTypeParser
 
+com.tencent.supersonic.chat.server.parser.ChatParser=\
+    com.tencent.supersonic.chat.server.parser.Text2PluginParser, \
+    com.tencent.supersonic.chat.server.parser.Text2SqlParser
+
+com.tencent.supersonic.chat.server.executor.ChatExecutor=\
+    com.tencent.supersonic.chat.server.executor.PluginExecutor, \
+    com.tencent.supersonic.chat.server.executor.SqlExecutor
+
 com.tencent.supersonic.headless.core.chat.corrector.SemanticCorrector=\
     com.tencent.supersonic.headless.core.chat.corrector.SchemaCorrector, \
     com.tencent.supersonic.headless.core.chat.corrector.TimeCorrector, \
@@ -47,6 +55,13 @@ com.tencent.supersonic.auth.authentication.interceptor.AuthenticationInterceptor
 
 com.tencent.supersonic.auth.api.authentication.adaptor.UserAdaptor=\
     com.tencent.supersonic.auth.authentication.adaptor.DefaultUserAdaptor
+
+com.tencent.supersonic.chat.server.plugin.recognize.PluginRecognizer=\
+    com.tencent.supersonic.chat.server.plugin.recognize.embedding.EmbeddingRecallRecognizer
+
+com.tencent.supersonic.chat.server.processor.parse.ParseResultProcessor=\
+    com.tencent.supersonic.chat.server.processor.parse.RespBuildProcessor,\
+    com.tencent.supersonic.chat.server.processor.parse.QueryRecommendProcessor
 
 com.tencent.supersonic.chat.server.processor.execute.ExecuteResultProcessor=\
     com.tencent.supersonic.chat.server.processor.execute.MetricRecommendProcessor,\

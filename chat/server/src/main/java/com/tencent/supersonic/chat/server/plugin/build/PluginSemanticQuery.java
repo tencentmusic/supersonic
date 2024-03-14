@@ -1,14 +1,13 @@
 package com.tencent.supersonic.chat.server.plugin.build;
 
 import com.google.common.collect.Lists;
-import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.chat.server.plugin.PluginParseResult;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementMatch;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
-import com.tencent.supersonic.headless.api.pojo.SemanticSchema;
+import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.api.pojo.request.QueryFilter;
 import com.tencent.supersonic.headless.api.pojo.request.QueryFilters;
-import com.tencent.supersonic.headless.core.chat.query.BaseSemanticQuery;
+import com.tencent.supersonic.headless.api.pojo.response.QueryResult;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.CollectionUtils;
 
@@ -17,12 +16,11 @@ import java.util.List;
 import java.util.Map;
 
 @Slf4j
-public abstract class PluginSemanticQuery extends BaseSemanticQuery {
+public abstract class PluginSemanticQuery {
 
-    @Override
-    public void initS2Sql(SemanticSchema semanticSchema, User user) {
+    protected SemanticParseInfo parseInfo;
 
-    }
+    public abstract QueryResult build();
 
     private Map<Long, Object> getFilterMap(PluginParseResult pluginParseResult) {
         Map<Long, Object> map = new HashMap<>();
@@ -89,6 +87,10 @@ public abstract class PluginSemanticQuery extends BaseSemanticQuery {
         }
         webBaseResult.setParamOptions(paramOptions);
         return webBaseResult;
+    }
+
+    public void setParseInfo(SemanticParseInfo parseInfo) {
+        this.parseInfo = parseInfo;
     }
 
 }

@@ -32,6 +32,7 @@ import com.tencent.supersonic.headless.api.pojo.request.QueryReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
 import com.tencent.supersonic.headless.api.pojo.request.SemanticQueryReq;
 import com.tencent.supersonic.headless.api.pojo.response.ExplainResp;
+import com.tencent.supersonic.headless.api.pojo.response.MapResp;
 import com.tencent.supersonic.headless.api.pojo.response.ParseResp;
 import com.tencent.supersonic.headless.api.pojo.response.QueryResult;
 import com.tencent.supersonic.headless.api.pojo.response.QueryState;
@@ -105,6 +106,18 @@ public class ChatQueryServiceImpl implements ChatQueryService {
     private List<SemanticParser> semanticParsers = ComponentFactory.getSemanticParsers();
     private List<SemanticCorrector> semanticCorrectors = ComponentFactory.getSemanticCorrectors();
     private List<ResultProcessor> resultProcessors = ComponentFactory.getResultProcessors();
+
+    @Override
+    public MapResp performMapping(QueryReq queryReq) {
+        MapResp mapResp = new MapResp();
+        QueryContext queryCtx = buildQueryContext(queryReq);
+        schemaMappers.forEach(mapper -> {
+            mapper.map(queryCtx);
+        });
+        SchemaMapInfo mapInfo = queryCtx.getMapInfo();
+        mapResp.setMapInfo(mapInfo);
+        return mapResp;
+    }
 
     @Override
     public ParseResp performParsing(QueryReq queryReq) {
