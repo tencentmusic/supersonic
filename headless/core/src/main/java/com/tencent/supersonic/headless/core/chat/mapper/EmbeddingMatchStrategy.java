@@ -49,7 +49,7 @@ public class EmbeddingMatchStrategy extends BaseMatchStrategy<EmbeddingResult> {
 
     @Override
     public void detectByStep(QueryContext queryContext, Set<EmbeddingResult> existResults, Set<Long> detectDataSetIds,
-                             String detectSegment, int offset) {
+            String detectSegment, int offset) {
 
     }
 
@@ -77,10 +77,12 @@ public class EmbeddingMatchStrategy extends BaseMatchStrategy<EmbeddingResult> {
         int embeddingNumber = optimizationConfig.getEmbeddingMapperNumber();
         Double distance = optimizationConfig.getEmbeddingMapperDistanceThreshold();
         // step1. build query params
+
         RetrieveQuery retrieveQuery = RetrieveQuery.builder().queryTextsList(queryTextsSub).build();
         // step2. retrieveQuery by detectSegment
+
         List<RetrieveQueryResult> retrieveQueryResults = metaEmbeddingService.retrieveQuery(
-                retrieveQuery, embeddingNumber, modelIdToDataSetIds);
+                retrieveQuery, embeddingNumber, modelIdToDataSetIds, detectDataSetIds);
 
         if (CollectionUtils.isEmpty(retrieveQueryResults)) {
             return;

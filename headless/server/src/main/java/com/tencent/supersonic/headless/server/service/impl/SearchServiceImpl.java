@@ -78,8 +78,11 @@ public class SearchServiceImpl implements SearchService {
 
         QueryContext queryContext = new QueryContext();
         BeanUtils.copyProperties(queryReq, queryContext);
+        queryContext.setModelIdToDataSetIds(dataSetService.getModelIdToDataSetIds());
+
         Map<MatchText, List<HanlpMapResult>> regTextMap =
                 searchMatchStrategy.match(queryContext, originals, dataSetIds);
+
         regTextMap.entrySet().stream().forEach(m -> HanlpHelper.transLetterOriginal(m.getValue()));
 
         // 3.get the most matching data
@@ -100,16 +103,16 @@ public class SearchServiceImpl implements SearchService {
         Set<SearchResult> searchResults = new LinkedHashSet();
         DataSetInfoStat dataSetInfoStat = NatureHelper.getDataSetStat(originals);
 
-        List<Long> possibleModels = getPossibleDataSets(queryReq, originals, dataSetInfoStat, dataSetIds);
+        List<Long> possibleDataSets = getPossibleDataSets(queryReq, originals, dataSetInfoStat, dataSetIds);
 
         // 5.1 priority dimension metric
-        boolean existMetricAndDimension = searchMetricAndDimension(new HashSet<>(possibleModels), dataSetIdToName,
+        boolean existMetricAndDimension = searchMetricAndDimension(new HashSet<>(possibleDataSets), dataSetIdToName,
                 searchTextEntry, searchResults);
 
         // 5.2 process based on dimension values
         MatchText matchText = searchTextEntry.getKey();
-        Map<String, String> natureToNameMap = getNatureToNameMap(searchTextEntry, new HashSet<>(possibleModels));
-        log.debug("possibleModels:{},natureToNameMap:{}", possibleModels, natureToNameMap);
+        Map<String, String> natureToNameMap = getNatureToNameMap(searchTextEntry, new HashSet<>(possibleDataSets));
+        log.debug("possibleDataSets:{},natureToNameMap:{}", possibleDataSets, natureToNameMap);
 
         for (Map.Entry<String, String> natureToNameEntry : natureToNameMap.entrySet()) {
 
@@ -123,23 +126,23 @@ public class SearchServiceImpl implements SearchService {
     }
 
     private List<Long> getPossibleDataSets(QueryReq queryCtx, List<S2Term> originals,
-                                         DataSetInfoStat dataSetInfoStat, Set<Long> dataSetIds) {
+            DataSetInfoStat dataSetInfoStat, Set<Long> dataSetIds) {
         if (CollectionUtils.isNotEmpty(dataSetIds)) {
             return new ArrayList<>(dataSetIds);
         }
 
-        List<Long> possibleModels = NatureHelper.selectPossibleDataSets(originals);
+        List<Long> possibleDataSets = NatureHelper.selectPossibleDataSets(originals);
 
         Long contextModel = chatContextService.getContextModel(queryCtx.getChatId());
 
-        log.debug("possibleModels:{},dataSetInfoStat:{},contextModel:{}",
-                possibleModels, dataSetInfoStat, contextModel);
+        log.debug("possibleDataSets:{},dataSetInfoStat:{},contextModel:{}",
+                possibleDataSets, dataSetInfoStat, contextModel);
 
         // If nothing is recognized or only metric are present, then add the contextModel.
         if (nothingOrOnlyMetric(dataSetInfoStat)) {
             return Lists.newArrayList(contextModel);
         }
-        return possibleModels;
+        return possibleDataSets;
     }
 
     private boolean nothingOrOnlyMetric(DataSetInfoStat modelStat) {
@@ -174,7 +177,6 @@ public class SearchServiceImpl implements SearchService {
                 .schemaElementType(schemaElementType)
                 .subRecommend(wordName)
                 .build();
-
 
         if (metricModelCount <= 0 && !existMetricAndDimension) {
             if (filterByQueryFilter(wordName, queryFilters)) {
@@ -265,7 +267,7 @@ public class SearchServiceImpl implements SearchService {
                         LinkedHashMap::new));
     }
 
-    private boolean searchMetricAndDimension(Set<Long> possibleModels, Map<Long, String> modelToName,
+    private boolean searchMetricAndDimension(Set<Long> possibleDataSets, Map<Long, String> modelToName,
             Map.Entry<MatchText, List<HanlpMapResult>> searchTextEntry, Set<SearchResult> searchResults) {
         boolean existMetric = false;
         log.info("searchMetricAndDimension searchTextEntry:{}", searchTextEntry);
@@ -277,7 +279,7 @@ public class SearchServiceImpl implements SearchService {
             List<ModelWithSemanticType> dimensionMetricClassIds = hanlpMapResult.getNatures().stream()
                     .map(nature -> new ModelWithSemanticType(NatureHelper.getDataSetId(nature),
                             NatureHelper.convertToElementType(nature)))
-                    .filter(entry -> matchCondition(entry, possibleModels)).collect(Collectors.toList());
+                    .filter(entry -> matchCondition(entry, possibleDataSets)).collect(Collectors.toList());
 
             if (CollectionUtils.isEmpty(dimensionMetricClassIds)) {
                 continue;
@@ -296,22 +298,22 @@ public class SearchServiceImpl implements SearchService {
                 //visibility to filter  metrics
                 searchResults.add(searchResult);
             }
-            log.info("parseResult:{},dimensionMetricClassIds:{},possibleModels:{}", hanlpMapResult,
-                    dimensionMetricClassIds, possibleModels);
+            log.info("parseResult:{},dimensionMetricClassIds:{},possibleDataSets:{}", hanlpMapResult,
+                    dimensionMetricClassIds, possibleDataSets);
         }
         log.info("searchMetricAndDimension searchResults:{}", searchResults);
         return existMetric;
     }
 
-    private boolean matchCondition(ModelWithSemanticType entry, Set<Long> possibleModels) {
+    private boolean matchCondition(ModelWithSemanticType entry, Set<Long> possibleDataSets) {
         if (!(SchemaElementType.METRIC.equals(entry.getSchemaElementType()) || SchemaElementType.DIMENSION.equals(
                 entry.getSchemaElementType()))) {
             return false;
         }
 
-        if (CollectionUtils.isEmpty(possibleModels)) {
+        if (CollectionUtils.isEmpty(possibleDataSets)) {
             return true;
         }
-        return possibleModels.contains(entry.getModel());
+        return possibleDataSets.contains(entry.getModel());
     }
 }

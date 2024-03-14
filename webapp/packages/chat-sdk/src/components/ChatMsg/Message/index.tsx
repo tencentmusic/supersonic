@@ -45,7 +45,7 @@ const Message: React.FC<Props> = ({
               e.stopPropagation();
             }}
           >
-            {(queryMode === 'METRIC_TAG' || queryMode === 'TAG_DETAIL') &&
+            {(queryMode === 'METRIC_ID' || queryMode === 'TAG_DETAIL') &&
               entityInfoList.length > 0 && (
                 <div className={`${prefixCls}-info-bar`}>
                   <div className={`${prefixCls}-main-entity-info`}>
