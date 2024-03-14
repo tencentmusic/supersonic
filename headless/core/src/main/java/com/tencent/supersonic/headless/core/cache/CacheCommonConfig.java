@@ -20,5 +20,8 @@ public class CacheCommonConfig {
     @Value("${cache.common.expire.after.write:10}")
     private Integer cacheCommonExpireAfterWrite;
 
+    @Value("${query.cache.enable:true}")
+    private Boolean cacheEnable;
+
 
 }

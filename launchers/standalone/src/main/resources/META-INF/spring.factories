@@ -14,6 +14,24 @@ com.tencent.supersonic.headless.core.chat.corrector.SemanticCorrector=\
     com.tencent.supersonic.headless.core.chat.corrector.TimeCorrector, \
     com.tencent.supersonic.headless.core.chat.corrector.GrammarCorrector
 
+com.tencent.supersonic.headless.core.parser.converter.HeadlessConverter=\
+    com.tencent.supersonic.headless.core.parser.converter.DefaultDimValueConverter,\
+    com.tencent.supersonic.headless.core.parser.converter.SqlVariableParseConverter,\
+    com.tencent.supersonic.headless.core.parser.converter.CalculateAggConverter,\
+    com.tencent.supersonic.headless.core.parser.converter.ParserDefaultConverter
+
+com.tencent.supersonic.headless.core.planner.QueryOptimizer=\
+    com.tencent.supersonic.headless.core.planner.DetailQueryOptimizer
+
+com.tencent.supersonic.headless.core.executor.QueryExecutor=\
+    com.tencent.supersonic.headless.core.executor.JdbcExecutor
+
+com.tencent.supersonic.headless.core.parser.SqlParser=\
+    com.tencent.supersonic.headless.core.parser.calcite.CalciteSqlParser
+
+com.tencent.supersonic.headless.core.cache.QueryCache=\
+    com.tencent.supersonic.headless.core.cache.DefaultQueryCache
+
 com.tencent.supersonic.headless.server.processor.ResultProcessor=\
     com.tencent.supersonic.headless.server.processor.ParseInfoProcessor, \
     com.tencent.supersonic.headless.server.processor.QueryRankProcessor, \
