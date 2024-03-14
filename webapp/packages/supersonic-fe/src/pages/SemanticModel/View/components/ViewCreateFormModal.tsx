@@ -84,6 +84,7 @@ const ViewCreateFormModal: React.FC<ModelCreateFormModalProps> = ({
   const queryTagList = async (modelId: number) => {
     const { code, data, msg } = await getTagList({
       modelIds: [modelId],
+      pageSize: 9999,
     });
 
     const { list } = data || {};

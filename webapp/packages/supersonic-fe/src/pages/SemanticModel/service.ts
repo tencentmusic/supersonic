@@ -615,7 +615,7 @@ export function deleteView(viewId: number): Promise<any> {
 export function getTagList(data: any): Promise<any> {
   return request(`${process.env.API_BASE_URL}tag/queryTag`, {
     method: 'POST',
-    data,
+    data: { pageSize: 9999, ...data },
   });
 }
 

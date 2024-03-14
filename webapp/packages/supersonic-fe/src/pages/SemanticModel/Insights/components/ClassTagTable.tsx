@@ -15,6 +15,7 @@ import moment from 'moment';
 import styles from '../style.less';
 import { ISemantic } from '../../data';
 import { ColumnsConfig } from '../../components/TableColumnRender';
+import TagValueSettingModal from './TagValueSettingModal';
 
 type Props = {
   dispatch: Dispatch;
@@ -36,6 +37,8 @@ const ClassTagTable: React.FC<Props> = ({ domainManger, dispatch }) => {
   const [pagination, setPagination] = useState(defaultPagination);
 
   const [filterParams, setFilterParams] = useState<Record<string, any>>({});
+
+  const [tagValueSettingModalVisible, setTagValueSettingModalVisible] = useState<boolean>(false);
 
   const actionRef = useRef<ActionType>();
 
@@ -159,6 +162,16 @@ const ClassTagTable: React.FC<Props> = ({ domainManger, dispatch }) => {
               }}
             >
               编辑
+            </Button>
+            <Button
+              key="tagValueEditBtn"
+              type="link"
+              onClick={() => {
+                setTagItem(record);
+                setTagValueSettingModalVisible(true);
+              }}
+            >
+              标签值设置
             </Button>
             {record.status === StatusEnum.ONLINE ? (
               <Button
@@ -338,6 +351,18 @@ const ClassTagTable: React.FC<Props> = ({ domainManger, dispatch }) => {
           }}
           onCancel={() => {
             setCreateModalVisible(false);
+          }}
+        />
+      )}
+      {tagValueSettingModalVisible && (
+        <TagValueSettingModal
+          open={tagValueSettingModalVisible}
+          tagItem={tagItem}
+          onCancel={() => {
+            setTagValueSettingModalVisible(false);
+          }}
+          onSubmit={() => {
+            setTagValueSettingModalVisible(false);
           }}
         />
       )}

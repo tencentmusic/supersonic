@@ -184,7 +184,7 @@ const DimensionValueSettingModal: React.FC<CreateFormProps> = ({
     {
       label: '维度值设置',
       key: 'setting',
-      children: <DimensionValueSettingForm dimensionItem={dimensionItem} />,
+      children: <DimensionValueSettingForm dataItem={dimensionItem} />,
     },
   ];
 

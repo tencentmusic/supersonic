@@ -4,7 +4,12 @@ import { Form, Switch, Space, Button, Tooltip, message, Select } from 'antd';
 import FormItemTitle from '@/components/FormHelper/FormItemTitle';
 import { RedoOutlined, InfoCircleOutlined } from '@ant-design/icons';
 import { formLayout } from '@/components/FormHelper/utils';
-import { DictTaskState, KnowledgeConfigTypeEnum, KnowledgeConfigStatusEnum } from '../../enum';
+import {
+  DictTaskState,
+  KnowledgeConfigTypeEnum,
+  KnowledgeConfigStatusEnum,
+  KnowledgeConfigTypeWordingMap,
+} from '../../enum';
 import {
   searchKnowledgeConfigQuery,
   searchDictLatestTaskList,
@@ -19,14 +24,15 @@ import styles from '../style.less';
 import CommonEditList from '../../components/CommonEditList';
 
 type Props = {
-  dimensionItem: ISemantic.IDimensionItem;
+  dataItem: ISemantic.IDimensionItem | ISemantic.ITagItem;
+  type?: KnowledgeConfigTypeEnum;
   onSubmit?: () => void;
 };
 
 const FormItem = Form.Item;
 
 const DimensionValueSettingForm: ForwardRefRenderFunction<any, Props> = (
-  { dimensionItem },
+  { dataItem, type = KnowledgeConfigTypeEnum.DIMENSION },
   ref,
 ) => {
   const [form] = Form.useForm();
@@ -56,7 +62,7 @@ const DimensionValueSettingForm: ForwardRefRenderFunction<any, Props> = (
     if (taskItemState?.taskStatus) {
       return (
         <span style={{ color: '#5493ff', fontWeight: 'bold' }}>
-          {DictTaskState[taskItemState.taskStatus] || '未知状态'}
+          {DictTaskState[taskItemState?.taskStatus || 'unknown']}
         </span>
       );
     }
@@ -66,8 +72,8 @@ const DimensionValueSettingForm: ForwardRefRenderFunction<any, Props> = (
   const searchKnowledgeConfig = async () => {
     setRefreshLoading(true);
     const { code, data } = await searchKnowledgeConfigQuery({
-      type: KnowledgeConfigTypeEnum.DIMENSION,
-      itemId: dimensionItem.id,
+      type,
+      itemId: dataItem.id,
     });
 
     setRefreshLoading(false);
@@ -91,15 +97,15 @@ const DimensionValueSettingForm: ForwardRefRenderFunction<any, Props> = (
       form.setFieldsValue({
         ...defaultKnowledgeConfig,
       });
-      createDictConfigQuery(dimensionItem, defaultKnowledgeConfig);
+      createDictConfigQuery(dataItem, defaultKnowledgeConfig);
     }
   };
 
   const queryDictLatestTaskList = async () => {
     setRefreshLoading(true);
     const { code, data } = await searchDictLatestTaskList({
-      type: KnowledgeConfigTypeEnum.DIMENSION,
-      itemId: dimensionItem.id,
+      type,
+      itemId: dataItem.id,
     });
     setRefreshLoading(false);
     if (code !== 200) {
@@ -117,7 +123,7 @@ const DimensionValueSettingForm: ForwardRefRenderFunction<any, Props> = (
 
   const getFormValidateFields = async () => {
     const fields = await form.validateFields();
-    const fieldValue = Object.keys(fields).reduce((formField, key: string) => {
+    const fieldValue = Object.keys(fields).reduce((formField: any, key: string) => {
       const targetValue = fields[key];
       if (exchangeFields.includes(key)) {
         if (isString(targetValue)) {
@@ -144,7 +150,7 @@ const DimensionValueSettingForm: ForwardRefRenderFunction<any, Props> = (
     config: ISemantic.IDictKnowledgeConfigItemConfig,
   ) => {
     const { code, data } = await createDictConfig({
-      type: KnowledgeConfigTypeEnum.DIMENSION,
+      type,
       itemId: dimension.id,
       config,
       status: 1,
@@ -160,7 +166,7 @@ const DimensionValueSettingForm: ForwardRefRenderFunction<any, Props> = (
   const createDictTaskQuery = async (dimension: ISemantic.IDimensionItem) => {
     setImportDictState(true);
     const { code } = await createDictTask({
-      type: KnowledgeConfigTypeEnum.DIMENSION,
+      type,
       itemId: dimension.id,
     });
 
@@ -199,7 +205,7 @@ const DimensionValueSettingForm: ForwardRefRenderFunction<any, Props> = (
   const deleteDictTaskQuery = async (dimension: ISemantic.IDimensionItem) => {
     setDeleteLoading(true);
     const { code } = await deleteDictTask({
-      type: KnowledgeConfigTypeEnum.DIMENSION,
+      type,
       itemId: dimension.id,
     });
     setDeleteLoading(false);
@@ -225,7 +231,9 @@ const DimensionValueSettingForm: ForwardRefRenderFunction<any, Props> = (
               title={
                 <>
                   <Space>
-                    <span style={{ fontSize: 16 }}>维度值可见</span>
+                    <span style={{ fontSize: 16 }}>
+                      {KnowledgeConfigTypeWordingMap[type]}值可见
+                    </span>
                     <Switch
                       defaultChecked
                       size="small"
@@ -242,20 +250,20 @@ const DimensionValueSettingForm: ForwardRefRenderFunction<any, Props> = (
                   </Space>
                 </>
               }
-              subTitle={'设置可见后，维度值将在搜索时可以被联想出来'}
+              subTitle={`设置可见后，${KnowledgeConfigTypeWordingMap[type]}值将在搜索时可以被联想出来`}
             />
           }
         >
           {dimensionVisible && (
             <Space size={20} style={{ marginBottom: 20 }}>
-              <Tooltip title="立即将维度值导入字典">
+              <Tooltip title={`立即将${KnowledgeConfigTypeWordingMap[type]}值导入字典`}>
                 <Button
                   type="link"
                   size="small"
                   style={{ padding: 0 }}
                   disabled={importDictState}
                   onClick={(event) => {
-                    createDictTaskQuery(dimensionItem);
+                    createDictTaskQuery(dataItem);
                     setTaskItemState({
                       ...(taskItemState || ({} as ISemantic.IDictKnowledgeTaskItem)),
                       taskStatus: 'running',
@@ -282,7 +290,7 @@ const DimensionValueSettingForm: ForwardRefRenderFunction<any, Props> = (
                   >
                     导入状态
                     <Space>
-                      <RedoOutlined />: <span>{taskRender(dimensionItem)}</span>
+                      <RedoOutlined />: <span>{taskRender(dataItem)}</span>
                     </Space>
                   </Button>
                 </Space>
@@ -295,7 +303,7 @@ const DimensionValueSettingForm: ForwardRefRenderFunction<any, Props> = (
                 disabled={taskItemState?.taskStatus === 'running'}
                 loading={deleteLoading}
                 onClick={(event) => {
-                  deleteDictTaskQuery(dimensionItem);
+                  deleteDictTaskQuery(dataItem);
                   setTaskItemState({
                     ...(taskItemState || ({} as ISemantic.IDictKnowledgeTaskItem)),
                     taskStatus: '',
@@ -328,7 +336,7 @@ const DimensionValueSettingForm: ForwardRefRenderFunction<any, Props> = (
                   marginBottom: 20,
                 }}
               >
-                <span style={{ flex: 'auto' }}>维度值过滤</span>
+                <span style={{ flex: 'auto' }}>{KnowledgeConfigTypeWordingMap[type]}值过滤</span>
                 <span style={{ marginLeft: 'auto' }}>
                   <Button
                     type="primary"
@@ -345,7 +353,7 @@ const DimensionValueSettingForm: ForwardRefRenderFunction<any, Props> = (
               <FormItem name="blackList" label="黑名单">
                 <Select
                   mode="tags"
-                  placeholder="输入维度值后回车确认，多别名输入、复制粘贴支持英文逗号自动分隔"
+                  placeholder={`输入${KnowledgeConfigTypeWordingMap[type]}值后回车确认，多别名输入、复制粘贴支持英文逗号自动分隔`}
                   tokenSeparators={[',']}
                   maxTagCount={9}
                 />
@@ -354,7 +362,7 @@ const DimensionValueSettingForm: ForwardRefRenderFunction<any, Props> = (
               <FormItem name="whiteList" label="白名单">
                 <Select
                   mode="tags"
-                  placeholder="输入维度值后回车确认，多别名输入、复制粘贴支持英文逗号自动分隔"
+                  placeholder={`输入${KnowledgeConfigTypeWordingMap[type]}值后回车确认，多别名输入、复制粘贴支持英文逗号自动分隔`}
                   tokenSeparators={[',']}
                   maxTagCount={9}
                 />

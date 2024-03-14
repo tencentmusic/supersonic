@@ -47,6 +47,7 @@ export enum OperatorEnum {
 
 export enum KnowledgeConfigTypeEnum {
   DIMENSION = 'DIMENSION',
+  TAG = 'TAG',
   METRIC = 'METRIC',
   DOMAIN = 'DOMAIN',
   ENTITY = 'ENTITY',
@@ -54,6 +55,17 @@ export enum KnowledgeConfigTypeEnum {
   MODEL = 'MODEL',
   UNKNOWN = 'UNKNOWN',
 }
+
+export const KnowledgeConfigTypeWordingMap = {
+  [KnowledgeConfigTypeEnum.DIMENSION]: '维度',
+  [KnowledgeConfigTypeEnum.TAG]: '标签',
+  [KnowledgeConfigTypeEnum.METRIC]: '指标',
+  [KnowledgeConfigTypeEnum.DOMAIN]: '域',
+  [KnowledgeConfigTypeEnum.ENTITY]: '实体',
+  [KnowledgeConfigTypeEnum.VIEW]: '视图',
+  [KnowledgeConfigTypeEnum.MODEL]: '模型',
+  [KnowledgeConfigTypeEnum.UNKNOWN]: '未知',
+};
 
 export enum KnowledgeConfigStatusEnum {
   ONLINE = 'ONLINE',
