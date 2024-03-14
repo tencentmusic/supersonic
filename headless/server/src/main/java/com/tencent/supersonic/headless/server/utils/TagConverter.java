@@ -105,6 +105,7 @@ public class TagConverter {
         if (!CollectionUtils.isEmpty(queryTagReq.getTagFilters())) {
             queryStructReq.setDimensionFilters(queryTagReq.getTagFilters());
         }
+        queryStructReq.setQueryType(QueryType.TAG);
         QuerySqlReq querySqlReq = queryStructReq.convert();
         convert(querySqlReq, semanticSchemaResp, queryStatement, queryStructReq);
         QueryParam queryParam = new QueryParam();

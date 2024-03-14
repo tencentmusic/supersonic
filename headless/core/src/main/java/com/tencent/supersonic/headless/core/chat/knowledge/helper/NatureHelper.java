@@ -6,17 +6,17 @@ import com.tencent.supersonic.common.pojo.enums.DictWordType;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
 import com.tencent.supersonic.headless.api.pojo.response.S2Term;
 import com.tencent.supersonic.headless.core.chat.knowledge.DataSetInfoStat;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.util.CollectionUtils;
-
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.util.CollectionUtils;
 
 /**
  * nature parse helper
@@ -220,4 +220,18 @@ public class NatureHelper {
         return 0L;
     }
 
+    public static Set<Long> getModelIds(Map<Long, List<Long>> modelIdToDataSetIds, Set<Long> detectDataSetIds) {
+        Set<Long> detectModelIds = modelIdToDataSetIds.keySet();
+        if (!CollectionUtils.isEmpty(detectDataSetIds)) {
+            detectModelIds = modelIdToDataSetIds.entrySet().stream().filter(entry -> {
+                List<Long> dataSetIds = entry.getValue().stream().filter(detectDataSetIds::contains)
+                        .collect(Collectors.toList());
+                if (!CollectionUtils.isEmpty(dataSetIds)) {
+                    return true;
+                }
+                return false;
+            }).map(entry -> entry.getKey()).collect(Collectors.toSet());
+        }
+        return detectModelIds;
+    }
 }

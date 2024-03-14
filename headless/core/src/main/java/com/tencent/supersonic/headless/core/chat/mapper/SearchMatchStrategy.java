@@ -33,7 +33,7 @@ public class SearchMatchStrategy extends BaseMatchStrategy<HanlpMapResult> {
 
     @Override
     public Map<MatchText, List<HanlpMapResult>> match(QueryContext queryContext, List<S2Term> originals,
-                                                      Set<Long> detectDataSetIds) {
+            Set<Long> detectDataSetIds) {
         String text = queryContext.getQueryText();
         Map<Integer, Integer> regOffsetToLength = getRegOffsetToLength(originals);
 
@@ -58,9 +58,9 @@ public class SearchMatchStrategy extends BaseMatchStrategy<HanlpMapResult> {
 
                     if (StringUtils.isNotEmpty(detectSegment)) {
                         List<HanlpMapResult> hanlpMapResults = knowledgeService.prefixSearch(detectSegment,
-                                SearchService.SEARCH_SIZE, queryContext.getModelIdToDataSetIds());
+                                SearchService.SEARCH_SIZE, queryContext.getModelIdToDataSetIds(), detectDataSetIds);
                         List<HanlpMapResult> suffixHanlpMapResults = knowledgeService.suffixSearch(
-                                detectSegment, SEARCH_SIZE, queryContext.getModelIdToDataSetIds());
+                                detectSegment, SEARCH_SIZE, queryContext.getModelIdToDataSetIds(), detectDataSetIds);
                         hanlpMapResults.addAll(suffixHanlpMapResults);
                         // remove entity name where search
                         hanlpMapResults = hanlpMapResults.stream().filter(entry -> {

@@ -13,15 +13,15 @@ import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.api.pojo.request.ExecuteQueryReq;
 import com.tencent.supersonic.headless.api.pojo.response.QueryResult;
 import com.tencent.supersonic.headless.core.chat.knowledge.MetaEmbeddingService;
-import org.springframework.util.CollectionUtils;
-
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.springframework.util.CollectionUtils;
 
 /**
  * MetricRecommendProcessor fills recommended metrics based on embedding similarity.
@@ -49,7 +49,8 @@ public class MetricRecommendProcessor implements ExecuteResultProcessor {
                 .filterCondition(filterCondition).queryEmbeddings(null).build();
         MetaEmbeddingService metaEmbeddingService = ContextUtils.getBean(MetaEmbeddingService.class);
         List<RetrieveQueryResult> retrieveQueryResults =
-                metaEmbeddingService.retrieveQuery(retrieveQuery, METRIC_RECOMMEND_SIZE + 1, new HashMap<>());
+                metaEmbeddingService.retrieveQuery(retrieveQuery, METRIC_RECOMMEND_SIZE + 1, new HashMap<>(),
+                        new HashSet<>());
         if (CollectionUtils.isEmpty(retrieveQueryResults)) {
             return;
         }

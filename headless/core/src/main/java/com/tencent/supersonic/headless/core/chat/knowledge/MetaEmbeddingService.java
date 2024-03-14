@@ -7,12 +7,7 @@ import com.tencent.supersonic.common.util.embedding.Retrieval;
 import com.tencent.supersonic.common.util.embedding.RetrieveQuery;
 import com.tencent.supersonic.common.util.embedding.RetrieveQueryResult;
 import com.tencent.supersonic.common.util.embedding.S2EmbeddingStore;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections.CollectionUtils;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
+import com.tencent.supersonic.headless.core.chat.knowledge.helper.NatureHelper;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -21,6 +16,11 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 @Service
 @Slf4j
@@ -31,9 +31,9 @@ public class MetaEmbeddingService {
     private EmbeddingConfig embeddingConfig;
 
     public List<RetrieveQueryResult> retrieveQuery(RetrieveQuery retrieveQuery, int num,
-                                                   Map<Long, List<Long>> modelIdToDataSetIds) {
+            Map<Long, List<Long>> modelIdToDataSetIds, Set<Long> detectDataSetIds) {
         // dataSetIds->modelIds
-        Set<Long> allModels = modelIdToDataSetIds.keySet();
+        Set<Long> allModels = NatureHelper.getModelIds(modelIdToDataSetIds, detectDataSetIds);
 
         if (CollectionUtils.isNotEmpty(allModels) && allModels.size() == 1) {
             Map<String, String> filterCondition = new HashMap<>();
