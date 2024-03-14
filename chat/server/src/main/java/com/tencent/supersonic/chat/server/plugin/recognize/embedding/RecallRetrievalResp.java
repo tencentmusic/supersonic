@@ -1,4 +1,4 @@
-package com.tencent.supersonic.chat.server.plugin.recall.embedding;
+package com.tencent.supersonic.chat.server.plugin.recognize.embedding;
 
 
 import lombok.Data;

@@ -7,12 +7,10 @@ import com.tencent.supersonic.chat.api.pojo.request.PageQueryInfoReq;
 import com.tencent.supersonic.chat.api.pojo.response.SimilarQueryRecallResp;
 import com.tencent.supersonic.chat.server.persistence.dataobject.ChatQueryDO;
 import com.tencent.supersonic.chat.server.persistence.repository.ChatQueryRepository;
+import com.tencent.supersonic.chat.server.pojo.ChatParseContext;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.headless.api.pojo.response.ParseResp;
 import com.tencent.supersonic.headless.api.pojo.response.QueryResp;
-import com.tencent.supersonic.headless.core.pojo.ChatContext;
-import com.tencent.supersonic.headless.core.pojo.QueryContext;
-import com.tencent.supersonic.headless.server.processor.ResultProcessor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.CollectionUtils;
@@ -26,18 +24,17 @@ import java.util.stream.Collectors;
  * MetricRecommendProcessor fills recommended query based on embedding similarity.
  */
 @Slf4j
-public class QueryRecommendProcessor implements ResultProcessor {
+public class QueryRecommendProcessor implements ParseResultProcessor {
 
     @Override
-    public void process(ParseResp parseResp, QueryContext queryContext, ChatContext chatContext) {
-        CompletableFuture.runAsync(() -> doProcess(parseResp, queryContext));
+    public void process(ChatParseContext chatParseContext, ParseResp parseResp) {
+        CompletableFuture.runAsync(() -> doProcess(parseResp, chatParseContext));
     }
 
     @SneakyThrows
-    private void doProcess(ParseResp parseResp, QueryContext queryContext) {
+    private void doProcess(ParseResp parseResp, ChatParseContext chatParseContext) {
         Long queryId = parseResp.getQueryId();
-        //TODO
-        List<SimilarQueryRecallResp> solvedQueries = getSimilarQueries(queryContext.getQueryText(),
+        List<SimilarQueryRecallResp> solvedQueries = getSimilarQueries(chatParseContext.getQueryText(),
                 null);
         ChatQueryDO chatQueryDO = getChatQuery(queryId);
         chatQueryDO.setSimilarQueries(JSONObject.toJSONString(solvedQueries));
