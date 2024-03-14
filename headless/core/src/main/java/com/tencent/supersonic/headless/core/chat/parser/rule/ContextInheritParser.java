@@ -10,7 +10,7 @@ import com.tencent.supersonic.headless.core.chat.query.SemanticQuery;
 import com.tencent.supersonic.headless.core.chat.query.rule.RuleSemanticQuery;
 import com.tencent.supersonic.headless.core.chat.query.rule.metric.MetricModelQuery;
 import com.tencent.supersonic.headless.core.chat.query.rule.metric.MetricSemanticQuery;
-import com.tencent.supersonic.headless.core.chat.query.rule.metric.MetricTagQuery;
+import com.tencent.supersonic.headless.core.chat.query.rule.metric.MetricIdQuery;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.AbstractMap;
@@ -94,7 +94,7 @@ public class ContextInheritParser implements SemanticParser {
         return matches.stream().anyMatch(m -> {
             SchemaElementType type = m.getElement().getType();
             if (Objects.nonNull(ruleQuery) && ruleQuery instanceof MetricSemanticQuery
-                    && !(ruleQuery instanceof MetricTagQuery)) {
+                    && !(ruleQuery instanceof MetricIdQuery)) {
                 return types.contains(type);
             }
             return type.equals(matchType);

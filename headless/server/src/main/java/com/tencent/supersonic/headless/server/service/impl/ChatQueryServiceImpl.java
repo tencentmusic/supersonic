@@ -193,7 +193,7 @@ public class ChatQueryServiceImpl implements ChatQueryService {
     }
 
     private QueryResult doExecution(SemanticQueryReq semanticQueryReq,
-                                  SemanticParseInfo parseInfo, User user) throws Exception {
+            SemanticParseInfo parseInfo, User user) throws Exception {
         SemanticQueryResp queryResp = queryService.queryByReq(semanticQueryReq, user);
         QueryResult queryResult = new QueryResult();
         if (queryResp != null) {
@@ -591,7 +591,7 @@ public class ChatQueryServiceImpl implements ChatQueryService {
         modelIdToDataSetIds.put(dimensionValueReq.getModelId(), new ArrayList<>(dataSetIds));
         //search from prefixSearch
         List<HanlpMapResult> hanlpMapResultList = knowledgeService.prefixSearch(dimensionValueReq.getValue(),
-                2000, modelIdToDataSetIds);
+                2000, modelIdToDataSetIds, dataSetIds);
         HanlpHelper.transLetterOriginal(hanlpMapResultList);
         return hanlpMapResultList.stream()
                 .filter(o -> {

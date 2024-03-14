@@ -41,13 +41,15 @@ public class SearchService {
      * @param key
      * @return
      */
-    public static List<HanlpMapResult> prefixSearch(String key, int limit, Map<Long, List<Long>> modelIdToViewIds) {
-        return prefixSearch(key, limit, trie, modelIdToViewIds);
+    public static List<HanlpMapResult> prefixSearch(String key, int limit, Map<Long, List<Long>> modelIdToDataSetIds,
+            Set<Long> detectDataSetIds) {
+        return prefixSearch(key, limit, trie, modelIdToDataSetIds, detectDataSetIds);
     }
 
     public static List<HanlpMapResult> prefixSearch(String key, int limit, BinTrie<List<String>> binTrie,
-                                                    Map<Long, List<Long>> modelIdToViewIds) {
-        Set<Map.Entry<String, List<String>>> result = prefixSearchLimit(key, limit, binTrie, modelIdToViewIds.keySet());
+            Map<Long, List<Long>> modelIdToDataSetIds, Set<Long> detectDataSetIds) {
+        Set<Map.Entry<String, List<String>>> result = prefixSearchLimit(key, limit, binTrie,
+                modelIdToDataSetIds, detectDataSetIds);
         List<HanlpMapResult> hanlpMapResults = result.stream().map(
                         entry -> {
                             String name = entry.getKey().replace("#", " ");
@@ -58,7 +60,7 @@ public class SearchService {
                 .collect(Collectors.toList());
         for (HanlpMapResult hanlpMapResult : hanlpMapResults) {
             List<String> natures = hanlpMapResult.getNatures().stream()
-                    .map(nature -> NatureHelper.changeModel2DataSet(nature, modelIdToViewIds))
+                    .map(nature -> NatureHelper.changeModel2DataSet(nature, modelIdToDataSetIds))
                     .flatMap(Collection::stream).collect(Collectors.toList());
             hanlpMapResult.setNatures(natures);
         }
@@ -70,14 +72,18 @@ public class SearchService {
      * @param key
      * @return
      */
-    public static List<HanlpMapResult> suffixSearch(String key, int limit, Set<Long> detectModelIds) {
+    public static List<HanlpMapResult> suffixSearch(String key, int limit, Map<Long, List<Long>> modelIdToDataSetIds,
+            Set<Long> detectDataSetIds) {
         String reverseDetectSegment = StringUtils.reverse(key);
-        return suffixSearch(reverseDetectSegment, limit, suffixTrie, detectModelIds);
+        return suffixSearch(reverseDetectSegment, limit, suffixTrie, modelIdToDataSetIds, detectDataSetIds);
     }
 
     public static List<HanlpMapResult> suffixSearch(String key, int limit, BinTrie<List<String>> binTrie,
-                                                    Set<Long> detectModelIds) {
-        Set<Map.Entry<String, List<String>>> result = prefixSearchLimit(key, limit, binTrie, detectModelIds);
+            Map<Long, List<Long>> modelIdToDataSetIds, Set<Long> detectDataSetIds) {
+
+        Set<Map.Entry<String, List<String>>> result = prefixSearchLimit(key, limit, binTrie, modelIdToDataSetIds,
+                detectDataSetIds);
+
         return result.stream().map(
                         entry -> {
                             String name = entry.getKey().replace("#", " ");
@@ -93,7 +99,10 @@ public class SearchService {
     }
 
     private static Set<Map.Entry<String, List<String>>> prefixSearchLimit(String key, int limit,
-            BinTrie<List<String>> binTrie, Set<Long> detectModelIds) {
+            BinTrie<List<String>> binTrie, Map<Long, List<Long>> modelIdToDataSetIds, Set<Long> detectDataSetIds) {
+
+        Set<Long> detectModelIds = NatureHelper.getModelIds(modelIdToDataSetIds, detectDataSetIds);
+
         key = key.toLowerCase();
         Set<Map.Entry<String, List<String>>> entrySet = new TreeSet<Map.Entry<String, List<String>>>();
 
