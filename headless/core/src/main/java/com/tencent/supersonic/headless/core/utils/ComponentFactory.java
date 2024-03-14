@@ -1,30 +1,23 @@
 package com.tencent.supersonic.headless.core.utils;
 
 import com.tencent.supersonic.common.util.ContextUtils;
+import com.tencent.supersonic.headless.core.cache.QueryCache;
 import com.tencent.supersonic.headless.core.chat.parser.JavaLLMProxy;
 import com.tencent.supersonic.headless.core.chat.parser.LLMProxy;
 import com.tencent.supersonic.headless.core.chat.parser.llm.DataSetResolver;
-import com.tencent.supersonic.headless.core.executor.JdbcExecutor;
 import com.tencent.supersonic.headless.core.executor.QueryExecutor;
 import com.tencent.supersonic.headless.core.parser.SqlParser;
-import com.tencent.supersonic.headless.core.parser.calcite.CalciteSqlParser;
-import com.tencent.supersonic.headless.core.parser.converter.CalculateAggConverter;
-import com.tencent.supersonic.headless.core.parser.converter.DefaultDimValueConverter;
 import com.tencent.supersonic.headless.core.parser.converter.HeadlessConverter;
-import com.tencent.supersonic.headless.core.parser.converter.ParserDefaultConverter;
-import com.tencent.supersonic.headless.core.parser.converter.SqlVariableParseConverter;
-import com.tencent.supersonic.headless.core.planner.DetailQueryOptimizer;
 import com.tencent.supersonic.headless.core.planner.QueryOptimizer;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.core.io.support.SpringFactoriesLoader;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.core.io.support.SpringFactoriesLoader;
 
 /**
  * HeadlessConverter QueryOptimizer QueryExecutor object factory
@@ -36,6 +29,7 @@ public class ComponentFactory {
     private static Map<String, QueryOptimizer> queryOptimizers = new HashMap<>();
     private static List<QueryExecutor> queryExecutors = new ArrayList<>();
     private static SqlParser sqlParser;
+    private static QueryCache queryCache;
 
     private static LLMProxy llmProxy;
     private static DataSetResolver modelResolver;
@@ -69,9 +63,16 @@ public class ComponentFactory {
 
     public static SqlParser getSqlParser() {
         if (sqlParser == null) {
-            sqlParser = ContextUtils.getContext().getBean("CalciteSqlParser", CalciteSqlParser.class);
+            initQueryParser();
         }
         return sqlParser;
+    }
+
+    public static QueryCache getQueryCache() {
+        if (queryCache == null) {
+            initQueryCache();
+        }
+        return queryCache;
     }
 
     public static void setSqlParser(SqlParser parser) {
@@ -82,23 +83,29 @@ public class ComponentFactory {
         queryOptimizers.put(name, queryOptimizer);
     }
 
-    public static <T> T getBean(String name, Class<T> tClass) {
-        return ContextUtils.getContext().getBean(name, tClass);
-    }
-
     private static void initQueryOptimizer() {
-        queryOptimizers.put("DetailQueryOptimizer", getBean("DetailQueryOptimizer", DetailQueryOptimizer.class));
+        List<QueryOptimizer> queryOptimizerList = new ArrayList<>();
+        init(QueryOptimizer.class, queryOptimizerList);
+        if (!queryOptimizerList.isEmpty()) {
+            queryOptimizerList.stream().forEach(q -> addQueryOptimizer(q.getClass().getSimpleName(), q));
+        }
     }
 
     private static void initQueryExecutors() {
-        queryExecutors.add(ContextUtils.getContext().getBean("JdbcExecutor", JdbcExecutor.class));
+        //queryExecutors.add(ContextUtils.getContext().getBean("JdbcExecutor", JdbcExecutor.class));
+        init(QueryExecutor.class, queryExecutors);
     }
 
     private static void initSemanticConverter() {
-        headlessConverters.add(getBean("DefaultDimValueConverter", DefaultDimValueConverter.class));
-        headlessConverters.add(getBean("SqlVariableParseConverter", SqlVariableParseConverter.class));
-        headlessConverters.add(getBean("CalculateAggConverter", CalculateAggConverter.class));
-        headlessConverters.add(getBean("ParserDefaultConverter", ParserDefaultConverter.class));
+        init(HeadlessConverter.class, headlessConverters);
+    }
+
+    private static void initQueryParser() {
+        sqlParser = init(SqlParser.class);
+    }
+
+    private static void initQueryCache() {
+        queryCache = init(QueryCache.class);
     }
 
     public static LLMProxy getLLMProxy() {
@@ -125,6 +132,10 @@ public class ComponentFactory {
             modelResolver = init(DataSetResolver.class);
         }
         return modelResolver;
+    }
+
+    public static <T> T getBean(String name, Class<T> tClass) {
+        return ContextUtils.getContext().getBean(name, tClass);
     }
 
     private static <T> List<T> init(Class<T> factoryType, List list) {

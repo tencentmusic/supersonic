@@ -6,3 +6,22 @@ com.tencent.supersonic.auth.api.authentication.adaptor.UserAdaptor=\
 
 com.tencent.supersonic.common.util.embedding.S2EmbeddingStore=\
     com.tencent.supersonic.common.util.embedding.InMemoryS2EmbeddingStore
+
+
+com.tencent.supersonic.headless.core.parser.converter.HeadlessConverter=\
+    com.tencent.supersonic.headless.core.parser.converter.DefaultDimValueConverter,\
+    com.tencent.supersonic.headless.core.parser.converter.SqlVariableParseConverter,\
+    com.tencent.supersonic.headless.core.parser.converter.CalculateAggConverter,\
+    com.tencent.supersonic.headless.core.parser.converter.ParserDefaultConverter
+
+com.tencent.supersonic.headless.core.planner.QueryOptimizer=\
+    com.tencent.supersonic.headless.core.planner.DetailQueryOptimizer
+
+com.tencent.supersonic.headless.core.executor.QueryExecutor=\
+    com.tencent.supersonic.headless.core.executor.JdbcExecutor
+
+com.tencent.supersonic.headless.core.parser.SqlParser=\
+    com.tencent.supersonic.headless.core.parser.calcite.CalciteSqlParser
+
+com.tencent.supersonic.headless.core.cache.QueryCache=\
+    com.tencent.supersonic.headless.core.cache.DefaultQueryCache

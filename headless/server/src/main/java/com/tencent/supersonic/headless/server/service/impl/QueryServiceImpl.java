@@ -41,6 +41,7 @@ import com.tencent.supersonic.headless.core.parser.QueryParser;
 import com.tencent.supersonic.headless.core.parser.calcite.s2sql.SemanticModel;
 import com.tencent.supersonic.headless.core.planner.QueryPlanner;
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;
+import com.tencent.supersonic.headless.core.utils.ComponentFactory;
 import com.tencent.supersonic.headless.server.annotation.S2DataPermission;
 import com.tencent.supersonic.headless.server.aspect.ApiHeaderCheckAspect;
 import com.tencent.supersonic.headless.server.manager.SemanticSchemaManager;
@@ -75,7 +76,6 @@ public class QueryServiceImpl implements QueryService {
     private final TagConverter tagConverter;
     private final Catalog catalog;
     private final AppService appService;
-    private final QueryCache queryCache;
     private final SemanticSchemaManager semanticSchemaManager;
     private final QueryParser queryParser;
     private final QueryPlanner queryPlanner;
@@ -86,7 +86,6 @@ public class QueryServiceImpl implements QueryService {
             QueryReqConverter queryReqConverter,
             TagConverter tagConverter, Catalog catalog,
             AppService appService,
-            QueryCache queryCache,
             SemanticSchemaManager semanticSchemaManager,
             DefaultQueryParser queryParser,
             QueryPlanner queryPlanner) {
@@ -96,7 +95,6 @@ public class QueryServiceImpl implements QueryService {
         this.tagConverter = tagConverter;
         this.catalog = catalog;
         this.appService = appService;
-        this.queryCache = queryCache;
         this.semanticSchemaManager = semanticSchemaManager;
         this.queryParser = queryParser;
         this.queryPlanner = queryPlanner;
@@ -112,6 +110,7 @@ public class QueryServiceImpl implements QueryService {
             //1.initStatInfo
             statUtils.initStatInfo(queryReq, user);
             //2.query from cache
+            QueryCache queryCache = ComponentFactory.getQueryCache();
             String cacheKey = queryCache.getCacheKey(queryReq);
             Object query = queryCache.query(queryReq, cacheKey);
             if (Objects.nonNull(query)) {

@@ -1,19 +1,19 @@
 package com.tencent.supersonic.headless.core.parser.converter;
 
 import com.tencent.supersonic.common.pojo.ColumnOrder;
+import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.headless.api.pojo.QueryParam;
 import com.tencent.supersonic.headless.core.parser.calcite.s2sql.DataSource;
 import com.tencent.supersonic.headless.core.pojo.MetricQueryParam;
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;
 import com.tencent.supersonic.headless.core.utils.SqlGenerateUtils;
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
-
-import java.util.Map;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 /**
  * HeadlessConverter default implement
@@ -22,26 +22,18 @@ import java.util.stream.Collectors;
 @Slf4j
 public class ParserDefaultConverter implements HeadlessConverter {
 
-    private final SqlGenerateUtils sqlGenerateUtils;
-
-    private final CalculateAggConverter calculateConverterAgg;
-
-    public ParserDefaultConverter(CalculateAggConverter calculateConverterAgg,
-            SqlGenerateUtils sqlGenerateUtils) {
-        this.calculateConverterAgg = calculateConverterAgg;
-        this.sqlGenerateUtils = sqlGenerateUtils;
-    }
-
     @Override
     public boolean accept(QueryStatement queryStatement) {
         if (Objects.isNull(queryStatement.getQueryParam()) || queryStatement.getIsS2SQL()) {
             return false;
         }
+        CalculateAggConverter calculateConverterAgg = ContextUtils.getBean(CalculateAggConverter.class);
         return !calculateConverterAgg.accept(queryStatement);
     }
 
     @Override
     public void convert(QueryStatement queryStatement) throws Exception {
+        SqlGenerateUtils sqlGenerateUtils = ContextUtils.getBean(SqlGenerateUtils.class);
         QueryParam queryParam = queryStatement.getQueryParam();
         MetricQueryParam metricQueryParam = queryStatement.getMetricQueryParam();
         MetricQueryParam metricReq = generateSqlCommand(queryStatement.getQueryParam(), queryStatement);
@@ -50,6 +42,7 @@ public class ParserDefaultConverter implements HeadlessConverter {
     }
 
     public MetricQueryParam generateSqlCommand(QueryParam queryParam, QueryStatement queryStatement) {
+        SqlGenerateUtils sqlGenerateUtils = ContextUtils.getBean(SqlGenerateUtils.class);
         MetricQueryParam metricQueryParam = new MetricQueryParam();
         metricQueryParam.setMetrics(queryParam.getMetrics());
         metricQueryParam.setDimensions(queryParam.getGroups());
