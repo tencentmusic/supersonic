@@ -1,22 +1,22 @@
 package com.tencent.supersonic.util;
 
+import static java.time.LocalDate.now;
+
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
-import com.tencent.supersonic.headless.api.pojo.SchemaElement;
-import com.tencent.supersonic.chat.api.pojo.request.QueryFilter;
-import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
-import com.tencent.supersonic.chat.core.agent.Agent;
-import com.tencent.supersonic.chat.core.agent.AgentConfig;
-import com.tencent.supersonic.chat.core.agent.AgentToolType;
-import com.tencent.supersonic.chat.core.agent.PluginTool;
-import com.tencent.supersonic.chat.core.agent.RuleParserTool;
+import com.tencent.supersonic.chat.api.pojo.request.ChatParseReq;
+import com.tencent.supersonic.chat.server.agent.Agent;
+import com.tencent.supersonic.chat.server.agent.AgentConfig;
+import com.tencent.supersonic.chat.server.agent.AgentToolType;
+import com.tencent.supersonic.chat.server.agent.PluginTool;
+import com.tencent.supersonic.chat.server.agent.RuleParserTool;
 import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
+import com.tencent.supersonic.headless.api.pojo.SchemaElement;
+import com.tencent.supersonic.headless.api.pojo.request.QueryFilter;
 import java.util.HashSet;
 import java.util.Set;
-
-import static java.time.LocalDate.now;
 
 public class DataUtils {
 
@@ -41,16 +41,16 @@ public class DataUtils {
         return User.get(3L, "tom");
     }
 
-    public static QueryReq getQueryContextReq(Integer id, String query) {
-        QueryReq queryContextReq = new QueryReq();
-        queryContextReq.setQueryText(query);
-        queryContextReq.setChatId(id);
-        queryContextReq.setUser(user_test);
-        return queryContextReq;
+    public static ChatParseReq getChatParseReq(Integer id, String query) {
+        ChatParseReq chatParseReq = new ChatParseReq();
+        chatParseReq.setQueryText(query);
+        chatParseReq.setChatId(id);
+        chatParseReq.setUser(user_test);
+        return chatParseReq;
     }
 
-    public static QueryReq getQueryReqWithAgent(Integer id, String query, Integer agentId) {
-        QueryReq queryReq = new QueryReq();
+    public static ChatParseReq getChatParseReqWithAgent(Integer id, String query, Integer agentId) {
+        ChatParseReq queryReq = new ChatParseReq();
         queryReq.setQueryText(query);
         queryReq.setChatId(id);
         queryReq.setUser(user_test);
@@ -139,7 +139,7 @@ public class DataUtils {
         RuleParserTool ruleQueryTool = new RuleParserTool();
         ruleQueryTool.setType(AgentToolType.NL2SQL_RULE);
         ruleQueryTool.setDataSetIds(Lists.newArrayList(-1L));
-        ruleQueryTool.setQueryModes(Lists.newArrayList("METRIC_TAG", "METRIC_FILTER", "METRIC_MODEL",
+        ruleQueryTool.setQueryModes(Lists.newArrayList("METRIC_ID", "METRIC_FILTER", "METRIC_MODEL",
                 "TAG_DETAIL", "TAG_LIST_FILTER", "TAG_ID"));
         return ruleQueryTool;
     }

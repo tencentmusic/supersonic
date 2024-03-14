@@ -2,7 +2,7 @@ package com.tencent.supersonic.chat;
 
 
 import com.google.common.collect.Lists;
-import com.tencent.supersonic.chat.core.plugin.PluginManager;
+import com.tencent.supersonic.chat.server.plugin.PluginManager;
 import com.tencent.supersonic.chat.server.service.AgentService;
 import com.tencent.supersonic.common.config.EmbeddingConfig;
 import com.tencent.supersonic.common.util.embedding.Retrieval;

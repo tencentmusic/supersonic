@@ -3,30 +3,28 @@ package com.tencent.supersonic;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
-import com.tencent.supersonic.chat.api.pojo.request.ExecuteQueryReq;
-import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
-import com.tencent.supersonic.chat.api.pojo.response.ParseResp;
-import com.tencent.supersonic.chat.core.agent.Agent;
-import com.tencent.supersonic.chat.core.agent.AgentConfig;
-import com.tencent.supersonic.chat.core.agent.AgentToolType;
-import com.tencent.supersonic.chat.core.agent.LLMParserTool;
-import com.tencent.supersonic.chat.core.agent.RuleParserTool;
-import com.tencent.supersonic.chat.core.plugin.Plugin;
-import com.tencent.supersonic.chat.core.plugin.PluginParseConfig;
-import com.tencent.supersonic.chat.core.query.plugin.ParamOption;
-import com.tencent.supersonic.chat.core.query.plugin.WebBase;
+import com.tencent.supersonic.chat.api.pojo.request.ChatExecuteReq;
+import com.tencent.supersonic.chat.api.pojo.request.ChatParseReq;
+import com.tencent.supersonic.chat.server.agent.Agent;
+import com.tencent.supersonic.chat.server.agent.AgentConfig;
+import com.tencent.supersonic.chat.server.agent.AgentToolType;
+import com.tencent.supersonic.chat.server.agent.LLMParserTool;
+import com.tencent.supersonic.chat.server.agent.RuleParserTool;
+import com.tencent.supersonic.chat.server.plugin.Plugin;
+import com.tencent.supersonic.chat.server.plugin.PluginParseConfig;
+import com.tencent.supersonic.chat.server.plugin.build.ParamOption;
+import com.tencent.supersonic.chat.server.plugin.build.WebBase;
 import com.tencent.supersonic.chat.server.service.AgentService;
 import com.tencent.supersonic.chat.server.service.ChatService;
 import com.tencent.supersonic.chat.server.service.PluginService;
-import com.tencent.supersonic.chat.server.service.QueryService;
 import com.tencent.supersonic.common.pojo.SysParameter;
 import com.tencent.supersonic.common.service.SysParameterService;
 import com.tencent.supersonic.common.util.JsonUtil;
+import com.tencent.supersonic.headless.api.pojo.response.ParseResp;
 import java.util.Arrays;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.annotation.Order;
@@ -39,9 +37,6 @@ import org.springframework.util.CollectionUtils;
 public class ChatDemoLoader implements CommandLineRunner {
 
     private User user = User.getFakeUser();
-    @Qualifier("chatQueryService")
-    @Autowired
-    private QueryService queryService;
     @Autowired
     private ChatService chatService;
     @Autowired
@@ -84,26 +79,24 @@ public class ChatDemoLoader implements CommandLineRunner {
     }
 
     private void parseAndExecute(int chatId, String queryText) throws Exception {
-        QueryReq queryRequest = new QueryReq();
-        queryRequest.setQueryText(queryText);
-        queryRequest.setChatId(chatId);
-        queryRequest.setAgentId(1);
-        queryRequest.setUser(User.getFakeUser());
-        ParseResp parseResp = queryService.performParsing(queryRequest);
+        ChatParseReq chatParseReq = new ChatParseReq();
+        chatParseReq.setQueryText(queryText);
+        chatParseReq.setChatId(chatId);
+        chatParseReq.setAgentId(1);
+        chatParseReq.setUser(User.getFakeUser());
+        ParseResp parseResp = chatService.performParsing(chatParseReq);
         if (CollectionUtils.isEmpty(parseResp.getSelectedParses())) {
             log.info("parseResp.getSelectedParses() is empty");
             return;
         }
-        ExecuteQueryReq executeReq = ExecuteQueryReq.builder().build();
+        ChatExecuteReq executeReq = new ChatExecuteReq();
         executeReq.setQueryId(parseResp.getQueryId());
         executeReq.setParseId(parseResp.getSelectedParses().get(0).getId());
-        executeReq.setQueryText(queryRequest.getQueryText());
-        executeReq.setParseInfo(parseResp.getSelectedParses().get(0));
+        executeReq.setQueryText(queryText);
         executeReq.setChatId(parseResp.getChatId());
-        executeReq.setUser(queryRequest.getUser());
-        executeReq.setAgentId(1);
+        executeReq.setUser(User.getFakeUser());
         executeReq.setSaveAnswer(true);
-        queryService.performExecution(executeReq);
+        chatService.performExecution(executeReq);
     }
 
     public void addSampleChats() throws Exception {

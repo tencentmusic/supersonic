@@ -3,23 +3,22 @@ package com.tencent.supersonic.chat.server.processor.parse;
 import com.alibaba.fastjson.JSONObject;
 import com.github.pagehelper.PageInfo;
 import com.google.common.collect.Lists;
-import com.tencent.supersonic.chat.core.pojo.ChatContext;
-import com.tencent.supersonic.chat.core.pojo.QueryContext;
 import com.tencent.supersonic.chat.api.pojo.request.PageQueryInfoReq;
-import com.tencent.supersonic.chat.api.pojo.response.ParseResp;
-import com.tencent.supersonic.chat.api.pojo.response.QueryResp;
 import com.tencent.supersonic.chat.api.pojo.response.SimilarQueryRecallResp;
-import com.tencent.supersonic.chat.core.utils.SimilarQueryManager;
 import com.tencent.supersonic.chat.server.persistence.dataobject.ChatQueryDO;
 import com.tencent.supersonic.chat.server.persistence.repository.ChatQueryRepository;
+import com.tencent.supersonic.chat.server.pojo.ChatParseContext;
 import com.tencent.supersonic.common.util.ContextUtils;
+import com.tencent.supersonic.headless.api.pojo.response.ParseResp;
+import com.tencent.supersonic.headless.api.pojo.response.QueryResp;
+import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.util.CollectionUtils;
+
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
-import lombok.SneakyThrows;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.util.CollectionUtils;
 
 /**
  * MetricRecommendProcessor fills recommended query based on embedding similarity.
@@ -28,15 +27,15 @@ import org.springframework.util.CollectionUtils;
 public class QueryRecommendProcessor implements ParseResultProcessor {
 
     @Override
-    public void process(ParseResp parseResp, QueryContext queryContext, ChatContext chatContext) {
-        CompletableFuture.runAsync(() -> doProcess(parseResp, queryContext));
+    public void process(ChatParseContext chatParseContext, ParseResp parseResp) {
+        CompletableFuture.runAsync(() -> doProcess(parseResp, chatParseContext));
     }
 
     @SneakyThrows
-    private void doProcess(ParseResp parseResp, QueryContext queryContext) {
+    private void doProcess(ParseResp parseResp, ChatParseContext chatParseContext) {
         Long queryId = parseResp.getQueryId();
-        List<SimilarQueryRecallResp> solvedQueries = getSimilarQueries(queryContext.getQueryText(),
-                queryContext.getAgentId());
+        List<SimilarQueryRecallResp> solvedQueries = getSimilarQueries(chatParseContext.getQueryText(),
+                null);
         ChatQueryDO chatQueryDO = getChatQuery(queryId);
         chatQueryDO.setSimilarQueries(JSONObject.toJSONString(solvedQueries));
         updateChatQuery(chatQueryDO);
@@ -44,8 +43,8 @@ public class QueryRecommendProcessor implements ParseResultProcessor {
 
     public List<SimilarQueryRecallResp> getSimilarQueries(String queryText, Integer agentId) {
         //1. recall solved query by queryText
-        SimilarQueryManager solvedQueryManager = ContextUtils.getBean(SimilarQueryManager.class);
-        List<SimilarQueryRecallResp> similarQueries = solvedQueryManager.recallSimilarQuery(queryText, agentId);
+        //SimilarQueryManager solvedQueryManager = ContextUtils.getBean(SimilarQueryManager.class);
+        List<SimilarQueryRecallResp> similarQueries = Lists.newArrayList();
         if (CollectionUtils.isEmpty(similarQueries)) {
             return Lists.newArrayList();
         }

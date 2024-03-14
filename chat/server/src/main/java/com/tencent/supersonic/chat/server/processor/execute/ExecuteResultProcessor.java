@@ -1,8 +1,8 @@
 package com.tencent.supersonic.chat.server.processor.execute;
 
-import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
-import com.tencent.supersonic.chat.api.pojo.request.ExecuteQueryReq;
-import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
+import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
+import com.tencent.supersonic.headless.api.pojo.request.ExecuteQueryReq;
+import com.tencent.supersonic.headless.api.pojo.response.QueryResult;
 import com.tencent.supersonic.chat.server.processor.ResultProcessor;
 
 /**

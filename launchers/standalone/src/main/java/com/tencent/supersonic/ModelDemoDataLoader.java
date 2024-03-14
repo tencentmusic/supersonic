@@ -445,6 +445,19 @@ public class ModelDemoDataLoader {
         tagDefineParam3s.setDependencies(new ArrayList<>(Arrays.asList(5)));
         tagReq3.setTagDefineParams(tagDefineParam3s);
         tagMetaService.create(tagReq3, user);
+
+        TagReq tagReq4 = new TagReq();
+        tagReq4.setModelId(4L);
+        tagReq4.setName("歌手名");
+        tagReq4.setBizName("singer_name");
+        tagReq4.setStatus(StatusEnum.ONLINE.getCode());
+        tagReq4.setTypeEnum(TypeEnums.TAG);
+        tagReq4.setTagDefineType(TagDefineType.DIMENSION);
+        TagDefineParams tagDefineParam4s = new TagDefineParams();
+        tagDefineParam4s.setExpr("singer_name");
+        tagDefineParam4s.setDependencies(new ArrayList<>(Arrays.asList(7)));
+        tagReq4.setTagDefineParams(tagDefineParam4s);
+        tagMetaService.create(tagReq4, user);
     }
 
     public void addMetric_uv() throws Exception {
@@ -529,7 +542,7 @@ public class ModelDemoDataLoader {
         dataSetReq.setAdmins(Lists.newArrayList("admin", "jack"));
         List<DataSetModelConfig> dataSetModelConfigs = Lists.newArrayList(
                 new DataSetModelConfig(4L, Lists.newArrayList(4L, 5L, 6L, 7L),
-                        Lists.newArrayList(5L, 6L, 7L), Lists.newArrayList(1L, 2L, 3L))
+                        Lists.newArrayList(5L, 6L, 7L), Lists.newArrayList(1L, 2L, 3L, 4L))
         );
         DataSetDetail dataSetDetail = new DataSetDetail();
         dataSetDetail.setDataSetModelConfigs(dataSetModelConfigs);

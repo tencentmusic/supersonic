@@ -1,80 +1,136 @@
 package com.tencent.supersonic.chat.server.service.impl;
 
+import com.alibaba.fastjson.JSONObject;
 import com.github.pagehelper.PageInfo;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
-import com.tencent.supersonic.chat.core.pojo.ChatContext;
-import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
+import com.tencent.supersonic.chat.api.pojo.request.ChatExecuteReq;
+import com.tencent.supersonic.chat.api.pojo.request.ChatParseReq;
 import com.tencent.supersonic.chat.api.pojo.request.PageQueryInfoReq;
-import com.tencent.supersonic.chat.api.pojo.response.ParseResp;
-import com.tencent.supersonic.chat.api.pojo.response.QueryResp;
-import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.chat.api.pojo.response.ShowCaseResp;
-import com.tencent.supersonic.chat.core.pojo.QueryContext;
+import com.tencent.supersonic.chat.server.executor.ChatExecutor;
+import com.tencent.supersonic.chat.server.parser.ChatParser;
 import com.tencent.supersonic.chat.server.persistence.dataobject.ChatDO;
 import com.tencent.supersonic.chat.server.persistence.dataobject.ChatParseDO;
 import com.tencent.supersonic.chat.server.persistence.dataobject.ChatQueryDO;
 import com.tencent.supersonic.chat.server.persistence.dataobject.QueryDO;
-import com.tencent.supersonic.chat.server.persistence.repository.ChatContextRepository;
 import com.tencent.supersonic.chat.server.persistence.repository.ChatQueryRepository;
 import com.tencent.supersonic.chat.server.persistence.repository.ChatRepository;
+import com.tencent.supersonic.chat.server.pojo.ChatExecuteContext;
+import com.tencent.supersonic.chat.server.pojo.ChatParseContext;
+import com.tencent.supersonic.chat.server.processor.parse.ParseResultProcessor;
 import com.tencent.supersonic.chat.server.service.ChatService;
+import com.tencent.supersonic.chat.server.util.ComponentFactory;
+import com.tencent.supersonic.chat.server.util.QueryReqConverter;
+import com.tencent.supersonic.common.util.BeanMapper;
 import com.tencent.supersonic.common.util.JsonUtil;
+import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
+import com.tencent.supersonic.headless.api.pojo.request.DimensionValueReq;
+import com.tencent.supersonic.headless.api.pojo.request.QueryDataReq;
+import com.tencent.supersonic.headless.api.pojo.request.QueryReq;
+import com.tencent.supersonic.headless.api.pojo.response.MapResp;
+import com.tencent.supersonic.headless.api.pojo.response.ParseResp;
+import com.tencent.supersonic.headless.api.pojo.response.QueryResp;
+import com.tencent.supersonic.headless.api.pojo.response.QueryResult;
+import com.tencent.supersonic.headless.api.pojo.response.SearchResult;
+import com.tencent.supersonic.headless.server.service.ChatQueryService;
+import com.tencent.supersonic.headless.server.service.SearchService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.annotation.Primary;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
-
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-@Service("ChatService")
-@Primary
+
 @Slf4j
+@Service
 public class ChatServiceImpl implements ChatService {
 
-    private ChatContextRepository chatContextRepository;
+    @Autowired
     private ChatRepository chatRepository;
+    @Autowired
     private ChatQueryRepository chatQueryRepository;
+    @Autowired
+    private ChatQueryService chatQueryService;
+    @Autowired
+    private SearchService searchService;
+    private List<ChatParser> chatParsers = ComponentFactory.getChatParsers();
+    private List<ChatExecutor> chatExecutors = ComponentFactory.getChatExecutors();
+    private List<ParseResultProcessor> parseResultProcessors = ComponentFactory.getParseProcessors();
 
-    public ChatServiceImpl(ChatContextRepository chatContextRepository, ChatRepository chatRepository,
-            ChatQueryRepository chatQueryRepository) {
-        this.chatContextRepository = chatContextRepository;
-        this.chatRepository = chatRepository;
-        this.chatQueryRepository = chatQueryRepository;
+    @Override
+    public List<SearchResult> search(ChatParseReq chatParseReq) {
+        ChatParseContext chatParseContext = buildParseContext(chatParseReq);
+        QueryReq queryReq = QueryReqConverter.buildText2SqlQueryReq(chatParseContext);
+        return searchService.search(queryReq);
     }
 
     @Override
-    public Long getContextModel(Integer chatId) {
-        if (Objects.isNull(chatId)) {
-            return null;
+    public ParseResp performParsing(ChatParseReq chatParseReq) {
+        ParseResp parseResp = new ParseResp();
+        ChatParseContext chatParseContext = buildParseContext(chatParseReq);
+        for (ChatParser chatParser : chatParsers) {
+            chatParser.parse(chatParseContext, parseResp);
         }
-        ChatContext chatContext = getOrCreateContext(chatId);
-        if (Objects.isNull(chatContext)) {
-            return null;
+        for (ParseResultProcessor processor : parseResultProcessors) {
+            processor.process(chatParseContext, parseResp);
         }
-        SemanticParseInfo originalSemanticParse = chatContext.getParseInfo();
-        if (Objects.nonNull(originalSemanticParse) && Objects.nonNull(originalSemanticParse.getDataSetId())) {
-            return originalSemanticParse.getDataSetId();
-        }
-        return null;
+        batchAddParse(chatParseReq, parseResp);
+        return parseResp;
     }
 
     @Override
-    public ChatContext getOrCreateContext(int chatId) {
-        return chatContextRepository.getOrCreateContext(chatId);
+    public QueryResult performExecution(ChatExecuteReq chatExecuteReq) {
+        QueryResult queryResult = new QueryResult();
+        ChatExecuteContext chatExecuteContext = buildExecuteContext(chatExecuteReq);
+        for (ChatExecutor chatExecutor : chatExecutors) {
+            queryResult = chatExecutor.execute(chatExecuteContext);
+            if (queryResult != null) {
+                break;
+            }
+        }
+        saveQueryResult(chatExecuteReq, queryResult);
+        return queryResult;
+    }
+
+    private ChatParseContext buildParseContext(ChatParseReq chatParseReq) {
+        ChatParseContext chatParseContext = new ChatParseContext();
+        BeanMapper.mapper(chatParseReq, chatParseContext);
+        QueryReq queryReq = QueryReqConverter.buildText2SqlQueryReq(chatParseContext);
+        MapResp mapResp = chatQueryService.performMapping(queryReq);
+        chatParseContext.setMapInfo(mapResp.getMapInfo());
+        return chatParseContext;
+    }
+
+    private ChatExecuteContext buildExecuteContext(ChatExecuteReq chatExecuteReq) {
+        ChatExecuteContext chatExecuteContext = new ChatExecuteContext();
+        BeanMapper.mapper(chatExecuteReq, chatExecuteContext);
+        ChatParseDO chatParseDO = getParseInfo(chatExecuteReq.getQueryId(), chatExecuteReq.getParseId());
+        SemanticParseInfo semanticParseInfo = JSONObject.parseObject(chatParseDO.getParseInfo(),
+                SemanticParseInfo.class);
+        chatExecuteContext.setParseInfo(semanticParseInfo);
+        return chatExecuteContext;
     }
 
     @Override
-    public void updateContext(ChatContext chatCtx) {
-        log.debug("save ChatContext {}", chatCtx);
-        chatContextRepository.updateContext(chatCtx);
+    public Object queryData(QueryDataReq queryData, User user) throws Exception {
+        return chatQueryService.executeDirectQuery(queryData, user);
+    }
+
+    @Override
+    public SemanticParseInfo queryContext(Integer chatId) {
+        return chatQueryService.queryContext(chatId);
+    }
+
+    @Override
+    public Object queryDimensionValue(DimensionValueReq dimensionValueReq, User user) throws Exception {
+        return chatQueryService.queryDimensionValue(dimensionValueReq, user);
     }
 
     @Override
@@ -190,18 +246,18 @@ public class ChatServiceImpl implements ChatService {
     }
 
     @Override
-    public void updateQuery(Long questionId, int parseId, QueryResult queryResult, ChatContext chatCtx) {
+    public void saveQueryResult(ChatExecuteReq chatExecuteReq, QueryResult queryResult) {
         //The history record only retains the query result of the first parse
-        if (parseId > 1) {
+        if (chatExecuteReq.getParseId() > 1) {
             return;
         }
         ChatQueryDO chatQueryDO = new ChatQueryDO();
-        chatQueryDO.setQuestionId(questionId);
+        chatQueryDO.setQuestionId(chatExecuteReq.getQueryId());
         chatQueryDO.setQueryResult(JsonUtil.toString(queryResult));
         chatQueryDO.setQueryState(1);
         updateQuery(chatQueryDO);
-        chatRepository.updateLastQuestion(chatCtx.getChatId().longValue(),
-                chatCtx.getQueryText(), getCurrentTime());
+        chatRepository.updateLastQuestion(chatExecuteReq.getChatId().longValue(),
+                chatExecuteReq.getQueryText(), getCurrentTime());
     }
 
     @Override
@@ -210,9 +266,9 @@ public class ChatServiceImpl implements ChatService {
     }
 
     @Override
-    public List<ChatParseDO> batchAddParse(ChatContext chatCtx, QueryContext queryContext, ParseResp parseResult) {
+    public List<ChatParseDO> batchAddParse(ChatParseReq chatParseReq, ParseResp parseResult) {
         List<SemanticParseInfo> candidateParses = parseResult.getSelectedParses();
-        return chatQueryRepository.batchSaveParseInfo(chatCtx, queryContext, parseResult, candidateParses);
+        return chatQueryRepository.batchSaveParseInfo(chatParseReq, parseResult, candidateParses);
     }
 
     @Override

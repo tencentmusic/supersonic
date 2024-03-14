@@ -1,16 +1,16 @@
 package com.tencent.supersonic;
 
-import com.tencent.supersonic.chat.core.parser.JavaLLMProxy;
-import com.tencent.supersonic.chat.core.parser.sql.llm.SqlExamplarLoader;
-import com.tencent.supersonic.chat.core.parser.sql.llm.SqlExample;
-import com.tencent.supersonic.chat.core.utils.ComponentFactory;
 import com.tencent.supersonic.common.config.EmbeddingConfig;
-import java.util.List;
+import com.tencent.supersonic.headless.core.chat.parser.JavaLLMProxy;
+import com.tencent.supersonic.headless.core.chat.parser.llm.SqlExamplarLoader;
+import com.tencent.supersonic.headless.core.chat.parser.llm.SqlExample;
+import com.tencent.supersonic.headless.core.utils.ComponentFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
+import java.util.List;
 
 @Slf4j
 @Component

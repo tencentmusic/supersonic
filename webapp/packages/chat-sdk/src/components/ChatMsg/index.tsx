@@ -233,7 +233,7 @@ const ChatMsg: React.FC<Props> = ({ queryId, data, chartIndex, triggerResize }) 
     ?.name;
 
   const isEntityMode =
-    (queryMode === 'TAG_LIST_FILTER' || queryMode === 'METRIC_TAG') &&
+    (queryMode === 'TAG_LIST_FILTER' || queryMode === 'METRIC_ID') &&
     typeof entityId === 'string' &&
     entityName !== undefined;
 

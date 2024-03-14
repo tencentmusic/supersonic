@@ -1,5 +1,7 @@
 package com.tencent.supersonic.headless.server.service.impl;
 
+import static com.tencent.supersonic.common.pojo.Constants.DESC_UPPER;
+
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.common.pojo.Aggregator;
 import com.tencent.supersonic.common.pojo.DateConf;
@@ -8,6 +10,7 @@ import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
 import com.tencent.supersonic.headless.api.pojo.Dim;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
 import com.tencent.supersonic.headless.api.pojo.ValueDistribution;
+import com.tencent.supersonic.headless.api.pojo.enums.TagDefineType;
 import com.tencent.supersonic.headless.api.pojo.request.ItemValueReq;
 import com.tencent.supersonic.headless.api.pojo.request.QuerySqlReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryTagReq;
@@ -19,11 +22,6 @@ import com.tencent.supersonic.headless.server.service.ModelService;
 import com.tencent.supersonic.headless.server.service.QueryService;
 import com.tencent.supersonic.headless.server.service.TagMetaService;
 import com.tencent.supersonic.headless.server.service.TagQueryService;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
-
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -33,8 +31,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-
-import static com.tencent.supersonic.common.pojo.Constants.DESC_UPPER;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 @Service
 @Slf4j
@@ -62,6 +62,7 @@ public class TagQueryServiceImpl implements TagQueryService {
         itemValueResp.setItemId(itemValueReq.getItemId());
         itemValueResp.setType(SchemaElementType.TAG);
         TagResp tag = tagMetaService.getTag(itemValueReq.getItemId(), user);
+        checkTag(tag);
         itemValueResp.setName(tag.getName());
         itemValueResp.setBizName(tag.getBizName());
         correctDateConf(itemValueReq, tag, user);
@@ -74,6 +75,12 @@ public class TagQueryServiceImpl implements TagQueryService {
         return itemValueResp;
     }
 
+    private void checkTag(TagResp tag) throws Exception {
+        if (Objects.nonNull(tag) && TagDefineType.METRIC.equals(tag.getTagDefineType())) {
+            throw new Exception("do not support value distribution query for tag: " + tag.getBizName());
+        }
+    }
+
     private void correctDateConf(ItemValueReq itemValueReq, TagResp tag, User user) throws Exception {
         if (Objects.nonNull(itemValueReq.getDateConf())) {
             return;
@@ -83,6 +90,7 @@ public class TagQueryServiceImpl implements TagQueryService {
         if (CollectionUtils.isEmpty(timeDimension)) {
             return;
         }
+
         // query date info from db
         String endDate = queryTagDateFromDbBySql(timeDimension.get(0), tag, user);
         DateConf dateConf = new DateConf();

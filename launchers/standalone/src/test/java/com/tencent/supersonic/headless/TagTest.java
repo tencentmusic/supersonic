@@ -96,12 +96,13 @@ public class TagTest extends BaseTest {
     }
 
     @Test
-    void testTagValue() throws Exception {
+    void testTagValue() {
         TagReq tagReq = newTagReq();
         tagMetaService.create(tagReq, User.getFakeUser());
         TagResp tag = queryTagRespByBizName(bizName);
         ItemValueReq itemValueReq = new ItemValueReq();
         itemValueReq.setItemId(tag.getId());
+        // ItemValueResp itemValueResp = tagQueryService.queryTagValue(itemValueReq, User.getFakeUser());
         tagMetaService.delete(tag.getId(), User.getFakeUser());
     }
 

@@ -52,6 +52,8 @@ public class TagConverter {
         queryStatement.setQueryParam(queryParam);
         queryStatement.setDataSetId(queryStructReq.getDataSetId());
         return queryStatement;
+
+
     }
 
     public void convert(QuerySqlReq querySqlReq,
@@ -99,9 +101,11 @@ public class TagConverter {
         // covert to QueryReqConverter
         QueryStructReq queryStructReq = new QueryStructReq();
         BeanUtils.copyProperties(queryTagReq, queryStructReq);
+        queryStructReq.setModelIds(queryTagReq.getModelIdSet());
         if (!CollectionUtils.isEmpty(queryTagReq.getTagFilters())) {
             queryStructReq.setDimensionFilters(queryTagReq.getTagFilters());
         }
+        queryStructReq.setQueryType(QueryType.TAG);
         QuerySqlReq querySqlReq = queryStructReq.convert();
         convert(querySqlReq, semanticSchemaResp, queryStatement, queryStructReq);
         QueryParam queryParam = new QueryParam();

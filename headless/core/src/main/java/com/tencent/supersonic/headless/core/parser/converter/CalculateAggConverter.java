@@ -9,19 +9,18 @@ import com.tencent.supersonic.headless.api.pojo.MetricTable;
 import com.tencent.supersonic.headless.api.pojo.QueryParam;
 import com.tencent.supersonic.headless.api.pojo.enums.AggOption;
 import com.tencent.supersonic.headless.api.pojo.enums.EngineType;
+import com.tencent.supersonic.headless.core.pojo.DataSetQueryParam;
 import com.tencent.supersonic.headless.core.pojo.Database;
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;
-import com.tencent.supersonic.headless.core.pojo.DataSetQueryParam;
 import com.tencent.supersonic.headless.core.utils.SqlGenerateUtils;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 /**
  * supplement the QueryStatement when query with custom aggregation method
@@ -30,12 +29,6 @@ import java.util.stream.Collectors;
 @Slf4j
 public class CalculateAggConverter implements HeadlessConverter {
 
-    private final SqlGenerateUtils sqlGenerateUtils;
-
-
-    public CalculateAggConverter(SqlGenerateUtils sqlGenerateUtils) {
-        this.sqlGenerateUtils = sqlGenerateUtils;
-    }
 
     public interface EngineSql {
 
@@ -43,8 +36,9 @@ public class CalculateAggConverter implements HeadlessConverter {
     }
 
     public DataSetQueryParam generateSqlCommend(QueryStatement queryStatement,
-                                                EngineType engineTypeEnum, String version)
+            EngineType engineTypeEnum, String version)
             throws Exception {
+        SqlGenerateUtils sqlGenerateUtils = ContextUtils.getBean(SqlGenerateUtils.class);
         QueryParam queryParam = queryStatement.getQueryParam();
         // 同环比
         if (isRatioAccept(queryParam)) {
@@ -130,8 +124,9 @@ public class CalculateAggConverter implements HeadlessConverter {
     }
 
     public DataSetQueryParam generateRatioSqlCommand(QueryStatement queryStatement, EngineType engineTypeEnum,
-                                                     String version)
+            String version)
             throws Exception {
+        SqlGenerateUtils sqlGenerateUtils = ContextUtils.getBean(SqlGenerateUtils.class);
         QueryParam queryParam = queryStatement.getQueryParam();
         check(queryParam);
         queryStatement.setEnableOptimize(false);
@@ -412,6 +407,7 @@ public class CalculateAggConverter implements HeadlessConverter {
     }
 
     private String getSelectField(final Aggregator agg, String alias) {
+        SqlGenerateUtils sqlGenerateUtils = ContextUtils.getBean(SqlGenerateUtils.class);
         if (agg.getFunc().equals(AggOperatorEnum.RATIO_OVER) || agg.getFunc().equals(AggOperatorEnum.RATIO_ROLL)) {
             return alias + agg.getColumn();
         }

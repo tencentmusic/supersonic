@@ -1,30 +1,27 @@
 package com.tencent.supersonic.chat.server.processor.execute;
 
 import com.alibaba.fastjson.JSONObject;
-import com.google.common.collect.Lists;
-import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
-import com.tencent.supersonic.chat.api.pojo.request.ExecuteQueryReq;
-import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.enums.QueryType;
-import com.tencent.supersonic.common.util.ComponentFactory;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.embedding.Retrieval;
 import com.tencent.supersonic.common.util.embedding.RetrieveQuery;
 import com.tencent.supersonic.common.util.embedding.RetrieveQueryResult;
-import com.tencent.supersonic.common.util.embedding.S2EmbeddingStore;
 import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
-import com.tencent.supersonic.headless.server.service.MetaEmbeddingService;
-import org.springframework.util.CollectionUtils;
-
+import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
+import com.tencent.supersonic.headless.api.pojo.request.ExecuteQueryReq;
+import com.tencent.supersonic.headless.api.pojo.response.QueryResult;
+import com.tencent.supersonic.headless.core.chat.knowledge.MetaEmbeddingService;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.springframework.util.CollectionUtils;
 
 /**
  * MetricRecommendProcessor fills recommended metrics based on embedding similarity.
@@ -32,8 +29,6 @@ import java.util.stream.Collectors;
 public class MetricRecommendProcessor implements ExecuteResultProcessor {
 
     private static final int METRIC_RECOMMEND_SIZE = 5;
-
-    private S2EmbeddingStore s2EmbeddingStore = ComponentFactory.getS2EmbeddingStore();
 
     @Override
     public void process(QueryResult queryResult, SemanticParseInfo semanticParseInfo, ExecuteQueryReq queryReq) {
@@ -54,8 +49,8 @@ public class MetricRecommendProcessor implements ExecuteResultProcessor {
                 .filterCondition(filterCondition).queryEmbeddings(null).build();
         MetaEmbeddingService metaEmbeddingService = ContextUtils.getBean(MetaEmbeddingService.class);
         List<RetrieveQueryResult> retrieveQueryResults =
-                metaEmbeddingService.retrieveQuery(Lists.newArrayList(parseInfo.getDataSetId()),
-                        retrieveQuery, METRIC_RECOMMEND_SIZE + 1);
+                metaEmbeddingService.retrieveQuery(retrieveQuery, METRIC_RECOMMEND_SIZE + 1, new HashMap<>(),
+                        new HashSet<>());
         if (CollectionUtils.isEmpty(retrieveQueryResults)) {
             return;
         }

@@ -1,11 +1,5 @@
 package com.tencent.supersonic.headless.server.utils;
 
-import static com.tencent.supersonic.common.pojo.Constants.AND_UPPER;
-import static com.tencent.supersonic.common.pojo.Constants.APOSTROPHE;
-import static com.tencent.supersonic.common.pojo.Constants.COMMA;
-import static com.tencent.supersonic.common.pojo.Constants.POUND;
-import static com.tencent.supersonic.common.pojo.Constants.SPACE;
-
 import com.google.common.base.Strings;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.common.pojo.Aggregator;
@@ -40,7 +34,13 @@ import com.tencent.supersonic.headless.server.service.DimensionService;
 import com.tencent.supersonic.headless.server.service.MetricService;
 import com.tencent.supersonic.headless.server.service.ModelService;
 import com.tencent.supersonic.headless.server.service.QueryService;
-
+import com.tencent.supersonic.headless.server.service.TagMetaService;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -53,14 +53,11 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.StringJoiner;
-
-import com.tencent.supersonic.headless.server.service.TagMetaService;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
+import static com.tencent.supersonic.common.pojo.Constants.AND_UPPER;
+import static com.tencent.supersonic.common.pojo.Constants.APOSTROPHE;
+import static com.tencent.supersonic.common.pojo.Constants.COMMA;
+import static com.tencent.supersonic.common.pojo.Constants.POUND;
+import static com.tencent.supersonic.common.pojo.Constants.SPACE;
 
 @Slf4j
 @Component
@@ -268,16 +265,17 @@ public class DictUtils {
                 dictItemResp.getConfig().getLimit();
 
         // todo 自定义指标
+        Set<Long> modelIds = new HashSet<>();
         String metric = "count(1)";
         if (Objects.nonNull(dictItemResp.getConfig()) && Objects.nonNull(dictItemResp.getConfig().getMetricId())) {
             Long metricId = dictItemResp.getConfig().getMetricId();
             MetricResp metricResp = metricService.getMetric(metricId);
             String metricBizName = metricResp.getBizName();
             metric = String.format("sum(%s)", metricBizName);
+            modelIds.add(metricResp.getModelId());
         }
 
         String sql = String.format(sqlPattern, bizName, metric, where, bizName, metric, limit);
-        Set<Long> modelIds = new HashSet<>();
         modelIds.add(dictItemResp.getModelId());
         QuerySqlReq querySqlReq = new QuerySqlReq();
         querySqlReq.setSql(sql);
@@ -321,8 +319,6 @@ public class DictUtils {
         QueryStructReq queryStructReq = new QueryStructReq();
 
         Set<Long> modelIds = new HashSet<>(Arrays.asList(dictItemResp.getModelId()));
-        queryStructReq.setModelIds(modelIds);
-
         List<String> groups = new ArrayList<>(Arrays.asList(dictItemResp.getBizName()));
         queryStructReq.setGroups(groups);
 
@@ -335,6 +331,8 @@ public class DictUtils {
         String metricBizName = metric.getBizName();
         aggregators.add(new Aggregator(metricBizName, AggOperatorEnum.SUM));
         queryStructReq.setAggregators(aggregators);
+        modelIds.add(metric.getModelId());
+        queryStructReq.setModelIds(modelIds);
 
         List<Order> orders = new ArrayList<>();
         orders.add(new Order(metricBizName, Constants.DESC_UPPER));

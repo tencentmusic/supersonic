@@ -11,8 +11,9 @@ import com.tencent.supersonic.headless.api.pojo.response.ItemQueryResultResp;
 import com.tencent.supersonic.headless.api.pojo.response.ItemUseResp;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
 import com.tencent.supersonic.headless.server.annotation.ApiHeaderCheck;
-import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 public interface QueryService {
 

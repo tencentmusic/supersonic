@@ -6,7 +6,6 @@
     <packaging>pom</packaging>
     <modules>
         <module>api</module>
-        <module>core</module>
         <module>server</module>
     </modules>
 

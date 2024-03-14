@@ -3,9 +3,6 @@ package com.tencent.supersonic.chat.server.service.impl;
 
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
-import com.tencent.supersonic.chat.core.query.semantic.SemanticInterpreter;
-import com.tencent.supersonic.chat.api.pojo.DataSetSchema;
-import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.chat.api.pojo.request.ChatAggConfigReq;
 import com.tencent.supersonic.chat.api.pojo.request.ChatConfigBaseReq;
 import com.tencent.supersonic.chat.api.pojo.request.ChatConfigEditReqReq;
@@ -24,23 +21,22 @@ import com.tencent.supersonic.chat.api.pojo.response.ChatDetailRichConfigResp;
 import com.tencent.supersonic.chat.api.pojo.response.EntityRichInfoResp;
 import com.tencent.supersonic.chat.api.pojo.response.ItemVisibilityInfo;
 import com.tencent.supersonic.chat.server.config.ChatConfig;
-import com.tencent.supersonic.chat.server.util.ChatConfigHelper;
-import com.tencent.supersonic.chat.core.utils.ComponentFactory;
-import com.tencent.supersonic.chat.server.util.VisibilityEvent;
 import com.tencent.supersonic.chat.server.persistence.repository.ChatConfigRepository;
 import com.tencent.supersonic.chat.server.service.ConfigService;
-import com.tencent.supersonic.chat.server.service.SemanticService;
+import com.tencent.supersonic.chat.server.util.ChatConfigHelper;
 import com.tencent.supersonic.common.util.JsonUtil;
+import com.tencent.supersonic.headless.api.pojo.DataSetSchema;
+import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.headless.api.pojo.SchemaItem;
 import com.tencent.supersonic.headless.api.pojo.response.DimensionResp;
 import com.tencent.supersonic.headless.api.pojo.response.MetricResp;
 import com.tencent.supersonic.headless.server.pojo.MetaFilter;
 import com.tencent.supersonic.headless.server.service.DimensionService;
 import com.tencent.supersonic.headless.server.service.MetricService;
+import com.tencent.supersonic.headless.server.service.impl.SemanticService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -62,10 +58,6 @@ public class ConfigServiceImpl implements ConfigService {
     private final MetricService metricService;
     @Autowired
     private SemanticService semanticService;
-    @Autowired
-    private ApplicationEventPublisher applicationEventPublisher;
-
-    private SemanticInterpreter semanticInterpreter = ComponentFactory.getSemanticLayer();
 
 
     public ConfigServiceImpl(ChatConfigRepository chatConfigRepository,
@@ -83,9 +75,7 @@ public class ConfigServiceImpl implements ConfigService {
         log.info("[create model extend] object:{}", JsonUtil.toString(configBaseCmd, true));
         duplicateCheck(configBaseCmd.getModelId());
         ChatConfig chaConfig = chatConfigHelper.newChatConfig(configBaseCmd, user);
-        Long id = chatConfigRepository.createConfig(chaConfig);
-        applicationEventPublisher.publishEvent(new VisibilityEvent(this, chaConfig));
-        return id;
+        return chatConfigRepository.createConfig(chaConfig);
     }
 
     private void duplicateCheck(Long modelId) {
@@ -106,7 +96,6 @@ public class ConfigServiceImpl implements ConfigService {
         }
         ChatConfig chaConfig = chatConfigHelper.editChatConfig(configEditCmd, user);
         chatConfigRepository.updateConfig(chaConfig);
-        applicationEventPublisher.publishEvent(new VisibilityEvent(this, chaConfig));
         return configEditCmd.getId();
     }
 
@@ -350,15 +339,7 @@ public class ConfigServiceImpl implements ConfigService {
 
     @Override
     public List<ChatConfigRichResp> getAllChatRichConfig() {
-        List<ChatConfigRichResp> chatConfigRichInfoList = new ArrayList<>();
-        List<DataSetSchema> modelSchemas = semanticInterpreter.getDataSetSchema();
-        modelSchemas.stream().forEach(modelSchema -> {
-            ChatConfigRichResp chatConfigRichInfo = getConfigRichInfo(modelSchema.getDataSet().getId());
-            if (Objects.nonNull(chatConfigRichInfo)) {
-                chatConfigRichInfoList.add(chatConfigRichInfo);
-            }
-        });
-        return chatConfigRichInfoList;
+        return new ArrayList<>();
     }
 
     @Override
@@ -367,4 +348,5 @@ public class ConfigServiceImpl implements ConfigService {
         return allChatRichConfig.stream()
                 .collect(Collectors.toMap(ChatConfigRichResp::getModelId, value -> value, (k1, k2) -> k1));
     }
+
 }

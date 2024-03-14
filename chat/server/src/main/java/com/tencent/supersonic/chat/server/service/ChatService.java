@@ -2,30 +2,36 @@ package com.tencent.supersonic.chat.server.service;
 
 import com.github.pagehelper.PageInfo;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
-import com.tencent.supersonic.chat.core.pojo.ChatContext;
+import com.tencent.supersonic.chat.api.pojo.request.ChatExecuteReq;
+import com.tencent.supersonic.chat.api.pojo.request.ChatParseReq;
 import com.tencent.supersonic.chat.api.pojo.request.PageQueryInfoReq;
-import com.tencent.supersonic.chat.api.pojo.response.ParseResp;
-import com.tencent.supersonic.chat.api.pojo.response.QueryResp;
-import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.chat.api.pojo.response.ShowCaseResp;
-import com.tencent.supersonic.chat.core.pojo.QueryContext;
 import com.tencent.supersonic.chat.server.persistence.dataobject.ChatDO;
 import com.tencent.supersonic.chat.server.persistence.dataobject.ChatParseDO;
 import com.tencent.supersonic.chat.server.persistence.dataobject.ChatQueryDO;
+import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
+import com.tencent.supersonic.headless.api.pojo.request.DimensionValueReq;
+import com.tencent.supersonic.headless.api.pojo.request.QueryDataReq;
+import com.tencent.supersonic.headless.api.pojo.response.ParseResp;
+import com.tencent.supersonic.headless.api.pojo.response.QueryResp;
+import com.tencent.supersonic.headless.api.pojo.response.QueryResult;
+import com.tencent.supersonic.headless.api.pojo.response.SearchResult;
+
 import java.util.List;
 
 public interface ChatService {
 
-    /***
-     * get the model from context
-     * @param chatId
-     * @return
-     */
-    Long getContextModel(Integer chatId);
+    List<SearchResult> search(ChatParseReq chatParseReq);
 
-    ChatContext getOrCreateContext(int chatId);
+    ParseResp performParsing(ChatParseReq chatParseReq);
 
-    void updateContext(ChatContext chatCtx);
+    QueryResult performExecution(ChatExecuteReq chatExecuteReq) throws Exception;
+
+    Object queryData(QueryDataReq queryData, User user) throws Exception;
+
+    SemanticParseInfo queryContext(Integer chatId);
+
+    Object queryDimensionValue(DimensionValueReq dimensionValueReq, User user) throws Exception;
 
     Boolean addChat(User user, String chatName, Integer agentId);
 
@@ -45,13 +51,13 @@ public interface ChatService {
 
     ShowCaseResp queryShowCase(PageQueryInfoReq pageQueryInfoCommend, int agentId);
 
-    List<ChatParseDO> batchAddParse(ChatContext chatCtx, QueryContext queryContext, ParseResp parseResult);
+    List<ChatParseDO> batchAddParse(ChatParseReq chatParseReq, ParseResp parseResult);
 
     ChatQueryDO getLastQuery(long chatId);
 
     int updateQuery(ChatQueryDO chatQueryDO);
 
-    void updateQuery(Long questionId, int parseId, QueryResult queryResult, ChatContext chatCtx);
+    void saveQueryResult(ChatExecuteReq chatExecuteReq, QueryResult queryResult);
 
     ChatParseDO getParseInfo(Long questionId, int parseId);
 

@@ -1,25 +1,8 @@
 package com.tencent.supersonic.chat.server.processor.execute;
 
-import static com.tencent.supersonic.common.pojo.Constants.DAY;
-import static com.tencent.supersonic.common.pojo.Constants.DAY_FORMAT;
-import static com.tencent.supersonic.common.pojo.Constants.DAY_FORMAT_INT;
-import static com.tencent.supersonic.common.pojo.Constants.MONTH;
-import static com.tencent.supersonic.common.pojo.Constants.MONTH_FORMAT;
-import static com.tencent.supersonic.common.pojo.Constants.MONTH_FORMAT_INT;
-import static com.tencent.supersonic.common.pojo.Constants.TIMES_FORMAT;
-import static com.tencent.supersonic.common.pojo.Constants.TIME_FORMAT;
-import static com.tencent.supersonic.common.pojo.Constants.WEEK;
-
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
-import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
-import com.tencent.supersonic.chat.api.pojo.request.ExecuteQueryReq;
 import com.tencent.supersonic.chat.api.pojo.response.AggregateInfo;
 import com.tencent.supersonic.chat.api.pojo.response.MetricInfo;
-import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
-import com.tencent.supersonic.chat.core.config.AggregatorConfig;
-import com.tencent.supersonic.chat.core.query.semantic.SemanticInterpreter;
-import com.tencent.supersonic.chat.core.utils.ComponentFactory;
-import com.tencent.supersonic.chat.core.utils.QueryReqBuilder;
 import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.common.pojo.DateConf.DateMode;
 import com.tencent.supersonic.common.pojo.QueryColumn;
@@ -29,8 +12,16 @@ import com.tencent.supersonic.common.pojo.enums.RatioOverType;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.DateUtils;
 import com.tencent.supersonic.headless.api.pojo.SchemaElement;
+import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
+import com.tencent.supersonic.headless.api.pojo.request.ExecuteQueryReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
+import com.tencent.supersonic.headless.api.pojo.response.QueryResult;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
+import com.tencent.supersonic.headless.core.config.AggregatorConfig;
+import com.tencent.supersonic.headless.core.utils.QueryReqBuilder;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.util.CollectionUtils;
+
 import java.text.DecimalFormat;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -48,8 +39,16 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.util.CollectionUtils;
+
+import static com.tencent.supersonic.common.pojo.Constants.DAY;
+import static com.tencent.supersonic.common.pojo.Constants.DAY_FORMAT;
+import static com.tencent.supersonic.common.pojo.Constants.DAY_FORMAT_INT;
+import static com.tencent.supersonic.common.pojo.Constants.MONTH;
+import static com.tencent.supersonic.common.pojo.Constants.MONTH_FORMAT;
+import static com.tencent.supersonic.common.pojo.Constants.MONTH_FORMAT_INT;
+import static com.tencent.supersonic.common.pojo.Constants.TIMES_FORMAT;
+import static com.tencent.supersonic.common.pojo.Constants.TIME_FORMAT;
+import static com.tencent.supersonic.common.pojo.Constants.WEEK;
 
 /**
  * Add ratio queries for metric queries.
@@ -57,7 +56,7 @@ import org.springframework.util.CollectionUtils;
 @Slf4j
 public class MetricRatioProcessor implements ExecuteResultProcessor {
 
-    private SemanticInterpreter semanticInterpreter = ComponentFactory.getSemanticLayer();
+    //private SemanticInterpreter semanticInterpreter = ComponentFactory.getSemanticLayer();
 
     @Override
     public void process(QueryResult queryResult, SemanticParseInfo semanticParseInfo, ExecuteQueryReq queryReq) {
@@ -68,8 +67,8 @@ public class MetricRatioProcessor implements ExecuteResultProcessor {
                 || !QueryType.METRIC.equals(semanticParseInfo.getQueryType())) {
             return;
         }
-        AggregateInfo aggregateInfo = getAggregateInfo(queryReq.getUser(), semanticParseInfo, queryResult);
-        queryResult.setAggregateInfo(aggregateInfo);
+        //AggregateInfo aggregateInfo = getAggregateInfo(queryReq.getUser(), semanticParseInfo, queryResult);
+        //queryResult.setAggregateInfo(aggregateInfo);
     }
 
     public AggregateInfo getAggregateInfo(User user, SemanticParseInfo semanticParseInfo, QueryResult queryResult) {
@@ -133,7 +132,7 @@ public class MetricRatioProcessor implements ExecuteResultProcessor {
         queryStructReq.setDateInfo(getRatioDateConf(aggOperatorEnum, semanticParseInfo, queryResult));
         queryStructReq.setConvertToSql(false);
 
-        SemanticQueryResp queryResp = semanticInterpreter.queryByStruct(queryStructReq, user);
+        SemanticQueryResp queryResp = null;
         MetricInfo metricInfo = new MetricInfo();
         metricInfo.setStatistics(new HashMap<>());
         if (Objects.isNull(queryResp) || CollectionUtils.isEmpty(queryResp.getResultList())) {
