@@ -21,7 +21,7 @@ type Props = {
 const ViewModelConfigTransfer: React.FC<Props> = forwardRef(
   (
     {
-      queryType = 'METRIC',
+      queryType = TransType.METRIC,
       viewItem,
       modelItem,
       dimensionList,
@@ -138,7 +138,7 @@ const ViewModelConfigTransfer: React.FC<Props> = forwardRef(
           idList.push(id);
           viewConfigMap[id] = { ...item };
 
-          if (queryType === 'METRIC') {
+          if (queryType === TransType.METRIC) {
             if (Array.isArray(metrics)) {
               metrics.forEach((metricId: number) => {
                 transferKeys.push(wrapperTransTypeAndId(TransType.METRIC, metricId));
@@ -150,7 +150,7 @@ const ViewModelConfigTransfer: React.FC<Props> = forwardRef(
               });
             }
           }
-          if (queryType === 'TAG') {
+          if (queryType === TransType.TAG) {
             if (Array.isArray(tagIds)) {
               tagIds.forEach((tagId: number) => {
                 transferKeys.push(wrapperTransTypeAndId(TransType.TAG, tagId));
@@ -164,7 +164,7 @@ const ViewModelConfigTransfer: React.FC<Props> = forwardRef(
     }, [queryType]);
 
     useEffect(() => {
-      if (queryType !== 'METRIC') {
+      if (queryType !== TransType.METRIC) {
         return;
       }
       if (!dimensionList || !metricList) {
@@ -190,7 +190,7 @@ const ViewModelConfigTransfer: React.FC<Props> = forwardRef(
     }, [queryType, modelItem, dimensionList, metricList]);
 
     useEffect(() => {
-      if (queryType !== 'TAG') {
+      if (queryType !== TransType.TAG) {
         return;
       }
       if (!tagList) {
@@ -213,7 +213,7 @@ const ViewModelConfigTransfer: React.FC<Props> = forwardRef(
 
     return (
       <>
-        <div style={{ display: queryType === 'TAG' ? 'none' : 'block' }}>
+        <div style={{ display: queryType === TransType.TAG ? 'none' : 'block' }}>
           <DimensionMetricTransferModal
             toolbarSolt={toolbarSolt}
             modelId={modelItem?.id}
@@ -245,7 +245,7 @@ const ViewModelConfigTransfer: React.FC<Props> = forwardRef(
             onCancel={() => {}}
           />
         </div>
-        <div style={{ display: queryType !== 'TAG' ? 'none' : 'block' }}>
+        <div style={{ display: queryType !== TransType.TAG ? 'none' : 'block' }}>
           <TagTransferModal
             toolbarSolt={toolbarSolt}
             modelId={modelItem?.id}
