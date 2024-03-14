@@ -3,15 +3,17 @@ package com.tencent.supersonic.chat.server.plugin.build.webservice;
 import com.alibaba.fastjson.JSON;
 import com.tencent.supersonic.chat.server.plugin.Plugin;
 import com.tencent.supersonic.chat.server.plugin.PluginParseResult;
+import com.tencent.supersonic.chat.server.plugin.PluginQueryManager;
 import com.tencent.supersonic.chat.server.plugin.build.ParamOption;
 import com.tencent.supersonic.chat.server.plugin.build.PluginSemanticQuery;
 import com.tencent.supersonic.chat.server.plugin.build.WebBase;
+import com.tencent.supersonic.common.pojo.Constants;
+import com.tencent.supersonic.common.pojo.QueryColumn;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.JsonUtil;
-import com.tencent.supersonic.headless.api.pojo.request.SemanticQueryReq;
-import com.tencent.supersonic.headless.core.chat.query.QueryManager;
+import com.tencent.supersonic.headless.api.pojo.response.QueryResult;
+import com.tencent.supersonic.headless.api.pojo.response.QueryState;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.calcite.sql.parser.SqlParseException;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -36,17 +38,30 @@ public class WebServiceQuery extends PluginSemanticQuery {
     private RestTemplate restTemplate;
 
     public WebServiceQuery() {
-        QueryManager.register(this);
+        PluginQueryManager.register(QUERY_MODE, this);
     }
 
     @Override
-    public String getQueryMode() {
-        return QUERY_MODE;
-    }
-
-    @Override
-    public SemanticQueryReq buildSemanticQueryReq() throws SqlParseException {
-        return null;
+    public QueryResult build() {
+        QueryResult queryResult = new QueryResult();
+        queryResult.setQueryMode(QUERY_MODE);
+        Map<String, Object> properties = parseInfo.getProperties();
+        PluginParseResult pluginParseResult = JsonUtil.toObject(
+                JsonUtil.toString(properties.get(Constants.CONTEXT)), PluginParseResult.class);
+        WebServiceResp webServiceResponse = buildResponse(pluginParseResult);
+        Object object = webServiceResponse.getResult();
+        // in order to show webServiceQuery result int frontend conveniently,
+        // webServiceResponse result format is consistent with queryByStruct result.
+        log.info("webServiceResponse result:{}", JsonUtil.toString(object));
+        try {
+            Map<String, Object> data = JsonUtil.toMap(JsonUtil.toString(object), String.class, Object.class);
+            queryResult.setQueryResults((List<Map<String, Object>>) data.get("resultList"));
+            queryResult.setQueryColumns((List<QueryColumn>) data.get("columns"));
+            queryResult.setQueryState(QueryState.SUCCESS);
+        } catch (Exception e) {
+            log.info("webServiceResponse result has an exception:{}", e.getMessage());
+        }
+        return queryResult;
     }
 
     protected WebServiceResp buildResponse(PluginParseResult pluginParseResult) {

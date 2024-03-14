@@ -7,22 +7,27 @@ import com.tencent.supersonic.chat.api.pojo.request.ChatExecuteReq;
 import com.tencent.supersonic.chat.api.pojo.request.ChatParseReq;
 import com.tencent.supersonic.chat.api.pojo.request.PageQueryInfoReq;
 import com.tencent.supersonic.chat.api.pojo.response.ShowCaseResp;
-import com.tencent.supersonic.chat.server.agent.Agent;
+import com.tencent.supersonic.chat.server.executor.ChatExecutor;
+import com.tencent.supersonic.chat.server.parser.ChatParser;
 import com.tencent.supersonic.chat.server.persistence.dataobject.ChatDO;
 import com.tencent.supersonic.chat.server.persistence.dataobject.ChatParseDO;
 import com.tencent.supersonic.chat.server.persistence.dataobject.ChatQueryDO;
 import com.tencent.supersonic.chat.server.persistence.dataobject.QueryDO;
 import com.tencent.supersonic.chat.server.persistence.repository.ChatQueryRepository;
 import com.tencent.supersonic.chat.server.persistence.repository.ChatRepository;
-import com.tencent.supersonic.chat.server.service.AgentService;
+import com.tencent.supersonic.chat.server.pojo.ChatExecuteContext;
+import com.tencent.supersonic.chat.server.pojo.ChatParseContext;
+import com.tencent.supersonic.chat.server.processor.parse.ParseResultProcessor;
 import com.tencent.supersonic.chat.server.service.ChatService;
+import com.tencent.supersonic.chat.server.util.ComponentFactory;
+import com.tencent.supersonic.chat.server.util.QueryReqConverter;
 import com.tencent.supersonic.common.util.BeanMapper;
 import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.api.pojo.request.DimensionValueReq;
-import com.tencent.supersonic.headless.api.pojo.request.ExecuteQueryReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryDataReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryReq;
+import com.tencent.supersonic.headless.api.pojo.response.MapResp;
 import com.tencent.supersonic.headless.api.pojo.response.ParseResp;
 import com.tencent.supersonic.headless.api.pojo.response.QueryResp;
 import com.tencent.supersonic.headless.api.pojo.response.QueryResult;
@@ -33,7 +38,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
-
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -55,30 +59,63 @@ public class ChatServiceImpl implements ChatService {
     @Autowired
     private ChatQueryService chatQueryService;
     @Autowired
-    private AgentService agentService;
-    @Autowired
     private SearchService searchService;
+    private List<ChatParser> chatParsers = ComponentFactory.getChatParsers();
+    private List<ChatExecutor> chatExecutors = ComponentFactory.getChatExecutors();
+    private List<ParseResultProcessor> parseResultProcessors = ComponentFactory.getParseProcessors();
 
     @Override
     public List<SearchResult> search(ChatParseReq chatParseReq) {
-        QueryReq queryReq = buildSqlQueryReq(chatParseReq);
+        ChatParseContext chatParseContext = buildParseContext(chatParseReq);
+        QueryReq queryReq = QueryReqConverter.buildText2SqlQueryReq(chatParseContext);
         return searchService.search(queryReq);
     }
 
     @Override
     public ParseResp performParsing(ChatParseReq chatParseReq) {
-        QueryReq queryReq = buildSqlQueryReq(chatParseReq);
-        ParseResp parseResp = chatQueryService.performParsing(queryReq);
+        ParseResp parseResp = new ParseResp();
+        ChatParseContext chatParseContext = buildParseContext(chatParseReq);
+        for (ChatParser chatParser : chatParsers) {
+            chatParser.parse(chatParseContext, parseResp);
+        }
+        for (ParseResultProcessor processor : parseResultProcessors) {
+            processor.process(chatParseContext, parseResp);
+        }
         batchAddParse(chatParseReq, parseResp);
         return parseResp;
     }
 
     @Override
-    public QueryResult performExecution(ChatExecuteReq chatExecuteReq) throws Exception {
-        ExecuteQueryReq executeQueryReq = buildExecuteReq(chatExecuteReq);
-        QueryResult queryResult = chatQueryService.performExecution(executeQueryReq);
+    public QueryResult performExecution(ChatExecuteReq chatExecuteReq) {
+        QueryResult queryResult = new QueryResult();
+        ChatExecuteContext chatExecuteContext = buildExecuteContext(chatExecuteReq);
+        for (ChatExecutor chatExecutor : chatExecutors) {
+            queryResult = chatExecutor.execute(chatExecuteContext);
+            if (queryResult != null) {
+                break;
+            }
+        }
         saveQueryResult(chatExecuteReq, queryResult);
         return queryResult;
+    }
+
+    private ChatParseContext buildParseContext(ChatParseReq chatParseReq) {
+        ChatParseContext chatParseContext = new ChatParseContext();
+        BeanMapper.mapper(chatParseReq, chatParseContext);
+        QueryReq queryReq = QueryReqConverter.buildText2SqlQueryReq(chatParseContext);
+        MapResp mapResp = chatQueryService.performMapping(queryReq);
+        chatParseContext.setMapInfo(mapResp.getMapInfo());
+        return chatParseContext;
+    }
+
+    private ChatExecuteContext buildExecuteContext(ChatExecuteReq chatExecuteReq) {
+        ChatExecuteContext chatExecuteContext = new ChatExecuteContext();
+        BeanMapper.mapper(chatExecuteReq, chatExecuteContext);
+        ChatParseDO chatParseDO = getParseInfo(chatExecuteReq.getQueryId(), chatExecuteReq.getParseId());
+        SemanticParseInfo semanticParseInfo = JSONObject.parseObject(chatParseDO.getParseInfo(),
+                SemanticParseInfo.class);
+        chatExecuteContext.setParseInfo(semanticParseInfo);
+        return chatExecuteContext;
     }
 
     @Override
@@ -94,36 +131,6 @@ public class ChatServiceImpl implements ChatService {
     @Override
     public Object queryDimensionValue(DimensionValueReq dimensionValueReq, User user) throws Exception {
         return chatQueryService.queryDimensionValue(dimensionValueReq, user);
-    }
-
-    private QueryReq buildSqlQueryReq(ChatParseReq chatParseReq) {
-        QueryReq queryReq = new QueryReq();
-        BeanMapper.mapper(chatParseReq, queryReq);
-        if (chatParseReq.getAgentId() == null) {
-            return queryReq;
-        }
-        Agent agent = agentService.getAgent(chatParseReq.getAgentId());
-        if (agent == null) {
-            return queryReq;
-        }
-        if (agent.containsLLMParserTool()) {
-            queryReq.setEnableLLM(true);
-        }
-        queryReq.setDataSetIds(agent.getDataSetIds());
-        return queryReq;
-    }
-
-    private ExecuteQueryReq buildExecuteReq(ChatExecuteReq chatExecuteReq) {
-        ChatParseDO chatParseDO = getParseInfo(chatExecuteReq.getQueryId(), chatExecuteReq.getParseId());
-        SemanticParseInfo parseInfo = JSONObject.parseObject(chatParseDO.getParseInfo(), SemanticParseInfo.class);
-        return ExecuteQueryReq.builder()
-                .queryId(chatExecuteReq.getQueryId())
-                .chatId(chatExecuteReq.getChatId())
-                .queryText(chatExecuteReq.getQueryText())
-                .parseInfo(parseInfo)
-                .saveAnswer(chatExecuteReq.isSaveAnswer())
-                .user(chatExecuteReq.getUser())
-                .build();
     }
 
     @Override

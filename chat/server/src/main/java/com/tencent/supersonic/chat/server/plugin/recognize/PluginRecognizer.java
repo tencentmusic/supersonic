@@ -1,13 +1,12 @@
-package com.tencent.supersonic.chat.server.plugin.recall;
+package com.tencent.supersonic.chat.server.plugin.recognize;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.tencent.supersonic.chat.api.pojo.request.ChatParseReq;
 import com.tencent.supersonic.chat.server.plugin.Plugin;
 import com.tencent.supersonic.chat.server.plugin.PluginManager;
 import com.tencent.supersonic.chat.server.plugin.PluginParseResult;
 import com.tencent.supersonic.chat.server.plugin.PluginRecallResult;
-import com.tencent.supersonic.chat.server.plugin.build.PluginSemanticQuery;
+import com.tencent.supersonic.chat.server.pojo.ChatParseContext;
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementMatch;
@@ -15,7 +14,7 @@ import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.api.pojo.request.QueryFilter;
 import com.tencent.supersonic.headless.api.pojo.request.QueryFilters;
-import com.tencent.supersonic.headless.core.pojo.QueryContext;
+import com.tencent.supersonic.headless.api.pojo.response.ParseResp;
 import org.springframework.util.CollectionUtils;
 
 import java.util.HashMap;
@@ -26,64 +25,58 @@ import java.util.Set;
 /**
  * PluginParser defines the basic process and common methods for recalling plugins.
  */
-public abstract class PluginParser {
+public abstract class PluginRecognizer {
 
-    public void parse(ChatParseReq chatParseReq) {
-        if (!checkPreCondition(chatParseReq)) {
+    public void recognize(ChatParseContext chatParseContext, ParseResp parseResp) {
+        if (!checkPreCondition(chatParseContext)) {
             return;
         }
-        PluginRecallResult pluginRecallResult = recallPlugin(chatParseReq);
+        PluginRecallResult pluginRecallResult = recallPlugin(chatParseContext);
         if (pluginRecallResult == null) {
             return;
         }
-        buildQuery(chatParseReq, pluginRecallResult);
+        buildQuery(chatParseContext, parseResp, pluginRecallResult);
     }
 
-    public abstract boolean checkPreCondition(ChatParseReq chatParseReq);
+    public abstract boolean checkPreCondition(ChatParseContext chatParseContext);
 
-    public abstract PluginRecallResult recallPlugin(ChatParseReq chatParseReq);
+    public abstract PluginRecallResult recallPlugin(ChatParseContext chatParseContext);
 
-    public void buildQuery(ChatParseReq chatParseReq, PluginRecallResult pluginRecallResult) {
+    public void buildQuery(ChatParseContext chatParseContext, ParseResp parseResp,
+                           PluginRecallResult pluginRecallResult) {
         Plugin plugin = pluginRecallResult.getPlugin();
         Set<Long> dataSetIds = pluginRecallResult.getDataSetIds();
         if (plugin.isContainsAllModel()) {
             dataSetIds = Sets.newHashSet(-1L);
         }
         for (Long dataSetId : dataSetIds) {
-            //todo
-            PluginSemanticQuery pluginQuery = null;
             SemanticParseInfo semanticParseInfo = buildSemanticParseInfo(dataSetId, plugin,
-                    null, pluginRecallResult.getDistance());
-            semanticParseInfo.setQueryMode(pluginQuery.getQueryMode());
+                    chatParseContext, pluginRecallResult.getDistance());
+            semanticParseInfo.setQueryMode(plugin.getType());
             semanticParseInfo.setScore(pluginRecallResult.getScore());
-            pluginQuery.setParseInfo(semanticParseInfo);
-            //chatParseReq.getCandidateQueries().add(pluginQuery);
+            parseResp.getSelectedParses().add(semanticParseInfo);
         }
     }
 
-    protected List<Plugin> getPluginList(ChatParseReq chatParseReq) {
-        return PluginManager.getPluginAgentCanSupport(chatParseReq);
+    protected List<Plugin> getPluginList(ChatParseContext chatParseContext) {
+        return PluginManager.getPluginAgentCanSupport(chatParseContext);
     }
 
     protected SemanticParseInfo buildSemanticParseInfo(Long dataSetId, Plugin plugin,
-                                                       QueryContext queryContext, double distance) {
-        List<SchemaElementMatch> schemaElementMatches = queryContext.getMapInfo().getMatchedElements(dataSetId);
-        QueryFilters queryFilters = queryContext.getQueryFilters();
-        if (dataSetId == null && !CollectionUtils.isEmpty(plugin.getDataSetList())) {
-            dataSetId = plugin.getDataSetList().get(0);
-        }
+                                                       ChatParseContext chatParseContext, double distance) {
+        List<SchemaElementMatch> schemaElementMatches = chatParseContext.getMapInfo().getMatchedElements(dataSetId);
+        QueryFilters queryFilters = chatParseContext.getQueryFilters();
         if (schemaElementMatches == null) {
             schemaElementMatches = Lists.newArrayList();
         }
         SemanticParseInfo semanticParseInfo = new SemanticParseInfo();
         semanticParseInfo.setElementMatches(schemaElementMatches);
-        semanticParseInfo.setDataSet(queryContext.getSemanticSchema().getDataSet(dataSetId));
         Map<String, Object> properties = new HashMap<>();
         PluginParseResult pluginParseResult = new PluginParseResult();
         pluginParseResult.setPlugin(plugin);
         pluginParseResult.setQueryFilters(queryFilters);
         pluginParseResult.setDistance(distance);
-        pluginParseResult.setQueryText(queryContext.getQueryText());
+        pluginParseResult.setQueryText(chatParseContext.getQueryText());
         properties.put(Constants.CONTEXT, pluginParseResult);
         properties.put("type", "plugin");
         properties.put("name", plugin.getName());
@@ -111,4 +104,5 @@ public abstract class PluginParser {
                     semanticParseInfo.getDimensionFilters().add(queryFilter);
                 });
     }
+
 }

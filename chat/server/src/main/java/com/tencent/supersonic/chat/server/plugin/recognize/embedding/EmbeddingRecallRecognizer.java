@@ -1,12 +1,12 @@
-package com.tencent.supersonic.chat.server.plugin.recall.embedding;
+package com.tencent.supersonic.chat.server.plugin.recognize.embedding;
 
 import com.google.common.collect.Lists;
-import com.tencent.supersonic.chat.api.pojo.request.ChatParseReq;
 import com.tencent.supersonic.chat.server.plugin.ParseMode;
 import com.tencent.supersonic.chat.server.plugin.Plugin;
 import com.tencent.supersonic.chat.server.plugin.PluginManager;
 import com.tencent.supersonic.chat.server.plugin.PluginRecallResult;
-import com.tencent.supersonic.chat.server.plugin.recall.PluginParser;
+import com.tencent.supersonic.chat.server.plugin.recognize.PluginRecognizer;
+import com.tencent.supersonic.chat.server.pojo.ChatParseContext;
 import com.tencent.supersonic.common.config.EmbeddingConfig;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.embedding.Retrieval;
@@ -28,32 +28,31 @@ import java.util.stream.Collectors;
  * EmbeddingRecallParser is an implementation of a recall plugin based on Embedding
  */
 @Slf4j
-public class EmbeddingRecallParser extends PluginParser {
+public class EmbeddingRecallRecognizer extends PluginRecognizer {
 
-    public boolean checkPreCondition(ChatParseReq chatParseReq) {
+    public boolean checkPreCondition(ChatParseContext chatParseContext) {
         EmbeddingConfig embeddingConfig = ContextUtils.getBean(EmbeddingConfig.class);
         if (StringUtils.isBlank(embeddingConfig.getUrl()) && ComponentFactory.getLLMProxy() instanceof PythonLLMProxy) {
             return false;
         }
-        List<Plugin> plugins = getPluginList(chatParseReq);
+        List<Plugin> plugins = getPluginList(chatParseContext);
         return !CollectionUtils.isEmpty(plugins);
     }
 
-    public PluginRecallResult recallPlugin(ChatParseReq chatParseReq) {
-        String text = chatParseReq.getQueryText();
+    public PluginRecallResult recallPlugin(ChatParseContext chatParseContext) {
+        String text = chatParseContext.getQueryText();
         List<Retrieval> embeddingRetrievals = embeddingRecall(text);
         if (CollectionUtils.isEmpty(embeddingRetrievals)) {
             return null;
         }
-        List<Plugin> plugins = getPluginList(chatParseReq);
+        List<Plugin> plugins = getPluginList(chatParseContext);
         Map<Long, Plugin> pluginMap = plugins.stream().collect(Collectors.toMap(Plugin::getId, p -> p));
         for (Retrieval embeddingRetrieval : embeddingRetrievals) {
             Plugin plugin = pluginMap.get(Long.parseLong(embeddingRetrieval.getId()));
             if (plugin == null) {
                 continue;
             }
-            //todo
-            Pair<Boolean, Set<Long>> pair = PluginManager.resolve(plugin, null);
+            Pair<Boolean, Set<Long>> pair = PluginManager.resolve(plugin, chatParseContext);
             log.info("embedding plugin resolve: {}", pair);
             if (pair.getLeft()) {
                 Set<Long> dataSetList = pair.getRight();
@@ -62,7 +61,7 @@ public class EmbeddingRecallParser extends PluginParser {
                 }
                 plugin.setParseMode(ParseMode.EMBEDDING_RECALL);
                 double distance = embeddingRetrieval.getDistance();
-                double score = chatParseReq.getQueryText().length() * (1 - distance);
+                double score = chatParseContext.getQueryText().length() * (1 - distance);
                 return PluginRecallResult.builder()
                         .plugin(plugin).dataSetIds(dataSetList).score(score).distance(distance).build();
             }

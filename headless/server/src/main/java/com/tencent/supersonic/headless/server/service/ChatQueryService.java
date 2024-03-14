@@ -7,6 +7,7 @@ import com.tencent.supersonic.headless.api.pojo.request.DimensionValueReq;
 import com.tencent.supersonic.headless.api.pojo.request.ExecuteQueryReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryDataReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryReq;
+import com.tencent.supersonic.headless.api.pojo.response.MapResp;
 import com.tencent.supersonic.headless.api.pojo.response.ParseResp;
 import com.tencent.supersonic.headless.api.pojo.response.QueryResult;
 
@@ -14,6 +15,8 @@ import com.tencent.supersonic.headless.api.pojo.response.QueryResult;
  * QueryService for query and search
  */
 public interface ChatQueryService {
+
+    MapResp performMapping(QueryReq queryReq);
 
     ParseResp performParsing(QueryReq queryReq);
 
