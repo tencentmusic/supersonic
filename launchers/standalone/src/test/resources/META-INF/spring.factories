@@ -18,7 +18,7 @@ com.tencent.supersonic.headless.server.processor.ResultProcessor=\
     com.tencent.supersonic.headless.server.processor.ParseInfoProcessor, \
     com.tencent.supersonic.headless.server.processor.QueryRankProcessor, \
     com.tencent.supersonic.headless.server.processor.SqlInfoProcessor, \
-    com.tencent.supersonic.headless.server.processor.TimeCostProcessor, \
+    com.tencent.supersonic.chat.server.processor.parse.TimeCostProcessor, \
     com.tencent.supersonic.headless.server.processor.RespBuildProcessor
 
 com.tencent.supersonic.headless.core.chat.parser.llm.DataSetResolver=\

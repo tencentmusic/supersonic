@@ -6,7 +6,7 @@ import com.tencent.supersonic.chat.server.util.ComponentFactory;
 import com.tencent.supersonic.headless.api.pojo.response.ParseResp;
 import java.util.List;
 
-public class Text2PluginParser implements ChatParser {
+public class NL2PluginParser implements ChatParser {
 
     private final List<PluginRecognizer> pluginRecognizers = ComponentFactory.getPluginRecognizers();
 

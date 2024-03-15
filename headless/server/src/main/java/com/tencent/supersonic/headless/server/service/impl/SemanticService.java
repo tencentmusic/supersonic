@@ -55,7 +55,7 @@ public class SemanticService {
     }
 
     public EntityInfo getEntityInfo(SemanticParseInfo parseInfo, DataSetSchema dataSetSchema, User user) {
-        if (parseInfo != null && parseInfo.getDataSetId() > 0) {
+        if (parseInfo != null && parseInfo.getDataSetId() != null && parseInfo.getDataSetId() > 0) {
             EntityInfo entityInfo = getEntityBasicInfo(dataSetSchema);
             if (parseInfo.getDimensionFilters().size() <= 0 || entityInfo.getDataSetInfo() == null) {
                 entityInfo.setMetrics(null);

@@ -10,8 +10,8 @@ com.tencent.supersonic.headless.core.chat.parser.SemanticParser=\
     com.tencent.supersonic.headless.core.chat.parser.QueryTypeParser
 
 com.tencent.supersonic.chat.server.parser.ChatParser=\
-    com.tencent.supersonic.chat.server.parser.Text2PluginParser, \
-    com.tencent.supersonic.chat.server.parser.Text2SqlParser
+    com.tencent.supersonic.chat.server.parser.NL2PluginParser, \
+    com.tencent.supersonic.chat.server.parser.NL2SQLParser
 
 com.tencent.supersonic.chat.server.executor.ChatExecutor=\
     com.tencent.supersonic.chat.server.executor.PluginExecutor, \
@@ -42,10 +42,7 @@ com.tencent.supersonic.headless.core.cache.QueryCache=\
 
 com.tencent.supersonic.headless.server.processor.ResultProcessor=\
     com.tencent.supersonic.headless.server.processor.ParseInfoProcessor, \
-    com.tencent.supersonic.headless.server.processor.QueryRankProcessor, \
-    com.tencent.supersonic.headless.server.processor.SqlInfoProcessor, \
-    com.tencent.supersonic.headless.server.processor.TimeCostProcessor, \
-    com.tencent.supersonic.headless.server.processor.RespBuildProcessor
+    com.tencent.supersonic.headless.server.processor.SqlInfoProcessor
 
 com.tencent.supersonic.headless.core.chat.parser.llm.DataSetResolver=\
   com.tencent.supersonic.headless.core.chat.parser.llm.HeuristicDataSetResolver
@@ -60,8 +57,9 @@ com.tencent.supersonic.chat.server.plugin.recognize.PluginRecognizer=\
     com.tencent.supersonic.chat.server.plugin.recognize.embedding.EmbeddingRecallRecognizer
 
 com.tencent.supersonic.chat.server.processor.parse.ParseResultProcessor=\
-    com.tencent.supersonic.chat.server.processor.parse.RespBuildProcessor,\
-    com.tencent.supersonic.chat.server.processor.parse.QueryRecommendProcessor
+    com.tencent.supersonic.chat.server.processor.parse.QueryRecommendProcessor,\
+    com.tencent.supersonic.chat.server.processor.parse.EntityInfoProcessor,\
+    com.tencent.supersonic.chat.server.processor.parse.TimeCostProcessor
 
 com.tencent.supersonic.chat.server.processor.execute.ExecuteResultProcessor=\
     com.tencent.supersonic.chat.server.processor.execute.MetricRecommendProcessor,\
