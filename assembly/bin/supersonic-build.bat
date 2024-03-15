@@ -40,7 +40,7 @@ move webapp ..\..\launchers\standalone\target\classes
 rem 5. build backend python modules
 if "%service%"=="pyllm" (
     echo "start installing python modules with pip: ${pip_path}"
-    set requirementPath="%baseDir%/../chat/python/requirements.txt"
+    set requirementPath="%baseDir%/../headless/python/requirements.txt"
     %pip_path% install -r %requirementPath%
     echo "install python modules success"
 )
