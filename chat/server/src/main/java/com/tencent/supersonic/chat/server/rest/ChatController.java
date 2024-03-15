@@ -7,7 +7,7 @@ import com.tencent.supersonic.chat.api.pojo.request.PageQueryInfoReq;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResp;
 import com.tencent.supersonic.chat.api.pojo.response.ShowCaseResp;
 import com.tencent.supersonic.chat.server.persistence.dataobject.ChatDO;
-import com.tencent.supersonic.chat.server.service.ChatService;
+import com.tencent.supersonic.chat.server.service.ChatManageService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;
@@ -23,9 +24,9 @@ import java.util.List;
 @RequestMapping({"/api/chat/manage", "/openapi/chat/manage"})
 public class ChatController {
 
-    private final ChatService chatService;
+    private final ChatManageService chatService;
 
-    public ChatController(ChatService chatService) {
+    public ChatController(ChatManageService chatService) {
         this.chatService = chatService;
     }
 
