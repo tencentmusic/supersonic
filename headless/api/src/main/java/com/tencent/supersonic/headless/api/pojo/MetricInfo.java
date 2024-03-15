@@ -1,7 +1,8 @@
-package com.tencent.supersonic.chat.api.pojo.response;
+package com.tencent.supersonic.headless.api.pojo;
+
+import lombok.Data;
 
 import java.util.Map;
-import lombok.Data;
 
 @Data
 public class MetricInfo {
