@@ -1,25 +1,25 @@
-package com.tencent.supersonic.headless.server.processor;
+package com.tencent.supersonic.chat.server.processor.parse;
 
+import com.tencent.supersonic.chat.server.pojo.ChatParseContext;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.headless.api.pojo.DataSetSchema;
 import com.tencent.supersonic.headless.api.pojo.EntityInfo;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.api.pojo.response.ParseResp;
 import com.tencent.supersonic.headless.core.chat.query.QueryManager;
-import com.tencent.supersonic.headless.core.pojo.ChatContext;
-import com.tencent.supersonic.headless.core.pojo.QueryContext;
 import com.tencent.supersonic.headless.server.service.impl.SemanticService;
 import org.springframework.util.CollectionUtils;
+
 import java.util.List;
 
 /**
  * EntityInfoProcessor fills core attributes of an entity so that
  * users get to know which entity is parsed out.
  */
-public class EntityInfoProcessor implements ResultProcessor {
+public class EntityInfoProcessor implements ParseResultProcessor {
 
     @Override
-    public void process(ParseResp parseResp, QueryContext queryContext, ChatContext chatContext) {
+    public void process(ChatParseContext chatParseContext, ParseResp parseResp) {
         List<SemanticParseInfo> selectedParses = parseResp.getSelectedParses();
         if (CollectionUtils.isEmpty(selectedParses)) {
             return;
@@ -30,10 +30,9 @@ public class EntityInfoProcessor implements ResultProcessor {
                 return;
             }
             //1. set entity info
-            DataSetSchema dataSetSchema =
-                    queryContext.getSemanticSchema().getDataSetSchemaMap().get(parseInfo.getDataSetId());
             SemanticService semanticService = ContextUtils.getBean(SemanticService.class);
-            EntityInfo entityInfo = semanticService.getEntityInfo(parseInfo, dataSetSchema, queryContext.getUser());
+            DataSetSchema dataSetSchema = semanticService.getDataSetSchema(parseInfo.getDataSetId());
+            EntityInfo entityInfo = semanticService.getEntityInfo(parseInfo, dataSetSchema, chatParseContext.getUser());
             if (QueryManager.isTagQuery(queryMode)
                     || QueryManager.isMetricQuery(queryMode)) {
                 parseInfo.setEntityInfo(entityInfo);

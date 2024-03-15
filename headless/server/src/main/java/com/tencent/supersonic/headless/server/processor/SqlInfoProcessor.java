@@ -40,9 +40,7 @@ public class SqlInfoProcessor implements ResultProcessor {
         }
         List<SemanticParseInfo> selectedParses = semanticQueries.stream().map(SemanticQuery::getParseInfo)
                 .collect(Collectors.toList());
-        long startTime = System.currentTimeMillis();
         addSqlInfo(queryContext, selectedParses);
-        parseResp.getParseTimeCost().setSqlTime(System.currentTimeMillis() - startTime);
     }
 
     private void addSqlInfo(QueryContext queryContext, List<SemanticParseInfo> semanticParseInfos) {
