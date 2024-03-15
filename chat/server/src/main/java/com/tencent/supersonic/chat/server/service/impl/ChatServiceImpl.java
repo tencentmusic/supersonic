@@ -7,6 +7,7 @@ import com.tencent.supersonic.chat.api.pojo.request.ChatExecuteReq;
 import com.tencent.supersonic.chat.api.pojo.request.ChatParseReq;
 import com.tencent.supersonic.chat.api.pojo.request.PageQueryInfoReq;
 import com.tencent.supersonic.chat.api.pojo.response.ShowCaseResp;
+import com.tencent.supersonic.chat.server.agent.Agent;
 import com.tencent.supersonic.chat.server.executor.ChatExecutor;
 import com.tencent.supersonic.chat.server.parser.ChatParser;
 import com.tencent.supersonic.chat.server.persistence.dataobject.ChatDO;
@@ -18,10 +19,12 @@ import com.tencent.supersonic.chat.server.persistence.repository.ChatRepository;
 import com.tencent.supersonic.chat.server.pojo.ChatExecuteContext;
 import com.tencent.supersonic.chat.server.pojo.ChatParseContext;
 import com.tencent.supersonic.chat.server.processor.parse.ParseResultProcessor;
+import com.tencent.supersonic.chat.server.service.AgentService;
 import com.tencent.supersonic.chat.server.service.ChatService;
 import com.tencent.supersonic.chat.server.util.ComponentFactory;
 import com.tencent.supersonic.chat.server.util.QueryReqConverter;
 import com.tencent.supersonic.common.util.BeanMapper;
+import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.api.pojo.request.DimensionValueReq;
@@ -73,7 +76,7 @@ public class ChatServiceImpl implements ChatService {
 
     @Override
     public ParseResp performParsing(ChatParseReq chatParseReq) {
-        ParseResp parseResp = new ParseResp();
+        ParseResp parseResp = new ParseResp(chatParseReq.getChatId(), chatParseReq.getQueryText());
         ChatParseContext chatParseContext = buildParseContext(chatParseReq);
         for (ChatParser chatParser : chatParsers) {
             chatParser.parse(chatParseContext, parseResp);
@@ -102,6 +105,9 @@ public class ChatServiceImpl implements ChatService {
     private ChatParseContext buildParseContext(ChatParseReq chatParseReq) {
         ChatParseContext chatParseContext = new ChatParseContext();
         BeanMapper.mapper(chatParseReq, chatParseContext);
+        AgentService agentService = ContextUtils.getBean(AgentService.class);
+        Agent agent = agentService.getAgent(chatParseReq.getAgentId());
+        chatParseContext.setAgent(agent);
         QueryReq queryReq = QueryReqConverter.buildText2SqlQueryReq(chatParseContext);
         MapResp mapResp = chatQueryService.performMapping(queryReq);
         chatParseContext.setMapInfo(mapResp.getMapInfo());

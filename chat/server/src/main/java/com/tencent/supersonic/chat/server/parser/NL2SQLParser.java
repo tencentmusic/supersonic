@@ -7,10 +7,13 @@ import com.tencent.supersonic.headless.api.pojo.request.QueryReq;
 import com.tencent.supersonic.headless.api.pojo.response.ParseResp;
 import com.tencent.supersonic.headless.server.service.ChatQueryService;
 
-public class Text2SqlParser implements ChatParser {
+public class NL2SQLParser implements ChatParser {
 
     @Override
     public void parse(ChatParseContext chatParseContext, ParseResp parseResp) {
+        if (!chatParseContext.enableNL2SQL()) {
+            return;
+        }
         QueryReq queryReq = QueryReqConverter.buildText2SqlQueryReq(chatParseContext);
         ChatQueryService chatQueryService = ContextUtils.getBean(ChatQueryService.class);
         ParseResp text2SqlParseResp = chatQueryService.performParsing(queryReq);

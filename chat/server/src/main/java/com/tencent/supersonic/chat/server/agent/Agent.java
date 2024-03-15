@@ -70,6 +70,11 @@ public class Agent extends RecordInfo {
         return !CollectionUtils.isEmpty(getParserTools(AgentToolType.NL2SQL_LLM));
     }
 
+    public boolean containsNL2SQLTool() {
+        return !CollectionUtils.isEmpty(getParserTools(AgentToolType.NL2SQL_LLM))
+                || !CollectionUtils.isEmpty(getParserTools(AgentToolType.NL2SQL_RULE));
+    }
+
     public Set<Long> getDataSetIds() {
         Set<Long> dataSetIds = getDataSetIds(null);
         if (containsAllModel(dataSetIds)) {
