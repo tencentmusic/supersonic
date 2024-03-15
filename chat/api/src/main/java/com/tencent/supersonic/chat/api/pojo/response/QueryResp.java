@@ -1,6 +1,7 @@
-package com.tencent.supersonic.headless.api.pojo.response;
+package com.tencent.supersonic.chat.api.pojo.response;
 
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
+import com.tencent.supersonic.headless.api.pojo.response.QueryResult;
 import lombok.Data;
 import java.util.Date;
 import java.util.List;
@@ -17,5 +18,6 @@ public class QueryResp {
     private String queryText;
     private QueryResult queryResult;
     private List<SemanticParseInfo> parseInfos;
+    private List<SimilarQueryRecallResp> similarQueries;
 
 }

@@ -1,6 +1,7 @@
 package com.tencent.supersonic.chat.server.processor.execute;
 
 import com.alibaba.fastjson.JSONObject;
+import com.tencent.supersonic.chat.server.pojo.ChatExecuteContext;
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.enums.QueryType;
 import com.tencent.supersonic.common.util.ContextUtils;
@@ -10,9 +11,10 @@ import com.tencent.supersonic.common.util.embedding.RetrieveQueryResult;
 import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
-import com.tencent.supersonic.headless.api.pojo.request.ExecuteQueryReq;
 import com.tencent.supersonic.headless.api.pojo.response.QueryResult;
 import com.tencent.supersonic.headless.core.chat.knowledge.MetaEmbeddingService;
+import org.springframework.util.CollectionUtils;
+
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -21,7 +23,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-import org.springframework.util.CollectionUtils;
 
 /**
  * MetricRecommendProcessor fills recommended metrics based on embedding similarity.
@@ -31,7 +32,7 @@ public class MetricRecommendProcessor implements ExecuteResultProcessor {
     private static final int METRIC_RECOMMEND_SIZE = 5;
 
     @Override
-    public void process(QueryResult queryResult, SemanticParseInfo semanticParseInfo, ExecuteQueryReq queryReq) {
+    public void process(ChatExecuteContext chatExecuteContext, QueryResult queryResult) {
         fillSimilarMetric(queryResult.getChatContext());
     }
 

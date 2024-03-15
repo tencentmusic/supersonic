@@ -5,7 +5,9 @@ import com.github.pagehelper.PageInfo;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.chat.api.pojo.request.ChatExecuteReq;
 import com.tencent.supersonic.chat.api.pojo.request.ChatParseReq;
+import com.tencent.supersonic.chat.api.pojo.request.ChatQueryDataReq;
 import com.tencent.supersonic.chat.api.pojo.request.PageQueryInfoReq;
+import com.tencent.supersonic.chat.api.pojo.request.SimilarQueryReq;
 import com.tencent.supersonic.chat.api.pojo.response.ShowCaseResp;
 import com.tencent.supersonic.chat.server.agent.Agent;
 import com.tencent.supersonic.chat.server.executor.ChatExecutor;
@@ -18,11 +20,13 @@ import com.tencent.supersonic.chat.server.persistence.repository.ChatQueryReposi
 import com.tencent.supersonic.chat.server.persistence.repository.ChatRepository;
 import com.tencent.supersonic.chat.server.pojo.ChatExecuteContext;
 import com.tencent.supersonic.chat.server.pojo.ChatParseContext;
+import com.tencent.supersonic.chat.server.processor.execute.ExecuteResultProcessor;
 import com.tencent.supersonic.chat.server.processor.parse.ParseResultProcessor;
 import com.tencent.supersonic.chat.server.service.AgentService;
 import com.tencent.supersonic.chat.server.service.ChatService;
 import com.tencent.supersonic.chat.server.util.ComponentFactory;
 import com.tencent.supersonic.chat.server.util.QueryReqConverter;
+import com.tencent.supersonic.chat.server.util.SimilarQueryManager;
 import com.tencent.supersonic.common.util.BeanMapper;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.JsonUtil;
@@ -32,7 +36,7 @@ import com.tencent.supersonic.headless.api.pojo.request.QueryDataReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryReq;
 import com.tencent.supersonic.headless.api.pojo.response.MapResp;
 import com.tencent.supersonic.headless.api.pojo.response.ParseResp;
-import com.tencent.supersonic.headless.api.pojo.response.QueryResp;
+import com.tencent.supersonic.chat.api.pojo.response.QueryResp;
 import com.tencent.supersonic.headless.api.pojo.response.QueryResult;
 import com.tencent.supersonic.headless.api.pojo.response.SearchResult;
 import com.tencent.supersonic.headless.server.service.ChatQueryService;
@@ -63,9 +67,12 @@ public class ChatServiceImpl implements ChatService {
     private ChatQueryService chatQueryService;
     @Autowired
     private SearchService searchService;
+    @Autowired
+    private SimilarQueryManager similarQueryManager;
     private List<ChatParser> chatParsers = ComponentFactory.getChatParsers();
     private List<ChatExecutor> chatExecutors = ComponentFactory.getChatExecutors();
     private List<ParseResultProcessor> parseResultProcessors = ComponentFactory.getParseProcessors();
+    private List<ExecuteResultProcessor> executeResultProcessors = ComponentFactory.getExecuteProcessors();
 
     @Override
     public List<SearchResult> search(ChatParseReq chatParseReq) {
@@ -77,6 +84,7 @@ public class ChatServiceImpl implements ChatService {
     @Override
     public ParseResp performParsing(ChatParseReq chatParseReq) {
         ParseResp parseResp = new ParseResp(chatParseReq.getChatId(), chatParseReq.getQueryText());
+        createChatQuery(chatParseReq, parseResp);
         ChatParseContext chatParseContext = buildParseContext(chatParseReq);
         for (ChatParser chatParser : chatParsers) {
             chatParser.parse(chatParseContext, parseResp);
@@ -98,6 +106,9 @@ public class ChatServiceImpl implements ChatService {
                 break;
             }
         }
+        for (ExecuteResultProcessor processor : executeResultProcessors) {
+            processor.process(chatExecuteContext, queryResult);
+        }
         saveQueryResult(chatExecuteReq, queryResult);
         return queryResult;
     }
@@ -117,15 +128,18 @@ public class ChatServiceImpl implements ChatService {
     private ChatExecuteContext buildExecuteContext(ChatExecuteReq chatExecuteReq) {
         ChatExecuteContext chatExecuteContext = new ChatExecuteContext();
         BeanMapper.mapper(chatExecuteReq, chatExecuteContext);
-        ChatParseDO chatParseDO = getParseInfo(chatExecuteReq.getQueryId(), chatExecuteReq.getParseId());
-        SemanticParseInfo semanticParseInfo = JSONObject.parseObject(chatParseDO.getParseInfo(),
-                SemanticParseInfo.class);
-        chatExecuteContext.setParseInfo(semanticParseInfo);
+        SemanticParseInfo parseInfo = getParseInfo(chatExecuteReq.getQueryId(), chatExecuteReq.getParseId());
+        chatExecuteContext.setParseInfo(parseInfo);
         return chatExecuteContext;
     }
 
     @Override
-    public Object queryData(QueryDataReq queryData, User user) throws Exception {
+    public Object queryData(ChatQueryDataReq chatQueryDataReq, User user) throws Exception {
+        Integer parseId = chatQueryDataReq.getParseId();
+        SemanticParseInfo parseInfo = getParseInfo(chatQueryDataReq.getQueryId(), parseId);
+        QueryDataReq queryData = new QueryDataReq();
+        BeanMapper.mapper(chatQueryDataReq, queryData);
+        queryData.setParseInfo(parseInfo);
         return chatQueryService.executeDirectQuery(queryData, user);
     }
 
@@ -190,6 +204,11 @@ public class ChatServiceImpl implements ChatService {
         }
         fillParseInfo(queryRespPageInfo.getList());
         return queryRespPageInfo;
+    }
+
+    public void createChatQuery(ChatParseReq chatParseReq, ParseResp parseResp) {
+        Long queryId = chatQueryRepository.createChatQuery(chatParseReq);
+        parseResp.setQueryId(queryId);
     }
 
     @Override
@@ -257,13 +276,16 @@ public class ChatServiceImpl implements ChatService {
         if (chatExecuteReq.getParseId() > 1) {
             return;
         }
-        ChatQueryDO chatQueryDO = new ChatQueryDO();
+        ChatQueryDO chatQueryDO = chatQueryRepository.getChatQueryDO(chatExecuteReq.getQueryId());
         chatQueryDO.setQuestionId(chatExecuteReq.getQueryId());
         chatQueryDO.setQueryResult(JsonUtil.toString(queryResult));
         chatQueryDO.setQueryState(1);
         updateQuery(chatQueryDO);
         chatRepository.updateLastQuestion(chatExecuteReq.getChatId().longValue(),
                 chatExecuteReq.getQueryText(), getCurrentTime());
+        SimilarQueryReq similarQueryReq = SimilarQueryReq.builder().queryId(chatExecuteReq.getQueryId())
+                .queryText(chatQueryDO.getQueryText()).agentId(chatQueryDO.getAgentId()).build();
+        similarQueryManager.saveSimilarQuery(similarQueryReq);
     }
 
     @Override
@@ -277,22 +299,14 @@ public class ChatServiceImpl implements ChatService {
         return chatQueryRepository.batchSaveParseInfo(chatParseReq, parseResult, candidateParses);
     }
 
-    @Override
-    public ChatQueryDO getLastQuery(long chatId) {
-        return chatQueryRepository.getLastChatQuery(chatId);
-    }
-
     private String getCurrentTime() {
         SimpleDateFormat tempDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         return tempDate.format(new java.util.Date());
     }
 
-    public ChatParseDO getParseInfo(Long questionId, int parseId) {
-        return chatQueryRepository.getParseInfo(questionId, parseId);
-    }
-
-    public Boolean deleteChatQuery(Long questionId) {
-        return chatQueryRepository.deleteChatQuery(questionId);
+    public SemanticParseInfo getParseInfo(Long questionId, int parseId) {
+        ChatParseDO chatParseDO = chatQueryRepository.getParseInfo(questionId, parseId);
+        return JSONObject.parseObject(chatParseDO.getParseInfo(), SemanticParseInfo.class);
     }
 
 }
