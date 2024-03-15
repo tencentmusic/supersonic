@@ -7,7 +7,7 @@ import com.tencent.supersonic.chat.server.persistence.dataobject.ChatParseDO;
 import com.tencent.supersonic.chat.server.persistence.dataobject.ChatQueryDO;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.api.pojo.response.ParseResp;
-import com.tencent.supersonic.headless.api.pojo.response.QueryResp;
+import com.tencent.supersonic.chat.api.pojo.response.QueryResp;
 
 import java.util.List;
 
@@ -24,6 +24,8 @@ public interface ChatQueryRepository {
     ChatQueryDO getLastChatQuery(long chatId);
 
     int updateChatQuery(ChatQueryDO chatQueryDO);
+
+    Long createChatQuery(ChatParseReq chatParseReq);
 
     List<ChatParseDO> batchSaveParseInfo(ChatParseReq chatParseReq, ParseResp parseResult,
                                          List<SemanticParseInfo> candidateParses);

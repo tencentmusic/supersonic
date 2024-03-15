@@ -1,9 +1,11 @@
 package com.tencent.supersonic.chat.server.persistence.repository.impl;
 
+import com.alibaba.fastjson.JSONObject;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.tencent.supersonic.chat.api.pojo.request.ChatParseReq;
 import com.tencent.supersonic.chat.api.pojo.request.PageQueryInfoReq;
+import com.tencent.supersonic.chat.api.pojo.response.SimilarQueryRecallResp;
 import com.tencent.supersonic.chat.server.persistence.dataobject.ChatParseDO;
 import com.tencent.supersonic.chat.server.persistence.dataobject.ChatQueryDO;
 import com.tencent.supersonic.chat.server.persistence.dataobject.ChatQueryDOExample;
@@ -16,7 +18,7 @@ import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.common.util.PageUtils;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.api.pojo.response.ParseResp;
-import com.tencent.supersonic.headless.api.pojo.response.QueryResp;
+import com.tencent.supersonic.chat.api.pojo.response.QueryResp;
 import com.tencent.supersonic.headless.api.pojo.response.QueryResult;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -24,7 +26,6 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.CollectionUtils;
-
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -106,10 +107,13 @@ public class ChatQueryRepositoryImpl implements ChatQueryRepository {
             queryResult.setQueryId(chatQueryDO.getQuestionId());
             queryResp.setQueryResult(queryResult);
         }
+        queryResp.setSimilarQueries(JSONObject.parseArray(chatQueryDO.getSimilarQueries(),
+                SimilarQueryRecallResp.class));
         return queryResp;
     }
 
-    public Long createChatQuery(ParseResp parseResult, ChatParseReq chatParseReq) {
+    @Override
+    public Long createChatQuery(ChatParseReq chatParseReq) {
         ChatQueryDO chatQueryDO = new ChatQueryDO();
         chatQueryDO.setChatId(Long.valueOf(chatParseReq.getChatId()));
         chatQueryDO.setCreateTime(new java.util.Date());
@@ -122,17 +126,14 @@ public class ChatQueryRepositoryImpl implements ChatQueryRepository {
         } catch (Exception e) {
             log.info("database insert has an exception:{}", e.toString());
         }
-        Long queryId = chatQueryDO.getQuestionId();
-        parseResult.setQueryId(queryId);
-        return queryId;
+        return chatQueryDO.getQuestionId();
     }
 
     @Override
     public List<ChatParseDO> batchSaveParseInfo(ChatParseReq chatParseReq,
             ParseResp parseResult, List<SemanticParseInfo> candidateParses) {
-        Long queryId = createChatQuery(parseResult, chatParseReq);
         List<ChatParseDO> chatParseDOList = new ArrayList<>();
-        getChatParseDO(chatParseReq, queryId, candidateParses, chatParseDOList);
+        getChatParseDO(chatParseReq, parseResult.getQueryId(), candidateParses, chatParseDOList);
         if (!CollectionUtils.isEmpty(candidateParses)) {
             chatParseMapper.batchSaveParseInfo(chatParseDOList);
         }

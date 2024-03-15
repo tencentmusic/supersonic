@@ -8,9 +8,10 @@ import com.tencent.supersonic.chat.api.pojo.response.SimilarQueryRecallResp;
 import com.tencent.supersonic.chat.server.persistence.dataobject.ChatQueryDO;
 import com.tencent.supersonic.chat.server.persistence.repository.ChatQueryRepository;
 import com.tencent.supersonic.chat.server.pojo.ChatParseContext;
+import com.tencent.supersonic.chat.server.util.SimilarQueryManager;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.headless.api.pojo.response.ParseResp;
-import com.tencent.supersonic.headless.api.pojo.response.QueryResp;
+import com.tencent.supersonic.chat.api.pojo.response.QueryResp;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.CollectionUtils;
@@ -35,7 +36,7 @@ public class QueryRecommendProcessor implements ParseResultProcessor {
     private void doProcess(ParseResp parseResp, ChatParseContext chatParseContext) {
         Long queryId = parseResp.getQueryId();
         List<SimilarQueryRecallResp> solvedQueries = getSimilarQueries(chatParseContext.getQueryText(),
-                null);
+                chatParseContext.getAgent().getId());
         ChatQueryDO chatQueryDO = getChatQuery(queryId);
         chatQueryDO.setSimilarQueries(JSONObject.toJSONString(solvedQueries));
         updateChatQuery(chatQueryDO);
@@ -43,8 +44,8 @@ public class QueryRecommendProcessor implements ParseResultProcessor {
 
     public List<SimilarQueryRecallResp> getSimilarQueries(String queryText, Integer agentId) {
         //1. recall solved query by queryText
-        //SimilarQueryManager solvedQueryManager = ContextUtils.getBean(SimilarQueryManager.class);
-        List<SimilarQueryRecallResp> similarQueries = Lists.newArrayList();
+        SimilarQueryManager solvedQueryManager = ContextUtils.getBean(SimilarQueryManager.class);
+        List<SimilarQueryRecallResp> similarQueries = solvedQueryManager.recallSimilarQuery(queryText, agentId);
         if (CollectionUtils.isEmpty(similarQueries)) {
             return Lists.newArrayList();
         }

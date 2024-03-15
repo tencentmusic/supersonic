@@ -1,7 +1,6 @@
 package com.tencent.supersonic.chat.api.pojo.response;
 
 
-import com.tencent.supersonic.headless.api.pojo.response.QueryResp;
 import lombok.Data;
 
 import java.util.List;
