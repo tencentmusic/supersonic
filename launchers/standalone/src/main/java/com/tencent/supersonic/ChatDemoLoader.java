@@ -15,14 +15,13 @@ import com.tencent.supersonic.chat.server.plugin.PluginParseConfig;
 import com.tencent.supersonic.chat.server.plugin.build.ParamOption;
 import com.tencent.supersonic.chat.server.plugin.build.WebBase;
 import com.tencent.supersonic.chat.server.service.AgentService;
+import com.tencent.supersonic.chat.server.service.ChatManageService;
 import com.tencent.supersonic.chat.server.service.ChatService;
 import com.tencent.supersonic.chat.server.service.PluginService;
 import com.tencent.supersonic.common.pojo.SysParameter;
 import com.tencent.supersonic.common.service.SysParameterService;
 import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.headless.api.pojo.response.ParseResp;
-import java.util.Arrays;
-import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -30,6 +29,9 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
+
+import java.util.Arrays;
+import java.util.List;
 
 @Component
 @Slf4j
@@ -39,6 +41,8 @@ public class ChatDemoLoader implements CommandLineRunner {
     private User user = User.getFakeUser();
     @Autowired
     private ChatService chatService;
+    @Autowired
+    private ChatManageService chatManageService;
     @Autowired
     private PluginService pluginService;
     @Autowired
@@ -100,7 +104,7 @@ public class ChatDemoLoader implements CommandLineRunner {
     }
 
     public void addSampleChats() throws Exception {
-        chatService.addChat(user, "样例对话1", 1);
+        chatManageService.addChat(user, "样例对话1", 1);
 
         parseAndExecute(1, "超音数 访问次数");
         parseAndExecute(1, "按部门统计");
@@ -108,7 +112,7 @@ public class ChatDemoLoader implements CommandLineRunner {
     }
 
     public void addSampleChats2() throws Exception {
-        chatService.addChat(user, "样例对话2", 1);
+        chatManageService.addChat(user, "样例对话2", 1);
 
         parseAndExecute(2, "alice 停留时长");
         parseAndExecute(2, "对比alice和lucy的访问次数");
@@ -246,7 +250,7 @@ public class ChatDemoLoader implements CommandLineRunner {
     }
 
     private void updateQueryScore(Integer queryId) {
-        chatService.updateFeedback(queryId, 5, "");
+        chatManageService.updateFeedback(queryId, 5, "");
     }
 
     private boolean checkEnable() {
