@@ -24,9 +24,15 @@ public class ParseResp {
         FAILED
     }
 
+    public ParseResp(Integer chatId, String queryText) {
+        this.chatId = chatId;
+        this.queryText = queryText;
+        parseTimeCost.setParseStartTime(System.currentTimeMillis());
+    }
+
     public List<SemanticParseInfo> getSelectedParses() {
         selectedParses = selectedParses.stream()
-                .sorted(Comparator.comparingDouble(SemanticParseInfo::getScore))
+                .sorted(Comparator.comparingDouble(SemanticParseInfo::getScore).reversed())
                 .collect(Collectors.toList());
         generateParseInfoId(selectedParses);
         return selectedParses;
@@ -48,9 +54,4 @@ public class ParseResp {
         }
     }
 
-    public ParseResp(Integer chatId, String queryText) {
-        this.chatId = chatId;
-        this.queryText = queryText;
-        parseTimeCost.setParseStartTime(System.currentTimeMillis());
-    }
 }
