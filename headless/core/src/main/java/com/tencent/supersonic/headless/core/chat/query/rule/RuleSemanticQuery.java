@@ -3,7 +3,6 @@ package com.tencent.supersonic.headless.core.chat.query.rule;
 
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
-import com.tencent.supersonic.common.pojo.enums.QueryType;
 import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementMatch;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
@@ -18,10 +17,6 @@ import com.tencent.supersonic.headless.core.chat.query.QueryManager;
 import com.tencent.supersonic.headless.core.pojo.ChatContext;
 import com.tencent.supersonic.headless.core.pojo.QueryContext;
 import com.tencent.supersonic.headless.core.utils.QueryReqBuilder;
-import lombok.ToString;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -30,6 +25,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
+import lombok.ToString;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 
 @Slf4j
 @ToString
@@ -42,7 +40,7 @@ public abstract class RuleSemanticQuery extends BaseSemanticQuery {
     }
 
     public List<SchemaElementMatch> match(List<SchemaElementMatch> candidateElementMatches,
-                                          QueryContext queryCtx) {
+            QueryContext queryCtx) {
         return queryMatcher.match(candidateElementMatches);
     }
 
@@ -101,22 +99,31 @@ public abstract class RuleSemanticQuery extends BaseSemanticQuery {
         parseInfo.setDataSet(semanticSchema.getDataSet(dataSetId));
         Map<Long, List<SchemaElementMatch>> dim2Values = new HashMap<>();
         Map<Long, List<SchemaElementMatch>> id2Values = new HashMap<>();
-        Map<Long, List<SchemaElementMatch>> tag2Values = new HashMap<>();
 
         for (SchemaElementMatch schemaMatch : parseInfo.getElementMatches()) {
             SchemaElement element = schemaMatch.getElement();
             element.setOrder(1 - schemaMatch.getSimilarity());
             switch (element.getType()) {
                 case ID:
-                    addToValues(semanticSchema, SchemaElementType.ENTITY, id2Values, schemaMatch);
-                    break;
-                case TAG_VALUE:
-                    addToValues(semanticSchema, SchemaElementType.TAG, tag2Values, schemaMatch);
+                    SchemaElement entityElement = semanticSchema.getElement(SchemaElementType.ENTITY, element.getId());
+                    if (entityElement != null) {
+                        if (id2Values.containsKey(element.getId())) {
+                            id2Values.get(element.getId()).add(schemaMatch);
+                        } else {
+                            id2Values.put(element.getId(), new ArrayList<>(Arrays.asList(schemaMatch)));
+                        }
+                    }
                     break;
                 case VALUE:
-                    addToValues(semanticSchema, SchemaElementType.DIMENSION, dim2Values, schemaMatch);
+                    SchemaElement dimElement = semanticSchema.getElement(SchemaElementType.DIMENSION, element.getId());
+                    if (dimElement != null) {
+                        if (dim2Values.containsKey(element.getId())) {
+                            dim2Values.get(element.getId()).add(schemaMatch);
+                        } else {
+                            dim2Values.put(element.getId(), new ArrayList<>(Arrays.asList(schemaMatch)));
+                        }
+                    }
                     break;
-                case TAG:
                 case DIMENSION:
                     parseInfo.getDimensions().add(element);
                     break;
@@ -129,10 +136,8 @@ public abstract class RuleSemanticQuery extends BaseSemanticQuery {
                 default:
             }
         }
-
         addToFilters(id2Values, parseInfo, semanticSchema, SchemaElementType.ENTITY);
         addToFilters(dim2Values, parseInfo, semanticSchema, SchemaElementType.DIMENSION);
-        addToFilters(tag2Values, parseInfo, semanticSchema, SchemaElementType.TAG);
     }
 
     private void addToFilters(Map<Long, List<SchemaElementMatch>> id2Values, SemanticParseInfo parseInfo,
@@ -220,8 +225,6 @@ public abstract class RuleSemanticQuery extends BaseSemanticQuery {
     public static List<RuleSemanticQuery> resolve(Long dataSetId, List<SchemaElementMatch> candidateElementMatches,
             QueryContext queryContext) {
         List<RuleSemanticQuery> matchedQueries = new ArrayList<>();
-        candidateElementMatches = filterByQueryType(dataSetId, candidateElementMatches, queryContext);
-
         for (RuleSemanticQuery semanticQuery : QueryManager.getRuleQueries()) {
             List<SchemaElementMatch> matches = semanticQuery.match(candidateElementMatches, queryContext);
 
@@ -231,28 +234,7 @@ public abstract class RuleSemanticQuery extends BaseSemanticQuery {
                 matchedQueries.add(query);
             }
         }
-
         return matchedQueries;
-    }
-
-    private static List<SchemaElementMatch> filterByQueryType(Long dataSetId,
-            List<SchemaElementMatch> candidateElementMatches, QueryContext queryContext) {
-        QueryType queryType = queryContext.getQueryType(dataSetId);
-        if (QueryType.TAG.equals(queryType)) {
-            candidateElementMatches = candidateElementMatches.stream()
-                    .filter(elementMatch -> !(SchemaElementType.METRIC.equals(elementMatch.getElement().getType())
-                            || SchemaElementType.DIMENSION.equals(elementMatch.getElement().getType())
-                            || SchemaElementType.VALUE.equals(elementMatch.getElement().getType()))
-                    )
-                    .collect(Collectors.toList());
-        }
-        if (QueryType.METRIC.equals(queryType)) {
-            candidateElementMatches = candidateElementMatches.stream()
-                    .filter(elementMatch -> !(SchemaElementType.TAG.equals(elementMatch.getElement().getType())
-                            || SchemaElementType.TAG_VALUE.equals(elementMatch.getElement().getType())))
-                    .collect(Collectors.toList());
-        }
-        return candidateElementMatches;
     }
 
     protected QueryStructReq convertQueryStruct() {

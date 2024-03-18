@@ -146,11 +146,7 @@ public class QueryServiceImpl implements QueryService {
         queryStatement.setModelIds(querySqlReq.getModelIds());
         queryStatement.setEnableOptimize(queryUtils.enableOptimize());
         queryStatement.setSemanticSchemaResp(semanticSchemaResp);
-        if (QueryType.TAG.equals(semanticSchemaResp.getQueryType())) {
-            queryStatement.setSemanticModel(semanticSchemaManager.getTagSemanticModel(semanticSchemaResp));
-        } else {
-            queryStatement.setSemanticModel(semanticSchemaManager.getSemanticModel(semanticSchemaResp));
-        }
+        queryStatement.setSemanticModel(semanticSchemaManager.getSemanticModel(semanticSchemaResp));
         return queryStatement;
     }
 

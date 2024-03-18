@@ -33,10 +33,8 @@ public class EntityMapper extends BaseMapper {
                 continue;
             }
             List<SchemaElementMatch> valueSchemaElements = schemaElementMatchList.stream()
-                    .filter(schemaElementMatch ->
-                            SchemaElementType.VALUE.equals(schemaElementMatch.getElement().getType())
-                                    || SchemaElementType.TAG_VALUE.equals(schemaElementMatch.getElement().getType()
-                            ))
+                    .filter(schemaElementMatch -> SchemaElementType.VALUE.equals(
+                            schemaElementMatch.getElement().getType()))
                     .collect(Collectors.toList());
             for (SchemaElementMatch schemaElementMatch : valueSchemaElements) {
                 if (!entity.getId().equals(schemaElementMatch.getElement().getId())) {

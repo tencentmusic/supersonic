@@ -11,7 +11,7 @@ import javax.validation.constraints.NotNull;
 @ToString
 public class ItemValueReq {
 
-    private SchemaElementType type = SchemaElementType.TAG;
+    private SchemaElementType type;
 
     @NotNull
     private Long itemId;

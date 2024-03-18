@@ -18,7 +18,7 @@ public class KnowledgeService {
     public void updateSemanticKnowledge(List<DictWord> natures) {
 
         List<DictWord> prefixes = natures.stream()
-                .filter(entry -> !entry.getNatureWithFrequency().contains(DictWordType.SUFFIX.getTypeWithSpilt()))
+                .filter(entry -> !entry.getNatureWithFrequency().contains(DictWordType.SUFFIX.getType()))
                 .collect(Collectors.toList());
 
         for (DictWord nature : prefixes) {
@@ -26,7 +26,7 @@ public class KnowledgeService {
         }
 
         List<DictWord> suffixes = natures.stream()
-                .filter(entry -> entry.getNatureWithFrequency().contains(DictWordType.SUFFIX.getTypeWithSpilt()))
+                .filter(entry -> entry.getNatureWithFrequency().contains(DictWordType.SUFFIX.getType()))
                 .collect(Collectors.toList());
 
         SearchService.loadSuffix(suffixes);

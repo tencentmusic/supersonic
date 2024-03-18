@@ -19,12 +19,12 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Slf4j
-public class QueryFilterMapper implements SchemaMapper {
+public class QueryFilterMapper extends BaseMapper {
 
     private double similarity = 1.0;
 
     @Override
-    public void map(QueryContext queryContext) {
+    public void doMap(QueryContext queryContext) {
         Set<Long> dataSetIds = queryContext.getDataSetIds();
         if (CollectionUtils.isEmpty(dataSetIds)) {
             return;
