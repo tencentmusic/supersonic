@@ -60,7 +60,7 @@ public class TagQueryServiceImpl implements TagQueryService {
     public ItemValueResp queryTagValue(ItemValueReq itemValueReq, User user) throws Exception {
         ItemValueResp itemValueResp = new ItemValueResp();
         itemValueResp.setItemId(itemValueReq.getItemId());
-        itemValueResp.setType(SchemaElementType.TAG);
+        itemValueResp.setType(SchemaElementType.DIMENSION);
         TagResp tag = tagMetaService.getTag(itemValueReq.getItemId(), user);
         checkTag(tag);
         itemValueResp.setName(tag.getName());

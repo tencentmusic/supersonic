@@ -1,7 +1,6 @@
 package com.tencent.supersonic.headless.core.chat.parser.llm;
 
 import com.tencent.supersonic.common.pojo.enums.DataFormatTypeEnum;
-import com.tencent.supersonic.common.pojo.enums.QueryType;
 import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import com.tencent.supersonic.common.util.DateUtils;
 import com.tencent.supersonic.headless.api.pojo.SchemaElement;
@@ -17,13 +16,6 @@ import com.tencent.supersonic.headless.core.config.OptimizationConfig;
 import com.tencent.supersonic.headless.core.pojo.QueryContext;
 import com.tencent.supersonic.headless.core.utils.ComponentFactory;
 import com.tencent.supersonic.headless.core.utils.S2SqlDateHelper;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
-
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -32,10 +24,17 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 @Slf4j
 @Service
 public class LLMRequestService {
+
     @Autowired
     private LLMParserConfig llmParserConfig;
     @Autowired
@@ -62,7 +61,7 @@ public class LLMRequestService {
     }
 
     public LLMReq getLlmReq(QueryContext queryCtx, Long dataSetId,
-                            SemanticSchema semanticSchema, List<LLMReq.ElementValue> linkingValues) {
+            SemanticSchema semanticSchema, List<LLMReq.ElementValue> linkingValues) {
         Map<Long, String> dataSetIdToName = semanticSchema.getDataSetIdToName();
         String queryText = queryCtx.getQueryText();
 
@@ -154,8 +153,7 @@ public class LLMRequestService {
                 .filter(elementMatch -> !elementMatch.isInherited())
                 .filter(schemaElementMatch -> {
                     SchemaElementType type = schemaElementMatch.getElement().getType();
-                    return SchemaElementType.VALUE.equals(type) || SchemaElementType.TAG_VALUE.equals(type)
-                            || SchemaElementType.ID.equals(type);
+                    return SchemaElementType.VALUE.equals(type) || SchemaElementType.ID.equals(type);
                 })
                 .map(elementMatch -> {
                     ElementValue elementValue = new ElementValue();
@@ -169,9 +167,6 @@ public class LLMRequestService {
     protected Map<Long, String> getItemIdToName(QueryContext queryCtx, Long dataSetId) {
         SemanticSchema semanticSchema = queryCtx.getSemanticSchema();
         List<SchemaElement> elements = semanticSchema.getDimensions(dataSetId);
-        if (QueryType.TAG.equals(queryCtx.getQueryType(dataSetId))) {
-            elements = semanticSchema.getTags(dataSetId);
-        }
         return elements.stream()
                 .collect(Collectors.toMap(SchemaElement::getId, SchemaElement::getName, (value1, value2) -> value2));
     }
@@ -179,27 +174,18 @@ public class LLMRequestService {
     private Set<String> getTopNFieldNames(QueryContext queryCtx, Long dataSetId, LLMParserConfig llmParserConfig) {
         SemanticSchema semanticSchema = queryCtx.getSemanticSchema();
         Set<String> results = new HashSet<>();
-        if (QueryType.TAG.equals(queryCtx.getQueryType(dataSetId))) {
-            Set<String> tags = semanticSchema.getTags(dataSetId).stream()
-                    .sorted(Comparator.comparing(SchemaElement::getUseCnt).reversed())
-                    .limit(llmParserConfig.getDimensionTopN())
-                    .map(entry -> entry.getName())
-                    .collect(Collectors.toSet());
-            results.addAll(tags);
-        } else {
-            Set<String> dimensions = semanticSchema.getDimensions(dataSetId).stream()
-                    .sorted(Comparator.comparing(SchemaElement::getUseCnt).reversed())
-                    .limit(llmParserConfig.getDimensionTopN())
-                    .map(entry -> entry.getName())
-                    .collect(Collectors.toSet());
-            results.addAll(dimensions);
-            Set<String> metrics = semanticSchema.getMetrics(dataSetId).stream()
-                    .sorted(Comparator.comparing(SchemaElement::getUseCnt).reversed())
-                    .limit(llmParserConfig.getMetricTopN())
-                    .map(entry -> entry.getName())
-                    .collect(Collectors.toSet());
-            results.addAll(metrics);
-        }
+        Set<String> dimensions = semanticSchema.getDimensions(dataSetId).stream()
+                .sorted(Comparator.comparing(SchemaElement::getUseCnt).reversed())
+                .limit(llmParserConfig.getDimensionTopN())
+                .map(entry -> entry.getName())
+                .collect(Collectors.toSet());
+        results.addAll(dimensions);
+        Set<String> metrics = semanticSchema.getMetrics(dataSetId).stream()
+                .sorted(Comparator.comparing(SchemaElement::getUseCnt).reversed())
+                .limit(llmParserConfig.getMetricTopN())
+                .map(entry -> entry.getName())
+                .collect(Collectors.toSet());
+        results.addAll(metrics);
         return results;
     }
 
@@ -214,15 +200,12 @@ public class LLMRequestService {
                     SchemaElementType elementType = schemaElementMatch.getElement().getType();
                     return SchemaElementType.METRIC.equals(elementType)
                             || SchemaElementType.DIMENSION.equals(elementType)
-                            || SchemaElementType.VALUE.equals(elementType)
-                            || SchemaElementType.TAG.equals(elementType)
-                            || SchemaElementType.TAG_VALUE.equals(elementType);
+                            || SchemaElementType.VALUE.equals(elementType);
                 })
                 .map(schemaElementMatch -> {
                     SchemaElement element = schemaElementMatch.getElement();
                     SchemaElementType elementType = element.getType();
-                    if (SchemaElementType.VALUE.equals(elementType) || SchemaElementType.TAG_VALUE.equals(
-                            elementType)) {
+                    if (SchemaElementType.VALUE.equals(elementType)) {
                         return itemIdToName.get(element.getId());
                     }
                     return schemaElementMatch.getWord();

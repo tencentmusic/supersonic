@@ -44,9 +44,6 @@ public class SemanticSchema implements Serializable {
             case TAG:
                 element = getElementsById(elementID, getTags());
                 break;
-            case TAG_VALUE:
-                element = getElementsById(elementID, getTagValues());
-                break;
             default:
         }
 
@@ -85,28 +82,6 @@ public class SemanticSchema implements Serializable {
         return dimension.orElse(null);
     }
 
-    public List<SchemaElement> getTags() {
-        List<SchemaElement> tags = new ArrayList<>();
-        dataSetSchemaList.stream().forEach(d -> tags.addAll(d.getTags()));
-        return tags;
-    }
-
-    public List<SchemaElement> getTags(Long dataSetId) {
-        List<SchemaElement> tags = getTags();
-        return getElementsByDataSetId(dataSetId, tags);
-    }
-
-    public List<SchemaElement> getTagValues() {
-        List<SchemaElement> tags = new ArrayList<>();
-        dataSetSchemaList.stream().forEach(d -> tags.addAll(d.getTagValues()));
-        return tags;
-    }
-
-    public List<SchemaElement> getTagValues(Long dataSetId) {
-        List<SchemaElement> tags = getTagValues();
-        return getElementsByDataSetId(dataSetId, tags);
-    }
-
     public List<SchemaElement> getMetrics() {
         List<SchemaElement> metrics = new ArrayList<>();
         dataSetSchemaList.stream().forEach(d -> metrics.addAll(d.getMetrics()));
@@ -127,6 +102,20 @@ public class SemanticSchema implements Serializable {
     public List<SchemaElement> getEntities(Long dataSetId) {
         List<SchemaElement> entities = getEntities();
         return getElementsByDataSetId(dataSetId, entities);
+    }
+
+    public List<SchemaElement> getTags() {
+        List<SchemaElement> tags = new ArrayList<>();
+        dataSetSchemaList.stream().forEach(d -> tags.addAll(d.getTags()));
+        return tags;
+    }
+
+    public List<SchemaElement> getTags(Long dataSetId) {
+        List<SchemaElement> tags = new ArrayList<>();
+        dataSetSchemaList.stream().filter(schemaElement ->
+                        dataSetId.equals(schemaElement.getDataSet().getDataSet()))
+                .forEach(d -> tags.addAll(d.getTags()));
+        return tags;
     }
 
     private List<SchemaElement> getElementsByDataSetId(Long dataSetId, List<SchemaElement> elements) {

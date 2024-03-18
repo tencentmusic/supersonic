@@ -12,11 +12,6 @@ import com.tencent.supersonic.headless.api.pojo.SchemaValueMap;
 import com.tencent.supersonic.headless.api.pojo.response.DataSetSchemaResp;
 import com.tencent.supersonic.headless.api.pojo.response.DimSchemaResp;
 import com.tencent.supersonic.headless.api.pojo.response.MetricSchemaResp;
-import com.tencent.supersonic.headless.api.pojo.response.TagResp;
-import org.apache.logging.log4j.util.Strings;
-import org.springframework.beans.BeanUtils;
-import org.springframework.util.CollectionUtils;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -24,6 +19,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.apache.logging.log4j.util.Strings;
+import org.springframework.beans.BeanUtils;
+import org.springframework.util.CollectionUtils;
 
 public class DataSetSchemaBuilder {
 
@@ -43,23 +41,75 @@ public class DataSetSchemaBuilder {
         Set<SchemaElement> metrics = getMetrics(resp);
         dataSetSchema.getMetrics().addAll(metrics);
 
+        Set<SchemaElement> metricTags = getMetricTags(resp);
+        dataSetSchema.getTags().addAll(metricTags);
+
         Set<SchemaElement> dimensions = getDimensions(resp);
         dataSetSchema.getDimensions().addAll(dimensions);
 
+        Set<SchemaElement> dimensionTags = getDimensionTags(resp);
+        dataSetSchema.getTags().addAll(dimensionTags);
+
         Set<SchemaElement> dimensionValues = getDimensionValues(resp);
         dataSetSchema.getDimensionValues().addAll(dimensionValues);
-
-        Set<SchemaElement> tags = getTags(resp);
-        dataSetSchema.getTags().addAll(tags);
-
-        Set<SchemaElement> tagValues = getTagValues(resp);
-        dataSetSchema.getTagValues().addAll(tagValues);
 
         SchemaElement entity = getEntity(resp);
         if (Objects.nonNull(entity)) {
             dataSetSchema.setEntity(entity);
         }
         return dataSetSchema;
+    }
+
+    private static Set<SchemaElement> getMetricTags(DataSetSchemaResp resp) {
+        Set<SchemaElement> tags = new HashSet<>();
+        for (MetricSchemaResp metric : resp.getMetrics()) {
+            List<String> alias = SchemaItem.getAliasList(metric.getAlias());
+            if (metric.getIsTag() == 1) {
+                SchemaElement tagToAdd = SchemaElement.builder()
+                        .dataSet(resp.getId())
+                        .model(metric.getModelId())
+                        .id(metric.getId())
+                        .name(metric.getName())
+                        .bizName(metric.getBizName())
+                        .type(SchemaElementType.TAG)
+                        .useCnt(metric.getUseCnt())
+                        .alias(alias)
+                        .build();
+                tags.add(tagToAdd);
+            }
+        }
+        return tags;
+    }
+
+    private static Set<SchemaElement> getDimensionTags(DataSetSchemaResp resp) {
+        Set<SchemaElement> tags = new HashSet<>();
+        for (DimSchemaResp dim : resp.getDimensions()) {
+            List<String> alias = SchemaItem.getAliasList(dim.getAlias());
+            List<DimValueMap> dimValueMaps = dim.getDimValueMaps();
+            List<SchemaValueMap> schemaValueMaps = new ArrayList<>();
+            if (!CollectionUtils.isEmpty(dimValueMaps)) {
+                for (DimValueMap dimValueMap : dimValueMaps) {
+                    SchemaValueMap schemaValueMap = new SchemaValueMap();
+                    BeanUtils.copyProperties(dimValueMap, schemaValueMap);
+                    schemaValueMaps.add(schemaValueMap);
+                }
+            }
+            if (dim.getIsTag() == 1) {
+                SchemaElement tagToAdd = SchemaElement.builder()
+                        .dataSet(resp.getId())
+                        .model(dim.getModelId())
+                        .id(dim.getId())
+                        .name(dim.getName())
+                        .bizName(dim.getBizName())
+                        .type(SchemaElementType.TAG)
+                        .useCnt(dim.getUseCnt())
+                        .alias(alias)
+                        .schemaValueMaps(schemaValueMaps)
+                        .build();
+                tags.add(tagToAdd);
+            }
+        }
+        return tags;
     }
 
     private static SchemaElement getEntity(DataSetSchemaResp resp) {
@@ -77,38 +127,6 @@ public class DataSetSchemaBuilder {
                 .useCnt(dim.getUseCnt())
                 .alias(dim.getEntityAlias())
                 .build();
-    }
-
-    private static Set<SchemaElement> getTags(DataSetSchemaResp resp) {
-        Set<SchemaElement> tags = new HashSet<>();
-        for (TagResp tagResp : resp.getTags()) {
-            SchemaElement element = SchemaElement.builder()
-                    .dataSet(resp.getId())
-                    .model(tagResp.getModelId())
-                    .id(tagResp.getId())
-                    .name(tagResp.getName())
-                    .bizName(tagResp.getBizName())
-                    .type(SchemaElementType.TAG)
-                    .build();
-            tags.add(element);
-        }
-        return tags;
-    }
-
-    private static Set<SchemaElement> getTagValues(DataSetSchemaResp resp) {
-        Set<SchemaElement> dimensionValues = new HashSet<>();
-        for (TagResp tagResp : resp.getTags()) {
-            SchemaElement element = SchemaElement.builder()
-                    .dataSet(resp.getId())
-                    .model(tagResp.getModelId())
-                    .id(tagResp.getId())
-                    .name(tagResp.getName())
-                    .bizName(tagResp.getBizName())
-                    .type(SchemaElementType.TAG_VALUE)
-                    .build();
-            dimensionValues.add(element);
-        }
-        return dimensionValues;
     }
 
     private static Set<SchemaElement> getDimensions(DataSetSchemaResp resp) {

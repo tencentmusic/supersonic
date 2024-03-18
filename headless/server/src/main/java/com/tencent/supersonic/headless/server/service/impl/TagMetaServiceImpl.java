@@ -148,7 +148,6 @@ public class TagMetaServiceImpl implements TagMetaService {
 
     @Override
     public TagResp getTag(Long id, User user) {
-        // return convert(tagRepository.getTagById(id));
         TagDO tagDO = tagRepository.getTagById(id);
         TagResp tagResp = fillCollectAndAdminInfo(tagDO, user);
         tagResp = fillModelInfo(tagResp);
