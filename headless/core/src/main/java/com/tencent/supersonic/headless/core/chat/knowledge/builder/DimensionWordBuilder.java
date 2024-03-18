@@ -31,10 +31,10 @@ public class DimensionWordBuilder extends BaseWordWithAliasBuilder {
         dictWord.setWord(word);
         Long modelId = schemaElement.getModel();
         String nature = DictWordType.NATURE_SPILT + modelId + DictWordType.NATURE_SPILT + schemaElement.getId()
-                + DictWordType.DIMENSION.getTypeWithSpilt();
+                + DictWordType.DIMENSION.getType();
         if (isSuffix) {
             nature = DictWordType.NATURE_SPILT + modelId + DictWordType.NATURE_SPILT + schemaElement.getId()
-                    + DictWordType.SUFFIX.getTypeWithSpilt() + DictWordType.DIMENSION.getTypeWithSpilt();
+                    + DictWordType.SUFFIX.getType() + DictWordType.DIMENSION.getType();
         }
         dictWord.setNatureWithFrequency(String.format("%s " + DEFAULT_FREQUENCY, nature));
         return dictWord;

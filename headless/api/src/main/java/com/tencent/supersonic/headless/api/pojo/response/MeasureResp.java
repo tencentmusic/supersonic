@@ -27,4 +27,5 @@ public class MeasureResp {
 
     private Long modelId;
 
+    private int isTag;
 }

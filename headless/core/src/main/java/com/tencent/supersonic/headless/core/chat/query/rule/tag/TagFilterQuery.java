@@ -1,13 +1,11 @@
 package com.tencent.supersonic.headless.core.chat.query.rule.tag;
 
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
-
-import static com.tencent.supersonic.headless.api.pojo.SchemaElementType.TAG;
-import static com.tencent.supersonic.headless.api.pojo.SchemaElementType.TAG_VALUE;
-import static com.tencent.supersonic.headless.core.chat.query.rule.QueryMatchOption.OptionType.OPTIONAL;
+import static com.tencent.supersonic.headless.api.pojo.SchemaElementType.VALUE;
 import static com.tencent.supersonic.headless.core.chat.query.rule.QueryMatchOption.OptionType.REQUIRED;
 import static com.tencent.supersonic.headless.core.chat.query.rule.QueryMatchOption.RequireNumberType.AT_LEAST;
+
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
@@ -17,8 +15,7 @@ public class TagFilterQuery extends TagListQuery {
 
     public TagFilterQuery() {
         super();
-        queryMatcher.addOption(TAG, OPTIONAL, AT_LEAST, 0);
-        queryMatcher.addOption(TAG_VALUE, REQUIRED, AT_LEAST, 1);
+        queryMatcher.addOption(VALUE, REQUIRED, AT_LEAST, 1);
     }
 
     @Override

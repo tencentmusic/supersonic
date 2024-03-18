@@ -34,7 +34,6 @@ public class WordService {
         addWordsByType(DictWordType.METRIC, semanticSchema.getMetrics(), words);
         addWordsByType(DictWordType.ENTITY, semanticSchema.getEntities(), words);
         addWordsByType(DictWordType.VALUE, semanticSchema.getDimensionValues(), words);
-        addWordsByType(DictWordType.TAG, semanticSchema.getTags(), words);
 
         return words;
     }

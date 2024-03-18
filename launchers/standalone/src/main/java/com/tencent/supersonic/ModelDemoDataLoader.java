@@ -110,7 +110,6 @@ public class ModelDemoDataLoader {
             updateDimension();
             updateMetric();
             updateMetric_pv();
-            addTags();
             addDataSet_1();
             addDataSet_2();
             addAuthGroup_1();

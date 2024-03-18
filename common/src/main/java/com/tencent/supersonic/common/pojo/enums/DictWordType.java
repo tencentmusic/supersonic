@@ -13,17 +13,15 @@ public enum DictWordType {
 
     DIMENSION("dimension"),
 
-    VALUE("dv"),
+    VALUE("value"),
 
-    DATASET("dataset"),
+    DATASET("dataSet"),
 
     ENTITY("entity"),
 
     NUMBER("m"),
 
     TAG("tag"),
-
-    TAG_VALUE("tv"),
 
     SUFFIX("suffix");
 
@@ -35,7 +33,7 @@ public enum DictWordType {
         this.type = type;
     }
 
-    public String getTypeWithSpilt() {
+    public String getType() {
         return NATURE_SPILT + type;
     }
 
@@ -44,7 +42,7 @@ public enum DictWordType {
             return null;
         }
         for (DictWordType dictWordType : values()) {
-            if (nature.endsWith(dictWordType.getTypeWithSpilt())) {
+            if (nature.endsWith(dictWordType.getType())) {
                 return dictWordType;
             }
         }
@@ -54,7 +52,7 @@ public enum DictWordType {
             return DATASET;
         }
         //dimension value
-        if (natures.length >= 3 && StringUtils.isNumeric(natures[1]) && StringUtils.isNumeric(natures[2])) {
+        if (natures.length == 3 && StringUtils.isNumeric(natures[1]) && StringUtils.isNumeric(natures[2])) {
             return VALUE;
         }
         return null;
@@ -76,4 +74,5 @@ public enum DictWordType {
         }
         return "";
     }
+
 }
