@@ -519,7 +519,7 @@ CREATE TABLE `s2_tag`
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8 COMMENT ='标签表';
 
-  CREATE TABLE IF NOT EXISTS `s2_tag_object`
+CREATE TABLE IF NOT EXISTS `s2_tag_object`
 (
     `id`                bigint(20)   NOT NULL AUTO_INCREMENT,
     `domain_id`         bigint(20)   DEFAULT NULL,
