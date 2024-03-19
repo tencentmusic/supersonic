@@ -1,7 +1,6 @@
 package com.tencent.supersonic.headless.api.pojo.response;
 
 import com.google.common.collect.Lists;
-import com.tencent.supersonic.common.pojo.enums.QueryType;
 import com.tencent.supersonic.headless.api.pojo.DataSetDetail;
 import com.tencent.supersonic.headless.api.pojo.DataSetModelConfig;
 import com.tencent.supersonic.headless.api.pojo.QueryConfig;
@@ -30,14 +29,16 @@ public class DataSetResp extends SchemaItem {
 
     private QueryConfig queryConfig;
 
-    private QueryType queryType;
+    private List<TagItem> allMetrics = new ArrayList<>();
 
-    public List<Long> getAllMetrics() {
+    private List<TagItem> allDimensions = new ArrayList<>();
+
+    public List<Long> metricIds() {
         return getDataSetModelConfigs().stream().map(DataSetModelConfig::getMetrics)
                 .flatMap(Collection::stream).collect(Collectors.toList());
     }
 
-    public List<Long> getAllDimensions() {
+    public List<Long> dimensionIds() {
         return getDataSetModelConfigs().stream().map(DataSetModelConfig::getDimensions)
                 .flatMap(Collection::stream).collect(Collectors.toList());
     }

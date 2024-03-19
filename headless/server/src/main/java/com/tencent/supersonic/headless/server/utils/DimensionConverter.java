@@ -86,7 +86,7 @@ public class DimensionConverter {
 
     public static List<DimensionResp> filterByDataSet(List<DimensionResp> dimensionResps, DataSetResp dataSetResp) {
         return dimensionResps.stream().filter(dimensionResp ->
-                dataSetResp.getAllDimensions().contains(dimensionResp.getId())
+                dataSetResp.dimensionIds().contains(dimensionResp.getId())
                         || dataSetResp.getAllIncludeAllModels().contains(dimensionResp.getModelId()))
                 .collect(Collectors.toList());
     }

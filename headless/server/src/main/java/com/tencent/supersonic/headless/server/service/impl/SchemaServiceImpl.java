@@ -161,7 +161,7 @@ public class SchemaServiceImpl implements SchemaService {
         MetaFilter metaFilter = new MetaFilter();
         metaFilter.setStatus(StatusEnum.ONLINE.getCode());
         metaFilter.setIds(filter.getDataSetIds());
-        List<DataSetResp> dataSetResps = dataSetService.getDataSetList(metaFilter);
+        List<DataSetResp> dataSetResps = dataSetService.getDataSetList(metaFilter, User.getFakeUser());
         Map<Long, DataSetResp> dataSetRespMap = getDataSetMap(dataSetResps);
 
         List<Long> modelIds = dataSetRespMap.values().stream().map(DataSetResp::getAllModels)
@@ -337,7 +337,6 @@ public class SchemaServiceImpl implements SchemaService {
             semanticSchemaResp.setModelRelas(modelRelas);
             semanticSchemaResp.setModelIds(modelIds);
             semanticSchemaResp.setSchemaType(SchemaType.VIEW);
-            semanticSchemaResp.setQueryType(dataSetSchemaResp.getQueryType());
         } else if (!CollectionUtils.isEmpty(schemaFilterReq.getModelIds())) {
             List<ModelSchemaResp> modelSchemaResps = fetchModelSchemaResps(schemaFilterReq.getModelIds());
             semanticSchemaResp.setMetrics(modelSchemaResps.stream().map(ModelSchemaResp::getMetrics)
@@ -402,7 +401,7 @@ public class SchemaServiceImpl implements SchemaService {
             }
             parentItem.getChildren().add(itemResp);
         }
-        List<DataSetResp> dataSetResps = dataSetService.getDataSetList(new MetaFilter());
+        List<DataSetResp> dataSetResps = dataSetService.getDataSetList(new MetaFilter(), User.getFakeUser());
         for (DataSetResp dataSetResp : dataSetResps) {
             ItemResp itemResp = itemRespMap.get(dataSetResp.getDomainId());
             if (itemResp != null) {

@@ -1,6 +1,5 @@
 package com.tencent.supersonic.headless.api.pojo.request;
 
-import com.tencent.supersonic.common.pojo.enums.QueryType;
 import com.tencent.supersonic.headless.api.pojo.DataSetDetail;
 import com.tencent.supersonic.headless.api.pojo.QueryConfig;
 import com.tencent.supersonic.headless.api.pojo.SchemaItem;
@@ -21,8 +20,6 @@ public class DataSetReq extends SchemaItem {
     private List<String> admins;
 
     private List<String> adminOrgs;
-
-    private QueryType queryType;
 
     public String getAdmin() {
         if (admins == null) {
