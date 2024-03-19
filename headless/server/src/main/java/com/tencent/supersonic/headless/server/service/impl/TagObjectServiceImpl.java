@@ -51,7 +51,7 @@ public class TagObjectServiceImpl implements TagObjectService {
             return;
         }
         tagObjectRespList = tagObjectRespList.stream()
-                .filter(tagObjectResp -> StatusEnum.ONLINE.equals(tagObjectResp.getStatus()))
+                .filter(tagObjectResp -> StatusEnum.ONLINE.getCode().equals(tagObjectResp.getStatus()))
                 .collect(Collectors.toList());
         for (TagObjectResp tagObject : tagObjectRespList) {
             if (tagObject.getBizName().equalsIgnoreCase(tagObjectReq.getBizName())) {
