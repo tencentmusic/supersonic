@@ -46,6 +46,7 @@ import com.tencent.supersonic.headless.api.pojo.request.DimensionReq;
 import com.tencent.supersonic.headless.api.pojo.request.DomainReq;
 import com.tencent.supersonic.headless.api.pojo.request.MetricReq;
 import com.tencent.supersonic.headless.api.pojo.request.ModelReq;
+import com.tencent.supersonic.headless.api.pojo.request.TagObjectReq;
 import com.tencent.supersonic.headless.server.service.DataSetService;
 import com.tencent.supersonic.headless.server.service.DatabaseService;
 import com.tencent.supersonic.headless.server.service.DimensionService;
@@ -58,6 +59,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+
+import com.tencent.supersonic.headless.server.service.TagObjectService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -87,6 +90,8 @@ public class ModelDemoDataLoader {
     private DataSetService dataSetService;
     @Autowired
     private DataSourceProperties dataSourceProperties;
+    @Autowired
+    private TagObjectService tagObjectService;
 
     @Autowired
     private TagMetaService tagMetaService;
@@ -95,6 +100,8 @@ public class ModelDemoDataLoader {
         try {
             addDatabase();
             addDomain();
+            addTagObjectUser();
+            addTagObjectSinger();
             addModel_1();
             addModel_2();
             addMetric_uv();
@@ -115,6 +122,24 @@ public class ModelDemoDataLoader {
             log.error("Failed to add model demo data", e);
         }
 
+    }
+
+    private void addTagObjectUser() throws Exception {
+        TagObjectReq tagObjectReq = new TagObjectReq();
+        tagObjectReq.setDomainId(1L);
+        tagObjectReq.setName("用户");
+        tagObjectReq.setBizName("user");
+        User user = User.getFakeUser();
+        tagObjectService.create(tagObjectReq, user);
+    }
+
+    private void addTagObjectSinger() throws Exception {
+        TagObjectReq tagObjectReq = new TagObjectReq();
+        tagObjectReq.setDomainId(2L);
+        tagObjectReq.setName("艺人");
+        tagObjectReq.setBizName("singer");
+        User user = User.getFakeUser();
+        tagObjectService.create(tagObjectReq, user);
     }
 
     public void addDatabase() {
@@ -155,6 +180,7 @@ public class ModelDemoDataLoader {
         modelReq.setDescription("用户部门信息");
         modelReq.setDatabaseId(1L);
         modelReq.setDomainId(1L);
+        modelReq.setTagObjectId(1L);
         modelReq.setViewers(Arrays.asList("admin", "tom", "jack"));
         modelReq.setViewOrgs(Collections.singletonList("1"));
         modelReq.setAdmins(Arrays.asList("admin", "alice"));
@@ -309,6 +335,7 @@ public class ModelDemoDataLoader {
         modelReq.setDescription("艺人库");
         modelReq.setDatabaseId(1L);
         modelReq.setDomainId(2L);
+        modelReq.setTagObjectId(2L);
         modelReq.setViewers(Arrays.asList("admin", "tom", "jack"));
         modelReq.setViewOrgs(Collections.singletonList("1"));
         modelReq.setAdmins(Collections.singletonList("admin"));
