@@ -25,6 +25,8 @@ public class ModelResp extends SchemaItem {
 
     private Long databaseId;
 
+    private Long tagObjectId;
+
     private ModelDetail modelDetail;
 
     private String depends;
