@@ -3,28 +3,29 @@ package com.tencent.supersonic.headless.server.persistence.dataobject;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import java.util.Date;
 import lombok.Data;
 
+import java.util.Date;
+
 @Data
-@TableName("s2_tag")
-public class TagDO {
+@TableName("s2_tag_object")
+public class TagObjectDO {
 
     @TableId(type = IdType.AUTO)
     private Long id;
 
     /**
-     * 主体域ID
+     * 关联到某个主题域下
      */
-    private Long modelId;
+    private Long domainId;
 
     /**
-     * 标签名称
+     * 标签对象名称
      */
     private String name;
 
     /**
-     * 标签业务名称
+     * 标签对象业务名称
      */
     private String bizName;
 
@@ -34,7 +35,7 @@ public class TagDO {
     private String description;
 
     /**
-     * 指标状态,0正常,1下架,2删除
+     * 状态,0正常,1下架,2删除
      */
     private Integer status;
 
@@ -42,11 +43,6 @@ public class TagDO {
      * 敏感级别
      */
     private Integer sensitiveLevel;
-
-    /**
-     * 类型 DERIVED,ATOMIC
-     */
-    private String type;
 
     /**
      * 创建时间
@@ -68,12 +64,8 @@ public class TagDO {
      */
     private String updatedBy;
 
-
     /**
-     * 类型参数
+     * 扩展信息
      */
-    private String defineType;
-    private String typeParams;
     private String ext;
-
 }

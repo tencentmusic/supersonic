@@ -38,6 +38,8 @@ public class ModelReq extends SchemaItem {
 
     private List<String> adminOrgs;
 
+    private Long tagObjectId;
+
     public List<Dim> getTimeDimension() {
         if (modelDetail == null) {
             return Lists.newArrayList();

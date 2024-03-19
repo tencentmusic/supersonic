@@ -120,6 +120,7 @@ CREATE TABLE IF NOT EXISTS `s2_model` (
     `name` varchar(255) DEFAULT NULL  , -- domain name
     `biz_name` varchar(255) DEFAULT NULL  , -- internal name
     `domain_id` INT DEFAULT '0'  , -- parent domain ID
+    `tag_object_id` INT DEFAULT '0'  ,
     `alias` varchar(255) DEFAULT NULL  , -- internal name
     `status` INT DEFAULT NULL,
     `description` varchar(500) DEFAULT  NULL ,
@@ -594,3 +595,20 @@ CREATE TABLE IF NOT EXISTS `s2_tag` (
     PRIMARY KEY (`id`)
     );
 COMMENT ON TABLE s2_tag IS 'tag information';
+
+CREATE TABLE IF NOT EXISTS `s2_tag_object` (
+    `id` INT NOT NULL  AUTO_INCREMENT,
+    `domain_id` INT  NOT NULL ,
+    `name` varchar(255)  NOT NULL ,
+    `biz_name` varchar(255)  NOT NULL ,
+    `description` varchar(500) DEFAULT NULL ,
+    `status` INT  NOT NULL ,
+    `sensitive_level` INT NOT NULL ,
+    `created_at` TIMESTAMP NOT NULL ,
+    `created_by` varchar(100) NOT NULL ,
+    `updated_at` TIMESTAMP DEFAULT NULL ,
+    `updated_by` varchar(100) DEFAULT NULL ,
+    `ext` LONGVARCHAR DEFAULT NULL  ,
+    PRIMARY KEY (`id`)
+    );
+COMMENT ON TABLE s2_tag IS 'tag object information';
