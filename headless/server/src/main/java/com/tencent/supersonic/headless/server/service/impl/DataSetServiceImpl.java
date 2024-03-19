@@ -8,39 +8,28 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.common.pojo.enums.AuthType;
-import com.tencent.supersonic.common.pojo.enums.QueryType;
 import com.tencent.supersonic.common.pojo.enums.StatusEnum;
 import com.tencent.supersonic.common.pojo.enums.TypeEnums;
 import com.tencent.supersonic.common.pojo.exception.InvalidArgumentException;
 import com.tencent.supersonic.common.util.BeanMapper;
-import com.tencent.supersonic.headless.api.pojo.DataSetModelConfig;
-import com.tencent.supersonic.headless.api.pojo.QueryConfig;
 import com.tencent.supersonic.headless.api.pojo.DataSetDetail;
+import com.tencent.supersonic.headless.api.pojo.QueryConfig;
+import com.tencent.supersonic.headless.api.pojo.request.DataSetReq;
+import com.tencent.supersonic.headless.api.pojo.request.QueryDataSetReq;
 import com.tencent.supersonic.headless.api.pojo.request.QuerySqlReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
-import com.tencent.supersonic.headless.api.pojo.request.QueryDataSetReq;
 import com.tencent.supersonic.headless.api.pojo.request.SemanticQueryReq;
-import com.tencent.supersonic.headless.api.pojo.request.DataSetReq;
+import com.tencent.supersonic.headless.api.pojo.response.DataSetResp;
 import com.tencent.supersonic.headless.api.pojo.response.DimensionResp;
 import com.tencent.supersonic.headless.api.pojo.response.DomainResp;
 import com.tencent.supersonic.headless.api.pojo.response.MetricResp;
-import com.tencent.supersonic.headless.api.pojo.response.DataSetResp;
 import com.tencent.supersonic.headless.server.persistence.dataobject.DataSetDO;
 import com.tencent.supersonic.headless.server.persistence.mapper.DataSetDOMapper;
 import com.tencent.supersonic.headless.server.pojo.MetaFilter;
+import com.tencent.supersonic.headless.server.service.DataSetService;
 import com.tencent.supersonic.headless.server.service.DimensionService;
 import com.tencent.supersonic.headless.server.service.DomainService;
 import com.tencent.supersonic.headless.server.service.MetricService;
-import com.tencent.supersonic.headless.server.service.DataSetService;
-import java.util.Objects;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
-
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Date;
@@ -51,6 +40,13 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 @Service
 public class DataSetServiceImpl
@@ -171,11 +167,6 @@ public class DataSetServiceImpl
         dataSetResp.setAdminOrgs(StringUtils.isBlank(dataSetDO.getAdminOrg())
                 ? Lists.newArrayList() : Arrays.asList(dataSetDO.getAdminOrg().split(",")));
         dataSetResp.setTypeEnum(TypeEnums.DATASET);
-        String queryType = dataSetDO.getQueryType();
-        if (Objects.isNull(queryType)) {
-            queryType = QueryType.METRIC.name();
-        }
-        dataSetResp.setQueryType(QueryType.valueOf(queryType));
         return dataSetResp;
     }
 
@@ -184,8 +175,6 @@ public class DataSetServiceImpl
         BeanMapper.mapper(dataSetReq, dataSetDO);
         dataSetDO.setDataSetDetail(JSONObject.toJSONString(dataSetReq.getDataSetDetail()));
         dataSetDO.setQueryConfig(JSONObject.toJSONString(dataSetReq.getQueryConfig()));
-        QueryType queryType = getQueryType(dataSetReq);
-        dataSetDO.setQueryType(queryType.name());
         return dataSetDO;
     }
 
@@ -196,24 +185,6 @@ public class DataSetServiceImpl
         }
         BeanUtils.copyProperties(queryDataSetReq, queryReq);
         return queryReq;
-    }
-
-    private QueryType getQueryType(DataSetReq dataSetReq) {
-        QueryType queryType = dataSetReq.getQueryType();
-        if (Objects.nonNull(queryType)) {
-            return queryType;
-        }
-        List<DataSetModelConfig> dataSetModelConfigs = dataSetReq.getDataSetDetail().getDataSetModelConfigs();
-        if (CollectionUtils.isEmpty(dataSetModelConfigs)) {
-            return QueryType.METRIC;
-        }
-
-        Set<DataSetModelConfig> collect = dataSetModelConfigs.stream()
-                .filter(config -> !CollectionUtils.isEmpty(config.getTagIds())).collect(Collectors.toSet());
-        if (CollectionUtils.isEmpty(collect)) {
-            return QueryType.METRIC;
-        }
-        return QueryType.TAG;
     }
 
     public static boolean checkAdminPermission(User user, DataSetResp dataSetResp) {
