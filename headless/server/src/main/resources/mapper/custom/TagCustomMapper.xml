@@ -20,7 +20,7 @@
         <result column="model_name" jdbcType="VARCHAR" property="modelName" />
         <result column="tag_object_id" jdbcType="BIGINT" property="tagObjectId" />
         <result column="tag_object_name" jdbcType="VARCHAR" property="tagObjectName" />
-        <result column="tag_define_type" jdbcType="VARCHAR" property="tagDefineType" />
+        <result column="type" jdbcType="VARCHAR" property="tagDefineType" />
         <result column="item_id" jdbcType="VARCHAR" property="itemId" />
         <result column="name" jdbcType="VARCHAR" property="name" />
         <result column="biz_name" jdbcType="VARCHAR" property="bizName" />
@@ -45,28 +45,28 @@
                 </foreach>
             </if>
             <if test="tagDefineType != null">
-                and tag_define_type = #{tagDefineType}
+                and type = #{tagDefineType}
             </if>
         </where>
     </select>
 
     <select id="queryTagRespList" resultMap="TagResp">
         select * from (
-        select s2_tag.id as id, s2_dimension.model_id as model_id, 'DIMENSION' as tag_define_type, s2_dimension.id as item_id,
+        select s2_tag.id as id, s2_dimension.model_id as model_id, 'DIMENSION' as type, s2_dimension.id as item_id,
         s2_dimension.name as name, s2_dimension.biz_name as biz_name, s2_dimension.description as description, s2_tag.updated_at as updated_at
         from s2_tag join s2_dimension
         on s2_tag.item_id = s2_dimension.id
-        where s2_dimension.status=1
+        where s2_dimension.status=1 and s2_tag.type='DIMENSION'
         union
-        select s2_tag.id as id, s2_metric.model_id as model_id, 'METRIC' as tag_define_type, s2_metric.id as item_id,
+        select s2_tag.id as id, s2_metric.model_id as model_id, 'METRIC' as type, s2_metric.id as item_id,
         s2_metric.name as name, s2_metric.biz_name as biz_name, s2_metric.description as description, s2_tag.updated_at as updated_at
         from s2_tag join s2_metric
         on s2_tag.item_id = s2_metric.id
-        where s2_metric.status=1
+        where s2_metric.status=1 and s2_tag.type='METRIC'
         )t
         <where>
             <if test="tagDefineType != null">
-                and tag_define_type = #{tagDefineType}
+                and type = #{tagDefineType}
             </if>
             <if test="itemIds != null and itemIds.size >0">
                 and item_id in
