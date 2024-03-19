@@ -580,7 +580,7 @@ CREATE TABLE IF NOT EXISTS `s2_data_set` (
 CREATE TABLE IF NOT EXISTS `s2_tag` (
     `id` INT NOT NULL  AUTO_INCREMENT,
     `item_id` INT  NOT NULL ,
-    `type` varchar(50)  NOT NULL , -- ATOMIC, DERIVED
+    `type` varchar(50)  NOT NULL ,
     `created_at` TIMESTAMP NOT NULL ,
     `created_by` varchar(100) NOT NULL ,
     `updated_at` TIMESTAMP DEFAULT NULL ,

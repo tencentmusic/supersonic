@@ -18,11 +18,11 @@ public interface DataSetService {
 
     DataSetResp getDataSet(Long id);
 
-    List<DataSetResp> getDataSetList(MetaFilter metaFilter);
+    List<DataSetResp> getDataSetList(MetaFilter metaFilter, User user);
 
     void delete(Long id, User user);
 
-    Map<Long, List<Long>> getModelIdToDataSetIds(List<Long> dataSetIds);
+    Map<Long, List<Long>> getModelIdToDataSetIds(List<Long> dataSetIds, User user);
 
     Map<Long, List<Long>> getModelIdToDataSetIds();
 

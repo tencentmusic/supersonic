@@ -20,12 +20,9 @@ public class DataSetModelConfig {
 
     private List<Long> dimensions = Lists.newArrayList();
 
-    private List<Long> tagIds = Lists.newArrayList();
-
-    public DataSetModelConfig(Long id, List<Long> dimensions, List<Long> metrics, List<Long> tagIds) {
+    public DataSetModelConfig(Long id, List<Long> dimensions, List<Long> metrics) {
         this.id = id;
         this.metrics = metrics;
         this.dimensions = dimensions;
-        this.tagIds = tagIds;
     }
 }
