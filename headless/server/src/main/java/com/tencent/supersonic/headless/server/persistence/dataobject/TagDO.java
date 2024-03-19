@@ -14,37 +14,12 @@ public class TagDO {
     private Long id;
 
     /**
-     * 主体域ID
+     * itemID
      */
-    private Long modelId;
+    private Long itemId;
 
     /**
-     * 标签名称
-     */
-    private String name;
-
-    /**
-     * 标签业务名称
-     */
-    private String bizName;
-
-    /**
-     * 描述
-     */
-    private String description;
-
-    /**
-     * 指标状态,0正常,1下架,2删除
-     */
-    private Integer status;
-
-    /**
-     * 敏感级别
-     */
-    private Integer sensitiveLevel;
-
-    /**
-     * 类型 DERIVED,ATOMIC
+     * 标签类型
      */
     private String type;
 
@@ -67,13 +42,5 @@ public class TagDO {
      * 更新人
      */
     private String updatedBy;
-
-
-    /**
-     * 类型参数
-     */
-    private String defineType;
-    private String typeParams;
-    private String ext;
 
 }

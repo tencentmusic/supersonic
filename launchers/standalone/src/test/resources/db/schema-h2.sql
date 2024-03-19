@@ -579,20 +579,12 @@ CREATE TABLE IF NOT EXISTS `s2_data_set` (
 
 CREATE TABLE IF NOT EXISTS `s2_tag` (
     `id` INT NOT NULL  AUTO_INCREMENT,
-    `model_id` INT  NOT NULL ,
-    `name` varchar(255)  NOT NULL ,
-    `biz_name` varchar(255)  NOT NULL ,
-    `description` varchar(500) DEFAULT NULL ,
-    `status` INT  NOT NULL ,
-    `sensitive_level` INT NOT NULL ,
+    `item_id` INT  NOT NULL ,
     `type` varchar(50)  NOT NULL , -- ATOMIC, DERIVED
-    `define_type` varchar(50)  NOT NULL, -- FIELD, DIMENSION
-    `type_params` LONGVARCHAR DEFAULT NULL  ,
     `created_at` TIMESTAMP NOT NULL ,
     `created_by` varchar(100) NOT NULL ,
     `updated_at` TIMESTAMP DEFAULT NULL ,
     `updated_by` varchar(100) DEFAULT NULL ,
-    `ext` LONGVARCHAR DEFAULT NULL  ,
     PRIMARY KEY (`id`)
     );
 COMMENT ON TABLE s2_tag IS 'tag information';

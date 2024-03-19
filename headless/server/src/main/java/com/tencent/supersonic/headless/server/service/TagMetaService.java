@@ -2,29 +2,30 @@ package com.tencent.supersonic.headless.server.service;
 
 import com.github.pagehelper.PageInfo;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
-import com.tencent.supersonic.headless.api.pojo.request.MetaBatchReq;
-import com.tencent.supersonic.headless.api.pojo.request.TagBatchCreateReq;
+import com.tencent.supersonic.headless.api.pojo.request.TagDeleteReq;
+import com.tencent.supersonic.headless.api.pojo.request.TagFilterPageReq;
 import com.tencent.supersonic.headless.api.pojo.request.TagReq;
 import com.tencent.supersonic.headless.api.pojo.response.TagResp;
+import com.tencent.supersonic.headless.server.persistence.dataobject.TagDO;
 import com.tencent.supersonic.headless.server.pojo.TagFilter;
-import com.tencent.supersonic.headless.server.pojo.TagFilterPage;
+
 import java.util.List;
 
 public interface TagMetaService {
 
     TagResp create(TagReq tagReq, User user);
 
-    TagResp update(TagReq tagReq, User user);
+    Integer createBatch(List<TagReq> tagReqList, User user);
 
-    void delete(Long id, User user);
+    Boolean delete(Long id, User user);
+
+    Boolean deleteBatch(TagDeleteReq tagDeleteReq, User user);
 
     TagResp getTag(Long id, User user);
 
     List<TagResp> getTags(TagFilter tagFilter);
 
-    PageInfo<TagResp> queryPage(TagFilterPage tagFilterPage, User user);
+    List<TagDO> getTagDOList(TagFilter tagFilter, User user);
 
-    Boolean batchUpdateStatus(MetaBatchReq metaBatchReq, User user);
-
-    Integer createBatch(TagBatchCreateReq tagBatchReq, User user);
+    PageInfo<TagResp> queryTagMarketPage(TagFilterPageReq tagMarketPageReq, User user);
 }

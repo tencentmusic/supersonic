@@ -1,40 +1,34 @@
 package com.tencent.supersonic.headless.server.service.impl;
 
-import com.alibaba.fastjson.JSONObject;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
-import com.tencent.supersonic.common.pojo.Constants;
-import com.tencent.supersonic.common.pojo.DataEvent;
-import com.tencent.supersonic.common.pojo.DataItem;
 import com.tencent.supersonic.common.pojo.enums.AuthType;
-import com.tencent.supersonic.common.pojo.enums.EventType;
-import com.tencent.supersonic.common.pojo.enums.StatusEnum;
 import com.tencent.supersonic.common.pojo.enums.TypeEnums;
-import com.tencent.supersonic.common.pojo.exception.InvalidArgumentException;
-import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
 import com.tencent.supersonic.headless.api.pojo.TagDefineParams;
 import com.tencent.supersonic.headless.api.pojo.enums.TagDefineType;
-import com.tencent.supersonic.headless.api.pojo.request.MetaBatchReq;
 import com.tencent.supersonic.headless.api.pojo.request.TagBatchCreateReq;
+import com.tencent.supersonic.headless.api.pojo.request.TagDeleteReq;
+import com.tencent.supersonic.headless.api.pojo.request.TagFilterPageReq;
 import com.tencent.supersonic.headless.api.pojo.request.TagReq;
 import com.tencent.supersonic.headless.api.pojo.response.DimensionResp;
+import com.tencent.supersonic.headless.api.pojo.response.DomainResp;
 import com.tencent.supersonic.headless.api.pojo.response.MetricResp;
 import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
+import com.tencent.supersonic.headless.api.pojo.response.TagObjectResp;
 import com.tencent.supersonic.headless.api.pojo.response.TagResp;
 import com.tencent.supersonic.headless.server.persistence.dataobject.CollectDO;
 import com.tencent.supersonic.headless.server.persistence.dataobject.TagDO;
 import com.tencent.supersonic.headless.server.persistence.repository.TagRepository;
-import com.tencent.supersonic.headless.server.pojo.MetaFilter;
 import com.tencent.supersonic.headless.server.pojo.TagFilter;
-import com.tencent.supersonic.headless.server.pojo.TagFilterPage;
+import com.tencent.supersonic.headless.server.pojo.TagObjectFilter;
 import com.tencent.supersonic.headless.server.service.CollectService;
 import com.tencent.supersonic.headless.server.service.DimensionService;
+import com.tencent.supersonic.headless.server.service.DomainService;
 import com.tencent.supersonic.headless.server.service.MetricService;
 import com.tencent.supersonic.headless.server.service.ModelService;
 import com.tencent.supersonic.headless.server.service.TagMetaService;
-import com.tencent.supersonic.headless.server.utils.NameCheckUtils;
+import com.tencent.supersonic.headless.server.service.TagObjectService;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -47,10 +41,7 @@ import java.util.stream.Collectors;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.BeanUtils;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
@@ -61,189 +52,186 @@ public class TagMetaServiceImpl implements TagMetaService {
     private final TagRepository tagRepository;
     private final ModelService modelService;
     private final CollectService collectService;
-    private ApplicationEventPublisher eventPublisher;
     private final DimensionService dimensionService;
     private final MetricService metricService;
+    private final TagObjectService tagObjectService;
+    private final DomainService domainService;
 
     public TagMetaServiceImpl(TagRepository tagRepository, ModelService modelService,
-                              CollectService collectService, ApplicationEventPublisher eventPublisher,
-                              @Lazy DimensionService dimensionService, @Lazy MetricService metricService) {
+                              CollectService collectService, @Lazy DimensionService dimensionService,
+                              @Lazy MetricService metricService, TagObjectService tagObjectService,
+                              DomainService domainService) {
         this.tagRepository = tagRepository;
         this.modelService = modelService;
         this.collectService = collectService;
-        this.eventPublisher = eventPublisher;
         this.dimensionService = dimensionService;
         this.metricService = metricService;
+        this.tagObjectService = tagObjectService;
+        this.domainService = domainService;
     }
 
     @Override
     public TagResp create(TagReq tagReq, User user) {
-        checkParam(tagReq);
         checkExit(tagReq);
         TagDO tagDO = convert(tagReq);
         Date date = new Date();
+        tagDO.setId(null);
         tagDO.setCreatedBy(user.getName());
         tagDO.setCreatedAt(date);
         tagDO.setUpdatedBy(user.getName());
         tagDO.setUpdatedAt(date);
-        if (Objects.nonNull(tagReq.getStatus())) {
-            tagDO.setStatus(tagReq.getStatus());
-        } else {
-            tagDO.setStatus(StatusEnum.ONLINE.getCode());
-        }
         tagRepository.create(tagDO);
-        sendEventBatch(Lists.newArrayList(tagDO), EventType.ADD);
-        return convert(tagDO);
-    }
-
-    private void sendEventBatch(List<TagDO> tagDOS, EventType eventType) {
-        List<DataItem> dataItems = tagDOS.stream().map(this::getDataItem)
-                .collect(Collectors.toList());
-        eventPublisher.publishEvent(new DataEvent(this, dataItems, eventType));
-    }
-
-    private void sendEvent(DataItem dataItem, EventType eventType) {
-        eventPublisher.publishEvent(new DataEvent(this,
-                Lists.newArrayList(dataItem), eventType));
-    }
-
-    private DataItem getDataItem(TagDO tagDO) {
-        return DataItem.builder().id(tagDO.getId() + Constants.UNDERLINE).name(tagDO.getName())
-                .bizName(tagDO.getBizName()).modelId(tagDO.getModelId() + Constants.UNDERLINE)
-                .type(TypeEnums.TAG).build();
+        return convert2Resp(tagDO);
     }
 
     @Override
-    public TagResp update(TagReq tagReq, User user) {
-        if (Objects.isNull(tagReq.getId()) || tagReq.getId() <= 0) {
-            throw new RuntimeException("id is empty");
-        }
-        TagDO tagDO = tagRepository.getTagById(tagReq.getId());
-        String oldName = tagDO.getName();
-        tagDO = fillUpdateInfo(tagReq, tagDO);
-        tagDO.setUpdatedBy(user.getName());
-        tagDO.setUpdatedAt(new Date());
-        tagRepository.update(tagDO);
-        if (!oldName.equals(tagReq.getName())) {
-            DataItem dataItem = getDataItem(tagDO);
-            dataItem.setName(oldName);
-            dataItem.setNewName(tagReq.getName());
-            sendEvent(getDataItem(tagDO), EventType.UPDATE);
-        }
-        return convert(tagDO);
+    public Integer createBatch(List<TagReq> tagReqList, User user) {
+        tagReqList.stream().forEach(tagReq -> {
+            create(tagReq, user);
+        });
+        return tagReqList.size();
     }
 
     @Override
-    public void delete(Long id, User user) {
-        TagDO tagDO = tagRepository.getTagById(id);
-        if (Objects.isNull(tagDO)) {
-            throw new RuntimeException("tag not found");
-        }
-        tagDO.setStatus(StatusEnum.DELETED.getCode());
-        tagDO.setUpdatedBy(user.getName());
-        tagDO.setUpdatedAt(new Date());
-        tagRepository.update(tagDO);
-        sendEventBatch(Lists.newArrayList(tagDO), EventType.DELETE);
+    public Boolean delete(Long id, User user) {
+        tagRepository.delete(id);
+        return true;
+    }
+
+    @Override
+    public Boolean deleteBatch(TagDeleteReq tagDeleteReq, User user) {
+        tagRepository.deleteBatch(tagDeleteReq);
+        return true;
     }
 
     @Override
     public TagResp getTag(Long id, User user) {
         TagDO tagDO = tagRepository.getTagById(id);
-        TagResp tagResp = fillCollectAndAdminInfo(tagDO, user);
-        tagResp = fillModelInfo(tagResp);
+        TagResp tagResp = convert2Resp(tagDO);
+        tagResp = fillTagObjectInfo(tagResp, user);
+        tagResp = fillCollectAndAdminInfo(tagResp, user);
         return tagResp;
     }
 
     @Override
     public List<TagResp> getTags(TagFilter tagFilter) {
-        List<TagDO> tagDOS = tagRepository.query(tagFilter);
-        if (!CollectionUtils.isEmpty(tagDOS)) {
-            return tagDOS.stream().map(tagDO -> convert(tagDO)).collect(Collectors.toList());
-        }
-        return new ArrayList<>();
+        List<TagResp> tagRespList = tagRepository.queryTagRespList(tagFilter);
+        return tagRespList;
     }
 
     @Override
-    public PageInfo<TagResp> queryPage(TagFilterPage tagFilterPage, User user) {
-        TagFilter tagFilter = new TagFilter();
-        BeanUtils.copyProperties(tagFilterPage, tagFilter);
-        List<ModelResp> modelRespList = modelService.getAllModelByDomainIds(tagFilterPage.getDomainIds());
-        List<Long> modelIds = modelRespList.stream().map(ModelResp::getId).collect(Collectors.toList());
-        tagFilterPage.getModelIds().addAll(modelIds);
-        tagFilter.setModelIds(tagFilterPage.getModelIds());
+    public List<TagDO> getTagDOList(TagFilter tagFilter, User user) {
+        return tagRepository.getTagDOList(tagFilter);
+    }
 
-        List<CollectDO> collectList = collectService.getCollectList(user.getName())
-                .stream().filter(collectDO -> TypeEnums.TAG.name().equalsIgnoreCase(collectDO.getType()))
-                .collect(Collectors.toList());
-        List<Long> collectIds = collectList.stream().map(CollectDO::getCollectId).collect(Collectors.toList());
-        if (tagFilterPage.isHasCollect()) {
-            if (CollectionUtils.isEmpty(collectIds)) {
-                tagFilter.setIds(Lists.newArrayList(-1L));
-            } else {
-                tagFilter.setIds(collectIds);
+    /**
+     * 分页查询标签列表信息
+     *
+     * @param tagMarketPageReq
+     * @param user
+     * @return
+     */
+    @Override
+    public PageInfo<TagResp> queryTagMarketPage(TagFilterPageReq tagMarketPageReq, User user) {
+        List<ModelResp> modelRespList = getRelatedModel(tagMarketPageReq);
+        List<Long> modelIds = modelRespList.stream().map(model -> model.getId()).collect(Collectors.toList());
+        TagFilter tagFilter = new TagFilter();
+        BeanUtils.copyProperties(tagMarketPageReq, tagFilter);
+        tagFilter.setModelIds(modelIds);
+        PageInfo<TagResp> tagDOPageInfo = PageHelper.startPage(tagMarketPageReq.getCurrent(),
+                tagMarketPageReq.getPageSize())
+                .doSelectPageInfo(() -> getTags(tagFilter));
+
+        List<TagResp> tagRespList = tagDOPageInfo.getList();
+        fillModelInfo(tagRespList);
+        fillDomainInfo(tagRespList);
+        fillTagObjectInfo(tagRespList, user);
+        return tagDOPageInfo;
+    }
+
+    private void fillTagObjectInfo(List<TagResp> tagRespList, User user) {
+        TagObjectFilter filter = new TagObjectFilter();
+        List<TagObjectResp> tagObjects = tagObjectService.getTagObjects(filter, user);
+        if (CollectionUtils.isEmpty(tagObjects)) {
+            return;
+        }
+        Map<Long, TagObjectResp> tagObjectMap = tagObjects.stream()
+                .collect(Collectors.toMap(TagObjectResp::getId, tagObject -> tagObject, (v1, v2) -> v2));
+        if (CollectionUtils.isNotEmpty(tagRespList)) {
+            tagRespList.stream().forEach(tagResp -> {
+                if (tagObjectMap.containsKey(tagResp.getTagObjectId())) {
+                    tagResp.setTagObjectName(tagObjectMap.get(tagResp.getTagObjectId()).getName());
+                }
+            });
+        }
+    }
+
+    private TagResp fillTagObjectInfo(TagResp tagResp, User user) {
+        Long modelId = tagResp.getModelId();
+        ModelResp model = modelService.getModel(modelId);
+        TagObjectResp tagObject = tagObjectService.getTagObject(model.getTagObjectId(), user);
+        tagResp.setTagObjectId(tagObject.getId());
+        tagResp.setTagObjectName(tagObject.getName());
+        return tagResp;
+    }
+
+    private void fillDomainInfo(List<TagResp> tagRespList) {
+        Map<Long, DomainResp> domainMap = domainService.getDomainList().stream()
+                .collect(Collectors.toMap(DomainResp::getId, domain -> domain, (v1, v2) -> v2));
+        if (CollectionUtils.isNotEmpty(tagRespList) && Objects.nonNull(domainMap)) {
+            tagRespList.stream().forEach(tagResp -> {
+                if (domainMap.containsKey(tagResp.getDomainId())) {
+                    tagResp.setDomainName(domainMap.get(tagResp.getDomainId()).getName());
+                }
+            });
+        }
+    }
+
+    private TagResp convert2Resp(TagDO tagDO) {
+        TagResp tagResp = new TagResp();
+        BeanUtils.copyProperties(tagDO, tagResp);
+        if (TagDefineType.METRIC.name().equalsIgnoreCase(tagDO.getType())) {
+            MetricResp metric = metricService.getMetric(tagDO.getItemId());
+            tagResp.setBizName(metric.getBizName());
+            tagResp.setName(metric.getName());
+            tagResp.setModelId(metric.getModelId());
+            tagResp.setModelName(metric.getModelName());
+            tagResp.setDomainId(metric.getDomainId());
+        }
+        if (TagDefineType.DIMENSION.name().equalsIgnoreCase(tagDO.getType())) {
+            DimensionResp dimensionResp = dimensionService.getDimension(tagDO.getItemId());
+            tagResp.setBizName(dimensionResp.getBizName());
+            tagResp.setName(dimensionResp.getName());
+            tagResp.setModelId(dimensionResp.getModelId());
+            tagResp.setModelName(dimensionResp.getModelName());
+        }
+
+        return tagResp;
+    }
+
+    private List<ModelResp> getRelatedModel(TagFilterPageReq tagMarketPageReq) {
+        List<ModelResp> modelRespList = new ArrayList<>();
+        Map<Long, ModelResp> modelMap = modelService.getModelMap();
+        for (Long modelId : modelMap.keySet()) {
+            ModelResp modelResp = modelMap.get(modelId);
+            if (Objects.isNull(modelResp)) {
+                continue;
+            }
+            if (tagMarketPageReq.getTagObjectId().equals(modelResp.getTagObjectId())) {
+                if (CollectionUtils.isNotEmpty(tagMarketPageReq.getDomainIds())) {
+                    if (!tagMarketPageReq.getDomainIds().contains(modelResp.getDomainId())) {
+                        continue;
+                    }
+                }
+                if (CollectionUtils.isNotEmpty(tagMarketPageReq.getModelIds())) {
+                    if (!tagMarketPageReq.getModelIds().contains(modelResp.getId())) {
+                        continue;
+                    }
+                }
+                modelRespList.add(modelResp);
             }
         }
-
-        PageInfo<TagDO> tagDOPageInfo = PageHelper.startPage(tagFilterPage.getCurrent(),
-                tagFilterPage.getPageSize())
-                .doSelectPageInfo(() -> getTags(tagFilter));
-        PageInfo<TagResp> pageInfo = new PageInfo<>();
-        BeanUtils.copyProperties(tagDOPageInfo, pageInfo);
-        List<TagResp> tagRespList = convertList(tagDOPageInfo.getList(), collectIds);
-        fillAdminRes(tagRespList, user);
-        fillModelInfo(tagRespList);
-        pageInfo.setList(tagRespList);
-
-        return pageInfo;
-    }
-
-    @Override
-    public Boolean batchUpdateStatus(MetaBatchReq metaBatchReq, User user) {
-        if (Objects.isNull(metaBatchReq)) {
-            return false;
-        }
-        TagFilter tagFilter = new TagFilter();
-        BeanUtils.copyProperties(metaBatchReq, tagFilter);
-        tagFilter.setStatus(null);
-        List<TagDO> tagDOList = tagRepository.query(tagFilter);
-        log.info("tagFilter:{},{}", tagFilter.getModelIds(), tagFilter.getBizNames());
-        if (CollectionUtils.isEmpty(tagDOList)) {
-            return true;
-        }
-        tagDOList.stream().forEach(tagDO -> {
-            tagDO.setStatus(metaBatchReq.getStatus());
-            tagDO.setUpdatedAt(new Date());
-            tagDO.setUpdatedBy(user.getName());
-        });
-
-        tagRepository.batchUpdateStatus(tagDOList);
-        if (StatusEnum.OFFLINE.getCode().equals(metaBatchReq.getStatus())
-                || StatusEnum.DELETED.getCode().equals(metaBatchReq.getStatus())) {
-            sendEventBatch(tagDOList, EventType.DELETE);
-        } else if (StatusEnum.ONLINE.getCode().equals(metaBatchReq.getStatus())) {
-            sendEventBatch(tagDOList, EventType.ADD);
-        }
-        return true;
-    }
-
-    @Override
-    public Integer createBatch(TagBatchCreateReq tagLoadReq, User user) {
-        Long modelId = tagLoadReq.getModelId();
-        int num = 0;
-        MetaFilter metaFilter = new MetaFilter();
-        List<Long> modelIds = new ArrayList<>();
-        modelIds.add(modelId);
-        metaFilter.setModelIds(modelIds);
-        if (Objects.isNull(tagLoadReq.getType()) || SchemaElementType.DIMENSION.equals(tagLoadReq.getType())) {
-            List<DimensionResp> dimensions = dimensionService.getDimensions(metaFilter);
-            num += loadDimTagBatch(tagLoadReq, dimensions, user);
-        }
-        if (Objects.isNull(tagLoadReq.getType()) || SchemaElementType.METRIC.equals(tagLoadReq.getType())) {
-            List<MetricResp> metrics = metricService.getMetrics(metaFilter);
-            num += loadMetricTagBatch(tagLoadReq, metrics, user);
-        }
-        log.info("loadTagBatch finished ,tag num:{}", num);
-        return num;
+        return modelRespList;
     }
 
     private int loadMetricTagBatch(TagBatchCreateReq tagLoadReq, List<MetricResp> metrics, User user) {
@@ -255,12 +243,10 @@ public class TagMetaServiceImpl implements TagMetaService {
             TagReq tagReq = new TagReq();
             BeanUtils.copyProperties(metric, tagReq);
             tagReq.setId(null);
-            tagReq.setBizName(metric.getBizName());
             tagReq.setTagDefineType(TagDefineType.METRIC);
             TagDefineParams tagDefineParams = new TagDefineParams();
             tagDefineParams.setExpr(metric.getBizName());
             tagDefineParams.setDependencies(new ArrayList<>(Arrays.asList(metric.getId())));
-            tagReq.setTagDefineParams(tagDefineParams);
             try {
                 create(tagReq, user);
             } catch (Exception e) {
@@ -279,12 +265,10 @@ public class TagMetaServiceImpl implements TagMetaService {
             TagReq tagReq = new TagReq();
             BeanUtils.copyProperties(dim, tagReq);
             tagReq.setId(null);
-            tagReq.setBizName(dim.getBizName());
             tagReq.setTagDefineType(TagDefineType.DIMENSION);
             TagDefineParams tagDefineParams = new TagDefineParams();
             tagDefineParams.setExpr(dim.getBizName());
             tagDefineParams.setDependencies(new ArrayList<>(Arrays.asList(dim.getId())));
-            tagReq.setTagDefineParams(tagDefineParams);
             try {
                 create(tagReq, user);
             } catch (Exception e) {
@@ -293,35 +277,6 @@ public class TagMetaServiceImpl implements TagMetaService {
 
         });
         return dimensions.size();
-    }
-
-    private TagDO fillUpdateInfo(TagReq tagReq, TagDO tagDO) {
-        if (Objects.nonNull(tagDO) && tagDO.getId() > 0) {
-            if (Objects.nonNull(tagReq.getExt()) && !tagReq.getExt().isEmpty()) {
-                tagDO.setExt(tagReq.getExtJson());
-            }
-        }
-        if (Objects.nonNull(tagReq.getTagDefineType())) {
-            tagDO.setDefineType(tagReq.getTagDefineType().name());
-        }
-        if (Objects.nonNull(tagReq.getTagDefineParams()) && !StringUtils.isBlank(
-                tagReq.getTagDefineParams().getExpr())) {
-            tagDO.setTypeParams(tagReq.getTypeParamsJson());
-        }
-        if (Strings.isNotEmpty(tagReq.getDescription())) {
-            tagDO.setDescription(tagReq.getDescription());
-        }
-        if (Objects.nonNull(tagReq.getSensitiveLevel())) {
-            tagDO.setSensitiveLevel(tagReq.getSensitiveLevel());
-        }
-        if (Strings.isNotEmpty(tagReq.getName())) {
-            tagDO.setName(tagReq.getName());
-        }
-        if (Objects.nonNull(tagReq.getStatus())) {
-            tagDO.setStatus(tagReq.getStatus());
-        }
-
-        return tagDO;
     }
 
     private TagResp fillModelInfo(TagResp tagResp) {
@@ -337,16 +292,19 @@ public class TagMetaServiceImpl implements TagMetaService {
             if (Objects.nonNull(modelIdAndRespMap) && modelIdAndRespMap.containsKey(tagResp.getModelId())) {
                 tagResp.setModelName(modelIdAndRespMap.get(tagResp.getModelId()).getName());
                 tagResp.setDomainId(modelIdAndRespMap.get(tagResp.getModelId()).getDomainId());
+                tagResp.setTagObjectId(modelIdAndRespMap.get(tagResp.getModelId()).getTagObjectId());
             }
         });
     }
 
-    private TagResp fillCollectAndAdminInfo(TagDO tagDO, User user) {
+    private TagResp fillCollectAndAdminInfo(TagResp tagResp, User user) {
         List<Long> collectIds = collectService.getCollectList(user.getName())
                 .stream().filter(collectDO -> TypeEnums.TAG.name().equalsIgnoreCase(collectDO.getType()))
                 .map(CollectDO::getCollectId).collect(Collectors.toList());
-
-        List<TagResp> tagRespList = convertList(new ArrayList<>(Arrays.asList(tagDO)), collectIds);
+        if (CollectionUtils.isNotEmpty(collectIds) && collectIds.contains(tagResp.getId())) {
+            tagResp.setIsCollect(true);
+        }
+        List<TagResp> tagRespList = Arrays.asList(tagResp);
         fillAdminRes(tagRespList, user);
         return tagRespList.get(0);
     }
@@ -366,85 +324,23 @@ public class TagMetaServiceImpl implements TagMetaService {
         }
     }
 
-    private List<TagResp> convertList(List<TagDO> tagDOList, List<Long> collectIds) {
-        List<TagResp> tagRespList = new ArrayList<>();
-        if (CollectionUtils.isNotEmpty(tagDOList)) {
-            tagDOList.stream().forEach(tagDO -> {
-                TagResp tagResp = convert(tagDO);
-                tagResp.setTypeEnum(TypeEnums.TAG);
-                if (CollectionUtils.isNotEmpty(collectIds) && collectIds.contains(tagDO.getId())) {
-                    tagResp.setIsCollect(true);
-                } else {
-                    tagResp.setIsCollect(false);
-                }
-                tagRespList.add(tagResp);
-            });
-        }
-        return tagRespList;
-    }
-
     private void checkExit(TagReq tagReq) {
         TagFilter tagFilter = new TagFilter();
-        tagFilter.setModelIds(Arrays.asList(tagReq.getModelId()));
-
-        List<TagResp> tagResps = getTags(tagFilter);
-        if (!CollectionUtils.isEmpty(tagResps)) {
-            Long bizNameSameCount = tagResps.stream().filter(tagResp -> !tagResp.getId().equals(tagReq.getId()))
-                    .filter(tagResp -> tagResp.getBizName().equalsIgnoreCase(tagReq.getBizName())).count();
-            if (bizNameSameCount > 0) {
-                throw new RuntimeException(String.format("the bizName %s is exit", tagReq.getBizName()));
-            }
-            Long nameSameCount = tagResps.stream().filter(tagResp -> !tagResp.getId().equals(tagReq.getId()))
-                    .filter(tagResp -> tagResp.getName().equalsIgnoreCase(tagReq.getName())).count();
-            if (nameSameCount > 0) {
-                throw new RuntimeException(String.format("the name %s is exit", tagReq.getName()));
-            }
-        }
-    }
-
-    private void checkParam(TagReq tagReq) {
-        if (Objects.isNull(tagReq.getModelId()) || tagReq.getModelId() <= 0) {
-            throw new RuntimeException("the modelId is empty");
-        }
-        if (Objects.isNull(tagReq.getBizName()) || tagReq.getBizName().isEmpty() || Objects.isNull(tagReq.getName())
-                || tagReq.getName().isEmpty()) {
-            throw new RuntimeException("the bizName or name is empty");
-        }
-        if (Objects.isNull(tagReq.getTagDefineType()) || Objects.isNull(tagReq.getTagDefineParams())
-                || StringUtils.isBlank(tagReq.getTagDefineParams().getExpr())) {
-            throw new InvalidArgumentException("表达式不可为空");
+        tagFilter.setTagDefineType(tagReq.getTagDefineType());
+        if (Objects.nonNull(tagReq.getItemId())) {
+            tagFilter.setItemIds(Arrays.asList(tagReq.getItemId()));
         }
 
-        if (NameCheckUtils.containsSpecialCharacters(tagReq.getBizName())) {
-            throw new InvalidArgumentException("名称包含特殊字符, 请修改");
+        List<TagDO> tagRespList = tagRepository.getTagDOList(tagFilter);
+        if (!CollectionUtils.isEmpty(tagRespList)) {
+            throw new RuntimeException(String.format("the tag is exit, itemId:{}", tagReq.getItemId()));
         }
-    }
-
-    private TagResp convert(TagDO tagDO) {
-        TagResp tagResp = new TagResp();
-        BeanUtils.copyProperties(tagDO, tagResp);
-        if (Objects.nonNull(tagDO.getExt()) && !tagDO.getExt().isEmpty()) {
-            Map<String, Object> ext = JSONObject.parseObject(tagDO.getExt(),
-                    Map.class);
-            tagResp.setExt(ext);
-        }
-        tagResp.setTagDefineType(TagDefineType.valueOf(tagDO.getDefineType()));
-        if (Objects.nonNull(tagDO.getTypeParams()) && !tagDO.getTypeParams().isEmpty()) {
-            TagDefineParams tagDefineParams = JSONObject.parseObject(tagDO.getTypeParams(),
-                    TagDefineParams.class);
-            tagResp.setTagDefineParams(tagDefineParams);
-        }
-
-        return tagResp;
     }
 
     private TagDO convert(TagReq tagReq) {
         TagDO tagDO = new TagDO();
         BeanUtils.copyProperties(tagReq, tagDO);
-        tagDO.setDefineType(tagReq.getTagDefineType().name());
-        tagDO.setType(tagReq.getType().name());
-        tagDO.setTypeParams(tagReq.getTypeParamsJson());
-        tagDO.setExt(tagReq.getExtJson());
+        tagDO.setType(tagReq.getTagDefineType().name());
         return tagDO;
     }
 }
