@@ -252,3 +252,22 @@ alter table s2_data_set change view_detail data_set_detail text;
 
 --20240311
 alter table s2_data_set add column query_type varchar(100) DEFAULT NULL;
+
+--20240319
+CREATE TABLE IF NOT EXISTS `s2_tag_object`
+(
+    `id`                bigint(20)   NOT NULL AUTO_INCREMENT,
+    `domain_id`         bigint(20)   DEFAULT NULL,
+    `name`              varchar(255) NOT NULL COMMENT '名称',
+    `biz_name`          varchar(255) NOT NULL COMMENT '英文名称',
+    `description`       varchar(500) DEFAULT NULL COMMENT '描述',
+    `status`            int(10)      NOT NULL COMMENT '状态',
+    `sensitive_level`   int(10)      NOT NULL COMMENT '敏感级别',
+    `created_at`        datetime     NOT NULL COMMENT '创建时间',
+    `created_by`        varchar(100) NOT NULL COMMENT '创建人',
+    `updated_at`        datetime      NULL COMMENT '更新时间',
+    `updated_by`        varchar(100)  NULL COMMENT '更新人',
+    `ext`               text DEFAULT NULL,
+    PRIMARY KEY (`id`)
+) ENGINE = InnoDB
+DEFAULT CHARSET = utf8 COMMENT ='标签表对象';
