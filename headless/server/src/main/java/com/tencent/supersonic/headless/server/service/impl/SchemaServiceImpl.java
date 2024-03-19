@@ -1,5 +1,7 @@
 package com.tencent.supersonic.headless.server.service.impl;
 
+import static com.tencent.supersonic.common.pojo.Constants.AT_SYMBOL;
+
 import com.github.pagehelper.PageInfo;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
@@ -47,13 +49,6 @@ import com.tencent.supersonic.headless.server.utils.DataSetSchemaBuilder;
 import com.tencent.supersonic.headless.server.utils.DimensionConverter;
 import com.tencent.supersonic.headless.server.utils.MetricConverter;
 import com.tencent.supersonic.headless.server.utils.StatUtils;
-import com.tencent.supersonic.headless.server.utils.TagConverter;
-import lombok.SneakyThrows;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeanUtils;
-import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -62,8 +57,11 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-
-import static com.tencent.supersonic.common.pojo.Constants.AT_SYMBOL;
+import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
+import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 @Slf4j
 @Service
@@ -181,7 +179,6 @@ public class SchemaServiceImpl implements SchemaService {
 
         TagFilter tagFilter = new TagFilter();
         tagFilter.setModelIds(modelIds);
-        List<TagResp> tagRespList = tagService.getTags(tagFilter);
 
         List<DataSetSchemaResp> dataSetSchemaResps = new ArrayList<>();
         for (Long dataSetId : dataSetRespMap.keySet()) {
@@ -200,8 +197,6 @@ public class SchemaServiceImpl implements SchemaService {
             dataSetSchemaResp.setModelResps(modelResps.stream().filter(modelResp ->
                     dataSetResp.getAllModels().contains(modelResp.getId())).collect(Collectors.toList()));
 
-            List<TagResp> tagResps = TagConverter.filterByDataSet(tagRespList, dataSetResp);
-            dataSetSchemaResp.setTags(tagResps);
             dataSetSchemaResps.add(dataSetSchemaResp);
         }
         fillStaticInfo(dataSetSchemaResps);

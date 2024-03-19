@@ -513,9 +513,9 @@ public class ModelDemoDataLoader {
         dataSetReq.setDescription("包含超音数访问统计相关的指标和维度等");
         dataSetReq.setAdmins(Lists.newArrayList("admin"));
         List<DataSetModelConfig> dataSetModelConfigs = Lists.newArrayList(
-                new DataSetModelConfig(1L, Lists.newArrayList(1L, 2L), Lists.newArrayList(), Lists.newArrayList()),
-                new DataSetModelConfig(2L, Lists.newArrayList(), Lists.newArrayList(1L, 2L, 3L), Lists.newArrayList()),
-                new DataSetModelConfig(3L, Lists.newArrayList(3L), Lists.newArrayList(4L), Lists.newArrayList()));
+                new DataSetModelConfig(1L, Lists.newArrayList(1L, 2L), Lists.newArrayList()),
+                new DataSetModelConfig(2L, Lists.newArrayList(), Lists.newArrayList(1L, 2L, 3L)),
+                new DataSetModelConfig(3L, Lists.newArrayList(3L), Lists.newArrayList(4L)));
 
         DataSetDetail dataSetDetail = new DataSetDetail();
         dataSetDetail.setDataSetModelConfigs(dataSetModelConfigs);
@@ -540,8 +540,7 @@ public class ModelDemoDataLoader {
         dataSetReq.setDescription("包含艺人相关标签和指标信息");
         dataSetReq.setAdmins(Lists.newArrayList("admin", "jack"));
         List<DataSetModelConfig> dataSetModelConfigs = Lists.newArrayList(
-                new DataSetModelConfig(4L, Lists.newArrayList(4L, 5L, 6L, 7L),
-                        Lists.newArrayList(5L, 6L, 7L), Lists.newArrayList(1L, 2L, 3L, 4L))
+                new DataSetModelConfig(4L, Lists.newArrayList(4L, 5L, 6L, 7L), Lists.newArrayList(5L, 6L, 7L))
         );
         DataSetDetail dataSetDetail = new DataSetDetail();
         dataSetDetail.setDataSetModelConfigs(dataSetModelConfigs);
