@@ -29,14 +29,14 @@ public class DataSetController {
 
     @PostMapping
     public DataSetResp save(@RequestBody DataSetReq dataSetReq,
-                            HttpServletRequest request, HttpServletResponse response) {
+            HttpServletRequest request, HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
         return dataSetService.save(dataSetReq, user);
     }
 
     @PutMapping
     public DataSetResp update(@RequestBody DataSetReq dataSetReq,
-                              HttpServletRequest request, HttpServletResponse response) {
+            HttpServletRequest request, HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
         return dataSetService.update(dataSetReq, user);
     }
@@ -47,15 +47,17 @@ public class DataSetController {
     }
 
     @GetMapping("/getDataSetList")
-    public List<DataSetResp> getDataSetList(@RequestParam("domainId") Long domainId) {
+    public List<DataSetResp> getDataSetList(@RequestParam("domainId") Long domainId,
+            HttpServletRequest request, HttpServletResponse response) {
         MetaFilter metaFilter = new MetaFilter();
         metaFilter.setDomainId(domainId);
-        return dataSetService.getDataSetList(metaFilter);
+        User user = UserHolder.findUser(request, response);
+        return dataSetService.getDataSetList(metaFilter, user);
     }
 
     @DeleteMapping("/{id}")
     public Boolean delete(@PathVariable("id") Long id,
-                       HttpServletRequest request, HttpServletResponse response) {
+            HttpServletRequest request, HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
         dataSetService.delete(id, user);
         return true;
