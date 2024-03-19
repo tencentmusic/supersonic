@@ -258,7 +258,6 @@ CREATE TABLE IF NOT EXISTS s2_tag(
                        `id` INT NOT NULL  AUTO_INCREMENT,
                        `item_id` INT  NOT NULL ,
                        `type` varchar(255)  NOT NULL ,
-                        `tag_define_type` varchar(20) NOT  NULL , --DIMENSION,METRIC
                        `created_at` TIMESTAMP NOT NULL ,
                        `created_by` varchar(100) NOT NULL ,
                        `updated_at` TIMESTAMP DEFAULT NULL ,

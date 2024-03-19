@@ -72,7 +72,8 @@ public class TagMetaServiceImpl implements TagMetaService {
 
     @Override
     public TagResp create(TagReq tagReq, User user) {
-        checkExit(tagReq);
+        checkExist(tagReq);
+        checkTagObject(tagReq);
         TagDO tagDO = convert(tagReq);
         Date date = new Date();
         tagDO.setId(null);
@@ -81,7 +82,7 @@ public class TagMetaServiceImpl implements TagMetaService {
         tagDO.setUpdatedBy(user.getName());
         tagDO.setUpdatedAt(date);
         tagRepository.create(tagDO);
-        return convert2Resp(tagDO);
+        return getTag(tagDO.getId(), user);
     }
 
     @Override
@@ -108,6 +109,10 @@ public class TagMetaServiceImpl implements TagMetaService {
     public TagResp getTag(Long id, User user) {
         TagDO tagDO = tagRepository.getTagById(id);
         TagResp tagResp = convert2Resp(tagDO);
+        List<TagResp> tagRespList = Arrays.asList(tagResp);
+        fillModelInfo(tagRespList);
+        fillDomainInfo(tagRespList);
+        tagResp = tagRespList.get(0);
         tagResp = fillTagObjectInfo(tagResp, user);
         tagResp = fillCollectAndAdminInfo(tagResp, user);
         return tagResp;
@@ -190,6 +195,7 @@ public class TagMetaServiceImpl implements TagMetaService {
     private TagResp convert2Resp(TagDO tagDO) {
         TagResp tagResp = new TagResp();
         BeanUtils.copyProperties(tagDO, tagResp);
+        tagResp.setTagDefineType(tagDO.getType());
         if (TagDefineType.METRIC.name().equalsIgnoreCase(tagDO.getType())) {
             MetricResp metric = metricService.getMetric(tagDO.getItemId());
             tagResp.setBizName(metric.getBizName());
@@ -279,13 +285,6 @@ public class TagMetaServiceImpl implements TagMetaService {
         return dimensions.size();
     }
 
-    private TagResp fillModelInfo(TagResp tagResp) {
-        ModelResp model = modelService.getModel(tagResp.getModelId());
-        tagResp.setModelName(model.getName());
-        tagResp.setDomainId(model.getDomainId());
-        return tagResp;
-    }
-
     private void fillModelInfo(List<TagResp> tagRespList) {
         Map<Long, ModelResp> modelIdAndRespMap = modelService.getModelMap();
         tagRespList.stream().forEach(tagResp -> {
@@ -303,6 +302,8 @@ public class TagMetaServiceImpl implements TagMetaService {
                 .map(CollectDO::getCollectId).collect(Collectors.toList());
         if (CollectionUtils.isNotEmpty(collectIds) && collectIds.contains(tagResp.getId())) {
             tagResp.setIsCollect(true);
+        } else {
+            tagResp.setIsCollect(false);
         }
         List<TagResp> tagRespList = Arrays.asList(tagResp);
         fillAdminRes(tagRespList, user);
@@ -324,7 +325,7 @@ public class TagMetaServiceImpl implements TagMetaService {
         }
     }
 
-    private void checkExit(TagReq tagReq) {
+    private void checkExist(TagReq tagReq) {
         TagFilter tagFilter = new TagFilter();
         tagFilter.setTagDefineType(tagReq.getTagDefineType());
         if (Objects.nonNull(tagReq.getItemId())) {
@@ -334,6 +335,25 @@ public class TagMetaServiceImpl implements TagMetaService {
         List<TagDO> tagRespList = tagRepository.getTagDOList(tagFilter);
         if (!CollectionUtils.isEmpty(tagRespList)) {
             throw new RuntimeException(String.format("the tag is exit, itemId:{}", tagReq.getItemId()));
+        }
+    }
+
+    private void checkTagObject(TagReq tagReq) {
+        if (TagDefineType.DIMENSION.equals(tagReq.getTagDefineType())) {
+            DimensionResp dimension = dimensionService.getDimension(tagReq.getItemId());
+            ModelResp model = modelService.getModel(dimension.getModelId());
+            if (Objects.isNull(model.getTagObjectId())) {
+                throw new RuntimeException(String.format("this dimension:{} is not supported to create tag",
+                        tagReq.getItemId()));
+            }
+        }
+        if (TagDefineType.METRIC.equals(tagReq.getTagDefineType())) {
+            MetricResp metric = metricService.getMetric(tagReq.getItemId());
+            ModelResp model = modelService.getModel(metric.getModelId());
+            if (Objects.isNull(model.getTagObjectId())) {
+                throw new RuntimeException(String.format("this metric:{} is not supported to create tag",
+                        tagReq.getItemId()));
+            }
         }
     }
 
