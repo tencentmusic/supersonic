@@ -49,8 +49,8 @@ public class TagObjectTest extends BaseTest {
     private TagObjectReq newTagObjectReq() {
         TagObjectReq tagObjectReq = new TagObjectReq();
         tagObjectReq.setDomainId(2L);
-        tagObjectReq.setName("艺人");
-        tagObjectReq.setBizName("singer");
+        tagObjectReq.setName("新艺人");
+        tagObjectReq.setBizName("new_singer");
         return tagObjectReq;
     }
 
