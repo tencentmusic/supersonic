@@ -101,7 +101,7 @@ public class MetricConverter {
 
     public static List<MetricResp> filterByDataSet(List<MetricResp> metricResps, DataSetResp dataSetResp) {
         return metricResps.stream().filter(metricResp ->
-                        dataSetResp.getAllMetrics().contains(metricResp.getId())
+                        dataSetResp.metricIds().contains(metricResp.getId())
                                 || dataSetResp.getAllIncludeAllModels().contains(metricResp.getModelId()))
                 .collect(Collectors.toList());
     }

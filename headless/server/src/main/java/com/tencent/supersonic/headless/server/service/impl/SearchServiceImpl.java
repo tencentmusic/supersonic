@@ -1,6 +1,7 @@
 package com.tencent.supersonic.headless.server.service.impl;
 
 import com.google.common.collect.Lists;
+import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.common.pojo.enums.DictWordType;
 import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
@@ -70,7 +71,7 @@ public class SearchServiceImpl implements SearchService {
         List<SchemaElement> metricsDb = semanticSchemaDb.getMetrics();
         final Map<Long, String> dataSetIdToName = semanticSchemaDb.getDataSetIdToName();
         Map<Long, List<Long>> modelIdToDataSetIds =
-                dataSetService.getModelIdToDataSetIds(new ArrayList<>(dataSetIdToName.keySet()));
+                dataSetService.getModelIdToDataSetIds(new ArrayList<>(dataSetIdToName.keySet()), User.getFakeUser());
         // 2.detect by segment
         List<S2Term> originals = knowledgeService.getTerms(queryText, modelIdToDataSetIds);
         log.info("hanlp parse result: {}", originals);

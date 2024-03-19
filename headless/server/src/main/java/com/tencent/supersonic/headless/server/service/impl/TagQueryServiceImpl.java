@@ -13,7 +13,7 @@ import com.tencent.supersonic.headless.api.pojo.ValueDistribution;
 import com.tencent.supersonic.headless.api.pojo.enums.TagDefineType;
 import com.tencent.supersonic.headless.api.pojo.request.ItemValueReq;
 import com.tencent.supersonic.headless.api.pojo.request.QuerySqlReq;
-import com.tencent.supersonic.headless.api.pojo.request.QueryTagReq;
+import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
 import com.tencent.supersonic.headless.api.pojo.response.ItemValueResp;
 import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
@@ -50,7 +50,7 @@ public class TagQueryServiceImpl implements TagQueryService {
     private final ModelService modelService;
 
     public TagQueryServiceImpl(TagMetaService tagMetaService, QueryService queryService,
-                               ModelService modelService) {
+            ModelService modelService) {
         this.tagMetaService = tagMetaService;
         this.queryService = queryService;
         this.modelService = modelService;
@@ -60,7 +60,7 @@ public class TagQueryServiceImpl implements TagQueryService {
     public ItemValueResp queryTagValue(ItemValueReq itemValueReq, User user) throws Exception {
         ItemValueResp itemValueResp = new ItemValueResp();
         itemValueResp.setItemId(itemValueReq.getItemId());
-        itemValueResp.setType(SchemaElementType.DIMENSION);
+        itemValueResp.setType(SchemaElementType.TAG);
         TagResp tag = tagMetaService.getTag(itemValueReq.getItemId(), user);
         checkTag(tag);
         itemValueResp.setName(tag.getName());
@@ -69,8 +69,8 @@ public class TagQueryServiceImpl implements TagQueryService {
         // tag total count
         Long totalCount = queryTagTotalCount(tag, itemValueReq, user);
         // tag value
-        QueryTagReq queryTagReq = generateTagReq(tag, itemValueReq);
-        SemanticQueryResp semanticQueryResp = queryService.queryByReq(queryTagReq, user);
+        QueryStructReq queryStructReq = generateReq(tag, itemValueReq);
+        SemanticQueryResp semanticQueryResp = queryService.queryByReq(queryStructReq, user);
         fillTagValueInfo(itemValueResp, semanticQueryResp, totalCount);
         return itemValueResp;
     }
@@ -102,28 +102,7 @@ public class TagQueryServiceImpl implements TagQueryService {
 
     private String queryTagDate(Dim dim) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern(dim.getDateFormat());
-        String endDate = LocalDate.now().plusDays(-dayBefore).format(formatter);
-        return endDate;
-    }
-
-    private String queryTagDateFromDbByStruct(Dim dim, TagResp tag, User user) throws Exception {
-        QueryTagReq queryTagReq = new QueryTagReq();
-        queryTagReq.addModelId(tag.getModelId());
-        queryTagReq.setLimit(1L);
-        List<Aggregator> aggregators = new ArrayList<>();
-        aggregators.add(new Aggregator(dim.getBizName(), AggOperatorEnum.MAX, maxDateAlias));
-        queryTagReq.setAggregators(aggregators);
-        queryTagReq.setDateInfo(null);
-        log.info("queryTagDateFromDb, queryTagReq:{}", queryTagReq.toCustomizedString());
-        SemanticQueryResp semanticQueryResp = queryService.queryByReq(queryTagReq, user);
-        if (!CollectionUtils.isEmpty(semanticQueryResp.getResultList())) {
-            Object date = semanticQueryResp.getResultList().get(0).get(maxDateAlias);
-            if (Objects.nonNull(date)) {
-                return date.toString();
-            }
-        }
-        throw new RuntimeException("queryTagTotalCount error");
-
+        return LocalDate.now().plusDays(-dayBefore).format(formatter);
     }
 
     private String queryTagDateFromDbBySql(Dim dim, TagResp tag, User user) throws Exception {
@@ -156,16 +135,16 @@ public class TagQueryServiceImpl implements TagQueryService {
 
     private Long queryTagTotalCount(TagResp tag, ItemValueReq itemValueReq, User user) throws Exception {
 
-        QueryTagReq queryTagReq = new QueryTagReq();
-        queryTagReq.addModelId(tag.getModelId());
-        queryTagReq.setLimit(1L);
+        QueryStructReq queryStructReq = new QueryStructReq();
+        queryStructReq.addModelId(tag.getModelId());
+        queryStructReq.setLimit(1L);
         List<Aggregator> aggregators = new ArrayList<>();
         aggregators.add(new Aggregator(tag.getBizName(), AggOperatorEnum.COUNT, tagValueAlias));
-        queryTagReq.setAggregators(aggregators);
+        queryStructReq.setAggregators(aggregators);
         DateConf dateConf = generateDateConf(itemValueReq);
-        queryTagReq.setDateInfo(dateConf);
+        queryStructReq.setDateInfo(dateConf);
 
-        SemanticQueryResp semanticQueryResp = queryService.queryByReq(queryTagReq, user);
+        SemanticQueryResp semanticQueryResp = queryService.queryByReq(queryStructReq, user);
         if (!CollectionUtils.isEmpty(semanticQueryResp.getResultList())) {
             Object total = semanticQueryResp.getResultList().get(0).get(tagValueAlias);
             if (Objects.nonNull(total)) {
@@ -194,24 +173,24 @@ public class TagQueryServiceImpl implements TagQueryService {
         itemValueResp.setValueDistributionList(valueDistributionList);
     }
 
-    private QueryTagReq generateTagReq(TagResp tag, ItemValueReq itemValueReq) {
-        QueryTagReq queryTagReq = new QueryTagReq();
-        queryTagReq.addModelId(tag.getModelId());
-        queryTagReq.setGroups(new ArrayList<>(Arrays.asList(tag.getBizName())));
-        queryTagReq.setLimit(itemValueReq.getLimit());
+    private QueryStructReq generateReq(TagResp tag, ItemValueReq itemValueReq) {
+        QueryStructReq queryStructReq = new QueryStructReq();
+        queryStructReq.addModelId(tag.getModelId());
+        queryStructReq.setGroups(new ArrayList<>(Arrays.asList(tag.getBizName())));
+        queryStructReq.setLimit(itemValueReq.getLimit());
 
         List<Aggregator> aggregators = new ArrayList<>();
         aggregators.add(new Aggregator(tag.getBizName(), AggOperatorEnum.COUNT, tagValueAlias));
-        queryTagReq.setAggregators(aggregators);
+        queryStructReq.setAggregators(aggregators);
 
         List<Order> orders = new ArrayList<>();
         orders.add(new Order(String.format("count(%s)", tag.getBizName()), DESC_UPPER));
-        queryTagReq.setOrders(orders);
+        queryStructReq.setOrders(orders);
 
         DateConf dateConf = generateDateConf(itemValueReq);
-        queryTagReq.setDateInfo(dateConf);
+        queryStructReq.setDateInfo(dateConf);
 
-        return queryTagReq;
+        return queryStructReq;
     }
 
     private DateConf generateDateConf(ItemValueReq itemValueReq) {

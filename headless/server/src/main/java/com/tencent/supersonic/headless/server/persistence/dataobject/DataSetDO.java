@@ -40,7 +40,4 @@ public class DataSetDO {
     private String admin;
 
     private String adminOrg;
-
-    private String queryType;
-
 }

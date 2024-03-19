@@ -52,13 +52,13 @@
 
     <select id="queryTagRespList" resultMap="TagResp">
         select * from (
-        select s2_tag.id as id, s2_dimension.model_id as model_id, "DIMENSION" as tag_define_type, s2_dimension.id as item_id,
+        select s2_tag.id as id, s2_dimension.model_id as model_id, 'DIMENSION' as tag_define_type, s2_dimension.id as item_id,
         s2_dimension.name as name, s2_dimension.biz_name as biz_name, s2_dimension.description as description, s2_tag.updated_at as updated_at
         from s2_tag join s2_dimension
         on s2_tag.item_id = s2_dimension.id
         where s2_dimension.status=1
         union
-        select s2_tag.id as id, s2_metric.model_id as model_id, "METRIC" as tag_define_type, s2_metric.id as item_id,
+        select s2_tag.id as id, s2_metric.model_id as model_id, 'METRIC' as tag_define_type, s2_metric.id as item_id,
         s2_metric.name as name, s2_metric.biz_name as biz_name, s2_metric.description as description, s2_tag.updated_at as updated_at
         from s2_tag join s2_metric
         on s2_tag.item_id = s2_metric.id
