@@ -194,26 +194,6 @@ alter table s2_view_info rename to s2_canvas;
 
 alter table s2_query_stat_info add column `view_id` bigint(20) DEFAULT NULL after `model_id`;
 
---20240221
-CREATE TABLE s2_tag(
-                       `id` INT NOT NULL  AUTO_INCREMENT,
-                       `model_id` INT  NOT NULL ,
-                       `name` varchar(255)  NOT NULL ,
-                       `biz_name` varchar(255)  NOT NULL ,
-                       `description` varchar(500) DEFAULT NULL ,
-                       `status` INT  NOT NULL ,
-                       `sensitive_level` INT NOT NULL ,
-                       `type` varchar(50)  NOT NULL , -- ATOMIC, DERIVED
-                       `define_type` varchar(50)  NOT NULL, -- FIELD, DIMENSION
-                       `type_params` LONGVARCHAR DEFAULT NULL  ,
-                       `created_at` TIMESTAMP NOT NULL ,
-                       `created_by` varchar(100) NOT NULL ,
-                       `updated_at` TIMESTAMP DEFAULT NULL ,
-                       `updated_by` varchar(100) DEFAULT NULL ,
-                       `ext` LONGVARCHAR DEFAULT NULL  ,
-                       PRIMARY KEY (`id`)
-)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
 --20240301
 CREATE TABLE IF NOT EXISTS `s2_dictionary_conf` (
    `id` INT NOT NULL AUTO_INCREMENT,
@@ -271,3 +251,17 @@ CREATE TABLE IF NOT EXISTS `s2_tag_object`
     PRIMARY KEY (`id`)
 ) ENGINE = InnoDB
 DEFAULT CHARSET = utf8 COMMENT ='标签表对象';
+
+alter table s2_model add column `tag_object_id` bigint(20) DEFAULT NULL after domain_id;
+
+CREATE TABLE IF NOT EXISTS s2_tag(
+                       `id` INT NOT NULL  AUTO_INCREMENT,
+                       `item_id` INT  NOT NULL ,
+                       `type` varchar(255)  NOT NULL ,
+                       `created_at` TIMESTAMP NOT NULL ,
+                       `created_by` varchar(100) NOT NULL ,
+                       `updated_at` TIMESTAMP DEFAULT NULL ,
+                       `updated_by` varchar(100) DEFAULT NULL ,
+                       `ext` LONGVARCHAR DEFAULT NULL  ,
+                       PRIMARY KEY (`id`)
+)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

@@ -58,7 +58,7 @@ public class TagObjectServiceImpl implements TagObjectService {
                 throw new Exception(String.format("the bizName %s is exit", tagObjectReq.getBizName()));
             }
             if (tagObject.getName().equalsIgnoreCase(tagObjectReq.getName())) {
-                throw new Exception(String.format("the bizName %s is exit", tagObjectReq.getName()));
+                throw new Exception(String.format("the name %s is exit", tagObjectReq.getName()));
             }
         }
     }

@@ -33,7 +33,6 @@ import com.tencent.supersonic.headless.api.pojo.MetricTypeDefaultConfig;
 import com.tencent.supersonic.headless.api.pojo.ModelDetail;
 import com.tencent.supersonic.headless.api.pojo.QueryConfig;
 import com.tencent.supersonic.headless.api.pojo.RelateDimension;
-import com.tencent.supersonic.headless.api.pojo.TagDefineParams;
 import com.tencent.supersonic.headless.api.pojo.TagTypeDefaultConfig;
 import com.tencent.supersonic.headless.api.pojo.TimeDefaultConfig;
 import com.tencent.supersonic.headless.api.pojo.enums.DataType;
@@ -41,14 +40,12 @@ import com.tencent.supersonic.headless.api.pojo.enums.DimensionType;
 import com.tencent.supersonic.headless.api.pojo.enums.IdentifyType;
 import com.tencent.supersonic.headless.api.pojo.enums.MetricDefineType;
 import com.tencent.supersonic.headless.api.pojo.enums.SemanticType;
-import com.tencent.supersonic.headless.api.pojo.enums.TagDefineType;
 import com.tencent.supersonic.headless.api.pojo.request.DataSetReq;
 import com.tencent.supersonic.headless.api.pojo.request.DatabaseReq;
 import com.tencent.supersonic.headless.api.pojo.request.DimensionReq;
 import com.tencent.supersonic.headless.api.pojo.request.DomainReq;
 import com.tencent.supersonic.headless.api.pojo.request.MetricReq;
 import com.tencent.supersonic.headless.api.pojo.request.ModelReq;
-import com.tencent.supersonic.headless.api.pojo.request.TagReq;
 import com.tencent.supersonic.headless.server.service.DataSetService;
 import com.tencent.supersonic.headless.server.service.DatabaseService;
 import com.tencent.supersonic.headless.server.service.DimensionService;
@@ -403,60 +400,6 @@ public class ModelDemoDataLoader {
         metricReq.setMetricDefineType(MetricDefineType.MEASURE);
         metricReq.setRelateDimension(getRelateDimension(Lists.newArrayList(1L, 2L)));
         metricService.updateMetric(metricReq, user);
-    }
-
-    private void addTags() {
-        TagReq tagReq = new TagReq();
-        tagReq.setModelId(4L);
-        tagReq.setName("活跃区域");
-        tagReq.setBizName("act_area");
-        tagReq.setStatus(StatusEnum.ONLINE.getCode());
-        tagReq.setTypeEnum(TypeEnums.TAG);
-        tagReq.setTagDefineType(TagDefineType.DIMENSION);
-        TagDefineParams tagDefineParams = new TagDefineParams();
-        tagDefineParams.setExpr("act_area");
-        tagDefineParams.setDependencies(new ArrayList<>(Arrays.asList(4)));
-        tagReq.setTagDefineParams(tagDefineParams);
-        tagMetaService.create(tagReq, user);
-
-        TagReq tagReq2 = new TagReq();
-        tagReq2.setModelId(4L);
-        tagReq2.setName("风格");
-        tagReq2.setBizName("genre");
-        tagReq2.setStatus(StatusEnum.ONLINE.getCode());
-        tagReq2.setTypeEnum(TypeEnums.TAG);
-        tagReq2.setTagDefineType(TagDefineType.DIMENSION);
-        TagDefineParams tagDefineParam2s = new TagDefineParams();
-        tagDefineParam2s.setExpr("genre");
-        tagDefineParam2s.setDependencies(new ArrayList<>(Arrays.asList(6)));
-        tagReq2.setTagDefineParams(tagDefineParam2s);
-        tagMetaService.create(tagReq2, user);
-
-        TagReq tagReq3 = new TagReq();
-        tagReq3.setModelId(4L);
-        tagReq3.setName("播放量");
-        tagReq3.setBizName("js_play_cnt");
-        tagReq3.setStatus(StatusEnum.ONLINE.getCode());
-        tagReq3.setTypeEnum(TypeEnums.TAG);
-        tagReq3.setTagDefineType(TagDefineType.METRIC);
-        TagDefineParams tagDefineParam3s = new TagDefineParams();
-        tagDefineParam3s.setExpr("js_play_cnt");
-        tagDefineParam3s.setDependencies(new ArrayList<>(Arrays.asList(5)));
-        tagReq3.setTagDefineParams(tagDefineParam3s);
-        tagMetaService.create(tagReq3, user);
-
-        TagReq tagReq4 = new TagReq();
-        tagReq4.setModelId(4L);
-        tagReq4.setName("歌手名");
-        tagReq4.setBizName("singer_name");
-        tagReq4.setStatus(StatusEnum.ONLINE.getCode());
-        tagReq4.setTypeEnum(TypeEnums.TAG);
-        tagReq4.setTagDefineType(TagDefineType.DIMENSION);
-        TagDefineParams tagDefineParam4s = new TagDefineParams();
-        tagDefineParam4s.setExpr("singer_name");
-        tagDefineParam4s.setDependencies(new ArrayList<>(Arrays.asList(7)));
-        tagReq4.setTagDefineParams(tagDefineParam4s);
-        tagMetaService.create(tagReq4, user);
     }
 
     public void addMetric_uv() throws Exception {

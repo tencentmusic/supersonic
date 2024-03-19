@@ -10,7 +10,6 @@ import java.util.Date;
 @ToString
 public class RecordInfo {
 
-
     private String createdBy;
 
     private String updatedBy;

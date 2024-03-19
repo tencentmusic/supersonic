@@ -31,6 +31,7 @@ import com.tencent.supersonic.headless.server.pojo.yaml.MetricTypeParamsYamlTpl;
 import com.tencent.supersonic.headless.server.pojo.yaml.MetricYamlTpl;
 import com.tencent.supersonic.headless.server.service.Catalog;
 import com.tencent.supersonic.headless.server.utils.DatabaseConverter;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -41,6 +42,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Triple;
 import org.springframework.stereotype.Service;
@@ -123,12 +125,14 @@ public class SemanticSchemaManager {
 
     private void addTagModel(TagResp tagResp, List<Dimension> modelDimensions, List<Metric> modelMetrics)
             throws Exception {
-        switch (tagResp.getTagDefineType()) {
+        TagDefineType tagDefineType = TagDefineType.valueOf(tagResp.getTagDefineType());
+        switch (tagDefineType) {
             case FIELD:
             case DIMENSION:
                 if (TagDefineType.DIMENSION.equals(tagResp.getTagDefineType())) {
                     Optional<Dimension> modelDimension = modelDimensions.stream()
-                            .filter(d -> d.getBizName().equals(tagResp.getExpr())).findFirst();
+                            // .filter(d -> d.getBizName().equals(tagResp.getExpr()))
+                            .findFirst();
                     if (modelDimension.isPresent()) {
                         modelDimension.get().setName(tagResp.getBizName());
                         return;
@@ -136,7 +140,7 @@ public class SemanticSchemaManager {
                 }
                 Dimension dimension = Dimension.builder().build();
                 dimension.setType("");
-                dimension.setExpr(tagResp.getExpr());
+                //  dimension.setExpr(tagResp.getExpr());
                 dimension.setName(tagResp.getBizName());
                 dimension.setOwners("");
                 dimension.setBizName(tagResp.getBizName());
@@ -150,12 +154,12 @@ public class SemanticSchemaManager {
                 return;
             case METRIC:
                 Optional<Metric> modelMetric = modelMetrics.stream()
-                        .filter(m -> m.getName().equalsIgnoreCase(tagResp.getExpr())).findFirst();
+                        // .filter(m -> m.getName().equalsIgnoreCase(tagResp.getExpr()))
+                        .findFirst();
                 if (modelMetric.isPresent()) {
                     modelMetric.get().setName(tagResp.getBizName());
                 } else {
-                    throw new Exception(String.format("tag [{}] cant find the metric [{}]", tagResp.getBizName(),
-                            tagResp.getExpr()));
+                    throw new Exception(String.format("tag [{}] cant find the metric", tagResp.getBizName()));
                 }
                 return;
             default:
