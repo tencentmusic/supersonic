@@ -184,7 +184,7 @@ public class SqlGenerateUtils {
         return whereClauseFromFilter;
     }
 
-    private String getDateWhereClause(DateConf dateInfo, ItemDateResp dateDate) {
+    public String getDateWhereClause(DateConf dateInfo, ItemDateResp dateDate) {
         if (Objects.isNull(dateDate)
                 || Strings.isEmpty(dateDate.getStartDate())
                 && Strings.isEmpty(dateDate.getEndDate())) {
