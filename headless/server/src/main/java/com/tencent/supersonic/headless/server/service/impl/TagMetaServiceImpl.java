@@ -225,6 +225,7 @@ public class TagMetaServiceImpl implements TagMetaService {
             tagResp.setModelId(metric.getModelId());
             tagResp.setModelName(metric.getModelName());
             tagResp.setDomainId(metric.getDomainId());
+            tagResp.setSensitiveLevel(metric.getSensitiveLevel());
         }
         if (TagDefineType.DIMENSION.name().equalsIgnoreCase(tagDO.getType())) {
             DimensionResp dimensionResp = dimensionService.getDimension(tagDO.getItemId());
@@ -232,6 +233,7 @@ public class TagMetaServiceImpl implements TagMetaService {
             tagResp.setName(dimensionResp.getName());
             tagResp.setModelId(dimensionResp.getModelId());
             tagResp.setModelName(dimensionResp.getModelName());
+            tagResp.setSensitiveLevel(dimensionResp.getSensitiveLevel());
         }
 
         return tagResp;

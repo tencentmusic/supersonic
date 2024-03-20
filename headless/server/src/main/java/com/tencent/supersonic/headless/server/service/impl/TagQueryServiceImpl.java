@@ -82,16 +82,15 @@ public class TagQueryServiceImpl implements TagQueryService {
     }
 
     private void correctDateConf(ItemValueReq itemValueReq, TagResp tag, User user) throws Exception {
-        if (Objects.nonNull(itemValueReq.getDateConf())) {
-            return;
-        }
         ModelResp model = modelService.getModel(tag.getModelId());
         List<Dim> timeDimension = model.getTimeDimension();
         if (CollectionUtils.isEmpty(timeDimension)) {
             itemValueReq.setDateConf(null);
             return;
         }
-
+        if (Objects.nonNull(itemValueReq.getDateConf())) {
+            return;
+        }
         // query date info from db
         String endDate = queryTagDateFromDbBySql(timeDimension.get(0), tag, user);
         DateConf dateConf = new DateConf();

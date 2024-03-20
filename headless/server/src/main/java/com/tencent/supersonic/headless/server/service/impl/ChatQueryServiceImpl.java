@@ -136,7 +136,7 @@ public class ChatQueryServiceImpl implements ChatQueryService {
         // 2. parser
         semanticParsers.forEach(parser -> {
             parser.parse(queryCtx, chatCtx);
-            log.debug("{} result:{}", parser.getClass().getSimpleName(), JsonUtil.toString(queryCtx));
+            log.info("{} result:{}", parser.getClass().getSimpleName(), JsonUtil.toString(queryCtx));
         });
 
         // 3. corrector

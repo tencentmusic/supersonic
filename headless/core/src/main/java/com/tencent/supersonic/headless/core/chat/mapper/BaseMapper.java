@@ -35,7 +35,7 @@ public abstract class BaseMapper implements SchemaMapper {
         }
 
         long cost = System.currentTimeMillis() - startTime;
-        log.debug("after {},cost:{},mapInfo:{}", simpleName, cost,
+        log.info("after {},cost:{},mapInfo:{}", simpleName, cost,
                 queryContext.getMapInfo().getDataSetElementMatches());
     }
 
