@@ -12,7 +12,7 @@ import {
   updateDimension,
   mockDimensionAlias,
   batchCreateTag,
-  batchUpdateTagStatus,
+  batchDeleteTag,
 } from '../service';
 import FormItemTitle from '@/components/FormHelper/FormItemTitle';
 
@@ -77,11 +77,11 @@ const DimensionInfoModal: React.FC<CreateFormProps> = ({
     }
     const { code, msg, data } = await saveDimensionQuery(queryParams);
     if (code === 200) {
-      if (!queryParams.id && queryParams.isTag) {
-        queryBatchExportTag(data.id);
+      if (queryParams.isTag) {
+        queryBatchExportTag(data.id || dimensionItem?.id);
       }
       if (dimensionItem?.id && !queryParams.isTag) {
-        queryBatchUpdateStatus(dimensionItem.bizName, StatusEnum.DELETED);
+        queryBatchDeleteTag(dimensionItem);
       }
       if (!isSilenceSubmit) {
         message.success('编辑维度成功');
@@ -92,11 +92,10 @@ const DimensionInfoModal: React.FC<CreateFormProps> = ({
     message.error(msg);
   };
 
-  const queryBatchUpdateStatus = async (bizName: string, status: StatusEnum) => {
-    const { code, msg } = await batchUpdateTagStatus({
-      bizNames: [bizName],
-      modelId: [modelId],
-      status,
+  const queryBatchDeleteTag = async (dimensionItem: ISemantic.IDimensionItem) => {
+    const { code, msg } = await batchDeleteTag({
+      itemIds: [dimensionItem.id],
+      tagDefineType: TAG_DEFINE_TYPE.DIMENSION,
     });
     if (code === 200) {
       return;
@@ -105,11 +104,9 @@ const DimensionInfoModal: React.FC<CreateFormProps> = ({
   };
 
   const queryBatchExportTag = async (id: number) => {
-    const { code, msg } = await batchCreateTag({
-      itemIds: [id],
-      type: TAG_DEFINE_TYPE.DIMENSION,
-      modelId,
-    });
+    const { code, msg } = await batchCreateTag([
+      { itemId: id, tagDefineType: TAG_DEFINE_TYPE.DIMENSION },
+    ]);
 
     if (code === 200) {
       return;

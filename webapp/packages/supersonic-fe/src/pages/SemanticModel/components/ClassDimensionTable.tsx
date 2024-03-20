@@ -120,11 +120,15 @@ const ClassDimensionTable: React.FC<Props> = ({ domainManger, dispatch }) => {
       return;
     }
     setLoading(true);
-    const { code, msg } = await batchCreateTag({
-      itemIds: ids,
-      type: TAG_DEFINE_TYPE.DIMENSION,
-      modelId,
-    });
+    const { code, msg } = await batchCreateTag(
+      ids.map((id) => {
+        return {
+          itemId: id,
+          tagDefineType: TAG_DEFINE_TYPE.DIMENSION,
+        };
+      }),
+    );
+
     setLoading(false);
     if (code === 200) {
       queryDimensionList({ ...filterParams, ...defaultPagination });

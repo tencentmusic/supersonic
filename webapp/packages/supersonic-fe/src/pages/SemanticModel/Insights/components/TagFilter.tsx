@@ -1,20 +1,22 @@
-import { Form, Input, Space, Row, Col, Switch } from 'antd';
+import { Form, Input, Space, Row, Col, Switch, Select } from 'antd';
 import StandardFormRow from '@/components/StandardFormRow';
 import TagSelect from '@/components/TagSelect';
 import React, { useEffect } from 'react';
 import { SENSITIVE_LEVEL_OPTIONS } from '../../constant';
 import { SearchOutlined } from '@ant-design/icons';
 import DomainTreeSelect from '../../components/DomainTreeSelect';
+import { ISemantic } from '../../data';
 import styles from '../style.less';
 
 const FormItem = Form.Item;
 
 type Props = {
+  tagObjectList: ISemantic.ITagObjectItem[];
   initFilterValues?: any;
   onFiltersChange: (_: any, values: any) => void;
 };
 
-const TagFilter: React.FC<Props> = ({ initFilterValues = {}, onFiltersChange }) => {
+const TagFilter: React.FC<Props> = ({ tagObjectList, initFilterValues = {}, onFiltersChange }) => {
   const [form] = Form.useForm();
 
   useEffect(() => {
@@ -22,6 +24,14 @@ const TagFilter: React.FC<Props> = ({ initFilterValues = {}, onFiltersChange }) 
       ...initFilterValues,
     });
   }, [form]);
+
+  useEffect(() => {
+    const target = tagObjectList?.[0];
+    if (!target) {
+      return;
+    }
+    form.setFieldValue('tagObjectId', target.id);
+  }, [tagObjectList]);
 
   const handleValuesChange = (value: any, values: any) => {
     localStorage.setItem('metricMarketShowType', !!values.showType ? '1' : '0');
@@ -98,17 +108,20 @@ const TagFilter: React.FC<Props> = ({ initFilterValues = {}, onFiltersChange }) 
         </div>
       </StandardFormRow>
       <Space size={40}>
-        {/* <StandardFormRow key="showType" title="切换为卡片" block>
-          <FormItem name="showType" valuePropName="checked">
-            <Switch size="small" />
+        <StandardFormRow key="tagObjectId" title="所属对象" block>
+          <FormItem name="tagObjectId">
+            <Select
+              style={{ minWidth: 150 }}
+              placeholder="请选择所属对象"
+              options={tagObjectList.map((item: ISemantic.ITagObjectItem) => {
+                return {
+                  label: item.name,
+                  value: item.id,
+                };
+              })}
+            />
           </FormItem>
-        </StandardFormRow> */}
-        {/* <StandardFormRow key="onlyShowMe" title="仅显示我的" block>
-          <FormItem name="onlyShowMe" valuePropName="checked">
-            <Switch size="small" />
-          </FormItem>
-        </StandardFormRow> */}
-
+        </StandardFormRow>
         {filterList.map((item) => {
           const { title, key, options } = item;
           return (
@@ -125,11 +138,11 @@ const TagFilter: React.FC<Props> = ({ initFilterValues = {}, onFiltersChange }) 
             </StandardFormRow>
           );
         })}
-        <StandardFormRow key="domainIds" title="所属主题域" block>
+        {/* <StandardFormRow key="domainIds" title="所属主题域" block>
           <FormItem name="domainIds">
             <DomainTreeSelect />
           </FormItem>
-        </StandardFormRow>
+        </StandardFormRow> */}
       </Space>
     </Form>
   );

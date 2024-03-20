@@ -21,8 +21,6 @@ import {
 import { ISemantic } from '../../data';
 import IndicatorStar from '../../components/IndicatorStar';
 
-const { Text } = Typography;
-
 type Props = {
   tagData: ISemantic.ITagItem;
   domainManger: StateType;
@@ -39,8 +37,8 @@ const TagInfoSider: React.FC<Props> = ({ tagData, dimensionMap, metricMap }) => 
     if (!tagData) {
       return <></>;
     }
-    const { tagDefineType, tagDefineParams } = tagData;
-    const { dependencies } = tagDefineParams;
+    const { tagDefineType, tagDefineParams = {} } = tagData;
+    const { dependencies } = tagDefineParams as any;
     if (!Array.isArray(dependencies)) {
       return <></>;
     }

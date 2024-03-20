@@ -82,4 +82,6 @@ export interface TooltipToolOptions extends ToolsView.ToolItem.Options {
   tooltip?: string;
 }
 
-Graph.registerEdgeTool('tooltip', TooltipTool, true);
+export const registerEdgeTool = () => {
+  Graph.registerEdgeTool('tooltip', TooltipTool, true);
+};

@@ -5,7 +5,13 @@ import DataSourceFieldForm from './DataSourceFieldForm';
 import { formLayout } from '@/components/FormHelper/utils';
 import { EnumDataSourceType } from '../constants';
 import styles from '../style.less';
-import { updateModel, createModel, getColumns, getUnAvailableItem } from '../../service';
+import {
+  updateModel,
+  createModel,
+  getColumns,
+  getUnAvailableItem,
+  getTagObjectList,
+} from '../../service';
 import type { Dispatch } from 'umi';
 import type { StateType } from '../../model';
 import { connect } from 'umi';
@@ -63,7 +69,8 @@ const DataSourceCreateForm: React.FC<CreateFormProps> = ({
   const [effectTipsData, setEffectTipsData] = useState<
     (ISemantic.IDimensionItem | ISemantic.IMetricItem)[]
   >([]);
-
+  const [tagObjectList, setTagObjectList] = useState<ISemantic.ITagObjectItem[]>([]);
+  const [tagObjectIdState, setTagObjectIdState] = useState(modelItem?.tagObjectId);
   const formValRef = useRef(initFormVal as any);
   const [form] = Form.useForm();
   const { databaseConfigList, selectModelId: modelId, selectDomainId } = domainManger;
@@ -91,8 +98,22 @@ const DataSourceCreateForm: React.FC<CreateFormProps> = ({
     }
   }, [scriptColumns]);
 
+  useEffect(() => {
+    queryTagObjectList();
+  }, []);
+
   const forward = () => setCurrentStep(currentStep + 1);
   const backward = () => setCurrentStep(currentStep - 1);
+
+  const queryTagObjectList = async () => {
+    const { code, msg, data } = await getTagObjectList({ domainId: selectDomainId });
+    if (code === 200) {
+      setTagObjectList(data);
+
+      return;
+    }
+    message.error(msg);
+  };
 
   const checkAvailableItem = async (fields: string[] = []) => {
     if (!modelItem) {
@@ -151,7 +172,7 @@ const DataSourceCreateForm: React.FC<CreateFormProps> = ({
       (fieldsClassify, item: any) => {
         const {
           type,
-          bizName,
+          // bizName,
           fieldName,
           timeGranularity,
           agg,
@@ -159,7 +180,7 @@ const DataSourceCreateForm: React.FC<CreateFormProps> = ({
           name,
           isCreateMetric: createMetric,
           dateFormat,
-          entityNames,
+          // entityNames,
           isTag,
         } = item;
         const isCreateDimension = createDimension ? 1 : 0;
@@ -194,7 +215,8 @@ const DataSourceCreateForm: React.FC<CreateFormProps> = ({
               isCreateDimension,
               name,
               type,
-              entityNames,
+              // entityNames,
+              tagObjectId: modelItem?.tagObjectId,
             });
             break;
           case EnumDataSourceType.MEASURES:
@@ -253,6 +275,7 @@ const DataSourceCreateForm: React.FC<CreateFormProps> = ({
           sqlQuery: sql,
           sqlVariables: sqlParams,
         },
+        tagObjectId: tagObjectIdState,
       };
       setQueryParamsState(queryParams);
       const checkState = await checkAvailableItem(fieldColumns.map((item) => item.nameEn));
@@ -370,6 +393,7 @@ const DataSourceCreateForm: React.FC<CreateFormProps> = ({
         initFields([], fieldColumns);
       }
     }
+    setTagObjectIdState(modelItem?.tagObjectId);
   }, [modelItem]);
 
   useEffect(() => {
@@ -423,6 +447,11 @@ const DataSourceCreateForm: React.FC<CreateFormProps> = ({
         <div style={{ display: currentStep === 1 ? 'block' : 'none' }}>
           <DataSourceFieldForm
             fields={fields}
+            tagObjectList={tagObjectList}
+            tagObjectId={tagObjectIdState}
+            onTagObjectChange={(tagObjectId) => {
+              setTagObjectIdState(tagObjectId);
+            }}
             onFieldChange={handleFieldChange}
             onSqlChange={(sql) => {
               setSqlFilter(sql);
