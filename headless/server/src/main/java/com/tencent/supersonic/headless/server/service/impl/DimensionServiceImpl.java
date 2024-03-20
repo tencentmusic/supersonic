@@ -27,8 +27,8 @@ import com.tencent.supersonic.headless.api.pojo.response.DatabaseResp;
 import com.tencent.supersonic.headless.api.pojo.response.DimensionResp;
 import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
-import com.tencent.supersonic.headless.api.pojo.response.TagResp;
 import com.tencent.supersonic.headless.server.persistence.dataobject.DimensionDO;
+import com.tencent.supersonic.headless.server.persistence.dataobject.TagDO;
 import com.tencent.supersonic.headless.server.persistence.repository.DimensionRepository;
 import com.tencent.supersonic.headless.server.pojo.DimensionFilter;
 import com.tencent.supersonic.headless.server.pojo.DimensionsFilter;
@@ -300,14 +300,18 @@ public class DimensionServiceImpl implements DimensionService {
         }
         TagFilter tagFilter = new TagFilter();
         tagFilter.setTagDefineType(TagDefineType.DIMENSION);
-        Map<String, TagResp> keyAndTagMap = tagMetaService.getTags(tagFilter).stream()
-                .collect(Collectors.toMap(tag -> tag.getModelId() + "_" + tag.getBizName(), tag -> tag,
+        List<Long> dimensionIds = dimensionResps.stream().map(dimension -> dimension.getId())
+                .collect(Collectors.toList());
+        tagFilter.setItemIds(dimensionIds);
+        Map<Long, TagDO> keyAndTagMap = tagMetaService.getTagDOList(tagFilter, User.getFakeUser()).stream()
+                .collect(Collectors.toMap(tag -> tag.getItemId(), tag -> tag,
                         (newTag, oldTag) -> newTag));
         if (Objects.nonNull(keyAndTagMap)) {
             dimensionResps.stream().forEach(dim -> {
-                String key = dim.getModelId() + "_" + dim.getBizName();
-                if (keyAndTagMap.containsKey(key)) {
+                if (keyAndTagMap.containsKey(dim.getId())) {
                     dim.setIsTag(1);
+                } else {
+                    dim.setIsTag(0);
                 }
             });
         }
