@@ -58,9 +58,9 @@ public class TagMetaServiceImpl implements TagMetaService {
     private final DomainService domainService;
 
     public TagMetaServiceImpl(TagRepository tagRepository, ModelService modelService,
-            CollectService collectService, @Lazy DimensionService dimensionService,
-            @Lazy MetricService metricService, TagObjectService tagObjectService,
-            DomainService domainService) {
+                              CollectService collectService, @Lazy DimensionService dimensionService,
+                              @Lazy MetricService metricService, TagObjectService tagObjectService,
+                              DomainService domainService) {
         this.tagRepository = tagRepository;
         this.modelService = modelService;
         this.collectService = collectService;
@@ -147,6 +147,7 @@ public class TagMetaServiceImpl implements TagMetaService {
         List<Long> modelIds = modelRespList.stream().map(model -> model.getId()).collect(Collectors.toList());
 
         TagFilter tagFilter = new TagFilter();
+        BeanUtils.copyProperties(tagMarketPageReq, tagFilter);
         List<CollectDO> collectList = collectService.getCollectList(user.getName());
         List<Long> collectIds = collectList.stream()
                 .filter(collectDO -> SchemaElementType.TAG.name().equalsIgnoreCase(collectDO.getType()))
@@ -158,14 +159,15 @@ public class TagMetaServiceImpl implements TagMetaService {
                 tagFilter.setIds(collectIds);
             }
         }
-
-        BeanUtils.copyProperties(tagMarketPageReq, tagFilter);
         tagFilter.setModelIds(modelIds);
         PageInfo<TagResp> tagDOPageInfo = PageHelper.startPage(tagMarketPageReq.getCurrent(),
                 tagMarketPageReq.getPageSize())
                 .doSelectPageInfo(() -> getTags(tagFilter));
 
         List<TagResp> tagRespList = tagDOPageInfo.getList();
+        if (CollectionUtils.isEmpty(tagRespList)) {
+            return tagDOPageInfo;
+        }
         fillModelInfo(tagRespList);
         fillDomainInfo(tagRespList);
         fillTagObjectInfo(tagRespList, user);

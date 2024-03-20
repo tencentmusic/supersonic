@@ -36,4 +36,6 @@ public class TagResp extends RecordInfo {
 
     private String description;
 
+    private Integer sensitiveLevel;
+
 }
