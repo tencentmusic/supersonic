@@ -54,7 +54,7 @@ public class TagTest extends BaseTest {
         List<TagResp> tags = tagMetaService.getTags(new TagFilter());
         Assert.assertEquals(2, tags.size());
         TagDeleteReq tagDeleteReq = new TagDeleteReq();
-        tagDeleteReq.setType(TagDefineType.DIMENSION);
+        tagDeleteReq.setTagDefineType(TagDefineType.DIMENSION);
         tagDeleteReq.setItemIds(Arrays.asList(4L, 5L));
         tagMetaService.deleteBatch(tagDeleteReq, user);
         List<TagResp> tags1 = tagMetaService.getTags(new TagFilter());
@@ -75,7 +75,7 @@ public class TagTest extends BaseTest {
         PageInfo<TagResp> tags = tagMetaService.queryTagMarketPage(filter, user);
         Assert.assertEquals(1, tags.getList().size());
         TagDeleteReq tagDeleteReq = new TagDeleteReq();
-        tagDeleteReq.setType(TagDefineType.DIMENSION);
+        tagDeleteReq.setTagDefineType(TagDefineType.DIMENSION);
         tagDeleteReq.setItemIds(Arrays.asList(1L, 4L, 5L));
         tagMetaService.deleteBatch(tagDeleteReq, user);
         List<TagResp> tags1 = tagMetaService.getTags(new TagFilter());

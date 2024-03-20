@@ -56,6 +56,7 @@ public class TagRepositoryImpl implements TagRepository {
 
     @Override
     public void deleteBatch(TagDeleteReq tagDeleteReq) {
-        tagCustomMapper.deleteBatch(tagDeleteReq.getItemIds(), tagDeleteReq.getIds(), tagDeleteReq.getType().name());
+        tagCustomMapper.deleteBatch(tagDeleteReq.getItemIds(), tagDeleteReq.getIds(),
+                tagDeleteReq.getTagDefineType().name());
     }
 }
