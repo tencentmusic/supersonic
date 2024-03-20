@@ -40,6 +40,7 @@ import com.tencent.supersonic.headless.api.pojo.enums.DimensionType;
 import com.tencent.supersonic.headless.api.pojo.enums.IdentifyType;
 import com.tencent.supersonic.headless.api.pojo.enums.MetricDefineType;
 import com.tencent.supersonic.headless.api.pojo.enums.SemanticType;
+import com.tencent.supersonic.headless.api.pojo.enums.TagDefineType;
 import com.tencent.supersonic.headless.api.pojo.request.DataSetReq;
 import com.tencent.supersonic.headless.api.pojo.request.DatabaseReq;
 import com.tencent.supersonic.headless.api.pojo.request.DimensionReq;
@@ -47,6 +48,7 @@ import com.tencent.supersonic.headless.api.pojo.request.DomainReq;
 import com.tencent.supersonic.headless.api.pojo.request.MetricReq;
 import com.tencent.supersonic.headless.api.pojo.request.ModelReq;
 import com.tencent.supersonic.headless.api.pojo.request.TagObjectReq;
+import com.tencent.supersonic.headless.api.pojo.request.TagReq;
 import com.tencent.supersonic.headless.server.service.DataSetService;
 import com.tencent.supersonic.headless.server.service.DatabaseService;
 import com.tencent.supersonic.headless.server.service.DimensionService;
@@ -113,6 +115,7 @@ public class ModelDemoDataLoader {
             addModel_4();
             updateDimension();
             updateMetric();
+            addTags();
             updateMetric_pv();
             addDataSet_1();
             addDataSet_2();
@@ -368,6 +371,20 @@ public class ModelDemoDataLoader {
                 + "js_play_cnt, down_cnt, favor_cnt from singer");
         modelReq.setModelDetail(modelDetail);
         modelService.createModel(modelReq, user);
+    }
+
+    private void addTags() {
+        addTag(4L);
+        addTag(5L);
+        addTag(6L);
+        addTag(7L);
+    }
+
+    private void addTag(Long itemId) {
+        TagReq tagReq = new TagReq();
+        tagReq.setTagDefineType(TagDefineType.DIMENSION);
+        tagReq.setItemId(itemId);
+        tagMetaService.create(tagReq, User.getFakeUser());
     }
 
     public void updateDimension() throws Exception {
