@@ -15,5 +15,7 @@ public interface TagCustomMapper {
 
     Boolean deleteById(Long id);
 
-    void deleteBatch(List<Long> itemIds, List<Long> ids, String type);
+    void deleteBatchByIds(List<Long> ids);
+
+    void deleteBatchByType(List<Long> itemIds, String type);
 }
