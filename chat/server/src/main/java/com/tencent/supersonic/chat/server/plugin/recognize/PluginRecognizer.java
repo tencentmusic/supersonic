@@ -9,6 +9,7 @@ import com.tencent.supersonic.chat.server.plugin.PluginRecallResult;
 import com.tencent.supersonic.chat.server.pojo.ChatParseContext;
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
+import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementMatch;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
@@ -71,6 +72,9 @@ public abstract class PluginRecognizer {
         }
         SemanticParseInfo semanticParseInfo = new SemanticParseInfo();
         semanticParseInfo.setElementMatches(schemaElementMatches);
+        SchemaElement schemaElement = new SchemaElement();
+        schemaElement.setDataSet(dataSetId);
+        semanticParseInfo.setDataSet(schemaElement);
         Map<String, Object> properties = new HashMap<>();
         PluginParseResult pluginParseResult = new PluginParseResult();
         pluginParseResult.setPlugin(plugin);
