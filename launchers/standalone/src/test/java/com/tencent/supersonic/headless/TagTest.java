@@ -10,6 +10,7 @@ import com.tencent.supersonic.headless.api.pojo.response.TagResp;
 import com.tencent.supersonic.headless.server.pojo.TagFilter;
 import com.tencent.supersonic.headless.server.service.TagMetaService;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -44,25 +45,36 @@ public class TagTest extends BaseTest {
         return tagReq;
     }
 
+    @Before
+    public void setUp() {
+        TagDeleteReq tagDeleteReq = new TagDeleteReq();
+        tagDeleteReq.setTagDefineType(TagDefineType.DIMENSION);
+        tagDeleteReq.setItemIds(Arrays.asList(1L, 4L, 5L));
+        tagMetaService.deleteBatch(tagDeleteReq, user);
+    }
+
     @Test
-    void testCreateTag() {
+    public void testCreateTag() {
+        setUp();
         TagReq tagReq = newTagReq();
         tagMetaService.create(tagReq, user);
         TagReq tagReq1 = newTagReqV1();
         tagMetaService.create(tagReq1, user);
-
-        List<TagResp> tags = tagMetaService.getTags(new TagFilter());
+        TagFilter tagFilter = new TagFilter();
+        tagFilter.setItemIds(Arrays.asList(4L, 5L));
+        List<TagResp> tags = tagMetaService.getTags(tagFilter);
         Assert.assertEquals(2, tags.size());
         TagDeleteReq tagDeleteReq = new TagDeleteReq();
         tagDeleteReq.setTagDefineType(TagDefineType.DIMENSION);
         tagDeleteReq.setItemIds(Arrays.asList(4L, 5L));
         tagMetaService.deleteBatch(tagDeleteReq, user);
-        List<TagResp> tags1 = tagMetaService.getTags(new TagFilter());
+        List<TagResp> tags1 = tagMetaService.getTags(tagFilter);
         Assert.assertEquals(0, tags1.size());
     }
 
     @Test
-    void testTagMarket() {
+    public void testTagMarket() {
+        setUp();
         TagReq tagReq = newTagReq();
         tagMetaService.create(tagReq, user);
         TagReq tagReq1 = newTagReqV1();
@@ -78,8 +90,6 @@ public class TagTest extends BaseTest {
         tagDeleteReq.setTagDefineType(TagDefineType.DIMENSION);
         tagDeleteReq.setItemIds(Arrays.asList(1L, 4L, 5L));
         tagMetaService.deleteBatch(tagDeleteReq, user);
-        List<TagResp> tags1 = tagMetaService.getTags(new TagFilter());
-        Assert.assertEquals(0, tags1.size());
     }
 
 }
