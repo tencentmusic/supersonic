@@ -34,10 +34,10 @@ import com.tencent.supersonic.headless.api.pojo.response.DataSetResp;
 import com.tencent.supersonic.headless.api.pojo.response.DimensionResp;
 import com.tencent.supersonic.headless.api.pojo.response.MetricResp;
 import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
-import com.tencent.supersonic.headless.api.pojo.response.TagResp;
 import com.tencent.supersonic.headless.server.persistence.dataobject.CollectDO;
 import com.tencent.supersonic.headless.server.persistence.dataobject.MetricDO;
 import com.tencent.supersonic.headless.server.persistence.dataobject.MetricQueryDefaultConfigDO;
+import com.tencent.supersonic.headless.server.persistence.dataobject.TagDO;
 import com.tencent.supersonic.headless.server.persistence.repository.MetricRepository;
 import com.tencent.supersonic.headless.server.pojo.DimensionsFilter;
 import com.tencent.supersonic.headless.server.pojo.MetaFilter;
@@ -256,13 +256,18 @@ public class MetricServiceImpl implements MetricService {
         }
         TagFilter tagFilter = new TagFilter();
         tagFilter.setTagDefineType(TagDefineType.METRIC);
-        Map<String, TagResp> keyAndTagMap = tagMetaService.getTags(tagFilter).stream()
-                .collect(Collectors.toMap(tag -> tag.getModelId() + "_" + tag.getBizName(), tag -> tag));
+        List<Long> metricIds = metricRespList.stream().map(metric -> metric.getId())
+                .collect(Collectors.toList());
+        tagFilter.setItemIds(metricIds);
+        Map<Long, TagDO> keyAndTagMap = tagMetaService.getTagDOList(tagFilter, User.getFakeUser()).stream()
+                .collect(Collectors.toMap(tag -> tag.getItemId(), tag -> tag,
+                        (newTag, oldTag) -> newTag));
         if (Objects.nonNull(keyAndTagMap)) {
             metricRespList.stream().forEach(metric -> {
-                String key = metric.getModelId() + "_" + metric.getBizName();
-                if (keyAndTagMap.containsKey(key)) {
+                if (keyAndTagMap.containsKey(metric.getId())) {
                     metric.setIsTag(1);
+                } else {
+                    metric.setIsTag(0);
                 }
             });
         }

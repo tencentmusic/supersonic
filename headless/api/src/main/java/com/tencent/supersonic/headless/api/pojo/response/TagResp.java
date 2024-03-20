@@ -1,11 +1,12 @@
 package com.tencent.supersonic.headless.api.pojo.response;
 
+import com.tencent.supersonic.common.pojo.RecordInfo;
 import lombok.Data;
 import lombok.ToString;
 
 @Data
 @ToString(callSuper = true)
-public class TagResp {
+public class TagResp extends RecordInfo {
 
     private Long id;
 

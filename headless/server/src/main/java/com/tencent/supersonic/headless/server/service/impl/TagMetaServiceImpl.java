@@ -5,9 +5,7 @@ import com.github.pagehelper.PageInfo;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.common.pojo.enums.AuthType;
 import com.tencent.supersonic.common.pojo.enums.TypeEnums;
-import com.tencent.supersonic.headless.api.pojo.TagDefineParams;
 import com.tencent.supersonic.headless.api.pojo.enums.TagDefineType;
-import com.tencent.supersonic.headless.api.pojo.request.TagBatchCreateReq;
 import com.tencent.supersonic.headless.api.pojo.request.TagDeleteReq;
 import com.tencent.supersonic.headless.api.pojo.request.TagFilterPageReq;
 import com.tencent.supersonic.headless.api.pojo.request.TagReq;
@@ -112,10 +110,9 @@ public class TagMetaServiceImpl implements TagMetaService {
         List<TagResp> tagRespList = Arrays.asList(tagResp);
         fillModelInfo(tagRespList);
         fillDomainInfo(tagRespList);
-        tagResp = tagRespList.get(0);
-        tagResp = fillTagObjectInfo(tagResp, user);
-        tagResp = fillCollectAndAdminInfo(tagResp, user);
-        return tagResp;
+        fillTagObjectInfo(tagRespList, user);
+        fillCollectAndAdminInfo(tagRespList, user);
+        return tagRespList.get(0);
     }
 
     @Override
@@ -151,6 +148,8 @@ public class TagMetaServiceImpl implements TagMetaService {
         fillModelInfo(tagRespList);
         fillDomainInfo(tagRespList);
         fillTagObjectInfo(tagRespList, user);
+        fillCollectAndAdminInfo(tagRespList, user);
+        tagDOPageInfo.setList(tagRespList);
         return tagDOPageInfo;
     }
 
@@ -240,51 +239,6 @@ public class TagMetaServiceImpl implements TagMetaService {
         return modelRespList;
     }
 
-    private int loadMetricTagBatch(TagBatchCreateReq tagLoadReq, List<MetricResp> metrics, User user) {
-        if (!CollectionUtils.isEmpty(tagLoadReq.getItemIds())) {
-            metrics = metrics.stream().filter(metric -> tagLoadReq.getItemIds().contains(metric.getId()))
-                    .collect(Collectors.toList());
-        }
-        metrics.parallelStream().forEach(metric -> {
-            TagReq tagReq = new TagReq();
-            BeanUtils.copyProperties(metric, tagReq);
-            tagReq.setId(null);
-            tagReq.setTagDefineType(TagDefineType.METRIC);
-            TagDefineParams tagDefineParams = new TagDefineParams();
-            tagDefineParams.setExpr(metric.getBizName());
-            tagDefineParams.setDependencies(new ArrayList<>(Arrays.asList(metric.getId())));
-            try {
-                create(tagReq, user);
-            } catch (Exception e) {
-                log.info("loadMetricTagBatch, e:{}", e.getMessage());
-            }
-        });
-        return metrics.size();
-    }
-
-    private Integer loadDimTagBatch(TagBatchCreateReq tagLoadReq, List<DimensionResp> dimensions, User user) {
-        if (!CollectionUtils.isEmpty(tagLoadReq.getItemIds())) {
-            dimensions = dimensions.stream().filter(dim -> tagLoadReq.getItemIds().contains(dim.getId()))
-                    .collect(Collectors.toList());
-        }
-        dimensions.parallelStream().forEach(dim -> {
-            TagReq tagReq = new TagReq();
-            BeanUtils.copyProperties(dim, tagReq);
-            tagReq.setId(null);
-            tagReq.setTagDefineType(TagDefineType.DIMENSION);
-            TagDefineParams tagDefineParams = new TagDefineParams();
-            tagDefineParams.setExpr(dim.getBizName());
-            tagDefineParams.setDependencies(new ArrayList<>(Arrays.asList(dim.getId())));
-            try {
-                create(tagReq, user);
-            } catch (Exception e) {
-                log.info("loadDimTagBatch, e:{}", e.getMessage());
-            }
-
-        });
-        return dimensions.size();
-    }
-
     private void fillModelInfo(List<TagResp> tagRespList) {
         Map<Long, ModelResp> modelIdAndRespMap = modelService.getModelMap();
         tagRespList.stream().forEach(tagResp -> {
@@ -310,6 +264,23 @@ public class TagMetaServiceImpl implements TagMetaService {
         return tagRespList.get(0);
     }
 
+    private TagResp fillCollectAndAdminInfo(List<TagResp> tagRespList, User user) {
+        List<Long> collectIds = collectService.getCollectList(user.getName())
+                .stream().filter(collectDO -> TypeEnums.TAG.name().equalsIgnoreCase(collectDO.getType()))
+                .map(CollectDO::getCollectId).collect(Collectors.toList());
+
+        tagRespList.stream().forEach(tagResp -> {
+            if (CollectionUtils.isNotEmpty(collectIds) && collectIds.contains(tagResp.getId())) {
+                tagResp.setIsCollect(true);
+            } else {
+                tagResp.setIsCollect(false);
+            }
+        });
+
+        fillAdminRes(tagRespList, user);
+        return tagRespList.get(0);
+    }
+
     private void fillAdminRes(List<TagResp> tagRespList, User user) {
         List<ModelResp> modelRespList = modelService.getModelListWithAuth(user, null, AuthType.ADMIN);
         if (CollectionUtils.isEmpty(modelRespList)) {
@@ -317,7 +288,7 @@ public class TagMetaServiceImpl implements TagMetaService {
         }
         Set<Long> modelIdSet = modelRespList.stream().map(ModelResp::getId).collect(Collectors.toSet());
         for (TagResp tagResp : tagRespList) {
-            if (modelIdSet.contains(tagResp.getModelId())) {
+            if (modelIdSet.contains(tagResp.getModelId()) || tagResp.getCreatedBy().equalsIgnoreCase(user.getName())) {
                 tagResp.setHasAdminRes(true);
             } else {
                 tagResp.setHasAdminRes(false);
@@ -334,7 +305,7 @@ public class TagMetaServiceImpl implements TagMetaService {
 
         List<TagDO> tagRespList = tagRepository.getTagDOList(tagFilter);
         if (!CollectionUtils.isEmpty(tagRespList)) {
-            throw new RuntimeException(String.format("the tag is exit, itemId:{}", tagReq.getItemId()));
+            throw new RuntimeException(String.format("the tag is exit, itemId:%s", tagReq.getItemId()));
         }
     }
 
@@ -343,7 +314,7 @@ public class TagMetaServiceImpl implements TagMetaService {
             DimensionResp dimension = dimensionService.getDimension(tagReq.getItemId());
             ModelResp model = modelService.getModel(dimension.getModelId());
             if (Objects.isNull(model.getTagObjectId())) {
-                throw new RuntimeException(String.format("this dimension:{} is not supported to create tag",
+                throw new RuntimeException(String.format("this dimension:%s is not supported to create tag",
                         tagReq.getItemId()));
             }
         }
@@ -351,7 +322,7 @@ public class TagMetaServiceImpl implements TagMetaService {
             MetricResp metric = metricService.getMetric(tagReq.getItemId());
             ModelResp model = modelService.getModel(metric.getModelId());
             if (Objects.isNull(model.getTagObjectId())) {
-                throw new RuntimeException(String.format("this metric:{} is not supported to create tag",
+                throw new RuntimeException(String.format("this metric:%s is not supported to create tag",
                         tagReq.getItemId()));
             }
         }

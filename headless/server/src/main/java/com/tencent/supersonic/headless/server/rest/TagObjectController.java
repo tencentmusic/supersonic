@@ -86,7 +86,7 @@ public class TagObjectController {
      * @return
      * @throws Exception
      */
-    @PostMapping("/query/tagObject")
+    @PostMapping("/query")
     public List<TagObjectResp> queryTagObject(@RequestBody TagObjectFilter filter,
                                          HttpServletRequest request,
                                          HttpServletResponse response) throws Exception {

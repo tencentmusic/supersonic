@@ -579,7 +579,7 @@ CREATE TABLE IF NOT EXISTS `s2_data_set` (
 CREATE TABLE IF NOT EXISTS `s2_tag` (
     `id` INT NOT NULL  AUTO_INCREMENT,
     `item_id` INT  NOT NULL ,
-    `type` varchar(50)  NOT NULL , -- ATOMIC, DERIVED
+    `type` varchar(50)  NOT NULL , -- METRIC DIMENSION
     `created_at` TIMESTAMP NOT NULL ,
     `created_by` varchar(100) NOT NULL ,
     `updated_at` TIMESTAMP DEFAULT NULL ,
@@ -594,8 +594,8 @@ CREATE TABLE IF NOT EXISTS `s2_tag_object` (
     `name` varchar(255)  NOT NULL ,
     `biz_name` varchar(255)  NOT NULL ,
     `description` varchar(500) DEFAULT NULL ,
-    `status` INT  NOT NULL ,
-    `sensitive_level` INT NOT NULL ,
+    `status` INT  NOT NULL DEFAULT '1' ,
+    `sensitive_level` INT NOT NULL DEFAULT '1' ,
     `created_at` TIMESTAMP NOT NULL ,
     `created_by` varchar(100) NOT NULL ,
     `updated_at` TIMESTAMP DEFAULT NULL ,
