@@ -8,7 +8,7 @@ import { ICommandContextProvider } from '@antv/xflow';
 
 import { CustomCommands } from './constants';
 
-import 'antd/es/modal/style/index.css';
+// import 'antd/es/modal/style/index.css';
 
 // prettier-ignore
 type ICommand = ICommandHandler<NsRenameNodeCmd.IArgs, NsRenameNodeCmd.IResult, NsRenameNodeCmd.ICmdHooks>;

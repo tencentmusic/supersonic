@@ -145,6 +145,7 @@ export declare namespace ISemantic {
     viewOrgs?: any[];
     admins?: string[];
     adminOrgs?: any[];
+    tagObjectId?: number;
     drillDownDimensions: IDrillDownDimensionItem[];
     createdBy: UserName;
     updatedBy: UserName;
@@ -410,6 +411,22 @@ export declare namespace ISemantic {
     tagDefineType: TAG_DEFINE_TYPE;
     tagDefineParams: ITagDefineParams;
     expr: string;
+  }
+
+  interface ITagObjectItem {
+    createdBy: string;
+    updatedBy: string;
+    createdAt: string;
+    updatedAt: string;
+    id: number;
+    name: string;
+    bizName: string;
+    description: string;
+    status: number;
+    typeEnum: null;
+    sensitiveLevel: SENSITIVE_LEVEL;
+    domainId: number;
+    ext: null;
   }
 }
 

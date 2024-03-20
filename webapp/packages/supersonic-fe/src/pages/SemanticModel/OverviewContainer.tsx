@@ -8,7 +8,7 @@ import type { StateType } from './model';
 import { LeftOutlined, RightOutlined } from '@ant-design/icons';
 import { ISemantic } from './data';
 import { getDomainList, getModelList } from './service';
-import ChatSettingTab from './ChatSetting/ChatSettingTab';
+// import ChatSettingTab from './ChatSetting/ChatSettingTab';
 import DomainManagerTab from './components/DomainManagerTab';
 import type { Dispatch } from 'umi';
 

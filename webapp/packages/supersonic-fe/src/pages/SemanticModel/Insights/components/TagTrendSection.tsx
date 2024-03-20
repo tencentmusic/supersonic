@@ -28,7 +28,7 @@ const TagTrendSection: React.FC<Props> = ({ tagData }) => {
   const queryTagValueDistribution = async (params: any) => {
     setTagTrendLoading(true);
     const { data, code } = await getTagValueDistribution({
-      itemId: params.id,
+      id: params.id,
       dateConf: {
         unit: 5,
       },

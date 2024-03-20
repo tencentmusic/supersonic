@@ -129,7 +129,7 @@ const ViewTable: React.FC<Props> = ({ disabledEdit = false, modelList, domainMan
             >
               编辑
             </a>
-            <a
+            {/* <a
               key="searchEditBtn"
               onClick={() => {
                 setViewItem(record);
@@ -137,7 +137,7 @@ const ViewTable: React.FC<Props> = ({ disabledEdit = false, modelList, domainMan
               }}
             >
               查询设置
-            </a>
+            </a> */}
             {record.status === StatusEnum.ONLINE ? (
               <Button
                 type="link"

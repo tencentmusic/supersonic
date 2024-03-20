@@ -4,6 +4,7 @@ import TableTitleTooltips from '../../components/TableTitleTooltips';
 import { isUndefined } from 'lodash';
 import { ExclamationCircleOutlined } from '@ant-design/icons';
 import SqlEditor from '@/components/SqlEditor';
+import { ISemantic } from '../../data';
 import {
   TYPE_OPTIONS,
   DATE_FORMATTER,
@@ -23,7 +24,8 @@ type FieldItem = {
   checked?: number;
   dateFormat?: string;
   timeGranularity?: string;
-  entityNames?: string[];
+  // entityNames?: string[];
+  // tagObjectId?: number;
   isTag?: number;
 };
 const { Search } = Input;
@@ -32,8 +34,11 @@ const FormItem = Form.Item;
 type Props = {
   onSqlChange: (sql: string) => void;
   sql: string;
+  tagObjectList: ISemantic.ITagObjectItem[];
+  tagObjectId?: number;
   fields: FieldItem[];
   onFieldChange: (fieldName: string, data: Partial<FieldItem>) => void;
+  onTagObjectChange?: (tagObjectId: number) => void;
 };
 
 const { Option } = Select;
@@ -47,7 +52,15 @@ const getCreateFieldName = (type: EnumDataSourceType) => {
   return isCreateName;
 };
 
-const DataSourceFieldForm: React.FC<Props> = ({ fields, sql, onFieldChange, onSqlChange }) => {
+const DataSourceFieldForm: React.FC<Props> = ({
+  fields,
+  sql,
+  tagObjectList,
+  tagObjectId,
+  onTagObjectChange,
+  onFieldChange,
+  onSqlChange,
+}) => {
   const handleFieldChange = (record: FieldItem, fieldName: string, value: any) => {
     onFieldChange(record.bizName, {
       ...record,
@@ -123,12 +136,28 @@ const DataSourceFieldForm: React.FC<Props> = ({ fields, sql, onFieldChange, onSq
       width: 185,
       render: (_: any, record: FieldItem) => {
         const { type } = record;
+        console.log(record, 3333);
         if (type === EnumDataSourceType.PRIMARY) {
-          const entityNames =
-            fields.find((field) => field.bizName === record.bizName)?.entityNames || [];
           return (
             <Space>
+              {/* <FormItem name="tagObjectId"> */}
               <Select
+                style={{ minWidth: 150 }}
+                value={tagObjectId}
+                placeholder="请选择所属对象"
+                onChange={(value) => {
+                  // handleFieldChange(record, 'tagObjectId', value);
+                  onTagObjectChange?.(value);
+                }}
+                options={tagObjectList.map((item: ISemantic.ITagObjectItem) => {
+                  return {
+                    label: item.name,
+                    value: item.id,
+                  };
+                })}
+              />
+              {/* </FormItem> */}
+              {/* <Select
                 style={{ minWidth: 345 }}
                 mode="tags"
                 value={entityNames}
@@ -141,7 +170,7 @@ const DataSourceFieldForm: React.FC<Props> = ({ fields, sql, onFieldChange, onSq
               />
               <Tooltip title="主键可以作为一个实体，在此设置一个或多个实体名称">
                 <ExclamationCircleOutlined />
-              </Tooltip>
+              </Tooltip> */}
             </Space>
           );
         }

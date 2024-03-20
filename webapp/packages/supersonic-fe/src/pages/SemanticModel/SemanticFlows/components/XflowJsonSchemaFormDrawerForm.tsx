@@ -7,7 +7,7 @@ import { connect } from 'umi';
 import { DATASOURCE_NODE_RENDER_ID } from '../constant';
 import DataSourceRelationFormDrawer from './DataSourceRelationFormDrawer';
 import DataSourceCreateForm from '../../Datasource/components/DataSourceCreateForm';
-import ClassDataSourceTypeModal from '../../components/ClassDataSourceTypeModal1';
+// import ClassDataSourceTypeModal from '../../components/ClassDataSourceTypeModal1';
 import { GraphApi } from '../service';
 import { SemanticNodeType } from '../../enum';
 import type { StateType } from '../../model';
@@ -153,7 +153,7 @@ const XflowJsonSchemaFormDrawerForm: React.FC<CreateFormProps> = (props) => {
           }}
         />
       </Drawer>
-      {
+      {/* {
         <ClassDataSourceTypeModal
           open={createDataSourceModalOpen}
           onCancel={() => {
@@ -169,7 +169,7 @@ const XflowJsonSchemaFormDrawerForm: React.FC<CreateFormProps> = (props) => {
             setCreateDataSourceModalOpen(false);
           }}
         />
-      }
+      } */}
     </WorkspacePanel>
   );
 };

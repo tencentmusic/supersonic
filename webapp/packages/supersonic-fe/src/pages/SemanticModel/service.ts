@@ -613,7 +613,7 @@ export function deleteView(viewId: number): Promise<any> {
 }
 
 export function getTagList(data: any): Promise<any> {
-  return request(`${process.env.API_BASE_URL}tag/queryTag`, {
+  return request(`${process.env.API_BASE_URL}tag/queryTag/market`, {
     method: 'POST',
     data: { pageSize: 9999, ...data },
   });
@@ -662,5 +662,39 @@ export function batchCreateTag(data: any): Promise<any> {
   return request(`${process.env.API_BASE_URL}tag/create/batch`, {
     method: 'POST',
     data,
+  });
+}
+
+export function batchDeleteTag(data: any): Promise<any> {
+  return request(`${process.env.API_BASE_URL}tag/delete/batch`, {
+    method: 'POST',
+    data,
+  });
+}
+
+export function createTagObject(data: any): Promise<any> {
+  return request(`${process.env.API_BASE_URL}tagObject/create`, {
+    method: 'POST',
+    data,
+  });
+}
+
+export function updateTagObject(data: any): Promise<any> {
+  return request(`${process.env.API_BASE_URL}tagObject/update`, {
+    method: 'POST',
+    data,
+  });
+}
+
+export function deleteTagObject(id: number): Promise<any> {
+  return request(`${process.env.API_BASE_URL}tagObject/delete/${id}`, {
+    method: 'DELETE',
+  });
+}
+
+export function getTagObjectList(data: any): Promise<any> {
+  return request(`${process.env.API_BASE_URL}tagObject/query`, {
+    method: 'POST',
+    data: { pageSize: 9999, status: 1, ...data },
   });
 }

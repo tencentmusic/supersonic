@@ -6,7 +6,7 @@ import { ICommandContextProvider } from '@antv/xflow';
 import { DATASOURCE_NODE_RENDER_ID } from '../constant';
 import { CustomCommands } from './constants';
 
-import 'antd/es/modal/style/index.css';
+// import 'antd/es/modal/style/index.css';
 
 export namespace NsConfirmModalCmd {
   /** Command: 用于注册named factory */

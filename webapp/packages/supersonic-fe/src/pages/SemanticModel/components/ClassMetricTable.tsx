@@ -73,11 +73,14 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
       return;
     }
     setLoading(true);
-    const { code, msg } = await batchCreateTag({
-      itemIds: ids,
-      type: TAG_DEFINE_TYPE.METRIC,
-      modelId,
-    });
+    const { code, msg } = await batchCreateTag(
+      ids.map((id) => {
+        return {
+          itemId: id,
+          tagDefineType: TAG_DEFINE_TYPE.METRIC,
+        };
+      }),
+    );
     setLoading(false);
     if (code === 200) {
       queryMetricList({ ...filterParams, ...defaultPagination });
