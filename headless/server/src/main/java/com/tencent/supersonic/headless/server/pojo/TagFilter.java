@@ -10,5 +10,5 @@ public class TagFilter extends MetaFilter {
 
     private List<Long> itemIds;
     private TagDefineType tagDefineType;
-
+    private boolean hasCollect;
 }
