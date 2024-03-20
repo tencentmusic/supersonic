@@ -62,6 +62,9 @@ public class TagQueryServiceImpl implements TagQueryService {
         itemValueResp.setItemId(itemValueReq.getItemId());
         itemValueResp.setType(SchemaElementType.TAG);
         TagResp tag = tagMetaService.getTag(itemValueReq.getItemId(), user);
+        if (Objects.isNull(tag)) {
+            return null;
+        }
         checkTag(tag);
         itemValueResp.setName(tag.getName());
         itemValueResp.setBizName(tag.getBizName());

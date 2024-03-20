@@ -56,9 +56,9 @@ public class TagMetaServiceImpl implements TagMetaService {
     private final DomainService domainService;
 
     public TagMetaServiceImpl(TagRepository tagRepository, ModelService modelService,
-                              CollectService collectService, @Lazy DimensionService dimensionService,
-                              @Lazy MetricService metricService, TagObjectService tagObjectService,
-                              DomainService domainService) {
+            CollectService collectService, @Lazy DimensionService dimensionService,
+            @Lazy MetricService metricService, TagObjectService tagObjectService,
+            DomainService domainService) {
         this.tagRepository = tagRepository;
         this.modelService = modelService;
         this.collectService = collectService;
@@ -106,6 +106,9 @@ public class TagMetaServiceImpl implements TagMetaService {
     @Override
     public TagResp getTag(Long id, User user) {
         TagDO tagDO = tagRepository.getTagById(id);
+        if (Objects.isNull(tagDO)) {
+            return null;
+        }
         TagResp tagResp = convert2Resp(tagDO);
         List<TagResp> tagRespList = Arrays.asList(tagResp);
         fillModelInfo(tagRespList);
@@ -141,7 +144,7 @@ public class TagMetaServiceImpl implements TagMetaService {
         BeanUtils.copyProperties(tagMarketPageReq, tagFilter);
         tagFilter.setModelIds(modelIds);
         PageInfo<TagResp> tagDOPageInfo = PageHelper.startPage(tagMarketPageReq.getCurrent(),
-                tagMarketPageReq.getPageSize())
+                        tagMarketPageReq.getPageSize())
                 .doSelectPageInfo(() -> getTags(tagFilter));
 
         List<TagResp> tagRespList = tagDOPageInfo.getList();
