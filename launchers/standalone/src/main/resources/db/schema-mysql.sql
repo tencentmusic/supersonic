@@ -498,18 +498,17 @@ CREATE TABLE s2_view
     `admin_org` varchar(3000) DEFAULT NULL
 )ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS `s2_tag`
-(
-    `id`                bigint(20)   NOT NULL AUTO_INCREMENT,
-    `item_id`           bigint(20)   DEFAULT NULL,
-    `type`              varchar(255) NOT NULL ,
-    `created_at`        datetime     NOT NULL COMMENT '创建时间',
-    `created_by`        varchar(100) NOT NULL COMMENT '创建人',
-    `updated_at`        datetime      NULL COMMENT '更新时间',
-    `updated_by`        varchar(100)  NULL COMMENT '更新人',
-    `ext`               text DEFAULT NULL,
-    PRIMARY KEY (`id`)
-) ENGINE = InnoDB DEFAULT CHARSET = utf8 COMMENT ='标签表';
+CREATE TABLE IF NOT EXISTS s2_tag(
+                       `id` INT NOT NULL  AUTO_INCREMENT,
+                       `item_id` INT  NOT NULL ,
+                       `type` varchar(255)  NOT NULL ,
+                       `created_at` datetime NOT NULL ,
+                       `created_by` varchar(100) NOT NULL ,
+                       `updated_at` datetime DEFAULT NULL ,
+                       `updated_by` varchar(100) DEFAULT NULL ,
+                       `ext` text DEFAULT NULL  ,
+                       PRIMARY KEY (`id`)
+)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `s2_tag_object`
 (
@@ -518,8 +517,8 @@ CREATE TABLE IF NOT EXISTS `s2_tag_object`
     `name`              varchar(255) NOT NULL COMMENT '名称',
     `biz_name`          varchar(255) NOT NULL COMMENT '英文名称',
     `description`       varchar(500) DEFAULT NULL COMMENT '描述',
-    `status`            int(10)      NOT NULL COMMENT '状态',
-    `sensitive_level`   int(10)      NOT NULL COMMENT '敏感级别',
+    `status`            int(10) NOT NULL DEFAULT '1' COMMENT '状态',
+    `sensitive_level`   int(10) NOT NULL DEFAULT '0' COMMENT '敏感级别',
     `created_at`        datetime     NOT NULL COMMENT '创建时间',
     `created_by`        varchar(100) NOT NULL COMMENT '创建人',
     `updated_at`        datetime      NULL COMMENT '更新时间',

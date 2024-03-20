@@ -10,5 +10,5 @@ public class TagDeleteReq {
 
     private List<Long> ids;
     private List<Long> itemIds;
-    private TagDefineType type;
+    private TagDefineType tagDefineType;
 }
