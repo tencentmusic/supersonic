@@ -14,7 +14,7 @@ public class DataSetModelConfig {
 
     private Long id;
 
-    private boolean includesAll;
+    private Boolean includesAll = false;
 
     private List<Long> metrics = Lists.newArrayList();
 
