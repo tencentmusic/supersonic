@@ -33,7 +33,7 @@ public class CollectDO implements Serializable {
     private Long id;
 
     /**
-     * 收藏的类型
+     * 收藏的类型 metric,dimension,tag
      */
     @TableField("type")
     private String type;

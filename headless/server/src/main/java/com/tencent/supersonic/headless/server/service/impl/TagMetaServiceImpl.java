@@ -2,9 +2,11 @@ package com.tencent.supersonic.headless.server.service.impl;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.common.pojo.enums.AuthType;
 import com.tencent.supersonic.common.pojo.enums.TypeEnums;
+import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
 import com.tencent.supersonic.headless.api.pojo.enums.TagDefineType;
 import com.tencent.supersonic.headless.api.pojo.request.TagDeleteReq;
 import com.tencent.supersonic.headless.api.pojo.request.TagFilterPageReq;
@@ -139,12 +141,28 @@ public class TagMetaServiceImpl implements TagMetaService {
     @Override
     public PageInfo<TagResp> queryTagMarketPage(TagFilterPageReq tagMarketPageReq, User user) {
         List<ModelResp> modelRespList = getRelatedModel(tagMarketPageReq);
+        if (CollectionUtils.isEmpty(modelRespList)) {
+            return new PageInfo<>();
+        }
         List<Long> modelIds = modelRespList.stream().map(model -> model.getId()).collect(Collectors.toList());
+
         TagFilter tagFilter = new TagFilter();
+        List<CollectDO> collectList = collectService.getCollectList(user.getName());
+        List<Long> collectIds = collectList.stream()
+                .filter(collectDO -> SchemaElementType.TAG.name().equalsIgnoreCase(collectDO.getType()))
+                .map(CollectDO::getCollectId).collect(Collectors.toList());
+        if (tagMarketPageReq.isHasCollect()) {
+            if (CollectionUtils.isEmpty(collectIds)) {
+                tagFilter.setIds(Lists.newArrayList(-1L));
+            } else {
+                tagFilter.setIds(collectIds);
+            }
+        }
+
         BeanUtils.copyProperties(tagMarketPageReq, tagFilter);
         tagFilter.setModelIds(modelIds);
         PageInfo<TagResp> tagDOPageInfo = PageHelper.startPage(tagMarketPageReq.getCurrent(),
-                        tagMarketPageReq.getPageSize())
+                tagMarketPageReq.getPageSize())
                 .doSelectPageInfo(() -> getTags(tagFilter));
 
         List<TagResp> tagRespList = tagDOPageInfo.getList();
