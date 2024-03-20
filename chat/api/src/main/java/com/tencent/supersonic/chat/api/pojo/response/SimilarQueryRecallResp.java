@@ -10,8 +10,6 @@ public class SimilarQueryRecallResp {
 
     private Long queryId;
 
-    private Integer parseId;
-
     private String queryText;
 
 }

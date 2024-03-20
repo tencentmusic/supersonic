@@ -121,7 +121,7 @@ public class ChatQueryServiceImpl implements ChatQueryService {
 
     @Override
     public ParseResp performParsing(QueryReq queryReq) {
-        ParseResp parseResult = new ParseResp();
+        ParseResp parseResult = new ParseResp(queryReq.getChatId(), queryReq.getQueryText());
         // build queryContext and chatContext
         QueryContext queryCtx = buildQueryContext(queryReq);
 
@@ -157,6 +157,9 @@ public class ChatQueryServiceImpl implements ChatQueryService {
         resultProcessors.forEach(processor -> {
             processor.process(parseResult, queryCtx, chatCtx);
         });
+        List<SemanticParseInfo> parseInfos = queryCtx.getCandidateQueries().stream()
+                .map(SemanticQuery::getParseInfo).collect(Collectors.toList());
+        parseResult.setSelectedParses(parseInfos);
         return parseResult;
     }
 

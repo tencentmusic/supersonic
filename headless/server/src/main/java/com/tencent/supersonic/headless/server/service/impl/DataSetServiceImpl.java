@@ -8,39 +8,33 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.common.pojo.enums.AuthType;
-import com.tencent.supersonic.common.pojo.enums.QueryType;
 import com.tencent.supersonic.common.pojo.enums.StatusEnum;
 import com.tencent.supersonic.common.pojo.enums.TypeEnums;
 import com.tencent.supersonic.common.pojo.exception.InvalidArgumentException;
 import com.tencent.supersonic.common.util.BeanMapper;
-import com.tencent.supersonic.headless.api.pojo.DataSetModelConfig;
-import com.tencent.supersonic.headless.api.pojo.QueryConfig;
 import com.tencent.supersonic.headless.api.pojo.DataSetDetail;
+import com.tencent.supersonic.headless.api.pojo.QueryConfig;
+import com.tencent.supersonic.headless.api.pojo.enums.TagDefineType;
+import com.tencent.supersonic.headless.api.pojo.request.DataSetReq;
+import com.tencent.supersonic.headless.api.pojo.request.QueryDataSetReq;
 import com.tencent.supersonic.headless.api.pojo.request.QuerySqlReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
-import com.tencent.supersonic.headless.api.pojo.request.QueryDataSetReq;
 import com.tencent.supersonic.headless.api.pojo.request.SemanticQueryReq;
-import com.tencent.supersonic.headless.api.pojo.request.DataSetReq;
+import com.tencent.supersonic.headless.api.pojo.response.DataSetResp;
 import com.tencent.supersonic.headless.api.pojo.response.DimensionResp;
 import com.tencent.supersonic.headless.api.pojo.response.DomainResp;
 import com.tencent.supersonic.headless.api.pojo.response.MetricResp;
-import com.tencent.supersonic.headless.api.pojo.response.DataSetResp;
+import com.tencent.supersonic.headless.api.pojo.response.TagItem;
 import com.tencent.supersonic.headless.server.persistence.dataobject.DataSetDO;
+import com.tencent.supersonic.headless.server.persistence.dataobject.TagDO;
 import com.tencent.supersonic.headless.server.persistence.mapper.DataSetDOMapper;
 import com.tencent.supersonic.headless.server.pojo.MetaFilter;
+import com.tencent.supersonic.headless.server.pojo.TagFilter;
+import com.tencent.supersonic.headless.server.service.DataSetService;
 import com.tencent.supersonic.headless.server.service.DimensionService;
 import com.tencent.supersonic.headless.server.service.DomainService;
 import com.tencent.supersonic.headless.server.service.MetricService;
-import com.tencent.supersonic.headless.server.service.DataSetService;
-import java.util.Objects;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
-
+import com.tencent.supersonic.headless.server.service.TagMetaService;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Date;
@@ -51,6 +45,13 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 @Service
 public class DataSetServiceImpl
@@ -70,12 +71,16 @@ public class DataSetServiceImpl
     @Autowired
     private MetricService metricService;
 
+    @Lazy
+    @Autowired
+    private TagMetaService tagMetaService;
+
     @Override
     public DataSetResp save(DataSetReq dataSetReq, User user) {
         dataSetReq.createdBy(user.getName());
         DataSetDO dataSetDO = convert(dataSetReq);
         dataSetDO.setStatus(StatusEnum.ONLINE.getCode());
-        DataSetResp dataSetResp = convert(dataSetDO);
+        DataSetResp dataSetResp = convert(dataSetDO, user);
         conflictCheck(dataSetResp);
         save(dataSetDO);
         return dataSetResp;
@@ -85,7 +90,7 @@ public class DataSetServiceImpl
     public DataSetResp update(DataSetReq dataSetReq, User user) {
         dataSetReq.updatedBy(user.getName());
         DataSetDO dataSetDO = convert(dataSetReq);
-        DataSetResp dataSetResp = convert(dataSetDO);
+        DataSetResp dataSetResp = convert(dataSetDO, user);
         conflictCheck(dataSetResp);
         updateById(dataSetDO);
         return dataSetResp;
@@ -94,11 +99,11 @@ public class DataSetServiceImpl
     @Override
     public DataSetResp getDataSet(Long id) {
         DataSetDO dataSetDO = getById(id);
-        return convert(dataSetDO);
+        return convert(dataSetDO, User.getFakeUser());
     }
 
     @Override
-    public List<DataSetResp> getDataSetList(MetaFilter metaFilter) {
+    public List<DataSetResp> getDataSetList(MetaFilter metaFilter, User user) {
         QueryWrapper<DataSetDO> wrapper = new QueryWrapper<>();
         if (metaFilter.getDomainId() != null) {
             wrapper.lambda().eq(DataSetDO::getDomainId, metaFilter.getDomainId());
@@ -110,7 +115,7 @@ public class DataSetServiceImpl
             wrapper.lambda().eq(DataSetDO::getStatus, metaFilter.getStatus());
         }
         wrapper.lambda().ne(DataSetDO::getStatus, StatusEnum.DELETED.getCode());
-        return list(wrapper).stream().map(this::convert).collect(Collectors.toList());
+        return list(wrapper).stream().map(entry -> convert(entry, user)).collect(Collectors.toList());
     }
 
     @Override
@@ -124,13 +129,13 @@ public class DataSetServiceImpl
 
     @Override
     public List<DataSetResp> getDataSets(User user) {
-        List<DataSetResp> dataSetResps = getDataSetList(new MetaFilter());
+        List<DataSetResp> dataSetResps = getDataSetList(new MetaFilter(), user);
         return getDataSetFilterByAuth(dataSetResps, user);
     }
 
     @Override
     public List<DataSetResp> getDataSetsInheritAuth(User user, Long domainId) {
-        List<DataSetResp> dataSetResps = getDataSetList(new MetaFilter());
+        List<DataSetResp> dataSetResps = getDataSetList(new MetaFilter(), user);
         List<DataSetResp> inheritAuthFormDomain = getDataSetFilterByDomainAuth(dataSetResps, user);
         Set<DataSetResp> dataSetRespSet = new HashSet<>(inheritAuthFormDomain);
         List<DataSetResp> dataSetFilterByAuth = getDataSetFilterByAuth(dataSetResps, user);
@@ -159,7 +164,22 @@ public class DataSetServiceImpl
                 domainIds.contains(dataSetResp.getDomainId())).collect(Collectors.toList());
     }
 
-    private DataSetResp convert(DataSetDO dataSetDO) {
+    private List<TagItem> getTagItems(User user, List<Long> dimensionIds, TagDefineType tagDefineType) {
+        TagFilter tagFilter = new TagFilter();
+        tagFilter.setTagDefineType(tagDefineType);
+        tagFilter.setItemIds(dimensionIds);
+        Set<Long> dimensionItemSet = tagMetaService.getTagDOList(tagFilter, user).stream().map(TagDO::getItemId)
+                .collect(Collectors.toSet());
+        return dimensionIds.stream().map(entry -> {
+                    TagItem tagItem = new TagItem();
+                    tagItem.setIsTag(Boolean.compare(dimensionItemSet.contains(entry), false));
+                    tagItem.setItemId(entry);
+                    return tagItem;
+                }
+        ).collect(Collectors.toList());
+    }
+
+    private DataSetResp convert(DataSetDO dataSetDO, User user) {
         DataSetResp dataSetResp = new DataSetResp();
         BeanMapper.mapper(dataSetDO, dataSetResp);
         dataSetResp.setDataSetDetail(JSONObject.parseObject(dataSetDO.getDataSetDetail(), DataSetDetail.class));
@@ -171,11 +191,11 @@ public class DataSetServiceImpl
         dataSetResp.setAdminOrgs(StringUtils.isBlank(dataSetDO.getAdminOrg())
                 ? Lists.newArrayList() : Arrays.asList(dataSetDO.getAdminOrg().split(",")));
         dataSetResp.setTypeEnum(TypeEnums.DATASET);
-        String queryType = dataSetDO.getQueryType();
-        if (Objects.isNull(queryType)) {
-            queryType = QueryType.METRIC.name();
-        }
-        dataSetResp.setQueryType(QueryType.valueOf(queryType));
+        List<TagItem> dimensionItems = getTagItems(user, dataSetResp.dimensionIds(), TagDefineType.DIMENSION);
+        dataSetResp.setAllDimensions(dimensionItems);
+
+        List<TagItem> metricItems = getTagItems(user, dataSetResp.metricIds(), TagDefineType.METRIC);
+        dataSetResp.setAllMetrics(metricItems);
         return dataSetResp;
     }
 
@@ -184,8 +204,6 @@ public class DataSetServiceImpl
         BeanMapper.mapper(dataSetReq, dataSetDO);
         dataSetDO.setDataSetDetail(JSONObject.toJSONString(dataSetReq.getDataSetDetail()));
         dataSetDO.setQueryConfig(JSONObject.toJSONString(dataSetReq.getQueryConfig()));
-        QueryType queryType = getQueryType(dataSetReq);
-        dataSetDO.setQueryType(queryType.name());
         return dataSetDO;
     }
 
@@ -198,24 +216,6 @@ public class DataSetServiceImpl
         return queryReq;
     }
 
-    private QueryType getQueryType(DataSetReq dataSetReq) {
-        QueryType queryType = dataSetReq.getQueryType();
-        if (Objects.nonNull(queryType)) {
-            return queryType;
-        }
-        List<DataSetModelConfig> dataSetModelConfigs = dataSetReq.getDataSetDetail().getDataSetModelConfigs();
-        if (CollectionUtils.isEmpty(dataSetModelConfigs)) {
-            return QueryType.METRIC;
-        }
-
-        Set<DataSetModelConfig> collect = dataSetModelConfigs.stream()
-                .filter(config -> !CollectionUtils.isEmpty(config.getTagIds())).collect(Collectors.toSet());
-        if (CollectionUtils.isEmpty(collect)) {
-            return QueryType.METRIC;
-        }
-        return QueryType.TAG;
-    }
-
     public static boolean checkAdminPermission(User user, DataSetResp dataSetResp) {
         List<String> admins = dataSetResp.getAdmins();
         if (user.isSuperAdmin()) {
@@ -226,13 +226,13 @@ public class DataSetServiceImpl
     }
 
     @Override
-    public Map<Long, List<Long>> getModelIdToDataSetIds(List<Long> dataSetIds) {
+    public Map<Long, List<Long>> getModelIdToDataSetIds(List<Long> dataSetIds, User user) {
         MetaFilter metaFilter = new MetaFilter();
         metaFilter.setStatus(StatusEnum.ONLINE.getCode());
         metaFilter.setIds(dataSetIds);
         List<DataSetResp> dataSetList = dataSetSchemaCache.getIfPresent(metaFilter);
         if (CollectionUtils.isEmpty(dataSetList)) {
-            dataSetList = getDataSetList(metaFilter);
+            dataSetList = getDataSetList(metaFilter, user);
             dataSetSchemaCache.put(metaFilter, dataSetList);
         }
         return dataSetList.stream()
@@ -245,12 +245,12 @@ public class DataSetServiceImpl
 
     @Override
     public Map<Long, List<Long>> getModelIdToDataSetIds() {
-        return getModelIdToDataSetIds(Lists.newArrayList());
+        return getModelIdToDataSetIds(Lists.newArrayList(), User.getFakeUser());
     }
 
     private void conflictCheck(DataSetResp dataSetResp) {
-        List<Long> allDimensionIds = dataSetResp.getAllDimensions();
-        List<Long> allMetricIds = dataSetResp.getAllMetrics();
+        List<Long> allDimensionIds = dataSetResp.dimensionIds();
+        List<Long> allMetricIds = dataSetResp.metricIds();
         MetaFilter metaFilter = new MetaFilter();
         if (!CollectionUtils.isEmpty(allDimensionIds)) {
             metaFilter.setIds(allDimensionIds);

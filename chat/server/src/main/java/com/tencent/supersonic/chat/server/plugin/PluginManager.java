@@ -12,7 +12,6 @@ import com.tencent.supersonic.chat.server.plugin.event.PluginAddEvent;
 import com.tencent.supersonic.chat.server.plugin.event.PluginDelEvent;
 import com.tencent.supersonic.chat.server.plugin.event.PluginUpdateEvent;
 import com.tencent.supersonic.chat.server.pojo.ChatParseContext;
-import com.tencent.supersonic.chat.server.service.AgentService;
 import com.tencent.supersonic.chat.server.service.PluginService;
 import com.tencent.supersonic.common.config.EmbeddingConfig;
 import com.tencent.supersonic.common.util.ComponentFactory;
@@ -54,9 +53,7 @@ public class PluginManager {
 
     public static List<Plugin> getPluginAgentCanSupport(ChatParseContext chatParseContext) {
         PluginService pluginService = ContextUtils.getBean(PluginService.class);
-        AgentService agentService = ContextUtils.getBean(AgentService.class);
-        Agent agent = agentService.getAgent(chatParseContext.getAgentId());
-
+        Agent agent = chatParseContext.getAgent();
         List<Plugin> plugins = pluginService.getPluginList();
         if (Objects.isNull(agent)) {
             return plugins;

@@ -6,8 +6,7 @@ public enum SchemaElementType {
     DIMENSION,
     VALUE,
     ENTITY,
-    TAG,
-    TAG_VALUE,
     ID,
-    DATE
+    DATE,
+    TAG
 }

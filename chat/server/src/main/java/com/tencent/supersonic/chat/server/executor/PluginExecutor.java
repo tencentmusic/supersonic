@@ -15,6 +15,7 @@ public class PluginExecutor implements ChatExecutor {
             return null;
         }
         PluginSemanticQuery query = PluginQueryManager.getPluginQuery(parseInfo.getQueryMode());
+        query.setParseInfo(parseInfo);
         return query.build();
     }
 

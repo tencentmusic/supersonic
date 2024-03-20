@@ -46,7 +46,7 @@ rm -fr  ${buildDir}/webapp
 #5. build backend python modules
 if [ "$service" == "pyllm" ]; then
   echo "start installing python modules with pip: ${pip_path}"
-  requirementPath=$baseDir/../chat/python/requirements.txt
+  requirementPath=$baseDir/../headless/python/requirements.txt
   ${pip_path} install -r ${requirementPath}
   echo "install python modules success"
 fi

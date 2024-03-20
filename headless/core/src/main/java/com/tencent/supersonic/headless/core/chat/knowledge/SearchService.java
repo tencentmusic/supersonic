@@ -88,7 +88,7 @@ public class SearchService {
                         entry -> {
                             String name = entry.getKey().replace("#", " ");
                             List<String> natures = entry.getValue().stream()
-                                    .map(nature -> nature.replaceAll(DictWordType.SUFFIX.getTypeWithSpilt(), ""))
+                                    .map(nature -> nature.replaceAll(DictWordType.SUFFIX.getType(), ""))
                                     .collect(Collectors.toList());
                             name = StringUtils.reverse(name);
                             return new HanlpMapResult(name, natures, key);
@@ -169,8 +169,8 @@ public class SearchService {
         if (Objects.nonNull(natures) && natures.length > 0) {
             trie.put(dictWord.getWord(), getValue(natures));
         }
-        if (dictWord.getNature().contains(DictWordType.METRIC.getTypeWithSpilt()) || dictWord.getNature()
-                .contains(DictWordType.DIMENSION.getTypeWithSpilt())) {
+        if (dictWord.getNature().contains(DictWordType.METRIC.getType()) || dictWord.getNature()
+                .contains(DictWordType.DIMENSION.getType())) {
             suffixTrie.remove(dictWord.getWord());
         }
     }

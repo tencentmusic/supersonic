@@ -1,8 +1,7 @@
 package com.tencent.supersonic.chat.server.processor.execute;
 
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
-import com.tencent.supersonic.chat.api.pojo.response.AggregateInfo;
-import com.tencent.supersonic.chat.api.pojo.response.MetricInfo;
+import com.tencent.supersonic.chat.server.pojo.ChatExecuteContext;
 import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.common.pojo.DateConf.DateMode;
 import com.tencent.supersonic.common.pojo.QueryColumn;
@@ -11,14 +10,17 @@ import com.tencent.supersonic.common.pojo.enums.QueryType;
 import com.tencent.supersonic.common.pojo.enums.RatioOverType;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.DateUtils;
+import com.tencent.supersonic.headless.api.pojo.AggregateInfo;
+import com.tencent.supersonic.headless.api.pojo.MetricInfo;
 import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
-import com.tencent.supersonic.headless.api.pojo.request.ExecuteQueryReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
 import com.tencent.supersonic.headless.api.pojo.response.QueryResult;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
 import com.tencent.supersonic.headless.core.config.AggregatorConfig;
 import com.tencent.supersonic.headless.core.utils.QueryReqBuilder;
+import com.tencent.supersonic.headless.server.service.QueryService;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.CollectionUtils;
 
@@ -56,19 +58,18 @@ import static com.tencent.supersonic.common.pojo.Constants.WEEK;
 @Slf4j
 public class MetricRatioProcessor implements ExecuteResultProcessor {
 
-    //private SemanticInterpreter semanticInterpreter = ComponentFactory.getSemanticLayer();
-
     @Override
-    public void process(QueryResult queryResult, SemanticParseInfo semanticParseInfo, ExecuteQueryReq queryReq) {
-
+    public void process(ChatExecuteContext chatExecuteContext, QueryResult queryResult) {
+        SemanticParseInfo semanticParseInfo = chatExecuteContext.getParseInfo();
         AggregatorConfig aggregatorConfig = ContextUtils.getBean(AggregatorConfig.class);
         if (CollectionUtils.isEmpty(semanticParseInfo.getMetrics())
                 || !aggregatorConfig.getEnableRatio()
                 || !QueryType.METRIC.equals(semanticParseInfo.getQueryType())) {
             return;
         }
-        //AggregateInfo aggregateInfo = getAggregateInfo(queryReq.getUser(), semanticParseInfo, queryResult);
-        //queryResult.setAggregateInfo(aggregateInfo);
+        AggregateInfo aggregateInfo = getAggregateInfo(chatExecuteContext.getUser(),
+                semanticParseInfo, queryResult);
+        queryResult.setAggregateInfo(aggregateInfo);
     }
 
     public AggregateInfo getAggregateInfo(User user, SemanticParseInfo semanticParseInfo, QueryResult queryResult) {
@@ -123,16 +124,17 @@ public class MetricRatioProcessor implements ExecuteResultProcessor {
         return aggregateInfo;
     }
 
+    @SneakyThrows
     private MetricInfo queryRatio(User user, SemanticParseInfo semanticParseInfo, SchemaElement metric,
-            AggOperatorEnum aggOperatorEnum, QueryResult queryResult) {
+                                  AggOperatorEnum aggOperatorEnum, QueryResult queryResult) {
 
         QueryStructReq queryStructReq = QueryReqBuilder.buildStructRatioReq(semanticParseInfo, metric, aggOperatorEnum);
         String dateField = QueryReqBuilder.getDateField(semanticParseInfo.getDateInfo());
         queryStructReq.setGroups(new ArrayList<>(Arrays.asList(dateField)));
         queryStructReq.setDateInfo(getRatioDateConf(aggOperatorEnum, semanticParseInfo, queryResult));
         queryStructReq.setConvertToSql(false);
-
-        SemanticQueryResp queryResp = null;
+        QueryService queryService = ContextUtils.getBean(QueryService.class);
+        SemanticQueryResp queryResp = queryService.queryByReq(queryStructReq, user);
         MetricInfo metricInfo = new MetricInfo();
         metricInfo.setStatistics(new HashMap<>());
         if (Objects.isNull(queryResp) || CollectionUtils.isEmpty(queryResp.getResultList())) {

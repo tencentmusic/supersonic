@@ -1,23 +1,19 @@
 package com.tencent.supersonic.headless.server.service.impl;
 
-import static com.tencent.supersonic.common.pojo.Constants.DESC_UPPER;
-
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
-import com.tencent.supersonic.common.pojo.Aggregator;
 import com.tencent.supersonic.common.pojo.DateConf;
-import com.tencent.supersonic.common.pojo.Order;
-import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
+import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import com.tencent.supersonic.headless.api.pojo.Dim;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
 import com.tencent.supersonic.headless.api.pojo.ValueDistribution;
 import com.tencent.supersonic.headless.api.pojo.enums.TagDefineType;
 import com.tencent.supersonic.headless.api.pojo.request.ItemValueReq;
 import com.tencent.supersonic.headless.api.pojo.request.QuerySqlReq;
-import com.tencent.supersonic.headless.api.pojo.request.QueryTagReq;
 import com.tencent.supersonic.headless.api.pojo.response.ItemValueResp;
 import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
 import com.tencent.supersonic.headless.api.pojo.response.TagResp;
+import com.tencent.supersonic.headless.core.utils.SqlGenerateUtils;
 import com.tencent.supersonic.headless.server.service.ModelService;
 import com.tencent.supersonic.headless.server.service.QueryService;
 import com.tencent.supersonic.headless.server.service.TagMetaService;
@@ -25,7 +21,6 @@ import com.tencent.supersonic.headless.server.service.TagQueryService;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -48,20 +43,25 @@ public class TagQueryServiceImpl implements TagQueryService {
     private final TagMetaService tagMetaService;
     private final QueryService queryService;
     private final ModelService modelService;
+    private final SqlGenerateUtils sqlGenerateUtils;
 
     public TagQueryServiceImpl(TagMetaService tagMetaService, QueryService queryService,
-                               ModelService modelService) {
+            ModelService modelService, SqlGenerateUtils sqlGenerateUtils) {
         this.tagMetaService = tagMetaService;
         this.queryService = queryService;
         this.modelService = modelService;
+        this.sqlGenerateUtils = sqlGenerateUtils;
     }
 
     @Override
     public ItemValueResp queryTagValue(ItemValueReq itemValueReq, User user) throws Exception {
         ItemValueResp itemValueResp = new ItemValueResp();
-        itemValueResp.setItemId(itemValueReq.getItemId());
+        itemValueResp.setItemId(itemValueReq.getId());
         itemValueResp.setType(SchemaElementType.TAG);
-        TagResp tag = tagMetaService.getTag(itemValueReq.getItemId(), user);
+        TagResp tag = tagMetaService.getTag(itemValueReq.getId(), user);
+        if (Objects.isNull(tag)) {
+            return null;
+        }
         checkTag(tag);
         itemValueResp.setName(tag.getName());
         itemValueResp.setBizName(tag.getBizName());
@@ -69,8 +69,8 @@ public class TagQueryServiceImpl implements TagQueryService {
         // tag total count
         Long totalCount = queryTagTotalCount(tag, itemValueReq, user);
         // tag value
-        QueryTagReq queryTagReq = generateTagReq(tag, itemValueReq);
-        SemanticQueryResp semanticQueryResp = queryService.queryByReq(queryTagReq, user);
+        QuerySqlReq querySqlReq = generateReq(tag, itemValueReq);
+        SemanticQueryResp semanticQueryResp = queryService.queryByReq(querySqlReq, user);
         fillTagValueInfo(itemValueResp, semanticQueryResp, totalCount);
         return itemValueResp;
     }
@@ -88,6 +88,7 @@ public class TagQueryServiceImpl implements TagQueryService {
         ModelResp model = modelService.getModel(tag.getModelId());
         List<Dim> timeDimension = model.getTimeDimension();
         if (CollectionUtils.isEmpty(timeDimension)) {
+            itemValueReq.setDateConf(null);
             return;
         }
 
@@ -102,34 +103,13 @@ public class TagQueryServiceImpl implements TagQueryService {
 
     private String queryTagDate(Dim dim) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern(dim.getDateFormat());
-        String endDate = LocalDate.now().plusDays(-dayBefore).format(formatter);
-        return endDate;
-    }
-
-    private String queryTagDateFromDbByStruct(Dim dim, TagResp tag, User user) throws Exception {
-        QueryTagReq queryTagReq = new QueryTagReq();
-        queryTagReq.addModelId(tag.getModelId());
-        queryTagReq.setLimit(1L);
-        List<Aggregator> aggregators = new ArrayList<>();
-        aggregators.add(new Aggregator(dim.getBizName(), AggOperatorEnum.MAX, maxDateAlias));
-        queryTagReq.setAggregators(aggregators);
-        queryTagReq.setDateInfo(null);
-        log.info("queryTagDateFromDb, queryTagReq:{}", queryTagReq.toCustomizedString());
-        SemanticQueryResp semanticQueryResp = queryService.queryByReq(queryTagReq, user);
-        if (!CollectionUtils.isEmpty(semanticQueryResp.getResultList())) {
-            Object date = semanticQueryResp.getResultList().get(0).get(maxDateAlias);
-            if (Objects.nonNull(date)) {
-                return date.toString();
-            }
-        }
-        throw new RuntimeException("queryTagTotalCount error");
-
+        return LocalDate.now().plusDays(-dayBefore).format(formatter);
     }
 
     private String queryTagDateFromDbBySql(Dim dim, TagResp tag, User user) throws Exception {
 
         String sqlPattern = "select max(%s)  as %s from tbl where %s is not null";
-        String sql = String.format(sqlPattern, dim.getBizName(), maxDateAlias, tag.getBizName());
+        String sql = String.format(sqlPattern, TimeDimensionEnum.DAY.getName(), maxDateAlias, tag.getBizName());
         Set<Long> modelIds = new HashSet<>();
         modelIds.add(tag.getModelId());
         QuerySqlReq querySqlReq = new QuerySqlReq();
@@ -155,17 +135,17 @@ public class TagQueryServiceImpl implements TagQueryService {
     }
 
     private Long queryTagTotalCount(TagResp tag, ItemValueReq itemValueReq, User user) throws Exception {
+        String sqlPattern = "select count(1)  as %s from tbl where %s is not null %s";
+        String dateFilter = getDateFilter(itemValueReq);
+        String sql = String.format(sqlPattern, tagValueAlias, tag.getBizName(), dateFilter);
+        Set<Long> modelIds = new HashSet<>();
+        modelIds.add(tag.getModelId());
+        QuerySqlReq querySqlReq = new QuerySqlReq();
+        querySqlReq.setSql(sql);
+        querySqlReq.setNeedAuth(false);
+        querySqlReq.setModelIds(modelIds);
 
-        QueryTagReq queryTagReq = new QueryTagReq();
-        queryTagReq.addModelId(tag.getModelId());
-        queryTagReq.setLimit(1L);
-        List<Aggregator> aggregators = new ArrayList<>();
-        aggregators.add(new Aggregator(tag.getBizName(), AggOperatorEnum.COUNT, tagValueAlias));
-        queryTagReq.setAggregators(aggregators);
-        DateConf dateConf = generateDateConf(itemValueReq);
-        queryTagReq.setDateInfo(dateConf);
-
-        SemanticQueryResp semanticQueryResp = queryService.queryByReq(queryTagReq, user);
+        SemanticQueryResp semanticQueryResp = queryService.queryByReq(querySqlReq, user);
         if (!CollectionUtils.isEmpty(semanticQueryResp.getResultList())) {
             Object total = semanticQueryResp.getResultList().get(0).get(tagValueAlias);
             if (Objects.nonNull(total)) {
@@ -175,6 +155,14 @@ public class TagQueryServiceImpl implements TagQueryService {
             }
         }
         throw new RuntimeException("queryTagTotalCount error");
+    }
+
+    private String getDateFilter(ItemValueReq itemValueReq) {
+        if (Objects.isNull(itemValueReq.getDateConf())) {
+            return "";
+        }
+        String dateWhereClause = sqlGenerateUtils.getDateWhereClause(itemValueReq.getDateConf(), null);
+        return " and " + dateWhereClause;
     }
 
     private void fillTagValueInfo(ItemValueResp itemValueResp, SemanticQueryResp semanticQueryResp, Long totalCount) {
@@ -194,24 +182,19 @@ public class TagQueryServiceImpl implements TagQueryService {
         itemValueResp.setValueDistributionList(valueDistributionList);
     }
 
-    private QueryTagReq generateTagReq(TagResp tag, ItemValueReq itemValueReq) {
-        QueryTagReq queryTagReq = new QueryTagReq();
-        queryTagReq.addModelId(tag.getModelId());
-        queryTagReq.setGroups(new ArrayList<>(Arrays.asList(tag.getBizName())));
-        queryTagReq.setLimit(itemValueReq.getLimit());
+    private QuerySqlReq generateReq(TagResp tag, ItemValueReq itemValueReq) {
+        String sqlPattern = "select %s, count(1)  as %s from tbl where %s is not null %s "
+                + "group by %s order by %s desc";
+        String sql = String.format(sqlPattern, tag.getBizName(), tagValueAlias, tag.getBizName(),
+                getDateFilter(itemValueReq), tag.getBizName(), tag.getBizName());
 
-        List<Aggregator> aggregators = new ArrayList<>();
-        aggregators.add(new Aggregator(tag.getBizName(), AggOperatorEnum.COUNT, tagValueAlias));
-        queryTagReq.setAggregators(aggregators);
-
-        List<Order> orders = new ArrayList<>();
-        orders.add(new Order(String.format("count(%s)", tag.getBizName()), DESC_UPPER));
-        queryTagReq.setOrders(orders);
-
-        DateConf dateConf = generateDateConf(itemValueReq);
-        queryTagReq.setDateInfo(dateConf);
-
-        return queryTagReq;
+        Set<Long> modelIds = new HashSet<>();
+        modelIds.add(tag.getModelId());
+        QuerySqlReq querySqlReq = new QuerySqlReq();
+        querySqlReq.setSql(sql);
+        querySqlReq.setNeedAuth(false);
+        querySqlReq.setModelIds(modelIds);
+        return querySqlReq;
     }
 
     private DateConf generateDateConf(ItemValueReq itemValueReq) {

@@ -46,12 +46,6 @@ public class NatureHelper {
             case VALUE:
                 result = SchemaElementType.VALUE;
                 break;
-            case TAG:
-                result = SchemaElementType.TAG;
-                break;
-            case TAG_VALUE:
-                result = SchemaElementType.TAG_VALUE;
-                break;
             default:
                 break;
         }
@@ -60,7 +54,7 @@ public class NatureHelper {
 
     private static boolean isDataSetOrEntity(S2Term term, Integer model) {
         return (DictWordType.NATURE_SPILT + model).equals(term.nature.toString()) || term.nature.toString()
-                .endsWith(DictWordType.ENTITY.getTypeWithSpilt());
+                .endsWith(DictWordType.ENTITY.getType());
     }
 
     public static Integer getDataSetByNature(Nature nature) {
@@ -134,8 +128,8 @@ public class NatureHelper {
         if (split.length <= 1) {
             return false;
         }
-        return !nature.endsWith(DictWordType.METRIC.getTypeWithSpilt()) && !nature.endsWith(
-                DictWordType.DIMENSION.getTypeWithSpilt())
+        return !nature.endsWith(DictWordType.METRIC.getType()) && !nature.endsWith(
+                DictWordType.DIMENSION.getType())
                 && StringUtils.isNumeric(split[1]);
     }
 
@@ -158,12 +152,12 @@ public class NatureHelper {
 
     private static long getDimensionCount(List<S2Term> terms) {
         return terms.stream().filter(term -> term.nature.startsWith(DictWordType.NATURE_SPILT) && term.nature.toString()
-                .endsWith(DictWordType.DIMENSION.getTypeWithSpilt())).count();
+                .endsWith(DictWordType.DIMENSION.getType())).count();
     }
 
     private static long getMetricCount(List<S2Term> terms) {
         return terms.stream().filter(term -> term.nature.startsWith(DictWordType.NATURE_SPILT) && term.nature.toString()
-                .endsWith(DictWordType.METRIC.getTypeWithSpilt())).count();
+                .endsWith(DictWordType.METRIC.getType())).count();
     }
 
     /**

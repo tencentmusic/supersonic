@@ -1,132 +1,95 @@
 package com.tencent.supersonic.headless;
 
-
+import com.github.pagehelper.PageInfo;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
-import com.tencent.supersonic.common.pojo.enums.StatusEnum;
-import com.tencent.supersonic.common.pojo.enums.TypeEnums;
-import com.tencent.supersonic.headless.api.pojo.ItemValueConfig;
-import com.tencent.supersonic.headless.api.pojo.TagDefineParams;
 import com.tencent.supersonic.headless.api.pojo.enums.TagDefineType;
-import com.tencent.supersonic.headless.api.pojo.request.DictItemReq;
-import com.tencent.supersonic.headless.api.pojo.request.DictSingleTaskReq;
-import com.tencent.supersonic.headless.api.pojo.request.ItemValueReq;
+import com.tencent.supersonic.headless.api.pojo.request.TagDeleteReq;
+import com.tencent.supersonic.headless.api.pojo.request.TagFilterPageReq;
 import com.tencent.supersonic.headless.api.pojo.request.TagReq;
 import com.tencent.supersonic.headless.api.pojo.response.TagResp;
 import com.tencent.supersonic.headless.server.pojo.TagFilter;
-import com.tencent.supersonic.headless.server.service.DictConfService;
-import com.tencent.supersonic.headless.server.service.DictTaskService;
 import com.tencent.supersonic.headless.server.service.TagMetaService;
-import com.tencent.supersonic.headless.server.service.TagQueryService;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public class TagTest extends BaseTest {
 
-    private final String bizName = "page";
-    private final Long modelId = 3L;
-    private final Integer dimId = 3;
-
     @Autowired
     private TagMetaService tagMetaService;
-    @Autowired
-    private TagQueryService tagQueryService;
-    @Autowired
-    private DictConfService dictConfService;
-    @Autowired
-    private DictTaskService dictTaskService;
 
-    @Test
-    void testCreateTag() {
-        TagReq tagReq = newTagReq();
-        tagMetaService.create(tagReq, User.getFakeUser());
+    private User user = User.getFakeUser();
 
-        TagResp tag = queryTagRespByBizName(bizName);
-        Assert.assertEquals(bizName, tag.getBizName());
-        tagMetaService.delete(tag.getId(), User.getFakeUser());
-    }
-
-    @Test
-    void testUpdateTag() {
-        TagReq tagReq = newTagReq();
-        TagResp tagResp = tagMetaService.create(tagReq, User.getFakeUser());
-        Assert.assertEquals(bizName, tagReq.getBizName());
-        tagReq.setId(tagResp.getId());
-        tagReq.setName("新页面");
-        tagMetaService.update(tagReq, User.getFakeUser());
-
-        TagResp tag = queryTagRespByBizName(bizName);
-        Assert.assertEquals("新页面", tag.getName());
-        tagMetaService.delete(tag.getId(), User.getFakeUser());
-    }
-
-    private TagResp queryTagRespByBizName(String bizName) {
-        TagFilter tagFilter = new TagFilter();
-        tagFilter.setBizName(bizName);
-        TagResp tagRespDb = tagMetaService.getTags(tagFilter).get(0);
-        return tagRespDb;
-    }
-
-    private TagReq newTagReq() {
+    public TagReq newTagReq() {
         TagReq tagReq = new TagReq();
-        tagReq.setModelId(modelId);
-        tagReq.setName("页面");
-        tagReq.setBizName(bizName);
-        tagReq.setStatus(1);
-        tagReq.setTypeEnum(TypeEnums.TAG);
         tagReq.setTagDefineType(TagDefineType.DIMENSION);
-
-        TagDefineParams tagDefineParams = new TagDefineParams();
-        tagDefineParams.setExpr(bizName);
-        tagDefineParams.setDependencies(new ArrayList<>(Arrays.asList(dimId)));
-        tagReq.setTagDefineParams(tagDefineParams);
+        tagReq.setItemId(4L);
         return tagReq;
     }
 
-    @Test
-    void testQueryTag() {
-        TagReq tagReq = newTagReq();
-        tagMetaService.create(tagReq, User.getFakeUser());
-        TagResp tag = queryTagRespByBizName(bizName);
-        Assert.assertEquals(bizName, tag.getBizName());
-        tagMetaService.delete(tag.getId(), User.getFakeUser());
+    public TagReq newTagReqV1() {
+        TagReq tagReq = new TagReq();
+        tagReq.setTagDefineType(TagDefineType.DIMENSION);
+        tagReq.setItemId(5L);
+        return tagReq;
+    }
+
+    public TagReq newTagReqV2() {
+        TagReq tagReq = new TagReq();
+        tagReq.setTagDefineType(TagDefineType.DIMENSION);
+        tagReq.setItemId(1L);
+        return tagReq;
+    }
+
+    @Before
+    public void setUp() {
+        TagDeleteReq tagDeleteReq = new TagDeleteReq();
+        tagDeleteReq.setTagDefineType(TagDefineType.DIMENSION);
+        tagDeleteReq.setItemIds(Arrays.asList(1L, 4L, 5L));
+        tagMetaService.deleteBatch(tagDeleteReq, user);
     }
 
     @Test
-    void testTagValue() {
+    public void testCreateTag() {
+        setUp();
         TagReq tagReq = newTagReq();
-        tagMetaService.create(tagReq, User.getFakeUser());
-        TagResp tag = queryTagRespByBizName(bizName);
-        ItemValueReq itemValueReq = new ItemValueReq();
-        itemValueReq.setItemId(tag.getId());
-        // ItemValueResp itemValueResp = tagQueryService.queryTagValue(itemValueReq, User.getFakeUser());
-        tagMetaService.delete(tag.getId(), User.getFakeUser());
+        tagMetaService.create(tagReq, user);
+        TagReq tagReq1 = newTagReqV1();
+        tagMetaService.create(tagReq1, user);
+        TagFilter tagFilter = new TagFilter();
+        tagFilter.setItemIds(Arrays.asList(4L, 5L));
+        List<TagResp> tags = tagMetaService.getTags(tagFilter);
+        Assert.assertEquals(2, tags.size());
+        TagDeleteReq tagDeleteReq = new TagDeleteReq();
+        tagDeleteReq.setTagDefineType(TagDefineType.DIMENSION);
+        tagDeleteReq.setItemIds(Arrays.asList(4L, 5L));
+        tagMetaService.deleteBatch(tagDeleteReq, user);
+        List<TagResp> tags1 = tagMetaService.getTags(tagFilter);
+        Assert.assertEquals(0, tags1.size());
     }
 
     @Test
-    void testTagDict() {
-        User user = User.getFakeUser();
+    public void testTagMarket() {
+        setUp();
         TagReq tagReq = newTagReq();
-        TagResp tagResp = tagMetaService.create(tagReq, user);
-        // add conf
-        DictItemReq itemValueReq = new DictItemReq();
-        itemValueReq.setType(TypeEnums.TAG);
-        itemValueReq.setItemId(tagResp.getId());
-        itemValueReq.setStatus(StatusEnum.ONLINE);
-        ItemValueConfig config = new ItemValueConfig();
-        config.setMetricId(4L);
-        config.setWhiteList(Arrays.asList("p10", "p20"));
-        config.setBlackList(Arrays.asList("p1", "p2"));
-        itemValueReq.setConfig(config);
-        dictConfService.addDictConf(itemValueReq, user);
-        // run Task
-        DictSingleTaskReq taskReq = DictSingleTaskReq.builder().type(TypeEnums.TAG).itemId(tagResp.getId()).build();
-        dictTaskService.addDictTask(taskReq, user);
-
-        tagMetaService.delete(tagResp.getId(), user);
+        tagMetaService.create(tagReq, user);
+        TagReq tagReq1 = newTagReqV1();
+        tagMetaService.create(tagReq1, user);
+        TagReq tagReq2 = newTagReqV2();
+        tagMetaService.create(tagReq2, user);
+        TagFilterPageReq filter = new TagFilterPageReq();
+        filter.setTagObjectId(2L);
+        filter.setKey("区域");
+        PageInfo<TagResp> tags = tagMetaService.queryTagMarketPage(filter, user);
+        Assert.assertEquals(1, tags.getList().size());
+        TagDeleteReq tagDeleteReq = new TagDeleteReq();
+        tagDeleteReq.setTagDefineType(TagDefineType.DIMENSION);
+        tagDeleteReq.setItemIds(Arrays.asList(1L, 4L, 5L));
+        tagMetaService.deleteBatch(tagDeleteReq, user);
     }
 
 }

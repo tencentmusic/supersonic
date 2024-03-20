@@ -13,7 +13,6 @@ import com.tencent.supersonic.headless.api.pojo.DimValueMap;
 import com.tencent.supersonic.headless.api.pojo.SchemaItem;
 import com.tencent.supersonic.headless.api.pojo.request.QuerySqlReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
-import com.tencent.supersonic.headless.api.pojo.request.QueryTagReq;
 import com.tencent.supersonic.headless.api.pojo.request.SemanticQueryReq;
 import com.tencent.supersonic.headless.api.pojo.response.DimensionResp;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
@@ -47,7 +46,7 @@ public class DimValueAspect {
     @Autowired
     private DimensionService dimensionService;
 
-    @Around("execution(* com.tencent.supersonic.headless.server.service.ChatQueryService.queryByReq(..))")
+    @Around("execution(* com.tencent.supersonic.headless.server.service.QueryService.queryByReq(..))")
     public Object handleDimValue(ProceedingJoinPoint joinPoint) throws Throwable {
         if (!dimensionValueMapEnable) {
             log.debug("dimensionValueMapEnable is false, skip dimensionValueMap");
@@ -63,15 +62,7 @@ public class DimValueAspect {
         if (queryReq instanceof QuerySqlReq) {
             return handleSqlDimValue(joinPoint);
         }
-
-        if (queryReq instanceof QueryTagReq) {
-            return handleTagValue(joinPoint);
-        }
         throw new InvalidArgumentException("queryReq is not Invalid:" + queryReq);
-    }
-
-    public Object handleTagValue(ProceedingJoinPoint joinPoint) throws Throwable {
-        return (SemanticQueryResp) joinPoint.proceed();
     }
 
     private SemanticQueryResp handleStructDimValue(ProceedingJoinPoint joinPoint) throws Throwable {

@@ -33,7 +33,6 @@ import com.tencent.supersonic.headless.api.pojo.MetricTypeDefaultConfig;
 import com.tencent.supersonic.headless.api.pojo.ModelDetail;
 import com.tencent.supersonic.headless.api.pojo.QueryConfig;
 import com.tencent.supersonic.headless.api.pojo.RelateDimension;
-import com.tencent.supersonic.headless.api.pojo.TagDefineParams;
 import com.tencent.supersonic.headless.api.pojo.TagTypeDefaultConfig;
 import com.tencent.supersonic.headless.api.pojo.TimeDefaultConfig;
 import com.tencent.supersonic.headless.api.pojo.enums.DataType;
@@ -48,6 +47,7 @@ import com.tencent.supersonic.headless.api.pojo.request.DimensionReq;
 import com.tencent.supersonic.headless.api.pojo.request.DomainReq;
 import com.tencent.supersonic.headless.api.pojo.request.MetricReq;
 import com.tencent.supersonic.headless.api.pojo.request.ModelReq;
+import com.tencent.supersonic.headless.api.pojo.request.TagObjectReq;
 import com.tencent.supersonic.headless.api.pojo.request.TagReq;
 import com.tencent.supersonic.headless.server.service.DataSetService;
 import com.tencent.supersonic.headless.server.service.DatabaseService;
@@ -61,6 +61,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+
+import com.tencent.supersonic.headless.server.service.TagObjectService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -90,6 +92,8 @@ public class ModelDemoDataLoader {
     private DataSetService dataSetService;
     @Autowired
     private DataSourceProperties dataSourceProperties;
+    @Autowired
+    private TagObjectService tagObjectService;
 
     @Autowired
     private TagMetaService tagMetaService;
@@ -98,6 +102,8 @@ public class ModelDemoDataLoader {
         try {
             addDatabase();
             addDomain();
+            addTagObjectUser();
+            addTagObjectSinger();
             addModel_1();
             addModel_2();
             addMetric_uv();
@@ -109,8 +115,8 @@ public class ModelDemoDataLoader {
             addModel_4();
             updateDimension();
             updateMetric();
-            updateMetric_pv();
             addTags();
+            updateMetric_pv();
             addDataSet_1();
             addDataSet_2();
             addAuthGroup_1();
@@ -119,6 +125,24 @@ public class ModelDemoDataLoader {
             log.error("Failed to add model demo data", e);
         }
 
+    }
+
+    private void addTagObjectUser() throws Exception {
+        TagObjectReq tagObjectReq = new TagObjectReq();
+        tagObjectReq.setDomainId(1L);
+        tagObjectReq.setName("用户");
+        tagObjectReq.setBizName("user");
+        User user = User.getFakeUser();
+        tagObjectService.create(tagObjectReq, user);
+    }
+
+    private void addTagObjectSinger() throws Exception {
+        TagObjectReq tagObjectReq = new TagObjectReq();
+        tagObjectReq.setDomainId(2L);
+        tagObjectReq.setName("艺人");
+        tagObjectReq.setBizName("singer");
+        User user = User.getFakeUser();
+        tagObjectService.create(tagObjectReq, user);
     }
 
     public void addDatabase() {
@@ -159,6 +183,7 @@ public class ModelDemoDataLoader {
         modelReq.setDescription("用户部门信息");
         modelReq.setDatabaseId(1L);
         modelReq.setDomainId(1L);
+        modelReq.setTagObjectId(1L);
         modelReq.setViewers(Arrays.asList("admin", "tom", "jack"));
         modelReq.setViewOrgs(Collections.singletonList("1"));
         modelReq.setAdmins(Arrays.asList("admin", "alice"));
@@ -313,6 +338,7 @@ public class ModelDemoDataLoader {
         modelReq.setDescription("艺人库");
         modelReq.setDatabaseId(1L);
         modelReq.setDomainId(2L);
+        modelReq.setTagObjectId(2L);
         modelReq.setViewers(Arrays.asList("admin", "tom", "jack"));
         modelReq.setViewOrgs(Collections.singletonList("1"));
         modelReq.setAdmins(Collections.singletonList("admin"));
@@ -345,6 +371,20 @@ public class ModelDemoDataLoader {
                 + "js_play_cnt, down_cnt, favor_cnt from singer");
         modelReq.setModelDetail(modelDetail);
         modelService.createModel(modelReq, user);
+    }
+
+    private void addTags() {
+        addTag(4L);
+        addTag(5L);
+        addTag(6L);
+        addTag(7L);
+    }
+
+    private void addTag(Long itemId) {
+        TagReq tagReq = new TagReq();
+        tagReq.setTagDefineType(TagDefineType.DIMENSION);
+        tagReq.setItemId(itemId);
+        tagMetaService.create(tagReq, User.getFakeUser());
     }
 
     public void updateDimension() throws Exception {
@@ -406,60 +446,6 @@ public class ModelDemoDataLoader {
         metricService.updateMetric(metricReq, user);
     }
 
-    private void addTags() {
-        TagReq tagReq = new TagReq();
-        tagReq.setModelId(4L);
-        tagReq.setName("活跃区域");
-        tagReq.setBizName("act_area");
-        tagReq.setStatus(StatusEnum.ONLINE.getCode());
-        tagReq.setTypeEnum(TypeEnums.TAG);
-        tagReq.setTagDefineType(TagDefineType.DIMENSION);
-        TagDefineParams tagDefineParams = new TagDefineParams();
-        tagDefineParams.setExpr("act_area");
-        tagDefineParams.setDependencies(new ArrayList<>(Arrays.asList(4)));
-        tagReq.setTagDefineParams(tagDefineParams);
-        tagMetaService.create(tagReq, user);
-
-        TagReq tagReq2 = new TagReq();
-        tagReq2.setModelId(4L);
-        tagReq2.setName("风格");
-        tagReq2.setBizName("genre");
-        tagReq2.setStatus(StatusEnum.ONLINE.getCode());
-        tagReq2.setTypeEnum(TypeEnums.TAG);
-        tagReq2.setTagDefineType(TagDefineType.DIMENSION);
-        TagDefineParams tagDefineParam2s = new TagDefineParams();
-        tagDefineParam2s.setExpr("genre");
-        tagDefineParam2s.setDependencies(new ArrayList<>(Arrays.asList(6)));
-        tagReq2.setTagDefineParams(tagDefineParam2s);
-        tagMetaService.create(tagReq2, user);
-
-        TagReq tagReq3 = new TagReq();
-        tagReq3.setModelId(4L);
-        tagReq3.setName("播放量");
-        tagReq3.setBizName("js_play_cnt");
-        tagReq3.setStatus(StatusEnum.ONLINE.getCode());
-        tagReq3.setTypeEnum(TypeEnums.TAG);
-        tagReq3.setTagDefineType(TagDefineType.METRIC);
-        TagDefineParams tagDefineParam3s = new TagDefineParams();
-        tagDefineParam3s.setExpr("js_play_cnt");
-        tagDefineParam3s.setDependencies(new ArrayList<>(Arrays.asList(5)));
-        tagReq3.setTagDefineParams(tagDefineParam3s);
-        tagMetaService.create(tagReq3, user);
-
-        TagReq tagReq4 = new TagReq();
-        tagReq4.setModelId(4L);
-        tagReq4.setName("歌手名");
-        tagReq4.setBizName("singer_name");
-        tagReq4.setStatus(StatusEnum.ONLINE.getCode());
-        tagReq4.setTypeEnum(TypeEnums.TAG);
-        tagReq4.setTagDefineType(TagDefineType.DIMENSION);
-        TagDefineParams tagDefineParam4s = new TagDefineParams();
-        tagDefineParam4s.setExpr("singer_name");
-        tagDefineParam4s.setDependencies(new ArrayList<>(Arrays.asList(7)));
-        tagReq4.setTagDefineParams(tagDefineParam4s);
-        tagMetaService.create(tagReq4, user);
-    }
-
     public void addMetric_uv() throws Exception {
         MetricReq metricReq = new MetricReq();
         metricReq.setModelId(2L);
@@ -514,9 +500,9 @@ public class ModelDemoDataLoader {
         dataSetReq.setDescription("包含超音数访问统计相关的指标和维度等");
         dataSetReq.setAdmins(Lists.newArrayList("admin"));
         List<DataSetModelConfig> dataSetModelConfigs = Lists.newArrayList(
-                new DataSetModelConfig(1L, Lists.newArrayList(1L, 2L), Lists.newArrayList(), Lists.newArrayList()),
-                new DataSetModelConfig(2L, Lists.newArrayList(), Lists.newArrayList(1L, 2L, 3L), Lists.newArrayList()),
-                new DataSetModelConfig(3L, Lists.newArrayList(3L), Lists.newArrayList(4L), Lists.newArrayList()));
+                new DataSetModelConfig(1L, Lists.newArrayList(1L, 2L), Lists.newArrayList()),
+                new DataSetModelConfig(2L, Lists.newArrayList(), Lists.newArrayList(1L, 2L, 3L)),
+                new DataSetModelConfig(3L, Lists.newArrayList(3L), Lists.newArrayList(4L)));
 
         DataSetDetail dataSetDetail = new DataSetDetail();
         dataSetDetail.setDataSetModelConfigs(dataSetModelConfigs);
@@ -541,8 +527,7 @@ public class ModelDemoDataLoader {
         dataSetReq.setDescription("包含艺人相关标签和指标信息");
         dataSetReq.setAdmins(Lists.newArrayList("admin", "jack"));
         List<DataSetModelConfig> dataSetModelConfigs = Lists.newArrayList(
-                new DataSetModelConfig(4L, Lists.newArrayList(4L, 5L, 6L, 7L),
-                        Lists.newArrayList(5L, 6L, 7L), Lists.newArrayList(1L, 2L, 3L, 4L))
+                new DataSetModelConfig(4L, Lists.newArrayList(4L, 5L, 6L, 7L), Lists.newArrayList(5L, 6L, 7L))
         );
         DataSetDetail dataSetDetail = new DataSetDetail();
         dataSetDetail.setDataSetModelConfigs(dataSetModelConfigs);

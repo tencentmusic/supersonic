@@ -16,6 +16,8 @@ public class ModelDO {
 
     private Long domainId;
 
+    private Long tagObjectId;
+
     private String name;
 
     private String bizName;

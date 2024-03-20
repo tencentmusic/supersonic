@@ -65,7 +65,7 @@ public class SearchMatchStrategy extends BaseMatchStrategy<HanlpMapResult> {
                         // remove entity name where search
                         hanlpMapResults = hanlpMapResults.stream().filter(entry -> {
                             List<String> natures = entry.getNatures().stream()
-                                    .filter(nature -> !nature.endsWith(DictWordType.ENTITY.getTypeWithSpilt()))
+                                    .filter(nature -> !nature.endsWith(DictWordType.ENTITY.getType()))
                                     .collect(Collectors.toList());
                             if (CollectionUtils.isEmpty(natures)) {
                                 return false;

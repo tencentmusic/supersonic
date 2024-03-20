@@ -194,26 +194,6 @@ alter table s2_view_info rename to s2_canvas;
 
 alter table s2_query_stat_info add column `view_id` bigint(20) DEFAULT NULL after `model_id`;
 
---20240221
-CREATE TABLE s2_tag(
-                       `id` INT NOT NULL  AUTO_INCREMENT,
-                       `model_id` INT  NOT NULL ,
-                       `name` varchar(255)  NOT NULL ,
-                       `biz_name` varchar(255)  NOT NULL ,
-                       `description` varchar(500) DEFAULT NULL ,
-                       `status` INT  NOT NULL ,
-                       `sensitive_level` INT NOT NULL ,
-                       `type` varchar(50)  NOT NULL , -- ATOMIC, DERIVED
-                       `define_type` varchar(50)  NOT NULL, -- FIELD, DIMENSION
-                       `type_params` LONGVARCHAR DEFAULT NULL  ,
-                       `created_at` TIMESTAMP NOT NULL ,
-                       `created_by` varchar(100) NOT NULL ,
-                       `updated_at` TIMESTAMP DEFAULT NULL ,
-                       `updated_by` varchar(100) DEFAULT NULL ,
-                       `ext` LONGVARCHAR DEFAULT NULL  ,
-                       PRIMARY KEY (`id`)
-)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
 --20240301
 CREATE TABLE IF NOT EXISTS `s2_dictionary_conf` (
    `id` INT NOT NULL AUTO_INCREMENT,
@@ -252,3 +232,36 @@ alter table s2_data_set change view_detail data_set_detail text;
 
 --20240311
 alter table s2_data_set add column query_type varchar(100) DEFAULT NULL;
+
+--20240319
+CREATE TABLE IF NOT EXISTS `s2_tag_object`
+(
+    `id`                bigint(20)   NOT NULL AUTO_INCREMENT,
+    `domain_id`         bigint(20)   DEFAULT NULL,
+    `name`              varchar(255) NOT NULL COMMENT '名称',
+    `biz_name`          varchar(255) NOT NULL COMMENT '英文名称',
+    `description`       varchar(500) DEFAULT NULL COMMENT '描述',
+    `status`            int(10) NOT NULL DEFAULT '1' COMMENT '状态',
+    `sensitive_level`   int(10) NOT NULL DEFAULT '0' COMMENT '敏感级别',
+    `created_at`        datetime     NOT NULL COMMENT '创建时间',
+    `created_by`        varchar(100) NOT NULL COMMENT '创建人',
+    `updated_at`        datetime      NULL COMMENT '更新时间',
+    `updated_by`        varchar(100)  NULL COMMENT '更新人',
+    `ext`               text DEFAULT NULL,
+    PRIMARY KEY (`id`)
+) ENGINE = InnoDB
+DEFAULT CHARSET = utf8 COMMENT ='标签表对象';
+
+alter table s2_model add column `tag_object_id` bigint(20) DEFAULT NULL after domain_id;
+
+CREATE TABLE IF NOT EXISTS s2_tag(
+                       `id` INT NOT NULL  AUTO_INCREMENT,
+                       `item_id` INT  NOT NULL ,
+                       `type` varchar(255)  NOT NULL ,
+                       `created_at` datetime NOT NULL ,
+                       `created_by` varchar(100) NOT NULL ,
+                       `updated_at` datetime DEFAULT NULL ,
+                       `updated_by` varchar(100) DEFAULT NULL ,
+                       `ext` text DEFAULT NULL  ,
+                       PRIMARY KEY (`id`)
+)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

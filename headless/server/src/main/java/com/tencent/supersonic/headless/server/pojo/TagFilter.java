@@ -1,17 +1,14 @@
 package com.tencent.supersonic.headless.server.pojo;
 
-
-import java.util.List;
-
 import com.tencent.supersonic.headless.api.pojo.enums.TagDefineType;
 import lombok.Data;
+
+import java.util.List;
 
 @Data
 public class TagFilter extends MetaFilter {
 
-    private String type;
-    private List<Integer> statusList;
+    private List<Long> itemIds;
     private TagDefineType tagDefineType;
-    private List<String> bizNames;
-
+    private boolean hasCollect;
 }

@@ -18,7 +18,6 @@ public class WordBuilderFactory {
         wordNatures.put(DictWordType.DATASET, new ModelWordBuilder());
         wordNatures.put(DictWordType.ENTITY, new EntityWordBuilder());
         wordNatures.put(DictWordType.VALUE, new ValueWordBuilder());
-        wordNatures.put(DictWordType.TAG, new TagWordBuilder());
     }
 
     public static BaseWordBuilder get(DictWordType strategyType) {

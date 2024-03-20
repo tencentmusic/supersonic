@@ -2,7 +2,9 @@ package com.tencent.supersonic.headless.api.pojo.response;
 
 import com.tencent.supersonic.common.pojo.QueryAuthorization;
 import com.tencent.supersonic.common.pojo.QueryColumn;
+import com.tencent.supersonic.headless.api.pojo.AggregateInfo;
 import com.tencent.supersonic.headless.api.pojo.EntityInfo;
+import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import lombok.Data;
 
@@ -22,4 +24,6 @@ public class QueryResult {
     private List<Map<String, Object>> queryResults;
     private Long queryTimeCost;
     private EntityInfo entityInfo;
+    private List<SchemaElement> recommendedDimensions;
+    private AggregateInfo aggregateInfo;
 }
