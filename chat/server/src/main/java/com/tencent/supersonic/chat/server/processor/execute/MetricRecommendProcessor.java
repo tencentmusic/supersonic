@@ -33,7 +33,7 @@ public class MetricRecommendProcessor implements ExecuteResultProcessor {
 
     @Override
     public void process(ChatExecuteContext chatExecuteContext, QueryResult queryResult) {
-        fillSimilarMetric(queryResult.getChatContext());
+        fillSimilarMetric(chatExecuteContext.getParseInfo());
     }
 
     private void fillSimilarMetric(SemanticParseInfo parseInfo) {
