@@ -147,20 +147,7 @@ public class TagMetaServiceImpl implements TagMetaService {
         List<Long> modelIds = modelRespList.stream().map(model -> model.getId()).collect(Collectors.toList());
 
         TagFilter tagFilter = new TagFilter();
-        List<CollectDO> collectList = collectService.getCollectList(user.getName());
-        List<Long> collectIds = collectList.stream()
-                .filter(collectDO -> SchemaElementType.TAG.name().equalsIgnoreCase(collectDO.getType()))
-                .map(CollectDO::getCollectId).collect(Collectors.toList());
-        if (tagMarketPageReq.isHasCollect()) {
-            if (CollectionUtils.isEmpty(collectIds)) {
-                tagFilter.setIds(Lists.newArrayList(-1L));
-            } else {
-                tagFilter.setIds(collectIds);
-            }
-        }
-
         BeanUtils.copyProperties(tagMarketPageReq, tagFilter);
-
         List<CollectDO> collectList = collectService.getCollectList(user.getName());
         List<Long> collectIds = collectList.stream()
                 .filter(collectDO -> SchemaElementType.TAG.name().equalsIgnoreCase(collectDO.getType()))
