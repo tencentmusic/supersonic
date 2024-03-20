@@ -1,0 +1,57 @@
+// @import '@antv/xflow/dist/index.css';
+
+.xflow-er-solution-container {
+  width: 100%;
+  height: 550px;
+  border: 1px solid #ebedf1;
+  background-color: #fff;
+
+  .cursor-tip-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 999;
+    display: none;
+    width: 200px;
+    height: 40px;
+    color: #000;
+    background: #ced4de;
+
+    .draft-entity-container {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+      padding-left: 8px;
+    }
+  }
+
+  .xflow-canvas-root {
+    margin-top: 40px;
+  }
+
+  /** 覆盖节点默认选中色 */
+  .x6-node-selected rect {
+    stroke: #1890ff;
+    stroke-width: 4px;
+  }
+
+  .x6-edge-selected path {
+    stroke: #1890ff;
+    stroke-width: 2px;
+  }
+
+  /** 默认隐藏链接桩 */
+  .x6-port-body {
+    z-index: 1;
+    visibility: hidden;
+  }
+}
+
+.er-demo {
+  .__dumi-default-previewer-actions {
+    border: 0;
+  }
+}

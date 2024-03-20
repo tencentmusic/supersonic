@@ -36,7 +36,7 @@ import { getGraphConfigFromList } from './utils';
 import type { GraphConfig } from './data';
 import '@antv/xflow/dist/index.css';
 
-import './ReactNodes/ToolTipsNode';
+import { registerEdgeTool } from './ReactNodes/ToolTipsNode';
 
 export interface IProps {
   domainManger: StateType;
@@ -56,6 +56,8 @@ export const SemanticFlow: React.FC<IProps> = (props) => {
     flowId: 'semanticFlow',
     domainManger,
   });
+
+  registerEdgeTool();
 
   const cache =
     React.useMemo<{ app: IApplication } | null>(

@@ -29,7 +29,7 @@ import {
   getModelDetail,
   getDrillDownDimension,
   batchCreateTag,
-  batchUpdateTagStatus,
+  batchDeleteTag,
 } from '../service';
 import MetricMetricFormTable from './MetricMetricFormTable';
 import MetricFieldFormTable from './MetricFieldFormTable';
@@ -381,11 +381,12 @@ const MetricInfoCreateForm: React.FC<CreateFormProps> = ({
     }
     const { code, msg, data } = await saveMetricQuery(queryParams);
     if (code === 200) {
-      if (!queryParams.id && queryParams.isTag) {
-        queryBatchExportTag(data.id);
+      if (queryParams.isTag) {
+        queryBatchExportTag(data.id || metricItem?.id);
       }
+
       if (metricItem?.id && !queryParams.isTag) {
-        queryBatchUpdateStatus(metricItem.bizName, StatusEnum.DELETED);
+        queryBatchDelete(metricItem);
       }
       message.success('编辑指标成功');
       onSubmit?.(queryParams);
@@ -394,11 +395,10 @@ const MetricInfoCreateForm: React.FC<CreateFormProps> = ({
     message.error(msg);
   };
 
-  const queryBatchUpdateStatus = async (bizName: string, status: StatusEnum) => {
-    const { code, msg } = await batchUpdateTagStatus({
-      bizNames: [bizName],
-      modelId: [modelId],
-      status,
+  const queryBatchDelete = async (metricItem: ISemantic.IMetricItem) => {
+    const { code, msg } = await batchDeleteTag({
+      itemIds: [metricItem.id],
+      tagDefineType: TAG_DEFINE_TYPE.METRIC,
     });
     if (code === 200) {
       return;
@@ -407,11 +407,9 @@ const MetricInfoCreateForm: React.FC<CreateFormProps> = ({
   };
 
   const queryBatchExportTag = async (id: number) => {
-    const { code, msg } = await batchCreateTag({
-      itemIds: [id],
-      type: TAG_DEFINE_TYPE.METRIC,
-      modelId,
-    });
+    const { code, msg } = await batchCreateTag([
+      { itemId: id, tagDefineType: TAG_DEFINE_TYPE.METRIC },
+    ]);
 
     if (code === 200) {
       return;

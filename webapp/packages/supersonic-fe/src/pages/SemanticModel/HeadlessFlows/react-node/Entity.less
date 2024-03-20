@@ -1,0 +1,122 @@
+.entity-container {
+  width: 100%;
+  height: 100%;
+  background-color: white;
+  border-radius: 2px;
+
+  &.fact {
+    border: 1px solid #cdddfd;
+
+    &:hover {
+      border: 1px solid #1890ff;
+    }
+  }
+
+  &.dim {
+    border: 1px solid #decfea;
+
+    &:hover {
+      border: 1px solid #1890ff;
+    }
+  }
+
+  &.other {
+    border: 1px solid #ced4de;
+
+    &:hover {
+      border: 1px solid #1890ff;
+    }
+  }
+
+  .content {
+    width: calc(100% - 2px);
+    height: calc(100% - 2px);
+    margin: 1px 1px;
+
+    &.fact {
+      background-color: #cdddfd;
+    }
+
+    &.dim {
+      background-color: #decfea;
+    }
+
+    &.other {
+      background-color: #ced4de;
+    }
+
+    .head {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      width: calc(100% - 12px);
+      height: 38px;
+      margin-left: 6px;
+      font-size: 12px;
+
+      .type {
+        padding-right: 8px;
+      }
+
+      .del-icon {
+        cursor: pointer;
+        width: 20px;
+        height: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        size: 16px;
+        font-size: 14px;
+
+        &:hover {
+          opacity: 0.6;
+          color: #1890ff;
+        }
+      }
+    }
+
+    .body {
+      width: calc(100% - 12px);
+      height: calc(100% - 36px - 6px);
+      margin-bottom: 6px;
+      margin-left: 6px;
+      overflow: auto;
+      background-color: white;
+      cursor: pointer;
+
+      .body-item {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        height: 28px;
+        color: #595959;
+        font-size: 12px;
+        border-bottom: 1px solid rgba(206, 212, 222, 0.2);
+
+        .name {
+          margin-left: 6px;
+          overflow: hidden;
+          white-space: nowrap;
+          text-overflow: ellipsis;
+
+          .pk,
+          .fk {
+            width: 12px;
+            margin-right: 6px;
+            color: #ffd666;
+            font-family: HelveticaNeue-CondensedBold;
+          }
+        }
+
+        .type {
+          margin-right: 8px;
+          color: #bfbfbf;
+          font-size: 8px;
+        }
+      }
+    }
+  }
+}

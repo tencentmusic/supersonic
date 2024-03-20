@@ -6,10 +6,10 @@ import type { Dispatch } from 'umi';
 import { connect, useModel } from 'umi';
 import type { StateType } from '../model';
 import { SENSITIVE_LEVEL_ENUM } from '../constant';
-import { getTagList, deleteTag, batchUpdateTagStatus } from '../service';
+import { getTagList, deleteTag, batchUpdateTagStatus, getTagObjectList } from '../service';
 import TagFilter from './components/TagFilter';
 import TagInfoCreateForm from './components/TagInfoCreateForm';
-import { SemanticNodeType, StatusEnum } from '../enum';
+import { StatusEnum } from '../enum';
 import moment from 'moment';
 import styles from './style.less';
 import { ISemantic } from '../data';
@@ -54,11 +54,26 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
 
   const [hasAllPermission, setHasAllPermission] = useState<boolean>(true);
 
+  const [tagObjectList, setTagObjectList] = useState<ISemantic.ITagObjectItem[]>([]);
+
   const actionRef = useRef<ActionType>();
 
   useEffect(() => {
-    queryTagList(filterParams);
+    queryTagObjectList();
   }, []);
+
+  const queryTagObjectList = async () => {
+    const { code, msg, data } = await getTagObjectList({});
+    if (code === 200) {
+      setTagObjectList(data);
+      const target = data[0];
+      if (target) {
+        queryTagList({ ...filterParams, tagObjectId: target.id });
+      }
+      return;
+    }
+    message.error(msg);
+  };
 
   const queryBatchUpdateStatus = async (ids: React.Key[], status: StatusEnum) => {
     if (Array.isArray(ids) && ids.length === 0) {
@@ -167,17 +182,26 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
       width: 300,
       render: columnsConfig.description.render,
     },
+    // {
+    //   dataIndex: 'status',
+    //   title: '状态',
+    //   width: 180,
+    //   search: false,
+    //   render: columnsConfig.state.render,
+    // },
     {
-      dataIndex: 'status',
-      title: '状态',
-      width: 180,
+      dataIndex: 'domainName',
+      title: '所属主题域',
       search: false,
-      render: columnsConfig.state.render,
+    },
+    {
+      dataIndex: 'tagObjectName',
+      title: '所属对象',
+      search: false,
     },
     {
       dataIndex: 'createdBy',
       title: '创建人',
-      // width: 150,
       search: false,
     },
     {
@@ -234,7 +258,7 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
 
   const handleFilterChange = async (filterParams: {
     key: string;
-    sensitiveLevel: string[];
+    sensitiveLevel: string;
     showFilter: string[];
     type: string;
   }) => {
@@ -296,6 +320,7 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
     <>
       <div className={styles.TagFilterWrapper}>
         <TagFilter
+          tagObjectList={tagObjectList}
           initFilterValues={filterParams}
           onFiltersChange={(_, values) => {
             if (_.showType !== undefined) {
@@ -321,22 +346,22 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
             return false;
           }}
           sticky={{ offsetHeader: 0 }}
-          rowSelection={{
-            type: 'checkbox',
-            ...rowSelection,
-          }}
-          toolBarRender={() => [
-            <BatchCtrlDropDownButton
-              key="ctrlBtnList"
-              downloadLoading={downloadLoading}
-              onDeleteConfirm={() => {
-                queryBatchUpdateStatus(selectedRowKeys, StatusEnum.DELETED);
-              }}
-              hiddenList={['batchDownload']}
-              disabledList={hasAllPermission ? [] : ['batchStart', 'batchStop', 'batchDelete']}
-              onMenuClick={onMenuClick}
-            />,
-          ]}
+          // rowSelection={{
+          //   type: 'checkbox',
+          //   ...rowSelection,
+          // }}
+          // toolBarRender={() => [
+          //   <BatchCtrlDropDownButton
+          //     key="ctrlBtnList"
+          //     downloadLoading={downloadLoading}
+          //     onDeleteConfirm={() => {
+          //       queryBatchUpdateStatus(selectedRowKeys, StatusEnum.DELETED);
+          //     }}
+          //     hiddenList={['batchDownload', 'batchStart', 'batchStop']}
+          //     disabledList={hasAllPermission ? [] : ['batchStart', 'batchDelete']}
+          //     onMenuClick={onMenuClick}
+          //   />,
+          // ]}
           loading={loading}
           onChange={(data: any) => {
             const { current, pageSize, total } = data;

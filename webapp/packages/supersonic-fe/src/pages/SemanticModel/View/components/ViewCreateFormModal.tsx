@@ -48,7 +48,7 @@ const ViewCreateFormModal: React.FC<ModelCreateFormModalProps> = ({
     form.setFieldsValue({
       ...viewItem,
     });
-    setQueryType(viewItem?.queryType);
+    // setQueryType(viewItem?.queryType);
   }, [viewItem]);
 
   const [dimensionList, setDimensionList] = useState<ISemantic.IDimensionItem[]>();
@@ -59,7 +59,7 @@ const ViewCreateFormModal: React.FC<ModelCreateFormModalProps> = ({
     if (selectedModelItem?.id) {
       queryDimensionList(selectedModelItem.id);
       queryMetricList(selectedModelItem.id);
-      queryTagList(selectedModelItem.id);
+      // queryTagList(selectedModelItem.id);
     }
   }, [selectedModelItem]);
 
@@ -81,20 +81,20 @@ const ViewCreateFormModal: React.FC<ModelCreateFormModalProps> = ({
     }
   };
 
-  const queryTagList = async (modelId: number) => {
-    const { code, data, msg } = await getTagList({
-      modelIds: [modelId],
-      pageSize: 9999,
-    });
+  // const queryTagList = async (modelId: number) => {
+  //   const { code, data, msg } = await getTagList({
+  //     modelIds: [modelId],
+  //     pageSize: 9999,
+  //   });
 
-    const { list } = data || {};
-    if (code === 200) {
-      setTagList(list);
-    } else {
-      message.error(msg);
-      setTagList([]);
-    }
-  };
+  //   const { list } = data || {};
+  //   if (code === 200) {
+  //     setTagList(list);
+  //   } else {
+  //     message.error(msg);
+  //     setTagList([]);
+  //   }
+  // };
 
   const handleConfirm = async () => {
     const fieldsValue = await form.validateFields();
@@ -183,7 +183,7 @@ const ViewCreateFormModal: React.FC<ModelCreateFormModalProps> = ({
     return (
       <>
         <div style={{ display: currentStep === 1 ? 'block' : 'none' }}>
-          <div style={{ marginBottom: 10, paddingLeft: 12 }}>
+          {/* <div style={{ marginBottom: 10, paddingLeft: 12 }}>
             <Radio.Group
               buttonStyle="solid"
               value={queryType}
@@ -194,7 +194,7 @@ const ViewCreateFormModal: React.FC<ModelCreateFormModalProps> = ({
               <Radio.Button value="METRIC">指标模式</Radio.Button>
               <Radio.Button value="TAG">标签模式</Radio.Button>
             </Radio.Group>
-          </div>
+          </div> */}
 
           <ViewModelConfigTransfer
             key={queryType}

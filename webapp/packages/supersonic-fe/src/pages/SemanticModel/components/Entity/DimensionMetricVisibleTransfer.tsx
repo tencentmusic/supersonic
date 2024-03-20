@@ -32,13 +32,14 @@ const DimensionMetricVisibleTransfer: React.FC<Props> = ({
 
   useEffect(() => {
     setTransferData(
-      sourceList.map(({ key, id, name, bizName, transType, modelName }) => {
+      sourceList.map(({ key, id, name, bizName, transType, modelName, isTag }) => {
         return {
           key,
           name,
           bizName,
           id,
           modelName,
+          isTag,
           type: transType,
         };
       }),

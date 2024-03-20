@@ -5,13 +5,17 @@ import { connect, history } from 'umi';
 import ClassDimensionTable from './ClassDimensionTable';
 import ClassMetricTable from './ClassMetricTable';
 import PermissionSection from './Permission/PermissionSection';
-import ClassTagTable from '../Insights/components/ClassTagTable';
+// import ClassTagTable from '../Insights/components/ClassTagTable';
+import TagObjectTable from '../Insights/components/TagObjectTable';
+
 import OverView from './OverView';
 import styles from './style.less';
 import type { StateType } from '../model';
 import { HomeOutlined, FundViewOutlined } from '@ant-design/icons';
 import { ISemantic } from '../data';
 import SemanticGraphCanvas from '../SemanticGraphCanvas';
+import HeadlessFlows from '../HeadlessFlows';
+import SemanticFlows from '../SemanticFlows';
 import RecommendedQuestionsSection from '../components/Entity/RecommendedQuestionsSection';
 import View from '../View';
 // import DatabaseTable from '../components/Database/DatabaseTable';
@@ -67,11 +71,17 @@ const DomainManagerTab: React.FC<Props> = ({
       ),
     },
     {
+      label: '标签对象管理',
+      key: 'tagObjectManange',
+      children: <TagObjectTable />,
+    },
+    {
       label: '画布',
       key: 'xflow',
       children: (
         <div style={{ width: '100%' }}>
           <SemanticGraphCanvas />
+          {/* <HeadlessFlows /> */}
         </div>
       ),
     },
@@ -104,11 +114,11 @@ const DomainManagerTab: React.FC<Props> = ({
       key: 'dimenstion',
       children: <ClassDimensionTable />,
     },
-    {
-      label: '标签管理',
-      key: 'tag',
-      children: <ClassTagTable />,
-    },
+    // {
+    //   label: '标签管理',
+    //   key: 'tag',
+    //   children: <ClassTagTable />,
+    // },
 
     {
       label: '权限管理',
