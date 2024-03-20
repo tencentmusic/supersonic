@@ -49,7 +49,7 @@ public class DataSetResp extends SchemaItem {
     }
 
     public List<Long> getAllIncludeAllModels() {
-        return getDataSetModelConfigs().stream().filter(DataSetModelConfig::isIncludesAll)
+        return getDataSetModelConfigs().stream().filter(DataSetModelConfig::getIncludesAll)
                 .map(DataSetModelConfig::getId)
                 .collect(Collectors.toList());
     }

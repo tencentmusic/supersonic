@@ -56,9 +56,9 @@ public class TagQueryServiceImpl implements TagQueryService {
     @Override
     public ItemValueResp queryTagValue(ItemValueReq itemValueReq, User user) throws Exception {
         ItemValueResp itemValueResp = new ItemValueResp();
-        itemValueResp.setItemId(itemValueReq.getItemId());
+        itemValueResp.setItemId(itemValueReq.getId());
         itemValueResp.setType(SchemaElementType.TAG);
-        TagResp tag = tagMetaService.getTag(itemValueReq.getItemId(), user);
+        TagResp tag = tagMetaService.getTag(itemValueReq.getId(), user);
         if (Objects.isNull(tag)) {
             return null;
         }
@@ -88,6 +88,7 @@ public class TagQueryServiceImpl implements TagQueryService {
         ModelResp model = modelService.getModel(tag.getModelId());
         List<Dim> timeDimension = model.getTimeDimension();
         if (CollectionUtils.isEmpty(timeDimension)) {
+            itemValueReq.setDateConf(null);
             return;
         }
 
