@@ -339,16 +339,16 @@ public class TagMetaServiceImpl implements TagMetaService {
             DimensionResp dimension = dimensionService.getDimension(tagReq.getItemId());
             ModelResp model = modelService.getModel(dimension.getModelId());
             if (Objects.isNull(model.getTagObjectId())) {
-                throw new RuntimeException(String.format("this dimension:%s is not supported to create tag, no related tag object",
-                        tagReq.getItemId()));
+                throw new RuntimeException(String.format("this dimension:%s is not supported to create tag,"
+                                + " no related tag object", tagReq.getItemId()));
             }
         }
         if (TagDefineType.METRIC.equals(tagReq.getTagDefineType())) {
             MetricResp metric = metricService.getMetric(tagReq.getItemId());
             ModelResp model = modelService.getModel(metric.getModelId());
             if (Objects.isNull(model.getTagObjectId())) {
-                throw new RuntimeException(String.format("this metric:%s is not supported to create tag, no related tag object",
-                        tagReq.getItemId()));
+                throw new RuntimeException(String.format("this metric:%s is not supported to create tag,"
+                                + " no related tag object", tagReq.getItemId()));
             }
         }
     }
