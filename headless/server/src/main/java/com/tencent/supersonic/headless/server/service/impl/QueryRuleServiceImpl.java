@@ -91,7 +91,7 @@ public class QueryRuleServiceImpl implements QueryRuleService {
                 log.debug(String.format("user:%s, queryRuleReq:%s", userName, queryRuleReq));
                 return;
             }
-            throw new RuntimeException("用户暂无权限增加数据集的规则, 请确认");
+            throw new RuntimeException("用户暂无权限变更数据集的规则, 请确认");
         }
     }
 
@@ -101,8 +101,9 @@ public class QueryRuleServiceImpl implements QueryRuleService {
             DataSetResp dataSet = dataSetService.getDataSet(queryRuleDO.getDataSetId());
             if (dataSet.getAdmins().contains(userName) || dataSet.getCreatedBy().equalsIgnoreCase(userName)) {
                 log.debug(String.format("user:%s, queryRuleDO:%s", userName, queryRuleDO));
+                return;
             }
-            throw new RuntimeException("用户暂无权限增加数据集的规则, 请确认");
+            throw new RuntimeException("用户暂无权限变更数据集的规则, 请确认");
         }
     }
 

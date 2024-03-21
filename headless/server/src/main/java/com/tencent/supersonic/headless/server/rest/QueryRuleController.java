@@ -83,7 +83,7 @@ public class QueryRuleController {
      * @param response
      * @return
      */
-    @DeleteMapping("query")
+    @PostMapping("query")
     public List<QueryRuleResp> query(@RequestBody @Validated QueryRuleFilter queryRuleFilter,
                                       HttpServletRequest request,
                                       HttpServletResponse response) {
