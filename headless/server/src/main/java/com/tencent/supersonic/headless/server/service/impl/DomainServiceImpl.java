@@ -77,6 +77,12 @@ public class DomainServiceImpl implements DomainService {
         if (!CollectionUtils.isEmpty(modelResps)) {
             throw new RuntimeException("该主题域下还存在模型, 暂不能删除, 请确认");
         }
+        List<DomainResp> domainList = getDomainList();
+        for (DomainResp domainResp : domainList) {
+            if (id.equals(domainResp.getParentId())) {
+                throw new RuntimeException("该主题域下还存在子主题域, 暂不能删除, 请确认");
+            }
+        }
         domainRepository.deleteDomain(id);
     }
 
