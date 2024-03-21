@@ -526,4 +526,23 @@ CREATE TABLE IF NOT EXISTS `s2_tag_object`
     `ext`               text DEFAULT NULL,
     PRIMARY KEY (`id`)
 ) ENGINE = InnoDB
-DEFAULT CHARSET = utf8 COMMENT ='标签表对象';
+DEFAULT CHARSET = utf8 COMMENT ='标签对象表';
+
+CREATE TABLE IF NOT EXISTS `s2_query_rule` (
+    `id` bigint(20)   NOT NULL AUTO_INCREMENT,
+    `data_set_id` bigint(20) ,
+    `priority` int(10) NOT NULL DEFAULT '1' ,
+    `rule_type` varchar(255)  NOT NULL ,
+    `name` varchar(255)  NOT NULL ,
+    `biz_name` varchar(255)  NOT NULL ,
+    `description` varchar(500) DEFAULT NULL ,
+    `rule` text DEFAULT NULL  ,
+    `action` text DEFAULT NULL  ,
+    `status` INT  NOT NULL DEFAULT '1' ,
+    `created_at` datetime NOT NULL ,
+    `created_by` varchar(100) NOT NULL ,
+    `updated_at` datetime DEFAULT NULL ,
+    `updated_by` varchar(100) DEFAULT NULL ,
+    `ext` text DEFAULT NULL  ,
+    PRIMARY KEY (`id`)
+    ) ENGINE = InnoDB DEFAULT CHARSET = utf8 COMMENT ='查询规则表';

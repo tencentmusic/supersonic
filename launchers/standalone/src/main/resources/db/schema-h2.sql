@@ -604,3 +604,23 @@ CREATE TABLE IF NOT EXISTS `s2_tag_object` (
     PRIMARY KEY (`id`)
     );
 COMMENT ON TABLE s2_tag IS 'tag object information';
+
+CREATE TABLE IF NOT EXISTS `s2_query_rule` (
+    `id` INT NOT NULL  AUTO_INCREMENT,
+    `data_set_id` INT ,
+    `priority` INT  NOT NULL DEFAULT '1' ,
+    `rule_type` varchar(255)  NOT NULL ,
+    `name` varchar(255)  NOT NULL ,
+    `biz_name` varchar(255)  NOT NULL ,
+    `description` varchar(500) DEFAULT NULL ,
+    `rule` LONGVARCHAR DEFAULT NULL  ,
+    `action` LONGVARCHAR DEFAULT NULL  ,
+    `status` INT  NOT NULL DEFAULT '1' ,
+    `created_at` TIMESTAMP NOT NULL ,
+    `created_by` varchar(100) NOT NULL ,
+    `updated_at` TIMESTAMP DEFAULT NULL ,
+    `updated_by` varchar(100) DEFAULT NULL ,
+    `ext` LONGVARCHAR DEFAULT NULL  ,
+    PRIMARY KEY (`id`)
+    );
+COMMENT ON TABLE s2_query_rule IS 'tag query rule table';
