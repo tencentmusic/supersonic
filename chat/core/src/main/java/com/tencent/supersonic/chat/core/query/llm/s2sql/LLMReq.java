@@ -22,6 +22,8 @@ public class LLMReq {
 
     private String sqlGenerationMode;
 
+    private Integer chatId;
+
     @Data
     public static class ElementValue {
 
@@ -56,7 +58,9 @@ public class LLMReq {
 
         TWO_PASS_AUTO_COT("2_pass_auto_cot"),
 
-        TWO_PASS_AUTO_COT_SELF_CONSISTENCY("2_pass_auto_cot_self_consistency");
+        TWO_PASS_AUTO_COT_SELF_CONSISTENCY("2_pass_auto_cot_self_consistency"),
+
+        MULTIPLE_ROUNDS("multiple_rounds");
 
 
         private String name;

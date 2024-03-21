@@ -98,6 +98,7 @@ public class LLMRequestService {
         String queryText = queryCtx.getQueryText();
 
         LLMReq llmReq = new LLMReq();
+        llmReq.setChatId(queryCtx.getChatId());
         llmReq.setQueryText(queryText);
         LLMReq.FilterCondition filterCondition = new LLMReq.FilterCondition();
         llmReq.setFilterCondition(filterCondition);
