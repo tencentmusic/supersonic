@@ -53,7 +53,6 @@ public class StatRepositoryImpl implements StatRepository {
                 updateStatMapInfo(map, metrics, TypeEnums.METRIC.name().toLowerCase(), stat.getDataSetId());
             }
         });
-        log.info("map:{}", map);
         map.forEach((k, v) -> {
             Long classId = Long.parseLong(k.split(AT_SYMBOL + AT_SYMBOL)[0]);
             String type = k.split(AT_SYMBOL + AT_SYMBOL)[1];
