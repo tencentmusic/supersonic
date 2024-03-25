@@ -1,0 +1,114 @@
+[
+    {
+        "question": "robinlee在内容库的访问次数",
+        "questionAugmented": "contextual questions：[]。current question：robinlee在内容库的访问次数 (补充信息:’'robinlee'‘是一个’用户名‘。当前的日期是2020-12-01) (备注: )",
+        "dbSchema": "Table: 内容库产品, Columns = [\"部门\", \"模块\", \"用户名\", \"访问次数\", \"访问人数\", \"访问时长\", \"数据日期\"]\nForeign_keys: []",
+        "sql": "SELECT 用户名, 访问次数 FROM 内容库产品 WHERE 用户名 ='robinlee'",
+        "generatedSchemaLinkingCoT": "Let’s think step by step. In the question \"robinlee在内容库的访问次数 (补充信息:’ 'robinlee'‘是一个’用户名‘。当前的日期是2020-12-01) (备注: )\",thers is no contextual questions,not need to consider,so this is not a multi-turn dialogue.we are asked:\n\"’用户名‘，\" so we need column = [用户名]\n\"的访问次数 \" so we need column = [访问次数]\nBased on the contextual questions,tables, columns, and Foreign_keys, The set of possible cell values are = [robinlee]. So the Schema_links are:\nSchema_links: [用户名,访问次数,robinlee]",
+        "generatedSchemaLinkings": "[用户名,访问次数,robinlee]"
+    },
+    {
+        "question": "对比jackjchen呢？",
+        "questionAugmented": "contextual questions：[\"robinlee在内容库的访问次数 (补充信息:’ 'robinlee'‘是一个’用户名‘。当前的日期是2020-12-01) (备注: )\"]。current question：对比jackjchen呢？ (补充信息:’'jackjchen'‘是一个’用户名‘。当前的日期是2020-12-01) (备注: )",
+        "dbSchema": "Table: 内容库产品, Columns = [\"部门\", \"模块\", \"用户名\", \"访问次数\", \"访问人数\", \"访问时长\", \"数据日期\"]\nForeign_keys: []",
+        "sql": "SELECT 用户名, 访问次数 FROM 内容库产品 WHERE 用户名 IN ('jackjchen', 'robinlee')",
+        "generatedSchemaLinkingCoT": "Let’s think step by step. In the question \"对比jackjchen呢？ (补充信息:’'jackjchen'‘是一个’用户名‘。当前的日期是2020-12-01) (备注: )\",we consider the contextual question:'robinlee在内容库的访问次数 (补充信息:’ 'robinlee'‘是一个’用户名‘。当前的日期是2020-12-01) (备注: )',this is a multi-turn dialogue.we are asked:\n\"’robinlee‘，\" so we need column = [用户名]\n\"’对比jackjchen‘，\" so we need column = [用户名]\n\"的访问次数 \" so we need column = [访问次数]\nBased on the contextual questions, tables, columns, and Foreign_keys, The set of possible cell values are = [jackjchen,robinlee]. So the Schema_links are:\nSchema_links: [用户名,访问次数,jackjchen,robinlee]",
+        "generatedSchemaLinkings": "[用户名,访问次数,jackjchen,robinlee]"
+    },
+    {
+        "question": "内容库近12个月访问人数 按部门",
+        "questionAugmented": "contextual questions：[\"robinlee在内容库的访问次数 (补充信息:’ 'robinlee'‘是一个’用户名‘。当前的日期是2020-12-01) (备注: )\",\"对比jackjchen呢？ (补充信息:’'jackjchen'‘是一个’用户名‘。当前的日期是2020-12-01) (备注: )\"]。current question：内容库近12个月访问人数 按部门 (补充信息:。当前的日期是2022-11-06) (备注: )",
+        "dbSchema": "Table: 内容库产品, Columns = [\"部门\", \"模块\", \"用户名\", \"访问次数\", \"访问人数\", \"访问时长\", \"数据日期\"]\nForeign_keys: []",
+        "sql": "SELECT 部门, 数据日期, 访问人数 FROM 内容库产品 WHERE datediff('month', 数据日期, '2022-11-06') <= 12",
+        "generatedSchemaLinkingCoT": "Let’s think step by step. In the question \"内容库近12个月访问人数 按部门 (补充信息:。当前的日期是2022-11-06) (备注: )\",we consider the contextual questions,it is an independent question，so this is not a multi-turn dialogue.we are asked.\n\" 按部门 (\" so we need column = [部门]\n\"访问人数 按\" so we need column = [访问人数]\n\"当前的日期是\" so we need column = [数据日期]\nBased on the contextual questions, tables, columns, and Foreign_keys, The set of possible cell values are = [12,month]. So the Schema_links are:\nSchema_links: [部门,访问人数,数据日期,12,month]",
+        "generatedSchemaLinkings": "[部门,访问人数,数据日期,12,month]"
+    },
+    {
+        "question": "访问次数呢？",
+        "questionAugmented": "contextual questions：[\"robinlee在内容库的访问次数 (补充信息:’ 'robinlee'‘是一个’用户名‘。当前的日期是2020-12-01) (备注: )\",\"对比jackjchen呢？ (补充信息:’'jackjchen'‘是一个’用户名‘。当前的日期是2020-12-01) (备注: )\",\"内容库近12个月访问人数 按部门 (补充信息:。当前的日期是2022-11-06) (备注: )\"]。current question：访问次数呢？ (当前的日期是2023-04-21) (备注: )",
+        "dbSchema": "Table: 内容库产品, Columns = [\"部门\", \"模块\", \"用户名\", \"访问次数\", \"访问人数\", \"访问时长\", \"数据日期\"]\nForeign_keys: []",
+        "sql": "SELECT 部门, 数据日期, 访问次数 FROM 内容库产品 WHERE datediff('month', 数据日期, '2022-11-06') <= 12 ",
+        "generatedSchemaLinkingCoT": "Let’s think step by step. In the question \"访问次数呢？ (当前的日期是2023-04-21) (备注: )\", we consider the contextual question:'内容库近12个月访问人数 按部门',this is a multi-turn dialogue.we are asked. \n\" 按部门 (\" so we need column = [部门]\n\"访问次数呢？\" so we need column = [访问次数]\n\"当前的日期是\" so we need column = [数据日期]\nBased on the contextual questions, tables, columns, and Foreign_keys, The set of possible cell values are = [12,month]. So the Schema_links are:\nSchema_links: [部门,访问次数,数据日期,12,month]",
+        "generatedSchemaLinkings": "[部门,访问次数,数据日期,12,month]"
+    },
+    {
+        "question": "近3天海田飞系MPPM结算播放份额",
+        "questionAugmented": "contextual questions：[]。current question：近3天海田飞系MPPM结算播放份额 (补充信息:’'海田飞系'‘是一个’严选版权归属系‘。当前的日期是2023-08-21) (备注: )",
+        "dbSchema": "Table: 严选, Columns = [\"严选版权归属系\", \"付费模式\", \"结算播放份额\", \"付费用户结算播放份额\", \"数据日期\"]\nForeign_keys: []",
+        "sql": "SELECT 严选版权归属系, 结算播放份额 FROM 严选 WHERE 严选版权归属系 = '海田飞系' AND datediff('day', 数据日期, '2023-08-21') <= 3",
+        "generatedSchemaLinkingCoT": "Let’s think step by step. In the question \"近3天海田飞系MPPM结算播放份额 (补充信息:’'海田飞系'‘是一个’严选版权归属系‘。当前的日期是2023-08-21) (备注: )\",thers is no contextual questions,not need to consider,so this is not a multi-turn dialogue.we are asked:\n\"结算播放份额 \" so we need column = [结算播放份额]\n\"严选版权归属系\" so we need column = [严选版权归属系]\n\"当前的日期是\" so we need column = [数据日期]\nBased on the contextual questions,tables, columns, and Foreign_keys, The set of possible cell values are = [海田飞系,3,day]. So the Schema_links are:\nSchema_links: [结算播放份额,严选版权归属系,数据日期,海田飞系,3,day]",
+        "generatedSchemaLinkings": "[结算播放份额,严选版权归属系,数据日期,海田飞系,3,day]"
+    },
+    {
+        "question": "近60天呢",
+        "questionAugmented": "contextual questions：[\"近3天海田飞系MPPM结算播放份额 (补充信息:’'海田飞系'‘是一个’严选版权归属系‘。当前的日期是2023-08-21) (备注: )\"]。current question：近60天呢 (补充信息:当前的日期是2023-08-21) (备注: )",
+        "dbSchema": "Table: 严选, Columns = [\"严选版权归属系\", \"付费模式\", \"结算播放份额\", \"付费用户结算播放份额\", \"数据日期\"]\nForeign_keys: []",
+        "sql": "SELECT 严选版权归属系, 结算播放份额 FROM 严选 WHERE 严选版权归属系 = '海田飞系' AND datediff('day', 数据日期, '2023-08-21') <= 60",
+        "generatedSchemaLinkingCoT": "Let’s think step by step. In the question \"近60天呢 (补充信息:当前的日期是2023-08-21) (备注: )\",  we consider the contextual question:'近3天海田飞系MPPM结算播放份额',this is a multi-turn dialogue.we are asked:\n\"结算播放份额 \" so we need column = [结算播放份额]\n\"严选版权归属系\" so we need column = [严选版权归属系]\n\"当前的日期是\" so we need column = [数据日期]\nBased on the contextual questions,tables, columns, and Foreign_keys, The set of possible cell values are = [海田飞系,60,day]. So the Schema_links are:\nSchema_links: [结算播放份额,严选版权归属系,数据日期,海田飞系,60,day]",
+        "generatedSchemaLinkings": "[结算播放份额,严选版权归属系,数据日期,海田飞系,60,day]"
+    },
+    {
+        "question": "播放量大于1万的歌曲有多少",
+        "questionAugmented": "contextual questions：[]。current question：播放量大于1万的歌曲有多少 (补充信息:。当前的日期是2023-07-31) (备注: )",
+        "dbSchema": "Table: 歌曲库, Columns = [\"歌曲名\", \"歌曲版本\", \"歌曲类型\", \"MPPM歌曲ID\", \"是否严选窄口径歌曲\", \"是否严选宽口径歌曲\", \"是否潮流人歌曲\", \"超声波歌曲ID\", \"C音歌曲ID\", \"C音歌曲MID\", \"结算播放量\", \"运营播放量\", \"分享量\", \"收藏量\", \"运营搜播量\", \"结算搜播量\", \"拉新用户数\", \"拉活用户数\", \"分享率\", \"结算播放份额\", \"数据日期\"]\nForeign_keys: []",
+        "sql": "SELECT 歌曲名 FROM 歌曲库 WHERE 运营播放量 > 10000",
+        "generatedSchemaLinkingCoT": "Let’s think step by step. In the question \"播放量大于1万的歌曲有多少 (补充信息:。当前的日期是2023-07-31) (备注: )\",thers is no contextual questions,not need to consider,so this is not a multi-turn dialogue. we are asked:\n\"歌曲有多少 \" so we need column = [歌曲名]\n\"播放量大于1\" so we need column = [运营播放量]\nBased on the contextual questions,tables, columns, and Foreign_keys, The set of possible cell values are = [10000]. So the Schema_links are:\nSchema_links: [歌曲名,运营播放量,10000]",
+        "generatedSchemaLinkings": "[歌曲名,运营播放量,10000]"
+    },
+    {
+        "question": "下载量大于10万的呢",
+        "questionAugmented": "contextual questions：[\"播放量大于1万的歌曲有多少 (补充信息:。当前的日期是2023-07-31) (备注: )\"]。current question：下载量大于10万的呢 (补充信息:。当前的日期是2023-07-31) (备注: )",
+        "dbSchema": "Table: 歌曲库, Columns = [\"歌曲名\", \"歌曲版本\", \"歌曲类型\", \"MPPM歌曲ID\", \"是否严选窄口径歌曲\", \"是否严选宽口径歌曲\", \"是否潮流人歌曲\", \"超声波歌曲ID\", \"C音歌曲ID\", \"C音歌曲MID\", \"结算播放量\", \"运营播放量\", \"下载量\",\"分享量\", \"收藏量\", \"运营搜播量\", \"结算搜播量\", \"拉新用户数\", \"拉活用户数\", \"分享率\", \"结算播放份额\", \"数据日期\"]\nForeign_keys: []",
+        "sql": "SELECT 歌曲名 FROM 歌曲库 WHERE 下载量 > 100000",
+        "generatedSchemaLinkingCoT": "Let’s think step by step. In the question \"下载量大于10万的呢 (补充信息:。当前的日期是2023-07-31) (备注: )\", we consider the contextual question:'播放量大于1万的歌曲有多少',this is a multi-turn dialogue. we are asked:\n\"歌曲有多少 \" so we need column = [歌曲名]\n\"下载量大于10万\" so we need column = [下载量]\nBased on the contextual questions,tables, columns, and Foreign_keys, The set of possible cell values are = [100000]. So the Schema_links are:\nSchema_links: [歌曲名,下载量,100000]",
+        "generatedSchemaLinkings": "[歌曲名,下载量,100000]"
+    },
+    {
+        "question": "内容库近20天访问次数",
+        "questionAugmented": "contextual questions：[]。current question：内容库近20天访问次数 (补充信息:当前的日期是2020-12-01) (备注: )",
+        "dbSchema": "Table: 内容库产品, Columns = [\"部门\", \"模块\", \"用户名\", \"访问次数\", \"访问人数\", \"访问时长\", \"数据日期\"]\nForeign_keys: []",
+        "sql": "SELECT 数据日期,访问次数 FROM 内容库产品 WHERE datediff('day', 数据日期, '2020-12-01') <= 20",
+        "generatedSchemaLinkingCoT": "Let’s think step by step. In the question \"内容库近20天访问次数 (补充信息:当前的日期是2020-12-01) (备注: )\",thers is no contextual questions,not need to consider,so this is not a multi-turn dialogue.  we are asked:\n\"访问次数 \" so we need column = [访问次数]\nBased on the contextual questions,tables, columns, and Foreign_keys. So the Schema_links are:\nSchema_links: [访问次数,数据日期,20,day]",
+        "generatedSchemaLinkings": "[访问次数,数据日期,20,day]"
+    },
+    {
+        "question": "按部门看一下",
+        "questionAugmented": "contextual questions：[\"内容库近20天访问次数 (补充信息:当前的日期是2020-12-01) (备注: )\"]。current question：按部门看一下 (补充信息:当前的日期是2020-12-01) (备注: )",
+        "dbSchema": "Table: 内容库产品, Columns = [\"部门\", \"模块\", \"用户名\", \"访问次数\", \"访问人数\", \"访问时长\", \"数据日期\"]\nForeign_keys: []",
+        "sql": "SELECT 部门,访问次数 FROM 内容库产品 WHERE datediff('day', 数据日期, '2020-12-01') <= 20",
+        "generatedSchemaLinkingCoT": "Let’s think step by step. In the question \"按部门看一下 (补充信息:当前的日期是2020-12-01) (备注: )\", we consider the contextual question:'内容库近20天访问次数',this is a multi-turn dialogue.we are asked:\n\"访问次数 \" so we need column = [访问次数]\n\"按部门\" so we need column = [部门]\nBased on the contextual questions,tables, columns, and Foreign_keys. So the Schema_links are:\nSchema_links: [访问次数,数据日期,部门,20,day]",
+        "generatedSchemaLinkings": "[访问次数,数据日期,部门,20,day]"
+    },
+    {
+        "question": "按模块看一下",
+        "questionAugmented": "contextual questions：[\"内容库近20天访问次数 (补充信息:当前的日期是2020-12-01) (备注: )\",\"按部门看一下 (补充信息:当前的日期是2020-12-01) (备注: )\"]。current question：按模块看一下 (补充信息:当前的日期是2020-12-01) (备注: )",
+        "dbSchema": "Table: 内容库产品, Columns = [\"部门\", \"模块\", \"用户名\", \"访问次数\", \"访问人数\", \"访问时长\", \"数据日期\"]\nForeign_keys: []",
+        "sql": "SELECT 模块,访问次数 FROM 内容库产品 WHERE datediff('day', 数据日期, '2020-12-01') <= 20",
+        "generatedSchemaLinkingCoT": "Let’s think step by step. In the question \"按模块看一下 (补充信息:当前的日期是2020-12-01) (备注: )\", we consider the contextual question:'内容库近20天访问次数',this is a multi-turn dialogue.we are asked:\n\"访问次数 \" so we need column = [访问次数]\n\"按模块\" so we need column = [模块]\nBased on the contextual questions,tables, columns, and Foreign_keys. So the Schema_links are:\nSchema_links: [访问次数,数据日期,模块,20,day]",
+        "generatedSchemaLinkings": "[访问次数,数据日期,模块,20,day]"
+    },
+    {
+        "question": "看一下技术部的",
+        "questionAugmented": "contextual questions：[\"内容库近20天访问次数 (补充信息:当前的日期是2020-12-01) (备注: )\",\"按部门看一下 (补充信息:当前的日期是2020-12-01) (备注: )\",\"按模块看一下 (补充信息:当前的日期是2020-12-01) (备注: )\"]。current question：看一下技术部的 (补充信息:’'技术部'‘是一个’部门‘。当前的日期是2020-12-01) (备注: )",
+        "dbSchema": "Table: 内容库产品, Columns = [\"部门\", \"模块\", \"用户名\", \"访问次数\", \"访问人数\", \"访问时长\", \"数据日期\"]\nForeign_keys: []",
+        "sql": "SELECT 数据日期,访问次数 FROM 内容库产品 WHERE datediff('day', 数据日期, '2020-12-01') <= 20 and 部门='技术部'",
+        "generatedSchemaLinkingCoT": "Let’s think step by step. In the question \"看一下技术部的 (补充信息:’'技术部'‘是一个’部门‘。当前的日期是2020-12-01) (备注: )\", we consider the contextual question:'内容库近20天访问次数',this is a multi-turn dialogue.we are asked:\n\"访问次数 \" so we need column = [访问次数]\n\"技术部\" so we need column = [部门]\nBased on the contextual questions,tables, columns, and Foreign_keys, The set of possible cell values are = [技术部]. So the Schema_links are:\nSchema_links: [访问次数,数据日期,部门,技术部,20,day]",
+        "generatedSchemaLinkings": "[访问次数,数据日期,部门,技术部,20,day]"
+    },
+    {
+        "question": "看一下产品部的",
+        "questionAugmented": "contextual questions：[\"内容库近20天访问次数 (补充信息:当前的日期是2020-12-01) (备注: )\",\"按部门看一下 (补充信息:当前的日期是2020-12-01) (备注: )\",\"按模块看一下 (补充信息:当前的日期是2020-12-01) (备注: )\",\"看一下技术部的 (补充信息:’'技术部'‘是一个’部门‘。当前的日期是2020-12-01) (备注: )\"]。current question：看一下产品部的 (补充信息:’'产品部'‘是一个’部门‘。当前的日期是2020-12-01) (备注: )",
+        "dbSchema": "Table: 内容库产品, Columns = [\"部门\", \"模块\", \"用户名\", \"访问次数\", \"访问人数\", \"访问时长\", \"数据日期\"]\nForeign_keys: []",
+        "sql": "SELECT 数据日期,访问次数 FROM 内容库产品 WHERE datediff('day', 数据日期, '2020-12-01') <= 20 and 部门='产品部'",
+        "generatedSchemaLinkingCoT": "Let’s think step by step. In the question \"看一下产品部的 (补充信息:’'产品部'‘是一个’部门‘。当前的日期是2020-12-01) (备注: )\", we consider the contextual question:'内容库近20天访问次数'、'看一下技术部的',this is a multi-turn dialogue.we are asked:\n\"访问次数 \" so we need column = [访问次数]\n\"产品部\" so we need column = [部门]\nBased on the  contextual questions,tables, columns, and Foreign_keys, The set of possible cell values are = [产品部]. So the Schema_links are:\nSchema_links: [访问次数,数据日期,部门,产品部,20,day]",
+        "generatedSchemaLinkings": "[访问次数,数据日期,部门,产品部,20,day]"
+    },
+    {
+        "question": "对比一下技术部、产品部",
+        "questionAugmented": "contextual questions：[\"内容库近20天访问次数 (补充信息:当前的日期是2020-12-01) (备注: )\",\"按部门看一下 (补充信息:当前的日期是2020-12-01) (备注: )\",\"按模块看一下 (补充信息:当前的日期是2020-12-01) (备注: )\",\"看一下技术部的 (补充信息:’'技术部'‘是一个’部门‘。当前的日期是2020-12-01) (备注: )\",\"看一下产品部的 (补充信息:’'产品部'‘是一个’部门‘。当前的日期是2020-12-01) (备注: )\"]。current question：对比一下技术部、产品部 (补充信息:’'技术部'‘是一个’部门,'产品部'‘是一个’部门‘。当前的日期是2020-12-01) (备注: )",
+        "dbSchema": "Table: 内容库产品, Columns = [\"部门\", \"模块\", \"用户名\", \"访问次数\", \"访问人数\", \"访问时长\", \"数据日期\"]\nForeign_keys: []",
+        "sql": "SELECT 数据日期,部门,访问次数 FROM 内容库产品 WHERE datediff('day', 数据日期, '2020-12-01') <= 20 and 部门 in ('技术部','产品部')",
+        "generatedSchemaLinkingCoT": "Let’s think step by step. In the question \"对比一下技术部、产品部 (补充信息:’'技术部'‘是一个’部门,'产品部'‘是一个’部门‘。当前的日期是2020-12-01) (备注: )\", we consider the contextual question:'内容库近20天访问次数'、'看一下技术部的','看一下产品部的',this is a multi-turn dialogue.we are asked:\n\"访问次数 \" so we need column = [访问次数]\n\"技术部\" so we need column = [部门]\n\"产品部\" so we need column = [部门]\nBased on the contextual questions,tables, columns, and Foreign_keys, The set of possible cell values are = [技术部,产品部]. So the Schema_links are:\nSchema_links: [访问次数,数据日期,部门,技术部,产品部,20,day]",
+        "generatedSchemaLinkings": "[访问次数,数据日期,部门,技术部,产品部,20,day]"
+    }
+]

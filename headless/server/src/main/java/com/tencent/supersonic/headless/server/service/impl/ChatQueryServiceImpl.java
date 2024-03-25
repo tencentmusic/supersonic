@@ -174,6 +174,7 @@ public class ChatQueryServiceImpl implements ChatQueryService {
                 .mapInfo(new SchemaMapInfo())
                 .modelIdToDataSetIds(modelIdToDataSetIds)
                 .enableLLM(queryReq.isEnableLLM())
+                .contextualParseInfoList(queryReq.getContextualParseInfoList())
                 .build();
         BeanUtils.copyProperties(queryReq, queryCtx);
         return queryCtx;

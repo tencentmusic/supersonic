@@ -2,8 +2,10 @@ package com.tencent.supersonic.headless.api.pojo.request;
 
 import com.google.common.collect.Sets;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
+import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import lombok.Data;
 
+import java.util.List;
 import java.util.Set;
 
 @Data
@@ -15,4 +17,5 @@ public class QueryReq {
     private QueryFilters queryFilters;
     private boolean saveAnswer = true;
     private boolean enableLLM;
+    private List<SemanticParseInfo> contextualParseInfoList;
 }

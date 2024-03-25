@@ -35,4 +35,6 @@ public interface ChatQueryRepository {
     List<ChatParseDO> getParseInfoList(List<Long> questionIds);
 
     Boolean deleteChatQuery(Long questionId);
+
+    List<SemanticParseInfo> getContextualParseInfo(Integer chatId);
 }

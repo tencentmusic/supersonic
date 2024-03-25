@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.headless.api.pojo.SchemaMapInfo;
+import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.api.pojo.SemanticSchema;
 import com.tencent.supersonic.headless.api.pojo.request.QueryFilters;
 import com.tencent.supersonic.headless.core.chat.query.SemanticQuery;
@@ -37,6 +38,8 @@ public class QueryContext {
     private SchemaMapInfo mapInfo = new SchemaMapInfo();
     @JsonIgnore
     private SemanticSchema semanticSchema;
+    @JsonIgnore
+    private List<SemanticParseInfo> contextualParseInfoList;
 
     public List<SemanticQuery> getCandidateQueries() {
         OptimizationConfig optimizationConfig = ContextUtils.getBean(OptimizationConfig.class);

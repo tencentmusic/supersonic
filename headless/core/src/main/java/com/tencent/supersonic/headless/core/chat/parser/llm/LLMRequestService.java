@@ -2,6 +2,7 @@ package com.tencent.supersonic.headless.core.chat.parser.llm;
 
 import com.tencent.supersonic.common.pojo.enums.DataFormatTypeEnum;
 import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
+import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.DateUtils;
 import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementMatch;
@@ -16,6 +17,7 @@ import com.tencent.supersonic.headless.core.config.OptimizationConfig;
 import com.tencent.supersonic.headless.core.pojo.QueryContext;
 import com.tencent.supersonic.headless.core.utils.ComponentFactory;
 import com.tencent.supersonic.headless.core.utils.S2SqlDateHelper;
+
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -24,10 +26,12 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -61,11 +65,18 @@ public class LLMRequestService {
     }
 
     public LLMReq getLlmReq(QueryContext queryCtx, Long dataSetId,
-            SemanticSchema semanticSchema, List<LLMReq.ElementValue> linkingValues) {
+                            SemanticSchema semanticSchema, List<LLMReq.ElementValue> linkingValues) {
         Map<Long, String> dataSetIdToName = semanticSchema.getDataSetIdToName();
         String queryText = queryCtx.getQueryText();
 
         LLMReq llmReq = new LLMReq();
+        llmReq.setContextualParseInfoList(queryCtx.getContextualParseInfoList());
+        Environment environment = ContextUtils.getBean(Environment.class);
+        String multiTurn = environment.getProperty("multi.turn");
+        if (StringUtils.isNotBlank(multiTurn) && Boolean.parseBoolean(multiTurn)) {
+            llmReq.setIsMultiTurn(Boolean.parseBoolean(multiTurn));
+        }
+
         llmReq.setChatId(queryCtx.getChatId());
         llmReq.setQueryText(queryText);
         LLMReq.FilterCondition filterCondition = new LLMReq.FilterCondition();
@@ -104,7 +115,7 @@ public class LLMRequestService {
     }
 
     protected List<String> getFieldNameList(QueryContext queryCtx, Long dataSetId,
-            LLMParserConfig llmParserConfig) {
+                                            LLMParserConfig llmParserConfig) {
 
         Set<String> results = getTopNFieldNames(queryCtx, dataSetId, llmParserConfig);
 

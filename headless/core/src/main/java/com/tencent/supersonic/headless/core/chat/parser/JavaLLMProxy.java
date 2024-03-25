@@ -2,6 +2,7 @@ package com.tencent.supersonic.headless.core.chat.parser;
 
 
 import com.tencent.supersonic.common.util.ContextUtils;
+import com.tencent.supersonic.headless.core.chat.parser.llm.MultiTurnSqlGeneration;
 import com.tencent.supersonic.headless.core.chat.parser.llm.SqlGeneration;
 import com.tencent.supersonic.headless.core.chat.parser.llm.SqlGenerationFactory;
 import com.tencent.supersonic.headless.core.chat.query.llm.s2sql.LLMReq;
@@ -10,8 +11,10 @@ import com.tencent.supersonic.headless.core.chat.query.llm.s2sql.LLMResp;
 import com.tencent.supersonic.headless.core.pojo.QueryContext;
 import dev.langchain4j.model.chat.ChatLanguageModel;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
 import java.util.Objects;
@@ -36,6 +39,17 @@ public class JavaLLMProxy implements LLMProxy {
     }
 
     public LLMResp query2sql(LLMReq llmReq, Long dataSetId) {
+        Environment environment = ContextUtils.getBean(Environment.class);
+        String multiTurn = environment.getProperty("multi.turn");
+        log.info("multiTurn:{}", multiTurn);
+        if (StringUtils.isNotBlank(multiTurn) && Boolean.parseBoolean(multiTurn)) {
+            SqlGeneration sqlGeneration = ContextUtils.getBean(MultiTurnSqlGeneration.class);
+            String modelName = llmReq.getSchema().getDataSetName();
+            LLMResp result = sqlGeneration.generation(llmReq, dataSetId);
+            result.setQuery(llmReq.getQueryText());
+            result.setModelName(modelName);
+            return result;
+        }
 
         SqlGeneration sqlGeneration = SqlGenerationFactory.get(
                 SqlGenerationMode.getMode(llmReq.getSqlGenerationMode()));

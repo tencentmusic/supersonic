@@ -11,6 +11,9 @@ import com.tencent.supersonic.headless.core.chat.query.llm.s2sql.LLMResp;
 import com.tencent.supersonic.headless.core.chat.query.llm.s2sql.LLMSqlResp;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.core.env.Environment;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -21,8 +24,12 @@ public class LLMSqlParser implements SemanticParser {
     @Override
     public void parse(QueryContext queryCtx, ChatContext chatCtx) {
         LLMRequestService requestService = ContextUtils.getBean(LLMRequestService.class);
+        Environment environment = ContextUtils.getBean(Environment.class);
+        String multiTurn = environment.getProperty("multi.turn");
+        boolean isMultiTurn = StringUtils.isNotBlank(multiTurn) && Boolean.parseBoolean(multiTurn);
+        log.info("multiTurn:{}", multiTurn);
         //1.determine whether to skip this parser.
-        if (requestService.isSkip(queryCtx)) {
+        if (requestService.isSkip(queryCtx) && !isMultiTurn) {
             return;
         }
         try {

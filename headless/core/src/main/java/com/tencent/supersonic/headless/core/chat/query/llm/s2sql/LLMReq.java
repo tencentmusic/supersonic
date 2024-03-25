@@ -1,6 +1,8 @@
 package com.tencent.supersonic.headless.core.chat.query.llm.s2sql;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonValue;
+import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import lombok.Data;
 
 import java.util.List;
@@ -23,6 +25,11 @@ public class LLMReq {
     private String sqlGenerationMode;
 
     private Integer chatId;
+
+    private Boolean isMultiTurn = false;
+
+    @JsonIgnore
+    private List<SemanticParseInfo> contextualParseInfoList;
 
     @Data
     public static class ElementValue {
@@ -58,9 +65,7 @@ public class LLMReq {
 
         TWO_PASS_AUTO_COT("2_pass_auto_cot"),
 
-        TWO_PASS_AUTO_COT_SELF_CONSISTENCY("2_pass_auto_cot_self_consistency"),
-
-        MULTIPLE_ROUNDS("multiple_rounds");
+        TWO_PASS_AUTO_COT_SELF_CONSISTENCY("2_pass_auto_cot_self_consistency");
 
 
         private String name;
