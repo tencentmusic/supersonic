@@ -43,7 +43,7 @@ public class MetricResp extends SchemaItem {
 
     private String alias;
 
-    private List<String> tags;
+    private List<String> classifications;
 
     private RelateDimension relateDimension;
 
@@ -63,11 +63,11 @@ public class MetricResp extends SchemaItem {
 
     private int isTag;
 
-    public void setTag(String tag) {
+    public void setClassifications(String tag) {
         if (StringUtils.isBlank(tag)) {
-            tags = Lists.newArrayList();
+            classifications = Lists.newArrayList();
         } else {
-            tags = Arrays.asList(tag.split(","));
+            classifications = Arrays.asList(tag.split(","));
         }
     }
 

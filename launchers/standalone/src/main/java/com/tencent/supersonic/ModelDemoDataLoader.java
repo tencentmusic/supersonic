@@ -411,7 +411,7 @@ public class ModelDemoDataLoader {
         metricReq.setBizName("stay_hours");
         metricReq.setSensitiveLevel(SensitiveLevelEnum.HIGH.getCode());
         metricReq.setDescription("停留时长");
-        metricReq.setTags(Collections.singletonList("核心指标"));
+        metricReq.setClassifications(Collections.singletonList("核心指标"));
         metricReq.setAlias("访问时长");
         MetricDefineByMeasureParams metricTypeParams = new MetricDefineByMeasureParams();
         metricTypeParams.setExpr("s2_stay_time_statis_stay_hours");
@@ -476,7 +476,7 @@ public class ModelDemoDataLoader {
         metricReq.setBizName("pv_avg");
         metricReq.setSensitiveLevel(SensitiveLevelEnum.HIGH.getCode());
         metricReq.setDescription("每个用户平均访问的次数");
-        metricReq.setTags(Collections.singletonList("核心指标"));
+        metricReq.setClassifications(Collections.singletonList("核心指标"));
         metricReq.setAlias("平均访问次数");
         MetricDefineByMetricParams metricTypeParams = new MetricDefineByMetricParams();
         metricTypeParams.setExpr("pv/uv");

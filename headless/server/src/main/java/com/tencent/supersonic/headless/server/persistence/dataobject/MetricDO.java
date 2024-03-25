@@ -87,7 +87,7 @@ public class MetricDO {
     /**
      *
      */
-    private String tags;
+    private String classifications;
 
     /**
      *
