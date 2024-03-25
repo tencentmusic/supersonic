@@ -19,7 +19,7 @@
         <result column="data_format_type" jdbcType="VARCHAR" property="dataFormatType"/>
         <result column="data_format" jdbcType="VARCHAR" property="dataFormat"/>
         <result column="alias" jdbcType="VARCHAR" property="alias"/>
-        <result column="tags" jdbcType="VARCHAR" property="tags"/>
+        <result column="classifications" jdbcType="VARCHAR" property="classifications"/>
         <result column="define_type" jdbcType="VARCHAR" property="defineType"/>
     </resultMap>
     <resultMap extends="BaseResultMap" id="ResultMapWithBLOBs"
@@ -60,7 +60,7 @@
     <sql id="Base_Column_List">
         id
         , model_id, name, biz_name, description, status, sensitive_level, type, created_at,
-    created_by, updated_at, updated_by, data_format_type, data_format, alias, tags, define_type
+    created_by, updated_at, updated_by, data_format_type, data_format, alias, classifications, define_type
     </sql>
     <sql id="Blob_Column_List">
         type_params
@@ -110,7 +110,7 @@
             biz_name like CONCAT('%',#{key , jdbcType=VARCHAR},'%') or
             description like CONCAT('%',#{key , jdbcType=VARCHAR},'%') or
             alias like CONCAT('%',#{key , jdbcType=VARCHAR},'%') or
-            tags like CONCAT('%',#{key , jdbcType=VARCHAR},'%')  or
+            classifications like CONCAT('%',#{key , jdbcType=VARCHAR},'%')  or
             created_by like CONCAT('%',#{key , jdbcType=VARCHAR},'%') )
         </if>
         <if test="id != null">

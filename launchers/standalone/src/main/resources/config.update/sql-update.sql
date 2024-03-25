@@ -286,3 +286,6 @@ CREATE TABLE IF NOT EXISTS `s2_query_rule` (
     PRIMARY KEY (`id`)
     );
 COMMENT ON TABLE s2_query_rule IS 'tag query rule table';
+
+--20240325
+ALTER TABLE s2_metric RENAME COLUMN tags TO classifications;

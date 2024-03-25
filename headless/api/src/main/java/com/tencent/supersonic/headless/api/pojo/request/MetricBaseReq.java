@@ -23,20 +23,22 @@ public class MetricBaseReq extends SchemaItem {
 
     private DataFormat dataFormat;
 
-    private List<String> tags;
+    private List<String> classifications;
 
     private RelateDimension relateDimension;
 
+    private int isTag;
+
     private Map<String, Object> ext = new HashMap<>();
 
-    public String getTag() {
-        if (tags == null) {
+    public String getClassifications() {
+        if (classifications == null) {
             return null;
         }
-        if (CollectionUtils.isEmpty(tags)) {
+        if (CollectionUtils.isEmpty(classifications)) {
             return "";
         }
-        return StringUtils.join(tags, ",");
+        return StringUtils.join(classifications, ",");
     }
 
 }
