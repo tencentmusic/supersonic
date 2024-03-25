@@ -15,6 +15,7 @@ import com.tencent.supersonic.headless.api.pojo.response.DimensionResp;
 import com.tencent.supersonic.headless.api.pojo.response.DomainResp;
 import com.tencent.supersonic.headless.api.pojo.response.MetricResp;
 import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
+import com.tencent.supersonic.headless.api.pojo.response.TagItem;
 import com.tencent.supersonic.headless.api.pojo.response.TagObjectResp;
 import com.tencent.supersonic.headless.api.pojo.response.TagResp;
 import com.tencent.supersonic.headless.server.persistence.dataobject.CollectDO;
@@ -58,9 +59,9 @@ public class TagMetaServiceImpl implements TagMetaService {
     private final DomainService domainService;
 
     public TagMetaServiceImpl(TagRepository tagRepository, ModelService modelService,
-                              CollectService collectService, @Lazy DimensionService dimensionService,
-                              @Lazy MetricService metricService, TagObjectService tagObjectService,
-                              DomainService domainService) {
+            CollectService collectService, @Lazy DimensionService dimensionService,
+            @Lazy MetricService metricService, TagObjectService tagObjectService,
+            DomainService domainService) {
         this.tagRepository = tagRepository;
         this.modelService = modelService;
         this.collectService = collectService;
@@ -155,10 +156,10 @@ public class TagMetaServiceImpl implements TagMetaService {
         TagFilter tagFilter = new TagFilter();
         BeanUtils.copyProperties(tagMarketPageReq, tagFilter);
         List<CollectDO> collectList = collectService.getCollectList(user.getName());
-        List<Long> collectIds = collectList.stream()
-                .filter(collectDO -> SchemaElementType.TAG.name().equalsIgnoreCase(collectDO.getType()))
-                .map(CollectDO::getCollectId).collect(Collectors.toList());
         if (tagMarketPageReq.isHasCollect()) {
+            List<Long> collectIds = collectList.stream()
+                    .filter(collectDO -> SchemaElementType.TAG.name().equalsIgnoreCase(collectDO.getType()))
+                    .map(CollectDO::getCollectId).collect(Collectors.toList());
             if (CollectionUtils.isEmpty(collectIds)) {
                 tagFilter.setIds(Lists.newArrayList(-1L));
             } else {
@@ -167,7 +168,7 @@ public class TagMetaServiceImpl implements TagMetaService {
         }
         tagFilter.setModelIds(modelIds);
         PageInfo<TagResp> tagDOPageInfo = PageHelper.startPage(tagMarketPageReq.getCurrent(),
-                tagMarketPageReq.getPageSize())
+                        tagMarketPageReq.getPageSize())
                 .doSelectPageInfo(() -> getTags(tagFilter));
 
         List<TagResp> tagRespList = tagDOPageInfo.getList();
@@ -363,5 +364,20 @@ public class TagMetaServiceImpl implements TagMetaService {
         BeanUtils.copyProperties(tagReq, tagDO);
         tagDO.setType(tagReq.getTagDefineType().name());
         return tagDO;
+    }
+
+    public List<TagItem> getTagItems(User user, List<Long> itemIds, TagDefineType tagDefineType) {
+        TagFilter tagFilter = new TagFilter();
+        tagFilter.setTagDefineType(tagDefineType);
+        tagFilter.setItemIds(itemIds);
+        Set<Long> dimensionItemSet = getTagDOList(tagFilter, user).stream().map(TagDO::getItemId)
+                .collect(Collectors.toSet());
+        return itemIds.stream().map(entry -> {
+                    TagItem tagItem = new TagItem();
+                    tagItem.setIsTag(Boolean.compare(dimensionItemSet.contains(entry), false));
+                    tagItem.setItemId(entry);
+                    return tagItem;
+                }
+        ).collect(Collectors.toList());
     }
 }

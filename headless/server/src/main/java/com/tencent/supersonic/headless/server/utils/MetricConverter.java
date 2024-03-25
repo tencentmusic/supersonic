@@ -31,7 +31,7 @@ public class MetricConverter {
         metricDO.setType(metricReq.getMetricType().name());
         metricDO.setTypeParams(metricReq.getTypeParamsJson());
         metricDO.setDataFormat(JSONObject.toJSONString(metricReq.getDataFormat()));
-        metricDO.setTags(metricReq.getTag());
+        metricDO.setClassifications(metricReq.getClassifications());
         metricDO.setRelateDimensions(JSONObject.toJSONString(metricReq.getRelateDimension()));
         metricDO.setStatus(StatusEnum.ONLINE.getCode());
         metricDO.setExt(JSONObject.toJSONString(metricReq.getExt()));
@@ -48,8 +48,8 @@ public class MetricConverter {
         if (metricReq.getRelateDimension() != null) {
             metricDO.setRelateDimensions(JSONObject.toJSONString(metricReq.getRelateDimension()));
         }
-        if (metricReq.getTag() != null) {
-            metricDO.setTags(metricReq.getTag());
+        if (metricReq.getClassifications() != null) {
+            metricDO.setClassifications(metricReq.getClassifications());
         }
         if (metricReq.getExt() != null) {
             metricDO.setExt(JSONObject.toJSONString(metricReq.getExt()));
@@ -76,7 +76,7 @@ public class MetricConverter {
             metricResp.setDomainId(modelResp.getDomainId());
         }
         metricResp.setIsCollect(collect != null && collect.contains(metricDO.getId()));
-        metricResp.setTag(metricDO.getTags());
+        metricResp.setClassifications(metricDO.getClassifications());
         metricResp.setRelateDimension(JSONObject.parseObject(metricDO.getRelateDimensions(),
                 RelateDimension.class));
         if (metricDO.getExt() != null) {
