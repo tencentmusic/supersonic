@@ -12,17 +12,8 @@
     <artifactId>chat-server</artifactId>
     <dependencies>
         <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-context</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.tencent.supersonic</groupId>
-            <artifactId>common</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.tencent.supersonic</groupId>
@@ -36,25 +27,13 @@
         </dependency>
         <dependency>
             <groupId>com.tencent.supersonic</groupId>
-            <artifactId>headless-core</artifactId>
-            <version>${project.version}</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.tencent.supersonic</groupId>
-            <artifactId>chat-core</artifactId>
+            <artifactId>headless-server</artifactId>
             <version>${project.version}</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-inline</artifactId>
-            <version>${mockito-inline.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

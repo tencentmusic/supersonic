@@ -16,16 +16,6 @@ public class ChatConfigBaseReq {
 
     private Long modelId;
 
-    /**
-     * the chatDetailConfig about the model
-     */
-    private ChatDetailConfigReq chatDetailConfig;
-
-    /**
-     * the chatAggConfig about the model
-     */
-    private ChatAggConfigReq chatAggConfig;
-
 
     /**
      * the recommended questions about the model

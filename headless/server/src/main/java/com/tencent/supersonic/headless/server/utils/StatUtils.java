@@ -10,7 +10,7 @@ import com.tencent.supersonic.common.util.jsqlparser.SqlSelectHelper;
 import com.tencent.supersonic.headless.api.pojo.QueryStat;
 import com.tencent.supersonic.headless.api.pojo.SchemaItem;
 import com.tencent.supersonic.headless.api.pojo.enums.QueryOptMode;
-import com.tencent.supersonic.headless.api.pojo.enums.QueryType;
+import com.tencent.supersonic.headless.api.pojo.enums.QueryMethod;
 import com.tencent.supersonic.headless.api.pojo.enums.QueryTypeBack;
 import com.tencent.supersonic.headless.api.pojo.request.ItemUseReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryMultiStructReq;
@@ -110,7 +110,7 @@ public class StatUtils {
             queryStatInfo.setTraceId(traceId)
                     .setDataSetId(queryTagReq.getDataSetId())
                     .setUser(user)
-                    .setQueryType(QueryType.STRUCT.getValue())
+                    .setQueryType(QueryMethod.STRUCT.getValue())
                     .setQueryTypeBack(QueryTypeBack.NORMAL.getState())
                     .setQueryStructCmd(queryTagReq.toString())
                     .setQueryStructCmdMd5(DigestUtils.md5Hex(queryTagReq.toString()))
@@ -147,7 +147,7 @@ public class StatUtils {
             queryStatInfo.setTraceId("")
                     .setUser(userName)
                     .setDataSetId(querySqlReq.getDataSetId())
-                    .setQueryType(QueryType.SQL.getValue())
+                    .setQueryType(QueryMethod.SQL.getValue())
                     .setQueryTypeBack(QueryTypeBack.NORMAL.getState())
                     .setQuerySqlCmd(querySqlReq.toString())
                     .setQuerySqlCmdMd5(DigestUtils.md5Hex(querySqlReq.toString()))
@@ -178,7 +178,7 @@ public class StatUtils {
             queryStatInfo.setTraceId(traceId)
                     .setDataSetId(queryStructReq.getDataSetId())
                     .setUser(user)
-                    .setQueryType(QueryType.STRUCT.getValue())
+                    .setQueryType(QueryMethod.STRUCT.getValue())
                     .setQueryTypeBack(QueryTypeBack.NORMAL.getState())
                     .setQueryStructCmd(queryStructReq.toString())
                     .setQueryStructCmdMd5(DigestUtils.md5Hex(queryStructReq.toString()))
