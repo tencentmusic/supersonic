@@ -144,6 +144,12 @@ public class TagMetaServiceImpl implements TagMetaService {
         if (CollectionUtils.isEmpty(modelRespList)) {
             return new PageInfo<>();
         }
+
+        if (Objects.nonNull(tagMarketPageReq.getTagObjectId())) {
+            modelRespList = modelRespList.stream()
+                    .filter(modelResp -> tagMarketPageReq.getTagObjectId().equals(modelResp.getTagObjectId()))
+                    .collect(Collectors.toList());
+        }
         List<Long> modelIds = modelRespList.stream().map(model -> model.getId()).collect(Collectors.toList());
 
         TagFilter tagFilter = new TagFilter();
@@ -247,19 +253,18 @@ public class TagMetaServiceImpl implements TagMetaService {
             if (Objects.isNull(modelResp)) {
                 continue;
             }
-            if (tagMarketPageReq.getTagObjectId().equals(modelResp.getTagObjectId())) {
-                if (CollectionUtils.isNotEmpty(tagMarketPageReq.getDomainIds())) {
-                    if (!tagMarketPageReq.getDomainIds().contains(modelResp.getDomainId())) {
-                        continue;
-                    }
+            if (CollectionUtils.isNotEmpty(tagMarketPageReq.getDomainIds())) {
+                if (!tagMarketPageReq.getDomainIds().contains(modelResp.getDomainId())) {
+                    continue;
                 }
-                if (CollectionUtils.isNotEmpty(tagMarketPageReq.getModelIds())) {
-                    if (!tagMarketPageReq.getModelIds().contains(modelResp.getId())) {
-                        continue;
-                    }
-                }
-                modelRespList.add(modelResp);
             }
+            if (CollectionUtils.isNotEmpty(tagMarketPageReq.getModelIds())) {
+                if (!tagMarketPageReq.getModelIds().contains(modelResp.getId())) {
+                    continue;
+                }
+            }
+            modelRespList.add(modelResp);
+
         }
         return modelRespList;
     }
@@ -340,7 +345,7 @@ public class TagMetaServiceImpl implements TagMetaService {
             ModelResp model = modelService.getModel(dimension.getModelId());
             if (Objects.isNull(model.getTagObjectId())) {
                 throw new RuntimeException(String.format("this dimension:%s is not supported to create tag,"
-                                + " no related tag object", tagReq.getItemId()));
+                        + " no related tag object", tagReq.getItemId()));
             }
         }
         if (TagDefineType.METRIC.equals(tagReq.getTagDefineType())) {
@@ -348,7 +353,7 @@ public class TagMetaServiceImpl implements TagMetaService {
             ModelResp model = modelService.getModel(metric.getModelId());
             if (Objects.isNull(model.getTagObjectId())) {
                 throw new RuntimeException(String.format("this metric:%s is not supported to create tag,"
-                                + " no related tag object", tagReq.getItemId()));
+                        + " no related tag object", tagReq.getItemId()));
             }
         }
     }
