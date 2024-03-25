@@ -1,5 +1,6 @@
 package com.tencent.supersonic.headless.core.parser;
 
+import cn.hutool.core.exceptions.ExceptionUtil;
 import com.google.common.base.Strings;
 import com.tencent.supersonic.common.util.StringUtil;
 import com.tencent.supersonic.headless.api.pojo.MetricTable;
@@ -67,7 +68,7 @@ public class DefaultQueryParser implements QueryParser {
         try {
             if (!CollectionUtils.isEmpty(dataSetQueryParam.getTables())) {
                 List<String[]> tables = new ArrayList<>();
-                Boolean isSingleTable = dataSetQueryParam.getTables().size() == 1;
+                boolean isSingleTable = dataSetQueryParam.getTables().size() == 1;
                 for (MetricTable metricTable : dataSetQueryParam.getTables()) {
                     QueryStatement tableSql = parserSql(metricTable, isSingleTable, dataSetQueryParam, queryStatement);
                     if (isSingleTable && Objects.nonNull(tableSql.getDataSetQueryParam())
@@ -79,11 +80,10 @@ public class DefaultQueryParser implements QueryParser {
                     tables.add(new String[]{metricTable.getAlias(), tableSql.getSql()});
                 }
                 if (!tables.isEmpty()) {
-                    String sql = "";
+                    String sql;
                     if (dataSetQueryParam.isSupportWith()) {
-                        sql = "with " + String.join(",",
-                                tables.stream().map(t -> String.format("%s as (%s)", t[0], t[1])).collect(
-                                        Collectors.toList())) + "\n" + dataSetQueryParam.getSql();
+                        sql = "with " + tables.stream().map(t -> String.format("%s as (%s)", t[0], t[1])).collect(
+                                Collectors.joining(",")) + "\n" + dataSetQueryParam.getSql();
                     } else {
                         sql = dataSetQueryParam.getSql();
                         for (String[] tb : tables) {
@@ -97,7 +97,7 @@ public class DefaultQueryParser implements QueryParser {
                 }
             }
         } catch (Exception e) {
-            log.error("physicalSql error {}", e);
+            log.error("physicalSql error {}", ExceptionUtil.getMessage(e));
             queryStatement.setErrMsg(e.getMessage());
         }
         return queryStatement;
@@ -114,7 +114,7 @@ public class DefaultQueryParser implements QueryParser {
             return ComponentFactory.getSqlParser().explain(queryStatement, isAgg);
         } catch (Exception e) {
             queryStatement.setErrMsg(e.getMessage());
-            log.error("parser error metricQueryReq[{}] error [{}]", metricQueryParam, e);
+            log.error("parser error metricQueryReq[{}] error [{}]", metricQueryParam, ExceptionUtil.getMessage(e));
         }
         return queryStatement;
     }
