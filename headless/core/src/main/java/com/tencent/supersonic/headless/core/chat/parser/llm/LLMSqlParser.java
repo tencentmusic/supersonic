@@ -14,6 +14,7 @@ import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.env.Environment;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -35,6 +36,7 @@ public class LLMSqlParser implements SemanticParser {
         try {
             //2.get dataSetId from queryCtx and chatCtx.
             Long dataSetId = requestService.getDataSetId(queryCtx);
+            log.info("dataSetId:{}", dataSetId);
             if (dataSetId == null) {
                 return;
             }
@@ -46,6 +48,9 @@ public class LLMSqlParser implements SemanticParser {
 
             if (Objects.isNull(llmResp)) {
                 return;
+            }
+            if (isMultiTurn) {
+                linkingValues = new ArrayList<>(llmReq.getLinking());
             }
             //4. deduplicate the SQL result list and build parserInfo
             LLMResponseService responseService = ContextUtils.getBean(LLMResponseService.class);

@@ -1,5 +1,6 @@
 package com.tencent.supersonic.headless.core.chat.parser.llm;
 
+import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.headless.core.chat.query.llm.s2sql.LLMReq;
 import com.tencent.supersonic.headless.core.chat.query.llm.s2sql.LLMReq.ElementValue;
@@ -124,19 +125,22 @@ public class SqlPromptGenerator {
     public Map<String, String> transformQuestionMultiTurnPrompt(LLMReq llmReq, Long dataSetId) {
         List<String> contextualQuestionAugmented = new ArrayList<>();
         List<String> fullFieldNameList = llmReq.getSchema().getFieldNameList();
+        List<ElementValue> fullLinking = llmReq.getLinking();
         if (!CollectionUtils.isEmpty(llmReq.getContextualParseInfoList())) {
             llmReq.getContextualParseInfoList().forEach(o -> {
                 Map<String, Object> context = JsonUtil.toMap(
-                        JsonUtil.toString(o.getProperties().get("CONTEXT")), String.class, Object.class);
+                        JsonUtil.toString(o.getProperties().get(Constants.CONTEXT)), String.class, Object.class);
                 LLMReq contextualLlmReq = JsonUtil.toObject(JsonUtil.toString(context.get("llmReq")), LLMReq.class);
                 fullFieldNameList.addAll(contextualLlmReq.getSchema().getFieldNameList());
                 Pair<String, String> contextualQuestion = transformQuestionPrompt(contextualLlmReq);
                 contextualQuestionAugmented.add("\"" + contextualQuestion.getRight() + "\"");
+                fullLinking.addAll(contextualLlmReq.getLinking());
             });
         }
-        List<String> fieldNameList = fullFieldNameList
-                .stream().collect(Collectors.toSet()).stream().collect(Collectors.toList());
-        //llmReq.getSchema().setFieldNameList(fieldNameList);
+        List<String> fieldNameList = fullFieldNameList.stream().collect(Collectors.toSet())
+                .stream().collect(Collectors.toList());
+        llmReq.getSchema().setFieldNameList(fieldNameList);
+
 
         String modelName = llmReq.getSchema().getDataSetName();
         //List<String> fieldNameList = llmReq.getSchema().getFieldNameList();
@@ -159,6 +163,8 @@ public class SqlPromptGenerator {
                 currentDataStr, priorExts);
         String fullQuestionAugmented = String.format("contextual questions：[%s]。current question：%s",
                 contextualQuestionAugmentedStr, questionAugmented);
+
+        llmReq.setLinking(fullLinking.stream().collect(Collectors.toSet()).stream().collect(Collectors.toList()));
         Map<String, String> result = new HashMap<>();
         result.put("dbSchema", dbSchema);
         result.put("fullQuestionAugmented", fullQuestionAugmented);
