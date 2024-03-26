@@ -288,4 +288,4 @@ CREATE TABLE IF NOT EXISTS `s2_query_rule` (
 COMMENT ON TABLE s2_query_rule IS 'tag query rule table';
 
 --20240325
-ALTER TABLE s2_metric RENAME COLUMN tags TO classifications;
+alter  table s2_metric  change tags classifications varchar(500) null;

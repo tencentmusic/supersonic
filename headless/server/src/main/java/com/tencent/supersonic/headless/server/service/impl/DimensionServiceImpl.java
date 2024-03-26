@@ -244,15 +244,15 @@ public class DimensionServiceImpl implements DimensionService {
 
         List<Long> dimensionIds = dimensionResps.stream().map(dimensionResp -> dimensionResp.getId())
                 .collect(Collectors.toList());
-        List<TagItem> tagItems = tagMetaService.getTagItems(User.getFakeUser(), dimensionIds, TagDefineType.METRIC);
+        List<TagItem> tagItems = tagMetaService.getTagItems(User.getFakeUser(), dimensionIds, TagDefineType.DIMENSION);
         Map<Long, TagItem> itemIdToTagItem = tagItems.stream()
                 .collect(Collectors.toMap(tag -> tag.getItemId(), tag -> tag, (newTag, oldTag) -> newTag));
 
         if (Objects.nonNull(itemIdToTagItem)) {
-            dimensionResps.stream().forEach(metricResp -> {
-                Long metricRespId = metricResp.getId();
+            dimensionResps.stream().forEach(dimensionResp -> {
+                Long metricRespId = dimensionResp.getId();
                 if (itemIdToTagItem.containsKey(metricRespId)) {
-                    metricResp.setIsTag(itemIdToTagItem.get(metricRespId).getIsTag());
+                    dimensionResp.setIsTag(itemIdToTagItem.get(metricRespId).getIsTag());
                 }
             });
         }
