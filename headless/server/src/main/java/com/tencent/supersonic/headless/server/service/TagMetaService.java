@@ -21,7 +21,7 @@ public interface TagMetaService {
 
     Boolean delete(Long id, User user);
 
-    Boolean deleteBatch(TagDeleteReq tagDeleteReq, User user);
+    Boolean deleteBatch(List<TagDeleteReq> tagDeleteReqList, User user);
 
     TagResp getTag(Long id, User user);
 
