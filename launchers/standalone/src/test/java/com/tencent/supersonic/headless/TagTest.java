@@ -14,6 +14,7 @@ import org.junit.Before;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -50,7 +51,9 @@ public class TagTest extends BaseTest {
         TagDeleteReq tagDeleteReq = new TagDeleteReq();
         tagDeleteReq.setTagDefineType(TagDefineType.DIMENSION);
         tagDeleteReq.setItemIds(Arrays.asList(1L, 4L, 5L));
-        tagMetaService.deleteBatch(tagDeleteReq, user);
+        List<TagDeleteReq> tagDeleteReqList = new ArrayList<>();
+        tagDeleteReqList.add(tagDeleteReq);
+        tagMetaService.deleteBatch(tagDeleteReqList, user);
     }
 
     @Test
@@ -67,7 +70,9 @@ public class TagTest extends BaseTest {
         TagDeleteReq tagDeleteReq = new TagDeleteReq();
         tagDeleteReq.setTagDefineType(TagDefineType.DIMENSION);
         tagDeleteReq.setItemIds(Arrays.asList(4L, 5L));
-        tagMetaService.deleteBatch(tagDeleteReq, user);
+        List<TagDeleteReq> tagDeleteReqList = new ArrayList<>();
+        tagDeleteReqList.add(tagDeleteReq);
+        tagMetaService.deleteBatch(tagDeleteReqList, user);
         List<TagResp> tags1 = tagMetaService.getTags(tagFilter);
         Assert.assertEquals(0, tags1.size());
     }
@@ -89,7 +94,9 @@ public class TagTest extends BaseTest {
         TagDeleteReq tagDeleteReq = new TagDeleteReq();
         tagDeleteReq.setTagDefineType(TagDefineType.DIMENSION);
         tagDeleteReq.setItemIds(Arrays.asList(1L, 4L, 5L));
-        tagMetaService.deleteBatch(tagDeleteReq, user);
+        List<TagDeleteReq> tagDeleteReqList = new ArrayList<>();
+        tagDeleteReqList.add(tagDeleteReq);
+        tagMetaService.deleteBatch(tagDeleteReqList, user);
     }
 
 }

@@ -15,6 +15,7 @@ import com.tencent.supersonic.headless.server.service.TagMetaService;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
 
 import com.tencent.supersonic.headless.server.service.TagQueryService;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -67,7 +68,7 @@ public class TagController {
      * @throws Exception
      */
     @PostMapping("/create/batch")
-    public Integer createBatch(@RequestBody List<TagReq> tagReqList,
+    public Integer createBatch(@RequestBody @Valid List<TagReq> tagReqList,
                                HttpServletRequest request,
                                HttpServletResponse response) throws Exception {
         User user = UserHolder.findUser(request, response);
@@ -77,18 +78,18 @@ public class TagController {
     /**
      * 批量删除标签
      *
-     * @param tagDeleteReq
+     * @param tagDeleteReqList
      * @param request
      * @param response
      * @return
      * @throws Exception
      */
     @PostMapping("/delete/batch")
-    public Boolean deleteBatch(@RequestBody TagDeleteReq tagDeleteReq,
+    public Boolean deleteBatch(@RequestBody @Valid List<TagDeleteReq> tagDeleteReqList,
                           HttpServletRequest request,
                           HttpServletResponse response) throws Exception {
         User user = UserHolder.findUser(request, response);
-        return tagMetaService.deleteBatch(tagDeleteReq, user);
+        return tagMetaService.deleteBatch(tagDeleteReqList, user);
     }
 
     /**
