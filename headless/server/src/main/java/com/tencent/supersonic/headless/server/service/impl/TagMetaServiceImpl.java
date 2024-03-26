@@ -59,9 +59,9 @@ public class TagMetaServiceImpl implements TagMetaService {
     private final DomainService domainService;
 
     public TagMetaServiceImpl(TagRepository tagRepository, ModelService modelService,
-            CollectService collectService, @Lazy DimensionService dimensionService,
-            @Lazy MetricService metricService, TagObjectService tagObjectService,
-            DomainService domainService) {
+                              CollectService collectService, @Lazy DimensionService dimensionService,
+                              @Lazy MetricService metricService, TagObjectService tagObjectService,
+                              DomainService domainService) {
         this.tagRepository = tagRepository;
         this.modelService = modelService;
         this.collectService = collectService;
@@ -88,9 +88,13 @@ public class TagMetaServiceImpl implements TagMetaService {
 
     @Override
     public Integer createBatch(List<TagReq> tagReqList, User user) {
-        tagReqList.stream().forEach(tagReq -> {
-            create(tagReq, user);
-        });
+        for (TagReq tagReq : tagReqList) {
+            try {
+                create(tagReq, user);
+            } catch (Exception e) {
+                log.warn("createBatch, e:{}", e);
+            }
+        }
         return tagReqList.size();
     }
 
@@ -101,8 +105,14 @@ public class TagMetaServiceImpl implements TagMetaService {
     }
 
     @Override
-    public Boolean deleteBatch(TagDeleteReq tagDeleteReq, User user) {
-        tagRepository.deleteBatch(tagDeleteReq);
+    public Boolean deleteBatch(List<TagDeleteReq> tagDeleteReqList, User user) {
+        for (TagDeleteReq tagDeleteReq : tagDeleteReqList) {
+            try {
+                tagRepository.deleteBatch(tagDeleteReq);
+            } catch (Exception e) {
+                log.warn("createBatch, e:{}", e);
+            }
+        }
         return true;
     }
 
@@ -168,7 +178,7 @@ public class TagMetaServiceImpl implements TagMetaService {
         }
         tagFilter.setModelIds(modelIds);
         PageInfo<TagResp> tagDOPageInfo = PageHelper.startPage(tagMarketPageReq.getCurrent(),
-                        tagMarketPageReq.getPageSize())
+                tagMarketPageReq.getPageSize())
                 .doSelectPageInfo(() -> getTags(tagFilter));
 
         List<TagResp> tagRespList = tagDOPageInfo.getList();
@@ -366,6 +376,7 @@ public class TagMetaServiceImpl implements TagMetaService {
         return tagDO;
     }
 
+    @Override
     public List<TagItem> getTagItems(User user, List<Long> itemIds, TagDefineType tagDefineType) {
         TagFilter tagFilter = new TagFilter();
         tagFilter.setTagDefineType(tagDefineType);
