@@ -119,7 +119,7 @@
     <delete id="deleteBatchByIds">
         delete from s2_tag
         where id in
-        <foreach collection="ids" index="index" item="tagId" open="(" close=")"
+        <foreach collection="list" index="index" item="tagId" open="(" close=")"
                  separator=",">
             #{tagId}
         </foreach>
