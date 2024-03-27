@@ -131,7 +131,8 @@ public class DownloadServiceImpl implements DownloadService {
                     QuerySqlReq querySqlReq = queryStructReq.convert();
                     querySqlReq.setNeedAuth(true);
                     SemanticQueryResp queryResult = queryService.queryByReq(querySqlReq, user);
-                    DataDownload dataDownload = buildDataDownload(queryResult, queryStructReq, batchDownloadReq.isTransform());
+                    DataDownload dataDownload = buildDataDownload(queryResult,
+                            queryStructReq, batchDownloadReq.isTransform());
                     WriteSheet writeSheet = EasyExcel.writerSheet("Sheet" + sheetCount)
                             .head(dataDownload.getHeaders()).build();
                     excelWriter.write(dataDownload.getData(), writeSheet);

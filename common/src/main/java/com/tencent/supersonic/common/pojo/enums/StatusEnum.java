@@ -7,6 +7,7 @@ public enum StatusEnum {
     OFFLINE("OFFLINE", 2),
     DELETED("DELETED", 3),
     UNAVAILABLE("UNAVAILABLE", 4),
+    PUBLISH("PUBLISH", 5),
     UNKNOWN("UNKNOWN", -1);
 
 

@@ -153,6 +153,9 @@
         <if test="isTag != null and isTag == 1">
             and t1.id is not null
         </if>
+        <if test="isFromMetricMarket != null and isFromMetricMarket == 1">
+           and (t.created_by = #{userName} or t.status = 5)
+        </if>
     </select>
 
     <select id="queryMetrics" resultMap="ResultMapWithBLOBs">

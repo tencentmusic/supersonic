@@ -109,8 +109,11 @@ public class DataSetServiceImpl
         if (!CollectionUtils.isEmpty(metaFilter.getIds())) {
             wrapper.lambda().in(DataSetDO::getId, metaFilter.getIds());
         }
-        if (metaFilter.getStatus() != null) {
-            wrapper.lambda().eq(DataSetDO::getStatus, metaFilter.getStatus());
+        if (!CollectionUtils.isEmpty(metaFilter.getStatus())) {
+            wrapper.lambda().in(DataSetDO::getStatus, metaFilter.getStatus());
+        }
+        if (metaFilter.isAvailable()) {
+            wrapper.lambda().eq(DataSetDO::getStatus, StatusEnum.ONLINE.getCode());
         }
         wrapper.lambda().ne(DataSetDO::getStatus, StatusEnum.DELETED.getCode());
         return list(wrapper).stream().map(entry -> convert(entry, user)).collect(Collectors.toList());
@@ -212,7 +215,7 @@ public class DataSetServiceImpl
     @Override
     public Map<Long, List<Long>> getModelIdToDataSetIds(List<Long> dataSetIds, User user) {
         MetaFilter metaFilter = new MetaFilter();
-        metaFilter.setStatus(StatusEnum.ONLINE.getCode());
+        metaFilter.setAvailable(true);
         metaFilter.setIds(dataSetIds);
         List<DataSetResp> dataSetList = dataSetSchemaCache.getIfPresent(metaFilter);
         if (CollectionUtils.isEmpty(dataSetList)) {
