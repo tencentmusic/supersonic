@@ -34,6 +34,8 @@ public class MetaFilter {
 
     private List<String> fieldsDepend;
 
+    private Integer isTag;
+
     public MetaFilter(List<Long> modelIds) {
         this.modelIds = modelIds;
     }
