@@ -37,8 +37,6 @@ public class MetaFilter {
 
     private Integer isTag;
 
-    private boolean isAvailable;
-
     public MetaFilter(List<Long> modelIds) {
         this.modelIds = modelIds;
     }

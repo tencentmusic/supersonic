@@ -11,6 +11,6 @@ public class PageMetricReq extends PageSchemaItemReq {
 
     private Integer isTag;
 
-    private Integer isFromMetricMarket;
+    private Integer isPublish;
 
 }

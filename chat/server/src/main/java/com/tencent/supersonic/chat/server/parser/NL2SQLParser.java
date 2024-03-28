@@ -25,6 +25,7 @@ public class NL2SQLParser implements ChatParser {
         if (!ParseResp.ParseState.FAILED.equals(text2SqlParseResp.getState())) {
             parseResp.getSelectedParses().addAll(text2SqlParseResp.getSelectedParses());
         }
+        parseResp.getParseTimeCost().setSqlTime(text2SqlParseResp.getParseTimeCost().getSqlTime());
     }
 
     private boolean checkSkip(ParseResp parseResp) {

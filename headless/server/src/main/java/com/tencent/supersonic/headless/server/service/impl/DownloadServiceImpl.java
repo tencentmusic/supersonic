@@ -80,7 +80,7 @@ public class DownloadServiceImpl implements DownloadService {
         File file = FileUtils.createTmpFile(fileName);
         try {
             QueryStructReq queryStructReq = metricService.convert(downloadMetricReq);
-            SemanticQueryResp queryResult = queryService.queryByReq(queryStructReq.convert(), user);
+            SemanticQueryResp queryResult = queryService.queryByReq(queryStructReq.convert(true), user);
             DataDownload dataDownload = buildDataDownload(queryResult, queryStructReq, downloadMetricReq.isTransform());
             EasyExcel.write(file).sheet("Sheet1").head(dataDownload.getHeaders()).doWrite(dataDownload.getData());
         } catch (RuntimeException e) {

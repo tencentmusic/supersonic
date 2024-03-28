@@ -33,6 +33,13 @@ import com.tencent.supersonic.headless.server.service.DimensionService;
 import com.tencent.supersonic.headless.server.service.DomainService;
 import com.tencent.supersonic.headless.server.service.MetricService;
 import com.tencent.supersonic.headless.server.service.TagMetaService;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Date;
@@ -43,13 +50,6 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 
 @Service
 public class DataSetServiceImpl
@@ -111,9 +111,6 @@ public class DataSetServiceImpl
         }
         if (!CollectionUtils.isEmpty(metaFilter.getStatus())) {
             wrapper.lambda().in(DataSetDO::getStatus, metaFilter.getStatus());
-        }
-        if (metaFilter.isAvailable()) {
-            wrapper.lambda().eq(DataSetDO::getStatus, StatusEnum.ONLINE.getCode());
         }
         wrapper.lambda().ne(DataSetDO::getStatus, StatusEnum.DELETED.getCode());
         return list(wrapper).stream().map(entry -> convert(entry, user)).collect(Collectors.toList());
@@ -215,7 +212,7 @@ public class DataSetServiceImpl
     @Override
     public Map<Long, List<Long>> getModelIdToDataSetIds(List<Long> dataSetIds, User user) {
         MetaFilter metaFilter = new MetaFilter();
-        metaFilter.setAvailable(true);
+        metaFilter.setStatus(Lists.newArrayList(StatusEnum.ONLINE.getCode()));
         metaFilter.setIds(dataSetIds);
         List<DataSetResp> dataSetList = dataSetSchemaCache.getIfPresent(metaFilter);
         if (CollectionUtils.isEmpty(dataSetList)) {

@@ -288,4 +288,6 @@ CREATE TABLE IF NOT EXISTS `s2_query_rule` (
 COMMENT ON TABLE s2_query_rule IS 'tag query rule table';
 
 --20240325
-alter  table s2_metric  change tags classifications varchar(500) null;
+alter table s2_metric  change tags classifications varchar(500) null;
+alter table s2_metric  add column `is_publish` int(10) DEFAULT NULL COMMENT '是否发布';
+update s2_metric set is_publish = 1;

@@ -39,7 +39,7 @@ public class MetricQueryApiController {
             HttpServletResponse response) throws Exception {
         User user = UserHolder.findUser(request, response);
         QueryStructReq queryStructReq = metricService.convert(queryMetricReq);
-        return queryService.queryByReq(queryStructReq.convert(), user);
+        return queryService.queryByReq(queryStructReq.convert(true), user);
     }
 
     @PostMapping("/download/metric")

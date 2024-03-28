@@ -34,6 +34,7 @@ public class SqlInfoProcessor implements ResultProcessor {
 
     @Override
     public void process(ParseResp parseResp, QueryContext queryContext, ChatContext chatContext) {
+        long start = System.currentTimeMillis();
         List<SemanticQuery> semanticQueries = queryContext.getCandidateQueries();
         if (CollectionUtils.isEmpty(semanticQueries)) {
             return;
@@ -41,6 +42,7 @@ public class SqlInfoProcessor implements ResultProcessor {
         List<SemanticParseInfo> selectedParses = semanticQueries.stream().map(SemanticQuery::getParseInfo)
                 .collect(Collectors.toList());
         addSqlInfo(queryContext, selectedParses);
+        parseResp.getParseTimeCost().setSqlTime(System.currentTimeMillis() - start);
     }
 
     private void addSqlInfo(QueryContext queryContext, List<SemanticParseInfo> semanticParseInfos) {

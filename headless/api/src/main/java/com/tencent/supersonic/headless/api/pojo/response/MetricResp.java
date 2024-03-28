@@ -63,6 +63,8 @@ public class MetricResp extends SchemaItem {
 
     private int isTag;
 
+    private Integer isPublish;
+
     public void setClassifications(String tag) {
         if (StringUtils.isBlank(tag)) {
             classifications = Lists.newArrayList();

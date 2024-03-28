@@ -170,9 +170,9 @@ create table IF NOT EXISTS s2_auth_groups
 );
 
 CREATE TABLE IF NOT EXISTS `s2_metric` (
-                                           `id` INT NOT NULL  AUTO_INCREMENT,
-                                           `model_id` INT  NOT NULL ,
-                                           `name` varchar(255)  NOT NULL ,
+    `id` INT NOT NULL  AUTO_INCREMENT,
+    `model_id` INT  NOT NULL ,
+    `name` varchar(255)  NOT NULL ,
     `biz_name` varchar(255)  NOT NULL ,
     `description` varchar(500) DEFAULT NULL ,
     `status` INT  NOT NULL ,
@@ -190,6 +190,7 @@ CREATE TABLE IF NOT EXISTS `s2_metric` (
     `relate_dimensions` varchar(500) DEFAULT NULL,
     `ext` LONGVARCHAR DEFAULT NULL  ,
     `define_type` varchar(50)  NOT NULL, -- MEASURE, FIELD, METRIC
+    `is_publish` INT,
     PRIMARY KEY (`id`)
     );
 COMMENT ON TABLE s2_metric IS 'metric information table';

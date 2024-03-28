@@ -160,7 +160,7 @@ public class SchemaServiceImpl implements SchemaService {
 
     public List<DataSetSchemaResp> buildDataSetSchema(DataSetFilterReq filter) {
         MetaFilter metaFilter = new MetaFilter();
-        metaFilter.setAvailable(true);
+        metaFilter.setStatus(Lists.newArrayList(StatusEnum.ONLINE.getCode()));
         metaFilter.setIds(filter.getDataSetIds());
         List<DataSetResp> dataSetResps = dataSetService.getDataSetList(metaFilter, User.getFakeUser());
         Map<Long, DataSetResp> dataSetRespMap = getDataSetMap(dataSetResps);

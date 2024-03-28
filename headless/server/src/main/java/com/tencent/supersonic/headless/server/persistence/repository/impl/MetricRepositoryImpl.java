@@ -53,6 +53,16 @@ public class MetricRepositoryImpl implements MetricRepository {
     }
 
     @Override
+    public void batchPublish(List<MetricDO> metricDOS) {
+        metricDOCustomMapper.batchPublish(metricDOS);
+    }
+
+    @Override
+    public void batchUnPublish(List<MetricDO> metricDOS) {
+        metricDOCustomMapper.batchUnPublish(metricDOS);
+    }
+
+    @Override
     public MetricDO getMetricById(Long id) {
         return metricDOMapper.selectById(id);
     }

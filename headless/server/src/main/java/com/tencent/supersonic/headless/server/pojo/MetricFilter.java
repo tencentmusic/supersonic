@@ -9,5 +9,5 @@ public class MetricFilter extends MetaFilter {
 
     private String userName;
 
-    private Integer isFromMetricMarket;
+    private Integer isPublish;
 }

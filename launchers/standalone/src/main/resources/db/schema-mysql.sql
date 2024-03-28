@@ -295,6 +295,7 @@ CREATE TABLE `s2_metric`
     `relate_dimensions` varchar(500) DEFAULT NULL COMMENT '指标相关维度',
     `ext`               text DEFAULT NULL,
     `define_type` varchar(50)  DEFAULT NULL, -- MEASURE, FIELD, METRIC
+    `is_publish` int(10) DEFAULT NULL COMMENT '是否发布',
     PRIMARY KEY (`id`)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8 COMMENT ='指标表';

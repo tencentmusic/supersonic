@@ -143,8 +143,12 @@
         <if test="sensitiveLevel != null">
             and t.sensitive_level = #{sensitiveLevel}
         </if>
-        <if test="status != null">
-            and t.status = #{status}
+        <if test="status != null and status.size >0">
+            and t.status in
+            <foreach collection="status" index="index" item="status" open="(" close=")"
+                     separator=",">
+                #{status}
+            </foreach>
         </if>
         <if test="modelIds != null and modelIds.size >0">
             and t.model_id in
@@ -165,6 +169,9 @@
         </if>
         <if test="isTag != null and isTag == 1">
             and t1.id is not null
+        </if>
+        <if test="isTag != null and isTag == 0">
+            and t1.id is null
         </if>
     </select>
 

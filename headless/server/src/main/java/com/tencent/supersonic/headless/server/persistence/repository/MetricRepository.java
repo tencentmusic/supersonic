@@ -18,6 +18,10 @@ public interface MetricRepository {
 
     void batchUpdateStatus(List<MetricDO> metricDOS);
 
+    void batchPublish(List<MetricDO> metricDOS);
+
+    void batchUnPublish(List<MetricDO> metricDOS);
+
     MetricDO getMetricById(Long id);
 
     List<MetricDO> getMetric(MetricFilter metricFilter);
