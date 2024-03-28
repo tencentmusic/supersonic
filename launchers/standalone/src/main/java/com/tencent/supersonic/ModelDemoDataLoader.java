@@ -57,17 +57,17 @@ import com.tencent.supersonic.headless.server.service.MetricService;
 import com.tencent.supersonic.headless.server.service.ModelRelaService;
 import com.tencent.supersonic.headless.server.service.ModelService;
 import com.tencent.supersonic.headless.server.service.TagMetaService;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
 import com.tencent.supersonic.headless.server.service.TagObjectService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 @Component
 @Slf4j
@@ -121,6 +121,7 @@ public class ModelDemoDataLoader {
             addDataSet_2();
             addAuthGroup_1();
             addAuthGroup_2();
+            batchPushlishMetric();
         } catch (Exception e) {
             log.error("Failed to add model demo data", e);
         }
@@ -583,6 +584,11 @@ public class ModelDemoDataLoader {
         authGroupReq.setAuthorizedUsers(Collections.singletonList("tom"));
         authGroupReq.setAuthorizedDepartmentIds(Collections.emptyList());
         authService.addOrUpdateAuthGroup(authGroupReq);
+    }
+
+    private void batchPushlishMetric() {
+        List<Long> ids = Lists.newArrayList(1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L);
+        metricService.batchPublish(ids, User.getFakeUser());
     }
 
     private RelateDimension getRelateDimension(List<Long> dimensionIds) {

@@ -97,6 +97,26 @@
         </foreach>
     </update>
 
+    <update id="batchPublish" parameterType="java.util.List">
+        <foreach collection="list" item="metric" separator=";">
+            update s2_metric
+            set is_publish = 1,
+            updated_at = #{metric.updatedAt,jdbcType=TIMESTAMP},
+            updated_by = #{metric.updatedBy,jdbcType=VARCHAR}
+            where id = #{metric.id,jdbcType=BIGINT}
+        </foreach>
+    </update>
+
+    <update id="batchUnPublish" parameterType="java.util.List">
+        <foreach collection="list" item="metric" separator=";">
+            update s2_metric
+            set is_publish = 0,
+            updated_at = #{metric.updatedAt,jdbcType=TIMESTAMP},
+            updated_by = #{metric.updatedBy,jdbcType=VARCHAR}
+            where id = #{metric.id,jdbcType=BIGINT}
+        </foreach>
+    </update>
+
     <select id="query" resultMap="ResultMapWithBLOBs">
         select t.*
         from s2_metric t
@@ -130,8 +150,12 @@
         <if test="sensitiveLevel != null">
             and t.sensitive_level = #{sensitiveLevel}
         </if>
-        <if test="status != null">
-            and t.status = #{status}
+        <if test="status != null and status.size >0">
+            and t.status in
+            <foreach collection="status" index="index" item="status" open="(" close=")"
+                     separator=",">
+                #{status}
+            </foreach>
         </if>
         <if test="modelIds != null and modelIds.size >0">
             and t.model_id in
@@ -152,6 +176,12 @@
         </if>
         <if test="isTag != null and isTag == 1">
             and t1.id is not null
+        </if>
+        <if test="isTag != null and isTag == 0">
+            and t1.id is null
+        </if>
+        <if test="isPublish != null and isPublish == 1">
+           and (t.created_by = #{userName} or t.is_publish = 1)
         </if>
     </select>
 

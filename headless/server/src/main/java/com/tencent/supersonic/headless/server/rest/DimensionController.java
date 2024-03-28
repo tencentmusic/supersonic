@@ -9,10 +9,14 @@ import com.tencent.supersonic.headless.api.pojo.DimValueMap;
 import com.tencent.supersonic.headless.api.pojo.request.DimensionReq;
 import com.tencent.supersonic.headless.api.pojo.request.MetaBatchReq;
 import com.tencent.supersonic.headless.api.pojo.request.PageDimensionReq;
+import com.tencent.supersonic.headless.api.pojo.request.QueryDimValueReq;
 import com.tencent.supersonic.headless.api.pojo.response.DimensionResp;
+import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
 import com.tencent.supersonic.headless.server.pojo.DimensionFilter;
 import com.tencent.supersonic.headless.server.pojo.MetaFilter;
 import com.tencent.supersonic.headless.server.service.DimensionService;
+import com.tencent.supersonic.headless.server.service.QueryService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -30,11 +34,11 @@ import java.util.List;
 @RequestMapping("/api/semantic/dimension")
 public class DimensionController {
 
+    @Autowired
     private DimensionService dimensionService;
 
-    public DimensionController(DimensionService dimensionService) {
-        this.dimensionService = dimensionService;
-    }
+    @Autowired
+    private QueryService queryService;
 
 
     /**
@@ -105,6 +109,14 @@ public class DimensionController {
     @PostMapping("/queryDimension")
     public PageInfo<DimensionResp> queryDimension(@RequestBody PageDimensionReq pageDimensionReq) {
         return dimensionService.queryDimension(pageDimensionReq);
+    }
+
+    @PostMapping("/queryDimValue")
+    public SemanticQueryResp queryDimValue(@RequestBody QueryDimValueReq queryDimValueReq,
+                                           HttpServletRequest request,
+                                           HttpServletResponse response) {
+        User user = UserHolder.findUser(request, response);
+        return queryService.queryDimValue(queryDimValueReq, user);
     }
 
     @DeleteMapping("deleteDimension/{id}")
