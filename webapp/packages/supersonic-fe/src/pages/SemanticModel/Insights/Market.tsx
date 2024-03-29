@@ -6,7 +6,7 @@ import type { Dispatch } from 'umi';
 import { connect, useModel } from 'umi';
 import type { StateType } from '../model';
 import { SENSITIVE_LEVEL_ENUM } from '../constant';
-import { getTagList, deleteTag, batchUpdateTagStatus, getTagObjectList } from '../service';
+import { getTagList, deleteTag, batchDeleteTag, getTagObjectList } from '../service';
 import TagFilter from './components/TagFilter';
 import TagInfoCreateForm from './components/TagInfoCreateForm';
 import { StatusEnum } from '../enum';
@@ -46,9 +46,7 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
   const [dataSource, setDataSource] = useState<ISemantic.ITagItem[]>([]);
   const [tagItem, setTagItem] = useState<ISemantic.ITagItem>();
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
-  const [filterParams, setFilterParams] = useState<Record<string, any>>({
-    showType: localStorage.getItem('metricMarketShowType') === '1' ? true : false,
-  });
+  const [filterParams, setFilterParams] = useState<Record<string, any>>({});
 
   const [downloadLoading, setDownloadLoading] = useState<boolean>(false);
 
@@ -66,23 +64,36 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
     const { code, msg, data } = await getTagObjectList({});
     if (code === 200) {
       setTagObjectList(data);
-      const target = data[0];
-      if (target) {
-        queryTagList({ ...filterParams, tagObjectId: target.id });
-      }
+      // const target = data[0];
+      // if (target) {
+      //   queryTagList({ ...filterParams, tagObjectId: target.id });
+      // }
       return;
     }
     message.error(msg);
   };
 
-  const queryBatchUpdateStatus = async (ids: React.Key[], status: StatusEnum) => {
+  // const getTagList = (ids: React.Key[])=>{
+  //   const filterItem = dataSource.filter((item)=>{
+  //     return ids.includes(item.id);
+  //   });
+  //   const dimension = {
+
+  //   }
+  //   filterItem.forEach((item)=>{
+
+  //   })
+  // }
+
+  const queryBatchDeleteTag = async (ids: React.Key[]) => {
     if (Array.isArray(ids) && ids.length === 0) {
       return;
     }
-    const { code, msg } = await batchUpdateTagStatus({
-      ids,
-      status,
-    });
+    const { code, msg } = await batchDeleteTag([
+      {
+        ids,
+      },
+    ]);
     if (code === 200) {
       queryTagList(filterParams);
       return;
@@ -93,6 +104,11 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
   const queryTagList = async (params: QueryMetricListParams = {}, disabledLoading = false) => {
     if (!disabledLoading) {
       setLoading(true);
+    }
+    if (!params.tagObjectId) {
+      setLoading(false);
+      setDataSource([]);
+      return;
     }
     const { code, data, msg } = await getTagList({
       ...pagination,
@@ -191,12 +207,12 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
     // },
     {
       dataIndex: 'domainName',
-      title: '所属主题域',
+      title: '主题域',
       search: false,
     },
     {
       dataIndex: 'tagObjectName',
-      title: '所属对象',
+      title: '标签对象',
       search: false,
     },
     {
@@ -221,14 +237,14 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
         if (record.hasAdminRes) {
           return (
             <Space>
-              <a
+              {/* <a
                 key="metricEditBtn"
                 onClick={() => {
                   handleMetricEdit(record);
                 }}
               >
                 编辑
-              </a>
+              </a> */}
 
               <Popconfirm
                 title="确认删除？"
@@ -303,18 +319,18 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
     // }),
   };
 
-  const onMenuClick = (key: string) => {
-    switch (key) {
-      case 'batchStart':
-        queryBatchUpdateStatus(selectedRowKeys, StatusEnum.ONLINE);
-        break;
-      case 'batchStop':
-        queryBatchUpdateStatus(selectedRowKeys, StatusEnum.OFFLINE);
-        break;
-      default:
-        break;
-    }
-  };
+  // const onMenuClick = (key: string) => {
+  //   switch (key) {
+  //     case 'batchStart':
+  //       queryBatchUpdateStatus(selectedRowKeys, StatusEnum.ONLINE);
+  //       break;
+  //     case 'batchStop':
+  //       queryBatchUpdateStatus(selectedRowKeys, StatusEnum.OFFLINE);
+  //       break;
+  //     default:
+  //       break;
+  //   }
+  // };
 
   return (
     <>
@@ -322,6 +338,13 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
         <TagFilter
           tagObjectList={tagObjectList}
           initFilterValues={filterParams}
+          onFilterInit={(values) => {
+            setFilterParams({
+              ...filterParams,
+              ...values,
+            });
+            queryTagList(values);
+          }}
           onFiltersChange={(_, values) => {
             if (_.showType !== undefined) {
               setLoading(true);
@@ -346,22 +369,22 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
             return false;
           }}
           sticky={{ offsetHeader: 0 }}
-          // rowSelection={{
-          //   type: 'checkbox',
-          //   ...rowSelection,
-          // }}
-          // toolBarRender={() => [
-          //   <BatchCtrlDropDownButton
-          //     key="ctrlBtnList"
-          //     downloadLoading={downloadLoading}
-          //     onDeleteConfirm={() => {
-          //       queryBatchUpdateStatus(selectedRowKeys, StatusEnum.DELETED);
-          //     }}
-          //     hiddenList={['batchDownload', 'batchStart', 'batchStop']}
-          //     disabledList={hasAllPermission ? [] : ['batchStart', 'batchDelete']}
-          //     onMenuClick={onMenuClick}
-          //   />,
-          // ]}
+          rowSelection={{
+            type: 'checkbox',
+            ...rowSelection,
+          }}
+          toolBarRender={() => [
+            <BatchCtrlDropDownButton
+              key="ctrlBtnList"
+              downloadLoading={downloadLoading}
+              onDeleteConfirm={() => {
+                queryBatchDeleteTag(selectedRowKeys);
+              }}
+              hiddenList={['batchDownload', 'batchStart', 'batchStop']}
+              disabledList={hasAllPermission ? [] : ['batchStart', 'batchDelete']}
+              // onMenuClick={onMenuClick}
+            />,
+          ]}
           loading={loading}
           onChange={(data: any) => {
             const { current, pageSize, total } = data;

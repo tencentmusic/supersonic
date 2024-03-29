@@ -3,12 +3,13 @@ import { Form, Button, Modal, Input } from 'antd';
 import styles from '../style.less';
 import { message } from 'antd';
 import { formLayout } from '@/components/FormHelper/utils';
-import { createView, updateView, getDimensionList, queryMetric } from '../../service';
+import { createView, updateView, getDimensionList, queryMetric, getTagList } from '../../service';
 import { ISemantic } from '../../data';
 import DefaultSettingForm from './DefaultSettingForm';
 import { isArrayOfValues } from '@/utils/utils';
 import ProCard from '@ant-design/pro-card';
-import { ChatConfigType } from '../../enum';
+import { TransType } from '../../enum';
+import { number } from 'echarts';
 
 export type ModelCreateFormModalProps = {
   domainId: number;
@@ -31,21 +32,39 @@ const ViewSearchFormModal: React.FC<ModelCreateFormModalProps> = ({
 
   const [dimensionList, setDimensionList] = useState<ISemantic.IDimensionItem[]>();
   const [metricList, setMetricList] = useState<ISemantic.IMetricItem[]>();
+  const [tagList, setTagList] = useState<ISemantic.ITagItem[]>();
 
   useEffect(() => {
     const dataSetModelConfigs = viewItem?.dataSetDetail?.dataSetModelConfigs;
     if (Array.isArray(dataSetModelConfigs)) {
       const allMetrics: number[] = [];
       const allDimensions: number[] = [];
+      const allTags: number[] = [];
       dataSetModelConfigs.forEach((item: ISemantic.IViewModelConfigItem) => {
-        const { metrics, dimensions } = item;
+        const { metrics, dimensions, tagIds = [] } = item;
         allMetrics.push(...metrics);
         allDimensions.push(...dimensions);
+        allTags.push(...tagIds);
       });
       queryDimensionListByIds(allDimensions);
       queryMetricListByIds(allMetrics);
+      queryTagListByIds(allTags);
     }
   }, [viewItem]);
+
+  const queryTagListByIds = async (ids: number[]) => {
+    const { code, data, msg } = await getTagList({
+      ids,
+    });
+
+    const { list } = data || {};
+    if (code === 200) {
+      setTagList(list);
+    } else {
+      message.error(msg);
+      setTagList([]);
+    }
+  };
 
   const queryDimensionListByIds = async (ids: number[]) => {
     if (!isArrayOfValues(ids)) {
@@ -110,23 +129,22 @@ const ViewSearchFormModal: React.FC<ModelCreateFormModalProps> = ({
   const renderContent = () => {
     return (
       <div className={styles.viewSearchFormContainer}>
-        <ProCard title="指标模式" style={{ marginBottom: 10, borderBottom: '1px solid #eee' }}>
-          <DefaultSettingForm
-            form={form}
-            dimensionList={dimensionList}
-            metricList={metricList}
-            chatConfigType={ChatConfigType.METRIC}
-          />
-        </ProCard>
+        {viewItem?.queryType === TransType.METRIC && (
+          <ProCard title="指标模式" style={{ marginBottom: 10, borderBottom: '1px solid #eee' }}>
+            <DefaultSettingForm
+              form={form}
+              dimensionList={dimensionList}
+              metricList={metricList}
+              chatConfigType={TransType.METRIC}
+            />
+          </ProCard>
+        )}
 
-        <ProCard title="标签模式">
-          <DefaultSettingForm
-            form={form}
-            dimensionList={dimensionList}
-            metricList={metricList}
-            chatConfigType={ChatConfigType.TAG}
-          />
-        </ProCard>
+        {viewItem?.queryType === TransType.TAG && (
+          <ProCard title="标签模式">
+            <DefaultSettingForm form={form} tagList={tagList} chatConfigType={TransType.TAG} />
+          </ProCard>
+        )}
       </div>
     );
   };

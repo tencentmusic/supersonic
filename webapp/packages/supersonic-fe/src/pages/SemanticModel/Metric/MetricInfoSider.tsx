@@ -62,14 +62,14 @@ const MetricInfoSider: React.FC<Props> = ({
       <div className={styles.sectionContainer}>
         <hr className={styles.hr} />
         <div className={styles.section}>
-          <div className={styles.sectionTitleBox}>
+          {/* <div className={styles.sectionTitleBox}>
             <span className={styles.sectionTitle}>
               <Space>
                 <ContainerOutlined />
                 基本信息
               </Space>
             </span>
-          </div>
+          </div> */}
 
           <div className={styles.item}>
             <span className={styles.itemLable}>敏感度: </span>
@@ -193,12 +193,12 @@ const MetricInfoSider: React.FC<Props> = ({
             </span>
           </div>
 
-          {isArrayOfValues(metircData?.tags) && (
+          {isArrayOfValues(metircData?.classifications) && (
             <div className={styles.item}>
-              <span className={styles.itemLable}>标签: </span>
+              <span className={styles.itemLable}>分类: </span>
               <span className={styles.itemValue}>
                 <Space size={2} wrap>
-                  {metircData?.tags.map((tag) => (
+                  {metircData?.classifications.map((tag) => (
                     <Tag color="blue" key={tag}>
                       {tag}
                     </Tag>

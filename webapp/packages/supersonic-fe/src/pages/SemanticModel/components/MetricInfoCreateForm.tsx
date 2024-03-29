@@ -250,7 +250,7 @@ const MetricInfoCreateForm: React.FC<CreateFormProps> = ({
       dataFormat,
       dataFormatType,
       alias,
-      tags,
+      classifications,
       metricDefineType,
       metricDefineByMeasureParams,
       metricDefineByMetricParams,
@@ -264,7 +264,7 @@ const MetricInfoCreateForm: React.FC<CreateFormProps> = ({
       bizName,
       sensitiveLevel,
       description,
-      tags,
+      classifications,
       isTag,
       // isPercent,
       dataFormatType: dataFormatType || '',
@@ -396,10 +396,12 @@ const MetricInfoCreateForm: React.FC<CreateFormProps> = ({
   };
 
   const queryBatchDelete = async (metricItem: ISemantic.IMetricItem) => {
-    const { code, msg } = await batchDeleteTag({
-      itemIds: [metricItem.id],
-      tagDefineType: TAG_DEFINE_TYPE.METRIC,
-    });
+    const { code, msg } = await batchDeleteTag([
+      {
+        itemIds: [metricItem.id],
+        tagDefineType: TAG_DEFINE_TYPE.METRIC,
+      },
+    ]);
     if (code === 200) {
       return;
     }
@@ -661,10 +663,10 @@ const MetricInfoCreateForm: React.FC<CreateFormProps> = ({
             )}
           </Row>
         </FormItem>
-        <FormItem name="tags" label="标签">
+        <FormItem name="classifications" label="分类">
           <Select
             mode="tags"
-            placeholder="输入别名后回车确认，多别名输入、复制粘贴支持英文逗号自动分隔"
+            placeholder="输入分类名后回车确认，多别名输入、复制粘贴支持英文逗号自动分隔"
             tokenSeparators={[',']}
             maxTagCount={9}
             options={tagOptions}

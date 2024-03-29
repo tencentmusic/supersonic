@@ -1,6 +1,6 @@
 import { TreeGraphData } from '@antv/g6-core';
 import { StatusEnum } from './enum';
-import { SENSITIVE_LEVEL, TAG_DEFINE_TYPE } from './constant';
+import { SENSITIVE_LEVEL, TAG_DEFINE_TYPE, METRIC_DEFINE_TYPE } from './constant';
 
 export type ISODateString =
   `${number}-${number}-${number}T${number}:${number}:${number}.${number}+${number}:${number}`;
@@ -278,10 +278,12 @@ export declare namespace ISemantic {
     domainName: string;
     modelName: string;
     modelId: number;
+    modelBizName: string;
     hasAdminRes: boolean;
     type: string;
-    tags: string[];
+    classifications: string[];
     // typeParams: IMeasureTypeParams;
+    metricDefineType: METRIC_DEFINE_TYPE;
     metricDefineByMeasureParams: IMeasureTypeParams;
     metricDefineByFieldParams: IFieldTypeParams;
     metricDefineByMetricParams: IMetricTypeParams;
@@ -291,6 +293,7 @@ export declare namespace ISemantic {
     alias: string;
     useCnt: number;
     isCollect: boolean;
+    isPublish: boolean;
     relateDimension?: IRelateDimension;
   }
 

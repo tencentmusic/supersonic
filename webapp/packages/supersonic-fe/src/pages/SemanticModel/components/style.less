@@ -285,20 +285,10 @@
 
 
 .domainSelector {
-  display: flex;
-  width: max-content;
-  padding: 0 11px;
-  cursor: pointer;
-  position: relative;
-  border-radius: 4px;
-  transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
-  color: #000a24d9;
-  .downIcon {
-    margin-left: 10px;
-    font-size: 14px;
-  }
-  &:hover {
-    color:#296DF3;
+  :global {
+    .ant-select-tree .ant-select-tree-treenode-active .ant-select-tree-node-content-wrapper {
+      outline: none;
+    }
   }
 }
 

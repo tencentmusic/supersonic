@@ -1,6 +1,6 @@
 import request from 'umi-request';
 import moment from 'moment';
-import { DatePeridMap } from '@/pages/SemanticModel/constant';
+import { DateRangeType } from '@/components/MDatePicker/type';
 import { IDataSource } from './data';
 
 const getRunningEnv = () => {
@@ -144,7 +144,7 @@ export function batchUpdateDimensionStatus(data: any): Promise<any> {
 }
 
 export async function batchDownloadMetric(data: any): Promise<any> {
-  const response = await request.post(`${process.env.API_BASE_URL}query/download/batch`, {
+  const response = await request.post(`${process.env.API_BASE_URL}query/downloadBatch/metric`, {
     responseType: 'blob',
     getResponse: true,
     data,
@@ -486,53 +486,47 @@ const downloadStruct = (blob: Blob) => {
 };
 
 export function queryDimValue(data: any): Promise<any> {
-  return request(`${process.env.API_BASE_URL}query/queryDimValue`, {
+  return request(`${process.env.API_BASE_URL}dimension/queryDimValue`, {
     method: 'POST',
     data,
   });
 }
 
 export async function queryStruct({
-  modelIds,
-  bizName,
+  domainId,
   dateField = 'sys_imp_date',
   startDate,
   endDate,
   download = false,
-  groups = [],
-  dimensionFilters = [],
+  period = DateRangeType.DAY,
+  dimensionIds = [],
+  metricIds,
+  filters = [],
   isTransform,
 }: {
-  modelIds: number[];
-  bizName: string;
+  domainId: number;
+  metricIds: number[];
   dateField: string;
   startDate: string;
   endDate: string;
   download?: boolean;
-  groups?: string[];
-  dimensionFilters?: string[];
+  dimensionIds: number[];
+  period: DateRangeType;
+  filters?: string[];
   isTransform: boolean;
 }): Promise<any> {
   const response = await request(
-    `${process.env.API_BASE_URL}query/${download ? 'download/' : ''}struct`,
+    `${process.env.API_BASE_URL}query/${download ? 'download/' : ''}metric`,
     {
       method: 'POST',
       ...(download ? { responseType: 'blob', getResponse: true } : {}),
       data: {
-        modelIds,
-        groups: [dateField, ...groups],
-        dimensionFilters,
+        domainId,
+        filters,
         isTransform,
-        aggregators: [
-          {
-            column: bizName,
-            // func: 'SUM',
-            nameCh: 'null',
-            args: null,
-          },
-        ],
+        metricIds,
+        dimensionIds,
         orders: [{ column: dateField, direction: 'desc' }],
-        metricFilters: [],
         params: [],
         dateInfo: {
           dateMode: 'BETWEEN',
@@ -540,8 +534,8 @@ export async function queryStruct({
           endDate,
           dateList: [],
           unit: 7,
-          // period: 'DAY',
-          period: DatePeridMap[dateField],
+          groupByDate: true,
+          period,
           text: 'null',
         },
         limit: 2000,
@@ -667,6 +661,20 @@ export function batchCreateTag(data: any): Promise<any> {
 
 export function batchDeleteTag(data: any): Promise<any> {
   return request(`${process.env.API_BASE_URL}tag/delete/batch`, {
+    method: 'POST',
+    data,
+  });
+}
+
+export function batchMetricPublish(data: any): Promise<any> {
+  return request(`${process.env.API_BASE_URL}metric/batchPublish`, {
+    method: 'POST',
+    data,
+  });
+}
+
+export function batchMetricUnPublish(data: any): Promise<any> {
+  return request(`${process.env.API_BASE_URL}metric/batchUnPublish`, {
     method: 'POST',
     data,
   });

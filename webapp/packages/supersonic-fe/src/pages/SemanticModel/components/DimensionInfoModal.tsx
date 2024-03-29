@@ -93,10 +93,12 @@ const DimensionInfoModal: React.FC<CreateFormProps> = ({
   };
 
   const queryBatchDeleteTag = async (dimensionItem: ISemantic.IDimensionItem) => {
-    const { code, msg } = await batchDeleteTag({
-      itemIds: [dimensionItem.id],
-      tagDefineType: TAG_DEFINE_TYPE.DIMENSION,
-    });
+    const { code, msg } = await batchDeleteTag([
+      {
+        itemIds: [dimensionItem.id],
+        tagDefineType: TAG_DEFINE_TYPE.DIMENSION,
+      },
+    ]);
     if (code === 200) {
       return;
     }

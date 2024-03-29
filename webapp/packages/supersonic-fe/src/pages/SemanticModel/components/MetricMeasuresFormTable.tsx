@@ -37,13 +37,13 @@ const MetricMeasuresFormTable: React.FC<Props> = ({
   );
 
   const [selectedKeys, setSelectedKeys] = useState<string[]>(() => {
-    return measuresParams?.measures.map((item: any) => {
+    return measuresParams?.measures.map((item: ISemantic.IMeasure) => {
       return item.bizName;
     });
   });
 
   const [selectedKeysMap, setSelectedKeysMap] = useState<Record<string, boolean>>(() => {
-    return measuresParams.measures.reduce((keyMap, item: any) => {
+    return measuresParams.measures.reduce((keyMap: any, item: ISemantic.IMeasure) => {
       keyMap[item.bizName] = true;
       return keyMap;
     }, {});
