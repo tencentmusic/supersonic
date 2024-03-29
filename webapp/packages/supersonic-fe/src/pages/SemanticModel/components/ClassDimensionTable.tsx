@@ -103,7 +103,7 @@ const ClassDimensionTable: React.FC<Props> = ({ domainManger, dispatch }) => {
     });
     setLoading(false);
     if (code === 200) {
-      queryDimensionList({ ...filterParams, ...defaultPagination });
+      queryDimensionList({ ...filterParams, ...pagination });
       dispatch({
         type: 'domainManger/queryDimensionList',
         payload: {
@@ -131,7 +131,7 @@ const ClassDimensionTable: React.FC<Props> = ({ domainManger, dispatch }) => {
 
     setLoading(false);
     if (code === 200) {
-      queryDimensionList({ ...filterParams, ...defaultPagination });
+      queryDimensionList({ ...filterParams, ...pagination });
       dispatch({
         type: 'domainManger/queryDimensionList',
         payload: {
@@ -206,6 +206,7 @@ const ClassDimensionTable: React.FC<Props> = ({ domainManger, dispatch }) => {
     {
       dataIndex: 'description',
       title: '描述',
+      width: 250,
       search: false,
       render: columnsConfig.description.render,
     },
@@ -375,7 +376,7 @@ const ClassDimensionTable: React.FC<Props> = ({ domainManger, dispatch }) => {
                 ),
               },
               {
-                label: '标签状态',
+                label: '是否为标签',
                 component: (
                   <Select
                     style={{ width: 145 }}
@@ -439,7 +440,7 @@ const ClassDimensionTable: React.FC<Props> = ({ domainManger, dispatch }) => {
           </Button>,
           <BatchCtrlDropDownButton
             key="ctrlBtnList"
-            extenderEnable={true}
+            extenderList={['exportTagButton']}
             onDeleteConfirm={() => {
               queryBatchUpdateStatus(selectedRowKeys, StatusEnum.DELETED);
             }}

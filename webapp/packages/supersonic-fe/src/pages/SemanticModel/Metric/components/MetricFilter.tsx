@@ -108,7 +108,11 @@ const MetricFilter: React.FC<Props> = ({ initFilterValues = {}, onFiltersChange 
             <Switch size="small" />
           </FormItem>
         </StandardFormRow> */}
-
+        <StandardFormRow key="domainIds" title="主题域" block>
+          <FormItem name="domainIds">
+            <DomainTreeSelect />
+          </FormItem>
+        </StandardFormRow>
         {filterList.map((item) => {
           const { title, key, options } = item;
           return (
@@ -125,11 +129,6 @@ const MetricFilter: React.FC<Props> = ({ initFilterValues = {}, onFiltersChange 
             </StandardFormRow>
           );
         })}
-        <StandardFormRow key="domainIds" title="所属主题域" block>
-          <FormItem name="domainIds">
-            <DomainTreeSelect />
-          </FormItem>
-        </StandardFormRow>
       </Space>
     </Form>
   );

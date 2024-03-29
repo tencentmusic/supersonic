@@ -43,10 +43,12 @@ const MetricTrendSection: React.FC<Props> = ({
     startDate: string;
     endDate: string;
     dateField: string;
+    period: DateRangeType;
   }>({
     startDate: dayjs().subtract(6, 'days').format('YYYY-MM-DD'),
     endDate: dayjs().format('YYYY-MM-DD'),
     dateField: DateFieldMap[DateRangeType.DAY],
+    period: DateRangeType.DAY,
   });
   const [rowNumber, setRowNumber] = useState<number>(5);
 
@@ -66,31 +68,24 @@ const MetricTrendSection: React.FC<Props> = ({
     if (!metircData) {
       return;
     }
-    const { modelId, bizName, name } = metircData;
+    const { bizName, id, domainId, name } = metircData;
     indicatorFields.current = [{ name, column: bizName }];
 
-    const dimensionFiltersBizNameList = dimensionFilters.map((item) => {
-      return item.bizName;
-    });
-
-    const bizNameList = Array.from(new Set([...dimensionFiltersBizNameList, ...dimensionGroup]));
-
-    const modelIds = dimensionList.reduce(
+    const dimensionIds = dimensionList.reduce(
       (idList: number[], item: ISemantic.IDimensionItem) => {
-        if (bizNameList.includes(item.bizName)) {
-          idList.push(item.modelId);
+        if (dimensionGroup.includes(item.bizName)) {
+          idList.push(item.id);
         }
         return idList;
       },
-      [modelId],
+      [],
     );
-
     const res = await queryStruct({
-      // modelId,
-      modelIds: Array.from(new Set(modelIds)),
-      bizName,
-      groups: dimensionGroup,
-      dimensionFilters,
+      domainId,
+      metricIds: [id],
+      dimensionIds,
+      filters: dimensionFilters,
+      period: periodDate.period,
       dateField: periodDate.dateField,
       startDate: periodDate.startDate,
       endDate: periodDate.endDate,
@@ -162,13 +157,16 @@ const MetricTrendSection: React.FC<Props> = ({
                       const [startDate, endDate] = value;
                       const { dateSettingType, dynamicParams, staticParams } = config;
                       let dateField = DateFieldMap[DateRangeType.DAY];
+                      let period = DateRangeType.DAY;
                       if (DateSettingType.DYNAMIC === dateSettingType) {
                         dateField = DateFieldMap[dynamicParams.dateRangeType];
+                        period = dynamicParams.dateRangeType;
                       }
                       if (DateSettingType.STATIC === dateSettingType) {
                         dateField = DateFieldMap[staticParams.dateRangeType];
+                        period = staticParams.dateRangeType;
                       }
-                      setPeriodDate({ startDate, endDate, dateField });
+                      setPeriodDate({ startDate, endDate, dateField, period });
                     }}
                     disabledAdvanceSetting={true}
                   />

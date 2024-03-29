@@ -73,7 +73,7 @@ const DataSourceCreateForm: React.FC<CreateFormProps> = ({
   const [tagObjectIdState, setTagObjectIdState] = useState(modelItem?.tagObjectId);
   const formValRef = useRef(initFormVal as any);
   const [form] = Form.useForm();
-  const { databaseConfigList, selectModelId: modelId, selectDomainId } = domainManger;
+  const { databaseConfigList, selectModelId: modelId, selectDomainId, domainData } = domainManger;
   const updateFormVal = (val: any) => {
     formValRef.current = val;
   };
@@ -106,7 +106,9 @@ const DataSourceCreateForm: React.FC<CreateFormProps> = ({
   const backward = () => setCurrentStep(currentStep - 1);
 
   const queryTagObjectList = async () => {
-    const { code, msg, data } = await getTagObjectList({ domainId: selectDomainId });
+    const { code, msg, data } = await getTagObjectList({
+      domainId: domainData?.parentId || domainData?.id,
+    });
     if (code === 200) {
       setTagObjectList(data);
 
