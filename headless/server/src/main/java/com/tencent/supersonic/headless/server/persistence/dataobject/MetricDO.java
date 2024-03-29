@@ -103,4 +103,6 @@ public class MetricDO {
 
     private String defineType;
 
+    private Integer isPublish;
+
 }

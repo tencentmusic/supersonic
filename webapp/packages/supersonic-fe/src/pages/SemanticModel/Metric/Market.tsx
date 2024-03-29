@@ -11,6 +11,8 @@ import {
   deleteMetric,
   batchUpdateMetricStatus,
   batchDownloadMetric,
+  batchMetricPublish,
+  batchMetricUnPublish,
 } from '../service';
 import MetricFilter from './components/MetricFilter';
 import MetricInfoCreateForm from '../components/MetricInfoCreateForm';
@@ -92,6 +94,7 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
       ...params,
       createdBy: params.onlyShowMe ? currentUser.name : null,
       pageSize: params.showType ? 100 : params.pageSize || pagination.pageSize,
+      isPublish: 1,
     });
     setLoading(false);
     const { list, pageSize, pageNum, total } = data || {};
@@ -159,6 +162,21 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
     setCreateModalVisible(true);
   };
 
+  const queryBatchUpdatePublish = async (ids: React.Key[], status: boolean) => {
+    if (Array.isArray(ids) && ids.length === 0) {
+      return;
+    }
+    const queryPublish = status ? batchMetricPublish : batchMetricUnPublish;
+    const { code, msg } = await queryPublish({
+      ids,
+    });
+    if (code === 200) {
+      queryMetricList(filterParams);
+      return;
+    }
+    message.error(msg);
+  };
+
   const columnsConfig = ColumnsConfig();
 
   const columns: ProColumns[] = [
@@ -203,6 +221,22 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
       width: 150,
       valueEnum: SENSITIVE_LEVEL_ENUM,
       render: columnsConfig.sensitiveLevel.render,
+    },
+    {
+      dataIndex: 'isPublish',
+      title: '是否发布',
+      width: 100,
+      search: false,
+      render: (isPublish) => {
+        switch (isPublish) {
+          case 0:
+            return '否';
+          case 1:
+            return <span style={{ color: '#1677ff' }}>是</span>;
+          default:
+            return <Tag color="default">未知</Tag>;
+        }
+      },
     },
 
     {
@@ -250,6 +284,25 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
               >
                 编辑
               </a>
+              {record.isPublish ? (
+                <a
+                  key="metricUnPublishBtn"
+                  onClick={() => {
+                    queryBatchUpdatePublish([record.id], false);
+                  }}
+                >
+                  下架
+                </a>
+              ) : (
+                <a
+                  key="metricPublishBtn"
+                  onClick={() => {
+                    queryBatchUpdatePublish([record.id], true);
+                  }}
+                >
+                  发布
+                </a>
+              )}
 
               <Popconfirm
                 title="确认删除？"

@@ -1,9 +1,12 @@
 package com.tencent.supersonic.headless.api.pojo.request;
 
+import com.google.common.collect.Lists;
 import com.tencent.supersonic.common.pojo.DateConf;
-import java.util.List;
+import com.tencent.supersonic.common.pojo.Filter;
 import lombok.Data;
 import lombok.ToString;
+
+import java.util.List;
 
 @Data
 @ToString
@@ -11,13 +14,15 @@ public class QueryMetricReq {
 
     private Long domainId;
 
-    private List<Long> metricIds;
+    private List<Long> metricIds = Lists.newArrayList();
 
-    private List<String> metricNames;
+    private List<String> metricNames = Lists.newArrayList();
 
-    private List<Long> dimensionIds;
+    private List<Long> dimensionIds = Lists.newArrayList();
 
-    private List<String> dimensionNames;
+    private List<String> dimensionNames = Lists.newArrayList();
+
+    private List<Filter> filters = Lists.newArrayList();
 
     private DateConf dateInfo = new DateConf();
 

@@ -7,6 +7,7 @@ import styles from './style.less';
 import { ArrowLeftOutlined } from '@ant-design/icons';
 import MetricTrendSection from '@/pages/SemanticModel/Metric/components/MetricTrendSection';
 import { ISemantic } from '../data';
+import MetricBasicInfo from './components/MetricBasicInfo';
 import DimensionAndMetricRelationModal from '../components/DimensionAndMetricRelationModal';
 import MetricInfoSider from './MetricInfoSider';
 import type { TabsProps } from 'antd';
@@ -78,8 +79,13 @@ const MetricDetail: React.FC<Props> = () => {
 
   const tabItems: TabsProps['items'] = [
     {
+      key: 'metricCaliberInput',
+      label: '基础信息',
+      children: <MetricBasicInfo metircData={metircData} onQueryMetricData={queryMetricData} />,
+    },
+    {
       key: 'metricTrend',
-      label: '图表',
+      label: '指标探索',
       children: (
         <MetricTrendSection
           metircData={metircData}
@@ -88,11 +94,7 @@ const MetricDetail: React.FC<Props> = () => {
         />
       ),
     },
-    // {
-    //   key: 'metricCaliberInput',
-    //   label: '基础信息',
-    //   children: <></>,
-    // },
+
     // {
     //   key: 'metricDataRemark',
     //   label: '备注',
@@ -106,7 +108,7 @@ const MetricDetail: React.FC<Props> = () => {
         <div className={styles.metricDetail}>
           <div className={styles.tabContainer}>
             <Tabs
-              defaultActiveKey="metricTrend"
+              defaultActiveKey="metricCaliberInput"
               items={tabItems}
               tabBarExtraContent={{
                 right: (

@@ -1,5 +1,5 @@
 import { Tabs, Breadcrumb, Space } from 'antd';
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 import { connect, history } from 'umi';
 
 import ClassDimensionTable from './ClassDimensionTable';
@@ -41,9 +41,14 @@ const DomainManagerTab: React.FC<Props> = ({
   onBackDomainBtnClick,
   onMenuChange,
 }) => {
+  const initState = useRef<boolean>(false);
   const defaultTabKey = 'metric';
-  const { selectDomainId, domainList, selectModelId, selectModelName, selectDomainName } =
+  const { selectDomainId, selectModelId, selectModelName, selectDomainName, domainData } =
     domainManger;
+
+  useEffect(() => {
+    initState.current = false;
+  }, [selectModelId]);
 
   const tabItem = [
     {
@@ -73,6 +78,7 @@ const DomainManagerTab: React.FC<Props> = ({
     {
       label: '标签对象管理',
       key: 'tagObjectManange',
+      hidden: !!domainData?.parentId,
       children: <TagObjectTable />,
     },
     {
@@ -96,8 +102,10 @@ const DomainManagerTab: React.FC<Props> = ({
     //   children: <DatabaseTable />,
     // },
   ].filter((item) => {
-    const target = domainList.find((domain) => domain.id === selectDomainId);
-    if (target?.hasEditPermission) {
+    if (item.hidden) {
+      return false;
+    }
+    if (domainData?.hasEditPermission) {
       return true;
     }
     return item.key !== 'permissonSetting';
@@ -107,7 +115,16 @@ const DomainManagerTab: React.FC<Props> = ({
     {
       label: '指标管理',
       key: 'metric',
-      children: <ClassMetricTable />,
+      children: (
+        <ClassMetricTable
+          onEmptyMetricData={() => {
+            if (!initState.current) {
+              initState.current = true;
+              onMenuChange?.('dimenstion');
+            }
+          }}
+        />
+      ),
     },
     {
       label: '维度管理',

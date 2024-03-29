@@ -97,7 +97,7 @@ export const ColumnsConfig = (params?: {
     },
     indicatorInfo: {
       render: (_, record: ISemantic.IMetricItem) => {
-        const { name, alias, bizName, tags, id, isCollect } = record;
+        const { name, alias, bizName, classifications, id, isCollect } = record;
         let url = `/metric/detail/`;
         let starType: StarType = 'metric';
         if (params) {
@@ -137,7 +137,7 @@ export const ColumnsConfig = (params?: {
               {bizName}
             </div>
 
-            {(alias || isArrayOfValues(tags)) && (
+            {(alias || isArrayOfValues(classifications)) && (
               <div style={{ marginTop: 8 }}>
                 <Space direction="vertical" size={4}>
                   {alias && (
@@ -181,16 +181,16 @@ export const ColumnsConfig = (params?: {
                     </Space>
                   )}
 
-                  {isArrayOfValues(tags) && (
+                  {isArrayOfValues(classifications) && (
                     <Space
                       size={4}
                       style={{ color: '#5f748d', fontSize: 12, margin: '5px 0 5px 0' }}
                     >
                       <TagsOutlined />
-                      <div style={{ width: 'max-content' }}>标签:</div>
+                      <div style={{ width: 'max-content' }}>分类:</div>
                       <span style={{ marginLeft: 2 }}>
                         <Space size={[0, 8]} wrap>
-                          {tags.map((tag: string) => {
+                          {classifications.map((tag: string) => {
                             return (
                               <Tag
                                 color="#eee"
@@ -280,7 +280,7 @@ export const ColumnsConfig = (params?: {
         switch (status) {
           case StatusEnum.ONLINE:
             tagProps = {
-              // color: 'success',
+              // color: 'processing',
               color: 'geekblue',
               label: '已启用',
             };

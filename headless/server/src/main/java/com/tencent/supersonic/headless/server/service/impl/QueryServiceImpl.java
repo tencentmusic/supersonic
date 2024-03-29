@@ -3,32 +3,21 @@ package com.tencent.supersonic.headless.server.service.impl;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
-import com.tencent.supersonic.common.pojo.Aggregator;
-import com.tencent.supersonic.common.pojo.Constants;
-import com.tencent.supersonic.common.pojo.DateConf;
-import com.tencent.supersonic.common.pojo.enums.ApiItemType;
 import com.tencent.supersonic.common.pojo.enums.TaskStatusEnum;
 import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
-import com.tencent.supersonic.common.pojo.exception.InvalidArgumentException;
 import com.tencent.supersonic.headless.api.pojo.Dim;
-import com.tencent.supersonic.headless.api.pojo.Item;
 import com.tencent.supersonic.headless.api.pojo.QueryParam;
-import com.tencent.supersonic.headless.api.pojo.SingleItemQueryResult;
 import com.tencent.supersonic.headless.api.pojo.request.ExplainSqlReq;
 import com.tencent.supersonic.headless.api.pojo.request.ItemUseReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryDimValueReq;
-import com.tencent.supersonic.headless.api.pojo.request.QueryItemReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryMultiStructReq;
 import com.tencent.supersonic.headless.api.pojo.request.QuerySqlReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
 import com.tencent.supersonic.headless.api.pojo.request.SchemaFilterReq;
 import com.tencent.supersonic.headless.api.pojo.request.SemanticQueryReq;
-import com.tencent.supersonic.headless.api.pojo.response.AppDetailResp;
 import com.tencent.supersonic.headless.api.pojo.response.DimensionResp;
 import com.tencent.supersonic.headless.api.pojo.response.ExplainResp;
-import com.tencent.supersonic.headless.api.pojo.response.ItemQueryResultResp;
 import com.tencent.supersonic.headless.api.pojo.response.ItemUseResp;
-import com.tencent.supersonic.headless.api.pojo.response.MetricResp;
 import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticSchemaResp;
@@ -41,26 +30,21 @@ import com.tencent.supersonic.headless.core.planner.QueryPlanner;
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;
 import com.tencent.supersonic.headless.core.utils.ComponentFactory;
 import com.tencent.supersonic.headless.server.annotation.S2DataPermission;
-import com.tencent.supersonic.headless.server.aspect.ApiHeaderCheckAspect;
 import com.tencent.supersonic.headless.server.manager.SemanticSchemaManager;
-import com.tencent.supersonic.headless.server.pojo.DimensionFilter;
 import com.tencent.supersonic.headless.server.service.AppService;
 import com.tencent.supersonic.headless.server.service.Catalog;
 import com.tencent.supersonic.headless.server.service.QueryService;
 import com.tencent.supersonic.headless.server.utils.QueryReqConverter;
 import com.tencent.supersonic.headless.server.utils.QueryUtils;
 import com.tencent.supersonic.headless.server.utils.StatUtils;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
-import javax.servlet.http.HttpServletRequest;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 
 @Service
@@ -158,7 +142,7 @@ public class QueryServiceImpl implements QueryService {
         return null;
     }
 
-    private QueryStatement buildStructQueryStatement(QueryStructReq queryStructReq) throws Exception {
+    private QueryStatement buildStructQueryStatement(QueryStructReq queryStructReq) {
         SchemaFilterReq filter = buildSchemaFilterReq(queryStructReq);
         SemanticSchemaResp semanticSchemaResp = catalog.fetchSemanticSchema(filter);
         QueryStatement queryStatement = new QueryStatement();
@@ -215,84 +199,6 @@ public class QueryServiceImpl implements QueryService {
         QueryStatement queryStatement = buildQueryStatement((SemanticQueryReq) queryReq);
         queryStatement = plan(queryStatement);
         return getExplainResp(queryStatement);
-    }
-
-    @Override
-    public ItemQueryResultResp queryMetricDataById(QueryItemReq queryItemReq,
-            HttpServletRequest request) throws Exception {
-        AppDetailResp appDetailResp = getAppDetailResp(request);
-        authCheck(appDetailResp, queryItemReq.getIds(), ApiItemType.METRIC);
-        List<SingleItemQueryResult> results = Lists.newArrayList();
-        Map<Long, Item> map = appDetailResp.getConfig().getItems().stream()
-                .collect(Collectors.toMap(Item::getId, i -> i));
-        for (Long id : queryItemReq.getIds()) {
-            Item item = map.get(id);
-            SingleItemQueryResult apiQuerySingleResult = dataQuery(appDetailResp.getId(),
-                    item, queryItemReq.getDateConf(), queryItemReq.getLimit());
-            results.add(apiQuerySingleResult);
-        }
-        return ItemQueryResultResp.builder().results(results).build();
-    }
-
-    private QueryStructReq buildQueryStructReq(List<DimensionResp> dimensionResps,
-            MetricResp metricResp, DateConf dateConf, Long limit) {
-        Set<Long> modelIds = dimensionResps.stream().map(DimensionResp::getModelId).collect(Collectors.toSet());
-        modelIds.add(metricResp.getModelId());
-        QueryStructReq queryStructReq = new QueryStructReq();
-        queryStructReq.setGroups(dimensionResps.stream()
-                .map(DimensionResp::getBizName).collect(Collectors.toList()));
-        queryStructReq.getGroups().add(0, getTimeDimension(dateConf));
-        Aggregator aggregator = new Aggregator();
-        aggregator.setColumn(metricResp.getBizName());
-        queryStructReq.setAggregators(Lists.newArrayList(aggregator));
-        queryStructReq.setDateInfo(dateConf);
-        queryStructReq.setModelIds(modelIds);
-        queryStructReq.setLimit(limit);
-        return queryStructReq;
-    }
-
-    private SingleItemQueryResult dataQuery(Integer appId, Item item, DateConf dateConf, Long limit) throws Exception {
-        MetricResp metricResp = catalog.getMetric(item.getId());
-        item.setCreatedBy(metricResp.getCreatedBy());
-        item.setBizName(metricResp.getBizName());
-        item.setName(metricResp.getName());
-        List<Item> items = item.getRelateItems();
-        List<DimensionResp> dimensionResps = Lists.newArrayList();
-        if (!CollectionUtils.isEmpty(items)) {
-            List<Long> ids = items.stream().map(Item::getId).collect(Collectors.toList());
-            DimensionFilter dimensionFilter = new DimensionFilter();
-            dimensionFilter.setIds(ids);
-            dimensionResps = catalog.getDimensions(dimensionFilter);
-        }
-        QueryStructReq queryStructReq = buildQueryStructReq(dimensionResps, metricResp, dateConf, limit);
-        SemanticQueryResp semanticQueryResp = queryByReq(queryStructReq, User.getAppUser(appId));
-        SingleItemQueryResult apiQuerySingleResult = new SingleItemQueryResult();
-        apiQuerySingleResult.setItem(item);
-        apiQuerySingleResult.setResult(semanticQueryResp);
-        return apiQuerySingleResult;
-    }
-
-    private AppDetailResp getAppDetailResp(HttpServletRequest request) {
-        int appId = Integer.parseInt(request.getHeader(ApiHeaderCheckAspect.APPID));
-        return appService.getApp(appId);
-    }
-
-    private String getTimeDimension(DateConf dateConf) {
-        if (Constants.MONTH.equals(dateConf.getPeriod())) {
-            return TimeDimensionEnum.MONTH.getName();
-        } else if (Constants.WEEK.equals(dateConf.getPeriod())) {
-            return TimeDimensionEnum.WEEK.getName();
-        } else {
-            return TimeDimensionEnum.DAY.getName();
-        }
-    }
-
-    private void authCheck(AppDetailResp appDetailResp, List<Long> ids, ApiItemType type) {
-        Set<Long> idsInApp = appDetailResp.allItems().stream()
-                .filter(item -> type.equals(item.getType())).map(Item::getId).collect(Collectors.toSet());
-        if (!idsInApp.containsAll(ids)) {
-            throw new InvalidArgumentException("查询范围超过应用申请范围, 请检查");
-        }
     }
 
     private ExplainResp getExplainResp(QueryStatement queryStatement) {

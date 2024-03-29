@@ -40,7 +40,12 @@ const ROUTES = [
     name: 'semanticModel',
     envEnableList: [ENV_KEY.SEMANTIC],
   },
-
+  {
+    path: '/plugin',
+    name: 'plugin',
+    component: './ChatPlugin',
+    envEnableList: [ENV_KEY.CHAT],
+  },
   {
     path: '/metric',
     name: 'metric',
@@ -93,12 +98,6 @@ const ROUTES = [
     ],
   },
 
-  {
-    path: '/plugin',
-    name: 'plugin',
-    component: './ChatPlugin',
-    envEnableList: [ENV_KEY.CHAT],
-  },
   {
     path: '/login',
     name: 'login',

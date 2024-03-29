@@ -1,7 +1,7 @@
 import { Form, Input, Space, Row, Col, Switch, Select } from 'antd';
 import StandardFormRow from '@/components/StandardFormRow';
 import TagSelect from '@/components/TagSelect';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { SENSITIVE_LEVEL_OPTIONS } from '../../constant';
 import { SearchOutlined } from '@ant-design/icons';
 import DomainTreeSelect from '../../components/DomainTreeSelect';
@@ -13,10 +13,16 @@ const FormItem = Form.Item;
 type Props = {
   tagObjectList: ISemantic.ITagObjectItem[];
   initFilterValues?: any;
+  onFilterInit?: (values: any) => void;
   onFiltersChange: (_: any, values: any) => void;
 };
 
-const TagFilter: React.FC<Props> = ({ tagObjectList, initFilterValues = {}, onFiltersChange }) => {
+const TagFilter: React.FC<Props> = ({
+  tagObjectList,
+  initFilterValues = {},
+  onFilterInit,
+  onFiltersChange,
+}) => {
   const [form] = Form.useForm();
 
   useEffect(() => {
@@ -25,16 +31,45 @@ const TagFilter: React.FC<Props> = ({ tagObjectList, initFilterValues = {}, onFi
     });
   }, [form]);
 
+  const [currentDomainId, setCurrentDomainId] = useState<number>();
+
+  const [tagObjectOptions, setTagObjectOptions] = useState<OptionsItem[]>([]);
+
+  const initState = useRef<boolean>(false);
+
   useEffect(() => {
-    const target = tagObjectList?.[0];
-    if (!target) {
-      return;
+    const options = tagObjectList
+      .filter((item) => {
+        if (currentDomainId) {
+          return item.domainId === currentDomainId;
+        } else {
+          return true;
+        }
+      })
+      .map((item: ISemantic.ITagObjectItem) => {
+        return {
+          label: item.name,
+          value: item.id,
+        };
+      });
+    setTagObjectOptions(options);
+    const target = options[0];
+    form.setFieldValue('tagObjectId', target?.value);
+
+    if (currentDomainId && target?.value && !initState.current) {
+      initState.current = true;
+      const data = form.getFieldsValue();
+      onFilterInit?.({ ...data, tagObjectId: target?.value });
     }
-    form.setFieldValue('tagObjectId', target.id);
-  }, [tagObjectList]);
+  }, [currentDomainId, tagObjectList]);
+
+  // useEffect(() => {
+  //   if (currentDomainId) {
+  //     onFilterInit?.();
+  //   }
+  // }, [currentDomainId])
 
   const handleValuesChange = (value: any, values: any) => {
-    localStorage.setItem('metricMarketShowType', !!values.showType ? '1' : '0');
     onFiltersChange(value, values);
   };
 
@@ -73,6 +108,22 @@ const TagFilter: React.FC<Props> = ({ tagObjectList, initFilterValues = {}, onFi
         if (value.key) {
           return;
         }
+        if (value.domainId) {
+          setCurrentDomainId(value.domainId);
+          const options = tagObjectList.filter((item) => {
+            if (value.domainId) {
+              return item.domainId === value.domainId;
+            } else {
+              return true;
+            }
+          });
+          handleValuesChange(value, {
+            ...values,
+            tagObjectId: options[0]?.id,
+          });
+          return;
+        }
+
         handleValuesChange(value, values);
       }}
     >
@@ -108,17 +159,23 @@ const TagFilter: React.FC<Props> = ({ tagObjectList, initFilterValues = {}, onFi
         </div>
       </StandardFormRow>
       <Space size={40}>
-        <StandardFormRow key="tagObjectId" title="所属对象" block>
+        <StandardFormRow key="domainId" title="主题域" block>
+          <FormItem name="domainId">
+            <DomainTreeSelect
+              firstLevelOnly={true}
+              treeSelectProps={{ multiple: false, allowClear: false }}
+              onDefaultValue={(value) => {
+                setCurrentDomainId(value);
+              }}
+            />
+          </FormItem>
+        </StandardFormRow>
+        <StandardFormRow key="tagObjectId" title="标签对象" block>
           <FormItem name="tagObjectId">
             <Select
               style={{ minWidth: 150 }}
               placeholder="请选择所属对象"
-              options={tagObjectList.map((item: ISemantic.ITagObjectItem) => {
-                return {
-                  label: item.name,
-                  value: item.id,
-                };
-              })}
+              options={tagObjectOptions}
             />
           </FormItem>
         </StandardFormRow>
@@ -138,11 +195,6 @@ const TagFilter: React.FC<Props> = ({ tagObjectList, initFilterValues = {}, onFi
             </StandardFormRow>
           );
         })}
-        {/* <StandardFormRow key="domainIds" title="所属主题域" block>
-          <FormItem name="domainIds">
-            <DomainTreeSelect />
-          </FormItem>
-        </StandardFormRow> */}
       </Space>
     </Form>
   );

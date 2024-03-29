@@ -136,7 +136,6 @@ const DataSourceFieldForm: React.FC<Props> = ({
       width: 185,
       render: (_: any, record: FieldItem) => {
         const { type } = record;
-        console.log(record, 3333);
         if (type === EnumDataSourceType.PRIMARY) {
           return (
             <Space>

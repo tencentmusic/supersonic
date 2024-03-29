@@ -65,6 +65,24 @@ public class MetricController {
         return true;
     }
 
+    @PostMapping("/batchPublish")
+    public Boolean batchPublish(@RequestBody MetaBatchReq metaBatchReq,
+                                     HttpServletRequest request,
+                                     HttpServletResponse response) {
+        User user = UserHolder.findUser(request, response);
+        metricService.batchPublish(metaBatchReq.getIds(), user);
+        return true;
+    }
+
+    @PostMapping("/batchUnPublish")
+    public Boolean batchUnPublish(@RequestBody MetaBatchReq metaBatchReq,
+                                     HttpServletRequest request,
+                                     HttpServletResponse response) {
+        User user = UserHolder.findUser(request, response);
+        metricService.batchUnPublish(metaBatchReq.getIds(), user);
+        return true;
+    }
+
     @PostMapping("/mockMetricAlias")
     public List<String> mockMetricAlias(@RequestBody MetricBaseReq metricReq,
             HttpServletRequest request,

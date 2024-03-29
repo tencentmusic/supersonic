@@ -7,18 +7,15 @@ import { Form, Input, Select, InputNumber } from 'antd';
 import { wrapperTransTypeAndId } from '../../utils';
 
 import { ISemantic } from '../../data';
-import { ChatConfigType, TransType, SemanticNodeType } from '../../enum';
+import { TransType, SemanticNodeType } from '../../enum';
 import TransTypeTag from '../../components/TransTypeTag';
 
 type Props = {
-  // entityData: any;
-  // chatConfigKey: string;
-  chatConfigType: ChatConfigType.TAG | ChatConfigType.METRIC;
+  chatConfigType: TransType;
   metricList?: ISemantic.IMetricItem[];
   dimensionList?: ISemantic.IDimensionItem[];
+  tagList?: ISemantic.ITagItem[];
   form: any;
-  // domainId: number;
-  // onSubmit: (params?: any) => void;
 };
 
 const FormItem = Form.Item;
@@ -31,7 +28,7 @@ const formDefaultValue = {
 };
 
 const DefaultSettingForm: ForwardRefRenderFunction<any, Props> = (
-  { metricList, dimensionList, chatConfigType, form },
+  { metricList, dimensionList, tagList, chatConfigType, form },
   ref,
 ) => {
   const [dataItemListOptions, setDataItemListOptions] = useState<any>([]);
@@ -54,84 +51,57 @@ const DefaultSettingForm: ForwardRefRenderFunction<any, Props> = (
     }
   }, []);
 
-  const defaultConfigKeyMap = {
-    [ChatConfigType.TAG]: 'tagTypeDefaultConfig',
-    [ChatConfigType.METRIC]: 'metricTypeDefaultConfig',
+  const defaultConfigKeyMap: any = {
+    [TransType.TAG]: 'tagTypeDefaultConfig',
+    [TransType.METRIC]: 'metricTypeDefaultConfig',
   };
 
   useEffect(() => {
-    if (Array.isArray(dimensionList) && Array.isArray(metricList)) {
-      const dimensionEnum = dimensionList.map((item: ISemantic.IDimensionItem) => {
+    if (Array.isArray(tagList)) {
+      const tagEnum = tagList.map((item: ISemantic.ITagItem) => {
         const { name, id, bizName } = item;
         return {
           name,
           label: (
             <>
-              <TransTypeTag type={SemanticNodeType.DIMENSION} />
+              <TransTypeTag type={SemanticNodeType.TAG} />
               {name}
             </>
           ),
-          value: wrapperTransTypeAndId(TransType.DIMENSION, id),
+          value: wrapperTransTypeAndId(TransType.TAG, id),
           bizName,
           id,
-          transType: TransType.DIMENSION,
+          transType: TransType.TAG,
         };
       });
-      const metricEnum = metricList.map((item: ISemantic.IMetricItem) => {
-        const { name, id, bizName } = item;
-        return {
-          name,
-          label: (
-            <>
-              <TransTypeTag type={SemanticNodeType.METRIC} />
-              {name}
-            </>
-          ),
-          value: wrapperTransTypeAndId(TransType.METRIC, id),
-          bizName,
-          id,
-          transType: TransType.METRIC,
-        };
-      });
-      setDataItemListOptions([...dimensionEnum, ...metricEnum]);
+      setDataItemListOptions([...tagEnum]);
     }
-  }, [dimensionList, metricList]);
+  }, [tagList]);
 
   return (
     <>
-      {chatConfigType === ChatConfigType.TAG && (
+      {chatConfigType === TransType.TAG && (
         <FormItem
-          name={['queryConfig', defaultConfigKeyMap[ChatConfigType.TAG], 'defaultDisplayInfo']}
+          name={['queryConfig', defaultConfigKeyMap[TransType.TAG], 'defaultDisplayInfo']}
           label="圈选结果展示字段"
           getValueFromEvent={(value, items) => {
-            const result: { dimensionIds: number[]; metricIds: number[] } = {
-              dimensionIds: [],
-              metricIds: [],
+            const result: { tagIds: number[] } = {
+              tagIds: [],
             };
             items.forEach((item: any) => {
-              if (item.transType === TransType.DIMENSION) {
-                result.dimensionIds.push(item.id);
-              }
-              if (item.transType === TransType.METRIC) {
-                result.metricIds.push(item.id);
-              }
+              result.tagIds.push(item.id);
             });
             return result;
           }}
           getValueProps={(value) => {
-            const { dimensionIds, metricIds } = value || {};
-            const dimensionValues = Array.isArray(dimensionIds)
-              ? dimensionIds.map((id: number) => {
-                  return wrapperTransTypeAndId(TransType.DIMENSION, id);
-                })
-              : [];
-            const metricValues = Array.isArray(metricIds)
-              ? metricIds.map((id: number) => {
-                  return wrapperTransTypeAndId(TransType.METRIC, id);
+            const { tagIds } = value || {};
+            const tagValues = Array.isArray(tagIds)
+              ? tagIds.map((id: number) => {
+                  return wrapperTransTypeAndId(TransType.TAG, id);
                 })
               : [];
             return {
-              value: [...dimensionValues, ...metricValues],
+              value: [...tagValues],
             };
           }}
         >
@@ -161,7 +131,7 @@ const DefaultSettingForm: ForwardRefRenderFunction<any, Props> = (
         }
       >
         <Input.Group compact>
-          {chatConfigType === ChatConfigType.TAG ? (
+          {chatConfigType === TransType.TAG ? (
             <span
               style={{
                 display: 'inline-block',

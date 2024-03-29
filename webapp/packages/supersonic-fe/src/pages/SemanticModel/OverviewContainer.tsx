@@ -13,7 +13,7 @@ import DomainManagerTab from './components/DomainManagerTab';
 import type { Dispatch } from 'umi';
 
 type Props = {
-  mode: 'domain' | 'chatSetting';
+  mode: 'domain';
   domainManger: StateType;
   dispatch: Dispatch;
 };
@@ -160,8 +160,7 @@ const OverviewContainer: React.FC<Props> = ({ mode, domainManger, dispatch }) =>
   }, [selectModelId]);
 
   const pushUrlMenu = (domainId: number, modelId: number, menuKey: string) => {
-    const path = mode === 'domain' ? 'model' : 'chatSetting/model';
-    history.push(`/${path}/${domainId}/${modelId || 0}/${menuKey}`);
+    history.push(`/model/${domainId}/${modelId || 0}/${menuKey}`);
   };
 
   const handleModelChange = (model?: ISemantic.IModelItem) => {

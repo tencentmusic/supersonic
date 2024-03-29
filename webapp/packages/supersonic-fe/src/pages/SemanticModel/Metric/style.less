@@ -10,13 +10,62 @@
     margin: 20px;
 }
 
+.table {
+    overflow: auto;
+}
+  
+.metricBasicInfo {
+    .label {
+        font-size: 14px;
+        color: rgb(95, 116, 141);
+    }
+    div {
+        min-width: 300px;
+        font-size: 15px;
+        margin-bottom: 10px;
+        color:  rgb(18, 31, 67);
+    }
+}
+  
+.caliberTitle {
+    font-weight: 500;
+    font-size: 16px;
+    margin-bottom: 20px;
+    color: rgb(18, 31, 67);
+}
 
+.caliberSubTitle {
+    font-weight: 500;
+    font-size: 14px;
+    color: rgb(33, 43, 54);
+}
+
+.defineDataTable{
+    width: 600px;
+    background-color: rgb(255, 255, 255);
+    color: rgb(67, 71, 75);
+    transition: box-shadow 300ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+    border-radius: 6px;
+    box-shadow: rgba(114, 117, 120, 0.14) 0px 9px 16px, rgba(179, 181, 183, 0.38) 0px 0px 2px;
+    overflow: hidden;
+    :global {
+        .ant-table-thead {
+            font-size: 13px;
+        }
+    }
+}
+  
+.caliberDesc {
+    font-size: 14px;
+    color: #bdbdbd;
+}
+  
 
 .searchBox {
     // margin-bottom: 12px;
     background: #fff;
     border-radius: 10px;
-    width: 540px;
+    width: 740px;
     margin: 0 auto;
     .searchInput {
         width: 100%;
