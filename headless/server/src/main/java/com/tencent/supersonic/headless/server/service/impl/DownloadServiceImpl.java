@@ -16,8 +16,9 @@ import com.tencent.supersonic.headless.api.pojo.DrillDownDimension;
 import com.tencent.supersonic.headless.api.pojo.RelateDimension;
 import com.tencent.supersonic.headless.api.pojo.enums.SemanticType;
 import com.tencent.supersonic.headless.api.pojo.request.BatchDownloadReq;
-import com.tencent.supersonic.headless.api.pojo.request.DownloadStructReq;
+import com.tencent.supersonic.headless.api.pojo.request.DownloadMetricReq;
 import com.tencent.supersonic.headless.api.pojo.request.QuerySqlReq;
+import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
 import com.tencent.supersonic.headless.api.pojo.response.DimensionResp;
 import com.tencent.supersonic.headless.api.pojo.response.MetricResp;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
@@ -73,14 +74,14 @@ public class DownloadServiceImpl implements DownloadService {
     }
 
     @Override
-    public void downloadByStruct(DownloadStructReq downloadStructReq,
-            User user, HttpServletResponse response) throws Exception {
+    public void downloadByStruct(DownloadMetricReq downloadMetricReq,
+                                 User user, HttpServletResponse response) throws Exception {
         String fileName = String.format("%s_%s.xlsx", "supersonic", DateUtils.format(new Date(), DateUtils.FORMAT));
         File file = FileUtils.createTmpFile(fileName);
         try {
-            QuerySqlReq querySqlReq = downloadStructReq.convert(true);
-            SemanticQueryResp queryResult = queryService.queryByReq(querySqlReq, user);
-            DataDownload dataDownload = buildDataDownload(queryResult, downloadStructReq);
+            QueryStructReq queryStructReq = metricService.convert(downloadMetricReq);
+            SemanticQueryResp queryResult = queryService.queryByReq(queryStructReq.convert(true), user);
+            DataDownload dataDownload = buildDataDownload(queryResult, queryStructReq, downloadMetricReq.isTransform());
             EasyExcel.write(file).sheet("Sheet1").head(dataDownload.getHeaders()).doWrite(dataDownload.getData());
         } catch (RuntimeException e) {
             EasyExcel.write(file).sheet("Sheet1").head(buildErrMessageHead())
@@ -126,11 +127,12 @@ public class DownloadServiceImpl implements DownloadService {
             List<DimensionResp> dimensions = getMetricRelaDimensions(metricResp, dimensionRespMap);
             for (MetricResp metric : metrics) {
                 try {
-                    DownloadStructReq downloadStructReq = buildDownloadReq(dimensions, metric, batchDownloadReq);
-                    QuerySqlReq querySqlReq = downloadStructReq.convert();
+                    QueryStructReq queryStructReq = buildDownloadReq(dimensions, metric, batchDownloadReq);
+                    QuerySqlReq querySqlReq = queryStructReq.convert();
                     querySqlReq.setNeedAuth(true);
                     SemanticQueryResp queryResult = queryService.queryByReq(querySqlReq, user);
-                    DataDownload dataDownload = buildDataDownload(queryResult, downloadStructReq);
+                    DataDownload dataDownload = buildDataDownload(queryResult,
+                            queryStructReq, batchDownloadReq.isTransform());
                     WriteSheet writeSheet = EasyExcel.writerSheet("Sheet" + sheetCount)
                             .head(dataDownload.getHeaders()).build();
                     excelWriter.write(dataDownload.getData(), writeSheet);
@@ -215,15 +217,16 @@ public class DownloadServiceImpl implements DownloadService {
         return data;
     }
 
-    private DataDownload buildDataDownload(SemanticQueryResp queryResult, DownloadStructReq downloadStructReq) {
+    private DataDownload buildDataDownload(SemanticQueryResp queryResult,
+                                           QueryStructReq queryStructReq, boolean isTransform) {
         List<QueryColumn> metricColumns = queryResult.getMetricColumns();
         List<QueryColumn> dimensionColumns = queryResult.getDimensionColumns();
-        if (downloadStructReq.isTransform() && !CollectionUtils.isEmpty(metricColumns)) {
+        if (isTransform && !CollectionUtils.isEmpty(metricColumns)) {
             QueryColumn metric = metricColumns.get(0);
-            List<String> groups = downloadStructReq.getGroups();
+            List<String> groups = queryStructReq.getGroups();
             List<Map<String, Object>> dataTransformed = DataTransformUtils.transform(queryResult.getResultList(),
-                    metric.getNameEn(), groups, downloadStructReq.getDateInfo());
-            List<List<String>> headers = buildHeader(dimensionColumns, downloadStructReq.getDateInfo().getDateList());
+                    metric.getNameEn(), groups, queryStructReq.getDateInfo());
+            List<List<String>> headers = buildHeader(dimensionColumns, queryStructReq.getDateInfo().getDateList());
             List<List<String>> data = buildData(headers, getDimensionNameMap(dimensionColumns),
                     dataTransformed, metric.getName());
             return DataDownload.builder().headers(headers).data(data).build();
@@ -234,23 +237,22 @@ public class DownloadServiceImpl implements DownloadService {
         }
     }
 
-    private DownloadStructReq buildDownloadReq(List<DimensionResp> dimensionResps, MetricResp metricResp,
-            BatchDownloadReq batchDownloadReq) {
+    private QueryStructReq buildDownloadReq(List<DimensionResp> dimensionResps, MetricResp metricResp,
+                                               BatchDownloadReq batchDownloadReq) {
         DateConf dateConf = batchDownloadReq.getDateInfo();
         Set<Long> modelIds = dimensionResps.stream().map(DimensionResp::getModelId).collect(Collectors.toSet());
         modelIds.add(metricResp.getModelId());
-        DownloadStructReq downloadStructReq = new DownloadStructReq();
-        downloadStructReq.setGroups(dimensionResps.stream()
+        QueryStructReq queryStructReq = new QueryStructReq();
+        queryStructReq.setGroups(dimensionResps.stream()
                 .map(DimensionResp::getBizName).collect(Collectors.toList()));
-        downloadStructReq.getGroups().add(0, getTimeDimension(dateConf));
+        queryStructReq.getGroups().add(0, getTimeDimension(dateConf));
         Aggregator aggregator = new Aggregator();
         aggregator.setColumn(metricResp.getBizName());
-        downloadStructReq.setAggregators(Lists.newArrayList(aggregator));
-        downloadStructReq.setDateInfo(dateConf);
-        downloadStructReq.setModelIds(modelIds);
-        downloadStructReq.setLimit(downloadSize);
-        downloadStructReq.setIsTransform(batchDownloadReq.isTransform());
-        return downloadStructReq;
+        queryStructReq.setAggregators(Lists.newArrayList(aggregator));
+        queryStructReq.setDateInfo(dateConf);
+        queryStructReq.setModelIds(modelIds);
+        queryStructReq.setLimit(downloadSize);
+        return queryStructReq;
     }
 
     private String getTimeDimension(DateConf dateConf) {

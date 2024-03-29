@@ -2,10 +2,10 @@ package com.tencent.supersonic.common.pojo;
 
 
 import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
-import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -13,6 +13,7 @@ import lombok.NoArgsConstructor;
 public class Filter {
 
     private Relation relation = Relation.FILTER;
+    private Long id;
     private String bizName;
     private String name;
     private FilterOperatorEnum operator;

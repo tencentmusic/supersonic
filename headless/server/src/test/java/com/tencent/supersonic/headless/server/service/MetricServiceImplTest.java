@@ -1,5 +1,8 @@
 package com.tencent.supersonic.headless.server.service;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
+
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.common.pojo.DataFormat;
@@ -22,15 +25,11 @@ import com.tencent.supersonic.headless.server.persistence.repository.MetricRepos
 import com.tencent.supersonic.headless.server.service.impl.DataSetServiceImpl;
 import com.tencent.supersonic.headless.server.service.impl.MetricServiceImpl;
 import com.tencent.supersonic.headless.server.utils.MetricConverter;
+import java.util.HashMap;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.context.ApplicationEventPublisher;
-
-import java.util.HashMap;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
 
 public class MetricServiceImplTest {
 
@@ -94,7 +93,7 @@ public class MetricServiceImplTest {
                 new MeasureParam("s2_uv", "department='hr'")));
         typeParams.setExpr("s2_pv/s2_uv");
         metricReq.setMetricDefineByMeasureParams(typeParams);
-        metricReq.setTags(Lists.newArrayList("核心指标"));
+        metricReq.setClassifications(Lists.newArrayList("核心指标"));
         metricReq.setRelateDimension(
                 RelateDimension.builder().drillDownDimensions(Lists.newArrayList(
                         new DrillDownDimension(1L),
@@ -125,7 +124,7 @@ public class MetricServiceImplTest {
                 new MeasureParam("s2_uv", "department='hr'")));
         typeParams.setExpr("s2_pv/s2_uv");
         metricResp.setMetricDefineByMeasureParams(typeParams);
-        metricResp.setTags(Lists.newArrayList("核心指标"));
+        metricResp.setClassifications("核心指标");
         metricResp.setRelateDimension(
                 RelateDimension.builder().drillDownDimensions(Lists.newArrayList(
                         new DrillDownDimension(1L),

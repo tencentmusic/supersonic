@@ -3,7 +3,7 @@ package com.tencent.supersonic.headless.api.pojo.request;
 import lombok.Data;
 
 @Data
-public class DownloadStructReq extends QueryStructReq {
+public class DownloadMetricReq extends QueryMetricReq {
 
     private boolean isTransform;
 

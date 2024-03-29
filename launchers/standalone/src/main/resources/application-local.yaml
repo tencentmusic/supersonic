@@ -59,8 +59,8 @@ s2:
   langchain4j:
     #1.chat-model
     chat-model:
-      provider: local_ai
-      local_ai:
+      provider: open_ai
+      openai:
         api-key: api_key
         model-name: gpt-3.5-turbo-16k
         temperature: 0.0

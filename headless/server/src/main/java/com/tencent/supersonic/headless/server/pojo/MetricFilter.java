@@ -7,4 +7,7 @@ public class MetricFilter extends MetaFilter {
 
     private String type;
 
+    private String userName;
+
+    private Integer isPublish;
 }

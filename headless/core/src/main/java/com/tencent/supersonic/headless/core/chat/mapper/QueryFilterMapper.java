@@ -49,11 +49,11 @@ public class QueryFilterMapper extends BaseMapper {
         }
     }
 
-    private List<SchemaElementMatch> addValueSchemaElementMatch(Long viewId, QueryContext queryContext,
+    private void addValueSchemaElementMatch(Long dataSetId, QueryContext queryContext,
             List<SchemaElementMatch> candidateElementMatches) {
         QueryFilters queryFilters = queryContext.getQueryFilters();
         if (queryFilters == null || CollectionUtils.isEmpty(queryFilters.getFilters())) {
-            return candidateElementMatches;
+            return;
         }
         for (QueryFilter filter : queryFilters.getFilters()) {
             if (checkExistSameValueSchemaElementMatch(filter, candidateElementMatches)) {
@@ -64,7 +64,7 @@ public class QueryFilterMapper extends BaseMapper {
                     .name(String.valueOf(filter.getValue()))
                     .type(SchemaElementType.VALUE)
                     .bizName(filter.getBizName())
-                    .dataSet(viewId)
+                    .dataSet(dataSetId)
                     .build();
             SchemaElementMatch schemaElementMatch = SchemaElementMatch.builder()
                     .element(element)
@@ -75,7 +75,7 @@ public class QueryFilterMapper extends BaseMapper {
                     .build();
             candidateElementMatches.add(schemaElementMatch);
         }
-        return candidateElementMatches;
+        queryContext.getMapInfo().setMatchedElements(dataSetId, candidateElementMatches);
     }
 
     private boolean checkExistSameValueSchemaElementMatch(QueryFilter queryFilter,

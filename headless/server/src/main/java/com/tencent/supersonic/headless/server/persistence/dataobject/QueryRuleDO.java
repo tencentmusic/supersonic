@@ -8,24 +8,34 @@ import lombok.Data;
 import java.util.Date;
 
 @Data
-@TableName("s2_metric")
-public class MetricDO {
+@TableName("s2_query_rule")
+public class QueryRuleDO {
 
     @TableId(type = IdType.AUTO)
     private Long id;
 
     /**
-     * 主体域ID
+     * dataSetID
      */
-    private Long modelId;
+    private Long dataSetId;
 
     /**
-     * 指标名称
+     * 规则的优先级, 0-系统默认规则
+     */
+    private Integer priority;
+
+    /**
+     * 规则类型
+     */
+    private String ruleType;
+
+    /**
+     * 规则名称
      */
     private String name;
 
     /**
-     * 字段名称
+     * 规则业务名称
      */
     private String bizName;
 
@@ -35,19 +45,19 @@ public class MetricDO {
     private String description;
 
     /**
-     * 指标状态,0正常,1下架,2删除
+     * 具体规则信息
+     */
+    private String rule;
+
+    /**
+     * 规则输出信息
+     */
+    private String action;
+
+    /**
+     * 状态,0-正常,1-下线,2-删除
      */
     private Integer status;
-
-    /**
-     * 敏感级别
-     */
-    private Integer sensitiveLevel;
-
-    /**
-     * 指标类型 proxy,expr
-     */
-    private String type;
 
     /**
      * 创建时间
@@ -70,39 +80,9 @@ public class MetricDO {
     private String updatedBy;
 
     /**
-     * 数值类型
+     * 扩展信息
      */
-    private String dataFormatType;
-
-    /**
-     * 数值类型参数
-     */
-    private String dataFormat;
-
-    /**
-     *
-     */
-    private String alias;
-
-    /**
-     *
-     */
-    private String classifications;
-
-    /**
-     *
-     */
-    private String relateDimensions;
-
-    /**
-     * 类型参数
-     */
-    private String typeParams;
-
     private String ext;
 
-    private String defineType;
-
-    private Integer isPublish;
 
 }

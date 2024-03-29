@@ -9,4 +9,8 @@ public class PageMetricReq extends PageSchemaItemReq {
 
     private String type;
 
+    private Integer isTag;
+
+    private Integer isPublish;
+
 }

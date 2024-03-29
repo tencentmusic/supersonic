@@ -27,6 +27,10 @@ public interface MetricService {
 
     void batchUpdateStatus(MetaBatchReq metaBatchReq, User user);
 
+    void batchPublish(List<Long> metricIds, User user);
+
+    void batchUnPublish(List<Long> metricIds, User user);
+
     void deleteMetric(Long id, User user) throws Exception;
 
     PageInfo<MetricResp> queryMetric(PageMetricReq pageMetricReq, User user);

@@ -15,6 +15,7 @@ import com.tencent.supersonic.headless.api.pojo.response.DimensionResp;
 import com.tencent.supersonic.headless.api.pojo.response.DomainResp;
 import com.tencent.supersonic.headless.api.pojo.response.MetricResp;
 import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
+import com.tencent.supersonic.headless.api.pojo.response.TagItem;
 import com.tencent.supersonic.headless.api.pojo.response.TagObjectResp;
 import com.tencent.supersonic.headless.api.pojo.response.TagResp;
 import com.tencent.supersonic.headless.server.persistence.dataobject.CollectDO;
@@ -87,9 +88,13 @@ public class TagMetaServiceImpl implements TagMetaService {
 
     @Override
     public Integer createBatch(List<TagReq> tagReqList, User user) {
-        tagReqList.stream().forEach(tagReq -> {
-            create(tagReq, user);
-        });
+        for (TagReq tagReq : tagReqList) {
+            try {
+                create(tagReq, user);
+            } catch (Exception e) {
+                log.warn("createBatch, e:{}", e);
+            }
+        }
         return tagReqList.size();
     }
 
@@ -100,8 +105,14 @@ public class TagMetaServiceImpl implements TagMetaService {
     }
 
     @Override
-    public Boolean deleteBatch(TagDeleteReq tagDeleteReq, User user) {
-        tagRepository.deleteBatch(tagDeleteReq);
+    public Boolean deleteBatch(List<TagDeleteReq> tagDeleteReqList, User user) {
+        for (TagDeleteReq tagDeleteReq : tagDeleteReqList) {
+            try {
+                tagRepository.deleteBatch(tagDeleteReq);
+            } catch (Exception e) {
+                log.warn("createBatch, e:{}", e);
+            }
+        }
         return true;
     }
 
@@ -144,15 +155,21 @@ public class TagMetaServiceImpl implements TagMetaService {
         if (CollectionUtils.isEmpty(modelRespList)) {
             return new PageInfo<>();
         }
+
+        if (Objects.nonNull(tagMarketPageReq.getTagObjectId())) {
+            modelRespList = modelRespList.stream()
+                    .filter(modelResp -> tagMarketPageReq.getTagObjectId().equals(modelResp.getTagObjectId()))
+                    .collect(Collectors.toList());
+        }
         List<Long> modelIds = modelRespList.stream().map(model -> model.getId()).collect(Collectors.toList());
 
         TagFilter tagFilter = new TagFilter();
         BeanUtils.copyProperties(tagMarketPageReq, tagFilter);
         List<CollectDO> collectList = collectService.getCollectList(user.getName());
-        List<Long> collectIds = collectList.stream()
-                .filter(collectDO -> SchemaElementType.TAG.name().equalsIgnoreCase(collectDO.getType()))
-                .map(CollectDO::getCollectId).collect(Collectors.toList());
         if (tagMarketPageReq.isHasCollect()) {
+            List<Long> collectIds = collectList.stream()
+                    .filter(collectDO -> SchemaElementType.TAG.name().equalsIgnoreCase(collectDO.getType()))
+                    .map(CollectDO::getCollectId).collect(Collectors.toList());
             if (CollectionUtils.isEmpty(collectIds)) {
                 tagFilter.setIds(Lists.newArrayList(-1L));
             } else {
@@ -247,19 +264,18 @@ public class TagMetaServiceImpl implements TagMetaService {
             if (Objects.isNull(modelResp)) {
                 continue;
             }
-            if (tagMarketPageReq.getTagObjectId().equals(modelResp.getTagObjectId())) {
-                if (CollectionUtils.isNotEmpty(tagMarketPageReq.getDomainIds())) {
-                    if (!tagMarketPageReq.getDomainIds().contains(modelResp.getDomainId())) {
-                        continue;
-                    }
+            if (CollectionUtils.isNotEmpty(tagMarketPageReq.getDomainIds())) {
+                if (!tagMarketPageReq.getDomainIds().contains(modelResp.getDomainId())) {
+                    continue;
                 }
-                if (CollectionUtils.isNotEmpty(tagMarketPageReq.getModelIds())) {
-                    if (!tagMarketPageReq.getModelIds().contains(modelResp.getId())) {
-                        continue;
-                    }
-                }
-                modelRespList.add(modelResp);
             }
+            if (CollectionUtils.isNotEmpty(tagMarketPageReq.getModelIds())) {
+                if (!tagMarketPageReq.getModelIds().contains(modelResp.getId())) {
+                    continue;
+                }
+            }
+            modelRespList.add(modelResp);
+
         }
         return modelRespList;
     }
@@ -339,16 +355,16 @@ public class TagMetaServiceImpl implements TagMetaService {
             DimensionResp dimension = dimensionService.getDimension(tagReq.getItemId());
             ModelResp model = modelService.getModel(dimension.getModelId());
             if (Objects.isNull(model.getTagObjectId())) {
-                throw new RuntimeException(String.format("this dimension:%s is not supported to create tag",
-                        tagReq.getItemId()));
+                throw new RuntimeException(String.format("this dimension:%s is not supported to create tag,"
+                        + " no related tag object", tagReq.getItemId()));
             }
         }
         if (TagDefineType.METRIC.equals(tagReq.getTagDefineType())) {
             MetricResp metric = metricService.getMetric(tagReq.getItemId());
             ModelResp model = modelService.getModel(metric.getModelId());
             if (Objects.isNull(model.getTagObjectId())) {
-                throw new RuntimeException(String.format("this metric:%s is not supported to create tag",
-                        tagReq.getItemId()));
+                throw new RuntimeException(String.format("this metric:%s is not supported to create tag,"
+                        + " no related tag object", tagReq.getItemId()));
             }
         }
     }
@@ -358,5 +374,21 @@ public class TagMetaServiceImpl implements TagMetaService {
         BeanUtils.copyProperties(tagReq, tagDO);
         tagDO.setType(tagReq.getTagDefineType().name());
         return tagDO;
+    }
+
+    @Override
+    public List<TagItem> getTagItems(User user, List<Long> itemIds, TagDefineType tagDefineType) {
+        TagFilter tagFilter = new TagFilter();
+        tagFilter.setTagDefineType(tagDefineType);
+        tagFilter.setItemIds(itemIds);
+        Set<Long> dimensionItemSet = getTagDOList(tagFilter, user).stream().map(TagDO::getItemId)
+                .collect(Collectors.toSet());
+        return itemIds.stream().map(entry -> {
+                    TagItem tagItem = new TagItem();
+                    tagItem.setIsTag(Boolean.compare(dimensionItemSet.contains(entry), false));
+                    tagItem.setItemId(entry);
+                    return tagItem;
+                }
+        ).collect(Collectors.toList());
     }
 }

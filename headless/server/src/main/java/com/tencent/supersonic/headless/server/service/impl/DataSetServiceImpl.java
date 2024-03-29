@@ -1,6 +1,6 @@
 package com.tencent.supersonic.headless.server.service.impl;
 
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson2.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.common.cache.Cache;
@@ -26,15 +26,20 @@ import com.tencent.supersonic.headless.api.pojo.response.DomainResp;
 import com.tencent.supersonic.headless.api.pojo.response.MetricResp;
 import com.tencent.supersonic.headless.api.pojo.response.TagItem;
 import com.tencent.supersonic.headless.server.persistence.dataobject.DataSetDO;
-import com.tencent.supersonic.headless.server.persistence.dataobject.TagDO;
 import com.tencent.supersonic.headless.server.persistence.mapper.DataSetDOMapper;
 import com.tencent.supersonic.headless.server.pojo.MetaFilter;
-import com.tencent.supersonic.headless.server.pojo.TagFilter;
 import com.tencent.supersonic.headless.server.service.DataSetService;
 import com.tencent.supersonic.headless.server.service.DimensionService;
 import com.tencent.supersonic.headless.server.service.DomainService;
 import com.tencent.supersonic.headless.server.service.MetricService;
 import com.tencent.supersonic.headless.server.service.TagMetaService;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Date;
@@ -45,13 +50,6 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 
 @Service
 public class DataSetServiceImpl
@@ -111,8 +109,8 @@ public class DataSetServiceImpl
         if (!CollectionUtils.isEmpty(metaFilter.getIds())) {
             wrapper.lambda().in(DataSetDO::getId, metaFilter.getIds());
         }
-        if (metaFilter.getStatus() != null) {
-            wrapper.lambda().eq(DataSetDO::getStatus, metaFilter.getStatus());
+        if (!CollectionUtils.isEmpty(metaFilter.getStatus())) {
+            wrapper.lambda().in(DataSetDO::getStatus, metaFilter.getStatus());
         }
         wrapper.lambda().ne(DataSetDO::getStatus, StatusEnum.DELETED.getCode());
         return list(wrapper).stream().map(entry -> convert(entry, user)).collect(Collectors.toList());
@@ -164,21 +162,6 @@ public class DataSetServiceImpl
                 domainIds.contains(dataSetResp.getDomainId())).collect(Collectors.toList());
     }
 
-    private List<TagItem> getTagItems(User user, List<Long> dimensionIds, TagDefineType tagDefineType) {
-        TagFilter tagFilter = new TagFilter();
-        tagFilter.setTagDefineType(tagDefineType);
-        tagFilter.setItemIds(dimensionIds);
-        Set<Long> dimensionItemSet = tagMetaService.getTagDOList(tagFilter, user).stream().map(TagDO::getItemId)
-                .collect(Collectors.toSet());
-        return dimensionIds.stream().map(entry -> {
-                    TagItem tagItem = new TagItem();
-                    tagItem.setIsTag(Boolean.compare(dimensionItemSet.contains(entry), false));
-                    tagItem.setItemId(entry);
-                    return tagItem;
-                }
-        ).collect(Collectors.toList());
-    }
-
     private DataSetResp convert(DataSetDO dataSetDO, User user) {
         DataSetResp dataSetResp = new DataSetResp();
         BeanMapper.mapper(dataSetDO, dataSetResp);
@@ -191,10 +174,11 @@ public class DataSetServiceImpl
         dataSetResp.setAdminOrgs(StringUtils.isBlank(dataSetDO.getAdminOrg())
                 ? Lists.newArrayList() : Arrays.asList(dataSetDO.getAdminOrg().split(",")));
         dataSetResp.setTypeEnum(TypeEnums.DATASET);
-        List<TagItem> dimensionItems = getTagItems(user, dataSetResp.dimensionIds(), TagDefineType.DIMENSION);
+        List<TagItem> dimensionItems = tagMetaService.getTagItems(user, dataSetResp.dimensionIds(),
+                TagDefineType.DIMENSION);
         dataSetResp.setAllDimensions(dimensionItems);
 
-        List<TagItem> metricItems = getTagItems(user, dataSetResp.metricIds(), TagDefineType.METRIC);
+        List<TagItem> metricItems = tagMetaService.getTagItems(user, dataSetResp.metricIds(), TagDefineType.METRIC);
         dataSetResp.setAllMetrics(metricItems);
         return dataSetResp;
     }
@@ -228,7 +212,7 @@ public class DataSetServiceImpl
     @Override
     public Map<Long, List<Long>> getModelIdToDataSetIds(List<Long> dataSetIds, User user) {
         MetaFilter metaFilter = new MetaFilter();
-        metaFilter.setStatus(StatusEnum.ONLINE.getCode());
+        metaFilter.setStatus(Lists.newArrayList(StatusEnum.ONLINE.getCode()));
         metaFilter.setIds(dataSetIds);
         List<DataSetResp> dataSetList = dataSetSchemaCache.getIfPresent(metaFilter);
         if (CollectionUtils.isEmpty(dataSetList)) {

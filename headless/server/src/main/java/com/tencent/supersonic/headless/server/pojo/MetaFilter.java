@@ -3,6 +3,7 @@ package com.tencent.supersonic.headless.server.pojo;
 import com.google.common.base.Objects;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
 import java.util.List;
 
 
@@ -26,13 +27,15 @@ public class MetaFilter {
 
     private Integer sensitiveLevel;
 
-    private Integer status;
+    private List<Integer> status;
 
     private String key;
 
     private List<Long> ids;
 
     private List<String> fieldsDepend;
+
+    private Integer isTag;
 
     public MetaFilter(List<Long> modelIds) {
         this.modelIds = modelIds;
