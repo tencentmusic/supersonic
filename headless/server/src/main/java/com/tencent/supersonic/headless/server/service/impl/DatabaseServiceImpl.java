@@ -99,6 +99,7 @@ public class DatabaseServiceImpl implements DatabaseService {
     public void deleteDatabase(Long databaseId) {
         ModelFilter modelFilter = new ModelFilter();
         modelFilter.setDatabaseId(databaseId);
+        modelFilter.setIncludesDetail(false);
         List<ModelResp> modelResps = datasourceService.getModelList(modelFilter);
         if (!CollectionUtils.isEmpty(modelResps)) {
             List<String> datasourceNames = modelResps.stream()

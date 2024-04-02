@@ -21,6 +21,7 @@ import com.tencent.supersonic.headless.api.pojo.response.TagResp;
 import com.tencent.supersonic.headless.server.persistence.dataobject.CollectDO;
 import com.tencent.supersonic.headless.server.persistence.dataobject.TagDO;
 import com.tencent.supersonic.headless.server.persistence.repository.TagRepository;
+import com.tencent.supersonic.headless.server.pojo.ModelFilter;
 import com.tencent.supersonic.headless.server.pojo.TagFilter;
 import com.tencent.supersonic.headless.server.pojo.TagObjectFilter;
 import com.tencent.supersonic.headless.server.service.CollectService;
@@ -30,6 +31,11 @@ import com.tencent.supersonic.headless.server.service.MetricService;
 import com.tencent.supersonic.headless.server.service.ModelService;
 import com.tencent.supersonic.headless.server.service.TagMetaService;
 import com.tencent.supersonic.headless.server.service.TagObjectService;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
+import org.springframework.beans.BeanUtils;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -39,12 +45,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections.CollectionUtils;
-import org.springframework.beans.BeanUtils;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.stereotype.Service;
 
 @Service
 @Slf4j
@@ -258,7 +258,10 @@ public class TagMetaServiceImpl implements TagMetaService {
 
     private List<ModelResp> getRelatedModel(TagFilterPageReq tagMarketPageReq) {
         List<ModelResp> modelRespList = new ArrayList<>();
-        Map<Long, ModelResp> modelMap = modelService.getModelMap();
+        ModelFilter modelFilter = new ModelFilter();
+        modelFilter.setDomainIds(tagMarketPageReq.getDomainIds());
+        modelFilter.setIds(tagMarketPageReq.getModelIds());
+        Map<Long, ModelResp> modelMap = modelService.getModelMap(modelFilter);
         for (Long modelId : modelMap.keySet()) {
             ModelResp modelResp = modelMap.get(modelId);
             if (Objects.isNull(modelResp)) {
@@ -281,7 +284,10 @@ public class TagMetaServiceImpl implements TagMetaService {
     }
 
     private void fillModelInfo(List<TagResp> tagRespList) {
-        Map<Long, ModelResp> modelIdAndRespMap = modelService.getModelMap();
+        List<Long> modelIds = tagRespList.stream().map(TagResp::getModelId)
+                .collect(Collectors.toList());
+        ModelFilter modelFilter = new ModelFilter(false, modelIds);
+        Map<Long, ModelResp> modelIdAndRespMap = modelService.getModelMap(modelFilter);
         tagRespList.stream().forEach(tagResp -> {
             if (Objects.nonNull(modelIdAndRespMap) && modelIdAndRespMap.containsKey(tagResp.getModelId())) {
                 tagResp.setModelName(modelIdAndRespMap.get(tagResp.getModelId()).getName());

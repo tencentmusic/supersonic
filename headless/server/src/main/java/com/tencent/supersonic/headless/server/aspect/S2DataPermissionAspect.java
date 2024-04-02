@@ -201,21 +201,20 @@ public class S2DataPermissionAspect {
         }
     }
 
-    private void doFilterCheckLogic(QueryStructReq queryStructReq, Set<String> resAuthName,
-            Set<String> sensitiveResReq) {
+    private void doFilterCheckLogic(Set<String> resAuthName, Set<String> sensitiveResReq,
+                                    List<Long> modelIdInDataSet, QueryStructReq queryStructReq) {
         Set<String> resFilterSet = queryStructUtils.getFilterResNameEnExceptInternalCol(queryStructReq);
         Set<String> need2Apply = resFilterSet.stream()
                 .filter(res -> !resAuthName.contains(res) && sensitiveResReq.contains(res)).collect(Collectors.toSet());
         Set<String> nameCnSet = new HashSet<>();
-
-        Map<Long, ModelResp> modelRespMap = modelService.getModelMap();
-        List<Long> modelIds = Lists.newArrayList(queryStructReq.getModelIds());
-        List<DimensionResp> dimensionDescList = dimensionService.getDimensions(new MetaFilter(modelIds));
+        ModelFilter modelFilter = new ModelFilter(false, modelIdInDataSet);
+        Map<Long, ModelResp> modelRespMap = modelService.getModelMap(modelFilter);
+        List<DimensionResp> dimensionDescList = dimensionService.getDimensions(new MetaFilter(modelIdInDataSet));
         dimensionDescList.stream().filter(dim -> need2Apply.contains(dim.getBizName()))
                 .forEach(dim -> nameCnSet.add(modelRespMap.get(dim.getModelId()).getName() + MINUS + dim.getName()));
 
         if (!CollectionUtils.isEmpty(need2Apply)) {
-            List<String> admins = modelService.getModelAdmin(modelIds.get(0));
+            List<String> admins = modelService.getModelAdmin(modelIdInDataSet.get(0));
             log.info("in doFilterLogic, need2Apply:{}", need2Apply);
             String message = String.format("您没有以下维度%s权限, 请联系管理员%s开通", nameCnSet, admins);
             throw new InvalidPermissionException(message);
@@ -247,7 +246,7 @@ public class S2DataPermissionAspect {
         Set<String> resAuthSet = getAuthResNameSet(authorizedResource, modelIdInDataSet);
 
         // if sensitive fields without permission are involved in filter, thrown an exception
-        doFilterCheckLogic(queryStructReq, resAuthSet, sensitiveResReq);
+        doFilterCheckLogic(resAuthSet, sensitiveResReq, modelIdInDataSet, queryStructReq);
 
         // row permission pre-filter
         doRowPermission(queryStructReq, authorizedResource);
