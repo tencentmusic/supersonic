@@ -18,7 +18,6 @@ import DimensionInfoModal from './DimensionInfoModal';
 import DimensionValueSettingModal from './DimensionValueSettingModal';
 import { ISemantic, IDataSource } from '../data';
 import TableHeaderFilter from './TableHeaderFilter';
-import moment from 'moment';
 import BatchCtrlDropDownButton from '@/components/BatchCtrlDropDownButton';
 import { ColumnsConfig } from './TableColumnRender';
 import styles from './style.less';
