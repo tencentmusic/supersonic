@@ -294,25 +294,23 @@ public class ModelServiceImpl implements ModelService {
 
     @Override
     public List<ModelResp> getModelListWithAuth(User user, Long domainId, AuthType authType) {
-        List<ModelResp> modelResps = getModelAuthList(user, authType);
+        List<ModelResp> modelResps = getModelAuthList(user, domainId, authType);
         Set<ModelResp> modelRespSet = new HashSet<>(modelResps);
-        List<ModelResp> modelRespsAuthInheritDomain = getModelRespAuthInheritDomain(user, authType);
+        List<ModelResp> modelRespsAuthInheritDomain = getModelRespAuthInheritDomain(user, domainId, authType);
         modelRespSet.addAll(modelRespsAuthInheritDomain);
-        if (domainId != null && domainId > 0) {
-            modelRespSet = modelRespSet.stream().filter(modelResp ->
-                    modelResp.getDomainId().equals(domainId)).collect(Collectors.toSet());
-        }
         return modelRespSet.stream().sorted(Comparator.comparingLong(ModelResp::getId))
                 .collect(Collectors.toList());
     }
 
-    public List<ModelResp> getModelRespAuthInheritDomain(User user, AuthType authType) {
-        Set<DomainResp> domainResps = domainService.getDomainAuthSet(user, authType);
-        if (CollectionUtils.isEmpty(domainResps)) {
+    public List<ModelResp> getModelRespAuthInheritDomain(User user, Long domainId, AuthType authType) {
+        List<Long> domainIds = domainService.getDomainAuthSet(user, authType)
+                .stream().map(DomainResp::getId)
+                .collect(Collectors.toList());
+        if (domainIds.contains(domainId)) {
+            domainIds = Lists.newArrayList(domainId);
+        } else {
             return Lists.newArrayList();
         }
-        List<Long> domainIds = domainResps.stream().map(DomainResp::getId)
-                .collect(Collectors.toList());
         ModelFilter modelFilter = new ModelFilter();
         modelFilter.setIncludesDetail(false);
         modelFilter.setDomainIds(domainIds);
@@ -320,9 +318,10 @@ public class ModelServiceImpl implements ModelService {
     }
 
     @Override
-    public List<ModelResp> getModelAuthList(User user, AuthType authTypeEnum) {
+    public List<ModelResp> getModelAuthList(User user, Long domainId, AuthType authTypeEnum) {
         ModelFilter modelFilter = new ModelFilter();
         modelFilter.setIncludesDetail(false);
+        modelFilter.setDomainId(domainId);
         List<ModelResp> modelResps = getModelList(modelFilter);
         Set<String> orgIds = userService.getUserAllOrgId(user.getName());
         List<ModelResp> modelWithAuth = Lists.newArrayList();

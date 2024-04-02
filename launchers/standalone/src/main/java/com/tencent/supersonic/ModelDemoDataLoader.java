@@ -121,7 +121,6 @@ public class ModelDemoDataLoader {
             addDataSet_2();
             addAuthGroup_1();
             addAuthGroup_2();
-            batchPushlishMetric();
         } catch (Exception e) {
             log.error("Failed to add model demo data", e);
         }
@@ -585,11 +584,6 @@ public class ModelDemoDataLoader {
         authGroupReq.setAuthorizedUsers(Collections.singletonList("tom"));
         authGroupReq.setAuthorizedDepartmentIds(Collections.emptyList());
         authService.addOrUpdateAuthGroup(authGroupReq);
-    }
-
-    private void batchPushlishMetric() {
-        List<Long> ids = Lists.newArrayList(1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L);
-        metricService.batchPublish(ids, User.getFakeUser());
     }
 
     private RelateDimension getRelateDimension(List<Long> dimensionIds) {

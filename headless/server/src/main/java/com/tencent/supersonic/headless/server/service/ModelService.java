@@ -34,7 +34,7 @@ public interface ModelService {
 
     List<ModelResp> getModelListWithAuth(User user, Long domainId, AuthType authType);
 
-    List<ModelResp> getModelAuthList(User user, AuthType authTypeEnum);
+    List<ModelResp> getModelAuthList(User user, Long domainId, AuthType authTypeEnum);
 
     List<ModelResp> getModelByDomainIds(List<Long> domainIds);
 
