@@ -3,7 +3,7 @@ import { ConsoleSqlOutlined, CoffeeOutlined } from '@ant-design/icons';
 import React, { useState, useEffect } from 'react';
 import type { Dispatch } from 'umi';
 import { connect } from 'umi';
-import DataSourceCreateForm from '../Datasource/components/DataSourceCreateForm';
+import ModelCreateForm from '../Datasource/components/ModelCreateForm';
 import { excuteSql } from '../service';
 import type { StateType } from '../model';
 import DataSource from '../Datasource';
@@ -146,7 +146,7 @@ const ClassDataSourceTypeModal: React.FC<Props> = ({
       </Modal>
 
       {dataSourceModalVisible && (
-        <DataSourceCreateForm
+        <ModelCreateForm
           sql={fastModeSql}
           basicInfoFormMode="fast"
           modelItem={dataSourceItem}
@@ -165,7 +165,7 @@ const ClassDataSourceTypeModal: React.FC<Props> = ({
         />
       )}
       {createModalVisible && (
-        <DataSourceCreateForm
+        <ModelCreateForm
           sql={sql}
           databaseId={currentDatabaseId}
           basicInfoFormMode="normal"
@@ -209,7 +209,7 @@ const ClassDataSourceTypeModal: React.FC<Props> = ({
               }}
             />
           </Drawer>
-        </DataSourceCreateForm>
+        </ModelCreateForm>
       )}
     </>
   );

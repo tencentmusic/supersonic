@@ -74,13 +74,6 @@ const ViewTable: React.FC<Props> = ({ disabledEdit = false, modelList, domainMan
       search: false,
     },
     {
-      dataIndex: 'alias',
-      title: '别名',
-      width: 150,
-      ellipsis: true,
-      search: false,
-    },
-    {
       dataIndex: 'bizName',
       title: '英文名称',
       search: false,
