@@ -325,6 +325,7 @@ CREATE TABLE `s2_model` (
                             `source_type` varchar(128) DEFAULT NULL ,
                             `depends` varchar(500) DEFAULT NULL ,
                             `filter_sql` varchar(1000) DEFAULT NULL ,
+                            `tag_object_id` int(11) DEFAULT '0',
                             PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
@@ -342,6 +343,7 @@ CREATE TABLE `s2_plugin` (
                              `updated_by` varchar(100) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL,
                              `config` text CHARACTER SET utf8 COLLATE utf8_unicode_ci,
                              `comment` text COLLATE utf8mb4_unicode_ci,
+                             ADD COLUMN `data_set` varchar(100) DEFAULT NULL,
                              PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -547,3 +549,24 @@ CREATE TABLE IF NOT EXISTS `s2_query_rule` (
     `ext` text DEFAULT NULL  ,
     PRIMARY KEY (`id`)
     ) ENGINE = InnoDB DEFAULT CHARSET = utf8 COMMENT ='查询规则表';
+
+-- 2024-04-02补充mysql脚本
+CREATE TABLE IF NOT EXISTS `s2_data_set` (
+    `id` bigint(20)   NOT NULL AUTO_INCREMENT,
+    `domain_id` bigint(20) ,
+    `name` varchar(255)  NOT NULL ,
+    `biz_name` varchar(255)  NOT NULL ,
+    `description` varchar(255)  NOT NULL ,
+    `status` INT  NOT NULL DEFAULT '1' ,
+    `alias` varchar(255)  NOT NULL ,
+    `data_set_detail` text DEFAULT NULL  ,
+    `created_at` datetime NOT NULL ,
+    `created_by` varchar(100) NOT NULL ,
+    `updated_at` datetime DEFAULT NULL ,
+    `updated_by` varchar(100) DEFAULT NULL ,
+    `query_config` varchar(3000) DEFAULT NULL ,
+    `admin` varchar(3000) DEFAULT NULL ,
+    `admin_org` varchar(3000) DEFAULT NULL ,
+    `query_type` varchar(100) DEFAULT NULL ,
+    PRIMARY KEY (`id`)
+    ) ENGINE = InnoDB DEFAULT CHARSET = utf8; 
