@@ -160,7 +160,7 @@ public class SchemaServiceImpl implements SchemaService {
 
     public List<DataSetSchemaResp> buildDataSetSchema(DataSetFilterReq filter) {
         MetaFilter metaFilter = new MetaFilter();
-        metaFilter.setStatus(Lists.newArrayList(StatusEnum.ONLINE.getCode()));
+        metaFilter.setStatus(StatusEnum.ONLINE.getCode());
         metaFilter.setIds(filter.getDataSetIds());
         List<DataSetResp> dataSetResps = dataSetService.getDataSetList(metaFilter, User.getFakeUser());
         Map<Long, DataSetResp> dataSetRespMap = getDataSetMap(dataSetResps);
@@ -210,7 +210,7 @@ public class SchemaServiceImpl implements SchemaService {
             return modelSchemaResps;
         }
         MetaFilter metaFilter = new MetaFilter(modelIds);
-        metaFilter.setStatus(Lists.newArrayList(StatusEnum.ONLINE.getCode()));
+        metaFilter.setStatus(StatusEnum.ONLINE.getCode());
         Map<Long, List<MetricResp>> metricRespMap = metricService.getMetrics(metaFilter)
                 .stream().collect(Collectors.groupingBy(MetricResp::getModelId));
         Map<Long, List<DimensionResp>> dimensionRespsMap = dimensionService.getDimensions(metaFilter)
