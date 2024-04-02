@@ -27,7 +27,7 @@ public class MetaFilter {
 
     private Integer sensitiveLevel;
 
-    private List<Integer> status;
+    private Integer status;
 
     private String key;
 

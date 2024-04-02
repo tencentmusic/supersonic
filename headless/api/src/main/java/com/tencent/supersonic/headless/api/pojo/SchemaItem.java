@@ -41,14 +41,13 @@ public class SchemaItem extends RecordInfo {
         }
         SchemaItem that = (SchemaItem) o;
         return Objects.equal(id, that.id) && Objects.equal(name, that.name)
-                && Objects.equal(bizName, that.bizName) && Objects.equal(
-                description, that.description) && Objects.equal(status, that.status)
-                && typeEnum == that.typeEnum && Objects.equal(sensitiveLevel, that.sensitiveLevel);
+                && Objects.equal(bizName, that.bizName)
+                && typeEnum == that.typeEnum;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(id, name, bizName, description, status, typeEnum, sensitiveLevel);
+        return Objects.hashCode(id, name, bizName, typeEnum);
     }
 
     public static List<String> getAliasList(String alias) {

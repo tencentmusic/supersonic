@@ -34,6 +34,7 @@ import com.tencent.supersonic.headless.server.persistence.repository.DimensionRe
 import com.tencent.supersonic.headless.server.pojo.DimensionFilter;
 import com.tencent.supersonic.headless.server.pojo.DimensionsFilter;
 import com.tencent.supersonic.headless.server.pojo.MetaFilter;
+import com.tencent.supersonic.headless.server.pojo.ModelFilter;
 import com.tencent.supersonic.headless.server.pojo.TagFilter;
 import com.tencent.supersonic.headless.server.service.DataSetService;
 import com.tencent.supersonic.headless.server.service.DatabaseService;
@@ -221,7 +222,7 @@ public class DimensionServiceImpl implements DimensionService {
                 .doSelectPageInfo(() -> queryDimension(dimensionFilter));
         PageInfo<DimensionResp> pageInfo = new PageInfo<>();
         BeanUtils.copyProperties(dimensionDOPageInfo, pageInfo);
-        pageInfo.setList(convertList(dimensionDOPageInfo.getList(), modelService.getModelMap()));
+        pageInfo.setList(convertList(dimensionDOPageInfo.getList()));
         return pageInfo;
     }
 
@@ -232,7 +233,7 @@ public class DimensionServiceImpl implements DimensionService {
     @Override
     public List<DimensionResp> queryDimensions(DimensionsFilter dimensionsFilter) {
         List<DimensionDO> dimensions = dimensionRepository.getDimensions(dimensionsFilter);
-        return convertList(dimensions, modelService.getModelMap());
+        return convertList(dimensions);
     }
 
     @Override
@@ -240,7 +241,7 @@ public class DimensionServiceImpl implements DimensionService {
         DimensionFilter dimensionFilter = new DimensionFilter();
         BeanUtils.copyProperties(metaFilter, dimensionFilter);
         List<DimensionDO> dimensionDOS = dimensionRepository.getDimension(dimensionFilter);
-        List<DimensionResp> dimensionResps = convertList(dimensionDOS, modelService.getModelMap());
+        List<DimensionResp> dimensionResps = convertList(dimensionDOS);
 
         List<Long> dimensionIds = dimensionResps.stream().map(dimensionResp -> dimensionResp.getId())
                 .collect(Collectors.toList());
@@ -298,13 +299,16 @@ public class DimensionServiceImpl implements DimensionService {
         return getDimensions(dimensionFilter);
     }
 
-    private List<DimensionResp> convertList(List<DimensionDO> dimensionDOS,
-            Map<Long, ModelResp> modelRespMap) {
+    private List<DimensionResp> convertList(List<DimensionDO> dimensionDOS) {
+        List<Long> modelIds = dimensionDOS.stream().map(DimensionDO::getModelId)
+                .collect(Collectors.toList());
+        ModelFilter modelFilter = new ModelFilter(false, modelIds);
+        Map<Long, ModelResp> modelMap = modelService.getModelMap(modelFilter);
         List<DimensionResp> dimensionResps = Lists.newArrayList();
         if (!CollectionUtils.isEmpty(dimensionDOS)) {
             dimensionResps = dimensionDOS.stream()
                     .map(dimensionDO -> DimensionConverter
-                            .convert2DimensionResp(dimensionDO, modelRespMap))
+                            .convert2DimensionResp(dimensionDO, modelMap))
                     .collect(Collectors.toList());
         }
         fillTagInfo(dimensionResps);
