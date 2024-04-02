@@ -244,7 +244,7 @@ const ViewCreateFormModal: React.FC<ModelCreateFormModalProps> = ({
           >
             <Input placeholder="请输入数据集英文名称" />
           </FormItem>
-          <FormItem
+          {/* <FormItem
             name="alias"
             label="别名"
             getValueFromEvent={(value) => {
@@ -262,7 +262,7 @@ const ViewCreateFormModal: React.FC<ModelCreateFormModalProps> = ({
               tokenSeparators={[',']}
               maxTagCount={9}
             />
-          </FormItem>
+          </FormItem> */}
           <FormItem name="admins" label={<FormItemTitle title={'责任人'} />}>
             <SelectTMEPerson placeholder="请邀请团队成员" />
           </FormItem>

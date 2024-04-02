@@ -6,8 +6,8 @@ import { NS_DATA_SOURCE_RELATION_MODAL_OPEN_STATE } from '../ConfigModelService'
 import { connect } from 'umi';
 import { DATASOURCE_NODE_RENDER_ID } from '../constant';
 import DataSourceRelationFormDrawer from './DataSourceRelationFormDrawer';
-import DataSourceCreateForm from '../../Datasource/components/DataSourceCreateForm';
-// import ClassDataSourceTypeModal from '../../components/ClassDataSourceTypeModal1';
+import ModelCreateForm from '../../Datasource/components/ModelCreateForm';
+// import ClassModelTypeModal from '../../components/ClassDataSourceTypeModal1';
 import { GraphApi } from '../service';
 import { SemanticNodeType } from '../../enum';
 import type { StateType } from '../../model';
@@ -99,7 +99,7 @@ const XflowJsonSchemaFormDrawerForm: React.FC<CreateFormProps> = (props) => {
         open={visible}
       />
       {dataSourceModalVisible && (
-        <DataSourceCreateForm
+        <ModelCreateForm
           basicInfoFormMode="fast"
           dataSourceItem={dataSourceItem}
           onCancel={() => {
@@ -154,7 +154,7 @@ const XflowJsonSchemaFormDrawerForm: React.FC<CreateFormProps> = (props) => {
         />
       </Drawer>
       {/* {
-        <ClassDataSourceTypeModal
+        <ClassModelTypeModal
           open={createDataSourceModalOpen}
           onCancel={() => {
             resetSelectedNode();

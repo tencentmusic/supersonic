@@ -30,7 +30,7 @@ import NodeInfoDrawer from './components/NodeInfoDrawer';
 import DimensionInfoModal from '../components/DimensionInfoModal';
 import MetricInfoCreateForm from '../components/MetricInfoCreateForm';
 import DeleteConfirmModal from './components/DeleteConfirmModal';
-import ClassDataSourceTypeModal from '../components/ClassDataSourceTypeModal';
+import ClassModelTypeModal from '../components/ClassModelTypeModal';
 import GraphToolBar from './components/GraphToolBar';
 import GraphLegend from './components/GraphLegend';
 import GraphLegendVisibleModeItem from './components/GraphLegendVisibleModeItem';
@@ -1115,7 +1115,7 @@ const DomainManger: React.FC<Props> = ({ domainManger, dispatch }) => {
       )}
 
       {createDataSourceModalOpen && (
-        <ClassDataSourceTypeModal
+        <ClassModelTypeModal
           open={createDataSourceModalOpen}
           onCancel={() => {
             setNodeDataSource(undefined);

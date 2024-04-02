@@ -54,6 +54,9 @@ const MetricBasicInformation: React.FC<Props> = ({ metircData }) => {
         '该限定条件用于在计算指标时限定口径，作用于度量，所用于过滤的维度必须在创建模型的时候被标记为日期或者维度，不需要加where关键字。比如：维度A="值1" and 维度B="值2"',
       render: (_: any, record: any) => {
         const { constraint } = record;
+        if (!constraint) {
+          return '--';
+        }
         return <TextArea readOnly value={constraint} />;
       },
     },

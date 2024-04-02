@@ -11,6 +11,7 @@ import com.tencent.supersonic.headless.api.pojo.response.DatabaseResp;
 import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
 import com.tencent.supersonic.headless.api.pojo.response.UnAvailableItemResp;
 import com.tencent.supersonic.headless.server.pojo.MetaFilter;
+import com.tencent.supersonic.headless.server.pojo.ModelFilter;
 
 import java.util.List;
 import java.util.Map;
@@ -23,7 +24,7 @@ public interface ModelService {
 
     List<ModelResp> getModelList(MetaFilter metaFilter);
 
-    Map<Long, ModelResp> getModelMap();
+    Map<Long, ModelResp> getModelMap(ModelFilter modelFilter);
 
     void deleteModel(Long id, User user);
 

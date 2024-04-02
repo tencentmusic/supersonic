@@ -35,17 +35,18 @@ const ROUTES = [
     envEnableList: [ENV_KEY.CHAT],
   },
   {
-    path: '/model/:domainId?/:modelId?/:menuKey?',
-    component: './SemanticModel/DomainManager',
-    name: 'semanticModel',
-    envEnableList: [ENV_KEY.SEMANTIC],
-  },
-  {
     path: '/plugin',
     name: 'plugin',
     component: './ChatPlugin',
     envEnableList: [ENV_KEY.CHAT],
   },
+  {
+    path: '/model/:domainId?/:modelId?/:menuKey?',
+    component: './SemanticModel/DomainManager',
+    name: 'semanticModel',
+    envEnableList: [ENV_KEY.SEMANTIC],
+  },
+
   {
     path: '/metric',
     name: 'metric',

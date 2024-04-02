@@ -19,7 +19,6 @@ import {
 import MetricInfoCreateForm from './MetricInfoCreateForm';
 import BatchCtrlDropDownButton from '@/components/BatchCtrlDropDownButton';
 import TableHeaderFilter from './TableHeaderFilter';
-import moment from 'moment';
 import styles from './style.less';
 import { ISemantic } from '../data';
 import { ColumnsConfig } from './TableColumnRender';
@@ -165,9 +164,9 @@ const ClassMetricTable: React.FC<Props> = ({ onEmptyMetricData, domainManger, di
     {
       dataIndex: 'name',
       title: '指标',
-      width: 280,
+      // width: 280,
       fixed: 'left',
-      // width: '30%',
+      width: '20%',
       search: false,
       render: columnsConfig.indicatorInfo.render,
     },
@@ -179,15 +178,15 @@ const ClassMetricTable: React.FC<Props> = ({ onEmptyMetricData, domainManger, di
     {
       dataIndex: 'sensitiveLevel',
       title: '敏感度',
-      width: 160,
+      // width: 100,
       valueEnum: SENSITIVE_LEVEL_ENUM,
       render: columnsConfig.sensitiveLevel.render,
     },
 
     {
       dataIndex: 'isTag',
-      title: '是否为标签',
-      width: 120,
+      title: '是否标签',
+      // width: 90,
       render: (isTag) => {
         switch (isTag) {
           case 0:
@@ -202,7 +201,7 @@ const ClassMetricTable: React.FC<Props> = ({ onEmptyMetricData, domainManger, di
     {
       dataIndex: 'isPublish',
       title: '是否发布',
-      width: 150,
+      // width: 90,
       search: false,
       render: (isPublish) => {
         switch (isPublish) {
@@ -216,6 +215,13 @@ const ClassMetricTable: React.FC<Props> = ({ onEmptyMetricData, domainManger, di
       },
     },
     {
+      dataIndex: 'status',
+      title: '状态',
+      // width: 100,
+      search: false,
+      render: columnsConfig.state.render,
+    },
+    {
       dataIndex: 'description',
       title: '描述',
       width: 300,
@@ -223,31 +229,13 @@ const ClassMetricTable: React.FC<Props> = ({ onEmptyMetricData, domainManger, di
       render: columnsConfig.description.render,
     },
     {
-      dataIndex: 'status',
-      title: '状态',
-      width: 160,
-      search: false,
-      render: columnsConfig.state.render,
-    },
-    {
-      dataIndex: 'createdBy',
-      title: '创建人',
-      width: 150,
-      search: false,
-    },
-    {
-      dataIndex: 'updatedAt',
-      title: '更新时间',
-      width: 180,
-      search: false,
-      render: (value: any) => {
-        return value && value !== '-' ? moment(value).format('YYYY-MM-DD HH:mm:ss') : '-';
-      },
+      ...columnsConfig.createInfo,
     },
     {
       title: '操作',
       dataIndex: 'x',
       valueType: 'option',
+      fixed: 'right',
       width: 150,
       render: (_, record) => {
         return (

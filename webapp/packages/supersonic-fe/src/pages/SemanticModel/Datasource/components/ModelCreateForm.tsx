@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Form, Button, Modal, Steps, message } from 'antd';
-import DataSourceBasicForm from './DataSourceBasicForm';
-import DataSourceFieldForm from './DataSourceFieldForm';
+import ModelBasicForm from './ModelBasicForm';
+import ModelFieldForm from './ModelFieldForm';
 import { formLayout } from '@/components/FormHelper/utils';
 import { EnumDataSourceType } from '../constants';
 import styles from '../style.less';
@@ -43,7 +43,7 @@ const initFormVal = {
   description: '', // 模型描述
 };
 
-const DataSourceCreateForm: React.FC<CreateFormProps> = ({
+const ModelCreateForm: React.FC<CreateFormProps> = ({
   domainManger,
   onCancel,
   createModalVisible,
@@ -59,6 +59,7 @@ const DataSourceCreateForm: React.FC<CreateFormProps> = ({
   children,
 }) => {
   const isEdit = !!modelItem?.id;
+
   const [fields, setFields] = useState<any[]>([]);
   const [currentStep, setCurrentStep] = useState(0);
   const [saveLoading, setSaveLoading] = useState(false);
@@ -447,7 +448,7 @@ const DataSourceCreateForm: React.FC<CreateFormProps> = ({
     return (
       <>
         <div style={{ display: currentStep === 1 ? 'block' : 'none' }}>
-          <DataSourceFieldForm
+          <ModelFieldForm
             fields={fields}
             tagObjectList={tagObjectList}
             tagObjectId={tagObjectIdState}
@@ -462,7 +463,7 @@ const DataSourceCreateForm: React.FC<CreateFormProps> = ({
           />
         </div>
         <div style={{ display: currentStep !== 1 ? 'block' : 'none' }}>
-          <DataSourceBasicForm
+          <ModelBasicForm
             form={form}
             isEdit={isEdit}
             mode={basicInfoFormMode}
@@ -589,4 +590,4 @@ const DataSourceCreateForm: React.FC<CreateFormProps> = ({
 
 export default connect(({ domainManger }: { domainManger: StateType }) => ({
   domainManger,
-}))(DataSourceCreateForm);
+}))(ModelCreateForm);

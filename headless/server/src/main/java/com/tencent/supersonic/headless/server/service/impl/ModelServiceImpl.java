@@ -154,9 +154,9 @@ public class ModelServiceImpl implements ModelService {
     }
 
     @Override
-    public Map<Long, ModelResp> getModelMap() {
+    public Map<Long, ModelResp> getModelMap(ModelFilter modelFilter) {
         Map<Long, ModelResp> map = new HashMap<>();
-        List<ModelResp> modelResps = getModelList(new ModelFilter());
+        List<ModelResp> modelResps = getModelList(modelFilter);
         if (CollectionUtils.isEmpty(modelResps)) {
             return map;
         }
@@ -311,15 +311,19 @@ public class ModelServiceImpl implements ModelService {
         if (CollectionUtils.isEmpty(domainResps)) {
             return Lists.newArrayList();
         }
-        List<ModelResp> allModelList = getModelList(new ModelFilter());
-        Set<Long> domainIds = domainResps.stream().map(DomainResp::getId).collect(Collectors.toSet());
-        return allModelList.stream().filter(modelResp ->
-                domainIds.contains(modelResp.getDomainId())).collect(Collectors.toList());
+        List<Long> domainIds = domainResps.stream().map(DomainResp::getId)
+                .collect(Collectors.toList());
+        ModelFilter modelFilter = new ModelFilter();
+        modelFilter.setIncludesDetail(false);
+        modelFilter.setDomainIds(domainIds);
+        return getModelList(modelFilter);
     }
 
     @Override
     public List<ModelResp> getModelAuthList(User user, AuthType authTypeEnum) {
-        List<ModelResp> modelResps = getModelList(new ModelFilter());
+        ModelFilter modelFilter = new ModelFilter();
+        modelFilter.setIncludesDetail(false);
+        List<ModelResp> modelResps = getModelList(modelFilter);
         Set<String> orgIds = userService.getUserAllOrgId(user.getName());
         List<ModelResp> modelWithAuth = Lists.newArrayList();
         if (authTypeEnum.equals(AuthType.ADMIN)) {
@@ -342,6 +346,7 @@ public class ModelServiceImpl implements ModelService {
         }
         ModelFilter modelFilter = new ModelFilter();
         modelFilter.setDomainIds(domainIds);
+        modelFilter.setIncludesDetail(false);
         List<ModelResp> modelResps = getModelList(modelFilter);
         if (CollectionUtils.isEmpty(modelResps)) {
             return modelResps;

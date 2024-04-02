@@ -5,13 +5,14 @@ import { TagsOutlined, ReadOutlined } from '@ant-design/icons';
 import { history } from 'umi';
 import { ISemantic } from '../data';
 import { isString } from 'lodash';
+import dayjs from 'dayjs';
 import { isArrayOfValues } from '@/utils/utils';
 import styles from './style.less';
 import IndicatorStar, { StarType } from '../components/IndicatorStar';
 
 const { Text, Paragraph } = Typography;
 
-export const ColumnsConfig = (params?: {
+export const ColumnsConfig: any = (params?: {
   indicatorInfo?: {
     url?: string;
     starType?: StarType;
@@ -329,6 +330,21 @@ export const ColumnsConfig = (params?: {
           >
             {tagProps.label}
           </Tag>
+        );
+      },
+    },
+    createInfo: {
+      dataIndex: 'updatedAt',
+      title: '创建信息',
+      tooltip: '创建人/更新时间',
+      width: 180,
+      search: false,
+      render: (value: any, record: ISemantic.IMetricItem) => {
+        return (
+          <Space direction="vertical">
+            <span> {record.createdBy}</span>
+            <span>{value && value !== '-' ? dayjs(value).format('YYYY-MM-DD HH:mm:ss') : '-'}</span>
+          </Space>
         );
       },
     },

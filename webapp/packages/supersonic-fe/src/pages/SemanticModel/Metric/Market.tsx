@@ -218,26 +218,26 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
     {
       dataIndex: 'sensitiveLevel',
       title: '敏感度',
-      width: 150,
+      // width: 150,
       valueEnum: SENSITIVE_LEVEL_ENUM,
       render: columnsConfig.sensitiveLevel.render,
     },
-    {
-      dataIndex: 'isPublish',
-      title: '是否发布',
-      width: 100,
-      search: false,
-      render: (isPublish) => {
-        switch (isPublish) {
-          case 0:
-            return '否';
-          case 1:
-            return <span style={{ color: '#1677ff' }}>是</span>;
-          default:
-            return <Tag color="default">未知</Tag>;
-        }
-      },
-    },
+    // {
+    //   dataIndex: 'isPublish',
+    //   title: '是否发布',
+    //   width: 100,
+    //   search: false,
+    //   render: (isPublish) => {
+    //     switch (isPublish) {
+    //       case 0:
+    //         return '否';
+    //       case 1:
+    //         return <span style={{ color: '#1677ff' }}>是</span>;
+    //       default:
+    //         return <Tag color="default">未知</Tag>;
+    //     }
+    //   },
+    // },
 
     {
       dataIndex: 'description',
