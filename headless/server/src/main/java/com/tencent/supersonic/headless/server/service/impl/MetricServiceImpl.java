@@ -46,6 +46,7 @@ import com.tencent.supersonic.headless.server.pojo.MetaFilter;
 import com.tencent.supersonic.headless.server.pojo.MetricFilter;
 import com.tencent.supersonic.headless.server.pojo.MetricsFilter;
 import com.tencent.supersonic.headless.server.pojo.ModelCluster;
+import com.tencent.supersonic.headless.server.pojo.ModelFilter;
 import com.tencent.supersonic.headless.server.pojo.TagFilter;
 import com.tencent.supersonic.headless.server.service.CollectService;
 import com.tencent.supersonic.headless.server.service.DataSetService;
@@ -401,7 +402,9 @@ public class MetricServiceImpl implements MetricService {
         if (metricDO == null) {
             return null;
         }
-        Map<Long, ModelResp> modelMap = modelService.getModelMap();
+        ModelFilter modelFilter = new ModelFilter(false,
+                Lists.newArrayList(metricDO.getModelId()));
+        Map<Long, ModelResp> modelMap = modelService.getModelMap(modelFilter);
         List<CollectDO> collectList = collectService.getCollectList(user.getName());
         List<Long> collect = collectList.stream().map(CollectDO::getCollectId).collect(Collectors.toList());
         MetricResp metricResp = MetricConverter.convert2MetricResp(metricDO, modelMap, collect);
@@ -526,8 +529,10 @@ public class MetricServiceImpl implements MetricService {
 
     private List<MetricResp> convertList(List<MetricDO> metricDOS, List<Long> collect) {
         List<MetricResp> metricResps = Lists.newArrayList();
-
-        Map<Long, ModelResp> modelMap = modelService.getModelMap();
+        List<Long> modelIds = metricDOS.stream().map(MetricDO::getModelId)
+                .collect(Collectors.toList());
+        ModelFilter modelFilter = new ModelFilter(false, modelIds);
+        Map<Long, ModelResp> modelMap = modelService.getModelMap(modelFilter);
         if (!CollectionUtils.isEmpty(metricDOS)) {
             metricResps = metricDOS.stream()
                     .map(metricDO -> MetricConverter.convert2MetricResp(metricDO, modelMap, collect))
@@ -584,7 +589,9 @@ public class MetricServiceImpl implements MetricService {
         //3. choose ModelCluster
         Set<Long> modelIds = getModelIds(modelIdsByDomainId, metricResps, dimensionResps);
         ModelCluster modelCluster = getModelCluster(metricResps, modelIds);
-
+        if (modelCluster == null) {
+            throw new IllegalArgumentException("Invalid input parameters, unable to obtain valid metrics");
+        }
         //4. set groups
         List<String> dimensionBizNames = dimensionResps.stream()
                 .filter(entry -> modelCluster.getModelIds().contains(entry.getModelId()))
@@ -604,7 +611,7 @@ public class MetricServiceImpl implements MetricService {
         List<String> metricBizNames = metricResps.stream()
                 .filter(entry -> modelCluster.getModelIds().contains(entry.getModelId()))
                 .map(SchemaItem::getBizName).collect(Collectors.toList());
-        if (org.apache.commons.collections.CollectionUtils.isEmpty(metricBizNames)) {
+        if (CollectionUtils.isEmpty(metricBizNames)) {
             throw new IllegalArgumentException("Invalid input parameters, unable to obtain valid metrics");
         }
         List<Aggregator> aggregators = new ArrayList<>();

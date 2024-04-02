@@ -34,6 +34,7 @@ import com.tencent.supersonic.headless.api.pojo.response.ModelSchemaResp;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticSchemaResp;
 import com.tencent.supersonic.headless.api.pojo.response.TagResp;
 import com.tencent.supersonic.headless.server.pojo.MetaFilter;
+import com.tencent.supersonic.headless.server.pojo.ModelFilter;
 import com.tencent.supersonic.headless.server.pojo.TagFilter;
 import com.tencent.supersonic.headless.server.service.DataSetService;
 import com.tencent.supersonic.headless.server.service.DimensionService;
@@ -216,7 +217,8 @@ public class SchemaServiceImpl implements SchemaService {
         Map<Long, List<DimensionResp>> dimensionRespsMap = dimensionService.getDimensions(metaFilter)
                 .stream().collect(Collectors.groupingBy(DimensionResp::getModelId));
         List<ModelRela> modelRelas = modelRelaService.getModelRela(modelIds);
-        Map<Long, ModelResp> modelMap = modelService.getModelMap();
+        ModelFilter modelFilter = new ModelFilter(true, modelIds);
+        Map<Long, ModelResp> modelMap = modelService.getModelMap(modelFilter);
         for (Long modelId : modelIds) {
             ModelResp modelResp = modelMap.get(modelId);
             if (modelResp == null || !StatusEnum.ONLINE.getCode().equals(modelResp.getStatus())) {
