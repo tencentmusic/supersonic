@@ -7,7 +7,7 @@ import { connect } from 'umi';
 import { DATASOURCE_NODE_RENDER_ID } from '../constant';
 import DataSourceRelationFormDrawer from './DataSourceRelationFormDrawer';
 import ModelCreateForm from '../../Datasource/components/ModelCreateForm';
-// import ClassDataSourceTypeModal from '../../components/ClassDataSourceTypeModal1';
+// import ClassModelTypeModal from '../../components/ClassDataSourceTypeModal1';
 import { GraphApi } from '../service';
 import { SemanticNodeType } from '../../enum';
 import type { StateType } from '../../model';
@@ -154,7 +154,7 @@ const XflowJsonSchemaFormDrawerForm: React.FC<CreateFormProps> = (props) => {
         />
       </Drawer>
       {/* {
-        <ClassDataSourceTypeModal
+        <ClassModelTypeModal
           open={createDataSourceModalOpen}
           onCancel={() => {
             resetSelectedNode();

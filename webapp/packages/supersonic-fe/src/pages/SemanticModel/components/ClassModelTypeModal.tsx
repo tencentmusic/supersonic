@@ -1,19 +1,19 @@
-import { Drawer, Modal, Card, Row, Col } from 'antd';
+import { Drawer, Modal, Card, Row, Col, message } from 'antd';
 import { ConsoleSqlOutlined, CoffeeOutlined } from '@ant-design/icons';
 import React, { useState, useEffect } from 'react';
 import type { Dispatch } from 'umi';
 import { connect } from 'umi';
 import ModelCreateForm from '../Datasource/components/ModelCreateForm';
-import { excuteSql } from '../service';
+import { excuteSql, getModelDetail } from '../service';
 import type { StateType } from '../model';
 import DataSource from '../Datasource';
-import { IDataSource } from '../data';
+import { IDataSource, ISemantic } from '../data';
 import styles from './style.less';
 
 const { Meta } = Card;
 type Props = {
   open: boolean;
-  dataSourceItem: IDataSource.IDataSourceItem;
+  modelItem: ISemantic.IModelItem;
   onTypeChange?: (type: 'fast' | 'normal') => void;
   onSubmit?: () => void;
   onCancel?: () => void;
@@ -21,11 +21,11 @@ type Props = {
   domainManger: StateType;
 };
 
-const ClassDataSourceTypeModal: React.FC<Props> = ({
+const ClassModelTypeModal: React.FC<Props> = ({
   open,
   onTypeChange,
   onSubmit,
-  dataSourceItem,
+  modelItem: modelBasicItem,
   domainManger,
   onCancel,
   dispatch,
@@ -43,17 +43,36 @@ const ClassDataSourceTypeModal: React.FC<Props> = ({
   const [scriptColumns, setScriptColumns] = useState<IDataSource.IExecuteSqlColumn[]>([]);
   const [sqlParams, setSqlParams] = useState<IDataSource.ISqlParamsItem[]>([]);
 
+  const [modelItem, setModelItem] = useState<ISemantic.IModelItem>({});
+
   useEffect(() => {
-    if (!dataSourceItem?.id || !open) {
+    if (!modelBasicItem?.id || !open) {
       setCreateDataSourceModalOpen(true);
       return;
     }
-    if (dataSourceItem?.modelDetail?.queryType === 'table_query') {
-      setDataSourceModalVisible(true);
-    } else {
-      setCreateModalVisible(true);
+  }, [modelBasicItem, open]);
+
+  useEffect(() => {
+    if (modelBasicItem?.id) {
+      queryModelDetail(modelBasicItem.id);
     }
-  }, [dataSourceItem, open]);
+  }, [modelBasicItem]);
+
+  const queryModelDetail = async (modelId: number) => {
+    const { code, msg, data } = await getModelDetail({
+      modelId,
+    });
+    if (code === 200) {
+      setModelItem(data);
+      if (data?.modelDetail?.queryType === 'table_query') {
+        setDataSourceModalVisible(true);
+      } else {
+        setCreateModalVisible(true);
+      }
+    } else {
+      message.error(msg);
+    }
+  };
 
   const queryDataBaseExcuteSql = (tableName: string) => {
     const sql = `select * from ${tableName}`;
@@ -73,10 +92,10 @@ const ClassDataSourceTypeModal: React.FC<Props> = ({
   };
 
   useEffect(() => {
-    // queryTableColumnListByScript(dataSourceItem);
-    setSql(dataSourceItem?.modelDetail?.sqlQuery);
+    // queryTableColumnListByScript(modelItem);
+    setSql(modelItem?.modelDetail?.sqlQuery);
 
-    const modelDetailFields = dataSourceItem?.modelDetail?.fields;
+    const modelDetailFields = modelItem?.modelDetail?.fields;
     if (Array.isArray(modelDetailFields)) {
       setScriptColumns(
         modelDetailFields.map((item) => {
@@ -87,7 +106,7 @@ const ClassDataSourceTypeModal: React.FC<Props> = ({
         }),
       );
     }
-  }, [dataSourceItem]);
+  }, [modelItem]);
 
   return (
     <>
@@ -149,7 +168,7 @@ const ClassDataSourceTypeModal: React.FC<Props> = ({
         <ModelCreateForm
           sql={fastModeSql}
           basicInfoFormMode="fast"
-          modelItem={dataSourceItem}
+          modelItem={modelItem}
           onCancel={() => {
             setDataSourceModalVisible(false);
             handleCancel();
@@ -169,7 +188,7 @@ const ClassDataSourceTypeModal: React.FC<Props> = ({
           sql={sql}
           databaseId={currentDatabaseId}
           basicInfoFormMode="normal"
-          modelItem={dataSourceItem}
+          modelItem={modelItem}
           scriptColumns={scriptColumns}
           sqlParams={sqlParams}
           onCancel={() => {
@@ -198,7 +217,7 @@ const ClassDataSourceTypeModal: React.FC<Props> = ({
             footer={null}
           >
             <DataSource
-              initialValues={dataSourceItem}
+              initialValues={modelItem}
               onSubmitSuccess={(dataSourceInfo) => {
                 const { columns, sql, databaseId, sqlParams } = dataSourceInfo;
                 setSql(sql);
@@ -216,4 +235,4 @@ const ClassDataSourceTypeModal: React.FC<Props> = ({
 };
 export default connect(({ domainManger }: { domainManger: StateType }) => ({
   domainManger,
-}))(ClassDataSourceTypeModal);
+}))(ClassModelTypeModal);

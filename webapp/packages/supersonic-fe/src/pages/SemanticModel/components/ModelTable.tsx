@@ -1,15 +1,15 @@
 import type { ActionType, ProColumns } from '@ant-design/pro-table';
 import ProTable from '@ant-design/pro-table';
-import { message, Button, Space, Popconfirm, Input, Tag } from 'antd';
+import { message, Button, Space, Popconfirm, Input } from 'antd';
 import React, { useRef, useState, useEffect } from 'react';
 import { StatusEnum } from '../enum';
 import type { Dispatch } from 'umi';
 import { connect } from 'umi';
 import type { StateType } from '../model';
 import { deleteModel, updateModel } from '../service';
-import ClassDataSourceTypeModal from './ClassDataSourceTypeModal';
+import ClassModelTypeModal from './ClassModelTypeModal';
 import { ColumnsConfig } from './TableColumnRender';
-
+import TableHeaderFilter from './TableHeaderFilter';
 import moment from 'moment';
 import styles from './style.less';
 import { ISemantic } from '../data';
@@ -25,8 +25,27 @@ type Props = {
 const ModelTable: React.FC<Props> = ({ modelList, disabledEdit = false, onModelChange }) => {
   const [modelItem, setModelItem] = useState<ISemantic.IModelItem>();
   const [saveLoading, setSaveLoading] = useState<boolean>(false);
+  const [filterParams, setFilterParams] = useState<Record<string, any>>({});
   const [createDataSourceModalOpen, setCreateDataSourceModalOpen] = useState(false);
   const actionRef = useRef<ActionType>();
+
+  const [tableData, setTableData] = useState<ISemantic.IModelItem[]>([]);
+
+  useEffect(() => {
+    if (!Array.isArray(modelList)) {
+      return;
+    }
+    setTableData(modelList);
+  }, [modelList]);
+
+  useEffect(() => {
+    const { key } = filterParams;
+    if (key) {
+      setTableData(modelList.filter((item) => item.name.includes(key)));
+    } else {
+      setTableData(modelList);
+    }
+  }, [filterParams]);
 
   const updateModelStatus = async (modelData: ISemantic.IModelItem) => {
     setSaveLoading(true);
@@ -177,10 +196,33 @@ const ModelTable: React.FC<Props> = ({ modelList, disabledEdit = false, onModelC
         rowKey="id"
         search={false}
         columns={columns}
-        dataSource={modelList}
+        dataSource={tableData}
         tableAlertRender={() => {
           return false;
         }}
+        headerTitle={
+          <TableHeaderFilter
+            components={[
+              {
+                label: '模型搜索',
+                component: (
+                  <Input.Search
+                    style={{ width: 280 }}
+                    placeholder="请输入模型名称"
+                    onSearch={(value) => {
+                      setFilterParams((preState) => {
+                        return {
+                          ...preState,
+                          key: value,
+                        };
+                      });
+                    }}
+                  />
+                ),
+              },
+            ]}
+          />
+        }
         size="small"
         options={{ reload: false, density: false, fullScreen: false }}
         toolBarRender={() =>
@@ -201,9 +243,9 @@ const ModelTable: React.FC<Props> = ({ modelList, disabledEdit = false, onModelC
         }
       />
       {createDataSourceModalOpen && (
-        <ClassDataSourceTypeModal
+        <ClassModelTypeModal
           open={createDataSourceModalOpen}
-          dataSourceItem={modelItem}
+          modelItem={modelItem}
           onSubmit={() => {
             onModelChange?.();
             setCreateDataSourceModalOpen(false);

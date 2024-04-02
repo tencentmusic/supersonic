@@ -11,7 +11,6 @@ import {
   getColumns,
   getUnAvailableItem,
   getTagObjectList,
-  getModelDetail,
 } from '../../service';
 import type { Dispatch } from 'umi';
 import type { StateType } from '../../model';
@@ -52,15 +51,15 @@ const ModelCreateForm: React.FC<CreateFormProps> = ({
   sql = '',
   sqlParams,
   onSubmit,
-  modelItem: modelBasicInfo,
+  modelItem,
   databaseId,
   basicInfoFormMode,
   onDataSourceBtnClick,
   onOpenDataSourceEdit,
   children,
 }) => {
-  const isEdit = !!modelBasicInfo?.id;
-  const [modelItem, setModelItem] = useState<ISemantic.IModelItem>({});
+  const isEdit = !!modelItem?.id;
+
   const [fields, setFields] = useState<any[]>([]);
   const [currentStep, setCurrentStep] = useState(0);
   const [saveLoading, setSaveLoading] = useState(false);
@@ -104,25 +103,8 @@ const ModelCreateForm: React.FC<CreateFormProps> = ({
     queryTagObjectList();
   }, []);
 
-  useEffect(() => {
-    if (modelBasicInfo?.id) {
-      queryModelDetail(modelBasicInfo.id);
-    }
-  }, [modelBasicInfo]);
-
   const forward = () => setCurrentStep(currentStep + 1);
   const backward = () => setCurrentStep(currentStep - 1);
-
-  const queryModelDetail = async (modelId: number) => {
-    const { code, msg, data } = await getModelDetail({
-      modelId,
-    });
-    if (code === 200) {
-      setModelItem(data);
-    } else {
-      message.error(msg);
-    }
-  };
 
   const queryTagObjectList = async () => {
     const { code, msg, data } = await getTagObjectList({
