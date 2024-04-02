@@ -52,7 +52,7 @@ const getCreateFieldName = (type: EnumDataSourceType) => {
   return isCreateName;
 };
 
-const DataSourceFieldForm: React.FC<Props> = ({
+const ModelFieldForm: React.FC<Props> = ({
   fields,
   sql,
   tagObjectList,
@@ -366,4 +366,4 @@ const DataSourceFieldForm: React.FC<Props> = ({
   );
 };
 
-export default DataSourceFieldForm;
+export default ModelFieldForm;

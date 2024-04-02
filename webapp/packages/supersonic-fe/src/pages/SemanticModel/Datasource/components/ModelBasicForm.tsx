@@ -17,7 +17,7 @@ type Props = {
   mode?: 'normal' | 'fast';
 };
 
-const DataSourceBasicForm: React.FC<Props> = ({
+const ModelBasicForm: React.FC<Props> = ({
   isEdit,
   modelItem,
   databaseConfigList,
@@ -152,7 +152,7 @@ const DataSourceBasicForm: React.FC<Props> = ({
       >
         <Input placeholder="名称不可重复" disabled={isEdit} />
       </FormItem>
-      <FormItem
+      {/* <FormItem
         name="alias"
         label="别名"
         getValueFromEvent={(value) => {
@@ -170,7 +170,7 @@ const DataSourceBasicForm: React.FC<Props> = ({
           tokenSeparators={[',']}
           maxTagCount={9}
         />
-      </FormItem>
+      </FormItem> */}
       <FormItem
         name="drillDownDimensions"
         label={
@@ -195,4 +195,4 @@ const DataSourceBasicForm: React.FC<Props> = ({
   );
 };
 
-export default DataSourceBasicForm;
+export default ModelBasicForm;

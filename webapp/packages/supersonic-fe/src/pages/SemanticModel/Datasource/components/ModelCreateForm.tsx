@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Form, Button, Modal, Steps, message } from 'antd';
-import DataSourceBasicForm from './DataSourceBasicForm';
-import DataSourceFieldForm from './DataSourceFieldForm';
+import ModelBasicForm from './ModelBasicForm';
+import ModelFieldForm from './ModelFieldForm';
 import { formLayout } from '@/components/FormHelper/utils';
 import { EnumDataSourceType } from '../constants';
 import styles from '../style.less';
@@ -11,6 +11,7 @@ import {
   getColumns,
   getUnAvailableItem,
   getTagObjectList,
+  getModelDetail,
 } from '../../service';
 import type { Dispatch } from 'umi';
 import type { StateType } from '../../model';
@@ -43,7 +44,7 @@ const initFormVal = {
   description: '', // 模型描述
 };
 
-const DataSourceCreateForm: React.FC<CreateFormProps> = ({
+const ModelCreateForm: React.FC<CreateFormProps> = ({
   domainManger,
   onCancel,
   createModalVisible,
@@ -51,14 +52,15 @@ const DataSourceCreateForm: React.FC<CreateFormProps> = ({
   sql = '',
   sqlParams,
   onSubmit,
-  modelItem,
+  modelItem: modelBasicInfo,
   databaseId,
   basicInfoFormMode,
   onDataSourceBtnClick,
   onOpenDataSourceEdit,
   children,
 }) => {
-  const isEdit = !!modelItem?.id;
+  const isEdit = !!modelBasicInfo?.id;
+  const [modelItem, setModelItem] = useState<ISemantic.IModelItem>({});
   const [fields, setFields] = useState<any[]>([]);
   const [currentStep, setCurrentStep] = useState(0);
   const [saveLoading, setSaveLoading] = useState(false);
@@ -102,8 +104,25 @@ const DataSourceCreateForm: React.FC<CreateFormProps> = ({
     queryTagObjectList();
   }, []);
 
+  useEffect(() => {
+    if (modelBasicInfo?.id) {
+      queryModelDetail(modelBasicInfo.id);
+    }
+  }, [modelBasicInfo]);
+
   const forward = () => setCurrentStep(currentStep + 1);
   const backward = () => setCurrentStep(currentStep - 1);
+
+  const queryModelDetail = async (modelId: number) => {
+    const { code, msg, data } = await getModelDetail({
+      modelId,
+    });
+    if (code === 200) {
+      setModelItem(data);
+    } else {
+      message.error(msg);
+    }
+  };
 
   const queryTagObjectList = async () => {
     const { code, msg, data } = await getTagObjectList({
@@ -447,7 +466,7 @@ const DataSourceCreateForm: React.FC<CreateFormProps> = ({
     return (
       <>
         <div style={{ display: currentStep === 1 ? 'block' : 'none' }}>
-          <DataSourceFieldForm
+          <ModelFieldForm
             fields={fields}
             tagObjectList={tagObjectList}
             tagObjectId={tagObjectIdState}
@@ -462,7 +481,7 @@ const DataSourceCreateForm: React.FC<CreateFormProps> = ({
           />
         </div>
         <div style={{ display: currentStep !== 1 ? 'block' : 'none' }}>
-          <DataSourceBasicForm
+          <ModelBasicForm
             form={form}
             isEdit={isEdit}
             mode={basicInfoFormMode}
@@ -589,4 +608,4 @@ const DataSourceCreateForm: React.FC<CreateFormProps> = ({
 
 export default connect(({ domainManger }: { domainManger: StateType }) => ({
   domainManger,
-}))(DataSourceCreateForm);
+}))(ModelCreateForm);

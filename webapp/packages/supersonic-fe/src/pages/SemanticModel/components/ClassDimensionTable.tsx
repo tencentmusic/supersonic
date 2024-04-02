@@ -163,21 +163,21 @@ const ClassDimensionTable: React.FC<Props> = ({ domainManger, dispatch }) => {
       dataIndex: 'name',
       title: '维度',
       fixed: 'left',
-      width: 280,
+      // width: 280,
       render: columnsConfig.dimensionInfo.render,
       search: false,
     },
     {
       dataIndex: 'sensitiveLevel',
       title: '敏感度',
-      width: 150,
+      // width: 100,
       valueEnum: SENSITIVE_LEVEL_ENUM,
       render: columnsConfig.sensitiveLevel.render,
     },
     {
       dataIndex: 'isTag',
-      title: '是否为标签',
-      width: 120,
+      title: '是否标签',
+      // width: 90,
       render: (isTag) => {
         switch (isTag) {
           case 0:
@@ -192,39 +192,27 @@ const ClassDimensionTable: React.FC<Props> = ({ domainManger, dispatch }) => {
     {
       dataIndex: 'status',
       title: '状态',
-      width: 150,
+      // width: 100,
       search: false,
       render: columnsConfig.state.render,
-    },
-    {
-      dataIndex: 'createdBy',
-      title: '创建人',
-      width: 180,
-      search: false,
     },
 
     {
       dataIndex: 'description',
       title: '描述',
-      width: 250,
+      width: 300,
       search: false,
       render: columnsConfig.description.render,
     },
 
     {
-      dataIndex: 'updatedAt',
-      title: '更新时间',
-      width: 180,
-      search: false,
-      render: (value: any) => {
-        return value && value !== '-' ? moment(value).format('YYYY-MM-DD HH:mm:ss') : '-';
-      },
+      ...columnsConfig.createInfo,
     },
-
     {
       title: '操作',
       dataIndex: 'x',
       valueType: 'option',
+      fixed: 'right',
       width: 250,
       render: (_, record) => {
         return (

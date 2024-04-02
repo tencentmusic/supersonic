@@ -125,7 +125,7 @@ const ModelCreateFormModal: React.FC<ModelCreateFormModalProps> = (props) => {
         >
           <Input placeholder="请输入模型英文名称" />
         </FormItem>
-        <FormItem
+        {/* <FormItem
           name="alias"
           label="别名"
           getValueFromEvent={(value) => {
@@ -143,7 +143,7 @@ const ModelCreateFormModal: React.FC<ModelCreateFormModalProps> = (props) => {
             tokenSeparators={[',']}
             maxTagCount={9}
           />
-        </FormItem>
+        </FormItem> */}
         <FormItem name="description" label="模型描述">
           <Input.TextArea placeholder="模型描述" />
         </FormItem>

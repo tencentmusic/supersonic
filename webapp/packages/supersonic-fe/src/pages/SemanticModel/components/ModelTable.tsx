@@ -73,13 +73,6 @@ const ModelTable: React.FC<Props> = ({ modelList, disabledEdit = false, onModelC
       renderFormItem: () => <Input placeholder="请输入ID/模型名称/英文名称/标签" />,
     },
     {
-      dataIndex: 'alias',
-      title: '别名',
-      width: 150,
-      ellipsis: true,
-      search: false,
-    },
-    {
       dataIndex: 'bizName',
       title: '英文名称',
       search: false,
