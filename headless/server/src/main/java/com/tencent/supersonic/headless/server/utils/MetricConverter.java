@@ -3,6 +3,7 @@ package com.tencent.supersonic.headless.server.utils;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.common.pojo.DataFormat;
+import com.tencent.supersonic.common.pojo.enums.PublishEnum;
 import com.tencent.supersonic.common.pojo.enums.StatusEnum;
 import com.tencent.supersonic.common.pojo.enums.TypeEnums;
 import com.tencent.supersonic.common.util.BeanMapper;
@@ -34,7 +35,10 @@ public class MetricConverter {
         metricDO.setClassifications(metricReq.getClassifications());
         metricDO.setRelateDimensions(JSONObject.toJSONString(metricReq.getRelateDimension()));
         metricDO.setStatus(StatusEnum.ONLINE.getCode());
-        metricDO.setExt(JSONObject.toJSONString(metricReq.getExt()));
+        metricDO.setIsPublish(PublishEnum.UN_PUBLISHED.getCode());
+        if (metricReq.getExt() != null) {
+            metricDO.setExt(JSONObject.toJSONString(metricReq.getExt()));
+        }
         metricDO.setDefineType(metricReq.getMetricDefineType().name());
         return metricDO;
     }
@@ -80,7 +84,7 @@ public class MetricConverter {
         metricResp.setRelateDimension(JSONObject.parseObject(metricDO.getRelateDimensions(),
                 RelateDimension.class));
         if (metricDO.getExt() != null) {
-            metricResp.setExt(JSONObject.parseObject(metricDO.getExt(), Map.class));
+            metricResp.setExt(JSONObject.parseObject(metricDO.getExt(), HashMap.class));
         }
         metricResp.setTypeEnum(TypeEnums.METRIC);
         if (MetricDefineType.MEASURE.name().equalsIgnoreCase(metricDO.getDefineType())) {

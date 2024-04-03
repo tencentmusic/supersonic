@@ -250,6 +250,7 @@ CREATE TABLE `s2_dimension` (
                                 `default_values` varchar(500) DEFAULT NULL,
                                 `dim_value_maps` varchar(5000) DEFAULT NULL,
                                 `is_tag` int(10) DEFAULT NULL,
+                                `ext` varchar(1000) DEFAULT NULL,
                                 PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='维度表';
 
@@ -332,7 +333,7 @@ CREATE TABLE `s2_model` (
 CREATE TABLE `s2_plugin` (
                              `id` bigint(20) NOT NULL AUTO_INCREMENT,
                              `type` varchar(50) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL COMMENT 'DASHBOARD,WIDGET,URL',
-                             `view` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+                             `data_set` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
                              `pattern` varchar(500) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL,
                              `parse_mode` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
                              `parse_mode_config` text COLLATE utf8mb4_unicode_ci,
@@ -343,7 +344,6 @@ CREATE TABLE `s2_plugin` (
                              `updated_by` varchar(100) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL,
                              `config` text CHARACTER SET utf8 COLLATE utf8_unicode_ci,
                              `comment` text COLLATE utf8mb4_unicode_ci,
-                             ADD COLUMN `data_set` varchar(100) DEFAULT NULL,
                              PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -351,7 +351,7 @@ CREATE TABLE `s2_query_stat_info` (
                                       `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
                                       `trace_id` varchar(200) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '查询标识',
                                       `model_id` bigint(20) DEFAULT NULL,
-                                      `view_id` bigint(20) DEFAULT NULL,
+                                      `data_set_id` bigint(20) DEFAULT NULL,
                                       `user` varchar(200) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '执行sql的用户',
                                       `created_at` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
                                       `query_type` varchar(200) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '查询对应的场景',
@@ -482,7 +482,7 @@ CREATE TABLE `s2_app`
     `updated_by`     varchar(255) null
 )ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE s2_view
+CREATE TABLE s2_data_set
 (
     id          BIGINT AUTO_INCREMENT PRIMARY KEY,
     domain_id   BIGINT,
@@ -491,7 +491,7 @@ CREATE TABLE s2_view
     `description` VARCHAR(255),
     `status`      INT,
     alias       VARCHAR(255),
-    view_detail text,
+    data_set_detail text,
     created_at  datetime,
     created_by  VARCHAR(255),
     updated_at  datetime,
@@ -549,24 +549,3 @@ CREATE TABLE IF NOT EXISTS `s2_query_rule` (
     `ext` text DEFAULT NULL  ,
     PRIMARY KEY (`id`)
     ) ENGINE = InnoDB DEFAULT CHARSET = utf8 COMMENT ='查询规则表';
-
--- 2024-04-02补充mysql脚本
-CREATE TABLE IF NOT EXISTS `s2_data_set` (
-    `id` bigint(20)   NOT NULL AUTO_INCREMENT,
-    `domain_id` bigint(20) ,
-    `name` varchar(255)  NOT NULL ,
-    `biz_name` varchar(255)  NOT NULL ,
-    `description` varchar(255)  NOT NULL ,
-    `status` INT  NOT NULL DEFAULT '1' ,
-    `alias` varchar(255)  NOT NULL ,
-    `data_set_detail` text DEFAULT NULL  ,
-    `created_at` datetime NOT NULL ,
-    `created_by` varchar(100) NOT NULL ,
-    `updated_at` datetime DEFAULT NULL ,
-    `updated_by` varchar(100) DEFAULT NULL ,
-    `query_config` varchar(3000) DEFAULT NULL ,
-    `admin` varchar(3000) DEFAULT NULL ,
-    `admin_org` varchar(3000) DEFAULT NULL ,
-    `query_type` varchar(100) DEFAULT NULL ,
-    PRIMARY KEY (`id`)
-    ) ENGINE = InnoDB DEFAULT CHARSET = utf8; 

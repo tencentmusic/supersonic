@@ -7,7 +7,9 @@ import com.tencent.supersonic.headless.api.pojo.SchemaItem;
 import lombok.Data;
 import lombok.ToString;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
 @Data
@@ -37,5 +39,7 @@ public class DimensionResp extends SchemaItem {
     private DataTypeEnums dataType;
 
     private int isTag;
+
+    private Map<String, Object> ext = new HashMap<>();
 
 }
