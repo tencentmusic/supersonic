@@ -102,6 +102,7 @@ public class ModelDemoDataLoader {
         try {
             addDatabase();
             addDomain();
+            addTagObjectUser();
             addTagObjectSinger();
             addModel_1();
             addModel_2();
@@ -125,6 +126,15 @@ public class ModelDemoDataLoader {
             log.error("Failed to add model demo data", e);
         }
 
+    }
+
+    private void addTagObjectUser() throws Exception {
+        TagObjectReq tagObjectReq = new TagObjectReq();
+        tagObjectReq.setDomainId(1L);
+        tagObjectReq.setName("用户");
+        tagObjectReq.setBizName("user");
+        User user = User.getFakeUser();
+        tagObjectService.create(tagObjectReq, user);
     }
 
     private void addTagObjectSinger() throws Exception {
@@ -174,6 +184,7 @@ public class ModelDemoDataLoader {
         modelReq.setDescription("用户部门信息");
         modelReq.setDatabaseId(1L);
         modelReq.setDomainId(1L);
+        modelReq.setTagObjectId(1L);
         modelReq.setViewers(Arrays.asList("admin", "tom", "jack"));
         modelReq.setViewOrgs(Collections.singletonList("1"));
         modelReq.setAdmins(Arrays.asList("admin", "alice"));
@@ -328,7 +339,7 @@ public class ModelDemoDataLoader {
         modelReq.setDescription("艺人库");
         modelReq.setDatabaseId(1L);
         modelReq.setDomainId(2L);
-        modelReq.setTagObjectId(1L);
+        modelReq.setTagObjectId(2L);
         modelReq.setViewers(Arrays.asList("admin", "tom", "jack"));
         modelReq.setViewOrgs(Collections.singletonList("1"));
         modelReq.setAdmins(Collections.singletonList("admin"));
@@ -364,6 +375,7 @@ public class ModelDemoDataLoader {
     }
 
     private void addTags() {
+        addTag(1L);
         addTag(4L);
         addTag(5L);
         addTag(6L);
