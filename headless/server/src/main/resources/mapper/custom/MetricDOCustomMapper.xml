@@ -71,7 +71,7 @@
         insert into s2_metric (model_id, name,
         biz_name, description, type,status,sensitive_level,
         created_at, created_by, updated_at,
-        updated_by, type_params, define_type
+        updated_by, type_params, define_type,is_publish
         )
         values
         <foreach collection="list" item="metric" separator=",">
@@ -82,7 +82,7 @@
             #{metric.createdAt,jdbcType=TIMESTAMP}, #{metric.createdBy,jdbcType=VARCHAR},
             #{metric.updatedAt,jdbcType=TIMESTAMP},
             #{metric.updatedBy,jdbcType=VARCHAR}, #{metric.typeParams,jdbcType=LONGVARCHAR},
-            #{metric.defineType,jdbcType=VARCHAR}
+            #{metric.defineType,jdbcType=VARCHAR},#{metric.isPublish,jdbcType=VARCHAR}
             )
         </foreach>
     </insert>
