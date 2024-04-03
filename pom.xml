@@ -64,7 +64,7 @@
         <xk.time.version>3.2.4</xk.time.version>
         <mockito-inline.version>4.5.1</mockito-inline.version>
         <jsqlparser.version>4.5</jsqlparser.version>
-        <revision>0.8.6-SNAPSHOT</revision>
+        <revision>0.9.0-SNAPSHOT</revision>
         <!-- Do not bump spotless plugin version since 2.30.0 is the latest version supports Java 8-->
         <maven.plugin.spotless.version>2.30.0</maven.plugin.spotless.version>
         <spotless.python.includes></spotless.python.includes>
