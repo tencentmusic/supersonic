@@ -217,6 +217,7 @@ CREATE TABLE IF NOT EXISTS `s2_dimension` (
     `default_values` varchar(500) DEFAULT NULL,
     `dim_value_maps` varchar(500) DEFAULT NULL,
     `is_tag` INT DEFAULT NULL,
+    `ext` varchar(1000) DEFAULT NULL,
     PRIMARY KEY (`id`)
     );
 COMMENT ON TABLE s2_dimension IS 'dimension information table';
