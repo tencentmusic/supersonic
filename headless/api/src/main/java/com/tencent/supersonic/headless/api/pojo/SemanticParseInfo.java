@@ -27,7 +27,7 @@ public class SemanticParseInfo {
     private Set<SchemaElement> dimensions = new LinkedHashSet();
     private SchemaElement entity;
     private AggregateTypeEnum aggType = AggregateTypeEnum.NONE;
-    private FilterType filterType = FilterType.UNION;
+    private FilterType filterType = FilterType.AND;
     private Set<QueryFilter> dimensionFilters = new LinkedHashSet();
     private Set<QueryFilter> metricFilters = new LinkedHashSet();
     private Set<Order> orders = new LinkedHashSet();
