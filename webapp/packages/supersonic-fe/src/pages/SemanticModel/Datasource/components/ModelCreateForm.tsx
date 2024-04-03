@@ -63,7 +63,7 @@ const ModelCreateForm: React.FC<CreateFormProps> = ({
   const [fields, setFields] = useState<any[]>([]);
   const [currentStep, setCurrentStep] = useState(0);
   const [saveLoading, setSaveLoading] = useState(false);
-  const [hasEmptyNameField, setHasEmptyNameField] = useState<boolean>(false);
+  // const [hasEmptyNameField, setHasEmptyNameField] = useState<boolean>(false);
   const [formDatabaseId, setFormDatabaseId] = useState<number>();
   const [queryParamsState, setQueryParamsState] = useState({});
   const [effectTipsModalOpenState, setEffectTipsModalOpenState] = useState<boolean>(false);
@@ -79,16 +79,16 @@ const ModelCreateForm: React.FC<CreateFormProps> = ({
     formValRef.current = val;
   };
   const [sqlFilter, setSqlFilter] = useState<string>('');
-  useEffect(() => {
-    const hasEmpty = fields.some((item) => {
-      const { name, isCreateDimension, isCreateMetric } = item;
-      if ((isCreateMetric || isCreateDimension) && !name) {
-        return true;
-      }
-      return false;
-    });
-    setHasEmptyNameField(hasEmpty);
-  }, [fields]);
+  // useEffect(() => {
+  //   const hasEmpty = fields.some((item) => {
+  //     const { name, isCreateDimension, isCreateMetric } = item;
+  //     if ((isCreateMetric || isCreateDimension) && !name) {
+  //       return true;
+  //     }
+  //     return false;
+  //   });
+  //   setHasEmptyNameField(hasEmpty);
+  // }, [fields]);
 
   const [fieldColumns, setFieldColumns] = useState<IDataSource.IExecuteSqlColumn[]>(
     scriptColumns || [],
@@ -500,7 +500,7 @@ const ModelCreateForm: React.FC<CreateFormProps> = ({
             onClick={() => {
               handleNext(true);
             }}
-            disabled={hasEmptyNameField}
+            // disabled={hasEmptyNameField}
           >
             保 存
           </Button>

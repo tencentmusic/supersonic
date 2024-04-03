@@ -90,6 +90,7 @@ const ModelFieldForm: React.FC<Props> = ({
           <Select
             placeholder="字段类型"
             value={type}
+            allowClear
             onChange={(value) => {
               let defaultParams = {};
               if (value === EnumDataSourceType.MEASURES) {
