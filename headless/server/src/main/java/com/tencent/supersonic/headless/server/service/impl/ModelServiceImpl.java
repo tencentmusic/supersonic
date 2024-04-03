@@ -306,6 +306,9 @@ public class ModelServiceImpl implements ModelService {
         List<Long> domainIds = domainService.getDomainAuthSet(user, authType)
                 .stream().map(DomainResp::getId)
                 .collect(Collectors.toList());
+        if (CollectionUtils.isEmpty(domainIds)) {
+            return Lists.newArrayList();
+        }
         if (domainId != null) {
             if (domainIds.contains(domainId)) {
                 domainIds = Lists.newArrayList(domainId);
