@@ -6,6 +6,7 @@ import {
   CloudDownloadOutlined,
   DeleteOutlined,
   ExportOutlined,
+  RocketOutlined,
 } from '@ant-design/icons';
 
 export type BatchCtrlDropDownButtonProps = {
@@ -15,7 +16,7 @@ export type BatchCtrlDropDownButtonProps = {
   downloadLoading?: boolean;
   disabledList?: string[];
   hiddenList?: string[];
-  extenderEnable?: boolean;
+  extenderList?: string[];
 };
 const { RangePicker } = DatePicker;
 
@@ -26,20 +27,40 @@ const BatchCtrlDropDownButton: FC<BatchCtrlDropDownButtonProps> = ({
   downloadLoading,
   disabledList = [],
   hiddenList = [],
-  extenderEnable = false,
+  extenderList = [],
 }) => {
   const [popoverOpenState, setPopoverOpenState] = useState<boolean>(false);
   const [pickerType, setPickerType] = useState<string>('day');
   const dateRangeRef = useRef<any>([]);
 
-  const exportTagButton = {
-    key: 'exportTagButton',
-    label: '导出为标签',
-    icon: <ExportOutlined />,
-    disabled: disabledList?.includes('exportTagButton'),
+  const extenderConfig: any = {
+    exportTagButton: {
+      key: 'exportTagButton',
+      label: '导出为标签',
+      icon: <ExportOutlined />,
+      disabled: disabledList?.includes('exportTagButton'),
+    },
+    batchPublish: {
+      key: 'batchPublish',
+      label: '批量发布',
+      icon: <RocketOutlined />,
+      disabled: disabledList?.includes('batchPublish'),
+    },
+    batchUnPublish: {
+      key: 'batchUnPublish',
+      label: '批量下架',
+      icon: <RocketOutlined />,
+      disabled: disabledList?.includes('batchUnPublish'),
+    },
   };
 
-  const extenderList: any[] = extenderEnable ? [exportTagButton] : [];
+  const extenderButtonList: any[] = extenderList.reduce((list: any[], key) => {
+    const target = extenderConfig[key];
+    if (target) {
+      list.push(target);
+    }
+    return list;
+  }, []);
 
   const dropdownButtonItems: any[] = [
     {
@@ -68,15 +89,7 @@ const BatchCtrlDropDownButton: FC<BatchCtrlDropDownButtonProps> = ({
       icon: <CloudDownloadOutlined />,
       disabled: disabledList?.includes('batchDownload'),
     },
-    {
-      key: 'divider',
-      type: 'divider',
-    },
-    ...extenderList,
-    {
-      key: 'batchDeleteDivider',
-      type: 'divider',
-    },
+    ...extenderButtonList,
     {
       key: 'batchDelete',
       label: (
