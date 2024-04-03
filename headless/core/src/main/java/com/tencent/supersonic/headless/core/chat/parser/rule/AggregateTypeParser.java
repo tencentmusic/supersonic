@@ -18,8 +18,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum.AVG;
-import static com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum.COUNT;
-import static com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum.DISTINCT;
 import static com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum.MAX;
 import static com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum.MIN;
 import static com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum.NONE;
@@ -41,8 +39,6 @@ public class AggregateTypeParser implements SemanticParser {
             new AbstractMap.SimpleEntry<>(SUM, Pattern.compile("(?i)(汇总|总和|sum)")),
             new AbstractMap.SimpleEntry<>(AVG, Pattern.compile("(?i)(平均值|日均|平均|avg)")),
             new AbstractMap.SimpleEntry<>(TOPN, Pattern.compile("(?i)(top)")),
-            new AbstractMap.SimpleEntry<>(DISTINCT, Pattern.compile("(?i)(uv)")),
-            new AbstractMap.SimpleEntry<>(COUNT, Pattern.compile("(?i)(总数|pv)")),
             new AbstractMap.SimpleEntry<>(NONE, Pattern.compile("(?i)(明细)"))
     ).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (k1, k2) -> k2));
 
