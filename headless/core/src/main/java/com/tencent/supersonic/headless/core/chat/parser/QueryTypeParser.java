@@ -66,7 +66,7 @@ public class QueryTypeParser implements SemanticParser {
             }
             List<String> selectFields = SqlSelectHelper.getSelectFields(sqlInfo.getS2SQL());
             selectFields.addAll(whereFields);
-            List<String> selectWhereFilterByTimeFields = filterByTimeFields(whereFields);
+            List<String> selectWhereFilterByTimeFields = filterByTimeFields(selectFields);
             if (CollectionUtils.isNotEmpty(selectWhereFilterByTimeFields)) {
                 Set<String> tags = semanticSchema.getTags(dataSetId).stream().map(SchemaElement::getName)
                         .collect(Collectors.toSet());
