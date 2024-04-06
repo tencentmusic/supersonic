@@ -52,8 +52,8 @@ public class OptimizationConfig {
     @Value("${embedding.mapper.round.number:10}")
     private int embeddingMapperRoundNumber;
 
-    @Value("${embedding.mapper.distance.threshold:0.01}")
-    private Double embeddingMapperDistanceThreshold;
+    @Value("${embedding.mapper.threshold:0.99}")
+    private Double embeddingMapperThreshold;
 
     @Value("${s2SQL.linking.value.switch:true}")
     private boolean useLinkingValueSwitch;
@@ -135,8 +135,8 @@ public class OptimizationConfig {
         return convertValue("embedding.mapper.round.number", Integer.class, embeddingMapperRoundNumber);
     }
 
-    public Double getEmbeddingMapperDistanceThreshold() {
-        return convertValue("embedding.mapper.distance.threshold", Double.class, embeddingMapperDistanceThreshold);
+    public Double getEmbeddingMapperThreshold() {
+        return convertValue("embedding.mapper.threshold", Double.class, embeddingMapperThreshold);
     }
 
     public boolean isUseLinkingValueSwitch() {

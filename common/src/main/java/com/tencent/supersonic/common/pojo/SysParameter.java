@@ -74,8 +74,8 @@ public class SysParameter {
                 "批量向量召回文本请求个数", "每次进行向量语义召回的原始文本片段个数", "number", "Mapper相关配置"));
         parameters.add(new Parameter("embedding.mapper.number", "5",
                 "批量向量召回文本返回结果个数", "每个文本进行向量语义召回的文本结果个数", "number", "Mapper相关配置"));
-        parameters.add(new Parameter("embedding.mapper.distance.threshold",
-                "0.01", "向量召回相似度阈值", "相似度大于该阈值的则舍弃", "number", "Mapper相关配置"));
+        parameters.add(new Parameter("embedding.mapper.threshold",
+                "0.99", "向量召回相似度阈值", "相似度小于该阈值的则舍弃", "number", "Mapper相关配置"));
 
         //parser config
         Parameter s2SQLParameter = new Parameter("s2SQL.generation", "TWO_PASS_AUTO_COT",
