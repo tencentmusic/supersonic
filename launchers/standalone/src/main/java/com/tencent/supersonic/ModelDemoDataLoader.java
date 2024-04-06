@@ -374,16 +374,17 @@ public class ModelDemoDataLoader {
     }
 
     private void addTags() {
-        addTag(1L);
-        addTag(4L);
-        addTag(5L);
-        addTag(6L);
-        addTag(7L);
+        addTag(1L, TagDefineType.DIMENSION);
+        addTag(4L, TagDefineType.DIMENSION);
+        addTag(5L, TagDefineType.DIMENSION);
+        addTag(6L, TagDefineType.DIMENSION);
+        addTag(7L, TagDefineType.DIMENSION);
+        addTag(5L, TagDefineType.METRIC);
     }
 
-    private void addTag(Long itemId) {
+    private void addTag(Long itemId, TagDefineType tagDefineType) {
         TagReq tagReq = new TagReq();
-        tagReq.setTagDefineType(TagDefineType.DIMENSION);
+        tagReq.setTagDefineType(tagDefineType);
         tagReq.setItemId(itemId);
         tagMetaService.create(tagReq, User.getFakeUser());
     }
@@ -542,6 +543,7 @@ public class ModelDemoDataLoader {
         tagTypeDefaultConfig.setTimeDefaultConfig(tagTimeDefaultConfig);
         DefaultDisplayInfo defaultDisplayInfo = new DefaultDisplayInfo();
         defaultDisplayInfo.setDimensionIds(Lists.newArrayList(4L, 5L, 6L, 7L));
+        defaultDisplayInfo.setMetricIds(Lists.newArrayList(5L));
         tagTypeDefaultConfig.setDefaultDisplayInfo(defaultDisplayInfo);
         MetricTypeDefaultConfig metricTypeDefaultConfig = new MetricTypeDefaultConfig();
         TimeDefaultConfig timeDefaultConfig = new TimeDefaultConfig();

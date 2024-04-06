@@ -65,6 +65,7 @@ public class TagTest extends BaseTest {
         tagMetaService.create(tagReq1, user);
         TagFilter tagFilter = new TagFilter();
         tagFilter.setItemIds(Arrays.asList(4L, 5L));
+        tagFilter.setTagDefineType(TagDefineType.DIMENSION);
         List<TagResp> tags = tagMetaService.getTags(tagFilter);
         Assert.assertEquals(2, tags.size());
         TagDeleteReq tagDeleteReq = new TagDeleteReq();
