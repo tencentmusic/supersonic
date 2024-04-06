@@ -40,7 +40,7 @@ public class OptimizationConfig {
     @Value("${embedding.mapper.word.min:4}")
     private int embeddingMapperWordMin;
 
-    @Value("${embedding.mapper.word.max:5}")
+    @Value("${embedding.mapper.word.max:4}")
     private int embeddingMapperWordMax;
 
     @Value("${embedding.mapper.batch:50}")

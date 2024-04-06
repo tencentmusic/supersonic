@@ -2,6 +2,7 @@ package com.tencent.supersonic.headless.api.pojo.request;
 
 import com.google.common.collect.Sets;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
+import com.tencent.supersonic.headless.api.pojo.SchemaMapInfo;
 import lombok.Data;
 
 import java.util.Set;
@@ -15,4 +16,5 @@ public class QueryReq {
     private QueryFilters queryFilters;
     private boolean saveAnswer = true;
     private boolean enableLLM;
+    private SchemaMapInfo mapInfo = new SchemaMapInfo();
 }
