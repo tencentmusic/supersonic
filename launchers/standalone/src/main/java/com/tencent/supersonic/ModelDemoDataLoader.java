@@ -542,7 +542,6 @@ public class ModelDemoDataLoader {
         tagTypeDefaultConfig.setTimeDefaultConfig(tagTimeDefaultConfig);
         DefaultDisplayInfo defaultDisplayInfo = new DefaultDisplayInfo();
         defaultDisplayInfo.setDimensionIds(Lists.newArrayList(4L, 5L, 6L, 7L));
-        defaultDisplayInfo.setMetricIds(Lists.newArrayList(5L));
         tagTypeDefaultConfig.setDefaultDisplayInfo(defaultDisplayInfo);
         MetricTypeDefaultConfig metricTypeDefaultConfig = new MetricTypeDefaultConfig();
         TimeDefaultConfig timeDefaultConfig = new TimeDefaultConfig();
