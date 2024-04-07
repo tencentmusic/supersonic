@@ -18,6 +18,7 @@ import java.util.List;
 public class SchemaElement implements Serializable {
 
     private Long dataSet;
+    private String dataSetName;
     private Long model;
     private Long id;
     private String name;

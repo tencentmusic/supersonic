@@ -117,6 +117,7 @@ public class ChatQueryServiceImpl implements ChatQueryService {
         });
         SchemaMapInfo mapInfo = queryCtx.getMapInfo();
         mapResp.setMapInfo(mapInfo);
+        mapResp.setQueryText(queryReq.getQueryText());
         return mapResp;
     }
 
