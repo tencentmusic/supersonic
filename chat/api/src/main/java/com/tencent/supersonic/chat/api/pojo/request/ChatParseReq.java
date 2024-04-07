@@ -10,6 +10,7 @@ public class ChatParseReq {
     private String queryText;
     private Integer chatId;
     private Integer agentId;
+    private Integer topN = 10;
     private User user;
     private QueryFilters queryFilters;
     private boolean saveAnswer = true;
