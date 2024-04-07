@@ -20,15 +20,10 @@ import net.sf.jsqlparser.expression.operators.relational.MinorThan;
 import net.sf.jsqlparser.expression.operators.relational.MinorThanEquals;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.schema.Column;
-import net.sf.jsqlparser.statement.select.GroupByElement;
-import net.sf.jsqlparser.statement.select.PlainSelect;
-import net.sf.jsqlparser.statement.select.Select;
-import net.sf.jsqlparser.statement.select.SelectBody;
-import net.sf.jsqlparser.statement.select.SelectExpressionItem;
-import net.sf.jsqlparser.statement.select.SelectItem;
-import net.sf.jsqlparser.statement.select.SelectVisitorAdapter;
+import net.sf.jsqlparser.statement.select.*;
 import org.springframework.util.CollectionUtils;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.Objects;
@@ -57,6 +52,32 @@ public class SqlRemoveHelper {
             }
             return false;
         });
+        return selectStatement.toString();
+    }
+
+    public static String removeSameFieldFromSelect(String sql) {
+        Select selectStatement = SqlSelectHelper.getSelect(sql);
+        if (selectStatement == null) {
+            return sql;
+        }
+        SelectBody selectBody = selectStatement.getSelectBody();
+        if (!(selectBody instanceof PlainSelect)) {
+            return sql;
+        }
+        List<SelectItem> selectItems = ((PlainSelect) selectBody).getSelectItems();
+        Set<String> fields = new HashSet<>();
+        selectItems.removeIf(selectItem -> {
+            if (selectItem instanceof SelectExpressionItem) {
+                SelectExpressionItem selectExpressionItem = (SelectExpressionItem) selectItem;
+                String field = selectExpressionItem.getExpression().toString();
+                if (fields.contains(field)) {
+                    return true;
+                }
+                fields.add(field);
+            }
+            return false;
+        });
+        ((PlainSelect) selectBody).setSelectItems(selectItems);
         return selectStatement.toString();
     }
 
