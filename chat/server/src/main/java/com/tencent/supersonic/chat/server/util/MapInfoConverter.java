@@ -12,6 +12,7 @@ import com.tencent.supersonic.headless.api.pojo.response.MapResp;
 import com.tencent.supersonic.headless.core.chat.knowledge.builder.BaseWordBuilder;
 import com.tencent.supersonic.headless.server.service.impl.SemanticService;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 
 import java.util.ArrayList;
@@ -60,7 +61,9 @@ public class MapInfoConverter {
         SemanticSchema semanticSchema = semanticService.getSemanticSchema();
         for (Long dataSetId : dataSetIds) {
             String dataSetName = dataSetMap.get(dataSetId);
-
+            if (StringUtils.isBlank(dataSetName)) {
+                continue;
+            }
             //topN dimensions
             Set<SchemaElementMatch> dimensions = semanticSchema.getDimensions(dataSetId)
                     .stream().sorted(Comparator.comparing(SchemaElement::getUseCnt).reversed())
