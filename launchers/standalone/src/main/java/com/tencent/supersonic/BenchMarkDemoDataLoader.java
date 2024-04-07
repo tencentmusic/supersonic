@@ -26,6 +26,7 @@ import com.tencent.supersonic.headless.api.pojo.request.DomainReq;
 import com.tencent.supersonic.headless.api.pojo.request.ModelReq;
 import com.tencent.supersonic.headless.api.pojo.request.DataSetReq;
 import com.tencent.supersonic.headless.server.service.DomainService;
+import com.tencent.supersonic.headless.server.service.MetricService;
 import com.tencent.supersonic.headless.server.service.ModelRelaService;
 import com.tencent.supersonic.headless.server.service.ModelService;
 import com.tencent.supersonic.headless.server.service.DataSetService;
@@ -50,9 +51,10 @@ public class BenchMarkDemoDataLoader {
     private ModelService modelService;
     @Autowired
     private ModelRelaService modelRelaService;
-
     @Autowired
     private DataSetService viewService;
+    @Autowired
+    private MetricService metricService;
 
     public void doRun() {
         try {
@@ -67,6 +69,7 @@ public class BenchMarkDemoDataLoader {
             addModelRela_3();
             addModelRela_4();
             addModelRela_5();
+            batchPushlishMetric();
         } catch (Exception e) {
             log.error("Failed to add bench mark demo data", e);
         }
@@ -310,4 +313,10 @@ public class BenchMarkDemoDataLoader {
         modelRelaReq.setJoinConditions(joinConditions);
         modelRelaService.save(modelRelaReq, user);
     }
+
+    private void batchPushlishMetric() {
+        List<Long> ids = Lists.newArrayList(1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L);
+        metricService.batchPublish(ids, User.getFakeUser());
+    }
+
 }

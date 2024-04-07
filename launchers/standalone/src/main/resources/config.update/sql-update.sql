@@ -291,3 +291,6 @@ COMMENT ON TABLE s2_query_rule IS 'tag query rule table';
 alter table s2_metric  change tags classifications varchar(500) null;
 alter table s2_metric  add column `is_publish` int(10) DEFAULT NULL COMMENT '是否发布';
 update s2_metric set is_publish = 1;
+
+--20240402
+alter table s2_dimension add column `ext` varchar(1000) DEFAULT NULL;

@@ -4,6 +4,15 @@
 - "Breaking Changes" describes any changes that may break existing functionality or cause
   compatibility issues with previous versions.
 
+## SuperSonic [0.9.0] - 2024-04-03
+
+### Added
+- add tag abstraction and enhance tag marketplace management.
+- headless-server provides Chat API interface.
+
+### Updated
+- migrate chat-core core component to headless-core.
+
 ## SuperSonic [0.8.6] - 2024-02-23
 
 ### Added

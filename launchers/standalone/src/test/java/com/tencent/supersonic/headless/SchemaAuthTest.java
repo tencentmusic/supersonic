@@ -39,7 +39,7 @@ public class SchemaAuthTest extends BaseTest {
     @Test
     public void test_getModelList_alice() {
         User user = DataUtils.getUserAlice();
-        List<ModelResp> modelResps = modelService.getModelListWithAuth(user, 0L, AuthType.ADMIN);
+        List<ModelResp> modelResps = modelService.getModelListWithAuth(user, null, AuthType.ADMIN);
         List<Long> expectedModelIds = Lists.newArrayList(1L, 4L);
         Assertions.assertEquals(expectedModelIds,
                 modelResps.stream().map(ModelResp::getId).collect(Collectors.toList()));
@@ -48,7 +48,7 @@ public class SchemaAuthTest extends BaseTest {
     @Test
     public void test_getVisibleModelList_alice() {
         User user = DataUtils.getUserAlice();
-        List<ModelResp> modelResps = modelService.getModelListWithAuth(user, 0L, AuthType.VISIBLE);
+        List<ModelResp> modelResps = modelService.getModelListWithAuth(user, null, AuthType.VISIBLE);
         List<Long> expectedModelIds = Lists.newArrayList(1L, 4L);
         Assertions.assertEquals(expectedModelIds,
                 modelResps.stream().map(ModelResp::getId).collect(Collectors.toList()));
@@ -75,7 +75,7 @@ public class SchemaAuthTest extends BaseTest {
     @Test
     public void test_getModelList_jack() {
         User user = DataUtils.getUserJack();
-        List<ModelResp> modelResps = modelService.getModelListWithAuth(user, 0L, AuthType.ADMIN);
+        List<ModelResp> modelResps = modelService.getModelListWithAuth(user, null, AuthType.ADMIN);
         List<Long> expectedModelIds = Lists.newArrayList(1L, 2L, 3L);
         Assertions.assertEquals(expectedModelIds,
                 modelResps.stream().map(ModelResp::getId).collect(Collectors.toList()));
