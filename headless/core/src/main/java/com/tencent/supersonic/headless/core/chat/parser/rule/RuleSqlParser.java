@@ -6,9 +6,9 @@ import com.tencent.supersonic.headless.core.chat.parser.SemanticParser;
 import com.tencent.supersonic.headless.core.chat.query.rule.RuleSemanticQuery;
 import com.tencent.supersonic.headless.core.pojo.ChatContext;
 import com.tencent.supersonic.headless.core.pojo.QueryContext;
+import lombok.extern.slf4j.Slf4j;
 import java.util.Arrays;
 import java.util.List;
-import lombok.extern.slf4j.Slf4j;
 
 /**
  * RuleSqlParser resolves a specific SemanticQuery according to co-appearance
@@ -25,6 +25,10 @@ public class RuleSqlParser implements SemanticParser {
 
     @Override
     public void parse(QueryContext queryContext, ChatContext chatContext) {
+        if (!queryContext.getText2SQLType().enableRule()) {
+            log.info("not enable rule, skip");
+            return;
+        }
         SchemaMapInfo mapInfo = queryContext.getMapInfo();
         // iterate all schemaElementMatches to resolve query mode
         for (Long dataSetId : mapInfo.getMatchedDataSetInfos()) {

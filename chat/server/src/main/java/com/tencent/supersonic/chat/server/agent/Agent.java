@@ -70,6 +70,10 @@ public class Agent extends RecordInfo {
         return !CollectionUtils.isEmpty(getParserTools(AgentToolType.NL2SQL_LLM));
     }
 
+    public boolean containsRuleTool() {
+        return !CollectionUtils.isEmpty(getParserTools(AgentToolType.NL2SQL_RULE));
+    }
+
     public boolean containsNL2SQLTool() {
         return !CollectionUtils.isEmpty(getParserTools(AgentToolType.NL2SQL_LLM))
                 || !CollectionUtils.isEmpty(getParserTools(AgentToolType.NL2SQL_RULE));
