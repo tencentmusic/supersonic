@@ -102,6 +102,8 @@ public class MultiTurnSqlGeneration implements SqlGeneration, InitializingBean {
         //3.format response.
         String schemaLinkStr = OutputFormat.getSchemaLinks(response.content().text());
         String sql = OutputFormat.getSql(response.content().text());
+        log.info("multi turn sql result:{}", sql);
+        keyPipelineLog.info("multi turn sql result:{}", sql);
         Map<String, LLMSqlResp> sqlRespMap = new HashMap<>();
         sqlRespMap.put(sql, LLMSqlResp.builder().sqlWeight(1D).fewShots(exampleList).build());
         keyPipelineLog.info("schemaLinkStr:{},sqlRespMap:{}", schemaLinkStr, sqlRespMap);
