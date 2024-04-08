@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.ArrayList;
+
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.Function;
@@ -12,6 +13,7 @@ import net.sf.jsqlparser.expression.LongValue;
 import net.sf.jsqlparser.expression.Parenthesis;
 import net.sf.jsqlparser.expression.StringValue;
 import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
+import net.sf.jsqlparser.expression.operators.conditional.OrExpression;
 import net.sf.jsqlparser.expression.operators.relational.ComparisonOperator;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
 import net.sf.jsqlparser.schema.Column;
@@ -225,7 +227,7 @@ public class SqlAddHelper {
     }
 
     private static void addAggregateToSelectItems(List<SelectItem> selectItems,
-            Map<String, String> fieldNameToAggregate) {
+                                                  Map<String, String> fieldNameToAggregate) {
         for (SelectItem selectItem : selectItems) {
             if (selectItem instanceof SelectExpressionItem) {
                 SelectExpressionItem selectExpressionItem = (SelectExpressionItem) selectItem;
@@ -240,7 +242,7 @@ public class SqlAddHelper {
     }
 
     private static void addAggregateToOrderByItems(List<OrderByElement> orderByElements,
-            Map<String, String> fieldNameToAggregate) {
+                                                   Map<String, String> fieldNameToAggregate) {
         if (orderByElements == null) {
             return;
         }
@@ -255,7 +257,7 @@ public class SqlAddHelper {
     }
 
     private static void addAggregateToGroupByItems(GroupByElement groupByElement,
-            Map<String, String> fieldNameToAggregate) {
+                                                   Map<String, String> fieldNameToAggregate) {
         if (groupByElement == null) {
             return;
         }
@@ -276,13 +278,22 @@ public class SqlAddHelper {
     }
 
     private static void modifyWhereExpression(Expression whereExpression,
-            Map<String, String> fieldNameToAggregate) {
+                                              Map<String, String> fieldNameToAggregate) {
         if (SqlSelectHelper.isLogicExpression(whereExpression)) {
-            AndExpression andExpression = (AndExpression) whereExpression;
-            Expression leftExpression = andExpression.getLeftExpression();
-            Expression rightExpression = andExpression.getRightExpression();
-            modifyWhereExpression(leftExpression, fieldNameToAggregate);
-            modifyWhereExpression(rightExpression, fieldNameToAggregate);
+            if (whereExpression instanceof AndExpression) {
+                AndExpression andExpression = (AndExpression) whereExpression;
+                Expression leftExpression = andExpression.getLeftExpression();
+                Expression rightExpression = andExpression.getRightExpression();
+                modifyWhereExpression(leftExpression, fieldNameToAggregate);
+                modifyWhereExpression(rightExpression, fieldNameToAggregate);
+            }
+            if (whereExpression instanceof OrExpression) {
+                OrExpression orExpression = (OrExpression) whereExpression;
+                Expression leftExpression = orExpression.getLeftExpression();
+                Expression rightExpression = orExpression.getRightExpression();
+                modifyWhereExpression(leftExpression, fieldNameToAggregate);
+                modifyWhereExpression(rightExpression, fieldNameToAggregate);
+            }
         } else if (whereExpression instanceof Parenthesis) {
             modifyWhereExpression(((Parenthesis) whereExpression).getExpression(), fieldNameToAggregate);
         } else {
