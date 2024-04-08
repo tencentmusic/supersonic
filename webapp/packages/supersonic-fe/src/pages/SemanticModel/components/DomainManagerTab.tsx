@@ -14,8 +14,8 @@ import type { StateType } from '../model';
 import { HomeOutlined, FundViewOutlined } from '@ant-design/icons';
 import { ISemantic } from '../data';
 import SemanticGraphCanvas from '../SemanticGraphCanvas';
-import HeadlessFlows from '../HeadlessFlows';
-import SemanticFlows from '../SemanticFlows';
+// import HeadlessFlows from '../HeadlessFlows';
+// import SemanticFlows from '../SemanticFlows';
 import RecommendedQuestionsSection from '../components/Entity/RecommendedQuestionsSection';
 import View from '../View';
 // import DatabaseTable from '../components/Database/DatabaseTable';
@@ -56,6 +56,7 @@ const DomainManagerTab: React.FC<Props> = ({
       key: 'overview',
       children: (
         <OverView
+          key={selectDomainId}
           modelList={modelList}
           onModelChange={(model) => {
             handleModelChange(model);
@@ -96,11 +97,6 @@ const DomainManagerTab: React.FC<Props> = ({
       key: 'permissonSetting',
       children: <PermissionSection permissionTarget={'domain'} />,
     },
-    // {
-    //   label: '数据库管理',
-    //   key: 'database',
-    //   children: <DatabaseTable />,
-    // },
   ].filter((item) => {
     if (item.hidden) {
       return false;
@@ -131,22 +127,11 @@ const DomainManagerTab: React.FC<Props> = ({
       key: 'dimenstion',
       children: <ClassDimensionTable />,
     },
-    // {
-    //   label: '标签管理',
-    //   key: 'tag',
-    //   children: <ClassTagTable />,
-    // },
-
     {
       label: '权限管理',
       key: 'permissonSetting',
       children: <PermissionSection permissionTarget={'model'} />,
     },
-    // {
-    //   label: '问答设置',
-    //   key: 'chatSetting',
-    //   children: <ChatSettingSection />,
-    // },
     {
       label: '推荐问题',
       key: 'recommendedQuestions',
@@ -166,13 +151,14 @@ const DomainManagerTab: React.FC<Props> = ({
         separator=""
         items={[
           {
-            path: `/webapp/model/${selectDomainId}/0/overview`,
             title: (
               <Space
                 onClick={() => {
                   onBackDomainBtnClick?.();
                 }}
-                style={selectModelName ? {} : { color: '#296df3', fontWeight: 'bold' }}
+                style={
+                  selectModelName ? { cursor: 'pointer' } : { color: '#296df3', fontWeight: 'bold' }
+                }
               >
                 <HomeOutlined />
                 <span>{selectDomainName}</span>

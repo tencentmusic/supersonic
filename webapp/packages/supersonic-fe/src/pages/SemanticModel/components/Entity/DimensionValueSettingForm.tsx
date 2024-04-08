@@ -3,7 +3,10 @@ import type { ForwardRefRenderFunction } from 'react';
 import { Form, Switch, Space, Button, Tooltip, message, Select } from 'antd';
 import FormItemTitle from '@/components/FormHelper/FormItemTitle';
 import { RedoOutlined, InfoCircleOutlined } from '@ant-design/icons';
+import DisabledWheelNumberInput from '@/components/DisabledWheelNumberInput';
 import { formLayout } from '@/components/FormHelper/utils';
+import ProCard from '@ant-design/pro-card';
+import { connect } from 'umi';
 import {
   DictTaskState,
   KnowledgeConfigTypeEnum,
@@ -17,8 +20,12 @@ import {
   editDictConfig,
   createDictConfig,
   deleteDictTask,
+  queryMetric,
+  getModelList,
+  getMetricData,
 } from '../../service';
 import type { ISemantic } from '../../data';
+import type { StateType } from '../../model';
 import { isString } from 'lodash';
 import styles from '../style.less';
 import CommonEditList from '../../components/CommonEditList';
@@ -27,26 +34,28 @@ type Props = {
   dataItem: ISemantic.IDimensionItem | ISemantic.ITagItem;
   type?: KnowledgeConfigTypeEnum;
   onSubmit?: () => void;
+  domainManger: StateType;
 };
 
 const FormItem = Form.Item;
 
-const DimensionValueSettingForm: ForwardRefRenderFunction<any, Props> = (
-  { dataItem, type = KnowledgeConfigTypeEnum.DIMENSION },
-  ref,
-) => {
+const DimensionValueSettingForm: React.FC<Props> = ({
+  dataItem,
+  type = KnowledgeConfigTypeEnum.DIMENSION,
+  domainManger,
+}) => {
   const [form] = Form.useForm();
-
+  const { selectDomainId } = domainManger;
   const exchangeFields = ['blackList', 'whiteList'];
   const [dimensionVisible, setDimensionVisible] = useState<boolean>(false);
   const [taskItemState, setTaskItemState] = useState<ISemantic.IDictKnowledgeTaskItem>();
   const [saveLoading, setSaveLoading] = useState<boolean>(false);
   const [refreshLoading, setRefreshLoading] = useState<boolean>(false);
   const [knowledgeConfig, setKnowledgeConfig] = useState<ISemantic.IDictKnowledgeConfigItem>();
-
+  const [modelList, setModelList] = useState<ISemantic.IModelItem[]>([]);
   const [deleteLoading, setDeleteLoading] = useState<boolean>(false);
   const [importDictState, setImportDictState] = useState<boolean>(false);
-
+  const [metricList, setMetricList] = useState<ISemantic.IMetricItem[]>();
   const defaultKnowledgeConfig: ISemantic.IDictKnowledgeConfigItemConfig = {
     blackList: [],
     whiteList: [],
@@ -58,11 +67,44 @@ const DimensionValueSettingForm: ForwardRefRenderFunction<any, Props> = (
     queryDictLatestTaskList();
   }, []);
 
+  // useEffect(() => {
+  //   const modelId = dataItem?.modelId;
+  //   if (modelId) {
+  //     queryMetricList(modelId);
+  //     form.setFieldValue('modelId', modelId);
+  //   }
+  // }, [dataItem]);
+
+  useEffect(() => {
+    if (!selectDomainId) {
+      return;
+    }
+    queryModelList(selectDomainId);
+  }, [selectDomainId]);
+
+  const queryModelList = async (domainId: number) => {
+    const { code, data } = await getModelList(domainId);
+    if (code === 200) {
+      setModelList(data);
+    } else {
+      message.error('获取模型列表失败!');
+    }
+  };
+
+  const queryMetricList = async (modelId: number) => {
+    const { code, data, msg } = await queryMetric({ modelId });
+    if (code === 200 && Array.isArray(data?.list)) {
+      setMetricList(data.list);
+    } else {
+      message.error(msg);
+    }
+  };
+
   const taskRender = () => {
     if (taskItemState?.taskStatus) {
       return (
         <span style={{ color: '#5493ff', fontWeight: 'bold' }}>
-          {DictTaskState[taskItemState?.taskStatus || 'unknown']}
+          {DictTaskState[`${taskItemState?.taskStatus || 'unknown'}`]}
         </span>
       );
     }
@@ -93,6 +135,10 @@ const DimensionValueSettingForm: ForwardRefRenderFunction<any, Props> = (
         ...config,
       });
       setKnowledgeConfig(configItem);
+      const { metricId } = config;
+      if (metricId) {
+        queryMetricData(metricId);
+      }
     } else {
       form.setFieldsValue({
         ...defaultKnowledgeConfig,
@@ -121,29 +167,16 @@ const DimensionValueSettingForm: ForwardRefRenderFunction<any, Props> = (
     }
   };
 
-  const getFormValidateFields = async () => {
-    const fields = await form.validateFields();
-    const fieldValue = Object.keys(fields).reduce((formField: any, key: string) => {
-      const targetValue = fields[key];
-      if (exchangeFields.includes(key)) {
-        if (isString(targetValue)) {
-          formField[key] = targetValue.split(',');
-        } else {
-          formField[key] = [];
-        }
-      } else {
-        formField[key] = targetValue;
-      }
-      return formField;
-    }, {});
-    return {
-      ...fieldValue,
-    };
+  const queryMetricData = async (metricId: string) => {
+    const { code, data, msg } = await getMetricData(metricId);
+    if (code === 200) {
+      const { modelId } = data;
+      queryMetricList(modelId);
+      form.setFieldValue('modelId', modelId);
+      return;
+    }
+    message.error(msg);
   };
-
-  useImperativeHandle(ref, () => ({
-    getFormValidateFields,
-  }));
 
   const createDictConfigQuery = async (
     dimension: ISemantic.IDimensionItem,
@@ -196,10 +229,11 @@ const DimensionValueSettingForm: ForwardRefRenderFunction<any, Props> = (
       status,
     });
     setSaveLoading(false);
-    if (code !== 200) {
-      message.error('字典导入配置保存失败!');
+    if (code === 200) {
+      message.success('字典导入配置保存成功!');
       return;
     }
+    message.error('字典导入配置保存失败!');
   };
 
   const deleteDictTaskQuery = async (dimension: ISemantic.IDimensionItem) => {
@@ -223,6 +257,17 @@ const DimensionValueSettingForm: ForwardRefRenderFunction<any, Props> = (
         style={{ margin: '0 30px 30px 30px' }}
         layout="vertical"
         className={styles.form}
+        onValuesChange={(value, values) => {
+          if (value.modelId === undefined && values.modelId == undefined) {
+            setMetricList([]);
+            form.setFieldValue('metricId', undefined);
+            return;
+          }
+          if (value.modelId) {
+            form.setFieldValue('metricId', undefined);
+            queryMetricList(value.modelId);
+          }
+        }}
       >
         <FormItem
           style={{ marginTop: 15 }}
@@ -322,56 +367,116 @@ const DimensionValueSettingForm: ForwardRefRenderFunction<any, Props> = (
         </FormItem>
         {dimensionVisible && (
           <>
-            {/* <Divider
-              style={{
-                marginBottom: 35,
-              }}
-            /> */}
-            <div style={{ padding: 20, border: '1px solid #eee', borderRadius: 10 }}>
-              <div
-                style={{
-                  color: '#2f374c',
-                  fontSize: 16,
-                  display: 'flex',
-                  marginBottom: 20,
-                }}
-              >
-                <span style={{ flex: 'auto' }}>{KnowledgeConfigTypeWordingMap[type]}值过滤</span>
-                <span style={{ marginLeft: 'auto' }}>
-                  <Button
-                    type="primary"
-                    onClick={() => {
-                      editDictTaskQuery();
-                    }}
-                    loading={saveLoading}
-                  >
-                    保 存
-                  </Button>
+            <ProCard
+              title={
+                <span
+                  style={{
+                    color: '#2f374c',
+                    fontSize: 16,
+                    fontWeight: 400,
+                  }}
+                >
+                  指标设置
                 </span>
+              }
+              bordered
+              extra={
+                <Button
+                  type="primary"
+                  onClick={() => {
+                    editDictTaskQuery();
+                  }}
+                  loading={saveLoading}
+                >
+                  保 存
+                </Button>
+              }
+              style={{ marginBottom: 20 }}
+            >
+              <FormItem
+                label={
+                  <FormItemTitle
+                    title="参考指标"
+                    subTitle="字典中维度值的重要性参照指标值大小，指标值越大，维度值最越重要"
+                  />
+                }
+              >
+                <Space.Compact>
+                  <FormItem noStyle name="modelId">
+                    <Select
+                      allowClear
+                      showSearch
+                      style={{ minWidth: 300 }}
+                      optionFilterProp="label"
+                      placeholder={`请选择所属model`}
+                      options={modelList?.map((item) => {
+                        return {
+                          value: item.id,
+                          label: item.name,
+                        };
+                      })}
+                    />
+                  </FormItem>
+                  <FormItem name="metricId" noStyle>
+                    <Select
+                      allowClear
+                      showSearch
+                      optionFilterProp="label"
+                      style={{ minWidth: 300 }}
+                      placeholder={`请选择参考指标`}
+                      options={metricList?.map((item) => {
+                        return {
+                          value: item.id,
+                          label: item.name,
+                        };
+                      })}
+                    />
+                  </FormItem>
+                </Space.Compact>
+              </FormItem>
+              <FormItem
+                name="limit"
+                label={
+                  <FormItemTitle title="最大维度值个数" subTitle="维度写入字典的维度值的最大个数" />
+                }
+              >
+                <DisabledWheelNumberInput placeholder={`请输入维度值`} style={{ minWidth: 200 }} />
+              </FormItem>
+              <div>
+                <div
+                  style={{
+                    color: '#2f374c',
+                    fontSize: 16,
+                    display: 'flex',
+                    marginBottom: 10,
+                  }}
+                >
+                  <span style={{ flex: 'auto' }}>{KnowledgeConfigTypeWordingMap[type]}值过滤</span>
+                </div>
+
+                <FormItem name="blackList" label="黑名单">
+                  <Select
+                    mode="tags"
+                    placeholder={`输入${KnowledgeConfigTypeWordingMap[type]}值后回车确认，多别名输入、复制粘贴支持英文逗号自动分隔`}
+                    tokenSeparators={[',']}
+                    maxTagCount={9}
+                  />
+                </FormItem>
+
+                <FormItem name="whiteList" label="白名单">
+                  <Select
+                    mode="tags"
+                    placeholder={`输入${KnowledgeConfigTypeWordingMap[type]}值后回车确认，多别名输入、复制粘贴支持英文逗号自动分隔`}
+                    tokenSeparators={[',']}
+                    maxTagCount={9}
+                  />
+                </FormItem>
+
+                <FormItem name="ruleList">
+                  <CommonEditList title="过滤规则" />
+                </FormItem>
               </div>
-
-              <FormItem name="blackList" label="黑名单">
-                <Select
-                  mode="tags"
-                  placeholder={`输入${KnowledgeConfigTypeWordingMap[type]}值后回车确认，多别名输入、复制粘贴支持英文逗号自动分隔`}
-                  tokenSeparators={[',']}
-                  maxTagCount={9}
-                />
-              </FormItem>
-
-              <FormItem name="whiteList" label="白名单">
-                <Select
-                  mode="tags"
-                  placeholder={`输入${KnowledgeConfigTypeWordingMap[type]}值后回车确认，多别名输入、复制粘贴支持英文逗号自动分隔`}
-                  tokenSeparators={[',']}
-                  maxTagCount={9}
-                />
-              </FormItem>
-
-              <FormItem name="ruleList">
-                <CommonEditList title="过滤规则" />
-              </FormItem>
-            </div>
+            </ProCard>
           </>
         )}
       </Form>
@@ -379,4 +484,6 @@ const DimensionValueSettingForm: ForwardRefRenderFunction<any, Props> = (
   );
 };
 
-export default forwardRef(DimensionValueSettingForm);
+export default connect(({ domainManger }: { domainManger: StateType }) => ({
+  domainManger,
+}))(DimensionValueSettingForm);
