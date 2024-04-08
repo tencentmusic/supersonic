@@ -19,6 +19,8 @@ public abstract class SemanticQueryReq {
 
     protected boolean needAuth = true;
 
+    protected boolean innerLayerNative = false;
+
     protected Long dataSetId;
 
     protected String dataSetName;
