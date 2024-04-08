@@ -7,6 +7,7 @@ import lombok.Data;
 
 import javax.validation.constraints.NotNull;
 import java.util.List;
+import java.util.Map;
 
 @Data
 public class DimensionReq extends SchemaItem {
@@ -30,4 +31,6 @@ public class DimensionReq extends SchemaItem {
     private DataTypeEnums dataType;
 
     private int isTag;
+
+    private Map<String, Object> ext;
 }

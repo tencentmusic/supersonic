@@ -38,6 +38,9 @@ public class DimensionConverter {
         if (Objects.nonNull(dimensionReq.getDataType())) {
             dimensionDO.setDataType(dimensionReq.getDataType().getType());
         }
+        if (dimensionReq.getExt() != null) {
+            dimensionDO.setExt(JSONObject.toJSONString(dimensionReq.getExt()));
+        }
         return dimensionDO;
     }
 
@@ -52,6 +55,9 @@ public class DimensionConverter {
         }
         if (Objects.nonNull(dimensionReq.getDataType())) {
             dimensionDO.setDataType(dimensionReq.getDataType().getType());
+        }
+        if (dimensionReq.getExt() != null) {
+            dimensionDO.setExt(JSONObject.toJSONString(dimensionReq.getExt()));
         }
         dimensionDO.setStatus(StatusEnum.ONLINE.getCode());
         return dimensionDO;
@@ -75,6 +81,9 @@ public class DimensionConverter {
         }
         if (Strings.isNotEmpty(dimensionDO.getDataType())) {
             dimensionResp.setDataType(DataTypeEnums.of(dimensionDO.getDataType()));
+        }
+        if (dimensionDO.getExt() != null) {
+            dimensionResp.setExt(JSONObject.parseObject(dimensionDO.getExt(), Map.class));
         }
         dimensionResp.setTypeEnum(TypeEnums.DIMENSION);
         return dimensionResp;

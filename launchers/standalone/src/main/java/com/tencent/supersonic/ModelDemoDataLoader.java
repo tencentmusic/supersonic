@@ -102,6 +102,7 @@ public class ModelDemoDataLoader {
         try {
             addDatabase();
             addDomain();
+            addTagObjectUser();
             addTagObjectSinger();
             addModel_1();
             addModel_2();
@@ -120,11 +121,19 @@ public class ModelDemoDataLoader {
             addDataSet_2();
             addAuthGroup_1();
             addAuthGroup_2();
-            batchPushlishMetric();
         } catch (Exception e) {
             log.error("Failed to add model demo data", e);
         }
 
+    }
+
+    private void addTagObjectUser() throws Exception {
+        TagObjectReq tagObjectReq = new TagObjectReq();
+        tagObjectReq.setDomainId(1L);
+        tagObjectReq.setName("用户");
+        tagObjectReq.setBizName("user");
+        User user = User.getFakeUser();
+        tagObjectService.create(tagObjectReq, user);
     }
 
     private void addTagObjectSinger() throws Exception {
@@ -174,6 +183,7 @@ public class ModelDemoDataLoader {
         modelReq.setDescription("用户部门信息");
         modelReq.setDatabaseId(1L);
         modelReq.setDomainId(1L);
+        modelReq.setTagObjectId(1L);
         modelReq.setViewers(Arrays.asList("admin", "tom", "jack"));
         modelReq.setViewOrgs(Collections.singletonList("1"));
         modelReq.setAdmins(Arrays.asList("admin", "alice"));
@@ -328,7 +338,7 @@ public class ModelDemoDataLoader {
         modelReq.setDescription("艺人库");
         modelReq.setDatabaseId(1L);
         modelReq.setDomainId(2L);
-        modelReq.setTagObjectId(1L);
+        modelReq.setTagObjectId(2L);
         modelReq.setViewers(Arrays.asList("admin", "tom", "jack"));
         modelReq.setViewOrgs(Collections.singletonList("1"));
         modelReq.setAdmins(Collections.singletonList("admin"));
@@ -364,15 +374,17 @@ public class ModelDemoDataLoader {
     }
 
     private void addTags() {
-        addTag(4L);
-        addTag(5L);
-        addTag(6L);
-        addTag(7L);
+        addTag(1L, TagDefineType.DIMENSION);
+        addTag(4L, TagDefineType.DIMENSION);
+        addTag(5L, TagDefineType.DIMENSION);
+        addTag(6L, TagDefineType.DIMENSION);
+        addTag(7L, TagDefineType.DIMENSION);
+        addTag(5L, TagDefineType.METRIC);
     }
 
-    private void addTag(Long itemId) {
+    private void addTag(Long itemId, TagDefineType tagDefineType) {
         TagReq tagReq = new TagReq();
-        tagReq.setTagDefineType(TagDefineType.DIMENSION);
+        tagReq.setTagDefineType(tagDefineType);
         tagReq.setItemId(itemId);
         tagMetaService.create(tagReq, User.getFakeUser());
     }
@@ -573,11 +585,6 @@ public class ModelDemoDataLoader {
         authGroupReq.setAuthorizedUsers(Collections.singletonList("tom"));
         authGroupReq.setAuthorizedDepartmentIds(Collections.emptyList());
         authService.addOrUpdateAuthGroup(authGroupReq);
-    }
-
-    private void batchPushlishMetric() {
-        List<Long> ids = Lists.newArrayList(1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L);
-        metricService.batchPublish(ids, User.getFakeUser());
     }
 
     private RelateDimension getRelateDimension(List<Long> dimensionIds) {

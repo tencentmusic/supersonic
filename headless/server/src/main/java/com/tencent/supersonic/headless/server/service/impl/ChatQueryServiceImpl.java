@@ -72,6 +72,7 @@ import net.sf.jsqlparser.expression.operators.relational.MinorThan;
 import net.sf.jsqlparser.expression.operators.relational.MinorThanEquals;
 import net.sf.jsqlparser.schema.Column;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.BeanUtils;
@@ -116,6 +117,7 @@ public class ChatQueryServiceImpl implements ChatQueryService {
         });
         SchemaMapInfo mapInfo = queryCtx.getMapInfo();
         mapResp.setMapInfo(mapInfo);
+        mapResp.setQueryText(queryReq.getQueryText());
         return mapResp;
     }
 
@@ -129,9 +131,12 @@ public class ChatQueryServiceImpl implements ChatQueryService {
         ChatContext chatCtx = chatContextService.getOrCreateContext(queryReq.getChatId());
 
         // 1. mapper
-        schemaMappers.forEach(mapper -> {
-            mapper.map(queryCtx);
-        });
+        if (Objects.isNull(queryReq.getMapInfo())
+                || MapUtils.isEmpty(queryReq.getMapInfo().getDataSetElementMatches())) {
+            schemaMappers.forEach(mapper -> {
+                mapper.map(queryCtx);
+            });
+        }
 
         // 2. parser
         semanticParsers.forEach(parser -> {
@@ -173,7 +178,7 @@ public class ChatQueryServiceImpl implements ChatQueryService {
                 .candidateQueries(new ArrayList<>())
                 .mapInfo(new SchemaMapInfo())
                 .modelIdToDataSetIds(modelIdToDataSetIds)
-                .enableLLM(queryReq.isEnableLLM())
+                .text2SQLType(queryReq.getText2SQLType())
                 .build();
         BeanUtils.copyProperties(queryReq, queryCtx);
         return queryCtx;
@@ -209,7 +214,7 @@ public class ChatQueryServiceImpl implements ChatQueryService {
     }
 
     private QueryResult doExecution(SemanticQueryReq semanticQueryReq,
-            SemanticParseInfo parseInfo, User user) throws Exception {
+                                    SemanticParseInfo parseInfo, User user) throws Exception {
         SemanticQueryResp queryResp = queryService.queryByReq(semanticQueryReq, user);
         QueryResult queryResult = new QueryResult();
         if (queryResp != null) {
@@ -357,10 +362,10 @@ public class ChatQueryServiceImpl implements ChatQueryService {
     }
 
     private void updateDateInfo(QueryDataReq queryData, SemanticParseInfo parseInfo,
-            Map<String, Map<String, String>> filedNameToValueMap,
-            List<FieldExpression> fieldExpressionList,
-            List<Expression> addConditions,
-            Set<String> removeFieldNames) {
+                                Map<String, Map<String, String>> filedNameToValueMap,
+                                List<FieldExpression> fieldExpressionList,
+                                List<Expression> addConditions,
+                                Set<String> removeFieldNames) {
         if (Objects.isNull(queryData.getDateInfo())) {
             return;
         }
@@ -424,8 +429,8 @@ public class ChatQueryServiceImpl implements ChatQueryService {
     }
 
     private <T extends ComparisonOperator> void addTimeFilters(String date,
-            T comparisonExpression,
-            List<Expression> addConditions) {
+                                                               T comparisonExpression,
+                                                               List<Expression> addConditions) {
         Column column = new Column(TimeDimensionEnum.DAY.getChName());
         StringValue stringValue = new StringValue(date);
         comparisonExpression.setLeftExpression(column);
@@ -434,10 +439,10 @@ public class ChatQueryServiceImpl implements ChatQueryService {
     }
 
     private void updateFilters(List<FieldExpression> fieldExpressionList,
-            Set<QueryFilter> metricFilters,
-            Set<QueryFilter> contextMetricFilters,
-            List<Expression> addConditions,
-            Set<String> removeFieldNames) {
+                               Set<QueryFilter> metricFilters,
+                               Set<QueryFilter> contextMetricFilters,
+                               List<Expression> addConditions,
+                               Set<String> removeFieldNames) {
         if (CollectionUtils.isEmpty(metricFilters)) {
             return;
         }
@@ -473,9 +478,9 @@ public class ChatQueryServiceImpl implements ChatQueryService {
 
     // add in condition to sql where  condition
     private void addWhereInFilters(QueryFilter dslQueryFilter,
-            InExpression inExpression,
-            Set<QueryFilter> contextMetricFilters,
-            List<Expression> addConditions) {
+                                   InExpression inExpression,
+                                   Set<QueryFilter> contextMetricFilters,
+                                   List<Expression> addConditions) {
         Column column = new Column(dslQueryFilter.getName());
         ExpressionList expressionList = new ExpressionList();
         List<Expression> expressions = new ArrayList<>();
@@ -502,9 +507,9 @@ public class ChatQueryServiceImpl implements ChatQueryService {
 
     // add where filter
     private <T extends ComparisonOperator> void addWhereFilters(QueryFilter dslQueryFilter,
-            T comparisonExpression,
-            Set<QueryFilter> contextMetricFilters,
-            List<Expression> addConditions) {
+                                                                T comparisonExpression,
+                                                                Set<QueryFilter> contextMetricFilters,
+                                                                List<Expression> addConditions) {
         String columnName = dslQueryFilter.getName();
         if (StringUtils.isNotBlank(dslQueryFilter.getFunction())) {
             columnName = dslQueryFilter.getFunction() + "(" + dslQueryFilter.getName() + ")";

@@ -51,9 +51,7 @@ public abstract class BaseMapper implements SchemaMapper {
         AtomicBoolean needAddNew = new AtomicBoolean(true);
         schemaElementMatches.removeIf(
                 existElementMatch -> {
-                    SchemaElement existElement = existElementMatch.getElement();
-                    SchemaElement newElement = newElementMatch.getElement();
-                    if (existElement.equals(newElement)) {
+                    if (isEquals(existElementMatch, newElementMatch)) {
                         if (newElementMatch.getSimilarity() > existElementMatch.getSimilarity()) {
                             return true;
                         } else {
@@ -68,8 +66,20 @@ public abstract class BaseMapper implements SchemaMapper {
         }
     }
 
+    private static boolean isEquals(SchemaElementMatch existElementMatch, SchemaElementMatch newElementMatch) {
+        SchemaElement existElement = existElementMatch.getElement();
+        SchemaElement newElement = newElementMatch.getElement();
+        if (!existElement.equals(newElement)) {
+            return false;
+        }
+        if (SchemaElementType.VALUE.equals(newElement.getType())) {
+            return existElementMatch.getWord().equalsIgnoreCase(newElementMatch.getWord());
+        }
+        return true;
+    }
+
     public SchemaElement getSchemaElement(Long dataSetId, SchemaElementType elementType, Long elementID,
-            SemanticSchema semanticSchema) {
+                                          SemanticSchema semanticSchema) {
         SchemaElement element = new SchemaElement();
         DataSetSchema dataSetSchema = semanticSchema.getDataSetSchemaMap().get(dataSetId);
         if (Objects.isNull(dataSetSchema)) {

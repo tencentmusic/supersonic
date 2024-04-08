@@ -51,4 +51,6 @@ public class DimensionDO {
     private String dataType;
 
     private int isTag;
+
+    private String ext;
 }

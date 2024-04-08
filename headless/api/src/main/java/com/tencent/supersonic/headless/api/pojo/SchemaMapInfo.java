@@ -1,6 +1,7 @@
 package com.tencent.supersonic.headless.api.pojo;
 
 import com.google.common.collect.Lists;
+import org.apache.commons.collections4.CollectionUtils;
 
 import java.util.HashMap;
 import java.util.List;
@@ -30,4 +31,18 @@ public class SchemaMapInfo {
     public void setMatchedElements(Long dataSet, List<SchemaElementMatch> elementMatches) {
         dataSetElementMatches.put(dataSet, elementMatches);
     }
+
+    public Map<Long, String> generateDataSetMap() {
+        Map<Long, String> dataSetIdToName = new HashMap<>();
+        for (Map.Entry<Long, List<SchemaElementMatch>> entry : dataSetElementMatches.entrySet()) {
+            List<SchemaElementMatch> values = entry.getValue();
+            if (CollectionUtils.isNotEmpty(values)) {
+                SchemaElementMatch schemaElementMatch = values.get(0);
+                String dataSetName = schemaElementMatch.getElement().getDataSetName();
+                dataSetIdToName.put(entry.getKey(), dataSetName);
+            }
+        }
+        return dataSetIdToName;
+    }
+
 }

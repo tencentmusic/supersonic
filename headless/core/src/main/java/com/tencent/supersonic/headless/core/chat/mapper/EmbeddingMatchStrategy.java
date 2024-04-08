@@ -49,13 +49,13 @@ public class EmbeddingMatchStrategy extends BaseMatchStrategy<EmbeddingResult> {
 
     @Override
     public void detectByStep(QueryContext queryContext, Set<EmbeddingResult> existResults, Set<Long> detectDataSetIds,
-            String detectSegment, int offset) {
+                             String detectSegment, int offset) {
 
     }
 
     @Override
     protected void detectByBatch(QueryContext queryContext, Set<EmbeddingResult> results, Set<Long> detectDataSetIds,
-            Set<String> detectSegments) {
+                                 Set<String> detectSegments) {
 
         List<String> queryTextsList = detectSegments.stream()
                 .map(detectSegment -> detectSegment.trim())
@@ -73,9 +73,9 @@ public class EmbeddingMatchStrategy extends BaseMatchStrategy<EmbeddingResult> {
     }
 
     private void detectByQueryTextsSub(Set<EmbeddingResult> results, Set<Long> detectDataSetIds,
-            List<String> queryTextsSub, Map<Long, List<Long>> modelIdToDataSetIds) {
+                                       List<String> queryTextsSub, Map<Long, List<Long>> modelIdToDataSetIds) {
         int embeddingNumber = optimizationConfig.getEmbeddingMapperNumber();
-        Double distance = optimizationConfig.getEmbeddingMapperDistanceThreshold();
+        Double distance = optimizationConfig.getEmbeddingMapperThreshold();
         // step1. build query params
 
         RetrieveQuery retrieveQuery = RetrieveQuery.builder().queryTextsList(queryTextsSub).build();
@@ -94,7 +94,7 @@ public class EmbeddingMatchStrategy extends BaseMatchStrategy<EmbeddingResult> {
                     if (CollectionUtils.isNotEmpty(retrievals)) {
                         retrievals.removeIf(retrieval -> {
                             if (!retrieveQueryResult.getQuery().contains(retrieval.getQuery())) {
-                                return retrieval.getDistance() > distance.doubleValue();
+                                return retrieval.getDistance() > 1 - distance.doubleValue();
                             }
                             return false;
                         });

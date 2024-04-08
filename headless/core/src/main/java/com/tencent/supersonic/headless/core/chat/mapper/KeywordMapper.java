@@ -6,6 +6,7 @@ import com.tencent.supersonic.headless.api.pojo.SchemaElementMatch;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
 import com.tencent.supersonic.headless.api.pojo.SchemaMapInfo;
 import com.tencent.supersonic.headless.api.pojo.response.S2Term;
+import com.tencent.supersonic.headless.core.chat.knowledge.builder.BaseWordBuilder;
 import com.tencent.supersonic.headless.core.pojo.QueryContext;
 import com.tencent.supersonic.headless.core.chat.knowledge.DatabaseMapResult;
 import com.tencent.supersonic.headless.core.chat.knowledge.HanlpMapResult;
@@ -46,7 +47,7 @@ public class KeywordMapper extends BaseMapper {
     }
 
     private void convertHanlpMapResultToMapInfo(List<HanlpMapResult> mapResults, QueryContext queryContext,
-            List<S2Term> terms) {
+                                                List<S2Term> terms) {
         if (CollectionUtils.isEmpty(mapResults)) {
             return;
         }
@@ -70,9 +71,6 @@ public class KeywordMapper extends BaseMapper {
                         elementID, queryContext.getSemanticSchema());
                 if (element == null) {
                     continue;
-                }
-                if (element.getType().equals(SchemaElementType.VALUE)) {
-                    element.setName(hanlpMapResult.getName());
                 }
                 Long frequency = wordNatureToFrequency.get(hanlpMapResult.getName() + nature);
                 SchemaElementMatch schemaElementMatch = SchemaElementMatch.builder()
@@ -100,7 +98,7 @@ public class KeywordMapper extends BaseMapper {
                     .element(schemaElement)
                     .word(schemaElement.getName())
                     .detectWord(match.getDetectWord())
-                    .frequency(10000L)
+                    .frequency(BaseWordBuilder.DEFAULT_FREQUENCY)
                     .similarity(mapperHelper.getSimilarity(match.getDetectWord(), schemaElement.getName()))
                     .build();
             log.info("add to schema, elementMatch {}", schemaElementMatch);

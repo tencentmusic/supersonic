@@ -12,6 +12,7 @@ import com.tencent.supersonic.headless.api.pojo.SchemaValueMap;
 import com.tencent.supersonic.headless.api.pojo.response.DataSetSchemaResp;
 import com.tencent.supersonic.headless.api.pojo.response.DimSchemaResp;
 import com.tencent.supersonic.headless.api.pojo.response.MetricSchemaResp;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -19,6 +20,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.BeanUtils;
 import org.springframework.util.CollectionUtils;
@@ -30,6 +32,7 @@ public class DataSetSchemaBuilder {
         dataSetSchema.setQueryConfig(resp.getQueryConfig());
         SchemaElement dataSet = SchemaElement.builder()
                 .dataSet(resp.getId())
+                .dataSetName(resp.getName())
                 .id(resp.getId())
                 .name(resp.getName())
                 .bizName(resp.getBizName())
@@ -66,6 +69,7 @@ public class DataSetSchemaBuilder {
             if (metric.getIsTag() == 1) {
                 SchemaElement tagToAdd = SchemaElement.builder()
                         .dataSet(resp.getId())
+                        .dataSetName(resp.getName())
                         .model(metric.getModelId())
                         .id(metric.getId())
                         .name(metric.getName())
@@ -96,6 +100,7 @@ public class DataSetSchemaBuilder {
             if (dim.getIsTag() == 1) {
                 SchemaElement tagToAdd = SchemaElement.builder()
                         .dataSet(resp.getId())
+                        .dataSetName(resp.getName())
                         .model(dim.getModelId())
                         .id(dim.getId())
                         .name(dim.getName())
@@ -143,6 +148,7 @@ public class DataSetSchemaBuilder {
             }
             SchemaElement dimToAdd = SchemaElement.builder()
                     .dataSet(resp.getId())
+                    .dataSetName(resp.getName())
                     .model(dim.getModelId())
                     .id(dim.getId())
                     .name(dim.getName())
@@ -174,6 +180,7 @@ public class DataSetSchemaBuilder {
             }
             SchemaElement dimValueToAdd = SchemaElement.builder()
                     .dataSet(resp.getId())
+                    .dataSetName(resp.getName())
                     .model(dim.getModelId())
                     .id(dim.getId())
                     .name(dim.getName())
@@ -195,6 +202,7 @@ public class DataSetSchemaBuilder {
 
             SchemaElement metricToAdd = SchemaElement.builder()
                     .dataSet(resp.getId())
+                    .dataSetName(resp.getName())
                     .model(metric.getModelId())
                     .id(metric.getId())
                     .name(metric.getName())
