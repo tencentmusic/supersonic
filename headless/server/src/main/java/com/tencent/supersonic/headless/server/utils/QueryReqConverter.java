@@ -28,6 +28,15 @@ import com.tencent.supersonic.headless.core.adaptor.db.DbAdaptorFactory;
 import com.tencent.supersonic.headless.core.pojo.DataSetQueryParam;
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;
 import com.tencent.supersonic.headless.core.utils.SqlGenerateUtils;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -37,14 +46,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
 
 @Component
 @Slf4j
@@ -60,7 +61,7 @@ public class QueryReqConverter {
     private SqlGenerateUtils sqlGenerateUtils;
 
     public QueryStatement convert(QuerySqlReq querySQLReq,
-            SemanticSchemaResp semanticSchemaResp) throws Exception {
+                                  SemanticSchemaResp semanticSchemaResp) throws Exception {
 
         if (semanticSchemaResp == null) {
             return new QueryStatement();
@@ -150,7 +151,7 @@ public class QueryReqConverter {
                 || SqlSelectFunctionHelper.hasFunction(sql, "count_distinct")) {
             return AggOption.NATIVE;
         }
-        if (Objects.nonNull(databaseReq.getQueryType()) && QueryType.TAG.equals(databaseReq.getQueryType())) {
+        if (databaseReq.isInnerLayerNative()) {
             return AggOption.NATIVE;
         }
         return AggOption.DEFAULT;
@@ -242,7 +243,7 @@ public class QueryReqConverter {
     }
 
     private void generateDerivedMetric(SemanticSchemaResp semanticSchemaResp, AggOption aggOption,
-            DataSetQueryParam viewQueryParam) {
+                                       DataSetQueryParam viewQueryParam) {
         String sql = viewQueryParam.getSql();
         for (MetricTable metricTable : viewQueryParam.getTables()) {
             List<String> measures = new ArrayList<>();
@@ -264,8 +265,8 @@ public class QueryReqConverter {
     }
 
     private void generateDerivedMetric(SemanticSchemaResp semanticSchemaResp, AggOption aggOption,
-            List<String> metrics, List<String> dimensions,
-            List<String> measures, Map<String, String> replaces) {
+                                       List<String> metrics, List<String> dimensions,
+                                       List<String> measures, Map<String, String> replaces) {
         List<MetricSchemaResp> metricResps = semanticSchemaResp.getMetrics();
         List<DimSchemaResp> dimensionResps = semanticSchemaResp.getDimensions();
         // check metrics has derived

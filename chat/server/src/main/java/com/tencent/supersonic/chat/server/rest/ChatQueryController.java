@@ -1,13 +1,19 @@
 package com.tencent.supersonic.chat.server.rest;
 
 
+import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
 import com.tencent.supersonic.chat.api.pojo.request.ChatExecuteReq;
 import com.tencent.supersonic.chat.api.pojo.request.ChatParseReq;
 import com.tencent.supersonic.chat.api.pojo.request.ChatQueryDataReq;
 import com.tencent.supersonic.chat.server.service.ChatService;
+import com.tencent.supersonic.common.pojo.exception.InvalidArgumentException;
+import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.api.pojo.request.DimensionValueReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryReq;
+import com.tencent.supersonic.headless.api.pojo.response.ParseResp;
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -37,7 +43,7 @@ public class ChatQueryController {
 
     @PostMapping("map")
     public Object map(@RequestBody ChatParseReq chatParseReq,
-                        HttpServletRequest request, HttpServletResponse response) throws Exception {
+                      HttpServletRequest request, HttpServletResponse response) throws Exception {
         chatParseReq.setUser(UserHolder.findUser(request, response));
         return chatService.performMapping(chatParseReq);
     }
@@ -54,6 +60,25 @@ public class ChatQueryController {
                           HttpServletRequest request, HttpServletResponse response)
             throws Exception {
         chatExecuteReq.setUser(UserHolder.findUser(request, response));
+        return chatService.performExecution(chatExecuteReq);
+    }
+
+    @PostMapping("/")
+    public Object query(@RequestBody ChatParseReq chatParseReq,
+                        HttpServletRequest request, HttpServletResponse response)
+            throws Exception {
+        User user = UserHolder.findUser(request, response);
+        chatParseReq.setUser(user);
+        ParseResp parseResp = chatService.performParsing(chatParseReq);
+
+        if (CollectionUtils.isEmpty(parseResp.getSelectedParses())) {
+            throw new InvalidArgumentException("parser error,no selectedParses");
+        }
+        SemanticParseInfo semanticParseInfo = parseResp.getSelectedParses().get(0);
+        ChatExecuteReq chatExecuteReq = ChatExecuteReq.builder().build();
+        BeanUtils.copyProperties(chatParseReq, chatExecuteReq);
+        chatExecuteReq.setQueryId(parseResp.getQueryId());
+        chatExecuteReq.setParseId(semanticParseInfo.getId());
         return chatService.performExecution(chatExecuteReq);
     }
 
