@@ -40,6 +40,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Date;
@@ -112,6 +113,9 @@ public class DataSetServiceImpl
         if (metaFilter.getStatus() != null) {
             wrapper.lambda().eq(DataSetDO::getStatus, metaFilter.getStatus());
         }
+        if (metaFilter.getName() != null) {
+            wrapper.lambda().eq(DataSetDO::getName, metaFilter.getName());
+        }
         wrapper.lambda().ne(DataSetDO::getStatus, StatusEnum.DELETED.getCode());
         return list(wrapper).stream().map(entry -> convert(entry, user)).collect(Collectors.toList());
     }
@@ -128,6 +132,14 @@ public class DataSetServiceImpl
     @Override
     public List<DataSetResp> getDataSets(User user) {
         List<DataSetResp> dataSetResps = getDataSetList(new MetaFilter(), user);
+        return getDataSetFilterByAuth(dataSetResps, user);
+    }
+
+    @Override
+    public List<DataSetResp> getDataSets(String dataSetName, User user) {
+        MetaFilter metaFilter = new MetaFilter();
+        metaFilter.setName(dataSetName);
+        List<DataSetResp> dataSetResps = getDataSetList(metaFilter, user);
         return getDataSetFilterByAuth(dataSetResps, user);
     }
 
