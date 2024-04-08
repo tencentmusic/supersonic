@@ -17,7 +17,6 @@ import com.tencent.supersonic.chat.server.service.AgentService;
 import com.tencent.supersonic.chat.server.service.ChatManageService;
 import com.tencent.supersonic.chat.server.service.ChatService;
 import com.tencent.supersonic.chat.server.util.ComponentFactory;
-import com.tencent.supersonic.chat.server.util.MapInfoConverter;
 import com.tencent.supersonic.chat.server.util.QueryReqConverter;
 import com.tencent.supersonic.chat.server.util.SimilarQueryManager;
 import com.tencent.supersonic.common.util.BeanMapper;
@@ -26,7 +25,6 @@ import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.api.pojo.request.DimensionValueReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryDataReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryReq;
-import com.tencent.supersonic.headless.api.pojo.response.MapInfoResp;
 import com.tencent.supersonic.headless.api.pojo.response.MapResp;
 import com.tencent.supersonic.headless.api.pojo.response.ParseResp;
 import com.tencent.supersonic.headless.api.pojo.response.QueryResult;
@@ -62,11 +60,6 @@ public class ChatServiceImpl implements ChatService {
         ChatParseContext chatParseContext = buildParseContext(chatParseReq);
         QueryReq queryReq = QueryReqConverter.buildText2SqlQueryReq(chatParseContext);
         return searchService.search(queryReq);
-    }
-
-    @Override
-    public MapInfoResp performMapping(ChatParseReq chatParseReq) {
-        return getMapResp(chatParseReq);
     }
 
     @Override
@@ -111,17 +104,6 @@ public class ChatServiceImpl implements ChatService {
         MapResp mapResp = chatQueryService.performMapping(queryReq);
         chatParseContext.setMapInfo(mapResp.getMapInfo());
         return chatParseContext;
-    }
-
-    private MapInfoResp getMapResp(ChatParseReq chatParseReq) {
-        ChatParseContext chatParseContext = new ChatParseContext();
-        BeanMapper.mapper(chatParseReq, chatParseContext);
-        AgentService agentService = ContextUtils.getBean(AgentService.class);
-        Agent agent = agentService.getAgent(chatParseReq.getAgentId());
-        chatParseContext.setAgent(agent);
-        QueryReq queryReq = QueryReqConverter.buildText2SqlQueryReq(chatParseContext);
-        MapResp mapResp = chatQueryService.performMapping(queryReq);
-        return MapInfoConverter.convert(mapResp, chatParseReq.getTopN());
     }
 
     private ChatExecuteContext buildExecuteContext(ChatExecuteReq chatExecuteReq) {

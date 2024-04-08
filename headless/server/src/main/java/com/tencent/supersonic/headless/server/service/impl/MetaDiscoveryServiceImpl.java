@@ -1,19 +1,25 @@
-package com.tencent.supersonic.chat.server.util;
+package com.tencent.supersonic.headless.server.service.impl;
 
 import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
-import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementMatch;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
 import com.tencent.supersonic.headless.api.pojo.SchemaMapInfo;
 import com.tencent.supersonic.headless.api.pojo.SemanticSchema;
+import com.tencent.supersonic.headless.api.pojo.request.QueryMapReq;
+import com.tencent.supersonic.headless.api.pojo.request.QueryReq;
+import com.tencent.supersonic.headless.api.pojo.response.DataSetResp;
 import com.tencent.supersonic.headless.api.pojo.response.MapInfoResp;
 import com.tencent.supersonic.headless.api.pojo.response.MapResp;
 import com.tencent.supersonic.headless.core.chat.knowledge.builder.BaseWordBuilder;
-import com.tencent.supersonic.headless.server.service.impl.SemanticService;
+import com.tencent.supersonic.headless.server.service.ChatQueryService;
+import com.tencent.supersonic.headless.server.service.DataSetService;
+import com.tencent.supersonic.headless.server.service.MetaDiscoveryService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -25,22 +31,47 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public class MapInfoConverter {
+@Service
+public class MetaDiscoveryServiceImpl implements MetaDiscoveryService {
 
-    public static MapInfoResp convert(MapResp mapResp, Integer topN) {
+    @Autowired
+    private DataSetService dataSetService;
+
+    @Autowired
+    private ChatQueryService chatQueryService;
+
+    @Autowired
+    private SemanticService semanticService;
+
+    @Override
+    public MapInfoResp getMapMeta(QueryMapReq queryMapReq) {
+
+        QueryReq queryReq = new QueryReq();
+        BeanUtils.copyProperties(queryMapReq, queryReq);
+        List<DataSetResp> dataSets = dataSetService.getDataSets(queryMapReq.getDataSetNames(), queryMapReq.getUser());
+        Set<Long> dataSetIds = dataSets.stream().map(dataSetResp -> dataSetResp.getId()).collect(Collectors.toSet());
+        queryReq.setDataSetIds(dataSetIds);
+
+        MapResp mapResp = chatQueryService.performMapping(queryReq);
+        return convert(mapResp, queryMapReq.getTopN());
+    }
+
+    public MapInfoResp convert(MapResp mapResp, Integer topN) {
         MapInfoResp mapInfoResp = new MapInfoResp();
         if (Objects.isNull(mapResp)) {
             return mapInfoResp;
         }
         BeanUtils.copyProperties(mapResp, mapInfoResp);
-        Map<Long, String> dataSetMap = mapResp.getMapInfo().generateDataSetMap();
+        Set<Long> dataSetIds = mapResp.getMapInfo().getDataSetElementMatches().keySet();
+        Map<Long, String> dataSetMap = dataSetService.getDataSetIdToNameMap(new ArrayList<>(dataSetIds));
+
         mapInfoResp.setMapFields(getMapFields(mapResp.getMapInfo(), dataSetMap));
         mapInfoResp.setTopFields(getTopFields(topN, mapResp.getMapInfo(), dataSetMap));
         return mapInfoResp;
     }
 
-    private static Map<String, List<SchemaElementMatch>> getMapFields(SchemaMapInfo mapInfo,
-                                                                      Map<Long, String> dataSetMap) {
+    private Map<String, List<SchemaElementMatch>> getMapFields(SchemaMapInfo mapInfo,
+                                                               Map<Long, String> dataSetMap) {
         Map<String, List<SchemaElementMatch>> result = new HashMap<>();
         for (Map.Entry<Long, List<SchemaElementMatch>> entry : mapInfo.getDataSetElementMatches().entrySet()) {
             List<SchemaElementMatch> values = entry.getValue();
@@ -51,13 +82,12 @@ public class MapInfoConverter {
         return result;
     }
 
-    private static Map<String, List<SchemaElementMatch>> getTopFields(Integer topN,
-                                                                      SchemaMapInfo mapInfo,
-                                                                      Map<Long, String> dataSetMap) {
+    private Map<String, List<SchemaElementMatch>> getTopFields(Integer topN,
+                                                               SchemaMapInfo mapInfo,
+                                                               Map<Long, String> dataSetMap) {
         Set<Long> dataSetIds = mapInfo.getDataSetElementMatches().keySet();
         Map<String, List<SchemaElementMatch>> result = new HashMap<>();
 
-        SemanticService semanticService = ContextUtils.getBean(SemanticService.class);
         SemanticSchema semanticSchema = semanticService.getSemanticSchema();
         for (Long dataSetId : dataSetIds) {
             String dataSetName = dataSetMap.get(dataSetId);
@@ -89,7 +119,7 @@ public class MapInfoConverter {
      * @param dataSetName
      * @return
      */
-    private static SchemaElementMatch getTimeDimension(Long dataSetId, String dataSetName) {
+    private SchemaElementMatch getTimeDimension(Long dataSetId, String dataSetName) {
         SchemaElement element = SchemaElement.builder().dataSet(dataSetId).dataSetName(dataSetName)
                 .type(SchemaElementType.DIMENSION).bizName(TimeDimensionEnum.DAY.getName()).build();
 
@@ -100,7 +130,7 @@ public class MapInfoConverter {
         return timeDimensionMatch;
     }
 
-    private static Function<SchemaElement, SchemaElementMatch> mergeFunction() {
+    private Function<SchemaElement, SchemaElementMatch> mergeFunction() {
         return schemaElement -> SchemaElementMatch.builder().element(schemaElement)
                 .frequency(BaseWordBuilder.DEFAULT_FREQUENCY).word(schemaElement.getName()).similarity(1)
                 .detectWord(schemaElement.getName()).build();

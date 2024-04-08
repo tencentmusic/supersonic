@@ -41,13 +41,6 @@ public class ChatQueryController {
         return chatService.search(chatParseReq);
     }
 
-    @PostMapping("map")
-    public Object map(@RequestBody ChatParseReq chatParseReq,
-                      HttpServletRequest request, HttpServletResponse response) throws Exception {
-        chatParseReq.setUser(UserHolder.findUser(request, response));
-        return chatService.performMapping(chatParseReq);
-    }
-
     @PostMapping("parse")
     public Object parse(@RequestBody ChatParseReq chatParseReq,
                         HttpServletRequest request, HttpServletResponse response) throws Exception {
