@@ -28,6 +28,8 @@ public interface DataSetService {
 
     List<DataSetResp> getDataSets(User user);
 
+    List<DataSetResp> getDataSets(String dataSetName, User user);
+
     List<DataSetResp> getDataSetsInheritAuth(User user, Long domainId);
 
     SemanticQueryReq convert(QueryDataSetReq queryDataSetReq);
