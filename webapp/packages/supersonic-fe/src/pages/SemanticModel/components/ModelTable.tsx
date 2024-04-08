@@ -4,7 +4,7 @@ import { message, Button, Space, Popconfirm, Input } from 'antd';
 import React, { useRef, useState, useEffect } from 'react';
 import { StatusEnum } from '../enum';
 import type { Dispatch } from 'umi';
-import { connect } from 'umi';
+import { connect, history } from 'umi';
 import type { StateType } from '../model';
 import { deleteModel, updateModel } from '../service';
 import ClassModelTypeModal from './ClassModelTypeModal';
@@ -22,30 +22,64 @@ type Props = {
   domainManger: StateType;
 };
 
-const ModelTable: React.FC<Props> = ({ modelList, disabledEdit = false, onModelChange }) => {
+const ModelTable: React.FC<Props> = ({
+  modelList,
+  disabledEdit = false,
+  onModelChange,
+  dispatch,
+  domainManger,
+}) => {
+  const { selectDomainId, modelTableHistoryParams } = domainManger;
   const [modelItem, setModelItem] = useState<ISemantic.IModelItem>();
   const [saveLoading, setSaveLoading] = useState<boolean>(false);
   const [filterParams, setFilterParams] = useState<Record<string, any>>({});
   const [createDataSourceModalOpen, setCreateDataSourceModalOpen] = useState(false);
+  const [currentPageNumber, setCurrentPageNumber] = useState<number>(1);
   const actionRef = useRef<ActionType>();
 
   const [tableData, setTableData] = useState<ISemantic.IModelItem[]>([]);
+  const params = modelTableHistoryParams?.[selectDomainId];
 
   useEffect(() => {
     if (!Array.isArray(modelList)) {
       return;
     }
-    setTableData(modelList);
-  }, [modelList]);
+    const { key } = filterParams;
+    getTableData(key);
+  }, [modelList, filterParams]);
 
   useEffect(() => {
-    const { key } = filterParams;
+    if (!params) {
+      return;
+    }
+    const { pageNumber, key } = params;
+    setFilterParams((preState) => {
+      return {
+        ...preState,
+        key,
+      };
+    });
+    setCurrentPageNumber(pageNumber);
+  }, []);
+
+  const dipatchParams = (params: Record<string, any>) => {
+    dispatch({
+      type: 'domainManger/setModelTableHistoryParams',
+      payload: {
+        [selectDomainId]: {
+          ...params,
+        },
+      },
+    });
+  };
+
+  const getTableData = (key: string) => {
     if (key) {
       setTableData(modelList.filter((item) => item.name.includes(key)));
     } else {
       setTableData(modelList);
     }
-  }, [filterParams]);
+  };
 
   const updateModelStatus = async (modelData: ISemantic.IModelItem) => {
     setSaveLoading(true);
@@ -89,7 +123,6 @@ const ModelTable: React.FC<Props> = ({ modelList, disabledEdit = false, onModelC
       dataIndex: 'key',
       title: '模型搜索',
       hideInTable: true,
-      renderFormItem: () => <Input placeholder="请输入ID/模型名称/英文名称/标签" />,
     },
     {
       dataIndex: 'bizName',
@@ -200,6 +233,16 @@ const ModelTable: React.FC<Props> = ({ modelList, disabledEdit = false, onModelC
         tableAlertRender={() => {
           return false;
         }}
+        pagination={{
+          current: currentPageNumber,
+          onChange: (pageNumber) => {
+            setCurrentPageNumber(pageNumber);
+            dipatchParams({
+              ...filterParams,
+              pageNumber: `${pageNumber}`,
+            });
+          },
+        }}
         headerTitle={
           <TableHeaderFilter
             components={[
@@ -209,7 +252,14 @@ const ModelTable: React.FC<Props> = ({ modelList, disabledEdit = false, onModelC
                   <Input.Search
                     style={{ width: 280 }}
                     placeholder="请输入模型名称"
+                    defaultValue={params?.key}
                     onSearch={(value) => {
+                      setCurrentPageNumber(1);
+                      dipatchParams({
+                        ...filterParams,
+                        key: value,
+                        pageNumber: `1`,
+                      });
                       setFilterParams((preState) => {
                         return {
                           ...preState,
