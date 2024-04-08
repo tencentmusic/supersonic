@@ -45,6 +45,8 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -116,6 +118,14 @@ public class QueryServiceImpl implements QueryService {
         } finally {
             statUtils.statInfo2DbAsync(state);
         }
+    }
+
+    @Override
+    public List<SemanticQueryResp> queryByReqs(List<SemanticQueryReq> queryReqs, User user) throws Exception {
+        List<CompletableFuture<SemanticQueryResp>> futures = queryReqs.stream()
+                .map(querySqlReq -> CompletableFuture.supplyAsync(() -> queryByReq(querySqlReq, user)))
+                .collect(Collectors.toList());
+        return futures.stream().map(CompletableFuture::join).collect(Collectors.toList());
     }
 
     private QueryStatement buildSqlQueryStatement(QuerySqlReq querySqlReq) throws Exception {

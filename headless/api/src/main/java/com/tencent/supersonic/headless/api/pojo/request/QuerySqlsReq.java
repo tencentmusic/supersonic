@@ -3,10 +3,12 @@ package com.tencent.supersonic.headless.api.pojo.request;
 import lombok.Data;
 import lombok.ToString;
 
+import java.util.List;
+
 @Data
 @ToString
-public class QuerySqlReq extends SemanticQueryReq {
-    private String sql;
+public class QuerySqlsReq extends SemanticQueryReq {
+    private List<String> sqls;
 
     @Override
     public String toCustomizedString() {
@@ -19,8 +21,8 @@ public class QuerySqlReq extends SemanticQueryReq {
                 .append(params);
         stringBuilder.append(",\"cacheInfo\":")
                 .append(cacheInfo);
-        stringBuilder.append(",\"sql\":")
-                .append(sql);
+        stringBuilder.append(",\"sqls\":")
+                .append(sqls);
         stringBuilder.append('}');
         return stringBuilder.toString();
     }
