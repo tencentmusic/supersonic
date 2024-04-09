@@ -33,6 +33,8 @@ public class MetaFilter {
 
     private List<Long> ids;
 
+    private List<String> names;
+
     private List<String> fieldsDepend;
 
     private Integer isTag;

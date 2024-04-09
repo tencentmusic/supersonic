@@ -131,16 +131,36 @@ public class DataSetServiceImpl
 
     @Override
     public List<DataSetResp> getDataSets(User user) {
-        List<DataSetResp> dataSetResps = getDataSetList(new MetaFilter(), user);
-        return getDataSetFilterByAuth(dataSetResps, user);
+        MetaFilter metaFilter = new MetaFilter();
+        return getDataSetsByAuth(user, metaFilter);
     }
 
     @Override
     public List<DataSetResp> getDataSets(String dataSetName, User user) {
         MetaFilter metaFilter = new MetaFilter();
         metaFilter.setName(dataSetName);
+        return getDataSetsByAuth(user, metaFilter);
+    }
+
+    @Override
+    public List<DataSetResp> getDataSets(List<String> dataSetNames, User user) {
+        MetaFilter metaFilter = new MetaFilter();
+        metaFilter.setNames(dataSetNames);
+        return getDataSetsByAuth(user, metaFilter);
+    }
+
+    private List<DataSetResp> getDataSetsByAuth(User user, MetaFilter metaFilter) {
         List<DataSetResp> dataSetResps = getDataSetList(metaFilter, user);
         return getDataSetFilterByAuth(dataSetResps, user);
+    }
+
+    @Override
+    public Map<Long, String> getDataSetIdToNameMap(List<Long> dataSetIds) {
+        MetaFilter metaFilter = new MetaFilter();
+        metaFilter.setIds(dataSetIds);
+        List<DataSetResp> dataSetResps = getDataSetList(metaFilter, User.getFakeUser());
+        return dataSetResps.stream().collect(
+                Collectors.toMap(DataSetResp::getId, DataSetResp::getName, (k1, k2) -> k1));
     }
 
     @Override
