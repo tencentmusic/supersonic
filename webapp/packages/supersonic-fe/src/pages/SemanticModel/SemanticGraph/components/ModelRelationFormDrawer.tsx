@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Form, Button, Drawer, Space, Input, Select, message, Popconfirm } from 'antd';
 import { formLayout } from '@/components/FormHelper/utils';
-import { createOrUpdateModelRela, deleteModelRela } from '../../service';
+import { createOrUpdateModelRela, deleteModelRela, getModelDetail } from '../../service';
 
 export type ModelRelationFormDrawerProps = {
   domainId: number;
@@ -46,27 +46,30 @@ const ModelRelationFormDrawer: React.FC<ModelRelationFormDrawerProps> = ({
     form.setFieldsValue(formData);
   }, [relationData]);
 
+  const queryModelDetail = async (modelId: number, isSource: boolean) => {
+    const { code, data } = await getModelDetail({ modelId });
+    if (code === 200) {
+      if (Array.isArray(data?.modelDetail?.identifiers)) {
+        const dataSourceIdentifiers = data.modelDetail.identifiers;
+        const options = dataSourceIdentifiers.map((item: any) => {
+          return {
+            label: `${item.bizName}${item.name ? `(${item.name})` : ''}`,
+            value: item.bizName,
+          };
+        });
+        if (isSource) {
+          setSourcePrimaryOptions(options);
+        } else {
+          setTargetPrimaryOptions(options);
+        }
+      }
+    }
+  };
+
   useEffect(() => {
     const { sourceData, targetData } = nodeModel;
-    const dataSourceFromIdentifiers = sourceData?.modelDetail?.identifiers || [];
-    const dataSourceToIdentifiers = targetData?.modelDetail?.identifiers || [];
-
-    const sourceOptions = dataSourceFromIdentifiers.map((item: any) => {
-      return {
-        label: `${item.bizName}${item.name ? `(${item.name})` : ''}`,
-        value: item.bizName,
-      };
-    });
-
-    const targetOptions = dataSourceToIdentifiers.map((item: any) => {
-      return {
-        label: `${item.bizName}${item.name ? `(${item.name})` : ''}`,
-        value: item.bizName,
-      };
-    });
-
-    setSourcePrimaryOptions(sourceOptions);
-    setTargetPrimaryOptions(targetOptions);
+    queryModelDetail(sourceData.uid, true);
+    queryModelDetail(targetData.uid, false);
   }, [nodeModel]);
 
   const renderContent = () => {

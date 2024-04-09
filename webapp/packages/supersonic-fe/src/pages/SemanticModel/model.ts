@@ -18,6 +18,7 @@ export type StateType = {
   domainData?: ISemantic.IDomainItem;
   modelData?: ISemantic.IDomainItem;
   domainList: ISemantic.IDomainItem[];
+  modelTableHistoryParams?: Record<string, any>;
 };
 
 export type ModelType = {
@@ -38,6 +39,7 @@ export type ModelType = {
     setDataBaseScriptColumn: Reducer<StateType>;
     setDatabaseConfigList: Reducer<StateType>;
     setMetricList: Reducer<StateType>;
+    setModelTableHistoryParams: Reducer<StateType>;
     reset: Reducer<StateType>;
   };
 };
@@ -56,8 +58,8 @@ export const defaultState: StateType = {
   domainData: undefined,
   dataBaseResultColsMap: {},
   databaseConfigList: [],
-  // dataBaseConfig: {},
   domainList: [],
+  modelTableHistoryParams: {},
 };
 
 const Model: ModelType = {
@@ -175,6 +177,15 @@ const Model: ModelType = {
       return {
         ...state,
         ...action.payload,
+      };
+    },
+    setModelTableHistoryParams(state = defaultState, action) {
+      return {
+        ...state,
+        modelTableHistoryParams: {
+          ...state.modelTableHistoryParams,
+          ...action.payload,
+        },
       };
     },
     reset() {

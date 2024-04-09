@@ -38,17 +38,17 @@ import com.tencent.supersonic.headless.api.pojo.response.QueryResult;
 import com.tencent.supersonic.headless.api.pojo.response.QueryState;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
 import com.tencent.supersonic.headless.core.chat.corrector.SemanticCorrector;
+import com.tencent.supersonic.headless.core.chat.knowledge.HanlpMapResult;
+import com.tencent.supersonic.headless.core.chat.knowledge.KnowledgeService;
+import com.tencent.supersonic.headless.core.chat.knowledge.SearchService;
+import com.tencent.supersonic.headless.core.chat.knowledge.helper.HanlpHelper;
+import com.tencent.supersonic.headless.core.chat.knowledge.helper.NatureHelper;
 import com.tencent.supersonic.headless.core.chat.mapper.SchemaMapper;
 import com.tencent.supersonic.headless.core.chat.parser.SemanticParser;
 import com.tencent.supersonic.headless.core.chat.query.QueryManager;
 import com.tencent.supersonic.headless.core.chat.query.SemanticQuery;
 import com.tencent.supersonic.headless.core.chat.query.llm.s2sql.LLMSqlQuery;
 import com.tencent.supersonic.headless.core.chat.query.rule.RuleSemanticQuery;
-import com.tencent.supersonic.headless.core.chat.knowledge.HanlpMapResult;
-import com.tencent.supersonic.headless.core.chat.knowledge.KnowledgeService;
-import com.tencent.supersonic.headless.core.chat.knowledge.SearchService;
-import com.tencent.supersonic.headless.core.chat.knowledge.helper.HanlpHelper;
-import com.tencent.supersonic.headless.core.chat.knowledge.helper.NatureHelper;
 import com.tencent.supersonic.headless.core.pojo.ChatContext;
 import com.tencent.supersonic.headless.core.pojo.QueryContext;
 import com.tencent.supersonic.headless.server.persistence.dataobject.StatisticsDO;
@@ -179,6 +179,7 @@ public class ChatQueryServiceImpl implements ChatQueryService {
                 .mapInfo(new SchemaMapInfo())
                 .modelIdToDataSetIds(modelIdToDataSetIds)
                 .text2SQLType(queryReq.getText2SQLType())
+                .mapModeEnum(queryReq.getMapModeEnum())
                 .build();
         BeanUtils.copyProperties(queryReq, queryCtx);
         return queryCtx;
