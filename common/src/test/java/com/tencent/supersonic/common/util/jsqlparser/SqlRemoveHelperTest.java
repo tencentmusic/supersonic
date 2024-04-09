@@ -20,7 +20,7 @@ class SqlRemoveHelperTest {
         System.out.println(sql);
         sql = "SELECT 结算播放量 FROM 艺人 WHERE (歌手名 IN ('林俊杰', '陈奕迅')) AND (数据日期 >= '2024-04-04' AND 数据日期 <= '2024-04-04')";
         List<FieldExpression> fieldExpressionList = SqlSelectHelper.getWhereExpressions(sql);
-        fieldExpressionList.stream().forEach(fieldExpression->{
+        fieldExpressionList.stream().forEach(fieldExpression -> {
             System.out.println(fieldExpression.toString());
         });
 
