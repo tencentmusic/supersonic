@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.CollectionUtils;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -57,12 +58,14 @@ public class SysParameter {
         parameters.add(new Parameter("metric.dimension.threshold", "0.3",
                 "指标名、维度名文本相似度阈值", "文本片段和匹配到的指标、维度名计算出来的编辑距离阈值, 若超出该阈值, 则舍弃",
                 "number", "Mapper相关配置"));
-        parameters.add(new Parameter("metric.dimension.min.threshold", "0.3",
-                "指标名、维度名最小文本相似度阈值",
-                "最小编辑距离阈值, 在FuzzyNameMapper中, 如果上面设定的编辑距离阈值的1/2大于该最小编辑距离, 则取上面设定阈值的1/2作为阈值, 否则取该阈值",
+        parameters.add(new Parameter("metric.dimension.min.threshold", "0.25",
+                "指标名、维度名最小文本相似度阈值", "指标名、维度名相似度阈值在动态调整中的最低值",
                 "number", "Mapper相关配置"));
         parameters.add(new Parameter("dimension.value.threshold", "0.5",
-                "维度值最小文本相似度阈值", "文本片段和匹配到的维度值计算出来的编辑距离阈值, 若超出该阈值, 则舍弃",
+                "维度值文本相似度阈值", "文本片段和匹配到的维度值计算出来的编辑距离阈值, 若超出该阈值, 则舍弃",
+                "number", "Mapper相关配置"));
+        parameters.add(new Parameter("dimension.value.min.threshold", "0.3",
+                "维度值最小文本相似度阈值", "维度值相似度阈值在动态调整中的最低值",
                 "number", "Mapper相关配置"));
 
         //embedding mapper config
@@ -76,6 +79,8 @@ public class SysParameter {
                 "批量向量召回文本返回结果个数", "每个文本进行向量语义召回的文本结果个数", "number", "Mapper相关配置"));
         parameters.add(new Parameter("embedding.mapper.threshold",
                 "0.99", "向量召回相似度阈值", "相似度小于该阈值的则舍弃", "number", "Mapper相关配置"));
+        parameters.add(new Parameter("embedding.mapper.min.threshold",
+                "0.9", "向量召回最小相似度阈值", "向量召回相似度阈值在动态调整中的最低值", "number", "Mapper相关配置"));
 
         //parser config
         Parameter s2SQLParameter = new Parameter("s2SQL.generation", "TWO_PASS_AUTO_COT",

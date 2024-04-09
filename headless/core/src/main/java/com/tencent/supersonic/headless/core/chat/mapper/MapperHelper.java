@@ -45,13 +45,6 @@ public class MapperHelper {
         return index;
     }
 
-    public double getThresholdMatch(List<String> natures) {
-        if (existDimensionValues(natures)) {
-            return optimizationConfig.getDimensionValueThresholdConfig();
-        }
-        return optimizationConfig.getMetricDimensionThresholdConfig();
-    }
-
     /***
      * exist dimension values
      * @param natures

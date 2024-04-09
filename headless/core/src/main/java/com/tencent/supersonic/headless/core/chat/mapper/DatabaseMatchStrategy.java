@@ -56,7 +56,7 @@ public class DatabaseMatchStrategy extends BaseMatchStrategy<DatabaseMapResult> 
     }
 
     public void detectByStep(QueryContext queryContext, Set<DatabaseMapResult> existResults, Set<Long> detectDataSetIds,
-            String detectSegment, int offset) {
+                             String detectSegment, int offset) {
         if (StringUtils.isBlank(detectSegment)) {
             return;
         }
@@ -94,22 +94,20 @@ public class DatabaseMatchStrategy extends BaseMatchStrategy<DatabaseMapResult> 
     }
 
     private Double getThreshold(QueryContext queryContext) {
-        Double metricDimensionThresholdConfig = optimizationConfig.getMetricDimensionThresholdConfig();
-        Double metricDimensionMinThresholdConfig = optimizationConfig.getMetricDimensionMinThresholdConfig();
+
+        Double threshold = optimizationConfig.getMetricDimensionThresholdConfig();
+        Double minThreshold = optimizationConfig.getMetricDimensionMinThresholdConfig();
 
         Map<Long, List<SchemaElementMatch>> modelElementMatches = queryContext.getMapInfo().getDataSetElementMatches();
 
         boolean existElement = modelElementMatches.entrySet().stream().anyMatch(entry -> entry.getValue().size() >= 1);
 
         if (!existElement) {
-            double halfThreshold = metricDimensionThresholdConfig / 2;
-
-            metricDimensionThresholdConfig = halfThreshold >= metricDimensionMinThresholdConfig ? halfThreshold
-                    : metricDimensionMinThresholdConfig;
-            log.info("ModelElementMatches:{} , not exist Element metricDimensionThresholdConfig reduce by half:{}",
-                    modelElementMatches, metricDimensionThresholdConfig);
+            threshold = threshold / 2;
+            log.info("ModelElementMatches:{},not exist Element threshold reduce by half:{}",
+                    modelElementMatches, threshold);
         }
-        return metricDimensionThresholdConfig;
+        return getThreshold(threshold, minThreshold, queryContext.getMapModeEnum());
     }
 
     private Map<String, Set<SchemaElement>> getNameToItems(List<SchemaElement> models) {

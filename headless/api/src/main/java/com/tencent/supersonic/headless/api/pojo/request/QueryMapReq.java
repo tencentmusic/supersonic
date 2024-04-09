@@ -14,5 +14,5 @@ public class QueryMapReq {
     private List<String> dataSetNames;
     private User user;
     private Integer topN = 10;
-    private MapModeEnum mapModeEnum;
+    private MapModeEnum mapModeEnum = MapModeEnum.STRICT;
 }

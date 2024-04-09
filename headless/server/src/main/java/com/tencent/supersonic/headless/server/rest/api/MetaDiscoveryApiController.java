@@ -15,7 +15,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 @RestController
-@RequestMapping("/api/semantic/query")
+@RequestMapping("/api/semantic/meta")
 @Slf4j
 public class MetaDiscoveryApiController {
 

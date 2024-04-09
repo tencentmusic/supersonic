@@ -179,6 +179,7 @@ public class ChatQueryServiceImpl implements ChatQueryService {
                 .mapInfo(new SchemaMapInfo())
                 .modelIdToDataSetIds(modelIdToDataSetIds)
                 .text2SQLType(queryReq.getText2SQLType())
+                .mapModeEnum(queryReq.getMapModeEnum())
                 .build();
         BeanUtils.copyProperties(queryReq, queryCtx);
         return queryCtx;
