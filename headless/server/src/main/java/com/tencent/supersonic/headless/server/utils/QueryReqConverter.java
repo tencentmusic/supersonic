@@ -246,7 +246,7 @@ public class QueryReqConverter {
                                        DataSetQueryParam viewQueryParam) {
         String sql = viewQueryParam.getSql();
         for (MetricTable metricTable : viewQueryParam.getTables()) {
-            List<String> measures = new ArrayList<>();
+            Set<String> measures = new HashSet<>();
             Map<String, String> replaces = new HashMap<>();
             generateDerivedMetric(semanticSchemaResp, aggOption, metricTable.getMetrics(),
                     metricTable.getDimensions(),
@@ -257,7 +257,7 @@ public class QueryReqConverter {
                 metricTable.setAggOption(AggOption.NATIVE);
                 // metricTable use measures replace metric
                 if (!CollectionUtils.isEmpty(measures)) {
-                    metricTable.setMetrics(measures);
+                    metricTable.setMetrics(new ArrayList<>(measures));
                 }
             }
         }
@@ -266,7 +266,7 @@ public class QueryReqConverter {
 
     private void generateDerivedMetric(SemanticSchemaResp semanticSchemaResp, AggOption aggOption,
                                        List<String> metrics, List<String> dimensions,
-                                       List<String> measures, Map<String, String> replaces) {
+                                       Set<String> measures, Map<String, String> replaces) {
         List<MetricSchemaResp> metricResps = semanticSchemaResp.getMetrics();
         List<DimSchemaResp> dimensionResps = semanticSchemaResp.getDimensions();
         // check metrics has derived
