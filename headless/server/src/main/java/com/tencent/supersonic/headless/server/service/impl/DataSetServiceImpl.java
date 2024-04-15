@@ -116,6 +116,9 @@ public class DataSetServiceImpl
         if (metaFilter.getName() != null) {
             wrapper.lambda().eq(DataSetDO::getName, metaFilter.getName());
         }
+        if (!CollectionUtils.isEmpty(metaFilter.getNames())) {
+            wrapper.lambda().in(DataSetDO::getName, metaFilter.getNames());
+        }
         wrapper.lambda().ne(DataSetDO::getStatus, StatusEnum.DELETED.getCode());
         return list(wrapper).stream().map(entry -> convert(entry, user)).collect(Collectors.toList());
     }
