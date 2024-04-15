@@ -2,10 +2,15 @@ package com.tencent.supersonic.headless.server.rest.api;
 
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
+import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
+import com.tencent.supersonic.headless.api.pojo.SqlInfo;
 import com.tencent.supersonic.headless.api.pojo.request.QuerySqlReq;
 import com.tencent.supersonic.headless.api.pojo.request.QuerySqlsReq;
 import com.tencent.supersonic.headless.api.pojo.request.SemanticQueryReq;
+import com.tencent.supersonic.headless.core.chat.corrector.GrammarCorrector;
+import com.tencent.supersonic.headless.core.pojo.QueryContext;
 import com.tencent.supersonic.headless.server.service.QueryService;
+import com.tencent.supersonic.headless.server.utils.ComponentFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +37,7 @@ public class SqlQueryApiController {
                              HttpServletRequest request,
                              HttpServletResponse response) throws Exception {
         User user = UserHolder.findUser(request, response);
+        correct(querySqlReq);
         return queryService.queryByReq(querySqlReq, user);
     }
 
@@ -45,8 +51,25 @@ public class SqlQueryApiController {
                     QuerySqlReq querySqlReq = new QuerySqlReq();
                     BeanUtils.copyProperties(querySqlsReq, querySqlReq);
                     querySqlReq.setSql(sql);
+                    correct(querySqlReq);
                     return querySqlReq;
                 }).collect(Collectors.toList());
         return queryService.queryByReqs(semanticQueryReqs, user);
+    }
+
+    private void correct(QuerySqlReq querySqlReq) {
+        QueryContext queryCtx = new QueryContext();
+        SemanticParseInfo semanticParseInfo = new SemanticParseInfo();
+        SqlInfo sqlInfo = new SqlInfo();
+        sqlInfo.setCorrectS2SQL(querySqlReq.getSql());
+        sqlInfo.setS2SQL(querySqlReq.getSql());
+        semanticParseInfo.setSqlInfo(sqlInfo);
+
+        ComponentFactory.getSemanticCorrectors().forEach(corrector -> {
+            if (!(corrector instanceof GrammarCorrector)) {
+                corrector.correct(queryCtx, semanticParseInfo);
+            }
+        });
+        querySqlReq.setSql(sqlInfo.getCorrectS2SQL());
     }
 }

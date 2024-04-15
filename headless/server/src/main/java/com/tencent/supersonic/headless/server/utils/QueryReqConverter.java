@@ -157,13 +157,13 @@ public class QueryReqConverter {
         return AggOption.DEFAULT;
     }
 
-    private void convertNameToBizName(QuerySqlReq databaseReq, SemanticSchemaResp semanticSchemaResp) {
+    private void convertNameToBizName(QuerySqlReq querySqlReq, SemanticSchemaResp semanticSchemaResp) {
         Map<String, String> fieldNameToBizNameMap = getFieldNameToBizNameMap(semanticSchemaResp);
-        String sql = databaseReq.getSql();
-        log.info("convert name to bizName before:{}", sql);
+        String sql = querySqlReq.getSql();
+        log.info("dataSetId:{},convert name to bizName before:{}", querySqlReq.getDataSetId(), sql);
         String replaceFields = SqlReplaceHelper.replaceFields(sql, fieldNameToBizNameMap, true);
-        log.info("convert name to bizName after:{}", replaceFields);
-        databaseReq.setSql(replaceFields);
+        log.info("dataSetId:{},convert name to bizName after:{}", querySqlReq.getDataSetId(), replaceFields);
+        querySqlReq.setSql(replaceFields);
     }
 
     private Set<String> getDimensions(SemanticSchemaResp semanticSchemaResp, List<String> allFields) {
