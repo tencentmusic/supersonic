@@ -45,6 +45,7 @@ import com.tencent.supersonic.headless.server.service.TagMetaService;
 import com.tencent.supersonic.headless.server.utils.DimensionConverter;
 import com.tencent.supersonic.headless.server.utils.NameCheckUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
@@ -83,12 +84,12 @@ public class DimensionServiceImpl implements DimensionService {
 
 
     public DimensionServiceImpl(DimensionRepository dimensionRepository,
-            ModelService modelService,
-            ChatGptHelper chatGptHelper,
-            DatabaseService databaseService,
-            ModelRelaService modelRelaService,
-            DataSetService dataSetService,
-            TagMetaService tagMetaService) {
+                                ModelService modelService,
+                                ChatGptHelper chatGptHelper,
+                                DatabaseService databaseService,
+                                ModelRelaService modelRelaService,
+                                DataSetService dataSetService,
+                                TagMetaService tagMetaService) {
         this.modelService = modelService;
         this.dimensionRepository = dimensionRepository;
         this.chatGptHelper = chatGptHelper;
@@ -398,8 +399,10 @@ public class DimensionServiceImpl implements DimensionService {
         Map<String, DimensionResp> nameMap = dimensionResps.stream()
                 .collect(Collectors.toMap(DimensionResp::getName, a -> a, (k1, k2) -> k1));
         for (DimensionReq dimensionReq : dimensionReqs) {
-            if (NameCheckUtils.containsSpecialCharacters(dimensionReq.getName())) {
-                throw new InvalidArgumentException("名称包含特殊字符, 请修改: " + dimensionReq.getName());
+            String forbiddenCharacters = NameCheckUtils.findForbiddenCharacters(dimensionReq.getName());
+            if (StringUtils.isNotBlank(forbiddenCharacters)) {
+                throw new InvalidArgumentException(String.format("名称包含特殊字符, 请修改: %s，特殊字符: %s",
+                        dimensionReq.getBizName(), forbiddenCharacters));
             }
             if (bizNameMap.containsKey(dimensionReq.getBizName())) {
                 DimensionResp dimensionResp = bizNameMap.get(dimensionReq.getBizName());
