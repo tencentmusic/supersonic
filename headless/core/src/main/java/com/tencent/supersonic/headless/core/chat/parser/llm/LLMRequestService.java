@@ -2,7 +2,6 @@ package com.tencent.supersonic.headless.core.chat.parser.llm;
 
 import com.tencent.supersonic.common.pojo.enums.DataFormatTypeEnum;
 import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
-import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.DateUtils;
 import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementMatch;
@@ -31,9 +30,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-
-import org.springframework.core.env.Environment;
 
 @Slf4j
 @Service
@@ -70,12 +66,6 @@ public class LLMRequestService {
         String queryText = queryCtx.getQueryText();
 
         LLMReq llmReq = new LLMReq();
-        llmReq.setContextualParseInfoList(queryCtx.getContextualParseInfoList());
-        Environment environment = ContextUtils.getBean(Environment.class);
-        String multiTurn = environment.getProperty("multi.turn");
-        if (StringUtils.isNotBlank(multiTurn) && Boolean.parseBoolean(multiTurn)) {
-            llmReq.setIsMultiTurn(Boolean.parseBoolean(multiTurn));
-        }
 
         llmReq.setChatId(queryCtx.getChatId());
         llmReq.setQueryText(queryText);

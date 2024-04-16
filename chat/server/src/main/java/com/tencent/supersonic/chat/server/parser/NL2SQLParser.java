@@ -1,6 +1,5 @@
 package com.tencent.supersonic.chat.server.parser;
 
-import com.tencent.supersonic.chat.server.persistence.repository.ChatQueryRepository;
 import com.tencent.supersonic.chat.server.pojo.ChatParseContext;
 import com.tencent.supersonic.chat.server.util.QueryReqConverter;
 import com.tencent.supersonic.common.util.ContextUtils;
@@ -9,8 +8,6 @@ import com.tencent.supersonic.headless.api.pojo.request.QueryReq;
 import com.tencent.supersonic.headless.api.pojo.response.ParseResp;
 import com.tencent.supersonic.headless.server.service.ChatQueryService;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.core.env.Environment;
 
 import java.util.List;
 @Slf4j
@@ -25,16 +22,6 @@ public class NL2SQLParser implements ChatParser {
             return;
         }
         QueryReq queryReq = QueryReqConverter.buildText2SqlQueryReq(chatParseContext);
-
-        //decide whether add contextual parseInfos to QueryReq for multi-turn query
-        Environment environment = ContextUtils.getBean(Environment.class);
-        String multiTurn = environment.getProperty("multi.turn");
-        if (StringUtils.isNotBlank(multiTurn) && Boolean.parseBoolean(multiTurn)) {
-            log.info("multi turn text-to-sql!");
-            ChatQueryRepository chatQueryRepository = ContextUtils.getBean(ChatQueryRepository.class);
-
-            queryReq.setContextualParseInfoList(chatQueryRepository.getContextualParseInfo(queryReq.getChatId()));
-        }
         ChatQueryService chatQueryService = ContextUtils.getBean(ChatQueryService.class);
         ParseResp text2SqlParseResp = chatQueryService.performParsing(queryReq);
         if (!ParseResp.ParseState.FAILED.equals(text2SqlParseResp.getState())) {
