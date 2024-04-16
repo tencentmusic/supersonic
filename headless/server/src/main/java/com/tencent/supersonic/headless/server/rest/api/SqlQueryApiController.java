@@ -3,6 +3,7 @@ package com.tencent.supersonic.headless.server.rest.api;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
+import com.tencent.supersonic.headless.api.pojo.SemanticSchema;
 import com.tencent.supersonic.headless.api.pojo.SqlInfo;
 import com.tencent.supersonic.headless.api.pojo.request.QuerySqlReq;
 import com.tencent.supersonic.headless.api.pojo.request.QuerySqlsReq;
@@ -10,6 +11,7 @@ import com.tencent.supersonic.headless.api.pojo.request.SemanticQueryReq;
 import com.tencent.supersonic.headless.core.chat.corrector.GrammarCorrector;
 import com.tencent.supersonic.headless.core.pojo.QueryContext;
 import com.tencent.supersonic.headless.server.service.QueryService;
+import com.tencent.supersonic.headless.server.service.impl.SemanticService;
 import com.tencent.supersonic.headless.server.utils.ComponentFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
@@ -31,6 +33,9 @@ public class SqlQueryApiController {
 
     @Autowired
     private QueryService queryService;
+
+    @Autowired
+    private SemanticService semanticService;
 
     @PostMapping("/sql")
     public Object queryBySql(@RequestBody QuerySqlReq querySqlReq,
@@ -59,6 +64,8 @@ public class SqlQueryApiController {
 
     private void correct(QuerySqlReq querySqlReq) {
         QueryContext queryCtx = new QueryContext();
+        SemanticSchema semanticSchema = semanticService.getSemanticSchema();
+        queryCtx.setSemanticSchema(semanticSchema);
         SemanticParseInfo semanticParseInfo = new SemanticParseInfo();
         SqlInfo sqlInfo = new SqlInfo();
         sqlInfo.setCorrectS2SQL(querySqlReq.getSql());

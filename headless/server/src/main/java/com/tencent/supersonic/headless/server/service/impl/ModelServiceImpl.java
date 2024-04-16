@@ -81,13 +81,13 @@ public class ModelServiceImpl implements ModelService {
     private DateInfoRepository dateInfoRepository;
 
     public ModelServiceImpl(ModelRepository modelRepository,
-            DatabaseService databaseService,
-            @Lazy DimensionService dimensionService,
-            @Lazy MetricService metricService,
-            DomainService domainService,
-            UserService userService,
-            DataSetService dataSetService,
-            DateInfoRepository dateInfoRepository) {
+                            DatabaseService databaseService,
+                            @Lazy DimensionService dimensionService,
+                            @Lazy MetricService metricService,
+                            DomainService domainService,
+                            UserService userService,
+                            DataSetService dataSetService,
+                            DateInfoRepository dateInfoRepository) {
         this.modelRepository = modelRepository;
         this.databaseService = databaseService;
         this.dimensionService = dimensionService;
@@ -217,8 +217,9 @@ public class ModelServiceImpl implements ModelService {
     }
 
     private void checkName(ModelReq modelReq) {
-        if (NameCheckUtils.containsSpecialCharacters(modelReq.getName())) {
-            String message = String.format("模型名称[%s]包含特殊字符, 请修改", modelReq.getName());
+        String forbiddenCharacters = NameCheckUtils.findForbiddenCharacters(modelReq.getName());
+        if (StringUtils.isNotBlank(forbiddenCharacters)) {
+            String message = String.format("模型名称[%s]包含特殊字符(%s), 请修改", modelReq.getName(), forbiddenCharacters);
             throw new InvalidArgumentException(message);
         }
         List<Dim> dims = modelReq.getModelDetail().getDimensions();
@@ -232,23 +233,27 @@ public class ModelServiceImpl implements ModelService {
             throw new InvalidArgumentException("有度量时, 不可缺少时间维度");
         }
         for (Measure measure : measures) {
+            String measureForbiddenCharacters = NameCheckUtils.findForbiddenCharacters(measure.getName());
             if (StringUtils.isNotBlank(measure.getName())
-                    && NameCheckUtils.containsSpecialCharacters(measure.getName())) {
-                String message = String.format("度量[%s]包含特殊字符, 请修改", measure.getName());
+                    && StringUtils.isNotBlank(measureForbiddenCharacters)) {
+                String message = String.format("度量[%s]包含特殊字符(%s), 请修改", measure.getName(), measureForbiddenCharacters);
                 throw new InvalidArgumentException(message);
             }
         }
         for (Dim dim : dims) {
+            String dimForbiddenCharacters = NameCheckUtils.findForbiddenCharacters(dim.getName());
             if (StringUtils.isNotBlank(dim.getName())
-                    && NameCheckUtils.containsSpecialCharacters(dim.getName())) {
-                String message = String.format("维度[%s]包含特殊字符, 请修改", dim.getName());
+                    && StringUtils.isNotBlank(dimForbiddenCharacters)) {
+                String message = String.format("维度[%s]包含特殊字符(%s), 请修改", dim.getName(), dimForbiddenCharacters);
                 throw new InvalidArgumentException(message);
             }
         }
         for (Identify identify : identifies) {
+            String identifyForbiddenCharacters = NameCheckUtils.findForbiddenCharacters(identify.getName());
             if (StringUtils.isNotBlank(identify.getName())
-                    && NameCheckUtils.containsSpecialCharacters(identify.getName())) {
-                String message = String.format("主键/外键[%s]包含特殊字符, 请修改", identify.getName());
+                    && StringUtils.isNotBlank(identifyForbiddenCharacters)) {
+                String message = String.format("主键/外键[%s]包含特殊字符(%s), 请修改", identify.getName(),
+                        identifyForbiddenCharacters);
                 throw new InvalidArgumentException(message);
             }
         }
