@@ -192,4 +192,5 @@ public class ChatQueryRepositoryImpl implements ChatQueryRepository {
     public Boolean deleteChatQuery(Long questionId) {
         return chatQueryDOMapper.deleteByPrimaryKey(questionId);
     }
+
 }

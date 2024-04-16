@@ -61,11 +61,12 @@ public class LLMRequestService {
     }
 
     public LLMReq getLlmReq(QueryContext queryCtx, Long dataSetId,
-            SemanticSchema semanticSchema, List<LLMReq.ElementValue> linkingValues) {
+                            SemanticSchema semanticSchema, List<LLMReq.ElementValue> linkingValues) {
         Map<Long, String> dataSetIdToName = semanticSchema.getDataSetIdToName();
         String queryText = queryCtx.getQueryText();
 
         LLMReq llmReq = new LLMReq();
+
         llmReq.setQueryText(queryText);
         LLMReq.FilterCondition filterCondition = new LLMReq.FilterCondition();
         llmReq.setFilterCondition(filterCondition);
@@ -103,7 +104,7 @@ public class LLMRequestService {
     }
 
     protected List<String> getFieldNameList(QueryContext queryCtx, Long dataSetId,
-            LLMParserConfig llmParserConfig) {
+                                            LLMParserConfig llmParserConfig) {
 
         Set<String> results = getTopNFieldNames(queryCtx, dataSetId, llmParserConfig);
 

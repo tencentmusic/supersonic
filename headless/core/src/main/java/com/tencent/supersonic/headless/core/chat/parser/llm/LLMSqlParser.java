@@ -11,6 +11,7 @@ import com.tencent.supersonic.headless.core.chat.query.llm.s2sql.LLMResp;
 import com.tencent.supersonic.headless.core.chat.query.llm.s2sql.LLMSqlResp;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.MapUtils;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -28,6 +29,7 @@ public class LLMSqlParser implements SemanticParser {
         try {
             //2.get dataSetId from queryCtx and chatCtx.
             Long dataSetId = requestService.getDataSetId(queryCtx);
+            log.info("dataSetId:{}", dataSetId);
             if (dataSetId == null) {
                 return;
             }
