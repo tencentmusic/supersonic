@@ -25,12 +25,8 @@ public class LLMSqlParser implements SemanticParser {
     @Override
     public void parse(QueryContext queryCtx, ChatContext chatCtx) {
         LLMRequestService requestService = ContextUtils.getBean(LLMRequestService.class);
-        Environment environment = ContextUtils.getBean(Environment.class);
-        String multiTurn = environment.getProperty("multi.turn");
-        boolean isMultiTurn = StringUtils.isNotBlank(multiTurn) && Boolean.parseBoolean(multiTurn);
-        log.info("multiTurn:{}", multiTurn);
         //1.determine whether to skip this parser.
-        if (requestService.isSkip(queryCtx) && !isMultiTurn) {
+        if (requestService.isSkip(queryCtx)) {
             return;
         }
         try {
@@ -48,9 +44,6 @@ public class LLMSqlParser implements SemanticParser {
 
             if (Objects.isNull(llmResp)) {
                 return;
-            }
-            if (isMultiTurn) {
-                linkingValues = new ArrayList<>(llmReq.getLinking());
             }
             //4. deduplicate the SQL result list and build parserInfo
             LLMResponseService responseService = ContextUtils.getBean(LLMResponseService.class);

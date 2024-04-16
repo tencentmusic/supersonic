@@ -24,13 +24,6 @@ public class LLMReq {
 
     private String sqlGenerationMode;
 
-    private Integer chatId;
-
-    private Boolean isMultiTurn = false;
-
-    @JsonIgnore
-    private List<SemanticParseInfo> contextualParseInfoList;
-
     @Data
     public static class ElementValue {
 

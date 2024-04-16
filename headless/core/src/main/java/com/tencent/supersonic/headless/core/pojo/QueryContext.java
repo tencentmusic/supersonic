@@ -15,7 +15,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -43,8 +42,6 @@ public class QueryContext {
     private MapModeEnum mapModeEnum = MapModeEnum.STRICT;
     @JsonIgnore
     private SemanticSchema semanticSchema;
-    @JsonIgnore
-    private List<SemanticParseInfo> contextualParseInfoList;
 
     public List<SemanticQuery> getCandidateQueries() {
         OptimizationConfig optimizationConfig = ContextUtils.getBean(OptimizationConfig.class);
