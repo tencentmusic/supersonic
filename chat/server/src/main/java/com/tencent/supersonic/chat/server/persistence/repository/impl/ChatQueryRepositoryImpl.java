@@ -193,12 +193,4 @@ public class ChatQueryRepositoryImpl implements ChatQueryRepository {
         return chatQueryDOMapper.deleteByPrimaryKey(questionId);
     }
 
-    @Override
-    public List<SemanticParseInfo> getContextualParseInfo(Integer chatId) {
-        List<ChatParseDO> chatParseDOList = chatParseMapper.getContextualParseInfo(chatId);
-        List<SemanticParseInfo> semanticParseInfoList = chatParseDOList.stream().map(parseInfo -> {
-            return JSONObject.parseObject(parseInfo.getParseInfo(), SemanticParseInfo.class);
-        }).collect(Collectors.toList());
-        return semanticParseInfoList;
-    }
 }
