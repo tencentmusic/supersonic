@@ -1,8 +1,6 @@
 package com.tencent.supersonic.headless.core.chat.query.llm.s2sql;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonValue;
-import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import lombok.Data;
 
 import java.util.List;
