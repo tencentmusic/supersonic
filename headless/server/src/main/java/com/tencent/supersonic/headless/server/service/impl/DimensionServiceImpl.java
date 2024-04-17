@@ -430,17 +430,27 @@ public class DimensionServiceImpl implements DimensionService {
     }
 
     private void sendEventBatch(List<DimensionDO> dimensionDOS, EventType eventType) {
+        DataEvent dataEvent = getDataEvent(dimensionDOS, eventType);
+        eventPublisher.publishEvent(dataEvent);
+    }
+
+    public DataEvent getDataEvent() {
+        DimensionFilter dimensionFilter = new DimensionFilter();
+        List<DimensionDO> dimensionDOS = queryDimension(dimensionFilter);
+        return getDataEvent(dimensionDOS, EventType.ADD);
+    }
+
+    private DataEvent getDataEvent(List<DimensionDO> dimensionDOS, EventType eventType) {
         List<DataItem> dataItems = dimensionDOS.stream()
                 .map(dimensionDO -> DataItem.builder().id(dimensionDO.getId() + Constants.UNDERLINE)
                         .name(dimensionDO.getName()).modelId(dimensionDO.getModelId() + Constants.UNDERLINE)
                         .type(TypeEnums.DIMENSION).build())
                 .collect(Collectors.toList());
-        eventPublisher.publishEvent(new DataEvent(this, dataItems, eventType));
+        return new DataEvent(this, dataItems, eventType);
     }
 
     private void sendEvent(DataItem dataItem, EventType eventType) {
         eventPublisher.publishEvent(new DataEvent(this,
                 Lists.newArrayList(dataItem), eventType));
     }
-
 }

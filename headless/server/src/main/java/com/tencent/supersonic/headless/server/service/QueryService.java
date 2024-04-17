@@ -21,5 +21,4 @@ public interface QueryService {
     List<ItemUseResp> getStatInfo(ItemUseReq itemUseCommend);
 
     <T> ExplainResp explain(ExplainSqlReq<T> explainSqlReq, User user) throws Exception;
-
 }

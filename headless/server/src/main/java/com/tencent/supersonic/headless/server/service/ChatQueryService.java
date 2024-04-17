@@ -7,6 +7,7 @@ import com.tencent.supersonic.headless.api.pojo.request.DimensionValueReq;
 import com.tencent.supersonic.headless.api.pojo.request.ExecuteQueryReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryDataReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryReq;
+import com.tencent.supersonic.headless.api.pojo.request.QuerySqlReq;
 import com.tencent.supersonic.headless.api.pojo.response.MapResp;
 import com.tencent.supersonic.headless.api.pojo.response.ParseResp;
 import com.tencent.supersonic.headless.api.pojo.response.QueryResult;
@@ -29,5 +30,7 @@ public interface ChatQueryService {
     EntityInfo getEntityInfo(SemanticParseInfo parseInfo, User user);
 
     Object queryDimensionValue(DimensionValueReq dimensionValueReq, User user) throws Exception;
+
+    void correct(QuerySqlReq querySqlReq, User user);
 }
 

@@ -97,13 +97,13 @@ public class MetricServiceImpl implements MetricService {
     private TagMetaService tagMetaService;
 
     public MetricServiceImpl(MetricRepository metricRepository,
-            ModelService modelService,
-            ChatGptHelper chatGptHelper,
-            CollectService collectService,
-            DataSetService dataSetService,
-            ApplicationEventPublisher eventPublisher,
-            DimensionService dimensionService,
-            TagMetaService tagMetaService) {
+                             ModelService modelService,
+                             ChatGptHelper chatGptHelper,
+                             CollectService collectService,
+                             DataSetService dataSetService,
+                             ApplicationEventPublisher eventPublisher,
+                             DimensionService dimensionService,
+                             TagMetaService tagMetaService) {
         this.metricRepository = metricRepository;
         this.modelService = modelService;
         this.chatGptHelper = chatGptHelper;
@@ -326,7 +326,7 @@ public class MetricServiceImpl implements MetricService {
     }
 
     private boolean filterByField(List<MetricResp> metricResps, MetricResp metricResp,
-            List<String> fields, Set<MetricResp> metricRespFiltered) {
+                                  List<String> fields, Set<MetricResp> metricRespFiltered) {
         if (MetricDefineType.METRIC.equals(metricResp.getMetricDefineType())) {
             List<Long> ids = metricResp.getMetricDefineByMetricParams().getMetrics()
                     .stream().map(MetricParam::getId).collect(Collectors.toList());
@@ -556,9 +556,20 @@ public class MetricServiceImpl implements MetricService {
     }
 
     private void sendEventBatch(List<MetricDO> metricDOS, EventType eventType) {
+        DataEvent dataEvent = getDataEvent(metricDOS, eventType);
+        eventPublisher.publishEvent(dataEvent);
+    }
+
+    public DataEvent getDataEvent() {
+        MetricsFilter metricsFilter = new MetricsFilter();
+        List<MetricDO> metricDOS = metricRepository.getMetrics(metricsFilter);
+        return getDataEvent(metricDOS, EventType.ADD);
+    }
+
+    private DataEvent getDataEvent(List<MetricDO> metricDOS, EventType eventType) {
         List<DataItem> dataItems = metricDOS.stream().map(this::getDataItem)
                 .collect(Collectors.toList());
-        eventPublisher.publishEvent(new DataEvent(this, dataItems, eventType));
+        return new DataEvent(this, dataItems, eventType);
     }
 
     private void sendEvent(DataItem dataItem, EventType eventType) {
@@ -662,7 +673,7 @@ public class MetricServiceImpl implements MetricService {
     }
 
     private Set<Long> getModelIds(Set<Long> modelIdsByDomainId, List<MetricResp> metricResps,
-            List<DimensionResp> dimensionResps) {
+                                  List<DimensionResp> dimensionResps) {
         Set<Long> result = new HashSet<>();
         if (org.apache.commons.collections.CollectionUtils.isNotEmpty(modelIdsByDomainId)) {
             result.addAll(modelIdsByDomainId);

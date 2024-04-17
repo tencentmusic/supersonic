@@ -2,6 +2,7 @@ package com.tencent.supersonic.headless.server.service;
 
 import com.github.pagehelper.PageInfo;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
+import com.tencent.supersonic.common.pojo.DataEvent;
 import com.tencent.supersonic.common.pojo.enums.EventType;
 import com.tencent.supersonic.headless.api.pojo.DrillDownDimension;
 import com.tencent.supersonic.headless.api.pojo.MetricQueryDefaultConfig;
@@ -14,6 +15,7 @@ import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
 import com.tencent.supersonic.headless.api.pojo.response.MetricResp;
 import com.tencent.supersonic.headless.server.pojo.MetaFilter;
 import com.tencent.supersonic.headless.server.pojo.MetricsFilter;
+
 import java.util.List;
 import java.util.Set;
 
@@ -60,4 +62,6 @@ public interface MetricService {
     List<MetricResp> queryMetrics(MetricsFilter metricsFilter);
 
     QueryStructReq convert(QueryMetricReq queryMetricReq);
+
+    DataEvent getDataEvent();
 }
