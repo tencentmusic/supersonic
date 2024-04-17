@@ -402,7 +402,7 @@ public class DimensionServiceImpl implements DimensionService {
             String forbiddenCharacters = NameCheckUtils.findForbiddenCharacters(dimensionReq.getName());
             if (StringUtils.isNotBlank(forbiddenCharacters)) {
                 throw new InvalidArgumentException(String.format("名称包含特殊字符, 请修改: %s，特殊字符: %s",
-                        dimensionReq.getBizName(), forbiddenCharacters));
+                        dimensionReq.getName(), forbiddenCharacters));
             }
             if (bizNameMap.containsKey(dimensionReq.getBizName())) {
                 DimensionResp dimensionResp = bizNameMap.get(dimensionReq.getBizName());

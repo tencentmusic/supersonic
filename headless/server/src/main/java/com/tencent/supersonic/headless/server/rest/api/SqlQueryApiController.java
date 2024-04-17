@@ -2,6 +2,7 @@ package com.tencent.supersonic.headless.server.rest.api;
 
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
+import com.tencent.supersonic.common.pojo.enums.QueryType;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.api.pojo.SemanticSchema;
 import com.tencent.supersonic.headless.api.pojo.SqlInfo;
@@ -71,6 +72,7 @@ public class SqlQueryApiController {
         sqlInfo.setCorrectS2SQL(querySqlReq.getSql());
         sqlInfo.setS2SQL(querySqlReq.getSql());
         semanticParseInfo.setSqlInfo(sqlInfo);
+        semanticParseInfo.setQueryType(QueryType.TAG);
 
         ComponentFactory.getSemanticCorrectors().forEach(corrector -> {
             if (!(corrector instanceof GrammarCorrector)) {
