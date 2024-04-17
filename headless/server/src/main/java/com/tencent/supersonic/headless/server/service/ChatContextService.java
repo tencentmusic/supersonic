@@ -11,7 +11,7 @@ public interface ChatContextService {
      */
     Long getContextModel(Integer chatId);
 
-    ChatContext getOrCreateContext(int chatId);
+    ChatContext getOrCreateContext(Integer chatId);
 
     void updateContext(ChatContext chatCtx);
 
