@@ -20,6 +20,7 @@ import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.headless.api.pojo.SchemaMapInfo;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.api.pojo.SemanticSchema;
+import com.tencent.supersonic.headless.api.pojo.SqlInfo;
 import com.tencent.supersonic.headless.api.pojo.enums.CostType;
 import com.tencent.supersonic.headless.api.pojo.enums.QueryMethod;
 import com.tencent.supersonic.headless.api.pojo.request.DimensionValueReq;
@@ -29,6 +30,7 @@ import com.tencent.supersonic.headless.api.pojo.request.QueryDataReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryFilter;
 import com.tencent.supersonic.headless.api.pojo.request.QueryFilters;
 import com.tencent.supersonic.headless.api.pojo.request.QueryReq;
+import com.tencent.supersonic.headless.api.pojo.request.QuerySqlReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
 import com.tencent.supersonic.headless.api.pojo.request.SemanticQueryReq;
 import com.tencent.supersonic.headless.api.pojo.response.ExplainResp;
@@ -37,6 +39,7 @@ import com.tencent.supersonic.headless.api.pojo.response.ParseResp;
 import com.tencent.supersonic.headless.api.pojo.response.QueryResult;
 import com.tencent.supersonic.headless.api.pojo.response.QueryState;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
+import com.tencent.supersonic.headless.core.chat.corrector.GrammarCorrector;
 import com.tencent.supersonic.headless.core.chat.corrector.SemanticCorrector;
 import com.tencent.supersonic.headless.core.chat.knowledge.HanlpMapResult;
 import com.tencent.supersonic.headless.core.chat.knowledge.KnowledgeService;
@@ -647,5 +650,30 @@ public class ChatQueryServiceImpl implements ChatQueryService {
         return queryService.queryByReq(queryStructReq, user);
     }
 
-}
+    public void correct(QuerySqlReq querySqlReq, User user) {
+        QueryContext queryCtx = new QueryContext();
+        SemanticSchema semanticSchema = semanticService.getSemanticSchema();
+        queryCtx.setSemanticSchema(semanticSchema);
+        SemanticParseInfo semanticParseInfo = new SemanticParseInfo();
+        SqlInfo sqlInfo = new SqlInfo();
+        sqlInfo.setCorrectS2SQL(querySqlReq.getSql());
+        sqlInfo.setS2SQL(querySqlReq.getSql());
+        semanticParseInfo.setSqlInfo(sqlInfo);
+        semanticParseInfo.setQueryType(QueryType.TAG);
 
+        Long dataSetId = querySqlReq.getDataSetId();
+        if (Objects.isNull(dataSetId)) {
+            dataSetId = dataSetService.getDataSetIdFromSql(querySqlReq.getSql(), user);
+        }
+        SchemaElement dataSet = semanticSchema.getDataSet(dataSetId);
+        semanticParseInfo.setDataSet(dataSet);
+
+        ComponentFactory.getSemanticCorrectors().forEach(corrector -> {
+            if (!(corrector instanceof GrammarCorrector)) {
+                corrector.correct(queryCtx, semanticParseInfo);
+            }
+        });
+        querySqlReq.setSql(sqlInfo.getCorrectS2SQL());
+    }
+
+}

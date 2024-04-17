@@ -38,4 +38,6 @@ public interface DataSetService {
 
     SemanticQueryReq convert(QueryDataSetReq queryDataSetReq);
 
+    Long getDataSetIdFromSql(String sql, User user);
+
 }
