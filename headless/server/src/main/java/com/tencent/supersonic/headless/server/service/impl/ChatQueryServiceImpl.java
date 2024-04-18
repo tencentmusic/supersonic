@@ -40,6 +40,7 @@ import com.tencent.supersonic.headless.api.pojo.response.QueryResult;
 import com.tencent.supersonic.headless.api.pojo.response.QueryState;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
 import com.tencent.supersonic.headless.core.chat.corrector.GrammarCorrector;
+import com.tencent.supersonic.headless.core.chat.corrector.SchemaCorrector;
 import com.tencent.supersonic.headless.core.chat.corrector.SemanticCorrector;
 import com.tencent.supersonic.headless.core.chat.knowledge.HanlpMapResult;
 import com.tencent.supersonic.headless.core.chat.knowledge.KnowledgeService;
@@ -669,7 +670,7 @@ public class ChatQueryServiceImpl implements ChatQueryService {
         semanticParseInfo.setDataSet(dataSet);
 
         ComponentFactory.getSemanticCorrectors().forEach(corrector -> {
-            if (!(corrector instanceof GrammarCorrector)) {
+            if (!(corrector instanceof GrammarCorrector || (corrector instanceof SchemaCorrector))) {
                 corrector.correct(queryCtx, semanticParseInfo);
             }
         });
