@@ -10,6 +10,7 @@ import java.util.Objects;
 @ToString
 public class QuerySqlReq extends SemanticQueryReq {
     private String sql;
+    private Integer limit = 1000;
 
     @Override
     public String toCustomizedString() {
