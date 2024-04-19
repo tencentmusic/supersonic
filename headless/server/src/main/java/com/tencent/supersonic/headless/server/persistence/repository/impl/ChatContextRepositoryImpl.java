@@ -8,7 +8,6 @@ import com.tencent.supersonic.headless.server.persistence.dataobject.ChatContext
 import com.tencent.supersonic.headless.server.persistence.mapper.ChatContextMapper;
 import com.tencent.supersonic.headless.server.persistence.repository.ChatContextRepository;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Repository;
 
@@ -17,7 +16,7 @@ import org.springframework.stereotype.Repository;
 @Slf4j
 public class ChatContextRepositoryImpl implements ChatContextRepository {
 
-    @Autowired(required = false)
+
     private final ChatContextMapper chatContextMapper;
 
     public ChatContextRepositoryImpl(ChatContextMapper chatContextMapper) {
@@ -25,7 +24,7 @@ public class ChatContextRepositoryImpl implements ChatContextRepository {
     }
 
     @Override
-    public ChatContext getOrCreateContext(int chatId) {
+    public ChatContext getOrCreateContext(Integer chatId) {
         ChatContextDO context = chatContextMapper.getContextByChatId(chatId);
         if (context == null) {
             ChatContext chatContext = new ChatContext();

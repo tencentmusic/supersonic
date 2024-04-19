@@ -11,6 +11,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -39,7 +40,7 @@ public class HanlpDictMatchStrategy extends BaseMatchStrategy<HanlpMapResult> {
 
     @Override
     public Map<MatchText, List<HanlpMapResult>> match(QueryContext queryContext, List<S2Term> terms,
-            Set<Long> detectDataSetIds) {
+                                                      Set<Long> detectDataSetIds) {
         String text = queryContext.getQueryText();
         if (Objects.isNull(terms) || StringUtils.isEmpty(text)) {
             return null;
@@ -61,7 +62,7 @@ public class HanlpDictMatchStrategy extends BaseMatchStrategy<HanlpMapResult> {
     }
 
     public void detectByStep(QueryContext queryContext, Set<HanlpMapResult> existResults, Set<Long> detectDataSetIds,
-            String detectSegment, int offset) {
+                             String detectSegment, int offset) {
         // step1. pre search
         Integer oneDetectionMaxSize = optimizationConfig.getOneDetectionMaxSize();
         LinkedHashSet<HanlpMapResult> hanlpMapResults = knowledgeService.prefixSearch(detectSegment,
@@ -84,7 +85,7 @@ public class HanlpDictMatchStrategy extends BaseMatchStrategy<HanlpMapResult> {
         // step4. filter by similarity
         hanlpMapResults = hanlpMapResults.stream()
                 .filter(term -> mapperHelper.getSimilarity(detectSegment, term.getName())
-                        >= mapperHelper.getThresholdMatch(term.getNatures()))
+                        >= getThresholdMatch(term.getNatures(), queryContext))
                 .filter(term -> CollectionUtils.isNotEmpty(term.getNatures()))
                 .collect(Collectors.toCollection(LinkedHashSet::new));
 
@@ -117,5 +118,16 @@ public class HanlpDictMatchStrategy extends BaseMatchStrategy<HanlpMapResult> {
 
     public String getMapKey(HanlpMapResult a) {
         return a.getName() + Constants.UNDERLINE + String.join(Constants.UNDERLINE, a.getNatures());
+    }
+
+    public double getThresholdMatch(List<String> natures, QueryContext queryContext) {
+        Double threshold = optimizationConfig.getMetricDimensionThresholdConfig();
+        Double minThreshold = optimizationConfig.getMetricDimensionMinThresholdConfig();
+        if (mapperHelper.existDimensionValues(natures)) {
+            threshold = optimizationConfig.getDimensionValueThresholdConfig();
+            minThreshold = optimizationConfig.getDimensionValueMinThresholdConfig();
+        }
+        return getThreshold(threshold, minThreshold, queryContext.getMapModeEnum());
+
     }
 }

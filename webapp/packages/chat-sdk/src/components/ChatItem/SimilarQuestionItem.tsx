@@ -34,10 +34,10 @@ const SimilarQuestions: React.FC<Props> = ({
   };
 
   useEffect(() => {
-    if (expanded && similarQuestions?.length === 0) {
+    if (expanded && similarQuestions?.length === 0 && queryId) {
       initData();
     }
-  }, [expanded]);
+  }, [expanded, queryId]);
 
   const onToggleExpanded = () => {
     setExpanded(!expanded);

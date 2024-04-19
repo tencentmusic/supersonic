@@ -1,4 +1,4 @@
-package com.tencent.supersonic;
+package com.tencent.supersonic.headless.server.listener;
 
 import com.tencent.supersonic.common.config.EmbeddingConfig;
 import com.tencent.supersonic.headless.core.chat.parser.JavaLLMProxy;

@@ -6,11 +6,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
-import java.util.Map;
 
 @Component
 @Slf4j
@@ -85,7 +85,7 @@ public class SqlPromptGenerator {
     }
 
     public List<List<Map<String, String>>> getExampleCombos(List<Map<String, String>> exampleList, int numFewShots,
-            int numSelfConsistency) {
+                                                            int numSelfConsistency) {
         List<List<Map<String, String>>> results = new ArrayList<>();
         for (int i = 0; i < numSelfConsistency; i++) {
             List<Map<String, String>> shuffledList = new ArrayList<>(exampleList);
@@ -118,7 +118,7 @@ public class SqlPromptGenerator {
     }
 
     public List<String> generateSqlPromptPool(LLMReq llmReq, List<String> schemaLinkStrPool,
-            List<List<Map<String, String>>> fewshotExampleListPool) {
+                                              List<List<Map<String, String>>> fewshotExampleListPool) {
         List<String> sqlPromptPool = new ArrayList<>();
         for (int i = 0; i < schemaLinkStrPool.size(); i++) {
             String schemaLinkStr = schemaLinkStrPool.get(i);

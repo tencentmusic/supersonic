@@ -1,6 +1,7 @@
 package com.tencent.supersonic.common.util.jsqlparser;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;
@@ -9,6 +10,21 @@ import org.junit.jupiter.api.Test;
  * SqlParser Remove Helper Test
  */
 class SqlRemoveHelperTest {
+
+    @Test
+    void testRemoveSameFieldFromSelect() {
+        String sql = "select 歌曲名,歌手名,粉丝数,粉丝数,sum(粉丝数),sum(粉丝数),avg(播放量),avg(播放量)"
+                + " from 歌曲库 where sum(粉丝数) > 20000 and  2>1 and "
+                + "sum(播放量) > 20000 and 1=1  HAVING sum(播放量) > 20000 and 3>1";
+        sql = SqlRemoveHelper.removeSameFieldFromSelect(sql);
+        System.out.println(sql);
+        sql = "SELECT 结算播放量 FROM 艺人 WHERE (歌手名 IN ('林俊杰', '陈奕迅')) AND (数据日期 >= '2024-04-04' AND 数据日期 <= '2024-04-04')";
+        List<FieldExpression> fieldExpressionList = SqlSelectHelper.getWhereExpressions(sql);
+        fieldExpressionList.stream().forEach(fieldExpression -> {
+            System.out.println(fieldExpression.toString());
+        });
+
+    }
 
     @Test
     void testRemoveWhereHavingCondition() {

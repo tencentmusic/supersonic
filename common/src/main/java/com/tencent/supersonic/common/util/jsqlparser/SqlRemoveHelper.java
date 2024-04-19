@@ -29,6 +29,7 @@ import net.sf.jsqlparser.statement.select.SelectItem;
 import net.sf.jsqlparser.statement.select.SelectVisitorAdapter;
 import org.springframework.util.CollectionUtils;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.Objects;
@@ -57,6 +58,32 @@ public class SqlRemoveHelper {
             }
             return false;
         });
+        return selectStatement.toString();
+    }
+
+    public static String removeSameFieldFromSelect(String sql) {
+        Select selectStatement = SqlSelectHelper.getSelect(sql);
+        if (selectStatement == null) {
+            return sql;
+        }
+        SelectBody selectBody = selectStatement.getSelectBody();
+        if (!(selectBody instanceof PlainSelect)) {
+            return sql;
+        }
+        List<SelectItem> selectItems = ((PlainSelect) selectBody).getSelectItems();
+        Set<String> fields = new HashSet<>();
+        selectItems.removeIf(selectItem -> {
+            if (selectItem instanceof SelectExpressionItem) {
+                SelectExpressionItem selectExpressionItem = (SelectExpressionItem) selectItem;
+                String field = selectExpressionItem.getExpression().toString();
+                if (fields.contains(field)) {
+                    return true;
+                }
+                fields.add(field);
+            }
+            return false;
+        });
+        ((PlainSelect) selectBody).setSelectItems(selectItems);
         return selectStatement.toString();
     }
 

@@ -1,6 +1,7 @@
 package com.tencent.supersonic.headless.core.chat.mapper;
 
 
+import com.tencent.supersonic.headless.api.pojo.enums.MapModeEnum;
 import com.tencent.supersonic.headless.api.pojo.response.S2Term;
 import com.tencent.supersonic.headless.core.pojo.QueryContext;
 import com.tencent.supersonic.headless.core.chat.knowledge.helper.NatureHelper;
@@ -9,6 +10,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -29,7 +31,7 @@ public abstract class BaseMatchStrategy<T> implements MatchStrategy<T> {
 
     @Override
     public Map<MatchText, List<T>> match(QueryContext queryContext, List<S2Term> terms,
-            Set<Long> detectDataSetIds) {
+                                         Set<Long> detectDataSetIds) {
         String text = queryContext.getQueryText();
         if (Objects.isNull(terms) || StringUtils.isEmpty(text)) {
             return null;
@@ -69,8 +71,7 @@ public abstract class BaseMatchStrategy<T> implements MatchStrategy<T> {
     }
 
     protected void detectByBatch(QueryContext queryContext, Set<T> results, Set<Long> detectDataSetIds,
-            Set<String> detectSegments) {
-        return;
+                                 Set<String> detectSegments) {
     }
 
     public Map<Integer, Integer> getRegOffsetToLength(List<S2Term> terms) {
@@ -152,6 +153,11 @@ public abstract class BaseMatchStrategy<T> implements MatchStrategy<T> {
     public abstract String getMapKey(T a);
 
     public abstract void detectByStep(QueryContext queryContext, Set<T> existResults, Set<Long> detectDataSetIds,
-            String detectSegment, int offset);
+                                      String detectSegment, int offset);
 
+    public double getThreshold(Double threshold, Double minThreshold, MapModeEnum mapModeEnum) {
+        double decreaseAmount = (threshold - minThreshold) / 4;
+        double divideThreshold = threshold - mapModeEnum.threshold * decreaseAmount;
+        return divideThreshold >= minThreshold ? divideThreshold : minThreshold;
+    }
 }

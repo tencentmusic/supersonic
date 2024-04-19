@@ -51,9 +51,6 @@ import java.util.stream.Stream;
 @Slf4j
 public class QueryReqConverter {
 
-    @Value("${query.sql.limitWrapper:true}")
-    private Boolean limitWrapper;
-
     @Autowired
     private QueryStructUtils queryStructUtils;
 
@@ -130,7 +127,7 @@ public class QueryReqConverter {
         queryStatement.setIsS2SQL(true);
         queryStatement.setMinMaxTime(queryStructUtils.getBeginEndTime(queryStructReq));
         queryStatement.setDataSetId(querySQLReq.getDataSetId());
-        queryStatement.setEnableLimitWrapper(limitWrapper);
+        queryStatement.setLimit(querySQLReq.getLimit());
 
         return queryStatement;
     }
@@ -157,13 +154,13 @@ public class QueryReqConverter {
         return AggOption.DEFAULT;
     }
 
-    private void convertNameToBizName(QuerySqlReq databaseReq, SemanticSchemaResp semanticSchemaResp) {
+    private void convertNameToBizName(QuerySqlReq querySqlReq, SemanticSchemaResp semanticSchemaResp) {
         Map<String, String> fieldNameToBizNameMap = getFieldNameToBizNameMap(semanticSchemaResp);
-        String sql = databaseReq.getSql();
-        log.info("convert name to bizName before:{}", sql);
+        String sql = querySqlReq.getSql();
+        log.info("dataSetId:{},convert name to bizName before:{}", querySqlReq.getDataSetId(), sql);
         String replaceFields = SqlReplaceHelper.replaceFields(sql, fieldNameToBizNameMap, true);
-        log.info("convert name to bizName after:{}", replaceFields);
-        databaseReq.setSql(replaceFields);
+        log.info("dataSetId:{},convert name to bizName after:{}", querySqlReq.getDataSetId(), replaceFields);
+        querySqlReq.setSql(replaceFields);
     }
 
     private Set<String> getDimensions(SemanticSchemaResp semanticSchemaResp, List<String> allFields) {
@@ -246,7 +243,7 @@ public class QueryReqConverter {
                                        DataSetQueryParam viewQueryParam) {
         String sql = viewQueryParam.getSql();
         for (MetricTable metricTable : viewQueryParam.getTables()) {
-            List<String> measures = new ArrayList<>();
+            Set<String> measures = new HashSet<>();
             Map<String, String> replaces = new HashMap<>();
             generateDerivedMetric(semanticSchemaResp, aggOption, metricTable.getMetrics(),
                     metricTable.getDimensions(),
@@ -257,7 +254,7 @@ public class QueryReqConverter {
                 metricTable.setAggOption(AggOption.NATIVE);
                 // metricTable use measures replace metric
                 if (!CollectionUtils.isEmpty(measures)) {
-                    metricTable.setMetrics(measures);
+                    metricTable.setMetrics(new ArrayList<>(measures));
                 }
             }
         }
@@ -266,7 +263,7 @@ public class QueryReqConverter {
 
     private void generateDerivedMetric(SemanticSchemaResp semanticSchemaResp, AggOption aggOption,
                                        List<String> metrics, List<String> dimensions,
-                                       List<String> measures, Map<String, String> replaces) {
+                                       Set<String> measures, Map<String, String> replaces) {
         List<MetricSchemaResp> metricResps = semanticSchemaResp.getMetrics();
         List<DimSchemaResp> dimensionResps = semanticSchemaResp.getDimensions();
         // check metrics has derived

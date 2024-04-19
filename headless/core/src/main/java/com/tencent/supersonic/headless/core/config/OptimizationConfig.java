@@ -26,6 +26,9 @@ public class OptimizationConfig {
     @Value("${metric.dimension.threshold:0.3}")
     private Double metricDimensionThresholdConfig;
 
+    @Value("${dimension.value.min.threshold:0.2}")
+    private Double dimensionValueMinThresholdConfig;
+
     @Value("${dimension.value.threshold:0.5}")
     private Double dimensionValueThresholdConfig;
 
@@ -51,6 +54,9 @@ public class OptimizationConfig {
 
     @Value("${embedding.mapper.round.number:10}")
     private int embeddingMapperRoundNumber;
+
+    @Value("${embedding.mapper.min.threshold:0.6}")
+    private Double embeddingMapperMinThreshold;
 
     @Value("${embedding.mapper.threshold:0.99}")
     private Double embeddingMapperThreshold;
@@ -95,6 +101,10 @@ public class OptimizationConfig {
         return convertValue("metric.dimension.threshold", Double.class, metricDimensionThresholdConfig);
     }
 
+    public Double getDimensionValueMinThresholdConfig() {
+        return convertValue("dimension.value.min.threshold", Double.class, dimensionValueMinThresholdConfig);
+    }
+
     public Double getDimensionValueThresholdConfig() {
         return convertValue("dimension.value.threshold", Double.class, dimensionValueThresholdConfig);
     }
@@ -133,6 +143,10 @@ public class OptimizationConfig {
 
     public Integer getEmbeddingMapperRoundNumber() {
         return convertValue("embedding.mapper.round.number", Integer.class, embeddingMapperRoundNumber);
+    }
+
+    public Double getEmbeddingMapperMinThreshold() {
+        return convertValue("embedding.mapper.min.threshold", Double.class, embeddingMapperMinThreshold);
     }
 
     public Double getEmbeddingMapperThreshold() {

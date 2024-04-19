@@ -5,8 +5,6 @@ import com.google.common.collect.Sets;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.common.pojo.enums.TaskStatusEnum;
 import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
-import com.tencent.supersonic.common.pojo.exception.InvalidArgumentException;
-import com.tencent.supersonic.common.util.jsqlparser.SqlSelectHelper;
 import com.tencent.supersonic.headless.api.pojo.Dim;
 import com.tencent.supersonic.headless.api.pojo.QueryParam;
 import com.tencent.supersonic.headless.api.pojo.request.ExplainSqlReq;
@@ -17,7 +15,6 @@ import com.tencent.supersonic.headless.api.pojo.request.QuerySqlReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
 import com.tencent.supersonic.headless.api.pojo.request.SchemaFilterReq;
 import com.tencent.supersonic.headless.api.pojo.request.SemanticQueryReq;
-import com.tencent.supersonic.headless.api.pojo.response.DataSetResp;
 import com.tencent.supersonic.headless.api.pojo.response.DimensionResp;
 import com.tencent.supersonic.headless.api.pojo.response.ExplainResp;
 import com.tencent.supersonic.headless.api.pojo.response.ItemUseResp;
@@ -137,8 +134,8 @@ public class QueryServiceImpl implements QueryService {
 
     private QueryStatement buildSqlQueryStatement(QuerySqlReq querySqlReq, User user) throws Exception {
         //If dataSetId or DataSetName is empty, parse dataSetId from the SQL
-        if (needGetDataSetId(querySqlReq)) {
-            Long dataSetId = getDataSetIdFromSql(querySqlReq, user);
+        if (querySqlReq.needGetDataSetId()) {
+            Long dataSetId = dataSetService.getDataSetIdFromSql(querySqlReq.getSql(), user);
             querySqlReq.setDataSetId(dataSetId);
         }
         SchemaFilterReq filter = buildSchemaFilterReq(querySqlReq);
@@ -149,27 +146,6 @@ public class QueryServiceImpl implements QueryService {
         queryStatement.setSemanticSchemaResp(semanticSchemaResp);
         queryStatement.setSemanticModel(semanticSchemaManager.getSemanticModel(semanticSchemaResp));
         return queryStatement;
-    }
-
-    private static boolean needGetDataSetId(QuerySqlReq querySqlReq) {
-        return (Objects.isNull(querySqlReq.getDataSetId()) || querySqlReq.getDataSetId() <= 0)
-                && (CollectionUtils.isEmpty(querySqlReq.getModelIds()));
-    }
-
-    private Long getDataSetIdFromSql(QuerySqlReq querySqlReq, User user) {
-        List<DataSetResp> dataSets = null;
-        try {
-            String tableName = SqlSelectHelper.getTableName(querySqlReq.getSql());
-            dataSets = dataSetService.getDataSets(tableName, user);
-        } catch (Exception e) {
-            log.error("getDataSetIdFromSql error:{}", e);
-        }
-        if (CollectionUtils.isEmpty(dataSets)) {
-            throw new InvalidArgumentException("从Sql参数中无法获取到DataSetId");
-        }
-        Long dataSetId = dataSets.get(0).getId();
-        log.info("getDataSetIdFromSql dataSetId:{}", dataSetId);
-        return dataSetId;
     }
 
     private QueryStatement buildQueryStatement(SemanticQueryReq semanticQueryReq, User user) throws Exception {

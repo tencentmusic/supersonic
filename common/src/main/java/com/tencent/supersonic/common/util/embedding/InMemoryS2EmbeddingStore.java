@@ -1,10 +1,5 @@
 package com.tencent.supersonic.common.util.embedding;
 
-import static dev.langchain4j.internal.Utils.randomUUID;
-import static java.nio.file.StandardOpenOption.CREATE;
-import static java.nio.file.StandardOpenOption.TRUNCATE_EXISTING;
-import static java.util.Comparator.comparingDouble;
-
 import com.tencent.supersonic.common.config.EmbeddingConfig;
 import com.tencent.supersonic.common.util.ContextUtils;
 import dev.langchain4j.data.embedding.Embedding;
@@ -13,6 +8,10 @@ import dev.langchain4j.store.embedding.CosineSimilarity;
 import dev.langchain4j.store.embedding.EmbeddingMatch;
 import dev.langchain4j.store.embedding.EmbeddingStore;
 import dev.langchain4j.store.embedding.RelevanceScore;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -20,6 +19,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -29,9 +29,11 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.stream.Collectors;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.lang3.StringUtils;
+
+import static dev.langchain4j.internal.Utils.randomUUID;
+import static java.nio.file.StandardOpenOption.CREATE;
+import static java.nio.file.StandardOpenOption.TRUNCATE_EXISTING;
+import static java.util.Comparator.comparingDouble;
 
 /***
  * Implementation of S2EmbeddingStore within the Java process's in-memory.
@@ -134,7 +136,11 @@ public class InMemoryS2EmbeddingStore implements S2EmbeddingStore {
                 retrieval.setDistance(1 - embeddingMatch.score());
                 retrieval.setId(embeddingMatch.embeddingId());
                 retrieval.setQuery(embeddingMatch.embedded().getQuery());
-                Map<String, Object> metadata = embeddingMatch.embedded().getMetadata();
+                Map<String, Object> metadata = new HashMap<>();
+                if (Objects.nonNull(embeddingMatch.embedded())
+                        && MapUtils.isNotEmpty(embeddingMatch.embedded().getMetadata())) {
+                    metadata.putAll(embeddingMatch.embedded().getMetadata());
+                }
                 if (filterRetrieval(filterCondition, metadata)) {
                     continue;
                 }
@@ -179,9 +185,9 @@ public class InMemoryS2EmbeddingStore implements S2EmbeddingStore {
      * Uses a brute force approach by iterating over all embeddings to find the best matches.
      *
      * @param <Embedded> The class of the object that has been embedded.
-     *         Typically, it is {@link dev.langchain4j.data.segment.TextSegment}.
-     *         copy from dev.langchain4j.store.embedding.inmemory.InMemoryEmbeddingStore
-     *         and fix concurrentModificationException in a multi-threaded environment
+     *                   Typically, it is {@link dev.langchain4j.data.segment.TextSegment}.
+     *                   copy from dev.langchain4j.store.embedding.inmemory.InMemoryEmbeddingStore
+     *                   and fix concurrentModificationException in a multi-threaded environment
      */
     public static class InMemoryEmbeddingStore<Embedded> implements EmbeddingStore<Embedded> {
 
@@ -267,7 +273,7 @@ public class InMemoryS2EmbeddingStore implements S2EmbeddingStore {
 
         @Override
         public List<EmbeddingMatch<Embedded>> findRelevant(Embedding referenceEmbedding, int maxResults,
-                double minScore) {
+                                                           double minScore) {
 
             Comparator<EmbeddingMatch<Embedded>> comparator = comparingDouble(EmbeddingMatch::score);
             PriorityQueue<EmbeddingMatch<Embedded>> matches = new PriorityQueue<>(comparator);
