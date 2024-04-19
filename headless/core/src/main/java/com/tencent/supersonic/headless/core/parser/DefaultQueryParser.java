@@ -56,9 +56,9 @@ public class DefaultQueryParser implements QueryParser {
             throw new RuntimeException("parse Exception: " + queryStatement.getErrMsg());
         }
         String querySql =
-                Objects.nonNull(queryStatement.getEnableLimitWrapper()) && queryStatement.getEnableLimitWrapper()
+                Objects.nonNull(queryStatement.getLimit()) && queryStatement.getLimit() > 0
                         ? String.format(SqlExecuteReq.LIMIT_WRAPPER,
-                        queryStatement.getSql())
+                        queryStatement.getSql(), queryStatement.getLimit())
                         : queryStatement.getSql();
         queryStatement.setSql(querySql);
     }

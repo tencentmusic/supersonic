@@ -51,9 +51,6 @@ import java.util.stream.Stream;
 @Slf4j
 public class QueryReqConverter {
 
-    @Value("${query.sql.limitWrapper:true}")
-    private Boolean limitWrapper;
-
     @Autowired
     private QueryStructUtils queryStructUtils;
 
@@ -130,7 +127,7 @@ public class QueryReqConverter {
         queryStatement.setIsS2SQL(true);
         queryStatement.setMinMaxTime(queryStructUtils.getBeginEndTime(queryStructReq));
         queryStatement.setDataSetId(querySQLReq.getDataSetId());
-        queryStatement.setEnableLimitWrapper(limitWrapper);
+        queryStatement.setLimit(querySQLReq.getLimit());
 
         return queryStatement;
     }
