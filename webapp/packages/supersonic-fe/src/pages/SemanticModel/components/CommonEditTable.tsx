@@ -1,9 +1,9 @@
-import type { ActionType } from '@ant-design/pro-table';
+import type { ActionType } from '@ant-design/pro-components';
 import type { Ref, ReactNode } from 'react';
 import { Space, message } from 'antd';
 import React, { useRef, forwardRef, useImperativeHandle, useState, useEffect } from 'react';
 
-import { EditableProTable } from '@ant-design/pro-table';
+import { EditableProTable } from '@ant-design/pro-components';
 
 type Props = {
   title?: string;

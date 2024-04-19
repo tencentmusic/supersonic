@@ -1,4 +1,4 @@
-import type { ColumnsState } from '@ant-design/pro-table';
+import type { ColumnsState } from '@ant-design/pro-components';
 import { useCallback, useEffect, useState } from 'react';
 import type { DependencyList } from 'react';
 
