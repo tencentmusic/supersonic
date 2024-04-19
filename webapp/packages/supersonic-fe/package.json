@@ -57,9 +57,8 @@
   "dependencies": {
     "@ant-design/icons": "^5.2.6",
     "@ant-design/pro-card": "^2.5.26",
-    "@ant-design/pro-components": "^2.6.41",
+    "@ant-design/pro-components": "2.7.0",
     "@ant-design/pro-layout": "^7.17.15",
-    "@ant-design/pro-table": "^3.13.9",
     "@antv/dom-util": "^2.0.4",
     "@antv/g6": "^4.8.23",
     "@antv/g6-core": "^0.8.23",
