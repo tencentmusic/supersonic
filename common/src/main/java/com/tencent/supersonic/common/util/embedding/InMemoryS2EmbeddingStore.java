@@ -137,7 +137,10 @@ public class InMemoryS2EmbeddingStore implements S2EmbeddingStore {
                 retrieval.setId(embeddingMatch.embeddingId());
                 retrieval.setQuery(embeddingMatch.embedded().getQuery());
                 Map<String, Object> metadata = new HashMap<>();
-                metadata.putAll(embeddingMatch.embedded().getMetadata());
+                if (Objects.nonNull(embeddingMatch.embedded())
+                        && MapUtils.isNotEmpty(embeddingMatch.embedded().getMetadata())) {
+                    metadata.putAll(embeddingMatch.embedded().getMetadata());
+                }
                 if (filterRetrieval(filterCondition, metadata)) {
                     continue;
                 }
