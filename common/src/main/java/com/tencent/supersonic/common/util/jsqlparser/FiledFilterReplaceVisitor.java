@@ -11,6 +11,7 @@ import net.sf.jsqlparser.expression.ExpressionVisitorAdapter;
 import net.sf.jsqlparser.expression.Function;
 import net.sf.jsqlparser.expression.operators.relational.ComparisonOperator;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
+import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
 import net.sf.jsqlparser.expression.operators.relational.GreaterThan;
 import net.sf.jsqlparser.expression.operators.relational.GreaterThanEquals;
 import net.sf.jsqlparser.expression.operators.relational.MinorThan;
@@ -85,7 +86,8 @@ public class FiledFilterReplaceVisitor extends ExpressionVisitorAdapter {
             return result;
         }
 
-        List<Expression> leftExpressions = leftExpressionFunction.getParameters().getExpressions();
+        //List<Expression> leftExpressions = leftExpressionFunction.getParameters().getExpressions();
+        ExpressionList<?> leftExpressions = leftExpressionFunction.getParameters();
         if (CollectionUtils.isEmpty(leftExpressions)) {
             return result;
         }

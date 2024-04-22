@@ -501,7 +501,7 @@ public class ChatQueryServiceImpl implements ChatQueryService {
         });
         expressionList.setExpressions(expressions);
         inExpression.setLeftExpression(column);
-        inExpression.setRightItemsList(expressionList);
+        inExpression.setRightExpression(expressionList);
         addConditions.add(inExpression);
         contextMetricFilters.stream().forEach(o -> {
             if (o.getName().equals(dslQueryFilter.getName())) {

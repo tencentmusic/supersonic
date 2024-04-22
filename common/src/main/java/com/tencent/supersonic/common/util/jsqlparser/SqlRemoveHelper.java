@@ -1,5 +1,9 @@
 package com.tencent.supersonic.common.util.jsqlparser;
 
+import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.BinaryExpression;
@@ -10,7 +14,6 @@ import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
 import net.sf.jsqlparser.expression.operators.conditional.OrExpression;
 import net.sf.jsqlparser.expression.operators.relational.ComparisonOperator;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
-import net.sf.jsqlparser.expression.operators.relational.NotEqualsTo;
 import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
 import net.sf.jsqlparser.expression.operators.relational.GreaterThan;
 import net.sf.jsqlparser.expression.operators.relational.GreaterThanEquals;
@@ -18,21 +21,15 @@ import net.sf.jsqlparser.expression.operators.relational.InExpression;
 import net.sf.jsqlparser.expression.operators.relational.LikeExpression;
 import net.sf.jsqlparser.expression.operators.relational.MinorThan;
 import net.sf.jsqlparser.expression.operators.relational.MinorThanEquals;
+import net.sf.jsqlparser.expression.operators.relational.NotEqualsTo;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.statement.select.GroupByElement;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.Select;
-import net.sf.jsqlparser.statement.select.SelectBody;
-import net.sf.jsqlparser.statement.select.SelectExpressionItem;
 import net.sf.jsqlparser.statement.select.SelectItem;
 import net.sf.jsqlparser.statement.select.SelectVisitorAdapter;
 import org.springframework.util.CollectionUtils;
-
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.Objects;
 
 /**
  * Sql Parser remove Helper
@@ -45,18 +42,14 @@ public class SqlRemoveHelper {
         if (selectStatement == null) {
             return sql;
         }
-        SelectBody selectBody = selectStatement.getSelectBody();
-        if (!(selectBody instanceof PlainSelect)) {
+        //SelectBody selectBody = selectStatement.getSelectBody();
+        if (!(selectStatement instanceof PlainSelect)) {
             return sql;
         }
-        List<SelectItem> selectItems = ((PlainSelect) selectBody).getSelectItems();
+        List<SelectItem<?>> selectItems = ((PlainSelect) selectStatement).getSelectItems();
         selectItems.removeIf(selectItem -> {
-            if (selectItem instanceof SelectExpressionItem) {
-                SelectExpressionItem selectExpressionItem = (SelectExpressionItem) selectItem;
-                String columnName = SqlSelectHelper.getColumnName(selectExpressionItem.getExpression());
-                return fields.contains(columnName);
-            }
-            return false;
+            String columnName = SqlSelectHelper.getColumnName(selectItem.getExpression());
+            return fields.contains(columnName);
         });
         return selectStatement.toString();
     }
@@ -66,35 +59,32 @@ public class SqlRemoveHelper {
         if (selectStatement == null) {
             return sql;
         }
-        SelectBody selectBody = selectStatement.getSelectBody();
-        if (!(selectBody instanceof PlainSelect)) {
+        //SelectBody selectBody = selectStatement.getSelectBody();
+        if (!(selectStatement instanceof PlainSelect)) {
             return sql;
         }
-        List<SelectItem> selectItems = ((PlainSelect) selectBody).getSelectItems();
+        List<SelectItem<?>> selectItems = ((PlainSelect) selectStatement).getSelectItems();
         Set<String> fields = new HashSet<>();
         selectItems.removeIf(selectItem -> {
-            if (selectItem instanceof SelectExpressionItem) {
-                SelectExpressionItem selectExpressionItem = (SelectExpressionItem) selectItem;
-                String field = selectExpressionItem.getExpression().toString();
-                if (fields.contains(field)) {
-                    return true;
-                }
-                fields.add(field);
+            String field = selectItem.getExpression().toString();
+            if (fields.contains(field)) {
+                return true;
             }
+            fields.add(field);
             return false;
         });
-        ((PlainSelect) selectBody).setSelectItems(selectItems);
+        ((PlainSelect) selectStatement).setSelectItems(selectItems);
         return selectStatement.toString();
     }
 
     public static String removeWhereCondition(String sql, Set<String> removeFieldNames) {
         Select selectStatement = SqlSelectHelper.getSelect(sql);
-        SelectBody selectBody = selectStatement.getSelectBody();
+        //SelectBody selectBody = selectStatement.getSelectBody();
 
-        if (!(selectBody instanceof PlainSelect)) {
+        if (!(selectStatement instanceof PlainSelect)) {
             return sql;
         }
-        selectBody.accept(new SelectVisitorAdapter() {
+        selectStatement.accept(new SelectVisitorAdapter() {
             @Override
             public void visit(PlainSelect plainSelect) {
                 removeWhereCondition(plainSelect.getWhere(), removeFieldNames);
@@ -115,16 +105,16 @@ public class SqlRemoveHelper {
         if (selectStatement == null) {
             return sql;
         }
-        SelectBody selectBody = selectStatement.getSelectBody();
+        //SelectBody selectBody = selectStatement.getSelectBody();
 
-        if (!(selectBody instanceof PlainSelect)) {
+        if (!(selectStatement instanceof PlainSelect)) {
             return sql;
         }
-        Expression where = ((PlainSelect) selectBody).getWhere();
-        Expression having = ((PlainSelect) selectBody).getHaving();
+        Expression where = ((PlainSelect) selectStatement).getWhere();
+        Expression having = ((PlainSelect) selectStatement).getHaving();
         try {
-            ((PlainSelect) selectBody).setWhere(filteredExpression(where, SqlEditEnum.NUMBER_FILTER));
-            ((PlainSelect) selectBody).setHaving(filteredExpression(having, SqlEditEnum.NUMBER_FILTER));
+            ((PlainSelect) selectStatement).setWhere(filteredExpression(where, SqlEditEnum.NUMBER_FILTER));
+            ((PlainSelect) selectStatement).setHaving(filteredExpression(having, SqlEditEnum.NUMBER_FILTER));
         } catch (Exception e) {
             log.info("replaceFunction has an exception:{}", e.toString());
         }
@@ -194,7 +184,8 @@ public class SqlRemoveHelper {
                 InExpression constantExpression = (InExpression) CCJSqlParserUtil.parseCondExpression(
                         JsqlConstants.IN_CONSTANT);
                 inExpression.setLeftExpression(constantExpression.getLeftExpression());
-                inExpression.setRightItemsList(constantExpression.getRightItemsList());
+                //inExpression.setRightItemsList(constantExpression.getRightItemsList());
+                inExpression.setRightExpression(constantExpression.getRightExpression());
                 inExpression.setASTNode(constantExpression.getASTNode());
             } catch (JSQLParserException e) {
                 log.error("JSQLParserException", e);
@@ -220,12 +211,12 @@ public class SqlRemoveHelper {
 
     public static String removeHavingCondition(String sql, Set<String> removeFieldNames) {
         Select selectStatement = SqlSelectHelper.getSelect(sql);
-        SelectBody selectBody = selectStatement.getSelectBody();
+        //SelectBody selectBody = selectStatement.getSelectBody();
 
-        if (!(selectBody instanceof PlainSelect)) {
+        if (!(selectStatement instanceof PlainSelect)) {
             return sql;
         }
-        selectBody.accept(new SelectVisitorAdapter() {
+        selectStatement.accept(new SelectVisitorAdapter() {
             @Override
             public void visit(PlainSelect plainSelect) {
                 removeWhereCondition(plainSelect.getHaving(), removeFieldNames);
@@ -239,11 +230,11 @@ public class SqlRemoveHelper {
         if (selectStatement == null) {
             return sql;
         }
-        SelectBody selectBody = selectStatement.getSelectBody();
-        if (!(selectBody instanceof PlainSelect)) {
+        //SelectBody selectBody = selectStatement.getSelectBody();
+        if (!(selectStatement instanceof PlainSelect)) {
             return sql;
         }
-        GroupByElement groupByElement = ((PlainSelect) selectBody).getGroupBy();
+        GroupByElement groupByElement = ((PlainSelect) selectStatement).getGroupBy();
         if (groupByElement == null) {
             return sql;
         }
@@ -256,7 +247,7 @@ public class SqlRemoveHelper {
             return false;
         });
         if (CollectionUtils.isEmpty(groupByExpressionList.getExpressions())) {
-            ((PlainSelect) selectBody).setGroupByElement(null);
+            ((PlainSelect) selectStatement).setGroupByElement(null);
         }
         return selectStatement.toString();
     }
