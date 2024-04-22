@@ -4,6 +4,9 @@ import com.tencent.supersonic.common.pojo.RecordInfo;
 import lombok.Data;
 import lombok.ToString;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @Data
 @ToString(callSuper = true)
 public class TagResp extends RecordInfo {
@@ -37,5 +40,7 @@ public class TagResp extends RecordInfo {
     private String description;
 
     private Integer sensitiveLevel;
+
+    private Map<String, Object> ext = new HashMap();
 
 }
