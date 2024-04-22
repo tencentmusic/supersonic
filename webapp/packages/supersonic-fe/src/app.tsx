@@ -135,7 +135,7 @@ export const layout: RunTimeLayoutConfig = (params) => {
           color="#fff"
           style={{ display: 'inline-block', marginTop: 8 }}
         />
-        <div className="logo">超音数(SuperSonic)</div>
+        <div className="logo">SuperSonic</div>
       </Space>
     ),
     contentStyle: { ...(initialState?.contentStyle || {}) },

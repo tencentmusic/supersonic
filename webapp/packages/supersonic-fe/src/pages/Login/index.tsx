@@ -93,7 +93,7 @@ const LoginPage: React.FC = () => {
                       color="#296DF3"
                       style={{ display: 'inline-block', marginTop: 8 }}
                     />
-                    <div>超音数(SuperSonic)</div>
+                    <div>SuperSonic</div>
                   </Space>
                 </h3>
                 <Item name="name" rules={[{ required: true }]} label="">
