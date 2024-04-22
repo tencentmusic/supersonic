@@ -1,6 +1,7 @@
 package com.tencent.supersonic.common.util;
 
 
+import cn.hutool.core.util.StrUtil;
 import com.plexpt.chatgpt.ChatGPT;
 import com.plexpt.chatgpt.entity.chat.ChatCompletion;
 import com.plexpt.chatgpt.entity.chat.ChatCompletionResponse;
@@ -14,6 +15,7 @@ import java.net.Proxy;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 
 
 @Component
@@ -47,9 +49,15 @@ public class ChatGptHelper {
     }
 
     public Message getChatCompletion(Message system, Message message) {
+        List<Message> messages ;
+        if (StrUtil.isBlank(system.getContent())) {
+            messages = Arrays.asList(message);
+        } else {
+            messages = Arrays.asList(system, message);
+        }
         ChatCompletion chatCompletion = ChatCompletion.builder()
                 .model(ChatCompletion.Model.GPT_3_5_TURBO_16K.getName())
-                .messages(Arrays.asList(system, message))
+                .messages(messages)
                 .maxTokens(10000)
                 .temperature(0.9)
                 .build();
