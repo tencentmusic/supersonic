@@ -1,7 +1,5 @@
 package com.tencent.supersonic.common.util.jsqlparser;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import net.sf.jsqlparser.expression.BinaryExpression;
@@ -9,6 +7,7 @@ import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.ExpressionVisitorAdapter;
 import net.sf.jsqlparser.expression.Function;
 import net.sf.jsqlparser.expression.WhenClause;
+import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
 import net.sf.jsqlparser.schema.Column;
 
 public class ExpressionReplaceVisitor extends ExpressionVisitorAdapter {
@@ -80,12 +79,12 @@ public class ExpressionReplaceVisitor extends ExpressionVisitorAdapter {
             Expression expression = QueryExpressionReplaceVisitor.getExpression(
                     QueryExpressionReplaceVisitor.getReplaceExpr(function, fieldExprMap));
             if (Objects.nonNull(expression)) {
-                List<Expression> expressions = new ArrayList<>();
+                ExpressionList<Expression> expressions = new ExpressionList<>();
                 expressions.add(expression);
-                for (int i = 1; i < function.getParameters().getExpressions().size(); i++) {
-                    expressions.add(function.getParameters().getExpressions().get(i));
+                for (int i = 1; i < function.getParameters().size(); i++) {
+                    expressions.add((Expression) function.getParameters().get(i));
                 }
-                function.getParameters().setExpressions(expressions);
+                function.setParameters(expressions);
                 return true;
             }
         }

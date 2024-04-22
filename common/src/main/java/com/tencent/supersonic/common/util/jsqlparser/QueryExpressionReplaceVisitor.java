@@ -9,7 +9,7 @@ import net.sf.jsqlparser.expression.ExpressionVisitorAdapter;
 import net.sf.jsqlparser.expression.Function;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.schema.Column;
-import net.sf.jsqlparser.statement.select.SelectExpressionItem;
+import net.sf.jsqlparser.statement.select.SelectItem;
 
 public class QueryExpressionReplaceVisitor extends ExpressionVisitorAdapter {
 
@@ -43,7 +43,7 @@ public class QueryExpressionReplaceVisitor extends ExpressionVisitorAdapter {
 
     }
 
-    public void visit(SelectExpressionItem selectExpressionItem) {
+    public void visit(SelectItem selectExpressionItem) {
 
         Expression expression = selectExpressionItem.getExpression();
         String toReplace = "";

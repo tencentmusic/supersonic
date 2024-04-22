@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import net.sf.jsqlparser.expression.Function;
-import net.sf.jsqlparser.statement.select.SelectExpressionItem;
+import net.sf.jsqlparser.statement.select.SelectItem;
 import net.sf.jsqlparser.statement.select.SelectItemVisitorAdapter;
 
 public class FunctionAliasReplaceVisitor extends SelectItemVisitorAdapter {
@@ -12,7 +12,7 @@ public class FunctionAliasReplaceVisitor extends SelectItemVisitorAdapter {
     private Map<String, String> aliasToActualExpression = new HashMap<>();
 
     @Override
-    public void visit(SelectExpressionItem selectExpressionItem) {
+    public void visit(SelectItem selectExpressionItem) {
         if (selectExpressionItem.getExpression() instanceof Function) {
             Function function = (Function) selectExpressionItem.getExpression();
             String columnName = SqlSelectHelper.getColumnName(function);
