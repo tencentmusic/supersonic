@@ -372,9 +372,6 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
       }
       setSelectedRowKeys(selectedRowKeys);
     },
-    // getCheckboxProps: (record: ISemantic.IMetricItem) => ({
-    //   disabled: !record.hasAdminRes,
-    // }),
   };
 
   const onMenuClick = (key: string) => {
@@ -395,6 +392,20 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
       <div className={styles.metricFilterWrapper}>
         <MetricFilter
           initFilterValues={filterParams}
+          extraNode={
+            <BatchCtrlDropDownButton
+              key="ctrlBtnList"
+              downloadLoading={downloadLoading}
+              onDeleteConfirm={() => {
+                queryBatchUpdateStatus(selectedRowKeys, StatusEnum.DELETED);
+              }}
+              disabledList={hasAllPermission ? [] : ['batchStart', 'batchStop', 'batchDelete']}
+              onMenuClick={onMenuClick}
+              onDownloadDateRangeChange={(searchDateRange, pickerType) => {
+                downloadMetricQuery(selectedRowKeys, searchDateRange, pickerType);
+              }}
+            />
+          }
           onFiltersChange={(_, values) => {
             if (_.showType !== undefined) {
               setLoading(true);
@@ -441,20 +452,6 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
               type: 'checkbox',
               ...rowSelection,
             }}
-            toolBarRender={() => [
-              <BatchCtrlDropDownButton
-                key="ctrlBtnList"
-                downloadLoading={downloadLoading}
-                onDeleteConfirm={() => {
-                  queryBatchUpdateStatus(selectedRowKeys, StatusEnum.DELETED);
-                }}
-                disabledList={hasAllPermission ? [] : ['batchStart', 'batchStop', 'batchDelete']}
-                onMenuClick={onMenuClick}
-                onDownloadDateRangeChange={(searchDateRange, pickerType) => {
-                  downloadMetricQuery(selectedRowKeys, searchDateRange, pickerType);
-                }}
-              />,
-            ]}
             loading={loading}
             onChange={(data: any) => {
               const { current, pageSize, total } = data;
@@ -466,7 +463,7 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
               setPagination(pagin);
               queryMetricList({ ...pagin, ...filterParams });
             }}
-            options={{ reload: false, density: false, fullScreen: false }}
+            options={false}
           />
         )}
       </>

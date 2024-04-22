@@ -73,7 +73,7 @@
     "@umijs/route-utils": "^1.0.33",
     "ace-builds": "^1.4.12",
     "ahooks": "^3.7.7",
-    "antd": "^5.11.0",
+    "antd": "5.11.0",
     "classnames": "^2.2.6",
     "compression-webpack-plugin": "^11.0.0",
     "copy-to-clipboard": "^3.3.1",
