@@ -37,7 +37,7 @@ public class TagObjectServiceImpl implements TagObjectService {
         tagObjectDO.setUpdatedBy(user.getName());
         tagObjectDO.setUpdatedAt(date);
         tagObjectDO.setStatus(StatusEnum.ONLINE.getCode());
-        tagObjectRepository.create(tagObjectDO).longValue();
+        tagObjectRepository.create(tagObjectDO);
         TagObjectDO tagObjectById = tagObjectRepository.getTagObjectById(tagObjectDO.getId());
         return TagObjectConverter.convert2Resp(tagObjectById);
     }
