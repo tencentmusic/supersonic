@@ -100,3 +100,6 @@ inMemoryEmbeddingStore:
 query:
   optimizer:
     enable: true
+multi:
+  turn: true
+  num: 5

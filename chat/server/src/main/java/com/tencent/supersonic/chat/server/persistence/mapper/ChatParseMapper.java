@@ -18,4 +18,6 @@ public interface ChatParseMapper {
 
     List<ChatParseDO> getParseInfoList(List<Long> questionIds);
 
+    List<ChatParseDO> getContextualParseInfo(Integer chatId);
+
 }

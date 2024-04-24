@@ -168,7 +168,7 @@ public class ChatQueryServiceImpl implements ChatQueryService {
         return parseResult;
     }
 
-    private QueryContext buildQueryContext(QueryReq queryReq) {
+    public QueryContext buildQueryContext(QueryReq queryReq) {
 
         SemanticSchema semanticSchema = semanticService.getSemanticSchema();
         Map<Long, List<Long>> modelIdToDataSetIds = dataSetService.getModelIdToDataSetIds();
