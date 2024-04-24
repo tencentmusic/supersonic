@@ -20,6 +20,7 @@ type FieldItem = {
   dataType: string;
   name: string;
   type: EnumDataSourceType;
+  comment?: string;
   agg?: string;
   checked?: number;
   dateFormat?: string;
@@ -132,7 +133,7 @@ const ModelFieldForm: React.FC<Props> = ({
     {
       title: '扩展配置',
       dataIndex: 'extender',
-      width: 185,
+      width: 200,
       render: (_: any, record: FieldItem) => {
         const { type } = record;
         if (type === EnumDataSourceType.PRIMARY) {
@@ -269,7 +270,8 @@ const ModelFieldForm: React.FC<Props> = ({
       dataIndex: 'fastCreate',
       width: 200,
       render: (_: any, record: FieldItem) => {
-        const { type, name } = record;
+        const { type, name, comment } = record;
+        const inputValue = name || comment;
         if (
           [
             EnumDataSourceType.PRIMARY,
@@ -308,9 +310,9 @@ const ModelFieldForm: React.FC<Props> = ({
               </Col>
               <Col flex="auto">
                 <Input
-                  className={!name && styles.dataSourceFieldsName}
+                  className={!inputValue && styles.dataSourceFieldsName}
                   style={{ minHeight: 20 }}
-                  value={name}
+                  value={inputValue}
                   disabled={!editState}
                   minLength={1}
                   onChange={(e) => {
