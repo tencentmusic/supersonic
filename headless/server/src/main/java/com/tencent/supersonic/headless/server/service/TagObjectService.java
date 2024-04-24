@@ -6,6 +6,7 @@ import com.tencent.supersonic.headless.api.pojo.response.TagObjectResp;
 import com.tencent.supersonic.headless.server.pojo.TagObjectFilter;
 
 import java.util.List;
+import java.util.Map;
 
 public interface TagObjectService {
 
@@ -18,4 +19,7 @@ public interface TagObjectService {
     TagObjectResp getTagObject(Long id, User user);
 
     List<TagObjectResp> getTagObjects(TagObjectFilter filter, User user);
+
+    Map<Long, TagObjectResp> getAllTagObjectMap();
+
 }

@@ -7,10 +7,12 @@ import com.tencent.supersonic.headless.server.persistence.repository.ClassReposi
 import com.tencent.supersonic.headless.server.pojo.ClassFilter;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.logging.log4j.util.Strings;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Objects;
 
+@Repository
 public class ClassRepositoryImpl implements ClassRepository {
 
     private final ClassMapper mapper;
@@ -47,8 +49,8 @@ public class ClassRepositoryImpl implements ClassRepository {
         if (Objects.nonNull(filter.getDomainId())) {
             wrapper.lambda().eq(ClassDO::getDomainId, filter.getDomainId());
         }
-        if (Objects.nonNull(filter.getTagObjectId())) {
-            wrapper.lambda().eq(ClassDO::getTagObjectId, filter.getTagObjectId());
+        if (Objects.nonNull(filter.getDataSetId())) {
+            wrapper.lambda().eq(ClassDO::getDataSetId, filter.getDataSetId());
         }
         if (Strings.isNotEmpty(filter.getType())) {
             wrapper.lambda().eq(ClassDO::getType, filter.getType());
@@ -65,6 +67,12 @@ public class ClassRepositoryImpl implements ClassRepository {
         if (Objects.nonNull(filter.getBizName())) {
             wrapper.lambda().eq(ClassDO::getBizName, filter.getBizName());
         }
+        return mapper.selectList(wrapper);
+    }
+
+    @Override
+    public List<ClassDO> getAllClassDOList() {
+        QueryWrapper<ClassDO> wrapper = new QueryWrapper();
         return mapper.selectList(wrapper);
     }
 }

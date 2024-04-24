@@ -3,6 +3,7 @@ package com.tencent.supersonic.headless.api.pojo.response;
 import lombok.Data;
 
 import java.util.Date;
+import java.util.List;
 
 @Data
 public class ClassResp {
@@ -11,8 +12,7 @@ public class ClassResp {
 
     private Long domainId;
     private String domainName;
-    private Long tagObjectId;
-    private String tagObjectName;
+    private Long dataSetId;
 
     private String name;
     private String bizName;
@@ -29,13 +29,11 @@ public class ClassResp {
      * METRIC、DIMENSION、TAG
      */
     private String type;
-    private String itemIds;
+    private List<Long> itemIds;
 
     private Date createdAt;
     private String createdBy;
     private Date updatedAt;
     private String updatedBy;
-
-    private boolean hasEditPermission = false;
 
 }

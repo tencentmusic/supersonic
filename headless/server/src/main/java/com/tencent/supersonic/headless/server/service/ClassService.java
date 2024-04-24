@@ -13,7 +13,7 @@ public interface ClassService {
 
     ClassResp update(ClassReq classReq, User user);
 
-    Boolean delete(Long id, User user);
+    Boolean delete(Long id, Boolean force, User user) throws Exception;
 
     List<ClassResp> getClassList(ClassFilter filter, User user);
 }

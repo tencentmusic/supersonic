@@ -15,7 +15,7 @@ public class ClassDO {
     private Long id;
 
     private Long domainId;
-    private Long tagObjectId;
+    private Long dataSetId;
 
     private String name;
     private String bizName;

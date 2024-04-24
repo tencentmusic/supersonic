@@ -6,6 +6,6 @@ import lombok.Data;
 public class ClassFilter extends MetaFilter {
 
     private String type;
-    private Long tagObjectId;
+    private Long dataSetId;
     private Long classId;
 }

@@ -16,4 +16,6 @@ public interface ClassRepository {
     ClassDO getClassById(Long id);
 
     List<ClassDO> getClassDOList(ClassFilter filter);
+
+    List<ClassDO> getAllClassDOList();
 }
