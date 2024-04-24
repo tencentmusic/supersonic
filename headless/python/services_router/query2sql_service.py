@@ -50,11 +50,11 @@ async def query2sql(query_body: Mapping[str, Any]):
     else:
         sql_generation_mode = query_body['sqlGenerationMode']
 
-    viewName = schema['viewName']
+    dataset_name = schema['dataSetName']
     fields_list = schema['fieldNameList']
     prior_schema_links = {item['fieldValue']:item['fieldName'] for item in linking}
 
-    resp = await text2sql_agent_router.async_query2sql(question=query_text, filter_condition=filter_condition, model_name=viewName, fields_list=fields_list,
+    resp = await text2sql_agent_router.async_query2sql(question=query_text, filter_condition=filter_condition, model_name=dataset_name, fields_list=fields_list,
                                             data_date=current_date, prior_schema_links=prior_schema_links, prior_exts=prior_exts, sql_generation_mode=sql_generation_mode)
 
     return resp

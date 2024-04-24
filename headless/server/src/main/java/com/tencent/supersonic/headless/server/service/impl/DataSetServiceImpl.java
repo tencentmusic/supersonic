@@ -8,10 +8,12 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.common.pojo.enums.AuthType;
+import com.tencent.supersonic.common.pojo.enums.QueryType;
 import com.tencent.supersonic.common.pojo.enums.StatusEnum;
 import com.tencent.supersonic.common.pojo.enums.TypeEnums;
 import com.tencent.supersonic.common.pojo.exception.InvalidArgumentException;
 import com.tencent.supersonic.common.util.BeanMapper;
+import com.tencent.supersonic.common.util.jsqlparser.SqlSelectHelper;
 import com.tencent.supersonic.headless.api.pojo.DataSetDetail;
 import com.tencent.supersonic.headless.api.pojo.QueryConfig;
 import com.tencent.supersonic.headless.api.pojo.enums.TagDefineType;
@@ -33,6 +35,7 @@ import com.tencent.supersonic.headless.server.service.DimensionService;
 import com.tencent.supersonic.headless.server.service.DomainService;
 import com.tencent.supersonic.headless.server.service.MetricService;
 import com.tencent.supersonic.headless.server.service.TagMetaService;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.BeanUtils;
@@ -47,12 +50,14 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 public class DataSetServiceImpl
         extends ServiceImpl<DataSetDOMapper, DataSetDO> implements DataSetService {
 
@@ -115,6 +120,9 @@ public class DataSetServiceImpl
         }
         if (metaFilter.getName() != null) {
             wrapper.lambda().eq(DataSetDO::getName, metaFilter.getName());
+        }
+        if (!CollectionUtils.isEmpty(metaFilter.getNames())) {
+            wrapper.lambda().in(DataSetDO::getName, metaFilter.getNames());
         }
         wrapper.lambda().ne(DataSetDO::getStatus, StatusEnum.DELETED.getCode());
         return list(wrapper).stream().map(entry -> convert(entry, user)).collect(Collectors.toList());
@@ -229,6 +237,9 @@ public class DataSetServiceImpl
             queryReq = new QuerySqlReq();
         }
         BeanUtils.copyProperties(queryDataSetReq, queryReq);
+        if (Objects.nonNull(queryDataSetReq.getQueryType()) && QueryType.TAG.equals(queryDataSetReq.getQueryType())) {
+            queryReq.setInnerLayerNative(true);
+        }
         return queryReq;
     }
 
@@ -304,4 +315,21 @@ public class DataSetServiceImpl
                 .map(Object::toString)
                 .collect(Collectors.toList());
     }
+
+    public Long getDataSetIdFromSql(String sql, User user) {
+        List<DataSetResp> dataSets = null;
+        try {
+            String tableName = SqlSelectHelper.getTableName(sql);
+            dataSets = getDataSets(tableName, user);
+        } catch (Exception e) {
+            log.error("getDataSetIdFromSql error:{}", e);
+        }
+        if (org.apache.commons.collections.CollectionUtils.isEmpty(dataSets)) {
+            throw new InvalidArgumentException("从Sql参数中无法获取到DataSetId");
+        }
+        Long dataSetId = dataSets.get(0).getId();
+        log.info("getDataSetIdFromSql dataSetId:{}", dataSetId);
+        return dataSetId;
+    }
+
 }

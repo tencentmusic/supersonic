@@ -21,7 +21,7 @@
             </includes>
         </fileSet>
         <fileSet>
-            <directory>${project.basedir}/../../chat/python</directory>
+            <directory>${project.basedir}/../../headless/python</directory>
             <outputDirectory>pyllm</outputDirectory>
             <fileMode>0777</fileMode>
             <directoryMode>0755</directoryMode>

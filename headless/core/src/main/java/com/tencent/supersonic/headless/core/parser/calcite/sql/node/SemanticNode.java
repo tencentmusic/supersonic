@@ -89,12 +89,7 @@ public abstract class SemanticNode {
     }
 
     public static String getSql(SqlNode sqlNode, EngineType engineType) {
-        SemanticSqlDialect sqlDialect = SqlDialectFactory.getSqlDialect(engineType);
-        SqlWriterConfig config = SqlPrettyWriter.config().withDialect(sqlDialect)
-                .withKeywordsLowerCase(false).withClauseEndsLine(true).withAlwaysUseParentheses(false)
-                .withSelectListItemsOnSeparateLines(false).withUpdateSetListNewline(false).withIndentation(0);
-
-        UnaryOperator<SqlWriterConfig> sqlWriterConfigUnaryOperator = (c) -> config;
+        UnaryOperator<SqlWriterConfig> sqlWriterConfigUnaryOperator = (c) -> getSqlWriterConfig(engineType);
         return sqlNode.toSqlString(sqlWriterConfigUnaryOperator).getSql();
     }
 
@@ -165,6 +160,18 @@ public abstract class SemanticNode {
             }
         }
         return sqlNode;
+    }
+
+    private static SqlWriterConfig getSqlWriterConfig(EngineType engineType) {
+        SemanticSqlDialect sqlDialect = SqlDialectFactory.getSqlDialect(engineType);
+        SqlWriterConfig config = SqlPrettyWriter.config().withDialect(sqlDialect)
+                .withKeywordsLowerCase(false).withClauseEndsLine(true).withAlwaysUseParentheses(false)
+                .withSelectListItemsOnSeparateLines(false).withUpdateSetListNewline(false).withIndentation(0);
+        if (EngineType.MYSQL.equals(engineType)) {
+            //no backticks around function name
+            config = config.withQuoteAllIdentifiers(false);
+        }
+        return config;
     }
 
     private static void sqlVisit(SqlNode sqlNode, Map<String, Object> parseInfo) {

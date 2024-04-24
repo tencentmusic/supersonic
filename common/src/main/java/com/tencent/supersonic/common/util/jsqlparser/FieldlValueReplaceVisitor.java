@@ -1,11 +1,10 @@
 package com.tencent.supersonic.common.util.jsqlparser;
 
-import java.util.List;
+import com.tencent.supersonic.common.util.JsonUtil;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-
-import com.tencent.supersonic.common.util.JsonUtil;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.expression.DoubleValue;
 import net.sf.jsqlparser.expression.Expression;
@@ -15,12 +14,12 @@ import net.sf.jsqlparser.expression.LongValue;
 import net.sf.jsqlparser.expression.StringValue;
 import net.sf.jsqlparser.expression.operators.relational.ComparisonOperator;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
+import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
 import net.sf.jsqlparser.expression.operators.relational.GreaterThan;
 import net.sf.jsqlparser.expression.operators.relational.GreaterThanEquals;
+import net.sf.jsqlparser.expression.operators.relational.InExpression;
 import net.sf.jsqlparser.expression.operators.relational.MinorThan;
 import net.sf.jsqlparser.expression.operators.relational.MinorThanEquals;
-import net.sf.jsqlparser.expression.operators.relational.InExpression;
-import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
 import net.sf.jsqlparser.schema.Column;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.CollectionUtils;
@@ -64,7 +63,7 @@ public class FieldlValueReplaceVisitor extends ExpressionVisitorAdapter {
         }
         Column column = (Column) inExpression.getLeftExpression();
         Map<String, String> valueMap = filedNameToValueMap.get(column.getColumnName());
-        ExpressionList rightItemsList = (ExpressionList) inExpression.getRightItemsList();
+        ExpressionList rightItemsList = (ExpressionList) inExpression.getRightExpression();
         List<Expression> expressions = rightItemsList.getExpressions();
         List<String> values = new ArrayList<>();
         expressions.stream().forEach(o -> {
@@ -86,7 +85,7 @@ public class FieldlValueReplaceVisitor extends ExpressionVisitorAdapter {
             newExpressions.add(stringValue);
         });
         rightItemsList.setExpressions(newExpressions);
-        inExpression.setRightItemsList(rightItemsList);
+        inExpression.setRightExpression(rightItemsList);
     }
 
     public <T extends Expression> void replaceComparisonExpression(T expression) {

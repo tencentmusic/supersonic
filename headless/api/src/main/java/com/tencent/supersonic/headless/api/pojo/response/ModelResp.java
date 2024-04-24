@@ -7,7 +7,9 @@ import com.tencent.supersonic.headless.api.pojo.Field;
 import com.tencent.supersonic.headless.api.pojo.Identify;
 import com.tencent.supersonic.headless.api.pojo.ModelDetail;
 import com.tencent.supersonic.headless.api.pojo.SchemaItem;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.ToString;
 import org.springframework.util.CollectionUtils;
 
@@ -20,6 +22,8 @@ import java.util.stream.Collectors;
 
 @Data
 @ToString(callSuper = true)
+@AllArgsConstructor
+@NoArgsConstructor
 public class ModelResp extends SchemaItem {
 
     private Long domainId;

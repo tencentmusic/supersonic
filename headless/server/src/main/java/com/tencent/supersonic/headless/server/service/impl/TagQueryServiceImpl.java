@@ -76,8 +76,8 @@ public class TagQueryServiceImpl implements TagQueryService {
     }
 
     private void checkTag(TagResp tag) throws Exception {
-        if (Objects.nonNull(tag) && TagDefineType.METRIC.equals(tag.getTagDefineType())) {
-            throw new Exception("do not support value distribution query for tag: " + tag.getBizName());
+        if (Objects.nonNull(tag) && TagDefineType.METRIC.name().equalsIgnoreCase(tag.getTagDefineType())) {
+            throw new Exception("do not support value distribution query for tag (from metric): " + tag.getBizName());
         }
     }
 

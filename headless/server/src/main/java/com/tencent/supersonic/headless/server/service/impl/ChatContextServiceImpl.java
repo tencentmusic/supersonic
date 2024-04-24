@@ -37,7 +37,7 @@ public class ChatContextServiceImpl implements ChatContextService {
     }
 
     @Override
-    public ChatContext getOrCreateContext(int chatId) {
+    public ChatContext getOrCreateContext(Integer chatId) {
         return chatContextRepository.getOrCreateContext(chatId);
     }
 

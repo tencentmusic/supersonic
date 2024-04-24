@@ -3,25 +3,25 @@ package com.tencent.supersonic.headless.server.rest;
 
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.validation.Valid;
-
 import com.tencent.supersonic.headless.api.pojo.request.DictItemFilter;
 import com.tencent.supersonic.headless.api.pojo.request.DictItemReq;
 import com.tencent.supersonic.headless.api.pojo.request.DictSingleTaskReq;
 import com.tencent.supersonic.headless.api.pojo.response.DictItemResp;
 import com.tencent.supersonic.headless.api.pojo.response.DictTaskResp;
+import com.tencent.supersonic.headless.server.schedule.EmbeddingTask;
 import com.tencent.supersonic.headless.server.service.DictConfService;
 import com.tencent.supersonic.headless.server.service.DictTaskService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
 import java.util.List;
 
 
@@ -35,6 +35,9 @@ public class KnowledgeController {
     @Autowired
     private DictConfService confService;
 
+    @Autowired
+    private EmbeddingTask embeddingTask;
+
     /**
      * addDictConf-新增item的字典配置
      * Add configuration information for dictionary entries
@@ -43,8 +46,8 @@ public class KnowledgeController {
      */
     @PostMapping("/conf")
     public DictItemResp addDictConf(@RequestBody @Valid DictItemReq dictItemReq,
-                            HttpServletRequest request,
-                            HttpServletResponse response) {
+                                    HttpServletRequest request,
+                                    HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
         return confService.addDictConf(dictItemReq, user);
     }
@@ -57,8 +60,8 @@ public class KnowledgeController {
      */
     @PutMapping("/conf")
     public DictItemResp editDictConf(@RequestBody @Valid DictItemReq dictItemReq,
-                             HttpServletRequest request,
-                             HttpServletResponse response) {
+                                     HttpServletRequest request,
+                                     HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
         return confService.editDictConf(dictItemReq, user);
     }
@@ -129,4 +132,9 @@ public class KnowledgeController {
         return taskService.queryLatestDictTask(taskReq, user);
     }
 
+    @GetMapping("/meta/embedding/reload")
+    public Object reloadMetaEmbedding() {
+        embeddingTask.reloadMetaEmbedding();
+        return true;
+    }
 }

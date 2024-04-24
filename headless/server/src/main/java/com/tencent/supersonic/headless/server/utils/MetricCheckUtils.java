@@ -56,8 +56,9 @@ public class MetricCheckUtils {
         if (StringUtils.isBlank(expr)) {
             throw new InvalidArgumentException("表达式不可为空");
         }
-        if (NameCheckUtils.containsSpecialCharacters(metricReq.getName())) {
-            throw new InvalidArgumentException("名称包含特殊字符, 请修改");
+        String forbiddenCharacters = NameCheckUtils.findForbiddenCharacters(metricReq.getName());
+        if (StringUtils.isNotBlank(forbiddenCharacters)) {
+            throw new InvalidArgumentException(String.format("名称包含特殊字符%s, 请修改", forbiddenCharacters));
         }
     }
 

@@ -5,6 +5,7 @@ import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
 import com.tencent.supersonic.headless.api.pojo.request.QuerySqlReq;
 import com.tencent.supersonic.headless.api.pojo.request.QuerySqlsReq;
 import com.tencent.supersonic.headless.api.pojo.request.SemanticQueryReq;
+import com.tencent.supersonic.headless.server.service.ChatQueryService;
 import com.tencent.supersonic.headless.server.service.QueryService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
@@ -27,11 +28,15 @@ public class SqlQueryApiController {
     @Autowired
     private QueryService queryService;
 
+    @Autowired
+    private ChatQueryService chatQueryService;
+
     @PostMapping("/sql")
     public Object queryBySql(@RequestBody QuerySqlReq querySqlReq,
                              HttpServletRequest request,
                              HttpServletResponse response) throws Exception {
         User user = UserHolder.findUser(request, response);
+        chatQueryService.correct(querySqlReq, user);
         return queryService.queryByReq(querySqlReq, user);
     }
 
@@ -45,6 +50,7 @@ public class SqlQueryApiController {
                     QuerySqlReq querySqlReq = new QuerySqlReq();
                     BeanUtils.copyProperties(querySqlsReq, querySqlReq);
                     querySqlReq.setSql(sql);
+                    chatQueryService.correct(querySqlReq, user);
                     return querySqlReq;
                 }).collect(Collectors.toList());
         return queryService.queryByReqs(semanticQueryReqs, user);

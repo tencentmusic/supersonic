@@ -10,7 +10,7 @@ import java.util.List;
 
 @Data
 public class SqlExecuteReq {
-    public static final String LIMIT_WRAPPER = " SELECT * FROM ( %s ) a LIMIT 1000 ";
+    public static final String LIMIT_WRAPPER = " SELECT * FROM ( %s ) a LIMIT %d ";
 
     @NotNull(message = "modelId can not be null")
     private Long id;

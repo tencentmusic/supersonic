@@ -12,6 +12,7 @@ const FormItem = Form.Item;
 
 type Props = {
   tagObjectList: ISemantic.ITagObjectItem[];
+  extraNode?: ReactNode;
   initFilterValues?: any;
   onFilterInit?: (values: any) => void;
   onFiltersChange: (_: any, values: any) => void;
@@ -19,6 +20,7 @@ type Props = {
 
 const TagFilter: React.FC<Props> = ({
   tagObjectList,
+  extraNode,
   initFilterValues = {},
   onFilterInit,
   onFiltersChange,
@@ -62,12 +64,6 @@ const TagFilter: React.FC<Props> = ({
       onFilterInit?.({ ...data, tagObjectId: target?.value });
     }
   }, [currentDomainId, tagObjectList]);
-
-  // useEffect(() => {
-  //   if (currentDomainId) {
-  //     onFilterInit?.();
-  //   }
-  // }, [currentDomainId])
 
   const handleValuesChange = (value: any, values: any) => {
     onFiltersChange(value, values);
@@ -158,44 +154,49 @@ const TagFilter: React.FC<Props> = ({
           </Row>
         </div>
       </StandardFormRow>
-      <Space size={40}>
-        <StandardFormRow key="domainId" title="主题域" block>
-          <FormItem name="domainId">
-            <DomainTreeSelect
-              firstLevelOnly={true}
-              treeSelectProps={{ multiple: false, allowClear: false }}
-              onDefaultValue={(value) => {
-                setCurrentDomainId(value);
-              }}
-            />
-          </FormItem>
-        </StandardFormRow>
-        <StandardFormRow key="tagObjectId" title="标签对象" block>
-          <FormItem name="tagObjectId">
-            <Select
-              style={{ minWidth: 150 }}
-              placeholder="请选择所属对象"
-              options={tagObjectOptions}
-            />
-          </FormItem>
-        </StandardFormRow>
-        {filterList.map((item) => {
-          const { title, key, options } = item;
-          return (
-            <StandardFormRow key={key} title={title} block>
-              <FormItem name={key}>
-                <TagSelect reverseCheckAll single>
-                  {options.map((item: any) => (
-                    <TagSelect.Option key={item.value} value={item.value}>
-                      {item.label}
-                    </TagSelect.Option>
-                  ))}
-                </TagSelect>
+      <Row style={{ width: '100%' }}>
+        <Col flex="auto">
+          <Space size={40}>
+            <StandardFormRow key="domainId" title="主题域" block>
+              <FormItem name="domainId">
+                <DomainTreeSelect
+                  firstLevelOnly={true}
+                  treeSelectProps={{ multiple: false, allowClear: false }}
+                  onDefaultValue={(value) => {
+                    setCurrentDomainId(value);
+                  }}
+                />
               </FormItem>
             </StandardFormRow>
-          );
-        })}
-      </Space>
+            <StandardFormRow key="tagObjectId" title="标签对象" block>
+              <FormItem name="tagObjectId">
+                <Select
+                  style={{ minWidth: 150 }}
+                  placeholder="请选择所属对象"
+                  options={tagObjectOptions}
+                />
+              </FormItem>
+            </StandardFormRow>
+            {filterList.map((item) => {
+              const { title, key, options } = item;
+              return (
+                <StandardFormRow key={key} title={title} block>
+                  <FormItem name={key}>
+                    <TagSelect reverseCheckAll single>
+                      {options.map((item: any) => (
+                        <TagSelect.Option key={item.value} value={item.value}>
+                          {item.label}
+                        </TagSelect.Option>
+                      ))}
+                    </TagSelect>
+                  </FormItem>
+                </StandardFormRow>
+              );
+            })}
+          </Space>
+        </Col>
+        {extraNode && <Col flex="130px">{extraNode}</Col>}
+      </Row>
     </Form>
   );
 };

@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Table, Select, Checkbox, Input, Alert, Space, Tooltip, Form, Switch } from 'antd';
+import React, { useState } from 'react';
+import { Table, Select, Checkbox, Input, Space, Tooltip, Form, Switch, Row, Col } from 'antd';
 import TableTitleTooltips from '../../components/TableTitleTooltips';
 import { isUndefined } from 'lodash';
 import { ExclamationCircleOutlined } from '@ant-design/icons';
@@ -24,8 +24,6 @@ type FieldItem = {
   checked?: number;
   dateFormat?: string;
   timeGranularity?: string;
-  // entityNames?: string[];
-  // tagObjectId?: number;
   isTag?: number;
 };
 const { Search } = Input;
@@ -269,7 +267,7 @@ const ModelFieldForm: React.FC<Props> = ({
         />
       ),
       dataIndex: 'fastCreate',
-      width: 100,
+      width: 200,
       render: (_: any, record: FieldItem) => {
         const { type, name } = record;
         if (
@@ -284,41 +282,49 @@ const ModelFieldForm: React.FC<Props> = ({
           const isCreateName = getCreateFieldName(type);
           const editState = !isUndefined(record[isCreateName]) ? !!record[isCreateName] : true;
           return (
-            <Checkbox
-              checked={editState}
-              onChange={(e) => {
-                const value = e.target.checked ? 1 : 0;
-                if (!value) {
-                  onFieldChange(record.bizName, {
-                    ...record,
-                    name: '',
-                    checked: value,
-                    [isCreateName]: value,
-                  });
-                } else {
-                  onFieldChange(record.bizName, {
-                    ...record,
-                    checked: value,
-                    [isCreateName]: value,
-                  });
-                }
-              }}
-            >
-              <Input
-                className={!name && styles.dataSourceFieldsName}
-                value={name}
-                disabled={!editState}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  onFieldChange(record.bizName, {
-                    ...record,
-                    name: value,
-                    [isCreateName]: 1,
-                  });
-                }}
-                placeholder="请填写名称"
-              />
-            </Checkbox>
+            <Row>
+              <Col flex="25px">
+                <Checkbox
+                  style={{ width: '100%', position: 'relative', top: 5 }}
+                  checked={editState}
+                  onChange={(e) => {
+                    const value = e.target.checked ? 1 : 0;
+                    if (!value) {
+                      onFieldChange(record.bizName, {
+                        ...record,
+                        name: '',
+                        checked: value,
+                        [isCreateName]: value,
+                      });
+                    } else {
+                      onFieldChange(record.bizName, {
+                        ...record,
+                        checked: value,
+                        [isCreateName]: value,
+                      });
+                    }
+                  }}
+                />
+              </Col>
+              <Col flex="auto">
+                <Input
+                  className={!name && styles.dataSourceFieldsName}
+                  style={{ minHeight: 20 }}
+                  value={name}
+                  disabled={!editState}
+                  minLength={1}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    onFieldChange(record.bizName, {
+                      ...record,
+                      name: value,
+                      [isCreateName]: 1,
+                    });
+                  }}
+                  placeholder="请填写名称"
+                />
+              </Col>
+            </Row>
           );
         }
         return <></>;

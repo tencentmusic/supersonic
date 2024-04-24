@@ -161,6 +161,9 @@ public class TagMetaServiceImpl implements TagMetaService {
                     .filter(modelResp -> tagMarketPageReq.getTagObjectId().equals(modelResp.getTagObjectId()))
                     .collect(Collectors.toList());
         }
+        if (CollectionUtils.isEmpty(modelRespList)) {
+            return new PageInfo<TagResp>();
+        }
         List<Long> modelIds = modelRespList.stream().map(model -> model.getId()).collect(Collectors.toList());
 
         TagFilter tagFilter = new TagFilter();
@@ -243,6 +246,7 @@ public class TagMetaServiceImpl implements TagMetaService {
             tagResp.setModelName(metric.getModelName());
             tagResp.setDomainId(metric.getDomainId());
             tagResp.setSensitiveLevel(metric.getSensitiveLevel());
+            tagResp.setExt(metric.getExt());
         }
         if (TagDefineType.DIMENSION.name().equalsIgnoreCase(tagDO.getType())) {
             DimensionResp dimensionResp = dimensionService.getDimension(tagDO.getItemId());
@@ -251,6 +255,7 @@ public class TagMetaServiceImpl implements TagMetaService {
             tagResp.setModelId(dimensionResp.getModelId());
             tagResp.setModelName(dimensionResp.getModelName());
             tagResp.setSensitiveLevel(dimensionResp.getSensitiveLevel());
+            tagResp.setExt(dimensionResp.getExt());
         }
 
         return tagResp;
