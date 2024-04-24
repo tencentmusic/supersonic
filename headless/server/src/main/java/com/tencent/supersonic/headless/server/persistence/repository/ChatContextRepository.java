@@ -4,7 +4,7 @@ import com.tencent.supersonic.headless.core.pojo.ChatContext;
 
 public interface ChatContextRepository {
 
-    ChatContext getOrCreateContext(int chatId);
+    ChatContext getOrCreateContext(Integer chatId);
 
     void updateContext(ChatContext chatCtx);
 

@@ -2,15 +2,18 @@ package com.tencent.supersonic.headless.api.pojo;
 
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.headless.api.pojo.enums.DimensionType;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.CollectionUtils;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
-
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class ModelDetail {
 
     private String queryType;

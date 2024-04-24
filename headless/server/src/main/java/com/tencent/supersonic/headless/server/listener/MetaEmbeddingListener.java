@@ -1,15 +1,12 @@
 package com.tencent.supersonic.headless.server.listener;
 
-import com.alibaba.fastjson.JSONObject;
 import com.tencent.supersonic.common.config.EmbeddingConfig;
 import com.tencent.supersonic.common.pojo.DataEvent;
+import com.tencent.supersonic.common.pojo.DataItem;
 import com.tencent.supersonic.common.pojo.enums.EventType;
 import com.tencent.supersonic.common.util.ComponentFactory;
 import com.tencent.supersonic.common.util.embedding.EmbeddingQuery;
 import com.tencent.supersonic.common.util.embedding.S2EmbeddingStore;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,6 +14,8 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
+
+import java.util.List;
 
 @Component
 @Slf4j
@@ -33,30 +32,15 @@ public class MetaEmbeddingListener implements ApplicationListener<DataEvent> {
     @Async
     @Override
     public void onApplicationEvent(DataEvent event) {
-        if (CollectionUtils.isEmpty(event.getDataItems())) {
+        List<DataItem> dataItems = event.getDataItems();
+        if (CollectionUtils.isEmpty(dataItems)) {
             return;
         }
-
-        List<EmbeddingQuery> embeddingQueries = event.getDataItems()
-                .stream()
-                .map(dataItem -> {
-                    EmbeddingQuery embeddingQuery = new EmbeddingQuery();
-                    embeddingQuery.setQueryId(
-                            dataItem.getId() + dataItem.getType().name().toLowerCase());
-                    embeddingQuery.setQuery(dataItem.getName());
-                    Map meta = JSONObject.parseObject(JSONObject.toJSONString(dataItem), Map.class);
-                    embeddingQuery.setMetadata(meta);
-                    embeddingQuery.setQueryEmbedding(null);
-                    return embeddingQuery;
-                }).collect(Collectors.toList());
+        List<EmbeddingQuery> embeddingQueries = EmbeddingQuery.convertToEmbedding(dataItems);
         if (CollectionUtils.isEmpty(embeddingQueries)) {
             return;
         }
-        try {
-            Thread.sleep(embeddingOperationSleepTime);
-        } catch (InterruptedException e) {
-            log.error("", e);
-        }
+        sleep();
         s2EmbeddingStore.addCollection(embeddingConfig.getMetaCollectionName());
         if (event.getEventType().equals(EventType.ADD)) {
             s2EmbeddingStore.addQuery(embeddingConfig.getMetaCollectionName(), embeddingQueries);
@@ -65,6 +49,14 @@ public class MetaEmbeddingListener implements ApplicationListener<DataEvent> {
         } else if (event.getEventType().equals(EventType.UPDATE)) {
             s2EmbeddingStore.deleteQuery(embeddingConfig.getMetaCollectionName(), embeddingQueries);
             s2EmbeddingStore.addQuery(embeddingConfig.getMetaCollectionName(), embeddingQueries);
+        }
+    }
+
+    private void sleep() {
+        try {
+            Thread.sleep(embeddingOperationSleepTime);
+        } catch (InterruptedException e) {
+            log.error("", e);
         }
     }
 

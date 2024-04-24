@@ -31,9 +31,8 @@ import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.GroupByElement;
 import net.sf.jsqlparser.statement.select.Limit;
 import net.sf.jsqlparser.statement.select.OrderByElement;
+import net.sf.jsqlparser.statement.select.ParenthesedSelect;
 import net.sf.jsqlparser.statement.select.PlainSelect;
-import net.sf.jsqlparser.statement.select.Select;
-import net.sf.jsqlparser.statement.select.SelectExpressionItem;
 import net.sf.jsqlparser.statement.select.SelectItem;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -169,14 +168,14 @@ public class QueryStructReq extends SemanticQueryReq {
     }
 
     private String buildSql(QueryStructReq queryStructReq, boolean isBizName) throws JSQLParserException {
-        Select select = new Select();
+        ParenthesedSelect select = new ParenthesedSelect();
         //1.Set the select items (columns)
         PlainSelect plainSelect = new PlainSelect();
-        List<SelectItem> selectItems = new ArrayList<>();
+        List<SelectItem<?>> selectItems = new ArrayList<>();
         List<String> groups = queryStructReq.getGroups();
         if (!CollectionUtils.isEmpty(groups)) {
             for (String group : groups) {
-                selectItems.add(new SelectExpressionItem(new Column(group)));
+                selectItems.add(new SelectItem(new Column(group)));
             }
         }
         List<Aggregator> aggregators = queryStructReq.getAggregators();
@@ -184,7 +183,7 @@ public class QueryStructReq extends SemanticQueryReq {
             for (Aggregator aggregator : aggregators) {
                 String columnName = aggregator.getColumn();
                 if (queryStructReq.getQueryType().isNativeAggQuery()) {
-                    selectItems.add(new SelectExpressionItem(new Column(columnName)));
+                    selectItems.add(new SelectItem(new Column(columnName)));
                 } else {
                     Function sumFunction = new Function();
                     AggOperatorEnum func = aggregator.getFunc();
@@ -197,7 +196,7 @@ public class QueryStructReq extends SemanticQueryReq {
                         sumFunction.setDistinct(true);
                     }
                     sumFunction.setParameters(new ExpressionList(new Column(columnName)));
-                    SelectExpressionItem selectExpressionItem = new SelectExpressionItem(sumFunction);
+                    SelectItem selectExpressionItem = new SelectItem(sumFunction);
                     String alias = StringUtils.isNotBlank(aggregator.getAlias()) ? aggregator.getAlias() : columnName;
                     selectExpressionItem.setAlias(new Alias(alias));
                     selectItems.add(selectExpressionItem);
@@ -243,7 +242,9 @@ public class QueryStructReq extends SemanticQueryReq {
             limit.setRowCount(new LongValue(queryStructReq.getLimit()));
             plainSelect.setLimit(limit);
         }
-        select.setSelectBody(plainSelect);
+        //select.setSelectBody(plainSelect);
+        select.setSelect(plainSelect);
+
 
         //6.Set where
         List<Filter> dimensionFilters = queryStructReq.getDimensionFilters();

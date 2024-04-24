@@ -1,5 +1,5 @@
-import type { ActionType, ProColumns } from '@ant-design/pro-table';
-import ProTable from '@ant-design/pro-table';
+import type { ActionType, ProColumns } from '@ant-design/pro-components';
+import { ProTable } from '@ant-design/pro-components';
 import { message, Space, Popconfirm } from 'antd';
 import React, { useRef, useState, useEffect } from 'react';
 import type { Dispatch } from 'umi';
@@ -9,7 +9,6 @@ import { SENSITIVE_LEVEL_ENUM } from '../constant';
 import { getTagList, deleteTag, batchDeleteTag, getTagObjectList } from '../service';
 import TagFilter from './components/TagFilter';
 import TagInfoCreateForm from './components/TagInfoCreateForm';
-import { StatusEnum } from '../enum';
 import moment from 'moment';
 import styles from './style.less';
 import { ISemantic } from '../data';
@@ -338,6 +337,17 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
         <TagFilter
           tagObjectList={tagObjectList}
           initFilterValues={filterParams}
+          extraNode={
+            <BatchCtrlDropDownButton
+              key="ctrlBtnList"
+              downloadLoading={downloadLoading}
+              onDeleteConfirm={() => {
+                queryBatchDeleteTag(selectedRowKeys);
+              }}
+              hiddenList={['batchDownload', 'batchStart', 'batchStop']}
+              disabledList={hasAllPermission ? [] : ['batchStart', 'batchDelete']}
+            />
+          }
           onFilterInit={(values) => {
             setFilterParams({
               ...filterParams,
@@ -373,18 +383,6 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
             type: 'checkbox',
             ...rowSelection,
           }}
-          toolBarRender={() => [
-            <BatchCtrlDropDownButton
-              key="ctrlBtnList"
-              downloadLoading={downloadLoading}
-              onDeleteConfirm={() => {
-                queryBatchDeleteTag(selectedRowKeys);
-              }}
-              hiddenList={['batchDownload', 'batchStart', 'batchStop']}
-              disabledList={hasAllPermission ? [] : ['batchStart', 'batchDelete']}
-              // onMenuClick={onMenuClick}
-            />,
-          ]}
           loading={loading}
           onChange={(data: any) => {
             const { current, pageSize, total } = data;
@@ -396,7 +394,7 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
             setPagination(pagin);
             queryTagList({ ...pagin, ...filterParams });
           }}
-          options={{ reload: false, density: false, fullScreen: false }}
+          options={false}
         />
       </>
 

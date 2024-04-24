@@ -24,7 +24,7 @@ public class ChatContextRepositoryImpl implements ChatContextRepository {
     }
 
     @Override
-    public ChatContext getOrCreateContext(int chatId) {
+    public ChatContext getOrCreateContext(Integer chatId) {
         ChatContextDO context = chatContextMapper.getContextByChatId(chatId);
         if (context == null) {
             ChatContext chatContext = new ChatContext();

@@ -33,6 +33,7 @@ public class QueryStatement {
     private SemanticModel semanticModel;
 
     private SemanticSchemaResp semanticSchemaResp;
+    private Integer limit;
 
     public boolean isOk() {
         this.ok = "".equals(errMsg) && !"".equals(sql);

@@ -1,6 +1,11 @@
 package com.tencent.supersonic.common.util.jsqlparser;
 
 import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.Function;
@@ -8,16 +13,9 @@ import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.Select;
-import net.sf.jsqlparser.statement.select.SelectBody;
 import net.sf.jsqlparser.statement.select.SelectItem;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.CollectionUtils;
-
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
 
 /**
  * Sql Parser Select function Helper
@@ -42,13 +40,13 @@ public class SqlSelectFunctionHelper {
 
     public static Set<String> getFunctions(String sql) {
         Select selectStatement = SqlSelectHelper.getSelect(sql);
-        SelectBody selectBody = selectStatement.getSelectBody();
+        //SelectBody selectBody = selectStatement.getSelectBody();
 
-        if (!(selectBody instanceof PlainSelect)) {
+        if (!(selectStatement instanceof PlainSelect)) {
             return new HashSet<>();
         }
-        PlainSelect plainSelect = (PlainSelect) selectBody;
-        List<SelectItem> selectItems = plainSelect.getSelectItems();
+        PlainSelect plainSelect = (PlainSelect) selectStatement;
+        List<SelectItem<?>> selectItems = plainSelect.getSelectItems();
         FunctionVisitor visitor = new FunctionVisitor();
         for (SelectItem selectItem : selectItems) {
             selectItem.accept(visitor);

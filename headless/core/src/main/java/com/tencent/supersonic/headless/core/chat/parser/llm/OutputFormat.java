@@ -113,6 +113,9 @@ public class OutputFormat {
 
     public static Map<String, LLMSqlResp> buildSqlRespMap(List<Map<String, String>> sqlExamples,
                                                           Map<String, Double> sqlMap) {
+        if (sqlMap == null) {
+            return new HashMap<>();
+        }
         return sqlMap.entrySet().stream()
                 .collect(Collectors.toMap(
                         Map.Entry::getKey,

@@ -540,7 +540,7 @@ const ModelCreateForm: React.FC<CreateFormProps> = ({
   return (
     <Modal
       forceRender
-      width={1300}
+      width={currentStep ? 1300 : 800}
       destroyOnClose
       title={`${isEdit ? '编辑' : '新建'}模型`}
       maskClosable={false}
