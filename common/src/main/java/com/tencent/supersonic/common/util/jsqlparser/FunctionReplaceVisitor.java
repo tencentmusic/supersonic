@@ -12,6 +12,7 @@ import net.sf.jsqlparser.expression.Function;
 import net.sf.jsqlparser.expression.LongValue;
 import net.sf.jsqlparser.expression.operators.relational.ComparisonOperator;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
+import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
 import net.sf.jsqlparser.expression.operators.relational.GreaterThan;
 import net.sf.jsqlparser.expression.operators.relational.GreaterThanEquals;
 import net.sf.jsqlparser.expression.operators.relational.MinorThan;
@@ -79,7 +80,8 @@ public class FunctionReplaceVisitor extends ExpressionVisitorAdapter {
         if (!leftExpressionFunction.toString().contains(JsqlConstants.DATE_FUNCTION)) {
             return result;
         }
-        List<Expression> leftExpressions = leftExpressionFunction.getParameters().getExpressions();
+        //List<Expression> leftExpressions = leftExpressionFunction.getParameters().getExpressions();
+        ExpressionList<?> leftExpressions = leftExpressionFunction.getParameters();
         if (CollectionUtils.isEmpty(leftExpressions) || leftExpressions.size() < 3) {
             return result;
         }

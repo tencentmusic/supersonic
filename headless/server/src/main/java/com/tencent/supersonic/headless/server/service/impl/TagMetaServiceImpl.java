@@ -161,6 +161,9 @@ public class TagMetaServiceImpl implements TagMetaService {
                     .filter(modelResp -> tagMarketPageReq.getTagObjectId().equals(modelResp.getTagObjectId()))
                     .collect(Collectors.toList());
         }
+        if (CollectionUtils.isEmpty(modelRespList)) {
+            return new PageInfo<TagResp>();
+        }
         List<Long> modelIds = modelRespList.stream().map(model -> model.getId()).collect(Collectors.toList());
 
         TagFilter tagFilter = new TagFilter();

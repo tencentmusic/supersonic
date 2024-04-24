@@ -19,7 +19,6 @@ import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
 import net.sf.jsqlparser.expression.operators.relational.GreaterThan;
 import net.sf.jsqlparser.expression.operators.relational.GreaterThanEquals;
 import net.sf.jsqlparser.expression.operators.relational.InExpression;
-import net.sf.jsqlparser.expression.operators.relational.ItemsList;
 import net.sf.jsqlparser.expression.operators.relational.LikeExpression;
 import net.sf.jsqlparser.expression.operators.relational.MinorThan;
 import net.sf.jsqlparser.expression.operators.relational.MinorThanEquals;
@@ -58,7 +57,7 @@ public class FieldAndValueAcquireVisitor extends ExpressionVisitorAdapter {
         }
         fieldExpression.setFieldName(((Column) leftExpression).getColumnName());
         fieldExpression.setOperator(JsqlConstants.IN);
-        ItemsList rightItemsList = expr.getRightItemsList();
+        Expression rightItemsList = expr.getRightExpression();
         fieldExpression.setFieldValue(rightItemsList);
         List<Object> result = new ArrayList<>();
         if (rightItemsList instanceof ExpressionList) {
@@ -143,7 +142,8 @@ public class FieldAndValueAcquireVisitor extends ExpressionVisitorAdapter {
     }
 
     private Column getColumn(Function leftExpressionFunction) {
-        List<Expression> leftExpressions = leftExpressionFunction.getParameters().getExpressions();
+        //List<Expression> leftExpressions = leftExpressionFunction.getParameters().getExpressions();
+        ExpressionList<?> leftExpressions = leftExpressionFunction.getParameters();
         if (CollectionUtils.isEmpty(leftExpressions)) {
             return null;
         }

@@ -2,6 +2,7 @@ package com.tencent.supersonic.headless.server.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
+import com.tencent.supersonic.common.pojo.enums.TypeEnums;
 import com.tencent.supersonic.headless.server.persistence.dataobject.CollectDO;
 import com.tencent.supersonic.headless.server.persistence.mapper.CollectMapper;
 import com.tencent.supersonic.headless.server.service.CollectService;
@@ -60,4 +61,15 @@ public class CollectServiceImpl implements CollectService {
         }
         return collectMapper.selectList(queryWrapper);
     }
+
+    @Override
+    public List<CollectDO> getCollectList(String username, TypeEnums typeEnums) {
+        QueryWrapper<CollectDO> queryWrapper = new QueryWrapper<>();
+        if (!StringUtils.isEmpty(username)) {
+            queryWrapper.lambda().eq(CollectDO::getUsername, username);
+        }
+        queryWrapper.lambda().eq(CollectDO::getType, typeEnums.name().toLowerCase());
+        return collectMapper.selectList(queryWrapper);
+    }
+
 }

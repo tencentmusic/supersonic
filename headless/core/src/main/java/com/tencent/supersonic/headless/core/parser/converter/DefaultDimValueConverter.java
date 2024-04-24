@@ -56,7 +56,7 @@ public class DefaultDimValueConverter implements HeadlessConverter {
             expressionList.setExpressions(exprs);
             InExpression inExpression = new InExpression();
             inExpression.setLeftExpression(new Column(dimension.getBizName()));
-            inExpression.setRightItemsList(expressionList);
+            inExpression.setRightExpression(expressionList);
             expressions.add(inExpression);
             if (metricTable != null) {
                 metricTable.getDimensions().add(dimension.getBizName());

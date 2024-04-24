@@ -65,6 +65,8 @@ public class MetricResp extends SchemaItem {
 
     private Integer isPublish;
 
+    private double similarity;
+
     public void setClassifications(String tag) {
         if (StringUtils.isBlank(tag)) {
             classifications = Lists.newArrayList();
