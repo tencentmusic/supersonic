@@ -430,7 +430,7 @@ const ModelCreateForm: React.FC<CreateFormProps> = ({
     const { code, data, msg } = await getColumns(databaseId, dbName, tableName);
     if (code === 200) {
       const list = data?.resultList || [];
-      const columns = list.map((item: any) => {
+      const columns = list.map((item: any, index: number) => {
         const { dataType, name } = item;
         return {
           ...item,
