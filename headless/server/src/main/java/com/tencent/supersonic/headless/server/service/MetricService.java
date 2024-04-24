@@ -35,6 +35,8 @@ public interface MetricService {
 
     void deleteMetric(Long id, User user) throws Exception;
 
+    PageInfo<MetricResp> queryMetricMarket(PageMetricReq pageMetricReq, User user);
+
     PageInfo<MetricResp> queryMetric(PageMetricReq pageMetricReq, User user);
 
     List<MetricResp> getMetrics(MetaFilter metaFilter);
