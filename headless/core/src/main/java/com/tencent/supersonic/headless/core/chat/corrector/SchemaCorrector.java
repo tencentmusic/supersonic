@@ -36,8 +36,6 @@ public class SchemaCorrector extends BaseSemanticCorrector {
     @Override
     public void doCorrect(QueryContext queryContext, SemanticParseInfo semanticParseInfo) {
 
-        removeFilterIfNotInLinkingValue(queryContext, semanticParseInfo);
-
         correctAggFunction(semanticParseInfo);
 
         replaceAlias(semanticParseInfo);
