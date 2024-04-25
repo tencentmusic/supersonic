@@ -514,6 +514,7 @@ const MetricInfoCreateForm: React.FC<CreateFormProps> = ({
                 typeParams={exprTypeParamsState[METRIC_DEFINE_TYPE.MEASURE]}
                 measuresList={classMeasureList}
                 onFieldChange={(measures: ISemantic.IMeasure[]) => {
+                  // setClassMeasureList(measures);
                   setExprTypeParamsState((prevState) => {
                     return {
                       ...prevState,

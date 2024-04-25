@@ -107,7 +107,7 @@ public class MetricController {
             HttpServletRequest request,
             HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
-        return metricService.queryMetric(pageMetricReq, user);
+        return metricService.queryMetricMarket(pageMetricReq, user);
     }
 
     @Deprecated

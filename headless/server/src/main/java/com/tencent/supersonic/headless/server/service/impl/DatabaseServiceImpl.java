@@ -22,6 +22,7 @@ import com.tencent.supersonic.headless.server.service.DatabaseService;
 import com.tencent.supersonic.headless.server.service.ModelService;
 import com.tencent.supersonic.headless.server.utils.DatabaseConverter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -35,6 +36,8 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 public class DatabaseServiceImpl implements DatabaseService {
+    @Value("${inMemoryEmbeddingStore.persistent.path:/tmp}")
+    private String embeddingStorePersistentPath;
 
     private final SqlUtils sqlUtils;
     private DatabaseRepository databaseRepository;
@@ -179,6 +182,13 @@ public class DatabaseServiceImpl implements DatabaseService {
     @Override
     public SemanticQueryResp getColumns(Long id, String db, String table) {
         DatabaseResp databaseResp = getDatabase(id);
+        DbAdaptor engineAdaptor = DbAdaptorFactory.getEngineAdaptor(databaseResp.getType());
+        String metaQueryTpl = engineAdaptor.getColumnMetaQueryTpl();
+        String metaQuerySql = String.format(metaQueryTpl, db, table);
+        return queryWithColumns(metaQuerySql, DatabaseConverter.convert(databaseResp));
+    }
+
+    public SemanticQueryResp getColumns(DatabaseResp databaseResp, String db, String table) {
         DbAdaptor engineAdaptor = DbAdaptorFactory.getEngineAdaptor(databaseResp.getType());
         String metaQueryTpl = engineAdaptor.getColumnMetaQueryTpl();
         String metaQuerySql = String.format(metaQueryTpl, db, table);

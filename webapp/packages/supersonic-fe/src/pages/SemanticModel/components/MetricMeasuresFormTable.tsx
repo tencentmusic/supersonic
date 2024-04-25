@@ -43,19 +43,41 @@ const MetricMeasuresFormTable: React.FC<Props> = ({
   });
 
   const [selectedKeysMap, setSelectedKeysMap] = useState<Record<string, boolean>>(() => {
+    if (!Array.isArray(measuresParams?.measures)) {
+      return {};
+    }
     return measuresParams.measures.reduce((keyMap: any, item: ISemantic.IMeasure) => {
       keyMap[item.bizName] = true;
       return keyMap;
     }, {});
   });
 
-  useEffect(() => {
+  const getTableData = () => {
     const datasource =
       datasourceId && Array.isArray(measuresList)
         ? measuresList.filter((item) => item.datasourceId === datasourceId)
         : measuresList;
-    setTableData(datasource);
-  }, [measuresList]);
+    const { measures } = measuresParams;
+    if (!Array.isArray(measures)) {
+      return datasource;
+    }
+    const tableData = datasource.map((item) => {
+      const { bizName } = item;
+      const target = measures.find((measureItem) => measureItem.bizName === bizName);
+      if (target) {
+        return {
+          ...item,
+          constraint: target.constraint,
+        };
+      }
+      return item;
+    });
+    return tableData;
+  };
+
+  useEffect(() => {
+    setTableData(getTableData());
+  }, [measuresList, measuresParams]);
 
   useEffect(() => {
     setMeasuresParams({ ...typeParams });
@@ -76,24 +98,29 @@ const MetricMeasuresFormTable: React.FC<Props> = ({
       tooltip:
         '该限定条件用于在计算指标时限定口径，作用于度量，所用于过滤的维度必须在创建模型的时候被标记为日期或者维度，不需要加where关键字。比如：维度A="值1" and 维度B="值2"',
       render: (_: any, record: any) => {
-        const { constraint, name } = record;
-        const { measures } = measuresParams;
+        const { constraint, bizName } = record;
         return (
           <TextArea
             placeholder="请输入限定条件"
             value={constraint}
+            disabled={!selectedKeysMap[bizName]}
             onChange={(event) => {
               const { value } = event.target;
-              const list = measures.map((item: any) => {
-                if (item.name === name) {
-                  return {
-                    ...item,
-                    constraint: value,
-                  };
+
+              const measures = tableData.reduce((list: any[], item) => {
+                if (selectedKeysMap[item.bizName] === true) {
+                  if (item.bizName === bizName) {
+                    list.push({
+                      ...item,
+                      constraint: value,
+                    });
+                  } else {
+                    list.push(item);
+                  }
                 }
-                return item;
-              });
-              onFieldChange?.(list);
+                return list;
+              }, []);
+              onFieldChange?.(measures);
             }}
           />
         );
@@ -107,28 +134,16 @@ const MetricMeasuresFormTable: React.FC<Props> = ({
   ];
 
   const handleUpdateKeys = (updateKeys: Record<string, boolean>) => {
-    const datasource =
-      datasourceId && Array.isArray(measuresList)
-        ? measuresList.filter((item) => item.datasourceId === datasourceId)
-        : measuresList;
+    const datasource = getTableData();
     setSelectedKeysMap(updateKeys);
     const selectedKeys: string[] = [];
-    const measures = datasource.reduce(
-      (list: any[], { bizName, name, expr, datasourceId, agg }) => {
-        if (updateKeys[bizName] === true) {
-          selectedKeys.push(bizName);
-          list.push({
-            bizName,
-            name,
-            expr,
-            agg,
-            datasourceId,
-          });
-        }
-        return list;
-      },
-      [],
-    );
+    const measures = datasource.reduce((list: any[], item) => {
+      if (updateKeys[item.bizName] === true) {
+        selectedKeys.push(item.bizName);
+        list.push(item);
+      }
+      return list;
+    }, []);
     setSelectedKeys(selectedKeys);
     onFieldChange(measures);
   };
@@ -169,16 +184,13 @@ const MetricMeasuresFormTable: React.FC<Props> = ({
             search: {
               placeholder: '请输入度量名称',
               onSearch: (value: string) => {
-                const datasource =
-                  datasourceId && Array.isArray(measuresList)
-                    ? measuresList.filter((item) => item.datasourceId === datasourceId)
-                    : measuresList;
+                const tableData = getTableData();
                 if (!value) {
-                  setTableData(datasource);
+                  setTableData(tableData);
                   return;
                 }
                 setTableData(
-                  [...datasource].reduce((data: ISemantic.IMeasure[], item: ISemantic.IMeasure) => {
+                  [...tableData].reduce((data: ISemantic.IMeasure[], item: ISemantic.IMeasure) => {
                     if (item.bizName.includes(value)) {
                       data.push(item);
                     }

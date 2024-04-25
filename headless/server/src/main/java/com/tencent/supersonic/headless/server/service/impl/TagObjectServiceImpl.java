@@ -15,6 +15,7 @@ import org.springframework.util.CollectionUtils;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -37,7 +38,7 @@ public class TagObjectServiceImpl implements TagObjectService {
         tagObjectDO.setUpdatedBy(user.getName());
         tagObjectDO.setUpdatedAt(date);
         tagObjectDO.setStatus(StatusEnum.ONLINE.getCode());
-        tagObjectRepository.create(tagObjectDO).longValue();
+        tagObjectRepository.create(tagObjectDO);
         TagObjectDO tagObjectById = tagObjectRepository.getTagObjectById(tagObjectDO.getId());
         return TagObjectConverter.convert2Resp(tagObjectById);
     }
@@ -54,10 +55,10 @@ public class TagObjectServiceImpl implements TagObjectService {
                 .collect(Collectors.toList());
         for (TagObjectResp tagObject : tagObjectRespList) {
             if (tagObject.getBizName().equalsIgnoreCase(tagObjectReq.getBizName())) {
-                throw new Exception(String.format("the bizName %s is exit", tagObjectReq.getBizName()));
+                throw new Exception(String.format("the bizName %s is exist", tagObjectReq.getBizName()));
             }
             if (tagObject.getName().equalsIgnoreCase(tagObjectReq.getName())) {
-                throw new Exception(String.format("the name %s is exit", tagObjectReq.getName()));
+                throw new Exception(String.format("the name %s is exist", tagObjectReq.getName()));
             }
         }
     }
@@ -101,5 +102,15 @@ public class TagObjectServiceImpl implements TagObjectService {
     public List<TagObjectResp> getTagObjects(TagObjectFilter filter, User user) {
         List<TagObjectDO> tagObjectDOList = tagObjectRepository.query(filter);
         return TagObjectConverter.convert2RespList(tagObjectDOList);
+    }
+
+    @Override
+    public Map<Long, TagObjectResp> getAllTagObjectMap() {
+        TagObjectFilter filter = new TagObjectFilter();
+        List<TagObjectDO> tagObjectDOList = tagObjectRepository.query(filter);
+        List<TagObjectResp> tagObjectRespList = TagObjectConverter.convert2RespList(tagObjectDOList);
+        Map<Long, TagObjectResp> map =
+                tagObjectRespList.stream().collect(Collectors.toMap(TagObjectResp::getId, a -> a, (k1, k2) -> k1));
+        return map;
     }
 }
