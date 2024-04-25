@@ -188,6 +188,13 @@ public class DatabaseServiceImpl implements DatabaseService {
         return queryWithColumns(metaQuerySql, DatabaseConverter.convert(databaseResp));
     }
 
+    public SemanticQueryResp getColumns(DatabaseResp databaseResp, String db, String table) {
+        DbAdaptor engineAdaptor = DbAdaptorFactory.getEngineAdaptor(databaseResp.getType());
+        String metaQueryTpl = engineAdaptor.getColumnMetaQueryTpl();
+        String metaQuerySql = String.format(metaQueryTpl, db, table);
+        return queryWithColumns(metaQuerySql, DatabaseConverter.convert(databaseResp));
+    }
+
     private void checkPermission(DatabaseResp databaseResp, User user) {
         List<String> admins = databaseResp.getAdmins();
         List<String> viewers = databaseResp.getViewers();
