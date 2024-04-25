@@ -20,11 +20,13 @@ public class SqlExecuteReq {
 
     private List<SqlVariable> sqlVariables;
 
+    private Integer limit = 1000;
+
     public String getSql() {
         if (StringUtils.isNotBlank(sql) && sql.endsWith(";")) {
             sql = sql.substring(0, sql.length() - 1);
         }
-        return String.format(LIMIT_WRAPPER, sql);
+        return String.format(LIMIT_WRAPPER, sql, limit);
     }
 
 }

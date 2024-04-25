@@ -23,6 +23,7 @@ export declare namespace IDataSource {
     authorized?: boolean;
     dataFormatType?: string;
     dataFormat?: string;
+    comment?: string;
   }
 
   interface IIdentifiersItem {

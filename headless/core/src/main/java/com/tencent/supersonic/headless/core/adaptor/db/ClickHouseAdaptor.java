@@ -12,7 +12,7 @@ public class ClickHouseAdaptor extends DbAdaptor {
     public String getDateFormat(String dateType, String dateFormat, String column) {
         if (dateFormat.equalsIgnoreCase(Constants.DAY_FORMAT_INT)) {
             if (TimeDimensionEnum.MONTH.name().equalsIgnoreCase(dateType)) {
-                return "formatDateTime(toDate(parseDateTimeBestEffort(toString(%s))),'%Y-%m')".replace("%s", column);
+                return "toYYYYMM(toDate(parseDateTimeBestEffort(toString(%s))))".replace("%s", column);
             } else if (TimeDimensionEnum.WEEK.name().equalsIgnoreCase(dateType)) {
                 return "toMonday(toDate(parseDateTimeBestEffort(toString(%s))))".replace("%s", column);
             } else {

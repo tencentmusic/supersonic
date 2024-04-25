@@ -72,6 +72,7 @@ s2:
 #      inProcess:
 #        modelPath: /data/model.onnx
 #        vocabularyPath: /data/onnx_vocab.txt
+#        shibing624/text2vec-base-chinese
     #2.2 open_ai
     #  embedding-model:
     #    provider: open_ai

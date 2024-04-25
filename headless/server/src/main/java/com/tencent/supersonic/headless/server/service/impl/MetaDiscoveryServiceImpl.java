@@ -85,13 +85,14 @@ public class MetaDiscoveryServiceImpl implements MetaDiscoveryService {
     private Map<String, List<SchemaElementMatch>> getTopFields(Integer topN,
                                                                SchemaMapInfo mapInfo,
                                                                Map<Long, String> dataSetMap) {
-        Set<Long> dataSetIds = mapInfo.getDataSetElementMatches().keySet();
         Map<String, List<SchemaElementMatch>> result = new HashMap<>();
 
         SemanticSchema semanticSchema = semanticService.getSemanticSchema();
-        for (Long dataSetId : dataSetIds) {
+        for (Map.Entry<Long, List<SchemaElementMatch>> entry : mapInfo.getDataSetElementMatches().entrySet()) {
+            Long dataSetId = entry.getKey();
+            List<SchemaElementMatch> values = entry.getValue();
             String dataSetName = dataSetMap.get(dataSetId);
-            if (StringUtils.isBlank(dataSetName)) {
+            if (StringUtils.isBlank(dataSetName) || CollectionUtils.isEmpty(values)) {
                 continue;
             }
             //topN dimensions
