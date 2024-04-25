@@ -77,32 +77,6 @@ public class SqlRemoveHelper {
         return selectStatement.toString();
     }
 
-    public static String removeSameFieldFromSelect(String sql) {
-        Select selectStatement = SqlSelectHelper.getSelect(sql);
-        if (selectStatement == null) {
-            return sql;
-        }
-        SelectBody selectBody = selectStatement.getSelectBody();
-        if (!(selectBody instanceof PlainSelect)) {
-            return sql;
-        }
-        List<SelectItem> selectItems = ((PlainSelect) selectBody).getSelectItems();
-        Set<String> fields = new HashSet<>();
-        selectItems.removeIf(selectItem -> {
-            if (selectItem instanceof SelectExpressionItem) {
-                SelectExpressionItem selectExpressionItem = (SelectExpressionItem) selectItem;
-                String field = selectExpressionItem.getExpression().toString();
-                if (fields.contains(field)) {
-                    return true;
-                }
-                fields.add(field);
-            }
-            return false;
-        });
-        ((PlainSelect) selectBody).setSelectItems(selectItems);
-        return selectStatement.toString();
-    }
-
     public static String removeWhereCondition(String sql, Set<String> removeFieldNames) {
         Select selectStatement = SqlSelectHelper.getSelect(sql);
         //SelectBody selectBody = selectStatement.getSelectBody();

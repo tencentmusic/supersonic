@@ -64,6 +64,7 @@ public class ChatServiceImpl implements ChatService {
 
     @Override
     public ParseResp performParsing(ChatParseReq chatParseReq) {
+        String queryText = chatParseReq.getQueryText();
         ParseResp parseResp = new ParseResp(chatParseReq.getChatId(), chatParseReq.getQueryText());
         chatManageService.createChatQuery(chatParseReq, parseResp);
         ChatParseContext chatParseContext = buildParseContext(chatParseReq);
@@ -73,6 +74,9 @@ public class ChatServiceImpl implements ChatService {
         for (ParseResultProcessor processor : parseResultProcessors) {
             processor.process(chatParseContext, parseResp);
         }
+        log.info("queryText:{}", queryText);
+        parseResp.setQueryText(queryText);
+        chatParseReq.setQueryText(queryText);
         chatManageService.batchAddParse(chatParseReq, parseResp);
         return parseResp;
     }

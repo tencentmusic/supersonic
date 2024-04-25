@@ -5,6 +5,7 @@ import com.tencent.supersonic.chat.server.pojo.ChatParseContext;
 import com.tencent.supersonic.chat.server.util.QueryReqConverter;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.JsonUtil;
+import com.tencent.supersonic.headless.api.pojo.SchemaMapInfo;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.api.pojo.request.QueryReq;
 import com.tencent.supersonic.headless.api.pojo.response.ParseResp;
@@ -51,7 +52,7 @@ public class NL2SQLParser implements ChatParser {
         }
         considerMultiturn(chatParseContext, parseResp);
         QueryReq queryReq = QueryReqConverter.buildText2SqlQueryReq(chatParseContext);
-        queryReq.setMapInfo(null);
+        queryReq.setMapInfo(new SchemaMapInfo());
         ChatQueryService chatQueryService = ContextUtils.getBean(ChatQueryService.class);
         ParseResp text2SqlParseResp = chatQueryService.performParsing(queryReq);
         if (!ParseResp.ParseState.FAILED.equals(text2SqlParseResp.getState())) {
@@ -69,20 +70,21 @@ public class NL2SQLParser implements ChatParser {
         if (StringUtils.isNotBlank(multiTurn) && Boolean.parseBoolean(multiTurn)) {
             log.info("multi turn text-to-sql!");
             ChatQueryRepository chatQueryRepository = ContextUtils.getBean(ChatQueryRepository.class);
-            List<SemanticParseInfo> contextualParseInfoList = chatQueryRepository.getContextualParseInfo(
-                    parseResp.getChatId()).stream().filter(o -> o.getQueryMode().equals(LLMSqlQuery.QUERY_MODE)
+            List<ParseResp> contextualParseInfoList = chatQueryRepository.getContextualParseInfo(
+                    parseResp.getChatId()).stream().filter(o -> o.getSelectedParses().get(0)
+                    .getQueryMode().equals(LLMSqlQuery.QUERY_MODE)
             ).collect(Collectors.toList());
             if (StringUtils.isNotBlank(multiNum) && StringUtils.isNumeric(multiNum)) {
                 int num = Integer.parseInt(multiNum);
                 contextualNum = Math.min(contextualNum, num);
             }
-            List<SemanticParseInfo> contextualList = contextualParseInfoList.subList(0,
+            List<ParseResp> contextualList = contextualParseInfoList.subList(0,
                     Math.min(contextualNum, contextualParseInfoList.size()));
             Collections.reverse(contextualList);
             List<String> contextualQuestions = new ArrayList<>();
             contextualList.stream().forEach(o -> {
                 Map<String, Object> map = JsonUtil.toMap(JsonUtil.toString(
-                        o.getProperties().get(CONTEXT)), String.class, Object.class);
+                        o.getSelectedParses().get(0).getProperties().get(CONTEXT)), String.class, Object.class);
                 LLMReq llmReq = JsonUtil.toObject(JsonUtil.toString(map.get("llmReq")), LLMReq.class);
                 List<LLMReq.ElementValue> linking = llmReq.getLinking();
                 List<String> priorLinkingList = new ArrayList<>();
@@ -92,13 +94,17 @@ public class NL2SQLParser implements ChatParser {
                     priorLinkingList.add("‘" + fieldValue + "‘是一个‘" + fieldName + "‘");
                 }
                 String linkingListStr = String.join("，", priorLinkingList);
-                String questionAugmented = String.format("%s (补充信息:%s) ", llmReq.getQueryText(), linkingListStr);
+                String questionAugmented = String.format("%s (补充信息:%s) ", o.getQueryText(), linkingListStr);
                 contextualQuestions.add(questionAugmented);
             });
             Long startTime1 = System.currentTimeMillis();
             log.info("timecost1:{}", startTime1 - startTime);
             StringBuffer currentPromptSb = new StringBuffer();
-            currentPromptSb.append("contextualQuestions:" + JsonUtil.toString(contextualQuestions) + "\n");
+            if (contextualQuestions.size() == 0) {
+                currentPromptSb.append("contextualQuestions:" + "\n");
+            } else {
+                currentPromptSb.append("contextualQuestions:" + "\n" + String.join("\n", contextualQuestions) + "\n");
+            }
             String currentQuestion = getQueryLinks(chatParseContext);
             currentPromptSb.append("currentQuestion:" + currentQuestion + "\n");
             currentPromptSb.append("rewritingCurrentQuestion:\n");
