@@ -7,6 +7,7 @@ import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.headless.api.pojo.SchemaMapInfo;
 import com.tencent.supersonic.headless.api.pojo.SemanticSchema;
 import com.tencent.supersonic.headless.api.pojo.enums.MapModeEnum;
+import com.tencent.supersonic.headless.api.pojo.enums.WorkflowState;
 import com.tencent.supersonic.headless.api.pojo.request.QueryFilters;
 import com.tencent.supersonic.headless.core.chat.query.SemanticQuery;
 import com.tencent.supersonic.headless.core.config.OptimizationConfig;
@@ -42,6 +43,8 @@ public class QueryContext {
     private MapModeEnum mapModeEnum = MapModeEnum.STRICT;
     @JsonIgnore
     private SemanticSchema semanticSchema;
+    @JsonIgnore
+    private WorkflowState workflowState;
 
     public List<SemanticQuery> getCandidateQueries() {
         OptimizationConfig optimizationConfig = ContextUtils.getBean(OptimizationConfig.class);
