@@ -5,6 +5,10 @@ import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import com.tencent.supersonic.common.util.jsqlparser.SqlReplaceHelper;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
+import java.util.function.UnaryOperator;
+import net.sf.jsqlparser.expression.StringValue;
+import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
 
 public class PostgresqlAdaptor extends DbAdaptor {
 
@@ -44,10 +48,35 @@ public class PostgresqlAdaptor extends DbAdaptor {
     @Override
     public String functionNameCorrector(String sql) {
         Map<String, String> functionMap = new HashMap<>();
-        functionMap.put("MONTH".toLowerCase(), "toMonth");
-        functionMap.put("DAY".toLowerCase(), "toDayOfMonth");
-        functionMap.put("YEAR".toLowerCase(), "toYear");
-        return SqlReplaceHelper.replaceFunction(sql, functionMap);
+        functionMap.put("MONTH".toLowerCase(), "TO_CHAR");
+        functionMap.put("DAY".toLowerCase(), "TO_CHAR");
+        functionMap.put("YEAR".toLowerCase(), "TO_CHAR");
+        Map<String, UnaryOperator> functionCall = new HashMap<>();
+        functionCall.put("MONTH".toLowerCase(), o -> {
+            if (Objects.nonNull(o) && o instanceof ExpressionList) {
+                ExpressionList expressionList = (ExpressionList) o;
+                expressionList.add(new StringValue("MM"));
+                return expressionList;
+            }
+            return o;
+        });
+        functionCall.put("DAY".toLowerCase(), o -> {
+            if (Objects.nonNull(o) && o instanceof ExpressionList) {
+                ExpressionList expressionList = (ExpressionList) o;
+                expressionList.add(new StringValue("dd"));
+                return expressionList;
+            }
+            return o;
+        });
+        functionCall.put("YEAR".toLowerCase(), o -> {
+            if (Objects.nonNull(o) && o instanceof ExpressionList) {
+                ExpressionList expressionList = (ExpressionList) o;
+                expressionList.add(new StringValue("YYYY"));
+                return expressionList;
+            }
+            return o;
+        });
+        return SqlReplaceHelper.replaceFunction(sql, functionMap, functionCall);
     }
 
     @Override
