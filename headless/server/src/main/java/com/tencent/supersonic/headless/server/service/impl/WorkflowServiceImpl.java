@@ -77,7 +77,7 @@ public class WorkflowServiceImpl implements WorkflowService {
                 }
                 for (SemanticCorrector corrector : semanticCorrectors) {
                     corrector.correct(queryCtx, semanticQuery.getParseInfo());
-                    if (!WorkflowState.PARSING.equals(queryCtx.getWorkflowState())) {
+                    if (!WorkflowState.CORRECTING.equals(queryCtx.getWorkflowState())) {
                         break;
                     }
                 }
