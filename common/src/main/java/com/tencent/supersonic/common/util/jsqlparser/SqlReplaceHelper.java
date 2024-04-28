@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.UnaryOperator;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.Alias;
@@ -255,6 +256,11 @@ public class SqlReplaceHelper {
     }
 
     public static String replaceFunction(String sql, Map<String, String> functionMap) {
+        return replaceFunction(sql, functionMap, null);
+    }
+
+    public static String replaceFunction(String sql, Map<String, String> functionMap,
+            Map<String, UnaryOperator> functionCall) {
         Select selectStatement = SqlSelectHelper.getSelect(sql);
         //SelectBody selectBody = selectStatement.getSelectBody();
         if (!(selectStatement instanceof PlainSelect)) {
@@ -264,23 +270,24 @@ public class SqlReplaceHelper {
         plainSelectList.add((PlainSelect) selectStatement);
         List<PlainSelect> plainSelects = SqlSelectHelper.getPlainSelects(plainSelectList);
         for (PlainSelect plainSelect : plainSelects) {
-            replaceFunction(functionMap, plainSelect);
+            replaceFunction(functionMap, functionCall, plainSelect);
         }
         return selectStatement.toString();
     }
 
-    private static void replaceFunction(Map<String, String> functionMap, PlainSelect selectBody) {
+    private static void replaceFunction(Map<String, String> functionMap, Map<String, UnaryOperator> functionCall,
+            PlainSelect selectBody) {
         PlainSelect plainSelect = selectBody;
         //1. replace where dataDiff function
         Expression where = plainSelect.getWhere();
 
-        FunctionNameReplaceVisitor visitor = new FunctionNameReplaceVisitor(functionMap);
+        FunctionNameReplaceVisitor visitor = new FunctionNameReplaceVisitor(functionMap, functionCall);
         if (Objects.nonNull(where)) {
             where.accept(visitor);
         }
         GroupByElement groupBy = plainSelect.getGroupBy();
         if (Objects.nonNull(groupBy)) {
-            GroupByFunctionReplaceVisitor replaceVisitor = new GroupByFunctionReplaceVisitor(functionMap);
+            GroupByFunctionReplaceVisitor replaceVisitor = new GroupByFunctionReplaceVisitor(functionMap, functionCall);
             groupBy.accept(replaceVisitor);
         }
 
