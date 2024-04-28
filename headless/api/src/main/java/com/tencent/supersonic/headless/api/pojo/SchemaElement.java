@@ -31,6 +31,7 @@ public class SchemaElement implements Serializable {
     private String defaultAgg;
     private String dataFormatType;
     private double order;
+    private int isTag;
 
     @Override
     public boolean equals(Object o) {

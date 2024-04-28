@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.common.pojo.enums.Text2SQLType;
 import com.tencent.supersonic.common.util.ContextUtils;
+import com.tencent.supersonic.headless.api.pojo.QueryDataType;
 import com.tencent.supersonic.headless.api.pojo.SchemaMapInfo;
 import com.tencent.supersonic.headless.api.pojo.SemanticSchema;
 import com.tencent.supersonic.headless.api.pojo.enums.MapModeEnum;
@@ -45,6 +46,7 @@ public class QueryContext {
     private SemanticSchema semanticSchema;
     @JsonIgnore
     private WorkflowState workflowState;
+    private QueryDataType queryDataType = QueryDataType.ALL;
 
     public List<SemanticQuery> getCandidateQueries() {
         OptimizationConfig optimizationConfig = ContextUtils.getBean(OptimizationConfig.class);
