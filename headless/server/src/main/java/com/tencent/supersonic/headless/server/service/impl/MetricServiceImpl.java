@@ -253,7 +253,7 @@ public class MetricServiceImpl implements MetricService {
         QueryMapReq queryMapReq = new QueryMapReq();
         queryMapReq.setQueryText(pageMetricReq.getKey());
         queryMapReq.setUser(user);
-        queryMapReq.setMapModeEnum(MapModeEnum.MODERATE);
+        queryMapReq.setMapModeEnum(MapModeEnum.LOOSE);
         MapInfoResp mapMeta = metaDiscoveryService.getMapMeta(queryMapReq);
         Map<String, List<SchemaElementMatch>> mapFields = mapMeta.getMapFields();
         if (CollectionUtils.isEmpty(mapFields)) {

@@ -1,17 +1,15 @@
 package com.tencent.supersonic.common.util;
 
-import static com.tencent.supersonic.common.pojo.Constants.APOSTROPHE;
-import static com.tencent.supersonic.common.pojo.Constants.COMMA;
-import static com.tencent.supersonic.common.pojo.Constants.DAY;
-import static com.tencent.supersonic.common.pojo.Constants.DAY_FORMAT;
-import static com.tencent.supersonic.common.pojo.Constants.MONTH;
-import static com.tencent.supersonic.common.pojo.Constants.MONTH_FORMAT;
-import static com.tencent.supersonic.common.pojo.Constants.WEEK;
-import static com.tencent.supersonic.common.pojo.Constants.YEAR;
-
 import com.google.common.base.Strings;
+import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.common.pojo.ItemDateResp;
+import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -24,12 +22,14 @@ import java.util.Objects;
 import java.util.StringJoiner;
 import java.util.regex.Pattern;
 
-import lombok.Data;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
+import static com.tencent.supersonic.common.pojo.Constants.APOSTROPHE;
+import static com.tencent.supersonic.common.pojo.Constants.COMMA;
+import static com.tencent.supersonic.common.pojo.Constants.DAY;
+import static com.tencent.supersonic.common.pojo.Constants.DAY_FORMAT;
+import static com.tencent.supersonic.common.pojo.Constants.MONTH;
+import static com.tencent.supersonic.common.pojo.Constants.MONTH_FORMAT;
+import static com.tencent.supersonic.common.pojo.Constants.WEEK;
+import static com.tencent.supersonic.common.pojo.Constants.YEAR;
 
 
 @Slf4j
@@ -253,6 +253,11 @@ public class DateModeUtils {
      */
     public String betweenDateStr(ItemDateResp dateDate, DateConf dateInfo) {
         if (MONTH.equalsIgnoreCase(dateInfo.getPeriod())) {
+            // startDate YYYYMM
+            if (!dateInfo.getStartDate().contains(Constants.MINUS)) {
+                return String.format("%s >= '%s' and %s <= '%s'",
+                        sysDateMonthCol, dateInfo.getStartDate(), sysDateMonthCol, dateInfo.getEndDate());
+            }
             LocalDate endData = LocalDate.parse(dateInfo.getEndDate(),
                     DateTimeFormatter.ofPattern(DAY_FORMAT));
             LocalDate startData = LocalDate.parse(dateInfo.getStartDate(),

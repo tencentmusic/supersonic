@@ -1,6 +1,7 @@
 package com.tencent.supersonic.headless;
 
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
+import com.tencent.supersonic.headless.api.pojo.QueryDataType;
 import com.tencent.supersonic.headless.api.pojo.request.QueryMapReq;
 import com.tencent.supersonic.headless.api.pojo.response.MapInfoResp;
 import com.tencent.supersonic.headless.server.service.MetaDiscoveryService;
@@ -27,5 +28,29 @@ public class MetaDiscoveryTest extends BaseTest {
         Assert.assertNotNull(mapMeta);
         Assert.assertNotEquals(0, mapMeta.getMapFields());
         Assert.assertNotEquals(0, mapMeta.getTopFields());
+    }
+
+    @Test
+    public void testGetMapMeta2() throws Exception {
+        QueryMapReq queryMapReq = new QueryMapReq();
+        queryMapReq.setQueryText("风格为流行的艺人");
+        queryMapReq.setTopN(10);
+        queryMapReq.setUser(User.getFakeUser());
+        queryMapReq.setDataSetNames(Collections.singletonList("艺人库"));
+        queryMapReq.setQueryDataType(QueryDataType.TAG);
+        MapInfoResp mapMeta = metaDiscoveryService.getMapMeta(queryMapReq);
+        Assert.assertNotNull(mapMeta);
+    }
+
+    @Test
+    public void testGetMapMeta3() throws Exception {
+        QueryMapReq queryMapReq = new QueryMapReq();
+        queryMapReq.setQueryText("超音数访问次数最高的部门");
+        queryMapReq.setTopN(10);
+        queryMapReq.setUser(User.getFakeUser());
+        queryMapReq.setDataSetNames(Collections.singletonList("超音数"));
+        queryMapReq.setQueryDataType(QueryDataType.METRIC);
+        MapInfoResp mapMeta = metaDiscoveryService.getMapMeta(queryMapReq);
+        Assert.assertNotNull(mapMeta);
     }
 }
