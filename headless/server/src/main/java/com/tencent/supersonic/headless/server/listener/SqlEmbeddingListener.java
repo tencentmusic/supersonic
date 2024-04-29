@@ -10,12 +10,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
+
 import java.util.List;
 
 @Slf4j
 @Component
 @Order(0)
-public class EmbeddingInitListener implements CommandLineRunner {
+public class SqlEmbeddingListener implements CommandLineRunner {
 
     @Autowired
     private SqlExamplarLoader sqlExamplarLoader;
