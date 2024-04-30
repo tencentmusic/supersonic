@@ -7,7 +7,7 @@ import { createView, updateView, getDimensionList, queryMetric } from '../../ser
 import { ISemantic } from '../../data';
 import DefaultSettingForm from './DefaultSettingForm';
 import { isArrayOfValues } from '@/utils/utils';
-import ProCard from '@ant-design/pro-card';
+import { ProCard } from  '@ant-design/pro-components';
 import { ChatConfigType } from '../../enum';
 
 export type ModelCreateFormModalProps = {

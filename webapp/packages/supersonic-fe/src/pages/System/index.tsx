@@ -15,7 +15,7 @@ import {
 } from 'antd';
 import React, { useState, useEffect } from 'react';
 import { getSystemConfig, saveSystemConfig } from '@/services/user';
-import ProCard from '@ant-design/pro-card';
+import { ProCard } from  '@ant-design/pro-components';
 import SelectTMEPerson from '@/components/SelectTMEPerson';
 import { ConfigParametersItem, SystemConfig } from './types';
 import FormItemTitle from '@/components/FormHelper/FormItemTitle';
