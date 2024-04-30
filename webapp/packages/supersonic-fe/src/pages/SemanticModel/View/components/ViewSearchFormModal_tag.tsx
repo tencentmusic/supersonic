@@ -7,7 +7,7 @@ import { createView, updateView, getDimensionList, queryMetric, getTagList } fro
 import { ISemantic } from '../../data';
 import DefaultSettingForm from './DefaultSettingForm';
 import { isArrayOfValues } from '@/utils/utils';
-import ProCard from '@ant-design/pro-card';
+import { ProCard } from  '@ant-design/pro-components';
 import { TransType, ChatConfigType } from '../../enum';
 import { number } from 'echarts';
 

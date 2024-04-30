@@ -16,7 +16,7 @@ import { LatestDateMap } from './type';
 import StaticDate from './StaticDate';
 import DynamicDate from './DynamicDate';
 import dayjs from 'dayjs';
-import { ProCard } from '@ant-design/pro-card';
+import { ProCard } from  '@ant-design/pro-components';
 
 type Props = {
   disabledAdvanceSetting?: boolean;
