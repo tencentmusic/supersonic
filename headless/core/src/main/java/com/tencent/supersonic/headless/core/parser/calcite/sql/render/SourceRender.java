@@ -1,8 +1,9 @@
 package com.tencent.supersonic.headless.core.parser.calcite.sql.render;
 
 
+import static com.tencent.supersonic.headless.core.parser.calcite.s2sql.Constants.DIMENSION_DELIMITER;
+
 import com.tencent.supersonic.headless.api.pojo.enums.EngineType;
-import com.tencent.supersonic.headless.core.pojo.MetricQueryParam;
 import com.tencent.supersonic.headless.core.parser.calcite.s2sql.Constants;
 import com.tencent.supersonic.headless.core.parser.calcite.s2sql.DataSource;
 import com.tencent.supersonic.headless.core.parser.calcite.s2sql.Dimension;
@@ -19,19 +20,22 @@ import com.tencent.supersonic.headless.core.parser.calcite.sql.node.FilterNode;
 import com.tencent.supersonic.headless.core.parser.calcite.sql.node.IdentifyNode;
 import com.tencent.supersonic.headless.core.parser.calcite.sql.node.MetricNode;
 import com.tencent.supersonic.headless.core.parser.calcite.sql.node.SemanticNode;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.calcite.sql.SqlNode;
-import org.apache.calcite.sql.validate.SqlValidatorScope;
-import org.springframework.util.CollectionUtils;
-
+import com.tencent.supersonic.headless.core.pojo.MetricQueryParam;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.calcite.sql.SqlNode;
+import org.apache.calcite.sql.validate.SqlValidatorScope;
+import org.springframework.util.CollectionUtils;
 
 /**
  * process the table dataSet from the defined data model schema
@@ -49,7 +53,7 @@ public class SourceRender extends Renderer {
         List<String> queryMetrics = new ArrayList<>(reqMetrics);
         List<String> queryDimensions = new ArrayList<>(reqDimensions);
         List<String> fieldWhere = new ArrayList<>(fieldWheres);
-        Set<String> extendFields = new HashSet<>();
+        Map<String, String> extendFields = new HashMap<>();
         if (!fieldWhere.isEmpty()) {
             Set<String> dimensions = new HashSet<>();
             Set<String> metrics = new HashSet<>();
@@ -95,7 +99,8 @@ public class SourceRender extends Renderer {
     }
 
     private static void buildDimension(String alias, String dimension, DataSource datasource, SemanticSchema schema,
-            boolean nonAgg, Set<String> extendFields, TableView dataSet, TableView output, SqlValidatorScope scope)
+            boolean nonAgg, Map<String, String> extendFields, TableView dataSet, TableView output,
+            SqlValidatorScope scope)
             throws Exception {
         List<Dimension> dimensionList = schema.getDimension().get(datasource.getName());
         EngineType engineType = EngineType.fromString(schema.getSemanticModel().getDatabase().getType());
@@ -106,6 +111,7 @@ public class SourceRender extends Renderer {
                     continue;
                 }
                 dataSet.getMeasure().add(DimensionNode.build(dim, scope, engineType));
+                addExtendFields(dim, extendFields);
                 if (nonAgg) {
                     output.getMeasure().add(DimensionNode.buildName(dim, scope, engineType));
                     isAdd = true;
@@ -141,9 +147,7 @@ public class SourceRender extends Renderer {
         Optional<Dimension> dimensionOptional = getDimensionByName(dimension, datasource);
         if (dimensionOptional.isPresent()) {
             dataSet.getMeasure().add(DimensionNode.buildArray(dimensionOptional.get(), scope, engineType));
-            if (dimensionOptional.get().getDataType().isArray()) {
-                extendFields.add(dimensionOptional.get().getExpr());
-            }
+            addExtendFields(dimensionOptional.get(), extendFields);
             if (nonAgg) {
                 output.getMeasure().add(DimensionNode.buildName(dimensionOptional.get(), scope, engineType));
                 return;
@@ -152,16 +156,21 @@ public class SourceRender extends Renderer {
         }
     }
 
-    private static boolean isWhereHasMetric(List<String> fields, DataSource datasource) {
-        Long metricNum = datasource.getMeasures().stream().filter(m -> fields.contains(m.getName().toLowerCase()))
-                .count();
-        Long measureNum = datasource.getMeasures().stream().filter(m -> fields.contains(m.getName().toLowerCase()))
-                .count();
-        return metricNum > 0 || measureNum > 0;
+    private static void addExtendFields(Dimension dimension, Map<String, String> extendFields) {
+        if (dimension.getDataType().isArray()) {
+            if (Objects.nonNull(dimension.getExt()) && dimension.getExt()
+                    .containsKey(DIMENSION_DELIMITER)) {
+                extendFields.put(dimension.getExpr(),
+                        (String) dimension.getExt().get(DIMENSION_DELIMITER));
+            } else {
+                extendFields.put(dimension.getExpr(), "");
+            }
+        }
     }
 
     private static List<SqlNode> getWhereMeasure(List<String> fields, List<String> queryMetrics,
-            List<String> queryDimensions, Set<String> extendFields, DataSource datasource, SqlValidatorScope scope,
+            List<String> queryDimensions, Map<String, String> extendFields, DataSource datasource,
+            SqlValidatorScope scope,
             SemanticSchema schema, boolean nonAgg) throws Exception {
         Iterator<String> iterator = fields.iterator();
         List<SqlNode> whereNode = new ArrayList<>();
@@ -195,9 +204,7 @@ public class SourceRender extends Renderer {
             Optional<Dimension> dimensionOptional = getDimensionByName(where, datasource);
             if (dimensionOptional.isPresent()) {
                 whereNode.add(DimensionNode.buildArray(dimensionOptional.get(), scope, engineType));
-                if (dimensionOptional.get().getDataType().isArray()) {
-                    extendFields.add(dimensionOptional.get().getExpr());
-                }
+                addExtendFields(dimensionOptional.get(), extendFields);
             }
         }
         return whereNode;
@@ -205,7 +212,8 @@ public class SourceRender extends Renderer {
 
     private static void mergeWhere(List<String> fields, TableView dataSet, TableView outputSet,
             List<String> queryMetrics,
-            List<String> queryDimensions, Set<String> extendFields, DataSource datasource, SqlValidatorScope scope,
+            List<String> queryDimensions, Map<String, String> extendFields, DataSource datasource,
+            SqlValidatorScope scope,
             SemanticSchema schema,
             boolean nonAgg) throws Exception {
         List<SqlNode> whereNode = getWhereMeasure(fields, queryMetrics, queryDimensions, extendFields, datasource,

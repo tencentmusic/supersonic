@@ -13,17 +13,6 @@ import com.tencent.supersonic.headless.core.parser.calcite.schema.SchemaBuilder;
 import com.tencent.supersonic.headless.core.parser.calcite.schema.SemanticSchema;
 import com.tencent.supersonic.headless.core.parser.calcite.sql.node.extend.LateralViewExplodeNode;
 import com.tencent.supersonic.headless.core.pojo.MetricQueryParam;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.calcite.sql.SqlBasicCall;
-import org.apache.calcite.sql.SqlDataTypeSpec;
-import org.apache.calcite.sql.SqlNode;
-import org.apache.calcite.sql.SqlNodeList;
-import org.apache.calcite.sql.SqlUserDefinedTypeNameSpec;
-import org.apache.calcite.sql.parser.SqlParser;
-import org.apache.calcite.sql.parser.SqlParserPos;
-import org.apache.calcite.sql.validate.SqlValidatorScope;
-import org.springframework.util.CollectionUtils;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -35,6 +24,16 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.calcite.sql.SqlBasicCall;
+import org.apache.calcite.sql.SqlDataTypeSpec;
+import org.apache.calcite.sql.SqlNode;
+import org.apache.calcite.sql.SqlNodeList;
+import org.apache.calcite.sql.SqlUserDefinedTypeNameSpec;
+import org.apache.calcite.sql.parser.SqlParser;
+import org.apache.calcite.sql.parser.SqlParserPos;
+import org.apache.calcite.sql.validate.SqlValidatorScope;
+import org.springframework.util.CollectionUtils;
 
 @Slf4j
 public class DataSourceNode extends SemanticNode {
@@ -120,22 +119,23 @@ public class DataSourceNode extends SemanticNode {
                 dimensions, metrics);
     }
 
-    public static SqlNode buildExtend(DataSource datasource, Set<String> exprList,
+    public static SqlNode buildExtend(DataSource datasource, Map<String, String> exprList,
             SqlValidatorScope scope)
             throws Exception {
         if (CollectionUtils.isEmpty(exprList)) {
             return build(datasource, scope);
         }
         EngineType engineType = EngineType.fromString(datasource.getType());
-        SqlNode dataSet = new SqlBasicCall(new LateralViewExplodeNode(), Arrays.asList(build(datasource, scope),
+        SqlNode dataSet = new SqlBasicCall(new LateralViewExplodeNode(exprList), Arrays.asList(build(datasource, scope),
                 new SqlNodeList(getExtendField(exprList, scope, engineType), SqlParserPos.ZERO)), SqlParserPos.ZERO);
         return buildAs(datasource.getName() + Constants.DIMENSION_ARRAY_SINGLE_SUFFIX, dataSet);
     }
 
-    public static List<SqlNode> getExtendField(Set<String> exprList, SqlValidatorScope scope, EngineType engineType)
+    public static List<SqlNode> getExtendField(Map<String, String> exprList, SqlValidatorScope scope,
+            EngineType engineType)
             throws Exception {
         List<SqlNode> sqlNodeList = new ArrayList<>();
-        for (String expr : exprList) {
+        for (String expr : exprList.keySet()) {
             sqlNodeList.add(parse(expr, scope, engineType));
             sqlNodeList.add(new SqlDataTypeSpec(
                     new SqlUserDefinedTypeNameSpec(expr + Constants.DIMENSION_ARRAY_SINGLE_SUFFIX, SqlParserPos.ZERO),

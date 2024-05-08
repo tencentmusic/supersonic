@@ -21,8 +21,12 @@ import net.sf.jsqlparser.expression.WhenClause;
 import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
 import net.sf.jsqlparser.expression.operators.conditional.OrExpression;
 import net.sf.jsqlparser.expression.operators.conditional.XorExpression;
+import net.sf.jsqlparser.expression.operators.relational.Between;
 import net.sf.jsqlparser.expression.operators.relational.ComparisonOperator;
 import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
+import net.sf.jsqlparser.expression.operators.relational.InExpression;
+import net.sf.jsqlparser.expression.operators.relational.IsBooleanExpression;
+import net.sf.jsqlparser.expression.operators.relational.IsNullExpression;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
@@ -563,6 +567,22 @@ public class SqlSelectHelper {
             BinaryExpression expr = (BinaryExpression) expression;
             getColumnFromExpr(expr.getLeftExpression(), columns);
             getColumnFromExpr(expr.getRightExpression(), columns);
+        }
+        if (expression instanceof InExpression) {
+            InExpression inExpression = (InExpression) expression;
+            getColumnFromExpr(inExpression.getLeftExpression(), columns);
+        }
+        if (expression instanceof Between) {
+            Between between = (Between) expression;
+            getColumnFromExpr(between.getLeftExpression(), columns);
+        }
+        if (expression instanceof IsBooleanExpression) {
+            IsBooleanExpression isBooleanExpression = (IsBooleanExpression) expression;
+            getColumnFromExpr(isBooleanExpression.getLeftExpression(), columns);
+        }
+        if (expression instanceof IsNullExpression) {
+            IsNullExpression isNullExpression = (IsNullExpression) expression;
+            getColumnFromExpr(isNullExpression.getLeftExpression(), columns);
         }
         if (expression instanceof Parenthesis) {
             Parenthesis expr = (Parenthesis) expression;
