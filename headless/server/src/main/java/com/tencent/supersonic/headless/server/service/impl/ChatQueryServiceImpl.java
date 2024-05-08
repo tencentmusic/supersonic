@@ -337,60 +337,20 @@ public class ChatQueryServiceImpl implements ChatQueryService {
         if (Objects.isNull(queryData.getDateInfo())) {
             return;
         }
-        Map<String, String> map = new HashMap<>();
-        String dateField = TimeDimensionEnum.DAY.getChName();
         if (queryData.getDateInfo().getUnit() > 1) {
             queryData.getDateInfo().setStartDate(DateUtils.getBeforeDate(queryData.getDateInfo().getUnit() + 1));
             queryData.getDateInfo().setEndDate(DateUtils.getBeforeDate(1));
         }
         // startDate equals to endDate
-        if (queryData.getDateInfo().getStartDate().equals(queryData.getDateInfo().getEndDate())) {
-            for (FieldExpression fieldExpression : fieldExpressionList) {
-                if (TimeDimensionEnum.DAY.getChName().equals(fieldExpression.getFieldName())) {
-                    //sql where condition exists 'equals' operator about date,just replace
-                    if (fieldExpression.getOperator().equals(FilterOperatorEnum.EQUALS)) {
-                        dateField = fieldExpression.getFieldName();
-                        map.put(fieldExpression.getFieldValue().toString(),
-                                queryData.getDateInfo().getStartDate());
-                        filedNameToValueMap.put(dateField, map);
-                    } else {
-                        // first remove,then add
-                        removeFieldNames.add(TimeDimensionEnum.DAY.getChName());
-                        EqualsTo equalsTo = new EqualsTo();
-                        Column column = new Column(TimeDimensionEnum.DAY.getChName());
-                        StringValue stringValue = new StringValue(queryData.getDateInfo().getStartDate());
-                        equalsTo.setLeftExpression(column);
-                        equalsTo.setRightExpression(stringValue);
-                        addConditions.add(equalsTo);
-                    }
-                    break;
-                }
-            }
-        } else {
-            for (FieldExpression fieldExpression : fieldExpressionList) {
-                if (TimeDimensionEnum.DAY.getChName().equals(fieldExpression.getFieldName())) {
-                    dateField = fieldExpression.getFieldName();
-                    //just replace
-                    if (FilterOperatorEnum.GREATER_THAN_EQUALS.getValue().equals(fieldExpression.getOperator())
-                            || FilterOperatorEnum.GREATER_THAN.getValue().equals(fieldExpression.getOperator())) {
-                        map.put(fieldExpression.getFieldValue().toString(),
-                                queryData.getDateInfo().getStartDate());
-                    }
-                    if (FilterOperatorEnum.MINOR_THAN_EQUALS.getValue().equals(fieldExpression.getOperator())
-                            || FilterOperatorEnum.MINOR_THAN.getValue().equals(fieldExpression.getOperator())) {
-                        map.put(fieldExpression.getFieldValue().toString(),
-                                queryData.getDateInfo().getEndDate());
-                    }
-                    filedNameToValueMap.put(dateField, map);
-                    // first remove,then add
-                    if (FilterOperatorEnum.EQUALS.getValue().equals(fieldExpression.getOperator())) {
-                        removeFieldNames.add(TimeDimensionEnum.DAY.getChName());
-                        GreaterThanEquals greaterThanEquals = new GreaterThanEquals();
-                        addTimeFilters(queryData.getDateInfo().getStartDate(), greaterThanEquals, addConditions);
-                        MinorThanEquals minorThanEquals = new MinorThanEquals();
-                        addTimeFilters(queryData.getDateInfo().getEndDate(), minorThanEquals, addConditions);
-                    }
-                }
+        for (FieldExpression fieldExpression : fieldExpressionList) {
+            if (TimeDimensionEnum.DAY.getChName().equals(fieldExpression.getFieldName())) {
+                // first remove,then add
+                removeFieldNames.add(TimeDimensionEnum.DAY.getChName());
+                GreaterThanEquals greaterThanEquals = new GreaterThanEquals();
+                addTimeFilters(queryData.getDateInfo().getStartDate(), greaterThanEquals, addConditions);
+                MinorThanEquals minorThanEquals = new MinorThanEquals();
+                addTimeFilters(queryData.getDateInfo().getEndDate(), minorThanEquals, addConditions);
+                break;
             }
         }
         parseInfo.setDateInfo(queryData.getDateInfo());
