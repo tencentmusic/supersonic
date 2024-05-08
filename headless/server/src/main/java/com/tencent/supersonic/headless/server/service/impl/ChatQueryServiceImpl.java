@@ -64,7 +64,7 @@ import net.sf.jsqlparser.expression.LongValue;
 import net.sf.jsqlparser.expression.StringValue;
 import net.sf.jsqlparser.expression.operators.relational.ComparisonOperator;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
-import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
+import net.sf.jsqlparser.expression.operators.relational.ParenthesedExpressionList;
 import net.sf.jsqlparser.expression.operators.relational.GreaterThan;
 import net.sf.jsqlparser.expression.operators.relational.GreaterThanEquals;
 import net.sf.jsqlparser.expression.operators.relational.InExpression;
@@ -450,8 +450,7 @@ public class ChatQueryServiceImpl implements ChatQueryService {
                                    Set<QueryFilter> contextMetricFilters,
                                    List<Expression> addConditions) {
         Column column = new Column(dslQueryFilter.getName());
-        ExpressionList expressionList = new ExpressionList();
-        List<Expression> expressions = new ArrayList<>();
+        ParenthesedExpressionList parenthesedExpressionList = new ParenthesedExpressionList<>();
         List<String> valueList = JsonUtil.toList(
                 JsonUtil.toString(dslQueryFilter.getValue()), String.class);
         if (CollectionUtils.isEmpty(valueList)) {
@@ -459,11 +458,10 @@ public class ChatQueryServiceImpl implements ChatQueryService {
         }
         valueList.stream().forEach(o -> {
             StringValue stringValue = new StringValue(o);
-            expressions.add(stringValue);
+            parenthesedExpressionList.add(stringValue);
         });
-        expressionList.setExpressions(expressions);
         inExpression.setLeftExpression(column);
-        inExpression.setRightExpression(expressionList);
+        inExpression.setRightExpression(parenthesedExpressionList);
         addConditions.add(inExpression);
         contextMetricFilters.stream().forEach(o -> {
             if (o.getName().equals(dslQueryFilter.getName())) {
