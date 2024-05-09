@@ -13,7 +13,7 @@ import { ColumnConfig } from '../data';
 import dayjs from 'dayjs';
 import { ISemantic } from '../../data';
 import { DateFieldMap } from '@/pages/SemanticModel/constant';
-import ProCard from '@ant-design/pro-card';
+import { ProCard } from  '@ant-design/pro-components';
 
 import styles from '../style.less';
 

@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Input, Space, Tag } from 'antd';
 import { ProTable } from '@ant-design/pro-components';
-import ProCard from '@ant-design/pro-card';
+import { ProCard } from '@ant-design/pro-components';
 import SqlEditor from '@/components/SqlEditor';
 
 import FormLabelRequire from './FormLabelRequire';

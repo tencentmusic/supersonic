@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { connect } from 'umi';
 import type { StateType } from '../../model';
 import { getDomainExtendConfig, addDomainExtend, editDomainExtend } from '../../service';
-import ProCard from '@ant-design/pro-card';
+import { ProCard } from  '@ant-design/pro-components';
 
 import TextAreaCommonEditList from '../../components/CommonEditList/TextArea';
 
