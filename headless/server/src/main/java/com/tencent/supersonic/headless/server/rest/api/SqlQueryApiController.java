@@ -2,6 +2,7 @@ package com.tencent.supersonic.headless.server.rest.api;
 
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
+import com.tencent.supersonic.common.util.StringUtil;
 import com.tencent.supersonic.headless.api.pojo.request.QuerySqlReq;
 import com.tencent.supersonic.headless.api.pojo.request.QuerySqlsReq;
 import com.tencent.supersonic.headless.api.pojo.request.SemanticQueryReq;
@@ -36,6 +37,8 @@ public class SqlQueryApiController {
                              HttpServletRequest request,
                              HttpServletResponse response) throws Exception {
         User user = UserHolder.findUser(request, response);
+        String sql = querySqlReq.getSql();
+        querySqlReq.setSql(StringUtil.replaceBackticks(sql));
         chatQueryService.correct(querySqlReq, user);
         return queryService.queryByReq(querySqlReq, user);
     }
@@ -49,10 +52,11 @@ public class SqlQueryApiController {
                 .stream().map(sql -> {
                     QuerySqlReq querySqlReq = new QuerySqlReq();
                     BeanUtils.copyProperties(querySqlsReq, querySqlReq);
-                    querySqlReq.setSql(sql);
+                    querySqlReq.setSql(StringUtil.replaceBackticks(sql));
                     chatQueryService.correct(querySqlReq, user);
                     return querySqlReq;
                 }).collect(Collectors.toList());
         return queryService.queryByReqs(semanticQueryReqs, user);
     }
+
 }

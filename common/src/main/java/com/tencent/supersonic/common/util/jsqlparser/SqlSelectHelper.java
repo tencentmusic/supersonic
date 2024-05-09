@@ -1,11 +1,6 @@
 package com.tencent.supersonic.common.util.jsqlparser;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
+import com.tencent.supersonic.common.util.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.Alias;
@@ -43,6 +38,13 @@ import net.sf.jsqlparser.statement.select.SelectVisitorAdapter;
 import net.sf.jsqlparser.statement.select.SetOperationList;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.CollectionUtils;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Sql Parser Select Helper
@@ -363,7 +365,7 @@ public class SqlSelectHelper {
 
     public static String getTableName(String sql) {
         Table table = getTable(sql);
-        return table.getName();
+        return StringUtil.replaceBackticks(table.getName());
     }
 
     public static List<String> getAggregateFields(String sql) {
