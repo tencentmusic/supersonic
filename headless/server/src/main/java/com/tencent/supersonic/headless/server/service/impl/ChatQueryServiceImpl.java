@@ -353,6 +353,26 @@ public class ChatQueryServiceImpl implements ChatQueryService {
                 break;
             }
         }
+        for (FieldExpression fieldExpression : fieldExpressionList) {
+            for (QueryFilter queryFilter : queryData.getDimensionFilters()) {
+                if (queryFilter.getOperator().equals(FilterOperatorEnum.LIKE)
+                        && FilterOperatorEnum.LIKE.getValue().toLowerCase().equals(
+                                fieldExpression.getOperator().toLowerCase())) {
+                    Map<String, String> replaceMap = new HashMap<>();
+                    String preValue = fieldExpression.getFieldValue().toString();
+                    String curValue = queryFilter.getValue().toString();
+                    if (preValue.startsWith("%")) {
+                        curValue = "%" + curValue;
+                    }
+                    if (preValue.endsWith("%")) {
+                        curValue = curValue + "%";
+                    }
+                    replaceMap.put(preValue, curValue);
+                    filedNameToValueMap.put(fieldExpression.getFieldName(), replaceMap);
+                    break;
+                }
+            }
+        }
         parseInfo.setDateInfo(queryData.getDateInfo());
     }
 
