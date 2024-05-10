@@ -34,7 +34,6 @@ const OverviewContainer: React.FC<Props> = ({ mode, domainManger, dispatch }) =>
     const targetNode = domainList.filter((item: any) => {
       return `${item.id}` === domainId;
     })[0];
-
     if (!targetNode) {
       const firstRootNode = domainList.filter((item: any) => {
         return item.parentId === 0;

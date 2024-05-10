@@ -8,9 +8,6 @@ const getRunningEnv = () => {
 };
 
 export function getDomainList(): Promise<any> {
-  if (getRunningEnv() === 'chat') {
-    return request.get(`${process.env.CHAT_API_BASE_URL}conf/domainList`);
-  }
   return request.get(`${process.env.API_BASE_URL}domain/getDomainList`);
 }
 
