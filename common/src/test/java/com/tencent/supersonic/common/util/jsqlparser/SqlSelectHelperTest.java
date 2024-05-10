@@ -1,10 +1,11 @@
 package com.tencent.supersonic.common.util.jsqlparser;
 
-import java.util.List;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.statement.select.Select;
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;
+
+import java.util.List;
 
 /**
  * SqlParserSelectHelper Test
@@ -270,6 +271,15 @@ class SqlSelectHelperTest {
         List<String> selectFields = SqlSelectHelper.getAggregateFields(sql);
         Assert.assertEquals(selectFields.contains("访问次数"), true);
 
+    }
+
+    @Test
+    void testGetTableName() {
+
+        String sql = "select 部门,sum (访问次数) from `超音数` where 数据日期 = '2023-08-08'"
+                + " and 用户 = 'alice' and 发布日期 ='11' group by 部门 limit 1";
+        String tableName = SqlSelectHelper.getTableName(sql);
+        Assert.assertEquals(tableName, "超音数");
     }
 
 }

@@ -12,6 +12,9 @@ import com.tencent.supersonic.headless.api.pojo.SchemaValueMap;
 import com.tencent.supersonic.headless.api.pojo.response.DataSetSchemaResp;
 import com.tencent.supersonic.headless.api.pojo.response.DimSchemaResp;
 import com.tencent.supersonic.headless.api.pojo.response.MetricSchemaResp;
+import org.apache.logging.log4j.util.Strings;
+import org.springframework.beans.BeanUtils;
+import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -20,10 +23,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import org.apache.logging.log4j.util.Strings;
-import org.springframework.beans.BeanUtils;
-import org.springframework.util.CollectionUtils;
 
 public class DataSetSchemaBuilder {
 
@@ -77,6 +76,9 @@ public class DataSetSchemaBuilder {
                         .type(SchemaElementType.TAG)
                         .useCnt(metric.getUseCnt())
                         .alias(alias)
+                        .defaultAgg(metric.getDefaultAgg())
+                        .isTag(metric.getIsTag())
+                        .description(metric.getDescription())
                         .build();
                 tags.add(tagToAdd);
             }
@@ -109,6 +111,8 @@ public class DataSetSchemaBuilder {
                         .useCnt(dim.getUseCnt())
                         .alias(alias)
                         .schemaValueMaps(schemaValueMaps)
+                        .isTag(dim.getIsTag())
+                        .description(dim.getDescription())
                         .build();
                 tags.add(tagToAdd);
             }
@@ -157,6 +161,8 @@ public class DataSetSchemaBuilder {
                     .useCnt(dim.getUseCnt())
                     .alias(alias)
                     .schemaValueMaps(schemaValueMaps)
+                    .isTag(dim.getIsTag())
+                    .description(dim.getDescription())
                     .build();
             dimensions.add(dimToAdd);
         }
@@ -188,6 +194,8 @@ public class DataSetSchemaBuilder {
                     .type(SchemaElementType.VALUE)
                     .useCnt(dim.getUseCnt())
                     .alias(new ArrayList<>(Arrays.asList(dimValueAlias.toArray(new String[0]))))
+                    .isTag(dim.getIsTag())
+                    .description(dim.getDescription())
                     .build();
             dimensionValues.add(dimValueToAdd);
         }
@@ -213,6 +221,8 @@ public class DataSetSchemaBuilder {
                     .relatedSchemaElements(getRelateSchemaElement(metric))
                     .defaultAgg(metric.getDefaultAgg())
                     .dataFormatType(metric.getDataFormatType())
+                    .isTag(metric.getIsTag())
+                    .description(metric.getDescription())
                     .build();
             metrics.add(metricToAdd);
 

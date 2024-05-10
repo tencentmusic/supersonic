@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -30,13 +31,51 @@ public abstract class BaseMapper implements SchemaMapper {
 
         try {
             doMap(queryContext);
+            filter(queryContext);
         } catch (Exception e) {
             log.error("work error", e);
         }
 
         long cost = System.currentTimeMillis() - startTime;
-        log.info("after {},cost:{},mapInfo:{}", simpleName, cost,
-                queryContext.getMapInfo().getDataSetElementMatches());
+        log.info("after {},cost:{},mapInfo:{}", simpleName, cost, queryContext.getMapInfo().getDataSetElementMatches());
+    }
+
+    private void filter(QueryContext queryContext) {
+
+        switch (queryContext.getQueryDataType()) {
+            case TAG:
+                filterByQueryDataType(queryContext, element -> !(element.getIsTag() > 0));
+                break;
+            case METRIC:
+                filterByQueryDataType(queryContext, element -> !SchemaElementType.METRIC.equals(element.getType()));
+                break;
+            case DIMENSION:
+                filterByQueryDataType(queryContext, element -> {
+                    boolean isDimensionOrValue = SchemaElementType.DIMENSION.equals(element.getType())
+                            || SchemaElementType.VALUE.equals(element.getType());
+                    return !isDimensionOrValue;
+                });
+                break;
+            case ALL:
+            default:
+                break;
+        }
+
+    }
+
+    private static void filterByQueryDataType(QueryContext queryContext, Predicate<SchemaElement> needRemovePredicate) {
+        queryContext.getMapInfo().getDataSetElementMatches().values().stream().forEach(
+                schemaElementMatches -> schemaElementMatches.removeIf(
+                        schemaElementMatch -> {
+                            SchemaElement element = schemaElementMatch.getElement();
+                            SchemaElementType type = element.getType();
+                            if (SchemaElementType.ENTITY.equals(type) || SchemaElementType.DATASET.equals(type)
+                                    || SchemaElementType.ID.equals(type)) {
+                                return false;
+                            }
+                            return needRemovePredicate.test(element);
+                        }
+                ));
     }
 
     public abstract void doMap(QueryContext queryContext);

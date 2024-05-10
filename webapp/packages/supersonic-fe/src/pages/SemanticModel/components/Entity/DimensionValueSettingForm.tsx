@@ -5,7 +5,7 @@ import FormItemTitle from '@/components/FormHelper/FormItemTitle';
 import { RedoOutlined, InfoCircleOutlined } from '@ant-design/icons';
 import DisabledWheelNumberInput from '@/components/DisabledWheelNumberInput';
 import { formLayout } from '@/components/FormHelper/utils';
-import ProCard from '@ant-design/pro-card';
+import { ProCard } from  '@ant-design/pro-components';
 import { connect } from 'umi';
 import {
   DictTaskState,

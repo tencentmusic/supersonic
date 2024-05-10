@@ -41,26 +41,22 @@ import com.tencent.supersonic.headless.api.pojo.response.QueryState;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
 import com.tencent.supersonic.headless.core.chat.corrector.GrammarCorrector;
 import com.tencent.supersonic.headless.core.chat.corrector.SchemaCorrector;
-import com.tencent.supersonic.headless.core.chat.corrector.SemanticCorrector;
 import com.tencent.supersonic.headless.core.chat.knowledge.HanlpMapResult;
 import com.tencent.supersonic.headless.core.chat.knowledge.KnowledgeService;
 import com.tencent.supersonic.headless.core.chat.knowledge.SearchService;
 import com.tencent.supersonic.headless.core.chat.knowledge.helper.HanlpHelper;
 import com.tencent.supersonic.headless.core.chat.knowledge.helper.NatureHelper;
-import com.tencent.supersonic.headless.core.chat.mapper.SchemaMapper;
-import com.tencent.supersonic.headless.core.chat.parser.SemanticParser;
 import com.tencent.supersonic.headless.core.chat.query.QueryManager;
 import com.tencent.supersonic.headless.core.chat.query.SemanticQuery;
 import com.tencent.supersonic.headless.core.chat.query.llm.s2sql.LLMSqlQuery;
-import com.tencent.supersonic.headless.core.chat.query.rule.RuleSemanticQuery;
 import com.tencent.supersonic.headless.core.pojo.ChatContext;
 import com.tencent.supersonic.headless.core.pojo.QueryContext;
 import com.tencent.supersonic.headless.server.persistence.dataobject.StatisticsDO;
-import com.tencent.supersonic.headless.server.processor.ResultProcessor;
 import com.tencent.supersonic.headless.server.service.ChatContextService;
 import com.tencent.supersonic.headless.server.service.ChatQueryService;
 import com.tencent.supersonic.headless.server.service.DataSetService;
 import com.tencent.supersonic.headless.server.service.QueryService;
+import com.tencent.supersonic.headless.server.service.WorkflowService;
 import com.tencent.supersonic.headless.server.utils.ComponentFactory;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.expression.Expression;
@@ -68,7 +64,7 @@ import net.sf.jsqlparser.expression.LongValue;
 import net.sf.jsqlparser.expression.StringValue;
 import net.sf.jsqlparser.expression.operators.relational.ComparisonOperator;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
-import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
+import net.sf.jsqlparser.expression.operators.relational.ParenthesedExpressionList;
 import net.sf.jsqlparser.expression.operators.relational.GreaterThan;
 import net.sf.jsqlparser.expression.operators.relational.GreaterThanEquals;
 import net.sf.jsqlparser.expression.operators.relational.InExpression;
@@ -76,7 +72,6 @@ import net.sf.jsqlparser.expression.operators.relational.MinorThan;
 import net.sf.jsqlparser.expression.operators.relational.MinorThanEquals;
 import net.sf.jsqlparser.schema.Column;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.BeanUtils;
@@ -106,17 +101,14 @@ public class ChatQueryServiceImpl implements ChatQueryService {
     private QueryService queryService;
     @Autowired
     private DataSetService dataSetService;
-
-    private List<SchemaMapper> schemaMappers = ComponentFactory.getSchemaMappers();
-    private List<SemanticParser> semanticParsers = ComponentFactory.getSemanticParsers();
-    private List<SemanticCorrector> semanticCorrectors = ComponentFactory.getSemanticCorrectors();
-    private List<ResultProcessor> resultProcessors = ComponentFactory.getResultProcessors();
+    @Autowired
+    private WorkflowService workflowService;
 
     @Override
     public MapResp performMapping(QueryReq queryReq) {
         MapResp mapResp = new MapResp();
         QueryContext queryCtx = buildQueryContext(queryReq);
-        schemaMappers.forEach(mapper -> {
+        ComponentFactory.getSchemaMappers().forEach(mapper -> {
             mapper.map(queryCtx);
         });
         SchemaMapInfo mapInfo = queryCtx.getMapInfo();
@@ -134,38 +126,8 @@ public class ChatQueryServiceImpl implements ChatQueryService {
         // in order to support multi-turn conversation, chat context is needed
         ChatContext chatCtx = chatContextService.getOrCreateContext(queryReq.getChatId());
 
-        // 1. mapper
-        if (Objects.isNull(queryReq.getMapInfo())
-                || MapUtils.isEmpty(queryReq.getMapInfo().getDataSetElementMatches())) {
-            schemaMappers.forEach(mapper -> {
-                mapper.map(queryCtx);
-            });
-        }
+        workflowService.startWorkflow(queryCtx, chatCtx, parseResult);
 
-        // 2. parser
-        semanticParsers.forEach(parser -> {
-            parser.parse(queryCtx, chatCtx);
-            log.info("{} result:{}", parser.getClass().getSimpleName(), JsonUtil.toString(queryCtx));
-        });
-
-        // 3. corrector
-        List<SemanticQuery> candidateQueries = queryCtx.getCandidateQueries();
-        if (CollectionUtils.isNotEmpty(candidateQueries)) {
-            for (SemanticQuery semanticQuery : candidateQueries) {
-                // the rules are not being corrected.
-                if (semanticQuery instanceof RuleSemanticQuery) {
-                    continue;
-                }
-                semanticCorrectors.forEach(corrector -> {
-                    corrector.correct(queryCtx, semanticQuery.getParseInfo());
-                });
-            }
-        }
-
-        //4. processor
-        resultProcessors.forEach(processor -> {
-            processor.process(parseResult, queryCtx, chatCtx);
-        });
         List<SemanticParseInfo> parseInfos = queryCtx.getCandidateQueries().stream()
                 .map(SemanticQuery::getParseInfo).collect(Collectors.toList());
         parseResult.setSelectedParses(parseInfos);
@@ -375,59 +337,39 @@ public class ChatQueryServiceImpl implements ChatQueryService {
         if (Objects.isNull(queryData.getDateInfo())) {
             return;
         }
-        Map<String, String> map = new HashMap<>();
-        String dateField = TimeDimensionEnum.DAY.getChName();
         if (queryData.getDateInfo().getUnit() > 1) {
             queryData.getDateInfo().setStartDate(DateUtils.getBeforeDate(queryData.getDateInfo().getUnit() + 1));
             queryData.getDateInfo().setEndDate(DateUtils.getBeforeDate(1));
         }
         // startDate equals to endDate
-        if (queryData.getDateInfo().getStartDate().equals(queryData.getDateInfo().getEndDate())) {
-            for (FieldExpression fieldExpression : fieldExpressionList) {
-                if (TimeDimensionEnum.DAY.getChName().equals(fieldExpression.getFieldName())) {
-                    //sql where condition exists 'equals' operator about date,just replace
-                    if (fieldExpression.getOperator().equals(FilterOperatorEnum.EQUALS)) {
-                        dateField = fieldExpression.getFieldName();
-                        map.put(fieldExpression.getFieldValue().toString(),
-                                queryData.getDateInfo().getStartDate());
-                        filedNameToValueMap.put(dateField, map);
-                    } else {
-                        // first remove,then add
-                        removeFieldNames.add(TimeDimensionEnum.DAY.getChName());
-                        EqualsTo equalsTo = new EqualsTo();
-                        Column column = new Column(TimeDimensionEnum.DAY.getChName());
-                        StringValue stringValue = new StringValue(queryData.getDateInfo().getStartDate());
-                        equalsTo.setLeftExpression(column);
-                        equalsTo.setRightExpression(stringValue);
-                        addConditions.add(equalsTo);
-                    }
-                    break;
-                }
+        for (FieldExpression fieldExpression : fieldExpressionList) {
+            if (TimeDimensionEnum.DAY.getChName().equals(fieldExpression.getFieldName())) {
+                // first remove,then add
+                removeFieldNames.add(TimeDimensionEnum.DAY.getChName());
+                GreaterThanEquals greaterThanEquals = new GreaterThanEquals();
+                addTimeFilters(queryData.getDateInfo().getStartDate(), greaterThanEquals, addConditions);
+                MinorThanEquals minorThanEquals = new MinorThanEquals();
+                addTimeFilters(queryData.getDateInfo().getEndDate(), minorThanEquals, addConditions);
+                break;
             }
-        } else {
-            for (FieldExpression fieldExpression : fieldExpressionList) {
-                if (TimeDimensionEnum.DAY.getChName().equals(fieldExpression.getFieldName())) {
-                    dateField = fieldExpression.getFieldName();
-                    //just replace
-                    if (FilterOperatorEnum.GREATER_THAN_EQUALS.getValue().equals(fieldExpression.getOperator())
-                            || FilterOperatorEnum.GREATER_THAN.getValue().equals(fieldExpression.getOperator())) {
-                        map.put(fieldExpression.getFieldValue().toString(),
-                                queryData.getDateInfo().getStartDate());
+        }
+        for (FieldExpression fieldExpression : fieldExpressionList) {
+            for (QueryFilter queryFilter : queryData.getDimensionFilters()) {
+                if (queryFilter.getOperator().equals(FilterOperatorEnum.LIKE)
+                        && FilterOperatorEnum.LIKE.getValue().toLowerCase().equals(
+                                fieldExpression.getOperator().toLowerCase())) {
+                    Map<String, String> replaceMap = new HashMap<>();
+                    String preValue = fieldExpression.getFieldValue().toString();
+                    String curValue = queryFilter.getValue().toString();
+                    if (preValue.startsWith("%")) {
+                        curValue = "%" + curValue;
                     }
-                    if (FilterOperatorEnum.MINOR_THAN_EQUALS.getValue().equals(fieldExpression.getOperator())
-                            || FilterOperatorEnum.MINOR_THAN.getValue().equals(fieldExpression.getOperator())) {
-                        map.put(fieldExpression.getFieldValue().toString(),
-                                queryData.getDateInfo().getEndDate());
+                    if (preValue.endsWith("%")) {
+                        curValue = curValue + "%";
                     }
-                    filedNameToValueMap.put(dateField, map);
-                    // first remove,then add
-                    if (FilterOperatorEnum.EQUALS.getValue().equals(fieldExpression.getOperator())) {
-                        removeFieldNames.add(TimeDimensionEnum.DAY.getChName());
-                        GreaterThanEquals greaterThanEquals = new GreaterThanEquals();
-                        addTimeFilters(queryData.getDateInfo().getStartDate(), greaterThanEquals, addConditions);
-                        MinorThanEquals minorThanEquals = new MinorThanEquals();
-                        addTimeFilters(queryData.getDateInfo().getEndDate(), minorThanEquals, addConditions);
-                    }
+                    replaceMap.put(preValue, curValue);
+                    filedNameToValueMap.put(fieldExpression.getFieldName(), replaceMap);
+                    break;
                 }
             }
         }
@@ -488,8 +430,7 @@ public class ChatQueryServiceImpl implements ChatQueryService {
                                    Set<QueryFilter> contextMetricFilters,
                                    List<Expression> addConditions) {
         Column column = new Column(dslQueryFilter.getName());
-        ExpressionList expressionList = new ExpressionList();
-        List<Expression> expressions = new ArrayList<>();
+        ParenthesedExpressionList parenthesedExpressionList = new ParenthesedExpressionList<>();
         List<String> valueList = JsonUtil.toList(
                 JsonUtil.toString(dslQueryFilter.getValue()), String.class);
         if (CollectionUtils.isEmpty(valueList)) {
@@ -497,11 +438,10 @@ public class ChatQueryServiceImpl implements ChatQueryService {
         }
         valueList.stream().forEach(o -> {
             StringValue stringValue = new StringValue(o);
-            expressions.add(stringValue);
+            parenthesedExpressionList.add(stringValue);
         });
-        expressionList.setExpressions(expressions);
         inExpression.setLeftExpression(column);
-        inExpression.setRightExpression(expressionList);
+        inExpression.setRightExpression(parenthesedExpressionList);
         addConditions.add(inExpression);
         contextMetricFilters.stream().forEach(o -> {
             if (o.getName().equals(dslQueryFilter.getName())) {

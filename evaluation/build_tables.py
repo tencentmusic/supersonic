@@ -294,7 +294,7 @@ def build_table():
         os.remove(db_file)
         print("db_file removed!")
     print(db_file)
-    build_internet(db_path,-1)
+    build_internet(db_path,0)
 if __name__ == '__main__':
     current_directory = os.path.dirname(os.path.abspath(__file__))
     config_file=current_directory+"/config/config.yaml"

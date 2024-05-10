@@ -31,7 +31,6 @@ import com.tencent.supersonic.headless.server.pojo.yaml.MetricTypeParamsYamlTpl;
 import com.tencent.supersonic.headless.server.pojo.yaml.MetricYamlTpl;
 import com.tencent.supersonic.headless.server.service.Catalog;
 import com.tencent.supersonic.headless.server.utils.DatabaseConverter;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -42,7 +41,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Triple;
 import org.springframework.stereotype.Service;
@@ -291,6 +289,9 @@ public class SemanticSchemaManager {
             }
             if (Objects.isNull(dimension.getDataType())) {
                 dimension.setDataType(DataType.UNKNOWN);
+            }
+            if (Objects.nonNull(dimensionYamlTpl.getExt())) {
+                dimension.setExt(dimensionYamlTpl.getExt());
             }
             dimension.setDimensionTimeTypeParams(getDimensionTimeTypeParams(dimensionYamlTpl.getTypeParams()));
             dimensions.add(dimension);

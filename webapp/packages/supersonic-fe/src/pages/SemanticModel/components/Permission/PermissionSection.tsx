@@ -3,7 +3,7 @@ import React from 'react';
 import type { Dispatch } from 'umi';
 import { connect } from 'umi';
 import type { StateType } from '../../model';
-import { ProCard } from '@ant-design/pro-card';
+import { ProCard } from  '@ant-design/pro-components';
 import PermissionTable from './PermissionTable';
 import PermissionAdminForm from './PermissionAdminForm';
 
