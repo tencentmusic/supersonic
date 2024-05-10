@@ -239,7 +239,7 @@ public class SqlAddHelper {
     }
 
     private static void addAggregateToOrderByItems(List<OrderByElement> orderByElements,
-            Map<String, String> fieldNameToAggregate) {
+                                                   Map<String, String> fieldNameToAggregate) {
         if (orderByElements == null) {
             return;
         }
@@ -254,7 +254,7 @@ public class SqlAddHelper {
     }
 
     private static void addAggregateToGroupByItems(GroupByElement groupByElement,
-            Map<String, String> fieldNameToAggregate) {
+                                                   Map<String, String> fieldNameToAggregate) {
         if (groupByElement == null) {
             return;
         }
@@ -276,7 +276,7 @@ public class SqlAddHelper {
     }
 
     private static void modifyWhereExpression(Expression whereExpression,
-            Map<String, String> fieldNameToAggregate) {
+                                              Map<String, String> fieldNameToAggregate) {
         if (SqlSelectHelper.isLogicExpression(whereExpression)) {
             if (whereExpression instanceof AndExpression) {
                 AndExpression andExpression = (AndExpression) whereExpression;

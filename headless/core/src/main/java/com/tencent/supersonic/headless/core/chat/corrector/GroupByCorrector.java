@@ -1,6 +1,7 @@
 package com.tencent.supersonic.headless.core.chat.corrector;
 
 import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
+import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.jsqlparser.SqlAddHelper;
 import com.tencent.supersonic.common.util.jsqlparser.SqlSelectHelper;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
@@ -8,6 +9,8 @@ import com.tencent.supersonic.headless.api.pojo.SemanticSchema;
 import com.tencent.supersonic.headless.api.pojo.SqlInfo;
 import com.tencent.supersonic.headless.core.pojo.QueryContext;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.core.env.Environment;
 import org.springframework.util.CollectionUtils;
 import java.util.List;
 import java.util.Set;
@@ -51,6 +54,11 @@ public class GroupByCorrector extends BaseSemanticCorrector {
         }
         if (SqlSelectHelper.hasGroupBy(correctS2SQL)) {
             log.info("not add group by ,exist group by in correctS2SQL:{}", correctS2SQL);
+            return false;
+        }
+        Environment environment = ContextUtils.getBean(Environment.class);
+        String correctorAdditionalInfo = environment.getProperty("corrector.additional.information");
+        if (StringUtils.isNotBlank(correctorAdditionalInfo) && !Boolean.parseBoolean(correctorAdditionalInfo)) {
             return false;
         }
         return true;

@@ -64,7 +64,7 @@ import net.sf.jsqlparser.expression.LongValue;
 import net.sf.jsqlparser.expression.StringValue;
 import net.sf.jsqlparser.expression.operators.relational.ComparisonOperator;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
-import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
+import net.sf.jsqlparser.expression.operators.relational.ParenthesedExpressionList;
 import net.sf.jsqlparser.expression.operators.relational.GreaterThan;
 import net.sf.jsqlparser.expression.operators.relational.GreaterThanEquals;
 import net.sf.jsqlparser.expression.operators.relational.InExpression;
@@ -337,59 +337,39 @@ public class ChatQueryServiceImpl implements ChatQueryService {
         if (Objects.isNull(queryData.getDateInfo())) {
             return;
         }
-        Map<String, String> map = new HashMap<>();
-        String dateField = TimeDimensionEnum.DAY.getChName();
         if (queryData.getDateInfo().getUnit() > 1) {
             queryData.getDateInfo().setStartDate(DateUtils.getBeforeDate(queryData.getDateInfo().getUnit() + 1));
             queryData.getDateInfo().setEndDate(DateUtils.getBeforeDate(1));
         }
         // startDate equals to endDate
-        if (queryData.getDateInfo().getStartDate().equals(queryData.getDateInfo().getEndDate())) {
-            for (FieldExpression fieldExpression : fieldExpressionList) {
-                if (TimeDimensionEnum.DAY.getChName().equals(fieldExpression.getFieldName())) {
-                    //sql where condition exists 'equals' operator about date,just replace
-                    if (fieldExpression.getOperator().equals(FilterOperatorEnum.EQUALS)) {
-                        dateField = fieldExpression.getFieldName();
-                        map.put(fieldExpression.getFieldValue().toString(),
-                                queryData.getDateInfo().getStartDate());
-                        filedNameToValueMap.put(dateField, map);
-                    } else {
-                        // first remove,then add
-                        removeFieldNames.add(TimeDimensionEnum.DAY.getChName());
-                        EqualsTo equalsTo = new EqualsTo();
-                        Column column = new Column(TimeDimensionEnum.DAY.getChName());
-                        StringValue stringValue = new StringValue(queryData.getDateInfo().getStartDate());
-                        equalsTo.setLeftExpression(column);
-                        equalsTo.setRightExpression(stringValue);
-                        addConditions.add(equalsTo);
-                    }
-                    break;
-                }
+        for (FieldExpression fieldExpression : fieldExpressionList) {
+            if (TimeDimensionEnum.DAY.getChName().equals(fieldExpression.getFieldName())) {
+                // first remove,then add
+                removeFieldNames.add(TimeDimensionEnum.DAY.getChName());
+                GreaterThanEquals greaterThanEquals = new GreaterThanEquals();
+                addTimeFilters(queryData.getDateInfo().getStartDate(), greaterThanEquals, addConditions);
+                MinorThanEquals minorThanEquals = new MinorThanEquals();
+                addTimeFilters(queryData.getDateInfo().getEndDate(), minorThanEquals, addConditions);
+                break;
             }
-        } else {
-            for (FieldExpression fieldExpression : fieldExpressionList) {
-                if (TimeDimensionEnum.DAY.getChName().equals(fieldExpression.getFieldName())) {
-                    dateField = fieldExpression.getFieldName();
-                    //just replace
-                    if (FilterOperatorEnum.GREATER_THAN_EQUALS.getValue().equals(fieldExpression.getOperator())
-                            || FilterOperatorEnum.GREATER_THAN.getValue().equals(fieldExpression.getOperator())) {
-                        map.put(fieldExpression.getFieldValue().toString(),
-                                queryData.getDateInfo().getStartDate());
+        }
+        for (FieldExpression fieldExpression : fieldExpressionList) {
+            for (QueryFilter queryFilter : queryData.getDimensionFilters()) {
+                if (queryFilter.getOperator().equals(FilterOperatorEnum.LIKE)
+                        && FilterOperatorEnum.LIKE.getValue().toLowerCase().equals(
+                                fieldExpression.getOperator().toLowerCase())) {
+                    Map<String, String> replaceMap = new HashMap<>();
+                    String preValue = fieldExpression.getFieldValue().toString();
+                    String curValue = queryFilter.getValue().toString();
+                    if (preValue.startsWith("%")) {
+                        curValue = "%" + curValue;
                     }
-                    if (FilterOperatorEnum.MINOR_THAN_EQUALS.getValue().equals(fieldExpression.getOperator())
-                            || FilterOperatorEnum.MINOR_THAN.getValue().equals(fieldExpression.getOperator())) {
-                        map.put(fieldExpression.getFieldValue().toString(),
-                                queryData.getDateInfo().getEndDate());
+                    if (preValue.endsWith("%")) {
+                        curValue = curValue + "%";
                     }
-                    filedNameToValueMap.put(dateField, map);
-                    // first remove,then add
-                    if (FilterOperatorEnum.EQUALS.getValue().equals(fieldExpression.getOperator())) {
-                        removeFieldNames.add(TimeDimensionEnum.DAY.getChName());
-                        GreaterThanEquals greaterThanEquals = new GreaterThanEquals();
-                        addTimeFilters(queryData.getDateInfo().getStartDate(), greaterThanEquals, addConditions);
-                        MinorThanEquals minorThanEquals = new MinorThanEquals();
-                        addTimeFilters(queryData.getDateInfo().getEndDate(), minorThanEquals, addConditions);
-                    }
+                    replaceMap.put(preValue, curValue);
+                    filedNameToValueMap.put(fieldExpression.getFieldName(), replaceMap);
+                    break;
                 }
             }
         }
@@ -450,8 +430,7 @@ public class ChatQueryServiceImpl implements ChatQueryService {
                                    Set<QueryFilter> contextMetricFilters,
                                    List<Expression> addConditions) {
         Column column = new Column(dslQueryFilter.getName());
-        ExpressionList expressionList = new ExpressionList();
-        List<Expression> expressions = new ArrayList<>();
+        ParenthesedExpressionList parenthesedExpressionList = new ParenthesedExpressionList<>();
         List<String> valueList = JsonUtil.toList(
                 JsonUtil.toString(dslQueryFilter.getValue()), String.class);
         if (CollectionUtils.isEmpty(valueList)) {
@@ -459,11 +438,10 @@ public class ChatQueryServiceImpl implements ChatQueryService {
         }
         valueList.stream().forEach(o -> {
             StringValue stringValue = new StringValue(o);
-            expressions.add(stringValue);
+            parenthesedExpressionList.add(stringValue);
         });
-        expressionList.setExpressions(expressions);
         inExpression.setLeftExpression(column);
-        inExpression.setRightExpression(expressionList);
+        inExpression.setRightExpression(parenthesedExpressionList);
         addConditions.add(inExpression);
         contextMetricFilters.stream().forEach(o -> {
             if (o.getName().equals(dslQueryFilter.getName())) {

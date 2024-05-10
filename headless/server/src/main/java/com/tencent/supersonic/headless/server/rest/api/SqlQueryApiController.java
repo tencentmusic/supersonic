@@ -6,6 +6,7 @@ import com.tencent.supersonic.common.util.StringUtil;
 import com.tencent.supersonic.headless.api.pojo.request.QuerySqlReq;
 import com.tencent.supersonic.headless.api.pojo.request.QuerySqlsReq;
 import com.tencent.supersonic.headless.api.pojo.request.SemanticQueryReq;
+import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
 import com.tencent.supersonic.headless.server.service.ChatQueryService;
 import com.tencent.supersonic.headless.server.service.QueryService;
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 @RestController
@@ -56,7 +58,17 @@ public class SqlQueryApiController {
                     chatQueryService.correct(querySqlReq, user);
                     return querySqlReq;
                 }).collect(Collectors.toList());
-        return queryService.queryByReqs(semanticQueryReqs, user);
+        List<CompletableFuture<SemanticQueryResp>> futures = semanticQueryReqs.stream()
+                        .map(querySqlReq -> CompletableFuture.supplyAsync(() -> {
+                            try {
+                                return queryService.queryByReq(querySqlReq, user);
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                                return new SemanticQueryResp();
+                            }
+                        }))
+                        .collect(Collectors.toList());
+        return futures.stream().map(CompletableFuture::join).collect(Collectors.toList());
     }
 
 }
