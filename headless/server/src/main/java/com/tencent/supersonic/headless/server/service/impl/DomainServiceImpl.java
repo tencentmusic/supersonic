@@ -106,14 +106,19 @@ public class DomainServiceImpl implements DomainService {
             domainWithAuthAll.addAll(getParentDomain(domainIds));
         }
         List<ModelResp> modelResps = modelService.getModelAuthList(user, null, AuthType.ADMIN);
+        List<Long> domainIdsFromModel = modelResps.stream().map(ModelResp::getDomainId).collect(Collectors.toList());
         if (!CollectionUtils.isEmpty(modelResps)) {
-            List<Long> domainIds = modelResps.stream().map(ModelResp::getDomainId).collect(Collectors.toList());
-            domainWithAuthAll.addAll(getParentDomain(domainIds));
+            domainWithAuthAll.addAll(getParentDomain(domainIdsFromModel));
         }
         List<DataSetResp> dataSetResps = dataSetService.getDataSets(user);
         if (!CollectionUtils.isEmpty(dataSetResps)) {
             List<Long> domainIds = dataSetResps.stream().map(DataSetResp::getDomainId).collect(Collectors.toList());
             domainWithAuthAll.addAll(getParentDomain(domainIds));
+        }
+        for (DomainResp domainResp : domainWithAuthAll) {
+            if (domainIdsFromModel.contains(domainResp.getId())) {
+                domainResp.setHasModel(true);
+            }
         }
         return new ArrayList<>(domainWithAuthAll).stream()
                 .sorted(Comparator.comparingLong(DomainResp::getId)).collect(Collectors.toList());
