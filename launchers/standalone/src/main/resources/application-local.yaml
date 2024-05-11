@@ -102,5 +102,5 @@ query:
   optimizer:
     enable: true
 multi:
-  turn: true
+  turn: false
   num: 5
