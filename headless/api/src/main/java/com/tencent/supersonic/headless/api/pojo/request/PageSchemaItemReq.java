@@ -19,4 +19,5 @@ public class PageSchemaItemReq extends PageBaseReq {
     private String key;
     private List<Long> ids;
     private boolean hasCollect;
+    private List<String> classifications;
 }

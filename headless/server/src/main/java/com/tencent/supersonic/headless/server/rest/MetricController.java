@@ -83,6 +83,15 @@ public class MetricController {
         return true;
     }
 
+    @PostMapping("/batchUpdateClassifications")
+    public Boolean batchUpdateClassifications(@RequestBody MetaBatchReq metaBatchReq,
+                                     HttpServletRequest request,
+                                     HttpServletResponse response) {
+        User user = UserHolder.findUser(request, response);
+        metricService.batchUpdateClassifications(metaBatchReq, user);
+        return true;
+    }
+
     @PostMapping("/mockMetricAlias")
     public List<String> mockMetricAlias(@RequestBody MetricBaseReq metricReq,
             HttpServletRequest request,
@@ -141,8 +150,14 @@ public class MetricController {
         return metricService.getMetrics(metricFilter);
     }
 
+    @Deprecated
     @GetMapping("/getMetricTags")
     public Set<String> getMetricTags() {
+        return metricService.getMetricTags();
+    }
+
+    @GetMapping("/getMetricClassifications")
+    public Set<String> getMetricClassifications() {
         return metricService.getMetricTags();
     }
 
