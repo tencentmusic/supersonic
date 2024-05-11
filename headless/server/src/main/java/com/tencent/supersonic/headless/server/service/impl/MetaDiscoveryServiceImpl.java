@@ -4,17 +4,21 @@ import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementMatch;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
+import com.tencent.supersonic.headless.api.pojo.SchemaItem;
 import com.tencent.supersonic.headless.api.pojo.SchemaMapInfo;
 import com.tencent.supersonic.headless.api.pojo.SemanticSchema;
+import com.tencent.supersonic.headless.api.pojo.Term;
 import com.tencent.supersonic.headless.api.pojo.request.QueryMapReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryReq;
 import com.tencent.supersonic.headless.api.pojo.response.DataSetResp;
 import com.tencent.supersonic.headless.api.pojo.response.MapInfoResp;
 import com.tencent.supersonic.headless.api.pojo.response.MapResp;
 import com.tencent.supersonic.headless.core.chat.knowledge.builder.BaseWordBuilder;
+import com.tencent.supersonic.headless.server.pojo.MetaFilter;
 import com.tencent.supersonic.headless.server.service.ChatQueryService;
 import com.tencent.supersonic.headless.server.service.DataSetService;
 import com.tencent.supersonic.headless.server.service.MetaDiscoveryService;
+import com.tencent.supersonic.headless.server.service.TermService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -43,30 +47,37 @@ public class MetaDiscoveryServiceImpl implements MetaDiscoveryService {
     @Autowired
     private SemanticService semanticService;
 
+    @Autowired
+    private TermService termService;
+
     @Override
     public MapInfoResp getMapMeta(QueryMapReq queryMapReq) {
 
         QueryReq queryReq = new QueryReq();
         BeanUtils.copyProperties(queryMapReq, queryReq);
         List<DataSetResp> dataSets = dataSetService.getDataSets(queryMapReq.getDataSetNames(), queryMapReq.getUser());
-        Set<Long> dataSetIds = dataSets.stream().map(dataSetResp -> dataSetResp.getId()).collect(Collectors.toSet());
-        queryReq.setDataSetIds(dataSetIds);
 
+        Set<Long> dataSetIds = dataSets.stream().map(SchemaItem::getId).collect(Collectors.toSet());
+        queryReq.setDataSetIds(dataSetIds);
         MapResp mapResp = chatQueryService.performMapping(queryReq);
         return convert(mapResp, queryMapReq.getTopN());
     }
 
-    public MapInfoResp convert(MapResp mapResp, Integer topN) {
+    private MapInfoResp convert(MapResp mapResp, Integer topN) {
         MapInfoResp mapInfoResp = new MapInfoResp();
         if (Objects.isNull(mapResp)) {
             return mapInfoResp;
         }
         BeanUtils.copyProperties(mapResp, mapInfoResp);
         Set<Long> dataSetIds = mapResp.getMapInfo().getDataSetElementMatches().keySet();
-        Map<Long, String> dataSetMap = dataSetService.getDataSetIdToNameMap(new ArrayList<>(dataSetIds));
-
+        MetaFilter metaFilter = new MetaFilter();
+        metaFilter.setIds(new ArrayList<>(dataSetIds));
+        List<DataSetResp> dataSetList = dataSetService.getDataSetList(metaFilter);
+        Map<Long, String> dataSetMap = dataSetList.stream()
+                .collect(Collectors.toMap(DataSetResp::getId, DataSetResp::getName));
         mapInfoResp.setMapFields(getMapFields(mapResp.getMapInfo(), dataSetMap));
         mapInfoResp.setTopFields(getTopFields(topN, mapResp.getMapInfo(), dataSetMap));
+        mapInfoResp.setTerms(getTerms(dataSetList, dataSetMap));
         return mapInfoResp;
     }
 
@@ -112,6 +123,19 @@ public class MetaDiscoveryServiceImpl implements MetaDiscoveryService {
             result.put(dataSetName, new ArrayList<>(dimensions));
         }
         return result;
+    }
+
+    private Map<String, List<Term>> getTerms(List<DataSetResp> dataSets, Map<Long, String> dataSetNameMap) {
+        Set<Long> domainIds = dataSets.stream().map(DataSetResp::getDomainId).collect(Collectors.toSet());
+        Map<Long, Long> dataSetDomainIdMap = dataSets.stream()
+                .collect(Collectors.toMap(DataSetResp::getId, DataSetResp::getDomainId));
+        Map<Long, List<Term>> domainTermSetMap = termService.getTermSets(domainIds);
+        Map<String, List<Term>> dataSetTermSetMap = new HashMap<>();
+        for (DataSetResp dataSet : dataSets) {
+            dataSetTermSetMap.put(dataSetNameMap.get(dataSet.getId()),
+                    domainTermSetMap.get(dataSetDomainIdMap.get(dataSet.getId())));
+        }
+        return dataSetTermSetMap;
     }
 
     /***

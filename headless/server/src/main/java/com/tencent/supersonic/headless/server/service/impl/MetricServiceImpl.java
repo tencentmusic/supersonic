@@ -316,7 +316,7 @@ public class MetricServiceImpl implements MetricService {
         List<MetricResp> metricResps = convertList(queryMetric(metricFilter));
         List<Long> metricIds = metricResps.stream().map(metricResp -> metricResp.getId()).collect(Collectors.toList());
 
-        List<TagItem> tagItems = tagMetaService.getTagItems(User.getFakeUser(), metricIds, TagDefineType.METRIC);
+        List<TagItem> tagItems = tagMetaService.getTagItems(metricIds, TagDefineType.METRIC);
         Map<Long, TagItem> itemIdToTagItem = tagItems.stream()
                 .collect(Collectors.toMap(tag -> tag.getItemId(), tag -> tag, (newTag, oldTag) -> newTag));
 
@@ -374,7 +374,7 @@ public class MetricServiceImpl implements MetricService {
         List<Long> metricIds = metricRespList.stream().map(metric -> metric.getId())
                 .collect(Collectors.toList());
         tagFilter.setItemIds(metricIds);
-        Map<Long, TagDO> keyAndTagMap = tagMetaService.getTagDOList(tagFilter, User.getFakeUser()).stream()
+        Map<Long, TagDO> keyAndTagMap = tagMetaService.getTagDOList(tagFilter).stream()
                 .collect(Collectors.toMap(tag -> tag.getItemId(), tag -> tag,
                         (newTag, oldTag) -> newTag));
         if (Objects.nonNull(keyAndTagMap)) {

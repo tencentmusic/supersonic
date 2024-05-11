@@ -47,12 +47,10 @@ public class DataSetController {
     }
 
     @GetMapping("/getDataSetList")
-    public List<DataSetResp> getDataSetList(@RequestParam("domainId") Long domainId,
-            HttpServletRequest request, HttpServletResponse response) {
+    public List<DataSetResp> getDataSetList(@RequestParam("domainId") Long domainId) {
         MetaFilter metaFilter = new MetaFilter();
         metaFilter.setDomainId(domainId);
-        User user = UserHolder.findUser(request, response);
-        return dataSetService.getDataSetList(metaFilter, user);
+        return dataSetService.getDataSetList(metaFilter);
     }
 
     @DeleteMapping("/{id}")
