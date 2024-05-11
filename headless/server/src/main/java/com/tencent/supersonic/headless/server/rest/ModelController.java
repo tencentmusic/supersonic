@@ -84,7 +84,7 @@ public class ModelController {
 
     @GetMapping("/getAllModelByDomainId")
     public List<ModelResp> getAllModelByDomainId(@RequestParam("domainId") Long domainId) {
-       return modelService.getAllModelByDomainIds(Lists.newArrayList(domainId));
+        return modelService.getAllModelByDomainIds(Lists.newArrayList(domainId));
     }
 
     @GetMapping("/getModelDatabase/{modelId}")
