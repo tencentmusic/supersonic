@@ -86,7 +86,6 @@ public class DuSQLDemoDataLoader {
         domainReq.setViewOrgs(Collections.singletonList("1"));
         domainReq.setAdmins(Collections.singletonList("admin"));
         domainReq.setAdminOrgs(Collections.emptyList());
-        log.info("addDomain:{}", JsonUtil.toString(domainReq));
         domainService.createDomain(domainReq, user);
     }
 
@@ -129,7 +128,6 @@ public class DuSQLDemoDataLoader {
         modelDetail.setSqlQuery("SELECT imp_date,company_id,company_name,headquarter_address,"
                 + "company_established_time,founder,ceo,annual_turnover,employee_count FROM company");
         modelReq.setModelDetail(modelDetail);
-        log.info("modelReq1:{}", JsonUtil.toString(modelReq));
         modelService.createModel(modelReq, user);
     }
 
@@ -169,7 +167,6 @@ public class DuSQLDemoDataLoader {
         modelDetail.setSqlQuery("SELECT  imp_date,brand_id,brand_name,brand_established_time,"
                 + "company_id,legal_representative,registered_capital FROM brand");
         modelReq.setModelDetail(modelDetail);
-        log.info("modelReq2:{}", JsonUtil.toString(modelReq));
         modelService.createModel(modelReq, user);
     }
 
@@ -215,7 +212,6 @@ public class DuSQLDemoDataLoader {
         MetricReq metricReq = new MetricReq();
         BeanUtils.copyProperties(metricResp, metricReq);
         metricReq.setAlias("收入比例");
-        log.info("modelReq3:{}", JsonUtil.toString(modelReq));
         metricService.updateMetric(metricReq, user);
     }
 
@@ -255,7 +251,6 @@ public class DuSQLDemoDataLoader {
         modelDetail.setSqlQuery("SELECT imp_date,year_time,brand_id,revenue,profit,"
                 + "revenue_growth_year_on_year,profit_growth_year_on_year FROM company_brand_revenue");
         modelReq.setModelDetail(modelDetail);
-        log.info("modelReq4:{}", JsonUtil.toString(modelReq));
         modelService.createModel(modelReq, user);
 
     }
@@ -285,7 +280,6 @@ public class DuSQLDemoDataLoader {
         metricTypeDefaultConfig.setTimeDefaultConfig(timeDefaultConfig);
         queryConfig.setMetricTypeDefaultConfig(metricTypeDefaultConfig);
         viewReq.setQueryConfig(queryConfig);
-        log.info("viewReq1:{}", JsonUtil.toString(viewReq));
         viewService.save(viewReq, User.getFakeUser());
     }
 
@@ -298,7 +292,6 @@ public class DuSQLDemoDataLoader {
         modelRelaReq.setToModelId(10L);
         modelRelaReq.setJoinType("inner join");
         modelRelaReq.setJoinConditions(joinConditions);
-        log.info("modelRelaReq1:{}", JsonUtil.toString(modelRelaReq));
         modelRelaService.save(modelRelaReq, user);
     }
 
@@ -311,7 +304,6 @@ public class DuSQLDemoDataLoader {
         modelRelaReq.setToModelId(11L);
         modelRelaReq.setJoinType("inner join");
         modelRelaReq.setJoinConditions(joinConditions);
-        log.info("modelRelaReq2:{}", JsonUtil.toString(modelRelaReq));
         modelRelaService.save(modelRelaReq, user);
     }
 
@@ -324,7 +316,6 @@ public class DuSQLDemoDataLoader {
         modelRelaReq.setToModelId(11L);
         modelRelaReq.setJoinType("inner join");
         modelRelaReq.setJoinConditions(joinConditions);
-        log.info("modelRelaReq3:{}", JsonUtil.toString(modelRelaReq));
         modelRelaService.save(modelRelaReq, user);
     }
 
@@ -337,7 +328,6 @@ public class DuSQLDemoDataLoader {
         modelRelaReq.setToModelId(12L);
         modelRelaReq.setJoinType("inner join");
         modelRelaReq.setJoinConditions(joinConditions);
-        log.info("modelRelaReq4:{}", JsonUtil.toString(modelRelaReq));
         modelRelaService.save(modelRelaReq, user);
     }
 

@@ -74,7 +74,6 @@ public class ChatServiceImpl implements ChatService {
         for (ParseResultProcessor processor : parseResultProcessors) {
             processor.process(chatParseContext, parseResp);
         }
-        log.info("queryText:{}", queryText);
         parseResp.setQueryText(queryText);
         chatParseReq.setQueryText(queryText);
         chatManageService.batchAddParse(chatParseReq, parseResp);
