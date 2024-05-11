@@ -63,6 +63,11 @@ public class MetricRepositoryImpl implements MetricRepository {
     }
 
     @Override
+    public void updateClassificationsBatch(List<MetricDO> metricDOS) {
+        metricDOCustomMapper.updateClassificationsBatch(metricDOS);
+    }
+
+    @Override
     public MetricDO getMetricById(Long id) {
         return metricDOMapper.selectById(id);
     }
