@@ -84,7 +84,7 @@ public class DataSetServiceImpl
         dataSetReq.createdBy(user.getName());
         DataSetDO dataSetDO = convert(dataSetReq);
         dataSetDO.setStatus(StatusEnum.ONLINE.getCode());
-        DataSetResp dataSetResp = convert(dataSetDO, user);
+        DataSetResp dataSetResp = convert(dataSetDO);
         conflictCheck(dataSetResp);
         save(dataSetDO);
         return dataSetResp;
@@ -94,7 +94,7 @@ public class DataSetServiceImpl
     public DataSetResp update(DataSetReq dataSetReq, User user) {
         dataSetReq.updatedBy(user.getName());
         DataSetDO dataSetDO = convert(dataSetReq);
-        DataSetResp dataSetResp = convert(dataSetDO, user);
+        DataSetResp dataSetResp = convert(dataSetDO);
         conflictCheck(dataSetResp);
         updateById(dataSetDO);
         return dataSetResp;
@@ -103,11 +103,11 @@ public class DataSetServiceImpl
     @Override
     public DataSetResp getDataSet(Long id) {
         DataSetDO dataSetDO = getById(id);
-        return convert(dataSetDO, User.getFakeUser());
+        return convert(dataSetDO);
     }
 
     @Override
-    public List<DataSetResp> getDataSetList(MetaFilter metaFilter, User user) {
+    public List<DataSetResp> getDataSetList(MetaFilter metaFilter) {
         QueryWrapper<DataSetDO> wrapper = new QueryWrapper<>();
         if (metaFilter.getDomainId() != null) {
             wrapper.lambda().eq(DataSetDO::getDomainId, metaFilter.getDomainId());
@@ -125,7 +125,7 @@ public class DataSetServiceImpl
             wrapper.lambda().in(DataSetDO::getName, metaFilter.getNames());
         }
         wrapper.lambda().ne(DataSetDO::getStatus, StatusEnum.DELETED.getCode());
-        return list(wrapper).stream().map(entry -> convert(entry, user)).collect(Collectors.toList());
+        return list(wrapper).stream().map(this::convert).collect(Collectors.toList());
     }
 
     @Override
@@ -158,22 +158,13 @@ public class DataSetServiceImpl
     }
 
     private List<DataSetResp> getDataSetsByAuth(User user, MetaFilter metaFilter) {
-        List<DataSetResp> dataSetResps = getDataSetList(metaFilter, user);
+        List<DataSetResp> dataSetResps = getDataSetList(metaFilter);
         return getDataSetFilterByAuth(dataSetResps, user);
     }
 
     @Override
-    public Map<Long, String> getDataSetIdToNameMap(List<Long> dataSetIds) {
-        MetaFilter metaFilter = new MetaFilter();
-        metaFilter.setIds(dataSetIds);
-        List<DataSetResp> dataSetResps = getDataSetList(metaFilter, User.getFakeUser());
-        return dataSetResps.stream().collect(
-                Collectors.toMap(DataSetResp::getId, DataSetResp::getName, (k1, k2) -> k1));
-    }
-
-    @Override
     public List<DataSetResp> getDataSetsInheritAuth(User user, Long domainId) {
-        List<DataSetResp> dataSetResps = getDataSetList(new MetaFilter(), user);
+        List<DataSetResp> dataSetResps = getDataSetList(new MetaFilter());
         List<DataSetResp> inheritAuthFormDomain = getDataSetFilterByDomainAuth(dataSetResps, user);
         Set<DataSetResp> dataSetRespSet = new HashSet<>(inheritAuthFormDomain);
         List<DataSetResp> dataSetFilterByAuth = getDataSetFilterByAuth(dataSetResps, user);
@@ -202,7 +193,7 @@ public class DataSetServiceImpl
                 domainIds.contains(dataSetResp.getDomainId())).collect(Collectors.toList());
     }
 
-    private DataSetResp convert(DataSetDO dataSetDO, User user) {
+    private DataSetResp convert(DataSetDO dataSetDO) {
         DataSetResp dataSetResp = new DataSetResp();
         BeanMapper.mapper(dataSetDO, dataSetResp);
         dataSetResp.setDataSetDetail(JSONObject.parseObject(dataSetDO.getDataSetDetail(), DataSetDetail.class));
@@ -214,11 +205,11 @@ public class DataSetServiceImpl
         dataSetResp.setAdminOrgs(StringUtils.isBlank(dataSetDO.getAdminOrg())
                 ? Lists.newArrayList() : Arrays.asList(dataSetDO.getAdminOrg().split(",")));
         dataSetResp.setTypeEnum(TypeEnums.DATASET);
-        List<TagItem> dimensionItems = tagMetaService.getTagItems(user, dataSetResp.dimensionIds(),
+        List<TagItem> dimensionItems = tagMetaService.getTagItems(dataSetResp.dimensionIds(),
                 TagDefineType.DIMENSION);
         dataSetResp.setAllDimensions(dimensionItems);
 
-        List<TagItem> metricItems = tagMetaService.getTagItems(user, dataSetResp.metricIds(), TagDefineType.METRIC);
+        List<TagItem> metricItems = tagMetaService.getTagItems(dataSetResp.metricIds(), TagDefineType.METRIC);
         dataSetResp.setAllMetrics(metricItems);
         return dataSetResp;
     }
@@ -259,7 +250,7 @@ public class DataSetServiceImpl
         metaFilter.setIds(dataSetIds);
         List<DataSetResp> dataSetList = dataSetSchemaCache.getIfPresent(metaFilter);
         if (CollectionUtils.isEmpty(dataSetList)) {
-            dataSetList = getDataSetList(metaFilter, user);
+            dataSetList = getDataSetList(metaFilter);
             dataSetSchemaCache.put(metaFilter, dataSetList);
         }
         return dataSetList.stream()

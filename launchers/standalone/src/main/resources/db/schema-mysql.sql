@@ -549,3 +549,14 @@ CREATE TABLE IF NOT EXISTS `s2_query_rule` (
     `ext` text DEFAULT NULL  ,
     PRIMARY KEY (`id`)
     ) ENGINE = InnoDB DEFAULT CHARSET = utf8 COMMENT ='查询规则表';
+
+CREATE TABLE IF NOT EXISTS `s2_term_set` (
+    `id` bigint(20) NOT NULL  AUTO_INCREMENT,
+    `domain_id` bigint(20),
+    `terms` varchar(1000),
+    `created_at` datetime NOT NULL ,
+    `created_by` varchar(100) NOT NULL ,
+    `updated_at` datetime DEFAULT NULL ,
+    `updated_by` varchar(100) DEFAULT NULL ,
+    PRIMARY KEY (`id`)
+);
