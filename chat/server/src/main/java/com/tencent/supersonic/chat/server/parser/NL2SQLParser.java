@@ -72,49 +72,60 @@ public class NL2SQLParser implements ChatParser {
         RewriteQueryGeneration rewriteQueryGeneration = ContextUtils.getBean(RewriteQueryGeneration.class);
         String multiTurn = environment.getProperty("multi.turn");
         String multiNum = environment.getProperty("multi.num");
-        if (StringUtils.isNotBlank(multiTurn) && Boolean.parseBoolean(multiTurn)) {
-            log.info("multi turn text-to-sql!");
-            ChatQueryRepository chatQueryRepository = ContextUtils.getBean(ChatQueryRepository.class);
-            List<ParseResp> contextualParseInfoList = chatQueryRepository.getContextualParseInfo(
-                    parseResp.getChatId()).stream().filter(o -> o.getSelectedParses().get(0)
-                    .getQueryMode().equals(LLMSqlQuery.QUERY_MODE)
-            ).collect(Collectors.toList());
-            if (StringUtils.isNotBlank(multiNum) && StringUtils.isNumeric(multiNum)) {
-                int num = Integer.parseInt(multiNum);
-                contextualNum = Math.min(contextualNum, num);
-            }
-            List<ParseResp> contextualList = contextualParseInfoList.subList(0,
-                    Math.min(contextualNum, contextualParseInfoList.size()));
-            Collections.reverse(contextualList);
-            List<String> contextualQuestions = new ArrayList<>();
-            contextualList.stream().forEach(o -> {
-                Map<String, Object> map = JsonUtil.toMap(JsonUtil.toString(
-                        o.getSelectedParses().get(0).getProperties().get(CONTEXT)), String.class, Object.class);
-                LLMReq llmReq = JsonUtil.toObject(JsonUtil.toString(map.get("llmReq")), LLMReq.class);
-                List<LLMReq.ElementValue> linking = llmReq.getLinking();
-                List<String> priorLinkingList = new ArrayList<>();
-                for (LLMReq.ElementValue priorLinking : linking) {
-                    String fieldName = priorLinking.getFieldName();
-                    String fieldValue = priorLinking.getFieldValue();
-                    priorLinkingList.add("‘" + fieldValue + "‘是一个‘" + fieldName + "‘");
-                }
-                String linkingListStr = String.join("，", priorLinkingList);
-                String questionAugmented = String.format("%s (补充信息:%s) ", o.getQueryText(), linkingListStr);
-                contextualQuestions.add(questionAugmented);
-            });
-            StringBuffer currentPromptSb = new StringBuffer();
-            if (contextualQuestions.size() == 0) {
-                currentPromptSb.append("contextualQuestions:" + "\n");
-            } else {
-                currentPromptSb.append("contextualQuestions:" + "\n" + String.join("\n", contextualQuestions) + "\n");
-            }
-            String currentQuestion = getQueryLinks(chatParseContext);
-            currentPromptSb.append("currentQuestion:" + currentQuestion + "\n");
-            currentPromptSb.append("rewritingCurrentQuestion:\n");
-            String rewriteQuery = rewriteQueryGeneration.generation(currentPromptSb.toString());
-            log.info("rewriteQuery:{}", rewriteQuery);
-            chatParseContext.setQueryText(rewriteQuery);
+        if (StringUtils.isBlank(multiTurn) || !Boolean.parseBoolean(multiTurn)) {
+            return;
         }
+        log.info("multi turn text-to-sql!");
+        List<ParseResp> contextualList = getContextualList(parseResp, multiNum);
+        List<String> contextualQuestions = getContextualQuestionsWithLink(contextualList);
+        StringBuffer currentPromptSb = new StringBuffer();
+        if (contextualQuestions.size() == 0) {
+            currentPromptSb.append("contextualQuestions:" + "\n");
+        } else {
+            currentPromptSb.append("contextualQuestions:" + "\n" + String.join("\n", contextualQuestions) + "\n");
+        }
+        String currentQuestion = getQueryLinks(chatParseContext);
+        currentPromptSb.append("currentQuestion:" + currentQuestion + "\n");
+        currentPromptSb.append("rewritingCurrentQuestion:\n");
+        String rewriteQuery = rewriteQueryGeneration.generation(currentPromptSb.toString());
+        log.info("rewriteQuery:{}", rewriteQuery);
+        chatParseContext.setQueryText(rewriteQuery);
+    }
+
+    private List<String> getContextualQuestionsWithLink(List<ParseResp> contextualList) {
+        List<String> contextualQuestions = new ArrayList<>();
+        contextualList.stream().forEach(o -> {
+            Map<String, Object> map = JsonUtil.toMap(JsonUtil.toString(
+                    o.getSelectedParses().get(0).getProperties().get(CONTEXT)), String.class, Object.class);
+            LLMReq llmReq = JsonUtil.toObject(JsonUtil.toString(map.get("llmReq")), LLMReq.class);
+            List<LLMReq.ElementValue> linking = llmReq.getLinking();
+            List<String> priorLinkingList = new ArrayList<>();
+            for (LLMReq.ElementValue priorLinking : linking) {
+                String fieldName = priorLinking.getFieldName();
+                String fieldValue = priorLinking.getFieldValue();
+                priorLinkingList.add("‘" + fieldValue + "‘是一个‘" + fieldName + "‘");
+            }
+            String linkingListStr = String.join("，", priorLinkingList);
+            String questionAugmented = String.format("%s (补充信息:%s) ", o.getQueryText(), linkingListStr);
+            contextualQuestions.add(questionAugmented);
+        });
+        return contextualQuestions;
+    }
+
+    private List<ParseResp> getContextualList(ParseResp parseResp, String multiNum) {
+        ChatQueryRepository chatQueryRepository = ContextUtils.getBean(ChatQueryRepository.class);
+        List<ParseResp> contextualParseInfoList = chatQueryRepository.getContextualParseInfo(
+                parseResp.getChatId()).stream().filter(o -> o.getSelectedParses().get(0)
+                .getQueryMode().equals(LLMSqlQuery.QUERY_MODE)
+        ).collect(Collectors.toList());
+        if (StringUtils.isNotBlank(multiNum) && StringUtils.isNumeric(multiNum)) {
+            int num = Integer.parseInt(multiNum);
+            contextualNum = Math.min(contextualNum, num);
+        }
+        List<ParseResp> contextualList = contextualParseInfoList.subList(0,
+                Math.min(contextualNum, contextualParseInfoList.size()));
+        Collections.reverse(contextualList);
+        return contextualList;
     }
 
     private String getQueryLinks(ChatParseContext chatParseContext) {
