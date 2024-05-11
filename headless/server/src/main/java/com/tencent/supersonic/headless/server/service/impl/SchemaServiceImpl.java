@@ -178,7 +178,7 @@ public class SchemaServiceImpl implements SchemaService {
 
         metaFilter.setIds(modelIds);
         List<ModelResp> modelResps = modelService.getModelList(metaFilter);
-
+        metricService.batchFillMetricDefaultAgg(metricResps, modelResps);
         TagFilter tagFilter = new TagFilter();
         tagFilter.setModelIds(modelIds);
 

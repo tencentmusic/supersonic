@@ -19,6 +19,7 @@ import com.tencent.supersonic.common.pojo.enums.TypeEnums;
 import com.tencent.supersonic.common.util.BeanMapper;
 import com.tencent.supersonic.common.util.ChatGptHelper;
 import com.tencent.supersonic.headless.api.pojo.DrillDownDimension;
+import com.tencent.supersonic.headless.api.pojo.Measure;
 import com.tencent.supersonic.headless.api.pojo.MeasureParam;
 import com.tencent.supersonic.headless.api.pojo.MetricParam;
 import com.tencent.supersonic.headless.api.pojo.MetricQueryDefaultConfig;
@@ -174,7 +175,7 @@ public class MetricServiceImpl implements MetricService {
             DataItem dataItem = getDataItem(metricDO);
             dataItem.setName(oldName);
             dataItem.setNewName(metricDO.getName());
-            sendEvent(getDataItem(metricDO), EventType.UPDATE);
+            sendEvent(dataItem, EventType.UPDATE);
         }
         return MetricConverter.convert2MetricResp(metricDO);
     }
@@ -688,10 +689,44 @@ public class MetricServiceImpl implements MetricService {
     private DataItem getDataItem(MetricDO metricDO) {
         MetricResp metricResp = MetricConverter.convert2MetricResp(metricDO,
                 new HashMap<>(), Lists.newArrayList());
+        fillDefaultAgg(metricResp);
         return DataItem.builder().id(metricDO.getId() + Constants.UNDERLINE).name(metricDO.getName())
                 .bizName(metricDO.getBizName())
                 .modelId(metricDO.getModelId() + Constants.UNDERLINE)
                 .type(TypeEnums.METRIC).defaultAgg(metricResp.getDefaultAgg()).build();
+    }
+
+    @Override
+    public void batchFillMetricDefaultAgg(List<MetricResp> metricResps, List<ModelResp> modelResps) {
+        Map<Long, ModelResp> modelRespMap = modelResps.stream().collect(Collectors.toMap(ModelResp::getId, m -> m));
+        for (MetricResp metricResp : metricResps) {
+            if (MetricDefineType.MEASURE.equals(metricResp.getMetricDefineType())) {
+                fillDefaultAgg(metricResp, modelRespMap.get(metricResp.getModelId()));
+            }
+        }
+    }
+
+    private void fillDefaultAgg(MetricResp metricResp) {
+        if (MetricDefineType.MEASURE.equals(metricResp.getMetricDefineType())) {
+            Long modelId = metricResp.getModelId();
+            ModelResp modelResp = modelService.getModel(modelId);
+            fillDefaultAgg(metricResp, modelResp);
+        }
+    }
+
+    private void fillDefaultAgg(MetricResp metricResp, ModelResp modelResp) {
+        if (modelResp == null) {
+            return;
+        }
+        List<Measure> measures = modelResp.getModelDetail().getMeasures();
+        MeasureParam firstMeasure = metricResp.getMetricDefineByMeasureParams()
+                .getMeasures().get(0);
+        for (Measure measure : measures) {
+            if (measure.getBizName().equalsIgnoreCase(firstMeasure.getBizName())) {
+                metricResp.setDefaultAgg(measure.getAgg());
+                break;
+            }
+        }
     }
 
     @Override
