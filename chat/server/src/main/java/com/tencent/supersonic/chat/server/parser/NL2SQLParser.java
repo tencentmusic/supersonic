@@ -52,7 +52,13 @@ public class NL2SQLParser implements ChatParser {
         }
         considerMultiturn(chatParseContext, parseResp);
         QueryReq queryReq = QueryReqConverter.buildText2SqlQueryReq(chatParseContext);
-        queryReq.setMapInfo(new SchemaMapInfo());
+
+        Environment environment = ContextUtils.getBean(Environment.class);
+        String multiTurn = environment.getProperty("multi.turn");
+        if (StringUtils.isNotBlank(multiTurn) && Boolean.parseBoolean(multiTurn)) {
+            queryReq.setMapInfo(new SchemaMapInfo());
+        }
+
         ChatQueryService chatQueryService = ContextUtils.getBean(ChatQueryService.class);
         ParseResp text2SqlParseResp = chatQueryService.performParsing(queryReq);
         if (!ParseResp.ParseState.FAILED.equals(text2SqlParseResp.getState())) {
@@ -62,7 +68,6 @@ public class NL2SQLParser implements ChatParser {
     }
 
     private void considerMultiturn(ChatParseContext chatParseContext, ParseResp parseResp) {
-        Long startTime = System.currentTimeMillis();
         Environment environment = ContextUtils.getBean(Environment.class);
         RewriteQueryGeneration rewriteQueryGeneration = ContextUtils.getBean(RewriteQueryGeneration.class);
         String multiTurn = environment.getProperty("multi.turn");
@@ -97,8 +102,6 @@ public class NL2SQLParser implements ChatParser {
                 String questionAugmented = String.format("%s (补充信息:%s) ", o.getQueryText(), linkingListStr);
                 contextualQuestions.add(questionAugmented);
             });
-            Long startTime1 = System.currentTimeMillis();
-            log.info("timecost1:{}", startTime1 - startTime);
             StringBuffer currentPromptSb = new StringBuffer();
             if (contextualQuestions.size() == 0) {
                 currentPromptSb.append("contextualQuestions:" + "\n");
@@ -108,18 +111,13 @@ public class NL2SQLParser implements ChatParser {
             String currentQuestion = getQueryLinks(chatParseContext);
             currentPromptSb.append("currentQuestion:" + currentQuestion + "\n");
             currentPromptSb.append("rewritingCurrentQuestion:\n");
-            Long startTime2 = System.currentTimeMillis();
-            log.info("timecost2:{}", startTime2 - startTime1);
             String rewriteQuery = rewriteQueryGeneration.generation(currentPromptSb.toString());
-            Long startTime3 = System.currentTimeMillis();
-            log.info("timecost3:{}", startTime3 - startTime2);
             log.info("rewriteQuery:{}", rewriteQuery);
             chatParseContext.setQueryText(rewriteQuery);
         }
     }
 
     private String getQueryLinks(ChatParseContext chatParseContext) {
-        //ChatContextService chatContextService=ContextUtils.getBean(ChatContextService.class);
         QueryReq queryReq = QueryReqConverter.buildText2SqlQueryReq(chatParseContext);
 
         ChatQueryServiceImpl chatQueryService = ContextUtils.getBean(ChatQueryServiceImpl.class);
@@ -134,7 +132,6 @@ public class NL2SQLParser implements ChatParser {
             });
         }
         LLMRequestService requestService = ContextUtils.getBean(LLMRequestService.class);
-        log.info("LLMRequestService:{}", requestService.getClass().getSimpleName());
         Long dataSetId = requestService.getDataSetId(queryCtx);
         log.info("dataSetId:{}", dataSetId);
         if (dataSetId == null) {
