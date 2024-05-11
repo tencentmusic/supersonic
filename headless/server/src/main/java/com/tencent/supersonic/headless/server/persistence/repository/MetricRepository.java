@@ -22,6 +22,8 @@ public interface MetricRepository {
 
     void batchUnPublish(List<MetricDO> metricDOS);
 
+    void updateClassificationsBatch(List<MetricDO> metricDOS);
+
     MetricDO getMetricById(Long id);
 
     List<MetricDO> getMetric(MetricFilter metricFilter);

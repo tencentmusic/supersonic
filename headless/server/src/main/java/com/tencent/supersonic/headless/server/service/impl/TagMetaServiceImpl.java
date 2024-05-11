@@ -138,7 +138,7 @@ public class TagMetaServiceImpl implements TagMetaService {
     }
 
     @Override
-    public List<TagDO> getTagDOList(TagFilter tagFilter, User user) {
+    public List<TagDO> getTagDOList(TagFilter tagFilter) {
         return tagRepository.getTagDOList(tagFilter);
     }
 
@@ -388,11 +388,11 @@ public class TagMetaServiceImpl implements TagMetaService {
     }
 
     @Override
-    public List<TagItem> getTagItems(User user, List<Long> itemIds, TagDefineType tagDefineType) {
+    public List<TagItem> getTagItems(List<Long> itemIds, TagDefineType tagDefineType) {
         TagFilter tagFilter = new TagFilter();
         tagFilter.setTagDefineType(tagDefineType);
         tagFilter.setItemIds(itemIds);
-        Set<Long> dimensionItemSet = getTagDOList(tagFilter, user).stream().map(TagDO::getItemId)
+        Set<Long> dimensionItemSet = getTagDOList(tagFilter).stream().map(TagDO::getItemId)
                 .collect(Collectors.toSet());
         return itemIds.stream().map(entry -> {
                     TagItem tagItem = new TagItem();

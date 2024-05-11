@@ -163,7 +163,7 @@ public class SchemaServiceImpl implements SchemaService {
         MetaFilter metaFilter = new MetaFilter();
         metaFilter.setStatus(StatusEnum.ONLINE.getCode());
         metaFilter.setIds(filter.getDataSetIds());
-        List<DataSetResp> dataSetResps = dataSetService.getDataSetList(metaFilter, User.getFakeUser());
+        List<DataSetResp> dataSetResps = dataSetService.getDataSetList(metaFilter);
         Map<Long, DataSetResp> dataSetRespMap = getDataSetMap(dataSetResps);
 
         List<Long> modelIds = dataSetRespMap.values().stream().map(DataSetResp::getAllModels)
@@ -404,7 +404,7 @@ public class SchemaServiceImpl implements SchemaService {
             }
             parentItem.getChildren().add(itemResp);
         }
-        List<DataSetResp> dataSetResps = dataSetService.getDataSetList(new MetaFilter(), User.getFakeUser());
+        List<DataSetResp> dataSetResps = dataSetService.getDataSetList(new MetaFilter());
         for (DataSetResp dataSetResp : dataSetResps) {
             ItemResp itemResp = itemRespMap.get(dataSetResp.getDomainId());
             if (itemResp != null) {

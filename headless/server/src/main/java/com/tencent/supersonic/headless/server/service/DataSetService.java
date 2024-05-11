@@ -18,7 +18,7 @@ public interface DataSetService {
 
     DataSetResp getDataSet(Long id);
 
-    List<DataSetResp> getDataSetList(MetaFilter metaFilter, User user);
+    List<DataSetResp> getDataSetList(MetaFilter metaFilter);
 
     void delete(Long id, User user);
 
@@ -31,8 +31,6 @@ public interface DataSetService {
     List<DataSetResp> getDataSets(String dataSetName, User user);
 
     List<DataSetResp> getDataSets(List<String> dataSetNames, User user);
-
-    Map<Long, String> getDataSetIdToNameMap(List<Long> dataSetIds);
 
     List<DataSetResp> getDataSetsInheritAuth(User user, Long domainId);
 

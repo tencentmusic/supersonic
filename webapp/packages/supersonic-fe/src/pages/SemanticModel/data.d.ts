@@ -110,11 +110,13 @@ export declare namespace ISemantic {
     name: string;
     bizName: string;
     description: any;
+    children: IDomainItem[];
     hasEditPermission: boolean;
     status?: number;
     typeEnum?: any;
     sensitiveLevel?: number;
     parentId: number;
+    hasModel: boolean;
     fullPath?: string;
     viewers?: any[];
     viewOrgs?: any[];

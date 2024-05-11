@@ -27,9 +27,9 @@ public interface TagMetaService {
 
     List<TagResp> getTags(TagFilter tagFilter);
 
-    List<TagDO> getTagDOList(TagFilter tagFilter, User user);
+    List<TagDO> getTagDOList(TagFilter tagFilter);
 
     PageInfo<TagResp> queryTagMarketPage(TagFilterPageReq tagMarketPageReq, User user);
 
-    List<TagItem> getTagItems(User user, List<Long> itemIds, TagDefineType tagDefineType);
+    List<TagItem> getTagItems(List<Long> itemIds, TagDefineType tagDefineType);
 }

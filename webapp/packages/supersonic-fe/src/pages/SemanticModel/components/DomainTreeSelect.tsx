@@ -2,11 +2,9 @@ import { message, TreeSelect } from 'antd';
 import type { DataNode } from 'antd/lib/tree';
 import { useEffect, useState, useRef } from 'react';
 import type { FC } from 'react';
-import type { Dispatch } from 'umi';
 import { getDomainList } from '../../SemanticModel/service';
 import { constructorClassTreeFromList, addPathInTreeData } from '../utils';
 import styles from './style.less';
-import { ISemantic } from '../data';
 
 type Props = {
   value?: any;

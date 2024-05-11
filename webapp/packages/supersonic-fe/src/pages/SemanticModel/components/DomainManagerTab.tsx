@@ -43,17 +43,27 @@ const DomainManagerTab: React.FC<Props> = ({
 }) => {
   const initState = useRef<boolean>(false);
   const defaultTabKey = 'metric';
-  const { selectDomainId, selectModelId, selectModelName, selectDomainName, domainData } =
-    domainManger;
-
+  const {
+    selectDomainId,
+    selectModelId,
+    selectModelName,
+    selectDomainName,
+    domainData,
+    domainList,
+  } = domainManger;
   useEffect(() => {
     initState.current = false;
   }, [selectModelId]);
+
+  const domainListParentIdList: number[] = Array.isArray(domainList)
+    ? Array.from(new Set(domainList.map((item) => item.parentId)))
+    : [];
 
   const tabItem = [
     {
       label: '模型管理',
       key: 'overview',
+      hidden: domainData && domainListParentIdList.includes(domainData.id),
       children: (
         <OverView
           key={selectDomainId}
@@ -67,6 +77,7 @@ const DomainManagerTab: React.FC<Props> = ({
     {
       label: '数据集管理',
       key: 'dataSetManange',
+      hidden: !!domainData?.parentId,
       children: (
         <View
           modelList={modelList}
@@ -85,6 +96,7 @@ const DomainManagerTab: React.FC<Props> = ({
     {
       label: '画布',
       key: 'xflow',
+      hidden: domainData && domainListParentIdList.includes(domainData.id),
       children: (
         <div style={{ width: '100%' }}>
           <SemanticGraphCanvas />
@@ -137,12 +149,17 @@ const DomainManagerTab: React.FC<Props> = ({
       key: 'recommendedQuestions',
       children: <RecommendedQuestionsSection />,
     },
-  ].filter((item) => {
-    if (window.RUNNING_ENV === 'headless') {
-      return !['chatSetting', 'recommendedQuestions'].includes(item.key);
+  ];
+
+  const getActiveKey = () => {
+    const key = activeKey || defaultTabKey;
+    const tabItems = !isModel ? tabItem : isModelItem;
+    const tabItemsKeys = tabItems.map((item) => item.key);
+    if (!tabItemsKeys.includes(key)) {
+      return tabItemsKeys[0];
     }
-    return item;
-  });
+    return key;
+  };
 
   return (
     <>
@@ -187,7 +204,7 @@ const DomainManagerTab: React.FC<Props> = ({
       <Tabs
         className={styles.tab}
         items={!isModel ? tabItem : isModelItem}
-        activeKey={activeKey || defaultTabKey}
+        activeKey={getActiveKey()}
         destroyInactiveTabPane
         size="large"
         onChange={(menuKey: string) => {
