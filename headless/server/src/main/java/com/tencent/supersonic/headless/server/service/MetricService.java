@@ -33,6 +33,8 @@ public interface MetricService {
 
     void batchUnPublish(List<Long> metricIds, User user);
 
+    void batchUpdateClassifications(MetaBatchReq metaBatchReq, User user);
+
     void deleteMetric(Long id, User user) throws Exception;
 
     PageInfo<MetricResp> queryMetricMarket(PageMetricReq pageMetricReq, User user);

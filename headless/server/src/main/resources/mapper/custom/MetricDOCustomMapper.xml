@@ -117,6 +117,16 @@
         </foreach>
     </update>
 
+    <update id="updateClassificationsBatch" parameterType="java.util.List">
+        <foreach collection="list" item="metric" separator=";">
+            update s2_metric
+            set classifications = #{metric.classifications,jdbcType=VARCHAR},
+            updated_at = #{metric.updatedAt,jdbcType=TIMESTAMP},
+            updated_by = #{metric.updatedBy,jdbcType=VARCHAR}
+            where id = #{metric.id,jdbcType=BIGINT}
+        </foreach>
+    </update>
+
     <select id="query" resultMap="ResultMapWithBLOBs">
         select t.*
         from s2_metric t

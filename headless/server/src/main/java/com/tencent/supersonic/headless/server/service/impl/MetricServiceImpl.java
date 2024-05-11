@@ -72,6 +72,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -230,6 +231,41 @@ public class MetricServiceImpl implements MetricService {
     }
 
     @Override
+    public void batchUpdateClassifications(MetaBatchReq metaBatchReq, User user) {
+        MetricFilter metricFilter = new MetricFilter();
+        metricFilter.setIds(metaBatchReq.getIds());
+        List<MetricDO> metrics = metricRepository.getMetric(metricFilter);
+        for (MetricDO metricDO : metrics) {
+            metricDO.setUpdatedAt(new Date());
+            metricDO.setUpdatedBy(user.getName());
+            fillClassifications(metaBatchReq, metricDO);
+        }
+        metricRepository.updateClassificationsBatch(metrics);
+    }
+
+    private void fillClassifications(MetaBatchReq metaBatchReq, MetricDO metricDO) {
+        String classificationStr = metricDO.getClassifications();
+        Set<String> classificationsList;
+        if (StringUtils.isBlank(classificationStr)) {
+            classificationsList = new HashSet<>();
+        } else {
+            classificationsList = new HashSet<>(Arrays.asList(classificationStr.split(",")));
+        }
+
+        if (EventType.ADD.equals(metaBatchReq.getType())) {
+            classificationsList.addAll(metaBatchReq.getClassifications());
+        }
+        if (EventType.DELETE.equals(metaBatchReq.getType())) {
+            classificationsList.removeAll(metaBatchReq.getClassifications());
+        }
+        String classifications = "";
+        if (!CollectionUtils.isEmpty(classificationsList)) {
+            classifications = StringUtils.join(classificationsList, ",");
+        }
+        metricDO.setClassifications(classifications);
+    }
+
+    @Override
     public void deleteMetric(Long id, User user) {
         MetricDO metricDO = metricRepository.getMetricById(id);
         if (metricDO == null) {
@@ -263,7 +299,7 @@ public class MetricServiceImpl implements MetricService {
                 .flatMap(Collection::stream).filter(schemaElementMatch ->
                         SchemaElementType.METRIC.equals(schemaElementMatch.getElement().getType()))
                 .collect(Collectors.toMap(schemaElementMatch ->
-                        schemaElementMatch.getElement().getId(), SchemaElementMatch::getSimilarity,
+                                schemaElementMatch.getElement().getId(), SchemaElementMatch::getSimilarity,
                         (existingValue, newValue) -> existingValue));
         List<Long> metricIds = new ArrayList<>(result.keySet());
         if (CollectionUtils.isEmpty(result.keySet())) {
@@ -294,7 +330,7 @@ public class MetricServiceImpl implements MetricService {
         List<Long> idsToFilter = getIdsToFilter(pageMetricReq, collectIds);
         metricFilter.setIds(idsToFilter);
         PageInfo<MetricDO> metricDOPageInfo = PageHelper.startPage(pageMetricReq.getCurrent(),
-                        pageMetricReq.getPageSize())
+                pageMetricReq.getPageSize())
                 .doSelectPageInfo(() -> queryMetric(metricFilter));
         PageInfo<MetricResp> pageInfo = new PageInfo<>();
         BeanUtils.copyProperties(metricDOPageInfo, pageInfo);
@@ -435,8 +471,8 @@ public class MetricServiceImpl implements MetricService {
         metricFilter.setModelIds(Lists.newArrayList(modelId));
         List<MetricResp> metricResps = getMetrics(metricFilter);
         return metricResps.stream().filter(metricResp ->
-                        MetricDefineType.FIELD.equals(metricResp.getMetricDefineType())
-                                || MetricDefineType.MEASURE.equals(metricResp.getMetricDefineType()))
+                MetricDefineType.FIELD.equals(metricResp.getMetricDefineType())
+                        || MetricDefineType.MEASURE.equals(metricResp.getMetricDefineType()))
                 .collect(Collectors.toList());
     }
 
@@ -626,11 +662,7 @@ public class MetricServiceImpl implements MetricService {
         return convertList(metricDOS, new ArrayList<>());
     }
 
-    private void sendEventBatch(List<MetricDO> metricDOS, EventType eventType) {
-        DataEvent dataEvent = getDataEvent(metricDOS, eventType);
-        eventPublisher.publishEvent(dataEvent);
-    }
-
+    @Override
     public DataEvent getDataEvent() {
         MetricsFilter metricsFilter = new MetricsFilter();
         List<MetricDO> metricDOS = metricRepository.getMetrics(metricsFilter);
@@ -641,6 +673,11 @@ public class MetricServiceImpl implements MetricService {
         List<DataItem> dataItems = metricDOS.stream().map(this::getDataItem)
                 .collect(Collectors.toList());
         return new DataEvent(this, dataItems, eventType);
+    }
+
+    private void sendEventBatch(List<MetricDO> metricDOS, EventType eventType) {
+        DataEvent dataEvent = getDataEvent(metricDOS, eventType);
+        eventPublisher.publishEvent(dataEvent);
     }
 
     private void sendEvent(DataItem dataItem, EventType eventType) {
@@ -657,6 +694,7 @@ public class MetricServiceImpl implements MetricService {
                 .type(TypeEnums.METRIC).defaultAgg(metricResp.getDefaultAgg()).build();
     }
 
+    @Override
     public QueryStructReq convert(QueryMetricReq queryMetricReq) {
         //1. If a domainId exists, the modelIds obtained from the domainId.
         Set<Long> modelIdsByDomainId = getModelIdsByDomainId(queryMetricReq);
