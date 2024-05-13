@@ -10,6 +10,7 @@ import com.tencent.supersonic.headless.api.pojo.SemanticSchema;
 import com.tencent.supersonic.headless.api.pojo.Term;
 import com.tencent.supersonic.headless.api.pojo.request.QueryMapReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryReq;
+import com.tencent.supersonic.headless.api.pojo.response.DataSetMapInfo;
 import com.tencent.supersonic.headless.api.pojo.response.DataSetResp;
 import com.tencent.supersonic.headless.api.pojo.response.MapInfoResp;
 import com.tencent.supersonic.headless.api.pojo.response.MapResp;
@@ -73,36 +74,56 @@ public class MetaDiscoveryServiceImpl implements MetaDiscoveryService {
         MetaFilter metaFilter = new MetaFilter();
         metaFilter.setIds(new ArrayList<>(dataSetIds));
         List<DataSetResp> dataSetList = dataSetService.getDataSetList(metaFilter);
-        Map<Long, String> dataSetMap = dataSetList.stream()
-                .collect(Collectors.toMap(DataSetResp::getId, DataSetResp::getName));
-        mapInfoResp.setMapFields(getMapFields(mapResp.getMapInfo(), dataSetMap));
-        mapInfoResp.setTopFields(getTopFields(topN, mapResp.getMapInfo(), dataSetMap));
+        Map<Long, DataSetResp> dataSetMap = dataSetList.stream()
+                .collect(Collectors.toMap(DataSetResp::getId, d -> d));
+        mapInfoResp.setDataSetMapInfo(getDataSetInfo(mapResp.getMapInfo(), dataSetMap, topN));
         mapInfoResp.setTerms(getTerms(dataSetList, dataSetMap));
         return mapInfoResp;
     }
 
-    private Map<String, List<SchemaElementMatch>> getMapFields(SchemaMapInfo mapInfo,
-                                                               Map<Long, String> dataSetMap) {
-        Map<String, List<SchemaElementMatch>> result = new HashMap<>();
+    private Map<String, DataSetMapInfo> getDataSetInfo(SchemaMapInfo mapInfo,
+                                                       Map<Long, DataSetResp> dataSetMap,
+                                                       Integer topN) {
+        Map<String, DataSetMapInfo> map = new HashMap<>();
+        Map<Long, List<SchemaElementMatch>> mapFields = getMapFields(mapInfo, dataSetMap);
+        Map<Long, List<SchemaElementMatch>> topFields = getTopFields(topN, mapInfo, dataSetMap);
+        for (Long dataSetId : mapInfo.getDataSetElementMatches().keySet()) {
+            DataSetResp dataSetResp = dataSetMap.get(dataSetId);
+            if (dataSetResp == null) {
+                continue;
+            }
+            DataSetMapInfo dataSetMapInfo = new DataSetMapInfo();
+            dataSetMapInfo.setMapFields(mapFields.get(dataSetId));
+            dataSetMapInfo.setTopFields(topFields.get(dataSetId));
+            dataSetMapInfo.setName(dataSetResp.getName());
+            dataSetMapInfo.setDescription(dataSetResp.getDescription());
+            map.put(dataSetMapInfo.getName(), dataSetMapInfo);
+        }
+        return map;
+    }
+
+    private Map<Long, List<SchemaElementMatch>> getMapFields(SchemaMapInfo mapInfo,
+                                                               Map<Long, DataSetResp> dataSetMap) {
+        Map<Long, List<SchemaElementMatch>> result = new HashMap<>();
         for (Map.Entry<Long, List<SchemaElementMatch>> entry : mapInfo.getDataSetElementMatches().entrySet()) {
             List<SchemaElementMatch> values = entry.getValue();
             if (CollectionUtils.isNotEmpty(values) && dataSetMap.containsKey(entry.getKey())) {
-                result.put(dataSetMap.get(entry.getKey()), values);
+                result.put(entry.getKey(), values);
             }
         }
         return result;
     }
 
-    private Map<String, List<SchemaElementMatch>> getTopFields(Integer topN,
+    private Map<Long, List<SchemaElementMatch>> getTopFields(Integer topN,
                                                                SchemaMapInfo mapInfo,
-                                                               Map<Long, String> dataSetMap) {
-        Map<String, List<SchemaElementMatch>> result = new HashMap<>();
+                                                               Map<Long, DataSetResp> dataSetMap) {
+        Map<Long, List<SchemaElementMatch>> result = new HashMap<>();
 
         SemanticSchema semanticSchema = semanticService.getSemanticSchema();
         for (Map.Entry<Long, List<SchemaElementMatch>> entry : mapInfo.getDataSetElementMatches().entrySet()) {
             Long dataSetId = entry.getKey();
             List<SchemaElementMatch> values = entry.getValue();
-            String dataSetName = dataSetMap.get(dataSetId);
+            String dataSetName = dataSetMap.get(dataSetId).getName();
             if (StringUtils.isBlank(dataSetName) || CollectionUtils.isEmpty(values)) {
                 continue;
             }
@@ -120,19 +141,19 @@ public class MetaDiscoveryServiceImpl implements MetaDiscoveryService {
                     .limit(topN).map(mergeFunction()).collect(Collectors.toSet());
 
             dimensions.addAll(metrics);
-            result.put(dataSetName, new ArrayList<>(dimensions));
+            result.put(dataSetId, new ArrayList<>(dimensions));
         }
         return result;
     }
 
-    private Map<String, List<Term>> getTerms(List<DataSetResp> dataSets, Map<Long, String> dataSetNameMap) {
+    private Map<String, List<Term>> getTerms(List<DataSetResp> dataSets, Map<Long, DataSetResp> dataSetNameMap) {
         Set<Long> domainIds = dataSets.stream().map(DataSetResp::getDomainId).collect(Collectors.toSet());
         Map<Long, Long> dataSetDomainIdMap = dataSets.stream()
                 .collect(Collectors.toMap(DataSetResp::getId, DataSetResp::getDomainId));
         Map<Long, List<Term>> domainTermSetMap = termService.getTermSets(domainIds);
         Map<String, List<Term>> dataSetTermSetMap = new HashMap<>();
         for (DataSetResp dataSet : dataSets) {
-            dataSetTermSetMap.put(dataSetNameMap.get(dataSet.getId()),
+            dataSetTermSetMap.put(dataSetNameMap.get(dataSet.getId()).getName(),
                     domainTermSetMap.get(dataSetDomainIdMap.get(dataSet.getId())));
         }
         return dataSetTermSetMap;

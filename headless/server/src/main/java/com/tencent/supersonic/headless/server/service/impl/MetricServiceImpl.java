@@ -37,6 +37,7 @@ import com.tencent.supersonic.headless.api.pojo.request.PageMetricReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryMapReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryMetricReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
+import com.tencent.supersonic.headless.api.pojo.response.DataSetMapInfo;
 import com.tencent.supersonic.headless.api.pojo.response.DataSetResp;
 import com.tencent.supersonic.headless.api.pojo.response.DimensionResp;
 import com.tencent.supersonic.headless.api.pojo.response.MapInfoResp;
@@ -292,11 +293,12 @@ public class MetricServiceImpl implements MetricService {
         queryMapReq.setUser(user);
         queryMapReq.setMapModeEnum(MapModeEnum.LOOSE);
         MapInfoResp mapMeta = metaDiscoveryService.getMapMeta(queryMapReq);
-        Map<String, List<SchemaElementMatch>> mapFields = mapMeta.getMapFields();
-        if (CollectionUtils.isEmpty(mapFields)) {
+        Map<String, DataSetMapInfo> dataSetMapInfo = mapMeta.getDataSetMapInfo();
+        if (CollectionUtils.isEmpty(dataSetMapInfo)) {
             return metricRespPageInfo;
         }
-        Map<Long, Double> result = mapFields.values().stream()
+        Map<Long, Double> result = dataSetMapInfo.values().stream()
+                .map(DataSetMapInfo::getMapFields)
                 .flatMap(Collection::stream).filter(schemaElementMatch ->
                         SchemaElementType.METRIC.equals(schemaElementMatch.getElement().getType()))
                 .collect(Collectors.toMap(schemaElementMatch ->
