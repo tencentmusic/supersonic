@@ -1,6 +1,7 @@
 import type { ActionType, ProColumns } from '@ant-design/pro-components';
 import { ProTable } from '@ant-design/pro-components';
 import { message, Space, Popconfirm, Tag, Spin, Tooltip } from 'antd';
+import MetricAddClass from './components/MetricAddClass';
 import React, { useRef, useState, useEffect } from 'react';
 import type { Dispatch } from 'umi';
 import { connect, history, useModel } from 'umi';
@@ -65,6 +66,8 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
   const [hasAllPermission, setHasAllPermission] = useState<boolean>(true);
 
   const actionRef = useRef<ActionType>();
+
+  const [addClassVisible, setAddClassVisible] = useState<boolean>(false);
 
   useEffect(() => {
     queryMetricList(filterParams);
@@ -382,6 +385,9 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
       case 'batchStop':
         queryBatchUpdateStatus(selectedRowKeys, StatusEnum.OFFLINE);
         break;
+      case 'batchAddClass':
+        setAddClassVisible(true);
+        break;
       default:
         break;
     }
@@ -400,6 +406,7 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
                 queryBatchUpdateStatus(selectedRowKeys, StatusEnum.DELETED);
               }}
               disabledList={hasAllPermission ? [] : ['batchStart', 'batchStop', 'batchDelete']}
+              extenderList={['batchAddClass']}
               onMenuClick={onMenuClick}
               onDownloadDateRangeChange={(searchDateRange, pickerType) => {
                 downloadMetricQuery(selectedRowKeys, searchDateRange, pickerType);
@@ -506,6 +513,25 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
           maskClosable={true}
           onNodeChange={({ eventName }: { eventName: string }) => {
             setInfoDrawerVisible(false);
+          }}
+        />
+      )}
+      {addClassVisible && (
+        <MetricAddClass
+          ids={selectedRowKeys as number[]}
+          createModalVisible={addClassVisible}
+          onCancel={() => {
+            setAddClassVisible(false);
+          }}
+          onSuccess={() => {
+            setAddClassVisible(false);
+            queryMetricList(filterParams);
+            dispatch({
+              type: 'domainManger/queryMetricList',
+              payload: {
+                domainId: selectDomainId,
+              },
+            });
           }}
         />
       )}

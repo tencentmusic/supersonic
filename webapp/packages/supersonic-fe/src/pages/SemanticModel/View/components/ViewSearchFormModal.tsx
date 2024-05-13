@@ -7,13 +7,12 @@ import { createView, updateView, getDimensionList, queryMetric } from '../../ser
 import { ISemantic } from '../../data';
 import DefaultSettingForm from './DefaultSettingForm';
 import { isArrayOfValues } from '@/utils/utils';
-import { ProCard } from  '@ant-design/pro-components';
+import { ProCard } from '@ant-design/pro-components';
 import { ChatConfigType } from '../../enum';
 
 export type ModelCreateFormModalProps = {
   domainId: number;
   viewItem: any;
-  modelList: ISemantic.IModelItem[];
   onCancel: () => void;
   onSubmit: (values: any) => void;
 };
