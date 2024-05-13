@@ -26,6 +26,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.CollectionUtils;
+
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -44,8 +45,8 @@ public class ChatQueryRepositoryImpl implements ChatQueryRepository {
     private final ShowCaseCustomMapper showCaseCustomMapper;
 
     public ChatQueryRepositoryImpl(ChatQueryDOMapper chatQueryDOMapper,
-            ChatParseMapper chatParseMapper,
-            ShowCaseCustomMapper showCaseCustomMapper) {
+                                   ChatParseMapper chatParseMapper,
+                                   ShowCaseCustomMapper showCaseCustomMapper) {
         this.chatQueryDOMapper = chatQueryDOMapper;
         this.chatParseMapper = chatParseMapper;
         this.showCaseCustomMapper = showCaseCustomMapper;
@@ -131,7 +132,7 @@ public class ChatQueryRepositoryImpl implements ChatQueryRepository {
 
     @Override
     public List<ChatParseDO> batchSaveParseInfo(ChatParseReq chatParseReq,
-            ParseResp parseResult, List<SemanticParseInfo> candidateParses) {
+                                                ParseResp parseResult, List<SemanticParseInfo> candidateParses) {
         List<ChatParseDO> chatParseDOList = new ArrayList<>();
         getChatParseDO(chatParseReq, parseResult.getQueryId(), candidateParses, chatParseDOList);
         if (!CollectionUtils.isEmpty(candidateParses)) {
@@ -141,7 +142,7 @@ public class ChatQueryRepositoryImpl implements ChatQueryRepository {
     }
 
     public void getChatParseDO(ChatParseReq chatParseReq, Long queryId,
-            List<SemanticParseInfo> parses, List<ChatParseDO> chatParseDOList) {
+                               List<SemanticParseInfo> parses, List<ChatParseDO> chatParseDOList) {
         for (int i = 0; i < parses.size(); i++) {
             ChatParseDO chatParseDO = new ChatParseDO();
             chatParseDO.setChatId(Long.valueOf(chatParseReq.getChatId()));
@@ -191,6 +192,19 @@ public class ChatQueryRepositoryImpl implements ChatQueryRepository {
     @Override
     public Boolean deleteChatQuery(Long questionId) {
         return chatQueryDOMapper.deleteByPrimaryKey(questionId);
+    }
+
+    @Override
+    public List<ParseResp> getContextualParseInfo(Integer chatId) {
+        List<ChatParseDO> chatParseDOList = chatParseMapper.getContextualParseInfo(chatId);
+        List<ParseResp> semanticParseInfoList = chatParseDOList.stream().map(parseInfo -> {
+            ParseResp parseResp = new ParseResp(chatId, parseInfo.getQueryText());
+            List<SemanticParseInfo> selectedParses = new ArrayList<>();
+            selectedParses.add(JSONObject.parseObject(parseInfo.getParseInfo(), SemanticParseInfo.class));
+            parseResp.setSelectedParses(selectedParses);
+            return parseResp;
+        }).collect(Collectors.toList());
+        return semanticParseInfoList;
     }
 
 }
