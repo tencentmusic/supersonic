@@ -715,14 +715,17 @@ public class MetricServiceImpl implements MetricService {
     }
 
     private void fillDefaultAgg(MetricResp metricResp, ModelResp modelResp) {
+        metricResp.setDefaultAgg(getDefaultAgg(metricResp, modelResp));
+    }
+
+    private String getDefaultAgg(MetricResp metricResp, ModelResp modelResp) {
         if (modelResp == null || (Objects.nonNull(metricResp.getDefaultAgg()) && !metricResp.getDefaultAgg()
                 .isEmpty())) {
-            return;
+            return metricResp.getDefaultAgg();
         }
         // FIELD define will get from expr
         if (MetricDefineType.FIELD.equals(metricResp.getMetricDefineType())) {
-            metricResp.setDefaultAgg(SqlSelectFunctionHelper.getFirstAggregateFunctions(metricResp.getExpr()));
-            return;
+            return SqlSelectFunctionHelper.getFirstAggregateFunctions(metricResp.getExpr());
         }
         // METRIC define will get from first metric
         if (MetricDefineType.METRIC.equals(metricResp.getMetricDefineType())) {
@@ -731,10 +734,10 @@ public class MetricServiceImpl implements MetricService {
                 MetricParam metricParam = metricResp.getMetricDefineByMetricParams().getMetrics().get(0);
                 MetricResp firstMetricResp = getMetric(modelResp.getDomainId(), metricParam.getBizName());
                 if (Objects.nonNull(firstMetricResp)) {
-                    fillDefaultAgg(firstMetricResp, modelResp);
+                    return getDefaultAgg(firstMetricResp, modelResp);
                 }
+                return "";
             }
-            return;
         }
         // Measure define will get from first measure
         List<Measure> measures = modelResp.getModelDetail().getMeasures();
@@ -742,10 +745,10 @@ public class MetricServiceImpl implements MetricService {
                 .getMeasures().get(0);
         for (Measure measure : measures) {
             if (measure.getBizName().equalsIgnoreCase(firstMeasure.getBizName())) {
-                metricResp.setDefaultAgg(measure.getAgg());
-                break;
+                return measure.getAgg();
             }
         }
+        return "";
     }
 
     @Override
