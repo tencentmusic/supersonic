@@ -13,6 +13,7 @@ import com.tencent.supersonic.headless.api.pojo.request.PageMetricReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryMetricReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
 import com.tencent.supersonic.headless.api.pojo.response.MetricResp;
+import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
 import com.tencent.supersonic.headless.server.pojo.MetaFilter;
 import com.tencent.supersonic.headless.server.pojo.MetricsFilter;
 
@@ -32,6 +33,8 @@ public interface MetricService {
     void batchPublish(List<Long> metricIds, User user);
 
     void batchUnPublish(List<Long> metricIds, User user);
+
+    void batchUpdateClassifications(MetaBatchReq metaBatchReq, User user);
 
     void deleteMetric(Long id, User user) throws Exception;
 
@@ -62,6 +65,8 @@ public interface MetricService {
     void sendMetricEventBatch(List<Long> modelIds, EventType eventType);
 
     List<MetricResp> queryMetrics(MetricsFilter metricsFilter);
+
+    void batchFillMetricDefaultAgg(List<MetricResp> metricResps, List<ModelResp> modelResps);
 
     QueryStructReq convert(QueryMetricReq queryMetricReq);
 

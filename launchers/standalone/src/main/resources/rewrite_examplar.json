@@ -1,0 +1,122 @@
+[
+    {
+        "contextualQuestions": "[“近7天纯音乐的歌曲播放量 (补充信息:’ '纯音乐'‘是一个’语种‘。)”]",
+        "currentQuestion": "对比翻唱版呢 (补充信息:’ '翻唱版'‘是一个’歌曲版本‘。)",
+        "rewritingCurrentQuestion": "对比近7天翻唱版和纯音乐的歌曲播放量"
+    },
+    {
+        "contextualQuestions": "[]",
+        "currentQuestion": "robinlee在内容库的访问次数 (补充信息:’ 'robinlee'‘是一个’用户名‘。)",
+        "rewritingCurrentQuestion": "robinlee在内容库的访问次数"
+    },
+    {
+        "contextualQuestions": "[\"robinlee在内容库的访问次数 (补充信息:’ 'robinlee'‘是一个’用户名‘。)\"]",
+        "currentQuestion": "对比jackjchen呢？ (补充信息:’ 'jackjchen'‘是一个’用户名‘。)",
+        "rewritingCurrentQuestion": "robinlee对比jackjchen在内容库的访问次数"
+    },
+    {
+        "contextualQuestions": "[\"robinlee在内容库的访问次数 (补充信息:’ 'robinlee'‘是一个’用户名‘。)\",\"对比jackjchen呢？ (补充信息:’ 'jackjchen'‘是一个’用户名‘。)\"]。",
+        "currentQuestion": "内容库近12个月访问人数按部门",
+        "rewritingCurrentQuestion": "内容库近12个月访问人数按部门"
+    },
+    {
+        "contextualQuestions": "[\"robinlee在内容库的访问次数 (补充信息:’ 'robinlee'‘是一个’用户名‘。)\",\"对比jackjchen呢？ (补充信息:’ 'jackjchen'‘是一个’用户名‘。)\",\"内容库近12个月访问人数按部门\"]",
+        "currentQuestion": "访问次数呢？",
+        "rewritingCurrentQuestion": "内容库近12个月访问次数按部门"
+    },
+    {
+        "contextualQuestions": "[]",
+        "currentQuestion": "近3天海田飞系MPPM结算播放份额 (补充信息:’'海田飞系'‘是一个’严选版权归属系‘)",
+        "rewritingCurrentQuestion": "近3天海田飞系MPPM结算播放份额"
+    },
+    {
+        "contextualQuestions": "[\"近3天海田飞系MPPM结算播放份额(补充信息:’'海田飞系'‘是一个’严选版权归属系‘) \"]",
+        "currentQuestion": "近60天呢",
+        "rewritingCurrentQuestion": "近60天海田飞系MPPM结算播放份额"
+    },
+    {
+        "contextualQuestions": "[\"近3天海田飞系MPPM结算播放份额(补充信息:’'海田飞系'‘是一个’严选版权归属系‘) \",\"近60天呢\"]",
+        "currentQuestion": "飞天系呢(补充信息:’'飞天系'‘是一个’严选版权归属系‘)",
+        "rewritingCurrentQuestion": "近60天飞天系MPPM结算播放份额"
+    },
+    {
+        "contextualQuestions": "[“近90天袁亚伟播放量是多少 (补充信息:'袁亚伟'是一个歌手名)”]",
+        "currentQuestion": "平均值是多少",
+        "rewritingCurrentQuestion": "近90天袁亚伟播放量的平均值是多少"
+    },
+    {
+        "contextualQuestions": "[“近90天袁亚伟播放量是多少 (补充信息:'袁亚伟'是一个歌手名)”,\"平均值是多少\",\"总和是多少\"]",
+        "currentQuestion": "总和是多少",
+        "rewritingCurrentQuestion": "近90天袁亚伟播放量的总和是多少"
+    },
+    {
+        "contextualQuestions": "[\"播放量大于1万的歌曲有多少\"]",
+        "currentQuestion": "下载量大于10万的呢",
+        "rewritingCurrentQuestion": "下载量大于10万的歌曲有多少"
+    },
+    {
+        "contextualQuestions": "[\"周杰伦2023年6月之后发布的歌曲有哪些(补充信息:'周杰伦'是一个歌手名)\"]",
+        "currentQuestion": "这些歌曲有哪些播放量大于500W的？",
+        "rewritingCurrentQuestion": "周杰伦2023年6月之后发布的歌曲，有哪些播放量大于500W的？"
+    },
+    {
+        "contextualQuestions": "[“陈奕迅唱的所有的播放量大于20万的歌曲有哪些(补充信息:'陈奕迅'是一个歌手名)”]",
+        "currentQuestion": "大于100万的呢",
+        "rewritingCurrentQuestion": "陈奕迅唱的所有的播放量大于100万的歌曲有哪些"
+    },
+    {
+        "contextualQuestions": "[“陈奕迅唱的所有的播放量大于20万的歌曲有哪些(补充信息:'陈奕迅'是一个歌手名)”,\"大于100万的呢\"]",
+        "currentQuestion": "周杰伦去年发布的歌曲有哪些(补充信息:'周杰伦'是一个歌手名)",
+        "rewritingCurrentQuestion": "周杰伦去年发布的歌曲有哪些"
+    },
+    {
+        "contextualQuestions": "[“陈奕迅唱的所有的播放量大于20万的歌曲有哪些(补充信息:'陈奕迅'是一个歌手名)”,\"大于100万的呢\",\"周杰伦去年发布的歌曲有哪些(补充信息:'周杰伦'是一个歌手名)\"]",
+        "currentQuestion": "他今年发布的呢",
+        "rewritingCurrentQuestion": "周杰伦今年发布的歌曲有哪些"
+    },
+    {
+        "contextualQuestions": "[“陈奕迅唱的所有的播放量大于20万的歌曲有哪些(补充信息:'陈奕迅'是一个歌手名)”,\"大于100万的呢\",\"周杰伦去年发布的歌曲有哪些(补充信息:'周杰伦'是一个歌手名)\",\"他今年发布的呢\"]",
+        "currentQuestion": "我想要近半年签约的播放量前十的歌手有哪些",
+        "rewritingCurrentQuestion": "我想要近半年签约的播放量前十的歌手有哪些"
+    },
+    {
+        "contextualQuestions": "[]",
+        "currentQuestion": "最近一年发行的歌曲中，有哪些在近7天播放超过一千万的",
+        "rewritingCurrentQuestion": "最近一年发行的歌曲中，有哪些在近7天播放超过一千万的"
+    },
+    {
+        "contextualQuestions": "[“最近一年发行的歌曲中，有哪些在近7天播放超过一千万的”]",
+        "currentQuestion": "今年以来呢？",
+        "rewritingCurrentQuestion": "今年以来发行的歌曲中，有哪些在近7天播放超过一千万的"
+    },
+    {
+        "contextualQuestions": "[“最近一年发行的歌曲中，有哪些在近7天播放超过一千万的”,\"今年以来呢？\"]",
+        "currentQuestion": "2023年以来呢？",
+        "rewritingCurrentQuestion": "2023年以来发行的歌曲中，有哪些在近7天播放超过一千万的"
+    },
+    {
+        "contextualQuestions": "[\"内容库近20天访问次数\"]",
+        "currentQuestion": "按部门看一下",
+        "rewritingCurrentQuestion": "内容库近20天按部门的访问次数"
+    },
+    {
+        "contextualQuestions": "[\"内容库近20天访问次数\",\"按部门看一下\"]",
+        "currentQuestion": "按模块看一下",
+        "rewritingCurrentQuestion": "内容库近20天按模块的访问次数"
+    },
+    {
+        "contextualQuestions": "[\"内容库近20天访问次数\",\"按部门看一下\",\"按模块看一下\"]",
+        "currentQuestion": "看一下技术部的 (补充信息:’'技术部'‘是一个’部门‘)",
+        "rewritingCurrentQuestion": "技术部在内容库近20天的访问次数"
+    },
+    {
+        "contextualQuestions": "[\"内容库近20天访问次数\",\"按部门看一下\",\"按模块看一下\",\"看一下技术部的 (补充信息:’'技术部'‘是一个’部门‘)\"]",
+        "currentQuestion": "看一下产品部的 (补充信息:’'产品部'‘是一个’部门‘)",
+        "rewritingCurrentQuestion": "产品部在内容库近20天的访问次数"
+    },
+    {
+        "contextualQuestions": "[\"内容库近20天访问次数\",\"按部门看一下\",\"按模块看一下\",\"看一下技术部的 (补充信息:’'技术部'‘是一个’部门‘)\",\"看一下产品部的 (补充信息:’'产品部'‘是一个’部门‘)\"]",
+        "currentQuestion": "对比一下技术部、产品部(补充信息:'技术部'、‘产品部’分别是一个’部门‘)",
+        "rewritingCurrentQuestion": "对比一下技术部、产品部在内容库近20天的访问次数"
+    }
+]

@@ -11,9 +11,11 @@ import com.tencent.supersonic.headless.api.pojo.response.QueryResult;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.CollectionUtils;
 
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Slf4j
 public abstract class PluginSemanticQuery {
@@ -41,7 +43,10 @@ public abstract class PluginSemanticQuery {
     protected Map<String, Object> getElementMap(PluginParseResult pluginParseResult) {
         Map<String, Object> elementValueMap = new HashMap<>();
         Map<Long, Object> filterValueMap = getFilterMap(pluginParseResult);
-        List<SchemaElementMatch> schemaElementMatchList = parseInfo.getElementMatches();
+        List<SchemaElementMatch> schemaElementMatchList = parseInfo.getElementMatches()
+                .stream().filter(schemaElementMatch -> schemaElementMatch.getFrequency() != null)
+                .sorted(Comparator.comparingLong(SchemaElementMatch::getFrequency).reversed())
+                .collect(Collectors.toList());
         if (!CollectionUtils.isEmpty(schemaElementMatchList)) {
             schemaElementMatchList.stream().filter(schemaElementMatch ->
                             SchemaElementType.VALUE.equals(schemaElementMatch.getElement().getType())

@@ -8,6 +8,7 @@ import com.tencent.supersonic.chat.api.pojo.response.QueryResp;
 import com.tencent.supersonic.chat.api.pojo.response.ShowCaseResp;
 import com.tencent.supersonic.chat.server.persistence.dataobject.ChatDO;
 import com.tencent.supersonic.chat.server.service.ChatManageService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -24,11 +25,8 @@ import java.util.List;
 @RequestMapping({"/api/chat/manage", "/openapi/chat/manage"})
 public class ChatController {
 
-    private final ChatManageService chatService;
-
-    public ChatController(ChatManageService chatService) {
-        this.chatService = chatService;
-    }
+    @Autowired
+    private ChatManageService chatService;
 
     @PostMapping("/save")
     public Boolean save(@RequestParam(value = "chatName") String chatName,

@@ -1,5 +1,6 @@
 package com.tencent.supersonic.headless.server.rest;
 
+import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
 import com.tencent.supersonic.common.pojo.enums.AuthType;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
@@ -78,6 +80,11 @@ public class ModelController {
         ModelFilter modelFilter = new ModelFilter();
         modelFilter.setIds(ids);
         return modelService.getModelList(modelFilter);
+    }
+
+    @GetMapping("/getAllModelByDomainId")
+    public List<ModelResp> getAllModelByDomainId(@RequestParam("domainId") Long domainId) {
+        return modelService.getAllModelByDomainIds(Lists.newArrayList(domainId));
     }
 
     @GetMapping("/getModelDatabase/{modelId}")

@@ -17,8 +17,9 @@ public interface MetricDOCustomMapper {
 
     void batchUnPublish(List<MetricDO> metricDOS);
 
+    void updateClassificationsBatch(List<MetricDO> metricDOS);
+
     List<MetricDO> query(MetricFilter metricFilter);
 
     List<MetricDO> queryMetrics(MetricsFilter metricsFilter);
-
 }

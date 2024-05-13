@@ -143,7 +143,7 @@ public class LLMRequestService {
         return extraInfoSb.toString();
     }
 
-    protected List<ElementValue> getValueList(QueryContext queryCtx, Long dataSetId) {
+    public List<ElementValue> getValueList(QueryContext queryCtx, Long dataSetId) {
         Map<Long, String> itemIdToName = getItemIdToName(queryCtx, dataSetId);
         List<SchemaElementMatch> matchedElements = queryCtx.getMapInfo().getMatchedElements(dataSetId);
         if (CollectionUtils.isEmpty(matchedElements)) {

@@ -12,11 +12,6 @@ import com.tencent.supersonic.headless.api.pojo.response.TagResp;
 import com.tencent.supersonic.headless.server.persistence.dataobject.TagDO;
 import com.tencent.supersonic.headless.server.pojo.TagFilter;
 import com.tencent.supersonic.headless.server.service.TagMetaService;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.validation.Valid;
-
 import com.tencent.supersonic.headless.server.service.TagQueryService;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,6 +21,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -130,17 +128,11 @@ public class TagController {
      * 标签查询
      *
      * @param tagFilter
-     * @param request
-     * @param response
      * @return
-     * @throws Exception
      */
     @PostMapping("/queryTag")
-    public List<TagDO> queryPage(@RequestBody TagFilter tagFilter,
-                                     HttpServletRequest request,
-                                     HttpServletResponse response) throws Exception {
-        User user = UserHolder.findUser(request, response);
-        return tagMetaService.getTagDOList(tagFilter, user);
+    public List<TagDO> queryPage(@RequestBody TagFilter tagFilter) {
+        return tagMetaService.getTagDOList(tagFilter);
     }
 
 

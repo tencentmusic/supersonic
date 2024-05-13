@@ -11,6 +11,7 @@ import com.tencent.supersonic.headless.core.chat.query.llm.s2sql.LLMResp;
 import com.tencent.supersonic.headless.core.chat.query.llm.s2sql.LLMSqlResp;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
 import java.util.Map;
@@ -53,10 +54,14 @@ public class LLMSqlParser implements SemanticParser {
                     .build();
 
             if (MapUtils.isEmpty(deduplicationSqlResp)) {
-                responseService.addParseInfo(queryCtx, parseResult, llmResp.getSqlOutput(), 1D);
+                if (StringUtils.isNotBlank(llmResp.getSqlOutput())) {
+                    responseService.addParseInfo(queryCtx, parseResult, llmResp.getSqlOutput(), 1D);
+                }
             } else {
                 deduplicationSqlResp.forEach((sql, sqlResp) -> {
-                    responseService.addParseInfo(queryCtx, parseResult, sql, sqlResp.getSqlWeight());
+                    if (StringUtils.isNotBlank(sql)) {
+                        responseService.addParseInfo(queryCtx, parseResult, sql, sqlResp.getSqlWeight());
+                    }
                 });
             }
 
