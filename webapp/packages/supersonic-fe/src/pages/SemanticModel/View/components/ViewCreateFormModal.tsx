@@ -5,7 +5,6 @@ import { message } from 'antd';
 import { formLayout } from '@/components/FormHelper/utils';
 import { createView, updateView, getDimensionList, queryMetric, getTagList } from '../../service';
 import { ISemantic } from '../../data';
-import { isString } from 'lodash';
 import FormItemTitle from '@/components/FormHelper/FormItemTitle';
 import SelectTMEPerson from '@/components/SelectTMEPerson';
 import ViewModelConfigTransfer from './ViewModelConfigTransfer';
@@ -80,21 +79,6 @@ const ViewCreateFormModal: React.FC<ModelCreateFormModalProps> = ({
       message.error(msg);
     }
   };
-
-  // const queryTagList = async (modelId: number) => {
-  //   const { code, data, msg } = await getTagList({
-  //     modelIds: [modelId],
-  //     pageSize: 9999,
-  //   });
-
-  //   const { list } = data || {};
-  //   if (code === 200) {
-  //     setTagList(list);
-  //   } else {
-  //     message.error(msg);
-  //     setTagList([]);
-  //   }
-  // };
 
   const handleConfirm = async () => {
     const fieldsValue = await form.validateFields();
@@ -204,7 +188,8 @@ const ViewCreateFormModal: React.FC<ModelCreateFormModalProps> = ({
                 <span>切换模型: </span>
                 <Select
                   style={{
-                    minWidth: 100,
+                    minWidth: 150,
+                    textAlign: 'left',
                   }}
                   value={selectedModelItem?.id}
                   placeholder="请选择模型，获取当前模型下指标维度信息"

@@ -7,7 +7,7 @@ import ClassMetricTable from './ClassMetricTable';
 import PermissionSection from './Permission/PermissionSection';
 // import ClassTagTable from '../Insights/components/ClassTagTable';
 import TagObjectTable from '../Insights/components/TagObjectTable';
-
+import TermTable from '../components/Term/TermTable';
 import OverView from './OverView';
 import styles from './style.less';
 import type { StateType } from '../model';
@@ -76,7 +76,7 @@ const DomainManagerTab: React.FC<Props> = ({
     },
     {
       label: '数据集管理',
-      key: 'dataSetManange',
+      key: 'dataSetManage',
       hidden: !!domainData?.parentId,
       children: (
         <View
@@ -89,9 +89,15 @@ const DomainManagerTab: React.FC<Props> = ({
     },
     {
       label: '标签对象管理',
-      key: 'tagObjectManange',
+      key: 'tagObjectManage',
       hidden: !!domainData?.parentId,
       children: <TagObjectTable />,
+    },
+    {
+      label: '术语管理',
+      key: 'termManage',
+      hidden: !!domainData?.parentId,
+      children: <TermTable />,
     },
     {
       label: '画布',

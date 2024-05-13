@@ -434,6 +434,12 @@ export declare namespace ISemantic {
     domainId: number;
     ext: null;
   }
+
+  interface ITermItem {
+    name: string;
+    description: string;
+    similarTerms: string[];
+  }
 }
 
 export declare namespace IChatConfig {
