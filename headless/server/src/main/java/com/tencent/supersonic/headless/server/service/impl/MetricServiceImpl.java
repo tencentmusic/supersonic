@@ -18,6 +18,7 @@ import com.tencent.supersonic.common.pojo.enums.StatusEnum;
 import com.tencent.supersonic.common.pojo.enums.TypeEnums;
 import com.tencent.supersonic.common.util.BeanMapper;
 import com.tencent.supersonic.common.util.ChatGptHelper;
+import com.tencent.supersonic.common.util.jsqlparser.SqlSelectFunctionHelper;
 import com.tencent.supersonic.headless.api.pojo.DrillDownDimension;
 import com.tencent.supersonic.headless.api.pojo.Measure;
 import com.tencent.supersonic.headless.api.pojo.MeasureParam;
@@ -64,14 +65,6 @@ import com.tencent.supersonic.headless.server.service.TagMetaService;
 import com.tencent.supersonic.headless.server.utils.MetricCheckUtils;
 import com.tencent.supersonic.headless.server.utils.MetricConverter;
 import com.tencent.supersonic.headless.server.utils.ModelClusterBuilder;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.BeanUtils;
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -85,6 +78,13 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 @Service
 @Slf4j
@@ -109,14 +109,14 @@ public class MetricServiceImpl implements MetricService {
     private MetaDiscoveryService metaDiscoveryService;
 
     public MetricServiceImpl(MetricRepository metricRepository,
-                             ModelService modelService,
-                             ChatGptHelper chatGptHelper,
-                             CollectService collectService,
-                             DataSetService dataSetService,
-                             ApplicationEventPublisher eventPublisher,
-                             DimensionService dimensionService,
-                             TagMetaService tagMetaService,
-                             @Lazy MetaDiscoveryService metaDiscoveryService) {
+            ModelService modelService,
+            ChatGptHelper chatGptHelper,
+            CollectService collectService,
+            DataSetService dataSetService,
+            ApplicationEventPublisher eventPublisher,
+            DimensionService dimensionService,
+            TagMetaService tagMetaService,
+            @Lazy MetaDiscoveryService metaDiscoveryService) {
         this.metricRepository = metricRepository;
         this.modelService = modelService;
         this.chatGptHelper = chatGptHelper;
@@ -331,7 +331,7 @@ public class MetricServiceImpl implements MetricService {
         List<Long> idsToFilter = getIdsToFilter(pageMetricReq, collectIds);
         metricFilter.setIds(idsToFilter);
         PageInfo<MetricDO> metricDOPageInfo = PageHelper.startPage(pageMetricReq.getCurrent(),
-                pageMetricReq.getPageSize())
+                        pageMetricReq.getPageSize())
                 .doSelectPageInfo(() -> queryMetric(metricFilter));
         PageInfo<MetricResp> pageInfo = new PageInfo<>();
         BeanUtils.copyProperties(metricDOPageInfo, pageInfo);
@@ -434,7 +434,7 @@ public class MetricServiceImpl implements MetricService {
     }
 
     private boolean filterByField(List<MetricResp> metricResps, MetricResp metricResp,
-                                  List<String> fields, Set<MetricResp> metricRespFiltered) {
+            List<String> fields, Set<MetricResp> metricRespFiltered) {
         if (MetricDefineType.METRIC.equals(metricResp.getMetricDefineType())) {
             List<Long> ids = metricResp.getMetricDefineByMetricParams().getMetrics()
                     .stream().map(MetricParam::getId).collect(Collectors.toList());
@@ -472,8 +472,8 @@ public class MetricServiceImpl implements MetricService {
         metricFilter.setModelIds(Lists.newArrayList(modelId));
         List<MetricResp> metricResps = getMetrics(metricFilter);
         return metricResps.stream().filter(metricResp ->
-                MetricDefineType.FIELD.equals(metricResp.getMetricDefineType())
-                        || MetricDefineType.MEASURE.equals(metricResp.getMetricDefineType()))
+                        MetricDefineType.FIELD.equals(metricResp.getMetricDefineType())
+                                || MetricDefineType.MEASURE.equals(metricResp.getMetricDefineType()))
                 .collect(Collectors.toList());
     }
 
@@ -700,9 +700,7 @@ public class MetricServiceImpl implements MetricService {
     public void batchFillMetricDefaultAgg(List<MetricResp> metricResps, List<ModelResp> modelResps) {
         Map<Long, ModelResp> modelRespMap = modelResps.stream().collect(Collectors.toMap(ModelResp::getId, m -> m));
         for (MetricResp metricResp : metricResps) {
-            if (MetricDefineType.MEASURE.equals(metricResp.getMetricDefineType())) {
-                fillDefaultAgg(metricResp, modelRespMap.get(metricResp.getModelId()));
-            }
+            fillDefaultAgg(metricResp, modelRespMap.get(metricResp.getModelId()));
         }
     }
 
@@ -715,9 +713,28 @@ public class MetricServiceImpl implements MetricService {
     }
 
     private void fillDefaultAgg(MetricResp metricResp, ModelResp modelResp) {
-        if (modelResp == null) {
+        if (modelResp == null || (Objects.nonNull(metricResp.getDefaultAgg()) && !metricResp.getDefaultAgg()
+                .isEmpty())) {
             return;
         }
+        // FIELD define will get from expr
+        if (MetricDefineType.FIELD.equals(metricResp.getMetricDefineType())) {
+            metricResp.setDefaultAgg(SqlSelectFunctionHelper.getFirstAggregateFunctions(metricResp.getExpr()));
+            return;
+        }
+        // METRIC define will get from first metric
+        if (MetricDefineType.METRIC.equals(metricResp.getMetricDefineType())) {
+            if (!CollectionUtils.isEmpty(
+                    metricResp.getMetricDefineByMetricParams().getMetrics())) {
+                MetricParam metricParam = metricResp.getMetricDefineByMetricParams().getMetrics().get(0);
+                MetricResp firstMetricResp = getMetric(modelResp.getDomainId(), metricParam.getBizName());
+                if (Objects.nonNull(firstMetricResp)) {
+                    fillDefaultAgg(firstMetricResp, modelResp);
+                }
+            }
+            return;
+        }
+        // Measure define will get from first measure
         List<Measure> measures = modelResp.getModelDetail().getMeasures();
         MeasureParam firstMeasure = metricResp.getMetricDefineByMeasureParams()
                 .getMeasures().get(0);
@@ -817,7 +834,7 @@ public class MetricServiceImpl implements MetricService {
     }
 
     private Set<Long> getModelIds(Set<Long> modelIdsByDomainId, List<MetricResp> metricResps,
-                                  List<DimensionResp> dimensionResps) {
+            List<DimensionResp> dimensionResps) {
         Set<Long> result = new HashSet<>();
         if (org.apache.commons.collections.CollectionUtils.isNotEmpty(modelIdsByDomainId)) {
             result.addAll(modelIdsByDomainId);
