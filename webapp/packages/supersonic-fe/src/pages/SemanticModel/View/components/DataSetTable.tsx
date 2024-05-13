@@ -6,7 +6,7 @@ import { StatusEnum } from '../../enum';
 import type { Dispatch } from 'umi';
 import { connect } from 'umi';
 import type { StateType } from '../../model';
-import { deleteView, updateView, getViewList } from '../../service';
+import { deleteView, updateView, getViewList, getAllModelByDomainId } from '../../service';
 import ViewCreateFormModal from './ViewCreateFormModal';
 import moment from 'moment';
 import styles from '../../components/style.less';
@@ -21,13 +21,14 @@ type Props = {
   domainManger: StateType;
 };
 
-const ViewTable: React.FC<Props> = ({ disabledEdit = false, modelList, domainManger }) => {
+const DataSetTable: React.FC<Props> = ({ disabledEdit = false, domainManger }) => {
   const { selectDomainId } = domainManger;
   const [viewItem, setViewItem] = useState<ISemantic.IViewItem>();
   const [saveLoading, setSaveLoading] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [createDataSourceModalOpen, setCreateDataSourceModalOpen] = useState(false);
   const [searchModalOpen, setSearchModalOpen] = useState(false);
+  const [modelList, setModelList] = useState<ISemantic.IModelItem[]>([]);
   const actionRef = useRef<ActionType>();
 
   const updateViewStatus = async (modelData: ISemantic.IViewItem) => {
@@ -47,6 +48,7 @@ const ViewTable: React.FC<Props> = ({ disabledEdit = false, modelList, domainMan
 
   useEffect(() => {
     queryViewList();
+    queryDomainAllModel();
   }, []);
 
   const queryViewList = async () => {
@@ -59,6 +61,16 @@ const ViewTable: React.FC<Props> = ({ disabledEdit = false, modelList, domainMan
       message.error(msg);
     }
   };
+
+  const queryDomainAllModel = async () => {
+    const { code, data, msg } = await getAllModelByDomainId(selectDomainId);
+    if (code === 200) {
+      setModelList(data);
+    } else {
+      message.error(msg);
+    }
+  };
+
   const columnsConfig = ColumnsConfig();
 
   const columns: ProColumns[] = [
@@ -230,7 +242,6 @@ const ViewTable: React.FC<Props> = ({ disabledEdit = false, modelList, domainMan
         <ViewSearchFormModal
           domainId={selectDomainId}
           viewItem={viewItem}
-          modelList={modelList}
           onSubmit={() => {
             queryViewList();
             setSearchModalOpen(false);
@@ -245,4 +256,4 @@ const ViewTable: React.FC<Props> = ({ disabledEdit = false, modelList, domainMan
 };
 export default connect(({ domainManger }: { domainManger: StateType }) => ({
   domainManger,
-}))(ViewTable);
+}))(DataSetTable);
