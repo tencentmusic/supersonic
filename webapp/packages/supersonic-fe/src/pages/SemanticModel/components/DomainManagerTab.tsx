@@ -113,6 +113,7 @@ const DomainManagerTab: React.FC<Props> = ({
     {
       label: '权限管理',
       key: 'permissonSetting',
+      hidden: !!domainData?.parentId,
       children: <PermissionSection permissionTarget={'domain'} />,
     },
   ].filter((item) => {
