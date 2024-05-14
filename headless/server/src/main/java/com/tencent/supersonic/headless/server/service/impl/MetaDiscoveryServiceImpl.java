@@ -1,5 +1,6 @@
 package com.tencent.supersonic.headless.server.service.impl;
 
+import com.google.common.collect.Lists;
 import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementMatch;
@@ -21,7 +22,6 @@ import com.tencent.supersonic.headless.server.service.DataSetService;
 import com.tencent.supersonic.headless.server.service.MetaDiscoveryService;
 import com.tencent.supersonic.headless.server.service.TermService;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -61,16 +61,16 @@ public class MetaDiscoveryServiceImpl implements MetaDiscoveryService {
         Set<Long> dataSetIds = dataSets.stream().map(SchemaItem::getId).collect(Collectors.toSet());
         queryReq.setDataSetIds(dataSetIds);
         MapResp mapResp = chatQueryService.performMapping(queryReq);
-        return convert(mapResp, queryMapReq.getTopN());
+        dataSetIds.retainAll(mapResp.getMapInfo().getDataSetElementMatches().keySet());
+        return convert(mapResp, queryMapReq.getTopN(), dataSetIds);
     }
 
-    private MapInfoResp convert(MapResp mapResp, Integer topN) {
+    private MapInfoResp convert(MapResp mapResp, Integer topN, Set<Long> dataSetIds) {
         MapInfoResp mapInfoResp = new MapInfoResp();
         if (Objects.isNull(mapResp)) {
             return mapInfoResp;
         }
         BeanUtils.copyProperties(mapResp, mapInfoResp);
-        Set<Long> dataSetIds = mapResp.getMapInfo().getDataSetElementMatches().keySet();
         MetaFilter metaFilter = new MetaFilter();
         metaFilter.setIds(new ArrayList<>(dataSetIds));
         List<DataSetResp> dataSetList = dataSetService.getDataSetList(metaFilter);
@@ -92,9 +92,12 @@ public class MetaDiscoveryServiceImpl implements MetaDiscoveryService {
             if (dataSetResp == null) {
                 continue;
             }
+            if (CollectionUtils.isEmpty(mapFields.get(dataSetId))) {
+                continue;
+            }
             DataSetMapInfo dataSetMapInfo = new DataSetMapInfo();
-            dataSetMapInfo.setMapFields(mapFields.get(dataSetId));
-            dataSetMapInfo.setTopFields(topFields.get(dataSetId));
+            dataSetMapInfo.setMapFields(mapFields.getOrDefault(dataSetId, Lists.newArrayList()));
+            dataSetMapInfo.setTopFields(topFields.getOrDefault(dataSetId, Lists.newArrayList()));
             dataSetMapInfo.setName(dataSetResp.getName());
             dataSetMapInfo.setDescription(dataSetResp.getDescription());
             map.put(dataSetMapInfo.getName(), dataSetMapInfo);
@@ -123,10 +126,11 @@ public class MetaDiscoveryServiceImpl implements MetaDiscoveryService {
         for (Map.Entry<Long, List<SchemaElementMatch>> entry : mapInfo.getDataSetElementMatches().entrySet()) {
             Long dataSetId = entry.getKey();
             List<SchemaElementMatch> values = entry.getValue();
-            String dataSetName = dataSetMap.get(dataSetId).getName();
-            if (StringUtils.isBlank(dataSetName) || CollectionUtils.isEmpty(values)) {
+            DataSetResp dataSetResp = dataSetMap.get(dataSetId);
+            if (dataSetResp == null || CollectionUtils.isEmpty(values)) {
                 continue;
             }
+            String dataSetName = dataSetResp.getName();
             //topN dimensions
             Set<SchemaElementMatch> dimensions = semanticSchema.getDimensions(dataSetId)
                     .stream().sorted(Comparator.comparing(SchemaElement::getUseCnt).reversed())
