@@ -61,7 +61,8 @@ s2:
     chat-model:
       provider: open_ai
       openai:
-        base-url: YOUR_API_URL
+        # Replace with your LLM configs
+        base-url: http://YOUR_API_URL
         api-key: YOUR_API_KEY
         model-name: gpt-3.5-turbo-16k
         temperature: 0.0

@@ -123,7 +123,6 @@ public class ComponentFactory {
         if (Objects.isNull(llmProxy)) {
             llmProxy = ContextUtils.getBean(JavaLLMProxy.class);
         }
-        log.info("llmProxy:{}", llmProxy);
         return llmProxy;
     }
 
