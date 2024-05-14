@@ -139,13 +139,11 @@ const ModelFieldForm: React.FC<Props> = ({
         if (type === EnumDataSourceType.PRIMARY) {
           return (
             <Space>
-              {/* <FormItem name="tagObjectId"> */}
               <Select
                 style={{ minWidth: 150 }}
                 value={tagObjectId}
                 placeholder="请选择所属对象"
                 onChange={(value) => {
-                  // handleFieldChange(record, 'tagObjectId', value);
                   onTagObjectChange?.(value);
                 }}
                 options={tagObjectList.map((item: ISemantic.ITagObjectItem) => {
@@ -155,21 +153,6 @@ const ModelFieldForm: React.FC<Props> = ({
                   };
                 })}
               />
-              {/* </FormItem> */}
-              {/* <Select
-                style={{ minWidth: 345 }}
-                mode="tags"
-                value={entityNames}
-                placeholder="输入实体名称后回车确认，支持英文逗号自动分隔"
-                tokenSeparators={[',']}
-                onChange={(value) => {
-                  handleFieldChange(record, 'entityNames', value);
-                }}
-                maxTagCount={9}
-              />
-              <Tooltip title="主键可以作为一个实体，在此设置一个或多个实体名称">
-                <ExclamationCircleOutlined />
-              </Tooltip> */}
             </Space>
           );
         }
@@ -182,6 +165,7 @@ const ModelFieldForm: React.FC<Props> = ({
               onChange={(value) => {
                 handleFieldChange(record, 'agg', value);
               }}
+              allowClear
               defaultValue={AGG_OPTIONS[0].value}
               style={{ width: '100%' }}
             >
