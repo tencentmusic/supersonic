@@ -8,7 +8,6 @@ import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
 import com.tencent.supersonic.headless.api.pojo.SchemaItem;
 import com.tencent.supersonic.headless.api.pojo.SchemaMapInfo;
 import com.tencent.supersonic.headless.api.pojo.SemanticSchema;
-import com.tencent.supersonic.headless.api.pojo.Term;
 import com.tencent.supersonic.headless.api.pojo.request.QueryMapReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryReq;
 import com.tencent.supersonic.headless.api.pojo.response.DataSetMapInfo;
@@ -20,7 +19,6 @@ import com.tencent.supersonic.headless.server.pojo.MetaFilter;
 import com.tencent.supersonic.headless.server.service.ChatQueryService;
 import com.tencent.supersonic.headless.server.service.DataSetService;
 import com.tencent.supersonic.headless.server.service.MetaDiscoveryService;
-import com.tencent.supersonic.headless.server.service.TermService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,9 +46,6 @@ public class MetaDiscoveryServiceImpl implements MetaDiscoveryService {
     @Autowired
     private SemanticService semanticService;
 
-    @Autowired
-    private TermService termService;
-
     @Override
     public MapInfoResp getMapMeta(QueryMapReq queryMapReq) {
 
@@ -77,7 +72,7 @@ public class MetaDiscoveryServiceImpl implements MetaDiscoveryService {
         Map<Long, DataSetResp> dataSetMap = dataSetList.stream()
                 .collect(Collectors.toMap(DataSetResp::getId, d -> d));
         mapInfoResp.setDataSetMapInfo(getDataSetInfo(mapResp.getMapInfo(), dataSetMap, topN));
-        mapInfoResp.setTerms(getTerms(dataSetList, dataSetMap));
+        mapInfoResp.setTerms(getTerms(mapResp.getMapInfo(), dataSetMap));
         return mapInfoResp;
     }
 
@@ -109,7 +104,10 @@ public class MetaDiscoveryServiceImpl implements MetaDiscoveryService {
                                                                Map<Long, DataSetResp> dataSetMap) {
         Map<Long, List<SchemaElementMatch>> result = new HashMap<>();
         for (Map.Entry<Long, List<SchemaElementMatch>> entry : mapInfo.getDataSetElementMatches().entrySet()) {
-            List<SchemaElementMatch> values = entry.getValue();
+            List<SchemaElementMatch> values = entry.getValue().stream()
+                    .filter(schemaElementMatch ->
+                            !SchemaElementType.TERM.equals(schemaElementMatch.getElement().getType()))
+                    .collect(Collectors.toList());
             if (CollectionUtils.isNotEmpty(values) && dataSetMap.containsKey(entry.getKey())) {
                 result.put(entry.getKey(), values);
             }
@@ -150,17 +148,21 @@ public class MetaDiscoveryServiceImpl implements MetaDiscoveryService {
         return result;
     }
 
-    private Map<String, List<Term>> getTerms(List<DataSetResp> dataSets, Map<Long, DataSetResp> dataSetNameMap) {
-        Set<Long> domainIds = dataSets.stream().map(DataSetResp::getDomainId).collect(Collectors.toSet());
-        Map<Long, Long> dataSetDomainIdMap = dataSets.stream()
-                .collect(Collectors.toMap(DataSetResp::getId, DataSetResp::getDomainId));
-        Map<Long, List<Term>> domainTermSetMap = termService.getTermSets(domainIds);
-        Map<String, List<Term>> dataSetTermSetMap = new HashMap<>();
-        for (DataSetResp dataSet : dataSets) {
-            dataSetTermSetMap.put(dataSetNameMap.get(dataSet.getId()).getName(),
-                    domainTermSetMap.get(dataSetDomainIdMap.get(dataSet.getId())));
+    private Map<String, List<SchemaElementMatch>> getTerms(SchemaMapInfo mapInfo,
+                                                           Map<Long, DataSetResp> dataSetNameMap) {
+        Map<String, List<SchemaElementMatch>> termMap = new HashMap<>();
+        Map<Long, List<SchemaElementMatch>> dataSetElementMatches = mapInfo.getDataSetElementMatches();
+        for (Map.Entry<Long, List<SchemaElementMatch>> entry : dataSetElementMatches.entrySet()) {
+            DataSetResp dataSetResp = dataSetNameMap.get(entry.getKey());
+            if (dataSetResp == null) {
+                continue;
+            }
+            List<SchemaElementMatch> terms = entry.getValue().stream().filter(schemaElementMatch
+                            -> SchemaElementType.TERM.equals(schemaElementMatch.getElement().getType()))
+                    .collect(Collectors.toList());
+            termMap.put(dataSetResp.getName(), terms);
         }
-        return dataSetTermSetMap;
+        return termMap;
     }
 
     /***

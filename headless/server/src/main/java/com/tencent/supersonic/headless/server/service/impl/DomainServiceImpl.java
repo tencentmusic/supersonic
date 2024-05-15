@@ -57,18 +57,20 @@ public class DomainServiceImpl implements DomainService {
     }
 
     @Override
-    public void createDomain(DomainReq domainReq, User user) {
+    public DomainResp createDomain(DomainReq domainReq, User user) {
         DomainDO domainDO = DomainConvert.convert(domainReq, user);
         domainDO.setStatus(StatusEnum.ONLINE.getCode());
         domainRepository.createDomain(domainDO);
+        return DomainConvert.convert(domainDO);
     }
 
     @Override
-    public void updateDomain(DomainUpdateReq domainUpdateReq, User user) {
+    public DomainResp updateDomain(DomainUpdateReq domainUpdateReq, User user) {
         domainUpdateReq.updatedBy(user.getName());
         DomainDO domainDO = getDomainDO(domainUpdateReq.getId());
         BeanMapper.mapper(domainUpdateReq, domainDO);
         domainRepository.updateDomain(domainDO);
+        return DomainConvert.convert(domainDO);
     }
 
     @Override

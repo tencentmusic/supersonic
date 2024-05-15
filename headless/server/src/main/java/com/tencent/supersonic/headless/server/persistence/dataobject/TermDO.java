@@ -4,18 +4,23 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
+
 import java.util.Date;
 
 @Data
-@TableName("s2_term_set")
-public class TermSetDO {
+@TableName("s2_term")
+public class TermDO {
 
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
 
     private Long domainId;
 
-    private String terms;
+    private String name;
+
+    private String description;
+
+    private String alias;
 
     private Date createdAt;
 

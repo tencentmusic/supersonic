@@ -16,9 +16,9 @@ public interface DomainService {
 
     Map<Long, String> getDomainFullPath();
 
-    void createDomain(DomainReq domainReq, User user);
+    DomainResp createDomain(DomainReq domainReq, User user);
 
-    void updateDomain(DomainUpdateReq domainUpdateReq, User user);
+    DomainResp updateDomain(DomainUpdateReq domainUpdateReq, User user);
 
     void deleteDomain(Long id);
 

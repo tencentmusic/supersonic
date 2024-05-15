@@ -10,6 +10,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
 
 public class DomainConvert {
@@ -38,6 +39,10 @@ public class DomainConvert {
         domainResp.setViewOrgs(StringUtils.isBlank(domainDO.getViewOrg())
                 ? Lists.newArrayList() : Arrays.asList(domainDO.getViewOrg().split(",")));
         return domainResp;
+    }
+
+    public static DomainResp convert(DomainDO domainDO) {
+        return convert(domainDO, new HashMap<>());
     }
 
 }
