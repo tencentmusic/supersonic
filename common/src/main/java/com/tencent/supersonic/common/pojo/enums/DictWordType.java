@@ -1,7 +1,7 @@
 package com.tencent.supersonic.common.pojo.enums;
 
-import java.util.Objects;
 import org.apache.commons.lang3.StringUtils;
+import java.util.Objects;
 
 /***
  * nature type
@@ -22,6 +22,8 @@ public enum DictWordType {
     NUMBER("m"),
 
     TAG("tag"),
+
+    TERM("term"),
 
     SUFFIX("suffix");
 

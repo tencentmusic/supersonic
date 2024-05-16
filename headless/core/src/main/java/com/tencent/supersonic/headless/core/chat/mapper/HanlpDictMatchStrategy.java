@@ -46,7 +46,7 @@ public class HanlpDictMatchStrategy extends BaseMatchStrategy<HanlpMapResult> {
             return null;
         }
 
-        log.debug("retryCount:{},terms:{},,detectModelIds:{}", terms, detectDataSetIds);
+        log.debug("terms:{},detectModelIds:{}", terms, detectDataSetIds);
 
         List<HanlpMapResult> detects = detect(queryContext, terms, detectDataSetIds);
         Map<MatchText, List<HanlpMapResult>> result = new HashMap<>();

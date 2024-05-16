@@ -1,6 +1,6 @@
 package com.tencent.supersonic.headless.api.pojo.response;
 
-import com.tencent.supersonic.headless.api.pojo.Term;
+import com.tencent.supersonic.headless.api.pojo.SchemaElementMatch;
 import lombok.Data;
 
 import java.util.HashMap;
@@ -14,6 +14,6 @@ public class MapInfoResp {
 
     private Map<String, DataSetMapInfo> dataSetMapInfo = new HashMap<>();
 
-    private Map<String, List<Term>> terms = new HashMap<>();
+    private Map<String, List<SchemaElementMatch>> terms = new HashMap<>();
 
 }

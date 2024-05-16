@@ -2,6 +2,7 @@ package com.tencent.supersonic.headless.server.service.impl;
 
 import com.tencent.supersonic.common.pojo.enums.DictWordType;
 import com.tencent.supersonic.headless.api.pojo.SchemaElement;
+import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
 import com.tencent.supersonic.headless.api.pojo.SemanticSchema;
 import com.tencent.supersonic.headless.core.chat.knowledge.DictWord;
 import com.tencent.supersonic.headless.core.chat.knowledge.builder.WordBuilderFactory;
@@ -9,6 +10,7 @@ import com.tencent.supersonic.headless.server.service.SchemaService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,7 +36,7 @@ public class WordService {
         addWordsByType(DictWordType.METRIC, semanticSchema.getMetrics(), words);
         addWordsByType(DictWordType.ENTITY, semanticSchema.getEntities(), words);
         addWordsByType(DictWordType.VALUE, semanticSchema.getDimensionValues(), words);
-
+        addWordsByType(DictWordType.TERM, semanticSchema.getTerms(), words);
         return words;
     }
 
@@ -54,6 +56,12 @@ public class WordService {
     }
 
     private List<SchemaElement> distinct(List<SchemaElement> metas) {
+        if (CollectionUtils.isEmpty(metas)) {
+            return metas;
+        }
+        if (SchemaElementType.TERM.equals(metas.get(0).getType())) {
+            return metas;
+        }
         return metas.stream()
                 .collect(Collectors.toMap(SchemaElement::getId, Function.identity(), (e1, e2) -> e1))
                 .values()
