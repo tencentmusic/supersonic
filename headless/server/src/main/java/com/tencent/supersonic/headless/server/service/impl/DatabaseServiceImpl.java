@@ -22,7 +22,6 @@ import com.tencent.supersonic.headless.server.service.DatabaseService;
 import com.tencent.supersonic.headless.server.service.ModelService;
 import com.tencent.supersonic.headless.server.utils.DatabaseConverter;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -36,8 +35,6 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 public class DatabaseServiceImpl implements DatabaseService {
-    @Value("${inMemoryEmbeddingStore.persistent.path:/tmp}")
-    private String embeddingStorePersistentPath;
 
     private final SqlUtils sqlUtils;
     private DatabaseRepository databaseRepository;

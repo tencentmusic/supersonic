@@ -4,6 +4,7 @@ package com.tencent.supersonic.chat.server.agent;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.tencent.supersonic.headless.api.pojo.LLMConfig;
 import com.tencent.supersonic.common.pojo.RecordInfo;
 import lombok.Data;
 import org.springframework.util.CollectionUtils;
@@ -30,6 +31,9 @@ public class Agent extends RecordInfo {
     private Integer status;
     private List<String> examples;
     private String agentConfig;
+    private LLMConfig llmConfig;
+    private MultiTurnConfig multiTurnConfig;
+    private VisualConfig visualConfig;
 
     public List<String> getTools(AgentToolType type) {
         Map map = JSONObject.parseObject(agentConfig, Map.class);

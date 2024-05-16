@@ -1,25 +1,23 @@
 package com.tencent.supersonic.chat.server.service.impl;
 
-import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.chat.server.agent.Agent;
+import com.tencent.supersonic.headless.api.pojo.LLMConfig;
+import com.tencent.supersonic.chat.server.agent.MultiTurnConfig;
+import com.tencent.supersonic.chat.server.agent.VisualConfig;
 import com.tencent.supersonic.chat.server.persistence.dataobject.AgentDO;
-import com.tencent.supersonic.chat.server.persistence.repository.AgentRepository;
+import com.tencent.supersonic.chat.server.persistence.mapper.AgentDOMapper;
 import com.tencent.supersonic.chat.server.service.AgentService;
-import java.util.Date;
-import java.util.List;
-import java.util.stream.Collectors;
+import com.tencent.supersonic.common.util.JsonUtil;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
-public class AgentServiceImpl implements AgentService {
-
-    private AgentRepository agentRepository;
-
-    public AgentServiceImpl(AgentRepository agentRepository) {
-        this.agentRepository = agentRepository;
-    }
+public class AgentServiceImpl extends ServiceImpl<AgentDOMapper, AgentDO>
+        implements AgentService {
 
     @Override
     public List<Agent> getAgents() {
@@ -29,12 +27,14 @@ public class AgentServiceImpl implements AgentService {
 
     @Override
     public void createAgent(Agent agent, User user) {
-        agentRepository.createAgent(convert(agent, user));
+        agent.createdBy(user.getName());
+        save(convert(agent));
     }
 
     @Override
     public void updateAgent(Agent agent, User user) {
-        agentRepository.updateAgent(convert(agent, user));
+        agent.updatedBy(user.getName());
+        updateById(convert(agent));
     }
 
     @Override
@@ -42,16 +42,16 @@ public class AgentServiceImpl implements AgentService {
         if (id == null) {
             return null;
         }
-        return convert(agentRepository.getAgent(id));
+        return convert(getById(id));
     }
 
     @Override
     public void deleteAgent(Integer id) {
-        agentRepository.deleteAgent(id);
+        removeById(id);
     }
 
     private List<AgentDO> getAgentDOList() {
-        return agentRepository.getAgents();
+        return list();
     }
 
     private Agent convert(AgentDO agentDO) {
@@ -61,19 +61,21 @@ public class AgentServiceImpl implements AgentService {
         Agent agent = new Agent();
         BeanUtils.copyProperties(agentDO, agent);
         agent.setAgentConfig(agentDO.getConfig());
-        agent.setExamples(JSONObject.parseArray(agentDO.getExamples(), String.class));
+        agent.setExamples(JsonUtil.toList(agentDO.getExamples(), String.class));
+        agent.setLlmConfig(JsonUtil.toObject(agentDO.getLlmConfig(), LLMConfig.class));
+        agent.setMultiTurnConfig(JsonUtil.toObject(agentDO.getMultiTurnConfig(), MultiTurnConfig.class));
+        agent.setVisualConfig(JsonUtil.toObject(agentDO.getVisualConfig(), VisualConfig.class));
         return agent;
     }
 
-    private AgentDO convert(Agent agent, User user) {
+    private AgentDO convert(Agent agent) {
         AgentDO agentDO = new AgentDO();
         BeanUtils.copyProperties(agent, agentDO);
         agentDO.setConfig(agent.getAgentConfig());
-        agentDO.setExamples(JSONObject.toJSONString(agent.getExamples()));
-        agentDO.setCreatedAt(new Date());
-        agentDO.setCreatedBy(user.getName());
-        agentDO.setUpdatedAt(new Date());
-        agentDO.setUpdatedBy(user.getName());
+        agentDO.setExamples(JsonUtil.toString(agent.getExamples()));
+        agentDO.setLlmConfig(JsonUtil.toString(agent.getLlmConfig()));
+        agentDO.setMultiTurnConfig(JsonUtil.toString(agent.getMultiTurnConfig()));
+        agentDO.setVisualConfig(JsonUtil.toString(agent.getVisualConfig()));
         if (agentDO.getStatus() == null) {
             agentDO.setStatus(1);
         }

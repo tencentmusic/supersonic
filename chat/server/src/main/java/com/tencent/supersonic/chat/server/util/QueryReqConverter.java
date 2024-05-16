@@ -30,6 +30,7 @@ public class QueryReqConverter {
                 && MapUtils.isNotEmpty(queryReq.getMapInfo().getDataSetElementMatches())) {
             queryReq.setMapInfo(queryReq.getMapInfo());
         }
+        queryReq.setLlmConfig(agent.getLlmConfig());
         return queryReq;
     }
 

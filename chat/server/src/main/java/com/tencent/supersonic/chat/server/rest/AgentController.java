@@ -5,6 +5,7 @@ import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
 import com.tencent.supersonic.chat.server.agent.Agent;
 import com.tencent.supersonic.chat.server.agent.AgentToolType;
 import com.tencent.supersonic.chat.server.service.AgentService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -21,11 +22,8 @@ import java.util.Map;
 @RequestMapping({"/api/chat/agent", "/openapi/chat/agent"})
 public class AgentController {
 
+    @Autowired
     private AgentService agentService;
-
-    public AgentController(AgentService agentService) {
-        this.agentService = agentService;
-    }
 
     @PostMapping
     public boolean createAgent(@RequestBody Agent agent,

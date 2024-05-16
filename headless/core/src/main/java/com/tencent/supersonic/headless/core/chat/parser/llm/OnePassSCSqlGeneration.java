@@ -1,7 +1,6 @@
 package com.tencent.supersonic.headless.core.chat.parser.llm;
 
 import com.tencent.supersonic.common.util.JsonUtil;
-import com.tencent.supersonic.headless.core.config.OptimizationConfig;
 import com.tencent.supersonic.headless.core.chat.query.llm.s2sql.LLMReq;
 import com.tencent.supersonic.headless.core.chat.query.llm.s2sql.LLMReq.SqlGenerationMode;
 import com.tencent.supersonic.headless.core.chat.query.llm.s2sql.LLMResp;
@@ -12,10 +11,6 @@ import dev.langchain4j.model.input.PromptTemplate;
 import dev.langchain4j.model.output.Response;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -26,20 +21,7 @@ import java.util.stream.Collectors;
 
 @Service
 @Slf4j
-public class OnePassSCSqlGeneration implements SqlGeneration, InitializingBean {
-
-    private static final Logger keyPipelineLog = LoggerFactory.getLogger("keyPipeline");
-    @Autowired
-    private ChatLanguageModel chatLanguageModel;
-
-    @Autowired
-    private SqlExamplarLoader sqlExamplarLoader;
-
-    @Autowired
-    private OptimizationConfig optimizationConfig;
-
-    @Autowired
-    private SqlPromptGenerator sqlPromptGenerator;
+public class OnePassSCSqlGeneration extends BaseSqlGeneration {
 
     @Override
     public LLMResp generation(LLMReq llmReq, Long dataSetId) {
@@ -59,7 +41,8 @@ public class OnePassSCSqlGeneration implements SqlGeneration, InitializingBean {
                     Prompt prompt = PromptTemplate.from(JsonUtil.toString(linkingSqlPrompt))
                             .apply(new HashMap<>());
                     keyPipelineLog.info("request prompt:{}", prompt.toSystemMessage());
-                    Response<AiMessage> response = chatLanguageModel.generate(prompt.toSystemMessage());
+            ChatLanguageModel chatLanguageModel = getChatLanguageModel(llmReq.getLlmConfig());
+            Response<AiMessage> response = chatLanguageModel.generate(prompt.toSystemMessage());
                     String result = response.content().text();
                     llmResults.add(result);
                     keyPipelineLog.info("model response:{}", result);

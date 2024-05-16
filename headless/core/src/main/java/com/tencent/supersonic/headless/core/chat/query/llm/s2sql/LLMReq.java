@@ -1,6 +1,7 @@
 package com.tencent.supersonic.headless.core.chat.query.llm.s2sql;
 
 import com.fasterxml.jackson.annotation.JsonValue;
+import com.tencent.supersonic.headless.api.pojo.LLMConfig;
 import lombok.Data;
 
 import java.util.List;
@@ -21,6 +22,8 @@ public class LLMReq {
     private String priorExts;
 
     private String sqlGenerationMode;
+
+    private LLMConfig llmConfig;
 
     @Data
     public static class ElementValue {

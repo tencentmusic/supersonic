@@ -96,6 +96,7 @@ public class LLMRequestService {
         }
         llmReq.setCurrentDate(currentDate);
         llmReq.setSqlGenerationMode(optimizationConfig.getSqlGenerationMode().getName());
+        llmReq.setLlmConfig(queryCtx.getLlmConfig());
         return llmReq;
     }
 

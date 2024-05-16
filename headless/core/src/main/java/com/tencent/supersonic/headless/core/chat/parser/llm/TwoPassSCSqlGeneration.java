@@ -1,7 +1,6 @@
 package com.tencent.supersonic.headless.core.chat.parser.llm;
 
 import com.tencent.supersonic.common.util.JsonUtil;
-import com.tencent.supersonic.headless.core.config.OptimizationConfig;
 import com.tencent.supersonic.headless.core.chat.query.llm.s2sql.LLMReq;
 import com.tencent.supersonic.headless.core.chat.query.llm.s2sql.LLMReq.SqlGenerationMode;
 import com.tencent.supersonic.headless.core.chat.query.llm.s2sql.LLMResp;
@@ -11,10 +10,6 @@ import dev.langchain4j.model.input.Prompt;
 import dev.langchain4j.model.input.PromptTemplate;
 import dev.langchain4j.model.output.Response;
 import org.apache.commons.lang3.tuple.Pair;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -23,20 +18,7 @@ import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 @Service
-public class TwoPassSCSqlGeneration implements SqlGeneration, InitializingBean {
-
-    private static final Logger keyPipelineLog = LoggerFactory.getLogger("keyPipeline");
-    @Autowired
-    private ChatLanguageModel chatLanguageModel;
-
-    @Autowired
-    private SqlExamplarLoader sqlExamplarLoader;
-
-    @Autowired
-    private OptimizationConfig optimizationConfig;
-
-    @Autowired
-    private SqlPromptGenerator sqlPromptGenerator;
+public class TwoPassSCSqlGeneration extends BaseSqlGeneration {
 
     @Override
     public LLMResp generation(LLMReq llmReq, Long dataSetId) {
@@ -51,6 +33,7 @@ public class TwoPassSCSqlGeneration implements SqlGeneration, InitializingBean {
         //2.generator linking prompt,and parallel generate response.
         List<String> linkingPromptPool = sqlPromptGenerator.generatePromptPool(llmReq, exampleListPool, false);
         List<String> linkingResults = new CopyOnWriteArrayList<>();
+        ChatLanguageModel chatLanguageModel = getChatLanguageModel(llmReq.getLlmConfig());
         linkingPromptPool.parallelStream().forEach(
                 linkingPrompt -> {
                     Prompt prompt = PromptTemplate.from(JsonUtil.toString(linkingPrompt)).apply(new HashMap<>());

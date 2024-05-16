@@ -1,5 +1,6 @@
 package dev.langchain4j;
 
+import com.tencent.supersonic.common.pojo.enums.S2ModelProvider;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
 
 class S2EmbeddingModel {

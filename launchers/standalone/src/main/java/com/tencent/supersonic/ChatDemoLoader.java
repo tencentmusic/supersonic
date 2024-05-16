@@ -9,6 +9,7 @@ import com.tencent.supersonic.chat.server.agent.Agent;
 import com.tencent.supersonic.chat.server.agent.AgentConfig;
 import com.tencent.supersonic.chat.server.agent.AgentToolType;
 import com.tencent.supersonic.chat.server.agent.LLMParserTool;
+import com.tencent.supersonic.chat.server.agent.MultiTurnConfig;
 import com.tencent.supersonic.chat.server.agent.RuleParserTool;
 import com.tencent.supersonic.chat.server.plugin.Plugin;
 import com.tencent.supersonic.chat.server.plugin.PluginParseConfig;
@@ -21,6 +22,8 @@ import com.tencent.supersonic.chat.server.service.PluginService;
 import com.tencent.supersonic.common.pojo.SysParameter;
 import com.tencent.supersonic.common.service.SysParameterService;
 import com.tencent.supersonic.common.util.JsonUtil;
+import com.tencent.supersonic.headless.api.pojo.LLMConfig;
+import com.tencent.supersonic.common.pojo.enums.S2ModelProvider;
 import com.tencent.supersonic.headless.api.pojo.response.ParseResp;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -174,6 +177,11 @@ public class ChatDemoLoader implements CommandLineRunner {
             agentConfig.getTools().add(llmParserTool);
         }
         agent.setAgentConfig(JSONObject.toJSONString(agentConfig));
+        LLMConfig llmConfig = new LLMConfig(S2ModelProvider.OPEN_AI.name(),
+                "", "your_key", "gpt-3.5-turbo");
+        MultiTurnConfig multiTurnConfig = new MultiTurnConfig(false);
+        agent.setLlmConfig(llmConfig);
+        agent.setMultiTurnConfig(multiTurnConfig);
         agentService.createAgent(agent, User.getFakeUser());
     }
 
