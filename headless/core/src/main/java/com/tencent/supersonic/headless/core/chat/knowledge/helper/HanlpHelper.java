@@ -214,17 +214,17 @@ public class HanlpHelper {
         }
     }
 
-    public static List<S2Term> getTerms(String text, Map<Long, List<Long>> modelIdToViewIds) {
+    public static List<S2Term> getTerms(String text, Map<Long, List<Long>> modelIdToDataSetIds) {
         return getSegment().seg(text.toLowerCase()).stream()
                 .filter(term -> term.getNature().startsWith(DictWordType.NATURE_SPILT))
-                .map(term -> transform2ApiTerm(term, modelIdToViewIds))
+                .map(term -> transform2ApiTerm(term, modelIdToDataSetIds))
                 .flatMap(Collection::stream)
                 .collect(Collectors.toList());
     }
 
-    public static List<S2Term> transform2ApiTerm(Term term, Map<Long, List<Long>> modelIdToViewIds) {
+    public static List<S2Term> transform2ApiTerm(Term term, Map<Long, List<Long>> modelIdToDataSetIds) {
         List<S2Term> s2Terms = Lists.newArrayList();
-        List<String> natures = NatureHelper.changeModel2DataSet(String.valueOf(term.getNature()), modelIdToViewIds);
+        List<String> natures = NatureHelper.changeModel2DataSet(String.valueOf(term.getNature()), modelIdToDataSetIds);
         for (String nature : natures) {
             S2Term s2Term = new S2Term();
             BeanUtils.copyProperties(term, s2Term);

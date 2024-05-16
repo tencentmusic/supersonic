@@ -8,5 +8,6 @@ public enum SchemaElementType {
     ENTITY,
     ID,
     DATE,
-    TAG
+    TAG,
+    TERM
 }

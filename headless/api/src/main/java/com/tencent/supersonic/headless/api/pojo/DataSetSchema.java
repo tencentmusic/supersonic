@@ -1,9 +1,9 @@
 package com.tencent.supersonic.headless.api.pojo;
 
+import lombok.Data;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
-import lombok.Data;
 
 @Data
 public class DataSetSchema {
@@ -12,6 +12,7 @@ public class DataSetSchema {
     private Set<SchemaElement> dimensions = new HashSet<>();
     private Set<SchemaElement> tags = new HashSet<>();
     private Set<SchemaElement> dimensionValues = new HashSet<>();
+    private Set<SchemaElement> terms = new HashSet<>();
     private SchemaElement entity = new SchemaElement();
     private QueryConfig queryConfig;
 
@@ -36,6 +37,9 @@ public class DataSetSchema {
                 break;
             case TAG:
                 element = tags.stream().filter(e -> e.getId() == elementID).findFirst();
+                break;
+            case TERM:
+                element = terms.stream().filter(e -> e.getId() == elementID).findFirst();
                 break;
             default:
         }

@@ -16,6 +16,7 @@ public class DataSetSchemaResp extends DataSetResp {
     private List<MetricSchemaResp> metrics = Lists.newArrayList();
     private List<DimSchemaResp> dimensions = Lists.newArrayList();
     private List<ModelResp> modelResps = Lists.newArrayList();
+    private List<TermResp> termResps = Lists.newArrayList();
 
     public DimSchemaResp getPrimaryKey() {
         for (ModelResp modelResp : modelResps) {

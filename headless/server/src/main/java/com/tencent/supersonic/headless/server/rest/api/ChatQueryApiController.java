@@ -3,6 +3,7 @@ package com.tencent.supersonic.headless.server.rest.api;
 import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
 import com.tencent.supersonic.headless.api.pojo.request.ExecuteQueryReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryReq;
+import com.tencent.supersonic.headless.api.pojo.response.MapResp;
 import com.tencent.supersonic.headless.server.service.ChatQueryService;
 import com.tencent.supersonic.headless.server.service.SearchService;
 import lombok.extern.slf4j.Slf4j;
@@ -30,6 +31,14 @@ public class ChatQueryApiController {
                         HttpServletResponse response) throws Exception {
         queryReq.setUser(UserHolder.findUser(request, response));
         return searchService.search(queryReq);
+    }
+
+    @PostMapping("/chat/map")
+    public MapResp map(@RequestBody QueryReq queryReq,
+                                  HttpServletRequest request,
+                                  HttpServletResponse response) {
+        queryReq.setUser(UserHolder.findUser(request, response));
+        return chatQueryService.performMapping(queryReq);
     }
 
     @PostMapping("/chat/parse")

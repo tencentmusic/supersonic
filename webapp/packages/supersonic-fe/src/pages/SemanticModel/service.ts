@@ -429,6 +429,15 @@ export function getMetricsToCreateNewMetric(data: any): Promise<any> {
   );
 }
 
+export function getAllModelByDomainId(domainId: number): Promise<any> {
+  return request(`${process.env.API_BASE_URL}model/getAllModelByDomainId`, {
+    method: 'GET',
+    params: {
+      domainId,
+    },
+  });
+}
+
 export function createDictTask(data: any): Promise<any> {
   return request(`${process.env.API_BASE_URL}knowledge/task`, {
     method: 'POST',
@@ -701,5 +710,34 @@ export function getTagObjectList(data: any): Promise<any> {
   return request(`${process.env.API_BASE_URL}tagObject/query`, {
     method: 'POST',
     data: { pageSize: 9999, status: 1, ...data },
+  });
+}
+
+export function getMetricClassifications(): Promise<any> {
+  return request(`${process.env.API_BASE_URL}metric/getMetricClassifications`, {
+    method: 'GET',
+  });
+}
+
+export function batchUpdateClassifications(data: any): Promise<any> {
+  return request(`${process.env.API_BASE_URL}metric/batchUpdateClassifications`, {
+    method: 'POST',
+    data: { ...data },
+  });
+}
+
+export function getTermList(domainId: number): Promise<any> {
+  return request(`${process.env.API_BASE_URL}term`, {
+    method: 'GET',
+    params: {
+      domainId,
+    },
+  });
+}
+
+export function saveOrUpdate(data: any): Promise<any> {
+  return request(`${process.env.API_BASE_URL}term/saveOrUpdate`, {
+    method: 'POST',
+    data: { ...data },
   });
 }

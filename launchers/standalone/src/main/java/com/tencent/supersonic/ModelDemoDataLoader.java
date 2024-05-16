@@ -49,6 +49,7 @@ import com.tencent.supersonic.headless.api.pojo.request.MetricReq;
 import com.tencent.supersonic.headless.api.pojo.request.ModelReq;
 import com.tencent.supersonic.headless.api.pojo.request.TagObjectReq;
 import com.tencent.supersonic.headless.api.pojo.request.TagReq;
+import com.tencent.supersonic.headless.api.pojo.request.TermReq;
 import com.tencent.supersonic.headless.server.service.DataSetService;
 import com.tencent.supersonic.headless.server.service.DatabaseService;
 import com.tencent.supersonic.headless.server.service.DimensionService;
@@ -58,6 +59,7 @@ import com.tencent.supersonic.headless.server.service.ModelRelaService;
 import com.tencent.supersonic.headless.server.service.ModelService;
 import com.tencent.supersonic.headless.server.service.TagMetaService;
 import com.tencent.supersonic.headless.server.service.TagObjectService;
+import com.tencent.supersonic.headless.server.service.TermService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -94,9 +96,10 @@ public class ModelDemoDataLoader {
     private DataSourceProperties dataSourceProperties;
     @Autowired
     private TagObjectService tagObjectService;
-
     @Autowired
     private TagMetaService tagMetaService;
+    @Autowired
+    private TermService termService;
 
     public void doRun() {
         try {
@@ -121,6 +124,8 @@ public class ModelDemoDataLoader {
             addDataSet_2();
             addAuthGroup_1();
             addAuthGroup_2();
+            addTerm();
+            addTerm_1();
         } catch (Exception e) {
             log.error("Failed to add model demo data", e);
         }
@@ -554,6 +559,24 @@ public class ModelDemoDataLoader {
         queryConfig.setMetricTypeDefaultConfig(metricTypeDefaultConfig);
         dataSetReq.setQueryConfig(queryConfig);
         dataSetService.save(dataSetReq, User.getFakeUser());
+    }
+
+    public void addTerm() {
+        TermReq termReq = new TermReq();
+        termReq.setName("近期");
+        termReq.setDescription("指近10天");
+        termReq.setAlias(Lists.newArrayList("近一段时间"));
+        termReq.setDomainId(1L);
+        termService.saveOrUpdate(termReq, User.getFakeUser());
+    }
+
+    public void addTerm_1() {
+        TermReq termReq = new TermReq();
+        termReq.setName("核心用户");
+        termReq.setDescription("核心用户指tom和lucy");
+        termReq.setAlias(Lists.newArrayList("VIP用户"));
+        termReq.setDomainId(1L);
+        termService.saveOrUpdate(termReq, User.getFakeUser());
     }
 
     public void addAuthGroup_1() {

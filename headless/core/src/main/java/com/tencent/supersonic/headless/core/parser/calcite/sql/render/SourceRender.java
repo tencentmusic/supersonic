@@ -110,7 +110,7 @@ public class SourceRender extends Renderer {
                 if (!dim.getName().equalsIgnoreCase(dimension)) {
                     continue;
                 }
-                dataSet.getMeasure().add(DimensionNode.build(dim, scope, engineType));
+                dataSet.getMeasure().add(DimensionNode.buildArray(dim, scope, engineType));
                 addExtendFields(dim, extendFields);
                 if (nonAgg) {
                     output.getMeasure().add(DimensionNode.buildName(dim, scope, engineType));

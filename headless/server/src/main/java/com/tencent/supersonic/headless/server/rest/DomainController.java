@@ -32,21 +32,19 @@ public class DomainController {
     }
 
     @PostMapping("/createDomain")
-    public Boolean createDomain(@RequestBody DomainReq domainReq,
+    public DomainResp createDomain(@RequestBody DomainReq domainReq,
                                 HttpServletRequest request,
                                 HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
-        domainService.createDomain(domainReq, user);
-        return true;
+        return domainService.createDomain(domainReq, user);
     }
 
     @PostMapping("/updateDomain")
-    public Boolean updateDomain(@RequestBody DomainUpdateReq domainUpdateReq,
+    public DomainResp updateDomain(@RequestBody DomainUpdateReq domainUpdateReq,
                                 HttpServletRequest request,
                                 HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
-        domainService.updateDomain(domainUpdateReq, user);
-        return true;
+        return domainService.updateDomain(domainUpdateReq, user);
     }
 
     @DeleteMapping("/deleteDomain/{domainId}")

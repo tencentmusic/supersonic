@@ -6,6 +6,7 @@ import com.tencent.supersonic.headless.api.pojo.request.QueryMapReq;
 import com.tencent.supersonic.headless.api.pojo.response.MapInfoResp;
 import com.tencent.supersonic.headless.server.service.MetaDiscoveryService;
 import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -25,9 +26,9 @@ public class MetaDiscoveryTest extends BaseTest {
         queryMapReq.setDataSetNames(Collections.singletonList("超音数"));
         MapInfoResp mapMeta = metaDiscoveryService.getMapMeta(queryMapReq);
 
-        Assert.assertNotNull(mapMeta);
-        Assert.assertNotEquals(0, mapMeta.getMapFields());
-        Assert.assertNotEquals(0, mapMeta.getTopFields());
+        Assertions.assertNotNull(mapMeta);
+        Assertions.assertNotEquals(0, mapMeta.getDataSetMapInfo().get("超音数").getMapFields());
+        Assertions.assertNotEquals(0, mapMeta.getDataSetMapInfo().get("超音数").getTopFields());
     }
 
     @Test
