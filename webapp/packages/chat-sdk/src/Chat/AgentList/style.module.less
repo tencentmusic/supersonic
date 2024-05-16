@@ -1,4 +1,5 @@
 .agentList {
+  position: relative;
   width: 248px;
   height: 100%;
   background: #f9f9f9;
@@ -33,6 +34,8 @@
     flex-direction: column;
     padding: 4px 8px;
     row-gap: 2px;
+    height: calc(100% - 50px);
+    overflow-y: auto;
 
     .agentItem {
       display: flex;
