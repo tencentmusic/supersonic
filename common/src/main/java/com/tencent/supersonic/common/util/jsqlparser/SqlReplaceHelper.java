@@ -206,6 +206,12 @@ public class SqlReplaceHelper {
             replaceAsName(fieldNameMap, selectItem);
         }
 
+        if (plainSelect.getFromItem() instanceof ParenthesedSelect) {
+            ParenthesedSelect parenthesedSelect = (ParenthesedSelect) plainSelect.getFromItem();
+            PlainSelect subPlainSelect = parenthesedSelect.getPlainSelect();
+            replaceFieldsInPlainOneSelect(fieldNameMap, exactReplace, subPlainSelect);
+        }
+
         //3. replace oder by fields
         List<OrderByElement> orderByElements = plainSelect.getOrderByElements();
         if (!CollectionUtils.isEmpty(orderByElements)) {

@@ -258,7 +258,7 @@ def build_dataSet(domain_id,model_id1,model_id2,model_id3,model_id4):
                    {"id":model_id3,"includesAll":False,"metrics":metric_list3,"dimensions":dimension_list3},
                    {"id":model_id4,"includesAll":False,"metrics":metric_list4,"dimensions":dimension_list4}
                ]},
-               "queryConfig":{"tagTypeDefaultConfig":{},"metricTypeDefaultConfig":{"timeDefaultConfig":{"unit":1,"period":"DAY","timeMode":"RECENT"}}},"admins":["admin"],"admin":"admin"}
+               "queryConfig":{"tagTypeDefaultConfig":{},"metricTypeDefaultConfig":{"timeDefaultConfig":{"unit":0,"period":"DAY","timeMode":"RECENT"}}},"admins":["admin"],"admin":"admin"}
     url=get_url_pre()+"/api/semantic/dataSet"
     authorization=get_authorization()
     header = {}

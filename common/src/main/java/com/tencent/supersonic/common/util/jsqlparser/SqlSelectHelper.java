@@ -122,17 +122,26 @@ public class SqlSelectHelper {
         List<PlainSelect> plainSelectList = new ArrayList<>();
         if (selectStatement instanceof PlainSelect) {
             PlainSelect plainSelect = (PlainSelect) selectStatement;
-            plainSelectList.add(plainSelect);
+            getSubPlainSelect(plainSelect, plainSelectList);
         } else if (selectStatement instanceof SetOperationList) {
             SetOperationList setOperationList = (SetOperationList) selectStatement;
             if (!CollectionUtils.isEmpty(setOperationList.getSelects())) {
                 setOperationList.getSelects().forEach(subSelectBody -> {
                     PlainSelect subPlainSelect = (PlainSelect) subSelectBody;
-                    plainSelectList.add(subPlainSelect);
+                    getSubPlainSelect(subPlainSelect, plainSelectList);
                 });
             }
         }
         return plainSelectList;
+    }
+
+    public static void getSubPlainSelect(PlainSelect plainSelect, List<PlainSelect> plainSelectList) {
+        plainSelectList.add(plainSelect);
+        if (plainSelect.getFromItem() instanceof ParenthesedSelect) {
+            ParenthesedSelect parenthesedSelect = (ParenthesedSelect) plainSelect.getFromItem();
+            PlainSelect subPlainSelect = parenthesedSelect.getPlainSelect();
+            getSubPlainSelect(subPlainSelect, plainSelectList);
+        }
     }
 
     public static Select getSelect(String sql) {
@@ -274,6 +283,14 @@ public class SqlSelectHelper {
             Expression where = plainSelect.getWhere();
             if (Objects.nonNull(where)) {
                 where.accept(new FieldAndValueAcquireVisitor(result));
+            }
+            if (plainSelect.getFromItem() instanceof ParenthesedSelect) {
+                ParenthesedSelect parenthesedSelect = (ParenthesedSelect) plainSelect.getFromItem();
+                PlainSelect subPlainSelect = parenthesedSelect.getPlainSelect();
+                Expression subWhere = subPlainSelect.getWhere();
+                if (Objects.nonNull(subWhere)) {
+                    subWhere.accept(new FieldAndValueAcquireVisitor(result));
+                }
             }
         }
         return new ArrayList<>(result);
