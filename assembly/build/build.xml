@@ -26,6 +26,12 @@
             <fileMode>0777</fileMode>
             <directoryMode>0755</directoryMode>
         </fileSet>
+        <fileSet>
+            <directory>${project.basedir}/../../assembly/bin</directory>
+            <outputDirectory>bin</outputDirectory>
+            <fileMode>0777</fileMode>
+            <directoryMode>0755</directoryMode>
+        </fileSet>
     </fileSets>
 
     <dependencySets>

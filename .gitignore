@@ -8,6 +8,7 @@ log/
 *.bin
 *.log
 *.tar.gz
+*.zip
 *.lib
 assembly/runtime/*
 **/dist/
