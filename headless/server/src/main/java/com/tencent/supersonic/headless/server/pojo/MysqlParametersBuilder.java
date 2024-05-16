@@ -2,10 +2,11 @@ package com.tencent.supersonic.headless.server.pojo;
 
 
 import com.google.common.collect.Lists;
-import java.util.ArrayList;
-import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @Slf4j
@@ -15,16 +16,10 @@ public class MysqlParametersBuilder implements DbParametersBuilder {
     public List<DatabaseParameter> build() {
         List<DatabaseParameter> databaseParameters = new ArrayList<>();
         DatabaseParameter host = new DatabaseParameter();
-        host.setComment("host");
-        host.setName("host");
-        host.setPlaceholder("请输入host");
+        host.setComment("链接");
+        host.setName("url");
+        host.setPlaceholder("请输入链接");
         databaseParameters.add(host);
-
-        DatabaseParameter port = new DatabaseParameter();
-        port.setComment("port");
-        port.setName("port");
-        port.setPlaceholder("请输入端口号");
-        databaseParameters.add(port);
 
         DatabaseParameter version = new DatabaseParameter();
         version.setComment("数据库版本");
@@ -46,13 +41,6 @@ public class MysqlParametersBuilder implements DbParametersBuilder {
         password.setName("password");
         password.setPlaceholder("请输入密码");
         databaseParameters.add(password);
-
-        DatabaseParameter database = new DatabaseParameter();
-        database.setComment("数据库名称");
-        database.setName("database");
-        database.setPlaceholder("请输入数据库名称");
-        database.setRequire(false);
-        databaseParameters.add(database);
         return databaseParameters;
     }
 }
