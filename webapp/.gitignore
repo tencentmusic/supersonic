@@ -15,8 +15,8 @@
 
 /supersonic-webapp
 
+../assembly/build/supersonic-webapp.tar.gz
 supersonic-webapp.tar.gz
-
 package-lock.json
 yarn.lock
 

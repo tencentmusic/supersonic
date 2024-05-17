@@ -1,72 +1,98 @@
 @echo off
-setlocal
+setlocal enabledelayedexpansion
 chcp 65001
-set "sbinDir=%~dp0"
-set "baseDir=%~dp0.."
-set "buildDir=%baseDir%\build"
-set "runtimeDir=%baseDir%\..\runtime"
-set "pip_path=pip3"
+
+call supersonic-common.bat %*
+
 set "service=%~1"
 
-
-rem 1. build backend java modules
-del /q "%buildDir%\*.tar.gz" 2>NUL
-call mvn -f "%baseDir%\..\pom.xml" clean package -DskipTests
-
-IF ERRORLEVEL 1 (
-    ECHO Failed to build backend Java modules.
-    EXIT /B 1
+cd %projectDir%
+if "%service%"=="" (
+    set service=%standalone_service%
 )
 
-rem 2. move package to build
-echo f|xcopy "%baseDir%\..\launchers\standalone\target\*.tar.gz" "%buildDir%\supersonic-standalone.tar.gz"
+call mvn help:evaluate -Dexpression=project.version > temp.txt
+for /f "delims=" %%i in (temp.txt) do (
+    set line=%%i
+    if not "!line:~0,1!"=="[" (
+        set MVN_VERSION=!line!
+    )
+)
+del temp.txt
+cd %baseDir%
 
-rem 3. build frontend webapp
-cd "%baseDir%\..\webapp"
-call start-fe-prod.bat
-copy /y "%baseDir%\..\webapp\supersonic-webapp.tar.gz" "%buildDir%\"
 
-IF ERRORLEVEL 1 (
-    ECHO Failed to build frontend webapp.
-    EXIT /B 1
+if "%service%"=="%pyllm_service%" (
+   echo start installing python modules required by supersonic-pyllm: %pip_path%
+   %pip_path% install -r %projectDir%\headless\python\requirements.txt"
+   echo install python modules success
+   goto :EOF
+) else if "%service%"=="webapp" (
+   call :buildWebapp
+   tar xvf supersonic-webapp.tar.gz
+   move /y supersonic-webapp webapp
+   move /y webapp %projectDir%\launchers\%STANDALONE_SERVICE%\target\classes
+   goto :EOF
+) else (
+   call :buildJavaService
+   call :buildWebapp
+   call :packageRelease
+   goto :EOF
 )
 
-rem 4. copy webapp to java classpath
-cd "%buildDir%"
-tar -zxvf supersonic-webapp.tar.gz
-move supersonic-webapp webapp
-move webapp ..\..\launchers\standalone\target\classes
 
-rem 5. build backend python modules
-if "%service%"=="pyllm" (
-    echo "start installing python modules with pip: ${pip_path}"
-    set requirementPath="%baseDir%/../headless/python/requirements.txt"
-    %pip_path% install -r %requirementPath%
-    echo "install python modules success"
-)
+:buildJavaService
+   set "model_name=%service%"
+   echo "starting building supersonic-%model_name% service"
+   call mvn -f %projectDir%\launchers\%model_name% clean package -DskipTests
+   IF ERRORLEVEL 1 (
+      ECHO Failed to build backend Java modules.
+      EXIT /B 1
+   )
+   copy /y %projectDir%\launchers\%model_name%\target\*.tar.gz %buildDir%\
+   echo "finished building supersonic-%model_name% service"
+   goto :EOF
 
-call :BUILD_RUNTIME
 
-:BUILD_RUNTIME
-  rem 6. reset runtime
-  IF EXIST "%runtimeDir%" (
-      echo begin to delete dir : %runtimeDir%
-      rd /s /q "%runtimeDir%"
-  ) ELSE (
-      echo %runtimeDir% does not exist, create directly
-  )
-  mkdir "%runtimeDir%"
-  tar -zxvf "%buildDir%\supersonic-standalone.tar.gz" -C "%runtimeDir%"
-  for /d %%f in ("%runtimeDir%\launchers-standalone-*") do (
-      move "%%f" "%runtimeDir%\supersonic-standalone"
-  )
+:buildWebapp
+   echo "starting building supersonic webapp"
+   cd %projectDir%\webapp
+   call start-fe-prod.bat
+   copy /y supersonic-webapp.tar.gz %buildDir%\
+   rem check build result
+   IF ERRORLEVEL 1 (
+        ECHO Failed to build frontend webapp.
+        EXIT /B 1
+   )
+   echo "finished building supersonic webapp"
+   goto :EOF
 
-  rem 7. copy webapp to runtime
-  tar -zxvf "%buildDir%\supersonic-webapp.tar.gz" -C "%buildDir%"
-  if not exist "%runtimeDir%\supersonic-standalone\webapp" mkdir "%runtimeDir%\supersonic-standalone\webapp"
-  xcopy /s /e /h /y "%buildDir%\supersonic-webapp\*" "%runtimeDir%\supersonic-standalone\webapp"
-  if not exist "%runtimeDir%\supersonic-standalone\conf\webapp" mkdir "%runtimeDir%\supersonic-standalone\conf\webapp"
-  xcopy /s /e /h /y "%runtimeDir%\supersonic-standalone\webapp\*" "%runtimeDir%\supersonic-standalone\conf\webapp"
-  rd /s /q "%buildDir%\supersonic-webapp"
+
+:packageRelease
+   set "model_name=%service%"
+   set "release_dir=supersonic-%model_name%-%MVN_VERSION%"
+   set "service_name=launchers-%model_name%-%MVN_VERSION%"
+   echo "starting packaging supersonic release"
+   cd %buildDir%
+   if exist %release_dir% rmdir /s /q %release_dir%
+   if exist %release_dir%.zip del %release_dir%.zip
+   mkdir %release_dir%
+   rem package webapp
+   tar xvf supersonic-webapp.tar.gz
+   move /y supersonic-webapp webapp
+   echo {"env": ""} > webapp\supersonic.config.json
+   move /y webapp %release_dir%
+   rem package java service
+   tar xvf %service_name%-bin.tar.gz
+   for /d %%D in ("%service_name%\*") do (
+       move "%%D" "%release_dir%"
+   )
+   rem generate zip file
+   powershell Compress-Archive -Path %release_dir% -DestinationPath %release_dir%.zip
+   del %service_name%-bin.tar.gz
+   del supersonic-webapp.tar.gz
+   rmdir /s /q %service_name%
+   echo "finished packaging supersonic release"
+   goto :EOF
 
 endlocal
