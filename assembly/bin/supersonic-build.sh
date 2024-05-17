@@ -48,7 +48,7 @@ function packageRelease {
   # package webapp
   tar xvf supersonic-webapp.tar.gz
   mv supersonic-webapp webapp
-  json='{"env": "'$model_name'"}'
+  json='{"env": "''"}'
   echo $json > webapp/supersonic.config.json
   mv webapp $release_dir/
   # package java service
@@ -57,9 +57,8 @@ function packageRelease {
   # generate zip file
   zip -r $release_dir.zip $release_dir
   # delete intermediate files
-  rm -rf supersonic-webapp.tar.gz
-  rm -rf $service_name-bin.tar.gz
-  rm -rf $service_name
+  rm supersonic-webapp.tar.gz $service_name-bin.tar.gz
+  rm -rf webapp $service_name $release_dir
   echo "finished packaging supersonic release"
 }
 
@@ -71,7 +70,9 @@ if [ "$service" == $PYLLM_SERVICE ]; then
   echo "install python modules success"
 elif [ "$service" == "webapp" ]; then
   buildWebapp
-  cp -fr webapp $projectDir/launchers/$STANDALONE_SERVICE/target/classes
+  target_path=$projectDir/launchers/$STANDALONE_SERVICE/target/classes
+  tar xvf $projectDir/webapp/supersonic-webapp.tar.gz -C $target_path
+  mv $target_path/supersonic_webapp $target_path/webapp
 else
   buildJavaService $service
   buildWebapp

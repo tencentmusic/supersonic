@@ -4,9 +4,9 @@ import com.tencent.supersonic.headless.core.pojo.ChatContext;
 import com.tencent.supersonic.headless.core.pojo.QueryContext;
 
 /**
- * A semantic parser understands user queries and extracts semantic information.
- * It could leverage either rule-based or LLM-based approach to identify query intent
- * and extract related semantic items from the query.
+ * A semantic parser understands user queries and generates semantic query statement.
+ * SuperSonic leverages a combination of rule-based and LLM-based parsers,
+ * each of which deals with specific scenarios.
  */
 public interface SemanticParser {
 
