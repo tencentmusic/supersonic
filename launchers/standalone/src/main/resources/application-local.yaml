@@ -45,14 +45,20 @@ mybatis:
 corrector:
   additional:
     information: true
+pyllm:
+  url: http://127.0.0.1:9092
 
 llm:
   parser:
-    url: http://127.0.0.1:9092
+    url: ${pyllm.url}
 embedding:
-  url: http://127.0.0.1:9092
+  url: ${pyllm.url}
 functionCall:
-  url: http://127.0.0.1:9092
+  url: ${pyllm.url}
+
+text2sql:
+  example:
+    num: 1
 
 #langchain4j config
 s2:
@@ -62,9 +68,10 @@ s2:
       provider: open_ai
       openai:
         # Replace with your LLM configs
-        base-url: http://YOUR_API_URL
-        api-key: YOUR_API_KEY
-        model-name: gpt-3.5-turbo-16k
+        # Note: Below API key `demo` is provided by langchain4j community which limits 1000 tokens per request.
+        base-url: https://api.openai.com/v1
+        api-key: demo
+        model-name: gpt-3.5-turbo
         temperature: 0.0
         timeout: PT60S
     #2.embedding-model
