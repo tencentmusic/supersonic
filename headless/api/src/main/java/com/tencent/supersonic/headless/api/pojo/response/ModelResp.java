@@ -16,6 +16,7 @@ import org.springframework.util.CollectionUtils;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -53,6 +54,8 @@ public class ModelResp extends SchemaItem {
     private String alias;
 
     private String fullPath;
+
+    private Map<String, Object> ext;
 
     public boolean openToAll() {
         return isOpen != null && isOpen == 1;

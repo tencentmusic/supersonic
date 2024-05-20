@@ -330,6 +330,7 @@ CREATE TABLE `s2_model` (
                             `depends` varchar(500) DEFAULT NULL ,
                             `filter_sql` varchar(1000) DEFAULT NULL ,
                             `tag_object_id` int(11) DEFAULT '0',
+                            `ext` varchar(1000) DEFAULT NULL,
                             PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 

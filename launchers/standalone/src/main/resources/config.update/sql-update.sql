@@ -313,3 +313,5 @@ CREATE TABLE IF NOT EXISTS `s2_term` (
 alter table s2_agent add column `llm_config` varchar(2000) COLLATE utf8_unicode_ci DEFAULT NULL;
 alter table s2_agent add column `multi_turn_config` varchar(2000) COLLATE utf8_unicode_ci DEFAULT NULL;
 alter table s2_agent add column `visual_config` varchar(2000) COLLATE utf8_unicode_ci DEFAULT NULL;
+
+alter table s2_model add column `ext` varchar(1000) DEFAULT NULL;

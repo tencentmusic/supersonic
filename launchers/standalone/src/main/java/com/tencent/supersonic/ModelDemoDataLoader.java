@@ -140,7 +140,7 @@ public class ModelDemoDataLoader {
             DimensionResp pageDimension = getDimension("page", stayTimeModel);
             updateDimension(stayTimeModel, pageDimension);
             updateMetric(stayTimeModel, departmentDimension, userDimension);
-            addTags(singerModel);
+            addTags(userModel, singerModel);
             updateMetric_pv(pvUvModel, departmentDimension, userDimension, metricPv);
             DataSetResp s2DataSet = addDataSet_1(s2Domain);
             addDataSet_2(singerDomain, singerModel);
@@ -402,7 +402,9 @@ public class ModelDemoDataLoader {
         return modelService.createModel(modelReq, user);
     }
 
-    private void addTags(ModelResp singerModel) {
+    private void addTags(ModelResp userModel, ModelResp singerModel) {
+        addTag(dimensionService.getDimension("department", userModel.getId()).getId(),
+                TagDefineType.DIMENSION);
         addTag(dimensionService.getDimension("act_area", singerModel.getId()).getId(),
                 TagDefineType.DIMENSION);
         addTag(dimensionService.getDimension("song_name", singerModel.getId()).getId(),
@@ -597,12 +599,12 @@ public class ModelDemoDataLoader {
         termService.saveOrUpdate(termReq, User.getFakeUser());
     }
 
-    public void addTerm_1(DomainResp domainResp) {
+    public void addTerm_1(DomainResp s2Domain) {
         TermReq termReq = new TermReq();
         termReq.setName("核心用户");
         termReq.setDescription("核心用户指tom和lucy");
         termReq.setAlias(Lists.newArrayList("VIP用户"));
-        termReq.setDomainId(domainResp.getId());
+        termReq.setDomainId(s2Domain.getId());
         termService.saveOrUpdate(termReq, User.getFakeUser());
     }
 
