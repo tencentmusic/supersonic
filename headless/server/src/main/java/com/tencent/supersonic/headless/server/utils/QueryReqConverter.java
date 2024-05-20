@@ -73,6 +73,10 @@ public class QueryReqConverter {
         if (StringUtils.isEmpty(tableName)) {
             return new QueryStatement();
         }
+        // correct order item is same as agg alias
+        String reqSql = querySQLReq.getSql();
+        querySQLReq.setSql(SqlReplaceHelper.replaceAggAliasOrderItem(querySQLReq.getSql()));
+        log.info("replaceOrderAggSameAlias {} -> {}", reqSql, querySQLReq.getSql());
         //4.build MetricTables
         List<String> allFields = SqlSelectHelper.getAllFields(querySQLReq.getSql());
         List<MetricSchemaResp> metricSchemas = getMetrics(semanticSchemaResp, allFields);
