@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+
+import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.Function;
@@ -23,6 +25,7 @@ import net.sf.jsqlparser.statement.select.Select;
 import net.sf.jsqlparser.statement.select.SelectItem;
 import net.sf.jsqlparser.statement.select.SelectVisitorAdapter;
 import net.sf.jsqlparser.statement.select.SetOperationList;
+import net.sf.jsqlparser.statement.select.ParenthesedSelect;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.CollectionUtils;
 
@@ -148,6 +151,24 @@ public class SqlAddHelper {
             return sql;
         }
         PlainSelect plainSelect = (PlainSelect) selectStatement;
+        List<String> chNameList = TimeDimensionEnum.getChNameList();
+        Boolean dateWhere = false;
+        for (String chName : chNameList) {
+            if (expression.toString().contains(chName)) {
+                dateWhere = true;
+            }
+        }
+        if (plainSelect.getFromItem() instanceof ParenthesedSelect && dateWhere) {
+            ParenthesedSelect parenthesedSelect = (ParenthesedSelect) plainSelect.getFromItem();
+            PlainSelect subPlainSelect = parenthesedSelect.getPlainSelect();
+            Expression subWhere = subPlainSelect.getWhere();
+            if (subWhere == null) {
+                subPlainSelect.setWhere(expression);
+            } else {
+                subPlainSelect.setWhere(new AndExpression(subWhere, expression));
+            }
+            return selectStatement.toString();
+        }
         Expression where = plainSelect.getWhere();
 
         if (where == null) {

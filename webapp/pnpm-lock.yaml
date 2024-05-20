@@ -416,7 +416,7 @@ importers:
         version: 2.3.4
       supersonic-chat-sdk:
         specifier: ^1.0.10
-        version: 1.1.5(react-dom@17.0.2)(react@17.0.2)
+        version: 1.1.6(react-dom@17.0.2)(react@17.0.2)
       supersonic-insights-flow-components:
         specifier: ^1.4.6
         version: 1.4.7(classnames@2.3.2)(karma@6.4.3)(moment@2.29.4)(rc-field-form@1.40.0)(reflect-metadata@0.1.13)
@@ -25503,8 +25503,8 @@ packages:
       kdbush: 4.0.2
     dev: false
 
-  /supersonic-chat-sdk@1.1.5(react-dom@17.0.2)(react@17.0.2):
-    resolution: {integrity: sha512-A4bicDxC6bwrgDuZ/06lG//IWzXvHPFa30lj98CNsRmXSIZJu1YPDEEyy79WkS4+DdINQ4UyqoiVtN+Q5Xxexg==}
+  /supersonic-chat-sdk@1.1.6(react-dom@17.0.2)(react@17.0.2):
+    resolution: {integrity: sha512-SEb6IA0l64XfZ1MMW27eIW6YyJ9BcjvfIZ+zvkFMGChcHKgPwot3hAA4W1xN1fEbGl6CNsSGY5MMSecoRmoU3A==}
     engines: {node: '>=16'}
     peerDependencies:
       react: '>=16.8.0'
@@ -26880,7 +26880,7 @@ packages:
     resolution: {integrity: sha512-2ham8XPWTONajOR0ohOKOHXkm3+gaBmGut3SRuu75xLd/RRaY6vqgh8NBYYk7+RW3u5AtzPQZG8F10LHkl0lAQ==}
 
   /void-elements@2.0.1:
-    resolution: {integrity: sha1-wGavtYK7HLQSjWDqkjkulNXp2+w=}
+    resolution: {integrity: sha512-qZKX4RnBzH2ugr8Lxa7x+0V6XD9Sb/ouARtiasEQCHB1EVU4NXtmHsDDrx1dO4ne5fc3J6EW05BP1Dl0z0iung==}
     engines: {node: '>=0.10.0'}
     dev: false
 
