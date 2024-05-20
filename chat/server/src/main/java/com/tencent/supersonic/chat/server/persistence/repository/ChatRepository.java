@@ -6,7 +6,7 @@ import java.util.List;
 
 public interface ChatRepository {
 
-    boolean createChat(ChatDO chatDO);
+    Long createChat(ChatDO chatDO);
 
     List<ChatDO> getAll(String creator, Integer agentId);
 

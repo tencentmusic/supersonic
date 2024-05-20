@@ -1,10 +1,16 @@
 package com.tencent.supersonic;
 
+import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.auth.api.authorization.pojo.AuthGroup;
 import com.tencent.supersonic.auth.api.authorization.pojo.AuthRule;
 import com.tencent.supersonic.auth.api.authorization.service.AuthService;
+import com.tencent.supersonic.chat.server.plugin.Plugin;
+import com.tencent.supersonic.chat.server.plugin.PluginParseConfig;
+import com.tencent.supersonic.chat.server.plugin.build.ParamOption;
+import com.tencent.supersonic.chat.server.plugin.build.WebBase;
+import com.tencent.supersonic.chat.server.service.PluginService;
 import com.tencent.supersonic.common.pojo.JoinCondition;
 import com.tencent.supersonic.common.pojo.ModelRela;
 import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
@@ -14,6 +20,7 @@ import com.tencent.supersonic.common.pojo.enums.SensitiveLevelEnum;
 import com.tencent.supersonic.common.pojo.enums.StatusEnum;
 import com.tencent.supersonic.common.pojo.enums.TimeMode;
 import com.tencent.supersonic.common.pojo.enums.TypeEnums;
+import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.headless.api.pojo.DataSetDetail;
 import com.tencent.supersonic.headless.api.pojo.DataSetModelConfig;
 import com.tencent.supersonic.headless.api.pojo.DefaultDisplayInfo;
@@ -50,6 +57,14 @@ import com.tencent.supersonic.headless.api.pojo.request.ModelReq;
 import com.tencent.supersonic.headless.api.pojo.request.TagObjectReq;
 import com.tencent.supersonic.headless.api.pojo.request.TagReq;
 import com.tencent.supersonic.headless.api.pojo.request.TermReq;
+import com.tencent.supersonic.headless.api.pojo.response.DataSetResp;
+import com.tencent.supersonic.headless.api.pojo.response.DatabaseResp;
+import com.tencent.supersonic.headless.api.pojo.response.DimensionResp;
+import com.tencent.supersonic.headless.api.pojo.response.DomainResp;
+import com.tencent.supersonic.headless.api.pojo.response.MetricResp;
+import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
+import com.tencent.supersonic.headless.api.pojo.response.TagObjectResp;
+import com.tencent.supersonic.headless.server.pojo.MetaFilter;
 import com.tencent.supersonic.headless.server.service.DataSetService;
 import com.tencent.supersonic.headless.server.service.DatabaseService;
 import com.tencent.supersonic.headless.server.service.DimensionService;
@@ -70,6 +85,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 @Slf4j
@@ -100,57 +116,64 @@ public class ModelDemoDataLoader {
     private TagMetaService tagMetaService;
     @Autowired
     private TermService termService;
+    @Autowired
+    private PluginService pluginService;
 
     public void doRun() {
         try {
-            addDatabase();
-            addDomain();
-            addTagObjectUser();
-            addTagObjectSinger();
-            addModel_1();
-            addModel_2();
-            addMetric_uv();
-            addMetric_pv_avg();
-            addModel_3();
-            addModelRela_1();
-            addModelRela_2();
-            addDomain_2();
-            addModel_4();
-            updateDimension();
-            updateMetric();
-            addTags();
-            updateMetric_pv();
-            addDataSet_1();
-            addDataSet_2();
-            addAuthGroup_1();
-            addAuthGroup_2();
-            addTerm();
-            addTerm_1();
+            DatabaseResp databaseResp = addDatabase();
+            DomainResp s2Domain = addDomain();
+            TagObjectResp s2TagObject = addTagObjectUser(s2Domain);
+            ModelResp userModel = addModel_1(s2Domain, databaseResp, s2TagObject);
+            ModelResp pvUvModel = addModel_2(s2Domain, databaseResp);
+            DimensionResp userDimension = getDimension("user_name", userModel);
+            DimensionResp departmentDimension = getDimension("department", userModel);
+            MetricResp metricUv = addMetric_uv(userModel, departmentDimension);
+            MetricResp metricPv = getMetric("pv", pvUvModel);
+            addMetric_pv_avg(metricPv, metricUv, departmentDimension, pvUvModel);
+            ModelResp stayTimeModel = addModel_3(s2Domain, databaseResp);
+            addModelRela_1(s2Domain, userModel, pvUvModel);
+            addModelRela_2(s2Domain, userModel, stayTimeModel);
+            DomainResp singerDomain = addDomain_2();
+            TagObjectResp singerTagObject = addTagObjectSinger(singerDomain);
+            ModelResp singerModel = addModel_4(singerDomain, databaseResp, singerTagObject);
+            DimensionResp pageDimension = getDimension("page", stayTimeModel);
+            updateDimension(stayTimeModel, pageDimension);
+            updateMetric(stayTimeModel, departmentDimension, userDimension);
+            addTags(singerModel);
+            updateMetric_pv(pvUvModel, departmentDimension, userDimension, metricPv);
+            DataSetResp s2DataSet = addDataSet_1(s2Domain);
+            addDataSet_2(singerDomain, singerModel);
+            addAuthGroup_1(stayTimeModel);
+            addAuthGroup_2(stayTimeModel);
+            addTerm(s2Domain);
+            addTerm_1(s2Domain);
+            addPlugin_1(s2DataSet, userDimension, userModel);
         } catch (Exception e) {
             log.error("Failed to add model demo data", e);
         }
 
     }
 
-    private void addTagObjectUser() throws Exception {
+    private TagObjectResp addTagObjectUser(DomainResp s2Domain) throws Exception {
         TagObjectReq tagObjectReq = new TagObjectReq();
-        tagObjectReq.setDomainId(1L);
+        tagObjectReq.setDomainId(s2Domain.getId());
         tagObjectReq.setName("用户");
         tagObjectReq.setBizName("user");
         User user = User.getFakeUser();
-        tagObjectService.create(tagObjectReq, user);
+        return tagObjectService.create(tagObjectReq, user);
     }
 
-    private void addTagObjectSinger() throws Exception {
+    private TagObjectResp addTagObjectSinger(DomainResp singerDomain) throws Exception {
         TagObjectReq tagObjectReq = new TagObjectReq();
-        tagObjectReq.setDomainId(2L);
+        tagObjectReq.setDomainId(singerDomain.getId());
         tagObjectReq.setName("艺人");
         tagObjectReq.setBizName("singer");
         User user = User.getFakeUser();
-        tagObjectService.create(tagObjectReq, user);
+        return tagObjectService.create(tagObjectReq, user);
     }
 
-    public void addDatabase() {
+    public DatabaseResp addDatabase() {
         String url = dataSourceProperties.getUrl();
         DatabaseReq databaseReq = new DatabaseReq();
         databaseReq.setName("数据实例");
@@ -165,10 +188,10 @@ public class ModelDemoDataLoader {
         databaseReq.setUrl(url);
         databaseReq.setUsername(dataSourceProperties.getUsername());
         databaseReq.setPassword(dataSourceProperties.getPassword());
-        databaseService.createOrUpdateDatabase(databaseReq, user);
+        return databaseService.createOrUpdateDatabase(databaseReq, user);
     }
 
-    public void addDomain() {
+    public DomainResp addDomain() {
         DomainReq domainReq = new DomainReq();
         domainReq.setName("超音数");
         domainReq.setBizName("supersonic");
@@ -178,17 +201,18 @@ public class ModelDemoDataLoader {
         domainReq.setViewOrgs(Collections.singletonList("1"));
         domainReq.setAdmins(Arrays.asList("admin", "jack"));
         domainReq.setAdminOrgs(Collections.emptyList());
-        domainService.createDomain(domainReq, user);
+        return domainService.createDomain(domainReq, user);
     }
 
-    public void addModel_1() throws Exception {
+    public ModelResp addModel_1(DomainResp s2Domain, DatabaseResp s2Database,
+                                TagObjectResp s2TagObject) throws Exception {
         ModelReq modelReq = new ModelReq();
         modelReq.setName("用户部门");
         modelReq.setBizName("user_department");
         modelReq.setDescription("用户部门信息");
-        modelReq.setDatabaseId(1L);
-        modelReq.setDomainId(1L);
-        modelReq.setTagObjectId(1L);
+        modelReq.setDatabaseId(s2Database.getId());
+        modelReq.setDomainId(s2Domain.getId());
+        modelReq.setTagObjectId(s2TagObject.getId());
         modelReq.setViewers(Arrays.asList("admin", "tom", "jack"));
         modelReq.setViewOrgs(Collections.singletonList("1"));
         modelReq.setAdmins(Arrays.asList("admin", "alice"));
@@ -210,16 +234,16 @@ public class ModelDemoDataLoader {
         modelDetail.setQueryType("sql_query");
         modelDetail.setSqlQuery("select user_name,department from s2_user_department");
         modelReq.setModelDetail(modelDetail);
-        modelReq.setDomainId(1L);
-        modelService.createModel(modelReq, user);
+        return modelService.createModel(modelReq, user);
     }
 
-    public void addModel_2() throws Exception {
+    public ModelResp addModel_2(DomainResp s2Domain, DatabaseResp s2Database) throws Exception {
         ModelReq modelReq = new ModelReq();
         modelReq.setName("PVUV统计");
         modelReq.setBizName("s2_pv_uv_statis");
         modelReq.setDescription("PVUV统计");
-        modelReq.setDatabaseId(1L);
+        modelReq.setDatabaseId(s2Database.getId());
+        modelReq.setDomainId(s2Domain.getId());
         modelReq.setViewers(Arrays.asList("admin", "tom", "jack"));
         modelReq.setViewOrgs(Collections.singletonList("1"));
         modelReq.setAdmins(Collections.singletonList("admin"));
@@ -253,17 +277,17 @@ public class ModelDemoDataLoader {
         modelDetail.setSqlQuery("SELECT imp_date, user_name, page, 1 as pv, "
                 + "user_name as user_id FROM s2_pv_uv_statis");
         modelDetail.setQueryType("sql_query");
-        modelReq.setDomainId(1L);
         modelReq.setModelDetail(modelDetail);
-        modelService.createModel(modelReq, user);
+        return modelService.createModel(modelReq, user);
     }
 
-    public void addModel_3() throws Exception {
+    public ModelResp addModel_3(DomainResp s2Domain, DatabaseResp s2Database) throws Exception {
         ModelReq modelReq = new ModelReq();
         modelReq.setName("停留时长统计");
         modelReq.setBizName("s2_stay_time_statis");
         modelReq.setDescription("停留时长统计");
-        modelReq.setDatabaseId(1L);
+        modelReq.setDomainId(s2Domain.getId());
+        modelReq.setDatabaseId(s2Database.getId());
         modelReq.setViewers(Arrays.asList("admin", "tom", "jack"));
         modelReq.setViewOrgs(Collections.singletonList("1"));
         modelReq.setAdmins(Collections.singletonList("admin"));
@@ -294,36 +318,35 @@ public class ModelDemoDataLoader {
         modelDetail.setFields(fields);
         modelDetail.setSqlQuery("select imp_date,user_name,stay_hours,page from s2_stay_time_statis");
         modelDetail.setQueryType("sql_query");
-        modelReq.setDomainId(1L);
         modelReq.setModelDetail(modelDetail);
-        modelService.createModel(modelReq, user);
+        return modelService.createModel(modelReq, user);
     }
 
-    public void addModelRela_1() {
+    public void addModelRela_1(DomainResp s2Domain, ModelResp userDepartmentModel, ModelResp pvUvModel) {
         List<JoinCondition> joinConditions = Lists.newArrayList();
         joinConditions.add(new JoinCondition("user_name", "user_name", FilterOperatorEnum.EQUALS));
         ModelRela modelRelaReq = new ModelRela();
-        modelRelaReq.setDomainId(1L);
-        modelRelaReq.setFromModelId(1L);
-        modelRelaReq.setToModelId(2L);
+        modelRelaReq.setDomainId(s2Domain.getId());
+        modelRelaReq.setFromModelId(userDepartmentModel.getId());
+        modelRelaReq.setToModelId(pvUvModel.getId());
         modelRelaReq.setJoinType("left join");
         modelRelaReq.setJoinConditions(joinConditions);
         modelRelaService.save(modelRelaReq, user);
     }
 
-    public void addModelRela_2() {
+    public void addModelRela_2(DomainResp s2Domain, ModelResp userDepartmentModel, ModelResp stayTimeModel) {
         List<JoinCondition> joinConditions = Lists.newArrayList();
         joinConditions.add(new JoinCondition("user_name", "user_name", FilterOperatorEnum.EQUALS));
         ModelRela modelRelaReq = new ModelRela();
-        modelRelaReq.setDomainId(1L);
-        modelRelaReq.setFromModelId(1L);
-        modelRelaReq.setToModelId(3L);
+        modelRelaReq.setDomainId(s2Domain.getId());
+        modelRelaReq.setFromModelId(userDepartmentModel.getId());
+        modelRelaReq.setToModelId(stayTimeModel.getId());
         modelRelaReq.setJoinType("left join");
         modelRelaReq.setJoinConditions(joinConditions);
         modelRelaService.save(modelRelaReq, user);
     }
 
-    public void addDomain_2() {
+    public DomainResp addDomain_2() {
         DomainReq domainReq = new DomainReq();
         domainReq.setName("艺人库");
         domainReq.setBizName("supersonic");
@@ -333,17 +356,18 @@ public class ModelDemoDataLoader {
         domainReq.setViewOrgs(Collections.singletonList("1"));
         domainReq.setAdmins(Arrays.asList("admin", "alice"));
         domainReq.setAdminOrgs(Collections.emptyList());
-        domainService.createDomain(domainReq, user);
+        return domainService.createDomain(domainReq, user);
     }
 
-    public void addModel_4() throws Exception {
+    public ModelResp addModel_4(DomainResp singerDomain,
+                                DatabaseResp s2Database, TagObjectResp singerTagObject) throws Exception {
         ModelReq modelReq = new ModelReq();
         modelReq.setName("艺人库");
         modelReq.setBizName("singer");
         modelReq.setDescription("艺人库");
-        modelReq.setDatabaseId(1L);
-        modelReq.setDomainId(2L);
-        modelReq.setTagObjectId(2L);
+        modelReq.setDatabaseId(s2Database.getId());
+        modelReq.setDomainId(singerDomain.getId());
+        modelReq.setTagObjectId(singerTagObject.getId());
         modelReq.setViewers(Arrays.asList("admin", "tom", "jack"));
         modelReq.setViewOrgs(Collections.singletonList("1"));
         modelReq.setAdmins(Collections.singletonList("admin"));
@@ -375,16 +399,20 @@ public class ModelDemoDataLoader {
         modelDetail.setSqlQuery("select imp_date, singer_name, act_area, song_name, genre, "
                 + "js_play_cnt, down_cnt, favor_cnt from singer");
         modelReq.setModelDetail(modelDetail);
-        modelService.createModel(modelReq, user);
+        return modelService.createModel(modelReq, user);
     }
 
-    private void addTags() {
-        addTag(1L, TagDefineType.DIMENSION);
-        addTag(4L, TagDefineType.DIMENSION);
-        addTag(5L, TagDefineType.DIMENSION);
-        addTag(6L, TagDefineType.DIMENSION);
-        addTag(7L, TagDefineType.DIMENSION);
-        addTag(5L, TagDefineType.METRIC);
+    private void addTags(ModelResp singerModel) {
+        addTag(dimensionService.getDimension("act_area", singerModel.getId()).getId(),
+                TagDefineType.DIMENSION);
+        addTag(dimensionService.getDimension("song_name", singerModel.getId()).getId(),
+                TagDefineType.DIMENSION);
+        addTag(dimensionService.getDimension("genre", singerModel.getId()).getId(),
+                TagDefineType.DIMENSION);
+        addTag(dimensionService.getDimension("singer_name", singerModel.getId()).getId(),
+                TagDefineType.DIMENSION);
+        addTag(metricService.getMetric(singerModel.getId(), "js_play_cnt").getId(),
+                TagDefineType.METRIC);
     }
 
     private void addTag(Long itemId, TagDefineType tagDefineType) {
@@ -394,26 +422,29 @@ public class ModelDemoDataLoader {
         tagMetaService.create(tagReq, User.getFakeUser());
     }
 
-    public void updateDimension() throws Exception {
+    public void updateDimension(ModelResp stayTimeModel, DimensionResp pageDimension) throws Exception {
         DimensionReq dimensionReq = new DimensionReq();
         dimensionReq.setType(DimensionType.categorical.name());
-        dimensionReq.setId(3L);
+        dimensionReq.setId(pageDimension.getId());
         dimensionReq.setName("页面");
         dimensionReq.setBizName("page");
-        dimensionReq.setModelId(3L);
+        dimensionReq.setModelId(stayTimeModel.getId());
         dimensionReq.setAlias("page");
         dimensionReq.setSemanticType(SemanticType.CATEGORY.name());
-        dimensionReq.setSensitiveLevel(2);
+        dimensionReq.setSensitiveLevel(SensitiveLevelEnum.HIGH.getCode());
         dimensionReq.setDescription("页面");
         dimensionReq.setExpr("page");
         dimensionReq.setDimValueMaps(Collections.emptyList());
         dimensionService.updateDimension(dimensionReq, user);
     }
 
-    public void updateMetric() throws Exception {
+    public void updateMetric(ModelResp stayTimeModel, DimensionResp departmentDimension,
+                             DimensionResp userDimension) throws Exception {
+        MetricResp stayHoursMetric =
+                metricService.getMetric(stayTimeModel.getId(), "stay_hours");
         MetricReq metricReq = new MetricReq();
-        metricReq.setModelId(3L);
-        metricReq.setId(4L);
+        metricReq.setModelId(stayTimeModel.getId());
+        metricReq.setId(stayHoursMetric.getId());
         metricReq.setName("停留时长");
         metricReq.setBizName("stay_hours");
         metricReq.setSensitiveLevel(SensitiveLevelEnum.HIGH.getCode());
@@ -429,14 +460,16 @@ public class ModelDemoDataLoader {
         metricTypeParams.setMeasures(measures);
         metricReq.setMetricDefineByMeasureParams(metricTypeParams);
         metricReq.setMetricDefineType(MetricDefineType.MEASURE);
-        metricReq.setRelateDimension(getRelateDimension(Lists.newArrayList(1L, 2L)));
+        metricReq.setRelateDimension(getRelateDimension(
+                Lists.newArrayList(departmentDimension.getId(), userDimension.getId())));
         metricService.updateMetric(metricReq, user);
     }
 
-    public void updateMetric_pv() throws Exception {
+    public void updateMetric_pv(ModelResp pvUvModel, DimensionResp departmentDimension,
+                                DimensionResp userDimension, MetricResp metricPv) throws Exception {
         MetricReq metricReq = new MetricReq();
-        metricReq.setModelId(2L);
-        metricReq.setId(1L);
+        metricReq.setModelId(pvUvModel.getId());
+        metricReq.setId(metricPv.getId());
         metricReq.setName("访问次数");
         metricReq.setBizName("pv");
         metricReq.setDescription("一段时间内用户的访问次数");
@@ -449,13 +482,14 @@ public class ModelDemoDataLoader {
         metricTypeParams.setMeasures(measures);
         metricReq.setMetricDefineByMeasureParams(metricTypeParams);
         metricReq.setMetricDefineType(MetricDefineType.MEASURE);
-        metricReq.setRelateDimension(getRelateDimension(Lists.newArrayList(1L, 2L)));
+        metricReq.setRelateDimension(getRelateDimension(
+                Lists.newArrayList(departmentDimension.getId(), userDimension.getId())));
         metricService.updateMetric(metricReq, user);
     }
 
-    public void addMetric_uv() throws Exception {
+    public MetricResp addMetric_uv(ModelResp uvModel, DimensionResp departmentDimension) throws Exception {
         MetricReq metricReq = new MetricReq();
-        metricReq.setModelId(2L);
+        metricReq.setModelId(uvModel.getId());
         metricReq.setName("访问用户数");
         metricReq.setBizName("uv");
         metricReq.setSensitiveLevel(SensitiveLevelEnum.LOW.getCode());
@@ -466,19 +500,17 @@ public class ModelDemoDataLoader {
         List<FieldParam> fieldParams = new ArrayList<>();
         fieldParams.add(new FieldParam("user_id"));
         metricTypeParams.setFields(fieldParams);
-        RelateDimension relateDimension = new RelateDimension();
-        relateDimension.setDrillDownDimensions(Lists.newArrayList(
-                new DrillDownDimension(1L)));
-        metricReq.setRelateDimension(relateDimension);
         metricReq.setMetricDefineByFieldParams(metricTypeParams);
         metricReq.setMetricDefineType(MetricDefineType.FIELD);
-        metricReq.setRelateDimension(getRelateDimension(Lists.newArrayList(1L)));
-        metricService.createMetric(metricReq, user);
+        metricReq.setRelateDimension(getRelateDimension(
+                Lists.newArrayList(departmentDimension.getId())));
+        return metricService.createMetric(metricReq, user);
     }
 
-    public void addMetric_pv_avg() throws Exception {
+    public MetricResp addMetric_pv_avg(MetricResp metricPv, MetricResp metricUv,
+                                       DimensionResp departmentDimension, ModelResp pvModel) throws Exception {
         MetricReq metricReq = new MetricReq();
-        metricReq.setModelId(2L);
+        metricReq.setModelId(pvModel.getId());
         metricReq.setName("人均访问次数");
         metricReq.setBizName("pv_avg");
         metricReq.setSensitiveLevel(SensitiveLevelEnum.HIGH.getCode());
@@ -488,29 +520,25 @@ public class ModelDemoDataLoader {
         MetricDefineByMetricParams metricTypeParams = new MetricDefineByMetricParams();
         metricTypeParams.setExpr("pv/uv");
         List<MetricParam> metrics = new ArrayList<>();
-        MetricParam metricPv = new MetricParam(1L, "pv");
-        MetricParam metricUv = new MetricParam(2L, "uv");
-        metrics.add(metricPv);
-        metrics.add(metricUv);
+        MetricParam pv = new MetricParam(metricPv.getId(), metricPv.getBizName());
+        MetricParam uv = new MetricParam(metricUv.getId(), metricUv.getBizName());
+        metrics.add(pv);
+        metrics.add(uv);
         metricTypeParams.setMetrics(metrics);
         metricReq.setMetricDefineByMetricParams(metricTypeParams);
         metricReq.setMetricDefineType(MetricDefineType.METRIC);
-        metricReq.setRelateDimension(getRelateDimension(Lists.newArrayList(1L)));
-        metricService.createMetric(metricReq, user);
+        metricReq.setRelateDimension(getRelateDimension(Lists.newArrayList(departmentDimension.getId())));
+        return metricService.createMetric(metricReq, user);
     }
 
-    public void addDataSet_1() {
+    public DataSetResp addDataSet_1(DomainResp s2Domain) {
         DataSetReq dataSetReq = new DataSetReq();
         dataSetReq.setName("超音数");
         dataSetReq.setBizName("s2");
         dataSetReq.setDomainId(1L);
         dataSetReq.setDescription("包含超音数访问统计相关的指标和维度等");
         dataSetReq.setAdmins(Lists.newArrayList("admin"));
-        List<DataSetModelConfig> dataSetModelConfigs = Lists.newArrayList(
-                new DataSetModelConfig(1L, Lists.newArrayList(1L, 2L), Lists.newArrayList()),
-                new DataSetModelConfig(2L, Lists.newArrayList(), Lists.newArrayList(1L, 2L, 3L)),
-                new DataSetModelConfig(3L, Lists.newArrayList(3L), Lists.newArrayList(4L)));
-
+        List<DataSetModelConfig> dataSetModelConfigs = getDataSetModelConfigs(s2Domain.getId());
         DataSetDetail dataSetDetail = new DataSetDetail();
         dataSetDetail.setDataSetModelConfigs(dataSetModelConfigs);
         dataSetReq.setDataSetDetail(dataSetDetail);
@@ -523,19 +551,17 @@ public class ModelDemoDataLoader {
         metricTypeDefaultConfig.setTimeDefaultConfig(timeDefaultConfig);
         queryConfig.setMetricTypeDefaultConfig(metricTypeDefaultConfig);
         dataSetReq.setQueryConfig(queryConfig);
-        dataSetService.save(dataSetReq, User.getFakeUser());
+        return dataSetService.save(dataSetReq, User.getFakeUser());
     }
 
-    public void addDataSet_2() {
+    public void addDataSet_2(DomainResp singerDomain, ModelResp singerModel) {
         DataSetReq dataSetReq = new DataSetReq();
         dataSetReq.setName("艺人库");
         dataSetReq.setBizName("singer");
-        dataSetReq.setDomainId(2L);
+        dataSetReq.setDomainId(singerDomain.getId());
         dataSetReq.setDescription("包含艺人相关标签和指标信息");
         dataSetReq.setAdmins(Lists.newArrayList("admin", "jack"));
-        List<DataSetModelConfig> dataSetModelConfigs = Lists.newArrayList(
-                new DataSetModelConfig(4L, Lists.newArrayList(4L, 5L, 6L, 7L), Lists.newArrayList(5L, 6L, 7L))
-        );
+        List<DataSetModelConfig> dataSetModelConfigs = getDataSetModelConfigs(singerDomain.getId());
         DataSetDetail dataSetDetail = new DataSetDetail();
         dataSetDetail.setDataSetModelConfigs(dataSetModelConfigs);
         dataSetReq.setDataSetDetail(dataSetDetail);
@@ -547,8 +573,9 @@ public class ModelDemoDataLoader {
         tagTimeDefaultConfig.setUnit(7);
         tagTypeDefaultConfig.setTimeDefaultConfig(tagTimeDefaultConfig);
         DefaultDisplayInfo defaultDisplayInfo = new DefaultDisplayInfo();
-        defaultDisplayInfo.setDimensionIds(Lists.newArrayList(4L, 5L, 6L, 7L));
-        defaultDisplayInfo.setMetricIds(Lists.newArrayList(5L));
+        defaultDisplayInfo.setDimensionIds(dataSetModelConfigs.get(0).getDimensions());
+        MetricResp jsPlayCntMetric = getMetric("js_play_cnt", singerModel);
+        defaultDisplayInfo.setMetricIds(Lists.newArrayList(jsPlayCntMetric.getId()));
         tagTypeDefaultConfig.setDefaultDisplayInfo(defaultDisplayInfo);
         MetricTypeDefaultConfig metricTypeDefaultConfig = new MetricTypeDefaultConfig();
         TimeDefaultConfig timeDefaultConfig = new TimeDefaultConfig();
@@ -561,27 +588,27 @@ public class ModelDemoDataLoader {
         dataSetService.save(dataSetReq, User.getFakeUser());
     }
 
-    public void addTerm() {
+    public void addTerm(DomainResp s2Domain) {
         TermReq termReq = new TermReq();
         termReq.setName("近期");
         termReq.setDescription("指近10天");
         termReq.setAlias(Lists.newArrayList("近一段时间"));
-        termReq.setDomainId(1L);
+        termReq.setDomainId(s2Domain.getId());
         termService.saveOrUpdate(termReq, User.getFakeUser());
     }
 
-    public void addTerm_1() {
+    public void addTerm_1(DomainResp domainResp) {
         TermReq termReq = new TermReq();
         termReq.setName("核心用户");
         termReq.setDescription("核心用户指tom和lucy");
         termReq.setAlias(Lists.newArrayList("VIP用户"));
-        termReq.setDomainId(1L);
+        termReq.setDomainId(domainResp.getId());
         termService.saveOrUpdate(termReq, User.getFakeUser());
     }
 
-    public void addAuthGroup_1() {
+    public void addAuthGroup_1(ModelResp stayTimeModel) {
         AuthGroup authGroupReq = new AuthGroup();
-        authGroupReq.setModelId(3L);
+        authGroupReq.setModelId(stayTimeModel.getId());
         authGroupReq.setName("admin-permission");
 
         List<AuthRule> authRules = new ArrayList<>();
@@ -596,9 +623,9 @@ public class ModelDemoDataLoader {
         authService.addOrUpdateAuthGroup(authGroupReq);
     }
 
-    public void addAuthGroup_2() {
+    public void addAuthGroup_2(ModelResp stayTimeModel) {
         AuthGroup authGroupReq = new AuthGroup();
-        authGroupReq.setModelId(3L);
+        authGroupReq.setModelId(stayTimeModel.getId());
         authGroupReq.setName("tom_row_permission");
 
         List<AuthRule> authRules = new ArrayList<>();
@@ -610,12 +637,67 @@ public class ModelDemoDataLoader {
         authService.addOrUpdateAuthGroup(authGroupReq);
     }
 
+    private void addPlugin_1(DataSetResp s2DataSet, DimensionResp userDimension,
+                             ModelResp userModel) {
+        Plugin plugin1 = new Plugin();
+        plugin1.setType("WEB_PAGE");
+        plugin1.setDataSetList(Arrays.asList(s2DataSet.getId()));
+        plugin1.setPattern("用于分析超音数的流量概况，包含UV、PV等核心指标的追踪。P.S. 仅作为示例展示，无实际看板");
+        plugin1.setName("超音数流量分析看板");
+        PluginParseConfig pluginParseConfig = new PluginParseConfig();
+        pluginParseConfig.setDescription(plugin1.getPattern());
+        pluginParseConfig.setName(plugin1.getName());
+        pluginParseConfig.setExamples(Lists.newArrayList("tom最近访问超音数情况怎么样"));
+        plugin1.setParseModeConfig(JSONObject.toJSONString(pluginParseConfig));
+        WebBase webBase = new WebBase();
+        webBase.setUrl("www.yourbi.com");
+        ParamOption paramOption = new ParamOption();
+        paramOption.setKey("name");
+        paramOption.setParamType(ParamOption.ParamType.SEMANTIC);
+        paramOption.setElementId(userDimension.getId());
+        paramOption.setModelId(userModel.getId());
+        List<ParamOption> paramOptions = Arrays.asList(paramOption);
+        webBase.setParamOptions(paramOptions);
+        plugin1.setConfig(JsonUtil.toString(webBase));
+        pluginService.createPlugin(plugin1, user);
+    }
+
     private RelateDimension getRelateDimension(List<Long> dimensionIds) {
         RelateDimension relateDimension = new RelateDimension();
         for (Long id : dimensionIds) {
             relateDimension.getDrillDownDimensions().add(new DrillDownDimension(id));
         }
         return relateDimension;
+    }
+
+    private DimensionResp getDimension(String bizName, ModelResp model) {
+        return dimensionService.getDimension(bizName, model.getId());
+    }
+
+    private MetricResp getMetric(String bizName, ModelResp model) {
+        return metricService.getMetric(model.getId(), bizName);
+    }
+
+    private List<DataSetModelConfig> getDataSetModelConfigs(Long domainId) {
+        List<DataSetModelConfig> dataSetModelConfigs = Lists.newArrayList();
+        List<ModelResp> modelByDomainIds =
+                modelService.getModelByDomainIds(Lists.newArrayList(domainId));
+
+        for (ModelResp modelResp : modelByDomainIds) {
+            DataSetModelConfig dataSetModelConfig = new DataSetModelConfig();
+            dataSetModelConfig.setId(modelResp.getId());
+            MetaFilter metaFilter = new MetaFilter();
+            metaFilter.setModelIds(Lists.newArrayList(modelResp.getId()));
+            List<Long> metrics = metricService.getMetrics(metaFilter)
+                    .stream().map(MetricResp::getId).collect(Collectors.toList());
+            dataSetModelConfig.setMetrics(metrics);
+            List<Long> dimensions = dimensionService.getDimensions(metaFilter)
+                    .stream().map(DimensionResp::getId).collect(Collectors.toList());
+            dataSetModelConfig.setMetrics(metrics);
+            dataSetModelConfig.setDimensions(dimensions);
+            dataSetModelConfigs.add(dataSetModelConfig);
+        }
+        return dataSetModelConfigs;
     }
 
 }

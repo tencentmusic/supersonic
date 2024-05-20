@@ -1,5 +1,6 @@
 package com.tencent.supersonic.headless.server.service.impl;
 
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.headless.api.pojo.request.DatabaseReq;
@@ -14,7 +15,7 @@ import com.tencent.supersonic.headless.core.utils.JdbcDataSourceUtils;
 import com.tencent.supersonic.headless.core.utils.SqlUtils;
 import com.tencent.supersonic.headless.core.utils.SqlVariableParseUtils;
 import com.tencent.supersonic.headless.server.persistence.dataobject.DatabaseDO;
-import com.tencent.supersonic.headless.server.persistence.repository.DatabaseRepository;
+import com.tencent.supersonic.headless.server.persistence.mapper.DatabaseDOMapper;
 import com.tencent.supersonic.headless.server.pojo.DatabaseParameter;
 import com.tencent.supersonic.headless.server.pojo.DbParameterFactory;
 import com.tencent.supersonic.headless.server.pojo.ModelFilter;
@@ -22,6 +23,7 @@ import com.tencent.supersonic.headless.server.service.DatabaseService;
 import com.tencent.supersonic.headless.server.service.ModelService;
 import com.tencent.supersonic.headless.server.utils.DatabaseConverter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -34,19 +36,15 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Service
-public class DatabaseServiceImpl implements DatabaseService {
+public class DatabaseServiceImpl extends ServiceImpl<DatabaseDOMapper, DatabaseDO>
+        implements DatabaseService {
 
-    private final SqlUtils sqlUtils;
-    private DatabaseRepository databaseRepository;
+    @Autowired
+    private SqlUtils sqlUtils;
+
+    @Lazy
+    @Autowired
     private ModelService datasourceService;
-
-    public DatabaseServiceImpl(DatabaseRepository databaseRepository,
-            SqlUtils sqlUtils,
-            @Lazy ModelService datasourceService) {
-        this.databaseRepository = databaseRepository;
-        this.sqlUtils = sqlUtils;
-        this.datasourceService = datasourceService;
-    }
 
     @Override
     public boolean testConnect(DatabaseReq databaseReq, User user) {
@@ -61,21 +59,19 @@ public class DatabaseServiceImpl implements DatabaseService {
         if (databaseDO != null) {
             database.updatedBy(user.getName());
             DatabaseConverter.convert(database, databaseDO);
-            databaseRepository.updateDatabase(databaseDO);
+            updateById(databaseDO);
             return DatabaseConverter.convertWithPassword(databaseDO);
         }
         database.createdBy(user.getName());
         databaseDO = DatabaseConverter.convert(database);
-        databaseRepository.createDatabase(databaseDO);
+        save(databaseDO);
         return DatabaseConverter.convertWithPassword(databaseDO);
     }
 
     @Override
     public List<DatabaseResp> getDatabaseList(User user) {
-        List<DatabaseResp> databaseResps =
-                databaseRepository.getDatabaseList()
-                        .stream().map(DatabaseConverter::convert)
-                        .collect(Collectors.toList());
+        List<DatabaseResp> databaseResps = list().stream().map(DatabaseConverter::convert)
+                .collect(Collectors.toList());
         fillPermission(databaseResps, user);
         return databaseResps;
     }
@@ -107,12 +103,12 @@ public class DatabaseServiceImpl implements DatabaseService {
             String message = String.format("该数据库被模型%s使用，无法删除", datasourceNames);
             throw new RuntimeException(message);
         }
-        databaseRepository.deleteDatabase(databaseId);
+        removeById(databaseId);
     }
 
     @Override
     public DatabaseResp getDatabase(Long id) {
-        DatabaseDO databaseDO = databaseRepository.getDatabase(id);
+        DatabaseDO databaseDO = getById(id);
         return DatabaseConverter.convertWithPassword(databaseDO);
     }
 
@@ -156,7 +152,7 @@ public class DatabaseServiceImpl implements DatabaseService {
     }
 
     private DatabaseDO getDatabaseDO(Long id) {
-        return databaseRepository.getDatabase(id);
+        return getById(id);
     }
 
     @Override
