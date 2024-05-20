@@ -67,7 +67,13 @@ const MetricAddClass: React.FC<Props> = ({ ids = [], createModalVisible, onCance
         >
           删 除
         </Button>
-        <Button type="primary" loading={saveLoading} onClick={handleSubmit}>
+        <Button
+          type="primary"
+          loading={saveLoading}
+          onClick={() => {
+            handleSubmit();
+          }}
+        >
           添 加
         </Button>
       </>

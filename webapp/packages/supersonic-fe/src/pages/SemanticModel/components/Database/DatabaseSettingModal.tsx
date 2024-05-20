@@ -67,7 +67,6 @@ const DatabaseSettingModal: React.FC<CreateFormProps> = ({
       <DatabaseCreateForm
         hideSubmitBtn={true}
         ref={createFormRef}
-        // dataBaseConfig={databaseItem}
         databaseId={databaseItem?.id}
         onSubmit={() => {
           onSubmit?.();

@@ -741,3 +741,9 @@ export function saveOrUpdate(data: any): Promise<any> {
     data: { ...data },
   });
 }
+
+export function deleteTerm(id: number): Promise<any> {
+  return request(`${process.env.API_BASE_URL}term/${id}`, {
+    method: 'DELETE',
+  });
+}

@@ -436,6 +436,7 @@ export declare namespace ISemantic {
   }
 
   interface ITermItem {
+    id: number;
     name: string;
     description: string;
     similarTerms: string[];
