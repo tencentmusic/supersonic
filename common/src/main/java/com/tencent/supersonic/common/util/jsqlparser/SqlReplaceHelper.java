@@ -3,6 +3,7 @@ package com.tencent.supersonic.common.util.jsqlparser;
 import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
 import com.tencent.supersonic.common.util.StringUtil;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -13,6 +14,7 @@ import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.Alias;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.Function;
+import net.sf.jsqlparser.expression.LongValue;
 import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
 import net.sf.jsqlparser.expression.operators.conditional.OrExpression;
 import net.sf.jsqlparser.expression.operators.relational.ComparisonOperator;
@@ -513,6 +515,50 @@ public class SqlReplaceHelper {
         } else {
             return expression;
         }
+    }
+
+    private static Select replaceAggAliasOrderItem(Select selectStatement) {
+        if (selectStatement instanceof PlainSelect) {
+            PlainSelect plainSelect = (PlainSelect) selectStatement;
+            if (Objects.nonNull(plainSelect.getOrderByElements())) {
+                Map<String, String> selectNames = new HashMap<>();
+                for (int i = 0; i < plainSelect.getSelectItems().size(); i++) {
+                    SelectItem<?> f = plainSelect.getSelectItem(i);
+                    if (Objects.nonNull(f.getAlias()) && f.getExpression() instanceof Function) {
+                        Function function = (Function) f.getExpression();
+                        String alias = f.getAlias().getName();
+                        if (function.getParameters().size() == 1 && function.getParameters().get(0) instanceof Column) {
+                            Column column = (Column) function.getParameters().get(0);
+                            if (column.getColumnName().equalsIgnoreCase(alias)) {
+                                selectNames.put(alias, String.valueOf(i + 1));
+                            }
+                        }
+                    }
+                }
+                plainSelect.getOrderByElements().stream().forEach(o -> {
+                    if (o.getExpression() instanceof Function) {
+                        Function function = (Function) o.getExpression();
+                        if (function.getParameters().size() == 1 && function.getParameters().get(0) instanceof Column) {
+                            Column column = (Column) function.getParameters().get(0);
+                            if (selectNames.containsKey(column.getColumnName())) {
+                                o.setExpression(new LongValue(selectNames.get(column.getColumnName())));
+                            }
+                        }
+                    }
+                });
+            }
+            if (plainSelect.getFromItem() instanceof ParenthesedSelect) {
+                ParenthesedSelect parenthesedSelect = (ParenthesedSelect) plainSelect.getFromItem();
+                parenthesedSelect.setSelect(replaceAggAliasOrderItem(parenthesedSelect.getSelect()));
+            }
+            return selectStatement;
+        }
+        return selectStatement;
+    }
+
+    public static String replaceAggAliasOrderItem(String sql) {
+        Select selectStatement = replaceAggAliasOrderItem(SqlSelectHelper.getSelect(sql));
+        return selectStatement.toString();
     }
 
     public static String replaceExpression(String expr, Map<String, String> replace) {
