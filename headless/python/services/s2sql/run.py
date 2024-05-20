@@ -14,7 +14,6 @@ import json
 from s2sql.constructor import FewShotPromptTemplate2
 from s2sql.sql_agent import Text2DSLAgent, Text2DSLAgentAutoCoT, Text2DSLAgentWrapper
 
-from instances.llm_instance import llm
 from instances.chromadb_instance import client as chromadb_client
 from instances.logging_instance import logger
 from instances.text2vec_instance import emb_func
@@ -40,9 +39,9 @@ text2dsl_agent_act_example_prompter = FewShotPromptTemplate2(collection=text2dsl
                                             few_shot_seperator='\n\n')
 
 text2sql_agent = Text2DSLAgent(num_fewshots=TEXT2DSL_FEWSHOTS_NUM, num_examples=TEXT2DSL_EXAMPLE_NUM, num_self_consistency=TEXT2DSL_SELF_CONSISTENCY_NUM,
-                               sql_example_prompter=text2dsl_agent_example_prompter, llm=llm)
+                               sql_example_prompter=text2dsl_agent_example_prompter)
 text2sql_agent_autoCoT = Text2DSLAgentAutoCoT(num_fewshots=TEXT2DSL_FEWSHOTS_NUM, num_examples=TEXT2DSL_EXAMPLE_NUM, num_self_consistency=TEXT2DSL_SELF_CONSISTENCY_NUM,
-                                            sql_example_prompter=text2dsl_agent_act_example_prompter, llm=llm,
+                                            sql_example_prompter=text2dsl_agent_act_example_prompter,
                                             auto_cot_min_window_size=ACT_MIN_WINDOWN_SIZE, auto_cot_max_window_size=ACT_MAX_WINDOWN_SIZE)
 
 sql_ids = [str(i) for i in range(0, len(sql_exemplars))]

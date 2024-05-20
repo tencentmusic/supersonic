@@ -30,7 +30,7 @@ import java.util.ArrayList;
 @Component
 public class PythonLLMProxy implements LLMProxy {
 
-    private static final Logger keyPipelineLog = LoggerFactory.getLogger("keyPipeline");
+    private static final Logger keyPipelineLog = LoggerFactory.getLogger(PythonLLMProxy.class);
 
     @Override
     public boolean isSkip(QueryContext queryContext) {

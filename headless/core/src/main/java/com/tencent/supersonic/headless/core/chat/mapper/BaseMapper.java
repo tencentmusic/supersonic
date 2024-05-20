@@ -27,7 +27,8 @@ public abstract class BaseMapper implements SchemaMapper {
 
         String simpleName = this.getClass().getSimpleName();
         long startTime = System.currentTimeMillis();
-        log.debug("before {},mapInfo:{}", simpleName, queryContext.getMapInfo().getDataSetElementMatches());
+        log.debug("before {},mapInfo:{}", simpleName,
+                queryContext.getMapInfo().getDataSetElementMatches());
 
         try {
             doMap(queryContext);
@@ -37,7 +38,8 @@ public abstract class BaseMapper implements SchemaMapper {
         }
 
         long cost = System.currentTimeMillis() - startTime;
-        log.info("after {},cost:{},mapInfo:{}", simpleName, cost, queryContext.getMapInfo().getDataSetElementMatches());
+        log.debug("after {},cost:{},mapInfo:{}", simpleName, cost,
+                queryContext.getMapInfo().getDataSetElementMatches());
     }
 
     private void filter(QueryContext queryContext) {
@@ -130,7 +132,7 @@ public abstract class BaseMapper implements SchemaMapper {
         }
         SchemaElement elementDb = dataSetSchema.getElement(elementType, elementID);
         if (Objects.isNull(elementDb)) {
-            log.info("element is null, elementType:{},elementID:{}", elementType, elementID);
+            log.warn("element is null, elementType:{},elementID:{}", elementType, elementID);
             return null;
         }
         BeanUtils.copyProperties(elementDb, element);
