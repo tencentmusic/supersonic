@@ -13,7 +13,7 @@
 
 /dist
 
-/supersonic-webapp
+/webapp
 
 ../assembly/build/supersonic-webapp.tar.gz
 supersonic-webapp.tar.gz

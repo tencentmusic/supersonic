@@ -308,3 +308,8 @@ CREATE TABLE IF NOT EXISTS `s2_term` (
     `updated_by` varchar(100) DEFAULT NULL ,
     PRIMARY KEY (`id`)
 );
+
+--20240520
+alter table s2_agent add column `llm_config` varchar(2000) COLLATE utf8_unicode_ci DEFAULT NULL;
+alter table s2_agent add column `multi_turn_config` varchar(2000) COLLATE utf8_unicode_ci DEFAULT NULL;
+alter table s2_agent add column `visual_config` varchar(2000) COLLATE utf8_unicode_ci DEFAULT NULL;
