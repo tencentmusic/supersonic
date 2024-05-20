@@ -26,6 +26,7 @@
     </parent>
 
     <properties>
+        <revision>0.9.2-SNAPSHOT</revision>
         <java.source.version>1.8</java.source.version>
         <java.target.version>1.8</java.target.version>
         <maven.compiler.source>8</maven.compiler.source>
@@ -65,7 +66,6 @@
         <xk.time.version>3.2.4</xk.time.version>
         <mockito-inline.version>4.5.1</mockito-inline.version>
 
-        <revision>0.9.0-SNAPSHOT</revision>
         <!-- Do not bump spotless plugin version since 2.30.0 is the latest version supports Java 8-->
         <maven.plugin.spotless.version>2.30.0</maven.plugin.spotless.version>
         <spotless.python.includes></spotless.python.includes>
@@ -138,11 +138,6 @@
             <dependency>
                 <groupId>dev.langchain4j</groupId>
                 <artifactId>langchain4j-embeddings</artifactId>
-                <version>${langchain4j.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>dev.langchain4j</groupId>
-                <artifactId>langchain4j-hugging-face</artifactId>
                 <version>${langchain4j.version}</version>
             </dependency>
             <dependency>

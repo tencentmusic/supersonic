@@ -58,6 +58,9 @@ public class S2SqlDateHelper {
             DatePeriodEnum datePeriodEnum = DatePeriodEnum.get(period);
             String startDate = DateUtils.getBeforeDate(unit, datePeriodEnum);
             String endDate = DateUtils.getBeforeDate(1, datePeriodEnum);
+            if (unit == 0) {
+                endDate = startDate;
+            }
             if (TimeMode.LAST.equals(timeMode)) {
                 endDate = startDate;
             }

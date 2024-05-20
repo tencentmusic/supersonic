@@ -32,9 +32,9 @@ With these ideas in mind, we develop SuperSonic as a practical reference impleme
 
 - Built-in Chat BI interface for *business users* to enter natural language queries
 - Built-in Headless BI interface for *analytics engineers* to build semantic data models
-- Built-in rule-based semantic parser to improve efficiency in certain scenarios
-- Support input auto-completion as well as query recommendation
-- Support four-level permission control: domain-level, model-level, column-level and row-level
+- Built-in rule-based semantic parser to improve efficiency in certain scenarios (e.g. demonstration, integration testing)
+- Built-in support for input auto-completion, multi-turn conversation as well as post-query recommendation
+- Built-in support for three-level data access control: dataset-level, column-level and row-level
 
 ## Extensible Components
 

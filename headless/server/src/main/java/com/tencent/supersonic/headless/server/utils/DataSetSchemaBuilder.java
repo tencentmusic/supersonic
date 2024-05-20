@@ -12,6 +12,7 @@ import com.tencent.supersonic.headless.api.pojo.SchemaValueMap;
 import com.tencent.supersonic.headless.api.pojo.response.DataSetSchemaResp;
 import com.tencent.supersonic.headless.api.pojo.response.DimSchemaResp;
 import com.tencent.supersonic.headless.api.pojo.response.MetricSchemaResp;
+import com.tencent.supersonic.headless.api.pojo.response.TermResp;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.BeanUtils;
 import org.springframework.util.CollectionUtils;
@@ -53,6 +54,9 @@ public class DataSetSchemaBuilder {
 
         Set<SchemaElement> dimensionValues = getDimensionValues(resp);
         dataSetSchema.getDimensionValues().addAll(dimensionValues);
+
+        Set<SchemaElement> terms = getTerms(resp);
+        dataSetSchema.getTerms().addAll(terms);
 
         SchemaElement entity = getEntity(resp);
         if (Objects.nonNull(entity)) {
@@ -228,6 +232,28 @@ public class DataSetSchemaBuilder {
 
         }
         return metrics;
+    }
+
+    private static Set<SchemaElement> getTerms(DataSetSchemaResp resp) {
+        Set<SchemaElement> terms = new HashSet<>();
+        for (TermResp termResp : resp.getTermResps()) {
+            List<String> alias = termResp.getAlias();
+            SchemaElement metricToAdd = SchemaElement.builder()
+                    .dataSet(resp.getId())
+                    .dataSetName(resp.getName())
+                    .model(-1L)
+                    .id(termResp.getId())
+                    .name(termResp.getName())
+                    .bizName(termResp.getName())
+                    .type(SchemaElementType.TERM)
+                    .useCnt(0L)
+                    .alias(alias)
+                    .description(termResp.getDescription())
+                    .build();
+            terms.add(metricToAdd);
+
+        }
+        return terms;
     }
 
     private static List<RelatedSchemaElement> getRelateSchemaElement(MetricSchemaResp metricSchemaResp) {

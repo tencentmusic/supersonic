@@ -6,6 +6,10 @@ import com.tencent.supersonic.common.pojo.enums.DictWordType;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
 import com.tencent.supersonic.headless.api.pojo.response.S2Term;
 import com.tencent.supersonic.headless.core.chat.knowledge.DataSetInfoStat;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.util.CollectionUtils;
+
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -14,9 +18,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.util.CollectionUtils;
 
 /**
  * nature parse helper
@@ -45,6 +46,9 @@ public class NatureHelper {
                 break;
             case VALUE:
                 result = SchemaElementType.VALUE;
+                break;
+            case TERM:
+                result = SchemaElementType.TERM;
                 break;
             default:
                 break;
@@ -108,6 +112,10 @@ public class NatureHelper {
     }
 
     public static List<String> changeModel2DataSet(String nature, Map<Long, List<Long>> modelIdToDataSetIds) {
+        //term prefix id is dataSetId, no need to transform
+        if (SchemaElementType.TERM.equals(NatureHelper.convertToElementType(nature))) {
+            return Lists.newArrayList(nature);
+        }
         Long modelId = getModelId(nature);
         List<Long> dataSetIds = modelIdToDataSetIds.get(modelId);
         if (CollectionUtils.isEmpty(dataSetIds)) {
@@ -129,7 +137,7 @@ public class NatureHelper {
             return false;
         }
         return !nature.endsWith(DictWordType.METRIC.getType()) && !nature.endsWith(
-                DictWordType.DIMENSION.getType())
+                DictWordType.DIMENSION.getType()) && !nature.endsWith(DictWordType.TERM.getType())
                 && StringUtils.isNumeric(split[1]);
     }
 

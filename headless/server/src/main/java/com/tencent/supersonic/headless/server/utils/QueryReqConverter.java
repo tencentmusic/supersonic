@@ -28,14 +28,6 @@ import com.tencent.supersonic.headless.core.adaptor.db.DbAdaptorFactory;
 import com.tencent.supersonic.headless.core.pojo.DataSetQueryParam;
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;
 import com.tencent.supersonic.headless.core.utils.SqlGenerateUtils;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -45,6 +37,14 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
+import org.apache.logging.log4j.util.Strings;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 @Component
 @Slf4j
@@ -57,7 +57,7 @@ public class QueryReqConverter {
     private SqlGenerateUtils sqlGenerateUtils;
 
     public QueryStatement convert(QuerySqlReq querySQLReq,
-                                  SemanticSchemaResp semanticSchemaResp) throws Exception {
+            SemanticSchemaResp semanticSchemaResp) throws Exception {
 
         if (semanticSchemaResp == null) {
             return new QueryStatement();
@@ -75,7 +75,8 @@ public class QueryReqConverter {
         }
         //4.build MetricTables
         List<String> allFields = SqlSelectHelper.getAllFields(querySQLReq.getSql());
-        List<String> metrics = getMetrics(semanticSchemaResp, allFields);
+        List<MetricSchemaResp> metricSchemas = getMetrics(semanticSchemaResp, allFields);
+        List<String> metrics = metricSchemas.stream().map(m -> m.getBizName()).collect(Collectors.toList());
         QueryStructReq queryStructReq = new QueryStructReq();
         MetricTable metricTable = new MetricTable();
         metricTable.setMetrics(metrics);
@@ -95,7 +96,7 @@ public class QueryReqConverter {
                     metricTable.getMetrics().stream().map(m -> new Aggregator(m, AggOperatorEnum.UNKNOWN)).collect(
                             Collectors.toList()));
         }
-        AggOption aggOption = getAggOption(querySQLReq);
+        AggOption aggOption = getAggOption(querySQLReq, metricSchemas);
         metricTable.setAggOption(aggOption);
         List<MetricTable> tables = new ArrayList<>();
         tables.add(metricTable);
@@ -138,7 +139,7 @@ public class QueryReqConverter {
         queryParam.setGroups(queryStructReq.getGroups());
     }
 
-    private AggOption getAggOption(QuerySqlReq databaseReq) {
+    private AggOption getAggOption(QuerySqlReq databaseReq, List<MetricSchemaResp> metricSchemas) {
         // if there is no group by in S2SQL,set MetricTable's aggOption to "NATIVE"
         // if there is count() in S2SQL,set MetricTable's aggOption to "NATIVE"
         String sql = databaseReq.getSql();
@@ -148,6 +149,12 @@ public class QueryReqConverter {
             return AggOption.NATIVE;
         }
         if (databaseReq.isInnerLayerNative()) {
+            return AggOption.NATIVE;
+        }
+        long defaultAggNullCnt = metricSchemas.stream()
+                .filter(m -> Objects.isNull(m.getDefaultAgg()) || Strings.isBlank(m.getDefaultAgg())).count();
+        if (defaultAggNullCnt > 0) {
+            log.info("getAggOption find null defaultAgg metric set to NATIVE");
             return AggOption.NATIVE;
         }
         return AggOption.DEFAULT;
@@ -174,9 +181,9 @@ public class QueryReqConverter {
                 .map(entry -> dimensionLowerToNameMap.get(entry.toLowerCase())).collect(Collectors.toSet());
     }
 
-    private List<String> getMetrics(SemanticSchemaResp semanticSchemaResp, List<String> allFields) {
-        Map<String, String> metricLowerToNameMap = semanticSchemaResp.getMetrics().stream()
-                .collect(Collectors.toMap(entry -> entry.getBizName().toLowerCase(), SchemaItem::getBizName));
+    private List<MetricSchemaResp> getMetrics(SemanticSchemaResp semanticSchemaResp, List<String> allFields) {
+        Map<String, MetricSchemaResp> metricLowerToNameMap = semanticSchemaResp.getMetrics().stream()
+                .collect(Collectors.toMap(entry -> entry.getBizName().toLowerCase(), entry -> entry));
         return allFields.stream().filter(entry -> metricLowerToNameMap.containsKey(entry.toLowerCase()))
                 .map(entry -> metricLowerToNameMap.get(entry.toLowerCase())).collect(Collectors.toList());
     }
@@ -239,7 +246,7 @@ public class QueryReqConverter {
     }
 
     private void generateDerivedMetric(SemanticSchemaResp semanticSchemaResp, AggOption aggOption,
-                                       DataSetQueryParam viewQueryParam) {
+            DataSetQueryParam viewQueryParam) {
         String sql = viewQueryParam.getSql();
         for (MetricTable metricTable : viewQueryParam.getTables()) {
             Set<String> measures = new HashSet<>();
@@ -261,8 +268,8 @@ public class QueryReqConverter {
     }
 
     private void generateDerivedMetric(SemanticSchemaResp semanticSchemaResp, AggOption aggOption,
-                                       List<String> metrics, List<String> dimensions,
-                                       Set<String> measures, Map<String, String> replaces) {
+            List<String> metrics, List<String> dimensions,
+            Set<String> measures, Map<String, String> replaces) {
         List<MetricSchemaResp> metricResps = semanticSchemaResp.getMetrics();
         List<DimSchemaResp> dimensionResps = semanticSchemaResp.getDimensions();
         // check metrics has derived

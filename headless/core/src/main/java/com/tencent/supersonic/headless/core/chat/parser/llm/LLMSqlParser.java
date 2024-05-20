@@ -17,6 +17,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+/**
+ * LLMSqlParser uses large language model to understand query semantics and
+ * generate S2SQL statements to be executed by the semantic query engine.
+ */
 @Slf4j
 public class LLMSqlParser implements SemanticParser {
 
@@ -30,20 +34,21 @@ public class LLMSqlParser implements SemanticParser {
         try {
             //2.get dataSetId from queryCtx and chatCtx.
             Long dataSetId = requestService.getDataSetId(queryCtx);
-            log.info("dataSetId:{}", dataSetId);
             if (dataSetId == null) {
                 return;
             }
-            //3.construct a request, call the API for the large model, and retrieve the results.
+            log.info("Generate query statement for dataSetId:{}", dataSetId);
+
+            //3.invoke LLM service to do parsing.
             List<LLMReq.ElementValue> linkingValues = requestService.getValueList(queryCtx, dataSetId);
             SemanticSchema semanticSchema = queryCtx.getSemanticSchema();
             LLMReq llmReq = requestService.getLlmReq(queryCtx, dataSetId, semanticSchema, linkingValues);
             LLMResp llmResp = requestService.requestLLM(llmReq, dataSetId);
-
             if (Objects.isNull(llmResp)) {
                 return;
             }
-            //4. deduplicate the SQL result list and build parserInfo
+
+            //4. deduplicate the S2SQL result list and build parserInfo
             LLMResponseService responseService = ContextUtils.getBean(LLMResponseService.class);
             Map<String, LLMSqlResp> deduplicationSqlResp = responseService.getDeduplicationSqlResp(llmResp);
             ParseResult parseResult = ParseResult.builder()
@@ -66,7 +71,7 @@ public class LLMSqlParser implements SemanticParser {
             }
 
         } catch (Exception e) {
-            log.error("parse", e);
+            log.error("Failed to parse query:", e);
         }
     }
 

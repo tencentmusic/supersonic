@@ -627,14 +627,16 @@ CREATE TABLE IF NOT EXISTS `s2_query_rule` (
     );
 COMMENT ON TABLE s2_query_rule IS 'tag query rule table';
 
-CREATE TABLE IF NOT EXISTS `s2_term_set` (
-                                             `id` INT NOT NULL  AUTO_INCREMENT,
-                                             `domain_id` INT ,
-                                             `terms` varchar(1000),
+CREATE TABLE IF NOT EXISTS `s2_term` (
+    `id` INT NOT NULL  AUTO_INCREMENT,
+    `domain_id` INT ,
+    `name` varchar(255)  NOT NULL ,
+    `description` varchar(500) DEFAULT NULL ,
+    `alias` varchar(1000)  NOT NULL ,
     `created_at` TIMESTAMP NOT NULL ,
     `created_by` varchar(100) NOT NULL ,
     `updated_at` TIMESTAMP DEFAULT NULL ,
     `updated_by` varchar(100) DEFAULT NULL ,
     PRIMARY KEY (`id`)
     );
-COMMENT ON TABLE s2_term_set IS 'term info';
+COMMENT ON TABLE s2_term IS 'term info';

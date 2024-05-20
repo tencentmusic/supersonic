@@ -129,19 +129,4 @@ public class SqlPromptGenerator {
         return sqlPromptPool;
     }
 
-    public String generateRewritePrompt(List<Map<String, String>> rewriteExamples) {
-        String instruction = "#this is a multi-turn text-to-sql scenes,you need consider the contextual "
-                + "questions and semantics, rewriting current question for expressing complete semantics of "
-                + "the current question based on the contextual questions.";
-        List<String> exampleKeys = Arrays.asList("contextualQuestions", "currentQuestion", "rewritingCurrentQuestion");
-        StringBuilder rewriteSb = new StringBuilder();
-        rewriteExamples.stream().forEach(o -> {
-            exampleKeys.stream().forEach(example -> {
-                rewriteSb.append(example + ":" + o.get(example) + "\n");
-            });
-            rewriteSb.append("\n");
-        });
-        return instruction + InputFormat.SEPERATOR + rewriteSb.toString();
-    }
-
 }
