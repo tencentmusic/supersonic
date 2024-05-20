@@ -1,8 +1,11 @@
 #!/usr/bin/env bash
 
 sbinDir=$(cd "$(dirname "$0")"; pwd)
-chmod +x $sbinDir/supersonic-common.sh
 source $sbinDir/supersonic-common.sh
+
+set -a
+source $sbinDir/../conf/supersonic-env.sh
+set +a
 
 command=$1
 service=$2
