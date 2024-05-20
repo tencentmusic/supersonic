@@ -17,7 +17,7 @@ import com.tencent.supersonic.common.pojo.enums.EventType;
 import com.tencent.supersonic.common.pojo.enums.StatusEnum;
 import com.tencent.supersonic.common.pojo.enums.TypeEnums;
 import com.tencent.supersonic.common.util.BeanMapper;
-import com.tencent.supersonic.common.util.ChatGptHelper;
+import com.tencent.supersonic.headless.server.utils.AliasGenerateHelper;
 import com.tencent.supersonic.common.util.jsqlparser.SqlSelectFunctionHelper;
 import com.tencent.supersonic.headless.api.pojo.DrillDownDimension;
 import com.tencent.supersonic.headless.api.pojo.Measure;
@@ -97,7 +97,7 @@ public class MetricServiceImpl implements MetricService {
 
     private DimensionService dimensionService;
 
-    private ChatGptHelper chatGptHelper;
+    private AliasGenerateHelper chatGptHelper;
 
     private CollectService collectService;
 
@@ -111,7 +111,7 @@ public class MetricServiceImpl implements MetricService {
 
     public MetricServiceImpl(MetricRepository metricRepository,
             ModelService modelService,
-            ChatGptHelper chatGptHelper,
+            AliasGenerateHelper chatGptHelper,
             CollectService collectService,
             DataSetService dataSetService,
             ApplicationEventPublisher eventPublisher,
@@ -535,7 +535,7 @@ public class MetricServiceImpl implements MetricService {
     @Override
     public List<String> mockAlias(MetricBaseReq metricReq, String mockType, User user) {
 
-        String mockAlias = chatGptHelper.mockAlias(mockType, metricReq.getName(), metricReq.getBizName(), "",
+        String mockAlias = chatGptHelper.generateAlias(mockType, metricReq.getName(), metricReq.getBizName(), "",
                 metricReq.getDescription(), !"".equals(metricReq.getDataFormatType()));
         return JSONObject.parseObject(mockAlias, new TypeReference<List<String>>() {
         });
