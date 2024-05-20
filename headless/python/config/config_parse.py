@@ -1,5 +1,4 @@
 # -*- coding:utf-8 -*-
-import os
 import configparser
 
 import os
@@ -8,6 +7,12 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
+class EnvInterpolation(configparser.BasicInterpolation):
+    """Interpolation which expands environment variables in values."""
+
+    def before_get(self, parser, section, option, value, defaults):
+        value = super().before_get(parser, section, option, value, defaults)
+        return os.path.expandvars(value)
 
 def type_convert(input_str: str):
     try:
@@ -16,13 +21,13 @@ def type_convert(input_str: str):
         return input_str
 
 
-PROJECT_DIR_PATH = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) 
+PROJECT_DIR_PATH = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 config_dir = "config"
-CONFIG_DIR_PATH = os.path.join(PROJECT_DIR_PATH, config_dir) 
+CONFIG_DIR_PATH = os.path.join(PROJECT_DIR_PATH, config_dir)
 config_file = "run_config.ini"
 config_path = os.path.join(CONFIG_DIR_PATH, config_file)
 
-config = configparser.ConfigParser()
+config = configparser.ConfigParser(interpolation=EnvInterpolation())
 config.read(config_path)
 
 log_dir = "log"
@@ -77,5 +82,3 @@ if __name__ == "__main__":
     print(f"ACT_MIN_WINDOWN_SIZE: {ACT_MIN_WINDOWN_SIZE}")
     print(f"ACT_MAX_WINDOWN_SIZE: {ACT_MAX_WINDOWN_SIZE}")
     print(f"LOG_FILE_PATH: {LOG_FILE_PATH}")
-
-    

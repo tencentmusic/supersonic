@@ -15,7 +15,7 @@ fi
 function buildJavaService {
   model_name=$1
   echo "starting building supersonic-${model_name} service"
-  mvn -f $projectDir/launchers/${model_name} clean package -DskipTests
+  mvn -f $projectDir clean package -DskipTests
   if [ $? -ne 0 ]; then
       echo "Failed to build backend Java modules."
       exit 1
@@ -72,7 +72,7 @@ elif [ "$service" == "webapp" ]; then
   buildWebapp
   target_path=$projectDir/launchers/$STANDALONE_SERVICE/target/classes
   tar xvf $projectDir/webapp/supersonic-webapp.tar.gz -C $target_path
-  mv $target_path/supersonic_webapp $target_path/webapp
+  mv $target_path/supersonic-webapp $target_path/webapp
 else
   buildJavaService $service
   buildWebapp
