@@ -64,6 +64,12 @@ const MetricBasicInformation: React.FC<Props> = ({ metircData }) => {
       dataIndex: 'agg',
       title: '聚合函数',
       width: 80,
+      render: (_: string) => {
+        if (!_) {
+          return '--';
+        }
+        return _;
+      },
     },
   ];
 

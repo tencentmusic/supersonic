@@ -4,17 +4,16 @@ import styles from './style.less';
 import { useMounted } from '@/hooks/useMounted';
 import { message } from 'antd';
 import { formLayout } from '@/components/FormHelper/utils';
-import { EnumTransModelType } from '@/enum';
 
 const FormItem = Form.Item;
 
-export type ProjectInfoFormProps = {
+export type Props = {
   basicInfo: any;
   onCancel: () => void;
   onSubmit: (values: any) => Promise<any>;
 };
 
-const ProjectInfoForm: React.FC<ProjectInfoFormProps> = (props) => {
+const DomaintInfoForm: React.FC<Props> = (props) => {
   const { basicInfo, onSubmit: handleUpdate, onCancel } = props;
   const { type, modelType } = basicInfo;
 
@@ -48,23 +47,13 @@ const ProjectInfoForm: React.FC<ProjectInfoFormProps> = (props) => {
     </>
   );
 
-  const titleRender = () => {
-    let str = EnumTransModelType[modelType];
-    if (type === 'top') {
-      str += '顶级';
-    } else if (modelType === 'add') {
-      str += '子';
-    }
-    str += '主题域';
-    return str;
-  };
+  const infoName = type === 'top' ? '主题域' : '模型集';
 
   return (
     <Modal
       width={640}
-      styles={{ padding: '32px 40px 48px' }}
       destroyOnClose
-      title={titleRender()}
+      title={`${modelType === 'add' ? '新增' : '编辑'}${infoName}`}
       open={true}
       footer={footer}
       onCancel={onCancel}
@@ -78,26 +67,26 @@ const ProjectInfoForm: React.FC<ProjectInfoFormProps> = (props) => {
         className={styles.form}
       >
         {type !== 'top' && modelType === 'add' && (
-          <FormItem name="parentName" label="父主题域名称">
-            <Input disabled placeholder="父主题域名称" />
+          <FormItem name="parentName" label="主题域名称">
+            <Input disabled placeholder="主题域名称" />
           </FormItem>
         )}
         <FormItem
           name="name"
-          label="主题域名称"
-          rules={[{ required: true, message: '请输入主题域名称！' }]}
+          label={`${infoName}名称`}
+          rules={[{ required: true, message: `请输入${infoName}名称！` }]}
         >
           <Input placeholder="主题域名称不可重复" />
         </FormItem>
         <FormItem
           name="bizName"
-          label="主题域英文名称"
-          rules={[{ required: true, message: '请输入主题域英文名称！' }]}
+          label={`${infoName}英文名称`}
+          rules={[{ required: true, message: `请输入${infoName}英文名称！` }]}
         >
-          <Input placeholder="请输入主题域英文名称" />
+          <Input placeholder={`请输入${infoName}英文名称`} />
         </FormItem>
-        <FormItem name="description" label="主题域描述" hidden={true}>
-          <Input.TextArea placeholder="主题域描述" />
+        <FormItem name="description" label={`${infoName}描述`} hidden={true}>
+          <Input.TextArea placeholder={`${infoName}描述`} />
         </FormItem>
         <FormItem name="isUnique" label="是否唯一" hidden={true}>
           <Switch size="small" checked={true} />
@@ -107,4 +96,4 @@ const ProjectInfoForm: React.FC<ProjectInfoFormProps> = (props) => {
   );
 };
 
-export default ProjectInfoForm;
+export default DomaintInfoForm;

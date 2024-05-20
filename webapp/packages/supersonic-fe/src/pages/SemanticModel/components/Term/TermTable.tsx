@@ -4,7 +4,7 @@ import { message, Button, Space, Popconfirm, Typography } from 'antd';
 import React, { useRef, useState, useEffect } from 'react';
 import { connect } from 'umi';
 import type { StateType } from '../../model';
-import { getTermList, saveOrUpdate } from '../../service';
+import { getTermList, saveOrUpdate, deleteTerm } from '../../service';
 
 import styles from '../style.less';
 import { ISemantic } from '../../data';
@@ -36,21 +36,21 @@ const TermTable: React.FC<Props> = ({ domainManger }) => {
     const { code, data, msg } = await getTermList(selectDomainId);
     setLoading(false);
     if (code === 200) {
-      setTableData(data?.terms || []);
+      setTableData(data || []);
     } else {
       message.error(msg);
       setTableData([]);
     }
   };
 
-  const queryTermConfig = async (terms: ISemantic.ITermItem[]) => {
+  const queryTermConfig = async (terms: ISemantic.ITermItem) => {
     const { code, msg } = await saveOrUpdate({
       domainId: selectDomainId,
-      terms,
+      ...terms,
     });
     setLoading(false);
     if (code === 200) {
-      setTableData(terms);
+      queryTagList();
     } else {
       message.error(msg);
     }
@@ -75,9 +75,13 @@ const TermTable: React.FC<Props> = ({ domainManger }) => {
     queryTermConfig(terms);
   };
 
-  const deleteTermConfig = (termItem: ISemantic.ITermItem) => {
-    const terms = tableData.filter((item) => item.name !== termItem.name);
-    queryTermConfig(terms);
+  const deleteTermConfig = async (termItem: ISemantic.ITermItem) => {
+    const { code, msg } = await deleteTerm(termItem.id);
+    if (code === 200) {
+      queryTagList();
+    } else {
+      message.error(msg);
+    }
   };
 
   const columnsConfig = ColumnsConfig();
@@ -89,17 +93,14 @@ const TermTable: React.FC<Props> = ({ domainManger }) => {
       search: false,
     },
     {
-      dataIndex: 'similarTerms',
+      dataIndex: 'alias',
       title: '近义词',
       search: false,
       render: (_: string[]) => {
-        const similarTerms = Array.isArray(_) ? _.join(',') : '-';
+        const alias = Array.isArray(_) ? _.join(',') : '-';
         return (
-          <Paragraph
-            ellipsis={{ tooltip: similarTerms, rows: 3 }}
-            style={{ width: 350, marginBottom: 0 }}
-          >
-            {similarTerms}
+          <Paragraph ellipsis={{ tooltip: alias, rows: 3 }} style={{ width: 350, marginBottom: 0 }}>
+            {alias}
           </Paragraph>
         );
       },
@@ -182,7 +183,7 @@ const TermTable: React.FC<Props> = ({ domainManger }) => {
           createModalVisible={createModalVisible}
           termItem={termItem}
           onSubmit={(termData) => {
-            saveTermConfig(termData);
+            queryTermConfig(termData);
             setCreateModalVisible(false);
           }}
           onCancel={() => {

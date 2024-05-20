@@ -1,5 +1,5 @@
-import { Tabs, Breadcrumb, Space } from 'antd';
-import React, { useRef, useEffect } from 'react';
+import { Tabs, Breadcrumb, Space, Radio } from 'antd';
+import React, { useRef, useEffect, useState } from 'react';
 import { connect, history } from 'umi';
 
 import ClassDimensionTable from './ClassDimensionTable';
@@ -55,6 +55,8 @@ const DomainManagerTab: React.FC<Props> = ({
     initState.current = false;
   }, [selectModelId]);
 
+  const [showModelType, setShowModelType] = useState<string>('list');
+
   const domainListParentIdList: number[] = Array.isArray(domainList)
     ? Array.from(new Set(domainList.map((item) => item.parentId)))
     : [];
@@ -64,15 +66,21 @@ const DomainManagerTab: React.FC<Props> = ({
       label: '模型管理',
       key: 'overview',
       hidden: domainData && domainListParentIdList.includes(domainData.id),
-      children: (
-        <OverView
-          key={selectDomainId}
-          modelList={modelList}
-          onModelChange={(model) => {
-            handleModelChange(model);
-          }}
-        />
-      ),
+      children:
+        showModelType === 'list' ? (
+          <OverView
+            key={selectDomainId}
+            modelList={modelList}
+            onModelChange={(model) => {
+              handleModelChange(model);
+            }}
+          />
+        ) : (
+          <div style={{ width: '100%' }}>
+            <SemanticGraphCanvas />
+            {/* <HeadlessFlows /> */}
+          </div>
+        ),
     },
     {
       label: '数据集管理',
@@ -99,17 +107,17 @@ const DomainManagerTab: React.FC<Props> = ({
       hidden: !!domainData?.parentId,
       children: <TermTable />,
     },
-    {
-      label: '画布',
-      key: 'xflow',
-      hidden: domainData && domainListParentIdList.includes(domainData.id),
-      children: (
-        <div style={{ width: '100%' }}>
-          <SemanticGraphCanvas />
-          {/* <HeadlessFlows /> */}
-        </div>
-      ),
-    },
+    // {
+    //   label: '画布',
+    //   key: 'xflow',
+    //   hidden: domainData && domainListParentIdList.includes(domainData.id),
+    //   children: (
+    //     <div style={{ width: '100%' }}>
+    //       <SemanticGraphCanvas />
+    //       {/* <HeadlessFlows /> */}
+    //     </div>
+    //   ),
+    // },
     {
       label: '权限管理',
       key: 'permissonSetting',
@@ -212,6 +220,24 @@ const DomainManagerTab: React.FC<Props> = ({
         className={styles.tab}
         items={!isModel ? tabItem : isModelItem}
         activeKey={getActiveKey()}
+        tabBarExtraContent={{
+          right:
+            getActiveKey() === 'overview' ? (
+              <Radio.Group
+                defaultValue="list"
+                buttonStyle="solid"
+                size="small"
+                style={{ marginRight: 25 }}
+                onChange={(e) => {
+                  const showType = e.target.value;
+                  setShowModelType(showType);
+                }}
+              >
+                <Radio.Button value="list">列表</Radio.Button>
+                <Radio.Button value="canvas">画布</Radio.Button>
+              </Radio.Group>
+            ) : undefined,
+        }}
         destroyInactiveTabPane
         size="large"
         onChange={(menuKey: string) => {

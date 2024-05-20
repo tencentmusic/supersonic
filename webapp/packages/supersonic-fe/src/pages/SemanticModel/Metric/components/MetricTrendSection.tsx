@@ -13,7 +13,7 @@ import { ColumnConfig } from '../data';
 import dayjs from 'dayjs';
 import { ISemantic } from '../../data';
 import { DateFieldMap } from '@/pages/SemanticModel/constant';
-import { ProCard } from  '@ant-design/pro-components';
+import { ProCard } from '@ant-design/pro-components';
 
 import styles from '../style.less';
 
@@ -100,7 +100,7 @@ const MetricTrendSection: React.FC<Props> = ({
     setMetricTrendLoading(false);
     if (code === 200) {
       const { resultList, columns, queryAuthorization } = data;
-      setMetricTrendData(resultList);
+
       setTableColumnConfig(columns);
       const message = queryAuthorization?.message;
       if (message) {
@@ -112,6 +112,22 @@ const MetricTrendSection: React.FC<Props> = ({
       if (targetConfig) {
         setMetricColumnConfig(targetConfig);
       }
+
+      const dateConfig = columns.find((item: ISemantic.IMetricTrendColumn) => {
+        return item.type === 'DATE';
+      });
+
+      if (dateConfig) {
+        const sortDateField = dateConfig.nameEn;
+        setMetricTrendData(
+          [...resultList].sort((a, b) => {
+            return a[sortDateField].localeCompare(b[sortDateField]);
+          }),
+        );
+      } else {
+        setMetricTrendData(resultList);
+      }
+
       setDownloadBtnDisabledState(false);
       if (dimensionGroup[dimensionGroup.length - 1]) {
         setGroupByDimensionFieldName(dimensionGroup[dimensionGroup.length - 1]);

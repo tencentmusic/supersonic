@@ -8,7 +8,7 @@ import type { Dispatch } from 'umi';
 import type { StateType } from '../model';
 import { createDomain, updateDomain, deleteDomain } from '../service';
 import { treeParentKeyLists } from '../utils';
-import ProjectInfoFormProps from './ProjectInfoForm';
+import DomainInfoForm from './DomainInfoForm';
 import { constructorClassTreeFromList, addPathInTreeData } from '../utils';
 
 import styles from './style.less';
@@ -49,11 +49,10 @@ const DomainListTree: FC<DomainListProps> = ({
   onCreateDomainBtnClick,
   onTreeSelected,
   onTreeDataUpdate,
-  dispatch,
 }) => {
   const [projectTree, setProjectTree] = useState<DataNode[]>([]);
   const [projectInfoModalVisible, setProjectInfoModalVisible] = useState<boolean>(false);
-  const [projectInfoParams, setProjectInfoParams] = useState<any>({});
+  const [domainInfoParams, setDomainInfoParams] = useState<any>({});
   const [filterValue, setFliterValue] = useState<string>('');
   const [expandedKeys, setExpandedKeys] = useState<string[]>([]);
   const [classList, setClassList] = useState<ISemantic.IDomainItem[]>([]);
@@ -91,9 +90,26 @@ const DomainListTree: FC<DomainListProps> = ({
     }
   };
 
-  const projectSubmit = async (values: any) => {
+  const createDefaultModelSet = async (domainId: number) => {
+    const { code, msg } = await createDomain({
+      modelType: 'add',
+      type: 'normal',
+      parentId: domainId,
+      name: '默认模型集',
+      bizName: 'defaultModelSet',
+      isUnique: 1,
+    });
+    if (code !== 200) {
+      message.error(msg);
+    }
+  };
+
+  const domainSubmit = async (values: any) => {
     if (values.modelType === 'add') {
-      await createDomain(values);
+      const { code, data } = await createDomain(values);
+      if (code === 200 && values.type === 'top') {
+        await createDefaultModelSet(data.id);
+      }
     } else if (values.modelType === 'edit') {
       await editProject(values);
     }
@@ -101,11 +117,10 @@ const DomainListTree: FC<DomainListProps> = ({
     setProjectInfoModalVisible(false);
   };
 
-  // 删除项目
-  const confirmDelete = async (projectId: string) => {
-    const res = await deleteDomain(projectId);
+  const confirmDelete = async (domainId: string) => {
+    const res = await deleteDomain(domainId);
     if (res.code === 200) {
-      message.success('编辑项目成功');
+      message.success('删除成功');
       setProjectInfoModalVisible(false);
       onTreeDataUpdate?.();
     } else {
@@ -131,7 +146,7 @@ const DomainListTree: FC<DomainListProps> = ({
               <PlusOutlined
                 className={styles.icon}
                 onClick={() => {
-                  setProjectInfoParams({
+                  setDomainInfoParams({
                     modelType: 'add',
                     type: 'normal',
                     parentId: id,
@@ -145,7 +160,7 @@ const DomainListTree: FC<DomainListProps> = ({
             <EditOutlined
               className={styles.icon}
               onClick={() => {
-                setProjectInfoParams({
+                setDomainInfoParams({
                   modelType: 'edit',
                   type: 'normal',
                   ...node,
@@ -190,13 +205,13 @@ const DomainListTree: FC<DomainListProps> = ({
           </Col>
           {createDomainBtnVisible && (
             <Col flex="0 0 45px" style={{ display: 'flex', alignItems: 'center' }}>
-              <Tooltip title="新增顶级域">
+              <Tooltip title="新增主题域">
                 <Button
                   type="primary"
                   icon={<PlusOutlined />}
                   size="small"
                   onClick={() => {
-                    setProjectInfoParams({ type: 'top', modelType: 'add' });
+                    setDomainInfoParams({ type: 'top', modelType: 'add' });
                     setProjectInfoModalVisible(true);
                     onCreateDomainBtnClick?.();
                   }}
@@ -218,9 +233,9 @@ const DomainListTree: FC<DomainListProps> = ({
         titleRender={titleRender}
       />
       {projectInfoModalVisible && (
-        <ProjectInfoFormProps
-          basicInfo={projectInfoParams}
-          onSubmit={projectSubmit}
+        <DomainInfoForm
+          basicInfo={domainInfoParams}
+          onSubmit={domainSubmit}
           onCancel={() => {
             setProjectInfoModalVisible(false);
           }}

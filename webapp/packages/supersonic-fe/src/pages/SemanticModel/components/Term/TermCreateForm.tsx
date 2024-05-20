@@ -1,9 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { Form, Button, Modal, Input, Select } from 'antd';
-
 import { formLayout } from '@/components/FormHelper/utils';
 import styles from '../style.less';
-
 import { ISemantic } from '../../data';
 
 export type CreateFormProps = {
@@ -62,11 +60,7 @@ const TermCreateForm: React.FC<CreateFormProps> = ({
         <FormItem name="name" label="名称" rules={[{ required: true, message: '请输入名称' }]}>
           <Input placeholder="名称不可重复" />
         </FormItem>
-        <FormItem
-          name="similarTerms"
-          label={'近义词'}
-          rules={[{ required: true, message: '请输入业务口径' }]}
-        >
+        <FormItem name="alias" label={'近义词'}>
           <Select
             mode="tags"
             placeholder="输入近义词后回车确认，多近义词输入、复制粘贴支持英文逗号自动分隔"
@@ -74,7 +68,11 @@ const TermCreateForm: React.FC<CreateFormProps> = ({
             maxTagCount={9}
           />
         </FormItem>
-        <FormItem name="description" label={'描述'}>
+        <FormItem
+          name="description"
+          label={'描述'}
+          rules={[{ required: true, message: '请输入描述' }]}
+        >
           <TextArea placeholder="请输入描述" />
         </FormItem>
       </>
