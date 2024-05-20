@@ -15,7 +15,7 @@ import com.tencent.supersonic.common.pojo.enums.EventType;
 import com.tencent.supersonic.common.pojo.enums.StatusEnum;
 import com.tencent.supersonic.common.pojo.enums.TypeEnums;
 import com.tencent.supersonic.common.pojo.exception.InvalidArgumentException;
-import com.tencent.supersonic.common.util.ChatGptHelper;
+import com.tencent.supersonic.headless.server.utils.AliasGenerateHelper;
 import com.tencent.supersonic.headless.api.pojo.DimValueMap;
 import com.tencent.supersonic.headless.api.pojo.ModelDetail;
 import com.tencent.supersonic.headless.api.pojo.enums.TagDefineType;
@@ -69,7 +69,7 @@ public class DimensionServiceImpl implements DimensionService {
 
     private ModelService modelService;
 
-    private ChatGptHelper chatGptHelper;
+    private AliasGenerateHelper chatGptHelper;
 
     private DatabaseService databaseService;
 
@@ -85,7 +85,7 @@ public class DimensionServiceImpl implements DimensionService {
 
     public DimensionServiceImpl(DimensionRepository dimensionRepository,
                                 ModelService modelService,
-                                ChatGptHelper chatGptHelper,
+                                AliasGenerateHelper chatGptHelper,
                                 DatabaseService databaseService,
                                 ModelRelaService modelRelaService,
                                 DataSetService dataSetService,
@@ -341,7 +341,7 @@ public class DimensionServiceImpl implements DimensionService {
 
     @Override
     public List<String> mockAlias(DimensionReq dimensionReq, String mockType, User user) {
-        String mockAlias = chatGptHelper.mockAlias(mockType, dimensionReq.getName(), dimensionReq.getBizName(),
+        String mockAlias = chatGptHelper.generateAlias(mockType, dimensionReq.getName(), dimensionReq.getBizName(),
                 "", dimensionReq.getDescription(), false);
         return JSONObject.parseObject(mockAlias, new TypeReference<List<String>>() {
         });
@@ -363,7 +363,7 @@ public class DimensionServiceImpl implements DimensionService {
             String value = (String) stringObjectMap.get(dimensionReq.getBizName());
             valueList.add(value);
         }
-        String json = chatGptHelper.mockDimensionValueAlias(JSON.toJSONString(valueList));
+        String json = chatGptHelper.generateDimensionValueAlias(JSON.toJSONString(valueList));
         log.info("return llm res is :{}", json);
 
         JSONObject jsonObject = JSON.parseObject(json);

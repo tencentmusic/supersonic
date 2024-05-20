@@ -111,20 +111,6 @@
             <version>${transmittable.version}</version>
             <scope>compile</scope>
         </dependency>
-
-
-        <dependency>
-            <groupId>com.github.plexpt</groupId>
-            <artifactId>chatgpt</artifactId>
-            <version>4.1.2</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>com.knuddels</groupId>
-                    <artifactId>jtokkit</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-
         <dependency>
             <groupId>com.github.pagehelper</groupId>
             <artifactId>pagehelper-spring-boot-starter</artifactId>
