@@ -15,10 +15,8 @@ import com.tencent.supersonic.chat.server.service.AgentService;
 import com.tencent.supersonic.chat.server.service.ChatManageService;
 import com.tencent.supersonic.chat.server.service.ChatService;
 import com.tencent.supersonic.common.pojo.SysParameter;
-import com.tencent.supersonic.common.pojo.enums.S2ModelProvider;
 import com.tencent.supersonic.common.service.SysParameterService;
 import com.tencent.supersonic.common.util.JsonUtil;
-import com.tencent.supersonic.headless.api.pojo.LLMConfig;
 import com.tencent.supersonic.headless.api.pojo.response.ParseResp;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -106,9 +104,9 @@ public class ChatDemoLoader implements CommandLineRunner {
     public void addSampleChats2(Integer agentId) throws Exception {
         Long chatId = chatManageService.addChat(user, "样例对话2", agentId);
 
-        parseAndExecute(chatId.intValue(), agentId,"alice 停留时长");
-        parseAndExecute(chatId.intValue(), agentId,"对比alice和lucy的访问次数");
-        parseAndExecute(chatId.intValue(), agentId,"访问次数最高的部门");
+        parseAndExecute(chatId.intValue(), agentId, "alice 停留时长");
+        parseAndExecute(chatId.intValue(), agentId, "对比alice和lucy的访问次数");
+        parseAndExecute(chatId.intValue(), agentId, "访问次数最高的部门");
     }
 
     public void addSysParameter() {

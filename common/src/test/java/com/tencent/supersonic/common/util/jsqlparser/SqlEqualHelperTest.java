@@ -1,7 +1,7 @@
 package com.tencent.supersonic.common.util.jsqlparser;
 
 
-import cn.hutool.core.lang.Assert;
+import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -14,27 +14,29 @@ class SqlEqualHelperTest {
     void testEquals() {
         String sql1 = "SELECT * FROM table1 WHERE column1 = 1 AND column2 = 2";
         String sql2 = "SELECT * FROM table1 WHERE column2 = 2 AND column1 = 1";
-        Assert.equals(SqlEqualHelper.equals(sql1, sql2), true);
+        Assert.assertEquals(SqlEqualHelper.equals(sql1, sql2), true);
 
         sql1 = "SELECT a,b,c,d FROM table1 WHERE column1 = 1 AND column2 = 2 order by a";
         sql2 = "SELECT d,c,b,a FROM table1 WHERE column2 = 2 AND column1 = 1 order by a";
-        Assert.equals(SqlEqualHelper.equals(sql1, sql2), true);
+        Assert.assertEquals(SqlEqualHelper.equals(sql1, sql2), true);
 
         sql1 = "SELECT a,sum(b),sum(c),sum(d) FROM table1 WHERE column1 = 1 AND column2 = 2 group by a order by a";
 
         sql2 = "SELECT sum(d),sum(c),sum(b),a FROM table1 WHERE column2 = 2 AND column1 = 1 group by a order by a";
 
-        Assert.equals(SqlEqualHelper.equals(sql1, sql2), true);
+        Assert.assertEquals(SqlEqualHelper.equals(sql1, sql2), true);
 
         sql1 = "SELECT a,sum(b),sum(c),sum(d) FROM table1 WHERE column1 = 1 AND column2 = 2 group by a order by a";
 
         sql2 = "SELECT sum(d),sum(c),sum(b),a FROM table1 WHERE column2 = 2 AND column1 = 1 group by a order by a";
 
-        Assert.equals(SqlEqualHelper.equals(sql1, sql2), true);
+        Assert.assertEquals(SqlEqualHelper.equals(sql1, sql2), true);
+
 
         sql1 = "SELECT a,b,c,d FROM table1 WHERE column1 = 1 AND column2 = 2 order by a";
         sql2 = "SELECT d,c,b,f FROM table1 WHERE column2 = 2 AND column1 = 1 order by a";
-        Assert.equals(SqlEqualHelper.equals(sql1, sql2), false);
+        Assert.assertEquals(SqlEqualHelper.equals(sql1, sql2), false);
+
 
         sql1 = "SELECT\n"
                 + "页面,\n"
@@ -63,7 +65,6 @@ class SqlEqualHelperTest {
                 + "页面\n"
                 + "LIMIT\n"
                 + "365";
-
-        Assert.equals(SqlEqualHelper.equals(sql1, sql2), true);
+        Assert.assertEquals(SqlEqualHelper.equals(sql1, sql2), true);
     }
 }
