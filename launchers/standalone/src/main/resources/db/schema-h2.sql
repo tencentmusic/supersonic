@@ -140,6 +140,7 @@ CREATE TABLE IF NOT EXISTS `s2_model` (
     `depends` varchar(500) DEFAULT NULL ,
     `source_type` varchar(128) DEFAULT NULL ,
     `filter_sql` varchar(1000) DEFAULT NULL ,
+    `ext` varchar(1000) DEFAULT NULL,
     PRIMARY KEY (`id`)
     );
 COMMENT ON TABLE s2_model IS 'model information';
