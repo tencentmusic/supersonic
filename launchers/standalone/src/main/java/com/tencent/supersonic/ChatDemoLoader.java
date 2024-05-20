@@ -11,17 +11,14 @@ import com.tencent.supersonic.chat.server.agent.AgentToolType;
 import com.tencent.supersonic.chat.server.agent.LLMParserTool;
 import com.tencent.supersonic.chat.server.agent.MultiTurnConfig;
 import com.tencent.supersonic.chat.server.agent.RuleParserTool;
-import com.tencent.supersonic.chat.server.plugin.Plugin;
-import com.tencent.supersonic.chat.server.plugin.PluginParseConfig;
-import com.tencent.supersonic.chat.server.plugin.build.ParamOption;
-import com.tencent.supersonic.chat.server.plugin.build.WebBase;
 import com.tencent.supersonic.chat.server.service.AgentService;
 import com.tencent.supersonic.chat.server.service.ChatManageService;
 import com.tencent.supersonic.chat.server.service.ChatService;
-import com.tencent.supersonic.chat.server.service.PluginService;
 import com.tencent.supersonic.common.pojo.SysParameter;
+import com.tencent.supersonic.common.pojo.enums.S2ModelProvider;
 import com.tencent.supersonic.common.service.SysParameterService;
 import com.tencent.supersonic.common.util.JsonUtil;
+import com.tencent.supersonic.headless.api.pojo.LLMConfig;
 import com.tencent.supersonic.headless.api.pojo.response.ParseResp;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,9 +27,6 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
-
-import java.util.Arrays;
-import java.util.List;
 
 @Component
 @Slf4j
@@ -44,8 +38,6 @@ public class ChatDemoLoader implements CommandLineRunner {
     private ChatService chatService;
     @Autowired
     private ChatManageService chatManageService;
-    @Autowired
-    private PluginService pluginService;
     @Autowired
     private AgentService agentService;
     @Autowired
@@ -69,13 +61,12 @@ public class ChatDemoLoader implements CommandLineRunner {
     public void doRun() {
         try {
             addSysParameter();
-            addPlugin_1();
-            addAgent1();
+            Integer agentId = addAgent1();
             addAgent2();
             addAgent3();
             //addAgent4();
-            addSampleChats();
-            addSampleChats2();
+            addSampleChats(agentId);
+            addSampleChats2(agentId);
             updateQueryScore(1);
             updateQueryScore(4);
         } catch (Exception e) {
@@ -83,11 +74,11 @@ public class ChatDemoLoader implements CommandLineRunner {
         }
     }
 
-    private void parseAndExecute(int chatId, String queryText) throws Exception {
+    private void parseAndExecute(int chatId, int agentId, String queryText) throws Exception {
         ChatParseReq chatParseReq = new ChatParseReq();
         chatParseReq.setQueryText(queryText);
         chatParseReq.setChatId(chatId);
-        chatParseReq.setAgentId(1);
+        chatParseReq.setAgentId(agentId);
         chatParseReq.setUser(User.getFakeUser());
         ParseResp parseResp = chatService.performParsing(chatParseReq);
         if (CollectionUtils.isEmpty(parseResp.getSelectedParses())) {
@@ -104,20 +95,20 @@ public class ChatDemoLoader implements CommandLineRunner {
         chatService.performExecution(executeReq);
     }
 
-    public void addSampleChats() throws Exception {
-        chatManageService.addChat(user, "样例对话1", 1);
+    public void addSampleChats(Integer agentId) throws Exception {
+        Long chatId = chatManageService.addChat(user, "样例对话1", agentId);
 
-        parseAndExecute(1, "超音数 访问次数");
-        parseAndExecute(1, "按部门统计");
-        parseAndExecute(1, "查询近30天");
+        parseAndExecute(chatId.intValue(), agentId, "超音数 访问次数");
+        parseAndExecute(chatId.intValue(), agentId, "按部门统计");
+        parseAndExecute(chatId.intValue(), agentId, "查询近30天");
     }
 
-    public void addSampleChats2() throws Exception {
-        chatManageService.addChat(user, "样例对话2", 1);
+    public void addSampleChats2(Integer agentId) throws Exception {
+        Long chatId = chatManageService.addChat(user, "样例对话2", agentId);
 
-        parseAndExecute(2, "alice 停留时长");
-        parseAndExecute(2, "对比alice和lucy的访问次数");
-        parseAndExecute(2, "访问次数最高的部门");
+        parseAndExecute(chatId.intValue(), agentId,"alice 停留时长");
+        parseAndExecute(chatId.intValue(), agentId,"对比alice和lucy的访问次数");
+        parseAndExecute(chatId.intValue(), agentId,"访问次数最高的部门");
     }
 
     public void addSysParameter() {
@@ -127,32 +118,7 @@ public class ChatDemoLoader implements CommandLineRunner {
         sysParameterService.save(sysParameter);
     }
 
-    private void addPlugin_1() {
-        Plugin plugin1 = new Plugin();
-        plugin1.setType("WEB_PAGE");
-        plugin1.setDataSetList(Arrays.asList(1L));
-        plugin1.setPattern("用于分析超音数的流量概况，包含UV、PV等核心指标的追踪。P.S. 仅作为示例展示，无实际看板");
-        plugin1.setName("超音数流量分析看板");
-        PluginParseConfig pluginParseConfig = new PluginParseConfig();
-        pluginParseConfig.setDescription(plugin1.getPattern());
-        pluginParseConfig.setName(plugin1.getName());
-        pluginParseConfig.setExamples(Lists.newArrayList("tom最近访问超音数情况怎么样"));
-        plugin1.setParseModeConfig(JSONObject.toJSONString(pluginParseConfig));
-        WebBase webBase = new WebBase();
-        webBase.setUrl("www.yourbi.com");
-        ParamOption paramOption = new ParamOption();
-        paramOption.setKey("name");
-        paramOption.setParamType(ParamOption.ParamType.SEMANTIC);
-        paramOption.setElementId(2L);
-        paramOption.setModelId(1L);
-        List<ParamOption> paramOptions = Arrays.asList(paramOption);
-        webBase.setParamOptions(paramOptions);
-        plugin1.setConfig(JsonUtil.toString(webBase));
-
-        pluginService.createPlugin(plugin1, user);
-    }
-
-    private void addAgent1() {
+    private Integer addAgent1() {
         Agent agent = new Agent();
         agent.setId(1);
         agent.setName("算指标");
@@ -165,7 +131,7 @@ public class ChatDemoLoader implements CommandLineRunner {
         RuleParserTool ruleQueryTool = new RuleParserTool();
         ruleQueryTool.setType(AgentToolType.NL2SQL_RULE);
         ruleQueryTool.setId("0");
-        ruleQueryTool.setDataSetIds(Lists.newArrayList(1L));
+        ruleQueryTool.setDataSetIds(Lists.newArrayList(-1L));
         agentConfig.getTools().add(ruleQueryTool);
         if (demoEnabledNl2SqlLlm) {
             LLMParserTool llmParserTool = new LLMParserTool();
@@ -178,6 +144,7 @@ public class ChatDemoLoader implements CommandLineRunner {
         MultiTurnConfig multiTurnConfig = new MultiTurnConfig(false);
         agent.setMultiTurnConfig(multiTurnConfig);
         agentService.createAgent(agent, User.getFakeUser());
+        return agent.getId();
     }
 
     private void addAgent2() {
@@ -192,7 +159,7 @@ public class ChatDemoLoader implements CommandLineRunner {
         RuleParserTool ruleQueryTool = new RuleParserTool();
         ruleQueryTool.setId("0");
         ruleQueryTool.setType(AgentToolType.NL2SQL_RULE);
-        ruleQueryTool.setDataSetIds(Lists.newArrayList(2L));
+        ruleQueryTool.setDataSetIds(Lists.newArrayList(-1L));
         agentConfig.getTools().add(ruleQueryTool);
 
         if (demoEnabledNl2SqlLlm) {
