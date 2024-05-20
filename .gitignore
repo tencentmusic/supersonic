@@ -8,6 +8,7 @@ log/
 *.bin
 *.log
 *.tar.gz
+*.zip
 *.lib
 assembly/runtime/*
 **/dist/
@@ -18,3 +19,4 @@ assembly/runtime/*
 chm_db/
 __pycache__/
 /dict
+assembly/build/*-SNAPSHOT
