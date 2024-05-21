@@ -93,6 +93,7 @@ public class ModelDemoDataLoader {
 
     protected DatabaseResp tmpDatabaseResp = null;
     private User user = User.getFakeUser();
+    protected DatabaseResp tmpDatabaseResp = null;
     @Autowired
     private DatabaseService databaseService;
     @Autowired
