@@ -25,6 +25,9 @@ import com.tencent.supersonic.headless.api.pojo.enums.IdentifyType;
 import com.tencent.supersonic.headless.api.pojo.request.DomainReq;
 import com.tencent.supersonic.headless.api.pojo.request.ModelReq;
 import com.tencent.supersonic.headless.api.pojo.request.DataSetReq;
+import com.tencent.supersonic.headless.api.pojo.response.DatabaseResp;
+import com.tencent.supersonic.headless.api.pojo.response.DomainResp;
+import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
 import com.tencent.supersonic.headless.server.service.DomainService;
 import com.tencent.supersonic.headless.server.service.MetricService;
 import com.tencent.supersonic.headless.server.service.ModelRelaService;
@@ -55,28 +58,31 @@ public class BenchMarkDemoDataLoader {
     private DataSetService viewService;
     @Autowired
     private MetricService metricService;
+    @Autowired
+    private ModelDemoDataLoader modelDemoDataLoader;
 
     public void doRun() {
         try {
-            addDomain();
-            addModel_1();
-            addModel_2();
-            addModel_3();
-            addModel_4();
-            addDataSet_1();
-            addModelRela_1();
-            addModelRela_2();
-            addModelRela_3();
-            addModelRela_4();
-            addModelRela_5();
-            batchPushlishMetric();
+            DatabaseResp databaseResp = modelDemoDataLoader.tmpDatabaseResp;
+            DomainResp s2Domain = addDomain();
+            ModelResp genreModelResp = addModel_1(s2Domain, databaseResp);
+            ModelResp artistModelResp = addModel_2(s2Domain, databaseResp);
+            ModelResp filesModelResp = addModel_3(s2Domain, databaseResp);
+            ModelResp songModelResp = addModel_4(s2Domain, databaseResp);
+            addDataSet_1(s2Domain);
+            addModelRela_1(s2Domain, genreModelResp, artistModelResp);
+            addModelRela_2(s2Domain, filesModelResp, artistModelResp);
+            addModelRela_3(s2Domain, songModelResp, artistModelResp);
+            addModelRela_4(s2Domain, songModelResp, genreModelResp);
+            addModelRela_5(s2Domain, songModelResp, filesModelResp);
+            //batchPushlishMetric();
         } catch (Exception e) {
             log.error("Failed to add bench mark demo data", e);
         }
 
     }
 
-    public void addDomain() {
+    public DomainResp addDomain() {
         DomainReq domainReq = new DomainReq();
         domainReq.setName("测评数据_音乐");
         domainReq.setBizName("music");
@@ -85,17 +91,16 @@ public class BenchMarkDemoDataLoader {
         domainReq.setViewOrgs(Collections.singletonList("1"));
         domainReq.setAdmins(Collections.singletonList("admin"));
         domainReq.setAdminOrgs(Collections.emptyList());
-        domainService.createDomain(domainReq, user);
+        return domainService.createDomain(domainReq, user);
     }
 
-    public void addModel_1() throws Exception {
+    public ModelResp addModel_1(DomainResp s2Domain, DatabaseResp s2Database) throws Exception {
         ModelReq modelReq = new ModelReq();
-        modelReq.setDomainId(3L);
+        modelReq.setDomainId(s2Domain.getId());
         modelReq.setName("艺术类型");
         modelReq.setBizName("genre");
         modelReq.setDescription("艺术类型");
-        modelReq.setDatabaseId(1L);
-        modelReq.setDomainId(3L);
+        modelReq.setDatabaseId(s2Database.getId());
         modelReq.setViewers(Arrays.asList("admin", "tom", "jack"));
         modelReq.setViewOrgs(Collections.singletonList("1"));
         modelReq.setAdmins(Collections.singletonList("admin"));
@@ -121,16 +126,16 @@ public class BenchMarkDemoDataLoader {
         modelDetail.setQueryType("sql_query");
         modelDetail.setSqlQuery("SELECT g_name, rating, most_popular_in FROM genre");
         modelReq.setModelDetail(modelDetail);
-        modelService.createModel(modelReq, user);
+        return modelService.createModel(modelReq, user);
     }
 
-    public void addModel_2() throws Exception {
+    public ModelResp addModel_2(DomainResp s2Domain, DatabaseResp s2Database) throws Exception {
         ModelReq modelReq = new ModelReq();
-        modelReq.setDomainId(3L);
+        modelReq.setDomainId(s2Domain.getId());
         modelReq.setName("艺术家");
         modelReq.setBizName("artist");
         modelReq.setDescription("艺术家");
-        modelReq.setDatabaseId(1L);
+        modelReq.setDatabaseId(s2Database.getId());
         ModelDetail modelDetail = new ModelDetail();
         List<Dim> dimensions = new ArrayList<>();
         dimensions.add(new Dim("艺术家名称", "artist_name", DimensionType.categorical.name(), 1));
@@ -148,16 +153,16 @@ public class BenchMarkDemoDataLoader {
         modelDetail.setQueryType("sql_query");
         modelDetail.setSqlQuery("SELECT artist_name, country, gender, g_name FROM artist");
         modelReq.setModelDetail(modelDetail);
-        modelService.createModel(modelReq, user);
+        return modelService.createModel(modelReq, user);
     }
 
-    public void addModel_3() throws Exception {
+    public ModelResp addModel_3(DomainResp s2Domain, DatabaseResp s2Database) throws Exception {
         ModelReq modelReq = new ModelReq();
-        modelReq.setDomainId(3L);
+        modelReq.setDomainId(s2Domain.getId());
         modelReq.setName("文件");
         modelReq.setBizName("files");
         modelReq.setDescription("文件");
-        modelReq.setDatabaseId(1L);
+        modelReq.setDatabaseId(s2Database.getId());
         ModelDetail modelDetail = new ModelDetail();
         List<Dim> dimensions = new ArrayList<>();
         dimensions.add(new Dim("持续时间", "duration", DimensionType.categorical.name(), 1));
@@ -175,16 +180,16 @@ public class BenchMarkDemoDataLoader {
         modelDetail.setQueryType("sql_query");
         modelDetail.setSqlQuery("SELECT f_id, artist_name, file_size, duration, formats FROM files");
         modelReq.setModelDetail(modelDetail);
-        modelService.createModel(modelReq, user);
+        return modelService.createModel(modelReq, user);
     }
 
-    public void addModel_4() throws Exception {
+    public ModelResp addModel_4(DomainResp s2Domain, DatabaseResp s2Database) throws Exception {
         ModelReq modelReq = new ModelReq();
-        modelReq.setDomainId(3L);
+        modelReq.setDomainId(s2Domain.getId());
         modelReq.setName("歌曲");
         modelReq.setBizName("song");
         modelReq.setDescription("歌曲");
-        modelReq.setDatabaseId(1L);
+        modelReq.setDatabaseId(s2Database.getId());
         ModelDetail modelDetail = new ModelDetail();
         List<Dim> dimensions = new ArrayList<>();
         Dim dimension1 = new Dim("", "imp_date", DimensionType.time.name(), 0);
@@ -213,22 +218,17 @@ public class BenchMarkDemoDataLoader {
         modelDetail.setSqlQuery("SELECT imp_date, song_name, artist_name, country, f_id, g_name, "
                 + " rating, languages, releasedate, resolution FROM song");
         modelReq.setModelDetail(modelDetail);
-        modelService.createModel(modelReq, user);
+        return modelService.createModel(modelReq, user);
     }
 
-    public void addDataSet_1() {
+    public void addDataSet_1(DomainResp s2Domain) {
         DataSetReq viewReq = new DataSetReq();
         viewReq.setName("cspider");
         viewReq.setBizName("singer");
-        viewReq.setDomainId(3L);
+        viewReq.setDomainId(s2Domain.getId());
         viewReq.setDescription("包含cspider数据集相关标签和指标信息");
         viewReq.setAdmins(Lists.newArrayList("admin"));
-        List<DataSetModelConfig> viewModelConfigs = Lists.newArrayList(
-                new DataSetModelConfig(5L, Lists.newArrayList(8L), Lists.newArrayList()),
-                new DataSetModelConfig(6L, Lists.newArrayList(9L, 10L), Lists.newArrayList()),
-                new DataSetModelConfig(7L, Lists.newArrayList(11L, 12L), Lists.newArrayList()),
-                new DataSetModelConfig(8L, Lists.newArrayList(13L, 14L), Lists.newArrayList(8L, 9L))
-        );
+        List<DataSetModelConfig> viewModelConfigs = modelDemoDataLoader.getDataSetModelConfigs(s2Domain.getId());
         DataSetDetail viewDetail = new DataSetDetail();
         viewDetail.setDataSetModelConfigs(viewModelConfigs);
         viewReq.setDataSetDetail(viewDetail);
@@ -254,61 +254,61 @@ public class BenchMarkDemoDataLoader {
         viewService.save(viewReq, User.getFakeUser());
     }
 
-    public void addModelRela_1() {
+    public void addModelRela_1(DomainResp s2Domain, ModelResp genreModelResp, ModelResp artistModelResp) {
         List<JoinCondition> joinConditions = Lists.newArrayList();
         joinConditions.add(new JoinCondition("g_name", "g_name", FilterOperatorEnum.EQUALS));
         ModelRela modelRelaReq = new ModelRela();
-        modelRelaReq.setDomainId(3L);
-        modelRelaReq.setFromModelId(6L);
-        modelRelaReq.setToModelId(5L);
+        modelRelaReq.setDomainId(s2Domain.getId());
+        modelRelaReq.setFromModelId(artistModelResp.getId());
+        modelRelaReq.setToModelId(genreModelResp.getId());
         modelRelaReq.setJoinType("left join");
         modelRelaReq.setJoinConditions(joinConditions);
         modelRelaService.save(modelRelaReq, user);
     }
 
-    public void addModelRela_2() {
+    public void addModelRela_2(DomainResp s2Domain, ModelResp filesModelResp, ModelResp artistModelResp) {
         List<JoinCondition> joinConditions = Lists.newArrayList();
         joinConditions.add(new JoinCondition("artist_name", "artist_name", FilterOperatorEnum.EQUALS));
         ModelRela modelRelaReq = new ModelRela();
-        modelRelaReq.setDomainId(3L);
-        modelRelaReq.setFromModelId(7L);
-        modelRelaReq.setToModelId(6L);
+        modelRelaReq.setDomainId(s2Domain.getId());
+        modelRelaReq.setFromModelId(filesModelResp.getId());
+        modelRelaReq.setToModelId(artistModelResp.getId());
         modelRelaReq.setJoinType("left join");
         modelRelaReq.setJoinConditions(joinConditions);
         modelRelaService.save(modelRelaReq, user);
     }
 
-    public void addModelRela_3() {
+    public void addModelRela_3(DomainResp s2Domain, ModelResp songModelResp, ModelResp artistModelResp) {
         List<JoinCondition> joinConditions = Lists.newArrayList();
         joinConditions.add(new JoinCondition("artist_name", "artist_name", FilterOperatorEnum.EQUALS));
         ModelRela modelRelaReq = new ModelRela();
-        modelRelaReq.setDomainId(3L);
-        modelRelaReq.setFromModelId(8L);
-        modelRelaReq.setToModelId(6L);
+        modelRelaReq.setDomainId(s2Domain.getId());
+        modelRelaReq.setFromModelId(songModelResp.getId());
+        modelRelaReq.setToModelId(artistModelResp.getId());
         modelRelaReq.setJoinType("left join");
         modelRelaReq.setJoinConditions(joinConditions);
         modelRelaService.save(modelRelaReq, user);
     }
 
-    public void addModelRela_4() {
+    public void addModelRela_4(DomainResp s2Domain, ModelResp songModelResp, ModelResp genreModelResp) {
         List<JoinCondition> joinConditions = Lists.newArrayList();
         joinConditions.add(new JoinCondition("g_name", "g_name", FilterOperatorEnum.EQUALS));
         ModelRela modelRelaReq = new ModelRela();
-        modelRelaReq.setDomainId(3L);
-        modelRelaReq.setFromModelId(8L);
-        modelRelaReq.setToModelId(5L);
+        modelRelaReq.setDomainId(s2Domain.getId());
+        modelRelaReq.setFromModelId(songModelResp.getId());
+        modelRelaReq.setToModelId(genreModelResp.getId());
         modelRelaReq.setJoinType("left join");
         modelRelaReq.setJoinConditions(joinConditions);
         modelRelaService.save(modelRelaReq, user);
     }
 
-    public void addModelRela_5() {
+    public void addModelRela_5(DomainResp s2Domain, ModelResp songModelResp, ModelResp filesModelResp) {
         List<JoinCondition> joinConditions = Lists.newArrayList();
         joinConditions.add(new JoinCondition("f_id", "f_id", FilterOperatorEnum.EQUALS));
         ModelRela modelRelaReq = new ModelRela();
-        modelRelaReq.setDomainId(3L);
-        modelRelaReq.setFromModelId(8L);
-        modelRelaReq.setToModelId(7L);
+        modelRelaReq.setDomainId(s2Domain.getId());
+        modelRelaReq.setFromModelId(songModelResp.getId());
+        modelRelaReq.setToModelId(filesModelResp.getId());
         modelRelaReq.setJoinType("left join");
         modelRelaReq.setJoinConditions(joinConditions);
         modelRelaService.save(modelRelaReq, user);
