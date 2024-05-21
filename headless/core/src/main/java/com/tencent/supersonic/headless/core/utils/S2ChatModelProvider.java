@@ -13,7 +13,7 @@ public class S2ChatModelProvider {
 
     public static ChatLanguageModel provide(LLMConfig llmConfig) {
         ChatLanguageModel chatLanguageModel = ContextUtils.getBean(ChatLanguageModel.class);
-        if (StringUtils.isBlank(llmConfig.getProvider())
+        if (llmConfig == null || StringUtils.isBlank(llmConfig.getProvider())
                 || StringUtils.isBlank(llmConfig.getBaseUrl())) {
             return chatLanguageModel;
         }

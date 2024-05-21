@@ -113,10 +113,6 @@ public abstract class BaseMapper implements SchemaMapper {
         if (!existElement.equals(newElement)) {
             return false;
         }
-        if (SchemaElementType.TERM.equals(existElement.getType())
-                && SchemaElementType.TERM.equals(newElement.getType())) {
-            return false;
-        }
         if (SchemaElementType.VALUE.equals(newElement.getType())) {
             return existElementMatch.getWord().equalsIgnoreCase(newElementMatch.getWord());
         }
