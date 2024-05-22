@@ -91,8 +91,8 @@ import java.util.stream.Collectors;
 @Slf4j
 public class ModelDemoDataLoader {
 
-    private User user = User.getFakeUser();
     protected DatabaseResp tmpDatabaseResp = null;
+    private User user = User.getFakeUser();
     @Autowired
     private DatabaseService databaseService;
     @Autowired
