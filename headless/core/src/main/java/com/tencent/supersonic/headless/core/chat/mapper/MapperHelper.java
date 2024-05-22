@@ -59,6 +59,15 @@ public class MapperHelper {
         return false;
     }
 
+    public boolean existTerms(List<String> natures) {
+        for (String nature : natures) {
+            if (NatureHelper.isTermNature(nature)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /***
      * get similarity
      * @param detectSegment
