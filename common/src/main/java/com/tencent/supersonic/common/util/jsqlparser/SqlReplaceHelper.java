@@ -397,17 +397,27 @@ public class SqlReplaceHelper {
         if (selectStatement instanceof PlainSelect) {
             PlainSelect plainSelect = (PlainSelect) selectStatement;
             replaceSingleTable(plainSelect, tableName);
+            replaceSubTable(plainSelect, tableName);
         } else if (selectStatement instanceof SetOperationList) {
             SetOperationList setOperationList = (SetOperationList) selectStatement;
             if (!CollectionUtils.isEmpty(setOperationList.getSelects())) {
                 setOperationList.getSelects().forEach(subSelectBody -> {
                     PlainSelect subPlainSelect = (PlainSelect) subSelectBody;
                     replaceSingleTable(subPlainSelect, tableName);
+                    replaceSubTable(subPlainSelect, tableName);
                 });
             }
         }
 
         return selectStatement.toString();
+    }
+
+    public static void replaceSubTable(PlainSelect plainSelect, String tableName) {
+        if (plainSelect.getFromItem() instanceof ParenthesedSelect) {
+            ParenthesedSelect parenthesedSelect = (ParenthesedSelect) plainSelect.getFromItem();
+            PlainSelect subPlainSelect = parenthesedSelect.getPlainSelect();
+            replaceSingleTable(subPlainSelect, tableName);
+        }
     }
 
     public static void replaceSingleTable(PlainSelect plainSelect, String tableName) {

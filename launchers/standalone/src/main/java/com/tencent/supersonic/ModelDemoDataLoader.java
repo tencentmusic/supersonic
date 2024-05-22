@@ -91,6 +91,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class ModelDemoDataLoader {
 
+    protected DatabaseResp tmpDatabaseResp = null;
     private User user = User.getFakeUser();
     @Autowired
     private DatabaseService databaseService;
@@ -122,6 +123,7 @@ public class ModelDemoDataLoader {
     public void doRun() {
         try {
             DatabaseResp databaseResp = addDatabase();
+            tmpDatabaseResp = databaseResp;
             DomainResp s2Domain = addDomain();
             TagObjectResp s2TagObject = addTagObjectUser(s2Domain);
             ModelResp userModel = addModel_1(s2Domain, databaseResp, s2TagObject);
@@ -537,7 +539,7 @@ public class ModelDemoDataLoader {
         DataSetReq dataSetReq = new DataSetReq();
         dataSetReq.setName("超音数");
         dataSetReq.setBizName("s2");
-        dataSetReq.setDomainId(1L);
+        dataSetReq.setDomainId(s2Domain.getId());
         dataSetReq.setDescription("包含超音数访问统计相关的指标和维度等");
         dataSetReq.setAdmins(Lists.newArrayList("admin"));
         List<DataSetModelConfig> dataSetModelConfigs = getDataSetModelConfigs(s2Domain.getId());
@@ -680,7 +682,7 @@ public class ModelDemoDataLoader {
         return metricService.getMetric(model.getId(), bizName);
     }
 
-    private List<DataSetModelConfig> getDataSetModelConfigs(Long domainId) {
+    protected List<DataSetModelConfig> getDataSetModelConfigs(Long domainId) {
         List<DataSetModelConfig> dataSetModelConfigs = Lists.newArrayList();
         List<ModelResp> modelByDomainIds =
                 modelService.getModelByDomainIds(Lists.newArrayList(domainId));
