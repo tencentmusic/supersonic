@@ -2,10 +2,10 @@ package com.tencent.supersonic.headless.core.chat.mapper;
 
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.headless.api.pojo.response.S2Term;
-import com.tencent.supersonic.headless.core.config.OptimizationConfig;
-import com.tencent.supersonic.headless.core.pojo.QueryContext;
 import com.tencent.supersonic.headless.core.chat.knowledge.HanlpMapResult;
 import com.tencent.supersonic.headless.core.chat.knowledge.KnowledgeService;
+import com.tencent.supersonic.headless.core.config.OptimizationConfig;
+import com.tencent.supersonic.headless.core.pojo.QueryContext;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -108,9 +108,12 @@ public class HanlpDictMatchStrategy extends BaseMatchStrategy<HanlpMapResult> {
         Integer oneDetectionSize = optimizationConfig.getOneDetectionSize();
         List<HanlpMapResult> oneRoundResults = hanlpMapResults.stream().limit(oneDetectionSize)
                 .collect(Collectors.toList());
-
         if (CollectionUtils.isNotEmpty(dimensionMetrics)) {
             oneRoundResults = dimensionMetrics;
+            List<HanlpMapResult> termOneRoundResults = hanlpMapResults.stream()
+                    .filter(hanlpMapResult -> mapperHelper.existTerms(hanlpMapResult.getNatures()))
+                    .collect(Collectors.toList());
+            oneRoundResults.addAll(termOneRoundResults);
         }
         // step6. select mapResul in one round
         selectResultInOneRound(existResults, oneRoundResults);

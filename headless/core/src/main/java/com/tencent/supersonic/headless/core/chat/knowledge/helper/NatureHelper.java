@@ -141,6 +141,20 @@ public class NatureHelper {
                 && StringUtils.isNumeric(split[1]);
     }
 
+    public static boolean isTermNature(String nature) {
+        if (StringUtils.isEmpty(nature)) {
+            return false;
+        }
+        if (!nature.startsWith(DictWordType.NATURE_SPILT)) {
+            return false;
+        }
+        String[] split = nature.split(DictWordType.NATURE_SPILT);
+        if (split.length <= 1) {
+            return false;
+        }
+        return nature.endsWith(DictWordType.TERM.getType());
+    }
+
     public static DataSetInfoStat getDataSetStat(List<S2Term> terms) {
         return DataSetInfoStat.builder()
                 .dataSetCount(getDataSetCount(terms))
