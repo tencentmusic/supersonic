@@ -82,7 +82,7 @@ public abstract class BaseSemanticCorrector implements SemanticCorrector {
 
         //decide whether add order by expression field to select
         Environment environment = ContextUtils.getBean(Environment.class);
-        String correctorAdditionalInfo = environment.getProperty("corrector.additional.information");
+        String correctorAdditionalInfo = environment.getProperty("s2.corrector.additional.information");
         if (StringUtils.isNotBlank(correctorAdditionalInfo) && Boolean.parseBoolean(correctorAdditionalInfo)) {
             needAddFields.addAll(SqlSelectHelper.getOrderByFields(correctS2SQL));
         }

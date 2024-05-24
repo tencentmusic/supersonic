@@ -53,7 +53,7 @@ public class MultiTurnParser implements ChatParser {
     public void parse(ChatParseContext chatParseContext, ParseResp parseResp) {
         Environment environment = ContextUtils.getBean(Environment.class);
         MultiTurnConfig agentMultiTurnConfig = chatParseContext.getAgent().getMultiTurnConfig();
-        Boolean globalMultiTurnConfig = environment.getProperty("s2.multi-turn.enable", Boolean.class);
+        Boolean globalMultiTurnConfig = environment.getProperty("s2.parser.multi-turn.enable", Boolean.class);
 
         Boolean multiTurnConfig = agentMultiTurnConfig != null
                 ? agentMultiTurnConfig.isEnableMultiTurn() : globalMultiTurnConfig;

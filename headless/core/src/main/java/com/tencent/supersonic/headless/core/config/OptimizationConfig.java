@@ -14,72 +14,73 @@ import org.springframework.context.annotation.Configuration;
 @Slf4j
 public class OptimizationConfig {
 
-    @Value("${one.detection.size:8}")
+    @Value("${s2.one.detection.size:8}")
     private Integer oneDetectionSize;
 
-    @Value("${one.detection.max.size:20}")
+    @Value("${s2.one.detection.max.size:20}")
     private Integer oneDetectionMaxSize;
 
-    @Value("${metric.dimension.min.threshold:0.3}")
+    @Value("${s2.metric.dimension.min.threshold:0.3}")
     private Double metricDimensionMinThresholdConfig;
 
-    @Value("${metric.dimension.threshold:0.3}")
+    @Value("${s2.metric.dimension.threshold:0.3}")
     private Double metricDimensionThresholdConfig;
 
-    @Value("${dimension.value.min.threshold:0.2}")
+    @Value("${s2.dimension.value.min.threshold:0.2}")
     private Double dimensionValueMinThresholdConfig;
 
-    @Value("${dimension.value.threshold:0.5}")
+    @Value("${s2.dimension.value.threshold:0.5}")
     private Double dimensionValueThresholdConfig;
 
-    @Value("${long.text.threshold:0.8}")
+    @Value("${s2.long.text.threshold:0.8}")
     private Double longTextThreshold;
 
-    @Value("${short.text.threshold:0.5}")
+    @Value("${s2.short.text.threshold:0.5}")
     private Double shortTextThreshold;
 
-    @Value("${query.text.length.threshold:10}")
+    @Value("${s2.query.text.length.threshold:10}")
     private Integer queryTextLengthThreshold;
-    @Value("${embedding.mapper.word.min:4}")
+
+    @Value("${s2.embedding.mapper.word.min:4}")
     private int embeddingMapperWordMin;
 
-    @Value("${embedding.mapper.word.max:4}")
+    @Value("${s2.embedding.mapper.word.max:4}")
     private int embeddingMapperWordMax;
 
-    @Value("${embedding.mapper.batch:50}")
+    @Value("${s2.embedding.mapper.batch:50}")
     private int embeddingMapperBatch;
 
-    @Value("${embedding.mapper.number:5}")
+    @Value("${s2.embedding.mapper.number:5}")
     private int embeddingMapperNumber;
 
-    @Value("${embedding.mapper.round.number:10}")
+    @Value("${s2.embedding.mapper.round.number:10}")
     private int embeddingMapperRoundNumber;
 
-    @Value("${embedding.mapper.min.threshold:0.6}")
+    @Value("${s2.embedding.mapper.min.threshold:0.6}")
     private Double embeddingMapperMinThreshold;
 
-    @Value("${embedding.mapper.threshold:0.99}")
+    @Value("${s2.embedding.mapper.threshold:0.99}")
     private Double embeddingMapperThreshold;
 
-    @Value("${s2SQL.linking.value.switch:true}")
+    @Value("${s2.parser.linking.value.switch:true}")
     private boolean useLinkingValueSwitch;
 
-    @Value("${s2SQL.generation:TWO_PASS_AUTO_COT}")
+    @Value("${s2.parser.generation:TWO_PASS_AUTO_COT}")
     private LLMReq.SqlGenType sqlGenType;
 
-    @Value("${s2SQL.use.switch:true}")
+    @Value("${s2.parser.use.switch:true}")
     private boolean useS2SqlSwitch;
 
-    @Value("${text2sql.example.num:15}")
+    @Value("${s2.parser.exemplar-recall.num:15}")
     private int text2sqlExampleNum;
 
-    @Value("${text2sql.fewShots.num:10}")
+    @Value("${s2.parser.few-shot.num:10}")
     private int text2sqlFewShotsNum;
 
-    @Value("${text2sql.self.consistency.num:5}")
+    @Value("${s2.parser.self-consistency.num:5}")
     private int text2sqlSelfConsistencyNum;
 
-    @Value("${parse.show.count:3}")
+    @Value("${s2.parser.show-count:3}")
     private Integer parseShowCount;
 
     @Autowired

@@ -9,22 +9,21 @@ import org.springframework.context.annotation.Configuration;
 @Data
 public class LLMParserConfig {
 
-
-    @Value("${llm.parser.url:}")
+    @Value("${s2.parser.url:}")
     private String url;
 
-    @Value("${query2sql.path:/query2sql}")
+    @Value("${s2.query2sql.path:/query2sql}")
     private String queryToSqlPath;
 
-    @Value("${dimension.topn:10}")
+    @Value("${s2.dimension.topn:10}")
     private Integer dimensionTopN;
 
-    @Value("${metric.topn:10}")
+    @Value("${s2.metric.topn:10}")
     private Integer metricTopN;
 
-    @Value("${tag.topn:20}")
+    @Value("${s2.tag.topn:20}")
     private Integer tagTopN;
 
-    @Value("${all.model:false}")
+    @Value("${s2.all.model:false}")
     private Boolean allModel;
 }

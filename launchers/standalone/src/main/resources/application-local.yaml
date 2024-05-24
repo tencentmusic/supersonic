@@ -30,44 +30,42 @@ authentication:
       header:
         key: Authorization
 
-query:
-  optimizer:
-    enable: true
-
-time:
-  threshold: 100
-
-dimension:
-  topn: 20
-metric:
-  topn: 20
-
-corrector:
-  additional:
-    information: true
-
-pyllm:
-  url: http://127.0.0.1:9092
-llm:
-  parser:
-    url: ${pyllm.url}
-
-embedding:
-  url: ${pyllm.url}
-
-functionCall:
-  url: ${pyllm.url}
-
-text2sql:
-  example:
-    num: 1
+logging:
+  level:
+    dev.langchain4j: DEBUG
+    dev.ai4j.openai4j: DEBUG
 
 s2:
+  pyllm:
+    url: http://127.0.0.1:9092
+
+  parser:
+    url: ${s2.pyllm.url}
+    exemplar-recall:
+      number: 10
+    few-shot:
+      number: 5
+    self-consistency:
+      number: 5
+    multi-turn:
+      enable: false
+
+  corrector:
+    additional:
+      information: true
+
+  functionCall:
+    url: ${s2.pyllm.url}
+
+  embedding:
+    url: ${s2.pyllm.url}
+    persistent:
+      path: /tmp
+
   demo:
     names: S2VisitsDemo,S2ArtistDemo
     enableLLM: true
-  multi-turn:
-    enable: false
+
   langchain4j:
     #1.chat-model
     chat-model:
@@ -103,13 +101,3 @@ s2:
     #      access-token: hg_access_token
     #      model-id: sentence-transformers/all-MiniLM-L6-v2
     #      timeout: 1h
-
-#langchain4j log
-logging:
-  level:
-    dev.langchain4j: DEBUG
-    dev.ai4j.openai4j: DEBUG
-
-inMemoryEmbeddingStore:
-  persistent:
-    path: /tmp
