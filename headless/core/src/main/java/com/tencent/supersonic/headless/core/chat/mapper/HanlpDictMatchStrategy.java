@@ -89,7 +89,7 @@ public class HanlpDictMatchStrategy extends BaseMatchStrategy<HanlpMapResult> {
                 .filter(term -> CollectionUtils.isNotEmpty(term.getNatures()))
                 .collect(Collectors.toCollection(LinkedHashSet::new));
 
-        log.info("detectSegment:{},after isSimilarity parseResults:{}", detectSegment, hanlpMapResults);
+        log.debug("detectSegment:{},after isSimilarity parseResults:{}", detectSegment, hanlpMapResults);
 
         hanlpMapResults = hanlpMapResults.stream().map(parseResult -> {
             parseResult.setOffset(offset);

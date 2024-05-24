@@ -168,12 +168,12 @@ public class HanlpHelper {
     }
 
     public static boolean addToCustomDictionary(DictWord dictWord) {
-        log.info("dictWord:{}", dictWord);
+        log.debug("dictWord:{}", dictWord);
         return getDynamicCustomDictionary().insert(dictWord.getWord(), dictWord.getNatureWithFrequency());
     }
 
     public static void removeFromCustomDictionary(DictWord dictWord) {
-        log.info("dictWord:{}", dictWord);
+        log.debug("dictWord:{}", dictWord);
         CoreDictionary.Attribute attribute = getDynamicCustomDictionary().get(dictWord.getWord());
         if (attribute == null) {
             return;

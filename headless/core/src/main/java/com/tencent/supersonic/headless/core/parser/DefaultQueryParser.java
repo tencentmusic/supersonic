@@ -35,14 +35,14 @@ public class DefaultQueryParser implements QueryParser {
         if (Objects.isNull(queryStatement.getMetricQueryParam())) {
             queryStatement.setMetricQueryParam(new MetricQueryParam());
         }
-        log.info("SemanticConverter before [{}]", queryParam);
+        log.debug("SemanticConverter before [{}]", queryParam);
         for (HeadlessConverter headlessConverter : ComponentFactory.getSemanticConverters()) {
             if (headlessConverter.accept(queryStatement)) {
                 log.info("SemanticConverter accept [{}]", headlessConverter.getClass().getName());
                 headlessConverter.convert(queryStatement);
             }
         }
-        log.info("SemanticConverter after {} {} {}", queryParam, queryStatement.getDataSetQueryParam(),
+        log.debug("SemanticConverter after {} {} {}", queryParam, queryStatement.getDataSetQueryParam(),
                 queryStatement.getMetricQueryParam());
         if (!queryStatement.getDataSetQueryParam().getSql().isEmpty()) {
             queryStatement = parser(queryStatement.getDataSetQueryParam(), queryStatement);

@@ -37,7 +37,7 @@ public abstract class BaseSemanticCorrector implements SemanticCorrector {
                 return;
             }
             doCorrect(queryContext, semanticParseInfo);
-            log.info("sqlCorrection:{} sql:{}", this.getClass().getSimpleName(), semanticParseInfo.getSqlInfo());
+            log.debug("sqlCorrection:{} sql:{}", this.getClass().getSimpleName(), semanticParseInfo.getSqlInfo());
         } catch (Exception e) {
             log.error(String.format("correct error,sqlInfo:%s", semanticParseInfo.getSqlInfo()), e);
         }
