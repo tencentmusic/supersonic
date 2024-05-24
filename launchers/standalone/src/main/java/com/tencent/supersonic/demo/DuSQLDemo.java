@@ -1,13 +1,20 @@
-package com.tencent.supersonic;
+package com.tencent.supersonic.demo;
 
+import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
+import com.tencent.supersonic.chat.server.agent.Agent;
+import com.tencent.supersonic.chat.server.agent.AgentConfig;
+import com.tencent.supersonic.chat.server.agent.AgentToolType;
+import com.tencent.supersonic.chat.server.agent.LLMParserTool;
 import com.tencent.supersonic.common.pojo.JoinCondition;
 import com.tencent.supersonic.common.pojo.ModelRela;
 import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
 import com.tencent.supersonic.common.pojo.enums.TimeMode;
 import com.tencent.supersonic.common.pojo.enums.TypeEnums;
 import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
+import com.tencent.supersonic.common.util.JsonUtil;
+import com.tencent.supersonic.demo.S2BaseDemo;
 import com.tencent.supersonic.headless.api.pojo.enums.DimensionType;
 import com.tencent.supersonic.headless.api.pojo.enums.IdentifyType;
 import com.tencent.supersonic.headless.api.pojo.Dim;
@@ -25,14 +32,8 @@ import com.tencent.supersonic.headless.api.pojo.request.MetricReq;
 import com.tencent.supersonic.headless.api.pojo.request.ModelReq;
 import com.tencent.supersonic.headless.api.pojo.request.DataSetReq;
 import com.tencent.supersonic.headless.api.pojo.response.MetricResp;
-import com.tencent.supersonic.headless.server.service.DomainService;
-import com.tencent.supersonic.headless.server.service.MetricService;
-import com.tencent.supersonic.headless.server.service.ModelRelaService;
-import com.tencent.supersonic.headless.server.service.ModelService;
-import com.tencent.supersonic.headless.server.service.DataSetService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -42,21 +43,7 @@ import java.util.List;
 
 @Component
 @Slf4j
-public class DuSQLDemoDataLoader {
-
-    private User user = User.getFakeUser();
-
-    @Autowired
-    private DomainService domainService;
-    @Autowired
-    private ModelService modelService;
-    @Autowired
-    private ModelRelaService modelRelaService;
-    @Autowired
-    private MetricService metricService;
-
-    @Autowired
-    private DataSetService viewService;
+public class DuSQLDemo extends S2BaseDemo {
 
     public void doRun() {
         try {
@@ -70,6 +57,7 @@ public class DuSQLDemoDataLoader {
             addModelRela_2();
             addModelRela_3();
             addModelRela_4();
+            addAgent();
         } catch (Exception e) {
             log.error("Failed to add bench mark demo data", e);
         }
@@ -255,22 +243,22 @@ public class DuSQLDemoDataLoader {
     }
 
     public void addDataSet_1() {
-        DataSetReq viewReq = new DataSetReq();
-        viewReq.setName("DuSQL 互联网企业");
-        viewReq.setBizName("internet");
-        viewReq.setDomainId(4L);
-        viewReq.setDescription("DuSQL互联网企业数据源相关的指标和维度等");
-        viewReq.setAdmins(Lists.newArrayList("admin"));
+        DataSetReq dataSetReq = new DataSetReq();
+        dataSetReq.setName("DuSQL 互联网企业");
+        dataSetReq.setBizName("internet");
+        dataSetReq.setDomainId(4L);
+        dataSetReq.setDescription("DuSQL互联网企业数据源相关的指标和维度等");
+        dataSetReq.setAdmins(Lists.newArrayList("admin"));
         List<DataSetModelConfig> viewModelConfigs = Lists.newArrayList(
                 new DataSetModelConfig(9L, Lists.newArrayList(16L, 17L, 18L, 19L, 20L), Lists.newArrayList(10L, 11L)),
                 new DataSetModelConfig(10L, Lists.newArrayList(21L, 22L, 23L), Lists.newArrayList(12L)),
                 new DataSetModelConfig(11L, Lists.newArrayList(), Lists.newArrayList(13L, 14L, 15L)),
                 new DataSetModelConfig(12L, Lists.newArrayList(24L), Lists.newArrayList(16L, 17L, 18L, 19L)));
 
-        DataSetDetail viewDetail = new DataSetDetail();
-        viewDetail.setDataSetModelConfigs(viewModelConfigs);
-        viewReq.setDataSetDetail(viewDetail);
-        viewReq.setTypeEnum(TypeEnums.DATASET);
+        DataSetDetail dsDetail = new DataSetDetail();
+        dsDetail.setDataSetModelConfigs(viewModelConfigs);
+        dataSetReq.setDataSetDetail(dsDetail);
+        dataSetReq.setTypeEnum(TypeEnums.DATASET);
         QueryConfig queryConfig = new QueryConfig();
         MetricTypeDefaultConfig metricTypeDefaultConfig = new MetricTypeDefaultConfig();
         TimeDefaultConfig timeDefaultConfig = new TimeDefaultConfig();
@@ -278,8 +266,8 @@ public class DuSQLDemoDataLoader {
         timeDefaultConfig.setUnit(1);
         metricTypeDefaultConfig.setTimeDefaultConfig(timeDefaultConfig);
         queryConfig.setMetricTypeDefaultConfig(metricTypeDefaultConfig);
-        viewReq.setQueryConfig(queryConfig);
-        viewService.save(viewReq, User.getFakeUser());
+        dataSetReq.setQueryConfig(queryConfig);
+        dataSetService.save(dataSetReq, User.getFakeUser());
     }
 
     public void addModelRela_1() {
@@ -328,6 +316,26 @@ public class DuSQLDemoDataLoader {
         modelRelaReq.setJoinType("inner join");
         modelRelaReq.setJoinConditions(joinConditions);
         modelRelaService.save(modelRelaReq, user);
+    }
+
+    private void addAgent() {
+        Agent agent = new Agent();
+        agent.setName("DuSQL 互联网企业");
+        agent.setDescription("DuSQL");
+        agent.setStatus(1);
+        agent.setEnableSearch(1);
+        agent.setExamples(Lists.newArrayList());
+        AgentConfig agentConfig = new AgentConfig();
+
+        LLMParserTool llmParserTool = new LLMParserTool();
+        llmParserTool.setId("1");
+        llmParserTool.setType(AgentToolType.NL2SQL_LLM);
+        llmParserTool.setDataSetIds(Lists.newArrayList(4L));
+        agentConfig.getTools().add(llmParserTool);
+
+        agent.setAgentConfig(JSONObject.toJSONString(agentConfig));
+        log.info("agent:{}", JsonUtil.toString(agent));
+        agentService.createAgent(agent, User.getFakeUser());
     }
 
 }

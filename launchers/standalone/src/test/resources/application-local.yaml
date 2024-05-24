@@ -1,8 +1,14 @@
+server:
+  port: 9080
+  compression:
+    enabled: true
+    min-response-size: 1024
+    mime-types: application/javascript,application/json,application/xml,text/html,text/xml,text/plain,text/css,image/*
+
 spring:
   h2:
     console:
-      path: /h2-console/chat
-      # enabled web
+      path: /h2-console/semantic
       enabled: true
   datasource:
     driver-class-name: org.h2.Driver
@@ -12,32 +18,56 @@ spring:
     username: root
     password: semantic
 
-demo:
-  enabled: true
-  nl2SqlLlm:
-    enabled: false
-
-server:
-  port: 9080
+mybatis:
+  mapper-locations=classpath:mappers/custom/*.xml,classpath*:/mappers/*.xml
 
 authentication:
-  enable: false
+  enable: true
   exclude:
     path: /api/auth/user/register,/api/auth/user/login
+  token:
+    http:
+      header:
+        key: Authorization
 
-semantic:
-  url:
-    prefix: http://127.0.0.1:9081
+query:
+  optimizer:
+    enable: true
 
 time:
   threshold: 100
 
-mybatis:
-  mapper-locations=classpath:mappers/custom/*.xml,classpath*:/mappers/*.xml
+dimension:
+  topn: 20
+metric:
+  topn: 20
 
+corrector:
+  additional:
+    information: true
 
-#langchain4j config
+pyllm:
+  url: http://127.0.0.1:9092
+llm:
+  parser:
+    url: ${pyllm.url}
+
+embedding:
+  url: ${pyllm.url}
+
+functionCall:
+  url: ${pyllm.url}
+
+text2sql:
+  example:
+    num: 1
+
 s2:
+  demo:
+    names: S2VisitsDemo,S2ArtistDemo
+    enableLLM: true
+  multi-turn:
+    enable: false
   langchain4j:
     #1.chat-model
     chat-model:
@@ -58,6 +88,7 @@ s2:
     #      inProcess:
     #        modelPath: /data/model.onnx
     #        vocabularyPath: /data/onnx_vocab.txt
+    #        shibing624/text2vec-base-chinese
     #2.2 open_ai
     #  embedding-model:
     #    provider: open_ai

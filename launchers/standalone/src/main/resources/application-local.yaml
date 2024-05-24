@@ -9,7 +9,6 @@ spring:
   h2:
     console:
       path: /h2-console/semantic
-      # enabled web
       enabled: true
   datasource:
     driver-class-name: org.h2.Driver
@@ -31,15 +30,9 @@ authentication:
       header:
         key: Authorization
 
-demo:
-  enabled: true
-
 query:
   optimizer:
     enable: true
-
-multi:
-  turn: false
 
 time:
   threshold: 100
@@ -70,6 +63,11 @@ text2sql:
     num: 1
 
 s2:
+  demo:
+    names: S2VisitsDemo,S2ArtistDemo
+    enableLLM: true
+  multi-turn:
+    enable: false
   langchain4j:
     #1.chat-model
     chat-model:

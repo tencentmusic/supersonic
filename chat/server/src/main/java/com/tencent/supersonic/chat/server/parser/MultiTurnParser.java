@@ -1,5 +1,6 @@
 package com.tencent.supersonic.chat.server.parser;
 
+import com.tencent.supersonic.chat.server.agent.MultiTurnConfig;
 import com.tencent.supersonic.chat.server.persistence.repository.ChatQueryRepository;
 import com.tencent.supersonic.chat.server.pojo.ChatParseContext;
 import com.tencent.supersonic.chat.server.util.QueryReqConverter;
@@ -34,14 +35,14 @@ import java.util.Collections;
 @Slf4j
 public class MultiTurnParser implements ChatParser {
 
-    private static final Logger keyPipelineLog = LoggerFactory.getLogger(MultiTurnParser.class);
+    private static final Logger keyPipelineLog = LoggerFactory.getLogger("keyPipeline");
 
     private static final PromptTemplate promptTemplate = PromptTemplate.from(
             "You are a data product manager experienced in data requirements."
                     + "Your will be provided with current and history questions asked by a user,"
                     + "along with their mapped schema elements(metric, dimension and value), "
                     + "please try understanding the semantics and rewrite a question"
-                    + "(keep relevant metrics, dimensions, values and date ranges)."
+                    + "(keep relevant entities, metrics, dimensions, values and date ranges)."
                     + "Current Question: {{curtQuestion}} "
                     + "Current Mapped Schema: {{curtSchema}} "
                     + "History Question: {{histQuestion}} "
@@ -51,8 +52,11 @@ public class MultiTurnParser implements ChatParser {
     @Override
     public void parse(ChatParseContext chatParseContext, ParseResp parseResp) {
         Environment environment = ContextUtils.getBean(Environment.class);
-        Boolean multiTurn = environment.getProperty("multi.turn", Boolean.class);
-        if (!Boolean.TRUE.equals(multiTurn)) {
+        MultiTurnConfig agentMultiTurnConfig = chatParseContext.getAgent().getMultiTurnConfig();
+        Boolean globalMultiTurnConfig = environment.getProperty("s2.multi-turn.enable", Boolean.class);
+
+        Boolean multiTurnConfig = agentMultiTurnConfig != null ? agentMultiTurnConfig.isEnableMultiTurn() : globalMultiTurnConfig;
+        if (!Boolean.TRUE.equals(multiTurnConfig)) {
             return;
         }
 
