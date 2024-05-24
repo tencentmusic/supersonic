@@ -139,7 +139,7 @@ public class BenchMarkDemoDataLoader {
         ModelDetail modelDetail = new ModelDetail();
         List<Dim> dimensions = new ArrayList<>();
         dimensions.add(new Dim("艺术家名称", "artist_name", DimensionType.categorical.name(), 1));
-        dimensions.add(new Dim("国籍", "country", DimensionType.categorical.name(), 1));
+        dimensions.add(new Dim("国籍", "citizenship", DimensionType.categorical.name(), 1));
         dimensions.add(new Dim("性别", "gender", DimensionType.categorical.name(), 1));
         modelDetail.setDimensions(dimensions);
 
@@ -151,7 +151,7 @@ public class BenchMarkDemoDataLoader {
         modelDetail.setMeasures(Collections.emptyList());
 
         modelDetail.setQueryType("sql_query");
-        modelDetail.setSqlQuery("SELECT artist_name, country, gender, g_name FROM artist");
+        modelDetail.setSqlQuery("SELECT artist_name, citizenship, gender, g_name FROM artist");
         modelReq.setModelDetail(modelDetail);
         return modelService.createModel(modelReq, user);
     }
@@ -167,7 +167,7 @@ public class BenchMarkDemoDataLoader {
         List<Dim> dimensions = new ArrayList<>();
         dimensions.add(new Dim("持续时间", "duration", DimensionType.categorical.name(), 1));
         dimensions.add(new Dim("文件格式", "formats", DimensionType.categorical.name(), 1));
-        dimensions.add(new Dim("艺术家名称", "artist_name", DimensionType.categorical.name(), 1));
+        //dimensions.add(new Dim("艺术家名称", "artist_name", DimensionType.categorical.name(), 1));
         modelDetail.setDimensions(dimensions);
 
         List<Identify> identifiers = new ArrayList<>();
@@ -205,7 +205,7 @@ public class BenchMarkDemoDataLoader {
         identifiers.add(new Identify("歌曲名称", IdentifyType.primary.name(), "song_name"));
         identifiers.add(new Identify("歌曲ID", IdentifyType.foreign.name(), "f_id"));
         identifiers.add(new Identify("艺术家名称", IdentifyType.foreign.name(), "artist_name"));
-        identifiers.add(new Identify("艺术家名称", IdentifyType.foreign.name(), "artist_name"));
+        //identifiers.add(new Identify("艺术家名称", IdentifyType.foreign.name(), "artist_name"));
 
         modelDetail.setIdentifiers(identifiers);
 

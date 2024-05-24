@@ -37,7 +37,7 @@ CREATE TABLE IF NOT EXISTS `genre` (
 
 CREATE TABLE IF NOT EXISTS `artist` (
     `artist_name` varchar(50) NOT NULL , -- genre name
-    `country` varchar(20) ,
+    `citizenship` varchar(20) ,
     `gender` varchar(20) ,
     `g_name` varchar(50)
 )ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

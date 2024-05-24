@@ -1181,12 +1181,12 @@ insert into genre(g_name,rating,most_popular_in) VALUES ('现代',8,'孟加拉�
 insert into genre(g_name,rating,most_popular_in) VALUES ('蓝调',7,'加拿大');
 insert into genre(g_name,rating,most_popular_in) VALUES ('流行',9,'美国');
 
-insert into artist(artist_name,country,gender,g_name) VALUES ('Shrikanta','印度','男性','tagore');
-insert into artist(artist_name,country,gender,g_name) VALUES ('Prity','孟加拉国','女性','nazrul');
-insert into artist(artist_name,country,gender,g_name) VALUES ('Farida','孟加拉国','女性','民间');
-insert into artist(artist_name,country,gender,g_name) VALUES ('Topu','印度','女性','现代');
-insert into artist(artist_name,country,gender,g_name) VALUES ('Enrique','美国','男性','蓝调');
-insert into artist(artist_name,country,gender,g_name) VALUES ('Michel','英国','男性','流行');
+insert into artist(artist_name,citizenship,gender,g_name) VALUES ('Shrikanta','印度','男性','tagore');
+insert into artist(artist_name,citizenship,gender,g_name) VALUES ('Prity','孟加拉国','女性','nazrul');
+insert into artist(artist_name,citizenship,gender,g_name) VALUES ('Farida','孟加拉国','女性','民间');
+insert into artist(artist_name,citizenship,gender,g_name) VALUES ('Topu','印度','女性','现代');
+insert into artist(artist_name,citizenship,gender,g_name) VALUES ('Enrique','美国','男性','蓝调');
+insert into artist(artist_name,citizenship,gender,g_name) VALUES ('Michel','英国','男性','流行');
 
 insert into files(f_id,artist_name,file_size,duration,formats) VALUES (1,'Shrikanta','3.78 MB','3:45','mp4');
 insert into files(f_id,artist_name,file_size,duration,formats) VALUES (2,'Prity','4.12 MB','2:56','mp3');
