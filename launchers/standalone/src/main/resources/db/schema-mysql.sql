@@ -72,6 +72,9 @@ CREATE TABLE `s2_agent` (
                             `status` int(11) DEFAULT NULL,
                             `model` varchar(100) COLLATE utf8_unicode_ci DEFAULT NULL,
                             `config` varchar(6000) COLLATE utf8_unicode_ci DEFAULT NULL,
+                            `llm_config` varchar(2000) COLLATE utf8_unicode_ci DEFAULT NULL,
+                            `multi_turn_config` varchar(2000) COLLATE utf8_unicode_ci DEFAULT NULL,
+                            `visual_config` varchar(2000) COLLATE utf8_unicode_ci DEFAULT NULL,
                             `created_by` varchar(100) COLLATE utf8_unicode_ci DEFAULT NULL,
                             `created_at` datetime DEFAULT NULL,
                             `updated_by` varchar(100) COLLATE utf8_unicode_ci DEFAULT NULL,
@@ -327,6 +330,7 @@ CREATE TABLE `s2_model` (
                             `depends` varchar(500) DEFAULT NULL ,
                             `filter_sql` varchar(1000) DEFAULT NULL ,
                             `tag_object_id` int(11) DEFAULT '0',
+                            `ext` varchar(1000) DEFAULT NULL,
                             PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 

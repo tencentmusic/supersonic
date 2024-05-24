@@ -32,7 +32,8 @@ public class ChatController {
     public Boolean save(@RequestParam(value = "chatName") String chatName,
                         @RequestParam(value = "agentId", required = false) Integer agentId,
             HttpServletRequest request, HttpServletResponse response) {
-        return chatService.addChat(UserHolder.findUser(request, response), chatName, agentId);
+        chatService.addChat(UserHolder.findUser(request, response), chatName, agentId);
+        return true;
     }
 
     @GetMapping("/getAll")

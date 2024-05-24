@@ -140,6 +140,7 @@ CREATE TABLE IF NOT EXISTS `s2_model` (
     `depends` varchar(500) DEFAULT NULL ,
     `source_type` varchar(128) DEFAULT NULL ,
     `filter_sql` varchar(1000) DEFAULT NULL ,
+    `ext` varchar(1000) DEFAULT NULL,
     PRIMARY KEY (`id`)
     );
 COMMENT ON TABLE s2_model IS 'model information';
@@ -351,6 +352,9 @@ CREATE TABLE IF NOT EXISTS s2_agent
     status       int null,
     examples    varchar(500) null,
     config      varchar(2000)  null,
+    llm_config varchar(2000)  null,
+    multi_turn_config varchar(2000)  null,
+    visual_config varchar(2000)  null,
     created_by  varchar(100) null,
     created_at  TIMESTAMP  null,
     updated_by  varchar(100) null,

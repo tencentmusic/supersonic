@@ -45,6 +45,9 @@ public class ModelConverter {
         modelDO.setStatus(StatusEnum.ONLINE.getCode());
         modelDO.setModelDetail(JSONObject.toJSONString(modelDetail));
         modelDO.setDrillDownDimensions(JSONObject.toJSONString(modelReq.getDrillDownDimensions()));
+        if (modelReq.getExt() != null) {
+            modelDO.setExt(JSONObject.toJSONString(modelReq.getExt()));
+        }
         return modelDO;
     }
 
@@ -60,7 +63,8 @@ public class ModelConverter {
         modelResp.setViewOrgs(StringUtils.isBlank(modelDO.getViewOrg())
                 ? Lists.newArrayList() : Arrays.asList(modelDO.getViewOrg().split(",")));
         modelResp.setDrillDownDimensions(JsonUtil.toList(modelDO.getDrillDownDimensions(), DrillDownDimension.class));
-        modelResp.setModelDetail(JSONObject.parseObject(modelDO.getModelDetail(), ModelDetail.class));
+        modelResp.setModelDetail(JsonUtil.toObject(modelDO.getModelDetail(), ModelDetail.class));
+        modelResp.setExt(JsonUtil.toObject(modelDO.getExt(), Map.class));
         return modelResp;
     }
 
@@ -81,6 +85,9 @@ public class ModelConverter {
             modelDO.setDrillDownDimensions(JSONObject.toJSONString(modelReq.getDrillDownDimensions()));
         }
         modelDO.setModelDetail(JSONObject.toJSONString((modelDetail)));
+        if (modelReq.getExt() != null) {
+            modelDO.setExt(JSONObject.toJSONString(modelReq.getExt()));
+        }
         modelDO.setUpdatedBy(user.getName());
         modelDO.setUpdatedAt(new Date());
         return modelDO;

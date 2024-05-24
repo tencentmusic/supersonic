@@ -17,7 +17,7 @@ import com.tencent.supersonic.common.pojo.enums.EventType;
 import com.tencent.supersonic.common.pojo.enums.StatusEnum;
 import com.tencent.supersonic.common.pojo.enums.TypeEnums;
 import com.tencent.supersonic.common.util.BeanMapper;
-import com.tencent.supersonic.common.util.ChatGptHelper;
+import com.tencent.supersonic.headless.server.utils.AliasGenerateHelper;
 import com.tencent.supersonic.common.util.jsqlparser.SqlSelectFunctionHelper;
 import com.tencent.supersonic.headless.api.pojo.DrillDownDimension;
 import com.tencent.supersonic.headless.api.pojo.Measure;
@@ -66,6 +66,13 @@ import com.tencent.supersonic.headless.server.service.TagMetaService;
 import com.tencent.supersonic.headless.server.utils.MetricCheckUtils;
 import com.tencent.supersonic.headless.server.utils.MetricConverter;
 import com.tencent.supersonic.headless.server.utils.ModelClusterBuilder;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -79,13 +86,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.BeanUtils;
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 
 @Service
 @Slf4j
@@ -97,7 +97,7 @@ public class MetricServiceImpl implements MetricService {
 
     private DimensionService dimensionService;
 
-    private ChatGptHelper chatGptHelper;
+    private AliasGenerateHelper chatGptHelper;
 
     private CollectService collectService;
 
@@ -111,7 +111,7 @@ public class MetricServiceImpl implements MetricService {
 
     public MetricServiceImpl(MetricRepository metricRepository,
             ModelService modelService,
-            ChatGptHelper chatGptHelper,
+            AliasGenerateHelper chatGptHelper,
             CollectService collectService,
             DataSetService dataSetService,
             ApplicationEventPublisher eventPublisher,
@@ -293,12 +293,13 @@ public class MetricServiceImpl implements MetricService {
         queryMapReq.setUser(user);
         queryMapReq.setMapModeEnum(MapModeEnum.LOOSE);
         MapInfoResp mapMeta = metaDiscoveryService.getMapMeta(queryMapReq);
-        Map<String, DataSetMapInfo> dataSetMapInfo = mapMeta.getDataSetMapInfo();
-        if (CollectionUtils.isEmpty(dataSetMapInfo)) {
+        Map<String, DataSetMapInfo> dataSetMapInfoMap = mapMeta.getDataSetMapInfo();
+        if (CollectionUtils.isEmpty(dataSetMapInfoMap)) {
             return metricRespPageInfo;
         }
-        Map<Long, Double> result = dataSetMapInfo.values().stream()
+        Map<Long, Double> result = dataSetMapInfoMap.values().stream()
                 .map(DataSetMapInfo::getMapFields)
+                .filter(Objects::nonNull)
                 .flatMap(Collection::stream).filter(schemaElementMatch ->
                         SchemaElementType.METRIC.equals(schemaElementMatch.getElement().getType()))
                 .collect(Collectors.toMap(schemaElementMatch ->
@@ -534,7 +535,7 @@ public class MetricServiceImpl implements MetricService {
     @Override
     public List<String> mockAlias(MetricBaseReq metricReq, String mockType, User user) {
 
-        String mockAlias = chatGptHelper.mockAlias(mockType, metricReq.getName(), metricReq.getBizName(), "",
+        String mockAlias = chatGptHelper.generateAlias(mockType, metricReq.getName(), metricReq.getBizName(), "",
                 metricReq.getDescription(), !"".equals(metricReq.getDataFormatType()));
         return JSONObject.parseObject(mockAlias, new TypeReference<List<String>>() {
         });

@@ -17,7 +17,7 @@ import com.tencent.supersonic.headless.api.pojo.response.QueryResult;
 import java.util.List;
 
 public interface ChatManageService {
-    Boolean addChat(User user, String chatName, Integer agentId);
+    Long addChat(User user, String chatName, Integer agentId);
 
     List<ChatDO> getAll(String userName, Integer agentId);
 

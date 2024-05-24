@@ -1,15 +1,14 @@
 package com.tencent.supersonic.common.util.jsqlparser;
 
 import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
-import org.apache.commons.lang3.tuple.Pair;
-import org.junit.Assert;
-import org.junit.jupiter.api.Test;
-
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import org.apache.commons.lang3.tuple.Pair;
+import org.junit.Assert;
+import org.junit.jupiter.api.Test;
 
 /**
  * SqlParserReplaceHelperTest
@@ -477,6 +476,17 @@ class SqlReplaceHelperTest {
                         + "'2023-09-05') <= 3) AND 数据日期 = '2023-10-10' GROUP BY 部门 ORDER BY 访问次数 DESC LIMIT 10",
                 replaceSql);
 
+    }
+
+    @Test
+    void testReplaceAggAliasOrderItem() {
+        String sql = "SELECT SUM(访问次数) AS top10总播放量 FROM (SELECT 部门, SUM(访问次数) AS 访问次数 FROM 超音数  "
+                + "GROUP BY 部门 ORDER BY SUM(访问次数) DESC LIMIT 10) AS top10";
+        String replaceSql = SqlReplaceHelper.replaceAggAliasOrderItem(sql);
+        Assert.assertEquals(
+                "SELECT SUM(访问次数) AS top10总播放量 FROM (SELECT 部门, SUM(访问次数) AS 访问次数 FROM 超音数 "
+                        + "GROUP BY 部门 ORDER BY 2 DESC LIMIT 10) AS top10",
+                replaceSql);
     }
 
     private Map<String, String> initParams() {

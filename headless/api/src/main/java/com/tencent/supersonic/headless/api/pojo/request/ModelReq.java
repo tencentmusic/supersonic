@@ -9,6 +9,7 @@ import com.tencent.supersonic.headless.api.pojo.SchemaItem;
 import lombok.Data;
 
 import java.util.List;
+import java.util.Map;
 
 
 @Data
@@ -39,6 +40,8 @@ public class ModelReq extends SchemaItem {
     private List<String> adminOrgs;
 
     private Long tagObjectId;
+
+    private Map<String, Object> ext;
 
     public List<Dim> getTimeDimension() {
         if (modelDetail == null) {

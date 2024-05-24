@@ -7,7 +7,7 @@ import com.tencent.supersonic.common.pojo.enums.DataFormatTypeEnum;
 import com.tencent.supersonic.common.pojo.enums.SensitiveLevelEnum;
 import com.tencent.supersonic.common.pojo.enums.StatusEnum;
 import com.tencent.supersonic.common.pojo.enums.TypeEnums;
-import com.tencent.supersonic.common.util.ChatGptHelper;
+import com.tencent.supersonic.headless.server.utils.AliasGenerateHelper;
 import com.tencent.supersonic.headless.api.pojo.DrillDownDimension;
 import com.tencent.supersonic.headless.api.pojo.MeasureParam;
 import com.tencent.supersonic.headless.api.pojo.MetricDefineByMeasureParams;
@@ -64,7 +64,7 @@ public class MetricServiceImplTest {
 
     private MetricService mockMetricService(MetricRepository metricRepository,
             ModelService modelService) {
-        ChatGptHelper chatGptHelper = Mockito.mock(ChatGptHelper.class);
+        AliasGenerateHelper chatGptHelper = Mockito.mock(AliasGenerateHelper.class);
         CollectService collectService = Mockito.mock(CollectService.class);
         ApplicationEventPublisher eventPublisher = Mockito.mock(ApplicationEventPublisher.class);
         DataSetService dataSetService = Mockito.mock(DataSetServiceImpl.class);

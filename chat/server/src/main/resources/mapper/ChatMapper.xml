@@ -49,7 +49,7 @@
         where chat_id = #{chatId}
     </update>
 
-    <insert id="createChat" parameterType="com.tencent.supersonic.chat.server.persistence.dataobject.ChatDO">
+    <insert id="createChat" parameterType="com.tencent.supersonic.chat.server.persistence.dataobject.ChatDO"  useGeneratedKeys="true" keyProperty="chatId">
         insert into s2_chat
         (agent_id, chat_name, create_time, last_time, creator, last_question, is_delete, is_top)
         values (#{agentId}, #{chatName}, #{createTime}, #{lastTime}, #{creator}, #{lastQuestion}, #{isDelete}, #{isTop})

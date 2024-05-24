@@ -12,17 +12,15 @@ from plugin_call.prompt_construct import (
     construct_task_prompt,
     plugin_selection_output_parse,
 )
-from instances.llm_instance import llm
 
+# def plugin_selection_run(
+#     query_text: str, plugin_configs: List[Mapping[str, Any]]
+# ) -> Union[Mapping[str, str], None]:
 
-def plugin_selection_run(
-    query_text: str, plugin_configs: List[Mapping[str, Any]]
-) -> Union[Mapping[str, str], None]:
+#     tools_prompt = construct_plugin_pool_prompt(plugin_configs)
 
-    tools_prompt = construct_plugin_pool_prompt(plugin_configs)
+#     task_prompt = construct_task_prompt(query_text, tools_prompt)
+#     llm_output = llm(task_prompt)
+#     parsed_output = plugin_selection_output_parse(llm_output)
 
-    task_prompt = construct_task_prompt(query_text, tools_prompt)
-    llm_output = llm(task_prompt)
-    parsed_output = plugin_selection_output_parse(llm_output)
-
-    return parsed_output
+#     return parsed_output

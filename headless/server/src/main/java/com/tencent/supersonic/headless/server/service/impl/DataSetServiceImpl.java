@@ -87,6 +87,7 @@ public class DataSetServiceImpl
         DataSetResp dataSetResp = convert(dataSetDO);
         conflictCheck(dataSetResp);
         save(dataSetDO);
+        dataSetResp.setId(dataSetDO.getId());
         return dataSetResp;
     }
 

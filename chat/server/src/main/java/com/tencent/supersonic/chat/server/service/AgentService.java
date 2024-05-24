@@ -8,7 +8,7 @@ public interface AgentService {
 
     List<Agent> getAgents();
 
-    void createAgent(Agent agent, User user);
+    Integer createAgent(Agent agent, User user);
 
     void updateAgent(Agent agent, User user);
 

@@ -1,12 +1,13 @@
 # -*- coding:utf-8 -*-
 import os
 import sys
-from typing import Any, List, Mapping, Optional, Union
+import ast
+from typing import Any, Mapping
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, HTTPException
 
 from services.s2sql.run import text2sql_agent_router
 
@@ -50,12 +51,20 @@ async def query2sql(query_body: Mapping[str, Any]):
     else:
         sql_generation_mode = query_body['sqlGenerationMode']
 
+    if 'llmConfig' in query_body:
+        llm_config = ast.literal_eval(str(query_body['llmConfig']))
+    else:
+        llm_config = None
+
     dataset_name = schema['dataSetName']
     fields_list = schema['fieldNameList']
     prior_schema_links = {item['fieldValue']:item['fieldName'] for item in linking}
 
-    resp = await text2sql_agent_router.async_query2sql(question=query_text, filter_condition=filter_condition, model_name=dataset_name, fields_list=fields_list,
-                                            data_date=current_date, prior_schema_links=prior_schema_links, prior_exts=prior_exts, sql_generation_mode=sql_generation_mode)
+    resp = await text2sql_agent_router.async_query2sql(question=query_text, filter_condition=filter_condition, 
+                                            model_name=dataset_name, fields_list=fields_list,
+                                            data_date=current_date, prior_schema_links=prior_schema_links, 
+                                            prior_exts=prior_exts, sql_generation_mode=sql_generation_mode,
+                                            llm_config=llm_config)
 
     return resp
 

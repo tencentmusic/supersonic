@@ -9,13 +9,13 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from config.config_parse import LLM_PROVIDER_NAME, llm_config_dict
 
 
-def get_llm_provider(llm_provider_name: str, llm_config_dict: dict):
-    if llm_provider_name in llms.type_to_cls_dict:
-        llm_provider = llms.type_to_cls_dict[llm_provider_name]
-        llm = llm_provider(**llm_config_dict)
+def get_llm(llm_config: dict):
+    if LLM_PROVIDER_NAME in llms.type_to_cls_dict:
+        llm_provider = llms.type_to_cls_dict[LLM_PROVIDER_NAME]
+        if llm_config is None:
+            llm = llm_provider(**llm_config_dict)
+        else:
+            llm = llm_provider(**llm_config)
         return llm
     else:
-        raise Exception("llm_provider_name is not supported: {}".format(llm_provider_name))
-
-
-llm = get_llm_provider(LLM_PROVIDER_NAME, llm_config_dict)
+        raise Exception("llm_provider_name is not supported: {}".format(LLM_PROVIDER_NAME))

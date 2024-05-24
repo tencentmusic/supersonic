@@ -43,7 +43,7 @@ public class ChatManageServiceImpl implements ChatManageService {
     private ChatQueryRepository chatQueryRepository;
 
     @Override
-    public Boolean addChat(User user, String chatName, Integer agentId) {
+    public Long addChat(User user, String chatName, Integer agentId) {
         ChatDO chatDO = new ChatDO();
         chatDO.setChatName(chatName);
         chatDO.setCreator(user.getName());

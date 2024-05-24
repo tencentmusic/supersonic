@@ -1,6 +1,5 @@
 package com.tencent.supersonic.headless.core.parser;
 
-import cn.hutool.core.exceptions.ExceptionUtil;
 import com.google.common.base.Strings;
 import com.tencent.supersonic.common.util.StringUtil;
 import com.tencent.supersonic.headless.api.pojo.MetricTable;
@@ -97,7 +96,7 @@ public class DefaultQueryParser implements QueryParser {
                 }
             }
         } catch (Exception e) {
-            log.error("physicalSql error {}", ExceptionUtil.getMessage(e));
+            log.error("physicalSql error {}", e);
             queryStatement.setErrMsg(e.getMessage());
         }
         return queryStatement;
@@ -114,7 +113,7 @@ public class DefaultQueryParser implements QueryParser {
             return ComponentFactory.getSqlParser().explain(queryStatement, isAgg);
         } catch (Exception e) {
             queryStatement.setErrMsg(e.getMessage());
-            log.error("parser error metricQueryReq[{}] error [{}]", metricQueryParam, ExceptionUtil.getMessage(e));
+            log.error("parser error metricQueryReq[{}] error [{}]", metricQueryParam, e);
         }
         return queryStatement;
     }

@@ -10,11 +10,13 @@ import com.tencent.supersonic.headless.core.pojo.QueryContext;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
+import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -27,7 +29,8 @@ public abstract class BaseMapper implements SchemaMapper {
 
         String simpleName = this.getClass().getSimpleName();
         long startTime = System.currentTimeMillis();
-        log.debug("before {},mapInfo:{}", simpleName, queryContext.getMapInfo().getDataSetElementMatches());
+        log.debug("before {},mapInfo:{}", simpleName,
+                queryContext.getMapInfo().getDataSetElementMatches());
 
         try {
             doMap(queryContext);
@@ -37,11 +40,12 @@ public abstract class BaseMapper implements SchemaMapper {
         }
 
         long cost = System.currentTimeMillis() - startTime;
-        log.info("after {},cost:{},mapInfo:{}", simpleName, cost, queryContext.getMapInfo().getDataSetElementMatches());
+        log.debug("after {},cost:{},mapInfo:{}", simpleName, cost,
+                queryContext.getMapInfo().getDataSetElementMatches());
     }
 
     private void filter(QueryContext queryContext) {
-
+        filterByDataSetId(queryContext);
         switch (queryContext.getQueryDataType()) {
             case TAG:
                 filterByQueryDataType(queryContext, element -> !(element.getIsTag() > 0));
@@ -60,7 +64,19 @@ public abstract class BaseMapper implements SchemaMapper {
             default:
                 break;
         }
+    }
 
+    private static void filterByDataSetId(QueryContext queryContext) {
+        Set<Long> dataSetIds = queryContext.getDataSetIds();
+        if (CollectionUtils.isEmpty(dataSetIds)) {
+            return;
+        }
+        Set<Long> dataSetIdInMapInfo = queryContext.getMapInfo().getDataSetElementMatches().keySet();
+        for (Long dataSetId : dataSetIdInMapInfo) {
+            if (!dataSetIds.contains(dataSetId)) {
+                queryContext.getMapInfo().getDataSetElementMatches().remove(dataSetId);
+            }
+        }
     }
 
     private static void filterByQueryDataType(QueryContext queryContext, Predicate<SchemaElement> needRemovePredicate) {
@@ -111,10 +127,6 @@ public abstract class BaseMapper implements SchemaMapper {
         if (!existElement.equals(newElement)) {
             return false;
         }
-        if (SchemaElementType.TERM.equals(existElement.getType())
-                && SchemaElementType.TERM.equals(newElement.getType())) {
-            return false;
-        }
         if (SchemaElementType.VALUE.equals(newElement.getType())) {
             return existElementMatch.getWord().equalsIgnoreCase(newElementMatch.getWord());
         }
@@ -130,7 +142,7 @@ public abstract class BaseMapper implements SchemaMapper {
         }
         SchemaElement elementDb = dataSetSchema.getElement(elementType, elementID);
         if (Objects.isNull(elementDb)) {
-            log.info("element is null, elementType:{},elementID:{}", elementType, elementID);
+            log.warn("element is null, elementType:{},elementID:{}", elementType, elementID);
             return null;
         }
         BeanUtils.copyProperties(elementDb, element);
