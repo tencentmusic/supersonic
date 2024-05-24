@@ -5,7 +5,7 @@ import com.tencent.supersonic.common.pojo.enums.DictWordType;
 import com.tencent.supersonic.headless.api.pojo.response.S2Term;
 import com.tencent.supersonic.headless.core.pojo.QueryContext;
 import com.tencent.supersonic.headless.core.chat.knowledge.HanlpMapResult;
-import com.tencent.supersonic.headless.core.chat.knowledge.KnowledgeService;
+import com.tencent.supersonic.headless.core.chat.knowledge.KnowledgeBaseService;
 import com.tencent.supersonic.headless.core.chat.knowledge.SearchService;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -29,7 +29,7 @@ public class SearchMatchStrategy extends BaseMatchStrategy<HanlpMapResult> {
     private static final int SEARCH_SIZE = 3;
 
     @Autowired
-    private KnowledgeService knowledgeService;
+    private KnowledgeBaseService knowledgeBaseService;
 
     @Override
     public Map<MatchText, List<HanlpMapResult>> match(QueryContext queryContext, List<S2Term> originals,
@@ -57,9 +57,9 @@ public class SearchMatchStrategy extends BaseMatchStrategy<HanlpMapResult> {
                     String detectSegment = text.substring(detectIndex);
 
                     if (StringUtils.isNotEmpty(detectSegment)) {
-                        List<HanlpMapResult> hanlpMapResults = knowledgeService.prefixSearch(detectSegment,
+                        List<HanlpMapResult> hanlpMapResults = knowledgeBaseService.prefixSearch(detectSegment,
                                 SearchService.SEARCH_SIZE, queryContext.getModelIdToDataSetIds(), detectDataSetIds);
-                        List<HanlpMapResult> suffixHanlpMapResults = knowledgeService.suffixSearch(
+                        List<HanlpMapResult> suffixHanlpMapResults = knowledgeBaseService.suffixSearch(
                                 detectSegment, SEARCH_SIZE, queryContext.getModelIdToDataSetIds(), detectDataSetIds);
                         hanlpMapResults.addAll(suffixHanlpMapResults);
                         // remove entity name where search

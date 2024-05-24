@@ -41,6 +41,8 @@ public class LLMReq {
 
         private String dataSetName;
 
+        private Long dataSetId;
+
         private List<String> fieldNameList;
 
     }
@@ -51,7 +53,7 @@ public class LLMReq {
         private String tableName;
     }
 
-    public enum SqlGenerationMode {
+    public enum SqlGenType {
 
         ONE_PASS_AUTO_COT("1_pass_auto_cot"),
 
@@ -64,7 +66,7 @@ public class LLMReq {
 
         private String name;
 
-        SqlGenerationMode(String name) {
+        SqlGenType(String name) {
             this.name = name;
         }
 
@@ -73,10 +75,10 @@ public class LLMReq {
             return name;
         }
 
-        public static SqlGenerationMode getMode(String name) {
-            for (SqlGenerationMode sqlGenerationMode : SqlGenerationMode.values()) {
-                if (sqlGenerationMode.name.equals(name)) {
-                    return sqlGenerationMode;
+        public static SqlGenType getMode(String name) {
+            for (SqlGenType sqlGenType : SqlGenType.values()) {
+                if (sqlGenType.name.equals(name)) {
+                    return sqlGenType;
                 }
             }
             return null;

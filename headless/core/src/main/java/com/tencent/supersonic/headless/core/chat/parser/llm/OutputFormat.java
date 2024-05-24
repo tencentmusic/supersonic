@@ -13,9 +13,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-/***
- * output format
- */
 @Slf4j
 public class OutputFormat {
 

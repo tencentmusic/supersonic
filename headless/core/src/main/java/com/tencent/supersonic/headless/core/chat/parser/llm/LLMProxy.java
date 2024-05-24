@@ -1,7 +1,6 @@
-package com.tencent.supersonic.headless.core.chat.parser;
+package com.tencent.supersonic.headless.core.chat.parser.llm;
 
 
-import com.tencent.supersonic.headless.core.pojo.QueryContext;
 import com.tencent.supersonic.headless.core.chat.query.llm.s2sql.LLMReq;
 import com.tencent.supersonic.headless.core.chat.query.llm.s2sql.LLMResp;
 
@@ -12,8 +11,6 @@ import com.tencent.supersonic.headless.core.chat.query.llm.s2sql.LLMResp;
  */
 public interface LLMProxy {
 
-    boolean isSkip(QueryContext queryContext);
-
-    LLMResp query2sql(LLMReq llmReq, Long dataSetId);
+    LLMResp text2sql(LLMReq llmReq);
 
 }

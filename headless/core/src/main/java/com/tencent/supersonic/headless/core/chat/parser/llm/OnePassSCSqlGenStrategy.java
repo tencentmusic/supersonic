@@ -2,7 +2,6 @@ package com.tencent.supersonic.headless.core.chat.parser.llm;
 
 import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.headless.core.chat.query.llm.s2sql.LLMReq;
-import com.tencent.supersonic.headless.core.chat.query.llm.s2sql.LLMReq.SqlGenerationMode;
 import com.tencent.supersonic.headless.core.chat.query.llm.s2sql.LLMResp;
 import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.model.chat.ChatLanguageModel;
@@ -21,21 +20,21 @@ import java.util.stream.Collectors;
 
 @Service
 @Slf4j
-public class OnePassSCSqlGeneration extends BaseSqlGeneration {
+public class OnePassSCSqlGenStrategy extends SqlGenStrategy {
 
     @Override
-    public LLMResp generation(LLMReq llmReq, Long dataSetId) {
+    public LLMResp generate(LLMReq llmReq) {
         //1.retriever sqlExamples and generate exampleListPool
-        keyPipelineLog.info("dataSetId:{},llmReq:{}", dataSetId, llmReq);
+        keyPipelineLog.info("llmReq:{}", llmReq);
 
-        List<Map<String, String>> sqlExamples = sqlExamplarLoader.retrieverSqlExamples(llmReq.getQueryText(),
+        List<Map<String, String>> sqlExamples = exemplarManager.recallExemplars(llmReq.getQueryText(),
                 optimizationConfig.getText2sqlExampleNum());
 
-        List<List<Map<String, String>>> exampleListPool = sqlPromptGenerator.getExampleCombos(sqlExamples,
+        List<List<Map<String, String>>> exampleListPool = promptGenerator.getExampleCombos(sqlExamples,
                 optimizationConfig.getText2sqlFewShotsNum(), optimizationConfig.getText2sqlSelfConsistencyNum());
 
         //2.generator linking and sql prompt by sqlExamples,and parallel generate response.
-        List<String> linkingSqlPromptPool = sqlPromptGenerator.generatePromptPool(llmReq, exampleListPool, true);
+        List<String> linkingSqlPromptPool = promptGenerator.generatePromptPool(llmReq, exampleListPool, true);
         List<String> llmResults = new CopyOnWriteArrayList<>();
         linkingSqlPromptPool.parallelStream().forEach(linkingSqlPrompt -> {
                     Prompt prompt = PromptTemplate.from(JsonUtil.toString(linkingSqlPrompt))
@@ -67,6 +66,6 @@ public class OnePassSCSqlGeneration extends BaseSqlGeneration {
 
     @Override
     public void afterPropertiesSet() {
-        SqlGenerationFactory.addSqlGenerationForFactory(SqlGenerationMode.ONE_PASS_AUTO_COT_SELF_CONSISTENCY, this);
+        SqlGenStrategyFactory.addSqlGenerationForFactory(LLMReq.SqlGenType.ONE_PASS_AUTO_COT_SELF_CONSISTENCY, this);
     }
 }

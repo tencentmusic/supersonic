@@ -2,7 +2,7 @@ package com.tencent.supersonic.headless.core.chat.parser.llm;
 
 import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.headless.core.chat.query.llm.s2sql.LLMReq;
-import com.tencent.supersonic.headless.core.chat.query.llm.s2sql.LLMReq.SqlGenerationMode;
+import com.tencent.supersonic.headless.core.chat.query.llm.s2sql.LLMReq.SqlGenType;
 import com.tencent.supersonic.headless.core.chat.query.llm.s2sql.LLMResp;
 import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.model.chat.ChatLanguageModel;
@@ -18,15 +18,15 @@ import java.util.Map;
 
 @Service
 @Slf4j
-public class TwoPassSqlGeneration extends BaseSqlGeneration {
+public class TwoPassSqlGenStrategy extends SqlGenStrategy {
 
     @Override
-    public LLMResp generation(LLMReq llmReq, Long dataSetId) {
-        keyPipelineLog.info("dataSetId:{},llmReq:{}", dataSetId, llmReq);
-        List<Map<String, String>> sqlExamples = sqlExamplarLoader.retrieverSqlExamples(llmReq.getQueryText(),
+    public LLMResp generate(LLMReq llmReq) {
+        keyPipelineLog.info("llmReq:{}", llmReq);
+        List<Map<String, String>> sqlExamples = exemplarManager.recallExemplars(llmReq.getQueryText(),
                 optimizationConfig.getText2sqlExampleNum());
 
-        String linkingPromptStr = sqlPromptGenerator.generateLinkingPrompt(llmReq, sqlExamples);
+        String linkingPromptStr = promptGenerator.generateLinkingPrompt(llmReq, sqlExamples);
 
         Prompt prompt = PromptTemplate.from(JsonUtil.toString(linkingPromptStr)).apply(new HashMap<>());
         keyPipelineLog.info("step one request prompt:{}", prompt.toSystemMessage());
@@ -34,7 +34,7 @@ public class TwoPassSqlGeneration extends BaseSqlGeneration {
         Response<AiMessage> response = chatLanguageModel.generate(prompt.toSystemMessage());
         keyPipelineLog.info("step one model response:{}", response.content().text());
         String schemaLinkStr = OutputFormat.getSchemaLink(response.content().text());
-        String generateSqlPrompt = sqlPromptGenerator.generateSqlPrompt(llmReq, schemaLinkStr, sqlExamples);
+        String generateSqlPrompt = promptGenerator.generateSqlPrompt(llmReq, schemaLinkStr, sqlExamples);
 
         Prompt sqlPrompt = PromptTemplate.from(JsonUtil.toString(generateSqlPrompt)).apply(new HashMap<>());
         keyPipelineLog.info("step two request prompt:{}", sqlPrompt.toSystemMessage());
@@ -53,6 +53,6 @@ public class TwoPassSqlGeneration extends BaseSqlGeneration {
 
     @Override
     public void afterPropertiesSet() {
-        SqlGenerationFactory.addSqlGenerationForFactory(SqlGenerationMode.TWO_PASS_AUTO_COT, this);
+        SqlGenStrategyFactory.addSqlGenerationForFactory(SqlGenType.TWO_PASS_AUTO_COT, this);
     }
 }

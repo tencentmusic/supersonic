@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 
 @Service
 @Slf4j
-public class KnowledgeService {
+public class KnowledgeBaseService {
 
     public void updateSemanticKnowledge(List<DictWord> natures) {
 

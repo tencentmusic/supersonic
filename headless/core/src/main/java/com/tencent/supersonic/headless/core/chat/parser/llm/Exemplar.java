@@ -3,7 +3,7 @@ package com.tencent.supersonic.headless.core.chat.parser.llm;
 import lombok.Data;
 
 @Data
-public class SqlExample {
+public class Exemplar {
 
     private String question;
 

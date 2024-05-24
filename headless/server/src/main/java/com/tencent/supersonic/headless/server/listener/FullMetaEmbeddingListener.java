@@ -1,6 +1,6 @@
 package com.tencent.supersonic.headless.server.listener;
 
-import com.tencent.supersonic.headless.core.chat.parser.JavaLLMProxy;
+import com.tencent.supersonic.headless.core.chat.parser.llm.JavaLLMProxy;
 import com.tencent.supersonic.headless.core.utils.ComponentFactory;
 import com.tencent.supersonic.headless.server.schedule.EmbeddingTask;
 import lombok.extern.slf4j.Slf4j;

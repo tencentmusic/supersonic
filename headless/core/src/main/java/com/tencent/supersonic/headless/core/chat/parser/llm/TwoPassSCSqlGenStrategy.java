@@ -2,7 +2,7 @@ package com.tencent.supersonic.headless.core.chat.parser.llm;
 
 import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.headless.core.chat.query.llm.s2sql.LLMReq;
-import com.tencent.supersonic.headless.core.chat.query.llm.s2sql.LLMReq.SqlGenerationMode;
+import com.tencent.supersonic.headless.core.chat.query.llm.s2sql.LLMReq.SqlGenType;
 import com.tencent.supersonic.headless.core.chat.query.llm.s2sql.LLMResp;
 import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.model.chat.ChatLanguageModel;
@@ -18,20 +18,20 @@ import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 @Service
-public class TwoPassSCSqlGeneration extends BaseSqlGeneration {
+public class TwoPassSCSqlGenStrategy extends SqlGenStrategy {
 
     @Override
-    public LLMResp generation(LLMReq llmReq, Long dataSetId) {
+    public LLMResp generate(LLMReq llmReq) {
         //1.retriever sqlExamples and generate exampleListPool
-        keyPipelineLog.info("dataSetId:{},llmReq:{}", dataSetId, llmReq);
-        List<Map<String, String>> sqlExamples = sqlExamplarLoader.retrieverSqlExamples(llmReq.getQueryText(),
+        keyPipelineLog.info("llmReq:{}", llmReq);
+        List<Map<String, String>> sqlExamples = exemplarManager.recallExemplars(llmReq.getQueryText(),
                 optimizationConfig.getText2sqlExampleNum());
 
-        List<List<Map<String, String>>> exampleListPool = sqlPromptGenerator.getExampleCombos(sqlExamples,
+        List<List<Map<String, String>>> exampleListPool = promptGenerator.getExampleCombos(sqlExamples,
                 optimizationConfig.getText2sqlFewShotsNum(), optimizationConfig.getText2sqlSelfConsistencyNum());
 
         //2.generator linking prompt,and parallel generate response.
-        List<String> linkingPromptPool = sqlPromptGenerator.generatePromptPool(llmReq, exampleListPool, false);
+        List<String> linkingPromptPool = promptGenerator.generatePromptPool(llmReq, exampleListPool, false);
         List<String> linkingResults = new CopyOnWriteArrayList<>();
         ChatLanguageModel chatLanguageModel = getChatLanguageModel(llmReq.getLlmConfig());
         linkingPromptPool.parallelStream().forEach(
@@ -47,7 +47,7 @@ public class TwoPassSCSqlGeneration extends BaseSqlGeneration {
         List<String> sortedList = OutputFormat.formatList(linkingResults);
         Pair<String, Map<String, Double>> linkingMap = OutputFormat.selfConsistencyVote(sortedList);
         //3.generator sql prompt,and parallel generate response.
-        List<String> sqlPromptPool = sqlPromptGenerator.generateSqlPromptPool(llmReq, sortedList, exampleListPool);
+        List<String> sqlPromptPool = promptGenerator.generateSqlPromptPool(llmReq, sortedList, exampleListPool);
         List<String> sqlTaskPool = new CopyOnWriteArrayList<>();
         sqlPromptPool.parallelStream().forEach(sqlPrompt -> {
             Prompt linkingPrompt = PromptTemplate.from(JsonUtil.toString(sqlPrompt)).apply(new HashMap<>());
@@ -69,6 +69,6 @@ public class TwoPassSCSqlGeneration extends BaseSqlGeneration {
 
     @Override
     public void afterPropertiesSet() {
-        SqlGenerationFactory.addSqlGenerationForFactory(SqlGenerationMode.TWO_PASS_AUTO_COT_SELF_CONSISTENCY, this);
+        SqlGenStrategyFactory.addSqlGenerationForFactory(SqlGenType.TWO_PASS_AUTO_COT_SELF_CONSISTENCY, this);
     }
 }

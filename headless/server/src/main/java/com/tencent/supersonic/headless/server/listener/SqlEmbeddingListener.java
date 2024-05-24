@@ -1,9 +1,9 @@
 package com.tencent.supersonic.headless.server.listener;
 
 import com.tencent.supersonic.common.config.EmbeddingConfig;
-import com.tencent.supersonic.headless.core.chat.parser.JavaLLMProxy;
-import com.tencent.supersonic.headless.core.chat.parser.llm.SqlExamplarLoader;
-import com.tencent.supersonic.headless.core.chat.parser.llm.SqlExample;
+import com.tencent.supersonic.headless.core.chat.parser.llm.JavaLLMProxy;
+import com.tencent.supersonic.headless.core.chat.parser.llm.ExemplarManager;
+import com.tencent.supersonic.headless.core.chat.parser.llm.Exemplar;
 import com.tencent.supersonic.headless.core.utils.ComponentFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +19,7 @@ import java.util.List;
 public class SqlEmbeddingListener implements CommandLineRunner {
 
     @Autowired
-    private SqlExamplarLoader sqlExamplarLoader;
+    private ExemplarManager exemplarManager;
     @Autowired
     private EmbeddingConfig embeddingConfig;
 
@@ -31,9 +31,9 @@ public class SqlEmbeddingListener implements CommandLineRunner {
     public void initSqlExamples() {
         try {
             if (ComponentFactory.getLLMProxy() instanceof JavaLLMProxy) {
-                List<SqlExample> sqlExamples = sqlExamplarLoader.getSqlExamples();
+                List<Exemplar> exemplars = exemplarManager.getExemplars();
                 String collectionName = embeddingConfig.getText2sqlCollectionName();
-                sqlExamplarLoader.addEmbeddingStore(sqlExamples, collectionName);
+                exemplarManager.addExemplars(exemplars, collectionName);
             }
         } catch (Exception e) {
             log.error("initSqlExamples error", e);

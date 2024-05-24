@@ -1,15 +1,12 @@
-package com.tencent.supersonic.headless.core.chat.parser;
+package com.tencent.supersonic.headless.core.chat.parser.llm;
 
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.headless.core.config.LLMParserConfig;
-import com.tencent.supersonic.headless.core.chat.parser.llm.OutputFormat;
-import com.tencent.supersonic.headless.core.pojo.QueryContext;
 import com.tencent.supersonic.headless.core.chat.query.llm.s2sql.LLMReq;
 import com.tencent.supersonic.headless.core.chat.query.llm.s2sql.LLMResp;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpEntity;
@@ -30,22 +27,12 @@ import java.util.ArrayList;
 @Component
 public class PythonLLMProxy implements LLMProxy {
 
-    private static final Logger keyPipelineLog = LoggerFactory.getLogger(PythonLLMProxy.class);
+    private static final Logger keyPipelineLog = LoggerFactory.getLogger("keyPipeline");
 
-    @Override
-    public boolean isSkip(QueryContext queryContext) {
-        LLMParserConfig llmParserConfig = ContextUtils.getBean(LLMParserConfig.class);
-        if (StringUtils.isEmpty(llmParserConfig.getUrl())) {
-            log.warn("llmParserUrl is empty, skip :{}", PythonLLMProxy.class.getName());
-            return true;
-        }
-        return false;
-    }
-
-    public LLMResp query2sql(LLMReq llmReq, Long dataSetId) {
+    public LLMResp text2sql(LLMReq llmReq) {
         long startTime = System.currentTimeMillis();
-        log.info("requestLLM request, dataSetId:{},llmReq:{}", dataSetId, llmReq);
-        keyPipelineLog.info("dataSetId:{},llmReq:{}", dataSetId, llmReq);
+        log.info("requestLLM request, llmReq:{}", llmReq);
+        keyPipelineLog.info("llmReq:{}", llmReq);
         try {
             LLMParserConfig llmParserConfig = ContextUtils.getBean(LLMParserConfig.class);
 

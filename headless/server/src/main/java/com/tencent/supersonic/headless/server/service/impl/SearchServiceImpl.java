@@ -18,7 +18,7 @@ import com.tencent.supersonic.headless.core.pojo.QueryContext;
 import com.tencent.supersonic.headless.core.chat.knowledge.DataSetInfoStat;
 import com.tencent.supersonic.headless.core.chat.knowledge.DictWord;
 import com.tencent.supersonic.headless.core.chat.knowledge.HanlpMapResult;
-import com.tencent.supersonic.headless.core.chat.knowledge.KnowledgeService;
+import com.tencent.supersonic.headless.core.chat.knowledge.KnowledgeBaseService;
 import com.tencent.supersonic.headless.core.chat.knowledge.helper.HanlpHelper;
 import com.tencent.supersonic.headless.core.chat.knowledge.helper.NatureHelper;
 import com.tencent.supersonic.headless.server.service.ChatContextService;
@@ -58,7 +58,7 @@ public class SearchServiceImpl implements SearchService {
     @Autowired
     private ChatContextService chatContextService;
     @Autowired
-    private KnowledgeService knowledgeService;
+    private KnowledgeBaseService knowledgeBaseService;
     @Autowired
     private DataSetService dataSetService;
 
@@ -73,7 +73,7 @@ public class SearchServiceImpl implements SearchService {
         Map<Long, List<Long>> modelIdToDataSetIds =
                 dataSetService.getModelIdToDataSetIds(new ArrayList<>(dataSetIdToName.keySet()), User.getFakeUser());
         // 2.detect by segment
-        List<S2Term> originals = knowledgeService.getTerms(queryText, modelIdToDataSetIds);
+        List<S2Term> originals = knowledgeBaseService.getTerms(queryText, modelIdToDataSetIds);
         log.info("hanlp parse result: {}", originals);
         Set<Long> dataSetIds = queryReq.getDataSetIds();
 
