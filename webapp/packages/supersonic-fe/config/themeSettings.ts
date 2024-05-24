@@ -57,6 +57,11 @@ export const configProviderTheme = {
     Radio: {
       colorPrimary: '#3182ce',
     },
+    Checkbox: {
+      colorPrimary: '#3182ce',
+      borderRadiusSM: 0,
+      checkboxSize: 24,
+    },
     Table: {
       headerBg: '#f9fafb',
       headerColor: '#667085',

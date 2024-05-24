@@ -1,7 +1,5 @@
 import { Tag, Space, Tooltip, Typography } from 'antd';
 import React from 'react';
-import { connect } from 'umi';
-import type { StateType } from '../model';
 import { isArrayOfValues } from '@/utils/utils';
 import dayjs from 'dayjs';
 import {
@@ -22,7 +20,6 @@ const { Text } = Typography;
 
 type Props = {
   metircData: ISemantic.IMetricItem;
-  domainManger: StateType;
   relationDimensionOptions: { value: string; label: string; modelId: number }[];
   onNodeChange: (params?: { eventName?: string }) => void;
   onEditBtnClick?: (metircData: any) => void;
@@ -256,6 +253,4 @@ const MetricInfoSider: React.FC<Props> = ({
   );
 };
 
-export default connect(({ domainManger }: { domainManger: StateType }) => ({
-  domainManger,
-}))(MetricInfoSider);
+export default MetricInfoSider;

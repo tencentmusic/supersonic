@@ -3,10 +3,8 @@ import { ProTable } from '@ant-design/pro-components';
 import { message, Button, Space, Popconfirm, Input } from 'antd';
 import React, { useRef, useState, useEffect } from 'react';
 import { StatusEnum } from '../enum';
-import type { Dispatch } from 'umi';
-import { connect, history } from 'umi';
-import type { StateType } from '../model';
-import { deleteModel, updateModel } from '../service';
+import { useModel } from '@umijs/max';
+import { deleteModel, updateModel, batchUpdateModelStatus } from '../service';
 import ClassModelTypeModal from './ClassModelTypeModal';
 import { ColumnsConfig } from './TableColumnRender';
 import TableHeaderFilter from './TableHeaderFilter';
@@ -18,18 +16,14 @@ type Props = {
   disabledEdit?: boolean;
   modelList: ISemantic.IModelItem[];
   onModelChange?: (model?: ISemantic.IModelItem) => void;
-  dispatch: Dispatch;
-  domainManger: StateType;
 };
 
-const ModelTable: React.FC<Props> = ({
-  modelList,
-  disabledEdit = false,
-  onModelChange,
-  dispatch,
-  domainManger,
-}) => {
-  const { selectDomainId, modelTableHistoryParams } = domainManger;
+const ModelTable: React.FC<Props> = ({ modelList, disabledEdit = false, onModelChange }) => {
+  const domainModel = useModel('SemanticModel.domainData');
+  const modelModel = useModel('SemanticModel.modelData');
+  const { selectDomainId } = domainModel;
+  const { modelTableHistoryParams, setModelTableHistoryParams } = modelModel;
+
   const [modelItem, setModelItem] = useState<ISemantic.IModelItem>();
   const [saveLoading, setSaveLoading] = useState<boolean>(false);
   const [filterParams, setFilterParams] = useState<Record<string, any>>({});
@@ -63,12 +57,9 @@ const ModelTable: React.FC<Props> = ({
   }, []);
 
   const dipatchParams = (params: Record<string, any>) => {
-    dispatch({
-      type: 'domainManger/setModelTableHistoryParams',
-      payload: {
-        [selectDomainId]: {
-          ...params,
-        },
+    setModelTableHistoryParams({
+      [selectDomainId]: {
+        ...params,
       },
     });
   };
@@ -81,17 +72,19 @@ const ModelTable: React.FC<Props> = ({
     }
   };
 
-  const updateModelStatus = async (modelData: ISemantic.IModelItem) => {
-    setSaveLoading(true);
-    const { code, msg } = await updateModel({
-      ...modelData,
+  const queryBatchUpdateStatus = async (ids: React.Key[], status: StatusEnum) => {
+    if (Array.isArray(ids) && ids.length === 0) {
+      return;
+    }
+    const { code, msg } = await batchUpdateModelStatus({
+      ids,
+      status,
     });
-    setSaveLoading(false);
     if (code === 200) {
       onModelChange?.();
-    } else {
-      message.error(msg);
+      return;
     }
+    message.error(msg);
   };
 
   const columnsConfig = ColumnsConfig();
@@ -178,10 +171,7 @@ const ModelTable: React.FC<Props> = ({
                 type="link"
                 key="editStatusOfflineBtn"
                 onClick={() => {
-                  updateModelStatus({
-                    ...record,
-                    status: StatusEnum.OFFLINE,
-                  });
+                  queryBatchUpdateStatus([record.id], StatusEnum.OFFLINE);
                 }}
               >
                 停用
@@ -191,10 +181,7 @@ const ModelTable: React.FC<Props> = ({
                 type="link"
                 key="editStatusOnlineBtn"
                 onClick={() => {
-                  updateModelStatus({
-                    ...record,
-                    status: StatusEnum.ONLINE,
-                  });
+                  queryBatchUpdateStatus([record.id], StatusEnum.ONLINE);
                 }}
               >
                 启用
@@ -308,6 +295,4 @@ const ModelTable: React.FC<Props> = ({
     </>
   );
 };
-export default connect(({ domainManger }: { domainManger: StateType }) => ({
-  domainManger,
-}))(ModelTable);
+export default ModelTable;

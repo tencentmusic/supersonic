@@ -12,23 +12,19 @@ import {
   getUnAvailableItem,
   getTagObjectList,
 } from '../../service';
-import type { Dispatch } from 'umi';
-import type { StateType } from '../../model';
-import { connect } from 'umi';
+import { useModel } from '@umijs/max';
 import { ISemantic, IDataSource } from '../../data';
 import { isArrayOfValues } from '@/utils/utils';
 import EffectDimensionAndMetricTipsModal from './EffectDimensionAndMetricTipsModal';
 
 export type CreateFormProps = {
-  domainManger: StateType;
-  dispatch: Dispatch;
   createModalVisible: boolean;
   sql?: string;
   sqlParams?: IDataSource.ISqlParamsItem[];
   databaseId?: number;
   modelItem: ISemantic.IModelItem;
   onCancel?: () => void;
-  onSubmit?: (dataSourceInfo: any) => void;
+  onSubmit?: (modelItem: ISemantic.IModelItem) => void;
   scriptColumns?: any[] | undefined;
   basicInfoFormMode?: 'normal' | 'fast';
   onDataBaseTableChange?: (tableName: string) => void;
@@ -44,7 +40,6 @@ const initFormVal = {
 };
 
 const ModelCreateForm: React.FC<CreateFormProps> = ({
-  domainManger,
   onCancel,
   createModalVisible,
   scriptColumns,
@@ -63,7 +58,7 @@ const ModelCreateForm: React.FC<CreateFormProps> = ({
   const [fields, setFields] = useState<any[]>([]);
   const [currentStep, setCurrentStep] = useState(0);
   const [saveLoading, setSaveLoading] = useState(false);
-  // const [hasEmptyNameField, setHasEmptyNameField] = useState<boolean>(false);
+
   const [formDatabaseId, setFormDatabaseId] = useState<number>();
   const [queryParamsState, setQueryParamsState] = useState({});
   const [effectTipsModalOpenState, setEffectTipsModalOpenState] = useState<boolean>(false);
@@ -74,21 +69,18 @@ const ModelCreateForm: React.FC<CreateFormProps> = ({
   const [tagObjectIdState, setTagObjectIdState] = useState(modelItem?.tagObjectId);
   const formValRef = useRef(initFormVal as any);
   const [form] = Form.useForm();
-  const { databaseConfigList, selectModelId: modelId, selectDomainId, domainData } = domainManger;
+  const domainModel = useModel('SemanticModel.domainData');
+  const modelModel = useModel('SemanticModel.modelData');
+  const { selectDomainId, selectDomain: domainData } = domainModel;
+  const { selectModelId: modelId } = modelModel;
+
+  const databaseModel = useModel('SemanticModel.databaseData');
+  const { databaseConfigList } = databaseModel;
+
   const updateFormVal = (val: any) => {
     formValRef.current = val;
   };
   const [sqlFilter, setSqlFilter] = useState<string>('');
-  // useEffect(() => {
-  //   const hasEmpty = fields.some((item) => {
-  //     const { name, isCreateDimension, isCreateMetric } = item;
-  //     if ((isCreateMetric || isCreateDimension) && !name) {
-  //       return true;
-  //     }
-  //     return false;
-  //   });
-  //   setHasEmptyNameField(hasEmpty);
-  // }, [fields]);
 
   const [fieldColumns, setFieldColumns] = useState<IDataSource.IExecuteSqlColumn[]>(
     scriptColumns || [],
@@ -155,8 +147,8 @@ const ModelCreateForm: React.FC<CreateFormProps> = ({
 
   const saveModel = async (queryParams: any) => {
     setSaveLoading(true);
-    const queryDatasource = isEdit ? updateModel : createModel;
-    const { code, msg, data } = await queryDatasource(queryParams);
+    const querySaveModel = isEdit ? updateModel : createModel;
+    const { code, msg, data } = await querySaveModel(queryParams);
     setSaveLoading(false);
     if (code === 200) {
       message.success('保存模型成功！');
@@ -218,7 +210,6 @@ const ModelCreateForm: React.FC<CreateFormProps> = ({
               isCreateDimension,
               name,
               type,
-              // entityNames,
               tagObjectId: modelItem?.tagObjectId,
             });
             break;
@@ -502,7 +493,6 @@ const ModelCreateForm: React.FC<CreateFormProps> = ({
             onClick={() => {
               handleNext(true);
             }}
-            // disabled={hasEmptyNameField}
           >
             保 存
           </Button>
@@ -590,6 +580,4 @@ const ModelCreateForm: React.FC<CreateFormProps> = ({
   );
 };
 
-export default connect(({ domainManger }: { domainManger: StateType }) => ({
-  domainManger,
-}))(ModelCreateForm);
+export default ModelCreateForm;

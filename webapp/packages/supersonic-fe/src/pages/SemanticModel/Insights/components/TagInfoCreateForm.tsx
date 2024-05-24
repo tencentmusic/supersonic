@@ -15,8 +15,7 @@ import { ISemantic } from '../../data';
 
 export type CreateFormProps = {
   datasourceId?: number;
-  domainId: number;
-  modelId: number;
+  modelId?: number;
   createModalVisible: boolean;
   tagItem?: ISemantic.ITagItem;
   onCancel?: () => void;
@@ -78,8 +77,8 @@ const TagInfoCreateForm: React.FC<CreateFormProps> = ({
   const forward = () => setCurrentStep(currentStep + 1);
   const backward = () => setCurrentStep(currentStep - 1);
 
-  const queryModelDetail = async () => {
-    const { code, data } = await getModelDetail({ modelId: modelId || tagItem?.modelId });
+  const queryModelDetail = async (modelId) => {
+    const { code, data } = await getModelDetail({ modelId });
     if (code === 200) {
       if (Array.isArray(data?.modelDetail?.fields)) {
         if (Array.isArray(tagItem?.tagDefineParams?.dependencies)) {
@@ -112,10 +111,14 @@ const TagInfoCreateForm: React.FC<CreateFormProps> = ({
   };
 
   useEffect(() => {
-    queryModelDetail();
-    queryDimensionList(modelId);
-    queryMetricList(modelId);
-  }, [modelId]);
+    const id = modelId || tagItem?.modelId;
+    if (!id) {
+      return;
+    }
+    queryModelDetail(id);
+    queryDimensionList(id);
+    queryMetricList(id);
+  }, [modelId, tagItem]);
 
   const handleNext = async () => {
     const fieldsValue = await form.validateFields();
@@ -226,7 +229,7 @@ const TagInfoCreateForm: React.FC<CreateFormProps> = ({
       if (isArrayOfValues(tagItem?.tagDefineParams?.dependencies)) {
         const fieldList = list.map((item: ISemantic.IDimensionItem) => {
           const { id } = item;
-          if (tagItem.tagDefineParams.dependencies.includes(id)) {
+          if (tagItem?.tagDefineParams.dependencies.includes(id)) {
             return {
               ...item,
               orderNumber: 9999,
@@ -262,7 +265,7 @@ const TagInfoCreateForm: React.FC<CreateFormProps> = ({
       if (isArrayOfValues(tagItem?.tagDefineParams?.dependencies)) {
         const fieldList = list.map((item: ISemantic.IMetricItem) => {
           const { id } = item;
-          if (tagItem.tagDefineParams.dependencies.includes(id)) {
+          if (tagItem?.tagDefineParams.dependencies.includes(id)) {
             return {
               ...item,
               orderNumber: 9999,

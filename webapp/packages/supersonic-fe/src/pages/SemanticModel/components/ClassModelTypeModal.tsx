@@ -1,11 +1,8 @@
 import { Drawer, Modal, Card, Row, Col, message } from 'antd';
 import { ConsoleSqlOutlined, CoffeeOutlined } from '@ant-design/icons';
 import React, { useState, useEffect } from 'react';
-import type { Dispatch } from 'umi';
-import { connect } from 'umi';
 import ModelCreateForm from '../Datasource/components/ModelCreateForm';
-import { excuteSql, getModelDetail } from '../service';
-import type { StateType } from '../model';
+import { getModelDetail } from '../service';
 import DataSource from '../Datasource';
 import { IDataSource, ISemantic } from '../data';
 import styles from './style.less';
@@ -17,8 +14,6 @@ type Props = {
   onTypeChange?: (type: 'fast' | 'normal') => void;
   onSubmit?: () => void;
   onCancel?: () => void;
-  dispatch: Dispatch;
-  domainManger: StateType;
 };
 
 const ClassModelTypeModal: React.FC<Props> = ({
@@ -26,17 +21,12 @@ const ClassModelTypeModal: React.FC<Props> = ({
   onTypeChange,
   onSubmit,
   modelItem: modelBasicItem,
-  domainManger,
   onCancel,
-  dispatch,
 }) => {
-  const { selectDomainId } = domainManger;
   const [createModalVisible, setCreateModalVisible] = useState<boolean>(false);
-
   const [dataSourceModalVisible, setDataSourceModalVisible] = useState(false);
   const [fastModeSql, setFastModeSql] = useState<string>('');
   const [sql, setSql] = useState<string>('');
-
   const [createDataSourceModalOpen, setCreateDataSourceModalOpen] = useState<boolean>(false);
   const [dataSourceEditOpen, setDataSourceEditOpen] = useState<boolean>(false);
   const [currentDatabaseId, setCurrentDatabaseId] = useState<number>();
@@ -77,22 +67,12 @@ const ClassModelTypeModal: React.FC<Props> = ({
   const queryDataBaseExcuteSql = (tableName: string) => {
     const sql = `select * from ${tableName}`;
     setFastModeSql(sql);
-
-    dispatch({
-      type: 'domainManger/queryDataBaseExcuteSql',
-      payload: {
-        sql,
-        domainId: selectDomainId,
-        tableName,
-      },
-    });
   };
   const handleCancel = () => {
     onCancel?.();
   };
 
   useEffect(() => {
-    // queryTableColumnListByScript(modelItem);
     setSql(modelItem?.modelDetail?.sqlQuery);
 
     const modelDetailFields = modelItem?.modelDetail?.fields;
@@ -135,7 +115,7 @@ const ClassModelTypeModal: React.FC<Props> = ({
               cover={
                 <CoffeeOutlined
                   width={240}
-                  style={{ paddingTop: '45px', height: 75, fontSize: '48px', color: '#1890ff' }}
+                  style={{ marginTop: '45px', height: 75, fontSize: '48px', color: '#1890ff' }}
                 />
               }
             >
@@ -154,7 +134,7 @@ const ClassModelTypeModal: React.FC<Props> = ({
               style={{ height: 220 }}
               cover={
                 <ConsoleSqlOutlined
-                  style={{ paddingTop: '45px', height: 75, fontSize: '48px', color: '#1890ff' }}
+                  style={{ marginTop: '45px', height: 75, fontSize: '48px', color: '#1890ff' }}
                 />
               }
             >
@@ -233,6 +213,4 @@ const ClassModelTypeModal: React.FC<Props> = ({
     </>
   );
 };
-export default connect(({ domainManger }: { domainManger: StateType }) => ({
-  domainManger,
-}))(ClassModelTypeModal);
+export default ClassModelTypeModal;

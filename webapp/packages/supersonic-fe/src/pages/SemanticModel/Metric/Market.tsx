@@ -1,11 +1,9 @@
 import type { ActionType, ProColumns } from '@ant-design/pro-components';
 import { ProTable } from '@ant-design/pro-components';
-import { message, Space, Popconfirm, Tag, Spin, Tooltip } from 'antd';
+import { message, Space, Popconfirm, Spin } from 'antd';
 import MetricAddClass from './components/MetricAddClass';
 import React, { useRef, useState, useEffect } from 'react';
-import type { Dispatch } from 'umi';
-import { connect, history, useModel } from 'umi';
-import type { StateType } from '../model';
+import {  history, useModel } from '@umijs/max';
 import { SENSITIVE_LEVEL_ENUM } from '../constant';
 import {
   queryMetric,
@@ -18,8 +16,7 @@ import {
 import MetricFilter from './components/MetricFilter';
 import MetricInfoCreateForm from '../components/MetricInfoCreateForm';
 import MetricCardList from './components/MetricCardList';
-import NodeInfoDrawer from '../SemanticGraph/components/NodeInfoDrawer';
-import { SemanticNodeType, StatusEnum } from '../enum';
+import {  StatusEnum } from '../enum';
 import moment from 'moment';
 import styles from './style.less';
 import { ISemantic } from '../data';
@@ -27,8 +24,7 @@ import BatchCtrlDropDownButton from '@/components/BatchCtrlDropDownButton';
 import { ColumnsConfig } from '../components/TableColumnRender';
 
 type Props = {
-  dispatch: Dispatch;
-  domainManger: StateType;
+
 };
 
 type QueryMetricListParams = {
@@ -40,11 +36,9 @@ type QueryMetricListParams = {
   [key: string]: any;
 };
 
-const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
+const ClassMetricTable: React.FC<Props> = ({   }) => {
   const { initialState = {} } = useModel('@@initialState');
-
   const { currentUser = {} } = initialState as any;
-  const { selectDomainId, selectModelId: modelId } = domainManger;
   const [createModalVisible, setCreateModalVisible] = useState<boolean>(false);
   const defaultPagination = {
     current: 1,
@@ -59,7 +53,6 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
   const [filterParams, setFilterParams] = useState<Record<string, any>>({
     showType: localStorage.getItem('metricMarketShowType') === '1' ? true : false,
   });
-  const [infoDrawerVisible, setInfoDrawerVisible] = useState<boolean>(false);
 
   const [downloadLoading, setDownloadLoading] = useState<boolean>(false);
 
@@ -193,55 +186,16 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
     {
       dataIndex: 'name',
       title: '指标',
-      // width: '20%',
       width: 280,
       fixed: 'left',
       render: columnsConfig.indicatorInfo.render,
     },
-    // {
-    //   dataIndex: 'modelName',
-    //   title: '所属模型',
-    //   render: (_, record: any) => {
-    //     if (record.hasAdminRes) {
-    //       return (
-    //         <a
-    //           target="blank"
-    //           href={`/webapp/model/${record.domainId}/${record.modelId}/metric`}
-    //           // onClick={() => {
-    //           //   history.push(`/model/${record.domainId}/${record.modelId}/metric`);
-    //           // }}
-    //         >
-    //           {record.modelName}
-    //         </a>
-    //       );
-    //     }
-    //     return <> {record.modelName}</>;
-    //   },
-    // },
     {
       dataIndex: 'sensitiveLevel',
       title: '敏感度',
-      // width: 150,
       valueEnum: SENSITIVE_LEVEL_ENUM,
       render: columnsConfig.sensitiveLevel.render,
     },
-    // {
-    //   dataIndex: 'isPublish',
-    //   title: '是否发布',
-    //   width: 100,
-    //   search: false,
-    //   render: (isPublish) => {
-    //     switch (isPublish) {
-    //       case 0:
-    //         return '否';
-    //       case 1:
-    //         return <span style={{ color: '#1677ff' }}>是</span>;
-    //       default:
-    //         return <Tag color="default">未知</Tag>;
-    //     }
-    //   },
-    // },
-
     {
       dataIndex: 'description',
       title: '描述',
@@ -259,7 +213,6 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
     {
       dataIndex: 'createdBy',
       title: '创建人',
-      // width: 150,
       search: false,
     },
     {
@@ -477,45 +430,18 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
 
       {createModalVisible && (
         <MetricInfoCreateForm
-          domainId={Number(selectDomainId)}
           createModalVisible={createModalVisible}
-          modelId={modelId}
           metricItem={metricItem}
           onSubmit={() => {
             setCreateModalVisible(false);
             queryMetricList(filterParams);
-            dispatch({
-              type: 'domainManger/queryMetricList',
-              payload: {
-                domainId: selectDomainId,
-              },
-            });
           }}
           onCancel={() => {
             setCreateModalVisible(false);
           }}
         />
       )}
-      {infoDrawerVisible && (
-        <NodeInfoDrawer
-          nodeData={{ ...metricItem, nodeType: SemanticNodeType.METRIC }}
-          placement="right"
-          onClose={() => {
-            setInfoDrawerVisible(false);
-          }}
-          width="100%"
-          open={infoDrawerVisible}
-          mask={true}
-          getContainer={false}
-          onEditBtnClick={(nodeData: any) => {
-            handleMetricEdit(nodeData);
-          }}
-          maskClosable={true}
-          onNodeChange={({ eventName }: { eventName: string }) => {
-            setInfoDrawerVisible(false);
-          }}
-        />
-      )}
+
       {addClassVisible && (
         <MetricAddClass
           ids={selectedRowKeys as number[]}
@@ -526,18 +452,10 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
           onSuccess={() => {
             setAddClassVisible(false);
             queryMetricList(filterParams);
-            dispatch({
-              type: 'domainManger/queryMetricList',
-              payload: {
-                domainId: selectDomainId,
-              },
-            });
           }}
         />
       )}
     </>
   );
 };
-export default connect(({ domainManger }: { domainManger: StateType }) => ({
-  domainManger,
-}))(ClassMetricTable);
+export default ClassMetricTable

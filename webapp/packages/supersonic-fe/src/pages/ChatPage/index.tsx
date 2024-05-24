@@ -1,10 +1,12 @@
-import { useLocation } from 'umi';
+import { useLocation } from '@umijs/max';
 import { getToken } from '@/utils/utils';
+import queryString from 'query-string';
 import { Chat } from 'supersonic-chat-sdk';
 
 const ChatPage = () => {
   const location = useLocation();
-  const { agentId } = (location as any).query;
+  const query = queryString.parse(location.search) || {};
+  const { agentId } = query;
 
   return (
     <Chat initialAgentId={agentId ? +agentId : undefined} token={getToken() || ''} isDeveloper />

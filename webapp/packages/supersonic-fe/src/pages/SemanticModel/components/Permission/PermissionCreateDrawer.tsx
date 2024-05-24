@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Button, message, Form, Space, Drawer, Input } from 'antd';
 import { ProCard } from '@ant-design/pro-components';
-import { connect } from 'umi';
+import { useModel } from 'umi';
 import { createGroupAuth, updateGroupAuth } from '../../service';
 import PermissionCreateForm from './PermissionCreateForm';
 import type { StateType } from '../../model';
@@ -12,7 +12,6 @@ import { wrapperTransTypeAndId } from '../../utils';
 import styles from '../style.less';
 
 type Props = {
-  domainManger: StateType;
   permissonData: any;
   onCancel: () => void;
   visible: boolean;
@@ -21,13 +20,19 @@ type Props = {
 const FormItem = Form.Item;
 const TextArea = Input.TextArea;
 const PermissionCreateDrawer: React.FC<Props> = ({
-  domainManger,
   visible,
   permissonData,
   onCancel,
   onSubmit,
 }) => {
-  const { dimensionList, metricList, selectModelId: modelId } = domainManger;
+  const modelModel = useModel('SemanticModel.modelData');
+  const dimensionModel = useModel('SemanticModel.dimensionData');
+  const metricModel = useModel('SemanticModel.metricData');
+
+  const { selectModelId: modelId } = modelModel;
+  const { MdimensionList: dimensionList } = dimensionModel;
+  const { MmetricList: metricList } = metricModel;
+
   const [form] = Form.useForm();
   const basicInfoFormRef = useRef<any>(null);
   const [selectedDimensionKeyList, setSelectedDimensionKeyList] = useState<string[]>([]);
@@ -217,6 +222,4 @@ const PermissionCreateDrawer: React.FC<Props> = ({
   );
 };
 
-export default connect(({ domainManger }: { domainManger: StateType }) => ({
-  domainManger,
-}))(PermissionCreateDrawer);
+export default PermissionCreateDrawer;

@@ -2,8 +2,6 @@ import { Button, Drawer, message, Row, Col, Divider, Tag, Space, Popconfirm } fr
 import React, { useState, useEffect, ReactNode } from 'react';
 import { SemanticNodeType } from '../../enum';
 import { deleteDimension, deleteMetric, deleteDatasource } from '../../service';
-import { connect } from 'umi';
-import type { StateType } from '../../model';
 import moment from 'moment';
 import styles from '../style.less';
 import TransTypeTag from '../../components/TransTypeTag';
@@ -11,7 +9,6 @@ import { SENSITIVE_LEVEL_ENUM } from '../../constant';
 
 type Props = {
   nodeData: any;
-  domainManger: StateType;
   onNodeChange: (params?: { eventName?: string }) => void;
   onEditBtnClick?: (nodeData: any) => void;
   [key: string]: any;
@@ -47,13 +44,11 @@ const DescriptionItem = ({ title, content }: DescriptionItemProps) => (
 
 const NodeInfoDrawer: React.FC<Props> = ({
   nodeData,
-  domainManger,
   onNodeChange,
   onEditBtnClick,
   ...restProps
 }) => {
   const [infoList, setInfoList] = useState<InfoListItem[]>([]);
-  const { selectModelName } = domainManger;
 
   useEffect(() => {
     if (!nodeData) {
@@ -87,7 +82,7 @@ const NodeInfoDrawer: React.FC<Props> = ({
           {
             label: '所属模型',
             value: modelName,
-            content: <Tag>{modelName || selectModelName}</Tag>,
+            content: <Tag>{modelName}</Tag>,
           },
 
           {
@@ -266,6 +261,4 @@ const NodeInfoDrawer: React.FC<Props> = ({
   );
 };
 
-export default connect(({ domainManger }: { domainManger: StateType }) => ({
-  domainManger,
-}))(NodeInfoDrawer);
+export default NodeInfoDrawer

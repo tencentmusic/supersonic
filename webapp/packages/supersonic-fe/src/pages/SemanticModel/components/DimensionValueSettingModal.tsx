@@ -4,9 +4,7 @@ import { InfoCircleOutlined } from '@ant-design/icons';
 import { ISemantic } from '../data';
 import CommonEditTable from './CommonEditTable';
 import { updateDimension, mockDimensionValuesAlias } from '../service';
-import { connect } from 'umi';
 import DimensionValueSettingForm from './Entity/DimensionValueSettingForm';
-import type { StateType } from '../model';
 
 export type CreateFormProps = {
   dimensionValueSettingList: ISemantic.IDimensionValueSettingItem[];
@@ -14,7 +12,6 @@ export type CreateFormProps = {
   dimensionItem: ISemantic.IDimensionItem;
   open: boolean;
   onSubmit: (values?: any) => void;
-  domainManger: StateType;
 };
 
 type TableDataSource = { techName: string; bizName: string; alias?: string[] };
@@ -24,11 +21,9 @@ const DimensionValueSettingModal: React.FC<CreateFormProps> = ({
   open,
   dimensionItem,
   dimensionValueSettingList,
-  domainManger,
   onSubmit,
 }) => {
   const [tableDataSource, setTableDataSource] = useState<TableDataSource[]>([]);
-  const { selectDomainId, selectModelId: modelId } = domainManger;
   const [dimValueMaps, setDimValueMaps] = useState<ISemantic.IDimensionValueSettingItem[]>([]);
   const [llmLoading, setLlmLoading] = useState<boolean>(false);
   const [menuKey, setMenuKey] = useState<string>('default');
@@ -49,7 +44,6 @@ const DimensionValueSettingModal: React.FC<CreateFormProps> = ({
     }
     const queryParams = {
       ...dimensionItem,
-      domainId: selectDomainId,
       ...fieldsValue,
     };
     const { code, msg } = await updateDimension(queryParams);
@@ -215,6 +209,4 @@ const DimensionValueSettingModal: React.FC<CreateFormProps> = ({
   );
 };
 
-export default connect(({ domainManger }: { domainManger: StateType }) => ({
-  domainManger,
-}))(DimensionValueSettingModal);
+export default DimensionValueSettingModal;

@@ -1,26 +1,18 @@
 import { Tabs, Breadcrumb, Space, Radio } from 'antd';
 import React, { useRef, useEffect, useState } from 'react';
-import { connect, history } from 'umi';
-
+import { history, useModel } from '@umijs/max';
 import ClassDimensionTable from './ClassDimensionTable';
 import ClassMetricTable from './ClassMetricTable';
 import PermissionSection from './Permission/PermissionSection';
-// import ClassTagTable from '../Insights/components/ClassTagTable';
 import TagObjectTable from '../Insights/components/TagObjectTable';
 import TermTable from '../components/Term/TermTable';
 import OverView from './OverView';
 import styles from './style.less';
-import type { StateType } from '../model';
 import { HomeOutlined, FundViewOutlined } from '@ant-design/icons';
 import { ISemantic } from '../data';
 import SemanticGraphCanvas from '../SemanticGraphCanvas';
-// import HeadlessFlows from '../HeadlessFlows';
-// import SemanticFlows from '../SemanticFlows';
 import RecommendedQuestionsSection from '../components/Entity/RecommendedQuestionsSection';
 import View from '../View';
-// import DatabaseTable from '../components/Database/DatabaseTable';
-
-import type { Dispatch } from 'umi';
 
 type Props = {
   isModel: boolean;
@@ -29,28 +21,24 @@ type Props = {
   handleModelChange: (model?: ISemantic.IModelItem) => void;
   onBackDomainBtnClick?: () => void;
   onMenuChange?: (menuKey: string) => void;
-  domainManger: StateType;
-  dispatch: Dispatch;
 };
 const DomainManagerTab: React.FC<Props> = ({
   isModel,
   activeKey,
   modelList,
-  domainManger,
   handleModelChange,
   onBackDomainBtnClick,
   onMenuChange,
 }) => {
   const initState = useRef<boolean>(false);
   const defaultTabKey = 'metric';
-  const {
-    selectDomainId,
-    selectModelId,
-    selectModelName,
-    selectDomainName,
-    domainData,
-    domainList,
-  } = domainManger;
+
+  const domainModel = useModel('SemanticModel.domainData');
+  const modelModel = useModel('SemanticModel.modelData');
+
+  const { selectDomainId, selectDomainName, selectDomain: domainData, domainList } = domainModel;
+  const { selectModelId, selectModelName } = modelModel;
+
   useEffect(() => {
     initState.current = false;
   }, [selectModelId]);
@@ -238,7 +226,7 @@ const DomainManagerTab: React.FC<Props> = ({
               </Radio.Group>
             ) : undefined,
         }}
-        destroyInactiveTabPane
+        // destroyInactiveTabPane
         size="large"
         onChange={(menuKey: string) => {
           onMenuChange?.(menuKey);
@@ -248,6 +236,4 @@ const DomainManagerTab: React.FC<Props> = ({
   );
 };
 
-export default connect(({ domainManger }: { domainManger: StateType }) => ({
-  domainManger,
-}))(DomainManagerTab);
+export default DomainManagerTab;

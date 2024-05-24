@@ -10,6 +10,7 @@ export default {
   'menu.semanticModel': '语义建模',
   'menu.metric': '指标市场',
   'menu.metric.metricDetail': '指标详情页',
+  'menu.metricEdit': '指标编辑',
   'menu.tag': '标签市场',
   'menu.tag.tagDetail': '标签详情页',
   'menu.database': '数据库管理',

@@ -2,10 +2,8 @@ import type { ActionType, ProColumns } from '@ant-design/pro-components';
 import { ProTable } from '@ant-design/pro-components';
 import { message, Button, Space, Popconfirm, Input, Select } from 'antd';
 import React, { useRef, useState, useEffect } from 'react';
-import type { Dispatch } from 'umi';
 import { StatusEnum } from '../../enum';
-import { connect } from 'umi';
-import type { StateType } from '../../model';
+import { useModel } from '@umijs/max';
 import { SENSITIVE_LEVEL_ENUM, SENSITIVE_LEVEL_OPTIONS } from '../../constant';
 import { getTagList, deleteTag, batchUpdateTagStatus } from '../../service';
 import TagInfoCreateForm from './TagInfoCreateForm';
@@ -17,13 +15,14 @@ import { ISemantic } from '../../data';
 import { ColumnsConfig } from '../../components/TableColumnRender';
 import TagValueSettingModal from './TagValueSettingModal';
 
-type Props = {
-  dispatch: Dispatch;
-  domainManger: StateType;
-};
+type Props = {};
 
-const ClassTagTable: React.FC<Props> = ({ domainManger, dispatch }) => {
-  const { selectModelId: modelId, selectDomainId } = domainManger;
+const ClassTagTable: React.FC<Props> = ({}) => {
+  const domainModel = useModel('SemanticModel.domainData');
+  const modelModel = useModel('SemanticModel.modelData');
+  const { selectDomainId } = domainModel;
+  const { selectModelId: modelId } = modelModel;
+
   const [createModalVisible, setCreateModalVisible] = useState<boolean>(false);
   const [tagItem, setTagItem] = useState<ISemantic.ITagItem>();
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
@@ -369,6 +368,4 @@ const ClassTagTable: React.FC<Props> = ({ domainManger, dispatch }) => {
     </>
   );
 };
-export default connect(({ domainManger }: { domainManger: StateType }) => ({
-  domainManger,
-}))(ClassTagTable);
+export default ClassTagTable;

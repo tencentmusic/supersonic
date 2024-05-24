@@ -1,7 +1,7 @@
 
 
 :root:root {
-  --primary-color: #f87653;
+  --tme-primary-color: #1672fa;
   --blue: #296df3;
   --deep-blue: #446dff;
   --chat-blue: #1b4aef;
@@ -22,13 +22,15 @@
   --processing-color: #ff2442;
   --error-color: #ff4d4f;
   --highlight-color: #ff4d4f;
+  --font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Microsoft YaHei,"Helvetica Neue",Arial,"Noto Sans",sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";
+  --tencent-font-family: 'tencentFont',-apple-system,BlinkMacSystemFont,"Segoe UI",Microsoft YaHei,"Helvetica Neue",Arial,"Noto Sans",sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";
 }
 
 html,
 body,
 #root {
   height: 100%;
-  font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Microsoft YaHei,"Helvetica Neue",Arial,"Noto Sans",sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";
+  font-family: var(--tencent-font-family);
   -webkit-font-smoothing:antialiased;
   margin: 0;
 }
@@ -54,6 +56,16 @@ body {
 ul,
 ol {
   list-style: none;
+}
+
+@font-face {
+  font-family: 'DINPro Medium';
+  src: url('~@/assets/fonts/DINPro.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'tencentFont';
+  src: url('~@/assets/fonts/TencentSans-W7.woff') format('woff');
 }
 
 @media (max-width: 480px) {
@@ -96,9 +108,9 @@ ol {
   margin: 12px 12px 0 !important;
 }
 
-.ant-page-header {
-  padding-bottom: 10px !important;
-}
+// .ant-page-header {
+//   padding-bottom: 10px !important;
+// }
 
 .ant-spin-spinning {
   display: flex !important;
@@ -120,10 +132,12 @@ ol {
     height: 100vh;
   }
 }
-
+.ant-pro-layout .ant-pro-layout-bg-list {
+  background: #fafafb;
+}
 .ant-pro-layout .ant-pro-layout-content {
   padding: 0;
-  background-color: #f0f2f5;
+  background-color: #fafafb;
 }
 
 
@@ -132,51 +146,55 @@ ol {
   text-overflow: ellipsis;
 }
 
-.ant-pro-top-nav-header-menu {
-  padding: 0!important;
-  line-height: unset!important;
-}
 
-.ant-menu-root>.ant-menu-item,
-.ant-menu-root>.ant-menu-submenu {
-  font-weight: bold;
-  font-size: 14px;
-  &>span>a,
-  &>a {
-    color: white;
-    &:hover {
-      color: white;
-    }
-  }
-  &:hover {
-    background-color: #296DF3!important;
-  }
-}
+
+// .ant-menu-root>.ant-menu-item,
+// .ant-menu-root>.ant-menu-submenu {
+//   font-weight: bold;
+//   font-size: 14px;
+//   &>span>a,
+//   &>a {
+//     color: white;
+//     &:hover {
+//       color: white;
+//     }
+//   }
+//   &:hover {
+//     background-color: #296DF3!important;
+//   }
+// }
 
 .ant-menu-root>.ant-menu-item.ant-menu-item-selected {
-  background-color: #296DF3!important;
-  color: white;
+  // background-color: #296DF3!important;
+  color: var(--tme-primary-color);
+  font-size: 15px;
+  font-weight: 500;
 }
+.ant-menu-light.ant-menu-horizontal >.ant-menu-item-selected::after {
+  border-bottom-width: 2px;
+    border-bottom-color: var(--tme-primary-color);
+}
+
+// .ant-menu-light.ant-menu-horizontal >.ant-menu-item-selected::hover {
+//   border-bottom-width: 2px;
+//     border-bottom-color: var(--tme-primary-color);
+// }
 
 .ant-pro-top-nav-header-logo h1 {
-  font-size: 18px;
-}
-
-.ant-layout-header {
-  background: linear-gradient(to right, #153d8f, #0a276d) !important;
-  background-color: rgba(0, 0, 0, 0.2) !important;
-  backdrop-filter: blur(10px) !important;
+  // font-size: 18px;
+  color: var(--tme-primary-color)
 }
 
 
 
-.ant-pro-top-nav-header-main-left {
-  min-width: 100px !important;
-}
 
-.ant-pro-top-nav-header-logo {
-  min-width: 100px !important;
-}
+// .ant-pro-top-nav-header-main-left {
+//   min-width: 100px !important;
+// }
+
+// .ant-pro-top-nav-header-logo {
+//   min-width: 100px !important;
+// }
 
 
 .logo {
@@ -240,3 +258,37 @@ ol {
   font-weight: 500;
   color: #667085;
 }
+
+.ant-select-dropdown {
+  .ant-select-item {
+    -webkit-tap-highlight-color: transparent;
+    background-color: transparent;
+    outline: 0px;
+    border: 0px;
+    margin: 0px;
+    border-radius: 0px;
+    cursor: pointer;
+    user-select: none;
+    vertical-align: middle;
+    appearance: none;
+    color: #606060;
+    font-size: 14px;
+    line-height: 1.57;
+    font-family: var(--tencent-font-family);
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    position: relative;
+    text-decoration: none;
+    min-height: 36px;
+    padding: 6px 16px;
+    box-sizing: border-box;
+    white-space: nowrap;
+    font-weight: 400;
+  }
+ &.ant-select-item-option-selected:not(.ant-select-item-option-disabled) {
+  font-weight: 400;
+  color: rgb(38, 38, 38);
+ }
+}
+

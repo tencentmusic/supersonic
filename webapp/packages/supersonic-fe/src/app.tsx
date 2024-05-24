@@ -3,18 +3,16 @@ import S2Icon, { ICON } from '@/components/S2Icon';
 import type { Settings as LayoutSettings } from '@ant-design/pro-layout';
 import { Space, Spin, ConfigProvider } from 'antd';
 import ScaleLoader from 'react-spinners/ScaleLoader';
-import type { RunTimeLayoutConfig } from 'umi';
-import { history } from 'umi';
+import { history, RunTimeLayoutConfig } from '@umijs/max';
 import defaultSettings from '../config/defaultSettings';
 import settings from '../config/themeSettings';
 import { queryCurrentUser } from './services/user';
-import { traverseRoutes, isMobile, getToken } from './utils/utils';
+import { deleteUrlQuery, isMobile, getToken } from '@/utils/utils';
 import { publicPath } from '../config/defaultSettings';
 import { Copilot } from 'supersonic-chat-sdk';
-import { getSystemConfig } from '@/services/user';
+import { configProviderTheme } from '../config/themeSettings';
 export { request } from './services/request';
 import { ROUTE_AUTH_CODES } from '../config/routes';
-import { configProviderTheme } from '../config/themeSettings';
 
 const replaceRoute = '/';
 
@@ -31,14 +29,6 @@ const getRunningEnv = async () => {
 Spin.setDefaultIndicator(
   <ScaleLoader color={settings['primary-color']} height={25} width={2} radius={2} margin={2} />,
 );
-
-export const initialStateConfig = {
-  loading: (
-    <Spin wrapperClassName="initialLoading">
-      <div className="loadingPlaceholder" />
-    </Spin>
-  ),
-};
 
 const getAuthCodes = (params: any) => {
   const { currentUser } = params;
@@ -66,7 +56,6 @@ export async function getInitialState(): Promise<{
     return undefined;
   };
 
-
   let currentUser: any;
   if (!window.location.pathname.includes('login')) {
     currentUser = await fetchUserInfo();
@@ -91,33 +80,37 @@ export async function getInitialState(): Promise<{
   };
 }
 
-export async function patchRoutes({ routes }) {
-  const config = await getRunningEnv();
-  if (config && config.env) {
-    window.RUNNING_ENV = config.env;
-    const { env } = config;
-    const target = routes[0].routes;
-    if (env) {
-      const envRoutes = traverseRoutes(target, env);
-      // 清空原本route;
-      target.splice(0, 99);
-      // 写入根据环境转换过的的route
-      target.push(...envRoutes);
-    }
-  } else {
-    const target = routes[0].routes;
-    // start-standalone模式不存在env，在此模式下不显示chatSetting
-    const envRoutes = target.filter((item: any) => {
-      return !['chatSetting'].includes(item.name);
-    });
-    target.splice(0, 99);
-    target.push(...envRoutes);
-  }
-}
+// export async function patchRoutes({ routes }) {
+//   const config = await getRunningEnv();
+//   if (config && config.env) {
+//     window.RUNNING_ENV = config.env;
+//     const { env } = config;
+//     const target = routes[0].routes;
+//     if (env) {
+//       const envRoutes = traverseRoutes(target, env);
+//       // 清空原本route;
+//       target.splice(0, 99);
+//       // 写入根据环境转换过的的route
+//       target.push(...envRoutes);
+//     }
+//   } else {
+//     const target = routes[0].routes;
+//     // start-standalone模式不存在env，在此模式下不显示chatSetting
+//     const envRoutes = target.filter((item: any) => {
+//       return !['chatSetting'].includes(item.name);
+//     });
+//     target.splice(0, 99);
+//     target.push(...envRoutes);
+//   }
+// }
 
 export function onRouteChange() {
   const title = window.document.title.split('-SuperSonic')[0];
-  window.document.title = `${title}-SuperSonic`;
+  if (!title.includes('SuperSonic')) {
+    window.document.title = `${title}-SuperSonic`;
+  } else {
+    window.document.title = 'SuperSonic';
+  }
 }
 
 export const layout: RunTimeLayoutConfig = (params) => {
@@ -132,27 +125,31 @@ export const layout: RunTimeLayoutConfig = (params) => {
         <S2Icon
           icon={ICON.iconlogobiaoshi}
           size={30}
-          color="#fff"
+          color="#1672fa"
           style={{ display: 'inline-block', marginTop: 8 }}
         />
-        <div className="logo">SuperSonic</div>
+        <div className="logo" style={{ color: '#262626' }}>
+          SuperSonic
+        </div>
       </Space>
     ),
     contentStyle: { ...(initialState?.contentStyle || {}) },
     rightContentRender: () => <RightContent />,
     disableContentMargin: true,
-    menuHeaderRender: undefined,
-    childrenRender: (dom: any) => {
+    // menuHeaderRender: undefined,
+    childrenRender: (dom) => {
       return (
         <ConfigProvider theme={configProviderTheme}>
           <div
-          style={{ height: location.pathname.includes('chat') ? 'calc(100vh - 56px)' : undefined }}
-        >
-          {dom}
-          {history.location.pathname !== '/chat' && !isMobile && (
-            <Copilot token={getToken() || ''} isDeveloper />
-          )}
-        </div>
+            style={{
+              height: location.pathname.includes('chat') ? 'calc(100vh - 56px)' : undefined,
+            }}
+          >
+            {dom}
+            {history.location.pathname !== '/chat' && !isMobile && (
+              <Copilot token={getToken() || ''} isDeveloper />
+            )}
+          </div>
         </ConfigProvider>
       );
     },

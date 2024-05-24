@@ -1,4 +1,4 @@
-import { request } from 'umi';
+import request from 'umi-request';
 
 export async function query() {
   return request<API.CurrentUser[]>(`${process.env.API_BASE_URL}users`);

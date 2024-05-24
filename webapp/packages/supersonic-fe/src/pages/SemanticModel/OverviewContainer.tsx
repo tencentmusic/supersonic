@@ -1,31 +1,39 @@
-import { Popover, message, Space } from 'antd';
+import { message } from 'antd';
 import React, { useEffect, useState } from 'react';
-import { connect, history, useParams } from 'umi';
+import { history, useParams, useModel } from '@umijs/max';
 import DomainListTree from './components/DomainList';
-
 import styles from './components/style.less';
-import type { StateType } from './model';
 import { LeftOutlined, RightOutlined } from '@ant-design/icons';
 import { ISemantic } from './data';
 import { getDomainList, getModelList } from './service';
-// import ChatSettingTab from './ChatSetting/ChatSettingTab';
 import DomainManagerTab from './components/DomainManagerTab';
-import type { Dispatch } from 'umi';
 
 type Props = {
   mode: 'domain';
-  domainManger: StateType;
-  dispatch: Dispatch;
 };
 
-const OverviewContainer: React.FC<Props> = ({ mode, domainManger, dispatch }) => {
+const OverviewContainer: React.FC<Props> = ({ mode }) => {
   const params: any = useParams();
   const domainId = params.domainId;
   const modelId = params.modelId;
-
+  const domainModel = useModel('SemanticModel.domainData');
+  const modelModel = useModel('SemanticModel.modelData');
+  const dimensionModel = useModel('SemanticModel.dimensionData');
+  const metricModel = useModel('SemanticModel.metricData');
+  const databaseModel = useModel('SemanticModel.databaseData');
+  const { selectDomainId, domainList, setSelectDomain, setDomainList } = domainModel;
+  const {
+    selectModelId,
+    modelList,
+    MrefreshModelList,
+    setSelectModel,
+    setModelTableHistoryParams,
+  } = modelModel;
+  const { MrefreshDimensionList } = dimensionModel;
+  const { MrefreshMetricList } = metricModel;
+  const { MrefreshDatabaseList } = databaseModel;
   const menuKey = params.menuKey ? params.menuKey : !Number(modelId) ? 'overview' : '';
-  const { selectDomainId, selectModelId, domainList } = domainManger;
-  const [modelList, setModelList] = useState<ISemantic.IModelItem[]>([]);
+  // const [modelList, setModelList] = useState<ISemantic.IModelItem[]>([]);
   const [isModel, setIsModel] = useState<boolean>(false);
   const [collapsedState, setCollapsedState] = useState(true);
   const [activeKey, setActiveKey] = useState<string>(menuKey);
@@ -39,24 +47,13 @@ const OverviewContainer: React.FC<Props> = ({ mode, domainManger, dispatch }) =>
         return item.parentId === 0;
       })[0];
       if (firstRootNode) {
-        const { id, name } = firstRootNode;
-        dispatch({
-          type: 'domainManger/setSelectDomain',
-          selectDomainId: id,
-          selectDomainName: name,
-          domainData: firstRootNode,
-        });
+        const { id } = firstRootNode;
+        setSelectDomain(firstRootNode);
         setActiveKey(menuKey);
         pushUrlMenu(id, 0, menuKey);
       }
     } else {
-      const { id, name } = targetNode;
-      dispatch({
-        type: 'domainManger/setSelectDomain',
-        selectDomainId: id,
-        selectDomainName: name,
-        domainData: targetNode,
-      });
+      setSelectDomain(targetNode);
     }
   };
 
@@ -64,10 +61,7 @@ const OverviewContainer: React.FC<Props> = ({ mode, domainManger, dispatch }) =>
     const { code, data, msg } = await getDomainList();
     if (code === 200) {
       initSelectedDomain(data);
-      dispatch({
-        type: 'domainManger/setDomainList',
-        payload: { domainList: data },
-      });
+      setDomainList(data);
     } else {
       message.error(msg);
     }
@@ -75,22 +69,10 @@ const OverviewContainer: React.FC<Props> = ({ mode, domainManger, dispatch }) =>
 
   useEffect(() => {
     initProjectTree();
-    dispatch({
-      type: 'domainManger/queryDatabaseList',
-    });
+    MrefreshDatabaseList();
     return () => {
-      dispatch({
-        type: 'domainManger/setSelectDomain',
-        selectDomainId: 0,
-        selectDomainName: '',
-        domainData: undefined,
-      });
-      dispatch({
-        type: 'domainManger/setSelectModel',
-        selectModelId: 0,
-        selectModelName: '',
-        modelData: undefined,
-      });
+      setSelectDomain(undefined);
+      setSelectModel(undefined);
     };
   }, []);
 
@@ -102,26 +84,15 @@ const OverviewContainer: React.FC<Props> = ({ mode, domainManger, dispatch }) =>
   }, [selectDomainId]);
 
   const queryModelList = async () => {
-    const { code, data } = await getModelList(selectDomainId);
-    if (code === 200) {
-      setModelList(data);
-      const model = data.filter((item: any) => {
-        return `${item.id}` === modelId;
-      })[0];
-      if (model) {
-        const { id, name } = model;
-        dispatch({
-          type: 'domainManger/setSelectModel',
-          selectModelId: id,
-          selectModelName: name,
-          modelData: model,
-        });
-        setActiveKey(menuKey);
-        setIsModel(true);
-        pushUrlMenu(selectDomainId, id, menuKey);
-      }
-    } else {
-      message.error('获取模型列表失败!');
+    const list = await MrefreshModelList(selectDomainId);
+    const model = list.filter((item: any) => {
+      return `${item.id}` === modelId;
+    })[0];
+    if (model) {
+      setSelectModel(model);
+      setActiveKey(menuKey);
+      setIsModel(true);
+      pushUrlMenu(model.domainId, model.id, menuKey);
     }
   };
 
@@ -144,18 +115,8 @@ const OverviewContainer: React.FC<Props> = ({ mode, domainManger, dispatch }) =>
       return;
     }
     initModelConfig();
-    dispatch({
-      type: 'domainManger/queryDimensionList',
-      payload: {
-        modelId: selectModelId,
-      },
-    });
-    dispatch({
-      type: 'domainManger/queryMetricList',
-      payload: {
-        modelId: selectModelId,
-      },
-    });
+    MrefreshDimensionList({ modelId: selectModelId });
+    MrefreshMetricList({ modelId: selectModelId });
   }, [selectModelId]);
 
   const pushUrlMenu = (domainId: number, modelId: number, menuKey: string) => {
@@ -163,32 +124,21 @@ const OverviewContainer: React.FC<Props> = ({ mode, domainManger, dispatch }) =>
   };
 
   const handleModelChange = (model?: ISemantic.IModelItem) => {
-    // queryModelList();
+    console.log(model, 1111);
     if (!model) {
       return;
     }
     if (`${model.id}` === `${selectModelId}`) {
       initModelConfig();
     }
-    const { id, name } = model;
-    dispatch({
-      type: 'domainManger/setSelectModel',
-      selectModelId: id,
-      selectModelName: name,
-      modelData: model,
-    });
+    setSelectModel(model);
   };
 
   const cleanModelInfo = (domainId) => {
     setIsModel(false);
     setActiveKey('overview');
     pushUrlMenu(domainId, 0, 'overview');
-    dispatch({
-      type: 'domainManger/setSelectModel',
-      selectModelId: 0,
-      selectModelName: '',
-      modelData: undefined,
-    });
+    setSelectModel(undefined);
   };
 
   const handleCollapsedBtn = () => {
@@ -203,19 +153,11 @@ const OverviewContainer: React.FC<Props> = ({ mode, domainManger, dispatch }) =>
             <DomainListTree
               createDomainBtnVisible={mode === 'domain' ? true : false}
               onTreeSelected={(domainData: ISemantic.IDomainItem) => {
-                const { id, name } = domainData;
+                const { id } = domainData;
                 cleanModelInfo(id);
-                dispatch({
-                  type: 'domainManger/setSelectDomain',
-                  selectDomainId: id,
-                  selectDomainName: name,
-                  domainData,
-                });
-                dispatch({
-                  type: 'domainManger/setModelTableHistoryParams',
-                  payload: {
-                    [id]: {},
-                  },
+                setSelectDomain(domainData);
+                setModelTableHistoryParams({
+                  [id]: {},
                 });
               }}
               onTreeDataUpdate={() => {
@@ -232,7 +174,6 @@ const OverviewContainer: React.FC<Props> = ({ mode, domainManger, dispatch }) =>
           >
             {collapsedState ? <LeftOutlined /> : <RightOutlined />}
           </div>
-          {/* <RightOutlined /> */}
         </div>
         <div className={styles.content}>
           {selectDomainId ? (
@@ -243,6 +184,7 @@ const OverviewContainer: React.FC<Props> = ({ mode, domainManger, dispatch }) =>
                 modelList={modelList}
                 handleModelChange={(model) => {
                   handleModelChange(model);
+                  MrefreshModelList(selectDomainId);
                 }}
                 onBackDomainBtnClick={() => {
                   cleanModelInfo(selectDomainId);
@@ -262,6 +204,4 @@ const OverviewContainer: React.FC<Props> = ({ mode, domainManger, dispatch }) =>
   );
 };
 
-export default connect(({ domainManger }: { domainManger: StateType }) => ({
-  domainManger,
-}))(OverviewContainer);
+export default OverviewContainer;

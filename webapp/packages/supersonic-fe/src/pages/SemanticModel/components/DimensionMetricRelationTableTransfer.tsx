@@ -4,8 +4,6 @@ import type { TransferItem } from 'antd/es/transfer';
 import type { CheckboxChangeEvent } from 'antd/es/checkbox';
 import difference from 'lodash/difference';
 import React, { useState, useEffect } from 'react';
-import { connect } from 'umi';
-import type { StateType } from '../model';
 import TransTypeTag from './TransTypeTag';
 import TableTitleTooltips from '../components/TableTitleTooltips';
 import { ISemantic } from '../data';
@@ -23,7 +21,6 @@ interface RecordType {
 
 type Props = {
   metricItem: ISemantic.IMetricItem;
-  domainManger: StateType;
   relationsInitialValue?: ISemantic.IDrillDownDimensionItem[];
   onChange: (relations: ISemantic.IDrillDownDimensionItem[]) => void;
 };
@@ -31,11 +28,9 @@ type Props = {
 const DimensionMetricRelationTableTransfer: React.FC<Props> = ({
   metricItem,
   relationsInitialValue,
-  domainManger,
   onChange,
 }) => {
   const [targetKeys, setTargetKeys] = useState<string[]>([]);
-  const { selectModelId: modelId } = domainManger;
   const [checkedMap, setCheckedMap] = useState<Record<string, ISemantic.IDrillDownDimensionItem>>(
     {},
   );
@@ -47,7 +42,7 @@ const DimensionMetricRelationTableTransfer: React.FC<Props> = ({
   }, [metricItem, relationsInitialValue]);
 
   const queryDimensionList = async () => {
-    const { code, data, msg } = await getDimensionInModelCluster(metricItem?.modelId || modelId);
+    const { code, data, msg } = await getDimensionInModelCluster(metricItem?.modelId);
     if (code === 200 && Array.isArray(data)) {
       setDimensionList(data);
     } else {
@@ -220,7 +215,7 @@ const DimensionMetricRelationTableTransfer: React.FC<Props> = ({
           selectedKeys: listSelectedKeys,
           disabled: listDisabled,
         }) => {
-          const columns = direction === 'left' ? leftColumns : rightColumns;
+          const columns: any = direction === 'left' ? leftColumns : rightColumns;
           const rowSelection: TableRowSelection<TransferItem> = {
             getCheckboxProps: (item) => ({ disabled: listDisabled || item.disabled }),
             onSelectAll(selected, selectedRows) {
@@ -277,6 +272,4 @@ const DimensionMetricRelationTableTransfer: React.FC<Props> = ({
   );
 };
 
-export default connect(({ domainManger }: { domainManger: StateType }) => ({
-  domainManger,
-}))(DimensionMetricRelationTableTransfer);
+export default DimensionMetricRelationTableTransfer;

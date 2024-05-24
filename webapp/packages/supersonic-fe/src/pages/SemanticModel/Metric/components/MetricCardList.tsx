@@ -3,10 +3,7 @@ import React, { useState } from 'react';
 import { Dropdown, Popconfirm, Typography } from 'antd';
 import { EllipsisOutlined } from '@ant-design/icons';
 import { ISemantic } from '../../data';
-import { connect } from 'umi';
 import icon from '../../../../assets/icon/sourceState.svg';
-import type { Dispatch } from 'umi';
-import type { StateType } from '../../model';
 import { SemanticNodeType } from '../../enum';
 import styles from '../style.less';
 
@@ -17,8 +14,6 @@ type Props = {
   onMetricChange?: (metricItem: ISemantic.IMetricItem) => void;
   onEditBtnClick?: (metricItem: ISemantic.IMetricItem) => void;
   onDeleteBtnClick?: (metricItem: ISemantic.IMetricItem) => void;
-  domainManger: StateType;
-  dispatch: Dispatch;
 };
 
 const MetricCardList: React.FC<Props> = ({
@@ -27,7 +22,6 @@ const MetricCardList: React.FC<Props> = ({
   onMetricChange,
   onEditBtnClick,
   onDeleteBtnClick,
-  domainManger,
 }) => {
   const [currentNodeData, setCurrentNodeData] = useState<any>({});
 
@@ -129,6 +123,4 @@ const MetricCardList: React.FC<Props> = ({
   );
 };
 
-export default connect(({ domainManger }: { domainManger: StateType }) => ({
-  domainManger,
-}))(MetricCardList);
+export default MetricCardList;

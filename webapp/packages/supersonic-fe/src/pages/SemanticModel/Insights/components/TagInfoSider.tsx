@@ -1,6 +1,5 @@
-import { Tag, Space, Tooltip, Typography } from 'antd';
+import { Tag, Space, Tooltip } from 'antd';
 import React, { ReactNode } from 'react';
-import { connect } from 'umi';
 import type { StateType } from '../../model';
 import dayjs from 'dayjs';
 import {
@@ -23,7 +22,6 @@ import IndicatorStar from '../../components/IndicatorStar';
 
 type Props = {
   tagData: ISemantic.ITagItem;
-  domainManger: StateType;
   onNodeChange: (params?: { eventName?: string }) => void;
   onEditBtnClick?: (tagData: any) => void;
   onDimensionRelationBtnClick?: () => void;
@@ -251,6 +249,4 @@ const TagInfoSider: React.FC<Props> = ({ tagData, dimensionMap, metricMap }) => 
   );
 };
 
-export default connect(({ domainManger }: { domainManger: StateType }) => ({
-  domainManger,
-}))(TagInfoSider);
+export default TagInfoSider;

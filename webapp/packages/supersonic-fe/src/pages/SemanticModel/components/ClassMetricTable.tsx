@@ -2,10 +2,8 @@ import type { ActionType, ProColumns } from '@ant-design/pro-components';
 import { ProTable } from '@ant-design/pro-components';
 import { message, Button, Space, Popconfirm, Input, Select, Tag } from 'antd';
 import React, { useRef, useState, useEffect } from 'react';
-import type { Dispatch } from 'umi';
 import { StatusEnum } from '../enum';
-import { connect, history } from 'umi';
-import type { StateType } from '../model';
+import { useModel } from '@umijs/max';
 import { SENSITIVE_LEVEL_ENUM, SENSITIVE_LEVEL_OPTIONS, TAG_DEFINE_TYPE } from '../constant';
 import {
   queryMetric,
@@ -25,12 +23,16 @@ import { ColumnsConfig } from './TableColumnRender';
 
 type Props = {
   onEmptyMetricData?: () => void;
-  dispatch: Dispatch;
-  domainManger: StateType;
 };
 
-const ClassMetricTable: React.FC<Props> = ({ onEmptyMetricData, domainManger, dispatch }) => {
-  const { selectModelId: modelId, selectDomainId } = domainManger;
+const ClassMetricTable: React.FC<Props> = ({ onEmptyMetricData }) => {
+  const domainModel = useModel('SemanticModel.domainData');
+  const modelModel = useModel('SemanticModel.modelData');
+  const metricModel = useModel('SemanticModel.metricData');
+  const { selectDomainId } = domainModel;
+  const { selectModelId: modelId } = modelModel;
+  const { MrefreshMetricList } = metricModel;
+
   const [createModalVisible, setCreateModalVisible] = useState<boolean>(false);
   const [metricItem, setMetricItem] = useState<ISemantic.IMetricItem>();
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
@@ -60,12 +62,7 @@ const ClassMetricTable: React.FC<Props> = ({ onEmptyMetricData, domainManger, di
     });
     if (code === 200) {
       queryMetricList({ ...filterParams, ...defaultPagination });
-      dispatch({
-        type: 'domainManger/queryMetricList',
-        payload: {
-          modelId,
-        },
-      });
+      MrefreshMetricList({ modelId });
       return;
     }
     message.error(msg);
@@ -87,12 +84,7 @@ const ClassMetricTable: React.FC<Props> = ({ onEmptyMetricData, domainManger, di
     setLoading(false);
     if (code === 200) {
       queryMetricList({ ...filterParams, ...defaultPagination });
-      dispatch({
-        type: 'domainManger/queryMetricList',
-        payload: {
-          modelId,
-        },
-      });
+      MrefreshMetricList({ modelId });
       return;
     }
     message.error(msg);
@@ -108,12 +100,7 @@ const ClassMetricTable: React.FC<Props> = ({ onEmptyMetricData, domainManger, di
     });
     if (code === 200) {
       queryMetricList({ ...filterParams, ...defaultPagination });
-      dispatch({
-        type: 'domainManger/queryMetricList',
-        payload: {
-          modelId,
-        },
-      });
+      MrefreshMetricList({ modelId });
       return;
     }
     message.error(msg);
@@ -151,7 +138,7 @@ const ClassMetricTable: React.FC<Props> = ({ onEmptyMetricData, domainManger, di
     }
   };
 
-  const columnsConfig = ColumnsConfig();
+  const columnsConfig = ColumnsConfig({ indicatorInfo: { url: '/model/metric/edit/' } });
 
   const columns: ProColumns[] = [
     {
@@ -481,12 +468,7 @@ const ClassMetricTable: React.FC<Props> = ({ onEmptyMetricData, domainManger, di
           onSubmit={() => {
             setCreateModalVisible(false);
             queryMetricList({ ...filterParams, ...defaultPagination });
-            dispatch({
-              type: 'domainManger/queryMetricList',
-              payload: {
-                modelId,
-              },
-            });
+            MrefreshMetricList({ modelId });
           }}
           onCancel={() => {
             setCreateModalVisible(false);
@@ -496,6 +478,4 @@ const ClassMetricTable: React.FC<Props> = ({ onEmptyMetricData, domainManger, di
     </>
   );
 };
-export default connect(({ domainManger }: { domainManger: StateType }) => ({
-  domainManger,
-}))(ClassMetricTable);
+export default ClassMetricTable;

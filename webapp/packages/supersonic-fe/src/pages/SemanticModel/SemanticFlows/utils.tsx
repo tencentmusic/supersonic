@@ -1,6 +1,5 @@
 import type { NsGraph } from '@antv/xflow';
 import { uuidv4 } from '@antv/xflow';
-import type { StateType } from '../model';
 import { GraphApi } from './service';
 import { NODE_WIDTH, NODE_HEIGHT } from './constant';
 import moment from 'moment';
@@ -51,7 +50,7 @@ export const computedSingerNodesEdgesPosition = ({ nodes, edges }: NsGraph.IGrap
 
 export const addClassInfoAsDataSourceParents = (
   { nodes = [], edges = [] }: NsGraph.IGraphData,
-  domainManger: StateType,
+  domainManger: any,
 ) => {
   const { selectDomainId, selectDomainName } = domainManger;
   const sourceId = `classNodeId-${selectDomainId}`;

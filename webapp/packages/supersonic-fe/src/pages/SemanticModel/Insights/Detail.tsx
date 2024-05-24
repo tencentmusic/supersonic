@@ -1,8 +1,7 @@
 import { message, Tabs, Button, Space } from 'antd';
 import React, { useState, useEffect } from 'react';
 import { getTagData } from '../service';
-import { connect, useParams, history } from 'umi';
-import type { StateType } from '../model';
+import { useParams, history } from 'umi';
 import styles from './style.less';
 import { ArrowLeftOutlined } from '@ant-design/icons';
 import TagTrendSection from './components/TagTrendSection';
@@ -16,7 +15,7 @@ type Props = Record<string, any>;
 const TagDetail: React.FC<Props> = () => {
   const params: any = useParams();
   const tagId = params.tagId;
-  const [tagData, setTagData] = useState<ISemantic.IMetricItem>();
+  const [tagData, setTagData] = useState<ISemantic.ITagItem>();
   const [dimensionMap, setDimensionMap] = useState<Record<string, ISemantic.IDimensionItem>>({});
 
   const [metricMap, setMetricMap] = useState<Record<string, ISemantic.IMetricItem>>({});
@@ -146,6 +145,4 @@ const TagDetail: React.FC<Props> = () => {
   );
 };
 
-export default connect(({ domainManger }: { domainManger: StateType }) => ({
-  domainManger,
-}))(TagDetail);
+export default TagDetail;

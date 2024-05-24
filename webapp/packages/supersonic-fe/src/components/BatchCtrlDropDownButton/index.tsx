@@ -7,6 +7,7 @@ import {
   DeleteOutlined,
   ExportOutlined,
   RocketOutlined,
+  FormOutlined,
 } from '@ant-design/icons';
 
 export type BatchCtrlDropDownButtonProps = {
@@ -51,6 +52,12 @@ const BatchCtrlDropDownButton: FC<BatchCtrlDropDownButtonProps> = ({
       label: '批量下架',
       icon: <RocketOutlined />,
       disabled: disabledList?.includes('batchUnPublish'),
+    },
+    batchAddClass: {
+      key: 'batchAddClass',
+      label: '批量分类',
+      icon: <FormOutlined />,
+      disabled: disabledList?.includes('batchAddClass'),
     },
   };
 

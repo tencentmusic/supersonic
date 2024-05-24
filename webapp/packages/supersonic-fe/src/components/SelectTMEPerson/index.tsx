@@ -1,11 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { FC } from 'react';
-import { Select, message } from 'antd';
+import { Select } from 'antd';
 import type { UserItem } from './service';
-import { getAllUser } from './service';
-
+import { useModel } from '@umijs/max';
 import styles from './index.less';
-import { useFetchDataEffect } from '@/utils/curd';
 import TMEAvatar from '../TMEAvatar';
 
 interface Props {
@@ -17,27 +15,20 @@ interface Props {
 
 const SelectTMEPerson: FC<Props> = ({ placeholder, value, isMultiple = true, onChange }) => {
   const [userList, setUserList] = useState<UserItem[]>([]);
+  const allUserModel = useModel('allUserData');
+  const { allUserList, MrefreshUserList } = allUserModel;
 
-  useFetchDataEffect(
-    {
-      fetcher: async () => {
-        const res = await getAllUser();
-        if (res.code == 200 || Number(res.code) == 0) {
-          return res.data || [];
-        } else {
-          message.error(res.msg);
-          throw new Error(res.msg);
-        }
-      },
-      updater: (list) => {
-        setUserList(list);
-      },
-      cleanup: () => {
-        setUserList([]);
-      },
-    },
-    [],
-  );
+  const queryTmePersonData = async () => {
+    const list = await MrefreshUserList();
+    setUserList(list);
+  };
+  useEffect(() => {
+    if (Array.isArray(allUserList) && allUserList.length > 0) {
+      setUserList(allUserList);
+    } else {
+      queryTmePersonData();
+    }
+  }, []);
 
   return (
     <Select
