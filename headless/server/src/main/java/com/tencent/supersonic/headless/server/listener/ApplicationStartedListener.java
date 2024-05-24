@@ -2,7 +2,7 @@ package com.tencent.supersonic.headless.server.listener;
 
 
 import com.tencent.supersonic.headless.core.chat.knowledge.DictWord;
-import com.tencent.supersonic.headless.core.chat.knowledge.KnowledgeService;
+import com.tencent.supersonic.headless.core.chat.knowledge.KnowledgeBaseService;
 import com.tencent.supersonic.headless.server.service.impl.WordService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
@@ -21,7 +21,7 @@ import java.util.concurrent.CompletableFuture;
 public class ApplicationStartedListener implements CommandLineRunner {
 
     @Autowired
-    private KnowledgeService knowledgeService;
+    private KnowledgeBaseService knowledgeBaseService;
     @Autowired
     private WordService wordService;
 
@@ -37,7 +37,7 @@ public class ApplicationStartedListener implements CommandLineRunner {
 
             List<DictWord> dictWords = wordService.getAllDictWords();
             wordService.setPreDictWords(dictWords);
-            knowledgeService.reloadAllData(dictWords);
+            knowledgeBaseService.reloadAllData(dictWords);
 
             log.debug("ApplicationStartedInit end");
             isOk = true;
@@ -72,7 +72,7 @@ public class ApplicationStartedListener implements CommandLineRunner {
             }
             log.info("dictWords has changed");
             wordService.setPreDictWords(dictWords);
-            knowledgeService.updateOnlineKnowledge(wordService.getAllDictWords());
+            knowledgeBaseService.updateOnlineKnowledge(wordService.getAllDictWords());
         } catch (Exception e) {
             log.error("reloadKnowledge error", e);
         }

@@ -14,7 +14,7 @@ import java.util.Collections;
 
 @Component
 @Slf4j
-public class SqlPromptGenerator {
+public class PromptGenerator {
 
     public String generatorLinkingAndSqlPrompt(LLMReq llmReq, List<Map<String, String>> exampleList) {
         String instruction =

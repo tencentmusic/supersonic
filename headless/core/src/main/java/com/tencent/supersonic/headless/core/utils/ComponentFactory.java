@@ -2,8 +2,8 @@ package com.tencent.supersonic.headless.core.utils;
 
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.headless.core.cache.QueryCache;
-import com.tencent.supersonic.headless.core.chat.parser.JavaLLMProxy;
-import com.tencent.supersonic.headless.core.chat.parser.LLMProxy;
+import com.tencent.supersonic.headless.core.chat.parser.llm.JavaLLMProxy;
+import com.tencent.supersonic.headless.core.chat.parser.llm.LLMProxy;
 import com.tencent.supersonic.headless.core.chat.parser.llm.DataSetResolver;
 import com.tencent.supersonic.headless.core.executor.QueryExecutor;
 import com.tencent.supersonic.headless.core.parser.SqlParser;

@@ -9,7 +9,7 @@ import com.tencent.supersonic.headless.api.pojo.request.DictSingleTaskReq;
 import com.tencent.supersonic.headless.api.pojo.response.DictItemResp;
 import com.tencent.supersonic.headless.api.pojo.response.DictTaskResp;
 import com.tencent.supersonic.headless.core.file.FileHandler;
-import com.tencent.supersonic.headless.core.chat.knowledge.KnowledgeService;
+import com.tencent.supersonic.headless.core.chat.knowledge.KnowledgeBaseService;
 import com.tencent.supersonic.headless.core.chat.knowledge.helper.HanlpHelper;
 import com.tencent.supersonic.headless.server.persistence.dataobject.DictTaskDO;
 import com.tencent.supersonic.headless.server.persistence.repository.DictRepository;
@@ -46,7 +46,7 @@ public class DictTaskServiceImpl implements DictTaskService {
                                DictUtils dictConverter,
                                DictUtils dictUtils,
                                FileHandler fileHandler,
-                               KnowledgeService knowledgeService) {
+                               KnowledgeBaseService knowledgeBaseService) {
         this.dictRepository = dictRepository;
         this.dictConverter = dictConverter;
         this.dictUtils = dictUtils;

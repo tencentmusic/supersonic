@@ -27,29 +27,29 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Component
-public class SqlExamplarLoader {
+public class ExemplarManager {
 
-    private static final String EXAMPLE_JSON_FILE = "s2ql_examplar.json";
+    private static final String EXAMPLE_JSON_FILE = "s2ql_exemplar.json";
 
     private S2EmbeddingStore s2EmbeddingStore = ComponentFactory.getS2EmbeddingStore();
-    private TypeReference<List<SqlExample>> valueTypeRef = new TypeReference<List<SqlExample>>() {
+    private TypeReference<List<Exemplar>> valueTypeRef = new TypeReference<List<Exemplar>>() {
     };
 
     @Autowired
     private EmbeddingConfig embeddingConfig;
 
-    public List<SqlExample> getSqlExamples() throws IOException {
+    public List<Exemplar> getExemplars() throws IOException {
         ClassPathResource resource = new ClassPathResource(EXAMPLE_JSON_FILE);
         InputStream inputStream = resource.getInputStream();
         return JsonUtil.INSTANCE.getObjectMapper().readValue(inputStream, valueTypeRef);
     }
 
-    public void addEmbeddingStore(List<SqlExample> sqlExamples, String collectionName) {
+    public void addExemplars(List<Exemplar> exemplars, String collectionName) {
         List<EmbeddingQuery> queries = new ArrayList<>();
-        for (int i = 0; i < sqlExamples.size(); i++) {
-            SqlExample sqlExample = sqlExamples.get(i);
-            String question = sqlExample.getQuestion();
-            Map<String, Object> metaDataMap = JsonUtil.toMap(JsonUtil.toString(sqlExample), String.class, Object.class);
+        for (int i = 0; i < exemplars.size(); i++) {
+            Exemplar exemplar = exemplars.get(i);
+            String question = exemplar.getQuestion();
+            Map<String, Object> metaDataMap = JsonUtil.toMap(JsonUtil.toString(exemplar), String.class, Object.class);
             EmbeddingQuery embeddingQuery = new EmbeddingQuery();
             embeddingQuery.setQueryId(String.valueOf(i));
             embeddingQuery.setQuery(question);
@@ -59,7 +59,7 @@ public class SqlExamplarLoader {
         s2EmbeddingStore.addQuery(collectionName, queries);
     }
 
-    public List<Map<String, String>> retrieverSqlExamples(String queryText, int maxResults) {
+    public List<Map<String, String>> recallExemplars(String queryText, int maxResults) {
         String collectionName = embeddingConfig.getText2sqlCollectionName();
         RetrieveQuery retrieveQuery = RetrieveQuery.builder().queryTextsList(Collections.singletonList(queryText))
                 .queryEmbeddings(null).build();

@@ -42,7 +42,7 @@ import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
 import com.tencent.supersonic.headless.core.chat.corrector.GrammarCorrector;
 import com.tencent.supersonic.headless.core.chat.corrector.SchemaCorrector;
 import com.tencent.supersonic.headless.core.chat.knowledge.HanlpMapResult;
-import com.tencent.supersonic.headless.core.chat.knowledge.KnowledgeService;
+import com.tencent.supersonic.headless.core.chat.knowledge.KnowledgeBaseService;
 import com.tencent.supersonic.headless.core.chat.knowledge.SearchService;
 import com.tencent.supersonic.headless.core.chat.knowledge.helper.HanlpHelper;
 import com.tencent.supersonic.headless.core.chat.knowledge.helper.NatureHelper;
@@ -96,7 +96,7 @@ public class ChatQueryServiceImpl implements ChatQueryService {
     @Autowired
     private ChatContextService chatContextService;
     @Autowired
-    private KnowledgeService knowledgeService;
+    private KnowledgeBaseService knowledgeBaseService;
     @Autowired
     private QueryService queryService;
     @Autowired
@@ -557,7 +557,7 @@ public class ChatQueryServiceImpl implements ChatQueryService {
         Map<Long, List<Long>> modelIdToDataSetIds = new HashMap<>();
         modelIdToDataSetIds.put(dimensionValueReq.getModelId(), new ArrayList<>(dataSetIds));
         //search from prefixSearch
-        List<HanlpMapResult> hanlpMapResultList = knowledgeService.prefixSearch(dimensionValueReq.getValue(),
+        List<HanlpMapResult> hanlpMapResultList = knowledgeBaseService.prefixSearch(dimensionValueReq.getValue(),
                 2000, modelIdToDataSetIds, dataSetIds);
         HanlpHelper.transLetterOriginal(hanlpMapResultList);
         return hanlpMapResultList.stream()

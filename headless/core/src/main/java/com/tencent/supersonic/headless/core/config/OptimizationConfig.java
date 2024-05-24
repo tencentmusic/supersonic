@@ -1,7 +1,7 @@
 package com.tencent.supersonic.headless.core.config;
 
 import com.tencent.supersonic.common.service.SysParameterService;
-import com.tencent.supersonic.headless.core.chat.query.llm.s2sql.LLMReq.SqlGenerationMode;
+import com.tencent.supersonic.headless.core.chat.query.llm.s2sql.LLMReq;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -65,7 +65,7 @@ public class OptimizationConfig {
     private boolean useLinkingValueSwitch;
 
     @Value("${s2SQL.generation:TWO_PASS_AUTO_COT}")
-    private SqlGenerationMode sqlGenerationMode;
+    private LLMReq.SqlGenType sqlGenType;
 
     @Value("${s2SQL.use.switch:true}")
     private boolean useS2SqlSwitch;
@@ -157,8 +157,8 @@ public class OptimizationConfig {
         return convertValue("s2SQL.linking.value.switch", Boolean.class, useLinkingValueSwitch);
     }
 
-    public SqlGenerationMode getSqlGenerationMode() {
-        return convertValue("s2SQL.generation", SqlGenerationMode.class, sqlGenerationMode);
+    public LLMReq.SqlGenType getSqlGenType() {
+        return convertValue("s2SQL.generation", LLMReq.SqlGenType.class, sqlGenType);
     }
 
     public Integer getParseShowCount() {
@@ -177,8 +177,8 @@ public class OptimizationConfig {
                 return targetType.cast(Integer.parseInt(value));
             } else if (targetType == Boolean.class) {
                 return targetType.cast(Boolean.parseBoolean(value));
-            } else if (targetType == SqlGenerationMode.class) {
-                return targetType.cast(SqlGenerationMode.valueOf(value));
+            } else if (targetType == LLMReq.SqlGenType.class) {
+                return targetType.cast(LLMReq.SqlGenType.valueOf(value));
             }
         } catch (Exception e) {
             log.error("convertValue", e);

@@ -43,7 +43,7 @@ public class LLMSqlParser implements SemanticParser {
             List<LLMReq.ElementValue> linkingValues = requestService.getValueList(queryCtx, dataSetId);
             SemanticSchema semanticSchema = queryCtx.getSemanticSchema();
             LLMReq llmReq = requestService.getLlmReq(queryCtx, dataSetId, semanticSchema, linkingValues);
-            LLMResp llmResp = requestService.requestLLM(llmReq, dataSetId);
+            LLMResp llmResp = requestService.invokeLLM(llmReq);
             if (Objects.isNull(llmResp)) {
                 return;
             }

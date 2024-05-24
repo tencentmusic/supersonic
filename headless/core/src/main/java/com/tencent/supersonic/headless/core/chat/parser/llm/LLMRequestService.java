@@ -45,13 +45,12 @@ public class LLMRequestService {
             log.info("not enable llm, skip");
             return true;
         }
-        if (ComponentFactory.getLLMProxy().isSkip(queryCtx)) {
-            return true;
-        }
+
         if (SatisfactionChecker.isSkip(queryCtx)) {
             log.info("skip {}, queryText:{}", LLMSqlParser.class, queryCtx.getQueryText());
             return true;
         }
+
         return false;
     }
 
@@ -72,6 +71,7 @@ public class LLMRequestService {
         llmReq.setFilterCondition(filterCondition);
 
         LLMReq.LLMSchema llmSchema = new LLMReq.LLMSchema();
+        llmSchema.setDataSetId(dataSetId);
         llmSchema.setDataSetName(dataSetIdToName.get(dataSetId));
         llmSchema.setDomainName(dataSetIdToName.get(dataSetId));
 
@@ -95,13 +95,13 @@ public class LLMRequestService {
             currentDate = DateUtils.getBeforeDate(0);
         }
         llmReq.setCurrentDate(currentDate);
-        llmReq.setSqlGenerationMode(optimizationConfig.getSqlGenerationMode().getName());
+        llmReq.setSqlGenerationMode(optimizationConfig.getSqlGenType().getName());
         llmReq.setLlmConfig(queryCtx.getLlmConfig());
         return llmReq;
     }
 
-    public LLMResp requestLLM(LLMReq llmReq, Long dataSetId) {
-        return ComponentFactory.getLLMProxy().query2sql(llmReq, dataSetId);
+    public LLMResp invokeLLM(LLMReq llmReq) {
+        return ComponentFactory.getLLMProxy().text2sql(llmReq);
     }
 
     protected List<String> getFieldNameList(QueryContext queryCtx, Long dataSetId,
