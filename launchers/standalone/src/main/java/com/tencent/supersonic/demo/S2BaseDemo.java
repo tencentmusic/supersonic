@@ -17,9 +17,22 @@ import com.tencent.supersonic.headless.api.pojo.enums.DataType;
 import com.tencent.supersonic.headless.api.pojo.enums.TagDefineType;
 import com.tencent.supersonic.headless.api.pojo.request.DatabaseReq;
 import com.tencent.supersonic.headless.api.pojo.request.TagReq;
-import com.tencent.supersonic.headless.api.pojo.response.*;
+import com.tencent.supersonic.headless.api.pojo.response.DatabaseResp;
+import com.tencent.supersonic.headless.api.pojo.response.DimensionResp;
+import com.tencent.supersonic.headless.api.pojo.response.MetricResp;
+import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
+import com.tencent.supersonic.headless.api.pojo.response.ParseResp;
 import com.tencent.supersonic.headless.server.pojo.MetaFilter;
-import com.tencent.supersonic.headless.server.service.*;
+import com.tencent.supersonic.headless.server.service.DataSetService;
+import com.tencent.supersonic.headless.server.service.DatabaseService;
+import com.tencent.supersonic.headless.server.service.DimensionService;
+import com.tencent.supersonic.headless.server.service.DomainService;
+import com.tencent.supersonic.headless.server.service.MetricService;
+import com.tencent.supersonic.headless.server.service.ModelRelaService;
+import com.tencent.supersonic.headless.server.service.ModelService;
+import com.tencent.supersonic.headless.server.service.TagMetaService;
+import com.tencent.supersonic.headless.server.service.TagObjectService;
+import com.tencent.supersonic.headless.server.service.TermService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -127,7 +140,6 @@ public abstract class S2BaseDemo implements CommandLineRunner {
         }
         return dataSetModelConfigs;
     }
-
 
     protected void parseAndExecute(int chatId, int agentId, String queryText) throws Exception {
         ChatParseReq chatParseReq = new ChatParseReq();

@@ -55,7 +55,8 @@ public class MultiTurnParser implements ChatParser {
         MultiTurnConfig agentMultiTurnConfig = chatParseContext.getAgent().getMultiTurnConfig();
         Boolean globalMultiTurnConfig = environment.getProperty("s2.multi-turn.enable", Boolean.class);
 
-        Boolean multiTurnConfig = agentMultiTurnConfig != null ? agentMultiTurnConfig.isEnableMultiTurn() : globalMultiTurnConfig;
+        Boolean multiTurnConfig = agentMultiTurnConfig != null
+                ? agentMultiTurnConfig.isEnableMultiTurn() : globalMultiTurnConfig;
         if (!Boolean.TRUE.equals(multiTurnConfig)) {
             return;
         }

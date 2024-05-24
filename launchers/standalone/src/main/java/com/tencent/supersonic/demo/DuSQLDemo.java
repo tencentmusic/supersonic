@@ -14,7 +14,6 @@ import com.tencent.supersonic.common.pojo.enums.TimeMode;
 import com.tencent.supersonic.common.pojo.enums.TypeEnums;
 import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
 import com.tencent.supersonic.common.util.JsonUtil;
-import com.tencent.supersonic.demo.S2BaseDemo;
 import com.tencent.supersonic.headless.api.pojo.enums.DimensionType;
 import com.tencent.supersonic.headless.api.pojo.enums.IdentifyType;
 import com.tencent.supersonic.headless.api.pojo.Dim;
