@@ -11,6 +11,9 @@ import com.tencent.supersonic.headless.server.persistence.dataobject.TermDO;
 import com.tencent.supersonic.headless.server.persistence.mapper.TermMapper;
 import com.tencent.supersonic.headless.server.service.TermService;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
+
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -50,6 +53,9 @@ public class TermServiceImpl extends ServiceImpl<TermMapper, TermDO> implements 
 
     @Override
     public Map<Long, List<TermResp>> getTermSets(Set<Long> domainIds) {
+        if (CollectionUtils.isEmpty(domainIds)) {
+            return new HashMap<>();
+        }
         QueryWrapper<TermDO> queryWrapper = new QueryWrapper<>();
         queryWrapper.lambda().in(TermDO::getDomainId, domainIds);
         List<TermDO> list = list(queryWrapper);
