@@ -41,10 +41,10 @@ import { history } from 'umi';
 
 export type CreateFormProps = {
   datasourceId?: number;
-  domainId: number;
-  modelId: number;
+  domainId?: number;
+  modelId?: number;
   createModalVisible: boolean;
-  metricItem: any;
+  metricItem?: ISemantic.IMetricItem;
   onCancel?: () => void;
   onSubmit?: (values: any) => void;
 };

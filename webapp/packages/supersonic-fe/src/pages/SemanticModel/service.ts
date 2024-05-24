@@ -406,6 +406,13 @@ export function updateModel(data: any): Promise<any> {
   });
 }
 
+export function batchUpdateModelStatus(data: any): Promise<any> {
+  return request(`${process.env.API_BASE_URL}model/batchUpdateStatus`, {
+    method: 'POST',
+    data,
+  });
+}
+
 export function deleteModel(modelId: number): Promise<any> {
   return request(`${process.env.API_BASE_URL}model/deleteModel/${modelId}`, {
     method: 'DELETE',

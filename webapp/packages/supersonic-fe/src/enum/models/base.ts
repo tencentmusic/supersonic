@@ -1,8 +1,3 @@
-export const EnumTransModelType = {
-  edit: '编辑',
-  add: '新增',
-};
-
 export const EnumDescSensitivity = {
   low: {
     value: 1,

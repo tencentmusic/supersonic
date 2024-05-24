@@ -1,18 +1,17 @@
 import { message } from 'antd';
 import React, { useState, useEffect } from 'react';
-import { connect } from 'umi';
+import { useModel } from '@umijs/max';
 import type { StateType } from '../../model';
 import { getDomainExtendConfig, addDomainExtend, editDomainExtend } from '../../service';
-import { ProCard } from  '@ant-design/pro-components';
+import { ProCard } from '@ant-design/pro-components';
 
 import TextAreaCommonEditList from '../../components/CommonEditList/TextArea';
 
-type Props = {
-  domainManger: StateType;
-};
+type Props = {};
 
-const RecommendedQuestionsSection: React.FC<Props> = ({ domainManger }) => {
-  const { selectModelId: modelId } = domainManger;
+const RecommendedQuestionsSection: React.FC<Props> = ({}) => {
+  const modelModel = useModel('SemanticModel.modelData');
+  const { selectModelId: modelId } = modelModel;
 
   const [questionData, setQuestionData] = useState<string[]>([]);
   const [currentRecordId, setCurrentRecordId] = useState<number>(0);
@@ -85,6 +84,4 @@ const RecommendedQuestionsSection: React.FC<Props> = ({ domainManger }) => {
     </div>
   );
 };
-export default connect(({ domainManger }: { domainManger: StateType }) => ({
-  domainManger,
-}))(RecommendedQuestionsSection);
+export default RecommendedQuestionsSection;

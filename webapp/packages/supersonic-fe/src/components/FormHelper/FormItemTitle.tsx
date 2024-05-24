@@ -18,7 +18,7 @@ const FormItemTitle: React.FC<IProps> = ({
 }) => {
   return (
     <Space direction="vertical" size={2} style={{ width: '100%' }}>
-      <div>{title}</div>
+      <div className={styles.title}>{title}</div>
       <div className={styles.subTitleContainer}>
         {subTitleEditable ? (
           <Paragraph
@@ -31,7 +31,7 @@ const FormItemTitle: React.FC<IProps> = ({
             {subTitle || '添加描述'}
           </Paragraph>
         ) : (
-          subTitle && <span style={{ fontSize: '12px', color: '#6a6a6a' }}>{subTitle}</span>
+          subTitle && <span style={{ fontSize: '12px', color: '#7b809a' }}>{subTitle}</span>
         )}
       </div>
     </Space>

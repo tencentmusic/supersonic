@@ -3,8 +3,6 @@ import type { ColumnsType, TableRowSelection } from 'antd/es/table/interface';
 import type { TransferItem } from 'antd/es/transfer';
 import difference from 'lodash/difference';
 import React from 'react';
-import { connect } from 'umi';
-import type { StateType } from '../../model';
 import type { IChatConfig } from '../../data';
 import TransTypeTag from '../TransTypeTag';
 import { SemanticNodeType, TransType } from '../../enum';
@@ -17,7 +15,6 @@ interface RecordType {
 }
 
 type Props = {
-  domainManger: StateType;
   knowledgeInfosMap?: IChatConfig.IKnowledgeInfosItemMap;
   onKnowledgeInfosMapChange?: (knowledgeInfosMap: IChatConfig.IKnowledgeInfosItemMap) => void;
   [key: string]: any;
@@ -83,7 +80,7 @@ const DimensionMetricVisibleTableTransfer: React.FC<Props> = ({
           onItemSelect,
           selectedKeys: listSelectedKeys,
         }) => {
-          const columns = direction === 'left' ? leftColumns : rightColumns;
+          const columns:any = direction === 'left' ? leftColumns : rightColumns;
           const rowSelection: TableRowSelection<TransferItem> = {
             onSelectAll(selected, selectedRows) {
               const treeSelectedKeys = selectedRows.map(({ key }) => key);
@@ -119,6 +116,4 @@ const DimensionMetricVisibleTableTransfer: React.FC<Props> = ({
   );
 };
 
-export default connect(({ domainManger }: { domainManger: StateType }) => ({
-  domainManger,
-}))(DimensionMetricVisibleTableTransfer);
+export default DimensionMetricVisibleTableTransfer;

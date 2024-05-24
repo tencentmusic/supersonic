@@ -1,13 +1,7 @@
 import React from 'react';
-import { connect } from 'umi';
-import type { StateType } from './model';
 import OverviewContainer from './OverviewContainer';
-import type { Dispatch } from 'umi';
 
-type Props = {
-  domainManger: StateType;
-  dispatch: Dispatch;
-};
+type Props = {};
 const DomainManager: React.FC<Props> = () => {
   return (
     <>
@@ -16,6 +10,4 @@ const DomainManager: React.FC<Props> = () => {
   );
 };
 
-export default connect(({ domainManger }: { domainManger: StateType }) => ({
-  domainManger,
-}))(DomainManager);
+export default DomainManager;

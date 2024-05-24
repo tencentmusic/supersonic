@@ -1,11 +1,9 @@
 import { DownOutlined, PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
-import { Input, message, Tree, Popconfirm, Space, Tooltip, Row, Col, Button } from 'antd';
+import { Input, message, Tree, Popconfirm, Tooltip, Row, Col, Button } from 'antd';
 import type { DataNode } from 'antd/lib/tree';
 import { useEffect, useState } from 'react';
 import type { FC, Key } from 'react';
-import { connect } from 'umi';
-import type { Dispatch } from 'umi';
-import type { StateType } from '../model';
+import { useModel } from '@umijs/max';
 import { createDomain, updateDomain, deleteDomain } from '../service';
 import { treeParentKeyLists } from '../utils';
 import DomainInfoForm from './DomainInfoForm';
@@ -17,11 +15,7 @@ import { ISemantic } from '../data';
 const { Search } = Input;
 
 type DomainListProps = {
-  selectDomainId: number;
-  selectDomainName: string;
-  domainList: ISemantic.IDomainItem[];
   createDomainBtnVisible?: boolean;
-  dispatch: Dispatch;
   onCreateDomainBtnClick?: () => void;
   onTreeSelected?: (targetNodeData: ISemantic.IDomainItem) => void;
   onTreeDataUpdate?: () => void;
@@ -43,8 +37,6 @@ const projectTreeFlat = (projectTree: DataNode[], filterValue: string): DataNode
 };
 
 const DomainListTree: FC<DomainListProps> = ({
-  selectDomainId,
-  domainList,
   createDomainBtnVisible = true,
   onCreateDomainBtnClick,
   onTreeSelected,
@@ -56,6 +48,8 @@ const DomainListTree: FC<DomainListProps> = ({
   const [filterValue, setFliterValue] = useState<string>('');
   const [expandedKeys, setExpandedKeys] = useState<string[]>([]);
   const [classList, setClassList] = useState<ISemantic.IDomainItem[]>([]);
+  const domainModel = useModel('SemanticModel.domainData');
+  const { selectDomainId, domainList } = domainModel;
 
   useEffect(() => {
     const treeData = addPathInTreeData(constructorClassTreeFromList(domainList));
@@ -68,7 +62,7 @@ const DomainListTree: FC<DomainListProps> = ({
     setFliterValue(value);
   };
 
-  const handleSelect = (selectedKeys: string, projectName: string) => {
+  const handleSelect = (selectedKeys: string) => {
     if (`${selectedKeys}` === `${selectDomainId}`) {
       return;
     }
@@ -135,7 +129,7 @@ const DomainListTree: FC<DomainListProps> = ({
         <span
           className={styles.projectItemTitle}
           onClick={() => {
-            handleSelect(id, name);
+            handleSelect(id);
           }}
         >
           {name}
@@ -195,11 +189,11 @@ const DomainListTree: FC<DomainListProps> = ({
     <div className={styles.domainList}>
       <div className={styles.searchContainer}>
         <Row style={{ gap: 10 }}>
-          <Col flex="1 1 215px">
+          <Col flex="1 1 150px">
             <Search
               allowClear
               className={styles.search}
-              placeholder="请输入主题域名称"
+              placeholder="请输入主题域"
               onSearch={onSearch}
             />
           </Col>
@@ -245,14 +239,4 @@ const DomainListTree: FC<DomainListProps> = ({
   );
 };
 
-export default connect(
-  ({
-    domainManger: { selectDomainId, selectDomainName, domainList },
-  }: {
-    domainManger: StateType;
-  }) => ({
-    selectDomainId,
-    selectDomainName,
-    domainList,
-  }),
-)(DomainListTree);
+export default DomainListTree;

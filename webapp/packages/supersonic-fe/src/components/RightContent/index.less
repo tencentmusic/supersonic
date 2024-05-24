@@ -27,19 +27,21 @@
     cursor: pointer;
     transition: all 0.3s;
     color: #fff;
+    margin-right: 10px;
     >span {
       vertical-align: middle;
     }
 
 
     &:hover {
-      background: #296df3;
+      background: rgba(232, 232, 232, 0.65);
+      border-radius: 8px;
     }
 
 
-    &:global(.opened) {
-      background: @pro-header-hover-bg;
-    }
+    // &:global(.opened) {
+    //   background: @pro-header-hover-bg;
+    // }
   }
 
   .search {
@@ -53,9 +55,13 @@
   .account {
     .avatar {
       margin-right: 8px;
-      color: @primary-color;
+      color: var(--tme-primary-color);
       vertical-align: top;
-      background: rgba(255, 255, 255, 0.85);
+      background: rgba(150, 150, 150, 0.85);
+    }
+    .userName {
+      color: var(--tme-primary-color);
+      font-family: var(--tencent-font-family);
     }
   }
 }

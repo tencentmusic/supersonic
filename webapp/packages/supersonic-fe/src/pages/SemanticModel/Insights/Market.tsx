@@ -2,9 +2,7 @@ import type { ActionType, ProColumns } from '@ant-design/pro-components';
 import { ProTable } from '@ant-design/pro-components';
 import { message, Space, Popconfirm } from 'antd';
 import React, { useRef, useState, useEffect } from 'react';
-import type { Dispatch } from 'umi';
-import { connect, useModel } from 'umi';
-import type { StateType } from '../model';
+import { useModel } from 'umi';
 import { SENSITIVE_LEVEL_ENUM } from '../constant';
 import { getTagList, deleteTag, batchDeleteTag, getTagObjectList } from '../service';
 import TagFilter from './components/TagFilter';
@@ -15,10 +13,7 @@ import { ISemantic } from '../data';
 import BatchCtrlDropDownButton from '@/components/BatchCtrlDropDownButton';
 import { ColumnsConfig } from '../components/TableColumnRender';
 
-type Props = {
-  dispatch: Dispatch;
-  domainManger: StateType;
-};
+type Props = {};
 
 type QueryMetricListParams = {
   id?: string;
@@ -29,11 +24,9 @@ type QueryMetricListParams = {
   [key: string]: any;
 };
 
-const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
+const ClassMetricTable: React.FC<Props> = ({}) => {
   const { initialState = {} } = useModel('@@initialState');
-
   const { currentUser = {} } = initialState as any;
-  const { selectDomainId, selectModelId: modelId } = domainManger;
   const [createModalVisible, setCreateModalVisible] = useState<boolean>(false);
   const defaultPagination = {
     current: 1,
@@ -400,8 +393,6 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
 
       {createModalVisible && (
         <TagInfoCreateForm
-          domainId={selectDomainId}
-          modelId={Number(modelId)}
           createModalVisible={createModalVisible}
           tagItem={tagItem}
           onSubmit={() => {
@@ -416,6 +407,4 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
     </>
   );
 };
-export default connect(({ domainManger }: { domainManger: StateType }) => ({
-  domainManger,
-}))(ClassMetricTable);
+export default ClassMetricTable;

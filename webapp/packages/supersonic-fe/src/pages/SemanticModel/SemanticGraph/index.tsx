@@ -1,7 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { connect } from 'umi';
-import type { StateType } from '../model';
-import type { Dispatch } from 'umi';
+import { useModel } from 'umi';
 import {
   typeConfigs,
   formatterRelationData,
@@ -37,12 +35,9 @@ import GraphLegendVisibleModeItem from './components/GraphLegendVisibleModeItem'
 import ModelRelationFormDrawer from './components/ModelRelationFormDrawer';
 import ControlToolBar from './components/ControlToolBar';
 
-type Props = {
-  domainManger: StateType;
-  dispatch: Dispatch;
-};
+type Props = {};
 
-const DomainManger: React.FC<Props> = ({ domainManger, dispatch }) => {
+const SemanticGraph: React.FC<Props> = ({}) => {
   const ref = useRef(null);
   const dataSourceRef = useRef<ISemantic.IDomainSchemaRelaList>([]);
   const [graphData, setGraphData] = useState<TreeGraphData>();
@@ -63,7 +58,15 @@ const DomainManger: React.FC<Props> = ({ domainManger, dispatch }) => {
 
   const [dataSourceInfoList, setDataSourceInfoList] = useState<IDataSource.IDataSourceItem[]>([]);
 
-  const { dimensionList, metricList, selectModelId: modelId, selectDomainId } = domainManger;
+  const domainModel = useModel('SemanticModel.domainData');
+  const modelModel = useModel('SemanticModel.modelData');
+  const dimensionModel = useModel('SemanticModel.dimensionData');
+  const metricModel = useModel('SemanticModel.metricData');
+
+  const { selectDomainId, selectDomainName } = domainModel;
+  const { selectModelId: modelId } = modelModel;
+  const { MdimensionList: dimensionList, MrefreshDimensionList } = dimensionModel;
+  const { MmetricList: metricList, MrefreshMetricList } = metricModel;
 
   const dimensionListRef = useRef<ISemantic.IDimensionItem[]>([]);
   const metricListRef = useRef<ISemantic.IMetricItem[]>([]);
@@ -134,7 +137,7 @@ const DomainManger: React.FC<Props> = ({ domainManger, dispatch }) => {
 
     const graphRootData = {
       id: 'root',
-      name: domainManger.selectDomainName,
+      name: selectDomainName,
       children: relationData,
     };
     return graphRootData;
@@ -211,7 +214,6 @@ const DomainManger: React.FC<Props> = ({ domainManger, dispatch }) => {
   const saveRelationConfig = async (domainId: number, graphData: any) => {
     const configData = {
       id: relationConfig?.id,
-      // modelId: domainManger.selectModelId,
       domainId: domainId,
       type: 'modelEdgeRelation',
       config: JSON.stringify(graphData),
@@ -1050,20 +1052,10 @@ const DomainManger: React.FC<Props> = ({ domainManger, dispatch }) => {
           updateGraphData();
           setInfoDrawerVisible(false);
           if (eventName === SemanticNodeType.METRIC) {
-            dispatch({
-              type: 'domainManger/queryMetricList',
-              payload: {
-                modelId,
-              },
-            });
+            MrefreshMetricList({ modelId });
           }
           if (eventName === SemanticNodeType.DIMENSION) {
-            dispatch({
-              type: 'domainManger/queryDimensionList',
-              payload: {
-                modelId,
-              },
-            });
+            MrefreshDimensionList({ modelId });
           }
         }}
       />
@@ -1078,12 +1070,7 @@ const DomainManger: React.FC<Props> = ({ domainManger, dispatch }) => {
           onSubmit={() => {
             setCreateDimensionModalVisible(false);
             updateGraphData();
-            dispatch({
-              type: 'domainManger/queryDimensionList',
-              payload: {
-                modelId,
-              },
-            });
+            MrefreshDimensionList({ modelId });
           }}
           onCancel={() => {
             setCreateDimensionModalVisible(false);
@@ -1101,12 +1088,7 @@ const DomainManger: React.FC<Props> = ({ domainManger, dispatch }) => {
           onSubmit={() => {
             setCreateMetricModalVisible(false);
             updateGraphData();
-            dispatch({
-              type: 'domainManger/queryMetricList',
-              payload: {
-                modelId,
-              },
-            });
+            MrefreshMetricList({ modelId });
           }}
           onCancel={() => {
             setCreateMetricModalVisible(false);
@@ -1134,18 +1116,8 @@ const DomainManger: React.FC<Props> = ({ domainManger, dispatch }) => {
             setConfirmModalOpenState(false);
             updateGraphData();
             graphShowTypeState === SemanticNodeType.DIMENSION
-              ? dispatch({
-                  type: 'domainManger/queryDimensionList',
-                  payload: {
-                    modelId,
-                  },
-                })
-              : dispatch({
-                  type: 'domainManger/queryMetricList',
-                  payload: {
-                    modelId,
-                  },
-                });
+              ? MrefreshDimensionList({ modelId })
+              : MrefreshMetricList({ modelId });
           }}
           onCancelClick={() => {
             setConfirmModalOpenState(false);
@@ -1154,7 +1126,7 @@ const DomainManger: React.FC<Props> = ({ domainManger, dispatch }) => {
         />
       }
       <ModelRelationFormDrawer
-        domainId={domainManger.selectDomainId}
+        domainId={selectDomainId}
         nodeModel={nodeModel}
         relationData={currentRelationDataItem}
         onClose={() => {
@@ -1176,6 +1148,4 @@ const DomainManger: React.FC<Props> = ({ domainManger, dispatch }) => {
     </>
   );
 };
-export default connect(({ domainManger }: { domainManger: StateType }) => ({
-  domainManger,
-}))(DomainManger);
+export default SemanticGraph;

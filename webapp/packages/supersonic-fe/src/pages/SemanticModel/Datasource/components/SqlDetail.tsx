@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Button, Table, message, Tooltip, Space, Dropdown } from 'antd';
 import SplitPane from 'react-split-pane';
 import Pane from 'react-split-pane/lib/Pane';
-import { connect } from 'umi';
+import { useModel } from '@umijs/max';
 import sqlFormatter from 'sql-formatter';
 import {
   FullscreenOutlined,
@@ -19,7 +19,6 @@ import FullScreen from '@/components/FullScreen';
 import SqlEditor from '@/components/SqlEditor';
 import type { TaskResultItem, TaskResultColumn } from '../data';
 import { excuteSql } from '@/pages/SemanticModel/service';
-import type { Dispatch } from 'umi';
 import type { StateType } from '../../model';
 import SqlParams from './SqlParams';
 import styles from '../style.less';
@@ -37,8 +36,6 @@ export type DataSourceSubmitData = {
 };
 
 type IProps = {
-  domainManger: StateType;
-  dispatch: Dispatch;
   dataSourceItem: IDataSource.IDataSourceItem;
   onUpdateSql?: (sql: string) => void;
   sql?: string;
@@ -61,13 +58,14 @@ type DatabaseItem = {
 };
 
 const SqlDetail: React.FC<IProps> = ({
-  domainManger,
   dataSourceItem,
   onSubmitSuccess,
   sql = '',
   onUpdateSql,
 }) => {
-  const { databaseConfigList } = domainManger;
+  const databaseModel = useModel('SemanticModel.databaseData');
+  const { databaseConfigList } = databaseModel;
+
   const [resultTable, setResultTable] = useState<ResultTableItem[]>([]);
   const [resultTableLoading, setResultTableLoading] = useState(false);
   const [resultCols, setResultCols] = useState<ResultColItem[]>([]);
@@ -385,7 +383,6 @@ const SqlDetail: React.FC<IProps> = ({
   }, [resultTable, isSqlResFullScreen]);
 
   useEffect(() => {
-    // queryDatabaseConfig();
     const windowHeight = window.innerHeight;
     let size: ScreenSize = 'small';
     if (windowHeight > 1100) {
@@ -479,10 +476,7 @@ const SqlDetail: React.FC<IProps> = ({
                 onSelect={onSelect}
               />
             </div>
-            <div
-              className={variableCollapsed ? styles.hideSqlParams : styles.sqlParams}
-              // style={{ height: sqlEditorHeight }}
-            >
+            <div className={variableCollapsed ? styles.hideSqlParams : styles.sqlParams}>
               <SqlParams
                 value={sqlParams}
                 onChange={(params) => {
@@ -538,6 +532,4 @@ const SqlDetail: React.FC<IProps> = ({
   );
 };
 
-export default connect(({ domainManger }: { domainManger: StateType }) => ({
-  domainManger,
-}))(SqlDetail);
+export default SqlDetail;

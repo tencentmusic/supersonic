@@ -8,12 +8,12 @@ import { SemanticNodeType } from './enum';
 import SemanticGraph from './SemanticGraph';
 
 type Props = {
-  domainManger: StateType;
+
 };
 
-const SemanticGraphCanvas: React.FC<Props> = ({ domainManger }) => {
+const SemanticGraphCanvas: React.FC<Props> = ({  }) => {
   // const [graphShowType, setGraphShowType] = useState<SemanticNodeType>(SemanticNodeType.DIMENSION);
-  const { selectDomainId } = domainManger;
+
   return (
     <div className={styles.semanticGraphCanvas}>
       {/* <div className={styles.toolbar}>
@@ -46,6 +46,4 @@ const SemanticGraphCanvas: React.FC<Props> = ({ domainManger }) => {
   );
 };
 
-export default connect(({ domainManger }: { domainManger: StateType }) => ({
-  domainManger,
-}))(SemanticGraphCanvas);
+export default SemanticGraphCanvas;

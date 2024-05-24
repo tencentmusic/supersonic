@@ -1,11 +1,9 @@
 import type { ActionType, ProColumns } from '@ant-design/pro-components';
 import { ProTable } from '@ant-design/pro-components';
-import { message, Button, Space, Popconfirm, Input, Tag } from 'antd';
+import { message, Button, Space, Popconfirm } from 'antd';
 import React, { useRef, useState, useEffect } from 'react';
 import { StatusEnum } from '../../enum';
-import type { Dispatch } from 'umi';
-import { connect } from 'umi';
-import type { StateType } from '../../model';
+import { useModel } from '@umijs/max';
 import { deleteView, updateView, getViewList, getAllModelByDomainId } from '../../service';
 import ViewCreateFormModal from './ViewCreateFormModal';
 import moment from 'moment';
@@ -17,12 +15,12 @@ import ViewSearchFormModal from './ViewSearchFormModal';
 type Props = {
   disabledEdit?: boolean;
   modelList: ISemantic.IModelItem[];
-  dispatch: Dispatch;
-  domainManger: StateType;
 };
 
-const DataSetTable: React.FC<Props> = ({ disabledEdit = false, domainManger }) => {
-  const { selectDomainId } = domainManger;
+const DataSetTable: React.FC<Props> = ({ disabledEdit = false }) => {
+  const domainModel = useModel('SemanticModel.domainData');
+  const { selectDomainId } = domainModel;
+
   const [viewItem, setViewItem] = useState<ISemantic.IViewItem>();
   const [saveLoading, setSaveLoading] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
@@ -254,6 +252,4 @@ const DataSetTable: React.FC<Props> = ({ disabledEdit = false, domainManger }) =
     </>
   );
 };
-export default connect(({ domainManger }: { domainManger: StateType }) => ({
-  domainManger,
-}))(DataSetTable);
+export default DataSetTable;

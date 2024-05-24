@@ -8,15 +8,15 @@ import type {
   CancelStatic,
 } from 'umi-request';
 import { extend } from 'umi-request';
-import { history } from 'umi';
+import { history } from '@umijs/max';
+import queryString from 'query-string';
 import { AUTH_TOKEN_KEY } from '@/common/constants';
 
 export const TOKEN_KEY = AUTH_TOKEN_KEY;
 
 const authHeaderInterceptor = (url: string, options: RequestOptionsInit) => {
   const headers: any = {};
-  const { query } = history.location as any;
-
+  const query = queryString.parse(history.location.search) || {};
   const token = query[TOKEN_KEY] || localStorage.getItem(TOKEN_KEY);
   if (token) {
     headers.Authorization = `Bearer ${token}`;
@@ -31,12 +31,12 @@ const authHeaderInterceptor = (url: string, options: RequestOptionsInit) => {
 };
 
 const responseInterceptor = async (response: Response) => {
-  const redirect = response.headers.get('redirect'); // 若HEADER中含有REDIRECT说明后端想重定向
+  const redirect = response.headers?.get?.('redirect'); // 若HEADER中含有REDIRECT说明后端想重定向
   if (redirect === 'REDIRECT') {
     localStorage.removeItem(TOKEN_KEY);
     const win: any = window;
     // 将后端重定向的地址取出来,使用win.location.href去实现重定向的要求
-    const contextpath = response.headers.get('contextpath');
+    const contextpath = response.headers?.get?.('contextpath');
     win.location.href = contextpath;
   } else {
     try {

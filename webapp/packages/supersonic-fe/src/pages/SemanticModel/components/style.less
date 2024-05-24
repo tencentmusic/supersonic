@@ -13,7 +13,7 @@
     position: relative;
     .sider {
       flex: 0 0 auto;
-      width: 285px;
+      width: 250px;
       border-right: 5px solid #eee;
       position: relative;
       transition: all 0.2s,background 0s;
@@ -81,7 +81,7 @@
         }
       }
       .search {
-        width: 205px;
+        width: 175px;
         margin: 10px 0 10px 16px;
       }
     
@@ -235,7 +235,7 @@
   width: 100%;
   overflow: hidden;
   .searchContainer {
-    width: 280px;
+    width: 250px;
     padding:3px 0;
     border-bottom: 1px solid #eee;
   }
@@ -369,12 +369,12 @@
 
 .desc {
   margin: 0;
-  padding: 25px;
+  // padding: 25px;
   color: #667085;
   font-size: 14px;
-  border-bottom: 1px solid #eee;
-  border-top: 1px solid #eee;
-  margin-bottom: 10px;
+  // border-bottom: 1px solid #eee;
+  // border-top: 1px solid #eee;
+  // margin-bottom: 10px;
   .markerTag {
     color: #2499ef;
     font-size: 14px;
@@ -399,3 +399,89 @@
     display: flex;
   }
 }
+
+
+.infoCard {
+    min-height: 100%;
+    background-color: rgb(255, 255, 255);
+    color: rgb(38, 38, 38);
+    transition: box-shadow 300ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+    position: relative;
+    border: 1px solid rgb(230, 235, 241);
+    border-radius: 4px;
+    box-shadow: inherit;
+    .infoCardTitle {
+      display: flex;
+      border-bottom: 1px solid #e6ebf1;
+      padding: 20px 20px 20px 40px;
+      align-items: center;
+      color: rgb(38, 38, 38);
+      margin: 0px;
+      font-size: 16px;
+      font-weight: 600;
+      line-height: 1.57;
+      font-family: "tencentFont", sans-serif;
+    }
+    .infoCardContainer {
+      padding: 20px;
+      height: calc(100vh - 260px);
+      overflow: scroll;
+    }
+    .infoCardFooter {
+      border-top: 1px solid #e6ebf1;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      flex: 0 0 auto;
+      padding: 20px;
+      .infoCardFooterContainer {
+        box-sizing: border-box;
+        display: flex;
+        flex-flow: wrap;
+        // width: 100%;
+        justify-content: space-between;
+        align-items: center;
+      }
+    }
+}
+
+.supersonicForm {
+  padding: 0 20px;
+  :global {
+    .ant-input-search .ant-input-search-button {
+      height: 42px;
+    }
+    .ant-form-item .ant-form-item-label > label {
+      color:#262626;
+    }
+    .ant-form-item-label {
+      font-family: "tencentFont", sans-serif;
+    }
+    .ant-input {
+      padding: 9px 14px 9px 12px;
+    }
+    .ant-select {
+      &.ant-select-single {
+        height: auto;
+      }
+      &.ant-select-multiple {
+        .ant-select-selector {
+          padding: 6px 14px 6px 12px;
+         }
+      }
+    .ant-select-selector {
+      padding: 5px 14px 5px 12px;
+      .ant-select-selection-placeholder {
+        padding: 0px 8px 0px 8px;
+      }
+      .ant-select-selection-overflow-item {
+        .ant-select-selection-item {
+          color: rgb(22, 119, 255);
+          background-color: rgb(230, 244, 255);
+        }
+      }
+    }
+  }
+  }
+}
+

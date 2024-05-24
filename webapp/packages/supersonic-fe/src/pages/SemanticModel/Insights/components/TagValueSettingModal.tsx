@@ -1,28 +1,19 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Button, Modal, Space } from 'antd';
 import { KnowledgeConfigTypeEnum } from '../../enum';
 import { ISemantic } from '../../data';
 import DimensionValueSettingForm from '../../components/Entity/DimensionValueSettingForm';
-import { connect } from 'umi';
-import type { StateType } from '../../model';
 
 export type CreateFormProps = {
   onCancel: () => void;
   tagItem: ISemantic.ITagItem;
   open: boolean;
   onSubmit: (values?: any) => void;
-  domainManger: StateType;
 };
 
 type TableDataSource = { techName: string; bizName: string; alias?: string[] };
 
-const TagValueSettingModal: React.FC<CreateFormProps> = ({
-  onCancel,
-  open,
-  tagItem,
-  domainManger,
-  onSubmit,
-}) => {
+const TagValueSettingModal: React.FC<CreateFormProps> = ({ onCancel, open, tagItem, onSubmit }) => {
   const [tableDataSource, setTableDataSource] = useState<TableDataSource[]>([]);
 
   // const handleSubmit = async () => {
@@ -81,6 +72,4 @@ const TagValueSettingModal: React.FC<CreateFormProps> = ({
   );
 };
 
-export default connect(({ domainManger }: { domainManger: StateType }) => ({
-  domainManger,
-}))(TagValueSettingModal);
+export default TagValueSettingModal;

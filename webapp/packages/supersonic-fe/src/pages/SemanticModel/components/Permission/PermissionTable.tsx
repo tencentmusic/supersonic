@@ -2,24 +2,29 @@ import type { ActionType, ProColumns } from '@ant-design/pro-components';
 import { ProTable } from '@ant-design/pro-components';
 import { message, Button, Space, Popconfirm, Tooltip } from 'antd';
 import React, { useRef, useState, useEffect } from 'react';
-import type { Dispatch } from 'umi';
-import { connect } from 'umi';
-import type { StateType } from '../../model';
+import { useModel } from '@umijs/max';
 import { getGroupAuthInfo, removeGroupAuth } from '../../service';
 import { getOrganizationTree } from '@/components/SelectPartner/service';
 import { getAllUser } from '@/components/SelectTMEPerson/service';
 import PermissionCreateDrawer from './PermissionCreateDrawer';
 import { findDepartmentTree } from '@/pages/SemanticModel/utils';
 
-type Props = {
-  dispatch: Dispatch;
-  domainManger: StateType;
-};
+type Props = {};
 
-const PermissionTable: React.FC<Props> = ({ domainManger }) => {
+const PermissionTable: React.FC<Props> = ({}) => {
   const { APP_TARGET } = process.env;
   const isInner = APP_TARGET === 'inner';
-  const { dimensionList, metricList, selectModelId: modelId } = domainManger;
+
+  const modelModel = useModel('SemanticModel.modelData');
+  const dimensionModel = useModel('SemanticModel.dimensionData');
+  const metricModel = useModel('SemanticModel.metricData');
+  const allUserModel = useModel('allUserData');
+  const { allUserList, MrefreshUserList } = allUserModel;
+
+  const { selectModelId: modelId } = modelModel;
+  const { MdimensionList: dimensionList } = dimensionModel;
+  const { MmetricList: metricList } = metricModel;
+
   const [createModalVisible, setCreateModalVisible] = useState<boolean>(false);
 
   const [permissonData, setPermissonData] = useState<any>({});
@@ -59,16 +64,19 @@ const PermissionTable: React.FC<Props> = ({ domainManger }) => {
   };
 
   const queryTmePersonData = async () => {
-    const { code, data } = await getAllUser();
-    if (code === 200 || Number(code) === 0) {
-      setTmePerson(data);
-    }
+    const list = await MrefreshUserList();
+
+    setTmePerson(list);
   };
   useEffect(() => {
     if (isInner) {
       queryDepartmentData();
     }
-    queryTmePersonData();
+    if (Array.isArray(allUserList) && allUserList.length > 0) {
+      setTmePerson(allUserList);
+    } else {
+      queryTmePersonData();
+    }
   }, []);
 
   const columns: ProColumns[] = [
@@ -273,6 +281,4 @@ const PermissionTable: React.FC<Props> = ({ domainManger }) => {
     </>
   );
 };
-export default connect(({ domainManger }: { domainManger: StateType }) => ({
-  domainManger,
-}))(PermissionTable);
+export default PermissionTable;

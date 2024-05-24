@@ -1,8 +1,7 @@
 import { message, Tabs, Button, Space } from 'antd';
 import React, { useState, useEffect } from 'react';
 import { getMetricData, getDimensionList, getDrillDownDimension } from '../service';
-import { connect, useParams, history } from 'umi';
-import type { StateType } from '../model';
+import { useParams, history } from '@umijs/max';
 import styles from './style.less';
 import { ArrowLeftOutlined } from '@ant-design/icons';
 import MetricTrendSection from '@/pages/SemanticModel/Metric/components/MetricTrendSection';
@@ -159,6 +158,4 @@ const MetricDetail: React.FC<Props> = () => {
   );
 };
 
-export default connect(({ domainManger }: { domainManger: StateType }) => ({
-  domainManger,
-}))(MetricDetail);
+export default MetricDetail;

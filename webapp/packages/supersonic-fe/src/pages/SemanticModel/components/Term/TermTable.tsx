@@ -2,10 +2,9 @@ import type { ActionType, ProColumns } from '@ant-design/pro-components';
 import { ProTable } from '@ant-design/pro-components';
 import { message, Button, Space, Popconfirm, Typography } from 'antd';
 import React, { useRef, useState, useEffect } from 'react';
-import { connect } from 'umi';
-import type { StateType } from '../../model';
+import { useModel } from '@umijs/max';
 import { getTermList, saveOrUpdate, deleteTerm } from '../../service';
-
+import dayjs from 'dayjs';
 import styles from '../style.less';
 import { ISemantic } from '../../data';
 import { ColumnsConfig } from '../../components/TableColumnRender';
@@ -13,12 +12,11 @@ import TermCreateForm from './TermCreateForm';
 
 const { Paragraph } = Typography;
 
-type Props = {
-  domainManger: StateType;
-};
+type Props = {};
 
-const TermTable: React.FC<Props> = ({ domainManger }) => {
-  const { selectDomainId } = domainManger;
+const TermTable: React.FC<Props> = ({}) => {
+  const domainModel = useModel('SemanticModel.domainData');
+  const { selectDomainId } = domainModel;
   const [createModalVisible, setCreateModalVisible] = useState<boolean>(false);
   const [termItem, setTermItem] = useState<ISemantic.ITermItem>();
 
@@ -96,7 +94,7 @@ const TermTable: React.FC<Props> = ({ domainManger }) => {
       dataIndex: 'alias',
       title: '近义词',
       search: false,
-      render: (_: string[]) => {
+      render: (_) => {
         const alias = Array.isArray(_) ? _.join(',') : '-';
         return (
           <Paragraph ellipsis={{ tooltip: alias, rows: 3 }} style={{ width: 350, marginBottom: 0 }}>
@@ -107,10 +105,23 @@ const TermTable: React.FC<Props> = ({ domainManger }) => {
     },
 
     {
+      dataIndex: 'createdBy',
+      title: '创建人',
+      search: false,
+    },
+    {
+      dataIndex: 'updatedAt',
+      title: '更新时间',
+      search: false,
+      render: (value: any) => {
+        return value && value !== '-' ? dayjs(value).format('YYYY-MM-DD HH:mm:ss') : '-';
+      },
+    },
+
+    {
       dataIndex: 'description',
       title: '描述',
       search: false,
-      render: columnsConfig.description.render,
     },
 
     {
@@ -194,6 +205,4 @@ const TermTable: React.FC<Props> = ({ domainManger }) => {
     </>
   );
 };
-export default connect(({ domainManger }: { domainManger: StateType }) => ({
-  domainManger,
-}))(TermTable);
+export default TermTable;

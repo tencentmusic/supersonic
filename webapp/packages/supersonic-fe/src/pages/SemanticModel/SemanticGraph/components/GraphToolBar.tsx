@@ -2,11 +2,7 @@ import { Button, Space } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 import React from 'react';
 
-import { connect } from 'umi';
-import type { StateType } from '../../model';
-
 type Props = {
-  domainManger: StateType;
   onClick: (params?: { eventName?: string }) => void;
   [key: string]: any;
 };
@@ -61,6 +57,4 @@ const GraphToolBar: React.FC<Props> = ({ onClick }) => {
   );
 };
 
-export default connect(({ domainManger }: { domainManger: StateType }) => ({
-  domainManger,
-}))(GraphToolBar);
+export default GraphToolBar

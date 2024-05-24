@@ -1,12 +1,11 @@
-import { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
-import type { ForwardRefRenderFunction } from 'react';
+import { useState, useEffect } from 'react';
 import { Form, Switch, Space, Button, Tooltip, message, Select } from 'antd';
 import FormItemTitle from '@/components/FormHelper/FormItemTitle';
+import { useModel } from '@umijs/max';
 import { RedoOutlined, InfoCircleOutlined } from '@ant-design/icons';
 import DisabledWheelNumberInput from '@/components/DisabledWheelNumberInput';
 import { formLayout } from '@/components/FormHelper/utils';
-import { ProCard } from  '@ant-design/pro-components';
-import { connect } from 'umi';
+import { ProCard } from '@ant-design/pro-components';
 import {
   DictTaskState,
   KnowledgeConfigTypeEnum,
@@ -26,7 +25,6 @@ import {
 } from '../../service';
 import type { ISemantic } from '../../data';
 import type { StateType } from '../../model';
-import { isString } from 'lodash';
 import styles from '../style.less';
 import CommonEditList from '../../components/CommonEditList';
 
@@ -34,7 +32,6 @@ type Props = {
   dataItem: ISemantic.IDimensionItem | ISemantic.ITagItem;
   type?: KnowledgeConfigTypeEnum;
   onSubmit?: () => void;
-  domainManger: StateType;
 };
 
 const FormItem = Form.Item;
@@ -42,11 +39,10 @@ const FormItem = Form.Item;
 const DimensionValueSettingForm: React.FC<Props> = ({
   dataItem,
   type = KnowledgeConfigTypeEnum.DIMENSION,
-  domainManger,
 }) => {
   const [form] = Form.useForm();
-  const { selectDomainId } = domainManger;
-  const exchangeFields = ['blackList', 'whiteList'];
+  const domainModel = useModel('SemanticModel.domainData');
+  const { selectDomainId } = domainModel;
   const [dimensionVisible, setDimensionVisible] = useState<boolean>(false);
   const [taskItemState, setTaskItemState] = useState<ISemantic.IDictKnowledgeTaskItem>();
   const [saveLoading, setSaveLoading] = useState<boolean>(false);
@@ -484,6 +480,4 @@ const DimensionValueSettingForm: React.FC<Props> = ({
   );
 };
 
-export default connect(({ domainManger }: { domainManger: StateType }) => ({
-  domainManger,
-}))(DimensionValueSettingForm);
+export default DimensionValueSettingForm;

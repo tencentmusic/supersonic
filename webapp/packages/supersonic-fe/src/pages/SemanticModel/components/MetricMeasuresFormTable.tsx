@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Input, Space, Tag } from 'antd';
+import { Input, Space, Tag, Divider } from 'antd';
 import { ProTable } from '@ant-design/pro-components';
 import { ProCard } from '@ant-design/pro-components';
 import SqlEditor from '@/components/SqlEditor';
@@ -94,7 +94,7 @@ const MetricMeasuresFormTable: React.FC<Props> = ({
     {
       dataIndex: 'constraint',
       title: '限定条件',
-      width: 250,
+      width: 350,
       tooltip:
         '该限定条件用于在计算指标时限定口径，作用于度量，所用于过滤的维度必须在创建模型的时候被标记为日期或者维度，不需要加where关键字。比如：维度A="值1" and 维度B="值2"',
       render: (_: any, record: any) => {
@@ -103,6 +103,7 @@ const MetricMeasuresFormTable: React.FC<Props> = ({
           <TextArea
             placeholder="请输入限定条件"
             value={constraint}
+            style={{ height: 42 }}
             disabled={!selectedKeysMap[bizName]}
             onChange={(event) => {
               const { value } = event.target;
@@ -129,7 +130,7 @@ const MetricMeasuresFormTable: React.FC<Props> = ({
     {
       dataIndex: 'agg',
       title: '聚合函数',
-      width: 80,
+      width: 150,
     },
   ];
 
@@ -201,12 +202,13 @@ const MetricMeasuresFormTable: React.FC<Props> = ({
             },
           }}
           pagination={{ defaultPageSize: 10 }}
-          size="small"
+          // size="small"
           options={false}
           tableAlertRender={false}
-          scroll={{ y: 500 }}
+          scroll={{ y: 700 }}
           rowSelection={rowSelection}
         />
+        <Divider style={{ marginBottom: 0 }} />
         <ProCard
           title={<FormLabelRequire title="表达式" />}
           // tooltip="由于度量已自带聚合函数，因此通过度量创建指标时，表达式中无需再写聚合函数，如
