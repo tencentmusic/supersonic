@@ -1,4 +1,4 @@
-package com.tencent.supersonic.headless.core.chat.query.rule.tag;
+package com.tencent.supersonic.headless.core.chat.query.rule.detail;
 
 import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.common.pojo.enums.QueryType;
@@ -20,11 +20,11 @@ import static com.tencent.supersonic.headless.core.chat.query.rule.QueryMatchOpt
 import static com.tencent.supersonic.headless.core.chat.query.rule.QueryMatchOption.RequireNumberType.AT_LEAST;
 
 @Slf4j
-public abstract class TagSemanticQuery extends RuleSemanticQuery {
+public abstract class DetailSemanticQuery extends RuleSemanticQuery {
 
-    private static final Long TAG_MAX_RESULTS = 500L;
+    private static final Long DETAIL_MAX_RESULTS = 500L;
 
-    public TagSemanticQuery() {
+    public DetailSemanticQuery() {
         super();
         queryMatcher.addOption(ENTITY, REQUIRED, AT_LEAST, 1);
     }
@@ -39,8 +39,8 @@ public abstract class TagSemanticQuery extends RuleSemanticQuery {
     public void fillParseInfo(QueryContext queryContext, ChatContext chatContext) {
         super.fillParseInfo(queryContext, chatContext);
 
-        parseInfo.setQueryType(QueryType.TAG);
-        parseInfo.setLimit(TAG_MAX_RESULTS);
+        parseInfo.setQueryType(QueryType.DETAIL);
+        parseInfo.setLimit(DETAIL_MAX_RESULTS);
         if (parseInfo.getDateInfo() == null) {
             DataSetSchema dataSetSchema =
                     queryContext.getSemanticSchema().getDataSetSchemaMap().get(parseInfo.getDataSetId());
