@@ -1090,12 +1090,12 @@ MERGE INTO genre(g_name,rating,most_popular_in) VALUES ('现代',8,'孟加拉国
 MERGE INTO genre(g_name,rating,most_popular_in) VALUES ('蓝调',7,'加拿大');
 MERGE INTO genre(g_name,rating,most_popular_in) VALUES ('流行',9,'美国');
 
-MERGE INTO artist(artist_name,country,gender,g_name) VALUES ('Shrikanta','印度','男性','tagore');
-MERGE INTO artist(artist_name,country,gender,g_name) VALUES ('Prity','孟加拉国','女性','nazrul');
-MERGE INTO artist(artist_name,country,gender,g_name) VALUES ('Farida','孟加拉国','女性','民间');
-MERGE INTO artist(artist_name,country,gender,g_name) VALUES ('Topu','印度','女性','现代');
-MERGE INTO artist(artist_name,country,gender,g_name) VALUES ('Enrique','美国','男性','蓝调');
-MERGE INTO artist(artist_name,country,gender,g_name) VALUES ('Michel','英国','男性','流行');
+MERGE INTO artist(artist_name,citizenship,gender,g_name) VALUES ('Shrikanta','印度','男性','tagore');
+MERGE INTO artist(artist_name,citizenship,gender,g_name) VALUES ('Prity','孟加拉国','女性','nazrul');
+MERGE INTO artist(artist_name,citizenship,gender,g_name) VALUES ('Farida','孟加拉国','女性','民间');
+MERGE INTO artist(artist_name,citizenship,gender,g_name) VALUES ('Topu','印度','女性','现代');
+MERGE INTO artist(artist_name,citizenship,gender,g_name) VALUES ('Enrique','美国','男性','蓝调');
+MERGE INTO artist(artist_name,citizenship,gender,g_name) VALUES ('Michel','英国','男性','流行');
 
 MERGE INTO files(f_id,artist_name,file_size,duration,formats) VALUES (1,'Shrikanta','3.78 MB','3:45','mp4');
 MERGE INTO files(f_id,artist_name,file_size,duration,formats) VALUES (2,'Prity','4.12 MB','2:56','mp3');
