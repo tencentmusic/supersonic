@@ -6,6 +6,7 @@ import com.tencent.supersonic.headless.core.chat.knowledge.HanlpMapResult;
 import com.tencent.supersonic.headless.core.chat.knowledge.KnowledgeBaseService;
 import com.tencent.supersonic.headless.core.config.OptimizationConfig;
 import com.tencent.supersonic.headless.core.pojo.QueryContext;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -96,23 +97,27 @@ public class HanlpDictMatchStrategy extends BaseMatchStrategy<HanlpMapResult> {
             return parseResult;
         }).collect(Collectors.toCollection(LinkedHashSet::new));
 
-        // step5. take only M dimensionValue or N metric/dimension per rond.
+        // step5. take only M dimensionValue or N-M metric/dimension value per rond.
         List<HanlpMapResult> dimensionValues = hanlpMapResults.stream()
                 .filter(entry -> mapperHelper.existDimensionValues(entry.getNatures()))
                 .limit(optimizationConfig.getOneDetectionDimensionValueSize())
                 .collect(Collectors.toList());
 
         Integer oneDetectionSize = optimizationConfig.getOneDetectionSize();
-        List<HanlpMapResult> oneRoundResults = hanlpMapResults.stream().limit(oneDetectionSize)
-                .collect(Collectors.toList());
+        List<HanlpMapResult> oneRoundResults = new ArrayList<>();
 
-        // add the dimensionValue/term if it exists dimensionValue
+        // add the dimensionValue if it exists
         if (CollectionUtils.isNotEmpty(dimensionValues)) {
-            oneRoundResults = dimensionValues;
-            List<HanlpMapResult> termOneRoundResults = hanlpMapResults.stream()
-                    .filter(hanlpMapResult -> mapperHelper.existTerms(hanlpMapResult.getNatures()))
+            oneRoundResults.addAll(dimensionValues);
+        }
+        // fill the rest of the list with other results, excluding the dimensionValue if it was added
+        if (oneRoundResults.size() < oneDetectionSize) {
+            List<HanlpMapResult> additionalResults = hanlpMapResults.stream()
+                    .filter(entry -> !mapperHelper.existDimensionValues(entry.getNatures())
+                            || !oneRoundResults.contains(entry))
+                    .limit(oneDetectionSize - oneRoundResults.size())
                     .collect(Collectors.toList());
-            oneRoundResults.addAll(termOneRoundResults);
+            oneRoundResults.addAll(additionalResults);
         }
         // step6. select mapResul in one round
         selectResultInOneRound(existResults, oneRoundResults);
