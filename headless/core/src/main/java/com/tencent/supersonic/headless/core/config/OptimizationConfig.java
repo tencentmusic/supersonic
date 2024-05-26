@@ -16,9 +16,11 @@ public class OptimizationConfig {
 
     @Value("${s2.one.detection.size:8}")
     private Integer oneDetectionSize;
-
     @Value("${s2.one.detection.max.size:20}")
     private Integer oneDetectionMaxSize;
+
+    @Value("${s2.one.detection.dimensionValue.size:1}")
+    private Integer oneDetectionDimensionValueSize;
 
     @Value("${s2.metric.dimension.min.threshold:0.3}")
     private Double metricDimensionMinThresholdConfig;
