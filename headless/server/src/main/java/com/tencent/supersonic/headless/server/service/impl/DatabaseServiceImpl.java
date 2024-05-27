@@ -3,6 +3,10 @@ package com.tencent.supersonic.headless.server.service.impl;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
+import com.tencent.supersonic.common.pojo.Constants;
+import com.tencent.supersonic.common.pojo.Pair;
+import com.tencent.supersonic.common.pojo.QueryColumn;
+import com.tencent.supersonic.common.util.jsqlparser.SqlSelectHelper;
 import com.tencent.supersonic.headless.api.pojo.request.DatabaseReq;
 import com.tencent.supersonic.headless.api.pojo.request.SqlExecuteReq;
 import com.tencent.supersonic.headless.api.pojo.response.DatabaseResp;
@@ -23,11 +27,13 @@ import com.tencent.supersonic.headless.server.service.DatabaseService;
 import com.tencent.supersonic.headless.server.service.ModelService;
 import com.tencent.supersonic.headless.server.utils.DatabaseConverter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -128,12 +134,51 @@ public class DatabaseServiceImpl extends ServiceImpl<DatabaseDOMapper, DatabaseD
         checkPermission(databaseResp, user);
         String sql = sqlExecuteReq.getSql();
         sql = SqlVariableParseUtils.parse(sql, sqlExecuteReq.getSqlVariables(), Lists.newArrayList());
-        return executeSql(sql, databaseResp);
+        SemanticQueryResp semanticQueryResp = executeSql(sql, databaseResp);
+        fillColumnComment(sql, databaseResp, semanticQueryResp);
+        return semanticQueryResp;
     }
 
     @Override
     public SemanticQueryResp executeSql(String sql, DatabaseResp databaseResp) {
         return queryWithColumns(sql, DatabaseConverter.convert(databaseResp));
+    }
+
+    private void fillColumnComment(String sql, DatabaseResp databaseResp,
+                                   SemanticQueryResp semanticQueryResp) {
+        Pair<String, String> dbTableName = getDbTableName(sql, databaseResp);
+        String db = dbTableName.first;
+        String table = dbTableName.second;
+        if (StringUtils.isBlank(db) || StringUtils.isBlank(table)) {
+            return;
+        }
+        SemanticQueryResp columnsWithComment = getColumns(databaseResp, db, table);
+        Map<String, String> columnCommentMap = getColumnCommentMap(columnsWithComment.getResultList());
+        List<QueryColumn> columns = semanticQueryResp.getColumns();
+        for (QueryColumn column : columns) {
+            column.setComment(columnCommentMap.get(column.getNameEn()));
+        }
+    }
+
+    private Map<String, String> getColumnCommentMap(List<Map<String, Object>> resultList) {
+        Map<String, String> map = new HashMap<>();
+        for (Map<String, Object> result : resultList) {
+            map.put(String.valueOf(result.get("name")), String.valueOf(result.get("comment")));
+        }
+        return map;
+    }
+
+    private Pair<String, String> getDbTableName(String sql, DatabaseResp databaseResp) {
+        String dbTableName = SqlSelectHelper.getDbTableName(sql);
+        if (StringUtils.isBlank(dbTableName)) {
+            return Pair.pair("", "");
+        }
+        if (dbTableName.contains(Constants.DOT)) {
+            String db = dbTableName.split("\\.")[0];
+            String table = dbTableName.split("\\.")[1];
+            return Pair.pair(db, table);
+        }
+        return Pair.pair(databaseResp.getDatabase(), dbTableName);
     }
 
     @Override
