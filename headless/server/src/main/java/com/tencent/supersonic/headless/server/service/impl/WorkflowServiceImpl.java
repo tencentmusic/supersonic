@@ -64,7 +64,7 @@ public class WorkflowServiceImpl implements WorkflowService {
     public void performParsing(QueryContext queryCtx, ChatContext chatCtx) {
         semanticParsers.forEach(parser -> {
             parser.parse(queryCtx, chatCtx);
-            log.info("{} result:{}", parser.getClass().getSimpleName(), JsonUtil.toString(queryCtx));
+            log.debug("{} result:{}", parser.getClass().getSimpleName(), JsonUtil.toString(queryCtx));
         });
     }
 

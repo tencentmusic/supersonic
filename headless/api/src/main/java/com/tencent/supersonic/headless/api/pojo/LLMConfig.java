@@ -17,16 +17,14 @@ public class LLMConfig {
 
     private String modelName;
 
-    private Double temperature;
+    private Double temperature = 0.0d;
 
-    private Long timeOut;
+    private Long timeOut = 60L;
 
     public LLMConfig(String provider, String baseUrl, String apiKey, String modelName) {
         this.provider = provider;
         this.baseUrl = baseUrl;
         this.apiKey = apiKey;
         this.modelName = modelName;
-        this.temperature = 0.0d;
-        this.timeOut = 60L;
     }
 }

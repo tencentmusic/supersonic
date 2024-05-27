@@ -97,7 +97,7 @@ public class MetricServiceImpl implements MetricService {
 
     private DimensionService dimensionService;
 
-    private AliasGenerateHelper chatGptHelper;
+    private AliasGenerateHelper aliasGenerateHelper;
 
     private CollectService collectService;
 
@@ -111,7 +111,7 @@ public class MetricServiceImpl implements MetricService {
 
     public MetricServiceImpl(MetricRepository metricRepository,
             ModelService modelService,
-            AliasGenerateHelper chatGptHelper,
+            AliasGenerateHelper aliasGenerateHelper,
             CollectService collectService,
             DataSetService dataSetService,
             ApplicationEventPublisher eventPublisher,
@@ -120,7 +120,7 @@ public class MetricServiceImpl implements MetricService {
             @Lazy MetaDiscoveryService metaDiscoveryService) {
         this.metricRepository = metricRepository;
         this.modelService = modelService;
-        this.chatGptHelper = chatGptHelper;
+        this.aliasGenerateHelper = aliasGenerateHelper;
         this.eventPublisher = eventPublisher;
         this.collectService = collectService;
         this.dataSetService = dataSetService;
@@ -535,7 +535,7 @@ public class MetricServiceImpl implements MetricService {
     @Override
     public List<String> mockAlias(MetricBaseReq metricReq, String mockType, User user) {
 
-        String mockAlias = chatGptHelper.generateAlias(mockType, metricReq.getName(), metricReq.getBizName(), "",
+        String mockAlias = aliasGenerateHelper.generateAlias(mockType, metricReq.getName(), metricReq.getBizName(), "",
                 metricReq.getDescription(), !"".equals(metricReq.getDataFormatType()));
         return JSONObject.parseObject(mockAlias, new TypeReference<List<String>>() {
         });

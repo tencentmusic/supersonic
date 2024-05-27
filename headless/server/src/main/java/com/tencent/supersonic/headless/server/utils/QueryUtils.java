@@ -42,7 +42,7 @@ public class QueryUtils {
 
     private final Set<Pattern> patterns = new HashSet<>();
 
-    @Value("${query.optimizer.enable:true}")
+    @Value("${s2.query-optimizer.enable:true}")
     private Boolean optimizeEnable;
 
     @PostConstruct
