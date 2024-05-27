@@ -97,13 +97,13 @@ const LoginPage: React.FC = () => {
                   </Space>
                 </h3>
                 <Item name="name" rules={[{ required: true }]} label="">
-                  <Input size="large" placeholder="用户名: admin" prefix={<UserOutlined />} />
+                  <Input size="large" placeholder="用户名" prefix={<UserOutlined />} />
                 </Item>
                 <Item name="password" rules={[{ required: true }]} label="">
                   <Input
                     size="large"
                     type="password"
-                    placeholder="密码: admin"
+                    placeholder="密码"
                     onPressEnter={handleLogin}
                     prefix={<LockOutlined />}
                   />
