@@ -167,6 +167,11 @@
             <artifactId>xk-time</artifactId>
             <version>${xk.time.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.duckdb</groupId>
+            <artifactId>duckdb_jdbc</artifactId>
+            <version>${duckdb_jdbc.version}</version>
+        </dependency>
     </dependencies>
 
 
