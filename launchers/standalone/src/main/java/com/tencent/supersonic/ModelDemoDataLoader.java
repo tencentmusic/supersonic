@@ -388,7 +388,7 @@ public class ModelDemoDataLoader {
         dimensions.add(new Dim("活跃区域", "act_area",
                 DimensionType.categorical.name(), 1, 1));
         dimensions.add(new Dim("代表作", "song_name",
-                DimensionType.categorical.name(), 1));
+                DimensionType.categorical.name(), 1, 0));
         dimensions.add(new Dim("风格", "genre",
                 DimensionType.categorical.name(), 1, 1));
         modelDetail.setDimensions(dimensions);
@@ -409,11 +409,7 @@ public class ModelDemoDataLoader {
                 TagDefineType.DIMENSION);
         addTag(dimensionService.getDimension("act_area", singerModel.getId()).getId(),
                 TagDefineType.DIMENSION);
-        addTag(dimensionService.getDimension("song_name", singerModel.getId()).getId(),
-                TagDefineType.DIMENSION);
         addTag(dimensionService.getDimension("genre", singerModel.getId()).getId(),
-                TagDefineType.DIMENSION);
-        addTag(dimensionService.getDimension("singer_name", singerModel.getId()).getId(),
                 TagDefineType.DIMENSION);
         addTag(metricService.getMetric(singerModel.getId(), "js_play_cnt").getId(),
                 TagDefineType.METRIC);
