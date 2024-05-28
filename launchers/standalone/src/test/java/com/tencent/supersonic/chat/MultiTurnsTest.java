@@ -17,7 +17,6 @@ public class MultiTurnsTest extends BaseTest {
     @Test
     @Order(1)
     public void queryTest_01() throws Exception {
-        MockConfiguration.mockMetricAgent(agentService);
         QueryResult actualResult = submitMultiTurnChat("alice的访问次数",
                 DataUtils.metricAgentId, DataUtils.MULTI_TURNS_CHAT_ID);
 
@@ -44,7 +43,6 @@ public class MultiTurnsTest extends BaseTest {
     @Test
     @Order(2)
     public void queryTest_02() throws Exception {
-        MockConfiguration.mockMetricAgent(agentService);
         QueryResult actualResult = submitMultiTurnChat("停留时长呢", DataUtils.metricAgentId,
                 DataUtils.MULTI_TURNS_CHAT_ID);
 
@@ -69,7 +67,6 @@ public class MultiTurnsTest extends BaseTest {
     @Test
     @Order(3)
     public void queryTest_03() throws Exception {
-        MockConfiguration.mockMetricAgent(agentService);
         QueryResult actualResult = submitMultiTurnChat("lucy的如何", DataUtils.metricAgentId,
                 DataUtils.MULTI_TURNS_CHAT_ID);
 

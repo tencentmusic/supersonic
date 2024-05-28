@@ -66,6 +66,10 @@ s2:
     names: S2VisitsDemo,S2ArtistDemo
     enableLLM: true
 
+  schema:
+    cache:
+      enable: false
+
   langchain4j:
     #1.chat-model
     chat-model:

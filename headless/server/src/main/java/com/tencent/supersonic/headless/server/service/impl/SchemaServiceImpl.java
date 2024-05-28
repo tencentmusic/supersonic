@@ -53,6 +53,7 @@ import com.tencent.supersonic.headless.server.utils.StatUtils;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -91,6 +92,9 @@ public class SchemaServiceImpl implements SchemaService {
     private final TagMetaService tagService;
     private final TermService termService;
 
+    @Value("${s2.schema.cache.enable:true}")
+    private boolean schemaCacheEnable;
+
     public SchemaServiceImpl(ModelService modelService,
             DimensionService dimensionService,
             MetricService metricService,
@@ -112,7 +116,10 @@ public class SchemaServiceImpl implements SchemaService {
     @SneakyThrows
     @Override
     public List<DataSetSchemaResp> fetchDataSetSchema(DataSetFilterReq filter) {
-        List<DataSetSchemaResp> dataSetList = dataSetSchemaCache.getIfPresent(filter);
+        List<DataSetSchemaResp> dataSetList = Lists.newArrayList();
+        if (schemaCacheEnable) {
+            dataSetList = dataSetSchemaCache.getIfPresent(filter);
+        }
         if (CollectionUtils.isEmpty(dataSetList)) {
             dataSetList = buildDataSetSchema(filter);
             dataSetSchemaCache.put(filter, dataSetList);
@@ -376,7 +383,10 @@ public class SchemaServiceImpl implements SchemaService {
 
     @Override
     public SemanticSchemaResp fetchSemanticSchema(SchemaFilterReq schemaFilterReq) {
-        SemanticSchemaResp semanticSchemaResp = semanticSchemaCache.getIfPresent(schemaFilterReq);
+        SemanticSchemaResp semanticSchemaResp = null;
+        if (schemaCacheEnable) {
+            semanticSchemaResp = semanticSchemaCache.getIfPresent(schemaFilterReq);
+        }
         if (semanticSchemaResp == null) {
             semanticSchemaResp = buildSemanticSchema(schemaFilterReq);
             semanticSchemaCache.put(schemaFilterReq, semanticSchemaResp);

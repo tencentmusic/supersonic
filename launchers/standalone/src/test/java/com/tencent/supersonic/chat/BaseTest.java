@@ -13,7 +13,6 @@ import com.tencent.supersonic.headless.api.pojo.response.QueryResult;
 import com.tencent.supersonic.headless.api.pojo.response.QueryState;
 import com.tencent.supersonic.util.DataUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 
 import java.time.LocalDate;
 import java.util.Objects;
@@ -33,7 +32,7 @@ public class BaseTest extends BaseApplication {
     protected ChatService chatService;
     @Autowired
     protected ConfigService configService;
-    @MockBean
+    @Autowired
     protected AgentService agentService;
 
     protected QueryResult submitMultiTurnChat(String queryText, Integer agentId, Integer chatId) throws Exception {
