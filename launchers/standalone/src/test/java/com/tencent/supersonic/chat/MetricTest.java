@@ -29,7 +29,6 @@ public class MetricTest extends BaseTest {
 
     @Test
     public void testMetricFilter() throws Exception {
-        MockConfiguration.mockMetricAgent(agentService);
         QueryResult actualResult = submitNewChat("alice的访问次数", DataUtils.metricAgentId);
 
         QueryResult expectedResult = new QueryResult();
@@ -55,7 +54,6 @@ public class MetricTest extends BaseTest {
     @Test
     public void testMetricFilterWithAgent() {
         //agent only support METRIC_ENTITY, METRIC_FILTER
-        MockConfiguration.mockMetricAgent(agentService);
         ParseResp parseResp = submitParseWithAgent("alice的访问次数", DataUtils.getMetricAgent().getId());
         Assert.assertNotNull(parseResp.getSelectedParses());
         List<String> queryModes = parseResp.getSelectedParses().stream()
@@ -65,7 +63,6 @@ public class MetricTest extends BaseTest {
 
     @Test
     public void testMetricDomain() throws Exception {
-        MockConfiguration.mockMetricAgent(agentService);
         QueryResult actualResult = submitNewChat("超音数的访问次数", DataUtils.metricAgentId);
 
         QueryResult expectedResult = new QueryResult();
@@ -87,7 +84,6 @@ public class MetricTest extends BaseTest {
     @Test
     public void testMetricModelWithAgent() {
         //agent only support METRIC_ENTITY, METRIC_FILTER
-        MockConfiguration.mockMetricAgent(agentService);
         ParseResp parseResp = submitParseWithAgent("超音数的访问次数", DataUtils.getMetricAgent().getId());
         List<String> queryModes = parseResp.getSelectedParses().stream()
                 .map(SemanticParseInfo::getQueryMode).collect(Collectors.toList());
@@ -118,7 +114,6 @@ public class MetricTest extends BaseTest {
 
     @Test
     public void testMetricFilterCompare() throws Exception {
-        MockConfiguration.mockMetricAgent(agentService);
         QueryResult actualResult = submitNewChat("对比alice和lucy的访问次数", DataUtils.metricAgentId);
 
         QueryResult expectedResult = new QueryResult();
@@ -187,7 +182,6 @@ public class MetricTest extends BaseTest {
 
     @Test
     public void testMetricFilterTime() throws Exception {
-        MockConfiguration.mockMetricAgent(agentService);
         DateFormat format = new SimpleDateFormat("yyyy-mm-dd");
         DateFormat textFormat = new SimpleDateFormat("yyyy年mm月dd日");
         String dateStr = textFormat.format(format.parse(startDay));

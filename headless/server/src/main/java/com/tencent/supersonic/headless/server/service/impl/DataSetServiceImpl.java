@@ -3,8 +3,6 @@ package com.tencent.supersonic.headless.server.service.impl;
 import com.alibaba.fastjson2.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.common.pojo.enums.AuthType;
@@ -52,7 +50,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -60,9 +57,6 @@ import java.util.stream.Collectors;
 @Slf4j
 public class DataSetServiceImpl
         extends ServiceImpl<DataSetDOMapper, DataSetDO> implements DataSetService {
-
-    protected final Cache<MetaFilter, List<DataSetResp>> dataSetSchemaCache =
-            CacheBuilder.newBuilder().expireAfterWrite(30, TimeUnit.SECONDS).build();
 
     @Autowired
     private DomainService domainService;
@@ -249,11 +243,7 @@ public class DataSetServiceImpl
         MetaFilter metaFilter = new MetaFilter();
         metaFilter.setStatus(StatusEnum.ONLINE.getCode());
         metaFilter.setIds(dataSetIds);
-        List<DataSetResp> dataSetList = dataSetSchemaCache.getIfPresent(metaFilter);
-        if (CollectionUtils.isEmpty(dataSetList)) {
-            dataSetList = getDataSetList(metaFilter);
-            dataSetSchemaCache.put(metaFilter, dataSetList);
-        }
+        List<DataSetResp> dataSetList = getDataSetList(metaFilter);
         return dataSetList.stream()
                 .flatMap(
                         dataSetResp -> dataSetResp.getAllModels().stream().map(modelId ->

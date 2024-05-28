@@ -1,16 +1,17 @@
 package com.tencent.supersonic.headless;
 
-import static org.junit.Assert.assertThrows;
-
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.headless.api.pojo.request.QueryMetricReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
 import com.tencent.supersonic.headless.server.service.MetricService;
-import java.util.Arrays;
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.Arrays;
+
+import static org.junit.Assert.assertThrows;
 
 public class QueryByMetricTest extends BaseTest {
 
@@ -58,7 +59,7 @@ public class QueryByMetricTest extends BaseTest {
     public void testWithMetricAndDimensionIds() throws Exception {
         QueryMetricReq queryMetricReq = new QueryMetricReq();
         queryMetricReq.setDomainId(1L);
-        queryMetricReq.setMetricIds(Arrays.asList(1L, 4L));
+        queryMetricReq.setMetricIds(Arrays.asList(1L, 3L));
         queryMetricReq.setDimensionIds(Arrays.asList(1L, 2L));
         SemanticQueryResp queryResp = queryByMetric(queryMetricReq, User.getFakeUser());
         Assert.assertNotNull(queryResp.getResultList());
