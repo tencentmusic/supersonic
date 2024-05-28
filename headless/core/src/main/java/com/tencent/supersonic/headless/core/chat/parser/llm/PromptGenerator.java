@@ -115,8 +115,8 @@ public class PromptGenerator {
         String currentDataStr = "当前的日期是" + currentDate;
         String linkingListStr = String.join("，", priorLinkingList);
         String termStr = getTermStr(llmReq);
-        String questionAugmented = String.format("%s (补充信息:%s . %s . %s) (备注: %s)", llmReq.getQueryText(), linkingListStr,
-                currentDataStr, termStr, priorExts);
+        String questionAugmented = String.format("%s (补充信息:%s . %s . %s) (备注: %s)", llmReq.getQueryText(),
+                linkingListStr, currentDataStr, termStr, priorExts);
         return Pair.of(dbSchema, questionAugmented);
     }
 
@@ -125,7 +125,7 @@ public class PromptGenerator {
         StringBuilder termsDesc = new StringBuilder();
         if (!CollectionUtils.isEmpty(terms)) {
             termsDesc.append("相关业务术语：");
-            for (int idx = 0 ; idx < terms.size() ; idx++) {
+            for (int idx = 0; idx < terms.size(); idx++) {
                 LLMReq.Term term = terms.get(idx);
                 String name = term.getName();
                 String description = term.getDescription();

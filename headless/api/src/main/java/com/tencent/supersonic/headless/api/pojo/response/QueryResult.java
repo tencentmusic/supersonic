@@ -22,6 +22,7 @@ public class QueryResult {
     private SemanticParseInfo chatContext;
     private Object response;
     private List<Map<String, Object>> queryResults;
+    private String textResult;
     private Long queryTimeCost;
     private EntityInfo entityInfo;
     private List<SchemaElement> recommendedDimensions;
