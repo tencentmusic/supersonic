@@ -2,10 +2,11 @@ package com.tencent.supersonic.headless.core.utils;
 
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.headless.core.cache.QueryCache;
+import com.tencent.supersonic.headless.core.chat.parser.llm.DataSetResolver;
 import com.tencent.supersonic.headless.core.chat.parser.llm.JavaLLMProxy;
 import com.tencent.supersonic.headless.core.chat.parser.llm.LLMProxy;
-import com.tencent.supersonic.headless.core.chat.parser.llm.DataSetResolver;
 import com.tencent.supersonic.headless.core.executor.QueryExecutor;
+import com.tencent.supersonic.headless.core.executor.accelerator.QueryAccelerator;
 import com.tencent.supersonic.headless.core.parser.SqlParser;
 import com.tencent.supersonic.headless.core.parser.converter.HeadlessConverter;
 import com.tencent.supersonic.headless.core.planner.QueryOptimizer;
@@ -28,6 +29,7 @@ public class ComponentFactory {
     private static List<HeadlessConverter> headlessConverters = new ArrayList<>();
     private static Map<String, QueryOptimizer> queryOptimizers = new HashMap<>();
     private static List<QueryExecutor> queryExecutors = new ArrayList<>();
+    private static List<QueryAccelerator> queryAccelerators = new ArrayList<>();
     private static SqlParser sqlParser;
     private static QueryCache queryCache;
 
@@ -59,6 +61,13 @@ public class ComponentFactory {
             initQueryExecutors();
         }
         return queryExecutors;
+    }
+
+    public static List<QueryAccelerator> getQueryAccelerators() {
+        if (queryAccelerators.isEmpty()) {
+            initQueryAccelerators();
+        }
+        return queryAccelerators;
     }
 
     public static SqlParser getSqlParser() {
@@ -94,6 +103,11 @@ public class ComponentFactory {
     private static void initQueryExecutors() {
         //queryExecutors.add(ContextUtils.getContext().getBean("JdbcExecutor", JdbcExecutor.class));
         init(QueryExecutor.class, queryExecutors);
+    }
+
+    private static void initQueryAccelerators() {
+        //queryExecutors.add(ContextUtils.getContext().getBean("JdbcExecutor", JdbcExecutor.class));
+        init(QueryAccelerator.class, queryAccelerators);
     }
 
     private static void initSemanticConverter() {

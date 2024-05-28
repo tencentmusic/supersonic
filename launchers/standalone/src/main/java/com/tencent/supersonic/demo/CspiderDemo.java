@@ -1,4 +1,4 @@
-package com.tencent.supersonic;
+package com.tencent.supersonic.demo;
 
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
@@ -28,13 +28,7 @@ import com.tencent.supersonic.headless.api.pojo.request.DataSetReq;
 import com.tencent.supersonic.headless.api.pojo.response.DatabaseResp;
 import com.tencent.supersonic.headless.api.pojo.response.DomainResp;
 import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
-import com.tencent.supersonic.headless.server.service.DomainService;
-import com.tencent.supersonic.headless.server.service.MetricService;
-import com.tencent.supersonic.headless.server.service.ModelRelaService;
-import com.tencent.supersonic.headless.server.service.ModelService;
-import com.tencent.supersonic.headless.server.service.DataSetService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -44,31 +38,15 @@ import java.util.List;
 
 @Component
 @Slf4j
-public class BenchMarkDemoDataLoader {
-
-    private User user = User.getFakeUser();
-
-    @Autowired
-    private DomainService domainService;
-    @Autowired
-    private ModelService modelService;
-    @Autowired
-    private ModelRelaService modelRelaService;
-    @Autowired
-    private DataSetService viewService;
-    @Autowired
-    private MetricService metricService;
-    @Autowired
-    private ModelDemoDataLoader modelDemoDataLoader;
+public class CspiderDemo extends S2BaseDemo {
 
     public void doRun() {
         try {
-            DatabaseResp databaseResp = modelDemoDataLoader.tmpDatabaseResp;
             DomainResp s2Domain = addDomain();
-            ModelResp genreModelResp = addModel_1(s2Domain, databaseResp);
-            ModelResp artistModelResp = addModel_2(s2Domain, databaseResp);
-            ModelResp filesModelResp = addModel_3(s2Domain, databaseResp);
-            ModelResp songModelResp = addModel_4(s2Domain, databaseResp);
+            ModelResp genreModelResp = addModel_1(s2Domain, demoDatabaseResp);
+            ModelResp artistModelResp = addModel_2(s2Domain, demoDatabaseResp);
+            ModelResp filesModelResp = addModel_3(s2Domain, demoDatabaseResp);
+            ModelResp songModelResp = addModel_4(s2Domain, demoDatabaseResp);
             addDataSet_1(s2Domain);
             addModelRela_1(s2Domain, genreModelResp, artistModelResp);
             addModelRela_2(s2Domain, filesModelResp, artistModelResp);
@@ -79,7 +57,6 @@ public class BenchMarkDemoDataLoader {
         } catch (Exception e) {
             log.error("Failed to add bench mark demo data", e);
         }
-
     }
 
     public DomainResp addDomain() {
@@ -222,17 +199,17 @@ public class BenchMarkDemoDataLoader {
     }
 
     public void addDataSet_1(DomainResp s2Domain) {
-        DataSetReq viewReq = new DataSetReq();
-        viewReq.setName("cspider");
-        viewReq.setBizName("singer");
-        viewReq.setDomainId(s2Domain.getId());
-        viewReq.setDescription("包含cspider数据集相关标签和指标信息");
-        viewReq.setAdmins(Lists.newArrayList("admin"));
-        List<DataSetModelConfig> viewModelConfigs = modelDemoDataLoader.getDataSetModelConfigs(s2Domain.getId());
-        DataSetDetail viewDetail = new DataSetDetail();
-        viewDetail.setDataSetModelConfigs(viewModelConfigs);
-        viewReq.setDataSetDetail(viewDetail);
-        viewReq.setTypeEnum(TypeEnums.DATASET);
+        DataSetReq dataSetReq = new DataSetReq();
+        dataSetReq.setName("cspider");
+        dataSetReq.setBizName("singer");
+        dataSetReq.setDomainId(s2Domain.getId());
+        dataSetReq.setDescription("包含cspider数据集相关标签和指标信息");
+        dataSetReq.setAdmins(Lists.newArrayList("admin"));
+        List<DataSetModelConfig> viewModelConfigs = getDataSetModelConfigs(s2Domain.getId());
+        DataSetDetail dsDetail = new DataSetDetail();
+        dsDetail.setDataSetModelConfigs(viewModelConfigs);
+        dataSetReq.setDataSetDetail(dsDetail);
+        dataSetReq.setTypeEnum(TypeEnums.DATASET);
         QueryConfig queryConfig = new QueryConfig();
         TagTypeDefaultConfig tagTypeDefaultConfig = new TagTypeDefaultConfig();
         TimeDefaultConfig tagTimeDefaultConfig = new TimeDefaultConfig();
@@ -250,8 +227,8 @@ public class BenchMarkDemoDataLoader {
         metricTypeDefaultConfig.setTimeDefaultConfig(timeDefaultConfig);
         queryConfig.setTagTypeDefaultConfig(tagTypeDefaultConfig);
         queryConfig.setMetricTypeDefaultConfig(metricTypeDefaultConfig);
-        viewReq.setQueryConfig(queryConfig);
-        viewService.save(viewReq, User.getFakeUser());
+        dataSetReq.setQueryConfig(queryConfig);
+        dataSetService.save(dataSetReq, User.getFakeUser());
     }
 
     public void addModelRela_1(DomainResp s2Domain, ModelResp genreModelResp, ModelResp artistModelResp) {

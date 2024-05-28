@@ -69,7 +69,7 @@ public class DimensionServiceImpl implements DimensionService {
 
     private ModelService modelService;
 
-    private AliasGenerateHelper chatGptHelper;
+    private AliasGenerateHelper aliasGenerateHelper;
 
     private DatabaseService databaseService;
 
@@ -85,14 +85,14 @@ public class DimensionServiceImpl implements DimensionService {
 
     public DimensionServiceImpl(DimensionRepository dimensionRepository,
                                 ModelService modelService,
-                                AliasGenerateHelper chatGptHelper,
+                                AliasGenerateHelper aliasGenerateHelper,
                                 DatabaseService databaseService,
                                 ModelRelaService modelRelaService,
                                 DataSetService dataSetService,
                                 TagMetaService tagMetaService) {
         this.modelService = modelService;
         this.dimensionRepository = dimensionRepository;
-        this.chatGptHelper = chatGptHelper;
+        this.aliasGenerateHelper = aliasGenerateHelper;
         this.databaseService = databaseService;
         this.modelRelaService = modelRelaService;
         this.dataSetService = dataSetService;
@@ -341,8 +341,8 @@ public class DimensionServiceImpl implements DimensionService {
 
     @Override
     public List<String> mockAlias(DimensionReq dimensionReq, String mockType, User user) {
-        String mockAlias = chatGptHelper.generateAlias(mockType, dimensionReq.getName(), dimensionReq.getBizName(),
-                "", dimensionReq.getDescription(), false);
+        String mockAlias = aliasGenerateHelper.generateAlias(mockType, dimensionReq.getName(),
+                dimensionReq.getBizName(), "", dimensionReq.getDescription(), false);
         return JSONObject.parseObject(mockAlias, new TypeReference<List<String>>() {
         });
     }
@@ -363,7 +363,7 @@ public class DimensionServiceImpl implements DimensionService {
             String value = (String) stringObjectMap.get(dimensionReq.getBizName());
             valueList.add(value);
         }
-        String json = chatGptHelper.generateDimensionValueAlias(JSON.toJSONString(valueList));
+        String json = aliasGenerateHelper.generateDimensionValueAlias(JSON.toJSONString(valueList));
         log.info("return llm res is :{}", json);
 
         JSONObject jsonObject = JSON.parseObject(json);

@@ -6,12 +6,7 @@ import com.tencent.supersonic.headless.core.chat.knowledge.HanlpMapResult;
 import com.tencent.supersonic.headless.core.chat.knowledge.KnowledgeBaseService;
 import com.tencent.supersonic.headless.core.config.OptimizationConfig;
 import com.tencent.supersonic.headless.core.pojo.QueryContext;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -19,6 +14,11 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 /**
  * HanlpDictMatchStrategy uses <a href="https://www.hanlp.com/">HanLP</a> to
@@ -40,7 +40,7 @@ public class HanlpDictMatchStrategy extends BaseMatchStrategy<HanlpMapResult> {
 
     @Override
     public Map<MatchText, List<HanlpMapResult>> match(QueryContext queryContext, List<S2Term> terms,
-                                                      Set<Long> detectDataSetIds) {
+            Set<Long> detectDataSetIds) {
         String text = queryContext.getQueryText();
         if (Objects.isNull(terms) || StringUtils.isEmpty(text)) {
             return null;
@@ -62,7 +62,7 @@ public class HanlpDictMatchStrategy extends BaseMatchStrategy<HanlpMapResult> {
     }
 
     public void detectByStep(QueryContext queryContext, Set<HanlpMapResult> existResults, Set<Long> detectDataSetIds,
-                             String detectSegment, int offset) {
+            String detectSegment, int offset) {
         // step1. pre search
         Integer oneDetectionMaxSize = optimizationConfig.getOneDetectionMaxSize();
         LinkedHashSet<HanlpMapResult> hanlpMapResults = knowledgeBaseService.prefixSearch(detectSegment,
@@ -89,7 +89,7 @@ public class HanlpDictMatchStrategy extends BaseMatchStrategy<HanlpMapResult> {
                 .filter(term -> CollectionUtils.isNotEmpty(term.getNatures()))
                 .collect(Collectors.toCollection(LinkedHashSet::new));
 
-        log.info("detectSegment:{},after isSimilarity parseResults:{}", detectSegment, hanlpMapResults);
+        log.debug("detectSegment:{},after isSimilarity parseResults:{}", detectSegment, hanlpMapResults);
 
         hanlpMapResults = hanlpMapResults.stream().map(parseResult -> {
             parseResult.setOffset(offset);
@@ -97,23 +97,27 @@ public class HanlpDictMatchStrategy extends BaseMatchStrategy<HanlpMapResult> {
             return parseResult;
         }).collect(Collectors.toCollection(LinkedHashSet::new));
 
-        // step5. take only one dimension or 10 metric/dimension value per rond.
-        List<HanlpMapResult> dimensionMetrics = hanlpMapResults.stream()
+        // step5. take only M dimensionValue or N-M metric/dimension value per rond.
+        List<HanlpMapResult> dimensionValues = hanlpMapResults.stream()
                 .filter(entry -> mapperHelper.existDimensionValues(entry.getNatures()))
-                .collect(Collectors.toList())
-                .stream()
-                .limit(1)
+                .limit(optimizationConfig.getOneDetectionDimensionValueSize())
                 .collect(Collectors.toList());
 
         Integer oneDetectionSize = optimizationConfig.getOneDetectionSize();
-        List<HanlpMapResult> oneRoundResults = hanlpMapResults.stream().limit(oneDetectionSize)
-                .collect(Collectors.toList());
-        if (CollectionUtils.isNotEmpty(dimensionMetrics)) {
-            oneRoundResults = dimensionMetrics;
-            List<HanlpMapResult> termOneRoundResults = hanlpMapResults.stream()
-                    .filter(hanlpMapResult -> mapperHelper.existTerms(hanlpMapResult.getNatures()))
+        List<HanlpMapResult> oneRoundResults = new ArrayList<>();
+
+        // add the dimensionValue if it exists
+        if (CollectionUtils.isNotEmpty(dimensionValues)) {
+            oneRoundResults.addAll(dimensionValues);
+        }
+        // fill the rest of the list with other results, excluding the dimensionValue if it was added
+        if (oneRoundResults.size() < oneDetectionSize) {
+            List<HanlpMapResult> additionalResults = hanlpMapResults.stream()
+                    .filter(entry -> !mapperHelper.existDimensionValues(entry.getNatures())
+                            || !oneRoundResults.contains(entry))
+                    .limit(oneDetectionSize - oneRoundResults.size())
                     .collect(Collectors.toList());
-            oneRoundResults.addAll(termOneRoundResults);
+            oneRoundResults.addAll(additionalResults);
         }
         // step6. select mapResul in one round
         selectResultInOneRound(existResults, oneRoundResults);
