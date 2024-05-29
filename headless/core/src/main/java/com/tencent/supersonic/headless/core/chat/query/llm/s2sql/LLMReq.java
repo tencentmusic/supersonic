@@ -1,6 +1,7 @@
 package com.tencent.supersonic.headless.core.chat.query.llm.s2sql;
 
 import com.fasterxml.jackson.annotation.JsonValue;
+import com.google.common.collect.Lists;
 import com.tencent.supersonic.headless.api.pojo.LLMConfig;
 import lombok.Data;
 
@@ -45,12 +46,25 @@ public class LLMReq {
 
         private List<String> fieldNameList;
 
+        private List<Term> terms;
+
     }
 
     @Data
     public static class FilterCondition {
 
         private String tableName;
+    }
+
+    @Data
+    public static class Term {
+
+        private String name;
+
+        private String description;
+
+        private List<String> alias = Lists.newArrayList();
+
     }
 
     public enum SqlGenType {

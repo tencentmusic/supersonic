@@ -82,6 +82,7 @@ public class LLMRequestService {
 
         fieldNameList.add(TimeDimensionEnum.DAY.getChName());
         llmSchema.setFieldNameList(fieldNameList);
+        llmSchema.setTerms(getTerms(queryCtx, dataSetId));
         llmReq.setSchema(llmSchema);
 
         List<ElementValue> linking = new ArrayList<>();
@@ -113,6 +114,24 @@ public class LLMRequestService {
 
         results.addAll(fieldNameList);
         return new ArrayList<>(results);
+    }
+
+    protected List<LLMReq.Term> getTerms(QueryContext queryCtx, Long dataSetId) {
+        List<SchemaElementMatch> matchedElements = queryCtx.getMapInfo().getMatchedElements(dataSetId);
+        if (CollectionUtils.isEmpty(matchedElements)) {
+            return new ArrayList<>();
+        }
+        return matchedElements.stream()
+                .filter(schemaElementMatch -> {
+                    SchemaElementType elementType = schemaElementMatch.getElement().getType();
+                    return SchemaElementType.TERM.equals(elementType);
+                }).map(schemaElementMatch -> {
+                    LLMReq.Term term = new LLMReq.Term();
+                    term.setName(schemaElementMatch.getElement().getName());
+                    term.setDescription(schemaElementMatch.getElement().getDescription());
+                    term.setAlias(schemaElementMatch.getElement().getAlias());
+                    return term;
+                }).collect(Collectors.toList());
     }
 
     private String getPriorExts(QueryContext queryContext, List<String> fieldNameList) {
