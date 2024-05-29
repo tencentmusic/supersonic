@@ -59,6 +59,7 @@ async def query2sql(query_body: Mapping[str, Any]):
     dataset_name = schema['dataSetName']
     fields_list = schema['fieldNameList']
     prior_schema_links = {item['fieldValue']:item['fieldName'] for item in linking}
+    terms_list = schema['terms']
 
     resp = await text2sql_agent_router.async_query2sql(question=query_text, filter_condition=filter_condition, 
                                             model_name=dataset_name, fields_list=fields_list,
