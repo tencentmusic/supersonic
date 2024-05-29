@@ -63,6 +63,11 @@ public class DuSQLDemo extends S2BaseDemo {
 
     }
 
+    @Override
+    boolean checkNeedToRun() {
+        return false;
+    }
+
     public void addDomain() {
         DomainReq domainReq = new DomainReq();
         domainReq.setName("DuSQL_互联网企业");

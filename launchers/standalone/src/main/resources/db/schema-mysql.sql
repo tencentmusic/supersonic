@@ -565,4 +565,4 @@ CREATE TABLE IF NOT EXISTS `s2_term` (
     `updated_at` datetime DEFAULT NULL ,
     `updated_by` varchar(100) DEFAULT NULL ,
     PRIMARY KEY (`id`)
-);
+) ENGINE = InnoDB DEFAULT CHARSET = utf8 COMMENT ='术语表';
