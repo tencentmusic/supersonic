@@ -644,6 +644,7 @@ public class SqlReplaceHelper {
         for (int i = 0; i < selectItemList.size(); i++) {
             if (!Objects.isNull(selectItemList.get(i).getAlias())) {
                 map.put(selectItemList.get(i).getAlias().getName(), selectItemList.get(i).getExpression());
+                selectItemList.get(i).setAlias(null);
             }
         }
         for (OrderByElement orderByElement : orderByElementList) {

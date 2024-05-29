@@ -28,6 +28,9 @@ public class SelectCorrector extends BaseSemanticCorrector {
             return;
         }
         addFieldsToSelect(semanticParseInfo, correctS2SQL);
-        semanticParseInfo.getSqlInfo().setCorrectS2SQL(SqlReplaceHelper.dealAliasToOrderBy(correctS2SQL));
+        log.info("correctS2SQL:{}", correctS2SQL);
+        String querySql = SqlReplaceHelper.dealAliasToOrderBy(correctS2SQL);
+        log.info("querySql:{}", querySql);
+        semanticParseInfo.getSqlInfo().setCorrectS2SQL(querySql);
     }
 }
