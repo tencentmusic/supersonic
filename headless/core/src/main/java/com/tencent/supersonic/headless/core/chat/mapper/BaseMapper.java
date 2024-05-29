@@ -46,6 +46,7 @@ public abstract class BaseMapper implements SchemaMapper {
 
     private void filter(QueryContext queryContext) {
         filterByDataSetId(queryContext);
+        filterTermByDetectWordLen(queryContext);
         switch (queryContext.getQueryDataType()) {
             case TAG:
                 filterByQueryDataType(queryContext, element -> !(element.getIsTag() > 0));
@@ -75,6 +76,22 @@ public abstract class BaseMapper implements SchemaMapper {
         for (Long dataSetId : dataSetIdInMapInfo) {
             if (!dataSetIds.contains(dataSetId)) {
                 queryContext.getMapInfo().getDataSetElementMatches().remove(dataSetId);
+            }
+        }
+    }
+
+    private static void filterTermByDetectWordLen(QueryContext queryContext) {
+        Map<Long, List<SchemaElementMatch>> dataSetElementMatches =
+                queryContext.getMapInfo().getDataSetElementMatches();
+        for (Map.Entry<Long, List<SchemaElementMatch>> entry : dataSetElementMatches.entrySet()) {
+            List<SchemaElementMatch> value = entry.getValue();
+            if (!CollectionUtils.isEmpty(value)) {
+                value.removeIf(schemaElementMatch -> {
+                    if (!SchemaElementType.TERM.equals(schemaElementMatch.getElement().getType())) {
+                        return false;
+                    }
+                    return StringUtils.length(schemaElementMatch.getDetectWord()) <= 1;
+                });
             }
         }
     }
