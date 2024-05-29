@@ -3,14 +3,16 @@ package com.tencent.supersonic.headless.core.chat.parser.llm;
 import com.tencent.supersonic.headless.core.chat.query.llm.s2sql.LLMReq;
 import com.tencent.supersonic.headless.core.chat.query.llm.s2sql.LLMReq.ElementValue;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
-import java.util.List;
 import java.util.ArrayList;
-import java.util.Map;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 @Component
 @Slf4j
@@ -112,9 +114,31 @@ public class PromptGenerator {
         }
         String currentDataStr = "当前的日期是" + currentDate;
         String linkingListStr = String.join("，", priorLinkingList);
-        String questionAugmented = String.format("%s (补充信息:%s 。 %s) (备注: %s)", llmReq.getQueryText(), linkingListStr,
-                currentDataStr, priorExts);
+        String termStr = getTermStr(llmReq);
+        String questionAugmented = String.format("%s (补充信息:%s . %s . %s) (备注: %s)", llmReq.getQueryText(), linkingListStr,
+                currentDataStr, termStr, priorExts);
         return Pair.of(dbSchema, questionAugmented);
+    }
+
+    private String getTermStr(LLMReq llmReq) {
+        List<LLMReq.Term> terms = llmReq.getSchema().getTerms();
+        StringBuilder termsDesc = new StringBuilder();
+        if (!CollectionUtils.isEmpty(terms)) {
+            termsDesc.append("相关业务术语：");
+            for (int idx = 0 ; idx < terms.size() ; idx++) {
+                LLMReq.Term term = terms.get(idx);
+                String name = term.getName();
+                String description = term.getDescription();
+                List<String> alias = term.getAlias();
+                String descPart = StringUtils.isBlank(description) ? "" : String.format("，它通常是指<%s>", description);
+                String aliasPart = CollectionUtils.isEmpty(alias) ? "" : String.format("，类似的表达还有%s", alias);
+                termsDesc.append(String.format("%d.<%s>是业务术语%s%s；", idx + 1, name, descPart, aliasPart));
+            }
+            if (termsDesc.length() > 0) {
+                termsDesc.setLength(termsDesc.length() - 1);
+            }
+        }
+        return termsDesc.toString();
     }
 
     public List<String> generateSqlPromptPool(LLMReq llmReq, List<String> schemaLinkStrPool,
