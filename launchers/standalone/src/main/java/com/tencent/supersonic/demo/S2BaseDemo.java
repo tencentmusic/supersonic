@@ -89,15 +89,23 @@ public abstract class S2BaseDemo implements CommandLineRunner {
     protected boolean demoEnableLlm;
 
     public void run(String... args) {
-        demoDatabaseResp = addDatabase();
+        demoDatabaseResp = addDatabaseIfNotExist();
         if (demoList != null && demoList.contains(getClass().getSimpleName())) {
-            doRun();
+            if (checkNeedToRun()) {
+                doRun();
+            }
         }
     }
 
     abstract void doRun();
 
-    protected DatabaseResp addDatabase() {
+    abstract boolean checkNeedToRun();
+
+    protected DatabaseResp addDatabaseIfNotExist() {
+        List<DatabaseResp> databaseList = databaseService.getDatabaseList(User.getFakeUser());
+        if (!CollectionUtils.isEmpty(databaseList)) {
+            return databaseList.get(0);
+        }
         String url = dataSourceProperties.getUrl();
         DatabaseReq databaseReq = new DatabaseReq();
         databaseReq.setName("数据实例");

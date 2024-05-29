@@ -123,6 +123,18 @@ public class S2VisitsDemo extends S2BaseDemo {
         }
     }
 
+    @Override
+    boolean checkNeedToRun() {
+        List<DomainResp> domainList = domainService.getDomainList();
+        for (DomainResp domainResp : domainList) {
+            if (domainResp.getBizName().equalsIgnoreCase("supersonic")) {
+                log.info("Already exist domain:supersonic, no need to run demo");
+                return false;
+            }
+        }
+        return true;
+    }
+
     public void addSampleChats(Integer agentId) throws Exception {
         Long chatId = chatManageService.addChat(user, "样例对话1", agentId);
 
