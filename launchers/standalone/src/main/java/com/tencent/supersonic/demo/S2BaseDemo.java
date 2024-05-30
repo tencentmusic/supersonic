@@ -23,6 +23,7 @@ import com.tencent.supersonic.headless.api.pojo.response.MetricResp;
 import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
 import com.tencent.supersonic.headless.api.pojo.response.ParseResp;
 import com.tencent.supersonic.headless.server.pojo.MetaFilter;
+import com.tencent.supersonic.headless.server.service.CanvasService;
 import com.tencent.supersonic.headless.server.service.DataSetService;
 import com.tencent.supersonic.headless.server.service.DatabaseService;
 import com.tencent.supersonic.headless.server.service.DimensionService;
@@ -83,6 +84,8 @@ public abstract class S2BaseDemo implements CommandLineRunner {
     protected AgentService agentService;
     @Autowired
     protected SysParameterService sysParameterService;
+    @Autowired
+    protected CanvasService canvasService;
     @Value("${s2.demo.names:S2VisitsDemo}")
     protected List<String> demoList;
     @Value("${s2.demo.enableLLM:true}")

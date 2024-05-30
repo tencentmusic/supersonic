@@ -10,12 +10,10 @@ import com.tencent.supersonic.headless.api.pojo.request.DomainReq;
 import com.tencent.supersonic.headless.api.pojo.request.DomainUpdateReq;
 import com.tencent.supersonic.headless.api.pojo.response.DomainResp;
 import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
-import com.tencent.supersonic.headless.api.pojo.response.DataSetResp;
 import com.tencent.supersonic.headless.server.persistence.dataobject.DomainDO;
 import com.tencent.supersonic.headless.server.persistence.repository.DomainRepository;
 import com.tencent.supersonic.headless.server.service.DomainService;
 import com.tencent.supersonic.headless.server.service.ModelService;
-import com.tencent.supersonic.headless.server.service.DataSetService;
 import com.tencent.supersonic.headless.server.utils.DomainConvert;
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.util.Sets;
@@ -43,17 +41,13 @@ public class DomainServiceImpl implements DomainService {
     private final DomainRepository domainRepository;
     private final ModelService modelService;
     private final UserService userService;
-    private final DataSetService dataSetService;
-
 
     public DomainServiceImpl(DomainRepository domainRepository,
                              @Lazy ModelService modelService,
-                             UserService userService,
-                             @Lazy DataSetService dataSetService) {
+                             UserService userService) {
         this.domainRepository = domainRepository;
         this.modelService = modelService;
         this.userService = userService;
-        this.dataSetService = dataSetService;
     }
 
     @Override
@@ -111,11 +105,6 @@ public class DomainServiceImpl implements DomainService {
         List<Long> domainIdsFromModel = modelResps.stream().map(ModelResp::getDomainId).collect(Collectors.toList());
         if (!CollectionUtils.isEmpty(modelResps)) {
             domainWithAuthAll.addAll(getParentDomain(domainIdsFromModel));
-        }
-        List<DataSetResp> dataSetResps = dataSetService.getDataSets(user);
-        if (!CollectionUtils.isEmpty(dataSetResps)) {
-            List<Long> domainIds = dataSetResps.stream().map(DataSetResp::getDomainId).collect(Collectors.toList());
-            domainWithAuthAll.addAll(getParentDomain(domainIds));
         }
         for (DomainResp domainResp : domainWithAuthAll) {
             if (domainIdsFromModel.contains(domainResp.getId())) {
