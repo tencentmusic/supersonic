@@ -7,7 +7,7 @@ import routes from './routes';
 import dayjs from 'dayjs';
 const { REACT_APP_ENV = 'dev', RUN_TYPE } = process.env;
 
-const publicPath = '/webapp/';
+const publicPath = '/';
 import ENV_CONFIG from './envConfig';
 
 export default defineConfig({
@@ -150,7 +150,7 @@ export default defineConfig({
    */
   headScripts: [
     // 解决首次加载时白屏的问题
-    { src: '/webapp/scripts/loading.js', async: true },
+    { src: '/scripts/loading.js', async: true },
   ],
 
   //================ pro 插件配置 =================
