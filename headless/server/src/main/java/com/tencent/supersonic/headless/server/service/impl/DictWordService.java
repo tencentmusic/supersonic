@@ -5,6 +5,7 @@ import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
 import com.tencent.supersonic.headless.api.pojo.SemanticSchema;
 import com.tencent.supersonic.headless.core.chat.knowledge.DictWord;
+import com.tencent.supersonic.headless.core.chat.knowledge.KnowledgeBaseService;
 import com.tencent.supersonic.headless.core.chat.knowledge.builder.WordBuilderFactory;
 import com.tencent.supersonic.headless.server.service.SchemaService;
 import lombok.extern.slf4j.Slf4j;
@@ -20,12 +21,32 @@ import java.util.stream.Collectors;
 
 @Service
 @Slf4j
-public class WordService {
+public class DictWordService {
 
     @Autowired
     private SchemaService schemaService;
+    @Autowired
+    private KnowledgeBaseService knowledgeBaseService;
 
     private List<DictWord> preDictWords = new ArrayList<>();
+
+    public void loadDictWord() {
+        List<DictWord> dictWords = getAllDictWords();
+        setPreDictWords(dictWords);
+        knowledgeBaseService.reloadAllData(dictWords);
+    }
+
+    public void reloadDictWord() {
+        List<DictWord> dictWords = getAllDictWords();
+        List<DictWord> preDictWords = getPreDictWords();
+        if (org.apache.commons.collections.CollectionUtils.isEqualCollection(dictWords, preDictWords)) {
+            log.debug("dictWords has not changed, reloadKnowledge end");
+            return;
+        }
+        log.info("dictWords has changed");
+        setPreDictWords(dictWords);
+        knowledgeBaseService.updateOnlineKnowledge(getAllDictWords());
+    }
 
     public List<DictWord> getAllDictWords() {
         SemanticSchema semanticSchema = new SemanticSchema(schemaService.getDataSetSchema());

@@ -13,7 +13,6 @@ import com.tencent.supersonic.chat.server.agent.MultiTurnConfig;
 import com.tencent.supersonic.chat.server.agent.RuleParserTool;
 import com.tencent.supersonic.chat.server.plugin.Plugin;
 import com.tencent.supersonic.chat.server.plugin.PluginParseConfig;
-import com.tencent.supersonic.chat.server.plugin.build.ParamOption;
 import com.tencent.supersonic.chat.server.plugin.build.WebBase;
 import com.tencent.supersonic.common.pojo.JoinCondition;
 import com.tencent.supersonic.common.pojo.ModelRela;
@@ -111,8 +110,11 @@ public class S2VisitsDemo extends S2BaseDemo {
             //create terms and plugin
             addTerm(s2Domain);
             addTerm_1(s2Domain);
-            addPlugin(s2DataSet, userDimension, userModel);
+            addPlugin(s2DataSet);
             addSysParameter();
+
+            //load dict word
+            loadDictWord();
 
             //create agent
             Integer agentId = addAgent(s2DataSet.getId());
@@ -531,8 +533,7 @@ public class S2VisitsDemo extends S2BaseDemo {
         authService.addOrUpdateAuthGroup(authGroupReq);
     }
 
-    private void addPlugin(DataSetResp s2DataSet, DimensionResp userDimension,
-                           ModelResp userModel) {
+    private void addPlugin(DataSetResp s2DataSet) {
         Plugin plugin1 = new Plugin();
         plugin1.setType("WEB_PAGE");
         plugin1.setDataSetList(Arrays.asList(s2DataSet.getId()));
@@ -545,13 +546,7 @@ public class S2VisitsDemo extends S2BaseDemo {
         plugin1.setParseModeConfig(JSONObject.toJSONString(pluginParseConfig));
         WebBase webBase = new WebBase();
         webBase.setUrl("www.yourbi.com");
-        ParamOption paramOption = new ParamOption();
-        paramOption.setKey("name");
-        paramOption.setParamType(ParamOption.ParamType.SEMANTIC);
-        paramOption.setElementId(userDimension.getId());
-        paramOption.setModelId(userModel.getId());
-        List<ParamOption> paramOptions = Arrays.asList(paramOption);
-        webBase.setParamOptions(paramOptions);
+        webBase.setParamOptions(Lists.newArrayList());
         plugin1.setConfig(JsonUtil.toString(webBase));
         pluginService.createPlugin(plugin1, user);
     }
@@ -563,6 +558,10 @@ public class S2VisitsDemo extends S2BaseDemo {
         tagObjectReq.setBizName("user");
         User user = User.getFakeUser();
         return tagObjectService.create(tagObjectReq, user);
+    }
+
+    private void loadDictWord() {
+        dictWordService.loadDictWord();
     }
 
 }

@@ -34,6 +34,7 @@ import com.tencent.supersonic.headless.server.service.ModelService;
 import com.tencent.supersonic.headless.server.service.TagMetaService;
 import com.tencent.supersonic.headless.server.service.TagObjectService;
 import com.tencent.supersonic.headless.server.service.TermService;
+import com.tencent.supersonic.headless.server.service.impl.DictWordService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -86,6 +87,8 @@ public abstract class S2BaseDemo implements CommandLineRunner {
     protected SysParameterService sysParameterService;
     @Autowired
     protected CanvasService canvasService;
+    @Autowired
+    protected DictWordService dictWordService;
     @Value("${s2.demo.names:S2VisitsDemo}")
     protected List<String> demoList;
     @Value("${s2.demo.enableLLM:true}")
