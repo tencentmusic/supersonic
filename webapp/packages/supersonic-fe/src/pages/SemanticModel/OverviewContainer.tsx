@@ -5,7 +5,7 @@ import DomainListTree from './components/DomainList';
 import styles from './components/style.less';
 import { LeftOutlined, RightOutlined } from '@ant-design/icons';
 import { ISemantic } from './data';
-import { getDomainList, getModelList } from './service';
+import { getDomainList } from './service';
 import DomainManagerTab from './components/DomainManagerTab';
 
 type Props = {
@@ -33,7 +33,6 @@ const OverviewContainer: React.FC<Props> = ({ mode }) => {
   const { MrefreshMetricList } = metricModel;
   const { MrefreshDatabaseList } = databaseModel;
   const menuKey = params.menuKey ? params.menuKey : !Number(modelId) ? 'overview' : '';
-  // const [modelList, setModelList] = useState<ISemantic.IModelItem[]>([]);
   const [isModel, setIsModel] = useState<boolean>(false);
   const [collapsedState, setCollapsedState] = useState(true);
   const [activeKey, setActiveKey] = useState<string>(menuKey);

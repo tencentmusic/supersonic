@@ -286,7 +286,7 @@ const ModelCreateForm: React.FC<CreateFormProps> = ({
       return;
     }
     const columnFields: any[] = columns.map((item: IDataSource.IExecuteSqlColumn) => {
-      const { type, nameEn, comment } = item;
+      const { type, nameEn, comment, name } = item;
       const oldItem =
         fieldsClassifyList.find((oItem) => {
           return oItem.fieldName === item.nameEn;
@@ -296,6 +296,7 @@ const ModelCreateForm: React.FC<CreateFormProps> = ({
         bizName: nameEn,
         fieldName: nameEn,
         dataType: type,
+        name: name || comment,
         comment,
       };
     });
