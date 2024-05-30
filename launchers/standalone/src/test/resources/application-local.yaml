@@ -36,17 +36,14 @@ logging:
     dev.ai4j.openai4j: DEBUG
 
 s2:
-  pyllm:
-    url: http://127.0.0.1:9092
-
   parser:
-    url: ${s2.pyllm.url}
+    strategy: TWO_PASS_AUTO_COT_SELF_CONSISTENCY
     exemplar-recall:
-      number: 10
+      number: 5
     few-shot:
-      number: 5
+      number: 1
     self-consistency:
-      number: 5
+      number: 1
     multi-turn:
       enable: false
 
@@ -54,17 +51,9 @@ s2:
     additional:
       information: true
 
-  functionCall:
-    url: ${s2.pyllm.url}
-
-  embedding:
-    url: ${s2.pyllm.url}
-    persistent:
-      path: /tmp
-
   demo:
     names: S2VisitsDemo,S2ArtistDemo
-    enableLLM: true
+    enableLLM: false
 
   schema:
     cache:
@@ -87,21 +76,3 @@ s2:
     #2.1 in_memory(default)
     embedding-model:
       provider: in_process
-    #      inProcess:
-    #        modelPath: /data/model.onnx
-    #        vocabularyPath: /data/onnx_vocab.txt
-    #        shibing624/text2vec-base-chinese
-    #2.2 open_ai
-    #  embedding-model:
-    #    provider: open_ai
-    #    openai:
-    #      api-key: api_key
-    #      modelName: all-minilm-l6-v2.onnx
-
-    #2.2 hugging_face
-    #  embedding-model:
-    #    provider: hugging_face
-    #    hugging-face:
-    #      access-token: hg_access_token
-    #      model-id: sentence-transformers/all-MiniLM-L6-v2
-    #      timeout: 1h

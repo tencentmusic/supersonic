@@ -95,13 +95,13 @@ public class MultiTurnParser implements ChatParser {
         variables.put("histSchema", context.getHistSchema());
 
         Prompt prompt = promptTemplate.apply(variables);
-        keyPipelineLog.info("request prompt:{}", prompt.toSystemMessage());
+        keyPipelineLog.info("MultiTurnParser reqPrompt:{}", prompt.toSystemMessage());
 
         ChatLanguageModel chatLanguageModel = S2ChatModelProvider.provide(context.getLlmConfig());
         Response<AiMessage> response = chatLanguageModel.generate(prompt.toSystemMessage());
 
         String result = response.content().text();
-        keyPipelineLog.info("model response:{}", result);
+        keyPipelineLog.info("MultiTurnParser modelResp:{}", result);
         return response.content().text();
     }
 

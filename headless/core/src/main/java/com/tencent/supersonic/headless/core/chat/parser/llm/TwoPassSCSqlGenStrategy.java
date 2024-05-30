@@ -23,7 +23,7 @@ public class TwoPassSCSqlGenStrategy extends SqlGenStrategy {
     @Override
     public LLMResp generate(LLMReq llmReq) {
         //1.retriever sqlExamples and generate exampleListPool
-        keyPipelineLog.info("llmReq:{}", llmReq);
+        keyPipelineLog.info("TwoPassSCSqlGenStrategy llmReq:{}", llmReq);
         List<Map<String, String>> sqlExamples = exemplarManager.recallExemplars(llmReq.getQueryText(),
                 optimizationConfig.getText2sqlExampleNum());
 
@@ -37,10 +37,10 @@ public class TwoPassSCSqlGenStrategy extends SqlGenStrategy {
         linkingPromptPool.parallelStream().forEach(
                 linkingPrompt -> {
                     Prompt prompt = PromptTemplate.from(JsonUtil.toString(linkingPrompt)).apply(new HashMap<>());
-                    keyPipelineLog.info("step one request prompt:{}", prompt.toSystemMessage());
+                    keyPipelineLog.info("TwoPassSCSqlGenStrategy step one reqPrompt:{}", prompt.toSystemMessage());
                     Response<AiMessage> linkingResult = chatLanguageModel.generate(prompt.toSystemMessage());
                     String result = linkingResult.content().text();
-                    keyPipelineLog.info("step one model response:{}", result);
+                    keyPipelineLog.info("TwoPassSCSqlGenStrategy step one modelResp:{}", result);
                     linkingResults.add(OutputFormat.getSchemaLink(result));
                 }
         );
@@ -51,15 +51,14 @@ public class TwoPassSCSqlGenStrategy extends SqlGenStrategy {
         List<String> sqlTaskPool = new CopyOnWriteArrayList<>();
         sqlPromptPool.parallelStream().forEach(sqlPrompt -> {
             Prompt linkingPrompt = PromptTemplate.from(JsonUtil.toString(sqlPrompt)).apply(new HashMap<>());
-            keyPipelineLog.info("step two request prompt:{}", linkingPrompt.toSystemMessage());
+            keyPipelineLog.info("TwoPassSCSqlGenStrategy step two reqPrompt:{}", linkingPrompt.toSystemMessage());
             Response<AiMessage> sqlResult = chatLanguageModel.generate(linkingPrompt.toSystemMessage());
             String result = sqlResult.content().text();
-            keyPipelineLog.info("step two model response:{}", result);
+            keyPipelineLog.info("TwoPassSCSqlGenStrategy step two modelResp:{}", result);
             sqlTaskPool.add(result);
         });
         //4.format response.
         Pair<String, Map<String, Double>> sqlMapPair = OutputFormat.selfConsistencyVote(sqlTaskPool);
-        keyPipelineLog.info("linkingMap:{} sqlMap:{}", linkingMap, sqlMapPair.getRight());
 
         LLMResp llmResp = new LLMResp();
         llmResp.setQuery(llmReq.getQueryText());

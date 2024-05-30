@@ -32,7 +32,7 @@ public class PythonLLMProxy implements LLMProxy {
     public LLMResp text2sql(LLMReq llmReq) {
         long startTime = System.currentTimeMillis();
         log.info("requestLLM request, llmReq:{}", llmReq);
-        keyPipelineLog.info("llmReq:{}", llmReq);
+        keyPipelineLog.info("PythonLLMProxy llmReq:{}", llmReq);
         try {
             LLMParserConfig llmParserConfig = ContextUtils.getBean(LLMParserConfig.class);
 
@@ -47,7 +47,7 @@ public class PythonLLMProxy implements LLMProxy {
             LLMResp llmResp = responseEntity.getBody();
             log.info("requestLLM response,cost:{}, questUrl:{} \n entity:{} \n body:{}",
                     System.currentTimeMillis() - startTime, url, entity, llmResp);
-            keyPipelineLog.info("LLMResp:{}", llmResp);
+            keyPipelineLog.info("PythonLLMProxy llmResp:{}", llmResp);
 
             if (MapUtils.isEmpty(llmResp.getSqlRespMap())) {
                 llmResp.setSqlRespMap(OutputFormat.buildSqlRespMap(new ArrayList<>(), llmResp.getSqlWeight()));

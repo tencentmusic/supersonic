@@ -16,6 +16,7 @@ public class OptimizationConfig {
 
     @Value("${s2.one.detection.size:8}")
     private Integer oneDetectionSize;
+
     @Value("${s2.one.detection.max.size:20}")
     private Integer oneDetectionMaxSize;
 
@@ -67,19 +68,19 @@ public class OptimizationConfig {
     @Value("${s2.parser.linking.value.switch:true}")
     private boolean useLinkingValueSwitch;
 
-    @Value("${s2.parser.generation:TWO_PASS_AUTO_COT}")
+    @Value("${s2.parser.strategy:TWO_PASS_AUTO_COT_SELF_CONSISTENCY}")
     private LLMReq.SqlGenType sqlGenType;
 
     @Value("${s2.parser.use.switch:true}")
     private boolean useS2SqlSwitch;
 
-    @Value("${s2.parser.exemplar-recall.num:15}")
+    @Value("${s2.parser.exemplar-recall.number:15}")
     private int text2sqlExampleNum;
 
-    @Value("${s2.parser.few-shot.num:10}")
+    @Value("${s2.parser.few-shot.number:5}")
     private int text2sqlFewShotsNum;
 
-    @Value("${s2.parser.self-consistency.num:5}")
+    @Value("${s2.parser.self-consistency.number:5}")
     private int text2sqlSelfConsistencyNum;
 
     @Value("${s2.parser.show-count:3}")
@@ -89,83 +90,83 @@ public class OptimizationConfig {
     private SysParameterService sysParameterService;
 
     public Integer getOneDetectionSize() {
-        return convertValue("one.detection.size", Integer.class, oneDetectionSize);
+        return convertValue("s2.one.detection.size", Integer.class, oneDetectionSize);
     }
 
     public Integer getOneDetectionMaxSize() {
-        return convertValue("one.detection.max.size", Integer.class, oneDetectionMaxSize);
+        return convertValue("s2.one.detection.max.size", Integer.class, oneDetectionMaxSize);
     }
 
     public Double getMetricDimensionMinThresholdConfig() {
-        return convertValue("metric.dimension.min.threshold", Double.class, metricDimensionMinThresholdConfig);
+        return convertValue("s2.metric.dimension.min.threshold", Double.class, metricDimensionMinThresholdConfig);
     }
 
     public Double getMetricDimensionThresholdConfig() {
-        return convertValue("metric.dimension.threshold", Double.class, metricDimensionThresholdConfig);
+        return convertValue("s2.metric.dimension.threshold", Double.class, metricDimensionThresholdConfig);
     }
 
     public Double getDimensionValueMinThresholdConfig() {
-        return convertValue("dimension.value.min.threshold", Double.class, dimensionValueMinThresholdConfig);
+        return convertValue("s2.dimension.value.min.threshold", Double.class, dimensionValueMinThresholdConfig);
     }
 
     public Double getDimensionValueThresholdConfig() {
-        return convertValue("dimension.value.threshold", Double.class, dimensionValueThresholdConfig);
+        return convertValue("s2.dimension.value.threshold", Double.class, dimensionValueThresholdConfig);
     }
 
     public Double getLongTextThreshold() {
-        return convertValue("long.text.threshold", Double.class, longTextThreshold);
+        return convertValue("s2.long.text.threshold", Double.class, longTextThreshold);
     }
 
     public Double getShortTextThreshold() {
-        return convertValue("short.text.threshold", Double.class, shortTextThreshold);
+        return convertValue("s2.short.text.threshold", Double.class, shortTextThreshold);
     }
 
     public Integer getQueryTextLengthThreshold() {
-        return convertValue("query.text.length.threshold", Integer.class, queryTextLengthThreshold);
-    }
-
-    public boolean isUseS2SqlSwitch() {
-        return convertValue("use.s2SQL.switch", Boolean.class, useS2SqlSwitch);
+        return convertValue("s2.query.text.length.threshold", Integer.class, queryTextLengthThreshold);
     }
 
     public Integer getEmbeddingMapperWordMin() {
-        return convertValue("embedding.mapper.word.min", Integer.class, embeddingMapperWordMin);
+        return convertValue("s2.embedding.mapper.word.min", Integer.class, embeddingMapperWordMin);
     }
 
     public Integer getEmbeddingMapperWordMax() {
-        return convertValue("embedding.mapper.word.max", Integer.class, embeddingMapperWordMax);
+        return convertValue("s2.embedding.mapper.word.max", Integer.class, embeddingMapperWordMax);
     }
 
     public Integer getEmbeddingMapperBatch() {
-        return convertValue("embedding.mapper.batch", Integer.class, embeddingMapperBatch);
+        return convertValue("s2.embedding.mapper.batch", Integer.class, embeddingMapperBatch);
     }
 
     public Integer getEmbeddingMapperNumber() {
-        return convertValue("embedding.mapper.number", Integer.class, embeddingMapperNumber);
+        return convertValue("s2.embedding.mapper.number", Integer.class, embeddingMapperNumber);
     }
 
     public Integer getEmbeddingMapperRoundNumber() {
-        return convertValue("embedding.mapper.round.number", Integer.class, embeddingMapperRoundNumber);
+        return convertValue("s2.embedding.mapper.round.number", Integer.class, embeddingMapperRoundNumber);
     }
 
     public Double getEmbeddingMapperMinThreshold() {
-        return convertValue("embedding.mapper.min.threshold", Double.class, embeddingMapperMinThreshold);
+        return convertValue("s2.embedding.mapper.min.threshold", Double.class, embeddingMapperMinThreshold);
     }
 
     public Double getEmbeddingMapperThreshold() {
-        return convertValue("embedding.mapper.threshold", Double.class, embeddingMapperThreshold);
+        return convertValue("s2.embedding.mapper.threshold", Double.class, embeddingMapperThreshold);
+    }
+
+    public boolean isUseS2SqlSwitch() {
+        return convertValue("s2.parser.use.switch", Boolean.class, useS2SqlSwitch);
     }
 
     public boolean isUseLinkingValueSwitch() {
-        return convertValue("s2SQL.linking.value.switch", Boolean.class, useLinkingValueSwitch);
+        return convertValue("s2.parser.linking.value.switch", Boolean.class, useLinkingValueSwitch);
     }
 
     public LLMReq.SqlGenType getSqlGenType() {
-        return convertValue("s2SQL.generation", LLMReq.SqlGenType.class, sqlGenType);
+        return convertValue("s2.parser.strategy", LLMReq.SqlGenType.class, sqlGenType);
     }
 
     public Integer getParseShowCount() {
-        return convertValue("parse.show.count", Integer.class, parseShowCount);
+        return convertValue("s2.parse.show-count", Integer.class, parseShowCount);
     }
 
     public <T> T convertValue(String paramName, Class<T> targetType, T defaultValue) {

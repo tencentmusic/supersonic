@@ -68,15 +68,8 @@ public class LLMReq {
     }
 
     public enum SqlGenType {
-
-        ONE_PASS_AUTO_COT("1_pass_auto_cot"),
-
         ONE_PASS_AUTO_COT_SELF_CONSISTENCY("1_pass_auto_cot_self_consistency"),
-
-        TWO_PASS_AUTO_COT("2_pass_auto_cot"),
-
         TWO_PASS_AUTO_COT_SELF_CONSISTENCY("2_pass_auto_cot_self_consistency");
-
 
         private String name;
 
