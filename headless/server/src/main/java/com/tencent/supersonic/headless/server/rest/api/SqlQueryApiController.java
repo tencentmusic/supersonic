@@ -61,7 +61,6 @@ public class SqlQueryApiController {
         List<CompletableFuture<SemanticQueryResp>> futures = semanticQueryReqs.stream()
                         .map(querySqlReq -> CompletableFuture.supplyAsync(() -> {
                             try {
-                                querySqlReq.setInnerLayerNative(true);
                                 return queryService.queryByReq(querySqlReq, user);
                             } catch (Exception e) {
                                 e.printStackTrace();
