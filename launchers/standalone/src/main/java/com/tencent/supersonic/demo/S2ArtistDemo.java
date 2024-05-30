@@ -64,6 +64,18 @@ public class S2ArtistDemo extends S2BaseDemo {
 
     }
 
+    @Override
+    boolean checkNeedToRun() {
+        List<DomainResp> domainList = domainService.getDomainList();
+        for (DomainResp domainResp : domainList) {
+            if (domainResp.getBizName().equalsIgnoreCase("singer")) {
+                log.info("Already exist domain:singer, no need to run demo");
+                return false;
+            }
+        }
+        return true;
+    }
+
     private TagObjectResp addTagObjectSinger(DomainResp singerDomain) throws Exception {
         TagObjectReq tagObjectReq = new TagObjectReq();
         tagObjectReq.setDomainId(singerDomain.getId());
@@ -76,7 +88,7 @@ public class S2ArtistDemo extends S2BaseDemo {
     public DomainResp addDomain() {
         DomainReq domainReq = new DomainReq();
         domainReq.setName("艺人库");
-        domainReq.setBizName("supersonic");
+        domainReq.setBizName("singer");
         domainReq.setParentId(0L);
         domainReq.setStatus(StatusEnum.ONLINE.getCode());
         domainReq.setViewers(Arrays.asList("admin", "tom", "jack"));

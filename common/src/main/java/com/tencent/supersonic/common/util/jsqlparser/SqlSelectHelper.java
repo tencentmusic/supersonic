@@ -1,6 +1,14 @@
 package com.tencent.supersonic.common.util.jsqlparser;
 
 import com.tencent.supersonic.common.util.StringUtil;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.Alias;
@@ -28,6 +36,7 @@ import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.select.Distinct;
 import net.sf.jsqlparser.statement.select.GroupByElement;
+import net.sf.jsqlparser.statement.select.Join;
 import net.sf.jsqlparser.statement.select.LateralView;
 import net.sf.jsqlparser.statement.select.OrderByElement;
 import net.sf.jsqlparser.statement.select.ParenthesedSelect;
@@ -36,15 +45,9 @@ import net.sf.jsqlparser.statement.select.Select;
 import net.sf.jsqlparser.statement.select.SelectItem;
 import net.sf.jsqlparser.statement.select.SelectVisitorAdapter;
 import net.sf.jsqlparser.statement.select.SetOperationList;
+import net.sf.jsqlparser.statement.select.WithItem;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.CollectionUtils;
-
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * Sql Parser Select Helper
@@ -606,6 +609,53 @@ public class SqlSelectHelper {
         if (expression instanceof Parenthesis) {
             Parenthesis expr = (Parenthesis) expression;
             getColumnFromExpr(expr.getExpression(), columns);
+        }
+    }
+
+    public static Map<String, Set<String>> getFieldsWithSubQuery(String sql) {
+        List<PlainSelect> plainSelects = getPlainSelects(getPlainSelect(sql));
+        Map<String, Set<String>> results = new HashMap<>();
+        for (PlainSelect plainSelect : plainSelects) {
+            getFieldsWithSubQuery(plainSelect, results);
+        }
+        return results;
+    }
+
+    private static void getFieldsWithSubQuery(PlainSelect plainSelect, Map<String, Set<String>> fields) {
+        if (plainSelect.getFromItem() instanceof Table) {
+            boolean isWith = false;
+            if (!CollectionUtils.isEmpty(plainSelect.getWithItemsList())) {
+                for (WithItem withItem : plainSelect.getWithItemsList()) {
+                    if (Objects.nonNull(withItem.getSelect())) {
+                        getFieldsWithSubQuery(withItem.getSelect().getPlainSelect(), fields);
+                        isWith = true;
+                    }
+                }
+            }
+            if (!isWith) {
+                Table table = (Table) plainSelect.getFromItem();
+                if (!fields.containsKey(table.getFullyQualifiedName())) {
+                    fields.put(table.getFullyQualifiedName(), new HashSet<>());
+                }
+                List<String> sqlFields = getFieldsByPlainSelect(plainSelect).stream().map(f -> f.replaceAll("`", ""))
+                        .collect(
+                                Collectors.toList());
+                fields.get(table.getFullyQualifiedName()).addAll(sqlFields);
+            }
+        }
+        if (plainSelect.getFromItem() instanceof ParenthesedSelect) {
+            ParenthesedSelect parenthesedSelect = (ParenthesedSelect) plainSelect.getFromItem();
+            getFieldsWithSubQuery(parenthesedSelect.getPlainSelect(), fields);
+            if (!CollectionUtils.isEmpty(plainSelect.getJoins())) {
+                for (Join join : plainSelect.getJoins()) {
+                    if (join.getRightItem() instanceof ParenthesedSelect) {
+                        getFieldsWithSubQuery(((ParenthesedSelect) join.getRightItem()).getPlainSelect(), fields);
+                    }
+                    if (join.getFromItem() instanceof ParenthesedSelect) {
+                        getFieldsWithSubQuery(((ParenthesedSelect) join.getFromItem()).getPlainSelect(), fields);
+                    }
+                }
+            }
         }
     }
 }

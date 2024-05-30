@@ -16,7 +16,6 @@ public class TagTest extends BaseTest {
 
     @Test
     public void queryTest_tag_list_filter() throws Exception {
-        MockConfiguration.mockTagAgent(agentService);
         QueryResult actualResult = submitNewChat("爱情、流行类型的艺人", DataUtils.tagAgentId);
 
         QueryResult expectedResult = new QueryResult();

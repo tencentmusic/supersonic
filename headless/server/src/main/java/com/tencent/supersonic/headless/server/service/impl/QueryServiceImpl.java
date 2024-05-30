@@ -23,6 +23,7 @@ import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticSchemaResp;
 import com.tencent.supersonic.headless.core.cache.QueryCache;
 import com.tencent.supersonic.headless.core.executor.QueryExecutor;
+import com.tencent.supersonic.headless.core.executor.accelerator.QueryAccelerator;
 import com.tencent.supersonic.headless.core.parser.DefaultQueryParser;
 import com.tencent.supersonic.headless.core.parser.QueryParser;
 import com.tencent.supersonic.headless.core.parser.calcite.s2sql.SemanticModel;
@@ -38,14 +39,13 @@ import com.tencent.supersonic.headless.server.service.QueryService;
 import com.tencent.supersonic.headless.server.utils.QueryReqConverter;
 import com.tencent.supersonic.headless.server.utils.QueryUtils;
 import com.tencent.supersonic.headless.server.utils.StatUtils;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.stereotype.Service;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
 
 
 @Service
@@ -249,7 +249,16 @@ public class QueryServiceImpl implements QueryService {
             queryParser.parse(queryStatement);
             //2 plan
             QueryExecutor queryExecutor = queryPlanner.plan(queryStatement);
-            //3 execute
+            //3 accelerate
+            QueryAccelerator queryAccelerator = queryPlanner.accelerate(queryStatement);
+            if (queryAccelerator != null) {
+                semanticQueryResp = queryAccelerator.query(queryStatement);
+                if (Objects.nonNull(semanticQueryResp) && !semanticQueryResp.getResultList().isEmpty()) {
+                    log.info("query by Accelerator {}", queryAccelerator.getClass().getSimpleName());
+                    return semanticQueryResp;
+                }
+            }
+            //4 execute
             if (queryExecutor != null) {
                 semanticQueryResp = queryExecutor.execute(queryStatement);
                 queryUtils.fillItemNameInfo(semanticQueryResp, queryStatement.getSemanticSchemaResp());

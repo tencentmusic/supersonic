@@ -16,6 +16,7 @@ public class QueryColumn {
     private Boolean authorized = true;
     private String dataFormatType;
     private DataFormat dataFormat;
+    private String comment;
 
     public QueryColumn(String nameEn, String type) {
         this.type = type;

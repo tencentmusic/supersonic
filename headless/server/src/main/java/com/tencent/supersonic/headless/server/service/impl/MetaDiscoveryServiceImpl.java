@@ -119,7 +119,9 @@ public class MetaDiscoveryServiceImpl implements MetaDiscoveryService {
                                                                SchemaMapInfo mapInfo,
                                                                Map<Long, DataSetResp> dataSetMap) {
         Map<Long, List<SchemaElementMatch>> result = new HashMap<>();
-
+        if (0 == topN) {
+            return result;
+        }
         SemanticSchema semanticSchema = semanticService.getSemanticSchema();
         for (Map.Entry<Long, List<SchemaElementMatch>> entry : mapInfo.getDataSetElementMatches().entrySet()) {
             Long dataSetId = entry.getKey();

@@ -76,6 +76,7 @@
         <langchain4j.version>0.24.0</langchain4j.version>
         <postgresql.version>42.7.1</postgresql.version>
         <st.version>4.0.8</st.version>
+        <duckdb_jdbc.version>0.10.0</duckdb_jdbc.version>
     </properties>
 
     <dependencyManagement>
