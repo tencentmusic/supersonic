@@ -313,7 +313,7 @@ const ChatMsg: React.FC<Props> = ({
       ) : (
         <div>
           {getMsgContent()}
-          {(isMultipleMetric || existDrillDownDimension) && (
+          {(isMultipleMetric || existDrillDownDimension) && !isSimpleMode && (
             <div
               className={`${prefixCls}-bottom-tools ${
                 getMsgContentType() === MsgContentTypeEnum.METRIC_CARD
