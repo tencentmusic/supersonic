@@ -34,7 +34,7 @@ const ClassMetricTable: React.FC<Props> = ({}) => {
     total: 0,
   };
   const [pagination, setPagination] = useState(defaultPagination);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true);
   const [dataSource, setDataSource] = useState<ISemantic.ITagItem[]>([]);
   const [tagItem, setTagItem] = useState<ISemantic.ITagItem>();
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);

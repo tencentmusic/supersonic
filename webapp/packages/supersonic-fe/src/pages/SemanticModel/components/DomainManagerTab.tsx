@@ -57,14 +57,13 @@ const DomainManagerTab: React.FC<Props> = ({
       children:
         showModelType === 'list' ? (
           <OverView
-            key={selectDomainId}
             modelList={modelList}
             onModelChange={(model) => {
               handleModelChange(model);
             }}
           />
         ) : (
-          <div style={{ width: '100%' }}>
+          <div style={{ width: '100%' }} key={selectDomainId}>
             <SemanticGraphCanvas />
             {/* <HeadlessFlows /> */}
           </div>
@@ -208,6 +207,7 @@ const DomainManagerTab: React.FC<Props> = ({
         className={styles.tab}
         items={!isModel ? tabItem : isModelItem}
         activeKey={getActiveKey()}
+        // destroyInactiveTabPane
         tabBarExtraContent={{
           right:
             getActiveKey() === 'overview' ? (

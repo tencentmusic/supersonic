@@ -15,13 +15,13 @@
 }
 
 .content {
-  margin-top: 20px;
+  // margin-top: 20px;
   .searchBar {
     display: flex;
     align-items: center;
     column-gap: 30px;
-    margin-bottom: 40px;
-
+    margin-bottom: 20px;
+    justify-content: right;
     .searchControl {
       width: 500px;
     }
@@ -195,6 +195,14 @@
     display: flex;
     flex-direction: column;
     row-gap: 12px;
+    .infoItem {
+      margin-bottom: 10px;
+      .label {
+        font-family: var(--tencent-font-family);
+        margin-right: 10px;
+        font-size: 14px;
+      }
+    }
   }
 }
 

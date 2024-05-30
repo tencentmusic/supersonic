@@ -38,6 +38,7 @@ import { createMetric, updateMetric, mockMetricAlias, getMetricTags } from '../.
 import { MetricSettingKey, MetricSettingWording } from '../constants';
 import { ISemantic } from '../../data';
 import { history } from '@umijs/max';
+import globalStyles from '@/global.less';
 
 export type CreateFormProps = {
   datasourceId?: number;
@@ -868,7 +869,7 @@ const MetricInfoCreateForm: React.FC<CreateFormProps> = ({
             </div>
             <div className={styles.infoCardContainer}>
               <Form
-                className={styles.supersonicForm}
+                className={globalStyles.supersonicForm}
                 {...formLayout}
                 form={form}
                 initialValues={{

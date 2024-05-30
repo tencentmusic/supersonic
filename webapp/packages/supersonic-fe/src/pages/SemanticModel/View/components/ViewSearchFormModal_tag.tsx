@@ -7,7 +7,7 @@ import { createView, updateView, getDimensionList, queryMetric, getTagList } fro
 import { ISemantic } from '../../data';
 import DefaultSettingForm from './DefaultSettingForm';
 import { isArrayOfValues } from '@/utils/utils';
-import { ProCard } from  '@ant-design/pro-components';
+import { ProCard } from '@ant-design/pro-components';
 import { TransType, ChatConfigType } from '../../enum';
 import { number } from 'echarts';
 
@@ -141,7 +141,7 @@ const ViewSearchFormModal: React.FC<ModelCreateFormModalProps> = ({
         )}
 
         {viewItem?.queryType === TransType.TAG && (
-          <ProCard title="标签模式">
+          <ProCard title="明细模式">
             <DefaultSettingForm form={form} tagList={tagList} chatConfigType={ChatConfigType.TAG} />
           </ProCard>
         )}
