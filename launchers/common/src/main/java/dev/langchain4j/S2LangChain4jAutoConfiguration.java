@@ -16,7 +16,7 @@ import dev.langchain4j.model.localai.LocalAiChatModel;
 import dev.langchain4j.model.localai.LocalAiEmbeddingModel;
 import dev.langchain4j.model.localai.LocalAiLanguageModel;
 import dev.langchain4j.model.moderation.ModerationModel;
-import dev.langchain4j.model.openai.OpenAiChatModel;
+import dev.langchain4j.model.openai.FullOpenAiChatModel;
 import dev.langchain4j.model.openai.OpenAiEmbeddingModel;
 import dev.langchain4j.model.openai.OpenAiLanguageModel;
 import dev.langchain4j.model.openai.OpenAiModerationModel;
@@ -53,7 +53,7 @@ public class S2LangChain4jAutoConfiguration {
                 if (openAi == null || isNullOrBlank(openAi.getApiKey())) {
                     throw illegalConfiguration("\n\nPlease define 'langchain4j.chat-model.openai.api-key' property");
                 }
-                return OpenAiChatModel.builder()
+                return FullOpenAiChatModel.builder()
                         .baseUrl(openAi.getBaseUrl())
                         .apiKey(openAi.getApiKey())
                         .modelName(openAi.getModelName())

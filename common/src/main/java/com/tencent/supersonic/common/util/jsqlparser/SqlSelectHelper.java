@@ -46,6 +46,7 @@ import net.sf.jsqlparser.statement.select.SelectItem;
 import net.sf.jsqlparser.statement.select.SelectVisitorAdapter;
 import net.sf.jsqlparser.statement.select.SetOperationList;
 import net.sf.jsqlparser.statement.select.WithItem;
+import net.sf.jsqlparser.statement.select.Limit;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.CollectionUtils;
 
@@ -609,6 +610,17 @@ public class SqlSelectHelper {
         if (expression instanceof Parenthesis) {
             Parenthesis expr = (Parenthesis) expression;
             getColumnFromExpr(expr.getExpression(), columns);
+        }
+    }
+
+    public static Boolean hasLimit(String querySql) {
+        Select selectStatement = SqlSelectHelper.getSelect(querySql);
+        PlainSelect plainSelect = selectStatement.getPlainSelect();
+        Limit limit = plainSelect.getLimit();
+        if (Objects.nonNull(limit)) {
+            return true;
+        } else {
+            return false;
         }
     }
 

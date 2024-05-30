@@ -2,10 +2,10 @@ package com.tencent.supersonic.headless.core.parser;
 
 import com.google.common.base.Strings;
 import com.tencent.supersonic.common.util.StringUtil;
+import com.tencent.supersonic.common.util.jsqlparser.SqlSelectHelper;
 import com.tencent.supersonic.headless.api.pojo.MetricTable;
 import com.tencent.supersonic.headless.api.pojo.QueryParam;
 import com.tencent.supersonic.headless.api.pojo.enums.AggOption;
-import com.tencent.supersonic.headless.api.pojo.request.SqlExecuteReq;
 import com.tencent.supersonic.headless.core.parser.converter.HeadlessConverter;
 import com.tencent.supersonic.headless.core.pojo.DataSetQueryParam;
 import com.tencent.supersonic.headless.core.pojo.MetricQueryParam;
@@ -54,12 +54,10 @@ public class DefaultQueryParser implements QueryParser {
                 || Strings.isNullOrEmpty(queryStatement.getSourceId())) {
             throw new RuntimeException("parse Exception: " + queryStatement.getErrMsg());
         }
-        String querySql =
-                Objects.nonNull(queryStatement.getLimit()) && queryStatement.getLimit() > 0
-                        ? String.format(SqlExecuteReq.LIMIT_WRAPPER,
-                        queryStatement.getSql(), queryStatement.getLimit())
-                        : queryStatement.getSql();
-        queryStatement.setSql(querySql);
+        if (!SqlSelectHelper.hasLimit(queryStatement.getSql())) {
+            String querySql = queryStatement.getSql() + " limit " + queryStatement.getLimit().toString();
+            queryStatement.setSql(querySql);
+        }
     }
 
     public QueryStatement parser(DataSetQueryParam dataSetQueryParam, QueryStatement queryStatement) {

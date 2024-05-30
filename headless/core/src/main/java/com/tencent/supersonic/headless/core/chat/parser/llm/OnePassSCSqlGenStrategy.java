@@ -48,12 +48,8 @@ public class OnePassSCSqlGenStrategy extends SqlGenStrategy {
                 }
         );
         //3.format response.
-        List<String> schemaLinkingResults = llmResults.stream()
-                .map(llmResult -> OutputFormat.getSchemaLinks(llmResult)).collect(Collectors.toList());
-        List<String> candidateSortedList = OutputFormat.formatList(schemaLinkingResults);
-        Pair<String, Map<String, Double>> linkingMap = OutputFormat.selfConsistencyVote(candidateSortedList);
         List<String> sqlList = llmResults.stream()
-                .map(llmResult -> OutputFormat.getSql(llmResult)).collect(Collectors.toList());
+                .map(OutputFormat::getSql).collect(Collectors.toList());
 
         Pair<String, Map<String, Double>> sqlMapPair = OutputFormat.selfConsistencyVote(sqlList);
 
