@@ -8,6 +8,5 @@ export function queryShowCase(agentId: number, current: number, pageSize: number
   return axios.post<ShowCaseType>(`${prefix}/chat/manage/queryShowCase?agentId=${agentId}`, {
     current,
     pageSize,
-    userName: 'jerryjzhang',
   });
 }
