@@ -162,6 +162,20 @@ const SqlItem: React.FC<Props> = ({
                 <div className={`${prefixCls}-schema-content`}>{priorExts}</div>
               </div>
             )}
+            {schema?.terms?.length > 0 && (
+              <div className={`${prefixCls}-schema-row`}>
+                <div className={`${prefixCls}-schema-title`}>术语：</div>
+                <div className={`${prefixCls}-schema-content`}>
+                  {schema.terms
+                    .map((item: any) => {
+                      return `${item.name}${
+                        item.alias?.length > 0 ? `(${item.alias.join(',')})` : ''
+                      }: ${item.description}`;
+                    })
+                    .join('、')}
+                </div>
+              </div>
+            )}
           </div>
         )}
         {sqlType === 'fewShots' && (

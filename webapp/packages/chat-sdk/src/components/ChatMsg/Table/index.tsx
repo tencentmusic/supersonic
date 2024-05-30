@@ -33,10 +33,14 @@ const Table: React.FC<Props> = ({ data, size, loading, onApplyAuth }) => {
           if (dataFormatType === 'percent') {
             return (
               <div className={`${prefixCls}-formatted-value`}>
-                {`${formatByDecimalPlaces(
-                  dataFormat?.needMultiply100 ? +value * 100 : value,
-                  dataFormat?.decimalPlaces || 2
-                )}%`}
+                {`${
+                  value
+                    ? formatByDecimalPlaces(
+                        dataFormat?.needMultiply100 ? +value * 100 : value,
+                        dataFormat?.decimalPlaces || 2
+                      )
+                    : 0
+                }%`}
               </div>
             );
           }

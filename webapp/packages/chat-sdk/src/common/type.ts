@@ -93,10 +93,11 @@ export type ChatContextType = {
   elementMatches: any[];
   nativeQuery: boolean;
   queryMode: string;
-  queryType: 'METRIC' | 'METRIC_ID' | 'ID' | 'TAG' | 'OTHER';
+  queryType: 'METRIC' | 'METRIC_TAG' | 'ID' | 'DETAIL' | 'OTHER';
   dimensionFilters: FilterItemType[];
   properties: any;
   sqlInfo: SqlInfoType;
+  textInfo: string;
 };
 
 export enum MsgValidTypeEnum {
@@ -143,6 +144,7 @@ export type MsgDataType = {
   queryTimeCost?: number;
   similarQueries: SimilarQuestionType[];
   recommendedDimensions: DrillDownDimensionType[];
+  textResult: string;
 };
 
 export enum ParseStateEnum {
