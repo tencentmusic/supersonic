@@ -2,6 +2,7 @@ package com.tencent.supersonic.chat.server.executor;
 
 import com.tencent.supersonic.chat.server.plugin.PluginQueryManager;
 import com.tencent.supersonic.chat.server.pojo.ChatExecuteContext;
+import com.tencent.supersonic.chat.server.util.ResultFormatter;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.api.pojo.request.ExecuteQueryReq;
@@ -20,7 +21,11 @@ public class SqlExecutor implements ChatExecutor {
         }
         ExecuteQueryReq executeQueryReq = buildExecuteReq(chatExecuteContext);
         ChatQueryService chatQueryService = ContextUtils.getBean(ChatQueryService.class);
-        return chatQueryService.performExecution(executeQueryReq);
+        QueryResult queryResult = chatQueryService.performExecution(executeQueryReq);
+        String textResult = ResultFormatter.transform2TextNew(queryResult.getQueryColumns(),
+                queryResult.getQueryResults());
+        queryResult.setTextResult(textResult);
+        return queryResult;
     }
 
     private ExecuteQueryReq buildExecuteReq(ChatExecuteContext chatExecuteContext) {

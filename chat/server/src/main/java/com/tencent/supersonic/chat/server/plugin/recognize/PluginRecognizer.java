@@ -86,6 +86,7 @@ public abstract class PluginRecognizer {
         properties.put("name", plugin.getName());
         semanticParseInfo.setProperties(properties);
         semanticParseInfo.setScore(distance);
+        semanticParseInfo.setTextInfo(String.format("将由插件工具**%s**来解答", plugin.getName()));
         fillSemanticParseInfo(semanticParseInfo);
         return semanticParseInfo;
     }

@@ -6,7 +6,8 @@ import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
 import com.tencent.supersonic.headless.api.pojo.request.CanvasReq;
 import com.tencent.supersonic.headless.api.pojo.response.CanvasSchemaResp;
 import com.tencent.supersonic.headless.server.persistence.dataobject.CanvasDO;
-import com.tencent.supersonic.headless.server.service.impl.CanvasServiceImpl;
+import com.tencent.supersonic.headless.server.service.CanvasService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -23,11 +24,8 @@ import java.util.List;
 @RequestMapping("/api/semantic/viewInfo")
 public class CanvasController {
 
-    private CanvasServiceImpl canvasService;
-
-    public CanvasController(CanvasServiceImpl canvasService) {
-        this.canvasService = canvasService;
-    }
+    @Autowired
+    private CanvasService canvasService;
 
     @PostMapping("/createOrUpdateViewInfo")
     public CanvasDO createOrUpdateCanvas(@RequestBody CanvasReq canvasReq, HttpServletRequest request,

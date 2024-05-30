@@ -55,8 +55,13 @@ public class WebServiceQuery extends PluginSemanticQuery {
         log.info("webServiceResponse result:{}", JsonUtil.toString(object));
         try {
             Map<String, Object> data = JsonUtil.toMap(JsonUtil.toString(object), String.class, Object.class);
-            queryResult.setQueryResults((List<Map<String, Object>>) data.get("resultList"));
-            queryResult.setQueryColumns((List<QueryColumn>) data.get("columns"));
+            if (data.get("resultList") != null) {
+                queryResult.setQueryResults((List<Map<String, Object>>) data.get("resultList"));
+            }
+            if (data.get("columns") != null) {
+                queryResult.setQueryColumns((List<QueryColumn>) data.get("columns"));
+            }
+            queryResult.setTextResult(String.valueOf(data.get("textInfo")));
             queryResult.setQueryState(QueryState.SUCCESS);
         } catch (Exception e) {
             log.info("webServiceResponse result has an exception:{}", e.getMessage());
