@@ -57,7 +57,6 @@
   "dependencies": {
     "@ant-design/icons": "^5.2.6",
     "@ant-design/pro-components": "2.7.0",
-    "@ant-design/pro-layout": "^7.17.15",
     "@antv/dom-util": "^2.0.4",
     "@antv/g6": "^4.8.23",
     "@antv/g6-core": "^0.8.23",
@@ -83,22 +82,20 @@
     "jsencrypt": "^3.0.1",
     "lodash": "^4.17.11",
     "moment": "^2.29.1",
+    "nprogress": "^0.2.0",
     "numeral": "^2.0.6",
     "omit.js": "^2.0.2",
     "path-to-regexp": "^2.4.0",
     "qs": "^6.9.0",
     "query-string": "^9.0.0",
-    "react": "^17.0.0",
+    "react": "^18.3.1",
     "react-ace": "^9.4.1",
-    "react-dev-inspector": "^1.8.4",
-    "react-dom": "^17.0.2",
-    "react-fast-marquee": "^1.6.0",
-    "react-helmet-async": "^1.0.4",
-    "react-spinners": "^0.10.6",
+    "react-dom": "^18.3.1",
+    "react-spinners": "^0.13.8",
     "react-split-pane": "^2.0.3",
     "react-syntax-highlighter": "^15.4.3",
     "sql-formatter": "^2.3.3",
-    "supersonic-chat-sdk": "^1.1.6",
+    "supersonic-chat-sdk": "^1.1.7",
     "supersonic-insights-flow-components": "^1.4.9",
     "umi-request": "1.4.0"
   },
@@ -114,11 +111,11 @@
     "@types/lodash": "^4.14.144",
     "@types/pinyin": "^2.8.3",
     "@types/qs": "^6.5.3",
-    "@types/react": "^17.0.0",
-    "@types/react-dom": "^17.0.0",
+    "@types/react": "18.3.1",
+    "@types/react-dom": "^18.3.0",
     "@types/react-helmet": "^6.1.0",
-    "@umijs/max": "^4.2.5",
     "@umijs/fabric": "^4.0.1",
+    "@umijs/max": "^4.2.5",
     "@umijs/plugin-model": "^2.6.2",
     "carlo": "^0.9.46",
     "cross-port-killer": "^1.1.1",
@@ -141,7 +138,7 @@
     "node": ">=16.0.0 <20.0.0"
   },
   "resolutions": {
-    "@types/react": "17.0.0"
+    "@types/react": "18.3.1"
   },
   "__npminstall_done": false
 }

@@ -124,7 +124,6 @@ const OverviewContainer: React.FC<Props> = ({ mode }) => {
   };
 
   const handleModelChange = (model?: ISemantic.IModelItem) => {
-    console.log(model, 1111);
     if (!model) {
       return;
     }

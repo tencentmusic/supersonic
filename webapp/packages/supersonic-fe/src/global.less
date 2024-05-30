@@ -96,42 +96,35 @@ ol {
   }
 }
 
-.ant-card-body {
-  padding: 24px !important;
-}
+// .ant-card-body {
+//   padding: 24px !important;
+// }
 
 .ant-modal-body {
   padding: 24px;
 }
 
-.ant-pro-page-container-children-content {
-  margin: 12px 12px 0 !important;
-}
+// .ant-pro-page-container-children-content {
+//   margin: 12px 12px 0 !important;
+// }
 
 // .ant-page-header {
 //   padding-bottom: 10px !important;
 // }
 
-.ant-spin-spinning {
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-}
+// .ant-spin-spinning {
+//   display: flex !important;
+//   align-items: center !important;
+//   justify-content: center !important;
+// }
 
-.ant-table-selection-extra {
-  .ant-dropdown-trigger {
-    display: none !important;
-  }
-}
+// .ant-table-selection-extra {
+//   .ant-dropdown-trigger {
+//     display: none !important;
+//   }
+// }
 
-.initialLoading {
-  .ant-spin-spinning {
-    max-height: none !important;
-  }
-  .loadingPlaceholder {
-    height: 100vh;
-  }
-}
+
 .ant-pro-layout .ant-pro-layout-bg-list {
   background: #fafafb;
 }
@@ -146,56 +139,39 @@ ol {
   text-overflow: ellipsis;
 }
 
-
-
-// .ant-menu-root>.ant-menu-item,
-// .ant-menu-root>.ant-menu-submenu {
-//   font-weight: bold;
-//   font-size: 14px;
-//   &>span>a,
-//   &>a {
-//     color: white;
-//     &:hover {
-//       color: white;
-//     }
-//   }
-//   &:hover {
-//     background-color: #296DF3!important;
-//   }
-// }
+.ant-table-wrapper {
+  .ant-spin .ant-spin-dot {
+    font-size: 30px;
+  }
+}
 
 .ant-menu-root>.ant-menu-item.ant-menu-item-selected {
-  // background-color: #296DF3!important;
   color: var(--tme-primary-color);
-  font-size: 15px;
   font-weight: 500;
 }
-.ant-menu-light.ant-menu-horizontal >.ant-menu-item-selected::after {
+.ant-menu-light.ant-menu-horizontal >.ant-menu-item:hover {
+  background: #f0f5ff;
+}
+.ant-menu-light .ant-menu-item:not(.ant-menu-item-selected):not(.ant-menu-submenu-selected):hover {
+  color: var(--tme-primary-color);
+}
+
+.ant-menu-light.ant-menu-horizontal >.ant-menu-item-selected:hover::after {
+  border-bottom-color: var(--tme-primary-color);
   border-bottom-width: 2px;
+}
+.ant-menu-light.ant-menu-horizontal >.ant-menu-item-selected::after {
     border-bottom-color: var(--tme-primary-color);
+    border-bottom-width: 2px;
 }
 
-// .ant-menu-light.ant-menu-horizontal >.ant-menu-item-selected::hover {
-//   border-bottom-width: 2px;
-//     border-bottom-color: var(--tme-primary-color);
-// }
-
-.ant-pro-top-nav-header-logo h1 {
-  // font-size: 18px;
-  color: var(--tme-primary-color)
+.ant-menu-light.ant-menu-horizontal >.ant-menu-item:hover::after {
+  border-bottom-color: var(--tme-primary-color);
 }
 
-
-
-
-// .ant-pro-top-nav-header-main-left {
-//   min-width: 100px !important;
-// }
-
-// .ant-pro-top-nav-header-logo {
-//   min-width: 100px !important;
-// }
-
+.ant-pro-table-list-toolbar-container-mobile {
+  flex-direction: unset;
+}
 
 .logo {
   position: relative;
@@ -291,4 +267,50 @@ ol {
   color: rgb(38, 38, 38);
  }
 }
-
+.ant-form-item .ant-form-item-label > label {
+  font-family: "tencentFont", sans-serif;
+  margin-right: 10px;
+}
+.supersonicForm {
+  padding: 0 20px;
+  :global {
+    .ant-input-search .ant-input-search-button {
+      height: 42px;
+    }
+    .ant-switch.ant-switch-checked {
+      background: var(--tme-primary-color);
+    }
+    .ant-form-item .ant-form-item-label > label {
+      color:#262626;
+    }
+    .ant-form-item-label {
+      font-family: "tencentFont", sans-serif;
+      margin-right: 10px;
+    }
+    .ant-input {
+      padding: 9px 14px 9px 12px;
+    }
+    .ant-select {
+      &.ant-select-single {
+        height: auto;
+      }
+      &.ant-select-multiple {
+        .ant-select-selector {
+          padding: 6px 14px 6px 12px;
+         }
+      }
+    .ant-select-selector {
+      padding: 5px 14px 5px 12px;
+      .ant-select-selection-placeholder {
+        padding: 0px 8px 0px 8px;
+      }
+      .ant-select-selection-overflow-item {
+        .ant-select-selection-item {
+          color: rgb(22, 119, 255);
+          background-color: rgb(230, 244, 255);
+        }
+      }
+    }
+  }
+  }
+}
