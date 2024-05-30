@@ -10,6 +10,7 @@ import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.data.message.ChatMessage;
 import dev.langchain4j.internal.RetryUtils;
 import dev.langchain4j.internal.Utils;
+import dev.langchain4j.model.ChatModel;
 import dev.langchain4j.model.Tokenizer;
 import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.chat.TokenCountEstimator;
@@ -72,11 +73,18 @@ public class FullOpenAiChatModel implements ChatLanguageModel, TokenCountEstimat
     private Response<AiMessage> generate(List<ChatMessage> messages,
                                          List<ToolSpecification> toolSpecifications,
                                          ToolSpecification toolThatMustBeExecuted) {
-        Builder requestBuilder = ChatCompletionRequest.builder()
-                .model(this.modelName)
-                .messages(ImproveInternalOpenAiHelper.toOpenAiMessages(messages, this.modelName))
-                .temperature(this.temperature).topP(this.topP).stop(this.stop).maxTokens(this.maxTokens)
-                .presencePenalty(this.presencePenalty).frequencyPenalty(this.frequencyPenalty);
+        Builder requestBuilder = null;
+        if (modelName.contains(ChatModel.ZHIPU.toString()) || modelName.contains(ChatModel.ALI.toString())) {
+            requestBuilder = ChatCompletionRequest.builder()
+                    .model(this.modelName)
+                    .messages(ImproveInternalOpenAiHelper.toOpenAiMessages(messages, this.modelName));
+        } else {
+            requestBuilder = ChatCompletionRequest.builder()
+                    .model(this.modelName)
+                    .messages(ImproveInternalOpenAiHelper.toOpenAiMessages(messages, this.modelName))
+                    .temperature(this.temperature).topP(this.topP).stop(this.stop).maxTokens(this.maxTokens)
+                    .presencePenalty(this.presencePenalty).frequencyPenalty(this.frequencyPenalty);
+        }
         if (toolSpecifications != null && !toolSpecifications.isEmpty()) {
             requestBuilder.functions(InternalOpenAiHelper.toFunctions(toolSpecifications));
         }

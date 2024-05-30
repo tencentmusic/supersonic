@@ -172,6 +172,12 @@
             <artifactId>duckdb_jdbc</artifactId>
             <version>${duckdb_jdbc.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.tencent.supersonic</groupId>
+            <artifactId>launchers-common</artifactId>
+            <version>0.9.2-SNAPSHOT</version>
+            <scope>compile</scope>
+        </dependency>
     </dependencies>
 
 
