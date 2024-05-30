@@ -21,7 +21,7 @@ import MobileAgents from './MobileAgents';
 import { HistoryMsgItemType, MsgDataType, SendMsgParamsType } from '../common/type';
 import { getHistoryMsg } from '../service';
 import ShowCase from '../ShowCase';
-import { Drawer, Modal } from 'antd';
+import { Drawer, Modal, Row, Col, Space, Switch, Tooltip } from 'antd';
 
 type Props = {
   token?: string;
@@ -65,6 +65,8 @@ const Chat: ForwardRefRenderFunction<any, Props> = (
   const [mobileAgentsVisible, setMobileAgentsVisible] = useState(false);
   const [agentListVisible, setAgentListVisible] = useState(true);
   const [showCaseVisible, setShowCaseVisible] = useState(false);
+
+  const [isSimpleMode, setIsSimpleMode] = useState<boolean>(false);
 
   const conversationRef = useRef<any>();
   const chatFooterRef = useRef<any>();
@@ -370,12 +372,32 @@ const Chat: ForwardRefRenderFunction<any, Props> = (
               <div className={styles.chatContent}>
                 {currentAgent && !isMobile && !noInput && (
                   <div className={styles.chatHeader}>
-                    <div className={styles.chatHeaderTitle}>{currentAgent.name}</div>
-                    <div className={styles.chatHeaderTip}>{currentAgent.description}</div>
+                    <Row style={{ width: '100%' }}>
+                      <Col flex="1 1 200px">
+                        <Space>
+                          <div className={styles.chatHeaderTitle}>{currentAgent.name}</div>
+                          <div className={styles.chatHeaderTip}>{currentAgent.description}</div>
+                          <Tooltip title="精简模式下，问答结果将以文本形式输出">
+                            <Switch
+                              style={{ position: 'relative', top: -1 }}
+                              size="small"
+                              value={isSimpleMode}
+                              checkedChildren="精简模式"
+                              unCheckedChildren="精简模式"
+                              onChange={checked => {
+                                setIsSimpleMode(checked);
+                              }}
+                            />
+                          </Tooltip>
+                        </Space>
+                      </Col>
+                      <Col flex="0 1 118px"></Col>
+                    </Row>
                   </div>
                 )}
                 <MessageContainer
                   id="messageContainer"
+                  isSimpleMode={isSimpleMode}
                   messageList={messageList}
                   chatId={currentConversation?.chatId}
                   historyVisible={historyVisible}

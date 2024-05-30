@@ -5,6 +5,7 @@ import { Button, DatePicker } from 'antd';
 import { CheckCircleFilled, ReloadOutlined } from '@ant-design/icons';
 import Loading from './Loading';
 import FilterItem from './FilterItem';
+import MarkDown from '../ChatMsg/MarkDown';
 import classNames from 'classnames';
 import { isMobile } from '../../utils/utils';
 import dayjs from 'dayjs';
@@ -23,6 +24,7 @@ type Props = {
   integrateSystem?: string;
   parseTimeCost?: number;
   isDeveloper?: boolean;
+  isSimpleMode?: boolean;
   onSelectParseInfo: (parseInfo: ChatContextType) => void;
   onSwitchEntity: (entityId: string) => void;
   onFiltersChange: (filters: FilterItemType[]) => void;
@@ -44,6 +46,7 @@ const ParseTip: React.FC<Props> = ({
   integrateSystem,
   parseTimeCost,
   isDeveloper,
+  isSimpleMode,
   onSelectParseInfo,
   onSwitchEntity,
   onFiltersChange,
@@ -51,7 +54,6 @@ const ParseTip: React.FC<Props> = ({
   onRefresh,
 }) => {
   const prefixCls = `${PREFIX_CLS}-item`;
-
   const getNode = (tipTitle: ReactNode, tipNode?: ReactNode) => {
     return (
       <div className={`${prefixCls}-parse-tip`}>
@@ -99,6 +101,7 @@ const ParseTip: React.FC<Props> = ({
     entity,
     elementMatches,
     nativeQuery,
+    textInfo = '',
   } = currentParseInfo || {};
 
   const entityAlias = entity?.alias?.[0]?.split('.')?.[0];
@@ -152,15 +155,15 @@ const ParseTip: React.FC<Props> = ({
                 <div className={itemValueClass}>{dataSet?.name}</div>
               </div>
             )}
-            {(queryType === 'METRIC' || queryType === 'METRIC_ID' || queryType === 'TAG') && (
+            {(queryType === 'METRIC' || queryType === 'METRIC_TAG' || queryType === 'DETAIL') && (
               <div className={`${prefixCls}-tip-item`}>
                 <div className={`${prefixCls}-tip-item-name`}>查询模式：</div>
                 <div className={itemValueClass}>
-                  {queryType === 'METRIC' || queryType === 'METRIC_ID' ? '指标模式' : '标签模式'}
+                  {queryType === 'METRIC' || queryType === 'METRIC_TAG' ? '指标模式' : '明细模式'}
                 </div>
               </div>
             )}
-            {queryType !== 'TAG' &&
+            {queryType !== 'DETAIL' &&
               metrics &&
               metrics.length > 0 &&
               !dimensions?.some(item => item.bizName?.includes('_id')) && (
@@ -315,7 +318,7 @@ const ParseTip: React.FC<Props> = ({
         </div>
       )}
     </div>,
-    tipNode
+    isSimpleMode ? <MarkDown markdown={textInfo} /> : tipNode
   );
 };
 
