@@ -151,7 +151,7 @@ public class SemanticService {
                                                           DataSetSchema dataSetSchema, User user) {
         SemanticParseInfo semanticParseInfo = new SemanticParseInfo();
         semanticParseInfo.setDataSet(dataSetSchema.getDataSet());
-        semanticParseInfo.setQueryType(QueryType.TAG);
+        semanticParseInfo.setQueryType(QueryType.DETAIL);
         semanticParseInfo.setMetrics(getMetrics(entityInfo));
         semanticParseInfo.setDimensions(getDimensions(entityInfo));
         DateConf dateInfo = new DateConf();

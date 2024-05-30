@@ -223,7 +223,8 @@ public class DataSetServiceImpl
             queryReq = new QuerySqlReq();
         }
         BeanUtils.copyProperties(queryDataSetReq, queryReq);
-        if (Objects.nonNull(queryDataSetReq.getQueryType()) && QueryType.TAG.equals(queryDataSetReq.getQueryType())) {
+        if (Objects.nonNull(queryDataSetReq.getQueryType())
+                && QueryType.DETAIL.equals(queryDataSetReq.getQueryType())) {
             queryReq.setInnerLayerNative(true);
         }
         return queryReq;

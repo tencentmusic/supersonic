@@ -27,7 +27,7 @@ public class QueryByStructTest extends BaseTest {
     @Test
     public void testDetailQuery() throws Exception {
         QueryStructReq queryStructReq = buildQueryStructReq(Arrays.asList("user_name", "department"),
-                QueryType.TAG);
+                QueryType.DETAIL);
         SemanticQueryResp semanticQueryResp = queryService.queryByReq(queryStructReq, User.getFakeUser());
         assertEquals(3, semanticQueryResp.getColumns().size());
         QueryColumn firstColumn = semanticQueryResp.getColumns().get(0);

@@ -600,7 +600,7 @@ public class ChatQueryServiceImpl implements ChatQueryService {
         sqlInfo.setCorrectS2SQL(querySqlReq.getSql());
         sqlInfo.setS2SQL(querySqlReq.getSql());
         semanticParseInfo.setSqlInfo(sqlInfo);
-        semanticParseInfo.setQueryType(QueryType.TAG);
+        semanticParseInfo.setQueryType(QueryType.DETAIL);
 
         Long dataSetId = querySqlReq.getDataSetId();
         if (Objects.isNull(dataSetId)) {
