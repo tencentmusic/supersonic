@@ -94,7 +94,7 @@ public class ParseInfoProcessor implements ResultProcessor {
             List<String> groupByFields = SqlSelectHelper.getGroupByFields(sqlInfo.getCorrectS2SQL());
             List<String> groupByDimensions = getFieldsExceptDate(groupByFields);
             parseInfo.setDimensions(getElements(dataSetId, groupByDimensions, semanticSchema.getDimensions()));
-        } else if (QueryType.TAG.equals(parseInfo.getQueryType())) {
+        } else if (QueryType.DETAIL.equals(parseInfo.getQueryType())) {
             List<String> selectFields = SqlSelectHelper.getSelectFields(sqlInfo.getCorrectS2SQL());
             List<String> selectDimensions = getFieldsExceptDate(selectFields);
             parseInfo.setDimensions(getElements(dataSetId, selectDimensions, semanticSchema.getDimensions()));

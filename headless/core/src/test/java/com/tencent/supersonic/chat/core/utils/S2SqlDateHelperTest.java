@@ -57,11 +57,11 @@ class S2SqlDateHelperTest {
         Long dataSetId = 1L;
         QueryContext queryContext = buildQueryContext(dataSetId);
 
-        Pair<String, String> startEndDate = S2SqlDateHelper.getStartEndDate(queryContext, null, QueryType.TAG);
+        Pair<String, String> startEndDate = S2SqlDateHelper.getStartEndDate(queryContext, null, QueryType.DETAIL);
         Assert.assertEquals(startEndDate.getLeft(), DateUtils.getBeforeDate(0));
         Assert.assertEquals(startEndDate.getRight(), DateUtils.getBeforeDate(0));
 
-        startEndDate = S2SqlDateHelper.getStartEndDate(queryContext, dataSetId, QueryType.TAG);
+        startEndDate = S2SqlDateHelper.getStartEndDate(queryContext, dataSetId, QueryType.DETAIL);
         Assert.assertNull(startEndDate.getLeft());
         Assert.assertNull(startEndDate.getRight());
 
@@ -74,7 +74,7 @@ class S2SqlDateHelperTest {
         queryConfig.getTagTypeDefaultConfig().setTimeDefaultConfig(timeDefaultConfig);
         queryConfig.getMetricTypeDefaultConfig().setTimeDefaultConfig(timeDefaultConfig);
 
-        startEndDate = S2SqlDateHelper.getStartEndDate(queryContext, dataSetId, QueryType.TAG);
+        startEndDate = S2SqlDateHelper.getStartEndDate(queryContext, dataSetId, QueryType.DETAIL);
         Assert.assertEquals(startEndDate.getLeft(), DateUtils.getBeforeDate(20));
         Assert.assertEquals(startEndDate.getRight(), DateUtils.getBeforeDate(20));
 
@@ -88,7 +88,7 @@ class S2SqlDateHelperTest {
         Assert.assertEquals(startEndDate.getLeft(), DateUtils.getBeforeDate(2));
         Assert.assertEquals(startEndDate.getRight(), DateUtils.getBeforeDate(1));
 
-        startEndDate = S2SqlDateHelper.getStartEndDate(queryContext, dataSetId, QueryType.TAG);
+        startEndDate = S2SqlDateHelper.getStartEndDate(queryContext, dataSetId, QueryType.DETAIL);
         Assert.assertEquals(startEndDate.getLeft(), DateUtils.getBeforeDate(2));
         Assert.assertEquals(startEndDate.getRight(), DateUtils.getBeforeDate(1));
 
