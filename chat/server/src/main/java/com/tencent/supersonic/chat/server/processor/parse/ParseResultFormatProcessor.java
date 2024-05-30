@@ -37,9 +37,9 @@ public class ParseResultFormatProcessor implements ParseResultProcessor {
         if (!CollectionUtils.isEmpty(dimensionNames)) {
             textBuilder.append("**维度:** ").append(String.join(",", dimensionNames));
         }
-        textBuilder.append("\n**筛选条件:**\n");
+        textBuilder.append("\n\n**筛选条件:** \n");
         if (parseInfo.getDateInfo() != null) {
-            textBuilder.append("数据时间:").append(parseInfo.getDateInfo().getStartDate()).append("~")
+            textBuilder.append("**数据时间:** ").append(parseInfo.getDateInfo().getStartDate()).append("~")
                     .append(parseInfo.getDateInfo().getEndDate()).append(" ");
         }
         if (!CollectionUtils.isEmpty(parseInfo.getDimensionFilters())
@@ -47,7 +47,7 @@ public class ParseResultFormatProcessor implements ParseResultProcessor {
             Set<QueryFilter> queryFilters = parseInfo.getDimensionFilters();
             queryFilters.addAll(parseInfo.getMetricFilters());
             for (QueryFilter queryFilter : queryFilters) {
-                textBuilder.append(queryFilter.getName())
+                textBuilder.append("**").append(queryFilter.getName()).append("**")
                         .append(" ")
                         .append(queryFilter.getOperator().getValue())
                         .append(" ")

@@ -45,7 +45,6 @@ public class TwoPassSCSqlGenStrategy extends SqlGenStrategy {
                 }
         );
         List<String> sortedList = OutputFormat.formatList(linkingResults);
-        Pair<String, Map<String, Double>> linkingMap = OutputFormat.selfConsistencyVote(sortedList);
         //3.generator sql prompt,and parallel generate response.
         List<String> sqlPromptPool = promptGenerator.generateSqlPromptPool(llmReq, sortedList, exampleListPool);
         List<String> sqlTaskPool = new CopyOnWriteArrayList<>();
