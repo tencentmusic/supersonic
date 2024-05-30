@@ -48,7 +48,7 @@ s2:
     self-consistency:
       number: 5
     multi-turn:
-      enable: false
+      enable: true
 
   corrector:
     additional:
@@ -74,11 +74,11 @@ s2:
         # Replace with your LLM configs
         # Note: The default API key `demo` is provided by langchain4j community
         #       which limits 1000 tokens per request.
-        base-url: ${OPENAI_API_BASE:https://api.openai.com/v1}
-        api-key: ${OPENAI_API_KEY:demo}
-        model-name: ${OPENAI_MODEL_NAME:gpt-3.5-turbo}
-        temperature: ${OPENAI_TEMPERATURE:0.0}
-        timeout: ${OPENAI_TIMEOUT:PT60S}
+        base-url: https://aihubmix.com/v1
+        api-key: sk-PQXoJIdEZhdnWClvC38559546c1945EcAa1e11570eE99b6d
+        model-name: gpt-3.5-turbo-16k
+        temperature: 0.0
+        timeout: PT60S
     #2.embedding-model
     #2.1 in_memory(default)
     embedding-model:

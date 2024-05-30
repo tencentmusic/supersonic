@@ -130,7 +130,7 @@ export const layout: RunTimeLayoutConfig = (params) => {
           style={{ display: 'inline-block', marginTop: 8 }}
         />
         <div className="logo" style={{ color: '#262626' }}>
-          SuperSonic
+          ChatData
         </div>
       </Space>
     ),
