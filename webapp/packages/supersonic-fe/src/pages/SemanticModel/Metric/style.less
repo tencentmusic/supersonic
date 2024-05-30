@@ -1,3 +1,18 @@
+
+.metricWrapper {
+  width: 100%;
+  margin-left: auto;
+  box-sizing: border-box;
+  margin-right: auto;
+  padding-left: 16px;
+  padding-right: 16px;
+  position: relative;
+  min-height: calc(-110px + 100vh);
+  display: flex;
+  flex-direction: column;
+}
+
+
 .metricFilterWrapper {
   margin: 20px;
   padding: 20px;
@@ -169,8 +184,6 @@
 }
 
 .metricEditWrapper {
-  // height: calc(100vh - 56px);
-  // overflow: scroll;
   .metricDetailTab {
     :global {
       .ant-tabs-nav {
@@ -197,7 +210,6 @@
     height: 100%;
     .tabContainer {
       padding: 24px;
-      // height: 100%;
       min-height: calc(100vh - 78px);
       width: calc(100vw - 350px);
       background-color: #fafafb;
@@ -228,12 +240,8 @@
     .siderContainer {
       width: 350px;
       min-height: calc(100vh - 78px);
-      // margin: 10px 20px 20px 0;
-      // background-color: rgb(255, 255, 255);
       border-radius: 6px;
       padding: 24px 0 24px 24px;
-      // box-shadow: rgba(0, 0, 0, 0.08) 6px 0px 16px 0px, rgba(0, 0, 0, 0.12) 3px 0px 6px -4px,
-      //   rgba(0, 0, 0, 0.05) 9px 0px 28px 8px;
     }
   }
 }

@@ -111,7 +111,6 @@ const ModelFieldForm: React.FC<Props> = ({
               const isCreateName = getCreateFieldName(value);
               const editState = !isUndefined(record[isCreateName]) ? !!record[isCreateName] : true;
               const { name, comment } = record;
-              // handleFieldChange(record, 'type', value);
               onFieldChange(record.bizName, {
                 ...record,
                 type: value,
@@ -255,8 +254,8 @@ const ModelFieldForm: React.FC<Props> = ({
       dataIndex: 'fastCreate',
       width: 200,
       render: (_: any, record: FieldItem) => {
-        const { type, name, comment } = record;
-        const inputValue = name || comment;
+        const { type, name } = record;
+        const inputValue = name;
         if (
           [
             EnumDataSourceType.PRIMARY,
