@@ -75,7 +75,7 @@ public class SqlInfoProcessor implements ResultProcessor {
         }
         SqlInfo sqlInfo = parseInfo.getSqlInfo();
         if (semanticQuery instanceof LLMSqlQuery) {
-            keyPipelineLog.info("\nparsedS2SQL:{}\ncorrectedS2SQL:{}\nfinalSQL:{}", sqlInfo.getS2SQL(),
+            keyPipelineLog.info("SqlInfoProcessor results:\nParsed S2SQL:{}\nCorrected S2SQL:{}\nFinal SQL:{}", sqlInfo.getS2SQL(),
                     sqlInfo.getCorrectS2SQL(), explainSql);
         }
         sqlInfo.setQuerySQL(explainSql);

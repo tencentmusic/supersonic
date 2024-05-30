@@ -25,7 +25,7 @@ public class OnePassSCSqlGenStrategy extends SqlGenStrategy {
     @Override
     public LLMResp generate(LLMReq llmReq) {
         //1.retriever sqlExamples and generate exampleListPool
-        keyPipelineLog.info("llmReq:{}", llmReq);
+        keyPipelineLog.info("OnePassSCSqlGenStrategy llmReq:{}", llmReq);
 
         List<Map<String, String>> sqlExamples = exemplarManager.recallExemplars(llmReq.getQueryText(),
                 optimizationConfig.getText2sqlExampleNum());
@@ -39,12 +39,12 @@ public class OnePassSCSqlGenStrategy extends SqlGenStrategy {
         linkingSqlPromptPool.parallelStream().forEach(linkingSqlPrompt -> {
                     Prompt prompt = PromptTemplate.from(JsonUtil.toString(linkingSqlPrompt))
                             .apply(new HashMap<>());
-                    keyPipelineLog.info("request prompt:{}", prompt.toSystemMessage());
+                    keyPipelineLog.info("OnePassSCSqlGenStrategy reqPrompt:{}", prompt.toSystemMessage());
             ChatLanguageModel chatLanguageModel = getChatLanguageModel(llmReq.getLlmConfig());
             Response<AiMessage> response = chatLanguageModel.generate(prompt.toSystemMessage());
                     String result = response.content().text();
                     llmResults.add(result);
-                    keyPipelineLog.info("model response:{}", result);
+                    keyPipelineLog.info("OnePassSCSqlGenStrategy modelResp:{}", result);
                 }
         );
         //3.format response.
@@ -56,7 +56,6 @@ public class OnePassSCSqlGenStrategy extends SqlGenStrategy {
                 .map(llmResult -> OutputFormat.getSql(llmResult)).collect(Collectors.toList());
 
         Pair<String, Map<String, Double>> sqlMapPair = OutputFormat.selfConsistencyVote(sqlList);
-        keyPipelineLog.info("linkingMap:{} sqlMap:{}", linkingMap, sqlMapPair.getRight());
 
         LLMResp result = new LLMResp();
         result.setQuery(llmReq.getQueryText());
