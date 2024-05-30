@@ -52,6 +52,9 @@ const ClassDimensionTable: React.FC<Props> = ({}) => {
   const actionRef = useRef<ActionType>();
 
   const queryDimensionList = async (params: any) => {
+    if (!modelId) {
+      return;
+    }
     setLoading(true);
     const { code, data, msg } = await getDimensionList({
       ...pagination,
@@ -85,7 +88,7 @@ const ClassDimensionTable: React.FC<Props> = ({}) => {
 
   useEffect(() => {
     queryDimensionList({ ...filterParams, ...defaultPagination });
-  }, [filterParams]);
+  }, [filterParams, modelId]);
 
   useEffect(() => {
     queryDataSourceList();

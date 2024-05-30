@@ -110,11 +110,12 @@ const ModelFieldForm: React.FC<Props> = ({
               }
               const isCreateName = getCreateFieldName(value);
               const editState = !isUndefined(record[isCreateName]) ? !!record[isCreateName] : true;
+              const { name, comment } = record;
               // handleFieldChange(record, 'type', value);
               onFieldChange(record.bizName, {
                 ...record,
                 type: value,
-                name: '',
+                name: name || comment,
                 [isCreateName]: editState,
                 ...defaultParams,
               });

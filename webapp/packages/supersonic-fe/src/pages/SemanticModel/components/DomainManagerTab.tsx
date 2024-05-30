@@ -205,7 +205,7 @@ const DomainManagerTab: React.FC<Props> = ({
       />
       <Tabs
         className={styles.tab}
-        items={!isModel ? tabItem : isModelItem}
+        items={!isModel ? tabItem : selectModelId ? isModelItem : []}
         activeKey={getActiveKey()}
         // destroyInactiveTabPane
         tabBarExtraContent={{
