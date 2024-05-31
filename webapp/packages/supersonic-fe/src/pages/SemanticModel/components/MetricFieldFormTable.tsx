@@ -1,7 +1,7 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Button, Tag, Space } from 'antd';
+import React, { useState, useEffect } from 'react';
+import { Tag, Space } from 'antd';
 import { ProTable } from '@ant-design/pro-components';
-import { ProCard } from  '@ant-design/pro-components';
+import { ProCard } from '@ant-design/pro-components';
 import SqlEditor from '@/components/SqlEditor';
 import styles from './style.less';
 import FormLabelRequire from './FormLabelRequire';

@@ -100,8 +100,6 @@ const MetricInfoCreateForm: React.FC<CreateFormProps> = ({
     },
   } as any);
 
-  // const [exprTypeParamsState, setExprTypeParamsState] = useState<ISemantic.IMeasure[]>([]);
-
   const [defineType, setDefineType] = useState(METRIC_DEFINE_TYPE.MEASURE);
 
   const [createNewMetricList, setCreateNewMetricList] = useState<ISemantic.IMetricItem[]>([]);
@@ -123,11 +121,11 @@ const MetricInfoCreateForm: React.FC<CreateFormProps> = ({
     ISemantic.IDrillDownDimensionItem[]
   >([]);
 
-  const forward = () => setCurrentStep(currentStep + 1);
-  const backward = () => setCurrentStep(currentStep - 1);
-
   const queryModelDetail = async () => {
-    const { code, data } = await getModelDetail({ modelId: modelId || metricItem?.modelId });
+    if (!modelId) {
+      return;
+    }
+    const { code, data } = await getModelDetail({ modelId });
     if (code === 200) {
       if (Array.isArray(data?.modelDetail?.fields)) {
         if (Array.isArray(metricItem?.metricDefineByFieldParams?.fields)) {
@@ -817,32 +815,7 @@ const MetricInfoCreateForm: React.FC<CreateFormProps> = ({
       </>
     );
   };
-  const renderFooter = () => {
-    if (!hasMeasuresState) {
-      return <Button onClick={onCancel}>取消</Button>;
-    }
-    if (currentStep === 1) {
-      return (
-        <>
-          <Button style={{ float: 'left' }} onClick={backward}>
-            上一步
-          </Button>
-          <Button onClick={onCancel}>取消</Button>
-          <Button type="primary" onClick={handleSave}>
-            完成
-          </Button>
-        </>
-      );
-    }
-    return (
-      <>
-        <Button onClick={onCancel}>取消</Button>
-        <Button type="primary" onClick={handleSave}>
-          下一步
-        </Button>
-      </>
-    );
-  };
+
   return (
     <>
       {hasMeasuresState ? (

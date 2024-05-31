@@ -35,16 +35,16 @@ const MetricDetail: React.FC<Props> = () => {
 
   return (
     <>
-      <div className={styles.metricEditWrapper}>
+      <div className={styles.metricWrapper}>
         <div className={styles.metricDetail}>
-          <div className={styles.siderContainer}>
+          {/* <div className={styles.siderContainer}>
             <MetricInfoEditSider
               onSettingKeyChange={(key: string) => {
                 setSettingKey(key);
               }}
               metircData={metircData}
             />
-          </div>
+          </div> */}
           <div className={styles.tabContainer}>
             <MetricInfoCreateForm settingKey={settingKey} metricItem={metircData} />
           </div>

@@ -27,4 +27,13 @@ public class LLMConfig {
         this.apiKey = apiKey;
         this.modelName = modelName;
     }
+
+    public LLMConfig(String provider, String baseUrl, String apiKey, String modelName,
+                     double temperature) {
+        this.provider = provider;
+        this.baseUrl = baseUrl;
+        this.apiKey = apiKey;
+        this.modelName = modelName;
+        this.temperature = temperature;
+    }
 }

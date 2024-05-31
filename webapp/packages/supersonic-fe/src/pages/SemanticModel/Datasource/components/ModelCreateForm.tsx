@@ -406,9 +406,9 @@ const ModelCreateForm: React.FC<CreateFormProps> = ({
     if (code === 200) {
       const list = data?.resultList || [];
       const columns = list.map((item: any, index: number) => {
-        const { dataType, name } = item;
+        const { dataType, name, comment } = item;
         return {
-          ...item,
+          comment,
           nameEn: name,
           type: dataType,
         };

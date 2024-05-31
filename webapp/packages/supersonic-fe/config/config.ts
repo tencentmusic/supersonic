@@ -1,13 +1,12 @@
 // https://umijs.org/config/
 import { defineConfig } from '@umijs/max';
 // import { join } from 'path';
-import defaultSettings from './defaultSettings';
+import defaultSettings, { publicPath } from './defaultSettings';
 import proxy from './proxy';
 import routes from './routes';
 import dayjs from 'dayjs';
 const { REACT_APP_ENV = 'dev', RUN_TYPE } = process.env;
 
-const publicPath = '/webapp/';
 import ENV_CONFIG from './envConfig';
 
 export default defineConfig({
@@ -77,7 +76,10 @@ export default defineConfig({
    * @doc 代理配置 https://umijs.org/docs/api/config#proxy
    */
   proxy: proxy[REACT_APP_ENV as keyof typeof proxy],
-  base: publicPath,
+  manifest: {
+    basePath: '/',
+  },
+  base: '/',
   publicPath,
   outputPath: RUN_TYPE === 'local' ? 'supersonic-webapp' : 'dist',
   /**
@@ -101,7 +103,7 @@ export default defineConfig({
    * @name layout 插件
    * @doc https://umijs.org/docs/max/layout-menu
    */
-  title: 'TME内容库',
+  title: 'Supersonic',
   layout: {
     locale: true,
     ...defaultSettings,
@@ -150,7 +152,7 @@ export default defineConfig({
    */
   headScripts: [
     // 解决首次加载时白屏的问题
-    { src: '/webapp/scripts/loading.js', async: true },
+    { src: `${publicPath}scripts/loading.js`, async: true },
   ],
 
   //================ pro 插件配置 =================
