@@ -10,15 +10,17 @@ import java.util.List;
 @NoArgsConstructor
 public class Parameter {
     private String name;
-    private String value;
+    private String defaultValue;
     private String comment;
     private String description;
     private String dataType;
     private String module;
     private List<Object> candidateValues;
-    public Parameter(String name, String value, String comment, String description, String dataType, String module) {
+
+    public Parameter(String name, String defaultValue, String comment,
+                     String description, String dataType, String module) {
         this.name = name;
-        this.value = value;
+        this.defaultValue = defaultValue;
         this.comment = comment;
         this.description = description;
         this.dataType = dataType;

@@ -4,7 +4,6 @@ import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.headless.api.pojo.response.S2Term;
 import com.tencent.supersonic.headless.core.chat.knowledge.HanlpMapResult;
 import com.tencent.supersonic.headless.core.chat.knowledge.KnowledgeBaseService;
-import com.tencent.supersonic.headless.core.config.OptimizationConfig;
 import com.tencent.supersonic.headless.core.pojo.QueryContext;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
@@ -21,6 +20,14 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static com.tencent.supersonic.headless.core.config.MapperConfig.MAPPER_DETECTION_MAX_SIZE;
+import static com.tencent.supersonic.headless.core.config.MapperConfig.MAPPER_DETECTION_SIZE;
+import static com.tencent.supersonic.headless.core.config.MapperConfig.MAPPER_DIMENSION_VALUE_SIZE;
+import static com.tencent.supersonic.headless.core.config.MapperConfig.MAPPER_NAME_THRESHOLD;
+import static com.tencent.supersonic.headless.core.config.MapperConfig.MAPPER_NAME_THRESHOLD_MIN;
+import static com.tencent.supersonic.headless.core.config.MapperConfig.MAPPER_VALUE_THRESHOLD;
+import static com.tencent.supersonic.headless.core.config.MapperConfig.MAPPER_VALUE_THRESHOLD_MIN;
+
 /**
  * HanlpDictMatchStrategy uses <a href="https://www.hanlp.com/">HanLP</a> to
  * match schema elements. It currently supports prefix and suffix matching
@@ -29,12 +36,6 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 public class HanlpDictMatchStrategy extends BaseMatchStrategy<HanlpMapResult> {
-
-    @Autowired
-    private MapperHelper mapperHelper;
-
-    @Autowired
-    private OptimizationConfig optimizationConfig;
 
     @Autowired
     private KnowledgeBaseService knowledgeBaseService;
@@ -65,7 +66,7 @@ public class HanlpDictMatchStrategy extends BaseMatchStrategy<HanlpMapResult> {
     public void detectByStep(QueryContext queryContext, Set<HanlpMapResult> existResults, Set<Long> detectDataSetIds,
             String detectSegment, int offset) {
         // step1. pre search
-        Integer oneDetectionMaxSize = optimizationConfig.getOneDetectionMaxSize();
+        Integer oneDetectionMaxSize = Integer.valueOf(mapperConfig.getParameterValue(MAPPER_DETECTION_MAX_SIZE));
         LinkedHashSet<HanlpMapResult> hanlpMapResults = knowledgeBaseService.prefixSearch(detectSegment,
                         oneDetectionMaxSize, queryContext.getModelIdToDataSetIds(), detectDataSetIds)
                 .stream().collect(Collectors.toCollection(LinkedHashSet::new));
@@ -99,12 +100,13 @@ public class HanlpDictMatchStrategy extends BaseMatchStrategy<HanlpMapResult> {
         }).collect(Collectors.toCollection(LinkedHashSet::new));
 
         // step5. take only M dimensionValue or N-M metric/dimension value per rond.
+        int oneDetectionValueSize = Integer.valueOf(mapperConfig.getParameterValue(MAPPER_DIMENSION_VALUE_SIZE));
         List<HanlpMapResult> dimensionValues = hanlpMapResults.stream()
                 .filter(entry -> mapperHelper.existDimensionValues(entry.getNatures()))
-                .limit(optimizationConfig.getOneDetectionDimensionValueSize())
+                .limit(oneDetectionValueSize)
                 .collect(Collectors.toList());
 
-        Integer oneDetectionSize = optimizationConfig.getOneDetectionSize();
+        Integer oneDetectionSize = Integer.valueOf(mapperConfig.getParameterValue(MAPPER_DETECTION_SIZE));
         List<HanlpMapResult> oneRoundResults = new ArrayList<>();
 
         // add the dimensionValue if it exists
@@ -129,13 +131,14 @@ public class HanlpDictMatchStrategy extends BaseMatchStrategy<HanlpMapResult> {
     }
 
     public double getThresholdMatch(List<String> natures, QueryContext queryContext) {
-        Double threshold = optimizationConfig.getMetricDimensionThresholdConfig();
-        Double minThreshold = optimizationConfig.getMetricDimensionMinThresholdConfig();
+        Double threshold = Double.valueOf(mapperConfig.getParameterValue(MAPPER_NAME_THRESHOLD));
+        Double minThreshold = Double.valueOf(mapperConfig.getParameterValue(MAPPER_NAME_THRESHOLD_MIN));
         if (mapperHelper.existDimensionValues(natures)) {
-            threshold = optimizationConfig.getDimensionValueThresholdConfig();
-            minThreshold = optimizationConfig.getDimensionValueMinThresholdConfig();
+            threshold = Double.valueOf(mapperConfig.getParameterValue(MAPPER_VALUE_THRESHOLD));
+            minThreshold = Double.valueOf(mapperConfig.getParameterValue(MAPPER_VALUE_THRESHOLD_MIN));
         }
-        return getThreshold(threshold, minThreshold, queryContext.getMapModeEnum());
 
+        return getThreshold(threshold, minThreshold, queryContext.getMapModeEnum());
     }
+
 }

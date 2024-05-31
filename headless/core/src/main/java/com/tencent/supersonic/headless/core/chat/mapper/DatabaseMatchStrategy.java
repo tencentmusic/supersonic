@@ -5,12 +5,10 @@ import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementMatch;
 import com.tencent.supersonic.headless.api.pojo.response.S2Term;
-import com.tencent.supersonic.headless.core.config.OptimizationConfig;
 import com.tencent.supersonic.headless.core.pojo.QueryContext;
 import com.tencent.supersonic.headless.core.chat.knowledge.DatabaseMapResult;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -22,6 +20,9 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static com.tencent.supersonic.headless.core.config.MapperConfig.MAPPER_NAME_THRESHOLD;
+import static com.tencent.supersonic.headless.core.config.MapperConfig.MAPPER_NAME_THRESHOLD_MIN;
+
 /**
  * DatabaseMatchStrategy uses SQL LIKE operator to match schema elements.
  * It currently supports fuzzy matching against names and aliases.
@@ -30,10 +31,6 @@ import java.util.stream.Collectors;
 @Slf4j
 public class DatabaseMatchStrategy extends BaseMatchStrategy<DatabaseMapResult> {
 
-    @Autowired
-    private OptimizationConfig optimizationConfig;
-    @Autowired
-    private MapperHelper mapperHelper;
     private List<SchemaElement> allElements;
 
     @Override
@@ -94,9 +91,8 @@ public class DatabaseMatchStrategy extends BaseMatchStrategy<DatabaseMapResult> 
     }
 
     private Double getThreshold(QueryContext queryContext) {
-
-        Double threshold = optimizationConfig.getMetricDimensionThresholdConfig();
-        Double minThreshold = optimizationConfig.getMetricDimensionMinThresholdConfig();
+        Double threshold = Double.valueOf(mapperConfig.getParameterValue(MAPPER_NAME_THRESHOLD));
+        Double minThreshold = Double.valueOf(mapperConfig.getParameterValue(MAPPER_NAME_THRESHOLD_MIN));
 
         Map<Long, List<SchemaElementMatch>> modelElementMatches = queryContext.getMapInfo().getDataSetElementMatches();
 
