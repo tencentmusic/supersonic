@@ -90,7 +90,7 @@ const DomainListTree: FC<DomainListProps> = ({
       type: 'normal',
       parentId: domainId,
       name: '默认模型集',
-      bizName: 'defaultModelSet',
+      bizName: `defaultModelSet_${(Math.random() * 1000000).toFixed(0)}`,
       isUnique: 1,
     });
     if (code !== 200) {
@@ -124,6 +124,7 @@ const DomainListTree: FC<DomainListProps> = ({
 
   const titleRender = (node: any) => {
     const { id, name, path, hasEditPermission, parentId, hasModel } = node as any;
+    const type = parentId === 0 ? 'top' : 'normal';
     return (
       <div className={styles.projectItem}>
         <span
@@ -156,7 +157,7 @@ const DomainListTree: FC<DomainListProps> = ({
               onClick={() => {
                 setDomainInfoParams({
                   modelType: 'edit',
-                  type: 'normal',
+                  type,
                   ...node,
                 });
                 setProjectInfoModalVisible(true);

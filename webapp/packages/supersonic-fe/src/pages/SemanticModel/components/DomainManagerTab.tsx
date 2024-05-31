@@ -164,7 +164,7 @@ const DomainManagerTab: React.FC<Props> = ({
   };
 
   return (
-    <>
+    <div>
       <Breadcrumb
         className={styles.breadcrumb}
         separator=""
@@ -207,7 +207,6 @@ const DomainManagerTab: React.FC<Props> = ({
         className={styles.tab}
         items={!isModel ? tabItem : selectModelId ? isModelItem : []}
         activeKey={getActiveKey()}
-        // destroyInactiveTabPane
         tabBarExtraContent={{
           right:
             getActiveKey() === 'overview' ? (
@@ -226,13 +225,12 @@ const DomainManagerTab: React.FC<Props> = ({
               </Radio.Group>
             ) : undefined,
         }}
-        // destroyInactiveTabPane
         size="large"
         onChange={(menuKey: string) => {
           onMenuChange?.(menuKey);
         }}
       />
-    </>
+    </div>
   );
 };
 

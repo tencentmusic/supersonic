@@ -141,7 +141,7 @@ const ModelFieldForm: React.FC<Props> = ({
             <Space>
               <Select
                 style={{ minWidth: 150 }}
-                value={tagObjectId}
+                value={tagObjectId ? tagObjectId : undefined}
                 placeholder="请选择所属对象"
                 onChange={(value) => {
                   onTagObjectChange?.(value);
