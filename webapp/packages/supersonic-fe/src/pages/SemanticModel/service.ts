@@ -383,11 +383,6 @@ export function getColumns(dbId: number, dbName: string, tableName: string): Pro
 }
 
 export function getModelList(domainId: number): Promise<any> {
-  if (getRunningEnv() === 'chat') {
-    return request(`${process.env.CHAT_API_BASE_URL}conf/modelList/${domainId}`, {
-      method: 'GET',
-    });
-  }
   return request(`${process.env.API_BASE_URL}model/getModelList/${domainId}`, {
     method: 'GET',
   });

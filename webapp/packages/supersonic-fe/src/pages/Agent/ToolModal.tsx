@@ -1,4 +1,4 @@
-import { Form, Modal, Input, Select, Button, TreeSelect } from 'antd';
+import { Form, Modal, Input, Select, Button, TreeSelect, message } from 'antd';
 import {
   AgentToolType,
   AgentToolTypeEnum,
@@ -32,14 +32,12 @@ const ToolModal: React.FC<Props> = ({ editTool, onSaveTool, onCancel }) => {
   const [form] = Form.useForm();
 
   const initModelList = async () => {
-    const res = await getModelList();
-    const treeData = traverseTree(res.data, (node: any) => {
-      node.title = node.name;
-      node.value = node.type === 'DOMAIN' ? `DOMAIN_${node.id}` : node.id;
-      node.checkable =
-        node.type === 'DATASET' || (node.type === 'DOMAIN' && node.children?.length > 0);
-    });
-    setModelList([{ title: '默认', value: -1, type: 'DATASET' }, ...treeData]);
+    const { code, data } = await getModelList();
+    if (code === 200) {
+      setModelList([{ name: '默认', id: -1 }, ...data]);
+    } else {
+      message.error('获取模型列表失败!');
+    }
   };
 
   const initPluginList = async () => {
@@ -106,11 +104,10 @@ const ToolModal: React.FC<Props> = ({ editTool, onSaveTool, onCancel }) => {
         {(toolType === AgentToolTypeEnum.NL2SQL_RULE ||
           toolType === AgentToolTypeEnum.NL2SQL_LLM) && (
           <FormItem name="dataSetIds" label="数据集">
-            <TreeSelect
-              treeData={modelList}
+            <Select
+              options={modelList.map((item) => ({ label: item.name, value: item.id }))}
               placeholder="请选择数据集"
-              multiple
-              treeCheckable
+              mode="multiple"
               allowClear
             />
           </FormItem>
