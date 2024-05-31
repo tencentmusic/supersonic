@@ -300,7 +300,7 @@ const ParseTip: React.FC<Props> = ({
         )}
         {parseInfoOptions?.length > 1 ? '：' : ''}
       </div>
-      {parseInfoOptions?.length > 1 && (
+      {!isSimpleMode && parseInfoOptions?.length > 1 && (
         <div className={`${prefixCls}-content-options`}>
           {parseInfoOptions.map((parseInfo, index) => (
             <div

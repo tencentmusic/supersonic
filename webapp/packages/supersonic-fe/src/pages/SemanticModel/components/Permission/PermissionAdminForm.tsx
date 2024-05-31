@@ -48,7 +48,7 @@ const PermissionAdminForm: React.FC<Props> = ({ permissionTarget, onValuesChange
 
   useEffect(() => {
     queryClassDetail();
-  }, [modelId]);
+  }, [modelId, selectDomainId]);
 
   const saveAuth = async () => {
     const values = await form.validateFields();

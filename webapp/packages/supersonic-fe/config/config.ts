@@ -1,7 +1,7 @@
 // https://umijs.org/config/
 import { defineConfig } from '@umijs/max';
 // import { join } from 'path';
-import defaultSettings, { publicPath } from './defaultSettings';
+import defaultSettings, { publicPath, basePath } from './defaultSettings';
 import proxy from './proxy';
 import routes from './routes';
 import dayjs from 'dayjs';
@@ -76,10 +76,7 @@ export default defineConfig({
    * @doc 代理配置 https://umijs.org/docs/api/config#proxy
    */
   proxy: proxy[REACT_APP_ENV as keyof typeof proxy],
-  manifest: {
-    basePath: '/',
-  },
-  base: '/',
+  base: basePath,
   publicPath,
   outputPath: RUN_TYPE === 'local' ? 'supersonic-webapp' : 'dist',
   /**

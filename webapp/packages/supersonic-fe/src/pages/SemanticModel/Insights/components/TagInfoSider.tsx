@@ -1,7 +1,7 @@
 import { Tag, Space, Tooltip } from 'antd';
 import React, { ReactNode } from 'react';
-import type { StateType } from '../../model';
 import dayjs from 'dayjs';
+import { basePath } from '../../../../../config/defaultSettings';
 import {
   ExportOutlined,
   SolutionOutlined,
@@ -90,10 +90,10 @@ const TagInfoSider: React.FC<Props> = ({ tagData, dimensionMap, metricMap }) => 
               <span
                 className={styles.gotoMetricListIcon}
                 onClick={() => {
-                  window.open(`/model/${tagData.domainId}/${tagData.modelId}/`);
+                  window.open(`${basePath}model/${tagData.domainId}/${tagData.modelId}/`);
                 }}
               >
-                <Tooltip title="前往所属模型指标列表">
+                <Tooltip title="前往所属模3型指标列表">
                   <ExportOutlined />
                 </Tooltip>
               </span>
@@ -139,7 +139,7 @@ const TagInfoSider: React.FC<Props> = ({ tagData, dimensionMap, metricMap }) => 
                   <span
                     className={styles.gotoMetricListIcon}
                     onClick={() => {
-                      window.open(`/model/${tagData.domainId}/0/overview`);
+                      window.open(`${basePath}model/${tagData.domainId}/0/overview`);
                     }}
                   >
                     <Tooltip title="前往模型设置页">

@@ -5,7 +5,6 @@ import React, { useRef, useState, useEffect } from 'react';
 import { useModel } from '@umijs/max';
 import { getGroupAuthInfo, removeGroupAuth } from '../../service';
 import { getOrganizationTree } from '@/components/SelectPartner/service';
-import { getAllUser } from '@/components/SelectTMEPerson/service';
 import PermissionCreateDrawer from './PermissionCreateDrawer';
 import { findDepartmentTree } from '@/pages/SemanticModel/utils';
 
