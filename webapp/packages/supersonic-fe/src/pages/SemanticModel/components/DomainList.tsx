@@ -194,7 +194,7 @@ const DomainListTree: FC<DomainListProps> = ({
             <Search
               allowClear
               className={styles.search}
-              placeholder="请输入主题域"
+              placeholder="请输入名称搜索"
               onSearch={onSearch}
             />
           </Col>
