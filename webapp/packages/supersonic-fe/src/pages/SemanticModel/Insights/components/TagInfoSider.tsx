@@ -90,7 +90,7 @@ const TagInfoSider: React.FC<Props> = ({ tagData, dimensionMap, metricMap }) => 
               <span
                 className={styles.gotoMetricListIcon}
                 onClick={() => {
-                  window.open(`/webapp/model/${tagData.domainId}/${tagData.modelId}/`);
+                  window.open(`/model/${tagData.domainId}/${tagData.modelId}/`);
                 }}
               >
                 <Tooltip title="前往所属模型指标列表">
@@ -139,7 +139,7 @@ const TagInfoSider: React.FC<Props> = ({ tagData, dimensionMap, metricMap }) => 
                   <span
                     className={styles.gotoMetricListIcon}
                     onClick={() => {
-                      window.open(`/webapp/model/${tagData.domainId}/0/overview`);
+                      window.open(`/model/${tagData.domainId}/0/overview`);
                     }}
                   >
                     <Tooltip title="前往模型设置页">

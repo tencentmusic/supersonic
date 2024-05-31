@@ -53,7 +53,7 @@ const MetricInfoEditSider: React.FC<Props> = ({ metircData, onSettingKeyChange }
                   <span
                     className={styles.gotoMetricListIcon}
                     onClick={() => {
-                      window.open(`/webapp/model/${metircData.domainId}/${metircData.modelId}/`);
+                      window.open(`/model/${metircData.domainId}/${metircData.modelId}/`);
                     }}
                   >
                     <Tooltip title="前往所属模型指标列表">
@@ -118,7 +118,7 @@ const MetricInfoEditSider: React.FC<Props> = ({ metircData, onSettingKeyChange }
                     <span
                       className={styles.gotoMetricListIcon}
                       onClick={() => {
-                        window.open(`/webapp/model/${metircData.domainId}/0/overview`);
+                        window.open(`/model/${metircData.domainId}/0/overview`);
                       }}
                     >
                       <Tooltip title="前往模型设置页">

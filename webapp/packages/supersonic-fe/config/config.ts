@@ -79,7 +79,7 @@ export default defineConfig({
   manifest: {
     basePath: '/',
   },
-  base: publicPath,
+  base: '/',
   publicPath,
   outputPath: RUN_TYPE === 'local' ? 'supersonic-webapp' : 'dist',
   /**
@@ -152,7 +152,7 @@ export default defineConfig({
    */
   headScripts: [
     // 解决首次加载时白屏的问题
-    { src: '/scripts/loading.js', async: true },
+    { src: `${publicPath}scripts/loading.js`, async: true },
   ],
 
   //================ pro 插件配置 =================
