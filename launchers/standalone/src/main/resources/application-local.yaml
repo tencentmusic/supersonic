@@ -61,7 +61,7 @@ s2:
   embedding:
     url: ${s2.pyllm.url}
     persistent:
-      path: d://
+      path: /tmp
 
   demo:
     names: S2VisitsDemo,S2ArtistDemo
