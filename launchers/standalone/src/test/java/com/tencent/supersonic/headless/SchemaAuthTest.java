@@ -22,7 +22,7 @@ public class SchemaAuthTest extends BaseTest {
     private DomainService domainService;
 
     @Autowired
-    private DataSetService viewService;
+    private DataSetService dataSetService;
 
     @Autowired
     private ModelService modelService;
@@ -31,63 +31,64 @@ public class SchemaAuthTest extends BaseTest {
     public void test_getDomainList_alice() {
         User user = DataUtils.getUserAlice();
         List<DomainResp> domainResps = domainService.getDomainListWithAdminAuth(user);
-        List<Long> expectedDomainIds = Lists.newArrayList(1L, 2L);
-        Assertions.assertEquals(expectedDomainIds,
-                domainResps.stream().map(DomainResp::getId).collect(Collectors.toList()));
+        List<String> expectedDomainBizNames = Lists.newArrayList("supersonic", "visit_info", "singer", "singer_info");
+        Assertions.assertEquals(expectedDomainBizNames,
+                domainResps.stream().map(DomainResp::getBizName).collect(Collectors.toList()));
     }
 
     @Test
     public void test_getModelList_alice() {
         User user = DataUtils.getUserAlice();
         List<ModelResp> modelResps = modelService.getModelListWithAuth(user, null, AuthType.ADMIN);
-        List<Long> expectedModelIds = Lists.newArrayList(1L, 4L);
-        Assertions.assertEquals(expectedModelIds,
-                modelResps.stream().map(ModelResp::getId).collect(Collectors.toList()));
+        List<String> expectedModelBizNames = Lists.newArrayList("user_department", "singer");
+        Assertions.assertEquals(expectedModelBizNames,
+                modelResps.stream().map(ModelResp::getBizName).collect(Collectors.toList()));
     }
 
     @Test
     public void test_getVisibleModelList_alice() {
         User user = DataUtils.getUserAlice();
         List<ModelResp> modelResps = modelService.getModelListWithAuth(user, null, AuthType.VISIBLE);
-        List<Long> expectedModelIds = Lists.newArrayList(1L, 4L);
-        Assertions.assertEquals(expectedModelIds,
-                modelResps.stream().map(ModelResp::getId).collect(Collectors.toList()));
+        List<String> expectedModelBizNames = Lists.newArrayList("user_department", "singer");
+        Assertions.assertEquals(expectedModelBizNames,
+                modelResps.stream().map(ModelResp::getBizName).collect(Collectors.toList()));
     }
 
     @Test
-    public void test_getViewList_alice() {
+    public void test_getDataSetList_alice() {
         User user = DataUtils.getUserAlice();
-        List<DataSetResp> modelResps = viewService.getDataSetsInheritAuth(user, 0L);
-        List<Long> expectedViewIds = Lists.newArrayList(2L);
-        Assertions.assertEquals(expectedViewIds,
-                modelResps.stream().map(DataSetResp::getId).collect(Collectors.toList()));
+        List<DataSetResp> dataSetResps = dataSetService.getDataSetsInheritAuth(user, 0L);
+        List<String> expectedDataSetBizNames = Lists.newArrayList("singer");
+        Assertions.assertEquals(expectedDataSetBizNames,
+                dataSetResps.stream().map(DataSetResp::getBizName).collect(Collectors.toList()));
     }
 
     @Test
     public void test_getDomainList_jack() {
         User user = DataUtils.getUserJack();
         List<DomainResp> domainResps = domainService.getDomainListWithAdminAuth(user);
-        List<Long> expectedDomainIds = Lists.newArrayList(1L, 2L);
-        Assertions.assertEquals(expectedDomainIds,
-                domainResps.stream().map(DomainResp::getId).collect(Collectors.toList()));
+        List<String> expectedDomainBizNames = Lists.newArrayList("supersonic", "visit_info");
+        Assertions.assertEquals(expectedDomainBizNames,
+                domainResps.stream().map(DomainResp::getBizName).collect(Collectors.toList()));
     }
 
     @Test
     public void test_getModelList_jack() {
         User user = DataUtils.getUserJack();
         List<ModelResp> modelResps = modelService.getModelListWithAuth(user, null, AuthType.ADMIN);
-        List<Long> expectedModelIds = Lists.newArrayList(1L, 2L, 3L);
-        Assertions.assertEquals(expectedModelIds,
-                modelResps.stream().map(ModelResp::getId).collect(Collectors.toList()));
+        List<String> expectedModelBizNames = Lists.newArrayList("user_department",
+                "s2_pv_uv_statis", "s2_stay_time_statis");
+        Assertions.assertEquals(expectedModelBizNames,
+                modelResps.stream().map(ModelResp::getBizName).collect(Collectors.toList()));
     }
 
     @Test
-    public void test_getViewList_jack() {
+    public void test_getDataSetList_jack() {
         User user = DataUtils.getUserJack();
-        List<DataSetResp> modelResps = viewService.getDataSetsInheritAuth(user, 0L);
-        List<Long> expectedViewIds = Lists.newArrayList(1L, 2L);
-        Assertions.assertEquals(expectedViewIds,
-                modelResps.stream().map(DataSetResp::getId).collect(Collectors.toList()));
+        List<DataSetResp> dataSetResps = dataSetService.getDataSetsInheritAuth(user, 0L);
+        List<String> expectedDataSetBizNames = Lists.newArrayList("s2", "singer");
+        Assertions.assertEquals(expectedDataSetBizNames,
+                dataSetResps.stream().map(DataSetResp::getBizName).collect(Collectors.toList()));
     }
 
 }

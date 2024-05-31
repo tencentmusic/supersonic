@@ -2,7 +2,9 @@
 
 import os
 import sys
-from typing import Any, List, Union, Mapping
+from typing import Any, Dict, List, Union, Mapping
+
+from git import Optional
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -14,7 +16,7 @@ from auto_cot import auto_cot_run
 
 
 
-def transform_sql_example(question:str, current_date:str, table_name:str, field_list: Union[str, List[str]], prior_linkings: Union[str, Mapping[str,str]], prior_exts:str, sql:str=None):
+def transform_sql_example(question:str, current_date:str, table_name:str, field_list: Union[str, List[str]], prior_linkings: Union[str, Mapping[str,str]], prior_exts:str, sql:str=None, terms_list: Optional[List[Dict]] = []):
     db_schema = f"Table: {table_name}, Columns = {field_list}\nForeign_keys: []"
 
     prior_linkings_pairs = []
@@ -40,7 +42,27 @@ def transform_sql_example(question:str, current_date:str, table_name:str, field_
 
     current_data_str = """当前的日期是{}""".format(current_date)
 
-    question_augmented = """{question} (补充信息:{prior_linking}。{current_date}) (备注: {prior_exts})""".format(question=question, prior_linking=prior_linkings_str, prior_exts=prior_exts, current_date=current_data_str)
+    terms_desc = ''
+
+    if len(terms_list) > 0:
+        terms_desc += "相关业务术语："
+        for idx, term in enumerate(terms_list):
+            
+            if (term['description'] is not None and len(term['description']) > 0) and (term['alias'] is not None and len(term['alias']) > 0):
+                terms_desc += f"""{idx+1}.<{term['name']}>是业务术语，它通常是指<{term['description']}>，类似的表达还有{term['alias']}；"""
+            elif (term['description'] is None or len(term['description']) == 0) and (term['alias'] is not None and len(term['alias']) > 0):
+                terms_desc += f"""{idx+1}.<{term['name']}>是业务术语，类似的表达还有{term['alias']}；"""
+            elif (term['description'] is not None and len(term['description']) > 0) and (term['alias'] is None or len(term['alias']) == 0):
+                terms_desc += f"""{idx+1}.<{term['name']}>是业务术语，它通常是指<{term['description']}>；"""
+            else:
+                terms_desc += f"""{idx+1}.<{term['name']}>是业务术语；"""
+        
+        if len(terms_desc) > 0:
+            terms_desc = terms_desc[:-1] 
+              
+
+
+    question_augmented = """{question} (补充信息:{prior_linking}。{current_date}。{terms_desc}) (备注: {prior_exts})""".format(question=question, prior_linking=prior_linkings_str, prior_exts=prior_exts, current_date=current_data_str)
 
     return question_augmented, db_schema, sql
 

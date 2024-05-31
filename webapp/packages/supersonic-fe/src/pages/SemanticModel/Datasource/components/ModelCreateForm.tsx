@@ -337,26 +337,10 @@ const ModelCreateForm: React.FC<CreateFormProps> = ({
   };
 
   const formatterInitData = (columns: any[], extendParams: Record<string, any> = {}) => {
-    const {
-      id,
-      name,
-      bizName,
-      description,
-      modelDetail,
-      databaseId,
-      filterSql,
-      alias,
-      drillDownDimensions = [],
-    } = modelItem;
+    const { modelDetail, filterSql, drillDownDimensions = [] } = modelItem;
     const { dimensions, identifiers, measures } = modelDetail || {};
     const initValue = {
-      id,
-      name,
-      bizName,
-      description,
-      databaseId,
-      filterSql,
-      alias,
+      ...modelItem,
       drillDownDimensions: Array.isArray(drillDownDimensions)
         ? drillDownDimensions.map((item) => {
             return item.dimensionId;
@@ -422,9 +406,9 @@ const ModelCreateForm: React.FC<CreateFormProps> = ({
     if (code === 200) {
       const list = data?.resultList || [];
       const columns = list.map((item: any, index: number) => {
-        const { dataType, name } = item;
+        const { dataType, name, comment } = item;
         return {
-          ...item,
+          comment,
           nameEn: name,
           type: dataType,
         };

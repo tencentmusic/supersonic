@@ -39,6 +39,7 @@ public class SemanticParseInfo {
     private SqlInfo sqlInfo = new SqlInfo();
     private QueryType queryType = QueryType.ID;
     private EntityInfo entityInfo;
+    private String textInfo;
     private static class SchemaNameLengthComparator implements Comparator<SchemaElement> {
 
         @Override

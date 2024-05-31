@@ -3,7 +3,7 @@ package com.tencent.supersonic.headless.core.chat.query;
 import com.tencent.supersonic.headless.core.chat.query.llm.LLMSemanticQuery;
 import com.tencent.supersonic.headless.core.chat.query.rule.RuleSemanticQuery;
 import com.tencent.supersonic.headless.core.chat.query.rule.metric.MetricSemanticQuery;
-import com.tencent.supersonic.headless.core.chat.query.rule.tag.TagSemanticQuery;
+import com.tencent.supersonic.headless.core.chat.query.rule.detail.DetailSemanticQuery;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -70,7 +70,7 @@ public class QueryManager {
         if (queryMode == null || !ruleQueryMap.containsKey(queryMode)) {
             return false;
         }
-        return ruleQueryMap.get(queryMode) instanceof TagSemanticQuery;
+        return ruleQueryMap.get(queryMode) instanceof DetailSemanticQuery;
     }
 
     public static RuleSemanticQuery getRuleQuery(String queryMode) {

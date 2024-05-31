@@ -11,13 +11,13 @@ public enum QueryType {
     /**
      * queries with tag-based entity targeting
      */
-    TAG,
+    DETAIL,
     /**
      * queries with ID-based entity selection
      */
     ID;
 
     public boolean isNativeAggQuery() {
-        return TAG.equals(this);
+        return DETAIL.equals(this);
     }
 }

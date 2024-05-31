@@ -1,6 +1,7 @@
 package com.tencent.supersonic.headless.core.chat.query.llm.s2sql;
 
 import com.fasterxml.jackson.annotation.JsonValue;
+import com.google.common.collect.Lists;
 import com.tencent.supersonic.headless.api.pojo.LLMConfig;
 import lombok.Data;
 
@@ -45,6 +46,8 @@ public class LLMReq {
 
         private List<String> fieldNameList;
 
+        private List<Term> terms;
+
     }
 
     @Data
@@ -53,16 +56,20 @@ public class LLMReq {
         private String tableName;
     }
 
+    @Data
+    public static class Term {
+
+        private String name;
+
+        private String description;
+
+        private List<String> alias = Lists.newArrayList();
+
+    }
+
     public enum SqlGenType {
-
-        ONE_PASS_AUTO_COT("1_pass_auto_cot"),
-
         ONE_PASS_AUTO_COT_SELF_CONSISTENCY("1_pass_auto_cot_self_consistency"),
-
-        TWO_PASS_AUTO_COT("2_pass_auto_cot"),
-
         TWO_PASS_AUTO_COT_SELF_CONSISTENCY("2_pass_auto_cot_self_consistency");
-
 
         private String name;
 

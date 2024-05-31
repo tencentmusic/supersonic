@@ -59,6 +59,11 @@ public class CspiderDemo extends S2BaseDemo {
         }
     }
 
+    @Override
+    boolean checkNeedToRun() {
+        return false;
+    }
+
     public DomainResp addDomain() {
         DomainReq domainReq = new DomainReq();
         domainReq.setName("测评数据_音乐");

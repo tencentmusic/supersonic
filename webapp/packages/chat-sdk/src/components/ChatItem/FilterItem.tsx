@@ -126,7 +126,7 @@ const FilterItem: React.FC<Props> = ({
     onFiltersChange(newFilters);
   };
 
-  const onDateChange = (_: any, date: string) => {
+  const onDateChange = (_: any, date: string | string[]) => {
     const newFilters = filters.map((item, indexValue) => {
       if (item.bizName === filter.bizName && index === indexValue) {
         item.value = date;

@@ -1,6 +1,6 @@
 import RightContent from '@/components/RightContent';
 import S2Icon, { ICON } from '@/components/S2Icon';
-import type { Settings as LayoutSettings } from '@ant-design/pro-layout';
+import type { Settings as LayoutSettings } from '@ant-design/pro-components';
 import { Space, Spin, ConfigProvider } from 'antd';
 import ScaleLoader from 'react-spinners/ScaleLoader';
 import { history, RunTimeLayoutConfig } from '@umijs/max';
@@ -13,6 +13,7 @@ import { Copilot } from 'supersonic-chat-sdk';
 import { configProviderTheme } from '../config/themeSettings';
 export { request } from './services/request';
 import { ROUTE_AUTH_CODES } from '../config/routes';
+import AppPage from './pages/index';
 
 const replaceRoute = '/';
 
@@ -145,7 +146,8 @@ export const layout: RunTimeLayoutConfig = (params) => {
               height: location.pathname.includes('chat') ? 'calc(100vh - 56px)' : undefined,
             }}
           >
-            {dom}
+            <AppPage dom={dom} />
+            {/* {dom} */}
             {history.location.pathname !== '/chat' && !isMobile && (
               <Copilot token={getToken() || ''} isDeveloper />
             )}
