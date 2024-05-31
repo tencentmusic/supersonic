@@ -115,7 +115,7 @@ public class HanlpDictMatchStrategy extends BaseMatchStrategy<HanlpMapResult> {
         if (oneRoundResults.size() < oneDetectionSize) {
             List<HanlpMapResult> additionalResults = hanlpMapResults.stream()
                     .filter(entry -> !mapperHelper.existDimensionValues(entry.getNatures())
-                            || !oneRoundResults.contains(entry))
+                            && !oneRoundResults.contains(entry))
                     .limit(oneDetectionSize - oneRoundResults.size())
                     .collect(Collectors.toList());
             oneRoundResults.addAll(additionalResults);
