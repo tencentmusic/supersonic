@@ -31,13 +31,25 @@ const ToolModal: React.FC<Props> = ({ editTool, onSaveTool, onCancel }) => {
   const [plugins, setPlugins] = useState<PluginType[]>([]);
   const [form] = Form.useForm();
 
+  // const filterTree = (treeData: any[]) => {
+  //   treeData.forEach((node) => {
+  //     if (Array.isArray(node.children) && node.children?.length > 0) {
+  //       node.children = node.children.filter((item: any) => item.type !== 'DOMAIN');
+  //       filterTree(node.children);
+  //     }
+  //   });
+  //   return treeData;
+  // };
+
   const initModelList = async () => {
-    const { code, data } = await getModelList();
-    if (code === 200) {
-      setModelList([{ name: '默认', id: -1 }, ...data]);
-    } else {
-      message.error('获取模型列表失败!');
-    }
+    const res = await getModelList();
+    const treeData = traverseTree(res.data, (node: any) => {
+      node.title = node.name;
+      node.value = node.type === 'DOMAIN' ? `DOMAIN_${node.id}` : node.id;
+      node.checkable =
+        node.type === 'DATASET' || (node.type === 'DOMAIN' && node.children?.length > 0);
+    });
+    setModelList([{ title: '默认', value: -1, type: 'DATASET' }, ...treeData]);
   };
 
   const initPluginList = async () => {
@@ -104,10 +116,11 @@ const ToolModal: React.FC<Props> = ({ editTool, onSaveTool, onCancel }) => {
         {(toolType === AgentToolTypeEnum.NL2SQL_RULE ||
           toolType === AgentToolTypeEnum.NL2SQL_LLM) && (
           <FormItem name="dataSetIds" label="数据集">
-            <Select
-              options={modelList.map((item) => ({ label: item.name, value: item.id }))}
+            <TreeSelect
+              treeData={modelList}
               placeholder="请选择数据集"
-              mode="multiple"
+              multiple
+              treeCheckable
               allowClear
             />
           </FormItem>
