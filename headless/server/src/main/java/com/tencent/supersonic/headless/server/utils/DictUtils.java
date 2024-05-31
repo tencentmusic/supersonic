@@ -395,7 +395,7 @@ public class DictUtils {
         if (Objects.nonNull(model)) {
             List<Dim> timeDims = model.getTimeDimension();
             if (!CollectionUtils.isEmpty(timeDims)) {
-                String format = timeDims.get(0).getDateFormat();
+                String format = "yyyy-MM-dd";
                 String start = LocalDate.now().minusDays(itemValueDateStart)
                         .format(DateTimeFormatter.ofPattern(format));
                 String end = LocalDate.now().minusDays(itemValueDateEnd)
