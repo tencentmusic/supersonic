@@ -5,7 +5,6 @@ import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.util.embedding.Retrieval;
 import com.tencent.supersonic.common.util.embedding.RetrieveQuery;
 import com.tencent.supersonic.common.util.embedding.RetrieveQueryResult;
-import com.tencent.supersonic.headless.core.config.OptimizationConfig;
 import com.tencent.supersonic.headless.core.chat.knowledge.EmbeddingResult;
 import com.tencent.supersonic.headless.core.chat.knowledge.MetaEmbeddingService;
 import com.tencent.supersonic.headless.core.pojo.QueryContext;
@@ -22,6 +21,14 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static com.tencent.supersonic.headless.core.config.MapperConfig.EMBEDDING_MAPPER_BATCH;
+import static com.tencent.supersonic.headless.core.config.MapperConfig.EMBEDDING_MAPPER_MAX;
+import static com.tencent.supersonic.headless.core.config.MapperConfig.EMBEDDING_MAPPER_MIN;
+import static com.tencent.supersonic.headless.core.config.MapperConfig.EMBEDDING_MAPPER_NUMBER;
+import static com.tencent.supersonic.headless.core.config.MapperConfig.EMBEDDING_MAPPER_ROUND_NUMBER;
+import static com.tencent.supersonic.headless.core.config.MapperConfig.EMBEDDING_MAPPER_THRESHOLD;
+import static com.tencent.supersonic.headless.core.config.MapperConfig.EMBEDDING_MAPPER_THRESHOLD_MIN;
+
 /**
  * EmbeddingMatchStrategy uses vector database to perform
  * similarity search against the embeddings of schema elements.
@@ -29,9 +36,6 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 public class EmbeddingMatchStrategy extends BaseMatchStrategy<EmbeddingResult> {
-
-    @Autowired
-    private OptimizationConfig optimizationConfig;
 
     @Autowired
     private MetaEmbeddingService metaEmbeddingService;
@@ -48,24 +52,27 @@ public class EmbeddingMatchStrategy extends BaseMatchStrategy<EmbeddingResult> {
     }
 
     @Override
-    public void detectByStep(QueryContext queryContext, Set<EmbeddingResult> existResults, Set<Long> detectDataSetIds,
-                             String detectSegment, int offset) {
+    public void detectByStep(QueryContext queryContext, Set<EmbeddingResult> existResults,
+                             Set<Long> detectDataSetIds, String detectSegment, int offset) {
 
     }
 
     @Override
-    protected void detectByBatch(QueryContext queryContext, Set<EmbeddingResult> results, Set<Long> detectDataSetIds,
-                                 Set<String> detectSegments) {
+    protected void detectByBatch(QueryContext queryContext, Set<EmbeddingResult> results,
+                                 Set<Long> detectDataSetIds, Set<String> detectSegments) {
+        int embedddingMapperMin = Integer.valueOf(mapperConfig.getParameterValue(EMBEDDING_MAPPER_MIN));
+        int embedddingMapperMax = Integer.valueOf(mapperConfig.getParameterValue(EMBEDDING_MAPPER_MAX));
+        int embeddingMapperBatch = Integer.valueOf(mapperConfig.getParameterValue(EMBEDDING_MAPPER_BATCH));
 
         List<String> queryTextsList = detectSegments.stream()
                 .map(detectSegment -> detectSegment.trim())
                 .filter(detectSegment -> StringUtils.isNotBlank(detectSegment)
-                        && detectSegment.length() >= optimizationConfig.getEmbeddingMapperWordMin()
-                        && detectSegment.length() <= optimizationConfig.getEmbeddingMapperWordMax())
+                        && detectSegment.length() >= embedddingMapperMin
+                        && detectSegment.length() <= embedddingMapperMax)
                 .collect(Collectors.toList());
 
         List<List<String>> queryTextsSubList = Lists.partition(queryTextsList,
-                optimizationConfig.getEmbeddingMapperBatch());
+                embeddingMapperBatch);
 
         for (List<String> queryTextsSub : queryTextsSubList) {
             detectByQueryTextsSub(results, detectDataSetIds, queryTextsSub, queryContext);
@@ -74,15 +81,16 @@ public class EmbeddingMatchStrategy extends BaseMatchStrategy<EmbeddingResult> {
 
     private void detectByQueryTextsSub(Set<EmbeddingResult> results, Set<Long> detectDataSetIds,
                                        List<String> queryTextsSub, QueryContext queryContext) {
-
         Map<Long, List<Long>> modelIdToDataSetIds = queryContext.getModelIdToDataSetIds();
-        int embeddingNumber = optimizationConfig.getEmbeddingMapperNumber();
-        double threshold = getThreshold(optimizationConfig.getEmbeddingMapperThreshold(),
-                optimizationConfig.getEmbeddingMapperMinThreshold(), queryContext.getMapModeEnum());
+        double embeddingThreshold = Double.valueOf(mapperConfig.getParameterValue(EMBEDDING_MAPPER_THRESHOLD));
+        double embeddingThresholdMin = Double.valueOf(mapperConfig.getParameterValue(EMBEDDING_MAPPER_THRESHOLD_MIN));
+        double threshold = getThreshold(embeddingThreshold, embeddingThresholdMin, queryContext.getMapModeEnum());
+
         // step1. build query params
         RetrieveQuery retrieveQuery = RetrieveQuery.builder().queryTextsList(queryTextsSub).build();
-        // step2. retrieveQuery by detectSegment
 
+        // step2. retrieveQuery by detectSegment
+        int embeddingNumber = Integer.valueOf(mapperConfig.getParameterValue(EMBEDDING_MAPPER_NUMBER));
         List<RetrieveQueryResult> retrieveQueryResults = metaEmbeddingService.retrieveQuery(
                 retrieveQuery, embeddingNumber, modelIdToDataSetIds, detectDataSetIds);
 
@@ -118,7 +126,8 @@ public class EmbeddingMatchStrategy extends BaseMatchStrategy<EmbeddingResult> {
                 .collect(Collectors.toList());
 
         // step4. select mapResul in one round
-        int roundNumber = optimizationConfig.getEmbeddingMapperRoundNumber() * queryTextsSub.size();
+        int embeddingRoundNumber = Integer.valueOf(mapperConfig.getParameterValue(EMBEDDING_MAPPER_ROUND_NUMBER));
+        int roundNumber = embeddingRoundNumber * queryTextsSub.size();
         List<EmbeddingResult> oneRoundResults = collect.stream()
                 .sorted(Comparator.comparingDouble(EmbeddingResult::getDistance))
                 .limit(roundNumber)

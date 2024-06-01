@@ -6,8 +6,8 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
 @Data
-@TableName("s2_sys_parameter")
-public class SysParameterDO {
+@TableName("s2_system_config")
+public class SystemConfigDO {
     @TableId(type = IdType.AUTO)
     private Integer id;
 

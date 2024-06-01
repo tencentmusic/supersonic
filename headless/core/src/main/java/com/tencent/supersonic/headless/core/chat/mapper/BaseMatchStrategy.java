@@ -3,6 +3,7 @@ package com.tencent.supersonic.headless.core.chat.mapper;
 
 import com.tencent.supersonic.headless.api.pojo.enums.MapModeEnum;
 import com.tencent.supersonic.headless.api.pojo.response.S2Term;
+import com.tencent.supersonic.headless.core.config.MapperConfig;
 import com.tencent.supersonic.headless.core.pojo.QueryContext;
 import com.tencent.supersonic.headless.core.chat.knowledge.helper.NatureHelper;
 import lombok.extern.slf4j.Slf4j;
@@ -27,7 +28,10 @@ import java.util.stream.Collectors;
 public abstract class BaseMatchStrategy<T> implements MatchStrategy<T> {
 
     @Autowired
-    private MapperHelper mapperHelper;
+    protected MapperHelper mapperHelper;
+
+    @Autowired
+    protected MapperConfig mapperConfig;
 
     @Override
     public Map<MatchText, List<T>> match(QueryContext queryContext, List<S2Term> terms,

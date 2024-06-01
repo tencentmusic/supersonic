@@ -17,6 +17,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import static com.tencent.supersonic.headless.core.config.ParserConfig.PARSER_EXEMPLAR_RECALL_NUMBER;
+import static com.tencent.supersonic.headless.core.config.ParserConfig.PARSER_FEW_SHOT_NUMBER;
+import static com.tencent.supersonic.headless.core.config.ParserConfig.PARSER_SELF_CONSISTENCY_NUMBER;
+
 @Service
 public class TwoPassSCSqlGenStrategy extends SqlGenStrategy {
 
@@ -24,11 +28,15 @@ public class TwoPassSCSqlGenStrategy extends SqlGenStrategy {
     public LLMResp generate(LLMReq llmReq) {
         //1.retriever sqlExamples and generate exampleListPool
         keyPipelineLog.info("TwoPassSCSqlGenStrategy llmReq:{}", llmReq);
-        List<Map<String, String>> sqlExamples = exemplarManager.recallExemplars(llmReq.getQueryText(),
-                optimizationConfig.getText2sqlExampleNum());
 
+        int exemplarRecallNumber = Integer.valueOf(parserConfig.getParameterValue(PARSER_EXEMPLAR_RECALL_NUMBER));
+        int fewShotNumber = Integer.valueOf(parserConfig.getParameterValue(PARSER_FEW_SHOT_NUMBER));
+        int selfConsistencyNumber = Integer.valueOf(parserConfig.getParameterValue(PARSER_SELF_CONSISTENCY_NUMBER));
+
+        List<Map<String, String>> sqlExamples = exemplarManager.recallExemplars(llmReq.getQueryText(),
+                exemplarRecallNumber);
         List<List<Map<String, String>>> exampleListPool = promptGenerator.getExampleCombos(sqlExamples,
-                optimizationConfig.getText2sqlFewShotsNum(), optimizationConfig.getText2sqlSelfConsistencyNum());
+                fewShotNumber, selfConsistencyNumber);
 
         //2.generator linking prompt,and parallel generate response.
         List<String> linkingPromptPool = promptGenerator.generatePromptPool(llmReq, exampleListPool, false);

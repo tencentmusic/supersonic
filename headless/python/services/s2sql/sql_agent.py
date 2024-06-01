@@ -402,7 +402,7 @@ class Text2DSLAgentAutoCoT(Text2DSLAgentBase):
             fewshot_example_meta_list = self.get_examples_candidates(question, filter_condition, self.num_examples)
             fewshot_example_list_combo = self.get_fewshot_example_combos(fewshot_example_meta_list, self.num_fewshots)
 
-            schema_linking_sql_output_candidates, schema_linking_sql_prompt_list, _ = await self.generate_schema_linking_sql_tasks(question, model_name, fields_list, current_date, prior_schema_links, prior_exts, fewshot_example_list_combo, terms_list=terms_list)
+            schema_linking_sql_output_candidates, schema_linking_sql_prompt_list, _ = await self.generate_schema_linking_sql_tasks(question, model_name, fields_list, current_date, prior_schema_links, prior_exts, fewshot_example_list_combo, llm_config=llm_config, terms_list=terms_list)
             logger.debug(f'schema_linking_sql_output_candidates:{schema_linking_sql_output_candidates}')
             schema_linking_output_candidate_list = [combo_schema_link_parse(schema_linking_sql_output_candidate) for schema_linking_sql_output_candidate in schema_linking_sql_output_candidates]
             logger.debug(f'schema_linking_sql_output_candidate_list:{schema_linking_output_candidate_list}')

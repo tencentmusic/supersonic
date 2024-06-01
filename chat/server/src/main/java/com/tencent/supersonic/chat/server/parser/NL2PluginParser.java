@@ -17,8 +17,8 @@ public class NL2PluginParser implements ChatParser {
     public void parse(ChatParseContext chatParseContext, ParseResp parseResp) {
         pluginRecognizers.forEach(pluginRecognizer -> {
             pluginRecognizer.recognize(chatParseContext, parseResp);
-            log.info("{} context:{} result:{}", pluginRecognizer.getClass().getSimpleName(),
-                    JsonUtil.toString(chatParseContext), JsonUtil.toString(parseResp));
+            log.info("{} recallResult:{}", pluginRecognizer.getClass().getSimpleName(),
+                    JsonUtil.toString(parseResp));
         });
     }
 

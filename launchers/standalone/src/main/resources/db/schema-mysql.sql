@@ -431,7 +431,7 @@ create table s2_user
     PRIMARY KEY (`id`)
 );
 
-CREATE TABLE s2_sys_parameter
+CREATE TABLE s2_system_config
 (
     id  int primary key AUTO_INCREMENT COMMENT '主键id',
     admin varchar(500) COMMENT '系统管理员',
