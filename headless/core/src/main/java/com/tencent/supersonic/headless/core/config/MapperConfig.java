@@ -36,8 +36,8 @@ public class MapperConfig extends ParameterConfig {
 
     public static final Parameter MAPPER_DIMENSION_VALUE_SIZE =
             new Parameter("s2.mapper.value.size", "1",
-                    "指标名、维度名最小文本相似度阈值",
-                    "指标名、维度名相似度阈值在动态调整中的最低值",
+                    "一次探测返回维度值结果个数",
+                    "在每次探测后, 将前后缀匹配的结果合并, 并根据相似度阈值过滤后的维度值结果个数",
                     "number", "Mapper相关配置");
 
     public static final Parameter MAPPER_VALUE_THRESHOLD =

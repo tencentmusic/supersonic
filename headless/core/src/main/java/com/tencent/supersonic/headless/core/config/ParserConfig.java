@@ -31,14 +31,14 @@ public class ParserConfig extends ParameterConfig {
                     "number", "Parser相关配置");
 
     public static final Parameter PARSER_TEXT_LENGTH_THRESHOLD_SHORT =
-            new Parameter("s2.parser.text.threshold", "0.5",
+            new Parameter("s2.parser.text.threshold.short", "0.5",
                     "短文本匹配阈值",
                     "由于请求大模型耗时较长, 因此如果有规则类型的Query得分达到阈值,则跳过大模型的调用,"
                     + "\n如果是短文本, 若query得分/文本长度>该阈值, 则跳过当前parser",
                     "number", "Parser相关配置");
 
     public static final Parameter PARSER_TEXT_LENGTH_THRESHOLD_LONG =
-            new Parameter("s2.parser.text.threshold", "0.8",
+            new Parameter("s2.parser.text.threshold.long", "0.8",
                     "长文本匹配阈值", "如果是长文本, 若query得分/文本长度>该阈值, 则跳过当前parser",
                     "number", "Parser相关配置");
 

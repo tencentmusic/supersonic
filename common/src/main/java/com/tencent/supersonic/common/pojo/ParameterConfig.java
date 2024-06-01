@@ -31,7 +31,7 @@ public abstract class ParameterConfig {
      */
     public String getParameterValue(Parameter parameter) {
         String paramName = parameter.getName();
-        String value = sysConfigService.getSysParameter().getParameterByName(paramName);
+        String value = sysConfigService.getSystemConfig().getParameterByName(paramName);
         try {
             if (StringUtils.isBlank(value)) {
                 if (environment.containsProperty(paramName)) {

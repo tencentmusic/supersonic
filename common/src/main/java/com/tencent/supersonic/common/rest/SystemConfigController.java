@@ -17,14 +17,14 @@ public class SystemConfigController {
     private SystemConfigService sysConfigService;
 
     @PostMapping
-    public Boolean save(@RequestBody SystemConfig sysParameter) {
-        sysConfigService.save(sysParameter);
+    public Boolean save(@RequestBody SystemConfig systemConfig) {
+        sysConfigService.save(systemConfig);
         return true;
     }
 
     @GetMapping
     public SystemConfig get() {
-        return sysConfigService.getSysParameter();
+        return sysConfigService.getSystemConfig();
     }
 
 }
