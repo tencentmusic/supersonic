@@ -28,9 +28,9 @@ public class UserServiceImpl implements UserService {
     public User getCurrentUser(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {
         User user = UserHolder.findUser(httpServletRequest, httpServletResponse);
         if (user != null) {
-            SystemConfig sysParameter = sysParameterService.getSysParameter();
-            if (!CollectionUtils.isEmpty(sysParameter.getAdmins())
-                    && sysParameter.getAdmins().contains(user.getName())) {
+            SystemConfig systemConfig = sysParameterService.getSystemConfig();
+            if (!CollectionUtils.isEmpty(systemConfig.getAdmins())
+                    && systemConfig.getAdmins().contains(user.getName())) {
                 user.setIsAdmin(1);
             }
         }

@@ -32,8 +32,8 @@ public class SystemConfig {
         if (StringUtils.isBlank(name)) {
             return "";
         }
-        Map<String, String> nameToValue = parameters.stream()
-                .collect(Collectors.toMap(Parameter::getName, Parameter::getDefaultValue, (k1, k2) -> k1));
+        Map<String, String> nameToValue = getParameters().stream()
+                .collect(Collectors.toMap(Parameter::getName, Parameter::getValue, (k1, k2) -> k1));
         return nameToValue.get(name);
     }
 
@@ -46,14 +46,32 @@ public class SystemConfig {
     }
 
     public void init() {
-        parameters = Lists.newArrayList();
+        parameters = buildDefaultParameters();
         admins = Lists.newArrayList("admin");
+    }
 
+    private List<Parameter> buildDefaultParameters() {
+        List<Parameter> defaultParameters = Lists.newArrayList();
         Collection<ParameterConfig> configurableParameters =
                 ContextUtils.getBeansOfType(ParameterConfig.class).values();
         for (ParameterConfig configParameters : configurableParameters) {
-            parameters.addAll(configParameters.getSysParameters());
+            defaultParameters.addAll(configParameters.getSysParameters());
         }
+        return defaultParameters;
+    }
+
+    public List<Parameter> getParameters() {
+        List<Parameter> defaultParameters = buildDefaultParameters();
+        if (CollectionUtils.isEmpty(parameters)) {
+            return defaultParameters;
+        }
+        Map<String, String> parameterNameValueMap = parameters.stream()
+                .collect(Collectors.toMap(Parameter::getName, Parameter::getValue, (v1, v2) -> v2));
+        for (Parameter parameter : defaultParameters) {
+            parameter.setValue(parameterNameValueMap.getOrDefault(parameter.getName(),
+                    parameter.getDefaultValue()));
+        }
+        return defaultParameters;
     }
 
 }
