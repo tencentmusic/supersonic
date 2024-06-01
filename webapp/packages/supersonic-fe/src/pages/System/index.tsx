@@ -15,7 +15,7 @@ import {
 } from 'antd';
 import React, { useState, useEffect } from 'react';
 import { getSystemConfig, saveSystemConfig } from '@/services/user';
-import { ProCard } from '@ant-design/pro-components';
+import { ProCard } from  '@ant-design/pro-components';
 import SelectTMEPerson from '@/components/SelectTMEPerson';
 import { ConfigParametersItem, SystemConfig } from './types';
 import FormItemTitle from '@/components/FormHelper/FormItemTitle';
@@ -59,10 +59,10 @@ const System: React.FC = () => {
   const setInitData = (admins: string[], systemConfigParameters: ConfigParametersItem[]) => {
     const fieldsValue = systemConfigParameters.reduce(
       (fields, item) => {
-        const { name, value, defaultValue } = item;
+        const { name, value } = item;
         return {
           ...fields,
-          [name]: value || defaultValue,
+          [name]: value,
         };
       },
       { admins },
@@ -81,7 +81,6 @@ const System: React.FC = () => {
           return {
             ...item,
             value: submitData[name],
-            defaultValue: submitData[name],
           };
         }
         return item;

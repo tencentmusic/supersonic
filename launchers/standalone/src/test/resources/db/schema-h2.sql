@@ -517,7 +517,7 @@ CREATE TABLE IF NOT EXISTS `company_brand_revenue` (
 
 
 
-CREATE TABLE IF NOT EXISTS s2_sys_parameter
+CREATE TABLE IF NOT EXISTS s2_system_config
 (
     id  INT PRIMARY KEY AUTO_INCREMENT,
     admin varchar(500),

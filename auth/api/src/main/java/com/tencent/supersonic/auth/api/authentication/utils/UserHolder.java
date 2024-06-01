@@ -21,9 +21,9 @@ public final class UserHolder {
     public static User findUser(HttpServletRequest request, HttpServletResponse response) {
         User user = REPO.findUser(request, response);
         SystemConfigService sysParameterService = ContextUtils.getBean(SystemConfigService.class);
-        SystemConfig sysParameter = sysParameterService.getSysParameter();
-        if (!CollectionUtils.isEmpty(sysParameter.getAdmins())
-                && sysParameter.getAdmins().contains(user.getName())) {
+        SystemConfig systemConfig = sysParameterService.getSystemConfig();
+        if (!CollectionUtils.isEmpty(systemConfig.getAdmins())
+                && systemConfig.getAdmins().contains(user.getName())) {
             user.setIsAdmin(1);
         }
         return user;
