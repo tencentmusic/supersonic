@@ -6,22 +6,22 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.tencent.supersonic.common.persistence.dataobject.SysParameterDO;
 import com.tencent.supersonic.common.persistence.mapper.SysParameterMapper;
 import com.tencent.supersonic.common.pojo.Parameter;
-import com.tencent.supersonic.common.pojo.SysParameter;
-import com.tencent.supersonic.common.service.SysParameterService;
+import com.tencent.supersonic.common.pojo.SystemConfig;
+import com.tencent.supersonic.common.service.SystemConfigService;
 import com.tencent.supersonic.common.util.JsonUtil;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 @Service
-public class SysParameterServiceImpl
-        extends ServiceImpl<SysParameterMapper, SysParameterDO> implements SysParameterService {
+public class SystemConfigServiceImpl
+        extends ServiceImpl<SysParameterMapper, SysParameterDO> implements SystemConfigService {
 
     @Override
-    public SysParameter getSysParameter() {
+    public SystemConfig getSysParameter() {
         List<SysParameterDO> list = list();
         if (CollectionUtils.isEmpty(list)) {
-            SysParameter sysParameter = new SysParameter();
+            SystemConfig sysParameter = new SystemConfig();
             sysParameter.setId(1);
             sysParameter.init();
             save(sysParameter);
@@ -31,13 +31,13 @@ public class SysParameterServiceImpl
     }
 
     @Override
-    public void save(SysParameter sysParameter) {
-        SysParameterDO sysParameterDO = convert(sysParameter);
+    public void save(SystemConfig sysConfig) {
+        SysParameterDO sysParameterDO = convert(sysConfig);
         saveOrUpdate(sysParameterDO);
     }
 
-    private SysParameter convert(SysParameterDO sysParameterDO) {
-        SysParameter sysParameter = new SysParameter();
+    private SystemConfig convert(SysParameterDO sysParameterDO) {
+        SystemConfig sysParameter = new SystemConfig();
         sysParameter.setId(sysParameterDO.getId());
         List<Parameter> parameters = JsonUtil.toObject(sysParameterDO.getParameters(),
                 new TypeReference<List<Parameter>>() {
@@ -47,7 +47,7 @@ public class SysParameterServiceImpl
         return sysParameter;
     }
 
-    private SysParameterDO convert(SysParameter sysParameter) {
+    private SysParameterDO convert(SystemConfig sysParameter) {
         SysParameterDO sysParameterDO = new SysParameterDO();
         sysParameterDO.setId(sysParameter.getId());
         sysParameterDO.setParameters(JSONObject.toJSONString(sysParameter.getParameters()));

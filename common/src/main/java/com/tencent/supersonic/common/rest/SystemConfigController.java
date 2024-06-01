@@ -1,7 +1,7 @@
 package com.tencent.supersonic.common.rest;
 
-import com.tencent.supersonic.common.pojo.SysParameter;
-import com.tencent.supersonic.common.service.SysParameterService;
+import com.tencent.supersonic.common.pojo.SystemConfig;
+import com.tencent.supersonic.common.service.SystemConfigService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -11,20 +11,20 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping({"/api/semantic/parameter"})
-public class SysParameterController {
+public class SystemConfigController {
 
     @Autowired
-    private SysParameterService sysParameterService;
+    private SystemConfigService sysConfigService;
 
     @PostMapping
-    public Boolean save(@RequestBody SysParameter sysParameter) {
-        sysParameterService.save(sysParameter);
+    public Boolean save(@RequestBody SystemConfig sysParameter) {
+        sysConfigService.save(sysParameter);
         return true;
     }
 
     @GetMapping
-    public SysParameter get() {
-        return sysParameterService.getSysParameter();
+    public SystemConfig get() {
+        return sysConfigService.getSysParameter();
     }
 
 }

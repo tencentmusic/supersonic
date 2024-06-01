@@ -16,7 +16,7 @@ import com.tencent.supersonic.chat.server.plugin.PluginParseConfig;
 import com.tencent.supersonic.chat.server.plugin.build.WebBase;
 import com.tencent.supersonic.common.pojo.JoinCondition;
 import com.tencent.supersonic.common.pojo.ModelRela;
-import com.tencent.supersonic.common.pojo.SysParameter;
+import com.tencent.supersonic.common.pojo.SystemConfig;
 import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
 import com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum;
 import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
@@ -150,7 +150,7 @@ public class S2VisitsDemo extends S2BaseDemo {
     }
 
     public void addSysParameter() {
-        SysParameter sysParameter = new SysParameter();
+        SystemConfig sysParameter = new SystemConfig();
         sysParameter.setId(1);
         sysParameter.init();
         sysParameterService.save(sysParameter);

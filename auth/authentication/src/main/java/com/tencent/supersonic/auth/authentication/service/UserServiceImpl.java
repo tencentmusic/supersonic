@@ -6,8 +6,8 @@ import com.tencent.supersonic.auth.api.authentication.request.UserReq;
 import com.tencent.supersonic.auth.api.authentication.service.UserService;
 import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
 import com.tencent.supersonic.auth.authentication.utils.ComponentFactory;
-import com.tencent.supersonic.common.pojo.SysParameter;
-import com.tencent.supersonic.common.service.SysParameterService;
+import com.tencent.supersonic.common.pojo.SystemConfig;
+import com.tencent.supersonic.common.service.SystemConfigService;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import javax.servlet.http.HttpServletRequest;
@@ -18,9 +18,9 @@ import java.util.Set;
 @Service
 public class UserServiceImpl implements UserService {
 
-    private SysParameterService sysParameterService;
+    private SystemConfigService sysParameterService;
 
-    public UserServiceImpl(SysParameterService sysParameterService) {
+    public UserServiceImpl(SystemConfigService sysParameterService) {
         this.sysParameterService = sysParameterService;
     }
 
@@ -28,7 +28,7 @@ public class UserServiceImpl implements UserService {
     public User getCurrentUser(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {
         User user = UserHolder.findUser(httpServletRequest, httpServletResponse);
         if (user != null) {
-            SysParameter sysParameter = sysParameterService.getSysParameter();
+            SystemConfig sysParameter = sysParameterService.getSysParameter();
             if (!CollectionUtils.isEmpty(sysParameter.getAdmins())
                     && sysParameter.getAdmins().contains(user.getName())) {
                 user.setIsAdmin(1);

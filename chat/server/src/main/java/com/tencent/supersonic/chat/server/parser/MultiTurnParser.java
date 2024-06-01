@@ -23,7 +23,6 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.env.Environment;
 
 import java.util.Map;
 import java.util.HashMap;
@@ -31,6 +30,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.Collections;
+
+import static com.tencent.supersonic.chat.server.parser.ParserConfig.PARSER_MULTI_TURN_ENABLE;
 
 @Slf4j
 public class MultiTurnParser implements ChatParser {
@@ -51,9 +52,9 @@ public class MultiTurnParser implements ChatParser {
 
     @Override
     public void parse(ChatParseContext chatParseContext, ParseResp parseResp) {
-        Environment environment = ContextUtils.getBean(Environment.class);
+        ParserConfig parserConfig = ContextUtils.getBean(ParserConfig.class);
         MultiTurnConfig agentMultiTurnConfig = chatParseContext.getAgent().getMultiTurnConfig();
-        Boolean globalMultiTurnConfig = environment.getProperty("s2.parser.multi-turn.enable", Boolean.class);
+        Boolean globalMultiTurnConfig = Boolean.valueOf(parserConfig.getParameterValue(PARSER_MULTI_TURN_ENABLE));
 
         Boolean multiTurnConfig = agentMultiTurnConfig != null
                 ? agentMultiTurnConfig.isEnableMultiTurn() : globalMultiTurnConfig;
