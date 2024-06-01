@@ -3,6 +3,7 @@ export type ConfigParametersItem = {
   name: string;
   comment: string;
   value: string;
+  defaultValue?: string;
   candidateValues: string[];
   description: string;
   require?: boolean;
