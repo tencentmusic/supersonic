@@ -1,32 +1,18 @@
 package dev.langchain4j.model.openai;
 
-import dev.ai4j.openai4j.chat.ChatCompletionChoice;
-import dev.ai4j.openai4j.chat.ChatCompletionResponse;
-import dev.ai4j.openai4j.chat.Function;
 import dev.ai4j.openai4j.chat.FunctionCall;
 import dev.ai4j.openai4j.chat.Message;
-import dev.ai4j.openai4j.chat.Parameters;
 import dev.ai4j.openai4j.chat.Role;
-import dev.ai4j.openai4j.shared.Usage;
-import dev.langchain4j.agent.tool.ToolExecutionRequest;
-import dev.langchain4j.agent.tool.ToolParameters;
-import dev.langchain4j.agent.tool.ToolSpecification;
 import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.data.message.ChatMessage;
 import dev.langchain4j.data.message.SystemMessage;
 import dev.langchain4j.data.message.ToolExecutionResultMessage;
 import dev.langchain4j.data.message.UserMessage;
 import dev.langchain4j.model.ChatModel;
-import dev.langchain4j.model.output.TokenUsage;
-
-import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class ImproveInternalOpenAiHelper {
-    static final String OPENAI_URL = "https://api.openai.com/v1";
-    static final String OPENAI_DEMO_API_KEY = "demo";
-    static final String OPENAI_DEMO_URL = "http://langchain4j.dev/demo/openai/v1";
 
     public ImproveInternalOpenAiHelper() {
     }
@@ -77,35 +63,4 @@ public class ImproveInternalOpenAiHelper {
         }
     }
 
-    public static List<Function> toFunctions(Collection<ToolSpecification> toolSpecifications) {
-        return (List) toolSpecifications.stream().map(ImproveInternalOpenAiHelper::toFunction)
-                .collect(Collectors.toList());
-    }
-
-    private static Function toFunction(ToolSpecification toolSpecification) {
-        return Function.builder().name(toolSpecification.name())
-                .description(toolSpecification.description())
-                .parameters(toOpenAiParameters(toolSpecification.parameters())).build();
-    }
-
-    private static Parameters toOpenAiParameters(ToolParameters toolParameters) {
-        return toolParameters == null ? Parameters.builder().build() : Parameters.builder()
-                .properties(toolParameters.properties()).required(toolParameters.required()).build();
-    }
-
-    public static AiMessage aiMessageFrom(ChatCompletionResponse response) {
-        if (response.content() != null) {
-            return AiMessage.aiMessage(response.content());
-        } else {
-            FunctionCall functionCall = ((ChatCompletionChoice) response.choices().get(0)).message().functionCall();
-            ToolExecutionRequest toolExecutionRequest = ToolExecutionRequest.builder()
-                    .name(functionCall.name()).arguments(functionCall.arguments()).build();
-            return AiMessage.aiMessage(toolExecutionRequest);
-        }
-    }
-
-    public static TokenUsage tokenUsageFrom(Usage openAiUsage) {
-        return openAiUsage == null ? null : new TokenUsage(openAiUsage.promptTokens(),
-                openAiUsage.completionTokens(), openAiUsage.totalTokens());
-    }
 }
