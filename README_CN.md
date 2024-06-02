@@ -52,6 +52,11 @@ SuperSonic的整体架构和主流程如下图所示：
 
 ## 快速体验
 
+### 线上环境体验
+访问http://117.72.46.148:9080 用户名/密码:admin/admin. 请勿修改系统配置。我们每周末定期重启重置配置。
+
+### 本地构建
+
 SuperSonic自带样例的语义模型和问答对话，只需以下三步即可快速体验：
 
 - 从[release page](https://github.com/tencentmusic/supersonic/releases)下载预先构建好的发行包
