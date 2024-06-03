@@ -4,12 +4,12 @@ import static com.tencent.supersonic.auth.api.authentication.constant.UserConsta
 import static com.tencent.supersonic.auth.api.authentication.constant.UserConstants.TOKEN_CREATE_TIME;
 import static com.tencent.supersonic.auth.api.authentication.constant.UserConstants.TOKEN_IS_ADMIN;
 import static com.tencent.supersonic.auth.api.authentication.constant.UserConstants.TOKEN_PREFIX;
-import static com.tencent.supersonic.auth.api.authentication.constant.UserConstants.TOKEN_TIME_OUT;
 import static com.tencent.supersonic.auth.api.authentication.constant.UserConstants.TOKEN_USER_DISPLAY_NAME;
 import static com.tencent.supersonic.auth.api.authentication.constant.UserConstants.TOKEN_USER_EMAIL;
 import static com.tencent.supersonic.auth.api.authentication.constant.UserConstants.TOKEN_USER_ID;
 import static com.tencent.supersonic.auth.api.authentication.constant.UserConstants.TOKEN_USER_NAME;
 import static com.tencent.supersonic.auth.api.authentication.constant.UserConstants.TOKEN_USER_PASSWORD;
+
 import com.tencent.supersonic.auth.api.authentication.config.AuthenticationConfig;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.auth.api.authentication.pojo.UserWithPassword;
@@ -48,14 +48,13 @@ public class UserTokenUtils {
     }
 
     public String generateAdminToken() {
-        Map<String, Object> claims = new HashMap<>(5);
-        claims.put(TOKEN_USER_ID, "1");
-        claims.put(TOKEN_USER_NAME, "admin");
-        claims.put(TOKEN_USER_PASSWORD, "admin");
-        claims.put(TOKEN_USER_DISPLAY_NAME, "admin");
-        claims.put(TOKEN_CREATE_TIME, System.currentTimeMillis());
-        claims.put(TOKEN_IS_ADMIN, 1);
-        return generate(claims);
+        UserWithPassword admin = new UserWithPassword("admin");
+        admin.setId(1L);
+        admin.setName("admin");
+        admin.setPassword("admin");
+        admin.setDisplayName("admin");
+        admin.setIsAdmin(1);
+        return generateToken(admin);
     }
 
     public User getUser(HttpServletRequest request) {
@@ -107,13 +106,15 @@ public class UserTokenUtils {
     }
 
     private String toTokenString(Map<String, Object> claims) {
-        long expiration = Long.parseLong(claims.get(TOKEN_CREATE_TIME) + "") + TOKEN_TIME_OUT;
+        Long tokenTimeout = authenticationConfig.getTokenTimeout();
+        long expiration = Long.parseLong(claims.get(TOKEN_CREATE_TIME) + "") + tokenTimeout;
+        Date expirationDate = new Date(expiration);
 
         SignatureAlgorithm.valueOf(TOKEN_ALGORITHM);
         return Jwts.builder()
                 .setClaims(claims)
                 .setSubject(claims.get(TOKEN_USER_NAME).toString())
-                .setExpiration(new Date(expiration))
+                .setExpiration(expirationDate)
                 .signWith(SignatureAlgorithm.valueOf(TOKEN_ALGORITHM),
                         authenticationConfig.getTokenSecret().getBytes(StandardCharsets.UTF_8))
                 .compact();
