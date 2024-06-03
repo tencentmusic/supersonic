@@ -1,9 +1,11 @@
 package com.tencent.supersonic.chat.server.processor.parse;
 
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.github.pagehelper.PageInfo;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.chat.api.pojo.request.PageQueryInfoReq;
+import com.tencent.supersonic.chat.api.pojo.response.QueryResp;
 import com.tencent.supersonic.chat.api.pojo.response.SimilarQueryRecallResp;
 import com.tencent.supersonic.chat.server.persistence.dataobject.ChatQueryDO;
 import com.tencent.supersonic.chat.server.persistence.repository.ChatQueryRepository;
@@ -11,7 +13,6 @@ import com.tencent.supersonic.chat.server.pojo.ChatParseContext;
 import com.tencent.supersonic.chat.server.util.SimilarQueryManager;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.headless.api.pojo.response.ParseResp;
-import com.tencent.supersonic.chat.api.pojo.response.QueryResp;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.CollectionUtils;
@@ -82,7 +83,10 @@ public class QueryRecommendProcessor implements ParseResultProcessor {
 
     private void updateChatQuery(ChatQueryDO chatQueryDO) {
         ChatQueryRepository chatQueryRepository = ContextUtils.getBean(ChatQueryRepository.class);
-        chatQueryRepository.updateChatQuery(chatQueryDO);
+        UpdateWrapper<ChatQueryDO> updateWrapper = new UpdateWrapper<>();
+        updateWrapper.eq("question_id", chatQueryDO.getQuestionId());
+        updateWrapper.set("parse_time_cost", chatQueryDO.getSimilarQueries());
+        chatQueryRepository.updateChatQuery(chatQueryDO, updateWrapper);
     }
 
 }
