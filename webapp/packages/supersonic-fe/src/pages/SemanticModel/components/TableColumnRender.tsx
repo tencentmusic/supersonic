@@ -2,7 +2,7 @@ import { Space, Tag, Typography } from 'antd';
 import { StatusEnum } from '../enum';
 import { SENSITIVE_LEVEL_ENUM, SENSITIVE_LEVEL_COLOR } from '../constant';
 import { TagsOutlined, ReadOutlined } from '@ant-design/icons';
-import { history } from 'umi';
+import { history } from '@umijs/max';
 import { ISemantic } from '../data';
 import { isString } from 'lodash';
 import dayjs from 'dayjs';

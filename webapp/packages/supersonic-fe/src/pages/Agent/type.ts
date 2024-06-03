@@ -27,7 +27,7 @@ export const AGENT_TOOL_TYPE_LIST = [
 
 export enum QueryModeEnum {
   METRIC = 'METRIC',
-  TAG = 'TAG',
+  DETAIL = 'DETAIL',
 }
 
 export const QUERY_MODE_LIST = [
@@ -36,8 +36,8 @@ export const QUERY_MODE_LIST = [
     value: QueryModeEnum.METRIC,
   },
   {
-    label: '标签模式',
-    value: QueryModeEnum.TAG,
+    label: '明细模式',
+    value: QueryModeEnum.DETAIL,
   },
 ];
 
@@ -56,6 +56,22 @@ export type AgentConfigType = {
   tools: AgentToolType[];
 };
 
+export type LlmConfigType = {
+  provider: string;
+  baseUrl: string;
+  apiKey: string;
+  modelName: string;
+  temperature: number;
+  timeOut: number;
+};
+
+export type MultiTurnConfig = {
+  enableMultiTurn: boolean;
+};
+export type VisualConfig = {
+  defaultShowType: string;
+};
+
 export type AgentType = {
   id?: number;
   name?: string;
@@ -68,6 +84,9 @@ export type AgentType = {
   status?: 0 | 1;
   enableSearch?: 0 | 1;
   agentConfig?: AgentConfigType;
+  llmConfig?: LlmConfigType;
+  multiTurnConfig?: MultiTurnConfig;
+  visualConfig?: VisualConfig;
 };
 
 export type ModelType = {

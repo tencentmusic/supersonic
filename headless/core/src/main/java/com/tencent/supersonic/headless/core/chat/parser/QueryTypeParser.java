@@ -13,15 +13,14 @@ import com.tencent.supersonic.headless.core.chat.query.llm.s2sql.LLMSqlQuery;
 import com.tencent.supersonic.headless.core.chat.query.rule.RuleSemanticQuery;
 import com.tencent.supersonic.headless.core.pojo.ChatContext;
 import com.tencent.supersonic.headless.core.pojo.QueryContext;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 
 /**
  * QueryTypeParser resolves query type as either METRIC or TAG, or ID.
@@ -73,7 +72,7 @@ public class QueryTypeParser implements SemanticParser {
                 //If all the fields in the SELECT/WHERE statement are of tag type.
                 if (CollectionUtils.isNotEmpty(tags)
                         && tags.containsAll(selectWhereFilterByTimeFields)) {
-                    return QueryType.TAG;
+                    return QueryType.DETAIL;
                 }
             }
         }

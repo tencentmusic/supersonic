@@ -60,6 +60,4 @@ public class AgentDO {
 
     private String multiTurnConfig;
 
-    private String visualConfig;
-
 }

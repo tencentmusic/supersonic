@@ -3,13 +3,12 @@ package com.tencent.supersonic.chat.server.service.impl;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.chat.server.agent.Agent;
-import com.tencent.supersonic.headless.api.pojo.LLMConfig;
 import com.tencent.supersonic.chat.server.agent.MultiTurnConfig;
-import com.tencent.supersonic.chat.server.agent.VisualConfig;
 import com.tencent.supersonic.chat.server.persistence.dataobject.AgentDO;
 import com.tencent.supersonic.chat.server.persistence.mapper.AgentDOMapper;
 import com.tencent.supersonic.chat.server.service.AgentService;
 import com.tencent.supersonic.common.util.JsonUtil;
+import com.tencent.supersonic.headless.api.pojo.LLMConfig;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import java.util.List;
@@ -66,7 +65,6 @@ public class AgentServiceImpl extends ServiceImpl<AgentDOMapper, AgentDO>
         agent.setExamples(JsonUtil.toList(agentDO.getExamples(), String.class));
         agent.setLlmConfig(JsonUtil.toObject(agentDO.getLlmConfig(), LLMConfig.class));
         agent.setMultiTurnConfig(JsonUtil.toObject(agentDO.getMultiTurnConfig(), MultiTurnConfig.class));
-        agent.setVisualConfig(JsonUtil.toObject(agentDO.getVisualConfig(), VisualConfig.class));
         return agent;
     }
 
@@ -77,7 +75,6 @@ public class AgentServiceImpl extends ServiceImpl<AgentDOMapper, AgentDO>
         agentDO.setExamples(JsonUtil.toString(agent.getExamples()));
         agentDO.setLlmConfig(JsonUtil.toString(agent.getLlmConfig()));
         agentDO.setMultiTurnConfig(JsonUtil.toString(agent.getMultiTurnConfig()));
-        agentDO.setVisualConfig(JsonUtil.toString(agent.getVisualConfig()));
         if (agentDO.getStatus() == null) {
             agentDO.setStatus(1);
         }

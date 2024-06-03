@@ -2,11 +2,15 @@ package com.tencent.supersonic.headless.core.chat.parser;
 
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
-import com.tencent.supersonic.headless.core.config.OptimizationConfig;
+import com.tencent.supersonic.headless.core.config.ParserConfig;
 import com.tencent.supersonic.headless.core.pojo.QueryContext;
 import com.tencent.supersonic.headless.core.chat.query.SemanticQuery;
 import com.tencent.supersonic.headless.core.chat.query.llm.s2sql.LLMSqlQuery;
 import lombok.extern.slf4j.Slf4j;
+
+import static com.tencent.supersonic.headless.core.config.ParserConfig.PARSER_TEXT_LENGTH_THRESHOLD;
+import static com.tencent.supersonic.headless.core.config.ParserConfig.PARSER_TEXT_LENGTH_THRESHOLD_LONG;
+import static com.tencent.supersonic.headless.core.config.ParserConfig.PARSER_TEXT_LENGTH_THRESHOLD_SHORT;
 
 /**
  * This checker can be used by semantic parsers to check if query intent
@@ -32,12 +36,19 @@ public class SatisfactionChecker {
     private static boolean checkThreshold(String queryText, SemanticParseInfo semanticParseInfo) {
         int queryTextLength = queryText.replaceAll(" ", "").length();
         double degree = semanticParseInfo.getScore() / queryTextLength;
-        OptimizationConfig optimizationConfig = ContextUtils.getBean(OptimizationConfig.class);
-        if (queryTextLength > optimizationConfig.getQueryTextLengthThreshold()) {
-            if (degree < optimizationConfig.getLongTextThreshold()) {
+        ParserConfig parserConfig = ContextUtils.getBean(ParserConfig.class);
+        int textLengthThreshold =
+                Integer.valueOf(parserConfig.getParameterValue(PARSER_TEXT_LENGTH_THRESHOLD));
+        double longTextLengthThreshold =
+                Double.valueOf(parserConfig.getParameterValue(PARSER_TEXT_LENGTH_THRESHOLD_LONG));
+        double shortTextLengthThreshold =
+                Double.valueOf(parserConfig.getParameterValue(PARSER_TEXT_LENGTH_THRESHOLD_SHORT));
+
+        if (queryTextLength > textLengthThreshold) {
+            if (degree < longTextLengthThreshold) {
                 return false;
             }
-        } else if (degree < optimizationConfig.getShortTextThreshold()) {
+        } else if (degree < shortTextLengthThreshold) {
             return false;
         }
         log.info("queryMode:{}, degree:{}, parse info:{}",

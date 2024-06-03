@@ -18,6 +18,7 @@ type Props = {
   chatVisible?: boolean;
   isDeveloper?: boolean;
   integrateSystem?: string;
+  isSimpleMode?: boolean;
   onMsgDataLoaded: (
     data: MsgDataType,
     questionId: string | number,
@@ -37,6 +38,7 @@ const MessageContainer: React.FC<Props> = ({
   chatVisible,
   isDeveloper,
   integrateSystem,
+  isSimpleMode,
   onMsgDataLoaded,
   onSendMsg,
 }) => {
@@ -65,7 +67,7 @@ const MessageContainer: React.FC<Props> = ({
   return (
     <div id={id} className={messageContainerClass}>
       <div className={styles.messageList}>
-        {messageList.map((msgItem: MessageItem, index: number) => {
+        {messageList.map((msgItem: MessageItem) => {
           const {
             id: msgId,
             modelId,
@@ -92,6 +94,7 @@ const MessageContainer: React.FC<Props> = ({
                   <Text position="right" data={msg} />
                   {identityMsg && <Text position="left" data={identityMsg} />}
                   <ChatItem
+                    isSimpleMode={isSimpleMode}
                     msg={msgValue || msg || ''}
                     parseInfos={parseInfos}
                     parseTimeCostValue={parseTimeCost}
@@ -126,7 +129,8 @@ function areEqual(prevProps: Props, nextProps: Props) {
     isEqual(prevProps.messageList, nextProps.messageList) &&
     prevProps.historyVisible === nextProps.historyVisible &&
     prevProps.currentAgent === nextProps.currentAgent &&
-    prevProps.chatVisible === nextProps.chatVisible
+    prevProps.chatVisible === nextProps.chatVisible &&
+    prevProps.isSimpleMode === nextProps.isSimpleMode
   ) {
     return true;
   }

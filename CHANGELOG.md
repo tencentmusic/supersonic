@@ -4,6 +4,20 @@
 - "Breaking Changes" describes any changes that may break existing functionality or cause
   compatibility issues with previous versions.
 
+## SuperSonic [0.9.2] - 2024-06-01
+
+### Added
+- support multiple rounds of dialogue
+- add term configuration and identification to help LLM learn private domain knowledge
+- support configuring LLM parameters in the agent
+- metric market supports searching in natural language
+
+### Updated
+- introducing WorkFlow, Mapper, Parser, and Corrector support jump execution
+- Introducing the concept of Model-Set to simplify Domain management
+- overall optimization and upgrade of system pages
+- optimize startup script
+
 ## SuperSonic [0.9.0] - 2024-04-03
 
 ### Added

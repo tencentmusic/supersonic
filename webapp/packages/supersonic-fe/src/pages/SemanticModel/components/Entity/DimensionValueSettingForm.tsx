@@ -63,14 +63,6 @@ const DimensionValueSettingForm: React.FC<Props> = ({
     queryDictLatestTaskList();
   }, []);
 
-  // useEffect(() => {
-  //   const modelId = dataItem?.modelId;
-  //   if (modelId) {
-  //     queryMetricList(modelId);
-  //     form.setFieldValue('modelId', modelId);
-  //   }
-  // }, [dataItem]);
-
   useEffect(() => {
     if (!selectDomainId) {
       return;

@@ -33,4 +33,6 @@ public class AuthenticationConfig {
     @Value("${authentication.app.signature:signature}")
     private String signature;
 
+    @Value("${authentication.token.timeout:7200000}")
+    private Long tokenTimeout;
 }

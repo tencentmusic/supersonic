@@ -11,8 +11,8 @@ import com.tencent.supersonic.headless.core.chat.parser.SatisfactionChecker;
 import com.tencent.supersonic.headless.core.chat.query.llm.s2sql.LLMReq;
 import com.tencent.supersonic.headless.core.chat.query.llm.s2sql.LLMReq.ElementValue;
 import com.tencent.supersonic.headless.core.chat.query.llm.s2sql.LLMResp;
+import com.tencent.supersonic.headless.core.config.ParserConfig;
 import com.tencent.supersonic.headless.core.config.LLMParserConfig;
-import com.tencent.supersonic.headless.core.config.OptimizationConfig;
 import com.tencent.supersonic.headless.core.pojo.QueryContext;
 import com.tencent.supersonic.headless.core.utils.ComponentFactory;
 import com.tencent.supersonic.headless.core.utils.S2SqlDateHelper;
@@ -31,14 +31,18 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static com.tencent.supersonic.headless.core.config.ParserConfig.PARSER_LINKING_VALUE_ENABLE;
+import static com.tencent.supersonic.headless.core.config.ParserConfig.PARSER_STRATEGY_TYPE;
+
 @Slf4j
 @Service
 public class LLMRequestService {
 
     @Autowired
     private LLMParserConfig llmParserConfig;
+
     @Autowired
-    private OptimizationConfig optimizationConfig;
+    private ParserConfig parserConfig;
 
     public boolean isSkip(QueryContext queryCtx) {
         if (!queryCtx.getText2SQLType().enableLLM()) {
@@ -82,10 +86,13 @@ public class LLMRequestService {
 
         fieldNameList.add(TimeDimensionEnum.DAY.getChName());
         llmSchema.setFieldNameList(fieldNameList);
+        llmSchema.setTerms(getTerms(queryCtx, dataSetId));
         llmReq.setSchema(llmSchema);
 
         List<ElementValue> linking = new ArrayList<>();
-        if (optimizationConfig.isUseLinkingValueSwitch()) {
+        boolean linkingValueEnabled = Boolean.valueOf(parserConfig.getParameterValue(PARSER_LINKING_VALUE_ENABLE));
+
+        if (linkingValueEnabled) {
             linking.addAll(linkingValues);
         }
         llmReq.setLinking(linking);
@@ -95,7 +102,7 @@ public class LLMRequestService {
             currentDate = DateUtils.getBeforeDate(0);
         }
         llmReq.setCurrentDate(currentDate);
-        llmReq.setSqlGenerationMode(optimizationConfig.getSqlGenType().getName());
+        llmReq.setSqlGenType(LLMReq.SqlGenType.valueOf(parserConfig.getParameterValue(PARSER_STRATEGY_TYPE)));
         llmReq.setLlmConfig(queryCtx.getLlmConfig());
         return llmReq;
     }
@@ -113,6 +120,24 @@ public class LLMRequestService {
 
         results.addAll(fieldNameList);
         return new ArrayList<>(results);
+    }
+
+    protected List<LLMReq.Term> getTerms(QueryContext queryCtx, Long dataSetId) {
+        List<SchemaElementMatch> matchedElements = queryCtx.getMapInfo().getMatchedElements(dataSetId);
+        if (CollectionUtils.isEmpty(matchedElements)) {
+            return new ArrayList<>();
+        }
+        return matchedElements.stream()
+                .filter(schemaElementMatch -> {
+                    SchemaElementType elementType = schemaElementMatch.getElement().getType();
+                    return SchemaElementType.TERM.equals(elementType);
+                }).map(schemaElementMatch -> {
+                    LLMReq.Term term = new LLMReq.Term();
+                    term.setName(schemaElementMatch.getElement().getName());
+                    term.setDescription(schemaElementMatch.getElement().getDescription());
+                    term.setAlias(schemaElementMatch.getElement().getAlias());
+                    return term;
+                }).collect(Collectors.toList());
     }
 
     private String getPriorExts(QueryContext queryContext, List<String> fieldNameList) {

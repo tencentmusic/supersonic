@@ -1,6 +1,7 @@
 package com.tencent.supersonic.headless.core.planner;
 
 import com.tencent.supersonic.headless.core.executor.QueryExecutor;
+import com.tencent.supersonic.headless.core.executor.accelerator.QueryAccelerator;
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;
 
 /**
@@ -11,4 +12,6 @@ public interface QueryPlanner {
     QueryExecutor plan(QueryStatement queryStatement);
 
     QueryExecutor route(QueryStatement queryStatement);
+
+    QueryAccelerator accelerate(QueryStatement queryStatement);
 }

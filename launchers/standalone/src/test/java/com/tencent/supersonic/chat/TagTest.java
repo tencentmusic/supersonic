@@ -8,7 +8,7 @@ import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.api.pojo.request.QueryFilter;
 import com.tencent.supersonic.headless.api.pojo.response.QueryResult;
-import com.tencent.supersonic.headless.core.chat.query.rule.tag.TagFilterQuery;
+import com.tencent.supersonic.headless.core.chat.query.rule.detail.DetailFilterQuery;
 import com.tencent.supersonic.util.DataUtils;
 import org.junit.jupiter.api.Test;
 
@@ -16,14 +16,13 @@ public class TagTest extends BaseTest {
 
     @Test
     public void queryTest_tag_list_filter() throws Exception {
-        MockConfiguration.mockTagAgent(agentService);
         QueryResult actualResult = submitNewChat("爱情、流行类型的艺人", DataUtils.tagAgentId);
 
         QueryResult expectedResult = new QueryResult();
         SemanticParseInfo expectedParseInfo = new SemanticParseInfo();
         expectedResult.setChatContext(expectedParseInfo);
 
-        expectedResult.setQueryMode(TagFilterQuery.QUERY_MODE);
+        expectedResult.setQueryMode(DetailFilterQuery.QUERY_MODE);
         expectedParseInfo.setAggType(AggregateTypeEnum.NONE);
 
         QueryFilter dimensionFilter = DataUtils.getFilter("genre", FilterOperatorEnum.EQUALS,
@@ -43,7 +42,7 @@ public class TagTest extends BaseTest {
         expectedParseInfo.getDimensions().add(dim4);
 
         expectedParseInfo.setDateInfo(DataUtils.getDateConf(DateConf.DateMode.BETWEEN, startDay, startDay, 7));
-        expectedParseInfo.setQueryType(QueryType.TAG);
+        expectedParseInfo.setQueryType(QueryType.DETAIL);
 
         assertQueryResult(expectedResult, actualResult);
     }

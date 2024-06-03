@@ -53,15 +53,27 @@ public class S2ArtistDemo extends S2BaseDemo {
     public void doRun() {
         try {
             DomainResp singerDomain = addDomain();
+            DomainResp singerModelSet = addModelSet(singerDomain);
             TagObjectResp singerTagObject = addTagObjectSinger(singerDomain);
-            ModelResp singerModel = addModel(singerDomain, demoDatabaseResp, singerTagObject);
+            ModelResp singerModel = addModel(singerModelSet, demoDatabaseResp, singerTagObject);
             addTags(singerModel);
-            long dataSetId = addDataSet(singerDomain, singerModel);
+            long dataSetId = addDataSet(singerDomain, singerModelSet, singerModel);
             addAgent(dataSetId);
         } catch (Exception e) {
             log.error("Failed to add model demo data", e);
         }
+    }
 
+    @Override
+    boolean checkNeedToRun() {
+        List<DomainResp> domainList = domainService.getDomainList();
+        for (DomainResp domainResp : domainList) {
+            if (domainResp.getBizName().equalsIgnoreCase("singer")) {
+                log.info("Already exist domain:singer, no need to run demo");
+                return false;
+            }
+        }
+        return true;
     }
 
     private TagObjectResp addTagObjectSinger(DomainResp singerDomain) throws Exception {
@@ -76,13 +88,22 @@ public class S2ArtistDemo extends S2BaseDemo {
     public DomainResp addDomain() {
         DomainReq domainReq = new DomainReq();
         domainReq.setName("艺人库");
-        domainReq.setBizName("supersonic");
+        domainReq.setBizName("singer");
         domainReq.setParentId(0L);
         domainReq.setStatus(StatusEnum.ONLINE.getCode());
         domainReq.setViewers(Arrays.asList("admin", "tom", "jack"));
         domainReq.setViewOrgs(Collections.singletonList("1"));
         domainReq.setAdmins(Arrays.asList("admin", "alice"));
         domainReq.setAdminOrgs(Collections.emptyList());
+        return domainService.createDomain(domainReq, user);
+    }
+
+    public DomainResp addModelSet(DomainResp singerDomain) {
+        DomainReq domainReq = new DomainReq();
+        domainReq.setName("标签模型集");
+        domainReq.setBizName("singer_info");
+        domainReq.setParentId(singerDomain.getId());
+        domainReq.setStatus(StatusEnum.ONLINE.getCode());
         return domainService.createDomain(domainReq, user);
     }
 
@@ -142,14 +163,14 @@ public class S2ArtistDemo extends S2BaseDemo {
                 TagDefineType.METRIC);
     }
 
-    public long addDataSet(DomainResp singerDomain, ModelResp singerModel) {
+    public long addDataSet(DomainResp singerDomain, DomainResp singerModelSet, ModelResp singerModel) {
         DataSetReq dataSetReq = new DataSetReq();
         dataSetReq.setName("艺人库");
         dataSetReq.setBizName("singer");
         dataSetReq.setDomainId(singerDomain.getId());
         dataSetReq.setDescription("包含艺人相关标签和指标信息");
         dataSetReq.setAdmins(Lists.newArrayList("admin", "jack"));
-        List<DataSetModelConfig> dataSetModelConfigs = getDataSetModelConfigs(singerDomain.getId());
+        List<DataSetModelConfig> dataSetModelConfigs = getDataSetModelConfigs(singerModelSet.getId());
         DataSetDetail dataSetDetail = new DataSetDetail();
         dataSetDetail.setDataSetModelConfigs(dataSetModelConfigs);
         dataSetReq.setDataSetDetail(dataSetDetail);

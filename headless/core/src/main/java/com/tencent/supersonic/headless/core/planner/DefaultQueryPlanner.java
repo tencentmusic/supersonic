@@ -1,6 +1,7 @@
 package com.tencent.supersonic.headless.core.planner;
 
 import com.tencent.supersonic.headless.core.executor.QueryExecutor;
+import com.tencent.supersonic.headless.core.executor.accelerator.QueryAccelerator;
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;
 import com.tencent.supersonic.headless.core.utils.ComponentFactory;
 import lombok.extern.slf4j.Slf4j;
@@ -25,6 +26,16 @@ public class DefaultQueryPlanner implements QueryPlanner {
         for (QueryExecutor queryExecutor : ComponentFactory.getQueryExecutors()) {
             if (queryExecutor.accept(queryStatement)) {
                 return queryExecutor;
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public QueryAccelerator accelerate(QueryStatement queryStatement) {
+        for (QueryAccelerator queryAccelerator : ComponentFactory.getQueryAccelerators()) {
+            if (queryAccelerator.check(queryStatement)) {
+                return queryAccelerator;
             }
         }
         return null;

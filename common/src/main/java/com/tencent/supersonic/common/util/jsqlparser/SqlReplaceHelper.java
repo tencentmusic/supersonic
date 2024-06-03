@@ -631,5 +631,30 @@ public class SqlReplaceHelper {
             }
         }
     }
+
+    public static String dealAliasToOrderBy(String querySql) {
+        Select selectStatement = SqlSelectHelper.getSelect(querySql);
+        PlainSelect plainSelect = selectStatement.getPlainSelect();
+        List<SelectItem<?>> selectItemList = plainSelect.getSelectItems();
+        List<OrderByElement> orderByElementList = plainSelect.getOrderByElements();
+        if (CollectionUtils.isEmpty(orderByElementList)) {
+            return querySql;
+        }
+        Map<String, Expression> map = new HashMap<>();
+        for (int i = 0; i < selectItemList.size(); i++) {
+            if (!Objects.isNull(selectItemList.get(i).getAlias())) {
+                map.put(selectItemList.get(i).getAlias().getName(), selectItemList.get(i).getExpression());
+                selectItemList.get(i).setAlias(null);
+            }
+        }
+        for (OrderByElement orderByElement : orderByElementList) {
+            if (map.containsKey(orderByElement.getExpression().toString())) {
+                orderByElement.setExpression(map.get(orderByElement.getExpression().toString()));
+            }
+        }
+        plainSelect.setOrderByElements(orderByElementList);
+        return plainSelect.toString();
+    }
+
 }
 
