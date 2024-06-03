@@ -10,7 +10,7 @@ import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.api.pojo.SemanticSchema;
 import com.tencent.supersonic.headless.api.pojo.request.QuerySqlReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
-import com.tencent.supersonic.headless.core.config.OptimizationConfig;
+import com.tencent.supersonic.headless.core.config.ParserConfig;
 import com.tencent.supersonic.headless.core.utils.QueryReqBuilder;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +20,8 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import static com.tencent.supersonic.headless.core.config.ParserConfig.PARSER_S2SQL_ENABLE;
 
 @Slf4j
 @ToString
@@ -73,8 +75,9 @@ public abstract class BaseSemanticQuery implements SemanticQuery, Serializable {
     }
 
     protected void initS2SqlByStruct(SemanticSchema semanticSchema) {
-        OptimizationConfig optimizationConfig = ContextUtils.getBean(OptimizationConfig.class);
-        if (!optimizationConfig.isUseS2SqlSwitch()) {
+        ParserConfig parserConfig = ContextUtils.getBean(ParserConfig.class);
+        boolean s2sqlEnable = Boolean.valueOf(parserConfig.getParameterValue(PARSER_S2SQL_ENABLE));
+        if (!s2sqlEnable) {
             return;
         }
         QueryStructReq queryStructReq = convertQueryStruct();

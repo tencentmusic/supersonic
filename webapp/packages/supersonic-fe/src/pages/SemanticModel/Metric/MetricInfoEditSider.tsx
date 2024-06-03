@@ -2,6 +2,7 @@ import { Tag, Space, Tooltip } from 'antd';
 import React, { useState } from 'react';
 import dayjs from 'dayjs';
 import { MetricSettingKey, MetricSettingWording } from './constants';
+import { basePath } from '../../../../config/defaultSettings';
 import {
   ExportOutlined,
   SolutionOutlined,
@@ -53,7 +54,7 @@ const MetricInfoEditSider: React.FC<Props> = ({ metircData, onSettingKeyChange }
                   <span
                     className={styles.gotoMetricListIcon}
                     onClick={() => {
-                      window.open(`/model/${metircData.domainId}/${metircData.modelId}/`);
+                      window.open(`${basePath}model/${metircData.domainId}/${metircData.modelId}/`);
                     }}
                   >
                     <Tooltip title="前往所属模型指标列表">
@@ -118,7 +119,7 @@ const MetricInfoEditSider: React.FC<Props> = ({ metircData, onSettingKeyChange }
                     <span
                       className={styles.gotoMetricListIcon}
                       onClick={() => {
-                        window.open(`/model/${metircData.domainId}/0/overview`);
+                        window.open(`${basePath}model/${metircData.domainId}/0/overview`);
                       }}
                     >
                       <Tooltip title="前往模型设置页">

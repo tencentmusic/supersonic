@@ -159,7 +159,6 @@ public abstract class BaseMapper implements SchemaMapper {
         }
         SchemaElement elementDb = dataSetSchema.getElement(elementType, elementID);
         if (Objects.isNull(elementDb)) {
-            log.warn("element is null, elementType:{},elementID:{}", elementType, elementID);
             return null;
         }
         BeanUtils.copyProperties(elementDb, element);

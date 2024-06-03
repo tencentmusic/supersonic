@@ -9,7 +9,7 @@ import com.tencent.supersonic.chat.server.service.AgentService;
 import com.tencent.supersonic.chat.server.service.ChatManageService;
 import com.tencent.supersonic.chat.server.service.ChatService;
 import com.tencent.supersonic.chat.server.service.PluginService;
-import com.tencent.supersonic.common.service.SysParameterService;
+import com.tencent.supersonic.common.service.SystemConfigService;
 import com.tencent.supersonic.headless.api.pojo.DataSetModelConfig;
 import com.tencent.supersonic.headless.api.pojo.DrillDownDimension;
 import com.tencent.supersonic.headless.api.pojo.RelateDimension;
@@ -84,7 +84,7 @@ public abstract class S2BaseDemo implements CommandLineRunner {
     @Autowired
     protected AgentService agentService;
     @Autowired
-    protected SysParameterService sysParameterService;
+    protected SystemConfigService sysParameterService;
     @Autowired
     protected CanvasService canvasService;
     @Autowired

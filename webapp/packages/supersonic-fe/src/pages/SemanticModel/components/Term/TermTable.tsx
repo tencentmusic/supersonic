@@ -7,7 +7,6 @@ import { getTermList, saveOrUpdate, deleteTerm } from '../../service';
 import dayjs from 'dayjs';
 import styles from '../style.less';
 import { ISemantic } from '../../data';
-import { ColumnsConfig } from '../../components/TableColumnRender';
 import TermCreateForm from './TermCreateForm';
 
 const { Paragraph } = Typography;
@@ -26,10 +25,10 @@ const TermTable: React.FC<Props> = ({}) => {
   const actionRef = useRef<ActionType>();
 
   useEffect(() => {
-    queryTagList();
-  }, []);
+    queryTermList();
+  }, [selectDomainId]);
 
-  const queryTagList = async () => {
+  const queryTermList = async () => {
     setLoading(true);
     const { code, data, msg } = await getTermList(selectDomainId);
     setLoading(false);
@@ -48,41 +47,20 @@ const TermTable: React.FC<Props> = ({}) => {
     });
     setLoading(false);
     if (code === 200) {
-      queryTagList();
+      queryTermList();
     } else {
       message.error(msg);
     }
-  };
-
-  const saveTermConfig = (termItem: ISemantic.ITermItem) => {
-    const hasTerm = tableData.find((item) => item.name === termItem.name);
-    let terms = [];
-    if (hasTerm) {
-      terms = tableData.map((item) => {
-        if (item.name === termItem.name) {
-          return {
-            ...item,
-            ...termItem,
-          };
-        }
-        return item;
-      });
-    } else {
-      terms = [...tableData, termItem];
-    }
-    queryTermConfig(terms);
   };
 
   const deleteTermConfig = async (termItem: ISemantic.ITermItem) => {
     const { code, msg } = await deleteTerm(termItem.id);
     if (code === 200) {
-      queryTagList();
+      queryTermList();
     } else {
       message.error(msg);
     }
   };
-
-  const columnsConfig = ColumnsConfig();
 
   const columns: ProColumns[] = [
     {
@@ -166,6 +144,7 @@ const TermTable: React.FC<Props> = ({}) => {
         className={`${styles.classTable}  ${styles.disabledSearchTable} `}
         actionRef={actionRef}
         rowKey="id"
+        size="small"
         loading={loading}
         search={false}
         columns={columns}
@@ -174,7 +153,6 @@ const TermTable: React.FC<Props> = ({}) => {
           return false;
         }}
         sticky={{ offsetHeader: 0 }}
-        size="large"
         options={false}
         toolBarRender={() => [
           <Button

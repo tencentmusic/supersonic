@@ -1,0 +1,33 @@
+name: supersonic RHEL/CentOS CI
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: quay.io/centos/centos:stream8  # 使用 CentOS Stream 8 容器
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install Java and Maven
+        run: |
+          dnf install -y java-1.8.0-openjdk-devel maven
+          java -version
+          mvn -version
+      - name: Cache Maven packages
+        uses: actions/cache@v2
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+      - name: Build with Maven
+        run: mvn -B package --file pom.xml
+      - name: Test with Maven
+        run: mvn test

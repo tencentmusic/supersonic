@@ -2,10 +2,10 @@ import { Tag, Space, Tooltip, Typography } from 'antd';
 import React from 'react';
 import { isArrayOfValues } from '@/utils/utils';
 import dayjs from 'dayjs';
+import { basePath } from '../../../../config/defaultSettings';
 import {
   ExportOutlined,
   SolutionOutlined,
-  ContainerOutlined,
   PartitionOutlined,
   PlusOutlined,
   AreaChartOutlined,
@@ -43,7 +43,7 @@ const MetricInfoSider: React.FC<Props> = ({
               <span
                 className={styles.gotoMetricListIcon}
                 onClick={() => {
-                  window.open(`/model/${metircData.domainId}/${metircData.modelId}/`);
+                  window.open(`${basePath}model/${metircData.domainId}/${metircData.modelId}/`);
                 }}
               >
                 <Tooltip title="前往所属模型指标列表">
@@ -92,7 +92,7 @@ const MetricInfoSider: React.FC<Props> = ({
                   <span
                     className={styles.gotoMetricListIcon}
                     onClick={() => {
-                      window.open(`/model/${metircData.domainId}/0/overview`);
+                      window.open(`${basePath}model/${metircData.domainId}/0/overview`);
                     }}
                   >
                     <Tooltip title="前往模型设置页">

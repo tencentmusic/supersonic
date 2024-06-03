@@ -12,7 +12,7 @@ import com.tencent.supersonic.headless.api.pojo.enums.MapModeEnum;
 import com.tencent.supersonic.headless.api.pojo.enums.WorkflowState;
 import com.tencent.supersonic.headless.api.pojo.request.QueryFilters;
 import com.tencent.supersonic.headless.core.chat.query.SemanticQuery;
-import com.tencent.supersonic.headless.core.config.OptimizationConfig;
+import com.tencent.supersonic.headless.core.config.ParserConfig;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -25,6 +25,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import static com.tencent.supersonic.headless.core.config.ParserConfig.PARSER_SHOW_COUNT;
 
 @Data
 @Builder
@@ -51,8 +53,8 @@ public class QueryContext {
     private LLMConfig llmConfig;
 
     public List<SemanticQuery> getCandidateQueries() {
-        OptimizationConfig optimizationConfig = ContextUtils.getBean(OptimizationConfig.class);
-        Integer parseShowCount = optimizationConfig.getParseShowCount();
+        ParserConfig parserConfig = ContextUtils.getBean(ParserConfig.class);
+        int parseShowCount = Integer.valueOf(parserConfig.getParameterValue(PARSER_SHOW_COUNT));
         candidateQueries = candidateQueries.stream()
                 .sorted(Comparator.comparing(semanticQuery -> semanticQuery.getParseInfo().getScore(),
                         Comparator.reverseOrder()))

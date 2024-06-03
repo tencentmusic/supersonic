@@ -62,7 +62,7 @@ def transform_sql_example(question:str, current_date:str, table_name:str, field_
               
 
 
-    question_augmented = """{question} (补充信息:{prior_linking}。{current_date}。{terms_desc}) (备注: {prior_exts})""".format(question=question, prior_linking=prior_linkings_str, prior_exts=prior_exts, current_date=current_data_str)
+    question_augmented = """{question} (补充信息:{prior_linking}。{current_date}。{terms_desc}) (备注: {prior_exts})""".format(question=question, prior_linking=prior_linkings_str, prior_exts=prior_exts, current_date=current_data_str, terms_desc=terms_desc)
 
     return question_augmented, db_schema, sql
 

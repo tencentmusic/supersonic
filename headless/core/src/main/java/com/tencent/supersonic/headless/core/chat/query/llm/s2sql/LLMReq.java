@@ -22,7 +22,7 @@ public class LLMReq {
 
     private String priorExts;
 
-    private String sqlGenerationMode;
+    private SqlGenType sqlGenType;
 
     private LLMConfig llmConfig;
 
@@ -80,15 +80,6 @@ public class LLMReq {
         @JsonValue
         public String getName() {
             return name;
-        }
-
-        public static SqlGenType getMode(String name) {
-            for (SqlGenType sqlGenType : SqlGenType.values()) {
-                if (sqlGenType.name.equals(name)) {
-                    return sqlGenType;
-                }
-            }
-            return null;
         }
 
     }

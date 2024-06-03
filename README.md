@@ -55,7 +55,10 @@ The high-level architecture and main process flow is as follows:
 - **Chat Plugin:** extends functionality with third-party tools. The LLM is going to select the most suitable one, given all configured plugins with function description and sample questions.
 
 ## Quick Demo
+### Online playground
+Visit http://117.72.46.148:9080 with username/password: admin/admin. Please do not modify system configurations. We will restart to reset configurations regularly every weekend.
 
+## Local build
 SuperSonic comes with sample semantic models as well as chat conversations that can be used as a starting point. Please follow the steps: 
 
 - Download the latest prebuilt binary from the [release page](https://github.com/tencentmusic/supersonic/releases)

@@ -314,3 +314,6 @@ alter table s2_agent add column `llm_config` varchar(2000) COLLATE utf8_unicode_
 alter table s2_agent add column `multi_turn_config` varchar(2000) COLLATE utf8_unicode_ci DEFAULT NULL;
 
 alter table s2_model add column `ext` varchar(1000) DEFAULT NULL;
+
+--20240601
+alter table s2_sys_parameter rename to s2_system_config;

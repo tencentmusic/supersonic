@@ -31,12 +31,22 @@ type Props = {
 const AgentModal: React.FC<Props> = ({ editAgent, onSaveAgent, onCancel }) => {
   const [saveLoading, setSaveLoading] = useState(false);
   const [examples, setExamples] = useState<{ id: string; question?: string }[]>([]);
-  const [formData, setFormData] = useState<any>({});
+  const [formData, setFormData] = useState<any>({
+    enableSearch: true,
+    llmConfig: {
+      timeOut: 60,
+      provider: 'OPEN_AI',
+    },
+  });
   const [form] = Form.useForm();
 
   useEffect(() => {
     if (editAgent) {
-      form.setFieldsValue({ ...editAgent, enableSearch: editAgent.enableSearch !== 0 });
+      const sourceData = { ...editAgent };
+      if (!sourceData.llmConfig) {
+        delete sourceData.llmConfig;
+      }
+      form.setFieldsValue({ ...sourceData, enableSearch: editAgent.enableSearch !== 0 });
       if (editAgent.examples) {
         setExamples(editAgent.examples.map((question) => ({ id: uuid(), question })));
       }
@@ -173,7 +183,7 @@ const AgentModal: React.FC<Props> = ({ editAgent, onSaveAgent, onCancel }) => {
             <Input placeholder="请输入API KEY" />
           </FormItem>
 
-          <FormItem name={['llmConfig', 'temperature']} label="回复随机性">
+          <FormItem name={['llmConfig', 'temperature']} label="Temperature">
             <Slider
               min={0}
               max={1}
@@ -205,13 +215,7 @@ const AgentModal: React.FC<Props> = ({ editAgent, onSaveAgent, onCancel }) => {
       <Form
         {...layout}
         form={form}
-        initialValues={{
-          enableSearch: true,
-          llmConfig: {
-            timeOut: 60,
-            provider: 'OPEN_AI',
-          },
-        }}
+        initialValues={formData}
         onValuesChange={(value, values) => {
           setFormData(values);
         }}

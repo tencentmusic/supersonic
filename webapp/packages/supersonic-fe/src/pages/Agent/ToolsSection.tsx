@@ -111,34 +111,38 @@ const ToolsSection: React.FC<Props> = ({ currentAgent, onSaveAgent, onEditAgent,
           </div>
         </div>
       </div>
-      <div className={styles.basicInfo}>
-        <div className={styles.basicInfoTitle}>大模型信息</div>
-        <div className={styles.infoContent}>
-          <div className={styles.infoItem}>
-            <span className={styles.label}> 模型提供方式：</span>
-            {currentAgent?.llmConfig?.provider}
-          </div>
-          <div className={styles.infoItem}>
-            <span className={styles.label}>大模型名称:</span>
-            {currentAgent?.llmConfig?.modelName}
-          </div>
-          <div className={styles.infoItem}>
-            <span className={styles.label}>Base URL: </span>
-            {currentAgent?.llmConfig?.baseUrl}
-          </div>
-          <div className={styles.infoItem}>
-            <span className={styles.label}>API KEY:</span>
-            {currentAgent?.llmConfig?.apiKey}
-          </div>
-          <div className={styles.infoItem}>
-            <span className={styles.label}>回复随机性: </span>
-            {currentAgent?.llmConfig?.temperature}
-          </div>
-          <div className={styles.infoItem}>
-            <span className={styles.label}>超时时间(秒): </span> {currentAgent?.llmConfig?.timeOut}
+      {currentAgent?.llmConfig && (
+        <div className={styles.basicInfo}>
+          <div className={styles.basicInfoTitle}>大模型信息</div>
+          <div className={styles.infoContent}>
+            <div className={styles.infoItem}>
+              <span className={styles.label}> 模型提供方式：</span>
+              {currentAgent?.llmConfig?.provider}
+            </div>
+            <div className={styles.infoItem}>
+              <span className={styles.label}>大模型名称:</span>
+              {currentAgent?.llmConfig?.modelName}
+            </div>
+            <div className={styles.infoItem}>
+              <span className={styles.label}>Base URL: </span>
+              {currentAgent?.llmConfig?.baseUrl}
+            </div>
+            <div className={styles.infoItem}>
+              <span className={styles.label}>API KEY:</span>
+              {currentAgent?.llmConfig?.apiKey}
+            </div>
+            <div className={styles.infoItem}>
+              <span className={styles.label}>Temperature: </span>
+              {currentAgent?.llmConfig?.temperature}
+            </div>
+            <div className={styles.infoItem}>
+              <span className={styles.label}>超时时间(秒): </span>{' '}
+              {currentAgent?.llmConfig?.timeOut}
+            </div>
           </div>
         </div>
-      </div>
+      )}
+
       <div className={styles.toolSection}>
         <div className={styles.toolSectionTitleBar}>
           <div className={styles.toolSectionTitle}>工具</div>

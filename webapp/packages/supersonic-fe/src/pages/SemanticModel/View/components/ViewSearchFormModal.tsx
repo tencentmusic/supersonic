@@ -118,7 +118,7 @@ const ViewSearchFormModal: React.FC<ModelCreateFormModalProps> = ({
           />
         </ProCard>
 
-        <ProCard title="标签模式">
+        <ProCard title="明细模式">
           <DefaultSettingForm
             form={form}
             dimensionList={dimensionList}
