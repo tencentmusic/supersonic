@@ -128,11 +128,6 @@ const NodeInfoDrawer: React.FC<Props> = ({
             value: bizName,
           },
           {
-            label: '所属模型',
-            value: modelName,
-            content: <Tag>{modelName || selectModelName}</Tag>,
-          },
-          {
             label: '描述',
             value: description,
           },
@@ -261,4 +256,4 @@ const NodeInfoDrawer: React.FC<Props> = ({
   );
 };
 
-export default NodeInfoDrawer
+export default NodeInfoDrawer;

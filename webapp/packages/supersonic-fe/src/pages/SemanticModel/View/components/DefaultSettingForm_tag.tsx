@@ -83,7 +83,7 @@ const DefaultSettingForm: ForwardRefRenderFunction<any, Props> = (
       {chatConfigType === TransType.TAG && (
         <FormItem
           name={['queryConfig', defaultConfigKeyMap[TransType.TAG], 'defaultDisplayInfo']}
-          label="圈选结果展示字段"
+          label="明细查询结果展示字段"
           getValueFromEvent={(value, items) => {
             const result: { tagIds: number[] } = {
               tagIds: [],
@@ -117,7 +117,7 @@ const DefaultSettingForm: ForwardRefRenderFunction<any, Props> = (
               }
               return false;
             }}
-            placeholder="请选择圈选结果展示字段"
+            placeholder="请选择明细查询结果展示字段"
             options={dataItemListOptions}
           />
         </FormItem>

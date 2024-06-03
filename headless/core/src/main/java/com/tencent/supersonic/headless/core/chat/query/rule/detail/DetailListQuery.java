@@ -1,4 +1,4 @@
-package com.tencent.supersonic.headless.core.chat.query.rule.tag;
+package com.tencent.supersonic.headless.core.chat.query.rule.detail;
 
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.Order;
@@ -16,7 +16,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public abstract class TagListQuery extends TagSemanticQuery {
+public abstract class DetailListQuery extends DetailSemanticQuery {
 
     @Override
     public void fillParseInfo(QueryContext queryContext, ChatContext chatContext) {

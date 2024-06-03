@@ -57,14 +57,13 @@ const DomainManagerTab: React.FC<Props> = ({
       children:
         showModelType === 'list' ? (
           <OverView
-            key={selectDomainId}
             modelList={modelList}
             onModelChange={(model) => {
               handleModelChange(model);
             }}
           />
         ) : (
-          <div style={{ width: '100%' }}>
+          <div style={{ width: '100%' }} key={selectDomainId}>
             <SemanticGraphCanvas />
             {/* <HeadlessFlows /> */}
           </div>
@@ -165,7 +164,7 @@ const DomainManagerTab: React.FC<Props> = ({
   };
 
   return (
-    <>
+    <div>
       <Breadcrumb
         className={styles.breadcrumb}
         separator=""
@@ -206,7 +205,7 @@ const DomainManagerTab: React.FC<Props> = ({
       />
       <Tabs
         className={styles.tab}
-        items={!isModel ? tabItem : isModelItem}
+        items={!isModel ? tabItem : selectModelId ? isModelItem : []}
         activeKey={getActiveKey()}
         tabBarExtraContent={{
           right:
@@ -226,13 +225,12 @@ const DomainManagerTab: React.FC<Props> = ({
               </Radio.Group>
             ) : undefined,
         }}
-        // destroyInactiveTabPane
         size="large"
         onChange={(menuKey: string) => {
           onMenuChange?.(menuKey);
         }}
       />
-    </>
+    </div>
   );
 };
 

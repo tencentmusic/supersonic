@@ -3,7 +3,7 @@ import { ProTable } from '@ant-design/pro-components';
 import { message, Space, Popconfirm, Spin } from 'antd';
 import MetricAddClass from './components/MetricAddClass';
 import React, { useRef, useState, useEffect } from 'react';
-import {  history, useModel } from '@umijs/max';
+import { history, useModel } from '@umijs/max';
 import { SENSITIVE_LEVEL_ENUM } from '../constant';
 import {
   queryMetric,
@@ -16,16 +16,14 @@ import {
 import MetricFilter from './components/MetricFilter';
 import MetricInfoCreateForm from '../components/MetricInfoCreateForm';
 import MetricCardList from './components/MetricCardList';
-import {  StatusEnum } from '../enum';
+import { StatusEnum } from '../enum';
 import moment from 'moment';
 import styles from './style.less';
 import { ISemantic } from '../data';
 import BatchCtrlDropDownButton from '@/components/BatchCtrlDropDownButton';
 import { ColumnsConfig } from '../components/TableColumnRender';
 
-type Props = {
-
-};
+type Props = {};
 
 type QueryMetricListParams = {
   id?: string;
@@ -36,7 +34,7 @@ type QueryMetricListParams = {
   [key: string]: any;
 };
 
-const ClassMetricTable: React.FC<Props> = ({   }) => {
+const ClassMetricTable: React.FC<Props> = ({}) => {
   const { initialState = {} } = useModel('@@initialState');
   const { currentUser = {} } = initialState as any;
   const [createModalVisible, setCreateModalVisible] = useState<boolean>(false);
@@ -46,7 +44,7 @@ const ClassMetricTable: React.FC<Props> = ({   }) => {
     total: 0,
   };
   const [pagination, setPagination] = useState(defaultPagination);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true);
   const [dataSource, setDataSource] = useState<ISemantic.IMetricItem[]>([]);
   const [metricItem, setMetricItem] = useState<ISemantic.IMetricItem>();
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
@@ -154,8 +152,9 @@ const ClassMetricTable: React.FC<Props> = ({   }) => {
   };
 
   const handleMetricEdit = (metricItem: ISemantic.IMetricItem) => {
-    setMetricItem(metricItem);
-    setCreateModalVisible(true);
+    // setMetricItem(metricItem);
+    // setCreateModalVisible(true);
+    history.push(`/model/metric/edit/${metricItem.id}`);
   };
 
   const queryBatchUpdatePublish = async (ids: React.Key[], status: boolean) => {
@@ -458,4 +457,4 @@ const ClassMetricTable: React.FC<Props> = ({   }) => {
     </>
   );
 };
-export default ClassMetricTable
+export default ClassMetricTable;

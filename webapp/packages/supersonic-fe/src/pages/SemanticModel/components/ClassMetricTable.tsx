@@ -108,9 +108,12 @@ const ClassMetricTable: React.FC<Props> = ({ onEmptyMetricData }) => {
 
   useEffect(() => {
     queryMetricList({ ...filterParams, ...defaultPagination });
-  }, [filterParams]);
+  }, [filterParams, modelId]);
 
   const queryMetricList = async (params: any) => {
+    if (!modelId) {
+      return;
+    }
     setLoading(true);
     const { code, data, msg } = await queryMetric({
       ...pagination,

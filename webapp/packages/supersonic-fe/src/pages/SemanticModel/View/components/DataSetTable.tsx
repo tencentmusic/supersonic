@@ -47,7 +47,7 @@ const DataSetTable: React.FC<Props> = ({ disabledEdit = false }) => {
   useEffect(() => {
     queryViewList();
     queryDomainAllModel();
-  }, []);
+  }, [selectDomainId]);
 
   const queryViewList = async () => {
     setLoading(true);

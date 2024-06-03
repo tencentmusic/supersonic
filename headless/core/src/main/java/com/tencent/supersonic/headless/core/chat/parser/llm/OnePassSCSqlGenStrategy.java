@@ -18,6 +18,11 @@ import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
+import static com.tencent.supersonic.headless.core.config.ParserConfig.PARSER_EXEMPLAR_RECALL_NUMBER;
+import static com.tencent.supersonic.headless.core.config.ParserConfig.PARSER_FEW_SHOT_NUMBER;
+import static com.tencent.supersonic.headless.core.config.ParserConfig.PARSER_SELF_CONSISTENCY_NUMBER;
+
+
 @Service
 @Slf4j
 public class OnePassSCSqlGenStrategy extends SqlGenStrategy {
@@ -25,13 +30,16 @@ public class OnePassSCSqlGenStrategy extends SqlGenStrategy {
     @Override
     public LLMResp generate(LLMReq llmReq) {
         //1.retriever sqlExamples and generate exampleListPool
-        keyPipelineLog.info("llmReq:{}", llmReq);
+        keyPipelineLog.info("OnePassSCSqlGenStrategy llmReq:{}", llmReq);
+
+        int exemplarRecallNumber = Integer.valueOf(parserConfig.getParameterValue(PARSER_EXEMPLAR_RECALL_NUMBER));
+        int fewShotNumber = Integer.valueOf(parserConfig.getParameterValue(PARSER_FEW_SHOT_NUMBER));
+        int selfConsistencyNumber = Integer.valueOf(parserConfig.getParameterValue(PARSER_SELF_CONSISTENCY_NUMBER));
 
         List<Map<String, String>> sqlExamples = exemplarManager.recallExemplars(llmReq.getQueryText(),
-                optimizationConfig.getText2sqlExampleNum());
-
+                exemplarRecallNumber);
         List<List<Map<String, String>>> exampleListPool = promptGenerator.getExampleCombos(sqlExamples,
-                optimizationConfig.getText2sqlFewShotsNum(), optimizationConfig.getText2sqlSelfConsistencyNum());
+                fewShotNumber, selfConsistencyNumber);
 
         //2.generator linking and sql prompt by sqlExamples,and parallel generate response.
         List<String> linkingSqlPromptPool = promptGenerator.generatePromptPool(llmReq, exampleListPool, true);
@@ -39,24 +47,19 @@ public class OnePassSCSqlGenStrategy extends SqlGenStrategy {
         linkingSqlPromptPool.parallelStream().forEach(linkingSqlPrompt -> {
                     Prompt prompt = PromptTemplate.from(JsonUtil.toString(linkingSqlPrompt))
                             .apply(new HashMap<>());
-                    keyPipelineLog.info("request prompt:{}", prompt.toSystemMessage());
+                    keyPipelineLog.info("OnePassSCSqlGenStrategy reqPrompt:{}", prompt.toSystemMessage());
             ChatLanguageModel chatLanguageModel = getChatLanguageModel(llmReq.getLlmConfig());
             Response<AiMessage> response = chatLanguageModel.generate(prompt.toSystemMessage());
                     String result = response.content().text();
                     llmResults.add(result);
-                    keyPipelineLog.info("model response:{}", result);
+                    keyPipelineLog.info("OnePassSCSqlGenStrategy modelResp:{}", result);
                 }
         );
         //3.format response.
-        List<String> schemaLinkingResults = llmResults.stream()
-                .map(llmResult -> OutputFormat.getSchemaLinks(llmResult)).collect(Collectors.toList());
-        List<String> candidateSortedList = OutputFormat.formatList(schemaLinkingResults);
-        Pair<String, Map<String, Double>> linkingMap = OutputFormat.selfConsistencyVote(candidateSortedList);
         List<String> sqlList = llmResults.stream()
-                .map(llmResult -> OutputFormat.getSql(llmResult)).collect(Collectors.toList());
+                .map(OutputFormat::getSql).collect(Collectors.toList());
 
         Pair<String, Map<String, Double>> sqlMapPair = OutputFormat.selfConsistencyVote(sqlList);
-        keyPipelineLog.info("linkingMap:{} sqlMap:{}", linkingMap, sqlMapPair.getRight());
 
         LLMResp result = new LLMResp();
         result.setQuery(llmReq.getQueryText());

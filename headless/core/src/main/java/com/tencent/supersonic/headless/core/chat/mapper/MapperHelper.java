@@ -2,11 +2,9 @@ package com.tencent.supersonic.headless.core.chat.mapper;
 
 import com.hankcs.hanlp.algorithm.EditDistance;
 import com.tencent.supersonic.headless.api.pojo.response.S2Term;
-import com.tencent.supersonic.headless.core.config.OptimizationConfig;
 import com.tencent.supersonic.headless.core.chat.knowledge.helper.NatureHelper;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Comparator;
@@ -19,9 +17,6 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 public class MapperHelper {
-
-    @Autowired
-    private OptimizationConfig optimizationConfig;
 
     public Integer getStepIndex(Map<Integer, Integer> regOffsetToLength, Integer index) {
         Integer subRegLength = regOffsetToLength.get(index);

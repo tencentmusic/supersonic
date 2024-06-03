@@ -13,6 +13,7 @@ import javax.sql.DataSource;
 public class DataBaseConfig {
 
     @Bean("h2")
+    @Primary
     @ConfigurationProperties("spring.datasource")
     public DataSource dataSource() {
         return new DruidDataSource();

@@ -33,7 +33,6 @@ public class Agent extends RecordInfo {
     private String agentConfig;
     private LLMConfig llmConfig;
     private MultiTurnConfig multiTurnConfig;
-    private VisualConfig visualConfig;
 
     public List<String> getTools(AgentToolType type) {
         Map map = JSONObject.parseObject(agentConfig, Map.class);

@@ -354,7 +354,6 @@ CREATE TABLE IF NOT EXISTS s2_agent
     config      varchar(2000)  null,
     llm_config varchar(2000)  null,
     multi_turn_config varchar(2000)  null,
-    visual_config varchar(2000)  null,
     created_by  varchar(100) null,
     created_at  TIMESTAMP  null,
     updated_by  varchar(100) null,
@@ -518,7 +517,7 @@ CREATE TABLE IF NOT EXISTS `company_brand_revenue` (
 
 
 
-CREATE TABLE IF NOT EXISTS s2_sys_parameter
+CREATE TABLE IF NOT EXISTS s2_system_config
 (
     id  INT PRIMARY KEY AUTO_INCREMENT,
     admin varchar(500),

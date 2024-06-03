@@ -42,7 +42,7 @@ s2:
     self-consistency:
       number: 5
     multi-turn:
-      enable: false
+      enable: true
 
   corrector:
     additional:
@@ -70,7 +70,7 @@ s2:
         #       which limits 1000 tokens per request.
         base-url: https://aihubmix.com/v1
         api-key: sk-PQXoJIdEZhdnWClvC38559546c1945EcAa1e11570eE99b6d
-        model-name: gpt-3.5-turbo-16k
+        model-name: gpt-4o
         temperature: 0.0
         timeout: PT60S
     #2.embedding-model

@@ -36,6 +36,7 @@ type Props = {
   integrateSystem?: string;
   executeItemNode?: React.ReactNode;
   renderCustomExecuteNode?: boolean;
+  isSimpleMode?: boolean;
   onMsgDataLoaded?: (data: MsgDataType, valid: boolean, isRefresh?: boolean) => void;
   onUpdateMessageScroll?: () => void;
   onSendMsg?: (msg: string) => void;
@@ -56,6 +57,7 @@ const ChatItem: React.FC<Props> = ({
   integrateSystem,
   executeItemNode,
   renderCustomExecuteNode,
+  isSimpleMode,
   onMsgDataLoaded,
   onUpdateMessageScroll,
   onSendMsg,
@@ -318,6 +320,7 @@ const ChatItem: React.FC<Props> = ({
       <div className={isMobile ? `${prefixCls}-mobile-msg-card` : `${prefixCls}-msg-card`}>
         <div className={contentClass}>
           <ParseTip
+            isSimpleMode={isSimpleMode}
             parseLoading={parseLoading}
             parseInfoOptions={parseInfoOptions}
             parseTip={parseTip}
@@ -337,17 +340,22 @@ const ChatItem: React.FC<Props> = ({
           />
           {executeMode && (
             <>
-              {!isMobile && parseInfo?.sqlInfo && isDeveloper && integrateSystem !== 'c2' && (
-                <SqlItem
-                  llmReq={llmReq}
-                  llmResp={llmResp}
-                  integrateSystem={integrateSystem}
-                  queryMode={parseInfo.queryMode}
-                  sqlInfo={parseInfo.sqlInfo}
-                  sqlTimeCost={parseTimeCost?.sqlTime}
-                />
-              )}
+              {!isMobile &&
+                parseInfo?.sqlInfo &&
+                isDeveloper &&
+                integrateSystem !== 'c2' &&
+                !isSimpleMode && (
+                  <SqlItem
+                    llmReq={llmReq}
+                    llmResp={llmResp}
+                    integrateSystem={integrateSystem}
+                    queryMode={parseInfo.queryMode}
+                    sqlInfo={parseInfo.sqlInfo}
+                    sqlTimeCost={parseTimeCost?.sqlTime}
+                  />
+                )}
               <ExecuteItem
+                isSimpleMode={isSimpleMode}
                 queryId={parseInfo?.queryId}
                 executeLoading={executeLoading}
                 entitySwitchLoading={entitySwitchLoading}
@@ -361,14 +369,16 @@ const ChatItem: React.FC<Props> = ({
               />
             </>
           )}
-          {(parseTip !== '' || (executeMode && !executeLoading)) && integrateSystem !== 'c2' && (
-            <SimilarQuestionItem
-              queryId={parseInfo?.queryId}
-              defaultExpanded={parseTip !== '' || executeTip !== '' || integrateSystem === 'wiki'}
-              similarQueries={data?.similarQueries}
-              onSelectQuestion={onSelectQuestion}
-            />
-          )}
+          {(parseTip !== '' || (executeMode && !executeLoading)) &&
+            integrateSystem !== 'c2' &&
+            !isSimpleMode && (
+              <SimilarQuestionItem
+                queryId={parseInfo?.queryId}
+                defaultExpanded={parseTip !== '' || executeTip !== '' || integrateSystem === 'wiki'}
+                similarQueries={data?.similarQueries}
+                onSelectQuestion={onSelectQuestion}
+              />
+            )}
         </div>
         {(parseTip !== '' || (executeMode && !executeLoading)) && integrateSystem !== 'c2' && (
           <Tools queryId={parseInfo?.queryId || 0} scoreValue={score} />

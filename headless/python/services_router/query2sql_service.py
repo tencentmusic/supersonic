@@ -46,10 +46,10 @@ async def query2sql(query_body: Mapping[str, Any]):
     else:
         filter_condition = query_body['filterCondition']
 
-    if 'sqlGenerationMode' not in query_body:
-        raise HTTPException(status_code=400, detail="sql_generation_mode is not in query_body")
+    if 'sqlGenType' not in query_body:
+        raise HTTPException(status_code=400, detail="sqlGenType is not in query_body")
     else:
-        sql_generation_mode = query_body['sqlGenerationMode']
+        sqlGenType = query_body['sqlGenType']
 
     if 'llmConfig' in query_body:
         llm_config = ast.literal_eval(str(query_body['llmConfig']))
@@ -59,12 +59,13 @@ async def query2sql(query_body: Mapping[str, Any]):
     dataset_name = schema['dataSetName']
     fields_list = schema['fieldNameList']
     prior_schema_links = {item['fieldValue']:item['fieldName'] for item in linking}
+    terms_list = schema['terms']
 
     resp = await text2sql_agent_router.async_query2sql(question=query_text, filter_condition=filter_condition, 
                                             model_name=dataset_name, fields_list=fields_list,
                                             data_date=current_date, prior_schema_links=prior_schema_links, 
-                                            prior_exts=prior_exts, sql_generation_mode=sql_generation_mode,
-                                            llm_config=llm_config)
+                                            prior_exts=prior_exts, sql_generation_mode=sqlGenType,
+                                            llm_config=llm_config, terms_list=terms_list)
 
     return resp
 

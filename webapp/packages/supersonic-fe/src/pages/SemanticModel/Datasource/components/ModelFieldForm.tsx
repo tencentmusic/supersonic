@@ -110,11 +110,11 @@ const ModelFieldForm: React.FC<Props> = ({
               }
               const isCreateName = getCreateFieldName(value);
               const editState = !isUndefined(record[isCreateName]) ? !!record[isCreateName] : true;
-              // handleFieldChange(record, 'type', value);
+              const { name, comment } = record;
               onFieldChange(record.bizName, {
                 ...record,
                 type: value,
-                name: '',
+                name: name || comment,
                 [isCreateName]: editState,
                 ...defaultParams,
               });
@@ -141,7 +141,7 @@ const ModelFieldForm: React.FC<Props> = ({
             <Space>
               <Select
                 style={{ minWidth: 150 }}
-                value={tagObjectId}
+                value={tagObjectId ? tagObjectId : undefined}
                 placeholder="请选择所属对象"
                 onChange={(value) => {
                   onTagObjectChange?.(value);
@@ -254,8 +254,8 @@ const ModelFieldForm: React.FC<Props> = ({
       dataIndex: 'fastCreate',
       width: 200,
       render: (_: any, record: FieldItem) => {
-        const { type, name, comment } = record;
-        const inputValue = name || comment;
+        const { type, name } = record;
+        const inputValue = name;
         if (
           [
             EnumDataSourceType.PRIMARY,

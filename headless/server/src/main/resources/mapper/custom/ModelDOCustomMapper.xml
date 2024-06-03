@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tencent.supersonic.headless.server.persistence.mapper.ModelDOCustomMapper">
+
+    <update id="batchUpdateStatus" parameterType="java.util.List">
+        <foreach collection="list" item="model" separator=";">
+            update s2_model
+            set status = #{model.status,jdbcType=INTEGER},
+            updated_at = #{model.updatedAt,jdbcType=TIMESTAMP},
+            updated_by = #{model.updatedBy,jdbcType=VARCHAR}
+            where id = #{model.id,jdbcType=BIGINT}
+        </foreach>
+    </update>
+
+</mapper>
