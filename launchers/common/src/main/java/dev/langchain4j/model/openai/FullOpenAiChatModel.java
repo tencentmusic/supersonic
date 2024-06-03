@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.List;
 
 public class FullOpenAiChatModel implements ChatLanguageModel, TokenCountEstimator {
+
     private final OpenAiClient client;
     private final String modelName;
     private final Double temperature;
@@ -34,36 +35,36 @@ public class FullOpenAiChatModel implements ChatLanguageModel, TokenCountEstimat
     private final Tokenizer tokenizer;
 
     public FullOpenAiChatModel(String baseUrl, String apiKey, String modelName, Double temperature,
-                               Double topP, List<String> stop, Integer maxTokens, Double presencePenalty,
-                               Double frequencyPenalty, Duration timeout, Integer maxRetries, Proxy proxy,
-                               Boolean logRequests, Boolean logResponses, Tokenizer tokenizer) {
-        baseUrl = (String) Utils.getOrDefault(baseUrl, "https://api.openai.com/v1");
+            Double topP, List<String> stop, Integer maxTokens, Double presencePenalty,
+            Double frequencyPenalty, Duration timeout, Integer maxRetries, Proxy proxy,
+            Boolean logRequests, Boolean logResponses, Tokenizer tokenizer) {
+        baseUrl = Utils.getOrDefault(baseUrl, "https://api.openai.com/v1");
         if ("demo".equals(apiKey)) {
             baseUrl = "http://langchain4j.dev/demo/openai/v1";
         }
 
-        timeout = (Duration) Utils.getOrDefault(timeout, Duration.ofSeconds(60L));
+        timeout = Utils.getOrDefault(timeout, Duration.ofSeconds(60L));
         this.client = OpenAiClient.builder().openAiApiKey(apiKey)
-                        .baseUrl(baseUrl).callTimeout(timeout).connectTimeout(timeout)
-                        .readTimeout(timeout).writeTimeout(timeout).proxy(proxy)
-                        .logRequests(logRequests).logResponses(logResponses).build();
-        this.modelName = (String) Utils.getOrDefault(modelName, "gpt-3.5-turbo");
-        this.temperature = (Double) Utils.getOrDefault(temperature, 0.7D);
+                .baseUrl(baseUrl).callTimeout(timeout).connectTimeout(timeout)
+                .readTimeout(timeout).writeTimeout(timeout).proxy(proxy)
+                .logRequests(logRequests).logResponses(logResponses).build();
+        this.modelName = Utils.getOrDefault(modelName, "gpt-3.5-turbo");
+        this.temperature = Utils.getOrDefault(temperature, 0.7D);
         this.topP = topP;
         this.stop = stop;
         this.maxTokens = maxTokens;
         this.presencePenalty = presencePenalty;
         this.frequencyPenalty = frequencyPenalty;
-        this.maxRetries = (Integer) Utils.getOrDefault(maxRetries, 3);
-        this.tokenizer = (Tokenizer) Utils.getOrDefault(tokenizer, new OpenAiTokenizer(this.modelName));
+        this.maxRetries = Utils.getOrDefault(maxRetries, 3);
+        this.tokenizer = Utils.getOrDefault(tokenizer, new OpenAiTokenizer(this.modelName));
     }
 
     public Response<AiMessage> generate(List<ChatMessage> messages) {
-        return this.generate(messages, (List) null, (ToolSpecification) null);
+        return this.generate(messages, null, null);
     }
 
     public Response<AiMessage> generate(List<ChatMessage> messages, List<ToolSpecification> toolSpecifications) {
-        return this.generate(messages, toolSpecifications, (ToolSpecification) null);
+        return this.generate(messages, toolSpecifications, null);
     }
 
     public Response<AiMessage> generate(List<ChatMessage> messages, ToolSpecification toolSpecification) {
@@ -71,8 +72,8 @@ public class FullOpenAiChatModel implements ChatLanguageModel, TokenCountEstimat
     }
 
     private Response<AiMessage> generate(List<ChatMessage> messages,
-                                         List<ToolSpecification> toolSpecifications,
-                                         ToolSpecification toolThatMustBeExecuted) {
+            List<ToolSpecification> toolSpecifications,
+            ToolSpecification toolThatMustBeExecuted) {
         Builder requestBuilder = null;
         if (modelName.contains(ChatModel.ZHIPU.toString()) || modelName.contains(ChatModel.ALI.toString())) {
             requestBuilder = ChatCompletionRequest.builder()
@@ -107,15 +108,12 @@ public class FullOpenAiChatModel implements ChatLanguageModel, TokenCountEstimat
         return this.tokenizer.estimateTokenCountInMessages(messages);
     }
 
-    public static FullOpenAiChatModel withApiKey(String apiKey) {
-        return builder().apiKey(apiKey).build();
-    }
-
     public static FullOpenAiChatModel.FullOpenAiChatModelBuilder builder() {
         return new FullOpenAiChatModel.FullOpenAiChatModelBuilder();
     }
 
     public static class FullOpenAiChatModelBuilder {
+
         private String baseUrl;
         private String apiKey;
         private String modelName;
