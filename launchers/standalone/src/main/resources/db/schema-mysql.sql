@@ -171,6 +171,7 @@ CREATE TABLE `s2_chat_query`
     `score`           int(11)             DEFAULT '0',
     `feedback`        varchar(1024)       DEFAULT '',
     `similar_queries` varchar(1024)       DEFAULT '',
+    `parse_time_cost` varchar(1024)       DEFAULT '',
     PRIMARY KEY (`question_id`)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8;
 

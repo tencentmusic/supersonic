@@ -178,6 +178,13 @@ public class ChatManageServiceImpl implements ChatManageService {
     }
 
     @Override
+    public void updateParseCostTime(ParseResp parseResp) {
+        ChatQueryDO chatQueryDO = chatQueryRepository.getChatQueryDO(parseResp.getQueryId());
+        chatQueryDO.setParseTimeCost(JsonUtil.toString(parseResp.getParseTimeCost()));
+        updateQuery(chatQueryDO);
+    }
+
+    @Override
     public List<ChatParseDO> batchAddParse(ChatParseReq chatParseReq, ParseResp parseResult) {
         List<SemanticParseInfo> candidateParses = parseResult.getSelectedParses();
         return chatQueryRepository.batchSaveParseInfo(chatParseReq, parseResult, candidateParses);
