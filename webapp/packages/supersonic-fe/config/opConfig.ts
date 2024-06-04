@@ -1,4 +1,4 @@
-const { REACT_APP_ENV = 'dev' } = process.env;
+const { BUILD_ENV = 'dev' } = process.env;
 
 const opConfig = {
   domain: 'https://home.cvte.com',
@@ -9,5 +9,5 @@ const testOpConfig = {
   domain: 'https://op-fat.cvte.com',
   appId: 'b9114441c4544c5093ce5754a9f8b6c4',
 };
-const OP_CONFIG = REACT_APP_ENV === 'prod' ? opConfig : testOpConfig;
+const OP_CONFIG = BUILD_ENV === 'prod' ? opConfig : testOpConfig;
 export default OP_CONFIG;
