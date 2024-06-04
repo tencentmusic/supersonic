@@ -92,7 +92,7 @@ public class S2VisitsDemo extends S2BaseDemo {
 
             //create metrics and dimensions
             DimensionResp departmentDimension = getDimension("department", userModel);
-            MetricResp metricUv = addMetric_uv(userModel, departmentDimension);
+            MetricResp metricUv = addMetric_uv(pvUvModel, departmentDimension);
             MetricResp metricPv = getMetric("pv", pvUvModel);
             addMetric_pv_avg(metricPv, metricUv, departmentDimension, pvUvModel);
 
@@ -463,7 +463,7 @@ public class S2VisitsDemo extends S2BaseDemo {
 
     public DataSetResp addDataSet(DomainResp s2Domain, DomainResp s2ModelSet) {
         DataSetReq dataSetReq = new DataSetReq();
-        dataSetReq.setName("超音数");
+        dataSetReq.setName("超音数数据集");
         dataSetReq.setBizName("s2");
         dataSetReq.setDomainId(s2Domain.getId());
         dataSetReq.setDescription("包含超音数访问统计相关的指标和维度等");

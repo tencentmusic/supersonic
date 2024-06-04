@@ -27,7 +27,7 @@ public class SelectCorrector extends BaseSemanticCorrector {
                 && aggregateFields.size() == selectFields.size()) {
             return;
         }
-        addFieldsToSelect(semanticParseInfo, correctS2SQL);
+        correctS2SQL = addFieldsToSelect(queryContext, semanticParseInfo, correctS2SQL);
         String querySql = SqlReplaceHelper.dealAliasToOrderBy(correctS2SQL);
         semanticParseInfo.getSqlInfo().setCorrectS2SQL(querySql);
     }
