@@ -33,12 +33,14 @@ const ROUTES = [
     name: 'agent',
     component: './Agent',
     envEnableList: [ENV_KEY.CHAT],
+    access: ROUTE_AUTH_CODES.SYSTEM_ADMIN,
   },
   {
     path: '/plugin',
     name: 'plugin',
     component: './ChatPlugin',
     envEnableList: [ENV_KEY.CHAT],
+    access: ROUTE_AUTH_CODES.SYSTEM_ADMIN,
   },
   {
     path: '/model/metric/edit/:metricId',
@@ -46,24 +48,28 @@ const ROUTES = [
     hideInMenu: true,
     component: './SemanticModel/Metric/Edit',
     envEnableList: [ENV_KEY.SEMANTIC],
+    access: ROUTE_AUTH_CODES.SYSTEM_ADMIN,
   },
   {
     path: '/model/',
     component: './SemanticModel/DomainManager',
     name: 'semanticModel',
     envEnableList: [ENV_KEY.SEMANTIC],
+    access: ROUTE_AUTH_CODES.SYSTEM_ADMIN,
     routes: [
       {
         path: '/model/:domainId/:modelId',
         component: './SemanticModel/DomainManager',
         // name: 'semanticModel',
         envEnableList: [ENV_KEY.SEMANTIC],
+        access: ROUTE_AUTH_CODES.SYSTEM_ADMIN,
       },
       {
         path: '/model/:domainId/:modelId/:menuKey',
         component: './SemanticModel/DomainManager',
         // name: 'semanticModel',
         envEnableList: [ENV_KEY.SEMANTIC],
+        access: ROUTE_AUTH_CODES.SYSTEM_ADMIN,
       },
     ],
   },
@@ -80,16 +86,19 @@ const ROUTES = [
     name: 'metric',
     component: './SemanticModel/Metric',
     envEnableList: [ENV_KEY.SEMANTIC],
+    access: ROUTE_AUTH_CODES.SYSTEM_ADMIN,
     routes: [
       {
         path: '/metric',
         redirect: '/metric/market',
+        access: ROUTE_AUTH_CODES.SYSTEM_ADMIN,
       },
       {
         path: '/metric/market',
         component: './SemanticModel/Metric/Market',
         hideInMenu: true,
         envEnableList: [ENV_KEY.SEMANTIC],
+        access: ROUTE_AUTH_CODES.SYSTEM_ADMIN,
       },
       {
         path: '/metric/detail/:metricId',
@@ -97,6 +106,7 @@ const ROUTES = [
         hideInMenu: true,
         component: './SemanticModel/Metric/Detail',
         envEnableList: [ENV_KEY.SEMANTIC],
+        access: ROUTE_AUTH_CODES.SYSTEM_ADMIN,
       },
       {
         path: '/metric/detail/edit/:metricId',
@@ -104,6 +114,7 @@ const ROUTES = [
         hideInMenu: true,
         component: './SemanticModel/Metric/Edit',
         envEnableList: [ENV_KEY.SEMANTIC],
+        access: ROUTE_AUTH_CODES.SYSTEM_ADMIN,
       },
     ],
   },
@@ -117,12 +128,14 @@ const ROUTES = [
       {
         path: '/tag',
         redirect: '/tag/market',
+        access: ROUTE_AUTH_CODES.SYSTEM_ADMIN,
       },
       {
         path: '/tag/market',
         component: './SemanticModel/Insights/Market',
         hideInMenu: true,
         envEnableList: [ENV_KEY.SEMANTIC],
+        access: ROUTE_AUTH_CODES.SYSTEM_ADMIN,
       },
       {
         path: '/tag/detail/:tagId',
@@ -130,6 +143,7 @@ const ROUTES = [
         hideInMenu: true,
         component: './SemanticModel/Insights/Detail',
         envEnableList: [ENV_KEY.SEMANTIC],
+        access: ROUTE_AUTH_CODES.SYSTEM_ADMIN,
       },
     ],
   },
@@ -147,6 +161,7 @@ const ROUTES = [
     // hideInMenu: true,
     component: './SemanticModel/components/Database/DatabaseTable',
     envEnableList: [ENV_KEY.SEMANTIC],
+    access: ROUTE_AUTH_CODES.SYSTEM_ADMIN,
   },
   {
     path: '/system',

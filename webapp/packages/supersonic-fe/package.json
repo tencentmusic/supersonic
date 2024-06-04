@@ -109,6 +109,7 @@
     "@types/history": "^4.7.2",
     "@types/jest": "^26.0.0",
     "@types/lodash": "^4.14.144",
+    "@types/nprogress": "^0.2.3",
     "@types/pinyin": "^2.8.3",
     "@types/qs": "^6.5.3",
     "@types/react": "18.3.1",

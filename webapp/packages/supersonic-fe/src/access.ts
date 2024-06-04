@@ -1,6 +1,7 @@
 import { ROUTE_AUTH_CODES } from '../config/routes';
 
 export default function access(params) {
+  console.log('🚀 ~ access ~ params:', params);
   if (!params) {
     return {};
   }

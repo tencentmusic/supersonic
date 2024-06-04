@@ -4,14 +4,14 @@ module.exports = function (app) {
   app.use(
     '/api',
     createProxyMiddleware({
-      target: 'http://localhost:9080',
+      target: 'https://chatdata-dev.test.seewo.com/',
       changeOrigin: true,
     })
   );
   app.use(
     '/openapi',
     createProxyMiddleware({
-      target: 'http://localhost:9080',
+      target: 'https://chatdata-dev.test.seewo.com/',
       changeOrigin: true,
     })
   );

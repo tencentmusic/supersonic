@@ -18,6 +18,10 @@ const metricChartSelectOptions = [
     value: 'bar',
     label: '柱状图',
   },
+  {
+    value: 'pie',
+    label: '饼图',
+  }
 ];
 
 type Props = {
@@ -53,6 +57,7 @@ const MetricTrend: React.FC<Props> = ({
   const categoryColumnName =
     queryColumns?.find((column: any) => column.showType === 'CATEGORY')?.nameEn || '';
   const metricFields = queryColumns?.filter((column: any) => column.showType === 'NUMBER');
+  console.log('🚀 ~ metricFields:', metricFields)
 
   const currentMetricField = queryColumns?.find((column: any) => column.showType === 'NUMBER');
 
