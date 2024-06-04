@@ -21,3 +21,4 @@ __pycache__/
 /dict
 assembly/build/*-SNAPSHOT
 webapp/pnpm-lock.yaml
+*.code-workspace

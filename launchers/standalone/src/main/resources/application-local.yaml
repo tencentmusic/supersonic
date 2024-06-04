@@ -6,23 +6,11 @@ server:
     mime-types: application/javascript,application/json,application/xml,text/html,text/xml,text/plain,text/css,image/*
 
 spring:
-  h2:
-    console:
-      path: /h2-console/semantic
-      enabled: true
   datasource:
-    driver-class-name: org.h2.Driver
-    schema: classpath:db/schema-h2.sql
-    data: classpath:db/data-h2.sql
-    url: jdbc:h2:mem:semantic;DATABASE_TO_UPPER=false
-    username: root
-    password: semantic
-#    driver-class-name: com.mysql.cj.jdbc.Driver
-#    #schema: classpath:db/scddhema-h2.sql
-#    #data: classpath:db/data-h2.sql
-#    url: jdbc:mysql://10.21.46.128:3306/datavines?useUnicode=true&characterEncoding=UTF-8&useSSL=false
-#    username: databin
-#    password: AxfOk4rY0SpHz
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://mysql8-test01-mysql-master-3489.ot1.gz.paas.cvtecs.com:3489/chatdata
+    username: chatdata
+    password: Ae?15LjU
 
 mybatis:
   mapper-locations=classpath:mappers/custom/*.xml,classpath*:/mappers/*.xml
@@ -81,8 +69,8 @@ s2:
         # Note: The default API key `demo` is provided by langchain4j community
         #       which limits 1000 tokens per request.
         base-url: https://aihubmix.com/v1
-        api-key: sk-PQXoJIdEZhdnWClvC38559546c1945EcAa1e11570eE99b6d
-        model-name: gpt-4o
+        api-key: sk-lZ9dlL3R9rgG5zYg62057024228f4d8b851eEeC407F219D8
+        model-name: gpt-3.5-turbo
         temperature: 0.0
         timeout: PT60S
     #2.embedding-model

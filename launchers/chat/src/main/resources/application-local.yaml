@@ -1,16 +1,9 @@
 spring:
-  h2:
-    console:
-      path: /h2-console/chat
-      # enabled web
-      enabled: true
   datasource:
-    driver-class-name: org.h2.Driver
-    schema: classpath:db/chat-schema-h2.sql
-    data: classpath:db/chat-data-h2.sql
-    url: jdbc:h2:mem:chat;DATABASE_TO_UPPER=false
-    username: root
-    password: chat
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://mysql8-test01-mysql-master-3489.ot1.gz.paas.cvtecs.com:3489/chatdata
+    username: chatdata
+    password: Ae?15LjU
 
 server:
   port: 9082
