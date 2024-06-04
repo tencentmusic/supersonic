@@ -26,4 +26,6 @@ public interface UserService {
     List<User> getUserByOrg(String key);
 
     List<Organization> getOrganizationTree();
+
+    String casLogin(String prefixUrl, String ticket, String service);
 }
