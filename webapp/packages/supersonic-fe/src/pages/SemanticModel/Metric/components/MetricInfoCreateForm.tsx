@@ -216,7 +216,7 @@ const MetricInfoCreateForm: React.FC<CreateFormProps> = ({
     queryModelDetail();
     queryMetricsToCreateNewMetric();
     queryMetricTags();
-  }, []);
+  }, [metricItem]);
 
   const handleSave = async () => {
     const fieldsValue = await form.validateFields();

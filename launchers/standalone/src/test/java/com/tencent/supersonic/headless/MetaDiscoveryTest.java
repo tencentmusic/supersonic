@@ -23,12 +23,12 @@ public class MetaDiscoveryTest extends BaseTest {
         queryMapReq.setQueryText("对比alice和lucy的访问次数");
         queryMapReq.setTopN(10);
         queryMapReq.setUser(User.getFakeUser());
-        queryMapReq.setDataSetNames(Collections.singletonList("超音数"));
+        queryMapReq.setDataSetNames(Collections.singletonList("超音数数据集"));
         MapInfoResp mapMeta = metaDiscoveryService.getMapMeta(queryMapReq);
 
         Assertions.assertNotNull(mapMeta);
-        Assertions.assertNotEquals(0, mapMeta.getDataSetMapInfo().get("超音数").getMapFields());
-        Assertions.assertNotEquals(0, mapMeta.getDataSetMapInfo().get("超音数").getTopFields());
+        Assertions.assertNotEquals(0, mapMeta.getDataSetMapInfo().get("超音数数据集").getMapFields());
+        Assertions.assertNotEquals(0, mapMeta.getDataSetMapInfo().get("超音数数据集").getTopFields());
     }
 
     @Test

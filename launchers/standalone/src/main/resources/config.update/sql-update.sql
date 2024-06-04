@@ -317,3 +317,6 @@ alter table s2_model add column `ext` varchar(1000) DEFAULT NULL;
 
 --20240601
 alter table s2_sys_parameter rename to s2_system_config;
+
+--20240603
+alter table s2_chat_query add column `parse_time_cost` varchar(1024);
