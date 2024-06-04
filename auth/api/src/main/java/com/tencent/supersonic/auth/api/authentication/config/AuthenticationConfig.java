@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class AuthenticationConfig {
 
-    @Value("${authentication.exclude.path:XXX}")
+    @Value("${authentication.exclude.path:XXX},/api/auth/user/validateLogin")
     private String excludePath;
 
     @Value("${authentication.include.path:/api}")

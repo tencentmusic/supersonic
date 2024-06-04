@@ -565,3 +565,28 @@ CREATE TABLE IF NOT EXISTS `s2_term` (
     `updated_by` varchar(100) DEFAULT NULL ,
     PRIMARY KEY (`id`)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8 COMMENT ='术语表';
+
+CREATE TABLE IF NOT EXISTS `s2_role` (
+    `id` varchar(255) NOT NULL comment '角色ID',
+    `roleType` int(11) NOT NULL Comment '角色类型:0-系统角色(普通用户,系统用户), 1-自定义角色',
+    `description` varchar(255)  DEFAULT NULL COMMENT '描述',
+    `enable` bit(1) DEFAULT NULL comment '是否启用',
+    `lastOperationType` int(11) NOT NULL comment '最后操作类型:0-新增, 1-修改, 2-删除',
+    `name` varchar(255)  DEFAULT NULL comment '角色名称',
+    `alias` varchar(255)  DEFAULT NULL comment '角色别名',
+    `tenantId` varchar(255) NOT NULL DEFAULT 'default',
+    PRIMARY KEY (`id`,`tenantId`)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8 COMMENT ='角色表';
+
+CREATE TABLE IF NOT EXISTS `s2_user_role_rela` (
+     `id` varchar(255)  NOT NULL comment '关系ID',
+     `roleId` varchar(255)  NOT NULL comment '角色ID',
+     `roleType` int(11) NOT NULL comment '角色类型:0-系统角色(普通用户,系统用户), 1-自定义角色',
+     `userId` varchar(255)  NOT NULL comment '用户ID',
+     `tenantId` varchar(255)  NOT NULL DEFAULT 'default',
+     PRIMARY KEY (`id`),
+     UNIQUE KEY `UKrjlfin3kwa87iecxe4mqvr7if` (`userId`,`roleId`,`roleType`,`tenantId`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin comment='用户角色关系表';
+
+
+

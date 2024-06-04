@@ -2,6 +2,7 @@ package com.tencent.supersonic.auth.api.authentication.adaptor;
 
 import com.tencent.supersonic.auth.api.authentication.pojo.Organization;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
+import com.tencent.supersonic.auth.api.authentication.pojo.UserWithPassword;
 import com.tencent.supersonic.auth.api.authentication.request.UserReq;
 
 import java.util.List;
@@ -25,4 +26,8 @@ public interface UserAdaptor {
     List<User> getUserByOrg(String key);
 
     Set<String> getUserAllOrgId(String userName);
+
+    UserWithPassword getUserByName(String name);
+
+    String casLogin(String prefixUrl, String ticket, String service);
 }

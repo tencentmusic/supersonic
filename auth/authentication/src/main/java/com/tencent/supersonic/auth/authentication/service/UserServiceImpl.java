@@ -72,4 +72,9 @@ public class UserServiceImpl implements UserService {
         return ComponentFactory.getUserAdaptor().login(userReq);
     }
 
+    @Override
+    public String casLogin(String prefixUrl, String ticket, String service) {
+        return ComponentFactory.getUserAdaptor().casLogin(prefixUrl, ticket, service);
+    }
+
 }
