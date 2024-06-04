@@ -470,3 +470,22 @@ export const objToArray = (_obj: ObjToArrayParams, keyType: string = 'string') =
     };
   });
 };
+
+export function ssoLogin() {
+  const opUrl =
+    process.env.OP.domain +
+    '/login?redirect=' +
+    encodeURIComponent(
+      `${process.env.OP.domain}/portal/app_oauth?appId=${
+        process.env.OP.appId
+      }&redirect=${decodeURIComponent(window.location.href)} `,
+    );
+  window.location.href = opUrl;
+}
+
+export function ssoLogout() {
+  const opUrl = `${process.env.OP.domain}/portal/logout?appId=${
+    process.env.OP.appId
+  }&redirect=${decodeURIComponent(window.location.href)} `;
+  window.location.href = opUrl;
+}
