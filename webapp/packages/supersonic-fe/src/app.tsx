@@ -14,6 +14,7 @@ import { configProviderTheme } from '../config/themeSettings';
 export { request } from './services/request';
 import { ROUTE_AUTH_CODES } from '../config/routes';
 import AppPage from './pages/index';
+import type { API } from './services/API';
 
 const replaceRoute = '/';
 
@@ -106,12 +107,12 @@ export async function getInitialState(): Promise<{
 // }
 
 export function onRouteChange() {
-  const title = window.document.title.split('-SuperSonic')[0];
-  if (!title.includes('SuperSonic')) {
-    window.document.title = `${title}-SuperSonic`;
-  } else {
-    window.document.title = 'SuperSonic';
-  }
+  // const title = window.document.title.split('-SuperSonic')[0];
+  // if (!title.includes('SuperSonic')) {
+  //   window.document.title = `${title}-SuperSonic`;
+  // } else {
+  //   window.document.title = 'SuperSonic';
+  // }
 }
 
 export const layout: RunTimeLayoutConfig = (params) => {
@@ -130,7 +131,7 @@ export const layout: RunTimeLayoutConfig = (params) => {
           style={{ display: 'inline-block', marginTop: 8 }}
         />
         <div className="logo" style={{ position: 'relative', top: '-2px' }}>
-          SuperSonic
+          Chatdata
         </div>
       </Space>
     ),
