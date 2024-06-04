@@ -6,13 +6,17 @@ import RegisterForm from './components/RegisterForm';
 // import ForgetPwdForm from './components/ForgetPwdForm';
 import { ROUTE_AUTH_CODES } from '../../../config/routes';
 import S2Icon, { ICON } from '@/components/S2Icon';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useForm } from 'antd/lib/form/Form';
 import type { RegisterFormDetail } from './components/types';
 import { postUserLogin, userRegister } from './services';
 import { AUTH_TOKEN_KEY } from '@/common/constants';
-import { queryCurrentUser } from '@/services/user';
+import { getUserInfoByTicket, queryCurrentUser } from '@/services/user';
 import { history, useModel } from '@umijs/max';
+import { TOKEN_KEY } from '@/services/request';
+import { ssoLogin } from '@/utils/utils';
+
+const openSSO = true;
 
 const { Item } = Form;
 const LoginPage: React.FC = () => {
@@ -66,6 +70,41 @@ const LoginPage: React.FC = () => {
     setCreateModalVisible(true);
   };
 
+  async function loginWithTicket(ticket: string) {
+    const { code, data } = await getUserInfoByTicket(ticket);
+
+    if (code === 200) {
+      localStorage.setItem(TOKEN_KEY, data);
+      const { code: queryUserCode, data: queryUserData } = await queryCurrentUser();
+      if (queryUserCode === 200) {
+        const currentUser = {
+          ...queryUserData,
+          staffName: queryUserData.staffName || queryUserData.name,
+        };
+        const authCodes = Array.isArray(initialState?.authCodes) ? initialState?.authCodes : [];
+        if (queryUserData.superAdmin) {
+          authCodes.push(ROUTE_AUTH_CODES.SYSTEM_ADMIN);
+        }
+        setInitialState({ ...initialState, currentUser, authCodes });
+      }
+
+      history.push('/');
+    } else {
+      ssoLogin();
+    }
+  }
+
+  async function login() {
+    // 判断是否存在ticket
+    const urlParams = new URL(window.location.href);
+    const ticket = urlParams.searchParams.get('ticket');
+    if (ticket) {
+      await loginWithTicket(ticket);
+    } else {
+      ssoLogin();
+    }
+  }
+
   // // 忘记密码弹窗确定响应
   // const handleForgetPwd = async (values: RegisterFormDetail) => {
   //   await getUserForgetPwd({ ...values });
@@ -78,7 +117,11 @@ const LoginPage: React.FC = () => {
   //   setForgetModalVisible(true);
   // };
 
-  return (
+  useEffect(() => {
+    login();
+  }, []);
+
+  return openSSO ? null : (
     <div className={styles.loginWarp}>
       <div className={styles.content}>
         <div className={styles.formContent}>
