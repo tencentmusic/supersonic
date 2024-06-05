@@ -5,12 +5,13 @@ import com.tencent.supersonic.headless.api.pojo.DataSetDetail;
 import com.tencent.supersonic.headless.api.pojo.DataSetModelConfig;
 import com.tencent.supersonic.headless.api.pojo.QueryConfig;
 import com.tencent.supersonic.headless.api.pojo.SchemaItem;
+import lombok.Data;
+import org.springframework.util.CollectionUtils;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
-import lombok.Data;
-import org.springframework.util.CollectionUtils;
 
 @Data
 public class DataSetResp extends SchemaItem {
@@ -27,7 +28,7 @@ public class DataSetResp extends SchemaItem {
 
     private List<String> adminOrgs = new ArrayList<>();
 
-    private QueryConfig queryConfig;
+    private QueryConfig queryConfig = new QueryConfig();
 
     private List<TagItem> allMetrics = new ArrayList<>();
 
