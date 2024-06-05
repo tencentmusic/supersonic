@@ -26,7 +26,8 @@
     "rehype-highlight": "^7.0.0",
     "remark-gfm": "^4.0.0",
     "sql-formatter": "^2.3.3",
-    "tslib": "^2.5.2"
+    "tslib": "^2.5.2",
+    "xlsx": "^0.18.5"
   },
   "peerDependencies": {
     "react": ">=16.8.0",
