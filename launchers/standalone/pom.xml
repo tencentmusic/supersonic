@@ -16,6 +16,36 @@
         <maven.compiler.target>8</maven.compiler.target>
         <start-class>com.tencent.supersonic.StandaloneLauncher</start-class>
     </properties>
+
+    <repositories>
+        <repository>
+            <id>jfrog-virtual</id>
+            <name>artifactory-releases</name>
+            <url>https://artifactory.gz.cvte.cn:443/artifactory/SR_maven_virtual/</url>
+            <releases>
+                <enabled>true</enabled>
+                <updatePolicy>always</updatePolicy>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+                <updatePolicy>always</updatePolicy>
+            </snapshots>
+        </repository>
+
+        <repository>
+            <id>nexus</id>
+            <name>nexus</name>
+            <url>https://mvn.gz.cvte.cn/nexus/content/groups/public/</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+                <updatePolicy>always</updatePolicy>
+            </snapshots>
+        </repository>
+    </repositories>
+
     <dependencies>
         <dependency>
             <groupId>com.tencent.supersonic</groupId>
@@ -85,9 +115,16 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
-            <scope>test</scope>
+            <groupId>com.cvte.psd</groupId>
+            <artifactId>spring-cloud-starter-cvte-conf</artifactId>
+            <version>1.3.2-SNAPSHOT</version>
+            <type>pom</type>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.springframework.cloud</groupId>
+                    <artifactId>spring-cloud-context</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
     </dependencies>
 
