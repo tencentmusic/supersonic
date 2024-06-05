@@ -13,12 +13,12 @@ import java.util.List;
 public class ParserConfig extends ParameterConfig {
 
     public static final Parameter PARSER_STRATEGY_TYPE =
-            new Parameter("s2.parser.strategy", "ONE_PASS_AUTO_COT_SELF_CONSISTENCY",
+            new Parameter("s2.parser.strategy", "ONE_PASS_SELF_CONSISTENCY",
                     "LLM解析生成S2SQL策略",
-                    "ONE_PASS_AUTO_COT_SELF_CONSISTENCY: 通过思维链且投票方式一步生成sql"
+                    "ONE_PASS_SELF_CONSISTENCY: 通过投票方式一步生成sql"
                     + "\nTWO_PASS_AUTO_COT_SELF_CONSISTENCY: 通过思维链且投票方式两步生成sql",
                     "list", "Parser相关配置", Lists.newArrayList(
-            "ONE_PASS_AUTO_COT_SELF_CONSISTENCY", "TWO_PASS_AUTO_COT_SELF_CONSISTENCY"));
+            "ONE_PASS_SELF_CONSISTENCY", "TWO_PASS_AUTO_COT_SELF_CONSISTENCY"));
 
     public static final Parameter PARSER_LINKING_VALUE_ENABLE =
             new Parameter("s2.parser.linking.value.enable", "true",
@@ -48,7 +48,7 @@ public class ParserConfig extends ParameterConfig {
                     "number", "Parser相关配置");
 
     public static final Parameter PARSER_FEW_SHOT_NUMBER =
-            new Parameter("s2.parser.few-shot.number", "5",
+            new Parameter("s2.parser.few-shot.number", "3",
                     "few-shot样例个数", "样例越多效果可能越好，但token消耗越大",
                     "number", "Parser相关配置");
 
@@ -70,11 +70,7 @@ public class ParserConfig extends ParameterConfig {
     @Override
     public List<Parameter> getSysParameters() {
         return Lists.newArrayList(
-                PARSER_STRATEGY_TYPE,
                 PARSER_LINKING_VALUE_ENABLE,
-                PARSER_TEXT_LENGTH_THRESHOLD,
-                PARSER_TEXT_LENGTH_THRESHOLD_SHORT,
-                PARSER_TEXT_LENGTH_THRESHOLD_LONG,
                 PARSER_FEW_SHOT_NUMBER,
                 PARSER_SELF_CONSISTENCY_NUMBER,
                 PARSER_SHOW_COUNT

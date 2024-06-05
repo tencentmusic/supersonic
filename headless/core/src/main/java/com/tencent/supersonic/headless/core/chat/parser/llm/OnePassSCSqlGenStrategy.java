@@ -1,6 +1,6 @@
 package com.tencent.supersonic.headless.core.chat.parser.llm;
 
-import com.tencent.supersonic.common.util.JsonUtil;
+import com.google.common.collect.Lists;
 import com.tencent.supersonic.headless.core.chat.query.llm.s2sql.LLMReq;
 import com.tencent.supersonic.headless.core.chat.query.llm.s2sql.LLMResp;
 import dev.langchain4j.data.message.AiMessage;
@@ -15,12 +15,7 @@ import org.springframework.stereotype.Service;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.stream.Collectors;
-
-import static com.tencent.supersonic.headless.core.config.ParserConfig.PARSER_EXEMPLAR_RECALL_NUMBER;
-import static com.tencent.supersonic.headless.core.config.ParserConfig.PARSER_FEW_SHOT_NUMBER;
-import static com.tencent.supersonic.headless.core.config.ParserConfig.PARSER_SELF_CONSISTENCY_NUMBER;
+import java.util.concurrent.ConcurrentHashMap;
 
 
 @Service
@@ -29,46 +24,75 @@ public class OnePassSCSqlGenStrategy extends SqlGenStrategy {
 
     @Override
     public LLMResp generate(LLMReq llmReq) {
-        //1.retriever sqlExamples and generate exampleListPool
-        keyPipelineLog.info("OnePassSCSqlGenStrategy llmReq:{}", llmReq);
+        //1.recall exemplars
+        keyPipelineLog.info("OnePassSCSqlGenStrategy llmReq:\n{}", llmReq);
+        List<List<Map<String, String>>> exemplarsList = promptHelper.getFewShotExemplars(llmReq);
 
-        int exemplarRecallNumber = Integer.valueOf(parserConfig.getParameterValue(PARSER_EXEMPLAR_RECALL_NUMBER));
-        int fewShotNumber = Integer.valueOf(parserConfig.getParameterValue(PARSER_FEW_SHOT_NUMBER));
-        int selfConsistencyNumber = Integer.valueOf(parserConfig.getParameterValue(PARSER_SELF_CONSISTENCY_NUMBER));
+        //2.generate sql generation prompt for each self-consistency inference
+        Map<Prompt, List<Map<String, String>>> prompt2Exemplar = new HashMap<>();
+        for (List<Map<String, String>> exemplars : exemplarsList) {
+            Prompt prompt = generatePrompt(llmReq, exemplars);
+            prompt2Exemplar.put(prompt, exemplars);
+        }
 
-        List<Map<String, String>> sqlExamples = exemplarManager.recallExemplars(llmReq.getQueryText(),
-                exemplarRecallNumber);
-        List<List<Map<String, String>>> exampleListPool = promptGenerator.getExampleCombos(sqlExamples,
-                fewShotNumber, selfConsistencyNumber);
-
-        //2.generator linking and sql prompt by sqlExamples,and parallel generate response.
-        List<String> linkingSqlPromptPool = promptGenerator.generatePromptPool(llmReq, exampleListPool, true);
-        List<String> llmResults = new CopyOnWriteArrayList<>();
-        linkingSqlPromptPool.parallelStream().forEach(linkingSqlPrompt -> {
-                    Prompt prompt = PromptTemplate.from(JsonUtil.toString(linkingSqlPrompt))
-                            .apply(new HashMap<>());
-                    keyPipelineLog.info("OnePassSCSqlGenStrategy reqPrompt:{}", prompt.toSystemMessage());
-            ChatLanguageModel chatLanguageModel = getChatLanguageModel(llmReq.getLlmConfig());
-            Response<AiMessage> response = chatLanguageModel.generate(prompt.toSystemMessage());
+        //3.perform multiple self-consistency inferences parallelly
+        Map<Prompt, String> prompt2Output = new ConcurrentHashMap<>();
+        prompt2Exemplar.keySet().parallelStream().forEach(prompt -> {
+                    keyPipelineLog.info("OnePassSCSqlGenStrategy reqPrompt:\n{}", prompt.toSystemMessage());
+                    ChatLanguageModel chatLanguageModel = getChatLanguageModel(llmReq.getLlmConfig());
+                    Response<AiMessage> response = chatLanguageModel.generate(prompt.toSystemMessage());
                     String result = response.content().text();
-                    llmResults.add(result);
-                    keyPipelineLog.info("OnePassSCSqlGenStrategy modelResp:{}", result);
+                    prompt2Output.put(prompt, result);
+                    keyPipelineLog.info("OnePassSCSqlGenStrategy modelResp:\n{}", result);
                 }
         );
-        //3.format response.
-        List<String> sqlList = llmResults.stream()
-                .map(OutputFormat::getSql).collect(Collectors.toList());
 
-        Pair<String, Map<String, Double>> sqlMapPair = OutputFormat.selfConsistencyVote(sqlList);
+        //4.format response.
+        Pair<String, Map<String, Double>> sqlMapPair = OutputFormat.selfConsistencyVote(
+                Lists.newArrayList(prompt2Output.values()));
+        LLMResp llmResp = new LLMResp();
+        llmResp.setQuery(llmReq.getQueryText());
+        //TODO: should use the same few-shot exemplars as the one chose by self-consistency vote
+        llmResp.setSqlRespMap(OutputFormat.buildSqlRespMap(exemplarsList.get(0), sqlMapPair.getRight()));
 
-        LLMResp result = new LLMResp();
-        result.setQuery(llmReq.getQueryText());
-        result.setSqlRespMap(OutputFormat.buildSqlRespMap(sqlExamples, sqlMapPair.getRight()));
-        return result;
+        return llmResp;
+    }
+
+    private Prompt generatePrompt(LLMReq llmReq, List<Map<String, String>> fewshotExampleList) {
+        String instruction = ""
+                + "#Role: You are a data analyst experienced in SQL languages.\n"
+                + "#Task: You will be provided a natural language query asked by business users,"
+                + "please convert it to a SQL query so that relevant answer could be returned to the user "
+                + "by executing the SQL query against underlying database.\n"
+                + "#Rules:\n"
+                + "1.Always use `数据日期` as the date field.\n"
+                + "2.Always use `datediff` function to calculate date range.\n"
+                + "3.Only output SQL statement.\n"
+                + "#Exemplars:\n%s"
+                + "#UserQuery: %s "
+                + "#DatabaseMetadata: %s "
+                + "#SQL: ";
+
+        StringBuilder exemplarsStr = new StringBuilder();
+        for (Map<String, String> example : fewshotExampleList) {
+            String metadata = example.get("dbSchema");
+            String question = example.get("questionAugmented");
+            String sql = example.get("sql");
+            String exemplarStr = String.format("#UserQuery: %s #DatabaseMetadata: %s #SQL: %s\n",
+                    question, metadata, sql);
+            exemplarsStr.append(exemplarStr);
+        }
+
+        Pair<String, String> questionPrompt = promptHelper.transformQuestionPrompt(llmReq);
+        String dbSchema = questionPrompt.getLeft();
+        String questionAugmented = questionPrompt.getRight();
+        String promptStr = String.format(instruction, exemplarsStr, questionAugmented, dbSchema);
+
+        return PromptTemplate.from(promptStr).apply(new HashMap<>());
     }
 
     @Override
     public void afterPropertiesSet() {
-        SqlGenStrategyFactory.addSqlGenerationForFactory(LLMReq.SqlGenType.ONE_PASS_AUTO_COT_SELF_CONSISTENCY, this);
+        SqlGenStrategyFactory.addSqlGenerationForFactory(LLMReq.SqlGenType.ONE_PASS_SELF_CONSISTENCY, this);
     }
 }

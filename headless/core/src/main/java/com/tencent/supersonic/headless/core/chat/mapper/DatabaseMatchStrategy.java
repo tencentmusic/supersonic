@@ -100,7 +100,7 @@ public class DatabaseMatchStrategy extends BaseMatchStrategy<DatabaseMapResult> 
 
         if (!existElement) {
             threshold = threshold / 2;
-            log.info("ModelElementMatches:{},not exist Element threshold reduce by half:{}",
+            log.debug("ModelElementMatches:{},not exist Element threshold reduce by half:{}",
                     modelElementMatches, threshold);
         }
         return getThreshold(threshold, minThreshold, queryContext.getMapModeEnum());

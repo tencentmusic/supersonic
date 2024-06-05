@@ -22,7 +22,6 @@ import com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum;
 import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
 import com.tencent.supersonic.common.pojo.enums.SensitiveLevelEnum;
 import com.tencent.supersonic.common.pojo.enums.StatusEnum;
-import com.tencent.supersonic.common.pojo.enums.TimeMode;
 import com.tencent.supersonic.common.pojo.enums.TypeEnums;
 import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.headless.api.pojo.DataSetDetail;
@@ -38,10 +37,7 @@ import com.tencent.supersonic.headless.api.pojo.MetricDefineByFieldParams;
 import com.tencent.supersonic.headless.api.pojo.MetricDefineByMeasureParams;
 import com.tencent.supersonic.headless.api.pojo.MetricDefineByMetricParams;
 import com.tencent.supersonic.headless.api.pojo.MetricParam;
-import com.tencent.supersonic.headless.api.pojo.MetricTypeDefaultConfig;
 import com.tencent.supersonic.headless.api.pojo.ModelDetail;
-import com.tencent.supersonic.headless.api.pojo.QueryConfig;
-import com.tencent.supersonic.headless.api.pojo.TimeDefaultConfig;
 import com.tencent.supersonic.headless.api.pojo.enums.DimensionType;
 import com.tencent.supersonic.headless.api.pojo.enums.IdentifyType;
 import com.tencent.supersonic.headless.api.pojo.enums.MetricDefineType;
@@ -111,7 +107,6 @@ public class S2VisitsDemo extends S2BaseDemo {
             addTerm(s2Domain);
             addTerm_1(s2Domain);
             addPlugin(s2DataSet);
-            addSysParameter();
 
             //load dict word
             loadDictWord();
@@ -147,13 +142,6 @@ public class S2VisitsDemo extends S2BaseDemo {
         parseAndExecute(chatId.intValue(), agentId, "alice 停留时长");
         parseAndExecute(chatId.intValue(), agentId, "对比alice和lucy的访问次数");
         parseAndExecute(chatId.intValue(), agentId, "访问次数最高的部门");
-    }
-
-    public void addSysParameter() {
-        SystemConfig sysParameter = new SystemConfig();
-        sysParameter.setId(1);
-        sysParameter.init();
-        sysParameterService.save(sysParameter);
     }
 
     private Integer addAgent(long dataSetId) {
@@ -473,14 +461,6 @@ public class S2VisitsDemo extends S2BaseDemo {
         dataSetDetail.setDataSetModelConfigs(dataSetModelConfigs);
         dataSetReq.setDataSetDetail(dataSetDetail);
         dataSetReq.setTypeEnum(TypeEnums.DATASET);
-        QueryConfig queryConfig = new QueryConfig();
-        MetricTypeDefaultConfig metricTypeDefaultConfig = new MetricTypeDefaultConfig();
-        TimeDefaultConfig timeDefaultConfig = new TimeDefaultConfig();
-        timeDefaultConfig.setTimeMode(TimeMode.RECENT);
-        timeDefaultConfig.setUnit(7);
-        metricTypeDefaultConfig.setTimeDefaultConfig(timeDefaultConfig);
-        queryConfig.setMetricTypeDefaultConfig(metricTypeDefaultConfig);
-        dataSetReq.setQueryConfig(queryConfig);
         return dataSetService.save(dataSetReq, User.getFakeUser());
     }
 

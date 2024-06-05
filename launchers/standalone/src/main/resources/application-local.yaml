@@ -41,7 +41,7 @@ s2:
 
   parser:
     url: ${s2.pyllm.url}
-    strategy: TWO_PASS_AUTO_COT_SELF_CONSISTENCY
+    strategy: ONE_PASS_SELF_CONSISTENCY
     exemplar-recall:
       number: 10
     few-shot:
