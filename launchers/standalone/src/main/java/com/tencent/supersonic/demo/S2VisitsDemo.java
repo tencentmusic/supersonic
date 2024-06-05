@@ -107,7 +107,6 @@ public class S2VisitsDemo extends S2BaseDemo {
             addTerm(s2Domain);
             addTerm_1(s2Domain);
             addPlugin(s2DataSet);
-            addSysParameter();
 
             //load dict word
             loadDictWord();
@@ -143,13 +142,6 @@ public class S2VisitsDemo extends S2BaseDemo {
         parseAndExecute(chatId.intValue(), agentId, "alice 停留时长");
         parseAndExecute(chatId.intValue(), agentId, "对比alice和lucy的访问次数");
         parseAndExecute(chatId.intValue(), agentId, "访问次数最高的部门");
-    }
-
-    public void addSysParameter() {
-        SystemConfig sysParameter = new SystemConfig();
-        sysParameter.setId(1);
-        sysParameter.init();
-        sysParameterService.save(sysParameter);
     }
 
     private Integer addAgent(long dataSetId) {

@@ -39,9 +39,9 @@ s2:
   parser:
     strategy: ONE_PASS_SELF_CONSISTENCY
     exemplar-recall:
-      number: 5
+      number: 10
     few-shot:
-      number: 1
+      number: 5
     self-consistency:
       number: 1
     multi-turn:
