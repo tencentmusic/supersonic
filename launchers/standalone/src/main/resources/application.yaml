@@ -1,7 +1,0 @@
-spring:
-  profiles:
-    active: local
-  application:
-    name: chat
-mybatis:
-  mapper-locations=classpath:mappers/custom/*.xml,classpath*:/mappers/*.xml
