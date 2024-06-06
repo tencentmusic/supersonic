@@ -248,6 +248,28 @@ const ChatFooter: ForwardRefRenderFunction<any, Props> = (
     );
   });
 
+
+  const fixWidthBug = () => {
+    setTimeout(() => {
+      const dropdownDom = document.querySelector( '.' + styles.autoCompleteDropdown + ' .rc-virtual-list-holder-inner')
+
+      if (!dropdownDom) {
+        fixWidthBug()
+      }else{
+        // 获取popoverDom样式
+        const popoverDomStyle = window.getComputedStyle(dropdownDom)
+        // 在获取popoverDom中增加样式 width: fit-content
+        dropdownDom.setAttribute('style', `${popoverDomStyle.cssText};width: fit-content`)
+        // 获取popoverDom的宽度
+        const popoverDomWidth = dropdownDom.clientWidth
+        // 将popoverDom的宽度赋值给他的父元素
+        dropdownDom.parentElement!.style.width = popoverDomWidth + 'px'
+
+        
+      }
+    })
+  }
+
   const associateOptionNodes = Object.keys(stepOptions).map(key => {
     return (
       <OptGroup key={key} label={key}>
@@ -292,6 +314,13 @@ const ChatFooter: ForwardRefRenderFunction<any, Props> = (
       </OptGroup>
     );
   });
+
+  useEffect(() => {
+    if (modelOptionNodes.length || associateOptionNodes.length) {
+      fixWidthBug()
+    }
+  }
+  , [modelOptionNodes.length, associateOptionNodes.length]);
 
   return (
     <div className={chatFooterClass}>
@@ -369,7 +398,6 @@ const ChatFooter: ForwardRefRenderFunction<any, Props> = (
             popupClassName={autoCompleteDropdownClass}
             listHeight={500}
             allowClear={false}
-            virtual={false}
             open={open}
             defaultActiveFirstOption={false}
             getPopupContainer={triggerNode => triggerNode.parentNode}
