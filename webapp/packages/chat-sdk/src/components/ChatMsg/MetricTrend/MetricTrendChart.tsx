@@ -92,19 +92,25 @@ const MetricTrendChart: React.FC<Props> = ({
       return date.length === 10 ? moment(date).format('MM-DD') : date;
     });
 
+    const width = chartRef.current.offsetWidth
+
     instanceObj.setOption({
       title: sortedGroupKeys.slice(0, 20).map((category,idx) => {
-        const xRate = 100 / sortedGroupKeys.length * idx + 8;
-
+        const xRate = 100 / sortedGroupKeys.length * idx;
         return {
           show: chartType === 'pie',
-          text: category + '' === 'undefined' ? '' : category,
+          text: `{a|${category + '' === 'undefined' ? '' : category}}` ,
           bottom: 0,
           left: xRate + '%',
           textStyle: {
-            fontSize: 14,
-            color: '#666',
-            textAlign: 'center',
+            rich:{
+              a: {
+                fontSize: 14,
+                color: '#666',
+                align: 'center',
+                width: width / sortedGroupKeys.length,
+              }
+            }
           }
         }
       }),

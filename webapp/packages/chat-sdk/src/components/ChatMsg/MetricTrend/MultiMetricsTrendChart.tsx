@@ -42,7 +42,29 @@ const MultiMetricsTrendChart: React.FC<Props> = ({
       return date.length === 10 ? moment(date).format('MM-DD') : date;
     });
 
+    const width = chartRef.current.offsetWidth
+
     instanceObj.setOption({
+      title: metricFields.map((category,idx) => {
+        const xRate = 100 / metricFields.length * idx;
+
+        return {
+          show: chartType === 'pie',
+          text: `{a|${category + '' === 'undefined' ? '' : category}}` ,
+          bottom: 0,
+          left: xRate + '%',
+          textStyle: {
+            rich:{
+              a: {
+                fontSize: 14,
+                color: '#666',
+                align: 'center',
+                width: width / metricFields.length,
+              }
+            }
+          }
+        }
+      }),
       legend: {
         left: 0,
         top: 0,
