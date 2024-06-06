@@ -3,8 +3,9 @@ package com.tencent.supersonic.headless.api.pojo.request;
 import com.tencent.supersonic.headless.api.pojo.DataSetDetail;
 import com.tencent.supersonic.headless.api.pojo.QueryConfig;
 import com.tencent.supersonic.headless.api.pojo.SchemaItem;
-import java.util.List;
 import lombok.Data;
+
+import java.util.List;
 
 @Data
 public class DataSetReq extends SchemaItem {
@@ -15,7 +16,7 @@ public class DataSetReq extends SchemaItem {
 
     private String alias;
 
-    private QueryConfig queryConfig;
+    private QueryConfig queryConfig = new QueryConfig();
 
     private List<String> admins;
 

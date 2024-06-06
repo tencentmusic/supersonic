@@ -1,12 +1,17 @@
 package com.tencent.supersonic.chat.server.persistence.dataobject;
 
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 import java.util.Date;
 
 @Data
+@TableName("s2_chat_query")
 public class ChatQueryDO {
     /**
      */
+    @TableId(type = IdType.AUTO)
     private Long questionId;
 
     /**
@@ -46,5 +51,7 @@ public class ChatQueryDO {
     private String queryResult;
 
     private String similarQueries;
+
+    private String parseTimeCost;
 
 }

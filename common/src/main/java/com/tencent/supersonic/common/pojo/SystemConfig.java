@@ -21,6 +21,11 @@ public class SystemConfig {
 
     private List<Parameter> parameters;
 
+    public void init() {
+        parameters = buildDefaultParameters();
+        admins = Lists.newArrayList("admin");
+    }
+
     public String getAdmin() {
         if (CollectionUtils.isEmpty(admins)) {
             return "";
@@ -45,31 +50,12 @@ public class SystemConfig {
         }
     }
 
-    public void init() {
-        parameters = buildDefaultParameters();
-        admins = Lists.newArrayList("admin");
-    }
-
     private List<Parameter> buildDefaultParameters() {
         List<Parameter> defaultParameters = Lists.newArrayList();
         Collection<ParameterConfig> configurableParameters =
                 ContextUtils.getBeansOfType(ParameterConfig.class).values();
         for (ParameterConfig configParameters : configurableParameters) {
             defaultParameters.addAll(configParameters.getSysParameters());
-        }
-        return defaultParameters;
-    }
-
-    public List<Parameter> getParameters() {
-        List<Parameter> defaultParameters = buildDefaultParameters();
-        if (CollectionUtils.isEmpty(parameters)) {
-            return defaultParameters;
-        }
-        Map<String, String> parameterNameValueMap = parameters.stream()
-                .collect(Collectors.toMap(Parameter::getName, Parameter::getValue, (v1, v2) -> v2));
-        for (Parameter parameter : defaultParameters) {
-            parameter.setValue(parameterNameValueMap.getOrDefault(parameter.getName(),
-                    parameter.getDefaultValue()));
         }
         return defaultParameters;
     }

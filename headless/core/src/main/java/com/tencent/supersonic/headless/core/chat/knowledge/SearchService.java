@@ -48,22 +48,16 @@ public class SearchService {
 
     public static List<HanlpMapResult> prefixSearch(String key, int limit, BinTrie<List<String>> binTrie,
             Map<Long, List<Long>> modelIdToDataSetIds, Set<Long> detectDataSetIds) {
-        Set<Map.Entry<String, List<String>>> result = prefixSearchLimit(key, limit, binTrie,
-                modelIdToDataSetIds, detectDataSetIds);
+        Set<Map.Entry<String, List<String>>> result = search(key, binTrie);
         List<HanlpMapResult> hanlpMapResults = result.stream().map(
                         entry -> {
                             String name = entry.getKey().replace("#", " ");
                             return new HanlpMapResult(name, entry.getValue(), key);
                         }
                 ).sorted((a, b) -> -(b.getName().length() - a.getName().length()))
-                .limit(SEARCH_SIZE)
                 .collect(Collectors.toList());
-        for (HanlpMapResult hanlpMapResult : hanlpMapResults) {
-            List<String> natures = hanlpMapResult.getNatures().stream()
-                    .map(nature -> NatureHelper.changeModel2DataSet(nature, modelIdToDataSetIds))
-                    .flatMap(Collection::stream).collect(Collectors.toList());
-            hanlpMapResult.setNatures(natures);
-        }
+        hanlpMapResults = transformAndFilterByDataSet(hanlpMapResults, modelIdToDataSetIds,
+                detectDataSetIds, limit);
         return hanlpMapResults;
     }
 
@@ -80,11 +74,8 @@ public class SearchService {
 
     public static List<HanlpMapResult> suffixSearch(String key, int limit, BinTrie<List<String>> binTrie,
             Map<Long, List<Long>> modelIdToDataSetIds, Set<Long> detectDataSetIds) {
-
-        Set<Map.Entry<String, List<String>>> result = prefixSearchLimit(key, limit, binTrie, modelIdToDataSetIds,
-                detectDataSetIds);
-
-        return result.stream().map(
+        Set<Map.Entry<String, List<String>>> result = search(key, binTrie);
+        List<HanlpMapResult> hanlpMapResults = result.stream().map(
                         entry -> {
                             String name = entry.getKey().replace("#", " ");
                             List<String> natures = entry.getValue().stream()
@@ -94,15 +85,34 @@ public class SearchService {
                             return new HanlpMapResult(name, natures, key);
                         }
                 ).sorted((a, b) -> -(b.getName().length() - a.getName().length()))
-                .limit(SEARCH_SIZE)
                 .collect(Collectors.toList());
+        return transformAndFilterByDataSet(hanlpMapResults, modelIdToDataSetIds, detectDataSetIds, limit);
     }
 
-    private static Set<Map.Entry<String, List<String>>> prefixSearchLimit(String key, int limit,
-            BinTrie<List<String>> binTrie, Map<Long, List<Long>> modelIdToDataSetIds, Set<Long> detectDataSetIds) {
+    private static List<HanlpMapResult> transformAndFilterByDataSet(List<HanlpMapResult> hanlpMapResults,
+                                                             Map<Long, List<Long>> modelIdToDataSetIds,
+                                                             Set<Long> detectDataSetIds, int limit) {
+        return hanlpMapResults.stream().peek(hanlpMapResult -> {
+            List<String> natures = hanlpMapResult.getNatures().stream()
+                    .map(nature -> NatureHelper.changeModel2DataSet(nature, modelIdToDataSetIds))
+                    .flatMap(Collection::stream)
+                    .filter(nature -> {
+                        if (CollectionUtils.isEmpty(detectDataSetIds)) {
+                            return true;
+                        }
+                        Long dataSetId = NatureHelper.getDataSetId(nature);
+                        if (dataSetId != null) {
+                            return detectDataSetIds.contains(dataSetId);
+                        }
+                        return false;
+                    }).collect(Collectors.toList());
+            hanlpMapResult.setNatures(natures);
+        }).filter(hanlpMapResult -> !CollectionUtils.isEmpty(hanlpMapResult.getNatures()))
+                .limit(limit).collect(Collectors.toList());
+    }
 
-        Set<Long> detectModelIds = NatureHelper.getModelIds(modelIdToDataSetIds, detectDataSetIds);
-
+    private static Set<Map.Entry<String, List<String>>> search(String key,
+                                                                          BinTrie<List<String>> binTrie) {
         key = key.toLowerCase();
         Set<Map.Entry<String, List<String>>> entrySet = new TreeSet<Map.Entry<String, List<String>>>();
 
@@ -122,7 +132,7 @@ public class SearchService {
         if (branch == null) {
             return entrySet;
         }
-        branch.walkLimit(sb, entrySet, limit, detectModelIds);
+        branch.walkLimit(sb, entrySet);
         return entrySet;
     }
 
