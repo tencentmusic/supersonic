@@ -333,7 +333,9 @@ const ModelCreateForm: React.FC<CreateFormProps> = ({
           comment,
         };
         const semanticType = getTypeByDataType(type);
-        return autoFillModelInfo ? getExtraRecordByType(baseItem, semanticType) : baseItem;
+        return autoFillModelInfo && comment
+          ? getExtraRecordByType(baseItem, semanticType)
+          : baseItem;
       }
     });
     setFields(columnFields || []);
