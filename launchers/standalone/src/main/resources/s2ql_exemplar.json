@@ -1,26 +1,26 @@
 [
     {
-        "question": "比较jackjchen和robinlee在内容库的访问次数",
-        "questionAugmented": "比较jackjchen和robinlee在内容库的访问次数 (补充信息:’'jackjchen'‘是一个’用户名‘，’ 'robinlee'‘是一个’用户名‘。当前的日期是2020-12-01) ",
-        "dbSchema": "Table: 内容库产品, Columns = [\"部门\", \"模块\", \"用户名\", \"访问次数\", \"访问人数\", \"访问时长\", \"数据日期\"]",
-        "sql": "SELECT 用户名, 访问次数 FROM 内容库产品 WHERE 用户名 IN ('jackjchen', 'robinlee')",
-        "generatedSchemaLinkingCoT": "Let’s think step by step. In the question \"比较jackjchen和robinlee在内容库的访问次数 (补充信息:’'jackjchen'‘是一个’用户名‘，’ 'robinlee'‘是一个’用户名‘。当前的日期是2020-12-01) \", we are asked:\n\"’用户名‘，\" so we need column = [用户名]\n\"的访问次数 \" so we need column = [访问次数]\nBased on the tables, columns, and Foreign_keys, The set of possible cell values are = [jackjchen,robinlee]. So the Schema_links are:\nSchema_links: [用户名,访问次数,jackjchen,robinlee]",
+        "question": "比较jackjchen和robinlee在超音数的访问次数",
+        "questionAugmented": "比较jackjchen和robinlee在超音数的访问次数 (补充信息:’'jackjchen'‘是一个’用户名‘，’ 'robinlee'‘是一个’用户名‘。当前的日期是2020-12-01) ",
+        "dbSchema": "Table: 超音数产品, Columns = [\"部门\", \"模块\", \"用户名\", \"访问次数\", \"访问人数\", \"访问时长\", \"数据日期\"]",
+        "sql": "SELECT 用户名, 访问次数 FROM 超音数产品 WHERE 用户名 IN ('jackjchen', 'robinlee')",
+        "generatedSchemaLinkingCoT": "Let’s think step by step. In the question \"比较jackjchen和robinlee在超音数的访问次数 (补充信息:’'jackjchen'‘是一个’用户名‘，’ 'robinlee'‘是一个’用户名‘。当前的日期是2020-12-01) \", we are asked:\n\"’用户名‘，\" so we need column = [用户名]\n\"的访问次数 \" so we need column = [访问次数]\nBased on the tables, columns, and Foreign_keys, The set of possible cell values are = [jackjchen,robinlee]. So the Schema_links are:\nSchema_links: [用户名,访问次数,jackjchen,robinlee]",
         "generatedSchemaLinkings": "[用户名,访问次数,jackjchen,robinlee]"
     },
     {
-        "question": "内容库近12个月访问人数 按部门",
-        "questionAugmented": "内容库近12个月访问人数 按部门 (补充信息:。当前的日期是2022-11-06) ",
-        "dbSchema": "Table: 内容库产品, Columns = [\"部门\", \"模块\", \"用户名\", \"访问次数\", \"访问人数\", \"访问时长\", \"数据日期\"]",
-        "sql": "SELECT 部门, 数据日期, 访问人数 FROM 内容库产品 WHERE datediff('month', 数据日期, '2022-11-06') <= 12 ",
-        "generatedSchemaLinkingCoT": "Let’s think step by step. In the question \"内容库近12个月访问人数 按部门 (补充信息:。当前的日期是2022-11-06) \", we are asked:\n\" 按部门 (\" so we need column = [部门]\n\"访问人数 按\" so we need column = [访问人数]\n\"当前的日期是\" so we need column = [数据日期]\nBased on the tables, columns, and Foreign_keys, The set of possible cell values are = [12,month]. So the Schema_links are:\nSchema_links: [部门,访问人数,数据日期,12,month]",
+        "question": "超音数近12个月访问人数 按部门",
+        "questionAugmented": "超音数近12个月访问人数 按部门 (补充信息:。当前的日期是2022-11-06) ",
+        "dbSchema": "Table: 超音数产品, Columns = [\"部门\", \"模块\", \"用户名\", \"访问次数\", \"访问人数\", \"访问时长\", \"数据日期\"]",
+        "sql": "SELECT 部门, 数据日期, 访问人数 FROM 超音数产品 WHERE datediff('month', 数据日期, '2022-11-06') <= 12 ",
+        "generatedSchemaLinkingCoT": "Let’s think step by step. In the question \"超音数近12个月访问人数 按部门 (补充信息:。当前的日期是2022-11-06) \", we are asked:\n\" 按部门 (\" so we need column = [部门]\n\"访问人数 按\" so we need column = [访问人数]\n\"当前的日期是\" so we need column = [数据日期]\nBased on the tables, columns, and Foreign_keys, The set of possible cell values are = [12,month]. So the Schema_links are:\nSchema_links: [部门,访问人数,数据日期,12,month]",
         "generatedSchemaLinkings": "[部门,访问人数,数据日期,12,month]"
     },
     {
-        "question": "内容库美术部、技术研发部的访问时长",
-        "questionAugmented": "内容库美术部、技术研发部的访问时长 (补充信息:’'美术部'‘是一个’部门‘，’ '技术研发部'‘是一个’部门‘。当前的日期是2023-04-21) ",
-        "dbSchema": "Table: 内容库产品, Columns = [\"部门\", \"模块\", \"用户名\", \"访问次数\", \"访问人数\", \"访问时长\", \"数据日期\"]",
-        "sql": "SELECT 部门, 访问时长 FROM 内容库产品 WHERE 部门 IN ('美术部', '技术研发部')",
-        "generatedSchemaLinkingCoT": "Let’s think step by step. In the question \"内容库美术部、技术研发部的访问时长 (补充信息:’'美术部'‘是一个’部门‘，’ '技术研发部'‘是一个’部门‘。当前的日期是2023-04-21) \", we are asked:\n\"部门‘，’ \" so we need column = [部门]\n\"的访问时长 \" so we need column = [访问时长]\nBased on the tables, columns, and Foreign_keys, The set of possible cell values are = [美术部,技术研发部]. So the Schema_links are:\nSchema_links: [部门,访问时长,美术部,技术研发部]",
+        "question": "超音数美术部、技术研发部的访问时长",
+        "questionAugmented": "超音数美术部、技术研发部的访问时长 (补充信息:’'美术部'‘是一个’部门‘，’ '技术研发部'‘是一个’部门‘。当前的日期是2023-04-21) ",
+        "dbSchema": "Table: 超音数产品, Columns = [\"部门\", \"模块\", \"用户名\", \"访问次数\", \"访问人数\", \"访问时长\", \"数据日期\"]",
+        "sql": "SELECT 部门, 访问时长 FROM 超音数产品 WHERE 部门 IN ('美术部', '技术研发部')",
+        "generatedSchemaLinkingCoT": "Let’s think step by step. In the question \"超音数美术部、技术研发部的访问时长 (补充信息:’'美术部'‘是一个’部门‘，’ '技术研发部'‘是一个’部门‘。当前的日期是2023-04-21) \", we are asked:\n\"部门‘，’ \" so we need column = [部门]\n\"的访问时长 \" so we need column = [访问时长]\nBased on the tables, columns, and Foreign_keys, The set of possible cell values are = [美术部,技术研发部]. So the Schema_links are:\nSchema_links: [部门,访问时长,美术部,技术研发部]",
         "generatedSchemaLinkings": "[部门,访问时长,美术部,技术研发部]"
     },
     {
@@ -56,19 +56,19 @@
         "generatedSchemaLinkings": "[歌曲名,结算播放量,10000]"
     },
     {
-        "question": "内容库访问时长小于1小时，且来自美术部的用户是哪些",
-        "questionAugmented": "内容库访问时长小于1小时，且来自美术部的用户是哪些 (补充信息:’'美术部'‘是一个’部门‘。当前的日期是2023-07-31) ",
-        "dbSchema": "Table: 内容库产品, Columns = [\"用户名\", \"部门\", \"模块\", \"访问时长\", \"访问次数\", \"访问人数\", \"数据日期\"]",
-        "sql": "SELECT 用户名 FROM 内容库产品 WHERE 部门 = '美术部' AND 访问时长 < 1",
-        "generatedSchemaLinkingCoT": "Let’s think step by step. In the question \"内容库访问时长小于1小时，且来自美术部的用户是哪些 (补充信息:’'美术部'‘是一个’部门‘。当前的日期是2023-07-31) \", we are asked:\n\"术部的用户是\" so we need column = [用户名]\n\"一个’部门‘\" so we need column = [部门]\n\"访问时长小于\" so we need column = [访问时长]\nBased on the tables, columns, and Foreign_keys, The set of possible cell values are = [美术部,1]. So the Schema_links are:\nSchema_links: [用户名,部门,访问时长,美术部,1]",
+        "question": "超音数访问时长小于1小时，且来自美术部的用户是哪些",
+        "questionAugmented": "超音数访问时长小于1小时，且来自美术部的用户是哪些 (补充信息:’'美术部'‘是一个’部门‘。当前的日期是2023-07-31) ",
+        "dbSchema": "Table: 超音数产品, Columns = [\"用户名\", \"部门\", \"模块\", \"访问时长\", \"访问次数\", \"访问人数\", \"数据日期\"]",
+        "sql": "SELECT 用户名 FROM 超音数产品 WHERE 部门 = '美术部' AND 访问时长 < 1",
+        "generatedSchemaLinkingCoT": "Let’s think step by step. In the question \"超音数访问时长小于1小时，且来自美术部的用户是哪些 (补充信息:’'美术部'‘是一个’部门‘。当前的日期是2023-07-31) \", we are asked:\n\"术部的用户是\" so we need column = [用户名]\n\"一个’部门‘\" so we need column = [部门]\n\"访问时长小于\" so we need column = [访问时长]\nBased on the tables, columns, and Foreign_keys, The set of possible cell values are = [美术部,1]. So the Schema_links are:\nSchema_links: [用户名,部门,访问时长,美术部,1]",
         "generatedSchemaLinkings": "[用户名,部门,访问时长,美术部,1]"
     },
     {
-        "question": "内容库pv最高的用户有哪些",
-        "questionAugmented": "内容库pv最高的用户有哪些 (补充信息:。当前的日期是2023-08-31) ",
-        "dbSchema": "Table: 内容库产品, Columns = [\"用户名\", \"部门\", \"模块\", \"访问时长\", \"访问次数\", \"访问人数\", \"数据日期\"]",
-        "sql": "SELECT 用户名 FROM 内容库产品 ORDER BY 访问次数 DESC LIMIT 1",
-        "generatedSchemaLinkingCoT": "Let’s think step by step. In the question \"内容库pv最高的用户有哪些 (补充信息:。当前的日期是2023-08-31) \", we are asked:\n\"用户有哪些 (\" so we need column = [用户名]\n\"最高的用户有\" so we need column = [访问次数]\nBased on the tables, columns, and Foreign_keys, The set of possible cell values are = [1]. So the Schema_links are:\nSchema_links: [用户名,访问次数,1]",
+        "question": "超音数pv最高的用户有哪些",
+        "questionAugmented": "超音数pv最高的用户有哪些 (补充信息:。当前的日期是2023-08-31) ",
+        "dbSchema": "Table: 超音数产品, Columns = [\"用户名\", \"部门\", \"模块\", \"访问时长\", \"访问次数\", \"访问人数\", \"数据日期\"]",
+        "sql": "SELECT 用户名 FROM 超音数产品 ORDER BY 访问次数 DESC LIMIT 1",
+        "generatedSchemaLinkingCoT": "Let’s think step by step. In the question \"超音数pv最高的用户有哪些 (补充信息:。当前的日期是2023-08-31) \", we are asked:\n\"用户有哪些 (\" so we need column = [用户名]\n\"最高的用户有\" so we need column = [访问次数]\nBased on the tables, columns, and Foreign_keys, The set of possible cell values are = [1]. So the Schema_links are:\nSchema_links: [用户名,访问次数,1]",
         "generatedSchemaLinkings": "[用户名,访问次数,1]"
     },
     {
@@ -88,11 +88,11 @@
         "generatedSchemaLinkings": "[结算播放量,歌手名,数据日期,周倩倩,7,day]"
     },
     {
-        "question": "内容库访问次数大于1k的部门是哪些",
-        "questionAugmented": "内容库访问次数大于1k的部门是哪些 (补充信息:。当前的日期是2023-09-14) ",
-        "dbSchema": "Table: 内容库产品, Columns = [\"部门\", \"模块\", \"用户名\", \"访问次数\", \"访问人数\", \"访问时长\", \"数据日期\"]",
-        "sql": "SELECT 部门 FROM 内容库产品 WHERE 访问次数 > 1000",
-        "generatedSchemaLinkingCoT": "Let’s think step by step. In the question \"内容库访问次数大于1k的部门是哪些 (补充信息:。当前的日期是2023-09-14) \", we are asked:\n\"访问次数大于\" so we need column = [访问次数]\n\"部门是哪些 \" so we need column = [部门]\nBased on the tables, columns, and Foreign_keys, The set of possible cell values are = [1000]. So the Schema_links are:\nSchema_links: [访问次数,部门,1000]",
+        "question": "超音数访问次数大于1k的部门是哪些",
+        "questionAugmented": "超音数访问次数大于1k的部门是哪些 (补充信息:。当前的日期是2023-09-14) ",
+        "dbSchema": "Table: 超音数产品, Columns = [\"部门\", \"模块\", \"用户名\", \"访问次数\", \"访问人数\", \"访问时长\", \"数据日期\"]",
+        "sql": "SELECT 部门 FROM 超音数产品 WHERE 访问次数 > 1000",
+        "generatedSchemaLinkingCoT": "Let’s think step by step. In the question \"超音数访问次数大于1k的部门是哪些 (补充信息:。当前的日期是2023-09-14) \", we are asked:\n\"访问次数大于\" so we need column = [访问次数]\n\"部门是哪些 \" so we need column = [部门]\nBased on the tables, columns, and Foreign_keys, The set of possible cell values are = [1000]. So the Schema_links are:\nSchema_links: [访问次数,部门,1000]",
         "generatedSchemaLinkings": "[访问次数,部门,1000]"
     },
     {
@@ -184,42 +184,42 @@
         "generatedSchemaLinkings": "[歌曲名,结算播放量,歌手名,发布时间,200000,刘锝桦,1992-04-02,2020-05-02]"
     },
     {
-        "question": "内容库近30天访问次数的平均数",
-        "questionAugmented": "内容库近30天访问次数的平均数 (补充信息:。当前的日期是2023-09-04) ",
-        "dbSchema": "Table: 内容库产品, Columns = [\"用户名\", \"部门\", \"模块\", \"访问时长\", \"访问次数\", \"访问人数\", \"数据日期\"]",
-        "sql": "SELECT AVG(访问次数) FROM 内容库产品 WHERE datediff('day', 数据日期, '2023-09-04') <= 30 ",
-        "generatedSchemaLinkingCoT": "Let’s think step by step. In the question \"内容库近30天访问次数的平均数 (补充信息:。当前的日期是2023-09-04) \", we are asked:\n\"访问次数的平均数\" so we need column = [访问次数]\n\"当前的日期是\" so we need column = [数据日期]\nBased on the tables, columns, and Foreign_keys, The set of possible cell values are = [30,day]. So the Schema_links are:\nSchema_links: [访问次数,数据日期,30,day]",
+        "question": "超音数近30天访问次数的平均数",
+        "questionAugmented": "超音数近30天访问次数的平均数 (补充信息:。当前的日期是2023-09-04) ",
+        "dbSchema": "Table: 超音数产品, Columns = [\"用户名\", \"部门\", \"模块\", \"访问时长\", \"访问次数\", \"访问人数\", \"数据日期\"]",
+        "sql": "SELECT AVG(访问次数) FROM 超音数产品 WHERE datediff('day', 数据日期, '2023-09-04') <= 30 ",
+        "generatedSchemaLinkingCoT": "Let’s think step by step. In the question \"超音数近30天访问次数的平均数 (补充信息:。当前的日期是2023-09-04) \", we are asked:\n\"访问次数的平均数\" so we need column = [访问次数]\n\"当前的日期是\" so we need column = [数据日期]\nBased on the tables, columns, and Foreign_keys, The set of possible cell values are = [30,day]. So the Schema_links are:\nSchema_links: [访问次数,数据日期,30,day]",
         "generatedSchemaLinkings": "[访问次数,数据日期,30,day]"
     },
     {
-        "question": "内容库近半年哪个月的访问次数汇总最高",
-        "questionAugmented": "内容库近半年哪个月的访问次数汇总最高 (补充信息:。当前的日期是2023-09-04) ",
-        "dbSchema": "Table: 内容库产品, Columns = [\"用户名\", \"部门\", \"模块\", \"访问时长\", \"访问次数\", \"访问人数\", \"数据日期\"]",
-        "sql": "SELECT MONTH(数据日期), SUM(访问次数) FROM 内容库产品 WHERE datediff('year', 数据日期, '2023-09-04') <= 0.5 GROUP BY MONTH(数据日期) ORDER BY SUM(访问次数) DESC LIMIT 1",
-        "generatedSchemaLinkingCoT": "Let’s think step by step. In the question \"内容库近半年哪个月的访问次数汇总最高 (补充信息:。当前的日期是2023-09-04) \", we are asked:\n\"的访问次数汇总\" so we need column = [访问次数]\n\"当前的日期是\" so we need column = [数据日期]\nBased on the tables, columns, and Foreign_keys, The set of possible cell values are = [1,0.5,year]. So the Schema_links are:\nSchema_links: [访问次数,数据日期,1,0.5,year]",
+        "question": "超音数近半年哪个月的访问次数汇总最高",
+        "questionAugmented": "超音数近半年哪个月的访问次数汇总最高 (补充信息:。当前的日期是2023-09-04) ",
+        "dbSchema": "Table: 超音数产品, Columns = [\"用户名\", \"部门\", \"模块\", \"访问时长\", \"访问次数\", \"访问人数\", \"数据日期\"]",
+        "sql": "SELECT MONTH(数据日期), SUM(访问次数) FROM 超音数产品 WHERE datediff('year', 数据日期, '2023-09-04') <= 0.5 GROUP BY MONTH(数据日期) ORDER BY SUM(访问次数) DESC LIMIT 1",
+        "generatedSchemaLinkingCoT": "Let’s think step by step. In the question \"超音数近半年哪个月的访问次数汇总最高 (补充信息:。当前的日期是2023-09-04) \", we are asked:\n\"的访问次数汇总\" so we need column = [访问次数]\n\"当前的日期是\" so we need column = [数据日期]\nBased on the tables, columns, and Foreign_keys, The set of possible cell values are = [1,0.5,year]. So the Schema_links are:\nSchema_links: [访问次数,数据日期,1,0.5,year]",
         "generatedSchemaLinkings": "[访问次数,数据日期,1,0.5,year]"
     },
     {
-        "question": "内容库近半年每个月的平均访问次数",
-        "questionAugmented": "内容库近半年每个月的平均访问次数 (补充信息:。当前的日期是2023-09-04) ",
-        "dbSchema": "Table: 内容库产品, Columns = [\"用户名\", \"部门\", \"模块\", \"访问时长\", \"访问次数\", \"访问人数\", \"数据日期\"]",
-        "sql": "SELECT MONTH(数据日期), AVG(访问次数) FROM 内容库产品 WHERE datediff('year', 数据日期, '2023-09-04') <= 0.5 GROUP BY MONTH(数据日期)",
-        "generatedSchemaLinkingCoT": "Let’s think step by step. In the question \"内容库近半年每个月的平均访问次数 (补充信息:。当前的日期是2023-09-04) \", we are asked:\n\"访问次数 (\" so we need column = [访问次数]\n\"当前的日期是\" so we need column = [数据日期]\nBased on the tables, columns, and Foreign_keys, The set of possible cell values are = [0.5,year]. So the Schema_links are:\nSchema_links: [访问次数,数据日期,0.5,year]",
+        "question": "超音数近半年每个月的平均访问次数",
+        "questionAugmented": "超音数近半年每个月的平均访问次数 (补充信息:。当前的日期是2023-09-04) ",
+        "dbSchema": "Table: 超音数产品, Columns = [\"用户名\", \"部门\", \"模块\", \"访问时长\", \"访问次数\", \"访问人数\", \"数据日期\"]",
+        "sql": "SELECT MONTH(数据日期), AVG(访问次数) FROM 超音数产品 WHERE datediff('year', 数据日期, '2023-09-04') <= 0.5 GROUP BY MONTH(数据日期)",
+        "generatedSchemaLinkingCoT": "Let’s think step by step. In the question \"超音数近半年每个月的平均访问次数 (补充信息:。当前的日期是2023-09-04) \", we are asked:\n\"访问次数 (\" so we need column = [访问次数]\n\"当前的日期是\" so we need column = [数据日期]\nBased on the tables, columns, and Foreign_keys, The set of possible cell values are = [0.5,year]. So the Schema_links are:\nSchema_links: [访问次数,数据日期,0.5,year]",
         "generatedSchemaLinkings": "[访问次数,数据日期,0.5,year]"
     },
     {
-        "question": "内容库 按部门统计访问次数 top10 的部门",
-        "questionAugmented": "内容库 按部门统计访问次数 top10 的部门 (补充信息:。当前的日期是2023-09-10) ",
-        "dbSchema": "Table: 内容库产品, Columns = [\"用户名\", \"部门\", \"模块\", \"访问时长\", \"访问次数\", \"访问人数\", \"数据日期\"]",
-        "sql": "SELECT 部门, SUM(访问次数) FROM 内容库产品 GROUP BY 部门 ORDER BY SUM(访问次数) DESC LIMIT 10",
-        "generatedSchemaLinkingCoT": "Let’s think step by step. In the question \"内容库 按部门统计访问次数 top10 的部门 (补充信息:。当前的日期是2023-09-10) \", we are asked:\n\"计访问次数 \" so we need column = [访问次数]\n\" 的部门 (\" so we need column = [部门]\nBased on the tables, columns, and Foreign_keys, The set of possible cell values are = [10]. So the Schema_links are:\nSchema_links: [访问次数,部门,10]",
+        "question": "超音数 按部门统计访问次数 top10 的部门",
+        "questionAugmented": "超音数 按部门统计访问次数 top10 的部门 (补充信息:。当前的日期是2023-09-10) ",
+        "dbSchema": "Table: 超音数产品, Columns = [\"用户名\", \"部门\", \"模块\", \"访问时长\", \"访问次数\", \"访问人数\", \"数据日期\"]",
+        "sql": "SELECT 部门, SUM(访问次数) FROM 超音数产品 GROUP BY 部门 ORDER BY SUM(访问次数) DESC LIMIT 10",
+        "generatedSchemaLinkingCoT": "Let’s think step by step. In the question \"超音数 按部门统计访问次数 top10 的部门 (补充信息:。当前的日期是2023-09-10) \", we are asked:\n\"计访问次数 \" so we need column = [访问次数]\n\" 的部门 (\" so we need column = [部门]\nBased on the tables, columns, and Foreign_keys, The set of possible cell values are = [10]. So the Schema_links are:\nSchema_links: [访问次数,部门,10]",
         "generatedSchemaLinkings": "[访问次数,部门,10]"
     },
     {
         "question": "超音速 近7个月，月度总访问量超过 2万的月份",
         "questionAugmented": "超音速 近7个月，月度总访问量超过 2万的月份 (补充信息:。当前的日期是2023-09-10) ",
-        "dbSchema": "Table: 内容库产品, Columns = [\"用户名\", \"部门\", \"模块\", \"访问时长\", \"访问次数\", \"访问人数\", \"数据日期\"]",
-        "sql": "SELECT MONTH(数据日期) FROM 内容库产品 WHERE datediff('month', 数据日期, '2023-09-10') <= 7 GROUP BY MONTH(数据日期) HAVING SUM(访问次数) > 20000",
+        "dbSchema": "Table: 超音数产品, Columns = [\"用户名\", \"部门\", \"模块\", \"访问时长\", \"访问次数\", \"访问人数\", \"数据日期\"]",
+        "sql": "SELECT MONTH(数据日期) FROM 超音数产品 WHERE datediff('month', 数据日期, '2023-09-10') <= 7 GROUP BY MONTH(数据日期) HAVING SUM(访问次数) > 20000",
         "generatedSchemaLinkingCoT": "Let’s think step by step. In the question \"超音速 近7个月，月度总访问量超过 2万的月份 (补充信息:。当前的日期是2023-09-10) \", we are asked:\n\"访问量超过 \" so we need column = [访问次数]\n\"当前的日期是\" so we need column = [数据日期]\nBased on the tables, columns, and Foreign_keys, The set of possible cell values are = [7,20000,month]. So the Schema_links are:\nSchema_links: [访问次数,数据日期,7,20000,month]",
         "generatedSchemaLinkings": "[访问次数,数据日期,7,20000,month]"
     },
