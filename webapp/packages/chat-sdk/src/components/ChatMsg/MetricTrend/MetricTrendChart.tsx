@@ -103,6 +103,7 @@ const MetricTrendChart: React.FC<Props> = ({
       },
       xAxis: {
         type: 'category',
+        show: ['bar', 'line'].includes(chartType!),
         axisTick: {
           alignWithLabel: true,
           lineStyle: {
@@ -122,6 +123,7 @@ const MetricTrendChart: React.FC<Props> = ({
       },
       yAxis: {
         type: 'value',
+        show: ['bar', 'line'].includes(chartType!),
         splitLine: {
           lineStyle: {
             opacity: 0.3,
@@ -174,20 +176,38 @@ const MetricTrendChart: React.FC<Props> = ({
       },
       series: sortedGroupKeys.slice(0, 20).map((category, index) => {
         const data = groupData[category];
+        const normalizedData = data.map((item: any) => {
+          const value = item[valueColumnName];
+          return (metricField.dataFormatType === 'percent' ||
+            metricField.dataFormatType === 'decimal') &&
+            metricField.dataFormat?.needMultiply100
+            ? value * 100
+            : value
+          })
+
+        if (chartType === 'pie') {
+          return {
+            type: 'pie',
+            name: category,
+            data: xData.map(xItem => {
+              return {
+                name: xItem,
+                value: normalizedData[xData.indexOf(xItem)],
+                itemStyle: {
+                  color: THEME_COLOR_LIST[xData.indexOf(xItem)],
+                },
+              }
+            })
+          };
+        }
+
         return {
           type: chartType,
           name: categoryColumnName ? category : metricField.name,
           symbol: 'circle',
           showSymbol: data.length === 1,
           smooth: true,
-          data: data.map((item: any) => {
-            const value = item[valueColumnName];
-            return (metricField.dataFormatType === 'percent' ||
-              metricField.dataFormatType === 'decimal') &&
-              metricField.dataFormat?.needMultiply100
-              ? value * 100
-              : value;
-          }),
+          data: normalizedData,
           color: THEME_COLOR_LIST[index],
         };
       }),
