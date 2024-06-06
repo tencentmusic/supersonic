@@ -52,6 +52,7 @@ const MultiMetricsTrendChart: React.FC<Props> = ({
         type: 'scroll',
       },
       xAxis: {
+        show: ['bar', 'line'].includes(chartType!),
         type: 'category',
         axisTick: {
           alignWithLabel: true,
@@ -71,6 +72,7 @@ const MultiMetricsTrendChart: React.FC<Props> = ({
         data: xData,
       },
       yAxis: {
+        show: ['bar', 'line'].includes(chartType!),
         type: 'value',
         splitLine: {
           lineStyle: {
@@ -111,6 +113,30 @@ const MultiMetricsTrendChart: React.FC<Props> = ({
         containLabel: true,
       },
       series: metricFields.map((metricField, index) => {
+        const normalizedData = resultList.map((item: any) => {
+          const value = item[metricField.nameEn];
+          return (metricField.dataFormatType === 'percent' ||
+            metricField.dataFormatType === 'decimal') &&
+            metricField.dataFormat?.needMultiply100
+            ? value * 100
+            : value;
+        })
+
+        if (chartType === 'pie') {
+          return {
+            type: 'pie',
+            name: metricField.name,
+            data: xData.map(xItem => {
+              return {
+                name: xItem,
+                value: normalizedData[xData.indexOf(xItem)],
+                itemStyle: {
+                  color: THEME_COLOR_LIST[xData.indexOf(xItem)],
+                },
+              }
+            })
+          };
+        }
         return {
           type: chartType,
           name: metricField.name,
