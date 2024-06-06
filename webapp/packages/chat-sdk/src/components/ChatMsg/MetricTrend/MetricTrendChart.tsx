@@ -140,6 +140,7 @@ const MetricTrendChart: React.FC<Props> = ({
         },
       },
       tooltip: {
+        show: ['bar', 'line'].includes(chartType!),
         trigger: 'axis',
         formatter: function (params: any[]) {
           const param = params[0];
@@ -185,10 +186,14 @@ const MetricTrendChart: React.FC<Props> = ({
             : value
           })
 
+        const xRate = 100 / sortedGroupKeys.length / 2 + 100 / sortedGroupKeys.length * index;
+
         if (chartType === 'pie') {
           return {
             type: 'pie',
             name: category,
+            // 位置，按照index跟总数的比例确定横向位置
+            center: [`${xRate}%`, '50%'],
             data: xData.map(xItem => {
               return {
                 name: xItem,

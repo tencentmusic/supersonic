@@ -86,6 +86,7 @@ const MultiMetricsTrendChart: React.FC<Props> = ({
         },
       },
       tooltip: {
+        show: ['bar', 'line'].includes(chartType!),
         trigger: 'axis',
         formatter: function (params: any[]) {
           const param = params[0];
@@ -122,10 +123,13 @@ const MultiMetricsTrendChart: React.FC<Props> = ({
             : value;
         })
 
+        const xRate = 100 / metricFields.length / 2 + 100 / metricFields.length * index;
+
         if (chartType === 'pie') {
           return {
             type: 'pie',
             name: metricField.name,
+            center: [`${xRate}%`, '50%'],
             data: xData.map(xItem => {
               return {
                 name: xItem,
