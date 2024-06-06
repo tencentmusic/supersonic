@@ -589,4 +589,18 @@ CREATE TABLE IF NOT EXISTS `s2_user_role_rela` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin comment='用户角色关系表';
 
 
+CREATE TABLE IF NOT EXISTS s2_model_comment (
+    id          bigint primary key AUTO_INCREMENT,
+    model_id    bigint not null comment '模型ID,s2_model表主键',
+    field_name  varchar(255) not null comment '字段名称',
+    field_type  char(1) not null comment 'F-普通, M-指标, D-维度',
+    comment     varchar(500) not null comment '字段注释',
+    created_by  varchar(255),
+    updated_by  varchar(255),
+    created_at  datetime ,
+    updated_at  datetime ,
+    UNIQUE KEY `UK_model_id_field_name` (`model_id`, `field_name`)
+)ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin comment='模型字段注释补充信息表';
+
+
 

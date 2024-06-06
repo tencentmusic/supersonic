@@ -27,23 +27,20 @@ import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
 import com.tencent.supersonic.headless.api.pojo.response.UnAvailableItemResp;
 import com.tencent.supersonic.headless.api.pojo.response.DataSetResp;
 import com.tencent.supersonic.headless.server.persistence.dataobject.DateInfoDO;
+import com.tencent.supersonic.headless.server.persistence.dataobject.ModelCommentDO;
 import com.tencent.supersonic.headless.server.persistence.dataobject.ModelDO;
 import com.tencent.supersonic.headless.server.persistence.repository.DateInfoRepository;
 import com.tencent.supersonic.headless.server.persistence.repository.ModelRepository;
 import com.tencent.supersonic.headless.server.pojo.MetaFilter;
 import com.tencent.supersonic.headless.server.pojo.ModelFilter;
-import com.tencent.supersonic.headless.server.service.DatabaseService;
-import com.tencent.supersonic.headless.server.service.DimensionService;
-import com.tencent.supersonic.headless.server.service.DomainService;
-import com.tencent.supersonic.headless.server.service.MetricService;
-import com.tencent.supersonic.headless.server.service.ModelService;
-import com.tencent.supersonic.headless.server.service.DataSetService;
+import com.tencent.supersonic.headless.server.service.*;
 import com.tencent.supersonic.headless.server.utils.ModelConverter;
 import com.tencent.supersonic.headless.server.utils.NameCheckUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -80,6 +77,9 @@ public class ModelServiceImpl implements ModelService {
 
     private DateInfoRepository dateInfoRepository;
 
+    @Autowired
+    private ModelCommentService modelCommentService;
+
     public ModelServiceImpl(ModelRepository modelRepository,
                             DatabaseService databaseService,
                             @Lazy DimensionService dimensionService,
@@ -114,7 +114,11 @@ public class ModelServiceImpl implements ModelService {
     public ModelResp updateModel(ModelReq modelReq, User user) throws Exception {
         checkName(modelReq);
         ModelDO modelDO = modelRepository.getModelById(modelReq.getId());
-        ModelConverter.convert(modelDO, modelReq, user);
+
+        // 根据注释信息，自动识别为维度和度量
+        List<ModelCommentDO> modelCommentDOList = modelCommentService.getModelCommentList(modelReq.getId());
+
+        ModelConverter.convert(modelDO, modelReq, user, modelCommentDOList);
         modelRepository.updateModel(modelDO);
         batchCreateDimension(modelDO, user);
         batchCreateMetric(modelDO, user);

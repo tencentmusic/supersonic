@@ -22,6 +22,8 @@ import com.tencent.supersonic.headless.api.pojo.request.ModelReq;
 import com.tencent.supersonic.headless.api.pojo.response.DomainResp;
 import com.tencent.supersonic.headless.api.pojo.response.MeasureResp;
 import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
+import com.tencent.supersonic.headless.api.pojo.Field;
+import com.tencent.supersonic.headless.server.persistence.dataobject.ModelCommentDO;
 import com.tencent.supersonic.headless.server.persistence.dataobject.ModelDO;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -78,8 +80,12 @@ public class ModelConverter {
         return modelResp;
     }
 
-    public static ModelDO convert(ModelDO modelDO, ModelReq modelReq, User user) {
+    public static ModelDO convert(ModelDO modelDO, ModelReq modelReq, User user,List<ModelCommentDO> modelCommentDOList) {
         ModelDetail modelDetail = updateModelDetail(modelReq);
+
+        // 数据库中的字段注释导入
+        importComment(modelDetail,modelCommentDOList);
+
         BeanMapper.mapper(modelReq, modelDO);
         if (modelReq.getDrillDownDimensions() != null) {
             modelDO.setDrillDownDimensions(JSONObject.toJSONString(modelReq.getDrillDownDimensions()));
@@ -261,6 +267,41 @@ public class ModelConverter {
         }
         BeanMapper.mapper(modelReq.getModelDetail(), modelDetail);
         return modelDetail;
+    }
+
+    private static void importComment(ModelDetail modelDetail,List<ModelCommentDO> modelCommentDOList) {
+        if (!CollectionUtils.isEmpty(modelCommentDOList)) {
+
+            List<Field> fieldList = modelDetail.getFields().stream()
+                    .filter(field -> !modelDetail.getMeasures().stream().map(Measure::getFieldName).collect(Collectors.toList()).contains(field.getFieldName()))
+                    .filter(field -> !modelDetail.getDimensions().stream().map(Dim::getFieldName).collect(Collectors.toList()).contains(field.getFieldName()))
+                    .collect(Collectors.toList());
+
+            for (Field field : fieldList) {
+                for (ModelCommentDO modelCommentDO : modelCommentDOList) {
+                    if (field.getFieldName().equals(modelCommentDO.getFieldName())) {
+                        if ("D".equals(modelCommentDO.getFieldType())) {
+                            Dim dim = new Dim();
+                            dim.setBizName(modelCommentDO.getFieldName());
+                            dim.setExpr(modelCommentDO.getFieldName());
+                            dim.setName(modelCommentDO.getComment());
+                            dim.setType(DimensionType.categorical.name());
+                            dim.setIsCreateDimension(1);
+                            dim.setDateFormat("yyyy-MM-dd");
+                            modelDetail.getDimensions().add(dim);
+                        } else if ("M".equals(modelCommentDO.getFieldType())) {
+                            Measure measure = new Measure();
+                            measure.setBizName(modelCommentDO.getFieldName());
+                            measure.setExpr(modelCommentDO.getFieldName());
+                            measure.setName(modelCommentDO.getComment());
+                            measure.setIsCreateMetric(1);
+                            measure.setAgg("sum");
+                            modelDetail.getMeasures().add(measure);
+                        }
+                    }
+                }
+            }
+        }
     }
 
 }
