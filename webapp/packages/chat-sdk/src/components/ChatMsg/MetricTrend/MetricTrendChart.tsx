@@ -93,6 +93,21 @@ const MetricTrendChart: React.FC<Props> = ({
     });
 
     instanceObj.setOption({
+      title: sortedGroupKeys.slice(0, 20).map((category,idx) => {
+        const xRate = 100 / sortedGroupKeys.length * idx + 8;
+
+        return {
+          show: chartType === 'pie',
+          text: category + '' === 'undefined' ? '' : category,
+          bottom: 0,
+          left: xRate + '%',
+          textStyle: {
+            fontSize: 14,
+            color: '#666',
+            textAlign: 'center',
+          }
+        }
+      }),
       legend: categoryColumnName && {
         left: 0,
         top: 0,
@@ -194,8 +209,10 @@ const MetricTrendChart: React.FC<Props> = ({
             name: category,
             // 位置，按照index跟总数的比例确定横向位置
             center: [`${xRate}%`, '50%'],
+            radius: `${100/sortedGroupKeys.length}%`,
             data: xData.map(xItem => {
               return {
+                title: xItem,
                 name: xItem,
                 value: normalizedData[xData.indexOf(xItem)],
                 itemStyle: {
