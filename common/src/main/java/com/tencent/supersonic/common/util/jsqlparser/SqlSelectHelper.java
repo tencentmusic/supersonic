@@ -38,6 +38,7 @@ import net.sf.jsqlparser.statement.select.Distinct;
 import net.sf.jsqlparser.statement.select.GroupByElement;
 import net.sf.jsqlparser.statement.select.Join;
 import net.sf.jsqlparser.statement.select.LateralView;
+import net.sf.jsqlparser.statement.select.Limit;
 import net.sf.jsqlparser.statement.select.OrderByElement;
 import net.sf.jsqlparser.statement.select.ParenthesedSelect;
 import net.sf.jsqlparser.statement.select.PlainSelect;
@@ -46,7 +47,6 @@ import net.sf.jsqlparser.statement.select.SelectItem;
 import net.sf.jsqlparser.statement.select.SelectVisitorAdapter;
 import net.sf.jsqlparser.statement.select.SetOperationList;
 import net.sf.jsqlparser.statement.select.WithItem;
-import net.sf.jsqlparser.statement.select.Limit;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.CollectionUtils;
 
@@ -139,12 +139,21 @@ public class SqlSelectHelper {
         return plainSelectList;
     }
 
-    public static void getSubPlainSelect(PlainSelect plainSelect, List<PlainSelect> plainSelectList) {
-        plainSelectList.add(plainSelect);
-        if (plainSelect.getFromItem() instanceof ParenthesedSelect) {
-            ParenthesedSelect parenthesedSelect = (ParenthesedSelect) plainSelect.getFromItem();
-            PlainSelect subPlainSelect = parenthesedSelect.getPlainSelect();
-            getSubPlainSelect(subPlainSelect, plainSelectList);
+    public static void getSubPlainSelect(Select select, List<PlainSelect> plainSelectList) {
+        if (select instanceof PlainSelect) {
+            PlainSelect plainSelect = (PlainSelect) select;
+            plainSelectList.add(plainSelect);
+            if (plainSelect.getFromItem() instanceof ParenthesedSelect) {
+                ParenthesedSelect parenthesedSelect = (ParenthesedSelect) plainSelect.getFromItem();
+                Select subSelect = parenthesedSelect.getSelect();
+                getSubPlainSelect(subSelect, plainSelectList);
+            }
+        }
+        if (select instanceof SetOperationList) {
+            SetOperationList setOperationList = (SetOperationList) select;
+            for (Select subSelect : setOperationList.getSelects()) {
+                getSubPlainSelect(subSelect, plainSelectList);
+            }
         }
     }
 
