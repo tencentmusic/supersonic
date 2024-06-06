@@ -6,6 +6,4 @@ import java.util.List;
 public interface ModelCommentService {
 
     List<ModelCommentDO> getModelCommentList(Long modelId);
-
-
 }

@@ -33,14 +33,19 @@ import com.tencent.supersonic.headless.server.persistence.repository.DateInfoRep
 import com.tencent.supersonic.headless.server.persistence.repository.ModelRepository;
 import com.tencent.supersonic.headless.server.pojo.MetaFilter;
 import com.tencent.supersonic.headless.server.pojo.ModelFilter;
-import com.tencent.supersonic.headless.server.service.*;
+import com.tencent.supersonic.headless.server.service.ModelService;
+import com.tencent.supersonic.headless.server.service.DatabaseService;
+import com.tencent.supersonic.headless.server.service.DimensionService;
+import com.tencent.supersonic.headless.server.service.DomainService;
+import com.tencent.supersonic.headless.server.service.MetricService;
+import com.tencent.supersonic.headless.server.service.ModelCommentService;
+import com.tencent.supersonic.headless.server.service.DataSetService;
 import com.tencent.supersonic.headless.server.utils.ModelConverter;
 import com.tencent.supersonic.headless.server.utils.NameCheckUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -77,7 +82,6 @@ public class ModelServiceImpl implements ModelService {
 
     private DateInfoRepository dateInfoRepository;
 
-    @Autowired
     private ModelCommentService modelCommentService;
 
     public ModelServiceImpl(ModelRepository modelRepository,
@@ -87,6 +91,7 @@ public class ModelServiceImpl implements ModelService {
                             DomainService domainService,
                             UserService userService,
                             DataSetService dataSetService,
+                            ModelCommentService modelCommentService,
                             DateInfoRepository dateInfoRepository) {
         this.modelRepository = modelRepository;
         this.databaseService = databaseService;
@@ -95,6 +100,7 @@ public class ModelServiceImpl implements ModelService {
         this.domainService = domainService;
         this.userService = userService;
         this.dataSetService = dataSetService;
+        this.modelCommentService = modelCommentService;
         this.dateInfoRepository = dateInfoRepository;
     }
 

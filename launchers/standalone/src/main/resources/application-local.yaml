@@ -6,6 +6,10 @@ server:
     mime-types: application/javascript,application/json,application/xml,text/html,text/xml,text/plain,text/css,image/*
 
 spring:
+  h2:
+    console:
+      path: /h2-console/semantic
+      enabled: true
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://mysql8-test01-mysql-master-3489.ot1.gz.paas.cvtecs.com:3489/chatdata
@@ -35,14 +39,15 @@ s2:
 
   parser:
     url: ${s2.pyllm.url}
+    strategy: ONE_PASS_SELF_CONSISTENCY
     exemplar-recall:
       number: 10
     few-shot:
       number: 5
     self-consistency:
-      number: 5
+      number: 1
     multi-turn:
-      enable: true
+      enable: false
 
   corrector:
     additional:

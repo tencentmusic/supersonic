@@ -1,9 +1,11 @@
 package com.tencent.supersonic.headless.server.persistence.dataobject;
 
+import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 import java.util.Date;
 
 @Data
+@TableName("s2_model_comment")
 public class ModelCommentDO {
     private Long id;
     private Long modelId;

@@ -80,11 +80,12 @@ public class ModelConverter {
         return modelResp;
     }
 
-    public static ModelDO convert(ModelDO modelDO, ModelReq modelReq, User user,List<ModelCommentDO> modelCommentDOList) {
+    public static ModelDO convert(ModelDO modelDO, ModelReq modelReq, User user,
+                                  List<ModelCommentDO> modelCommentDOList) {
         ModelDetail modelDetail = updateModelDetail(modelReq);
 
         // 数据库中的字段注释导入
-        importComment(modelDetail,modelCommentDOList);
+        importComment(modelDetail, modelCommentDOList);
 
         BeanMapper.mapper(modelReq, modelDO);
         if (modelReq.getDrillDownDimensions() != null) {
@@ -269,12 +270,14 @@ public class ModelConverter {
         return modelDetail;
     }
 
-    private static void importComment(ModelDetail modelDetail,List<ModelCommentDO> modelCommentDOList) {
+    private static void importComment(ModelDetail modelDetail, List<ModelCommentDO> modelCommentDOList) {
         if (!CollectionUtils.isEmpty(modelCommentDOList)) {
 
             List<Field> fieldList = modelDetail.getFields().stream()
-                    .filter(field -> !modelDetail.getMeasures().stream().map(Measure::getFieldName).collect(Collectors.toList()).contains(field.getFieldName()))
-                    .filter(field -> !modelDetail.getDimensions().stream().map(Dim::getFieldName).collect(Collectors.toList()).contains(field.getFieldName()))
+                    .filter(field -> !modelDetail.getMeasures().stream().map(Measure::getFieldName)
+                            .collect(Collectors.toList()).contains(field.getFieldName()))
+                    .filter(field -> !modelDetail.getDimensions().stream().map(Dim::getFieldName)
+                            .collect(Collectors.toList()).contains(field.getFieldName()))
                     .collect(Collectors.toList());
 
             for (Field field : fieldList) {
