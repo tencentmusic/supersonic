@@ -84,15 +84,6 @@ public class GroupByCorrector extends BaseSemanticCorrector {
                 })
                 .collect(Collectors.toSet());
         semanticParseInfo.getSqlInfo().setCorrectS2SQL(SqlAddHelper.addGroupBy(correctS2SQL, groupByFields));
-        addAggregate(queryContext, semanticParseInfo);
     }
 
-    private void addAggregate(QueryContext queryContext, SemanticParseInfo semanticParseInfo) {
-        List<String> sqlGroupByFields = SqlSelectHelper.getGroupByFields(
-                semanticParseInfo.getSqlInfo().getCorrectS2SQL());
-        if (CollectionUtils.isEmpty(sqlGroupByFields)) {
-            return;
-        }
-        addAggregateToMetric(queryContext, semanticParseInfo);
-    }
 }
