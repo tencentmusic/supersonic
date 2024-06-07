@@ -6,6 +6,7 @@ import {
   useImperativeHandle,
   useRef,
   useState,
+  useMemo,
 } from 'react';
 import MessageContainer from './MessageContainer';
 import styles from './style.module.less';
@@ -67,6 +68,8 @@ const Chat: ForwardRefRenderFunction<any, Props> = (
   const [showCaseVisible, setShowCaseVisible] = useState(false);
 
   const [isSimpleMode, setIsSimpleMode] = useState<boolean>(false);
+  // 是否存在未完成响应的消息
+  const isAllMsgResolved = useMemo(() => messageList.every(msg => msg.msgData), [messageList]);
 
   const conversationRef = useRef<any>();
   const chatFooterRef = useRef<any>();
@@ -414,6 +417,7 @@ const Chat: ForwardRefRenderFunction<any, Props> = (
                     chatId={currentConversation?.chatId}
                     agentList={agentList}
                     currentAgent={currentAgent}
+                    isAllMsgResolved={isAllMsgResolved}
                     onToggleHistoryVisible={onToggleHistoryVisible}
                     onInputMsgChange={onInputMsgChange}
                     onSendMsg={sendMsg}

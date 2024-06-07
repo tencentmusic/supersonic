@@ -14,6 +14,7 @@ type Props = {
   inputMsg: string;
   chatId?: number;
   currentAgent?: AgentType;
+  isAllMsgResolved?: boolean;
   agentList: AgentType[];
   onToggleHistoryVisible: () => void;
   onOpenAgents: () => void;
@@ -41,6 +42,7 @@ const ChatFooter: ForwardRefRenderFunction<any, Props> = (
     inputMsg,
     chatId,
     currentAgent,
+    isAllMsgResolved,
     agentList,
     onToggleHistoryVisible,
     onOpenAgents,
@@ -52,6 +54,7 @@ const ChatFooter: ForwardRefRenderFunction<any, Props> = (
   },
   ref
 ) => {
+    console.log('🚀 ~ isAllMsgResolved:', isAllMsgResolved)
   const [modelOptions, setModelOptions] = useState<(ModelType | AgentType)[]>([]);
   const [stepOptions, setStepOptions] = useState<Record<string, any[]>>({});
   const [open, setOpen] = useState(false);
@@ -195,6 +198,8 @@ const ChatFooter: ForwardRefRenderFunction<any, Props> = (
   }, [stepOptions]);
 
   const sendMsg = (value: string) => {
+    if (!isAllMsgResolved) return
+
     const option = Object.keys(stepOptions)
       .reduce((result: any[], item) => {
         result = result.concat(stepOptions[item]);
@@ -404,7 +409,7 @@ const ChatFooter: ForwardRefRenderFunction<any, Props> = (
           </AutoComplete>
           <div
             className={classNames(styles.sendBtn, {
-              [styles.sendBtnActive]: inputMsg?.length > 0,
+              [styles.sendBtnActive]: inputMsg?.length > 0 && isAllMsgResolved,
             })}
             onClick={() => {
               sendMsg(inputMsg);
