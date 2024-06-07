@@ -86,9 +86,13 @@ public class SqlQueryApiController {
                     return querySqlReq;
                 }).collect(Collectors.toList());
         List<SemanticQueryResp> semanticQueryRespList = new ArrayList<>();
-        for (SemanticQueryReq semanticQueryReq : semanticQueryReqs) {
-            SemanticQueryResp semanticQueryResp = queryService.queryByReq(semanticQueryReq, user);
-            semanticQueryRespList.add(semanticQueryResp);
+        try {
+            for (SemanticQueryReq semanticQueryReq : semanticQueryReqs) {
+                SemanticQueryResp semanticQueryResp = queryService.queryByReq(semanticQueryReq, user);
+                semanticQueryRespList.add(semanticQueryResp);
+            }
+        } catch (Exception e) {
+            throw new Exception(e.getCause().getMessage());
         }
         return semanticQueryRespList;
     }
