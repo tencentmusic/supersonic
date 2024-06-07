@@ -88,7 +88,7 @@ public class SqlSelectHelper {
         return new ArrayList<>(result);
     }
 
-    private static void getWhereFields(List<PlainSelect> plainSelectList, Set<String> result) {
+    public static void getWhereFields(List<PlainSelect> plainSelectList, Set<String> result) {
         plainSelectList.stream().forEach(plainSelect -> {
             Expression where = plainSelect.getWhere();
             if (Objects.nonNull(where)) {
@@ -121,9 +121,9 @@ public class SqlSelectHelper {
         if (selectStatement == null) {
             return null;
         }
-        //SelectBody selectBody = selectStatement.getSelectBody();
 
         List<PlainSelect> plainSelectList = new ArrayList<>();
+        plainSelectList.addAll(getWithItem(selectStatement));
         if (selectStatement instanceof PlainSelect) {
             PlainSelect plainSelect = (PlainSelect) selectStatement;
             getSubPlainSelect(plainSelect, plainSelectList);
@@ -137,6 +137,20 @@ public class SqlSelectHelper {
             }
         }
         return plainSelectList;
+    }
+
+    public static Boolean hasSubSelect(String sql) {
+        Select selectStatement = getSelect(sql);
+        if (selectStatement == null) {
+            return false;
+        }
+        if (selectStatement instanceof PlainSelect) {
+            PlainSelect plainSelect = (PlainSelect) selectStatement;
+            if (plainSelect.getFromItem() instanceof ParenthesedSelect) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public static void getSubPlainSelect(Select select, List<PlainSelect> plainSelectList) {
@@ -453,7 +467,6 @@ public class SqlSelectHelper {
 
     public static boolean hasGroupBy(String sql) {
         Select selectStatement = getSelect(sql);
-        //SelectBody selectBody = selectStatement.getSelectBody();
 
         if (!(selectStatement instanceof PlainSelect)) {
             return false;
@@ -470,7 +483,6 @@ public class SqlSelectHelper {
 
     public static boolean hasDistinct(String sql) {
         Select selectStatement = getSelect(sql);
-        //SelectBody selectBody = selectStatement.getSelectBody();
 
         if (!(selectStatement instanceof PlainSelect)) {
             return false;
@@ -531,12 +543,89 @@ public class SqlSelectHelper {
         return "";
     }
 
+    public static Boolean hasWith(String sql) {
+        Select selectStatement = getSelect(sql);
+        if (selectStatement == null) {
+            return false;
+        }
+        List<WithItem> withItemList = selectStatement.getWithItemsList();
+        if (!CollectionUtils.isEmpty(withItemList)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public static List<PlainSelect> getWithItem(Select selectStatement) {
+        if (selectStatement == null) {
+            return new ArrayList<>();
+        }
+        List<PlainSelect> plainSelectList = new ArrayList<>();
+        List<WithItem> withItemList = selectStatement.getWithItemsList();
+        if (!CollectionUtils.isEmpty(withItemList)) {
+            for (int i = 0; i < withItemList.size(); i++) {
+                WithItem withItem = withItemList.get(i);
+                Select withSelect = withItem.getSelect();
+                if (withSelect instanceof PlainSelect) {
+                    PlainSelect withPlainSelect = (PlainSelect) withSelect;
+                    plainSelectList.add(withPlainSelect);
+                    if (withPlainSelect.getFromItem() instanceof ParenthesedSelect) {
+                        ParenthesedSelect parenthesedSelect = (ParenthesedSelect) withPlainSelect.getFromItem();
+                        plainSelectList.add(parenthesedSelect.getPlainSelect());
+                    }
+                }
+                if (withSelect instanceof ParenthesedSelect) {
+                    ParenthesedSelect parenthesedSelect = (ParenthesedSelect) withSelect;
+                    PlainSelect withPlainSelect = parenthesedSelect.getPlainSelect();
+                    plainSelectList.add(withPlainSelect);
+                }
+            }
+        }
+        return plainSelectList;
+    }
+
+    public static List<String> getWithName(String sql) {
+        Select selectStatement = getSelect(sql);
+        if (selectStatement == null) {
+            return new ArrayList<>();
+        }
+        List<String> withNameList = new ArrayList<>();
+        List<WithItem> withItemList = selectStatement.getWithItemsList();
+        if (!CollectionUtils.isEmpty(withItemList)) {
+            for (int i = 0; i < withItemList.size(); i++) {
+                WithItem withItem = withItemList.get(i);
+                withNameList.add(withItem.getAlias().getName());
+            }
+        }
+        return withNameList;
+    }
+
+    public static Map<String, WithItem> getWith(String sql) {
+        Select selectStatement = getSelect(sql);
+        if (selectStatement == null) {
+            return new HashMap<>();
+        }
+        Map<String, WithItem> withMap = new HashMap<>();
+        List<WithItem> withItemList = selectStatement.getWithItemsList();
+        if (!CollectionUtils.isEmpty(withItemList)) {
+            for (int i = 0; i < withItemList.size(); i++) {
+                WithItem withItem = withItemList.get(i);
+                withMap.put(withItem.getAlias().getName(), withItem);
+            }
+        }
+        return withMap;
+    }
+
     public static Table getTable(String sql) {
         Select selectStatement = getSelect(sql);
         if (selectStatement == null) {
             return null;
         }
-        //SelectBody selectBody = selectStatement.getSelectBody();
+        List<PlainSelect> plainSelectList = getWithItem(selectStatement);
+        if (!CollectionUtils.isEmpty(plainSelectList)) {
+            Table table = getTable(plainSelectList.get(0).toString());
+            return table;
+        }
         if (selectStatement instanceof PlainSelect) {
             PlainSelect plainSelect = (PlainSelect) selectStatement;
             if (plainSelect.getFromItem() instanceof Table) {
@@ -544,7 +633,6 @@ public class SqlSelectHelper {
             }
             if (plainSelect.getFromItem() instanceof ParenthesedSelect) {
 
-                //ParenthesedFromItem subSelect = (ParenthesedFromItem) plainSelect.getFromItem();
                 PlainSelect subSelect = ((ParenthesedSelect) plainSelect.getFromItem()).getPlainSelect();
                 return getTable(subSelect.getSelectBody().toString());
             }
@@ -577,7 +665,6 @@ public class SqlSelectHelper {
             columns.add(((Column) expression).getColumnName());
         }
         if (expression instanceof Function) {
-            //List<Expression> expressionList = ((Function) expression).getParameters().getExpressions();
             ExpressionList<?> expressionList = ((Function) expression).getParameters();
             for (Expression expr : expressionList) {
                 getColumnFromExpr(expr, columns);
@@ -624,13 +711,26 @@ public class SqlSelectHelper {
 
     public static Boolean hasLimit(String querySql) {
         Select selectStatement = SqlSelectHelper.getSelect(querySql);
-        PlainSelect plainSelect = selectStatement.getPlainSelect();
-        Limit limit = plainSelect.getLimit();
-        if (Objects.nonNull(limit)) {
-            return true;
-        } else {
-            return false;
+        if (selectStatement instanceof PlainSelect) {
+            PlainSelect plainSelect = selectStatement.getPlainSelect();
+            Limit limit = plainSelect.getLimit();
+            return Objects.nonNull(limit);
+        } else if (selectStatement instanceof SetOperationList) {
+            SetOperationList setOperationList = (SetOperationList) selectStatement;
+            Boolean result = true;
+            if (!CollectionUtils.isEmpty(setOperationList.getSelects())) {
+                for (Select select : setOperationList.getSelects()) {
+                    PlainSelect subPlainSelect = select.getPlainSelect();
+                    Limit limit = subPlainSelect.getLimit();
+                    if (Objects.isNull(limit)) {
+                        result = false;
+                        break;
+                    }
+                }
+            }
+            return result;
         }
+        return false;
     }
 
     public static Map<String, Set<String>> getFieldsWithSubQuery(String sql) {
