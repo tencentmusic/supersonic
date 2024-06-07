@@ -2,7 +2,6 @@ package com.tencent.supersonic.headless.core.chat.parser.llm;
 
 import com.tencent.supersonic.common.pojo.enums.DataFormatTypeEnum;
 import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
-import com.tencent.supersonic.common.util.DateUtils;
 import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementMatch;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
@@ -11,17 +10,11 @@ import com.tencent.supersonic.headless.core.chat.parser.SatisfactionChecker;
 import com.tencent.supersonic.headless.core.chat.query.llm.s2sql.LLMReq;
 import com.tencent.supersonic.headless.core.chat.query.llm.s2sql.LLMReq.ElementValue;
 import com.tencent.supersonic.headless.core.chat.query.llm.s2sql.LLMResp;
-import com.tencent.supersonic.headless.core.config.ParserConfig;
 import com.tencent.supersonic.headless.core.config.LLMParserConfig;
+import com.tencent.supersonic.headless.core.config.ParserConfig;
 import com.tencent.supersonic.headless.core.pojo.QueryContext;
 import com.tencent.supersonic.headless.core.utils.ComponentFactory;
 import com.tencent.supersonic.headless.core.utils.S2SqlDateHelper;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -30,6 +23,11 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.tuple.Pair;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import static com.tencent.supersonic.headless.core.config.ParserConfig.PARSER_LINKING_VALUE_ENABLE;
 import static com.tencent.supersonic.headless.core.config.ParserConfig.PARSER_STRATEGY_TYPE;
@@ -98,9 +96,6 @@ public class LLMRequestService {
         llmReq.setLinking(linking);
 
         String currentDate = S2SqlDateHelper.getReferenceDate(queryCtx, dataSetId);
-        if (StringUtils.isEmpty(currentDate)) {
-            currentDate = DateUtils.getBeforeDate(0);
-        }
         llmReq.setCurrentDate(currentDate);
         llmReq.setSqlGenType(LLMReq.SqlGenType.valueOf(parserConfig.getParameterValue(PARSER_STRATEGY_TYPE)));
         llmReq.setLlmConfig(queryCtx.getLlmConfig());
