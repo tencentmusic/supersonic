@@ -74,5 +74,7 @@ SuperSonic自带样例的语义模型和问答对话，只需以下三步即可�
 <img src="./docs/images/supersonic_wechat_oa.png" height="50%" width="50%" align="center"/> 
 
 
+
 欢迎加入微信社群：
+
 <img src="./docs/images/supersonic_wechat.jpg" height="50%" width="50%" align="center"/> 
