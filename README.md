@@ -77,4 +77,5 @@ Please follow SuperSonic wechat official account:
 
 
 Welcome to join the WeChat community:
+
 <img src="./docs/images/supersonic_wechat.jpg" height="50%" width="50%" align="center"/> 
