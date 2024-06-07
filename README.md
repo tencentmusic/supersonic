@@ -74,3 +74,7 @@ Please refer to project [wiki](https://github.com/tencentmusic/supersonic/wiki).
 Please follow SuperSonic wechat official account:
 
 <img src="./docs/images/supersonic_wechat_oa.png" height="50%" width="50%" align="center"/> 
+
+
+Welcome to join the WeChat community:
+<img src="./docs/images/supersonic_wechat.jpg" height="50%" width="50%" align="center"/> 
