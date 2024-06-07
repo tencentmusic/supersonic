@@ -156,6 +156,9 @@ public class QueryReqConverter {
         if (databaseReq.isInnerLayerNative()) {
             return AggOption.NATIVE;
         }
+        if (SqlSelectHelper.hasSubSelect(sql) || SqlSelectHelper.hasWith(sql)) {
+            return AggOption.NATIVE;
+        }
         long defaultAggNullCnt = metricSchemas.stream()
                 .filter(m -> Objects.isNull(m.getDefaultAgg()) || Strings.isBlank(m.getDefaultAgg())).count();
         if (defaultAggNullCnt > 0) {
@@ -238,6 +241,7 @@ public class QueryReqConverter {
         String sql = querySqlReq.getSql();
         sql = SqlReplaceHelper.replaceTable(sql,
                 Constants.TABLE_PREFIX + querySqlReq.getDataSetId());
+        log.info("correctTableName after:{}", sql);
         querySqlReq.setSql(sql);
     }
 

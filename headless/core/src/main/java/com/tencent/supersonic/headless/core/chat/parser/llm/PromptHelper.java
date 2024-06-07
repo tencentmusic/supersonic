@@ -63,10 +63,10 @@ public class PromptHelper {
             String fieldValue = value.getFieldValue();
             priorLinkingList.add("‘" + fieldValue + "‘是一个‘" + fieldName + "‘");
         }
-        String currentDataStr = "current date is " + currentDate;
+        String currentDataStr = "当前的日期是" + currentDate;
         String linkingListStr = String.join("，", priorLinkingList);
         String termStr = getTermStr(llmReq);
-        String questionAugmented = String.format("%s (补充信息:%s . %s . %s) (备注: %s)", llmReq.getQueryText(),
+        String questionAugmented = String.format("%s (补充信息:%s;%s;%s;%s)", llmReq.getQueryText(),
                 linkingListStr, currentDataStr, termStr, priorExts);
 
         return Pair.of(dbSchema, questionAugmented);

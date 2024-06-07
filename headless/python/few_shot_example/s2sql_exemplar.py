@@ -1,37 +1,37 @@
 exemplars= [
     {   "currentDate":"2020-12-01",
-        "tableName":"内容库产品",
+        "tableName":"超音数产品",
         "fieldsList":"""["部门", "模块", "用户名", "访问次数", "访问人数", "访问时长", "数据日期"]""",
-        "question":"比较jackjchen和robinlee在内容库的访问次数",
+        "question":"比较jackjchen和robinlee在超音数的访问次数",
         "priorSchemaLinks":"""['jackjchen'->用户名, 'robinlee'->用户名]""",
-        "analysis": """让我们一步一步地思考。在问题“比较jackjchen和robinlee在内容库的访问次数“中，我们被问：
+        "analysis": """让我们一步一步地思考。在问题“比较jackjchen和robinlee在超音数的访问次数“中，我们被问：
 “比较jackjchen和robinlee”，所以我们需要column=[用户名],cell values = ['jackjchen', 'robinlee'],所以有[用户名:('jackjchen', 'robinlee')]
-”内容库的访问次数“，所以我们需要column=[访问次数]""",
+”超音数的访问次数“，所以我们需要column=[访问次数]""",
         "schemaLinks":"""["用户名":("'jackjchen'", "'robinlee'"), "访问次数"]""",
-        "sql":"""SELECT 用户名, 访问次数 FROM 内容库产品 WHERE 用户名 IN ('jackjchen', 'robinlee')"""
+        "sql":"""SELECT 用户名, 访问次数 FROM 超音数产品 WHERE 用户名 IN ('jackjchen', 'robinlee')"""
         },
     {   "currentDate":"2022-11-06",
-        "tableName":"内容库产品",
+        "tableName":"超音数产品",
         "fieldsList":"""["部门", "模块", "用户名", "访问次数", "访问人数", "访问时长", "数据日期"]""",
-        "question":"内容库近12个月访问人数 按部门",
+        "question":"超音数近12个月访问人数 按部门",
         "priorSchemaLinks":"""[]""",
-        "analysis": """让我们一步一步地思考。在问题“内容库近12个月访问人数 按部门“中，我们被问：
-”内容库近12个月“，所以我们需要column=[数据日期],cell values = [12],所以有[数据日期:(12)]
+        "analysis": """让我们一步一步地思考。在问题“超音数近12个月访问人数 按部门“中，我们被问：
+”超音数近12个月“，所以我们需要column=[数据日期],cell values = [12],所以有[数据日期:(12)]
 “访问人数”，所以我们需要column=[访问人数]
 ”按部门“，所以我们需要column=[部门]""",
         "schemaLinks":"""["数据日期":(12), "访问人数", "部门"]""",
-        "sql":"""SELECT 部门, 数据日期, 访问人数 FROM 内容库产品 WHERE datediff('month', 数据日期, '2022-11-06') <= 12 """
+        "sql":"""SELECT 部门, 数据日期, 访问人数 FROM 超音数产品 WHERE datediff('month', 数据日期, '2022-11-06') <= 12 """
         },
     {   "currentDate":"2023-04-21",
-        "tableName":"内容库产品",
+        "tableName":"超音数产品",
         "fieldsList":"""["部门", "模块", "用户名", "访问次数", "访问人数", "访问时长", "数据日期"]""",
-        "question":"内容库美术部、技术研发部的访问时长",
+        "question":"超音数美术部、技术研发部的访问时长",
         "priorSchemaLinks":"""['美术部'->部门, '技术研发部'->部门]""",
-        "analysis": """让我们一步一步地思考。在问题“内容库美术部、技术研发部的访问时长“中，我们被问：
+        "analysis": """让我们一步一步地思考。在问题“超音数美术部、技术研发部的访问时长“中，我们被问：
 “访问时长”，所以我们需要column=[访问时长]
-”内容库美术部、技术研发部“，所以我们需要column=[部门], cell values = ['美术部', '技术研发部'],所以有[部门:('美术部', '技术研发部')]""",
+”超音数美术部、技术研发部“，所以我们需要column=[部门], cell values = ['美术部', '技术研发部'],所以有[部门:('美术部', '技术研发部')]""",
         "schemaLinks":"""["访问时长", "部门":("'美术部'", "'技术研发部'")]""",
-        "sql":"""SELECT 部门, 访问时长 FROM 内容库产品 WHERE 部门 IN ('美术部', '技术研发部')"""
+        "sql":"""SELECT 部门, 访问时长 FROM 超音数产品 WHERE 部门 IN ('美术部', '技术研发部')"""
         },
     {   "currentDate":"2023-08-21",
         "tableName":"严选",
@@ -81,27 +81,27 @@ exemplars= [
         "sql":"""SELECT 歌曲名 FROM 歌曲库 WHERE 结算播放量 > 10000"""
         },
     {   "currentDate":"2023-07-31",
-        "tableName":"内容库产品",
+        "tableName":"超音数产品",
         "fieldsList":"""["用户名", "部门", "模块", "访问时长", "访问次数", "访问人数", "数据日期"]""",
-        "question":"内容库访问时长小于1小时，且来自美术部的用户是哪些",
+        "question":"超音数访问时长小于1小时，且来自美术部的用户是哪些",
         "priorSchemaLinks":"""['美术部'->部门]""",
-        "analysis": """让我们一步一步地思考。在问题“内容库访问时长小于1小时，且来自美术部的用户是哪些“中，我们被问：
+        "analysis": """让我们一步一步地思考。在问题“超音数访问时长小于1小时，且来自美术部的用户是哪些“中，我们被问：
 “用户是哪些”，所以我们需要column=[用户名]
 ”美术部的“，所以我们需要column=[部门], cell values = ['美术部'],所以有[部门:('美术部')]
 ”访问时长小于1小时“，所以我们需要column=[访问时长], cell values = [1],所以有[访问时长:(1)]""",
         "schemaLinks":"""["用户名", "部门":("'美术部'"), "访问时长":(1)]""",
-        "sql":"""SELECT 用户名 FROM 内容库产品 WHERE 部门 = '美术部' AND 访问时长 < 1"""
+        "sql":"""SELECT 用户名 FROM 超音数产品 WHERE 部门 = '美术部' AND 访问时长 < 1"""
         },
     {   "currentDate":"2023-08-31",
-        "tableName":"内容库产品",
+        "tableName":"超音数产品",
         "fieldsList":"""["用户名", "部门", "模块", "访问时长", "访问次数", "访问人数", "数据日期"]""",
-        "question":"内容库pv最高的用户有哪些",
+        "question":"超音数pv最高的用户有哪些",
         "priorSchemaLinks":"""[]""",
-        "analysis": """让我们一步一步地思考。在问题“内容库pv最高的用户有哪些“中，我们被问：
+        "analysis": """让我们一步一步地思考。在问题“超音数pv最高的用户有哪些“中，我们被问：
 “用户有哪些”，所以我们需要column=[用户名]
 ”pv最高的“，所以我们需要column=[访问次数], cell values = [1],所以有[访问次数:(1)]""",
         "schemaLinks":"""["用户名", "访问次数":(1)]""",
-        "sql":"""SELECT 用户名 FROM 内容库产品 ORDER BY 访问次数 DESC LIMIT 1"""
+        "sql":"""SELECT 用户名 FROM 超音数产品 ORDER BY 访问次数 DESC LIMIT 1"""
         },
     {   "currentDate":"2023-08-31",
         "tableName":"艺人库",
@@ -128,15 +128,15 @@ exemplars= [
         "sql":"""SELECT SUM(结算播放量) FROM 艺人库 WHERE 歌手名 = '周倩倩' AND datediff('day', 数据日期, '2023-08-31') <= 7 """
         },
     {   "currentDate":"2023-09-14",
-        "tableName":"内容库产品",
+        "tableName":"超音数产品",
         "fieldsList":"""["部门", "模块", "用户名", "访问次数", "访问人数", "访问时长", "数据日期"]""",
-        "question":"内容库访问次数大于1k的部门是哪些",
+        "question":"超音数访问次数大于1k的部门是哪些",
         "priorSchemaLinks":"""[]""",
-        "analysis": """让我们一步一步地思考。在问题“内容库访问次数大于1k的部门是哪些“中，我们被问：
+        "analysis": """让我们一步一步地思考。在问题“超音数访问次数大于1k的部门是哪些“中，我们被问：
 “部门是哪些”，所以我们需要column=[部门]
 ”访问次数大于1k的“，所以我们需要column=[访问次数], cell values = [1000],所以有[访问次数:(1000)]""",
         "schemaLinks":"""["部门", "访问次数":(1000)]""",
-        "sql":"""SELECT 部门 FROM 内容库产品 WHERE 访问次数 > 1000"""
+        "sql":"""SELECT 部门 FROM 超音数产品 WHERE 访问次数 > 1000"""
         },
     {   "currentDate":"2023-09-18",
         "tableName":"歌曲库",
@@ -273,55 +273,55 @@ exemplars= [
         },
     {
         "currentDate":"2023-09-04",
-        "tableName":"内容库产品",
+        "tableName":"超音数产品",
         "fieldsList":"""["用户名", "部门", "模块", "访问时长", "访问次数", "访问人数", "数据日期"]""",
-        "question":"内容库近30天访问次数的平均数",
+        "question":"超音数近30天访问次数的平均数",
         "priorSchemaLinks":"""[]""",
-        "analysis": """让我们一步一步地思考。在问题“内容库近30天访问次数的平均数“中，我们被问：
+        "analysis": """让我们一步一步地思考。在问题“超音数近30天访问次数的平均数“中，我们被问：
 “访问次数的平均数”，所以我们需要column=[访问次数]
-”内容库近30天“，所以我们需要column=[数据日期], cell values = [30],所以有[数据日期:(30)]""",
+”超音数近30天“，所以我们需要column=[数据日期], cell values = [30],所以有[数据日期:(30)]""",
         "schemaLinks":"""["访问次数", "数据日期":(30)]""",
-        "sql":"""SELECT AVG(访问次数) FROM 内容库产品 WHERE datediff('day', 数据日期, '2023-09-04') <= 30 """
+        "sql":"""SELECT AVG(访问次数) FROM 超音数产品 WHERE datediff('day', 数据日期, '2023-09-04') <= 30 """
         },
     {
         "currentDate":"2023-09-04",
-        "tableName":"内容库产品",
+        "tableName":"超音数产品",
         "fieldsList":"""["用户名", "部门", "模块", "访问时长", "访问次数", "访问人数", "数据日期"]""",
-        "question":"内容库近半年哪个月的访问次数汇总最高",
+        "question":"超音数近半年哪个月的访问次数汇总最高",
         "priorSchemaLinks":"""[]""",
-        "analysis": """让我们一步一步地思考。在问题“内容库近半年哪个月的访问次数汇总最高“中，我们被问：
+        "analysis": """让我们一步一步地思考。在问题“超音数近半年哪个月的访问次数汇总最高“中，我们被问：
 “访问次数汇总最高”，所以我们需要column=[访问次数], cell values = [1],所以有[访问次数:(1)]
-”内容库近半年“，所以我们需要column=[数据日期], cell values = [0.5],所以有[数据日期:(0.5)]""",
+”超音数近半年“，所以我们需要column=[数据日期], cell values = [0.5],所以有[数据日期:(0.5)]""",
         "schemaLinks":"""["访问次数":(1), "数据日期":(0.5)]""",
-        "sql":"""SELECT MONTH(数据日期), SUM(访问次数) FROM 内容库产品 WHERE datediff('year', 数据日期, '2023-09-04') <= 0.5 GROUP BY MONTH(数据日期) ORDER BY SUM(访问次数) DESC LIMIT 1"""
+        "sql":"""SELECT MONTH(数据日期), SUM(访问次数) FROM 超音数产品 WHERE datediff('year', 数据日期, '2023-09-04') <= 0.5 GROUP BY MONTH(数据日期) ORDER BY SUM(访问次数) DESC LIMIT 1"""
         },
     {
         "currentDate":"2023-09-04",
-        "tableName":"内容库产品",
+        "tableName":"超音数产品",
         "fieldsList":"""["用户名", "部门", "模块", "访问时长", "访问次数", "访问人数", "数据日期"]""",
-        "question":"内容库近半年每个月的平均访问次数",
+        "question":"超音数近半年每个月的平均访问次数",
         "priorSchemaLinks":"""[]""",
-        "analysis": """让我们一步一步地思考。在问题“内容库近半年每个月的平均访问次数“中，我们被问：
+        "analysis": """让我们一步一步地思考。在问题“超音数近半年每个月的平均访问次数“中，我们被问：
 “每个月的平均访问次数”，所以我们需要column=[访问次数]
-”内容库近半年“，所以我们需要column=[数据日期], cell values = [0.5],所以有[数据日期:(0.5)]""",
+”超音数近半年“，所以我们需要column=[数据日期], cell values = [0.5],所以有[数据日期:(0.5)]""",
         "schemaLinks":"""["访问次数", "数据日期":(0.5)]""",
-        "sql":"""SELECT MONTH(数据日期), AVG(访问次数) FROM 内容库产品 WHERE datediff('year', 数据日期, '2023-09-04') <= 0.5 GROUP BY MONTH(数据日期)"""
+        "sql":"""SELECT MONTH(数据日期), AVG(访问次数) FROM 超音数产品 WHERE datediff('year', 数据日期, '2023-09-04') <= 0.5 GROUP BY MONTH(数据日期)"""
         },
     {
         "currentDate":"2023-09-10",
-        "tableName":"内容库产品",
+        "tableName":"超音数产品",
         "fieldsList":"""["用户名", "部门", "模块", "访问时长", "访问次数", "访问人数", "数据日期"]""",
-        "question":"内容库 按部门统计访问次数 top10 的部门",
+        "question":"超音数 按部门统计访问次数 top10 的部门",
         "priorSchemaLinks":"""[]""",
-        "analysis": """让我们一步一步地思考。在问题“内容库 按部门统计访问次数 top10 的部门“中，我们被问：
+        "analysis": """让我们一步一步地思考。在问题“超音数 按部门统计访问次数 top10 的部门“中，我们被问：
 “访问次数 top10 的部门”，所以我们需要column=[访问次数], cell values = [10],所以有[访问次数:(10)]
-”内容库 按部门统计“，所以我们需要column=[部门]""",
+”超音数 按部门统计“，所以我们需要column=[部门]""",
         "schemaLinks":"""["访问次数":(10), "部门"]""",
-        "sql":"""SELECT 部门, SUM(访问次数) FROM 内容库产品 GROUP BY 部门 ORDER BY SUM(访问次数) DESC LIMIT 10"""
+        "sql":"""SELECT 部门, SUM(访问次数) FROM 超音数产品 GROUP BY 部门 ORDER BY SUM(访问次数) DESC LIMIT 10"""
         },
     {
         "currentDate":"2023-09-10",
-        "tableName":"内容库产品",
+        "tableName":"超音数产品",
         "fieldsList":"""["用户名", "部门", "模块", "访问时长", "访问次数", "访问人数", "数据日期"]""",
         "question":"超音速 近7个月，月度总访问量超过 2万的月份",
         "priorSchemaLinks":"""[]""",
@@ -329,7 +329,7 @@ exemplars= [
 “月度总访问量超过 2万的月份”，所以我们需要column=[访问次数], cell values = [20000],所以有[访问次数:(20000)]
 ”超音速 近7个月“，所以我们需要column=[数据日期], cell values = [7],所以有[数据日期:(7)]""",
         "schemaLinks":"""["访问次数":(20000), "数据日期":(7)]""",
-        "sql":"""SELECT MONTH(数据日期) FROM 内容库产品 WHERE datediff('month', 数据日期, '2023-09-10') <= 7 GROUP BY MONTH(数据日期) HAVING SUM(访问次数) > 20000"""
+        "sql":"""SELECT MONTH(数据日期) FROM 超音数产品 WHERE datediff('month', 数据日期, '2023-09-10') <= 7 GROUP BY MONTH(数据日期) HAVING SUM(访问次数) > 20000"""
         },
     {
         "currentDate":"2023-09-10",
