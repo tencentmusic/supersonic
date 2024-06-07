@@ -231,6 +231,7 @@ const ParseTip: React.FC<Props> = ({
     });
     return (
       <div className={`${prefixCls}-tip-item-filter-content`}>
+        {(startDate || endDate) && (
         <div className={tipItemOptionClass}>
           <span className={`${prefixCls}-tip-item-filter-name`}>数据时间：</span>
           {nativeQuery ? (
@@ -246,6 +247,7 @@ const ParseTip: React.FC<Props> = ({
             />
           )}
         </div>
+        )}
         {filters?.map((filter: any, index: number) => (
           <FilterItem
             modelId={modelId!}
