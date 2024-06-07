@@ -9,6 +9,7 @@ import com.tencent.supersonic.auth.api.authentication.pojo.UserWithPassword;
 import com.tencent.supersonic.auth.api.authentication.request.UserReq;
 import com.tencent.supersonic.auth.authentication.persistence.dataobject.UserDO;
 import com.tencent.supersonic.auth.authentication.persistence.repository.UserRepository;
+import com.tencent.supersonic.auth.authentication.utils.AESEncryptionUtil;
 import com.tencent.supersonic.auth.authentication.utils.UserTokenUtils;
 import com.tencent.supersonic.common.util.ContextUtils;
 import org.springframework.beans.BeanUtils;
@@ -72,6 +73,14 @@ public class DefaultUserAdaptor implements UserAdaptor {
         }
         UserDO userDO = new UserDO();
         BeanUtils.copyProperties(userReq, userDO);
+        try {
+            byte[] salt = AESEncryptionUtil.generateSalt(userDO.getName());
+            userDO.setSalt(AESEncryptionUtil.getStringFromBytes(salt));
+            System.out.println("salt: " + userDO.getSalt());
+            userDO.setPassword(AESEncryptionUtil.encrypt(userReq.getPassword(), salt));
+        } catch (Exception e) {
+            throw new RuntimeException("password encrypt error, please try again");
+        }
         userRepository.addUser(userDO);
     }
 
@@ -82,12 +91,24 @@ public class DefaultUserAdaptor implements UserAdaptor {
         if (userDO == null) {
             throw new RuntimeException("user not exist,please register");
         }
-        if (userDO.getPassword().equals(userReq.getPassword())) {
-            UserWithPassword user = UserWithPassword.get(userDO.getId(), userDO.getName(), userDO.getDisplayName(),
-                    userDO.getEmail(), userDO.getPassword(), userDO.getIsAdmin());
-            return userTokenUtils.generateToken(user);
+
+        try {
+            String password = AESEncryptionUtil.encrypt(userReq.getPassword(),
+                    AESEncryptionUtil.getBytesFromString(userDO.getSalt()));
+            System.out.println("userReq.getPassword(): " + userReq.getPassword());
+            System.out.println("password: " + password);
+            System.out.println("userDO.getPassword(): " + userDO.getPassword());
+            if (userDO.getPassword().equals(password)) {
+                UserWithPassword user = UserWithPassword.get(userDO.getId(), userDO.getName(), userDO.getDisplayName(),
+                        userDO.getEmail(), userDO.getPassword(), userDO.getIsAdmin());
+                return userTokenUtils.generateToken(user);
+            } else {
+                throw new RuntimeException("password not correct, please try again");
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("password encrypt error, please try again");
         }
-        throw new RuntimeException("password not correct, please try again");
+
     }
 
     @Override

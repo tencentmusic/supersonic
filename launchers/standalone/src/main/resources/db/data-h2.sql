@@ -1,9 +1,9 @@
 -- sample user
-MERGE INTO s2_user (id, `name`, password, display_name, email, is_admin) values (1, 'admin','admin','admin','admin@xx.com', 1);
-MERGE INTO s2_user (id, `name`, password, display_name, email) values (2, 'jack','123456','jack','jack@xx.com');
-MERGE INTO s2_user (id, `name`, password, display_name, email) values (3, 'tom','123456','tom','tom@xx.com');
-MERGE INTO s2_user (id, `name`, password, display_name, email, is_admin) values (4, 'lucy','123456','lucy','lucy@xx.com', 1);
-MERGE INTO s2_user (id, `name`, password, display_name, email) values (5, 'alice','123456','alice','alice@xx.com');
+MERGE INTO s2_user (id, `name`, password, salt, display_name, email, is_admin) values (1, 'admin11','c3VwZXJzb25pY0BiaWNvbQIY4hJ2TJ0bM4aJLIAEreUBTMlveZUDOTINOon+hs59pSoijg6AoB6m3khO/6lX/g==','jGl25bVBBBW96Qi9Te4V3w==','admin11','admin@xx.com', 1);
+MERGE INTO s2_user (id, `name`, password, salt,  display_name, email) values (2, 'jack','123456','123456','jack','jack@xx.com');
+MERGE INTO s2_user (id, `name`, password, salt,  display_name, email) values (3, 'tom','123456','123456','tom','tom@xx.com');
+MERGE INTO s2_user (id, `name`, password, salt,  display_name, email, is_admin) values (4, 'lucy','123456','123456','lucy','lucy@xx.com', 1);
+MERGE INTO s2_user (id, `name`, password, salt,  display_name, email) values (5, 'alice','123456','123456','alice','alice@xx.com');
 
 MERGE INTO s2_available_date_info(`id`,`item_id` ,`type`    ,`date_format` ,`start_date`  ,`end_date` ,`unavailable_date` ,`created_at`  ,`created_by`  ,`updated_at`  ,`updated_by` )
 values (1 , 1, 'dimension', 'yyyy-MM-dd', DATEADD('DAY', -28, CURRENT_DATE()), DATEADD('DAY', -1, CURRENT_DATE()), '[]', '2023-06-01', 'admin', '2023-06-01', 'admin');
