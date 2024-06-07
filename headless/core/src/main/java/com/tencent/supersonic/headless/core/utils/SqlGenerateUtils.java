@@ -95,7 +95,7 @@ public class SqlGenerateUtils {
     }
 
     public String getLimit(QueryParam queryParam) {
-        if (queryParam.getLimit() > 0) {
+        if (queryParam != null && queryParam.getLimit() != null && queryParam.getLimit() > 0) {
             return " limit " + queryParam.getLimit();
         }
         return "";

@@ -1,5 +1,15 @@
 package com.tencent.supersonic.chat.server.processor.execute;
 
+import static com.tencent.supersonic.common.pojo.Constants.DAY;
+import static com.tencent.supersonic.common.pojo.Constants.DAY_FORMAT;
+import static com.tencent.supersonic.common.pojo.Constants.DAY_FORMAT_INT;
+import static com.tencent.supersonic.common.pojo.Constants.MONTH;
+import static com.tencent.supersonic.common.pojo.Constants.MONTH_FORMAT;
+import static com.tencent.supersonic.common.pojo.Constants.MONTH_FORMAT_INT;
+import static com.tencent.supersonic.common.pojo.Constants.TIMES_FORMAT;
+import static com.tencent.supersonic.common.pojo.Constants.TIME_FORMAT;
+import static com.tencent.supersonic.common.pojo.Constants.WEEK;
+
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.chat.server.pojo.ChatExecuteContext;
 import com.tencent.supersonic.common.pojo.DateConf;
@@ -10,6 +20,7 @@ import com.tencent.supersonic.common.pojo.enums.QueryType;
 import com.tencent.supersonic.common.pojo.enums.RatioOverType;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.DateUtils;
+import com.tencent.supersonic.common.util.jsqlparser.SqlSelectHelper;
 import com.tencent.supersonic.headless.api.pojo.AggregateInfo;
 import com.tencent.supersonic.headless.api.pojo.MetricInfo;
 import com.tencent.supersonic.headless.api.pojo.SchemaElement;
@@ -20,10 +31,6 @@ import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
 import com.tencent.supersonic.headless.core.config.AggregatorConfig;
 import com.tencent.supersonic.headless.core.utils.QueryReqBuilder;
 import com.tencent.supersonic.headless.server.service.QueryService;
-import lombok.SneakyThrows;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.util.CollectionUtils;
-
 import java.text.DecimalFormat;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -34,23 +41,16 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
-
-import static com.tencent.supersonic.common.pojo.Constants.DAY;
-import static com.tencent.supersonic.common.pojo.Constants.DAY_FORMAT;
-import static com.tencent.supersonic.common.pojo.Constants.DAY_FORMAT_INT;
-import static com.tencent.supersonic.common.pojo.Constants.MONTH;
-import static com.tencent.supersonic.common.pojo.Constants.MONTH_FORMAT;
-import static com.tencent.supersonic.common.pojo.Constants.MONTH_FORMAT_INT;
-import static com.tencent.supersonic.common.pojo.Constants.TIMES_FORMAT;
-import static com.tencent.supersonic.common.pojo.Constants.TIME_FORMAT;
-import static com.tencent.supersonic.common.pojo.Constants.WEEK;
+import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.util.CollectionUtils;
 
 /**
  * Add ratio queries for metric queries.
@@ -74,9 +74,9 @@ public class MetricRatioProcessor implements ExecuteResultProcessor {
 
     public AggregateInfo getAggregateInfo(User user, SemanticParseInfo semanticParseInfo, QueryResult queryResult) {
 
-        Set<String> resultMetricNames = queryResult.getQueryColumns()
-                .stream().map(c -> c.getNameEn()).collect(Collectors.toSet());
-
+        Set<String> resultMetricNames = new HashSet<>();
+        queryResult.getQueryColumns()
+                .stream().forEach(c -> resultMetricNames.addAll(SqlSelectHelper.getColumnFromExpr(c.getNameEn())));
         Optional<SchemaElement> ratioMetric = semanticParseInfo.getMetrics().stream()
                 .filter(m -> resultMetricNames.contains(m.getBizName())).findFirst();
 
@@ -126,7 +126,7 @@ public class MetricRatioProcessor implements ExecuteResultProcessor {
 
     @SneakyThrows
     private MetricInfo queryRatio(User user, SemanticParseInfo semanticParseInfo, SchemaElement metric,
-                                  AggOperatorEnum aggOperatorEnum, QueryResult queryResult) {
+            AggOperatorEnum aggOperatorEnum, QueryResult queryResult) {
 
         QueryStructReq queryStructReq = QueryReqBuilder.buildStructRatioReq(semanticParseInfo, metric, aggOperatorEnum);
         String dateField = QueryReqBuilder.getDateField(semanticParseInfo.getDateInfo());
