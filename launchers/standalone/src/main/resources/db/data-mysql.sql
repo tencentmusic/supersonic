@@ -1,6 +1,6 @@
 -- sample user
-insert into s2_user (id, `name`, password, display_name, email, is_admin) values (1, 'admin','admin','admin','admin@xx.com', 1);
-insert into s2_user (id, `name`, password, display_name, email, is_admin) values (4, 'lucy','123456','lucy','lucy@xx.com', 1);
+insert into s2_user (id, `name`, password, salt, display_name, email, is_admin) values (1, 'admin','admin','admin','admin@xx.com', 1);
+insert into s2_user (id, `name`, password, salt, display_name, email, is_admin) values (4, 'lucy','123456','lucy','lucy@xx.com', 1);
 
 
 INSERT INTO s2_available_date_info (`item_id`, `type`, `date_format`, `start_date`, `end_date`, `unavailable_date`, `created_at`, `created_by`, `updated_at`, `updated_by`)

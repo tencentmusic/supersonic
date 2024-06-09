@@ -16,6 +16,8 @@ public class UserDO {
      */
     private String password;
 
+    private String salt;
+
     /**
      * 
      */
@@ -77,6 +79,14 @@ public class UserDO {
      */
     public void setPassword(String password) {
         this.password = password == null ? null : password.trim();
+    }
+
+    public String getSalt() {
+        return salt;
+    }
+
+    public void setSalt(String salt) {
+        this.salt = salt == null ? null : salt.trim();
     }
 
     /**
