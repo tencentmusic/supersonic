@@ -16,9 +16,20 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      - name: Install Java and Maven
+      - name: Reset DNF repositories
         run: |
-          dnf install -y java-1.8.0-openjdk-devel maven
+          cd /etc/yum.repos.d/
+          sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-*
+          sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-*
+      - name: Update DNF package index
+        run: dnf makecache
+      - name: Install Java and Maven with retry
+        run: |
+          for i in {1..5}; do
+            dnf install -y java-1.8.0-openjdk-devel maven && break || sleep 15
+          done
+      - name: Verify Java and Maven installation
+        run: |
           java -version
           mvn -version
       - name: Cache Maven packages
