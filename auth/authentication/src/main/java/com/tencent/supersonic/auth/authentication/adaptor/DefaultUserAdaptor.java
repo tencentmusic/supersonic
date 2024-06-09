@@ -12,6 +12,7 @@ import com.tencent.supersonic.auth.authentication.persistence.repository.UserRep
 import com.tencent.supersonic.auth.authentication.utils.AESEncryptionUtil;
 import com.tencent.supersonic.auth.authentication.utils.UserTokenUtils;
 import com.tencent.supersonic.common.util.ContextUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import java.util.List;
 import java.util.Set;
@@ -20,6 +21,7 @@ import java.util.stream.Collectors;
 /**
  * DefaultUserAdaptor provides a default method to obtain user and organization information
  */
+@Slf4j
 public class DefaultUserAdaptor implements UserAdaptor {
 
     private List<UserDO> getUserDOList() {
@@ -76,7 +78,7 @@ public class DefaultUserAdaptor implements UserAdaptor {
         try {
             byte[] salt = AESEncryptionUtil.generateSalt(userDO.getName());
             userDO.setSalt(AESEncryptionUtil.getStringFromBytes(salt));
-            System.out.println("salt: " + userDO.getSalt());
+            log.info("salt: " + userDO.getSalt());
             userDO.setPassword(AESEncryptionUtil.encrypt(userReq.getPassword(), salt));
         } catch (Exception e) {
             throw new RuntimeException("password encrypt error, please try again");
