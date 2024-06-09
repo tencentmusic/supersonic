@@ -95,9 +95,6 @@ public class DefaultUserAdaptor implements UserAdaptor {
         try {
             String password = AESEncryptionUtil.encrypt(userReq.getPassword(),
                     AESEncryptionUtil.getBytesFromString(userDO.getSalt()));
-            System.out.println("userReq.getPassword(): " + userReq.getPassword());
-            System.out.println("password: " + password);
-            System.out.println("userDO.getPassword(): " + userDO.getPassword());
             if (userDO.getPassword().equals(password)) {
                 UserWithPassword user = UserWithPassword.get(userDO.getId(), userDO.getName(), userDO.getDisplayName(),
                         userDO.getEmail(), userDO.getPassword(), userDO.getIsAdmin());
