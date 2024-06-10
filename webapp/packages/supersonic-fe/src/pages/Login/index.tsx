@@ -107,7 +107,7 @@ const LoginPage: React.FC = () => {
                   <Input
                     size="large"
                     type="password"
-                    placeholder="密码: admin123"
+                    placeholder="密码: 123456"
                     onPressEnter={handleLogin}
                     prefix={<LockOutlined />}
                   />

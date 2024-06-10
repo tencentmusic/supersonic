@@ -36,7 +36,7 @@ public class UserTokenUtils {
         this.authenticationConfig = authenticationConfig;
     }
 
-    public String generateToken(UserWithPassword user) {
+    public String generateToken(UserWithPassword user, HttpServletRequest request) {
         Map<String, Object> claims = new HashMap<>(5);
         claims.put(TOKEN_USER_ID, user.getId());
         claims.put(TOKEN_USER_NAME, StringUtils.isEmpty(user.getName()) ? "" : user.getName());
@@ -44,22 +44,23 @@ public class UserTokenUtils {
         claims.put(TOKEN_USER_DISPLAY_NAME, user.getDisplayName());
         claims.put(TOKEN_CREATE_TIME, System.currentTimeMillis());
         claims.put(TOKEN_IS_ADMIN, user.getIsAdmin());
-        return generate(claims);
+        String appKey = getAppKey(request);
+        return generate(claims, appKey);
     }
 
-    public String generateAdminToken() {
+    public String generateAdminToken(HttpServletRequest request) {
         UserWithPassword admin = new UserWithPassword("admin");
         admin.setId(1L);
         admin.setName("admin");
         admin.setPassword("admin");
         admin.setDisplayName("admin");
         admin.setIsAdmin(1);
-        return generateToken(admin);
+        return generateToken(admin, request);
     }
 
     public User getUser(HttpServletRequest request) {
         String token = request.getHeader(authenticationConfig.getTokenHttpHeaderKey());
-        final Claims claims = getClaims(token);
+        final Claims claims = getClaims(token, request);
         Long userId = Long.parseLong(claims.getOrDefault(TOKEN_USER_ID, 0).toString());
         String userName = String.valueOf(claims.get(TOKEN_USER_NAME));
         String email = String.valueOf(claims.get(TOKEN_USER_EMAIL));
@@ -76,7 +77,7 @@ public class UserTokenUtils {
             log.warn("{}, uri: {}", message, request.getServletPath());
             throw new AccessException(message);
         }
-        final Claims claims = getClaims(token);
+        final Claims claims = getClaims(token, request);
         Long userId = Long.parseLong(claims.getOrDefault(TOKEN_USER_ID, 0).toString());
         String userName = String.valueOf(claims.get(TOKEN_USER_NAME));
         String email = String.valueOf(claims.get(TOKEN_USER_EMAIL));
@@ -87,11 +88,13 @@ public class UserTokenUtils {
         return UserWithPassword.get(userId, userName, displayName, email, password, isAdmin);
     }
 
-    private Claims getClaims(String token) {
+    private Claims getClaims(String token, HttpServletRequest request) {
         Claims claims;
         try {
+            String appKey = getAppKey(request);
+            String tokenSecret = getTokenSecret(appKey);
             claims = Jwts.parser()
-                    .setSigningKey(authenticationConfig.getTokenSecret().getBytes(StandardCharsets.UTF_8))
+                    .setSigningKey(tokenSecret.getBytes(StandardCharsets.UTF_8))
                     .parseClaimsJws(token.startsWith(TOKEN_PREFIX)
                             ? token.substring(token.indexOf(TOKEN_PREFIX) + TOKEN_PREFIX.length()).trim() :
                             token.trim()).getBody();
@@ -101,14 +104,15 @@ public class UserTokenUtils {
         return claims;
     }
 
-    private String generate(Map<String, Object> claims) {
-        return toTokenString(claims);
+    private String generate(Map<String, Object> claims, String appKey) {
+        return toTokenString(claims, appKey);
     }
 
-    private String toTokenString(Map<String, Object> claims) {
+    private String toTokenString(Map<String, Object> claims, String appKey) {
         Long tokenTimeout = authenticationConfig.getTokenTimeout();
         long expiration = Long.parseLong(claims.get(TOKEN_CREATE_TIME) + "") + tokenTimeout;
         Date expirationDate = new Date(expiration);
+        String tokenSecret = getTokenSecret(appKey);
 
         SignatureAlgorithm.valueOf(TOKEN_ALGORITHM);
         return Jwts.builder()
@@ -116,8 +120,24 @@ public class UserTokenUtils {
                 .setSubject(claims.get(TOKEN_USER_NAME).toString())
                 .setExpiration(expirationDate)
                 .signWith(SignatureAlgorithm.valueOf(TOKEN_ALGORITHM),
-                        authenticationConfig.getTokenSecret().getBytes(StandardCharsets.UTF_8))
+                        tokenSecret.getBytes(StandardCharsets.UTF_8))
                 .compact();
     }
 
+    private String getTokenSecret(String appKey) {
+        Map<String, String> appKeyToSecretMap = authenticationConfig.getAppKeyToSecretMap();
+        String secret = appKeyToSecretMap.get(appKey);
+        if (StringUtils.isBlank(secret)) {
+            throw new AccessException("get secret from appKey failed :" + appKey);
+        }
+        return secret;
+    }
+
+    private String getAppKey(HttpServletRequest request) {
+        String appKey = request.getHeader(authenticationConfig.getTokenHttpHeaderAppKey());
+        if (StringUtils.isBlank(appKey)) {
+            appKey = authenticationConfig.getTokenDefaultAppKey();
+        }
+        return appKey;
+    }
 }
