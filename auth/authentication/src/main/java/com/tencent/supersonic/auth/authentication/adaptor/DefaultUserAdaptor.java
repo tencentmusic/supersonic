@@ -12,6 +12,7 @@ import com.tencent.supersonic.auth.authentication.persistence.repository.UserRep
 import com.tencent.supersonic.auth.authentication.utils.AESEncryptionUtil;
 import com.tencent.supersonic.auth.authentication.utils.UserTokenUtils;
 import com.tencent.supersonic.common.util.ContextUtils;
+import javax.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import java.util.List;
@@ -87,7 +88,7 @@ public class DefaultUserAdaptor implements UserAdaptor {
     }
 
     @Override
-    public String login(UserReq userReq) {
+    public String login(UserReq userReq, HttpServletRequest request) {
         UserTokenUtils userTokenUtils = ContextUtils.getBean(UserTokenUtils.class);
         UserDO userDO = getUser(userReq.getName());
         if (userDO == null) {
@@ -100,7 +101,7 @@ public class DefaultUserAdaptor implements UserAdaptor {
             if (userDO.getPassword().equals(password)) {
                 UserWithPassword user = UserWithPassword.get(userDO.getId(), userDO.getName(), userDO.getDisplayName(),
                         userDO.getEmail(), userDO.getPassword(), userDO.getIsAdmin());
-                return userTokenUtils.generateToken(user);
+                return userTokenUtils.generateToken(user, request);
             } else {
                 throw new RuntimeException("password not correct, please try again");
             }

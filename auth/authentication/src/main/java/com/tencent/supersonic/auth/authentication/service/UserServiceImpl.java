@@ -68,8 +68,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public String login(UserReq userReq) {
-        return ComponentFactory.getUserAdaptor().login(userReq);
+    public String login(UserReq userReq, HttpServletRequest request) {
+        return ComponentFactory.getUserAdaptor().login(userReq, request);
     }
 
 }
