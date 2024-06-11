@@ -76,3 +76,16 @@ s2:
     #2.1 in_memory(default)
     embedding-model:
       provider: in_process
+
+# swagger配置
+swagger:
+  title: 'SuperSonic平台接口文档'
+  base:
+    package: com.tencent.supersonic
+  description: 'SuperSonic平台接口文档'
+  url: ''
+  contact:
+    name:
+    email:
+    url: ''
+  version: 3.0
