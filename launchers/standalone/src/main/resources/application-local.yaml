@@ -54,7 +54,7 @@ s2:
   corrector:
     additional:
       information: true
-
+    date: false
   functionCall:
     url: ${s2.pyllm.url}
 
