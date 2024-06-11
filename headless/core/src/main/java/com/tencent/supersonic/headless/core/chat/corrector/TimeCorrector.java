@@ -2,11 +2,13 @@ package com.tencent.supersonic.headless.core.chat.corrector;
 
 
 import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
-import com.tencent.supersonic.common.util.jsqlparser.DateVisitor.DateBoundInfo;
+import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.jsqlparser.SqlAddHelper;
 import com.tencent.supersonic.common.util.jsqlparser.SqlDateSelectHelper;
 import com.tencent.supersonic.common.util.jsqlparser.SqlReplaceHelper;
 import com.tencent.supersonic.common.util.jsqlparser.SqlSelectHelper;
+import com.tencent.supersonic.common.util.jsqlparser.SqlRemoveHelper;
+import com.tencent.supersonic.common.util.jsqlparser.DateVisitor.DateBoundInfo;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.core.pojo.QueryContext;
 import com.tencent.supersonic.headless.core.utils.S2SqlDateHelper;
@@ -16,10 +18,13 @@ import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.springframework.core.env.Environment;
 import org.springframework.util.CollectionUtils;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * Perform SQL corrections on the time in S2SQL.
@@ -32,15 +37,40 @@ public class TimeCorrector extends BaseSemanticCorrector {
 
         addDateIfNotExist(queryContext, semanticParseInfo);
 
+        removeDateIfExist(queryContext, semanticParseInfo);
+
         parserDateDiffFunction(semanticParseInfo);
 
         addLowerBoundDate(semanticParseInfo);
 
     }
 
+    private void removeDateIfExist(QueryContext queryContext, SemanticParseInfo semanticParseInfo) {
+        String correctS2SQL = semanticParseInfo.getSqlInfo().getCorrectS2SQL();
+        //decide whether remove date field from where
+        Environment environment = ContextUtils.getBean(Environment.class);
+        String correctorDate = environment.getProperty("s2.corrector.date");
+        if (StringUtils.isNotBlank(correctorDate) && !Boolean.parseBoolean(correctorDate)) {
+            Set<String> removeFieldNames = new HashSet<>();
+            removeFieldNames.add(TimeDimensionEnum.DAY.getChName());
+            removeFieldNames.add(TimeDimensionEnum.WEEK.getChName());
+            removeFieldNames.add(TimeDimensionEnum.MONTH.getChName());
+            correctS2SQL = SqlRemoveHelper.removeWhereCondition(correctS2SQL, removeFieldNames);
+            semanticParseInfo.getSqlInfo().setCorrectS2SQL(correctS2SQL);
+        }
+    }
+
     private void addDateIfNotExist(QueryContext queryContext, SemanticParseInfo semanticParseInfo) {
         String correctS2SQL = semanticParseInfo.getSqlInfo().getCorrectS2SQL();
         List<String> whereFields = SqlSelectHelper.getWhereFields(correctS2SQL);
+
+        //decide whether add date field to where
+        Environment environment = ContextUtils.getBean(Environment.class);
+        String correctorDate = environment.getProperty("s2.corrector.date");
+        log.info("correctorDate:{}", correctorDate);
+        if (StringUtils.isNotBlank(correctorDate) && !Boolean.parseBoolean(correctorDate)) {
+            return;
+        }
         if (CollectionUtils.isEmpty(whereFields) || !TimeDimensionEnum.containsZhTimeDimension(whereFields)) {
 
             Pair<String, String> startEndDate = S2SqlDateHelper.getStartEndDate(queryContext,
