@@ -69,7 +69,7 @@ const Chat: ForwardRefRenderFunction<any, Props> = (
 
   const [isSimpleMode, setIsSimpleMode] = useState<boolean>(false);
   // 是否存在未完成响应的消息
-  const isAllMsgResolved = useMemo(() => messageList.every(msg => msg.msgData), [messageList]);
+  const isAllMsgResolved = useMemo(() => messageList.filter(msg => msg.type === 'question').every(msg => msg.msgData), [messageList]);
 
   const conversationRef = useRef<any>();
   const chatFooterRef = useRef<any>();
