@@ -54,7 +54,6 @@ const ChatFooter: ForwardRefRenderFunction<any, Props> = (
   },
   ref
 ) => {
-    console.log('🚀 ~ isAllMsgResolved:', isAllMsgResolved)
   const [modelOptions, setModelOptions] = useState<(ModelType | AgentType)[]>([]);
   const [stepOptions, setStepOptions] = useState<Record<string, any[]>>({});
   const [open, setOpen] = useState(false);
