@@ -11,29 +11,28 @@ import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
 import com.tencent.supersonic.headless.api.pojo.request.QueryReq;
 import com.tencent.supersonic.headless.api.pojo.response.MapResp;
 import com.tencent.supersonic.headless.api.pojo.response.ParseResp;
-import com.tencent.supersonic.headless.core.utils.S2ChatModelProvider;
+import com.tencent.supersonic.headless.core.chat.parser.llm.DifyServiceClient;
 import com.tencent.supersonic.headless.server.service.ChatQueryService;
-import dev.langchain4j.data.message.AiMessage;
-import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.input.Prompt;
 import dev.langchain4j.model.input.PromptTemplate;
-import dev.langchain4j.model.output.Response;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import lombok.Builder;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Map;
-import java.util.HashMap;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.Collections;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import static com.tencent.supersonic.chat.server.parser.ParserConfig.PARSER_MULTI_TURN_ENABLE;
 
 @Slf4j
+@Component
 public class MultiTurnParser implements ChatParser {
 
     private static final Logger keyPipelineLog = LoggerFactory.getLogger("keyPipeline");
@@ -49,6 +48,9 @@ public class MultiTurnParser implements ChatParser {
                     + "History Question: {{histQuestion}} "
                     + "History Mapped Schema: {{histSchema}} "
                     + "Rewritten Question: ");
+
+    @Autowired
+    private DifyServiceClient difyServiceClient;
 
     @Override
     public void parse(ChatParseContext chatParseContext, ParseResp parseResp) {
@@ -98,12 +100,9 @@ public class MultiTurnParser implements ChatParser {
         Prompt prompt = promptTemplate.apply(variables);
         keyPipelineLog.info("MultiTurnParser reqPrompt:{}", prompt.toSystemMessage());
 
-        ChatLanguageModel chatLanguageModel = S2ChatModelProvider.provide(context.getLlmConfig());
-        Response<AiMessage> response = chatLanguageModel.generate(prompt.toSystemMessage());
-
-        String result = response.content().text();
+        String result = difyServiceClient.generate(prompt.toSystemMessage().text()).getAnswer();
         keyPipelineLog.info("MultiTurnParser modelResp:{}", result);
-        return response.content().text();
+        return result;
     }
 
     private String generateSchemaPrompt(List<SchemaElementMatch> elementMatches) {

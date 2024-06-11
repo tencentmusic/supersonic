@@ -4,18 +4,15 @@ import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.headless.core.chat.query.llm.s2sql.LLMReq;
 import com.tencent.supersonic.headless.core.chat.query.llm.s2sql.LLMReq.SqlGenType;
 import com.tencent.supersonic.headless.core.chat.query.llm.s2sql.LLMResp;
-import dev.langchain4j.data.message.AiMessage;
-import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.input.Prompt;
 import dev.langchain4j.model.input.PromptTemplate;
-import dev.langchain4j.model.output.Response;
-import org.apache.commons.lang3.tuple.Pair;
-import org.springframework.stereotype.Service;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
+import org.apache.commons.lang3.tuple.Pair;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import static com.tencent.supersonic.headless.core.config.ParserConfig.PARSER_EXEMPLAR_RECALL_NUMBER;
 import static com.tencent.supersonic.headless.core.config.ParserConfig.PARSER_FEW_SHOT_NUMBER;
@@ -23,6 +20,9 @@ import static com.tencent.supersonic.headless.core.config.ParserConfig.PARSER_SE
 
 @Service
 public class TwoPassSCSqlGenStrategy extends SqlGenStrategy {
+
+    @Autowired
+    private DifyServiceClient difyServiceClient;
 
     @Override
     public LLMResp generate(LLMReq llmReq) {
@@ -41,13 +41,11 @@ public class TwoPassSCSqlGenStrategy extends SqlGenStrategy {
         //2.generator linking prompt,and parallel generate response.
         List<String> linkingPromptPool = promptGenerator.generatePromptPool(llmReq, exampleListPool, false);
         List<String> linkingResults = new CopyOnWriteArrayList<>();
-        ChatLanguageModel chatLanguageModel = getChatLanguageModel(llmReq.getLlmConfig());
         linkingPromptPool.parallelStream().forEach(
                 linkingPrompt -> {
                     Prompt prompt = PromptTemplate.from(JsonUtil.toString(linkingPrompt)).apply(new HashMap<>());
                     keyPipelineLog.info("TwoPassSCSqlGenStrategy step one reqPrompt:{}", prompt.toSystemMessage());
-                    Response<AiMessage> linkingResult = chatLanguageModel.generate(prompt.toSystemMessage());
-                    String result = linkingResult.content().text();
+                    String result = difyServiceClient.generate(prompt.toSystemMessage().text()).getAnswer();
                     keyPipelineLog.info("TwoPassSCSqlGenStrategy step one modelResp:{}", result);
                     linkingResults.add(OutputFormat.getSchemaLink(result));
                 }
@@ -59,8 +57,7 @@ public class TwoPassSCSqlGenStrategy extends SqlGenStrategy {
         sqlPromptPool.parallelStream().forEach(sqlPrompt -> {
             Prompt linkingPrompt = PromptTemplate.from(JsonUtil.toString(sqlPrompt)).apply(new HashMap<>());
             keyPipelineLog.info("TwoPassSCSqlGenStrategy step two reqPrompt:{}", linkingPrompt.toSystemMessage());
-            Response<AiMessage> sqlResult = chatLanguageModel.generate(linkingPrompt.toSystemMessage());
-            String result = sqlResult.content().text();
+            String result = difyServiceClient.generate(linkingPrompt.toSystemMessage().text()).getAnswer();
             keyPipelineLog.info("TwoPassSCSqlGenStrategy step two modelResp:{}", result);
             sqlTaskPool.add(result);
         });
