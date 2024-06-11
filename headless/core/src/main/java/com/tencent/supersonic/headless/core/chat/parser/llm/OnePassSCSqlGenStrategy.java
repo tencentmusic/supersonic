@@ -1,22 +1,15 @@
 package com.tencent.supersonic.headless.core.chat.parser.llm;
 
-import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.headless.core.chat.query.llm.s2sql.LLMReq;
 import com.tencent.supersonic.headless.core.chat.query.llm.s2sql.LLMResp;
-import dev.langchain4j.data.message.AiMessage;
-import dev.langchain4j.model.chat.ChatLanguageModel;
-import dev.langchain4j.model.input.Prompt;
-import dev.langchain4j.model.input.PromptTemplate;
-import dev.langchain4j.model.output.Response;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.tuple.Pair;
-import org.springframework.stereotype.Service;
-
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.tuple.Pair;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import static com.tencent.supersonic.headless.core.config.ParserConfig.PARSER_EXEMPLAR_RECALL_NUMBER;
 import static com.tencent.supersonic.headless.core.config.ParserConfig.PARSER_FEW_SHOT_NUMBER;
@@ -26,6 +19,9 @@ import static com.tencent.supersonic.headless.core.config.ParserConfig.PARSER_SE
 @Service
 @Slf4j
 public class OnePassSCSqlGenStrategy extends SqlGenStrategy {
+
+    @Autowired
+    private DifyServiceClient difyServiceClient;
 
     @Override
     public LLMResp generate(LLMReq llmReq) {
@@ -45,12 +41,8 @@ public class OnePassSCSqlGenStrategy extends SqlGenStrategy {
         List<String> linkingSqlPromptPool = promptGenerator.generatePromptPool(llmReq, exampleListPool, true);
         List<String> llmResults = new CopyOnWriteArrayList<>();
         linkingSqlPromptPool.parallelStream().forEach(linkingSqlPrompt -> {
-                    Prompt prompt = PromptTemplate.from(JsonUtil.toString(linkingSqlPrompt))
-                            .apply(new HashMap<>());
-                    keyPipelineLog.info("OnePassSCSqlGenStrategy reqPrompt:{}", prompt.toSystemMessage());
-            ChatLanguageModel chatLanguageModel = getChatLanguageModel(llmReq.getLlmConfig());
-            Response<AiMessage> response = chatLanguageModel.generate(prompt.toSystemMessage());
-                    String result = response.content().text();
+                    keyPipelineLog.info("OnePassSCSqlGenStrategy reqPrompt:{}", linkingSqlPrompt);
+                    String result = difyServiceClient.generate(linkingSqlPrompt).getAnswer();
                     llmResults.add(result);
                     keyPipelineLog.info("OnePassSCSqlGenStrategy modelResp:{}", result);
                 }
