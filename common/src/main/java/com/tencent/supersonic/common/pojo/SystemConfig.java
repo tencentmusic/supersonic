@@ -60,4 +60,18 @@ public class SystemConfig {
         return defaultParameters;
     }
 
+    public List<Parameter> getParameters() {
+        List<Parameter> defaultParameters = buildDefaultParameters();
+        if (CollectionUtils.isEmpty(parameters)) {
+            return defaultParameters;
+        }
+        Map<String, String> parameterNameValueMap = parameters.stream()
+                .collect(Collectors.toMap(Parameter::getName, Parameter::getValue, (v1, v2) -> v2));
+        for (Parameter parameter : defaultParameters) {
+            parameter.setValue(parameterNameValueMap.getOrDefault(parameter.getName(),
+                    parameter.getDefaultValue()));
+        }
+        return defaultParameters;
+    }
+
 }

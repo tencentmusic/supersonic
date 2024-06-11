@@ -88,7 +88,8 @@ create table IF NOT EXISTS s2_user
     id       INT AUTO_INCREMENT,
     name     varchar(100) not null,
     display_name varchar(100) null,
-    password varchar(100) null,
+    password varchar(256) null,
+    salt varchar(256)  NULL,
     email varchar(100) null,
     is_admin INT null,
     PRIMARY KEY (`id`)

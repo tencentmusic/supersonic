@@ -56,7 +56,7 @@ The high-level architecture and main process flow is as follows:
 
 ## Quick Demo
 ### Online playground
-Visit http://117.72.46.148:9080 with username/password: admin/admin. Please do not modify system configurations. We will restart to reset configurations regularly every weekend.
+Visit http://117.72.46.148:9080 to register and experience as a new user. Please do not modify system configurations. We will restart to reset configurations regularly every weekend.
 
 ## Local build
 SuperSonic comes with sample semantic models as well as chat conversations that can be used as a starting point. Please follow the steps: 
@@ -76,5 +76,7 @@ Please follow SuperSonic wechat official account:
 <img src="./docs/images/supersonic_wechat_oa.png" height="50%" width="50%" align="center"/> 
 
 
+
 Welcome to join the WeChat community:
+
 <img src="./docs/images/supersonic_wechat.jpg" height="50%" width="50%" align="center"/> 
