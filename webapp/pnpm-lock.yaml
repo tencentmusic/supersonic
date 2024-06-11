@@ -364,7 +364,7 @@ importers:
         specifier: ^7.0.3
         version: 7.0.3
       crypto-js:
-        specifier: ^4.0.0
+        specifier: ^4.2.0
         version: 4.2.0
       dayjs:
         specifier: ^1.11.10
@@ -582,7 +582,7 @@ packages:
       babel-plugin-import: 1.13.8
       babel-runtime-jsx-plus: 0.1.5
       classnames: 2.5.1
-      dva-core: 2.0.4(redux@4.2.1)
+      dva-core: 2.0.4(redux@3.7.2)
       dva-immer: 1.0.2(dva@2.5.0-beta.2)
       dva-loading: 3.0.25(dva-core@2.0.4)
       history: 5.3.0
@@ -5549,7 +5549,7 @@ packages:
     dependencies:
       '@babel/core': 7.24.5
       postcss: 8.4.38
-      postcss-syntax: 0.36.2(postcss@8.4.38)
+      postcss-syntax: 0.36.2(postcss-html@0.36.0)(postcss-less@3.1.4)(postcss-scss@2.1.1)(postcss@7.0.39)
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -7553,7 +7553,7 @@ packages:
       eslint-plugin-react: 7.33.2(eslint@8.35.0)
       eslint-plugin-react-hooks: 4.6.0(eslint@8.35.0)
       postcss: 8.4.38
-      postcss-syntax: 0.36.2(postcss@8.4.38)
+      postcss-syntax: 0.36.2(postcss-html@0.36.0)(postcss-less@3.1.4)(postcss-scss@2.1.1)(postcss@7.0.39)
       stylelint-config-standard: 25.0.0(stylelint@14.8.2)
     transitivePeerDependencies:
       - eslint
@@ -11730,6 +11730,21 @@ packages:
     resolution: {integrity: sha512-xmtr/J63EZXBdVXNBW+QCD7p9CaE8kAo2U1faRyv3PIGcy0G3Y6IBDNtoBB/Cj3nzk/jvX0dv96Hnh1kpSnI7Q==}
     peerDependencies:
       redux: 3.x
+    dependencies:
+      '@babel/runtime': 7.24.5
+      flatten: 1.0.3
+      global: 4.4.0
+      invariant: 2.2.4
+      is-plain-object: 2.0.4
+      redux: 3.7.2
+      redux-saga: 0.16.2
+      warning: 3.0.0
+    dev: true
+
+  /dva-core@2.0.4(redux@3.7.2):
+    resolution: {integrity: sha512-Zh39llFyItu9HKXKfCZVf9UFtDTcypdAjGBew1S+wK8BGVzFpm1GPTdd6uIMeg7O6STtCvt2Qv+RwUut1GFynA==}
+    peerDependencies:
+      redux: 4.x
     dependencies:
       '@babel/runtime': 7.24.5
       flatten: 1.0.3
@@ -20462,30 +20477,6 @@ packages:
       postcss-html: 0.36.0(postcss-syntax@0.36.2)(postcss@7.0.39)
       postcss-less: 3.1.4
       postcss-scss: 2.1.1
-    dev: true
-
-  /postcss-syntax@0.36.2(postcss@8.4.38):
-    resolution: {integrity: sha512-nBRg/i7E3SOHWxF3PpF5WnJM/jQ1YpY9000OaVXlAQj6Zp/kIqJxEDWIZ67tAd7NLuk7zqN4yqe9nc0oNAOs1w==}
-    peerDependencies:
-      postcss: '>=5.0.0'
-      postcss-html: '*'
-      postcss-jsx: '*'
-      postcss-less: '*'
-      postcss-markdown: '*'
-      postcss-scss: '*'
-    peerDependenciesMeta:
-      postcss-html:
-        optional: true
-      postcss-jsx:
-        optional: true
-      postcss-less:
-        optional: true
-      postcss-markdown:
-        optional: true
-      postcss-scss:
-        optional: true
-    dependencies:
-      postcss: 8.4.38
     dev: true
 
   /postcss-unique-selectors@5.1.1(postcss@8.4.38):

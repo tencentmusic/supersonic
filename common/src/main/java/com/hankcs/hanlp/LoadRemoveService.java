@@ -10,7 +10,6 @@ import org.springframework.util.CollectionUtils;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 
 @Data
 @Slf4j
@@ -19,23 +18,11 @@ public class LoadRemoveService {
     @Value("${mapper.remove.nature.prefix:}")
     private String mapperRemoveNaturePrefix;
 
-    public List removeNatures(List value, Set<Long> detectModelIds) {
+    public List removeNatures(List value) {
         if (CollectionUtils.isEmpty(value)) {
             return value;
         }
         List<String> resultList = new ArrayList<>(value);
-        if (!CollectionUtils.isEmpty(detectModelIds)) {
-            resultList.removeIf(nature -> {
-                if (Objects.isNull(nature)) {
-                    return false;
-                }
-                Long modelId = getDataSetId(nature);
-                if (Objects.nonNull(modelId)) {
-                    return !detectModelIds.contains(modelId);
-                }
-                return false;
-            });
-        }
         if (StringUtils.isNotBlank(mapperRemoveNaturePrefix)) {
             resultList.removeIf(nature -> {
                 if (Objects.isNull(nature)) {

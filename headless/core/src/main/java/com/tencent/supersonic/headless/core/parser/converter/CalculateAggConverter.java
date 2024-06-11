@@ -393,7 +393,7 @@ public class CalculateAggConverter implements HeadlessConverter {
     }
 
     private static String getLimit(QueryParam queryParam) {
-        if (queryParam != null && queryParam.getLimit() > 0) {
+        if (queryParam != null && queryParam.getLimit() != null && queryParam.getLimit() > 0) {
             return " limit " + String.valueOf(queryParam.getLimit());
         }
         return "";

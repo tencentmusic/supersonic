@@ -3,6 +3,7 @@ import { message } from 'antd';
 import numeral from 'numeral';
 import copy from 'copy-to-clipboard';
 import { isString } from 'lodash';
+import CryptoJS from 'crypto-js';
 
 /* eslint no-useless-escape:0  */
 const reg =
@@ -469,4 +470,16 @@ export const objToArray = (_obj: ObjToArrayParams, keyType: string = 'string') =
       label: _obj[key],
     };
   });
+};
+
+export function encryptPassword(password: string, username: string) {
+  if (!password) {
+    return password;
+  }
+  // TODO This key should be stored in a secure place
+  const key = CryptoJS.enc.Utf8.parse('supersonic@2024');
+  const srcs = CryptoJS.enc.Utf8.parse(password);
+  const encrypted = CryptoJS.AES.encrypt(srcs, key, {mode: CryptoJS.mode.ECB, padding: CryptoJS.pad.Pkcs7});
+  return encrypted.toString();
+
 };
