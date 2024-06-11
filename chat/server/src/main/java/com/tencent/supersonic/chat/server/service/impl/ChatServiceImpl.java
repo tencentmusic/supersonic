@@ -76,6 +76,7 @@ public class ChatServiceImpl implements ChatService {
         chatParseReq.setQueryText(chatParseContext.getQueryText());
         parseResp.setQueryText(chatParseContext.getQueryText());
         chatManageService.batchAddParse(chatParseReq, parseResp);
+        chatManageService.updateParseCostTime(parseResp);
         return parseResp;
     }
 

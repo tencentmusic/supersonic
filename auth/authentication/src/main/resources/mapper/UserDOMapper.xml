@@ -5,6 +5,7 @@
     <result column="id" jdbcType="BIGINT" property="id" />
     <result column="name" jdbcType="VARCHAR" property="name" />
     <result column="password" jdbcType="VARCHAR" property="password" />
+    <result column="salt" jdbcType="VARCHAR" property="salt" />
     <result column="display_name" jdbcType="VARCHAR" property="displayName" />
     <result column="email" jdbcType="VARCHAR" property="email" />
     <result column="is_admin" jdbcType="INTEGER" property="isAdmin" />
@@ -39,7 +40,7 @@
     </where>
   </sql>
   <sql id="Base_Column_List">
-    id, name, password, display_name, email, is_admin
+    id, name, password, salt, display_name, email, is_admin
   </sql>
   <select id="selectByExample" parameterType="com.tencent.supersonic.auth.authentication.persistence.dataobject.UserDOExample" resultMap="BaseResultMap">
     select
@@ -59,10 +60,10 @@
     </if>
   </select>
   <insert id="insert" parameterType="com.tencent.supersonic.auth.authentication.persistence.dataobject.UserDO">
-    insert into s2_user (id, name, password, 
+    insert into s2_user (id, name, password, salt,
       display_name, email, is_admin
       )
-    values (#{id,jdbcType=BIGINT}, #{name,jdbcType=VARCHAR}, #{password,jdbcType=VARCHAR}, 
+    values (#{id,jdbcType=BIGINT}, #{name,jdbcType=VARCHAR}, #{password,jdbcType=VARCHAR}, #{salt,jdbcType=VARCHAR},
       #{displayName,jdbcType=VARCHAR}, #{email,jdbcType=VARCHAR}, #{isAdmin,jdbcType=INTEGER}
       )
   </insert>
@@ -77,6 +78,9 @@
       </if>
       <if test="password != null">
         password,
+      </if>
+      <if test="password != null">
+        salt,
       </if>
       <if test="displayName != null">
         display_name,
@@ -97,6 +101,9 @@
       </if>
       <if test="password != null">
         #{password,jdbcType=VARCHAR},
+      </if>
+      <if test="salt != null">
+        #{salt,jdbcType=VARCHAR},
       </if>
       <if test="displayName != null">
         #{displayName,jdbcType=VARCHAR},

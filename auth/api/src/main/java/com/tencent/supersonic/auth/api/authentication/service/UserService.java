@@ -19,7 +19,7 @@ public interface UserService {
 
     void register(UserReq userCmd);
 
-    String login(UserReq userCmd);
+    String login(UserReq userCmd, HttpServletRequest request);
 
     Set<String> getUserAllOrgId(String userName);
 

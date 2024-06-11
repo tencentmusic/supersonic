@@ -21,6 +21,11 @@ public class SystemConfig {
 
     private List<Parameter> parameters;
 
+    public void init() {
+        parameters = buildDefaultParameters();
+        admins = Lists.newArrayList("admin");
+    }
+
     public String getAdmin() {
         if (CollectionUtils.isEmpty(admins)) {
             return "";
@@ -43,11 +48,6 @@ public class SystemConfig {
         } else {
             admins = Lists.newArrayList();
         }
-    }
-
-    public void init() {
-        parameters = buildDefaultParameters();
-        admins = Lists.newArrayList("admin");
     }
 
     private List<Parameter> buildDefaultParameters() {

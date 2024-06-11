@@ -293,6 +293,30 @@ const ChatFooter: ForwardRefRenderFunction<any, Props> = (
     );
   });
 
+  const fixWidthBug = () => {
+    setTimeout(() => {
+      const dropdownDom = document.querySelector( '.' + styles.autoCompleteDropdown + ' .rc-virtual-list-holder-inner')
+
+      if (!dropdownDom) {
+        fixWidthBug()
+      }else{
+        // 获取popoverDom样式
+        const popoverDomStyle = window.getComputedStyle(dropdownDom)
+        // 在获取popoverDom中增加样式 width: fit-content
+        dropdownDom.setAttribute('style', `${popoverDomStyle.cssText};width: fit-content`)
+        // 获取popoverDom的宽度
+        const popoverDomWidth = dropdownDom.clientWidth
+        // 将popoverDom的宽度赋值给他的父元素
+        const offset = 20 // 预增加20px的宽度，预留空间给虚拟渲染出来的元素
+        dropdownDom.parentElement!.style.width = popoverDomWidth + offset + 'px'
+      }
+    })
+  }
+
+  useEffect(() => {
+    if (modelOptionNodes.length || associateOptionNodes.length) fixWidthBug()
+  }, [modelOptionNodes.length, associateOptionNodes.length]);
+
   return (
     <div className={chatFooterClass}>
       <div className={styles.tools}>

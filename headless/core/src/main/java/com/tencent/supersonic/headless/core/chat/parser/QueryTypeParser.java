@@ -47,7 +47,7 @@ public class QueryTypeParser implements SemanticParser {
         SemanticParseInfo parseInfo = semanticQuery.getParseInfo();
         SqlInfo sqlInfo = parseInfo.getSqlInfo();
         if (Objects.isNull(sqlInfo) || StringUtils.isBlank(sqlInfo.getS2SQL())) {
-            return QueryType.ID;
+            return QueryType.DETAIL;
         }
         //1. entity queryType
         Long dataSetId = parseInfo.getDataSetId();
@@ -80,7 +80,7 @@ public class QueryTypeParser implements SemanticParser {
         if (selectContainsMetric(sqlInfo, dataSetId, semanticSchema)) {
             return QueryType.METRIC;
         }
-        return QueryType.ID;
+        return QueryType.DETAIL;
     }
 
     private static List<String> filterByTimeFields(List<String> whereFields) {

@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
@@ -69,6 +70,31 @@ public class SqlQueryApiController {
                         }))
                         .collect(Collectors.toList());
         return futures.stream().map(CompletableFuture::join).collect(Collectors.toList());
+    }
+
+    @PostMapping("/sqlsWithException")
+    public Object queryBySqlsWithException(@RequestBody QuerySqlsReq querySqlsReq,
+                                           HttpServletRequest request,
+                                           HttpServletResponse response) throws Exception {
+        User user = UserHolder.findUser(request, response);
+        List<SemanticQueryReq> semanticQueryReqs = querySqlsReq.getSqls()
+                .stream().map(sql -> {
+                    QuerySqlReq querySqlReq = new QuerySqlReq();
+                    BeanUtils.copyProperties(querySqlsReq, querySqlReq);
+                    querySqlReq.setSql(StringUtil.replaceBackticks(sql));
+                    chatQueryService.correct(querySqlReq, user);
+                    return querySqlReq;
+                }).collect(Collectors.toList());
+        List<SemanticQueryResp> semanticQueryRespList = new ArrayList<>();
+        try {
+            for (SemanticQueryReq semanticQueryReq : semanticQueryReqs) {
+                SemanticQueryResp semanticQueryResp = queryService.queryByReq(semanticQueryReq, user);
+                semanticQueryRespList.add(semanticQueryResp);
+            }
+        } catch (Exception e) {
+            throw new Exception(e.getCause().getMessage());
+        }
+        return semanticQueryRespList;
     }
 
 }

@@ -16,13 +16,11 @@ import com.tencent.supersonic.chat.server.plugin.PluginParseConfig;
 import com.tencent.supersonic.chat.server.plugin.build.WebBase;
 import com.tencent.supersonic.common.pojo.JoinCondition;
 import com.tencent.supersonic.common.pojo.ModelRela;
-import com.tencent.supersonic.common.pojo.SystemConfig;
 import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
 import com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum;
 import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
 import com.tencent.supersonic.common.pojo.enums.SensitiveLevelEnum;
 import com.tencent.supersonic.common.pojo.enums.StatusEnum;
-import com.tencent.supersonic.common.pojo.enums.TimeMode;
 import com.tencent.supersonic.common.pojo.enums.TypeEnums;
 import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.headless.api.pojo.DataSetDetail;
@@ -38,10 +36,7 @@ import com.tencent.supersonic.headless.api.pojo.MetricDefineByFieldParams;
 import com.tencent.supersonic.headless.api.pojo.MetricDefineByMeasureParams;
 import com.tencent.supersonic.headless.api.pojo.MetricDefineByMetricParams;
 import com.tencent.supersonic.headless.api.pojo.MetricParam;
-import com.tencent.supersonic.headless.api.pojo.MetricTypeDefaultConfig;
 import com.tencent.supersonic.headless.api.pojo.ModelDetail;
-import com.tencent.supersonic.headless.api.pojo.QueryConfig;
-import com.tencent.supersonic.headless.api.pojo.TimeDefaultConfig;
 import com.tencent.supersonic.headless.api.pojo.enums.DimensionType;
 import com.tencent.supersonic.headless.api.pojo.enums.IdentifyType;
 import com.tencent.supersonic.headless.api.pojo.enums.MetricDefineType;
@@ -92,7 +87,7 @@ public class S2VisitsDemo extends S2BaseDemo {
 
             //create metrics and dimensions
             DimensionResp departmentDimension = getDimension("department", userModel);
-            MetricResp metricUv = addMetric_uv(userModel, departmentDimension);
+            MetricResp metricUv = addMetric_uv(pvUvModel, departmentDimension);
             MetricResp metricPv = getMetric("pv", pvUvModel);
             addMetric_pv_avg(metricPv, metricUv, departmentDimension, pvUvModel);
 
@@ -111,7 +106,6 @@ public class S2VisitsDemo extends S2BaseDemo {
             addTerm(s2Domain);
             addTerm_1(s2Domain);
             addPlugin(s2DataSet);
-            addSysParameter();
 
             //load dict word
             loadDictWord();
@@ -147,13 +141,6 @@ public class S2VisitsDemo extends S2BaseDemo {
         parseAndExecute(chatId.intValue(), agentId, "alice 停留时长");
         parseAndExecute(chatId.intValue(), agentId, "对比alice和lucy的访问次数");
         parseAndExecute(chatId.intValue(), agentId, "访问次数最高的部门");
-    }
-
-    public void addSysParameter() {
-        SystemConfig sysParameter = new SystemConfig();
-        sysParameter.setId(1);
-        sysParameter.init();
-        sysParameterService.save(sysParameter);
     }
 
     private Integer addAgent(long dataSetId) {
@@ -463,7 +450,7 @@ public class S2VisitsDemo extends S2BaseDemo {
 
     public DataSetResp addDataSet(DomainResp s2Domain, DomainResp s2ModelSet) {
         DataSetReq dataSetReq = new DataSetReq();
-        dataSetReq.setName("超音数");
+        dataSetReq.setName("超音数数据集");
         dataSetReq.setBizName("s2");
         dataSetReq.setDomainId(s2Domain.getId());
         dataSetReq.setDescription("包含超音数访问统计相关的指标和维度等");
@@ -473,14 +460,6 @@ public class S2VisitsDemo extends S2BaseDemo {
         dataSetDetail.setDataSetModelConfigs(dataSetModelConfigs);
         dataSetReq.setDataSetDetail(dataSetDetail);
         dataSetReq.setTypeEnum(TypeEnums.DATASET);
-        QueryConfig queryConfig = new QueryConfig();
-        MetricTypeDefaultConfig metricTypeDefaultConfig = new MetricTypeDefaultConfig();
-        TimeDefaultConfig timeDefaultConfig = new TimeDefaultConfig();
-        timeDefaultConfig.setTimeMode(TimeMode.RECENT);
-        timeDefaultConfig.setUnit(7);
-        metricTypeDefaultConfig.setTimeDefaultConfig(timeDefaultConfig);
-        queryConfig.setMetricTypeDefaultConfig(metricTypeDefaultConfig);
-        dataSetReq.setQueryConfig(queryConfig);
         return dataSetService.save(dataSetReq, User.getFakeUser());
     }
 

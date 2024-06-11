@@ -614,6 +614,7 @@ public class ChatQueryServiceImpl implements ChatQueryService {
                 corrector.correct(queryCtx, semanticParseInfo);
             }
         });
+        log.info("chatQueryServiceImpl correct:{}", sqlInfo.getCorrectS2SQL());
         querySqlReq.setSql(sqlInfo.getCorrectS2SQL());
     }
 

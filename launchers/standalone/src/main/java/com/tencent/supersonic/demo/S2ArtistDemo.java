@@ -165,7 +165,7 @@ public class S2ArtistDemo extends S2BaseDemo {
 
     public long addDataSet(DomainResp singerDomain, DomainResp singerModelSet, ModelResp singerModel) {
         DataSetReq dataSetReq = new DataSetReq();
-        dataSetReq.setName("艺人库");
+        dataSetReq.setName("艺人库数据集");
         dataSetReq.setBizName("singer");
         dataSetReq.setDomainId(singerDomain.getId());
         dataSetReq.setDescription("包含艺人相关标签和指标信息");
