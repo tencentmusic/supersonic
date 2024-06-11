@@ -52,7 +52,7 @@ importers:
         version: 1.4.4(react-dom@18.3.1)(react@18.3.1)
       react-markdown:
         specifier: ^9.0.1
-        version: 9.0.1(@types/react@18.3.2)(react@18.3.1)
+        version: 9.0.1(@types/react@18.3.1)(react@18.3.1)
       react-spinners:
         specifier: ^0.13.8
         version: 0.13.8(react-dom@18.3.1)(react@18.3.1)
@@ -115,10 +115,10 @@ importers:
         specifier: ^16.18.31
         version: 16.18.97
       '@types/react':
-        specifier: ^18.2.6
-        version: 18.3.2
+        specifier: ^18.3.0
+        version: 18.3.1
       '@types/react-dom':
-        specifier: ^18.2.4
+        specifier: ^18.3.0
         version: 18.3.0
       autoprefixer:
         specifier: ^10.4.14
@@ -226,7 +226,7 @@ importers:
         specifier: ^2.4.2
         version: 2.4.2
       react:
-        specifier: ^18.2.0
+        specifier: ^18.3.1
         version: 18.3.1
       react-app-polyfill:
         specifier: ^3.0.0
@@ -235,7 +235,7 @@ importers:
         specifier: ^12.0.1
         version: 12.0.1(eslint@8.57.0)(typescript@4.9.5)(webpack@5.91.0)
       react-dom:
-        specifier: ^18.2.0
+        specifier: ^18.3.0
         version: 18.3.1(react@18.3.1)
       react-refresh:
         specifier: ^0.11.0
@@ -427,7 +427,7 @@ importers:
         specifier: ^2.3.3
         version: 2.3.4
       supersonic-chat-sdk:
-        specifier: 0.0.0
+        specifier: workspace:*
         version: link:../chat-sdk
       supersonic-insights-flow-components:
         specifier: ^1.4.9
@@ -6445,12 +6445,6 @@ packages:
 
   /@types/react@18.3.1:
     resolution: {integrity: sha512-V0kuGBX3+prX+DQ/7r2qsv1NsdfnCLnTgnRJ1pYnxykBhGMz+qj+box5lq7XsO5mtZsBqpjwwTu/7wszPfMBcw==}
-    dependencies:
-      '@types/prop-types': 15.7.12
-      csstype: 3.1.3
-
-  /@types/react@18.3.2:
-    resolution: {integrity: sha512-Btgg89dAnqD4vV7R3hlwOxgqobUQKgx3MmrQRi0yYbs/P0ym8XozIAlkqVilPqHQwXs4e9Tf63rrCgl58BcO4w==}
     dependencies:
       '@types/prop-types': 15.7.12
       csstype: 3.1.3
@@ -22759,14 +22753,14 @@ packages:
   /react-lifecycles-compat@3.0.4:
     resolution: {integrity: sha512-fBASbA6LnOU9dOU2eW7aQ8xmYBSXUIWr+UmF9b1efZBazGNO+rcXT/icdKnYm2pTwcRylVUYwW7H1PHfLekVzA==}
 
-  /react-markdown@9.0.1(@types/react@18.3.2)(react@18.3.1):
+  /react-markdown@9.0.1(@types/react@18.3.1)(react@18.3.1):
     resolution: {integrity: sha512-186Gw/vF1uRkydbsOIkcGXw7aHq0sZOCRFFjGrr7b9+nVZg4UfA4enXCaxm4fUzecU38sWfrNDitGhshuU7rdg==}
     peerDependencies:
       '@types/react': '>=18'
       react: '>=18'
     dependencies:
       '@types/hast': 3.0.4
-      '@types/react': 18.3.2
+      '@types/react': 18.3.1
       devlop: 1.1.0
       hast-util-to-jsx-runtime: 2.3.0
       html-url-attributes: 3.0.0
