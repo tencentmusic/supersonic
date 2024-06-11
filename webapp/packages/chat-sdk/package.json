@@ -36,6 +36,7 @@
     "start": "npm run start:dev",
     "start:dev": "node scripts/start.js",
     "watch": "rollup -c rollup/rollup.esm.config.mjs --watch",
+    "watch:bg": "rollup -c rollup/rollup.esm.config.mjs --watch &",
     "clean": "rimraf ./dist",
     "build": "npm run clean && npm run build-es",
     "test": "node scripts/test.js",
