@@ -21,8 +21,8 @@ public class GrammarCorrector extends BaseSemanticCorrector {
         correctors.add(new SelectCorrector());
         correctors.add(new WhereCorrector());
         correctors.add(new GroupByCorrector());
-        correctors.add(new HavingCorrector());
         correctors.add(new AggCorrector());
+        correctors.add(new HavingCorrector());
     }
 
     @Override
