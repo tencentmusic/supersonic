@@ -90,25 +90,43 @@ public class DefaultUserAdaptor implements UserAdaptor {
     @Override
     public String login(UserReq userReq, HttpServletRequest request) {
         UserTokenUtils userTokenUtils = ContextUtils.getBean(UserTokenUtils.class);
+        try {
+            UserWithPassword user = getUserWithPassword(userReq);
+            return userTokenUtils.generateToken(user, request);
+        } catch (Exception e) {
+            throw new RuntimeException("password encrypt error, please try again");
+        }
+    }
+
+    @Override
+    public String login(UserReq userReq, String appKey) {
+        UserTokenUtils userTokenUtils = ContextUtils.getBean(UserTokenUtils.class);
+        try {
+            UserWithPassword user = getUserWithPassword(userReq);
+            return userTokenUtils.generateToken(user, appKey);
+        } catch (Exception e) {
+            throw new RuntimeException("password encrypt error, please try again");
+        }
+    }
+
+    private UserWithPassword getUserWithPassword(UserReq userReq) {
         UserDO userDO = getUser(userReq.getName());
         if (userDO == null) {
             throw new RuntimeException("user not exist,please register");
         }
-
         try {
             String password = AESEncryptionUtil.encrypt(userReq.getPassword(),
                     AESEncryptionUtil.getBytesFromString(userDO.getSalt()));
             if (userDO.getPassword().equals(password)) {
                 UserWithPassword user = UserWithPassword.get(userDO.getId(), userDO.getName(), userDO.getDisplayName(),
                         userDO.getEmail(), userDO.getPassword(), userDO.getIsAdmin());
-                return userTokenUtils.generateToken(user, request);
+                return user;
             } else {
                 throw new RuntimeException("password not correct, please try again");
             }
         } catch (Exception e) {
             throw new RuntimeException("password encrypt error, please try again");
         }
-
     }
 
     @Override
