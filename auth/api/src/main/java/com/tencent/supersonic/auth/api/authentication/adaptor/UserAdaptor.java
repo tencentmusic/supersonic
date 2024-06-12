@@ -23,6 +23,8 @@ public interface UserAdaptor {
 
     String login(UserReq userReq, HttpServletRequest request);
 
+    String login(UserReq userReq, String appKey);
+
     List<User> getUserByOrg(String key);
 
     Set<String> getUserAllOrgId(String userName);

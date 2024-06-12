@@ -72,4 +72,9 @@ public class UserServiceImpl implements UserService {
         return ComponentFactory.getUserAdaptor().login(userReq, request);
     }
 
+    @Override
+    public String login(UserReq userReq, String appKey) {
+        return ComponentFactory.getUserAdaptor().login(userReq, appKey);
+    }
+
 }

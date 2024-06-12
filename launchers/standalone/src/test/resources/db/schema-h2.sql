@@ -91,6 +91,7 @@ create table IF NOT EXISTS s2_user
     password varchar(100) null,
     email varchar(100) null,
     is_admin INT null,
+    salt varchar(100) null,
     PRIMARY KEY (`id`)
 );
 COMMENT ON TABLE s2_user IS 'user information table';
