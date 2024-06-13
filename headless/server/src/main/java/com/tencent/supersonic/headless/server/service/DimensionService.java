@@ -18,6 +18,8 @@ public interface DimensionService {
 
     List<DimensionResp> getDimensions(MetaFilter metaFilter);
 
+    List<DimensionResp> getDimensions(List<Long> dataSetIds);
+
     DimensionResp getDimension(String bizName, Long modelId);
 
     DimensionResp getDimension(Long id);
@@ -46,5 +48,4 @@ public interface DimensionService {
 
     DataEvent getDataEvent();
 
-    List<DimensionResp> getDimensions(List<Long> dataSetIds);
 }

@@ -3,7 +3,10 @@ package com.tencent.supersonic.headless.core.chat.parser.llm;
 import com.tencent.supersonic.common.pojo.enums.DataFormatTypeEnum;
 import com.tencent.supersonic.common.pojo.enums.DataTypeEnums;
 import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
-import com.tencent.supersonic.headless.api.pojo.*;
+import com.tencent.supersonic.headless.api.pojo.SchemaElement;
+import com.tencent.supersonic.headless.api.pojo.SchemaElementMatch;
+import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
+import com.tencent.supersonic.headless.api.pojo.SemanticSchema;
 import com.tencent.supersonic.headless.core.chat.parser.SatisfactionChecker;
 import com.tencent.supersonic.headless.core.chat.query.llm.s2sql.LLMReq;
 import com.tencent.supersonic.headless.core.chat.query.llm.s2sql.LLMReq.ElementValue;
@@ -13,8 +16,14 @@ import com.tencent.supersonic.headless.core.config.ParserConfig;
 import com.tencent.supersonic.headless.core.pojo.QueryContext;
 import com.tencent.supersonic.headless.core.utils.ComponentFactory;
 import com.tencent.supersonic.headless.core.utils.S2SqlDateHelper;
-
-import java.util.*;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Set;
+import java.util.Objects;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
@@ -55,7 +64,7 @@ public class LLMRequestService {
     }
 
     public LLMReq getLlmReq(QueryContext queryCtx, Long dataSetId,
-                            SemanticSchema semanticSchema, List<LLMReq.ElementValue> linkingValues) {
+                            SemanticSchema semanticSchema, List<ElementValue> linkingValues) {
         Map<Long, String> dataSetIdToName = semanticSchema.getDataSetIdToName();
         String queryText = queryCtx.getQueryText();
 
