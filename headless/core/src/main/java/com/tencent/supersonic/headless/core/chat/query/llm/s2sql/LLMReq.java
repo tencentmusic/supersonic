@@ -2,10 +2,12 @@ package com.tencent.supersonic.headless.core.chat.query.llm.s2sql;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.google.common.collect.Lists;
+import com.tencent.supersonic.common.pojo.enums.DataTypeEnums;
 import com.tencent.supersonic.headless.api.pojo.LLMConfig;
 import lombok.Data;
 
 import java.util.List;
+import java.util.Map;
 
 @Data
 public class LLMReq {
@@ -45,6 +47,8 @@ public class LLMReq {
         private Long dataSetId;
 
         private List<String> fieldNameList;
+
+        private Map<String, DataTypeEnums> fieldNameDataTypeMap;
 
         private List<Term> terms;
 

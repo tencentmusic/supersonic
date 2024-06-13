@@ -453,4 +453,12 @@ public class DimensionServiceImpl implements DimensionService {
         eventPublisher.publishEvent(new DataEvent(this,
                 Lists.newArrayList(dataItem), eventType));
     }
+
+    @Override
+    public List<DimensionResp> getDimensions(List<Long> dataSetIds) {
+        MetaFilter metaFilter = new MetaFilter();
+        metaFilter.setStatus(StatusEnum.ONLINE.getCode());
+        metaFilter.setModelIds(dataSetIds);
+        return getDimensions(metaFilter);
+    }
 }

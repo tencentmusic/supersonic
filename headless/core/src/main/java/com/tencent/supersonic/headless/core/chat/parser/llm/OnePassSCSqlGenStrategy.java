@@ -41,8 +41,8 @@ public class OnePassSCSqlGenStrategy extends SqlGenStrategy {
         List<String> linkingSqlPromptPool = promptGenerator.generatePromptPool(llmReq, exampleListPool, true);
         List<String> llmResults = new CopyOnWriteArrayList<>();
         linkingSqlPromptPool.parallelStream().forEach(linkingSqlPrompt -> {
-                    keyPipelineLog.info("OnePassSCSqlGenStrategy reqPrompt:{}", linkingSqlPrompt);
-                    String result = difyServiceClient.generate(linkingSqlPrompt).getAnswer();
+                    String result = difyServiceClient.generate(PromptEnhancer.enhanceDDLInfo(llmReq,
+                                                                                        linkingSqlPrompt)).getAnswer();
                     llmResults.add(result);
                     keyPipelineLog.info("OnePassSCSqlGenStrategy modelResp:{}", result);
                 }

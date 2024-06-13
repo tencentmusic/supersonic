@@ -45,7 +45,8 @@ public class TwoPassSCSqlGenStrategy extends SqlGenStrategy {
                 linkingPrompt -> {
                     Prompt prompt = PromptTemplate.from(JsonUtil.toString(linkingPrompt)).apply(new HashMap<>());
                     keyPipelineLog.info("TwoPassSCSqlGenStrategy step one reqPrompt:{}", prompt.toSystemMessage());
-                    String result = difyServiceClient.generate(prompt.toSystemMessage().text()).getAnswer();
+                    String result = difyServiceClient.generate(PromptEnhancer.enhanceDDLInfo(llmReq,
+                                    prompt.toSystemMessage().text())).getAnswer();
                     keyPipelineLog.info("TwoPassSCSqlGenStrategy step one modelResp:{}", result);
                     linkingResults.add(OutputFormat.getSchemaLink(result));
                 }
@@ -57,7 +58,9 @@ public class TwoPassSCSqlGenStrategy extends SqlGenStrategy {
         sqlPromptPool.parallelStream().forEach(sqlPrompt -> {
             Prompt linkingPrompt = PromptTemplate.from(JsonUtil.toString(sqlPrompt)).apply(new HashMap<>());
             keyPipelineLog.info("TwoPassSCSqlGenStrategy step two reqPrompt:{}", linkingPrompt.toSystemMessage());
-            String result = difyServiceClient.generate(linkingPrompt.toSystemMessage().text()).getAnswer();
+            String result = difyServiceClient.generate(
+                    PromptEnhancer.enhanceDDLInfo(llmReq,
+                            linkingPrompt.toSystemMessage().text())).getAnswer();
             keyPipelineLog.info("TwoPassSCSqlGenStrategy step two modelResp:{}", result);
             sqlTaskPool.add(result);
         });

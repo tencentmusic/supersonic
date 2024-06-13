@@ -11,6 +11,7 @@ import com.tencent.supersonic.headless.api.pojo.SemanticSchema;
 import com.tencent.supersonic.headless.api.pojo.enums.MapModeEnum;
 import com.tencent.supersonic.headless.api.pojo.enums.WorkflowState;
 import com.tencent.supersonic.headless.api.pojo.request.QueryFilters;
+import com.tencent.supersonic.headless.api.pojo.response.DimensionResp;
 import com.tencent.supersonic.headless.core.chat.query.SemanticQuery;
 import com.tencent.supersonic.headless.core.config.ParserConfig;
 import lombok.AllArgsConstructor;
@@ -51,6 +52,8 @@ public class QueryContext {
     private WorkflowState workflowState;
     private QueryDataType queryDataType = QueryDataType.ALL;
     private LLMConfig llmConfig;
+    @JsonIgnore
+    private List<DimensionResp> dimensions;
 
     public List<SemanticQuery> getCandidateQueries() {
         ParserConfig parserConfig = ContextUtils.getBean(ParserConfig.class);
