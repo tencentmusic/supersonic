@@ -5,10 +5,10 @@ import defaultSettings, { publicPath, basePath } from './defaultSettings';
 import proxy from './proxy';
 import routes from './routes';
 import dayjs from 'dayjs';
-const { REACT_APP_ENV = 'dev', RUN_TYPE } = process.env;
-
+import { codeInspectorPlugin } from 'code-inspector-plugin';
 import ENV_CONFIG from './envConfig';
 import OP_CONFIG from './opConfig';
+const { REACT_APP_ENV = 'dev', RUN_TYPE } = process.env;
 
 export default defineConfig({
   define: {
@@ -183,4 +183,12 @@ export default defineConfig({
   requestRecord: {},
   exportStatic: {},
   // esbuildMinifyIIFE: true,
+
+  chainWebpack(memo) {
+    memo.plugin('code-inspector-plugin').use(
+      codeInspectorPlugin({
+        bundler: 'webpack',
+      }),
+    );
+  },
 });

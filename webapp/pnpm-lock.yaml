@@ -61,12 +61,18 @@ importers:
       remark-gfm:
         specifier: ^4.0.0
         version: 4.0.0
+      scheduler:
+        specifier: ^0.23.2
+        version: 0.23.2
       sql-formatter:
         specifier: ^2.3.3
         version: 2.3.4
       tslib:
         specifier: ^2.5.2
         version: 2.6.2
+      use-context-selector:
+        specifier: ^2.0.0
+        version: 2.0.0(react@18.3.1)(scheduler@0.23.2)
       xlsx:
         specifier: ^0.18.5
         version: 0.18.5
@@ -146,6 +152,9 @@ importers:
       case-sensitive-paths-webpack-plugin:
         specifier: ^2.4.0
         version: 2.4.0
+      code-inspector-plugin:
+        specifier: ^0.14.2
+        version: 0.14.2
       css-loader:
         specifier: ^6.5.1
         version: 6.11.0(webpack@5.91.0)
@@ -422,6 +431,9 @@ importers:
       react-syntax-highlighter:
         specifier: ^15.4.3
         version: 15.5.0(react@18.3.1)
+      scheduler:
+        specifier: ^0.23.2
+        version: 0.23.2
       sql-formatter:
         specifier: ^2.3.3
         version: 2.3.4
@@ -434,6 +446,9 @@ importers:
       umi-request:
         specifier: 1.4.0
         version: 1.4.0
+      use-context-selector:
+        specifier: ^2.0.0
+        version: 2.0.0(react@18.3.1)(scheduler@0.23.2)
     devDependencies:
       '@ant-design/pro-cli':
         specifier: ^2.0.2
@@ -492,6 +507,9 @@ importers:
       carlo:
         specifier: ^0.9.46
         version: 0.9.46
+      code-inspector-plugin:
+        specifier: ^0.14.2
+        version: 0.14.2
       cross-port-killer:
         specifier: ^1.1.1
         version: 1.4.0
@@ -8216,6 +8234,27 @@ packages:
       - supports-color
     dev: true
 
+  /@vue/compiler-core@3.4.27:
+    resolution: {integrity: sha512-E+RyqY24KnyDXsCuQrI+mlcdW3ALND6U7Gqa/+bVwbcpcR3BRRIckFoz7Qyd4TTlnugtwuI7YgjbvsLmxb+yvg==}
+    dependencies:
+      '@babel/parser': 7.24.5
+      '@vue/shared': 3.4.27
+      entities: 4.5.0
+      estree-walker: 2.0.2
+      source-map-js: 1.2.0
+    dev: true
+
+  /@vue/compiler-dom@3.4.27:
+    resolution: {integrity: sha512-kUTvochG/oVgE1w5ViSr3KUBh9X7CWirebA3bezTbB5ZKBQZwR2Mwj9uoSKRMFcz4gSMzzLXBPD6KpCLb9nvWw==}
+    dependencies:
+      '@vue/compiler-core': 3.4.27
+      '@vue/shared': 3.4.27
+    dev: true
+
+  /@vue/shared@3.4.27:
+    resolution: {integrity: sha512-DL3NmY2OFlqmYYrzp39yi3LDkKxa5vZVwxWdQ3rG0ekuWscHraeIbnI8t+aZK7qhYqEqWKTUdijadunb9pnrgA==}
+    dev: true
+
   /@webassemblyjs/ast@1.12.1:
     resolution: {integrity: sha512-EKfMUOPRRUTy5UII4qJDGPpqfwjOmZ5jeGFwid9mnoqIFK+e0vqoi1qH56JpmZSzEL53jKnNzScdmftJyG5xWg==}
     dependencies:
@@ -9904,6 +9943,14 @@ packages:
       supports-color: 7.2.0
     dev: true
 
+  /chalk@4.1.1:
+    resolution: {integrity: sha512-diHzdDKxcU+bAsUboHLPEDQiw0qEe0qd7SYUn3HgcFlWgbDcfLGswOHYeGrHKzG9z6UYf01d9VFMfZxPM1xZSg==}
+    engines: {node: '>=10'}
+    dependencies:
+      ansi-styles: 4.3.0
+      supports-color: 7.2.0
+    dev: true
+
   /chalk@4.1.2:
     resolution: {integrity: sha512-oKnbhFyRIXpUuez8iBMmyEa4nbj4IOQyuhc/wy9kY7/WVPcwIO9VA668Pu8RkO7+0G76SLROeyw9CpQ061i4mA==}
     engines: {node: '>=10'}
@@ -10154,6 +10201,27 @@ packages:
       '@types/q': 1.5.8
       chalk: 2.4.2
       q: 1.5.1
+    dev: true
+
+  /code-inspector-core@0.14.2:
+    resolution: {integrity: sha512-YnOxgiXDXPOXDYmqVB9hQVVa94/uDk65fxG33r5aRilWXW7EPINBiV6KEqWqKKZO/MWiyXbUPx/mmL6IrR2KQw==}
+    dependencies:
+      '@vue/compiler-dom': 3.4.27
+      chalk: 4.1.2
+      portfinder: 1.0.32
+    transitivePeerDependencies:
+      - supports-color
+    dev: true
+
+  /code-inspector-plugin@0.14.2:
+    resolution: {integrity: sha512-FQAeTzA5nI7Q3x2HVdgOlenQC1DPDfGCoaM1tuhdLlXgTe34XpdV9dXD/wy4NqI2fIANwcNro30Kfg7Q1GavrQ==}
+    dependencies:
+      chalk: 4.1.1
+      code-inspector-core: 0.14.2
+      vite-code-inspector-plugin: 0.14.2
+      webpack-code-inspector-plugin: 0.14.2
+    transitivePeerDependencies:
+      - supports-color
     dev: true
 
   /codepage@1.15.0:
@@ -18963,6 +19031,17 @@ packages:
       polyline-miter-util: 1.0.1
     dev: false
 
+  /portfinder@1.0.32:
+    resolution: {integrity: sha512-on2ZJVVDXRADWE6jnQaX0ioEylzgBpQk8r55NE4wjXW1ZxO+BgDlY6DXwj20i0V8eB4SenDQ00WEaxfiIQPcxg==}
+    engines: {node: '>= 0.12.0'}
+    dependencies:
+      async: 2.6.4
+      debug: 3.2.7
+      mkdirp: 0.5.6
+    transitivePeerDependencies:
+      - supports-color
+    dev: true
+
   /possible-typed-array-names@1.0.0:
     resolution: {integrity: sha512-d7Uw+eZoloe0EHDIYoe+bQ5WXnGMOpmiZFTuMWCwpjzzkL2nTjcKiAk4hh8TjnGye2TwWOk3UXucZ+3rbmBa8Q==}
     engines: {node: '>= 0.4'}
@@ -26734,6 +26813,16 @@ packages:
       qs: 6.12.1
     dev: true
 
+  /use-context-selector@2.0.0(react@18.3.1)(scheduler@0.23.2):
+    resolution: {integrity: sha512-owfuSmUNd3eNp3J9CdDl0kMgfidV+MkDvHPpvthN5ThqM+ibMccNE0k+Iq7TWC6JPFvGZqanqiGCuQx6DyV24g==}
+    peerDependencies:
+      react: '>=18.0.0'
+      scheduler: '>=0.19.0'
+    dependencies:
+      react: 18.3.1
+      scheduler: 0.23.2
+    dev: false
+
   /use-isomorphic-layout-effect@1.1.2(@types/react@18.3.1)(react@18.1.0):
     resolution: {integrity: sha512-49L8yCO3iGT/ZF9QttjwLF/ZD9Iwto5LnH5LmEdk/6cFmXddqi2ulF0edxTwjj+7mqvpVVGQWvbXZdn32wRSHA==}
     peerDependencies:
@@ -26931,6 +27020,14 @@ packages:
       gl-matrix: 3.4.3
     dev: false
 
+  /vite-code-inspector-plugin@0.14.2:
+    resolution: {integrity: sha512-k04yeefaMSjvZQW+GvxbzVjJb8fw5BycSrH7oNw6y3M11AwUlyqDmmL8OcO8b07ljhkPZ0bYVotfBCftXkYRyQ==}
+    dependencies:
+      code-inspector-core: 0.14.2
+    transitivePeerDependencies:
+      - supports-color
+    dev: true
+
   /vite@4.5.2(less@4.1.3):
     resolution: {integrity: sha512-tBCZBNSBbHQkaGyhGCDUGqeo2ph8Fstyp6FMSvTtsXeZSPpSMGlviAOav2hxVTqFcx8Hj/twtWKsMJXNY0xI8w==}
     engines: {node: ^14.18.0 || >=16.0.0}
@@ -27087,6 +27184,14 @@ packages:
     dependencies:
       deepmerge: 1.5.2
       javascript-stringify: 2.1.0
+    dev: true
+
+  /webpack-code-inspector-plugin@0.14.2:
+    resolution: {integrity: sha512-WQoOFuckY1dQp4xCgNfyzddER+6OMvedpaa+UMGlvu9Zqb1aSxHm9ss8qJo9OeuLkw41qiOlHvg9FGvST877uA==}
+    dependencies:
+      code-inspector-core: 0.14.2
+    transitivePeerDependencies:
+      - supports-color
     dev: true
 
   /webpack-dev-middleware@5.3.4(webpack@5.91.0):

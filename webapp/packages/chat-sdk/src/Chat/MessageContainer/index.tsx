@@ -27,6 +27,7 @@ type Props = {
     isRefresh?: boolean
   ) => void;
   onSendMsg: (value: string) => void;
+  onQuestionAsked: (questionId: string | number) => void
 };
 
 const MessageContainer: React.FC<Props> = ({
@@ -40,6 +41,7 @@ const MessageContainer: React.FC<Props> = ({
   integrateSystem,
   isSimpleMode,
   onMsgDataLoaded,
+  onQuestionAsked,
   onSendMsg,
 }) => {
   const [triggerResize, setTriggerResize] = useState(false);
@@ -112,6 +114,7 @@ const MessageContainer: React.FC<Props> = ({
                     }}
                     onUpdateMessageScroll={updateMessageContainerScroll}
                     onSendMsg={onSendMsg}
+                    onQuestionAsked={() => onQuestionAsked(msgId)}
                   />
                 </>
               )}
