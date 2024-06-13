@@ -269,6 +269,14 @@ public class DimensionServiceImpl implements DimensionService {
         return dimensionResps;
     }
 
+    @Override
+    public List<DimensionResp> getDimensions(List<Long> dataSetIds) {
+        MetaFilter metaFilter = new MetaFilter();
+        metaFilter.setStatus(StatusEnum.ONLINE.getCode());
+        metaFilter.setModelIds(dataSetIds);
+        return getDimensions(metaFilter);
+    }
+
     private List<DimensionResp> getDimensions(Long modelId) {
         return getDimensions(new MetaFilter(Lists.newArrayList(modelId)));
     }
@@ -452,13 +460,5 @@ public class DimensionServiceImpl implements DimensionService {
     private void sendEvent(DataItem dataItem, EventType eventType) {
         eventPublisher.publishEvent(new DataEvent(this,
                 Lists.newArrayList(dataItem), eventType));
-    }
-
-    @Override
-    public List<DimensionResp> getDimensions(List<Long> dataSetIds) {
-        MetaFilter metaFilter = new MetaFilter();
-        metaFilter.setStatus(StatusEnum.ONLINE.getCode());
-        metaFilter.setModelIds(dataSetIds);
-        return getDimensions(metaFilter);
     }
 }
