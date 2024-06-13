@@ -3,6 +3,7 @@ package com.tencent.supersonic.headless.server.utils;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
+import com.tencent.supersonic.common.pojo.enums.DataTypeEnums;
 import com.tencent.supersonic.common.pojo.enums.StatusEnum;
 import com.tencent.supersonic.common.util.BeanMapper;
 import com.tencent.supersonic.common.util.JsonUtil;
@@ -110,7 +111,7 @@ public class ModelConverter {
         return measureResp;
     }
 
-    public static DimensionReq convert(Dim dim, ModelDO modelDO) {
+    public static DimensionReq convert(Dim dim, ModelDO modelDO, ModelDetail modelDetail) {
         DimensionReq dimensionReq = new DimensionReq();
         dimensionReq.setName(dim.getName());
         dimensionReq.setBizName(dim.getBizName());
@@ -121,6 +122,10 @@ public class ModelConverter {
         dimensionReq.setType(DimensionType.categorical.name());
         dimensionReq.setDescription(Objects.isNull(dim.getDescription()) ? "" : dim.getDescription());
         dimensionReq.setIsTag(dim.getIsTag());
+        Field field = modelDetail.getFields().stream()
+                .filter(f -> f.getFieldName().equals(dim.getBizName()))
+                .findFirst().orElse(null);
+        dimensionReq.setDataType(DataTypeEnums.of(field.getDataType()));
         return dimensionReq;
     }
 
@@ -140,7 +145,7 @@ public class ModelConverter {
         return metricReq;
     }
 
-    public static DimensionReq convert(Identify identify, ModelDO modelDO) {
+    public static DimensionReq convert(Identify identify, ModelDO modelDO, ModelDetail modelDetail) {
         DimensionReq dimensionReq = new DimensionReq();
         dimensionReq.setName(identify.getName());
         dimensionReq.setBizName(identify.getBizName());
@@ -210,14 +215,14 @@ public class ModelConverter {
         List<Dim> dims = getDimToCreateDimension(modelDetail);
         if (!CollectionUtils.isEmpty(dims)) {
             dimensionReqs = dims.stream().filter(dim -> StringUtils.isNotBlank(dim.getName()))
-                    .map(dim -> convert(dim, modelDO)).collect(Collectors.toList());
+                    .map(dim -> convert(dim, modelDO, modelDetail)).collect(Collectors.toList());
         }
         List<Identify> identifies = getIdentityToCreateDimension(modelDetail);
         if (CollectionUtils.isEmpty(identifies)) {
             return dimensionReqs;
         }
         dimensionReqs.addAll(identifies.stream()
-                .map(identify -> convert(identify, modelDO)).collect(Collectors.toList()));
+                .map(identify -> convert(identify, modelDO, modelDetail)).collect(Collectors.toList()));
         return dimensionReqs;
     }
 

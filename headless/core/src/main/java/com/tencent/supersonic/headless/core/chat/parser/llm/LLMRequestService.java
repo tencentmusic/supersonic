@@ -1,11 +1,9 @@
 package com.tencent.supersonic.headless.core.chat.parser.llm;
 
 import com.tencent.supersonic.common.pojo.enums.DataFormatTypeEnum;
+import com.tencent.supersonic.common.pojo.enums.DataTypeEnums;
 import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
-import com.tencent.supersonic.headless.api.pojo.SchemaElement;
-import com.tencent.supersonic.headless.api.pojo.SchemaElementMatch;
-import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
-import com.tencent.supersonic.headless.api.pojo.SemanticSchema;
+import com.tencent.supersonic.headless.api.pojo.*;
 import com.tencent.supersonic.headless.core.chat.parser.SatisfactionChecker;
 import com.tencent.supersonic.headless.core.chat.query.llm.s2sql.LLMReq;
 import com.tencent.supersonic.headless.core.chat.query.llm.s2sql.LLMReq.ElementValue;
@@ -15,13 +13,8 @@ import com.tencent.supersonic.headless.core.config.ParserConfig;
 import com.tencent.supersonic.headless.core.pojo.QueryContext;
 import com.tencent.supersonic.headless.core.utils.ComponentFactory;
 import com.tencent.supersonic.headless.core.utils.S2SqlDateHelper;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+
+import java.util.*;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
@@ -85,6 +78,7 @@ public class LLMRequestService {
         fieldNameList.add(TimeDimensionEnum.DAY.getChName());
         llmSchema.setFieldNameList(fieldNameList);
         llmSchema.setTerms(getTerms(queryCtx, dataSetId));
+        llmSchema.setFieldNameDataTypeMap(getFieldNameDataTypeMap(semanticSchema, dataSetId));
         llmReq.setSchema(llmSchema);
 
         List<ElementValue> linking = new ArrayList<>();
@@ -234,5 +228,14 @@ public class LLMRequestService {
                 })
                 .collect(Collectors.toSet());
         return fieldNameList;
+    }
+
+    public Map<String, DataTypeEnums> getFieldNameDataTypeMap(SemanticSchema semanticSchema, Long dataSetId) {
+        Map<String, DataTypeEnums> fieldNameDataTypeMap = new HashMap<>();
+        List<SchemaElement> dimensionList = semanticSchema.getDimensions(dataSetId);
+        List<SchemaElement> metricList = semanticSchema.getMetrics(dataSetId);
+        dimensionList.forEach(dimension -> fieldNameDataTypeMap.put(dimension.getName(), dimension.getDataType()));
+        metricList.forEach(metric -> fieldNameDataTypeMap.put(metric.getName(), metric.getDataType()));
+        return fieldNameDataTypeMap;
     }
 }

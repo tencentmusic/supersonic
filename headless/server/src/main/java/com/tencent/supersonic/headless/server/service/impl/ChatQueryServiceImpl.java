@@ -3,9 +3,7 @@ package com.tencent.supersonic.headless.server.service.impl;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.common.pojo.QueryColumn;
-import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
-import com.tencent.supersonic.common.pojo.enums.QueryType;
-import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
+import com.tencent.supersonic.common.pojo.enums.*;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.DateUtils;
 import com.tencent.supersonic.common.util.JsonUtil;
@@ -33,12 +31,7 @@ import com.tencent.supersonic.headless.api.pojo.request.QueryReq;
 import com.tencent.supersonic.headless.api.pojo.request.QuerySqlReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
 import com.tencent.supersonic.headless.api.pojo.request.SemanticQueryReq;
-import com.tencent.supersonic.headless.api.pojo.response.ExplainResp;
-import com.tencent.supersonic.headless.api.pojo.response.MapResp;
-import com.tencent.supersonic.headless.api.pojo.response.ParseResp;
-import com.tencent.supersonic.headless.api.pojo.response.QueryResult;
-import com.tencent.supersonic.headless.api.pojo.response.QueryState;
-import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
+import com.tencent.supersonic.headless.api.pojo.response.*;
 import com.tencent.supersonic.headless.core.chat.corrector.GrammarCorrector;
 import com.tencent.supersonic.headless.core.chat.corrector.SchemaCorrector;
 import com.tencent.supersonic.headless.core.chat.knowledge.HanlpMapResult;
@@ -52,11 +45,8 @@ import com.tencent.supersonic.headless.core.chat.query.llm.s2sql.LLMSqlQuery;
 import com.tencent.supersonic.headless.core.pojo.ChatContext;
 import com.tencent.supersonic.headless.core.pojo.QueryContext;
 import com.tencent.supersonic.headless.server.persistence.dataobject.StatisticsDO;
-import com.tencent.supersonic.headless.server.service.ChatContextService;
-import com.tencent.supersonic.headless.server.service.ChatQueryService;
-import com.tencent.supersonic.headless.server.service.DataSetService;
-import com.tencent.supersonic.headless.server.service.QueryService;
-import com.tencent.supersonic.headless.server.service.WorkflowService;
+import com.tencent.supersonic.headless.server.pojo.MetaFilter;
+import com.tencent.supersonic.headless.server.service.*;
 import com.tencent.supersonic.headless.server.utils.ComponentFactory;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.expression.Expression;
@@ -103,6 +93,11 @@ public class ChatQueryServiceImpl implements ChatQueryService {
     private DataSetService dataSetService;
     @Autowired
     private WorkflowService workflowService;
+    @Autowired
+    private DimensionService dimensionService;
+
+
+
 
     @Override
     public MapResp performMapping(QueryReq queryReq) {
@@ -147,6 +142,7 @@ public class ChatQueryServiceImpl implements ChatQueryService {
                 .text2SQLType(queryReq.getText2SQLType())
                 .mapModeEnum(queryReq.getMapModeEnum())
                 .dataSetIds(queryReq.getDataSetIds())
+                .dimensions(dimensionService.getDimensions(new ArrayList<>(queryReq.getDataSetIds())))
                 .build();
         BeanUtils.copyProperties(queryReq, queryCtx);
         return queryCtx;

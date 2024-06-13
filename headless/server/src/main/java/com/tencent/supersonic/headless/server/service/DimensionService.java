@@ -45,4 +45,6 @@ public interface DimensionService {
     void sendDimensionEventBatch(List<Long> modelIds, EventType eventType);
 
     DataEvent getDataEvent();
+
+    List<DimensionResp> getDimensions(List<Long> dataSetIds);
 }
