@@ -94,10 +94,12 @@
     "react-spinners": "^0.13.8",
     "react-split-pane": "^2.0.3",
     "react-syntax-highlighter": "^15.4.3",
+    "scheduler": "^0.23.2",
     "sql-formatter": "^2.3.3",
     "supersonic-chat-sdk": "0.0.0",
     "supersonic-insights-flow-components": "^1.4.9",
-    "umi-request": "1.4.0"
+    "umi-request": "1.4.0",
+    "use-context-selector": "^2.0.0"
   },
   "devDependencies": {
     "@ant-design/pro-cli": "^2.0.2",
@@ -119,6 +121,7 @@
     "@umijs/max": "^4.2.5",
     "@umijs/plugin-model": "^2.6.2",
     "carlo": "^0.9.46",
+    "code-inspector-plugin": "^0.14.2",
     "cross-port-killer": "^1.1.1",
     "detect-installer": "^1.0.1",
     "eslint": "^7.1.0",

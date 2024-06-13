@@ -29,6 +29,7 @@ export type MessageItem = {
   score?: number;
   feedback?: string;
   filters?: any;
+  __finished__?: boolean
 };
 
 export type ConversationDetailType = {

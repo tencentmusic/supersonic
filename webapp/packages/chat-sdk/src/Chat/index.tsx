@@ -68,8 +68,12 @@ const Chat: ForwardRefRenderFunction<any, Props> = (
   const [showCaseVisible, setShowCaseVisible] = useState(false);
 
   const [isSimpleMode, setIsSimpleMode] = useState<boolean>(false);
-  // 是否存在未完成响应的消息
-  const isAllMsgResolved = useMemo(() => messageList.filter(msg => msg.type === 'question').every(msg => msg.msgData), [messageList]);
+  // 是否所有问题都已经解决
+  const isAllMsgResolved = useMemo(() => messageList.filter(msg => msg.type === 'question').every(msg => {
+    if (msg.msgData) return true;
+    if (msg.__finished__) return true;
+    return false
+  }), [messageList]);
 
   const conversationRef = useRef<any>();
   const chatFooterRef = useRef<any>();
@@ -323,6 +327,15 @@ const Chat: ForwardRefRenderFunction<any, Props> = (
     }
   };
 
+  const onQuestionAsked = (questionId: string| number) => {
+    const msgs = cloneDeep(messageList);
+    const msg = msgs.find(item => item.id === questionId);
+    if (msg) {
+      msg.__finished__ = true;
+      setMessageList(msgs);
+    }
+  }
+
   const onToggleHistoryVisible = () => {
     setHistoryVisible(!historyVisible);
   };
@@ -410,6 +423,7 @@ const Chat: ForwardRefRenderFunction<any, Props> = (
                   integrateSystem={integrateSystem}
                   onMsgDataLoaded={onMsgDataLoaded}
                   onSendMsg={onSendMsg}
+                  onQuestionAsked={onQuestionAsked}
                 />
                 {!noInput && (
                   <ChatFooter

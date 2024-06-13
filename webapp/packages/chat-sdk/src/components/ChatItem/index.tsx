@@ -38,6 +38,7 @@ type Props = {
   renderCustomExecuteNode?: boolean;
   isSimpleMode?: boolean;
   onMsgDataLoaded?: (data: MsgDataType, valid: boolean, isRefresh?: boolean) => void;
+  onQuestionAsked?: () => void;
   onUpdateMessageScroll?: () => void;
   onSendMsg?: (msg: string) => void;
 };
@@ -59,6 +60,7 @@ const ChatItem: React.FC<Props> = ({
   renderCustomExecuteNode,
   isSimpleMode,
   onMsgDataLoaded,
+  onQuestionAsked,
   onUpdateMessageScroll,
   onSendMsg,
 }) => {
@@ -138,6 +140,7 @@ const ChatItem: React.FC<Props> = ({
       setExecuteTip(SEARCH_EXCEPTION_TIP);
       setDataCache({ ...dataCache, [parseInfoValue!.id!]: { tip } });
     }
+    onQuestionAsked?.()
     if (isSwitchParseInfo) {
       setEntitySwitchLoading(false);
     } else {
@@ -174,6 +177,7 @@ const ChatItem: React.FC<Props> = ({
     ) {
       setParseTip(PARSE_ERROR_TIP);
       setParseInfo({ queryId } as any);
+      onQuestionAsked?.()
       return;
     }
     onUpdateMessageScroll?.();
