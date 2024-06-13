@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.HashSet;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -72,7 +73,7 @@ public abstract class BaseMapper implements SchemaMapper {
         if (CollectionUtils.isEmpty(dataSetIds)) {
             return;
         }
-        Set<Long> dataSetIdInMapInfo = queryContext.getMapInfo().getDataSetElementMatches().keySet();
+        Set<Long> dataSetIdInMapInfo = new HashSet<>(queryContext.getMapInfo().getDataSetElementMatches().keySet());
         for (Long dataSetId : dataSetIdInMapInfo) {
             if (!dataSetIds.contains(dataSetId)) {
                 queryContext.getMapInfo().getDataSetElementMatches().remove(dataSetId);

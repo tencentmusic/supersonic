@@ -74,7 +74,7 @@
     "compression-webpack-plugin": "^11.0.0",
     "copy-to-clipboard": "^3.3.1",
     "cross-env": "^7.0.3",
-    "crypto-js": "^4.0.0",
+    "crypto-js": "^4.2.0",
     "dayjs": "^1.11.10",
     "echarts": "^5.0.2",
     "echarts-for-react": "^3.0.1",
@@ -95,7 +95,7 @@
     "react-split-pane": "^2.0.3",
     "react-syntax-highlighter": "^15.4.3",
     "sql-formatter": "^2.3.3",
-    "supersonic-chat-sdk": "0.0.0",
+    "supersonic-chat-sdk": "workspace:*",
     "supersonic-insights-flow-components": "^1.4.9",
     "umi-request": "1.4.0"
   },
@@ -136,9 +136,6 @@
   },
   "engines": {
     "node": ">=16.0.0 <20.0.0"
-  },
-  "resolutions": {
-    "@types/react": "18.3.1"
   },
   "__npminstall_done": false
 }

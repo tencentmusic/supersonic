@@ -171,6 +171,7 @@ CREATE TABLE `s2_chat_query`
     `score`           int(11)             DEFAULT '0',
     `feedback`        varchar(1024)       DEFAULT '',
     `similar_queries` varchar(1024)       DEFAULT '',
+    `parse_time_cost` varchar(1024)       DEFAULT '',
     PRIMARY KEY (`question_id`)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8;
 
@@ -425,7 +426,8 @@ create table s2_user
     id       int(11) NOT NULL AUTO_INCREMENT,
     name     varchar(100) not null,
     display_name varchar(100) null,
-    password varchar(100) null,
+    password varchar(256) null,
+    salt varchar(256) DEFAULT NULL COMMENT 'md5密码盐',
     email varchar(100) null,
     is_admin int(11) null,
     PRIMARY KEY (`id`)

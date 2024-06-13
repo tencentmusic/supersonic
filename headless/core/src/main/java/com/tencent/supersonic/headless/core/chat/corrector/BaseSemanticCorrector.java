@@ -4,7 +4,6 @@ import com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum;
 import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.jsqlparser.SqlAddHelper;
-import com.tencent.supersonic.common.util.jsqlparser.SqlSelectFunctionHelper;
 import com.tencent.supersonic.common.util.jsqlparser.SqlSelectHelper;
 import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
@@ -76,7 +75,7 @@ public abstract class BaseSemanticCorrector implements SemanticCorrector {
         return result;
     }
 
-    protected void addFieldsToSelect(SemanticParseInfo semanticParseInfo, String correctS2SQL) {
+    protected String addFieldsToSelect(SemanticParseInfo semanticParseInfo, String correctS2SQL) {
         Set<String> selectFields = new HashSet<>(SqlSelectHelper.getSelectFields(correctS2SQL));
         Set<String> needAddFields = new HashSet<>(SqlSelectHelper.getGroupByFields(correctS2SQL));
 
@@ -87,23 +86,14 @@ public abstract class BaseSemanticCorrector implements SemanticCorrector {
             needAddFields.addAll(SqlSelectHelper.getOrderByFields(correctS2SQL));
         }
 
-        // If there is no aggregate function in the S2SQL statement and
-        // there is a data field in 'WHERE' statement, add the field to the 'SELECT' statement.
-        if (!SqlSelectFunctionHelper.hasAggregateFunction(correctS2SQL)) {
-            List<String> whereFields = SqlSelectHelper.getWhereFields(correctS2SQL);
-            List<String> timeChNameList = TimeDimensionEnum.getChNameList();
-            Set<String> timeFields = whereFields.stream().filter(field -> timeChNameList.contains(field))
-                    .collect(Collectors.toSet());
-            needAddFields.addAll(timeFields);
-        }
-
         if (CollectionUtils.isEmpty(selectFields) || CollectionUtils.isEmpty(needAddFields)) {
-            return;
+            return correctS2SQL;
         }
 
         needAddFields.removeAll(selectFields);
-        String replaceFields = SqlAddHelper.addFieldsToSelect(correctS2SQL, new ArrayList<>(needAddFields));
-        semanticParseInfo.getSqlInfo().setCorrectS2SQL(replaceFields);
+        String addFieldsToSelectSql = SqlAddHelper.addFieldsToSelect(correctS2SQL, new ArrayList<>(needAddFields));
+        semanticParseInfo.getSqlInfo().setCorrectS2SQL(addFieldsToSelectSql);
+        return addFieldsToSelectSql;
     }
 
     protected void addAggregateToMetric(QueryContext queryContext, SemanticParseInfo semanticParseInfo) {

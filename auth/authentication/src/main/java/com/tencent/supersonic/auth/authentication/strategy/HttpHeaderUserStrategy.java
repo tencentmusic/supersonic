@@ -28,4 +28,9 @@ public class HttpHeaderUserStrategy implements UserStrategy {
     public User findUser(HttpServletRequest request, HttpServletResponse response) {
         return userTokenUtils.getUser(request);
     }
+
+    @Override
+    public User findUser(String token, String appKey) {
+        return userTokenUtils.getUser(token, appKey);
+    }
 }

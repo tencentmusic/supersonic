@@ -11,4 +11,6 @@ public interface UserStrategy {
 
     User findUser(HttpServletRequest request, HttpServletResponse response);
 
+    User findUser(String token, String appKey);
+
 }

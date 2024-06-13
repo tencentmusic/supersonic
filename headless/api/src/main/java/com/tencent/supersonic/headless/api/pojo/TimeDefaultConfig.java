@@ -3,9 +3,13 @@ package com.tencent.supersonic.headless.api.pojo;
 
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.enums.TimeMode;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class TimeDefaultConfig {
 
 
@@ -21,6 +25,5 @@ public class TimeDefaultConfig {
     private String period = Constants.DAY;
 
     private TimeMode timeMode = TimeMode.LAST;
-
 
 }

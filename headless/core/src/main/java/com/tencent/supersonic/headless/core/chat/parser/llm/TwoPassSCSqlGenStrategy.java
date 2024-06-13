@@ -12,34 +12,31 @@ import dev.langchain4j.model.output.Response;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import static com.tencent.supersonic.headless.core.config.ParserConfig.PARSER_EXEMPLAR_RECALL_NUMBER;
-import static com.tencent.supersonic.headless.core.config.ParserConfig.PARSER_FEW_SHOT_NUMBER;
-import static com.tencent.supersonic.headless.core.config.ParserConfig.PARSER_SELF_CONSISTENCY_NUMBER;
-
 @Service
+@Deprecated
 public class TwoPassSCSqlGenStrategy extends SqlGenStrategy {
 
     @Override
     public LLMResp generate(LLMReq llmReq) {
-        //1.retriever sqlExamples and generate exampleListPool
+        //1.recall exemplars
         keyPipelineLog.info("TwoPassSCSqlGenStrategy llmReq:{}", llmReq);
 
-        int exemplarRecallNumber = Integer.valueOf(parserConfig.getParameterValue(PARSER_EXEMPLAR_RECALL_NUMBER));
-        int fewShotNumber = Integer.valueOf(parserConfig.getParameterValue(PARSER_FEW_SHOT_NUMBER));
-        int selfConsistencyNumber = Integer.valueOf(parserConfig.getParameterValue(PARSER_SELF_CONSISTENCY_NUMBER));
+        List<List<Map<String, String>>> exampleListPool = promptHelper.getFewShotExemplars(llmReq);
 
-        List<Map<String, String>> sqlExamples = exemplarManager.recallExemplars(llmReq.getQueryText(),
-                exemplarRecallNumber);
-        List<List<Map<String, String>>> exampleListPool = promptGenerator.getExampleCombos(sqlExamples,
-                fewShotNumber, selfConsistencyNumber);
+        //2.generate schema linking prompt for each self-consistency inference
+        List<String> linkingPromptPool = new ArrayList<>();
+        for (List<Map<String, String>> exampleList : exampleListPool) {
+            String prompt = generateLinkingPrompt(llmReq, exampleList);
+            linkingPromptPool.add(prompt);
+        }
 
-        //2.generator linking prompt,and parallel generate response.
-        List<String> linkingPromptPool = promptGenerator.generatePromptPool(llmReq, exampleListPool, false);
         List<String> linkingResults = new CopyOnWriteArrayList<>();
         ChatLanguageModel chatLanguageModel = getChatLanguageModel(llmReq.getLlmConfig());
         linkingPromptPool.parallelStream().forEach(
@@ -53,8 +50,17 @@ public class TwoPassSCSqlGenStrategy extends SqlGenStrategy {
                 }
         );
         List<String> sortedList = OutputFormat.formatList(linkingResults);
-        //3.generator sql prompt,and parallel generate response.
-        List<String> sqlPromptPool = promptGenerator.generateSqlPromptPool(llmReq, sortedList, exampleListPool);
+
+        //3.generate sql generation prompt for each self-consistency inference
+        List<String> sqlPromptPool = new ArrayList<>();
+        for (int i = 0; i < sortedList.size(); i++) {
+            String schemaLinkStr = sortedList.get(i);
+            List<Map<String, String>> fewshotExampleList = exampleListPool.get(i);
+            String sqlPrompt = generateSqlPrompt(llmReq, schemaLinkStr, fewshotExampleList);
+            sqlPromptPool.add(sqlPrompt);
+        }
+
+        //4.perform multiple self-consistency inferences parallelly
         List<String> sqlTaskPool = new CopyOnWriteArrayList<>();
         sqlPromptPool.parallelStream().forEach(sqlPrompt -> {
             Prompt linkingPrompt = PromptTemplate.from(JsonUtil.toString(sqlPrompt)).apply(new HashMap<>());
@@ -64,13 +70,47 @@ public class TwoPassSCSqlGenStrategy extends SqlGenStrategy {
             keyPipelineLog.info("TwoPassSCSqlGenStrategy step two modelResp:{}", result);
             sqlTaskPool.add(result);
         });
-        //4.format response.
-        Pair<String, Map<String, Double>> sqlMapPair = OutputFormat.selfConsistencyVote(sqlTaskPool);
 
+        //5.format response.
+        Pair<String, Map<String, Double>> sqlMapPair = OutputFormat.selfConsistencyVote(sqlTaskPool);
         LLMResp llmResp = new LLMResp();
         llmResp.setQuery(llmReq.getQueryText());
-        llmResp.setSqlRespMap(OutputFormat.buildSqlRespMap(sqlExamples, sqlMapPair.getRight()));
+        //TODO: should use the same few-shot exemplars as the one chose by self-consistency vote
+        llmResp.setSqlRespMap(OutputFormat.buildSqlRespMap(exampleListPool.get(0), sqlMapPair.getRight()));
         return llmResp;
+    }
+
+    private String generateLinkingPrompt(LLMReq llmReq, List<Map<String, String>> exampleList) {
+        String instruction = "# Find the schema_links for generating SQL queries for each question "
+                + "based on the database schema and Foreign keys.";
+
+        List<String> exampleKeys = Arrays.asList("questionAugmented", "dbSchema", "generatedSchemaLinkingCoT");
+        String exampleTemplate = "dbSchema\nQ: questionAugmented\nA: generatedSchemaLinkingCoT";
+        String exampleFormat = InputFormat.format(exampleTemplate, exampleKeys, exampleList);
+
+        Pair<String, String> questionPrompt = promptHelper.transformQuestionPrompt(llmReq);
+        String dbSchema = questionPrompt.getLeft();
+        String questionAugmented = questionPrompt.getRight();
+        String newCaseTemplate = "%s\nQ: %s\nA: Let’s think step by step. In the question \"%s\", we are asked:";
+        String newCasePrompt = String.format(newCaseTemplate, dbSchema, questionAugmented, questionAugmented);
+
+        return instruction + InputFormat.SEPERATOR + exampleFormat + InputFormat.SEPERATOR + newCasePrompt;
+    }
+
+    private String generateSqlPrompt(LLMReq llmReq, String schemaLinkStr,
+                                     List<Map<String, String>> fewshotExampleList) {
+        String instruction = "# Use the the schema links to generate the SQL queries for each of the questions.";
+        List<String> exampleKeys = Arrays.asList("questionAugmented", "dbSchema", "generatedSchemaLinkings", "sql");
+        String exampleTemplate = "dbSchema\nQ: questionAugmented\n" + "Schema_links: generatedSchemaLinkings\n"
+                + "SQL: sql";
+
+        String schemaLinkingPrompt = InputFormat.format(exampleTemplate, exampleKeys, fewshotExampleList);
+        Pair<String, String> questionPrompt = promptHelper.transformQuestionPrompt(llmReq);
+        String dbSchema = questionPrompt.getLeft();
+        String questionAugmented = questionPrompt.getRight();
+        String newCaseTemplate = "%s\nQ: %s\nSchema_links: %s\nSQL: ";
+        String newCasePrompt = String.format(newCaseTemplate, dbSchema, questionAugmented, schemaLinkStr);
+        return instruction + InputFormat.SEPERATOR + schemaLinkingPrompt + InputFormat.SEPERATOR + newCasePrompt;
     }
 
     @Override
