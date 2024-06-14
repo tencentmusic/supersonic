@@ -37,6 +37,7 @@ public class SemanticParseInfo {
     private List<SchemaElementMatch> elementMatches = new ArrayList<>();
     private Map<String, Object> properties = new HashMap<>();
     private SqlInfo sqlInfo = new SqlInfo();
+    private SqlEvaluation sqlEvaluation = new SqlEvaluation();
     private QueryType queryType = QueryType.ID;
     private EntityInfo entityInfo;
     private String textInfo;
