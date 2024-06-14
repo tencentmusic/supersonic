@@ -37,8 +37,8 @@ public class SqlQueryApiController {
 
     @PostMapping("/sql")
     public Object queryBySql(@RequestBody QuerySqlReq querySqlReq,
-                             HttpServletRequest request,
-                             HttpServletResponse response) throws Exception {
+            HttpServletRequest request,
+            HttpServletResponse response) throws Exception {
         User user = UserHolder.findUser(request, response);
         String sql = querySqlReq.getSql();
         querySqlReq.setSql(StringUtil.replaceBackticks(sql));
@@ -48,8 +48,8 @@ public class SqlQueryApiController {
 
     @PostMapping("/sqls")
     public Object queryBySqls(@RequestBody QuerySqlsReq querySqlsReq,
-                              HttpServletRequest request,
-                              HttpServletResponse response) throws Exception {
+            HttpServletRequest request,
+            HttpServletResponse response) throws Exception {
         User user = UserHolder.findUser(request, response);
         List<SemanticQueryReq> semanticQueryReqs = querySqlsReq.getSqls()
                 .stream().map(sql -> {
@@ -60,22 +60,22 @@ public class SqlQueryApiController {
                     return querySqlReq;
                 }).collect(Collectors.toList());
         List<CompletableFuture<SemanticQueryResp>> futures = semanticQueryReqs.stream()
-                        .map(querySqlReq -> CompletableFuture.supplyAsync(() -> {
-                            try {
-                                return queryService.queryByReq(querySqlReq, user);
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                                return new SemanticQueryResp();
-                            }
-                        }))
-                        .collect(Collectors.toList());
+                .map(querySqlReq -> CompletableFuture.supplyAsync(() -> {
+                    try {
+                        return queryService.queryByReq(querySqlReq, user);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        return new SemanticQueryResp();
+                    }
+                }))
+                .collect(Collectors.toList());
         return futures.stream().map(CompletableFuture::join).collect(Collectors.toList());
     }
 
     @PostMapping("/sqlsWithException")
     public Object queryBySqlsWithException(@RequestBody QuerySqlsReq querySqlsReq,
-                                           HttpServletRequest request,
-                                           HttpServletResponse response) throws Exception {
+            HttpServletRequest request,
+            HttpServletResponse response) throws Exception {
         User user = UserHolder.findUser(request, response);
         List<SemanticQueryReq> semanticQueryReqs = querySqlsReq.getSqls()
                 .stream().map(sql -> {
@@ -95,6 +95,16 @@ public class SqlQueryApiController {
             throw new Exception(e.getCause().getMessage());
         }
         return semanticQueryRespList;
+    }
+
+    @PostMapping("/validate")
+    public Object validate(@RequestBody QuerySqlReq querySqlReq,
+            HttpServletRequest request,
+            HttpServletResponse response) throws Exception {
+        User user = UserHolder.findUser(request, response);
+        String sql = querySqlReq.getSql();
+        querySqlReq.setSql(StringUtil.replaceBackticks(sql));
+        return chatQueryService.validate(querySqlReq, user);
     }
 
 }
