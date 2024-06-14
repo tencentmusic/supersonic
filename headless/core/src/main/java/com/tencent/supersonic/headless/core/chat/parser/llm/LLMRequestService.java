@@ -23,6 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
@@ -80,14 +81,16 @@ public class LLMRequestService {
         llmSchema.setDomainName(dataSetIdToName.get(dataSetId));
 
         List<String> fieldNameList = getFieldNameList(queryCtx, dataSetId, llmParserConfig);
+        fieldNameList.add(TimeDimensionEnum.DAY.getChName());
+        llmSchema.setFieldNameList(fieldNameList);
+
+        llmSchema.setMetrics(getMatchedMetrics(queryCtx, dataSetId));
+        llmSchema.setDimensions(getMatchedDimensions(queryCtx, dataSetId));
+        llmSchema.setTerms(getTerms(queryCtx, dataSetId));
+        llmReq.setSchema(llmSchema);
 
         String priorExts = getPriorExts(queryCtx, fieldNameList);
         llmReq.setPriorExts(priorExts);
-
-        fieldNameList.add(TimeDimensionEnum.DAY.getChName());
-        llmSchema.setFieldNameList(fieldNameList);
-        llmSchema.setTerms(getTerms(queryCtx, dataSetId));
-        llmReq.setSchema(llmSchema);
 
         List<ElementValue> linking = new ArrayList<>();
         boolean linkingValueEnabled = Boolean.valueOf(parserConfig.getParameterValue(PARSER_LINKING_VALUE_ENABLE));
@@ -104,10 +107,11 @@ public class LLMRequestService {
         llmReq.setCurrentDate(currentDate);
         llmReq.setSqlGenType(LLMReq.SqlGenType.valueOf(parserConfig.getParameterValue(PARSER_STRATEGY_TYPE)));
         llmReq.setLlmConfig(queryCtx.getLlmConfig());
+
         return llmReq;
     }
 
-    public LLMResp invokeLLM(LLMReq llmReq) {
+    public LLMResp runText2SQL(LLMReq llmReq) {
         return ComponentFactory.getLLMProxy().text2sql(llmReq);
     }
 
@@ -169,7 +173,7 @@ public class LLMRequestService {
         return extraInfoSb.toString();
     }
 
-    public List<ElementValue> getValueList(QueryContext queryCtx, Long dataSetId) {
+    public List<ElementValue> getValues(QueryContext queryCtx, Long dataSetId) {
         Map<Long, String> itemIdToName = getItemIdToName(queryCtx, dataSetId);
         List<SchemaElementMatch> matchedElements = queryCtx.getMapInfo().getMatchedElements(dataSetId);
         if (CollectionUtils.isEmpty(matchedElements)) {
@@ -214,6 +218,40 @@ public class LLMRequestService {
                 .collect(Collectors.toSet());
         results.addAll(metrics);
         return results;
+    }
+
+    protected List<SchemaElement> getMatchedMetrics(QueryContext queryCtx, Long dataSetId) {
+        List<SchemaElementMatch> matchedElements = queryCtx.getMapInfo().getMatchedElements(dataSetId);
+        if (CollectionUtils.isEmpty(matchedElements)) {
+            return Collections.emptyList();
+        }
+        List<SchemaElement> schemaElements = matchedElements.stream()
+                .filter(schemaElementMatch -> {
+                    SchemaElementType elementType = schemaElementMatch.getElement().getType();
+                    return SchemaElementType.METRIC.equals(elementType);
+                })
+                .map(schemaElementMatch -> {
+                    return schemaElementMatch.getElement();
+                })
+                .collect(Collectors.toList());
+        return schemaElements;
+    }
+
+    protected List<SchemaElement> getMatchedDimensions(QueryContext queryCtx, Long dataSetId) {
+        List<SchemaElementMatch> matchedElements = queryCtx.getMapInfo().getMatchedElements(dataSetId);
+        if (CollectionUtils.isEmpty(matchedElements)) {
+            return Collections.emptyList();
+        }
+        List<SchemaElement> schemaElements = matchedElements.stream()
+                .filter(schemaElementMatch -> {
+                    SchemaElementType elementType = schemaElementMatch.getElement().getType();
+                    return SchemaElementType.DIMENSION.equals(elementType);
+                })
+                .map(schemaElementMatch -> {
+                    return schemaElementMatch.getElement();
+                })
+                .collect(Collectors.toList());
+        return schemaElements;
     }
 
     protected Set<String> getMatchedFieldNames(QueryContext queryCtx, Long dataSetId) {

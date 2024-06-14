@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -68,7 +69,7 @@ public class OnePassSCSqlGenStrategy extends SqlGenStrategy {
                 + "1.ALWAYS use `数据日期` as the date field.\n"
                 + "2.ALWAYS use `datediff()` as the date function.\n"
                 + "3.DO NOT specify date filter in the where clause if not explicitly mentioned in the query.\n"
-                + "4.ONLY output SQL statement.\n"
+                + "4.ONLY respond with the converted SQL statement.\n"
                 + "#Exemplars:\n%s"
                 + "#UserQuery: %s "
                 + "#DatabaseMetadata: %s "
@@ -85,11 +86,11 @@ public class OnePassSCSqlGenStrategy extends SqlGenStrategy {
         }
 
         Pair<String, String> questionPrompt = promptHelper.transformQuestionPrompt(llmReq);
-        String dbSchema = questionPrompt.getLeft();
+        String dataSemanticsStr = promptHelper.buildMetadataStr(llmReq);
         String questionAugmented = questionPrompt.getRight();
-        String promptStr = String.format(instruction, exemplarsStr, questionAugmented, dbSchema);
+        String promptStr = String.format(instruction, exemplarsStr, questionAugmented, dataSemanticsStr);
 
-        return PromptTemplate.from(promptStr).apply(new HashMap<>());
+        return PromptTemplate.from(promptStr).apply(Collections.EMPTY_MAP);
     }
 
     @Override

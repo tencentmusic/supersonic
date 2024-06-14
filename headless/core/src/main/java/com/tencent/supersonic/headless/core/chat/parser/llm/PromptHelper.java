@@ -65,14 +65,48 @@ public class PromptHelper {
         }
         String currentDataStr = "当前的日期是" + currentDate;
         String linkingListStr = String.join("，", priorLinkingList);
-        String termStr = getTermStr(llmReq);
+        String termStr = buildTermStr(llmReq);
         String questionAugmented = String.format("%s (补充信息:%s;%s;%s;%s)", llmReq.getQueryText(),
                 linkingListStr, currentDataStr, termStr, priorExts);
 
         return Pair.of(dbSchema, questionAugmented);
     }
 
-    private String getTermStr(LLMReq llmReq) {
+    public String buildMetadataStr(LLMReq llmReq) {
+        String tableStr = llmReq.getSchema().getDataSetName();
+        StringBuilder metricStr = new StringBuilder();
+        StringBuilder dimensionStr = new StringBuilder();
+
+        llmReq.getSchema().getMetrics().stream().forEach(
+                metric -> {
+                    metricStr.append(metric.getName());
+                    if (StringUtils.isNotEmpty(metric.getDescription())) {
+                        metricStr.append(" COMMENT '" + metric.getDescription() + "'");
+                    }
+                    if (StringUtils.isNotEmpty(metric.getDefaultAgg())) {
+                        metricStr.append(" AGGREGATE '" + metric.getDefaultAgg().toUpperCase() + "'");
+                    }
+                    metricStr.append(",");
+                }
+        );
+
+        llmReq.getSchema().getDimensions().stream().forEach(
+                dimension -> {
+                    dimensionStr.append(dimension.getName());
+                    if (StringUtils.isNotEmpty(dimension.getDescription())) {
+                        dimensionStr.append(" COMMENT '" + dimension.getDescription() + "'");
+                    }
+                    dimensionStr.append(",");
+                }
+        );
+
+        String template = "Table: %s, Metrics: [%s], Dimensions: [%s]";
+
+
+        return String.format(template, tableStr, metricStr, dimensionStr);
+    }
+
+    private String buildTermStr(LLMReq llmReq) {
         List<LLMReq.Term> terms = llmReq.getSchema().getTerms();
         StringBuilder termsDesc = new StringBuilder();
         if (!CollectionUtils.isEmpty(terms)) {
