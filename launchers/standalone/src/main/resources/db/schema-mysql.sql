@@ -566,27 +566,58 @@ CREATE TABLE IF NOT EXISTS `s2_term` (
     PRIMARY KEY (`id`)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8 COMMENT ='术语表';
 
-CREATE TABLE IF NOT EXISTS `s2_role` (
-    `id` varchar(255) NOT NULL comment '角色ID',
-    `roleType` int(11) NOT NULL Comment '角色类型:0-系统角色(普通用户,系统用户), 1-自定义角色',
-    `description` varchar(255)  DEFAULT NULL COMMENT '描述',
-    `enable` bit(1) DEFAULT NULL comment '是否启用',
-    `lastOperationType` int(11) NOT NULL comment '最后操作类型:0-新增, 1-修改, 2-删除',
-    `name` varchar(255)  DEFAULT NULL comment '角色名称',
-    `alias` varchar(255)  DEFAULT NULL comment '角色别名',
-    `tenantId` varchar(255) NOT NULL DEFAULT 'default',
-    PRIMARY KEY (`id`,`tenantId`)
-) ENGINE = InnoDB DEFAULT CHARSET = utf8 COMMENT ='角色表';
+-- s2.s2_role definition
+DROP TABLE IF EXISTS s2_role;
+CREATE TABLE IF NOT EXISTS  s2_role (
+    id bigint(20) NOT NULL AUTO_INCREMENT COMMENT '自定义角色表主键',
+    creation_type int(11) NOT NULL COMMENT '创建类型,1:系统创建,2:用户创建',
+    description varchar(255) COLLATE utf8_bin DEFAULT NULL COMMENT '角色描述',
+    is_enable bit(1) DEFAULT NULL  COMMENT '是否启用',
+    last_operation_type int(11) NOT NULL COMMENT '最后操作类型,1:新增,2:修改,3:删除',
+    name varchar(255) COLLATE utf8_bin DEFAULT NULL COMMENT '角色名称',
+    alias varchar(255) COLLATE utf8_bin DEFAULT NULL COMMENT '角色别名',
+    tenant_id bigint(20)  NOT NULL DEFAULT 1,
+    create_time datetime DEFAULT NULL,
+    update_time datetime DEFAULT NULL,
+    create_by varchar(255) COLLATE utf8_bin DEFAULT NULL,
+    update_by varchar(255) COLLATE utf8_bin DEFAULT NULL,
+    PRIMARY KEY (id,tenant_id),
+    KEY s2_custom_role_name_IDX (name) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT '角色表';
 
-CREATE TABLE IF NOT EXISTS `s2_user_role_rela` (
-     `id` varchar(255)  NOT NULL comment '关系ID',
-     `roleId` varchar(255)  NOT NULL comment '角色ID',
-     `roleType` int(11) NOT NULL comment '角色类型:0-系统角色(普通用户,系统用户), 1-自定义角色',
-     `userId` varchar(255)  NOT NULL comment '用户ID',
-     `tenantId` varchar(255)  NOT NULL DEFAULT 'default',
-     PRIMARY KEY (`id`),
-     UNIQUE KEY `UKrjlfin3kwa87iecxe4mqvr7if` (`userId`,`roleId`,`roleType`,`tenantId`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin comment='用户角色关系表';
+
+-- s2.s2_user_role_rela definition
+DROP TABLE IF EXISTS s2_user_role_rela;
+CREATE TABLE IF NOT EXISTS  s2_user_role_rela (
+      id bigint(20) NOT NULL AUTO_INCREMENT COMMENT '用户角色关联表主键',
+      role_id bigint(20) NOT NULL COMMENT '角色ID',
+      role_type int(11) NOT NULL COMMENT '角色类型,1:部门,2:自定义角色,3:用户,4:职位',
+      user_id bigint(20) NOT NULL COMMENT '用户ID',
+      tenant_id bigint(20) NOT NULL DEFAULT 1,
+      PRIMARY KEY (id),
+      UNIQUE KEY UKrjlfin3kwa87iecxe4mqvr7if (user_id,role_id,role_type,tenant_id),
+      KEY IDX8yknqk4qau61k1h614i87emdn (user_id),
+      KEY IDX8sr9fqbahqne0k3utap5kfx24 (role_id),
+      KEY IDXtmv6e3k2fr907sfbhuu1blkd6 (role_type)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='用户角色关联表';
+
+DROP TABLE IF EXISTS s2_authority;
+CREATE TABLE IF NOT EXISTS s2_authority (
+    id bigint(20) NOT NULL AUTO_INCREMENT COMMENT '权限表主键',
+    authority int(11) NOT NULL COMMENT '权限值,1:拒绝,2:允许',
+    authority_entity_id int(20) NOT NULL COMMENT '权限实体ID',
+    authority_entity_type int(11) NOT NULL COMMENT '所关联的权限实体类型,1:助理管理,2:插件管理,3:语义模型,4:指标市场,5:数据库管理,6:系统设置',
+    authority_type int(11) NOT NULL COMMENT '操作类型,1:新增,2:修改,3:删除,4:查询,5:导出,6:导入,7:审核,8:分配,9:授权,10:启用,11:禁用',
+    role_id bigint(20) COLLATE utf8_bin NOT NULL COMMENT '所关联的角色ID，关联表:s2_custom_role->id,s2_dep_role->id,s2_dep_role->id',
+    role_type int(11) NOT NULL COMMENT '角色类型,1:部门,2:自定义角色,3:用户,4:职位',
+    tenant_id bigint(20) NOT NULL DEFAULT 1,
+    create_time datetime DEFAULT NULL,
+    update_time datetime DEFAULT NULL,
+    create_by varchar(255) COLLATE utf8_bin DEFAULT NULL,
+    update_by varchar(255) COLLATE utf8_bin DEFAULT NULL,
+    PRIMARY KEY (id),
+    UNIQUE KEY UK1tsntnb9o3bajn025123mdv6n (role_id,role_type,authority_entity_id,authority_entity_type,authority,authority_type,tenant_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT '权限表';
 
 
 CREATE TABLE IF NOT EXISTS s2_model_comment (
@@ -601,6 +632,15 @@ CREATE TABLE IF NOT EXISTS s2_model_comment (
     updated_at  datetime ,
     UNIQUE KEY `UK_model_id_field_name` (`model_id`, `field_name`)
 )ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin comment='模型字段注释补充信息表';
+
+
+select * from s2_user s2u
+join s2_user_role_rela surr on s2u.id = surr.user_id
+join s2_role sr on surr.role_id = sr.id
+join s2_authority sa on sr.id = sa.role_id
+join s2_agent s2a on s2a.id = sa.authority_entity_id
+where s2u.name = 'admin' and sa.authority = 2
+  and sa.authority_entity_id = 1 and sa.authority_entity_type = 6 and sa.authority_type = 4;
 
 
 

@@ -1213,3 +1213,69 @@ VALUES (DATE_SUB(CURRENT_DATE(), INTERVAL 0 DAY), '打败它', 'Michel', '英国
 INSERT INTO song (imp_date, song_name, artist_name, country, f_id, g_name, rating, languages, releasedate, resolution)
 VALUES (DATE_SUB(CURRENT_DATE(), INTERVAL 0 DAY), '阿杰伊阿卡什', 'Topu', '印度', 6, '现代', 10, '孟加拉语', '2004-03-27', 320);
 -- benchmark
+
+-- 初始化数据
+INSERT INTO s2_role (id, creation_type, description, is_enable, last_operation_type, name, alias, tenant_id, create_time, update_time, create_by, update_by) VALUES
+(1, 1, 'System Admin Role', b'1', 1, '希沃助手', 'SysAdmin', 1, '2024-06-14 10:00:00', '2024-06-14 10:00:00', 'admin', 'admin'),
+(2, 2, 'User Role', b'1', 1, '财务助手', 'RegularUser', 1, '2024-06-14 10:05:00', '2024-06-14 10:05:00', 'admin', 'admin')
+;
+INSERT INTO s2_user_role_rela (id, role_id, role_type, user_id, tenant_id) VALUES
+(1, 1, 2, 5945, 1),
+(2, 2, 2, 564, 1)
+;
+
+INSERT INTO s2_authority (id, authority, authority_entity_id, authority_entity_type, authority_type, role_id, role_type, tenant_id, create_time, update_time, create_by, update_by) VALUES
+(1, 2, 'entity1', 1, 1, 1, 2, 1, '2024-06-14 10:10:00', '2024-06-14 10:10:00', 'admin', 'admin'),
+(2, 2, 'entity2', 2, 2, 2, 2, 1, '2024-06-14 10:15:00', '2024-06-14 10:15:00', 'admin', 'admin')
+;
+
+-- 初始化用户与角色数据
+INSERT INTO s2_user_role_rela (
+    role_id, user_id, role_type, tenant_id
+)
+SELECT
+    r.id AS role_id,
+    u.id AS user_id,
+    2 AS role_type,
+    1 AS tenant_id
+FROM
+    s2_user u
+        CROSS JOIN
+    s2_role r
+WHERE
+    u.name IN ('zhaodongsheng', 'jianghao')
+  AND r.name IN ('算指标', '圈选');
+
+-- 给角色授权
+insert into s2_authority(
+    authority,
+    authority_entity_id,
+    authority_entity_type,
+    authority_type,
+    role_id,
+    role_type,
+    tenant_id,
+    create_time,
+    update_time,
+    create_by,
+    update_by
+)
+select
+    2 as authority,
+    sa.id as authority_entity_id,
+    1 as authority_entity_type,
+    2 as authority_type,
+    sr.id as role_id ,
+    1 as role_type,
+    1 as tenant_id,
+    CURRENT_TIME() as create_time,
+    CURRENT_TIME() as update_time,
+    'admin' as create_by,
+    'admin' as update_by
+from s2_role sr
+         cross join
+     s2_agent sa
+where sr.name in ('算指标','圈选')
+  and sa.name in ('算指标','圈选')
+;
+

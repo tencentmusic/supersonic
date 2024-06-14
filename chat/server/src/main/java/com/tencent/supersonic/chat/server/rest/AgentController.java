@@ -50,8 +50,10 @@ public class AgentController {
     }
 
     @RequestMapping("/getAgentList")
-    public List<Agent> getAgentList() {
-        return agentService.getAgents();
+    public List<Agent> getAgentList(HttpServletRequest httpServletRequest,
+                                    HttpServletResponse httpServletResponse) {
+        User user = UserHolder.findUser(httpServletRequest, httpServletResponse);
+        return agentService.getAgents(user);
     }
 
     @RequestMapping("/getToolTypes")
