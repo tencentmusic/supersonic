@@ -6,6 +6,7 @@ import com.tencent.supersonic.common.pojo.ResultData;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.web.servlet.error.BasicErrorController;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -24,14 +25,19 @@ public class ResponseAdvice implements ResponseBodyAdvice<Object> {
 
     @Override
     public boolean supports(MethodParameter methodParameter, Class<? extends HttpMessageConverter<?>> aClass) {
-        return true;
+        return !methodParameter.getDeclaringClass().isAssignableFrom(BasicErrorController.class);
     }
 
     @SneakyThrows
     @Override
     public Object beforeBodyWrite(Object result, MethodParameter methodParameter, MediaType mediaType,
-            Class<? extends HttpMessageConverter<?>> aClass, ServerHttpRequest serverHttpRequest,
-            ServerHttpResponse serverHttpResponse) {
+                                  Class<? extends HttpMessageConverter<?>> aClass, ServerHttpRequest serverHttpRequest,
+                                  ServerHttpResponse serverHttpResponse) {
+        // 判断当前请求是否是 Swagger 相关的请求
+        String path = serverHttpRequest.getURI().getPath();
+        if (path.startsWith("/swagger") || path.startsWith("/v3/api-docs") || path.startsWith("/v2/api-docs")) {
+            return result;
+        }
         objectMapper.registerModule(new JavaTimeModule());
         if (result instanceof String) {
             return objectMapper.writeValueAsString(ResultData.success(result));

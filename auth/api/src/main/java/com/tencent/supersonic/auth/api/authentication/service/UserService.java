@@ -21,6 +21,8 @@ public interface UserService {
 
     String login(UserReq userCmd, HttpServletRequest request);
 
+    String login(UserReq userCmd, String appKey);
+
     Set<String> getUserAllOrgId(String userName);
 
     List<User> getUserByOrg(String key);

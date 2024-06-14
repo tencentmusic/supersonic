@@ -20,4 +20,9 @@ public class FakeUserStrategy implements UserStrategy {
         return User.getFakeUser();
     }
 
+    @Override
+    public User findUser(String token, String appKey) {
+        return User.getFakeUser();
+    }
+
 }

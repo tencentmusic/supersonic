@@ -37,6 +37,11 @@ public class UserTokenUtils {
     }
 
     public String generateToken(UserWithPassword user, HttpServletRequest request) {
+        String appKey = getAppKey(request);
+        return generateToken(user, appKey);
+    }
+
+    public String generateToken(UserWithPassword user, String appKey) {
         Map<String, Object> claims = new HashMap<>(5);
         claims.put(TOKEN_USER_ID, user.getId());
         claims.put(TOKEN_USER_NAME, StringUtils.isEmpty(user.getName()) ? "" : user.getName());
@@ -44,7 +49,6 @@ public class UserTokenUtils {
         claims.put(TOKEN_USER_DISPLAY_NAME, user.getDisplayName());
         claims.put(TOKEN_CREATE_TIME, System.currentTimeMillis());
         claims.put(TOKEN_IS_ADMIN, user.getIsAdmin());
-        String appKey = getAppKey(request);
         return generate(claims, appKey);
     }
 
@@ -61,6 +65,15 @@ public class UserTokenUtils {
     public User getUser(HttpServletRequest request) {
         String token = request.getHeader(authenticationConfig.getTokenHttpHeaderKey());
         final Claims claims = getClaims(token, request);
+        return getUser(claims);
+    }
+
+    public User getUser(String token, String appKey) {
+        final Claims claims = getClaims(token, appKey);
+        return getUser(claims);
+    }
+
+    private User getUser(Claims claims) {
         Long userId = Long.parseLong(claims.getOrDefault(TOKEN_USER_ID, 0).toString());
         String userName = String.valueOf(claims.get(TOKEN_USER_NAME));
         String email = String.valueOf(claims.get(TOKEN_USER_EMAIL));
@@ -92,6 +105,16 @@ public class UserTokenUtils {
         Claims claims;
         try {
             String appKey = getAppKey(request);
+            claims = getClaims(token, appKey);
+        } catch (Exception e) {
+            throw new AccessException("parse user info from token failed :" + token);
+        }
+        return claims;
+    }
+
+    private Claims getClaims(String token, String appKey) {
+        Claims claims;
+        try {
             String tokenSecret = getTokenSecret(appKey);
             claims = Jwts.parser()
                     .setSigningKey(tokenSecret.getBytes(StandardCharsets.UTF_8))

@@ -102,3 +102,16 @@ s2:
     #      access-token: hg_access_token
     #      model-id: sentence-transformers/all-MiniLM-L6-v2
     #      timeout: 1h
+
+# swagger配置
+swagger:
+  title: 'SuperSonic平台接口文档'
+  base:
+    package: com.tencent.supersonic
+  description: 'SuperSonic平台接口文档'
+  url: ''
+  contact:
+    name:
+    email:
+    url: ''
+  version: 3.0
