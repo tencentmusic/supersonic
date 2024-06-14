@@ -75,7 +75,17 @@ MERGE INTO s2_user_department (user_name, department) values ('john','strategy')
 MERGE INTO s2_user_department (user_name, department) values ('alice','sales');
 MERGE INTO s2_user_department (user_name, department) values ('dean','marketing');
 
-
+INSERT INTO s2_pv_uv_statis (imp_date, user_name, page) VALUES (CURRENT_DATE(), 'lucy', 'p1');
+INSERT INTO s2_pv_uv_statis (imp_date, user_name, page) VALUES (CURRENT_DATE(), 'jack', 'p1');
+INSERT INTO s2_pv_uv_statis (imp_date, user_name, page) VALUES (CURRENT_DATE(), 'lucy', 'p4');
+INSERT INTO s2_pv_uv_statis (imp_date, user_name, page) VALUES (CURRENT_DATE(), 'tom', 'p2');
+INSERT INTO s2_pv_uv_statis (imp_date, user_name, page) VALUES (CURRENT_DATE(), 'john', 'p3');
+INSERT INTO s2_pv_uv_statis (imp_date, user_name, page) VALUES (CURRENT_DATE(), 'alice', 'p1');
+INSERT INTO s2_pv_uv_statis (imp_date, user_name, page) VALUES (CURRENT_DATE(), 'dean', 'p2');
+INSERT INTO s2_pv_uv_statis (imp_date, user_name, page) VALUES (CURRENT_DATE(), 'john', 'p3');
+INSERT INTO s2_pv_uv_statis (imp_date, user_name, page) VALUES (CURRENT_DATE(), 'tom', 'p3');
+INSERT INTO s2_pv_uv_statis (imp_date, user_name, page) VALUES (CURRENT_DATE(), 'lucy', 'p1');
+INSERT INTO s2_pv_uv_statis (imp_date, user_name, page) VALUES (CURRENT_DATE(), 'dean', 'p4');
 INSERT INTO s2_pv_uv_statis (imp_date, user_name, page) VALUES (DATEADD('DAY', -5, CURRENT_DATE()), 'lucy', 'p1');
 INSERT INTO s2_pv_uv_statis (imp_date, user_name, page) VALUES (DATEADD('DAY', -4, CURRENT_DATE()), 'jack', 'p1');
 INSERT INTO s2_pv_uv_statis (imp_date, user_name, page) VALUES (DATEADD('DAY', -3, CURRENT_DATE()), 'lucy', 'p4');
