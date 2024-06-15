@@ -32,8 +32,7 @@ public class LocalFileConfig {
         try {
             return HanlpHelper.getHanlpPropertiesPath();
         } catch (FileNotFoundException e) {
-            log.warn("getDictDirectoryPrefixDir error: " + e);
-            e.printStackTrace();
+            log.error("getDictDirectoryPrefixDir error: ", e);
         }
         return "";
     }
