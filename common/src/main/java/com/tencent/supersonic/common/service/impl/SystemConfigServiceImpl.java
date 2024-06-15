@@ -6,7 +6,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.tencent.supersonic.common.persistence.dataobject.SystemConfigDO;
 import com.tencent.supersonic.common.persistence.mapper.SystemConfigMapper;
 import com.tencent.supersonic.common.pojo.Parameter;
-import com.tencent.supersonic.common.pojo.SystemConfig;
+import com.tencent.supersonic.common.config.SystemConfig;
 import com.tencent.supersonic.common.service.SystemConfigService;
 import com.tencent.supersonic.common.util.JsonUtil;
 import org.springframework.beans.factory.annotation.Autowired;

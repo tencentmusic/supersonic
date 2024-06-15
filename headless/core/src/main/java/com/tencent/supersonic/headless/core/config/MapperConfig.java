@@ -1,7 +1,7 @@
 package com.tencent.supersonic.headless.core.config;
 
 import com.google.common.collect.Lists;
-import com.tencent.supersonic.common.pojo.ParameterConfig;
+import com.tencent.supersonic.common.config.ParameterConfig;
 import com.tencent.supersonic.common.pojo.Parameter;
 import org.springframework.stereotype.Service;
 

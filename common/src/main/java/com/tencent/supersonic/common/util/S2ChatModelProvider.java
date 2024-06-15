@@ -1,7 +1,6 @@
-package com.tencent.supersonic.headless.core.utils;
+package com.tencent.supersonic.common.util;
 
-import com.tencent.supersonic.common.util.ContextUtils;
-import com.tencent.supersonic.headless.api.pojo.LLMConfig;
+import com.tencent.supersonic.common.config.LLMConfig;
 import com.tencent.supersonic.common.pojo.enums.S2ModelProvider;
 import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.localai.LocalAiChatModel;

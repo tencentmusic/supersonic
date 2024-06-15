@@ -1,4 +1,4 @@
-package com.tencent.supersonic.headless.api.pojo;
+package com.tencent.supersonic.common.config;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

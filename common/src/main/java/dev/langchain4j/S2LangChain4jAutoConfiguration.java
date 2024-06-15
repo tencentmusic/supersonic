@@ -1,6 +1,5 @@
 package dev.langchain4j;
 
-import static dev.langchain4j.ModelProvider.OPEN_AI;
 import static dev.langchain4j.exception.IllegalConfigurationException.illegalConfiguration;
 import static dev.langchain4j.internal.Utils.isNullOrBlank;
 
@@ -268,7 +267,7 @@ public class S2LangChain4jAutoConfiguration {
                     + "langchain4j.moderation-model.openai.api-key = sk-...\n");
         }
 
-        if (properties.getModerationModel().getProvider() != OPEN_AI) {
+        if (properties.getModerationModel().getProvider() != ModelProvider.OPEN_AI) {
             throw illegalConfiguration("Unsupported moderation model provider: %s",
                     properties.getModerationModel().getProvider());
         }

@@ -1,6 +1,7 @@
-package com.tencent.supersonic.common.pojo;
+package com.tencent.supersonic.common.config;
 
 import com.google.common.collect.Lists;
+import com.tencent.supersonic.common.pojo.Parameter;
 import com.tencent.supersonic.common.util.ContextUtils;
 import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
