@@ -59,16 +59,16 @@ public class SqlQueryApiController {
                     chatQueryService.correct(querySqlReq, user);
                     return querySqlReq;
                 }).collect(Collectors.toList());
+
         List<CompletableFuture<SemanticQueryResp>> futures = semanticQueryReqs.stream()
                 .map(querySqlReq -> CompletableFuture.supplyAsync(() -> {
                     try {
                         return queryService.queryByReq(querySqlReq, user);
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        log.error("querySqlReq:{},queryByReq error:", querySqlReq, e);
                         return new SemanticQueryResp();
                     }
-                }))
-                .collect(Collectors.toList());
+                })).collect(Collectors.toList());
         return futures.stream().map(CompletableFuture::join).collect(Collectors.toList());
     }
 

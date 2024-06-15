@@ -6,6 +6,7 @@ import static org.junit.Assert.assertTrue;
 import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
 import com.tencent.supersonic.auth.authentication.strategy.FakeUserStrategy;
 import com.tencent.supersonic.headless.server.listener.FlightSqlListener;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.arrow.flight.CallHeaders;
 import org.apache.arrow.flight.FlightCallHeaders;
 import org.apache.arrow.flight.FlightClient;
@@ -18,6 +19,7 @@ import org.apache.arrow.memory.RootAllocator;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+@Slf4j
 public class FlightSqlTest extends BaseTest {
 
 
@@ -59,7 +61,7 @@ public class FlightSqlTest extends BaseTest {
             assertEquals(2, colCnt);
             assertTrue(rowCnt > 0);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("", e);
         }
     }
 
@@ -95,7 +97,7 @@ public class FlightSqlTest extends BaseTest {
             assertEquals(2, colCnt);
             assertTrue(rowCnt > 0);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("", e);
         }
     }
 }

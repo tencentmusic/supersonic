@@ -130,7 +130,7 @@ public class StatUtils {
                 queryStatInfo.setModelId(queryTagReq.getModelIds().get(0));
             }
         } catch (JsonProcessingException e) {
-            e.printStackTrace();
+            log.error("", e);
         }
         StatUtils.set(queryStatInfo);
 
@@ -198,7 +198,7 @@ public class StatUtils {
                 queryStatInfo.setModelId(queryStructReq.getModelIds().get(0));
             }
         } catch (JsonProcessingException e) {
-            e.printStackTrace();
+            log.error("", e);
         }
         StatUtils.set(queryStatInfo);
 
