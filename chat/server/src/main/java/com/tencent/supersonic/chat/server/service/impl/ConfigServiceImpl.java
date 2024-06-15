@@ -342,11 +342,4 @@ public class ConfigServiceImpl implements ConfigService {
         return new ArrayList<>();
     }
 
-    @Override
-    public Map<Long, ChatConfigRichResp> getModelIdToChatRichConfig() {
-        List<ChatConfigRichResp> allChatRichConfig = getAllChatRichConfig();
-        return allChatRichConfig.stream()
-                .collect(Collectors.toMap(ChatConfigRichResp::getModelId, value -> value, (k1, k2) -> k1));
-    }
-
 }
