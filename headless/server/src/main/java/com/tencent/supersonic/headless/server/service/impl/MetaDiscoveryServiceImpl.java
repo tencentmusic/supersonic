@@ -14,7 +14,7 @@ import com.tencent.supersonic.headless.api.pojo.response.DataSetMapInfo;
 import com.tencent.supersonic.headless.api.pojo.response.DataSetResp;
 import com.tencent.supersonic.headless.api.pojo.response.MapInfoResp;
 import com.tencent.supersonic.headless.api.pojo.response.MapResp;
-import com.tencent.supersonic.headless.core.chat.knowledge.builder.BaseWordBuilder;
+import com.tencent.supersonic.headless.chat.knowledge.builder.BaseWordBuilder;
 import com.tencent.supersonic.headless.server.pojo.MetaFilter;
 import com.tencent.supersonic.headless.server.service.ChatQueryService;
 import com.tencent.supersonic.headless.server.service.DataSetService;

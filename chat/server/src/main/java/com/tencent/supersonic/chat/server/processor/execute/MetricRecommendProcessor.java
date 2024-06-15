@@ -12,7 +12,7 @@ import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.api.pojo.response.QueryResult;
-import com.tencent.supersonic.headless.core.chat.knowledge.MetaEmbeddingService;
+import com.tencent.supersonic.headless.chat.knowledge.MetaEmbeddingService;
 import org.springframework.util.CollectionUtils;
 
 import java.util.Collections;

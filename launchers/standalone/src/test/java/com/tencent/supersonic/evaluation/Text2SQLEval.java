@@ -141,7 +141,6 @@ public class Text2SQLEval extends BaseTest {
                 apiKey = "REPLACE_WITH_YOUR_KEY";
                 modelName = "gpt-3.5-turbo";
                 temperature = 0.0;
-                break;
         }
 
         return new LLMConfig("open_ai",
