@@ -16,6 +16,7 @@
         <module>api</module>
         <module>server</module>
         <module>core</module>
+        <module>chat</module>
     </modules>
 
 </project>

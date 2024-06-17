@@ -7,7 +7,7 @@ import com.tencent.supersonic.headless.api.pojo.request.ExplainSqlReq;
 import com.tencent.supersonic.headless.api.pojo.request.QuerySqlReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
 import com.tencent.supersonic.headless.api.pojo.response.ExplainResp;
-import com.tencent.supersonic.headless.core.utils.QueryReqBuilder;
+import com.tencent.supersonic.headless.chat.utils.QueryReqBuilder;
 import com.tencent.supersonic.util.DataUtils;
 import org.junit.jupiter.api.Test;
 

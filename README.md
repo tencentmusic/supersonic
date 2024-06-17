@@ -1,4 +1,4 @@
-[中文介绍](README_CN.md) | [文档中心](https://github.com/tencentmusic/supersonic/wiki)
+[中文介绍](README_CN.md) | [Docs](https://supersonicbi.github.io/)
 
 ![Java CI](https://github.com/tencentmusic/supersonic/workflows/supersonic%20CI/badge.svg)
 
@@ -79,4 +79,4 @@ Please follow SuperSonic wechat official account:
 
 Welcome to join the WeChat community:
 
-<img src="./docs/images/supersonic_wechat.jpg" height="50%" width="50%" align="center"/> 
+<img src="./docs/images/supersonic_wechat.png" height="50%" width="50%" align="center"/> 

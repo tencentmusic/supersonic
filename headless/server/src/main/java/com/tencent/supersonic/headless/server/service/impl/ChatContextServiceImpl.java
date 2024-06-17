@@ -1,7 +1,7 @@
 package com.tencent.supersonic.headless.server.service.impl;
 
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
-import com.tencent.supersonic.headless.core.pojo.ChatContext;
+import com.tencent.supersonic.headless.chat.ChatContext;
 import com.tencent.supersonic.headless.server.persistence.repository.ChatContextRepository;
 import com.tencent.supersonic.headless.server.service.ChatContextService;
 import lombok.extern.slf4j.Slf4j;

@@ -5,7 +5,7 @@ import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
 import com.tencent.supersonic.common.pojo.enums.QueryType;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.api.pojo.response.QueryResult;
-import com.tencent.supersonic.headless.core.chat.query.rule.metric.MetricFilterQuery;
+import com.tencent.supersonic.headless.chat.query.rule.metric.MetricFilterQuery;
 import com.tencent.supersonic.util.DataUtils;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;

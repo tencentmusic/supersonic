@@ -1,6 +1,6 @@
 package com.tencent.supersonic.headless.server.service;
 
-import com.tencent.supersonic.headless.core.pojo.ChatContext;
+import com.tencent.supersonic.headless.chat.ChatContext;
 
 public interface ChatContextService {
 

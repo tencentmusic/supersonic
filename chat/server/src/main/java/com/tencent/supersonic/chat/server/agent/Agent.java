@@ -4,7 +4,7 @@ package com.tencent.supersonic.chat.server.agent;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.tencent.supersonic.headless.api.pojo.LLMConfig;
+import com.tencent.supersonic.common.config.LLMConfig;
 import com.tencent.supersonic.common.pojo.RecordInfo;
 import lombok.Data;
 import org.springframework.util.CollectionUtils;
