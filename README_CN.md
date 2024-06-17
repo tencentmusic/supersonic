@@ -1,3 +1,5 @@
+[英文介绍](README.md) | [文档中心](https://supersonicbi.github.io/)
+
 # SuperSonic
 
 **SuperSonic融合Chat BI（powered by LLM）和Headless BI（powered by 语义层）打造新一代的BI平台**。这种融合确保了Chat BI能够与传统BI一样访问统一化治理的语义数据模型。此外，两种BI新范式都从中获得收益：
