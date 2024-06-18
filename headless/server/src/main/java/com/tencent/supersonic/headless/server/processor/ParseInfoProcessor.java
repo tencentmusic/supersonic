@@ -89,6 +89,22 @@ public class ParseInfoProcessor implements ResultProcessor {
         }
         List<String> allFields = getFieldsExceptDate(SqlSelectHelper.getAllFields(sqlInfo.getCorrectS2SQL()));
         Set<SchemaElement> metrics = getElements(dataSetId, allFields, semanticSchema.getMetrics());
+        Map<String, String> functionMap = SqlSelectHelper.getAggregate(sqlInfo.getCorrectS2SQL())
+                .stream()
+                .collect(Collectors.toMap(
+                        func -> func.getParameters().get(0).toString(),
+                        func -> func.getMultipartName().get(0)));
+
+        for (SchemaElement metric : metrics) {
+            String aggregator = functionMap.get(metric.getName());
+            if (aggregator != null) {
+                metric.setAggregator(aggregator);
+            } else {
+                // 如果没有找到匹配的聚合函数，使用默认聚合器
+                metric.setAggregator(metric.getDefaultAgg());
+            }
+        }
+
         parseInfo.setMetrics(metrics);
         if (QueryType.METRIC.equals(parseInfo.getQueryType())) {
             List<String> groupByFields = SqlSelectHelper.getGroupByFields(sqlInfo.getCorrectS2SQL());
