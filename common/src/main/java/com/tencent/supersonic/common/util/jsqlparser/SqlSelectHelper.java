@@ -413,6 +413,28 @@ public class SqlSelectHelper {
         return new ArrayList<>(result);
     }
 
+    public static List<Function> getAggregate(String sql) {
+        List<PlainSelect> plainSelectList = getPlainSelect(sql);
+        Set<Function> result = new HashSet<>();
+        for (PlainSelect plainSelect : plainSelectList) {
+            if (Objects.isNull(plainSelect)) {
+                continue;
+            }
+            List<SelectItem<?>> selectItems = plainSelect.getSelectItems();
+            for (SelectItem selectItem : selectItems) {
+                if (selectItem.getExpression() instanceof Function) {
+                    Function function = (Function) selectItem.getExpression();
+                    if (Objects.nonNull(function.getParameters())
+                            && !CollectionUtils.isEmpty(function.getParameters().getExpressions())) {
+                        result.add(function);
+                    }
+                }
+
+            }
+        }
+        return new ArrayList<>(result);
+    }
+
     public static List<String> getAggregateAsFields(String sql) {
         List<PlainSelect> plainSelectList = getPlainSelect(sql);
         Set<String> result = new HashSet<>();

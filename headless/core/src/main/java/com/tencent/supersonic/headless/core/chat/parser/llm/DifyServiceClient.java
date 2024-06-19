@@ -4,6 +4,8 @@ import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.headless.core.utils.HttpUtils;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -42,6 +44,16 @@ public class DifyServiceClient {
         } catch (Exception e) {
             log.error("请求dify失败---->" + e.getMessage());
             throw new RuntimeException(e);
+        }
+    }
+
+    public String parseSQLResult(String sql) {
+        Pattern pattern = Pattern.compile("```(sql)?(.*)```", Pattern.DOTALL);
+        Matcher matcher = pattern.matcher(sql);
+        if (!matcher.find()) {
+            return sql.trim();
+        } else {
+            return matcher.group(2).trim();
         }
     }
 

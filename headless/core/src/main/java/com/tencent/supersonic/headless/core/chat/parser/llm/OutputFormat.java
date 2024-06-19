@@ -35,12 +35,12 @@ public class OutputFormat {
     public static String getSql(String sqlOutput) {
         String sql = "";
         try {
-            sqlOutput = sqlOutput.trim();
-            String pattern = "SQL:(.*)";
+            sqlOutput = sqlOutput.replace('\n', ' ').trim();
+            String pattern = "\\s*SELECT\\s+(.+)";
             Pattern regexPattern = Pattern.compile(pattern);
             Matcher matcher = regexPattern.matcher(sqlOutput);
             if (matcher.find()) {
-                return matcher.group(1);
+                return matcher.group();
             }
         } catch (Exception e) {
             log.error("", e);

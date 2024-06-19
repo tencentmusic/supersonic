@@ -30,6 +30,7 @@ public class SchemaElement implements Serializable {
     private List<SchemaValueMap> schemaValueMaps;
     private List<RelatedSchemaElement> relatedSchemaElements;
     private String defaultAgg;
+    private String aggregator;
     private String dataFormatType;
     private double order;
     private int isTag;
