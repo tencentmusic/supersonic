@@ -59,11 +59,13 @@ public class OnePassSCSqlGenStrategy extends SqlGenStrategy {
     }
 
     private Prompt generatePrompt(LLMReq llmReq, List<Map<String, String>> fewshotExampleList) {
+        String ddlInfo = PromptEnhancer.getDDLInfo(llmReq);
         String instruction = ""
                 + "#Role: You are a data analyst experienced in SQL languages.\n"
                 + "#Task: You will be provided a natural language query asked by business users,"
                 + "please convert it to a SQL query so that relevant answer could be returned to the user "
                 + "by executing the SQL query against underlying database.\n"
+                + ddlInfo
                 + "#Rules:\n"
                 + "1.ALWAYS use `数据日期` as the date field.\n"
                 + "2.ALWAYS use `datediff()` as the date function.\n"
