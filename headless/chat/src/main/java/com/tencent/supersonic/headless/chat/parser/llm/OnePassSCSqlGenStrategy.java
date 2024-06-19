@@ -3,25 +3,25 @@ package com.tencent.supersonic.headless.chat.parser.llm;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMReq;
 import com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMResp;
-import dev.langchain4j.data.message.AiMessage;
-import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.input.Prompt;
 import dev.langchain4j.model.input.PromptTemplate;
-import dev.langchain4j.model.output.Response;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.tuple.Pair;
-import org.springframework.stereotype.Service;
-
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.tuple.Pair;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 
 @Service
 @Slf4j
 public class OnePassSCSqlGenStrategy extends SqlGenStrategy {
+
+    @Autowired
+    private DifyServiceClient difyServiceClient;
 
     @Override
     public LLMResp generate(LLMReq llmReq) {
@@ -40,11 +40,10 @@ public class OnePassSCSqlGenStrategy extends SqlGenStrategy {
         Map<Prompt, String> prompt2Output = new ConcurrentHashMap<>();
         prompt2Exemplar.keySet().parallelStream().forEach(prompt -> {
                     keyPipelineLog.info("OnePassSCSqlGenStrategy reqPrompt:\n{}", prompt.toSystemMessage());
-                    ChatLanguageModel chatLanguageModel = getChatLanguageModel(llmReq.getLlmConfig());
-                    Response<AiMessage> response = chatLanguageModel.generate(prompt.toSystemMessage());
-                    String result = response.content().text();
-                    prompt2Output.put(prompt, result);
-                    keyPipelineLog.info("OnePassSCSqlGenStrategy modelResp:\n{}", result);
+                    String result = difyServiceClient.generate(prompt.toSystemMessage().text()).getAnswer();
+                    prompt2Output.put(prompt, difyServiceClient.parseSQLResult(result));
+                    keyPipelineLog.info("OnePassSCSqlGenStrategy modelResp:\n{}",
+                            difyServiceClient.parseSQLResult(result));
                 }
         );
 
