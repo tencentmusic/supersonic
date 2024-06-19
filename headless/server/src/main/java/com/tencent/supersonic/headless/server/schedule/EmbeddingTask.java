@@ -2,10 +2,10 @@ package com.tencent.supersonic.headless.server.schedule;
 
 import com.tencent.supersonic.common.config.EmbeddingConfig;
 import com.tencent.supersonic.common.pojo.DataItem;
-import com.tencent.supersonic.common.util.ComponentFactory;
-import com.tencent.supersonic.common.util.embedding.EmbeddingQuery;
-import com.tencent.supersonic.common.util.embedding.InMemoryS2EmbeddingStore;
-import com.tencent.supersonic.common.util.embedding.S2EmbeddingStore;
+import dev.langchain4j.store.embedding.ComponentFactory;
+import dev.langchain4j.store.embedding.EmbeddingQuery;
+import dev.langchain4j.store.embedding.InMemoryS2EmbeddingStore;
+import dev.langchain4j.store.embedding.S2EmbeddingStore;
 import com.tencent.supersonic.headless.server.service.DimensionService;
 import com.tencent.supersonic.headless.server.service.MetricService;
 import lombok.extern.slf4j.Slf4j;
