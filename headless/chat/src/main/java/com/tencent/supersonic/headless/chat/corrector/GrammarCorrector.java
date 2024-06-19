@@ -1,6 +1,6 @@
 package com.tencent.supersonic.headless.chat.corrector;
 
-import com.tencent.supersonic.common.util.jsqlparser.SqlRemoveHelper;
+import com.tencent.supersonic.common.jsqlparser.SqlRemoveHelper;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.chat.QueryContext;
 import lombok.extern.slf4j.Slf4j;

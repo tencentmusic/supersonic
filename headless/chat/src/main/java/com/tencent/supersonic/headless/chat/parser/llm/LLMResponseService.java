@@ -1,7 +1,7 @@
 package com.tencent.supersonic.headless.chat.parser.llm;
 
 import com.tencent.supersonic.common.pojo.Constants;
-import com.tencent.supersonic.common.util.jsqlparser.SqlEqualHelper;
+import com.tencent.supersonic.common.jsqlparser.SqlEqualHelper;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.chat.query.QueryManager;
 import com.tencent.supersonic.headless.chat.query.llm.LLMSemanticQuery;

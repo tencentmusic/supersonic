@@ -1,6 +1,6 @@
 package com.tencent.supersonic.headless.core.executor.accelerator;
 
-import com.tencent.supersonic.common.util.jsqlparser.SqlSelectHelper;
+import com.tencent.supersonic.common.jsqlparser.SqlSelectHelper;
 import com.tencent.supersonic.headless.core.parser.calcite.Configuration;
 import com.tencent.supersonic.headless.core.parser.calcite.s2sql.TimeRange;
 import com.tencent.supersonic.headless.core.parser.calcite.schema.DataSourceTable;

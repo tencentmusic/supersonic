@@ -2,11 +2,11 @@ package com.tencent.supersonic.headless.chat.knowledge;
 
 import com.tencent.supersonic.common.config.EmbeddingConfig;
 import com.tencent.supersonic.common.pojo.Constants;
-import com.tencent.supersonic.common.util.ComponentFactory;
-import com.tencent.supersonic.common.util.embedding.Retrieval;
-import com.tencent.supersonic.common.util.embedding.RetrieveQuery;
-import com.tencent.supersonic.common.util.embedding.RetrieveQueryResult;
-import com.tencent.supersonic.common.util.embedding.S2EmbeddingStore;
+import dev.langchain4j.store.embedding.ComponentFactory;
+import dev.langchain4j.store.embedding.Retrieval;
+import dev.langchain4j.store.embedding.RetrieveQuery;
+import dev.langchain4j.store.embedding.RetrieveQueryResult;
+import dev.langchain4j.store.embedding.S2EmbeddingStore;
 import com.tencent.supersonic.headless.chat.knowledge.helper.NatureHelper;
 import java.util.ArrayList;
 import java.util.HashMap;

@@ -2,7 +2,7 @@ package com.tencent.supersonic.headless.core.parser;
 
 import com.google.common.base.Strings;
 import com.tencent.supersonic.common.util.StringUtil;
-import com.tencent.supersonic.common.util.jsqlparser.SqlSelectHelper;
+import com.tencent.supersonic.common.jsqlparser.SqlSelectHelper;
 import com.tencent.supersonic.headless.api.pojo.MetricTable;
 import com.tencent.supersonic.headless.api.pojo.QueryParam;
 import com.tencent.supersonic.headless.api.pojo.enums.AggOption;
