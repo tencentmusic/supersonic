@@ -150,8 +150,7 @@ public class ChatQueryServiceImpl implements ChatQueryService {
                 .text2SQLType(queryReq.getText2SQLType())
                 .mapModeEnum(queryReq.getMapModeEnum())
                 .dataSetIds(queryReq.getDataSetIds())
-                //TODO zds
-                //.dimensions(dimensionService.getDimensions(new ArrayList<>(queryReq.getDataSetIds())))
+                .dimensions(dimensionService.getDimensions(new ArrayList<>(queryReq.getDataSetIds())))
                 .build();
         BeanUtils.copyProperties(queryReq, queryCtx);
         return queryCtx;

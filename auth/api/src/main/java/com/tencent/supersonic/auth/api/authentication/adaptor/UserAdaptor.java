@@ -32,5 +32,5 @@ public interface UserAdaptor {
 
     UserWithPassword getUserByName(String name);
 
-    String casLogin(String prefixUrl, String ticket, String service);
+    String casLogin(String prefixUrl, String ticket, String service, String appKey);
 }

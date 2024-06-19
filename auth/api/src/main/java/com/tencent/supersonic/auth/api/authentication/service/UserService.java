@@ -29,5 +29,5 @@ public interface UserService {
 
     List<Organization> getOrganizationTree();
 
-    String casLogin(String prefixUrl, String ticket, String service);
+    String casLogin(String prefixUrl, String ticket, String service, String appKey);
 }

@@ -78,8 +78,8 @@ public class UserController {
     public String validateLogin(@RequestParam(name = "ticket") String ticket,
                                 @RequestParam(name = "service") String service) {
 
-
-        return userService.casLogin(prefixUrl, ticket, service);
+        // TODO zds: add appKey
+        return userService.casLogin(prefixUrl, ticket, service, "");
     }
 
 }

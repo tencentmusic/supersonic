@@ -10,10 +10,13 @@ import com.tencent.supersonic.auth.api.authentication.request.UserReq;
 import com.tencent.supersonic.auth.authentication.persistence.dataobject.UserDO;
 import com.tencent.supersonic.auth.authentication.persistence.repository.UserRepository;
 import com.tencent.supersonic.auth.authentication.utils.AESEncryptionUtil;
+import com.tencent.supersonic.auth.authentication.utils.CasServiceUtil;
 import com.tencent.supersonic.auth.authentication.utils.UserTokenUtils;
+import com.tencent.supersonic.auth.authentication.utils.XmlUtils;
 import com.tencent.supersonic.common.util.ContextUtils;
 import javax.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import java.util.List;
 import java.util.Set;
@@ -141,14 +144,37 @@ public class DefaultUserAdaptor implements UserAdaptor {
 
     @Override
     public UserWithPassword getUserByName(String name) {
-        //TODO zds
-        return null;
+        UserDO userDO = getUser(name);
+        if (userDO == null) {
+            return null;
+        }
+        UserWithPassword userWithPassword = new UserWithPassword(userDO.getId(), userDO.getName(),
+                userDO.getDisplayName(),
+                userDO.getEmail(), userDO.getPassword(), userDO.getIsAdmin());
+        BeanUtils.copyProperties(userDO, userWithPassword);
+
+        return userWithPassword;
     }
 
     @Override
-    public String casLogin(String prefixUrl, String ticket, String service) {
-        //TODO zds
-        return null;
+    public String casLogin(String prefixUrl, String ticket, String service, String appKey) {
+        String validateUrl = prefixUrl + "/serviceValidate";
+        String res = CasServiceUtil.getStValidate(validateUrl, ticket, service);
+        final String error = XmlUtils.getTextForElement(res, "authenticationFailure");
+        if (StringUtils.isNotEmpty(error)) {
+            throw new RuntimeException(error);
+        }
+        final String principal = XmlUtils.getTextForElement(res, "user");
+        if (StringUtils.isEmpty(principal)) {
+            throw new RuntimeException("No principal was found in the response from the CAS server.");
+        }
+        UserWithPassword user = getUserByName(principal);
+        if (user == null) {
+            throw new RuntimeException("user not exist,please register");
+        }
+        UserTokenUtils userTokenUtils = ContextUtils.getBean(UserTokenUtils.class);
+        return userTokenUtils.generateToken(user, appKey);
+
     }
 
 }

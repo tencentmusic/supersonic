@@ -78,8 +78,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public String casLogin(String prefixUrl, String ticket, String service) {
-        return ComponentFactory.getUserAdaptor().casLogin(prefixUrl, ticket, service);
+    public String casLogin(String prefixUrl, String ticket, String service, String appKey) {
+        return ComponentFactory.getUserAdaptor().casLogin(prefixUrl, ticket, service, appKey);
     }
 
 }
