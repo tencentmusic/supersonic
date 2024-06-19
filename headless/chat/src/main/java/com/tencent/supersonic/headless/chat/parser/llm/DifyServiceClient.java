@@ -1,7 +1,7 @@
-package com.tencent.supersonic.headless.core.chat.parser.llm;
+package com.tencent.supersonic.headless.chat.parser.llm;
 
 import com.tencent.supersonic.common.util.JsonUtil;
-import com.tencent.supersonic.headless.core.utils.HttpUtils;
+import com.tencent.supersonic.headless.chat.utils.HttpUtils;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;

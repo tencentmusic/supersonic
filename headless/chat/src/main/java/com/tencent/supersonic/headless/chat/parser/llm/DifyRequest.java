@@ -1,4 +1,4 @@
-package com.tencent.supersonic.headless.core.chat.parser.llm;
+package com.tencent.supersonic.headless.chat.parser.llm;
 
 import java.util.HashMap;
 import java.util.Map;

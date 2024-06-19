@@ -139,4 +139,16 @@ public class DefaultUserAdaptor implements UserAdaptor {
         return Sets.newHashSet();
     }
 
+    @Override
+    public UserWithPassword getUserByName(String name) {
+        //TODO zds
+        return null;
+    }
+
+    @Override
+    public String casLogin(String prefixUrl, String ticket, String service) {
+        //TODO zds
+        return null;
+    }
+
 }

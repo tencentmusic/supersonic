@@ -1,8 +1,8 @@
 package com.tencent.supersonic.headless.server.utils;
 
 
-import com.tencent.supersonic.headless.core.chat.parser.llm.DifyResult;
-import com.tencent.supersonic.headless.core.chat.parser.llm.DifyServiceClient;
+import com.tencent.supersonic.headless.chat.parser.llm.DifyResult;
+import com.tencent.supersonic.headless.chat.parser.llm.DifyServiceClient;
 import dev.langchain4j.data.message.SystemMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

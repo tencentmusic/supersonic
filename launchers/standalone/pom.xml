@@ -44,6 +44,18 @@
                 <updatePolicy>always</updatePolicy>
             </snapshots>
         </repository>
+        <repository>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+                <updatePolicy>always</updatePolicy>
+            </snapshots>
+            <id>alimaven</id>
+            <name>alimaven</name>
+            <url>https://maven.aliyun.com/repository/central</url>
+        </repository>
     </repositories>
 
     <dependencies>

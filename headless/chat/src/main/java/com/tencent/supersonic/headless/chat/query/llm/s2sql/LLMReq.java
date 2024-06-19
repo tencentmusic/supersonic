@@ -5,7 +5,6 @@ import com.google.common.collect.Lists;
 import com.tencent.supersonic.common.config.LLMConfig;
 import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.common.pojo.enums.DataTypeEnums;
-import com.tencent.supersonic.headless.api.pojo.LLMConfig;
 import lombok.Data;
 
 import java.util.List;
