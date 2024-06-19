@@ -47,8 +47,9 @@ public class TwoPassSCSqlGenStrategy extends SqlGenStrategy {
                     keyPipelineLog.info("TwoPassSCSqlGenStrategy step one reqPrompt:{}", prompt.toSystemMessage());
                     String result = difyServiceClient.generate(PromptEnhancer.enhanceDDLInfo(llmReq,
                                     prompt.toSystemMessage().text())).getAnswer();
-                    keyPipelineLog.info("TwoPassSCSqlGenStrategy step one modelResp:{}", result);
-                    linkingResults.add(OutputFormat.getSchemaLink(result));
+                    keyPipelineLog.info("TwoPassSCSqlGenStrategy step one modelResp:{}",
+                            difyServiceClient.parseSQLResult(result));
+                    linkingResults.add(OutputFormat.getSchemaLink(difyServiceClient.parseSQLResult(result)));
                 }
         );
         List<String> sortedList = OutputFormat.formatList(linkingResults);
@@ -61,8 +62,9 @@ public class TwoPassSCSqlGenStrategy extends SqlGenStrategy {
             String result = difyServiceClient.generate(
                     PromptEnhancer.enhanceDDLInfo(llmReq,
                             linkingPrompt.toSystemMessage().text())).getAnswer();
-            keyPipelineLog.info("TwoPassSCSqlGenStrategy step two modelResp:{}", result);
-            sqlTaskPool.add(result);
+            keyPipelineLog.info("TwoPassSCSqlGenStrategy step two modelResp:{}",
+                    difyServiceClient.parseSQLResult(result));
+            sqlTaskPool.add(difyServiceClient.parseSQLResult(result));
         });
         //4.format response.
         Pair<String, Map<String, Double>> sqlMapPair = OutputFormat.selfConsistencyVote(sqlTaskPool);
