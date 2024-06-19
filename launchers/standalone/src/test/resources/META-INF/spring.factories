@@ -1,13 +1,13 @@
-com.tencent.supersonic.headless.core.chat.mapper.SchemaMapper=\
-    com.tencent.supersonic.headless.core.chat.mapper.EmbeddingMapper, \
-    com.tencent.supersonic.headless.core.chat.mapper.KeywordMapper, \
-    com.tencent.supersonic.headless.core.chat.mapper.QueryFilterMapper, \
-    com.tencent.supersonic.headless.core.chat.mapper.EntityMapper
+com.tencent.supersonic.headless.chat.mapper.SchemaMapper=\
+    com.tencent.supersonic.headless.chat.mapper.EmbeddingMapper, \
+    com.tencent.supersonic.headless.chat.mapper.KeywordMapper, \
+    com.tencent.supersonic.headless.chat.mapper.QueryFilterMapper, \
+    com.tencent.supersonic.headless.chat.mapper.EntityMapper
 
-com.tencent.supersonic.headless.core.chat.parser.SemanticParser=\
-    com.tencent.supersonic.headless.core.chat.parser.rule.RuleSqlParser, \
-    com.tencent.supersonic.headless.core.chat.parser.llm.LLMSqlParser, \
-    com.tencent.supersonic.headless.core.chat.parser.QueryTypeParser
+com.tencent.supersonic.headless.chat.parser.SemanticParser=\
+    com.tencent.supersonic.headless.chat.parser.rule.RuleSqlParser, \
+    com.tencent.supersonic.headless.chat.parser.llm.LLMSqlParser, \
+    com.tencent.supersonic.headless.chat.parser.QueryTypeParser
 
 com.tencent.supersonic.chat.server.parser.ChatParser=\
     com.tencent.supersonic.chat.server.parser.NL2PluginParser, \
@@ -17,10 +17,10 @@ com.tencent.supersonic.chat.server.executor.ChatExecutor=\
     com.tencent.supersonic.chat.server.executor.PluginExecutor, \
     com.tencent.supersonic.chat.server.executor.SqlExecutor
 
-com.tencent.supersonic.headless.core.chat.corrector.SemanticCorrector=\
-    com.tencent.supersonic.headless.core.chat.corrector.SchemaCorrector, \
-    com.tencent.supersonic.headless.core.chat.corrector.TimeCorrector, \
-    com.tencent.supersonic.headless.core.chat.corrector.GrammarCorrector
+com.tencent.supersonic.headless.chat.corrector.SemanticCorrector=\
+    com.tencent.supersonic.headless.chat.corrector.SchemaCorrector, \
+    com.tencent.supersonic.headless.chat.corrector.TimeCorrector, \
+    com.tencent.supersonic.headless.chat.corrector.GrammarCorrector
 
 com.tencent.supersonic.headless.core.parser.converter.HeadlessConverter=\
     com.tencent.supersonic.headless.core.parser.converter.DefaultDimValueConverter,\
@@ -44,8 +44,8 @@ com.tencent.supersonic.headless.server.processor.ResultProcessor=\
     com.tencent.supersonic.headless.server.processor.ParseInfoProcessor, \
     com.tencent.supersonic.headless.server.processor.SqlInfoProcessor
 
-com.tencent.supersonic.headless.core.chat.parser.llm.DataSetResolver=\
-  com.tencent.supersonic.headless.core.chat.parser.llm.HeuristicDataSetResolver
+com.tencent.supersonic.headless.chat.parser.llm.DataSetResolver=\
+  com.tencent.supersonic.headless.chat.parser.llm.HeuristicDataSetResolver
 
 com.tencent.supersonic.auth.authentication.interceptor.AuthenticationInterceptor=\
     com.tencent.supersonic.auth.authentication.interceptor.DefaultAuthenticationInterceptor

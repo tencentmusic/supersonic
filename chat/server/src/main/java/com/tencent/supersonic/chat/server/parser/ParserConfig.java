@@ -1,7 +1,7 @@
 package com.tencent.supersonic.chat.server.parser;
 
 import com.google.common.collect.Lists;
-import com.tencent.supersonic.common.pojo.ParameterConfig;
+import com.tencent.supersonic.common.config.ParameterConfig;
 import com.tencent.supersonic.common.pojo.Parameter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

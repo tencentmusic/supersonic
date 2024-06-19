@@ -54,7 +54,8 @@ public class DefaultQueryParser implements QueryParser {
                 || Strings.isNullOrEmpty(queryStatement.getSourceId())) {
             throw new RuntimeException("parse Exception: " + queryStatement.getErrMsg());
         }
-        if (!SqlSelectHelper.hasLimit(queryStatement.getSql())) {
+        if (StringUtils.isNotBlank(queryStatement.getSql())
+                && !SqlSelectHelper.hasLimit(queryStatement.getSql())) {
             String querySql = queryStatement.getSql() + " limit " + queryStatement.getLimit().toString();
             queryStatement.setSql(querySql);
         }

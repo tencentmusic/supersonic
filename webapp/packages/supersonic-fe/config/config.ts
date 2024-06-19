@@ -1,6 +1,6 @@
 // https://umijs.org/config/
 import { defineConfig } from '@umijs/max';
-// import { join } from 'path';
+import path from 'path';
 import defaultSettings, { publicPath, basePath } from './defaultSettings';
 import proxy from './proxy';
 import routes from './routes';
@@ -182,6 +182,9 @@ export default defineConfig({
   },
   requestRecord: {},
   exportStatic: {},
+  alias: {
+    'supersonic-chat-sdk': path.resolve(__dirname, '../../chat-sdk/src/'),
+  },
   // esbuildMinifyIIFE: true,
 
   chainWebpack(memo) {

@@ -77,6 +77,10 @@
         <postgresql.version>42.7.1</postgresql.version>
         <st.version>4.0.8</st.version>
         <duckdb_jdbc.version>0.10.0</duckdb_jdbc.version>
+        <protobuf-java.version>3.23.1</protobuf-java.version>
+        <flight-sql.version>15.0.2</flight-sql.version>
+        <arrow-jdbc.version>15.0.2</arrow-jdbc.version>
+        <flight-sql-jdbc-driver.version>15.0.2</flight-sql-jdbc-driver.version>
     </properties>
 
     <dependencyManagement>

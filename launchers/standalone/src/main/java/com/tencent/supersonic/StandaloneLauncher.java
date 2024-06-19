@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
+import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 @SpringBootApplication(scanBasePackages = {"com.tencent.supersonic"},
         exclude = {MongoAutoConfiguration.class, MongoDataAutoConfiguration.class})
@@ -18,6 +19,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @Configuration
 @EnableApolloConfig
 @Import(S2LangChain4jAutoConfiguration.class)
+@EnableSwagger2
 public class StandaloneLauncher {
 
     public static void main(String[] args) {

@@ -318,11 +318,8 @@ const ChatFooter: ForwardRefRenderFunction<any, Props> = (
   }
 
   useEffect(() => {
-    if (modelOptionNodes.length || associateOptionNodes.length) {
-      fixWidthBug()
-    }
-  }
-  , [modelOptionNodes.length, associateOptionNodes.length]);
+    if (modelOptionNodes.length || associateOptionNodes.length) fixWidthBug()
+  }, [modelOptionNodes.length, associateOptionNodes.length]);
 
   return (
     <div className={chatFooterClass}>

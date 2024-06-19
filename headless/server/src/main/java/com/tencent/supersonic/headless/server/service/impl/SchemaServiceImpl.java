@@ -415,13 +415,6 @@ public class SchemaServiceImpl implements SchemaService {
                 .collect(Collectors.toList());
         Map<Long, ItemResp> itemRespMap = itemResps.stream()
                 .collect(Collectors.toMap(ItemResp::getId, item -> item));
-        for (ItemResp itemResp : itemResps) {
-            ItemResp parentItem = itemRespMap.get(itemResp.getParentId());
-            if (parentItem == null) {
-                continue;
-            }
-            parentItem.getChildren().add(itemResp);
-        }
         List<DataSetResp> dataSetResps = dataSetService.getDataSetList(new MetaFilter());
         for (DataSetResp dataSetResp : dataSetResps) {
             ItemResp itemResp = itemRespMap.get(dataSetResp.getDomainId());

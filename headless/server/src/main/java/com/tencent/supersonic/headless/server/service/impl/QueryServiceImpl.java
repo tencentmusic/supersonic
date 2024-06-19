@@ -97,7 +97,9 @@ public class QueryServiceImpl implements QueryService {
             String cacheKey = queryCache.getCacheKey(queryReq);
             Object query = queryCache.query(queryReq, cacheKey);
             if (Objects.nonNull(query)) {
-                return (SemanticQueryResp) query;
+                SemanticQueryResp queryResp = (SemanticQueryResp) query;
+                queryResp.setUseCache(true);
+                return queryResp;
             }
             StatUtils.get().setUseResultCache(false);
             //3 query

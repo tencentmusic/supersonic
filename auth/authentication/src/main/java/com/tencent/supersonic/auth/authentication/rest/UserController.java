@@ -70,8 +70,8 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public String login(@RequestBody UserReq userCmd) {
-        return userService.login(userCmd);
+    public String login(@RequestBody UserReq userCmd, HttpServletRequest request) {
+        return userService.login(userCmd, request);
     }
 
     @GetMapping("/validateLogin")

@@ -41,6 +41,8 @@ public interface ChatManageService {
 
     int updateQuery(ChatQueryDO chatQueryDO);
 
+    void updateParseCostTime(ParseResp parseResp);
+
     List<ChatParseDO> batchAddParse(ChatParseReq chatParseReq, ParseResp parseResult);
 
     SemanticParseInfo getParseInfo(Long questionId, int parseId);

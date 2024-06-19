@@ -3,6 +3,7 @@ package com.tencent.supersonic.headless.server.service;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.headless.api.pojo.EntityInfo;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
+import com.tencent.supersonic.headless.api.pojo.SqlEvaluation;
 import com.tencent.supersonic.headless.api.pojo.request.DimensionValueReq;
 import com.tencent.supersonic.headless.api.pojo.request.ExecuteQueryReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryDataReq;
@@ -32,5 +33,7 @@ public interface ChatQueryService {
     Object queryDimensionValue(DimensionValueReq dimensionValueReq, User user) throws Exception;
 
     void correct(QuerySqlReq querySqlReq, User user);
+
+    SqlEvaluation validate(QuerySqlReq querySqlReq, User user);
 }
 
