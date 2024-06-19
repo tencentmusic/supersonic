@@ -5,13 +5,13 @@ import com.tencent.supersonic.chat.server.persistence.repository.ChatQueryReposi
 import com.tencent.supersonic.chat.server.pojo.ChatParseContext;
 import com.tencent.supersonic.chat.server.util.QueryReqConverter;
 import com.tencent.supersonic.common.util.ContextUtils;
-import com.tencent.supersonic.headless.api.pojo.LLMConfig;
+import com.tencent.supersonic.common.config.LLMConfig;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementMatch;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
 import com.tencent.supersonic.headless.api.pojo.request.QueryReq;
 import com.tencent.supersonic.headless.api.pojo.response.MapResp;
 import com.tencent.supersonic.headless.api.pojo.response.ParseResp;
-import com.tencent.supersonic.headless.core.utils.S2ChatModelProvider;
+import com.tencent.supersonic.common.util.S2ChatModelProvider;
 import com.tencent.supersonic.headless.server.service.ChatQueryService;
 import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.model.chat.ChatLanguageModel;

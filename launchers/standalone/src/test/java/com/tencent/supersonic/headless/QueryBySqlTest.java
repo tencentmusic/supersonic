@@ -1,5 +1,10 @@
 package com.tencent.supersonic.headless;
 
+import static java.time.LocalDate.now;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
+
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.common.pojo.QueryColumn;
 import com.tencent.supersonic.common.pojo.exception.InvalidPermissionException;
@@ -8,10 +13,6 @@ import com.tencent.supersonic.util.DataUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import static java.time.LocalDate.now;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThrows;
-import static org.junit.Assert.assertTrue;
 public class QueryBySqlTest extends BaseTest {
 
     @Test
@@ -74,9 +75,9 @@ public class QueryBySqlTest extends BaseTest {
 
     @Test
     public void testCacheQuery() throws Exception {
-        SemanticQueryResp result1 = queryBySql("SELECT 部门, SUM(访问次数) AS 访问次数 FROM 超音数PVUV统计  GROUP BY 部门 ");
+        queryBySql("SELECT 部门, SUM(访问次数) AS 访问次数 FROM 超音数PVUV统计  GROUP BY 部门 ");
         SemanticQueryResp result2 = queryBySql("SELECT 部门, SUM(访问次数) AS 访问次数 FROM 超音数PVUV统计  GROUP BY 部门 ");
-        assertTrue(result1 == result2);
+        assertTrue(result2.isUseCache());
     }
 
     @Test

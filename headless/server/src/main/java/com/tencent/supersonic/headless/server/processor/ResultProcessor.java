@@ -1,8 +1,8 @@
 package com.tencent.supersonic.headless.server.processor;
 
 import com.tencent.supersonic.headless.api.pojo.response.ParseResp;
-import com.tencent.supersonic.headless.core.pojo.ChatContext;
-import com.tencent.supersonic.headless.core.pojo.QueryContext;
+import com.tencent.supersonic.headless.chat.ChatContext;
+import com.tencent.supersonic.headless.chat.QueryContext;
 
 /**
  * A ParseResultProcessor wraps things up before returning results to users in parse stage.

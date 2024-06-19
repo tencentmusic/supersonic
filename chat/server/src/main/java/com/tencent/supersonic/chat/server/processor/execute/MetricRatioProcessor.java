@@ -29,7 +29,7 @@ import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
 import com.tencent.supersonic.headless.api.pojo.response.QueryResult;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
 import com.tencent.supersonic.headless.core.config.AggregatorConfig;
-import com.tencent.supersonic.headless.core.utils.QueryReqBuilder;
+import com.tencent.supersonic.headless.chat.utils.QueryReqBuilder;
 import com.tencent.supersonic.headless.server.service.QueryService;
 import java.text.DecimalFormat;
 import java.time.DayOfWeek;

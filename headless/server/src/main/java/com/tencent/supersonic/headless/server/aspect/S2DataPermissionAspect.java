@@ -544,7 +544,9 @@ public class S2DataPermissionAspect {
             List<String> exprList = new ArrayList<>();
             List<String> descList = new ArrayList<>();
             filters.stream().forEach(filter -> {
-                descList.add(filter.getDescription());
+                if (StringUtils.isNotEmpty(filter.getDescription())) {
+                    descList.add(filter.getDescription());
+                }
                 exprList.add(filter.getExpressions().toString());
             });
             String promptInfo = "当前结果已经过行权限过滤，详细过滤条件如下:%s, 申请权限请联系管理员%s";

@@ -3,7 +3,7 @@ package com.tencent.supersonic.headless.api.pojo.request;
 import com.google.common.collect.Sets;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.common.pojo.enums.Text2SQLType;
-import com.tencent.supersonic.headless.api.pojo.LLMConfig;
+import com.tencent.supersonic.common.config.LLMConfig;
 import com.tencent.supersonic.headless.api.pojo.QueryDataType;
 import com.tencent.supersonic.headless.api.pojo.SchemaMapInfo;
 import com.tencent.supersonic.headless.api.pojo.enums.MapModeEnum;

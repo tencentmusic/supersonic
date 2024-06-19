@@ -2,9 +2,6 @@ package com.tencent.supersonic.headless.core.utils;
 
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.headless.core.cache.QueryCache;
-import com.tencent.supersonic.headless.core.chat.parser.llm.DataSetResolver;
-import com.tencent.supersonic.headless.core.chat.parser.llm.JavaLLMProxy;
-import com.tencent.supersonic.headless.core.chat.parser.llm.LLMProxy;
 import com.tencent.supersonic.headless.core.executor.QueryExecutor;
 import com.tencent.supersonic.headless.core.executor.accelerator.QueryAccelerator;
 import com.tencent.supersonic.headless.core.parser.SqlParser;
@@ -14,10 +11,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.io.support.SpringFactoriesLoader;
 
 /**
@@ -32,9 +27,6 @@ public class ComponentFactory {
     private static List<QueryAccelerator> queryAccelerators = new ArrayList<>();
     private static SqlParser sqlParser;
     private static QueryCache queryCache;
-
-    private static LLMProxy llmProxy;
-    private static DataSetResolver modelResolver;
 
     static {
         initSemanticConverter();
@@ -84,10 +76,6 @@ public class ComponentFactory {
         return queryCache;
     }
 
-    public static void setSqlParser(SqlParser parser) {
-        sqlParser = parser;
-    }
-
     public static void addQueryOptimizer(String name, QueryOptimizer queryOptimizer) {
         queryOptimizers.put(name, queryOptimizer);
     }
@@ -120,31 +108,6 @@ public class ComponentFactory {
 
     private static void initQueryCache() {
         queryCache = init(QueryCache.class);
-    }
-
-    public static LLMProxy getLLMProxy() {
-        //1.Preferentially retrieve from environment variables
-        String llmProxyEnv = System.getenv("llmProxy");
-        if (StringUtils.isNotBlank(llmProxyEnv)) {
-            Map<String, LLMProxy> implementations = ContextUtils.getBeansOfType(LLMProxy.class);
-            llmProxy = implementations.entrySet().stream()
-                    .filter(entry -> entry.getKey().equalsIgnoreCase(llmProxyEnv))
-                    .map(Map.Entry::getValue)
-                    .findFirst()
-                    .orElse(null);
-        }
-        //2.default JavaLLMProxy
-        if (Objects.isNull(llmProxy)) {
-            llmProxy = ContextUtils.getBean(JavaLLMProxy.class);
-        }
-        return llmProxy;
-    }
-
-    public static DataSetResolver getModelResolver() {
-        if (Objects.isNull(modelResolver)) {
-            modelResolver = init(DataSetResolver.class);
-        }
-        return modelResolver;
     }
 
     public static <T> T getBean(String name, Class<T> tClass) {
