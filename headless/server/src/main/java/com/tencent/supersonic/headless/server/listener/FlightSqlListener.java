@@ -36,6 +36,7 @@ public class FlightSqlListener implements CommandLineRunner {
     private ExecutorService executorService;
     private FlightServer flightServer;
     private BufferAllocator allocator;
+    private Boolean isRunning = false;
 
     public FlightSqlListener(FlightService flightService) {
         this.allocator = new RootAllocator();
@@ -60,10 +61,25 @@ public class FlightSqlListener implements CommandLineRunner {
         try {
             log.info("Arrow Flight JDBC server started on {} {}", host, port);
             flightServer.start();
+            isRunning = true;
         } catch (Exception e) {
             log.error("FlightSqlListener start error {}", e);
         }
 
+    }
+
+    public Boolean isRunning() {
+        return isRunning;
+    }
+
+    public void stop() {
+        try {
+            log.info("Arrow Flight JDBC server stop on {} {}", host, port);
+            flightServer.close();
+            allocator.close();
+        } catch (Exception e) {
+            log.error("FlightSqlListener start error {}", e);
+        }
     }
 
     @Override
