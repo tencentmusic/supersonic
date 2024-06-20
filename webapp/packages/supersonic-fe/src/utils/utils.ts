@@ -491,14 +491,16 @@ export function ssoLogout() {
   window.location.href = opUrl;
 }
 
-export function encryptPassword(password: string, username: string) {
+export function encryptPassword(password: string) {
   if (!password) {
     return password;
   }
   // TODO This key should be stored in a secure place
   const key = CryptoJS.enc.Utf8.parse('supersonic@2024');
   const srcs = CryptoJS.enc.Utf8.parse(password);
-  const encrypted = CryptoJS.AES.encrypt(srcs, key, {mode: CryptoJS.mode.ECB, padding: CryptoJS.pad.Pkcs7});
+  const encrypted = CryptoJS.AES.encrypt(srcs, key, {
+    mode: CryptoJS.mode.ECB,
+    padding: CryptoJS.pad.Pkcs7,
+  });
   return encrypted.toString();
-
-};
+}
