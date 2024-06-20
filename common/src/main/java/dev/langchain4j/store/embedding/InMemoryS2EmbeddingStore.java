@@ -3,10 +3,12 @@ package dev.langchain4j.store.embedding;
 import com.tencent.supersonic.common.config.EmbeddingConfig;
 import com.tencent.supersonic.common.util.ContextUtils;
 import dev.langchain4j.data.embedding.Embedding;
+import dev.langchain4j.model.embedding.BgeSmallZhEmbeddingModel;
 import dev.langchain4j.model.embedding.EmbeddingModel;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -95,7 +97,13 @@ public class InMemoryS2EmbeddingStore implements S2EmbeddingStore {
     }
 
     private static EmbeddingModel getEmbeddingModel() {
-        return ContextUtils.getBean(EmbeddingModel.class);
+        EmbeddingModel embeddingModel;
+        try {
+            embeddingModel = ContextUtils.getBean(EmbeddingModel.class);
+        } catch (NoSuchBeanDefinitionException e) {
+            embeddingModel = new BgeSmallZhEmbeddingModel();
+        }
+        return embeddingModel;
     }
 
     private InMemoryEmbeddingStore<EmbeddingQuery> getEmbeddingStore(String collectionName) {
