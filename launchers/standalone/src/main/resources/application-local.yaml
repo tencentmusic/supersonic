@@ -17,7 +17,14 @@ spring:
     url: jdbc:h2:mem:semantic;DATABASE_TO_UPPER=false
     username: root
     password: semantic
-
+  autoconfigure:
+    exclude:
+      - spring.dev.langchain4j.spring.LangChain4jAutoConfig
+      - spring.dev.langchain4j.openai.spring.AutoConfig
+      - spring.dev.langchain4j.ollama.spring.AutoConfig
+      - spring.dev.langchain4j.azure.openai.spring.AutoConfig
+      - spring.dev.langchain4j.azure.aisearch.spring.AutoConfig
+      - spring.dev.langchain4j.anthropic.spring.AutoConfig
 mybatis:
   mapper-locations=classpath:mappers/custom/*.xml,classpath*:/mappers/*.xml
 
@@ -67,42 +74,6 @@ s2:
     names: S2VisitsDemo,S2ArtistDemo
     enableLLM: true
 
-  langchain4j:
-    #1.chat-model
-    chat-model:
-      provider: open_ai
-      openai:
-        # Replace with your LLM configs
-        # Note: The default API key `demo` is provided by langchain4j community
-        #       which limits 1000 tokens per request.
-        base-url: ${OPENAI_API_BASE:https://api.openai.com/v1}
-        api-key: ${OPENAI_API_KEY:demo}
-        model-name: ${OPENAI_MODEL_NAME:gpt-3.5-turbo}
-        temperature: ${OPENAI_TEMPERATURE:0.0}
-        timeout: ${OPENAI_TIMEOUT:PT60S}
-    #2.embedding-model
-    #2.1 in_memory(default)
-    embedding-model:
-      provider: in_process
-    #      inProcess:
-    #        modelPath: /data/model.onnx
-    #        vocabularyPath: /data/onnx_vocab.txt
-    #        shibing624/text2vec-base-chinese
-    #2.2 open_ai
-    #  embedding-model:
-    #    provider: open_ai
-    #    openai:
-    #      api-key: api_key
-    #      modelName: all-minilm-l6-v2.onnx
-
-    #2.2 hugging_face
-    #  embedding-model:
-    #    provider: hugging_face
-    #    hugging-face:
-    #      access-token: hg_access_token
-    #      model-id: sentence-transformers/all-MiniLM-L6-v2
-    #      timeout: 1h
-
 # swagger配置
 swagger:
   title: 'SuperSonic平台接口文档'
@@ -115,3 +86,20 @@ swagger:
     email:
     url: ''
   version: 3.0
+
+
+langchain4j:
+  open-ai:
+    chat-model:
+      # Replace with your LLM configs
+      # Note: The default API key `demo` is provided by langchain4j community
+      #       which limits 1000 tokens per request.
+      base-url: ${OPENAI_API_BASE:https://api.openai.com/v1}
+      api-key: ${OPENAI_API_KEY:demo}
+      model-name: ${OPENAI_MODEL_NAME:gpt-3.5-turbo}
+      temperature: ${OPENAI_TEMPERATURE:0.0}
+      timeout: ${OPENAI_TIMEOUT:PT60S}
+# java.lang.RuntimeException: dev.ai4j.openai4j.OpenAiHttpException: Too many requests
+    embedding-model:
+      base-url: ${OPENAI_API_BASE:https://api.openai.com/v1}
+      api-key: ${OPENAI_API_KEY:demo}

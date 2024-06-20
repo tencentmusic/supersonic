@@ -11,7 +11,7 @@ import dev.langchain4j.store.embedding.RetrieveQuery;
 import dev.langchain4j.store.embedding.RetrieveQueryResult;
 import dev.langchain4j.store.embedding.S2EmbeddingStore;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;

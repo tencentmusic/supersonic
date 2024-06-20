@@ -14,8 +14,8 @@ import com.tencent.supersonic.headless.server.processor.ResultProcessor;
 import com.tencent.supersonic.headless.server.service.WorkflowService;
 import com.tencent.supersonic.headless.server.utils.ComponentFactory;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.MapUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

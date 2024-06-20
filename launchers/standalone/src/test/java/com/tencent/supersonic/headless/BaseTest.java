@@ -14,7 +14,7 @@ import com.tencent.supersonic.headless.api.pojo.request.SemanticQueryReq;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
 import com.tencent.supersonic.headless.server.service.QueryService;
 import com.tencent.supersonic.util.DataUtils;
-import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;

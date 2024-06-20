@@ -6,7 +6,7 @@ import com.tencent.supersonic.headless.api.pojo.response.S2Term;
 import com.tencent.supersonic.headless.chat.QueryContext;
 import com.tencent.supersonic.headless.chat.knowledge.helper.NatureHelper;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

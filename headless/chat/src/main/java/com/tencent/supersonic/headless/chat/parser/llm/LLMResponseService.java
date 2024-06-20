@@ -10,7 +10,7 @@ import com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMSqlQuery;
 import com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMSqlResp;
 import com.tencent.supersonic.headless.chat.QueryContext;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.collections.MapUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;

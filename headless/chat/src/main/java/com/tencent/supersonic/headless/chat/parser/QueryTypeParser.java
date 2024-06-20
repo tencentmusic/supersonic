@@ -14,7 +14,7 @@ import com.tencent.supersonic.headless.chat.query.rule.RuleSemanticQuery;
 import com.tencent.supersonic.headless.chat.ChatContext;
 import com.tencent.supersonic.headless.chat.QueryContext;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
