@@ -46,6 +46,7 @@ import org.apache.calcite.sql.parser.SqlParserPos;
 import org.apache.calcite.sql.pretty.SqlPrettyWriter;
 import org.apache.calcite.sql.validate.SqlValidator;
 import org.apache.calcite.sql.validate.SqlValidatorScope;
+import org.apache.calcite.sql.validate.SqlValidatorWithHints;
 import org.apache.calcite.sql2rel.SqlToRelConverter;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -75,6 +76,12 @@ public abstract class SemanticNode {
     }
 
     public static SqlNode parse(String expression, SqlValidatorScope scope, EngineType engineType) throws Exception {
+        SqlValidatorWithHints sqlValidatorWithHints = Configuration.getSqlValidatorWithHints(
+                scope.getValidator().getCatalogReader().getRootSchema(), engineType);
+        if (Configuration.getSqlAdvisor(sqlValidatorWithHints, engineType).getReservedAndKeyWords()
+                .contains(expression.toUpperCase())) {
+            expression = String.format("`%s`", expression);
+        }
         SqlParser sqlParser = SqlParser.create(expression, Configuration.getParserConfig(engineType));
         SqlNode sqlNode = sqlParser.parseExpression();
         scope.validateExpr(sqlNode);

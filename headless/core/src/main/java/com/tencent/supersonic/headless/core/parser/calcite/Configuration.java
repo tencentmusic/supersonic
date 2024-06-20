@@ -2,8 +2,8 @@ package com.tencent.supersonic.headless.core.parser.calcite;
 
 
 import com.tencent.supersonic.headless.api.pojo.enums.EngineType;
-import com.tencent.supersonic.headless.core.parser.calcite.schema.SemanticSqlTypeFactoryImpl;
 import com.tencent.supersonic.headless.core.parser.calcite.schema.SemanticSqlDialect;
+import com.tencent.supersonic.headless.core.parser.calcite.schema.SemanticSqlTypeFactoryImpl;
 import com.tencent.supersonic.headless.core.parser.calcite.schema.ViewExpanderImpl;
 import com.tencent.supersonic.headless.core.utils.SqlDialectFactory;
 import java.util.ArrayList;
@@ -27,6 +27,8 @@ import org.apache.calcite.rel.type.RelDataTypeFactory;
 import org.apache.calcite.rel.type.RelDataTypeSystem;
 import org.apache.calcite.rex.RexBuilder;
 import org.apache.calcite.sql.SqlOperatorTable;
+import org.apache.calcite.sql.advise.SqlAdvisor;
+import org.apache.calcite.sql.advise.SqlAdvisorValidator;
 import org.apache.calcite.sql.fun.SqlStdOperatorTable;
 import org.apache.calcite.sql.parser.SqlParser;
 import org.apache.calcite.sql.parser.impl.SqlParserImpl;
@@ -34,6 +36,7 @@ import org.apache.calcite.sql.util.ChainedSqlOperatorTable;
 import org.apache.calcite.sql.validate.SqlValidator;
 import org.apache.calcite.sql.validate.SqlValidatorScope;
 import org.apache.calcite.sql.validate.SqlValidatorUtil;
+import org.apache.calcite.sql.validate.SqlValidatorWithHints;
 import org.apache.calcite.sql2rel.SqlToRelConverter;
 import org.apache.calcite.tools.FrameworkConfig;
 import org.apache.calcite.tools.Frameworks;
@@ -96,6 +99,13 @@ public class Configuration {
                 Configuration.getValidatorConfig(engineType));
     }
 
+    public static SqlValidatorWithHints getSqlValidatorWithHints(CalciteSchema rootSchema, EngineType engineTyp) {
+        return new SqlAdvisorValidator(SqlStdOperatorTable.instance(),
+                new CalciteCatalogReader(rootSchema,
+                        Collections.singletonList(rootSchema.getName()), typeFactory, config),
+                typeFactory, SqlValidator.Config.DEFAULT);
+    }
+
     public static SqlToRelConverter.Config getConverterConfig() {
         HintStrategyTable strategies = HintStrategyTable.builder().build();
         return SqlToRelConverter.config()
@@ -117,6 +127,10 @@ public class Configuration {
                 sqlValidator,
                 (CatalogReader) scope.getValidator().getCatalogReader(), cluster, fromworkConfig.getConvertletTable(),
                 getConverterConfig());
+    }
+
+    public static SqlAdvisor getSqlAdvisor(SqlValidatorWithHints validator, EngineType engineType) {
+        return new SqlAdvisor(validator, getParserConfig(engineType));
     }
 
 }
