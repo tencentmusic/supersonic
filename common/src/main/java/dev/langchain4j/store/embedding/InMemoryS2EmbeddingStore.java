@@ -86,12 +86,16 @@ public class InMemoryS2EmbeddingStore implements S2EmbeddingStore {
     @Override
     public void addQuery(String collectionName, List<EmbeddingQuery> queries) {
         InMemoryEmbeddingStore<EmbeddingQuery> embeddingStore = getEmbeddingStore(collectionName);
-        EmbeddingModel embeddingModel = ContextUtils.getBean(EmbeddingModel.class);
+        EmbeddingModel embeddingModel = getEmbeddingModel();
         for (EmbeddingQuery query : queries) {
             String question = query.getQuery();
             Embedding embedding = embeddingModel.embed(question).content();
             embeddingStore.add(query.getQueryId(), embedding, query);
         }
+    }
+
+    private static EmbeddingModel getEmbeddingModel() {
+        return ContextUtils.getBean(EmbeddingModel.class);
     }
 
     private InMemoryEmbeddingStore<EmbeddingQuery> getEmbeddingStore(String collectionName) {
@@ -113,7 +117,7 @@ public class InMemoryS2EmbeddingStore implements S2EmbeddingStore {
     @Override
     public List<RetrieveQueryResult> retrieveQuery(String collectionName, RetrieveQuery retrieveQuery, int num) {
         InMemoryEmbeddingStore<EmbeddingQuery> embeddingStore = getEmbeddingStore(collectionName);
-        EmbeddingModel embeddingModel = ContextUtils.getBean(EmbeddingModel.class);
+        EmbeddingModel embeddingModel = getEmbeddingModel();
 
         List<RetrieveQueryResult> results = new ArrayList<>();
 

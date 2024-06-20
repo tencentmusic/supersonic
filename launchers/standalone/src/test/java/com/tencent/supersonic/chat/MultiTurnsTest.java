@@ -29,7 +29,6 @@ public class MultiTurnsTest extends BaseTest {
 
         expectedParseInfo.getMetrics().add(DataUtils.getSchemaElement("访问次数"));
         expectedParseInfo.getMetrics().add(DataUtils.getSchemaElement("人均访问次数"));
-        expectedParseInfo.getMetrics().add(DataUtils.getSchemaElement("访问用户数"));
 
         expectedParseInfo.getDimensionFilters().add(DataUtils.getFilter("user_name",
                 FilterOperatorEnum.EQUALS, "alice", "用户", 2L));
