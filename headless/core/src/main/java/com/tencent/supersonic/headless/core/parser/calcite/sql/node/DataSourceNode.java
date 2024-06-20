@@ -1,6 +1,7 @@
 package com.tencent.supersonic.headless.core.parser.calcite.sql.node;
 
 import com.google.common.collect.Lists;
+import com.tencent.supersonic.common.jsqlparser.SqlSelectHelper;
 import com.tencent.supersonic.headless.api.pojo.enums.EngineType;
 import com.tencent.supersonic.headless.core.parser.calcite.Configuration;
 import com.tencent.supersonic.headless.core.parser.calcite.s2sql.Constants;
@@ -55,29 +56,20 @@ public class DataSourceNode extends SemanticNode {
             throw new Exception("DatasourceNode build error [tableSqlNode not found]");
         }
         SqlNode source = getTable(sqlTable, scope, EngineType.fromString(datasource.getType()));
-        addSchema(scope, datasource, source);
+        addSchema(scope, datasource, sqlTable);
         return buildAs(datasource.getName(), source);
     }
 
-    private static void addSchema(SqlValidatorScope scope, DataSource datasource, SqlNode table) throws Exception {
-        Map<String, Object> parseInfo = SemanticNode.getDbTable(table);
-        if (!parseInfo.isEmpty() && parseInfo.containsKey(Constants.SQL_PARSER_TABLE)) {
-            Map<String, Set<String>> dbTbs = (Map<String, Set<String>>) parseInfo.get(Constants.SQL_PARSER_TABLE);
-            Map<String, Set<String>> fields = (Map<String, Set<String>>) parseInfo.get(Constants.SQL_PARSER_FIELD);
-            for (Map.Entry<String, Set<String>> entry : dbTbs.entrySet()) {
-                for (String dbTb : entry.getValue()) {
-                    String[] dbTable = dbTb.split("\\.");
-                    if (Objects.nonNull(dbTable) && dbTable.length > 0) {
-                        String tb = dbTable.length > 1 ? dbTable[1] : dbTable[0];
-                        String db = dbTable.length > 1 ? dbTable[0] : "";
-                        addSchemaTable(scope, datasource, db, tb,
-                                fields.containsKey(entry.getKey()) ? fields.get(entry.getKey())
-                                        : dbTbs.size() == 1 && fields.size() == 1 && fields.containsKey("")
-                                                ? fields.get("")
-                                                : new HashSet<>());
-                    }
-                }
+    private static void addSchema(SqlValidatorScope scope, DataSource datasource, String table) throws Exception {
+        Map<String, Set<String>> sqlTable = SqlSelectHelper.getFieldsWithSubQuery(table);
+        for (Map.Entry<String, Set<String>> entry : sqlTable.entrySet()) {
+            String tb = entry.getKey();
+            String db = "";
+            if (entry.getKey().indexOf(".") > 0) {
+                db = entry.getKey().substring(0, entry.getKey().indexOf("."));
+                tb = entry.getKey().substring(entry.getKey().indexOf(".") + 1);
             }
+            addSchemaTable(scope, datasource, db, tb, entry.getValue());
         }
     }
 

@@ -156,7 +156,7 @@ public class QueryReqConverter {
         if (databaseReq.isInnerLayerNative()) {
             return AggOption.NATIVE;
         }
-        if (SqlSelectHelper.hasSubSelect(sql) || SqlSelectHelper.hasWith(sql)) {
+        if (SqlSelectHelper.hasSubSelect(sql) || SqlSelectHelper.hasWith(sql) || SqlSelectHelper.hasGroupBy(sql)) {
             return AggOption.NATIVE;
         }
         long defaultAggNullCnt = metricSchemas.stream()
