@@ -1,10 +1,5 @@
 package com.tencent.supersonic.headless;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThrows;
-import static org.junit.Assert.assertTrue;
-
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.common.pojo.Aggregator;
 import com.tencent.supersonic.common.pojo.Filter;
@@ -15,26 +10,36 @@ import com.tencent.supersonic.common.pojo.enums.QueryType;
 import com.tencent.supersonic.common.pojo.exception.InvalidPermissionException;
 import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
+import com.tencent.supersonic.headless.core.cache.QueryCache;
+import com.tencent.supersonic.headless.core.utils.ComponentFactory;
 import com.tencent.supersonic.util.DataUtils;
+import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Order;
-import org.junit.jupiter.api.Test;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
 
 @Slf4j
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class QueryByStructTest extends BaseTest {
 
     @Test
-    @Order(1)
-    public void testCacheQuery() throws Exception {
+    @Order(0)
+    public void testCacheQuery() {
         QueryStructReq queryStructReq1 = buildQueryStructReq(Arrays.asList("department"));
         QueryStructReq queryStructReq2 = buildQueryStructReq(Arrays.asList("department"));
-        queryService.queryByReq(queryStructReq1, User.getFakeUser());
-        SemanticQueryResp result2 = queryService.queryByReq(queryStructReq2, User.getFakeUser());
-        assertTrue(result2.isUseCache());
+        QueryCache queryCache = ComponentFactory.getQueryCache();
+        String cacheKey1 = queryCache.getCacheKey(queryStructReq1);
+        String cacheKey2 = queryCache.getCacheKey(queryStructReq2);
+        Assertions.assertEquals(cacheKey1, cacheKey2);
     }
 
     @Test

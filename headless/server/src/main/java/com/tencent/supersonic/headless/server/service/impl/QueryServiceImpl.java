@@ -39,13 +39,14 @@ import com.tencent.supersonic.headless.server.service.QueryService;
 import com.tencent.supersonic.headless.server.utils.QueryReqConverter;
 import com.tencent.supersonic.headless.server.utils.QueryUtils;
 import com.tencent.supersonic.headless.server.utils.StatUtils;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 
 @Service
@@ -95,6 +96,7 @@ public class QueryServiceImpl implements QueryService {
             //2.query from cache
             QueryCache queryCache = ComponentFactory.getQueryCache();
             String cacheKey = queryCache.getCacheKey(queryReq);
+            log.info("cacheKey:{}", cacheKey);
             Object query = queryCache.query(queryReq, cacheKey);
             if (Objects.nonNull(query)) {
                 SemanticQueryResp queryResp = (SemanticQueryResp) query;
