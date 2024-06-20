@@ -1,2 +1,0 @@
-com.tencent.supersonic.headless.core.file.FileHandler=\
-    com.tencent.supersonic.headless.core.file.FileHandlerImpl

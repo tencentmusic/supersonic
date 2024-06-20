@@ -1,9 +1,10 @@
 -- sample user
-MERGE INTO s2_user (id, `name`, password, display_name, email, is_admin) values (1, 'admin','admin','admin','admin@xx.com', 1);
-MERGE INTO s2_user (id, `name`, password, display_name, email) values (2, 'jack','123456','jack','jack@xx.com');
-MERGE INTO s2_user (id, `name`, password, display_name, email) values (3, 'tom','123456','tom','tom@xx.com');
-MERGE INTO s2_user (id, `name`, password, display_name, email, is_admin) values (4, 'lucy','123456','lucy','lucy@xx.com', 1);
-MERGE INTO s2_user (id, `name`, password, display_name, email) values (5, 'alice','123456','alice','alice@xx.com');
+---The default value for the password is 123456
+MERGE INTO s2_user (id, `name`, password, salt, display_name, email, is_admin) values (1, 'admin','c3VwZXJzb25pY0BiaWNvbdktJJYWw6A3rEmBUPzbn/6DNeYnD+y3mAwDKEMS3KVT','jGl25bVBBBW96Qi9Te4V3w==','admin','admin@xx.com', 1);
+MERGE INTO s2_user (id, `name`, password, salt,  display_name, email) values (2, 'jack','c3VwZXJzb25pY0BiaWNvbWxGalmwa0h/trkh/3CWOYMDiku0Op1VmOfESIKmN0HG','MWERWefm/3hD6kYndF6JIg==','jack','jack@xx.com');
+MERGE INTO s2_user (id, `name`, password, salt,  display_name, email) values (3, 'tom','c3VwZXJzb25pY0BiaWNvbVWv0CZ6HzeX8GRUpw0C8NSaQ+0hE/dAcmzRpCFwAqxK','4WCPdcXXgT89QDHLML+3hg==','tom','tom@xx.com');
+MERGE INTO s2_user (id, `name`, password, salt,  display_name, email, is_admin) values (4, 'lucy','c3VwZXJzb25pY0BiaWNvbc7Ychfu99lPL7rLmCkf/vgF4RASa4Z++Mxo1qlDCpci','3Jnpqob6uDoGLP9eCAg5Fw==','lucy','lucy@xx.com', 1);
+MERGE INTO s2_user (id, `name`, password, salt,  display_name, email) values (5, 'alice','c3VwZXJzb25pY0BiaWNvbe9Z4F2/DVIfAJoN1HwUTuH1KgVuiusvfh7KkWYQSNHk','K9gGyX8OAK8aH8Myj6djqQ==','alice','alice@xx.com');
 
 MERGE INTO s2_available_date_info(`id`,`item_id` ,`type`    ,`date_format` ,`start_date`  ,`end_date` ,`unavailable_date` ,`created_at`  ,`created_by`  ,`updated_at`  ,`updated_by` )
 values (1 , 1, 'dimension', 'yyyy-MM-dd', DATEADD('DAY', -28, CURRENT_DATE()), DATEADD('DAY', -1, CURRENT_DATE()), '[]', '2023-06-01', 'admin', '2023-06-01', 'admin');
@@ -74,7 +75,17 @@ MERGE INTO s2_user_department (user_name, department) values ('john','strategy')
 MERGE INTO s2_user_department (user_name, department) values ('alice','sales');
 MERGE INTO s2_user_department (user_name, department) values ('dean','marketing');
 
-
+INSERT INTO s2_pv_uv_statis (imp_date, user_name, page) VALUES (CURRENT_DATE(), 'lucy', 'p1');
+INSERT INTO s2_pv_uv_statis (imp_date, user_name, page) VALUES (CURRENT_DATE(), 'jack', 'p1');
+INSERT INTO s2_pv_uv_statis (imp_date, user_name, page) VALUES (CURRENT_DATE(), 'lucy', 'p4');
+INSERT INTO s2_pv_uv_statis (imp_date, user_name, page) VALUES (CURRENT_DATE(), 'tom', 'p2');
+INSERT INTO s2_pv_uv_statis (imp_date, user_name, page) VALUES (CURRENT_DATE(), 'john', 'p3');
+INSERT INTO s2_pv_uv_statis (imp_date, user_name, page) VALUES (CURRENT_DATE(), 'alice', 'p1');
+INSERT INTO s2_pv_uv_statis (imp_date, user_name, page) VALUES (CURRENT_DATE(), 'dean', 'p2');
+INSERT INTO s2_pv_uv_statis (imp_date, user_name, page) VALUES (CURRENT_DATE(), 'john', 'p3');
+INSERT INTO s2_pv_uv_statis (imp_date, user_name, page) VALUES (CURRENT_DATE(), 'tom', 'p3');
+INSERT INTO s2_pv_uv_statis (imp_date, user_name, page) VALUES (CURRENT_DATE(), 'lucy', 'p1');
+INSERT INTO s2_pv_uv_statis (imp_date, user_name, page) VALUES (CURRENT_DATE(), 'dean', 'p4');
 INSERT INTO s2_pv_uv_statis (imp_date, user_name, page) VALUES (DATEADD('DAY', -5, CURRENT_DATE()), 'lucy', 'p1');
 INSERT INTO s2_pv_uv_statis (imp_date, user_name, page) VALUES (DATEADD('DAY', -4, CURRENT_DATE()), 'jack', 'p1');
 INSERT INTO s2_pv_uv_statis (imp_date, user_name, page) VALUES (DATEADD('DAY', -3, CURRENT_DATE()), 'lucy', 'p4');

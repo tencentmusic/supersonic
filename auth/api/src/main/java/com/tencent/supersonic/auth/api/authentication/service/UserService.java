@@ -19,7 +19,9 @@ public interface UserService {
 
     void register(UserReq userCmd);
 
-    String login(UserReq userCmd);
+    String login(UserReq userCmd, HttpServletRequest request);
+
+    String login(UserReq userCmd, String appKey);
 
     Set<String> getUserAllOrgId(String userName);
 
@@ -27,5 +29,5 @@ public interface UserService {
 
     List<Organization> getOrganizationTree();
 
-    String casLogin(String prefixUrl, String ticket, String service);
+    String casLogin(String prefixUrl, String ticket, String service, String appKey);
 }

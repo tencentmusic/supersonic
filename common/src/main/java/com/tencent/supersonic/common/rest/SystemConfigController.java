@@ -1,6 +1,6 @@
 package com.tencent.supersonic.common.rest;
 
-import com.tencent.supersonic.common.pojo.SystemConfig;
+import com.tencent.supersonic.common.config.SystemConfig;
 import com.tencent.supersonic.common.service.SystemConfigService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;

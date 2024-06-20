@@ -12,8 +12,9 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.List;
+import lombok.extern.slf4j.Slf4j;
 
-
+@Slf4j
 public class YamlUtils {
 
     /**
@@ -30,7 +31,7 @@ public class YamlUtils {
         try {
             return mapper.readValue(yamlStr, clazz);
         } catch (JsonProcessingException e) {
-            e.printStackTrace();
+            log.error("", e);
         }
         return null;
     }
@@ -53,7 +54,7 @@ public class YamlUtils {
                     .replaceAll("\"false\"", "false")
                     .replaceAll("\"False\"", "false");
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("", e);
         }
         return null;
     }

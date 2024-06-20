@@ -1,6 +1,6 @@
 package com.tencent.supersonic.chat.server.persistence.repository;
 
-import com.tencent.supersonic.headless.core.pojo.ChatContext;
+import com.tencent.supersonic.headless.chat.ChatContext;
 
 public interface ChatContextRepository {
 

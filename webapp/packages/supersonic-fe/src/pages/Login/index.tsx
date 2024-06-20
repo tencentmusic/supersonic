@@ -6,13 +6,14 @@ import RegisterForm from './components/RegisterForm';
 // import ForgetPwdForm from './components/ForgetPwdForm';
 import { ROUTE_AUTH_CODES } from '../../../config/routes';
 import S2Icon, { ICON } from '@/components/S2Icon';
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm } from 'antd/lib/form/Form';
 import type { RegisterFormDetail } from './components/types';
 import { postUserLogin, userRegister } from './services';
 import { AUTH_TOKEN_KEY } from '@/common/constants';
 import { getUserInfoByTicket, queryCurrentUser } from '@/services/user';
 import { history, useModel } from '@umijs/max';
+import { encryptPassword } from '@/utils/utils';
 import { TOKEN_KEY } from '@/services/request';
 import { ssoLogin } from '@/utils/utils';
 
@@ -51,17 +52,18 @@ const LoginPage: React.FC = () => {
   const handleLogin = async () => {
     const { validateFields } = form;
     const content = await validateFields();
-    await loginDone(content);
+    await loginDone({ ...content, password: encryptPassword(content.password) });
   };
 
   // 处理注册弹窗确定按钮
   const handleRegister = async (values: RegisterFormDetail) => {
-    const { code } = await userRegister({ ...values });
+    const enCodeValues = { ...values, password: encryptPassword(values.password) };
+    const { code } = await userRegister(enCodeValues);
     if (code === 200) {
       message.success('注册成功');
       setCreateModalVisible(false);
       // 注册完自动帮用户登录
-      await loginDone(values);
+      await loginDone(enCodeValues);
     }
   };
 
@@ -72,6 +74,8 @@ const LoginPage: React.FC = () => {
 
   async function loginWithTicket(ticket: string) {
     const { code, data } = await getUserInfoByTicket(ticket);
+
+    debugger;
 
     if (code === 200) {
       localStorage.setItem(TOKEN_KEY, data);

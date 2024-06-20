@@ -38,6 +38,7 @@ CREATE TABLE IF NOT EXISTS `s2_chat_query`
     `score`             int DEFAULT '0',
     `feedback`          varchar(1024) DEFAULT '',
     `similar_queries`          varchar(1024) DEFAULT '',
+    `parse_time_cost` varchar(1024) DEFAULT '',
     PRIMARY KEY (`question_id`)
 );
 
@@ -87,7 +88,8 @@ create table IF NOT EXISTS s2_user
     id       INT AUTO_INCREMENT,
     name     varchar(100) not null,
     display_name varchar(100) null,
-    password varchar(100) null,
+    password varchar(256) null,
+    salt varchar(256)  NULL,
     email varchar(100) null,
     is_admin INT null,
     PRIMARY KEY (`id`)

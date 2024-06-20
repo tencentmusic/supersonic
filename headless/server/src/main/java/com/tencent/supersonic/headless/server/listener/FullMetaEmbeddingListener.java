@@ -1,7 +1,7 @@
 package com.tencent.supersonic.headless.server.listener;
 
-import com.tencent.supersonic.headless.core.chat.parser.llm.JavaLLMProxy;
-import com.tencent.supersonic.headless.core.utils.ComponentFactory;
+import com.tencent.supersonic.headless.chat.utils.ComponentFactory;
+import com.tencent.supersonic.headless.chat.parser.llm.JavaLLMProxy;
 import com.tencent.supersonic.headless.server.schedule.EmbeddingTask;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

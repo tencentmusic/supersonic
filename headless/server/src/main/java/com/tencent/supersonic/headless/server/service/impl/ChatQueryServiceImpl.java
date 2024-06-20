@@ -20,6 +20,7 @@ import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.headless.api.pojo.SchemaMapInfo;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.api.pojo.SemanticSchema;
+import com.tencent.supersonic.headless.api.pojo.SqlEvaluation;
 import com.tencent.supersonic.headless.api.pojo.SqlInfo;
 import com.tencent.supersonic.headless.api.pojo.enums.CostType;
 import com.tencent.supersonic.headless.api.pojo.enums.QueryMethod;
@@ -39,18 +40,18 @@ import com.tencent.supersonic.headless.api.pojo.response.ParseResp;
 import com.tencent.supersonic.headless.api.pojo.response.QueryResult;
 import com.tencent.supersonic.headless.api.pojo.response.QueryState;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
-import com.tencent.supersonic.headless.core.chat.corrector.GrammarCorrector;
-import com.tencent.supersonic.headless.core.chat.corrector.SchemaCorrector;
-import com.tencent.supersonic.headless.core.chat.knowledge.HanlpMapResult;
-import com.tencent.supersonic.headless.core.chat.knowledge.KnowledgeBaseService;
-import com.tencent.supersonic.headless.core.chat.knowledge.SearchService;
-import com.tencent.supersonic.headless.core.chat.knowledge.helper.HanlpHelper;
-import com.tencent.supersonic.headless.core.chat.knowledge.helper.NatureHelper;
-import com.tencent.supersonic.headless.core.chat.query.QueryManager;
-import com.tencent.supersonic.headless.core.chat.query.SemanticQuery;
-import com.tencent.supersonic.headless.core.chat.query.llm.s2sql.LLMSqlQuery;
-import com.tencent.supersonic.headless.core.pojo.ChatContext;
-import com.tencent.supersonic.headless.core.pojo.QueryContext;
+import com.tencent.supersonic.headless.chat.corrector.GrammarCorrector;
+import com.tencent.supersonic.headless.chat.corrector.SchemaCorrector;
+import com.tencent.supersonic.headless.chat.knowledge.HanlpMapResult;
+import com.tencent.supersonic.headless.chat.knowledge.KnowledgeBaseService;
+import com.tencent.supersonic.headless.chat.knowledge.SearchService;
+import com.tencent.supersonic.headless.chat.knowledge.helper.HanlpHelper;
+import com.tencent.supersonic.headless.chat.knowledge.helper.NatureHelper;
+import com.tencent.supersonic.headless.chat.query.QueryManager;
+import com.tencent.supersonic.headless.chat.query.SemanticQuery;
+import com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMSqlQuery;
+import com.tencent.supersonic.headless.chat.ChatContext;
+import com.tencent.supersonic.headless.chat.QueryContext;
 import com.tencent.supersonic.headless.server.persistence.dataobject.StatisticsDO;
 import com.tencent.supersonic.headless.server.service.ChatContextService;
 import com.tencent.supersonic.headless.server.service.ChatQueryService;
@@ -185,7 +186,7 @@ public class ChatQueryServiceImpl implements ChatQueryService {
     }
 
     private QueryResult doExecution(SemanticQueryReq semanticQueryReq,
-                                    SemanticParseInfo parseInfo, User user) throws Exception {
+            SemanticParseInfo parseInfo, User user) throws Exception {
         SemanticQueryResp queryResp = queryService.queryByReq(semanticQueryReq, user);
         QueryResult queryResult = new QueryResult();
         if (queryResp != null) {
@@ -333,10 +334,10 @@ public class ChatQueryServiceImpl implements ChatQueryService {
     }
 
     private void updateDateInfo(QueryDataReq queryData, SemanticParseInfo parseInfo,
-                                Map<String, Map<String, String>> filedNameToValueMap,
-                                List<FieldExpression> fieldExpressionList,
-                                List<Expression> addConditions,
-                                Set<String> removeFieldNames) {
+            Map<String, Map<String, String>> filedNameToValueMap,
+            List<FieldExpression> fieldExpressionList,
+            List<Expression> addConditions,
+            Set<String> removeFieldNames) {
         if (Objects.isNull(queryData.getDateInfo())) {
             return;
         }
@@ -360,7 +361,7 @@ public class ChatQueryServiceImpl implements ChatQueryService {
             for (QueryFilter queryFilter : queryData.getDimensionFilters()) {
                 if (queryFilter.getOperator().equals(FilterOperatorEnum.LIKE)
                         && FilterOperatorEnum.LIKE.getValue().toLowerCase().equals(
-                                fieldExpression.getOperator().toLowerCase())) {
+                        fieldExpression.getOperator().toLowerCase())) {
                     Map<String, String> replaceMap = new HashMap<>();
                     String preValue = fieldExpression.getFieldValue().toString();
                     String curValue = queryFilter.getValue().toString();
@@ -380,8 +381,8 @@ public class ChatQueryServiceImpl implements ChatQueryService {
     }
 
     private <T extends ComparisonOperator> void addTimeFilters(String date,
-                                                               T comparisonExpression,
-                                                               List<Expression> addConditions) {
+            T comparisonExpression,
+            List<Expression> addConditions) {
         Column column = new Column(TimeDimensionEnum.DAY.getChName());
         StringValue stringValue = new StringValue(date);
         comparisonExpression.setLeftExpression(column);
@@ -390,10 +391,10 @@ public class ChatQueryServiceImpl implements ChatQueryService {
     }
 
     private void updateFilters(List<FieldExpression> fieldExpressionList,
-                               Set<QueryFilter> metricFilters,
-                               Set<QueryFilter> contextMetricFilters,
-                               List<Expression> addConditions,
-                               Set<String> removeFieldNames) {
+            Set<QueryFilter> metricFilters,
+            Set<QueryFilter> contextMetricFilters,
+            List<Expression> addConditions,
+            Set<String> removeFieldNames) {
         if (CollectionUtils.isEmpty(metricFilters)) {
             return;
         }
@@ -429,9 +430,9 @@ public class ChatQueryServiceImpl implements ChatQueryService {
 
     // add in condition to sql where  condition
     private void addWhereInFilters(QueryFilter dslQueryFilter,
-                                   InExpression inExpression,
-                                   Set<QueryFilter> contextMetricFilters,
-                                   List<Expression> addConditions) {
+            InExpression inExpression,
+            Set<QueryFilter> contextMetricFilters,
+            List<Expression> addConditions) {
         Column column = new Column(dslQueryFilter.getName());
         ParenthesedExpressionList parenthesedExpressionList = new ParenthesedExpressionList<>();
         List<String> valueList = JsonUtil.toList(
@@ -456,9 +457,9 @@ public class ChatQueryServiceImpl implements ChatQueryService {
 
     // add where filter
     private <T extends ComparisonOperator> void addWhereFilters(QueryFilter dslQueryFilter,
-                                                                T comparisonExpression,
-                                                                Set<QueryFilter> contextMetricFilters,
-                                                                List<Expression> addConditions) {
+            T comparisonExpression,
+            Set<QueryFilter> contextMetricFilters,
+            List<Expression> addConditions) {
         String columnName = dslQueryFilter.getName();
         if (StringUtils.isNotBlank(dslQueryFilter.getFunction())) {
             columnName = dslQueryFilter.getFunction() + "(" + dslQueryFilter.getName() + ")";
@@ -595,6 +596,17 @@ public class ChatQueryServiceImpl implements ChatQueryService {
     }
 
     public void correct(QuerySqlReq querySqlReq, User user) {
+        SemanticParseInfo semanticParseInfo = correctSqlReq(querySqlReq, user);
+        querySqlReq.setSql(semanticParseInfo.getSqlInfo().getCorrectS2SQL());
+    }
+
+    @Override
+    public SqlEvaluation validate(QuerySqlReq querySqlReq, User user) {
+        SemanticParseInfo semanticParseInfo = correctSqlReq(querySqlReq, user);
+        return semanticParseInfo.getSqlEvaluation();
+    }
+
+    private SemanticParseInfo correctSqlReq(QuerySqlReq querySqlReq, User user) {
         QueryContext queryCtx = new QueryContext();
         SemanticSchema semanticSchema = semanticService.getSemanticSchema();
         queryCtx.setSemanticSchema(semanticSchema);
@@ -617,7 +629,8 @@ public class ChatQueryServiceImpl implements ChatQueryService {
                 corrector.correct(queryCtx, semanticParseInfo);
             }
         });
-        querySqlReq.setSql(sqlInfo.getCorrectS2SQL());
+        log.info("chatQueryServiceImpl correct:{}", sqlInfo.getCorrectS2SQL());
+        return semanticParseInfo;
     }
 
 }

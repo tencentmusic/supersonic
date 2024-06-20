@@ -28,6 +28,10 @@
         </fileSet>
         <fileSet>
             <directory>${project.basedir}/../../assembly/bin</directory>
+            <excludes>
+                <exclude>supersonic-build.sh</exclude>
+                <exclude>supersonic-build.bat</exclude>
+            </excludes>
             <outputDirectory>bin</outputDirectory>
             <fileMode>0777</fileMode>
             <directoryMode>0755</directoryMode>

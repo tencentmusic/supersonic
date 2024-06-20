@@ -52,7 +52,7 @@ s2:
   corrector:
     additional:
       information: true
-
+    date: true
   functionCall:
     url: ${s2.pyllm.url}
 
@@ -105,3 +105,17 @@ s2:
 cas:
   # prefixUrl: https://op.cvte.com/d72f1f3c12904d359e1de7e99cac61e8
   prefixUrl: https://op-fat.cvte.com/b9114441c4544c5093ce5754a9f8b6c4
+
+
+# swagger配置
+swagger:
+  title: 'SuperSonic平台接口文档'
+  base:
+    package: com.tencent.supersonic
+  description: 'SuperSonic平台接口文档'
+  url: ''
+  contact:
+    name:
+    email:
+    url: ''
+  version: 3.0

@@ -70,16 +70,14 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public String login(@RequestBody UserReq userCmd) {
-        return userService.login(userCmd);
+    public String login(@RequestBody UserReq userCmd, HttpServletRequest request) {
+        return userService.login(userCmd, request);
     }
 
     @GetMapping("/validateLogin")
     public String validateLogin(@RequestParam(name = "ticket") String ticket,
                                 @RequestParam(name = "service") String service) {
-
-
-        return userService.casLogin(prefixUrl, ticket, service);
+        return userService.casLogin(prefixUrl, ticket, service, "");
     }
 
 }

@@ -5,6 +5,8 @@ import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
 import com.tencent.supersonic.chat.server.agent.Agent;
 import com.tencent.supersonic.chat.server.agent.AgentToolType;
 import com.tencent.supersonic.chat.server.service.AgentService;
+import com.tencent.supersonic.chat.server.util.LLMConnHelper;
+import com.tencent.supersonic.common.config.LLMConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -47,6 +49,11 @@ public class AgentController {
     public boolean deleteAgent(@PathVariable("id") Integer id) {
         agentService.deleteAgent(id);
         return true;
+    }
+
+    @PostMapping("/testLLMConn")
+    public boolean testLLMConn(@RequestBody LLMConfig llmConfig) {
+        return LLMConnHelper.testConnection(llmConfig);
     }
 
     @RequestMapping("/getAgentList")

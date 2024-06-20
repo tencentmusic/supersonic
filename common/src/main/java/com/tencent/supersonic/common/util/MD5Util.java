@@ -3,8 +3,9 @@ package com.tencent.supersonic.common.util;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.util.Base64;
+import lombok.extern.slf4j.Slf4j;
 
-
+@Slf4j
 public class MD5Util {
 
 
@@ -44,7 +45,7 @@ public class MD5Util {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("", e);
         }
 
         if (isUpper) {
