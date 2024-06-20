@@ -11,6 +11,7 @@ com.tencent.supersonic.headless.chat.parser.SemanticParser=\
 
 com.tencent.supersonic.chat.server.parser.ChatParser=\
     com.tencent.supersonic.chat.server.parser.NL2PluginParser, \
+    com.tencent.supersonic.chat.server.parser.MultiTurnParser, \
     com.tencent.supersonic.chat.server.parser.NL2SQLParser
 
 com.tencent.supersonic.chat.server.executor.ChatExecutor=\
