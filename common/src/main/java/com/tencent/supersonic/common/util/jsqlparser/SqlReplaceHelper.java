@@ -129,7 +129,7 @@ public class SqlReplaceHelper {
         }
         //List<PlainSelect> plainSelectList = new ArrayList<>();
         //plainSelectList.add((PlainSelect) selectStatement);
-        List<PlainSelect> plainSelects = SqlSelectHelper.getPlainSelect(sql);
+        List<PlainSelect> plainSelects = SqlSelectHelper.getPlainSelect(selectStatement);
         for (PlainSelect plainSelect : plainSelects) {
             Expression where = plainSelect.getWhere();
             FieldlValueReplaceVisitor visitor = new FieldlValueReplaceVisitor(exactReplace, filedNameToValueMap);
@@ -701,6 +701,10 @@ public class SqlReplaceHelper {
     public static String dealAliasToOrderBy(String querySql) {
         Select selectStatement = SqlSelectHelper.getSelect(querySql);
         List<PlainSelect> plainSelectList = new ArrayList<>();
+        List<PlainSelect> withPlainSelectList = SqlSelectHelper.getWithItem(selectStatement);
+        if (!CollectionUtils.isEmpty(withPlainSelectList)) {
+            plainSelectList.addAll(withPlainSelectList);
+        }
         if (selectStatement instanceof PlainSelect) {
             plainSelectList.add((PlainSelect) selectStatement);
         } else if (selectStatement instanceof SetOperationList) {

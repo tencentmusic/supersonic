@@ -116,8 +116,7 @@ public class SqlSelectHelper {
         return result;
     }
 
-    public static List<PlainSelect> getPlainSelect(String sql) {
-        Select selectStatement = getSelect(sql);
+    public static List<PlainSelect> getPlainSelect(Select selectStatement) {
         if (selectStatement == null) {
             return null;
         }
@@ -137,6 +136,11 @@ public class SqlSelectHelper {
             }
         }
         return plainSelectList;
+    }
+
+    public static List<PlainSelect> getPlainSelect(String sql) {
+        Select selectStatement = getSelect(sql);
+        return getPlainSelect(selectStatement);
     }
 
     public static Boolean hasSubSelect(String sql) {
