@@ -158,6 +158,8 @@ public class DefaultUserAdaptor implements UserAdaptor {
 
     @Override
     public String casLogin(String prefixUrl, String ticket, String service, String appKey) {
+        UserTokenUtils userTokenUtils = ContextUtils.getBean(UserTokenUtils.class);
+        appKey = StringUtils.isEmpty(appKey) ? userTokenUtils.getDefaultAppKey() : appKey;
         String validateUrl = prefixUrl + "/serviceValidate";
         String res = CasServiceUtil.getStValidate(validateUrl, ticket, service);
         final String error = XmlUtils.getTextForElement(res, "authenticationFailure");
@@ -172,7 +174,6 @@ public class DefaultUserAdaptor implements UserAdaptor {
         if (user == null) {
             throw new RuntimeException("user not exist,please register");
         }
-        UserTokenUtils userTokenUtils = ContextUtils.getBean(UserTokenUtils.class);
         return userTokenUtils.generateToken(user, appKey);
 
     }

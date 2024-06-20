@@ -77,8 +77,6 @@ public class UserController {
     @GetMapping("/validateLogin")
     public String validateLogin(@RequestParam(name = "ticket") String ticket,
                                 @RequestParam(name = "service") String service) {
-
-        // TODO zds: add appKey
         return userService.casLogin(prefixUrl, ticket, service, "");
     }
 
