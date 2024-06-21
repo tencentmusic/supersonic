@@ -14,6 +14,7 @@ import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.Function;
 import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
 import net.sf.jsqlparser.schema.Column;
+import net.sf.jsqlparser.statement.select.AllColumns;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.Select;
 import net.sf.jsqlparser.statement.select.SelectItem;
@@ -45,8 +46,6 @@ public class SqlSelectFunctionHelper {
 
     public static Set<String> getFunctions(String sql) {
         Select selectStatement = SqlSelectHelper.getSelect(sql);
-        //SelectBody selectBody = selectStatement.getSelectBody();
-
         if (!(selectStatement instanceof PlainSelect)) {
             return new HashSet<>();
         }
@@ -106,5 +105,18 @@ public class SqlSelectFunctionHelper {
         return new ArrayList<>();
     }
 
+    public static boolean hasAsterisk(String sql) {
+        List<PlainSelect> plainSelectList = SqlSelectHelper.getPlainSelect(sql);
+        if (CollectionUtils.isEmpty(plainSelectList)) {
+            return false;
+        }
+        for (PlainSelect plainSelect : plainSelectList) {
+            List<SelectItem<?>> selectItems = plainSelect.getSelectItems();
+            if (selectItems.stream().anyMatch(item -> item.getExpression() instanceof AllColumns)) {
+                return true;
+            }
+        }
+        return false;
+    }
 }
 

@@ -1,20 +1,12 @@
 package com.tencent.supersonic.headless.chat.corrector;
 
+import com.tencent.supersonic.common.jsqlparser.SqlAddHelper;
 import com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum;
 import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
-import com.tencent.supersonic.common.util.ContextUtils;
-import com.tencent.supersonic.common.jsqlparser.SqlAddHelper;
-import com.tencent.supersonic.common.jsqlparser.SqlSelectHelper;
 import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.api.pojo.SemanticSchema;
 import com.tencent.supersonic.headless.chat.QueryContext;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
-import org.springframework.core.env.Environment;
-import org.springframework.util.CollectionUtils;
-
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -22,6 +14,10 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
+import org.springframework.util.CollectionUtils;
 
 /**
  * basic semantic correction functionality, offering common methods and an
@@ -73,27 +69,6 @@ public abstract class BaseSemanticCorrector implements SemanticCorrector {
         result.put(TimeDimensionEnum.WEEK.getName(), TimeDimensionEnum.WEEK.getChName());
 
         return result;
-    }
-
-    protected String addFieldsToSelect(SemanticParseInfo semanticParseInfo, String correctS2SQL) {
-        Set<String> selectFields = new HashSet<>(SqlSelectHelper.getSelectFields(correctS2SQL));
-        Set<String> needAddFields = new HashSet<>(SqlSelectHelper.getGroupByFields(correctS2SQL));
-
-        //decide whether add order by expression field to select
-        Environment environment = ContextUtils.getBean(Environment.class);
-        String correctorAdditionalInfo = environment.getProperty("s2.corrector.additional.information");
-        if (StringUtils.isNotBlank(correctorAdditionalInfo) && Boolean.parseBoolean(correctorAdditionalInfo)) {
-            needAddFields.addAll(SqlSelectHelper.getOrderByFields(correctS2SQL));
-        }
-
-        if (CollectionUtils.isEmpty(selectFields) || CollectionUtils.isEmpty(needAddFields)) {
-            return correctS2SQL;
-        }
-
-        needAddFields.removeAll(selectFields);
-        String addFieldsToSelectSql = SqlAddHelper.addFieldsToSelect(correctS2SQL, new ArrayList<>(needAddFields));
-        semanticParseInfo.getSqlInfo().setCorrectS2SQL(addFieldsToSelectSql);
-        return addFieldsToSelectSql;
     }
 
     protected void addAggregateToMetric(QueryContext queryContext, SemanticParseInfo semanticParseInfo) {

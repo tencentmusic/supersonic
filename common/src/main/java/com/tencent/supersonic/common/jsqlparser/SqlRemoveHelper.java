@@ -1,5 +1,6 @@
 package com.tencent.supersonic.common.jsqlparser;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -24,6 +25,7 @@ import net.sf.jsqlparser.expression.operators.relational.MinorThanEquals;
 import net.sf.jsqlparser.expression.operators.relational.NotEqualsTo;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.schema.Column;
+import net.sf.jsqlparser.statement.select.AllColumns;
 import net.sf.jsqlparser.statement.select.GroupByElement;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.Select;
@@ -37,20 +39,24 @@ import org.springframework.util.CollectionUtils;
 @Slf4j
 public class SqlRemoveHelper {
 
-    public static String removeSelect(String sql, Set<String> fields) {
+    public static String removeAsteriskAndAddFields(String sql, Set<String> needAddDefaultFields) {
         Select selectStatement = SqlSelectHelper.getSelect(sql);
-        if (selectStatement == null) {
+        if (Objects.isNull(selectStatement)) {
             return sql;
         }
-        //SelectBody selectBody = selectStatement.getSelectBody();
         if (!(selectStatement instanceof PlainSelect)) {
             return sql;
         }
         List<SelectItem<?>> selectItems = ((PlainSelect) selectStatement).getSelectItems();
-        selectItems.removeIf(selectItem -> {
-            String columnName = SqlSelectHelper.getColumnName(selectItem.getExpression());
-            return fields.contains(columnName);
-        });
+        if (selectItems.stream().anyMatch(item -> item.getExpression() instanceof AllColumns)) {
+            selectItems.clear();
+            List<SelectItem<Column>> columnSelectItems = new ArrayList<>();
+            for (String fieldName : needAddDefaultFields) {
+                SelectItem<Column> selectExpressionItem = new SelectItem(new Column(fieldName));
+                columnSelectItems.add(selectExpressionItem);
+            }
+            selectItems.addAll(columnSelectItems);
+        }
         return selectStatement.toString();
     }
 
@@ -59,7 +65,6 @@ public class SqlRemoveHelper {
         if (selectStatement == null) {
             return sql;
         }
-        //SelectBody selectBody = selectStatement.getSelectBody();
         if (!(selectStatement instanceof PlainSelect)) {
             return sql;
         }
@@ -79,8 +84,6 @@ public class SqlRemoveHelper {
 
     public static String removeWhereCondition(String sql, Set<String> removeFieldNames) {
         Select selectStatement = SqlSelectHelper.getSelect(sql);
-        //SelectBody selectBody = selectStatement.getSelectBody();
-
         if (!(selectStatement instanceof PlainSelect)) {
             return sql;
         }
@@ -105,8 +108,6 @@ public class SqlRemoveHelper {
         if (selectStatement == null) {
             return sql;
         }
-        //SelectBody selectBody = selectStatement.getSelectBody();
-
         if (!(selectStatement instanceof PlainSelect)) {
             return sql;
         }
@@ -184,7 +185,6 @@ public class SqlRemoveHelper {
                 InExpression constantExpression = (InExpression) CCJSqlParserUtil.parseCondExpression(
                         JsqlConstants.IN_CONSTANT);
                 inExpression.setLeftExpression(constantExpression.getLeftExpression());
-                //inExpression.setRightItemsList(constantExpression.getRightItemsList());
                 inExpression.setRightExpression(constantExpression.getRightExpression());
                 inExpression.setASTNode(constantExpression.getASTNode());
             } catch (JSQLParserException e) {
@@ -211,8 +211,6 @@ public class SqlRemoveHelper {
 
     public static String removeHavingCondition(String sql, Set<String> removeFieldNames) {
         Select selectStatement = SqlSelectHelper.getSelect(sql);
-        //SelectBody selectBody = selectStatement.getSelectBody();
-
         if (!(selectStatement instanceof PlainSelect)) {
             return sql;
         }

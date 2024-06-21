@@ -1,12 +1,18 @@
 package com.tencent.supersonic.headless.api.pojo;
 
-import lombok.Data;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
+import lombok.Data;
+import org.apache.commons.collections.CollectionUtils;
 
 @Data
 public class DataSetSchema {
+
     private SchemaElement dataSet;
     private Set<SchemaElement> metrics = new HashSet<>();
     private Set<SchemaElement> dimensions = new HashSet<>();
@@ -76,6 +82,34 @@ public class DataSetSchema {
             return null;
         }
         return queryConfig.getTagTypeDefaultConfig();
+    }
+
+    public List<SchemaElement> getTagDefaultDimensions() {
+        TagTypeDefaultConfig tagTypeDefaultConfig = getTagTypeDefaultConfig();
+        if (Objects.isNull(tagTypeDefaultConfig) || Objects.isNull(tagTypeDefaultConfig.getDefaultDisplayInfo())) {
+            return new ArrayList<>();
+        }
+        if (CollectionUtils.isNotEmpty(tagTypeDefaultConfig.getDefaultDisplayInfo().getMetricIds())) {
+            return tagTypeDefaultConfig.getDefaultDisplayInfo().getMetricIds()
+                    .stream().map(id -> {
+                        SchemaElement metric = getElement(SchemaElementType.METRIC, id);
+                        return metric;
+                    }).filter(Objects::nonNull).collect(Collectors.toList());
+        }
+        return new ArrayList<>();
+    }
+
+    public List<SchemaElement> getTagDefaultMetrics() {
+        TagTypeDefaultConfig tagTypeDefaultConfig = getTagTypeDefaultConfig();
+        if (Objects.isNull(tagTypeDefaultConfig) || Objects.isNull(tagTypeDefaultConfig.getDefaultDisplayInfo())) {
+            return new ArrayList<>();
+        }
+        if (CollectionUtils.isNotEmpty(tagTypeDefaultConfig.getDefaultDisplayInfo().getDimensionIds())) {
+            return tagTypeDefaultConfig.getDefaultDisplayInfo().getDimensionIds().stream()
+                    .map(id -> getElement(SchemaElementType.DIMENSION, id))
+                    .filter(Objects::nonNull).collect(Collectors.toList());
+        }
+        return new ArrayList<>();
     }
 
 }
