@@ -5,7 +5,7 @@ import com.tencent.supersonic.headless.server.persistence.dataobject.ClassDO;
 import com.tencent.supersonic.headless.server.persistence.mapper.ClassMapper;
 import com.tencent.supersonic.headless.server.persistence.repository.ClassRepository;
 import com.tencent.supersonic.headless.server.pojo.ClassFilter;
-import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.stereotype.Repository;
 

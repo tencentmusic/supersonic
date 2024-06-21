@@ -17,7 +17,14 @@ spring:
     url: jdbc:h2:mem:semantic;DATABASE_TO_UPPER=false
     username: root
     password: semantic
-
+  autoconfigure:
+    exclude:
+      - spring.dev.langchain4j.spring.LangChain4jAutoConfig
+      - spring.dev.langchain4j.openai.spring.AutoConfig
+      - spring.dev.langchain4j.ollama.spring.AutoConfig
+      - spring.dev.langchain4j.azure.openai.spring.AutoConfig
+      - spring.dev.langchain4j.azure.aisearch.spring.AutoConfig
+      - spring.dev.langchain4j.anthropic.spring.AutoConfig
 mybatis:
   mapper-locations=classpath:mappers/custom/*.xml,classpath*:/mappers/*.xml
 
@@ -36,7 +43,11 @@ logging:
     dev.ai4j.openai4j: DEBUG
 
 s2:
+  pyllm:
+    url: http://127.0.0.1:9092
+
   parser:
+    url: ${s2.pyllm.url}
     strategy: ONE_PASS_SELF_CONSISTENCY
     exemplar-recall:
       number: 10
@@ -51,6 +62,13 @@ s2:
     additional:
       information: true
     date: true
+  functionCall:
+    url: ${s2.pyllm.url}
+
+  embedding:
+    url: ${s2.pyllm.url}
+    persistent:
+      path: /tmp
 
   demo:
     names: S2VisitsDemo,S2ArtistDemo
@@ -59,24 +77,6 @@ s2:
   schema:
     cache:
       enable: false
-
-  langchain4j:
-    #1.chat-model
-    chat-model:
-      provider: open_ai
-      openai:
-        # Replace with your LLM configs
-        # Note: The default API key `demo` is provided by langchain4j community
-        #       which limits 1000 tokens per request.
-        base-url: ${OPENAI_API_BASE:https://api.openai.com/v1}
-        api-key: ${OPENAI_API_KEY:demo}
-        model-name: ${OPENAI_MODEL_NAME:gpt-3.5-turbo}
-        temperature: ${OPENAI_TEMPERATURE:0.0}
-        timeout: ${OPENAI_TIMEOUT:PT60S}
-    #2.embedding-model
-    #2.1 in_memory(default)
-    embedding-model:
-      provider: in_process
 
 # swagger配置
 swagger:
@@ -90,3 +90,20 @@ swagger:
     email:
     url: ''
   version: 3.0
+
+
+langchain4j:
+  open-ai:
+    chat-model:
+      # Replace with your LLM configs
+      # Note: The default API key `demo` is provided by langchain4j community
+      #       which limits 1000 tokens per request.
+      base-url: ${OPENAI_API_BASE:https://api.openai.com/v1}
+      api-key: ${OPENAI_API_KEY:demo}
+      model-name: ${OPENAI_MODEL_NAME:gpt-3.5-turbo}
+      temperature: ${OPENAI_TEMPERATURE:0.0}
+      timeout: ${OPENAI_TIMEOUT:PT60S}
+# java.lang.RuntimeException: dev.ai4j.openai4j.OpenAiHttpException: Too many requests
+#    embedding-model:
+#      base-url: ${OPENAI_API_BASE:https://api.openai.com/v1}
+#      api-key: ${OPENAI_API_KEY:demo}

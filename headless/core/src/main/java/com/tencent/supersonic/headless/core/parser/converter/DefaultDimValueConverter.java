@@ -2,8 +2,8 @@ package com.tencent.supersonic.headless.core.parser.converter;
 
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
-import com.tencent.supersonic.common.util.jsqlparser.SqlAddHelper;
-import com.tencent.supersonic.common.util.jsqlparser.SqlSelectHelper;
+import com.tencent.supersonic.common.jsqlparser.SqlAddHelper;
+import com.tencent.supersonic.common.jsqlparser.SqlSelectHelper;
 import com.tencent.supersonic.headless.api.pojo.MetricTable;
 import com.tencent.supersonic.headless.core.parser.calcite.s2sql.Dimension;
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;

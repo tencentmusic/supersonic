@@ -80,12 +80,14 @@ public class SchemaBuilder {
                 .withRowCount(1)
                 .build();
         if (Objects.nonNull(db) && !db.isEmpty()) {
-            SchemaPlus schemaPlus = dataSetSchema.plus().getSubSchema(db);
-            if (Objects.isNull(schemaPlus)) {
-                dataSetSchema.plus().add(db, new AbstractSchema());
-                schemaPlus = dataSetSchema.plus().getSubSchema(db);
+            SchemaPlus dbPs = dataSetSchema.plus();
+            for (String d : db.split("\\.")) {
+                if (dbPs.getSubSchema(d) == null) {
+                    dbPs.add(d, new AbstractSchema());
+                }
+                dbPs = dbPs.getSubSchema(d);
             }
-            schemaPlus.add(tb, srcTable);
+            dbPs.add(tb, srcTable);
         } else {
             dataSetSchema.add(tb, srcTable);
         }

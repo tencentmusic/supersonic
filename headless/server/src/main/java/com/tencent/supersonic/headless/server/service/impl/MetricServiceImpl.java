@@ -2,6 +2,7 @@ package com.tencent.supersonic.headless.server.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.google.common.collect.Lists;
@@ -17,8 +18,9 @@ import com.tencent.supersonic.common.pojo.enums.EventType;
 import com.tencent.supersonic.common.pojo.enums.StatusEnum;
 import com.tencent.supersonic.common.pojo.enums.TypeEnums;
 import com.tencent.supersonic.common.util.BeanMapper;
+import com.tencent.supersonic.headless.server.persistence.mapper.MetricDOMapper;
 import com.tencent.supersonic.headless.server.utils.AliasGenerateHelper;
-import com.tencent.supersonic.common.util.jsqlparser.SqlSelectFunctionHelper;
+import com.tencent.supersonic.common.jsqlparser.SqlSelectFunctionHelper;
 import com.tencent.supersonic.headless.api.pojo.DrillDownDimension;
 import com.tencent.supersonic.headless.api.pojo.Measure;
 import com.tencent.supersonic.headless.api.pojo.MeasureParam;
@@ -89,7 +91,8 @@ import java.util.stream.Collectors;
 
 @Service
 @Slf4j
-public class MetricServiceImpl implements MetricService {
+public class MetricServiceImpl extends ServiceImpl<MetricDOMapper, MetricDO>
+        implements MetricService {
 
     private MetricRepository metricRepository;
 
@@ -186,9 +189,7 @@ public class MetricServiceImpl implements MetricService {
         if (CollectionUtils.isEmpty(metaBatchReq.getIds())) {
             return;
         }
-        MetricFilter metricFilter = new MetricFilter();
-        metricFilter.setIds(metaBatchReq.getIds());
-        List<MetricDO> metricDOS = metricRepository.getMetric(metricFilter);
+        List<MetricDO> metricDOS = getMetrics(metaBatchReq.getIds());
         if (CollectionUtils.isEmpty(metricDOS)) {
             return;
         }
@@ -210,9 +211,7 @@ public class MetricServiceImpl implements MetricService {
 
     @Override
     public void batchPublish(List<Long> metricIds, User user) {
-        MetricFilter metricFilter = new MetricFilter();
-        metricFilter.setIds(metricIds);
-        List<MetricDO> metrics = metricRepository.getMetric(metricFilter);
+        List<MetricDO> metrics = getMetrics(metricIds);
         for (MetricDO metricDO : metrics) {
             metricDO.setUpdatedAt(new Date());
             metricDO.setUpdatedBy(user.getName());
@@ -222,9 +221,7 @@ public class MetricServiceImpl implements MetricService {
 
     @Override
     public void batchUnPublish(List<Long> metricIds, User user) {
-        MetricFilter metricFilter = new MetricFilter();
-        metricFilter.setIds(metricIds);
-        List<MetricDO> metrics = metricRepository.getMetric(metricFilter);
+        List<MetricDO> metrics = getMetrics(metricIds);
         for (MetricDO metricDO : metrics) {
             metricDO.setUpdatedAt(new Date());
             metricDO.setUpdatedBy(user.getName());
@@ -234,9 +231,7 @@ public class MetricServiceImpl implements MetricService {
 
     @Override
     public void batchUpdateClassifications(MetaBatchReq metaBatchReq, User user) {
-        MetricFilter metricFilter = new MetricFilter();
-        metricFilter.setIds(metaBatchReq.getIds());
-        List<MetricDO> metrics = metricRepository.getMetric(metricFilter);
+        List<MetricDO> metrics = getMetrics(metaBatchReq.getIds());
         for (MetricDO metricDO : metrics) {
             metricDO.setUpdatedAt(new Date());
             metricDO.setUpdatedBy(user.getName());
@@ -265,6 +260,17 @@ public class MetricServiceImpl implements MetricService {
             classifications = StringUtils.join(classificationsList, ",");
         }
         metricDO.setClassifications(classifications);
+    }
+
+    @Override
+    public void batchUpdateSensitiveLevel(MetaBatchReq metaBatchReq, User user) {
+        List<MetricDO> metrics = getMetrics(metaBatchReq.getIds());
+        for (MetricDO metricDO : metrics) {
+            metricDO.setUpdatedAt(new Date());
+            metricDO.setUpdatedBy(user.getName());
+            metricDO.setSensitiveLevel(metaBatchReq.getSensitiveLevel());
+        }
+        updateBatchById(metrics);
     }
 
     @Override
@@ -346,6 +352,15 @@ public class MetricServiceImpl implements MetricService {
     }
 
     protected List<MetricDO> queryMetric(MetricFilter metricFilter) {
+        return metricRepository.getMetric(metricFilter);
+    }
+
+    private List<MetricDO> getMetrics(List<Long> ids) {
+        if (CollectionUtils.isEmpty(ids)) {
+            return Lists.newArrayList();
+        }
+        MetricFilter metricFilter = new MetricFilter();
+        metricFilter.setIds(ids);
         return metricRepository.getMetric(metricFilter);
     }
 

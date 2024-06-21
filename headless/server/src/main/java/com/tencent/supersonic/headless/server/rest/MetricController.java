@@ -92,6 +92,15 @@ public class MetricController {
         return true;
     }
 
+    @PostMapping("/batchUpdateSensitiveLevel")
+    public Boolean batchUpdateSensitiveLevel(@RequestBody MetaBatchReq metaBatchReq,
+                                              HttpServletRequest request,
+                                              HttpServletResponse response) {
+        User user = UserHolder.findUser(request, response);
+        metricService.batchUpdateSensitiveLevel(metaBatchReq, user);
+        return true;
+    }
+
     @PostMapping("/mockMetricAlias")
     public List<String> mockMetricAlias(@RequestBody MetricBaseReq metricReq,
             HttpServletRequest request,

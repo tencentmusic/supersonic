@@ -36,6 +36,8 @@ public interface MetricService {
 
     void batchUpdateClassifications(MetaBatchReq metaBatchReq, User user);
 
+    void batchUpdateSensitiveLevel(MetaBatchReq metaBatchReq, User user);
+
     void deleteMetric(Long id, User user) throws Exception;
 
     PageInfo<MetricResp> queryMetricMarket(PageMetricReq pageMetricReq, User user);

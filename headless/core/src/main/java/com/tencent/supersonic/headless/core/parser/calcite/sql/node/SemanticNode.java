@@ -8,17 +8,6 @@ import com.tencent.supersonic.headless.core.parser.calcite.schema.SemanticSchema
 import com.tencent.supersonic.headless.core.parser.calcite.schema.SemanticSqlDialect;
 import com.tencent.supersonic.headless.core.parser.calcite.sql.optimizer.FilterToGroupScanRule;
 import com.tencent.supersonic.headless.core.utils.SqlDialectFactory;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.function.UnaryOperator;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.calcite.plan.RelOptPlanner;
 import org.apache.calcite.plan.hep.HepPlanner;
@@ -46,9 +35,22 @@ import org.apache.calcite.sql.parser.SqlParserPos;
 import org.apache.calcite.sql.pretty.SqlPrettyWriter;
 import org.apache.calcite.sql.validate.SqlValidator;
 import org.apache.calcite.sql.validate.SqlValidatorScope;
+import org.apache.calcite.sql.validate.SqlValidatorWithHints;
 import org.apache.calcite.sql2rel.SqlToRelConverter;
-import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.function.UnaryOperator;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * model item node
@@ -75,6 +77,12 @@ public abstract class SemanticNode {
     }
 
     public static SqlNode parse(String expression, SqlValidatorScope scope, EngineType engineType) throws Exception {
+        SqlValidatorWithHints sqlValidatorWithHints = Configuration.getSqlValidatorWithHints(
+                scope.getValidator().getCatalogReader().getRootSchema(), engineType);
+        if (Configuration.getSqlAdvisor(sqlValidatorWithHints, engineType).getReservedAndKeyWords()
+                .contains(expression.toUpperCase())) {
+            expression = String.format("`%s`", expression);
+        }
         SqlParser sqlParser = SqlParser.create(expression, Configuration.getParserConfig(engineType));
         SqlNode sqlNode = sqlParser.parseExpression();
         scope.validateExpr(sqlNode);

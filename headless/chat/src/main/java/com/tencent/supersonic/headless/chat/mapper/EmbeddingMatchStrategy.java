@@ -2,9 +2,9 @@ package com.tencent.supersonic.headless.chat.mapper;
 
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.common.pojo.Constants;
-import com.tencent.supersonic.common.util.embedding.Retrieval;
-import com.tencent.supersonic.common.util.embedding.RetrieveQuery;
-import com.tencent.supersonic.common.util.embedding.RetrieveQueryResult;
+import dev.langchain4j.store.embedding.Retrieval;
+import dev.langchain4j.store.embedding.RetrieveQuery;
+import dev.langchain4j.store.embedding.RetrieveQueryResult;
 import com.tencent.supersonic.headless.chat.QueryContext;
 import com.tencent.supersonic.headless.chat.knowledge.EmbeddingResult;
 import com.tencent.supersonic.headless.chat.knowledge.MetaEmbeddingService;

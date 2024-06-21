@@ -86,5 +86,13 @@ com.tencent.supersonic.auth.api.authentication.adaptor.UserAdaptor=\
 
 ### common SPIs
 
-com.tencent.supersonic.common.util.embedding.S2EmbeddingStore=\
-    com.tencent.supersonic.common.util.embedding.InMemoryS2EmbeddingStore
+dev.langchain4j.store.embedding.S2EmbeddingStore=\
+    dev.langchain4j.store.embedding.InMemoryS2EmbeddingStore
+
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+    dev.langchain4j.spring.LangChain4jAutoConfig,\
+    dev.langchain4j.openai.spring.AutoConfig,\
+    dev.langchain4j.ollama.spring.AutoConfig,\
+    dev.langchain4j.azure.openai.spring.AutoConfig,\
+    dev.langchain4j.azure.aisearch.spring.AutoConfig,\
+    dev.langchain4j.anthropic.spring.AutoConfig

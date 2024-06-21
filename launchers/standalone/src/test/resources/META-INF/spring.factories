@@ -1,3 +1,5 @@
+### headless-chat SPIs
+
 com.tencent.supersonic.headless.chat.mapper.SchemaMapper=\
     com.tencent.supersonic.headless.chat.mapper.EmbeddingMapper, \
     com.tencent.supersonic.headless.chat.mapper.KeywordMapper, \
@@ -9,18 +11,19 @@ com.tencent.supersonic.headless.chat.parser.SemanticParser=\
     com.tencent.supersonic.headless.chat.parser.llm.LLMSqlParser, \
     com.tencent.supersonic.headless.chat.parser.QueryTypeParser
 
-com.tencent.supersonic.chat.server.parser.ChatParser=\
-    com.tencent.supersonic.chat.server.parser.NL2PluginParser, \
-    com.tencent.supersonic.chat.server.parser.NL2SQLParser
-
-com.tencent.supersonic.chat.server.executor.ChatExecutor=\
-    com.tencent.supersonic.chat.server.executor.PluginExecutor, \
-    com.tencent.supersonic.chat.server.executor.SqlExecutor
-
 com.tencent.supersonic.headless.chat.corrector.SemanticCorrector=\
     com.tencent.supersonic.headless.chat.corrector.SchemaCorrector, \
     com.tencent.supersonic.headless.chat.corrector.TimeCorrector, \
     com.tencent.supersonic.headless.chat.corrector.GrammarCorrector
+
+com.tencent.supersonic.headless.chat.knowledge.file.FileHandler=\
+    com.tencent.supersonic.headless.chat.knowledge.file.FileHandlerImpl
+
+com.tencent.supersonic.headless.chat.parser.llm.DataSetResolver=\
+  com.tencent.supersonic.headless.chat.parser.llm.HeuristicDataSetResolver
+
+
+### headless-core SPIs
 
 com.tencent.supersonic.headless.core.parser.converter.HeadlessConverter=\
     com.tencent.supersonic.headless.core.parser.converter.DefaultDimValueConverter,\
@@ -40,18 +43,24 @@ com.tencent.supersonic.headless.core.parser.SqlParser=\
 com.tencent.supersonic.headless.core.cache.QueryCache=\
     com.tencent.supersonic.headless.core.cache.DefaultQueryCache
 
+
+### headless-server SPIs
+
 com.tencent.supersonic.headless.server.processor.ResultProcessor=\
     com.tencent.supersonic.headless.server.processor.ParseInfoProcessor, \
     com.tencent.supersonic.headless.server.processor.SqlInfoProcessor
 
-com.tencent.supersonic.headless.chat.parser.llm.DataSetResolver=\
-  com.tencent.supersonic.headless.chat.parser.llm.HeuristicDataSetResolver
 
-com.tencent.supersonic.auth.authentication.interceptor.AuthenticationInterceptor=\
-    com.tencent.supersonic.auth.authentication.interceptor.DefaultAuthenticationInterceptor
+### chat-server SPIs
 
-com.tencent.supersonic.auth.api.authentication.adaptor.UserAdaptor=\
-    com.tencent.supersonic.auth.authentication.adaptor.DefaultUserAdaptor
+com.tencent.supersonic.chat.server.parser.ChatParser=\
+    com.tencent.supersonic.chat.server.parser.NL2PluginParser, \
+    com.tencent.supersonic.chat.server.parser.MultiTurnParser,\
+    com.tencent.supersonic.chat.server.parser.NL2SQLParser
+
+com.tencent.supersonic.chat.server.executor.ChatExecutor=\
+    com.tencent.supersonic.chat.server.executor.PluginExecutor, \
+    com.tencent.supersonic.chat.server.executor.SqlExecutor
 
 com.tencent.supersonic.chat.server.plugin.recognize.PluginRecognizer=\
     com.tencent.supersonic.chat.server.plugin.recognize.embedding.EmbeddingRecallRecognizer
@@ -66,5 +75,16 @@ com.tencent.supersonic.chat.server.processor.execute.ExecuteResultProcessor=\
     com.tencent.supersonic.chat.server.processor.execute.DimensionRecommendProcessor,\
     com.tencent.supersonic.chat.server.processor.execute.MetricRatioProcessor
 
-com.tencent.supersonic.common.util.embedding.S2EmbeddingStore=\
-    com.tencent.supersonic.common.util.embedding.InMemoryS2EmbeddingStore
+### auth-authentication SPIs
+
+com.tencent.supersonic.auth.authentication.interceptor.AuthenticationInterceptor=\
+    com.tencent.supersonic.auth.authentication.interceptor.DefaultAuthenticationInterceptor
+
+com.tencent.supersonic.auth.api.authentication.adaptor.UserAdaptor=\
+    com.tencent.supersonic.auth.authentication.adaptor.DefaultUserAdaptor
+
+
+### common SPIs
+
+dev.langchain4j.store.embedding.S2EmbeddingStore=\
+    dev.langchain4j.store.embedding.InMemoryS2EmbeddingStore

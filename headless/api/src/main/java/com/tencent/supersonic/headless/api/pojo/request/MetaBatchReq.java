@@ -22,6 +22,9 @@ public class MetaBatchReq {
      * 批量执行分类信息
      */
     private EventType type;
+
     private List<String> classifications;
+
+    private Integer sensitiveLevel;
 
 }
