@@ -74,6 +74,7 @@ CREATE TABLE `s2_agent` (
                             `config` varchar(6000) COLLATE utf8_unicode_ci DEFAULT NULL,
                             `llm_config` varchar(2000) COLLATE utf8_unicode_ci DEFAULT NULL,
                             `multi_turn_config` varchar(2000) COLLATE utf8_unicode_ci DEFAULT NULL,
+                            `visual_config` varchar(2000)  COLLATE utf8_unicode_ci DEFAULT NULL,
                             `created_by` varchar(100) COLLATE utf8_unicode_ci DEFAULT NULL,
                             `created_at` datetime DEFAULT NULL,
                             `updated_by` varchar(100) COLLATE utf8_unicode_ci DEFAULT NULL,
