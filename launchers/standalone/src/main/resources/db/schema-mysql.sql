@@ -562,6 +562,8 @@ CREATE TABLE IF NOT EXISTS `s2_term` (
     `name` varchar(255)  NOT NULL ,
     `description` varchar(500) DEFAULT NULL ,
     `alias` varchar(1000)  NOT NULL ,
+    `related_metrics` varchar(1000)  DEFAULT NULL ,
+    `related_dimensions` varchar(1000)  DEFAULT NULL,
     `created_at` datetime NOT NULL ,
     `created_by` varchar(100) NOT NULL ,
     `updated_at` datetime DEFAULT NULL ,
