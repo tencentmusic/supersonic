@@ -3,7 +3,6 @@ package com.tencent.supersonic.common.jsqlparser;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 
@@ -11,6 +10,20 @@ import org.junit.jupiter.api.Test;
  * SqlParser Remove Helper Test
  */
 class SqlRemoveHelperTest {
+
+    @Test
+    void testRemoveAsterisk() {
+        String sql = "select * from 歌曲库";
+        Set<String> fields = new HashSet<>();
+        fields.add("歌曲名");
+        fields.add("性别");
+        sql = SqlRemoveHelper.removeAsteriskAndAddFields(sql, fields);
+        Assert.assertEquals(sql, "SELECT 歌曲名, 性别 FROM 歌曲库");
+
+        sql = "select 歌曲名 from 歌曲库";
+        sql = SqlRemoveHelper.removeAsteriskAndAddFields(sql, fields);
+        Assert.assertEquals(sql, "SELECT 歌曲名 FROM 歌曲库");
+    }
 
     @Test
     void testRemoveSameFieldFromSelect() {
