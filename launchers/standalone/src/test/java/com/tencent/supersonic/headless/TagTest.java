@@ -3,25 +3,34 @@ package com.tencent.supersonic.headless;
 import com.github.pagehelper.PageInfo;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.headless.api.pojo.enums.TagDefineType;
+import com.tencent.supersonic.headless.api.pojo.request.ItemValueReq;
 import com.tencent.supersonic.headless.api.pojo.request.TagDeleteReq;
 import com.tencent.supersonic.headless.api.pojo.request.TagFilterPageReq;
 import com.tencent.supersonic.headless.api.pojo.request.TagReq;
+import com.tencent.supersonic.headless.api.pojo.response.ItemValueResp;
 import com.tencent.supersonic.headless.api.pojo.response.TagResp;
 import com.tencent.supersonic.headless.server.pojo.TagFilter;
 import com.tencent.supersonic.headless.server.service.TagMetaService;
+import com.tencent.supersonic.headless.server.service.TagQueryService;
 import org.junit.Assert;
-import org.junit.Before;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class TagTest extends BaseTest {
 
     @Autowired
     private TagMetaService tagMetaService;
+
+    @Autowired
+    private TagQueryService tagQueryService;
 
     private User user = User.getFakeUser();
 
@@ -46,7 +55,6 @@ public class TagTest extends BaseTest {
         return tagReq;
     }
 
-    @Before
     public void setUp() {
         TagDeleteReq tagDeleteReq = new TagDeleteReq();
         tagDeleteReq.setTagDefineType(TagDefineType.DIMENSION);
@@ -56,6 +64,7 @@ public class TagTest extends BaseTest {
         tagMetaService.deleteBatch(tagDeleteReqList, user);
     }
 
+    @Order(1)
     @Test
     public void testCreateTag() {
         setUp();
@@ -78,6 +87,7 @@ public class TagTest extends BaseTest {
         Assert.assertEquals(0, tags1.size());
     }
 
+    @Order(2)
     @Test
     public void testTagMarket() {
         setUp();
@@ -98,6 +108,15 @@ public class TagTest extends BaseTest {
         List<TagDeleteReq> tagDeleteReqList = new ArrayList<>();
         tagDeleteReqList.add(tagDeleteReq);
         tagMetaService.deleteBatch(tagDeleteReqList, user);
+    }
+
+    @Test
+    @Order(0)
+    public void testQueryTagValue() throws Exception {
+        ItemValueReq itemValueReq = new ItemValueReq();
+        itemValueReq.setId(1L);
+        ItemValueResp itemValueResp = tagQueryService.queryTagValue(itemValueReq, user);
+        Assertions.assertNotNull(itemValueResp);
     }
 
 }
