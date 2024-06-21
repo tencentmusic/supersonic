@@ -100,6 +100,6 @@ langchain4j:
       temperature: ${OPENAI_TEMPERATURE:0.0}
       timeout: ${OPENAI_TIMEOUT:PT60S}
 # java.lang.RuntimeException: dev.ai4j.openai4j.OpenAiHttpException: Too many requests
-    embedding-model:
-      base-url: ${OPENAI_API_BASE:https://api.openai.com/v1}
-      api-key: ${OPENAI_API_KEY:demo}
+#    embedding-model:
+#      base-url: ${OPENAI_API_BASE:https://api.openai.com/v1}
+#      api-key: ${OPENAI_API_KEY:demo}
