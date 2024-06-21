@@ -3,6 +3,7 @@ package com.tencent.supersonic.chat.server.persistence.dataobject;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.tencent.supersonic.common.config.VisualConfig;
 import lombok.Data;
 
 import java.util.Date;
@@ -59,5 +60,7 @@ public class AgentDO {
     private String llmConfig;
 
     private String multiTurnConfig;
+
+    private String visualConfig;
 
 }
