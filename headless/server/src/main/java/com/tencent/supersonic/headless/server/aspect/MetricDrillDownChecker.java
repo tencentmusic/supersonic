@@ -33,7 +33,7 @@ public class MetricDrillDownChecker {
     @Autowired
     private MetricService metricService;
 
-    @Around("execution(* com.tencent.supersonic.headless.core.parser.QueryParser.parse(..))")
+    @Around("execution(* com.tencent.supersonic.headless.core.translator.DefaultSemanticTranslator.parse(..))")
     public Object doAround(ProceedingJoinPoint joinPoint) throws Throwable {
         Object[] objects = joinPoint.getArgs();
         QueryStatement queryStatement = (QueryStatement) objects[0];

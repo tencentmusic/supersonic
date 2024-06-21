@@ -84,7 +84,7 @@ public class Text2SQLEval extends BaseTest {
         AgentConfig agentConfig = new AgentConfig();
         agentConfig.getTools().add(getLLMQueryTool());
         agent.setAgentConfig(JSONObject.toJSONString(agentConfig));
-        agent.setLlmConfig(getLLMConfig(LLMType.GPT));
+        agent.setLlmConfig(getLLMConfig(LLMType.DEEPSEEK));
         MultiTurnConfig multiTurnConfig = new MultiTurnConfig();
         multiTurnConfig.setEnableMultiTurn(enableMultiturn);
         agent.setMultiTurnConfig(multiTurnConfig);
@@ -146,4 +146,5 @@ public class Text2SQLEval extends BaseTest {
         return new LLMConfig("open_ai",
                 baseUrl, apiKey, modelName, temperature);
     }
+
 }

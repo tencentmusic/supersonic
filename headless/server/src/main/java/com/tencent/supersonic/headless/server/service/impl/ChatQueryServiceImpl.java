@@ -56,7 +56,7 @@ import com.tencent.supersonic.headless.server.persistence.dataobject.StatisticsD
 import com.tencent.supersonic.headless.server.service.ChatContextService;
 import com.tencent.supersonic.headless.server.service.ChatQueryService;
 import com.tencent.supersonic.headless.server.service.DataSetService;
-import com.tencent.supersonic.headless.server.service.QueryService;
+import com.tencent.supersonic.headless.server.service.SemanticLayerService;
 import com.tencent.supersonic.headless.server.service.WorkflowService;
 import com.tencent.supersonic.headless.server.utils.ComponentFactory;
 import lombok.extern.slf4j.Slf4j;
@@ -99,7 +99,7 @@ public class ChatQueryServiceImpl implements ChatQueryService {
     @Autowired
     private KnowledgeBaseService knowledgeBaseService;
     @Autowired
-    private QueryService queryService;
+    private SemanticLayerService queryService;
     @Autowired
     private DataSetService dataSetService;
     @Autowired

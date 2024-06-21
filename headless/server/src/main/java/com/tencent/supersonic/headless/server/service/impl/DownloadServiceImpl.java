@@ -28,7 +28,7 @@ import com.tencent.supersonic.headless.server.pojo.MetaFilter;
 import com.tencent.supersonic.headless.server.service.DimensionService;
 import com.tencent.supersonic.headless.server.service.DownloadService;
 import com.tencent.supersonic.headless.server.service.MetricService;
-import com.tencent.supersonic.headless.server.service.QueryService;
+import com.tencent.supersonic.headless.server.service.SemanticLayerService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.stereotype.Service;
@@ -64,10 +64,10 @@ public class DownloadServiceImpl implements DownloadService {
 
     private DimensionService dimensionService;
 
-    private QueryService queryService;
+    private SemanticLayerService queryService;
 
     public DownloadServiceImpl(MetricService metricService,
-            DimensionService dimensionService, QueryService queryService) {
+            DimensionService dimensionService, SemanticLayerService queryService) {
         this.metricService = metricService;
         this.dimensionService = dimensionService;
         this.queryService = queryService;

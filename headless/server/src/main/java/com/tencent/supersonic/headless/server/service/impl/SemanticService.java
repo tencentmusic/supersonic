@@ -19,7 +19,7 @@ import com.tencent.supersonic.headless.api.pojo.request.QueryFilter;
 import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
 import com.tencent.supersonic.headless.chat.utils.QueryReqBuilder;
-import com.tencent.supersonic.headless.server.service.QueryService;
+import com.tencent.supersonic.headless.server.service.SemanticLayerService;
 import com.tencent.supersonic.headless.server.service.SchemaService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -44,7 +44,7 @@ public class SemanticService {
     private SchemaService schemaService;
 
     @Autowired
-    private QueryService queryService;
+    private SemanticLayerService queryService;
 
     public SemanticSchema getSemanticSchema() {
         return new SemanticSchema(schemaService.getDataSetSchema());

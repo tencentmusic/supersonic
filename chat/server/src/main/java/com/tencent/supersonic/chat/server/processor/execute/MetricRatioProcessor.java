@@ -30,7 +30,7 @@ import com.tencent.supersonic.headless.api.pojo.response.QueryResult;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
 import com.tencent.supersonic.headless.core.config.AggregatorConfig;
 import com.tencent.supersonic.headless.chat.utils.QueryReqBuilder;
-import com.tencent.supersonic.headless.server.service.QueryService;
+import com.tencent.supersonic.headless.server.service.SemanticLayerService;
 import java.text.DecimalFormat;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -48,6 +48,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.CollectionUtils;
@@ -133,7 +134,7 @@ public class MetricRatioProcessor implements ExecuteResultProcessor {
         queryStructReq.setGroups(new ArrayList<>(Arrays.asList(dateField)));
         queryStructReq.setDateInfo(getRatioDateConf(aggOperatorEnum, semanticParseInfo, queryResult));
         queryStructReq.setConvertToSql(false);
-        QueryService queryService = ContextUtils.getBean(QueryService.class);
+        SemanticLayerService queryService = ContextUtils.getBean(SemanticLayerService.class);
         SemanticQueryResp queryResp = queryService.queryByReq(queryStructReq, user);
         MetricInfo metricInfo = new MetricInfo();
         metricInfo.setStatistics(new HashMap<>());
