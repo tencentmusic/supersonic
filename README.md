@@ -1,4 +1,4 @@
-[中文介绍](README_CN.md) | [Docs](https://supersonicbi.github.io/)
+[中文介绍](README_CN.md) | [日本語版](README_JP.md) | [Docs](https://supersonicbi.github.io/)
 
 ![Java CI](https://github.com/tencentmusic/supersonic/workflows/supersonic%20CI/badge.svg)
 
