@@ -39,9 +39,9 @@ public class OnePassSCSqlGenStrategy extends SqlGenStrategy {
         //3.perform multiple self-consistency inferences parallelly
         Map<Prompt, String> prompt2Output = new ConcurrentHashMap<>();
         prompt2Exemplar.keySet().parallelStream().forEach(prompt -> {
-                    keyPipelineLog.info("OnePassSCSqlGenStrategy reqPrompt:\n{}", prompt.toSystemMessage());
+                    keyPipelineLog.info("OnePassSCSqlGenStrategy reqPrompt:\n{}", prompt.toUserMessage());
                     ChatLanguageModel chatLanguageModel = getChatLanguageModel(llmReq.getLlmConfig());
-                    Response<AiMessage> response = chatLanguageModel.generate(prompt.toSystemMessage());
+                    Response<AiMessage> response = chatLanguageModel.generate(prompt.toUserMessage());
                     String result = response.content().text();
                     prompt2Output.put(prompt, result);
                     keyPipelineLog.info("OnePassSCSqlGenStrategy modelResp:\n{}", result);
