@@ -146,4 +146,5 @@ public class Text2SQLEval extends BaseTest {
         return new LLMConfig("open_ai",
                 baseUrl, apiKey, modelName, temperature);
     }
+
 }

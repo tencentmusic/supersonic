@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * HeadlessConverter QueryOptimizer QueryExecutor object factory
+ * QueryConverter QueryOptimizer QueryExecutor object factory
  */
 @Slf4j
 public class ComponentFactory {

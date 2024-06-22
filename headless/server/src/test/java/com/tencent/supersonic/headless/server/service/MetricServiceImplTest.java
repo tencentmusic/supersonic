@@ -1,8 +1,5 @@
 package com.tencent.supersonic.headless.server.service;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
-
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.common.pojo.DataFormat;
@@ -25,11 +22,15 @@ import com.tencent.supersonic.headless.server.service.impl.DataSetServiceImpl;
 import com.tencent.supersonic.headless.server.service.impl.MetricServiceImpl;
 import com.tencent.supersonic.headless.server.utils.AliasGenerateHelper;
 import com.tencent.supersonic.headless.server.utils.MetricConverter;
-import java.util.HashMap;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.context.ApplicationEventPublisher;
+
+import java.util.HashMap;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 public class MetricServiceImplTest {
 
@@ -69,7 +70,7 @@ public class MetricServiceImplTest {
         DataSetService dataSetService = Mockito.mock(DataSetServiceImpl.class);
         DimensionService dimensionService = Mockito.mock(DimensionService.class);
         TagMetaService tagMetaService = Mockito.mock(TagMetaService.class);
-        MetaDiscoveryService metaDiscoveryService = Mockito.mock(MetaDiscoveryService.class);
+        RetrieveService metaDiscoveryService = Mockito.mock(RetrieveService.class);
         return new MetricServiceImpl(metricRepository, modelService, aliasGenerateHelper,
                 collectService, dataSetService, eventPublisher, dimensionService,
                 tagMetaService, metaDiscoveryService);

@@ -12,7 +12,7 @@ import com.tencent.supersonic.common.pojo.enums.QueryType;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.DateModeUtils;
 import com.tencent.supersonic.common.util.SqlFilterUtils;
-import com.tencent.supersonic.common.util.jsqlparser.SqlAddHelper;
+import com.tencent.supersonic.common.jsqlparser.SqlAddHelper;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;

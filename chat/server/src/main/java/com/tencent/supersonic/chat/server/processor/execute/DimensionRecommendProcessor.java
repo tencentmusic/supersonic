@@ -9,7 +9,7 @@ import com.tencent.supersonic.headless.api.pojo.RelatedSchemaElement;
 import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.api.pojo.response.QueryResult;
-import com.tencent.supersonic.headless.server.service.impl.SemanticService;
+import com.tencent.supersonic.headless.server.service.SemanticLayerService;
 import org.springframework.util.CollectionUtils;
 
 import java.util.Comparator;
@@ -40,7 +40,7 @@ public class DimensionRecommendProcessor implements ExecuteResultProcessor {
     }
 
     private List<SchemaElement> getDimensions(Long metricId, Long dataSetId) {
-        SemanticService semanticService = ContextUtils.getBean(SemanticService.class);
+        SemanticLayerService semanticService = ContextUtils.getBean(SemanticLayerService.class);
         DataSetSchema dataSetSchema = semanticService.getDataSetSchema(dataSetId);
         List<Long> drillDownDimensions = Lists.newArrayList();
         Set<SchemaElement> metricElements = dataSetSchema.getMetrics();

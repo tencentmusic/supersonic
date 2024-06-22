@@ -17,9 +17,7 @@ import dev.langchain4j.model.input.Prompt;
 import dev.langchain4j.model.input.PromptTemplate;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 import lombok.Builder;
 import lombok.Data;
@@ -37,17 +35,20 @@ public class MultiTurnParser implements ChatParser {
 
     private static final Logger keyPipelineLog = LoggerFactory.getLogger("keyPipeline");
 
-    private static final PromptTemplate promptTemplate = PromptTemplate.from(
-            "You are a data product manager experienced in data requirements."
-                    + "Your will be provided with current and history questions asked by a user,"
-                    + "along with their mapped schema elements(metric, dimension and value), "
-                    + "please try understanding the semantics and rewrite a question"
-                    + "(keep relevant entities, metrics, dimensions, values and date ranges)."
-                    + "Current Question: {{curtQuestion}} "
-                    + "Current Mapped Schema: {{curtSchema}} "
-                    + "History Question: {{histQuestion}} "
-                    + "History Mapped Schema: {{histSchema}} "
-                    + "Rewritten Question: ");
+    private static final String instruction = ""
+                    + "#Role: You are a data product manager experienced in data requirements.\n"
+                    + "#Task: Your will be provided with current and history questions asked by a user,"
+                    + "along with their mapped schema elements(metric, dimension and value),"
+                    + "please try understanding the semantics and rewrite a question.\n"
+                    + "#Rules: "
+                    + "1.ALWAYS keep relevant entities, metrics, dimensions, values and date ranges. "
+                    + "2.ONLY respond with the rewritten question.\n"
+                    + "#Current Question: %s\n"
+                    + "#Current Mapped Schema: %s\n"
+                    + "#History Question: %s\n"
+                    + "#History Mapped Schema: %s\n"
+                    + "#History SQL: %s\n"
+                    + "#Rewritten Question: ";
 
     @Autowired
     private DifyServiceClient difyServiceClient;
@@ -78,11 +79,13 @@ public class MultiTurnParser implements ChatParser {
 
         String curtMapStr = generateSchemaPrompt(currentMapResult.getMapInfo().getMatchedElements(dataId));
         String histMapStr = generateSchemaPrompt(lastParseResult.getSelectedParses().get(0).getElementMatches());
+        String histSQL = lastParseResult.getSelectedParses().get(0).getSqlInfo().getCorrectS2SQL();
         String rewrittenQuery = rewriteQuery(RewriteContext.builder()
                         .curtQuestion(currentMapResult.getQueryText())
                         .histQuestion(lastParseResult.getQueryText())
                         .curtSchema(curtMapStr)
                         .histSchema(histMapStr)
+                        .histSQL(histSQL)
                         .llmConfig(queryReq.getLlmConfig())
                         .build());
         chatParseContext.setQueryText(rewrittenQuery);
@@ -91,14 +94,10 @@ public class MultiTurnParser implements ChatParser {
     }
 
     private String rewriteQuery(RewriteContext context) {
-        Map<String, Object> variables = new HashMap<>();
-        variables.put("curtQuestion", context.getCurtQuestion());
-        variables.put("histQuestion", context.getHistQuestion());
-        variables.put("curtSchema", context.getCurtSchema());
-        variables.put("histSchema", context.getHistSchema());
-
-        Prompt prompt = promptTemplate.apply(variables);
-        keyPipelineLog.info("MultiTurnParser reqPrompt:{}", prompt.toSystemMessage());
+        String promptStr = String.format(instruction, context.getCurtQuestion(), context.getCurtSchema(),
+                context.getHistQuestion(), context.getHistSchema(), context.getHistSQL());
+        Prompt prompt = PromptTemplate.from(promptStr).apply(Collections.EMPTY_MAP);
+        keyPipelineLog.info("MultiTurnParser reqPrompt:{}", promptStr);
 
         String result = difyServiceClient.generate(prompt.toSystemMessage().text()).getAnswer();
         keyPipelineLog.info("MultiTurnParser modelResp:{}", result);
@@ -148,6 +147,7 @@ public class MultiTurnParser implements ChatParser {
         private String histQuestion;
         private String curtSchema;
         private String histSchema;
+        private String histSQL;
         private LLMConfig llmConfig;
     }
 }

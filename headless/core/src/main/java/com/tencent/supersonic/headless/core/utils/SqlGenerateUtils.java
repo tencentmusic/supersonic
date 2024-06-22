@@ -15,8 +15,8 @@ import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import com.tencent.supersonic.common.util.DateModeUtils;
 import com.tencent.supersonic.common.util.SqlFilterUtils;
 import com.tencent.supersonic.common.util.StringUtil;
-import com.tencent.supersonic.common.util.jsqlparser.SqlReplaceHelper;
-import com.tencent.supersonic.common.util.jsqlparser.SqlSelectHelper;
+import com.tencent.supersonic.common.jsqlparser.SqlReplaceHelper;
+import com.tencent.supersonic.common.jsqlparser.SqlSelectHelper;
 import com.tencent.supersonic.headless.api.pojo.Measure;
 import com.tencent.supersonic.headless.api.pojo.QueryParam;
 import com.tencent.supersonic.headless.api.pojo.enums.AggOption;
@@ -26,6 +26,7 @@ import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
 import com.tencent.supersonic.headless.api.pojo.response.DimSchemaResp;
 import com.tencent.supersonic.headless.api.pojo.response.MetricResp;
 import com.tencent.supersonic.headless.api.pojo.response.MetricSchemaResp;
+import com.tencent.supersonic.headless.core.config.ExecutorConfig;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
@@ -42,7 +43,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Triple;
 import org.apache.logging.log4j.util.Strings;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
@@ -57,17 +57,13 @@ public class SqlGenerateUtils {
 
     private final DateModeUtils dateModeUtils;
 
-    @Value("${metricParser.agg.mysql.lowVersion:5.7}")
-    private String mysqlLowVersion;
-    @Value("${metricParser.agg.ck.lowVersion:20.4}")
-    private String ckLowVersion;
-    @Value("${internal.metric.cnt.suffix:internal_cnt}")
-    private String internalMetricNameSuffix;
+    private final ExecutorConfig executorConfig;
 
     public SqlGenerateUtils(SqlFilterUtils sqlFilterUtils,
-            DateModeUtils dateModeUtils) {
+            DateModeUtils dateModeUtils, ExecutorConfig executorConfig) {
         this.sqlFilterUtils = sqlFilterUtils;
         this.dateModeUtils = dateModeUtils;
+        this.executorConfig = executorConfig;
     }
 
     public static String getUnionSelect(QueryStructReq queryStructCmd) {
@@ -256,19 +252,19 @@ public class SqlGenerateUtils {
 
     public boolean isSupportWith(EngineType engineTypeEnum, String version) {
         if (engineTypeEnum.equals(EngineType.MYSQL) && Objects.nonNull(version) && version.startsWith(
-                mysqlLowVersion)) {
+                executorConfig.getMysqlLowVersion())) {
             return false;
         }
         if (engineTypeEnum.equals(EngineType.CLICKHOUSE) && Objects.nonNull(version)
                 && StringUtil.compareVersion(version,
-                ckLowVersion) < 0) {
+                executorConfig.getCkLowVersion()) < 0) {
             return false;
         }
         return true;
     }
 
     public String generateInternalMetricName(String modelBizName) {
-        return modelBizName + UNDERLINE + internalMetricNameSuffix;
+        return modelBizName + UNDERLINE + executorConfig.getInternalMetricNameSuffix();
     }
 
     public String generateDerivedMetric(final List<MetricSchemaResp> metricResps, final Set<String> allFields,

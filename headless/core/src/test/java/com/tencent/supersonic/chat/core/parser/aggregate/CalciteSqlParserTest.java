@@ -2,7 +2,7 @@ package com.tencent.supersonic.chat.core.parser.aggregate;
 
 import com.alibaba.fastjson.JSON;
 import com.tencent.supersonic.headless.api.pojo.enums.AggOption;
-import com.tencent.supersonic.headless.core.parser.calcite.CalciteSqlParser;
+import com.tencent.supersonic.headless.core.translator.calcite.CalciteQueryParser;
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;
 import org.junit.jupiter.api.Test;
 import org.testng.Assert;
@@ -459,9 +459,9 @@ public class CalciteSqlParserTest {
                 + "    }\n"
                 + "}";
         QueryStatement queryStatement = JSON.parseObject(json, QueryStatement.class);
-        CalciteSqlParser calciteSqlParser = new CalciteSqlParser();
-        QueryStatement explain = calciteSqlParser.explain(queryStatement, AggOption.DEFAULT);
-        Assert.assertEquals(explain.getSql().trim().replaceAll("\\s+", ""),
+        CalciteQueryParser calciteSqlParser = new CalciteQueryParser();
+        calciteSqlParser.parse(queryStatement, AggOption.DEFAULT);
+        Assert.assertEquals(queryStatement.getSql().trim().replaceAll("\\s+", ""),
                 "SELECT`imp_date`AS`sys_imp_date`,SUM(1)AS`pv`"
                 + "FROM"
                 + "`s2_pv_uv_statis`"

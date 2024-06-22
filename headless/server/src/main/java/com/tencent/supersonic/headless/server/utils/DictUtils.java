@@ -38,7 +38,7 @@ import com.tencent.supersonic.headless.server.persistence.dataobject.DictTaskDO;
 import com.tencent.supersonic.headless.server.service.DimensionService;
 import com.tencent.supersonic.headless.server.service.MetricService;
 import com.tencent.supersonic.headless.server.service.ModelService;
-import com.tencent.supersonic.headless.server.service.QueryService;
+import com.tencent.supersonic.headless.server.service.SemanticLayerService;
 import com.tencent.supersonic.headless.server.service.TagMetaService;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -81,13 +81,13 @@ public class DictUtils {
 
     private final DimensionService dimensionService;
     private final MetricService metricService;
-    private final QueryService queryService;
+    private final SemanticLayerService queryService;
     private final ModelService modelService;
     private final TagMetaService tagMetaService;
 
     public DictUtils(DimensionService dimensionService,
             MetricService metricService,
-            QueryService queryService,
+            SemanticLayerService queryService,
             ModelService modelService,
             @Lazy TagMetaService tagMetaService) {
         this.dimensionService = dimensionService;

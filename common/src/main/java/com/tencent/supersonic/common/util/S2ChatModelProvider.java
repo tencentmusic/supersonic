@@ -4,8 +4,9 @@ import com.tencent.supersonic.common.config.LLMConfig;
 import com.tencent.supersonic.common.pojo.enums.S2ModelProvider;
 import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.localai.LocalAiChatModel;
-import dev.langchain4j.model.openai.FullOpenAiChatModel;
+import dev.langchain4j.model.openai.OpenAiChatModel;
 import org.apache.commons.lang3.StringUtils;
+
 import java.time.Duration;
 
 public class S2ChatModelProvider {
@@ -17,7 +18,7 @@ public class S2ChatModelProvider {
             return chatLanguageModel;
         }
         if (S2ModelProvider.OPEN_AI.name().equalsIgnoreCase(llmConfig.getProvider())) {
-            return FullOpenAiChatModel
+            return OpenAiChatModel
                     .builder()
                     .baseUrl(llmConfig.getBaseUrl())
                     .modelName(llmConfig.getModelName())

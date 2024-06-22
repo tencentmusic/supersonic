@@ -14,7 +14,7 @@ import com.tencent.supersonic.headless.api.pojo.response.ParseResp;
 import com.tencent.supersonic.headless.api.pojo.response.QueryResult;
 
 /***
- * QueryService for query and search
+ * SemanticLayerService for query and search
  */
 public interface ChatQueryService {
 

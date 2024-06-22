@@ -4,7 +4,7 @@ import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.headless.api.pojo.QueryDataType;
 import com.tencent.supersonic.headless.api.pojo.request.QueryMapReq;
 import com.tencent.supersonic.headless.api.pojo.response.MapInfoResp;
-import com.tencent.supersonic.headless.server.service.MetaDiscoveryService;
+import com.tencent.supersonic.headless.server.service.RetrieveService;
 import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -15,7 +15,7 @@ import java.util.Collections;
 public class MetaDiscoveryTest extends BaseTest {
 
     @Autowired
-    protected MetaDiscoveryService metaDiscoveryService;
+    protected RetrieveService metaDiscoveryService;
 
     @Test
     public void testGetMapMeta() throws Exception {
@@ -24,7 +24,7 @@ public class MetaDiscoveryTest extends BaseTest {
         queryMapReq.setTopN(10);
         queryMapReq.setUser(User.getFakeUser());
         queryMapReq.setDataSetNames(Collections.singletonList("超音数数据集"));
-        MapInfoResp mapMeta = metaDiscoveryService.getMapMeta(queryMapReq);
+        MapInfoResp mapMeta = metaDiscoveryService.map(queryMapReq);
 
         Assertions.assertNotNull(mapMeta);
         Assertions.assertNotEquals(0, mapMeta.getDataSetMapInfo().get("超音数数据集").getMapFields());
@@ -39,7 +39,7 @@ public class MetaDiscoveryTest extends BaseTest {
         queryMapReq.setUser(User.getFakeUser());
         queryMapReq.setDataSetNames(Collections.singletonList("艺人库"));
         queryMapReq.setQueryDataType(QueryDataType.TAG);
-        MapInfoResp mapMeta = metaDiscoveryService.getMapMeta(queryMapReq);
+        MapInfoResp mapMeta = metaDiscoveryService.map(queryMapReq);
         Assert.assertNotNull(mapMeta);
     }
 
@@ -51,7 +51,7 @@ public class MetaDiscoveryTest extends BaseTest {
         queryMapReq.setUser(User.getFakeUser());
         queryMapReq.setDataSetNames(Collections.singletonList("超音数"));
         queryMapReq.setQueryDataType(QueryDataType.METRIC);
-        MapInfoResp mapMeta = metaDiscoveryService.getMapMeta(queryMapReq);
+        MapInfoResp mapMeta = metaDiscoveryService.map(queryMapReq);
         Assert.assertNotNull(mapMeta);
     }
 }
