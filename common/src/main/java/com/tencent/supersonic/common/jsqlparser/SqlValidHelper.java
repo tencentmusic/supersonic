@@ -2,13 +2,15 @@ package com.tencent.supersonic.common.jsqlparser;
 
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
+import net.sf.jsqlparser.JSQLParserException;
+import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import org.apache.commons.collections.CollectionUtils;
 
 /**
- * Sql Parser equal Helper
+ * Sql Parser valid Helper
  */
 @Slf4j
-public class SqlEqualHelper {
+public class SqlValidHelper {
 
     /**
      * determine if two SQL statements are equal.
@@ -61,6 +63,16 @@ public class SqlEqualHelper {
             return false;
         }
         return true;
+    }
+
+    public static boolean isValidSQL(String sql) {
+        try {
+            CCJSqlParserUtil.parse(sql);
+            return true;
+        } catch (JSQLParserException e) {
+            log.error("isValidSQL parse:{}", e);
+            return false;
+        }
     }
 
 }

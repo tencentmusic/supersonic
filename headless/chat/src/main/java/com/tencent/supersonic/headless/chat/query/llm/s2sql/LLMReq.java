@@ -26,7 +26,6 @@ public class LLMReq {
     private SqlGenType sqlGenType;
 
     private LLMConfig llmConfig;
-
     @Data
     public static class ElementValue {
 
