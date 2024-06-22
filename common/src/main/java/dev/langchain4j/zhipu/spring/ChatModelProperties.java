@@ -11,7 +11,7 @@ class ChatModelProperties {
     String apiKey;
     Double temperature;
     Double topP;
-    String model;
+    String modelName;
     Integer maxRetries;
     Integer maxToken;
     Boolean logRequests;
