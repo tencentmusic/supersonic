@@ -7,7 +7,7 @@ import com.tencent.supersonic.headless.api.pojo.EntityInfo;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.api.pojo.response.ParseResp;
 import com.tencent.supersonic.headless.chat.query.QueryManager;
-import com.tencent.supersonic.headless.server.service.impl.SemanticService;
+import com.tencent.supersonic.headless.server.service.SemanticLayerService;
 import org.springframework.util.CollectionUtils;
 
 import java.util.List;
@@ -30,7 +30,7 @@ public class EntityInfoProcessor implements ParseResultProcessor {
                 return;
             }
             //1. set entity info
-            SemanticService semanticService = ContextUtils.getBean(SemanticService.class);
+            SemanticLayerService semanticService = ContextUtils.getBean(SemanticLayerService.class);
             DataSetSchema dataSetSchema = semanticService.getDataSetSchema(parseInfo.getDataSetId());
             EntityInfo entityInfo = semanticService.getEntityInfo(parseInfo, dataSetSchema, chatParseContext.getUser());
             if (QueryManager.isTagQuery(queryMode)

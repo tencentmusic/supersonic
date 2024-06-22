@@ -61,7 +61,7 @@ import com.tencent.supersonic.headless.server.pojo.TagFilter;
 import com.tencent.supersonic.headless.server.service.CollectService;
 import com.tencent.supersonic.headless.server.service.DataSetService;
 import com.tencent.supersonic.headless.server.service.DimensionService;
-import com.tencent.supersonic.headless.server.service.MetaDiscoveryService;
+import com.tencent.supersonic.headless.server.service.RetrieveService;
 import com.tencent.supersonic.headless.server.service.MetricService;
 import com.tencent.supersonic.headless.server.service.ModelService;
 import com.tencent.supersonic.headless.server.service.TagMetaService;
@@ -110,7 +110,7 @@ public class MetricServiceImpl extends ServiceImpl<MetricDOMapper, MetricDO>
 
     private TagMetaService tagMetaService;
 
-    private MetaDiscoveryService metaDiscoveryService;
+    private RetrieveService metaDiscoveryService;
 
     public MetricServiceImpl(MetricRepository metricRepository,
             ModelService modelService,
@@ -120,7 +120,7 @@ public class MetricServiceImpl extends ServiceImpl<MetricDOMapper, MetricDO>
             ApplicationEventPublisher eventPublisher,
             DimensionService dimensionService,
             TagMetaService tagMetaService,
-            @Lazy MetaDiscoveryService metaDiscoveryService) {
+            @Lazy RetrieveService metaDiscoveryService) {
         this.metricRepository = metricRepository;
         this.modelService = modelService;
         this.aliasGenerateHelper = aliasGenerateHelper;
@@ -298,7 +298,7 @@ public class MetricServiceImpl extends ServiceImpl<MetricDOMapper, MetricDO>
         queryMapReq.setQueryText(pageMetricReq.getKey());
         queryMapReq.setUser(user);
         queryMapReq.setMapModeEnum(MapModeEnum.LOOSE);
-        MapInfoResp mapMeta = metaDiscoveryService.getMapMeta(queryMapReq);
+        MapInfoResp mapMeta = metaDiscoveryService.map(queryMapReq);
         Map<String, DataSetMapInfo> dataSetMapInfoMap = mapMeta.getDataSetMapInfo();
         if (CollectionUtils.isEmpty(dataSetMapInfoMap)) {
             return metricRespPageInfo;

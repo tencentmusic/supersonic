@@ -70,7 +70,7 @@ public class MetricServiceImplTest {
         DataSetService dataSetService = Mockito.mock(DataSetServiceImpl.class);
         DimensionService dimensionService = Mockito.mock(DimensionService.class);
         TagMetaService tagMetaService = Mockito.mock(TagMetaService.class);
-        MetaDiscoveryService metaDiscoveryService = Mockito.mock(MetaDiscoveryService.class);
+        RetrieveService metaDiscoveryService = Mockito.mock(RetrieveService.class);
         return new MetricServiceImpl(metricRepository, modelService, aliasGenerateHelper,
                 collectService, dataSetService, eventPublisher, dimensionService,
                 tagMetaService, metaDiscoveryService);

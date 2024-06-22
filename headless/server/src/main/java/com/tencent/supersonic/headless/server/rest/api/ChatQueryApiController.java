@@ -5,7 +5,7 @@ import com.tencent.supersonic.headless.api.pojo.request.ExecuteQueryReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryReq;
 import com.tencent.supersonic.headless.api.pojo.response.MapResp;
 import com.tencent.supersonic.headless.server.service.ChatQueryService;
-import com.tencent.supersonic.headless.server.service.SearchService;
+import com.tencent.supersonic.headless.server.service.RetrieveService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -22,8 +22,9 @@ public class ChatQueryApiController {
 
     @Autowired
     private ChatQueryService chatQueryService;
+
     @Autowired
-    private SearchService searchService;
+    private RetrieveService searchService;
 
     @PostMapping("/chat/search")
     public Object search(@RequestBody QueryReq queryReq,

@@ -84,7 +84,7 @@ public class Text2SQLEval extends BaseTest {
         AgentConfig agentConfig = new AgentConfig();
         agentConfig.getTools().add(getLLMQueryTool());
         agent.setAgentConfig(JSONObject.toJSONString(agentConfig));
-        agent.setLlmConfig(getLLMConfig(LLMType.DEEPSEEK));
+        agent.setLlmConfig(getLLMConfig(LLMType.GPT));
         MultiTurnConfig multiTurnConfig = new MultiTurnConfig();
         multiTurnConfig.setEnableMultiTurn(enableMultiturn);
         agent.setMultiTurnConfig(multiTurnConfig);
