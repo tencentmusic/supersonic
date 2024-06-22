@@ -1,4 +1,4 @@
-[英文介绍](README.md) | [日本語版](README_JP.md) | [文档中心](https://supersonicbi.github.io/)
+[English](README.md) | [日本語版](README_JP.md) | [文档中心](https://supersonicbi.github.io/)
 
 # SuperSonic
 

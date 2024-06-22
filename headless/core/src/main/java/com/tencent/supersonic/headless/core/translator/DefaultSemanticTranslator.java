@@ -52,7 +52,7 @@ public class DefaultSemanticTranslator implements SemanticTranslator {
         log.debug("SemanticConverter before [{}]", queryParam);
         for (QueryConverter headlessConverter : ComponentFactory.getQueryConverters()) {
             if (headlessConverter.accept(queryStatement)) {
-                log.info("SemanticConverter accept [{}]", headlessConverter.getClass().getName());
+                log.debug("SemanticConverter accept [{}]", headlessConverter.getClass().getName());
                 headlessConverter.convert(queryStatement);
             }
         }
@@ -76,7 +76,7 @@ public class DefaultSemanticTranslator implements SemanticTranslator {
     }
 
     public QueryStatement doParse(DataSetQueryParam dataSetQueryParam, QueryStatement queryStatement) {
-        log.info("parser MetricReq [{}] ", dataSetQueryParam);
+        log.info("parse dataSetQuery [{}] ", dataSetQueryParam);
         try {
             if (!CollectionUtils.isEmpty(dataSetQueryParam.getTables())) {
                 List<String[]> tables = new ArrayList<>();
@@ -123,7 +123,7 @@ public class DefaultSemanticTranslator implements SemanticTranslator {
 
     public QueryStatement doParse(QueryStatement queryStatement, AggOption isAgg) {
         MetricQueryParam metricQueryParam = queryStatement.getMetricQueryParam();
-        log.info("parser metricQueryReq [{}] isAgg [{}]", metricQueryParam, isAgg);
+        log.info("parse metricQuery [{}] isAgg [{}]", metricQueryParam, isAgg);
         try {
             ComponentFactory.getQueryParser().parse(queryStatement, isAgg);
         } catch (Exception e) {
