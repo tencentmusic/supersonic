@@ -30,6 +30,7 @@ public class SchemaAuthTest extends BaseTest {
     @Test
     public void test_getDomainList_alice() {
         User user = DataUtils.getUserAlice();
+        setDomainNotOpenToAll();
         List<DomainResp> domainResps = domainService.getDomainListWithAdminAuth(user);
         List<String> expectedDomainBizNames = Lists.newArrayList("supersonic", "visit_info", "singer", "singer_info");
         Assertions.assertEquals(expectedDomainBizNames,

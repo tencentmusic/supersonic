@@ -29,6 +29,10 @@ public class DomainResp extends SchemaItem {
 
     private boolean hasModel;
 
+    public boolean openToAll() {
+        return isOpen != null && isOpen == 1;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) {

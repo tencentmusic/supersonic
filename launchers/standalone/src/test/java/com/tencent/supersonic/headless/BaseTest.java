@@ -12,6 +12,8 @@ import com.tencent.supersonic.headless.api.pojo.request.QuerySqlReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
 import com.tencent.supersonic.headless.api.pojo.request.SemanticQueryReq;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
+import com.tencent.supersonic.headless.server.persistence.dataobject.DomainDO;
+import com.tencent.supersonic.headless.server.persistence.repository.DomainRepository;
 import com.tencent.supersonic.headless.server.service.SemanticLayerService;
 import com.tencent.supersonic.util.DataUtils;
 import org.apache.commons.collections.CollectionUtils;
@@ -27,6 +29,9 @@ public class BaseTest extends BaseApplication {
 
     @Autowired
     protected SemanticLayerService semanticLayerService;
+
+    @Autowired
+    private DomainRepository domainRepository;
 
     protected SemanticQueryResp queryBySql(String sql) throws Exception {
         return queryBySql(sql, User.getFakeUser());
@@ -95,6 +100,13 @@ public class BaseTest extends BaseApplication {
         dateConf.setStartDate(now().plusDays(-365).toString());
         queryStructReq.setDateInfo(dateConf);
         return queryStructReq;
+    }
+
+    protected void setDomainNotOpenToAll() {
+        Long s2Domain = 1L;
+        DomainDO domainDO = domainRepository.getDomainById(s2Domain);
+        domainDO.setIsOpen(0);
+        domainRepository.updateDomain(domainDO);
     }
 
 }
