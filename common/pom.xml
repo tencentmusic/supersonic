@@ -221,8 +221,11 @@
             <groupId>dev.langchain4j</groupId>
             <artifactId>langchain4j-qianfan</artifactId>
         </dependency>
+        <dependency>
+            <groupId>dev.langchain4j</groupId>
+            <artifactId>langchain4j-zhipu-ai</artifactId>
+        </dependency>
         <!--langchain4j-->
-
         <dependency>
             <groupId>com.hankcs</groupId>
             <artifactId>hanlp</artifactId>
