@@ -19,7 +19,6 @@ public class EmbeddingQuery {
     private Map<String, Object> metadata;
 
     private List<Double> queryEmbedding;
-
     public static List<EmbeddingQuery> convertToEmbedding(List<DataItem> dataItems) {
         return dataItems.stream().map(dataItem -> {
             EmbeddingQuery embeddingQuery = new EmbeddingQuery();

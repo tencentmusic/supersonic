@@ -109,4 +109,6 @@ langchain4j:
 #    embedding-model:
 #      api-key: ${OPENAI_API_KEY:demo}
 
-
+  in-memory:
+    embedding-store:
+      file-path: /tmp

@@ -4,16 +4,24 @@ import com.google.common.collect.Lists;
 import com.tencent.supersonic.chat.api.pojo.request.SimilarQueryReq;
 import com.tencent.supersonic.chat.api.pojo.response.SimilarQueryRecallResp;
 import com.tencent.supersonic.common.config.EmbeddingConfig;
-import dev.langchain4j.store.embedding.ComponentFactory;
+import com.tencent.supersonic.common.service.EmbeddingService;
 import dev.langchain4j.store.embedding.EmbeddingQuery;
 import dev.langchain4j.store.embedding.Retrieval;
 import dev.langchain4j.store.embedding.RetrieveQuery;
 import dev.langchain4j.store.embedding.RetrieveQueryResult;
-import dev.langchain4j.store.embedding.S2EmbeddingStore;
+import java.net.URI;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.util.Strings;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -24,22 +32,14 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import java.net.URI;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 @Slf4j
 @Component
 public class SimilarQueryManager {
 
     private EmbeddingConfig embeddingConfig;
 
-    private S2EmbeddingStore s2EmbeddingStore = ComponentFactory.getS2EmbeddingStore();
+    @Autowired
+    private EmbeddingService embeddingService;
 
 
     public SimilarQueryManager(EmbeddingConfig embeddingConfig) {
@@ -60,7 +60,7 @@ public class SimilarQueryManager {
             metaData.put("agentId", similarQueryReq.getAgentId());
             embeddingQuery.setMetadata(metaData);
             String solvedQueryCollection = embeddingConfig.getSolvedQueryCollection();
-            s2EmbeddingStore.addQuery(solvedQueryCollection, Lists.newArrayList(embeddingQuery));
+            embeddingService.addQuery(solvedQueryCollection, Lists.newArrayList(embeddingQuery));
         } catch (Exception e) {
             log.warn("save history question to embedding failed, queryText:{}", queryText, e);
         }
@@ -81,7 +81,7 @@ public class SimilarQueryManager {
                     .queryTextsList(Lists.newArrayList(queryText))
                     .filterCondition(filterCondition)
                     .build();
-            List<RetrieveQueryResult> resultList = s2EmbeddingStore.retrieveQuery(solvedQueryCollection, retrieveQuery,
+            List<RetrieveQueryResult> resultList = embeddingService.retrieveQuery(solvedQueryCollection, retrieveQuery,
                     solvedQueryResultNum * 20);
 
             log.info("[embedding] recognize result body:{}", resultList);

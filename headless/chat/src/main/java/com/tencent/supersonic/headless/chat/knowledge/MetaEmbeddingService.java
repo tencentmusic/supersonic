@@ -2,12 +2,11 @@ package com.tencent.supersonic.headless.chat.knowledge;
 
 import com.tencent.supersonic.common.config.EmbeddingConfig;
 import com.tencent.supersonic.common.pojo.Constants;
-import dev.langchain4j.store.embedding.ComponentFactory;
+import com.tencent.supersonic.common.service.EmbeddingService;
+import com.tencent.supersonic.headless.chat.knowledge.helper.NatureHelper;
 import dev.langchain4j.store.embedding.Retrieval;
 import dev.langchain4j.store.embedding.RetrieveQuery;
 import dev.langchain4j.store.embedding.RetrieveQueryResult;
-import dev.langchain4j.store.embedding.S2EmbeddingStore;
-import com.tencent.supersonic.headless.chat.knowledge.helper.NatureHelper;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -26,7 +25,8 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class MetaEmbeddingService {
 
-    private S2EmbeddingStore s2EmbeddingStore = ComponentFactory.getS2EmbeddingStore();
+    @Autowired
+    private EmbeddingService embeddingService;
     @Autowired
     private EmbeddingConfig embeddingConfig;
 
@@ -42,7 +42,7 @@ public class MetaEmbeddingService {
         }
 
         String collectionName = embeddingConfig.getMetaCollectionName();
-        List<RetrieveQueryResult> resultList = s2EmbeddingStore.retrieveQuery(collectionName, retrieveQuery, num);
+        List<RetrieveQueryResult> resultList = embeddingService.retrieveQuery(collectionName, retrieveQuery, num);
         if (CollectionUtils.isEmpty(resultList)) {
             return new ArrayList<>();
         }

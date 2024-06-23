@@ -14,13 +14,12 @@ import com.tencent.supersonic.chat.server.plugin.event.PluginUpdateEvent;
 import com.tencent.supersonic.chat.server.pojo.ChatParseContext;
 import com.tencent.supersonic.chat.server.service.PluginService;
 import com.tencent.supersonic.common.config.EmbeddingConfig;
-import dev.langchain4j.store.embedding.ComponentFactory;
 import com.tencent.supersonic.common.util.ContextUtils;
 import dev.langchain4j.store.embedding.EmbeddingQuery;
+import com.tencent.supersonic.common.service.EmbeddingService;
 import dev.langchain4j.store.embedding.Retrieval;
 import dev.langchain4j.store.embedding.RetrieveQuery;
 import dev.langchain4j.store.embedding.RetrieveQueryResult;
-import dev.langchain4j.store.embedding.S2EmbeddingStore;
 import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementMatch;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
@@ -49,7 +48,8 @@ public class PluginManager {
     @Autowired
     private EmbeddingConfig embeddingConfig;
 
-    private S2EmbeddingStore s2EmbeddingStore = ComponentFactory.getS2EmbeddingStore();
+    @Autowired
+    private EmbeddingService embeddingService;
 
     public static List<Plugin> getPluginAgentCanSupport(ChatParseContext chatParseContext) {
         PluginService pluginService = ContextUtils.getBean(PluginService.class);
@@ -122,7 +122,7 @@ public class PluginManager {
             embeddingQuery.setQueryId(id);
             queries.add(embeddingQuery);
         }
-        s2EmbeddingStore.deleteQuery(presetCollection, queries);
+        embeddingService.deleteQuery(presetCollection, queries);
     }
 
     public void requestEmbeddingPluginAdd(List<EmbeddingQuery> queries) {
@@ -130,7 +130,7 @@ public class PluginManager {
             return;
         }
         String presetCollection = embeddingConfig.getPresetCollection();
-        s2EmbeddingStore.addQuery(presetCollection, queries);
+        embeddingService.addQuery(presetCollection, queries);
     }
 
     public void requestEmbeddingPluginAddALL(List<Plugin> plugins) {
@@ -143,7 +143,7 @@ public class PluginManager {
                 .queryTextsList(Collections.singletonList(embeddingText))
                 .build();
 
-        List<RetrieveQueryResult> resultList = s2EmbeddingStore.retrieveQuery(embeddingConfig.getPresetCollection(),
+        List<RetrieveQueryResult> resultList = embeddingService.retrieveQuery(embeddingConfig.getPresetCollection(),
                 retrieveQuery, embeddingConfig.getNResult());
 
         if (CollectionUtils.isNotEmpty(resultList)) {
