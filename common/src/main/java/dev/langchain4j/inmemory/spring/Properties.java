@@ -14,4 +14,7 @@ public class Properties {
 
     @NestedConfigurationProperty
     EmbeddingStoreProperties embeddingStore;
+
+    @NestedConfigurationProperty
+    EmbeddingModelProperties embeddingModel;
 }
