@@ -4,9 +4,9 @@ import com.tencent.supersonic.common.config.EmbeddingConfig;
 import com.tencent.supersonic.common.pojo.DataEvent;
 import com.tencent.supersonic.common.pojo.DataItem;
 import com.tencent.supersonic.common.pojo.enums.EventType;
-import dev.langchain4j.store.embedding.ComponentFactory;
+import com.tencent.supersonic.common.service.EmbeddingService;
 import dev.langchain4j.store.embedding.EmbeddingQuery;
-import dev.langchain4j.store.embedding.S2EmbeddingStore;
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,8 +15,6 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
-import java.util.List;
-
 @Component
 @Slf4j
 public class MetaEmbeddingListener implements ApplicationListener<DataEvent> {
@@ -24,7 +22,8 @@ public class MetaEmbeddingListener implements ApplicationListener<DataEvent> {
     @Autowired
     private EmbeddingConfig embeddingConfig;
 
-    private S2EmbeddingStore s2EmbeddingStore = ComponentFactory.getS2EmbeddingStore();
+    @Autowired
+    private EmbeddingService embeddingService;
 
     @Value("${embedding.operation.sleep.time:3000}")
     private Integer embeddingOperationSleepTime;
@@ -41,14 +40,14 @@ public class MetaEmbeddingListener implements ApplicationListener<DataEvent> {
             return;
         }
         sleep();
-        s2EmbeddingStore.addCollection(embeddingConfig.getMetaCollectionName());
+        embeddingService.addCollection(embeddingConfig.getMetaCollectionName());
         if (event.getEventType().equals(EventType.ADD)) {
-            s2EmbeddingStore.addQuery(embeddingConfig.getMetaCollectionName(), embeddingQueries);
+            embeddingService.addQuery(embeddingConfig.getMetaCollectionName(), embeddingQueries);
         } else if (event.getEventType().equals(EventType.DELETE)) {
-            s2EmbeddingStore.deleteQuery(embeddingConfig.getMetaCollectionName(), embeddingQueries);
+            embeddingService.deleteQuery(embeddingConfig.getMetaCollectionName(), embeddingQueries);
         } else if (event.getEventType().equals(EventType.UPDATE)) {
-            s2EmbeddingStore.deleteQuery(embeddingConfig.getMetaCollectionName(), embeddingQueries);
-            s2EmbeddingStore.addQuery(embeddingConfig.getMetaCollectionName(), embeddingQueries);
+            embeddingService.deleteQuery(embeddingConfig.getMetaCollectionName(), embeddingQueries);
+            embeddingService.addQuery(embeddingConfig.getMetaCollectionName(), embeddingQueries);
         }
     }
 
