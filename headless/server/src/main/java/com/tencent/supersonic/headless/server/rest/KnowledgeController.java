@@ -1,13 +1,16 @@
 package com.tencent.supersonic.headless.server.rest;
 
 
+import com.github.pagehelper.PageInfo;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
 import com.tencent.supersonic.headless.api.pojo.request.DictItemFilter;
 import com.tencent.supersonic.headless.api.pojo.request.DictItemReq;
 import com.tencent.supersonic.headless.api.pojo.request.DictSingleTaskReq;
+import com.tencent.supersonic.headless.api.pojo.request.DictValueReq;
 import com.tencent.supersonic.headless.api.pojo.response.DictItemResp;
 import com.tencent.supersonic.headless.api.pojo.response.DictTaskResp;
+import com.tencent.supersonic.headless.api.pojo.response.DictValueResp;
 import com.tencent.supersonic.headless.server.schedule.EmbeddingTask;
 import com.tencent.supersonic.headless.server.service.DictConfService;
 import com.tencent.supersonic.headless.server.service.DictTaskService;
@@ -137,4 +140,31 @@ public class KnowledgeController {
         embeddingTask.reloadMetaEmbedding();
         return true;
     }
+
+    /**
+     * queryDictValue-返回字典的数据
+     *
+     * @param dictValueReq
+     */
+    @PostMapping("/dict/data")
+    public PageInfo<DictValueResp> queryDictValue(@RequestBody @Valid DictValueReq dictValueReq,
+                                                  HttpServletRequest request,
+                                                  HttpServletResponse response) {
+        User user = UserHolder.findUser(request, response);
+        return taskService.queryDictValue(dictValueReq, user);
+    }
+
+    /**
+     * queryDictFilePath-返回字典文件的路径
+     *
+     * @param dictValueReq
+     */
+    @PostMapping("/dict/file")
+    public String queryDictFilePath(@RequestBody @Valid DictValueReq dictValueReq,
+                                                  HttpServletRequest request,
+                                                  HttpServletResponse response) {
+        User user = UserHolder.findUser(request, response);
+        return taskService.queryDictFilePath(dictValueReq, user);
+    }
+
 }
