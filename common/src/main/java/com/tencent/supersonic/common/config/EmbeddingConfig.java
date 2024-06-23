@@ -11,9 +11,6 @@ public class EmbeddingConfig {
     @Value("${s2.embedding.url:}")
     private String url;
 
-    @Value("${s2.embedding.persistent.path:/tmp}")
-    private String embeddingStorePersistentPath;
-
     @Value("${s2.embedding.recognize.path:/preset_query_retrival}")
     private String recognizePath;
 
