@@ -1,5 +1,9 @@
 package com.tencent.supersonic.headless.chat.knowledge.file;
 
+import com.github.pagehelper.PageInfo;
+import com.tencent.supersonic.headless.api.pojo.request.DictValueReq;
+import com.tencent.supersonic.headless.api.pojo.response.DictValueResp;
+
 import java.util.List;
 
 public interface FileHandler {
@@ -54,4 +58,7 @@ public interface FileHandler {
      */
     void deleteFile(String fileName);
 
+    PageInfo<DictValueResp> queryDictValue(String fileName, DictValueReq dictValueReq);
+
+    String queryDictFilePath(String fileName);
 }
