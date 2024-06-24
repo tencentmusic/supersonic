@@ -14,16 +14,17 @@ import com.tencent.supersonic.chat.server.plugin.event.PluginUpdateEvent;
 import com.tencent.supersonic.chat.server.pojo.ChatParseContext;
 import com.tencent.supersonic.chat.server.service.PluginService;
 import com.tencent.supersonic.common.config.EmbeddingConfig;
-import com.tencent.supersonic.common.util.ContextUtils;
-import dev.langchain4j.store.embedding.EmbeddingQuery;
 import com.tencent.supersonic.common.service.EmbeddingService;
-import dev.langchain4j.store.embedding.Retrieval;
-import dev.langchain4j.store.embedding.RetrieveQuery;
-import dev.langchain4j.store.embedding.RetrieveQueryResult;
+import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementMatch;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
 import com.tencent.supersonic.headless.api.pojo.SchemaMapInfo;
+import dev.langchain4j.data.segment.TextSegment;
+import dev.langchain4j.store.embedding.Retrieval;
+import dev.langchain4j.store.embedding.RetrieveQuery;
+import dev.langchain4j.store.embedding.RetrieveQueryResult;
+import dev.langchain4j.store.embedding.TextSegmentConvert;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -116,25 +117,21 @@ public class PluginManager {
         }
         String presetCollection = embeddingConfig.getPresetCollection();
 
-        List<EmbeddingQuery> queries = new ArrayList<>();
+        List<TextSegment> queries = new ArrayList<>();
         for (String id : queryIds) {
-            EmbeddingQuery embeddingQuery = new EmbeddingQuery();
-            embeddingQuery.setQueryId(id);
-            queries.add(embeddingQuery);
+            TextSegment query = TextSegment.from("");
+            TextSegmentConvert.addQueryId(query, id);
+            queries.add(query);
         }
         embeddingService.deleteQuery(presetCollection, queries);
     }
 
-    public void requestEmbeddingPluginAdd(List<EmbeddingQuery> queries) {
+    public void requestEmbeddingPluginAdd(List<TextSegment> queries) {
         if (CollectionUtils.isEmpty(queries)) {
             return;
         }
         String presetCollection = embeddingConfig.getPresetCollection();
         embeddingService.addQuery(presetCollection, queries);
-    }
-
-    public void requestEmbeddingPluginAddALL(List<Plugin> plugins) {
-        requestEmbeddingPluginAdd(convert(plugins));
     }
 
     public RetrieveQueryResult recognize(String embeddingText) {
@@ -158,15 +155,14 @@ public class PluginManager {
         throw new RuntimeException("get embedding result failed");
     }
 
-    public List<EmbeddingQuery> convert(List<Plugin> plugins) {
-        List<EmbeddingQuery> queries = Lists.newArrayList();
+    public List<TextSegment> convert(List<Plugin> plugins) {
+        List<TextSegment> queries = Lists.newArrayList();
         for (Plugin plugin : plugins) {
             List<String> exampleQuestions = plugin.getExampleQuestionList();
             int num = 0;
             for (String pattern : exampleQuestions) {
-                EmbeddingQuery query = new EmbeddingQuery();
-                query.setQueryId(generateUniqueEmbeddingId(num, plugin.getId()));
-                query.setQuery(pattern);
+                TextSegment query = TextSegment.from(pattern);
+                TextSegmentConvert.addQueryId(query, generateUniqueEmbeddingId(num, plugin.getId()));
                 queries.add(query);
                 num++;
             }
@@ -176,8 +172,8 @@ public class PluginManager {
 
     private Set<String> getEmbeddingId(List<Plugin> plugins) {
         Set<String> embeddingIdSet = new HashSet<>();
-        for (EmbeddingQuery query : convert(plugins)) {
-            embeddingIdSet.add(query.getQueryId());
+        for (TextSegment query : convert(plugins)) {
+            TextSegmentConvert.addQueryId(query, TextSegmentConvert.getQueryId(query));
         }
         return embeddingIdSet;
     }
