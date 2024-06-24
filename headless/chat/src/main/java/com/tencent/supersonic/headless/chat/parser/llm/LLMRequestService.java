@@ -1,8 +1,12 @@
 package com.tencent.supersonic.headless.chat.parser.llm;
 
+import static com.tencent.supersonic.headless.chat.parser.ParserConfig.PARSER_LINKING_VALUE_ENABLE;
+import static com.tencent.supersonic.headless.chat.parser.ParserConfig.PARSER_STRATEGY_TYPE;
+
 import com.tencent.supersonic.common.pojo.enums.DataFormatTypeEnum;
 import com.tencent.supersonic.common.pojo.enums.DataTypeEnums;
 import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
+import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementMatch;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
@@ -29,9 +33,6 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
-
-import static com.tencent.supersonic.headless.chat.parser.ParserConfig.PARSER_LINKING_VALUE_ENABLE;
-import static com.tencent.supersonic.headless.chat.parser.ParserConfig.PARSER_STRATEGY_TYPE;
 
 @Slf4j
 @Service
@@ -62,8 +63,10 @@ public class LLMRequestService {
         return dataSetResolver.resolve(queryCtx, queryCtx.getDataSetIds());
     }
 
-    public LLMReq getLlmReq(QueryContext queryCtx, Long dataSetId,
-                            SemanticSchema semanticSchema, List<LLMReq.ElementValue> linkingValues) {
+    public LLMReq getLlmReq(QueryContext queryCtx, Long dataSetId) {
+        LLMRequestService requestService = ContextUtils.getBean(LLMRequestService.class);
+        List<LLMReq.ElementValue> linkingValues = requestService.getValues(queryCtx, dataSetId);
+        SemanticSchema semanticSchema = queryCtx.getSemanticSchema();
         Map<Long, String> dataSetIdToName = semanticSchema.getDataSetIdToName();
         String queryText = queryCtx.getQueryText();
 
@@ -112,7 +115,7 @@ public class LLMRequestService {
     }
 
     protected List<String> getFieldNameList(QueryContext queryCtx, Long dataSetId,
-                                            LLMParserConfig llmParserConfig) {
+            LLMParserConfig llmParserConfig) {
 
         Set<String> results = getTopNFieldNames(queryCtx, dataSetId, llmParserConfig);
 

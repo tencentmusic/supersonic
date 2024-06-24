@@ -1,6 +1,10 @@
 package com.tencent.supersonic.headless.chat.knowledge.file;
 
+import com.github.pagehelper.PageInfo;
+import com.tencent.supersonic.headless.api.pojo.request.DictValueReq;
+import com.tencent.supersonic.headless.api.pojo.response.DictValueResp;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.logging.log4j.util.Strings;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
@@ -14,7 +18,11 @@ import java.nio.file.StandardOpenOption;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Slf4j
 @Component
@@ -22,6 +30,7 @@ public class FileHandlerImpl implements FileHandler {
     public static final String FILE_SPILT = File.separator;
 
     private final LocalFileConfig localFileConfig;
+
     public FileHandlerImpl(LocalFileConfig localFileConfig) {
         this.localFileConfig = localFileConfig;
     }
@@ -66,6 +75,76 @@ public class FileHandlerImpl implements FileHandler {
         } catch (IOException e) {
             log.warn("Failed to delete file:{}, e:", getAbsolutePath(filePath), e);
         }
+    }
+
+    @Override
+    public PageInfo<DictValueResp> queryDictValue(String fileName, DictValueReq dictValueReq) {
+        PageInfo<DictValueResp> dictValueRespPageInfo = new PageInfo<>();
+        String filePath = localFileConfig.getDictDirectoryLatest() + FILE_SPILT + fileName;
+        Long fileLineNum = getFileLineNum(filePath);
+        Integer startLine = (dictValueReq.getCurrent() - 1) * dictValueReq.getPageSize() + 1;
+        Integer endLine = Integer.valueOf(
+                Math.min(dictValueReq.getCurrent() * dictValueReq.getPageSize(), fileLineNum) + "");
+        List<DictValueResp> dictValueRespList = getFileData(filePath, startLine, endLine);
+
+        dictValueRespPageInfo.setPageSize(dictValueReq.getPageSize());
+        dictValueRespPageInfo.setPageNum(dictValueReq.getCurrent());
+        dictValueRespPageInfo.setTotal(fileLineNum);
+        dictValueRespPageInfo.setList(dictValueRespList);
+        dictValueRespPageInfo.setHasNextPage(endLine >= fileLineNum ? false : true);
+        dictValueRespPageInfo.setHasPreviousPage(startLine <= 0 ? false : true);
+        return dictValueRespPageInfo;
+    }
+
+    @Override
+    public String queryDictFilePath(String fileName) {
+        String path = localFileConfig.getDictDirectoryLatest() + FILE_SPILT + fileName;
+        if (existPath(path)) {
+            return path;
+        }
+        log.info("dict file:{} is not exist", path);
+        return null;
+    }
+
+    private List<DictValueResp> getFileData(String filePath, Integer startLine, Integer endLine) {
+        List<DictValueResp> fileData = new ArrayList<>();
+
+        try (Stream<String> lines = Files.lines(Paths.get(filePath))) {
+            fileData = lines
+                    .skip(startLine - 1)
+                    .limit(endLine - startLine + 1)
+                    .map(lineStr -> convert2Resp(lineStr))
+                    .filter(line -> Objects.nonNull(line))
+                    .collect(Collectors.toList());
+        } catch (IOException e) {
+            log.warn("[getFileData] e:{}", e);
+        }
+        return fileData;
+
+    }
+
+    private DictValueResp convert2Resp(String lineStr) {
+        DictValueResp dictValueResp = new DictValueResp();
+        if (Strings.isNotEmpty(lineStr)) {
+            String[] itemArray = lineStr.split("\\s+");
+            if (Objects.nonNull(itemArray) && itemArray.length >= 3) {
+                dictValueResp.setValue(itemArray[0].replace("#", " "));
+                dictValueResp.setNature(itemArray[1]);
+                dictValueResp.setFrequency(Long.parseLong(itemArray[2]));
+            }
+        }
+        return dictValueResp;
+    }
+
+    private Long getFileLineNum(String filePath) {
+        try (Stream<String> lines = Files.lines(Paths.get(filePath))) {
+            Long lineCount = lines
+                    .count();
+            return lineCount;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return 0L;
     }
 
     @Override

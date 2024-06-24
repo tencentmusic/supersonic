@@ -23,7 +23,7 @@ class LLMResponseServiceTest {
 
         llmResp.setSqlRespMap(sqlWeight);
         LLMResponseService llmResponseService = new LLMResponseService();
-        Map<String, LLMSqlResp> deduplicationSqlResp = llmResponseService.getDeduplicationSqlResp(llmResp);
+        Map<String, LLMSqlResp> deduplicationSqlResp = llmResponseService.getDeduplicationSqlResp(0, llmResp);
 
         Assert.assertEquals(deduplicationSqlResp.size(), 1);
 
@@ -36,7 +36,7 @@ class LLMResponseServiceTest {
         sqlWeight2.put(sql2, LLMSqlResp.builder().sqlWeight(0.80).build());
 
         llmResp2.setSqlRespMap(sqlWeight2);
-        deduplicationSqlResp = llmResponseService.getDeduplicationSqlResp(llmResp2);
+        deduplicationSqlResp = llmResponseService.getDeduplicationSqlResp(0, llmResp2);
 
         Assert.assertEquals(deduplicationSqlResp.size(), 1);
 
@@ -48,7 +48,7 @@ class LLMResponseServiceTest {
         sqlWeight3.put(sql1, LLMSqlResp.builder().sqlWeight(0.20).build());
         sqlWeight3.put(sql2, LLMSqlResp.builder().sqlWeight(0.80).build());
         llmResp3.setSqlRespMap(sqlWeight3);
-        deduplicationSqlResp = llmResponseService.getDeduplicationSqlResp(llmResp3);
+        deduplicationSqlResp = llmResponseService.getDeduplicationSqlResp(0, llmResp3);
 
         Assert.assertEquals(deduplicationSqlResp.size(), 2);
 

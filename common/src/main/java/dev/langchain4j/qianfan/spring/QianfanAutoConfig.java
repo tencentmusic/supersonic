@@ -77,7 +77,7 @@ public class QianfanAutoConfig {
 
     @Bean
     @ConditionalOnProperty(PREFIX + ".streaming-language-model.api-key")
-    QianfanStreamingLanguageModel openAiStreamingLanguageModel(Properties properties) {
+    QianfanStreamingLanguageModel qianfanStreamingLanguageModel(Properties properties) {
         LanguageModelProperties languageModelProperties = properties.getStreamingLanguageModel();
         return QianfanStreamingLanguageModel.builder()
                 .endpoint(languageModelProperties.getEndpoint())

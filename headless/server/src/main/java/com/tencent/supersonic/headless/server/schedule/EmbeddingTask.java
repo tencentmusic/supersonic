@@ -2,12 +2,10 @@ package com.tencent.supersonic.headless.server.schedule;
 
 import com.tencent.supersonic.common.config.EmbeddingConfig;
 import com.tencent.supersonic.common.pojo.DataItem;
-import dev.langchain4j.store.embedding.ComponentFactory;
-import dev.langchain4j.store.embedding.EmbeddingQuery;
-import dev.langchain4j.store.embedding.InMemoryS2EmbeddingStore;
-import dev.langchain4j.store.embedding.S2EmbeddingStore;
+import com.tencent.supersonic.common.service.EmbeddingService;
 import com.tencent.supersonic.headless.server.service.DimensionService;
 import com.tencent.supersonic.headless.server.service.MetricService;
+import dev.langchain4j.store.embedding.TextSegmentConvert;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -20,7 +18,8 @@ import java.util.List;
 @Slf4j
 public class EmbeddingTask {
 
-    private S2EmbeddingStore s2EmbeddingStore = ComponentFactory.getS2EmbeddingStore();
+    @Autowired
+    private EmbeddingService embeddingService;
     @Autowired
     private EmbeddingConfig embeddingConfig;
     @Autowired
@@ -31,22 +30,21 @@ public class EmbeddingTask {
 
     @PreDestroy
     public void onShutdown() {
-        embeddingStorePersistentToFile();
+        //        embeddingStorePersistentToFile();
     }
 
-    private void embeddingStorePersistentToFile() {
-        if (s2EmbeddingStore instanceof InMemoryS2EmbeddingStore) {
-            log.info("start persistentToFile");
-            ((InMemoryS2EmbeddingStore) s2EmbeddingStore).persistentToFile();
-            log.info("end persistentToFile");
-        }
-    }
+    //    private void embeddingStorePersistentToFile() {
+    //        if (embeddingService instanceof InMemoryEmbeddingService) {
+    //            log.info("start persistentToFile");
+    //            ((InMemoryEmbeddingService) embeddingService).persistentToFile();
+    //            log.info("end persistentToFile");
+    //        }
+    //    }
 
     @Scheduled(cron = "${inMemoryEmbeddingStore.persistent.cron:0 0 * * * ?}")
     public void executeTask() {
-        embeddingStorePersistentToFile();
+        //        embeddingStorePersistentToFile();
     }
-
 
     /***
      * reload meta embedding
@@ -57,12 +55,12 @@ public class EmbeddingTask {
         try {
             List<DataItem> metricDataItems = metricService.getDataEvent().getDataItems();
 
-            s2EmbeddingStore.addQuery(embeddingConfig.getMetaCollectionName(),
-                    EmbeddingQuery.convertToEmbedding(metricDataItems));
+            embeddingService.addQuery(embeddingConfig.getMetaCollectionName(),
+                    TextSegmentConvert.convertToEmbedding(metricDataItems));
 
             List<DataItem> dimensionDataItems = dimensionService.getDataEvent().getDataItems();
-            s2EmbeddingStore.addQuery(embeddingConfig.getMetaCollectionName(),
-                    EmbeddingQuery.convertToEmbedding(dimensionDataItems));
+            embeddingService.addQuery(embeddingConfig.getMetaCollectionName(),
+                    TextSegmentConvert.convertToEmbedding(dimensionDataItems));
         } catch (Exception e) {
             log.error("reload.meta.embedding error", e);
         }

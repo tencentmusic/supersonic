@@ -15,6 +15,9 @@ public class LLMParserConfig {
     @Value("${s2.query2sql.path:/query2sql}")
     private String queryToSqlPath;
 
+    @Value("${s2.recall.max.retries:3}")
+    private int recallMaxRetries;
+
     @Value("${s2.dimension.topn:10}")
     private Integer dimensionTopN;
 

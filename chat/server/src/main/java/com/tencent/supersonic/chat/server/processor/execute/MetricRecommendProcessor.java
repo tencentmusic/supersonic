@@ -3,6 +3,7 @@ package com.tencent.supersonic.chat.server.processor.execute;
 import com.alibaba.fastjson.JSONObject;
 import com.tencent.supersonic.chat.server.pojo.ChatExecuteContext;
 import com.tencent.supersonic.common.pojo.Constants;
+import com.tencent.supersonic.common.pojo.enums.DictWordType;
 import com.tencent.supersonic.common.pojo.enums.QueryType;
 import com.tencent.supersonic.common.util.ContextUtils;
 import dev.langchain4j.store.embedding.Retrieval;
@@ -13,6 +14,7 @@ import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.api.pojo.response.QueryResult;
 import com.tencent.supersonic.headless.chat.knowledge.MetaEmbeddingService;
+import java.util.Objects;
 import org.springframework.util.CollectionUtils;
 
 import java.util.Collections;
@@ -66,8 +68,13 @@ public class MetricRecommendProcessor implements ExecuteResultProcessor {
         }
         for (Retrieval retrieval : retrievals) {
             if (!metricIds.contains(Retrieval.getLongId(retrieval.getId()))) {
-                SchemaElement schemaElement = JSONObject.parseObject(JSONObject.toJSONString(retrieval.getMetadata()),
-                        SchemaElement.class);
+                if (Objects.nonNull(retrieval.getMetadata().get("id"))) {
+                    String idStr = retrieval.getMetadata().get("id").toString()
+                            .replaceAll(DictWordType.NATURE_SPILT, "");
+                    retrieval.getMetadata().put("id", idStr);
+                }
+                String metaStr = JSONObject.toJSONString(retrieval.getMetadata());
+                SchemaElement schemaElement = JSONObject.parseObject(metaStr, SchemaElement.class);
                 if (retrieval.getMetadata().containsKey("dataSetId")) {
                     String dataSetId = retrieval.getMetadata().get("dataSetId").toString()
                             .replace(Constants.UNDERLINE, "");

@@ -180,6 +180,7 @@ public class S2VisitsDemo extends S2BaseDemo {
         domainReq.setStatus(StatusEnum.ONLINE.getCode());
         domainReq.setViewers(Arrays.asList("admin", "tom"));
         domainReq.setAdmins(Arrays.asList("admin", "jack"));
+        domainReq.setIsOpen(1);
         return domainService.createDomain(domainReq, user);
     }
 
@@ -484,7 +485,7 @@ public class S2VisitsDemo extends S2BaseDemo {
     public void addAuthGroup_1(ModelResp stayTimeModel) {
         AuthGroup authGroupReq = new AuthGroup();
         authGroupReq.setModelId(stayTimeModel.getId());
-        authGroupReq.setName("admin-permission");
+        authGroupReq.setName("jack_column_permission");
 
         List<AuthRule> authRules = new ArrayList<>();
         AuthRule authRule = new AuthRule();
