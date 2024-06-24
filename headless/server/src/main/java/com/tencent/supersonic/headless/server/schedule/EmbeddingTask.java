@@ -5,13 +5,14 @@ import com.tencent.supersonic.common.pojo.DataItem;
 import com.tencent.supersonic.common.service.EmbeddingService;
 import com.tencent.supersonic.headless.server.service.DimensionService;
 import com.tencent.supersonic.headless.server.service.MetricService;
-import dev.langchain4j.store.embedding.EmbeddingQuery;
-import java.util.List;
-import javax.annotation.PreDestroy;
+import dev.langchain4j.store.embedding.TextSegmentConvert;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+
+import javax.annotation.PreDestroy;
+import java.util.List;
 
 @Component
 @Slf4j
@@ -55,11 +56,11 @@ public class EmbeddingTask {
             List<DataItem> metricDataItems = metricService.getDataEvent().getDataItems();
 
             embeddingService.addQuery(embeddingConfig.getMetaCollectionName(),
-                    EmbeddingQuery.convertToEmbedding(metricDataItems));
+                    TextSegmentConvert.convertToEmbedding(metricDataItems));
 
             List<DataItem> dimensionDataItems = dimensionService.getDataEvent().getDataItems();
             embeddingService.addQuery(embeddingConfig.getMetaCollectionName(),
-                    EmbeddingQuery.convertToEmbedding(dimensionDataItems));
+                    TextSegmentConvert.convertToEmbedding(dimensionDataItems));
         } catch (Exception e) {
             log.error("reload.meta.embedding error", e);
         }

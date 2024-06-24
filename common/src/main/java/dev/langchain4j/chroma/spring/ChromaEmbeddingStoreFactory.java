@@ -17,7 +17,7 @@ public class ChromaEmbeddingStoreFactory implements EmbeddingStoreFactory {
         EmbeddingStoreProperties embeddingStore = properties.getEmbeddingStore();
         return ChromaEmbeddingStore.builder()
                 .baseUrl(embeddingStore.getBaseUrl())
-                .collectionName(embeddingStore.getCollectionName())
+                .collectionName(collectionName)
                 .timeout(embeddingStore.getTimeout())
                 .build();
     }
