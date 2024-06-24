@@ -1,10 +1,5 @@
 package com.tencent.supersonic.headless;
 
-import static java.time.LocalDate.now;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThrows;
-import static org.junit.Assert.assertTrue;
-
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.common.pojo.QueryColumn;
 import com.tencent.supersonic.common.pojo.exception.InvalidPermissionException;
@@ -12,6 +7,11 @@ import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
 import com.tencent.supersonic.util.DataUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import static java.time.LocalDate.now;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
 
 public class QueryBySqlTest extends BaseTest {
 
@@ -93,6 +93,7 @@ public class QueryBySqlTest extends BaseTest {
     @Test
     public void testAuthorization_model() {
         User alice = DataUtils.getUserAlice();
+        setDomainNotOpenToAll();
         assertThrows(InvalidPermissionException.class,
                 () -> queryBySql("SELECT SUM(pv) FROM 超音数PVUV统计  WHERE department ='HR'", alice));
     }

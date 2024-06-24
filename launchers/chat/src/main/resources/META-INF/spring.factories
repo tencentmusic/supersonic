@@ -41,7 +41,3 @@ com.tencent.supersonic.chat.server.processor.execute.ExecuteResultProcessor=\
     com.tencent.supersonic.chat.server.processor.execute.MetricRecommendProcessor,\
     com.tencent.supersonic.chat.server.processor.execute.DimensionRecommendProcessor,\
     com.tencent.supersonic.chat.server.processor.execute.MetricRatioProcessor
-
-
-dev.langchain4j.store.embedding.S2EmbeddingStore=\
-    dev.langchain4j.store.embedding.InMemoryS2EmbeddingStore

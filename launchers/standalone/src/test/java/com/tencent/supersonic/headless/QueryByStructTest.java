@@ -103,7 +103,8 @@ public class QueryByStructTest extends BaseTest {
 
     @Test
     public void testAuthorization_model() {
-        User alice = new User(2L, "alice", "alice", "alice@email", 0);
+        User alice = DataUtils.getUserAlice();
+        setDomainNotOpenToAll();
         QueryStructReq queryStructReq1 = buildQueryStructReq(Arrays.asList("department"));
         assertThrows(InvalidPermissionException.class,
                 () -> semanticLayerService.queryByReq(queryStructReq1, alice));

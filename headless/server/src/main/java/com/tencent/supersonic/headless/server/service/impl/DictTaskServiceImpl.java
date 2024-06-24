@@ -1,13 +1,16 @@
 package com.tencent.supersonic.headless.server.service.impl;
 
+import com.github.pagehelper.PageInfo;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.enums.StatusEnum;
 import com.tencent.supersonic.common.pojo.enums.TaskStatusEnum;
 import com.tencent.supersonic.headless.api.pojo.request.DictItemFilter;
 import com.tencent.supersonic.headless.api.pojo.request.DictSingleTaskReq;
+import com.tencent.supersonic.headless.api.pojo.request.DictValueReq;
 import com.tencent.supersonic.headless.api.pojo.response.DictItemResp;
 import com.tencent.supersonic.headless.api.pojo.response.DictTaskResp;
+import com.tencent.supersonic.headless.api.pojo.response.DictValueResp;
 import com.tencent.supersonic.headless.chat.knowledge.KnowledgeBaseService;
 import com.tencent.supersonic.headless.chat.knowledge.file.FileHandler;
 import com.tencent.supersonic.headless.chat.knowledge.helper.HanlpHelper;
@@ -146,6 +149,23 @@ public class DictTaskServiceImpl implements DictTaskService {
     @Override
     public DictTaskResp queryLatestDictTask(DictSingleTaskReq taskReq, User user) {
         return dictRepository.queryLatestDictTask(taskReq);
+    }
+
+    @Override
+    public PageInfo<DictValueResp> queryDictValue(DictValueReq dictValueReq, User user) {
+        String fileName = String.format("dic_value_%d_%s_%s",
+                dictValueReq.getModelId(), dictValueReq.getType().name(), dictValueReq.getItemId())
+                + Constants.DOT + dictFileType;
+        PageInfo<DictValueResp> dictValueRespList = fileHandler.queryDictValue(fileName, dictValueReq);
+        return dictValueRespList;
+    }
+
+    @Override
+    public String queryDictFilePath(DictValueReq dictValueReq, User user) {
+        String fileName = String.format("dic_value_%d_%s_%s",
+                dictValueReq.getModelId(), dictValueReq.getType().name(), dictValueReq.getItemId())
+                + Constants.DOT + dictFileType;
+        return fileHandler.queryDictFilePath(fileName);
     }
 
 }

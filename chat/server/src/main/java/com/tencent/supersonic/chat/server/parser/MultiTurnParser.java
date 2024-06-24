@@ -1,5 +1,6 @@
 package com.tencent.supersonic.chat.server.parser;
 
+import static com.tencent.supersonic.chat.server.parser.ParserConfig.PARSER_MULTI_TURN_ENABLE;
 import com.tencent.supersonic.chat.server.agent.MultiTurnConfig;
 import com.tencent.supersonic.chat.server.persistence.repository.ChatQueryRepository;
 import com.tencent.supersonic.chat.server.pojo.ChatParseContext;
@@ -27,8 +28,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import static com.tencent.supersonic.chat.server.parser.ParserConfig.PARSER_MULTI_TURN_ENABLE;
-
 @Slf4j
 @Component
 public class MultiTurnParser implements ChatParser {
@@ -36,19 +35,19 @@ public class MultiTurnParser implements ChatParser {
     private static final Logger keyPipelineLog = LoggerFactory.getLogger("keyPipeline");
 
     private static final String instruction = ""
-                    + "#Role: You are a data product manager experienced in data requirements.\n"
-                    + "#Task: Your will be provided with current and history questions asked by a user,"
-                    + "along with their mapped schema elements(metric, dimension and value),"
-                    + "please try understanding the semantics and rewrite a question.\n"
-                    + "#Rules: "
-                    + "1.ALWAYS keep relevant entities, metrics, dimensions, values and date ranges. "
-                    + "2.ONLY respond with the rewritten question.\n"
-                    + "#Current Question: %s\n"
-                    + "#Current Mapped Schema: %s\n"
-                    + "#History Question: %s\n"
-                    + "#History Mapped Schema: %s\n"
-                    + "#History SQL: %s\n"
-                    + "#Rewritten Question: ";
+            + "#Role: You are a data product manager experienced in data requirements.\n"
+            + "#Task: Your will be provided with current and history questions asked by a user,"
+            + "along with their mapped schema elements(metric, dimension and value),"
+            + "please try understanding the semantics and rewrite a question.\n"
+            + "#Rules: "
+            + "1.ALWAYS keep relevant entities, metrics, dimensions, values and date ranges. "
+            + "2.ONLY respond with the rewritten question.\n"
+            + "#Current Question: %s\n"
+            + "#Current Mapped Schema: %s\n"
+            + "#History Question: %s\n"
+            + "#History Mapped Schema: %s\n"
+            + "#History SQL: %s\n"
+            + "#Rewritten Question: ";
 
     @Autowired
     private DifyServiceClient difyServiceClient;
@@ -81,13 +80,13 @@ public class MultiTurnParser implements ChatParser {
         String histMapStr = generateSchemaPrompt(lastParseResult.getSelectedParses().get(0).getElementMatches());
         String histSQL = lastParseResult.getSelectedParses().get(0).getSqlInfo().getCorrectS2SQL();
         String rewrittenQuery = rewriteQuery(RewriteContext.builder()
-                        .curtQuestion(currentMapResult.getQueryText())
-                        .histQuestion(lastParseResult.getQueryText())
-                        .curtSchema(curtMapStr)
-                        .histSchema(histMapStr)
-                        .histSQL(histSQL)
-                        .llmConfig(queryReq.getLlmConfig())
-                        .build());
+                .curtQuestion(currentMapResult.getQueryText())
+                .histQuestion(lastParseResult.getQueryText())
+                .curtSchema(curtMapStr)
+                .histSchema(histMapStr)
+                .histSQL(histSQL)
+                .llmConfig(queryReq.getLlmConfig())
+                .build());
         chatParseContext.setQueryText(rewrittenQuery);
         log.info("Last Query: {} Current Query: {}, Rewritten Query: {}",
                 lastParseResult.getQueryText(), currentMapResult.getQueryText(), rewrittenQuery);
@@ -143,6 +142,7 @@ public class MultiTurnParser implements ChatParser {
     @Data
     @Builder
     public static class RewriteContext {
+
         private String curtQuestion;
         private String histQuestion;
         private String curtSchema;
