@@ -12,13 +12,13 @@ import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
+import javax.crypto.spec.SecretKeySpec;
 import javax.servlet.http.HttpServletRequest;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.tencent.supersonic.auth.api.authentication.constant.UserConstants.TOKEN_ALGORITHM;
 import static com.tencent.supersonic.auth.api.authentication.constant.UserConstants.TOKEN_CREATE_TIME;
 import static com.tencent.supersonic.auth.api.authentication.constant.UserConstants.TOKEN_IS_ADMIN;
 import static com.tencent.supersonic.auth.api.authentication.constant.UserConstants.TOKEN_PREFIX;
@@ -122,6 +122,7 @@ public class UserTokenUtils {
                     .setSigningKey(tokenSecret.getBytes(StandardCharsets.UTF_8))
                     .build().parseClaimsJws(getTokenString(token)).getBody();
         } catch (Exception e) {
+            log.error("getClaims", e);
             throw new AccessException("parse user info from token failed :" + token);
         }
         return claims;
@@ -143,13 +144,12 @@ public class UserTokenUtils {
         Date expirationDate = new Date(expiration);
         String tokenSecret = getTokenSecret(appKey);
 
-        SignatureAlgorithm.valueOf(TOKEN_ALGORITHM);
         return Jwts.builder()
                 .setClaims(claims)
                 .setSubject(claims.get(TOKEN_USER_NAME).toString())
                 .setExpiration(expirationDate)
-                .signWith(SignatureAlgorithm.valueOf(TOKEN_ALGORITHM),
-                        tokenSecret.getBytes(StandardCharsets.UTF_8))
+                .signWith(new SecretKeySpec(tokenSecret.getBytes(StandardCharsets.UTF_8),
+                        SignatureAlgorithm.HS512.getJcaName()), SignatureAlgorithm.HS512)
                 .compact();
     }
 
