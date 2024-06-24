@@ -56,7 +56,7 @@ public class UserTokenUtils {
         UserWithPassword admin = new UserWithPassword("admin");
         admin.setId(1L);
         admin.setName("admin");
-        admin.setPassword("admin");
+        admin.setPassword("c3VwZXJzb25pY0BiaWNvbdktJJYWw6A3rEmBUPzbn/6DNeYnD+y3mAwDKEMS3KVT");
         admin.setDisplayName("admin");
         admin.setIsAdmin(1);
         return generateToken(admin, request);

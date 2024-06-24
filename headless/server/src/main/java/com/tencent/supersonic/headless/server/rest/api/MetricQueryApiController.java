@@ -8,7 +8,7 @@ import com.tencent.supersonic.headless.api.pojo.request.QueryMetricReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
 import com.tencent.supersonic.headless.server.service.DownloadService;
 import com.tencent.supersonic.headless.server.service.MetricService;
-import com.tencent.supersonic.headless.server.service.QueryService;
+import com.tencent.supersonic.headless.server.service.SemanticLayerService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -25,7 +25,7 @@ import javax.servlet.http.HttpServletResponse;
 public class MetricQueryApiController {
 
     @Autowired
-    private QueryService queryService;
+    private SemanticLayerService queryService;
 
     @Autowired
     private MetricService metricService;

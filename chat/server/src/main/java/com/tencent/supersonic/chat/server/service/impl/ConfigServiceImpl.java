@@ -33,10 +33,9 @@ import com.tencent.supersonic.headless.api.pojo.response.MetricResp;
 import com.tencent.supersonic.headless.server.pojo.MetaFilter;
 import com.tencent.supersonic.headless.server.service.DimensionService;
 import com.tencent.supersonic.headless.server.service.MetricService;
-import com.tencent.supersonic.headless.server.service.impl.SemanticService;
+import com.tencent.supersonic.headless.server.service.SemanticLayerService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -56,18 +55,17 @@ public class ConfigServiceImpl implements ConfigService {
     private final ChatConfigHelper chatConfigHelper;
     private final DimensionService dimensionService;
     private final MetricService metricService;
-    @Autowired
-    private SemanticService semanticService;
+    private final SemanticLayerService semanticLayerService;
 
 
     public ConfigServiceImpl(ChatConfigRepository chatConfigRepository,
-            ChatConfigHelper chatConfigHelper,
-            DimensionService dimensionService,
-            MetricService metricService) {
+            ChatConfigHelper chatConfigHelper, DimensionService dimensionService,
+            MetricService metricService, SemanticLayerService semanticLayerService) {
         this.chatConfigRepository = chatConfigRepository;
         this.chatConfigHelper = chatConfigHelper;
         this.dimensionService = dimensionService;
         this.metricService = metricService;
+        this.semanticLayerService = semanticLayerService;
     }
 
     @Override
@@ -208,7 +206,7 @@ public class ConfigServiceImpl implements ConfigService {
         }
         BeanUtils.copyProperties(chatConfigResp, chatConfigRich);
 
-        DataSetSchema dataSetSchema = semanticService.getDataSetSchema(modelId);
+        DataSetSchema dataSetSchema = semanticLayerService.getDataSetSchema(modelId);
         if (dataSetSchema == null) {
             return chatConfigRich;
         }

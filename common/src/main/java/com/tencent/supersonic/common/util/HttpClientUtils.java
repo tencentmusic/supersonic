@@ -13,6 +13,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
@@ -50,15 +52,10 @@ import org.apache.http.protocol.HttpContext;
 import org.apache.http.ssl.SSLContexts;
 import org.apache.http.util.CharsetUtils;
 import org.apache.http.util.EntityUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
 
-
+@Slf4j
 public class HttpClientUtils {
-
-    private static final Logger logger = LoggerFactory.getLogger(HttpClientUtils.class);
-
     /***
      * Encoding format. Unified sending encoding format using UTF-8
      */
@@ -114,17 +111,17 @@ public class HttpClientUtils {
             HttpRequestRetryHandler httpRequestRetryHandler = (exception, executionCount, context) -> {
                 // 如果已经重试了3次，就放弃
                 if (executionCount > 3) {
-                    logger.warn("Maximum tries reached, exception would be thrown to outer block");
+                    log.warn("Maximum tries reached, exception would be thrown to outer block");
                     return false;
                 }
                 if (exception instanceof NoHttpResponseException) {
                     // 如果服务器丢掉了连接，那么就重试
-                    logger.warn("Retry, No response from server on  {}  error: {}", executionCount,
+                    log.warn("Retry, No response from server on  {}  error: {}", executionCount,
                             exception.getMessage());
                     return true;
                 } else if (exception instanceof SocketException) {
                     // 如果服务器断开了连接，那么就重试
-                    logger.warn("Retry, No connection from server on {} error: {}", executionCount,
+                    log.warn("Retry, No connection from server on {} error: {}", executionCount,
                             exception.getMessage());
                     return true;
                 }
@@ -154,7 +151,7 @@ public class HttpClientUtils {
                     .evictIdleConnections(5L, TimeUnit.SECONDS)
                     .build();
         } catch (Exception e) {
-            logger.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
             throw new RuntimeException(e);
         }
     }
@@ -207,11 +204,11 @@ public class HttpClientUtils {
                 response = httpClient.execute(httpPost);
                 // 获取返回结果
                 HttpClientResult result = getHttpClientResult(response);
-                logger.info("uri:{}, req:{}, resp:{}", url,
+                log.info("uri:{}, req:{}, resp:{}", url,
                         "headers:" + getHeaders(httpPost) + "------params:" + params, result);
                 return result;
             } catch (Exception e) {
-                logger.error("uri:{}, req:{}", url, "headers:" + headers + "------params:" + params, e);
+                log.error("uri:{}, req:{}", url, "headers:" + headers + "------params:" + params, e);
                 throw new RuntimeException(e.getMessage());
             } finally {
                 close(httpPost, response);
@@ -288,11 +285,11 @@ public class HttpClientUtils {
 
                 // 获取返回结果
                 HttpClientResult res = getHttpClientResult(response);
-                logger.debug("GET uri:{}, req:{}, resp:{}", url,
+                log.debug("GET uri:{}, req:{}, resp:{}", url,
                         "headers:" + getHeaders(httpGet) + "------params:" + params, res);
                 return res;
             } catch (Exception e) {
-                logger.error("GET error! uri:{}, req:{}", url, "headers:" + headers + "------params:" + params, e);
+                log.error("GET error! uri:{}, req:{}", url, "headers:" + headers + "------params:" + params, e);
                 throw new RuntimeException(e.getMessage());
             } finally {
                 close(httpGet, response);
@@ -320,12 +317,12 @@ public class HttpClientUtils {
             try {
                 EntityUtils.consume(response.getEntity());
             } catch (Throwable ex) {
-                logger.error("entity close error : ", ex);
+                log.error("entity close error : ", ex);
             }
             try {
                 response.close();
             } catch (Throwable ex) {
-                logger.error("response close error : ", ex);
+                log.error("response close error : ", ex);
             }
 
         }
@@ -333,7 +330,7 @@ public class HttpClientUtils {
             try {
                 httpRequest.abort();
             } catch (Throwable ex) {
-                logger.error("httpPost abort error : ", ex);
+                log.error("httpPost abort error : ", ex);
             }
         }
     }
@@ -433,11 +430,11 @@ public class HttpClientUtils {
                 response = httpClient.execute(httpPost);
                 // 获取返回结果
                 HttpClientResult res = getHttpClientResult(response);
-                logger.info("doPostJSON uri:{}, req:{}, resp:{}", url,
+                log.info("doPostJSON uri:{}, req:{}, resp:{}", url,
                         "headers:" + getHeaders(httpPost) + "------req:" + req, res);
                 return res;
             } catch (Exception e) {
-                logger.error("doPostJSON error! uri:{}, req:{}", url, "headers:" + headers + "------req:" + req, e);
+                log.error("doPostJSON error! uri:{}, req:{}", url, "headers:" + headers + "------req:" + req, e);
                 throw new RuntimeException(e.getMessage());
             } finally {
                 close(httpPost, response);
@@ -479,12 +476,12 @@ public class HttpClientUtils {
                 // 获取返回结果
                 HttpClientResult res = getHttpClientResult(response);
 
-                logger.info("doGetJSON uri:{}, req:{}, resp:{}", url,
+                log.info("doGetJSON uri:{}, req:{}, resp:{}", url,
                         "headers:" + getHeaders(httpGet) + "------params:" + params, res);
 
                 return res;
             } catch (Exception e) {
-                logger.warn("doGetJSON error! uri:{}, req:{}", url, "headers:" + headers + "------params:" + params, e);
+                log.warn("doGetJSON error! uri:{}, req:{}", url, "headers:" + headers + "------params:" + params, e);
                 throw new RuntimeException(e.getMessage());
             } finally {
                 close(httpGet, response);
@@ -548,11 +545,11 @@ public class HttpClientUtils {
                 response = httpClient.execute(httpPost);
                 // 执行请求并获得响应结果
                 HttpClientResult res = getHttpClientResult(response);
-                logger.info("doFileUpload uri:{}, req:{}, resp:{}", url,
+                log.info("doFileUpload uri:{}, req:{}, resp:{}", url,
                         "params:" + params + ", fullFilePath:" + fullFilePath, res);
                 return res;
             } catch (Exception e) {
-                logger.error("doFileUpload error! uri:{}, req:{}", url,
+                log.error("doFileUpload error! uri:{}, req:{}", url,
                         "params:" + params + ", fullFilePath:" + fullFilePath, e);
                 throw new RuntimeException(e.getMessage());
             } finally {
@@ -563,7 +560,7 @@ public class HttpClientUtils {
                     // 释放资源
                     close(httpPost, response);
                 } catch (IOException e) {
-                    logger.error("HttpClientUtils release error!", e);
+                    log.error("HttpClientUtils release error!", e);
                 }
             }
         });
@@ -619,11 +616,11 @@ public class HttpClientUtils {
                 response = httpClient.execute(httpDelete);
 
                 HttpClientResult res = getHttpClientResult(response);
-                logger.info("doDeleteJSON uri:{}, req:{}, resp:{}", url,
+                log.info("doDeleteJSON uri:{}, req:{}, resp:{}", url,
                         "headers:" + getHeaders(httpDelete) + "------req:" + req, res);
                 return res;
             } catch (Exception e) {
-                logger.error("doDeleteJSON error! uri:{}, req:{}", url, "headers:" + headers + "------req:" + req, e);
+                log.error("doDeleteJSON error! uri:{}, req:{}", url, "headers:" + headers + "------req:" + req, e);
                 throw new RuntimeException(e.getMessage());
             } finally {
                 close(httpDelete, response);
@@ -671,11 +668,11 @@ public class HttpClientUtils {
                 httpPut.setEntity(stringEntity);
                 response = httpClient.execute(httpPut);
                 HttpClientResult res = getHttpClientResult(response);
-                logger.info("doPutJSON uri:{}, req:{}, resp:{}", url,
+                log.info("doPutJSON uri:{}, req:{}, resp:{}", url,
                         "headers:" + getHeaders(httpPut) + "------req:" + req, res);
                 return res;
             } catch (Exception e) {
-                logger.error("doPutJSON error! uri:{}, req:{}", url, "headers:" + headers + "------req:" + req, e);
+                log.error("doPutJSON error! uri:{}, req:{}", url, "headers:" + headers + "------req:" + req, e);
                 throw new RuntimeException(e.getMessage());
             } finally {
                 close(httpPut, response);

@@ -15,9 +15,14 @@ import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
 import com.tencent.supersonic.headless.api.pojo.response.TagResp;
 import com.tencent.supersonic.headless.core.utils.SqlGenerateUtils;
 import com.tencent.supersonic.headless.server.service.ModelService;
-import com.tencent.supersonic.headless.server.service.QueryService;
+import com.tencent.supersonic.headless.server.service.SemanticLayerService;
 import com.tencent.supersonic.headless.server.service.TagMetaService;
 import com.tencent.supersonic.headless.server.service.TagQueryService;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
+
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -26,10 +31,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 
 @Service
 @Slf4j
@@ -41,11 +42,11 @@ public class TagQueryServiceImpl implements TagQueryService {
     private final String tagValueAlias = "internalTagCount";
     private final String maxDateAlias = "internalMaxDate";
     private final TagMetaService tagMetaService;
-    private final QueryService queryService;
+    private final SemanticLayerService queryService;
     private final ModelService modelService;
     private final SqlGenerateUtils sqlGenerateUtils;
 
-    public TagQueryServiceImpl(TagMetaService tagMetaService, QueryService queryService,
+    public TagQueryServiceImpl(TagMetaService tagMetaService, SemanticLayerService queryService,
             ModelService modelService, SqlGenerateUtils sqlGenerateUtils) {
         this.tagMetaService = tagMetaService;
         this.queryService = queryService;

@@ -12,9 +12,9 @@ import com.tencent.supersonic.headless.api.pojo.request.QuerySqlReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
 import com.tencent.supersonic.headless.api.pojo.request.SemanticQueryReq;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
-import com.tencent.supersonic.headless.server.service.QueryService;
+import com.tencent.supersonic.headless.server.service.SemanticLayerService;
 import com.tencent.supersonic.util.DataUtils;
-import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
@@ -26,14 +26,14 @@ import static java.time.LocalDate.now;
 public class BaseTest extends BaseApplication {
 
     @Autowired
-    protected QueryService queryService;
+    protected SemanticLayerService semanticLayerService;
 
     protected SemanticQueryResp queryBySql(String sql) throws Exception {
         return queryBySql(sql, User.getFakeUser());
     }
 
     protected SemanticQueryResp queryBySql(String sql, User user) throws Exception {
-        return queryService.queryByReq(buildQuerySqlReq(sql), user);
+        return semanticLayerService.queryByReq(buildQuerySqlReq(sql), user);
     }
 
     protected SemanticQueryReq buildQuerySqlReq(String sql) {

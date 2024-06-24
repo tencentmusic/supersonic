@@ -7,7 +7,7 @@ import com.tencent.supersonic.headless.api.pojo.SemanticSchema;
 import com.tencent.supersonic.headless.chat.knowledge.DictWord;
 import com.tencent.supersonic.headless.chat.knowledge.KnowledgeBaseService;
 import com.tencent.supersonic.headless.chat.knowledge.builder.WordBuilderFactory;
-import com.tencent.supersonic.headless.server.service.SchemaService;
+import com.tencent.supersonic.headless.server.service.SemanticLayerService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 public class DictWordService {
 
     @Autowired
-    private SchemaService schemaService;
+    private SemanticLayerService semanticLayerService;
     @Autowired
     private KnowledgeBaseService knowledgeBaseService;
 
@@ -49,7 +49,7 @@ public class DictWordService {
     }
 
     public List<DictWord> getAllDictWords() {
-        SemanticSchema semanticSchema = new SemanticSchema(schemaService.getDataSetSchema());
+        SemanticSchema semanticSchema = new SemanticSchema(semanticLayerService.getDataSetSchema());
 
         List<DictWord> words = new ArrayList<>();
 

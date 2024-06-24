@@ -6,8 +6,8 @@ import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
 import com.tencent.supersonic.common.pojo.enums.QueryType;
 import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import com.tencent.supersonic.common.util.ContextUtils;
-import com.tencent.supersonic.common.util.jsqlparser.FieldExpression;
-import com.tencent.supersonic.common.util.jsqlparser.SqlSelectHelper;
+import com.tencent.supersonic.common.jsqlparser.FieldExpression;
+import com.tencent.supersonic.common.jsqlparser.SqlSelectHelper;
 import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.api.pojo.SemanticSchema;
@@ -17,7 +17,7 @@ import com.tencent.supersonic.headless.api.pojo.response.ParseResp;
 import com.tencent.supersonic.headless.chat.ChatContext;
 import com.tencent.supersonic.headless.chat.QueryContext;
 import com.tencent.supersonic.headless.chat.query.SemanticQuery;
-import com.tencent.supersonic.headless.server.service.impl.SemanticService;
+import com.tencent.supersonic.headless.server.service.SemanticLayerService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -83,7 +83,7 @@ public class ParseInfoProcessor implements ResultProcessor {
             log.error("set dimensionFilter error :", e);
         }
 
-        SemanticSchema semanticSchema = ContextUtils.getBean(SemanticService.class).getSemanticSchema();
+        SemanticSchema semanticSchema = ContextUtils.getBean(SemanticLayerService.class).getSemanticSchema();
         if (Objects.isNull(semanticSchema)) {
             return;
         }
@@ -211,7 +211,7 @@ public class ParseInfoProcessor implements ResultProcessor {
     }
 
     protected Map<String, SchemaElement> getNameToElement(Long dataSetId) {
-        SemanticSchema semanticSchema = ContextUtils.getBean(SemanticService.class).getSemanticSchema();
+        SemanticSchema semanticSchema = ContextUtils.getBean(SemanticLayerService.class).getSemanticSchema();
         List<SchemaElement> dimensions = semanticSchema.getDimensions(dataSetId);
         List<SchemaElement> metrics = semanticSchema.getMetrics(dataSetId);
 

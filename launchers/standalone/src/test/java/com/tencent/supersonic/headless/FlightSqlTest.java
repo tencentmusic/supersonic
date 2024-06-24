@@ -30,10 +30,9 @@ public class FlightSqlTest extends BaseTest {
 
     @Test
     void test01() throws Exception {
+        startServer();
         String host = flightSqlListener.getHost();
         Integer port = flightSqlListener.getPort();
-        UserHolder.setStrategy(fakeUserStrategy);
-        flightSqlListener.startServer();
         FlightSqlClient sqlClient = new FlightSqlClient(
                 FlightClient.builder(new RootAllocator(Integer.MAX_VALUE), Location.forGrpcInsecure(host, port))
                         .build());
@@ -67,10 +66,9 @@ public class FlightSqlTest extends BaseTest {
 
     @Test
     void test02() throws Exception {
+        startServer();
         String host = flightSqlListener.getHost();
         Integer port = flightSqlListener.getPort();
-        UserHolder.setStrategy(fakeUserStrategy);
-        flightSqlListener.startServer();
         FlightSqlClient sqlClient = new FlightSqlClient(
                 FlightClient.builder(new RootAllocator(Integer.MAX_VALUE), Location.forGrpcInsecure(host, port))
                         .build());
@@ -81,7 +79,8 @@ public class FlightSqlTest extends BaseTest {
         headers.insert("password", "admin");
         HeaderCallOption headerOption = new HeaderCallOption(headers);
         try {
-            FlightInfo flightInfo = sqlClient.execute("SELECT 部门, SUM(访问次数) AS 访问次数 FROM 超音数PVUV统计  GROUP BY 部门",
+            FlightInfo flightInfo = sqlClient.execute(
+                    "SELECT 部门, SUM(访问次数) AS 访问次数 FROM 超音数PVUV统计  GROUP BY 部门",
                     headerOption);
             FlightStream stream = sqlClient.getStream(flightInfo
                     .getEndpoints()
@@ -98,6 +97,13 @@ public class FlightSqlTest extends BaseTest {
             assertTrue(rowCnt > 0);
         } catch (Exception e) {
             log.error("", e);
+        }
+    }
+
+    private void startServer() {
+        if (!flightSqlListener.isRunning()) {
+            UserHolder.setStrategy(fakeUserStrategy);
+            flightSqlListener.startServer();
         }
     }
 }

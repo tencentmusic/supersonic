@@ -21,7 +21,7 @@ import com.tencent.supersonic.headless.api.pojo.request.QuerySqlReq;
 import com.tencent.supersonic.headless.api.pojo.request.SemanticQueryReq;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
 import com.tencent.supersonic.headless.server.service.FlightService;
-import com.tencent.supersonic.headless.server.service.QueryService;
+import com.tencent.supersonic.headless.server.service.SemanticLayerService;
 import com.tencent.supersonic.headless.server.utils.FlightUtils;
 import java.nio.charset.StandardCharsets;
 import java.sql.ResultSet;
@@ -84,13 +84,13 @@ public class FlightServiceImpl extends BasicFlightSqlProducer implements FlightS
     private final String nameHeaderKey = "name";
     private final String passwordHeaderKey = "password";
     private final Calendar defaultCalendar = JdbcToArrowUtils.getUtcCalendar();
-    private final QueryService queryService;
+    private final SemanticLayerService queryService;
     private final AuthenticationConfig authenticationConfig;
     private final UserService userService;
 
-    public FlightServiceImpl(QueryService queryService,
-            AuthenticationConfig authenticationConfig,
-            UserService userService) {
+    public FlightServiceImpl(SemanticLayerService queryService,
+                             AuthenticationConfig authenticationConfig,
+                             UserService userService) {
         this.queryService = queryService;
         this.authenticationConfig = authenticationConfig;
 

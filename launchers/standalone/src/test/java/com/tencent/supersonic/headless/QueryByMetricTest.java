@@ -68,6 +68,6 @@ public class QueryByMetricTest extends BaseTest {
 
     private SemanticQueryResp queryByMetric(QueryMetricReq queryMetricReq, User user) throws Exception {
         QueryStructReq convert = metricService.convert(queryMetricReq);
-        return queryService.queryByReq(convert.convert(), user);
+        return semanticLayerService.queryByReq(convert.convert(), user);
     }
 }
