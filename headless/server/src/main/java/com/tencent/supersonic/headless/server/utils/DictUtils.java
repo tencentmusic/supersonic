@@ -162,7 +162,6 @@ public class DictUtils {
         semanticQueryReq.setNeedAuth(false);
         String bizName = dictItemResp.getBizName();
         try {
-            log.info("semanticQueryReq:{}", semanticQueryReq);
             SemanticQueryResp semanticQueryResp = queryService.queryByReq(semanticQueryReq, null);
             if (Objects.isNull(semanticQueryResp) || CollectionUtils.isEmpty(semanticQueryResp.getResultList())) {
                 return lines;
