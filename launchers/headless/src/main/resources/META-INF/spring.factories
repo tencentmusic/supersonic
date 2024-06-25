@@ -4,10 +4,6 @@ com.tencent.supersonic.auth.authentication.interceptor.AuthenticationInterceptor
 com.tencent.supersonic.auth.api.authentication.adaptor.UserAdaptor=\
     com.tencent.supersonic.auth.authentication.adaptor.DefaultUserAdaptor
 
-com.tencent.supersonic.common.util.embedding.S2EmbeddingStore=\
-    com.tencent.supersonic.common.util.embedding.InMemoryS2EmbeddingStore
-
-
 com.tencent.supersonic.headless.core.parser.converter.HeadlessConverter=\
     com.tencent.supersonic.headless.core.parser.converter.DefaultDimValueConverter,\
     com.tencent.supersonic.headless.core.parser.converter.SqlVariableParseConverter,\

@@ -1,12 +1,13 @@
 package dev.langchain4j.model.embedding;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import org.apache.commons.lang3.StringUtils;
 
 /**
  * An embedding model that runs within your Java application's process.
@@ -51,7 +52,7 @@ public class S2OnnxEmbeddingModel extends AbstractInProcessEmbeddingModel {
         try {
             return new OnnxBertBiEncoder(
                     Files.newInputStream(pathToModel),
-                    vocabularyFile,
+                    vocabularyFile.openStream(),
                     PoolingMode.MEAN
             );
         } catch (IOException e) {

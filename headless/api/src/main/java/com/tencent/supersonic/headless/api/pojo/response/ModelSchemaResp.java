@@ -2,13 +2,14 @@ package com.tencent.supersonic.headless.api.pojo.response;
 
 import com.google.common.collect.Sets;
 import com.tencent.supersonic.common.pojo.ModelRela;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections.CollectionUtils;
+
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 @Data
 @AllArgsConstructor

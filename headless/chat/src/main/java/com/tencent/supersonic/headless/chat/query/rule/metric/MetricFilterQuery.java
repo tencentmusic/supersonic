@@ -70,7 +70,7 @@ public class MetricFilterQuery extends MetricSemanticQuery {
     private void addDimension(QueryStructReq queryStructReq, boolean onlyOperateInFilter) {
         if (!queryStructReq.getDimensionFilters().isEmpty()) {
             List<String> dimensions = queryStructReq.getGroups();
-            log.info("addDimension before [{}]", queryStructReq.getGroups());
+            log.debug("addDimension before [{}]", queryStructReq.getGroups());
             List<Filter> filters = new ArrayList<>(queryStructReq.getDimensionFilters());
             if (onlyOperateInFilter) {
                 filters = filters.stream().filter(filter
@@ -82,7 +82,7 @@ public class MetricFilterQuery extends MetricSemanticQuery {
                 }
             });
             queryStructReq.setGroups(dimensions);
-            log.info("addDimension after [{}]", queryStructReq.getGroups());
+            log.debug("addDimension after [{}]", queryStructReq.getGroups());
         }
     }
 

@@ -1,10 +1,5 @@
 package com.tencent.supersonic.headless;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThrows;
-import static org.junit.Assert.assertTrue;
-
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.common.pojo.Aggregator;
 import com.tencent.supersonic.common.pojo.Filter;
@@ -15,33 +10,43 @@ import com.tencent.supersonic.common.pojo.enums.QueryType;
 import com.tencent.supersonic.common.pojo.exception.InvalidPermissionException;
 import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
+import com.tencent.supersonic.headless.core.cache.QueryCache;
+import com.tencent.supersonic.headless.core.utils.ComponentFactory;
 import com.tencent.supersonic.util.DataUtils;
+import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Order;
-import org.junit.jupiter.api.Test;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
 
 @Slf4j
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class QueryByStructTest extends BaseTest {
 
     @Test
-    @Order(1)
-    public void testCacheQuery() throws Exception {
+    @Order(0)
+    public void testCacheQuery() {
         QueryStructReq queryStructReq1 = buildQueryStructReq(Arrays.asList("department"));
         QueryStructReq queryStructReq2 = buildQueryStructReq(Arrays.asList("department"));
-        queryService.queryByReq(queryStructReq1, User.getFakeUser());
-        SemanticQueryResp result2 = queryService.queryByReq(queryStructReq2, User.getFakeUser());
-        assertTrue(result2.isUseCache());
+        QueryCache queryCache = ComponentFactory.getQueryCache();
+        String cacheKey1 = queryCache.getCacheKey(queryStructReq1);
+        String cacheKey2 = queryCache.getCacheKey(queryStructReq2);
+        Assertions.assertEquals(cacheKey1, cacheKey2);
     }
 
     @Test
     public void testDetailQuery() throws Exception {
         QueryStructReq queryStructReq = buildQueryStructReq(Arrays.asList("user_name", "department"),
                 QueryType.DETAIL);
-        SemanticQueryResp semanticQueryResp = queryService.queryByReq(queryStructReq, User.getFakeUser());
+        SemanticQueryResp semanticQueryResp = semanticLayerService.queryByReq(queryStructReq, User.getFakeUser());
         assertEquals(3, semanticQueryResp.getColumns().size());
         QueryColumn firstColumn = semanticQueryResp.getColumns().get(0);
         assertEquals("用户", firstColumn.getName());
@@ -55,7 +60,7 @@ public class QueryByStructTest extends BaseTest {
     @Test
     public void testSumQuery() throws Exception {
         QueryStructReq queryStructReq = buildQueryStructReq(null);
-        SemanticQueryResp semanticQueryResp = queryService.queryByReq(queryStructReq, User.getFakeUser());
+        SemanticQueryResp semanticQueryResp = semanticLayerService.queryByReq(queryStructReq, User.getFakeUser());
         assertEquals(1, semanticQueryResp.getColumns().size());
         QueryColumn queryColumn = semanticQueryResp.getColumns().get(0);
         assertEquals("访问次数", queryColumn.getName());
@@ -65,7 +70,7 @@ public class QueryByStructTest extends BaseTest {
     @Test
     public void testGroupByQuery() throws Exception {
         QueryStructReq queryStructReq = buildQueryStructReq(Arrays.asList("department"));
-        SemanticQueryResp result = queryService.queryByReq(queryStructReq, User.getFakeUser());
+        SemanticQueryResp result = semanticLayerService.queryByReq(queryStructReq, User.getFakeUser());
         assertEquals(2, result.getColumns().size());
         QueryColumn firstColumn = result.getColumns().get(0);
         QueryColumn secondColumn = result.getColumns().get(1);
@@ -86,7 +91,7 @@ public class QueryByStructTest extends BaseTest {
         dimensionFilters.add(filter);
         queryStructReq.setDimensionFilters(dimensionFilters);
 
-        SemanticQueryResp result = queryService.queryByReq(queryStructReq, User.getFakeUser());
+        SemanticQueryResp result = semanticLayerService.queryByReq(queryStructReq, User.getFakeUser());
         assertEquals(2, result.getColumns().size());
         QueryColumn firstColumn = result.getColumns().get(0);
         QueryColumn secondColumn = result.getColumns().get(1);
@@ -98,10 +103,11 @@ public class QueryByStructTest extends BaseTest {
 
     @Test
     public void testAuthorization_model() {
-        User alice = new User(2L, "alice", "alice", "alice@email", 0);
+        User alice = DataUtils.getUserAlice();
+        setDomainNotOpenToAll();
         QueryStructReq queryStructReq1 = buildQueryStructReq(Arrays.asList("department"));
         assertThrows(InvalidPermissionException.class,
-                () -> queryService.queryByReq(queryStructReq1, alice));
+                () -> semanticLayerService.queryByReq(queryStructReq1, alice));
     }
 
     @Test
@@ -111,7 +117,7 @@ public class QueryByStructTest extends BaseTest {
         aggregator.setFunc(AggOperatorEnum.SUM);
         aggregator.setColumn("stay_hours");
         QueryStructReq queryStructReq1 = buildQueryStructReq(Arrays.asList("department"), aggregator);
-        SemanticQueryResp semanticQueryResp = queryService.queryByReq(queryStructReq1, tom);
+        SemanticQueryResp semanticQueryResp = semanticLayerService.queryByReq(queryStructReq1, tom);
         Assertions.assertEquals(false, semanticQueryResp.getColumns().get(1).getAuthorized());
         Assertions.assertEquals("******", semanticQueryResp.getResultList().get(0).get("stay_hours"));
     }
@@ -123,7 +129,7 @@ public class QueryByStructTest extends BaseTest {
         aggregator.setFunc(AggOperatorEnum.SUM);
         aggregator.setColumn("stay_hours");
         QueryStructReq queryStructReq1 = buildQueryStructReq(Arrays.asList("department"), aggregator);
-        SemanticQueryResp semanticQueryResp = queryService.queryByReq(queryStructReq1, tom);
+        SemanticQueryResp semanticQueryResp = semanticLayerService.queryByReq(queryStructReq1, tom);
         Assertions.assertNotNull(semanticQueryResp.getQueryAuthorization().getMessage());
         Assertions.assertTrue(semanticQueryResp.getSql().contains("`user_name` = 'tom'"));
     }

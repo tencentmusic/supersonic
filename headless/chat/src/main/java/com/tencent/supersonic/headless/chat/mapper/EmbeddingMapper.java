@@ -2,7 +2,7 @@ package com.tencent.supersonic.headless.chat.mapper;
 
 
 import com.tencent.supersonic.common.util.ContextUtils;
-import com.tencent.supersonic.common.util.embedding.Retrieval;
+import dev.langchain4j.store.embedding.Retrieval;
 import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementMatch;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementType;

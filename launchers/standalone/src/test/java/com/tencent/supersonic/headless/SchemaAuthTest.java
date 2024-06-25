@@ -6,9 +6,9 @@ import com.tencent.supersonic.common.pojo.enums.AuthType;
 import com.tencent.supersonic.headless.api.pojo.response.DomainResp;
 import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
 import com.tencent.supersonic.headless.api.pojo.response.DataSetResp;
-import com.tencent.supersonic.headless.server.service.DomainService;
-import com.tencent.supersonic.headless.server.service.ModelService;
-import com.tencent.supersonic.headless.server.service.DataSetService;
+import com.tencent.supersonic.headless.server.web.service.DomainService;
+import com.tencent.supersonic.headless.server.web.service.ModelService;
+import com.tencent.supersonic.headless.server.web.service.DataSetService;
 import com.tencent.supersonic.util.DataUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -30,6 +30,7 @@ public class SchemaAuthTest extends BaseTest {
     @Test
     public void test_getDomainList_alice() {
         User user = DataUtils.getUserAlice();
+        setDomainNotOpenToAll();
         List<DomainResp> domainResps = domainService.getDomainListWithAdminAuth(user);
         List<String> expectedDomainBizNames = Lists.newArrayList("supersonic", "visit_info", "singer", "singer_info");
         Assertions.assertEquals(expectedDomainBizNames,

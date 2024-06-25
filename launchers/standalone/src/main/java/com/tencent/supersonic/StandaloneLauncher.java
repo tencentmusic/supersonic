@@ -1,24 +1,21 @@
 package com.tencent.supersonic;
 
 import com.cvte.psd.conf.core.spring.annotation.EnableApolloConfig;
-import dev.langchain4j.S2LangChain4jAutoConfiguration;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.data.mongo.MongoDataAutoConfiguration;
 import org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
-@SpringBootApplication(scanBasePackages = {"com.tencent.supersonic"},
+@SpringBootApplication(scanBasePackages = {"com.tencent.supersonic", "dev.langchain4j"},
         exclude = {MongoAutoConfiguration.class, MongoDataAutoConfiguration.class})
 @EnableScheduling
 @EnableAsync
 @Configuration
 @EnableApolloConfig
-@Import(S2LangChain4jAutoConfiguration.class)
 @EnableSwagger2
 public class StandaloneLauncher {
 

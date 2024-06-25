@@ -1,6 +1,6 @@
 package com.tencent.supersonic.headless.core.adaptor.db;
 
-import com.tencent.supersonic.common.util.jsqlparser.SqlReplaceHelper;
+import com.tencent.supersonic.common.jsqlparser.SqlReplaceHelper;
 import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import com.tencent.supersonic.common.pojo.Constants;
 import java.util.HashMap;

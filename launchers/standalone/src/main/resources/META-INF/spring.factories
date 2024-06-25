@@ -25,20 +25,20 @@ com.tencent.supersonic.headless.chat.parser.llm.DataSetResolver=\
 
 ### headless-core SPIs
 
-com.tencent.supersonic.headless.core.parser.converter.HeadlessConverter=\
-    com.tencent.supersonic.headless.core.parser.converter.DefaultDimValueConverter,\
-    com.tencent.supersonic.headless.core.parser.converter.SqlVariableParseConverter,\
-    com.tencent.supersonic.headless.core.parser.converter.CalculateAggConverter,\
-    com.tencent.supersonic.headless.core.parser.converter.ParserDefaultConverter
+com.tencent.supersonic.headless.core.translator.converter.QueryConverter=\
+    com.tencent.supersonic.headless.core.translator.converter.DefaultDimValueConverter,\
+    com.tencent.supersonic.headless.core.translator.converter.SqlVariableParseConverter,\
+    com.tencent.supersonic.headless.core.translator.converter.CalculateAggConverter,\
+    com.tencent.supersonic.headless.core.translator.converter.ParserDefaultConverter
 
-com.tencent.supersonic.headless.core.planner.QueryOptimizer=\
-    com.tencent.supersonic.headless.core.planner.DetailQueryOptimizer
+com.tencent.supersonic.headless.core.translator.QueryOptimizer=\
+    com.tencent.supersonic.headless.core.translator.DetailQueryOptimizer
+
+com.tencent.supersonic.headless.core.translator.QueryParser=\
+    com.tencent.supersonic.headless.core.translator.calcite.CalciteQueryParser
 
 com.tencent.supersonic.headless.core.executor.QueryExecutor=\
     com.tencent.supersonic.headless.core.executor.JdbcExecutor
-
-com.tencent.supersonic.headless.core.parser.SqlParser=\
-    com.tencent.supersonic.headless.core.parser.calcite.CalciteSqlParser
 
 com.tencent.supersonic.headless.core.cache.QueryCache=\
     com.tencent.supersonic.headless.core.cache.DefaultQueryCache
@@ -86,5 +86,10 @@ com.tencent.supersonic.auth.api.authentication.adaptor.UserAdaptor=\
 
 ### common SPIs
 
-com.tencent.supersonic.common.util.embedding.S2EmbeddingStore=\
-    com.tencent.supersonic.common.util.embedding.InMemoryS2EmbeddingStore
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+    dev.langchain4j.spring.LangChain4jAutoConfig,\
+    dev.langchain4j.openai.spring.AutoConfig,\
+    dev.langchain4j.ollama.spring.AutoConfig,\
+    dev.langchain4j.azure.openai.spring.AutoConfig,\
+    dev.langchain4j.azure.aisearch.spring.AutoConfig,\
+    dev.langchain4j.anthropic.spring.AutoConfig
