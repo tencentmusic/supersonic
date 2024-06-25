@@ -80,7 +80,6 @@ public class DefaultUserAdaptor implements UserAdaptor {
         try {
             byte[] salt = AESEncryptionUtil.generateSalt(userDO.getName());
             userDO.setSalt(AESEncryptionUtil.getStringFromBytes(salt));
-            log.info("salt: " + userDO.getSalt());
             userDO.setPassword(AESEncryptionUtil.encrypt(userReq.getPassword(), salt));
         } catch (Exception e) {
             throw new RuntimeException("password encrypt error, please try again");
@@ -91,13 +90,8 @@ public class DefaultUserAdaptor implements UserAdaptor {
     @Override
     public String login(UserReq userReq, HttpServletRequest request) {
         UserTokenUtils userTokenUtils = ContextUtils.getBean(UserTokenUtils.class);
-        try {
-            UserWithPassword user = getUserWithPassword(userReq);
-            return userTokenUtils.generateToken(user, request);
-        } catch (Exception e) {
-            log.error("", e);
-            throw new RuntimeException("password encrypt error, please try again");
-        }
+        String appKey = userTokenUtils.getAppKey(request);
+        return login(userReq, appKey);
     }
 
     @Override
@@ -107,6 +101,7 @@ public class DefaultUserAdaptor implements UserAdaptor {
             UserWithPassword user = getUserWithPassword(userReq);
             return userTokenUtils.generateToken(user, appKey);
         } catch (Exception e) {
+            log.error("", e);
             throw new RuntimeException("password encrypt error, please try again");
         }
     }
