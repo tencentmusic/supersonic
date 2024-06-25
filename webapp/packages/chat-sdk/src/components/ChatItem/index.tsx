@@ -1,8 +1,10 @@
 import {
   ChatContextType,
   DateInfoType,
+  DimensionType,
   EntityInfoType,
   FilterItemType,
+  MetricType,
   MsgDataType,
   ParseStateEnum,
   ParseTimeCostType,
@@ -20,6 +22,16 @@ import Tools from '../Tools';
 import SqlItem from './SqlItem';
 import SimilarQuestionItem from './SimilarQuestionItem';
 import dayjs from 'dayjs';
+import {
+  IAggregationPill,
+  IDateFilterPill,
+  IGroupPill,
+  INumberFilterPill,
+  IPill,
+  ITextFilterPill,
+  ITopNPill,
+} from '../FiltersInfo/types';
+import { cloneDeep } from 'lodash';
 
 type Props = {
   msg: string;
@@ -140,7 +152,7 @@ const ChatItem: React.FC<Props> = ({
       setExecuteTip(SEARCH_EXCEPTION_TIP);
       setDataCache({ ...dataCache, [parseInfoValue!.id!]: { tip } });
     }
-    onQuestionAsked?.()
+    onQuestionAsked?.();
     if (isSwitchParseInfo) {
       setEntitySwitchLoading(false);
     } else {
@@ -177,7 +189,7 @@ const ChatItem: React.FC<Props> = ({
     ) {
       setParseTip(PARSE_ERROR_TIP);
       setParseInfo({ queryId } as any);
-      onQuestionAsked?.()
+      onQuestionAsked?.();
       return;
     }
     onUpdateMessageScroll?.();
@@ -274,6 +286,160 @@ const ChatItem: React.FC<Props> = ({
     }
   };
 
+  const handleFilterEditConfirm = async ({
+    pillData,
+    datasetId,
+    dimensions: dataSetDimensions,
+    metrics: dataSetMetrics,
+  }: {
+    pillData: IPill[];
+    datasetId: number;
+    dimensions: any[];
+    metrics: any[];
+  }) => {
+    const getFieldInfo = (field: string) => {
+      const fieldInfo =
+        [...dataSetDimensions, ...dataSetMetrics].find(item => item.bizName === field) || {};
+      return fieldInfo;
+    };
+
+    setEntitySwitchLoading(true);
+    const { dimensions: oldDimensions, metrics: oldMetrics, id, queryId } = parseInfo || {};
+    const dateFilterPill = pillData.find(item => item.type === 'date-filter') as IDateFilterPill;
+    let newDateInfo = dateInfo ? { ...dateInfo } : undefined;
+    if (dateFilterPill) {
+      newDateInfo = {
+        ...dateInfo,
+        startDate: dateFilterPill.value?.[0]!,
+        endDate: dateFilterPill.value?.[1]!,
+      };
+    } else {
+      newDateInfo = undefined;
+    }
+
+    let newDimensionFilters: FilterItemType[] = [];
+    const textFilterPills = pillData.filter(
+      item => item.type === 'text-filter'
+    ) as ITextFilterPill[];
+
+    textFilterPills.forEach(item => {
+      // 判断原dimensionFilters中是否存在，存在则替换部分值，不存在则插入
+      const oldFilter = dimensionFilters.find(filter => filter.bizName === item.field);
+      if (oldFilter) {
+        oldFilter.name = item.fieldName;
+        oldFilter.value = item.value;
+        oldFilter.operator = item.operator;
+        newDimensionFilters.push(oldFilter);
+      } else {
+        newDimensionFilters.push({
+          elementID: getFieldInfo(item.field).id,
+          name: item.fieldName,
+          value: item.value,
+          operator: item.operator,
+          bizName: item.field,
+        });
+      }
+    });
+
+    const numberFilterPills = pillData.filter(
+      item => item.type === 'number-filter'
+    ) as INumberFilterPill[];
+
+    numberFilterPills.forEach(item => {
+      // 判断原dimensionFilters中是否存在，存在则替换部分值，不存在则插入
+      const oldFilter = dimensionFilters.find(filter => filter.bizName === item.field);
+      if (oldFilter) {
+        oldFilter.name = item.fieldName;
+        oldFilter.value = item.value;
+        oldFilter.operator = item.operator;
+        newDimensionFilters.push(oldFilter);
+      } else {
+        newDimensionFilters.push({
+          elementID: getFieldInfo(item.field).id,
+          name: item.fieldName,
+          value: item.value,
+          operator: item.operator,
+          bizName: item.field,
+        });
+      }
+    });
+
+    const newDimensions: DimensionType[] = [];
+    const groupPill = pillData.find(item => item.type === 'group') as IGroupPill;
+    groupPill?.fields.forEach(field => {
+      const oldDim = oldDimensions?.find(dim => dim.bizName === field.field);
+      if (!oldDim) {
+        const dim = getFieldInfo(field.field);
+        newDimensions?.push({
+          ...dim,
+          type: 'DIMENSION',
+          dataFormatType: null,
+          dataSet: datasetId,
+          dataSetName: '',
+          model: modelId!,
+          order: null,
+          relatedSchemaElements: [],
+          schemaValueMaps: null,
+          useCnt: null,
+        });
+      } else {
+        newDimensions.push(oldDim);
+      }
+    });
+
+    const newMetrics: MetricType[] = [];
+    const aggPill = pillData.find(item => item.type === 'aggregation') as IAggregationPill;
+    aggPill?.fields.forEach(field => {
+      const oldMetric = oldMetrics?.find(metric => metric.bizName === field.field);
+      if (!oldMetric) {
+        const metric = getFieldInfo(field.field);
+        newMetrics?.push({
+          ...metric,
+          type: 'METRIC',
+          aggregator: field.operator,
+          dataFormatType: null,
+          dataSet: datasetId,
+          dataSetName: '',
+          model: modelId!,
+          order: null,
+          relatedSchemaElements: [],
+          schemaValueMaps: null,
+          useCnt: null,
+        });
+      } else {
+        newMetrics.push(oldMetric);
+      }
+    });
+
+    const topNPill = pillData.find(item => item.type === 'top-n') as ITopNPill;
+
+    const chatContextValue = {
+      dimensions: newDimensions,
+      metrics: newMetrics,
+      dateInfo: newDateInfo,
+      dimensionFilters: newDimensionFilters,
+      parseId: id,
+      limit: topNPill?.value,
+      queryId,
+    };
+    const res: any = await queryData(chatContextValue);
+    setEntitySwitchLoading(false);
+    if (res.code === 200) {
+      const resChatContext = res.data?.chatContext;
+      const contextValue = { ...(resChatContext || chatContextValue), queryId };
+      const dataValue = {
+        ...res.data,
+        chatContext: contextValue,
+        parseInfos: parseInfoOptions,
+        queryId,
+      };
+      onMsgDataLoaded?.(dataValue, true, true);
+      setData(dataValue);
+      setParseInfo(contextValue);
+      setDataCache({ ...dataCache, [id!]: { tip: '', data: dataValue } });
+    }
+  };
+
   const getEntityInfo = async (parseInfoValue: ChatContextType) => {
     const res = await queryEntityInfo(parseInfoValue.queryId, parseInfoValue.id);
     setEntityInfo(res.data);
@@ -341,6 +507,7 @@ const ChatItem: React.FC<Props> = ({
             onFiltersChange={onFiltersChange}
             onDateInfoChange={onDateInfoChange}
             onRefresh={onRefresh}
+            onQueryConditionChange={handleFilterEditConfirm}
           />
           {executeMode && (
             <>

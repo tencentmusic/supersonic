@@ -1,9 +1,11 @@
 import axios from './axiosInstance';
 import {
   ChatContextType,
+  DimensionType,
   EntityInfoType,
   HistoryMsgItemType,
   HistoryType,
+  MetricType,
   MsgDataType,
   ParseDataType,
   SearchRecommendItem,
@@ -111,7 +113,7 @@ export function updateQAFeedback(questionId: number, score: number) {
 }
 
 export function queryDimensionValues(
-  modelId: number,
+  modelId: number | undefined,
   bizName: string,
   agentId: number,
   elementID: number,
@@ -130,4 +132,8 @@ export function queryEntityInfo(queryId: number, parseId: number) {
   return axios.get<EntityInfoType>(
     `${prefix}/chat/query/getEntityInfo?queryId=${queryId}&parseId=${parseId}`
   );
+}
+
+export function getDataSetInfo(datasetId: number) {
+  return axios.get<any>(`${prefix}/semantic/dataSet/detail/${datasetId}`);
 }

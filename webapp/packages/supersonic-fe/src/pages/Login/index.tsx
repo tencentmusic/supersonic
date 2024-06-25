@@ -17,7 +17,7 @@ import { encryptPassword } from '@/utils/utils';
 import { TOKEN_KEY } from '@/services/request';
 import { ssoLogin } from '@/utils/utils';
 
-const openSSO = true;
+export const openSSO = true;
 
 const { Item } = Form;
 const LoginPage: React.FC = () => {
@@ -75,8 +75,6 @@ const LoginPage: React.FC = () => {
   async function loginWithTicket(ticket: string) {
     const { code, data } = await getUserInfoByTicket(ticket);
 
-    debugger;
-
     if (code === 200) {
       localStorage.setItem(TOKEN_KEY, data);
       const { code: queryUserCode, data: queryUserData } = await queryCurrentUser();
@@ -122,7 +120,7 @@ const LoginPage: React.FC = () => {
   // };
 
   useEffect(() => {
-    login();
+    openSSO && login();
   }, []);
 
   return openSSO ? null : (
