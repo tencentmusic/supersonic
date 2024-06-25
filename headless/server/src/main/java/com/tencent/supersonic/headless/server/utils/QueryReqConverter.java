@@ -151,19 +151,19 @@ public class QueryReqConverter {
         if (!SqlSelectFunctionHelper.hasAggregateFunction(sql)
                 || SqlSelectFunctionHelper.hasFunction(sql, "count")
                 || SqlSelectFunctionHelper.hasFunction(sql, "count_distinct")) {
-            return AggOption.NATIVE;
+            return AggOption.OUTER;
         }
         if (databaseReq.isInnerLayerNative()) {
             return AggOption.NATIVE;
         }
         if (SqlSelectHelper.hasSubSelect(sql) || SqlSelectHelper.hasWith(sql) || SqlSelectHelper.hasGroupBy(sql)) {
-            return AggOption.NATIVE;
+            return AggOption.OUTER;
         }
         long defaultAggNullCnt = metricSchemas.stream()
                 .filter(m -> Objects.isNull(m.getDefaultAgg()) || Strings.isBlank(m.getDefaultAgg())).count();
         if (defaultAggNullCnt > 0) {
             log.info("getAggOption find null defaultAgg metric set to NATIVE");
-            return AggOption.NATIVE;
+            return AggOption.OUTER;
         }
         return AggOption.DEFAULT;
     }
