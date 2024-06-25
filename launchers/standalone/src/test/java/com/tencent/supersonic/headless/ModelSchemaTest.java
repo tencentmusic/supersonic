@@ -4,7 +4,7 @@ import com.google.common.collect.Lists;
 import com.tencent.supersonic.headless.api.pojo.request.FieldRemovedReq;
 import com.tencent.supersonic.headless.api.pojo.response.MetricResp;
 import com.tencent.supersonic.headless.api.pojo.response.UnAvailableItemResp;
-import com.tencent.supersonic.headless.server.service.ModelService;
+import com.tencent.supersonic.headless.server.web.service.ModelService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

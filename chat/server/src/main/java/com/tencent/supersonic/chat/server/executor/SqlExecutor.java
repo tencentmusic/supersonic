@@ -7,7 +7,7 @@ import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.api.pojo.request.ExecuteQueryReq;
 import com.tencent.supersonic.headless.api.pojo.response.QueryResult;
-import com.tencent.supersonic.headless.server.service.ChatQueryService;
+import com.tencent.supersonic.headless.server.facade.service.ChatQueryService;
 import lombok.SneakyThrows;
 
 public class SqlExecutor implements ChatExecutor {
