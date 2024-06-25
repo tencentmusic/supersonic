@@ -21,7 +21,7 @@ import java.util.TreeSet;
 public class SemanticParseInfo {
 
     private Integer id;
-    private String queryMode;
+    private String queryMode = "PLAIN_TEXT";
     private SchemaElement dataSet;
     private Set<SchemaElement> metrics = new TreeSet<>(new SchemaNameLengthComparator());
     private Set<SchemaElement> dimensions = new LinkedHashSet();

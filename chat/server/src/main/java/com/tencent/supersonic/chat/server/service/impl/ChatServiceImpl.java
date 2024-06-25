@@ -90,10 +90,14 @@ public class ChatServiceImpl implements ChatService {
                 break;
             }
         }
-        for (ExecuteResultProcessor processor : executeResultProcessors) {
-            processor.process(chatExecuteContext, queryResult);
+
+        if (queryResult != null) {
+            for (ExecuteResultProcessor processor : executeResultProcessors) {
+                processor.process(chatExecuteContext, queryResult);
+            }
+            saveQueryResult(chatExecuteReq, queryResult);
         }
-        saveQueryResult(chatExecuteReq, queryResult);
+
         return queryResult;
     }
 

@@ -52,6 +52,10 @@ public class MultiTurnParser implements ChatParser {
 
     @Override
     public void parse(ChatParseContext chatParseContext, ParseResp parseResp) {
+        if (!chatParseContext.getAgent().containsAnyTool()) {
+            return;
+        }
+
         ParserConfig parserConfig = ContextUtils.getBean(ParserConfig.class);
         MultiTurnConfig agentMultiTurnConfig = chatParseContext.getAgent().getMultiTurnConfig();
         Boolean globalMultiTurnConfig = Boolean.valueOf(parserConfig.getParameterValue(PARSER_MULTI_TURN_ENABLE));

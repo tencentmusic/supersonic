@@ -5,7 +5,6 @@ import com.tencent.supersonic.chat.api.pojo.request.ChatExecuteReq;
 import com.tencent.supersonic.chat.api.pojo.request.ChatParseReq;
 import com.tencent.supersonic.chat.server.service.AgentService;
 import com.tencent.supersonic.chat.server.service.ChatService;
-import com.tencent.supersonic.chat.server.service.ConfigService;
 import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.api.pojo.response.ParseResp;
@@ -30,8 +29,6 @@ public class BaseTest extends BaseApplication {
 
     @Autowired
     protected ChatService chatService;
-    @Autowired
-    protected ConfigService configService;
     @Autowired
     protected AgentService agentService;
 
@@ -61,6 +58,7 @@ public class BaseTest extends BaseApplication {
                 .queryText(parseResp.getQueryText())
                 .user(DataUtils.getUser())
                 .parseId(parseInfo.getId())
+                .agentId(agentId)
                 .queryId(parseResp.getQueryId())
                 .saveAnswer(false)
                 .build();
