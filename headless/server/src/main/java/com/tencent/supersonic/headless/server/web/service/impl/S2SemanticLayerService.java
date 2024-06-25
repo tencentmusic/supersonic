@@ -18,6 +18,7 @@ import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.api.pojo.SemanticSchema;
+import com.tencent.supersonic.headless.api.pojo.SqlInfo;
 import com.tencent.supersonic.headless.api.pojo.TagTypeDefaultConfig;
 import com.tencent.supersonic.headless.api.pojo.TimeDefaultConfig;
 import com.tencent.supersonic.headless.api.pojo.request.ExplainSqlReq;
@@ -172,6 +173,10 @@ public class S2SemanticLayerService implements SemanticLayerService {
     }
 
     private QueryStatement buildQueryStatement(SemanticQueryReq semanticQueryReq, User user) throws Exception {
+        if (Objects.nonNull(semanticQueryReq.getSqlInfo()) && StringUtils.isNotBlank(
+                semanticQueryReq.getSqlInfo().getQuerySQL())) {
+            return buildSqlInfoStatement(semanticQueryReq.getSqlInfo(), semanticQueryReq.getDataSetId());
+        }
         if (semanticQueryReq instanceof QuerySqlReq) {
             return buildSqlQueryStatement((QuerySqlReq) semanticQueryReq, user);
         }
@@ -215,6 +220,15 @@ public class S2SemanticLayerService implements SemanticLayerService {
         return queryUtils.sqlParserUnion(queryMultiStructReq, sqlParsers);
     }
 
+    private QueryStatement buildSqlInfoStatement(SqlInfo sqlInfo, Long dataSetId) {
+        QueryStatement queryStatement = new QueryStatement();
+        queryStatement.setSql(sqlInfo.getQuerySQL());
+        queryStatement.setSourceId(sqlInfo.getSourceId());
+        queryStatement.setDataSetId(dataSetId);
+        queryStatement.setIsTranslated(true);
+        return queryStatement;
+    }
+
     private SchemaFilterReq buildSchemaFilterReq(SemanticQueryReq semanticQueryReq) {
         SchemaFilterReq schemaFilterReq = new SchemaFilterReq();
         schemaFilterReq.setDataSetId(semanticQueryReq.getDataSetId());
@@ -242,10 +256,12 @@ public class S2SemanticLayerService implements SemanticLayerService {
         semanticTranslator.translate(queryStatement);
 
         String sql = "";
+        String sorceId = "";
         if (Objects.nonNull(queryStatement)) {
             sql = queryStatement.getSql();
+            sorceId = queryStatement.getSourceId();
         }
-        return ExplainResp.builder().sql(sql).build();
+        return ExplainResp.builder().sql(sql).sourceId(sorceId).build();
     }
 
     private QuerySqlReq buildQuerySqlReq(QueryDimValueReq queryDimValueReq) {
@@ -270,7 +286,9 @@ public class S2SemanticLayerService implements SemanticLayerService {
         SemanticQueryResp semanticQueryResp = null;
         try {
             //1 translate
-            semanticTranslator.translate(queryStatement);
+            if (!queryStatement.isTranslated()) {
+                semanticTranslator.translate(queryStatement);
+            }
 
             //2 execute
             for (QueryExecutor queryExecutor : ComponentFactory.getQueryExecutors()) {
@@ -381,7 +399,7 @@ public class S2SemanticLayerService implements SemanticLayerService {
     }
 
     private SemanticQueryResp getQueryResultWithSchemaResp(EntityInfo entityInfo,
-                                                           DataSetSchema dataSetSchema, User user) {
+            DataSetSchema dataSetSchema, User user) {
         SemanticParseInfo semanticParseInfo = new SemanticParseInfo();
         semanticParseInfo.setDataSet(dataSetSchema.getDataSet());
         semanticParseInfo.setQueryType(QueryType.DETAIL);

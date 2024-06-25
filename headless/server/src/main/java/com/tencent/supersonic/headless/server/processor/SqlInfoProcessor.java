@@ -79,6 +79,7 @@ public class SqlInfoProcessor implements ResultProcessor {
                     sqlInfo.getS2SQL(), sqlInfo.getCorrectS2SQL(), explainSql);
         }
         sqlInfo.setQuerySQL(explainSql);
+        sqlInfo.setSourceId(explain.getSourceId());
     }
 
 }

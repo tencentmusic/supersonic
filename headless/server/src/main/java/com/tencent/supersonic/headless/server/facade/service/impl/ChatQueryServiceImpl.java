@@ -240,6 +240,7 @@ public class ChatQueryServiceImpl implements ChatQueryService {
             ExplainResp explain = semanticLayerService.explain(explainSqlReq, user);
             if (StringUtils.isNotBlank(explain.getSql())) {
                 parseInfo.getSqlInfo().setQuerySQL(explain.getSql());
+                parseInfo.getSqlInfo().setSourceId(explain.getSourceId());
             }
         } else {
             log.info("rule begin replace metrics and revise filters!");
