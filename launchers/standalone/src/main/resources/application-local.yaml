@@ -108,24 +108,24 @@ langchain4j:
 #    embedding-model:
 #      api-key: ${OPENAI_API_KEY:demo}
   in-memory:
-    embedding-model:
-      model-name: bge-small-zh
+#    embedding-model:
+#      model-name: bge-small-zh
       #modelPath: /data/model.onnx
       #vocabularyPath: /data/onnx_vocab.txt
     embedding-store:
       file-path: /tmp
 
-#  zhipu:
+  zhipu:
 #    chat-model:
 #      base-url: ${ZHIPU_API_BASE:https://open.bigmodel.cn/api/paas/v4/}
 #      api-key: ${ZHIPU_API_KEY:9f822561220238c490050e6e60896e95.XCG5eL4X8ni1CjnB}
 #      model-name: ${ZHIPU_MODEL_NAME:glm-4}
 #      temperature: ${ZHIPU_TEMPERATURE:0.0}
 #      timeout: ${ZHIPU_TIMEOUT:PT60S}
-#    embedding-model:
-#      base-url: ${ZHIPU_API_BASE:https://open.bigmodel.cn/api/paas/v4/embeddings}
-#      api-key: ${ZHIPU_API_KEY:9f822561220238c490050e6e60896e95.XCG5eL4X8ni1CjnB}
-#      model: ${ZHIPU_MODEL_NAME:embedding-2}
+    embedding-model:
+      base-url: ${ZHIPU_API_BASE:https://open.bigmodel.cn/}
+      api-key: ${ZHIPU_API_KEY:9f822561220238c490050e6e60896e95.XCG5eL4X8ni1CjnB}
+      model: ${ZHIPU_MODEL_NAME:embedding-2}
 
 
 #cas单点登录
