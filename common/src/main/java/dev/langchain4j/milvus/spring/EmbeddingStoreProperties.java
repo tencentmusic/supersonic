@@ -10,13 +10,13 @@ import lombok.Setter;
 @Setter
 class EmbeddingStoreProperties {
 
+    private String uri;
     private String host;
     private Integer port;
     private String collectionName;
     private Integer dimension;
     private IndexType indexType;
     private MetricType metricType;
-    private String uri;
     private String token;
     private String username;
     private String password;
