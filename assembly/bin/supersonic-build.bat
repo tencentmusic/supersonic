@@ -45,7 +45,7 @@ if "%service%"=="%pyllm_service%" (
 :buildJavaService
    set "model_name=%service%"
    echo "starting building supersonic-%model_name% service"
-   call mvn -f %projectDir%\launchers\%model_name% clean package -DskipTests
+   call mvn -f %projectDir% clean package -DskipTests
    IF ERRORLEVEL 1 (
       ECHO Failed to build backend Java modules.
       EXIT /B 1

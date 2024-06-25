@@ -13,7 +13,4 @@ public class Exemplar {
 
     private String sql;
 
-    private String generatedSchemaLinkingCoT;
-
-    private String generatedSchemaLinkings;
 }

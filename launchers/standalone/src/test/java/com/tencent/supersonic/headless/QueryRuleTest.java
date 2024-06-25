@@ -7,7 +7,7 @@ import com.tencent.supersonic.headless.api.pojo.enums.QueryRuleType;
 import com.tencent.supersonic.headless.api.pojo.request.QueryRuleFilter;
 import com.tencent.supersonic.headless.api.pojo.request.QueryRuleReq;
 import com.tencent.supersonic.headless.api.pojo.response.QueryRuleResp;
-import com.tencent.supersonic.headless.server.service.QueryRuleService;
+import com.tencent.supersonic.headless.server.web.service.QueryRuleService;
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.BeanUtils;

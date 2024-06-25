@@ -4,7 +4,6 @@ import com.tencent.supersonic.headless.chat.parser.ParserConfig;
 import com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMReq;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
@@ -47,14 +46,10 @@ public class PromptHelper {
         return results;
     }
 
-    public Pair<String, String> transformQuestionPrompt(LLMReq llmReq) {
-        String tableName = llmReq.getSchema().getDataSetName();
-        List<String> fieldNameList = llmReq.getSchema().getFieldNameList();
+    public String buildAugmentedQuestion(LLMReq llmReq) {
         List<LLMReq.ElementValue> linkedValues = llmReq.getLinking();
         String currentDate = llmReq.getCurrentDate();
         String priorExts = llmReq.getPriorExts();
-
-        String dbSchema = "Table: " + tableName + ", Columns = " + fieldNameList;
 
         List<String> priorLinkingList = new ArrayList<>();
         for (LLMReq.ElementValue value : linkedValues) {
@@ -65,10 +60,8 @@ public class PromptHelper {
         String currentDataStr = "当前的日期是" + currentDate;
         String linkingListStr = String.join("，", priorLinkingList);
         String termStr = buildTermStr(llmReq);
-        String questionAugmented = String.format("%s (补充信息:%s;%s;%s;%s)", llmReq.getQueryText(),
+        return String.format("%s (补充信息:%s;%s;%s;%s)", llmReq.getQueryText(),
                 linkingListStr, currentDataStr, termStr, priorExts);
-
-        return Pair.of(dbSchema, questionAugmented);
     }
 
     public String buildMetadataStr(LLMReq llmReq) {

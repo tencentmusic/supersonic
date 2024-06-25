@@ -164,6 +164,7 @@ public class QueryStructReq extends SemanticQueryReq {
         result.setDataSetId(this.getDataSetId());
         result.setModelIds(this.getModelIdSet());
         result.setParams(new ArrayList<>());
+        result.setSqlInfo(this.getSqlInfo());
         return result;
     }
 

@@ -12,6 +12,7 @@ import com.tencent.supersonic.common.pojo.enums.QueryType;
 import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
+import com.tencent.supersonic.headless.api.pojo.SqlInfo;
 import com.tencent.supersonic.headless.api.pojo.request.QueryFilter;
 import com.tencent.supersonic.headless.api.pojo.request.QueryMultiStructReq;
 import com.tencent.supersonic.headless.api.pojo.request.QuerySqlReq;
@@ -127,6 +128,7 @@ public class QueryReqBuilder {
             BeanUtils.copyProperties(queryStructReq, req);
             req.setDataSetId(parseInfo.getDataSetId());
             req.setDimensionFilters(Lists.newArrayList(dimensionFilter));
+            req.setSqlInfo(parseInfo.getSqlInfo());
             queryStructReqs.add(req);
         }
         queryMultiStructReq.setQueryStructReqs(queryStructReqs);
@@ -145,6 +147,16 @@ public class QueryReqBuilder {
         if (Objects.nonNull(querySql)) {
             querySQLReq.setSql(querySql);
         }
+        querySQLReq.setDataSetId(dataSetId);
+        return querySQLReq;
+    }
+
+    public static QuerySqlReq buildS2SQLReq(SqlInfo sqlInfo, Long dataSetId) {
+        QuerySqlReq querySQLReq = new QuerySqlReq();
+        if (Objects.nonNull(sqlInfo.getCorrectS2SQL())) {
+            querySQLReq.setSql(sqlInfo.getCorrectS2SQL());
+        }
+        querySQLReq.setSqlInfo(sqlInfo);
         querySQLReq.setDataSetId(dataSetId);
         return querySQLReq;
     }

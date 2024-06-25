@@ -43,12 +43,12 @@ public class QueryManager {
 
     private static SemanticQuery getSemanticQuery(String queryMode, SemanticQuery semanticQuery) {
         if (Objects.isNull(semanticQuery)) {
-            throw new RuntimeException("no supported queryMode :" + queryMode);
+            return null;
         }
         try {
             return semanticQuery.getClass().getDeclaredConstructor().newInstance();
         } catch (Exception e) {
-            throw new RuntimeException("no supported queryMode :" + queryMode);
+            return null;
         }
     }
 

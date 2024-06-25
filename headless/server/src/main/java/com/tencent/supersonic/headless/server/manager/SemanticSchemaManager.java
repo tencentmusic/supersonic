@@ -29,7 +29,7 @@ import com.tencent.supersonic.headless.server.pojo.yaml.MeasureYamlTpl;
 import com.tencent.supersonic.headless.server.pojo.yaml.MetricParamYamlTpl;
 import com.tencent.supersonic.headless.server.pojo.yaml.MetricTypeParamsYamlTpl;
 import com.tencent.supersonic.headless.server.pojo.yaml.MetricYamlTpl;
-import com.tencent.supersonic.headless.server.service.CatalogService;
+import com.tencent.supersonic.headless.server.web.service.CatalogService;
 import com.tencent.supersonic.headless.server.utils.DatabaseConverter;
 import java.util.ArrayList;
 import java.util.HashMap;

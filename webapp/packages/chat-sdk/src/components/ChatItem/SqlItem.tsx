@@ -96,7 +96,7 @@ const SqlItem: React.FC<Props> = ({
                 setSqlType(sqlType === 's2SQL' ? '' : 's2SQL');
               }}
             >
-              {queryMode === 'LLM_S2SQL' ? 'LLM' : 'Rule'}解析S2SQL
+              {queryMode === 'LLM_S2SQL' || queryMode === 'PLAIN_TEXT' ? 'LLM' : 'Rule'}解析S2SQL
             </div>
           )}
           {sqlInfo.correctS2SQL && (

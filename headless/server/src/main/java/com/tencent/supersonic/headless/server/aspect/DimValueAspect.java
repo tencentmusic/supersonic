@@ -17,7 +17,7 @@ import com.tencent.supersonic.headless.api.pojo.request.SemanticQueryReq;
 import com.tencent.supersonic.headless.api.pojo.response.DimensionResp;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
 import com.tencent.supersonic.headless.server.pojo.MetaFilter;
-import com.tencent.supersonic.headless.server.service.DimensionService;
+import com.tencent.supersonic.headless.server.web.service.DimensionService;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -46,7 +46,7 @@ public class DimValueAspect {
     @Autowired
     private DimensionService dimensionService;
 
-    @Around("execution(* com.tencent.supersonic.headless.server.service.SemanticLayerService.queryByReq(..))")
+    @Around("execution(* com.tencent.supersonic.headless.server.web.service.SemanticLayerService.queryByReq(..))")
     public Object handleDimValue(ProceedingJoinPoint joinPoint) throws Throwable {
         if (!dimensionValueMapEnable) {
             log.debug("dimensionValueMapEnable is false, skip dimensionValueMap");

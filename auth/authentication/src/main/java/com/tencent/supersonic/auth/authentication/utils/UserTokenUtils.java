@@ -162,7 +162,7 @@ public class UserTokenUtils {
         return secret;
     }
 
-    private String getAppKey(HttpServletRequest request) {
+    public String getAppKey(HttpServletRequest request) {
         String appKey = request.getHeader(authenticationConfig.getTokenHttpHeaderAppKey());
         if (StringUtils.isBlank(appKey)) {
             appKey = authenticationConfig.getTokenDefaultAppKey();

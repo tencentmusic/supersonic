@@ -5,6 +5,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.tencent.supersonic.common.config.EmbeddingConfig;
 import com.tencent.supersonic.common.service.EmbeddingService;
 import com.tencent.supersonic.common.util.JsonUtil;
+import com.tencent.supersonic.headless.chat.utils.ComponentFactory;
 import dev.langchain4j.data.document.Metadata;
 import dev.langchain4j.data.segment.TextSegment;
 import dev.langchain4j.store.embedding.Retrieval;
@@ -14,6 +15,8 @@ import dev.langchain4j.store.embedding.TextSegmentConvert;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.core.annotation.Order;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
 
@@ -28,22 +31,29 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Component
-public class ExemplarManager {
+@Order(0)
+public class ExemplarManager implements CommandLineRunner {
 
     private static final String EXAMPLE_JSON_FILE = "s2ql_exemplar.json";
 
     @Autowired
     private EmbeddingService embeddingService;
-    private TypeReference<List<Exemplar>> valueTypeRef = new TypeReference<List<Exemplar>>() {
-    };
 
     @Autowired
     private EmbeddingConfig embeddingConfig;
 
-    public List<Exemplar> getExemplars() throws IOException {
-        ClassPathResource resource = new ClassPathResource(EXAMPLE_JSON_FILE);
-        InputStream inputStream = resource.getInputStream();
-        return JsonUtil.INSTANCE.getObjectMapper().readValue(inputStream, valueTypeRef);
+    private TypeReference<List<Exemplar>> valueTypeRef = new TypeReference<List<Exemplar>>() {
+    };
+
+    @Override
+    public void run(String... args) {
+        try {
+            if (ComponentFactory.getLLMProxy() instanceof JavaLLMProxy) {
+                loadDefaultExemplars();
+            }
+        } catch (Exception e) {
+            log.error("Failed to init examples", e);
+        }
     }
 
     public void addExemplars(List<Exemplar> exemplars, String collectionName) {
@@ -79,4 +89,13 @@ public class ExemplarManager {
         }
         return result;
     }
+
+    private void loadDefaultExemplars() throws IOException {
+        ClassPathResource resource = new ClassPathResource(EXAMPLE_JSON_FILE);
+        InputStream inputStream = resource.getInputStream();
+        List<Exemplar> examples = JsonUtil.INSTANCE.getObjectMapper().readValue(inputStream, valueTypeRef);
+        String collectionName = embeddingConfig.getText2sqlCollectionName();
+        addExemplars(examples, collectionName);
+    }
+
 }

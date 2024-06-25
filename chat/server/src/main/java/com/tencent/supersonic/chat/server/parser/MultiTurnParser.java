@@ -14,7 +14,7 @@ import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
 import com.tencent.supersonic.headless.api.pojo.request.QueryReq;
 import com.tencent.supersonic.headless.api.pojo.response.MapResp;
 import com.tencent.supersonic.headless.api.pojo.response.ParseResp;
-import com.tencent.supersonic.headless.server.service.ChatQueryService;
+import com.tencent.supersonic.headless.server.facade.service.ChatQueryService;
 import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.input.Prompt;
@@ -52,6 +52,10 @@ public class MultiTurnParser implements ChatParser {
 
     @Override
     public void parse(ChatParseContext chatParseContext, ParseResp parseResp) {
+        if (!chatParseContext.getAgent().containsAnyTool()) {
+            return;
+        }
+
         ParserConfig parserConfig = ContextUtils.getBean(ParserConfig.class);
         MultiTurnConfig agentMultiTurnConfig = chatParseContext.getAgent().getMultiTurnConfig();
         Boolean globalMultiTurnConfig = Boolean.valueOf(parserConfig.getParameterValue(PARSER_MULTI_TURN_ENABLE));

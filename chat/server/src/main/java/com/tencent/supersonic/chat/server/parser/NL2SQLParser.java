@@ -9,7 +9,7 @@ import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.api.pojo.request.QueryFilter;
 import com.tencent.supersonic.headless.api.pojo.request.QueryReq;
 import com.tencent.supersonic.headless.api.pojo.response.ParseResp;
-import com.tencent.supersonic.headless.server.service.ChatQueryService;
+import com.tencent.supersonic.headless.server.facade.service.ChatQueryService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.CollectionUtils;
 import java.util.List;
@@ -23,14 +23,11 @@ public class NL2SQLParser implements ChatParser {
 
     @Override
     public void parse(ChatParseContext chatParseContext, ParseResp parseResp) {
-        if (!chatParseContext.enableNL2SQL()) {
+        if (!chatParseContext.enableNL2SQL() || checkSkip(parseResp)) {
             return;
         }
-        if (checkSkip(parseResp)) {
-            return;
-        }
-        QueryReq queryReq = QueryReqConverter.buildText2SqlQueryReq(chatParseContext);
 
+        QueryReq queryReq = QueryReqConverter.buildText2SqlQueryReq(chatParseContext);
         ChatQueryService chatQueryService = ContextUtils.getBean(ChatQueryService.class);
         ParseResp text2SqlParseResp = chatQueryService.performParsing(queryReq);
         if (!ParseResp.ParseState.FAILED.equals(text2SqlParseResp.getState())) {
