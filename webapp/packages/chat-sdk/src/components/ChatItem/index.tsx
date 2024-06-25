@@ -123,7 +123,7 @@ const ChatItem: React.FC<Props> = ({
       setExecuteLoading(true);
     }
     try {
-      const res: any = await chatExecute(msg, conversationId!, parseInfoValue);
+      const res: any = await chatExecute(msg, conversationId!, parseInfoValue, agentId);
       const valid = updateData(res);
       onMsgDataLoaded?.(
         {
