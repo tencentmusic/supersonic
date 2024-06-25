@@ -9,7 +9,7 @@ import com.tencent.supersonic.headless.api.pojo.RelatedSchemaElement;
 import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.api.pojo.response.QueryResult;
-import com.tencent.supersonic.headless.server.web.service.SemanticLayerService;
+import com.tencent.supersonic.headless.server.facade.service.SemanticLayerService;
 import org.springframework.util.CollectionUtils;
 
 import java.util.Comparator;

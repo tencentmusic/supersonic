@@ -47,7 +47,7 @@ public class ChatServiceImpl implements ChatService {
     @Autowired
     private ChatQueryService chatQueryService;
     @Autowired
-    private RetrieveService searchService;
+    private RetrieveService retrieveService;
     @Autowired
     private SimilarQueryManager similarQueryManager;
     private List<ChatParser> chatParsers = ComponentFactory.getChatParsers();
@@ -59,7 +59,7 @@ public class ChatServiceImpl implements ChatService {
     public List<SearchResult> search(ChatParseReq chatParseReq) {
         ChatParseContext chatParseContext = buildParseContext(chatParseReq);
         QueryReq queryReq = QueryReqConverter.buildText2SqlQueryReq(chatParseContext);
-        return searchService.search(queryReq);
+        return retrieveService.retrieve(queryReq);
     }
 
     @Override

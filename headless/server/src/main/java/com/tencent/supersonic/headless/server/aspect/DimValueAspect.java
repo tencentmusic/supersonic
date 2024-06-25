@@ -46,7 +46,7 @@ public class DimValueAspect {
     @Autowired
     private DimensionService dimensionService;
 
-    @Around("execution(* com.tencent.supersonic.headless.server.web.service.SemanticLayerService.queryByReq(..))")
+    @Around("execution(* com.tencent.supersonic.headless.server.facade.service.SemanticLayerService.queryByReq(..))")
     public Object handleDimValue(ProceedingJoinPoint joinPoint) throws Throwable {
         if (!dimensionValueMapEnable) {
             log.debug("dimensionValueMapEnable is false, skip dimensionValueMap");

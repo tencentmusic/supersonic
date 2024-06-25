@@ -24,14 +24,14 @@ public class ChatQueryApiController {
     private ChatQueryService chatQueryService;
 
     @Autowired
-    private RetrieveService searchService;
+    private RetrieveService retrieveService;
 
     @PostMapping("/chat/search")
     public Object search(@RequestBody QueryReq queryReq,
                         HttpServletRequest request,
                         HttpServletResponse response) throws Exception {
         queryReq.setUser(UserHolder.findUser(request, response));
-        return searchService.search(queryReq);
+        return retrieveService.retrieve(queryReq);
     }
 
     @PostMapping("/chat/map")

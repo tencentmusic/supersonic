@@ -11,13 +11,13 @@ import java.util.List;
 
 public interface CollectService {
 
-    Boolean createCollectionIndicators(User user, CollectDO collectDO);
+    Boolean collect(User user, CollectDO collectDO);
 
-    Boolean deleteCollectionIndicators(User user, Long id);
+    Boolean unCollect(User user, Long id);
 
-    Boolean deleteCollectionIndicators(User user, CollectDO collectDO);
+    Boolean unCollect(User user, CollectDO collectDO);
 
-    List<CollectDO> getCollectList(String username);
+    List<CollectDO> getCollectionList(String username);
 
-    List<CollectDO> getCollectList(String username, TypeEnums typeEnums);
+    List<CollectDO> getCollectionList(String username, TypeEnums typeEnums);
 }

@@ -1,4 +1,4 @@
-package com.tencent.supersonic.headless.server.web.service.impl;
+package com.tencent.supersonic.headless.server.facade.service.impl;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -17,12 +17,10 @@ import com.tencent.supersonic.headless.api.pojo.QueryParam;
 import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
-import com.tencent.supersonic.headless.api.pojo.SemanticSchema;
 import com.tencent.supersonic.headless.api.pojo.SqlInfo;
 import com.tencent.supersonic.headless.api.pojo.TagTypeDefaultConfig;
 import com.tencent.supersonic.headless.api.pojo.TimeDefaultConfig;
 import com.tencent.supersonic.headless.api.pojo.request.ExplainSqlReq;
-import com.tencent.supersonic.headless.api.pojo.request.ItemUseReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryDimValueReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryFilter;
 import com.tencent.supersonic.headless.api.pojo.request.QueryMultiStructReq;
@@ -32,26 +30,25 @@ import com.tencent.supersonic.headless.api.pojo.request.SchemaFilterReq;
 import com.tencent.supersonic.headless.api.pojo.request.SemanticQueryReq;
 import com.tencent.supersonic.headless.api.pojo.response.DimensionResp;
 import com.tencent.supersonic.headless.api.pojo.response.ExplainResp;
-import com.tencent.supersonic.headless.api.pojo.response.ItemUseResp;
+import com.tencent.supersonic.headless.api.pojo.response.ItemResp;
 import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticSchemaResp;
 import com.tencent.supersonic.headless.chat.utils.QueryReqBuilder;
 import com.tencent.supersonic.headless.core.cache.QueryCache;
 import com.tencent.supersonic.headless.core.executor.QueryExecutor;
+import com.tencent.supersonic.headless.core.pojo.QueryStatement;
 import com.tencent.supersonic.headless.core.translator.SemanticTranslator;
 import com.tencent.supersonic.headless.core.translator.calcite.s2sql.SemanticModel;
-import com.tencent.supersonic.headless.core.pojo.QueryStatement;
 import com.tencent.supersonic.headless.core.utils.ComponentFactory;
 import com.tencent.supersonic.headless.server.annotation.S2DataPermission;
+import com.tencent.supersonic.headless.server.facade.service.SemanticLayerService;
 import com.tencent.supersonic.headless.server.manager.SemanticSchemaManager;
-import com.tencent.supersonic.headless.server.web.service.CatalogService;
-import com.tencent.supersonic.headless.server.web.service.DataSetService;
-import com.tencent.supersonic.headless.server.web.service.SchemaService;
-import com.tencent.supersonic.headless.server.web.service.SemanticLayerService;
 import com.tencent.supersonic.headless.server.utils.QueryReqConverter;
 import com.tencent.supersonic.headless.server.utils.QueryUtils;
 import com.tencent.supersonic.headless.server.utils.StatUtils;
+import com.tencent.supersonic.headless.server.web.service.DataSetService;
+import com.tencent.supersonic.headless.server.web.service.SchemaService;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
@@ -76,7 +73,6 @@ public class S2SemanticLayerService implements SemanticLayerService {
     private StatUtils statUtils;
     private final QueryUtils queryUtils;
     private final QueryReqConverter queryReqConverter;
-    private final CatalogService catalog;
     private final SemanticSchemaManager semanticSchemaManager;
     private final DataSetService dataSetService;
     private final SchemaService schemaService;
@@ -86,7 +82,6 @@ public class S2SemanticLayerService implements SemanticLayerService {
             StatUtils statUtils,
             QueryUtils queryUtils,
             QueryReqConverter queryReqConverter,
-            CatalogService catalog,
             SemanticSchemaManager semanticSchemaManager,
             DataSetService dataSetService,
             SchemaService schemaService,
@@ -94,24 +89,14 @@ public class S2SemanticLayerService implements SemanticLayerService {
         this.statUtils = statUtils;
         this.queryUtils = queryUtils;
         this.queryReqConverter = queryReqConverter;
-        this.catalog = catalog;
         this.semanticSchemaManager = semanticSchemaManager;
         this.dataSetService = dataSetService;
         this.schemaService = schemaService;
         this.semanticTranslator = semanticTranslator;
     }
 
-    public SemanticSchema getSemanticSchema() {
-        return new SemanticSchema(schemaService.getDataSetSchema());
-    }
-
     public DataSetSchema getDataSetSchema(Long id) {
         return schemaService.getDataSetSchema(id);
-    }
-
-    @Override
-    public List<DataSetSchema> getDataSetSchema() {
-        return schemaService.getDataSetSchema();
     }
 
     @Override
@@ -163,7 +148,7 @@ public class S2SemanticLayerService implements SemanticLayerService {
             querySqlReq.setDataSetId(dataSetId);
         }
         SchemaFilterReq filter = buildSchemaFilterReq(querySqlReq);
-        SemanticSchemaResp semanticSchemaResp = catalog.fetchSemanticSchema(filter);
+        SemanticSchemaResp semanticSchemaResp = schemaService.fetchSemanticSchema(filter);
         QueryStatement queryStatement = queryReqConverter.convert(querySqlReq, semanticSchemaResp);
         queryStatement.setModelIds(querySqlReq.getModelIds());
         queryStatement.setEnableOptimize(queryUtils.enableOptimize());
@@ -191,7 +176,7 @@ public class S2SemanticLayerService implements SemanticLayerService {
 
     private QueryStatement buildStructQueryStatement(QueryStructReq queryStructReq) {
         SchemaFilterReq filter = buildSchemaFilterReq(queryStructReq);
-        SemanticSchemaResp semanticSchemaResp = catalog.fetchSemanticSchema(filter);
+        SemanticSchemaResp semanticSchemaResp = schemaService.fetchSemanticSchema(filter);
         QueryStatement queryStatement = new QueryStatement();
         QueryParam queryParam = new QueryParam();
         queryReqConverter.convert(queryStructReq, queryParam);
@@ -244,12 +229,6 @@ public class S2SemanticLayerService implements SemanticLayerService {
     }
 
     @Override
-    @SneakyThrows
-    public List<ItemUseResp> getStatInfo(ItemUseReq itemUseReq) {
-        return catalog.getStatInfo(itemUseReq);
-    }
-
-    @Override
     public <T> ExplainResp explain(ExplainSqlReq<T> explainSqlReq, User user) throws Exception {
         T queryReq = explainSqlReq.getQueryReq();
         QueryStatement queryStatement = buildQueryStatement((SemanticQueryReq) queryReq, user);
@@ -264,10 +243,14 @@ public class S2SemanticLayerService implements SemanticLayerService {
         return ExplainResp.builder().sql(sql).sourceId(sorceId).build();
     }
 
+    public List<ItemResp> getDomainDataSetTree() {
+        return schemaService.getDomainDataSetTree();
+    }
+
     private QuerySqlReq buildQuerySqlReq(QueryDimValueReq queryDimValueReq) {
         QuerySqlReq querySqlReq = new QuerySqlReq();
-        List<ModelResp> modelResps = catalog.getModelList(Lists.newArrayList(queryDimValueReq.getModelId()));
-        DimensionResp dimensionResp = catalog.getDimension(queryDimValueReq.getDimensionBizName(),
+        List<ModelResp> modelResps = schemaService.getModelList(Lists.newArrayList(queryDimValueReq.getModelId()));
+        DimensionResp dimensionResp = schemaService.getDimension(queryDimValueReq.getDimensionBizName(),
                 queryDimValueReq.getModelId());
         ModelResp modelResp = modelResps.get(0);
         String sql = String.format("select distinct %s from %s", dimensionResp.getName(), modelResp.getName());
