@@ -1,12 +1,13 @@
 package com.tencent.supersonic.auth.api.authentication.config;
 
 
-import java.util.Arrays;
-import java.util.Map;
-import java.util.stream.Collectors;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
+
+import java.util.Arrays;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Data
 @Configuration
@@ -24,7 +25,8 @@ public class AuthenticationConfig {
     @Value("${authentication.token.default.appKey:supersonic}")
     private String tokenDefaultAppKey;
 
-    @Value("${authentication.token.appSecret:supersonic:secret}")
+    @Value("${authentication.token.appSecret:supersonic:WIaO9YRRVt+7QtpPvyWsARFngnEcbaKBk"
+            + "783uGFwMrbJBaochsqCH62L4Kijcb0sZCYoSsiKGV/zPml5MnZ3uQ==}")
     private String tokenAppSecret;
 
     @Value("${authentication.token.http.header.key:Authorization}")

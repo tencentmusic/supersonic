@@ -14,10 +14,11 @@ import com.tencent.supersonic.auth.authentication.utils.CasServiceUtil;
 import com.tencent.supersonic.auth.authentication.utils.UserTokenUtils;
 import com.tencent.supersonic.auth.authentication.utils.XmlUtils;
 import com.tencent.supersonic.common.util.ContextUtils;
-import javax.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
+
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -97,6 +98,7 @@ public class DefaultUserAdaptor implements UserAdaptor {
             UserWithPassword user = getUserWithPassword(userReq);
             return userTokenUtils.generateToken(user, request);
         } catch (Exception e) {
+            log.error("", e);
             throw new RuntimeException("password encrypt error, please try again");
         }
     }
