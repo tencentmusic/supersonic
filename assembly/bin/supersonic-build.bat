@@ -2,7 +2,8 @@
 setlocal enabledelayedexpansion
 chcp 65001
 
-call supersonic-common.bat %*
+set "sbinDir=%~dp0"
+call %sbinDir%/supersonic-common.bat %*
 
 set "service=%~1"
 
