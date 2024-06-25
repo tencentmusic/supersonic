@@ -136,7 +136,7 @@ public abstract class BaseMatchStrategy<T> implements MatchStrategy<T> {
                 }
                 return false;
             }).collect(Collectors.toList());
-            log.info("terms filter by dataSetId:{}", dataSetIds);
+            log.debug("terms filter by dataSetId:{}", dataSetIds);
             logTerms(terms);
         }
         return terms;

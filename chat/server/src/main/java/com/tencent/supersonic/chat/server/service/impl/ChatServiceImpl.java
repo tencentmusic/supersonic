@@ -30,7 +30,7 @@ import com.tencent.supersonic.headless.api.pojo.response.ParseResp;
 import com.tencent.supersonic.headless.api.pojo.response.QueryResult;
 import com.tencent.supersonic.headless.api.pojo.response.SearchResult;
 import com.tencent.supersonic.headless.server.service.ChatQueryService;
-import com.tencent.supersonic.headless.server.service.SearchService;
+import com.tencent.supersonic.headless.server.service.RetrieveService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -47,7 +47,7 @@ public class ChatServiceImpl implements ChatService {
     @Autowired
     private ChatQueryService chatQueryService;
     @Autowired
-    private SearchService searchService;
+    private RetrieveService searchService;
     @Autowired
     private SimilarQueryManager similarQueryManager;
     private List<ChatParser> chatParsers = ComponentFactory.getChatParsers();

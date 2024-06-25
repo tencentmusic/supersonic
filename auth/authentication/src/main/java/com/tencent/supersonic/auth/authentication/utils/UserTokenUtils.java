@@ -1,6 +1,24 @@
 package com.tencent.supersonic.auth.authentication.utils;
 
-import static com.tencent.supersonic.auth.api.authentication.constant.UserConstants.TOKEN_ALGORITHM;
+import com.tencent.supersonic.auth.api.authentication.config.AuthenticationConfig;
+import com.tencent.supersonic.auth.api.authentication.pojo.User;
+import com.tencent.supersonic.auth.api.authentication.pojo.UserWithPassword;
+import com.tencent.supersonic.common.pojo.exception.AccessException;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
+import org.springframework.stereotype.Component;
+
+import javax.crypto.spec.SecretKeySpec;
+import javax.servlet.http.HttpServletRequest;
+import java.nio.charset.StandardCharsets;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+
 import static com.tencent.supersonic.auth.api.authentication.constant.UserConstants.TOKEN_CREATE_TIME;
 import static com.tencent.supersonic.auth.api.authentication.constant.UserConstants.TOKEN_IS_ADMIN;
 import static com.tencent.supersonic.auth.api.authentication.constant.UserConstants.TOKEN_PREFIX;
@@ -9,22 +27,6 @@ import static com.tencent.supersonic.auth.api.authentication.constant.UserConsta
 import static com.tencent.supersonic.auth.api.authentication.constant.UserConstants.TOKEN_USER_ID;
 import static com.tencent.supersonic.auth.api.authentication.constant.UserConstants.TOKEN_USER_NAME;
 import static com.tencent.supersonic.auth.api.authentication.constant.UserConstants.TOKEN_USER_PASSWORD;
-
-import com.tencent.supersonic.auth.api.authentication.config.AuthenticationConfig;
-import com.tencent.supersonic.auth.api.authentication.pojo.User;
-import com.tencent.supersonic.auth.api.authentication.pojo.UserWithPassword;
-import com.tencent.supersonic.common.pojo.exception.AccessException;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
-import java.nio.charset.StandardCharsets;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import javax.servlet.http.HttpServletRequest;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
@@ -56,7 +58,7 @@ public class UserTokenUtils {
         UserWithPassword admin = new UserWithPassword("admin");
         admin.setId(1L);
         admin.setName("admin");
-        admin.setPassword("admin");
+        admin.setPassword("c3VwZXJzb25pY0BiaWNvbdktJJYWw6A3rEmBUPzbn/6DNeYnD+y3mAwDKEMS3KVT");
         admin.setDisplayName("admin");
         admin.setIsAdmin(1);
         return generateToken(admin, request);
@@ -118,13 +120,18 @@ public class UserTokenUtils {
             String tokenSecret = getTokenSecret(appKey);
             claims = Jwts.parser()
                     .setSigningKey(tokenSecret.getBytes(StandardCharsets.UTF_8))
-                    .parseClaimsJws(token.startsWith(TOKEN_PREFIX)
-                            ? token.substring(token.indexOf(TOKEN_PREFIX) + TOKEN_PREFIX.length()).trim() :
-                            token.trim()).getBody();
+                    .build().parseClaimsJws(getTokenString(token)).getBody();
         } catch (Exception e) {
+            log.error("getClaims", e);
             throw new AccessException("parse user info from token failed :" + token);
         }
         return claims;
+    }
+
+    @NotNull
+    private static String getTokenString(String token) {
+        return token.startsWith(TOKEN_PREFIX) ? token.substring(token.indexOf(TOKEN_PREFIX)
+                + TOKEN_PREFIX.length()).trim() : token.trim();
     }
 
     private String generate(Map<String, Object> claims, String appKey) {
@@ -137,13 +144,12 @@ public class UserTokenUtils {
         Date expirationDate = new Date(expiration);
         String tokenSecret = getTokenSecret(appKey);
 
-        SignatureAlgorithm.valueOf(TOKEN_ALGORITHM);
         return Jwts.builder()
                 .setClaims(claims)
                 .setSubject(claims.get(TOKEN_USER_NAME).toString())
                 .setExpiration(expirationDate)
-                .signWith(SignatureAlgorithm.valueOf(TOKEN_ALGORITHM),
-                        tokenSecret.getBytes(StandardCharsets.UTF_8))
+                .signWith(new SecretKeySpec(tokenSecret.getBytes(StandardCharsets.UTF_8),
+                        SignatureAlgorithm.HS512.getJcaName()), SignatureAlgorithm.HS512)
                 .compact();
     }
 

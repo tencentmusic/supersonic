@@ -107,3 +107,10 @@ langchain4j:
 #    embedding-model:
 #      base-url: ${OPENAI_API_BASE:https://api.openai.com/v1}
 #      api-key: ${OPENAI_API_KEY:demo}
+  in-memory:
+    embedding-model:
+      model-name: bge-small-zh
+      #modelPath: /data/model.onnx
+      #vocabularyPath: /data/onnx_vocab.txt
+    embedding-store:
+      file-path: /tmp

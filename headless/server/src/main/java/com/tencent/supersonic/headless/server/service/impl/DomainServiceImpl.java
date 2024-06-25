@@ -127,7 +127,7 @@ public class DomainServiceImpl implements DomainService {
         }
         if (authTypeEnum.equals(AuthType.VISIBLE)) {
             domainWithAuth = domainResps.stream()
-                    .filter(domainResp -> checkDataSeterPermission(orgIds, user, domainResp))
+                    .filter(domainResp -> checkViewPermission(orgIds, user, domainResp))
                     .collect(Collectors.toList());
         }
         List<Long> domainIds = domainWithAuth.stream().map(DomainResp::getId)
@@ -255,26 +255,20 @@ public class DomainServiceImpl implements DomainService {
         return false;
     }
 
-    private boolean checkDataSeterPermission(Set<String> orgIds, User user, DomainResp domainDesc) {
-        List<String> admins = domainDesc.getAdmins();
-        List<String> viewers = domainDesc.getViewers();
-        List<String> adminOrgs = domainDesc.getAdminOrgs();
-        List<String> viewOrgs = domainDesc.getViewOrgs();
-        if (user.isSuperAdmin()) {
+    private boolean checkViewPermission(Set<String> orgIds, User user, DomainResp domainResp) {
+        if (checkAdminPermission(orgIds, user, domainResp)) {
             return true;
         }
-        if (admins.contains(user.getName())
-                || viewers.contains(user.getName())
-                || domainDesc.getCreatedBy().equals(user.getName())) {
+        List<String> viewers = domainResp.getViewers();
+        List<String> viewOrgs = domainResp.getViewOrgs();
+        if (domainResp.openToAll()) {
             return true;
         }
-        if (CollectionUtils.isEmpty(adminOrgs) && CollectionUtils.isEmpty(viewOrgs)) {
+        if (viewers.contains(user.getName())) {
+            return true;
+        }
+        if (CollectionUtils.isEmpty(viewOrgs)) {
             return false;
-        }
-        for (String orgId : orgIds) {
-            if (adminOrgs.contains(orgId)) {
-                return true;
-            }
         }
         for (String orgId : orgIds) {
             if (viewOrgs.contains(orgId)) {

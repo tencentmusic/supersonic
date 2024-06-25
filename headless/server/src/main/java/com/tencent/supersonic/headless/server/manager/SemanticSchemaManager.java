@@ -7,19 +7,19 @@ import com.tencent.supersonic.headless.api.pojo.enums.TagDefineType;
 import com.tencent.supersonic.headless.api.pojo.response.DatabaseResp;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticSchemaResp;
 import com.tencent.supersonic.headless.api.pojo.response.TagResp;
-import com.tencent.supersonic.headless.core.parser.calcite.s2sql.Constants;
-import com.tencent.supersonic.headless.core.parser.calcite.s2sql.DataSource;
-import com.tencent.supersonic.headless.core.parser.calcite.s2sql.DataType;
-import com.tencent.supersonic.headless.core.parser.calcite.s2sql.Dimension;
-import com.tencent.supersonic.headless.core.parser.calcite.s2sql.DimensionTimeTypeParams;
-import com.tencent.supersonic.headless.core.parser.calcite.s2sql.Identify;
-import com.tencent.supersonic.headless.core.parser.calcite.s2sql.JoinRelation;
-import com.tencent.supersonic.headless.core.parser.calcite.s2sql.Materialization.TimePartType;
-import com.tencent.supersonic.headless.core.parser.calcite.s2sql.Measure;
-import com.tencent.supersonic.headless.core.parser.calcite.s2sql.Metric;
-import com.tencent.supersonic.headless.core.parser.calcite.s2sql.MetricTypeParams;
-import com.tencent.supersonic.headless.core.parser.calcite.s2sql.SemanticModel;
-import com.tencent.supersonic.headless.core.parser.calcite.schema.SemanticSchema;
+import com.tencent.supersonic.headless.core.translator.calcite.s2sql.Constants;
+import com.tencent.supersonic.headless.core.translator.calcite.s2sql.DataSource;
+import com.tencent.supersonic.headless.core.translator.calcite.s2sql.DataType;
+import com.tencent.supersonic.headless.core.translator.calcite.s2sql.Dimension;
+import com.tencent.supersonic.headless.core.translator.calcite.s2sql.DimensionTimeTypeParams;
+import com.tencent.supersonic.headless.core.translator.calcite.s2sql.Identify;
+import com.tencent.supersonic.headless.core.translator.calcite.s2sql.JoinRelation;
+import com.tencent.supersonic.headless.core.translator.calcite.s2sql.Materialization.TimePartType;
+import com.tencent.supersonic.headless.core.translator.calcite.s2sql.Measure;
+import com.tencent.supersonic.headless.core.translator.calcite.s2sql.Metric;
+import com.tencent.supersonic.headless.core.translator.calcite.s2sql.MetricTypeParams;
+import com.tencent.supersonic.headless.core.translator.calcite.s2sql.SemanticModel;
+import com.tencent.supersonic.headless.core.translator.calcite.schema.SemanticSchema;
 import com.tencent.supersonic.headless.server.pojo.yaml.DataModelYamlTpl;
 import com.tencent.supersonic.headless.server.pojo.yaml.DimensionTimeTypeParamsTpl;
 import com.tencent.supersonic.headless.server.pojo.yaml.DimensionYamlTpl;
@@ -29,7 +29,7 @@ import com.tencent.supersonic.headless.server.pojo.yaml.MeasureYamlTpl;
 import com.tencent.supersonic.headless.server.pojo.yaml.MetricParamYamlTpl;
 import com.tencent.supersonic.headless.server.pojo.yaml.MetricTypeParamsYamlTpl;
 import com.tencent.supersonic.headless.server.pojo.yaml.MetricYamlTpl;
-import com.tencent.supersonic.headless.server.service.Catalog;
+import com.tencent.supersonic.headless.server.service.CatalogService;
 import com.tencent.supersonic.headless.server.utils.DatabaseConverter;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -51,9 +51,9 @@ import org.springframework.util.CollectionUtils;
 @Service
 public class SemanticSchemaManager {
 
-    private final Catalog catalog;
+    private final CatalogService catalog;
 
-    public SemanticSchemaManager(Catalog catalog) {
+    public SemanticSchemaManager(CatalogService catalog) {
         this.catalog = catalog;
     }
 

@@ -13,7 +13,7 @@ import com.tencent.supersonic.headless.chat.QueryContext;
 import com.tencent.supersonic.headless.chat.query.QueryManager;
 import com.tencent.supersonic.headless.chat.query.SemanticQuery;
 import com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMSqlQuery;
-import com.tencent.supersonic.headless.server.service.QueryService;
+import com.tencent.supersonic.headless.server.service.SemanticLayerService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -65,7 +65,7 @@ public class SqlInfoProcessor implements ResultProcessor {
         }
         semanticQuery.setParseInfo(parseInfo);
         SemanticQueryReq semanticQueryReq = semanticQuery.buildSemanticQueryReq();
-        QueryService queryService = ContextUtils.getBean(QueryService.class);
+        SemanticLayerService queryService = ContextUtils.getBean(SemanticLayerService.class);
         ExplainSqlReq<Object> explainSqlReq = ExplainSqlReq.builder().queryReq(semanticQueryReq)
                 .queryTypeEnum(QueryMethod.SQL).build();
         ExplainResp explain = queryService.explain(explainSqlReq, queryContext.getUser());

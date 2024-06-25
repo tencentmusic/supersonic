@@ -2,7 +2,7 @@ package com.tencent.supersonic.headless.core.pojo;
 
 import com.tencent.supersonic.headless.api.pojo.QueryParam;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticSchemaResp;
-import com.tencent.supersonic.headless.core.parser.calcite.s2sql.SemanticModel;
+import com.tencent.supersonic.headless.core.translator.calcite.s2sql.SemanticModel;
 import lombok.Data;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Triple;

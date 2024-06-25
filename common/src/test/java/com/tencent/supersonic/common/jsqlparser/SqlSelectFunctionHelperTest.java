@@ -72,4 +72,15 @@ class SqlSelectFunctionHelperTest {
 
         Assert.assertEquals(hasFunction, true);
     }
+
+    @Test
+    void testHasAsterisk() {
+        String sql = "select 部门,sum (访问次数) from 超音数 where 数据日期 = '2023-08-08' "
+                + "and 用户 =alice and 发布日期 ='11' group by 部门 limit 1";
+
+        Assert.assertEquals(SqlSelectFunctionHelper.hasAsterisk(sql), false);
+        sql = "select * from 超音数 where 数据日期 = '2023-08-08' "
+                + "and 用户 =alice and 发布日期 ='11'";
+        Assert.assertEquals(SqlSelectFunctionHelper.hasAsterisk(sql), true);
+    }
 }

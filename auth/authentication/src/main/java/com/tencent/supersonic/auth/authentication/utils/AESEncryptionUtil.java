@@ -1,14 +1,17 @@
 package com.tencent.supersonic.auth.authentication.utils;
 
+import lombok.extern.slf4j.Slf4j;
+
 import javax.crypto.Cipher;
 import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
-import javax.crypto.spec.IvParameterSpec;
 import java.security.MessageDigest;
 import java.security.spec.KeySpec;
 import java.util.Base64;
 
+@Slf4j
 public class AESEncryptionUtil {
 
     private static final String ALGORITHM = "AES/CBC/PKCS5Padding";
@@ -28,24 +31,29 @@ public class AESEncryptionUtil {
     }
 
     public static String encrypt(String password, byte[] salt) throws Exception {
-        // TODO 固定IV，确保每次加密时使用相同的IV,该值应该安全保管
-        byte[] iv = "supersonic@bicom".getBytes(ENCODE);
-        IvParameterSpec ivParameterSpec = new IvParameterSpec(iv);
+        try {
+            // TODO 固定IV，确保每次加密时使用相同的IV,该值应该安全保管
+            byte[] iv = "supersonic@bicom".getBytes(ENCODE);
+            IvParameterSpec ivParameterSpec = new IvParameterSpec(iv);
 
-        KeySpec keySpec = new PBEKeySpec(password.toCharArray(), salt, ITERATIONS, KEY_LENGTH);
-        SecretKeyFactory keyFactory = SecretKeyFactory.getInstance(SECRET_KEY_ALGORITHM);
-        byte[] keyBytes = keyFactory.generateSecret(keySpec).getEncoded();
-        SecretKeySpec secretKeySpec = new SecretKeySpec(keyBytes, "AES");
+            KeySpec keySpec = new PBEKeySpec(password.toCharArray(), salt, ITERATIONS, KEY_LENGTH);
+            SecretKeyFactory keyFactory = SecretKeyFactory.getInstance(SECRET_KEY_ALGORITHM);
+            byte[] keyBytes = keyFactory.generateSecret(keySpec).getEncoded();
+            SecretKeySpec secretKeySpec = new SecretKeySpec(keyBytes, "AES");
 
-        Cipher cipher = Cipher.getInstance(ALGORITHM);
-        cipher.init(Cipher.ENCRYPT_MODE, secretKeySpec, ivParameterSpec);
+            Cipher cipher = Cipher.getInstance(ALGORITHM);
+            cipher.init(Cipher.ENCRYPT_MODE, secretKeySpec, ivParameterSpec);
 
-        byte[] encrypted = cipher.doFinal(password.getBytes(ENCODE));
-        byte[] combined = new byte[iv.length + encrypted.length];
-        System.arraycopy(iv, 0, combined, 0, iv.length);
-        System.arraycopy(encrypted, 0, combined, iv.length, encrypted.length);
+            byte[] encrypted = cipher.doFinal(password.getBytes(ENCODE));
+            byte[] combined = new byte[iv.length + encrypted.length];
+            System.arraycopy(iv, 0, combined, 0, iv.length);
+            System.arraycopy(encrypted, 0, combined, iv.length, encrypted.length);
 
-        return Base64.getEncoder().encodeToString(combined);
+            return Base64.getEncoder().encodeToString(combined);
+        } catch (Throwable e) {
+            log.error("encrypt", e);
+            throw e;
+        }
     }
 
     public static String getStringFromBytes(byte[] salt) {

@@ -95,6 +95,7 @@ public class S2ArtistDemo extends S2BaseDemo {
         domainReq.setViewOrgs(Collections.singletonList("1"));
         domainReq.setAdmins(Arrays.asList("admin", "alice"));
         domainReq.setAdminOrgs(Collections.emptyList());
+        domainReq.setIsOpen(1);
         return domainService.createDomain(domainReq, user);
     }
 

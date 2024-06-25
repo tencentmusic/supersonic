@@ -19,7 +19,7 @@ import com.tencent.supersonic.headless.api.pojo.response.MetricResp;
 import com.tencent.supersonic.headless.api.pojo.response.MetricSchemaResp;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticSchemaResp;
 import com.tencent.supersonic.headless.server.pojo.MetaFilter;
-import com.tencent.supersonic.headless.server.service.Catalog;
+import com.tencent.supersonic.headless.server.service.CatalogService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Triple;
@@ -62,12 +62,12 @@ public class QueryStructUtils {
 
     private final DateModeUtils dateModeUtils;
     private final SqlFilterUtils sqlFilterUtils;
-    private final Catalog catalog;
+    private final CatalogService catalog;
     private String variablePrefix = "'${";
 
     public QueryStructUtils(
             DateModeUtils dateModeUtils,
-            SqlFilterUtils sqlFilterUtils, @Lazy Catalog catalog) {
+            SqlFilterUtils sqlFilterUtils, @Lazy CatalogService catalog) {
 
         this.dateModeUtils = dateModeUtils;
         this.sqlFilterUtils = sqlFilterUtils;

@@ -24,17 +24,16 @@ import java.util.stream.Collectors;
 public class TermServiceImpl extends ServiceImpl<TermMapper, TermDO> implements TermService {
 
     @Override
-    public void saveOrUpdate(TermReq termSetReq, User user) {
+    public void saveOrUpdate(TermReq termReq, User user) {
         QueryWrapper<TermDO> queryWrapper = new QueryWrapper<>();
-        queryWrapper.lambda().eq(TermDO::getId, termSetReq.getId());
+        queryWrapper.lambda().eq(TermDO::getId, termReq.getId());
         TermDO termSetDO = getOne(queryWrapper);
         if (termSetDO == null) {
-            termSetReq.createdBy(user.getName());
+            termReq.createdBy(user.getName());
             termSetDO = new TermDO();
         }
-        termSetReq.updatedBy(user.getName());
-        BeanMapper.mapper(termSetReq, termSetDO);
-        termSetDO.setAlias(JsonUtil.toString(termSetReq.getAlias()));
+        termReq.updatedBy(user.getName());
+        convert(termReq, termSetDO);
         saveOrUpdate(termSetDO);
     }
 
@@ -63,11 +62,20 @@ public class TermServiceImpl extends ServiceImpl<TermMapper, TermDO> implements 
                 Collectors.groupingBy(TermResp::getDomainId));
     }
 
-    private TermResp convert(TermDO termSetDO) {
+    private TermResp convert(TermDO termDO) {
         TermResp termSetResp = new TermResp();
-        BeanMapper.mapper(termSetDO, termSetResp);
-        termSetResp.setAlias(JsonUtil.toList(termSetDO.getAlias(), String.class));
+        BeanMapper.mapper(termDO, termSetResp);
+        termSetResp.setAlias(JsonUtil.toList(termDO.getAlias(), String.class));
+        termSetResp.setRelatedMetrics(JsonUtil.toList(termDO.getRelatedMetrics(), Long.class));
+        termSetResp.setRelateDimensions(JsonUtil.toList(termDO.getRelatedDimensions(), Long.class));
         return termSetResp;
+    }
+
+    private void convert(TermReq termReq, TermDO termDO) {
+        BeanMapper.mapper(termReq, termDO);
+        termDO.setAlias(JsonUtil.toString(termReq.getAlias()));
+        termDO.setRelatedDimensions(JsonUtil.toString(termReq.getRelateDimensions()));
+        termDO.setRelatedMetrics(JsonUtil.toString(termReq.getRelatedMetrics()));
     }
 
 }

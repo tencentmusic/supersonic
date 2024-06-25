@@ -5,7 +5,7 @@ import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
 import com.tencent.supersonic.headless.api.pojo.request.QueryDataSetReq;
 import com.tencent.supersonic.headless.api.pojo.request.SemanticQueryReq;
 import com.tencent.supersonic.headless.server.service.DataSetService;
-import com.tencent.supersonic.headless.server.service.QueryService;
+import com.tencent.supersonic.headless.server.service.SemanticLayerService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -24,7 +24,7 @@ public class DataSetQueryApiController {
     @Autowired
     private DataSetService dataSetService;
     @Autowired
-    private QueryService queryService;
+    private SemanticLayerService queryService;
 
     @PostMapping("/dataSet")
     public Object queryByDataSet(@RequestBody QueryDataSetReq queryDataSetReq,

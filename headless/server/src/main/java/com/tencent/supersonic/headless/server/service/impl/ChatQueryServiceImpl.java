@@ -56,7 +56,7 @@ import com.tencent.supersonic.headless.server.persistence.dataobject.StatisticsD
 import com.tencent.supersonic.headless.server.service.ChatContextService;
 import com.tencent.supersonic.headless.server.service.ChatQueryService;
 import com.tencent.supersonic.headless.server.service.DataSetService;
-import com.tencent.supersonic.headless.server.service.QueryService;
+import com.tencent.supersonic.headless.server.service.SemanticLayerService;
 import com.tencent.supersonic.headless.server.service.WorkflowService;
 import com.tencent.supersonic.headless.server.utils.ComponentFactory;
 import lombok.extern.slf4j.Slf4j;
@@ -93,13 +93,11 @@ import java.util.stream.Collectors;
 public class ChatQueryServiceImpl implements ChatQueryService {
 
     @Autowired
-    private SemanticService semanticService;
+    private SemanticLayerService semanticLayerService;
     @Autowired
     private ChatContextService chatContextService;
     @Autowired
     private KnowledgeBaseService knowledgeBaseService;
-    @Autowired
-    private QueryService queryService;
     @Autowired
     private DataSetService dataSetService;
     @Autowired
@@ -137,7 +135,7 @@ public class ChatQueryServiceImpl implements ChatQueryService {
 
     public QueryContext buildQueryContext(QueryReq queryReq) {
 
-        SemanticSchema semanticSchema = semanticService.getSemanticSchema();
+        SemanticSchema semanticSchema = semanticLayerService.getSemanticSchema();
         Map<Long, List<Long>> modelIdToDataSetIds = dataSetService.getModelIdToDataSetIds();
         QueryContext queryCtx = QueryContext.builder()
                 .queryFilters(queryReq.getQueryFilters())
@@ -184,7 +182,7 @@ public class ChatQueryServiceImpl implements ChatQueryService {
 
     private QueryResult doExecution(SemanticQueryReq semanticQueryReq,
             SemanticParseInfo parseInfo, User user) throws Exception {
-        SemanticQueryResp queryResp = queryService.queryByReq(semanticQueryReq, user);
+        SemanticQueryResp queryResp = semanticLayerService.queryByReq(semanticQueryReq, user);
         QueryResult queryResult = new QueryResult();
         if (queryResp != null) {
             queryResult.setQueryAuthorization(queryResp.getQueryAuthorization());
@@ -214,7 +212,7 @@ public class ChatQueryServiceImpl implements ChatQueryService {
     @Override
     public QueryResult executeDirectQuery(QueryDataReq queryData, User user) throws Exception {
         SemanticParseInfo parseInfo = getSemanticParseInfo(queryData);
-        SemanticSchema semanticSchema = semanticService.getSemanticSchema();
+        SemanticSchema semanticSchema = semanticLayerService.getSemanticSchema();
 
         SemanticQuery semanticQuery = QueryManager.createQuery(parseInfo.getQueryMode());
         semanticQuery.setParseInfo(parseInfo);
@@ -239,7 +237,7 @@ public class ChatQueryServiceImpl implements ChatQueryService {
             SemanticQueryReq semanticQueryReq = semanticQuery.buildSemanticQueryReq();
             ExplainSqlReq<Object> explainSqlReq = ExplainSqlReq.builder().queryReq(semanticQueryReq)
                     .queryTypeEnum(QueryMethod.SQL).build();
-            ExplainResp explain = queryService.explain(explainSqlReq, user);
+            ExplainResp explain = semanticLayerService.explain(explainSqlReq, user);
             if (StringUtils.isNotBlank(explain.getSql())) {
                 parseInfo.getSqlInfo().setQuerySQL(explain.getSql());
             }
@@ -258,7 +256,7 @@ public class ChatQueryServiceImpl implements ChatQueryService {
         QueryResult queryResult = doExecution(semanticQueryReq, semanticQuery.getParseInfo(), user);
         queryResult.setChatContext(semanticQuery.getParseInfo());
         DataSetSchema dataSetSchema = semanticSchema.getDataSetSchemaMap().get(parseInfo.getDataSetId());
-        SemanticService semanticService = ContextUtils.getBean(SemanticService.class);
+        SemanticLayerService semanticService = ContextUtils.getBean(SemanticLayerService.class);
         EntityInfo entityInfo = semanticService.getEntityInfo(parseInfo, dataSetSchema, user);
         queryResult.setEntityInfo(entityInfo);
         return queryResult;
@@ -324,7 +322,7 @@ public class ChatQueryServiceImpl implements ChatQueryService {
 
     @Override
     public EntityInfo getEntityInfo(SemanticParseInfo parseInfo, User user) {
-        SemanticService semanticService = ContextUtils.getBean(SemanticService.class);
+        SemanticLayerService semanticService = ContextUtils.getBean(SemanticLayerService.class);
         DataSetSchema dataSetSchema =
                 semanticService.getSemanticSchema().getDataSetSchemaMap().get(parseInfo.getDataSetId());
         return semanticService.getEntityInfo(parseInfo, dataSetSchema, user);
@@ -520,7 +518,7 @@ public class ChatQueryServiceImpl implements ChatQueryService {
     @Override
     public Object queryDimensionValue(DimensionValueReq dimensionValueReq, User user) throws Exception {
         SemanticQueryResp semanticQueryResp = new SemanticQueryResp();
-        SemanticService semanticService = ContextUtils.getBean(SemanticService.class);
+        SemanticLayerService semanticService = ContextUtils.getBean(SemanticLayerService.class);
         SemanticSchema semanticSchema = semanticService.getSemanticSchema();
         SchemaElement schemaElement = semanticSchema.getDimension(dimensionValueReq.getElementID());
         Set<Long> detectDataSetIds = new HashSet<>();
@@ -589,7 +587,7 @@ public class ChatQueryServiceImpl implements ChatQueryService {
         List<String> groups = new ArrayList<>();
         groups.add(dimensionValueReq.getBizName());
         queryStructReq.setGroups(groups);
-        return queryService.queryByReq(queryStructReq, user);
+        return semanticLayerService.queryByReq(queryStructReq, user);
     }
 
     public void correct(QuerySqlReq querySqlReq, User user) {
@@ -605,7 +603,7 @@ public class ChatQueryServiceImpl implements ChatQueryService {
 
     private SemanticParseInfo correctSqlReq(QuerySqlReq querySqlReq, User user) {
         QueryContext queryCtx = new QueryContext();
-        SemanticSchema semanticSchema = semanticService.getSemanticSchema();
+        SemanticSchema semanticSchema = semanticLayerService.getSemanticSchema();
         queryCtx.setSemanticSchema(semanticSchema);
         SemanticParseInfo semanticParseInfo = new SemanticParseInfo();
         SqlInfo sqlInfo = new SqlInfo();

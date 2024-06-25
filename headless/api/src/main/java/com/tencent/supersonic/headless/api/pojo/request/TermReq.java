@@ -21,4 +21,8 @@ public class TermReq extends RecordInfo {
 
     private List<String> alias = Lists.newArrayList();
 
+    private List<Long> relatedMetrics = Lists.newArrayList();
+
+    private List<Long> relateDimensions = Lists.newArrayList();
+
 }
