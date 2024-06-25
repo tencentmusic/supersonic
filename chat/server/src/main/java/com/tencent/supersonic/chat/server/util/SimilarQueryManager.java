@@ -56,7 +56,7 @@ public class SimilarQueryManager {
         String queryText = similarQueryReq.getQueryText();
         try {
             Map<String, Object> metaData = new HashMap<>();
-            metaData.put("agentId", similarQueryReq.getAgentId());
+            metaData.put("agentId", String.valueOf(similarQueryReq.getAgentId()));
             TextSegment textSegment = TextSegment.from(queryText, new Metadata(metaData));
             TextSegmentConvert.addQueryId(textSegment, String.valueOf(similarQueryReq.getQueryId()));
 
