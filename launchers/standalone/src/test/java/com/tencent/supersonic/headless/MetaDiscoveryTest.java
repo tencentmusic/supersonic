@@ -4,7 +4,7 @@ import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.headless.api.pojo.QueryDataType;
 import com.tencent.supersonic.headless.api.pojo.request.QueryMapReq;
 import com.tencent.supersonic.headless.api.pojo.response.MapInfoResp;
-import com.tencent.supersonic.headless.server.service.RetrieveService;
+import com.tencent.supersonic.headless.server.facade.service.RetrieveService;
 import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;

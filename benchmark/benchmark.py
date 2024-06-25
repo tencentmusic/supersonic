@@ -62,7 +62,7 @@ class BatchTest:
         # secret 请和 com.tencent.supersonic.auth.api.authentication.config.AuthenticationConfig.tokenAppSecret 保持一致
         secret = "WIaO9YRRVt+7QtpPvyWsARFngnEcbaKBk783uGFwMrbJBaochsqCH62L4Kijcb0sZCYoSsiKGV/zPml5MnZ3uQ=="
         exp = time.time() + 100000000
-        token= jwt.encode({"token_userName": userName,"exp": exp}, secret, algorithm="HS512")
+        token= jwt.encode({"token_user_name": userName,"exp": exp}, secret, algorithm="HS512")
         return token
 
 
@@ -72,7 +72,6 @@ def benchmark(url:str, agentId:str, chatId:str, filePath:str, userName:str):
     for index, row in df.iterrows():
         question = row['question']
         print('start to ask question:', question)
-        # 捕获异常，防止程序中断
         try:
             parse_resp = batch_test.parse(question)
             batch_test.execute(question, parse_resp['data']['queryId'])
@@ -82,8 +81,9 @@ def benchmark(url:str, agentId:str, chatId:str, filePath:str, userName:str):
             continue
         time.sleep(1)
 
-if __name__ == '__main__':
 
+
+def main():
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument('-u', '--url', type=str, required=True, help='url:问答系统url,例如：https://chatdata-dev.test.com')
@@ -102,3 +102,7 @@ if __name__ == '__main__':
         benchmark(args.url, args.agentId, args.chatId, args.filePath, args.userName)
     else:
         print('请重新输入压力测试配置信息: url, agentId, chatId, filePath, userName')
+
+if __name__ == '__main__':
+    main()
+

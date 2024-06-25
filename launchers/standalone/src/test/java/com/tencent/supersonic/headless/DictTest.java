@@ -9,7 +9,7 @@ import com.tencent.supersonic.headless.api.pojo.ItemValueConfig;
 import com.tencent.supersonic.headless.api.pojo.request.DictSingleTaskReq;
 import com.tencent.supersonic.headless.server.persistence.dataobject.DictConfDO;
 import com.tencent.supersonic.headless.server.persistence.mapper.DictConfMapper;
-import com.tencent.supersonic.headless.server.service.DictTaskService;
+import com.tencent.supersonic.headless.server.web.service.DictTaskService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
