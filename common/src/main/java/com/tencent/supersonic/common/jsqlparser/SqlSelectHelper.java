@@ -116,8 +116,7 @@ public class SqlSelectHelper {
         return result;
     }
 
-    public static List<PlainSelect> getPlainSelect(String sql) {
-        Select selectStatement = getSelect(sql);
+    public static List<PlainSelect> getPlainSelect(Select selectStatement) {
         if (selectStatement == null) {
             return null;
         }
@@ -137,6 +136,11 @@ public class SqlSelectHelper {
             }
         }
         return plainSelectList;
+    }
+
+    public static List<PlainSelect> getPlainSelect(String sql) {
+        Select selectStatement = getSelect(sql);
+        return getPlainSelect(selectStatement);
     }
 
     public static Boolean hasSubSelect(String sql) {
@@ -161,6 +165,16 @@ public class SqlSelectHelper {
                 ParenthesedSelect parenthesedSelect = (ParenthesedSelect) plainSelect.getFromItem();
                 Select subSelect = parenthesedSelect.getSelect();
                 getSubPlainSelect(subSelect, plainSelectList);
+            }
+            List<Join> joinList = plainSelect.getJoins();
+            if (CollectionUtils.isEmpty(joinList)) {
+                return;
+            }
+            for (Join join : joinList) {
+                if (join.getRightItem() instanceof ParenthesedSelect) {
+                    ParenthesedSelect parenthesedSelect = (ParenthesedSelect) join.getRightItem();
+                    plainSelectList.add(parenthesedSelect.getPlainSelect());
+                }
             }
         }
         if (select instanceof SetOperationList) {
@@ -313,10 +327,28 @@ public class SqlSelectHelper {
             }
             if (plainSelect.getFromItem() instanceof ParenthesedSelect) {
                 ParenthesedSelect parenthesedSelect = (ParenthesedSelect) plainSelect.getFromItem();
-                PlainSelect subPlainSelect = parenthesedSelect.getPlainSelect();
-                Expression subWhere = subPlainSelect.getWhere();
-                if (Objects.nonNull(subWhere)) {
-                    subWhere.accept(new FieldAndValueAcquireVisitor(result));
+                Select subSelect = parenthesedSelect.getSelect();
+                if (subSelect instanceof PlainSelect) {
+                    PlainSelect subPlainSelect = parenthesedSelect.getPlainSelect();
+                    Expression subWhere = subPlainSelect.getWhere();
+                    if (Objects.nonNull(subWhere)) {
+                        subWhere.accept(new FieldAndValueAcquireVisitor(result));
+                    }
+                } else if (subSelect instanceof ParenthesedSelect) {
+                    ParenthesedSelect subParenthesedSelect = (ParenthesedSelect) subSelect;
+                    Expression subWhere = subParenthesedSelect.getPlainSelect().getWhere();
+                    if (Objects.nonNull(subWhere)) {
+                        subWhere.accept(new FieldAndValueAcquireVisitor(result));
+                    }
+                } else if (subSelect instanceof SetOperationList) {
+                    SetOperationList setOperationList = (SetOperationList) subSelect;
+                    List<Select> selectList = setOperationList.getSelects();
+                    for (Select select : selectList) {
+                        Expression subWhere = select.getPlainSelect().getWhere();
+                        if (Objects.nonNull(subWhere)) {
+                            subWhere.accept(new FieldAndValueAcquireVisitor(result));
+                        }
+                    }
                 }
             }
         }
@@ -767,14 +799,15 @@ public class SqlSelectHelper {
         if (plainSelect.getFromItem() instanceof ParenthesedSelect) {
             ParenthesedSelect parenthesedSelect = (ParenthesedSelect) plainSelect.getFromItem();
             getFieldsWithSubQuery(parenthesedSelect.getPlainSelect(), fields);
-            if (!CollectionUtils.isEmpty(plainSelect.getJoins())) {
-                for (Join join : plainSelect.getJoins()) {
-                    if (join.getRightItem() instanceof ParenthesedSelect) {
-                        getFieldsWithSubQuery(((ParenthesedSelect) join.getRightItem()).getPlainSelect(), fields);
-                    }
-                    if (join.getFromItem() instanceof ParenthesedSelect) {
-                        getFieldsWithSubQuery(((ParenthesedSelect) join.getFromItem()).getPlainSelect(), fields);
-                    }
+            if (CollectionUtils.isEmpty(plainSelect.getJoins())) {
+                return;
+            }
+            for (Join join : plainSelect.getJoins()) {
+                if (join.getRightItem() instanceof ParenthesedSelect) {
+                    getFieldsWithSubQuery(((ParenthesedSelect) join.getRightItem()).getPlainSelect(), fields);
+                }
+                if (join.getFromItem() instanceof ParenthesedSelect) {
+                    getFieldsWithSubQuery(((ParenthesedSelect) join.getFromItem()).getPlainSelect(), fields);
                 }
             }
         }
