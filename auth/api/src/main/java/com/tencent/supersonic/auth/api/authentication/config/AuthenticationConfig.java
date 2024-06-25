@@ -7,7 +7,10 @@ import java.util.stream.Collectors;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
-
+/*
+*用于管理和配置身份验证相关的设置，
+* 包括路径、开关、令牌、应用ID、时间戳、签名和令牌超时等
+*  */
 @Data
 @Configuration
 public class AuthenticationConfig {

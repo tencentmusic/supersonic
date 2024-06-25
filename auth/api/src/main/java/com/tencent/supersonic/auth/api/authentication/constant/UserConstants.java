@@ -1,5 +1,7 @@
 package com.tencent.supersonic.auth.api.authentication.constant;
-
+/*
+* 用于定义用户身份验证和令牌管理相关的常量。
+* */
 public class UserConstants {
 
     public static final String TOKEN_USER_ID = "token_user_id";

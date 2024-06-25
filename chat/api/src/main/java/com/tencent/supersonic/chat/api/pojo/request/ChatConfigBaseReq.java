@@ -19,11 +19,13 @@ public class ChatConfigBaseReq {
 
     /**
      * the recommended questions about the model
+     * 关于模型的推荐问题
      */
     private List<RecommendedQuestionReq> recommendedQuestions;
 
     /**
      *  the llm examples about the model
+     *  关于这个模型的法学硕士例子
      */
     private String llmExamples;
 

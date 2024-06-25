@@ -9,11 +9,13 @@ public class ChatDetailConfigReq {
 
     /**
      * invisible dimensions/metrics
+     * 一些指标维度不展示
      */
     private ItemVisibility visibility;
 
     /**
      * information about dictionary about the model
+     *一些模型的字典信息
      */
     private List<KnowledgeInfoReq> knowledgeInfos;
 

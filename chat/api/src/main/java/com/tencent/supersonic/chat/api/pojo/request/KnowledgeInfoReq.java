@@ -22,6 +22,8 @@ public class KnowledgeInfoReq {
     /**
      * type: IntentionTypeEnum
      * temporarily only supports dimension-related information
+     * *类型:IntentionTypeEnum
+     * *暂时只支持维度相关信息
      */
     @NotNull
     private TypeEnums type = TypeEnums.DIMENSION;

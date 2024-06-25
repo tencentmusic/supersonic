@@ -6,6 +6,7 @@ import java.util.List;
 @Data
 public class PageQueryInfoReq {
 
+
     private int current;
 
     private int pageSize;

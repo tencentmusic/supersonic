@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 
+
 /**
  * UserAdaptor defines some interfaces for obtaining user and organization information
  */

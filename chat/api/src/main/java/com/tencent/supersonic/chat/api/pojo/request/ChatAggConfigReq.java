@@ -14,6 +14,7 @@ public class ChatAggConfigReq {
 
     /**
      * information about dictionary about the model
+     * 关于模型的字典信息
      */
     private List<KnowledgeInfoReq> knowledgeInfos;
 

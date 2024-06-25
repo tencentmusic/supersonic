@@ -5,3 +5,6 @@ spring:
     name: chat
 mybatis:
   mapper-locations=classpath:mappers/custom/*.xml,classpath*:/mappers/*.xml
+logging:
+  level:
+    root: DEBUG
