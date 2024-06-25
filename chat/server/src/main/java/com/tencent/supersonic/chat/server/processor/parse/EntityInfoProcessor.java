@@ -7,7 +7,7 @@ import com.tencent.supersonic.headless.api.pojo.EntityInfo;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.api.pojo.response.ParseResp;
 import com.tencent.supersonic.headless.chat.query.QueryManager;
-import com.tencent.supersonic.headless.server.service.SemanticLayerService;
+import com.tencent.supersonic.headless.server.web.service.SemanticLayerService;
 import org.springframework.util.CollectionUtils;
 
 import java.util.List;

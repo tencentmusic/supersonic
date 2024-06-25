@@ -9,7 +9,7 @@ import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.api.pojo.request.QueryFilter;
 import com.tencent.supersonic.headless.api.pojo.request.QueryReq;
 import com.tencent.supersonic.headless.api.pojo.response.ParseResp;
-import com.tencent.supersonic.headless.server.service.ChatQueryService;
+import com.tencent.supersonic.headless.server.facade.service.ChatQueryService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.CollectionUtils;
 import java.util.List;
