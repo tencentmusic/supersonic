@@ -61,9 +61,15 @@ export function chatParse(
   });
 }
 
-export function chatExecute(queryText: string, chatId: number, parseInfo: ChatContextType) {
+export function chatExecute(
+  queryText: string,
+  chatId: number,
+  parseInfo: ChatContextType,
+  agentId?: number
+) {
   return axios.post<MsgDataType>(`${prefix}/chat/query/execute`, {
     queryText,
+    agentId,
     chatId: chatId || DEFAULT_CHAT_ID,
     queryId: parseInfo.queryId,
     parseId: parseInfo.id,
