@@ -61,6 +61,9 @@ public class Configuration {
 
     static {
         configProperties.put(CalciteConnectionProperty.CASE_SENSITIVE.camelName(), Boolean.TRUE.toString());
+        configProperties.put(CalciteConnectionProperty.UNQUOTED_CASING.camelName(), Casing.UNCHANGED.toString());
+        configProperties.put(CalciteConnectionProperty.QUOTED_CASING.camelName(), Casing.TO_LOWER.toString());
+
     }
 
     public static SqlParser.Config getParserConfig(EngineType engineType) {
@@ -77,10 +80,14 @@ public class Configuration {
                 .setIdentifierMaxLength(Integer.MAX_VALUE)
                 .setQuoting(Quoting.BACK_TICK)
                 .setQuoting(Quoting.SINGLE_QUOTE)
+                .setQuotedCasing(Casing.TO_UPPER)
+                .setUnquotedCasing(Casing.TO_UPPER)
                 .setConformance(sqlDialect.getConformance())
                 .setLex(Lex.BIG_QUERY);
-        parserConfig = parserConfig.setQuotedCasing(Casing.TO_LOWER);
-        parserConfig = parserConfig.setUnquotedCasing(Casing.TO_LOWER);
+        if (!EngineType.CLICKHOUSE.equals(engineType)) {
+            parserConfig = parserConfig.setQuotedCasing(Casing.TO_LOWER);
+            parserConfig = parserConfig.setUnquotedCasing(Casing.TO_LOWER);
+        }
         return parserConfig.build();
     }
 

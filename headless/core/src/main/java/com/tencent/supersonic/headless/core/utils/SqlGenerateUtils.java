@@ -327,12 +327,12 @@ public class SqlGenerateUtils {
 
     public String getExpr(Measure measure, AggOption aggOption) {
         if (AggOperatorEnum.COUNT_DISTINCT.getOperator().equalsIgnoreCase(measure.getAgg())) {
-            return aggOption.equals(AggOption.NATIVE) ? measure.getBizName()
+            return AggOption.NATIVE.equals(aggOption) ? measure.getBizName()
                     : AggOperatorEnum.COUNT.getOperator() + " ( " + AggOperatorEnum.DISTINCT + " "
                             + measure.getBizName()
                             + " ) ";
         }
-        return aggOption.equals(AggOption.NATIVE) ? measure.getBizName()
+        return AggOption.NATIVE.equals(aggOption) ? measure.getBizName()
                 : measure.getAgg() + " ( " + measure.getBizName() + " ) ";
     }
 

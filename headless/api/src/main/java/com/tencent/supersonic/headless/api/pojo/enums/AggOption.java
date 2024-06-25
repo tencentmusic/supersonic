@@ -8,6 +8,7 @@ package com.tencent.supersonic.headless.api.pojo.enums;
 public enum AggOption {
     NATIVE,
     AGGREGATION,
+    OUTER,
     DEFAULT;
 
     public static AggOption getAggregation(boolean isNativeQuery) {
@@ -15,6 +16,6 @@ public enum AggOption {
     }
 
     public static boolean isAgg(AggOption aggOption) {
-        return NATIVE.equals(aggOption) ? false : true;
+        return NATIVE.equals(aggOption) || OUTER.equals(aggOption) ? false : true;
     }
 }

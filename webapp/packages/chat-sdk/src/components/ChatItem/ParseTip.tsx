@@ -181,14 +181,7 @@ const ParseTip: React.FC<Props> = ({
               fields.length > 0 && (
                 <div className={`${prefixCls}-tip-item`}>
                   <div className={`${prefixCls}-tip-item-name`}>
-                    {queryMode === 'LLM_S2SQL'
-                      ? nativeQuery
-                        ? '查询字段'
-                        : '下钻维度'
-                      : queryMode === 'TAG_DETAIL'
-                      ? '查询字段'
-                      : '下钻维度'}
-                    ：
+                    {queryType === 'DETAIL' ? '查询字段' : '下钻维度'}：
                   </div>
                   <div className={itemValueClass}>
                     {fields
