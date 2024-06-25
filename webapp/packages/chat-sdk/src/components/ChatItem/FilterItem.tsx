@@ -54,6 +54,7 @@ const FilterItem: React.FC<Props> = ({
     );
   };
 
+  console.log('🚀 ~ useEffect ~ filter.value:', filter.value);
   useEffect(() => {
     if (
       (typeof filter.value === 'string' || isArray(filter.value)) &&

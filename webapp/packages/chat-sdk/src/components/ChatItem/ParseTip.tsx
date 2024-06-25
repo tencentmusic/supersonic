@@ -1,4 +1,4 @@
-import React, { ReactNode } from 'react';
+import React, { ReactNode, useEffect, useRef } from 'react';
 import { AGG_TYPE_MAP, PREFIX_CLS } from '../../common/constants';
 import { ChatContextType, DateInfoType, EntityInfoType, FilterItemType } from '../../common/type';
 import { Button, DatePicker } from 'antd';
@@ -9,6 +9,9 @@ import MarkDown from '../ChatMsg/MarkDown';
 import classNames from 'classnames';
 import { isMobile } from '../../utils/utils';
 import dayjs from 'dayjs';
+import FiltersInfo, { IPillEditHandleRef } from '../FiltersInfo';
+import { getPillsByParseInfo } from '../FiltersInfo/utils';
+import { IPill } from '../FiltersInfo/types';
 
 const { RangePicker } = DatePicker;
 
@@ -30,6 +33,12 @@ type Props = {
   onFiltersChange: (filters: FilterItemType[]) => void;
   onDateInfoChange: (dateRange: any) => void;
   onRefresh: () => void;
+  onQueryConditionChange: (data: {
+    pillData: IPill[];
+    datasetId: number;
+    dimensions: any[];
+    metrics: any[];
+  }) => void;
 };
 
 const MAX_OPTION_VALUES_COUNT = 2;
@@ -52,8 +61,12 @@ const ParseTip: React.FC<Props> = ({
   onFiltersChange,
   onDateInfoChange,
   onRefresh,
+  onQueryConditionChange,
 }) => {
   const prefixCls = `${PREFIX_CLS}-item`;
+
+  const pillEditHandleRef = useRef<IPillEditHandleRef>(null);
+
   const getNode = (tipTitle: ReactNode, tipNode?: ReactNode) => {
     return (
       <div className={`${prefixCls}-parse-tip`}>
@@ -68,6 +81,16 @@ const ParseTip: React.FC<Props> = ({
       </div>
     );
   };
+
+  useEffect(() => {
+    if (pillEditHandleRef.current && currentParseInfo && agentId && currentParseInfo?.dataSet?.id) {
+      pillEditHandleRef.current.resetData(
+        agentId,
+        currentParseInfo?.dataSet?.id!,
+        getPillsByParseInfo(currentParseInfo)
+      );
+    }
+  }, [currentParseInfo]);
 
   if (parseLoading) {
     return getNode('意图解析中');
@@ -130,6 +153,7 @@ const ParseTip: React.FC<Props> = ({
     const { type: agentType, name: agentName } = properties || {};
 
     const fields =
+      // @ts-ignore
       queryMode === 'TAG_DETAIL' ? dimensionItems?.concat(metrics || []) : dimensionItems;
 
     return (
@@ -232,21 +256,21 @@ const ParseTip: React.FC<Props> = ({
     return (
       <div className={`${prefixCls}-tip-item-filter-content`}>
         {(startDate || endDate) && (
-        <div className={tipItemOptionClass}>
-          <span className={`${prefixCls}-tip-item-filter-name`}>数据时间：</span>
-          {nativeQuery ? (
-            <span className={itemValueClass}>
-              {startDate === endDate ? startDate : `${startDate} ~ ${endDate}`}
-            </span>
-          ) : (
-            <RangePicker
-              value={[dayjs(startDate), dayjs(endDate)]}
-              onChange={onDateInfoChange}
-              getPopupContainer={trigger => trigger.parentNode as HTMLElement}
-              allowClear={false}
-            />
-          )}
-        </div>
+          <div className={tipItemOptionClass}>
+            <span className={`${prefixCls}-tip-item-filter-name`}>数据时间：</span>
+            {nativeQuery ? (
+              <span className={itemValueClass}>
+                {startDate === endDate ? startDate : `${startDate} ~ ${endDate}`}
+              </span>
+            ) : (
+              <RangePicker
+                value={[dayjs(startDate), dayjs(endDate)]}
+                onChange={onDateInfoChange}
+                getPopupContainer={trigger => trigger.parentNode as HTMLElement}
+                allowClear={false}
+              />
+            )}
+          </div>
         )}
         {filters?.map((filter: any, index: number) => (
           <FilterItem
@@ -270,16 +294,17 @@ const ParseTip: React.FC<Props> = ({
   const getFiltersNode = () => {
     return (
       <>
-        <div className={`${prefixCls}-tip-item`}>
+        <FiltersInfo ref={pillEditHandleRef} onConfirm={onQueryConditionChange} />
+        {/* <div className={`${prefixCls}-tip-item`}>
           <div className={`${prefixCls}-tip-item-name`}>筛选条件：</div>
           <div className={`${prefixCls}-tip-item-content`}>
             {getFilterContent(dimensionFilters)}
           </div>
-        </div>
-        <Button className={`${prefixCls}-reload`} size="small" onClick={onRefresh}>
+        </div> */}
+        {/* <Button className={`${prefixCls}-reload`} size="small" onClick={onRefresh}>
           <ReloadOutlined />
           重新查询
-        </Button>
+        </Button> */}
       </>
     );
   };
