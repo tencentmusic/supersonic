@@ -23,6 +23,21 @@ import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 public class OnePassSCSqlGenStrategy extends SqlGenStrategy {
 
+    private static final String INSTRUCTION = ""
+            + "#Role: You are a data analyst experienced in SQL languages.\n"
+            + "#Task: You will be provided a natural language query asked by business users,"
+            + "please convert it to a SQL query so that relevant answer could be returned to the user "
+            + "by executing the SQL query against underlying database.\n"
+            + "#Rules:"
+            + "1.ALWAYS use `数据日期` as the date field."
+            + "2.ALWAYS use `datediff()` as the date function."
+            + "3.DO NOT specify date filter in the where clause if not explicitly mentioned in the query."
+            + "4.ONLY respond with the converted SQL statement.\n"
+            + "#Exemplars:\n%s"
+            + "#UserQuery: %s "
+            + "#Schema: %s "
+            + "#SQL: ";
+
     @Override
     public LLMResp generate(LLMReq llmReq) {
         //1.recall exemplars
@@ -60,35 +75,19 @@ public class OnePassSCSqlGenStrategy extends SqlGenStrategy {
     }
 
     private Prompt generatePrompt(LLMReq llmReq, List<Map<String, String>> fewshotExampleList) {
-        String instruction = ""
-                + "#Role: You are a data analyst experienced in SQL languages.\n"
-                + "#Task: You will be provided a natural language query asked by business users,"
-                + "please convert it to a SQL query so that relevant answer could be returned to the user "
-                + "by executing the SQL query against underlying database.\n"
-                + "#Rules:"
-                + "1.ALWAYS use `数据日期` as the date field."
-                + "2.ALWAYS use `datediff()` as the date function."
-                + "3.DO NOT specify date filter in the where clause if not explicitly mentioned in the query."
-                + "4.ONLY respond with the converted SQL statement.\n"
-                + "#Exemplars:\n%s"
-                + "#UserQuery: %s "
-                + "#DatabaseMetadata: %s "
-                + "#SQL: ";
-
         StringBuilder exemplarsStr = new StringBuilder();
         for (Map<String, String> example : fewshotExampleList) {
             String metadata = example.get("dbSchema");
             String question = example.get("questionAugmented");
             String sql = example.get("sql");
-            String exemplarStr = String.format("#UserQuery: %s #DatabaseMetadata: %s #SQL: %s\n",
+            String exemplarStr = String.format("#UserQuery: %s #Schema: %s #SQL: %s\n",
                     question, metadata, sql);
             exemplarsStr.append(exemplarStr);
         }
 
-        Pair<String, String> questionPrompt = promptHelper.transformQuestionPrompt(llmReq);
         String dataSemanticsStr = promptHelper.buildMetadataStr(llmReq);
-        String questionAugmented = questionPrompt.getRight();
-        String promptStr = String.format(instruction, exemplarsStr, questionAugmented, dataSemanticsStr);
+        String questionAugmented = promptHelper.buildAugmentedQuestion(llmReq);
+        String promptStr = String.format(INSTRUCTION, exemplarsStr, questionAugmented, dataSemanticsStr);
 
         return PromptTemplate.from(promptStr).apply(Collections.EMPTY_MAP);
     }
