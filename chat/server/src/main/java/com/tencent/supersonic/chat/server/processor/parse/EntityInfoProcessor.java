@@ -26,9 +26,10 @@ public class EntityInfoProcessor implements ParseResultProcessor {
         }
         selectedParses.forEach(parseInfo -> {
             String queryMode = parseInfo.getQueryMode();
-            if (QueryManager.containsRuleQuery(queryMode)) {
+            if (QueryManager.containsRuleQuery(queryMode) || "PLAIN".equals(queryMode)) {
                 return;
             }
+
             //1. set entity info
             SemanticLayerService semanticService = ContextUtils.getBean(SemanticLayerService.class);
             DataSetSchema dataSetSchema = semanticService.getDataSetSchema(parseInfo.getDataSetId());
