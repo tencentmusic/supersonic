@@ -38,7 +38,7 @@ import com.tencent.supersonic.headless.server.persistence.dataobject.DictTaskDO;
 import com.tencent.supersonic.headless.server.web.service.DimensionService;
 import com.tencent.supersonic.headless.server.web.service.MetricService;
 import com.tencent.supersonic.headless.server.web.service.ModelService;
-import com.tencent.supersonic.headless.server.web.service.SemanticLayerService;
+import com.tencent.supersonic.headless.server.facade.service.SemanticLayerService;
 import com.tencent.supersonic.headless.server.web.service.TagMetaService;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;

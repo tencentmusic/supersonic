@@ -1,5 +1,6 @@
 package com.tencent.supersonic.headless.server.facade.service.impl;
 
+import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.common.pojo.QueryColumn;
@@ -17,6 +18,9 @@ import com.tencent.supersonic.common.jsqlparser.SqlSelectHelper;
 import com.tencent.supersonic.headless.api.pojo.DataSetSchema;
 import com.tencent.supersonic.headless.api.pojo.EntityInfo;
 import com.tencent.supersonic.headless.api.pojo.SchemaElement;
+import com.tencent.supersonic.headless.api.pojo.SchemaElementMatch;
+import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
+import com.tencent.supersonic.headless.api.pojo.SchemaItem;
 import com.tencent.supersonic.headless.api.pojo.SchemaMapInfo;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.api.pojo.SemanticSchema;
@@ -30,11 +34,15 @@ import com.tencent.supersonic.headless.api.pojo.request.ExplainSqlReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryDataReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryFilter;
 import com.tencent.supersonic.headless.api.pojo.request.QueryFilters;
+import com.tencent.supersonic.headless.api.pojo.request.QueryMapReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryReq;
 import com.tencent.supersonic.headless.api.pojo.request.QuerySqlReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
 import com.tencent.supersonic.headless.api.pojo.request.SemanticQueryReq;
+import com.tencent.supersonic.headless.api.pojo.response.DataSetMapInfo;
+import com.tencent.supersonic.headless.api.pojo.response.DataSetResp;
 import com.tencent.supersonic.headless.api.pojo.response.ExplainResp;
+import com.tencent.supersonic.headless.api.pojo.response.MapInfoResp;
 import com.tencent.supersonic.headless.api.pojo.response.MapResp;
 import com.tencent.supersonic.headless.api.pojo.response.ParseResp;
 import com.tencent.supersonic.headless.api.pojo.response.QueryResult;
@@ -45,6 +53,7 @@ import com.tencent.supersonic.headless.chat.corrector.SchemaCorrector;
 import com.tencent.supersonic.headless.chat.knowledge.HanlpMapResult;
 import com.tencent.supersonic.headless.chat.knowledge.KnowledgeBaseService;
 import com.tencent.supersonic.headless.chat.knowledge.SearchService;
+import com.tencent.supersonic.headless.chat.knowledge.builder.BaseWordBuilder;
 import com.tencent.supersonic.headless.chat.knowledge.helper.HanlpHelper;
 import com.tencent.supersonic.headless.chat.knowledge.helper.NatureHelper;
 import com.tencent.supersonic.headless.chat.query.QueryManager;
@@ -53,10 +62,12 @@ import com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMSqlQuery;
 import com.tencent.supersonic.headless.chat.ChatContext;
 import com.tencent.supersonic.headless.chat.QueryContext;
 import com.tencent.supersonic.headless.server.persistence.dataobject.StatisticsDO;
+import com.tencent.supersonic.headless.server.pojo.MetaFilter;
 import com.tencent.supersonic.headless.server.web.service.ChatContextService;
 import com.tencent.supersonic.headless.server.facade.service.ChatQueryService;
 import com.tencent.supersonic.headless.server.web.service.DataSetService;
-import com.tencent.supersonic.headless.server.web.service.SemanticLayerService;
+import com.tencent.supersonic.headless.server.facade.service.SemanticLayerService;
+import com.tencent.supersonic.headless.server.web.service.SchemaService;
 import com.tencent.supersonic.headless.server.web.service.WorkflowService;
 import com.tencent.supersonic.headless.server.utils.ComponentFactory;
 import lombok.extern.slf4j.Slf4j;
@@ -80,20 +91,23 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
 @Slf4j
 public class ChatQueryServiceImpl implements ChatQueryService {
-
     @Autowired
     private SemanticLayerService semanticLayerService;
+    @Autowired
+    private SchemaService schemaService;
     @Autowired
     private ChatContextService chatContextService;
     @Autowired
@@ -117,6 +131,20 @@ public class ChatQueryServiceImpl implements ChatQueryService {
     }
 
     @Override
+    public MapInfoResp map(QueryMapReq queryMapReq) {
+
+        QueryReq queryReq = new QueryReq();
+        BeanUtils.copyProperties(queryMapReq, queryReq);
+        List<DataSetResp> dataSets = dataSetService.getDataSets(queryMapReq.getDataSetNames(), queryMapReq.getUser());
+
+        Set<Long> dataSetIds = dataSets.stream().map(SchemaItem::getId).collect(Collectors.toSet());
+        queryReq.setDataSetIds(dataSetIds);
+        MapResp mapResp = performMapping(queryReq);
+        dataSetIds.retainAll(mapResp.getMapInfo().getDataSetElementMatches().keySet());
+        return convert(mapResp, queryMapReq.getTopN(), dataSetIds);
+    }
+
+    @Override
     public ParseResp performParsing(QueryReq queryReq) {
         ParseResp parseResult = new ParseResp(queryReq.getChatId(), queryReq.getQueryText());
         // build queryContext and chatContext
@@ -135,7 +163,7 @@ public class ChatQueryServiceImpl implements ChatQueryService {
 
     public QueryContext buildQueryContext(QueryReq queryReq) {
 
-        SemanticSchema semanticSchema = semanticLayerService.getSemanticSchema();
+        SemanticSchema semanticSchema = schemaService.getSemanticSchema();
         Map<Long, List<Long>> modelIdToDataSetIds = dataSetService.getModelIdToDataSetIds();
         QueryContext queryCtx = QueryContext.builder()
                 .queryFilters(queryReq.getQueryFilters())
@@ -212,7 +240,7 @@ public class ChatQueryServiceImpl implements ChatQueryService {
     @Override
     public QueryResult executeDirectQuery(QueryDataReq queryData, User user) throws Exception {
         SemanticParseInfo parseInfo = getSemanticParseInfo(queryData);
-        SemanticSchema semanticSchema = semanticLayerService.getSemanticSchema();
+        SemanticSchema semanticSchema = schemaService.getSemanticSchema();
 
         SemanticQuery semanticQuery = QueryManager.createQuery(parseInfo.getQueryMode());
         semanticQuery.setParseInfo(parseInfo);
@@ -319,14 +347,6 @@ public class ChatQueryServiceImpl implements ChatQueryService {
         }
         log.info("after replaceMetrics:{}", correctorSql);
         parseInfo.getSqlInfo().setCorrectS2SQL(correctorSql);
-    }
-
-    @Override
-    public EntityInfo getEntityInfo(SemanticParseInfo parseInfo, User user) {
-        SemanticLayerService semanticService = ContextUtils.getBean(SemanticLayerService.class);
-        DataSetSchema dataSetSchema =
-                semanticService.getSemanticSchema().getDataSetSchemaMap().get(parseInfo.getDataSetId());
-        return semanticService.getEntityInfo(parseInfo, dataSetSchema, user);
     }
 
     private void updateDateInfo(QueryDataReq queryData, SemanticParseInfo parseInfo,
@@ -519,8 +539,7 @@ public class ChatQueryServiceImpl implements ChatQueryService {
     @Override
     public Object queryDimensionValue(DimensionValueReq dimensionValueReq, User user) throws Exception {
         SemanticQueryResp semanticQueryResp = new SemanticQueryResp();
-        SemanticLayerService semanticService = ContextUtils.getBean(SemanticLayerService.class);
-        SemanticSchema semanticSchema = semanticService.getSemanticSchema();
+        SemanticSchema semanticSchema = schemaService.getSemanticSchema();
         SchemaElement schemaElement = semanticSchema.getDimension(dimensionValueReq.getElementID());
         Set<Long> detectDataSetIds = new HashSet<>();
         detectDataSetIds.add(schemaElement.getDataSet());
@@ -604,7 +623,7 @@ public class ChatQueryServiceImpl implements ChatQueryService {
 
     private SemanticParseInfo correctSqlReq(QuerySqlReq querySqlReq, User user) {
         QueryContext queryCtx = new QueryContext();
-        SemanticSchema semanticSchema = semanticLayerService.getSemanticSchema();
+        SemanticSchema semanticSchema = schemaService.getSemanticSchema();
         queryCtx.setSemanticSchema(semanticSchema);
         SemanticParseInfo semanticParseInfo = new SemanticParseInfo();
         SqlInfo sqlInfo = new SqlInfo();
@@ -627,6 +646,136 @@ public class ChatQueryServiceImpl implements ChatQueryService {
         });
         log.info("chatQueryServiceImpl correct:{}", sqlInfo.getCorrectS2SQL());
         return semanticParseInfo;
+    }
+
+    private MapInfoResp convert(MapResp mapResp, Integer topN, Set<Long> dataSetIds) {
+        MapInfoResp mapInfoResp = new MapInfoResp();
+        if (Objects.isNull(mapResp)) {
+            return mapInfoResp;
+        }
+        BeanUtils.copyProperties(mapResp, mapInfoResp);
+        MetaFilter metaFilter = new MetaFilter();
+        metaFilter.setIds(new ArrayList<>(dataSetIds));
+        List<DataSetResp> dataSetList = dataSetService.getDataSetList(metaFilter);
+        Map<Long, DataSetResp> dataSetMap = dataSetList.stream()
+                .collect(Collectors.toMap(DataSetResp::getId, d -> d));
+        mapInfoResp.setDataSetMapInfo(getDataSetInfo(mapResp.getMapInfo(), dataSetMap, topN));
+        mapInfoResp.setTerms(getTerms(mapResp.getMapInfo(), dataSetMap));
+        return mapInfoResp;
+    }
+
+    private Map<String, DataSetMapInfo> getDataSetInfo(SchemaMapInfo mapInfo,
+                                                       Map<Long, DataSetResp> dataSetMap,
+                                                       Integer topN) {
+        Map<String, DataSetMapInfo> map = new HashMap<>();
+        Map<Long, List<SchemaElementMatch>> mapFields = getMapFields(mapInfo, dataSetMap);
+        Map<Long, List<SchemaElementMatch>> topFields = getTopFields(topN, mapInfo, dataSetMap);
+        for (Long dataSetId : mapInfo.getDataSetElementMatches().keySet()) {
+            DataSetResp dataSetResp = dataSetMap.get(dataSetId);
+            if (dataSetResp == null) {
+                continue;
+            }
+            if (CollectionUtils.isEmpty(mapFields.get(dataSetId))) {
+                continue;
+            }
+            DataSetMapInfo dataSetMapInfo = new DataSetMapInfo();
+            dataSetMapInfo.setMapFields(mapFields.getOrDefault(dataSetId, Lists.newArrayList()));
+            dataSetMapInfo.setTopFields(topFields.getOrDefault(dataSetId, Lists.newArrayList()));
+            dataSetMapInfo.setName(dataSetResp.getName());
+            dataSetMapInfo.setDescription(dataSetResp.getDescription());
+            map.put(dataSetMapInfo.getName(), dataSetMapInfo);
+        }
+        return map;
+    }
+
+    private Map<Long, List<SchemaElementMatch>> getMapFields(SchemaMapInfo mapInfo,
+                                                             Map<Long, DataSetResp> dataSetMap) {
+        Map<Long, List<SchemaElementMatch>> result = new HashMap<>();
+        for (Map.Entry<Long, List<SchemaElementMatch>> entry : mapInfo.getDataSetElementMatches().entrySet()) {
+            List<SchemaElementMatch> values = entry.getValue().stream()
+                    .filter(schemaElementMatch ->
+                            !SchemaElementType.TERM.equals(schemaElementMatch.getElement().getType()))
+                    .collect(Collectors.toList());
+            if (CollectionUtils.isNotEmpty(values) && dataSetMap.containsKey(entry.getKey())) {
+                result.put(entry.getKey(), values);
+            }
+        }
+        return result;
+    }
+
+    private Map<Long, List<SchemaElementMatch>> getTopFields(Integer topN,
+                                                             SchemaMapInfo mapInfo,
+                                                             Map<Long, DataSetResp> dataSetMap) {
+        Map<Long, List<SchemaElementMatch>> result = new HashMap<>();
+        if (0 == topN) {
+            return result;
+        }
+        SemanticSchema semanticSchema = schemaService.getSemanticSchema();
+        for (Map.Entry<Long, List<SchemaElementMatch>> entry : mapInfo.getDataSetElementMatches().entrySet()) {
+            Long dataSetId = entry.getKey();
+            List<SchemaElementMatch> values = entry.getValue();
+            DataSetResp dataSetResp = dataSetMap.get(dataSetId);
+            if (dataSetResp == null || CollectionUtils.isEmpty(values)) {
+                continue;
+            }
+            String dataSetName = dataSetResp.getName();
+            //topN dimensions
+            Set<SchemaElementMatch> dimensions = semanticSchema.getDimensions(dataSetId)
+                    .stream().sorted(Comparator.comparing(SchemaElement::getUseCnt).reversed())
+                    .limit(topN - 1).map(mergeFunction()).collect(Collectors.toSet());
+
+            SchemaElementMatch timeDimensionMatch = getTimeDimension(dataSetId, dataSetName);
+            dimensions.add(timeDimensionMatch);
+
+            //topN metrics
+            Set<SchemaElementMatch> metrics = semanticSchema.getMetrics(dataSetId)
+                    .stream().sorted(Comparator.comparing(SchemaElement::getUseCnt).reversed())
+                    .limit(topN).map(mergeFunction()).collect(Collectors.toSet());
+
+            dimensions.addAll(metrics);
+            result.put(dataSetId, new ArrayList<>(dimensions));
+        }
+        return result;
+    }
+
+    private Map<String, List<SchemaElementMatch>> getTerms(SchemaMapInfo mapInfo,
+                                                           Map<Long, DataSetResp> dataSetNameMap) {
+        Map<String, List<SchemaElementMatch>> termMap = new HashMap<>();
+        Map<Long, List<SchemaElementMatch>> dataSetElementMatches = mapInfo.getDataSetElementMatches();
+        for (Map.Entry<Long, List<SchemaElementMatch>> entry : dataSetElementMatches.entrySet()) {
+            DataSetResp dataSetResp = dataSetNameMap.get(entry.getKey());
+            if (dataSetResp == null) {
+                continue;
+            }
+            List<SchemaElementMatch> terms = entry.getValue().stream().filter(schemaElementMatch
+                            -> SchemaElementType.TERM.equals(schemaElementMatch.getElement().getType()))
+                    .collect(Collectors.toList());
+            termMap.put(dataSetResp.getName(), terms);
+        }
+        return termMap;
+    }
+
+    /***
+     * get time dimension SchemaElementMatch
+     * @param dataSetId
+     * @param dataSetName
+     * @return
+     */
+    private SchemaElementMatch getTimeDimension(Long dataSetId, String dataSetName) {
+        SchemaElement element = SchemaElement.builder().dataSet(dataSetId).dataSetName(dataSetName)
+                .type(SchemaElementType.DIMENSION).bizName(TimeDimensionEnum.DAY.getName()).build();
+
+        SchemaElementMatch timeDimensionMatch = SchemaElementMatch.builder().element(element)
+                .detectWord(TimeDimensionEnum.DAY.getChName()).word(TimeDimensionEnum.DAY.getChName())
+                .similarity(1L).frequency(BaseWordBuilder.DEFAULT_FREQUENCY).build();
+
+        return timeDimensionMatch;
+    }
+
+    private Function<SchemaElement, SchemaElementMatch> mergeFunction() {
+        return schemaElement -> SchemaElementMatch.builder().element(schemaElement)
+                .frequency(BaseWordBuilder.DEFAULT_FREQUENCY).word(schemaElement.getName()).similarity(1)
+                .detectWord(schemaElement.getName()).build();
     }
 
 }

@@ -29,8 +29,13 @@ import com.tencent.supersonic.headless.server.pojo.yaml.MeasureYamlTpl;
 import com.tencent.supersonic.headless.server.pojo.yaml.MetricParamYamlTpl;
 import com.tencent.supersonic.headless.server.pojo.yaml.MetricTypeParamsYamlTpl;
 import com.tencent.supersonic.headless.server.pojo.yaml.MetricYamlTpl;
-import com.tencent.supersonic.headless.server.web.service.CatalogService;
 import com.tencent.supersonic.headless.server.utils.DatabaseConverter;
+import com.tencent.supersonic.headless.server.web.service.SchemaService;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.tuple.Triple;
+import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -41,20 +46,16 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.tuple.Triple;
-import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 
 
 @Slf4j
 @Service
 public class SemanticSchemaManager {
 
-    private final CatalogService catalog;
+    private final SchemaService schemaService;
 
-    public SemanticSchemaManager(CatalogService catalog) {
-        this.catalog = catalog;
+    public SemanticSchemaManager(SchemaService schemaService) {
+        this.schemaService = schemaService;
     }
 
     public SemanticModel getSemanticModel(SemanticSchemaResp semanticSchemaResp) {
@@ -64,7 +65,7 @@ public class SemanticSchemaManager {
         List<DataModelYamlTpl> dataModelYamlTpls = new ArrayList<>();
         List<MetricYamlTpl> metricYamlTpls = new ArrayList<>();
         Map<Long, String> modelIdName = new HashMap<>();
-        catalog.getSchemaYamlTpl(semanticSchemaResp, dimensionYamlTpls,
+        schemaService.getSchemaYamlTpl(semanticSchemaResp, dimensionYamlTpls,
                 dataModelYamlTpls, metricYamlTpls, modelIdName);
         DatabaseResp databaseResp = semanticSchemaResp.getDatabaseResp();
         semanticModel.setDatabase(DatabaseConverter.convert(databaseResp));

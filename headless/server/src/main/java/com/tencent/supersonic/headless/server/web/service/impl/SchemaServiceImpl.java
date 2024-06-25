@@ -1,24 +1,22 @@
 package com.tencent.supersonic.headless.server.web.service.impl;
 
-import com.github.pagehelper.PageInfo;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
+import com.tencent.supersonic.common.pojo.ItemDateResp;
 import com.tencent.supersonic.common.pojo.ModelRela;
 import com.tencent.supersonic.common.pojo.enums.AuthType;
 import com.tencent.supersonic.common.pojo.enums.StatusEnum;
 import com.tencent.supersonic.common.pojo.enums.TypeEnums;
-import com.tencent.supersonic.common.pojo.exception.InvalidArgumentException;
 import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.headless.api.pojo.DataSetSchema;
+import com.tencent.supersonic.headless.api.pojo.ItemDateFilter;
+import com.tencent.supersonic.headless.api.pojo.SemanticSchema;
 import com.tencent.supersonic.headless.api.pojo.enums.SchemaType;
 import com.tencent.supersonic.headless.api.pojo.request.DataSetFilterReq;
 import com.tencent.supersonic.headless.api.pojo.request.ItemUseReq;
-import com.tencent.supersonic.headless.api.pojo.request.PageDimensionReq;
-import com.tencent.supersonic.headless.api.pojo.request.PageMetricReq;
 import com.tencent.supersonic.headless.api.pojo.request.SchemaFilterReq;
-import com.tencent.supersonic.headless.api.pojo.request.SchemaItemQueryReq;
 import com.tencent.supersonic.headless.api.pojo.response.DataSetResp;
 import com.tencent.supersonic.headless.api.pojo.response.DataSetSchemaResp;
 import com.tencent.supersonic.headless.api.pojo.response.DatabaseResp;
@@ -34,10 +32,21 @@ import com.tencent.supersonic.headless.api.pojo.response.ModelSchemaResp;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticSchemaResp;
 import com.tencent.supersonic.headless.api.pojo.response.TagResp;
 import com.tencent.supersonic.headless.api.pojo.response.TermResp;
+import com.tencent.supersonic.headless.server.manager.DimensionYamlManager;
+import com.tencent.supersonic.headless.server.manager.MetricYamlManager;
+import com.tencent.supersonic.headless.server.manager.ModelYamlManager;
 import com.tencent.supersonic.headless.server.pojo.MetaFilter;
 import com.tencent.supersonic.headless.server.pojo.ModelFilter;
 import com.tencent.supersonic.headless.server.pojo.TagFilter;
+import com.tencent.supersonic.headless.server.pojo.yaml.DataModelYamlTpl;
+import com.tencent.supersonic.headless.server.pojo.yaml.DimensionYamlTpl;
+import com.tencent.supersonic.headless.server.pojo.yaml.MetricYamlTpl;
+import com.tencent.supersonic.headless.server.utils.DataSetSchemaBuilder;
+import com.tencent.supersonic.headless.server.utils.DimensionConverter;
+import com.tencent.supersonic.headless.server.utils.MetricConverter;
+import com.tencent.supersonic.headless.server.utils.StatUtils;
 import com.tencent.supersonic.headless.server.web.service.DataSetService;
+import com.tencent.supersonic.headless.server.web.service.DatabaseService;
 import com.tencent.supersonic.headless.server.web.service.DimensionService;
 import com.tencent.supersonic.headless.server.web.service.DomainService;
 import com.tencent.supersonic.headless.server.web.service.MetricService;
@@ -46,10 +55,6 @@ import com.tencent.supersonic.headless.server.web.service.ModelService;
 import com.tencent.supersonic.headless.server.web.service.SchemaService;
 import com.tencent.supersonic.headless.server.web.service.TagMetaService;
 import com.tencent.supersonic.headless.server.web.service.TermService;
-import com.tencent.supersonic.headless.server.utils.DataSetSchemaBuilder;
-import com.tencent.supersonic.headless.server.utils.DimensionConverter;
-import com.tencent.supersonic.headless.server.utils.MetricConverter;
-import com.tencent.supersonic.headless.server.utils.StatUtils;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
@@ -91,6 +96,7 @@ public class SchemaServiceImpl implements SchemaService {
     private final ModelRelaService modelRelaService;
     private final TagMetaService tagService;
     private final TermService termService;
+    private final DatabaseService databaseService;
 
     @Value("${s2.schema.cache.enable:true}")
     private boolean schemaCacheEnable;
@@ -101,7 +107,8 @@ public class SchemaServiceImpl implements SchemaService {
             DomainService domainService,
             DataSetService dataSetService,
             ModelRelaService modelRelaService,
-            StatUtils statUtils, TagMetaService tagService, TermService termService) {
+            StatUtils statUtils, TagMetaService tagService,
+            TermService termService, DatabaseService databaseService) {
         this.modelService = modelService;
         this.dimensionService = dimensionService;
         this.metricService = metricService;
@@ -111,10 +118,9 @@ public class SchemaServiceImpl implements SchemaService {
         this.statUtils = statUtils;
         this.tagService = tagService;
         this.termService = termService;
+        this.databaseService = databaseService;
     }
 
-    @SneakyThrows
-    @Override
     public List<DataSetSchemaResp> fetchDataSetSchema(DataSetFilterReq filter) {
         List<DataSetSchemaResp> dataSetList = Lists.newArrayList();
         if (schemaCacheEnable) {
@@ -156,11 +162,6 @@ public class SchemaServiceImpl implements SchemaService {
         return null;
     }
 
-    @Override
-    public List<DataSetSchema> getDataSetSchema() {
-        return getDataSetSchema(new ArrayList<>());
-    }
-
     public List<DataSetSchema> getDataSetSchema(List<Long> ids) {
         List<DataSetSchema> domainSchemaList = new ArrayList<>();
 
@@ -169,6 +170,11 @@ public class SchemaServiceImpl implements SchemaService {
         }
 
         return domainSchemaList;
+    }
+
+    @Override
+    public SemanticSchema getSemanticSchema() {
+        return new SemanticSchema(getDataSetSchema(new ArrayList<>()));
     }
 
     public List<DataSetSchemaResp> buildDataSetSchema(DataSetFilterReq filter) {
@@ -307,25 +313,18 @@ public class SchemaServiceImpl implements SchemaService {
     }
 
     @Override
-    public PageInfo<DimensionResp> queryDimension(PageDimensionReq pageDimensionCmd, User user) {
-        return dimensionService.queryDimension(pageDimensionCmd);
+    public DimensionResp getDimension(String bizName, Long modelId) {
+        return dimensionService.getDimension(bizName, modelId);
     }
 
     @Override
-    public PageInfo<MetricResp> queryMetric(PageMetricReq pageMetricReq, User user) {
-        return metricService.queryMetric(pageMetricReq, user);
+    public List<DimensionResp> getDimensions(MetaFilter metaFilter) {
+        return dimensionService.getDimensions(metaFilter);
     }
 
     @Override
-    public List querySchemaItem(SchemaItemQueryReq schemaItemQueryReq) {
-        MetaFilter metaFilter = new MetaFilter();
-        metaFilter.setIds(schemaItemQueryReq.getIds());
-        if (TypeEnums.METRIC.equals(schemaItemQueryReq.getType())) {
-            return metricService.getMetrics(metaFilter);
-        } else if (TypeEnums.DIMENSION.equals(schemaItemQueryReq.getType())) {
-            return dimensionService.getDimensions(metaFilter);
-        }
-        throw new InvalidArgumentException("暂不支持的类型" + schemaItemQueryReq.getType().name());
+    public List<MetricResp> getMetrics(MetaFilter metaFilter) {
+        return metricService.getMetrics(metaFilter);
     }
 
     @Override
@@ -336,6 +335,17 @@ public class SchemaServiceImpl implements SchemaService {
     @Override
     public List<ModelResp> getModelList(User user, AuthType authTypeEnum, Long domainId) {
         return modelService.getModelListWithAuth(user, domainId, authTypeEnum);
+    }
+
+    @Override
+    public List<ModelResp> getModelList(List<Long> modelIds) {
+        List<ModelResp> modelRespList = new ArrayList<>();
+        if (!org.apache.commons.collections.CollectionUtils.isEmpty(modelIds)) {
+            modelIds.stream().forEach(m -> {
+                modelRespList.add(modelService.getModel(m));
+            });
+        }
+        return modelRespList;
     }
 
     public SemanticSchemaResp buildSemanticSchema(SchemaFilterReq schemaFilterReq) {
@@ -365,7 +375,6 @@ public class SchemaServiceImpl implements SchemaService {
                     .flatMap(Collection::stream).collect(Collectors.toList()));
             semanticSchemaResp.setModelResps(modelSchemaResps.stream().map(this::convert).collect(Collectors.toList()));
             semanticSchemaResp.setSchemaType(SchemaType.MODEL);
-
         }
         if (!CollectionUtils.isEmpty(semanticSchemaResp.getModelIds())) {
             // add tag info
@@ -424,8 +433,7 @@ public class SchemaServiceImpl implements SchemaService {
                 itemResp.getChildren().add(dataSet);
             }
         }
-        return itemResps.stream().filter(itemResp -> itemResp.getParentId() == 0)
-                .collect(Collectors.toList());
+        return itemResps.stream().filter(ItemResp::isRoot).collect(Collectors.toList());
     }
 
     private void fillStaticInfo(List<DataSetSchemaResp> dataSetSchemaResps) {
@@ -463,6 +471,41 @@ public class SchemaServiceImpl implements SchemaService {
         ModelResp modelResp = new ModelResp();
         BeanUtils.copyProperties(modelSchemaResp, modelResp);
         return modelResp;
+    }
+
+    @Override
+    public void getSchemaYamlTpl(SemanticSchemaResp semanticSchemaResp,
+                                 Map<String, List<DimensionYamlTpl>> dimensionYamlMap,
+                                 List<DataModelYamlTpl> dataModelYamlTplList,
+                                 List<MetricYamlTpl> metricYamlTplList,
+                                 Map<Long, String> modelIdName) {
+
+        List<ModelResp> modelResps = semanticSchemaResp.getModelResps();
+        if (org.apache.commons.collections.CollectionUtils.isEmpty(modelResps)) {
+            return;
+        }
+        List<DimSchemaResp> dimensionResps = semanticSchemaResp.getDimensions();
+        Long databaseId = modelResps.get(0).getDatabaseId();
+        DatabaseResp databaseResp = databaseService.getDatabase(databaseId);
+        for (ModelResp modelResp : modelResps) {
+            modelIdName.put(modelResp.getId(), modelResp.getBizName());
+            dataModelYamlTplList.add(ModelYamlManager.convert2YamlObj(modelResp, databaseResp));
+            if (!dimensionYamlMap.containsKey(modelResp.getBizName())) {
+                dimensionYamlMap.put(modelResp.getBizName(), new ArrayList<>());
+            }
+            List<DimensionResp> dimensionRespList = dimensionResps.stream()
+                    .filter(d -> d.getModelBizName().equalsIgnoreCase(modelResp.getBizName()))
+                    .collect(Collectors.toList());
+            dimensionYamlMap.get(modelResp.getBizName()).addAll(DimensionYamlManager.convert2DimensionYaml(
+                    dimensionRespList));
+        }
+        List<MetricResp> metricResps = new ArrayList<>(semanticSchemaResp.getMetrics());
+        metricYamlTplList.addAll(MetricYamlManager.convert2YamlObj(metricResps));
+    }
+
+    @Override
+    public ItemDateResp getItemDate(ItemDateFilter dimension, ItemDateFilter metric) {
+        return modelService.getItemDate(dimension, metric);
     }
 
 }

@@ -168,7 +168,7 @@ public class TagMetaServiceImpl implements TagMetaService {
 
         TagFilter tagFilter = new TagFilter();
         BeanUtils.copyProperties(tagMarketPageReq, tagFilter);
-        List<CollectDO> collectList = collectService.getCollectList(user.getName());
+        List<CollectDO> collectList = collectService.getCollectionList(user.getName());
         if (tagMarketPageReq.isHasCollect()) {
             List<Long> collectIds = collectList.stream()
                     .filter(collectDO -> SchemaElementType.TAG.name().equalsIgnoreCase(collectDO.getType()))
@@ -303,7 +303,7 @@ public class TagMetaServiceImpl implements TagMetaService {
     }
 
     private TagResp fillCollectAndAdminInfo(TagResp tagResp, User user) {
-        List<Long> collectIds = collectService.getCollectList(user.getName())
+        List<Long> collectIds = collectService.getCollectionList(user.getName())
                 .stream().filter(collectDO -> TypeEnums.TAG.name().equalsIgnoreCase(collectDO.getType()))
                 .map(CollectDO::getCollectId).collect(Collectors.toList());
         if (CollectionUtils.isNotEmpty(collectIds) && collectIds.contains(tagResp.getId())) {
@@ -317,7 +317,7 @@ public class TagMetaServiceImpl implements TagMetaService {
     }
 
     private TagResp fillCollectAndAdminInfo(List<TagResp> tagRespList, User user) {
-        List<Long> collectIds = collectService.getCollectList(user.getName())
+        List<Long> collectIds = collectService.getCollectionList(user.getName())
                 .stream().filter(collectDO -> TypeEnums.TAG.name().equalsIgnoreCase(collectDO.getType()))
                 .map(CollectDO::getCollectId).collect(Collectors.toList());
 

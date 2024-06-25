@@ -5,7 +5,7 @@ import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
 import com.tencent.supersonic.headless.api.pojo.request.QueryDataSetReq;
 import com.tencent.supersonic.headless.api.pojo.request.SemanticQueryReq;
 import com.tencent.supersonic.headless.server.web.service.DataSetService;
-import com.tencent.supersonic.headless.server.web.service.SemanticLayerService;
+import com.tencent.supersonic.headless.server.facade.service.SemanticLayerService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;

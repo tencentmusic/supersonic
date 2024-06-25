@@ -33,7 +33,7 @@ import com.tencent.supersonic.headless.api.pojo.response.MetricResp;
 import com.tencent.supersonic.headless.server.pojo.MetaFilter;
 import com.tencent.supersonic.headless.server.web.service.DimensionService;
 import com.tencent.supersonic.headless.server.web.service.MetricService;
-import com.tencent.supersonic.headless.server.web.service.SemanticLayerService;
+import com.tencent.supersonic.headless.server.facade.service.SemanticLayerService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
