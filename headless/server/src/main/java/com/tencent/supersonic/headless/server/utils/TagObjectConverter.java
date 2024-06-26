@@ -4,7 +4,7 @@ import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.headless.api.pojo.request.TagObjectReq;
 import com.tencent.supersonic.headless.api.pojo.response.TagObjectResp;
 import com.tencent.supersonic.headless.server.persistence.dataobject.TagObjectDO;
-import org.apache.logging.log4j.util.Strings;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.util.CollectionUtils;
 
@@ -24,7 +24,7 @@ public class TagObjectConverter {
     public static TagObjectResp convert2Resp(TagObjectDO tagObjectDO) {
         TagObjectResp tagObjectResp = new TagObjectResp();
         BeanUtils.copyProperties(tagObjectDO, tagObjectResp);
-        if (Strings.isNotEmpty(tagObjectDO.getExt())) {
+        if (StringUtils.isNotEmpty(tagObjectDO.getExt())) {
             tagObjectResp.setExt(JsonUtil.objectToMapString(tagObjectDO.getExt()));
         }
         return tagObjectResp;

@@ -13,7 +13,7 @@ import static dev.langchain4j.milvus.spring.Properties.PREFIX;
 public class MilvusAutoConfig {
 
     @Bean
-    @ConditionalOnProperty(PREFIX + ".embedding-store.url")
+    @ConditionalOnProperty(PREFIX + ".embedding-store.uri")
     EmbeddingStoreFactory milvusChatModel(Properties properties) {
         return new MilvusEmbeddingStoreFactory(properties);
     }

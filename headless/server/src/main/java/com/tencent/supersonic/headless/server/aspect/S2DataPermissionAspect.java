@@ -2,7 +2,6 @@ package com.tencent.supersonic.headless.server.aspect;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
@@ -101,7 +100,7 @@ public class S2DataPermissionAspect {
             return joinPoint.proceed();
         }
         User user = (User) objects[1];
-        if (Objects.isNull(user) || Strings.isNullOrEmpty(user.getName())) {
+        if (Objects.isNull(user) || StringUtils.isEmpty(user.getName())) {
             throw new RuntimeException("please provide user information");
         }
         List<Long> modelIds = getModelsInDataSet(queryReq);

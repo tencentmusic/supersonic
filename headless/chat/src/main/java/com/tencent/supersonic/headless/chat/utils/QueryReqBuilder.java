@@ -20,7 +20,6 @@ import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
 import com.tencent.supersonic.headless.chat.query.QueryManager;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.BeanUtils;
 import org.springframework.util.CollectionUtils;
 
@@ -73,7 +72,7 @@ public class QueryReqBuilder {
 
     private static List<Filter> getFilters(Set<QueryFilter> queryFilters) {
         List<Filter> dimensionFilters = queryFilters.stream()
-                .filter(chatFilter -> Strings.isNotEmpty(chatFilter.getBizName()))
+                .filter(chatFilter -> StringUtils.isNotEmpty(chatFilter.getBizName()))
                 .map(chatFilter -> new Filter(chatFilter.getBizName(), chatFilter.getOperator(), chatFilter.getValue()))
                 .collect(Collectors.toList());
         return dimensionFilters;

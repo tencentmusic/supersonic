@@ -2,6 +2,7 @@ package com.tencent.supersonic.headless.api.pojo.request;
 
 
 import com.google.common.collect.Lists;
+import com.tencent.supersonic.common.jsqlparser.SqlAddHelper;
 import com.tencent.supersonic.common.pojo.Aggregator;
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.DateConf;
@@ -12,11 +13,6 @@ import com.tencent.supersonic.common.pojo.enums.QueryType;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.DateModeUtils;
 import com.tencent.supersonic.common.util.SqlFilterUtils;
-import com.tencent.supersonic.common.jsqlparser.SqlAddHelper;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.JSQLParserException;
@@ -36,8 +32,12 @@ import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.SelectItem;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.util.Strings;
 import org.springframework.util.CollectionUtils;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 
 @Data
@@ -56,7 +56,7 @@ public class QueryStructReq extends SemanticQueryReq {
 
     public List<String> getGroups() {
         if (!CollectionUtils.isEmpty(this.groups)) {
-            this.groups = groups.stream().filter(group -> !Strings.isEmpty(group)).collect(Collectors.toList());
+            this.groups = groups.stream().filter(group -> !StringUtils.isEmpty(group)).collect(Collectors.toList());
         }
 
         if (CollectionUtils.isEmpty(this.groups)) {

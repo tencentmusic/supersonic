@@ -14,7 +14,6 @@ import dev.langchain4j.store.embedding.TextSegmentConvert;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
@@ -116,7 +115,7 @@ public class SimilarQueryManager {
     }
 
     private ResponseEntity<String> doRequest(String path, String jsonBody) {
-        if (Strings.isEmpty(embeddingConfig.getUrl())) {
+        if (StringUtils.isEmpty(embeddingConfig.getUrl())) {
             return ResponseEntity.of(Optional.empty());
         }
         String url = embeddingConfig.getUrl() + path;

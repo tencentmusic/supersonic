@@ -1,6 +1,5 @@
 package com.tencent.supersonic.headless.core.translator;
 
-import com.google.common.base.Strings;
 import com.tencent.supersonic.common.jsqlparser.SqlSelectHelper;
 import com.tencent.supersonic.common.util.StringUtil;
 import com.tencent.supersonic.headless.api.pojo.MetricTable;
@@ -64,8 +63,8 @@ public class DefaultSemanticTranslator implements SemanticTranslator {
             queryStatement.getMetricQueryParam().setNativeQuery(queryParam.getQueryType().isNativeAggQuery());
             doParse(queryStatement);
         }
-        if (Strings.isNullOrEmpty(queryStatement.getSql())
-                || Strings.isNullOrEmpty(queryStatement.getSourceId())) {
+        if (StringUtils.isEmpty(queryStatement.getSql())
+                || StringUtils.isEmpty(queryStatement.getSourceId())) {
             throw new RuntimeException("parse Exception: " + queryStatement.getErrMsg());
         }
         if (StringUtils.isNotBlank(queryStatement.getSql())
