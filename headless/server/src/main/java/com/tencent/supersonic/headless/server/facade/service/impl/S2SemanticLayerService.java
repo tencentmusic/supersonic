@@ -17,7 +17,6 @@ import com.tencent.supersonic.headless.api.pojo.QueryParam;
 import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
-import com.tencent.supersonic.headless.api.pojo.SqlInfo;
 import com.tencent.supersonic.headless.api.pojo.TagTypeDefaultConfig;
 import com.tencent.supersonic.headless.api.pojo.TimeDefaultConfig;
 import com.tencent.supersonic.headless.api.pojo.request.ExplainSqlReq;
@@ -28,7 +27,6 @@ import com.tencent.supersonic.headless.api.pojo.request.QuerySqlReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
 import com.tencent.supersonic.headless.api.pojo.request.SchemaFilterReq;
 import com.tencent.supersonic.headless.api.pojo.request.SemanticQueryReq;
-import com.tencent.supersonic.headless.api.pojo.response.DatabaseResp;
 import com.tencent.supersonic.headless.api.pojo.response.DimensionResp;
 import com.tencent.supersonic.headless.api.pojo.response.ExplainResp;
 import com.tencent.supersonic.headless.api.pojo.response.ItemResp;
@@ -45,19 +43,11 @@ import com.tencent.supersonic.headless.core.utils.ComponentFactory;
 import com.tencent.supersonic.headless.server.annotation.S2DataPermission;
 import com.tencent.supersonic.headless.server.facade.service.SemanticLayerService;
 import com.tencent.supersonic.headless.server.manager.SemanticSchemaManager;
-import com.tencent.supersonic.headless.server.utils.DatabaseConverter;
 import com.tencent.supersonic.headless.server.utils.QueryReqConverter;
 import com.tencent.supersonic.headless.server.utils.QueryUtils;
 import com.tencent.supersonic.headless.server.utils.StatUtils;
 import com.tencent.supersonic.headless.server.web.service.DataSetService;
 import com.tencent.supersonic.headless.server.web.service.SchemaService;
-import lombok.SneakyThrows;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.BeanUtils;
-import org.springframework.stereotype.Service;
-
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
@@ -66,6 +56,12 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
+import org.springframework.stereotype.Service;
 
 
 @Service
@@ -160,20 +156,24 @@ public class S2SemanticLayerService implements SemanticLayerService {
     }
 
     private QueryStatement buildQueryStatement(SemanticQueryReq semanticQueryReq, User user) throws Exception {
-        if (Objects.nonNull(semanticQueryReq.getSqlInfo()) && StringUtils.isNotBlank(
-                semanticQueryReq.getSqlInfo().getQuerySQL())) {
-            return buildSqlInfoStatement(semanticQueryReq.getSqlInfo(), semanticQueryReq.getDataSetId());
-        }
+        QueryStatement queryStatement = null;
         if (semanticQueryReq instanceof QuerySqlReq) {
-            return buildSqlQueryStatement((QuerySqlReq) semanticQueryReq, user);
+            queryStatement = buildSqlQueryStatement((QuerySqlReq) semanticQueryReq, user);
         }
         if (semanticQueryReq instanceof QueryStructReq) {
-            return buildStructQueryStatement((QueryStructReq) semanticQueryReq);
+            queryStatement = buildStructQueryStatement((QueryStructReq) semanticQueryReq);
         }
         if (semanticQueryReq instanceof QueryMultiStructReq) {
-            return buildMultiStructQueryStatement((QueryMultiStructReq) semanticQueryReq, user);
+            queryStatement = buildMultiStructQueryStatement((QueryMultiStructReq) semanticQueryReq, user);
         }
-        return null;
+        if (Objects.nonNull(queryStatement) && Objects.nonNull(semanticQueryReq.getSqlInfo()) && StringUtils.isNotBlank(
+                semanticQueryReq.getSqlInfo().getQuerySQL())) {
+            queryStatement.setSql(semanticQueryReq.getSqlInfo().getQuerySQL());
+            queryStatement.setSourceId(semanticQueryReq.getSqlInfo().getSourceId());
+            queryStatement.setDataSetId(semanticQueryReq.getDataSetId());
+            queryStatement.setIsTranslated(true);
+        }
+        return queryStatement;
     }
 
     private QueryStatement buildStructQueryStatement(QueryStructReq queryStructReq) {
@@ -205,21 +205,6 @@ public class S2SemanticLayerService implements SemanticLayerService {
         }
         log.info("multi sqlParser:{}", sqlParsers);
         return queryUtils.sqlParserUnion(queryMultiStructReq, sqlParsers);
-    }
-
-    private QueryStatement buildSqlInfoStatement(SqlInfo sqlInfo, Long dataSetId) {
-        QueryStatement queryStatement = new QueryStatement();
-        SemanticModel semanticModel = new SemanticModel();
-        DatabaseResp databaseResp = schemaService.getDatabase(Long.valueOf(sqlInfo.getSourceId()));
-        if (Objects.nonNull(databaseResp)) {
-            semanticModel.setDatabase(DatabaseConverter.convert(databaseResp));
-        }
-        queryStatement.setSemanticModel(semanticModel);
-        queryStatement.setSql(sqlInfo.getQuerySQL());
-        queryStatement.setSourceId(sqlInfo.getSourceId());
-        queryStatement.setDataSetId(dataSetId);
-        queryStatement.setIsTranslated(true);
-        return queryStatement;
     }
 
     private SchemaFilterReq buildSchemaFilterReq(SemanticQueryReq semanticQueryReq) {
