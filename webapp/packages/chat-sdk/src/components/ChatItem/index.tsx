@@ -320,27 +320,25 @@ const ChatItem: React.FC<Props> = ({
       )}
       <div className={isMobile ? `${prefixCls}-mobile-msg-card` : `${prefixCls}-msg-card`}>
         <div className={contentClass}>
-          {parseInfo?.queryMode !== 'PLAIN_TEXT' && (
-            <ParseTip
-              isSimpleMode={isSimpleMode}
-              parseLoading={parseLoading}
-              parseInfoOptions={parseInfoOptions}
-              parseTip={parseTip}
-              currentParseInfo={parseInfo}
-              agentId={agentId}
-              dimensionFilters={dimensionFilters}
-              dateInfo={dateInfo}
-              entityInfo={entityInfo}
-              integrateSystem={integrateSystem}
-              parseTimeCost={parseTimeCost?.parseTime}
-              isDeveloper={isDeveloper}
-              onSelectParseInfo={onSelectParseInfo}
-              onSwitchEntity={onSwitchEntity}
-              onFiltersChange={onFiltersChange}
-              onDateInfoChange={onDateInfoChange}
-              onRefresh={onRefresh}
-            />
-          )}
+          <ParseTip
+            isSimpleMode={isSimpleMode}
+            parseLoading={parseLoading}
+            parseInfoOptions={parseInfoOptions}
+            parseTip={parseTip}
+            currentParseInfo={parseInfo}
+            agentId={agentId}
+            dimensionFilters={dimensionFilters}
+            dateInfo={dateInfo}
+            entityInfo={entityInfo}
+            integrateSystem={integrateSystem}
+            parseTimeCost={parseTimeCost?.parseTime}
+            isDeveloper={isDeveloper}
+            onSelectParseInfo={onSelectParseInfo}
+            onSwitchEntity={onSwitchEntity}
+            onFiltersChange={onFiltersChange}
+            onDateInfoChange={onDateInfoChange}
+            onRefresh={onRefresh}
+          />
           {executeMode && (
             <>
               {!isMobile && parseInfo?.sqlInfo && isDeveloper && !isSimpleMode && (
@@ -380,9 +378,10 @@ const ChatItem: React.FC<Props> = ({
               />
             )}
         </div>
-        {(parseTip !== '' || (executeMode && !executeLoading)) && (
-          <Tools queryId={parseInfo?.queryId || 0} scoreValue={score} />
-        )}
+        {(parseTip !== '' || (executeMode && !executeLoading)) &&
+          parseInfo?.queryMode !== 'PLAIN_TEXT' && (
+            <Tools queryId={parseInfo?.queryId || 0} scoreValue={score} />
+          )}
       </div>
     </div>
   );
