@@ -26,10 +26,11 @@ import static com.tencent.supersonic.chat.server.parser.ParserConfig.PARSER_MULT
 public class PlainTextExecutor implements ChatExecutor {
 
     private static final String INSTRUCTION = ""
-            + "#Role: You are a nice person to talked to.\n"
-            + "#Task: You will have a small talk with the user, please respond quickly and nicely."
-            + "#History Conversations: %s\n"
-            + "#Current User Input: %s\n"
+            + "#Role: You are a nice person to talk to.\n"
+            + "#Task: Respond quickly and nicely to the user."
+            + "#Rules: 1.ALWAYS use the same language as the input.\n"
+            + "#History Inputs: %s\n"
+            + "#Current Input: %s\n"
             + "#Your response: ";
 
     @Override
