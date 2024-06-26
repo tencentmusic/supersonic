@@ -84,7 +84,7 @@ const ChatItem: React.FC<Props> = ({
   const updateData = (res: Result<MsgDataType>) => {
     let tip: string = '';
     let data: MsgDataType | undefined = undefined;
-    const { queryColumns, queryResults, queryState, queryMode, response, chatContext } =
+    const { queryColumns, queryResults, queryState, queryMode, response, chatContext, textResult } =
       res.data || {};
     if (res.code === 400 || res.code === 401 || res.code === 412) {
       tip = res.msg;
@@ -94,7 +94,8 @@ const ChatItem: React.FC<Props> = ({
       tip = response && typeof response === 'string' ? response : SEARCH_EXCEPTION_TIP;
     } else if (
       (queryColumns && queryColumns.length > 0 && queryResults) ||
-      queryMode === 'WEB_PAGE'
+      queryMode === 'WEB_PAGE' ||
+      queryMode === 'PLAIN_TEXT'
     ) {
       data = res.data;
       tip = '';
@@ -319,44 +320,43 @@ const ChatItem: React.FC<Props> = ({
       )}
       <div className={isMobile ? `${prefixCls}-mobile-msg-card` : `${prefixCls}-msg-card`}>
         <div className={contentClass}>
-          <ParseTip
-            isSimpleMode={isSimpleMode}
-            parseLoading={parseLoading}
-            parseInfoOptions={parseInfoOptions}
-            parseTip={parseTip}
-            currentParseInfo={parseInfo}
-            agentId={agentId}
-            dimensionFilters={dimensionFilters}
-            dateInfo={dateInfo}
-            entityInfo={entityInfo}
-            integrateSystem={integrateSystem}
-            parseTimeCost={parseTimeCost?.parseTime}
-            isDeveloper={isDeveloper}
-            onSelectParseInfo={onSelectParseInfo}
-            onSwitchEntity={onSwitchEntity}
-            onFiltersChange={onFiltersChange}
-            onDateInfoChange={onDateInfoChange}
-            onRefresh={onRefresh}
-          />
+          {parseInfo?.queryMode !== 'PLAIN_TEXT' && (
+            <ParseTip
+              isSimpleMode={isSimpleMode}
+              parseLoading={parseLoading}
+              parseInfoOptions={parseInfoOptions}
+              parseTip={parseTip}
+              currentParseInfo={parseInfo}
+              agentId={agentId}
+              dimensionFilters={dimensionFilters}
+              dateInfo={dateInfo}
+              entityInfo={entityInfo}
+              integrateSystem={integrateSystem}
+              parseTimeCost={parseTimeCost?.parseTime}
+              isDeveloper={isDeveloper}
+              onSelectParseInfo={onSelectParseInfo}
+              onSwitchEntity={onSwitchEntity}
+              onFiltersChange={onFiltersChange}
+              onDateInfoChange={onDateInfoChange}
+              onRefresh={onRefresh}
+            />
+          )}
           {executeMode && (
             <>
-              {!isMobile &&
-                parseInfo?.sqlInfo &&
-                isDeveloper &&
-                integrateSystem !== 'c2' &&
-                !isSimpleMode && (
-                  <SqlItem
-                    llmReq={llmReq}
-                    llmResp={llmResp}
-                    integrateSystem={integrateSystem}
-                    queryMode={parseInfo.queryMode}
-                    sqlInfo={parseInfo.sqlInfo}
-                    sqlTimeCost={parseTimeCost?.sqlTime}
-                  />
-                )}
+              {!isMobile && parseInfo?.sqlInfo && isDeveloper && !isSimpleMode && (
+                <SqlItem
+                  llmReq={llmReq}
+                  llmResp={llmResp}
+                  integrateSystem={integrateSystem}
+                  queryMode={parseInfo.queryMode}
+                  sqlInfo={parseInfo.sqlInfo}
+                  sqlTimeCost={parseTimeCost?.sqlTime}
+                />
+              )}
               <ExecuteItem
                 isSimpleMode={isSimpleMode}
                 queryId={parseInfo?.queryId}
+                queryMode={parseInfo?.queryMode}
                 executeLoading={executeLoading}
                 entitySwitchLoading={entitySwitchLoading}
                 executeTip={executeTip}
@@ -370,17 +370,17 @@ const ChatItem: React.FC<Props> = ({
             </>
           )}
           {(parseTip !== '' || (executeMode && !executeLoading)) &&
-            integrateSystem !== 'c2' &&
-            !isSimpleMode && (
+            !isSimpleMode &&
+            parseInfo?.queryMode !== 'PLAIN_TEXT' && (
               <SimilarQuestionItem
                 queryId={parseInfo?.queryId}
-                defaultExpanded={parseTip !== '' || executeTip !== '' || integrateSystem === 'wiki'}
+                defaultExpanded={parseTip !== '' || executeTip !== ''}
                 similarQueries={data?.similarQueries}
                 onSelectQuestion={onSelectQuestion}
               />
             )}
         </div>
-        {(parseTip !== '' || (executeMode && !executeLoading)) && integrateSystem !== 'c2' && (
+        {(parseTip !== '' || (executeMode && !executeLoading)) && (
           <Tools queryId={parseInfo?.queryId || 0} scoreValue={score} />
         )}
       </div>

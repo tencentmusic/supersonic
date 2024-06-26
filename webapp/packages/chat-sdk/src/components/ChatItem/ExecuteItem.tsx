@@ -9,6 +9,7 @@ import React, { ReactNode, useState } from 'react';
 
 type Props = {
   queryId?: number;
+  queryMode?: string;
   executeLoading: boolean;
   entitySwitchLoading: boolean;
   chartIndex: number;
@@ -23,6 +24,7 @@ type Props = {
 
 const ExecuteItem: React.FC<Props> = ({
   queryId,
+  queryMode,
   executeLoading,
   entitySwitchLoading,
   chartIndex,
@@ -54,6 +56,9 @@ const ExecuteItem: React.FC<Props> = ({
   };
 
   if (executeLoading) {
+    if (queryMode === 'PLAIN_TEXT') {
+      return <Loading />;
+    }
     return getNodeTip('数据查询中');
   }
 
@@ -71,6 +76,10 @@ const ExecuteItem: React.FC<Props> = ({
 
   if (!data) {
     return null;
+  }
+
+  if (data.queryMode === 'PLAIN_TEXT') {
+    return <>{data.textResult}</>;
   }
 
   return (

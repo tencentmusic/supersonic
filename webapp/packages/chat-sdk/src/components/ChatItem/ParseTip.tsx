@@ -121,7 +121,6 @@ const ParseTip: React.FC<Props> = ({
 
   const getTipNode = () => {
     const dimensionItems = dimensions?.filter(item => item.type === 'DIMENSION');
-
     const itemValueClass = `${prefixCls}-tip-item-value`;
     const entityId = dimensionFilters?.length > 0 ? dimensionFilters[0].value : undefined;
     const entityAlias = entity?.alias?.[0]?.split('.')?.[0];
