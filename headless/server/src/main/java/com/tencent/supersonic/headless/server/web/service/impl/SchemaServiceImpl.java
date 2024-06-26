@@ -508,4 +508,9 @@ public class SchemaServiceImpl implements SchemaService {
         return modelService.getItemDate(dimension, metric);
     }
 
+    @Override
+    public DatabaseResp getDatabase(Long id) {
+        return databaseService.getDatabase(id);
+    }
+
 }
