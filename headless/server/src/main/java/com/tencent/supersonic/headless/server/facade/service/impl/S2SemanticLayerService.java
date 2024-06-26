@@ -28,6 +28,7 @@ import com.tencent.supersonic.headless.api.pojo.request.QuerySqlReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
 import com.tencent.supersonic.headless.api.pojo.request.SchemaFilterReq;
 import com.tencent.supersonic.headless.api.pojo.request.SemanticQueryReq;
+import com.tencent.supersonic.headless.api.pojo.response.DatabaseResp;
 import com.tencent.supersonic.headless.api.pojo.response.DimensionResp;
 import com.tencent.supersonic.headless.api.pojo.response.ExplainResp;
 import com.tencent.supersonic.headless.api.pojo.response.ItemResp;
@@ -44,6 +45,7 @@ import com.tencent.supersonic.headless.core.utils.ComponentFactory;
 import com.tencent.supersonic.headless.server.annotation.S2DataPermission;
 import com.tencent.supersonic.headless.server.facade.service.SemanticLayerService;
 import com.tencent.supersonic.headless.server.manager.SemanticSchemaManager;
+import com.tencent.supersonic.headless.server.utils.DatabaseConverter;
 import com.tencent.supersonic.headless.server.utils.QueryReqConverter;
 import com.tencent.supersonic.headless.server.utils.QueryUtils;
 import com.tencent.supersonic.headless.server.utils.StatUtils;
@@ -207,6 +209,12 @@ public class S2SemanticLayerService implements SemanticLayerService {
 
     private QueryStatement buildSqlInfoStatement(SqlInfo sqlInfo, Long dataSetId) {
         QueryStatement queryStatement = new QueryStatement();
+        SemanticModel semanticModel = new SemanticModel();
+        DatabaseResp databaseResp = schemaService.getDatabase(Long.valueOf(sqlInfo.getSourceId()));
+        if (Objects.nonNull(databaseResp)) {
+            semanticModel.setDatabase(DatabaseConverter.convert(databaseResp));
+        }
+        queryStatement.setSemanticModel(semanticModel);
         queryStatement.setSql(sqlInfo.getQuerySQL());
         queryStatement.setSourceId(sqlInfo.getSourceId());
         queryStatement.setDataSetId(dataSetId);

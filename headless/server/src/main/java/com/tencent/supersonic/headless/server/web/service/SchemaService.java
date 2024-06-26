@@ -8,6 +8,7 @@ import com.tencent.supersonic.headless.api.pojo.ItemDateFilter;
 import com.tencent.supersonic.headless.api.pojo.SemanticSchema;
 import com.tencent.supersonic.headless.api.pojo.request.ItemUseReq;
 import com.tencent.supersonic.headless.api.pojo.request.SchemaFilterReq;
+import com.tencent.supersonic.headless.api.pojo.response.DatabaseResp;
 import com.tencent.supersonic.headless.api.pojo.response.DimensionResp;
 import com.tencent.supersonic.headless.api.pojo.response.DomainResp;
 import com.tencent.supersonic.headless.api.pojo.response.ItemResp;
@@ -58,4 +59,6 @@ public interface SchemaService {
                           Map<Long, String> modelIdName);
 
     ItemDateResp getItemDate(ItemDateFilter dimension, ItemDateFilter metric);
+
+    DatabaseResp getDatabase(Long id);
 }
