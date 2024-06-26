@@ -71,7 +71,7 @@ s2:
       path: /tmp
 
   demo:
-    names: S2VisitsDemo,S2ArtistDemo
+    names: S2VisitsDemo,S2ArtistDemo,SmallTalkDemo
     enableLLM: true
 
 # swagger配置
