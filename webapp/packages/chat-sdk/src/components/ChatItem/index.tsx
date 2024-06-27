@@ -16,11 +16,9 @@ import { PARSE_ERROR_TIP, PREFIX_CLS, SEARCH_EXCEPTION_TIP } from '../../common/
 import IconFont from '../IconFont';
 import ParseTip from './ParseTip';
 import ExecuteItem from './ExecuteItem';
-import { isMobile } from '../../utils/utils';
+import { exportData, isMobile } from '../../utils/utils';
 import classNames from 'classnames';
 import Tools from '../Tools';
-import SqlItem from './SqlItem';
-import SimilarQuestionItem from './SimilarQuestionItem';
 import dayjs from 'dayjs';
 import {
   IAggregationPill,
@@ -32,6 +30,7 @@ import {
   ITopNPill,
 } from '../FiltersInfo/types';
 import SqlItemModal, { SqlItemModalHandle } from './SqlItemModal';
+import SimilarQuestionItem from './SimilarQuestionItem';
 
 type Props = {
   msg: string;
@@ -539,10 +538,27 @@ const ChatItem: React.FC<Props> = ({
                 executeItemNode={executeItemNode}
                 isDeveloper={isDeveloper}
                 renderCustomExecuteNode={renderCustomExecuteNode}
-                onClickItem={(key: string) => {
-                  if (key === 'viewSQL') {
-                    sqlItemModalRef.current?.show();
-                  }
+                menu={{
+                  onClick: ({ key }) => {
+                    if (key === 'viewSQL') {
+                      sqlItemModalRef.current?.show();
+                    }
+
+                    if (key === 'exportData' && !!data?.queryResults.length) {
+                      exportData(data);
+                    }
+                  },
+                  items: [
+                    {
+                      label: '导出查询结果',
+                      disabled: !data?.queryResults.length,
+                      key: 'exportData',
+                    },
+                    {
+                      label: '查看SQL',
+                      key: 'viewSQL',
+                    },
+                  ],
                 }}
               />
             </>

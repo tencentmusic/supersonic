@@ -15,11 +15,11 @@ type Props = {
   executeTip?: string;
   executeItemNode?: ReactNode;
   renderCustomExecuteNode?: boolean;
+  menu: MenuProps;
   data?: MsgDataType;
   triggerResize?: boolean;
   isDeveloper?: boolean;
   isSimpleMode?: boolean;
-  onClickItem?: (key: string) => void;
 };
 
 const ExecuteItem: React.FC<Props> = ({
@@ -34,11 +34,16 @@ const ExecuteItem: React.FC<Props> = ({
   triggerResize,
   isDeveloper,
   isSimpleMode,
-  onClickItem,
+  menu,
 }) => {
   const prefixCls = `${PREFIX_CLS}-item`;
-  const [showMsgContentTable, setShowMsgContentTable] = useState<boolean>(false);
   const [msgContentType, setMsgContentType] = useState<MsgContentTypeEnum>();
+  const isShowTableSwitch = [
+    MsgContentTypeEnum.METRIC_TREND,
+    MsgContentTypeEnum.METRIC_BAR,
+  ].includes(msgContentType as MsgContentTypeEnum);
+
+  const [showMsgContentTable, setShowMsgContentTable] = useState<boolean>(false);
 
   const getNodeTip = (title: ReactNode, tip?: string) => {
     return (
@@ -75,10 +80,6 @@ const ExecuteItem: React.FC<Props> = ({
     return null;
   }
 
-  const onClick: MenuProps['onClick'] = ({ key }) => {
-    onClickItem?.(key);
-  };
-
   return (
     <>
       <div className={`${prefixCls}-title-bar`}>
@@ -90,13 +91,12 @@ const ExecuteItem: React.FC<Props> = ({
               {data?.queryTimeCost && isDeveloper && (
                 <span className={`${prefixCls}-title-tip`}>(耗时: {data.queryTimeCost}ms)</span>
               )}
-              {[MsgContentTypeEnum.METRIC_TREND, MsgContentTypeEnum.METRIC_BAR].includes(
-                msgContentType as MsgContentTypeEnum
-              ) && (
+              {isShowTableSwitch && (
                 <Switch
                   style={{ marginLeft: '10px' }}
                   checkedChildren="表格"
                   unCheckedChildren="表格"
+                  checked={showMsgContentTable}
                   onChange={checked => {
                     setShowMsgContentTable(checked);
                   }}
@@ -104,23 +104,7 @@ const ExecuteItem: React.FC<Props> = ({
               )}
             </Col>
             <Col flex="0 1 30px">
-              <Dropdown
-                trigger={['click']}
-                menu={{
-                  onClick,
-                  items: [
-                    {
-                      label: '导出查询结果',
-                      disabled: true,
-                      key: 'exportData',
-                    },
-                    {
-                      label: '查看SQL',
-                      key: 'viewSQL',
-                    },
-                  ],
-                }}
-              >
+              <Dropdown trigger={['click']} menu={menu}>
                 <Tooltip title="更多操作">
                   <Button size="large" type="text" icon={<EllipsisOutlined />} />
                 </Tooltip>
@@ -148,6 +132,13 @@ const ExecuteItem: React.FC<Props> = ({
               triggerResize={triggerResize}
               onMsgContentTypeChange={type => {
                 setMsgContentType(type);
+                if (
+                  [MsgContentTypeEnum.METRIC_TREND, MsgContentTypeEnum.METRIC_BAR].includes(
+                    type as MsgContentTypeEnum
+                  )
+                ) {
+                  setShowMsgContentTable(true);
+                }
               }}
             />
           )}

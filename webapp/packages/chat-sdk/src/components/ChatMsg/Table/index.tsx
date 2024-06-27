@@ -1,11 +1,10 @@
 import { formatByDecimalPlaces, getFormattedValue } from '../../../utils/utils';
-import { Button, Table as AntTable } from 'antd';
+import { Table as AntTable } from 'antd';
 import { MsgDataType } from '../../../common/type';
 import { CLS_PREFIX } from '../../../common/constants';
 import ApplyAuth from '../ApplyAuth';
 import { SizeType } from 'antd/es/config-provider/SizeContext';
 import moment from 'moment';
-import {utils, writeFile} from 'xlsx';
 
 type Props = {
   data: MsgDataType;
@@ -74,28 +73,8 @@ const Table: React.FC<Props> = ({ data, size, loading, onApplyAuth }) => {
     ? queryResults.sort((a, b) => moment(a[dateColumn.nameEn]).diff(moment(b[dateColumn.nameEn])))
     : queryResults;
 
-
-  const handleExport = () => {
-    const data = queryResults.map(res => {
-      return Object.keys(res).reduce((acc, key) => {
-        const column = queryColumns.find(column => column.nameEn === key)!;
-        acc[column.name] = res[key];
-        return acc;
-      }
-      , {})
-    })
-    // 使用xlsx
-    const worksheet = utils.json_to_sheet(data);
-    const workbook = utils.book_new();
-    utils.book_append_sheet(workbook, worksheet, 'Sheet1');
-    writeFile(workbook, `${entityInfo?.dataSetInfo.name || '数据'}-${Date.now()}.xlsx`);
-  }
-
   return (
     <div className={prefixCls}>
-      {data.queryResults.length > 0 && (
-        <Button size='small' style={{marginBottom: '5px'}} onClick={handleExport}>导出</Button>
-      )}
       <AntTable
         pagination={
           queryResults.length <= 10 ? false : { defaultPageSize: 10, position: ['bottomCenter'] }
