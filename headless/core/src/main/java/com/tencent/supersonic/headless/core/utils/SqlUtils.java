@@ -1,13 +1,19 @@
 package com.tencent.supersonic.headless.core.utils;
 
-import static com.tencent.supersonic.common.pojo.Constants.AT_SYMBOL;
-
 import com.tencent.supersonic.common.pojo.QueryColumn;
 import com.tencent.supersonic.common.util.DateUtils;
 import com.tencent.supersonic.headless.api.pojo.enums.DataType;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
 import com.tencent.supersonic.headless.core.pojo.Database;
 import com.tencent.supersonic.headless.core.pojo.JdbcDataSource;
+import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Component;
+
+import javax.sql.DataSource;
 import java.rmi.ServerException;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -21,13 +27,8 @@ import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import javax.sql.DataSource;
-import lombok.Getter;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.stereotype.Component;
+
+import static com.tencent.supersonic.common.pojo.Constants.AT_SYMBOL;
 
 /**
  * tools functions about sql query
@@ -42,10 +43,10 @@ public class SqlUtils {
     @Autowired
     private JdbcDataSource jdbcDataSource;
 
-    @Value("${source.result-limit:1000000}")
+    @Value("${s2.source.result-limit:1000000}")
     private int resultLimit;
 
-    @Value("${source.enable-query-log:false}")
+    @Value("${s2.source.enable-query-log:false}")
     private boolean isQueryLogEnable;
 
     @Getter

@@ -41,7 +41,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class DimValueAspect {
 
-    @Value("${dimension.value.map.enable:true}")
+    @Value("${s2.dimension.value.map.enable:true}")
     private Boolean dimensionValueMapEnable;
     @Autowired
     private DimensionService dimensionService;
