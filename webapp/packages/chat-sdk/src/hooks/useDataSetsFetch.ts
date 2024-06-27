@@ -9,6 +9,7 @@ export function useDataSetsFetch(ids: number[]) {
     data: responseData,
     loading,
     error,
+    run,
   } = useRequest(() => Promise.all(ids.map(id => getDataSetInfo(id))), {
     cacheKey: 'datasetInfo' + ids.join(','),
     debounceWait: 500,
@@ -32,6 +33,10 @@ export function useDataSetsFetch(ids: number[]) {
       setDataSets(map);
     }
   }, [responseData]);
+
+  useEffect(() => {
+    run();
+  }, [ids]);
 
   return {
     loading,
