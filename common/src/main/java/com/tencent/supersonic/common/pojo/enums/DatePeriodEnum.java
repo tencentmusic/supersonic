@@ -1,4 +1,4 @@
-package com.tencent.supersonic.common.util;
+package com.tencent.supersonic.common.pojo.enums;
 
 public enum DatePeriodEnum {
     DAY("日"),

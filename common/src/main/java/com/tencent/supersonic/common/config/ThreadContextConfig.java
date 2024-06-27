@@ -1,5 +1,6 @@
-package com.tencent.supersonic.common.util;
+package com.tencent.supersonic.common.config;
 
+import com.tencent.supersonic.common.util.S2ThreadContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 

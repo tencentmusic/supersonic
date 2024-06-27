@@ -1,4 +1,4 @@
-package com.tencent.supersonic.common.util;
+package com.tencent.supersonic.common.config;
 
 import com.tencent.supersonic.common.interceptor.LogInterceptor;
 import org.springframework.context.annotation.Configuration;
