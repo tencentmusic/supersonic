@@ -1,7 +1,8 @@
 name: SuperSonic enhancement
 description: Add an enhanment for SuperSonic
 title: "[Enhancement] "
-labels: ["kind/enhancement"]
+labels: enhancement
+
 body:
   - type: markdown
     attributes:
