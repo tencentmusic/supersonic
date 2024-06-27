@@ -25,7 +25,7 @@ public class ChatMemoryDO {
     private Integer agentId;
 
     @TableField("db_schema")
-    private String schema;
+    private String dbSchema;
 
     @TableField("s2_sql")
     private String s2sql;

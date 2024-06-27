@@ -35,7 +35,7 @@ public class SqlExecutor implements ChatExecutor {
                         .status(ChatMemoryDO.Status.PENDING)
                         .question(chatExecuteContext.getQueryText())
                         .s2sql(chatExecuteContext.getParseInfo().getSqlInfo().getS2SQL())
-                        .schema(buildSchemaStr(chatExecuteContext.getParseInfo()))
+                        .dbSchema(buildSchemaStr(chatExecuteContext.getParseInfo()))
                         .build());
             }
         }
