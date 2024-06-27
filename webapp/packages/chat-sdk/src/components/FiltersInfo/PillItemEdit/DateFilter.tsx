@@ -11,8 +11,8 @@ type Props = {
 export default function DateFilter({ value, onChange }: Props) {
   const { startDate, endDate } = useMemo(() => {
     return {
-      startDate: value?.[0],
-      endDate: value?.[1],
+      startDate: value.value?.[0],
+      endDate: value.value?.[1],
     };
   }, [value]);
 
