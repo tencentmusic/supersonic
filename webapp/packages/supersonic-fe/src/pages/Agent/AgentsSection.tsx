@@ -1,6 +1,5 @@
-import { DeleteOutlined, EditOutlined, PlusOutlined, UserOutlined } from '@ant-design/icons';
+import { PlusOutlined } from '@ant-design/icons';
 import { Button, Popconfirm, Switch, Table } from 'antd';
-import classNames from 'classnames';
 import moment from 'moment';
 import { useEffect, useState } from 'react';
 import styles from './style.less';
@@ -8,24 +7,22 @@ import { AgentType } from './type';
 
 type Props = {
   agents: AgentType[];
-  currentAgent?: AgentType;
   loading: boolean;
   onSelectAgent: (agent: AgentType) => void;
   onDeleteAgent: (id: number) => void;
-  onEditAgent: (agent?: AgentType) => void;
+
   onSaveAgent: (agent: AgentType, noTip?: boolean) => Promise<void>;
+  onCreatBtnClick?: () => void;
 };
 
 const AgentsSection: React.FC<Props> = ({
   agents,
-  currentAgent,
   onSelectAgent,
   onDeleteAgent,
-  onEditAgent,
   onSaveAgent,
+  onCreatBtnClick,
 }) => {
   const [showAgents, setShowAgents] = useState<AgentType[]>([]);
-  const [showType, setShowType] = useState(localStorage.getItem('AGENT_SHOW_TYPE') || 'list');
 
   useEffect(() => {
     setShowAgents(agents);
@@ -129,91 +126,14 @@ const AgentsSection: React.FC<Props> = ({
           <Button
             type="primary"
             onClick={() => {
-              onEditAgent(undefined);
+              onCreatBtnClick?.();
             }}
           >
             <PlusOutlined />
             新建助理
           </Button>
         </div>
-        {showType === 'list' ? (
-          <Table columns={columns} dataSource={showAgents} />
-        ) : (
-          <div className={styles.agentsContainer}>
-            {showAgents.map((agent) => {
-              const agentItemClass = classNames(styles.agentItem, {
-                [styles.agentActive]: agent.id === currentAgent?.id,
-              });
-              return (
-                <div
-                  className={agentItemClass}
-                  key={agent.id}
-                  onClick={() => {
-                    onSelectAgent(agent);
-                  }}
-                >
-                  <UserOutlined className={styles.agentIcon} />
-                  <div className={styles.agentContent}>
-                    <div className={styles.agentNameBar}>
-                      <div className={styles.agentName}>{agent.name}</div>
-                      <div className={styles.operateIcons}>
-                        <EditOutlined
-                          className={styles.operateIcon}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onEditAgent(agent);
-                          }}
-                        />
-                        <Popconfirm
-                          title="确定删除吗？"
-                          onCancel={(e) => {
-                            e?.stopPropagation();
-                          }}
-                          onConfirm={(e) => {
-                            e?.stopPropagation();
-                            onDeleteAgent(agent.id!);
-                          }}
-                        >
-                          <DeleteOutlined
-                            className={styles.operateIcon}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                            }}
-                          />
-                        </Popconfirm>
-                      </div>
-                    </div>
-                    <div className={styles.bottomBar}>
-                      <div className={styles.agentDescription} title={agent.description}>
-                        {agent.description}
-                      </div>
-                      <div className={styles.toggleStatus}>
-                        {agent.status === 0 ? (
-                          '已禁用'
-                        ) : (
-                          <span className={styles.online}>已启用</span>
-                        )}
-                        <span
-                          onClick={(e) => {
-                            e.stopPropagation();
-                          }}
-                        >
-                          <Switch
-                            size="small"
-                            defaultChecked={agent.status === 1}
-                            onChange={(value) => {
-                              onSaveAgent({ ...agent, status: value ? 1 : 0 }, true);
-                            }}
-                          />
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
+        <Table columns={columns} dataSource={showAgents} />
       </div>
     </div>
   );

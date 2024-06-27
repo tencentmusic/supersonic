@@ -16,7 +16,8 @@ import { AgentType } from './type';
 import { useEffect, useState } from 'react';
 import styles from './style.less';
 import { DeleteOutlined, PlusOutlined } from '@ant-design/icons';
-import { uuid } from '@/utils/utils';
+import { uuid, jsonParse } from '@/utils/utils';
+import ToolsSection from './ToolsSection';
 import globalStyles from '@/global.less';
 
 const FormItem = Form.Item;
@@ -25,17 +26,26 @@ const { TextArea } = Input;
 type Props = {
   editAgent?: AgentType;
   onSaveAgent: (agent: AgentType) => Promise<void>;
-  onCancel: () => void;
+  onCreateToolBtnClick?: () => void;
 };
 
-const AgentModal: React.FC<Props> = ({ editAgent, onSaveAgent, onCancel }) => {
+const defaultAgentConfig = {
+  simpleMode: false,
+  debugMode: true,
+};
+
+const AgentForm: React.FC<Props> = ({ editAgent, onSaveAgent, onCreateToolBtnClick }) => {
   const [saveLoading, setSaveLoading] = useState(false);
   const [examples, setExamples] = useState<{ id: string; question?: string }[]>([]);
+  const [activeKey, setActiveKey] = useState('basic');
   const [formData, setFormData] = useState<any>({
     enableSearch: true,
     llmConfig: {
       timeOut: 60,
       provider: 'OPEN_AI',
+    },
+    agentConfig: {
+      ...defaultAgentConfig,
     },
   });
   const [form] = Form.useForm();
@@ -46,7 +56,14 @@ const AgentModal: React.FC<Props> = ({ editAgent, onSaveAgent, onCancel }) => {
       if (!sourceData.llmConfig) {
         delete sourceData.llmConfig;
       }
-      form.setFieldsValue({ ...sourceData, enableSearch: editAgent.enableSearch !== 0 });
+
+      const config = jsonParse(editAgent.agentConfig, {});
+
+      form.setFieldsValue({
+        ...sourceData,
+        enableSearch: editAgent.enableSearch !== 0,
+        agentConfig: { ...defaultAgentConfig, ...config },
+      });
       if (editAgent.examples) {
         setExamples(editAgent.examples.map((question) => ({ id: uuid(), question })));
       }
@@ -56,7 +73,7 @@ const AgentModal: React.FC<Props> = ({ editAgent, onSaveAgent, onCancel }) => {
   }, [editAgent]);
 
   const layout = {
-    labelCol: { span: 6 },
+    labelCol: { span: 4 },
     wrapperCol: { span: 16 },
     // layout: 'vertical',
   };
@@ -64,10 +81,12 @@ const AgentModal: React.FC<Props> = ({ editAgent, onSaveAgent, onCancel }) => {
   const onOk = async () => {
     const values = await form.validateFields();
     setSaveLoading(true);
-    await onSaveAgent({
+    const config = jsonParse(editAgent?.agentConfig, {});
+    await onSaveAgent?.({
       id: editAgent?.id,
       ...(editAgent || {}),
       ...values,
+      agentConfig: JSON.stringify({ ...config, ...values.agentConfig }) as any,
       examples: examples.map((example) => example.question),
       enableSearch: values.enableSearch ? 1 : 0,
     });
@@ -77,8 +96,9 @@ const AgentModal: React.FC<Props> = ({ editAgent, onSaveAgent, onCancel }) => {
   const formTabList = [
     {
       label: '基本信息',
+      key: 'basic',
       children: (
-        <>
+        <div className={styles.agentFormContainer}>
           <FormItem
             name="name"
             label="名称"
@@ -111,6 +131,24 @@ const AgentModal: React.FC<Props> = ({ editAgent, onSaveAgent, onCancel }) => {
           <FormItem
             name={['multiTurnConfig', 'enableMultiTurn']}
             label="开启多轮"
+            valuePropName="checked"
+          >
+            <Switch />
+          </FormItem>
+
+          <FormItem
+            name={['agentConfig', 'simpleMode']}
+            label="开启精简模式"
+            tooltip="精简模式下不可调整查询条件、不显示调试信息、不显示可视化组件"
+            valuePropName="checked"
+          >
+            <Switch />
+          </FormItem>
+
+          <FormItem
+            name={['agentConfig', 'debugMode']}
+            label="显示调试信息"
+            tooltip="包含Schema映射、SQL生成每阶段的关键信息"
             valuePropName="checked"
           >
             <Switch />
@@ -153,14 +191,15 @@ const AgentModal: React.FC<Props> = ({ editAgent, onSaveAgent, onCancel }) => {
           <FormItem name="description" label="描述">
             <TextArea placeholder="请输入助理描述" />
           </FormItem>
-        </>
+        </div>
       ),
     },
     {
       label: '大模型配置',
+      key: 'llmConfig',
       children: (
-        <>
-          <FormItem name={['llmConfig', 'provider']} label="模型提供方式">
+        <div className={styles.agentFormContainer}>
+          <FormItem name={['llmConfig', 'provider']} label="接口协议">
             <Select placeholder="">
               {['OPEN_AI'].map((item) => (
                 <Select.Option key={item} value={item}>
@@ -169,7 +208,7 @@ const AgentModal: React.FC<Props> = ({ editAgent, onSaveAgent, onCancel }) => {
               ))}
             </Select>
           </FormItem>
-          <FormItem name={['llmConfig', 'modelName']} label="大模型名称">
+          <FormItem name={['llmConfig', 'modelName']} label="Model Name">
             <Input placeholder="请输入大模型名称" />
           </FormItem>
           <FormItem name={['llmConfig', 'baseUrl']} label="Base URL">
@@ -177,10 +216,10 @@ const AgentModal: React.FC<Props> = ({ editAgent, onSaveAgent, onCancel }) => {
           </FormItem>
           <FormItem
             name={['llmConfig', 'apiKey']}
-            label="API KEY"
+            label="API Key"
             // hidden={formData?.llmConfig?.provider === 'LOCAL_AI'}
           >
-            <Input placeholder="请输入API KEY" />
+            <Input placeholder="请输入API Key" />
           </FormItem>
 
           <FormItem name={['llmConfig', 'temperature']} label="Temperature">
@@ -198,43 +237,61 @@ const AgentModal: React.FC<Props> = ({ editAgent, onSaveAgent, onCancel }) => {
           <FormItem name={['llmConfig', 'timeOut']} label="超时时间(秒)">
             <InputNumber />
           </FormItem>
-        </>
+        </div>
       ),
+    },
+    {
+      label: '工具管理',
+      key: 'tools',
+      children: <ToolsSection currentAgent={editAgent} onSaveAgent={onSaveAgent} />,
     },
   ];
 
   return (
-    <Modal
-      open
-      title={editAgent ? '编辑助理' : '新建助理'}
-      confirmLoading={saveLoading}
-      width={800}
-      onOk={onOk}
-      onCancel={onCancel}
+    <Form
+      {...layout}
+      form={form}
+      initialValues={formData}
+      onValuesChange={(value, values) => {
+        setFormData(values);
+      }}
+      className={globalStyles.supersonicForm}
     >
-      <Form
-        {...layout}
-        form={form}
-        initialValues={formData}
-        onValuesChange={(value, values) => {
-          setFormData(values);
+      <Tabs
+        tabBarExtraContent={
+          <Space>
+            <Button
+              type="primary"
+              loading={saveLoading}
+              onClick={() => {
+                onOk();
+              }}
+            >
+              保 存
+            </Button>
+            {activeKey === 'tools' && (
+              <Button
+                type="primary"
+                onClick={() => {
+                  // setEditTool(undefined);
+                  // setModalVisible(true);
+                  onCreateToolBtnClick?.();
+                }}
+              >
+                <PlusOutlined /> 新增工具
+              </Button>
+            )}
+          </Space>
+        }
+        defaultActiveKey="basic"
+        activeKey={activeKey}
+        onChange={(key) => {
+          setActiveKey(key);
         }}
-        className={globalStyles.supersonicForm}
-      >
-        <Tabs
-          tabPosition={'left'}
-          items={formTabList.map((item) => {
-            const { label, children } = item;
-            return {
-              label,
-              key: label,
-              children,
-            };
-          })}
-        />
-      </Form>
-    </Modal>
+        items={formTabList}
+      />
+    </Form>
   );
 };
 
-export default AgentModal;
+export default AgentForm;
