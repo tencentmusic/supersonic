@@ -8,37 +8,37 @@ import org.springframework.context.annotation.Configuration;
 @Data
 public class DefaultSemanticConfig {
 
-    @Value("${semantic.url.prefix:http://localhost:8081}")
+    @Value("${s2.semantic.url.prefix:http://localhost:8081}")
     private String semanticUrl;
 
-    @Value("${searchByStruct.path:/api/semantic/query/struct}")
+    @Value("${s2.searchByStruct.path:/api/semantic/query/struct}")
     private String searchByStructPath;
 
-    @Value("${searchByStruct.path:/api/semantic/query/multiStruct}")
+    @Value("${s2.searchByStruct.path:/api/semantic/query/multiStruct}")
     private String searchByMultiStructPath;
 
-    @Value("${searchByStruct.path:/api/semantic/query/sql}")
+    @Value("${s2.searchByStruct.path:/api/semantic/query/sql}")
     private String searchBySqlPath;
 
-    @Value("${searchByStruct.path:/api/semantic/query/queryDimValue}")
+    @Value("${s2.searchByStruct.path:/api/semantic/query/queryDimValue}")
     private String queryDimValuePath;
 
-    @Value("${fetchModelSchemaPath.path:/api/semantic/schema}")
+    @Value("${s2.fetchModelSchemaPath.path:/api/semantic/schema}")
     private String fetchModelSchemaPath;
 
-    @Value("${fetchModelList.path:/api/semantic/schema/dimension/page}")
+    @Value("${s2.fetchModelList.path:/api/semantic/schema/dimension/page}")
     private String fetchDimensionPagePath;
 
-    @Value("${fetchModelList.path:/api/semantic/schema/metric/page}")
+    @Value("${s2.fetchModelList.path:/api/semantic/schema/metric/page}")
     private String fetchMetricPagePath;
 
-    @Value("${fetchModelList.path:/api/semantic/schema/domain/list}")
+    @Value("${s2.fetchModelList.path:/api/semantic/schema/domain/list}")
     private String fetchDomainListPath;
 
-    @Value("${fetchModelList.path:/api/semantic/schema/model/list}")
+    @Value("${s2.fetchModelList.path:/api/semantic/schema/model/list}")
     private String fetchModelListPath;
 
-    @Value("${explain.path:/api/semantic/query/explain}")
+    @Value("${s2.explain.path:/api/semantic/query/explain}")
     private String explainPath;
 
 }

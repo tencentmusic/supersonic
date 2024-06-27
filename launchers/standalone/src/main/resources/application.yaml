@@ -1,10 +1,11 @@
 spring:
   profiles:
-    active: local
+    active: prd
   application:
     name: chat
   config:
     import:
-      - classpath:llm-config.yaml
+      - classpath:s2-config.yaml
+      - classpath:langchain4j-config.yaml
 mybatis:
   mapper-locations=classpath:mappers/custom/*.xml,classpath*:/mappers/*.xml

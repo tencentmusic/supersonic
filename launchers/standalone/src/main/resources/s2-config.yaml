@@ -1,0 +1,40 @@
+s2:
+  pyllm:
+    url: http://127.0.0.1:9092
+
+  parser:
+    url: ${s2.pyllm.url}
+    strategy: ONE_PASS_SELF_CONSISTENCY
+    exemplar-recall:
+      number: 10
+    few-shot:
+      number: 5
+    self-consistency:
+      number: 1
+    multi-turn:
+      enable: false
+
+  corrector:
+    additional:
+      information: true
+    date: true
+  functionCall:
+    url: ${s2.pyllm.url}
+
+  embedding:
+    url: ${s2.pyllm.url}
+    persistent:
+      path: /tmp
+
+  demo:
+    names: S2VisitsDemo,S2ArtistDemo,SmallTalkDemo
+    enableLLM: true
+
+  authentication:
+    enable: true
+    exclude:
+      path: /api/auth/user/register,/api/auth/user/login
+    token:
+      http:
+        header:
+          key: Authorization

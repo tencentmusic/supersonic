@@ -37,16 +37,16 @@ import static com.tencent.supersonic.common.pojo.Constants.YEAR;
 @Data
 public class DateModeUtils {
 
-    @Value("${query.parameter.sys.date:sys_imp_date}")
+    @Value("${s2.query.parameter.sys.date:sys_imp_date}")
     private String sysDateCol;
-    @Value("${query.parameter.sys.month:sys_imp_month}")
+    @Value("${s2.query.parameter.sys.month:sys_imp_month}")
     private String sysDateMonthCol;
-    @Value("${query.parameter.sys.month:sys_imp_week}")
+    @Value("${s2.query.parameter.sys.month:sys_imp_week}")
     private String sysDateWeekCol;
 
-    @Value("${query.parameter.sys.zipper.begin:start_}")
+    @Value("${s2.query.parameter.sys.zipper.begin:start_}")
     private String sysZipperDateColBegin;
-    @Value("${query.parameter.sys.zipper.end:end_}")
+    @Value("${s2.query.parameter.sys.zipper.end:end_}")
     private String sysZipperDateColEnd;
 
     public Boolean recentMode(DateConf dateInfo) {

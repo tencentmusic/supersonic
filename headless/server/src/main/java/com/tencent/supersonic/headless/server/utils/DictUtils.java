@@ -63,20 +63,18 @@ import static com.tencent.supersonic.common.pojo.Constants.SPACE;
 @Slf4j
 @Component
 public class DictUtils {
-
-    private static String dateTimeFormatter = "yyyyMMddHHmmss";
-    @Value("${dimension.multi.value.split:#}")
+    @Value("${s2.dimension.multi.value.split:#}")
     private String dimMultiValueSplit;
 
-    @Value("${item.value.max.count:100000}")
+    @Value("${s2.item.value.max.count:100000}")
     private Long itemValueMaxCount;
 
-    @Value("${item.value.white.frequency:999999}")
+    @Value("${s2.item.value.white.frequency:999999}")
     private Long itemValueWhiteFrequency;
 
-    @Value("${item.value.date.start:1}")
+    @Value("${s2.item.value.date.start:1}")
     private Integer itemValueDateStart;
-    @Value("${item.value.date.end:1}")
+    @Value("${s2.item.value.date.end:1}")
     private Integer itemValueDateEnd;
 
 

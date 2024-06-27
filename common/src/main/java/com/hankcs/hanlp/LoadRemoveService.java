@@ -15,7 +15,7 @@ import java.util.Objects;
 @Slf4j
 public class LoadRemoveService {
 
-    @Value("${mapper.remove.nature.prefix:}")
+    @Value("${s2.mapper.remove.nature.prefix:}")
     private String mapperRemoveNaturePrefix;
 
     public List removeNatures(List value) {

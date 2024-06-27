@@ -14,10 +14,10 @@ import java.io.FileNotFoundException;
 public class LocalFileConfig {
 
 
-    @Value("${dict.directory.latest:/data/dictionary/custom}")
+    @Value("${s2.dict.directory.latest:/data/dictionary/custom}")
     private String dictDirectoryLatest;
 
-    @Value("${dict.directory.backup:./data/dictionary/backup}")
+    @Value("${s2.dict.directory.backup:./data/dictionary/backup}")
     private String dictDirectoryBackup;
 
     public String getDictDirectoryLatest() {
