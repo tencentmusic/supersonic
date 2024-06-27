@@ -2,27 +2,42 @@ package com.tencent.supersonic.chat.server.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
+import com.tencent.supersonic.chat.api.pojo.request.ChatMemoryFilter;
+import com.tencent.supersonic.chat.api.pojo.request.ChatParseReq;
 import com.tencent.supersonic.chat.server.agent.Agent;
 import com.tencent.supersonic.chat.server.agent.MultiTurnConfig;
-import com.tencent.supersonic.chat.server.memory.AgentExample2MemoryTransformer;
 import com.tencent.supersonic.chat.server.persistence.dataobject.AgentDO;
+import com.tencent.supersonic.chat.server.persistence.dataobject.ChatMemoryDO;
 import com.tencent.supersonic.chat.server.persistence.mapper.AgentDOMapper;
 import com.tencent.supersonic.chat.server.service.AgentService;
+import com.tencent.supersonic.chat.server.service.ChatService;
+import com.tencent.supersonic.chat.server.service.MemoryService;
+import com.tencent.supersonic.chat.server.util.LLMConnHelper;
 import com.tencent.supersonic.common.config.LLMConfig;
 import com.tencent.supersonic.common.config.VisualConfig;
 import com.tencent.supersonic.common.util.JsonUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 public class AgentServiceImpl extends ServiceImpl<AgentDOMapper, AgentDO>
         implements AgentService {
 
     @Autowired
-    private AgentExample2MemoryTransformer agentExample2MemoryTransformer;
+    private MemoryService memoryService;
+
+    @Autowired
+    private ChatService chatService;
+
+    private ExecutorService executorService = Executors.newFixedThreadPool(1);
 
     @Override
     public List<Agent> getAgents() {
@@ -35,7 +50,7 @@ public class AgentServiceImpl extends ServiceImpl<AgentDOMapper, AgentDO>
         agent.createdBy(user.getName());
         AgentDO agentDO = convert(agent);
         save(agentDO);
-        agentExample2MemoryTransformer.transform(agent);
+        executeAgentExamplesAsync(agent);
         return agentDO.getId();
     }
 
@@ -43,7 +58,7 @@ public class AgentServiceImpl extends ServiceImpl<AgentDOMapper, AgentDO>
     public void updateAgent(Agent agent, User user) {
         agent.updatedBy(user.getName());
         updateById(convert(agent));
-        agentExample2MemoryTransformer.transform(agent);
+        executeAgentExamplesAsync(agent);
     }
 
     @Override
@@ -57,6 +72,36 @@ public class AgentServiceImpl extends ServiceImpl<AgentDOMapper, AgentDO>
     @Override
     public void deleteAgent(Integer id) {
         removeById(id);
+    }
+
+    /**
+     * the example in the agent will be executed by default,
+     * if the result is correct, it will be put into memory as a reference for LLM
+     * @param agent
+     */
+    private void executeAgentExamplesAsync(Agent agent) {
+        executorService.execute(() -> doExecuteAgentExamples(agent));
+    }
+
+    private synchronized void doExecuteAgentExamples(Agent agent) {
+        if (!agent.containsLLMParserTool() || !LLMConnHelper.testConnection(agent.getLlmConfig())) {
+            return;
+        }
+        List<String> examples = agent.getExamples();
+        ChatMemoryFilter chatMemoryFilter = ChatMemoryFilter.builder().questions(examples).build();
+        List<String> memoriesExisted = memoryService.getMemories(chatMemoryFilter)
+                .stream().map(ChatMemoryDO::getQuestion).collect(Collectors.toList());
+        for (String example : examples) {
+            if (memoriesExisted.contains(example)) {
+                continue;
+            }
+            ChatParseReq chatParseReq = new ChatParseReq();
+            chatParseReq.setAgentId(agent.getId());
+            chatParseReq.setQueryText(example);
+            chatParseReq.setUser(User.getFakeUser());
+            chatParseReq.setChatId(-1);
+            chatService.parseAndExecute(chatParseReq);
+        }
     }
 
     private List<AgentDO> getAgentDOList() {
