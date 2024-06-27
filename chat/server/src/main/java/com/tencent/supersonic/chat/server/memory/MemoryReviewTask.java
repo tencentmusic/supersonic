@@ -52,7 +52,7 @@ public class MemoryReviewTask {
                 .filter(c -> c.getStatus() == ChatMemoryDO.Status.PENDING)
                 .forEach(m -> {
                     Agent chatAgent = agentService.getAgent(m.getAgentId());
-                    String promptStr = String.format(INSTRUCTION, m.getQuestion(), m.getSchema(), m.getS2sql());
+                    String promptStr = String.format(INSTRUCTION, m.getQuestion(), m.getDbSchema(), m.getS2sql());
                     Prompt prompt = PromptTemplate.from(promptStr).apply(Collections.EMPTY_MAP);
 
                     keyPipelineLog.info("MemoryReviewTask reqPrompt:{}", promptStr);

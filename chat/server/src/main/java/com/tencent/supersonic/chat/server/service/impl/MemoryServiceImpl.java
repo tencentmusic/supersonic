@@ -47,7 +47,7 @@ public class MemoryServiceImpl implements MemoryService {
         exemplarService.storeExemplar(memory.getAgentId().toString(),
                 SqlExemplar.builder()
                         .question(memory.getQuestion())
-                        .dbSchema(memory.getSchema())
+                        .dbSchema(memory.getDbSchema())
                         .sql(memory.getS2sql())
                         .build());
         memory.setStatus(Status.ENABLED);
