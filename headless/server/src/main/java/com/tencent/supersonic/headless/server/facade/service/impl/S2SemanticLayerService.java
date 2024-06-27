@@ -48,6 +48,13 @@ import com.tencent.supersonic.headless.server.utils.QueryUtils;
 import com.tencent.supersonic.headless.server.utils.StatUtils;
 import com.tencent.supersonic.headless.server.web.service.DataSetService;
 import com.tencent.supersonic.headless.server.web.service.SchemaService;
+import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
+import org.springframework.stereotype.Service;
+
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
@@ -56,12 +63,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
-import lombok.SneakyThrows;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.BeanUtils;
-import org.springframework.stereotype.Service;
 
 
 @Service
@@ -246,12 +247,16 @@ public class S2SemanticLayerService implements SemanticLayerService {
         DimensionResp dimensionResp = schemaService.getDimension(queryDimValueReq.getDimensionBizName(),
                 queryDimValueReq.getModelId());
         ModelResp modelResp = modelResps.get(0);
-        String sql = String.format("select distinct %s from %s", dimensionResp.getName(), modelResp.getName());
+        String sql = String.format("select distinct %s from %s where 1=1",
+                dimensionResp.getName(), modelResp.getName());
         List<Dim> timeDims = modelResp.getTimeDimension();
         if (CollectionUtils.isNotEmpty(timeDims)) {
-            sql = String.format("%s where %s >= '%s' and %s <= '%s'", sql, TimeDimensionEnum.DAY.getName(),
+            sql = String.format("%s and %s >= '%s' and %s <= '%s'", sql, TimeDimensionEnum.DAY.getName(),
                     queryDimValueReq.getDateInfo().getStartDate(), TimeDimensionEnum.DAY.getName(),
                     queryDimValueReq.getDateInfo().getEndDate());
+        }
+        if (StringUtils.isNotBlank(queryDimValueReq.getValue())) {
+            sql += " AND " + queryDimValueReq.getDimensionBizName() + " LIKE '%" + queryDimValueReq.getValue() + "%'";
         }
         querySqlReq.setModelIds(Sets.newHashSet(queryDimValueReq.getModelId()));
         querySqlReq.setSql(sql);

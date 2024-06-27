@@ -1,7 +1,8 @@
 package com.tencent.supersonic.headless.api.pojo.request;
 
-import javax.validation.constraints.NotNull;
 import lombok.Data;
+import javax.validation.constraints.NotNull;
+import java.util.Set;
 
 @Data
 public class DimensionValueReq {
@@ -17,4 +18,7 @@ public class DimensionValueReq {
 
     @NotNull
     private String value;
+
+    private Set<Long> dataSetIds;
+
 }

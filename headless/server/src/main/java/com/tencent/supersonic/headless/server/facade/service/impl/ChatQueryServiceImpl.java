@@ -2,7 +2,11 @@ package com.tencent.supersonic.headless.server.facade.service.impl;
 
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
-import com.tencent.supersonic.common.pojo.DateConf;
+import com.tencent.supersonic.common.jsqlparser.FieldExpression;
+import com.tencent.supersonic.common.jsqlparser.SqlAddHelper;
+import com.tencent.supersonic.common.jsqlparser.SqlRemoveHelper;
+import com.tencent.supersonic.common.jsqlparser.SqlReplaceHelper;
+import com.tencent.supersonic.common.jsqlparser.SqlSelectHelper;
 import com.tencent.supersonic.common.pojo.QueryColumn;
 import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
 import com.tencent.supersonic.common.pojo.enums.QueryType;
@@ -10,11 +14,6 @@ import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.DateUtils;
 import com.tencent.supersonic.common.util.JsonUtil;
-import com.tencent.supersonic.common.jsqlparser.FieldExpression;
-import com.tencent.supersonic.common.jsqlparser.SqlAddHelper;
-import com.tencent.supersonic.common.jsqlparser.SqlRemoveHelper;
-import com.tencent.supersonic.common.jsqlparser.SqlReplaceHelper;
-import com.tencent.supersonic.common.jsqlparser.SqlSelectHelper;
 import com.tencent.supersonic.headless.api.pojo.DataSetSchema;
 import com.tencent.supersonic.headless.api.pojo.EntityInfo;
 import com.tencent.supersonic.headless.api.pojo.SchemaElement;
@@ -32,15 +31,16 @@ import com.tencent.supersonic.headless.api.pojo.request.DimensionValueReq;
 import com.tencent.supersonic.headless.api.pojo.request.ExecuteQueryReq;
 import com.tencent.supersonic.headless.api.pojo.request.ExplainSqlReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryDataReq;
+import com.tencent.supersonic.headless.api.pojo.request.QueryDimValueReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryFilter;
 import com.tencent.supersonic.headless.api.pojo.request.QueryFilters;
 import com.tencent.supersonic.headless.api.pojo.request.QueryMapReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryReq;
 import com.tencent.supersonic.headless.api.pojo.request.QuerySqlReq;
-import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
 import com.tencent.supersonic.headless.api.pojo.request.SemanticQueryReq;
 import com.tencent.supersonic.headless.api.pojo.response.DataSetMapInfo;
 import com.tencent.supersonic.headless.api.pojo.response.DataSetResp;
+import com.tencent.supersonic.headless.api.pojo.response.DimensionResp;
 import com.tencent.supersonic.headless.api.pojo.response.ExplainResp;
 import com.tencent.supersonic.headless.api.pojo.response.MapInfoResp;
 import com.tencent.supersonic.headless.api.pojo.response.MapResp;
@@ -48,6 +48,8 @@ import com.tencent.supersonic.headless.api.pojo.response.ParseResp;
 import com.tencent.supersonic.headless.api.pojo.response.QueryResult;
 import com.tencent.supersonic.headless.api.pojo.response.QueryState;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
+import com.tencent.supersonic.headless.chat.ChatContext;
+import com.tencent.supersonic.headless.chat.QueryContext;
 import com.tencent.supersonic.headless.chat.corrector.GrammarCorrector;
 import com.tencent.supersonic.headless.chat.corrector.SchemaCorrector;
 import com.tencent.supersonic.headless.chat.knowledge.HanlpMapResult;
@@ -59,29 +61,27 @@ import com.tencent.supersonic.headless.chat.knowledge.helper.NatureHelper;
 import com.tencent.supersonic.headless.chat.query.QueryManager;
 import com.tencent.supersonic.headless.chat.query.SemanticQuery;
 import com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMSqlQuery;
-import com.tencent.supersonic.headless.chat.ChatContext;
-import com.tencent.supersonic.headless.chat.QueryContext;
+import com.tencent.supersonic.headless.server.facade.service.ChatQueryService;
+import com.tencent.supersonic.headless.server.facade.service.SemanticLayerService;
 import com.tencent.supersonic.headless.server.persistence.dataobject.StatisticsDO;
 import com.tencent.supersonic.headless.server.pojo.MetaFilter;
+import com.tencent.supersonic.headless.server.utils.ComponentFactory;
 import com.tencent.supersonic.headless.server.web.service.ChatContextService;
-import com.tencent.supersonic.headless.server.facade.service.ChatQueryService;
 import com.tencent.supersonic.headless.server.web.service.DataSetService;
-import com.tencent.supersonic.headless.server.facade.service.SemanticLayerService;
 import com.tencent.supersonic.headless.server.web.service.SchemaService;
 import com.tencent.supersonic.headless.server.web.service.WorkflowService;
-import com.tencent.supersonic.headless.server.utils.ComponentFactory;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.LongValue;
 import net.sf.jsqlparser.expression.StringValue;
 import net.sf.jsqlparser.expression.operators.relational.ComparisonOperator;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
-import net.sf.jsqlparser.expression.operators.relational.ParenthesedExpressionList;
 import net.sf.jsqlparser.expression.operators.relational.GreaterThan;
 import net.sf.jsqlparser.expression.operators.relational.GreaterThanEquals;
 import net.sf.jsqlparser.expression.operators.relational.InExpression;
 import net.sf.jsqlparser.expression.operators.relational.MinorThan;
 import net.sf.jsqlparser.expression.operators.relational.MinorThanEquals;
+import net.sf.jsqlparser.expression.operators.relational.ParenthesedExpressionList;
 import net.sf.jsqlparser.schema.Column;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -539,12 +539,10 @@ public class ChatQueryServiceImpl implements ChatQueryService {
     @Override
     public Object queryDimensionValue(DimensionValueReq dimensionValueReq, User user) throws Exception {
         SemanticQueryResp semanticQueryResp = new SemanticQueryResp();
-        SemanticSchema semanticSchema = schemaService.getSemanticSchema();
-        SchemaElement schemaElement = semanticSchema.getDimension(dimensionValueReq.getElementID());
-        Set<Long> detectDataSetIds = new HashSet<>();
-        detectDataSetIds.add(schemaElement.getDataSet());
-        dimensionValueReq.setModelId(schemaElement.getModel());
-        List<String> dimensionValues = getDimensionValues(dimensionValueReq, detectDataSetIds);
+        DimensionResp dimensionResp = schemaService.getDimension(dimensionValueReq.getElementID());
+        Set<Long> dataSetIds = dimensionValueReq.getDataSetIds();
+        dimensionValueReq.setModelId(dimensionResp.getModelId());
+        List<String> dimensionValues = getDimensionValues(dimensionValueReq, dataSetIds);
         // if the search results is null,search dimensionValue from database
         if (CollectionUtils.isEmpty(dimensionValues)) {
             semanticQueryResp = queryDatabase(dimensionValueReq, user);
@@ -593,21 +591,12 @@ public class ChatQueryServiceImpl implements ChatQueryService {
                 .collect(Collectors.toList());
     }
 
-    private SemanticQueryResp queryDatabase(DimensionValueReq dimensionValueReq, User user) throws Exception {
-        QueryStructReq queryStructReq = new QueryStructReq();
-
-        DateConf dateConf = new DateConf();
-        dateConf.setDateMode(DateConf.DateMode.RECENT);
-        dateConf.setUnit(1);
-        dateConf.setPeriod("DAY");
-        queryStructReq.setDateInfo(dateConf);
-        queryStructReq.setLimit(20L);
-        queryStructReq.setDataSetId(dimensionValueReq.getModelId());
-        queryStructReq.setQueryType(QueryType.ID);
-        List<String> groups = new ArrayList<>();
-        groups.add(dimensionValueReq.getBizName());
-        queryStructReq.setGroups(groups);
-        return semanticLayerService.queryByReq(queryStructReq, user);
+    private SemanticQueryResp queryDatabase(DimensionValueReq dimensionValueReq, User user) {
+        QueryDimValueReq queryDimValueReq = new QueryDimValueReq();
+        queryDimValueReq.setValue(dimensionValueReq.getValue());
+        queryDimValueReq.setModelId(dimensionValueReq.getModelId());
+        queryDimValueReq.setDimensionBizName(dimensionValueReq.getBizName());
+        return semanticLayerService.queryDimValue(queryDimValueReq, user);
     }
 
     public void correct(QuerySqlReq querySqlReq, User user) {
