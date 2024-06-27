@@ -35,8 +35,8 @@ public class ChatMemoryRepositoryImpl implements ChatMemoryRepository {
     }
 
     @Override
-    public List<ChatMemoryDO> getMemories() {
-        return chatMemoryMapper.selectList(new QueryWrapper<>());
+    public List<ChatMemoryDO> getMemories(QueryWrapper<ChatMemoryDO> queryWrapper) {
+        return chatMemoryMapper.selectList(queryWrapper);
     }
 
 }

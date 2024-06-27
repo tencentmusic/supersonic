@@ -147,8 +147,8 @@ CREATE TABLE IF NOT EXISTS `s2_chat_memory` (
     `llm_comment`   TEXT,
     `human_review` char(10) ,
     `human_comment` TEXT    ,
-    `created_at` TIMESTAMP  NOT NULL   ,
-    `updated_at` TIMESTAMP  NOT NULL   ,
+    `created_at` datetime  NOT NULL   ,
+    `updated_at` datetime  NOT NULL   ,
     `created_by` varchar(100) NOT NULL   ,
     `updated_by` varchar(100) NOT NULL   ,
     PRIMARY KEY (`id`)

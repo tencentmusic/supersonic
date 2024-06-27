@@ -95,6 +95,19 @@ public class ChatServiceImpl implements ChatService {
         return queryResult;
     }
 
+    @Override
+    public QueryResult parseAndExecute(ChatParseReq chatParseReq) {
+        ParseResp parseResp = performParsing(chatParseReq);
+        ChatExecuteReq chatExecuteReq = new ChatExecuteReq();
+        chatExecuteReq.setQueryId(parseResp.getQueryId());
+        chatExecuteReq.setChatId(chatParseReq.getChatId());
+        chatExecuteReq.setUser(chatParseReq.getUser());
+        chatExecuteReq.setAgentId(chatParseReq.getAgentId());
+        chatExecuteReq.setQueryText(chatParseReq.getQueryText());
+        chatExecuteReq.setParseId(parseResp.getSelectedParses().get(0).getId());
+        return performExecution(chatExecuteReq);
+    }
+
     private ChatParseContext buildParseContext(ChatParseReq chatParseReq) {
         ChatParseContext chatParseContext = new ChatParseContext();
         BeanMapper.mapper(chatParseReq, chatParseContext);

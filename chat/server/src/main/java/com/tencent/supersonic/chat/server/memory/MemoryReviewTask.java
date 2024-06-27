@@ -1,8 +1,7 @@
 package com.tencent.supersonic.chat.server.memory;
 
+import com.tencent.supersonic.chat.api.pojo.enums.MemoryReviewResult;
 import com.tencent.supersonic.chat.server.agent.Agent;
-import com.tencent.supersonic.chat.server.persistence.dataobject.ChatMemoryDO;
-import com.tencent.supersonic.chat.server.persistence.dataobject.ChatMemoryDO.ReviewResult;
 import com.tencent.supersonic.chat.server.service.AgentService;
 import com.tencent.supersonic.chat.server.service.MemoryService;
 import com.tencent.supersonic.common.util.S2ChatModelProvider;
@@ -48,8 +47,7 @@ public class MemoryReviewTask {
 
     @Scheduled(fixedDelay = 60 * 1000)
     public void review() {
-        memoryService.getMemories().stream()
-                .filter(c -> c.getStatus() == ChatMemoryDO.Status.PENDING)
+        memoryService.getMemoriesForLlmReview().stream()
                 .forEach(m -> {
                     Agent chatAgent = agentService.getAgent(m.getAgentId());
                     String promptStr = String.format(INSTRUCTION, m.getQuestion(), m.getDbSchema(), m.getS2sql());
@@ -62,7 +60,7 @@ public class MemoryReviewTask {
 
                     Matcher matcher = OUTPUT_PATTERN.matcher(response);
                     if (matcher.find()) {
-                        m.setLlmReviewRet(ReviewResult.valueOf(matcher.group(1)));
+                        m.setLlmReviewRet(MemoryReviewResult.valueOf(matcher.group(1)));
                         m.setLlmReviewCmt(matcher.group(2));
                         memoryService.updateMemory(m);
                     }
