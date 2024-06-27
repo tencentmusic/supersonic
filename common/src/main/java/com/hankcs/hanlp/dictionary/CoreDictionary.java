@@ -8,7 +8,6 @@ import com.hankcs.hanlp.corpus.io.IOUtil;
 import com.hankcs.hanlp.corpus.tag.Nature;
 import com.hankcs.hanlp.utility.Predefine;
 import com.hankcs.hanlp.utility.TextUtility;
-
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
@@ -16,8 +15,11 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
 
 /**
  * 使用DoubleArrayTrie实现的核心词典
@@ -73,7 +75,8 @@ public class CoreDictionary {
                 totalFrequency += attribute.totalFrequency;
             }
             Predefine.logger.info(
-                    "核心词典读入词条" + map.size() + " 全部频次" + totalFrequency + "，耗时" + (System.currentTimeMillis() - start)
+                    "核心词典读入词条" + map.size() + " 全部频次" + totalFrequency + "，耗时" + (
+                            System.currentTimeMillis() - start)
                             + "ms");
             br.close();
             trie.build(map);
@@ -214,12 +217,14 @@ public class CoreDictionary {
         public int[] frequency;
 
         public int totalFrequency;
+        public String[] originals;
         public String original = null;
 
 
         public Attribute(int size) {
             nature = new Nature[size];
             frequency = new int[size];
+            originals = new String[size];
         }
 
         public Attribute(Nature[] nature, int[] frequency) {
@@ -237,6 +242,13 @@ public class CoreDictionary {
         public Attribute(Nature[] nature, int[] frequency, int totalFrequency) {
             this.nature = nature;
             this.frequency = frequency;
+            this.totalFrequency = totalFrequency;
+        }
+
+        public Attribute(Nature[] nature, int[] frequency, String[] originals, int totalFrequency) {
+            this.nature = nature;
+            this.frequency = frequency;
+            this.originals = originals;
             this.totalFrequency = totalFrequency;
         }
 
@@ -364,6 +376,35 @@ public class CoreDictionary {
                 out.writeInt(nature[i].ordinal());
                 out.writeInt(frequency[i]);
             }
+        }
+
+        public void setOriginals(String original) {
+            if (original == null) {
+                return;
+            }
+            if (originals == null || originals.length == 0) {
+                originals = new String[1];
+            }
+            originals[0] = original;
+        }
+
+        public String getOriginal(Nature find) {
+            if (originals == null || originals.length == 0 || find == null) {
+                return null;
+            }
+            for (int i = 0; i < nature.length; i++) {
+                if (find.equals(nature[i]) && originals.length > i) {
+                    return originals[i];
+                }
+            }
+            return null;
+        }
+
+        public List<String> getOriginals() {
+            if (originals == null || originals.length == 0) {
+                return null;
+            }
+            return Arrays.stream(originals).filter(o -> o != null).distinct().collect(Collectors.toList());
         }
     }
 
