@@ -1,6 +1,7 @@
 package com.tencent.supersonic.chat.server.parser;
 
 import com.tencent.supersonic.chat.server.agent.MultiTurnConfig;
+import com.tencent.supersonic.common.service.impl.ExemplarServiceImpl;
 import com.tencent.supersonic.chat.server.persistence.repository.ChatQueryRepository;
 import com.tencent.supersonic.chat.server.plugin.PluginQueryManager;
 import com.tencent.supersonic.chat.server.pojo.ChatParseContext;
@@ -12,6 +13,7 @@ import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementMatch;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
+import com.tencent.supersonic.common.pojo.SqlExemplar;
 import com.tencent.supersonic.headless.api.pojo.request.QueryFilter;
 import com.tencent.supersonic.headless.api.pojo.request.QueryReq;
 import com.tencent.supersonic.headless.api.pojo.response.MapResp;
@@ -64,9 +66,11 @@ public class NL2SQLParser implements ChatParser {
         if (!chatParseContext.enableNL2SQL() || checkSkip(parseResp)) {
             return;
         }
-        processMultiTurn(chatParseContext, parseResp);
+        processMultiTurn(chatParseContext);
 
         QueryReq queryReq = QueryReqConverter.buildText2SqlQueryReq(chatParseContext);
+        addExemplars(chatParseContext.getAgent().getId(), queryReq);
+
         ChatQueryService chatQueryService = ContextUtils.getBean(ChatQueryService.class);
         ParseResp text2SqlParseResp = chatQueryService.performParsing(queryReq);
         if (!ParseResp.ParseState.FAILED.equals(text2SqlParseResp.getState())) {
@@ -131,7 +135,7 @@ public class NL2SQLParser implements ChatParser {
         parseInfo.setTextInfo(textBuilder.toString());
     }
 
-    private void processMultiTurn(ChatParseContext chatParseContext, ParseResp parseResp) {
+    private void processMultiTurn(ChatParseContext chatParseContext) {
         ParserConfig parserConfig = ContextUtils.getBean(ParserConfig.class);
         MultiTurnConfig agentMultiTurnConfig = chatParseContext.getAgent().getMultiTurnConfig();
         Boolean globalMultiTurnConfig = Boolean.valueOf(parserConfig.getParameterValue(PARSER_MULTI_TURN_ENABLE));
@@ -218,6 +222,13 @@ public class NL2SQLParser implements ChatParser {
                 Math.min(multiNum, contextualParseInfoList.size()));
         Collections.reverse(contextualList);
         return contextualList;
+    }
+
+    private void addExemplars(Integer agentId, QueryReq queryReq) {
+        ExemplarServiceImpl exemplarManager = ContextUtils.getBean(ExemplarServiceImpl.class);
+        List<SqlExemplar> exemplars = exemplarManager.recallExemplars(agentId.toString(),
+                queryReq.getQueryText(), 5);
+        queryReq.getExemplars().addAll(exemplars);
     }
 
     @Builder

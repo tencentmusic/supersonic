@@ -109,6 +109,8 @@ public class LLMRequestService {
         llmReq.setSqlGenType(LLMReq.SqlGenType.valueOf(parserConfig.getParameterValue(PARSER_STRATEGY_TYPE)));
         llmReq.setLlmConfig(queryCtx.getLlmConfig());
 
+        llmReq.setExemplars(queryCtx.getExemplars());
+
         return llmReq;
     }
 

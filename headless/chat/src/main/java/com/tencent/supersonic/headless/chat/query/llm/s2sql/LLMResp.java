@@ -12,6 +12,8 @@ public class LLMResp {
 
     private String modelName;
 
+    private String dbSchema;
+
     private String sqlOutput;
 
     private List<String> fields;

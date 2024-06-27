@@ -136,6 +136,24 @@ CREATE TABLE `s2_chat_config` (
                                   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='主题域扩展信息表';
 
+CREATE TABLE IF NOT EXISTS `s2_chat_memory` (
+    `id` INT NOT NULL AUTO_INCREMENT,
+    `question` varchar(655)    ,
+    `agent_id`  INT    ,
+    `db_schema`  TEXT    ,
+    `s2_sql` TEXT   ,
+    `status` char(10)   ,
+    `llm_review` char(10)   ,
+    `llm_comment`   TEXT,
+    `human_review` char(10) ,
+    `human_comment` TEXT    ,
+    `created_at` TIMESTAMP  NOT NULL   ,
+    `updated_at` TIMESTAMP  NOT NULL   ,
+    `created_by` varchar(100) NOT NULL   ,
+    `updated_by` varchar(100) NOT NULL   ,
+    PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
 CREATE TABLE `s2_chat_context` (
                                    `chat_id` bigint(20) NOT NULL COMMENT 'context chat id',
                                    `modified_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'row modify time',

@@ -1,5 +1,8 @@
 package com.tencent.supersonic.headless.chat.parser.llm;
 
+import com.google.common.collect.Lists;
+import com.tencent.supersonic.common.pojo.SqlExemplar;
+import com.tencent.supersonic.common.service.ExemplarService;
 import com.tencent.supersonic.headless.chat.parser.ParserConfig;
 import com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMReq;
 import lombok.extern.slf4j.Slf4j;
@@ -11,7 +14,6 @@ import org.springframework.util.CollectionUtils;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 import static com.tencent.supersonic.headless.chat.parser.ParserConfig.PARSER_EXEMPLAR_RECALL_NUMBER;
 import static com.tencent.supersonic.headless.chat.parser.ParserConfig.PARSER_FEW_SHOT_NUMBER;
@@ -25,20 +27,27 @@ public class PromptHelper {
     private ParserConfig parserConfig;
 
     @Autowired
-    private ExemplarManager exemplarManager;
+    private ExemplarService exemplarService;
 
-    public List<List<Map<String, String>>> getFewShotExemplars(LLMReq llmReq) {
+    public List<List<SqlExemplar>> getFewShotExemplars(LLMReq llmReq) {
         int exemplarRecallNumber = Integer.valueOf(parserConfig.getParameterValue(PARSER_EXEMPLAR_RECALL_NUMBER));
         int fewShotNumber = Integer.valueOf(parserConfig.getParameterValue(PARSER_FEW_SHOT_NUMBER));
         int selfConsistencyNumber = Integer.valueOf(parserConfig.getParameterValue(PARSER_SELF_CONSISTENCY_NUMBER));
 
-        List<Map<String, String>> exemplars = exemplarManager.recallExemplars(llmReq.getQueryText(),
-                exemplarRecallNumber);
-        List<List<Map<String, String>>> results = new ArrayList<>();
+        List<SqlExemplar> exemplars = Lists.newArrayList();
+        llmReq.getExemplars().stream().forEach(e -> {
+            exemplars.add(e);
+        });
 
+        int recallSize = exemplarRecallNumber - llmReq.getExemplars().size();
+        if (recallSize > 0) {
+            exemplars.addAll(exemplarService.recallExemplars(llmReq.getQueryText(), recallSize));
+        }
+
+        List<List<SqlExemplar>> results = new ArrayList<>();
         // use random collection of exemplars for each self-consistency inference
         for (int i = 0; i < selfConsistencyNumber; i++) {
-            List<Map<String, String>> shuffledList = new ArrayList<>(exemplars);
+            List<SqlExemplar> shuffledList = new ArrayList<>(exemplars);
             Collections.shuffle(shuffledList);
             results.add(shuffledList.subList(0, fewShotNumber));
         }
@@ -64,7 +73,7 @@ public class PromptHelper {
                 linkingListStr, currentDataStr, termStr, priorExts);
     }
 
-    public String buildMetadataStr(LLMReq llmReq) {
+    public String buildSchemaStr(LLMReq llmReq) {
         String tableStr = llmReq.getSchema().getDataSetName();
         StringBuilder metricStr = new StringBuilder();
         StringBuilder dimensionStr = new StringBuilder();

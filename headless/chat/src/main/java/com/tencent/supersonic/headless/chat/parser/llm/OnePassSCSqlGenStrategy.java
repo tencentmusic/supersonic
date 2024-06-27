@@ -1,6 +1,7 @@
 package com.tencent.supersonic.headless.chat.parser.llm;
 
 import com.google.common.collect.Lists;
+import com.tencent.supersonic.common.pojo.SqlExemplar;
 import com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMReq;
 import com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMResp;
 import dev.langchain4j.data.message.AiMessage;
@@ -42,11 +43,11 @@ public class OnePassSCSqlGenStrategy extends SqlGenStrategy {
     public LLMResp generate(LLMReq llmReq) {
         //1.recall exemplars
         keyPipelineLog.info("OnePassSCSqlGenStrategy llmReq:\n{}", llmReq);
-        List<List<Map<String, String>>> exemplarsList = promptHelper.getFewShotExemplars(llmReq);
+        List<List<SqlExemplar>> exemplarsList = promptHelper.getFewShotExemplars(llmReq);
 
         //2.generate sql generation prompt for each self-consistency inference
-        Map<Prompt, List<Map<String, String>>> prompt2Exemplar = new HashMap<>();
-        for (List<Map<String, String>> exemplars : exemplarsList) {
+        Map<Prompt, List<SqlExemplar>> prompt2Exemplar = new HashMap<>();
+        for (List<SqlExemplar> exemplars : exemplarsList) {
             Prompt prompt = generatePrompt(llmReq, exemplars);
             prompt2Exemplar.put(prompt, exemplars);
         }
@@ -67,25 +68,24 @@ public class OnePassSCSqlGenStrategy extends SqlGenStrategy {
         Pair<String, Map<String, Double>> sqlMapPair = OutputFormat.selfConsistencyVote(
                 Lists.newArrayList(prompt2Output.values()));
         LLMResp llmResp = new LLMResp();
-        llmResp.setQuery(llmReq.getQueryText());
+        llmResp.setQuery(promptHelper.buildAugmentedQuestion(llmReq));
+        llmResp.setDbSchema(promptHelper.buildSchemaStr(llmReq));
+        llmResp.setSqlOutput(sqlMapPair.getLeft());
         //TODO: should use the same few-shot exemplars as the one chose by self-consistency vote
         llmResp.setSqlRespMap(OutputFormat.buildSqlRespMap(exemplarsList.get(0), sqlMapPair.getRight()));
 
         return llmResp;
     }
 
-    private Prompt generatePrompt(LLMReq llmReq, List<Map<String, String>> fewshotExampleList) {
+    private Prompt generatePrompt(LLMReq llmReq, List<SqlExemplar> fewshotExampleList) {
         StringBuilder exemplarsStr = new StringBuilder();
-        for (Map<String, String> example : fewshotExampleList) {
-            String metadata = example.get("dbSchema");
-            String question = example.get("questionAugmented");
-            String sql = example.get("sql");
+        for (SqlExemplar exemplar : fewshotExampleList) {
             String exemplarStr = String.format("#UserQuery: %s #Schema: %s #SQL: %s\n",
-                    question, metadata, sql);
+                    exemplar.getQuestion(), exemplar.getDbSchema(), exemplar.getSql());
             exemplarsStr.append(exemplarStr);
         }
 
-        String dataSemanticsStr = promptHelper.buildMetadataStr(llmReq);
+        String dataSemanticsStr = promptHelper.buildSchemaStr(llmReq);
         String questionAugmented = promptHelper.buildAugmentedQuestion(llmReq);
         String promptStr = String.format(INSTRUCTION, exemplarsStr, questionAugmented, dataSemanticsStr);
 

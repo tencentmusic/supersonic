@@ -8,6 +8,7 @@ import com.tencent.supersonic.common.config.LLMConfig;
 import com.tencent.supersonic.headless.api.pojo.QueryDataType;
 import com.tencent.supersonic.headless.api.pojo.SchemaMapInfo;
 import com.tencent.supersonic.headless.api.pojo.SemanticSchema;
+import com.tencent.supersonic.common.pojo.SqlExemplar;
 import com.tencent.supersonic.headless.api.pojo.enums.MapModeEnum;
 import com.tencent.supersonic.headless.api.pojo.enums.WorkflowState;
 import com.tencent.supersonic.headless.api.pojo.request.QueryFilters;
@@ -49,6 +50,7 @@ public class QueryContext {
     private WorkflowState workflowState;
     private QueryDataType queryDataType = QueryDataType.ALL;
     private LLMConfig llmConfig;
+    private List<SqlExemplar> exemplars;
 
     public List<SemanticQuery> getCandidateQueries() {
         ParserConfig parserConfig = ContextUtils.getBean(ParserConfig.class);

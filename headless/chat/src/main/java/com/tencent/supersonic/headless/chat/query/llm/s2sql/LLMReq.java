@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.common.config.LLMConfig;
 import com.tencent.supersonic.headless.api.pojo.SchemaElement;
+import com.tencent.supersonic.common.pojo.SqlExemplar;
 import lombok.Data;
 
 import java.util.List;
@@ -26,6 +27,9 @@ public class LLMReq {
     private SqlGenType sqlGenType;
 
     private LLMConfig llmConfig;
+
+    private List<SqlExemplar> exemplars;
+
     @Data
     public static class ElementValue {
 

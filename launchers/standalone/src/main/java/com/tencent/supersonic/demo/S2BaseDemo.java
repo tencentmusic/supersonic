@@ -172,6 +172,7 @@ public abstract class S2BaseDemo implements CommandLineRunner {
         executeReq.setQueryText(queryText);
         executeReq.setChatId(parseResp.getChatId());
         executeReq.setUser(User.getFakeUser());
+        executeReq.setAgentId(agentId);
         executeReq.setSaveAnswer(true);
         chatService.performExecution(executeReq);
     }
