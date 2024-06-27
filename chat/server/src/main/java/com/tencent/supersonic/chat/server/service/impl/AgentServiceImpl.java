@@ -4,13 +4,15 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.chat.server.agent.Agent;
 import com.tencent.supersonic.chat.server.agent.MultiTurnConfig;
+import com.tencent.supersonic.chat.server.memory.AgentExample2MemoryTransformer;
 import com.tencent.supersonic.chat.server.persistence.dataobject.AgentDO;
 import com.tencent.supersonic.chat.server.persistence.mapper.AgentDOMapper;
 import com.tencent.supersonic.chat.server.service.AgentService;
+import com.tencent.supersonic.common.config.LLMConfig;
 import com.tencent.supersonic.common.config.VisualConfig;
 import com.tencent.supersonic.common.util.JsonUtil;
-import com.tencent.supersonic.common.config.LLMConfig;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -18,6 +20,9 @@ import java.util.stream.Collectors;
 @Service
 public class AgentServiceImpl extends ServiceImpl<AgentDOMapper, AgentDO>
         implements AgentService {
+
+    @Autowired
+    private AgentExample2MemoryTransformer agentExample2MemoryTransformer;
 
     @Override
     public List<Agent> getAgents() {
@@ -30,6 +35,7 @@ public class AgentServiceImpl extends ServiceImpl<AgentDOMapper, AgentDO>
         agent.createdBy(user.getName());
         AgentDO agentDO = convert(agent);
         save(agentDO);
+        agentExample2MemoryTransformer.transform(agent);
         return agentDO.getId();
     }
 
@@ -37,6 +43,7 @@ public class AgentServiceImpl extends ServiceImpl<AgentDOMapper, AgentDO>
     public void updateAgent(Agent agent, User user) {
         agent.updatedBy(user.getName());
         updateById(convert(agent));
+        agentExample2MemoryTransformer.transform(agent);
     }
 
     @Override

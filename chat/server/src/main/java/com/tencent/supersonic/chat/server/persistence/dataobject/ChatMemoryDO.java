@@ -4,6 +4,8 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.tencent.supersonic.chat.api.pojo.enums.MemoryReviewResult;
+import com.tencent.supersonic.chat.api.pojo.enums.MemoryStatus;
 import lombok.Builder;
 import lombok.Data;
 import lombok.ToString;
@@ -31,16 +33,16 @@ public class ChatMemoryDO {
     private String s2sql;
 
     @TableField("status")
-    private Status status;
+    private MemoryStatus status;
 
     @TableField("llm_review")
-    private ReviewResult llmReviewRet;
+    private MemoryReviewResult llmReviewRet;
 
     @TableField("llm_comment")
     private String llmReviewCmt;
 
     @TableField("human_review")
-    private ReviewResult humanReviewRet;
+    private MemoryReviewResult humanReviewRet;
 
     @TableField("human_comment")
     private String humanReviewCmt;
@@ -57,14 +59,4 @@ public class ChatMemoryDO {
     @TableField("updated_at")
     private Date updatedAt;
 
-    public enum ReviewResult {
-        POSITIVE,
-        NEGATIVE
-    }
-
-    public enum Status {
-        PENDING,
-        ENABLED,
-        DISABLED;
-    }
 }
