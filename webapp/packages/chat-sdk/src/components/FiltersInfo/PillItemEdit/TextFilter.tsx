@@ -22,7 +22,7 @@ export default function TextFilter({ value, onChange }: Props) {
       ...value,
       field: v,
       fieldName: fieldOptions.find(o => o.value === v)?.label ?? '',
-      value: '',
+      value: null,
     });
 
   const mode = ['IN', 'NOT_IN'].includes(value.operator) ? 'multiple' : undefined;
@@ -44,7 +44,7 @@ export default function TextFilter({ value, onChange }: Props) {
         value={value.operator}
         style={{ width: 120 }}
         options={operatorOptions}
-        onChange={v => onChange({ ...value, operator: v })}
+        onChange={v => onChange({ ...value, operator: v, value: null })}
       />
 
       {selectMode && (
@@ -61,7 +61,7 @@ export default function TextFilter({ value, onChange }: Props) {
       {inputMode && (
         <Input
           style={{ width: 120 }}
-          value={value.value}
+          value={value.value as string}
           onChange={e => onChange({ ...value, value: e.target.value })}
         />
       )}

@@ -27,7 +27,7 @@ type Props = {
     isRefresh?: boolean
   ) => void;
   onSendMsg: (value: string) => void;
-  onQuestionAsked: (questionId: string | number) => void
+  onQuestionAsked: (questionId: string | number) => void;
 };
 
 const MessageContainer: React.FC<Props> = ({

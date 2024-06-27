@@ -9,7 +9,7 @@ export interface ITextFilterPill extends IPillBase {
   fieldId: number;
   fieldName: string;
   operator: string;
-  value: string | string[];
+  value: string | string[] | null;
 }
 
 export interface IDateFilterPill extends IPillBase {
@@ -80,7 +80,7 @@ export interface INumberFilterCondition extends IFilterConditionBase {
 
 export interface IDateFilterCondition extends IFilterConditionBase {
   fieldType: 'date';
-  value: string;
+  value: string | null;
 }
 
 export type FilterCondition =

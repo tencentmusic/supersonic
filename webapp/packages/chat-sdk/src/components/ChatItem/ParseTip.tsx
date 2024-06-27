@@ -1,16 +1,15 @@
-import React, { ReactNode, useEffect, useRef } from 'react';
+import React, { ReactNode } from 'react';
 import { AGG_TYPE_MAP, PREFIX_CLS } from '../../common/constants';
 import { ChatContextType, DateInfoType, EntityInfoType, FilterItemType } from '../../common/type';
-import { Button, DatePicker } from 'antd';
-import { CheckCircleFilled, ReloadOutlined } from '@ant-design/icons';
+import { DatePicker } from 'antd';
+import { CheckCircleFilled } from '@ant-design/icons';
 import Loading from './Loading';
 import FilterItem from './FilterItem';
 import MarkDown from '../ChatMsg/MarkDown';
 import classNames from 'classnames';
 import { isMobile } from '../../utils/utils';
 import dayjs from 'dayjs';
-import FiltersInfo, { IPillEditHandleRef } from '../FiltersInfo';
-import { getPillsByParseInfo } from '../FiltersInfo/utils';
+import FiltersInfo from '../FiltersInfo';
 import { IPill } from '../FiltersInfo/types';
 
 const { RangePicker } = DatePicker;
@@ -65,8 +64,6 @@ const ParseTip: React.FC<Props> = ({
 }) => {
   const prefixCls = `${PREFIX_CLS}-item`;
 
-  const pillEditHandleRef = useRef<IPillEditHandleRef>(null);
-
   const getNode = (tipTitle: ReactNode, tipNode?: ReactNode) => {
     return (
       <div className={`${prefixCls}-parse-tip`}>
@@ -81,16 +78,6 @@ const ParseTip: React.FC<Props> = ({
       </div>
     );
   };
-
-  useEffect(() => {
-    if (pillEditHandleRef.current && currentParseInfo && agentId && currentParseInfo?.dataSet?.id) {
-      pillEditHandleRef.current.resetData(
-        agentId,
-        currentParseInfo?.dataSet?.id!,
-        getPillsByParseInfo(currentParseInfo)
-      );
-    }
-  }, [currentParseInfo]);
 
   if (parseLoading) {
     return getNode('意图解析中');
@@ -292,9 +279,13 @@ const ParseTip: React.FC<Props> = ({
   };
 
   const getFiltersNode = () => {
-    return (
+    return currentParseInfo ? (
       <>
-        <FiltersInfo ref={pillEditHandleRef} onConfirm={onQueryConditionChange} />
+        <FiltersInfo
+          onConfirm={onQueryConditionChange}
+          agentId={agentId!}
+          chatContext={currentParseInfo}
+        />
         {/* <div className={`${prefixCls}-tip-item`}>
           <div className={`${prefixCls}-tip-item-name`}>筛选条件：</div>
           <div className={`${prefixCls}-tip-item-content`}>
@@ -306,7 +297,7 @@ const ParseTip: React.FC<Props> = ({
           重新查询
         </Button> */}
       </>
-    );
+    ) : null;
   };
 
   const { type: agentType } = properties || {};
@@ -325,9 +316,9 @@ const ParseTip: React.FC<Props> = ({
         {parseTimeCost && isDeveloper && (
           <span className={`${prefixCls}-title-tip`}>(耗时: {parseTimeCost}ms)</span>
         )}
-        {parseInfoOptions?.length > 1 ? '：' : ''}
+        {/* {parseInfoOptions?.length > 1 ? '：' : ''} */}
       </div>
-      {!isSimpleMode && parseInfoOptions?.length > 1 && (
+      {/* {!isSimpleMode && parseInfoOptions?.length > 1 && (
         <div className={`${prefixCls}-content-options`}>
           {parseInfoOptions.map((parseInfo, index) => (
             <div
@@ -343,7 +334,7 @@ const ParseTip: React.FC<Props> = ({
             </div>
           ))}
         </div>
-      )}
+      )} */}
     </div>,
     isSimpleMode ? <MarkDown markdown={textInfo} /> : tipNode
   );
