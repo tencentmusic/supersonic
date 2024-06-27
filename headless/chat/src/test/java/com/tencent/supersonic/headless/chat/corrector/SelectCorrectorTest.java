@@ -1,6 +1,7 @@
 package com.tencent.supersonic.headless.chat.corrector;
 
 import com.tencent.supersonic.common.pojo.enums.QueryType;
+import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.headless.api.pojo.DataSetSchema;
 import com.tencent.supersonic.headless.api.pojo.DefaultDisplayInfo;
 import com.tencent.supersonic.headless.api.pojo.QueryConfig;
@@ -10,12 +11,18 @@ import com.tencent.supersonic.headless.api.pojo.SemanticSchema;
 import com.tencent.supersonic.headless.api.pojo.SqlInfo;
 import com.tencent.supersonic.headless.api.pojo.TagTypeDefaultConfig;
 import com.tencent.supersonic.headless.chat.QueryContext;
+import org.junit.Assert;
+import org.junit.jupiter.api.Test;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
+import org.springframework.core.env.Environment;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import org.junit.Assert;
-import org.junit.jupiter.api.Test;
+
+import static org.mockito.Mockito.when;
 
 class SelectCorrectorTest {
 
@@ -23,6 +30,11 @@ class SelectCorrectorTest {
 
     @Test
     void testDoCorrect() {
+        MockedStatic<ContextUtils> mocked = Mockito.mockStatic(ContextUtils.class);
+        Environment mockEnvironment = Mockito.mock(Environment.class);
+        mocked.when(() -> ContextUtils.getBean(Environment.class)).thenReturn(mockEnvironment);
+        when(mockEnvironment.getProperty(SelectCorrector.ADDITIONAL_INFORMATION)).thenReturn("");
+
         BaseSemanticCorrector corrector = new SelectCorrector();
         QueryContext queryContext = buildQueryContext(dataSetId);
         SemanticParseInfo semanticParseInfo = new SemanticParseInfo();
