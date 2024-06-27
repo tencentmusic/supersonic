@@ -42,7 +42,6 @@ public class MetaEmbeddingListener implements ApplicationListener<DataEvent> {
             return;
         }
         sleep();
-        embeddingService.addCollection(embeddingConfig.getMetaCollectionName());
         if (event.getEventType().equals(EventType.ADD)) {
             embeddingService.addQuery(embeddingConfig.getMetaCollectionName(), textSegments);
         } else if (event.getEventType().equals(EventType.DELETE)) {
