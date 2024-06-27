@@ -318,6 +318,11 @@ public class SchemaServiceImpl implements SchemaService {
     }
 
     @Override
+    public DimensionResp getDimension(Long id) {
+        return dimensionService.getDimension(id);
+    }
+
+    @Override
     public List<DimensionResp> getDimensions(MetaFilter metaFilter) {
         return dimensionService.getDimensions(metaFilter);
     }
