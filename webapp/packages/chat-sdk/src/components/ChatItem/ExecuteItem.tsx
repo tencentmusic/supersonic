@@ -1,5 +1,5 @@
-import { Spin, Row, Col, Switch } from 'antd';
-import { CheckCircleFilled } from '@ant-design/icons';
+import { Spin, Row, Col, Switch, Button, Tooltip, Dropdown, MenuProps } from 'antd';
+import { CheckCircleFilled, EllipsisOutlined } from '@ant-design/icons';
 import { PREFIX_CLS, MsgContentTypeEnum } from '../../common/constants';
 import { MsgDataType } from '../../common/type';
 import ChatMsg from '../ChatMsg';
@@ -19,6 +19,7 @@ type Props = {
   triggerResize?: boolean;
   isDeveloper?: boolean;
   isSimpleMode?: boolean;
+  onClickItem?: (key: string) => void;
 };
 
 const ExecuteItem: React.FC<Props> = ({
@@ -33,6 +34,7 @@ const ExecuteItem: React.FC<Props> = ({
   triggerResize,
   isDeveloper,
   isSimpleMode,
+  onClickItem,
 }) => {
   const prefixCls = `${PREFIX_CLS}-item`;
   const [showMsgContentTable, setShowMsgContentTable] = useState<boolean>(false);
@@ -73,23 +75,26 @@ const ExecuteItem: React.FC<Props> = ({
     return null;
   }
 
+  const onClick: MenuProps['onClick'] = ({ key }) => {
+    onClickItem?.(key);
+  };
+
   return (
     <>
       <div className={`${prefixCls}-title-bar`}>
         <CheckCircleFilled className={`${prefixCls}-step-icon`} />
         <div className={`${prefixCls}-step-title`} style={{ width: '100%' }}>
-          <Row style={{ width: '100%' }}>
+          <Row style={{ width: '100%' }} align="middle" justify="center">
             <Col flex="1 1 auto">
               数据查询
               {data?.queryTimeCost && isDeveloper && (
                 <span className={`${prefixCls}-title-tip`}>(耗时: {data.queryTimeCost}ms)</span>
               )}
-            </Col>
-            <Col flex="0 1 70px">
               {[MsgContentTypeEnum.METRIC_TREND, MsgContentTypeEnum.METRIC_BAR].includes(
                 msgContentType as MsgContentTypeEnum
               ) && (
                 <Switch
+                  style={{ marginLeft: '10px' }}
                   checkedChildren="表格"
                   unCheckedChildren="表格"
                   onChange={checked => {
@@ -98,10 +103,33 @@ const ExecuteItem: React.FC<Props> = ({
                 />
               )}
             </Col>
+            <Col flex="0 1 30px">
+              <Dropdown
+                trigger={['click']}
+                menu={{
+                  onClick,
+                  items: [
+                    {
+                      label: '导出查询结果',
+                      disabled: true,
+                      key: 'exportData',
+                    },
+                    {
+                      label: '查看SQL',
+                      key: 'viewSQL',
+                    },
+                  ],
+                }}
+              >
+                <Tooltip title="更多操作">
+                  <Button size="large" type="text" icon={<EllipsisOutlined />} />
+                </Tooltip>
+              </Dropdown>
+            </Col>
           </Row>
         </div>
       </div>
-      <div className={`${prefixCls}-content-container`}>
+      <div className={`${prefixCls}-content-container without-border`}>
         <Spin spinning={entitySwitchLoading}>
           {data.queryAuthorization?.message && (
             <div className={`${prefixCls}-auth-tip`}>提示：{data.queryAuthorization.message}</div>

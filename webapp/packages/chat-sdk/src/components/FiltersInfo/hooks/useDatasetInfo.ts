@@ -1,25 +1,18 @@
-import { useRequest } from 'ahooks';
 import { useContextSelector } from 'use-context-selector';
 import { FilterInfosContext } from '..';
-import { getDataSetInfo } from '../../../service';
+import { useDataSetsInfo } from '../../../hooks/useDataSetsInfo';
 
-export function useDatasetInfo() {
-  const datasetId = useContextSelector(FilterInfosContext, context => context.datasetId);
+export function useDatasetInfo(dataSetIdFromParam?: number) {
+  const datasetIdFromContext = useContextSelector(FilterInfosContext, context => context.datasetId);
 
-  const { data: responseData } = useRequest(() => getDataSetInfo(datasetId!), {
-    cacheKey: 'datasetInfo' + datasetId,
-    debounceWait: 500,
-    staleTime: 1000 * 60 * 10,
-  });
+  const dataSetsInfo = useDataSetsInfo();
 
-  let dimensions: any[] = [];
-  let metrics: any[] = [];
+  const dataSetId = dataSetIdFromParam || datasetIdFromContext;
 
-  // @ts-ignore
-  if (responseData?.code === 200) {
-    dimensions = responseData.data.dimensions;
-    metrics = responseData.data.metrics;
-  }
+  const { dimensions, metrics } = dataSetsInfo.get(dataSetId!) ?? {
+    dimensions: [],
+    metrics: [],
+  };
 
   const getTypeByBizName = (bizName: string) => {
     const dimension = dimensions.find((item: any) => item.bizName === bizName);

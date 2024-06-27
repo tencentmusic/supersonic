@@ -10,7 +10,7 @@ import {
   ParseTimeCostType,
   SimilarQuestionType,
 } from '../../common/type';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { chatExecute, chatParse, queryData, queryEntityInfo, switchEntity } from '../../service';
 import { PARSE_ERROR_TIP, PREFIX_CLS, SEARCH_EXCEPTION_TIP } from '../../common/constants';
 import IconFont from '../IconFont';
@@ -31,7 +31,7 @@ import {
   ITextFilterPill,
   ITopNPill,
 } from '../FiltersInfo/types';
-import { cloneDeep } from 'lodash';
+import SqlItemModal, { SqlItemModalHandle } from './SqlItemModal';
 
 type Props = {
   msg: string;
@@ -92,6 +92,7 @@ const ChatItem: React.FC<Props> = ({
   const [dataCache, setDataCache] = useState<Record<number, { tip: string; data?: MsgDataType }>>(
     {}
   );
+  const sqlItemModalRef = useRef<SqlItemModalHandle>(null);
 
   const prefixCls = `${PREFIX_CLS}-item`;
 
@@ -516,7 +517,8 @@ const ChatItem: React.FC<Props> = ({
                 isDeveloper &&
                 integrateSystem !== 'c2' &&
                 !isSimpleMode && (
-                  <SqlItem
+                  <SqlItemModal
+                    ref={sqlItemModalRef}
                     llmReq={llmReq}
                     llmResp={llmResp}
                     integrateSystem={integrateSystem}
@@ -537,10 +539,15 @@ const ChatItem: React.FC<Props> = ({
                 executeItemNode={executeItemNode}
                 isDeveloper={isDeveloper}
                 renderCustomExecuteNode={renderCustomExecuteNode}
+                onClickItem={(key: string) => {
+                  if (key === 'viewSQL') {
+                    sqlItemModalRef.current?.show();
+                  }
+                }}
               />
             </>
           )}
-          {(parseTip !== '' || (executeMode && !executeLoading)) &&
+          {/* {(parseTip !== '' || (executeMode && !executeLoading)) &&
             integrateSystem !== 'c2' &&
             !isSimpleMode && (
               <SimilarQuestionItem
@@ -549,7 +556,7 @@ const ChatItem: React.FC<Props> = ({
                 similarQueries={data?.similarQueries}
                 onSelectQuestion={onSelectQuestion}
               />
-            )}
+            )} */}
         </div>
         {(parseTip !== '' || (executeMode && !executeLoading)) && integrateSystem !== 'c2' && (
           <Tools queryId={parseInfo?.queryId || 0} scoreValue={score} />

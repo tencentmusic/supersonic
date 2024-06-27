@@ -5,7 +5,6 @@ import { cloneDeep } from 'lodash';
 import { memo, useRef } from 'react';
 import { useContextSelector } from 'use-context-selector';
 import { FilterInfosContext } from '.';
-import { uuid } from '../../utils/utils';
 import ConditionPanel from './ConditionPanel';
 import { IConditionListHandle } from './ConditionPanel/ConditionList';
 import { useDatasetInfo } from './hooks/useDatasetInfo';
@@ -15,7 +14,6 @@ import {
   IAggregationPill,
   IGroupPill,
   INumberFilterPill,
-  IStringColumnCondition,
   ITextFilterPill,
   ITopNPill,
 } from './types';
@@ -141,13 +139,13 @@ function Actions({ onConfirm, onCancel }: Props) {
               id: 'group',
               selected: false,
               type: 'group',
-              fields: [
-                {
-                  field: condition.field!,
-                  fieldName: fieldInfo.name,
-                },
-              ],
+              fields: [],
             };
+
+            groupPill.fields.push({
+              field: condition.field!,
+              fieldName: fieldInfo.name,
+            });
 
             const index = cloneData.findIndex(item => item.type === 'group');
 
@@ -165,14 +163,14 @@ function Actions({ onConfirm, onCancel }: Props) {
               id: 'aggregation',
               selected: false,
               type: 'aggregation',
-              fields: [
-                {
-                  field: condition.field!,
-                  fieldName: fieldInfo.name,
-                  operator: condition.value as string,
-                },
-              ],
+              fields: [],
             };
+
+            aggPill.fields.push({
+              field: condition.field!,
+              fieldName: fieldInfo.name,
+              operator: condition.value as string,
+            });
 
             const index = cloneData.findIndex(item => item.type === 'aggregation');
 

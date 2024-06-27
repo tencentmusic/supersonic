@@ -1,4 +1,3 @@
-import { filter } from 'lodash';
 import { ChatContextType, DateInfoType, FilterItemType } from '../../common/type';
 import { uuid } from '../../utils/utils';
 import type {
@@ -174,16 +173,16 @@ const textOperatorMap = {
   IN: {
     getText: (v1: string[] | string) => {
       const _v1 = Array.isArray(v1) ? v1 : [v1];
-      return '包含' + _v1.join('、');
+      return '属于' + _v1.join('、');
     },
-    label: '包含',
+    label: '属于',
   },
   NOT_IN: {
     getText: (v1: string[] | string) => {
       const _v1 = Array.isArray(v1) ? v1 : [v1];
-      return '不包含' + _v1.join('、');
+      return '不属于' + _v1.join('、');
     },
-    label: '不包含',
+    label: '不属于',
   },
   IS_NULL: {
     getText: () => '为空',
@@ -196,9 +195,9 @@ const textOperatorMap = {
   LIKE: {
     getText: (v1: string[] | string) => {
       const _v1 = Array.isArray(v1) ? v1[0] : v1;
-      return 'LIKE ' + _v1;
+      return '包含 ' + _v1;
     },
-    label: 'LIKE',
+    label: '包含',
   },
   '=': {
     getText: (v1: string[] | string) => {
@@ -543,16 +542,20 @@ function createAggregationPill(metrics: ChatContextType['metrics']): IAggregatio
   };
 }
 
-export function getPillsByParseInfo(parseInfo?: ChatContextType): IPill[] {
+export function getPillsByParseInfo(
+  parseInfo: ChatContextType | null,
+  getTypeByBizName: (bizName: string) => 'string' | 'number' | 'date'
+): IPill[] {
   if (!parseInfo || !parseInfo.id) return [];
   const { dimensionFilters = [], dimensions = [], metrics = [], dateInfo, limit } = parseInfo;
 
   const filterPills: IPill[] = [];
   // dimensionFilters 根绝值类型来判断是 text-filter 还是 number-filter，分别转换成多个 filter
   dimensionFilters.forEach(filter => {
-    if (typeof filter.value === 'string') {
+    const bizNameType = getTypeByBizName(filter.bizName);
+    if (bizNameType === 'string') {
       filterPills.push(createTextFilterPill(filter));
-    } else if (typeof filter.value === 'number') {
+    } else if (bizNameType === 'number') {
       filterPills.push(createNumberFilterPill(filter));
     }
   });

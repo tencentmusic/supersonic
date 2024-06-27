@@ -56,6 +56,7 @@ export default function ConditionItemFilter({ data, onChange }: Props) {
     onChange({
       ...data,
       operator,
+      value: null,
     });
   };
 

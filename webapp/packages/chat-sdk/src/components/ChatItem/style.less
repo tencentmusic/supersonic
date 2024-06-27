@@ -166,6 +166,10 @@
     padding: 10px 0 4px 18px;
     border-left: 1px solid var(--green);
     padding-bottom: 10px;
+
+    &.without-border {
+      border-left: 1px solid transparent;
+    }
   }
 
   &-auth-tip {
@@ -442,6 +446,12 @@
   padding: 2px 0 8px 18px;
   border-left: 1px solid var(--green);
   overflow: auto;
+
+  &.without-border {
+    border-left: 1px solid transparent!important;
+    margin: 0;
+    padding: 0;
+  }
 
   &-toggle-expand-btn {
     color: var(--text-color-fourth);
