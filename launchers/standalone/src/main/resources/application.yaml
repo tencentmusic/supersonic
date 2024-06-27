@@ -3,5 +3,8 @@ spring:
     active: local
   application:
     name: chat
+  config:
+    import:
+      - classpath:llm-config.yaml
 mybatis:
   mapper-locations=classpath:mappers/custom/*.xml,classpath*:/mappers/*.xml

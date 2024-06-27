@@ -90,27 +90,3 @@ swagger:
     email:
     url: ''
   version: 3.0
-
-
-langchain4j:
-  open-ai:
-    chat-model:
-      # Replace with your LLM configs
-      # Note: The default API key `demo` is provided by langchain4j community
-      #       which limits 1000 tokens per request.
-      base-url: ${OPENAI_API_BASE:https://api.openai.com/v1}
-      api-key: ${OPENAI_API_KEY:demo}
-      model-name: ${OPENAI_MODEL_NAME:gpt-3.5-turbo}
-      temperature: ${OPENAI_TEMPERATURE:0.0}
-      timeout: ${OPENAI_TIMEOUT:PT60S}
-# java.lang.RuntimeException: dev.ai4j.openai4j.OpenAiHttpException: Too many requests
-#    embedding-model:
-#      base-url: ${OPENAI_API_BASE:https://api.openai.com/v1}
-#      api-key: ${OPENAI_API_KEY:demo}
-  in-memory:
-    embedding-model:
-      model-name: bge-small-zh
-      #modelPath: /data/model.onnx
-      #vocabularyPath: /data/onnx_vocab.txt
-    embedding-store:
-      file-path: /tmp

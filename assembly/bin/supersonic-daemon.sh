@@ -3,10 +3,6 @@
 sbinDir=$(cd "$(dirname "$0")"; pwd)
 source $sbinDir/supersonic-common.sh
 
-set -a
-source $sbinDir/../conf/supersonic-env.sh
-set +a
-
 command=$1
 service=$2
 if [ -z "$service"  ]; then

@@ -4,7 +4,6 @@ chcp 65001
 
 set "sbinDir=%~dp0"
 call %sbinDir%/supersonic-common.bat %*
-call %sbinDir%/../conf/supersonic-env.bat %*
 
 set "command=%~1"
 set "service=%~2"
