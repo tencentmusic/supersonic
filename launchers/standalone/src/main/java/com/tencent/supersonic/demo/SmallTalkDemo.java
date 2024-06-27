@@ -11,6 +11,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Component
 @Slf4j
 @Order(2)
@@ -35,6 +38,9 @@ public class SmallTalkDemo extends S2BaseDemo {
 
     @Override
     boolean checkNeedToRun() {
-        return true;
+        List<String> agentNames = agentService.getAgents()
+                .stream().map(Agent::getName).collect(Collectors.toList());
+        return !agentNames.contains("来闲聊");
     }
+
 }

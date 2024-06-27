@@ -4,11 +4,9 @@ import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.chat.api.pojo.request.ChatExecuteReq;
 import com.tencent.supersonic.chat.api.pojo.request.ChatParseReq;
 import com.tencent.supersonic.chat.api.pojo.request.ChatQueryDataReq;
-import com.tencent.supersonic.chat.api.pojo.request.SimilarQueryReq;
 import com.tencent.supersonic.chat.server.agent.Agent;
 import com.tencent.supersonic.chat.server.executor.ChatExecutor;
 import com.tencent.supersonic.chat.server.parser.ChatParser;
-import com.tencent.supersonic.chat.server.persistence.dataobject.ChatQueryDO;
 import com.tencent.supersonic.chat.server.pojo.ChatExecuteContext;
 import com.tencent.supersonic.chat.server.pojo.ChatParseContext;
 import com.tencent.supersonic.chat.server.processor.execute.ExecuteResultProcessor;
@@ -18,7 +16,6 @@ import com.tencent.supersonic.chat.server.service.ChatManageService;
 import com.tencent.supersonic.chat.server.service.ChatService;
 import com.tencent.supersonic.chat.server.util.ComponentFactory;
 import com.tencent.supersonic.chat.server.util.QueryReqConverter;
-import com.tencent.supersonic.chat.server.util.SimilarQueryManager;
 import com.tencent.supersonic.common.util.BeanMapper;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
@@ -48,8 +45,6 @@ public class ChatServiceImpl implements ChatService {
     private ChatQueryService chatQueryService;
     @Autowired
     private RetrieveService retrieveService;
-    @Autowired
-    private SimilarQueryManager similarQueryManager;
     private List<ChatParser> chatParsers = ComponentFactory.getChatParsers();
     private List<ChatExecutor> chatExecutors = ComponentFactory.getChatExecutors();
     private List<ParseResultProcessor> parseResultProcessors = ComponentFactory.getParseProcessors();
@@ -95,7 +90,6 @@ public class ChatServiceImpl implements ChatService {
             for (ExecuteResultProcessor processor : executeResultProcessors) {
                 processor.process(chatExecuteContext, queryResult);
             }
-            saveQueryResult(chatExecuteReq, queryResult);
         }
 
         return queryResult;
@@ -141,17 +135,6 @@ public class ChatServiceImpl implements ChatService {
     @Override
     public Object queryDimensionValue(DimensionValueReq dimensionValueReq, User user) throws Exception {
         return chatQueryService.queryDimensionValue(dimensionValueReq, user);
-    }
-
-    public void saveQueryResult(ChatExecuteReq chatExecuteReq, QueryResult queryResult) {
-        //The history record only retains the query result of the first parse
-        if (chatExecuteReq.getParseId() > 1) {
-            return;
-        }
-        ChatQueryDO chatQueryDO = chatManageService.saveQueryResult(chatExecuteReq, queryResult);
-        SimilarQueryReq similarQueryReq = SimilarQueryReq.builder().queryId(chatExecuteReq.getQueryId())
-                .queryText(chatQueryDO.getQueryText()).agentId(chatQueryDO.getAgentId()).build();
-        similarQueryManager.saveSimilarQuery(similarQueryReq);
     }
 
 }
