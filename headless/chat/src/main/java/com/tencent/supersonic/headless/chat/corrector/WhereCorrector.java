@@ -16,7 +16,6 @@ import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.util.Strings;
 import org.springframework.util.CollectionUtils;
 
 import java.util.HashMap;
@@ -95,7 +94,7 @@ public class WhereCorrector extends BaseSemanticCorrector {
 
         for (SchemaElement dimension : dimensions) {
             if (Objects.isNull(dimension)
-                    || Strings.isEmpty(dimension.getName())
+                    || StringUtils.isEmpty(dimension.getName())
                     || CollectionUtils.isEmpty(dimension.getSchemaValueMaps())) {
                 continue;
             }
@@ -104,15 +103,15 @@ public class WhereCorrector extends BaseSemanticCorrector {
             Map<String, String> aliasAndBizNameToTechName = new HashMap<>();
 
             for (SchemaValueMap valueMap : dimension.getSchemaValueMaps()) {
-                if (Objects.isNull(valueMap) || Strings.isEmpty(valueMap.getTechName())) {
+                if (Objects.isNull(valueMap) || StringUtils.isEmpty(valueMap.getTechName())) {
                     continue;
                 }
-                if (Strings.isNotEmpty(valueMap.getBizName())) {
+                if (StringUtils.isNotEmpty(valueMap.getBizName())) {
                     aliasAndBizNameToTechName.put(valueMap.getBizName(), valueMap.getTechName());
                 }
                 if (!CollectionUtils.isEmpty(valueMap.getAlias())) {
                     valueMap.getAlias().stream().forEach(alias -> {
-                        if (Strings.isNotEmpty(alias)) {
+                        if (StringUtils.isNotEmpty(alias)) {
                             aliasAndBizNameToTechName.put(alias, valueMap.getTechName());
                         }
                     });

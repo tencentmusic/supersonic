@@ -4,7 +4,7 @@ import com.github.pagehelper.PageInfo;
 import com.tencent.supersonic.headless.api.pojo.request.DictValueReq;
 import com.tencent.supersonic.headless.api.pojo.response.DictValueResp;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.logging.log4j.util.Strings;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
@@ -125,7 +125,7 @@ public class FileHandlerImpl implements FileHandler {
 
     private DictValueResp convert2Resp(String lineStr) {
         DictValueResp dictValueResp = new DictValueResp();
-        if (Strings.isNotEmpty(lineStr)) {
+        if (StringUtils.isNotEmpty(lineStr)) {
             String[] itemArray = lineStr.split("\\s+");
             if (Objects.nonNull(itemArray) && itemArray.length >= 3) {
                 dictValueResp.setValue(itemArray[0].replace("#", " "));

@@ -2,16 +2,16 @@ package com.tencent.supersonic.headless.chat.parser.rule;
 
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.DateConf;
+import com.tencent.supersonic.headless.chat.ChatContext;
+import com.tencent.supersonic.headless.chat.QueryContext;
+import com.tencent.supersonic.headless.chat.parser.SemanticParser;
 import com.tencent.supersonic.headless.chat.query.QueryManager;
 import com.tencent.supersonic.headless.chat.query.SemanticQuery;
 import com.tencent.supersonic.headless.chat.query.rule.RuleSemanticQuery;
-import com.tencent.supersonic.headless.chat.parser.SemanticParser;
-import com.tencent.supersonic.headless.chat.ChatContext;
-import com.tencent.supersonic.headless.chat.QueryContext;
 import com.xkzhangsan.time.nlp.TimeNLP;
 import com.xkzhangsan.time.nlp.TimeNLPUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.logging.log4j.util.Strings;
+import org.apache.commons.lang3.StringUtils;
 
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -22,6 +22,8 @@ import java.util.List;
 import java.util.Stack;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+;
 
 /**
  * TimeRangeParser extracts time range specified in the user query
@@ -155,7 +157,7 @@ public class TimeRangeParser implements SemanticParser {
                 days = days * num;
                 info.setDateMode(DateConf.DateMode.RECENT);
                 String detectWord = "近" + num + zhPeriod;
-                if (Strings.isNotEmpty(m.group("periodStr"))) {
+                if (StringUtils.isNotEmpty(m.group("periodStr"))) {
                     detectWord = m.group("periodStr");
                 }
                 info.setDetectWord(detectWord);

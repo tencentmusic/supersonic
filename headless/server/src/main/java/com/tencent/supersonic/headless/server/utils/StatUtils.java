@@ -4,13 +4,13 @@ import com.alibaba.ttl.TransmittableThreadLocal;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
+import com.tencent.supersonic.common.jsqlparser.SqlSelectHelper;
 import com.tencent.supersonic.common.pojo.enums.TaskStatusEnum;
 import com.tencent.supersonic.common.util.SqlFilterUtils;
-import com.tencent.supersonic.common.jsqlparser.SqlSelectHelper;
 import com.tencent.supersonic.headless.api.pojo.QueryStat;
 import com.tencent.supersonic.headless.api.pojo.SchemaItem;
-import com.tencent.supersonic.headless.api.pojo.enums.QueryOptMode;
 import com.tencent.supersonic.headless.api.pojo.enums.QueryMethod;
+import com.tencent.supersonic.headless.api.pojo.enums.QueryOptMode;
 import com.tencent.supersonic.headless.api.pojo.enums.QueryTypeBack;
 import com.tencent.supersonic.headless.api.pojo.request.ItemUseReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryMultiStructReq;
@@ -22,7 +22,7 @@ import com.tencent.supersonic.headless.api.pojo.response.ItemUseResp;
 import com.tencent.supersonic.headless.server.persistence.repository.StatRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.logging.log4j.util.Strings;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
@@ -32,6 +32,8 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
+
+;
 
 
 @Component
@@ -217,7 +219,7 @@ public class StatUtils {
     }
 
     private String getUserName(User facadeUser) {
-        return (Objects.nonNull(facadeUser) && Strings.isNotEmpty(facadeUser.getName())) ? facadeUser.getName()
+        return (Objects.nonNull(facadeUser) && StringUtils.isNotEmpty(facadeUser.getName())) ? facadeUser.getName()
                 : "Admin";
     }
 

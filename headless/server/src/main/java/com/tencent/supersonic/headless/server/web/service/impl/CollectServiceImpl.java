@@ -8,7 +8,6 @@ import com.tencent.supersonic.headless.server.persistence.mapper.CollectMapper;
 import com.tencent.supersonic.headless.server.web.service.CollectService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.util.Strings;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -26,7 +25,7 @@ public class CollectServiceImpl implements CollectService {
     @Override
     public Boolean collect(User user, CollectDO collectReq) {
         CollectDO collect = new CollectDO();
-        collect.setType(Strings.isEmpty(collectReq.getType()) ? type : collectReq.getType());
+        collect.setType(StringUtils.isEmpty(collectReq.getType()) ? type : collectReq.getType());
         collect.setUsername(user.getName());
         collect.setCollectId(collectReq.getCollectId());
         collectMapper.insert(collect);

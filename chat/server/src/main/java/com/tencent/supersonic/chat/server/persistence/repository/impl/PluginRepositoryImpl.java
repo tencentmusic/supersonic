@@ -6,7 +6,7 @@ import com.tencent.supersonic.chat.server.persistence.mapper.PluginDOMapper;
 import com.tencent.supersonic.chat.server.persistence.repository.PluginRepository;
 import com.tencent.supersonic.common.util.ContextUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.logging.log4j.util.Strings;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
@@ -39,7 +39,7 @@ public class PluginRepositoryImpl implements PluginRepository {
 
         for (PluginDO pluginDO : pluginDOS) {
             String pattern = pluginDO.getPattern();
-            if (Strings.isNotEmpty(pattern)) {
+            if (StringUtils.isNotEmpty(pattern)) {
 
                 Pattern pluginPattern = Pattern.compile(pattern);
                 Matcher pluginMatcher = pluginPattern.matcher(queryText);

@@ -1,12 +1,5 @@
 package com.tencent.supersonic.headless.server.utils;
 
-import static com.tencent.supersonic.common.pojo.Constants.AND_UPPER;
-import static com.tencent.supersonic.common.pojo.Constants.APOSTROPHE;
-import static com.tencent.supersonic.common.pojo.Constants.COMMA;
-import static com.tencent.supersonic.common.pojo.Constants.POUND;
-import static com.tencent.supersonic.common.pojo.Constants.SPACE;
-
-import com.google.common.base.Strings;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.common.pojo.Aggregator;
 import com.tencent.supersonic.common.pojo.Constants;
@@ -33,13 +26,21 @@ import com.tencent.supersonic.headless.api.pojo.response.MetricResp;
 import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
 import com.tencent.supersonic.headless.api.pojo.response.TagResp;
+import com.tencent.supersonic.headless.server.facade.service.SemanticLayerService;
 import com.tencent.supersonic.headless.server.persistence.dataobject.DictConfDO;
 import com.tencent.supersonic.headless.server.persistence.dataobject.DictTaskDO;
 import com.tencent.supersonic.headless.server.web.service.DimensionService;
 import com.tencent.supersonic.headless.server.web.service.MetricService;
 import com.tencent.supersonic.headless.server.web.service.ModelService;
-import com.tencent.supersonic.headless.server.facade.service.SemanticLayerService;
 import com.tencent.supersonic.headless.server.web.service.TagMetaService;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
+
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -52,12 +53,12 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.StringJoiner;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
+
+import static com.tencent.supersonic.common.pojo.Constants.AND_UPPER;
+import static com.tencent.supersonic.common.pojo.Constants.APOSTROPHE;
+import static com.tencent.supersonic.common.pojo.Constants.COMMA;
+import static com.tencent.supersonic.common.pojo.Constants.POUND;
+import static com.tencent.supersonic.common.pojo.Constants.SPACE;
 
 @Slf4j
 @Component
@@ -112,7 +113,7 @@ public class DictUtils {
         taskDO.setConfig(JsonUtil.toString(dictItemResp.getConfig()));
         taskDO.setStatus(status.getStatus());
         taskDO.setCreatedAt(createAt);
-        String creator = (Objects.isNull(user) || Strings.isNullOrEmpty(user.getName())) ? "" : user.getName();
+        String creator = (Objects.isNull(user) || StringUtils.isEmpty(user.getName())) ? "" : user.getName();
         taskDO.setCreatedBy(creator);
         return taskDO;
     }
@@ -124,7 +125,7 @@ public class DictUtils {
         confDO.setConfig(JsonUtil.toString(itemValueReq.getConfig()));
         Date createAt = new Date();
         confDO.setCreatedAt(createAt);
-        String creator = Strings.isNullOrEmpty(user.getName()) ? "" : user.getName();
+        String creator = StringUtils.isEmpty(user.getName()) ? "" : user.getName();
         confDO.setCreatedBy(creator);
         confDO.setStatus(itemValueReq.getStatus().name());
         return confDO;
@@ -180,7 +181,7 @@ public class DictUtils {
                         metricObject = line.get(key);
                     }
                 }
-                if (!Strings.isNullOrEmpty(dimValue) && Objects.nonNull(metricObject)) {
+                if (!StringUtils.isEmpty(dimValue) && Objects.nonNull(metricObject)) {
                     Long metric = Math.round(Double.parseDouble(metricObject.toString()));
                     mergeMultivaluedValue(valueAndFrequencyPair, dimValue, metric);
                 }
@@ -201,7 +202,7 @@ public class DictUtils {
         }
         List<String> whiteList = dictItemResp.getConfig().getWhiteList();
         whiteList.forEach(white -> {
-            if (!Strings.isNullOrEmpty(white)) {
+            if (!StringUtils.isEmpty(white)) {
                 white = white.replace(SPACE, POUND);
             }
             lines.add(String.format("%s %s %s", white, nature, itemValueWhiteFrequency));
@@ -214,7 +215,7 @@ public class DictUtils {
         }
 
         valueAndFrequencyPair.forEach((value, frequency) -> {
-            if (!Strings.isNullOrEmpty(value)) {
+            if (!StringUtils.isEmpty(value)) {
                 value = value.replace(SPACE, POUND);
             }
             lines.add(String.format("%s %s %s", value, nature, frequency));
@@ -222,7 +223,7 @@ public class DictUtils {
     }
 
     private void mergeMultivaluedValue(Map<String, Long> valueAndFrequencyPair, String dimValue, Long metric) {
-        if (org.apache.logging.log4j.util.Strings.isEmpty(dimValue)) {
+        if (StringUtils.isEmpty(dimValue)) {
             return;
         }
         Map<String, Long> tmp = new HashMap<>();
@@ -252,7 +253,7 @@ public class DictUtils {
         String sqlPattern = "select %s, %s from tbl %s group by %s order by %s desc limit %d";
         String bizName = dictItemResp.getBizName();
         String whereStr = generateWhereStr(dictItemResp);
-        String where = Strings.isNullOrEmpty(whereStr) ? "" : "WHERE" + whereStr;
+        String where = StringUtils.isEmpty(whereStr) ? "" : "WHERE" + whereStr;
         ItemValueConfig config = dictItemResp.getConfig();
         Long limit = (Objects.isNull(config) || Objects.isNull(config.getLimit())) ? itemValueMaxCount :
                 dictItemResp.getConfig().getLimit();
@@ -293,7 +294,7 @@ public class DictUtils {
         String sqlPattern = "select %s,count(1) from tbl %s group by %s order by count(1) desc limit %d";
         String bizName = dictItemResp.getBizName();
         String whereStr = generateWhereStr(dictItemResp);
-        String where = Strings.isNullOrEmpty(whereStr) ? "" : "WHERE" + whereStr;
+        String where = StringUtils.isEmpty(whereStr) ? "" : "WHERE" + whereStr;
         ItemValueConfig config = dictItemResp.getConfig();
         Long limit = (Objects.isNull(config) || Objects.isNull(config.getLimit())) ? itemValueMaxCount :
                 dictItemResp.getConfig().getLimit();
@@ -365,7 +366,7 @@ public class DictUtils {
             return new ArrayList<>();
         }
         String whereStr = generateWhereStr(dictItemResp);
-        if (Strings.isNullOrEmpty(whereStr)) {
+        if (StringUtils.isEmpty(whereStr)) {
             return new ArrayList<>();
         }
         Filter filter = new Filter("", FilterOperatorEnum.SQL_PART, whereStr);

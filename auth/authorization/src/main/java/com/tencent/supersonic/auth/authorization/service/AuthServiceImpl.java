@@ -1,27 +1,28 @@
 package com.tencent.supersonic.auth.authorization.service;
 
-import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.gson.Gson;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.auth.api.authentication.service.UserService;
+import com.tencent.supersonic.auth.api.authorization.pojo.AuthGroup;
 import com.tencent.supersonic.auth.api.authorization.pojo.AuthRes;
 import com.tencent.supersonic.auth.api.authorization.pojo.AuthResGrp;
+import com.tencent.supersonic.auth.api.authorization.pojo.AuthRule;
 import com.tencent.supersonic.auth.api.authorization.pojo.DimensionFilter;
 import com.tencent.supersonic.auth.api.authorization.request.QueryAuthResReq;
 import com.tencent.supersonic.auth.api.authorization.response.AuthorizedResourceResp;
 import com.tencent.supersonic.auth.api.authorization.service.AuthService;
-import com.tencent.supersonic.auth.api.authorization.pojo.AuthGroup;
-import com.tencent.supersonic.auth.api.authorization.pojo.AuthRule;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.Map;
-import java.util.ArrayList;
 import java.util.stream.Collectors;
 
 @Service
@@ -117,7 +118,8 @@ public class AuthServiceImpl implements AuthService {
             if (!CollectionUtils.isEmpty(authGroups)) {
                 for (AuthGroup group : authGroups) {
                     if (group.getDimensionFilters() != null
-                            && group.getDimensionFilters().stream().anyMatch(expr -> !Strings.isNullOrEmpty(expr))) {
+                            && group.getDimensionFilters().stream().anyMatch(expr ->
+                            !StringUtils.isEmpty(expr))) {
                         DimensionFilter df = new DimensionFilter();
                         df.setDescription(group.getDimensionFilterDescription());
                         df.setExpressions(group.getDimensionFilters());

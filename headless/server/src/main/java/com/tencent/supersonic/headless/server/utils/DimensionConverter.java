@@ -12,7 +12,7 @@ import com.tencent.supersonic.headless.api.pojo.response.DimensionResp;
 import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
 import com.tencent.supersonic.headless.api.pojo.response.DataSetResp;
 import com.tencent.supersonic.headless.server.persistence.dataobject.DimensionDO;
-import org.apache.logging.log4j.util.Strings;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.util.CollectionUtils;
 
@@ -76,10 +76,10 @@ public class DimensionConverter {
         }
         dimensionResp.setModelFilterSql(
                 modelRespMap.getOrDefault(dimensionResp.getModelId(), new ModelResp()).getFilterSql());
-        if (Strings.isNotEmpty(dimensionDO.getDimValueMaps())) {
+        if (StringUtils.isNotEmpty(dimensionDO.getDimValueMaps())) {
             dimensionResp.setDimValueMaps(JsonUtil.toList(dimensionDO.getDimValueMaps(), DimValueMap.class));
         }
-        if (Strings.isNotEmpty(dimensionDO.getDataType())) {
+        if (StringUtils.isNotEmpty(dimensionDO.getDataType())) {
             dimensionResp.setDataType(DataTypeEnums.of(dimensionDO.getDataType()));
         }
         if (dimensionDO.getExt() != null) {
