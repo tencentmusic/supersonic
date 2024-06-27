@@ -3,7 +3,7 @@ package com.tencent.supersonic.headless.server.aspect;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import com.tencent.supersonic.common.pojo.exception.InvalidArgumentException;
-import com.tencent.supersonic.common.util.jsqlparser.SqlSelectHelper;
+import com.tencent.supersonic.common.jsqlparser.SqlSelectHelper;
 import com.tencent.supersonic.headless.api.pojo.DrillDownDimension;
 import com.tencent.supersonic.headless.api.pojo.response.DimSchemaResp;
 import com.tencent.supersonic.headless.api.pojo.response.DimensionResp;
@@ -11,7 +11,7 @@ import com.tencent.supersonic.headless.api.pojo.response.MetricResp;
 import com.tencent.supersonic.headless.api.pojo.response.MetricSchemaResp;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticSchemaResp;
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;
-import com.tencent.supersonic.headless.server.service.MetricService;
+import com.tencent.supersonic.headless.server.web.service.MetricService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -33,7 +33,7 @@ public class MetricDrillDownChecker {
     @Autowired
     private MetricService metricService;
 
-    @Around("execution(* com.tencent.supersonic.headless.core.parser.QueryParser.parse(..))")
+    @Around("execution(* com.tencent.supersonic.headless.core.translator.DefaultSemanticTranslator.parse(..))")
     public Object doAround(ProceedingJoinPoint joinPoint) throws Throwable {
         Object[] objects = joinPoint.getArgs();
         QueryStatement queryStatement = (QueryStatement) objects[0];

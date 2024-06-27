@@ -2,8 +2,7 @@ package com.hankcs.hanlp.collection.trie.bintrie;
 
 import com.hankcs.hanlp.LoadRemoveService;
 import com.hankcs.hanlp.corpus.io.ByteArray;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -18,7 +17,7 @@ import java.util.Objects;
 import java.util.Queue;
 import java.util.Set;
 
-
+@Slf4j
 public abstract class BaseNode<V> implements Comparable<BaseNode> {
 
     /**
@@ -26,7 +25,6 @@ public abstract class BaseNode<V> implements Comparable<BaseNode> {
      */
     static final Status[] ARRAY_STATUS = Status.values();
 
-    private static final Logger logger = LoggerFactory.getLogger(BaseNode.class);
     /**
      * 子节点
      */
@@ -289,10 +287,10 @@ public abstract class BaseNode<V> implements Comparable<BaseNode> {
 
     public void walkNode(Set<Map.Entry<String, V>> entrySet) {
         if (status == Status.WORD_MIDDLE_2 || status == Status.WORD_END_3) {
-            logger.debug("walkNode before:{}", value.toString());
+            log.debug("walkNode before:{}", value.toString());
             List natures = new LoadRemoveService().removeNatures((List) value);
             String name = this.prefix != null ? this.prefix + c : "" + c;
-            logger.debug("walkNode name:{},after:{},natures:{}", name, (List) value, natures);
+            log.debug("walkNode name:{},after:{},natures:{}", name, (List) value, natures);
             entrySet.add(new TrieEntry(name, (V) natures));
         }
     }

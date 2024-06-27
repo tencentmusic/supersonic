@@ -86,11 +86,13 @@ const ChatMsg: React.FC<Props> = ({
     const isMetricCard = (queryMode.includes('METRIC') || isDslMetricCard) && singleData;
 
     const isText =
-      columns.length === 1 &&
-      columns[0].showType === 'CATEGORY' &&
-      ((!queryMode.includes('METRIC') && !queryMode.includes('ENTITY')) ||
-        queryMode === 'METRIC_INTERPRET') &&
-      singleData;
+      queryMode === 'PLAIN_TEXT' ||
+      (columns.length === 1 &&
+        columns[0].showType === 'CATEGORY' &&
+        ((!queryMode.includes('METRIC') && !queryMode.includes('ENTITY')) ||
+          queryMode === 'METRIC_INTERPRET') &&
+        singleData);
+
     if (isText) {
       return MsgContentTypeEnum.TEXT;
     }

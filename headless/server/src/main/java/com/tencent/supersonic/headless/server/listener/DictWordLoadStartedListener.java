@@ -1,6 +1,6 @@
 package com.tencent.supersonic.headless.server.listener;
 
-import com.tencent.supersonic.headless.server.service.impl.DictWordService;
+import com.tencent.supersonic.headless.server.web.service.impl.DictWordService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;

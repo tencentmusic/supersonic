@@ -11,7 +11,6 @@ import com.tencent.supersonic.chat.api.pojo.response.ChatConfigRichResp;
 import com.tencent.supersonic.chat.server.config.ChatConfig;
 
 import java.util.List;
-import java.util.Map;
 
 public interface ConfigService {
 
@@ -21,8 +20,6 @@ public interface ConfigService {
 
     ItemNameVisibilityInfo getItemNameVisibility(ChatConfig chatConfig);
 
-    ItemNameVisibilityInfo getVisibilityByModelId(Long modelId);
-
     List<ChatConfigResp> search(ChatConfigFilter filter, User user);
 
     ChatConfigRichResp getConfigRichInfo(Long modelId);
@@ -31,5 +28,4 @@ public interface ConfigService {
 
     List<ChatConfigRichResp> getAllChatRichConfig();
 
-    Map<Long, ChatConfigRichResp> getModelIdToChatRichConfig();
 }

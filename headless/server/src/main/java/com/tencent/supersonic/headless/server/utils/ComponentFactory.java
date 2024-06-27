@@ -1,9 +1,9 @@
 package com.tencent.supersonic.headless.server.utils;
 
 import com.tencent.supersonic.common.util.ContextUtils;
-import com.tencent.supersonic.headless.core.chat.corrector.SemanticCorrector;
-import com.tencent.supersonic.headless.core.chat.mapper.SchemaMapper;
-import com.tencent.supersonic.headless.core.chat.parser.SemanticParser;
+import com.tencent.supersonic.headless.chat.corrector.SemanticCorrector;
+import com.tencent.supersonic.headless.chat.mapper.SchemaMapper;
+import com.tencent.supersonic.headless.chat.parser.SemanticParser;
 import com.tencent.supersonic.headless.server.processor.ResultProcessor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * HeadlessConverter QueryOptimizer QueryExecutor object factory
+ * QueryConverter QueryOptimizer QueryExecutor object factory
  */
 @Slf4j
 public class ComponentFactory {

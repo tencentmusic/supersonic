@@ -6,7 +6,7 @@ import com.tencent.supersonic.auth.api.authentication.request.UserReq;
 import com.tencent.supersonic.auth.api.authentication.service.UserService;
 import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
 import com.tencent.supersonic.auth.authentication.utils.ComponentFactory;
-import com.tencent.supersonic.common.pojo.SystemConfig;
+import com.tencent.supersonic.common.config.SystemConfig;
 import com.tencent.supersonic.common.service.SystemConfigService;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -70,6 +70,11 @@ public class UserServiceImpl implements UserService {
     @Override
     public String login(UserReq userReq, HttpServletRequest request) {
         return ComponentFactory.getUserAdaptor().login(userReq, request);
+    }
+
+    @Override
+    public String login(UserReq userReq, String appKey) {
+        return ComponentFactory.getUserAdaptor().login(userReq, appKey);
     }
 
 }

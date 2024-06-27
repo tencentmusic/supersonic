@@ -19,6 +19,7 @@ public class SemanticQueryResp extends QueryResult<Map<String, Object>> {
     List<QueryColumn> columns = Lists.newArrayList();
     String sql;
     QueryAuthorization queryAuthorization;
+    boolean useCache;
 
     public List<QueryColumn> getMetricColumns() {
         return columns.stream()

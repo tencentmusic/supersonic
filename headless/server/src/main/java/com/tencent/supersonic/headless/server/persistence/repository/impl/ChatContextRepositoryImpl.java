@@ -3,7 +3,7 @@ package com.tencent.supersonic.headless.server.persistence.repository.impl;
 import com.google.gson.Gson;
 import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
-import com.tencent.supersonic.headless.core.pojo.ChatContext;
+import com.tencent.supersonic.headless.chat.ChatContext;
 import com.tencent.supersonic.headless.server.persistence.dataobject.ChatContextDO;
 import com.tencent.supersonic.headless.server.persistence.mapper.ChatContextMapper;
 import com.tencent.supersonic.headless.server.persistence.repository.ChatContextRepository;

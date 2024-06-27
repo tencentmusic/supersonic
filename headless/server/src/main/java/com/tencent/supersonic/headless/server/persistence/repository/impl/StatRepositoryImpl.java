@@ -10,7 +10,7 @@ import com.tencent.supersonic.headless.server.persistence.mapper.StatMapper;
 import com.tencent.supersonic.headless.server.persistence.repository.StatRepository;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.logging.log4j.util.Strings;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
@@ -70,7 +70,7 @@ public class StatRepositoryImpl implements StatRepository {
     }
 
     private void updateStatMapInfo(Map<String, Long> map, String dimensions, String type, Long dataSetId) {
-        if (Strings.isNotEmpty(dimensions)) {
+        if (StringUtils.isNotEmpty(dimensions)) {
             try {
                 List<String> dimensionList = mapper.readValue(dimensions, new TypeReference<List<String>>() {
                 });

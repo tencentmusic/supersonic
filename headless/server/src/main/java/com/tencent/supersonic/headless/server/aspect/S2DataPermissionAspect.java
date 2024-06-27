@@ -2,7 +2,6 @@ package com.tencent.supersonic.headless.server.aspect;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
@@ -21,7 +20,7 @@ import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
 import com.tencent.supersonic.common.pojo.enums.SensitiveLevelEnum;
 import com.tencent.supersonic.common.pojo.exception.InvalidArgumentException;
 import com.tencent.supersonic.common.pojo.exception.InvalidPermissionException;
-import com.tencent.supersonic.common.util.jsqlparser.SqlAddHelper;
+import com.tencent.supersonic.common.jsqlparser.SqlAddHelper;
 import com.tencent.supersonic.headless.api.pojo.request.QuerySqlReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
 import com.tencent.supersonic.headless.api.pojo.request.SchemaFilterReq;
@@ -33,10 +32,10 @@ import com.tencent.supersonic.headless.api.pojo.response.SemanticSchemaResp;
 import com.tencent.supersonic.headless.api.pojo.response.DataSetResp;
 import com.tencent.supersonic.headless.server.pojo.MetaFilter;
 import com.tencent.supersonic.headless.server.pojo.ModelFilter;
-import com.tencent.supersonic.headless.server.service.DimensionService;
-import com.tencent.supersonic.headless.server.service.ModelService;
-import com.tencent.supersonic.headless.server.service.SchemaService;
-import com.tencent.supersonic.headless.server.service.DataSetService;
+import com.tencent.supersonic.headless.server.web.service.DimensionService;
+import com.tencent.supersonic.headless.server.web.service.ModelService;
+import com.tencent.supersonic.headless.server.web.service.SchemaService;
+import com.tencent.supersonic.headless.server.web.service.DataSetService;
 import com.tencent.supersonic.headless.server.utils.QueryStructUtils;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.JSQLParserException;
@@ -101,7 +100,7 @@ public class S2DataPermissionAspect {
             return joinPoint.proceed();
         }
         User user = (User) objects[1];
-        if (Objects.isNull(user) || Strings.isNullOrEmpty(user.getName())) {
+        if (Objects.isNull(user) || StringUtils.isEmpty(user.getName())) {
             throw new RuntimeException("please provide user information");
         }
         List<Long> modelIds = getModelsInDataSet(queryReq);
@@ -544,7 +543,9 @@ public class S2DataPermissionAspect {
             List<String> exprList = new ArrayList<>();
             List<String> descList = new ArrayList<>();
             filters.stream().forEach(filter -> {
-                descList.add(filter.getDescription());
+                if (StringUtils.isNotEmpty(filter.getDescription())) {
+                    descList.add(filter.getDescription());
+                }
                 exprList.add(filter.getExpressions().toString());
             });
             String promptInfo = "当前结果已经过行权限过滤，详细过滤条件如下:%s, 申请权限请联系管理员%s";

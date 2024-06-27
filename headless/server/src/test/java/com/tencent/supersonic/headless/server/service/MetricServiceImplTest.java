@@ -1,8 +1,5 @@
 package com.tencent.supersonic.headless.server.service;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
-
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.common.pojo.DataFormat;
@@ -19,17 +16,28 @@ import com.tencent.supersonic.headless.api.pojo.enums.MetricType;
 import com.tencent.supersonic.headless.api.pojo.request.MetricReq;
 import com.tencent.supersonic.headless.api.pojo.response.MetricResp;
 import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
+import com.tencent.supersonic.headless.server.facade.service.ChatQueryService;
 import com.tencent.supersonic.headless.server.persistence.dataobject.MetricDO;
 import com.tencent.supersonic.headless.server.persistence.repository.MetricRepository;
-import com.tencent.supersonic.headless.server.service.impl.DataSetServiceImpl;
-import com.tencent.supersonic.headless.server.service.impl.MetricServiceImpl;
 import com.tencent.supersonic.headless.server.utils.AliasGenerateHelper;
 import com.tencent.supersonic.headless.server.utils.MetricConverter;
-import java.util.HashMap;
+import com.tencent.supersonic.headless.server.web.service.CollectService;
+import com.tencent.supersonic.headless.server.web.service.DataSetService;
+import com.tencent.supersonic.headless.server.web.service.DimensionService;
+import com.tencent.supersonic.headless.server.web.service.MetricService;
+import com.tencent.supersonic.headless.server.web.service.ModelService;
+import com.tencent.supersonic.headless.server.web.service.TagMetaService;
+import com.tencent.supersonic.headless.server.web.service.impl.DataSetServiceImpl;
+import com.tencent.supersonic.headless.server.web.service.impl.MetricServiceImpl;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.context.ApplicationEventPublisher;
+
+import java.util.HashMap;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 public class MetricServiceImplTest {
 
@@ -69,10 +77,10 @@ public class MetricServiceImplTest {
         DataSetService dataSetService = Mockito.mock(DataSetServiceImpl.class);
         DimensionService dimensionService = Mockito.mock(DimensionService.class);
         TagMetaService tagMetaService = Mockito.mock(TagMetaService.class);
-        MetaDiscoveryService metaDiscoveryService = Mockito.mock(MetaDiscoveryService.class);
+        ChatQueryService chatQueryService = Mockito.mock(ChatQueryService.class);
         return new MetricServiceImpl(metricRepository, modelService, aliasGenerateHelper,
                 collectService, dataSetService, eventPublisher, dimensionService,
-                tagMetaService, metaDiscoveryService);
+                tagMetaService, chatQueryService);
     }
 
     private MetricReq buildMetricReq() {

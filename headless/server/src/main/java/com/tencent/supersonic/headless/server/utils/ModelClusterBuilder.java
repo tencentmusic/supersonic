@@ -4,7 +4,7 @@ package com.tencent.supersonic.headless.server.utils;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.headless.api.pojo.response.ModelSchemaResp;
 import com.tencent.supersonic.headless.server.pojo.ModelCluster;
-import com.tencent.supersonic.headless.server.service.SchemaService;
+import com.tencent.supersonic.headless.server.web.service.SchemaService;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;

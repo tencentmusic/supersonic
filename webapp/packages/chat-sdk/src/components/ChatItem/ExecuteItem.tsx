@@ -9,6 +9,7 @@ import React, { ReactNode, useState } from 'react';
 
 type Props = {
   queryId?: number;
+  queryMode?: string;
   executeLoading: boolean;
   entitySwitchLoading: boolean;
   chartIndex: number;
@@ -23,6 +24,7 @@ type Props = {
 
 const ExecuteItem: React.FC<Props> = ({
   queryId,
+  queryMode,
   executeLoading,
   entitySwitchLoading,
   chartIndex,
@@ -37,6 +39,8 @@ const ExecuteItem: React.FC<Props> = ({
   const prefixCls = `${PREFIX_CLS}-item`;
   const [showMsgContentTable, setShowMsgContentTable] = useState<boolean>(false);
   const [msgContentType, setMsgContentType] = useState<MsgContentTypeEnum>();
+
+  const titlePrefix = queryMode === 'PLAIN_TEXT' ? '问答' : '数据';
 
   const getNodeTip = (title: ReactNode, tip?: string) => {
     return (
@@ -54,13 +58,13 @@ const ExecuteItem: React.FC<Props> = ({
   };
 
   if (executeLoading) {
-    return getNodeTip('数据查询中');
+    return getNodeTip(`${titlePrefix}查询中`);
   }
 
   if (executeTip) {
     return getNodeTip(
       <>
-        数据查询失败
+        {titlePrefix}查询失败
         {data?.queryTimeCost && isDeveloper && (
           <span className={`${prefixCls}-title-tip`}>(耗时: {data.queryTimeCost}ms)</span>
         )}
@@ -80,7 +84,7 @@ const ExecuteItem: React.FC<Props> = ({
         <div className={`${prefixCls}-step-title`} style={{ width: '100%' }}>
           <Row style={{ width: '100%' }}>
             <Col flex="1 1 auto">
-              数据查询
+              {titlePrefix}查询
               {data?.queryTimeCost && isDeveloper && (
                 <span className={`${prefixCls}-title-tip`}>(耗时: {data.queryTimeCost}ms)</span>
               )}
@@ -101,13 +105,18 @@ const ExecuteItem: React.FC<Props> = ({
           </Row>
         </div>
       </div>
-      <div className={`${prefixCls}-content-container`}>
+      <div
+        className={`${prefixCls}-content-container`}
+        style={{ borderLeft: queryMode === 'PLAIN_TEXT' ? 'none' : undefined }}
+      >
         <Spin spinning={entitySwitchLoading}>
           {data.queryAuthorization?.message && (
             <div className={`${prefixCls}-auth-tip`}>提示：{data.queryAuthorization.message}</div>
           )}
           {renderCustomExecuteNode && executeItemNode ? (
             executeItemNode
+          ) : data?.queryMode === 'PLAIN_TEXT' ? (
+            data?.textResult
           ) : data?.queryMode === 'WEB_PAGE' ? (
             <WebPage id={queryId!} data={data} />
           ) : (

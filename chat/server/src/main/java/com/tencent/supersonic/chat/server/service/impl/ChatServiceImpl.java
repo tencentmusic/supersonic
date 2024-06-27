@@ -4,11 +4,9 @@ import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.chat.api.pojo.request.ChatExecuteReq;
 import com.tencent.supersonic.chat.api.pojo.request.ChatParseReq;
 import com.tencent.supersonic.chat.api.pojo.request.ChatQueryDataReq;
-import com.tencent.supersonic.chat.api.pojo.request.SimilarQueryReq;
 import com.tencent.supersonic.chat.server.agent.Agent;
 import com.tencent.supersonic.chat.server.executor.ChatExecutor;
 import com.tencent.supersonic.chat.server.parser.ChatParser;
-import com.tencent.supersonic.chat.server.persistence.dataobject.ChatQueryDO;
 import com.tencent.supersonic.chat.server.pojo.ChatExecuteContext;
 import com.tencent.supersonic.chat.server.pojo.ChatParseContext;
 import com.tencent.supersonic.chat.server.processor.execute.ExecuteResultProcessor;
@@ -18,7 +16,6 @@ import com.tencent.supersonic.chat.server.service.ChatManageService;
 import com.tencent.supersonic.chat.server.service.ChatService;
 import com.tencent.supersonic.chat.server.util.ComponentFactory;
 import com.tencent.supersonic.chat.server.util.QueryReqConverter;
-import com.tencent.supersonic.chat.server.util.SimilarQueryManager;
 import com.tencent.supersonic.common.util.BeanMapper;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
@@ -29,8 +26,8 @@ import com.tencent.supersonic.headless.api.pojo.response.MapResp;
 import com.tencent.supersonic.headless.api.pojo.response.ParseResp;
 import com.tencent.supersonic.headless.api.pojo.response.QueryResult;
 import com.tencent.supersonic.headless.api.pojo.response.SearchResult;
-import com.tencent.supersonic.headless.server.service.ChatQueryService;
-import com.tencent.supersonic.headless.server.service.SearchService;
+import com.tencent.supersonic.headless.server.facade.service.ChatQueryService;
+import com.tencent.supersonic.headless.server.facade.service.RetrieveService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -47,9 +44,7 @@ public class ChatServiceImpl implements ChatService {
     @Autowired
     private ChatQueryService chatQueryService;
     @Autowired
-    private SearchService searchService;
-    @Autowired
-    private SimilarQueryManager similarQueryManager;
+    private RetrieveService retrieveService;
     private List<ChatParser> chatParsers = ComponentFactory.getChatParsers();
     private List<ChatExecutor> chatExecutors = ComponentFactory.getChatExecutors();
     private List<ParseResultProcessor> parseResultProcessors = ComponentFactory.getParseProcessors();
@@ -59,7 +54,7 @@ public class ChatServiceImpl implements ChatService {
     public List<SearchResult> search(ChatParseReq chatParseReq) {
         ChatParseContext chatParseContext = buildParseContext(chatParseReq);
         QueryReq queryReq = QueryReqConverter.buildText2SqlQueryReq(chatParseContext);
-        return searchService.search(queryReq);
+        return retrieveService.retrieve(queryReq);
     }
 
     @Override
@@ -90,10 +85,13 @@ public class ChatServiceImpl implements ChatService {
                 break;
             }
         }
-        for (ExecuteResultProcessor processor : executeResultProcessors) {
-            processor.process(chatExecuteContext, queryResult);
+
+        if (queryResult != null) {
+            for (ExecuteResultProcessor processor : executeResultProcessors) {
+                processor.process(chatExecuteContext, queryResult);
+            }
         }
-        saveQueryResult(chatExecuteReq, queryResult);
+
         return queryResult;
     }
 
@@ -137,17 +135,6 @@ public class ChatServiceImpl implements ChatService {
     @Override
     public Object queryDimensionValue(DimensionValueReq dimensionValueReq, User user) throws Exception {
         return chatQueryService.queryDimensionValue(dimensionValueReq, user);
-    }
-
-    public void saveQueryResult(ChatExecuteReq chatExecuteReq, QueryResult queryResult) {
-        //The history record only retains the query result of the first parse
-        if (chatExecuteReq.getParseId() > 1) {
-            return;
-        }
-        ChatQueryDO chatQueryDO = chatManageService.saveQueryResult(chatExecuteReq, queryResult);
-        SimilarQueryReq similarQueryReq = SimilarQueryReq.builder().queryId(chatExecuteReq.getQueryId())
-                .queryText(chatQueryDO.getQueryText()).agentId(chatQueryDO.getAgentId()).build();
-        similarQueryManager.saveSimilarQuery(similarQueryReq);
     }
 
 }

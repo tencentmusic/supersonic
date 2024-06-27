@@ -15,6 +15,10 @@ public class NL2PluginParser implements ChatParser {
 
     @Override
     public void parse(ChatParseContext chatParseContext, ParseResp parseResp) {
+        if (!chatParseContext.getAgent().containsPluginTool()) {
+            return;
+        }
+
         pluginRecognizers.forEach(pluginRecognizer -> {
             pluginRecognizer.recognize(chatParseContext, parseResp);
             log.info("{} recallResult:{}", pluginRecognizer.getClass().getSimpleName(),

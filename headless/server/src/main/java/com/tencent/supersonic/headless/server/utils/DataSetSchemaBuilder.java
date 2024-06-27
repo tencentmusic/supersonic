@@ -13,7 +13,7 @@ import com.tencent.supersonic.headless.api.pojo.response.DataSetSchemaResp;
 import com.tencent.supersonic.headless.api.pojo.response.DimSchemaResp;
 import com.tencent.supersonic.headless.api.pojo.response.MetricSchemaResp;
 import com.tencent.supersonic.headless.api.pojo.response.TermResp;
-import org.apache.logging.log4j.util.Strings;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.util.CollectionUtils;
 
@@ -180,7 +180,7 @@ public class DataSetSchemaBuilder {
             List<DimValueMap> dimValueMaps = dim.getDimValueMaps();
             if (!CollectionUtils.isEmpty(dimValueMaps)) {
                 for (DimValueMap dimValueMap : dimValueMaps) {
-                    if (Strings.isNotEmpty(dimValueMap.getBizName())) {
+                    if (StringUtils.isNotEmpty(dimValueMap.getBizName())) {
                         dimValueAlias.add(dimValueMap.getBizName());
                     }
                     if (!CollectionUtils.isEmpty(dimValueMap.getAlias())) {

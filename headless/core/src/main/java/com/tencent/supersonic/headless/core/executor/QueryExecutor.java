@@ -4,7 +4,7 @@ import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;
 
 /**
- * Query data or execute sql from a query engine
+ * QueryExecutor submits SQL to the database engine and performs acceleration if necessary.
  */
 public interface QueryExecutor {
 

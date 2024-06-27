@@ -3,6 +3,7 @@ package com.tencent.supersonic.headless.core.pojo;
 
 import com.tencent.supersonic.common.pojo.QueryColumn;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
+import com.tencent.supersonic.headless.core.config.ExecutorConfig;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import java.sql.ResultSet;
@@ -13,11 +14,6 @@ import java.util.List;
 import java.util.Map;
 import javax.sql.DataSource;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.DependsOn;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
@@ -27,51 +23,38 @@ import org.springframework.stereotype.Component;
 @Component
 @Slf4j
 public class DuckDbSource {
-
-    @Value("${accelerator.duckDb.temp:/data1/duck/tmp/}")
-    protected String duckDbTemp;
-
-    @Value("${accelerator.duckDb.maximumPoolSize:10}")
-    protected Integer duckDbMaximumPoolSize;
-
-    @Value("${accelerator.duckDb.MaxLifetime:3}")
-    protected Integer duckDbMaxLifetime;
-
-    @Value("${accelerator.duckDb.memoryLimit:31}")
-    protected Integer memoryLimit;
-
-    @Value("${accelerator.duckDb.threads:32}")
-    protected Integer threads;
-
-
-    @Autowired
-    @Qualifier("duckDbDataSource")
     protected DataSource duckDbDataSource;
 
-    @Autowired
-    @Qualifier("duckDbJdbcTemplate")
     protected JdbcTemplate duckDbJdbcTemplate;
 
-    @Bean(name = "duckDbConfig")
+    protected HikariConfig hikariConfig;
+
+    private final ExecutorConfig executorConfig;
+
+    public DuckDbSource(ExecutorConfig executorConfig) {
+        this.executorConfig = executorConfig;
+        if (executorConfig.getDuckEnable()) {
+            hikariConfig = getHikariConfig();
+            duckDbDataSource = getDuckDbDataSource(hikariConfig);
+            duckDbJdbcTemplate = getDuckDbTemplate(duckDbDataSource);
+        }
+    }
+
     public HikariConfig getHikariConfig() {
         HikariConfig config = new HikariConfig();
         config.setDriverClassName("org.duckdb.DuckDBDriver");
-        config.setMaximumPoolSize(duckDbMaximumPoolSize);
-        config.setMaxLifetime(duckDbMaxLifetime);
+        config.setMaximumPoolSize(executorConfig.getDuckDbMaximumPoolSize());
+        config.setMaxLifetime(executorConfig.getDuckDbMaxLifetime());
         config.setJdbcUrl("jdbc:duckdb:");
         return config;
     }
 
-    @Bean(name = "duckDbDataSource")
-    @DependsOn("duckDbConfig")
-    public DataSource getDuckDbDataSource(@Qualifier("duckDbConfig") HikariConfig config) {
+    public DataSource getDuckDbDataSource(HikariConfig config) {
         HikariDataSource ds = new HikariDataSource(config);
         return ds;
     }
 
-    @Bean("duckDbJdbcTemplate")
-    @DependsOn("duckDbDataSource")
-    public JdbcTemplate getDuckDbTemplate(@Qualifier("duckDbDataSource") DataSource dataSource) {
+    public JdbcTemplate getDuckDbTemplate(DataSource dataSource) {
         JdbcTemplate jdbcTemplate = new JdbcTemplate();
         jdbcTemplate.setDataSource(dataSource);
         init(jdbcTemplate);
@@ -79,9 +62,9 @@ public class DuckDbSource {
     }
 
     protected void init(JdbcTemplate jdbcTemplate) {
-        jdbcTemplate.execute(String.format("SET memory_limit = '%sGB';", memoryLimit));
-        jdbcTemplate.execute(String.format("SET temp_directory='%s';", duckDbTemp));
-        jdbcTemplate.execute(String.format("SET threads TO %s;", threads));
+        jdbcTemplate.execute(String.format("SET memory_limit = '%sGB';", executorConfig.getMemoryLimit()));
+        jdbcTemplate.execute(String.format("SET temp_directory='%s';", executorConfig.getDuckDbTemp()));
+        jdbcTemplate.execute(String.format("SET threads TO %s;", executorConfig.getThreads()));
         jdbcTemplate.execute("SET enable_object_cache = true;");
     }
 

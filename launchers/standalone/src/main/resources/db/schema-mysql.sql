@@ -74,6 +74,7 @@ CREATE TABLE `s2_agent` (
                             `config` varchar(6000) COLLATE utf8_unicode_ci DEFAULT NULL,
                             `llm_config` varchar(2000) COLLATE utf8_unicode_ci DEFAULT NULL,
                             `multi_turn_config` varchar(2000) COLLATE utf8_unicode_ci DEFAULT NULL,
+                            `visual_config` varchar(2000)  COLLATE utf8_unicode_ci DEFAULT NULL,
                             `created_by` varchar(100) COLLATE utf8_unicode_ci DEFAULT NULL,
                             `created_at` datetime DEFAULT NULL,
                             `updated_by` varchar(100) COLLATE utf8_unicode_ci DEFAULT NULL,
@@ -134,6 +135,24 @@ CREATE TABLE `s2_chat_config` (
                                   `llm_examples` text COMMENT 'llm examples',
                                   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='主题域扩展信息表';
+
+CREATE TABLE IF NOT EXISTS `s2_chat_memory` (
+    `id` INT NOT NULL AUTO_INCREMENT,
+    `question` varchar(655)    ,
+    `agent_id`  INT    ,
+    `db_schema`  TEXT    ,
+    `s2_sql` TEXT   ,
+    `status` char(10)   ,
+    `llm_review` char(10)   ,
+    `llm_comment`   TEXT,
+    `human_review` char(10) ,
+    `human_comment` TEXT    ,
+    `created_at` TIMESTAMP  NOT NULL   ,
+    `updated_at` TIMESTAMP  NOT NULL   ,
+    `created_by` varchar(100) NOT NULL   ,
+    `updated_by` varchar(100) NOT NULL   ,
+    PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `s2_chat_context` (
                                    `chat_id` bigint(20) NOT NULL COMMENT 'context chat id',
@@ -561,6 +580,8 @@ CREATE TABLE IF NOT EXISTS `s2_term` (
     `name` varchar(255)  NOT NULL ,
     `description` varchar(500) DEFAULT NULL ,
     `alias` varchar(1000)  NOT NULL ,
+    `related_metrics` varchar(1000)  DEFAULT NULL ,
+    `related_dimensions` varchar(1000)  DEFAULT NULL,
     `created_at` datetime NOT NULL ,
     `created_by` varchar(100) NOT NULL ,
     `updated_at` datetime DEFAULT NULL ,

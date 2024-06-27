@@ -4,7 +4,7 @@ import java.util.List;
 import lombok.Data;
 
 @Data
-public class MetricsFilter {
+public class MetricsFilter extends MetaFilter {
 
     private List<Long> modelIds;
 

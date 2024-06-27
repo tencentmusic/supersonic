@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ChatExecuteReq {
     private User user;
+    private Integer agentId;
     private Long queryId;
     private Integer chatId;
     private int parseId;
