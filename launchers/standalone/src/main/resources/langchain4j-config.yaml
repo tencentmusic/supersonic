@@ -13,4 +13,4 @@ langchain4j:
     embedding-model:
       model-name: bge-small-zh
     embedding-store:
-      file-path: /tmp
+      persist-path: /tmp

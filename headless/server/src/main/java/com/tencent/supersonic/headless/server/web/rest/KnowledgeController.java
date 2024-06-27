@@ -141,6 +141,12 @@ public class KnowledgeController {
         return true;
     }
 
+    @GetMapping("/embedding/persistFile")
+    public Object executePersistFileTask() {
+        embeddingTask.executePersistFileTask();
+        return true;
+    }
+
     /**
      * queryDictValue-返回字典的数据
      *
@@ -161,8 +167,8 @@ public class KnowledgeController {
      */
     @PostMapping("/dict/file")
     public String queryDictFilePath(@RequestBody @Valid DictValueReq dictValueReq,
-                                                  HttpServletRequest request,
-                                                  HttpServletResponse response) {
+                                    HttpServletRequest request,
+                                    HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
         return taskService.queryDictFilePath(dictValueReq, user);
     }
