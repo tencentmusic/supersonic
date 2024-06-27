@@ -15,6 +15,7 @@ import dev.langchain4j.store.embedding.RetrieveQueryResult;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.core.annotation.Order;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
@@ -24,6 +25,7 @@ import java.util.List;
 
 @Service
 @Slf4j
+@Order(0)
 public class ExemplarServiceImpl implements ExemplarService, CommandLineRunner {
 
     private static final String SYS_EXEMPLAR_FILE = "s2ql_exemplar.json";

@@ -76,7 +76,7 @@ public class QueryReqConverter {
         // correct order item is same as agg alias
         String reqSql = querySQLReq.getSql();
         querySQLReq.setSql(SqlReplaceHelper.replaceAggAliasOrderItem(querySQLReq.getSql()));
-        log.info("replaceOrderAggSameAlias {} -> {}", reqSql, querySQLReq.getSql());
+        log.debug("replaceOrderAggSameAlias {} -> {}", reqSql, querySQLReq.getSql());
         //4.build MetricTables
         List<String> allFields = SqlSelectHelper.getAllFields(querySQLReq.getSql());
         List<MetricSchemaResp> metricSchemas = getMetrics(semanticSchemaResp, allFields);
@@ -122,7 +122,7 @@ public class QueryReqConverter {
         queryStructReq.setDateInfo(queryStructUtils.getDateConfBySql(querySQLReq.getSql()));
         queryStructReq.setDataSetId(querySQLReq.getDataSetId());
         queryStructReq.setQueryType(getQueryType(aggOption));
-        log.info("QueryReqConverter queryStructReq[{}]", queryStructReq);
+        log.debug("QueryReqConverter queryStructReq[{}]", queryStructReq);
         QueryParam queryParam = new QueryParam();
         convert(queryStructReq, queryParam);
         QueryStatement queryStatement = new QueryStatement();
@@ -161,7 +161,7 @@ public class QueryReqConverter {
         long defaultAggNullCnt = metricSchemas.stream()
                 .filter(m -> Objects.isNull(m.getDefaultAgg()) || StringUtils.isBlank(m.getDefaultAgg())).count();
         if (defaultAggNullCnt > 0) {
-            log.info("getAggOption find null defaultAgg metric set to NATIVE");
+            log.debug("getAggOption find null defaultAgg metric set to NATIVE");
             return AggOption.OUTER;
         }
         return AggOption.DEFAULT;
@@ -170,9 +170,9 @@ public class QueryReqConverter {
     private void convertNameToBizName(QuerySqlReq querySqlReq, SemanticSchemaResp semanticSchemaResp) {
         Map<String, String> fieldNameToBizNameMap = getFieldNameToBizNameMap(semanticSchemaResp);
         String sql = querySqlReq.getSql();
-        log.info("dataSetId:{},convert name to bizName before:{}", querySqlReq.getDataSetId(), sql);
+        log.debug("dataSetId:{},convert name to bizName before:{}", querySqlReq.getDataSetId(), sql);
         String replaceFields = SqlReplaceHelper.replaceFields(sql, fieldNameToBizNameMap, true);
-        log.info("dataSetId:{},convert name to bizName after:{}", querySqlReq.getDataSetId(), replaceFields);
+        log.debug("dataSetId:{},convert name to bizName after:{}", querySqlReq.getDataSetId(), replaceFields);
         querySqlReq.setSql(replaceFields);
     }
 
@@ -240,7 +240,7 @@ public class QueryReqConverter {
         String sql = querySqlReq.getSql();
         sql = SqlReplaceHelper.replaceTable(sql,
                 Constants.TABLE_PREFIX + querySqlReq.getDataSetId());
-        log.info("correctTableName after:{}", sql);
+        log.debug("correctTableName after:{}", sql);
         querySqlReq.setSql(sql);
     }
 
@@ -286,7 +286,7 @@ public class QueryReqConverter {
                         m.getMetricDefineByMeasureParams()))) {
             return;
         }
-        log.info("begin to generateDerivedMetric {} [{}]", aggOption, metrics);
+        log.debug("begin to generateDerivedMetric {} [{}]", aggOption, metrics);
         Set<String> allFields = new HashSet<>();
         Map<String, Measure> allMeasures = new HashMap<>();
         semanticSchemaResp.getModelResps().forEach(modelResp -> {
@@ -310,7 +310,7 @@ public class QueryReqConverter {
                                 visitedMetric,
                                 deriveMetric, deriveDimension);
                         replaces.put(metricResp.getBizName(), expr);
-                        log.info("derived metric {}->{}", metricResp.getBizName(), expr);
+                        log.debug("derived metric {}->{}", metricResp.getBizName(), expr);
                     } else {
                         measures.add(metricResp.getBizName());
                     }

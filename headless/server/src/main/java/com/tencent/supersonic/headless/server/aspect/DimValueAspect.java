@@ -88,7 +88,7 @@ public class DimValueAspect {
         QuerySqlReq querySqlReq = (QuerySqlReq) args[0];
         MetaFilter metaFilter = new MetaFilter(Lists.newArrayList(querySqlReq.getModelIds()));
         String sql = querySqlReq.getSql();
-        log.info("correctorSql before replacing:{}", sql);
+        log.debug("correctorSql before replacing:{}", sql);
         List<FieldExpression> fieldExpressionList = SqlSelectHelper.getWhereExpressions(sql);
         List<DimensionResp> dimensions = dimensionService.getDimensions(metaFilter);
         Set<String> fieldNames = dimensions.stream().map(SchemaItem::getName).collect(Collectors.toSet());
@@ -117,7 +117,7 @@ public class DimValueAspect {
             }
         }
         sql = SqlReplaceHelper.replaceValue(sql, filedNameToValueMap);
-        log.info("correctorSql after replacing:{}", sql);
+        log.debug("correctorSql after replacing:{}", sql);
         querySqlReq.setSql(sql);
         Map<String, Map<String, String>> techNameToBizName = getTechNameToBizName(dimensions);
 
