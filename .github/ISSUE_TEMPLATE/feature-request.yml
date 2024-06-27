@@ -1,7 +1,7 @@
 name: SuperSonic feature request
 description: Suggest an idea for SuperSonic
 title: "[Feature] "
-labels: ["kind/feature"]
+labels: feature
 body:
   - type: markdown
     attributes:
