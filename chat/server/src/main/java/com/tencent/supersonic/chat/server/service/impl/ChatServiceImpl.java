@@ -18,7 +18,7 @@ import com.tencent.supersonic.chat.server.service.ChatManageService;
 import com.tencent.supersonic.chat.server.service.ChatService;
 import com.tencent.supersonic.chat.server.util.ComponentFactory;
 import com.tencent.supersonic.chat.server.util.QueryReqConverter;
-import com.tencent.supersonic.chat.server.util.SimilarQueryManager;
+import com.tencent.supersonic.chat.server.memory.QueryRecommender;
 import com.tencent.supersonic.common.util.BeanMapper;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
@@ -49,7 +49,7 @@ public class ChatServiceImpl implements ChatService {
     @Autowired
     private RetrieveService retrieveService;
     @Autowired
-    private SimilarQueryManager similarQueryManager;
+    private QueryRecommender similarQueryManager;
     private List<ChatParser> chatParsers = ComponentFactory.getChatParsers();
     private List<ChatExecutor> chatExecutors = ComponentFactory.getChatExecutors();
     private List<ParseResultProcessor> parseResultProcessors = ComponentFactory.getParseProcessors();
