@@ -2,7 +2,7 @@ package com.tencent.supersonic.chat.server.plugin.recognize.embedding;
 
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.chat.server.plugin.ParseMode;
-import com.tencent.supersonic.chat.server.plugin.Plugin;
+import com.tencent.supersonic.chat.server.plugin.ChatPlugin;
 import com.tencent.supersonic.chat.server.plugin.PluginManager;
 import com.tencent.supersonic.chat.server.plugin.PluginRecallResult;
 import com.tencent.supersonic.chat.server.plugin.recognize.PluginRecognizer;
@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
 public class EmbeddingRecallRecognizer extends PluginRecognizer {
 
     public boolean checkPreCondition(ChatParseContext chatParseContext) {
-        List<Plugin> plugins = getPluginList(chatParseContext);
+        List<ChatPlugin> plugins = getPluginList(chatParseContext);
         return !CollectionUtils.isEmpty(plugins);
     }
 
@@ -37,10 +37,10 @@ public class EmbeddingRecallRecognizer extends PluginRecognizer {
         if (CollectionUtils.isEmpty(embeddingRetrievals)) {
             return null;
         }
-        List<Plugin> plugins = getPluginList(chatParseContext);
-        Map<Long, Plugin> pluginMap = plugins.stream().collect(Collectors.toMap(Plugin::getId, p -> p));
+        List<ChatPlugin> plugins = getPluginList(chatParseContext);
+        Map<Long, ChatPlugin> pluginMap = plugins.stream().collect(Collectors.toMap(ChatPlugin::getId, p -> p));
         for (Retrieval embeddingRetrieval : embeddingRetrievals) {
-            Plugin plugin = pluginMap.get(Long.parseLong(embeddingRetrieval.getId()));
+            ChatPlugin plugin = pluginMap.get(Long.parseLong(embeddingRetrieval.getId()));
             if (plugin == null) {
                 continue;
             }

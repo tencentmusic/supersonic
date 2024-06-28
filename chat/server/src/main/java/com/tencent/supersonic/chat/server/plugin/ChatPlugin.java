@@ -10,7 +10,7 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.List;
 
 @Data
-public class Plugin extends RecordInfo {
+public class ChatPlugin extends RecordInfo {
 
     private Long id;
 
