@@ -14,3 +14,24 @@ langchain4j:
       model-name: bge-small-zh
     embedding-store:
       persist-path: /tmp
+#  ollama:
+#    chat-model:
+#      base-url: http://localhost:11434
+#      api-key: demo
+#      model-name: qwen:0.5b
+#      temperature: 0.0
+#      timeout: PT60S
+
+#  chroma:
+#    embedding-store:
+#      baseUrl: http://0.0.0.0:8000
+#      timeout: 120s
+
+#  milvus:
+#    embedding-store:
+#      host: localhost
+#      port: 2379
+#      uri: http://0.0.0.0:19530
+#      token: demo
+#      dimension: 512
+#      timeout: 120s
