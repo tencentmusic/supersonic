@@ -345,7 +345,11 @@ const SqlDetail: React.FC<IProps> = ({
           <div
             className={styles.sqlResultLog}
             dangerouslySetInnerHTML={{
-              __html: taskLog.replace(/\r\n/g, '<br/>').replace(/\t/g, '&nbsp;&nbsp;&nbsp;&nbsp;'),
+              __html: taskLog ? (
+                taskLog.replace(/\r\n/g, '<br/>').replace(/\t/g, '&nbsp;&nbsp;&nbsp;&nbsp;')
+              ) : (
+                <></>
+              ),
             }}
           />
         </>
