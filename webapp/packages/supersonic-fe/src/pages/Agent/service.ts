@@ -41,3 +41,13 @@ export function testLLMConn(data: any) {
     data,
   });
 }
+
+export function getMemeoryList() {
+  return request<Result<{ list: MetricType[] }>>('/api/semantic/metric/queryMetric', {
+    method: 'GET',
+    data: {
+      current: 1,
+      pageSize: 2000,
+    },
+  });
+}
