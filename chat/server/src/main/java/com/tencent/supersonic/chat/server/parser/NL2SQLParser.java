@@ -8,7 +8,6 @@ import com.tencent.supersonic.chat.server.pojo.ChatParseContext;
 import com.tencent.supersonic.chat.server.util.QueryReqConverter;
 import com.tencent.supersonic.common.config.LLMConfig;
 import com.tencent.supersonic.common.util.ContextUtils;
-import com.tencent.supersonic.common.util.S2ChatModelProvider;
 import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementMatch;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
@@ -24,6 +23,7 @@ import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.input.Prompt;
 import dev.langchain4j.model.input.PromptTemplate;
 import dev.langchain4j.model.output.Response;
+import dev.langchain4j.model.provider.ChatLanguageModelProvider;
 import lombok.Builder;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -180,7 +180,7 @@ public class NL2SQLParser implements ChatParser {
         Prompt prompt = PromptTemplate.from(promptStr).apply(Collections.EMPTY_MAP);
         keyPipelineLog.info("NL2SQLParser reqPrompt:{}", promptStr);
 
-        ChatLanguageModel chatLanguageModel = S2ChatModelProvider.provide(context.getLlmConfig());
+        ChatLanguageModel chatLanguageModel = ChatLanguageModelProvider.provide(context.getLlmConfig());
         Response<AiMessage> response = chatLanguageModel.generate(prompt.toUserMessage());
 
         String result = response.content().text();
