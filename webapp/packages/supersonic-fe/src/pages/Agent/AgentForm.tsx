@@ -20,6 +20,7 @@ import { uuid, jsonParse, encryptPassword, decryptPassword } from '@/utils/utils
 import ToolsSection from './ToolsSection';
 import globalStyles from '@/global.less';
 import { testLLMConn } from './service';
+import MemorySection from './MemorySection';
 
 const FormItem = Form.Item;
 const { TextArea } = Input;
@@ -270,6 +271,11 @@ const AgentForm: React.FC<Props> = ({ editAgent, onSaveAgent, onCreateToolBtnCli
       label: '工具管理',
       key: 'tools',
       children: <ToolsSection currentAgent={editAgent} onSaveAgent={onSaveAgent} />,
+    },
+    {
+      label: '记忆管理',
+      key: 'memory',
+      children: <MemorySection />,
     },
   ];
 

@@ -183,5 +183,5 @@ export default defineConfig({
   alias: {
     'supersonic-chat-sdk': path.resolve(__dirname, '../../chat-sdk/src/'),
   },
-  // esbuildMinifyIIFE: true,
+  esbuildMinifyIIFE: true,
 });
