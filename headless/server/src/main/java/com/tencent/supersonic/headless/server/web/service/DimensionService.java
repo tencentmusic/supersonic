@@ -34,6 +34,8 @@ public interface DimensionService {
 
     List<DimensionResp> queryDimensions(DimensionsFilter dimensionsFilter);
 
+    void batchUpdateSensitiveLevel(MetaBatchReq metaBatchReq, User user);
+
     void deleteDimension(Long id, User user);
 
     List<DimensionResp> getDimensionInModelCluster(Long modelId);
