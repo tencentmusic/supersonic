@@ -372,6 +372,7 @@ const ChatItem: React.FC<Props> = ({
         const dim = getFieldInfo(field.field);
         newDimensions?.push({
           ...dim,
+          alias: dim.alias ? dim.alias.split(',') : [],
           type: 'DIMENSION',
           dataFormatType: null,
           dataSet: datasetId,
@@ -395,6 +396,7 @@ const ChatItem: React.FC<Props> = ({
         const metric = getFieldInfo(field.field);
         newMetrics?.push({
           ...metric,
+          alias: metric.alias ? metric.alias.split(',') : [],
           type: 'METRIC',
           aggregator: field.operator,
           dataFormatType: null,
