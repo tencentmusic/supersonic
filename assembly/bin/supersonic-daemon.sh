@@ -10,10 +10,6 @@ if [ -z "$service"  ]; then
 fi
 
 model_name=$service
-if [ "$service" == "pyllm" ]; then
-  model_name=${STANDALONE_SERVICE}
-  export llmProxy=PythonLLMProxy
-fi
 cd $baseDir
 
 function setMainClass {
@@ -34,11 +30,6 @@ function setAppName {
   else
     app_name=$STANDALONE_APP_NAME
   fi
-}
-
-function reloadExamples {
-  cd $baseDir/pyllm/sql
-  ${python_path} examples_reload_run.py
 }
 
 function runJavaService {
@@ -72,49 +63,23 @@ function runJavaService {
   fi
 }
 
-function runPythonService {
-  pythonRunDir=$baseDir/pyllm
-  cd $pythonRunDir
-  nohup ${python_path} supersonic_pyllm.py  > $pythonRunDir/pyllm.log  2>&1   &
-  # add health check
-  for i in {1..10}
-  do
-    echo "pyllm health check attempt $i..."
-    response=$(curl -s http://${PYLLM_HOST}:${PYLLM_PORT}/health)
-    echo "pyllm health check response: $response"
-    status_ok="Healthy"
-    if [[ $response == *$status_ok* ]] ; then
-      echo "pyllm Health check passed."
-      break
-    else
-      if [ "$i" -eq 10 ]; then
-        echo "pyllm Health check failed after 10 attempts."
-        echo "May still downloading model files. Please check pyllm.log in runtime directory."
-      fi
-      echo "Retrying after 5 seconds..."
-      sleep 5
-    fi
-  done
-}
-
 function start()
 {
   local_app_name=$1
+  echo  "Starting ${local_app_name}"
   pid=$(ps aux |grep ${local_app_name} | grep -v grep | awk '{print $2}')
   if [[ "$pid" == "" ]]; then
-    if [[ ${local_app_name} == $PYLLM_APP_NAME ]]; then
-      runPythonService ${local_app_name}
-    else
       runJavaService ${local_app_name}
-    fi
   else
     echo "Process (PID = $pid) is running."
     return 1
   fi
+  echo  "Start success"
 }
 
 function stop()
 {
+  echo  "Stopping $1"
   pid=$(ps aux | grep $1 | grep -v grep | awk '{print $2}')
   if [[ "$pid" == "" ]]; then
     echo "Process $1 is not running !"
@@ -124,51 +89,21 @@ function stop()
     echo "Process (PID = $pid) is killed !"
     return 0
   fi
-}
-
-function reload()
-{
-  if [[ $1 == $PYLLM_APP_NAME ]]; then
-    reloadExamples
-  fi
+  echo  "Stop success"
 }
 
 setMainClass
 setAppName
 case "$command" in
   start)
-        if [ "$service" == $PYLLM_SERVICE ]; then
-          echo  "Starting $PYLLM_APP_NAME"
-          start $PYLLM_APP_NAME
-        fi
-        echo  "Starting ${app_name}"
         start ${app_name}
-        echo  "Start success"
         ;;
   stop)
-        echo  "Stopping $app_name"
         stop $app_name
-        echo  "Stopping $PYLLM_APP_NAME"
-        stop $PYLLM_APP_NAME
-        echo  "Stop success"
-        ;;
-  reload)
-        echo  "Reloading ${app_name}"
-        reload ${app_name}
-        echo  "Reload success"
         ;;
   restart)
-        if [ "$service" == $PYLLM_SERVICE ]; then
-          echo  "Stopping $PYLLM_APP_NAME"
-          stop $PYLLM_APP_NAME
-          echo  "Starting $PYLLM_APP_NAME"
-          start $PYLLM_APP_NAME
-        fi
-        echo  "Stopping ${app_name}"
         stop ${app_name}
-        echo  "Starting ${app_name}"
         start ${app_name}
-        echo  "Restart success"
         ;;
   *)
         echo "Use command {start|stop|restart} to run."

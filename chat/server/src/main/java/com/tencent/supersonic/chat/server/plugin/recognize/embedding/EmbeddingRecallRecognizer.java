@@ -7,14 +7,10 @@ import com.tencent.supersonic.chat.server.plugin.PluginManager;
 import com.tencent.supersonic.chat.server.plugin.PluginRecallResult;
 import com.tencent.supersonic.chat.server.plugin.recognize.PluginRecognizer;
 import com.tencent.supersonic.chat.server.pojo.ChatParseContext;
-import com.tencent.supersonic.common.config.EmbeddingConfig;
 import com.tencent.supersonic.common.util.ContextUtils;
 import dev.langchain4j.store.embedding.Retrieval;
 import dev.langchain4j.store.embedding.RetrieveQueryResult;
-import com.tencent.supersonic.headless.chat.utils.ComponentFactory;
-import com.tencent.supersonic.headless.chat.parser.llm.PythonLLMProxy;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.util.CollectionUtils;
 
@@ -31,10 +27,6 @@ import java.util.stream.Collectors;
 public class EmbeddingRecallRecognizer extends PluginRecognizer {
 
     public boolean checkPreCondition(ChatParseContext chatParseContext) {
-        EmbeddingConfig embeddingConfig = ContextUtils.getBean(EmbeddingConfig.class);
-        if (StringUtils.isBlank(embeddingConfig.getUrl()) && ComponentFactory.getLLMProxy() instanceof PythonLLMProxy) {
-            return false;
-        }
         List<Plugin> plugins = getPluginList(chatParseContext);
         return !CollectionUtils.isEmpty(plugins);
     }

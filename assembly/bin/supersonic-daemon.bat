@@ -11,10 +11,6 @@ if "%service%"=="" (
    set "service=%standalone_service%"
 )
 set "model_name=%service%"
-IF "%service%"=="pyllm" (
-  set "llmProxy=PythonLLMProxy"
-  set "model_name=%standalone_service%"
-)
 
 cd %baseDir%
 
@@ -36,29 +32,14 @@ if "%command%"=="restart" (
    goto :EOF
 )
 
-
 : start
-   if "%service%"=="%pyllm_service%" (
-         call :runPythonService
-         call :runJavaService
-         goto :EOF
-   )
    call :runJavaService
    goto :EOF
 
 
 : stop
-   call :stopPythonService
    call :stopJavaService
    goto :EOF
-
-
-: reloadExamples
-   set "pythonRunDir=%baseDir%\pyllm"
-   cd "%pythonRunDir%\sql"
-   start  %python_path% examples_reload_run.py
-   goto :EOF
-
 
 : runJavaService
    echo 'java service starting, see logs in logs/'
@@ -73,24 +54,6 @@ if "%command%"=="restart" (
    timeout /t 10 >nul
    echo 'java service started'
    goto :EOF
-
-
-: runPythonService
-   echo 'python service starting, see logs in pyllm\pyllm.log'
-   set "pythonRunDir=%baseDir%\pyllm"
-   start /B %python_path% %pythonRunDir%\supersonic_pyllm.py  > %pythonRunDir%\pyllm.log 2>&1
-   timeout /t 10 >nul
-   echo 'python service started'
-   goto :EOF
-
-
-: stopPythonService
-   for /f "tokens=2" %%i in ('tasklist ^| findstr /i "python"') do (
-           taskkill /PID %%i /F
-           echo "python service (PID = %%i) is killed."
-   )
-   goto :EOF
-
 
 : stopJavaService
    for /f "tokens=2" %%i in ('tasklist ^| findstr /i "java"') do (
