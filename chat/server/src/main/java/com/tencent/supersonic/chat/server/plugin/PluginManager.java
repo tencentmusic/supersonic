@@ -52,10 +52,10 @@ public class PluginManager {
     @Autowired
     private EmbeddingService embeddingService;
 
-    public static List<Plugin> getPluginAgentCanSupport(ChatParseContext chatParseContext) {
+    public static List<ChatPlugin> getPluginAgentCanSupport(ChatParseContext chatParseContext) {
         PluginService pluginService = ContextUtils.getBean(PluginService.class);
         Agent agent = chatParseContext.getAgent();
-        List<Plugin> plugins = pluginService.getPluginList();
+        List<ChatPlugin> plugins = pluginService.getPluginList();
         if (Objects.isNull(agent)) {
             return plugins;
         }
@@ -67,7 +67,7 @@ public class PluginManager {
         plugins = plugins.stream().filter(plugin -> pluginIds.contains(plugin.getId()))
                 .collect(Collectors.toList());
         log.info("plugins witch can be supported by cur agent :{} {}", agent.getName(),
-                plugins.stream().map(Plugin::getName).collect(Collectors.toList()));
+                plugins.stream().map(ChatPlugin::getName).collect(Collectors.toList()));
         return plugins;
     }
 
@@ -85,7 +85,7 @@ public class PluginManager {
 
     @EventListener
     public void addPlugin(PluginAddEvent pluginAddEvent) {
-        Plugin plugin = pluginAddEvent.getPlugin();
+        ChatPlugin plugin = pluginAddEvent.getPlugin();
         if (CollectionUtils.isNotEmpty(plugin.getExampleQuestionList())) {
             requestEmbeddingPluginAdd(convert(Lists.newArrayList(plugin)));
         }
@@ -93,8 +93,8 @@ public class PluginManager {
 
     @EventListener
     public void updatePlugin(PluginUpdateEvent pluginUpdateEvent) {
-        Plugin oldPlugin = pluginUpdateEvent.getOldPlugin();
-        Plugin newPlugin = pluginUpdateEvent.getNewPlugin();
+        ChatPlugin oldPlugin = pluginUpdateEvent.getOldPlugin();
+        ChatPlugin newPlugin = pluginUpdateEvent.getNewPlugin();
         if (CollectionUtils.isNotEmpty(oldPlugin.getExampleQuestionList())) {
             requestEmbeddingPluginDelete(getEmbeddingId(Lists.newArrayList(oldPlugin)));
         }
@@ -105,7 +105,7 @@ public class PluginManager {
 
     @EventListener
     public void delPlugin(PluginDelEvent pluginDelEvent) {
-        Plugin plugin = pluginDelEvent.getPlugin();
+        ChatPlugin plugin = pluginDelEvent.getPlugin();
         if (CollectionUtils.isNotEmpty(plugin.getExampleQuestionList())) {
             requestEmbeddingPluginDelete(getEmbeddingId(Lists.newArrayList(plugin)));
         }
@@ -155,9 +155,9 @@ public class PluginManager {
         throw new RuntimeException("get embedding result failed");
     }
 
-    public List<TextSegment> convert(List<Plugin> plugins) {
+    public List<TextSegment> convert(List<ChatPlugin> plugins) {
         List<TextSegment> queries = Lists.newArrayList();
-        for (Plugin plugin : plugins) {
+        for (ChatPlugin plugin : plugins) {
             List<String> exampleQuestions = plugin.getExampleQuestionList();
             int num = 0;
             for (String pattern : exampleQuestions) {
@@ -170,7 +170,7 @@ public class PluginManager {
         return queries;
     }
 
-    private Set<String> getEmbeddingId(List<Plugin> plugins) {
+    private Set<String> getEmbeddingId(List<ChatPlugin> plugins) {
         Set<String> embeddingIdSet = new HashSet<>();
         for (TextSegment query : convert(plugins)) {
             TextSegmentConvert.addQueryId(query, TextSegmentConvert.getQueryId(query));
@@ -191,7 +191,7 @@ public class PluginManager {
         return String.valueOf(Integer.parseInt(id) / 1000);
     }
 
-    public static Pair<Boolean, Set<Long>> resolve(Plugin plugin, ChatParseContext chatParseContext) {
+    public static Pair<Boolean, Set<Long>> resolve(ChatPlugin plugin, ChatParseContext chatParseContext) {
         SchemaMapInfo schemaMapInfo = chatParseContext.getMapInfo();
         Set<Long> pluginMatchedModel = getPluginMatchedModel(plugin, chatParseContext);
         if (CollectionUtils.isEmpty(pluginMatchedModel) && !plugin.isContainsAllModel()) {
@@ -245,7 +245,7 @@ public class PluginManager {
                 .collect(Collectors.toSet());
     }
 
-    private static List<ParamOption> getSemanticOption(Plugin plugin) {
+    private static List<ParamOption> getSemanticOption(ChatPlugin plugin) {
         WebBase webBase = JSONObject.parseObject(plugin.getConfig(), WebBase.class);
         if (Objects.isNull(webBase)) {
             return null;
@@ -259,7 +259,7 @@ public class PluginManager {
                 .collect(Collectors.toList());
     }
 
-    private static Set<Long> getPluginMatchedModel(Plugin plugin, ChatParseContext chatParseContext) {
+    private static Set<Long> getPluginMatchedModel(ChatPlugin plugin, ChatParseContext chatParseContext) {
         Set<Long> matchedDataSets = chatParseContext.getMapInfo().getMatchedDataSetInfos();
         if (plugin.isContainsAllModel()) {
             return Sets.newHashSet(plugin.getDefaultMode());

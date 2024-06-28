@@ -6,7 +6,7 @@ import lombok.Data;
 @Data
 public class PluginParseResult {
 
-    private Plugin plugin;
+    private ChatPlugin plugin;
     private QueryFilters queryFilters;
     private double distance;
     private String queryText;

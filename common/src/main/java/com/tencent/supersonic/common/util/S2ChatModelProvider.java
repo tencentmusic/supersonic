@@ -22,7 +22,7 @@ public class S2ChatModelProvider {
                     .builder()
                     .baseUrl(llmConfig.getBaseUrl())
                     .modelName(llmConfig.getModelName())
-                    .apiKey(llmConfig.getApiKey())
+                    .apiKey(llmConfig.keyDecrypt())
                     .temperature(llmConfig.getTemperature())
                     .timeout(Duration.ofSeconds(llmConfig.getTimeOut()))
                     .build();
