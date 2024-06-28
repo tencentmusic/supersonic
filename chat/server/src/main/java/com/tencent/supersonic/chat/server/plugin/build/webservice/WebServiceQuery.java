@@ -1,7 +1,7 @@
 package com.tencent.supersonic.chat.server.plugin.build.webservice;
 
 import com.alibaba.fastjson.JSON;
-import com.tencent.supersonic.chat.server.plugin.Plugin;
+import com.tencent.supersonic.chat.server.plugin.ChatPlugin;
 import com.tencent.supersonic.chat.server.plugin.PluginParseResult;
 import com.tencent.supersonic.chat.server.plugin.PluginQueryManager;
 import com.tencent.supersonic.chat.server.plugin.build.ParamOption;
@@ -71,7 +71,7 @@ public class WebServiceQuery extends PluginSemanticQuery {
 
     protected WebServiceResp buildResponse(PluginParseResult pluginParseResult) {
         WebServiceResp webServiceResponse = new WebServiceResp();
-        Plugin plugin = pluginParseResult.getPlugin();
+        ChatPlugin plugin = pluginParseResult.getPlugin();
         WebBase webBase = fillWebBaseResult(JsonUtil.toObject(plugin.getConfig(), WebBase.class), pluginParseResult);
         webServiceResponse.setWebBase(webBase);
         List<ParamOption> paramOptions = webBase.getParamOptions();

@@ -3,7 +3,7 @@ package com.tencent.supersonic.chat.server.rest;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
 import com.tencent.supersonic.chat.api.pojo.request.PluginQueryReq;
-import com.tencent.supersonic.chat.server.plugin.Plugin;
+import com.tencent.supersonic.chat.server.plugin.ChatPlugin;
 import com.tencent.supersonic.chat.server.service.PluginService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
@@ -25,7 +25,7 @@ public class PluginController {
     protected PluginService pluginService;
 
     @PostMapping
-    public boolean createPlugin(@RequestBody Plugin plugin,
+    public boolean createPlugin(@RequestBody ChatPlugin plugin,
                       HttpServletRequest httpServletRequest,
                       HttpServletResponse httpServletResponse) {
         User user = UserHolder.findUser(httpServletRequest, httpServletResponse);
@@ -34,7 +34,7 @@ public class PluginController {
     }
 
     @PutMapping
-    public boolean updatePlugin(@RequestBody Plugin plugin,
+    public boolean updatePlugin(@RequestBody ChatPlugin plugin,
                                 HttpServletRequest httpServletRequest,
                                 HttpServletResponse httpServletResponse) {
         User user = UserHolder.findUser(httpServletRequest, httpServletResponse);
@@ -49,14 +49,14 @@ public class PluginController {
     }
 
     @RequestMapping("/getPluginList")
-    public List<Plugin> getPluginList() {
+    public List<ChatPlugin> getPluginList() {
         return pluginService.getPluginList();
     }
 
     @PostMapping("/query")
-    List<Plugin> query(@RequestBody PluginQueryReq pluginQueryReq,
-                       HttpServletRequest httpServletRequest,
-                       HttpServletResponse httpServletResponse) {
+    List<ChatPlugin> query(@RequestBody PluginQueryReq pluginQueryReq,
+                           HttpServletRequest httpServletRequest,
+                           HttpServletResponse httpServletResponse) {
         User user = UserHolder.findUser(httpServletRequest, httpServletResponse);
         return pluginService.queryWithAuthCheck(pluginQueryReq, user);
     }

@@ -11,7 +11,7 @@ import com.tencent.supersonic.chat.server.agent.AgentToolType;
 import com.tencent.supersonic.chat.server.agent.LLMParserTool;
 import com.tencent.supersonic.chat.server.agent.MultiTurnConfig;
 import com.tencent.supersonic.chat.server.agent.RuleParserTool;
-import com.tencent.supersonic.chat.server.plugin.Plugin;
+import com.tencent.supersonic.chat.server.plugin.ChatPlugin;
 import com.tencent.supersonic.chat.server.plugin.PluginParseConfig;
 import com.tencent.supersonic.chat.server.plugin.build.WebBase;
 import com.tencent.supersonic.common.pojo.JoinCondition;
@@ -514,7 +514,7 @@ public class S2VisitsDemo extends S2BaseDemo {
     }
 
     private void addPlugin(DataSetResp s2DataSet) {
-        Plugin plugin1 = new Plugin();
+        ChatPlugin plugin1 = new ChatPlugin();
         plugin1.setType("WEB_PAGE");
         plugin1.setDataSetList(Arrays.asList(s2DataSet.getId()));
         plugin1.setPattern("用于分析超音数的流量概况，包含UV、PV等核心指标的追踪。P.S. 仅作为示例展示，无实际看板");
