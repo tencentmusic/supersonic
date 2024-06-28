@@ -13,12 +13,13 @@ import { postUserLogin, userRegister } from './services';
 import { AUTH_TOKEN_KEY } from '@/common/constants';
 import { queryCurrentUser } from '@/services/user';
 import { history, useModel } from 'umi';
+import CryptoJS from 'crypto-js';
 import { encryptPassword } from '@/utils/utils';
 
 const { Item } = Form;
 const LoginPage: React.FC = () => {
   const [createModalVisible, setCreateModalVisible] = useState<boolean>(false);
-  const encryptKey = 'supersonic@2024';
+  const encryptKey = CryptoJS.enc.Utf8.parse('supersonic@2024');
   const [form] = useForm();
   const { initialState = {}, setInitialState } = useModel('@@initialState');
   // 通过用户信息进行登录
