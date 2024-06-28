@@ -550,12 +550,12 @@ const ChatItem: React.FC<Props> = ({
                   },
                   items: [
                     {
-                      label: '导出查询结果',
+                      label: '导出数据',
                       disabled: !data?.queryResults.length,
                       key: 'exportData',
                     },
                     {
-                      label: '查看SQL',
+                      label: '执行详情',
                       key: 'viewSQL',
                     },
                   ],

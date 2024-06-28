@@ -443,7 +443,7 @@ export function translate2ExplainText(mode: 'detail' | 'metric', data: IPill[]):
   }
 
   return finnalPillsArray
-    .map((item, index) => orderIndicators[index] + getPillExplainTitle(item))
+    .map((item, index) => (orderIndicators[index] ?? '') + getPillExplainTitle(item))
     .join('，');
 }
 
