@@ -34,3 +34,10 @@ export function getMetricList(modelId: number) {
     },
   });
 }
+
+export function testLLMConn(data: any) {
+  return request<Result<{ list: MetricType[] }>>('/api/chat/agent/testLLMConn', {
+    method: 'POST',
+    data,
+  });
+}

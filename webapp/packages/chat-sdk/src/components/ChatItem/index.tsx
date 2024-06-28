@@ -37,6 +37,7 @@ type Props = {
   executeItemNode?: React.ReactNode;
   renderCustomExecuteNode?: boolean;
   isSimpleMode?: boolean;
+  isDebugMode?: boolean;
   onMsgDataLoaded?: (data: MsgDataType, valid: boolean, isRefresh?: boolean) => void;
   onUpdateMessageScroll?: () => void;
   onSendMsg?: (msg: string) => void;
@@ -58,6 +59,7 @@ const ChatItem: React.FC<Props> = ({
   executeItemNode,
   renderCustomExecuteNode,
   isSimpleMode,
+  isDebugMode,
   onMsgDataLoaded,
   onUpdateMessageScroll,
   onSendMsg,
@@ -341,7 +343,7 @@ const ChatItem: React.FC<Props> = ({
           />
           {executeMode && (
             <>
-              {!isMobile && parseInfo?.sqlInfo && isDeveloper && !isSimpleMode && (
+              {!isMobile && parseInfo?.sqlInfo && isDeveloper && isDebugMode && !isSimpleMode && (
                 <SqlItem
                   llmReq={llmReq}
                   llmResp={llmResp}

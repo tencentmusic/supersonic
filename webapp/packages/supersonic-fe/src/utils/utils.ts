@@ -472,14 +472,29 @@ export const objToArray = (_obj: ObjToArrayParams, keyType: string = 'string') =
   });
 };
 
-export function encryptPassword(password: string, username: string) {
+const encryptKey = CryptoJS.enc.Hex.parse(
+  '9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08',
+);
+
+export const encryptPassword = (password: string, key?: string) => {
   if (!password) {
     return password;
   }
-  // TODO This key should be stored in a secure place
-  const key = CryptoJS.enc.Utf8.parse('supersonic@2024');
   const srcs = CryptoJS.enc.Utf8.parse(password);
-  const encrypted = CryptoJS.AES.encrypt(srcs, key, {mode: CryptoJS.mode.ECB, padding: CryptoJS.pad.Pkcs7});
+  const encrypted = CryptoJS.AES.encrypt(srcs, key || encryptKey, {
+    mode: CryptoJS.mode.ECB,
+    padding: CryptoJS.pad.Pkcs7,
+  });
   return encrypted.toString();
-
 };
+
+export function decryptPassword(encryptPassword: string) {
+  if (!encryptPassword) {
+    return encryptPassword;
+  }
+  const decrypt = CryptoJS.AES.decrypt(encryptPassword, encryptKey, {
+    mode: CryptoJS.mode.ECB,
+    padding: CryptoJS.pad.Pkcs7,
+  });
+  return CryptoJS.enc.Utf8.stringify(decrypt).toString();
+}

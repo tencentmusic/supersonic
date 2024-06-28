@@ -1,4 +1,4 @@
-import { ChatContextType, MsgDataType, ParseTimeCostType, SendMsgParamsType } from "../common/type";
+import { ChatContextType, MsgDataType, ParseTimeCostType, SendMsgParamsType } from '../common/type';
 
 export enum MessageTypeEnum {
   TEXT = 'text', // 指标文本
@@ -84,4 +84,22 @@ export type AgentType = {
   examples: string[];
   status: 0 | 1;
   initialSendMsgParams?: SendMsgParamsType;
+  createdBy: string;
+  updatedBy: string;
+  createdAt: string;
+  updatedAt: string;
+  enableSearch: number;
+  agentConfig: string;
+  llmConfig: {
+    provider: string;
+    baseUrl: string;
+    apiKey: string;
+    modelName: string;
+    temperature: number;
+    timeOut: number;
+  };
+  multiTurnConfig: {
+    enableMultiTurn: boolean;
+  };
+  dataSetIds: number[];
 };

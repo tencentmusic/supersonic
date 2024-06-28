@@ -1,5 +1,6 @@
 import moment, { Moment } from 'moment';
 import { NumericUnit } from '../common/constants';
+import { isString } from 'lodash';
 
 export function formatByDecimalPlaces(value: number | string, decimalPlaces: number) {
   if (isNaN(+value) || decimalPlaces < 0 || decimalPlaces > 100) {
@@ -255,3 +256,18 @@ export const getTextWidth = (
   const metrics = context.measureText(text);
   return Math.ceil(metrics.width);
 };
+
+export function jsonParse(config: any, defaultReturn?: any) {
+  if (!isString(config)) {
+    return config;
+  }
+  if (!config) {
+    return defaultReturn;
+  }
+  try {
+    return JSON.parse(config);
+  } catch (error) {
+    console.log(error);
+    return defaultReturn;
+  }
+}

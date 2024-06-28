@@ -9,16 +9,17 @@ import {
   InputNumber,
   Select,
   Row,
-  Col,
+  message,
   Space,
 } from 'antd';
 import { AgentType } from './type';
 import { useEffect, useState } from 'react';
 import styles from './style.less';
 import { DeleteOutlined, PlusOutlined } from '@ant-design/icons';
-import { uuid, jsonParse } from '@/utils/utils';
+import { uuid, jsonParse, encryptPassword, decryptPassword } from '@/utils/utils';
 import ToolsSection from './ToolsSection';
 import globalStyles from '@/global.less';
+import { testLLMConn } from './service';
 
 const FormItem = Form.Item;
 const { TextArea } = Input;
@@ -38,11 +39,13 @@ const AgentForm: React.FC<Props> = ({ editAgent, onSaveAgent, onCreateToolBtnCli
   const [saveLoading, setSaveLoading] = useState(false);
   const [examples, setExamples] = useState<{ id: string; question?: string }[]>([]);
   const [activeKey, setActiveKey] = useState('basic');
+  const [llmTestLoading, setLlmTestLoading] = useState<boolean>(false);
   const [formData, setFormData] = useState<any>({
     enableSearch: true,
     llmConfig: {
       timeOut: 60,
       provider: 'OPEN_AI',
+      temperature: 0,
     },
     agentConfig: {
       ...defaultAgentConfig,
@@ -86,11 +89,26 @@ const AgentForm: React.FC<Props> = ({ editAgent, onSaveAgent, onCreateToolBtnCli
       id: editAgent?.id,
       ...(editAgent || {}),
       ...values,
-      agentConfig: JSON.stringify({ ...config, ...values.agentConfig }) as any,
+      agentConfig: JSON.stringify({
+        ...config,
+        ...values.agentConfig,
+        debugMode: values.agentConfig?.simpleMode === true ? false : values.agentConfig?.debugMode,
+      }) as any,
       examples: examples.map((example) => example.question),
       enableSearch: values.enableSearch ? 1 : 0,
     });
     setSaveLoading(false);
+  };
+
+  const testLLMConnect = async (params: any) => {
+    setLlmTestLoading(true);
+    const { code, msg, data } = await testLLMConn(params);
+    setLlmTestLoading(false);
+    if (code === 200 && data) {
+      message.success('连接成功');
+    } else {
+      message.error(msg);
+    }
   };
 
   const formTabList = [
@@ -148,6 +166,7 @@ const AgentForm: React.FC<Props> = ({ editAgent, onSaveAgent, onCreateToolBtnCli
           <FormItem
             name={['agentConfig', 'debugMode']}
             label="显示调试信息"
+            hidden={formData?.agentConfig?.simpleMode === true}
             tooltip="包含Schema映射、SQL生成每阶段的关键信息"
             valuePropName="checked"
           >
@@ -217,7 +236,15 @@ const AgentForm: React.FC<Props> = ({ editAgent, onSaveAgent, onCreateToolBtnCli
           <FormItem
             name={['llmConfig', 'apiKey']}
             label="API Key"
-            // hidden={formData?.llmConfig?.provider === 'LOCAL_AI'}
+            getValueFromEvent={(event) => {
+              const value = event.target.value;
+              return encryptPassword(value);
+            }}
+            getValueProps={(value) => {
+              return {
+                value: value ? decryptPassword(value) : '',
+              };
+            }}
           >
             <Input placeholder="请输入API Key" />
           </FormItem>
@@ -231,7 +258,6 @@ const AgentForm: React.FC<Props> = ({ editAgent, onSaveAgent, onCreateToolBtnCli
                 0: '精准',
                 1: '随机',
               }}
-              defaultValue={0}
             />
           </FormItem>
           <FormItem name={['llmConfig', 'timeOut']} label="超时时间(秒)">
@@ -273,12 +299,21 @@ const AgentForm: React.FC<Props> = ({ editAgent, onSaveAgent, onCreateToolBtnCli
               <Button
                 type="primary"
                 onClick={() => {
-                  // setEditTool(undefined);
-                  // setModalVisible(true);
                   onCreateToolBtnClick?.();
                 }}
               >
                 <PlusOutlined /> 新增工具
+              </Button>
+            )}
+            {activeKey === 'llmConfig' && (
+              <Button
+                type="primary"
+                loading={llmTestLoading}
+                onClick={() => {
+                  testLLMConnect(formData.llmConfig);
+                }}
+              >
+                大模型连接测试
               </Button>
             )}
           </Space>
