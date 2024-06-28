@@ -74,15 +74,14 @@ public class S2VisitsDemo extends S2BaseDemo {
         try {
             // create domain
             DomainResp s2Domain = addDomain();
-            DomainResp s2ModelSet = addModelSet(s2Domain);
             TagObjectResp s2TagObject = addTagObjectUser(s2Domain);
 
             // create models
-            ModelResp userModel = addModel_1(s2ModelSet, demoDatabaseResp, s2TagObject);
-            ModelResp pvUvModel = addModel_2(s2ModelSet, demoDatabaseResp);
-            ModelResp stayTimeModel = addModel_3(s2ModelSet, demoDatabaseResp);
-            addModelRela_1(s2ModelSet, userModel, pvUvModel);
-            addModelRela_2(s2ModelSet, userModel, stayTimeModel);
+            ModelResp userModel = addModel_1(s2Domain, demoDatabaseResp, s2TagObject);
+            ModelResp pvUvModel = addModel_2(s2Domain, demoDatabaseResp);
+            ModelResp stayTimeModel = addModel_3(s2Domain, demoDatabaseResp);
+            addModelRela_1(s2Domain, userModel, pvUvModel);
+            addModelRela_2(s2Domain, userModel, stayTimeModel);
             addTags(userModel);
 
             //create metrics and dimensions
@@ -98,7 +97,7 @@ public class S2VisitsDemo extends S2BaseDemo {
             updateMetric_pv(pvUvModel, departmentDimension, userDimension, metricPv);
 
             //create data set
-            DataSetResp s2DataSet = addDataSet(s2Domain, s2ModelSet);
+            DataSetResp s2DataSet = addDataSet(s2Domain);
             addAuthGroup_1(stayTimeModel);
             addAuthGroup_2(stayTimeModel);
 
@@ -180,15 +179,6 @@ public class S2VisitsDemo extends S2BaseDemo {
         domainReq.setViewers(Arrays.asList("admin", "tom"));
         domainReq.setAdmins(Arrays.asList("admin", "jack"));
         domainReq.setIsOpen(1);
-        return domainService.createDomain(domainReq, user);
-    }
-
-    public DomainResp addModelSet(DomainResp s2Domain) {
-        DomainReq domainReq = new DomainReq();
-        domainReq.setName("埋点模型集");
-        domainReq.setBizName("visit_info");
-        domainReq.setParentId(s2Domain.getId());
-        domainReq.setStatus(StatusEnum.ONLINE.getCode());
         return domainService.createDomain(domainReq, user);
     }
 
@@ -448,14 +438,14 @@ public class S2VisitsDemo extends S2BaseDemo {
         return metricService.createMetric(metricReq, user);
     }
 
-    public DataSetResp addDataSet(DomainResp s2Domain, DomainResp s2ModelSet) {
+    public DataSetResp addDataSet(DomainResp s2Domain) {
         DataSetReq dataSetReq = new DataSetReq();
         dataSetReq.setName("超音数数据集");
         dataSetReq.setBizName("s2");
         dataSetReq.setDomainId(s2Domain.getId());
         dataSetReq.setDescription("包含超音数访问统计相关的指标和维度等");
         dataSetReq.setAdmins(Lists.newArrayList("admin"));
-        List<DataSetModelConfig> dataSetModelConfigs = getDataSetModelConfigs(s2ModelSet.getId());
+        List<DataSetModelConfig> dataSetModelConfigs = getDataSetModelConfigs(s2Domain.getId());
         DataSetDetail dataSetDetail = new DataSetDetail();
         dataSetDetail.setDataSetModelConfigs(dataSetModelConfigs);
         dataSetReq.setDataSetDetail(dataSetDetail);

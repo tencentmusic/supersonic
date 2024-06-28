@@ -48,7 +48,7 @@ public class QueryByMetricTest extends BaseTest {
         Assert.assertNotNull(queryResp.getResultList());
         Assert.assertEquals(6, queryResp.getResultList().size());
 
-        queryMetricReq.setDomainId(3L);
+        queryMetricReq.setDomainId(2L);
         queryMetricReq.setMetricNames(Arrays.asList("stay_hours", "pv"));
         queryMetricReq.setDimensionNames(Arrays.asList("user_name", "department"));
         assertThrows(IllegalArgumentException.class,
