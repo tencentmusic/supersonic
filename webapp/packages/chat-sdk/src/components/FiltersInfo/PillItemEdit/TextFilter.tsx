@@ -49,7 +49,7 @@ export default function TextFilter({ value, onChange }: Props) {
 
       {selectMode && (
         <Select
-          style={{ width: 120 }}
+          style={{ width: 200 }}
           value={value.value}
           options={valueOptions}
           mode={mode}
@@ -60,7 +60,7 @@ export default function TextFilter({ value, onChange }: Props) {
 
       {inputMode && (
         <Input
-          style={{ width: 120 }}
+          style={{ width: 200 }}
           value={value.value as string}
           onChange={e => onChange({ ...value, value: e.target.value })}
         />
