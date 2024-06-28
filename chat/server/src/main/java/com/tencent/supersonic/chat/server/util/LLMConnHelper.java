@@ -2,8 +2,8 @@ package com.tencent.supersonic.chat.server.util;
 
 import com.tencent.supersonic.common.config.LLMConfig;
 import com.tencent.supersonic.common.pojo.exception.InvalidArgumentException;
-import com.tencent.supersonic.common.util.S2ChatModelProvider;
 import dev.langchain4j.model.chat.ChatLanguageModel;
+import dev.langchain4j.model.provider.ChatLanguageModelProvider;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
@@ -14,7 +14,7 @@ public class LLMConnHelper {
             if (llmConfig == null || StringUtils.isBlank(llmConfig.getBaseUrl())) {
                 return false;
             }
-            ChatLanguageModel chatLanguageModel = S2ChatModelProvider.provide(llmConfig);
+            ChatLanguageModel chatLanguageModel = ChatLanguageModelProvider.provide(llmConfig);
             String response = chatLanguageModel.generate("Hi there");
             return StringUtils.isNotEmpty(response) ? true : false;
         } catch (Exception e) {
