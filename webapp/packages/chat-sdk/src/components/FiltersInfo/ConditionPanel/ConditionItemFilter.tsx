@@ -107,13 +107,24 @@ export default function ConditionItemFilter({ data, onChange }: Props) {
             />
           </div>
           <div className="condition-item-base-third">
-            {['IN', 'NOT_IN', '='].includes(data.operator!) && (
+            {['IN', 'NOT_IN'].includes(data.operator!) && (
+              <Select
+                disabled={!data.field || !data.operator}
+                size="middle"
+                style={{ width: '100%' }}
+                value={data.value ?? []}
+                mode="multiple"
+                allowClear
+                onChange={handleValueChange}
+                options={stringValueOptions}
+              />
+            )}
+            {['='].includes(data.operator!) && (
               <Select
                 disabled={!data.field || !data.operator}
                 size="middle"
                 style={{ width: '100%' }}
                 value={data.value}
-                mode={['IN', 'NOT_IN'].includes(data.operator!) ? 'multiple' : undefined}
                 allowClear
                 onChange={handleValueChange}
                 options={stringValueOptions}
