@@ -13,12 +13,12 @@ import { postUserLogin, userRegister } from './services';
 import { AUTH_TOKEN_KEY } from '@/common/constants';
 import { queryCurrentUser } from '@/services/user';
 import { history, useModel } from 'umi';
-import {encryptPassword} from "@/utils/utils";
+import { encryptPassword } from '@/utils/utils';
 
 const { Item } = Form;
 const LoginPage: React.FC = () => {
   const [createModalVisible, setCreateModalVisible] = useState<boolean>(false);
-  // const [forgetModalVisible, setForgetModalVisible] = useState<boolean>(false);
+  const encryptKey = 'supersonic@2024';
   const [form] = useForm();
   const { initialState = {}, setInitialState } = useModel('@@initialState');
   // 通过用户信息进行登录
@@ -44,18 +44,16 @@ const LoginPage: React.FC = () => {
     message.success(msg);
   };
 
-
-
   // 处理登录按钮响应
   const handleLogin = async () => {
     const { validateFields } = form;
     const content = await validateFields();
-    await loginDone({...content, password: encryptPassword(content.password)});
+    await loginDone({ ...content, password: encryptPassword(content.password, encryptKey) });
   };
 
   // 处理注册弹窗确定按钮
   const handleRegister = async (values: RegisterFormDetail) => {
-    const enCodeValues = { ...values, password: encryptPassword(values.password) };
+    const enCodeValues = { ...values, password: encryptPassword(values.password, encryptKey) };
     const { code } = await userRegister(enCodeValues);
     if (code === 200) {
       message.success('注册成功');
