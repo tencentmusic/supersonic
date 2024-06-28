@@ -72,6 +72,15 @@ public class DimensionController {
         return true;
     }
 
+    @PostMapping("/batchUpdateSensitiveLevel")
+    public Boolean batchUpdateSensitiveLevel(@RequestBody MetaBatchReq metaBatchReq,
+                                             HttpServletRequest request,
+                                             HttpServletResponse response) {
+        User user = UserHolder.findUser(request, response);
+        dimensionService.batchUpdateSensitiveLevel(metaBatchReq, user);
+        return true;
+    }
+
     @PostMapping("/mockDimensionAlias")
     public List<String> mockMetricAlias(@RequestBody DimensionReq dimensionReq,
                                         HttpServletRequest request,
