@@ -7,5 +7,5 @@ import lombok.Setter;
 @Setter
 class EmbeddingStoreProperties {
 
-    private String filePath;
+    private String persistPath;
 }

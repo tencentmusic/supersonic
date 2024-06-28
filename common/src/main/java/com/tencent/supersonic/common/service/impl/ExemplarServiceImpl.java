@@ -49,6 +49,14 @@ public class ExemplarServiceImpl implements ExemplarService, CommandLineRunner {
         embeddingService.addQuery(collection, Lists.newArrayList(segment));
     }
 
+    public void removeExemplar(String collection, SqlExemplar exemplar) {
+        Metadata metadata = Metadata.from(JsonUtil.toMap(JsonUtil.toString(exemplar),
+                String.class, Object.class));
+        TextSegment segment = TextSegment.from(exemplar.getQuestion(), metadata);
+
+        embeddingService.deleteQuery(collection, Lists.newArrayList(segment));
+    }
+
     public List<SqlExemplar> recallExemplars(String query, int num) {
         String collection = embeddingConfig.getText2sqlCollectionName();
         return recallExemplars(collection, query, num);

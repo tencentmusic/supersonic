@@ -1,9 +1,0 @@
-langchain==0.0.207
-openai==0.27.4
-fastapi==0.95.1
-chromadb==0.3.26
-tiktoken==0.3.3
-uvicorn[standard]==0.21.1
-pandas==1.5.3
-loguru==0.7.2
-sqlglot==19.5.1

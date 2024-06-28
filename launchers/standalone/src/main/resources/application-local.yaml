@@ -17,63 +17,14 @@ spring:
     url: jdbc:h2:mem:semantic;DATABASE_TO_UPPER=false
     username: root
     password: semantic
-  autoconfigure:
-    exclude:
-      - spring.dev.langchain4j.spring.LangChain4jAutoConfig
-      - spring.dev.langchain4j.openai.spring.AutoConfig
-      - spring.dev.langchain4j.ollama.spring.AutoConfig
-      - spring.dev.langchain4j.azure.openai.spring.AutoConfig
-      - spring.dev.langchain4j.azure.aisearch.spring.AutoConfig
-      - spring.dev.langchain4j.anthropic.spring.AutoConfig
+
 mybatis:
   mapper-locations=classpath:mappers/custom/*.xml,classpath*:/mappers/*.xml
-
-authentication:
-  enable: true
-  exclude:
-    path: /api/auth/user/register,/api/auth/user/login
-  token:
-    http:
-      header:
-        key: Authorization
 
 logging:
   level:
     dev.langchain4j: DEBUG
     dev.ai4j.openai4j: DEBUG
-
-s2:
-  pyllm:
-    url: http://127.0.0.1:9092
-
-  parser:
-    url: ${s2.pyllm.url}
-    strategy: ONE_PASS_SELF_CONSISTENCY
-    exemplar-recall:
-      number: 10
-    few-shot:
-      number: 5
-    self-consistency:
-      number: 1
-    multi-turn:
-      enable: false
-
-  corrector:
-    additional:
-      information: true
-    date: true
-  functionCall:
-    url: ${s2.pyllm.url}
-
-  embedding:
-    url: ${s2.pyllm.url}
-    persistent:
-      path: /tmp
-
-  demo:
-    names: S2VisitsDemo,S2ArtistDemo,SmallTalkDemo
-    enableLLM: true
-
 # swagger配置
 swagger:
   title: 'SuperSonic平台接口文档'
@@ -86,32 +37,3 @@ swagger:
     email:
     url: ''
   version: 3.0
-
-
-langchain4j:
-  open-ai:
-    chat-model:
-      # Replace with your LLM configs
-      # Note: The default API key `demo` is provided by langchain4j community
-      #       which limits 1000 tokens per request.
-      base-url: ${OPENAI_API_BASE:https://api.openai.com/v1}
-      api-key: ${OPENAI_API_KEY:demo}
-      model-name: ${OPENAI_MODEL_NAME:gpt-3.5-turbo}
-      temperature: ${OPENAI_TEMPERATURE:0.0}
-      timeout: ${OPENAI_TIMEOUT:PT60S}
-#    embedding-model:
-#      base-url: ${OPENAI_API_BASE:https://api.openai.com/v1}
-#      api-key: ${OPENAI_API_KEY:demo}
-#  dashscope:
-#    chat-model:
-#      api-key: ${OPENAI_API_KEY:demo}
-#      model-name: qwen-max-1201
-#    embedding-model:
-#      api-key: ${OPENAI_API_KEY:demo}
-  in-memory:
-    embedding-model:
-      model-name: bge-small-zh
-      #modelPath: /data/model.onnx
-      #vocabularyPath: /data/onnx_vocab.txt
-    embedding-store:
-      file-path: /tmp

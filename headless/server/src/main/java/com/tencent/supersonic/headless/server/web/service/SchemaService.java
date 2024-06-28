@@ -40,6 +40,8 @@ public interface SchemaService {
 
     DimensionResp getDimension(String bizName, Long modelId);
 
+    DimensionResp getDimension(Long id);
+
     List<MetricResp> getMetrics(MetaFilter metaFilter);
 
     List<DomainResp> getDomainList(User user);

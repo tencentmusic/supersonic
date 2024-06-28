@@ -20,6 +20,8 @@ public interface ChatService {
 
     QueryResult performExecution(ChatExecuteReq chatExecuteReq) throws Exception;
 
+    QueryResult parseAndExecute(int chatId, int agentId, String queryText);
+
     Object queryData(ChatQueryDataReq chatQueryDataReq, User user) throws Exception;
 
     SemanticParseInfo queryContext(Integer chatId);

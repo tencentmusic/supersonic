@@ -11,23 +11,25 @@ import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.headless.api.pojo.DataSetSchema;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.chat.QueryContext;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.env.Environment;
 import org.springframework.util.CollectionUtils;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Perform SQL corrections on the "Select" section in S2SQL.
  */
 @Slf4j
 public class SelectCorrector extends BaseSemanticCorrector {
+
+    public static final String ADDITIONAL_INFORMATION = "s2.corrector.additional.information";
 
     @Override
     public void doCorrect(QueryContext queryContext, SemanticParseInfo semanticParseInfo) {
@@ -46,14 +48,15 @@ public class SelectCorrector extends BaseSemanticCorrector {
     }
 
     protected String addFieldsToSelect(QueryContext queryContext, SemanticParseInfo semanticParseInfo,
-            String correctS2SQL) {
+                                       String correctS2SQL) {
         correctS2SQL = addTagDefaultFields(queryContext, semanticParseInfo, correctS2SQL);
 
         Set<String> selectFields = new HashSet<>(SqlSelectHelper.getSelectFields(correctS2SQL));
         Set<String> needAddFields = new HashSet<>(SqlSelectHelper.getGroupByFields(correctS2SQL));
 
         //decide whether add order by expression field to select
-        String correctorAdditionalInfo = getAdditionalInfo();
+        Environment environment = ContextUtils.getBean(Environment.class);
+        String correctorAdditionalInfo = environment.getProperty(ADDITIONAL_INFORMATION);
         if (StringUtils.isNotBlank(correctorAdditionalInfo) && Boolean.parseBoolean(correctorAdditionalInfo)) {
             needAddFields.addAll(SqlSelectHelper.getOrderByFields(correctS2SQL));
         }
@@ -67,7 +70,7 @@ public class SelectCorrector extends BaseSemanticCorrector {
     }
 
     private String addTagDefaultFields(QueryContext queryContext, SemanticParseInfo semanticParseInfo,
-            String correctS2SQL) {
+                                       String correctS2SQL) {
         //If it is in DETAIL mode and select *, add default metrics and dimensions.
         boolean hasAsterisk = SqlSelectFunctionHelper.hasAsterisk(correctS2SQL);
         if (!(hasAsterisk && QueryType.DETAIL.equals(semanticParseInfo.getQueryType()))) {
@@ -95,16 +98,5 @@ public class SelectCorrector extends BaseSemanticCorrector {
             correctS2SQL = SqlRemoveHelper.removeAsteriskAndAddFields(correctS2SQL, needAddDefaultFields);
         }
         return correctS2SQL;
-    }
-
-    private String getAdditionalInfo() {
-        String correctorAdditionalInfo = null;
-        try {
-            Environment environment = ContextUtils.getBean(Environment.class);
-            correctorAdditionalInfo = environment.getProperty("s2.corrector.additional.information");
-        } catch (Exception e) {
-            log.error("getAdditionalInfo error:{}", e);
-        }
-        return correctorAdditionalInfo;
     }
 }

@@ -132,15 +132,15 @@ public class S2VisitsDemo extends S2BaseDemo {
         return true;
     }
 
-    public void addSampleChats(Integer agentId) throws Exception {
+    public void addSampleChats(Integer agentId) {
         Long chatId = chatManageService.addChat(user, "样例对话1", agentId);
 
-        parseAndExecute(chatId.intValue(), agentId, "超音数 访问次数");
-        parseAndExecute(chatId.intValue(), agentId, "按部门统计");
-        parseAndExecute(chatId.intValue(), agentId, "查询近30天");
-        parseAndExecute(chatId.intValue(), agentId, "alice 停留时长");
-        parseAndExecute(chatId.intValue(), agentId, "对比alice和lucy的访问次数");
-        parseAndExecute(chatId.intValue(), agentId, "访问次数最高的部门");
+        chatService.parseAndExecute(chatId.intValue(), agentId, "超音数 访问次数");
+        chatService.parseAndExecute(chatId.intValue(), agentId, "按部门统计");
+        chatService.parseAndExecute(chatId.intValue(), agentId, "查询近30天");
+        chatService.parseAndExecute(chatId.intValue(), agentId, "alice 停留时长");
+        chatService.parseAndExecute(chatId.intValue(), agentId, "对比alice和lucy的访问次数");
+        chatService.parseAndExecute(chatId.intValue(), agentId, "访问次数最高的部门");
     }
 
     private Integer addAgent(long dataSetId) {

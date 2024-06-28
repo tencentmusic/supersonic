@@ -1,7 +1,7 @@
 name: SuperSonic Bug report
 title: "[Bug] "
 description: Problems and issues with code of SuperSonic
-labels: ["kind/bug"]
+labels: bug
 body:
   - type: markdown
     attributes:

@@ -94,7 +94,7 @@
     "react-spinners": "^0.13.8",
     "react-split-pane": "^2.0.3",
     "react-syntax-highlighter": "^15.4.3",
-    "sql-formatter": "^2.3.3",
+    "sql-formatter": "^15.3.2",
     "supersonic-chat-sdk": "workspace:*",
     "supersonic-insights-flow-components": "^1.4.9",
     "umi-request": "1.4.0"
