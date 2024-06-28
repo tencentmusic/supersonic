@@ -15,12 +15,13 @@ import { useThrottleFn } from 'ahooks';
 import Conversation from './Conversation';
 import ChatFooter from './ChatFooter';
 import classNames from 'classnames';
-import { cloneDeep } from 'lodash';
+import { cloneDeep, isBoolean } from 'lodash';
 import AgentList from './AgentList';
 import MobileAgents from './MobileAgents';
 import { HistoryMsgItemType, MsgDataType, SendMsgParamsType } from '../common/type';
 import { getHistoryMsg } from '../service';
 import ShowCase from '../ShowCase';
+import { jsonParse } from '../utils/utils';
 import { Drawer, Modal, Row, Col, Space, Switch, Tooltip } from 'antd';
 
 type Props = {
@@ -67,6 +68,7 @@ const Chat: ForwardRefRenderFunction<any, Props> = (
   const [showCaseVisible, setShowCaseVisible] = useState(false);
 
   const [isSimpleMode, setIsSimpleMode] = useState<boolean>(false);
+  const [isDebugMode, setIsDebugMode] = useState<boolean>(true);
 
   const conversationRef = useRef<any>();
   const chatFooterRef = useRef<any>();
@@ -87,10 +89,28 @@ const Chat: ForwardRefRenderFunction<any, Props> = (
     }
   };
 
+  const updateAgentConfigMode = (agent: AgentType) => {
+    const agentConfig = jsonParse(agent?.agentConfig, {});
+    const { simpleMode, debugMode } = agentConfig;
+    if (isBoolean(simpleMode)) {
+      setIsSimpleMode(simpleMode);
+    } else {
+      setIsSimpleMode(false);
+    }
+    if (isBoolean(debugMode)) {
+      setIsDebugMode(debugMode);
+    } else {
+      setIsDebugMode(true);
+    }
+  };
+
   const updateCurrentAgent = (agent?: AgentType) => {
     setCurrentAgent(agent);
     onCurrentAgentChange?.(agent);
     localStorage.setItem('AGENT_ID', `${agent?.id}`);
+    if (agent) {
+      updateAgentConfigMode(agent);
+    }
     if (!isCopilot) {
       window.history.replaceState({}, '', `${window.location.pathname}?agentId=${agent?.id}`);
     }
@@ -398,6 +418,7 @@ const Chat: ForwardRefRenderFunction<any, Props> = (
                 <MessageContainer
                   id="messageContainer"
                   isSimpleMode={isSimpleMode}
+                  isDebugMode={isDebugMode}
                   messageList={messageList}
                   chatId={currentConversation?.chatId}
                   historyVisible={historyVisible}
