@@ -13,7 +13,7 @@ import java.util.Set;
 @NoArgsConstructor
 public class PluginRecallResult {
 
-    private Plugin plugin;
+    private ChatPlugin plugin;
 
     private Set<Long> dataSetIds;
 
