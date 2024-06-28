@@ -45,19 +45,21 @@ public class AgentServiceImpl extends ServiceImpl<AgentDOMapper, AgentDO>
     }
 
     @Override
-    public Integer createAgent(Agent agent, User user) {
+    public Agent createAgent(Agent agent, User user) {
         agent.createdBy(user.getName());
         AgentDO agentDO = convert(agent);
         save(agentDO);
+        agent.setId(agentDO.getId());
         executeAgentExamplesAsync(agent);
-        return agentDO.getId();
+        return agent;
     }
 
     @Override
-    public void updateAgent(Agent agent, User user) {
+    public Agent updateAgent(Agent agent, User user) {
         agent.updatedBy(user.getName());
         updateById(convert(agent));
         executeAgentExamplesAsync(agent);
+        return agent;
     }
 
     @Override

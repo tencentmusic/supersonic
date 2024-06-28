@@ -24,7 +24,8 @@ public class Text2SQLEval extends BaseTest {
 
     @BeforeAll
     public void init() {
-        agentId = agentService.createAgent(getLLMAgent(false), DataUtils.getUser());
+        Agent agent = agentService.createAgent(getLLMAgent(false), DataUtils.getUser());
+        agentId = agent.getId();
     }
 
     @Test
