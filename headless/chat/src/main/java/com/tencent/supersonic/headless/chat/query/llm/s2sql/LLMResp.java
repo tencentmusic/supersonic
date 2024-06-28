@@ -20,9 +20,4 @@ public class LLMResp {
 
     private Map<String, LLMSqlResp> sqlRespMap;
 
-    /**
-     * Only for compatibility with python code, later deleted
-     */
-    private Map<String, Double> sqlWeight;
-
 }

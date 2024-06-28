@@ -7,13 +7,6 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @Data
 public class EmbeddingConfig {
-
-    @Value("${s2.embedding.url:}")
-    private String url;
-
-    @Value("${s2.embedding.recognize.path:/preset_query_retrival}")
-    private String recognizePath;
-
     @Value("${s2.embedding.preset.collection:preset_query_collection}")
     private String presetCollection;
 

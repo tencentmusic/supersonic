@@ -63,12 +63,7 @@ function packageRelease {
 }
 
 #1. build backend services
-if [ "$service" == $PYLLM_SERVICE ]; then
-  echo "start installing python modules required by supersonic-pyllm: ${pip_path}"
-  requirementPath=$projectDir/headless/python/requirements.txt
-  ${pip_path} install -r ${requirementPath}
-  echo "install python modules success"
-elif [ "$service" == "webapp" ]; then
+if [ "$service" == "webapp" ]; then
   buildWebapp
   target_path=$projectDir/launchers/$STANDALONE_SERVICE/target/classes
   tar xvf $projectDir/webapp/supersonic-webapp.tar.gz -C $target_path
