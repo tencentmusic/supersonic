@@ -6,7 +6,7 @@ import TagTable from './Table';
 
 import { ISemantic } from '../../data';
 
-import { ProCard } from  '@ant-design/pro-components';
+import { ProCard } from '@ant-design/pro-components';
 import { TagGraph } from 'supersonic-insights-flow-components';
 import styles from '../style.less';
 
@@ -50,7 +50,7 @@ const TagTrendSection: React.FC<Props> = ({ tagData }) => {
         },
         {
           dataIndex: 'value',
-          title: '标签值',
+          title: '样本数',
         },
       ];
       setTableColumnConfig(columns);
