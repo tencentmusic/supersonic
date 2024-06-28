@@ -18,7 +18,7 @@ public class LLMConnHelper {
             String response = chatLanguageModel.generate("Hi there");
             return StringUtils.isNotEmpty(response) ? true : false;
         } catch (Exception e) {
-            log.warn("connect llm failed:", e);
+            log.warn("connect to llm failed:", e);
             throw new InvalidArgumentException(e.getMessage());
         }
     }

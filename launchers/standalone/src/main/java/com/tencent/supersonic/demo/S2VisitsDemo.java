@@ -167,9 +167,8 @@ public class S2VisitsDemo extends S2BaseDemo {
         agent.setAgentConfig(JSONObject.toJSONString(agentConfig));
         MultiTurnConfig multiTurnConfig = new MultiTurnConfig(false);
         agent.setMultiTurnConfig(multiTurnConfig);
-        int id = agentService.createAgent(agent, User.getFakeUser());
-        agent.setId(id);
-        return agent.getId();
+        Agent agentCreated = agentService.createAgent(agent, User.getFakeUser());
+        return agentCreated.getId();
     }
 
     public DomainResp addDomain() {

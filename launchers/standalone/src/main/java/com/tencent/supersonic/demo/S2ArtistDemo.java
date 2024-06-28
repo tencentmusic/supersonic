@@ -221,8 +221,7 @@ public class S2ArtistDemo extends S2BaseDemo {
             agentConfig.getTools().add(llmParserTool);
         }
         agent.setAgentConfig(JSONObject.toJSONString(agentConfig));
-        int id = agentService.createAgent(agent, User.getFakeUser());
-        agent.setId(id);
+        agentService.createAgent(agent, User.getFakeUser());
     }
 
 }
