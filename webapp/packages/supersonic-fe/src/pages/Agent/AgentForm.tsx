@@ -248,7 +248,7 @@ const AgentForm: React.FC<Props> = ({ editAgent, onSaveAgent, onCreateToolBtnCli
               };
             }}
           >
-            <Input placeholder="请输入API Key" />
+            <Input.Password placeholder="请输入API Key" visibilityToggle />
           </FormItem>
 
           <FormItem name={['llmConfig', 'temperature']} label="Temperature">
