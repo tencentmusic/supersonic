@@ -1,5 +1,6 @@
 package com.tencent.supersonic.chat.server.service.impl;
 
+import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.chat.api.pojo.request.ChatExecuteReq;
 import com.tencent.supersonic.chat.api.pojo.request.ChatParseReq;
@@ -55,6 +56,10 @@ public class ChatServiceImpl implements ChatService {
     @Override
     public List<SearchResult> search(ChatParseReq chatParseReq) {
         ChatParseContext chatParseContext = buildParseContext(chatParseReq);
+        Agent agent = chatParseContext.getAgent();
+        if (!agent.enableSearch()) {
+            return Lists.newArrayList();
+        }
         QueryReq queryReq = QueryReqConverter.buildText2SqlQueryReq(chatParseContext);
         return retrieveService.retrieve(queryReq);
     }
@@ -64,6 +69,7 @@ public class ChatServiceImpl implements ChatService {
         ParseResp parseResp = new ParseResp(chatParseReq.getChatId(), chatParseReq.getQueryText());
         chatManageService.createChatQuery(chatParseReq, parseResp);
         ChatParseContext chatParseContext = buildParseContext(chatParseReq);
+        supplyMapInfo(chatParseContext);
         for (ChatParser chatParser : chatParsers) {
             chatParser.parse(chatParseContext, parseResp);
         }
@@ -127,10 +133,13 @@ public class ChatServiceImpl implements ChatService {
         BeanMapper.mapper(chatParseReq, chatParseContext);
         Agent agent = agentService.getAgent(chatParseReq.getAgentId());
         chatParseContext.setAgent(agent);
+        return chatParseContext;
+    }
+
+    private void supplyMapInfo(ChatParseContext chatParseContext) {
         QueryReq queryReq = QueryReqConverter.buildText2SqlQueryReq(chatParseContext);
         MapResp mapResp = chatQueryService.performMapping(queryReq);
         chatParseContext.setMapInfo(mapResp.getMapInfo());
-        return chatParseContext;
     }
 
     private ChatExecuteContext buildExecuteContext(ChatExecuteReq chatExecuteReq) {
