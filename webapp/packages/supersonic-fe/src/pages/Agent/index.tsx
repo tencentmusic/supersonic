@@ -26,17 +26,6 @@ const Agent = () => {
     const res = await getAgentList();
     setLoading(false);
     setAgents(res.data || []);
-    if (!res.data?.length) {
-      return;
-    }
-    if (currentAgent) {
-      const agent = res.data.find((item) => item.id === currentAgent.id);
-      if (agent) {
-        setCurrentAgent(agent);
-      } else {
-        setCurrentAgent(res.data[0]);
-      }
-    }
   };
 
   useEffect(() => {
@@ -54,6 +43,15 @@ const Agent = () => {
     } else {
       newAgentConfig.tools.push({ ...tool, id: uuid() });
     }
+    setAgentConfig(newAgentConfig);
+    if (!currentAgent?.id) {
+      setCurrentAgent({
+        ...currentAgent,
+        agentConfig: JSON.stringify(newAgentConfig) as any,
+      });
+      setModalVisible(false);
+      return;
+    }
     await onSaveAgent({
       ...currentAgent,
       agentConfig: JSON.stringify(newAgentConfig) as any,
@@ -62,11 +60,16 @@ const Agent = () => {
   };
 
   const onSaveAgent = async (agent: AgentType, noTip?: boolean) => {
-    await saveAgent(agent);
+    const { data, code } = await saveAgent(agent);
+    if (code === 200) {
+      setCurrentAgent({
+        ...data,
+      });
+      updateData();
+    }
     if (!noTip) {
       message.success('保存成功');
     }
-    updateData();
   };
 
   const onDeleteAgent = async (id: number) => {

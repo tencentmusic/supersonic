@@ -61,12 +61,13 @@ const AgentForm: React.FC<Props> = ({ editAgent, onSaveAgent, onCreateToolBtnCli
       }
 
       const config = jsonParse(editAgent.agentConfig, {});
-
-      form.setFieldsValue({
+      const initData = {
         ...sourceData,
         enableSearch: editAgent.enableSearch !== 0,
         agentConfig: { ...defaultAgentConfig, ...config },
-      });
+      };
+      form.setFieldsValue(initData);
+      setFormData(initData);
       if (editAgent.examples) {
         setExamples(editAgent.examples.map((question) => ({ id: uuid(), question })));
       }
@@ -220,7 +221,7 @@ const AgentForm: React.FC<Props> = ({ editAgent, onSaveAgent, onCreateToolBtnCli
         <div className={styles.agentFormContainer}>
           <FormItem name={['llmConfig', 'provider']} label="接口协议">
             <Select placeholder="">
-              {['OPEN_AI'].map((item) => (
+              {['OPEN_AI', 'OLLAMA'].map((item) => (
                 <Select.Option key={item} value={item}>
                   {item}
                 </Select.Option>
@@ -236,6 +237,7 @@ const AgentForm: React.FC<Props> = ({ editAgent, onSaveAgent, onCreateToolBtnCli
           <FormItem
             name={['llmConfig', 'apiKey']}
             label="API Key"
+            hidden={formData?.llmConfig?.provider === 'OLLAMA'}
             getValueFromEvent={(event) => {
               const value = event.target.value;
               return encryptPassword(value);
