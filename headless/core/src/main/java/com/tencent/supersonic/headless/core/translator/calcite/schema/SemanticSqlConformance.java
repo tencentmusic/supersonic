@@ -80,6 +80,11 @@ public class SemanticSqlConformance implements SqlConformance {
     }
 
     @Override
+    public boolean isRegexReplaceCaptureGroupDollarIndexed() {
+        return SqlConformanceEnum.BIG_QUERY.isRegexReplaceCaptureGroupDollarIndexed();
+    }
+
+    @Override
     public boolean isApplyAllowed() {
         return SqlConformanceEnum.BIG_QUERY.isApplyAllowed();
     }
