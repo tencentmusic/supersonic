@@ -3,7 +3,6 @@ package com.tencent.supersonic.chat.server.service.impl;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.chat.api.pojo.request.ChatMemoryFilter;
-import com.tencent.supersonic.chat.api.pojo.request.ChatParseReq;
 import com.tencent.supersonic.chat.server.agent.Agent;
 import com.tencent.supersonic.chat.server.agent.MultiTurnConfig;
 import com.tencent.supersonic.chat.server.persistence.dataobject.AgentDO;
@@ -95,12 +94,7 @@ public class AgentServiceImpl extends ServiceImpl<AgentDOMapper, AgentDO>
             if (memoriesExisted.contains(example)) {
                 continue;
             }
-            ChatParseReq chatParseReq = new ChatParseReq();
-            chatParseReq.setAgentId(agent.getId());
-            chatParseReq.setQueryText(example);
-            chatParseReq.setUser(User.getFakeUser());
-            chatParseReq.setChatId(-1);
-            chatService.parseAndExecute(chatParseReq);
+            chatService.parseAndExecute(-1, agent.getId(), example);
         }
     }
 

@@ -30,6 +30,7 @@ import com.tencent.supersonic.headless.server.facade.service.RetrieveService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.util.List;
 
@@ -91,22 +92,34 @@ public class ChatServiceImpl implements ChatService {
             for (ExecuteResultProcessor processor : executeResultProcessors) {
                 processor.process(chatExecuteContext, queryResult);
             }
+            saveQueryResult(chatExecuteReq, queryResult);
         }
 
         return queryResult;
     }
 
     @Override
-    public QueryResult parseAndExecute(ChatParseReq chatParseReq) {
+    public QueryResult parseAndExecute(int chatId, int agentId, String queryText) {
+        ChatParseReq chatParseReq = new ChatParseReq();
+        chatParseReq.setQueryText(queryText);
+        chatParseReq.setChatId(chatId);
+        chatParseReq.setAgentId(agentId);
+        chatParseReq.setUser(User.getFakeUser());
         ParseResp parseResp = performParsing(chatParseReq);
-        ChatExecuteReq chatExecuteReq = new ChatExecuteReq();
-        chatExecuteReq.setQueryId(parseResp.getQueryId());
-        chatExecuteReq.setChatId(chatParseReq.getChatId());
-        chatExecuteReq.setUser(chatParseReq.getUser());
-        chatExecuteReq.setAgentId(chatParseReq.getAgentId());
-        chatExecuteReq.setQueryText(chatParseReq.getQueryText());
-        chatExecuteReq.setParseId(parseResp.getSelectedParses().get(0).getId());
-        return performExecution(chatExecuteReq);
+        if (CollectionUtils.isEmpty(parseResp.getSelectedParses())) {
+            log.debug("chatId:{}, agentId:{}, queryText:{}, parseResp.getSelectedParses() is empty",
+                    chatId, agentId, queryText);
+            return null;
+        }
+        ChatExecuteReq executeReq = new ChatExecuteReq();
+        executeReq.setQueryId(parseResp.getQueryId());
+        executeReq.setParseId(parseResp.getSelectedParses().get(0).getId());
+        executeReq.setQueryText(queryText);
+        executeReq.setChatId(parseResp.getChatId());
+        executeReq.setUser(User.getFakeUser());
+        executeReq.setAgentId(agentId);
+        executeReq.setSaveAnswer(true);
+        return performExecution(executeReq);
     }
 
     private ChatParseContext buildParseContext(ChatParseReq chatParseReq) {
@@ -151,6 +164,14 @@ public class ChatServiceImpl implements ChatService {
         Agent agent = agentService.getAgent(agentId);
         dimensionValueReq.setDataSetIds(agent.getDataSetIds());
         return chatQueryService.queryDimensionValue(dimensionValueReq, user);
+    }
+
+    public void saveQueryResult(ChatExecuteReq chatExecuteReq, QueryResult queryResult) {
+        //The history record only retains the query result of the first parse
+        if (chatExecuteReq.getParseId() > 1) {
+            return;
+        }
+        chatManageService.saveQueryResult(chatExecuteReq, queryResult);
     }
 
 }
