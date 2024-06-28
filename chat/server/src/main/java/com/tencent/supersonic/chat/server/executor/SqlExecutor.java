@@ -1,5 +1,6 @@
 package com.tencent.supersonic.chat.server.executor;
 
+import com.tencent.supersonic.chat.api.pojo.enums.MemoryStatus;
 import com.tencent.supersonic.chat.server.persistence.dataobject.ChatMemoryDO;
 import com.tencent.supersonic.chat.server.pojo.ChatExecuteContext;
 import com.tencent.supersonic.chat.server.service.MemoryService;
@@ -32,10 +33,10 @@ public class SqlExecutor implements ChatExecutor {
                 MemoryService memoryService = ContextUtils.getBean(MemoryService.class);
                 memoryService.createMemory(ChatMemoryDO.builder()
                         .agentId(chatExecuteContext.getAgentId())
-                        .status(ChatMemoryDO.Status.PENDING)
+                        .status(MemoryStatus.PENDING)
                         .question(chatExecuteContext.getQueryText())
                         .s2sql(chatExecuteContext.getParseInfo().getSqlInfo().getS2SQL())
-                        .schema(buildSchemaStr(chatExecuteContext.getParseInfo()))
+                        .dbSchema(buildSchemaStr(chatExecuteContext.getParseInfo()))
                         .build());
             }
         }

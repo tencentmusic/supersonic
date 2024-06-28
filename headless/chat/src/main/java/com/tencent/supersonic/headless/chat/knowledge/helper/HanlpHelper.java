@@ -9,17 +9,14 @@ import com.hankcs.hanlp.seg.Segment;
 import com.hankcs.hanlp.seg.common.Term;
 import com.tencent.supersonic.common.pojo.enums.DictWordType;
 import com.tencent.supersonic.headless.api.pojo.response.S2Term;
+import com.tencent.supersonic.headless.chat.knowledge.DatabaseMapResult;
 import com.tencent.supersonic.headless.chat.knowledge.DictWord;
+import com.tencent.supersonic.headless.chat.knowledge.EmbeddingResult;
 import com.tencent.supersonic.headless.chat.knowledge.HadoopFileIOAdapter;
+import com.tencent.supersonic.headless.chat.knowledge.HanlpMapResult;
 import com.tencent.supersonic.headless.chat.knowledge.MapResult;
 import com.tencent.supersonic.headless.chat.knowledge.MultiCustomDictionary;
 import com.tencent.supersonic.headless.chat.knowledge.SearchService;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.BeanUtils;
-import org.springframework.util.CollectionUtils;
-import org.springframework.util.ResourceUtils;
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -29,6 +26,11 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.ResourceUtils;
 
 /**
  * HanLP helper
@@ -200,16 +202,69 @@ public class HanlpHelper {
         if (CollectionUtils.isEmpty(mapResults)) {
             return;
         }
+        List<T> newResults = new ArrayList<>();
         for (T mapResult : mapResults) {
+            boolean isAdd = false;
             if (MultiCustomDictionary.isLowerLetter(mapResult.getName())) {
                 if (CustomDictionary.contains(mapResult.getName())) {
                     CoreDictionary.Attribute attribute = CustomDictionary.get(mapResult.getName());
-                    if (attribute != null && attribute.original != null) {
-                        mapResult.setName(attribute.original);
+                    if (attribute != null) {
+                        isAdd = addLetterOriginal(newResults, mapResult, attribute);
+                    }
+                }
+            }
+            if (!isAdd) {
+                newResults.add(mapResult);
+            }
+        }
+        mapResults.clear();
+        mapResults.addAll(newResults);
+    }
+
+    public static <T extends MapResult> boolean addLetterOriginal(List<T> mapResults, T mapResult,
+            CoreDictionary.Attribute attribute) {
+        boolean isAdd = false;
+        if (attribute != null) {
+            if (mapResult instanceof HanlpMapResult) {
+                HanlpMapResult hanlpMapResult = (HanlpMapResult) mapResult;
+                for (String nature : hanlpMapResult.getNatures()) {
+                    String orig = attribute.getOriginal(Nature.fromString(nature));
+                    if (orig != null) {
+                        MapResult addMapResult = new HanlpMapResult(orig, Arrays.asList(nature),
+                                hanlpMapResult.getDetectWord());
+                        mapResults.add((T) addMapResult);
+                        isAdd = true;
+                    }
+                }
+            } else if (mapResult instanceof DatabaseMapResult) {
+                List<String> originals = attribute.getOriginals();
+                if (!CollectionUtils.isEmpty(originals)) {
+                    for (String orig : originals) {
+                        DatabaseMapResult addMapResult = new DatabaseMapResult();
+                        addMapResult.setName(orig);
+                        addMapResult.setSchemaElement(((DatabaseMapResult) mapResult).getSchemaElement());
+                        addMapResult.setDetectWord(mapResult.getDetectWord());
+                        mapResults.add((T) addMapResult);
+                        isAdd = true;
+                    }
+                }
+            } else if (mapResult instanceof EmbeddingResult) {
+                List<String> originals = attribute.getOriginals();
+                if (!CollectionUtils.isEmpty(originals)) {
+                    for (String orig : originals) {
+                        EmbeddingResult addMapResult = new EmbeddingResult();
+                        addMapResult.setName(orig);
+                        addMapResult.setDetectWord(mapResult.getDetectWord());
+                        addMapResult.setId(((EmbeddingResult) mapResult).getId());
+                        addMapResult.setMetadata(((EmbeddingResult) mapResult).getMetadata());
+                        addMapResult.setDistance(((EmbeddingResult) mapResult).getDistance());
+                        mapResults.add((T) addMapResult);
+                        isAdd = true;
                     }
                 }
             }
         }
+        return isAdd;
     }
 
     public static List<S2Term> getTerms(String text, Map<Long, List<Long>> modelIdToDataSetIds) {

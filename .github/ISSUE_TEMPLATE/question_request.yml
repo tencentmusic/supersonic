@@ -1,0 +1,58 @@
+name: SuperSonic question request
+description: Ask a question about SuperSonic
+title: "[question] "
+labels: question
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Ask a Question about SuperSonic
+        Please provide a detailed description of your question or the clarification you seek regarding the SuperSonic project.
+  - type: textarea
+    id: describe-question
+    attributes:
+      label: Describe your question
+      description: Please provide a clear and concise description of your question.
+      placeholder: "Type your question here..."
+    validations:
+      required: true
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Provide any additional context or information
+      description: If your question is related to a specific part of the SuperSonic project or if you have already looked through certain documentation, please provide that information here.
+      placeholder: "Add context here..."
+    validations:
+      required: false
+  - type: textarea
+    id: tried-to-resolve
+    attributes:
+      label: What have you tried to resolve your question
+      description: Let us know what you have done to try and understand or resolve your question. This can help us provide you with the most useful guidance.
+      placeholder: "I've already tried..."
+    validations:
+      required: false
+  - type: textarea
+    id: environment
+    attributes:
+      label: Your environment
+      description: Share details about your environment to help us reproduce the issue. Include your operating system, version of SuperSonic, and any other relevant details.
+      placeholder: "OS, SuperSonic version, etc..."
+    validations:
+      required: false
+  - type: textarea
+    id: screenshots-logs
+    attributes:
+      label: Screenshots or Logs
+      description: If applicable, add screenshots or logs to help explain your problem.
+      placeholder: "Paste your logs or attach screenshots here..."
+    validations:
+      required: false
+  - type: textarea
+    id: additional-information
+    attributes:
+      label: Additional information
+      description: Add any other context or details you think might be helpful for understanding your question.
+      placeholder: "Any other information..."
+    validations:
+      required: false

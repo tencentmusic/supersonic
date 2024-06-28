@@ -36,10 +36,6 @@ public class EmbeddingServiceImpl implements EmbeddingService {
     @Autowired
     private EmbeddingModel embeddingModel;
 
-    public synchronized void addCollection(String collectionName) {
-        embeddingStoreFactory.create(collectionName);
-    }
-
     @Override
     public void addQuery(String collectionName, List<TextSegment> queries) {
         EmbeddingStore embeddingStore = embeddingStoreFactory.create(collectionName);

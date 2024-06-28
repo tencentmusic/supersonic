@@ -88,7 +88,7 @@ public class SqlGenerateUtils {
             sb.append(agg.getColumn()).append(" as ").append("value").append(locate).append(",");
         }
         String selectSql = sb.substring(0, sb.length() - 1);
-        log.info("union select sql {}", selectSql);
+        log.debug("union select sql {}", selectSql);
         return selectSql;
     }
 
@@ -176,7 +176,7 @@ public class SqlGenerateUtils {
         } else if (StringUtils.isNotEmpty(whereFromDate) && StringUtils.isEmpty(whereClauseFromFilter)) {
             return whereFromDate;
         } else if (Objects.isNull(whereFromDate) && StringUtils.isEmpty(whereClauseFromFilter)) {
-            log.info("the current date information is empty, enter the date initialization logic");
+            log.debug("the current date information is empty, enter the date initialization logic");
             return dateModeUtils.defaultRecentDateInfo(queryParam.getDateInfo());
         }
         return whereClauseFromFilter;
@@ -198,7 +198,7 @@ public class SqlGenerateUtils {
 
             return dateModeUtils.defaultRecentDateInfo(dateInfo);
         }
-        log.info("dateDate:{}", dateDate);
+        log.debug("dateDate:{}", dateDate);
         return dateModeUtils.getDateWhereStr(dateInfo, dateDate);
     }
 
@@ -320,7 +320,7 @@ public class SqlGenerateUtils {
             }
             if (!CollectionUtils.isEmpty(replace)) {
                 String expr = SqlReplaceHelper.replaceExpression(expression, replace);
-                log.info("derived measure {}->{}", expression, expr);
+                log.debug("derived measure {}->{}", expression, expr);
                 return expr;
             }
         }

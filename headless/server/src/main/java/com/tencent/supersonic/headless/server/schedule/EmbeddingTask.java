@@ -5,6 +5,8 @@ import com.tencent.supersonic.common.pojo.DataItem;
 import com.tencent.supersonic.common.service.EmbeddingService;
 import com.tencent.supersonic.headless.server.web.service.DimensionService;
 import com.tencent.supersonic.headless.server.web.service.MetricService;
+import dev.langchain4j.inmemory.spring.InMemoryEmbeddingStoreFactory;
+import dev.langchain4j.store.embedding.EmbeddingStoreFactory;
 import dev.langchain4j.store.embedding.TextSegmentConvert;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,28 +30,33 @@ public class EmbeddingTask {
     @Autowired
     private DimensionService dimensionService;
 
+    @Autowired
+    private EmbeddingStoreFactory embeddingStoreFactory;
+
     @PreDestroy
     public void onShutdown() {
-        //        embeddingStorePersistentToFile();
+        embeddingStorePersistFile();
     }
 
-    //    private void embeddingStorePersistentToFile() {
-    //        if (embeddingService instanceof InMemoryEmbeddingService) {
-    //            log.info("start persistentToFile");
-    //            ((InMemoryEmbeddingService) embeddingService).persistentToFile();
-    //            log.info("end persistentToFile");
-    //        }
-    //    }
+    private void embeddingStorePersistFile() {
+        if (embeddingStoreFactory instanceof InMemoryEmbeddingStoreFactory) {
+            log.info("start persistFile");
+            InMemoryEmbeddingStoreFactory inMemoryFactory =
+                    (InMemoryEmbeddingStoreFactory) embeddingStoreFactory;
+            inMemoryFactory.persistFile();
+            log.info("end persistFile");
+        }
+    }
 
-    @Scheduled(cron = "${inMemoryEmbeddingStore.persistent.cron:0 0 * * * ?}")
-    public void executeTask() {
-        //        embeddingStorePersistentToFile();
+    @Scheduled(cron = "${s2.inMemoryEmbeddingStore.persist.cron:0 0 * * * ?}")
+    public void executePersistFileTask() {
+        embeddingStorePersistFile();
     }
 
     /***
      * reload meta embedding
      */
-    @Scheduled(cron = "${reload.meta.embedding.corn:0 0 */2 * * ?}")
+    @Scheduled(cron = "${s2.reload.meta.embedding.corn:0 0 */2 * * ?}")
     public void reloadMetaEmbedding() {
         log.info("reload.meta.embedding start");
         try {

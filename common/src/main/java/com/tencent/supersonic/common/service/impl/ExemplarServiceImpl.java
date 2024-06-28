@@ -15,6 +15,7 @@ import dev.langchain4j.store.embedding.RetrieveQueryResult;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.core.annotation.Order;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
@@ -24,6 +25,7 @@ import java.util.List;
 
 @Service
 @Slf4j
+@Order(0)
 public class ExemplarServiceImpl implements ExemplarService, CommandLineRunner {
 
     private static final String SYS_EXEMPLAR_FILE = "s2ql_exemplar.json";
@@ -45,6 +47,14 @@ public class ExemplarServiceImpl implements ExemplarService, CommandLineRunner {
         TextSegment segment = TextSegment.from(exemplar.getQuestion(), metadata);
 
         embeddingService.addQuery(collection, Lists.newArrayList(segment));
+    }
+
+    public void removeExemplar(String collection, SqlExemplar exemplar) {
+        Metadata metadata = Metadata.from(JsonUtil.toMap(JsonUtil.toString(exemplar),
+                String.class, Object.class));
+        TextSegment segment = TextSegment.from(exemplar.getQuestion(), metadata);
+
+        embeddingService.deleteQuery(collection, Lists.newArrayList(segment));
     }
 
     public List<SqlExemplar> recallExemplars(String query, int num) {

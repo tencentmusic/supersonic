@@ -8,19 +8,19 @@ import org.springframework.context.annotation.Configuration;
 @Data
 public class CacheCommonConfig {
 
-    @Value("${cache.common.app:supersonic}")
+    @Value("${s2.cache.common.app:supersonic}")
     private String cacheCommonApp;
 
-    @Value("${cache.common.env:dev}")
+    @Value("${s2.cache.common.env:dev}")
     private String cacheCommonEnv;
 
-    @Value("${cache.common.version:0}")
+    @Value("${s2.cache.common.version:0}")
     private Integer cacheCommonVersion;
 
-    @Value("${cache.common.expire.after.write:10}")
+    @Value("${s2.cache.common.expire.after.write:10}")
     private Integer cacheCommonExpireAfterWrite;
 
-    @Value("${query.cache.enable:true}")
+    @Value("${s2.query.cache.enable:true}")
     private Boolean cacheEnable;
 
 

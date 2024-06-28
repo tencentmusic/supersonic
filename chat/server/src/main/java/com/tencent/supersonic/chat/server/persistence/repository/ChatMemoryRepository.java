@@ -1,5 +1,6 @@
 package com.tencent.supersonic.chat.server.persistence.repository;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.tencent.supersonic.chat.server.persistence.dataobject.ChatMemoryDO;
 
 import java.util.List;
@@ -11,5 +12,5 @@ public interface ChatMemoryRepository {
 
     ChatMemoryDO getMemory(Long id);
 
-    List<ChatMemoryDO> getMemories();
+    List<ChatMemoryDO> getMemories(QueryWrapper<ChatMemoryDO> queryWrapper);
 }

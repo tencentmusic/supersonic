@@ -13,38 +13,38 @@ import java.util.stream.Collectors;
 @Configuration
 public class AuthenticationConfig {
 
-    @Value("${authentication.exclude.path:XXX}")
+    @Value("${s2.authentication.exclude.path:XXX}")
     private String excludePath;
 
-    @Value("${authentication.include.path:/api}")
+    @Value("${s2.authentication.include.path:/api}")
     private String includePath;
 
-    @Value("${authentication.enable:false}")
+    @Value("${s2.authentication.enable:false}")
     private boolean enabled;
 
-    @Value("${authentication.token.default.appKey:supersonic}")
+    @Value("${s2.authentication.token.default.appKey:supersonic}")
     private String tokenDefaultAppKey;
 
-    @Value("${authentication.token.appSecret:supersonic:WIaO9YRRVt+7QtpPvyWsARFngnEcbaKBk"
+    @Value("${s2.authentication.token.appSecret:supersonic:WIaO9YRRVt+7QtpPvyWsARFngnEcbaKBk"
             + "783uGFwMrbJBaochsqCH62L4Kijcb0sZCYoSsiKGV/zPml5MnZ3uQ==}")
     private String tokenAppSecret;
 
-    @Value("${authentication.token.http.header.key:Authorization}")
+    @Value("${s2.authentication.token.http.header.key:Authorization}")
     private String tokenHttpHeaderKey;
 
-    @Value("${authentication.token.http.app.key:App-Key}")
+    @Value("${s2.authentication.token.http.app.key:App-Key}")
     private String tokenHttpHeaderAppKey;
 
-    @Value("${authentication.app.appId:appId}")
+    @Value("${s2.authentication.app.appId:appId}")
     private String appId;
 
-    @Value("${authentication.app.timestamp:timestamp}")
+    @Value("${s2.authentication.app.timestamp:timestamp}")
     private String timestamp;
 
-    @Value("${authentication.app.signature:signature}")
+    @Value("${s2.authentication.app.signature:signature}")
     private String signature;
 
-    @Value("${authentication.token.timeout:7200000}")
+    @Value("${s2.authentication.token.timeout:7200000}")
     private Long tokenTimeout;
 
     public Map<String, String> getAppKeyToSecretMap() {
