@@ -16,12 +16,6 @@ public class EmbeddingConfig {
     @Value("${s2.embedding.nResult:1}")
     private int nResult;
 
-    @Value("${s2.embedding.solved.query.collection:solved_query_collection}")
-    private String solvedQueryCollection;
-
-    @Value("${s2.embedding.solved.query.nResult:5}")
-    private int solvedQueryResultNum;
-
     @Value("${s2.embedding.metric.analyzeQuery.collection:solved_query_collection}")
     private String metricAnalyzeQueryCollection;
 
