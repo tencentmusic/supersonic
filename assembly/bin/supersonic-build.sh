@@ -44,6 +44,8 @@ function packageRelease {
   service_name=launchers-${model_name}-${MVN_VERSION}
   echo "starting packaging supersonic release"
   cd $buildDir
+  [ -d "$release_dir" ] && rm -rf "$release_dir"
+  [ -f "$release_dir.zip" ] && rm -f "$release_dir.zip"
   mkdir $release_dir
   # package webapp
   tar xvf supersonic-webapp.tar.gz
