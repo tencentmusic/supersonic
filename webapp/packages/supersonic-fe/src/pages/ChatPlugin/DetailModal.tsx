@@ -64,7 +64,7 @@ const DetailModal: React.FC<Props> = ({ detail, onSubmit, onCancel }) => {
     setDataSetDimensionList(
       dataSetIds.reduce(
         (result: Record<number, DimensionType[]>, dataSetId: number, index: number) => {
-          result[dataSetId] = res[index].data.list;
+          result[dataSetId] = res[index].data.dimensions;
           return result;
         },
         {},
@@ -183,7 +183,7 @@ const DetailModal: React.FC<Props> = ({ detail, onSubmit, onCancel }) => {
       return;
     }
     const res = await getDataSetSchema(value);
-    setDataSetDimensionList({ ...dataSetDimensionList, [value]: res.data.list });
+    setDataSetDimensionList({ ...dataSetDimensionList, [value]: res.data.dimensions });
   };
 
   const getDataSetList = () => {

@@ -98,6 +98,8 @@ const MemorySection = () => {
       dataIndex: 'status',
       valueType: 'radio',
       width: 120,
+      tooltip:
+        '若启用，将会把这条记录加入到向量库中作为样例召回供大模型参考以及作为相似问题推荐给用户',
       valueEnum: {
         [StatusEnum.PENDING]: { text: '待定' },
         [StatusEnum.ENABLED]: {
