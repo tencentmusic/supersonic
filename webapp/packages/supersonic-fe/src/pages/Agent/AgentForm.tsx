@@ -277,7 +277,7 @@ const AgentForm: React.FC<Props> = ({ editAgent, onSaveAgent, onCreateToolBtnCli
     {
       label: '记忆管理',
       key: 'memory',
-      children: <MemorySection />,
+      children: <MemorySection agentId={editAgent!.id!} />,
     },
   ];
 

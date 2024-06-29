@@ -3,16 +3,22 @@ import { EditableProTable } from '@ant-design/pro-components';
 import React, { useState } from 'react';
 import { MemoryType, ReviewEnum, StatusEnum } from './type';
 import { getMemeoryList, saveMemory } from './service';
-import { Popover, Input, Badge, Radio } from 'antd';
+import { Popover, Input, Badge, Radio, Select } from 'antd';
 import styles from './style.less';
 
-const { TextArea } = Input;
+const { TextArea, Search } = Input;
 const RadioGroup = Radio.Group;
 
-const MemorySection = () => {
+type Props = {
+  agentId: number;
+};
+
+const MemorySection = ({ agentId }: Props) => {
   const [editableKeys, setEditableRowKeys] = useState<React.Key[]>([]);
   const [dataSource, setDataSource] = useState<readonly MemoryType[]>([]);
   const [loading, setLoading] = useState(false);
+  const [filters, setFilters] = useState<any>({});
+  const { question, status, llmReviewRet, humanReviewRet } = filters;
 
   const columns: ProColumns<MemoryType>[] = [
     {
@@ -23,7 +29,7 @@ const MemorySection = () => {
     {
       title: 'Schema映射',
       dataIndex: 'dbSchema',
-      width: 300,
+      width: 220,
       valueType: 'textarea',
       renderFormItem: (_, { record }) => (
         <TextArea rows={3} disabled={record?.status === StatusEnum.ENABLED} />
@@ -32,7 +38,7 @@ const MemorySection = () => {
     {
       title: '大模型解析SQL',
       dataIndex: 's2sql',
-      width: 300,
+      width: 220,
       valueType: 'textarea',
       renderFormItem: (_, { record }) => (
         <TextArea rows={3} disabled={record?.status === StatusEnum.ENABLED} />
@@ -42,6 +48,7 @@ const MemorySection = () => {
       title: '大模型评估意见',
       dataIndex: 'llmReviewCmt',
       readonly: true,
+      width: 200,
       render: (value) => {
         return (
           <Popover trigger="hover" content={<div className={styles.commentPopover}>{value}</div>}>
@@ -155,9 +162,12 @@ const MemorySection = () => {
     },
   ];
 
-  const loadMemoryList = async () => {
+  const loadMemoryList = async ({
+    filtersValue,
+    current,
+  }: { filtersValue?: any; current?: number } = {}) => {
     setLoading(true);
-    const res = await getMemeoryList();
+    const res = await getMemeoryList(agentId, filtersValue || filters, current || 1);
     setLoading(false);
     const { list, total } = res.data;
     return {
@@ -171,25 +181,100 @@ const MemorySection = () => {
     await saveMemory(data);
   };
 
+  const onSearch = () => {
+    loadMemoryList();
+  };
+
   return (
-    <EditableProTable<MemoryType>
-      rowKey="id"
-      className={styles.memorySection}
-      recordCreatorProps={false}
-      loading={loading}
-      columns={columns}
-      request={loadMemoryList}
-      value={dataSource}
-      onChange={setDataSource}
-      pagination={{}}
-      editable={{
-        type: 'multiple',
-        editableKeys,
-        actionRender: (row, config, defaultDom) => [defaultDom.save, defaultDom.cancel],
-        onSave,
-        onChange: setEditableRowKeys,
-      }}
-    />
+    <div className={styles.memorySection}>
+      <div className={styles.filterSection}>
+        <div className={styles.filterItem}>
+          <div className={styles.filterItemTitle}>用户问题</div>
+          <Search
+            className={styles.filterItemControl}
+            placeholder="请输入用户问题"
+            value={question}
+            onChange={(e) => {
+              setFilters({ ...filters, question: e.target.value });
+            }}
+            onSearch={onSearch}
+          />
+        </div>
+        <div className={styles.filterItem}>
+          <div className={styles.filterItemTitle}>大模型评估结果</div>
+          <Select
+            className={styles.filterItemControl}
+            placeholder="请选择大模型评估结果"
+            options={[
+              { label: '正确', value: ReviewEnum.POSITIVE },
+              { label: '错误', value: ReviewEnum.NEGATIVE },
+            ]}
+            value={llmReviewRet}
+            allowClear
+            onChange={(value: ReviewEnum) => {
+              const filtersValue = { ...filters, llmReviewRet: value };
+              setFilters(filtersValue);
+              loadMemoryList({ filtersValue });
+            }}
+          />
+        </div>
+        <div className={styles.filterItem}>
+          <div className={styles.filterItemTitle}>管理员评估结果</div>
+          <Select
+            className={styles.filterItemControl}
+            placeholder="请选择管理员评估结果"
+            options={[
+              { label: '正确', value: ReviewEnum.POSITIVE },
+              { label: '错误', value: ReviewEnum.NEGATIVE },
+            ]}
+            value={humanReviewRet}
+            allowClear
+            onChange={(value: ReviewEnum) => {
+              const filtersValue = { ...filters, humanReviewRet: value };
+              setFilters(filtersValue);
+              loadMemoryList({ filtersValue });
+            }}
+          />
+        </div>
+        <div className={styles.filterItem}>
+          <div className={styles.filterItemTitle}>状态</div>
+          <Select
+            className={styles.filterItemControl}
+            placeholder="请选择状态"
+            options={[
+              { label: '待定', value: StatusEnum.PENDING },
+              { label: '已启用', value: StatusEnum.ENABLED },
+              { label: '已禁用', value: StatusEnum.DISABLED },
+            ]}
+            value={status}
+            allowClear
+            onChange={(value: ReviewEnum) => {
+              const filtersValue = { ...filters, status: value };
+              setFilters(filtersValue);
+              loadMemoryList({ filtersValue });
+            }}
+          />
+        </div>
+      </div>
+      <EditableProTable<MemoryType>
+        rowKey="id"
+        recordCreatorProps={false}
+        loading={loading}
+        columns={columns}
+        request={loadMemoryList}
+        value={dataSource}
+        onChange={setDataSource}
+        pagination={{ pageSize: 10 }}
+        sticky={{ offsetHeader: 0 }}
+        editable={{
+          type: 'multiple',
+          editableKeys,
+          actionRender: (row, config, defaultDom) => [defaultDom.save, defaultDom.cancel],
+          onSave,
+          onChange: setEditableRowKeys,
+        }}
+      />
+    </div>
   );
 };
 
