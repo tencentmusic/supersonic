@@ -8,6 +8,7 @@ import com.tencent.supersonic.chat.api.pojo.request.ChatConfigFilter;
 import com.tencent.supersonic.chat.api.pojo.response.ChatConfigResp;
 import com.tencent.supersonic.chat.api.pojo.response.ChatConfigRichResp;
 import com.tencent.supersonic.chat.server.service.ConfigService;
+import com.tencent.supersonic.headless.api.pojo.DataSetSchema;
 import com.tencent.supersonic.headless.api.pojo.response.ItemResp;
 import com.tencent.supersonic.headless.server.facade.service.SemanticLayerService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -71,6 +72,11 @@ public class ChatConfigController {
     @GetMapping("/getDomainDataSetTree")
     public List<ItemResp> getDomainDataSetTree() {
         return semanticLayerService.getDomainDataSetTree();
+    }
+
+    @GetMapping("/getDataSetSchema/{id}")
+    public DataSetSchema getDataSetSchema(@PathVariable("id") Long id) {
+        return semanticLayerService.getDataSetSchema(id);
     }
 
 }
