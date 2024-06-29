@@ -3,10 +3,8 @@ import { EditableProTable } from '@ant-design/pro-components';
 import React, { useState } from 'react';
 import { MemoryType, ReviewEnum, StatusEnum } from './type';
 import { getMemeoryList, saveMemory } from './service';
+import { Popover, Input, Badge } from 'antd';
 import styles from './style.less';
-import { Popover, Input, Tag, Badge } from 'antd';
-import { CheckCircleOutlined, ClockCircleOutlined, MinusCircleOutlined } from '@ant-design/icons';
-import { PRIMARY_COLOR } from '@/common/constants';
 
 const { TextArea } = Input;
 
