@@ -20,6 +20,7 @@ import { uuid, jsonParse, encryptPassword, decryptPassword } from '@/utils/utils
 import ToolsSection from './ToolsSection';
 import globalStyles from '@/global.less';
 import { testLLMConn } from './service';
+import MemorySection from './MemorySection';
 
 const FormItem = Form.Item;
 const { TextArea } = Input;
@@ -273,6 +274,11 @@ const AgentForm: React.FC<Props> = ({ editAgent, onSaveAgent, onCreateToolBtnCli
       key: 'tools',
       children: <ToolsSection currentAgent={editAgent} onSaveAgent={onSaveAgent} />,
     },
+    {
+      label: '记忆管理',
+      key: 'memory',
+      children: <MemorySection />,
+    },
   ];
 
   return (
@@ -288,15 +294,17 @@ const AgentForm: React.FC<Props> = ({ editAgent, onSaveAgent, onCreateToolBtnCli
       <Tabs
         tabBarExtraContent={
           <Space>
-            <Button
-              type="primary"
-              loading={saveLoading}
-              onClick={() => {
-                onOk();
-              }}
-            >
-              保 存
-            </Button>
+            {activeKey !== 'memory' && (
+              <Button
+                type="primary"
+                loading={saveLoading}
+                onClick={() => {
+                  onOk();
+                }}
+              >
+                保 存
+              </Button>
+            )}
             {activeKey === 'tools' && (
               <Button
                 type="primary"
