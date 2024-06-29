@@ -3,10 +3,11 @@ import { EditableProTable } from '@ant-design/pro-components';
 import React, { useState } from 'react';
 import { MemoryType, ReviewEnum, StatusEnum } from './type';
 import { getMemeoryList, saveMemory } from './service';
-import { Popover, Input, Badge } from 'antd';
+import { Popover, Input, Badge, Radio } from 'antd';
 import styles from './style.less';
 
 const { TextArea } = Input;
+const RadioGroup = Radio.Group;
 
 const MemorySection = () => {
   const [editableKeys, setEditableRowKeys] = useState<React.Key[]>([]);
@@ -24,12 +25,18 @@ const MemorySection = () => {
       dataIndex: 'dbSchema',
       width: 300,
       valueType: 'textarea',
+      renderFormItem: (_, { record }) => (
+        <TextArea rows={3} disabled={record?.status === StatusEnum.ENABLED} />
+      ),
     },
     {
       title: '大模型解析SQL',
       dataIndex: 's2sql',
       width: 300,
       valueType: 'textarea',
+      renderFormItem: (_, { record }) => (
+        <TextArea rows={3} disabled={record?.status === StatusEnum.ENABLED} />
+      ),
     },
     {
       title: '大模型评估意见',
@@ -64,7 +71,9 @@ const MemorySection = () => {
       title: '管理员评估意见',
       dataIndex: 'humanReviewCmt',
       valueType: 'textarea',
-      renderFormItem: () => <TextArea rows={12} />,
+      renderFormItem: (_, { record }) => (
+        <TextArea rows={12} disabled={record?.status === StatusEnum.ENABLED} />
+      ),
       render: (value) => {
         return value === '-' ? (
           '-'
@@ -81,6 +90,15 @@ const MemorySection = () => {
       dataIndex: 'humanReviewRet',
       width: 150,
       valueType: 'radio',
+      renderFormItem: (_, { record }) => (
+        <RadioGroup
+          disabled={record?.status === StatusEnum.ENABLED}
+          options={[
+            { label: '正确', value: ReviewEnum.POSITIVE },
+            { label: '错误', value: ReviewEnum.NEGATIVE },
+          ]}
+        />
+      ),
       valueEnum: {
         [ReviewEnum.POSITIVE]: {
           text: '正确',
@@ -98,6 +116,8 @@ const MemorySection = () => {
       dataIndex: 'status',
       valueType: 'radio',
       width: 120,
+      tooltip:
+        '若启用，将会把这条记录加入到向量库中作为样例召回供大模型参考以及作为相似问题推荐给用户',
       valueEnum: {
         [StatusEnum.PENDING]: { text: '待定' },
         [StatusEnum.ENABLED]: {
