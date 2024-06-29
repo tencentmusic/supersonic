@@ -6,10 +6,8 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.tencent.supersonic.chat.api.pojo.enums.MemoryReviewResult;
 import com.tencent.supersonic.chat.api.pojo.enums.MemoryStatus;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 import java.util.Date;
@@ -17,8 +15,6 @@ import java.util.Date;
 @Data
 @Builder
 @ToString
-@AllArgsConstructor
-@NoArgsConstructor
 @TableName("s2_chat_memory")
 public class ChatMemoryDO {
     @TableId(type = IdType.AUTO)

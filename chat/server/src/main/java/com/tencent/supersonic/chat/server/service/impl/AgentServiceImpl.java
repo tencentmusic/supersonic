@@ -96,7 +96,11 @@ public class AgentServiceImpl extends ServiceImpl<AgentDOMapper, AgentDO>
             if (memoriesExisted.contains(example)) {
                 continue;
             }
-            chatService.parseAndExecute(-1, agent.getId(), example);
+            try {
+                chatService.parseAndExecute(-1, agent.getId(), example);
+            } catch (Exception e) {
+                log.warn("agent:{} example execute failed:{}", agent.getName(), example);
+            }
         }
     }
 

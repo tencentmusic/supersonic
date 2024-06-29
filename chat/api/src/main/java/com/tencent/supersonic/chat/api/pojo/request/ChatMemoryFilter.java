@@ -15,6 +15,8 @@ import java.util.List;
 @NoArgsConstructor
 public class ChatMemoryFilter {
 
+    private Integer agentId;
+
     private String question;
 
     private List<String> questions;

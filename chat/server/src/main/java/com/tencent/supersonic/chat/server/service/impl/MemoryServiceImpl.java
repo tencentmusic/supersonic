@@ -3,14 +3,17 @@ package com.tencent.supersonic.chat.server.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.chat.api.pojo.enums.MemoryStatus;
 import com.tencent.supersonic.chat.api.pojo.request.ChatMemoryFilter;
+import com.tencent.supersonic.chat.api.pojo.request.ChatMemoryUpdateReq;
 import com.tencent.supersonic.chat.api.pojo.request.PageMemoryReq;
 import com.tencent.supersonic.chat.server.persistence.dataobject.ChatMemoryDO;
 import com.tencent.supersonic.chat.server.persistence.repository.ChatMemoryRepository;
 import com.tencent.supersonic.chat.server.service.MemoryService;
 import com.tencent.supersonic.common.pojo.SqlExemplar;
 import com.tencent.supersonic.common.service.ExemplarService;
+import com.tencent.supersonic.common.util.BeanMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -33,12 +36,21 @@ public class MemoryServiceImpl implements MemoryService {
     }
 
     @Override
-    public void updateMemory(ChatMemoryDO memory) {
-        if (MemoryStatus.ENABLED.equals(memory.getStatus())) {
-            enableMemory(memory);
-        } else if (MemoryStatus.DISABLED.equals(memory.getStatus())) {
-            disableMemory(memory);
+    public void updateMemory(ChatMemoryUpdateReq chatMemoryUpdateReq, User user) {
+        chatMemoryUpdateReq.updatedBy(user.getName());
+        ChatMemoryDO chatMemoryDO = chatMemoryRepository.getMemory(chatMemoryUpdateReq.getId());
+        boolean hadEnabled = MemoryStatus.ENABLED.equals(chatMemoryDO.getStatus());
+        BeanMapper.mapper(chatMemoryUpdateReq, chatMemoryDO);
+        if (MemoryStatus.ENABLED.equals(chatMemoryUpdateReq.getStatus()) && !hadEnabled) {
+            enableMemory(chatMemoryDO);
+        } else if (MemoryStatus.DISABLED.equals(chatMemoryUpdateReq.getStatus()) && hadEnabled) {
+            disableMemory(chatMemoryDO);
         }
+        updateMemory(chatMemoryDO);
+    }
+
+    @Override
+    public void updateMemory(ChatMemoryDO memory) {
         chatMemoryRepository.updateMemory(memory);
     }
 
@@ -52,6 +64,9 @@ public class MemoryServiceImpl implements MemoryService {
     @Override
     public List<ChatMemoryDO> getMemories(ChatMemoryFilter chatMemoryFilter) {
         QueryWrapper<ChatMemoryDO> queryWrapper = new QueryWrapper<>();
+        if (chatMemoryFilter.getAgentId() != null) {
+            queryWrapper.lambda().eq(ChatMemoryDO::getAgentId, chatMemoryFilter.getAgentId());
+        }
         if (StringUtils.isNotBlank(chatMemoryFilter.getQuestion())) {
             queryWrapper.lambda().like(ChatMemoryDO::getQuestion, chatMemoryFilter.getQuestion());
         }
