@@ -42,12 +42,14 @@ export function testLLMConn(data: any) {
   });
 }
 
-export function getMemeoryList() {
+export function getMemeoryList(agentId: number, chatMemoryFilter: any, current: number) {
   return request<Result<{ list: MetricType[] }>>('/api/chat/memory/pageMemories', {
     method: 'POST',
     data: {
-      current: 1,
-      pageSize: 2000,
+      agentId,
+      chatMemoryFilter,
+      current,
+      pageSize: 10,
     },
   });
 }
