@@ -94,8 +94,8 @@ CREATE TABLE IF NOT EXISTS `s2_chat_memory` (
     `llm_comment`   TEXT,
     `human_review` char(10) ,
     `human_comment` TEXT    ,
-    `created_at` TIMESTAMP     ,
-    `updated_at` TIMESTAMP     ,
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP  ,
+    `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP ,
     `created_by` varchar(100)  ,
     `updated_by` varchar(100)  ,
     PRIMARY KEY (`id`)
