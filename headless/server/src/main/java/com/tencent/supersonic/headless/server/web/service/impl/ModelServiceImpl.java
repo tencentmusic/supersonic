@@ -289,17 +289,16 @@ public class ModelServiceImpl implements ModelService {
 
     public List<ModelResp> getModelRespAuthInheritDomain(User user, Long domainId, AuthType authType) {
         List<Long> domainIds = domainService.getDomainAuthSet(user, authType)
-                .stream().map(DomainResp::getId)
+                .stream().filter(domainResp -> {
+                    if (domainId == null) {
+                        return true;
+                    } else {
+                        return domainId.equals(domainResp.getId()) || domainId.equals(domainResp.getParentId());
+                    }
+                }).map(DomainResp::getId)
                 .collect(Collectors.toList());
         if (CollectionUtils.isEmpty(domainIds)) {
             return Lists.newArrayList();
-        }
-        if (domainId != null) {
-            if (domainIds.contains(domainId)) {
-                domainIds = Lists.newArrayList(domainId);
-            } else {
-                return Lists.newArrayList();
-            }
         }
         ModelFilter modelFilter = new ModelFilter();
         modelFilter.setIncludesDetail(false);
