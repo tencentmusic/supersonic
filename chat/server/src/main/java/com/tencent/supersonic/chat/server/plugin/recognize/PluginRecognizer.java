@@ -47,7 +47,7 @@ public abstract class PluginRecognizer {
                            PluginRecallResult pluginRecallResult) {
         ChatPlugin plugin = pluginRecallResult.getPlugin();
         Set<Long> dataSetIds = pluginRecallResult.getDataSetIds();
-        if (plugin.isContainsAllModel()) {
+        if (plugin.isContainsAllDataSet()) {
             dataSetIds = Sets.newHashSet(-1L);
         }
         for (Long dataSetId : dataSetIds) {

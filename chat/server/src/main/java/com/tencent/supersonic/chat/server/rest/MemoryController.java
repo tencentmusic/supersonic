@@ -3,6 +3,7 @@ package com.tencent.supersonic.chat.server.rest;
 import com.github.pagehelper.PageInfo;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
+import com.tencent.supersonic.chat.api.pojo.request.ChatMemoryUpdateReq;
 import com.tencent.supersonic.chat.api.pojo.request.PageMemoryReq;
 import com.tencent.supersonic.chat.server.persistence.dataobject.ChatMemoryDO;
 import com.tencent.supersonic.chat.server.service.MemoryService;
@@ -14,7 +15,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.Date;
 
 @RestController
 @RequestMapping({"/api/chat/memory"})
@@ -23,27 +23,13 @@ public class MemoryController {
     @Autowired
     private MemoryService memoryService;
 
-    @PostMapping("/createMemory")
-    public Boolean createMemory(@RequestBody ChatMemoryDO memory,
-                                HttpServletRequest request,
-                                HttpServletResponse response) {
-        User user = UserHolder.findUser(request, response);
-        memory.setCreatedBy(user.getName());
-        memory.setUpdatedBy(user.getName());
-        memory.setCreatedAt(new Date());
-        memory.setUpdatedAt(new Date());
-        memoryService.createMemory(memory);
-        return true;
-    }
-
     @PostMapping("/updateMemory")
-    public void updateMemory(ChatMemoryDO memory,
+    public Boolean updateMemory(@RequestBody ChatMemoryUpdateReq chatMemoryUpdateReq,
                              HttpServletRequest request,
                              HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
-        memory.setUpdatedBy(user.getName());
-        memory.setUpdatedAt(new Date());
-        memoryService.updateMemory(memory);
+        memoryService.updateMemory(chatMemoryUpdateReq, user);
+        return true;
     }
 
     @RequestMapping("/pageMemories")

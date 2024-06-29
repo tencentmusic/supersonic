@@ -50,7 +50,7 @@ public class ChatPlugin extends RecordInfo {
         return Lists.newArrayList();
     }
 
-    public boolean isContainsAllModel() {
+    public boolean isContainsAllDataSet() {
         return CollectionUtils.isNotEmpty(dataSetList) && dataSetList.contains(-1L);
     }
 
