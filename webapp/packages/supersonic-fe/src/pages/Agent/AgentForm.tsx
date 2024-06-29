@@ -292,15 +292,17 @@ const AgentForm: React.FC<Props> = ({ editAgent, onSaveAgent, onCreateToolBtnCli
       <Tabs
         tabBarExtraContent={
           <Space>
-            <Button
-              type="primary"
-              loading={saveLoading}
-              onClick={() => {
-                onOk();
-              }}
-            >
-              保 存
-            </Button>
+            {activeKey !== 'memory' && (
+              <Button
+                type="primary"
+                loading={saveLoading}
+                onClick={() => {
+                  onOk();
+                }}
+              >
+                保 存
+              </Button>
+            )}
             {activeKey === 'tools' && (
               <Button
                 type="primary"

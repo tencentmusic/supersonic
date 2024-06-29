@@ -112,7 +112,7 @@
             overflow: hidden;
             font-size: 12px;
             margin-top: 4px;
-            color: var(--text-color-third)
+            color: var(--text-color-third);
           }
         }
       }
@@ -315,4 +315,25 @@
   display: flex;
   align-items: center;
   column-gap: 12px;
+}
+
+.memorySection {
+  margin-top: 10px;
+  margin-bottom: 30px;
+
+  :global {
+    .ant-pro-card-body {
+      padding: 0;
+    }
+  }
+
+  .reviewComment {
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+  }
+}
+
+.commentPopover {
+  width: 400px;
 }
