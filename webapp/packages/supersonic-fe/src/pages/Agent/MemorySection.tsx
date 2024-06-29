@@ -1,139 +1,129 @@
 import type { ProColumns } from '@ant-design/pro-components';
-import { EditableProTable, ProCard, ProFormField, ProFormRadio } from '@ant-design/pro-components';
+import { EditableProTable } from '@ant-design/pro-components';
 import React, { useState } from 'react';
+import { MemoryType, ReviewEnum, StatusEnum } from './type';
+import { getMemeoryList, saveMemory } from './service';
+import styles from './style.less';
+import { Popover, Input, Tag, Badge } from 'antd';
+import { CheckCircleOutlined, ClockCircleOutlined, MinusCircleOutlined } from '@ant-design/icons';
+import { PRIMARY_COLOR } from '@/common/constants';
 
-const waitTime = (time: number = 100) => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve(true);
-    }, time);
-  });
-};
-
-type DataSourceType = {
-  id: React.Key;
-  title?: string;
-  readonly?: string;
-  decs?: string;
-  state?: string;
-  created_at?: number;
-  update_at?: number;
-  children?: DataSourceType[];
-};
-
-const defaultData: DataSourceType[] = [
-  {
-    id: 624748504,
-    title: '活动名称一',
-    readonly: '活动名称一',
-    decs: '这个活动真好玩',
-    state: 'open',
-    created_at: 1590486176000,
-    update_at: 1590486176000,
-  },
-  {
-    id: 624691229,
-    title: '活动名称二',
-    readonly: '活动名称二',
-    decs: '这个活动真好玩',
-    state: 'closed',
-    created_at: 1590481162000,
-    update_at: 1590481162000,
-  },
-];
+const { TextArea } = Input;
 
 const MemorySection = () => {
   const [editableKeys, setEditableRowKeys] = useState<React.Key[]>([]);
-  const [dataSource, setDataSource] = useState<readonly DataSourceType[]>([]);
+  const [dataSource, setDataSource] = useState<readonly MemoryType[]>([]);
+  const [loading, setLoading] = useState(false);
 
-  const columns: ProColumns<DataSourceType>[] = [
+  const columns: ProColumns<MemoryType>[] = [
     {
       title: '用户问题',
       dataIndex: 'question',
-      formItemProps: (form, { rowIndex }) => {
-        return {
-          rules: rowIndex > 1 ? [{ required: true, message: '此项为必填项' }] : [],
-        };
-      },
+      readonly: true,
     },
     {
       title: 'Schema映射',
-      dataIndex: 'db_schema',
+      dataIndex: 'dbSchema',
+      width: 300,
+      valueType: 'textarea',
     },
     {
       title: '大模型解析SQL',
-      dataIndex: 's2_sql',
+      dataIndex: 's2sql',
+      width: 300,
+      valueType: 'textarea',
     },
     {
-      title: '状态',
-      key: 'status',
-      dataIndex: 'status',
-      valueType: 'select',
-      valueEnum: {
-        all: { text: '全部', status: 'Default' },
-        open: {
-          text: '未解决',
-          status: 'Error',
-        },
-        closed: {
-          text: '已解决',
-          status: 'Success',
-        },
+      title: '大模型评估意见',
+      dataIndex: 'llmReviewCmt',
+      readonly: true,
+      render: (value) => {
+        return (
+          <Popover trigger="hover" content={<div className={styles.commentPopover}>{value}</div>}>
+            <div className={styles.reviewComment}>{value}</div>
+          </Popover>
+        );
       },
     },
     {
       title: '大模型评估结果',
-      key: 'llm_review',
-      dataIndex: 'llm_review',
+      key: 'llmReviewRet',
+      dataIndex: 'llmReviewRet',
       readonly: true,
-    },
-    {
-      title: '大模型评估意见',
-      dataIndex: 'llm_comment',
-      readonly: true,
-    },
-    {
-      title: '管理员评估结果',
-      key: 'human_review',
-      dataIndex: 'human_review',
-      valueType: 'select',
+      width: 150,
       valueEnum: {
-        all: { text: '全部', status: 'Default' },
-        open: {
-          text: '未解决',
-          status: 'Error',
-        },
-        closed: {
-          text: '已解决',
+        [ReviewEnum.POSITIVE]: {
+          text: '正确',
           status: 'Success',
+        },
+        [ReviewEnum.NEGATIVE]: {
+          text: '错误',
+          status: 'Error',
         },
       },
     },
     {
       title: '管理员评估意见',
-      dataIndex: 'human_comment',
+      dataIndex: 'humanReviewCmt',
+      valueType: 'textarea',
+      renderFormItem: () => <TextArea rows={12} />,
+      render: (value) => {
+        return value === '-' ? (
+          '-'
+        ) : (
+          <Popover trigger="hover" content={<div className={styles.commentPopover}>{value}</div>}>
+            <div className={styles.reviewComment}>{value}</div>
+          </Popover>
+        );
+      },
+    },
+    {
+      title: '管理员评估结果',
+      key: 'humanReviewRet',
+      dataIndex: 'humanReviewRet',
+      width: 150,
+      valueType: 'radio',
+      valueEnum: {
+        [ReviewEnum.POSITIVE]: {
+          text: '正确',
+          status: 'Success',
+        },
+        [ReviewEnum.NEGATIVE]: {
+          text: '错误',
+          status: 'Error',
+        },
+      },
     },
     {
       title: '状态',
       key: 'status',
       dataIndex: 'status',
-      valueType: 'select',
+      valueType: 'radio',
+      width: 120,
       valueEnum: {
-        all: { text: '全部', status: 'Default' },
-        open: {
-          text: '未解决',
-          status: 'Error',
+        [StatusEnum.PENDING]: { text: '待定' },
+        [StatusEnum.ENABLED]: {
+          text: '启用',
         },
-        closed: {
-          text: '已解决',
-          status: 'Success',
+        [StatusEnum.DISABLED]: {
+          text: '禁用',
         },
+      },
+      render: (_, record) => {
+        const { status } = record;
+        if (status === StatusEnum.PENDING) {
+          return <Badge status="default" text="待定" />;
+        } else if (status === StatusEnum.ENABLED) {
+          return <Badge status="success" text="已启用" />;
+        } else {
+          return <Badge status="error" text="已禁用" />;
+        }
       },
     },
     {
       title: '操作',
       valueType: 'option',
-      width: 200,
+      width: 150,
       render: (text, record, _, action) => [
         <a
           key="editable"
@@ -143,42 +133,42 @@ const MemorySection = () => {
         >
           编辑
         </a>,
-        <a
-          key="delete"
-          onClick={() => {
-            setDataSource(dataSource.filter((item) => item.id !== record.id));
-          }}
-        >
-          删除
-        </a>,
       ],
     },
   ];
 
+  const loadMemoryList = async () => {
+    setLoading(true);
+    const res = await getMemeoryList();
+    setLoading(false);
+    const { list, total } = res.data;
+    return {
+      data: list,
+      total: total,
+      success: true,
+    };
+  };
+
+  const onSave = async (_: any, data: any) => {
+    await saveMemory(data);
+  };
+
   return (
-    <EditableProTable<DataSourceType>
+    <EditableProTable<MemoryType>
       rowKey="id"
-      maxLength={5}
-      scroll={{
-        x: 960,
-      }}
+      className={styles.memorySection}
       recordCreatorProps={false}
-      loading={false}
+      loading={loading}
       columns={columns}
-      request={async () => ({
-        data: defaultData,
-        total: 3,
-        success: true,
-      })}
+      request={loadMemoryList}
       value={dataSource}
       onChange={setDataSource}
+      pagination={{}}
       editable={{
         type: 'multiple',
         editableKeys,
-        onSave: async (rowKey, data, row) => {
-          console.log(rowKey, data, row);
-          await waitTime(2000);
-        },
+        actionRender: (row, config, defaultDom) => [defaultDom.save, defaultDom.cancel],
+        onSave,
         onChange: setEditableRowKeys,
       }}
     />
