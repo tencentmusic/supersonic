@@ -10,7 +10,7 @@ const { TextArea, Search } = Input;
 const RadioGroup = Radio.Group;
 
 type Props = {
-  agentId: number;
+  agentId?: number;
 };
 
 const MemorySection = ({ agentId }: Props) => {
@@ -166,6 +166,13 @@ const MemorySection = ({ agentId }: Props) => {
     filtersValue,
     current,
   }: { filtersValue?: any; current?: number } = {}) => {
+    if (!agentId) {
+      return {
+        data: [],
+        total: 0,
+        success: true,
+      };
+    }
     setLoading(true);
     const res = await getMemeoryList(agentId, filtersValue || filters, current || 1);
     setLoading(false);
