@@ -1239,7 +1239,20 @@ INSERT INTO s2_authority (id, authority, authority_entity_id, authority_entity_t
 (2, 2, 'entity2', 2, 2, 2, 2, 1, '2024-06-14 10:15:00', '2024-06-14 10:15:00', 'admin', 'admin')
 ;
 
--- 初始化用户与角色数据
+-- 新增角色，默认角色名为Agent助手名
+INSERT INTO s2_role (
+    name,
+    alias,
+    tenant_id,
+    create_time,
+    update_time,
+    create_by,
+    update_by
+)VALUES
+    ('算指标', 'Agent', 1, CURRENT_TIME(), CURRENT_TIME(), 'admin', 'admin'),
+    ('圈选', 'Agent', 1, CURRENT_TIME(), CURRENT_TIME(), 'admin', 'admin');
+
+-- 将用户和角色关联
 INSERT INTO s2_user_role_rela (
     role_id, user_id, role_type, tenant_id
 )
@@ -1256,7 +1269,7 @@ WHERE
     u.name IN ('zhaodongsheng', 'jianghao')
   AND r.name IN ('算指标', '圈选');
 
--- 给角色授权
+-- 给角色授权助手
 insert into s2_authority(
     authority,
     authority_entity_id,

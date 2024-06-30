@@ -47,11 +47,11 @@ public class PromptEnhancer {
                 + "for what tables might be available.\n \n");
         ddlInfo.append("#DDLInfo: \n");
         ddlInfo.append("CREATE TABLE " + modelName + " (\n");
-        for (String key : llmReq.getSchema().getFieldNameList()) {
+        for (String key : dataTypeEnumsMap.keySet()) {
             if (null != dataTypeEnumsMap.get(key)) {
                 ddlInfo.append(key + " " + dataTypeEnumsMap.get(key).name() + ",\n");
             } else {
-                ddlInfo.append(key + " " + "STRING" + ",\n");
+                ddlInfo.append(key + " " + "VARCHAR" + ",\n");
             }
         }
         ddlInfo.append(");\n");
