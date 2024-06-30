@@ -19,7 +19,7 @@ services:
       - 8.8.4.4
 
   db_init:
-    image: supersonic:0.9.2-SNAPSHOT
+    image: supersonicbi/supersonic:0.9.2-SNAPSHOT
     container_name: supersonic_db_init
     depends_on:
       - mysql
@@ -51,7 +51,7 @@ services:
       - 8.8.4.4
 
   java_backend:
-    image: supersonic:0.9.2-SNAPSHOT
+    image: supersonicbi/supersonic:0.9.2-SNAPSHOT
     container_name: supersonic_java_backend
     environment:
       DB_HOST: supersonic_mysql
