@@ -28,7 +28,7 @@ import java.util.List;
 @Order(0)
 public class ExemplarServiceImpl implements ExemplarService, CommandLineRunner {
 
-    private static final String SYS_EXEMPLAR_FILE = "s2ql_exemplar.json";
+    private static final String SYS_EXEMPLAR_FILE = "s2-exemplar.json";
 
     private TypeReference<List<SqlExemplar>> valueTypeRef = new TypeReference<List<SqlExemplar>>() {
     };
