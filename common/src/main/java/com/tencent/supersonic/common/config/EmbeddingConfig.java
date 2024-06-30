@@ -7,6 +7,10 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @Data
 public class EmbeddingConfig {
+
+    @Value("${s2.embedding.memory.collection.prefix:memory_}")
+    private String memoryCollectionPrefix;
+
     @Value("${s2.embedding.preset.collection:preset_query_collection}")
     private String presetCollection;
 
@@ -24,5 +28,9 @@ public class EmbeddingConfig {
 
     @Value("${s2.embedding.metric.analyzeQuery.nResult:5}")
     private int metricAnalyzeQueryResultNum;
+
+    public String getMemoryCollectionName(Integer agentId) {
+        return memoryCollectionPrefix + agentId;
+    }
 
 }

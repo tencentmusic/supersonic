@@ -42,7 +42,7 @@ services:
       - 8.8.4.4
 
   chroma:
-    image: chromadb/chroma:latest
+    image: chromadb/chroma:0.5.3
     container_name: supersonic_chroma
     ports:
       - "8000:8000"

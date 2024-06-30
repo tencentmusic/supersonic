@@ -11,15 +11,15 @@ import com.tencent.supersonic.chat.api.pojo.request.PageMemoryReq;
 import com.tencent.supersonic.chat.server.persistence.dataobject.ChatMemoryDO;
 import com.tencent.supersonic.chat.server.persistence.repository.ChatMemoryRepository;
 import com.tencent.supersonic.chat.server.service.MemoryService;
+import com.tencent.supersonic.common.config.EmbeddingConfig;
 import com.tencent.supersonic.common.pojo.SqlExemplar;
 import com.tencent.supersonic.common.service.ExemplarService;
 import com.tencent.supersonic.common.util.BeanMapper;
+import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
-
-import java.util.List;
 
 @Service
 public class MemoryServiceImpl implements MemoryService {
@@ -29,6 +29,9 @@ public class MemoryServiceImpl implements MemoryService {
 
     @Autowired
     private ExemplarService exemplarService;
+
+    @Autowired
+    private EmbeddingConfig embeddingConfig;
 
     @Override
     public void createMemory(ChatMemoryDO memory) {
@@ -94,7 +97,7 @@ public class MemoryServiceImpl implements MemoryService {
     }
 
     private void enableMemory(ChatMemoryDO memory) {
-        exemplarService.storeExemplar(memory.getAgentId().toString(),
+        exemplarService.storeExemplar(embeddingConfig.getMemoryCollectionName(memory.getAgentId()),
                 SqlExemplar.builder()
                         .question(memory.getQuestion())
                         .dbSchema(memory.getDbSchema())
@@ -103,7 +106,7 @@ public class MemoryServiceImpl implements MemoryService {
     }
 
     private void disableMemory(ChatMemoryDO memory) {
-        exemplarService.removeExemplar(memory.getAgentId().toString(),
+        exemplarService.removeExemplar(embeddingConfig.getMemoryCollectionName(memory.getAgentId()),
                 SqlExemplar.builder()
                         .question(memory.getQuestion())
                         .dbSchema(memory.getDbSchema())
