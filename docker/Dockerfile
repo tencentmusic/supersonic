@@ -7,6 +7,11 @@ WORKDIR /usr/src/app
 # Argument to pass in the supersonic version at build time
 ARG SUPERSONIC_VERSION
 
+# Install necessary packages, including MySQL client
+RUN apt-get update && \
+    apt-get install -y mysql-client unzip && \
+    rm -rf /var/lib/apt/lists/*
+
 # Copy the supersonic standalone zip file into the container
 COPY assembly/build/supersonic-standalone-${SUPERSONIC_VERSION}.zip .
 
