@@ -135,7 +135,7 @@
     "umi-presets-pro": "2.0.2"
   },
   "engines": {
-    "node": ">=16.0.0 <20.0.0"
+    "node": ">=16.0.0"
   },
   "__npminstall_done": false
 }
