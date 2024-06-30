@@ -7,6 +7,11 @@ WORKDIR /usr/src/app
 # Argument to pass in the supersonic version at build time
 ARG SUPERSONIC_VERSION
 
+# Install necessary packages, including MySQL client
+RUN apt-get update && \
+    apt-get install -y default-mysql-client unzip && \
+    rm -rf /var/lib/apt/lists/*
+
 # Install the vim editor.
 RUN apt-get update && \
     apt-get install -y vim && \
