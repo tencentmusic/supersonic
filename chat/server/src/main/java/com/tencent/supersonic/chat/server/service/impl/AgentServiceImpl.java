@@ -89,7 +89,8 @@ public class AgentServiceImpl extends ServiceImpl<AgentDOMapper, AgentDO>
             return;
         }
         List<String> examples = agent.getExamples();
-        ChatMemoryFilter chatMemoryFilter = ChatMemoryFilter.builder().questions(examples).build();
+        ChatMemoryFilter chatMemoryFilter = ChatMemoryFilter.builder().agentId(agent.getId())
+                .questions(examples).build();
         List<String> memoriesExisted = memoryService.getMemories(chatMemoryFilter)
                 .stream().map(ChatMemoryDO::getQuestion).collect(Collectors.toList());
         for (String example : examples) {
