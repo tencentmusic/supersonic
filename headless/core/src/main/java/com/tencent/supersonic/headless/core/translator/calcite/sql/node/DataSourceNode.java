@@ -226,14 +226,14 @@ public class DataSourceNode extends SemanticNode {
             boolean isAllMatch = checkMatch(sourceMeasure, queryDimension, measures, dimension, metricCommand, scope,
                     engineType);
             if (isAllMatch) {
-                log.info("baseDataSource  match all ");
+                log.debug("baseDataSource  match all ");
                 return dataSources;
             }
             // find all dataSource has the same identifiers
             List<DataSource> linkDataSources = getLinkDataSourcesByJoinRelation(queryDimension, measures,
                     baseDataSource, schema);
             if (CollectionUtils.isEmpty(linkDataSources)) {
-                log.info("baseDataSource  get by identifiers ");
+                log.debug("baseDataSource get by identifiers ");
                 Set<String> baseIdentifiers = baseDataSource.getIdentifiers().stream().map(i -> i.getName())
                         .collect(Collectors.toSet());
                 if (baseIdentifiers.isEmpty()) {
@@ -279,7 +279,7 @@ public class DataSourceNode extends SemanticNode {
 
         dimension.retainAll(queryDimension);
         if (dimension.size() < queryDimension.size()) {
-            log.info("baseDataSource not match all dimension");
+            log.debug("baseDataSource not match all dimension");
             isAllMatch = false;
         }
         queryDimension.removeAll(dimension);

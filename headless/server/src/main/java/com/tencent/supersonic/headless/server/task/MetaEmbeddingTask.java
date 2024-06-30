@@ -45,11 +45,12 @@ public class MetaEmbeddingTask implements CommandLineRunner {
 
     private void embeddingStorePersistFile() {
         if (embeddingStoreFactory instanceof InMemoryEmbeddingStoreFactory) {
-            log.info("start persistFile");
+            long startTime = System.currentTimeMillis();
             InMemoryEmbeddingStoreFactory inMemoryFactory =
                     (InMemoryEmbeddingStoreFactory) embeddingStoreFactory;
             inMemoryFactory.persistFile();
-            log.info("end persistFile");
+            long duration = System.currentTimeMillis() - startTime;
+            log.info("Embedding file has been regularly persisted in {} milliseconds", duration);
         }
     }
 
@@ -63,7 +64,7 @@ public class MetaEmbeddingTask implements CommandLineRunner {
      */
     @Scheduled(cron = "${s2.reload.meta.embedding.corn:0 0 */2 * * ?}")
     public void reloadMetaEmbedding() {
-        log.info("reload.meta.embedding start");
+        long startTime = System.currentTimeMillis();
         try {
             List<DataItem> metricDataItems = metricService.getDataEvent().getDataItems();
 
@@ -74,10 +75,10 @@ public class MetaEmbeddingTask implements CommandLineRunner {
             embeddingService.addQuery(embeddingConfig.getMetaCollectionName(),
                     TextSegmentConvert.convertToEmbedding(dimensionDataItems));
         } catch (Exception e) {
-            log.error("reload.meta.embedding error", e);
+            log.error("Failed to reload meta embedding.", e);
         }
-
-        log.info("reload.meta.embedding end");
+        long duration = System.currentTimeMillis() - startTime;
+        log.info("Embedding has been regularly reloaded  in {} milliseconds", duration);
     }
 
     @Override

@@ -110,7 +110,7 @@ public class S2SemanticLayerService implements SemanticLayerService {
             //2.query from cache
             QueryCache queryCache = ComponentFactory.getQueryCache();
             String cacheKey = queryCache.getCacheKey(queryReq);
-            log.info("cacheKey:{}", cacheKey);
+            log.debug("cacheKey:{}", cacheKey);
             Object query = queryCache.query(queryReq, cacheKey);
             if (Objects.nonNull(query)) {
                 SemanticQueryResp queryResp = (SemanticQueryResp) query;

@@ -75,7 +75,7 @@ public class RetrieveServiceImpl implements RetrieveService {
                 dataSetService.getModelIdToDataSetIds(new ArrayList<>(dataSetIdToName.keySet()), User.getFakeUser());
         // 2.detect by segment
         List<S2Term> originals = knowledgeBaseService.getTerms(queryText, modelIdToDataSetIds);
-        log.info("hanlp parse result: {}", originals);
+        log.debug("hanlp parse result: {}", originals);
         Set<Long> dataSetIds = queryReq.getDataSetIds();
 
         QueryContext queryContext = new QueryContext();
@@ -100,7 +100,7 @@ public class RetrieveServiceImpl implements RetrieveService {
             return Lists.newArrayList();
         }
         Map.Entry<MatchText, List<HanlpMapResult>> searchTextEntry = mostSimilarSearchResult.get();
-        log.info("searchTextEntry:{},queryReq:{}", searchTextEntry, queryReq);
+        log.debug("searchTextEntry:{},queryReq:{}", searchTextEntry, queryReq);
 
         Set<SearchResult> searchResults = new LinkedHashSet();
         DataSetInfoStat dataSetInfoStat = NatureHelper.getDataSetStat(originals);
@@ -273,7 +273,7 @@ public class RetrieveServiceImpl implements RetrieveService {
                                              Map.Entry<MatchText, List<HanlpMapResult>> searchTextEntry,
                                              Set<SearchResult> searchResults) {
         boolean existMetric = false;
-        log.info("searchMetricAndDimension searchTextEntry:{}", searchTextEntry);
+        log.debug("searchMetricAndDimension searchTextEntry:{}", searchTextEntry);
         MatchText matchText = searchTextEntry.getKey();
         List<HanlpMapResult> hanlpMapResults = searchTextEntry.getValue();
 
@@ -301,7 +301,7 @@ public class RetrieveServiceImpl implements RetrieveService {
                 //visibility to filter  metrics
                 searchResults.add(searchResult);
             }
-            log.info("parseResult:{},dimensionMetricClassIds:{},possibleDataSets:{}", hanlpMapResult,
+            log.debug("parseResult:{},dimensionMetricClassIds:{},possibleDataSets:{}", hanlpMapResult,
                     dimensionMetricClassIds, possibleDataSets);
         }
         log.info("searchMetricAndDimension searchResults:{}", searchResults);
