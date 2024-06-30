@@ -265,8 +265,8 @@ importers:
         specifier: ^4.0.0
         version: 4.0.0(rollup@3.29.4)
       rollup-plugin-typescript2:
-        specifier: ^0.34.1
-        version: 0.34.1(rollup@3.29.4)(typescript@4.9.5)
+        specifier: ^0.36.0
+        version: 0.36.0(rollup@3.29.4)(typescript@4.9.5)
       sass-loader:
         specifier: ^12.3.0
         version: 12.6.0(webpack@5.91.0)
@@ -11032,8 +11032,8 @@ packages:
     peerDependencies:
       rollup: ^2.0.0
 
-  rollup-plugin-typescript2@0.34.1:
-    resolution: {integrity: sha512-P4cHLtGikESmqi1CA+tdMDUv8WbQV48mzPYt77TSTOPJpERyZ9TXdDgjSDix8Fkqce6soYz3+fa4lrC93IEkcw==}
+  rollup-plugin-typescript2@0.36.0:
+    resolution: {integrity: sha512-NB2CSQDxSe9+Oe2ahZbf+B4bh7pHwjV5L+RSYpCu7Q5ROuN94F9b6ioWwKfz3ueL3KTtmX4o2MUH2cgHDIEUsw==}
     peerDependencies:
       rollup: '>=1.26.3'
       typescript: '>=2.4.0'
@@ -27496,7 +27496,7 @@ snapshots:
       serialize-javascript: 4.0.0
       terser: 5.31.0
 
-  rollup-plugin-typescript2@0.34.1(rollup@3.29.4)(typescript@4.9.5):
+  rollup-plugin-typescript2@0.36.0(rollup@3.29.4)(typescript@4.9.5):
     dependencies:
       '@rollup/pluginutils': 4.2.1
       find-cache-dir: 3.3.2
