@@ -573,22 +573,23 @@ CREATE TABLE IF NOT EXISTS `s2_term` (
 
 -- s2.s2_role definition
 DROP TABLE IF EXISTS s2_role;
-CREATE TABLE IF NOT EXISTS  s2_role (
-    id bigint(20) NOT NULL AUTO_INCREMENT COMMENT '自定义角色表主键',
-    creation_type int(11) NOT NULL COMMENT '创建类型,1:系统创建,2:用户创建',
-    description varchar(255) COLLATE utf8_bin DEFAULT NULL COMMENT '角色描述',
-    is_enable bit(1) DEFAULT NULL  COMMENT '是否启用',
-    last_operation_type int(11) NOT NULL COMMENT '最后操作类型,1:新增,2:修改,3:删除',
-    name varchar(255) COLLATE utf8_bin DEFAULT NULL COMMENT '角色名称',
-    alias varchar(255) COLLATE utf8_bin DEFAULT NULL COMMENT '角色别名',
-    tenant_id bigint(20)  NOT NULL DEFAULT 1,
-    create_time datetime DEFAULT NULL,
-    update_time datetime DEFAULT NULL,
-    create_by varchar(255) COLLATE utf8_bin DEFAULT NULL,
-    update_by varchar(255) COLLATE utf8_bin DEFAULT NULL,
-    PRIMARY KEY (id,tenant_id),
-    KEY s2_custom_role_name_IDX (name) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT '角色表';
+CREATE TABLE `s2_role` (
+   `id` bigint NOT NULL AUTO_INCREMENT COMMENT '自定义角色表主键',
+   `creation_type` int NOT NULL COMMENT '创建类型,1:系统创建,2:用户创建',
+   `description` varchar(255) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL COMMENT '角色描述',
+   `is_enable` bit(1) DEFAULT NULL COMMENT '是否启用',
+   `last_operation_type` int NOT NULL COMMENT '最后操作类型,1:新增,2:修改,3:删除',
+   `name` varchar(255) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL COMMENT '角色名称',
+   `alias` varchar(255) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL COMMENT '角色别名',
+   `tenant_id` bigint NOT NULL DEFAULT '1',
+   `create_time` datetime DEFAULT NULL,
+   `update_time` datetime DEFAULT NULL,
+   `create_by` varchar(255) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL,
+   `update_by` varchar(255) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL,
+   PRIMARY KEY (`id`,`tenant_id`),
+   UNIQUE KEY `s2_role_UN` (`name`),
+   KEY `s2_custom_role_name_IDX` (`name`) USING BTREE
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='角色表';
 
 
 -- s2.s2_user_role_rela definition
