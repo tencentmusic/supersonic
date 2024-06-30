@@ -1,6 +1,6 @@
 spring:
   profiles:
-    active: prd
+    active: local
   application:
     name: chat
   config:
