@@ -7,9 +7,16 @@ call %sbinDir%/supersonic-common.bat %*
 
 set "command=%~1"
 set "service=%~2"
+set "profile=%~3"
+
 if "%service%"=="" (
    set "service=%standalone_service%"
 )
+
+if "%profile%"=="" (
+   set "profile=local"
+)
+
 set "model_name=%service%"
 
 cd %baseDir%
@@ -32,30 +39,29 @@ if "%command%"=="restart" (
    goto :EOF
 )
 
-: start
+:start
    call :runJavaService
    goto :EOF
 
-
-: stop
+:stop
    call :stopJavaService
    goto :EOF
 
-: runJavaService
+:runJavaService
    echo 'java service starting, see logs in logs/'
    set "libDir=%baseDir%\lib"
    set "confDir=%baseDir%\conf"
    set "webDir=%baseDir%\webapp"
    set "logDir=%baseDir%\logs"
    set "classpath=%baseDir%;%webDir%;%libDir%\*;%confDir%"
-   set "java-command=-Dfile.encoding=UTF-8 -Duser.language=Zh -Duser.region=CN -Duser.timezone=GMT+08 -Xms1024m -Xmx2048m -cp %CLASSPATH% %MAIN_CLASS%"
+   set "java-command=-Dfile.encoding=UTF-8 -Duser.language=Zh -Duser.region=CN -Duser.timezone=GMT+08 -Dspring.profiles.active=%profile% -Xms1024m -Xmx2048m -cp %CLASSPATH% %MAIN_CLASS%"
    if not exist %logDir% mkdir %logDir%
    start /B java %java-command% >nul 2>&1
    timeout /t 10 >nul
    echo 'java service started'
    goto :EOF
 
-: stopJavaService
+:stopJavaService
    for /f "tokens=2" %%i in ('tasklist ^| findstr /i "java"') do (
             taskkill /PID %%i /F
             echo "java service (PID = %%i) is killed."
