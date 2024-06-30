@@ -5,7 +5,7 @@ import static org.junit.Assert.assertTrue;
 
 import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
 import com.tencent.supersonic.auth.authentication.strategy.FakeUserStrategy;
-import com.tencent.supersonic.headless.server.listener.FlightSqlListener;
+import com.tencent.supersonic.headless.server.task.FlightServerInitTask;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.arrow.flight.CallHeaders;
 import org.apache.arrow.flight.FlightCallHeaders;
@@ -24,7 +24,7 @@ public class FlightSqlTest extends BaseTest {
 
 
     @Autowired
-    private FlightSqlListener flightSqlListener;
+    private FlightServerInitTask flightSqlListener;
     @Autowired
     private FakeUserStrategy fakeUserStrategy;
 

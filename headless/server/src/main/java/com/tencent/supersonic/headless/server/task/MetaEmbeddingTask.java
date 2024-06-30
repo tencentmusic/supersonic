@@ -1,4 +1,4 @@
-package com.tencent.supersonic.headless.server.schedule;
+package com.tencent.supersonic.headless.server.task;
 
 import com.tencent.supersonic.common.config.EmbeddingConfig;
 import com.tencent.supersonic.common.pojo.DataItem;
@@ -10,6 +10,8 @@ import dev.langchain4j.store.embedding.EmbeddingStoreFactory;
 import dev.langchain4j.store.embedding.TextSegmentConvert;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.core.annotation.Order;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -18,12 +20,15 @@ import java.util.List;
 
 @Component
 @Slf4j
-public class EmbeddingTask {
+@Order(2)
+public class MetaEmbeddingTask implements CommandLineRunner {
 
     @Autowired
     private EmbeddingService embeddingService;
+
     @Autowired
     private EmbeddingConfig embeddingConfig;
+
     @Autowired
     private MetricService metricService;
 
@@ -73,5 +78,14 @@ public class EmbeddingTask {
         }
 
         log.info("reload.meta.embedding end");
+    }
+
+    @Override
+    public void run(String... args) throws Exception {
+        try {
+            reloadMetaEmbedding();
+        } catch (Exception e) {
+            log.error("initMetaEmbedding error", e);
+        }
     }
 }

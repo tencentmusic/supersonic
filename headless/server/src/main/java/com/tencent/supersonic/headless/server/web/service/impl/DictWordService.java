@@ -40,10 +40,10 @@ public class DictWordService {
         List<DictWord> dictWords = getAllDictWords();
         List<DictWord> preDictWords = getPreDictWords();
         if (org.apache.commons.collections.CollectionUtils.isEqualCollection(dictWords, preDictWords)) {
-            log.debug("dictWords has not changed, reloadKnowledge end");
+            log.debug("Dictionary hasn't been reloaded.");
             return;
         }
-        log.info("dictWords has changed");
+        log.info("Dictionary has been reloaded.");
         setPreDictWords(dictWords);
         knowledgeBaseService.updateOnlineKnowledge(getAllDictWords());
     }

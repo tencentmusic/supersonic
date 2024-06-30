@@ -1,4 +1,4 @@
-package com.tencent.supersonic.headless.server.listener;
+package com.tencent.supersonic.headless.server.task;
 
 import com.tencent.supersonic.headless.server.facade.service.FlightService;
 import java.util.concurrent.ExecutorService;
@@ -12,12 +12,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PreDestroy;
+
 /**
- * arrow flight jdbc server listener
+ * Initialize flight jdbc server
  */
 @Component
 @Slf4j
-public class FlightSqlListener implements CommandLineRunner {
+public class FlightServerInitTask implements CommandLineRunner {
 
     @Value("${s2.flightSql.enable:false}")
     private Boolean enable = false;
@@ -38,7 +40,7 @@ public class FlightSqlListener implements CommandLineRunner {
     private BufferAllocator allocator;
     private Boolean isRunning = false;
 
-    public FlightSqlListener(FlightService flightService) {
+    public FlightServerInitTask(FlightService flightService) {
         this.allocator = new RootAllocator();
         this.flightService = flightService;
         this.flightService.setLocation(host, port);
@@ -63,7 +65,7 @@ public class FlightSqlListener implements CommandLineRunner {
             flightServer.start();
             isRunning = true;
         } catch (Exception e) {
-            log.error("FlightSqlListener start error {}", e);
+            log.error("FlightServerInitTask start error {}", e);
         }
 
     }
@@ -72,13 +74,14 @@ public class FlightSqlListener implements CommandLineRunner {
         return isRunning;
     }
 
-    public void stop() {
+    @PreDestroy
+    public void onShutdown() {
         try {
             log.info("Arrow Flight JDBC server stop on {} {}", host, port);
             flightServer.close();
             allocator.close();
         } catch (Exception e) {
-            log.error("FlightSqlListener start error {}", e);
+            log.error("FlightServerInitTask start error {}", e);
         }
     }
 
