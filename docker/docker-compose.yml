@@ -44,15 +44,17 @@ services:
     container_name: supersonic_chroma
     ports:
       - "8000:8000"
+    volumes:
+      - chroma_data:/chroma
     networks:
       - supersonic_network
     dns:
       - 8.8.8.8
       - 8.8.4.4
 
-  java_backend:
+  supersonic_standalone:
     image: supersonicbi/supersonic:0.9.2-SNAPSHOT
-    container_name: supersonic_java_backend
+    container_name: supersonic_standalone
     environment:
       DB_HOST: supersonic_mysql
       DB_NAME: supersonic_db
@@ -72,6 +74,7 @@ services:
 
 volumes:
   mysql_data:
+  chroma_data:
 
 networks:
   supersonic_network:

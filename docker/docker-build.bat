@@ -15,7 +15,7 @@ REM Function to build the Docker image
 :build_docker_image
 set "version=%1"
 echo Building Docker image: supersonic:%version%
-docker build --no-cache --build-arg SUPERSONIC_VERSION=%version% -t supersonic:%version% -f docker\Dockerfile .
+docker build --no-cache --build-arg SUPERSONIC_VERSION=%version% -t supersonicbi/supersonic:%version% -f docker\Dockerfile .
 if %errorlevel% neq 0 (
     echo Docker build failed. Exiting.
     exit /b 1
