@@ -177,6 +177,7 @@ const MemorySection = ({ agentId }: Props) => {
     const res = await getMemeoryList(agentId, filtersValue || filters, current || 1);
     setLoading(false);
     const { list, total } = res.data;
+    setDataSource(list);
     return {
       data: list,
       total: total,
