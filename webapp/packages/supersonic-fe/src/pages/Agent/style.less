@@ -333,9 +333,8 @@
 
   .filterSection {
     display: flex;
-    flex-wrap: wrap;
-    row-gap: 12px;
-    column-gap: 20px;
+    justify-content: space-between;
+    // column-gap: 20px;
     margin-bottom: 20px;
 
     .filterItem {
@@ -366,4 +365,12 @@
 
 .commentPopover {
   width: 400px;
+}
+
+.search {
+  display: flex;
+  align-items: center;
+  justify-content: end;
+  gap: 10px;
+  margin-bottom: 20px;
 }

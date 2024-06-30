@@ -3,10 +3,10 @@ import { EditableProTable } from '@ant-design/pro-components';
 import React, { useState } from 'react';
 import { MemoryType, ReviewEnum, StatusEnum } from './type';
 import { getMemeoryList, saveMemory } from './service';
-import { Popover, Input, Badge, Radio, Select } from 'antd';
+import { Popover, Input, Badge, Radio, Select, Button } from 'antd';
 import styles from './style.less';
 
-const { TextArea, Search } = Input;
+const { TextArea } = Input;
 const RadioGroup = Radio.Group;
 
 type Props = {
@@ -189,23 +189,18 @@ const MemorySection = ({ agentId }: Props) => {
     await saveMemory(data);
   };
 
-  const onSearch = () => {
-    loadMemoryList();
-  };
-
   return (
     <div className={styles.memorySection}>
       <div className={styles.filterSection}>
         <div className={styles.filterItem}>
           <div className={styles.filterItemTitle}>用户问题</div>
-          <Search
+          <Input
             className={styles.filterItemControl}
             placeholder="请输入用户问题"
             value={question}
             onChange={(e) => {
               setFilters({ ...filters, question: e.target.value });
             }}
-            onSearch={onSearch}
           />
         </div>
         <div className={styles.filterItem}>
@@ -220,9 +215,7 @@ const MemorySection = ({ agentId }: Props) => {
             value={llmReviewRet}
             allowClear
             onChange={(value: ReviewEnum) => {
-              const filtersValue = { ...filters, llmReviewRet: value };
-              setFilters(filtersValue);
-              loadMemoryList({ filtersValue });
+              setFilters({ ...filters, llmReviewRet: value });
             }}
           />
         </div>
@@ -238,9 +231,7 @@ const MemorySection = ({ agentId }: Props) => {
             value={humanReviewRet}
             allowClear
             onChange={(value: ReviewEnum) => {
-              const filtersValue = { ...filters, humanReviewRet: value };
-              setFilters(filtersValue);
-              loadMemoryList({ filtersValue });
+              setFilters({ ...filters, humanReviewRet: value });
             }}
           />
         </div>
@@ -257,12 +248,16 @@ const MemorySection = ({ agentId }: Props) => {
             value={status}
             allowClear
             onChange={(value: ReviewEnum) => {
-              const filtersValue = { ...filters, status: value };
-              setFilters(filtersValue);
-              loadMemoryList({ filtersValue });
+              setFilters({ ...filters, status: value });
             }}
           />
         </div>
+      </div>
+      <div className={styles.search}>
+        <Button onClick={() => setFilters({})}>重置</Button>
+        <Button type="primary" onClick={() => loadMemoryList()}>
+          查询
+        </Button>
       </div>
       <EditableProTable<MemoryType>
         rowKey="id"
