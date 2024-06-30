@@ -1,15 +1,13 @@
 version: '3.8'
-
 services:
   mysql:
     image: mysql:8.0
     container_name: supersonic_mysql
     environment:
       MYSQL_ROOT_PASSWORD: root_password
-      MYSQL_DB_HOST: ${DB_HOST}
-      MYSQL_DATABASE: ${DB_NAME}
-      MYSQL_USER: ${DB_USERNAME}
-      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: supersonic_db
+      MYSQL_USER: supersonic_user
+      MYSQL_PASSWORD: supersonic_password
     ports:
       - "3306:3306"
     volumes:
@@ -30,9 +28,9 @@ services:
     command: >
       sh -c "
       sleep 30 &&
-      if ! mysql -h supersonic_mysql -uroot -proot_password -e 'use supersonic_db; show tables;' | grep -q 's2_database'; then
-        mysql -h supersonic_mysql -uroot -proot_password supersonic_db < /usr/src/app/supersonic-standalone-0.9.2-SNAPSHOT/conf/db/schema-mysql.sql &&
-        mysql -h supersonic_mysql -uroot -proot_password supersonic_db < /usr/src/app/supersonic-standalone-0.9.2-SNAPSHOT/conf/db/data-mysql.sql
+      if ! mysql -h supersonic_mysql -usupersonic_user -psupersonic_password -e 'use supersonic_db; show tables;' | grep -q 's2_database'; then
+        mysql -h supersonic_mysql -usupersonic_user -psupersonic_password supersonic_db < /usr/src/app/supersonic-standalone-0.9.2-SNAPSHOT/conf/db/schema-mysql.sql &&
+        mysql -h supersonic_mysql -usupersonic_user -psupersonic_password supersonic_db < /usr/src/app/supersonic-standalone-0.9.2-SNAPSHOT/conf/db/data-mysql.sql
       else
         echo 'Database already initialized.'
       fi

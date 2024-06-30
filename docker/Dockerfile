@@ -7,7 +7,7 @@ WORKDIR /usr/src/app
 # Argument to pass in the supersonic version at build time
 ARG SUPERSONIC_VERSION
 
-# Install the Vim editor.
+# Install the vim editor.
 RUN apt-get update && \
     apt-get install -y vim && \
     rm -rf /var/lib/apt/lists/*
