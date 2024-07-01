@@ -78,7 +78,6 @@ const DimensionMetricTransferModal: React.FC<ModelCreateFormModalProps> = ({
         }
         return modelMetricList;
       }, []);
-
     setSourceList([
       ...sourceDimensionList,
       ...sourceMetricList,
