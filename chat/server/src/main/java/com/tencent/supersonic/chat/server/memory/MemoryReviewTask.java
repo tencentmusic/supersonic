@@ -56,7 +56,8 @@ public class MemoryReviewTask {
                         Prompt prompt = PromptTemplate.from(promptStr).apply(Collections.EMPTY_MAP);
 
                         keyPipelineLog.info("MemoryReviewTask reqPrompt:{}", promptStr);
-                        ChatLanguageModel chatLanguageModel = ChatLanguageModelProvider.provide(chatAgent.getLlmConfig());
+                        ChatLanguageModel chatLanguageModel = ChatLanguageModelProvider.provide(
+                                chatAgent.getLlmConfig());
                         if (Objects.nonNull(chatLanguageModel)) {
                             String response = chatLanguageModel.generate(prompt.toUserMessage()).content().text();
                             keyPipelineLog.info("MemoryReviewTask modelResp:{}", response);
