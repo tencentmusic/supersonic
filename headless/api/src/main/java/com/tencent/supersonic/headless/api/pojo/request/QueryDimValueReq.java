@@ -11,6 +11,6 @@ public class QueryDimValueReq {
     private Long modelId;
     private String dimensionBizName;
     private String value;
-    private DateConf dateInfo;
+    private DateConf dateInfo = new DateConf();
 
 }

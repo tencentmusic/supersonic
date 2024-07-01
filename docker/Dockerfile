@@ -12,17 +12,6 @@ RUN apt-get update && \
     apt-get install -y default-mysql-client unzip && \
     rm -rf /var/lib/apt/lists/*
 
-# Install the vim editor.
-RUN apt-get update && \
-    apt-get install -y vim && \
-    rm -rf /var/lib/apt/lists/*
-
-# Update the package list and install iputils-ping.
-RUN apt-get update && apt-get install -y iputils-ping
-
-# 更新包列表并安装 dnsutils 包
-RUN apt-get update && apt-get install -y dnsutils
-
 # Copy the supersonic standalone zip file into the container
 COPY assembly/build/supersonic-standalone-${SUPERSONIC_VERSION}.zip .
 
