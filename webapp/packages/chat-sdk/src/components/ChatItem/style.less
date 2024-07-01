@@ -98,8 +98,10 @@
   }
 
   &-msg-card {
-    flex: 1;
-    overflow: hidden;
+    flex-shrink: 0;
+    flex-grow: 0;
+    flex-basis: calc(100% - 42px);
+    width: calc(100% - 42px);
   }
 
   &-content {
