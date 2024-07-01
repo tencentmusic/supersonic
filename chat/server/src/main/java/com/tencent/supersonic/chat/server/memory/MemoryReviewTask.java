@@ -16,6 +16,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -50,19 +51,28 @@ public class MemoryReviewTask {
         memoryService.getMemoriesForLlmReview().stream()
                 .forEach(m -> {
                     Agent chatAgent = agentService.getAgent(m.getAgentId());
-                    String promptStr = String.format(INSTRUCTION, m.getQuestion(), m.getDbSchema(), m.getS2sql());
-                    Prompt prompt = PromptTemplate.from(promptStr).apply(Collections.EMPTY_MAP);
+                    if (Objects.nonNull(chatAgent)) {
+                        String promptStr = String.format(INSTRUCTION, m.getQuestion(), m.getDbSchema(), m.getS2sql());
+                        Prompt prompt = PromptTemplate.from(promptStr).apply(Collections.EMPTY_MAP);
 
-                    keyPipelineLog.info("MemoryReviewTask reqPrompt:{}", promptStr);
-                    ChatLanguageModel chatLanguageModel = ChatLanguageModelProvider.provide(chatAgent.getLlmConfig());
-                    String response = chatLanguageModel.generate(prompt.toUserMessage()).content().text();
-                    keyPipelineLog.info("MemoryReviewTask modelResp:{}", response);
+                        keyPipelineLog.info("MemoryReviewTask reqPrompt:{}", promptStr);
+                        ChatLanguageModel chatLanguageModel = ChatLanguageModelProvider.provide(
+                                chatAgent.getLlmConfig());
+                        if (Objects.nonNull(chatLanguageModel)) {
+                            String response = chatLanguageModel.generate(prompt.toUserMessage()).content().text();
+                            keyPipelineLog.info("MemoryReviewTask modelResp:{}", response);
 
-                    Matcher matcher = OUTPUT_PATTERN.matcher(response);
-                    if (matcher.find()) {
-                        m.setLlmReviewRet(MemoryReviewResult.valueOf(matcher.group(1)));
-                        m.setLlmReviewCmt(matcher.group(2));
-                        memoryService.updateMemory(m);
+                            Matcher matcher = OUTPUT_PATTERN.matcher(response);
+                            if (matcher.find()) {
+                                m.setLlmReviewRet(MemoryReviewResult.valueOf(matcher.group(1)));
+                                m.setLlmReviewCmt(matcher.group(2));
+                                memoryService.updateMemory(m);
+                            }
+                        } else {
+                            log.debug("ChatLanguageModel not found for agent:{}", chatAgent.getId());
+                        }
+                    } else {
+                        log.debug("Agent not found for memory:{}", m.getAgentId());
                     }
                 });
     }

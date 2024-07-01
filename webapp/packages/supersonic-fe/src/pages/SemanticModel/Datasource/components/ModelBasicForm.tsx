@@ -191,7 +191,7 @@ const ModelBasicForm: React.FC<Props> = ({
       <FormItem name="description" label="模型描述">
         <TextArea placeholder="请输入模型描述" />
       </FormItem>
-      <FormItem name={['ext', 'usId']} label="上游任务ID">
+      <FormItem name={['ext', 'usId']} label="调度任务ID">
         <Select
           mode="tags"
           placeholder="输入ID后回车确认，多ID输入、复制粘贴支持英文逗号自动分隔"
