@@ -55,12 +55,13 @@ com.tencent.supersonic.headless.server.processor.ResultProcessor=\
 
 com.tencent.supersonic.chat.server.parser.ChatParser=\
     com.tencent.supersonic.chat.server.parser.NL2PluginParser, \
-    com.tencent.supersonic.chat.server.parser.MultiTurnParser,\
-    com.tencent.supersonic.chat.server.parser.NL2SQLParser
+    com.tencent.supersonic.chat.server.parser.NL2SQLParser,\
+    com.tencent.supersonic.chat.server.parser.PlainTextParser
 
 com.tencent.supersonic.chat.server.executor.ChatExecutor=\
     com.tencent.supersonic.chat.server.executor.PluginExecutor, \
-    com.tencent.supersonic.chat.server.executor.SqlExecutor
+    com.tencent.supersonic.chat.server.executor.SqlExecutor,\
+    com.tencent.supersonic.chat.server.executor.PlainTextExecutor
 
 com.tencent.supersonic.chat.server.plugin.recognize.PluginRecognizer=\
     com.tencent.supersonic.chat.server.plugin.recognize.embedding.EmbeddingRecallRecognizer

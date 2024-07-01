@@ -7,10 +7,12 @@ import com.tencent.supersonic.headless.core.pojo.QueryStatement;
 import com.tencent.supersonic.headless.core.utils.ComponentFactory;
 import com.tencent.supersonic.headless.core.utils.SqlUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.logging.log4j.util.Strings;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import java.util.Objects;
+
+;
 
 @Component("JdbcExecutor")
 @Slf4j
@@ -34,7 +36,7 @@ public class JdbcExecutor implements QueryExecutor {
         }
 
         SqlUtils sqlUtils = ContextUtils.getBean(SqlUtils.class);
-        if (Strings.isEmpty(queryStatement.getSourceId())) {
+        if (StringUtils.isEmpty(queryStatement.getSourceId())) {
             log.warn("data base id is empty");
             return null;
         }

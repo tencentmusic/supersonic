@@ -67,7 +67,6 @@ public class TimeCorrector extends BaseSemanticCorrector {
         //decide whether add date field to where
         Environment environment = ContextUtils.getBean(Environment.class);
         String correctorDate = environment.getProperty("s2.corrector.date");
-        log.info("correctorDate:{}", correctorDate);
         if (StringUtils.isNotBlank(correctorDate) && !Boolean.parseBoolean(correctorDate)) {
             return;
         }

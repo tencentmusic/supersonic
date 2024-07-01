@@ -19,6 +19,7 @@ type Props = {
   isDeveloper?: boolean;
   integrateSystem?: string;
   isSimpleMode?: boolean;
+  isDebugMode?: boolean;
   onMsgDataLoaded: (
     data: MsgDataType,
     questionId: string | number,
@@ -40,6 +41,7 @@ const MessageContainer: React.FC<Props> = ({
   isDeveloper,
   integrateSystem,
   isSimpleMode,
+  isDebugMode,
   onMsgDataLoaded,
   onQuestionAsked,
   onSendMsg,
@@ -97,6 +99,7 @@ const MessageContainer: React.FC<Props> = ({
                   {identityMsg && <Text position="left" data={identityMsg} />}
                   <ChatItem
                     isSimpleMode={isSimpleMode}
+                    isDebugMode={isDebugMode}
                     msg={msgValue || msg || ''}
                     parseInfos={parseInfos}
                     parseTimeCostValue={parseTimeCost}

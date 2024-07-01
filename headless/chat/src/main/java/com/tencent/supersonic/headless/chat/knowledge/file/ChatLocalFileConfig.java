@@ -15,10 +15,10 @@ import java.io.FileNotFoundException;
 public class ChatLocalFileConfig {
 
 
-    @Value("${dict.directory.latest:/data/dictionary/custom}")
+    @Value("${s2.dict.directory.latest:/data/dictionary/custom}")
     private String dictDirectoryLatest;
 
-    @Value("${dict.directory.backup:./dict/backup}")
+    @Value("${s2.dict.directory.backup:./dict/backup}")
     private String dictDirectoryBackup;
 
     public String getDictDirectoryLatest() {

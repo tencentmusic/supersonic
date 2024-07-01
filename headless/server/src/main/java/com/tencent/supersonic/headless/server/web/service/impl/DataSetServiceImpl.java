@@ -133,12 +133,6 @@ public class DataSetServiceImpl
     }
 
     @Override
-    public List<DataSetResp> getDataSets(User user) {
-        MetaFilter metaFilter = new MetaFilter();
-        return getDataSetsByAuth(user, metaFilter);
-    }
-
-    @Override
     public List<DataSetResp> getDataSets(String dataSetName, User user) {
         MetaFilter metaFilter = new MetaFilter();
         metaFilter.setName(dataSetName);

@@ -2,7 +2,7 @@ package com.tencent.supersonic.chat.server.plugin.recognize;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.tencent.supersonic.chat.server.plugin.Plugin;
+import com.tencent.supersonic.chat.server.plugin.ChatPlugin;
 import com.tencent.supersonic.chat.server.plugin.PluginManager;
 import com.tencent.supersonic.chat.server.plugin.PluginParseResult;
 import com.tencent.supersonic.chat.server.plugin.PluginRecallResult;
@@ -45,9 +45,9 @@ public abstract class PluginRecognizer {
 
     public void buildQuery(ChatParseContext chatParseContext, ParseResp parseResp,
                            PluginRecallResult pluginRecallResult) {
-        Plugin plugin = pluginRecallResult.getPlugin();
+        ChatPlugin plugin = pluginRecallResult.getPlugin();
         Set<Long> dataSetIds = pluginRecallResult.getDataSetIds();
-        if (plugin.isContainsAllModel()) {
+        if (plugin.isContainsAllDataSet()) {
             dataSetIds = Sets.newHashSet(-1L);
         }
         for (Long dataSetId : dataSetIds) {
@@ -59,11 +59,11 @@ public abstract class PluginRecognizer {
         }
     }
 
-    protected List<Plugin> getPluginList(ChatParseContext chatParseContext) {
+    protected List<ChatPlugin> getPluginList(ChatParseContext chatParseContext) {
         return PluginManager.getPluginAgentCanSupport(chatParseContext);
     }
 
-    protected SemanticParseInfo buildSemanticParseInfo(Long dataSetId, Plugin plugin,
+    protected SemanticParseInfo buildSemanticParseInfo(Long dataSetId, ChatPlugin plugin,
                                                        ChatParseContext chatParseContext, double distance) {
         List<SchemaElementMatch> schemaElementMatches = chatParseContext.getMapInfo().getMatchedElements(dataSetId);
         QueryFilters queryFilters = chatParseContext.getQueryFilters();

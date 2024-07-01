@@ -3,8 +3,6 @@ package com.tencent.supersonic.demo;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.auth.api.authorization.service.AuthService;
-import com.tencent.supersonic.chat.api.pojo.request.ChatExecuteReq;
-import com.tencent.supersonic.chat.api.pojo.request.ChatParseReq;
 import com.tencent.supersonic.chat.server.service.AgentService;
 import com.tencent.supersonic.chat.server.service.ChatManageService;
 import com.tencent.supersonic.chat.server.service.ChatService;
@@ -21,7 +19,6 @@ import com.tencent.supersonic.headless.api.pojo.response.DatabaseResp;
 import com.tencent.supersonic.headless.api.pojo.response.DimensionResp;
 import com.tencent.supersonic.headless.api.pojo.response.MetricResp;
 import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
-import com.tencent.supersonic.headless.api.pojo.response.ParseResp;
 import com.tencent.supersonic.headless.server.pojo.MetaFilter;
 import com.tencent.supersonic.headless.server.web.service.CanvasService;
 import com.tencent.supersonic.headless.server.web.service.DataSetService;
@@ -153,27 +150,6 @@ public abstract class S2BaseDemo implements CommandLineRunner {
             dataSetModelConfigs.add(dataSetModelConfig);
         }
         return dataSetModelConfigs;
-    }
-
-    protected void parseAndExecute(int chatId, int agentId, String queryText) throws Exception {
-        ChatParseReq chatParseReq = new ChatParseReq();
-        chatParseReq.setQueryText(queryText);
-        chatParseReq.setChatId(chatId);
-        chatParseReq.setAgentId(agentId);
-        chatParseReq.setUser(User.getFakeUser());
-        ParseResp parseResp = chatService.performParsing(chatParseReq);
-        if (CollectionUtils.isEmpty(parseResp.getSelectedParses())) {
-            log.info("parseResp.getSelectedParses() is empty");
-            return;
-        }
-        ChatExecuteReq executeReq = new ChatExecuteReq();
-        executeReq.setQueryId(parseResp.getQueryId());
-        executeReq.setParseId(parseResp.getSelectedParses().get(0).getId());
-        executeReq.setQueryText(queryText);
-        executeReq.setChatId(parseResp.getChatId());
-        executeReq.setUser(User.getFakeUser());
-        executeReq.setSaveAnswer(true);
-        chatService.performExecution(executeReq);
     }
 
     protected void addTag(Long itemId, TagDefineType tagDefineType) {

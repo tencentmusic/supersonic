@@ -84,37 +84,32 @@
         width: 175px;
         margin: 10px 0 10px 16px;
       }
-    
-      .tree {
-        flex: 1;
-        padding: 10px;
-        padding-right: 18px;
-        .projectItem {
-          display: flex;
-          width: 100%;
-          cursor: auto;
-          line-height: 25px;
-          height: 25px;
-          color: rgb(95, 116, 141);
-          font-weight: 500;
-          .projectItemTitle {
-            font-size: 15px;
-            flex: 1;
+      .projectItem {
+        display: flex;
+        width: 100%;
+        cursor: auto;
+        line-height: 25px;
+        height: 25px;
+        color: rgb(95, 116, 141);
+        font-weight: 500;
+        .projectItemTitle {
+          font-size: 15px;
+          flex: 1;
+          cursor: pointer;
+        }
+        .operation {
+          .icon {
+            margin-left: 6px;
             cursor: pointer;
           }
-          .operation {
-            .icon {
-              margin-left: 6px;
-              cursor: pointer;
-            }
-          }
+        }
+        .rowHover {
+          display: none;
+        }
+        &:hover {
           .rowHover {
-            display: none;
-          }
-          &:hover {
-            .rowHover {
-              display: block;
-            }
+            display: block;
+            color: var(--tme-primary-color);
           }
         }
       }

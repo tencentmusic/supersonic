@@ -1,4 +1,4 @@
-import { Form, Modal, Input, Select, Button, TreeSelect, message } from 'antd';
+import { Form, Modal, Input, Select, Button, TreeSelect } from 'antd';
 import {
   AgentToolType,
   AgentToolTypeEnum,
@@ -30,16 +30,6 @@ const ToolModal: React.FC<Props> = ({ editTool, onSaveTool, onCancel }) => {
   const [metricOptions, setMetricOptions] = useState<MetricOptionType[]>([]);
   const [plugins, setPlugins] = useState<PluginType[]>([]);
   const [form] = Form.useForm();
-
-  // const filterTree = (treeData: any[]) => {
-  //   treeData.forEach((node) => {
-  //     if (Array.isArray(node.children) && node.children?.length > 0) {
-  //       node.children = node.children.filter((item: any) => item.type !== 'DOMAIN');
-  //       filterTree(node.children);
-  //     }
-  //   });
-  //   return treeData;
-  // };
 
   const initModelList = async () => {
     const res = await getModelList();
@@ -99,6 +89,7 @@ const ToolModal: React.FC<Props> = ({ editTool, onSaveTool, onCancel }) => {
       title={editTool ? '编辑工具' : '新建工具'}
       confirmLoading={saveLoading}
       width={800}
+      maskClosable={false}
       onOk={onOk}
       onCancel={onCancel}
     >

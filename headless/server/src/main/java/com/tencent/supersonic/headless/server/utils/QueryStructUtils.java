@@ -1,5 +1,7 @@
 package com.tencent.supersonic.headless.server.utils;
 
+import com.tencent.supersonic.common.jsqlparser.FieldExpression;
+import com.tencent.supersonic.common.jsqlparser.SqlSelectHelper;
 import com.tencent.supersonic.common.pojo.Aggregator;
 import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.common.pojo.DateConf.DateMode;
@@ -7,8 +9,6 @@ import com.tencent.supersonic.common.pojo.ItemDateResp;
 import com.tencent.supersonic.common.pojo.enums.TypeEnums;
 import com.tencent.supersonic.common.util.DateModeUtils;
 import com.tencent.supersonic.common.util.SqlFilterUtils;
-import com.tencent.supersonic.common.jsqlparser.FieldExpression;
-import com.tencent.supersonic.common.jsqlparser.SqlSelectHelper;
 import com.tencent.supersonic.headless.api.pojo.ItemDateFilter;
 import com.tencent.supersonic.headless.api.pojo.SchemaItem;
 import com.tencent.supersonic.headless.api.pojo.request.QuerySqlReq;
@@ -19,11 +19,10 @@ import com.tencent.supersonic.headless.api.pojo.response.MetricResp;
 import com.tencent.supersonic.headless.api.pojo.response.MetricSchemaResp;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticSchemaResp;
 import com.tencent.supersonic.headless.server.pojo.MetaFilter;
-import com.tencent.supersonic.headless.server.web.service.CatalogService;
+import com.tencent.supersonic.headless.server.web.service.SchemaService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Triple;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
@@ -62,23 +61,22 @@ public class QueryStructUtils {
 
     private final DateModeUtils dateModeUtils;
     private final SqlFilterUtils sqlFilterUtils;
-    private final CatalogService catalog;
+    private final SchemaService schemaService;
     private String variablePrefix = "'${";
 
-    public QueryStructUtils(
-            DateModeUtils dateModeUtils,
-            SqlFilterUtils sqlFilterUtils, @Lazy CatalogService catalog) {
+    public QueryStructUtils(DateModeUtils dateModeUtils,
+            SqlFilterUtils sqlFilterUtils, SchemaService schemaService) {
 
         this.dateModeUtils = dateModeUtils;
         this.sqlFilterUtils = sqlFilterUtils;
-        this.catalog = catalog;
+        this.schemaService = schemaService;
     }
 
     private List<Long> getDimensionIds(QueryStructReq queryStructReq) {
         List<Long> dimensionIds = new ArrayList<>();
         MetaFilter metaFilter = new MetaFilter();
         metaFilter.setDataSetId(queryStructReq.getDataSetId());
-        List<DimensionResp> dimensions = catalog.getDimensions(metaFilter);
+        List<DimensionResp> dimensions = schemaService.getDimensions(metaFilter);
         Map<String, List<DimensionResp>> pair = dimensions.stream()
                 .collect(Collectors.groupingBy(DimensionResp::getBizName));
         for (String group : queryStructReq.getGroups()) {
@@ -100,7 +98,7 @@ public class QueryStructUtils {
         List<Long> metricIds = new ArrayList<>();
         MetaFilter metaFilter = new MetaFilter();
         metaFilter.setDataSetId(queryStructCmd.getDataSetId());
-        List<MetricResp> metrics = catalog.getMetrics(metaFilter);
+        List<MetricResp> metrics = schemaService.getMetrics(metaFilter);
         Map<String, List<MetricResp>> pair = metrics.stream().collect(Collectors.groupingBy(SchemaItem::getBizName));
         for (Aggregator agg : queryStructCmd.getAggregators()) {
             if (pair.containsKey(agg.getColumn())) {
@@ -177,7 +175,7 @@ public class QueryStructUtils {
     public ItemDateResp getItemDateResp(QueryStructReq queryStructCmd) {
         List<Long> dimensionIds = getDimensionIds(queryStructCmd);
         List<Long> metricIds = getMetricIds(queryStructCmd);
-        ItemDateResp dateDate = catalog.getItemDate(
+        ItemDateResp dateDate = schemaService.getItemDate(
                 new ItemDateFilter(dimensionIds, TypeEnums.DIMENSION.name()),
                 new ItemDateFilter(metricIds, TypeEnums.METRIC.name()));
         return dateDate;

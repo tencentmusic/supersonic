@@ -26,8 +26,6 @@ public interface DataSetService {
 
     Map<Long, List<Long>> getModelIdToDataSetIds();
 
-    List<DataSetResp> getDataSets(User user);
-
     List<DataSetResp> getDataSets(String dataSetName, User user);
 
     List<DataSetResp> getDataSets(List<String> dataSetNames, User user);

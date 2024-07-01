@@ -96,11 +96,6 @@ public class SemanticSchema implements Serializable {
         return getElementsByDataSetId(dataSetId, metrics);
     }
 
-    public List<String> getMetricNames() {
-        return getMetrics().stream()
-                .map(SchemaElement::getName).collect(Collectors.toList());
-    }
-
     public List<SchemaElement> getEntities() {
         List<SchemaElement> entities = new ArrayList<>();
         dataSetSchemaList.stream().forEach(d -> entities.add(d.getEntity()));

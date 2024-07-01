@@ -12,6 +12,7 @@ import com.tencent.supersonic.common.pojo.enums.QueryType;
 import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
+import com.tencent.supersonic.headless.api.pojo.SqlInfo;
 import com.tencent.supersonic.headless.api.pojo.request.QueryFilter;
 import com.tencent.supersonic.headless.api.pojo.request.QueryMultiStructReq;
 import com.tencent.supersonic.headless.api.pojo.request.QuerySqlReq;
@@ -19,7 +20,6 @@ import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
 import com.tencent.supersonic.headless.chat.query.QueryManager;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.BeanUtils;
 import org.springframework.util.CollectionUtils;
 
@@ -72,7 +72,7 @@ public class QueryReqBuilder {
 
     private static List<Filter> getFilters(Set<QueryFilter> queryFilters) {
         List<Filter> dimensionFilters = queryFilters.stream()
-                .filter(chatFilter -> Strings.isNotEmpty(chatFilter.getBizName()))
+                .filter(chatFilter -> StringUtils.isNotEmpty(chatFilter.getBizName()))
                 .map(chatFilter -> new Filter(chatFilter.getBizName(), chatFilter.getOperator(), chatFilter.getValue()))
                 .collect(Collectors.toList());
         return dimensionFilters;
@@ -127,6 +127,7 @@ public class QueryReqBuilder {
             BeanUtils.copyProperties(queryStructReq, req);
             req.setDataSetId(parseInfo.getDataSetId());
             req.setDimensionFilters(Lists.newArrayList(dimensionFilter));
+            req.setSqlInfo(parseInfo.getSqlInfo());
             queryStructReqs.add(req);
         }
         queryMultiStructReq.setQueryStructReqs(queryStructReqs);
@@ -145,6 +146,16 @@ public class QueryReqBuilder {
         if (Objects.nonNull(querySql)) {
             querySQLReq.setSql(querySql);
         }
+        querySQLReq.setDataSetId(dataSetId);
+        return querySQLReq;
+    }
+
+    public static QuerySqlReq buildS2SQLReq(SqlInfo sqlInfo, Long dataSetId) {
+        QuerySqlReq querySQLReq = new QuerySqlReq();
+        if (Objects.nonNull(sqlInfo.getCorrectS2SQL())) {
+            querySQLReq.setSql(sqlInfo.getCorrectS2SQL());
+        }
+        querySQLReq.setSqlInfo(sqlInfo);
         querySQLReq.setDataSetId(dataSetId);
         return querySQLReq;
     }

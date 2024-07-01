@@ -16,6 +16,8 @@ public interface TagObjectService {
 
     Boolean delete(Long id, User user) throws Exception;
 
+    Boolean delete(Long id, User user, Boolean checkStatus) throws Exception;
+
     TagObjectResp getTagObject(Long id, User user);
 
     List<TagObjectResp> getTagObjects(TagObjectFilter filter, User user);

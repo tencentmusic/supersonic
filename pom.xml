@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.tencent.supersonic</groupId>
@@ -32,7 +32,6 @@
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>
         <file.encoding>UTF-8</file.encoding>
-        <apache.log4j.version>2.17.1</apache.log4j.version>
         <jsqlparser.version>4.7</jsqlparser.version>
         <pagehelper.version>6.1.0</pagehelper.version>
         <pagehelper.spring.version>2.1.0</pagehelper.spring.version>
@@ -50,37 +49,31 @@
         <jjwt.version>0.12.3</jjwt.version>
         <alibaba.druid.version>1.2.3</alibaba.druid.version>
         <mysql.connector.java.version>5.1.46</mysql.connector.java.version>
-        <mybatis.plus.version>3.1.2</mybatis.plus.version>
+        <mybatis.plus.version>3.5.7</mybatis.plus.version>
         <clickhouse.jdbc.version>0.4.6</clickhouse.jdbc.version>
         <h2.version>1.4.200</h2.version>
         <fastjson.version>2.0.40</fastjson.version>
-        <dozer.verson>6.5.0</dozer.verson>
+        <dozer.verson>7.0.0</dozer.verson>
         <httpmime.version>4.5.6</httpmime.version>
         <transmittable.version>2.12.1</transmittable.version>
         <commons.compress.version>1.21</commons.compress.version>
         <jetty.util.version>6.1.26</jetty.util.version>
         <spring.version>2.5.1</spring.version>
         <jsonpath.version>2.8.0</jsonpath.version>
-        <calcite.version>1.35.0</calcite.version>
+        <calcite.version>1.37.0</calcite.version>
         <calcite.avatica.version>1.23.0</calcite.avatica.version>
         <xk.time.version>3.2.4</xk.time.version>
         <mockito-inline.version>4.5.1</mockito-inline.version>
-
-        <!-- Do not bump spotless plugin version since 2.30.0 is the latest version supports Java 8-->
-        <maven.plugin.spotless.version>2.30.0</maven.plugin.spotless.version>
-        <spotless.python.includes></spotless.python.includes>
-        <!-- Do not bump black version as decided by spotless maven plugin-->
-        <spotless.python.black.version>22.3.0</spotless.python.black.version>
         <easyexcel.version>2.2.6</easyexcel.version>
         <poi.version>3.17</poi.version>
         <langchain4j.version>0.31.0</langchain4j.version>
         <postgresql.version>42.7.1</postgresql.version>
         <st.version>4.0.8</st.version>
         <duckdb_jdbc.version>0.10.0</duckdb_jdbc.version>
-        <protobuf-java.version>3.23.1</protobuf-java.version>
         <flight-sql.version>15.0.2</flight-sql.version>
         <arrow-jdbc.version>15.0.2</arrow-jdbc.version>
         <flight-sql-jdbc-driver.version>15.0.2</flight-sql-jdbc-driver.version>
+        <gson.version>2.10.1</gson.version>
     </properties>
 
     <dependencyManagement>
@@ -199,42 +192,16 @@
                 <groupId>dev.langchain4j</groupId>
                 <artifactId>langchain4j-dashscope</artifactId>
                 <version>${langchain4j.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.slf4j</groupId>
-                        <artifactId>slf4j-simple</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
             <dependency>
                 <groupId>dev.langchain4j</groupId>
                 <artifactId>langchain4j-milvus</artifactId>
                 <version>${langchain4j.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.slf4j</groupId>
-                        <artifactId>slf4j-simple</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.apache.logging.log4j</groupId>
-                        <artifactId>log4j-slf4j-impl</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.apache.logging.log4j</groupId>
-                        <artifactId>log4j-to-slf4j</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
             <dependency>
                 <groupId>dev.langchain4j</groupId>
                 <artifactId>langchain4j-chatglm</artifactId>
                 <version>${langchain4j.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.slf4j</groupId>
-                        <artifactId>slf4j-simple</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
             <!---langchain4j-->
             <dependency>
@@ -242,17 +209,13 @@
                 <artifactId>spring-boot-autoconfigure-processor</artifactId>
                 <version>${spring.version}</version>
             </dependency>
+            <dependency>
+                <groupId>com.google.code.gson</groupId>
+                <artifactId>gson</artifactId>
+                <version>${gson.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
-
-    <profiles>
-        <profile>
-            <id>spotless-python</id>
-            <properties>
-                <spotless.python.includes>src/**/*.py</spotless.python.includes>
-            </properties>
-        </profile>
-    </profiles>
 
     <build>
         <plugins>
@@ -303,10 +266,6 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-checkstyle-plugin</artifactId>
             </plugin>
-            <plugin>
-                <groupId>com.diffplug.spotless</groupId>
-                <artifactId>spotless-maven-plugin</artifactId>
-            </plugin>
         </plugins>
         <pluginManagement>
             <plugins>
@@ -339,31 +298,6 @@
                             <id>checkstyle-validation</id>
                             <phase>validate</phase>
                             <inherited>true</inherited>
-                            <goals>
-                                <goal>check</goal>
-                            </goals>
-                        </execution>
-                    </executions>
-                </plugin>
-                <plugin>
-                    <groupId>com.diffplug.spotless</groupId>
-                    <artifactId>spotless-maven-plugin</artifactId>
-                    <version>${maven.plugin.spotless.version}</version>
-                    <configuration>
-                        <upToDateChecking>
-                            <enabled>true</enabled>
-                        </upToDateChecking>
-                        <python>
-                            <includes>
-                                <include>${spotless.python.includes}</include>
-                            </includes>
-                            <black>
-                                <version>${spotless.python.black.version}</version>
-                            </black>
-                        </python>
-                    </configuration>
-                    <executions>
-                        <execution>
                             <goals>
                                 <goal>check</goal>
                             </goals>

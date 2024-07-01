@@ -27,9 +27,7 @@ public class LLMSqlQuery extends LLMSemanticQuery {
 
     @Override
     public SemanticQueryReq buildSemanticQueryReq() {
-
-        String querySql = parseInfo.getSqlInfo().getCorrectS2SQL();
-        return QueryReqBuilder.buildS2SQLReq(querySql, parseInfo.getDataSetId());
+        return QueryReqBuilder.buildS2SQLReq(parseInfo.getSqlInfo(), parseInfo.getDataSetId());
     }
 
     @Override

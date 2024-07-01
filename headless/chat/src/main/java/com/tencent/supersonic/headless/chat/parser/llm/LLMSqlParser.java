@@ -35,7 +35,7 @@ public class LLMSqlParser implements SemanticParser {
             if (dataSetId == null) {
                 return;
             }
-            log.info("Generate query statement for dataSetId:{}", dataSetId);
+            log.info("Try generating query statement for dataSetId:{}", dataSetId);
 
             //3.invoke LLM service to do parsing.
             tryParse(queryCtx, dataSetId);
@@ -51,11 +51,11 @@ public class LLMSqlParser implements SemanticParser {
 
         LLMReq llmReq = requestService.getLlmReq(queryCtx, dataSetId);
 
-        int currentRetry = 0;
+        int currentRetry = 1;
         Map<String, LLMSqlResp> sqlRespMap = new HashMap<>();
         ParseResult parseResult = null;
-        while (currentRetry < maxRetries) {
-            log.info("currentRetry:{},start runText2SQL", currentRetry);
+        while (currentRetry <= maxRetries) {
+            log.info("currentRetryRound:{}, start runText2SQL", currentRetry);
             try {
                 LLMResp llmResp = requestService.runText2SQL(llmReq);
                 if (Objects.nonNull(llmResp)) {
@@ -68,7 +68,7 @@ public class LLMSqlParser implements SemanticParser {
                     }
                 }
             } catch (Exception e) {
-                log.error("currentRetry:{},runText2SQL error", currentRetry, e);
+                log.error("currentRetryRound:{}, runText2SQL failed", currentRetry, e);
             }
             currentRetry++;
         }

@@ -16,9 +16,11 @@ import com.tencent.supersonic.headless.api.pojo.enums.MetricType;
 import com.tencent.supersonic.headless.api.pojo.request.MetricReq;
 import com.tencent.supersonic.headless.api.pojo.response.MetricResp;
 import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
-import com.tencent.supersonic.headless.server.facade.service.RetrieveService;
+import com.tencent.supersonic.headless.server.facade.service.ChatQueryService;
 import com.tencent.supersonic.headless.server.persistence.dataobject.MetricDO;
 import com.tencent.supersonic.headless.server.persistence.repository.MetricRepository;
+import com.tencent.supersonic.headless.server.utils.AliasGenerateHelper;
+import com.tencent.supersonic.headless.server.utils.MetricConverter;
 import com.tencent.supersonic.headless.server.web.service.CollectService;
 import com.tencent.supersonic.headless.server.web.service.DataSetService;
 import com.tencent.supersonic.headless.server.web.service.DimensionService;
@@ -27,8 +29,6 @@ import com.tencent.supersonic.headless.server.web.service.ModelService;
 import com.tencent.supersonic.headless.server.web.service.TagMetaService;
 import com.tencent.supersonic.headless.server.web.service.impl.DataSetServiceImpl;
 import com.tencent.supersonic.headless.server.web.service.impl.MetricServiceImpl;
-import com.tencent.supersonic.headless.server.utils.AliasGenerateHelper;
-import com.tencent.supersonic.headless.server.utils.MetricConverter;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -77,10 +77,10 @@ public class MetricServiceImplTest {
         DataSetService dataSetService = Mockito.mock(DataSetServiceImpl.class);
         DimensionService dimensionService = Mockito.mock(DimensionService.class);
         TagMetaService tagMetaService = Mockito.mock(TagMetaService.class);
-        RetrieveService metaDiscoveryService = Mockito.mock(RetrieveService.class);
+        ChatQueryService chatQueryService = Mockito.mock(ChatQueryService.class);
         return new MetricServiceImpl(metricRepository, modelService, aliasGenerateHelper,
                 collectService, dataSetService, eventPublisher, dimensionService,
-                tagMetaService, metaDiscoveryService);
+                tagMetaService, chatQueryService);
     }
 
     private MetricReq buildMetricReq() {

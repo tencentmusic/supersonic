@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
 @Repository
 public class DictRepositoryImpl implements DictRepository {
 
-    @Value("${dict.task.num:10}")
+    @Value("${s2.dict.task.num:10}")
     private Integer dictTaskNum;
 
     private final DictTaskMapper dictTaskMapper;

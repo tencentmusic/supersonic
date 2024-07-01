@@ -6,7 +6,7 @@ import com.tencent.supersonic.headless.server.persistence.mapper.ClassMapper;
 import com.tencent.supersonic.headless.server.persistence.repository.ClassRepository;
 import com.tencent.supersonic.headless.server.pojo.ClassFilter;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.logging.log4j.util.Strings;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -52,7 +52,7 @@ public class ClassRepositoryImpl implements ClassRepository {
         if (Objects.nonNull(filter.getDataSetId())) {
             wrapper.lambda().eq(ClassDO::getDataSetId, filter.getDataSetId());
         }
-        if (Strings.isNotEmpty(filter.getType())) {
+        if (StringUtils.isNotEmpty(filter.getType())) {
             wrapper.lambda().eq(ClassDO::getType, filter.getType());
         }
         if (CollectionUtils.isNotEmpty(filter.getIds())) {

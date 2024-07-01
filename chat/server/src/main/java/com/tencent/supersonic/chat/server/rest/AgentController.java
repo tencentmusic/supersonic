@@ -28,21 +28,19 @@ public class AgentController {
     private AgentService agentService;
 
     @PostMapping
-    public boolean createAgent(@RequestBody Agent agent,
+    public Agent createAgent(@RequestBody Agent agent,
                                 HttpServletRequest httpServletRequest,
                                 HttpServletResponse httpServletResponse) {
         User user = UserHolder.findUser(httpServletRequest, httpServletResponse);
-        agentService.createAgent(agent, user);
-        return true;
+        return agentService.createAgent(agent, user);
     }
 
     @PutMapping
-    public boolean updateAgent(@RequestBody Agent agent,
+    public Agent updateAgent(@RequestBody Agent agent,
                                 HttpServletRequest httpServletRequest,
                                 HttpServletResponse httpServletResponse) {
         User user = UserHolder.findUser(httpServletRequest, httpServletResponse);
-        agentService.updateAgent(agent, user);
-        return true;
+        return agentService.updateAgent(agent, user);
     }
 
     @DeleteMapping("/{id}")

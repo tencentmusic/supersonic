@@ -1,12 +1,6 @@
 import { uuid } from '@/utils/utils';
-import {
-  ArrowLeftOutlined,
-  DeleteOutlined,
-  EditOutlined,
-  PlusOutlined,
-  ToolOutlined,
-} from '@ant-design/icons';
-import { Button, Empty, Popconfirm, Space, Switch, Tag } from 'antd';
+import { DeleteOutlined, EditOutlined, ToolOutlined } from '@ant-design/icons';
+import { Empty, Popconfirm } from 'antd';
 import { useState } from 'react';
 import styles from './style.less';
 import ToolModal from './ToolModal';
@@ -15,11 +9,9 @@ import { AgentToolType, AgentType, AGENT_TOOL_TYPE_LIST } from './type';
 type Props = {
   currentAgent?: AgentType;
   onSaveAgent: (agent: AgentType, noTip?: boolean) => Promise<void>;
-  onEditAgent: (agent?: AgentType) => void;
-  goBack: () => void;
 };
 
-const ToolsSection: React.FC<Props> = ({ currentAgent, onSaveAgent, onEditAgent, goBack }) => {
+const ToolsSection: React.FC<Props> = ({ currentAgent, onSaveAgent }) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [editTool, setEditTool] = useState<AgentToolType>();
 
@@ -63,99 +55,8 @@ const ToolsSection: React.FC<Props> = ({ currentAgent, onSaveAgent, onEditAgent,
   };
 
   return (
-    <div className={styles.toolsSection}>
-      <div className={styles.toolsSectionTitleBar}>
-        <ArrowLeftOutlined className={styles.backIcon} onClick={goBack} />
-        <div className={styles.agentTitle}>{currentAgent?.name}</div>
-        <div className={styles.toggleStatus}>
-          {currentAgent?.status === 0 ? '已禁用' : <span className={styles.online}>已启用</span>}
-          <span
-            onClick={(e) => {
-              e.stopPropagation();
-            }}
-          >
-            <Switch
-              size="small"
-              defaultChecked={currentAgent?.status === 1}
-              onChange={(value) => {
-                onSaveAgent({ ...currentAgent, status: value ? 1 : 0 }, true);
-              }}
-            />
-          </span>
-        </div>
-      </div>
-      <div className={styles.basicInfo}>
-        <div className={styles.basicInfoTitle}>
-          基本信息
-          <Button
-            type="primary"
-            onClick={() => {
-              onEditAgent(currentAgent);
-            }}
-          >
-            修改信息
-          </Button>
-        </div>
-        <div className={styles.infoContent}>
-          <div className={styles.infoItem}>
-            <span className={styles.label}> 示例问题：</span>
-            <Space>
-              {currentAgent?.examples?.map((item) => (
-                <Tag key={item}>{item}</Tag>
-              ))}
-            </Space>
-          </div>
-          <div className={styles.infoItem}>
-            <span className={styles.label}> 描述： </span>
-            {currentAgent?.description}
-          </div>
-        </div>
-      </div>
-      {currentAgent?.llmConfig && (
-        <div className={styles.basicInfo}>
-          <div className={styles.basicInfoTitle}>大模型信息</div>
-          <div className={styles.infoContent}>
-            <div className={styles.infoItem}>
-              <span className={styles.label}> 模型提供方式：</span>
-              {currentAgent?.llmConfig?.provider}
-            </div>
-            <div className={styles.infoItem}>
-              <span className={styles.label}>大模型名称:</span>
-              {currentAgent?.llmConfig?.modelName}
-            </div>
-            <div className={styles.infoItem}>
-              <span className={styles.label}>Base URL: </span>
-              {currentAgent?.llmConfig?.baseUrl}
-            </div>
-            <div className={styles.infoItem}>
-              <span className={styles.label}>API KEY:</span>
-              {currentAgent?.llmConfig?.apiKey}
-            </div>
-            <div className={styles.infoItem}>
-              <span className={styles.label}>Temperature: </span>
-              {currentAgent?.llmConfig?.temperature}
-            </div>
-            <div className={styles.infoItem}>
-              <span className={styles.label}>超时时间(秒): </span>{' '}
-              {currentAgent?.llmConfig?.timeOut}
-            </div>
-          </div>
-        </div>
-      )}
-
+    <>
       <div className={styles.toolSection}>
-        <div className={styles.toolSectionTitleBar}>
-          <div className={styles.toolSectionTitle}>工具</div>
-          <Button
-            type="primary"
-            onClick={() => {
-              setEditTool(undefined);
-              setModalVisible(true);
-            }}
-          >
-            <PlusOutlined /> 新增工具
-          </Button>
-        </div>
         {agentConfig?.tools && agentConfig?.tools?.length > 0 ? (
           <div className={styles.toolsContent}>
             {agentConfig.tools.map((tool: AgentToolType) => {
@@ -211,7 +112,11 @@ const ToolsSection: React.FC<Props> = ({ currentAgent, onSaveAgent, onEditAgent,
           </div>
         ) : (
           <div className={styles.emptyHolder}>
-            <Empty description={`【${currentAgent?.name}】暂无工具，请新增工具`} />
+            <Empty
+              description={`${
+                currentAgent?.name ? `【${currentAgent?.name}】` : ''
+              }暂无工具，请新增工具`}
+            />
           </div>
         )}
       </div>
@@ -224,7 +129,7 @@ const ToolsSection: React.FC<Props> = ({ currentAgent, onSaveAgent, onEditAgent,
           }}
         />
       )}
-    </div>
+    </>
   );
 };
 

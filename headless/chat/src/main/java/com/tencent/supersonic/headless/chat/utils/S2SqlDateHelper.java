@@ -2,7 +2,7 @@ package com.tencent.supersonic.headless.chat.utils;
 
 import com.tencent.supersonic.common.pojo.enums.QueryType;
 import com.tencent.supersonic.common.pojo.enums.TimeMode;
-import com.tencent.supersonic.common.util.DatePeriodEnum;
+import com.tencent.supersonic.common.pojo.enums.DatePeriodEnum;
 import com.tencent.supersonic.common.util.DateUtils;
 import com.tencent.supersonic.headless.api.pojo.DataSetSchema;
 import com.tencent.supersonic.headless.api.pojo.TimeDefaultConfig;

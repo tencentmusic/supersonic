@@ -8,11 +8,9 @@ public interface AgentService {
 
     List<Agent> getAgents();
 
-    List<Agent> getAgents(User user);
+    Agent createAgent(Agent agent, User user);
 
-    Integer createAgent(Agent agent, User user);
-
-    void updateAgent(Agent agent, User user);
+    Agent updateAgent(Agent agent, User user);
 
     Agent getAgent(Integer id);
 

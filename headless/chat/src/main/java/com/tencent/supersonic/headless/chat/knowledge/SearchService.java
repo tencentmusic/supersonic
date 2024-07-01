@@ -137,7 +137,7 @@ public class SearchService {
     }
 
     public static void clear() {
-        log.info("clear all trie");
+        log.debug("clear all trie");
         trie = new BinTrie<>();
         suffixTrie = new BinTrie<>();
     }
@@ -189,7 +189,7 @@ public class SearchService {
         String nature = DictWordType.NATURE_SPILT + dimensionValueReq.getModelId() + DictWordType.NATURE_SPILT
                 + dimensionValueReq.getElementID();
         PriorityQueue<Term> terms = MultiCustomDictionary.NATURE_TO_VALUES.get(nature);
-        if (org.apache.commons.collections.CollectionUtils.isEmpty(terms)) {
+        if (CollectionUtils.isEmpty(terms)) {
             return new ArrayList<>();
         }
         return terms.stream().map(term -> term.getWord()).collect(Collectors.toList());

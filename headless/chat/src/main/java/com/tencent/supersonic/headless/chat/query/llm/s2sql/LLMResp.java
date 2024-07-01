@@ -12,15 +12,12 @@ public class LLMResp {
 
     private String modelName;
 
+    private String dbSchema;
+
     private String sqlOutput;
 
     private List<String> fields;
 
     private Map<String, LLMSqlResp> sqlRespMap;
-
-    /**
-     * Only for compatibility with python code, later deleted
-     */
-    private Map<String, Double> sqlWeight;
 
 }

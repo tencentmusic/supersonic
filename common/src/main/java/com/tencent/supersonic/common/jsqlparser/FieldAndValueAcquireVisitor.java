@@ -1,6 +1,6 @@
 package com.tencent.supersonic.common.jsqlparser;
 
-import com.tencent.supersonic.common.util.DatePeriodEnum;
+import com.tencent.supersonic.common.pojo.enums.DatePeriodEnum;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;

@@ -71,10 +71,18 @@ const ParseTip: React.FC<Props> = ({
           <CheckCircleFilled className={`${prefixCls}-step-icon`} />
           <div className={`${prefixCls}-step-title`}>
             {tipTitle}
-            {!tipNode && <Loading />}
+            {tipNode === undefined && <Loading />}
           </div>
         </div>
-        {tipNode && <div className={`${prefixCls}-content-container`}>{tipNode}</div>}
+        {(tipNode || tipNode === null) && (
+          <div
+            className={`${prefixCls}-content-container ${
+              tipNode === null ? `${prefixCls}-empty-content-container` : ''
+            }`}
+          >
+            {tipNode}
+          </div>
+        )}
       </div>
     );
   };
@@ -131,7 +139,6 @@ const ParseTip: React.FC<Props> = ({
 
   const getTipNode = () => {
     const dimensionItems = dimensions?.filter(item => item.type === 'DIMENSION');
-
     const itemValueClass = `${prefixCls}-tip-item-value`;
     const entityId = dimensionFilters?.length > 0 ? dimensionFilters[0].value : undefined;
     const entityAlias = entity?.alias?.[0]?.split('.')?.[0];
@@ -192,14 +199,7 @@ const ParseTip: React.FC<Props> = ({
               fields.length > 0 && (
                 <div className={`${prefixCls}-tip-item`}>
                   <div className={`${prefixCls}-tip-item-name`}>
-                    {queryMode === 'LLM_S2SQL'
-                      ? nativeQuery
-                        ? '查询字段'
-                        : '下钻维度'
-                      : queryMode === 'TAG_DETAIL'
-                      ? '查询字段'
-                      : '下钻维度'}
-                    ：
+                    {queryType === 'DETAIL' ? '查询字段' : '下钻维度'}：
                   </div>
                   <div className={itemValueClass}>
                     {fields
@@ -336,7 +336,7 @@ const ParseTip: React.FC<Props> = ({
         </div>
       )} */}
     </div>,
-    isSimpleMode ? <MarkDown markdown={textInfo} /> : tipNode
+    isSimpleMode ? <MarkDown markdown={textInfo} /> : queryMode === 'PLAIN_TEXT' ? null : tipNode
   );
 };
 

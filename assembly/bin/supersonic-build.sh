@@ -44,6 +44,8 @@ function packageRelease {
   service_name=launchers-${model_name}-${MVN_VERSION}
   echo "starting packaging supersonic release"
   cd $buildDir
+  [ -d "$release_dir" ] && rm -rf "$release_dir"
+  [ -f "$release_dir.zip" ] && rm -f "$release_dir.zip"
   mkdir $release_dir
   # package webapp
   tar xvf supersonic-webapp.tar.gz
@@ -63,12 +65,7 @@ function packageRelease {
 }
 
 #1. build backend services
-if [ "$service" == $PYLLM_SERVICE ]; then
-  echo "start installing python modules required by supersonic-pyllm: ${pip_path}"
-  requirementPath=$projectDir/headless/python/requirements.txt
-  ${pip_path} install -r ${requirementPath}
-  echo "install python modules success"
-elif [ "$service" == "webapp" ]; then
+if [ "$service" == "webapp" ]; then
   buildWebapp
   target_path=$projectDir/launchers/$STANDALONE_SERVICE/target/classes
   tar xvf $projectDir/webapp/supersonic-webapp.tar.gz -C $target_path

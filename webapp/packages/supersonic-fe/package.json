@@ -95,7 +95,7 @@
     "react-split-pane": "^2.0.3",
     "react-syntax-highlighter": "^15.4.3",
     "scheduler": "^0.23.2",
-    "sql-formatter": "^2.3.3",
+    "sql-formatter": "^15.3.2",
     "supersonic-chat-sdk": "workspace:*",
     "supersonic-insights-flow-components": "^1.4.9",
     "umi-request": "1.4.0",
@@ -139,7 +139,7 @@
     "umi-presets-pro": "2.0.2"
   },
   "engines": {
-    "node": ">=16.0.0 <20.0.0"
+    "node": ">=16.0.0"
   },
   "__npminstall_done": false
 }

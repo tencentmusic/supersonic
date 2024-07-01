@@ -71,6 +71,10 @@ public class Agent extends RecordInfo {
                 .collect(Collectors.toList());
     }
 
+    public boolean containsPluginTool() {
+        return !CollectionUtils.isEmpty(getParserTools(AgentToolType.PLUGIN));
+    }
+
     public boolean containsLLMParserTool() {
         return !CollectionUtils.isEmpty(getParserTools(AgentToolType.NL2SQL_LLM));
     }
@@ -82,6 +86,19 @@ public class Agent extends RecordInfo {
     public boolean containsNL2SQLTool() {
         return !CollectionUtils.isEmpty(getParserTools(AgentToolType.NL2SQL_LLM))
                 || !CollectionUtils.isEmpty(getParserTools(AgentToolType.NL2SQL_RULE));
+    }
+
+    public boolean containsAnyTool() {
+        Map map = JSONObject.parseObject(agentConfig, Map.class);
+        if (CollectionUtils.isEmpty(map)) {
+            return false;
+        }
+        List<Map> toolList = (List) map.get("tools");
+        if (CollectionUtils.isEmpty(toolList)) {
+            return false;
+        }
+
+        return true;
     }
 
     public Set<Long> getDataSetIds() {

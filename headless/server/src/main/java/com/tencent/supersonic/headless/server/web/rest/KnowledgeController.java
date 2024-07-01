@@ -11,7 +11,7 @@ import com.tencent.supersonic.headless.api.pojo.request.DictValueReq;
 import com.tencent.supersonic.headless.api.pojo.response.DictItemResp;
 import com.tencent.supersonic.headless.api.pojo.response.DictTaskResp;
 import com.tencent.supersonic.headless.api.pojo.response.DictValueResp;
-import com.tencent.supersonic.headless.server.schedule.EmbeddingTask;
+import com.tencent.supersonic.headless.server.task.MetaEmbeddingTask;
 import com.tencent.supersonic.headless.server.web.service.DictConfService;
 import com.tencent.supersonic.headless.server.web.service.DictTaskService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,7 +39,7 @@ public class KnowledgeController {
     private DictConfService confService;
 
     @Autowired
-    private EmbeddingTask embeddingTask;
+    private MetaEmbeddingTask embeddingTask;
 
     /**
      * addDictConf-新增item的字典配置
@@ -141,6 +141,12 @@ public class KnowledgeController {
         return true;
     }
 
+    @GetMapping("/embedding/persistFile")
+    public Object executePersistFileTask() {
+        embeddingTask.executePersistFileTask();
+        return true;
+    }
+
     /**
      * queryDictValue-返回字典的数据
      *
@@ -161,8 +167,8 @@ public class KnowledgeController {
      */
     @PostMapping("/dict/file")
     public String queryDictFilePath(@RequestBody @Valid DictValueReq dictValueReq,
-                                                  HttpServletRequest request,
-                                                  HttpServletResponse response) {
+                                    HttpServletRequest request,
+                                    HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
         return taskService.queryDictFilePath(dictValueReq, user);
     }

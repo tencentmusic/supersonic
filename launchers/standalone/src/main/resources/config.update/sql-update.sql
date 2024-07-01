@@ -329,3 +329,22 @@ alter table s2_agent add column `visual_config` varchar(2000)  COLLATE utf8_unic
 
 alter table s2_term add column `related_metrics` varchar(1000)  DEFAULT NULL  COMMENT '术语关联的指标';
 alter table s2_term add column `related_dimensions` varchar(1000)  DEFAULT NULL  COMMENT '术语关联的维度';
+
+--20240627
+CREATE TABLE IF NOT EXISTS `s2_chat_memory` (
+                                                `id` INT NOT NULL AUTO_INCREMENT,
+                                                `question` varchar(655)    ,
+    `agent_id`  INT    ,
+    `db_schema`  TEXT    ,
+    `s2_sql` TEXT   ,
+    `status` char(10)   ,
+    `llm_review` char(10)   ,
+    `llm_comment`   TEXT,
+    `human_review` char(10) ,
+    `human_comment` TEXT    ,
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP  ,
+    `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP ,
+    `created_by` varchar(100) NOT NULL   ,
+    `updated_by` varchar(100) NOT NULL   ,
+    PRIMARY KEY (`id`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8;

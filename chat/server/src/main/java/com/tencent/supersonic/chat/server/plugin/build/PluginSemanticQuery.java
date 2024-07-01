@@ -77,8 +77,8 @@ public abstract class PluginSemanticQuery {
         List<ParamOption> paramOptions = Lists.newArrayList();
         if (!CollectionUtils.isEmpty(webPage.getParamOptions()) && !CollectionUtils.isEmpty(elementValueMap)) {
             for (ParamOption paramOption : webPage.getParamOptions()) {
-                if (paramOption.getModelId() != null
-                        && !parseInfo.getDataSetId().equals(paramOption.getModelId())) {
+                if (paramOption.getDataSetId() != null
+                        && !parseInfo.getDataSetId().equals(paramOption.getDataSetId())) {
                     continue;
                 }
                 paramOptions.add(paramOption);

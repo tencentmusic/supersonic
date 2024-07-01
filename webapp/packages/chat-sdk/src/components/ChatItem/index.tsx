@@ -48,6 +48,7 @@ type Props = {
   executeItemNode?: React.ReactNode;
   renderCustomExecuteNode?: boolean;
   isSimpleMode?: boolean;
+  isDebugMode?: boolean;
   onMsgDataLoaded?: (data: MsgDataType, valid: boolean, isRefresh?: boolean) => void;
   onQuestionAsked?: () => void;
   onUpdateMessageScroll?: () => void;
@@ -70,6 +71,7 @@ const ChatItem: React.FC<Props> = ({
   executeItemNode,
   renderCustomExecuteNode,
   isSimpleMode,
+  isDebugMode,
   onMsgDataLoaded,
   onQuestionAsked,
   onUpdateMessageScroll,
@@ -98,7 +100,7 @@ const ChatItem: React.FC<Props> = ({
   const updateData = (res: Result<MsgDataType>) => {
     let tip: string = '';
     let data: MsgDataType | undefined = undefined;
-    const { queryColumns, queryResults, queryState, queryMode, response, chatContext } =
+    const { queryColumns, queryResults, queryState, queryMode, response, chatContext, textResult } =
       res.data || {};
     if (res.code === 400 || res.code === 401 || res.code === 412) {
       tip = res.msg;
@@ -108,7 +110,8 @@ const ChatItem: React.FC<Props> = ({
       tip = response && typeof response === 'string' ? response : SEARCH_EXCEPTION_TIP;
     } else if (
       (queryColumns && queryColumns.length > 0 && queryResults) ||
-      queryMode === 'WEB_PAGE'
+      queryMode === 'WEB_PAGE' ||
+      queryMode === 'PLAIN_TEXT'
     ) {
       data = res.data;
       tip = '';
@@ -137,7 +140,7 @@ const ChatItem: React.FC<Props> = ({
       setExecuteLoading(true);
     }
     try {
-      const res: any = await chatExecute(msg, conversationId!, parseInfoValue);
+      const res: any = await chatExecute(msg, conversationId!, parseInfoValue, agentId);
       const valid = updateData(res);
       onMsgDataLoaded?.(
         {
@@ -524,6 +527,7 @@ const ChatItem: React.FC<Props> = ({
                 parseInfo?.sqlInfo &&
                 isDeveloper &&
                 integrateSystem !== 'c2' &&
+                isDebugMode &&
                 !isSimpleMode && (
                   <SqlItemModal
                     ref={sqlItemModalRef}
@@ -538,6 +542,7 @@ const ChatItem: React.FC<Props> = ({
               <ExecuteItem
                 isSimpleMode={isSimpleMode}
                 queryId={parseInfo?.queryId}
+                queryMode={parseInfo?.queryMode}
                 executeLoading={executeLoading}
                 entitySwitchLoading={entitySwitchLoading}
                 executeTip={executeTip}
@@ -573,19 +578,20 @@ const ChatItem: React.FC<Props> = ({
             </>
           )}
           {/* {(parseTip !== '' || (executeMode && !executeLoading)) &&
-            integrateSystem !== 'c2' &&
-            !isSimpleMode && (
+            !isSimpleMode &&
+            parseInfo?.queryMode !== 'PLAIN_TEXT' && (
               <SimilarQuestionItem
                 queryId={parseInfo?.queryId}
-                defaultExpanded={parseTip !== '' || executeTip !== '' || integrateSystem === 'wiki'}
+                defaultExpanded={parseTip !== '' || executeTip !== ''}
                 similarQueries={data?.similarQueries}
                 onSelectQuestion={onSelectQuestion}
               />
             )} */}
         </div>
-        {(parseTip !== '' || (executeMode && !executeLoading)) && integrateSystem !== 'c2' && (
-          <Tools queryId={parseInfo?.queryId || 0} scoreValue={score} />
-        )}
+        {(parseTip !== '' || (executeMode && !executeLoading)) &&
+          parseInfo?.queryMode !== 'PLAIN_TEXT' && (
+            <Tools queryId={parseInfo?.queryId || 0} scoreValue={score} />
+          )}
       </div>
     </div>
   );

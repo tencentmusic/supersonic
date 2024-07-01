@@ -1,6 +1,6 @@
 package com.tencent.supersonic.common.jsqlparser;
 
-import com.tencent.supersonic.common.util.DatePeriodEnum;
+import com.tencent.supersonic.common.pojo.enums.DatePeriodEnum;
 import com.tencent.supersonic.common.util.DateUtils;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.expression.DoubleValue;

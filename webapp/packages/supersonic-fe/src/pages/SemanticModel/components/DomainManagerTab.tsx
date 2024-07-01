@@ -53,7 +53,7 @@ const DomainManagerTab: React.FC<Props> = ({
     {
       label: '模型管理',
       key: 'overview',
-      hidden: domainData && domainListParentIdList.includes(domainData.id),
+      // hidden: domainData && domainListParentIdList.includes(domainData.id),
       children:
         showModelType === 'list' ? (
           <OverView
@@ -211,8 +211,8 @@ const DomainManagerTab: React.FC<Props> = ({
           right:
             getActiveKey() === 'overview' ? (
               <Radio.Group
-                defaultValue="list"
                 buttonStyle="solid"
+                value={showModelType}
                 size="small"
                 style={{ marginRight: 25 }}
                 onChange={(e) => {
@@ -220,6 +220,7 @@ const DomainManagerTab: React.FC<Props> = ({
                   setShowModelType(showType);
                 }}
               >
+                {showModelType}
                 <Radio.Button value="list">列表</Radio.Button>
                 <Radio.Button value="canvas">画布</Radio.Button>
               </Radio.Group>

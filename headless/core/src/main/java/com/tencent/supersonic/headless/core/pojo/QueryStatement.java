@@ -11,6 +11,7 @@ import java.util.List;
 
 @Data
 public class QueryStatement {
+
     private Long dataSetId;
     private List<Long> modelIds;
     private String sql = "";
@@ -34,10 +35,15 @@ public class QueryStatement {
 
     private SemanticSchemaResp semanticSchemaResp;
     private Integer limit = 1000;
+    private Boolean isTranslated = false;
 
     public boolean isOk() {
         this.ok = "".equals(errMsg) && !"".equals(sql);
         return ok;
+    }
+
+    public boolean isTranslated() {
+        return isTranslated != null && isTranslated && isOk();
     }
 
     public QueryStatement error(String msg) {
