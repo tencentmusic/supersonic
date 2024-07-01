@@ -27,7 +27,7 @@ public class MetaEmbeddingListener implements ApplicationListener<DataEvent> {
     @Autowired
     private EmbeddingService embeddingService;
 
-    @Value("${embedding.operation.sleep.time:3000}")
+    @Value("${s2.embedding.operation.sleep.time:3000}")
     private Integer embeddingOperationSleepTime;
 
     @Async
@@ -42,7 +42,6 @@ public class MetaEmbeddingListener implements ApplicationListener<DataEvent> {
             return;
         }
         sleep();
-        embeddingService.addCollection(embeddingConfig.getMetaCollectionName());
         if (event.getEventType().equals(EventType.ADD)) {
             embeddingService.addQuery(embeddingConfig.getMetaCollectionName(), textSegments);
         } else if (event.getEventType().equals(EventType.DELETE)) {

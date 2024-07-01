@@ -1,15 +1,17 @@
 package com.tencent.supersonic.headless.chat.parser.llm;
 
 import com.google.common.collect.Lists;
+import com.tencent.supersonic.common.pojo.SqlExemplar;
 import com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMReq;
 import com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMResp;
-import dev.langchain4j.model.input.Prompt;
-import dev.langchain4j.model.input.PromptTemplate;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
+import dev.langchain4j.model.input.Prompt;
+import dev.langchain4j.model.input.PromptTemplate;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,18 +22,33 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class OnePassSCSqlGenStrategy extends SqlGenStrategy {
 
+    private static final String INSTRUCTION = ""
+            + "#Role: You are a data analyst experienced in SQL languages.\n"
+            + "#Task: You will be provided a natural language query asked by business users,"
+            + "please convert it to a SQL query so that relevant answer could be returned to the user "
+            + "by executing the SQL query against underlying database.\n"
+            + "#DDLInfo:"
+            + "#Rules:"
+            + "1.ALWAYS use `数据日期` as the date field."
+            + "2.ALWAYS use `datediff()` as the date function."
+            + "3.DO NOT specify date filter in the where clause if not explicitly mentioned in the query."
+            + "4.ONLY respond with the converted SQL statement.\n"
+            + "#Exemplars:\n%s"
+            + "#UserQuery: %s "
+            + "#Schema: %s "
+            + "#SQL: ";
+
     @Autowired
     private DifyServiceClient difyServiceClient;
-
     @Override
     public LLMResp generate(LLMReq llmReq) {
         //1.recall exemplars
         keyPipelineLog.info("OnePassSCSqlGenStrategy llmReq:\n{}", llmReq);
-        List<List<Map<String, String>>> exemplarsList = promptHelper.getFewShotExemplars(llmReq);
+        List<List<SqlExemplar>> exemplarsList = promptHelper.getFewShotExemplars(llmReq);
 
         //2.generate sql generation prompt for each self-consistency inference
-        Map<Prompt, List<Map<String, String>>> prompt2Exemplar = new HashMap<>();
-        for (List<Map<String, String>> exemplars : exemplarsList) {
+        Map<Prompt, List<SqlExemplar>> prompt2Exemplar = new HashMap<>();
+        for (List<SqlExemplar> exemplars : exemplarsList) {
             Prompt prompt = generatePrompt(llmReq, exemplars);
             prompt2Exemplar.put(prompt, exemplars);
         }
@@ -51,45 +68,28 @@ public class OnePassSCSqlGenStrategy extends SqlGenStrategy {
         Pair<String, Map<String, Double>> sqlMapPair = OutputFormat.selfConsistencyVote(
                 Lists.newArrayList(prompt2Output.values()));
         LLMResp llmResp = new LLMResp();
-        llmResp.setQuery(llmReq.getQueryText());
+        llmResp.setQuery(promptHelper.buildAugmentedQuestion(llmReq));
+        llmResp.setDbSchema(promptHelper.buildSchemaStr(llmReq));
+        llmResp.setSqlOutput(sqlMapPair.getLeft());
         //TODO: should use the same few-shot exemplars as the one chose by self-consistency vote
         llmResp.setSqlRespMap(OutputFormat.buildSqlRespMap(exemplarsList.get(0), sqlMapPair.getRight()));
 
         return llmResp;
     }
 
-    private Prompt generatePrompt(LLMReq llmReq, List<Map<String, String>> fewshotExampleList) {
+    private Prompt generatePrompt(LLMReq llmReq, List<SqlExemplar> fewshotExampleList) {
         String ddlInfo = PromptEnhancer.getDDLInfo(llmReq);
-        String instruction = ""
-                + "#Role: You are a data analyst experienced in SQL languages.\n"
-                + "#Task: You will be provided a natural language query asked by business users,"
-                + "please convert it to a SQL query so that relevant answer could be returned to the user "
-                + "by executing the SQL query against underlying database.\n"
-                + ddlInfo
-                + "#Rules:\n"
-                + "1.ALWAYS use `数据日期` as the date field.\n"
-                + "2.ALWAYS use `datediff()` as the date function.\n"
-                + "3.DO NOT specify date filter in the where clause if not explicitly mentioned in the query.\n"
-                + "4.ONLY respond with the converted SQL statement.\n"
-                + "#Exemplars:\n%s"
-                + "#UserQuery: %s "
-                + "#DatabaseMetadata: %s "
-                + "#SQL: ";
-
         StringBuilder exemplarsStr = new StringBuilder();
-        for (Map<String, String> example : fewshotExampleList) {
-            String metadata = example.get("dbSchema");
-            String question = example.get("questionAugmented");
-            String sql = example.get("sql");
-            String exemplarStr = String.format("#UserQuery: %s #DatabaseMetadata: %s #SQL: %s\n",
-                    question, metadata, sql);
+        for (SqlExemplar exemplar : fewshotExampleList) {
+            String exemplarStr = String.format("#UserQuery: %s #Schema: %s #SQL: %s\n",
+                    exemplar.getQuestion(), exemplar.getDbSchema(), exemplar.getSql());
             exemplarsStr.append(exemplarStr);
         }
 
-        Pair<String, String> questionPrompt = promptHelper.transformQuestionPrompt(llmReq);
-        String dataSemanticsStr = promptHelper.buildMetadataStr(llmReq);
-        String questionAugmented = questionPrompt.getRight();
-        String promptStr = String.format(instruction, exemplarsStr, questionAugmented, dataSemanticsStr);
+        String dataSemanticsStr = promptHelper.buildSchemaStr(llmReq);
+        String questionAugmented = promptHelper.buildAugmentedQuestion(llmReq);
+        String promptStr = String.format(INSTRUCTION.replace("#DDLInfo:", ddlInfo),
+                exemplarsStr, questionAugmented, dataSemanticsStr);
 
         return PromptTemplate.from(promptStr).apply(Collections.EMPTY_MAP);
     }

@@ -15,7 +15,7 @@ import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
 import com.tencent.supersonic.headless.server.pojo.DimensionFilter;
 import com.tencent.supersonic.headless.server.pojo.MetaFilter;
 import com.tencent.supersonic.headless.server.web.service.DimensionService;
-import com.tencent.supersonic.headless.server.web.service.SemanticLayerService;
+import com.tencent.supersonic.headless.server.facade.service.SemanticLayerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -69,6 +69,15 @@ public class DimensionController {
                                      HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
         dimensionService.batchUpdateStatus(metaBatchReq, user);
+        return true;
+    }
+
+    @PostMapping("/batchUpdateSensitiveLevel")
+    public Boolean batchUpdateSensitiveLevel(@RequestBody MetaBatchReq metaBatchReq,
+                                             HttpServletRequest request,
+                                             HttpServletResponse response) {
+        User user = UserHolder.findUser(request, response);
+        dimensionService.batchUpdateSensitiveLevel(metaBatchReq, user);
         return true;
     }
 

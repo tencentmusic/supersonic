@@ -3,6 +3,7 @@ package com.tencent.supersonic.headless.api.pojo.request;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.headless.api.pojo.Cache;
 import com.tencent.supersonic.headless.api.pojo.Param;
+import com.tencent.supersonic.headless.api.pojo.SqlInfo;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -30,6 +31,8 @@ public abstract class SemanticQueryReq {
     protected List<Param> params = new ArrayList<>();
 
     protected Cache cacheInfo = new Cache();
+
+    protected SqlInfo sqlInfo = new SqlInfo();
 
     public void addModelId(Long modelId) {
         modelIds.add(modelId);

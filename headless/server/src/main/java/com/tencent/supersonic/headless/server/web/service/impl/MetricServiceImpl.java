@@ -8,6 +8,7 @@ import com.github.pagehelper.PageInfo;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
+import com.tencent.supersonic.common.jsqlparser.SqlSelectFunctionHelper;
 import com.tencent.supersonic.common.pojo.Aggregator;
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.DataEvent;
@@ -18,9 +19,6 @@ import com.tencent.supersonic.common.pojo.enums.EventType;
 import com.tencent.supersonic.common.pojo.enums.StatusEnum;
 import com.tencent.supersonic.common.pojo.enums.TypeEnums;
 import com.tencent.supersonic.common.util.BeanMapper;
-import com.tencent.supersonic.headless.server.persistence.mapper.MetricDOMapper;
-import com.tencent.supersonic.headless.server.utils.AliasGenerateHelper;
-import com.tencent.supersonic.common.jsqlparser.SqlSelectFunctionHelper;
 import com.tencent.supersonic.headless.api.pojo.DrillDownDimension;
 import com.tencent.supersonic.headless.api.pojo.Measure;
 import com.tencent.supersonic.headless.api.pojo.MeasureParam;
@@ -46,10 +44,12 @@ import com.tencent.supersonic.headless.api.pojo.response.MapInfoResp;
 import com.tencent.supersonic.headless.api.pojo.response.MetricResp;
 import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
 import com.tencent.supersonic.headless.api.pojo.response.TagItem;
+import com.tencent.supersonic.headless.server.facade.service.ChatQueryService;
 import com.tencent.supersonic.headless.server.persistence.dataobject.CollectDO;
 import com.tencent.supersonic.headless.server.persistence.dataobject.MetricDO;
 import com.tencent.supersonic.headless.server.persistence.dataobject.MetricQueryDefaultConfigDO;
 import com.tencent.supersonic.headless.server.persistence.dataobject.TagDO;
+import com.tencent.supersonic.headless.server.persistence.mapper.MetricDOMapper;
 import com.tencent.supersonic.headless.server.persistence.repository.MetricRepository;
 import com.tencent.supersonic.headless.server.pojo.DimensionsFilter;
 import com.tencent.supersonic.headless.server.pojo.MetaFilter;
@@ -58,16 +58,16 @@ import com.tencent.supersonic.headless.server.pojo.MetricsFilter;
 import com.tencent.supersonic.headless.server.pojo.ModelCluster;
 import com.tencent.supersonic.headless.server.pojo.ModelFilter;
 import com.tencent.supersonic.headless.server.pojo.TagFilter;
-import com.tencent.supersonic.headless.server.web.service.CollectService;
-import com.tencent.supersonic.headless.server.web.service.DataSetService;
-import com.tencent.supersonic.headless.server.web.service.DimensionService;
-import com.tencent.supersonic.headless.server.facade.service.RetrieveService;
-import com.tencent.supersonic.headless.server.web.service.MetricService;
-import com.tencent.supersonic.headless.server.web.service.ModelService;
-import com.tencent.supersonic.headless.server.web.service.TagMetaService;
+import com.tencent.supersonic.headless.server.utils.AliasGenerateHelper;
 import com.tencent.supersonic.headless.server.utils.MetricCheckUtils;
 import com.tencent.supersonic.headless.server.utils.MetricConverter;
 import com.tencent.supersonic.headless.server.utils.ModelClusterBuilder;
+import com.tencent.supersonic.headless.server.web.service.CollectService;
+import com.tencent.supersonic.headless.server.web.service.DataSetService;
+import com.tencent.supersonic.headless.server.web.service.DimensionService;
+import com.tencent.supersonic.headless.server.web.service.MetricService;
+import com.tencent.supersonic.headless.server.web.service.ModelService;
+import com.tencent.supersonic.headless.server.web.service.TagMetaService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -75,6 +75,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -110,7 +111,7 @@ public class MetricServiceImpl extends ServiceImpl<MetricDOMapper, MetricDO>
 
     private TagMetaService tagMetaService;
 
-    private RetrieveService metaDiscoveryService;
+    private ChatQueryService chatQueryService;
 
     public MetricServiceImpl(MetricRepository metricRepository,
             ModelService modelService,
@@ -120,7 +121,7 @@ public class MetricServiceImpl extends ServiceImpl<MetricDOMapper, MetricDO>
             ApplicationEventPublisher eventPublisher,
             DimensionService dimensionService,
             TagMetaService tagMetaService,
-            @Lazy RetrieveService metaDiscoveryService) {
+            @Lazy ChatQueryService chatQueryService) {
         this.metricRepository = metricRepository;
         this.modelService = modelService;
         this.aliasGenerateHelper = aliasGenerateHelper;
@@ -129,7 +130,7 @@ public class MetricServiceImpl extends ServiceImpl<MetricDOMapper, MetricDO>
         this.dataSetService = dataSetService;
         this.dimensionService = dimensionService;
         this.tagMetaService = tagMetaService;
-        this.metaDiscoveryService = metaDiscoveryService;
+        this.chatQueryService = chatQueryService;
     }
 
     @Override
@@ -298,7 +299,7 @@ public class MetricServiceImpl extends ServiceImpl<MetricDOMapper, MetricDO>
         queryMapReq.setQueryText(pageMetricReq.getKey());
         queryMapReq.setUser(user);
         queryMapReq.setMapModeEnum(MapModeEnum.LOOSE);
-        MapInfoResp mapMeta = metaDiscoveryService.map(queryMapReq);
+        MapInfoResp mapMeta = chatQueryService.map(queryMapReq);
         Map<String, DataSetMapInfo> dataSetMapInfoMap = mapMeta.getDataSetMapInfo();
         if (CollectionUtils.isEmpty(dataSetMapInfoMap)) {
             return metricRespPageInfo;
@@ -394,7 +395,7 @@ public class MetricServiceImpl extends ServiceImpl<MetricDOMapper, MetricDO>
     }
 
     private List<Long> getCollectIds(PageMetricReq pageMetricReq, User user) {
-        List<CollectDO> collectList = collectService.getCollectList(user.getName(), TypeEnums.METRIC);
+        List<CollectDO> collectList = collectService.getCollectionList(user.getName(), TypeEnums.METRIC);
         List<Long> collectIds = collectList.stream().map(CollectDO::getCollectId).collect(Collectors.toList());
         if (pageMetricReq.isHasCollect()) {
             if (CollectionUtils.isEmpty(collectIds)) {
@@ -531,7 +532,7 @@ public class MetricServiceImpl extends ServiceImpl<MetricDOMapper, MetricDO>
         ModelFilter modelFilter = new ModelFilter(false,
                 Lists.newArrayList(metricDO.getModelId()));
         Map<Long, ModelResp> modelMap = modelService.getModelMap(modelFilter);
-        List<CollectDO> collectList = collectService.getCollectList(user.getName(), TypeEnums.METRIC);
+        List<CollectDO> collectList = collectService.getCollectionList(user.getName(), TypeEnums.METRIC);
         List<Long> collect = collectList.stream().map(CollectDO::getCollectId).collect(Collectors.toList());
         MetricResp metricResp = MetricConverter.convert2MetricResp(metricDO, modelMap, collect);
         fillAdminRes(Lists.newArrayList(metricResp), user);

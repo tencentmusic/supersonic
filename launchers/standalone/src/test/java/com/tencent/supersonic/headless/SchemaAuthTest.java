@@ -32,7 +32,7 @@ public class SchemaAuthTest extends BaseTest {
         User user = DataUtils.getUserAlice();
         setDomainNotOpenToAll();
         List<DomainResp> domainResps = domainService.getDomainListWithAdminAuth(user);
-        List<String> expectedDomainBizNames = Lists.newArrayList("supersonic", "visit_info", "singer", "singer_info");
+        List<String> expectedDomainBizNames = Lists.newArrayList("supersonic", "singer");
         Assertions.assertEquals(expectedDomainBizNames,
                 domainResps.stream().map(DomainResp::getBizName).collect(Collectors.toList()));
     }
@@ -68,7 +68,7 @@ public class SchemaAuthTest extends BaseTest {
     public void test_getDomainList_jack() {
         User user = DataUtils.getUserJack();
         List<DomainResp> domainResps = domainService.getDomainListWithAdminAuth(user);
-        List<String> expectedDomainBizNames = Lists.newArrayList("supersonic", "visit_info");
+        List<String> expectedDomainBizNames = Lists.newArrayList("supersonic");
         Assertions.assertEquals(expectedDomainBizNames,
                 domainResps.stream().map(DomainResp::getBizName).collect(Collectors.toList()));
     }

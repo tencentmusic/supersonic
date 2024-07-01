@@ -1,5 +1,6 @@
 package com.tencent.supersonic.common.config;
 
+import com.tencent.supersonic.common.util.AESEncryptionUtil;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -36,4 +37,9 @@ public class LLMConfig {
         this.modelName = modelName;
         this.temperature = temperature;
     }
+
+    public String keyDecrypt() {
+        return AESEncryptionUtil.aesDecryptECB(apiKey);
+    }
+
 }

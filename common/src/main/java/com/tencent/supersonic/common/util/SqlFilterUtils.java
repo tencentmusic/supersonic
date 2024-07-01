@@ -1,23 +1,26 @@
 package com.tencent.supersonic.common.util;
 
-import static com.tencent.supersonic.common.pojo.Constants.PARENTHESES_END;
-import static com.tencent.supersonic.common.pojo.Constants.PARENTHESES_START;
-import static com.tencent.supersonic.common.pojo.Constants.SPACE;
-import static com.tencent.supersonic.common.pojo.Constants.SYS_VAR;
-
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.Criterion;
 import com.tencent.supersonic.common.pojo.Filter;
 import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.StringJoiner;
 import java.util.regex.Pattern;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.logging.log4j.util.Strings;
-import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
+
+import static com.tencent.supersonic.common.pojo.Constants.PARENTHESES_END;
+import static com.tencent.supersonic.common.pojo.Constants.PARENTHESES_START;
+import static com.tencent.supersonic.common.pojo.Constants.SPACE;
+import static com.tencent.supersonic.common.pojo.Constants.SYS_VAR;
+
+;
 
 
 @Component
@@ -41,7 +44,7 @@ public class SqlFilterUtils {
     private List<String> getFilterCol(Filter filter) {
         List<String> filterCols = new ArrayList<>();
         if (Filter.Relation.FILTER.equals(filter.getRelation())) {
-            if (Strings.isNotEmpty(filter.getBizName())) {
+            if (StringUtils.isNotEmpty(filter.getBizName())) {
                 filterCols.add(filter.getBizName());
             }
         }
@@ -61,11 +64,11 @@ public class SqlFilterUtils {
         if (!CollectionUtils.isEmpty(filters)) {
             filters.stream()
                     .forEach(filter -> {
-                        if (Strings.isNotEmpty(dealFilter(filter, isBizName))) {
+                        if (StringUtils.isNotEmpty(dealFilter(filter, isBizName))) {
                             joiner.add(SPACE + dealFilter(filter, isBizName) + SPACE);
                         }
                     });
-            log.info("getWhereClause, where sql : {}", joiner);
+            log.debug("getWhereClause, where sql : {}", joiner);
             return joiner.toString();
         }
 
@@ -80,7 +83,7 @@ public class SqlFilterUtils {
         if (Objects.isNull(filter)) {
             return "";
         }
-        if (Strings.isNotEmpty(filter.getBizName()) && filter.getBizName().endsWith(SYS_VAR)) {
+        if (StringUtils.isNotEmpty(filter.getBizName()) && filter.getBizName().endsWith(SYS_VAR)) {
             return "";
         }
         StringBuilder condition = new StringBuilder();
@@ -115,7 +118,7 @@ public class SqlFilterUtils {
     }
 
     private String generator(Criterion criterion) {
-        log.info("criterion :{}", criterion);
+        log.debug("criterion :{}", criterion);
         String sqlPart;
         switch (criterion.getOperator()) {
             case SQL_PART:

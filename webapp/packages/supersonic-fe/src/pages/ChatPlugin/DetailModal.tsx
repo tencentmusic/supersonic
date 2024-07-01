@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Modal, Select, Form, Input, InputNumber, message, Button, Radio, TreeSelect } from 'antd';
-import { getDimensionList, getModelList, savePlugin } from './service';
+import { getDataSetSchema, getModelList, savePlugin } from './service';
 import {
   DimensionType,
   ModelType,
@@ -27,13 +27,16 @@ type Props = {
 
 const DetailModal: React.FC<Props> = ({ detail, onSubmit, onCancel }) => {
   const [modelList, setModelList] = useState<ModelType[]>([]);
-  const [modelDimensionList, setModelDimensionList] = useState<Record<number, DimensionType[]>>({});
+  const [dataSetDimensionList, setDataSetDimensionList] = useState<Record<number, DimensionType[]>>(
+    {},
+  );
   const [confirmLoading, setConfirmLoading] = useState(false);
   const [pluginType, setPluginType] = useState<PluginTypeEnum>();
   const [functionName, setFunctionName] = useState<string>();
   const [functionParams, setFunctionParams] = useState<FunctionParamFormItemType[]>([]);
   const [examples, setExamples] = useState<{ id: string; question?: string }[]>([]);
   const [filters, setFilters] = useState<any[]>([]);
+  const [dataSetList, setDataSetList] = useState<number[]>([]);
   const [form] = Form.useForm();
 
   const initModelList = async () => {
@@ -52,15 +55,20 @@ const DetailModal: React.FC<Props> = ({ detail, onSubmit, onCancel }) => {
   }, []);
 
   const initModelDimensions = async (params: any) => {
-    const modelIds = params
-      .filter((param: any) => !!param.modelId)
-      .map((param: any) => param.modelId);
-    const res = await Promise.all(modelIds.map((modelId: number) => getDimensionList(modelId)));
-    setModelDimensionList(
-      modelIds.reduce((result: Record<number, DimensionType[]>, modelId: number, index: number) => {
-        result[modelId] = res[index].data.list;
-        return result;
-      }, {}),
+    const dataSetIds = params
+      .filter((param: any) => !!param.dataSetId)
+      .map((param: any) => param.dataSetId);
+    const res = await Promise.all(
+      dataSetIds.map((dataSetId: number) => getDataSetSchema(dataSetId)),
+    );
+    setDataSetDimensionList(
+      dataSetIds.reduce(
+        (result: Record<number, DimensionType[]>, dataSetId: number, index: number) => {
+          result[dataSetId] = res[index].data.dimensions;
+          return result;
+        },
+        {},
+      ),
     );
   };
 
@@ -75,6 +83,7 @@ const DetailModal: React.FC<Props> = ({ detail, onSubmit, onCancel }) => {
         url: detail.config?.url,
         height,
       });
+      setDataSetList(detail.dataSetList || []);
       if (paramOptions?.length > 0) {
         const params = paramOptions.filter(
           (option: any) => option.paramType !== ParamTypeEnum.FORWARD,
@@ -170,23 +179,39 @@ const DetailModal: React.FC<Props> = ({ detail, onSubmit, onCancel }) => {
   };
 
   const updateDimensionList = async (value: number) => {
-    if (modelDimensionList[value]) {
+    if (dataSetDimensionList[value]) {
       return;
     }
-    const res = await getDimensionList(value);
-    setModelDimensionList({ ...modelDimensionList, [value]: res.data.list });
+    const res = await getDataSetSchema(value);
+    setDataSetDimensionList({ ...dataSetDimensionList, [value]: res.data.dimensions });
+  };
+
+  const getDataSetList = () => {
+    const list: any[] = [];
+    traverseTree(modelList, (node: any) => {
+      if (node.type === 'DATASET' && dataSetList.includes(node.id)) {
+        list.push(node);
+      }
+    });
+    return list;
+  };
+
+  const onValuesChange = (value: PluginType) => {
+    if (value.dataSetList) {
+      setDataSetList(value.dataSetList);
+    }
   };
 
   return (
     <Modal
       open
       title={detail ? '编辑插件' : '新建插件'}
-      width={900}
+      width={920}
       confirmLoading={confirmLoading}
       onOk={onOk}
       onCancel={onCancel}
     >
-      <Form {...layout} form={form} style={{ maxWidth: 820 }}>
+      <Form {...layout} form={form} style={{ maxWidth: 820 }} onValuesChange={onValuesChange}>
         <FormItem name="dataSetList" label="数据集">
           <TreeSelect
             treeData={modelList}
@@ -322,10 +347,10 @@ const DetailModal: React.FC<Props> = ({ detail, onSubmit, onCancel }) => {
                       {filter.paramType === ParamTypeEnum.SEMANTIC && (
                         <>
                           <Select
-                            placeholder="主题域"
-                            options={modelList.map((model) => ({
-                              label: model.name,
-                              value: model.id,
+                            placeholder="数据集"
+                            options={getDataSetList().map((dataSet) => ({
+                              label: dataSet.name,
+                              value: dataSet.id,
                             }))}
                             showSearch
                             filterOption={(input, option) =>
@@ -335,16 +360,16 @@ const DetailModal: React.FC<Props> = ({ detail, onSubmit, onCancel }) => {
                             }
                             className={styles.filterParamName}
                             allowClear
-                            value={filter.modelId}
+                            value={filter.dataSetId}
                             onChange={(value) => {
-                              filter.modelId = value;
+                              filter.dataSetId = value;
                               setFilters([...filters]);
                               updateDimensionList(value);
                             }}
                           />
                           <Select
-                            placeholder="请选择维度，需先选择主题域"
-                            options={(modelDimensionList[filter.modelId] || []).map(
+                            placeholder="请选择维度，需先选择数据集"
+                            options={(dataSetDimensionList[filter.dataSetId] || []).map(
                               (dimension) => ({
                                 label: dimension.name,
                                 value: `${dimension.id}`,

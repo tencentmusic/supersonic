@@ -12,8 +12,6 @@ import java.util.List;
  */
 public interface EmbeddingService {
 
-    void addCollection(String collectionName);
-
     void addQuery(String collectionName, List<TextSegment> queries);
 
     void deleteQuery(String collectionName, List<TextSegment> queries);

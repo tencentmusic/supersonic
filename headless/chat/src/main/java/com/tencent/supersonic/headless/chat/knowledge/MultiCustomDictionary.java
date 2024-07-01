@@ -108,10 +108,11 @@ public class MultiCustomDictionary extends DynamicCustomDictionary {
                         attribute.nature[i] = LexiconUtility.convertStringToNature(param[1 + 2 * i],
                                 customNatureCollector);
                         attribute.frequency[i] = Integer.parseInt(param[2 + 2 * i]);
+                        attribute.originals[i] = original;
                         attribute.totalFrequency += attribute.frequency[i];
                     }
                 }
-                attribute.original = original;
+                //attribute.original = original;
 
                 if (removeDuplicates && map.containsKey(word)) {
                     attribute = DictionaryAttributeUtil.getAttribute(map.get(word), attribute);
@@ -373,7 +374,7 @@ public class MultiCustomDictionary extends DynamicCustomDictionary {
             if (att == null) {
                 return false;
             } else if (this.dat.containsKey(word)) {
-                att.original = original;
+                att.setOriginals(original);
                 att = DictionaryAttributeUtil.getAttribute(this.dat.get(word), att);
                 this.dat.set(word, att);
                 // return true;
@@ -381,7 +382,8 @@ public class MultiCustomDictionary extends DynamicCustomDictionary {
                 if (this.trie == null) {
                     this.trie = new BinTrie();
                 }
-                att.original = original;
+                //att.original = original;
+                att.setOriginals(original);
                 if (this.trie.containsKey(word)) {
                     att = DictionaryAttributeUtil.getAttribute(this.trie.get(word), att);
                 }

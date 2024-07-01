@@ -1,13 +1,14 @@
 package com.tencent.supersonic.headless.core.translator;
 
-import com.google.common.base.Strings;
 import com.tencent.supersonic.headless.api.pojo.QueryParam;
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;
-import java.util.Objects;
-import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
+
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * Remove the default metric added by the system when the query only has dimensions
@@ -20,7 +21,7 @@ public class DetailQueryOptimizer implements QueryOptimizer {
     public void rewrite(QueryStatement queryStatement) {
         QueryParam queryParam = queryStatement.getQueryParam();
         String sqlRaw = queryStatement.getSql().trim();
-        if (Strings.isNullOrEmpty(sqlRaw)) {
+        if (StringUtils.isEmpty(sqlRaw)) {
             throw new RuntimeException("sql is empty or null");
         }
         log.debug("before handleNoMetric, sql:{}", sqlRaw);

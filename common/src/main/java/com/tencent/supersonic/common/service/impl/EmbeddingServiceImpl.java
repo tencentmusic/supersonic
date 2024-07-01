@@ -15,6 +15,7 @@ import dev.langchain4j.store.embedding.RetrieveQueryResult;
 import dev.langchain4j.store.embedding.TextSegmentConvert;
 import dev.langchain4j.store.embedding.filter.Filter;
 import dev.langchain4j.store.embedding.filter.comparison.IsEqualTo;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.MapUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -28,6 +29,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 public class EmbeddingServiceImpl implements EmbeddingService {
 
     @Autowired
@@ -36,17 +38,18 @@ public class EmbeddingServiceImpl implements EmbeddingService {
     @Autowired
     private EmbeddingModel embeddingModel;
 
-    public synchronized void addCollection(String collectionName) {
-        embeddingStoreFactory.create(collectionName);
-    }
-
     @Override
     public void addQuery(String collectionName, List<TextSegment> queries) {
         EmbeddingStore embeddingStore = embeddingStoreFactory.create(collectionName);
         for (TextSegment query : queries) {
             String question = query.text();
-            Embedding embedding = embeddingModel.embed(question).content();
-            embeddingStore.add(embedding, query);
+            try {
+                Embedding embedding = embeddingModel.embed(question).content();
+                embeddingStore.add(embedding, query);
+            } catch (Exception e) {
+                log.error("embeddingModel embed error question: {}, embeddingStore: {}", question,
+                        embeddingStore.getClass().getSimpleName(), e);
+            }
         }
     }
 

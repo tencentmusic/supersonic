@@ -83,15 +83,34 @@ CREATE TABLE IF NOT EXISTS `s2_chat_config` (
 COMMENT ON TABLE s2_chat_config IS 'chat config information table ';
 
 
+CREATE TABLE IF NOT EXISTS `s2_chat_memory` (
+    `id` INT NOT NULL AUTO_INCREMENT,
+    `question` varchar(655)    ,
+    `agent_id`  INT    ,
+    `db_schema`  TEXT    ,
+    `s2_sql` TEXT   ,
+    `status` char(10)   ,
+    `llm_review` char(10)   ,
+    `llm_comment`   TEXT,
+    `human_review` char(10) ,
+    `human_comment` TEXT    ,
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP  ,
+    `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP ,
+    `created_by` varchar(100)  ,
+    `updated_by` varchar(100)  ,
+    PRIMARY KEY (`id`)
+    ) ;
+COMMENT ON TABLE s2_chat_memory IS 'chat memory table ';
+
 create table IF NOT EXISTS s2_user
 (
     id       INT AUTO_INCREMENT,
     name     varchar(100) not null,
     display_name varchar(100) null,
-    password varchar(100) null,
+    password varchar(256) null,
+    salt varchar(256)  NULL,
     email varchar(100) null,
     is_admin INT null,
-    salt varchar(100) null,
     PRIMARY KEY (`id`)
 );
 COMMENT ON TABLE s2_user IS 'user information table';

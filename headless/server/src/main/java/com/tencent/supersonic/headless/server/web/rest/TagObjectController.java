@@ -74,7 +74,7 @@ public class TagObjectController {
                           HttpServletRequest request,
                           HttpServletResponse response) throws Exception {
         User user = UserHolder.findUser(request, response);
-        tagObjectService.delete(id, user);
+        tagObjectService.delete(id, user, true);
         return true;
     }
 

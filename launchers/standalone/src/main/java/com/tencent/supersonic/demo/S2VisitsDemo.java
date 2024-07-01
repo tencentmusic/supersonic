@@ -11,7 +11,7 @@ import com.tencent.supersonic.chat.server.agent.AgentToolType;
 import com.tencent.supersonic.chat.server.agent.LLMParserTool;
 import com.tencent.supersonic.chat.server.agent.MultiTurnConfig;
 import com.tencent.supersonic.chat.server.agent.RuleParserTool;
-import com.tencent.supersonic.chat.server.plugin.Plugin;
+import com.tencent.supersonic.chat.server.plugin.ChatPlugin;
 import com.tencent.supersonic.chat.server.plugin.PluginParseConfig;
 import com.tencent.supersonic.chat.server.plugin.build.WebBase;
 import com.tencent.supersonic.common.pojo.JoinCondition;
@@ -74,15 +74,14 @@ public class S2VisitsDemo extends S2BaseDemo {
         try {
             // create domain
             DomainResp s2Domain = addDomain();
-            DomainResp s2ModelSet = addModelSet(s2Domain);
             TagObjectResp s2TagObject = addTagObjectUser(s2Domain);
 
             // create models
-            ModelResp userModel = addModel_1(s2ModelSet, demoDatabaseResp, s2TagObject);
-            ModelResp pvUvModel = addModel_2(s2ModelSet, demoDatabaseResp);
-            ModelResp stayTimeModel = addModel_3(s2ModelSet, demoDatabaseResp);
-            addModelRela_1(s2ModelSet, userModel, pvUvModel);
-            addModelRela_2(s2ModelSet, userModel, stayTimeModel);
+            ModelResp userModel = addModel_1(s2Domain, demoDatabaseResp, s2TagObject);
+            ModelResp pvUvModel = addModel_2(s2Domain, demoDatabaseResp);
+            ModelResp stayTimeModel = addModel_3(s2Domain, demoDatabaseResp);
+            addModelRela_1(s2Domain, userModel, pvUvModel);
+            addModelRela_2(s2Domain, userModel, stayTimeModel);
             addTags(userModel);
 
             //create metrics and dimensions
@@ -98,7 +97,7 @@ public class S2VisitsDemo extends S2BaseDemo {
             updateMetric_pv(pvUvModel, departmentDimension, userDimension, metricPv);
 
             //create data set
-            DataSetResp s2DataSet = addDataSet(s2Domain, s2ModelSet);
+            DataSetResp s2DataSet = addDataSet(s2Domain);
             addAuthGroup_1(stayTimeModel);
             addAuthGroup_2(stayTimeModel);
 
@@ -132,15 +131,15 @@ public class S2VisitsDemo extends S2BaseDemo {
         return true;
     }
 
-    public void addSampleChats(Integer agentId) throws Exception {
+    public void addSampleChats(Integer agentId) {
         Long chatId = chatManageService.addChat(user, "样例对话1", agentId);
 
-        parseAndExecute(chatId.intValue(), agentId, "超音数 访问次数");
-        parseAndExecute(chatId.intValue(), agentId, "按部门统计");
-        parseAndExecute(chatId.intValue(), agentId, "查询近30天");
-        parseAndExecute(chatId.intValue(), agentId, "alice 停留时长");
-        parseAndExecute(chatId.intValue(), agentId, "对比alice和lucy的访问次数");
-        parseAndExecute(chatId.intValue(), agentId, "访问次数最高的部门");
+        chatService.parseAndExecute(chatId.intValue(), agentId, "超音数 访问次数");
+        chatService.parseAndExecute(chatId.intValue(), agentId, "按部门统计");
+        chatService.parseAndExecute(chatId.intValue(), agentId, "查询近30天");
+        chatService.parseAndExecute(chatId.intValue(), agentId, "alice 停留时长");
+        chatService.parseAndExecute(chatId.intValue(), agentId, "对比alice和lucy的访问次数");
+        chatService.parseAndExecute(chatId.intValue(), agentId, "访问次数最高的部门");
     }
 
     private Integer addAgent(long dataSetId) {
@@ -167,9 +166,8 @@ public class S2VisitsDemo extends S2BaseDemo {
         agent.setAgentConfig(JSONObject.toJSONString(agentConfig));
         MultiTurnConfig multiTurnConfig = new MultiTurnConfig(false);
         agent.setMultiTurnConfig(multiTurnConfig);
-        int id = agentService.createAgent(agent, User.getFakeUser());
-        agent.setId(id);
-        return agent.getId();
+        Agent agentCreated = agentService.createAgent(agent, User.getFakeUser());
+        return agentCreated.getId();
     }
 
     public DomainResp addDomain() {
@@ -181,15 +179,6 @@ public class S2VisitsDemo extends S2BaseDemo {
         domainReq.setViewers(Arrays.asList("admin", "tom"));
         domainReq.setAdmins(Arrays.asList("admin", "jack"));
         domainReq.setIsOpen(1);
-        return domainService.createDomain(domainReq, user);
-    }
-
-    public DomainResp addModelSet(DomainResp s2Domain) {
-        DomainReq domainReq = new DomainReq();
-        domainReq.setName("埋点模型集");
-        domainReq.setBizName("visit_info");
-        domainReq.setParentId(s2Domain.getId());
-        domainReq.setStatus(StatusEnum.ONLINE.getCode());
         return domainService.createDomain(domainReq, user);
     }
 
@@ -449,14 +438,14 @@ public class S2VisitsDemo extends S2BaseDemo {
         return metricService.createMetric(metricReq, user);
     }
 
-    public DataSetResp addDataSet(DomainResp s2Domain, DomainResp s2ModelSet) {
+    public DataSetResp addDataSet(DomainResp s2Domain) {
         DataSetReq dataSetReq = new DataSetReq();
         dataSetReq.setName("超音数数据集");
         dataSetReq.setBizName("s2");
         dataSetReq.setDomainId(s2Domain.getId());
         dataSetReq.setDescription("包含超音数访问统计相关的指标和维度等");
         dataSetReq.setAdmins(Lists.newArrayList("admin"));
-        List<DataSetModelConfig> dataSetModelConfigs = getDataSetModelConfigs(s2ModelSet.getId());
+        List<DataSetModelConfig> dataSetModelConfigs = getDataSetModelConfigs(s2Domain.getId());
         DataSetDetail dataSetDetail = new DataSetDetail();
         dataSetDetail.setDataSetModelConfigs(dataSetModelConfigs);
         dataSetReq.setDataSetDetail(dataSetDetail);
@@ -514,7 +503,7 @@ public class S2VisitsDemo extends S2BaseDemo {
     }
 
     private void addPlugin(DataSetResp s2DataSet) {
-        Plugin plugin1 = new Plugin();
+        ChatPlugin plugin1 = new ChatPlugin();
         plugin1.setType("WEB_PAGE");
         plugin1.setDataSetList(Arrays.asList(s2DataSet.getId()));
         plugin1.setPattern("用于分析超音数的流量概况，包含UV、PV等核心指标的追踪。P.S. 仅作为示例展示，无实际看板");

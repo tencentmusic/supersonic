@@ -14,15 +14,18 @@ import { AUTH_TOKEN_KEY } from '@/common/constants';
 import { getUserInfoByTicket, queryCurrentUser } from '@/services/user';
 import { history, useModel } from '@umijs/max';
 import { encryptPassword } from '@/utils/utils';
+import CryptoJS from 'crypto-js';
 import { TOKEN_KEY } from '@/services/request';
 import { ssoLogin } from '@/utils/utils';
 
 export const openSSO = true;
 
+
+
 const { Item } = Form;
 const LoginPage: React.FC = () => {
   const [createModalVisible, setCreateModalVisible] = useState<boolean>(false);
-  // const [forgetModalVisible, setForgetModalVisible] = useState<boolean>(false);
+  const encryptKey = CryptoJS.enc.Utf8.parse('supersonic@2024');
   const [form] = useForm();
   const { initialState = {}, setInitialState } = useModel('@@initialState');
   // 通过用户信息进行登录
@@ -52,12 +55,12 @@ const LoginPage: React.FC = () => {
   const handleLogin = async () => {
     const { validateFields } = form;
     const content = await validateFields();
-    await loginDone({ ...content, password: encryptPassword(content.password) });
+    await loginDone({ ...content, password: encryptPassword(content.password, encryptKey) });
   };
 
   // 处理注册弹窗确定按钮
   const handleRegister = async (values: RegisterFormDetail) => {
-    const enCodeValues = { ...values, password: encryptPassword(values.password) };
+    const enCodeValues = { ...values, password: encryptPassword(values.password, encryptKey) };
     const { code } = await userRegister(enCodeValues);
     if (code === 200) {
       message.success('注册成功');

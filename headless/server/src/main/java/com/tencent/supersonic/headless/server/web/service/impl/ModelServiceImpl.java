@@ -44,7 +44,6 @@ import com.tencent.supersonic.headless.server.utils.ModelConverter;
 import com.tencent.supersonic.headless.server.utils.NameCheckUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.BeanUtils;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
@@ -273,10 +272,10 @@ public class ModelServiceImpl implements ModelService {
             String startDate1 = item.getStartDate();
             String endDate1 = item.getEndDate();
             List<String> unavailableDateList1 = item.getUnavailableDateList();
-            if (Strings.isNotEmpty(startDate1) && startDate1.compareTo(startDate) > 0) {
+            if (StringUtils.isNotEmpty(startDate1) && startDate1.compareTo(startDate) > 0) {
                 startDate = startDate1;
             }
-            if (Strings.isNotEmpty(endDate1) && endDate1.compareTo(endDate) < 0) {
+            if (StringUtils.isNotEmpty(endDate1) && endDate1.compareTo(endDate) < 0) {
                 endDate = endDate1;
             }
             if (!CollectionUtils.isEmpty(unavailableDateList1)) {
@@ -299,17 +298,16 @@ public class ModelServiceImpl implements ModelService {
 
     public List<ModelResp> getModelRespAuthInheritDomain(User user, Long domainId, AuthType authType) {
         List<Long> domainIds = domainService.getDomainAuthSet(user, authType)
-                .stream().map(DomainResp::getId)
+                .stream().filter(domainResp -> {
+                    if (domainId == null) {
+                        return true;
+                    } else {
+                        return domainId.equals(domainResp.getId()) || domainId.equals(domainResp.getParentId());
+                    }
+                }).map(DomainResp::getId)
                 .collect(Collectors.toList());
         if (CollectionUtils.isEmpty(domainIds)) {
             return Lists.newArrayList();
-        }
-        if (domainId != null) {
-            if (domainIds.contains(domainId)) {
-                domainIds = Lists.newArrayList(domainId);
-            } else {
-                return Lists.newArrayList();
-            }
         }
         ModelFilter modelFilter = new ModelFilter();
         modelFilter.setIncludesDetail(false);

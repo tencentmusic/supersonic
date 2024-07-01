@@ -2,19 +2,15 @@ package com.tencent.supersonic.chat.server.plugin.recognize.embedding;
 
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.chat.server.plugin.ParseMode;
-import com.tencent.supersonic.chat.server.plugin.Plugin;
+import com.tencent.supersonic.chat.server.plugin.ChatPlugin;
 import com.tencent.supersonic.chat.server.plugin.PluginManager;
 import com.tencent.supersonic.chat.server.plugin.PluginRecallResult;
 import com.tencent.supersonic.chat.server.plugin.recognize.PluginRecognizer;
 import com.tencent.supersonic.chat.server.pojo.ChatParseContext;
-import com.tencent.supersonic.common.config.EmbeddingConfig;
 import com.tencent.supersonic.common.util.ContextUtils;
 import dev.langchain4j.store.embedding.Retrieval;
 import dev.langchain4j.store.embedding.RetrieveQueryResult;
-import com.tencent.supersonic.headless.chat.utils.ComponentFactory;
-import com.tencent.supersonic.headless.chat.parser.llm.PythonLLMProxy;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.util.CollectionUtils;
 
@@ -31,11 +27,7 @@ import java.util.stream.Collectors;
 public class EmbeddingRecallRecognizer extends PluginRecognizer {
 
     public boolean checkPreCondition(ChatParseContext chatParseContext) {
-        EmbeddingConfig embeddingConfig = ContextUtils.getBean(EmbeddingConfig.class);
-        if (StringUtils.isBlank(embeddingConfig.getUrl()) && ComponentFactory.getLLMProxy() instanceof PythonLLMProxy) {
-            return false;
-        }
-        List<Plugin> plugins = getPluginList(chatParseContext);
+        List<ChatPlugin> plugins = getPluginList(chatParseContext);
         return !CollectionUtils.isEmpty(plugins);
     }
 
@@ -45,10 +37,10 @@ public class EmbeddingRecallRecognizer extends PluginRecognizer {
         if (CollectionUtils.isEmpty(embeddingRetrievals)) {
             return null;
         }
-        List<Plugin> plugins = getPluginList(chatParseContext);
-        Map<Long, Plugin> pluginMap = plugins.stream().collect(Collectors.toMap(Plugin::getId, p -> p));
+        List<ChatPlugin> plugins = getPluginList(chatParseContext);
+        Map<Long, ChatPlugin> pluginMap = plugins.stream().collect(Collectors.toMap(ChatPlugin::getId, p -> p));
         for (Retrieval embeddingRetrieval : embeddingRetrievals) {
-            Plugin plugin = pluginMap.get(Long.parseLong(embeddingRetrieval.getId()));
+            ChatPlugin plugin = pluginMap.get(Long.parseLong(embeddingRetrieval.getId()));
             if (plugin == null) {
                 continue;
             }

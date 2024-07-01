@@ -33,7 +33,7 @@ public class CollectController {
             HttpServletRequest request,
             HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
-        return collectService.createCollectionIndicators(user, collectDO);
+        return collectService.collect(user, collectDO);
     }
 
     @Deprecated
@@ -42,7 +42,7 @@ public class CollectController {
             HttpServletRequest request,
             HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
-        return collectService.deleteCollectionIndicators(user, id);
+        return collectService.unCollect(user, id);
     }
 
     @PostMapping("/deleteCollectionIndicators")
@@ -50,7 +50,7 @@ public class CollectController {
                                               HttpServletRequest request,
                                               HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
-        return collectService.deleteCollectionIndicators(user, collectDO);
+        return collectService.unCollect(user, collectDO);
     }
 
 }

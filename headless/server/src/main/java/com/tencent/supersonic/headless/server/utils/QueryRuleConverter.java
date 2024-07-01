@@ -7,7 +7,7 @@ import com.tencent.supersonic.headless.api.pojo.enums.QueryRuleType;
 import com.tencent.supersonic.headless.api.pojo.request.QueryRuleReq;
 import com.tencent.supersonic.headless.api.pojo.response.QueryRuleResp;
 import com.tencent.supersonic.headless.server.persistence.dataobject.QueryRuleDO;
-import org.apache.directory.api.util.Strings;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 
 import java.util.ArrayList;
@@ -33,7 +33,7 @@ public class QueryRuleConverter {
         BeanUtils.copyProperties(queryRuleDO, queryRuleResp);
         queryRuleResp.setRuleType(QueryRuleType.valueOf(queryRuleDO.getRuleType()));
         queryRuleResp.setRule(JsonUtil.toObject(queryRuleDO.getRule(), RuleInfo.class));
-        queryRuleResp.setAction(Strings.isEmpty(queryRuleDO.getAction()) ? new ActionInfo() :
+        queryRuleResp.setAction(StringUtils.isEmpty(queryRuleDO.getAction()) ? new ActionInfo() :
                 JsonUtil.toObject(queryRuleDO.getAction(), ActionInfo.class));
         queryRuleResp.setExt(JsonUtil.toMap(queryRuleDO.getExt(), String.class, String.class));
 

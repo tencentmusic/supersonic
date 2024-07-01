@@ -4,7 +4,7 @@ import { message, Button, Space, Popconfirm, Input } from 'antd';
 import React, { useRef, useState, useEffect } from 'react';
 import { StatusEnum } from '../enum';
 import { useModel } from '@umijs/max';
-import { deleteModel, updateModel, batchUpdateModelStatus } from '../service';
+import { deleteModel, batchUpdateModelStatus } from '../service';
 import ClassModelTypeModal from './ClassModelTypeModal';
 import { ColumnsConfig } from './TableColumnRender';
 import TableHeaderFilter from './TableHeaderFilter';
@@ -25,7 +25,6 @@ const ModelTable: React.FC<Props> = ({ modelList, disabledEdit = false, onModelC
   const { modelTableHistoryParams, setModelTableHistoryParams } = modelModel;
 
   const [modelItem, setModelItem] = useState<ISemantic.IModelItem>();
-  const [saveLoading, setSaveLoading] = useState<boolean>(false);
   const [filterParams, setFilterParams] = useState<Record<string, any>>({});
   const [createDataSourceModalOpen, setCreateDataSourceModalOpen] = useState(false);
   const [currentPageNumber, setCurrentPageNumber] = useState<number>(1);

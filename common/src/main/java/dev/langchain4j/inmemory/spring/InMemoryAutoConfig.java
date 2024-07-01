@@ -1,8 +1,6 @@
 package dev.langchain4j.inmemory.spring;
 
 
-import static dev.langchain4j.inmemory.spring.Properties.PREFIX;
-
 import dev.langchain4j.model.embedding.AllMiniLmL6V2QuantizedEmbeddingModel;
 import dev.langchain4j.model.embedding.BgeSmallZhEmbeddingModel;
 import dev.langchain4j.model.embedding.EmbeddingModel;
@@ -14,6 +12,8 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import static dev.langchain4j.inmemory.spring.Properties.PREFIX;
+
 @Configuration
 @EnableConfigurationProperties(Properties.class)
 public class InMemoryAutoConfig {
@@ -22,8 +22,8 @@ public class InMemoryAutoConfig {
     public static final String ALL_MINILM_L6_V2 = "all-minilm-l6-v2-q";
 
     @Bean
-    @ConditionalOnProperty(PREFIX + ".embedding-store.file-path")
-    EmbeddingStoreFactory milvusChatModel(Properties properties) {
+    @ConditionalOnProperty(PREFIX + ".embedding-store.persist-path")
+    EmbeddingStoreFactory inMemoryChatModel(Properties properties) {
         return new InMemoryEmbeddingStoreFactory(properties);
     }
 

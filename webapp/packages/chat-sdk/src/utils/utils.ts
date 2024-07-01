@@ -1,6 +1,7 @@
 import moment, { Moment } from 'moment';
 import { utils, writeFile } from 'xlsx';
 import { NumericUnit } from '../common/constants';
+import { isString } from 'lodash';
 import { MsgDataType } from '../common/type';
 
 export function formatByDecimalPlaces(value: number | string, decimalPlaces: number) {
@@ -260,6 +261,21 @@ export const getTextWidth = (
   const metrics = context.measureText(text);
   return Math.ceil(metrics.width);
 };
+
+export function jsonParse(config: any, defaultReturn?: any) {
+  if (!isString(config)) {
+    return config;
+  }
+  if (!config) {
+    return defaultReturn;
+  }
+  try {
+    return JSON.parse(config);
+  } catch (error) {
+    console.log(error);
+    return defaultReturn;
+  }
+}
 
 export function exportData({ queryResults, queryColumns, entityInfo }: MsgDataType) {
   const data = queryResults.map(res => {

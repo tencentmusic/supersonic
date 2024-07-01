@@ -1,6 +1,6 @@
 package com.tencent.supersonic.chat.server.plugin.build.webpage;
 
-import com.tencent.supersonic.chat.server.plugin.Plugin;
+import com.tencent.supersonic.chat.server.plugin.ChatPlugin;
 import com.tencent.supersonic.chat.server.plugin.PluginParseResult;
 import com.tencent.supersonic.chat.server.plugin.PluginQueryManager;
 import com.tencent.supersonic.chat.server.plugin.build.PluginSemanticQuery;
@@ -25,7 +25,7 @@ public class WebPageQuery extends PluginSemanticQuery {
     }
 
     protected WebPageResp buildResponse(PluginParseResult pluginParseResult) {
-        Plugin plugin = pluginParseResult.getPlugin();
+        ChatPlugin plugin = pluginParseResult.getPlugin();
         WebPageResp webPageResponse = new WebPageResp();
         webPageResponse.setName(plugin.getName());
         webPageResponse.setPluginId(plugin.getId());

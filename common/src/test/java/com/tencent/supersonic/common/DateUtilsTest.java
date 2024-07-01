@@ -1,7 +1,7 @@
 package com.tencent.supersonic.common;
 
 import com.tencent.supersonic.common.pojo.Constants;
-import com.tencent.supersonic.common.util.DatePeriodEnum;
+import com.tencent.supersonic.common.pojo.enums.DatePeriodEnum;
 import com.tencent.supersonic.common.util.DateUtils;
 import org.assertj.core.util.Lists;
 import org.junit.Assert;

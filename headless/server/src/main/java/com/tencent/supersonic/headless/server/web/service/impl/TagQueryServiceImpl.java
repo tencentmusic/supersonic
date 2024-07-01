@@ -15,7 +15,7 @@ import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
 import com.tencent.supersonic.headless.api.pojo.response.TagResp;
 import com.tencent.supersonic.headless.core.utils.SqlGenerateUtils;
 import com.tencent.supersonic.headless.server.web.service.ModelService;
-import com.tencent.supersonic.headless.server.web.service.SemanticLayerService;
+import com.tencent.supersonic.headless.server.facade.service.SemanticLayerService;
 import com.tencent.supersonic.headless.server.web.service.TagMetaService;
 import com.tencent.supersonic.headless.server.web.service.TagQueryService;
 import lombok.extern.slf4j.Slf4j;

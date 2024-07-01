@@ -86,4 +86,21 @@ export type AgentType = {
   examples: string[];
   status: 0 | 1;
   initialSendMsgParams?: SendMsgParamsType;
+  createdBy: string;
+  updatedBy: string;
+  createdAt: string;
+  updatedAt: string;
+  enableSearch: number;
+  agentConfig: string;
+  llmConfig: {
+    provider: string;
+    baseUrl: string;
+    apiKey: string;
+    modelName: string;
+    temperature: number;
+    timeOut: number;
+  };
+  multiTurnConfig: {
+    enableMultiTurn: boolean;
+  };
 };

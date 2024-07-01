@@ -52,7 +52,9 @@ The high-level architecture and main process flow is as follows:
 
 - **Semantic Translator:** converts semantic query statement into SQL statement that can be executed against physical data models.
 
-- **Chat Plugin:** extends functionality with third-party tools. The LLM is going to select the most suitable one, given all configured plugins with function description and sample questions.
+- **Chat Plugin:** extends functionality with third-party tools. Given a list of configured plugins with descriptions and sample questions, an LLM will be leveraged to select the most suitable one.
+
+- **Chat Memory:** encapsulates a collection of historical query trajectories that can be recalled to facilitate few-shot prompting.
 
 ## Quick Demo
 ### Online playground

@@ -23,12 +23,7 @@ del temp.txt
 cd %baseDir%
 
 
-if "%service%"=="%pyllm_service%" (
-   echo start installing python modules required by supersonic-pyllm: %pip_path%
-   %pip_path% install -r %projectDir%\headless\python\requirements.txt"
-   echo install python modules success
-   goto :EOF
-) else if "%service%"=="webapp" (
+if "%service%"=="webapp" (
    call :buildWebapp
    tar xvf supersonic-webapp.tar.gz
    move /y supersonic-webapp webapp
@@ -45,7 +40,7 @@ if "%service%"=="%pyllm_service%" (
 :buildJavaService
    set "model_name=%service%"
    echo "starting building supersonic-%model_name% service"
-   call mvn -f %projectDir%\launchers\%model_name% clean package -DskipTests
+   call mvn -f %projectDir% clean package -DskipTests
    IF ERRORLEVEL 1 (
       ECHO Failed to build backend Java modules.
       EXIT /B 1

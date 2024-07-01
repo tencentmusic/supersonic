@@ -9,7 +9,6 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.spec.SecretKeySpec;
@@ -128,7 +127,6 @@ public class UserTokenUtils {
         return claims;
     }
 
-    @NotNull
     private static String getTokenString(String token) {
         return token.startsWith(TOKEN_PREFIX) ? token.substring(token.indexOf(TOKEN_PREFIX)
                 + TOKEN_PREFIX.length()).trim() : token.trim();

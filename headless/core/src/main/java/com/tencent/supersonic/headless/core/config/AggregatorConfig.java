@@ -6,7 +6,7 @@ import org.springframework.context.annotation.Configuration;
 @Data
 @Configuration
 public class AggregatorConfig {
-    @Value("${metric.aggregator.ratio.enable:true}")
+    @Value("${s2.metric.aggregator.ratio.enable:true}")
     private Boolean enableRatio;
 }
 
