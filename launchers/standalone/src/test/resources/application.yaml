@@ -13,7 +13,6 @@ spring:
   config:
     import:
       - classpath:s2-config.yaml
-      - classpath:langchain4j-local.yaml
   autoconfigure:
     exclude:
       - spring.dev.langchain4j.spring.LangChain4jAutoConfig
@@ -22,17 +21,6 @@ spring:
       - spring.dev.langchain4j.azure.openai.spring.AutoConfig
       - spring.dev.langchain4j.azure.aisearch.spring.AutoConfig
       - spring.dev.langchain4j.anthropic.spring.AutoConfig
-  h2:
-    console:
-      path: /h2-console/semantic
-      enabled: true
-  datasource:
-    driver-class-name: org.h2.Driver
-    schema: classpath:db/schema-h2.sql
-    data: classpath:db/data-h2.sql
-    url: jdbc:h2:mem:semantic;DATABASE_TO_UPPER=false
-    username: root
-    password: semantic
 
 mybatis:
   mapper-locations=classpath:mappers/custom/*.xml,classpath*:/mappers/*.xml
@@ -41,3 +29,15 @@ logging:
   level:
     dev.langchain4j: DEBUG
     dev.ai4j.openai4j: DEBUG
+
+swagger:
+  title: 'SuperSonic API Documentation'
+  base:
+    package: com.tencent.supersonic
+  description: 'SuperSonic API Documentation'
+  url: ''
+  contact:
+    name:
+    email:
+    url: ''
+  version: 3.0

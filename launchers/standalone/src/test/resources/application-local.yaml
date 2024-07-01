@@ -1,0 +1,15 @@
+spring:
+  datasource:
+    driver-class-name: org.h2.Driver
+    schema: classpath:db/schema-h2.sql
+    data: classpath:db/data-h2.sql
+    url: jdbc:h2:mem:semantic;DATABASE_TO_UPPER=false
+    username: root
+    password: semantic
+  h2:
+    console:
+      path: /h2-console/semantic
+      enabled: true
+  config:
+    import:
+      - classpath:langchain4j-local.yaml
