@@ -40,7 +40,7 @@ const ExecuteItem: React.FC<Props> = ({
   const [showMsgContentTable, setShowMsgContentTable] = useState<boolean>(false);
   const [msgContentType, setMsgContentType] = useState<MsgContentTypeEnum>();
 
-  const titlePrefix = queryMode === 'PLAIN_TEXT' ? '问答' : '数据';
+  const titlePrefix = queryMode === 'PLAIN_TEXT' || queryMode === 'WEB_SERVICE' ? '问答' : '数据';
 
   const getNodeTip = (title: ReactNode, tip?: string) => {
     return (
@@ -115,7 +115,7 @@ const ExecuteItem: React.FC<Props> = ({
           )}
           {renderCustomExecuteNode && executeItemNode ? (
             executeItemNode
-          ) : data?.queryMode === 'PLAIN_TEXT' ? (
+          ) : data?.queryMode === 'PLAIN_TEXT' || data?.queryMode === 'WEB_SERVICE' ? (
             data?.textResult
           ) : data?.queryMode === 'WEB_PAGE' ? (
             <WebPage id={queryId!} data={data} />
