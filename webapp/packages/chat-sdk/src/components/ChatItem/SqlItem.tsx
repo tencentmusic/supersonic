@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import * as SqlFormatter from 'sql-formatter';
+import { format } from 'sql-formatter';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { solarizedlight } from 'react-syntax-highlighter/dist/esm/styles/prism';
@@ -7,8 +7,6 @@ import { message } from 'antd';
 import { PREFIX_CLS } from '../../common/constants';
 import { CheckCircleFilled, UpOutlined } from '@ant-design/icons';
 import { SqlInfoType } from '../../common/type';
-
-const { format } = SqlFormatter.default ?? SqlFormatter;
 
 type Props = {
   llmReq?: any;
