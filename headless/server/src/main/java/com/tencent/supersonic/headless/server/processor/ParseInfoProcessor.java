@@ -98,7 +98,7 @@ public class ParseInfoProcessor implements ResultProcessor {
         for (SchemaElement metric : metrics) {
             String aggregator = functionMap.get(metric.getName());
             if (aggregator != null) {
-                metric.setAggregator(aggregator);
+                metric.setAggregator(AggOperatorEnum.of(aggregator).name());
             } else {
                 // 如果没有找到匹配的聚合函数，使用默认聚合器
                 metric.setAggregator(AggOperatorEnum.of(metric.getDefaultAgg()).name());

@@ -74,7 +74,7 @@ const Table: React.FC<Props> = ({ data, size, loading, onApplyAuth }) => {
     : queryResults;
 
   return (
-    <div className={prefixCls}>
+    <div className={prefixCls} style={{ overflowX: 'auto' }}>
       <AntTable
         pagination={
           queryResults.length <= 10 ? false : { defaultPageSize: 10, position: ['bottomCenter'] }
