@@ -33,10 +33,9 @@ import java.util.stream.Collectors;
 @Slf4j
 @RequiredArgsConstructor
 public class EmbeddingServiceImpl implements EmbeddingService {
+    private static final Map<String, EmbeddingStore<TextSegment>> embeddingStoreMap = new ConcurrentHashMap<>();
     private final EmbeddingStoreFactory embeddingStoreFactory;
     private final EmbeddingModel embeddingModel;
-
-    private static final Map<String, EmbeddingStore<TextSegment>> embeddingStoreMap = new ConcurrentHashMap<>();
 
     @Override
     public void addQuery(String collectionName, List<TextSegment> queries) {
