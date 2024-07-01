@@ -103,7 +103,10 @@ export function getOperatorConfig(operator: string) {
  * @returns
  */
 export function getNumberFilterShowText(value: number | number[] | null, operator: string) {
-  if (!numberOperatorMap[operator]) return '';
+  if (!numberOperatorMap[operator]) {
+    const _v = Array.isArray(value) ? value : value === null ? [] : [value];
+    return operator + _v.join('、');
+  }
 
   const { getText } = numberOperatorMap[operator];
 
@@ -216,7 +219,10 @@ function getTextOperatorOptions() {
 }
 
 export function getStringFilterShowText(value: string | string[] | null, operator: string) {
-  if (!textOperatorMap[operator]) return '';
+  if (!textOperatorMap[operator]) {
+    const _v = Array.isArray(value) ? value : [value];
+    return operator + _v.join('、');
+  }
 
   const { getText } = textOperatorMap[operator];
 
@@ -278,7 +284,7 @@ export function getOptions(type: 'string' | 'number' | 'aggregation') {
 }
 
 export function getAggregationShowText(name: string, operator: string) {
-  if (!aggregationMap[operator]) return '';
+  if (!aggregationMap[operator]) return name + operator;
 
   const { getText } = aggregationMap[operator];
 
@@ -561,12 +567,12 @@ export function getPillsByParseInfo(
   });
   // dateInfo 转化为一个 date-filter
   dateInfo && filterPills.push(createDateFilterPill(dateInfo));
-  // limit 转化为一个 topN filter
-  typeof limit === 'number' && filterPills.push(createTopNPill(limit));
   // dimensions 转化为一个 group filter
   dimensions.length && filterPills.push(createGroupPill(dimensions));
   // metrics 转化为一个 aggregation filter
   metrics.length && filterPills.push(createAggregationPill(metrics));
+  // limit 转化为一个 topN filter
+  typeof limit === 'number' && filterPills.push(createTopNPill(limit));
 
   return filterPills;
 }
