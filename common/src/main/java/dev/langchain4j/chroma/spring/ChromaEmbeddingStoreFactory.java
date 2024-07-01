@@ -4,8 +4,9 @@ import dev.langchain4j.inmemory.spring.InMemoryEmbeddingStoreFactory;
 import dev.langchain4j.store.embedding.EmbeddingStore;
 import dev.langchain4j.store.embedding.EmbeddingStoreFactory;
 import dev.langchain4j.store.embedding.chroma.ChromaEmbeddingStore;
-import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
+
+import java.util.Objects;
 
 @Slf4j
 public class ChromaEmbeddingStoreFactory implements EmbeddingStoreFactory {
@@ -27,7 +28,7 @@ public class ChromaEmbeddingStoreFactory implements EmbeddingStoreFactory {
                     .timeout(storeProperties.getTimeout())
                     .build();
         } catch (Exception e) {
-            log.error("Failed to create ChromaEmbeddingStore,collectionName:{}"
+            log.debug("Failed to create ChromaEmbeddingStore,collectionName:{}"
                             + ", fallback to the default InMemoryEmbeddingStore method。",
                     collectionName, e.getMessage());
         }
