@@ -97,6 +97,7 @@ const ChatItem: React.FC<Props> = ({
     } else if (
       (queryColumns && queryColumns.length > 0 && queryResults) ||
       queryMode === 'WEB_PAGE' ||
+      queryMode === 'WEB_SERVICE' ||
       queryMode === 'PLAIN_TEXT'
     ) {
       data = res.data;
