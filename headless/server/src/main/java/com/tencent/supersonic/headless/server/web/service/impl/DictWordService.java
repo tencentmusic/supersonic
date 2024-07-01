@@ -37,15 +37,17 @@ public class DictWordService {
     }
 
     public void reloadDictWord() {
+        long startTime = System.currentTimeMillis();
         List<DictWord> dictWords = getAllDictWords();
         List<DictWord> preDictWords = getPreDictWords();
         if (org.apache.commons.collections.CollectionUtils.isEqualCollection(dictWords, preDictWords)) {
-            log.debug("dictWords has not changed, reloadKnowledge end");
+            log.debug("Dictionary hasn't been reloaded.");
             return;
         }
-        log.info("dictWords has changed");
         setPreDictWords(dictWords);
         knowledgeBaseService.updateOnlineKnowledge(getAllDictWords());
+        long duration = System.currentTimeMillis() - startTime;
+        log.info("Dictionary has been regularly reloaded in {} milliseconds", duration);
     }
 
     public List<DictWord> getAllDictWords() {

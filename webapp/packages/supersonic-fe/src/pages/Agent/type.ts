@@ -102,3 +102,31 @@ export type MetricType = {
   name: string;
   bizName: string;
 };
+
+export enum StatusEnum {
+  PENDING = 'PENDING',
+  ENABLED = 'ENABLED',
+  DISABLED = 'DISABLED',
+}
+
+export enum ReviewEnum {
+  POSITIVE = 'POSITIVE',
+  NEGATIVE = 'NEGATIVE',
+}
+
+export type MemoryType = {
+  id: number;
+  question: string;
+  agent_id: number;
+  db_schema: string;
+  s2_sql: string;
+  status: StatusEnum;
+  llm_review: ReviewEnum;
+  llm_comment: string;
+  human_review: ReviewEnum;
+  human_comment: string;
+  created_at: string;
+  updated_at: string;
+  created_by: string;
+  updated_by: string;
+};

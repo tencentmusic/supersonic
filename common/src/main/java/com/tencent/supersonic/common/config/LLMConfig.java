@@ -1,6 +1,6 @@
 package com.tencent.supersonic.common.config;
 
-import com.tencent.supersonic.common.util.AESUtil;
+import com.tencent.supersonic.common.util.AESEncryptionUtil;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -39,7 +39,7 @@ public class LLMConfig {
     }
 
     public String keyDecrypt() {
-        return AESUtil.aesDecrypt(apiKey);
+        return AESEncryptionUtil.aesDecryptECB(apiKey);
     }
 
 }

@@ -44,7 +44,7 @@ public class AuthenticationConfig {
     @Value("${s2.authentication.app.signature:signature}")
     private String signature;
 
-    @Value("${s2.authentication.token.timeout:7200000}")
+    @Value("${s2.authentication.token.timeout:72000000}")
     private Long tokenTimeout;
 
     public Map<String, String> getAppKeyToSecretMap() {

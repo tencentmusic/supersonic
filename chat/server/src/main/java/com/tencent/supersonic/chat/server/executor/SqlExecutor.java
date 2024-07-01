@@ -14,6 +14,7 @@ import com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMSqlQuery;
 import com.tencent.supersonic.headless.server.facade.service.ChatQueryService;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.StringUtils;
+import java.util.Date;
 
 public class SqlExecutor implements ChatExecutor {
 
@@ -37,6 +38,8 @@ public class SqlExecutor implements ChatExecutor {
                         .question(chatExecuteContext.getQueryText())
                         .s2sql(chatExecuteContext.getParseInfo().getSqlInfo().getS2SQL())
                         .dbSchema(buildSchemaStr(chatExecuteContext.getParseInfo()))
+                        .createdBy(chatExecuteContext.getUser().getName())
+                        .createdAt(new Date())
                         .build());
             }
         }

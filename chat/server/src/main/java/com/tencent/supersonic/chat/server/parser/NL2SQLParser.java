@@ -1,18 +1,21 @@
 package com.tencent.supersonic.chat.server.parser;
 
+import static com.tencent.supersonic.chat.server.parser.ParserConfig.PARSER_MULTI_TURN_ENABLE;
+
 import com.tencent.supersonic.chat.server.agent.MultiTurnConfig;
-import com.tencent.supersonic.common.service.impl.ExemplarServiceImpl;
 import com.tencent.supersonic.chat.server.persistence.repository.ChatQueryRepository;
 import com.tencent.supersonic.chat.server.plugin.PluginQueryManager;
 import com.tencent.supersonic.chat.server.pojo.ChatParseContext;
 import com.tencent.supersonic.chat.server.util.QueryReqConverter;
+import com.tencent.supersonic.common.config.EmbeddingConfig;
 import com.tencent.supersonic.common.config.LLMConfig;
+import com.tencent.supersonic.common.pojo.SqlExemplar;
+import com.tencent.supersonic.common.service.impl.ExemplarServiceImpl;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementMatch;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
-import com.tencent.supersonic.common.pojo.SqlExemplar;
 import com.tencent.supersonic.headless.api.pojo.request.QueryFilter;
 import com.tencent.supersonic.headless.api.pojo.request.QueryReq;
 import com.tencent.supersonic.headless.api.pojo.response.MapResp;
@@ -24,13 +27,6 @@ import dev.langchain4j.model.input.Prompt;
 import dev.langchain4j.model.input.PromptTemplate;
 import dev.langchain4j.model.output.Response;
 import dev.langchain4j.model.provider.ChatLanguageModelProvider;
-import lombok.Builder;
-import lombok.Data;
-import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.util.CollectionUtils;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -38,8 +34,12 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import static com.tencent.supersonic.chat.server.parser.ParserConfig.PARSER_MULTI_TURN_ENABLE;
+import lombok.Builder;
+import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.util.CollectionUtils;
 
 @Slf4j
 public class NL2SQLParser implements ChatParser {
@@ -226,7 +226,9 @@ public class NL2SQLParser implements ChatParser {
 
     private void addExemplars(Integer agentId, QueryReq queryReq) {
         ExemplarServiceImpl exemplarManager = ContextUtils.getBean(ExemplarServiceImpl.class);
-        List<SqlExemplar> exemplars = exemplarManager.recallExemplars(agentId.toString(),
+        EmbeddingConfig embeddingConfig = ContextUtils.getBean(EmbeddingConfig.class);
+        String memoryCollectionName = embeddingConfig.getMemoryCollectionName(agentId);
+        List<SqlExemplar> exemplars = exemplarManager.recallExemplars(memoryCollectionName,
                 queryReq.getQueryText(), 5);
         queryReq.getExemplars().addAll(exemplars);
     }

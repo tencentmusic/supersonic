@@ -1,5 +1,5 @@
 import { request } from 'umi';
-import { AgentType, MetricType, ModelType } from './type';
+import { AgentType, MemoryType, MetricType, ModelType } from './type';
 
 export function getAgentList() {
   return request<Result<AgentType[]>>('/api/chat/agent/getAgentList');
@@ -37,6 +37,24 @@ export function getMetricList(modelId: number) {
 
 export function testLLMConn(data: any) {
   return request<Result<{ list: MetricType[] }>>('/api/chat/agent/testLLMConn', {
+    method: 'POST',
+    data,
+  });
+}
+
+export function getMemeoryList(agentId: number, chatMemoryFilter: any, current: number) {
+  return request<Result<{ list: MetricType[] }>>('/api/chat/memory/pageMemories', {
+    method: 'POST',
+    data: {
+      chatMemoryFilter: { agentId, ...chatMemoryFilter },
+      current,
+      pageSize: 10,
+    },
+  });
+}
+
+export function saveMemory(data: MemoryType) {
+  return request<Result<string>>('/api/chat/memory/updateMemory', {
     method: 'POST',
     data,
   });

@@ -187,9 +187,7 @@ const SqlItem: React.FC<Props> = ({
                   <div className={`${prefixCls}-few-shot-content`}>
                     <div className={`${prefixCls}-few-shot-content-item`}>
                       <div className={`${prefixCls}-few-shot-content-title`}>问题：</div>
-                      <div className={`${prefixCls}-few-shot-content-text`}>
-                        {item.questionAugmented}
-                      </div>
+                      <div className={`${prefixCls}-few-shot-content-text`}>{item.question}</div>
                     </div>
                     <div className={`${prefixCls}-few-shot-content-item`}>
                       <div className={`${prefixCls}-few-shot-content-title`}>SQL：</div>

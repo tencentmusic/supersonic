@@ -26,6 +26,7 @@ export enum ParamTypeEnum {
 export type PluginType = {
   id: number;
   type: PluginTypeEnum;
+  dataSetList: number[];
   modelList: number[];
   pattern: string;
   parseMode: ParseModeEnum;

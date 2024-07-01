@@ -76,8 +76,8 @@ public class LLMReq {
     }
 
     public enum SqlGenType {
-        ONE_PASS_SELF_CONSISTENCY("1_pass_self_consistency"),
-        TWO_PASS_AUTO_COT_SELF_CONSISTENCY("2_pass_auto_cot_self_consistency");
+
+        ONE_PASS_SELF_CONSISTENCY("1_pass_self_consistency");
 
         private String name;
 

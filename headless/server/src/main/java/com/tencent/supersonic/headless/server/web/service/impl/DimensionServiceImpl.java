@@ -3,6 +3,7 @@ package com.tencent.supersonic.headless.server.web.service.impl;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.google.common.collect.Lists;
@@ -15,7 +16,6 @@ import com.tencent.supersonic.common.pojo.enums.EventType;
 import com.tencent.supersonic.common.pojo.enums.StatusEnum;
 import com.tencent.supersonic.common.pojo.enums.TypeEnums;
 import com.tencent.supersonic.common.pojo.exception.InvalidArgumentException;
-import com.tencent.supersonic.headless.server.utils.AliasGenerateHelper;
 import com.tencent.supersonic.headless.api.pojo.DimValueMap;
 import com.tencent.supersonic.headless.api.pojo.ModelDetail;
 import com.tencent.supersonic.headless.api.pojo.enums.TagDefineType;
@@ -30,20 +30,22 @@ import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
 import com.tencent.supersonic.headless.api.pojo.response.TagItem;
 import com.tencent.supersonic.headless.server.persistence.dataobject.DimensionDO;
 import com.tencent.supersonic.headless.server.persistence.dataobject.TagDO;
+import com.tencent.supersonic.headless.server.persistence.mapper.DimensionDOMapper;
 import com.tencent.supersonic.headless.server.persistence.repository.DimensionRepository;
 import com.tencent.supersonic.headless.server.pojo.DimensionFilter;
 import com.tencent.supersonic.headless.server.pojo.DimensionsFilter;
 import com.tencent.supersonic.headless.server.pojo.MetaFilter;
 import com.tencent.supersonic.headless.server.pojo.ModelFilter;
 import com.tencent.supersonic.headless.server.pojo.TagFilter;
+import com.tencent.supersonic.headless.server.utils.AliasGenerateHelper;
+import com.tencent.supersonic.headless.server.utils.DimensionConverter;
+import com.tencent.supersonic.headless.server.utils.NameCheckUtils;
 import com.tencent.supersonic.headless.server.web.service.DataSetService;
 import com.tencent.supersonic.headless.server.web.service.DatabaseService;
 import com.tencent.supersonic.headless.server.web.service.DimensionService;
 import com.tencent.supersonic.headless.server.web.service.ModelRelaService;
 import com.tencent.supersonic.headless.server.web.service.ModelService;
 import com.tencent.supersonic.headless.server.web.service.TagMetaService;
-import com.tencent.supersonic.headless.server.utils.DimensionConverter;
-import com.tencent.supersonic.headless.server.utils.NameCheckUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -62,7 +64,8 @@ import java.util.stream.Collectors;
 
 @Service
 @Slf4j
-public class DimensionServiceImpl implements DimensionService {
+public class DimensionServiceImpl extends ServiceImpl<DimensionDOMapper, DimensionDO>
+        implements DimensionService {
 
 
     private DimensionRepository dimensionRepository;
@@ -175,6 +178,19 @@ public class DimensionServiceImpl implements DimensionService {
         } else if (StatusEnum.ONLINE.getCode().equals(metaBatchReq.getStatus())) {
             sendEventBatch(dimensionDOS, EventType.ADD);
         }
+    }
+
+    @Override
+    public void batchUpdateSensitiveLevel(MetaBatchReq metaBatchReq, User user) {
+        DimensionFilter metaFilter = new DimensionFilter();
+        metaFilter.setIds(metaBatchReq.getIds());
+        List<DimensionDO> dimensionDOS = queryDimension(metaFilter);
+        for (DimensionDO dimensionDO : dimensionDOS) {
+            dimensionDO.setUpdatedAt(new Date());
+            dimensionDO.setUpdatedBy(user.getName());
+            dimensionDO.setSensitiveLevel(metaBatchReq.getSensitiveLevel());
+        }
+        updateBatchById(dimensionDOS);
     }
 
     @Override

@@ -45,19 +45,21 @@ public class AgentServiceImpl extends ServiceImpl<AgentDOMapper, AgentDO>
     }
 
     @Override
-    public Integer createAgent(Agent agent, User user) {
+    public Agent createAgent(Agent agent, User user) {
         agent.createdBy(user.getName());
         AgentDO agentDO = convert(agent);
         save(agentDO);
+        agent.setId(agentDO.getId());
         executeAgentExamplesAsync(agent);
-        return agentDO.getId();
+        return agent;
     }
 
     @Override
-    public void updateAgent(Agent agent, User user) {
+    public Agent updateAgent(Agent agent, User user) {
         agent.updatedBy(user.getName());
         updateById(convert(agent));
         executeAgentExamplesAsync(agent);
+        return agent;
     }
 
     @Override
@@ -87,14 +89,19 @@ public class AgentServiceImpl extends ServiceImpl<AgentDOMapper, AgentDO>
             return;
         }
         List<String> examples = agent.getExamples();
-        ChatMemoryFilter chatMemoryFilter = ChatMemoryFilter.builder().questions(examples).build();
+        ChatMemoryFilter chatMemoryFilter = ChatMemoryFilter.builder().agentId(agent.getId())
+                .questions(examples).build();
         List<String> memoriesExisted = memoryService.getMemories(chatMemoryFilter)
                 .stream().map(ChatMemoryDO::getQuestion).collect(Collectors.toList());
         for (String example : examples) {
             if (memoriesExisted.contains(example)) {
                 continue;
             }
-            chatService.parseAndExecute(-1, agent.getId(), example);
+            try {
+                chatService.parseAndExecute(-1, agent.getId(), example);
+            } catch (Exception e) {
+                log.warn("agent:{} example execute failed:{}", agent.getName(), example);
+            }
         }
     }
 

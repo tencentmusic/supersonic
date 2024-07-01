@@ -1,4 +1,4 @@
-package com.tencent.supersonic.headless.server.listener;
+package com.tencent.supersonic.headless.server.task;
 
 import com.tencent.supersonic.headless.server.web.service.impl.DictWordService;
 import lombok.extern.slf4j.Slf4j;
@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 @Order(2)
-public class DictWordLoadStartedListener implements CommandLineRunner {
+public class DictionaryReloadTask implements CommandLineRunner {
 
     @Autowired
     private DictWordService dictWordService;

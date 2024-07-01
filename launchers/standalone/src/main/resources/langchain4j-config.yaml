@@ -12,8 +12,10 @@ langchain4j:
   in-memory:
     embedding-model:
       model-name: bge-small-zh
+  chroma:
     embedding-store:
-      persist-path: /tmp
+      baseUrl: http://0.0.0.0:8000
+      timeout: 120s
 #  ollama:
 #    chat-model:
 #      base-url: http://localhost:11434

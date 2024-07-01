@@ -11,7 +11,7 @@ import com.tencent.supersonic.headless.api.pojo.request.DictValueReq;
 import com.tencent.supersonic.headless.api.pojo.response.DictItemResp;
 import com.tencent.supersonic.headless.api.pojo.response.DictTaskResp;
 import com.tencent.supersonic.headless.api.pojo.response.DictValueResp;
-import com.tencent.supersonic.headless.server.schedule.EmbeddingTask;
+import com.tencent.supersonic.headless.server.task.MetaEmbeddingTask;
 import com.tencent.supersonic.headless.server.web.service.DictConfService;
 import com.tencent.supersonic.headless.server.web.service.DictTaskService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,7 +39,7 @@ public class KnowledgeController {
     private DictConfService confService;
 
     @Autowired
-    private EmbeddingTask embeddingTask;
+    private MetaEmbeddingTask embeddingTask;
 
     /**
      * addDictConf-新增item的字典配置

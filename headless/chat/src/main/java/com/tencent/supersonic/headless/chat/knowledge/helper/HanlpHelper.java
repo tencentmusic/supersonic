@@ -86,8 +86,6 @@ public class HanlpHelper {
      */
     public static boolean reloadCustomDictionary() throws IOException {
 
-        log.info("reloadCustomDictionary start");
-
         final long startTime = System.currentTimeMillis();
 
         if (HanLP.Config.CustomDictionaryPath == null || HanLP.Config.CustomDictionaryPath.length == 0) {
@@ -106,7 +104,10 @@ public class HanlpHelper {
         SearchService.clear();
 
         boolean reload = getDynamicCustomDictionary().reload();
-        log.info("reloadCustomDictionary end ,cost:{},reload:{}", System.currentTimeMillis() - startTime, reload);
+        if (reload) {
+            log.info("Custom dictionary has been reloaded in {} milliseconds",
+                    System.currentTimeMillis() - startTime);
+        }
         return reload;
     }
 

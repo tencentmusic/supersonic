@@ -147,10 +147,10 @@ CREATE TABLE IF NOT EXISTS `s2_chat_memory` (
     `llm_comment`   TEXT COMMENT '大模型评估意见' ,
     `human_review` char(10) COMMENT '管理员评估结果',
     `human_comment` TEXT    COMMENT '管理员评估意见',
-    `created_at` datetime  NOT NULL ,
-    `updated_at` datetime  NOT NULL   ,
-    `created_by` varchar(100) NOT NULL   ,
-    `updated_by` varchar(100) NOT NULL   ,
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP  ,
+    `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP ,
+    `created_by` varchar(100) DEFAULT NULL   ,
+    `updated_by` varchar(100) DEFAULT NULL   ,
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 

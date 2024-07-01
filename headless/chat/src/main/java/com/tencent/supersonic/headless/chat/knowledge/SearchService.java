@@ -137,7 +137,7 @@ public class SearchService {
     }
 
     public static void clear() {
-        log.info("clear all trie");
+        log.debug("clear all trie");
         trie = new BinTrie<>();
         suffixTrie = new BinTrie<>();
     }

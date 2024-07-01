@@ -9,7 +9,7 @@ import com.tencent.supersonic.auth.api.authentication.pojo.UserWithPassword;
 import com.tencent.supersonic.auth.api.authentication.request.UserReq;
 import com.tencent.supersonic.auth.authentication.persistence.dataobject.UserDO;
 import com.tencent.supersonic.auth.authentication.persistence.repository.UserRepository;
-import com.tencent.supersonic.auth.authentication.utils.AESEncryptionUtil;
+import com.tencent.supersonic.common.util.AESEncryptionUtil;
 import com.tencent.supersonic.auth.authentication.utils.UserTokenUtils;
 import com.tencent.supersonic.common.util.ContextUtils;
 import lombok.extern.slf4j.Slf4j;

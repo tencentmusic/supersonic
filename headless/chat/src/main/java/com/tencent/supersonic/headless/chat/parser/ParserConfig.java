@@ -15,10 +15,9 @@ public class ParserConfig extends ParameterConfig {
     public static final Parameter PARSER_STRATEGY_TYPE =
             new Parameter("s2.parser.s2sql.strategy", "ONE_PASS_SELF_CONSISTENCY",
                     "LLM解析生成S2SQL策略",
-                    "ONE_PASS_SELF_CONSISTENCY: 通过投票方式一步生成sql"
-                    + "\nTWO_PASS_AUTO_COT_SELF_CONSISTENCY: 通过思维链且投票方式两步生成sql",
-                    "list", "Parser相关配置", Lists.newArrayList(
-            "ONE_PASS_SELF_CONSISTENCY", "TWO_PASS_AUTO_COT_SELF_CONSISTENCY"));
+                    "ONE_PASS_SELF_CONSISTENCY: 通过投票方式一步生成sql",
+                    "list", "Parser相关配置",
+                    Lists.newArrayList("ONE_PASS_SELF_CONSISTENCY"));
 
     public static final Parameter PARSER_LINKING_VALUE_ENABLE =
             new Parameter("s2.parser.linking.value.enable", "true",
