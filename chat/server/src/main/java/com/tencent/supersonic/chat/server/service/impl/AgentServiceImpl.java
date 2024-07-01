@@ -45,6 +45,17 @@ public class AgentServiceImpl extends ServiceImpl<AgentDOMapper, AgentDO>
     }
 
     @Override
+    public List<Agent> getAgents(User user) {
+        if (user.isSuperAdmin()) {
+            return getAgents();
+        }
+        List<AgentDO> agentDOList = baseMapper.listAgentByAuth(user.getName());
+        return agentDOList.stream()
+                .map(this::convert).collect(Collectors.toList());
+
+    }
+
+    @Override
     public Agent createAgent(Agent agent, User user) {
         agent.createdBy(user.getName());
         AgentDO agentDO = convert(agent);

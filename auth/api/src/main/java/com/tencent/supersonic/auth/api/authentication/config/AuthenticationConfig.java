@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 @Configuration
 public class AuthenticationConfig {
 
-    @Value("${s2.authentication.exclude.path:XXX}")
+    @Value("${s2.authentication.exclude.path:XXX},/api/auth/user/validateLogin")
     private String excludePath;
 
     @Value("${s2.authentication.include.path:/api}")

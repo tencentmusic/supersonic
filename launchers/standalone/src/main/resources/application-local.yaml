@@ -35,3 +35,12 @@ swagger:
     email:
     url: ''
   version: 3.0
+
+#cas单点登录
+cas:
+  # prefixUrl: https://op.cvte.com/d72f1f3c12904d359e1de7e99cac61e8
+  prefixUrl: https://op-fat.cvte.com/b9114441c4544c5093ce5754a9f8b6c4
+
+dify:
+  url: https://dify.cvte.com/v1/chat-messages
+  key: Bearer app-iPTMT6gRbDvx5K9tlAa8cfrE

@@ -103,5 +103,4 @@ export type AgentType = {
   multiTurnConfig: {
     enableMultiTurn: boolean;
   };
-  dataSetIds: number[];
 };
