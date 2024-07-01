@@ -2,7 +2,7 @@ import type { ActionType, ProColumns } from '@ant-design/pro-components';
 import { ProTable } from '@ant-design/pro-components';
 import { message, Button, Space, Popconfirm, Input, Select, Tag } from 'antd';
 import React, { useRef, useState, useEffect } from 'react';
-import { StatusEnum } from '../enum';
+import { StatusEnum, SemanticNodeType } from '../enum';
 import { useModel } from '@umijs/max';
 import { SENSITIVE_LEVEL_ENUM, SENSITIVE_LEVEL_OPTIONS, TAG_DEFINE_TYPE } from '../constant';
 import {
@@ -16,6 +16,7 @@ import {
 } from '../service';
 import MetricInfoCreateForm from './MetricInfoCreateForm';
 import BatchCtrlDropDownButton from '@/components/BatchCtrlDropDownButton';
+import BatchSensitiveLevelModal from '@/components/BatchCtrlDropDownButton/BatchSensitiveLevelModal';
 import TableHeaderFilter from './TableHeaderFilter';
 import styles from './style.less';
 import { ISemantic } from '../data';
@@ -32,7 +33,7 @@ const ClassMetricTable: React.FC<Props> = ({ onEmptyMetricData }) => {
   const { selectDomainId } = domainModel;
   const { selectModelId: modelId } = modelModel;
   const { MrefreshMetricList } = metricModel;
-
+  const [batchSensitiveLevelOpenState, setBatchSensitiveLevelOpenState] = useState<boolean>(false);
   const [createModalVisible, setCreateModalVisible] = useState<boolean>(false);
   const [metricItem, setMetricItem] = useState<ISemantic.IMetricItem>();
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
@@ -314,6 +315,9 @@ const ClassMetricTable: React.FC<Props> = ({ onEmptyMetricData }) => {
       case 'batchUnPublish':
         queryBatchUpdatePublish(selectedRowKeys, false);
         break;
+      case 'batchSensitiveLevel':
+        setBatchSensitiveLevelOpenState(true);
+        break;
       default:
         break;
     }
@@ -451,7 +455,12 @@ const ClassMetricTable: React.FC<Props> = ({ onEmptyMetricData }) => {
           <BatchCtrlDropDownButton
             key="ctrlBtnList"
             downloadLoading={downloadLoading}
-            extenderList={['batchPublish', 'batchUnPublish', 'exportTagButton']}
+            extenderList={[
+              'batchSensitiveLevel',
+              'batchPublish',
+              'batchUnPublish',
+              'exportTagButton',
+            ]}
             onDeleteConfirm={() => {
               queryBatchUpdateStatus(selectedRowKeys, StatusEnum.DELETED);
             }}
@@ -475,6 +484,20 @@ const ClassMetricTable: React.FC<Props> = ({ onEmptyMetricData }) => {
           }}
           onCancel={() => {
             setCreateModalVisible(false);
+          }}
+        />
+      )}
+      {batchSensitiveLevelOpenState && (
+        <BatchSensitiveLevelModal
+          ids={selectedRowKeys as number[]}
+          open={batchSensitiveLevelOpenState}
+          type={SemanticNodeType.METRIC}
+          onCancel={() => {
+            setBatchSensitiveLevelOpenState(false);
+          }}
+          onSubmit={() => {
+            queryMetricList({ ...filterParams, ...pagination });
+            setBatchSensitiveLevelOpenState(false);
           }}
         />
       )}
