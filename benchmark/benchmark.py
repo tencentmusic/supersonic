@@ -62,7 +62,7 @@ class BatchTest:
         # secret 请和 com.tencent.supersonic.auth.api.authentication.config.AuthenticationConfig.tokenAppSecret 保持一致
         secret = "WIaO9YRRVt+7QtpPvyWsARFngnEcbaKBk783uGFwMrbJBaochsqCH62L4Kijcb0sZCYoSsiKGV/zPml5MnZ3uQ=="
         exp = time.time() + 100000000
-        token= jwt.encode({"token_userName": userName,"exp": exp}, secret, algorithm="HS512")
+        token= jwt.encode({"token_user_name": userName,"exp": exp}, secret, algorithm="HS512")
         return token
 
 

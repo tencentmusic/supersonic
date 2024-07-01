@@ -23,4 +23,5 @@ class EmbeddingStoreProperties {
     private ConsistencyLevelEnum consistencyLevel;
     private Boolean retrieveEmbeddingsOnSearch;
     private String databaseName;
+    private Boolean autoFlushOnInsert;
 }
