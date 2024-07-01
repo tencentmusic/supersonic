@@ -1,5 +1,6 @@
 package com.tencent.supersonic.headless.api.pojo;
 
+import com.tencent.supersonic.common.pojo.DateConf;
 import lombok.Data;
 
 import java.util.ArrayList;
@@ -17,4 +18,5 @@ public class ItemValueConfig {
     private List<String> whiteList = new ArrayList<>();
     private List<String> ruleList = new ArrayList<>();
     private Long limit;
+    private DateConf dateConf;
 }
