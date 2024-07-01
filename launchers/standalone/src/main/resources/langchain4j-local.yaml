@@ -24,19 +24,19 @@ langchain4j:
     embedding-model:
       model-name: bge-small-zh
 
-    embedding-store:
-      persist-path: /tmp
+#    embedding-store:
+#      persist-path: /tmp
 
 #  chroma:
 #    embedding-store:
 #      baseUrl: http://0.0.0.0:8000
 #      timeout: 120s
 
-#  milvus:
-#    embedding-store:
-#      host: localhost
-#      port: 2379
-#      uri: http://0.0.0.0:19530
-#      token: demo
-#      dimension: 512
-#      timeout: 120s
+  milvus:
+    embedding-store:
+      host: localhost
+      port: 2379
+      uri: http://0.0.0.0:19530
+      token: demo
+      dimension: 512
+      timeout: 120s
