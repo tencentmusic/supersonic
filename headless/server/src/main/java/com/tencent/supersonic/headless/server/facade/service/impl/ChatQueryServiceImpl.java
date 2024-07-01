@@ -245,22 +245,22 @@ public class ChatQueryServiceImpl implements ChatQueryService {
         SemanticQuery semanticQuery = QueryManager.createQuery(parseInfo.getQueryMode());
         semanticQuery.setParseInfo(parseInfo);
 
-        List<String> fields = new ArrayList<>();
-        if (Objects.nonNull(parseInfo.getSqlInfo())
-                && StringUtils.isNotBlank(parseInfo.getSqlInfo().getCorrectS2SQL())) {
-            String correctorSql = parseInfo.getSqlInfo().getCorrectS2SQL();
-            fields = SqlSelectHelper.getAllFields(correctorSql);
-        }
-        if (LLMSqlQuery.QUERY_MODE.equalsIgnoreCase(parseInfo.getQueryMode())
-                && checkMetricReplace(fields, queryData.getMetrics())) {
-            //replace metrics
+        if (LLMSqlQuery.QUERY_MODE.equalsIgnoreCase(parseInfo.getQueryMode())) {
+            //update dimensions
+            log.info("llm begin replace dimensions!");
+            Set<SchemaElement> dimensions = queryData.getDimensions();
+            replaceDimensions(parseInfo, dimensions);
+            //update metrics
             log.info("llm begin replace metrics!");
-            SchemaElement metricToReplace = queryData.getMetrics().iterator().next();
-            replaceMetrics(parseInfo, metricToReplace);
-        } else if (LLMSqlQuery.QUERY_MODE.equalsIgnoreCase(parseInfo.getQueryMode())) {
+            Set<SchemaElement> metrics = queryData.getMetrics();
+            replaceMetrics(parseInfo, metrics);
+            //update filters
             log.info("llm begin revise filters!");
-            String correctorSql = reviseCorrectS2SQL(queryData, parseInfo);
-            parseInfo.getSqlInfo().setCorrectS2SQL(correctorSql);
+            replaceFilter(queryData, parseInfo);
+            //update order limit
+            log.info("llm begin order limit!");
+            appendLimitToSQL(queryData, parseInfo);
+
             semanticQuery.setParseInfo(parseInfo);
             SemanticQueryReq semanticQueryReq = semanticQuery.buildSemanticQueryReq();
             ExplainSqlReq<Object> explainSqlReq = ExplainSqlReq.builder().queryReq(semanticQueryReq)
@@ -291,30 +291,15 @@ public class ChatQueryServiceImpl implements ChatQueryService {
         return queryResult;
     }
 
-    private boolean checkMetricReplace(List<String> oriFields, Set<SchemaElement> metrics) {
-        if (CollectionUtils.isEmpty(oriFields)) {
-            return false;
-        }
-        if (CollectionUtils.isEmpty(metrics)) {
-            return false;
-        }
-        List<String> metricNames = metrics.stream().map(SchemaElement::getName).collect(Collectors.toList());
-        return !oriFields.containsAll(metricNames);
-    }
-
-    public String reviseCorrectS2SQL(QueryDataReq queryData, SemanticParseInfo parseInfo) {
+    public void replaceFilter(QueryDataReq queryData, SemanticParseInfo parseInfo) {
         Map<String, Map<String, String>> filedNameToValueMap = new HashMap<>();
-        Map<String, Map<String, String>> havingFiledNameToValueMap = new HashMap<>();
 
         String correctorSql = parseInfo.getSqlInfo().getCorrectS2SQL();
         log.info("correctorSql before replacing:{}", correctorSql);
         // get where filter and having filter
         List<FieldExpression> whereExpressionList = SqlSelectHelper.getWhereExpressions(correctorSql);
-        List<FieldExpression> havingExpressionList = SqlSelectHelper.getHavingExpressions(correctorSql);
         List<Expression> addWhereConditions = new ArrayList<>();
-        List<Expression> addHavingConditions = new ArrayList<>();
         Set<String> removeWhereFieldNames = new HashSet<>();
-        Set<String> removeHavingFieldNames = new HashSet<>();
         // replace where filter
         updateFilters(whereExpressionList, queryData.getDimensionFilters(),
                 parseInfo.getDimensionFilters(), addWhereConditions, removeWhereFieldNames);
@@ -322,31 +307,49 @@ public class ChatQueryServiceImpl implements ChatQueryService {
                 whereExpressionList, addWhereConditions, removeWhereFieldNames);
         correctorSql = SqlReplaceHelper.replaceValue(correctorSql, filedNameToValueMap);
         correctorSql = SqlRemoveHelper.removeWhereCondition(correctorSql, removeWhereFieldNames);
-        // replace having filter
-        updateFilters(havingExpressionList, queryData.getDimensionFilters(),
-                parseInfo.getDimensionFilters(), addHavingConditions, removeHavingFieldNames);
-        correctorSql = SqlReplaceHelper.replaceHavingValue(correctorSql, havingFiledNameToValueMap);
-        correctorSql = SqlRemoveHelper.removeHavingCondition(correctorSql, removeHavingFieldNames);
 
         correctorSql = SqlAddHelper.addWhere(correctorSql, addWhereConditions);
-        correctorSql = SqlAddHelper.addHaving(correctorSql, addHavingConditions);
         log.info("correctorSql after replacing:{}", correctorSql);
-        return correctorSql;
+        parseInfo.getSqlInfo().setCorrectS2SQL(correctorSql);
     }
 
-    private void replaceMetrics(SemanticParseInfo parseInfo, SchemaElement metric) {
+    public void appendLimitToSQL(QueryDataReq queryData, SemanticParseInfo parseInfo) {
+        String correctorSql = parseInfo.getSqlInfo().getCorrectS2SQL();
+        log.info("appendLimitToSQL before replacing:{}", correctorSql);
+        //add limit
+        correctorSql = SqlReplaceHelper.setLimit(correctorSql, queryData.getOffset(), queryData.getLimit());
+        log.info("appendLimitToSQL after replacing:{}", correctorSql);
+        parseInfo.setLimit(queryData.getLimit());
+        parseInfo.getSqlInfo().setCorrectS2SQL(correctorSql);
+    }
+
+    private void replaceMetrics(SemanticParseInfo parseInfo, Set<SchemaElement> metrics) {
         List<String> oriMetrics = parseInfo.getMetrics().stream()
                 .map(SchemaElement::getName).collect(Collectors.toList());
         String correctorSql = parseInfo.getSqlInfo().getCorrectS2SQL();
         log.info("before replaceMetrics:{}", correctorSql);
-        log.info("filteredMetrics:{},metrics:{}", oriMetrics, metric);
+        log.info("filteredMetrics:{},metrics:{}", oriMetrics, metrics);
         Map<String, Pair<String, String>> fieldMap = new HashMap<>();
-        if (CollectionUtils.isNotEmpty(oriMetrics) && !oriMetrics.contains(metric.getName())) {
-            fieldMap.put(oriMetrics.get(0), Pair.of(metric.getName(), metric.getDefaultAgg()));
-            correctorSql = SqlReplaceHelper.replaceAggFields(correctorSql, fieldMap);
+        for (SchemaElement metric : metrics) {
+            fieldMap.put(metric.getName(), Pair.of(metric.getName(), metric.getAggregator()));
         }
+        correctorSql = SqlReplaceHelper.replaceAggFields(correctorSql, fieldMap);
         log.info("after replaceMetrics:{}", correctorSql);
+        parseInfo.setMetrics(metrics);
         parseInfo.getSqlInfo().setCorrectS2SQL(correctorSql);
+    }
+
+    private void replaceDimensions(SemanticParseInfo parseInfo, Set<SchemaElement> dimensions) {
+        String correctorSql = parseInfo.getSqlInfo().getCorrectS2SQL();
+        log.info("before replaceDimensions:{}", correctorSql);
+        Map<String, String> fieldMap = new HashMap<>();
+        for (SchemaElement dimension : dimensions) {
+            fieldMap.put(dimension.getName(), dimension.getName());
+        }
+        String sql = SqlReplaceHelper.replaceSelectFields(correctorSql, fieldMap);
+        log.info("after replaceDimensions:{}", sql);
+        parseInfo.setDimensions(dimensions);
+        parseInfo.getSqlInfo().setCorrectS2SQL(sql);
     }
 
     private void updateDateInfo(QueryDataReq queryData, SemanticParseInfo parseInfo,
@@ -407,39 +410,40 @@ public class ChatQueryServiceImpl implements ChatQueryService {
     }
 
     private void updateFilters(List<FieldExpression> fieldExpressionList,
-            Set<QueryFilter> metricFilters,
-            Set<QueryFilter> contextMetricFilters,
-            List<Expression> addConditions,
-            Set<String> removeFieldNames) {
+                               Set<QueryFilter> metricFilters,
+                               Set<QueryFilter> contextMetricFilters,
+                               List<Expression> addConditions,
+                               Set<String> removeFieldNames) {
+        //删除已有where约束字段
+        for (FieldExpression fieldExpression : fieldExpressionList) {
+            removeFieldNames.add(fieldExpression.getFieldName());
+        }
+        contextMetricFilters.clear();
+
         if (CollectionUtils.isEmpty(metricFilters)) {
             return;
         }
+        //新增约束字段
         for (QueryFilter dslQueryFilter : metricFilters) {
-            for (FieldExpression fieldExpression : fieldExpressionList) {
-                if (fieldExpression.getFieldName() != null
-                        && fieldExpression.getFieldName().contains(dslQueryFilter.getName())) {
-                    removeFieldNames.add(dslQueryFilter.getName());
-                    if (dslQueryFilter.getOperator().equals(FilterOperatorEnum.EQUALS)) {
-                        EqualsTo equalsTo = new EqualsTo();
-                        addWhereFilters(dslQueryFilter, equalsTo, contextMetricFilters, addConditions);
-                    } else if (dslQueryFilter.getOperator().equals(FilterOperatorEnum.GREATER_THAN_EQUALS)) {
-                        GreaterThanEquals greaterThanEquals = new GreaterThanEquals();
-                        addWhereFilters(dslQueryFilter, greaterThanEquals, contextMetricFilters, addConditions);
-                    } else if (dslQueryFilter.getOperator().equals(FilterOperatorEnum.GREATER_THAN)) {
-                        GreaterThan greaterThan = new GreaterThan();
-                        addWhereFilters(dslQueryFilter, greaterThan, contextMetricFilters, addConditions);
-                    } else if (dslQueryFilter.getOperator().equals(FilterOperatorEnum.MINOR_THAN_EQUALS)) {
-                        MinorThanEquals minorThanEquals = new MinorThanEquals();
-                        addWhereFilters(dslQueryFilter, minorThanEquals, contextMetricFilters, addConditions);
-                    } else if (dslQueryFilter.getOperator().equals(FilterOperatorEnum.MINOR_THAN)) {
-                        MinorThan minorThan = new MinorThan();
-                        addWhereFilters(dslQueryFilter, minorThan, contextMetricFilters, addConditions);
-                    } else if (dslQueryFilter.getOperator().equals(FilterOperatorEnum.IN)) {
-                        InExpression inExpression = new InExpression();
-                        addWhereInFilters(dslQueryFilter, inExpression, contextMetricFilters, addConditions);
-                    }
-                    break;
-                }
+            contextMetricFilters.add(dslQueryFilter);
+            if (dslQueryFilter.getOperator().equals(FilterOperatorEnum.EQUALS)) {
+                EqualsTo equalsTo = new EqualsTo();
+                addWhereFilters(dslQueryFilter, equalsTo, addConditions);
+            } else if (dslQueryFilter.getOperator().equals(FilterOperatorEnum.GREATER_THAN_EQUALS)) {
+                GreaterThanEquals greaterThanEquals = new GreaterThanEquals();
+                addWhereFilters(dslQueryFilter, greaterThanEquals, addConditions);
+            } else if (dslQueryFilter.getOperator().equals(FilterOperatorEnum.GREATER_THAN)) {
+                GreaterThan greaterThan = new GreaterThan();
+                addWhereFilters(dslQueryFilter, greaterThan, addConditions);
+            } else if (dslQueryFilter.getOperator().equals(FilterOperatorEnum.MINOR_THAN_EQUALS)) {
+                MinorThanEquals minorThanEquals = new MinorThanEquals();
+                addWhereFilters(dslQueryFilter, minorThanEquals, addConditions);
+            } else if (dslQueryFilter.getOperator().equals(FilterOperatorEnum.MINOR_THAN)) {
+                MinorThan minorThan = new MinorThan();
+                addWhereFilters(dslQueryFilter, minorThan, addConditions);
+            } else if (dslQueryFilter.getOperator().equals(FilterOperatorEnum.IN)) {
+                InExpression inExpression = new InExpression();
+                addWhereInFilters(dslQueryFilter, inExpression, addConditions);
             }
         }
     }
@@ -447,7 +451,6 @@ public class ChatQueryServiceImpl implements ChatQueryService {
     // add in condition to sql where  condition
     private void addWhereInFilters(QueryFilter dslQueryFilter,
             InExpression inExpression,
-            Set<QueryFilter> contextMetricFilters,
             List<Expression> addConditions) {
         Column column = new Column(dslQueryFilter.getName());
         ParenthesedExpressionList parenthesedExpressionList = new ParenthesedExpressionList<>();
@@ -463,18 +466,11 @@ public class ChatQueryServiceImpl implements ChatQueryService {
         inExpression.setLeftExpression(column);
         inExpression.setRightExpression(parenthesedExpressionList);
         addConditions.add(inExpression);
-        contextMetricFilters.stream().forEach(o -> {
-            if (o.getName().equals(dslQueryFilter.getName())) {
-                o.setValue(dslQueryFilter.getValue());
-                o.setOperator(dslQueryFilter.getOperator());
-            }
-        });
     }
 
     // add where filter
     private <T extends ComparisonOperator> void addWhereFilters(QueryFilter dslQueryFilter,
             T comparisonExpression,
-            Set<QueryFilter> contextMetricFilters,
             List<Expression> addConditions) {
         String columnName = dslQueryFilter.getName();
         if (StringUtils.isNotBlank(dslQueryFilter.getFunction())) {
@@ -493,12 +489,6 @@ public class ChatQueryServiceImpl implements ChatQueryService {
             comparisonExpression.setRightExpression(stringValue);
         }
         addConditions.add(comparisonExpression);
-        contextMetricFilters.stream().forEach(o -> {
-            if (o.getName().equals(dslQueryFilter.getName())) {
-                o.setValue(dslQueryFilter.getValue());
-                o.setOperator(dslQueryFilter.getOperator());
-            }
-        });
     }
 
     private SemanticParseInfo getSemanticParseInfo(QueryDataReq queryData) {
