@@ -138,7 +138,13 @@ public class DictUtils {
 
     public List<DictItemResp> dictDOList2Req(List<DictConfDO> dictConfDOList) {
         List<DictItemResp> dictItemReqList = new ArrayList<>();
-        dictConfDOList.stream().forEach(conf -> dictItemReqList.add(dictDO2Req(conf)));
+        dictConfDOList.stream().forEach(conf -> {
+            DictItemResp dictItemResp = dictDO2Req(conf);
+            if (Objects.nonNull(dictItemResp)) {
+                dictItemReqList.add(dictDO2Req(conf));
+            }
+
+        });
         return dictItemReqList;
     }
 
@@ -150,6 +156,10 @@ public class DictUtils {
         dictItemResp.setStatus(StatusEnum.of(dictConfDO.getStatus()));
         if (TypeEnums.DIMENSION.equals(TypeEnums.valueOf(dictConfDO.getType()))) {
             DimensionResp dimension = dimensionService.getDimension(dictConfDO.getItemId());
+            if (Objects.isNull(dimension)) {
+                log.info("dimension is null, dictConfDO:{}", dictConfDO);
+                return null;
+            }
             dictItemResp.setModelId(dimension.getModelId());
             dictItemResp.setBizName(dimension.getBizName());
         }
