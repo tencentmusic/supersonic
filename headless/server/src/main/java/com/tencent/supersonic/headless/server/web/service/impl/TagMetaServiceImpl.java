@@ -133,8 +133,7 @@ public class TagMetaServiceImpl implements TagMetaService {
 
     @Override
     public List<TagResp> getTags(TagFilter tagFilter) {
-        List<TagResp> tagRespList = tagRepository.queryTagRespList(tagFilter);
-        return tagRespList;
+        return tagRepository.queryTagRespList(tagFilter);
     }
 
     @Override
