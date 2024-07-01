@@ -14,6 +14,8 @@ import com.tencent.supersonic.chat.server.agent.RuleParserTool;
 import com.tencent.supersonic.chat.server.plugin.ChatPlugin;
 import com.tencent.supersonic.chat.server.plugin.PluginParseConfig;
 import com.tencent.supersonic.chat.server.plugin.build.WebBase;
+import com.tencent.supersonic.chat.server.plugin.build.webpage.WebPageQuery;
+import com.tencent.supersonic.chat.server.plugin.build.webservice.WebServiceQuery;
 import com.tencent.supersonic.common.pojo.JoinCondition;
 import com.tencent.supersonic.common.pojo.ModelRela;
 import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
@@ -105,6 +107,7 @@ public class S2VisitsDemo extends S2BaseDemo {
             addTerm(s2Domain);
             addTerm_1(s2Domain);
             addPlugin(s2DataSet);
+            addPlugin_1();
 
             //load dict word
             loadDictWord();
@@ -504,8 +507,8 @@ public class S2VisitsDemo extends S2BaseDemo {
 
     private void addPlugin(DataSetResp s2DataSet) {
         ChatPlugin plugin1 = new ChatPlugin();
-        plugin1.setType("WEB_PAGE");
-        plugin1.setDataSetList(Arrays.asList(s2DataSet.getId()));
+        plugin1.setType(WebPageQuery.QUERY_MODE);
+        plugin1.setDataSetList(Collections.singletonList(s2DataSet.getId()));
         plugin1.setPattern("用于分析超音数的流量概况，包含UV、PV等核心指标的追踪。P.S. 仅作为示例展示，无实际看板");
         plugin1.setName("超音数流量分析看板");
         PluginParseConfig pluginParseConfig = new PluginParseConfig();
@@ -515,6 +518,24 @@ public class S2VisitsDemo extends S2BaseDemo {
         plugin1.setParseModeConfig(JSONObject.toJSONString(pluginParseConfig));
         WebBase webBase = new WebBase();
         webBase.setUrl("www.yourbi.com");
+        webBase.setParamOptions(Lists.newArrayList());
+        plugin1.setConfig(JsonUtil.toString(webBase));
+        pluginService.createPlugin(plugin1, user);
+    }
+
+    private void addPlugin_1() {
+        ChatPlugin plugin1 = new ChatPlugin();
+        plugin1.setType(WebServiceQuery.QUERY_MODE);
+        plugin1.setDataSetList(Collections.singletonList(-1L));
+        plugin1.setPattern("用于分析超音数的流量概况，包含UV、PV等核心指标的追踪。P.S. 仅作为示例展示，无实际内容");
+        plugin1.setName("超音数流量分析小助手");
+        PluginParseConfig pluginParseConfig = new PluginParseConfig();
+        pluginParseConfig.setDescription(plugin1.getPattern());
+        pluginParseConfig.setName(plugin1.getName());
+        pluginParseConfig.setExamples(Lists.newArrayList("tom最近访问超音数情况怎么样"));
+        plugin1.setParseModeConfig(JSONObject.toJSONString(pluginParseConfig));
+        WebBase webBase = new WebBase();
+        webBase.setUrl("http://localhost:9080/api/chat/plugin/pluginDemo");
         webBase.setParamOptions(Lists.newArrayList());
         plugin1.setConfig(JsonUtil.toString(webBase));
         pluginService.createPlugin(plugin1, user);

@@ -1,18 +1,21 @@
 package com.tencent.supersonic.chat.server.rest;
 
+import com.tencent.supersonic.auth.api.authentication.annotation.AuthenticationIgnore;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
 import com.tencent.supersonic.chat.api.pojo.request.PluginQueryReq;
 import com.tencent.supersonic.chat.server.plugin.ChatPlugin;
 import com.tencent.supersonic.chat.server.service.PluginService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;
@@ -59,6 +62,13 @@ public class PluginController {
                            HttpServletResponse httpServletResponse) {
         User user = UserHolder.findUser(httpServletRequest, httpServletResponse);
         return pluginService.queryWithAuthCheck(pluginQueryReq, user);
+    }
+
+    @AuthenticationIgnore
+    @PostMapping("/pluginDemo")
+    public String pluginDemo(@RequestParam("queryText") String queryText,
+                             @RequestBody Object object) {
+        return String.format("已收到您的问题:%s, 但这只是一个demo~", queryText);
     }
 
 }
