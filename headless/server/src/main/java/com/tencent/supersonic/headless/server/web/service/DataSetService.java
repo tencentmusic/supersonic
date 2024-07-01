@@ -4,6 +4,7 @@ import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.headless.api.pojo.request.QueryDataSetReq;
 import com.tencent.supersonic.headless.api.pojo.request.SemanticQueryReq;
 import com.tencent.supersonic.headless.api.pojo.request.DataSetReq;
+import com.tencent.supersonic.headless.api.pojo.response.DataSetDetailResp;
 import com.tencent.supersonic.headless.api.pojo.response.DataSetResp;
 import com.tencent.supersonic.headless.server.pojo.MetaFilter;
 
@@ -17,6 +18,8 @@ public interface DataSetService {
     DataSetResp update(DataSetReq dataSetReq, User user);
 
     DataSetResp getDataSet(Long id);
+
+    DataSetDetailResp getDataDetailSet(Long id);
 
     List<DataSetResp> getDataSetList(MetaFilter metaFilter);
 

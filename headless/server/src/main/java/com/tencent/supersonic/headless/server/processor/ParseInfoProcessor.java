@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import com.tencent.supersonic.common.jsqlparser.FieldExpression;
 import com.tencent.supersonic.common.jsqlparser.SqlSelectHelper;
 import com.tencent.supersonic.common.pojo.DateConf;
+import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
 import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
 import com.tencent.supersonic.common.pojo.enums.QueryType;
 import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
@@ -47,6 +48,9 @@ public class ParseInfoProcessor implements ResultProcessor {
         }
         List<SemanticParseInfo> candidateParses = candidateQueries.stream()
                 .map(SemanticQuery::getParseInfo).collect(Collectors.toList());
+        if (!candidateQueries.isEmpty()) {
+            candidateQueries.get(0).getParseInfo().setRecommendParse(true);
+        }
         candidateParses.forEach(this::updateParseInfo);
     }
 
@@ -54,10 +58,6 @@ public class ParseInfoProcessor implements ResultProcessor {
         SqlInfo sqlInfo = parseInfo.getSqlInfo();
         String correctS2SQL = sqlInfo.getCorrectS2SQL();
         if (StringUtils.isBlank(correctS2SQL)) {
-            return;
-        }
-        // if S2SQL equals correctS2SQL, then not update the parseInfo.
-        if (correctS2SQL.equals(sqlInfo.getS2SQL())) {
             return;
         }
         List<FieldExpression> expressions = SqlSelectHelper.getFilterExpression(correctS2SQL);
@@ -101,7 +101,7 @@ public class ParseInfoProcessor implements ResultProcessor {
                 metric.setAggregator(aggregator);
             } else {
                 // 如果没有找到匹配的聚合函数，使用默认聚合器
-                metric.setAggregator(metric.getDefaultAgg());
+                metric.setAggregator(AggOperatorEnum.of(metric.getDefaultAgg()).name());
             }
         }
 

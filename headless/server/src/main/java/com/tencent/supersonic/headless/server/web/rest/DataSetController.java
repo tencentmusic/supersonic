@@ -3,6 +3,7 @@ package com.tencent.supersonic.headless.server.web.rest;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
 import com.tencent.supersonic.headless.api.pojo.request.DataSetReq;
+import com.tencent.supersonic.headless.api.pojo.response.DataSetDetailResp;
 import com.tencent.supersonic.headless.api.pojo.response.DataSetResp;
 import com.tencent.supersonic.headless.server.pojo.MetaFilter;
 import com.tencent.supersonic.headless.server.web.service.DataSetService;
@@ -44,6 +45,11 @@ public class DataSetController {
     @GetMapping("/{id}")
     public DataSetResp getDataSet(@PathVariable("id") Long id) {
         return dataSetService.getDataSet(id);
+    }
+
+    @GetMapping("/detail/{id}")
+    public DataSetDetailResp getDataSetDetail(@PathVariable("id") Long id) {
+        return dataSetService.getDataDetailSet(id);
     }
 
     @GetMapping("/getDataSetList")

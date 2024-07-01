@@ -159,7 +159,9 @@ public class ChatServiceImpl implements ChatService {
         QueryDataReq queryData = new QueryDataReq();
         BeanMapper.mapper(chatQueryDataReq, queryData);
         queryData.setParseInfo(parseInfo);
-        return chatQueryService.executeDirectQuery(queryData, user);
+        QueryResult queryResult = chatQueryService.executeDirectQuery(queryData, user);
+        saveQueryResult(chatQueryDataReq, queryResult);
+        return queryResult;
     }
 
     @Override
@@ -181,6 +183,14 @@ public class ChatServiceImpl implements ChatService {
             return;
         }
         chatManageService.saveQueryResult(chatExecuteReq, queryResult);
+    }
+
+    public void saveQueryResult(ChatQueryDataReq chatQueryDataReq, QueryResult queryResult) {
+        //The history record only retains the query result of the first parse
+        if (chatQueryDataReq.getParseId() > 1) {
+            return;
+        }
+        chatManageService.saveQueryResult(chatQueryDataReq, queryResult);
     }
 
 }

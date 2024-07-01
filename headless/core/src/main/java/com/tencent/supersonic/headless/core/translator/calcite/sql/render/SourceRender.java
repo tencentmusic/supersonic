@@ -317,6 +317,9 @@ public class SourceRender extends Renderer {
             if (endTimeOp.isPresent() && !queryDimension.contains(endTimeOp.get().getName())) {
                 queryDimension.add(endTimeOp.get().getName());
             }
+        } else if (Materialization.TimePartType.FULL.equals(dataSource.getTimePartType())
+                || dataSource.getTimePartType() == null) {
+            log.info("nothing to do");
         } else {
             Optional<Dimension> timeOp = dataSource.getDimensions().stream()
                     .filter(d -> Constants.DIMENSION_TYPE_TIME.equalsIgnoreCase(d.getType())).findFirst();
