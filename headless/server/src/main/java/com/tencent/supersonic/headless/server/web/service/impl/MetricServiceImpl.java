@@ -114,14 +114,14 @@ public class MetricServiceImpl extends ServiceImpl<MetricDOMapper, MetricDO>
     private ChatQueryService chatQueryService;
 
     public MetricServiceImpl(MetricRepository metricRepository,
-            ModelService modelService,
-            AliasGenerateHelper aliasGenerateHelper,
-            CollectService collectService,
-            DataSetService dataSetService,
-            ApplicationEventPublisher eventPublisher,
-            DimensionService dimensionService,
-            TagMetaService tagMetaService,
-            @Lazy ChatQueryService chatQueryService) {
+                             ModelService modelService,
+                             AliasGenerateHelper aliasGenerateHelper,
+                             CollectService collectService,
+                             DataSetService dataSetService,
+                             ApplicationEventPublisher eventPublisher,
+                             DimensionService dimensionService,
+                             TagMetaService tagMetaService,
+                             @Lazy ChatQueryService chatQueryService) {
         this.metricRepository = metricRepository;
         this.modelService = modelService;
         this.aliasGenerateHelper = aliasGenerateHelper;
@@ -453,7 +453,7 @@ public class MetricServiceImpl extends ServiceImpl<MetricDOMapper, MetricDO>
     }
 
     private boolean filterByField(List<MetricResp> metricResps, MetricResp metricResp,
-            List<String> fields, Set<MetricResp> metricRespFiltered) {
+                                  List<String> fields, Set<MetricResp> metricRespFiltered) {
         if (MetricDefineType.METRIC.equals(metricResp.getMetricDefineType())) {
             List<Long> ids = metricResp.getMetricDefineByMetricParams().getMetrics()
                     .stream().map(MetricParam::getId).collect(Collectors.toList());
@@ -758,8 +758,13 @@ public class MetricServiceImpl extends ServiceImpl<MetricDOMapper, MetricDO>
         }
         // Measure define will get from first measure
         List<Measure> measures = modelResp.getModelDetail().getMeasures();
-        MeasureParam firstMeasure = metricResp.getMetricDefineByMeasureParams()
-                .getMeasures().get(0);
+        List<MeasureParam> measureParams = metricResp.getMetricDefineByMeasureParams()
+                .getMeasures();
+        if (CollectionUtils.isEmpty(measureParams)) {
+            return "";
+        }
+        MeasureParam firstMeasure = measureParams.get(0);
+
         for (Measure measure : measures) {
             if (measure.getBizName().equalsIgnoreCase(firstMeasure.getBizName())) {
                 return measure.getAgg();
@@ -856,7 +861,7 @@ public class MetricServiceImpl extends ServiceImpl<MetricDOMapper, MetricDO>
     }
 
     private Set<Long> getModelIds(Set<Long> modelIdsByDomainId, List<MetricResp> metricResps,
-            List<DimensionResp> dimensionResps) {
+                                  List<DimensionResp> dimensionResps) {
         Set<Long> result = new HashSet<>();
         if (org.apache.commons.collections.CollectionUtils.isNotEmpty(modelIdsByDomainId)) {
             result.addAll(modelIdsByDomainId);
