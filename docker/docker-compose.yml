@@ -1,5 +1,24 @@
 version: '3.8'
 services:
+  chroma:
+    image: chromadb/chroma:0.5.3
+    container_name: supersonic_chroma
+    ports:
+      - "8000:8000"
+    volumes:
+      - chroma_data:/chroma
+    networks:
+      - supersonic_network
+    dns:
+      - 114.114.114.114
+      - 8.8.8.8
+      - 8.8.4.4
+    healthcheck:
+      test: ["CMD", "curl", "http://0.0.0.0:8000"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
   mysql:
     image: mysql:8.0
     container_name: supersonic_mysql
@@ -18,17 +37,26 @@ services:
       - 114.114.114.114
       - 8.8.8.8
       - 8.8.4.4
+    depends_on:
+      chroma:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   db_init:
     image: supersonicbi/supersonic:${SUPERSONIC_VERSION:-latest}
     container_name: supersonic_db_init
     depends_on:
-      - mysql
+      mysql:
+        condition: service_healthy
     networks:
       - supersonic_network
     command: >
       sh -c "
-      sleep 30 &&
+      sleep 15 &&
       if ! mysql -h supersonic_mysql -usupersonic_user -psupersonic_password -e 'use supersonic_db; show tables;' | grep -q 's2_database'; then
         mysql -h supersonic_mysql -usupersonic_user -psupersonic_password supersonic_db < /usr/src/app/supersonic-standalone-0.9.2-SNAPSHOT/conf/db/schema-mysql.sql &&
         mysql -h supersonic_mysql -usupersonic_user -psupersonic_password supersonic_db < /usr/src/app/supersonic-standalone-0.9.2-SNAPSHOT/conf/db/data-mysql.sql
@@ -36,20 +64,6 @@ services:
         echo 'Database already initialized.'
       fi
       "
-    dns:
-      - 114.114.114.114
-      - 8.8.8.8
-      - 8.8.4.4
-
-  chroma:
-    image: chromadb/chroma:0.5.3
-    container_name: supersonic_chroma
-    ports:
-      - "8000:8000"
-    volumes:
-      - chroma_data:/chroma
-    networks:
-      - supersonic_network
     dns:
       - 114.114.114.114
       - 8.8.8.8
@@ -63,12 +77,16 @@ services:
       DB_NAME: supersonic_db
       DB_USERNAME: supersonic_user
       DB_PASSWORD: supersonic_password
+      CHROMA_HOST: supersonic_chroma
     ports:
       - "9080:9080"
     depends_on:
-      - mysql
-      - db_init
-      - chroma
+      chroma:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+      db_init:
+        condition: service_completed_successfully
     networks:
       - supersonic_network
     dns:

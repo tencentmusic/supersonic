@@ -26,4 +26,4 @@ WORKDIR /usr/src/app/supersonic-standalone-${SUPERSONIC_VERSION}
 EXPOSE 9080
 # Command to run the supersonic daemon
 RUN chmod +x bin/supersonic-daemon.sh
-CMD ["bash", "-c", "bin/supersonic-daemon.sh restart prd && tail -f /dev/null"]
+CMD ["bash", "-c", "bin/supersonic-daemon.sh restart standalone prd && tail -f /dev/null"]

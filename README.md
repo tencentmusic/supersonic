@@ -62,7 +62,7 @@ Visit http://117.72.46.148:9080 to register and experience as a new user. Please
 
 ### Docker Deployment
 - Install Docker and docker-compose.
-- Download the docker-compose.yml file; Execute https://raw.githubusercontent.com/tencentmusic/supersonic/master/docker/docker-compose.yml.
+- Download the docker-compose.yml file; Execute: wget https://raw.githubusercontent.com/tencentmusic/supersonic/master/docker/docker-compose.yml.
 - Execute "docker-compose up -d".
 - Open a browser and visit http://localhost:9080 to start exploring.
 
