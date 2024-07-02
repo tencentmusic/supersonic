@@ -9,6 +9,7 @@ import { SemanticTypeEnum, SEMANTIC_TYPE_MAP, HOLDER_TAG } from '../constants';
 import { AgentType, ModelType } from '../type';
 import { searchRecommend } from '../../service';
 import styles from './style.module.less';
+import { InfoCircleOutlined } from '@ant-design/icons';
 
 type Props = {
   inputMsg: string;
@@ -405,6 +406,10 @@ const ChatFooter: ForwardRefRenderFunction<any, Props> = (
           >
             {modelOptions.length > 0 ? modelOptionNodes : associateOptionNodes}
           </AutoComplete>
+          <div className={styles.AIGenTips}>
+            <InfoCircleOutlined />
+            AI生成的内容仅供参考，请注意甄别信息的准确性
+          </div>
           <div
             className={classNames(styles.sendBtn, {
               [styles.sendBtnActive]: inputMsg?.length > 0 && isAllMsgResolved,

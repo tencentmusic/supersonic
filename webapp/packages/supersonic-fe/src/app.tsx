@@ -15,6 +15,7 @@ export { request } from './services/request';
 import { ROUTE_AUTH_CODES } from '../config/routes';
 import AppPage from './pages/index';
 import type { API } from './services/API';
+import logoSrc from '@/assets/logo.png';
 
 const replaceRoute = '/';
 
@@ -124,12 +125,13 @@ export const layout: RunTimeLayoutConfig = (params) => {
     },
     logo: (
       <Space>
-        <S2Icon
+        {/* <S2Icon
           icon={ICON.iconlogobiaoshi}
           size={30}
           color="#1672fa"
           style={{ display: 'inline-block', marginTop: 8 }}
-        />
+        /> */}
+        <img src={logoSrc} alt="logo" style={{ height: 40 }} />
         <div className="logo" style={{ position: 'relative', top: '-2px' }}>
           Chatdata
         </div>
