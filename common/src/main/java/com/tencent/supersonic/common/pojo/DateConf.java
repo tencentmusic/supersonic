@@ -98,8 +98,9 @@ public class DateConf {
          * 2 - LIST, discrete static value, [dateList]
          * 3 - RECENT, dynamic time related to the actual available time of the element, [unit, period]
          * 4 - AVAILABLE, dynamic time which guaranteed to query some data, [startDate, endDate]
+         * 5 - ALL, all table data
          */
-        BETWEEN, LIST, RECENT, AVAILABLE
+        BETWEEN, LIST, RECENT, AVAILABLE, ALL
     }
 
     @Override
