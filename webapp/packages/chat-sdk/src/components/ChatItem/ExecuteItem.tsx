@@ -59,7 +59,7 @@ const ExecuteItem: React.FC<Props> = ({
             {!tip && <Loading />}
           </div>
         </div>
-        {tip && <div className={`${prefixCls}-content-container`}>{tip}</div>}
+        {tip && <div className={`${prefixCls}-content-container without-border`}>{tip}</div>}
       </>
     );
   };
@@ -110,7 +110,7 @@ const ExecuteItem: React.FC<Props> = ({
             <Col flex="0 1 30px">
               <Dropdown trigger={['click']} menu={menu}>
                 <Tooltip title="更多操作">
-                  <Button size="large" type="text" icon={<EllipsisOutlined />} />
+                  <EllipsisOutlined />
                 </Tooltip>
               </Dropdown>
             </Col>

@@ -431,7 +431,7 @@ const Chat: ForwardRefRenderFunction<any, Props> = (
                           <Space>
                             <div className={styles.chatHeaderTitle}>{currentAgent.name}</div>
                             <div className={styles.chatHeaderTip}>{currentAgent.description}</div>
-                            <Tooltip title="精简模式下，问答结果将以文本形式输出">
+                            {/* <Tooltip title="精简模式下，问答结果将以文本形式输出">
                               <Switch
                                 style={{ position: 'relative', top: -1 }}
                                 size="small"
@@ -442,7 +442,7 @@ const Chat: ForwardRefRenderFunction<any, Props> = (
                                   setIsSimpleMode(checked);
                                 }}
                               />
-                            </Tooltip>
+                            </Tooltip> */}
                           </Space>
                         </Col>
                         <Col flex="0 1 118px"></Col>

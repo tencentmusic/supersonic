@@ -88,7 +88,7 @@ const ParseTip: React.FC<Props> = ({
   };
 
   if (parseLoading) {
-    return getNode('意图解析中');
+    return getNode('正在为您查询中，请稍后');
   }
 
   if (parseTip) {
@@ -173,6 +173,8 @@ const ParseTip: React.FC<Props> = ({
                 <div className={itemValueClass}>{dataSet?.name}</div>
               </div>
             )}
+
+            {/* 
             {(queryType === 'METRIC' || queryType === 'METRIC_TAG' || queryType === 'DETAIL') && (
               <div className={`${prefixCls}-tip-item`}>
                 <div className={`${prefixCls}-tip-item-name`}>查询模式：</div>
@@ -228,6 +230,7 @@ const ParseTip: React.FC<Props> = ({
                   <div className={itemValueClass}>{AGG_TYPE_MAP[aggType]}</div>
                 </div>
               )}
+             */}
           </>
         )}
       </div>
