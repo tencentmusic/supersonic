@@ -728,6 +728,20 @@ export function batchUpdateClassifications(data: any): Promise<any> {
   });
 }
 
+export function batchUpdateDimensionSensitiveLevel(data: any): Promise<any> {
+  return request(`${process.env.API_BASE_URL}dimension/batchUpdateSensitiveLevel`, {
+    method: 'POST',
+    data: { ...data },
+  });
+}
+
+export function batchUpdateMetricSensitiveLevel(data: any): Promise<any> {
+  return request(`${process.env.API_BASE_URL}metric/batchUpdateSensitiveLevel`, {
+    method: 'POST',
+    data: { ...data },
+  });
+}
+
 export function getTermList(domainId: number): Promise<any> {
   return request(`${process.env.API_BASE_URL}term`, {
     method: 'GET',

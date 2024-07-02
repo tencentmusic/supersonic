@@ -60,6 +60,12 @@ The high-level architecture and main process flow is as follows:
 ### Online playground
 Visit http://117.72.46.148:9080 to register and experience as a new user. Please do not modify system configurations. We will restart to reset configurations regularly every weekend.
 
+### Docker Deployment
+- Install Docker and docker-compose.
+- Download the docker-compose.yml file; Execute https://raw.githubusercontent.com/tencentmusic/supersonic/master/docker/docker-compose.yml.
+- Execute "docker-compose up -d".
+- Open a browser and visit http://localhost:9080 to start exploring.
+
 ### Local build
 SuperSonic comes with sample semantic models as well as chat conversations that can be used as a starting point. Please follow the steps: 
 

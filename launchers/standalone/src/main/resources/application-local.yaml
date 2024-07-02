@@ -1,10 +1,3 @@
-server:
-  port: 9080
-  compression:
-    enabled: true
-    min-response-size: 1024
-    mime-types: application/javascript,application/json,application/xml,text/html,text/xml,text/plain,text/css,image/*
-
 spring:
   h2:
     console:
@@ -15,26 +8,9 @@ spring:
     url: jdbc:mysql://mysql8-test01-mysql-master-3489.ot1.gz.paas.cvtecs.com:3489/chatdata
     username: chatdata
     password: Ae?15LjU
-
-mybatis:
-  mapper-locations=classpath:mappers/custom/*.xml,classpath*:/mappers/*.xml
-
-logging:
-  level:
-    dev.langchain4j: DEBUG
-    dev.ai4j.openai4j: DEBUG
-# swagger配置
-swagger:
-  title: 'SuperSonic平台接口文档'
-  base:
-    package: com.tencent.supersonic
-  description: 'SuperSonic平台接口文档'
-  url: ''
-  contact:
-    name:
-    email:
-    url: ''
-  version: 3.0
+  config:
+    import:
+      - classpath:langchain4j-local.yaml
 
 #cas单点登录
 cas:

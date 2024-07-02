@@ -61,7 +61,7 @@ public class WebServiceQuery extends PluginSemanticQuery {
             if (data.get("columns") != null) {
                 queryResult.setQueryColumns((List<QueryColumn>) data.get("columns"));
             }
-            queryResult.setTextResult(String.valueOf(data.get("textInfo")));
+            queryResult.setTextResult(String.valueOf(data.get("data")));
             queryResult.setQueryState(QueryState.SUCCESS);
         } catch (Exception e) {
             log.info("webServiceResponse result has an exception:{}", e.getMessage());
@@ -80,7 +80,8 @@ public class WebServiceQuery extends PluginSemanticQuery {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<String> entity = new HttpEntity<>(JSON.toJSONString(params), headers);
-        URI requestUrl = UriComponentsBuilder.fromHttpUrl(webBase.getUrl()).build().encode().toUri();
+        String url = webBase.getUrl() + "?queryText=" + pluginParseResult.getQueryText();
+        URI requestUrl = UriComponentsBuilder.fromHttpUrl(url).build().encode().toUri();
         ResponseEntity responseEntity = null;
         Object objectResponse = null;
         restTemplate = ContextUtils.getBean(RestTemplate.class);

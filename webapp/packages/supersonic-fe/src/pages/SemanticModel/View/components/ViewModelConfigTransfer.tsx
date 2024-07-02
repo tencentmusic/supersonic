@@ -170,9 +170,12 @@ const ViewModelConfigTransfer: React.FC<Props> = forwardRef(
       if (!dimensionList || !metricList) {
         return;
       }
-      const dataSetModelConfigs = isArrayOfValues(Object.values(viewModelConfigsMap))
-        ? (Object.values(viewModelConfigsMap) as ISemantic.IViewModelConfigItem[])
-        : viewItem?.dataSetDetail?.dataSetModelConfigs;
+      // const dataSetModelConfigs = isArrayOfValues(Object.values(viewModelConfigsMap))
+      //   ? (Object.values(viewModelConfigsMap) as ISemantic.IViewModelConfigItem[])
+      //   : viewItem?.dataSetDetail?.dataSetModelConfigs;
+      const dataSetModelConfigs = Object.values(
+        viewModelConfigsMap,
+      ) as ISemantic.IViewModelConfigItem[];
       if (isArrayOfValues(dataSetModelConfigs)) {
         const allMetrics: number[] = [];
         const allDimensions: number[] = [];
