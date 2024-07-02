@@ -9,18 +9,14 @@ interface RecordType {
 }
 
 type Props = {
-  knowledgeInfosMap?: IChatConfig.IKnowledgeInfosItemMap;
   sourceList: any[];
   targetList: React.Key[];
   titles?: (React.ReactNode | string)[];
-  onKnowledgeInfosMapChange?: (knowledgeInfosMap: IChatConfig.IKnowledgeInfosItemMap) => void;
   onChange?: (params?: any) => void;
   [key: string]: any;
 };
 
 const DimensionMetricVisibleTransfer: React.FC<Props> = ({
-  knowledgeInfosMap,
-  onKnowledgeInfosMapChange,
   sourceList = [],
   targetList = [],
   titles,
@@ -59,8 +55,6 @@ const DimensionMetricVisibleTransfer: React.FC<Props> = ({
   return (
     <div style={{ display: 'flex', justifyContent: 'center' }}>
       <DimensionMetricVisibleTableTransfer
-        knowledgeInfosMap={knowledgeInfosMap}
-        onKnowledgeInfosMapChange={onKnowledgeInfosMapChange}
         dataSource={transferData}
         showSearch
         titles={titles || ['不可见维度', '可见维度']}

@@ -182,6 +182,9 @@ public class DimensionServiceImpl extends ServiceImpl<DimensionDOMapper, Dimensi
 
     @Override
     public void batchUpdateSensitiveLevel(MetaBatchReq metaBatchReq, User user) {
+        if (CollectionUtils.isEmpty(metaBatchReq.getIds())) {
+            return;
+        }
         DimensionFilter metaFilter = new DimensionFilter();
         metaFilter.setIds(metaBatchReq.getIds());
         List<DimensionDO> dimensionDOS = queryDimension(metaFilter);

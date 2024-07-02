@@ -59,6 +59,12 @@ const BatchCtrlDropDownButton: FC<BatchCtrlDropDownButtonProps> = ({
       icon: <FormOutlined />,
       disabled: disabledList?.includes('batchAddClass'),
     },
+    batchSensitiveLevel: {
+      key: 'batchSensitiveLevel',
+      label: '批量修改敏感度',
+      icon: <FormOutlined />,
+      disabled: disabledList?.includes('batchSensitiveLevel'),
+    },
   };
 
   const extenderButtonList: any[] = extenderList.reduce((list: any[], key) => {

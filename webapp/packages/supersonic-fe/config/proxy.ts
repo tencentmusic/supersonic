@@ -1,7 +1,7 @@
 export default {
   dev: {
     '/api/': {
-      target: 'https://chatdata-dev.test.seewo.com/',
+      target: 'http://localhost:9080',
       changeOrigin: true,
     },
   },

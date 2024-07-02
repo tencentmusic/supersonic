@@ -59,6 +59,12 @@ SuperSonic的整体架构和主流程如下图所示：
 ### 线上环境体验
 访问http://117.72.46.148:9080 注册新用户体验. 请勿修改系统配置。我们每周末定期重启重置配置。
 
+### Docker部署
+- 安装好Docker以及docker-compose
+- 下载docker-compose.yml；执行命令：wget https://raw.githubusercontent.com/tencentmusic/supersonic/master/docker/docker-compose.yml
+- 执行："docker-compose up -d"
+- 在浏览器访问http://localhost:9080 开启探索
+
 ### 本地构建
 
 SuperSonic自带样例的语义模型和问答对话，只需以下三步即可快速体验：
