@@ -59,6 +59,10 @@ const numberOperatorMap = {
     includeMin: false,
     includeMax: true,
   },
+  '=': {
+    getText: (v1: number, v2: number) => '等于' + v1,
+    label: '等于',
+  },
   // gtlt: {
   //   getText: (v1: number, v2: number) => '大于' + v1 + '且小于' + v2,
   //   typeMeaning: 'between',
@@ -110,15 +114,11 @@ export function getNumberFilterShowText(value: number | number[] | null, operato
 
   const { getText } = numberOperatorMap[operator];
 
-  if (typeof value === 'number') {
-    return getText(value ?? '', '');
-  }
-
   if (Array.isArray(value)) {
     return getText(value[0] ?? '', value[1] ?? '');
   }
 
-  return '';
+  return getText(value ?? '', '');
 }
 
 export function getNumberValue(value: number | number[] | null, operator: string) {
