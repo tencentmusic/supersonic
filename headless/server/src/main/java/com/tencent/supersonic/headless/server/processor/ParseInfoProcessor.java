@@ -87,7 +87,7 @@ public class ParseInfoProcessor implements ResultProcessor {
         if (Objects.isNull(semanticSchema)) {
             return;
         }
-        List<String> allFields = getFieldsExceptDate(SqlSelectHelper.getAllFields(sqlInfo.getCorrectS2SQL()));
+        List<String> allFields = getFieldsExceptDate(SqlSelectHelper.getAllSelectFields(sqlInfo.getCorrectS2SQL()));
         Set<SchemaElement> metrics = getElements(dataSetId, allFields, semanticSchema.getMetrics());
         Map<String, String> functionMap = SqlSelectHelper.getAggregate(sqlInfo.getCorrectS2SQL())
                 .stream()
