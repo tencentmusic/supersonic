@@ -19,6 +19,9 @@ COPY assembly/build/supersonic-standalone-${SUPERSONIC_VERSION}.zip .
 RUN unzip supersonic-standalone-${SUPERSONIC_VERSION}.zip && \
     rm supersonic-standalone-${SUPERSONIC_VERSION}.zip
 
+# Create a symbolic link to the supersonic installation directory
+RUN ln -s /usr/src/app/supersonic-standalone-${SUPERSONIC_VERSION} /usr/src/app/supersonic-standalone-latest
+
 # Set the working directory to the supersonic installation directory
 WORKDIR /usr/src/app/supersonic-standalone-${SUPERSONIC_VERSION}
 
