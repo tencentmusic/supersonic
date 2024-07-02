@@ -44,7 +44,6 @@ function useDropdown() {
       });
 
       mouseMoveHandlerRef.current = e => {
-        console.log('🚀 ~ handleDropdown ~ e:', e);
         // 判断鼠标位置是否在dropdownElement内
         if (dropdownElement) {
           if (e.clientX < left || e.clientX > right || e.clientY < top || e.clientY > bottom) {
