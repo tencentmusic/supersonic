@@ -38,10 +38,15 @@ langchain4j:
     #      model-name: ${ZHIPU_MODEL_NAME:glm-4}
     #      temperature: ${ZHIPU_TEMPERATURE:0.0}
     #      timeout: ${ZHIPU_TIMEOUT:PT60S}
+#    embedding-model:
+#      base-url: ${ZHIPU_API_BASE:https://open.bigmodel.cn/}
+#      api-key: ${ZHIPU_API_KEY:9f822561220238c490050e6e60896e95.XCG5eL4X8ni1CjnB}
+#      model: ${ZHIPU_MODEL_NAME:embedding-2}
+#
+  jina:
     embedding-model:
-      base-url: ${ZHIPU_API_BASE:https://open.bigmodel.cn/}
-      api-key: ${ZHIPU_API_KEY:9f822561220238c490050e6e60896e95.XCG5eL4X8ni1CjnB}
-      model: ${ZHIPU_MODEL_NAME:embedding-2}
+      base-url: ${JINA_API_BASE:http://10.10.20.161:9997/}
+      model: ${JINA_MODEL_NAME:12a22820-9888-11ee-b4f6-161d11c9987a}
 
 #  ollama:
 #    chat-model:

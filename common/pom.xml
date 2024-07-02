@@ -244,6 +244,10 @@
                 </exclusion>
             </exclusions>
         </dependency>
+        <dependency>
+            <groupId>dev.langchain4j</groupId>
+            <artifactId>langchain4j-jina</artifactId>
+        </dependency>
         <!--langchain4j-->
         <dependency>
             <groupId>com.hankcs</groupId>
