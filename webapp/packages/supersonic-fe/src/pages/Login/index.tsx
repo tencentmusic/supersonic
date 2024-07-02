@@ -20,8 +20,6 @@ import { ssoLogin } from '@/utils/utils';
 
 export const openSSO = true;
 
-
-
 const { Item } = Form;
 const LoginPage: React.FC = () => {
   const [createModalVisible, setCreateModalVisible] = useState<boolean>(false);

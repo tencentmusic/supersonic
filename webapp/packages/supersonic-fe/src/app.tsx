@@ -131,7 +131,7 @@ export const layout: RunTimeLayoutConfig = (params) => {
           color="#1672fa"
           style={{ display: 'inline-block', marginTop: 8 }}
         /> */}
-        <img src={logoSrc} alt="logo" style={{ height: 40 }} />
+        <img src={logoSrc} alt="logo" style={{ height: 34 }} />
         <div className="logo" style={{ position: 'relative', top: '-2px' }}>
           Chatdata
         </div>
@@ -152,7 +152,10 @@ export const layout: RunTimeLayoutConfig = (params) => {
             <AppPage dom={dom} />
             {/* {dom} */}
             {history.location.pathname !== '/chat' && !isMobile && (
-              <Copilot token={getToken() || ''} isDeveloper />
+              <Copilot
+                token={getToken() || ''}
+                isDeveloper={process.env.NODE_ENV === 'development'}
+              />
             )}
           </div>
         </ConfigProvider>
