@@ -531,7 +531,7 @@ const ChatItem: React.FC<Props> = ({
             <>
               {!isMobile &&
                 parseInfo?.sqlInfo &&
-                isDeveloper &&
+                // isDeveloper &&
                 integrateSystem !== 'c2' &&
                 isDebugMode &&
                 !isSimpleMode && (
