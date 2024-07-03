@@ -1,8 +1,8 @@
 const { BUILD_ENV = 'dev' } = process.env;
 
 const opConfig = {
-  domain: 'https://home.cvte.com',
-  appId: 'd72f1f3c12904d359e1de7e99cac61e8',
+  domain: 'https://op.cvte.com',
+  appId: 'f141a43a10e244e99e6e8dcd081c6658',
 };
 
 const testOpConfig = {
