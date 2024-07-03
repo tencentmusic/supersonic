@@ -15,7 +15,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 @EnableScheduling
 @EnableAsync
 @Configuration
-
+@EnableApolloConfig
 @EnableSwagger2
 public class StandaloneLauncher {
 

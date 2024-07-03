@@ -11,7 +11,6 @@ import java.io.IOException;
 import java.time.Duration;
 
 import static com.google.gson.FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES;
-import static dev.langchain4j.internal.ValidationUtils.ensureNotBlank;
 
 public class JinaClient {
     private static final Gson GSON = new GsonBuilder()
@@ -22,7 +21,7 @@ public class JinaClient {
     private final JinaApi jinaApi;
 
     @Builder
-    JinaClient(String baseUrl, Duration timeout){
+    JinaClient(String baseUrl, Duration timeout) {
         OkHttpClient.Builder okHttpClientBuilder = new OkHttpClient.Builder()
                 .callTimeout(timeout)
                 .connectTimeout(timeout)
@@ -52,8 +51,6 @@ public class JinaClient {
             throw new RuntimeException(e);
         }
     }
-
-
 
     private static RuntimeException toException(retrofit2.Response<?> response) throws IOException {
         int code = response.code();
