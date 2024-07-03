@@ -4,6 +4,7 @@ import { CLS_PREFIX } from '../../common/constants';
 import { useState } from 'react';
 import classNames from 'classnames';
 import { updateQAFeedback } from '../../service';
+import { notification } from 'antd';
 
 type Props = {
   queryId: number;
@@ -16,14 +17,21 @@ const Tools: React.FC<Props> = ({ queryId, scoreValue, isLastMessage }) => {
 
   const prefixCls = `${CLS_PREFIX}-tools`;
 
-  const like = () => {
+  const like = async () => {
     setScore(5);
-    updateQAFeedback(queryId, 5);
+    await updateQAFeedback(queryId, 5);
+    // toast提示成功
+    notification.info({
+      message: '点赞成功',
+    });
   };
 
-  const dislike = () => {
+  const dislike = async () => {
     setScore(1);
-    updateQAFeedback(queryId, 1);
+    await updateQAFeedback(queryId, 1);
+    notification.info({
+      message: '点踩成功',
+    });
   };
 
   const likeClass = classNames(`${prefixCls}-like`, {

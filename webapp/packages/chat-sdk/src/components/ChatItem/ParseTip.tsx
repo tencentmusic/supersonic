@@ -2,7 +2,11 @@ import React, { ReactNode } from 'react';
 import { AGG_TYPE_MAP, PREFIX_CLS } from '../../common/constants';
 import { ChatContextType, DateInfoType, EntityInfoType, FilterItemType } from '../../common/type';
 import { DatePicker } from 'antd';
-import { CheckCircleFilled } from '@ant-design/icons';
+import {
+  CheckCircleFilled,
+  ExclamationCircleFilled,
+  ExclamationCircleOutlined,
+} from '@ant-design/icons';
 import Loading from './Loading';
 import FilterItem from './FilterItem';
 import MarkDown from '../ChatMsg/MarkDown';
@@ -25,6 +29,7 @@ type Props = {
   entityInfo: EntityInfoType;
   integrateSystem?: string;
   parseTimeCost?: number;
+  withOutLeftBorder?: boolean;
   isDeveloper?: boolean;
   isSimpleMode?: boolean;
   onSelectParseInfo: (parseInfo: ChatContextType) => void;
@@ -55,6 +60,7 @@ const ParseTip: React.FC<Props> = ({
   parseTimeCost,
   isDeveloper,
   isSimpleMode,
+  withOutLeftBorder = false,
   onSelectParseInfo,
   onSwitchEntity,
   onFiltersChange,
@@ -64,11 +70,16 @@ const ParseTip: React.FC<Props> = ({
 }) => {
   const prefixCls = `${PREFIX_CLS}-item`;
 
-  const getNode = (tipTitle: ReactNode, tipNode?: ReactNode) => {
+  const getNode = (tipTitle: ReactNode, tipNode?: ReactNode, warning?: boolean) => {
     return (
       <div className={`${prefixCls}-parse-tip`}>
         <div className={`${prefixCls}-title-bar`}>
-          <CheckCircleFilled className={`${prefixCls}-step-icon`} />
+          {warning ? (
+            <ExclamationCircleFilled className={`${prefixCls}-step-icon`} />
+          ) : (
+            <CheckCircleFilled className={`${prefixCls}-step-icon`} />
+          )}
+
           <div className={`${prefixCls}-step-title`}>
             {tipTitle}
             {tipNode === undefined && <Loading />}
@@ -78,7 +89,7 @@ const ParseTip: React.FC<Props> = ({
           <div
             className={`${prefixCls}-content-container ${
               tipNode === null ? `${prefixCls}-empty-content-container` : ''
-            }`}
+            } ${withOutLeftBorder ? 'without-border' : ''}`}
           >
             {tipNode}
           </div>
@@ -99,7 +110,8 @@ const ParseTip: React.FC<Props> = ({
           <span className={`${prefixCls}-title-tip`}>(耗时: {parseTimeCost}ms)</span>
         )}
       </>,
-      parseTip
+      parseTip,
+      true
     );
   }
 
