@@ -39,6 +39,7 @@ public class SqlExecutor implements ChatExecutor {
                         .s2sql(chatExecuteContext.getParseInfo().getSqlInfo().getS2SQL())
                         .dbSchema(buildSchemaStr(chatExecuteContext.getParseInfo()))
                         .createdBy(chatExecuteContext.getUser().getName())
+                        .updatedBy(chatExecuteContext.getUser().getName())
                         .createdAt(new Date())
                         .build());
             }

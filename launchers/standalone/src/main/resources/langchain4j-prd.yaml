@@ -29,7 +29,7 @@ langchain4j:
 
   chroma:
     embedding-store:
-      baseUrl: http://0.0.0.0:8000
+      baseUrl: http://${CHROMA_HOST}:8000
       timeout: 120s
 
 #  milvus:
