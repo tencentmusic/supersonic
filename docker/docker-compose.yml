@@ -28,7 +28,7 @@ services:
       MYSQL_USER: supersonic_user
       MYSQL_PASSWORD: supersonic_password
     ports:
-      - "3306:3306"
+      - "13306:3306"
     volumes:
       - mysql_data:/var/lib/mysql
     networks:
