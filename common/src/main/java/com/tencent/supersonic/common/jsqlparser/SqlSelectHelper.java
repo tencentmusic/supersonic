@@ -254,6 +254,18 @@ public class SqlSelectHelper {
         return new ArrayList<>(results);
     }
 
+    public static List<String> getAllSelectFields(String sql) {
+        List<PlainSelect> plainSelects = getPlainSelects(getPlainSelect(sql));
+        Set<String> results = new HashSet<>();
+        for (PlainSelect plainSelect : plainSelects) {
+            List<PlainSelect> plainSelectList = new ArrayList<>();
+            plainSelectList.add(plainSelect);
+            Set<String> fields = getSelectFields(plainSelectList);
+            results.addAll(fields);
+        }
+        return new ArrayList<>(results);
+    }
+
     private static List<String> getFieldsByPlainSelect(PlainSelect plainSelect) {
         if (Objects.isNull(plainSelect)) {
             return new ArrayList<>();
