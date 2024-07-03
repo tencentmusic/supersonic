@@ -32,7 +32,7 @@ const Table: React.FC<Props> = ({ data, size, loading, onApplyAuth }) => {
                   return a[nameEn] - b[nameEn];
                 }
                 // 字符串按照字符串排
-                return a[nameEn].localeCompare(b[nameEn]);
+                return (a[nameEn] ?? '').localeCompare(b[nameEn]);
               },
             }
           : null),
