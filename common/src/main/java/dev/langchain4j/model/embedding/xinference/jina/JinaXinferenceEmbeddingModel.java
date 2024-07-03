@@ -44,10 +44,9 @@ public class JinaXinferenceEmbeddingModel implements EmbeddingModel {
         List<Embedding> embeddings = response.getData().stream()
                 .map(JinaEmbedding::toEmbedding).collect(toList());
 
-        TokenUsage tokenUsage = new TokenUsage(response.getUsage().getPromptTokens(),0 );
-        return Response.from(embeddings,tokenUsage);
+        TokenUsage tokenUsage = new TokenUsage(response.getUsage().getPromptTokens(), 0);
+        return Response.from(embeddings, tokenUsage);
     }
-
 
 }
 

@@ -7,7 +7,7 @@ public class JinaEmbedding {
     float[] embedding;
     String object;
 
-    public Embedding toEmbedding(){
+    public Embedding toEmbedding() {
         return Embedding.from(embedding);
     }
 }
