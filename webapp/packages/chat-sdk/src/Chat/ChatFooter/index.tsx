@@ -358,11 +358,12 @@ const ChatFooter: ForwardRefRenderFunction<any, Props> = (
           <AutoComplete
             className={styles.composerInput}
             placeholder={
-              currentAgent
-                ? `【${currentAgent.name}】将与您对话，点击${!isMobile ? '左侧' : ''}【智能助理】${
-                    !isMobile ? '列表' : ''
-                  }可切换`
-                : '请输入您的问题'
+              // currentAgent
+              //   ? `【${currentAgent.name}】将与您对话，点击${!isMobile ? '左侧' : ''}【智能助理】${
+              //       !isMobile ? '列表' : ''
+              //     }可切换`
+              //   : '请输入您的问题'
+              '请输入您想要查询的数据内容'
             }
             value={inputMsg}
             onChange={(value: string) => {
