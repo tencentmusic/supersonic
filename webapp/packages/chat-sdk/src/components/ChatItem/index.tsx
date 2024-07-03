@@ -519,6 +519,7 @@ const ChatItem: React.FC<Props> = ({
             integrateSystem={integrateSystem}
             parseTimeCost={parseTimeCost?.parseTime}
             isDeveloper={isDeveloper}
+            withOutLeftBorder={!executeMode}
             onSelectParseInfo={onSelectParseInfo}
             onSwitchEntity={onSwitchEntity}
             onFiltersChange={onFiltersChange}
@@ -530,7 +531,7 @@ const ChatItem: React.FC<Props> = ({
             <>
               {!isMobile &&
                 parseInfo?.sqlInfo &&
-                // isDeveloper &&
+                isDeveloper &&
                 integrateSystem !== 'c2' &&
                 isDebugMode &&
                 !isSimpleMode && (
@@ -563,18 +564,18 @@ const ChatItem: React.FC<Props> = ({
                       sqlItemModalRef.current?.show();
                     }
 
-                    if (key === 'exportData' && !!data?.queryResults.length) {
+                    if (key === 'exportData' && !!data?.queryResults?.length) {
                       exportData(data);
                     }
                   },
                   items: [
                     {
                       label: '导出数据',
-                      disabled: !data?.queryResults.length,
+                      disabled: !data?.queryResults?.length,
                       key: 'exportData',
                     },
                     {
-                      label: '执行详情',
+                      label: '查看SQL',
                       key: 'viewSQL',
                     },
                   ],
