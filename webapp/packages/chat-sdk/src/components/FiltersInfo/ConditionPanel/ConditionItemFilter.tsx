@@ -37,6 +37,7 @@ export default function ConditionItemFilter({ data, onChange }: Props) {
     () =>
       fieldOptions.map(option => ({
         ...option,
+        originLabel: option.label,
         label: getLabelReactNode(option),
       })),
     [fieldOptions]
@@ -90,6 +91,7 @@ export default function ConditionItemFilter({ data, onChange }: Props) {
             style={{ width: '150px' }}
             value={data.field}
             options={fieldOptionsWithLabel}
+            optionFilterProp="originLabel"
             onChange={handleFieldChange}
           />
         </Tooltip>

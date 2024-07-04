@@ -4,7 +4,7 @@ import { CLS_PREFIX } from '../../common/constants';
 import { useState } from 'react';
 import classNames from 'classnames';
 import { updateQAFeedback } from '../../service';
-import { notification } from 'antd';
+import { message } from 'antd';
 
 type Props = {
   queryId: number;
@@ -14,6 +14,7 @@ type Props = {
 
 const Tools: React.FC<Props> = ({ queryId, scoreValue, isLastMessage }) => {
   const [score, setScore] = useState(scoreValue || 0);
+  const [messageApi, contextHolder] = message.useMessage();
 
   const prefixCls = `${CLS_PREFIX}-tools`;
 
@@ -21,17 +22,13 @@ const Tools: React.FC<Props> = ({ queryId, scoreValue, isLastMessage }) => {
     setScore(5);
     await updateQAFeedback(queryId, 5);
     // toast提示成功
-    notification.info({
-      message: '点赞成功',
-    });
+    messageApi.success('点赞成功');
   };
 
   const dislike = async () => {
     setScore(1);
     await updateQAFeedback(queryId, 1);
-    notification.info({
-      message: '点踩成功',
-    });
+    messageApi.success('点踩成功');
   };
 
   const likeClass = classNames(`${prefixCls}-like`, {
@@ -42,21 +39,24 @@ const Tools: React.FC<Props> = ({ queryId, scoreValue, isLastMessage }) => {
   });
 
   return (
-    <div className={prefixCls}>
-      {!isMobile && (
-        <div className={`${prefixCls}-feedback`}>
-          <div>这个回答正确吗？</div>
-          <LikeOutlined className={likeClass} onClick={like} />
-          <DislikeOutlined
-            className={dislikeClass}
-            onClick={e => {
-              e.stopPropagation();
-              dislike();
-            }}
-          />
-        </div>
-      )}
-    </div>
+    <>
+      {contextHolder}
+      <div className={prefixCls}>
+        {!isMobile && (
+          <div className={`${prefixCls}-feedback`}>
+            <div>这个回答正确吗？</div>
+            <LikeOutlined className={likeClass} onClick={like} />
+            <DislikeOutlined
+              className={dislikeClass}
+              onClick={e => {
+                e.stopPropagation();
+                dislike();
+              }}
+            />
+          </div>
+        )}
+      </div>
+    </>
   );
 };
 
