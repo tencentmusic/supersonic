@@ -1,8 +1,5 @@
 package com.tencent.supersonic.headless.chat.parser.llm;
 
-import static com.tencent.supersonic.headless.chat.parser.ParserConfig.PARSER_LINKING_VALUE_ENABLE;
-import static com.tencent.supersonic.headless.chat.parser.ParserConfig.PARSER_STRATEGY_TYPE;
-
 import com.tencent.supersonic.common.pojo.enums.DataFormatTypeEnum;
 import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import com.tencent.supersonic.common.util.ContextUtils;
@@ -17,6 +14,12 @@ import com.tencent.supersonic.headless.chat.parser.SatisfactionChecker;
 import com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMReq;
 import com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMResp;
 import com.tencent.supersonic.headless.chat.utils.ComponentFactory;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.tuple.Pair;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -26,11 +29,9 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.tuple.Pair;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
+
+import static com.tencent.supersonic.headless.chat.parser.ParserConfig.PARSER_LINKING_VALUE_ENABLE;
+import static com.tencent.supersonic.headless.chat.parser.ParserConfig.PARSER_STRATEGY_TYPE;
 
 @Slf4j
 @Service
@@ -101,6 +102,7 @@ public class LLMRequestService {
 
         llmReq.setCurrentDate(DateUtils.getBeforeDate(0));
         llmReq.setSqlGenType(LLMReq.SqlGenType.valueOf(parserConfig.getParameterValue(PARSER_STRATEGY_TYPE)));
+        llmReq.setModelConfig(queryCtx.getModelConfig());
         llmReq.setLlmConfig(queryCtx.getLlmConfig());
         llmReq.setPromptConfig(queryCtx.getPromptConfig());
         llmReq.setDynamicExemplars(queryCtx.getDynamicExemplars());
@@ -118,7 +120,7 @@ public class LLMRequestService {
     }
 
     protected List<String> getFieldNameList(QueryContext queryCtx, Long dataSetId,
-            LLMParserConfig llmParserConfig) {
+                                            LLMParserConfig llmParserConfig) {
 
         Set<String> results = getTopNFieldNames(queryCtx, dataSetId, llmParserConfig);
 

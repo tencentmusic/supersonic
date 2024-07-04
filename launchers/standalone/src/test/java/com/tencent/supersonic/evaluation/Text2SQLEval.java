@@ -8,7 +8,8 @@ import com.tencent.supersonic.chat.server.agent.AgentConfig;
 import com.tencent.supersonic.chat.server.agent.AgentToolType;
 import com.tencent.supersonic.chat.server.agent.MultiTurnConfig;
 import com.tencent.supersonic.chat.server.agent.RuleParserTool;
-import com.tencent.supersonic.common.config.LLMConfig;
+import com.tencent.supersonic.common.config.ChatModelConfig;
+import com.tencent.supersonic.common.config.ModelConfig;
 import com.tencent.supersonic.headless.api.pojo.response.QueryResult;
 import com.tencent.supersonic.util.DataUtils;
 import org.junit.jupiter.api.BeforeAll;
@@ -85,7 +86,8 @@ public class Text2SQLEval extends BaseTest {
         AgentConfig agentConfig = new AgentConfig();
         agentConfig.getTools().add(getLLMQueryTool());
         agent.setAgentConfig(JSONObject.toJSONString(agentConfig));
-        agent.setLlmConfig(getLLMConfig(LLMType.GPT));
+        agent.setModelConfig(getLLMConfig(LLMType.GPT));
+        agent.setLlmConfig(getLLMConfig(LLMType.GPT).getChatModel());
         MultiTurnConfig multiTurnConfig = new MultiTurnConfig();
         multiTurnConfig.setEnableMultiTurn(enableMultiturn);
         agent.setMultiTurnConfig(multiTurnConfig);
@@ -108,7 +110,7 @@ public class Text2SQLEval extends BaseTest {
         GLM
     }
 
-    private static LLMConfig getLLMConfig(LLMType type) {
+    private static ModelConfig getLLMConfig(LLMType type) {
         String baseUrl;
         String apiKey;
         String modelName;
@@ -143,9 +145,16 @@ public class Text2SQLEval extends BaseTest {
                 modelName = "gpt-3.5-turbo";
                 temperature = 0.0;
         }
+        ChatModelConfig chatModel = new ChatModelConfig();
+        chatModel.setModelName(modelName);
+        chatModel.setBaseUrl(baseUrl);
+        chatModel.setApiKey(apiKey);
+        chatModel.setTemperature(temperature);
+        chatModel.setProvider("open_ai");
 
-        return new LLMConfig("open_ai",
-                baseUrl, apiKey, modelName, temperature);
+        ModelConfig modelConfig = new ModelConfig();
+        modelConfig.setChatModel(chatModel);
+        return modelConfig;
     }
 
 }

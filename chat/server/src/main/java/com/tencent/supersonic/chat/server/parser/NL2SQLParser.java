@@ -1,14 +1,12 @@
 package com.tencent.supersonic.chat.server.parser;
 
-import static com.tencent.supersonic.chat.server.parser.ParserConfig.PARSER_MULTI_TURN_ENABLE;
-
 import com.tencent.supersonic.chat.server.agent.MultiTurnConfig;
 import com.tencent.supersonic.chat.server.persistence.repository.ChatQueryRepository;
 import com.tencent.supersonic.chat.server.plugin.PluginQueryManager;
 import com.tencent.supersonic.chat.server.pojo.ChatParseContext;
 import com.tencent.supersonic.chat.server.util.QueryReqConverter;
+import com.tencent.supersonic.common.config.ChatModelConfig;
 import com.tencent.supersonic.common.config.EmbeddingConfig;
-import com.tencent.supersonic.common.config.LLMConfig;
 import com.tencent.supersonic.common.pojo.SqlExemplar;
 import com.tencent.supersonic.common.service.impl.ExemplarServiceImpl;
 import com.tencent.supersonic.common.util.ContextUtils;
@@ -26,7 +24,14 @@ import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.input.Prompt;
 import dev.langchain4j.model.input.PromptTemplate;
 import dev.langchain4j.model.output.Response;
-import dev.langchain4j.model.provider.ChatLanguageModelProvider;
+import dev.langchain4j.provider.ModelProvider;
+import lombok.Builder;
+import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.util.CollectionUtils;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -34,12 +39,8 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import lombok.Builder;
-import lombok.Data;
-import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.util.CollectionUtils;
+
+import static com.tencent.supersonic.chat.server.parser.ParserConfig.PARSER_MULTI_TURN_ENABLE;
 
 @Slf4j
 public class NL2SQLParser implements ChatParser {
@@ -180,7 +181,7 @@ public class NL2SQLParser implements ChatParser {
         Prompt prompt = PromptTemplate.from(promptStr).apply(Collections.EMPTY_MAP);
         keyPipelineLog.info("NL2SQLParser reqPrompt:{}", promptStr);
 
-        ChatLanguageModel chatLanguageModel = ChatLanguageModelProvider.provide(context.getLlmConfig());
+        ChatLanguageModel chatLanguageModel = ModelProvider.provideChatModel(context.getLlmConfig());
         Response<AiMessage> response = chatLanguageModel.generate(prompt.toUserMessage());
 
         String result = response.content().text();
@@ -242,7 +243,7 @@ public class NL2SQLParser implements ChatParser {
         private String curtSchema;
         private String histSchema;
         private String histSQL;
-        private LLMConfig llmConfig;
+        private ChatModelConfig llmConfig;
     }
 
 }
