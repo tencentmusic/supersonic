@@ -3,7 +3,7 @@ import { ProTable } from '@ant-design/pro-components';
 import { message, Button, Space, Popconfirm, Input, Tag, Select } from 'antd';
 import React, { useRef, useState, useEffect } from 'react';
 import { useModel } from '@umijs/max';
-import { StatusEnum } from '../enum';
+import { StatusEnum, SemanticNodeType } from '../enum';
 import { SENSITIVE_LEVEL_ENUM, SENSITIVE_LEVEL_OPTIONS, TAG_DEFINE_TYPE } from '../constant';
 import {
   getModelList,
@@ -18,6 +18,7 @@ import { ISemantic, IDataSource } from '../data';
 import TableHeaderFilter from './TableHeaderFilter';
 import BatchCtrlDropDownButton from '@/components/BatchCtrlDropDownButton';
 import { ColumnsConfig } from './TableColumnRender';
+import BatchSensitiveLevelModal from '@/components/BatchCtrlDropDownButton/BatchSensitiveLevelModal';
 import styles from './style.less';
 
 type Props = {};
@@ -36,6 +37,7 @@ const ClassDimensionTable: React.FC<Props> = ({}) => {
   const [filterParams, setFilterParams] = useState<Record<string, any>>({});
   const [loading, setLoading] = useState<boolean>(false);
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
+  const [batchSensitiveLevelOpenState, setBatchSensitiveLevelOpenState] = useState<boolean>(false);
   const [dimensionValueSettingList, setDimensionValueSettingList] = useState<
     ISemantic.IDimensionValueSettingItem[]
   >([]);
@@ -303,6 +305,9 @@ const ClassDimensionTable: React.FC<Props> = ({}) => {
       case 'exportTagButton':
         queryBatchExportTag(selectedRowKeys);
         break;
+      case 'batchSensitiveLevel':
+        setBatchSensitiveLevelOpenState(true);
+        break;
       default:
         break;
     }
@@ -420,7 +425,7 @@ const ClassDimensionTable: React.FC<Props> = ({}) => {
           </Button>,
           <BatchCtrlDropDownButton
             key="ctrlBtnList"
-            extenderList={['exportTagButton']}
+            extenderList={['batchSensitiveLevel', 'exportTagButton']}
             onDeleteConfirm={() => {
               queryBatchUpdateStatus(selectedRowKeys, StatusEnum.DELETED);
             }}
@@ -462,6 +467,20 @@ const ClassDimensionTable: React.FC<Props> = ({}) => {
             queryDimensionList({ ...filterParams, ...defaultPagination });
             MrefreshDimensionList({ modelId });
             setDimensionValueSettingModalVisible(false);
+          }}
+        />
+      )}
+      {batchSensitiveLevelOpenState && (
+        <BatchSensitiveLevelModal
+          ids={selectedRowKeys as number[]}
+          open={batchSensitiveLevelOpenState}
+          type={SemanticNodeType.DIMENSION}
+          onCancel={() => {
+            setBatchSensitiveLevelOpenState(false);
+          }}
+          onSubmit={() => {
+            queryDimensionList({ ...filterParams, ...pagination });
+            setBatchSensitiveLevelOpenState(false);
           }}
         />
       )}

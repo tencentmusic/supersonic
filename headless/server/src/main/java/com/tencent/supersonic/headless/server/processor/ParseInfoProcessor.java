@@ -87,7 +87,7 @@ public class ParseInfoProcessor implements ResultProcessor {
         if (Objects.isNull(semanticSchema)) {
             return;
         }
-        List<String> allFields = getFieldsExceptDate(SqlSelectHelper.getAllFields(sqlInfo.getCorrectS2SQL()));
+        List<String> allFields = getFieldsExceptDate(SqlSelectHelper.getAllSelectFields(sqlInfo.getCorrectS2SQL()));
         Set<SchemaElement> metrics = getElements(dataSetId, allFields, semanticSchema.getMetrics());
         Map<String, String> functionMap = SqlSelectHelper.getAggregate(sqlInfo.getCorrectS2SQL())
                 .stream()
@@ -98,7 +98,7 @@ public class ParseInfoProcessor implements ResultProcessor {
         for (SchemaElement metric : metrics) {
             String aggregator = functionMap.get(metric.getName());
             if (aggregator != null) {
-                metric.setAggregator(aggregator);
+                metric.setAggregator(AggOperatorEnum.of(aggregator).name());
             } else {
                 // 如果没有找到匹配的聚合函数，使用默认聚合器
                 metric.setAggregator(AggOperatorEnum.of(metric.getDefaultAgg()).name());

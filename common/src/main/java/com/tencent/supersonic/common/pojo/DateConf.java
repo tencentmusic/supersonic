@@ -21,8 +21,9 @@ public class DateConf {
     /**
      * like 2021-10-22, dateMode=1
      */
-    private String startDate = now().plusDays(-1).toString();
-    private String endDate = now().toString();
+    // TODO modify by zhaodongsheng, default value is 1 years ago
+    private String startDate = now().plusDays(-365).toString();
+    private String endDate = now().plusDays(1).toString();
 
     /**
      * [2021-10-22, 2022-01-22], dateMode=2
@@ -98,8 +99,9 @@ public class DateConf {
          * 2 - LIST, discrete static value, [dateList]
          * 3 - RECENT, dynamic time related to the actual available time of the element, [unit, period]
          * 4 - AVAILABLE, dynamic time which guaranteed to query some data, [startDate, endDate]
+         * 5 - ALL, all table data
          */
-        BETWEEN, LIST, RECENT, AVAILABLE
+        BETWEEN, LIST, RECENT, AVAILABLE, ALL
     }
 
     @Override

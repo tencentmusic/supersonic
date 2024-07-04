@@ -180,6 +180,7 @@
     </profiles>
 
     <build>
+        <finalName>launchers-standalone</finalName>
         <resources>
             <resource>
                 <directory>${basedir}/src/main/resources</directory>
