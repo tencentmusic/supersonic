@@ -287,6 +287,7 @@ const ChatItem: React.FC<Props> = ({
       setData(dataValue);
       setParseInfo(contextValue);
       setDataCache({ ...dataCache, [id!]: { tip: '', data: dataValue } });
+      setExecuteTip('');
     } else {
       setExecuteTip(SEARCH_EXCEPTION_TIP);
     }
@@ -445,6 +446,7 @@ const ChatItem: React.FC<Props> = ({
       setData(dataValue);
       setParseInfo(contextValue);
       setDataCache({ ...dataCache, [id!]: { tip: '', data: dataValue } });
+      setExecuteTip('');
     } else {
       setExecuteTip(SEARCH_EXCEPTION_TIP);
     }
