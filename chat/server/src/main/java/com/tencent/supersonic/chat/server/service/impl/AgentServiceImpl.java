@@ -19,6 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -89,6 +90,10 @@ public class AgentServiceImpl extends ServiceImpl<AgentDOMapper, AgentDO>
             return;
         }
         List<String> examples = agent.getExamples();
+        if (CollectionUtils.isEmpty(examples)) {
+            return;
+        }
+
         ChatMemoryFilter chatMemoryFilter = ChatMemoryFilter.builder().agentId(agent.getId())
                 .questions(examples).build();
         List<String> memoriesExisted = memoryService.getMemories(chatMemoryFilter)

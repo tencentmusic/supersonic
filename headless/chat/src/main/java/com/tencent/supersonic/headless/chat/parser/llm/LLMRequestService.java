@@ -17,7 +17,6 @@ import com.tencent.supersonic.headless.chat.parser.SatisfactionChecker;
 import com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMReq;
 import com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMResp;
 import com.tencent.supersonic.headless.chat.utils.ComponentFactory;
-import com.tencent.supersonic.headless.chat.utils.S2SqlDateHelper;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -28,7 +27,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -101,11 +99,7 @@ public class LLMRequestService {
         }
         llmReq.setLinking(linking);
 
-        String currentDate = S2SqlDateHelper.getReferenceDate(queryCtx, dataSetId);
-        if (StringUtils.isEmpty(currentDate)) {
-            currentDate = DateUtils.getBeforeDate(0);
-        }
-        llmReq.setCurrentDate(currentDate);
+        llmReq.setCurrentDate(DateUtils.getBeforeDate(0));
         llmReq.setSqlGenType(LLMReq.SqlGenType.valueOf(parserConfig.getParameterValue(PARSER_STRATEGY_TYPE)));
         llmReq.setLlmConfig(queryCtx.getLlmConfig());
 

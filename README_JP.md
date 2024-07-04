@@ -56,6 +56,12 @@ ChatGPTのような大規模言語モデル（LLM）の出現は、情報検索�
 ### オンラインプレイグラウンド
 http://117.72.46.148:9080 にアクセスして、新規ユーザーとして登録して体験してください。システム設定を変更しないでください。毎週末に定期的に再起動して設定をリセットします。
 
+### Dockerのデプロイメント
+- Dockerおよびdocker-composeをインストールします。
+- docker-compose.ymlファイルをダウンロードします。コマンドを実行します：wget https://raw.githubusercontent.com/tencentmusic/supersonic/master/docker/docker-compose.yml。
+- docker-compose up -dを実行します。
+- ブラウザを開いてhttp://localhost:9080にアクセスし、探索を開始します。
+
 ### ローカルビルド
 SuperSonicには、サンプルのセマンティックモデルとチャット会話が付属しており、以下の手順で簡単に体験できます：
 
