@@ -41,6 +41,7 @@ export default function Group({ value, onChange }: Props) {
               key={field.field}
               style={{ width: 120 }}
               options={options}
+              optionFilterProp="label"
               onChange={handleFieldSelect(field.field)}
             />
             {value.fields.length > 1 && (

@@ -37,6 +37,7 @@ export default function TextFilter({ value, onChange }: Props) {
         value={value.field}
         style={{ width: 150 }}
         options={fieldOptions}
+        optionFilterProp="label"
         onChange={handleFieldSelect}
       />
 

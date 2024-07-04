@@ -70,6 +70,7 @@ export default function Aggregation({ value, onChange }: Props) {
                 key={field.field}
                 style={{ width: 120 }}
                 options={options}
+                optionFilterProp="label"
                 onChange={handleFieldSelect(field.field)}
               />
               <Select
