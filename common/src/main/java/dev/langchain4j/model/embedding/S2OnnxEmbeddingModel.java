@@ -52,7 +52,7 @@ public class S2OnnxEmbeddingModel extends AbstractInProcessEmbeddingModel {
         try {
             return new OnnxBertBiEncoder(
                     Files.newInputStream(pathToModel),
-                    vocabularyFile.openStream(),
+                    vocabularyFile,
                     PoolingMode.MEAN
             );
         } catch (IOException e) {
