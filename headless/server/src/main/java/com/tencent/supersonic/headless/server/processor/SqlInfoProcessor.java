@@ -69,16 +69,19 @@ public class SqlInfoProcessor implements ResultProcessor {
         ExplainSqlReq<Object> explainSqlReq = ExplainSqlReq.builder().queryReq(semanticQueryReq)
                 .queryTypeEnum(QueryMethod.SQL).build();
         ExplainResp explain = queryService.explain(explainSqlReq, queryContext.getUser());
-        String explainSql = explain.getSql();
-        if (StringUtils.isBlank(explainSql)) {
+        String querySql = explain.getSql();
+        if (StringUtils.isBlank(querySql)) {
             return;
         }
         SqlInfo sqlInfo = parseInfo.getSqlInfo();
         if (semanticQuery instanceof LLMSqlQuery) {
-            keyPipelineLog.info("SqlInfoProcessor results:\nParsed S2SQL:{}\nCorrected S2SQL:{}\nFinal SQL:{}",
-                    sqlInfo.getS2SQL(), sqlInfo.getCorrectS2SQL(), explainSql);
+            keyPipelineLog.info("SqlInfoProcessor results:\n"
+                            + "Parsed S2SQL: {}\nCorrected S2SQL: {}\nQuery SQL: {}",
+                    StringUtils.normalizeSpace(sqlInfo.getS2SQL()),
+                    StringUtils.normalizeSpace(sqlInfo.getCorrectS2SQL()),
+                    StringUtils.normalizeSpace(querySql));
         }
-        sqlInfo.setQuerySQL(explainSql);
+        sqlInfo.setQuerySQL(querySql);
         sqlInfo.setSourceId(explain.getSourceId());
     }
 

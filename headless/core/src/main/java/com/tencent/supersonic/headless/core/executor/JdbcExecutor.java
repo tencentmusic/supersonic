@@ -12,8 +12,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.Objects;
 
-;
-
 @Component("JdbcExecutor")
 @Slf4j
 public class JdbcExecutor implements QueryExecutor {
@@ -40,7 +38,7 @@ public class JdbcExecutor implements QueryExecutor {
             log.warn("data base id is empty");
             return null;
         }
-        log.info("query SQL: {}", queryStatement.getSql());
+        log.info("executing SQL: {}", StringUtils.normalizeSpace(queryStatement.getSql()));
         Database database = queryStatement.getSemanticModel().getDatabase();
         SemanticQueryResp queryResultWithColumns = new SemanticQueryResp();
         SqlUtils sqlUtil = sqlUtils.init(database);

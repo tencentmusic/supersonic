@@ -27,6 +27,7 @@ import org.apache.calcite.sql.SqlNode;
 import org.apache.calcite.sql.fun.SqlStdOperatorTable;
 import org.apache.calcite.sql.parser.SqlParserPos;
 import org.apache.calcite.sql.validate.SqlValidatorScope;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Triple;
 import org.springframework.util.CollectionUtils;
 
@@ -106,7 +107,7 @@ public class JoinRender extends Renderer {
             addZipperField(dataSource, dataSourceWhere);
             TableView tableView = SourceRender.renderOne("", dataSourceWhere, queryMetrics, queryDimension,
                     metricCommand.getWhere(), dataSources.get(i), scope, schema, true);
-            log.info("tableView {}", tableView.getTable().toString());
+            log.info("tableView {}", StringUtils.normalizeSpace(tableView.getTable().toString()));
             String alias = Constants.JOIN_TABLE_PREFIX + dataSource.getName();
             tableView.setAlias(alias);
             tableView.setPrimary(primary);
