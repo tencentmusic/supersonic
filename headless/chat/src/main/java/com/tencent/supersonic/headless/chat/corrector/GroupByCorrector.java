@@ -39,7 +39,7 @@ public class GroupByCorrector extends BaseSemanticCorrector {
         SemanticSchema semanticSchema = queryContext.getSemanticSchema();
         // check has distinct
         if (SqlSelectHelper.hasDistinct(correctS2SQL)) {
-            log.info("not add group by ,exist distinct in correctS2SQL:{}", correctS2SQL);
+            log.debug("no need to add groupby ,existed distinct in s2sql:{}", correctS2SQL);
             return false;
         }
         //add alias field name
@@ -53,7 +53,7 @@ public class GroupByCorrector extends BaseSemanticCorrector {
             return false;
         }
         if (SqlSelectHelper.hasGroupBy(correctS2SQL)) {
-            log.info("not add group by ,exist group by in correctS2SQL:{}", correctS2SQL);
+            log.debug("No need to add groupby, existed groupby in s2sql:{}", correctS2SQL);
             return false;
         }
         Environment environment = ContextUtils.getBean(Environment.class);

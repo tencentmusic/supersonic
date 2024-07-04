@@ -19,6 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -85,9 +86,11 @@ public class AgentServiceImpl extends ServiceImpl<AgentDOMapper, AgentDO>
     }
 
     private synchronized void doExecuteAgentExamples(Agent agent) {
-        if (!agent.containsLLMParserTool() || !LLMConnHelper.testConnection(agent.getLlmConfig())) {
+        if (!agent.containsLLMParserTool() || !LLMConnHelper.testConnection(agent.getLlmConfig())
+                || CollectionUtils.isEmpty(agent.getExamples())) {
             return;
         }
+
         List<String> examples = agent.getExamples();
         ChatMemoryFilter chatMemoryFilter = ChatMemoryFilter.builder().agentId(agent.getId())
                 .questions(examples).build();
