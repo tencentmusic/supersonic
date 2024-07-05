@@ -2,7 +2,6 @@ package com.tencent.supersonic.common.jsqlparser;
 
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
-import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import org.apache.commons.collections.CollectionUtils;
 
@@ -69,7 +68,7 @@ public class SqlValidHelper {
         try {
             CCJSqlParserUtil.parse(sql);
             return true;
-        } catch (JSQLParserException e) {
+        } catch (Exception e) {
             log.error("isValidSQL parse:{}", e);
             return false;
         }

@@ -1,4 +1,4 @@
-package com.tencent.supersonic.headless.chat.utils;
+package com.tencent.supersonic.headless.chat.corrector;
 
 import com.tencent.supersonic.common.pojo.enums.QueryType;
 import com.tencent.supersonic.common.pojo.enums.TimeMode;

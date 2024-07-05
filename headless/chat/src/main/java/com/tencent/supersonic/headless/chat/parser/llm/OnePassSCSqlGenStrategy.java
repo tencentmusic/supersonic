@@ -65,14 +65,14 @@ public class OnePassSCSqlGenStrategy extends SqlGenStrategy {
         );
 
         //4.format response.
-        Pair<String, Map<String, Double>> sqlMapPair = OutputFormat.selfConsistencyVote(
+        Pair<String, Map<String, Double>> sqlMapPair = ResponseHelper.selfConsistencyVote(
                 Lists.newArrayList(prompt2Output.values()));
         LLMResp llmResp = new LLMResp();
         llmResp.setQuery(promptHelper.buildAugmentedQuestion(llmReq));
         llmResp.setDbSchema(promptHelper.buildSchemaStr(llmReq));
         llmResp.setSqlOutput(sqlMapPair.getLeft());
         //TODO: should use the same few-shot exemplars as the one chose by self-consistency vote
-        llmResp.setSqlRespMap(OutputFormat.buildSqlRespMap(exemplarsList.get(0), sqlMapPair.getRight()));
+        llmResp.setSqlRespMap(ResponseHelper.buildSqlRespMap(exemplarsList.get(0), sqlMapPair.getRight()));
 
         return llmResp;
     }

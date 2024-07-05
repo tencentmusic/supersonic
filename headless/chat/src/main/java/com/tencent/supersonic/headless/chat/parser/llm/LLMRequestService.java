@@ -109,7 +109,12 @@ public class LLMRequestService {
     }
 
     public LLMResp runText2SQL(LLMReq llmReq) {
-        return ComponentFactory.getLLMProxy().text2sql(llmReq);
+        SqlGenStrategy sqlGenStrategy = SqlGenStrategyFactory.get(llmReq.getSqlGenType());
+        String modelName = llmReq.getSchema().getDataSetName();
+        LLMResp result = sqlGenStrategy.generate(llmReq);
+        result.setQuery(llmReq.getQueryText());
+        result.setModelName(modelName);
+        return result;
     }
 
     protected List<String> getFieldNameList(QueryContext queryCtx, Long dataSetId,
