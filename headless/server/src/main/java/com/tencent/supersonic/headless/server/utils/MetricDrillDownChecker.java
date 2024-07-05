@@ -1,9 +1,9 @@
-package com.tencent.supersonic.headless.server.aspect;
+package com.tencent.supersonic.headless.server.utils;
 
 import com.google.common.collect.Lists;
+import com.tencent.supersonic.common.jsqlparser.SqlSelectHelper;
 import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import com.tencent.supersonic.common.pojo.exception.InvalidArgumentException;
-import com.tencent.supersonic.common.jsqlparser.SqlSelectHelper;
 import com.tencent.supersonic.headless.api.pojo.DrillDownDimension;
 import com.tencent.supersonic.headless.api.pojo.response.DimSchemaResp;
 import com.tencent.supersonic.headless.api.pojo.response.DimensionResp;
@@ -14,9 +14,6 @@ import com.tencent.supersonic.headless.core.pojo.QueryStatement;
 import com.tencent.supersonic.headless.server.web.service.MetricService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.aspectj.lang.ProceedingJoinPoint;
-import org.aspectj.lang.annotation.Around;
-import org.aspectj.lang.annotation.Aspect;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
@@ -25,7 +22,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-@Aspect
 @Component
 @Slf4j
 public class MetricDrillDownChecker {
@@ -33,15 +29,10 @@ public class MetricDrillDownChecker {
     @Autowired
     private MetricService metricService;
 
-    @Around("execution(* com.tencent.supersonic.headless.core.translator.DefaultSemanticTranslator.parse(..))")
-    public Object doAround(ProceedingJoinPoint joinPoint) throws Throwable {
-        Object[] objects = joinPoint.getArgs();
-        QueryStatement queryStatement = (QueryStatement) objects[0];
-        if (queryStatement.getDataSetQueryParam() == null) {
-            return joinPoint.proceed();
-        }
-        checkQuery(queryStatement.getSemanticSchemaResp(), queryStatement.getDataSetQueryParam().getSql());
-        return joinPoint.proceed();
+    public void checkQuery(QueryStatement queryStatement) {
+        SemanticSchemaResp semanticSchemaResp = queryStatement.getSemanticSchemaResp();
+        String sql = queryStatement.getDataSetQueryParam().getSql();
+        checkQuery(semanticSchemaResp, sql);
     }
 
     public void checkQuery(SemanticSchemaResp semanticSchemaResp, String sql) {
