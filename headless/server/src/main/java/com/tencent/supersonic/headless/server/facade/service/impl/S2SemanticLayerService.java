@@ -43,6 +43,7 @@ import com.tencent.supersonic.headless.core.utils.ComponentFactory;
 import com.tencent.supersonic.headless.server.annotation.S2DataPermission;
 import com.tencent.supersonic.headless.server.facade.service.SemanticLayerService;
 import com.tencent.supersonic.headless.server.manager.SemanticSchemaManager;
+import com.tencent.supersonic.headless.server.utils.MetricDrillDownChecker;
 import com.tencent.supersonic.headless.server.utils.QueryReqConverter;
 import com.tencent.supersonic.headless.server.utils.QueryUtils;
 import com.tencent.supersonic.headless.server.utils.StatUtils;
@@ -77,6 +78,8 @@ public class S2SemanticLayerService implements SemanticLayerService {
     private final SchemaService schemaService;
     private final SemanticTranslator semanticTranslator;
 
+    private final MetricDrillDownChecker metricDrillDownChecker;
+
     public S2SemanticLayerService(
             StatUtils statUtils,
             QueryUtils queryUtils,
@@ -84,7 +87,8 @@ public class S2SemanticLayerService implements SemanticLayerService {
             SemanticSchemaManager semanticSchemaManager,
             DataSetService dataSetService,
             SchemaService schemaService,
-            SemanticTranslator semanticTranslator) {
+            SemanticTranslator semanticTranslator,
+            MetricDrillDownChecker metricDrillDownChecker) {
         this.statUtils = statUtils;
         this.queryUtils = queryUtils;
         this.queryReqConverter = queryReqConverter;
@@ -92,6 +96,7 @@ public class S2SemanticLayerService implements SemanticLayerService {
         this.dataSetService = dataSetService;
         this.schemaService = schemaService;
         this.semanticTranslator = semanticTranslator;
+        this.metricDrillDownChecker = metricDrillDownChecker;
     }
 
     public DataSetSchema getDataSetSchema(Long id) {
@@ -263,15 +268,17 @@ public class S2SemanticLayerService implements SemanticLayerService {
         return querySqlReq;
     }
 
-    private SemanticQueryResp query(QueryStatement queryStatement) throws Exception {
+    private SemanticQueryResp query(QueryStatement queryStatement) {
         SemanticQueryResp semanticQueryResp = null;
         try {
             //1 translate
             if (!queryStatement.isTranslated()) {
                 semanticTranslator.translate(queryStatement);
             }
+            //2. query pre-check
+            queryPreCheck(queryStatement);
 
-            //2 execute
+            //3 execute
             for (QueryExecutor queryExecutor : ComponentFactory.getQueryExecutors()) {
                 if (queryExecutor.accept(queryStatement)) {
                     semanticQueryResp = queryExecutor.execute(queryStatement);
@@ -284,6 +291,12 @@ public class S2SemanticLayerService implements SemanticLayerService {
             log.error("exception in query, e: ", e);
             throw e;
         }
+    }
+
+    private void queryPreCheck(QueryStatement queryStatement) {
+        //Check whether the dimensions of the metric drill-down are correct temporarily,
+        //add the abstraction of a validator later.
+        metricDrillDownChecker.checkQuery(queryStatement);
     }
 
     public EntityInfo getEntityInfo(SemanticParseInfo parseInfo, DataSetSchema dataSetSchema, User user) {
