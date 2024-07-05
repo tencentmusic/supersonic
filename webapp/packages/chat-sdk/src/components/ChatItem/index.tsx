@@ -45,6 +45,7 @@ type Props = {
   triggerResize?: boolean;
   isDeveloper?: boolean;
   integrateSystem?: string;
+  defaultShowTable?: boolean;
   executeItemNode?: React.ReactNode;
   renderCustomExecuteNode?: boolean;
   isSimpleMode?: boolean;
@@ -72,6 +73,7 @@ const ChatItem: React.FC<Props> = ({
   renderCustomExecuteNode,
   isSimpleMode,
   isDebugMode,
+  defaultShowTable,
   onMsgDataLoaded,
   onQuestionAsked,
   onUpdateMessageScroll,
@@ -549,6 +551,7 @@ const ChatItem: React.FC<Props> = ({
                 )}
               <ExecuteItem
                 isSimpleMode={isSimpleMode}
+                defaultShowTable={defaultShowTable}
                 queryId={parseInfo?.queryId}
                 queryMode={parseInfo?.queryMode}
                 executeLoading={executeLoading}
