@@ -31,6 +31,7 @@ public class QueryReqConverter {
             queryReq.setMapInfo(queryReq.getMapInfo());
         }
         queryReq.setLlmConfig(agent.getLlmConfig());
+        queryReq.setPromptConfig(agent.getPromptConfig());
         return queryReq;
     }
 

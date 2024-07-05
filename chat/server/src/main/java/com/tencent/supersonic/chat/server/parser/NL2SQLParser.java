@@ -66,10 +66,10 @@ public class NL2SQLParser implements ChatParser {
         if (!chatParseContext.enableNL2SQL() || checkSkip(parseResp)) {
             return;
         }
-        processMultiTurn(chatParseContext);
 
+        processMultiTurn(chatParseContext);
         QueryReq queryReq = QueryReqConverter.buildText2SqlQueryReq(chatParseContext);
-        addExemplars(chatParseContext.getAgent().getId(), queryReq);
+        addDynamicExemplars(chatParseContext.getAgent().getId(), queryReq);
 
         ChatQueryService chatQueryService = ContextUtils.getBean(ChatQueryService.class);
         ParseResp text2SqlParseResp = chatQueryService.performParsing(queryReq);
@@ -224,13 +224,13 @@ public class NL2SQLParser implements ChatParser {
         return contextualList;
     }
 
-    private void addExemplars(Integer agentId, QueryReq queryReq) {
+    private void addDynamicExemplars(Integer agentId, QueryReq queryReq) {
         ExemplarServiceImpl exemplarManager = ContextUtils.getBean(ExemplarServiceImpl.class);
         EmbeddingConfig embeddingConfig = ContextUtils.getBean(EmbeddingConfig.class);
         String memoryCollectionName = embeddingConfig.getMemoryCollectionName(agentId);
         List<SqlExemplar> exemplars = exemplarManager.recallExemplars(memoryCollectionName,
                 queryReq.getQueryText(), 5);
-        queryReq.getExemplars().addAll(exemplars);
+        queryReq.getDynamicExemplars().addAll(exemplars);
     }
 
     @Builder

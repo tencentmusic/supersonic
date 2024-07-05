@@ -3,6 +3,7 @@ package com.tencent.supersonic.headless.api.pojo.request;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
+import com.tencent.supersonic.common.config.PromptConfig;
 import com.tencent.supersonic.common.pojo.enums.Text2SQLType;
 import com.tencent.supersonic.common.config.LLMConfig;
 import com.tencent.supersonic.headless.api.pojo.QueryDataType;
@@ -27,5 +28,6 @@ public class QueryReq {
     private SchemaMapInfo mapInfo = new SchemaMapInfo();
     private QueryDataType queryDataType = QueryDataType.ALL;
     private LLMConfig llmConfig;
-    private List<SqlExemplar> exemplars = Lists.newArrayList();
+    private PromptConfig promptConfig;
+    private List<SqlExemplar> dynamicExemplars = Lists.newArrayList();
 }
