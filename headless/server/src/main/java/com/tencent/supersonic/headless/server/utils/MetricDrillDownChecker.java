@@ -32,6 +32,9 @@ public class MetricDrillDownChecker {
     public void checkQuery(QueryStatement queryStatement) {
         SemanticSchemaResp semanticSchemaResp = queryStatement.getSemanticSchemaResp();
         String sql = queryStatement.getDataSetQueryParam().getSql();
+        if (StringUtils.isBlank(sql)) {
+            return;
+        }
         checkQuery(semanticSchemaResp, sql);
     }
 
@@ -40,7 +43,7 @@ public class MetricDrillDownChecker {
         List<String> metricFields = SqlSelectHelper.getAggregateAsFields(sql);
         List<String> whereFields = SqlSelectHelper.getWhereFields(sql);
         List<String> dimensionFields = getDimensionFields(groupByFields, whereFields);
-        if (CollectionUtils.isEmpty(metricFields) || StringUtils.isBlank(sql)) {
+        if (CollectionUtils.isEmpty(metricFields)) {
             return;
         }
         for (String metricName : metricFields) {
