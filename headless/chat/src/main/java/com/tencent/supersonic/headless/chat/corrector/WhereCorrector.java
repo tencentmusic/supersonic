@@ -1,8 +1,6 @@
 package com.tencent.supersonic.headless.chat.corrector;
 
 
-import com.tencent.supersonic.common.pojo.Constants;
-import com.tencent.supersonic.common.util.StringUtil;
 import com.tencent.supersonic.common.jsqlparser.SqlAddHelper;
 import com.tencent.supersonic.common.jsqlparser.SqlReplaceHelper;
 import com.tencent.supersonic.headless.api.pojo.SchemaElement;
@@ -11,6 +9,7 @@ import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.api.pojo.SemanticSchema;
 import com.tencent.supersonic.headless.api.pojo.request.QueryFilters;
 import com.tencent.supersonic.headless.chat.QueryContext;
+import com.tencent.supersonic.headless.chat.utils.QueryFilterParser;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.Expression;
@@ -22,7 +21,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 /**
  * Perform SQL corrections on the "Where" section in S2SQL.
@@ -38,7 +36,7 @@ public class WhereCorrector extends BaseSemanticCorrector {
         updateFieldValueByTechName(queryContext, semanticParseInfo);
     }
 
-    private void addQueryFilter(QueryContext queryContext, SemanticParseInfo semanticParseInfo) {
+    protected void addQueryFilter(QueryContext queryContext, SemanticParseInfo semanticParseInfo) {
         String queryFilter = getQueryFilter(queryContext.getQueryFilters());
 
         String correctS2SQL = semanticParseInfo.getSqlInfo().getCorrectS2SQL();
@@ -60,14 +58,7 @@ public class WhereCorrector extends BaseSemanticCorrector {
         if (Objects.isNull(queryFilters) || CollectionUtils.isEmpty(queryFilters.getFilters())) {
             return null;
         }
-        return queryFilters.getFilters().stream()
-                .map(filter -> {
-                    String bizNameWrap = StringUtil.getSpaceWrap(filter.getName());
-                    String operatorWrap = StringUtil.getSpaceWrap(filter.getOperator().getValue());
-                    String valueWrap = StringUtil.getCommaWrap(filter.getValue().toString());
-                    return bizNameWrap + operatorWrap + valueWrap;
-                })
-                .collect(Collectors.joining(Constants.AND_UPPER));
+        return QueryFilterParser.parse(queryFilters);
     }
 
     private void updateFieldValueByTechName(QueryContext queryContext, SemanticParseInfo semanticParseInfo) {

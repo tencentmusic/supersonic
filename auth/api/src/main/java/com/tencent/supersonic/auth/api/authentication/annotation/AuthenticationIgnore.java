@@ -1,4 +1,4 @@
-package com.tencent.supersonic.auth.authentication.interceptor;
+package com.tencent.supersonic.auth.api.authentication.annotation;
 
 
 import java.lang.annotation.ElementType;

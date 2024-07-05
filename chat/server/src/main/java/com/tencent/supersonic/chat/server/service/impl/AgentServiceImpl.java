@@ -13,12 +13,14 @@ import com.tencent.supersonic.chat.server.service.ChatService;
 import com.tencent.supersonic.chat.server.service.MemoryService;
 import com.tencent.supersonic.chat.server.util.LLMConnHelper;
 import com.tencent.supersonic.common.config.LLMConfig;
+import com.tencent.supersonic.common.config.PromptConfig;
 import com.tencent.supersonic.common.config.VisualConfig;
 import com.tencent.supersonic.common.util.JsonUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -85,9 +87,11 @@ public class AgentServiceImpl extends ServiceImpl<AgentDOMapper, AgentDO>
     }
 
     private synchronized void doExecuteAgentExamples(Agent agent) {
-        if (!agent.containsLLMParserTool() || !LLMConnHelper.testConnection(agent.getLlmConfig())) {
+        if (!agent.containsLLMParserTool() || !LLMConnHelper.testConnection(agent.getLlmConfig())
+                || CollectionUtils.isEmpty(agent.getExamples())) {
             return;
         }
+
         List<String> examples = agent.getExamples();
         ChatMemoryFilter chatMemoryFilter = ChatMemoryFilter.builder().agentId(agent.getId())
                 .questions(examples).build();
@@ -118,6 +122,7 @@ public class AgentServiceImpl extends ServiceImpl<AgentDOMapper, AgentDO>
         agent.setAgentConfig(agentDO.getConfig());
         agent.setExamples(JsonUtil.toList(agentDO.getExamples(), String.class));
         agent.setLlmConfig(JsonUtil.toObject(agentDO.getLlmConfig(), LLMConfig.class));
+        agent.setPromptConfig(JsonUtil.toObject(agentDO.getPromptConfig(), PromptConfig.class));
         agent.setMultiTurnConfig(JsonUtil.toObject(agentDO.getMultiTurnConfig(), MultiTurnConfig.class));
         agent.setVisualConfig(JsonUtil.toObject(agentDO.getVisualConfig(), VisualConfig.class));
         return agent;
@@ -131,6 +136,7 @@ public class AgentServiceImpl extends ServiceImpl<AgentDOMapper, AgentDO>
         agentDO.setLlmConfig(JsonUtil.toString(agent.getLlmConfig()));
         agentDO.setMultiTurnConfig(JsonUtil.toString(agent.getMultiTurnConfig()));
         agentDO.setVisualConfig(JsonUtil.toString(agent.getVisualConfig()));
+        agentDO.setPromptConfig(JsonUtil.toString(agent.getPromptConfig()));
         if (agentDO.getStatus() == null) {
             agentDO.setStatus(1);
         }

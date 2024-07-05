@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.tencent.supersonic.common.config.LLMConfig;
+import com.tencent.supersonic.common.config.PromptConfig;
 import com.tencent.supersonic.common.config.VisualConfig;
 import com.tencent.supersonic.common.pojo.RecordInfo;
 import lombok.Data;
@@ -33,6 +34,7 @@ public class Agent extends RecordInfo {
     private List<String> examples;
     private String agentConfig;
     private LLMConfig llmConfig;
+    private PromptConfig promptConfig;
     private MultiTurnConfig multiTurnConfig;
     private VisualConfig visualConfig;
 

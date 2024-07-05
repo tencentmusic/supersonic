@@ -3,6 +3,7 @@ package com.tencent.supersonic.headless.chat.query.llm.s2sql;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.common.config.LLMConfig;
+import com.tencent.supersonic.common.config.PromptConfig;
 import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.common.pojo.SqlExemplar;
 import lombok.Data;
@@ -28,7 +29,10 @@ public class LLMReq {
 
     private LLMConfig llmConfig;
 
-    private List<SqlExemplar> exemplars;
+    private PromptConfig promptConfig;
+
+    private List<SqlExemplar> dynamicExemplars;
+
 
     @Data
     public static class ElementValue {

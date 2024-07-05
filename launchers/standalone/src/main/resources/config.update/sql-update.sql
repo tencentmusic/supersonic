@@ -310,7 +310,7 @@ CREATE TABLE IF NOT EXISTS `s2_term` (
 );
 
 --20240520
-alter table s2_agent add column `llm_config` varchar(2000) COLLATE utf8_unicode_ci DEFAULT NULL;
+alter table s2_agent add column `llm_config` varchar(2000) COLLATE utf8_unicode_ci DEFAULT NULL COMMENT '大模型配置';
 alter table s2_agent add column `multi_turn_config` varchar(2000) COLLATE utf8_unicode_ci DEFAULT NULL;
 
 alter table s2_model add column `ext` varchar(1000) DEFAULT NULL;
@@ -348,3 +348,6 @@ CREATE TABLE IF NOT EXISTS `s2_chat_memory` (
     `updated_by` varchar(100) NOT NULL   ,
     PRIMARY KEY (`id`)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--20240705
+alter table s2_agent add column `prompt_config` varchar(6000) COLLATE utf8_unicode_ci DEFAULT NULL COMMENT '提示词配置';

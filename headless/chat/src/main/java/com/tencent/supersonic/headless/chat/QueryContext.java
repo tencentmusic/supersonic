@@ -2,6 +2,7 @@ package com.tencent.supersonic.headless.chat;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
+import com.tencent.supersonic.common.config.PromptConfig;
 import com.tencent.supersonic.common.pojo.enums.Text2SQLType;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.config.LLMConfig;
@@ -50,7 +51,8 @@ public class QueryContext {
     private WorkflowState workflowState;
     private QueryDataType queryDataType = QueryDataType.ALL;
     private LLMConfig llmConfig;
-    private List<SqlExemplar> exemplars;
+    private PromptConfig promptConfig;
+    private List<SqlExemplar> dynamicExemplars;
 
     public List<SemanticQuery> getCandidateQueries() {
         ParserConfig parserConfig = ContextUtils.getBean(ParserConfig.class);
