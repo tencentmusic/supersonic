@@ -23,6 +23,7 @@ services:
     image: mysql:8.0
     container_name: supersonic_mysql
     environment:
+      LANG: 'C.UTF-8'  # 设置环境变量
       MYSQL_ROOT_PASSWORD: root_password
       MYSQL_DATABASE: supersonic_db
       MYSQL_USER: supersonic_user
