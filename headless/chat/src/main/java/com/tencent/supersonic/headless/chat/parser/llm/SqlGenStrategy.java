@@ -1,6 +1,6 @@
 package com.tencent.supersonic.headless.chat.parser.llm;
 
-import com.tencent.supersonic.common.config.ChatModelConfig;
+import com.tencent.supersonic.common.config.ModelConfig;
 import com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMReq;
 import com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMResp;
 import dev.langchain4j.model.chat.ChatLanguageModel;
@@ -23,8 +23,8 @@ public abstract class SqlGenStrategy implements InitializingBean {
     @Autowired
     protected PromptHelper promptHelper;
 
-    protected ChatLanguageModel getChatLanguageModel(ChatModelConfig llmConfig) {
-        return ModelProvider.provideChatModel(llmConfig);
+    protected ChatLanguageModel getChatLanguageModel(ModelConfig modelConfig) {
+        return ModelProvider.getChatModel(modelConfig);
     }
 
     abstract LLMResp generate(LLMReq llmReq);

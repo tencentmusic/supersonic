@@ -46,7 +46,7 @@ public class PlainTextExecutor implements ChatExecutor {
         AgentService agentService = ContextUtils.getBean(AgentService.class);
         Agent chatAgent = agentService.getAgent(chatExecuteContext.getAgentId());
 
-        ChatLanguageModel chatLanguageModel = ModelProvider.provideChatModel(chatAgent.getLlmConfig());
+        ChatLanguageModel chatLanguageModel = ModelProvider.getChatModel(chatAgent.getModelConfig());
         Response<AiMessage> response = chatLanguageModel.generate(prompt.toUserMessage());
 
         QueryResult result = new QueryResult();

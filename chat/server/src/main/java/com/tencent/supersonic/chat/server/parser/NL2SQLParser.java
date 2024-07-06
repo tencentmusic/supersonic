@@ -5,8 +5,8 @@ import com.tencent.supersonic.chat.server.persistence.repository.ChatQueryReposi
 import com.tencent.supersonic.chat.server.plugin.PluginQueryManager;
 import com.tencent.supersonic.chat.server.pojo.ChatParseContext;
 import com.tencent.supersonic.chat.server.util.QueryReqConverter;
-import com.tencent.supersonic.common.config.ChatModelConfig;
 import com.tencent.supersonic.common.config.EmbeddingConfig;
+import com.tencent.supersonic.common.config.ModelConfig;
 import com.tencent.supersonic.common.pojo.SqlExemplar;
 import com.tencent.supersonic.common.service.impl.ExemplarServiceImpl;
 import com.tencent.supersonic.common.util.ContextUtils;
@@ -168,7 +168,7 @@ public class NL2SQLParser implements ChatParser {
                 .curtSchema(curtMapStr)
                 .histSchema(histMapStr)
                 .histSQL(histSQL)
-                .llmConfig(queryTextReq.getLlmConfig())
+                .modelConfig(queryTextReq.getModelConfig())
                 .build());
         chatParseContext.setQueryText(rewrittenQuery);
         log.info("Last Query: {} Current Query: {}, Rewritten Query: {}",
@@ -181,7 +181,7 @@ public class NL2SQLParser implements ChatParser {
         Prompt prompt = PromptTemplate.from(promptStr).apply(Collections.EMPTY_MAP);
         keyPipelineLog.info("NL2SQLParser reqPrompt:{}", promptStr);
 
-        ChatLanguageModel chatLanguageModel = ModelProvider.provideChatModel(context.getLlmConfig());
+        ChatLanguageModel chatLanguageModel = ModelProvider.getChatModel(context.getModelConfig());
         Response<AiMessage> response = chatLanguageModel.generate(prompt.toUserMessage());
 
         String result = response.content().text();
@@ -243,7 +243,7 @@ public class NL2SQLParser implements ChatParser {
         private String curtSchema;
         private String histSchema;
         private String histSQL;
-        private ChatModelConfig llmConfig;
+        private ModelConfig modelConfig;
     }
 
 }

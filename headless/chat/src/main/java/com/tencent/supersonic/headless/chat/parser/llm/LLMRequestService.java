@@ -103,7 +103,6 @@ public class LLMRequestService {
         llmReq.setCurrentDate(DateUtils.getBeforeDate(0));
         llmReq.setSqlGenType(LLMReq.SqlGenType.valueOf(parserConfig.getParameterValue(PARSER_STRATEGY_TYPE)));
         llmReq.setModelConfig(queryCtx.getModelConfig());
-        llmReq.setLlmConfig(queryCtx.getLlmConfig());
         llmReq.setPromptConfig(queryCtx.getPromptConfig());
         llmReq.setDynamicExemplars(queryCtx.getDynamicExemplars());
 
