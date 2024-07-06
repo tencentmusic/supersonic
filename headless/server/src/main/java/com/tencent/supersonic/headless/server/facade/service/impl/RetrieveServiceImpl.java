@@ -8,7 +8,7 @@ import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
 import com.tencent.supersonic.headless.api.pojo.SemanticSchema;
 import com.tencent.supersonic.headless.api.pojo.request.QueryFilter;
 import com.tencent.supersonic.headless.api.pojo.request.QueryFilters;
-import com.tencent.supersonic.headless.api.pojo.request.QueryReq;
+import com.tencent.supersonic.headless.api.pojo.request.QueryTextReq;
 import com.tencent.supersonic.headless.api.pojo.response.S2Term;
 import com.tencent.supersonic.headless.api.pojo.response.SearchResult;
 import com.tencent.supersonic.headless.chat.QueryContext;
@@ -64,9 +64,9 @@ public class RetrieveServiceImpl implements RetrieveService {
     @Autowired
     private SearchMatchStrategy searchMatchStrategy;
     @Override
-    public List<SearchResult> retrieve(QueryReq queryReq) {
+    public List<SearchResult> retrieve(QueryTextReq queryTextReq) {
 
-        String queryText = queryReq.getQueryText();
+        String queryText = queryTextReq.getQueryText();
         // 1.get meta info
         SemanticSchema semanticSchemaDb = schemaService.getSemanticSchema();
         List<SchemaElement> metricsDb = semanticSchemaDb.getMetrics();
@@ -76,10 +76,10 @@ public class RetrieveServiceImpl implements RetrieveService {
         // 2.detect by segment
         List<S2Term> originals = knowledgeBaseService.getTerms(queryText, modelIdToDataSetIds);
         log.debug("hanlp parse result: {}", originals);
-        Set<Long> dataSetIds = queryReq.getDataSetIds();
+        Set<Long> dataSetIds = queryTextReq.getDataSetIds();
 
         QueryContext queryContext = new QueryContext();
-        BeanUtils.copyProperties(queryReq, queryContext);
+        BeanUtils.copyProperties(queryTextReq, queryContext);
         queryContext.setModelIdToDataSetIds(dataSetService.getModelIdToDataSetIds());
 
         Map<MatchText, List<HanlpMapResult>> regTextMap =
@@ -100,12 +100,12 @@ public class RetrieveServiceImpl implements RetrieveService {
             return Lists.newArrayList();
         }
         Map.Entry<MatchText, List<HanlpMapResult>> searchTextEntry = mostSimilarSearchResult.get();
-        log.debug("searchTextEntry:{},queryReq:{}", searchTextEntry, queryReq);
+        log.debug("searchTextEntry:{},queryTextReq:{}", searchTextEntry, queryTextReq);
 
         Set<SearchResult> searchResults = new LinkedHashSet();
         DataSetInfoStat dataSetInfoStat = NatureHelper.getDataSetStat(originals);
 
-        List<Long> possibleDataSets = getPossibleDataSets(queryReq, originals, dataSetInfoStat, dataSetIds);
+        List<Long> possibleDataSets = getPossibleDataSets(queryTextReq, originals, dataSetInfoStat, dataSetIds);
 
         // 5.1 priority dimension metric
         boolean existMetricAndDimension = searchMetricAndDimension(new HashSet<>(possibleDataSets), dataSetIdToName,
@@ -120,14 +120,14 @@ public class RetrieveServiceImpl implements RetrieveService {
 
             Set<SearchResult> searchResultSet = searchDimensionValue(metricsDb, dataSetIdToName,
                     dataSetInfoStat.getMetricDataSetCount(), existMetricAndDimension,
-                    matchText, natureToNameMap, natureToNameEntry, queryReq.getQueryFilters());
+                    matchText, natureToNameMap, natureToNameEntry, queryTextReq.getQueryFilters());
 
             searchResults.addAll(searchResultSet);
         }
         return searchResults.stream().limit(RESULT_SIZE).collect(Collectors.toList());
     }
 
-    private List<Long> getPossibleDataSets(QueryReq queryCtx, List<S2Term> originals,
+    private List<Long> getPossibleDataSets(QueryTextReq queryCtx, List<S2Term> originals,
                                            DataSetInfoStat dataSetInfoStat, Set<Long> dataSetIds) {
         if (CollectionUtils.isNotEmpty(dataSetIds)) {
             return new ArrayList<>(dataSetIds);

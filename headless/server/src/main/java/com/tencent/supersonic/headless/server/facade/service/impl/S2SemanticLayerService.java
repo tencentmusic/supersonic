@@ -19,7 +19,7 @@ import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.api.pojo.TagTypeDefaultConfig;
 import com.tencent.supersonic.headless.api.pojo.TimeDefaultConfig;
-import com.tencent.supersonic.headless.api.pojo.request.ExplainSqlReq;
+import com.tencent.supersonic.headless.api.pojo.request.TranslateSqlReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryDimValueReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryFilter;
 import com.tencent.supersonic.headless.api.pojo.request.QueryMultiStructReq;
@@ -28,7 +28,7 @@ import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
 import com.tencent.supersonic.headless.api.pojo.request.SchemaFilterReq;
 import com.tencent.supersonic.headless.api.pojo.request.SemanticQueryReq;
 import com.tencent.supersonic.headless.api.pojo.response.DimensionResp;
-import com.tencent.supersonic.headless.api.pojo.response.ExplainResp;
+import com.tencent.supersonic.headless.api.pojo.response.TranslateResp;
 import com.tencent.supersonic.headless.api.pojo.response.ItemResp;
 import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
@@ -125,7 +125,7 @@ public class S2SemanticLayerService implements SemanticLayerService {
             StatUtils.get().setUseResultCache(false);
             //3 query
             QueryStatement queryStatement = buildQueryStatement(queryReq, user);
-            SemanticQueryResp result = query(queryStatement);
+            SemanticQueryResp result = doQuery(queryStatement);
             //4 reset cache and set stateInfo
             Boolean setCacheSuccess = queryCache.put(cacheKey, result);
             if (setCacheSuccess) {
@@ -228,8 +228,8 @@ public class S2SemanticLayerService implements SemanticLayerService {
     }
 
     @Override
-    public <T> ExplainResp explain(ExplainSqlReq<T> explainSqlReq, User user) throws Exception {
-        T queryReq = explainSqlReq.getQueryReq();
+    public <T> TranslateResp translate(TranslateSqlReq<T> translateSqlReq, User user) throws Exception {
+        T queryReq = translateSqlReq.getQueryReq();
         QueryStatement queryStatement = buildQueryStatement((SemanticQueryReq) queryReq, user);
         semanticTranslator.translate(queryStatement);
 
@@ -239,7 +239,7 @@ public class S2SemanticLayerService implements SemanticLayerService {
             sql = queryStatement.getSql();
             sorceId = queryStatement.getSourceId();
         }
-        return ExplainResp.builder().sql(sql).sourceId(sorceId).build();
+        return TranslateResp.builder().sql(sql).sourceId(sorceId).build();
     }
 
     public List<ItemResp> getDomainDataSetTree() {
@@ -268,7 +268,7 @@ public class S2SemanticLayerService implements SemanticLayerService {
         return querySqlReq;
     }
 
-    private SemanticQueryResp query(QueryStatement queryStatement) {
+    private SemanticQueryResp doQuery(QueryStatement queryStatement) {
         SemanticQueryResp semanticQueryResp = null;
         try {
             //1 translate

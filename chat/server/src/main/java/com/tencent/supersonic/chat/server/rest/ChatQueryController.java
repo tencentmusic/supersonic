@@ -10,7 +10,7 @@ import com.tencent.supersonic.chat.server.service.ChatService;
 import com.tencent.supersonic.common.pojo.exception.InvalidArgumentException;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.api.pojo.request.DimensionValueReq;
-import com.tencent.supersonic.headless.api.pojo.request.QueryReq;
+import com.tencent.supersonic.headless.api.pojo.request.QueryTextReq;
 import com.tencent.supersonic.headless.api.pojo.response.ParseResp;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.BeanUtils;
@@ -76,7 +76,7 @@ public class ChatQueryController {
     }
 
     @PostMapping("queryContext")
-    public Object queryContext(@RequestBody QueryReq queryCtx,
+    public Object queryContext(@RequestBody QueryTextReq queryCtx,
                                HttpServletRequest request, HttpServletResponse response) {
         queryCtx.setUser(UserHolder.findUser(request, response));
         return chatService.queryContext(queryCtx.getChatId());

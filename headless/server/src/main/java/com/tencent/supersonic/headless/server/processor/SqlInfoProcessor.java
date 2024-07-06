@@ -4,9 +4,9 @@ import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.api.pojo.SqlInfo;
 import com.tencent.supersonic.headless.api.pojo.enums.QueryMethod;
-import com.tencent.supersonic.headless.api.pojo.request.ExplainSqlReq;
+import com.tencent.supersonic.headless.api.pojo.request.TranslateSqlReq;
 import com.tencent.supersonic.headless.api.pojo.request.SemanticQueryReq;
-import com.tencent.supersonic.headless.api.pojo.response.ExplainResp;
+import com.tencent.supersonic.headless.api.pojo.response.TranslateResp;
 import com.tencent.supersonic.headless.api.pojo.response.ParseResp;
 import com.tencent.supersonic.headless.chat.ChatContext;
 import com.tencent.supersonic.headless.chat.QueryContext;
@@ -24,8 +24,8 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
- * SqlInfoProcessor adds S2SQL to the parsing results so that
- * technical users could verify SQL by themselves.
+ * SqlInfoProcessor adds intermediate S2SQL and final SQL to the parsing results
+ * so that technical users could verify SQL by themselves.
  **/
 @Slf4j
 public class SqlInfoProcessor implements ResultProcessor {
@@ -66,9 +66,9 @@ public class SqlInfoProcessor implements ResultProcessor {
         semanticQuery.setParseInfo(parseInfo);
         SemanticQueryReq semanticQueryReq = semanticQuery.buildSemanticQueryReq();
         SemanticLayerService queryService = ContextUtils.getBean(SemanticLayerService.class);
-        ExplainSqlReq<Object> explainSqlReq = ExplainSqlReq.builder().queryReq(semanticQueryReq)
+        TranslateSqlReq<Object> translateSqlReq = TranslateSqlReq.builder().queryReq(semanticQueryReq)
                 .queryTypeEnum(QueryMethod.SQL).build();
-        ExplainResp explain = queryService.explain(explainSqlReq, queryContext.getUser());
+        TranslateResp explain = queryService.translate(translateSqlReq, queryContext.getUser());
         String querySql = explain.getSql();
         if (StringUtils.isBlank(querySql)) {
             return;

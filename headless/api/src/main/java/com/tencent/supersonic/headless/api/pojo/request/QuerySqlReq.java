@@ -1,6 +1,9 @@
 package com.tencent.supersonic.headless.api.pojo.request;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.ToString;
 import org.apache.commons.collections.CollectionUtils;
 
@@ -8,8 +11,13 @@ import java.util.Objects;
 
 @Data
 @ToString
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class QuerySqlReq extends SemanticQueryReq {
+
     private String sql;
+
     private Integer limit = 1000;
 
     @Override
