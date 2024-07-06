@@ -54,10 +54,10 @@ const AgentForm: React.FC<Props> = ({ editAgent, onSaveAgent, onCreateToolBtnCli
         provider: 'OPEN_AI',
       },
     },
-    embeddingStore: {
-      provider: 'MILVUS',
-      timeOut: 60,
-    },
+    // embeddingStore: {
+    //   provider: 'MILVUS',
+    //   timeOut: 60,
+    // },
     agentConfig: {
       ...defaultAgentConfig,
     },
@@ -346,71 +346,54 @@ const AgentForm: React.FC<Props> = ({ editAgent, onSaveAgent, onCreateToolBtnCli
         </div>
       ),
     },
-    {
-      label: '向量库配置',
-      key: 'embeddingStore',
-      children: (
-        <div className={styles.agentFormContainer}>
-          <FormItem name={['embeddingStore', 'provider']} label="接口协议">
-            <Select placeholder="">
-              {['MILVUS', 'CHROMA', 'IN_MEMORY'].map((item) => (
-                <Select.Option key={item} value={item}>
-                  {item}
-                </Select.Option>
-              ))}
-            </Select>
-          </FormItem>
-          {formData?.embeddingStore?.provider === 'IN_MEMORY' ? (
-            <>
-              <FormItem name={['embeddingStore', 'persistPath']} label="持久化路径">
-                <Input placeholder="请输入持久化路径" />
-              </FormItem>
-            </>
-          ) : (
-            <>
-              <FormItem name={['embeddingStore', 'baseUrl']} label="Base URL">
-                <Input placeholder="请输入Base URL" />
-              </FormItem>
-              <FormItem
-                name={['embeddingStore', 'apiKey']}
-                label="API Key"
-                getValueFromEvent={(event) => {
-                  const value = event.target.value;
-                  return encryptPassword(value);
-                }}
-                getValueProps={(value) => {
-                  return {
-                    value: value ? decryptPassword(value) : '',
-                  };
-                }}
-              >
-                <Input.Password placeholder="请输入API Key" visibilityToggle />
-              </FormItem>
-              <FormItem name={['embeddingStore', 'timeOut']} label="超时时间(秒)">
-                <InputNumber />
-              </FormItem>
-            </>
-          )}
-        </div>
-      ),
-    },
-    {
-      label: '提示词配置',
-      key: 'promptConfig',
-      children: (
-        <div className={styles.agentFormContainer}>
-          <FormItem name={['promptConfig', 'promptTemplate']} label="提示词模板">
-            <Input.TextArea
-              style={{ minHeight: 600 }}
-              placeholder=" &nbsp;自定义提示词模板可嵌入以下变量，将由系统自动进行替换：&#13;&#10;
-                    -&nbsp;{{exemplar}} &nbsp;:替换成few-shot示例，示例个数由系统配置&#13;&#10;
-                    -&nbsp;{{question}} &nbsp;:替换成用户问题，拼接了一定的补充信息&#13;&#10;
-                    -&nbsp;{{schema}} &nbsp;:替换成数据语义信息，根据用户问题映射而来"
-            />
-          </FormItem>
-        </div>
-      ),
-    },
+    // {
+    //   label: '向量库配置',
+    //   key: 'embeddingStore',
+    //   children: (
+    //     <div className={styles.agentFormContainer}>
+    //       <FormItem name={['embeddingStore', 'provider']} label="接口协议">
+    //         <Select placeholder="">
+    //           {['MILVUS', 'CHROMA', 'IN_MEMORY'].map((item) => (
+    //             <Select.Option key={item} value={item}>
+    //               {item}
+    //             </Select.Option>
+    //           ))}
+    //         </Select>
+    //       </FormItem>
+    //       {formData?.embeddingStore?.provider === 'IN_MEMORY' ? (
+    //         <>
+    //           <FormItem name={['embeddingStore', 'persistPath']} label="持久化路径">
+    //             <Input placeholder="请输入持久化路径" />
+    //           </FormItem>
+    //         </>
+    //       ) : (
+    //         <>
+    //           <FormItem name={['embeddingStore', 'baseUrl']} label="Base URL">
+    //             <Input placeholder="请输入Base URL" />
+    //           </FormItem>
+    //           <FormItem
+    //             name={['embeddingStore', 'apiKey']}
+    //             label="API Key"
+    //             getValueFromEvent={(event) => {
+    //               const value = event.target.value;
+    //               return encryptPassword(value);
+    //             }}
+    //             getValueProps={(value) => {
+    //               return {
+    //                 value: value ? decryptPassword(value) : '',
+    //               };
+    //             }}
+    //           >
+    //             <Input.Password placeholder="请输入API Key" visibilityToggle />
+    //           </FormItem>
+    //           <FormItem name={['embeddingStore', 'timeOut']} label="超时时间(秒)">
+    //             <InputNumber />
+    //           </FormItem>
+    //         </>
+    //       )}
+    //     </div>
+    //   ),
+    // },
     {
       label: '提示词配置',
       key: 'promptConfig',
