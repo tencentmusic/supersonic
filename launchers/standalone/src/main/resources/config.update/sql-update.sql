@@ -351,3 +351,6 @@ CREATE TABLE IF NOT EXISTS `s2_chat_memory` (
 
 --20240705
 alter table s2_agent add column `prompt_config` varchar(6000) COLLATE utf8_unicode_ci DEFAULT NULL COMMENT '提示词配置';
+
+--20240707
+alter table s2_agent add model_config varchar(6000) null;

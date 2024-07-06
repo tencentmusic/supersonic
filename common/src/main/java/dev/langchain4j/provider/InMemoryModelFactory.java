@@ -16,9 +16,11 @@ import static dev.langchain4j.inmemory.spring.InMemoryAutoConfig.BGE_SMALL_ZH;
 
 @Service
 public class InMemoryModelFactory implements ModelFactory, InitializingBean {
+    public static final String PROVIDER = "IN_MEMORY";
+
     @Override
-    public ChatLanguageModel createChatModel(ChatModelConfig chatModel) {
-        return null;
+    public ChatLanguageModel createChatModel(ChatModelConfig modelConfig) {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
@@ -40,6 +42,6 @@ public class InMemoryModelFactory implements ModelFactory, InitializingBean {
 
     @Override
     public void afterPropertiesSet() {
-        ModelProvider.add(Provider.IN_MEMORY, this);
+        ModelProvider.add(PROVIDER, this);
     }
 }

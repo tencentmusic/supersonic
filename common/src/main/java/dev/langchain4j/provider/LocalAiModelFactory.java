@@ -13,14 +13,16 @@ import java.time.Duration;
 
 @Service
 public class LocalAiModelFactory implements ModelFactory, InitializingBean {
+    public static final String PROVIDER = "LOCAL_AI";
+
     @Override
-    public ChatLanguageModel createChatModel(ChatModelConfig chatModel) {
+    public ChatLanguageModel createChatModel(ChatModelConfig modelConfig) {
         return LocalAiChatModel
                 .builder()
-                .baseUrl(chatModel.getBaseUrl())
-                .modelName(chatModel.getModelName())
-                .temperature(chatModel.getTemperature())
-                .timeout(Duration.ofSeconds(chatModel.getTimeOut()))
+                .baseUrl(modelConfig.getBaseUrl())
+                .modelName(modelConfig.getModelName())
+                .temperature(modelConfig.getTemperature())
+                .timeout(Duration.ofSeconds(modelConfig.getTimeOut()))
                 .build();
     }
 
@@ -34,6 +36,6 @@ public class LocalAiModelFactory implements ModelFactory, InitializingBean {
 
     @Override
     public void afterPropertiesSet() {
-        ModelProvider.add(Provider.LOCAL_AI, this);
+        ModelProvider.add(PROVIDER, this);
     }
 }

@@ -10,8 +10,11 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class QianfanModelFactory implements ModelFactory, InitializingBean {
+
+    public static final String PROVIDER = "QIANFAN";
+
     @Override
-    public ChatLanguageModel createChatModel(ChatModelConfig chatModel) {
+    public ChatLanguageModel createChatModel(ChatModelConfig modelConfig) {
         return null;
     }
 
@@ -29,6 +32,6 @@ public class QianfanModelFactory implements ModelFactory, InitializingBean {
 
     @Override
     public void afterPropertiesSet() {
-        ModelProvider.add(Provider.QIANFAN, this);
+        ModelProvider.add(PROVIDER, this);
     }
 }

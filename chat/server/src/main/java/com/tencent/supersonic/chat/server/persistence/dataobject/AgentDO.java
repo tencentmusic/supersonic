@@ -11,15 +11,18 @@ import java.util.Date;
 @TableName("s2_agent")
 public class AgentDO {
     /**
+     *
      */
     @TableId(type = IdType.AUTO)
     private Integer id;
 
     /**
+     *
      */
     private String name;
 
     /**
+     *
      */
     private String description;
 
@@ -29,35 +32,40 @@ public class AgentDO {
     private Integer status;
 
     /**
+     *
      */
     private String examples;
 
     /**
+     *
      */
     private String config;
 
     /**
+     *
      */
     private String createdBy;
 
     /**
+     *
      */
     private Date createdAt;
 
     /**
+     *
      */
     private String updatedBy;
 
     /**
+     *
      */
     private Date updatedAt;
 
     /**
+     *
      */
     private Integer enableSearch;
-
-    private String llmConfig;
-
+    private String modelConfig;
     private String multiTurnConfig;
 
     private String visualConfig;

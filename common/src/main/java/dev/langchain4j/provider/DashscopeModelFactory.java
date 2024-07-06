@@ -11,14 +11,16 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class DashscopeModelFactory implements ModelFactory, InitializingBean {
+    public static final String PROVIDER = "DASHSCOPE";
+
     @Override
-    public ChatLanguageModel createChatModel(ChatModelConfig chatModel) {
+    public ChatLanguageModel createChatModel(ChatModelConfig modelConfig) {
         return QwenChatModel.builder()
-                .baseUrl(chatModel.getBaseUrl())
-                .apiKey(chatModel.getApiKey())
-                .modelName(chatModel.getModelName())
-                .temperature(chatModel.getTemperature() == null ? 0L :
-                        chatModel.getTemperature().floatValue())
+                .baseUrl(modelConfig.getBaseUrl())
+                .apiKey(modelConfig.getApiKey())
+                .modelName(modelConfig.getModelName())
+                .temperature(modelConfig.getTemperature() == null ? 0L :
+                        modelConfig.getTemperature().floatValue())
                 .build();
     }
 
@@ -32,6 +34,6 @@ public class DashscopeModelFactory implements ModelFactory, InitializingBean {
 
     @Override
     public void afterPropertiesSet() {
-        ModelProvider.add(Provider.DASHSCOPE, this);
+        ModelProvider.add(PROVIDER, this);
     }
 }
