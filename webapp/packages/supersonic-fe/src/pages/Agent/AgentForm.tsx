@@ -12,6 +12,7 @@ import {
   message,
   Space,
 } from 'antd';
+import MainTitleMark from '@/components/MainTitleMark';
 import { AgentType } from './type';
 import { useEffect, useState } from 'react';
 import styles from './style.less';
@@ -43,10 +44,19 @@ const AgentForm: React.FC<Props> = ({ editAgent, onSaveAgent, onCreateToolBtnCli
   const [llmTestLoading, setLlmTestLoading] = useState<boolean>(false);
   const [formData, setFormData] = useState<any>({
     enableSearch: true,
-    llmConfig: {
+    modelConfig: {
+      chatModel: {
+        timeOut: 60,
+        provider: 'OPEN_AI',
+        temperature: 0,
+      },
+      embeddingModel: {
+        provider: 'OPEN_AI',
+      },
+    },
+    embeddingStore: {
+      provider: 'MILVUS',
       timeOut: 60,
-      provider: 'OPEN_AI',
-      temperature: 0,
     },
     agentConfig: {
       ...defaultAgentConfig,
@@ -57,8 +67,8 @@ const AgentForm: React.FC<Props> = ({ editAgent, onSaveAgent, onCreateToolBtnCli
   useEffect(() => {
     if (editAgent) {
       const sourceData = { ...editAgent };
-      if (!sourceData.llmConfig) {
-        delete sourceData.llmConfig;
+      if (!sourceData.modelConfig) {
+        delete sourceData.modelConfig;
       }
 
       const config = jsonParse(editAgent.agentConfig, {});
@@ -217,10 +227,15 @@ const AgentForm: React.FC<Props> = ({ editAgent, onSaveAgent, onCreateToolBtnCli
     },
     {
       label: '大模型配置',
-      key: 'llmConfig',
+      key: 'modelConfig',
       children: (
         <div className={styles.agentFormContainer}>
-          <FormItem name={['llmConfig', 'provider']} label="接口协议">
+          <div className={styles.agentFormTitle}>
+            <Space>
+              语言模型 <MainTitleMark />
+            </Space>
+          </div>
+          <FormItem name={['modelConfig', 'chatModel', 'provider']} label="接口协议">
             <Select placeholder="">
               {['OPEN_AI', 'OLLAMA'].map((item) => (
                 <Select.Option key={item} value={item}>
@@ -229,16 +244,16 @@ const AgentForm: React.FC<Props> = ({ editAgent, onSaveAgent, onCreateToolBtnCli
               ))}
             </Select>
           </FormItem>
-          <FormItem name={['llmConfig', 'modelName']} label="Model Name">
-            <Input placeholder="请输入大模型名称" />
+          <FormItem name={['modelConfig', 'chatModel', 'modelName']} label="Model Name">
+            <Input placeholder="请输入语言模型名称" />
           </FormItem>
-          <FormItem name={['llmConfig', 'baseUrl']} label="Base URL">
+          <FormItem name={['modelConfig', 'chatModel', 'baseUrl']} label="Base URL">
             <Input placeholder="请输入Base URL" />
           </FormItem>
           <FormItem
-            name={['llmConfig', 'apiKey']}
+            name={['modelConfig', 'chatModel', 'apiKey']}
             label="API Key"
-            hidden={formData?.llmConfig?.provider === 'OLLAMA'}
+            hidden={formData?.modelConfig?.chatModel?.provider === 'OLLAMA'}
             getValueFromEvent={(event) => {
               const value = event.target.value;
               return encryptPassword(value);
@@ -252,7 +267,7 @@ const AgentForm: React.FC<Props> = ({ editAgent, onSaveAgent, onCreateToolBtnCli
             <Input.Password placeholder="请输入API Key" visibilityToggle />
           </FormItem>
 
-          <FormItem name={['llmConfig', 'temperature']} label="Temperature">
+          <FormItem name={['modelConfig', 'chatModel', 'temperature']} label="Temperature">
             <Slider
               min={0}
               max={1}
@@ -263,8 +278,135 @@ const AgentForm: React.FC<Props> = ({ editAgent, onSaveAgent, onCreateToolBtnCli
               }}
             />
           </FormItem>
-          <FormItem name={['llmConfig', 'timeOut']} label="超时时间(秒)">
+          <FormItem name={['modelConfig', 'chatModel', 'timeOut']} label="超时时间(秒)">
             <InputNumber />
+          </FormItem>
+
+          <div className={styles.agentFormTitle}>
+            <Space>
+              向量模型 <MainTitleMark />
+            </Space>
+          </div>
+
+          <FormItem name={['modelConfig', 'embeddingModel', 'provider']} label="接口协议">
+            <Select placeholder="">
+              {[
+                'OPEN_AI',
+                'OLLAMA',
+                'LOCAL_AI',
+                'IN_MEMORY',
+                'ZHIPU',
+                'AZURE',
+                'QIANFAN',
+                'DASHSCOPE',
+              ].map((item) => (
+                <Select.Option key={item} value={item}>
+                  {item}
+                </Select.Option>
+              ))}
+            </Select>
+          </FormItem>
+          <FormItem name={['modelConfig', 'embeddingModel', 'modelName']} label="Model Name">
+            <Input placeholder="请输入向量模型名称" />
+          </FormItem>
+          {formData?.modelConfig?.embeddingModel?.provider === 'IN_MEMORY' ? (
+            <>
+              <FormItem name={['modelConfig', 'embeddingModel', 'modelPath']} label="模型路径">
+                <Input placeholder="请输入模型路径" />
+              </FormItem>
+              <FormItem
+                name={['modelConfig', 'embeddingModel', 'vocabularyPath']}
+                label="词汇表路径"
+              >
+                <Input placeholder="请输入模型路径" />
+              </FormItem>
+            </>
+          ) : (
+            <>
+              <FormItem name={['modelConfig', 'embeddingModel', 'baseUrl']} label="Base URL">
+                <Input placeholder="请输入Base URL" />
+              </FormItem>
+              <FormItem
+                name={['modelConfig', 'embeddingModel', 'apiKey']}
+                label="API Key"
+                getValueFromEvent={(event) => {
+                  const value = event.target.value;
+                  return encryptPassword(value);
+                }}
+                getValueProps={(value) => {
+                  return {
+                    value: value ? decryptPassword(value) : '',
+                  };
+                }}
+              >
+                <Input.Password placeholder="请输入API Key" visibilityToggle />
+              </FormItem>
+            </>
+          )}
+        </div>
+      ),
+    },
+    {
+      label: '向量库配置',
+      key: 'embeddingStore',
+      children: (
+        <div className={styles.agentFormContainer}>
+          <FormItem name={['embeddingStore', 'provider']} label="接口协议">
+            <Select placeholder="">
+              {['MILVUS', 'CHROMA', 'IN_MEMORY'].map((item) => (
+                <Select.Option key={item} value={item}>
+                  {item}
+                </Select.Option>
+              ))}
+            </Select>
+          </FormItem>
+          {formData?.embeddingStore?.provider === 'IN_MEMORY' ? (
+            <>
+              <FormItem name={['embeddingStore', 'persistPath']} label="持久化路径">
+                <Input placeholder="请输入持久化路径" />
+              </FormItem>
+            </>
+          ) : (
+            <>
+              <FormItem name={['embeddingStore', 'baseUrl']} label="Base URL">
+                <Input placeholder="请输入Base URL" />
+              </FormItem>
+              <FormItem
+                name={['embeddingStore', 'apiKey']}
+                label="API Key"
+                getValueFromEvent={(event) => {
+                  const value = event.target.value;
+                  return encryptPassword(value);
+                }}
+                getValueProps={(value) => {
+                  return {
+                    value: value ? decryptPassword(value) : '',
+                  };
+                }}
+              >
+                <Input.Password placeholder="请输入API Key" visibilityToggle />
+              </FormItem>
+              <FormItem name={['embeddingStore', 'timeOut']} label="超时时间(秒)">
+                <InputNumber />
+              </FormItem>
+            </>
+          )}
+        </div>
+      ),
+    },
+    {
+      label: '提示词配置',
+      key: 'promptConfig',
+      children: (
+        <div className={styles.agentFormContainer}>
+          <FormItem name={['promptConfig', 'promptTemplate']} label="提示词模板">
+            <Input.TextArea
+              style={{ minHeight: 600 }}
+              placeholder=" &nbsp;自定义提示词模板可嵌入以下变量，将由系统自动进行替换：&#13;&#10;
+                    -&nbsp;{{exemplar}} &nbsp;:替换成few-shot示例，示例个数由系统配置&#13;&#10;
+                    -&nbsp;{{question}} &nbsp;:替换成用户问题，拼接了一定的补充信息&#13;&#10;
+                    -&nbsp;{{schema}} &nbsp;:替换成数据语义信息，根据用户问题映射而来"
+            />
           </FormItem>
         </div>
       ),
@@ -332,12 +474,12 @@ const AgentForm: React.FC<Props> = ({ editAgent, onSaveAgent, onCreateToolBtnCli
                 <PlusOutlined /> 新增工具
               </Button>
             )}
-            {activeKey === 'llmConfig' && (
+            {activeKey === 'modelConfig' && (
               <Button
                 type="primary"
                 loading={llmTestLoading}
                 onClick={() => {
-                  testLLMConnect(formData.llmConfig);
+                  testLLMConnect(formData.modelConfig.chatModel);
                 }}
               >
                 大模型连接测试
