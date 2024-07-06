@@ -15,7 +15,7 @@ import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.input.Prompt;
 import dev.langchain4j.model.input.PromptTemplate;
 import dev.langchain4j.model.output.Response;
-import dev.langchain4j.model.provider.ChatLanguageModelProvider;
+import dev.langchain4j.provider.ModelProvider;
 
 import java.util.Collections;
 import java.util.List;
@@ -46,7 +46,7 @@ public class PlainTextExecutor implements ChatExecutor {
         AgentService agentService = ContextUtils.getBean(AgentService.class);
         Agent chatAgent = agentService.getAgent(chatExecuteContext.getAgentId());
 
-        ChatLanguageModel chatLanguageModel = ChatLanguageModelProvider.provide(chatAgent.getLlmConfig());
+        ChatLanguageModel chatLanguageModel = ModelProvider.provideChatModel(chatAgent.getLlmConfig());
         Response<AiMessage> response = chatLanguageModel.generate(prompt.toUserMessage());
 
         QueryResult result = new QueryResult();

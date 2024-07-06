@@ -12,7 +12,7 @@ import com.tencent.supersonic.chat.server.service.AgentService;
 import com.tencent.supersonic.chat.server.service.ChatService;
 import com.tencent.supersonic.chat.server.service.MemoryService;
 import com.tencent.supersonic.chat.server.util.LLMConnHelper;
-import com.tencent.supersonic.common.config.LLMConfig;
+import com.tencent.supersonic.common.config.ChatModelConfig;
 import com.tencent.supersonic.common.config.PromptConfig;
 import com.tencent.supersonic.common.config.VisualConfig;
 import com.tencent.supersonic.common.util.JsonUtil;
@@ -80,6 +80,7 @@ public class AgentServiceImpl extends ServiceImpl<AgentDOMapper, AgentDO>
     /**
      * the example in the agent will be executed by default,
      * if the result is correct, it will be put into memory as a reference for LLM
+     *
      * @param agent
      */
     private void executeAgentExamplesAsync(Agent agent) {
@@ -121,7 +122,7 @@ public class AgentServiceImpl extends ServiceImpl<AgentDOMapper, AgentDO>
         BeanUtils.copyProperties(agentDO, agent);
         agent.setAgentConfig(agentDO.getConfig());
         agent.setExamples(JsonUtil.toList(agentDO.getExamples(), String.class));
-        agent.setLlmConfig(JsonUtil.toObject(agentDO.getLlmConfig(), LLMConfig.class));
+        agent.setLlmConfig(JsonUtil.toObject(agentDO.getLlmConfig(), ChatModelConfig.class));
         agent.setPromptConfig(JsonUtil.toObject(agentDO.getPromptConfig(), PromptConfig.class));
         agent.setMultiTurnConfig(JsonUtil.toObject(agentDO.getMultiTurnConfig(), MultiTurnConfig.class));
         agent.setVisualConfig(JsonUtil.toObject(agentDO.getVisualConfig(), VisualConfig.class));
