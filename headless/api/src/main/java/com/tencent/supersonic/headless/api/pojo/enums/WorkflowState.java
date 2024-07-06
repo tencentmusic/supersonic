@@ -4,6 +4,7 @@ public enum WorkflowState {
     MAPPING,
     PARSING,
     CORRECTING,
+    TRANSLATING,
     PROCESSING,
     FINISHED
 }

@@ -1,8 +1,7 @@
 package com.tencent.supersonic.headless.server.facade.rest;
 
 import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
-import com.tencent.supersonic.headless.api.pojo.request.ExecuteQueryReq;
-import com.tencent.supersonic.headless.api.pojo.request.QueryReq;
+import com.tencent.supersonic.headless.api.pojo.request.QueryTextReq;
 import com.tencent.supersonic.headless.api.pojo.response.MapResp;
 import com.tencent.supersonic.headless.server.facade.service.ChatQueryService;
 import com.tencent.supersonic.headless.server.facade.service.RetrieveService;
@@ -27,35 +26,27 @@ public class ChatQueryApiController {
     private RetrieveService retrieveService;
 
     @PostMapping("/chat/search")
-    public Object search(@RequestBody QueryReq queryReq,
+    public Object search(@RequestBody QueryTextReq queryTextReq,
                         HttpServletRequest request,
                         HttpServletResponse response) throws Exception {
-        queryReq.setUser(UserHolder.findUser(request, response));
-        return retrieveService.retrieve(queryReq);
+        queryTextReq.setUser(UserHolder.findUser(request, response));
+        return retrieveService.retrieve(queryTextReq);
     }
 
     @PostMapping("/chat/map")
-    public MapResp map(@RequestBody QueryReq queryReq,
+    public MapResp map(@RequestBody QueryTextReq queryTextReq,
                                   HttpServletRequest request,
                                   HttpServletResponse response) {
-        queryReq.setUser(UserHolder.findUser(request, response));
-        return chatQueryService.performMapping(queryReq);
+        queryTextReq.setUser(UserHolder.findUser(request, response));
+        return chatQueryService.performMapping(queryTextReq);
     }
 
     @PostMapping("/chat/parse")
-    public Object parse(@RequestBody QueryReq queryReq,
+    public Object parse(@RequestBody QueryTextReq queryTextReq,
             HttpServletRequest request,
             HttpServletResponse response) throws Exception {
-        queryReq.setUser(UserHolder.findUser(request, response));
-        return chatQueryService.performParsing(queryReq);
-    }
-
-    @PostMapping("/chat/execute")
-    public Object execute(@RequestBody ExecuteQueryReq executeQueryReq,
-                             HttpServletRequest request,
-                             HttpServletResponse response) throws Exception {
-        executeQueryReq.setUser(UserHolder.findUser(request, response));
-        return chatQueryService.performExecution(executeQueryReq);
+        queryTextReq.setUser(UserHolder.findUser(request, response));
+        return chatQueryService.performParsing(queryTextReq);
     }
 
 }

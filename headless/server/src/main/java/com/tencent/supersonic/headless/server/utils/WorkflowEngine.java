@@ -1,4 +1,4 @@
-package com.tencent.supersonic.headless.server.web.service.impl;
+package com.tencent.supersonic.headless.server.utils;
 
 import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.headless.api.pojo.enums.WorkflowState;
@@ -11,8 +11,6 @@ import com.tencent.supersonic.headless.chat.parser.SemanticParser;
 import com.tencent.supersonic.headless.chat.query.SemanticQuery;
 import com.tencent.supersonic.headless.chat.query.rule.RuleSemanticQuery;
 import com.tencent.supersonic.headless.server.processor.ResultProcessor;
-import com.tencent.supersonic.headless.server.web.service.WorkflowService;
-import com.tencent.supersonic.headless.server.utils.ComponentFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
@@ -23,7 +21,7 @@ import java.util.Objects;
 
 @Service
 @Slf4j
-public class WorkflowServiceImpl implements WorkflowService {
+public class WorkflowEngine {
     private List<SchemaMapper> schemaMappers = ComponentFactory.getSchemaMappers();
     private List<SemanticParser> semanticParsers = ComponentFactory.getSemanticParsers();
     private List<SemanticCorrector> semanticCorrectors = ComponentFactory.getSemanticCorrectors();
