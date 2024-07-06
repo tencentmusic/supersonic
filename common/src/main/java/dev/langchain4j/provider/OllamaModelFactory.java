@@ -13,14 +13,16 @@ import java.time.Duration;
 
 @Service
 public class OllamaModelFactory implements ModelFactory, InitializingBean {
+    public static final String PROVIDER = "OLLAMA";
+
     @Override
-    public ChatLanguageModel createChatModel(ChatModelConfig chatModel) {
+    public ChatLanguageModel createChatModel(ChatModelConfig modelConfig) {
         return OllamaChatModel
                 .builder()
-                .baseUrl(chatModel.getBaseUrl())
-                .modelName(chatModel.getModelName())
-                .temperature(chatModel.getTemperature())
-                .timeout(Duration.ofSeconds(chatModel.getTimeOut()))
+                .baseUrl(modelConfig.getBaseUrl())
+                .modelName(modelConfig.getModelName())
+                .temperature(modelConfig.getTemperature())
+                .timeout(Duration.ofSeconds(modelConfig.getTimeOut()))
                 .build();
     }
 
@@ -37,6 +39,6 @@ public class OllamaModelFactory implements ModelFactory, InitializingBean {
 
     @Override
     public void afterPropertiesSet() {
-        ModelProvider.add(Provider.OLLAMA, this);
+        ModelProvider.add(PROVIDER, this);
     }
 }

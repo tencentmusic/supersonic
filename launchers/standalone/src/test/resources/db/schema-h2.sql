@@ -374,6 +374,7 @@ CREATE TABLE IF NOT EXISTS s2_agent
     examples    varchar(500) null,
     config      varchar(2000)  null,
     llm_config varchar(2000)  null,
+    model_config varchar(6000) null,
     prompt_config varchar(5000)  null,
     multi_turn_config varchar(2000)  null,
     visual_config varchar(2000)  null,
@@ -383,7 +384,7 @@ CREATE TABLE IF NOT EXISTS s2_agent
     updated_at  TIMESTAMP null,
     enable_search int null,
     PRIMARY KEY (`id`)
-); COMMENT ON TABLE s2_agent IS 'agent information table';
+    ); COMMENT ON TABLE s2_agent IS 'agent information table';
 
 
 -------demo for semantic and chat
