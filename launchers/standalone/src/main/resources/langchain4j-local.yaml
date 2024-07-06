@@ -14,11 +14,11 @@ langchain4j:
       temperature: ${OPENAI_TEMPERATURE:0.0}
       timeout: ${OPENAI_TIMEOUT:PT60S}
 
-#    embedding-model:
-#      base-url: https://api.openai.com/v1
-#      api-key: demo
-#      model-name: text-embedding-3-small
-#      timeout: PT60S
+  #    embedding-model:
+  #      base-url: https://api.openai.com/v1
+  #      api-key: demo
+  #      model-name: text-embedding-3-small
+  #      timeout: PT60S
 
   in-memory:
     embedding-model:
