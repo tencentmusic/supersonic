@@ -1,6 +1,6 @@
 package com.tencent.supersonic.headless.chat.parser.llm;
 
-import com.tencent.supersonic.headless.api.pojo.request.QueryReq;
+import com.tencent.supersonic.headless.api.pojo.request.QueryTextReq;
 import com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMReq;
 import com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMResp;
 import lombok.AllArgsConstructor;
@@ -22,7 +22,7 @@ public class ParseResult {
 
     private LLMResp llmResp;
 
-    private QueryReq request;
+    private QueryTextReq request;
 
     private List<LLMReq.ElementValue> linkingValues;
 }

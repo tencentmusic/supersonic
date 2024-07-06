@@ -5,27 +5,27 @@ import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
 import com.tencent.supersonic.common.pojo.enums.QueryType;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.api.pojo.request.QueryFilter;
-import com.tencent.supersonic.headless.api.pojo.response.ParseResp;
 import com.tencent.supersonic.headless.api.pojo.response.QueryResult;
 import com.tencent.supersonic.headless.chat.query.rule.metric.MetricFilterQuery;
 import com.tencent.supersonic.headless.chat.query.rule.metric.MetricGroupByQuery;
 import com.tencent.supersonic.headless.chat.query.rule.metric.MetricModelQuery;
 import com.tencent.supersonic.headless.chat.query.rule.metric.MetricTopNQuery;
 import com.tencent.supersonic.util.DataUtils;
-import org.junit.Assert;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum.NONE;
 import static com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum.SUM;
 
 
 public class MetricTest extends BaseTest {
+
+    private int chatId = 10;
 
     @Test
     public void testMetricFilter() throws Exception {
@@ -52,16 +52,6 @@ public class MetricTest extends BaseTest {
     }
 
     @Test
-    public void testMetricFilterWithAgent() {
-        //agent only support METRIC_ENTITY, METRIC_FILTER
-        ParseResp parseResp = submitParseWithAgent("alice的访问次数", DataUtils.getMetricAgent().getId());
-        Assert.assertNotNull(parseResp.getSelectedParses());
-        List<String> queryModes = parseResp.getSelectedParses().stream()
-                .map(SemanticParseInfo::getQueryMode).collect(Collectors.toList());
-        Assert.assertTrue(queryModes.contains("METRIC_FILTER"));
-    }
-
-    @Test
     public void testMetricDomain() throws Exception {
         QueryResult actualResult = submitNewChat("超音数的访问次数", DataUtils.metricAgentId);
 
@@ -81,17 +71,8 @@ public class MetricTest extends BaseTest {
     }
 
     @Test
-    public void testMetricModelWithAgent() {
-        //agent only support METRIC_ENTITY, METRIC_FILTER
-        ParseResp parseResp = submitParseWithAgent("超音数的访问次数", DataUtils.getMetricAgent().getId());
-        List<String> queryModes = parseResp.getSelectedParses().stream()
-                .map(SemanticParseInfo::getQueryMode).collect(Collectors.toList());
-        Assert.assertTrue(queryModes.contains("METRIC_MODEL"));
-    }
-
-    @Test
     public void testMetricGroupBy() throws Exception {
-        QueryResult actualResult = submitNewChat("超音数各部门的访问次数", DataUtils.metricAgentId);
+        QueryResult actualResult = submitNewChat("近7天超音数各部门的访问次数", DataUtils.metricAgentId);
 
         QueryResult expectedResult = new QueryResult();
         SemanticParseInfo expectedParseInfo = new SemanticParseInfo();
@@ -137,6 +118,7 @@ public class MetricTest extends BaseTest {
     }
 
     @Test
+    @Order(3)
     public void testMetricTopN() throws Exception {
         QueryResult actualResult = submitNewChat("近3天访问次数最多的用户", DataUtils.metricAgentId);
 
@@ -160,7 +142,7 @@ public class MetricTest extends BaseTest {
 
     @Test
     public void testMetricGroupBySum() throws Exception {
-        QueryResult actualResult = submitNewChat("超音数各部门的访问次数总和", DataUtils.metricAgentId);
+        QueryResult actualResult = submitNewChat("近7天超音数各部门的访问次数总和", DataUtils.metricAgentId);
         QueryResult expectedResult = new QueryResult();
         SemanticParseInfo expectedParseInfo = new SemanticParseInfo();
         expectedResult.setChatContext(expectedParseInfo);

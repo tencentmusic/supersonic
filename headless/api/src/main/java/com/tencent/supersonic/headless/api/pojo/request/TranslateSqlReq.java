@@ -12,7 +12,7 @@ import lombok.ToString;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ExplainSqlReq<T> {
+public class TranslateSqlReq<T> {
 
     private QueryMethod queryTypeEnum;
 

@@ -15,7 +15,7 @@ import com.tencent.supersonic.headless.api.pojo.SchemaElementMatch;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.api.pojo.request.QueryFilter;
-import com.tencent.supersonic.headless.api.pojo.request.QueryReq;
+import com.tencent.supersonic.headless.api.pojo.request.QueryTextReq;
 import com.tencent.supersonic.headless.api.pojo.response.MapResp;
 import com.tencent.supersonic.headless.api.pojo.response.ParseResp;
 import com.tencent.supersonic.headless.server.facade.service.ChatQueryService;
@@ -69,11 +69,11 @@ public class NL2SQLParser implements ChatParser {
         }
 
         processMultiTurn(chatParseContext);
-        QueryReq queryReq = QueryReqConverter.buildText2SqlQueryReq(chatParseContext);
-        addDynamicExemplars(chatParseContext.getAgent().getId(), queryReq);
+        QueryTextReq queryTextReq = QueryReqConverter.buildText2SqlQueryReq(chatParseContext);
+        addDynamicExemplars(chatParseContext.getAgent().getId(), queryTextReq);
 
         ChatQueryService chatQueryService = ContextUtils.getBean(ChatQueryService.class);
-        ParseResp text2SqlParseResp = chatQueryService.performParsing(queryReq);
+        ParseResp text2SqlParseResp = chatQueryService.performParsing(queryTextReq);
         if (!ParseResp.ParseState.FAILED.equals(text2SqlParseResp.getState())) {
             parseResp.getSelectedParses().addAll(text2SqlParseResp.getSelectedParses());
         }
@@ -149,8 +149,8 @@ public class NL2SQLParser implements ChatParser {
 
         // derive mapping result of current question and parsing result of last question.
         ChatQueryService chatQueryService = ContextUtils.getBean(ChatQueryService.class);
-        QueryReq queryReq = QueryReqConverter.buildText2SqlQueryReq(chatParseContext);
-        MapResp currentMapResult = chatQueryService.performMapping(queryReq);
+        QueryTextReq queryTextReq = QueryReqConverter.buildText2SqlQueryReq(chatParseContext);
+        MapResp currentMapResult = chatQueryService.performMapping(queryTextReq);
 
         List<ParseResp> historyParseResults = getHistoryParseResult(chatParseContext.getChatId(), 1);
         if (historyParseResults.size() == 0) {
@@ -168,7 +168,7 @@ public class NL2SQLParser implements ChatParser {
                 .curtSchema(curtMapStr)
                 .histSchema(histMapStr)
                 .histSQL(histSQL)
-                .llmConfig(queryReq.getLlmConfig())
+                .llmConfig(queryTextReq.getLlmConfig())
                 .build());
         chatParseContext.setQueryText(rewrittenQuery);
         log.info("Last Query: {} Current Query: {}, Rewritten Query: {}",
@@ -225,13 +225,13 @@ public class NL2SQLParser implements ChatParser {
         return contextualList;
     }
 
-    private void addDynamicExemplars(Integer agentId, QueryReq queryReq) {
+    private void addDynamicExemplars(Integer agentId, QueryTextReq queryTextReq) {
         ExemplarServiceImpl exemplarManager = ContextUtils.getBean(ExemplarServiceImpl.class);
         EmbeddingConfig embeddingConfig = ContextUtils.getBean(EmbeddingConfig.class);
         String memoryCollectionName = embeddingConfig.getMemoryCollectionName(agentId);
         List<SqlExemplar> exemplars = exemplarManager.recallExemplars(memoryCollectionName,
-                queryReq.getQueryText(), 5);
-        queryReq.getDynamicExemplars().addAll(exemplars);
+                queryTextReq.getQueryText(), 5);
+        queryTextReq.getDynamicExemplars().addAll(exemplars);
     }
 
     @Builder
