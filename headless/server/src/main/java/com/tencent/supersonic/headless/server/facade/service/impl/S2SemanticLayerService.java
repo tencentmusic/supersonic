@@ -227,6 +227,7 @@ public class S2SemanticLayerService implements SemanticLayerService {
         return queryByReq(querySqlReq, user);
     }
 
+    @S2DataPermission
     @Override
     public <T> TranslateResp translate(TranslateSqlReq<T> translateSqlReq, User user) throws Exception {
         T queryReq = translateSqlReq.getQueryReq();
