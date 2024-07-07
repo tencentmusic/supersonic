@@ -4,7 +4,7 @@ import com.tencent.supersonic.headless.api.pojo.SchemaElementMatch;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
 import com.tencent.supersonic.headless.api.pojo.SchemaMapInfo;
 import com.tencent.supersonic.headless.chat.query.SemanticQuery;
-import com.tencent.supersonic.headless.chat.QueryContext;
+import com.tencent.supersonic.headless.chat.ChatQueryContext;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import java.util.ArrayList;
@@ -111,8 +111,8 @@ public class HeuristicDataSetResolver implements DataSetResolver {
         return dataSetCount;
     }
 
-    public Long resolve(QueryContext queryContext, Set<Long> agentDataSetIds) {
-        SchemaMapInfo mapInfo = queryContext.getMapInfo();
+    public Long resolve(ChatQueryContext chatQueryContext, Set<Long> agentDataSetIds) {
+        SchemaMapInfo mapInfo = chatQueryContext.getMapInfo();
         Set<Long> matchedDataSets = mapInfo.getMatchedDataSetInfos();
         if (CollectionUtils.isNotEmpty(agentDataSetIds)) {
             matchedDataSets.retainAll(agentDataSetIds);

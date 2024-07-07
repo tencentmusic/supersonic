@@ -13,7 +13,7 @@ import com.tencent.supersonic.common.jsqlparser.SqlSelectHelper;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.api.pojo.SemanticSchema;
 import com.tencent.supersonic.headless.api.pojo.SqlInfo;
-import com.tencent.supersonic.headless.chat.QueryContext;
+import com.tencent.supersonic.headless.chat.ChatQueryContext;
 import com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMReq;
 import com.tencent.supersonic.headless.chat.parser.llm.ParseResult;
 import lombok.extern.slf4j.Slf4j;
@@ -34,7 +34,7 @@ import java.util.stream.Collectors;
 public class SchemaCorrector extends BaseSemanticCorrector {
 
     @Override
-    public void doCorrect(QueryContext queryContext, SemanticParseInfo semanticParseInfo) {
+    public void doCorrect(ChatQueryContext chatQueryContext, SemanticParseInfo semanticParseInfo) {
 
         correctAggFunction(semanticParseInfo);
 
@@ -44,7 +44,7 @@ public class SchemaCorrector extends BaseSemanticCorrector {
 
         updateFieldValueByLinkingValue(semanticParseInfo);
 
-        correctFieldName(queryContext, semanticParseInfo);
+        correctFieldName(chatQueryContext, semanticParseInfo);
     }
 
     private void correctAggFunction(SemanticParseInfo semanticParseInfo) {
@@ -60,8 +60,8 @@ public class SchemaCorrector extends BaseSemanticCorrector {
         sqlInfo.setCorrectS2SQL(replaceAlias);
     }
 
-    private void correctFieldName(QueryContext queryContext, SemanticParseInfo semanticParseInfo) {
-        Map<String, String> fieldNameMap = getFieldNameMap(queryContext, semanticParseInfo.getDataSetId());
+    private void correctFieldName(ChatQueryContext chatQueryContext, SemanticParseInfo semanticParseInfo) {
+        Map<String, String> fieldNameMap = getFieldNameMap(chatQueryContext, semanticParseInfo.getDataSetId());
         SqlInfo sqlInfo = semanticParseInfo.getSqlInfo();
         String sql = SqlReplaceHelper.replaceFields(sqlInfo.getCorrectS2SQL(), fieldNameMap);
         sqlInfo.setCorrectS2SQL(sql);
@@ -115,7 +115,8 @@ public class SchemaCorrector extends BaseSemanticCorrector {
         sqlInfo.setCorrectS2SQL(sql);
     }
 
-    public void removeFilterIfNotInLinkingValue(QueryContext queryContext, SemanticParseInfo semanticParseInfo) {
+    public void removeFilterIfNotInLinkingValue(ChatQueryContext chatQueryContext,
+                                                SemanticParseInfo semanticParseInfo) {
         SqlInfo sqlInfo = semanticParseInfo.getSqlInfo();
         String correctS2SQL = sqlInfo.getCorrectS2SQL();
         List<FieldExpression> whereExpressionList = SqlSelectHelper.getWhereExpressions(correctS2SQL);
@@ -123,7 +124,7 @@ public class SchemaCorrector extends BaseSemanticCorrector {
             return;
         }
         List<LLMReq.ElementValue> linkingValues = getLinkingValues(semanticParseInfo);
-        SemanticSchema semanticSchema = queryContext.getSemanticSchema();
+        SemanticSchema semanticSchema = chatQueryContext.getSemanticSchema();
         Set<String> dimensions = getDimensions(semanticParseInfo.getDataSetId(), semanticSchema);
 
         if (CollectionUtils.isEmpty(linkingValues)) {

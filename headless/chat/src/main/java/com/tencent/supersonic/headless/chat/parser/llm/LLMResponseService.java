@@ -8,7 +8,7 @@ import com.tencent.supersonic.headless.chat.query.llm.LLMSemanticQuery;
 import com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMResp;
 import com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMSqlQuery;
 import com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMSqlResp;
-import com.tencent.supersonic.headless.chat.QueryContext;
+import com.tencent.supersonic.headless.chat.ChatQueryContext;
 import java.util.ArrayList;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.MapUtils;
@@ -22,7 +22,8 @@ import java.util.Objects;
 @Service
 public class LLMResponseService {
 
-    public SemanticParseInfo addParseInfo(QueryContext queryCtx, ParseResult parseResult, String s2SQL, Double weight) {
+    public SemanticParseInfo addParseInfo(ChatQueryContext queryCtx, ParseResult parseResult,
+                                          String s2SQL, Double weight) {
         if (Objects.isNull(weight)) {
             weight = 0D;
         }

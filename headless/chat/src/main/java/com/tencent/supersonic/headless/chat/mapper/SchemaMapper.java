@@ -1,7 +1,7 @@
 package com.tencent.supersonic.headless.chat.mapper;
 
 
-import com.tencent.supersonic.headless.chat.QueryContext;
+import com.tencent.supersonic.headless.chat.ChatQueryContext;
 
 /**
  * A schema mapper identifies references to schema elements(metrics/dimensions/entities/values)
@@ -9,5 +9,5 @@ import com.tencent.supersonic.headless.chat.QueryContext;
  */
 public interface SchemaMapper {
 
-    void map(QueryContext queryContext);
+    void map(ChatQueryContext chatQueryContext);
 }

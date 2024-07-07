@@ -6,7 +6,7 @@ import com.tencent.supersonic.headless.api.pojo.SchemaElementMatch;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
 import com.tencent.supersonic.headless.api.pojo.SchemaMapInfo;
 import com.tencent.supersonic.headless.api.pojo.SemanticSchema;
-import com.tencent.supersonic.headless.chat.QueryContext;
+import com.tencent.supersonic.headless.chat.ChatQueryContext;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -26,37 +26,37 @@ import java.util.stream.Collectors;
 public abstract class BaseMapper implements SchemaMapper {
 
     @Override
-    public void map(QueryContext queryContext) {
+    public void map(ChatQueryContext chatQueryContext) {
 
         String simpleName = this.getClass().getSimpleName();
         long startTime = System.currentTimeMillis();
         log.debug("before {},mapInfo:{}", simpleName,
-                queryContext.getMapInfo().getDataSetElementMatches());
+                chatQueryContext.getMapInfo().getDataSetElementMatches());
 
         try {
-            doMap(queryContext);
-            filter(queryContext);
+            doMap(chatQueryContext);
+            filter(chatQueryContext);
         } catch (Exception e) {
             log.error("work error", e);
         }
 
         long cost = System.currentTimeMillis() - startTime;
         log.debug("after {},cost:{},mapInfo:{}", simpleName, cost,
-                queryContext.getMapInfo().getDataSetElementMatches());
+                chatQueryContext.getMapInfo().getDataSetElementMatches());
     }
 
-    private void filter(QueryContext queryContext) {
-        filterByDataSetId(queryContext);
-        filterByDetectWordLenLessThanOne(queryContext);
-        switch (queryContext.getQueryDataType()) {
+    private void filter(ChatQueryContext chatQueryContext) {
+        filterByDataSetId(chatQueryContext);
+        filterByDetectWordLenLessThanOne(chatQueryContext);
+        switch (chatQueryContext.getQueryDataType()) {
             case TAG:
-                filterByQueryDataType(queryContext, element -> !(element.getIsTag() > 0));
+                filterByQueryDataType(chatQueryContext, element -> !(element.getIsTag() > 0));
                 break;
             case METRIC:
-                filterByQueryDataType(queryContext, element -> !SchemaElementType.METRIC.equals(element.getType()));
+                filterByQueryDataType(chatQueryContext, element -> !SchemaElementType.METRIC.equals(element.getType()));
                 break;
             case DIMENSION:
-                filterByQueryDataType(queryContext, element -> {
+                filterByQueryDataType(chatQueryContext, element -> {
                     boolean isDimensionOrValue = SchemaElementType.DIMENSION.equals(element.getType())
                             || SchemaElementType.VALUE.equals(element.getType());
                     return !isDimensionOrValue;
@@ -68,22 +68,22 @@ public abstract class BaseMapper implements SchemaMapper {
         }
     }
 
-    private static void filterByDataSetId(QueryContext queryContext) {
-        Set<Long> dataSetIds = queryContext.getDataSetIds();
+    private static void filterByDataSetId(ChatQueryContext chatQueryContext) {
+        Set<Long> dataSetIds = chatQueryContext.getDataSetIds();
         if (CollectionUtils.isEmpty(dataSetIds)) {
             return;
         }
-        Set<Long> dataSetIdInMapInfo = new HashSet<>(queryContext.getMapInfo().getDataSetElementMatches().keySet());
+        Set<Long> dataSetIdInMapInfo = new HashSet<>(chatQueryContext.getMapInfo().getDataSetElementMatches().keySet());
         for (Long dataSetId : dataSetIdInMapInfo) {
             if (!dataSetIds.contains(dataSetId)) {
-                queryContext.getMapInfo().getDataSetElementMatches().remove(dataSetId);
+                chatQueryContext.getMapInfo().getDataSetElementMatches().remove(dataSetId);
             }
         }
     }
 
-    private static void filterByDetectWordLenLessThanOne(QueryContext queryContext) {
+    private static void filterByDetectWordLenLessThanOne(ChatQueryContext chatQueryContext) {
         Map<Long, List<SchemaElementMatch>> dataSetElementMatches =
-                queryContext.getMapInfo().getDataSetElementMatches();
+                chatQueryContext.getMapInfo().getDataSetElementMatches();
         for (Map.Entry<Long, List<SchemaElementMatch>> entry : dataSetElementMatches.entrySet()) {
             List<SchemaElementMatch> value = entry.getValue();
             if (!CollectionUtils.isEmpty(value)) {
@@ -93,8 +93,9 @@ public abstract class BaseMapper implements SchemaMapper {
         }
     }
 
-    private static void filterByQueryDataType(QueryContext queryContext, Predicate<SchemaElement> needRemovePredicate) {
-        queryContext.getMapInfo().getDataSetElementMatches().values().stream().forEach(
+    private static void filterByQueryDataType(ChatQueryContext chatQueryContext,
+                                              Predicate<SchemaElement> needRemovePredicate) {
+        chatQueryContext.getMapInfo().getDataSetElementMatches().values().stream().forEach(
                 schemaElementMatches -> schemaElementMatches.removeIf(
                         schemaElementMatch -> {
                             SchemaElement element = schemaElementMatch.getElement();
@@ -108,7 +109,7 @@ public abstract class BaseMapper implements SchemaMapper {
                 ));
     }
 
-    public abstract void doMap(QueryContext queryContext);
+    public abstract void doMap(ChatQueryContext chatQueryContext);
 
     public void addToSchemaMap(SchemaMapInfo schemaMap, Long dataSetId, SchemaElementMatch newElementMatch) {
         Map<Long, List<SchemaElementMatch>> dataSetElementMatches = schemaMap.getDataSetElementMatches();

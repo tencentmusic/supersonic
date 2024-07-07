@@ -11,7 +11,7 @@ import com.tencent.supersonic.headless.api.pojo.request.QueryFilters;
 import com.tencent.supersonic.headless.api.pojo.request.QueryTextReq;
 import com.tencent.supersonic.headless.api.pojo.response.S2Term;
 import com.tencent.supersonic.headless.api.pojo.response.SearchResult;
-import com.tencent.supersonic.headless.chat.QueryContext;
+import com.tencent.supersonic.headless.chat.ChatQueryContext;
 import com.tencent.supersonic.headless.chat.knowledge.DataSetInfoStat;
 import com.tencent.supersonic.headless.chat.knowledge.DictWord;
 import com.tencent.supersonic.headless.chat.knowledge.HanlpMapResult;
@@ -78,12 +78,12 @@ public class RetrieveServiceImpl implements RetrieveService {
         log.debug("hanlp parse result: {}", originals);
         Set<Long> dataSetIds = queryTextReq.getDataSetIds();
 
-        QueryContext queryContext = new QueryContext();
-        BeanUtils.copyProperties(queryTextReq, queryContext);
-        queryContext.setModelIdToDataSetIds(dataSetService.getModelIdToDataSetIds());
+        ChatQueryContext chatQueryContext = new ChatQueryContext();
+        BeanUtils.copyProperties(queryTextReq, chatQueryContext);
+        chatQueryContext.setModelIdToDataSetIds(dataSetService.getModelIdToDataSetIds());
 
         Map<MatchText, List<HanlpMapResult>> regTextMap =
-                searchMatchStrategy.match(queryContext, originals, dataSetIds);
+                searchMatchStrategy.match(chatQueryContext, originals, dataSetIds);
 
         regTextMap.entrySet().stream().forEach(m -> HanlpHelper.transLetterOriginal(m.getValue()));
 

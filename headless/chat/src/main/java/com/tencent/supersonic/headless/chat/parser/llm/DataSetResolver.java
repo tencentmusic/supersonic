@@ -1,12 +1,12 @@
 package com.tencent.supersonic.headless.chat.parser.llm;
 
 
-import com.tencent.supersonic.headless.chat.QueryContext;
+import com.tencent.supersonic.headless.chat.ChatQueryContext;
 
 import java.util.Set;
 
 public interface DataSetResolver {
 
-    Long resolve(QueryContext queryContext, Set<Long> restrictiveModels);
+    Long resolve(ChatQueryContext chatQueryContext, Set<Long> restrictiveModels);
 
 }

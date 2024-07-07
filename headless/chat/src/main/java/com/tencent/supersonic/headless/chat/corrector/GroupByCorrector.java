@@ -7,7 +7,7 @@ import com.tencent.supersonic.common.jsqlparser.SqlSelectHelper;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.api.pojo.SemanticSchema;
 import com.tencent.supersonic.headless.api.pojo.SqlInfo;
-import com.tencent.supersonic.headless.chat.QueryContext;
+import com.tencent.supersonic.headless.chat.ChatQueryContext;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.env.Environment;
@@ -23,20 +23,20 @@ import java.util.stream.Collectors;
 public class GroupByCorrector extends BaseSemanticCorrector {
 
     @Override
-    public void doCorrect(QueryContext queryContext, SemanticParseInfo semanticParseInfo) {
-        Boolean needAddGroupBy = needAddGroupBy(queryContext, semanticParseInfo);
+    public void doCorrect(ChatQueryContext chatQueryContext, SemanticParseInfo semanticParseInfo) {
+        Boolean needAddGroupBy = needAddGroupBy(chatQueryContext, semanticParseInfo);
         if (!needAddGroupBy) {
             return;
         }
-        addGroupByFields(queryContext, semanticParseInfo);
+        addGroupByFields(chatQueryContext, semanticParseInfo);
     }
 
-    private Boolean needAddGroupBy(QueryContext queryContext, SemanticParseInfo semanticParseInfo) {
+    private Boolean needAddGroupBy(ChatQueryContext chatQueryContext, SemanticParseInfo semanticParseInfo) {
         Long dataSetId = semanticParseInfo.getDataSetId();
         //add dimension group by
         SqlInfo sqlInfo = semanticParseInfo.getSqlInfo();
         String correctS2SQL = sqlInfo.getCorrectS2SQL();
-        SemanticSchema semanticSchema = queryContext.getSemanticSchema();
+        SemanticSchema semanticSchema = chatQueryContext.getSemanticSchema();
         // check has distinct
         if (SqlSelectHelper.hasDistinct(correctS2SQL)) {
             log.debug("no need to add groupby ,existed distinct in s2sql:{}", correctS2SQL);
@@ -64,12 +64,12 @@ public class GroupByCorrector extends BaseSemanticCorrector {
         return true;
     }
 
-    private void addGroupByFields(QueryContext queryContext, SemanticParseInfo semanticParseInfo) {
+    private void addGroupByFields(ChatQueryContext chatQueryContext, SemanticParseInfo semanticParseInfo) {
         Long dataSetId = semanticParseInfo.getDataSetId();
         //add dimension group by
         SqlInfo sqlInfo = semanticParseInfo.getSqlInfo();
         String correctS2SQL = sqlInfo.getCorrectS2SQL();
-        SemanticSchema semanticSchema = queryContext.getSemanticSchema();
+        SemanticSchema semanticSchema = chatQueryContext.getSemanticSchema();
         //add alias field name
         Set<String> dimensions = getDimensions(dataSetId, semanticSchema);
         List<String> selectFields = SqlSelectHelper.getSelectFields(correctS2SQL);

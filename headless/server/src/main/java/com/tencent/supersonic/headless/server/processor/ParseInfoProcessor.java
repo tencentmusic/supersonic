@@ -15,7 +15,7 @@ import com.tencent.supersonic.headless.api.pojo.SqlInfo;
 import com.tencent.supersonic.headless.api.pojo.request.QueryFilter;
 import com.tencent.supersonic.headless.api.pojo.response.ParseResp;
 import com.tencent.supersonic.headless.chat.ChatContext;
-import com.tencent.supersonic.headless.chat.QueryContext;
+import com.tencent.supersonic.headless.chat.ChatQueryContext;
 import com.tencent.supersonic.headless.chat.query.SemanticQuery;
 import com.tencent.supersonic.headless.server.web.service.SchemaService;
 import lombok.extern.slf4j.Slf4j;
@@ -40,8 +40,8 @@ import java.util.stream.Collectors;
 public class ParseInfoProcessor implements ResultProcessor {
 
     @Override
-    public void process(ParseResp parseResp, QueryContext queryContext, ChatContext chatContext) {
-        List<SemanticQuery> candidateQueries = queryContext.getCandidateQueries();
+    public void process(ParseResp parseResp, ChatQueryContext chatQueryContext, ChatContext chatContext) {
+        List<SemanticQuery> candidateQueries = chatQueryContext.getCandidateQueries();
         if (CollectionUtils.isEmpty(candidateQueries)) {
             return;
         }

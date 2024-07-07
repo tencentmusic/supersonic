@@ -10,7 +10,7 @@ import com.tencent.supersonic.common.jsqlparser.SqlSelectHelper;
 import com.tencent.supersonic.common.jsqlparser.SqlRemoveHelper;
 import com.tencent.supersonic.common.jsqlparser.DateVisitor.DateBoundInfo;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
-import com.tencent.supersonic.headless.chat.QueryContext;
+import com.tencent.supersonic.headless.chat.ChatQueryContext;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.Expression;
@@ -32,11 +32,11 @@ import java.util.Set;
 public class TimeCorrector extends BaseSemanticCorrector {
 
     @Override
-    public void doCorrect(QueryContext queryContext, SemanticParseInfo semanticParseInfo) {
+    public void doCorrect(ChatQueryContext chatQueryContext, SemanticParseInfo semanticParseInfo) {
 
-        addDateIfNotExist(queryContext, semanticParseInfo);
+        addDateIfNotExist(chatQueryContext, semanticParseInfo);
 
-        removeDateIfExist(queryContext, semanticParseInfo);
+        removeDateIfExist(chatQueryContext, semanticParseInfo);
 
         parserDateDiffFunction(semanticParseInfo);
 
@@ -44,7 +44,7 @@ public class TimeCorrector extends BaseSemanticCorrector {
 
     }
 
-    private void removeDateIfExist(QueryContext queryContext, SemanticParseInfo semanticParseInfo) {
+    private void removeDateIfExist(ChatQueryContext chatQueryContext, SemanticParseInfo semanticParseInfo) {
         String correctS2SQL = semanticParseInfo.getSqlInfo().getCorrectS2SQL();
         //decide whether remove date field from where
         Environment environment = ContextUtils.getBean(Environment.class);
@@ -59,7 +59,7 @@ public class TimeCorrector extends BaseSemanticCorrector {
         }
     }
 
-    private void addDateIfNotExist(QueryContext queryContext, SemanticParseInfo semanticParseInfo) {
+    private void addDateIfNotExist(ChatQueryContext chatQueryContext, SemanticParseInfo semanticParseInfo) {
         String correctS2SQL = semanticParseInfo.getSqlInfo().getCorrectS2SQL();
         List<String> whereFields = SqlSelectHelper.getWhereFields(correctS2SQL);
 
@@ -71,7 +71,7 @@ public class TimeCorrector extends BaseSemanticCorrector {
         }
         if (CollectionUtils.isEmpty(whereFields) || !TimeDimensionEnum.containsZhTimeDimension(whereFields)) {
 
-            Pair<String, String> startEndDate = S2SqlDateHelper.getStartEndDate(queryContext,
+            Pair<String, String> startEndDate = S2SqlDateHelper.getStartEndDate(chatQueryContext,
                     semanticParseInfo.getDataSetId(), semanticParseInfo.getQueryType());
 
             if (StringUtils.isNotBlank(startEndDate.getLeft())
