@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 public class SqlExecutor implements ChatExecutor {
 
@@ -61,17 +62,20 @@ public class SqlExecutor implements ChatExecutor {
         ChatContextService chatContextService = ContextUtils.getBean(ChatContextService.class);
 
         ChatContext chatCtx = chatContextService.getOrCreateContext(chatExecuteContext.getChatId());
+        SemanticParseInfo parseInfo = chatExecuteContext.getParseInfo();
+        if (Objects.isNull(parseInfo.getSqlInfo())
+                || StringUtils.isBlank(parseInfo.getSqlInfo().getCorrectS2SQL())) {
+            return null;
+        }
 
         QuerySqlReq sqlReq = QuerySqlReq.builder()
-                .sql(chatExecuteContext.getParseInfo().getSqlInfo().getCorrectS2SQL())
+                .sql(parseInfo.getSqlInfo().getCorrectS2SQL())
                 .build();
-        sqlReq.setSqlInfo(chatExecuteContext.getParseInfo().getSqlInfo());
-        sqlReq.setDataSetId(chatExecuteContext.getParseInfo().getDataSetId());
-
+        sqlReq.setSqlInfo(parseInfo.getSqlInfo());
+        sqlReq.setDataSetId(parseInfo.getDataSetId());
         long startTime = System.currentTimeMillis();
         SemanticQueryResp queryResp = semanticLayer.queryByReq(sqlReq, chatExecuteContext.getUser());
         QueryResult queryResult = new QueryResult();
-
         if (queryResp != null) {
             queryResult.setQueryAuthorization(queryResp.getQueryAuthorization());
             List<Map<String, Object>> resultList = queryResp == null ? new ArrayList<>()
@@ -81,16 +85,16 @@ public class SqlExecutor implements ChatExecutor {
             queryResult.setQuerySql(queryResp.getSql());
             queryResult.setQueryResults(resultList);
             queryResult.setQueryColumns(columns);
-            queryResult.setQueryMode(chatExecuteContext.getParseInfo().getQueryMode());
+            queryResult.setQueryMode(parseInfo.getQueryMode());
             queryResult.setQueryState(QueryState.SUCCESS);
 
-            chatCtx.setParseInfo(chatExecuteContext.getParseInfo());
+            chatCtx.setParseInfo(parseInfo);
             chatContextService.updateContext(chatCtx);
         } else {
             queryResult.setQueryState(QueryState.INVALID);
-            queryResult.setQueryMode(chatExecuteContext.getParseInfo().getQueryMode());
+            queryResult.setQueryMode(parseInfo.getQueryMode());
         }
-
+        queryResult.setChatContext(chatCtx.getParseInfo());
         return queryResult;
     }
 
