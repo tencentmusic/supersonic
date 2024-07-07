@@ -172,7 +172,7 @@ public class S2SemanticLayerService implements SemanticLayerService {
             queryStatement.setSql(semanticQueryReq.getSqlInfo().getQuerySQL());
             queryStatement.setSourceId(semanticQueryReq.getSqlInfo().getSourceId());
             queryStatement.setDataSetId(semanticQueryReq.getDataSetId());
-            queryStatement.setIsTranslated(true);
+            //queryStatement.setIsTranslated(true);
         }
         return queryStatement;
     }

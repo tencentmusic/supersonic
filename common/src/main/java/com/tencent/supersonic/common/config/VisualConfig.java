@@ -10,5 +10,4 @@ public class VisualConfig {
     private boolean showDebugInfo;
 
     private boolean defaultShowTable;
-    
 }
