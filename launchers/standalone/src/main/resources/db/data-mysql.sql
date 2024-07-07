@@ -1224,7 +1224,7 @@ INSERT INTO song (imp_date, song_name, artist_name, country, f_id, g_name, ratin
 VALUES (DATE_SUB(CURRENT_DATE(), INTERVAL 0 DAY), '阿杰伊阿卡什', 'Topu', '印度', 6, '现代', 10, '孟加拉语', '2004-03-27', 320);
 -- benchmark
 
--- 初始化数据
+-- 初始化角色
 INSERT INTO s2_role (id, creation_type, description, is_enable, last_operation_type, name, alias, tenant_id, create_time, update_time, create_by, update_by) VALUES
 (1, 1, 'System Admin Role', b'1', 1, '希沃助手', 'SysAdmin', 1, '2024-06-14 10:00:00', '2024-06-14 10:00:00', 'admin', 'admin'),
 (2, 2, 'User Role', b'1', 1, '财务助手', 'RegularUser', 1, '2024-06-14 10:05:00', '2024-06-14 10:05:00', 'admin', 'admin')
@@ -1267,6 +1267,28 @@ FROM
     s2_role r
 WHERE
     u.name IN ('zhaodongsheng', 'jianghao')
+  AND r.name IN ('算指标', '圈选');
+
+
+-- 批量授权
+INSERT INTO s2_user_role_rela (
+    role_id, user_id, role_type, tenant_id
+)
+SELECT
+    r.id AS role_id,
+    u.id AS user_id,
+    2 AS role_type,
+    1 AS tenant_id
+FROM
+    s2_user u
+        CROSS JOIN
+    s2_role r
+WHERE
+    u.name IN (
+        select name from s2_user where id not in (
+            select DISTINCT user_id  from s2_user_role_rela where role_id = 4
+        )
+    )
   AND r.name IN ('算指标', '圈选');
 
 -- 给角色授权助手
