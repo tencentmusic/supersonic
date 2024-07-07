@@ -92,6 +92,7 @@ export type AgentType = {
   updatedAt: string;
   enableSearch: number;
   agentConfig: string;
+  visualConfig: Record<string, any> | null;
   llmConfig: {
     provider: string;
     baseUrl: string;

@@ -18,7 +18,6 @@ type Props = {
 
 const SqlItemModal = forwardRef<SqlItemModalHandle, Props>((props, ref) => {
   const [open, setOpen] = useState(false);
-  console.log('🚀 ~ SqlItemModal ~ open:', open);
   const { ...otherProps } = props;
 
   useImperativeHandle(ref, () => ({

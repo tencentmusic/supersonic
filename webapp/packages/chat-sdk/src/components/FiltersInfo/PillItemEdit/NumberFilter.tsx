@@ -25,6 +25,7 @@ function NumberFilter({ value, onChange }: Props) {
         value={value.field}
         style={{ width: 120 }}
         options={fieldOptions}
+        optionFilterProp="label"
         onChange={handleFieldSelect}
       />
 

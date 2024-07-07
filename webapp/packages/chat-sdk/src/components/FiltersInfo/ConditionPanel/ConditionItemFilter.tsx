@@ -1,6 +1,7 @@
 import { Flex, Input, InputNumber, Tooltip } from 'antd';
 import { useMemo } from 'react';
 import Select from '../components/Select';
+import SelectWithCustomOption from '../components/SelectWithCustomOption';
 import { useDatasetInfo } from '../hooks/useDatasetInfo';
 import { useDimensionValueOptions } from '../hooks/useDimensionValueOptions';
 import { useFieldOptions } from '../hooks/useFieldOptions';
@@ -37,6 +38,7 @@ export default function ConditionItemFilter({ data, onChange }: Props) {
     () =>
       fieldOptions.map(option => ({
         ...option,
+        originLabel: option.label,
         label: getLabelReactNode(option),
       })),
     [fieldOptions]
@@ -90,6 +92,7 @@ export default function ConditionItemFilter({ data, onChange }: Props) {
             style={{ width: '150px' }}
             value={data.field}
             options={fieldOptionsWithLabel}
+            optionFilterProp="originLabel"
             onChange={handleFieldChange}
           />
         </Tooltip>
@@ -108,7 +111,7 @@ export default function ConditionItemFilter({ data, onChange }: Props) {
           </div>
           <div className="condition-item-base-third">
             {['IN', 'NOT_IN'].includes(data.operator!) && (
-              <Select
+              <SelectWithCustomOption
                 disabled={!data.field || !data.operator}
                 size="middle"
                 style={{ width: '100%' }}
@@ -120,7 +123,7 @@ export default function ConditionItemFilter({ data, onChange }: Props) {
               />
             )}
             {['='].includes(data.operator!) && (
-              <Select
+              <SelectWithCustomOption
                 disabled={!data.field || !data.operator}
                 size="middle"
                 style={{ width: '100%' }}

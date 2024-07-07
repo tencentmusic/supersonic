@@ -23,15 +23,20 @@ const Table: React.FC<Props> = ({ data, size, loading, onApplyAuth }) => {
       return {
         dataIndex: nameEn,
         key: nameEn,
-        title: name || nameEn,
-        sorter: (a, b) => {
-          // 数值按照大小排
-          if (showType === 'NUMBER') {
-            return a[nameEn] - b[nameEn];
-          }
-          // 字符串按照字符串排
-          return a[nameEn].localeCompare(b[nameEn]);
-        },
+        title: name || (nameEn === 'count(*)' ? '数量' : nameEn),
+        ...(queryResults.length > 1
+          ? {
+              sorter: (a, b) => {
+                // 数值按照大小排
+                if (showType === 'NUMBER') {
+                  return a[nameEn] - b[nameEn];
+                }
+                // 字符串按照字符串排
+                return (a[nameEn] ?? '').localeCompare(b[nameEn]);
+              },
+            }
+          : null),
+
         render: (value: string | number) => {
           if (!authorized) {
             return (

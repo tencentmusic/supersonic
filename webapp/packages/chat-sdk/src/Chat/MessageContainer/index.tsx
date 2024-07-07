@@ -112,6 +112,7 @@ const MessageContainer: React.FC<Props> = ({
                     triggerResize={triggerResize}
                     isDeveloper={isDeveloper}
                     integrateSystem={integrateSystem}
+                    defaultShowTable={currentAgent?.visualConfig?.defaultShowTable ?? false}
                     onMsgDataLoaded={(data: MsgDataType, valid: boolean, isRefresh) => {
                       onMsgDataLoaded(data, msgId, msgValue || msg || '', valid, isRefresh);
                     }}

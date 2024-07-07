@@ -21,6 +21,7 @@ type Props = {
   triggerResize?: boolean;
   isDeveloper?: boolean;
   isSimpleMode?: boolean;
+  defaultShowTable?: boolean;
 };
 
 const ExecuteItem: React.FC<Props> = ({
@@ -36,6 +37,7 @@ const ExecuteItem: React.FC<Props> = ({
   triggerResize,
   isDeveloper,
   isSimpleMode,
+  defaultShowTable,
   menu,
 }) => {
   const prefixCls = `${PREFIX_CLS}-item`;
@@ -45,7 +47,7 @@ const ExecuteItem: React.FC<Props> = ({
     MsgContentTypeEnum.METRIC_BAR,
   ].includes(msgContentType as MsgContentTypeEnum);
 
-  const [showMsgContentTable, setShowMsgContentTable] = useState<boolean>(false);
+  const [showMsgContentTable, setShowMsgContentTable] = useState<boolean>(!!defaultShowTable);
 
   const titlePrefix = queryMode === 'PLAIN_TEXT' || queryMode === 'WEB_SERVICE' ? '问答' : '数据';
 
@@ -140,13 +142,15 @@ const ExecuteItem: React.FC<Props> = ({
               chartIndex={chartIndex}
               triggerResize={triggerResize}
               onMsgContentTypeChange={type => {
-                setMsgContentType(type);
-                if (
-                  [MsgContentTypeEnum.METRIC_TREND, MsgContentTypeEnum.METRIC_BAR].includes(
-                    type as MsgContentTypeEnum
-                  )
-                ) {
-                  setShowMsgContentTable(true);
+                if (msgContentType !== type) {
+                  setMsgContentType(type);
+                  if (
+                    [MsgContentTypeEnum.METRIC_TREND, MsgContentTypeEnum.METRIC_BAR].includes(
+                      type as MsgContentTypeEnum
+                    )
+                  ) {
+                    setShowMsgContentTable(!!defaultShowTable);
+                  }
                 }
               }}
             />

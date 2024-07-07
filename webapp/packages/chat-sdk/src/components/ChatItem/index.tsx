@@ -45,6 +45,7 @@ type Props = {
   triggerResize?: boolean;
   isDeveloper?: boolean;
   integrateSystem?: string;
+  defaultShowTable?: boolean;
   executeItemNode?: React.ReactNode;
   renderCustomExecuteNode?: boolean;
   isSimpleMode?: boolean;
@@ -72,6 +73,7 @@ const ChatItem: React.FC<Props> = ({
   renderCustomExecuteNode,
   isSimpleMode,
   isDebugMode,
+  defaultShowTable,
   onMsgDataLoaded,
   onQuestionAsked,
   onUpdateMessageScroll,
@@ -287,6 +289,7 @@ const ChatItem: React.FC<Props> = ({
       setData(dataValue);
       setParseInfo(contextValue);
       setDataCache({ ...dataCache, [id!]: { tip: '', data: dataValue } });
+      setExecuteTip('');
     } else {
       setExecuteTip(SEARCH_EXCEPTION_TIP);
     }
@@ -445,6 +448,7 @@ const ChatItem: React.FC<Props> = ({
       setData(dataValue);
       setParseInfo(contextValue);
       setDataCache({ ...dataCache, [id!]: { tip: '', data: dataValue } });
+      setExecuteTip('');
     } else {
       setExecuteTip(SEARCH_EXCEPTION_TIP);
     }
@@ -519,6 +523,7 @@ const ChatItem: React.FC<Props> = ({
             integrateSystem={integrateSystem}
             parseTimeCost={parseTimeCost?.parseTime}
             isDeveloper={isDeveloper}
+            withOutLeftBorder={!executeMode}
             onSelectParseInfo={onSelectParseInfo}
             onSwitchEntity={onSwitchEntity}
             onFiltersChange={onFiltersChange}
@@ -546,6 +551,7 @@ const ChatItem: React.FC<Props> = ({
                 )}
               <ExecuteItem
                 isSimpleMode={isSimpleMode}
+                defaultShowTable={defaultShowTable}
                 queryId={parseInfo?.queryId}
                 queryMode={parseInfo?.queryMode}
                 executeLoading={executeLoading}
@@ -563,18 +569,18 @@ const ChatItem: React.FC<Props> = ({
                       sqlItemModalRef.current?.show();
                     }
 
-                    if (key === 'exportData' && !!data?.queryResults.length) {
+                    if (key === 'exportData' && !!data?.queryResults?.length) {
                       exportData(data);
                     }
                   },
                   items: [
                     {
                       label: '导出数据',
-                      disabled: !data?.queryResults.length,
+                      disabled: !data?.queryResults?.length,
                       key: 'exportData',
                     },
                     {
-                      label: '执行详情',
+                      label: '查看SQL',
                       key: 'viewSQL',
                     },
                   ],

@@ -1,5 +1,6 @@
 import { Input, Space } from 'antd';
 import Select from '../components/Select';
+import SelectWithCustomOption from '../components/SelectWithCustomOption';
 import { useDemensionFieldOptions } from '../hooks/useDimensionFieldOptions';
 import { useDimensionValueOptions } from '../hooks/useDimensionValueOptions';
 import { useOptions } from '../hooks/useOptions';
@@ -37,6 +38,7 @@ export default function TextFilter({ value, onChange }: Props) {
         value={value.field}
         style={{ width: 150 }}
         options={fieldOptions}
+        optionFilterProp="label"
         onChange={handleFieldSelect}
       />
 
@@ -48,7 +50,7 @@ export default function TextFilter({ value, onChange }: Props) {
       />
 
       {selectMode && (
-        <Select
+        <SelectWithCustomOption
           style={{ width: 200 }}
           value={value.value}
           options={valueOptions}
