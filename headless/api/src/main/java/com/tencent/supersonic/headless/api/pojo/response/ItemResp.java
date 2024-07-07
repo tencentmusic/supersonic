@@ -30,4 +30,8 @@ public class ItemResp {
         this.type = type;
     }
 
+    public boolean isRoot() {
+        return parentId == null || parentId == 0;
+    }
+
 }

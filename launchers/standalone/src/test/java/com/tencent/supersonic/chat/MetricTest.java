@@ -7,10 +7,10 @@ import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.api.pojo.request.QueryFilter;
 import com.tencent.supersonic.headless.api.pojo.response.ParseResp;
 import com.tencent.supersonic.headless.api.pojo.response.QueryResult;
-import com.tencent.supersonic.headless.core.chat.query.rule.metric.MetricFilterQuery;
-import com.tencent.supersonic.headless.core.chat.query.rule.metric.MetricGroupByQuery;
-import com.tencent.supersonic.headless.core.chat.query.rule.metric.MetricModelQuery;
-import com.tencent.supersonic.headless.core.chat.query.rule.metric.MetricTopNQuery;
+import com.tencent.supersonic.headless.chat.query.rule.metric.MetricFilterQuery;
+import com.tencent.supersonic.headless.chat.query.rule.metric.MetricGroupByQuery;
+import com.tencent.supersonic.headless.chat.query.rule.metric.MetricModelQuery;
+import com.tencent.supersonic.headless.chat.query.rule.metric.MetricTopNQuery;
 import com.tencent.supersonic.util.DataUtils;
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;
@@ -40,7 +40,6 @@ public class MetricTest extends BaseTest {
 
         expectedParseInfo.getMetrics().add(DataUtils.getSchemaElement("访问次数"));
         expectedParseInfo.getMetrics().add(DataUtils.getSchemaElement("人均访问次数"));
-        expectedParseInfo.getMetrics().add(DataUtils.getSchemaElement("访问用户数"));
 
         expectedParseInfo.getDimensionFilters().add(DataUtils.getFilter("user_name",
                 FilterOperatorEnum.EQUALS, "alice", "用户", 2L));
@@ -74,7 +73,6 @@ public class MetricTest extends BaseTest {
 
         expectedParseInfo.getMetrics().add(DataUtils.getSchemaElement("访问次数"));
         expectedParseInfo.getMetrics().add(DataUtils.getSchemaElement("人均访问次数"));
-        expectedParseInfo.getMetrics().add(DataUtils.getSchemaElement("访问用户数"));
         expectedParseInfo.setDateInfo(DataUtils.getDateConf(DateConf.DateMode.RECENT, unit, period, startDay, endDay));
         expectedParseInfo.setQueryType(QueryType.METRIC);
 
@@ -103,7 +101,6 @@ public class MetricTest extends BaseTest {
 
         expectedParseInfo.getMetrics().add(DataUtils.getSchemaElement("访问次数"));
         expectedParseInfo.getMetrics().add(DataUtils.getSchemaElement("人均访问次数"));
-        expectedParseInfo.getMetrics().add(DataUtils.getSchemaElement("访问用户数"));
         expectedParseInfo.getDimensions().add(DataUtils.getSchemaElement("部门"));
 
         expectedParseInfo.setDateInfo(DataUtils.getDateConf(DateConf.DateMode.RECENT, unit, period, startDay, endDay));
@@ -124,7 +121,6 @@ public class MetricTest extends BaseTest {
         expectedParseInfo.setAggType(NONE);
         expectedParseInfo.getMetrics().add(DataUtils.getSchemaElement("访问次数"));
         expectedParseInfo.getMetrics().add(DataUtils.getSchemaElement("人均访问次数"));
-        expectedParseInfo.getMetrics().add(DataUtils.getSchemaElement("访问用户数"));
         List<String> list = new ArrayList<>();
         list.add("alice");
         list.add("lucy");
@@ -171,7 +167,6 @@ public class MetricTest extends BaseTest {
 
         expectedParseInfo.getMetrics().add(DataUtils.getSchemaElement("访问次数"));
         expectedParseInfo.getMetrics().add(DataUtils.getSchemaElement("人均访问次数"));
-        expectedParseInfo.getMetrics().add(DataUtils.getSchemaElement("访问用户数"));
         expectedParseInfo.getDimensions().add(DataUtils.getSchemaElement("部门"));
 
         expectedParseInfo.setDateInfo(DataUtils.getDateConf(DateConf.DateMode.RECENT, unit, period, startDay, endDay));
@@ -197,7 +192,6 @@ public class MetricTest extends BaseTest {
 
         expectedParseInfo.getMetrics().add(DataUtils.getSchemaElement("访问次数"));
         expectedParseInfo.getMetrics().add(DataUtils.getSchemaElement("人均访问次数"));
-        expectedParseInfo.getMetrics().add(DataUtils.getSchemaElement("访问用户数"));
         expectedParseInfo.getDimensionFilters().add(DataUtils.getFilter("user_name",
                 FilterOperatorEnum.EQUALS, "alice", "用户", 2L));
 

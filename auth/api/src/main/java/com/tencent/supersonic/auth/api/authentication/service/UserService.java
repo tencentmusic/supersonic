@@ -19,11 +19,15 @@ public interface UserService {
 
     void register(UserReq userCmd);
 
-    String login(UserReq userCmd);
+    String login(UserReq userCmd, HttpServletRequest request);
+
+    String login(UserReq userCmd, String appKey);
 
     Set<String> getUserAllOrgId(String userName);
 
     List<User> getUserByOrg(String key);
 
     List<Organization> getOrganizationTree();
+
+    String casLogin(String prefixUrl, String ticket, String service, String appKey);
 }

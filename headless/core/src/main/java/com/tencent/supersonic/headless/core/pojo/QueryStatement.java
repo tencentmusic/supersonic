@@ -2,7 +2,7 @@ package com.tencent.supersonic.headless.core.pojo;
 
 import com.tencent.supersonic.headless.api.pojo.QueryParam;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticSchemaResp;
-import com.tencent.supersonic.headless.core.parser.calcite.s2sql.SemanticModel;
+import com.tencent.supersonic.headless.core.translator.calcite.s2sql.SemanticModel;
 import lombok.Data;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Triple;
@@ -11,6 +11,7 @@ import java.util.List;
 
 @Data
 public class QueryStatement {
+
     private Long dataSetId;
     private List<Long> modelIds;
     private String sql = "";
@@ -34,10 +35,15 @@ public class QueryStatement {
 
     private SemanticSchemaResp semanticSchemaResp;
     private Integer limit = 1000;
+    private Boolean isTranslated = false;
 
     public boolean isOk() {
         this.ok = "".equals(errMsg) && !"".equals(sql);
         return ok;
+    }
+
+    public boolean isTranslated() {
+        return isTranslated != null && isTranslated && isOk();
     }
 
     public QueryStatement error(String msg) {

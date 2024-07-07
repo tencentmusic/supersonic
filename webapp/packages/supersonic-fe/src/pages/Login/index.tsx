@@ -6,18 +6,24 @@ import RegisterForm from './components/RegisterForm';
 // import ForgetPwdForm from './components/ForgetPwdForm';
 import { ROUTE_AUTH_CODES } from '../../../config/routes';
 import S2Icon, { ICON } from '@/components/S2Icon';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm } from 'antd/lib/form/Form';
 import type { RegisterFormDetail } from './components/types';
 import { postUserLogin, userRegister } from './services';
 import { AUTH_TOKEN_KEY } from '@/common/constants';
-import { queryCurrentUser } from '@/services/user';
+import { getUserInfoByTicket, queryCurrentUser } from '@/services/user';
 import { history, useModel } from '@umijs/max';
+import { encryptPassword } from '@/utils/utils';
+import CryptoJS from 'crypto-js';
+import { TOKEN_KEY } from '@/services/request';
+import { ssoLogin } from '@/utils/utils';
+
+export const openSSO = true;
 
 const { Item } = Form;
 const LoginPage: React.FC = () => {
   const [createModalVisible, setCreateModalVisible] = useState<boolean>(false);
-  // const [forgetModalVisible, setForgetModalVisible] = useState<boolean>(false);
+  const encryptKey = CryptoJS.enc.Utf8.parse('supersonic@2024');
   const [form] = useForm();
   const { initialState = {}, setInitialState } = useModel('@@initialState');
   // 通过用户信息进行登录
@@ -47,17 +53,18 @@ const LoginPage: React.FC = () => {
   const handleLogin = async () => {
     const { validateFields } = form;
     const content = await validateFields();
-    await loginDone(content);
+    await loginDone({ ...content, password: encryptPassword(content.password, encryptKey) });
   };
 
   // 处理注册弹窗确定按钮
   const handleRegister = async (values: RegisterFormDetail) => {
-    const { code } = await userRegister({ ...values });
+    const enCodeValues = { ...values, password: encryptPassword(values.password, encryptKey) };
+    const { code } = await userRegister(enCodeValues);
     if (code === 200) {
       message.success('注册成功');
       setCreateModalVisible(false);
       // 注册完自动帮用户登录
-      await loginDone(values);
+      await loginDone(enCodeValues);
     }
   };
 
@@ -65,6 +72,41 @@ const LoginPage: React.FC = () => {
   const handleRegisterBtn = () => {
     setCreateModalVisible(true);
   };
+
+  async function loginWithTicket(ticket: string) {
+    const { code, data } = await getUserInfoByTicket(ticket);
+
+    if (code === 200) {
+      localStorage.setItem(TOKEN_KEY, data);
+      const { code: queryUserCode, data: queryUserData } = await queryCurrentUser();
+      if (queryUserCode === 200) {
+        const currentUser = {
+          ...queryUserData,
+          staffName: queryUserData.staffName || queryUserData.name,
+        };
+        const authCodes = Array.isArray(initialState?.authCodes) ? initialState?.authCodes : [];
+        if (queryUserData.superAdmin) {
+          authCodes.push(ROUTE_AUTH_CODES.SYSTEM_ADMIN);
+        }
+        setInitialState({ ...initialState, currentUser, authCodes });
+      }
+
+      history.push('/');
+    } else {
+      ssoLogin();
+    }
+  }
+
+  async function login() {
+    // 判断是否存在ticket
+    const urlParams = new URL(window.location.href);
+    const ticket = urlParams.searchParams.get('ticket');
+    if (ticket) {
+      await loginWithTicket(ticket);
+    } else {
+      ssoLogin();
+    }
+  }
 
   // // 忘记密码弹窗确定响应
   // const handleForgetPwd = async (values: RegisterFormDetail) => {
@@ -78,7 +120,11 @@ const LoginPage: React.FC = () => {
   //   setForgetModalVisible(true);
   // };
 
-  return (
+  useEffect(() => {
+    openSSO && login();
+  }, []);
+
+  return openSSO ? null : (
     <div className={styles.loginWarp}>
       <div className={styles.content}>
         <div className={styles.formContent}>

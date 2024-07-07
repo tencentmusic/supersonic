@@ -1,6 +1,5 @@
 package com.tencent.supersonic.headless.server.utils;
 
-import com.google.common.base.Strings;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.common.pojo.Aggregator;
 import com.tencent.supersonic.common.pojo.Constants;
@@ -13,6 +12,7 @@ import com.tencent.supersonic.common.pojo.enums.StatusEnum;
 import com.tencent.supersonic.common.pojo.enums.TaskStatusEnum;
 import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import com.tencent.supersonic.common.pojo.enums.TypeEnums;
+import com.tencent.supersonic.common.util.BeanMapper;
 import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.headless.api.pojo.Dim;
 import com.tencent.supersonic.headless.api.pojo.ItemValueConfig;
@@ -27,14 +27,16 @@ import com.tencent.supersonic.headless.api.pojo.response.MetricResp;
 import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
 import com.tencent.supersonic.headless.api.pojo.response.TagResp;
+import com.tencent.supersonic.headless.server.facade.service.SemanticLayerService;
 import com.tencent.supersonic.headless.server.persistence.dataobject.DictConfDO;
 import com.tencent.supersonic.headless.server.persistence.dataobject.DictTaskDO;
-import com.tencent.supersonic.headless.server.service.DimensionService;
-import com.tencent.supersonic.headless.server.service.MetricService;
-import com.tencent.supersonic.headless.server.service.ModelService;
-import com.tencent.supersonic.headless.server.service.QueryService;
-import com.tencent.supersonic.headless.server.service.TagMetaService;
+import com.tencent.supersonic.headless.server.web.service.DimensionService;
+import com.tencent.supersonic.headless.server.web.service.MetricService;
+import com.tencent.supersonic.headless.server.web.service.ModelService;
+import com.tencent.supersonic.headless.server.web.service.TagMetaService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
@@ -63,32 +65,35 @@ import static com.tencent.supersonic.common.pojo.Constants.SPACE;
 @Slf4j
 @Component
 public class DictUtils {
-
-    private static String dateTimeFormatter = "yyyyMMddHHmmss";
-    @Value("${dimension.multi.value.split:#}")
+    @Value("${s2.dimension.multi.value.split:#}")
     private String dimMultiValueSplit;
 
-    @Value("${item.value.max.count:100000}")
+    @Value("${s2.item.value.max.count:100000}")
     private Long itemValueMaxCount;
 
-    @Value("${item.value.white.frequency:999999}")
+    @Value("${s2.item.value.white.frequency:999999}")
     private Long itemValueWhiteFrequency;
 
-    @Value("${item.value.date.start:1}")
+    // 前多少天
+    @Value("${s2.item.value.date.start:1}")
     private Integer itemValueDateStart;
-    @Value("${item.value.date.end:1}")
+    @Value("${s2.item.value.date.end:1}")
+    // 前多少天
     private Integer itemValueDateEnd;
+
+    @Value("${s2.item.value.date.format:yyyy-MM-dd}")
+    private String itemValueDateFormat;
 
 
     private final DimensionService dimensionService;
     private final MetricService metricService;
-    private final QueryService queryService;
+    private final SemanticLayerService queryService;
     private final ModelService modelService;
     private final TagMetaService tagMetaService;
 
     public DictUtils(DimensionService dimensionService,
                      MetricService metricService,
-                     QueryService queryService,
+                     SemanticLayerService queryService,
                      ModelService modelService,
                      @Lazy TagMetaService tagMetaService) {
         this.dimensionService = dimensionService;
@@ -113,7 +118,7 @@ public class DictUtils {
         taskDO.setConfig(JsonUtil.toString(dictItemResp.getConfig()));
         taskDO.setStatus(status.getStatus());
         taskDO.setCreatedAt(createAt);
-        String creator = (Objects.isNull(user) || Strings.isNullOrEmpty(user.getName())) ? "" : user.getName();
+        String creator = (Objects.isNull(user) || StringUtils.isEmpty(user.getName())) ? "" : user.getName();
         taskDO.setCreatedBy(creator);
         return taskDO;
     }
@@ -125,7 +130,7 @@ public class DictUtils {
         confDO.setConfig(JsonUtil.toString(itemValueReq.getConfig()));
         Date createAt = new Date();
         confDO.setCreatedAt(createAt);
-        String creator = Strings.isNullOrEmpty(user.getName()) ? "" : user.getName();
+        String creator = StringUtils.isEmpty(user.getName()) ? "" : user.getName();
         confDO.setCreatedBy(creator);
         confDO.setStatus(itemValueReq.getStatus().name());
         return confDO;
@@ -133,7 +138,13 @@ public class DictUtils {
 
     public List<DictItemResp> dictDOList2Req(List<DictConfDO> dictConfDOList) {
         List<DictItemResp> dictItemReqList = new ArrayList<>();
-        dictConfDOList.stream().forEach(conf -> dictItemReqList.add(dictDO2Req(conf)));
+        dictConfDOList.stream().forEach(conf -> {
+            DictItemResp dictItemResp = dictDO2Req(conf);
+            if (Objects.nonNull(dictItemResp)) {
+                dictItemReqList.add(dictDO2Req(conf));
+            }
+
+        });
         return dictItemReqList;
     }
 
@@ -145,6 +156,10 @@ public class DictUtils {
         dictItemResp.setStatus(StatusEnum.of(dictConfDO.getStatus()));
         if (TypeEnums.DIMENSION.equals(TypeEnums.valueOf(dictConfDO.getType()))) {
             DimensionResp dimension = dimensionService.getDimension(dictConfDO.getItemId());
+            if (Objects.isNull(dimension)) {
+                log.info("dimension is null, dictConfDO:{}", dictConfDO);
+                return null;
+            }
             dictItemResp.setModelId(dimension.getModelId());
             dictItemResp.setBizName(dimension.getBizName());
         }
@@ -181,7 +196,7 @@ public class DictUtils {
                         metricObject = line.get(key);
                     }
                 }
-                if (!Strings.isNullOrEmpty(dimValue) && Objects.nonNull(metricObject)) {
+                if (!StringUtils.isEmpty(dimValue) && Objects.nonNull(metricObject)) {
                     Long metric = Math.round(Double.parseDouble(metricObject.toString()));
                     mergeMultivaluedValue(valueAndFrequencyPair, dimValue, metric);
                 }
@@ -190,7 +205,7 @@ public class DictUtils {
             constructDictLines(valueAndFrequencyPair, lines, nature);
             addWhiteValueLines(dictItemResp, lines, nature);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("dictItemResp:{},fetchItemValue error:", dictItemResp, e);
         }
         return lines;
     }
@@ -202,7 +217,7 @@ public class DictUtils {
         }
         List<String> whiteList = dictItemResp.getConfig().getWhiteList();
         whiteList.forEach(white -> {
-            if (!Strings.isNullOrEmpty(white)) {
+            if (!StringUtils.isEmpty(white)) {
                 white = white.replace(SPACE, POUND);
             }
             lines.add(String.format("%s %s %s", white, nature, itemValueWhiteFrequency));
@@ -215,7 +230,7 @@ public class DictUtils {
         }
 
         valueAndFrequencyPair.forEach((value, frequency) -> {
-            if (!Strings.isNullOrEmpty(value)) {
+            if (!StringUtils.isEmpty(value)) {
                 value = value.replace(SPACE, POUND);
             }
             lines.add(String.format("%s %s %s", value, nature, frequency));
@@ -223,7 +238,7 @@ public class DictUtils {
     }
 
     private void mergeMultivaluedValue(Map<String, Long> valueAndFrequencyPair, String dimValue, Long metric) {
-        if (org.apache.logging.log4j.util.Strings.isEmpty(dimValue)) {
+        if (StringUtils.isEmpty(dimValue)) {
             return;
         }
         Map<String, Long> tmp = new HashMap<>();
@@ -253,7 +268,7 @@ public class DictUtils {
         String sqlPattern = "select %s, %s from tbl %s group by %s order by %s desc limit %d";
         String bizName = dictItemResp.getBizName();
         String whereStr = generateWhereStr(dictItemResp);
-        String where = Strings.isNullOrEmpty(whereStr) ? "" : "WHERE" + whereStr;
+        String where = StringUtils.isEmpty(whereStr) ? "" : "WHERE" + whereStr;
         ItemValueConfig config = dictItemResp.getConfig();
         Long limit = (Objects.isNull(config) || Objects.isNull(config.getLimit())) ? itemValueMaxCount :
                 dictItemResp.getConfig().getLimit();
@@ -294,7 +309,7 @@ public class DictUtils {
         String sqlPattern = "select %s,count(1) from tbl %s group by %s order by count(1) desc limit %d";
         String bizName = dictItemResp.getBizName();
         String whereStr = generateWhereStr(dictItemResp);
-        String where = Strings.isNullOrEmpty(whereStr) ? "" : "WHERE" + whereStr;
+        String where = StringUtils.isEmpty(whereStr) ? "" : "WHERE" + whereStr;
         ItemValueConfig config = dictItemResp.getConfig();
         Long limit = (Objects.isNull(config) || Objects.isNull(config.getLimit())) ? itemValueMaxCount :
                 dictItemResp.getConfig().getLimit();
@@ -342,7 +357,38 @@ public class DictUtils {
     }
 
     private void fillStructDateInfo(QueryStructReq queryStructReq, DictItemResp dictItemResp) {
+
+        ItemValueConfig config = dictItemResp.getConfig();
+
         ModelResp model = modelService.getModel(dictItemResp.getModelId());
+        // 用户未进行设置
+        if (Objects.isNull(config) || Objects.isNull(config.getDateConf())) {
+            fillStructDateBetween(queryStructReq, model, itemValueDateStart, itemValueDateEnd);
+            return;
+        }
+
+        // 全表扫描
+        if (DateConf.DateMode.ALL.equals(config.getDateConf().getDateMode())) {
+            return;
+        }
+        // 静态日期
+        if (DateConf.DateMode.BETWEEN.equals(config.getDateConf().getDateMode())) {
+            DateConf dateConf = new DateConf();
+            BeanMapper.mapper(config.getDateConf(), dateConf);
+            dateConf.setDateMode(DateConf.DateMode.BETWEEN);
+            queryStructReq.setDateInfo(dateConf);
+            return;
+        }
+        // 动态日期 包括今天日期
+        if (DateConf.DateMode.RECENT.equals(config.getDateConf().getDateMode())) {
+            fillStructDateBetween(queryStructReq, model, config.getDateConf().getUnit() - 1, 0);
+            return;
+        }
+        return;
+    }
+
+    private void fillStructDateBetween(QueryStructReq queryStructReq, ModelResp model,
+                                       Integer itemValueDateStart, Integer itemValueDateEnd) {
         if (Objects.nonNull(model)) {
             List<Dim> timeDims = model.getTimeDimension();
             if (!CollectionUtils.isEmpty(timeDims)) {
@@ -366,7 +412,7 @@ public class DictUtils {
             return new ArrayList<>();
         }
         String whereStr = generateWhereStr(dictItemResp);
-        if (Strings.isNullOrEmpty(whereStr)) {
+        if (StringUtils.isEmpty(whereStr)) {
             return new ArrayList<>();
         }
         Filter filter = new Filter("", FilterOperatorEnum.SQL_PART, whereStr);
@@ -391,20 +437,67 @@ public class DictUtils {
             }
         }
 
+        String dateFilter = generateDictDateFilter(dictItemResp);
+        if (Strings.isNotEmpty(dateFilter)) {
+            joiner.add(dateFilter);
+        }
+        return joiner.toString();
+    }
+
+    public String defaultDateFilter() {
+        String format = itemValueDateFormat;
+        String start = LocalDate.now().minusDays(itemValueDateStart)
+                .format(DateTimeFormatter.ofPattern(format));
+        String end = LocalDate.now().minusDays(itemValueDateEnd)
+                .format(DateTimeFormatter.ofPattern(format));
+        return String.format("( %s >= '%s' and %s <= '%s' )", TimeDimensionEnum.DAY.getName(), start,
+                TimeDimensionEnum.DAY.getName(), end);
+    }
+
+    private String generateDictDateFilter(DictItemResp dictItemResp) {
+        ItemValueConfig config = dictItemResp.getConfig();
+        // 未进行设置
+        if (Objects.isNull(config) || Objects.isNull(config.getDateConf())) {
+            return defaultDateFilter();
+        }
+        // 全表扫描
+        if (DateConf.DateMode.ALL.equals(config.getDateConf().getDateMode())) {
+            return "";
+        }
+        // 静态日期
+        if (DateConf.DateMode.BETWEEN.equals(config.getDateConf().getDateMode())) {
+            return String.format("( %s >= '%s' and %s <= '%s' )",
+                    TimeDimensionEnum.DAY.getName(),
+                    config.getDateConf().getStartDate(),
+                    TimeDimensionEnum.DAY.getName(),
+                    config.getDateConf().getEndDate());
+        }
+        // 动态日期
+        if (DateConf.DateMode.RECENT.equals(config.getDateConf().getDateMode())) {
+            return generateDictDateFilterRecent(dictItemResp);
+        }
+
+        return "";
+    }
+
+    private String generateDictDateFilterRecent(DictItemResp dictItemResp) {
         ModelResp model = modelService.getModel(dictItemResp.getModelId());
         if (Objects.nonNull(model)) {
             List<Dim> timeDims = model.getTimeDimension();
             if (!CollectionUtils.isEmpty(timeDims)) {
-                String format = "yyyy-MM-dd";
-                String start = LocalDate.now().minusDays(itemValueDateStart)
-                        .format(DateTimeFormatter.ofPattern(format));
-                String end = LocalDate.now().minusDays(itemValueDateEnd)
-                        .format(DateTimeFormatter.ofPattern(format));
-                joiner.add(String.format("( %s >= '%s' and %s <= '%s' )", TimeDimensionEnum.DAY.getName(), start,
-                        TimeDimensionEnum.DAY.getName(), end));
+                String dateFormat = timeDims.get(0).getDateFormat();
+                if (Strings.isEmpty(dateFormat)) {
+                    dateFormat = itemValueDateFormat;
+                }
+                String start = LocalDate.now().minusDays(dictItemResp.getConfig().getDateConf().getUnit())
+                        .format(DateTimeFormatter.ofPattern(dateFormat));
+                String end = LocalDate.now().minusDays(0)
+                        .format(DateTimeFormatter.ofPattern(dateFormat));
+                return String.format("( %s > '%s' and %s <= '%s' )", TimeDimensionEnum.DAY.getName(), start,
+                        TimeDimensionEnum.DAY.getName(), end);
             }
         }
-        return joiner.toString();
+        return "";
     }
 
     public DictTaskResp taskDO2Resp(DictTaskDO dictTaskDO) {

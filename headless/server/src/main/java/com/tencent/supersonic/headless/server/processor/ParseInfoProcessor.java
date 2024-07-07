@@ -1,23 +1,24 @@
 package com.tencent.supersonic.headless.server.processor;
 
 import com.google.common.collect.Lists;
+import com.tencent.supersonic.common.jsqlparser.FieldExpression;
+import com.tencent.supersonic.common.jsqlparser.SqlSelectHelper;
 import com.tencent.supersonic.common.pojo.DateConf;
+import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
 import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
 import com.tencent.supersonic.common.pojo.enums.QueryType;
 import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import com.tencent.supersonic.common.util.ContextUtils;
-import com.tencent.supersonic.common.util.jsqlparser.FieldExpression;
-import com.tencent.supersonic.common.util.jsqlparser.SqlSelectHelper;
 import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.api.pojo.SemanticSchema;
 import com.tencent.supersonic.headless.api.pojo.SqlInfo;
 import com.tencent.supersonic.headless.api.pojo.request.QueryFilter;
 import com.tencent.supersonic.headless.api.pojo.response.ParseResp;
-import com.tencent.supersonic.headless.core.pojo.ChatContext;
-import com.tencent.supersonic.headless.core.pojo.QueryContext;
-import com.tencent.supersonic.headless.core.chat.query.SemanticQuery;
-import com.tencent.supersonic.headless.server.service.impl.SemanticService;
+import com.tencent.supersonic.headless.chat.ChatContext;
+import com.tencent.supersonic.headless.chat.QueryContext;
+import com.tencent.supersonic.headless.chat.query.SemanticQuery;
+import com.tencent.supersonic.headless.server.web.service.SchemaService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -47,6 +48,9 @@ public class ParseInfoProcessor implements ResultProcessor {
         }
         List<SemanticParseInfo> candidateParses = candidateQueries.stream()
                 .map(SemanticQuery::getParseInfo).collect(Collectors.toList());
+        if (!candidateQueries.isEmpty()) {
+            candidateQueries.get(0).getParseInfo().setRecommendParse(true);
+        }
         candidateParses.forEach(this::updateParseInfo);
     }
 
@@ -54,10 +58,6 @@ public class ParseInfoProcessor implements ResultProcessor {
         SqlInfo sqlInfo = parseInfo.getSqlInfo();
         String correctS2SQL = sqlInfo.getCorrectS2SQL();
         if (StringUtils.isBlank(correctS2SQL)) {
-            return;
-        }
-        // if S2SQL equals correctS2SQL, then not update the parseInfo.
-        if (correctS2SQL.equals(sqlInfo.getS2SQL())) {
             return;
         }
         List<FieldExpression> expressions = SqlSelectHelper.getFilterExpression(correctS2SQL);
@@ -83,12 +83,28 @@ public class ParseInfoProcessor implements ResultProcessor {
             log.error("set dimensionFilter error :", e);
         }
 
-        SemanticSchema semanticSchema = ContextUtils.getBean(SemanticService.class).getSemanticSchema();
+        SemanticSchema semanticSchema = ContextUtils.getBean(SchemaService.class).getSemanticSchema();
         if (Objects.isNull(semanticSchema)) {
             return;
         }
-        List<String> allFields = getFieldsExceptDate(SqlSelectHelper.getAllFields(sqlInfo.getCorrectS2SQL()));
+        List<String> allFields = getFieldsExceptDate(SqlSelectHelper.getAllSelectFields(sqlInfo.getCorrectS2SQL()));
         Set<SchemaElement> metrics = getElements(dataSetId, allFields, semanticSchema.getMetrics());
+        Map<String, String> functionMap = SqlSelectHelper.getAggregate(sqlInfo.getCorrectS2SQL())
+                .stream()
+                .collect(Collectors.toMap(
+                        func -> func.getParameters().get(0).toString(),
+                        func -> func.getMultipartName().get(0)));
+
+        for (SchemaElement metric : metrics) {
+            String aggregator = functionMap.get(metric.getName());
+            if (aggregator != null) {
+                metric.setAggregator(AggOperatorEnum.of(aggregator).name());
+            } else {
+                // 如果没有找到匹配的聚合函数，使用默认聚合器
+                metric.setAggregator(AggOperatorEnum.of(metric.getDefaultAgg()).name());
+            }
+        }
+
         parseInfo.setMetrics(metrics);
         if (QueryType.METRIC.equals(parseInfo.getQueryType())) {
             List<String> groupByFields = SqlSelectHelper.getGroupByFields(sqlInfo.getCorrectS2SQL());
@@ -195,7 +211,7 @@ public class ParseInfoProcessor implements ResultProcessor {
     }
 
     protected Map<String, SchemaElement> getNameToElement(Long dataSetId) {
-        SemanticSchema semanticSchema = ContextUtils.getBean(SemanticService.class).getSemanticSchema();
+        SemanticSchema semanticSchema = ContextUtils.getBean(SchemaService.class).getSemanticSchema();
         List<SchemaElement> dimensions = semanticSchema.getDimensions(dataSetId);
         List<SchemaElement> metrics = semanticSchema.getMetrics(dataSetId);
 

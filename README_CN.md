@@ -1,3 +1,5 @@
+[English](README.md) | [日本語版](README_JP.md) | [文档中心](https://supersonicbi.github.io/)
+
 # SuperSonic
 
 **SuperSonic融合Chat BI（powered by LLM）和Headless BI（powered by 语义层）打造新一代的BI平台**。这种融合确保了Chat BI能够与传统BI一样访问统一化治理的语义数据模型。此外，两种BI新范式都从中获得收益：
@@ -5,11 +7,11 @@
 - Chat BI的Text2SQL生成通过检索语义数据模型得到增强。
 - Headless BI的查询接口通过支持自然语言API得到拓展。
 
-<img src="./docs/images/supersonic_ideas.png" height="75%" width="75%" align="center"/>
+<img src="https://github.com/supersonicbi/supersonic-website/blob/main/static/img/supersonic_ideas.png" height="75%" width="75%" />
 
 通过SuperSonic的问答对话界面，用户能够使用自然语言查询数据，系统会选择合适的可视化图表呈现结果。SuperSonic不需要修改或复制数据，只需要在物理数据模型之上构建逻辑语义模型（定义指标/维度/实体/标签，以及它们的业务含义、相互关系等），即可开启数据问答体验。与此同时，SuperSonic被设计为可插拔的框架，采用Java SPI机制来扩展定制功能。
 
-<img src="./docs/images/supersonic_demo.gif" height="100%" width="100%" align="center"/>
+<img src="https://github.com/supersonicbi/supersonic-website/blob/main/static/img/supersonic_demo.gif" height="100%" width="100%" />
 
 ## 项目动机
 
@@ -36,7 +38,7 @@
 
 SuperSonic的整体架构和主流程如下图所示：
 
-<img src="./docs/images/supersonic_components.png" height="65%" width="65%" align="center"/> 
+<img src="https://github.com/supersonicbi/supersonic-website/blob/main/static/img/supersonic_components.png" height="65%" width="65%" /> 
 
 - **模型知识库(Knowledge Base)：** 定期从语义模型中提取相关的模式信息，构建词典和索引，以便后续的模式映射。
 
@@ -50,10 +52,18 @@ SuperSonic的整体架构和主流程如下图所示：
 
 - **问答插件(Chat Plugin)：** 通过第三方工具扩展功能。给定所有配置的插件及其功能描述和示例问题，大语言模型将选择最合适的插件。
 
+- **问答记忆(Chat Memory)：** 将历史的查询轨迹进行封装，可被召回作为few-shot样例嵌入提示词。
+
 ## 快速体验
 
 ### 线上环境体验
-访问http://117.72.46.148:9080 用户名/密码:admin/admin. 请勿修改系统配置。我们每周末定期重启重置配置。
+访问http://117.72.46.148:9080 注册新用户体验. 请勿修改系统配置。我们每周末定期重启重置配置。
+
+### Docker部署
+- 安装好Docker以及docker-compose
+- 下载docker-compose.yml；执行命令：wget https://raw.githubusercontent.com/tencentmusic/supersonic/master/docker/docker-compose.yml
+- 执行："docker-compose up -d"
+- 在浏览器访问http://localhost:9080 开启探索
 
 ### 本地构建
 
@@ -65,10 +75,14 @@ SuperSonic自带样例的语义模型和问答对话，只需以下三步即可�
 
 ## 如何构建和部署
 
-请参考项目[wiki](https://github.com/tencentmusic/supersonic/wiki)。
+请参考项目[文档](https://supersonicbi.github.io/docs/%E7%B3%BB%E7%BB%9F%E9%83%A8%E7%BD%B2/%E7%BC%96%E8%AF%91%E6%9E%84%E5%BB%BA/)。
 
 ## 微信联系方式
 
 欢迎关注微信公众号：
 
-<img src="./docs/images/supersonic_wechat_oa.png" height="50%" width="50%" align="center"/> 
+<img src="https://github.com/supersonicbi/supersonic-website/blob/main/static/img/supersonic_wechat_oa.png" height="50%" width="50%" /> 
+
+欢迎加入微信社群：
+
+<img src="https://github.com/supersonicbi/supersonic-website/blob/main/static/img/supersonic_wechat.png" height="50%" width="50%" /> 

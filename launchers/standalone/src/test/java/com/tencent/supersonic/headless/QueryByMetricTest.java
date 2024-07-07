@@ -4,7 +4,7 @@ import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.headless.api.pojo.request.QueryMetricReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
-import com.tencent.supersonic.headless.server.service.MetricService;
+import com.tencent.supersonic.headless.server.web.service.MetricService;
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,7 +48,7 @@ public class QueryByMetricTest extends BaseTest {
         Assert.assertNotNull(queryResp.getResultList());
         Assert.assertEquals(6, queryResp.getResultList().size());
 
-        queryMetricReq.setDomainId(3L);
+        queryMetricReq.setDomainId(2L);
         queryMetricReq.setMetricNames(Arrays.asList("stay_hours", "pv"));
         queryMetricReq.setDimensionNames(Arrays.asList("user_name", "department"));
         assertThrows(IllegalArgumentException.class,
@@ -68,6 +68,6 @@ public class QueryByMetricTest extends BaseTest {
 
     private SemanticQueryResp queryByMetric(QueryMetricReq queryMetricReq, User user) throws Exception {
         QueryStructReq convert = metricService.convert(queryMetricReq);
-        return queryService.queryByReq(convert.convert(), user);
+        return semanticLayerService.queryByReq(convert.convert(), user);
     }
 }

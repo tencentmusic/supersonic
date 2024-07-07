@@ -2,51 +2,47 @@ package com.tencent.supersonic.headless.core.utils;
 
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.headless.core.cache.QueryCache;
-import com.tencent.supersonic.headless.core.chat.parser.llm.DataSetResolver;
-import com.tencent.supersonic.headless.core.chat.parser.llm.JavaLLMProxy;
-import com.tencent.supersonic.headless.core.chat.parser.llm.LLMProxy;
 import com.tencent.supersonic.headless.core.executor.QueryExecutor;
-import com.tencent.supersonic.headless.core.executor.accelerator.QueryAccelerator;
-import com.tencent.supersonic.headless.core.parser.SqlParser;
-import com.tencent.supersonic.headless.core.parser.converter.HeadlessConverter;
-import com.tencent.supersonic.headless.core.planner.QueryOptimizer;
+import com.tencent.supersonic.headless.core.executor.QueryAccelerator;
+import com.tencent.supersonic.headless.core.translator.QueryParser;
+import com.tencent.supersonic.headless.core.translator.converter.QueryConverter;
+import com.tencent.supersonic.headless.core.translator.QueryOptimizer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.stream.Collectors;
+
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.io.support.SpringFactoriesLoader;
 
 /**
- * HeadlessConverter QueryOptimizer QueryExecutor object factory
+ * QueryConverter QueryOptimizer QueryExecutor object factory
  */
 @Slf4j
 public class ComponentFactory {
 
-    private static List<HeadlessConverter> headlessConverters = new ArrayList<>();
+    private static List<QueryConverter> queryConverters = new ArrayList<>();
     private static Map<String, QueryOptimizer> queryOptimizers = new HashMap<>();
     private static List<QueryExecutor> queryExecutors = new ArrayList<>();
     private static List<QueryAccelerator> queryAccelerators = new ArrayList<>();
-    private static SqlParser sqlParser;
+    private static QueryParser queryParser;
     private static QueryCache queryCache;
 
-    private static LLMProxy llmProxy;
-    private static DataSetResolver modelResolver;
-
     static {
-        initSemanticConverter();
+        initQueryConverter();
         initQueryOptimizer();
         initQueryExecutors();
+        initQueryAccelerators();
+        initQueryParser();
+        initQueryCache();
     }
 
-    public static List<HeadlessConverter> getSemanticConverters() {
-        if (headlessConverters.isEmpty()) {
-            initSemanticConverter();
+    public static List<QueryConverter> getQueryConverters() {
+        if (queryConverters.isEmpty()) {
+            initQueryConverter();
         }
-        return headlessConverters;
+        return queryConverters;
     }
 
     public static List<QueryOptimizer> getQueryOptimizers() {
@@ -70,11 +66,11 @@ public class ComponentFactory {
         return queryAccelerators;
     }
 
-    public static SqlParser getSqlParser() {
-        if (sqlParser == null) {
+    public static QueryParser getQueryParser() {
+        if (queryParser == null) {
             initQueryParser();
         }
-        return sqlParser;
+        return queryParser;
     }
 
     public static QueryCache getQueryCache() {
@@ -82,10 +78,6 @@ public class ComponentFactory {
             initQueryCache();
         }
         return queryCache;
-    }
-
-    public static void setSqlParser(SqlParser parser) {
-        sqlParser = parser;
     }
 
     public static void addQueryOptimizer(String name, QueryOptimizer queryOptimizer) {
@@ -110,41 +102,16 @@ public class ComponentFactory {
         init(QueryAccelerator.class, queryAccelerators);
     }
 
-    private static void initSemanticConverter() {
-        init(HeadlessConverter.class, headlessConverters);
+    private static void initQueryConverter() {
+        init(QueryConverter.class, queryConverters);
     }
 
     private static void initQueryParser() {
-        sqlParser = init(SqlParser.class);
+        queryParser = init(QueryParser.class);
     }
 
     private static void initQueryCache() {
         queryCache = init(QueryCache.class);
-    }
-
-    public static LLMProxy getLLMProxy() {
-        //1.Preferentially retrieve from environment variables
-        String llmProxyEnv = System.getenv("llmProxy");
-        if (StringUtils.isNotBlank(llmProxyEnv)) {
-            Map<String, LLMProxy> implementations = ContextUtils.getBeansOfType(LLMProxy.class);
-            llmProxy = implementations.entrySet().stream()
-                    .filter(entry -> entry.getKey().equalsIgnoreCase(llmProxyEnv))
-                    .map(Map.Entry::getValue)
-                    .findFirst()
-                    .orElse(null);
-        }
-        //2.default JavaLLMProxy
-        if (Objects.isNull(llmProxy)) {
-            llmProxy = ContextUtils.getBean(JavaLLMProxy.class);
-        }
-        return llmProxy;
-    }
-
-    public static DataSetResolver getModelResolver() {
-        if (Objects.isNull(modelResolver)) {
-            modelResolver = init(DataSetResolver.class);
-        }
-        return modelResolver;
     }
 
     public static <T> T getBean(String name, Class<T> tClass) {

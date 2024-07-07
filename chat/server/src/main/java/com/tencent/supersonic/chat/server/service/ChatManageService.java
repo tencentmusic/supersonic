@@ -4,6 +4,7 @@ import com.github.pagehelper.PageInfo;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.chat.api.pojo.request.ChatExecuteReq;
 import com.tencent.supersonic.chat.api.pojo.request.ChatParseReq;
+import com.tencent.supersonic.chat.api.pojo.request.ChatQueryDataReq;
 import com.tencent.supersonic.chat.api.pojo.request.PageQueryInfoReq;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResp;
 import com.tencent.supersonic.chat.api.pojo.response.ShowCaseResp;
@@ -38,6 +39,8 @@ public interface ChatManageService {
     ShowCaseResp queryShowCase(PageQueryInfoReq pageQueryInfoReq, int agentId);
 
     ChatQueryDO saveQueryResult(ChatExecuteReq chatExecuteReq, QueryResult queryResult);
+
+    ChatQueryDO saveQueryResult(ChatQueryDataReq chatQueryDataReq, QueryResult queryResult);
 
     int updateQuery(ChatQueryDO chatQueryDO);
 

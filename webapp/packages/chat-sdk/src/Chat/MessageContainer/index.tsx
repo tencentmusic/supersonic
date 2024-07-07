@@ -19,6 +19,7 @@ type Props = {
   isDeveloper?: boolean;
   integrateSystem?: string;
   isSimpleMode?: boolean;
+  isDebugMode?: boolean;
   onMsgDataLoaded: (
     data: MsgDataType,
     questionId: string | number,
@@ -27,6 +28,7 @@ type Props = {
     isRefresh?: boolean
   ) => void;
   onSendMsg: (value: string) => void;
+  onQuestionAsked: (questionId: string | number) => void;
 };
 
 const MessageContainer: React.FC<Props> = ({
@@ -39,7 +41,9 @@ const MessageContainer: React.FC<Props> = ({
   isDeveloper,
   integrateSystem,
   isSimpleMode,
+  isDebugMode,
   onMsgDataLoaded,
+  onQuestionAsked,
   onSendMsg,
 }) => {
   const [triggerResize, setTriggerResize] = useState(false);
@@ -95,6 +99,7 @@ const MessageContainer: React.FC<Props> = ({
                   {identityMsg && <Text position="left" data={identityMsg} />}
                   <ChatItem
                     isSimpleMode={isSimpleMode}
+                    isDebugMode={isDebugMode}
                     msg={msgValue || msg || ''}
                     parseInfos={parseInfos}
                     parseTimeCostValue={parseTimeCost}
@@ -107,11 +112,13 @@ const MessageContainer: React.FC<Props> = ({
                     triggerResize={triggerResize}
                     isDeveloper={isDeveloper}
                     integrateSystem={integrateSystem}
+                    defaultShowTable={currentAgent?.visualConfig?.defaultShowTable ?? false}
                     onMsgDataLoaded={(data: MsgDataType, valid: boolean, isRefresh) => {
                       onMsgDataLoaded(data, msgId, msgValue || msg || '', valid, isRefresh);
                     }}
                     onUpdateMessageScroll={updateMessageContainerScroll}
                     onSendMsg={onSendMsg}
+                    onQuestionAsked={() => onQuestionAsked(msgId)}
                   />
                 </>
               )}

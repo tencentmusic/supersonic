@@ -52,7 +52,7 @@ const ViewCreateFormModal: React.FC<ModelCreateFormModalProps> = ({
 
   const [dimensionList, setDimensionList] = useState<ISemantic.IDimensionItem[]>();
   const [metricList, setMetricList] = useState<ISemantic.IMetricItem[]>();
-  const [tagList, setTagList] = useState<ISemantic.ITagItem[]>();
+  // const [tagList, setTagList] = useState<ISemantic.ITagItem[]>();
 
   useEffect(() => {
     if (selectedModelItem?.id) {
@@ -194,7 +194,7 @@ const ViewCreateFormModal: React.FC<ModelCreateFormModalProps> = ({
             }
             dimensionList={dimensionList}
             metricList={metricList}
-            tagList={tagList}
+            // tagList={tagList}
             modelItem={selectedModelItem}
             viewItem={viewItem}
             ref={configTableRef}

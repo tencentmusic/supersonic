@@ -1,11 +1,11 @@
 package com.tencent.supersonic.common.util;
 
-import com.google.common.base.Strings;
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.common.pojo.ItemDateResp;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -37,16 +37,16 @@ import static com.tencent.supersonic.common.pojo.Constants.YEAR;
 @Data
 public class DateModeUtils {
 
-    @Value("${query.parameter.sys.date:sys_imp_date}")
+    @Value("${s2.query.parameter.sys.date:sys_imp_date}")
     private String sysDateCol;
-    @Value("${query.parameter.sys.month:sys_imp_month}")
+    @Value("${s2.query.parameter.sys.month:sys_imp_month}")
     private String sysDateMonthCol;
-    @Value("${query.parameter.sys.month:sys_imp_week}")
+    @Value("${s2.query.parameter.sys.month:sys_imp_week}")
     private String sysDateWeekCol;
 
-    @Value("${query.parameter.sys.zipper.begin:start_}")
+    @Value("${s2.query.parameter.sys.zipper.begin:start_}")
     private String sysZipperDateColBegin;
-    @Value("${query.parameter.sys.zipper.end:end_}")
+    @Value("${s2.query.parameter.sys.zipper.end:end_}")
     private String sysZipperDateColEnd;
 
     public Boolean recentMode(DateConf dateInfo) {
@@ -73,8 +73,8 @@ public class DateModeUtils {
      */
     public String hasDataModeStr(ItemDateResp dateDate, DateConf dateInfo) {
         if (Objects.isNull(dateDate)
-                || Strings.isNullOrEmpty(dateDate.getStartDate())
-                || Strings.isNullOrEmpty(dateDate.getStartDate())
+                || StringUtils.isEmpty(dateDate.getStartDate())
+                || StringUtils.isEmpty(dateDate.getStartDate())
         ) {
             return String.format("(%s >= '%s' and %s <= '%s')", sysDateCol, dateInfo.getStartDate(), sysDateCol,
                     dateInfo.getEndDate());
@@ -82,7 +82,7 @@ public class DateModeUtils {
             log.info("dateDate:{}", dateDate);
         }
         String dateFormatStr = dateDate.getDateFormat();
-        if (Strings.isNullOrEmpty(dateFormatStr)) {
+        if (StringUtils.isEmpty(dateFormatStr)) {
             dateFormatStr = DAY_FORMAT;
         }
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern(dateFormatStr);
@@ -136,7 +136,7 @@ public class DateModeUtils {
 
     public ImmutablePair<String, String> recentDay(ItemDateResp dateDate, DateConf dateInfo) {
         String dateFormatStr = dateDate.getDateFormat();
-        if (Strings.isNullOrEmpty(dateFormatStr)) {
+        if (StringUtils.isEmpty(dateFormatStr)) {
             dateFormatStr = DAY_FORMAT;
         }
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern(dateFormatStr);
@@ -207,7 +207,7 @@ public class DateModeUtils {
 
     public ImmutablePair<String, String> recentWeek(ItemDateResp dateDate, DateConf dateInfo) {
         String dateFormatStr = dateDate.getDateFormat();
-        if (Strings.isNullOrEmpty(dateFormatStr)) {
+        if (StringUtils.isEmpty(dateFormatStr)) {
             dateFormatStr = DAY_FORMAT;
         }
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern(dateFormatStr);

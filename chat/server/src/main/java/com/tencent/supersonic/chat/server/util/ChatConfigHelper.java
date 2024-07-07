@@ -1,10 +1,6 @@
 package com.tencent.supersonic.chat.server.util;
 
-import static com.tencent.supersonic.common.pojo.Constants.ADMIN_LOWER;
-
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
-import com.tencent.supersonic.headless.api.pojo.DataSetSchema;
-import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.chat.api.pojo.request.ChatAggConfigReq;
 import com.tencent.supersonic.chat.api.pojo.request.ChatConfigBaseReq;
 import com.tencent.supersonic.chat.api.pojo.request.ChatConfigEditReqReq;
@@ -17,16 +13,21 @@ import com.tencent.supersonic.chat.server.persistence.dataobject.ChatConfigDO;
 import com.tencent.supersonic.common.pojo.RecordInfo;
 import com.tencent.supersonic.common.pojo.enums.StatusEnum;
 import com.tencent.supersonic.common.util.JsonUtil;
+import com.tencent.supersonic.headless.api.pojo.DataSetSchema;
+import com.tencent.supersonic.headless.api.pojo.SchemaElement;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
+import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.logging.log4j.util.Strings;
-import org.springframework.beans.BeanUtils;
-import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
+
+import static com.tencent.supersonic.common.pojo.Constants.ADMIN_LOWER;
 
 
 @Component
@@ -37,7 +38,7 @@ public class ChatConfigHelper {
         ChatConfig chatConfig = new ChatConfig();
         BeanUtils.copyProperties(extendBaseCmd, chatConfig);
         RecordInfo recordInfo = new RecordInfo();
-        String creator = (Objects.isNull(user) || Strings.isEmpty(user.getName())) ? ADMIN_LOWER : user.getName();
+        String creator = (Objects.isNull(user) || StringUtils.isEmpty(user.getName())) ? ADMIN_LOWER : user.getName();
         recordInfo.createdBy(creator);
         chatConfig.setRecordInfo(recordInfo);
         chatConfig.setStatus(StatusEnum.ONLINE);
@@ -49,7 +50,7 @@ public class ChatConfigHelper {
 
         BeanUtils.copyProperties(extendEditCmd, chatConfig);
         RecordInfo recordInfo = new RecordInfo();
-        String user = (Objects.isNull(facadeUser) || Strings.isEmpty(facadeUser.getName()))
+        String user = (Objects.isNull(facadeUser) || StringUtils.isEmpty(facadeUser.getName()))
                 ? ADMIN_LOWER : facadeUser.getName();
         recordInfo.updatedBy(user);
         chatConfig.setRecordInfo(recordInfo);
@@ -120,11 +121,11 @@ public class ChatConfigHelper {
         chatConfigDescriptor.setUpdatedAt(chatConfigDO.getUpdatedAt());
 
 
-        if (Strings.isEmpty(chatConfigDO.getChatAggConfig())) {
+        if (StringUtils.isEmpty(chatConfigDO.getChatAggConfig())) {
             chatConfigDescriptor.setChatAggConfig(generateEmptyChatAggConfigResp());
         }
 
-        if (Strings.isEmpty(chatConfigDO.getChatDetailConfig())) {
+        if (StringUtils.isEmpty(chatConfigDO.getChatDetailConfig())) {
             chatConfigDescriptor.setChatDetailConfig(generateEmptyChatDetailConfigResp());
         }
         return chatConfigDescriptor;

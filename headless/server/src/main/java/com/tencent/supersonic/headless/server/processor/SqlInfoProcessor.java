@@ -8,12 +8,12 @@ import com.tencent.supersonic.headless.api.pojo.request.ExplainSqlReq;
 import com.tencent.supersonic.headless.api.pojo.request.SemanticQueryReq;
 import com.tencent.supersonic.headless.api.pojo.response.ExplainResp;
 import com.tencent.supersonic.headless.api.pojo.response.ParseResp;
-import com.tencent.supersonic.headless.core.chat.query.QueryManager;
-import com.tencent.supersonic.headless.core.chat.query.SemanticQuery;
-import com.tencent.supersonic.headless.core.chat.query.llm.s2sql.LLMSqlQuery;
-import com.tencent.supersonic.headless.core.pojo.ChatContext;
-import com.tencent.supersonic.headless.core.pojo.QueryContext;
-import com.tencent.supersonic.headless.server.service.QueryService;
+import com.tencent.supersonic.headless.chat.ChatContext;
+import com.tencent.supersonic.headless.chat.QueryContext;
+import com.tencent.supersonic.headless.chat.query.QueryManager;
+import com.tencent.supersonic.headless.chat.query.SemanticQuery;
+import com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMSqlQuery;
+import com.tencent.supersonic.headless.server.facade.service.SemanticLayerService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -65,7 +65,7 @@ public class SqlInfoProcessor implements ResultProcessor {
         }
         semanticQuery.setParseInfo(parseInfo);
         SemanticQueryReq semanticQueryReq = semanticQuery.buildSemanticQueryReq();
-        QueryService queryService = ContextUtils.getBean(QueryService.class);
+        SemanticLayerService queryService = ContextUtils.getBean(SemanticLayerService.class);
         ExplainSqlReq<Object> explainSqlReq = ExplainSqlReq.builder().queryReq(semanticQueryReq)
                 .queryTypeEnum(QueryMethod.SQL).build();
         ExplainResp explain = queryService.explain(explainSqlReq, queryContext.getUser());
@@ -79,6 +79,7 @@ public class SqlInfoProcessor implements ResultProcessor {
                     sqlInfo.getS2SQL(), sqlInfo.getCorrectS2SQL(), explainSql);
         }
         sqlInfo.setQuerySQL(explainSql);
+        sqlInfo.setSourceId(explain.getSourceId());
     }
 
 }

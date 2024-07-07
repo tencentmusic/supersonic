@@ -1,7 +1,7 @@
 package com.tencent.supersonic.headless.core.utils;
 
 import com.tencent.supersonic.headless.api.pojo.enums.EngineType;
-import com.tencent.supersonic.headless.core.parser.calcite.schema.SemanticSqlDialect;
+import com.tencent.supersonic.headless.core.translator.calcite.schema.SemanticSqlDialect;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;

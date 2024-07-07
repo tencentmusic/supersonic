@@ -1,6 +1,10 @@
 -- sample user
-insert into s2_user (id, `name`, password, display_name, email, is_admin) values (1, 'admin','admin','admin','admin@xx.com', 1);
-insert into s2_user (id, `name`, password, display_name, email, is_admin) values (4, 'lucy','123456','lucy','lucy@xx.com', 1);
+---The default value for the password is 123456
+insert into s2_user (id, `name`, password, salt, display_name, email, is_admin) values (1, 'admin','c3VwZXJzb25pY0BiaWNvbdktJJYWw6A3rEmBUPzbn/6DNeYnD+y3mAwDKEMS3KVT','jGl25bVBBBW96Qi9Te4V3w==','admin','admin@xx.com', 1);
+insert into s2_user (id, `name`, password, salt,  display_name, email) values (2, 'jack','c3VwZXJzb25pY0BiaWNvbWxGalmwa0h/trkh/3CWOYMDiku0Op1VmOfESIKmN0HG','MWERWefm/3hD6kYndF6JIg==','jack','jack@xx.com');
+insert into s2_user (id, `name`, password, salt,  display_name, email) values (3, 'tom','c3VwZXJzb25pY0BiaWNvbVWv0CZ6HzeX8GRUpw0C8NSaQ+0hE/dAcmzRpCFwAqxK','4WCPdcXXgT89QDHLML+3hg==','tom','tom@xx.com');
+insert into s2_user (id, `name`, password, salt,  display_name, email, is_admin) values (4, 'lucy','c3VwZXJzb25pY0BiaWNvbc7Ychfu99lPL7rLmCkf/vgF4RASa4Z++Mxo1qlDCpci','3Jnpqob6uDoGLP9eCAg5Fw==','lucy','lucy@xx.com', 1);
+insert into s2_user (id, `name`, password, salt,  display_name, email) values (5, 'alice','c3VwZXJzb25pY0BiaWNvbe9Z4F2/DVIfAJoN1HwUTuH1KgVuiusvfh7KkWYQSNHk','K9gGyX8OAK8aH8Myj6djqQ==','alice','alice@xx.com');
 
 
 INSERT INTO s2_available_date_info (`item_id`, `type`, `date_format`, `start_date`, `end_date`, `unavailable_date`, `created_at`, `created_by`, `updated_at`, `updated_by`)
@@ -163,6 +167,12 @@ CREATE TABLE IF NOT EXISTS `s2_pv_uv_statis` (
     `user_name` varchar(200) NOT NULL,
     `page` varchar(200) NOT NULL
     );
+INSERT INTO s2_pv_uv_statis (imp_date, user_name, page) VALUES (CURRENT_DATE(), 'lucy', 'p1');
+INSERT INTO s2_pv_uv_statis (imp_date, user_name, page) VALUES (CURRENT_DATE(), 'jack', 'p1');
+INSERT INTO s2_pv_uv_statis (imp_date, user_name, page) VALUES (CURRENT_DATE(), 'lucy', 'p4');
+INSERT INTO s2_pv_uv_statis (imp_date, user_name, page) VALUES (CURRENT_DATE(), 'tom', 'p2');
+INSERT INTO s2_pv_uv_statis (imp_date, user_name, page) VALUES (CURRENT_DATE(), 'john', 'p3');
+INSERT INTO s2_pv_uv_statis (imp_date, user_name, page) VALUES (CURRENT_DATE(), 'alice', 'p1');
 INSERT INTO s2_pv_uv_statis (imp_date, user_name, page) VALUES (DATE_SUB(CURRENT_DATE(), INTERVAL 5 DAY), 'lucy', 'p1');
 INSERT INTO s2_pv_uv_statis (imp_date, user_name, page) VALUES (DATE_SUB(CURRENT_DATE(), INTERVAL 4 DAY), 'jack', 'p1');
 INSERT INTO s2_pv_uv_statis (imp_date, user_name, page) VALUES (DATE_SUB(CURRENT_DATE(), INTERVAL 3 DAY), 'lucy', 'p4');
@@ -1213,3 +1223,82 @@ VALUES (DATE_SUB(CURRENT_DATE(), INTERVAL 0 DAY), '打败它', 'Michel', '英国
 INSERT INTO song (imp_date, song_name, artist_name, country, f_id, g_name, rating, languages, releasedate, resolution)
 VALUES (DATE_SUB(CURRENT_DATE(), INTERVAL 0 DAY), '阿杰伊阿卡什', 'Topu', '印度', 6, '现代', 10, '孟加拉语', '2004-03-27', 320);
 -- benchmark
+
+-- 初始化数据
+INSERT INTO s2_role (id, creation_type, description, is_enable, last_operation_type, name, alias, tenant_id, create_time, update_time, create_by, update_by) VALUES
+(1, 1, 'System Admin Role', b'1', 1, '希沃助手', 'SysAdmin', 1, '2024-06-14 10:00:00', '2024-06-14 10:00:00', 'admin', 'admin'),
+(2, 2, 'User Role', b'1', 1, '财务助手', 'RegularUser', 1, '2024-06-14 10:05:00', '2024-06-14 10:05:00', 'admin', 'admin')
+;
+INSERT INTO s2_user_role_rela (id, role_id, role_type, user_id, tenant_id) VALUES
+(1, 1, 2, 5945, 1),
+(2, 2, 2, 564, 1)
+;
+
+INSERT INTO s2_authority (id, authority, authority_entity_id, authority_entity_type, authority_type, role_id, role_type, tenant_id, create_time, update_time, create_by, update_by) VALUES
+(1, 2, 'entity1', 1, 1, 1, 2, 1, '2024-06-14 10:10:00', '2024-06-14 10:10:00', 'admin', 'admin'),
+(2, 2, 'entity2', 2, 2, 2, 2, 1, '2024-06-14 10:15:00', '2024-06-14 10:15:00', 'admin', 'admin')
+;
+
+-- 新增角色，默认角色名为Agent助手名
+INSERT INTO s2_role (
+    name,
+    alias,
+    tenant_id,
+    create_time,
+    update_time,
+    create_by,
+    update_by
+)VALUES
+    ('算指标', 'Agent', 1, CURRENT_TIME(), CURRENT_TIME(), 'admin', 'admin'),
+    ('圈选', 'Agent', 1, CURRENT_TIME(), CURRENT_TIME(), 'admin', 'admin');
+
+-- 将用户和角色关联
+INSERT INTO s2_user_role_rela (
+    role_id, user_id, role_type, tenant_id
+)
+SELECT
+    r.id AS role_id,
+    u.id AS user_id,
+    2 AS role_type,
+    1 AS tenant_id
+FROM
+    s2_user u
+        CROSS JOIN
+    s2_role r
+WHERE
+    u.name IN ('zhaodongsheng', 'jianghao')
+  AND r.name IN ('算指标', '圈选');
+
+-- 给角色授权助手
+insert into s2_authority(
+    authority,
+    authority_entity_id,
+    authority_entity_type,
+    authority_type,
+    role_id,
+    role_type,
+    tenant_id,
+    create_time,
+    update_time,
+    create_by,
+    update_by
+)
+select
+    2 as authority,
+    sa.id as authority_entity_id,
+    1 as authority_entity_type,
+    2 as authority_type,
+    sr.id as role_id ,
+    1 as role_type,
+    1 as tenant_id,
+    CURRENT_TIME() as create_time,
+    CURRENT_TIME() as update_time,
+    'admin' as create_by,
+    'admin' as update_by
+from s2_role sr
+         cross join
+     s2_agent sa
+where sr.name in ('算指标','圈选')
+  and sa.name in ('算指标','圈选')
+;
+

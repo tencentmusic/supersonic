@@ -6,6 +6,7 @@ import {
   useImperativeHandle,
   useRef,
   useState,
+  useMemo,
 } from 'react';
 import MessageContainer from './MessageContainer';
 import styles from './style.module.less';
@@ -15,13 +16,15 @@ import { useThrottleFn } from 'ahooks';
 import Conversation from './Conversation';
 import ChatFooter from './ChatFooter';
 import classNames from 'classnames';
-import { cloneDeep } from 'lodash';
+import { cloneDeep, isBoolean } from 'lodash';
 import AgentList from './AgentList';
 import MobileAgents from './MobileAgents';
 import { HistoryMsgItemType, MsgDataType, SendMsgParamsType } from '../common/type';
 import { getHistoryMsg } from '../service';
 import ShowCase from '../ShowCase';
+import { jsonParse } from '../utils/utils';
 import { Drawer, Modal, Row, Col, Space, Switch, Tooltip } from 'antd';
+import { DataSetsInfoProvider } from '../hooks/useDataSetsInfo';
 
 type Props = {
   token?: string;
@@ -62,11 +65,25 @@ const Chat: ForwardRefRenderFunction<any, Props> = (
   const [historyVisible, setHistoryVisible] = useState(false);
   const [agentList, setAgentList] = useState<AgentType[]>([]);
   const [currentAgent, setCurrentAgent] = useState<AgentType>();
+  const [currentDataSetIds, setCurrentDataSetIds] = useState<number[]>([]);
   const [mobileAgentsVisible, setMobileAgentsVisible] = useState(false);
   const [agentListVisible, setAgentListVisible] = useState(true);
   const [showCaseVisible, setShowCaseVisible] = useState(false);
 
   const [isSimpleMode, setIsSimpleMode] = useState<boolean>(false);
+  // 是否所有问题都已经解决
+  const isAllMsgResolved = useMemo(
+    () =>
+      messageList
+        .filter(msg => msg.type === 'question')
+        .every(msg => {
+          if (msg.msgData) return true;
+          if (msg.__finished__) return true;
+          return false;
+        }),
+    [messageList]
+  );
+  const [isDebugMode, setIsDebugMode] = useState<boolean>(true);
 
   const conversationRef = useRef<any>();
   const chatFooterRef = useRef<any>();
@@ -87,10 +104,29 @@ const Chat: ForwardRefRenderFunction<any, Props> = (
     }
   };
 
+  const updateAgentConfigMode = (agent: AgentType) => {
+    const agentConfig = jsonParse(agent?.agentConfig, {});
+    const { simpleMode, debugMode } = agentConfig;
+    if (isBoolean(simpleMode)) {
+      setIsSimpleMode(simpleMode);
+    } else {
+      setIsSimpleMode(false);
+    }
+    if (isBoolean(debugMode)) {
+      setIsDebugMode(debugMode);
+    } else {
+      setIsDebugMode(true);
+    }
+  };
+
   const updateCurrentAgent = (agent?: AgentType) => {
     setCurrentAgent(agent);
+    setCurrentDataSetIds(agent?.dataSetIds || []);
     onCurrentAgentChange?.(agent);
     localStorage.setItem('AGENT_ID', `${agent?.id}`);
+    if (agent) {
+      updateAgentConfigMode(agent);
+    }
     if (!isCopilot) {
       window.history.replaceState({}, '', `${window.location.pathname}?agentId=${agent?.id}`);
     }
@@ -104,12 +140,11 @@ const Chat: ForwardRefRenderFunction<any, Props> = (
     setAgentList(agentListValue);
     if (agentListValue.length > 0) {
       const agentId = initialAgentId || localStorage.getItem('AGENT_ID');
+      let agentValue = agentListValue[0];
       if (agentId) {
-        const agent = agentListValue.find(item => item.id === +agentId);
-        updateCurrentAgent(agent || agentListValue[0]);
-      } else {
-        updateCurrentAgent(agentListValue[0]);
+        agentValue = agentListValue.find(item => item.id === +agentId) ?? agentValue;
       }
+      updateCurrentAgent(agentValue);
     }
   };
 
@@ -173,16 +208,25 @@ const Chat: ForwardRefRenderFunction<any, Props> = (
   };
 
   const convertHistoryMsg = (list: HistoryMsgItemType[]) => {
-    return list.map((item: HistoryMsgItemType) => ({
-      id: item.questionId,
-      type: MessageTypeEnum.QUESTION,
-      msg: item.queryText,
-      parseInfos: item.parseInfos,
-      parseTimeCost: item.parseTimeCost,
-      msgData: { ...(item.queryResult || {}), similarQueries: item.similarQueries },
-      score: item.score,
-      agentId: currentAgent?.id,
-    }));
+    return list.map((item: HistoryMsgItemType) => {
+      // 将queryResult中的数据存储的chatContext中的关键信息替换到parseInfos的第一个对象中
+
+      const parseInfos = item.parseInfos || [];
+      if (parseInfos.length > 0) {
+        parseInfos[0] = cloneDeep(item.queryResult?.chatContext || parseInfos[0]);
+      }
+
+      return {
+        id: item.questionId,
+        type: MessageTypeEnum.QUESTION,
+        msg: item.queryText,
+        parseInfos: parseInfos,
+        parseTimeCost: item.parseTimeCost,
+        msgData: { ...(item.queryResult || {}), similarQueries: item.similarQueries },
+        score: item.score,
+        agentId: currentAgent?.id,
+      };
+    });
   };
 
   const updateHistoryMsg = async (page: number) => {
@@ -320,6 +364,15 @@ const Chat: ForwardRefRenderFunction<any, Props> = (
     }
   };
 
+  const onQuestionAsked = (questionId: string | number) => {
+    const msgs = cloneDeep(messageList);
+    const msg = msgs.find(item => item.id === questionId);
+    if (msg) {
+      msg.__finished__ = true;
+      setMessageList(msgs);
+    }
+  };
+
   const onToggleHistoryVisible = () => {
     setHistoryVisible(!historyVisible);
   };
@@ -358,137 +411,142 @@ const Chat: ForwardRefRenderFunction<any, Props> = (
 
   return (
     <div className={chatClass}>
-      <div className={styles.chatSection}>
-        {!isMobile && agentList.length > 1 && agentListVisible && (
-          <AgentList
-            agentList={agentList}
+      <DataSetsInfoProvider ids={currentDataSetIds}>
+        <div className={styles.chatSection}>
+          {!isMobile && agentList.length > 1 && agentListVisible && (
+            <AgentList
+              agentList={agentList}
+              currentAgent={currentAgent}
+              onSelectAgent={onSelectAgent}
+            />
+          )}
+          <div className={styles.chatApp}>
+            {currentConversation && (
+              <div className={styles.chatBody}>
+                <div className={styles.chatContent}>
+                  {currentAgent && !isMobile && !noInput && (
+                    <div className={styles.chatHeader}>
+                      <Row style={{ width: '100%' }}>
+                        <Col flex="1 1 200px">
+                          <Space>
+                            <div className={styles.chatHeaderTitle}>{currentAgent.name}</div>
+                            <div className={styles.chatHeaderTip}>{currentAgent.description}</div>
+                            {/* <Tooltip title="精简模式下，问答结果将以文本形式输出">
+                              <Switch
+                                style={{ position: 'relative', top: -1 }}
+                                size="small"
+                                value={isSimpleMode}
+                                checkedChildren="精简模式"
+                                unCheckedChildren="精简模式"
+                                onChange={checked => {
+                                  setIsSimpleMode(checked);
+                                }}
+                              />
+                            </Tooltip> */}
+                          </Space>
+                        </Col>
+                        <Col flex="0 1 118px"></Col>
+                      </Row>
+                    </div>
+                  )}
+                  <MessageContainer
+                    id="messageContainer"
+                    isSimpleMode={isSimpleMode}
+                    isDebugMode={isDebugMode}
+                    messageList={messageList}
+                    chatId={currentConversation?.chatId}
+                    historyVisible={historyVisible}
+                    currentAgent={currentAgent}
+                    chatVisible={chatVisible}
+                    isDeveloper={isDeveloper}
+                    integrateSystem={integrateSystem}
+                    onMsgDataLoaded={onMsgDataLoaded}
+                    onSendMsg={onSendMsg}
+                    onQuestionAsked={onQuestionAsked}
+                  />
+                  {!noInput && (
+                    <ChatFooter
+                      inputMsg={inputMsg}
+                      chatId={currentConversation?.chatId}
+                      agentList={agentList}
+                      currentAgent={currentAgent}
+                      isAllMsgResolved={isAllMsgResolved}
+                      onToggleHistoryVisible={onToggleHistoryVisible}
+                      onInputMsgChange={onInputMsgChange}
+                      onSendMsg={sendMsg}
+                      onAddConversation={onAddConversation}
+                      onSelectAgent={onSelectAgent}
+                      onOpenAgents={() => {
+                        if (isMobile) {
+                          setMobileAgentsVisible(true);
+                        } else {
+                          setAgentListVisible(!agentListVisible);
+                        }
+                      }}
+                      onOpenShowcase={() => {
+                        setShowCaseVisible(!showCaseVisible);
+                      }}
+                      ref={chatFooterRef}
+                    />
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+          <Conversation
             currentAgent={currentAgent}
-            onSelectAgent={onSelectAgent}
+            currentConversation={currentConversation}
+            historyVisible={historyVisible}
+            onSelectConversation={onSelectConversation}
+            onCloseConversation={onCloseConversation}
+            ref={conversationRef}
           />
-        )}
-        <div className={styles.chatApp}>
-          {currentConversation && (
-            <div className={styles.chatBody}>
-              <div className={styles.chatContent}>
-                {currentAgent && !isMobile && !noInput && (
-                  <div className={styles.chatHeader}>
-                    <Row style={{ width: '100%' }}>
-                      <Col flex="1 1 200px">
-                        <Space>
-                          <div className={styles.chatHeaderTitle}>{currentAgent.name}</div>
-                          <div className={styles.chatHeaderTip}>{currentAgent.description}</div>
-                          <Tooltip title="精简模式下，问答结果将以文本形式输出">
-                            <Switch
-                              style={{ position: 'relative', top: -1 }}
-                              size="small"
-                              value={isSimpleMode}
-                              checkedChildren="精简模式"
-                              unCheckedChildren="精简模式"
-                              onChange={checked => {
-                                setIsSimpleMode(checked);
-                              }}
-                            />
-                          </Tooltip>
-                        </Space>
-                      </Col>
-                      <Col flex="0 1 118px"></Col>
-                    </Row>
-                  </div>
-                )}
-                <MessageContainer
-                  id="messageContainer"
-                  isSimpleMode={isSimpleMode}
-                  messageList={messageList}
-                  chatId={currentConversation?.chatId}
-                  historyVisible={historyVisible}
-                  currentAgent={currentAgent}
-                  chatVisible={chatVisible}
-                  isDeveloper={isDeveloper}
-                  integrateSystem={integrateSystem}
-                  onMsgDataLoaded={onMsgDataLoaded}
+          {currentAgent &&
+            (isMobile ? (
+              <Drawer
+                title="showcase"
+                placement="bottom"
+                height="95%"
+                open={showCaseVisible}
+                className={styles.showCaseDrawer}
+                destroyOnClose
+                onClose={() => {
+                  setShowCaseVisible(false);
+                }}
+              >
+                <ShowCase agentId={currentAgent.id} onSendMsg={onSendMsg} />
+              </Drawer>
+            ) : (
+              <Modal
+                title="showcase"
+                width="98%"
+                open={showCaseVisible}
+                centered
+                footer={null}
+                wrapClassName={styles.showCaseModal}
+                destroyOnClose
+                onCancel={() => {
+                  setShowCaseVisible(false);
+                }}
+              >
+                <ShowCase
+                  height="calc(100vh - 140px)"
+                  agentId={currentAgent.id}
                   onSendMsg={onSendMsg}
                 />
-                {!noInput && (
-                  <ChatFooter
-                    inputMsg={inputMsg}
-                    chatId={currentConversation?.chatId}
-                    agentList={agentList}
-                    currentAgent={currentAgent}
-                    onToggleHistoryVisible={onToggleHistoryVisible}
-                    onInputMsgChange={onInputMsgChange}
-                    onSendMsg={sendMsg}
-                    onAddConversation={onAddConversation}
-                    onSelectAgent={onSelectAgent}
-                    onOpenAgents={() => {
-                      if (isMobile) {
-                        setMobileAgentsVisible(true);
-                      } else {
-                        setAgentListVisible(!agentListVisible);
-                      }
-                    }}
-                    onOpenShowcase={() => {
-                      setShowCaseVisible(!showCaseVisible);
-                    }}
-                    ref={chatFooterRef}
-                  />
-                )}
-              </div>
-            </div>
-          )}
+              </Modal>
+            ))}
         </div>
-        <Conversation
+        <MobileAgents
+          open={mobileAgentsVisible}
+          agentList={agentList}
           currentAgent={currentAgent}
-          currentConversation={currentConversation}
-          historyVisible={historyVisible}
-          onSelectConversation={onSelectConversation}
-          onCloseConversation={onCloseConversation}
-          ref={conversationRef}
+          onSelectAgent={onSelectAgent}
+          onClose={() => {
+            setMobileAgentsVisible(false);
+          }}
         />
-        {currentAgent &&
-          (isMobile ? (
-            <Drawer
-              title="showcase"
-              placement="bottom"
-              height="95%"
-              open={showCaseVisible}
-              className={styles.showCaseDrawer}
-              destroyOnClose
-              onClose={() => {
-                setShowCaseVisible(false);
-              }}
-            >
-              <ShowCase agentId={currentAgent.id} onSendMsg={onSendMsg} />
-            </Drawer>
-          ) : (
-            <Modal
-              title="showcase"
-              width="98%"
-              open={showCaseVisible}
-              centered
-              footer={null}
-              wrapClassName={styles.showCaseModal}
-              destroyOnClose
-              onCancel={() => {
-                setShowCaseVisible(false);
-              }}
-            >
-              <ShowCase
-                height="calc(100vh - 140px)"
-                agentId={currentAgent.id}
-                onSendMsg={onSendMsg}
-              />
-            </Modal>
-          ))}
-      </div>
-      <MobileAgents
-        open={mobileAgentsVisible}
-        agentList={agentList}
-        currentAgent={currentAgent}
-        onSelectAgent={onSelectAgent}
-        onClose={() => {
-          setMobileAgentsVisible(false);
-        }}
-      />
+      </DataSetsInfoProvider>
     </div>
   );
 };

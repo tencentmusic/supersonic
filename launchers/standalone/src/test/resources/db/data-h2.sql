@@ -1,5 +1,5 @@
 -- sample user
-MERGE INTO s2_user (id, `name`, password, display_name, email, is_admin) values (1, 'admin','admin','admin','admin@xx.com', 1);
+MERGE INTO s2_user (id, `name`, password, salt, display_name, email, is_admin) values (1, 'admin','c3VwZXJzb25pY0BiaWNvbTD12g9wGXESwL7+o7xUW90=','jGl25bVBBBW96Qi9Te4V3w==','admin','admin@xx.com', 1);
 MERGE INTO s2_user (id, `name`, password, display_name, email) values (2, 'jack','123456','jack','jack@xx.com');
 MERGE INTO s2_user (id, `name`, password, display_name, email) values (3, 'tom','123456','tom','tom@xx.com');
 MERGE INTO s2_user (id, `name`, password, display_name, email, is_admin) values (4, 'lucy','123456','lucy','lucy@xx.com', 1);

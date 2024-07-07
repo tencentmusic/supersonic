@@ -16,7 +16,6 @@ interface RecordType {
 
 type Props = {
   knowledgeInfosMap?: IChatConfig.IKnowledgeInfosItemMap;
-  onKnowledgeInfosMapChange?: (knowledgeInfosMap: IChatConfig.IKnowledgeInfosItemMap) => void;
   [key: string]: any;
 };
 
@@ -80,7 +79,7 @@ const DimensionMetricVisibleTableTransfer: React.FC<Props> = ({
           onItemSelect,
           selectedKeys: listSelectedKeys,
         }) => {
-          const columns:any = direction === 'left' ? leftColumns : rightColumns;
+          const columns: any = direction === 'left' ? leftColumns : rightColumns;
           const rowSelection: TableRowSelection<TransferItem> = {
             onSelectAll(selected, selectedRows) {
               const treeSelectedKeys = selectedRows.map(({ key }) => key);

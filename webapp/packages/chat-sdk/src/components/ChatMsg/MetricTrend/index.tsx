@@ -1,5 +1,5 @@
 import { CLS_PREFIX } from '../../../common/constants';
-import { DrillDownDimensionType, FieldType, MsgDataType } from '../../../common/type';
+import { DrillDownDimensionType, MetricType, MsgDataType } from '../../../common/type';
 import { isMobile } from '../../../utils/utils';
 import MetricTrendChart from './MetricTrendChart';
 import { Spin, Select } from 'antd';
@@ -21,7 +21,7 @@ const metricChartSelectOptions = [
   {
     value: 'pie',
     label: '饼图',
-  }
+  },
 ];
 
 type Props = {
@@ -29,7 +29,7 @@ type Props = {
   chartIndex: number;
   triggerResize?: boolean;
   loading: boolean;
-  activeMetricField?: FieldType;
+  activeMetricField?: MetricType;
   drillDownDimension?: DrillDownDimensionType;
   currentDateOption?: number;
   onApplyAuth?: (model: string) => void;
@@ -57,7 +57,6 @@ const MetricTrend: React.FC<Props> = ({
   const categoryColumnName =
     queryColumns?.find((column: any) => column.showType === 'CATEGORY')?.nameEn || '';
   const metricFields = queryColumns?.filter((column: any) => column.showType === 'NUMBER');
-  console.log('🚀 ~ metricFields:', metricFields)
 
   const currentMetricField = queryColumns?.find((column: any) => column.showType === 'NUMBER');
 
@@ -96,6 +95,7 @@ const MetricTrend: React.FC<Props> = ({
               <div>
                 <Select
                   defaultValue="line"
+                  style={{ width: 85 }}
                   bordered={false}
                   options={metricChartSelectOptions}
                   onChange={(value: string) => setChartType(value)}

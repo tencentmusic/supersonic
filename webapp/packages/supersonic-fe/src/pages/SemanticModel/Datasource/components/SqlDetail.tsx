@@ -3,7 +3,7 @@ import { Button, Table, message, Tooltip, Space, Dropdown } from 'antd';
 import SplitPane from 'react-split-pane';
 import Pane from 'react-split-pane/lib/Pane';
 import { useModel } from '@umijs/max';
-import sqlFormatter from 'sql-formatter';
+import { format } from 'sql-formatter';
 import {
   FullscreenOutlined,
   WarningOutlined,
@@ -230,7 +230,7 @@ const SqlDetail: React.FC<IProps> = ({
   };
 
   const formatSQL = () => {
-    const sqlvalue = sqlFormatter.format(sql);
+    const sqlvalue = format(sql);
     if (onUpdateSql && isFunction(onUpdateSql)) {
       onUpdateSql(sqlvalue);
     }
@@ -345,7 +345,11 @@ const SqlDetail: React.FC<IProps> = ({
           <div
             className={styles.sqlResultLog}
             dangerouslySetInnerHTML={{
-              __html: taskLog.replace(/\r\n/g, '<br/>').replace(/\t/g, '&nbsp;&nbsp;&nbsp;&nbsp;'),
+              __html: taskLog ? (
+                taskLog.replace(/\r\n/g, '<br/>').replace(/\t/g, '&nbsp;&nbsp;&nbsp;&nbsp;')
+              ) : (
+                <></>
+              ),
             }}
           />
         </>

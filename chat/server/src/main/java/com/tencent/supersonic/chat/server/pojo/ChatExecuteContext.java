@@ -7,6 +7,7 @@ import lombok.Data;
 @Data
 public class ChatExecuteContext {
     private User user;
+    private Integer agentId;
     private Long queryId;
     private Integer chatId;
     private int parseId;

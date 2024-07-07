@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Form, Button, Modal, Steps, message } from 'antd';
 import ModelBasicForm from './ModelBasicForm';
-import ModelFieldForm from './ModelFieldForm';
+import ModelFieldForm, { getExtraRecordByType } from './ModelFieldForm';
 import { formLayout } from '@/components/FormHelper/utils';
 import { EnumDataSourceType } from '../constants';
 import styles from '../style.less';
@@ -16,6 +16,32 @@ import { useModel } from '@umijs/max';
 import { ISemantic, IDataSource } from '../../data';
 import { isArrayOfValues } from '@/utils/utils';
 import EffectDimensionAndMetricTipsModal from './EffectDimensionAndMetricTipsModal';
+
+const autoFillModelInfo = true;
+
+function getTypeByDataType(dataType: string): EnumDataSourceType {
+  // 映射字符串类型、数值型和日期时间型
+  if (dataType.includes('char') || dataType.includes('text')) {
+    return EnumDataSourceType.CATEGORICAL;
+  }
+
+  if (
+    dataType.includes('int') ||
+    dataType.includes('float') ||
+    dataType.includes('double') ||
+    dataType.includes('decimal') ||
+    dataType.includes('numeric') ||
+    dataType.includes('real')
+  ) {
+    return EnumDataSourceType.MEASURES;
+  }
+
+  if (dataType.includes('date') || dataType.includes('time')) {
+    return EnumDataSourceType.TIME;
+  }
+
+  return EnumDataSourceType.PRIMARY;
+}
 
 export type CreateFormProps = {
   createModalVisible: boolean;
@@ -287,17 +313,30 @@ const ModelCreateForm: React.FC<CreateFormProps> = ({
     }
     const columnFields: any[] = columns.map((item: IDataSource.IExecuteSqlColumn) => {
       const { type, nameEn, comment } = item;
-      const oldItem =
-        fieldsClassifyList.find((oItem) => {
-          return oItem.fieldName === item.nameEn;
-        }) || {};
-      return {
-        ...oldItem,
-        bizName: nameEn,
-        fieldName: nameEn,
-        dataType: type,
-        comment,
-      };
+      const oldItem = fieldsClassifyList.find((oItem) => {
+        return oItem.fieldName === item.nameEn;
+      });
+
+      if (oldItem) {
+        return {
+          ...oldItem,
+          bizName: nameEn,
+          fieldName: nameEn,
+          dataType: type,
+          comment,
+        };
+      } else {
+        const baseItem = {
+          bizName: nameEn,
+          fieldName: nameEn,
+          dataType: type,
+          comment,
+        };
+        const semanticType = getTypeByDataType(type);
+        return autoFillModelInfo && comment
+          ? getExtraRecordByType(baseItem, semanticType)
+          : baseItem;
+      }
     });
     setFields(columnFields || []);
   };

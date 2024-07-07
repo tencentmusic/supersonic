@@ -1,14 +1,14 @@
 package com.tencent.supersonic.headless.server.utils;
 
 
+import com.tencent.supersonic.common.jsqlparser.SqlReplaceHelper;
+import com.tencent.supersonic.common.jsqlparser.SqlSelectFunctionHelper;
+import com.tencent.supersonic.common.jsqlparser.SqlSelectHelper;
 import com.tencent.supersonic.common.pojo.Aggregator;
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
 import com.tencent.supersonic.common.pojo.enums.QueryType;
 import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
-import com.tencent.supersonic.common.util.jsqlparser.SqlReplaceHelper;
-import com.tencent.supersonic.common.util.jsqlparser.SqlSelectFunctionHelper;
-import com.tencent.supersonic.common.util.jsqlparser.SqlSelectHelper;
 import com.tencent.supersonic.headless.api.pojo.Measure;
 import com.tencent.supersonic.headless.api.pojo.MetricTable;
 import com.tencent.supersonic.headless.api.pojo.QueryParam;
@@ -31,7 +31,6 @@ import com.tencent.supersonic.headless.core.utils.SqlGenerateUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -77,7 +76,7 @@ public class QueryReqConverter {
         // correct order item is same as agg alias
         String reqSql = querySQLReq.getSql();
         querySQLReq.setSql(SqlReplaceHelper.replaceAggAliasOrderItem(querySQLReq.getSql()));
-        log.info("replaceOrderAggSameAlias {} -> {}", reqSql, querySQLReq.getSql());
+        log.debug("replaceOrderAggSameAlias {} -> {}", reqSql, querySQLReq.getSql());
         //4.build MetricTables
         List<String> allFields = SqlSelectHelper.getAllFields(querySQLReq.getSql());
         List<MetricSchemaResp> metricSchemas = getMetrics(semanticSchemaResp, allFields);
@@ -123,7 +122,7 @@ public class QueryReqConverter {
         queryStructReq.setDateInfo(queryStructUtils.getDateConfBySql(querySQLReq.getSql()));
         queryStructReq.setDataSetId(querySQLReq.getDataSetId());
         queryStructReq.setQueryType(getQueryType(aggOption));
-        log.info("QueryReqConverter queryStructReq[{}]", queryStructReq);
+        log.debug("QueryReqConverter queryStructReq[{}]", queryStructReq);
         QueryParam queryParam = new QueryParam();
         convert(queryStructReq, queryParam);
         QueryStatement queryStatement = new QueryStatement();
@@ -151,16 +150,19 @@ public class QueryReqConverter {
         if (!SqlSelectFunctionHelper.hasAggregateFunction(sql)
                 || SqlSelectFunctionHelper.hasFunction(sql, "count")
                 || SqlSelectFunctionHelper.hasFunction(sql, "count_distinct")) {
-            return AggOption.NATIVE;
+            return AggOption.OUTER;
         }
         if (databaseReq.isInnerLayerNative()) {
             return AggOption.NATIVE;
         }
+        if (SqlSelectHelper.hasSubSelect(sql) || SqlSelectHelper.hasWith(sql) || SqlSelectHelper.hasGroupBy(sql)) {
+            return AggOption.OUTER;
+        }
         long defaultAggNullCnt = metricSchemas.stream()
-                .filter(m -> Objects.isNull(m.getDefaultAgg()) || Strings.isBlank(m.getDefaultAgg())).count();
+                .filter(m -> Objects.isNull(m.getDefaultAgg()) || StringUtils.isBlank(m.getDefaultAgg())).count();
         if (defaultAggNullCnt > 0) {
-            log.info("getAggOption find null defaultAgg metric set to NATIVE");
-            return AggOption.NATIVE;
+            log.debug("getAggOption find null defaultAgg metric set to NATIVE");
+            return AggOption.OUTER;
         }
         return AggOption.DEFAULT;
     }
@@ -168,9 +170,9 @@ public class QueryReqConverter {
     private void convertNameToBizName(QuerySqlReq querySqlReq, SemanticSchemaResp semanticSchemaResp) {
         Map<String, String> fieldNameToBizNameMap = getFieldNameToBizNameMap(semanticSchemaResp);
         String sql = querySqlReq.getSql();
-        log.info("dataSetId:{},convert name to bizName before:{}", querySqlReq.getDataSetId(), sql);
+        log.debug("dataSetId:{},convert name to bizName before:{}", querySqlReq.getDataSetId(), sql);
         String replaceFields = SqlReplaceHelper.replaceFields(sql, fieldNameToBizNameMap, true);
-        log.info("dataSetId:{},convert name to bizName after:{}", querySqlReq.getDataSetId(), replaceFields);
+        log.debug("dataSetId:{},convert name to bizName after:{}", querySqlReq.getDataSetId(), replaceFields);
         querySqlReq.setSql(replaceFields);
     }
 
@@ -238,6 +240,7 @@ public class QueryReqConverter {
         String sql = querySqlReq.getSql();
         sql = SqlReplaceHelper.replaceTable(sql,
                 Constants.TABLE_PREFIX + querySqlReq.getDataSetId());
+        log.debug("correctTableName after:{}", sql);
         querySqlReq.setSql(sql);
     }
 
@@ -283,7 +286,7 @@ public class QueryReqConverter {
                         m.getMetricDefineByMeasureParams()))) {
             return;
         }
-        log.info("begin to generateDerivedMetric {} [{}]", aggOption, metrics);
+        log.debug("begin to generateDerivedMetric {} [{}]", aggOption, metrics);
         Set<String> allFields = new HashSet<>();
         Map<String, Measure> allMeasures = new HashMap<>();
         semanticSchemaResp.getModelResps().forEach(modelResp -> {
@@ -307,7 +310,7 @@ public class QueryReqConverter {
                                 visitedMetric,
                                 deriveMetric, deriveDimension);
                         replaces.put(metricResp.getBizName(), expr);
-                        log.info("derived metric {}->{}", metricResp.getBizName(), expr);
+                        log.debug("derived metric {}->{}", metricResp.getBizName(), expr);
                     } else {
                         measures.add(metricResp.getBizName());
                     }

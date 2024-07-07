@@ -5,6 +5,8 @@ import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
 import com.tencent.supersonic.chat.server.agent.Agent;
 import com.tencent.supersonic.chat.server.agent.AgentToolType;
 import com.tencent.supersonic.chat.server.service.AgentService;
+import com.tencent.supersonic.chat.server.util.LLMConnHelper;
+import com.tencent.supersonic.common.config.LLMConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -26,21 +28,19 @@ public class AgentController {
     private AgentService agentService;
 
     @PostMapping
-    public boolean createAgent(@RequestBody Agent agent,
+    public Agent createAgent(@RequestBody Agent agent,
                                 HttpServletRequest httpServletRequest,
                                 HttpServletResponse httpServletResponse) {
         User user = UserHolder.findUser(httpServletRequest, httpServletResponse);
-        agentService.createAgent(agent, user);
-        return true;
+        return agentService.createAgent(agent, user);
     }
 
     @PutMapping
-    public boolean updateAgent(@RequestBody Agent agent,
+    public Agent updateAgent(@RequestBody Agent agent,
                                 HttpServletRequest httpServletRequest,
                                 HttpServletResponse httpServletResponse) {
         User user = UserHolder.findUser(httpServletRequest, httpServletResponse);
-        agentService.updateAgent(agent, user);
-        return true;
+        return agentService.updateAgent(agent, user);
     }
 
     @DeleteMapping("/{id}")
@@ -49,9 +49,16 @@ public class AgentController {
         return true;
     }
 
+    @PostMapping("/testLLMConn")
+    public boolean testLLMConn(@RequestBody LLMConfig llmConfig) {
+        return LLMConnHelper.testConnection(llmConfig);
+    }
+
     @RequestMapping("/getAgentList")
-    public List<Agent> getAgentList() {
-        return agentService.getAgents();
+    public List<Agent> getAgentList(HttpServletRequest httpServletRequest,
+                                    HttpServletResponse httpServletResponse) {
+        User user = UserHolder.findUser(httpServletRequest, httpServletResponse);
+        return agentService.getAgents(user);
     }
 
     @RequestMapping("/getToolTypes")

@@ -1,14 +1,14 @@
 package com.tencent.supersonic.headless.server.aspect;
 
 import com.google.common.collect.Lists;
+import com.tencent.supersonic.common.jsqlparser.FieldExpression;
+import com.tencent.supersonic.common.jsqlparser.SqlReplaceHelper;
+import com.tencent.supersonic.common.jsqlparser.SqlSelectHelper;
 import com.tencent.supersonic.common.pojo.Filter;
 import com.tencent.supersonic.common.pojo.QueryColumn;
 import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
 import com.tencent.supersonic.common.pojo.exception.InvalidArgumentException;
 import com.tencent.supersonic.common.util.JsonUtil;
-import com.tencent.supersonic.common.util.jsqlparser.FieldExpression;
-import com.tencent.supersonic.common.util.jsqlparser.SqlReplaceHelper;
-import com.tencent.supersonic.common.util.jsqlparser.SqlSelectHelper;
 import com.tencent.supersonic.headless.api.pojo.DimValueMap;
 import com.tencent.supersonic.headless.api.pojo.SchemaItem;
 import com.tencent.supersonic.headless.api.pojo.request.QuerySqlReq;
@@ -17,17 +17,9 @@ import com.tencent.supersonic.headless.api.pojo.request.SemanticQueryReq;
 import com.tencent.supersonic.headless.api.pojo.response.DimensionResp;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
 import com.tencent.supersonic.headless.server.pojo.MetaFilter;
-import com.tencent.supersonic.headless.server.service.DimensionService;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
+import com.tencent.supersonic.headless.server.web.service.DimensionService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.util.Strings;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -36,17 +28,25 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 @Aspect
 @Component
 @Slf4j
 public class DimValueAspect {
 
-    @Value("${dimension.value.map.enable:true}")
+    @Value("${s2.dimension.value.map.enable:true}")
     private Boolean dimensionValueMapEnable;
     @Autowired
     private DimensionService dimensionService;
 
-    @Around("execution(* com.tencent.supersonic.headless.server.service.QueryService.queryByReq(..))")
+    @Around("execution(* com.tencent.supersonic.headless.server.facade.service.SemanticLayerService.queryByReq(..))")
     public Object handleDimValue(ProceedingJoinPoint joinPoint) throws Throwable {
         if (!dimensionValueMapEnable) {
             log.debug("dimensionValueMapEnable is false, skip dimensionValueMap");
@@ -88,7 +88,7 @@ public class DimValueAspect {
         QuerySqlReq querySqlReq = (QuerySqlReq) args[0];
         MetaFilter metaFilter = new MetaFilter(Lists.newArrayList(querySqlReq.getModelIds()));
         String sql = querySqlReq.getSql();
-        log.info("correctorSql before replacing:{}", sql);
+        log.debug("correctorSql before replacing:{}", sql);
         List<FieldExpression> fieldExpressionList = SqlSelectHelper.getWhereExpressions(sql);
         List<DimensionResp> dimensions = dimensionService.getDimensions(metaFilter);
         Set<String> fieldNames = dimensions.stream().map(SchemaItem::getName).collect(Collectors.toSet());
@@ -117,7 +117,7 @@ public class DimValueAspect {
             }
         }
         sql = SqlReplaceHelper.replaceValue(sql, filedNameToValueMap);
-        log.info("correctorSql after replacing:{}", sql);
+        log.debug("correctorSql after replacing:{}", sql);
         querySqlReq.setSql(sql);
         Map<String, Map<String, String>> techNameToBizName = getTechNameToBizName(dimensions);
 
@@ -176,7 +176,7 @@ public class DimValueAspect {
                     Map<String, String> techAndBizPair = dimAndTechNameAndBizNamePair.get(bizName);
                     if (!CollectionUtils.isEmpty(techAndBizPair) && techAndBizPair.containsKey(techName)) {
                         String bizValueName = techAndBizPair.get(techName);
-                        if (Strings.isNotEmpty(bizValueName)) {
+                        if (StringUtils.isNotEmpty(bizValueName)) {
                             line.put(bizName, bizValueName);
                         }
                     }
@@ -255,12 +255,12 @@ public class DimValueAspect {
                 if (needSkipDimValue(dimValueMap)) {
                     continue;
                 }
-                if (Strings.isNotEmpty(dimValueMap.getBizName())) {
+                if (StringUtils.isNotEmpty(dimValueMap.getBizName())) {
                     aliasAndBizNameToTechName.put(dimValueMap.getBizName(), dimValueMap.getTechName());
                 }
                 if (!CollectionUtils.isEmpty(dimValueMap.getAlias())) {
                     dimValueMap.getAlias().stream().forEach(alias -> {
-                        if (Strings.isNotEmpty(alias)) {
+                        if (StringUtils.isNotEmpty(alias)) {
                             aliasAndBizNameToTechName.put(alias, dimValueMap.getTechName());
                         }
                     });
@@ -275,7 +275,7 @@ public class DimValueAspect {
     }
 
     private boolean needSkipDimValue(DimValueMap dimValueMap) {
-        return Objects.isNull(dimValueMap) || Strings.isEmpty(dimValueMap.getTechName());
+        return Objects.isNull(dimValueMap) || StringUtils.isEmpty(dimValueMap.getTechName());
     }
 
     private Map<String, Map<String, String>> getTechNameToBizName(List<DimensionResp> dimensions) {
@@ -308,7 +308,7 @@ public class DimValueAspect {
     }
 
     private boolean needSkipDimension(DimensionResp dimension) {
-        return Objects.isNull(dimension) || Strings.isEmpty(dimension.getBizName()) || CollectionUtils.isEmpty(
+        return Objects.isNull(dimension) || StringUtils.isEmpty(dimension.getBizName()) || CollectionUtils.isEmpty(
                 dimension.getDimValueMaps());
     }
 }

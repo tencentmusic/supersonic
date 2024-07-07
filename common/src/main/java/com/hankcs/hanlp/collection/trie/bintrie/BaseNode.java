@@ -2,6 +2,8 @@ package com.hankcs.hanlp.collection.trie.bintrie;
 
 import com.hankcs.hanlp.LoadRemoveService;
 import com.hankcs.hanlp.corpus.io.ByteArray;
+import lombok.extern.slf4j.Slf4j;
+
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.ObjectInput;
@@ -14,10 +16,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Queue;
 import java.util.Set;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-
+@Slf4j
 public abstract class BaseNode<V> implements Comparable<BaseNode> {
 
     /**
@@ -25,7 +25,6 @@ public abstract class BaseNode<V> implements Comparable<BaseNode> {
      */
     static final Status[] ARRAY_STATUS = Status.values();
 
-    private static final Logger logger = LoggerFactory.getLogger(BaseNode.class);
     /**
      * 子节点
      */
@@ -286,12 +285,12 @@ public abstract class BaseNode<V> implements Comparable<BaseNode> {
                 + '}';
     }
 
-    public void walkNode(Set<Map.Entry<String, V>> entrySet, Set<Long> detectModelIds) {
+    public void walkNode(Set<Map.Entry<String, V>> entrySet) {
         if (status == Status.WORD_MIDDLE_2 || status == Status.WORD_END_3) {
-            logger.debug("detectModelIds:{},before:{}", detectModelIds, value.toString());
-            List natures = new LoadRemoveService().removeNatures((List) value, detectModelIds);
+            log.debug("walkNode before:{}", value.toString());
+            List natures = new LoadRemoveService().removeNatures((List) value);
             String name = this.prefix != null ? this.prefix + c : "" + c;
-            logger.debug("name:{},after:{},natures:{}", name, (List) value, natures);
+            log.debug("walkNode name:{},after:{},natures:{}", name, (List) value, natures);
             entrySet.add(new TrieEntry(name, (V) natures));
         }
     }
@@ -300,21 +299,17 @@ public abstract class BaseNode<V> implements Comparable<BaseNode> {
      * walk limit
      * @param sb
      * @param entrySet
-     * @param limit
      */
-    public void walkLimit(StringBuilder sb, Set<Map.Entry<String, V>> entrySet, int limit, Set<Long> detectModelIds) {
+    public void walkLimit(StringBuilder sb, Set<Map.Entry<String, V>> entrySet) {
         Queue<BaseNode> queue = new ArrayDeque<>();
         this.prefix = sb.toString();
         queue.add(this);
         while (!queue.isEmpty()) {
-            if (entrySet.size() >= limit) {
-                break;
-            }
             BaseNode root = queue.poll();
             if (root == null) {
                 continue;
             }
-            root.walkNode(entrySet, detectModelIds);
+            root.walkNode(entrySet);
             if (root.child == null) {
                 continue;
             }

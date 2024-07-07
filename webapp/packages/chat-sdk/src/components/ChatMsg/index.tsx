@@ -3,7 +3,7 @@ import MetricCard from './MetricCard';
 import MetricTrend from './MetricTrend';
 import MarkDown from './MarkDown';
 import Table from './Table';
-import { ColumnType, DrillDownDimensionType, FieldType, MsgDataType } from '../../common/type';
+import { ColumnType, DrillDownDimensionType, MetricType, MsgDataType } from '../../common/type';
 import { useEffect, useState } from 'react';
 import { queryData } from '../../service';
 import classNames from 'classnames';
@@ -42,8 +42,8 @@ const ChatMsg: React.FC<Props> = ({
   const [secondDrillDownDimension, setSecondDrillDownDimension] =
     useState<DrillDownDimensionType>();
   const [loading, setLoading] = useState(false);
-  const [defaultMetricField, setDefaultMetricField] = useState<FieldType>();
-  const [activeMetricField, setActiveMetricField] = useState<FieldType>();
+  const [defaultMetricField, setDefaultMetricField] = useState<MetricType>();
+  const [activeMetricField, setActiveMetricField] = useState<MetricType>();
   const [dateModeValue, setDateModeValue] = useState<any>();
   const [currentDateOption, setCurrentDateOption] = useState<number>();
 
@@ -86,11 +86,13 @@ const ChatMsg: React.FC<Props> = ({
     const isMetricCard = (queryMode.includes('METRIC') || isDslMetricCard) && singleData;
 
     const isText =
-      columns.length === 1 &&
-      columns[0].showType === 'CATEGORY' &&
-      ((!queryMode.includes('METRIC') && !queryMode.includes('ENTITY')) ||
-        queryMode === 'METRIC_INTERPRET') &&
-      singleData;
+      queryMode === 'PLAIN_TEXT' ||
+      (columns.length === 1 &&
+        columns[0].showType === 'CATEGORY' &&
+        ((!queryMode.includes('METRIC') && !queryMode.includes('ENTITY')) ||
+          queryMode === 'METRIC_INTERPRET') &&
+        singleData);
+
     if (isText) {
       return MsgContentTypeEnum.TEXT;
     }
@@ -250,7 +252,7 @@ const ChatMsg: React.FC<Props> = ({
     });
   };
 
-  const onSwitchMetric = (metricField?: FieldType) => {
+  const onSwitchMetric = (metricField?: MetricType) => {
     setActiveMetricField(metricField);
     onLoadData({
       dateInfo: {

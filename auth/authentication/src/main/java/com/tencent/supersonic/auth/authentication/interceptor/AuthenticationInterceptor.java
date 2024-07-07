@@ -5,19 +5,20 @@ import com.tencent.supersonic.auth.api.authentication.constant.UserConstants;
 import com.tencent.supersonic.auth.authentication.service.UserServiceImpl;
 import com.tencent.supersonic.auth.authentication.utils.UserTokenUtils;
 import com.tencent.supersonic.common.util.S2ThreadContext;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.catalina.connector.RequestFacade;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.util.Strings;
 import org.apache.tomcat.util.http.MimeHeaders;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.support.StandardMultipartHttpServletRequest;
 import org.springframework.web.servlet.HandlerInterceptor;
+
 import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.List;
 
-
+@Slf4j
 public abstract class AuthenticationInterceptor implements HandlerInterceptor {
 
 
@@ -32,7 +33,7 @@ public abstract class AuthenticationInterceptor implements HandlerInterceptor {
 
     protected boolean isExcludedUri(String uri) {
         String excludePathStr = authenticationConfig.getExcludePath();
-        if (Strings.isEmpty(excludePathStr)) {
+        if (StringUtils.isEmpty(excludePathStr)) {
             return false;
         }
         List<String> excludePaths = Arrays.asList(excludePathStr.split(","));
@@ -44,7 +45,7 @@ public abstract class AuthenticationInterceptor implements HandlerInterceptor {
 
     protected boolean isIncludedUri(String uri) {
         String includePathStr = authenticationConfig.getIncludePath();
-        if (Strings.isEmpty(includePathStr)) {
+        if (StringUtils.isEmpty(includePathStr)) {
             return false;
         }
         List<String> includePaths = Arrays.asList(includePathStr.split(","));
@@ -64,7 +65,7 @@ public abstract class AuthenticationInterceptor implements HandlerInterceptor {
         return StringUtils.isNotBlank(appId);
     }
 
-    protected void reflectSetparam(HttpServletRequest request, String key, String value) {
+    protected void reflectSetParam(HttpServletRequest request, String key, String value) {
         try {
             if (request instanceof StandardMultipartHttpServletRequest) {
                 RequestFacade servletRequest =
@@ -98,7 +99,7 @@ public abstract class AuthenticationInterceptor implements HandlerInterceptor {
                 o2.addValue(key).setString(value);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("reflectSetParam error:", e);
         }
     }
 }

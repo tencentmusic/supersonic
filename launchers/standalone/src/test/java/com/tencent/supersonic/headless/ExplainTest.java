@@ -7,7 +7,7 @@ import com.tencent.supersonic.headless.api.pojo.request.ExplainSqlReq;
 import com.tencent.supersonic.headless.api.pojo.request.QuerySqlReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
 import com.tencent.supersonic.headless.api.pojo.response.ExplainResp;
-import com.tencent.supersonic.headless.core.utils.QueryReqBuilder;
+import com.tencent.supersonic.headless.chat.utils.QueryReqBuilder;
 import com.tencent.supersonic.util.DataUtils;
 import org.junit.jupiter.api.Test;
 
@@ -25,7 +25,7 @@ public class ExplainTest extends BaseTest {
                 .queryTypeEnum(QueryMethod.SQL)
                 .queryReq(QueryReqBuilder.buildS2SQLReq(sql, DataUtils.getMetricAgentView()))
                 .build();
-        ExplainResp explain = queryService.explain(explainSqlReq, User.getFakeUser());
+        ExplainResp explain = semanticLayerService.explain(explainSqlReq, User.getFakeUser());
         assertNotNull(explain);
         assertNotNull(explain.getSql());
         assertTrue(explain.getSql().contains("department"));
@@ -39,7 +39,7 @@ public class ExplainTest extends BaseTest {
                 .queryTypeEnum(QueryMethod.STRUCT)
                 .queryReq(queryStructReq)
                 .build();
-        ExplainResp explain = queryService.explain(explainSqlReq, User.getFakeUser());
+        ExplainResp explain = semanticLayerService.explain(explainSqlReq, User.getFakeUser());
         assertNotNull(explain);
         assertNotNull(explain.getSql());
         assertTrue(explain.getSql().contains("department"));

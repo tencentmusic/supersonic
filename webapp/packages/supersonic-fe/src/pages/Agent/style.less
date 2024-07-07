@@ -14,6 +14,11 @@
   }
 }
 
+.agentFormContainer {
+  width: 1000px;
+  padding: 20px 0;
+}
+
 .content {
   // margin-top: 20px;
   .searchBar {
@@ -107,7 +112,7 @@
             overflow: hidden;
             font-size: 12px;
             margin-top: 4px;
-            color: var(--text-color-third)
+            color: var(--text-color-third);
           }
         }
       }
@@ -176,6 +181,7 @@
 
 .basicInfo {
   margin: 20px;
+  padding: 10px;
   background: #fff;
   border-radius: 6px;
 
@@ -309,4 +315,62 @@
   display: flex;
   align-items: center;
   column-gap: 12px;
+}
+
+.memorySection {
+  margin-top: 10px;
+  margin-bottom: 30px;
+
+  :global {
+    .ant-pro-card-body {
+      padding: 0;
+    }
+
+    .ant-input-search-button {
+      width: 42px !important;
+    }
+  }
+
+  .filterSection {
+    display: flex;
+    justify-content: space-between;
+    // column-gap: 20px;
+    margin-bottom: 20px;
+
+    .filterItem {
+      display: flex;
+      align-items: center;
+      column-gap: 12px;
+      width: 22vw;
+
+      .filterItemTitle {
+        margin-right: 6px;
+        text-align: right;
+      }
+
+      .filterItemControl {
+        flex: 1;
+      }
+    }
+  }
+
+  .reviewComment {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 4;
+    text-overflow: ellipsis;
+    overflow: hidden;
+  }
+}
+
+.commentPopover {
+  width: 400px;
+}
+
+.search {
+  display: flex;
+  align-items: center;
+  justify-content: end;
+  gap: 10px;
+  margin-bottom: 20px;
 }

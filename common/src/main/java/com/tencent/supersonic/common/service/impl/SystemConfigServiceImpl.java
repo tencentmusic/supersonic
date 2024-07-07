@@ -6,9 +6,11 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.tencent.supersonic.common.persistence.dataobject.SystemConfigDO;
 import com.tencent.supersonic.common.persistence.mapper.SystemConfigMapper;
 import com.tencent.supersonic.common.pojo.Parameter;
-import com.tencent.supersonic.common.pojo.SystemConfig;
+import com.tencent.supersonic.common.config.SystemConfig;
 import com.tencent.supersonic.common.service.SystemConfigService;
 import com.tencent.supersonic.common.util.JsonUtil;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import java.util.List;
@@ -17,6 +19,9 @@ import java.util.List;
 public class SystemConfigServiceImpl
         extends ServiceImpl<SystemConfigMapper, SystemConfigDO> implements SystemConfigService {
 
+    @Autowired
+    private Environment environment;
+
     @Override
     public SystemConfig getSystemConfig() {
         List<SystemConfigDO> list = list();
@@ -24,9 +29,16 @@ public class SystemConfigServiceImpl
             SystemConfig systemConfig = new SystemConfig();
             systemConfig.setId(1);
             systemConfig.init();
+            // use system property to initialize system parameter
+            systemConfig.getParameters().stream().forEach(p -> {
+                if (environment.containsProperty(p.getName())) {
+                    p.setValue(environment.getProperty(p.getName()));
+                }
+            });
             save(systemConfig);
             return systemConfig;
         }
+
         return convert(list.iterator().next());
     }
 

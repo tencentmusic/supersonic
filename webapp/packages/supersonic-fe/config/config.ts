@@ -1,13 +1,14 @@
 // https://umijs.org/config/
 import { defineConfig } from '@umijs/max';
-// import { join } from 'path';
+import path from 'path';
 import defaultSettings, { publicPath, basePath } from './defaultSettings';
 import proxy from './proxy';
 import routes from './routes';
 import dayjs from 'dayjs';
-const { REACT_APP_ENV = 'dev', RUN_TYPE } = process.env;
-
+import { codeInspectorPlugin } from 'code-inspector-plugin';
 import ENV_CONFIG from './envConfig';
+import OP_CONFIG from './opConfig';
+const { REACT_APP_ENV = 'dev', RUN_TYPE } = process.env;
 
 export default defineConfig({
   define: {
@@ -20,6 +21,7 @@ export default defineConfig({
       AUTH_API_BASE_URL: '/api/auth/',
       ...ENV_CONFIG,
     },
+    'process.env.OP': OP_CONFIG,
   },
   metas: [
     {
@@ -180,5 +182,16 @@ export default defineConfig({
   },
   requestRecord: {},
   exportStatic: {},
-  // esbuildMinifyIIFE: true,
+  alias: {
+    'supersonic-chat-sdk': path.resolve(__dirname, '../../chat-sdk/src/'),
+  },
+  esbuildMinifyIIFE: true,
+
+  chainWebpack(memo) {
+    memo.plugin('code-inspector-plugin').use(
+      codeInspectorPlugin({
+        bundler: 'webpack',
+      }),
+    );
+  },
 });

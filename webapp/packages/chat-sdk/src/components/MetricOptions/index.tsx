@@ -1,14 +1,14 @@
 import { CLS_PREFIX } from '../../common/constants';
-import { FieldType } from '../../common/type';
+import { MetricType } from '../../common/type';
 import classNames from 'classnames';
 import { isMobile } from '../../utils/utils';
 
 type Props = {
-  metrics: FieldType[];
-  defaultMetric?: FieldType;
-  currentMetric?: FieldType;
+  metrics: MetricType[];
+  defaultMetric?: MetricType;
+  currentMetric?: MetricType;
   isMetricCard?: boolean;
-  onSelectMetric: (metric?: FieldType) => void;
+  onSelectMetric: (metric?: MetricType) => void;
 };
 
 const MetricOptions: React.FC<Props> = ({

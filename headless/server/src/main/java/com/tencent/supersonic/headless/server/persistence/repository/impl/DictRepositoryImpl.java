@@ -13,7 +13,7 @@ import com.tencent.supersonic.headless.server.persistence.dataobject.DictTaskDO;
 import com.tencent.supersonic.headless.server.persistence.mapper.DictConfMapper;
 import com.tencent.supersonic.headless.server.persistence.mapper.DictTaskMapper;
 import com.tencent.supersonic.headless.server.persistence.repository.DictRepository;
-import com.tencent.supersonic.headless.server.service.DimensionService;
+import com.tencent.supersonic.headless.server.web.service.DimensionService;
 import com.tencent.supersonic.headless.server.utils.DictUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
 @Repository
 public class DictRepositoryImpl implements DictRepository {
 
-    @Value("${dict.task.num:10}")
+    @Value("${s2.dict.task.num:10}")
     private Integer dictTaskNum;
 
     private final DictTaskMapper dictTaskMapper;

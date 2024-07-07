@@ -83,12 +83,32 @@ CREATE TABLE IF NOT EXISTS `s2_chat_config` (
 COMMENT ON TABLE s2_chat_config IS 'chat config information table ';
 
 
+CREATE TABLE IF NOT EXISTS `s2_chat_memory` (
+    `id` INT NOT NULL AUTO_INCREMENT,
+    `question` varchar(655)    ,
+    `agent_id`  INT    ,
+    `db_schema`  TEXT    ,
+    `s2_sql` TEXT   ,
+    `status` char(10)   ,
+    `llm_review` char(10)   ,
+    `llm_comment`   TEXT,
+    `human_review` char(10) ,
+    `human_comment` TEXT    ,
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP  ,
+    `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP ,
+    `created_by` varchar(100)  ,
+    `updated_by` varchar(100)  ,
+    PRIMARY KEY (`id`)
+    ) ;
+COMMENT ON TABLE s2_chat_memory IS 'chat memory table ';
+
 create table IF NOT EXISTS s2_user
 (
     id       INT AUTO_INCREMENT,
     name     varchar(100) not null,
     display_name varchar(100) null,
-    password varchar(100) null,
+    password varchar(256) null,
+    salt varchar(256)  NULL,
     email varchar(100) null,
     is_admin INT null,
     PRIMARY KEY (`id`)
@@ -355,6 +375,7 @@ CREATE TABLE IF NOT EXISTS s2_agent
     config      varchar(2000)  null,
     llm_config varchar(2000)  null,
     multi_turn_config varchar(2000)  null,
+    visual_config varchar(2000)  null,
     created_by  varchar(100) null,
     created_at  TIMESTAMP  null,
     updated_by  varchar(100) null,
@@ -637,6 +658,8 @@ CREATE TABLE IF NOT EXISTS `s2_term` (
     `name` varchar(255)  NOT NULL ,
     `description` varchar(500) DEFAULT NULL ,
     `alias` varchar(1000)  NOT NULL ,
+    `related_metrics` varchar(1000)  DEFAULT NULL ,
+    `related_dimensions` varchar(1000)  DEFAULT NULL,
     `created_at` TIMESTAMP NOT NULL ,
     `created_by` varchar(100) NOT NULL ,
     `updated_at` TIMESTAMP DEFAULT NULL ,

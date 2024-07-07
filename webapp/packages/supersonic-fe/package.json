@@ -69,12 +69,12 @@
     "@umijs/route-utils": "2.2.2",
     "ace-builds": "^1.4.12",
     "ahooks": "^3.7.7",
-    "antd": "5.11.2",
+    "antd": "5.18.0",
     "classnames": "^2.2.6",
     "compression-webpack-plugin": "^11.0.0",
     "copy-to-clipboard": "^3.3.1",
     "cross-env": "^7.0.3",
-    "crypto-js": "^4.0.0",
+    "crypto-js": "^4.2.0",
     "dayjs": "^1.11.10",
     "echarts": "^5.0.2",
     "echarts-for-react": "^3.0.1",
@@ -94,10 +94,12 @@
     "react-spinners": "^0.13.8",
     "react-split-pane": "^2.0.3",
     "react-syntax-highlighter": "^15.4.3",
-    "sql-formatter": "^2.3.3",
-    "supersonic-chat-sdk": "0.0.0",
+    "scheduler": "^0.23.2",
+    "sql-formatter": "^15.3.2",
+    "supersonic-chat-sdk": "workspace:*",
     "supersonic-insights-flow-components": "^1.4.9",
-    "umi-request": "1.4.0"
+    "umi-request": "1.4.0",
+    "use-context-selector": "^2.0.0"
   },
   "devDependencies": {
     "@ant-design/pro-cli": "^2.0.2",
@@ -119,6 +121,7 @@
     "@umijs/max": "^4.2.5",
     "@umijs/plugin-model": "^2.6.2",
     "carlo": "^0.9.46",
+    "code-inspector-plugin": "^0.14.2",
     "cross-port-killer": "^1.1.1",
     "detect-installer": "^1.0.1",
     "eslint": "^7.1.0",
@@ -136,10 +139,7 @@
     "umi-presets-pro": "2.0.2"
   },
   "engines": {
-    "node": ">=16.0.0 <20.0.0"
-  },
-  "resolutions": {
-    "@types/react": "18.3.1"
+    "node": ">=16.0.0"
   },
   "__npminstall_done": false
 }

@@ -17,6 +17,13 @@ import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
 import com.tencent.supersonic.headless.server.persistence.dataobject.ModelDO;
 import com.tencent.supersonic.headless.server.persistence.repository.DateInfoRepository;
 import com.tencent.supersonic.headless.server.persistence.repository.ModelRepository;
+import com.tencent.supersonic.headless.server.web.service.DataSetService;
+import com.tencent.supersonic.headless.server.web.service.DatabaseService;
+import com.tencent.supersonic.headless.server.web.service.DimensionService;
+import com.tencent.supersonic.headless.server.web.service.DomainService;
+import com.tencent.supersonic.headless.server.web.service.MetricService;
+import com.tencent.supersonic.headless.server.web.service.ModelCommentService;
+import com.tencent.supersonic.headless.server.web.service.ModelService;
 import com.tencent.supersonic.headless.server.service.impl.ModelServiceImpl;
 import com.tencent.supersonic.headless.server.utils.ModelConverter;
 import org.junit.jupiter.api.Assertions;
@@ -76,9 +83,10 @@ class ModelServiceImplTest {
         UserService userService = Mockito.mock(UserService.class);
         DateInfoRepository dateInfoRepository = Mockito.mock(DateInfoRepository.class);
         DataSetService viewService = Mockito.mock(DataSetService.class);
+        ModelCommentService modelCommentService = Mockito.mock(ModelCommentService.class);
         return new ModelServiceImpl(modelRepository, databaseService,
                 dimensionService, metricService, domainService, userService,
-                viewService, dateInfoRepository);
+                viewService, modelCommentService, dateInfoRepository);
     }
 
     private ModelReq mockModelReq() {

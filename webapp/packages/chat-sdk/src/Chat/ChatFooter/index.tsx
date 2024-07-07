@@ -9,11 +9,13 @@ import { SemanticTypeEnum, SEMANTIC_TYPE_MAP, HOLDER_TAG } from '../constants';
 import { AgentType, ModelType } from '../type';
 import { searchRecommend } from '../../service';
 import styles from './style.module.less';
+import { InfoCircleOutlined } from '@ant-design/icons';
 
 type Props = {
   inputMsg: string;
   chatId?: number;
   currentAgent?: AgentType;
+  isAllMsgResolved?: boolean;
   agentList: AgentType[];
   onToggleHistoryVisible: () => void;
   onOpenAgents: () => void;
@@ -41,6 +43,7 @@ const ChatFooter: ForwardRefRenderFunction<any, Props> = (
     inputMsg,
     chatId,
     currentAgent,
+    isAllMsgResolved,
     agentList,
     onToggleHistoryVisible,
     onOpenAgents,
@@ -195,6 +198,8 @@ const ChatFooter: ForwardRefRenderFunction<any, Props> = (
   }, [stepOptions]);
 
   const sendMsg = (value: string) => {
+    if (!isAllMsgResolved) return;
+
     const option = Object.keys(stepOptions)
       .reduce((result: any[], item) => {
         result = result.concat(stepOptions[item]);
@@ -293,6 +298,32 @@ const ChatFooter: ForwardRefRenderFunction<any, Props> = (
     );
   });
 
+  const fixWidthBug = () => {
+    setTimeout(() => {
+      const dropdownDom = document.querySelector(
+        '.' + styles.autoCompleteDropdown + ' .rc-virtual-list-holder-inner'
+      );
+
+      if (!dropdownDom) {
+        fixWidthBug();
+      } else {
+        // 获取popoverDom样式
+        const popoverDomStyle = window.getComputedStyle(dropdownDom);
+        // 在获取popoverDom中增加样式 width: fit-content
+        dropdownDom.setAttribute('style', `${popoverDomStyle.cssText};width: fit-content`);
+        // 获取popoverDom的宽度
+        const popoverDomWidth = dropdownDom.clientWidth;
+        // 将popoverDom的宽度赋值给他的父元素
+        const offset = 20; // 预增加20px的宽度，预留空间给虚拟渲染出来的元素
+        dropdownDom.parentElement!.style.width = popoverDomWidth + offset + 'px';
+      }
+    });
+  };
+
+  useEffect(() => {
+    if (modelOptionNodes.length || associateOptionNodes.length) fixWidthBug();
+  }, [modelOptionNodes.length, associateOptionNodes.length]);
+
   return (
     <div className={chatFooterClass}>
       <div className={styles.tools}>
@@ -327,11 +358,12 @@ const ChatFooter: ForwardRefRenderFunction<any, Props> = (
           <AutoComplete
             className={styles.composerInput}
             placeholder={
-              currentAgent
-                ? `【${currentAgent.name}】将与您对话，点击${!isMobile ? '左侧' : ''}【智能助理】${
-                    !isMobile ? '列表' : ''
-                  }可切换`
-                : '请输入您的问题'
+              // currentAgent
+              //   ? `【${currentAgent.name}】将与您对话，点击${!isMobile ? '左侧' : ''}【智能助理】${
+              //       !isMobile ? '列表' : ''
+              //     }可切换`
+              //   : '请输入您的问题'
+              '请输入您想要查询的数据内容'
             }
             value={inputMsg}
             onChange={(value: string) => {
@@ -366,18 +398,22 @@ const ChatFooter: ForwardRefRenderFunction<any, Props> = (
             onBlur={() => {
               setFocused(false);
             }}
-            dropdownClassName={autoCompleteDropdownClass}
+            popupClassName={autoCompleteDropdownClass}
             listHeight={500}
-            allowClear
+            // allowClear={false}
             open={open}
             defaultActiveFirstOption={false}
             getPopupContainer={triggerNode => triggerNode.parentNode}
           >
             {modelOptions.length > 0 ? modelOptionNodes : associateOptionNodes}
           </AutoComplete>
+          <div className={styles.AIGenTips}>
+            <InfoCircleOutlined />
+            AI生成的内容仅供参考，请注意甄别信息的准确性
+          </div>
           <div
             className={classNames(styles.sendBtn, {
-              [styles.sendBtnActive]: inputMsg?.length > 0,
+              [styles.sendBtnActive]: inputMsg?.length > 0 && isAllMsgResolved,
             })}
             onClick={() => {
               sendMsg(inputMsg);

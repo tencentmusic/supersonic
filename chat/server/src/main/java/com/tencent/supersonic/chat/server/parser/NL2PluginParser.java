@@ -7,14 +7,20 @@ import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.headless.api.pojo.response.ParseResp;
 import lombok.extern.slf4j.Slf4j;
 import java.util.List;
+import org.springframework.stereotype.Component;
 
 @Slf4j
+@Component
 public class NL2PluginParser implements ChatParser {
 
     private final List<PluginRecognizer> pluginRecognizers = ComponentFactory.getPluginRecognizers();
 
     @Override
     public void parse(ChatParseContext chatParseContext, ParseResp parseResp) {
+        if (!chatParseContext.getAgent().containsPluginTool()) {
+            return;
+        }
+
         pluginRecognizers.forEach(pluginRecognizer -> {
             pluginRecognizer.recognize(chatParseContext, parseResp);
             log.info("{} recallResult:{}", pluginRecognizer.getClass().getSimpleName(),

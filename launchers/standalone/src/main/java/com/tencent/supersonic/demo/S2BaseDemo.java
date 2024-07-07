@@ -3,8 +3,6 @@ package com.tencent.supersonic.demo;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.auth.api.authorization.service.AuthService;
-import com.tencent.supersonic.chat.api.pojo.request.ChatExecuteReq;
-import com.tencent.supersonic.chat.api.pojo.request.ChatParseReq;
 import com.tencent.supersonic.chat.server.service.AgentService;
 import com.tencent.supersonic.chat.server.service.ChatManageService;
 import com.tencent.supersonic.chat.server.service.ChatService;
@@ -21,20 +19,19 @@ import com.tencent.supersonic.headless.api.pojo.response.DatabaseResp;
 import com.tencent.supersonic.headless.api.pojo.response.DimensionResp;
 import com.tencent.supersonic.headless.api.pojo.response.MetricResp;
 import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
-import com.tencent.supersonic.headless.api.pojo.response.ParseResp;
 import com.tencent.supersonic.headless.server.pojo.MetaFilter;
-import com.tencent.supersonic.headless.server.service.CanvasService;
-import com.tencent.supersonic.headless.server.service.DataSetService;
-import com.tencent.supersonic.headless.server.service.DatabaseService;
-import com.tencent.supersonic.headless.server.service.DimensionService;
-import com.tencent.supersonic.headless.server.service.DomainService;
-import com.tencent.supersonic.headless.server.service.MetricService;
-import com.tencent.supersonic.headless.server.service.ModelRelaService;
-import com.tencent.supersonic.headless.server.service.ModelService;
-import com.tencent.supersonic.headless.server.service.TagMetaService;
-import com.tencent.supersonic.headless.server.service.TagObjectService;
-import com.tencent.supersonic.headless.server.service.TermService;
-import com.tencent.supersonic.headless.server.service.impl.DictWordService;
+import com.tencent.supersonic.headless.server.web.service.CanvasService;
+import com.tencent.supersonic.headless.server.web.service.DataSetService;
+import com.tencent.supersonic.headless.server.web.service.DatabaseService;
+import com.tencent.supersonic.headless.server.web.service.DimensionService;
+import com.tencent.supersonic.headless.server.web.service.DomainService;
+import com.tencent.supersonic.headless.server.web.service.MetricService;
+import com.tencent.supersonic.headless.server.web.service.ModelRelaService;
+import com.tencent.supersonic.headless.server.web.service.ModelService;
+import com.tencent.supersonic.headless.server.web.service.TagMetaService;
+import com.tencent.supersonic.headless.server.web.service.TagObjectService;
+import com.tencent.supersonic.headless.server.web.service.TermService;
+import com.tencent.supersonic.headless.server.web.service.impl.DictWordService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -153,27 +150,6 @@ public abstract class S2BaseDemo implements CommandLineRunner {
             dataSetModelConfigs.add(dataSetModelConfig);
         }
         return dataSetModelConfigs;
-    }
-
-    protected void parseAndExecute(int chatId, int agentId, String queryText) throws Exception {
-        ChatParseReq chatParseReq = new ChatParseReq();
-        chatParseReq.setQueryText(queryText);
-        chatParseReq.setChatId(chatId);
-        chatParseReq.setAgentId(agentId);
-        chatParseReq.setUser(User.getFakeUser());
-        ParseResp parseResp = chatService.performParsing(chatParseReq);
-        if (CollectionUtils.isEmpty(parseResp.getSelectedParses())) {
-            log.info("parseResp.getSelectedParses() is empty");
-            return;
-        }
-        ChatExecuteReq executeReq = new ChatExecuteReq();
-        executeReq.setQueryId(parseResp.getQueryId());
-        executeReq.setParseId(parseResp.getSelectedParses().get(0).getId());
-        executeReq.setQueryText(queryText);
-        executeReq.setChatId(parseResp.getChatId());
-        executeReq.setUser(User.getFakeUser());
-        executeReq.setSaveAnswer(true);
-        chatService.performExecution(executeReq);
     }
 
     protected void addTag(Long itemId, TagDefineType tagDefineType) {

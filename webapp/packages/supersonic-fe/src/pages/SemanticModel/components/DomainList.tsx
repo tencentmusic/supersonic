@@ -1,5 +1,5 @@
 import { DownOutlined, PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
-import { Input, message, Tree, Popconfirm, Tooltip, Row, Col, Button } from 'antd';
+import { Input, message, Tree, Popconfirm, Tooltip, Row, Col, Button, Menu } from 'antd';
 import type { DataNode } from 'antd/lib/tree';
 import { useEffect, useState } from 'react';
 import type { FC, Key } from 'react';
@@ -8,7 +8,7 @@ import { createDomain, updateDomain, deleteDomain } from '../service';
 import { treeParentKeyLists } from '../utils';
 import DomainInfoForm from './DomainInfoForm';
 import { constructorClassTreeFromList, addPathInTreeData } from '../utils';
-
+import { AppstoreOutlined } from '@ant-design/icons';
 import styles from './style.less';
 import { ISemantic } from '../data';
 
@@ -84,26 +84,26 @@ const DomainListTree: FC<DomainListProps> = ({
     }
   };
 
-  const createDefaultModelSet = async (domainId: number) => {
-    const { code, msg } = await createDomain({
-      modelType: 'add',
-      type: 'normal',
-      parentId: domainId,
-      name: '默认模型集',
-      bizName: `defaultModelSet_${(Math.random() * 1000000).toFixed(0)}`,
-      isUnique: 1,
-    });
-    if (code !== 200) {
-      message.error(msg);
-    }
-  };
+  // const createDefaultModelSet = async (domainId: number) => {
+  //   const { code, msg } = await createDomain({
+  //     modelType: 'add',
+  //     type: 'normal',
+  //     parentId: domainId,
+  //     name: '默认模型集',
+  //     bizName: `defaultModelSet_${(Math.random() * 1000000).toFixed(0)}`,
+  //     isUnique: 1,
+  //   });
+  //   if (code !== 200) {
+  //     message.error(msg);
+  //   }
+  // };
 
   const domainSubmit = async (values: any) => {
     if (values.modelType === 'add') {
       const { code, data } = await createDomain(values);
-      if (code === 200 && values.type === 'top') {
-        await createDefaultModelSet(data.id);
-      }
+      // if (code === 200 && values.type === 'top') {
+      //   await createDefaultModelSet(data.id);
+      // }
     } else if (values.modelType === 'edit') {
       await editProject(values);
     }
@@ -136,7 +136,7 @@ const DomainListTree: FC<DomainListProps> = ({
           {name}
         </span>
         {createDomainBtnVisible && hasEditPermission && (
-          <span className={`${styles.operation} ${parentId ? styles.rowHover : ''}`}>
+          <span className={`${styles.operation}  ${styles.rowHover} `}>
             {Array.isArray(path) && path.length < 2 && !hasModel && (
               <PlusOutlined
                 className={styles.icon}
@@ -186,6 +186,55 @@ const DomainListTree: FC<DomainListProps> = ({
     setExpandedKeys(_expandedKeys as string[]);
   };
 
+  const items = domainList
+    .filter((domain) => domain.parentId === 0)
+    .map((domain: ISemantic.IDomainItem) => {
+      return {
+        key: domain.id,
+        label: titleRender(domain),
+        // icon: <AppstoreOutlined />,
+      };
+    });
+
+  const getLevelKeys = (items1: LevelKeysProps[]) => {
+    const key: Record<string, number> = {};
+    const func = (items2: LevelKeysProps[], level = 1) => {
+      items2.forEach((item) => {
+        if (item.key) {
+          key[item.key] = level;
+        }
+        if (item.children) {
+          func(item.children, level + 1);
+        }
+      });
+    };
+    func(items1);
+    return key;
+  };
+  const levelKeys = getLevelKeys(items as LevelKeysProps[]);
+  const [stateOpenKeys, setStateOpenKeys] = useState(['2', '23']);
+
+  const onOpenChange: MenuProps['onOpenChange'] = (openKeys) => {
+    const currentOpenKey = openKeys.find((key) => stateOpenKeys.indexOf(key) === -1);
+    // open
+    if (currentOpenKey !== undefined) {
+      const repeatIndex = openKeys
+        .filter((key) => key !== currentOpenKey)
+        .findIndex((key) => levelKeys[key] === levelKeys[currentOpenKey]);
+
+      setStateOpenKeys(
+        openKeys
+          // remove repeat key
+          .filter((_, index) => index !== repeatIndex)
+          // remove current level all child
+          .filter((key) => levelKeys[key] <= levelKeys[currentOpenKey]),
+      );
+    } else {
+      // close
+      setStateOpenKeys(openKeys);
+    }
+  };
+
   return (
     <div className={styles.domainList}>
       <div className={styles.searchContainer}>
@@ -216,7 +265,15 @@ const DomainListTree: FC<DomainListProps> = ({
           )}
         </Row>
       </div>
-      <Tree
+      <Menu
+        mode="inline"
+        defaultSelectedKeys={['231']}
+        openKeys={stateOpenKeys}
+        onOpenChange={onOpenChange}
+        style={{ width: 256 }}
+        items={items}
+      />
+      {/* <Tree
         expandedKeys={expandedKeys}
         onExpand={handleExpand}
         className={styles.tree}
@@ -226,7 +283,7 @@ const DomainListTree: FC<DomainListProps> = ({
         defaultExpandAll={true}
         treeData={projectRenderTree}
         titleRender={titleRender}
-      />
+      /> */}
       {projectInfoModalVisible && (
         <DomainInfoForm
           basicInfo={domainInfoParams}
