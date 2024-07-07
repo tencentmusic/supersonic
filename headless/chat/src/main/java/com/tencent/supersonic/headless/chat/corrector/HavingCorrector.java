@@ -6,7 +6,7 @@ import com.tencent.supersonic.common.jsqlparser.SqlSelectFunctionHelper;
 import com.tencent.supersonic.common.jsqlparser.SqlSelectHelper;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.api.pojo.SemanticSchema;
-import com.tencent.supersonic.headless.chat.QueryContext;
+import com.tencent.supersonic.headless.chat.ChatQueryContext;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.expression.Expression;
 import org.apache.commons.lang3.StringUtils;
@@ -24,10 +24,10 @@ import java.util.stream.Collectors;
 public class HavingCorrector extends BaseSemanticCorrector {
 
     @Override
-    public void doCorrect(QueryContext queryContext, SemanticParseInfo semanticParseInfo) {
+    public void doCorrect(ChatQueryContext chatQueryContext, SemanticParseInfo semanticParseInfo) {
 
         //add aggregate to all metric
-        addHaving(queryContext, semanticParseInfo);
+        addHaving(chatQueryContext, semanticParseInfo);
 
         //decide whether add having expression field to select
         Environment environment = ContextUtils.getBean(Environment.class);
@@ -38,10 +38,10 @@ public class HavingCorrector extends BaseSemanticCorrector {
 
     }
 
-    private void addHaving(QueryContext queryContext, SemanticParseInfo semanticParseInfo) {
+    private void addHaving(ChatQueryContext chatQueryContext, SemanticParseInfo semanticParseInfo) {
         Long dataSet = semanticParseInfo.getDataSet().getDataSet();
 
-        SemanticSchema semanticSchema = queryContext.getSemanticSchema();
+        SemanticSchema semanticSchema = chatQueryContext.getSemanticSchema();
 
         Set<String> metrics = semanticSchema.getMetrics(dataSet).stream()
                 .map(schemaElement -> schemaElement.getName()).collect(Collectors.toSet());

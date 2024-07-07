@@ -2,7 +2,7 @@ package com.tencent.supersonic.headless.chat.corrector;
 
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.api.pojo.SqlInfo;
-import com.tencent.supersonic.headless.chat.QueryContext;
+import com.tencent.supersonic.headless.chat.ChatQueryContext;
 import org.junit.Assert;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -13,7 +13,7 @@ class TimeCorrectorTest {
     @Test
     void testDoCorrect() {
         TimeCorrector corrector = new TimeCorrector();
-        QueryContext queryContext = new QueryContext();
+        ChatQueryContext chatQueryContext = new ChatQueryContext();
         SemanticParseInfo semanticParseInfo = new SemanticParseInfo();
         SqlInfo sqlInfo = new SqlInfo();
         //1.数据日期 <=
@@ -21,7 +21,7 @@ class TimeCorrectorTest {
                 + "WHERE (歌手名 = '张三') AND 数据日期 <= '2023-11-17' GROUP BY 维度1";
         sqlInfo.setCorrectS2SQL(sql);
         semanticParseInfo.setSqlInfo(sqlInfo);
-        corrector.doCorrect(queryContext, semanticParseInfo);
+        corrector.doCorrect(chatQueryContext, semanticParseInfo);
 
         Assert.assertEquals(
                 "SELECT 维度1, SUM(播放量) FROM 数据库 WHERE ((歌手名 = '张三') AND 数据日期 <= '2023-11-17') "
@@ -32,7 +32,7 @@ class TimeCorrectorTest {
         sql = "SELECT 维度1, SUM(播放量) FROM 数据库 "
                 + "WHERE (歌手名 = '张三') AND 数据日期 < '2023-11-17' GROUP BY 维度1";
         sqlInfo.setCorrectS2SQL(sql);
-        corrector.doCorrect(queryContext, semanticParseInfo);
+        corrector.doCorrect(chatQueryContext, semanticParseInfo);
 
         Assert.assertEquals(
                 "SELECT 维度1, SUM(播放量) FROM 数据库 WHERE ((歌手名 = '张三') AND 数据日期 < '2023-11-17') "
@@ -43,7 +43,7 @@ class TimeCorrectorTest {
         sql = "SELECT 维度1, SUM(播放量) FROM 数据库 "
                 + "WHERE (歌手名 = '张三') AND 数据日期 >= '2023-11-17' GROUP BY 维度1";
         sqlInfo.setCorrectS2SQL(sql);
-        corrector.doCorrect(queryContext, semanticParseInfo);
+        corrector.doCorrect(chatQueryContext, semanticParseInfo);
 
         Assert.assertEquals(
                 "SELECT 维度1, SUM(播放量) FROM 数据库 "
@@ -54,7 +54,7 @@ class TimeCorrectorTest {
         sql = "SELECT 维度1, SUM(播放量) FROM 数据库 "
                 + "WHERE (歌手名 = '张三') AND 数据日期 > '2023-11-17' GROUP BY 维度1";
         sqlInfo.setCorrectS2SQL(sql);
-        corrector.doCorrect(queryContext, semanticParseInfo);
+        corrector.doCorrect(chatQueryContext, semanticParseInfo);
 
         Assert.assertEquals(
                 "SELECT 维度1, SUM(播放量) FROM 数据库 "
@@ -65,7 +65,7 @@ class TimeCorrectorTest {
         sql = "SELECT 维度1, SUM(播放量) FROM 数据库 "
                 + "WHERE 歌手名 = '张三' GROUP BY 维度1";
         sqlInfo.setCorrectS2SQL(sql);
-        corrector.doCorrect(queryContext, semanticParseInfo);
+        corrector.doCorrect(chatQueryContext, semanticParseInfo);
 
         Assert.assertEquals(
                 "SELECT 维度1, SUM(播放量) FROM 数据库 WHERE 歌手名 = '张三' GROUP BY 维度1",
@@ -75,7 +75,7 @@ class TimeCorrectorTest {
         sql = "SELECT 维度1, SUM(播放量) FROM 数据库 "
                 + "WHERE 歌手名 = '张三' AND 数据日期_月 <= '2024-01' GROUP BY 维度1";
         sqlInfo.setCorrectS2SQL(sql);
-        corrector.doCorrect(queryContext, semanticParseInfo);
+        corrector.doCorrect(chatQueryContext, semanticParseInfo);
 
         Assert.assertEquals(
                 "SELECT 维度1, SUM(播放量) FROM 数据库 WHERE (歌手名 = '张三' AND 数据日期_月 <= '2024-01') "
@@ -86,7 +86,7 @@ class TimeCorrectorTest {
         sql = "SELECT 维度1, SUM(播放量) FROM 数据库 "
                 + "WHERE 歌手名 = '张三' AND 数据日期_月 > '2024-01' GROUP BY 维度1";
         sqlInfo.setCorrectS2SQL(sql);
-        corrector.doCorrect(queryContext, semanticParseInfo);
+        corrector.doCorrect(chatQueryContext, semanticParseInfo);
 
         Assert.assertEquals(
                 "SELECT 维度1, SUM(播放量) FROM 数据库 "
@@ -96,7 +96,7 @@ class TimeCorrectorTest {
         //8. no where
         sql = "SELECT COUNT(1) FROM 数据库";
         sqlInfo.setCorrectS2SQL(sql);
-        corrector.doCorrect(queryContext, semanticParseInfo);
+        corrector.doCorrect(chatQueryContext, semanticParseInfo);
         Assert.assertEquals("SELECT COUNT(1) FROM 数据库", sqlInfo.getCorrectS2SQL());
     }
 }

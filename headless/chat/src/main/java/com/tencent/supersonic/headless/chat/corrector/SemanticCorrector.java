@@ -2,7 +2,7 @@ package com.tencent.supersonic.headless.chat.corrector;
 
 
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
-import com.tencent.supersonic.headless.chat.QueryContext;
+import com.tencent.supersonic.headless.chat.ChatQueryContext;
 
 /**
  * A semantic corrector checks validity of extracted semantic information and
@@ -10,5 +10,5 @@ import com.tencent.supersonic.headless.chat.QueryContext;
  */
 public interface SemanticCorrector {
 
-    void correct(QueryContext queryContext, SemanticParseInfo semanticParseInfo);
+    void correct(ChatQueryContext chatQueryContext, SemanticParseInfo semanticParseInfo);
 }

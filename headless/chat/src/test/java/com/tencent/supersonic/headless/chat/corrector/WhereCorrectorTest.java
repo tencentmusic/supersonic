@@ -6,7 +6,7 @@ import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.api.pojo.SqlInfo;
 import com.tencent.supersonic.headless.api.pojo.request.QueryFilter;
 import com.tencent.supersonic.headless.api.pojo.request.QueryFilters;
-import com.tencent.supersonic.headless.chat.QueryContext;
+import com.tencent.supersonic.headless.chat.ChatQueryContext;
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 
@@ -22,7 +22,7 @@ class WhereCorrectorTest {
         sqlInfo.setCorrectS2SQL(sql);
         semanticParseInfo.setSqlInfo(sqlInfo);
 
-        QueryContext queryContext = new QueryContext();
+        ChatQueryContext chatQueryContext = new ChatQueryContext();
 
         QueryFilter filter1 = new QueryFilter();
         filter1.setName("age");
@@ -49,10 +49,10 @@ class WhereCorrectorTest {
         queryFilters.getFilters().add(filter2);
         queryFilters.getFilters().add(filter3);
         queryFilters.getFilters().add(filter4);
-        queryContext.setQueryFilters(queryFilters);
+        chatQueryContext.setQueryFilters(queryFilters);
 
         WhereCorrector whereCorrector = new WhereCorrector();
-        whereCorrector.addQueryFilter(queryContext, semanticParseInfo);
+        whereCorrector.addQueryFilter(chatQueryContext, semanticParseInfo);
 
         String correctS2SQL = semanticParseInfo.getSqlInfo().getCorrectS2SQL();
 

@@ -49,7 +49,7 @@ import com.tencent.supersonic.headless.api.pojo.response.QueryResult;
 import com.tencent.supersonic.headless.api.pojo.response.QueryState;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
 import com.tencent.supersonic.headless.chat.ChatContext;
-import com.tencent.supersonic.headless.chat.QueryContext;
+import com.tencent.supersonic.headless.chat.ChatQueryContext;
 import com.tencent.supersonic.headless.chat.corrector.GrammarCorrector;
 import com.tencent.supersonic.headless.chat.corrector.SchemaCorrector;
 import com.tencent.supersonic.headless.chat.knowledge.HanlpMapResult;
@@ -63,7 +63,7 @@ import com.tencent.supersonic.headless.chat.query.SemanticQuery;
 import com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMSqlQuery;
 import com.tencent.supersonic.headless.server.facade.service.ChatQueryService;
 import com.tencent.supersonic.headless.server.facade.service.SemanticLayerService;
-import com.tencent.supersonic.headless.server.utils.WorkflowEngine;
+import com.tencent.supersonic.headless.server.utils.ChatWorkflowEngine;
 import com.tencent.supersonic.headless.server.persistence.dataobject.StatisticsDO;
 import com.tencent.supersonic.headless.server.pojo.MetaFilter;
 import com.tencent.supersonic.headless.server.utils.ComponentFactory;
@@ -115,12 +115,12 @@ public class ChatQueryServiceImpl implements ChatQueryService {
     @Autowired
     private DataSetService dataSetService;
     @Autowired
-    private WorkflowEngine workflowEngine;
+    private ChatWorkflowEngine chatWorkflowEngine;
 
     @Override
     public MapResp performMapping(QueryTextReq queryTextReq) {
         MapResp mapResp = new MapResp();
-        QueryContext queryCtx = buildQueryContext(queryTextReq);
+        ChatQueryContext queryCtx = buildQueryContext(queryTextReq);
         ComponentFactory.getSchemaMappers().forEach(mapper -> {
             mapper.map(queryCtx);
         });
@@ -148,12 +148,12 @@ public class ChatQueryServiceImpl implements ChatQueryService {
     public ParseResp performParsing(QueryTextReq queryTextReq) {
         ParseResp parseResult = new ParseResp(queryTextReq.getChatId(), queryTextReq.getQueryText());
         // build queryContext and chatContext
-        QueryContext queryCtx = buildQueryContext(queryTextReq);
+        ChatQueryContext queryCtx = buildQueryContext(queryTextReq);
 
         // in order to support multi-turn conversation, chat context is needed
         ChatContext chatCtx = chatContextService.getOrCreateContext(queryTextReq.getChatId());
 
-        workflowEngine.startWorkflow(queryCtx, chatCtx, parseResult);
+        chatWorkflowEngine.execute(queryCtx, chatCtx, parseResult);
 
         List<SemanticParseInfo> parseInfos = queryCtx.getCandidateQueries().stream()
                 .map(SemanticQuery::getParseInfo).collect(Collectors.toList());
@@ -161,11 +161,11 @@ public class ChatQueryServiceImpl implements ChatQueryService {
         return parseResult;
     }
 
-    public QueryContext buildQueryContext(QueryTextReq queryTextReq) {
+    public ChatQueryContext buildQueryContext(QueryTextReq queryTextReq) {
 
         SemanticSchema semanticSchema = schemaService.getSemanticSchema();
         Map<Long, List<Long>> modelIdToDataSetIds = dataSetService.getModelIdToDataSetIds();
-        QueryContext queryCtx = QueryContext.builder()
+        ChatQueryContext queryCtx = ChatQueryContext.builder()
                 .queryFilters(queryTextReq.getQueryFilters())
                 .semanticSchema(semanticSchema)
                 .candidateQueries(new ArrayList<>())
@@ -612,7 +612,7 @@ public class ChatQueryServiceImpl implements ChatQueryService {
     }
 
     private SemanticParseInfo correctSqlReq(QuerySqlReq querySqlReq, User user) {
-        QueryContext queryCtx = new QueryContext();
+        ChatQueryContext queryCtx = new ChatQueryContext();
         SemanticSchema semanticSchema = schemaService.getSemanticSchema();
         queryCtx.setSemanticSchema(semanticSchema);
         SemanticParseInfo semanticParseInfo = new SemanticParseInfo();

@@ -10,7 +10,7 @@ import com.tencent.supersonic.headless.api.pojo.response.S2Term;
 import com.tencent.supersonic.headless.chat.knowledge.EmbeddingResult;
 import com.tencent.supersonic.headless.chat.knowledge.builder.BaseWordBuilder;
 import com.tencent.supersonic.headless.chat.knowledge.helper.HanlpHelper;
-import com.tencent.supersonic.headless.chat.QueryContext;
+import com.tencent.supersonic.headless.chat.ChatQueryContext;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
@@ -23,13 +23,13 @@ import java.util.Objects;
 public class EmbeddingMapper extends BaseMapper {
 
     @Override
-    public void doMap(QueryContext queryContext) {
+    public void doMap(ChatQueryContext chatQueryContext) {
         //1. query from embedding by queryText
-        String queryText = queryContext.getQueryText();
-        List<S2Term> terms = HanlpHelper.getTerms(queryText, queryContext.getModelIdToDataSetIds());
+        String queryText = chatQueryContext.getQueryText();
+        List<S2Term> terms = HanlpHelper.getTerms(queryText, chatQueryContext.getModelIdToDataSetIds());
 
         EmbeddingMatchStrategy matchStrategy = ContextUtils.getBean(EmbeddingMatchStrategy.class);
-        List<EmbeddingResult> matchResults = matchStrategy.getMatches(queryContext, terms);
+        List<EmbeddingResult> matchResults = matchStrategy.getMatches(chatQueryContext, terms);
 
         HanlpHelper.transLetterOriginal(matchResults);
 
@@ -42,7 +42,7 @@ public class EmbeddingMapper extends BaseMapper {
             }
             SchemaElementType elementType = SchemaElementType.valueOf(matchResult.getMetadata().get("type"));
             SchemaElement schemaElement = getSchemaElement(dataSetId, elementType, elementId,
-                    queryContext.getSemanticSchema());
+                    chatQueryContext.getSemanticSchema());
             if (schemaElement == null) {
                 continue;
             }
@@ -54,7 +54,7 @@ public class EmbeddingMapper extends BaseMapper {
                     .detectWord(matchResult.getDetectWord())
                     .build();
             //3. add to mapInfo
-            addToSchemaMap(queryContext.getMapInfo(), dataSetId, schemaElementMatch);
+            addToSchemaMap(chatQueryContext.getMapInfo(), dataSetId, schemaElementMatch);
         }
     }
 }

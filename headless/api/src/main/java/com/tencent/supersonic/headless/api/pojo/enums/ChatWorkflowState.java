@@ -1,6 +1,6 @@
 package com.tencent.supersonic.headless.api.pojo.enums;
 
-public enum WorkflowState {
+public enum ChatWorkflowState {
     MAPPING,
     PARSING,
     CORRECTING,

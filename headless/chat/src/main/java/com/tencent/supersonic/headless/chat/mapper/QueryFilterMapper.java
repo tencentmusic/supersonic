@@ -8,8 +8,8 @@ import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
 import com.tencent.supersonic.headless.api.pojo.SchemaMapInfo;
 import com.tencent.supersonic.headless.api.pojo.request.QueryFilter;
 import com.tencent.supersonic.headless.api.pojo.request.QueryFilters;
+import com.tencent.supersonic.headless.chat.ChatQueryContext;
 import com.tencent.supersonic.headless.chat.knowledge.builder.BaseWordBuilder;
-import com.tencent.supersonic.headless.chat.QueryContext;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.CollectionUtils;
 
@@ -24,12 +24,12 @@ public class QueryFilterMapper extends BaseMapper {
     private double similarity = 1.0;
 
     @Override
-    public void doMap(QueryContext queryContext) {
-        Set<Long> dataSetIds = queryContext.getDataSetIds();
+    public void doMap(ChatQueryContext chatQueryContext) {
+        Set<Long> dataSetIds = chatQueryContext.getDataSetIds();
         if (CollectionUtils.isEmpty(dataSetIds)) {
             return;
         }
-        SchemaMapInfo schemaMapInfo = queryContext.getMapInfo();
+        SchemaMapInfo schemaMapInfo = chatQueryContext.getMapInfo();
         clearOtherSchemaElementMatch(dataSetIds, schemaMapInfo);
         for (Long dataSetId : dataSetIds) {
             List<SchemaElementMatch> schemaElementMatches = schemaMapInfo.getMatchedElements(dataSetId);
@@ -37,7 +37,7 @@ public class QueryFilterMapper extends BaseMapper {
                 schemaElementMatches = Lists.newArrayList();
                 schemaMapInfo.setMatchedElements(dataSetId, schemaElementMatches);
             }
-            addValueSchemaElementMatch(dataSetId, queryContext, schemaElementMatches);
+            addValueSchemaElementMatch(dataSetId, chatQueryContext, schemaElementMatches);
         }
     }
 
@@ -49,9 +49,9 @@ public class QueryFilterMapper extends BaseMapper {
         }
     }
 
-    private void addValueSchemaElementMatch(Long dataSetId, QueryContext queryContext,
+    private void addValueSchemaElementMatch(Long dataSetId, ChatQueryContext chatQueryContext,
             List<SchemaElementMatch> candidateElementMatches) {
-        QueryFilters queryFilters = queryContext.getQueryFilters();
+        QueryFilters queryFilters = chatQueryContext.getQueryFilters();
         if (queryFilters == null || CollectionUtils.isEmpty(queryFilters.getFilters())) {
             return;
         }
@@ -75,7 +75,7 @@ public class QueryFilterMapper extends BaseMapper {
                     .build();
             candidateElementMatches.add(schemaElementMatch);
         }
-        queryContext.getMapInfo().setMatchedElements(dataSetId, candidateElementMatches);
+        chatQueryContext.getMapInfo().setMatchedElements(dataSetId, candidateElementMatches);
     }
 
     private boolean checkExistSameValueSchemaElementMatch(QueryFilter queryFilter,

@@ -2,7 +2,7 @@ package com.tencent.supersonic.headless.chat.corrector;
 
 import com.tencent.supersonic.common.jsqlparser.SqlRemoveHelper;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
-import com.tencent.supersonic.headless.chat.QueryContext;
+import com.tencent.supersonic.headless.chat.ChatQueryContext;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
@@ -26,9 +26,9 @@ public class GrammarCorrector extends BaseSemanticCorrector {
     }
 
     @Override
-    public void doCorrect(QueryContext queryContext, SemanticParseInfo semanticParseInfo) {
+    public void doCorrect(ChatQueryContext chatQueryContext, SemanticParseInfo semanticParseInfo) {
         for (BaseSemanticCorrector corrector : correctors) {
-            corrector.correct(queryContext, semanticParseInfo);
+            corrector.correct(chatQueryContext, semanticParseInfo);
         }
         removeSameFieldFromSelect(semanticParseInfo);
     }

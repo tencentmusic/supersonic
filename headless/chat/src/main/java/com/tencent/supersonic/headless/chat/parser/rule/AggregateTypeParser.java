@@ -2,7 +2,7 @@ package com.tencent.supersonic.headless.chat.parser.rule;
 
 import com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum;
 import com.tencent.supersonic.headless.chat.ChatContext;
-import com.tencent.supersonic.headless.chat.QueryContext;
+import com.tencent.supersonic.headless.chat.ChatQueryContext;
 import com.tencent.supersonic.headless.chat.query.SemanticQuery;
 import com.tencent.supersonic.headless.chat.parser.SemanticParser;
 import lombok.AllArgsConstructor;
@@ -41,11 +41,11 @@ public class AggregateTypeParser implements SemanticParser {
     ).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (k1, k2) -> k2));
 
     @Override
-    public void parse(QueryContext queryContext, ChatContext chatContext) {
-        String queryText = queryContext.getQueryText();
+    public void parse(ChatQueryContext chatQueryContext, ChatContext chatContext) {
+        String queryText = chatQueryContext.getQueryText();
         AggregateConf aggregateConf = resolveAggregateConf(queryText);
 
-        for (SemanticQuery semanticQuery : queryContext.getCandidateQueries()) {
+        for (SemanticQuery semanticQuery : chatQueryContext.getCandidateQueries()) {
             if (!AggregateTypeEnum.NONE.equals(semanticQuery.getParseInfo().getAggType())) {
                 continue;
             }
