@@ -114,28 +114,21 @@ public class QueryStructUtils {
         return metricIds;
     }
 
-    public Set<String> getResNameEn(QueryStructReq queryStructCmd) {
+    public Set<String> getBizNameFromStruct(QueryStructReq queryStructReq) {
         Set<String> resNameEnSet = new HashSet<>();
-        queryStructCmd.getAggregators().stream().forEach(agg -> resNameEnSet.add(agg.getColumn()));
-        resNameEnSet.addAll(queryStructCmd.getGroups());
-        queryStructCmd.getOrders().stream().forEach(order -> resNameEnSet.add(order.getColumn()));
-        sqlFilterUtils.getFiltersCol(queryStructCmd.getOriginalFilter()).stream().forEach(col -> resNameEnSet.add(col));
+        queryStructReq.getAggregators().stream().forEach(agg -> resNameEnSet.add(agg.getColumn()));
+        resNameEnSet.addAll(queryStructReq.getGroups());
+        queryStructReq.getOrders().stream().forEach(order -> resNameEnSet.add(order.getColumn()));
+        sqlFilterUtils.getFiltersCol(queryStructReq.getOriginalFilter()).stream().forEach(col -> resNameEnSet.add(col));
         return resNameEnSet;
     }
 
     public Set<String> getResName(QuerySqlReq querySqlReq) {
-        Set<String> resNameSet = SqlSelectHelper.getAllFields(querySqlReq.getSql())
-                .stream().collect(Collectors.toSet());
-        return resNameSet;
+        return new HashSet<>(SqlSelectHelper.getAllFields(querySqlReq.getSql()));
     }
 
-    public Set<String> getResNameEnExceptInternalCol(QueryStructReq queryStructCmd) {
-        Set<String> resNameEnSet = getResNameEn(queryStructCmd);
-        return resNameEnSet.stream().filter(res -> !internalCols.contains(res)).collect(Collectors.toSet());
-    }
-
-    public Set<String> getResNameEnExceptInternalCol(QuerySqlReq querySqlReq,
-                                                     SemanticSchemaResp semanticSchemaResp) {
+    public Set<String> getBizNameFromSql(QuerySqlReq querySqlReq,
+                                        SemanticSchemaResp semanticSchemaResp) {
         Set<String> resNameSet = getResName(querySqlReq);
         Set<String> resNameEnSet = new HashSet<>();
         if (semanticSchemaResp != null) {
@@ -152,23 +145,6 @@ public class QueryStructUtils {
                 }
             });
         }
-        return resNameEnSet.stream().filter(res -> !internalCols.contains(res)).collect(Collectors.toSet());
-    }
-
-    public Set<String> getFilterResNameEn(QueryStructReq queryStructCmd) {
-        Set<String> resNameEnSet = new HashSet<>();
-        sqlFilterUtils.getFiltersCol(queryStructCmd.getOriginalFilter()).stream().forEach(col -> resNameEnSet.add(col));
-        return resNameEnSet;
-    }
-
-    public Set<String> getFilterResNameEnExceptInternalCol(QueryStructReq queryStructCmd) {
-        Set<String> resNameEnSet = getFilterResNameEn(queryStructCmd);
-        return resNameEnSet.stream().filter(res -> !internalCols.contains(res)).collect(Collectors.toSet());
-    }
-
-    public Set<String> getFilterResNameEnExceptInternalCol(QuerySqlReq querySqlReq) {
-        String sql = querySqlReq.getSql();
-        Set<String> resNameEnSet = SqlSelectHelper.getWhereFields(sql).stream().collect(Collectors.toSet());
         return resNameEnSet.stream().filter(res -> !internalCols.contains(res)).collect(Collectors.toSet());
     }
 
@@ -279,14 +255,6 @@ public class QueryStructUtils {
             }
         }
         return null;
-    }
-
-    public List<String> getDateCol() {
-        return dateModeUtils.getDateCol();
-    }
-
-    public String getVariablePrefix() {
-        return variablePrefix;
     }
 
 }

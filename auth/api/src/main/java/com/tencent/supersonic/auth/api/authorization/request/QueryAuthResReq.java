@@ -1,7 +1,6 @@
 package com.tencent.supersonic.auth.api.authorization.request;
 
 import com.google.common.collect.Lists;
-import com.tencent.supersonic.auth.api.authorization.pojo.AuthRes;
 import lombok.Data;
 import lombok.ToString;
 import org.springframework.util.CollectionUtils;
@@ -14,8 +13,6 @@ import java.util.List;
 public class QueryAuthResReq {
 
     private List<String> departmentIds = new ArrayList<>();
-
-    private List<AuthRes> resources;
 
     private Long modelId;
 
