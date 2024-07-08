@@ -100,9 +100,9 @@ const LoginPage: React.FC = () => {
   async function login() {
     // 判断是否存在ticket
     const urlParams = new URL(window.location.href);
-    const ticket = urlParams.searchParams.get('ticket');
-    if (ticket) {
-      await loginWithTicket(ticket);
+    const tickets = urlParams.searchParams.getAll('ticket');
+    if (tickets.length > 0) {
+      await loginWithTicket(tickets[tickets.length - 1]);
     } else {
       ssoLogin();
     }

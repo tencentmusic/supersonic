@@ -380,7 +380,7 @@ const AgentForm: React.FC<Props> = ({ editAgent, onSaveAgent, onCreateToolBtnCli
         onCancel={() => setIsModalOpen(false)}
       >
         <TextArea
-          placeholder="请输入问题，多个问题请需换行区分"
+          placeholder="请输入问题，多个问题需换行区分"
           rows={10}
           value={batchAddQuestionText}
           onChange={(e) => setBatchAddQuestionText(e.target.value)}
