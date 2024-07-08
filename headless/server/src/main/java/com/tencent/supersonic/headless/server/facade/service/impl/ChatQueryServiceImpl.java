@@ -29,7 +29,7 @@ import com.tencent.supersonic.headless.api.pojo.enums.CostType;
 import com.tencent.supersonic.headless.api.pojo.enums.QueryMethod;
 import com.tencent.supersonic.headless.api.pojo.request.DimensionValueReq;
 import com.tencent.supersonic.headless.api.pojo.request.ExecuteQueryReq;
-import com.tencent.supersonic.headless.api.pojo.request.QueryTextReq;
+import com.tencent.supersonic.headless.api.pojo.request.QueryNLReq;
 import com.tencent.supersonic.headless.api.pojo.request.TranslateSqlReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryDataReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryDimValueReq;
@@ -118,40 +118,40 @@ public class ChatQueryServiceImpl implements ChatQueryService {
     private ChatWorkflowEngine chatWorkflowEngine;
 
     @Override
-    public MapResp performMapping(QueryTextReq queryTextReq) {
+    public MapResp performMapping(QueryNLReq queryNLReq) {
         MapResp mapResp = new MapResp();
-        ChatQueryContext queryCtx = buildQueryContext(queryTextReq);
+        ChatQueryContext queryCtx = buildChatQueryContext(queryNLReq);
         ComponentFactory.getSchemaMappers().forEach(mapper -> {
             mapper.map(queryCtx);
         });
         SchemaMapInfo mapInfo = queryCtx.getMapInfo();
         mapResp.setMapInfo(mapInfo);
-        mapResp.setQueryText(queryTextReq.getQueryText());
+        mapResp.setQueryText(queryNLReq.getQueryText());
         return mapResp;
     }
 
     @Override
     public MapInfoResp map(QueryMapReq queryMapReq) {
 
-        QueryTextReq queryTextReq = new QueryTextReq();
-        BeanUtils.copyProperties(queryMapReq, queryTextReq);
+        QueryNLReq queryNLReq = new QueryNLReq();
+        BeanUtils.copyProperties(queryMapReq, queryNLReq);
         List<DataSetResp> dataSets = dataSetService.getDataSets(queryMapReq.getDataSetNames(), queryMapReq.getUser());
 
         Set<Long> dataSetIds = dataSets.stream().map(SchemaItem::getId).collect(Collectors.toSet());
-        queryTextReq.setDataSetIds(dataSetIds);
-        MapResp mapResp = performMapping(queryTextReq);
+        queryNLReq.setDataSetIds(dataSetIds);
+        MapResp mapResp = performMapping(queryNLReq);
         dataSetIds.retainAll(mapResp.getMapInfo().getDataSetElementMatches().keySet());
         return convert(mapResp, queryMapReq.getTopN(), dataSetIds);
     }
 
     @Override
-    public ParseResp performParsing(QueryTextReq queryTextReq) {
-        ParseResp parseResult = new ParseResp(queryTextReq.getChatId(), queryTextReq.getQueryText());
+    public ParseResp performParsing(QueryNLReq queryNLReq) {
+        ParseResp parseResult = new ParseResp(queryNLReq.getChatId(), queryNLReq.getQueryText());
         // build queryContext and chatContext
-        ChatQueryContext queryCtx = buildQueryContext(queryTextReq);
+        ChatQueryContext queryCtx = buildChatQueryContext(queryNLReq);
 
         // in order to support multi-turn conversation, chat context is needed
-        ChatContext chatCtx = chatContextService.getOrCreateContext(queryTextReq.getChatId());
+        ChatContext chatCtx = chatContextService.getOrCreateContext(queryNLReq.getChatId());
 
         chatWorkflowEngine.execute(queryCtx, chatCtx, parseResult);
 
@@ -161,21 +161,20 @@ public class ChatQueryServiceImpl implements ChatQueryService {
         return parseResult;
     }
 
-    public ChatQueryContext buildQueryContext(QueryTextReq queryTextReq) {
-
+    public ChatQueryContext buildChatQueryContext(QueryNLReq queryNLReq) {
         SemanticSchema semanticSchema = schemaService.getSemanticSchema();
         Map<Long, List<Long>> modelIdToDataSetIds = dataSetService.getModelIdToDataSetIds();
         ChatQueryContext queryCtx = ChatQueryContext.builder()
-                .queryFilters(queryTextReq.getQueryFilters())
+                .queryFilters(queryNLReq.getQueryFilters())
                 .semanticSchema(semanticSchema)
                 .candidateQueries(new ArrayList<>())
                 .mapInfo(new SchemaMapInfo())
                 .modelIdToDataSetIds(modelIdToDataSetIds)
-                .text2SQLType(queryTextReq.getText2SQLType())
-                .mapModeEnum(queryTextReq.getMapModeEnum())
-                .dataSetIds(queryTextReq.getDataSetIds())
+                .text2SQLType(queryNLReq.getText2SQLType())
+                .mapModeEnum(queryNLReq.getMapModeEnum())
+                .dataSetIds(queryNLReq.getDataSetIds())
                 .build();
-        BeanUtils.copyProperties(queryTextReq, queryCtx);
+        BeanUtils.copyProperties(queryNLReq, queryCtx);
         return queryCtx;
     }
 
@@ -278,9 +277,9 @@ public class ChatQueryServiceImpl implements ChatQueryService {
             validFilter(semanticQuery.getParseInfo().getMetricFilters());
             //init s2sql
             semanticQuery.initS2Sql(semanticSchema, user);
-            QueryTextReq queryTextReq = new QueryTextReq();
-            queryTextReq.setQueryFilters(new QueryFilters());
-            queryTextReq.setUser(user);
+            QueryNLReq queryNLReq = new QueryNLReq();
+            queryNLReq.setQueryFilters(new QueryFilters());
+            queryNLReq.setUser(user);
         }
         SemanticQueryReq semanticQueryReq = semanticQuery.buildSemanticQueryReq();
         QueryResult queryResult = doExecution(semanticQueryReq, semanticQuery.getParseInfo(), user);
