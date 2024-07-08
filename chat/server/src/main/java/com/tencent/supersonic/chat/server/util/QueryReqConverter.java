@@ -4,35 +4,35 @@ import com.tencent.supersonic.chat.server.agent.Agent;
 import com.tencent.supersonic.chat.server.pojo.ChatParseContext;
 import com.tencent.supersonic.common.pojo.enums.Text2SQLType;
 import com.tencent.supersonic.common.util.BeanMapper;
-import com.tencent.supersonic.headless.api.pojo.request.QueryTextReq;
+import com.tencent.supersonic.headless.api.pojo.request.QueryNLReq;
 import org.apache.commons.collections.MapUtils;
 
 import java.util.Objects;
 
 public class QueryReqConverter {
 
-    public static QueryTextReq buildText2SqlQueryReq(ChatParseContext chatParseContext) {
-        QueryTextReq queryTextReq = new QueryTextReq();
-        BeanMapper.mapper(chatParseContext, queryTextReq);
+    public static QueryNLReq buildText2SqlQueryReq(ChatParseContext chatParseContext) {
+        QueryNLReq queryNLReq = new QueryNLReq();
+        BeanMapper.mapper(chatParseContext, queryNLReq);
         Agent agent = chatParseContext.getAgent();
         if (agent == null) {
-            return queryTextReq;
+            return queryNLReq;
         }
         if (agent.containsLLMParserTool() && agent.containsRuleTool()) {
-            queryTextReq.setText2SQLType(Text2SQLType.RULE_AND_LLM);
+            queryNLReq.setText2SQLType(Text2SQLType.RULE_AND_LLM);
         } else if (agent.containsLLMParserTool()) {
-            queryTextReq.setText2SQLType(Text2SQLType.ONLY_LLM);
+            queryNLReq.setText2SQLType(Text2SQLType.ONLY_LLM);
         } else if (agent.containsRuleTool()) {
-            queryTextReq.setText2SQLType(Text2SQLType.ONLY_RULE);
+            queryNLReq.setText2SQLType(Text2SQLType.ONLY_RULE);
         }
-        queryTextReq.setDataSetIds(agent.getDataSetIds());
-        if (Objects.nonNull(queryTextReq.getMapInfo())
-                && MapUtils.isNotEmpty(queryTextReq.getMapInfo().getDataSetElementMatches())) {
-            queryTextReq.setMapInfo(queryTextReq.getMapInfo());
+        queryNLReq.setDataSetIds(agent.getDataSetIds());
+        if (Objects.nonNull(queryNLReq.getMapInfo())
+                && MapUtils.isNotEmpty(queryNLReq.getMapInfo().getDataSetElementMatches())) {
+            queryNLReq.setMapInfo(queryNLReq.getMapInfo());
         }
-        queryTextReq.setModelConfig(agent.getModelConfig());
-        queryTextReq.setPromptConfig(agent.getPromptConfig());
-        return queryTextReq;
+        queryNLReq.setModelConfig(agent.getModelConfig());
+        queryNLReq.setPromptConfig(agent.getPromptConfig());
+        return queryNLReq;
     }
 
 }
