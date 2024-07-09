@@ -154,7 +154,10 @@ export const layout: RunTimeLayoutConfig = (params) => {
             {history.location.pathname !== '/chat' && !isMobile && (
               <Copilot
                 token={getToken() || ''}
-                isDeveloper={process.env.NODE_ENV === 'development'}
+                isDeveloper={
+                  process.env.NODE_ENV === 'development' ||
+                  initialState?.currentUser?.isDeveloper === 1
+                }
               />
             )}
           </div>
