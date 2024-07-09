@@ -26,11 +26,9 @@ import com.tencent.supersonic.headless.api.pojo.SemanticSchema;
 import com.tencent.supersonic.headless.api.pojo.SqlEvaluation;
 import com.tencent.supersonic.headless.api.pojo.SqlInfo;
 import com.tencent.supersonic.headless.api.pojo.enums.CostType;
-import com.tencent.supersonic.headless.api.pojo.enums.QueryMethod;
 import com.tencent.supersonic.headless.api.pojo.request.DimensionValueReq;
 import com.tencent.supersonic.headless.api.pojo.request.ExecuteQueryReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryNLReq;
-import com.tencent.supersonic.headless.api.pojo.request.TranslateSqlReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryDataReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryDimValueReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryFilter;
@@ -41,7 +39,7 @@ import com.tencent.supersonic.headless.api.pojo.request.SemanticQueryReq;
 import com.tencent.supersonic.headless.api.pojo.response.DataSetMapInfo;
 import com.tencent.supersonic.headless.api.pojo.response.DataSetResp;
 import com.tencent.supersonic.headless.api.pojo.response.DimensionResp;
-import com.tencent.supersonic.headless.api.pojo.response.TranslateResp;
+import com.tencent.supersonic.headless.api.pojo.response.SemanticTranslateResp;
 import com.tencent.supersonic.headless.api.pojo.response.MapInfoResp;
 import com.tencent.supersonic.headless.api.pojo.response.MapResp;
 import com.tencent.supersonic.headless.api.pojo.response.ParseResp;
@@ -247,8 +245,8 @@ public class ChatQueryServiceImpl implements ChatQueryService {
 
         List<String> fields = new ArrayList<>();
         if (Objects.nonNull(parseInfo.getSqlInfo())
-                && StringUtils.isNotBlank(parseInfo.getSqlInfo().getCorrectS2SQL())) {
-            String correctorSql = parseInfo.getSqlInfo().getCorrectS2SQL();
+                && StringUtils.isNotBlank(parseInfo.getSqlInfo().getCorrectedS2SQL())) {
+            String correctorSql = parseInfo.getSqlInfo().getCorrectedS2SQL();
             fields = SqlSelectHelper.getAllFields(correctorSql);
         }
         if (LLMSqlQuery.QUERY_MODE.equalsIgnoreCase(parseInfo.getQueryMode())
@@ -260,13 +258,11 @@ public class ChatQueryServiceImpl implements ChatQueryService {
         } else if (LLMSqlQuery.QUERY_MODE.equalsIgnoreCase(parseInfo.getQueryMode())) {
             log.info("llm begin revise filters!");
             String correctorSql = reviseCorrectS2SQL(queryData, parseInfo);
-            parseInfo.getSqlInfo().setCorrectS2SQL(correctorSql);
+            parseInfo.getSqlInfo().setCorrectedS2SQL(correctorSql);
             semanticQuery.setParseInfo(parseInfo);
             SemanticQueryReq semanticQueryReq = semanticQuery.buildSemanticQueryReq();
-            TranslateSqlReq<Object> translateSqlReq = TranslateSqlReq.builder().queryReq(semanticQueryReq)
-                    .queryTypeEnum(QueryMethod.SQL).build();
-            TranslateResp explain = semanticLayerService.translate(translateSqlReq, user);
-            parseInfo.getSqlInfo().setQuerySQL(explain.getSql());
+            SemanticTranslateResp explain = semanticLayerService.translate(semanticQueryReq, user);
+            parseInfo.getSqlInfo().setQuerySQL(explain.getQuerySQL());
         } else {
             log.info("rule begin replace metrics and revise filters!");
             //remove unvalid filters
@@ -303,7 +299,7 @@ public class ChatQueryServiceImpl implements ChatQueryService {
         Map<String, Map<String, String>> filedNameToValueMap = new HashMap<>();
         Map<String, Map<String, String>> havingFiledNameToValueMap = new HashMap<>();
 
-        String correctorSql = parseInfo.getSqlInfo().getCorrectS2SQL();
+        String correctorSql = parseInfo.getSqlInfo().getCorrectedS2SQL();
         log.info("correctorSql before replacing:{}", correctorSql);
         // get where filter and having filter
         List<FieldExpression> whereExpressionList = SqlSelectHelper.getWhereExpressions(correctorSql);
@@ -334,7 +330,7 @@ public class ChatQueryServiceImpl implements ChatQueryService {
     private void replaceMetrics(SemanticParseInfo parseInfo, SchemaElement metric) {
         List<String> oriMetrics = parseInfo.getMetrics().stream()
                 .map(SchemaElement::getName).collect(Collectors.toList());
-        String correctorSql = parseInfo.getSqlInfo().getCorrectS2SQL();
+        String correctorSql = parseInfo.getSqlInfo().getCorrectedS2SQL();
         log.info("before replaceMetrics:{}", correctorSql);
         log.info("filteredMetrics:{},metrics:{}", oriMetrics, metric);
         Map<String, Pair<String, String>> fieldMap = new HashMap<>();
@@ -343,7 +339,7 @@ public class ChatQueryServiceImpl implements ChatQueryService {
             correctorSql = SqlReplaceHelper.replaceAggFields(correctorSql, fieldMap);
         }
         log.info("after replaceMetrics:{}", correctorSql);
-        parseInfo.getSqlInfo().setCorrectS2SQL(correctorSql);
+        parseInfo.getSqlInfo().setCorrectedS2SQL(correctorSql);
     }
 
     private void updateDateInfo(QueryDataReq queryData, SemanticParseInfo parseInfo,
@@ -598,7 +594,7 @@ public class ChatQueryServiceImpl implements ChatQueryService {
 
     public void correct(QuerySqlReq querySqlReq, User user) {
         SemanticParseInfo semanticParseInfo = correctSqlReq(querySqlReq, user);
-        querySqlReq.setSql(semanticParseInfo.getSqlInfo().getCorrectS2SQL());
+        querySqlReq.setSql(semanticParseInfo.getSqlInfo().getCorrectedS2SQL());
     }
 
     @Override
@@ -613,8 +609,8 @@ public class ChatQueryServiceImpl implements ChatQueryService {
         queryCtx.setSemanticSchema(semanticSchema);
         SemanticParseInfo semanticParseInfo = new SemanticParseInfo();
         SqlInfo sqlInfo = new SqlInfo();
-        sqlInfo.setCorrectS2SQL(querySqlReq.getSql());
-        sqlInfo.setS2SQL(querySqlReq.getSql());
+        sqlInfo.setCorrectedS2SQL(querySqlReq.getSql());
+        sqlInfo.setParsedS2SQL(querySqlReq.getSql());
         semanticParseInfo.setSqlInfo(sqlInfo);
         semanticParseInfo.setQueryType(QueryType.DETAIL);
 
@@ -630,7 +626,7 @@ public class ChatQueryServiceImpl implements ChatQueryService {
                 corrector.correct(queryCtx, semanticParseInfo);
             }
         });
-        log.info("chatQueryServiceImpl correct:{}", sqlInfo.getCorrectS2SQL());
+        log.info("chatQueryServiceImpl correct:{}", sqlInfo.getCorrectedS2SQL());
         return semanticParseInfo;
     }
 

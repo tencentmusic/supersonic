@@ -46,14 +46,14 @@ public class QueryTypeParser implements SemanticParser {
     private QueryType getQueryType(ChatQueryContext chatQueryContext, SemanticQuery semanticQuery) {
         SemanticParseInfo parseInfo = semanticQuery.getParseInfo();
         SqlInfo sqlInfo = parseInfo.getSqlInfo();
-        if (Objects.isNull(sqlInfo) || StringUtils.isBlank(sqlInfo.getS2SQL())) {
+        if (Objects.isNull(sqlInfo) || StringUtils.isBlank(sqlInfo.getParsedS2SQL())) {
             return QueryType.DETAIL;
         }
         //1. entity queryType
         Long dataSetId = parseInfo.getDataSetId();
         SemanticSchema semanticSchema = chatQueryContext.getSemanticSchema();
         if (semanticQuery instanceof RuleSemanticQuery || semanticQuery instanceof LLMSqlQuery) {
-            List<String> whereFields = SqlSelectHelper.getWhereFields(sqlInfo.getS2SQL());
+            List<String> whereFields = SqlSelectHelper.getWhereFields(sqlInfo.getParsedS2SQL());
             List<String> whereFilterByTimeFields = filterByTimeFields(whereFields);
             if (CollectionUtils.isNotEmpty(whereFilterByTimeFields)) {
                 Set<String> ids = semanticSchema.getEntities(dataSetId).stream().map(SchemaElement::getName)
@@ -63,7 +63,7 @@ public class QueryTypeParser implements SemanticParser {
                     return QueryType.ID;
                 }
             }
-            List<String> selectFields = SqlSelectHelper.getSelectFields(sqlInfo.getS2SQL());
+            List<String> selectFields = SqlSelectHelper.getSelectFields(sqlInfo.getParsedS2SQL());
             selectFields.addAll(whereFields);
             List<String> selectWhereFilterByTimeFields = filterByTimeFields(selectFields);
             if (CollectionUtils.isNotEmpty(selectWhereFilterByTimeFields)) {
@@ -91,7 +91,7 @@ public class QueryTypeParser implements SemanticParser {
     }
 
     private static boolean selectContainsMetric(SqlInfo sqlInfo, Long dataSetId, SemanticSchema semanticSchema) {
-        List<String> selectFields = SqlSelectHelper.getSelectFields(sqlInfo.getS2SQL());
+        List<String> selectFields = SqlSelectHelper.getSelectFields(sqlInfo.getParsedS2SQL());
         List<SchemaElement> metrics = semanticSchema.getMetrics(dataSetId);
         if (CollectionUtils.isNotEmpty(metrics)) {
             Set<String> metricNameSet = metrics.stream().map(SchemaElement::getName).collect(Collectors.toSet());

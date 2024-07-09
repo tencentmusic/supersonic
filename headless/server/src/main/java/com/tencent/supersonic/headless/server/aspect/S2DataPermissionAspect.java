@@ -19,7 +19,6 @@ import com.tencent.supersonic.headless.api.pojo.request.QuerySqlReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
 import com.tencent.supersonic.headless.api.pojo.request.SchemaFilterReq;
 import com.tencent.supersonic.headless.api.pojo.request.SemanticQueryReq;
-import com.tencent.supersonic.headless.api.pojo.request.TranslateSqlReq;
 import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticSchemaResp;
@@ -73,9 +72,6 @@ public class S2DataPermissionAspect {
         SemanticQueryReq queryReq = null;
         if (objects[0] instanceof SemanticQueryReq) {
             queryReq = (SemanticQueryReq) objects[0];
-        } else if (objects[0] instanceof TranslateSqlReq) {
-            queryReq = (SemanticQueryReq) ((TranslateSqlReq<?>) objects[0]).getQueryReq();
-            needQueryData = false;
         }
         if (queryReq == null) {
             throw new InvalidArgumentException("queryReq is not Invalid");

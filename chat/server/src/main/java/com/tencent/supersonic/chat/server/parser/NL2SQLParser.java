@@ -161,7 +161,7 @@ public class NL2SQLParser implements ChatParser {
 
         String curtMapStr = generateSchemaPrompt(currentMapResult.getMapInfo().getMatchedElements(dataId));
         String histMapStr = generateSchemaPrompt(lastParseResult.getSelectedParses().get(0).getElementMatches());
-        String histSQL = lastParseResult.getSelectedParses().get(0).getSqlInfo().getCorrectS2SQL();
+        String histSQL = lastParseResult.getSelectedParses().get(0).getSqlInfo().getCorrectedS2SQL();
         String rewrittenQuery = rewriteQuery(RewriteContext.builder()
                 .curtQuestion(currentMapResult.getQueryText())
                 .histQuestion(lastParseResult.getQueryText())

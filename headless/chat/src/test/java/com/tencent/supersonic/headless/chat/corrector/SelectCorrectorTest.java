@@ -44,12 +44,12 @@ class SelectCorrectorTest {
         semanticParseInfo.setQueryType(QueryType.DETAIL);
         SqlInfo sqlInfo = new SqlInfo();
         String sql = "SELECT * FROM 艺人库 WHERE 艺人名='周杰伦'";
-        sqlInfo.setS2SQL(sql);
-        sqlInfo.setCorrectS2SQL(sql);
+        sqlInfo.setParsedS2SQL(sql);
+        sqlInfo.setCorrectedS2SQL(sql);
         semanticParseInfo.setSqlInfo(sqlInfo);
         corrector.correct(chatQueryContext, semanticParseInfo);
         Assert.assertEquals("SELECT 粉丝数, 国籍, 艺人名, 性别 FROM 艺人库 WHERE 艺人名 = '周杰伦'",
-                semanticParseInfo.getSqlInfo().getCorrectS2SQL());
+                semanticParseInfo.getSqlInfo().getCorrectedS2SQL());
     }
 
     private ChatQueryContext buildQueryContext(Long dataSetId) {

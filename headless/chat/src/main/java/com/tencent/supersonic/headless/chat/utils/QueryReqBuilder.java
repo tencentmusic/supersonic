@@ -152,8 +152,8 @@ public class QueryReqBuilder {
 
     public static QuerySqlReq buildS2SQLReq(SqlInfo sqlInfo, Long dataSetId) {
         QuerySqlReq querySQLReq = new QuerySqlReq();
-        if (Objects.nonNull(sqlInfo.getCorrectS2SQL())) {
-            querySQLReq.setSql(sqlInfo.getCorrectS2SQL());
+        if (Objects.nonNull(sqlInfo.getCorrectedS2SQL())) {
+            querySQLReq.setSql(sqlInfo.getCorrectedS2SQL());
         }
         querySQLReq.setSqlInfo(sqlInfo);
         querySQLReq.setDataSetId(dataSetId);

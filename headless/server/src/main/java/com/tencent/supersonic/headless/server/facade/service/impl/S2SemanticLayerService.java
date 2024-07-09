@@ -19,7 +19,6 @@ import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.api.pojo.TagTypeDefaultConfig;
 import com.tencent.supersonic.headless.api.pojo.TimeDefaultConfig;
-import com.tencent.supersonic.headless.api.pojo.request.TranslateSqlReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryDimValueReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryFilter;
 import com.tencent.supersonic.headless.api.pojo.request.QueryMultiStructReq;
@@ -28,7 +27,7 @@ import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
 import com.tencent.supersonic.headless.api.pojo.request.SchemaFilterReq;
 import com.tencent.supersonic.headless.api.pojo.request.SemanticQueryReq;
 import com.tencent.supersonic.headless.api.pojo.response.DimensionResp;
-import com.tencent.supersonic.headless.api.pojo.response.TranslateResp;
+import com.tencent.supersonic.headless.api.pojo.response.SemanticTranslateResp;
 import com.tencent.supersonic.headless.api.pojo.response.ItemResp;
 import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
@@ -228,12 +227,11 @@ public class S2SemanticLayerService implements SemanticLayerService {
 
     @S2DataPermission
     @Override
-    public <T> TranslateResp translate(TranslateSqlReq<T> translateSqlReq, User user) throws Exception {
-        T queryReq = translateSqlReq.getQueryReq();
-        QueryStatement queryStatement = buildQueryStatement((SemanticQueryReq) queryReq, user);
+    public SemanticTranslateResp translate(SemanticQueryReq queryReq, User user) throws Exception {
+        QueryStatement queryStatement = buildQueryStatement(queryReq, user);
         semanticTranslator.translate(queryStatement);
-        return TranslateResp.builder()
-                .sql(queryStatement.getSql())
+        return SemanticTranslateResp.builder()
+                .querySQL(queryStatement.getSql())
                 .isOk(queryStatement.isOk())
                 .errMsg(queryStatement.getErrMsg())
                 .build();

@@ -29,7 +29,7 @@ public abstract class BaseSemanticCorrector implements SemanticCorrector {
 
     public void correct(ChatQueryContext chatQueryContext, SemanticParseInfo semanticParseInfo) {
         try {
-            if (StringUtils.isBlank(semanticParseInfo.getSqlInfo().getCorrectS2SQL())) {
+            if (StringUtils.isBlank(semanticParseInfo.getSqlInfo().getCorrectedS2SQL())) {
                 return;
             }
             doCorrect(chatQueryContext, semanticParseInfo);
@@ -74,7 +74,7 @@ public abstract class BaseSemanticCorrector implements SemanticCorrector {
 
     protected void addAggregateToMetric(ChatQueryContext chatQueryContext, SemanticParseInfo semanticParseInfo) {
         //add aggregate to all metric
-        String correctS2SQL = semanticParseInfo.getSqlInfo().getCorrectS2SQL();
+        String correctS2SQL = semanticParseInfo.getSqlInfo().getCorrectedS2SQL();
         Long dataSetId = semanticParseInfo.getDataSet().getDataSet();
         List<SchemaElement> metrics = getMetricElements(chatQueryContext, dataSetId);
 
@@ -98,7 +98,7 @@ public abstract class BaseSemanticCorrector implements SemanticCorrector {
             return;
         }
         String aggregateSql = SqlAddHelper.addAggregateToField(correctS2SQL, metricToAggregate);
-        semanticParseInfo.getSqlInfo().setCorrectS2SQL(aggregateSql);
+        semanticParseInfo.getSqlInfo().setCorrectedS2SQL(aggregateSql);
     }
 
     protected List<SchemaElement> getMetricElements(ChatQueryContext chatQueryContext, Long dataSetId) {

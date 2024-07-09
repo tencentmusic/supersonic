@@ -44,7 +44,7 @@ public class SqlExecutor implements ChatExecutor {
                         .agentId(chatExecuteContext.getAgentId())
                         .status(MemoryStatus.PENDING)
                         .question(chatExecuteContext.getQueryText())
-                        .s2sql(chatExecuteContext.getParseInfo().getSqlInfo().getS2SQL())
+                        .s2sql(chatExecuteContext.getParseInfo().getSqlInfo().getParsedS2SQL())
                         .dbSchema(buildSchemaStr(chatExecuteContext.getParseInfo()))
                         .createdBy(chatExecuteContext.getUser().getName())
                         .updatedBy(chatExecuteContext.getUser().getName())
@@ -64,12 +64,12 @@ public class SqlExecutor implements ChatExecutor {
         ChatContext chatCtx = chatContextService.getOrCreateContext(chatExecuteContext.getChatId());
         SemanticParseInfo parseInfo = chatExecuteContext.getParseInfo();
         if (Objects.isNull(parseInfo.getSqlInfo())
-                || StringUtils.isBlank(parseInfo.getSqlInfo().getCorrectS2SQL())) {
+                || StringUtils.isBlank(parseInfo.getSqlInfo().getCorrectedS2SQL())) {
             return null;
         }
 
         QuerySqlReq sqlReq = QuerySqlReq.builder()
-                .sql(parseInfo.getSqlInfo().getCorrectS2SQL())
+                .sql(parseInfo.getSqlInfo().getCorrectedS2SQL())
                 .build();
         sqlReq.setSqlInfo(parseInfo.getSqlInfo());
         sqlReq.setDataSetId(parseInfo.getDataSetId());

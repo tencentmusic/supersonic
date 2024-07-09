@@ -4,11 +4,9 @@ import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.api.pojo.enums.ChatWorkflowState;
-import com.tencent.supersonic.headless.api.pojo.enums.QueryMethod;
 import com.tencent.supersonic.headless.api.pojo.request.SemanticQueryReq;
-import com.tencent.supersonic.headless.api.pojo.request.TranslateSqlReq;
 import com.tencent.supersonic.headless.api.pojo.response.ParseResp;
-import com.tencent.supersonic.headless.api.pojo.response.TranslateResp;
+import com.tencent.supersonic.headless.api.pojo.response.SemanticTranslateResp;
 import com.tencent.supersonic.headless.chat.ChatContext;
 import com.tencent.supersonic.headless.chat.ChatQueryContext;
 import com.tencent.supersonic.headless.chat.corrector.SemanticCorrector;
@@ -123,15 +121,13 @@ public class ChatWorkflowEngine {
                 semanticQuery.setParseInfo(parseInfo);
                 SemanticQueryReq semanticQueryReq = semanticQuery.buildSemanticQueryReq();
                 SemanticLayerService queryService = ContextUtils.getBean(SemanticLayerService.class);
-                TranslateSqlReq<Object> translateSqlReq = TranslateSqlReq.builder().queryReq(semanticQueryReq)
-                        .queryTypeEnum(QueryMethod.SQL).build();
-                TranslateResp explain = queryService.translate(translateSqlReq, chatQueryContext.getUser());
-                parseInfo.getSqlInfo().setQuerySQL(explain.getSql());
+                SemanticTranslateResp explain = queryService.translate(semanticQueryReq, chatQueryContext.getUser());
+                parseInfo.getSqlInfo().setQuerySQL(explain.getQuerySQL());
 
                 keyPipelineLog.info("SqlInfoProcessor results:\n"
                                 + "Parsed S2SQL: {}\nCorrected S2SQL: {}\nQuery SQL: {}",
-                        StringUtils.normalizeSpace(parseInfo.getSqlInfo().getS2SQL()),
-                        StringUtils.normalizeSpace(parseInfo.getSqlInfo().getCorrectS2SQL()),
+                        StringUtils.normalizeSpace(parseInfo.getSqlInfo().getParsedS2SQL()),
+                        StringUtils.normalizeSpace(parseInfo.getSqlInfo().getCorrectedS2SQL()),
                         StringUtils.normalizeSpace(parseInfo.getSqlInfo().getQuerySQL()));
             } catch (Exception e) {
                 log.warn("get sql info failed:{}", parseInfo, e);

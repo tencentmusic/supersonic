@@ -38,7 +38,7 @@ public class LLMResponseService {
         parseInfo.setProperties(properties);
         parseInfo.setScore(queryCtx.getQueryText().length() * (1 + weight));
         parseInfo.setQueryMode(semanticQuery.getQueryMode());
-        parseInfo.getSqlInfo().setS2SQL(s2SQL);
+        parseInfo.getSqlInfo().setParsedS2SQL(s2SQL);
         queryCtx.getCandidateQueries().add(semanticQuery);
         return parseInfo;
     }

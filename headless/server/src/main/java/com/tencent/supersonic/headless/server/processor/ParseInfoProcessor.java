@@ -52,12 +52,12 @@ public class ParseInfoProcessor implements ResultProcessor {
 
     public void updateParseInfo(SemanticParseInfo parseInfo) {
         SqlInfo sqlInfo = parseInfo.getSqlInfo();
-        String correctS2SQL = sqlInfo.getCorrectS2SQL();
+        String correctS2SQL = sqlInfo.getCorrectedS2SQL();
         if (StringUtils.isBlank(correctS2SQL)) {
             return;
         }
         // if S2SQL equals correctS2SQL, then not update the parseInfo.
-        if (correctS2SQL.equals(sqlInfo.getS2SQL())) {
+        if (correctS2SQL.equals(sqlInfo.getParsedS2SQL())) {
             return;
         }
         List<FieldExpression> expressions = SqlSelectHelper.getFilterExpression(correctS2SQL);
@@ -87,15 +87,15 @@ public class ParseInfoProcessor implements ResultProcessor {
         if (Objects.isNull(semanticSchema)) {
             return;
         }
-        List<String> allFields = getFieldsExceptDate(SqlSelectHelper.getAllFields(sqlInfo.getCorrectS2SQL()));
+        List<String> allFields = getFieldsExceptDate(SqlSelectHelper.getAllFields(sqlInfo.getCorrectedS2SQL()));
         Set<SchemaElement> metrics = getElements(dataSetId, allFields, semanticSchema.getMetrics());
         parseInfo.setMetrics(metrics);
         if (QueryType.METRIC.equals(parseInfo.getQueryType())) {
-            List<String> groupByFields = SqlSelectHelper.getGroupByFields(sqlInfo.getCorrectS2SQL());
+            List<String> groupByFields = SqlSelectHelper.getGroupByFields(sqlInfo.getCorrectedS2SQL());
             List<String> groupByDimensions = getFieldsExceptDate(groupByFields);
             parseInfo.setDimensions(getElements(dataSetId, groupByDimensions, semanticSchema.getDimensions()));
         } else if (QueryType.DETAIL.equals(parseInfo.getQueryType())) {
-            List<String> selectFields = SqlSelectHelper.getSelectFields(sqlInfo.getCorrectS2SQL());
+            List<String> selectFields = SqlSelectHelper.getSelectFields(sqlInfo.getCorrectedS2SQL());
             List<String> selectDimensions = getFieldsExceptDate(selectFields);
             parseInfo.setDimensions(getElements(dataSetId, selectDimensions, semanticSchema.getDimensions()));
         }

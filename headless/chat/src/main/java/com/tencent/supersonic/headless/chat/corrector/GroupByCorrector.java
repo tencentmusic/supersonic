@@ -35,7 +35,7 @@ public class GroupByCorrector extends BaseSemanticCorrector {
         Long dataSetId = semanticParseInfo.getDataSetId();
         //add dimension group by
         SqlInfo sqlInfo = semanticParseInfo.getSqlInfo();
-        String correctS2SQL = sqlInfo.getCorrectS2SQL();
+        String correctS2SQL = sqlInfo.getCorrectedS2SQL();
         SemanticSchema semanticSchema = chatQueryContext.getSemanticSchema();
         // check has distinct
         if (SqlSelectHelper.hasDistinct(correctS2SQL)) {
@@ -68,7 +68,7 @@ public class GroupByCorrector extends BaseSemanticCorrector {
         Long dataSetId = semanticParseInfo.getDataSetId();
         //add dimension group by
         SqlInfo sqlInfo = semanticParseInfo.getSqlInfo();
-        String correctS2SQL = sqlInfo.getCorrectS2SQL();
+        String correctS2SQL = sqlInfo.getCorrectedS2SQL();
         SemanticSchema semanticSchema = chatQueryContext.getSemanticSchema();
         //add alias field name
         Set<String> dimensions = getDimensions(dataSetId, semanticSchema);
@@ -83,7 +83,7 @@ public class GroupByCorrector extends BaseSemanticCorrector {
                     return true;
                 })
                 .collect(Collectors.toSet());
-        semanticParseInfo.getSqlInfo().setCorrectS2SQL(SqlAddHelper.addGroupBy(correctS2SQL, groupByFields));
+        semanticParseInfo.getSqlInfo().setCorrectedS2SQL(SqlAddHelper.addGroupBy(correctS2SQL, groupByFields));
     }
 
 }
