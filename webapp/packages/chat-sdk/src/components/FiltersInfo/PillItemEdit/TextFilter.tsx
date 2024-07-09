@@ -63,7 +63,8 @@ export default function TextFilter({ value, onChange }: Props) {
       {inputMode && (
         <Input
           style={{ width: 200 }}
-          value={value.value as string}
+          defaultValue={value.value as string}
+          // value={value.value as string}
           onChange={e => onChange({ ...value, value: e.target.value })}
         />
       )}
