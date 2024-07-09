@@ -100,6 +100,7 @@ export type AgentType = {
     modelName: string;
     temperature: number;
     timeOut: number;
+  }
   modelConfig: {
     chatModel: {
       provider: string;
@@ -126,3 +127,4 @@ export type AgentType = {
     enableMultiTurn: boolean;
   };
 };
+
