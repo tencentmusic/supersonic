@@ -370,7 +370,8 @@ public class DimensionServiceImpl extends ServiceImpl<DimensionDOMapper, Dimensi
     public List<DimValueMap> mockDimensionValueAlias(DimensionReq dimensionReq, User user) {
         ModelResp modelResp = modelService.getModel(dimensionReq.getModelId());
         ModelDetail modelDetail = modelResp.getModelDetail();
-        String sqlQuery = modelDetail.getSqlQuery();
+        String tableQuery = modelDetail.getTableQuery();
+        String sqlQuery = "SELECT * FROM " + tableQuery;
         DatabaseResp database = databaseService.getDatabase(modelResp.getDatabaseId());
 
         String sql = "select ai_talk." + dimensionReq.getBizName() + " from (" + sqlQuery
