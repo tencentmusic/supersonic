@@ -288,7 +288,7 @@ export function getAggregationShowText(name: string, operator: string) {
 
   const { getText } = aggregationMap[operator];
 
-  return getText(name);
+  return getText(name === '*' ? '记录数' : name);
 }
 
 export function getDateFilterShowText(value: [string | null, string | null] | null) {

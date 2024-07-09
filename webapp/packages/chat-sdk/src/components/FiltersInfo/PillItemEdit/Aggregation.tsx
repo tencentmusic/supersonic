@@ -59,6 +59,18 @@ export default function Aggregation({ value, onChange }: Props) {
     });
   };
 
+  const getLabelByOperatorValue = (value: string) => {
+    return (
+      [...stringOperatorOptions, ...numberOperatorOptions].find(option => option.value === value)
+        ?.label ?? ''
+    );
+  };
+
+  const getOptions = (field: string) => {
+    if (field === '*') return [...options, { value: '*', label: '记录数' }];
+    return options;
+  };
+
   return (
     <Space direction="vertical">
       {value.fields.map(field => {
@@ -69,7 +81,7 @@ export default function Aggregation({ value, onChange }: Props) {
                 value={field.field}
                 key={field.field}
                 style={{ width: 120 }}
-                options={options}
+                options={getOptions(field.field)}
                 optionFilterProp="label"
                 onChange={handleFieldSelect(field.field)}
               />
@@ -81,7 +93,7 @@ export default function Aggregation({ value, onChange }: Props) {
                     ? stringOperatorOptions
                     : getTypeByBizName(field.field) === 'number'
                     ? numberOperatorOptions
-                    : []
+                    : [{ value: field.operator, label: getLabelByOperatorValue(field.operator) }]
                 }
                 onChange={handleFieldOperator(field.field)}
               />

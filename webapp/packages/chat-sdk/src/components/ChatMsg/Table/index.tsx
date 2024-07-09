@@ -23,7 +23,7 @@ const Table: React.FC<Props> = ({ data, size, loading, onApplyAuth }) => {
       return {
         dataIndex: nameEn,
         key: nameEn,
-        title: name || (nameEn === 'count(*)' ? '数量' : nameEn),
+        title: name || (nameEn === 'count(*)' ? '记录数' : nameEn),
         ...(queryResults.length > 1
           ? {
               sorter: (a, b) => {
