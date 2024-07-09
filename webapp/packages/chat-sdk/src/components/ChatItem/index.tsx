@@ -31,6 +31,7 @@ import {
 } from '../FiltersInfo/types';
 import SqlItemModal, { SqlItemModalHandle } from './SqlItemModal';
 import SimilarQuestionItem from './SimilarQuestionItem';
+import { message } from 'antd';
 
 type Props = {
   msg: string;
@@ -418,7 +419,10 @@ const ChatItem: React.FC<Props> = ({
           useCnt: null,
         });
       } else {
-        newMetrics.push(oldMetric);
+        newMetrics.push({
+          ...oldMetric,
+          aggregator: field.operator,
+        });
       }
     });
 
