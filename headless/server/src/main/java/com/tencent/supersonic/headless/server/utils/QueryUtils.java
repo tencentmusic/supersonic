@@ -157,7 +157,6 @@ public class QueryUtils {
         }
         String unionSql = unionSqlBuilder.substring(0, unionSqlBuilder.length() - Constants.UNIONALL.length());
         sqlParser.setSql(unionSql);
-        sqlParser.setSourceId(sqlParsers.get(0).getSourceId());
         log.info("union sql parser:{}", sqlParser);
         return sqlParser;
     }

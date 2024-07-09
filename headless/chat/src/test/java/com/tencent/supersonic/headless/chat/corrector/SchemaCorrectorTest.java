@@ -65,8 +65,8 @@ class SchemaCorrectorTest {
                 + "and 商务组 = 'xxx' order by 播放量 desc  limit 10";
         SemanticParseInfo semanticParseInfo = new SemanticParseInfo();
         SqlInfo sqlInfo = new SqlInfo();
-        sqlInfo.setS2SQL(sql);
-        sqlInfo.setCorrectS2SQL(sql);
+        sqlInfo.setParsedS2SQL(sql);
+        sqlInfo.setCorrectedS2SQL(sql);
         semanticParseInfo.setSqlInfo(sqlInfo);
 
         SchemaElement schemaElement = new SchemaElement();
@@ -80,7 +80,7 @@ class SchemaCorrectorTest {
         schemaCorrector.removeFilterIfNotInLinkingValue(chatQueryContext, semanticParseInfo);
 
         Assert.assertEquals("SELECT 歌曲名 FROM 歌曲 WHERE 发行日期 >= '2024-01-01' "
-                + "ORDER BY 播放量 DESC LIMIT 10", semanticParseInfo.getSqlInfo().getCorrectS2SQL());
+                + "ORDER BY 播放量 DESC LIMIT 10", semanticParseInfo.getSqlInfo().getCorrectedS2SQL());
 
         parseResult = objectMapper.readValue(json, ParseResult.class);
 
@@ -92,11 +92,11 @@ class SchemaCorrectorTest {
         parseResult.setLinkingValues(linkingValues);
         semanticParseInfo.getProperties().put(Constants.CONTEXT, parseResult);
 
-        semanticParseInfo.getSqlInfo().setCorrectS2SQL(sql);
-        semanticParseInfo.getSqlInfo().setS2SQL(sql);
+        semanticParseInfo.getSqlInfo().setCorrectedS2SQL(sql);
+        semanticParseInfo.getSqlInfo().setParsedS2SQL(sql);
         schemaCorrector.removeFilterIfNotInLinkingValue(chatQueryContext, semanticParseInfo);
         Assert.assertEquals("SELECT 歌曲名 FROM 歌曲 WHERE 发行日期 >= '2024-01-01' "
-                + "AND 商务组 = 'xxx' ORDER BY 播放量 DESC LIMIT 10", semanticParseInfo.getSqlInfo().getCorrectS2SQL());
+                + "AND 商务组 = 'xxx' ORDER BY 播放量 DESC LIMIT 10", semanticParseInfo.getSqlInfo().getCorrectedS2SQL());
 
     }
 

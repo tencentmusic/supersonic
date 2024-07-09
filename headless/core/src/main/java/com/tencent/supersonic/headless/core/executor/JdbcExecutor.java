@@ -34,10 +34,6 @@ public class JdbcExecutor implements QueryExecutor {
         }
 
         SqlUtils sqlUtils = ContextUtils.getBean(SqlUtils.class);
-        if (StringUtils.isEmpty(queryStatement.getSourceId())) {
-            log.warn("data base id is empty");
-            return null;
-        }
         log.info("executing SQL: {}", StringUtils.normalizeSpace(queryStatement.getSql()));
         Database database = queryStatement.getSemanticModel().getDatabase();
         SemanticQueryResp queryResultWithColumns = new SemanticQueryResp();

@@ -22,7 +22,7 @@ public class AggCorrector extends BaseSemanticCorrector {
 
     private void addAggregate(ChatQueryContext chatQueryContext, SemanticParseInfo semanticParseInfo) {
         List<String> sqlGroupByFields = SqlSelectHelper.getGroupByFields(
-                semanticParseInfo.getSqlInfo().getCorrectS2SQL());
+                semanticParseInfo.getSqlInfo().getCorrectedS2SQL());
         if (CollectionUtils.isEmpty(sqlGroupByFields)) {
             return;
         }

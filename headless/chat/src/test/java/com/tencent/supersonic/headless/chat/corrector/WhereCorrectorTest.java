@@ -19,7 +19,7 @@ class WhereCorrectorTest {
         SqlInfo sqlInfo = new SqlInfo();
         String sql = "SELECT 维度1, SUM(播放量) FROM 数据库 "
                 + "WHERE (歌手名 = '张三') AND 数据日期 <= '2023-11-17' GROUP BY 维度1";
-        sqlInfo.setCorrectS2SQL(sql);
+        sqlInfo.setCorrectedS2SQL(sql);
         semanticParseInfo.setSqlInfo(sqlInfo);
 
         ChatQueryContext chatQueryContext = new ChatQueryContext();
@@ -54,7 +54,7 @@ class WhereCorrectorTest {
         WhereCorrector whereCorrector = new WhereCorrector();
         whereCorrector.addQueryFilter(chatQueryContext, semanticParseInfo);
 
-        String correctS2SQL = semanticParseInfo.getSqlInfo().getCorrectS2SQL();
+        String correctS2SQL = semanticParseInfo.getSqlInfo().getCorrectedS2SQL();
 
         Assert.assertEquals(correctS2SQL, "SELECT 维度1, SUM(播放量) FROM 数据库 WHERE "
                 + "(歌手名 = '张三') AND 数据日期 <= '2023-11-17' AND age > 30 AND "

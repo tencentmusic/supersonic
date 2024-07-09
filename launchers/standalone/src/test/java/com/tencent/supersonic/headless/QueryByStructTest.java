@@ -111,15 +111,14 @@ public class QueryByStructTest extends BaseTest {
     }
 
     @Test
-    public void testAuthorization_sensitive_metric() throws Exception {
+    public void testAuthorization_sensitive_metric() {
         User tom = DataUtils.getUserTom();
         Aggregator aggregator = new Aggregator();
         aggregator.setFunc(AggOperatorEnum.SUM);
         aggregator.setColumn("stay_hours");
-        QueryStructReq queryStructReq1 = buildQueryStructReq(Arrays.asList("department"), aggregator);
-        SemanticQueryResp semanticQueryResp = semanticLayerService.queryByReq(queryStructReq1, tom);
-        Assertions.assertEquals(false, semanticQueryResp.getColumns().get(1).getAuthorized());
-        Assertions.assertEquals("******", semanticQueryResp.getResultList().get(0).get("stay_hours"));
+        QueryStructReq queryStructReq = buildQueryStructReq(Arrays.asList("department"), aggregator);
+        assertThrows(InvalidPermissionException.class,
+                () -> semanticLayerService.queryByReq(queryStructReq, tom));
     }
 
     @Test
@@ -127,7 +126,7 @@ public class QueryByStructTest extends BaseTest {
         User tom = DataUtils.getUserTom();
         Aggregator aggregator = new Aggregator();
         aggregator.setFunc(AggOperatorEnum.SUM);
-        aggregator.setColumn("stay_hours");
+        aggregator.setColumn("pv");
         QueryStructReq queryStructReq1 = buildQueryStructReq(Arrays.asList("department"), aggregator);
         SemanticQueryResp semanticQueryResp = semanticLayerService.queryByReq(queryStructReq1, tom);
         Assertions.assertNotNull(semanticQueryResp.getQueryAuthorization().getMessage());

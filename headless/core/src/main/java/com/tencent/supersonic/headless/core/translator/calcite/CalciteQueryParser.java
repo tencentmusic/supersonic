@@ -35,7 +35,6 @@ public class CalciteQueryParser implements QueryParser {
         aggBuilder.explain(queryStatement, isAgg);
         EngineType engineType = EngineType.fromString(semanticSchema.getSemanticModel().getDatabase().getType());
         queryStatement.setSql(aggBuilder.getSql(engineType));
-        queryStatement.setSourceId(aggBuilder.getSourceId());
         if (Objects.nonNull(queryStatement.getEnableOptimize()) && queryStatement.getEnableOptimize()
                 && Objects.nonNull(queryStatement.getDataSetAlias()) && !queryStatement.getDataSetAlias().isEmpty()) {
             // simplify model sql with query sql

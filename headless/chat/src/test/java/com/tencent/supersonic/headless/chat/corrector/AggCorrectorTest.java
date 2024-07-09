@@ -30,14 +30,14 @@ class AggCorrectorTest {
         String sql = "SELECT 用户, 访问次数 FROM 超音数数据集 WHERE 部门 = 'sales' AND"
                 + " datediff('day', 数据日期, '2024-06-04') <= 7"
                 + " GROUP BY 用户 ORDER BY SUM(访问次数) DESC LIMIT 1";
-        sqlInfo.setS2SQL(sql);
-        sqlInfo.setCorrectS2SQL(sql);
+        sqlInfo.setParsedS2SQL(sql);
+        sqlInfo.setCorrectedS2SQL(sql);
         semanticParseInfo.setSqlInfo(sqlInfo);
         corrector.correct(chatQueryContext, semanticParseInfo);
         Assert.assertEquals("SELECT 用户, SUM(访问次数) FROM 超音数数据集 WHERE 部门 = 'sales'"
                 + " AND datediff('day', 数据日期, '2024-06-04') <= 7 GROUP BY 用户"
                 + " ORDER BY SUM(访问次数) DESC LIMIT 1",
-                semanticParseInfo.getSqlInfo().getCorrectS2SQL());
+                semanticParseInfo.getSqlInfo().getCorrectedS2SQL());
     }
 
     private ChatQueryContext buildQueryContext(Long dataSetId) {

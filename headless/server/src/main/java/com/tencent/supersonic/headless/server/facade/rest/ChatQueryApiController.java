@@ -1,7 +1,7 @@
 package com.tencent.supersonic.headless.server.facade.rest;
 
 import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
-import com.tencent.supersonic.headless.api.pojo.request.QueryTextReq;
+import com.tencent.supersonic.headless.api.pojo.request.QueryNLReq;
 import com.tencent.supersonic.headless.api.pojo.response.MapResp;
 import com.tencent.supersonic.headless.server.facade.service.ChatQueryService;
 import com.tencent.supersonic.headless.server.facade.service.RetrieveService;
@@ -26,27 +26,27 @@ public class ChatQueryApiController {
     private RetrieveService retrieveService;
 
     @PostMapping("/chat/search")
-    public Object search(@RequestBody QueryTextReq queryTextReq,
+    public Object search(@RequestBody QueryNLReq queryNLReq,
                         HttpServletRequest request,
                         HttpServletResponse response) throws Exception {
-        queryTextReq.setUser(UserHolder.findUser(request, response));
-        return retrieveService.retrieve(queryTextReq);
+        queryNLReq.setUser(UserHolder.findUser(request, response));
+        return retrieveService.retrieve(queryNLReq);
     }
 
     @PostMapping("/chat/map")
-    public MapResp map(@RequestBody QueryTextReq queryTextReq,
+    public MapResp map(@RequestBody QueryNLReq queryNLReq,
                                   HttpServletRequest request,
                                   HttpServletResponse response) {
-        queryTextReq.setUser(UserHolder.findUser(request, response));
-        return chatQueryService.performMapping(queryTextReq);
+        queryNLReq.setUser(UserHolder.findUser(request, response));
+        return chatQueryService.performMapping(queryNLReq);
     }
 
     @PostMapping("/chat/parse")
-    public Object parse(@RequestBody QueryTextReq queryTextReq,
+    public Object parse(@RequestBody QueryNLReq queryNLReq,
             HttpServletRequest request,
             HttpServletResponse response) throws Exception {
-        queryTextReq.setUser(UserHolder.findUser(request, response));
-        return chatQueryService.performParsing(queryTextReq);
+        queryNLReq.setUser(UserHolder.findUser(request, response));
+        return chatQueryService.performParsing(queryNLReq);
     }
 
 }

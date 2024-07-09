@@ -45,7 +45,7 @@ public class TimeCorrector extends BaseSemanticCorrector {
     }
 
     private void removeDateIfExist(ChatQueryContext chatQueryContext, SemanticParseInfo semanticParseInfo) {
-        String correctS2SQL = semanticParseInfo.getSqlInfo().getCorrectS2SQL();
+        String correctS2SQL = semanticParseInfo.getSqlInfo().getCorrectedS2SQL();
         //decide whether remove date field from where
         Environment environment = ContextUtils.getBean(Environment.class);
         String correctorDate = environment.getProperty("s2.corrector.date");
@@ -55,12 +55,12 @@ public class TimeCorrector extends BaseSemanticCorrector {
             removeFieldNames.add(TimeDimensionEnum.WEEK.getChName());
             removeFieldNames.add(TimeDimensionEnum.MONTH.getChName());
             correctS2SQL = SqlRemoveHelper.removeWhereCondition(correctS2SQL, removeFieldNames);
-            semanticParseInfo.getSqlInfo().setCorrectS2SQL(correctS2SQL);
+            semanticParseInfo.getSqlInfo().setCorrectedS2SQL(correctS2SQL);
         }
     }
 
     private void addDateIfNotExist(ChatQueryContext chatQueryContext, SemanticParseInfo semanticParseInfo) {
-        String correctS2SQL = semanticParseInfo.getSqlInfo().getCorrectS2SQL();
+        String correctS2SQL = semanticParseInfo.getSqlInfo().getCorrectedS2SQL();
         List<String> whereFields = SqlSelectHelper.getWhereFields(correctS2SQL);
 
         //decide whether add date field to where
@@ -88,11 +88,11 @@ public class TimeCorrector extends BaseSemanticCorrector {
                 }
             }
         }
-        semanticParseInfo.getSqlInfo().setCorrectS2SQL(correctS2SQL);
+        semanticParseInfo.getSqlInfo().setCorrectedS2SQL(correctS2SQL);
     }
 
     private void addLowerBoundDate(SemanticParseInfo semanticParseInfo) {
-        String correctS2SQL = semanticParseInfo.getSqlInfo().getCorrectS2SQL();
+        String correctS2SQL = semanticParseInfo.getSqlInfo().getCorrectedS2SQL();
         DateBoundInfo dateBoundInfo = SqlDateSelectHelper.getDateBoundInfo(correctS2SQL);
         if (Objects.isNull(dateBoundInfo)) {
             return;
@@ -108,14 +108,14 @@ public class TimeCorrector extends BaseSemanticCorrector {
             } catch (JSQLParserException e) {
                 log.error("parseCondExpression", e);
             }
-            semanticParseInfo.getSqlInfo().setCorrectS2SQL(correctS2SQL);
+            semanticParseInfo.getSqlInfo().setCorrectedS2SQL(correctS2SQL);
         }
     }
 
     private void parserDateDiffFunction(SemanticParseInfo semanticParseInfo) {
-        String correctS2SQL = semanticParseInfo.getSqlInfo().getCorrectS2SQL();
+        String correctS2SQL = semanticParseInfo.getSqlInfo().getCorrectedS2SQL();
         correctS2SQL = SqlReplaceHelper.replaceFunction(correctS2SQL);
-        semanticParseInfo.getSqlInfo().setCorrectS2SQL(correctS2SQL);
+        semanticParseInfo.getSqlInfo().setCorrectedS2SQL(correctS2SQL);
     }
 
 }

@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Set;
 
 @Data
-public class QueryTextReq {
+public class QueryNLReq {
     private String queryText;
     private Integer chatId;
     private Set<Long> dataSetIds = Sets.newHashSet();

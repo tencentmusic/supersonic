@@ -33,7 +33,7 @@ public class SelectCorrector extends BaseSemanticCorrector {
 
     @Override
     public void doCorrect(ChatQueryContext chatQueryContext, SemanticParseInfo semanticParseInfo) {
-        String correctS2SQL = semanticParseInfo.getSqlInfo().getCorrectS2SQL();
+        String correctS2SQL = semanticParseInfo.getSqlInfo().getCorrectedS2SQL();
         List<String> aggregateFields = SqlSelectHelper.getAggregateFields(correctS2SQL);
         List<String> selectFields = SqlSelectHelper.getSelectFields(correctS2SQL);
         // If the number of aggregated fields is equal to the number of queried fields, do not add fields to select.
@@ -44,7 +44,7 @@ public class SelectCorrector extends BaseSemanticCorrector {
         }
         correctS2SQL = addFieldsToSelect(chatQueryContext, semanticParseInfo, correctS2SQL);
         String querySql = SqlReplaceHelper.dealAliasToOrderBy(correctS2SQL);
-        semanticParseInfo.getSqlInfo().setCorrectS2SQL(querySql);
+        semanticParseInfo.getSqlInfo().setCorrectedS2SQL(querySql);
     }
 
     protected String addFieldsToSelect(ChatQueryContext chatQueryContext, SemanticParseInfo semanticParseInfo,
@@ -65,7 +65,7 @@ public class SelectCorrector extends BaseSemanticCorrector {
         }
         needAddFields.removeAll(selectFields);
         String addFieldsToSelectSql = SqlAddHelper.addFieldsToSelect(correctS2SQL, new ArrayList<>(needAddFields));
-        semanticParseInfo.getSqlInfo().setCorrectS2SQL(addFieldsToSelectSql);
+        semanticParseInfo.getSqlInfo().setCorrectedS2SQL(addFieldsToSelectSql);
         return addFieldsToSelectSql;
     }
 

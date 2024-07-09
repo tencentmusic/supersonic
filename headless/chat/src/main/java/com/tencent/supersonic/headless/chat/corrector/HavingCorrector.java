@@ -49,19 +49,19 @@ public class HavingCorrector extends BaseSemanticCorrector {
         if (CollectionUtils.isEmpty(metrics)) {
             return;
         }
-        String havingSql = SqlAddHelper.addHaving(semanticParseInfo.getSqlInfo().getCorrectS2SQL(), metrics);
-        semanticParseInfo.getSqlInfo().setCorrectS2SQL(havingSql);
+        String havingSql = SqlAddHelper.addHaving(semanticParseInfo.getSqlInfo().getCorrectedS2SQL(), metrics);
+        semanticParseInfo.getSqlInfo().setCorrectedS2SQL(havingSql);
     }
 
     private void addHavingToSelect(SemanticParseInfo semanticParseInfo) {
-        String correctS2SQL = semanticParseInfo.getSqlInfo().getCorrectS2SQL();
+        String correctS2SQL = semanticParseInfo.getSqlInfo().getCorrectedS2SQL();
         if (!SqlSelectFunctionHelper.hasAggregateFunction(correctS2SQL)) {
             return;
         }
         List<Expression> havingExpressionList = SqlSelectHelper.getHavingExpression(correctS2SQL);
         if (!CollectionUtils.isEmpty(havingExpressionList)) {
             String replaceSql = SqlAddHelper.addFunctionToSelect(correctS2SQL, havingExpressionList);
-            semanticParseInfo.getSqlInfo().setCorrectS2SQL(replaceSql);
+            semanticParseInfo.getSqlInfo().setCorrectedS2SQL(replaceSql);
         }
         return;
     }

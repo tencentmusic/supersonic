@@ -34,8 +34,8 @@ public class GrammarCorrector extends BaseSemanticCorrector {
     }
 
     public void removeSameFieldFromSelect(SemanticParseInfo semanticParseInfo) {
-        String correctS2SQL = semanticParseInfo.getSqlInfo().getCorrectS2SQL();
+        String correctS2SQL = semanticParseInfo.getSqlInfo().getCorrectedS2SQL();
         correctS2SQL = SqlRemoveHelper.removeSameFieldFromSelect(correctS2SQL);
-        semanticParseInfo.getSqlInfo().setCorrectS2SQL(correctS2SQL);
+        semanticParseInfo.getSqlInfo().setCorrectedS2SQL(correctS2SQL);
     }
 }

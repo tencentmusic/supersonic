@@ -56,7 +56,7 @@ public class ParseInfoProcessor implements ResultProcessor {
 
     public void updateParseInfo(SemanticParseInfo parseInfo) {
         SqlInfo sqlInfo = parseInfo.getSqlInfo();
-        String correctS2SQL = sqlInfo.getCorrectS2SQL();
+        String correctS2SQL = sqlInfo.getCorrectedS2SQL();
         if (StringUtils.isBlank(correctS2SQL)) {
             return;
         }
@@ -87,9 +87,9 @@ public class ParseInfoProcessor implements ResultProcessor {
         if (Objects.isNull(semanticSchema)) {
             return;
         }
-        List<String> allFields = getFieldsExceptDate(SqlSelectHelper.getAllSelectFields(sqlInfo.getCorrectS2SQL()));
+        List<String> allFields = getFieldsExceptDate(SqlSelectHelper.getAllSelectFields(sqlInfo.getCorrectedS2SQL()));
         Set<SchemaElement> metrics = getElements(dataSetId, allFields, semanticSchema.getMetrics());
-        Map<String, String> functionMap = SqlSelectHelper.getAggregate(sqlInfo.getCorrectS2SQL())
+        Map<String, String> functionMap = SqlSelectHelper.getAggregate(sqlInfo.getCorrectedS2SQL())
                 .stream()
                 .collect(Collectors.toMap(
                         func -> func.getParameters().get(0).toString(),
@@ -107,11 +107,11 @@ public class ParseInfoProcessor implements ResultProcessor {
 
         parseInfo.setMetrics(metrics);
         if (QueryType.METRIC.equals(parseInfo.getQueryType())) {
-            List<String> groupByFields = SqlSelectHelper.getGroupByFields(sqlInfo.getCorrectS2SQL());
+            List<String> groupByFields = SqlSelectHelper.getGroupByFields(sqlInfo.getCorrectedS2SQL());
             List<String> groupByDimensions = getFieldsExceptDate(groupByFields);
             parseInfo.setDimensions(getElements(dataSetId, groupByDimensions, semanticSchema.getDimensions()));
         } else if (QueryType.DETAIL.equals(parseInfo.getQueryType())) {
-            List<String> selectFields = SqlSelectHelper.getSelectFields(sqlInfo.getCorrectS2SQL());
+            List<String> selectFields = SqlSelectHelper.getSelectFields(sqlInfo.getCorrectedS2SQL());
             List<String> selectDimensions = getFieldsExceptDate(selectFields);
             parseInfo.setDimensions(getElements(dataSetId, selectDimensions, semanticSchema.getDimensions()));
         }
