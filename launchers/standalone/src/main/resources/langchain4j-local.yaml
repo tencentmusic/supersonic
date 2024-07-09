@@ -14,19 +14,16 @@ langchain4j:
       temperature: ${OPENAI_TEMPERATURE:0.0}
       timeout: ${OPENAI_TIMEOUT:PT60S}
 
-#    embedding-model:
-#      base-url: https://api.openai.com/v1
-#      api-key: demo
-#      model-name: text-embedding-3-small
-#      timeout: PT60S
-  jina:
+  #    embedding-model:
+  #      base-url: https://api.openai.com/v1
+  #      api-key: demo
+  #      model-name: text-embedding-3-small
+  #      timeout: PT60S
+
+  in-memory:
     embedding-model:
       base-url: http://10.10.20.161:9997/
       model: 12a22820-9888-11ee-b4f6-161d11c9987a
-
-  in-memory:
-#    embedding-model:
-#      model-name: bge-small-zh
 
     embedding-store:
       persist-path: /tmp

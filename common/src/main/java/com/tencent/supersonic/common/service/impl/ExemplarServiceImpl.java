@@ -12,6 +12,7 @@ import dev.langchain4j.data.document.Metadata;
 import dev.langchain4j.data.segment.TextSegment;
 import dev.langchain4j.store.embedding.RetrieveQuery;
 import dev.langchain4j.store.embedding.RetrieveQueryResult;
+import dev.langchain4j.store.embedding.TextSegmentConvert;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
@@ -45,6 +46,7 @@ public class ExemplarServiceImpl implements ExemplarService, CommandLineRunner {
         Metadata metadata = Metadata.from(JsonUtil.toMap(JsonUtil.toString(exemplar),
                 String.class, Object.class));
         TextSegment segment = TextSegment.from(exemplar.getQuestion(), metadata);
+        TextSegmentConvert.addQueryId(segment, exemplar.getQuestion());
 
         embeddingService.addQuery(collection, Lists.newArrayList(segment));
     }

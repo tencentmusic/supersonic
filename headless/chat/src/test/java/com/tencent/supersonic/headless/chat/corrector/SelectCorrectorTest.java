@@ -10,7 +10,7 @@ import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.api.pojo.SemanticSchema;
 import com.tencent.supersonic.headless.api.pojo.SqlInfo;
 import com.tencent.supersonic.headless.api.pojo.TagTypeDefaultConfig;
-import com.tencent.supersonic.headless.chat.QueryContext;
+import com.tencent.supersonic.headless.chat.ChatQueryContext;
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
@@ -36,7 +36,7 @@ class SelectCorrectorTest {
         when(mockEnvironment.getProperty(SelectCorrector.ADDITIONAL_INFORMATION)).thenReturn("");
 
         BaseSemanticCorrector corrector = new SelectCorrector();
-        QueryContext queryContext = buildQueryContext(dataSetId);
+        ChatQueryContext chatQueryContext = buildQueryContext(dataSetId);
         SemanticParseInfo semanticParseInfo = new SemanticParseInfo();
         SchemaElement dataSet = new SchemaElement();
         dataSet.setDataSet(dataSetId);
@@ -44,16 +44,16 @@ class SelectCorrectorTest {
         semanticParseInfo.setQueryType(QueryType.DETAIL);
         SqlInfo sqlInfo = new SqlInfo();
         String sql = "SELECT * FROM 艺人库 WHERE 艺人名='周杰伦'";
-        sqlInfo.setS2SQL(sql);
-        sqlInfo.setCorrectS2SQL(sql);
+        sqlInfo.setParsedS2SQL(sql);
+        sqlInfo.setCorrectedS2SQL(sql);
         semanticParseInfo.setSqlInfo(sqlInfo);
-        corrector.correct(queryContext, semanticParseInfo);
+        corrector.correct(chatQueryContext, semanticParseInfo);
         Assert.assertEquals("SELECT 粉丝数, 国籍, 艺人名, 性别 FROM 艺人库 WHERE 艺人名 = '周杰伦'",
-                semanticParseInfo.getSqlInfo().getCorrectS2SQL());
+                semanticParseInfo.getSqlInfo().getCorrectedS2SQL());
     }
 
-    private QueryContext buildQueryContext(Long dataSetId) {
-        QueryContext queryContext = new QueryContext();
+    private ChatQueryContext buildQueryContext(Long dataSetId) {
+        ChatQueryContext chatQueryContext = new ChatQueryContext();
         List<DataSetSchema> dataSetSchemaList = new ArrayList<>();
         DataSetSchema dataSetSchema = new DataSetSchema();
         QueryConfig queryConfig = new QueryConfig();
@@ -108,7 +108,7 @@ class SelectCorrectorTest {
         dataSetSchemaList.add(dataSetSchema);
 
         SemanticSchema semanticSchema = new SemanticSchema(dataSetSchemaList);
-        queryContext.setSemanticSchema(semanticSchema);
-        return queryContext;
+        chatQueryContext.setSemanticSchema(semanticSchema);
+        return chatQueryContext;
     }
 }

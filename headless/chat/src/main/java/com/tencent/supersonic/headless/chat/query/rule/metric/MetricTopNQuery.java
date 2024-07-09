@@ -5,7 +5,7 @@ import com.tencent.supersonic.common.pojo.Order;
 import com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum;
 import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementMatch;
-import com.tencent.supersonic.headless.chat.QueryContext;
+import com.tencent.supersonic.headless.chat.ChatQueryContext;
 import com.tencent.supersonic.headless.chat.ChatContext;
 import org.springframework.stereotype.Component;
 
@@ -36,7 +36,7 @@ public class MetricTopNQuery extends MetricSemanticQuery {
 
     @Override
     public List<SchemaElementMatch> match(List<SchemaElementMatch> candidateElementMatches,
-                                          QueryContext queryCtx) {
+                                          ChatQueryContext queryCtx) {
         Matcher matcher = INTENT_PATTERN.matcher(queryCtx.getQueryText());
         if (matcher.matches()) {
             return super.match(candidateElementMatches, queryCtx);
@@ -50,8 +50,8 @@ public class MetricTopNQuery extends MetricSemanticQuery {
     }
 
     @Override
-    public void fillParseInfo(QueryContext queryContext, ChatContext chatContext) {
-        super.fillParseInfo(queryContext, chatContext);
+    public void fillParseInfo(ChatQueryContext chatQueryContext, ChatContext chatContext) {
+        super.fillParseInfo(chatQueryContext, chatContext);
 
         parseInfo.setLimit(ORDERBY_MAX_RESULTS);
         parseInfo.setScore(parseInfo.getScore() + 2.0);

@@ -2,12 +2,12 @@ package com.tencent.supersonic.headless.chat.parser.rule;
 
 import com.tencent.supersonic.headless.api.pojo.SchemaElementMatch;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
+import com.tencent.supersonic.headless.chat.ChatQueryContext;
 import com.tencent.supersonic.headless.chat.query.QueryManager;
 import com.tencent.supersonic.headless.chat.query.SemanticQuery;
 import com.tencent.supersonic.headless.chat.query.rule.RuleSemanticQuery;
 import com.tencent.supersonic.headless.chat.parser.SemanticParser;
 import com.tencent.supersonic.headless.chat.ChatContext;
-import com.tencent.supersonic.headless.chat.QueryContext;
 import com.tencent.supersonic.headless.chat.query.rule.metric.MetricModelQuery;
 import com.tencent.supersonic.headless.chat.query.rule.metric.MetricSemanticQuery;
 import com.tencent.supersonic.headless.chat.query.rule.metric.MetricIdQuery;
@@ -43,16 +43,16 @@ public class ContextInheritParser implements SemanticParser {
     ).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
     @Override
-    public void parse(QueryContext queryContext, ChatContext chatContext) {
-        if (!shouldInherit(queryContext)) {
+    public void parse(ChatQueryContext chatQueryContext, ChatContext chatContext) {
+        if (!shouldInherit(chatQueryContext)) {
             return;
         }
-        Long dataSetId = getMatchedDataSet(queryContext, chatContext);
+        Long dataSetId = getMatchedDataSet(chatQueryContext, chatContext);
         if (dataSetId == null) {
             return;
         }
 
-        List<SchemaElementMatch> elementMatches = queryContext.getMapInfo().getMatchedElements(dataSetId);
+        List<SchemaElementMatch> elementMatches = chatQueryContext.getMapInfo().getMatchedElements(dataSetId);
 
         List<SchemaElementMatch> matchesToInherit = new ArrayList<>();
         for (SchemaElementMatch match : chatContext.getParseInfo().getElementMatches()) {
@@ -66,18 +66,18 @@ public class ContextInheritParser implements SemanticParser {
         }
         elementMatches.addAll(matchesToInherit);
 
-        List<RuleSemanticQuery> queries = RuleSemanticQuery.resolve(dataSetId, elementMatches, queryContext);
+        List<RuleSemanticQuery> queries = RuleSemanticQuery.resolve(dataSetId, elementMatches, chatQueryContext);
         for (RuleSemanticQuery query : queries) {
-            query.fillParseInfo(queryContext, chatContext);
-            if (existSameQuery(query.getParseInfo().getDataSetId(), query.getQueryMode(), queryContext)) {
+            query.fillParseInfo(chatQueryContext, chatContext);
+            if (existSameQuery(query.getParseInfo().getDataSetId(), query.getQueryMode(), chatQueryContext)) {
                 continue;
             }
-            queryContext.getCandidateQueries().add(query);
+            chatQueryContext.getCandidateQueries().add(query);
         }
     }
 
-    private boolean existSameQuery(Long dataSetId, String queryMode, QueryContext queryContext) {
-        for (SemanticQuery semanticQuery : queryContext.getCandidateQueries()) {
+    private boolean existSameQuery(Long dataSetId, String queryMode, ChatQueryContext chatQueryContext) {
+        for (SemanticQuery semanticQuery : chatQueryContext.getCandidateQueries()) {
             if (semanticQuery.getQueryMode().equals(queryMode)
                     && semanticQuery.getParseInfo().getDataSetId().equals(dataSetId)) {
                 return true;
@@ -100,20 +100,20 @@ public class ContextInheritParser implements SemanticParser {
         });
     }
 
-    protected boolean shouldInherit(QueryContext queryContext) {
+    protected boolean shouldInherit(ChatQueryContext chatQueryContext) {
         // if candidates only have MetricModel mode, count in context
-        List<SemanticQuery> metricModelQueries = queryContext.getCandidateQueries().stream()
+        List<SemanticQuery> metricModelQueries = chatQueryContext.getCandidateQueries().stream()
                 .filter(query -> query instanceof MetricModelQuery).collect(
                         Collectors.toList());
-        return metricModelQueries.size() == queryContext.getCandidateQueries().size();
+        return metricModelQueries.size() == chatQueryContext.getCandidateQueries().size();
     }
 
-    protected Long getMatchedDataSet(QueryContext queryContext, ChatContext chatContext) {
+    protected Long getMatchedDataSet(ChatQueryContext chatQueryContext, ChatContext chatContext) {
         Long dataSetId = chatContext.getParseInfo().getDataSetId();
         if (dataSetId == null) {
             return null;
         }
-        Set<Long> queryDataSets = queryContext.getMapInfo().getMatchedDataSetInfos();
+        Set<Long> queryDataSets = chatQueryContext.getMapInfo().getMatchedDataSetInfos();
         if (queryDataSets.contains(dataSetId)) {
             return dataSetId;
         }

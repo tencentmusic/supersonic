@@ -13,11 +13,12 @@ import java.io.Serializable;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ExplainResp implements Serializable {
+public class SemanticTranslateResp implements Serializable {
 
-    private String sql;
+    private String querySQL;
 
-    private String sourceId;
+    private boolean isOk;
 
+    private String errMsg;
 
 }

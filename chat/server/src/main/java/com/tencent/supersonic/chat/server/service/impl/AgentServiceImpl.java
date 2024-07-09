@@ -12,13 +12,15 @@ import com.tencent.supersonic.chat.server.service.AgentService;
 import com.tencent.supersonic.chat.server.service.ChatService;
 import com.tencent.supersonic.chat.server.service.MemoryService;
 import com.tencent.supersonic.chat.server.util.LLMConnHelper;
-import com.tencent.supersonic.common.config.LLMConfig;
+import com.tencent.supersonic.common.config.ModelConfig;
+import com.tencent.supersonic.common.config.PromptConfig;
 import com.tencent.supersonic.common.config.VisualConfig;
 import com.tencent.supersonic.common.util.JsonUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -89,6 +91,7 @@ public class AgentServiceImpl extends ServiceImpl<AgentDOMapper, AgentDO>
     /**
      * the example in the agent will be executed by default,
      * if the result is correct, it will be put into memory as a reference for LLM
+     *
      * @param agent
      */
     private void executeAgentExamplesAsync(Agent agent) {
@@ -96,9 +99,11 @@ public class AgentServiceImpl extends ServiceImpl<AgentDOMapper, AgentDO>
     }
 
     private synchronized void doExecuteAgentExamples(Agent agent) {
-        if (!agent.containsLLMParserTool() || !LLMConnHelper.testConnection(agent.getLlmConfig())) {
+        if (!agent.containsLLMParserTool() || !LLMConnHelper.testConnection(agent.getModelConfig())
+                || CollectionUtils.isEmpty(agent.getExamples())) {
             return;
         }
+
         List<String> examples = agent.getExamples();
         ChatMemoryFilter chatMemoryFilter = ChatMemoryFilter.builder().agentId(agent.getId())
                 .questions(examples).build();
@@ -128,7 +133,8 @@ public class AgentServiceImpl extends ServiceImpl<AgentDOMapper, AgentDO>
         BeanUtils.copyProperties(agentDO, agent);
         agent.setAgentConfig(agentDO.getConfig());
         agent.setExamples(JsonUtil.toList(agentDO.getExamples(), String.class));
-        agent.setLlmConfig(JsonUtil.toObject(agentDO.getLlmConfig(), LLMConfig.class));
+        agent.setModelConfig(JsonUtil.toObject(agentDO.getModelConfig(), ModelConfig.class));
+        agent.setPromptConfig(JsonUtil.toObject(agentDO.getPromptConfig(), PromptConfig.class));
         agent.setMultiTurnConfig(JsonUtil.toObject(agentDO.getMultiTurnConfig(), MultiTurnConfig.class));
         agent.setVisualConfig(JsonUtil.toObject(agentDO.getVisualConfig(), VisualConfig.class));
         return agent;
@@ -139,9 +145,10 @@ public class AgentServiceImpl extends ServiceImpl<AgentDOMapper, AgentDO>
         BeanUtils.copyProperties(agent, agentDO);
         agentDO.setConfig(agent.getAgentConfig());
         agentDO.setExamples(JsonUtil.toString(agent.getExamples()));
-        agentDO.setLlmConfig(JsonUtil.toString(agent.getLlmConfig()));
+        agentDO.setModelConfig(JsonUtil.toString(agent.getModelConfig()));
         agentDO.setMultiTurnConfig(JsonUtil.toString(agent.getMultiTurnConfig()));
         agentDO.setVisualConfig(JsonUtil.toString(agent.getVisualConfig()));
+        agentDO.setPromptConfig(JsonUtil.toString(agent.getPromptConfig()));
         if (agentDO.getStatus() == null) {
             agentDO.setStatus(1);
         }

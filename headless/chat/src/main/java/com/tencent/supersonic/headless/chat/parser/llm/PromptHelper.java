@@ -35,11 +35,11 @@ public class PromptHelper {
         int selfConsistencyNumber = Integer.valueOf(parserConfig.getParameterValue(PARSER_SELF_CONSISTENCY_NUMBER));
 
         List<SqlExemplar> exemplars = Lists.newArrayList();
-        llmReq.getExemplars().stream().forEach(e -> {
+        llmReq.getDynamicExemplars().stream().forEach(e -> {
             exemplars.add(e);
         });
 
-        int recallSize = exemplarRecallNumber - llmReq.getExemplars().size();
+        int recallSize = exemplarRecallNumber - llmReq.getDynamicExemplars().size();
         if (recallSize > 0) {
             exemplars.addAll(exemplarService.recallExemplars(llmReq.getQueryText(), recallSize));
         }

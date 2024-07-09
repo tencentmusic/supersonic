@@ -22,9 +22,9 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * QueryReqBuilderTest
+ * QueryNLReqBuilderTest
  */
-class QueryReqBuilderTest {
+class QueryNLReqBuilderTest {
 
     @Test
     void buildS2SQLReq() {

@@ -65,6 +65,19 @@ export type LlmConfigType = {
   timeOut: number;
 };
 
+export type EmbeddingModelConfigType = {
+  apiKey: string;
+  baseUrl: string;
+  // logRequests: true,
+  // logResponses: true,
+  // maxRetries: number,
+  // maxToken: number,
+  modelName: string;
+  modelPath: string;
+  provider: string;
+  vocabularyPath: string;
+};
+
 export type MultiTurnConfig = {
   enableMultiTurn: boolean;
 };
@@ -84,7 +97,10 @@ export type AgentType = {
   status?: 0 | 1;
   enableSearch?: 0 | 1;
   agentConfig?: AgentConfigType;
-  llmConfig?: LlmConfigType;
+  modelConfig: {
+    chatModel: LlmConfigType;
+    embeddingModel: EmbeddingModelConfigType;
+  };
   multiTurnConfig?: MultiTurnConfig;
   visualConfig?: VisualConfig;
 };

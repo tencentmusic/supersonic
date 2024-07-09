@@ -39,3 +39,16 @@ from s2_chat_query where user_name = 'zhaodongsheng' and chat_id = '141' and que
 
 -- 查看今日批量测试执行失败的数据
 select * from s2_chat_query where user_name = 'zhaodongsheng' and chat_id = '141' and query_state is null and create_time > current_date;
+
+
+-- 统计每个agent的平均解析时间
+select t.*,sa.name from (
+                            select
+                                agent_id,
+                                max(JSON_EXTRACT(parse_time_cost, '$.parseTime')) as 最大时间,
+                                min(JSON_EXTRACT(parse_time_cost, '$.parseTime')) as 最小时间,
+                                avg(JSON_EXTRACT(parse_time_cost, '$.parseTime')) as 平均时间,
+                                count(*) as 测试次数
+                            from s2_chat_query where parse_time_cost is  not null
+                            GROUP BY agent_id
+                        )t left join s2_agent  sa on t.agent_id = sa.id

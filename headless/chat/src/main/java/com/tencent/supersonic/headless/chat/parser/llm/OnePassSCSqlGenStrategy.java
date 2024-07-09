@@ -1,21 +1,22 @@
 package com.tencent.supersonic.headless.chat.parser.llm;
 
 import com.google.common.collect.Lists;
+import com.tencent.supersonic.common.config.PromptConfig;
 import com.tencent.supersonic.common.pojo.SqlExemplar;
 import com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMReq;
 import com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMResp;
-import java.util.Collections;
+import dev.langchain4j.model.input.Prompt;
+import dev.langchain4j.model.input.PromptTemplate;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
+import org.springframework.stereotype.Service;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
-import dev.langchain4j.model.input.Prompt;
-import dev.langchain4j.model.input.PromptTemplate;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 
 @Service
@@ -33,10 +34,8 @@ public class OnePassSCSqlGenStrategy extends SqlGenStrategy {
             + "2.ALWAYS use `datediff()` as the date function."
             + "3.DO NOT specify date filter in the where clause if not explicitly mentioned in the query."
             + "4.ONLY respond with the converted SQL statement.\n"
-            + "#Exemplars:\n%s"
-            + "#UserQuery: %s "
-            + "#Schema: %s "
-            + "#SQL: ";
+            + "#Exemplars:\n{{exemplar}}"
+            + "#Question:{{question}} #Schema:{{schema}} #SQL:";
 
     @Autowired
     private DifyServiceClient difyServiceClient;
@@ -65,14 +64,14 @@ public class OnePassSCSqlGenStrategy extends SqlGenStrategy {
         );
 
         //4.format response.
-        Pair<String, Map<String, Double>> sqlMapPair = OutputFormat.selfConsistencyVote(
+        Pair<String, Map<String, Double>> sqlMapPair = ResponseHelper.selfConsistencyVote(
                 Lists.newArrayList(prompt2Output.values()));
         LLMResp llmResp = new LLMResp();
         llmResp.setQuery(promptHelper.buildAugmentedQuestion(llmReq));
         llmResp.setDbSchema(promptHelper.buildSchemaStr(llmReq));
         llmResp.setSqlOutput(sqlMapPair.getLeft());
         //TODO: should use the same few-shot exemplars as the one chose by self-consistency vote
-        llmResp.setSqlRespMap(OutputFormat.buildSqlRespMap(exemplarsList.get(0), sqlMapPair.getRight()));
+        llmResp.setSqlRespMap(ResponseHelper.buildSqlRespMap(exemplarsList.get(0), sqlMapPair.getRight()));
 
         return llmResp;
     }
@@ -81,17 +80,25 @@ public class OnePassSCSqlGenStrategy extends SqlGenStrategy {
         String ddlInfo = PromptEnhancer.getDDLInfo(llmReq);
         StringBuilder exemplarsStr = new StringBuilder();
         for (SqlExemplar exemplar : fewshotExampleList) {
-            String exemplarStr = String.format("#UserQuery: %s #Schema: %s #SQL: %s\n",
+            String exemplarStr = String.format("#Question:%s #Schema:%s #SQL:%s\n",
                     exemplar.getQuestion(), exemplar.getDbSchema(), exemplar.getSql());
             exemplarsStr.append(exemplarStr);
         }
-
         String dataSemanticsStr = promptHelper.buildSchemaStr(llmReq);
         String questionAugmented = promptHelper.buildAugmentedQuestion(llmReq);
-        String promptStr = String.format(INSTRUCTION.replace("#DDLInfo:", ddlInfo),
-                exemplarsStr, questionAugmented, dataSemanticsStr);
 
-        return PromptTemplate.from(promptStr).apply(Collections.EMPTY_MAP);
+        Map<String, Object> variable = new HashMap<>();
+        variable.put("exemplar", exemplarsStr);
+        variable.put("question", questionAugmented);
+        variable.put("schema", dataSemanticsStr);
+
+        // use custom prompt template if provided.
+        PromptConfig promptConfig = llmReq.getPromptConfig();
+        String prompTemplate = INSTRUCTION.replace("#DDLInfo:", ddlInfo);
+        if (promptConfig != null && StringUtils.isNotBlank(promptConfig.getPromptTemplate())) {
+            prompTemplate = promptConfig.getPromptTemplate();
+        }
+        return PromptTemplate.from(prompTemplate.replace("#DDLInfo:", ddlInfo)).apply(variable);
     }
 
     @Override

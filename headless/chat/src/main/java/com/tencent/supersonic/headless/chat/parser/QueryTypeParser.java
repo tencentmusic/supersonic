@@ -12,7 +12,7 @@ import com.tencent.supersonic.headless.chat.query.SemanticQuery;
 import com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMSqlQuery;
 import com.tencent.supersonic.headless.chat.query.rule.RuleSemanticQuery;
 import com.tencent.supersonic.headless.chat.ChatContext;
-import com.tencent.supersonic.headless.chat.QueryContext;
+import com.tencent.supersonic.headless.chat.ChatQueryContext;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -29,31 +29,31 @@ import java.util.stream.Collectors;
 public class QueryTypeParser implements SemanticParser {
 
     @Override
-    public void parse(QueryContext queryContext, ChatContext chatContext) {
+    public void parse(ChatQueryContext chatQueryContext, ChatContext chatContext) {
 
-        List<SemanticQuery> candidateQueries = queryContext.getCandidateQueries();
-        User user = queryContext.getUser();
+        List<SemanticQuery> candidateQueries = chatQueryContext.getCandidateQueries();
+        User user = chatQueryContext.getUser();
 
         for (SemanticQuery semanticQuery : candidateQueries) {
             // 1.init S2SQL
-            semanticQuery.initS2Sql(queryContext.getSemanticSchema(), user);
+            semanticQuery.initS2Sql(chatQueryContext.getSemanticSchema(), user);
             // 2.set queryType
-            QueryType queryType = getQueryType(queryContext, semanticQuery);
+            QueryType queryType = getQueryType(chatQueryContext, semanticQuery);
             semanticQuery.getParseInfo().setQueryType(queryType);
         }
     }
 
-    private QueryType getQueryType(QueryContext queryContext, SemanticQuery semanticQuery) {
+    private QueryType getQueryType(ChatQueryContext chatQueryContext, SemanticQuery semanticQuery) {
         SemanticParseInfo parseInfo = semanticQuery.getParseInfo();
         SqlInfo sqlInfo = parseInfo.getSqlInfo();
-        if (Objects.isNull(sqlInfo) || StringUtils.isBlank(sqlInfo.getS2SQL())) {
+        if (Objects.isNull(sqlInfo) || StringUtils.isBlank(sqlInfo.getParsedS2SQL())) {
             return QueryType.DETAIL;
         }
         //1. entity queryType
         Long dataSetId = parseInfo.getDataSetId();
-        SemanticSchema semanticSchema = queryContext.getSemanticSchema();
+        SemanticSchema semanticSchema = chatQueryContext.getSemanticSchema();
         if (semanticQuery instanceof RuleSemanticQuery || semanticQuery instanceof LLMSqlQuery) {
-            List<String> whereFields = SqlSelectHelper.getWhereFields(sqlInfo.getS2SQL());
+            List<String> whereFields = SqlSelectHelper.getWhereFields(sqlInfo.getParsedS2SQL());
             List<String> whereFilterByTimeFields = filterByTimeFields(whereFields);
             if (CollectionUtils.isNotEmpty(whereFilterByTimeFields)) {
                 Set<String> ids = semanticSchema.getEntities(dataSetId).stream().map(SchemaElement::getName)
@@ -63,7 +63,7 @@ public class QueryTypeParser implements SemanticParser {
                     return QueryType.ID;
                 }
             }
-            List<String> selectFields = SqlSelectHelper.getSelectFields(sqlInfo.getS2SQL());
+            List<String> selectFields = SqlSelectHelper.getSelectFields(sqlInfo.getParsedS2SQL());
             selectFields.addAll(whereFields);
             List<String> selectWhereFilterByTimeFields = filterByTimeFields(selectFields);
             if (CollectionUtils.isNotEmpty(selectWhereFilterByTimeFields)) {
@@ -91,7 +91,7 @@ public class QueryTypeParser implements SemanticParser {
     }
 
     private static boolean selectContainsMetric(SqlInfo sqlInfo, Long dataSetId, SemanticSchema semanticSchema) {
-        List<String> selectFields = SqlSelectHelper.getSelectFields(sqlInfo.getS2SQL());
+        List<String> selectFields = SqlSelectHelper.getSelectFields(sqlInfo.getParsedS2SQL());
         List<SchemaElement> metrics = semanticSchema.getMetrics(dataSetId);
         if (CollectionUtils.isNotEmpty(metrics)) {
             Set<String> metricNameSet = metrics.stream().map(SchemaElement::getName).collect(Collectors.toSet());

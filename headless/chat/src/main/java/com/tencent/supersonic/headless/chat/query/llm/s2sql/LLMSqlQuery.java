@@ -33,6 +33,6 @@ public class LLMSqlQuery extends LLMSemanticQuery {
     @Override
     public void initS2Sql(SemanticSchema semanticSchema, User user) {
         SqlInfo sqlInfo = parseInfo.getSqlInfo();
-        sqlInfo.setCorrectS2SQL(sqlInfo.getS2SQL());
+        sqlInfo.setCorrectedS2SQL(sqlInfo.getParsedS2SQL());
     }
 }

@@ -4,6 +4,7 @@ import com.tencent.supersonic.headless.api.pojo.QueryParam;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticSchemaResp;
 import com.tencent.supersonic.headless.core.translator.calcite.s2sql.SemanticModel;
 import lombok.Data;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Triple;
 
@@ -14,10 +15,8 @@ public class QueryStatement {
 
     private Long dataSetId;
     private List<Long> modelIds;
-    private String sql = "";
-    private String sourceId = "";
-    private String errMsg = "";
-    private Boolean ok;
+    private String sql;
+    private String errMsg;
     private QueryParam queryParam;
     private MetricQueryParam metricQueryParam;
     private DataSetQueryParam dataSetQueryParam;
@@ -26,20 +25,17 @@ public class QueryStatement {
     private List<ImmutablePair<String, String>> timeRanges;
     private Boolean enableOptimize = true;
     private Triple<String, String, String> minMaxTime;
-    private String dataSetSql = "";
-    private String dataSetAlias = "";
-    private String dataSetSimplifySql = "";
+    private String dataSetSql;
+    private String dataSetAlias;
+    private String dataSetSimplifySql;
     private Boolean enableLimitWrapper = false;
-
     private SemanticModel semanticModel;
-
     private SemanticSchemaResp semanticSchemaResp;
     private Integer limit = 1000;
     private Boolean isTranslated = false;
 
     public boolean isOk() {
-        this.ok = "".equals(errMsg) && !"".equals(sql);
-        return ok;
+        return StringUtils.isBlank(errMsg) && StringUtils.isNotBlank(sql);
     }
 
     public boolean isTranslated() {

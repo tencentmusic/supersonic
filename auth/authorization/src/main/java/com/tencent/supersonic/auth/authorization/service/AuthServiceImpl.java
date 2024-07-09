@@ -1,19 +1,16 @@
 package com.tencent.supersonic.auth.authorization.service;
 
-import com.google.common.collect.Lists;
 import com.google.gson.Gson;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.auth.api.authentication.service.UserService;
 import com.tencent.supersonic.auth.api.authorization.pojo.AuthGroup;
 import com.tencent.supersonic.auth.api.authorization.pojo.AuthRes;
-import com.tencent.supersonic.auth.api.authorization.pojo.AuthResGrp;
 import com.tencent.supersonic.auth.api.authorization.pojo.AuthRule;
 import com.tencent.supersonic.auth.api.authorization.pojo.DimensionFilter;
 import com.tencent.supersonic.auth.api.authorization.request.QueryAuthResReq;
 import com.tencent.supersonic.auth.api.authorization.response.AuthorizedResourceResp;
 import com.tencent.supersonic.auth.api.authorization.service.AuthService;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -79,53 +76,35 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public AuthorizedResourceResp queryAuthorizedResources(QueryAuthResReq req, User user) {
+        if (CollectionUtils.isEmpty(req.getModelIds())) {
+            return new AuthorizedResourceResp();
+        }
         Set<String> userOrgIds = userService.getUserAllOrgId(user.getName());
         List<AuthGroup> groups = getAuthGroups(req.getModelIds(), user.getName(), new ArrayList<>(userOrgIds));
         AuthorizedResourceResp resource = new AuthorizedResourceResp();
         Map<Long, List<AuthGroup>> authGroupsByModelId = groups.stream()
                 .collect(Collectors.groupingBy(AuthGroup::getModelId));
-        Map<Long, List<AuthRes>> reqAuthRes = req.getResources().stream()
-                .collect(Collectors.groupingBy(AuthRes::getModelId));
-
-        for (Long modelId : reqAuthRes.keySet()) {
-            List<AuthRes> reqResourcesList = reqAuthRes.get(modelId);
-            AuthResGrp rg = new AuthResGrp();
+        for (Long modelId : req.getModelIds()) {
             if (authGroupsByModelId.containsKey(modelId)) {
                 List<AuthGroup> authGroups = authGroupsByModelId.get(modelId);
-                for (AuthRes reqRes : reqResourcesList) {
-                    for (AuthGroup authRuleGroup : authGroups) {
-                        List<AuthRule> authRules = authRuleGroup.getAuthRules();
-                        List<String> allAuthItems = new ArrayList<>();
-                        authRules.forEach(authRule -> allAuthItems.addAll(authRule.resourceNames()));
-
-                        if (allAuthItems.contains(reqRes.getName())) {
-                            rg.getGroup().add(reqRes);
+                for (AuthGroup authRuleGroup : authGroups) {
+                    List<AuthRule> authRules = authRuleGroup.getAuthRules();
+                    for (AuthRule authRule : authRules) {
+                        for (String resBizName : authRule.resourceNames()) {
+                            resource.getAuthResList().add(new AuthRes(modelId, resBizName));
                         }
-
                     }
                 }
-            }
-            if (!CollectionUtils.isEmpty(rg.getGroup())) {
-                resource.getResources().add(rg);
             }
         }
-
-        if (!CollectionUtils.isEmpty(req.getModelIds())) {
-            List<AuthGroup> authGroups = Lists.newArrayList();
-            for (Long modelId : authGroupsByModelId.keySet()) {
-                authGroups.addAll(authGroupsByModelId.getOrDefault(modelId, Lists.newArrayList()));
-            }
-            if (!CollectionUtils.isEmpty(authGroups)) {
-                for (AuthGroup group : authGroups) {
-                    if (group.getDimensionFilters() != null
-                            && group.getDimensionFilters().stream().anyMatch(expr ->
-                            !StringUtils.isEmpty(expr))) {
-                        DimensionFilter df = new DimensionFilter();
-                        df.setDescription(group.getDimensionFilterDescription());
-                        df.setExpressions(group.getDimensionFilters());
-                        resource.getFilters().add(df);
-                    }
-                }
+        Set<Map.Entry<Long, List<AuthGroup>>> entries = authGroupsByModelId.entrySet();
+        for (Map.Entry<Long, List<AuthGroup>> entry : entries) {
+            List<AuthGroup> authGroups = entry.getValue();
+            for (AuthGroup authGroup : authGroups) {
+                DimensionFilter df = new DimensionFilter();
+                df.setDescription(authGroup.getDimensionFilterDescription());
+                df.setExpressions(authGroup.getDimensionFilters());
+                resource.getFilters().add(df);
             }
         }
         return resource;
@@ -134,11 +113,11 @@ public class AuthServiceImpl implements AuthService {
     private List<AuthGroup> getAuthGroups(List<Long> modelIds, String userName, List<String> departmentIds) {
         List<AuthGroup> groups = load().stream()
                 .filter(group -> {
-                    if (CollectionUtils.isEmpty(modelIds) || !modelIds.contains(group.getModelId())) {
+                    if (!modelIds.contains(group.getModelId())) {
                         return false;
                     }
-                    if (!CollectionUtils.isEmpty(group.getAuthorizedUsers()) && group.getAuthorizedUsers()
-                            .contains(userName)) {
+                    if (!CollectionUtils.isEmpty(group.getAuthorizedUsers())
+                            && group.getAuthorizedUsers().contains(userName)) {
                         return true;
                     }
                     for (String departmentId : departmentIds) {
