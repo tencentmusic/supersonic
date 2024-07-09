@@ -576,3 +576,51 @@ export function getPillsByParseInfo(
 
   return filterPills;
 }
+
+export function validatePills(pills: IPill[]) {
+  return pills.every(pill => {
+    switch (pill.type) {
+      case 'text-filter':
+        // 字段名称、操作符、值都不能为空
+        if (!pill.field) return false;
+
+        if (!pill.operator) return false;
+
+        if (!['IS_NULL', 'IS_NOT_MULL'].includes(pill.operator) && !pill.value) {
+          return false;
+        }
+
+        return true;
+      case 'number-filter':
+        // 字段名称、操作符、值都不能为空
+        if (!pill.field) return false;
+
+        if (!pill.operator) return false;
+
+        if (!pill.value && pill.value !== 0) return false;
+
+        return true;
+      case 'date-filter':
+        if (!pill.value) return false;
+
+        if (!pill.value[0] || !pill.value[1]) return false;
+
+        return true;
+
+      case 'group':
+        // 分组字段不能为空
+        return pill.fields.every(field => !!field.field);
+
+      case 'aggregation':
+        // 计算字段不能为空
+        return pill.fields.every(field => !!field.field && !!field.operator);
+
+      case 'top-n':
+        // topN 数量不能为空
+        return !!pill.value;
+
+      default:
+        return true;
+    }
+  });
+}

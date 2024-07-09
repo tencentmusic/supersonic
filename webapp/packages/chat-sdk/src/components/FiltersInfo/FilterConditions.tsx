@@ -1,3 +1,4 @@
+import { message } from 'antd';
 import { memo } from 'react';
 import { useContextSelector } from 'use-context-selector';
 import { FilterInfosContext } from '.';
@@ -5,6 +6,7 @@ import Actions from './Actions';
 import { useDatasetInfo } from './hooks/useDatasetInfo';
 import PillList from './PillList';
 import { IPill } from './types';
+import { validatePills } from './utils';
 
 type Props = {
   mode: 'detail' | 'metric';
@@ -22,6 +24,10 @@ function FilterConditions({ onEditFinished, onEditConfirm }: Props) {
   const { datasetId, pillData } = useContextSelector(FilterInfosContext, context => context);
 
   const onConfirm = () => {
+    // 校验数据
+    if (!validatePills(pillData)) {
+      return message.warning('请完善筛选条件');
+    }
     onEditFinished();
 
     onEditConfirm({
