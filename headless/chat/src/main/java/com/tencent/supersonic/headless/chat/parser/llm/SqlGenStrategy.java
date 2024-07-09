@@ -1,6 +1,6 @@
 package com.tencent.supersonic.headless.chat.parser.llm;
 
-import com.tencent.supersonic.common.config.ChatModelConfig;
+import com.tencent.supersonic.common.pojo.ChatModelConfig;
 import com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMReq;
 import com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMResp;
 import dev.langchain4j.model.chat.ChatLanguageModel;

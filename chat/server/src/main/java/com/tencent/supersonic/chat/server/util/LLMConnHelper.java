@@ -1,6 +1,6 @@
 package com.tencent.supersonic.chat.server.util;
 
-import com.tencent.supersonic.common.config.ChatModelConfig;
+import com.tencent.supersonic.common.pojo.ChatModelConfig;
 import com.tencent.supersonic.common.pojo.exception.InvalidArgumentException;
 import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.provider.ModelProvider;

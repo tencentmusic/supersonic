@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
+
 import java.util.List;
 
 @Data
@@ -21,12 +22,7 @@ public class Parameter {
 
     public Parameter(String name, String defaultValue, String comment,
                      String description, String dataType, String module) {
-        this.name = name;
-        this.defaultValue = defaultValue;
-        this.comment = comment;
-        this.description = description;
-        this.dataType = dataType;
-        this.module = module;
+        this(name, defaultValue, comment, description, dataType, module, null);
     }
 
     public Parameter(String name, String defaultValue, String comment, String description,

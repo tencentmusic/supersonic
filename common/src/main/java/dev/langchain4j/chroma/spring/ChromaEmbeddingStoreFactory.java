@@ -1,6 +1,6 @@
 package dev.langchain4j.chroma.spring;
 
-import com.tencent.supersonic.common.config.EmbeddingStoreConfig;
+import com.tencent.supersonic.common.pojo.EmbeddingStoreConfig;
 import dev.langchain4j.store.embedding.BaseEmbeddingStoreFactory;
 import dev.langchain4j.store.embedding.EmbeddingStore;
 import dev.langchain4j.store.embedding.chroma.ChromaEmbeddingStore;

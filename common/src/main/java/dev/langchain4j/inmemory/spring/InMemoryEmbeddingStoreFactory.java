@@ -1,7 +1,7 @@
 package dev.langchain4j.inmemory.spring;
 
 import com.tencent.supersonic.common.config.EmbeddingConfig;
-import com.tencent.supersonic.common.config.EmbeddingStoreConfig;
+import com.tencent.supersonic.common.pojo.EmbeddingStoreConfig;
 import com.tencent.supersonic.common.util.ContextUtils;
 import dev.langchain4j.data.segment.TextSegment;
 import dev.langchain4j.store.embedding.BaseEmbeddingStoreFactory;
