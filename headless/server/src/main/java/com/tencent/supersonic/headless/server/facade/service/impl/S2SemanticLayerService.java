@@ -175,7 +175,6 @@ public class S2SemanticLayerService implements SemanticLayerService {
         if (Objects.nonNull(queryStatement) && Objects.nonNull(semanticQueryReq.getSqlInfo()) && StringUtils.isNotBlank(
                 semanticQueryReq.getSqlInfo().getQuerySQL())) {
             queryStatement.setSql(semanticQueryReq.getSqlInfo().getQuerySQL());
-            queryStatement.setSourceId(semanticQueryReq.getSqlInfo().getSourceId());
             queryStatement.setDataSetId(semanticQueryReq.getDataSetId());
             queryStatement.setIsTranslated(true);
         }
@@ -233,14 +232,11 @@ public class S2SemanticLayerService implements SemanticLayerService {
         T queryReq = translateSqlReq.getQueryReq();
         QueryStatement queryStatement = buildQueryStatement((SemanticQueryReq) queryReq, user);
         semanticTranslator.translate(queryStatement);
-
-        String sql = "";
-        String sorceId = "";
-        if (Objects.nonNull(queryStatement)) {
-            sql = queryStatement.getSql();
-            sorceId = queryStatement.getSourceId();
-        }
-        return TranslateResp.builder().sql(sql).sourceId(sorceId).build();
+        return TranslateResp.builder()
+                .sql(queryStatement.getSql())
+                .isOk(queryStatement.isOk())
+                .errMsg(queryStatement.getErrMsg())
+                .build();
     }
 
     public List<ItemResp> getDomainDataSetTree() {

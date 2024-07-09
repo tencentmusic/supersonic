@@ -3,7 +3,6 @@ package com.tencent.supersonic.headless.server.utils;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
-import com.tencent.supersonic.headless.api.pojo.SqlInfo;
 import com.tencent.supersonic.headless.api.pojo.enums.ChatWorkflowState;
 import com.tencent.supersonic.headless.api.pojo.enums.QueryMethod;
 import com.tencent.supersonic.headless.api.pojo.request.SemanticQueryReq;
@@ -127,19 +126,13 @@ public class ChatWorkflowEngine {
                 TranslateSqlReq<Object> translateSqlReq = TranslateSqlReq.builder().queryReq(semanticQueryReq)
                         .queryTypeEnum(QueryMethod.SQL).build();
                 TranslateResp explain = queryService.translate(translateSqlReq, chatQueryContext.getUser());
-                String querySql = explain.getSql();
-                if (StringUtils.isBlank(querySql)) {
-                    return;
-                }
-                SqlInfo sqlInfo = parseInfo.getSqlInfo();
-                sqlInfo.setQuerySQL(querySql);
-                sqlInfo.setSourceId(explain.getSourceId());
+                parseInfo.getSqlInfo().setQuerySQL(explain.getSql());
 
                 keyPipelineLog.info("SqlInfoProcessor results:\n"
                                 + "Parsed S2SQL: {}\nCorrected S2SQL: {}\nQuery SQL: {}",
-                        StringUtils.normalizeSpace(sqlInfo.getS2SQL()),
-                        StringUtils.normalizeSpace(sqlInfo.getCorrectS2SQL()),
-                        StringUtils.normalizeSpace(querySql));
+                        StringUtils.normalizeSpace(parseInfo.getSqlInfo().getS2SQL()),
+                        StringUtils.normalizeSpace(parseInfo.getSqlInfo().getCorrectS2SQL()),
+                        StringUtils.normalizeSpace(parseInfo.getSqlInfo().getQuerySQL()));
             } catch (Exception e) {
                 log.warn("get sql info failed:{}", parseInfo, e);
             }

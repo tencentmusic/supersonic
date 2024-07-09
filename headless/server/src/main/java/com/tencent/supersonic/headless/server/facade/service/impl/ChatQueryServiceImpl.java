@@ -266,10 +266,7 @@ public class ChatQueryServiceImpl implements ChatQueryService {
             TranslateSqlReq<Object> translateSqlReq = TranslateSqlReq.builder().queryReq(semanticQueryReq)
                     .queryTypeEnum(QueryMethod.SQL).build();
             TranslateResp explain = semanticLayerService.translate(translateSqlReq, user);
-            if (StringUtils.isNotBlank(explain.getSql())) {
-                parseInfo.getSqlInfo().setQuerySQL(explain.getSql());
-                parseInfo.getSqlInfo().setSourceId(explain.getSourceId());
-            }
+            parseInfo.getSqlInfo().setQuerySQL(explain.getSql());
         } else {
             log.info("rule begin replace metrics and revise filters!");
             //remove unvalid filters

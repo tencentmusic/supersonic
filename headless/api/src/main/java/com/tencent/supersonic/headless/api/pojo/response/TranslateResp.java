@@ -16,8 +16,7 @@ import java.io.Serializable;
 public class TranslateResp implements Serializable {
 
     private String sql;
-
-    private String sourceId;
-
+    private boolean isOk;
+    private String errMsg;
 
 }
