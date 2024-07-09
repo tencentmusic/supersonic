@@ -135,8 +135,9 @@ export default function ConditionItemFilter({ data, onChange }: Props) {
             )}
             {['LIKE'].includes(data.operator!) && (
               <Input
-                style={{ width: 120 }}
-                value={data.value as string}
+                style={{ width: '100%' }}
+                defaultValue={data.value as string}
+                // value={data.value as string}
                 onChange={e => onChange({ ...data, value: e.target.value })}
               />
             )}
