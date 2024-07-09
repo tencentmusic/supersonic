@@ -9,6 +9,10 @@ export async function queryCurrentUser() {
   return request<Result<API.CurrentUser>>(`${process.env.AUTH_API_BASE_URL}user/getCurrentUser`);
 }
 
+export async function getUserPermissions() {
+  return request<Result<string[]>>(`${process.env.AUTH_API_BASE_URL}user/getUserPermissions`);
+}
+
 export async function getUserInfoByTicket(ticket: string) {
   return request<Result<string>>(
     `${process.env.AUTH_API_BASE_URL}user/validateLogin?ticket=${ticket}&service=${window.location.origin}`,
