@@ -24,7 +24,7 @@ public class DataSetQueryApiController {
     @Autowired
     private DataSetService dataSetService;
     @Autowired
-    private SemanticLayerService queryService;
+    private SemanticLayerService semanticLayerService;
 
     @PostMapping("/dataSet")
     public Object queryByDataSet(@RequestBody QueryDataSetReq queryDataSetReq,
@@ -32,7 +32,7 @@ public class DataSetQueryApiController {
             HttpServletResponse response) throws Exception {
         User user = UserHolder.findUser(request, response);
         SemanticQueryReq queryReq = dataSetService.convert(queryDataSetReq);
-        return queryService.queryByReq(queryReq, user);
+        return semanticLayerService.queryByReq(queryReq, user);
     }
 
 }

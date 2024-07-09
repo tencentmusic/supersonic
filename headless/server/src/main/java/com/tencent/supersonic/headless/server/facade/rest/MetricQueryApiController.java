@@ -25,7 +25,7 @@ import javax.servlet.http.HttpServletResponse;
 public class MetricQueryApiController {
 
     @Autowired
-    private SemanticLayerService queryService;
+    private SemanticLayerService semanticLayerService;
 
     @Autowired
     private MetricService metricService;
@@ -39,7 +39,7 @@ public class MetricQueryApiController {
             HttpServletResponse response) throws Exception {
         User user = UserHolder.findUser(request, response);
         QueryStructReq queryStructReq = metricService.convert(queryMetricReq);
-        return queryService.queryByReq(queryStructReq.convert(true), user);
+        return semanticLayerService.queryByReq(queryStructReq.convert(true), user);
     }
 
     @PostMapping("/download/metric")

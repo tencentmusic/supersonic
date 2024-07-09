@@ -76,8 +76,9 @@ public class S2SemanticLayerService implements SemanticLayerService {
     private final DataSetService dataSetService;
     private final SchemaService schemaService;
     private final SemanticTranslator semanticTranslator;
-
     private final MetricDrillDownChecker metricDrillDownChecker;
+    private QueryCache queryCache = ComponentFactory.getQueryCache();
+    private List<QueryExecutor> queryExecutors = ComponentFactory.getQueryExecutors();
 
     public S2SemanticLayerService(
             StatUtils statUtils,
@@ -102,6 +103,18 @@ public class S2SemanticLayerService implements SemanticLayerService {
         return schemaService.getDataSetSchema(id);
     }
 
+    @S2DataPermission
+    @Override
+    public SemanticTranslateResp translate(SemanticQueryReq queryReq, User user) throws Exception {
+        QueryStatement queryStatement = buildQueryStatement(queryReq, user);
+        semanticTranslator.translate(queryStatement);
+        return SemanticTranslateResp.builder()
+                .querySQL(queryStatement.getSql())
+                .isOk(queryStatement.isOk())
+                .errMsg(queryStatement.getErrMsg())
+                .build();
+    }
+
     @Override
     @S2DataPermission
     @SneakyThrows
@@ -111,8 +124,9 @@ public class S2SemanticLayerService implements SemanticLayerService {
         try {
             //1.initStatInfo
             statUtils.initStatInfo(queryReq, user);
+
             //2.query from cache
-            QueryCache queryCache = ComponentFactory.getQueryCache();
+
             String cacheKey = queryCache.getCacheKey(queryReq);
             log.debug("cacheKey:{}", cacheKey);
             Object query = queryCache.query(queryReq, cacheKey);
@@ -122,19 +136,35 @@ public class S2SemanticLayerService implements SemanticLayerService {
                 return queryResp;
             }
             StatUtils.get().setUseResultCache(false);
+
             //3 query
             QueryStatement queryStatement = buildQueryStatement(queryReq, user);
-            SemanticQueryResp result = doQuery(queryStatement);
+            SemanticQueryResp queryResp = null;
+
+            // skip translation if already done.
+            if (!queryStatement.isTranslated()) {
+                semanticTranslator.translate(queryStatement);
+            }
+            queryPreCheck(queryStatement);
+
+            for (QueryExecutor queryExecutor : queryExecutors) {
+                if (queryExecutor.accept(queryStatement)) {
+                    queryResp = queryExecutor.execute(queryStatement);
+                    queryUtils.fillItemNameInfo(queryResp, queryStatement.getSemanticSchemaResp());
+                }
+            }
+
             //4 reset cache and set stateInfo
-            Boolean setCacheSuccess = queryCache.put(cacheKey, result);
+            Boolean setCacheSuccess = queryCache.put(cacheKey, queryResp);
             if (setCacheSuccess) {
                 // if result is not null, update cache data
                 statUtils.updateResultCacheKey(cacheKey);
             }
-            if (Objects.isNull(result)) {
+            if (Objects.isNull(queryResp)) {
                 state = TaskStatusEnum.ERROR;
             }
-            return result;
+
+            return queryResp;
         } catch (Exception e) {
             log.error("exception in queryByStruct, e: ", e);
             state = TaskStatusEnum.ERROR;
@@ -142,6 +172,49 @@ public class S2SemanticLayerService implements SemanticLayerService {
         } finally {
             statUtils.statInfo2DbAsync(state);
         }
+    }
+
+    @Override
+    @SneakyThrows
+    public SemanticQueryResp queryDimValue(QueryDimValueReq queryDimValueReq, User user) {
+        QuerySqlReq querySqlReq = buildQuerySqlReq(queryDimValueReq);
+        return queryByReq(querySqlReq, user);
+    }
+
+    public EntityInfo getEntityInfo(SemanticParseInfo parseInfo, DataSetSchema dataSetSchema, User user) {
+        if (parseInfo != null && parseInfo.getDataSetId() != null && parseInfo.getDataSetId() > 0) {
+            EntityInfo entityInfo = getEntityBasicInfo(dataSetSchema);
+            if (parseInfo.getDimensionFilters().size() <= 0 || entityInfo.getDataSetInfo() == null) {
+                entityInfo.setMetrics(null);
+                entityInfo.setDimensions(null);
+                return entityInfo;
+            }
+            String primaryKey = entityInfo.getDataSetInfo().getPrimaryKey();
+            if (StringUtils.isNotBlank(primaryKey)) {
+                String entityId = "";
+                for (QueryFilter chatFilter : parseInfo.getDimensionFilters()) {
+                    if (chatFilter != null && chatFilter.getBizName() != null && chatFilter.getBizName()
+                            .equals(primaryKey)) {
+                        if (chatFilter.getOperator().equals(FilterOperatorEnum.EQUALS)) {
+                            entityId = chatFilter.getValue().toString();
+                        }
+                    }
+                }
+                entityInfo.setEntityId(entityId);
+                try {
+                    fillEntityInfoValue(entityInfo, dataSetSchema, user);
+                    return entityInfo;
+                } catch (Exception e) {
+                    log.error("setMainModel error", e);
+                }
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public List<ItemResp> getDomainDataSetTree() {
+        return schemaService.getDomainDataSetTree();
     }
 
     private QueryStatement buildSqlQueryStatement(QuerySqlReq querySqlReq, User user) throws Exception {
@@ -171,8 +244,8 @@ public class S2SemanticLayerService implements SemanticLayerService {
         if (semanticQueryReq instanceof QueryMultiStructReq) {
             queryStatement = buildMultiStructQueryStatement((QueryMultiStructReq) semanticQueryReq, user);
         }
-        if (Objects.nonNull(queryStatement) && Objects.nonNull(semanticQueryReq.getSqlInfo()) && StringUtils.isNotBlank(
-                semanticQueryReq.getSqlInfo().getQuerySQL())) {
+        if (Objects.nonNull(queryStatement) && Objects.nonNull(semanticQueryReq.getSqlInfo())
+                && StringUtils.isNotBlank(semanticQueryReq.getSqlInfo().getQuerySQL())) {
             queryStatement.setSql(semanticQueryReq.getSqlInfo().getQuerySQL());
             queryStatement.setDataSetId(semanticQueryReq.getDataSetId());
             queryStatement.setIsTranslated(true);
@@ -218,29 +291,6 @@ public class S2SemanticLayerService implements SemanticLayerService {
         return schemaFilterReq;
     }
 
-    @Override
-    @SneakyThrows
-    public SemanticQueryResp queryDimValue(QueryDimValueReq queryDimValueReq, User user) {
-        QuerySqlReq querySqlReq = buildQuerySqlReq(queryDimValueReq);
-        return queryByReq(querySqlReq, user);
-    }
-
-    @S2DataPermission
-    @Override
-    public SemanticTranslateResp translate(SemanticQueryReq queryReq, User user) throws Exception {
-        QueryStatement queryStatement = buildQueryStatement(queryReq, user);
-        semanticTranslator.translate(queryStatement);
-        return SemanticTranslateResp.builder()
-                .querySQL(queryStatement.getSql())
-                .isOk(queryStatement.isOk())
-                .errMsg(queryStatement.getErrMsg())
-                .build();
-    }
-
-    public List<ItemResp> getDomainDataSetTree() {
-        return schemaService.getDomainDataSetTree();
-    }
-
     private QuerySqlReq buildQuerySqlReq(QueryDimValueReq queryDimValueReq) {
         QuerySqlReq querySqlReq = new QuerySqlReq();
         List<ModelResp> modelResps = schemaService.getModelList(Lists.newArrayList(queryDimValueReq.getModelId()));
@@ -263,66 +313,10 @@ public class S2SemanticLayerService implements SemanticLayerService {
         return querySqlReq;
     }
 
-    private SemanticQueryResp doQuery(QueryStatement queryStatement) {
-        SemanticQueryResp semanticQueryResp = null;
-        try {
-            //1 translate
-            if (!queryStatement.isTranslated()) {
-                semanticTranslator.translate(queryStatement);
-            }
-            //2. query pre-check
-            queryPreCheck(queryStatement);
-
-            //3 execute
-            for (QueryExecutor queryExecutor : ComponentFactory.getQueryExecutors()) {
-                if (queryExecutor.accept(queryStatement)) {
-                    semanticQueryResp = queryExecutor.execute(queryStatement);
-                    queryUtils.fillItemNameInfo(semanticQueryResp, queryStatement.getSemanticSchemaResp());
-                }
-            }
-
-            return semanticQueryResp;
-        } catch (Exception e) {
-            log.error("exception in query, e: ", e);
-            throw e;
-        }
-    }
-
     private void queryPreCheck(QueryStatement queryStatement) {
         //Check whether the dimensions of the metric drill-down are correct temporarily,
         //add the abstraction of a validator later.
         metricDrillDownChecker.checkQuery(queryStatement);
-    }
-
-    public EntityInfo getEntityInfo(SemanticParseInfo parseInfo, DataSetSchema dataSetSchema, User user) {
-        if (parseInfo != null && parseInfo.getDataSetId() != null && parseInfo.getDataSetId() > 0) {
-            EntityInfo entityInfo = getEntityBasicInfo(dataSetSchema);
-            if (parseInfo.getDimensionFilters().size() <= 0 || entityInfo.getDataSetInfo() == null) {
-                entityInfo.setMetrics(null);
-                entityInfo.setDimensions(null);
-                return entityInfo;
-            }
-            String primaryKey = entityInfo.getDataSetInfo().getPrimaryKey();
-            if (StringUtils.isNotBlank(primaryKey)) {
-                String entityId = "";
-                for (QueryFilter chatFilter : parseInfo.getDimensionFilters()) {
-                    if (chatFilter != null && chatFilter.getBizName() != null && chatFilter.getBizName()
-                            .equals(primaryKey)) {
-                        if (chatFilter.getOperator().equals(FilterOperatorEnum.EQUALS)) {
-                            entityId = chatFilter.getValue().toString();
-                        }
-                    }
-                }
-                entityInfo.setEntityId(entityId);
-                try {
-                    fillEntityInfoValue(entityInfo, dataSetSchema, user);
-                    return entityInfo;
-                } catch (Exception e) {
-                    log.error("setMainModel error", e);
-                }
-            }
-        }
-        return null;
     }
 
     private EntityInfo getEntityBasicInfo(DataSetSchema dataSetSchema) {
