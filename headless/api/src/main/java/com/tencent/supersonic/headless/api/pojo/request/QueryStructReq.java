@@ -155,7 +155,7 @@ public class QueryStructReq extends SemanticQueryReq {
         String sql = null;
         try {
             sql = buildSql(this, isBizName);
-        } catch (Exception e) {
+        } catch (JSQLParserException e) {
             log.error("buildSql error", e);
         }
 
@@ -164,7 +164,7 @@ public class QueryStructReq extends SemanticQueryReq {
         result.setDataSetId(this.getDataSetId());
         result.setModelIds(this.getModelIdSet());
         result.setParams(new ArrayList<>());
-        result.setSqlInfo(this.getSqlInfo());
+        result.getSqlInfo().setCorrectS2SQL(sql);
         return result;
     }
 

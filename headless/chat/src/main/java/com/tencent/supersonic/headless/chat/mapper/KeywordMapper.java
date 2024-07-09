@@ -6,12 +6,12 @@ import com.tencent.supersonic.headless.api.pojo.SchemaElementMatch;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
 import com.tencent.supersonic.headless.api.pojo.SchemaMapInfo;
 import com.tencent.supersonic.headless.api.pojo.response.S2Term;
+import com.tencent.supersonic.headless.chat.ChatQueryContext;
 import com.tencent.supersonic.headless.chat.knowledge.DatabaseMapResult;
 import com.tencent.supersonic.headless.chat.knowledge.HanlpMapResult;
 import com.tencent.supersonic.headless.chat.knowledge.builder.BaseWordBuilder;
 import com.tencent.supersonic.headless.chat.knowledge.helper.HanlpHelper;
 import com.tencent.supersonic.headless.chat.knowledge.helper.NatureHelper;
-import com.tencent.supersonic.headless.chat.QueryContext;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.CollectionUtils;
 
@@ -30,23 +30,23 @@ import java.util.stream.Collectors;
 public class KeywordMapper extends BaseMapper {
 
     @Override
-    public void doMap(QueryContext queryContext) {
-        String queryText = queryContext.getQueryText();
+    public void doMap(ChatQueryContext chatQueryContext) {
+        String queryText = chatQueryContext.getQueryText();
         //1.hanlpDict Match
-        List<S2Term> terms = HanlpHelper.getTerms(queryText, queryContext.getModelIdToDataSetIds());
+        List<S2Term> terms = HanlpHelper.getTerms(queryText, chatQueryContext.getModelIdToDataSetIds());
         HanlpDictMatchStrategy hanlpMatchStrategy = ContextUtils.getBean(HanlpDictMatchStrategy.class);
 
-        List<HanlpMapResult> hanlpMapResults = hanlpMatchStrategy.getMatches(queryContext, terms);
-        convertHanlpMapResultToMapInfo(hanlpMapResults, queryContext, terms);
+        List<HanlpMapResult> hanlpMapResults = hanlpMatchStrategy.getMatches(chatQueryContext, terms);
+        convertHanlpMapResultToMapInfo(hanlpMapResults, chatQueryContext, terms);
 
         //2.database Match
         DatabaseMatchStrategy databaseMatchStrategy = ContextUtils.getBean(DatabaseMatchStrategy.class);
 
-        List<DatabaseMapResult> databaseResults = databaseMatchStrategy.getMatches(queryContext, terms);
-        convertDatabaseMapResultToMapInfo(queryContext, databaseResults);
+        List<DatabaseMapResult> databaseResults = databaseMatchStrategy.getMatches(chatQueryContext, terms);
+        convertDatabaseMapResultToMapInfo(chatQueryContext, databaseResults);
     }
 
-    private void convertHanlpMapResultToMapInfo(List<HanlpMapResult> mapResults, QueryContext queryContext,
+    private void convertHanlpMapResultToMapInfo(List<HanlpMapResult> mapResults, ChatQueryContext chatQueryContext,
                                                 List<S2Term> terms) {
         if (CollectionUtils.isEmpty(mapResults)) {
             return;
@@ -68,7 +68,7 @@ public class KeywordMapper extends BaseMapper {
                 }
                 Long elementID = NatureHelper.getElementID(nature);
                 SchemaElement element = getSchemaElement(dataSetId, elementType,
-                        elementID, queryContext.getSemanticSchema());
+                        elementID, chatQueryContext.getSemanticSchema());
                 if (element == null) {
                     continue;
                 }
@@ -81,16 +81,17 @@ public class KeywordMapper extends BaseMapper {
                         .detectWord(hanlpMapResult.getDetectWord())
                         .build();
 
-                addToSchemaMap(queryContext.getMapInfo(), dataSetId, schemaElementMatch);
+                addToSchemaMap(chatQueryContext.getMapInfo(), dataSetId, schemaElementMatch);
             }
         }
     }
 
-    private void convertDatabaseMapResultToMapInfo(QueryContext queryContext, List<DatabaseMapResult> mapResults) {
+    private void convertDatabaseMapResultToMapInfo(ChatQueryContext chatQueryContext,
+                                                   List<DatabaseMapResult> mapResults) {
         MapperHelper mapperHelper = ContextUtils.getBean(MapperHelper.class);
         for (DatabaseMapResult match : mapResults) {
             SchemaElement schemaElement = match.getSchemaElement();
-            Set<Long> regElementSet = getRegElementSet(queryContext.getMapInfo(), schemaElement);
+            Set<Long> regElementSet = getRegElementSet(chatQueryContext.getMapInfo(), schemaElement);
             if (regElementSet.contains(schemaElement.getId())) {
                 continue;
             }
@@ -102,7 +103,7 @@ public class KeywordMapper extends BaseMapper {
                     .similarity(mapperHelper.getSimilarity(match.getDetectWord(), schemaElement.getName()))
                     .build();
             log.info("add to schema, elementMatch {}", schemaElementMatch);
-            addToSchemaMap(queryContext.getMapInfo(), schemaElement.getDataSet(), schemaElementMatch);
+            addToSchemaMap(chatQueryContext.getMapInfo(), schemaElement.getDataSet(), schemaElementMatch);
         }
     }
 

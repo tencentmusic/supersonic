@@ -33,7 +33,7 @@ public class DefaultQueryCache implements QueryCache {
                         log.warn("exception:", exception);
                         return null;
                     });
-            log.info("put to cache, key:{}", cacheKey);
+            log.debug("put to cache, key: {}", cacheKey);
             return true;
         }
         return false;

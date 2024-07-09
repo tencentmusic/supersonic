@@ -6,7 +6,8 @@ import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.api.pojo.SemanticSchema;
-import com.tencent.supersonic.headless.chat.QueryContext;
+import com.tencent.supersonic.headless.chat.ChatQueryContext;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -26,23 +27,23 @@ import org.springframework.util.CollectionUtils;
 @Slf4j
 public abstract class BaseSemanticCorrector implements SemanticCorrector {
 
-    public void correct(QueryContext queryContext, SemanticParseInfo semanticParseInfo) {
+    public void correct(ChatQueryContext chatQueryContext, SemanticParseInfo semanticParseInfo) {
         try {
             if (StringUtils.isBlank(semanticParseInfo.getSqlInfo().getCorrectS2SQL())) {
                 return;
             }
-            doCorrect(queryContext, semanticParseInfo);
+            doCorrect(chatQueryContext, semanticParseInfo);
             log.debug("sqlCorrection:{} sql:{}", this.getClass().getSimpleName(), semanticParseInfo.getSqlInfo());
         } catch (Exception e) {
             log.error(String.format("correct error,sqlInfo:%s", semanticParseInfo.getSqlInfo()), e);
         }
     }
 
-    public abstract void doCorrect(QueryContext queryContext, SemanticParseInfo semanticParseInfo);
+    public abstract void doCorrect(ChatQueryContext chatQueryContext, SemanticParseInfo semanticParseInfo);
 
-    protected Map<String, String> getFieldNameMap(QueryContext queryContext, Long dataSetId) {
+    protected Map<String, String> getFieldNameMap(ChatQueryContext chatQueryContext, Long dataSetId) {
 
-        SemanticSchema semanticSchema = queryContext.getSemanticSchema();
+        SemanticSchema semanticSchema = chatQueryContext.getSemanticSchema();
 
         List<SchemaElement> dbAllFields = new ArrayList<>();
         dbAllFields.addAll(semanticSchema.getMetrics());
@@ -71,11 +72,11 @@ public abstract class BaseSemanticCorrector implements SemanticCorrector {
         return result;
     }
 
-    protected void addAggregateToMetric(QueryContext queryContext, SemanticParseInfo semanticParseInfo) {
+    protected void addAggregateToMetric(ChatQueryContext chatQueryContext, SemanticParseInfo semanticParseInfo) {
         //add aggregate to all metric
         String correctS2SQL = semanticParseInfo.getSqlInfo().getCorrectS2SQL();
         Long dataSetId = semanticParseInfo.getDataSet().getDataSet();
-        List<SchemaElement> metrics = getMetricElements(queryContext, dataSetId);
+        List<SchemaElement> metrics = getMetricElements(chatQueryContext, dataSetId);
 
         Map<String, String> metricToAggregate = metrics.stream()
                 .map(schemaElement -> {
@@ -100,8 +101,8 @@ public abstract class BaseSemanticCorrector implements SemanticCorrector {
         semanticParseInfo.getSqlInfo().setCorrectS2SQL(aggregateSql);
     }
 
-    protected List<SchemaElement> getMetricElements(QueryContext queryContext, Long dataSetId) {
-        SemanticSchema semanticSchema = queryContext.getSemanticSchema();
+    protected List<SchemaElement> getMetricElements(ChatQueryContext chatQueryContext, Long dataSetId) {
+        SemanticSchema semanticSchema = chatQueryContext.getSemanticSchema();
         return semanticSchema.getMetrics(dataSetId);
     }
 

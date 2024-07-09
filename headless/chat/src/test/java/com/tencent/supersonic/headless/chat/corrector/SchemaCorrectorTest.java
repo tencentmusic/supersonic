@@ -10,7 +10,7 @@ import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.api.pojo.SemanticSchema;
 import com.tencent.supersonic.headless.api.pojo.SqlInfo;
 import com.tencent.supersonic.headless.chat.parser.llm.ParseResult;
-import com.tencent.supersonic.headless.chat.QueryContext;
+import com.tencent.supersonic.headless.chat.ChatQueryContext;
 import com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMReq;
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;
@@ -56,7 +56,7 @@ class SchemaCorrectorTest {
     @Test
     void doCorrect() throws JsonProcessingException {
         Long dataSetId = 1L;
-        QueryContext queryContext = buildQueryContext(dataSetId);
+        ChatQueryContext chatQueryContext = buildQueryContext(dataSetId);
         ObjectMapper objectMapper = new ObjectMapper();
         ParseResult parseResult = objectMapper.readValue(json, ParseResult.class);
 
@@ -77,7 +77,7 @@ class SchemaCorrectorTest {
         semanticParseInfo.getProperties().put(Constants.CONTEXT, parseResult);
 
         SchemaCorrector schemaCorrector = new SchemaCorrector();
-        schemaCorrector.removeFilterIfNotInLinkingValue(queryContext, semanticParseInfo);
+        schemaCorrector.removeFilterIfNotInLinkingValue(chatQueryContext, semanticParseInfo);
 
         Assert.assertEquals("SELECT 歌曲名 FROM 歌曲 WHERE 发行日期 >= '2024-01-01' "
                 + "ORDER BY 播放量 DESC LIMIT 10", semanticParseInfo.getSqlInfo().getCorrectS2SQL());
@@ -94,14 +94,14 @@ class SchemaCorrectorTest {
 
         semanticParseInfo.getSqlInfo().setCorrectS2SQL(sql);
         semanticParseInfo.getSqlInfo().setS2SQL(sql);
-        schemaCorrector.removeFilterIfNotInLinkingValue(queryContext, semanticParseInfo);
+        schemaCorrector.removeFilterIfNotInLinkingValue(chatQueryContext, semanticParseInfo);
         Assert.assertEquals("SELECT 歌曲名 FROM 歌曲 WHERE 发行日期 >= '2024-01-01' "
                 + "AND 商务组 = 'xxx' ORDER BY 播放量 DESC LIMIT 10", semanticParseInfo.getSqlInfo().getCorrectS2SQL());
 
     }
 
-    private QueryContext buildQueryContext(Long dataSetId) {
-        QueryContext queryContext = new QueryContext();
+    private ChatQueryContext buildQueryContext(Long dataSetId) {
+        ChatQueryContext chatQueryContext = new ChatQueryContext();
         List<DataSetSchema> dataSetSchemaList = new ArrayList<>();
         DataSetSchema dataSetSchema = new DataSetSchema();
         QueryConfig queryConfig = new QueryConfig();
@@ -129,7 +129,7 @@ class SchemaCorrectorTest {
         dataSetSchemaList.add(dataSetSchema);
 
         SemanticSchema semanticSchema = new SemanticSchema(dataSetSchemaList);
-        queryContext.setSemanticSchema(semanticSchema);
-        return queryContext;
+        chatQueryContext.setSemanticSchema(semanticSchema);
+        return chatQueryContext;
     }
 }

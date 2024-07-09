@@ -6,7 +6,7 @@ import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.api.pojo.SemanticSchema;
 import com.tencent.supersonic.headless.api.pojo.SqlInfo;
-import com.tencent.supersonic.headless.chat.QueryContext;
+import com.tencent.supersonic.headless.chat.ChatQueryContext;
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 
@@ -21,7 +21,7 @@ class AggCorrectorTest {
     void testDoCorrect() {
         AggCorrector corrector = new AggCorrector();
         Long dataSetId = 1L;
-        QueryContext queryContext = buildQueryContext(dataSetId);
+        ChatQueryContext chatQueryContext = buildQueryContext(dataSetId);
         SemanticParseInfo semanticParseInfo = new SemanticParseInfo();
         SchemaElement dataSet = new SchemaElement();
         dataSet.setDataSet(dataSetId);
@@ -33,15 +33,15 @@ class AggCorrectorTest {
         sqlInfo.setS2SQL(sql);
         sqlInfo.setCorrectS2SQL(sql);
         semanticParseInfo.setSqlInfo(sqlInfo);
-        corrector.correct(queryContext, semanticParseInfo);
+        corrector.correct(chatQueryContext, semanticParseInfo);
         Assert.assertEquals("SELECT 用户, SUM(访问次数) FROM 超音数数据集 WHERE 部门 = 'sales'"
                 + " AND datediff('day', 数据日期, '2024-06-04') <= 7 GROUP BY 用户"
                 + " ORDER BY SUM(访问次数) DESC LIMIT 1",
                 semanticParseInfo.getSqlInfo().getCorrectS2SQL());
     }
 
-    private QueryContext buildQueryContext(Long dataSetId) {
-        QueryContext queryContext = new QueryContext();
+    private ChatQueryContext buildQueryContext(Long dataSetId) {
+        ChatQueryContext chatQueryContext = new ChatQueryContext();
         List<DataSetSchema> dataSetSchemaList = new ArrayList<>();
         DataSetSchema dataSetSchema = new DataSetSchema();
         QueryConfig queryConfig = new QueryConfig();
@@ -67,8 +67,8 @@ class AggCorrectorTest {
         dataSetSchemaList.add(dataSetSchema);
 
         SemanticSchema semanticSchema = new SemanticSchema(dataSetSchemaList);
-        queryContext.setSemanticSchema(semanticSchema);
-        return queryContext;
+        chatQueryContext.setSemanticSchema(semanticSchema);
+        return chatQueryContext;
     }
 
 }

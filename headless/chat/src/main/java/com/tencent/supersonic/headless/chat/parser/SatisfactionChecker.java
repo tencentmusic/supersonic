@@ -2,7 +2,7 @@ package com.tencent.supersonic.headless.chat.parser;
 
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
-import com.tencent.supersonic.headless.chat.QueryContext;
+import com.tencent.supersonic.headless.chat.ChatQueryContext;
 import com.tencent.supersonic.headless.chat.query.SemanticQuery;
 import com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMSqlQuery;
 import lombok.extern.slf4j.Slf4j;
@@ -21,12 +21,12 @@ import static com.tencent.supersonic.headless.chat.parser.ParserConfig.PARSER_TE
 public class SatisfactionChecker {
 
     // check all the parse info in candidate
-    public static boolean isSkip(QueryContext queryContext) {
-        for (SemanticQuery query : queryContext.getCandidateQueries()) {
+    public static boolean isSkip(ChatQueryContext chatQueryContext) {
+        for (SemanticQuery query : chatQueryContext.getCandidateQueries()) {
             if (query.getQueryMode().equals(LLMSqlQuery.QUERY_MODE)) {
                 continue;
             }
-            if (checkThreshold(queryContext.getQueryText(), query.getParseInfo())) {
+            if (checkThreshold(chatQueryContext.getQueryText(), query.getParseInfo())) {
                 return true;
             }
         }

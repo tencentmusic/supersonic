@@ -1,14 +1,12 @@
 package com.tencent.supersonic.chat.server.parser;
 
-import static com.tencent.supersonic.chat.server.parser.ParserConfig.PARSER_MULTI_TURN_ENABLE;
-
 import com.tencent.supersonic.chat.server.agent.MultiTurnConfig;
 import com.tencent.supersonic.chat.server.persistence.repository.ChatQueryRepository;
 import com.tencent.supersonic.chat.server.plugin.PluginQueryManager;
 import com.tencent.supersonic.chat.server.pojo.ChatParseContext;
 import com.tencent.supersonic.chat.server.util.QueryReqConverter;
 import com.tencent.supersonic.common.config.EmbeddingConfig;
-import com.tencent.supersonic.common.config.LLMConfig;
+import com.tencent.supersonic.common.config.ModelConfig;
 import com.tencent.supersonic.common.pojo.SqlExemplar;
 import com.tencent.supersonic.common.service.impl.ExemplarServiceImpl;
 import com.tencent.supersonic.common.util.ContextUtils;
@@ -17,7 +15,7 @@ import com.tencent.supersonic.headless.api.pojo.SchemaElementMatch;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.api.pojo.request.QueryFilter;
-import com.tencent.supersonic.headless.api.pojo.request.QueryReq;
+import com.tencent.supersonic.headless.api.pojo.request.QueryTextReq;
 import com.tencent.supersonic.headless.api.pojo.response.MapResp;
 import com.tencent.supersonic.headless.api.pojo.response.ParseResp;
 import com.tencent.supersonic.headless.server.facade.service.ChatQueryService;
@@ -29,7 +27,11 @@ import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.input.Prompt;
 import dev.langchain4j.model.input.PromptTemplate;
 import dev.langchain4j.model.output.Response;
-import dev.langchain4j.model.provider.ChatLanguageModelProvider;
+import dev.langchain4j.provider.ModelProvider;
+import lombok.Builder;
+import lombok.Data;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -37,10 +39,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import lombok.Builder;
-import lombok.Data;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static com.tencent.supersonic.chat.server.parser.ParserConfig.PARSER_MULTI_TURN_ENABLE;
 
 @Slf4j
 @Component
@@ -68,13 +67,13 @@ public class NL2SQLParser implements ChatParser {
         if (!chatParseContext.enableNL2SQL() || checkSkip(parseResp)) {
             return;
         }
-        processMultiTurn(chatParseContext);
 
-        QueryReq queryReq = QueryReqConverter.buildText2SqlQueryReq(chatParseContext);
-        addExemplars(chatParseContext.getAgent().getId(), queryReq);
+        processMultiTurn(chatParseContext);
+        QueryTextReq queryTextReq = QueryReqConverter.buildText2SqlQueryReq(chatParseContext);
+        addDynamicExemplars(chatParseContext.getAgent().getId(), queryTextReq);
 
         ChatQueryService chatQueryService = ContextUtils.getBean(ChatQueryService.class);
-        ParseResp text2SqlParseResp = chatQueryService.performParsing(queryReq);
+        ParseResp text2SqlParseResp = chatQueryService.performParsing(queryTextReq);
         if (!ParseResp.ParseState.FAILED.equals(text2SqlParseResp.getState())) {
             parseResp.getSelectedParses().addAll(text2SqlParseResp.getSelectedParses());
         }
@@ -150,8 +149,8 @@ public class NL2SQLParser implements ChatParser {
 
         // derive mapping result of current question and parsing result of last question.
         ChatQueryService chatQueryService = ContextUtils.getBean(ChatQueryService.class);
-        QueryReq queryReq = QueryReqConverter.buildText2SqlQueryReq(chatParseContext);
-        MapResp currentMapResult = chatQueryService.performMapping(queryReq);
+        QueryTextReq queryTextReq = QueryReqConverter.buildText2SqlQueryReq(chatParseContext);
+        MapResp currentMapResult = chatQueryService.performMapping(queryTextReq);
 
         List<ParseResp> historyParseResults = getHistoryParseResult(chatParseContext.getChatId(), 1);
         if (historyParseResults.size() == 0) {
@@ -169,7 +168,7 @@ public class NL2SQLParser implements ChatParser {
                 .curtSchema(curtMapStr)
                 .histSchema(histMapStr)
                 .histSQL(histSQL)
-                .llmConfig(queryReq.getLlmConfig())
+                .modelConfig(queryTextReq.getModelConfig())
                 .build());
         chatParseContext.setQueryText(rewrittenQuery);
         log.info("Last Query: {} Current Query: {}, Rewritten Query: {}",
@@ -182,7 +181,7 @@ public class NL2SQLParser implements ChatParser {
         Prompt prompt = PromptTemplate.from(promptStr).apply(Collections.EMPTY_MAP);
         keyPipelineLog.info("NL2SQLParser reqPrompt:{}", promptStr);
 
-        ChatLanguageModel chatLanguageModel = ChatLanguageModelProvider.provide(context.getLlmConfig());
+        ChatLanguageModel chatLanguageModel = ModelProvider.getChatModel(context.getModelConfig());
         Response<AiMessage> response = chatLanguageModel.generate(prompt.toUserMessage());
 
         String result = response.content().text();
@@ -226,13 +225,13 @@ public class NL2SQLParser implements ChatParser {
         return contextualList;
     }
 
-    private void addExemplars(Integer agentId, QueryReq queryReq) {
+    private void addDynamicExemplars(Integer agentId, QueryTextReq queryTextReq) {
         ExemplarServiceImpl exemplarManager = ContextUtils.getBean(ExemplarServiceImpl.class);
         EmbeddingConfig embeddingConfig = ContextUtils.getBean(EmbeddingConfig.class);
         String memoryCollectionName = embeddingConfig.getMemoryCollectionName(agentId);
         List<SqlExemplar> exemplars = exemplarManager.recallExemplars(memoryCollectionName,
-                queryReq.getQueryText(), 5);
-        queryReq.getExemplars().addAll(exemplars);
+                queryTextReq.getQueryText(), 5);
+        queryTextReq.getDynamicExemplars().addAll(exemplars);
     }
 
     @Builder
@@ -244,7 +243,7 @@ public class NL2SQLParser implements ChatParser {
         private String curtSchema;
         private String histSchema;
         private String histSQL;
-        private LLMConfig llmConfig;
+        private ModelConfig modelConfig;
     }
 
 }

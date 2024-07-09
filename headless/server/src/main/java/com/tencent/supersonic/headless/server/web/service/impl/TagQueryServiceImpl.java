@@ -19,6 +19,7 @@ import com.tencent.supersonic.headless.server.facade.service.SemanticLayerServic
 import com.tencent.supersonic.headless.server.web.service.TagMetaService;
 import com.tencent.supersonic.headless.server.web.service.TagQueryService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -39,6 +40,9 @@ public class TagQueryServiceImpl implements TagQueryService {
     @Value("${item.value.date.before:3}")
     private Integer dayBefore;
 
+    @Value("${s2.item.value.date.format:yyyy-MM-dd}")
+    private String itemValueDateFormat;
+
     private final String tagValueAlias = "internalTagCount";
     private final String maxDateAlias = "internalMaxDate";
     private final TagMetaService tagMetaService;
@@ -47,7 +51,7 @@ public class TagQueryServiceImpl implements TagQueryService {
     private final SqlGenerateUtils sqlGenerateUtils;
 
     public TagQueryServiceImpl(TagMetaService tagMetaService, SemanticLayerService queryService,
-            ModelService modelService, SqlGenerateUtils sqlGenerateUtils) {
+                               ModelService modelService, SqlGenerateUtils sqlGenerateUtils) {
         this.tagMetaService = tagMetaService;
         this.queryService = queryService;
         this.modelService = modelService;
@@ -89,11 +93,12 @@ public class TagQueryServiceImpl implements TagQueryService {
             itemValueReq.setDateConf(null);
             return;
         }
-        if (Objects.nonNull(itemValueReq.getDateConf())) {
+        if (Objects.nonNull(itemValueReq.getDateConf()) && itemValueReq.getDateConf().getUnit() == 1) {
             return;
         }
+
         // query date info from db
-        String endDate = queryTagDateFromDbBySql(timeDimension.get(0), tag, user);
+        String endDate = queryTagDateFromDbBySql(timeDimension.get(0), tag, itemValueReq, user);
         DateConf dateConf = new DateConf();
         dateConf.setDateMode(DateConf.DateMode.BETWEEN);
         dateConf.setStartDate(endDate);
@@ -106,10 +111,32 @@ public class TagQueryServiceImpl implements TagQueryService {
         return LocalDate.now().plusDays(-dayBefore).format(formatter);
     }
 
-    private String queryTagDateFromDbBySql(Dim dim, TagResp tag, User user) throws Exception {
+    private String queryTagDateFromDbBySql(Dim dim, TagResp tag, ItemValueReq itemValueReq, User user) {
 
         String sqlPattern = "select max(%s)  as %s from tbl where %s is not null";
         String sql = String.format(sqlPattern, TimeDimensionEnum.DAY.getName(), maxDateAlias, tag.getBizName());
+
+        // 添加时间过滤信息
+        log.info("[queryTagDateFromDbBySql] calculate the maximum time start");
+        if (Objects.nonNull(itemValueReq) && itemValueReq.getDateConf().getUnit() > 1) {
+            ModelResp model = modelService.getModel(tag.getModelId());
+            if (Objects.nonNull(model)) {
+                List<Dim> timeDims = model.getTimeDimension();
+                if (!CollectionUtils.isEmpty(timeDims)) {
+                    String dateFormat = timeDims.get(0).getDateFormat();
+                    if (Strings.isEmpty(dateFormat)) {
+                        dateFormat = itemValueDateFormat;
+                    }
+                    String start = LocalDate.now().minusDays(itemValueReq.getDateConf().getUnit())
+                            .format(DateTimeFormatter.ofPattern(dateFormat));
+                    String end = LocalDate.now().minusDays(0)
+                            .format(DateTimeFormatter.ofPattern(dateFormat));
+                    sql = sql + String.format(" and ( %s > '%s' and %s <= '%s' )", TimeDimensionEnum.DAY.getName(),
+                            start, TimeDimensionEnum.DAY.getName(), end);
+                }
+            }
+        }
+        log.info("[queryTagDateFromDbBySql] calculate the maximum time end");
         Set<Long> modelIds = new HashSet<>();
         modelIds.add(tag.getModelId());
         QuerySqlReq querySqlReq = new QuerySqlReq();

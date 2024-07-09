@@ -1,8 +1,5 @@
 package com.tencent.supersonic.headless.chat.parser.llm;
 
-import static com.tencent.supersonic.headless.chat.parser.ParserConfig.PARSER_LINKING_VALUE_ENABLE;
-import static com.tencent.supersonic.headless.chat.parser.ParserConfig.PARSER_STRATEGY_TYPE;
-
 import com.tencent.supersonic.common.pojo.enums.DataFormatTypeEnum;
 import com.tencent.supersonic.common.pojo.enums.DataTypeEnums;
 import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
@@ -11,13 +8,18 @@ import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementMatch;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
 import com.tencent.supersonic.headless.api.pojo.SemanticSchema;
-import com.tencent.supersonic.headless.chat.QueryContext;
+import com.tencent.supersonic.headless.chat.ChatQueryContext;
 import com.tencent.supersonic.headless.chat.parser.ParserConfig;
 import com.tencent.supersonic.headless.chat.parser.SatisfactionChecker;
 import com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMReq;
 import com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMResp;
 import com.tencent.supersonic.headless.chat.utils.ComponentFactory;
-import com.tencent.supersonic.headless.chat.utils.S2SqlDateHelper;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.tuple.Pair;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -28,11 +30,9 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.tuple.Pair;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
+
+import static com.tencent.supersonic.headless.chat.parser.ParserConfig.PARSER_LINKING_VALUE_ENABLE;
+import static com.tencent.supersonic.headless.chat.parser.ParserConfig.PARSER_STRATEGY_TYPE;
 
 @Slf4j
 @Service
@@ -44,7 +44,7 @@ public class LLMRequestService {
     @Autowired
     private ParserConfig parserConfig;
 
-    public boolean isSkip(QueryContext queryCtx) {
+    public boolean isSkip(ChatQueryContext queryCtx) {
         if (!queryCtx.getText2SQLType().enableLLM()) {
             log.info("not enable llm, skip");
             return true;
@@ -58,12 +58,12 @@ public class LLMRequestService {
         return false;
     }
 
-    public Long getDataSetId(QueryContext queryCtx) {
+    public Long getDataSetId(ChatQueryContext queryCtx) {
         DataSetResolver dataSetResolver = ComponentFactory.getModelResolver();
         return dataSetResolver.resolve(queryCtx, queryCtx.getDataSetIds());
     }
 
-    public LLMReq getLlmReq(QueryContext queryCtx, Long dataSetId) {
+    public LLMReq getLlmReq(ChatQueryContext queryCtx, Long dataSetId) {
         LLMRequestService requestService = ContextUtils.getBean(LLMRequestService.class);
         List<LLMReq.ElementValue> linkingValues = requestService.getValues(queryCtx, dataSetId);
         SemanticSchema semanticSchema = queryCtx.getSemanticSchema();
@@ -102,22 +102,28 @@ public class LLMRequestService {
         }
         llmReq.setLinking(linking);
 
-        String currentDate = S2SqlDateHelper.getReferenceDate(queryCtx, dataSetId);
-        llmReq.setCurrentDate(currentDate);
+        //llmReq.setCurrentDate(DateUtils.getBeforeDate(0));
+        //String currentDate = S2SqlDateHelper.getReferenceDate(queryCtx, dataSetId);
+        //llmReq.setCurrentDate(currentDate);
         llmReq.setSqlGenType(LLMReq.SqlGenType.valueOf(parserConfig.getParameterValue(PARSER_STRATEGY_TYPE)));
-        llmReq.setLlmConfig(queryCtx.getLlmConfig());
-
-        llmReq.setExemplars(queryCtx.getExemplars());
+        llmReq.setModelConfig(queryCtx.getModelConfig());
+        llmReq.setPromptConfig(queryCtx.getPromptConfig());
+        llmReq.setDynamicExemplars(queryCtx.getDynamicExemplars());
 
         return llmReq;
     }
 
     public LLMResp runText2SQL(LLMReq llmReq) {
-        return ComponentFactory.getLLMProxy().text2sql(llmReq);
+        SqlGenStrategy sqlGenStrategy = SqlGenStrategyFactory.get(llmReq.getSqlGenType());
+        String modelName = llmReq.getSchema().getDataSetName();
+        LLMResp result = sqlGenStrategy.generate(llmReq);
+        result.setQuery(llmReq.getQueryText());
+        result.setModelName(modelName);
+        return result;
     }
 
-    protected List<String> getFieldNameList(QueryContext queryCtx, Long dataSetId,
-            LLMParserConfig llmParserConfig) {
+    protected List<String> getFieldNameList(ChatQueryContext queryCtx, Long dataSetId,
+                                            LLMParserConfig llmParserConfig) {
 
         Set<String> results = getTopNFieldNames(queryCtx, dataSetId, llmParserConfig);
 
@@ -127,7 +133,7 @@ public class LLMRequestService {
         return new ArrayList<>(results);
     }
 
-    protected List<LLMReq.Term> getTerms(QueryContext queryCtx, Long dataSetId) {
+    protected List<LLMReq.Term> getTerms(ChatQueryContext queryCtx, Long dataSetId) {
         List<SchemaElementMatch> matchedElements = queryCtx.getMapInfo().getMatchedElements(dataSetId);
         if (CollectionUtils.isEmpty(matchedElements)) {
             return new ArrayList<>();
@@ -145,7 +151,7 @@ public class LLMRequestService {
                 }).collect(Collectors.toList());
     }
 
-    private String getPriorExts(QueryContext queryContext, List<String> fieldNameList) {
+    private String getPriorExts(ChatQueryContext queryContext, List<String> fieldNameList) {
         StringBuilder extraInfoSb = new StringBuilder();
         SemanticSchema semanticSchema = queryContext.getSemanticSchema();
         Map<String, String> fieldNameToDataFormatType = semanticSchema.getMetrics()
@@ -174,7 +180,7 @@ public class LLMRequestService {
         return extraInfoSb.toString();
     }
 
-    public List<LLMReq.ElementValue> getValues(QueryContext queryCtx, Long dataSetId) {
+    public List<LLMReq.ElementValue> getValues(ChatQueryContext queryCtx, Long dataSetId) {
         Map<Long, String> itemIdToName = getItemIdToName(queryCtx, dataSetId);
         List<SchemaElementMatch> matchedElements = queryCtx.getMapInfo().getMatchedElements(dataSetId);
         if (CollectionUtils.isEmpty(matchedElements)) {
@@ -196,14 +202,14 @@ public class LLMRequestService {
         return new ArrayList<>(valueMatches);
     }
 
-    protected Map<Long, String> getItemIdToName(QueryContext queryCtx, Long dataSetId) {
+    protected Map<Long, String> getItemIdToName(ChatQueryContext queryCtx, Long dataSetId) {
         SemanticSchema semanticSchema = queryCtx.getSemanticSchema();
         List<SchemaElement> elements = semanticSchema.getDimensions(dataSetId);
         return elements.stream()
                 .collect(Collectors.toMap(SchemaElement::getId, SchemaElement::getName, (value1, value2) -> value2));
     }
 
-    private Set<String> getTopNFieldNames(QueryContext queryCtx, Long dataSetId, LLMParserConfig llmParserConfig) {
+    private Set<String> getTopNFieldNames(ChatQueryContext queryCtx, Long dataSetId, LLMParserConfig llmParserConfig) {
         SemanticSchema semanticSchema = queryCtx.getSemanticSchema();
         Set<String> results = new HashSet<>();
         Set<String> dimensions = semanticSchema.getDimensions(dataSetId).stream()
@@ -221,7 +227,7 @@ public class LLMRequestService {
         return results;
     }
 
-    protected List<SchemaElement> getMatchedMetrics(QueryContext queryCtx, Long dataSetId) {
+    protected List<SchemaElement> getMatchedMetrics(ChatQueryContext queryCtx, Long dataSetId) {
         List<SchemaElementMatch> matchedElements = queryCtx.getMapInfo().getMatchedElements(dataSetId);
         if (CollectionUtils.isEmpty(matchedElements)) {
             return Collections.emptyList();
@@ -238,7 +244,7 @@ public class LLMRequestService {
         return schemaElements;
     }
 
-    protected List<SchemaElement> getMatchedDimensions(QueryContext queryCtx, Long dataSetId) {
+    protected List<SchemaElement> getMatchedDimensions(ChatQueryContext queryCtx, Long dataSetId) {
         List<SchemaElementMatch> matchedElements = queryCtx.getMapInfo().getMatchedElements(dataSetId);
         if (CollectionUtils.isEmpty(matchedElements)) {
             return Collections.emptyList();
@@ -255,7 +261,7 @@ public class LLMRequestService {
         return schemaElements;
     }
 
-    protected Set<String> getMatchedFieldNames(QueryContext queryCtx, Long dataSetId) {
+    protected Set<String> getMatchedFieldNames(ChatQueryContext queryCtx, Long dataSetId) {
         Map<Long, String> itemIdToName = getItemIdToName(queryCtx, dataSetId);
         List<SchemaElementMatch> matchedElements = queryCtx.getMapInfo().getMatchedElements(dataSetId);
         if (CollectionUtils.isEmpty(matchedElements)) {

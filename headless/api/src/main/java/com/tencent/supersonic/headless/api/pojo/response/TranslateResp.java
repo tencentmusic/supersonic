@@ -13,7 +13,7 @@ import java.io.Serializable;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ExplainResp implements Serializable {
+public class TranslateResp implements Serializable {
 
     private String sql;
 
