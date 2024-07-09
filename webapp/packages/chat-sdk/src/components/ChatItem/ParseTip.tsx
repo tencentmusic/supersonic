@@ -1,14 +1,18 @@
 import React, { ReactNode } from 'react';
+import { useState } from 'react';
+
 import { AGG_TYPE_MAP, PREFIX_CLS } from '../../common/constants';
 import { ChatContextType, DateInfoType, EntityInfoType, FilterItemType } from '../../common/type';
-import { Button, DatePicker } from 'antd';
+import { Button, DatePicker,Row,Col } from 'antd';
 import { CheckCircleFilled, ReloadOutlined } from '@ant-design/icons';
 import Loading from './Loading';
 import FilterItem from './FilterItem';
 import MarkDown from '../ChatMsg/MarkDown';
 import classNames from 'classnames';
 import { isMobile } from '../../utils/utils';
-import dayjs from 'dayjs';
+import dayjs, { Dayjs } from 'dayjs';
+import quarterOfYear from 'dayjs/plugin/quarterOfYear';
+dayjs.extend(quarterOfYear);
 
 const { RangePicker } = DatePicker;
 
@@ -30,9 +34,15 @@ type Props = {
   onFiltersChange: (filters: FilterItemType[]) => void;
   onDateInfoChange: (dateRange: any) => void;
   onRefresh: () => void;
+  handlePresetClick : any;
 };
 
 const MAX_OPTION_VALUES_COUNT = 2;
+
+
+type RangeValue = [Dayjs, Dayjs];
+type RangeKeys = '近7日' | '近14日' | '近30日' | '本周' | '本月' | '上月' | '本季度' | '本年';
+
 
 const ParseTip: React.FC<Props> = ({
   parseLoading,
@@ -52,7 +62,53 @@ const ParseTip: React.FC<Props> = ({
   onFiltersChange,
   onDateInfoChange,
   onRefresh,
+  handlePresetClick
 }) => {
+
+
+
+  const [inputDate, setInputDate] = useState<string | null>(null);
+  const [selectedRange, setSelectedRange] = useState<RangeValue | null>(null);
+
+  const onChange = (date: Dayjs | null) => {
+    if (date) {
+      setInputDate(date.format('YYYYMMDD'));
+    } else {
+      setInputDate(null);
+    }
+  };
+
+  const onRangeChange = (dates: [Dayjs | null, Dayjs | null] | null, dateStrings: [string, string]) => {
+    if (dates) {
+      const [start, end] = dates;
+      if (start && end) {
+        setSelectedRange([start, end] as RangeValue);
+      } else {
+        setSelectedRange(null);
+      }
+    } else {
+      setSelectedRange(null);
+    }
+  };
+
+  // const handlePresetClick = (range: RangeValue) => {
+  //   setSelectedRange(range);
+  // };
+
+  const ranges: Record<RangeKeys, RangeValue> = {
+    '近7日': [dayjs().subtract(7, 'day'), dayjs()],
+    '近14日': [dayjs().subtract(14, 'day'), dayjs()],
+    '近30日': [dayjs().subtract(30, 'day'), dayjs()],
+    '本周': [dayjs().startOf('week'), dayjs().endOf('week')],
+    '本月': [dayjs().startOf('month'), dayjs().endOf('month')],
+    '上月': [dayjs().subtract(1, 'month').startOf('month'), dayjs().subtract(1, 'month').endOf('month')],
+    '本季度': [dayjs().startOf('quarter'), dayjs().endOf('quarter')], // 使用 quarterOfYear 插件
+    '本年': [dayjs().startOf('year'), dayjs().endOf('year')],
+  };
+
+
+
+
   const prefixCls = `${PREFIX_CLS}-item`;
   const getNode = (tipTitle: ReactNode, tipNode?: ReactNode) => {
     return (
@@ -238,12 +294,43 @@ const ParseTip: React.FC<Props> = ({
               {startDate === endDate ? startDate : `${startDate} ~ ${endDate}`}
             </span>
           ) : (
+
+            // <RangePicker
+            //   value={[dayjs(startDate), dayjs(endDate)]}
+            //   onChange={onDateInfoChange}
+            //   getPopupContainer={trigger => trigger.parentNode as HTMLElement}
+            //   allowClear={false}
+            // />
+
             <RangePicker
-              value={[dayjs(startDate), dayjs(endDate)]}
-              onChange={onDateInfoChange}
-              getPopupContainer={trigger => trigger.parentNode as HTMLElement}
-              allowClear={false}
-            />
+            value={[dayjs(startDate), dayjs(endDate)]}
+            onChange={onDateInfoChange}
+            // style={{ width: 200 }}
+            // showTime
+            format="YYYY/MM/DD"
+            renderExtraFooter={() => (
+              <Row gutter={[28, 28]}>
+                {Object.keys(ranges).map((key) => (
+                  <Col key={key}>
+                    <label
+                    style={{
+                      backgroundColor: '#F0FDFF',
+                      borderColor: '#33BDFC',
+                      color: '#33BDFC',
+                      borderWidth: 1,
+                      borderStyle: 'solid',
+                      cursor:'pointer'
+                    }}
+                    onClick={() => handlePresetClick(ranges[key as RangeKeys])}>
+                      {key}
+                    </label>
+                  </Col>
+                ))}
+              </Row>
+            )}
+          />
+
+
           )}
         </div>
         {filters?.map((filter: any, index: number) => (
