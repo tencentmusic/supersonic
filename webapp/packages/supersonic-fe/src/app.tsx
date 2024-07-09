@@ -155,8 +155,7 @@ export const layout: RunTimeLayoutConfig = (params) => {
               <Copilot
                 token={getToken() || ''}
                 isDeveloper={
-                  process.env.NODE_ENV === 'development' ||
-                  initialState?.currentUser?.isDeveloper === 1
+                  process.env.NODE_ENV === 'development' || initialState?.currentUser?.superAdmin
                 }
               />
             )}
