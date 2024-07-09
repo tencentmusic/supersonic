@@ -73,8 +73,8 @@ export type EntityDimensionType = {
 };
 
 export type SqlInfoType = {
-  s2SQL: string;
-  correctS2SQL: string;
+  parsedS2SQL: string;
+  correctedS2SQL: string;
   querySQL: string;
 };
 
