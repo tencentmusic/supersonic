@@ -45,6 +45,12 @@ public class DefaultUserAdaptor implements UserAdaptor {
     }
 
     @Override
+    public List<String> getUserPermissions(String userName) {
+        UserRepository userRepository = ContextUtils.getBean(UserRepository.class);
+        return userRepository.getUserPermissions(userName);
+    }
+
+    @Override
     public List<User> getUserList() {
         List<UserDO> userDOS = getUserDOList();
         return userDOS.stream().map(this::convert).collect(Collectors.toList());

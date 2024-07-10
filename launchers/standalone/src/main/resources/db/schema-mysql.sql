@@ -631,8 +631,8 @@ CREATE TABLE IF NOT EXISTS s2_authority (
     id bigint(20) NOT NULL AUTO_INCREMENT COMMENT '权限表主键',
     authority int(11) NOT NULL COMMENT '权限值,1:拒绝,2:允许',
     authority_entity_id int(20) NOT NULL COMMENT '权限实体ID',
-    authority_entity_type int(11) NOT NULL COMMENT '所关联的权限实体类型,1:助理管理,2:插件管理,3:语义模型,4:指标市场,5:数据库管理,6:系统设置',
-    authority_type int(11) NOT NULL COMMENT '操作类型,1:新增,2:修改,3:删除,4:查询,5:导出,6:导入,7:审核,8:分配,9:授权,10:启用,11:禁用',
+    authority_entity_type int(11) NOT NULL COMMENT '所关联的权限实体类型,0:菜单权限,1:助理管理,2:插件管理,3:语义模型,4:指标市场,5:标签市场,6:数据库管理,7:系统设置',
+    authority_type int(11) NOT NULL COMMENT '操作表示码',
     role_id bigint(20) COLLATE utf8_bin NOT NULL COMMENT '所关联的角色ID，关联表:s2_custom_role->id,s2_dep_role->id,s2_dep_role->id',
     role_type int(11) NOT NULL COMMENT '角色类型,1:部门,2:自定义角色,3:用户,4:职位',
     tenant_id bigint(20) NOT NULL DEFAULT 1,
@@ -644,6 +644,48 @@ CREATE TABLE IF NOT EXISTS s2_authority (
     UNIQUE KEY UK1tsntnb9o3bajn025123mdv6n (role_id,role_type,authority_entity_id,authority_entity_type,authority,authority_type,tenant_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT '权限表';
 
+
+
+-- databin.sys_permission_v2 definition
+drop table if exists s2_permission;
+CREATE TABLE `s2_permission` (
+              id bigint(20) NOT NULL AUTO_INCREMENT COMMENT '权限表主键',
+             `parent_id` bigint(20) DEFAULT NULL COMMENT '父id',
+             `name` varchar(100) DEFAULT NULL COMMENT '菜单标题',
+             `url` varchar(255) DEFAULT NULL COMMENT '路径',
+             `component` varchar(255) DEFAULT NULL COMMENT '组件',
+             `component_name` varchar(100) DEFAULT NULL COMMENT '组件名字',
+             `redirect` varchar(255) DEFAULT NULL COMMENT '一级菜单跳转地址',
+             `menu_type` int(11) DEFAULT NULL COMMENT '菜单类型(0:一级菜单; 1:子菜单:2:按钮权限)',
+             `perms` varchar(255) DEFAULT NULL COMMENT '菜单权限编码',
+             `perms_type` varchar(10) DEFAULT '0' COMMENT '权限策略1显示2禁用',
+             `sort_no` double(8,2) DEFAULT NULL COMMENT '菜单排序',
+             `always_show` tinyint(1) DEFAULT NULL COMMENT '聚合子路由: 1是0否',
+             `icon` varchar(100) DEFAULT NULL COMMENT '菜单图标',
+             `is_route` tinyint(1) DEFAULT '1' COMMENT '是否路由菜单: 0:不是  1:是（默认值1）',
+             `is_leaf` tinyint(1) DEFAULT NULL COMMENT '是否叶子节点:    1:是   0:不是',
+             `keep_alive` tinyint(1) DEFAULT NULL COMMENT '是否缓存该页面:    1:是   0:不是',
+             `hidden` tinyint(1) DEFAULT '0' COMMENT '是否隐藏路由: 0否,1是',
+             `hide_tab` tinyint(1) DEFAULT NULL COMMENT '是否隐藏tab: 0否,1是',
+             `description` varchar(255) DEFAULT NULL COMMENT '描述',
+             `create_by` varchar(32) DEFAULT NULL COMMENT '创建人',
+             `create_time` datetime DEFAULT NULL COMMENT '创建时间',
+             `update_by` varchar(32) DEFAULT NULL COMMENT '更新人',
+             `update_time` datetime DEFAULT NULL COMMENT '更新时间',
+             `del_flag` int(1) DEFAULT '0' COMMENT '删除状态 0正常 1已删除',
+             `rule_flag` int(3) DEFAULT '0' COMMENT '是否添加数据权限1是0否',
+             `status` varchar(2) DEFAULT NULL COMMENT '按钮权限状态(0无效1有效)',
+             `internal_or_external` tinyint(1) DEFAULT NULL COMMENT '外链菜单打开方式 0/内部打开 1/外部打开',
+             PRIMARY KEY (`id`) USING BTREE,
+             KEY `idx_sp_parent_id` (`parent_id`) USING BTREE,
+             KEY `idx_sp_is_route` (`is_route`) USING BTREE,
+             KEY `idx_sp_is_leaf` (`is_leaf`) USING BTREE,
+             KEY `idx_sp_sort_no` (`sort_no`) USING BTREE,
+             KEY `idx_sp_del_flag` (`del_flag`) USING BTREE,
+             KEY `idx_sp_menu_type` (`menu_type`) USING BTREE,
+             KEY `idx_sp_hidden` (`hidden`) USING BTREE,
+             KEY `idx_sp_status` (`status`) USING BTREE
+) ENGINE=InnoDB AUTO_INCREMENT=310 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='权限表';
 
 CREATE TABLE IF NOT EXISTS s2_model_comment (
     id          bigint primary key AUTO_INCREMENT,

@@ -44,6 +44,13 @@ public class UserController {
         return userService.getUserNames();
     }
 
+    @GetMapping("/getUserPermissions")
+    public List<String> getUserPermissions(HttpServletRequest request,
+                                           HttpServletResponse response) {
+        User user = userService.getCurrentUser(request, response);
+        return userService.getUserPermissions(user);
+    }
+
     @GetMapping("/getUserList")
     public List<User> getUserList() {
         return userService.getUserList();
