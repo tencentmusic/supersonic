@@ -114,12 +114,12 @@ const AgentForm: React.FC<Props> = ({ editAgent, onSaveAgent, onCreateToolBtnCli
 
   const testLLMConnect = async (params: any) => {
     setLlmTestLoading(true);
-    const { code, msg, data } = await testLLMConn(params);
+    const { code, data } = await testLLMConn(params);
     setLlmTestLoading(false);
     if (code === 200 && data) {
       message.success('连接成功');
     } else {
-      message.error(msg);
+      message.error('模型连接失败');
     }
   };
 
@@ -232,7 +232,7 @@ const AgentForm: React.FC<Props> = ({ editAgent, onSaveAgent, onCreateToolBtnCli
         <div className={styles.agentFormContainer}>
           <div className={styles.agentFormTitle}>
             <Space>
-              语言模型 <MainTitleMark />
+              对话模型 <MainTitleMark />
             </Space>
           </div>
           <FormItem name={['modelConfig', 'chatModel', 'provider']} label="接口协议">
@@ -282,7 +282,7 @@ const AgentForm: React.FC<Props> = ({ editAgent, onSaveAgent, onCreateToolBtnCli
             <InputNumber />
           </FormItem>
 
-          <div className={styles.agentFormTitle}>
+          {/* <div className={styles.agentFormTitle}>
             <Space>
               向量模型 <MainTitleMark />
             </Space>
@@ -342,7 +342,7 @@ const AgentForm: React.FC<Props> = ({ editAgent, onSaveAgent, onCreateToolBtnCli
                 <Input.Password placeholder="请输入API Key" visibilityToggle />
               </FormItem>
             </>
-          )}
+          )} */}
         </div>
       ),
     },
