@@ -11,7 +11,7 @@ import { useForm } from 'antd/lib/form/Form';
 import type { RegisterFormDetail } from './components/types';
 import { postUserLogin, userRegister } from './services';
 import { AUTH_TOKEN_KEY } from '@/common/constants';
-import { getUserInfoByTicket, queryCurrentUser } from '@/services/user';
+import { getUserInfoByTicket, getUserPermissions, queryCurrentUser } from '@/services/user';
 import { history, useModel } from '@umijs/max';
 import { encryptPassword } from '@/utils/utils';
 import CryptoJS from 'crypto-js';
@@ -38,6 +38,13 @@ const LoginPage: React.FC = () => {
           staffName: queryUserData.staffName || queryUserData.name,
         };
         const authCodes = Array.isArray(initialState?.authCodes) ? initialState?.authCodes : [];
+        try {
+          const { data: codes } = await getUserPermissions();
+          authCodes.push(...codes);
+        } catch (error) {
+          message.error('获取权限失败');
+        }
+
         if (queryUserData.superAdmin) {
           authCodes.push(ROUTE_AUTH_CODES.SYSTEM_ADMIN);
         }
@@ -85,6 +92,14 @@ const LoginPage: React.FC = () => {
           staffName: queryUserData.staffName || queryUserData.name,
         };
         const authCodes = Array.isArray(initialState?.authCodes) ? initialState?.authCodes : [];
+
+        try {
+          const { data: codes } = await getUserPermissions();
+          authCodes.push(...codes);
+        } catch (error) {
+          message.error('获取权限失败');
+        }
+
         if (queryUserData.superAdmin) {
           authCodes.push(ROUTE_AUTH_CODES.SYSTEM_ADMIN);
         }

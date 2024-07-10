@@ -1,12 +1,12 @@
 import RightContent from '@/components/RightContent';
 import S2Icon, { ICON } from '@/components/S2Icon';
 import type { Settings as LayoutSettings } from '@ant-design/pro-components';
-import { Space, Spin, ConfigProvider } from 'antd';
+import { Space, Spin, ConfigProvider, message } from 'antd';
 import ScaleLoader from 'react-spinners/ScaleLoader';
 import { history, RunTimeLayoutConfig } from '@umijs/max';
 import defaultSettings from '../config/defaultSettings';
 import settings from '../config/themeSettings';
-import { queryCurrentUser } from './services/user';
+import { getUserPermissions, queryCurrentUser } from './services/user';
 import { deleteUrlQuery, isMobile, getToken } from '@/utils/utils';
 import { publicPath } from '../config/defaultSettings';
 import { Copilot } from 'supersonic-chat-sdk';
@@ -33,13 +33,18 @@ Spin.setDefaultIndicator(
   <ScaleLoader color={settings['primary-color']} height={25} width={2} radius={2} margin={2} />,
 );
 
-const getAuthCodes = (params: any) => {
+const getAuthCodes = async (params: any) => {
   const { currentUser } = params;
-  const codes = [];
-  if (currentUser?.superAdmin) {
-    codes.push(ROUTE_AUTH_CODES.SYSTEM_ADMIN);
+  try {
+    const { data: codes } = await getUserPermissions();
+    if (currentUser?.superAdmin) {
+      codes.push(ROUTE_AUTH_CODES.SYSTEM_ADMIN);
+    }
+    return codes;
+  } catch (error) {
+    message.error('获取权限失败');
+    return [];
   }
-  return codes;
 };
 
 export async function getInitialState(): Promise<{
@@ -71,7 +76,7 @@ export async function getInitialState(): Promise<{
     }
   }
 
-  const authCodes = getAuthCodes({
+  const authCodes = await getAuthCodes({
     currentUser,
   });
 
@@ -118,6 +123,9 @@ export function onRouteChange() {
 
 export const layout: RunTimeLayoutConfig = (params) => {
   const { initialState } = params as any;
+
+  console.log('🚀 ~ initialState?.currentUser?.superAdmin:', initialState?.currentUser?.superAdmin);
+
   return {
     onMenuHeaderClick: (e) => {
       e.preventDefault();
