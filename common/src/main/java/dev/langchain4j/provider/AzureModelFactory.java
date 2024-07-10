@@ -13,15 +13,16 @@ import java.time.Duration;
 
 @Service
 public class AzureModelFactory implements ModelFactory, InitializingBean {
+    public static final String PROVIDER = "AZURE";
 
     @Override
-    public ChatLanguageModel createChatModel(ChatModelConfig chatModel) {
+    public ChatLanguageModel createChatModel(ChatModelConfig modelConfig) {
         AzureOpenAiChatModel.Builder builder = AzureOpenAiChatModel.builder()
-                .endpoint(chatModel.getBaseUrl())
-                .apiKey(chatModel.getApiKey())
-                .deploymentName(chatModel.getModelName())
-                .temperature(chatModel.getTemperature())
-                .timeout(Duration.ofSeconds(chatModel.getTimeOut() == null ? 0L : chatModel.getTimeOut()));
+                .endpoint(modelConfig.getBaseUrl())
+                .apiKey(modelConfig.getApiKey())
+                .deploymentName(modelConfig.getModelName())
+                .temperature(modelConfig.getTemperature())
+                .timeout(Duration.ofSeconds(modelConfig.getTimeOut() == null ? 0L : modelConfig.getTimeOut()));
         return builder.build();
     }
 
@@ -39,6 +40,6 @@ public class AzureModelFactory implements ModelFactory, InitializingBean {
 
     @Override
     public void afterPropertiesSet() {
-        ModelProvider.add(Provider.AZURE, this);
+        ModelProvider.add(PROVIDER, this);
     }
 }

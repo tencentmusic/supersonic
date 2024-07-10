@@ -13,15 +13,17 @@ import java.time.Duration;
 
 @Service
 public class OpenAiModelFactory implements ModelFactory, InitializingBean {
+    public static final String PROVIDER = "OPEN_AI";
+
     @Override
-    public ChatLanguageModel createChatModel(ChatModelConfig chatModel) {
+    public ChatLanguageModel createChatModel(ChatModelConfig modelConfig) {
         return OpenAiChatModel
                 .builder()
-                .baseUrl(chatModel.getBaseUrl())
-                .modelName(chatModel.getModelName())
-                .apiKey(chatModel.keyDecrypt())
-                .temperature(chatModel.getTemperature())
-                .timeout(Duration.ofSeconds(chatModel.getTimeOut()))
+                .baseUrl(modelConfig.getBaseUrl())
+                .modelName(modelConfig.getModelName())
+                .apiKey(modelConfig.keyDecrypt())
+                .temperature(modelConfig.getTemperature())
+                .timeout(Duration.ofSeconds(modelConfig.getTimeOut()))
                 .build();
     }
 
@@ -39,6 +41,6 @@ public class OpenAiModelFactory implements ModelFactory, InitializingBean {
 
     @Override
     public void afterPropertiesSet() {
-        ModelProvider.add(Provider.OPEN_AI, this);
+        ModelProvider.add(PROVIDER, this);
     }
 }

@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
 public class SqlQueryApiController {
 
     @Autowired
-    private SemanticLayerService queryService;
+    private SemanticLayerService semanticLayerService;
 
     @Autowired
     private ChatQueryService chatQueryService;
@@ -43,7 +43,7 @@ public class SqlQueryApiController {
         String sql = querySqlReq.getSql();
         querySqlReq.setSql(StringUtil.replaceBackticks(sql));
         chatQueryService.correct(querySqlReq, user);
-        return queryService.queryByReq(querySqlReq, user);
+        return semanticLayerService.queryByReq(querySqlReq, user);
     }
 
     @PostMapping("/sqls")
@@ -63,7 +63,7 @@ public class SqlQueryApiController {
         List<CompletableFuture<SemanticQueryResp>> futures = semanticQueryReqs.stream()
                 .map(querySqlReq -> CompletableFuture.supplyAsync(() -> {
                     try {
-                        return queryService.queryByReq(querySqlReq, user);
+                        return semanticLayerService.queryByReq(querySqlReq, user);
                     } catch (Exception e) {
                         log.error("querySqlReq:{},queryByReq error:", querySqlReq, e);
                         return new SemanticQueryResp();
@@ -88,7 +88,7 @@ public class SqlQueryApiController {
         List<SemanticQueryResp> semanticQueryRespList = new ArrayList<>();
         try {
             for (SemanticQueryReq semanticQueryReq : semanticQueryReqs) {
-                SemanticQueryResp semanticQueryResp = queryService.queryByReq(semanticQueryReq, user);
+                SemanticQueryResp semanticQueryResp = semanticLayerService.queryByReq(semanticQueryReq, user);
                 semanticQueryRespList.add(semanticQueryResp);
             }
         } catch (Exception e) {

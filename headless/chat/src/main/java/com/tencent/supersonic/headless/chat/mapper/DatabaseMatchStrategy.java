@@ -5,7 +5,7 @@ import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementMatch;
 import com.tencent.supersonic.headless.api.pojo.response.S2Term;
-import com.tencent.supersonic.headless.chat.QueryContext;
+import com.tencent.supersonic.headless.chat.ChatQueryContext;
 import com.tencent.supersonic.headless.chat.knowledge.DatabaseMapResult;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -31,10 +31,10 @@ public class DatabaseMatchStrategy extends BaseMatchStrategy<DatabaseMapResult> 
     private List<SchemaElement> allElements;
 
     @Override
-    public Map<MatchText, List<DatabaseMapResult>> match(QueryContext queryContext, List<S2Term> terms,
+    public Map<MatchText, List<DatabaseMapResult>> match(ChatQueryContext chatQueryContext, List<S2Term> terms,
                                                          Set<Long> detectDataSetIds) {
-        this.allElements = getSchemaElements(queryContext);
-        return super.match(queryContext, terms, detectDataSetIds);
+        this.allElements = getSchemaElements(chatQueryContext);
+        return super.match(chatQueryContext, terms, detectDataSetIds);
     }
 
     @Override
@@ -49,13 +49,13 @@ public class DatabaseMatchStrategy extends BaseMatchStrategy<DatabaseMapResult> 
                 + Constants.UNDERLINE + a.getSchemaElement().getName();
     }
 
-    public void detectByStep(QueryContext queryContext, Set<DatabaseMapResult> existResults, Set<Long> detectDataSetIds,
-                             String detectSegment, int offset) {
+    public void detectByStep(ChatQueryContext chatQueryContext, Set<DatabaseMapResult> existResults,
+                             Set<Long> detectDataSetIds, String detectSegment, int offset) {
         if (StringUtils.isBlank(detectSegment)) {
             return;
         }
 
-        Double metricDimensionThresholdConfig = getThreshold(queryContext);
+        Double metricDimensionThresholdConfig = getThreshold(chatQueryContext);
         Map<String, Set<SchemaElement>> nameToItems = getNameToItems(allElements);
 
         for (Entry<String, Set<SchemaElement>> entry : nameToItems.entrySet()) {
@@ -80,18 +80,19 @@ public class DatabaseMatchStrategy extends BaseMatchStrategy<DatabaseMapResult> 
         }
     }
 
-    private List<SchemaElement> getSchemaElements(QueryContext queryContext) {
+    private List<SchemaElement> getSchemaElements(ChatQueryContext chatQueryContext) {
         List<SchemaElement> allElements = new ArrayList<>();
-        allElements.addAll(queryContext.getSemanticSchema().getDimensions());
-        allElements.addAll(queryContext.getSemanticSchema().getMetrics());
+        allElements.addAll(chatQueryContext.getSemanticSchema().getDimensions());
+        allElements.addAll(chatQueryContext.getSemanticSchema().getMetrics());
         return allElements;
     }
 
-    private Double getThreshold(QueryContext queryContext) {
+    private Double getThreshold(ChatQueryContext chatQueryContext) {
         Double threshold = Double.valueOf(mapperConfig.getParameterValue(MapperConfig.MAPPER_NAME_THRESHOLD));
         Double minThreshold = Double.valueOf(mapperConfig.getParameterValue(MapperConfig.MAPPER_NAME_THRESHOLD_MIN));
 
-        Map<Long, List<SchemaElementMatch>> modelElementMatches = queryContext.getMapInfo().getDataSetElementMatches();
+        Map<Long, List<SchemaElementMatch>> modelElementMatches = chatQueryContext.getMapInfo()
+                .getDataSetElementMatches();
 
         boolean existElement = modelElementMatches.entrySet().stream().anyMatch(entry -> entry.getValue().size() >= 1);
 
@@ -100,7 +101,7 @@ public class DatabaseMatchStrategy extends BaseMatchStrategy<DatabaseMapResult> 
             log.debug("ModelElementMatches:{},not exist Element threshold reduce by half:{}",
                     modelElementMatches, threshold);
         }
-        return getThreshold(threshold, minThreshold, queryContext.getMapModeEnum());
+        return getThreshold(threshold, minThreshold, chatQueryContext.getMapModeEnum());
     }
 
     private Map<String, Set<SchemaElement>> getNameToItems(List<SchemaElement> models) {

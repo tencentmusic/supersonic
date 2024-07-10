@@ -19,10 +19,10 @@ import com.tencent.supersonic.headless.server.facade.service.SemanticLayerServic
 import com.tencent.supersonic.headless.server.web.service.TagMetaService;
 import com.tencent.supersonic.headless.server.web.service.TagQueryService;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -124,7 +124,7 @@ public class TagQueryServiceImpl implements TagQueryService {
                 List<Dim> timeDims = model.getTimeDimension();
                 if (!CollectionUtils.isEmpty(timeDims)) {
                     String dateFormat = timeDims.get(0).getDateFormat();
-                    if (Strings.isEmpty(dateFormat)) {
+                    if (StringUtils.isEmpty(dateFormat)) {
                         dateFormat = itemValueDateFormat;
                     }
                     String start = LocalDate.now().minusDays(itemValueReq.getDateConf().getUnit())

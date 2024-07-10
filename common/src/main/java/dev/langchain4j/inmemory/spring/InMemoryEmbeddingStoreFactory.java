@@ -1,6 +1,7 @@
 package dev.langchain4j.inmemory.spring;
 
 import com.tencent.supersonic.common.config.EmbeddingConfig;
+import com.tencent.supersonic.common.config.EmbeddingStoreConfig;
 import com.tencent.supersonic.common.util.ContextUtils;
 import dev.langchain4j.data.segment.TextSegment;
 import dev.langchain4j.store.embedding.BaseEmbeddingStoreFactory;
@@ -9,6 +10,7 @@ import dev.langchain4j.store.embedding.inmemory.InMemoryEmbeddingStore;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -23,9 +25,20 @@ public class InMemoryEmbeddingStoreFactory extends BaseEmbeddingStoreFactory {
     public static final String PERSISTENT_FILE_PRE = "InMemory.";
     private Properties properties;
 
+    public InMemoryEmbeddingStoreFactory(EmbeddingStoreConfig storeConfig) {
+        this(createPropertiesFromConfig(storeConfig));
+    }
 
     public InMemoryEmbeddingStoreFactory(Properties properties) {
         this.properties = properties;
+    }
+
+    private static Properties createPropertiesFromConfig(EmbeddingStoreConfig storeConfig) {
+        Properties properties = new Properties();
+        EmbeddingStoreProperties embeddingStore = new EmbeddingStoreProperties();
+        BeanUtils.copyProperties(storeConfig, embeddingStore);
+        properties.setEmbeddingStore(embeddingStore);
+        return properties;
     }
 
     @Override

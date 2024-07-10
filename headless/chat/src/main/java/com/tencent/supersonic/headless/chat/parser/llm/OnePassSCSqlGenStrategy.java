@@ -55,7 +55,7 @@ public class OnePassSCSqlGenStrategy extends SqlGenStrategy {
         Map<Prompt, String> prompt2Output = new ConcurrentHashMap<>();
         prompt2Exemplar.keySet().parallelStream().forEach(prompt -> {
                     keyPipelineLog.info("OnePassSCSqlGenStrategy reqPrompt:\n{}", prompt.toUserMessage());
-                    ChatLanguageModel chatLanguageModel = getChatLanguageModel(llmReq.getLlmConfig());
+                    ChatLanguageModel chatLanguageModel = getChatLanguageModel(llmReq.getModelConfig());
                     Response<AiMessage> response = chatLanguageModel.generate(prompt.toUserMessage());
                     String result = response.content().text();
                     prompt2Output.put(prompt, result);

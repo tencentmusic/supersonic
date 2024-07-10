@@ -9,7 +9,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static com.tencent.supersonic.common.pojo.Constants.UNDERLINE;
 
@@ -56,6 +58,22 @@ public class SemanticSchemaResp {
     public DimSchemaResp getDimension(Long id) {
         return dimensions.stream().filter(dimension -> id.equals(dimension.getId()))
                 .findFirst().orElse(null);
+    }
+
+    public Set<String> getNameFromBizNames(Set<String> bizNames) {
+        Set<String> names = new HashSet<>();
+        for (String bizName : bizNames) {
+            DimSchemaResp dimSchemaResp = getDimension(bizName);
+            if (dimSchemaResp != null) {
+                names.add(dimSchemaResp.getName());
+                continue;
+            }
+            MetricSchemaResp metricSchemaResp = getMetric(bizName);
+            if (metricSchemaResp != null) {
+                names.add(metricSchemaResp.getName());
+            }
+        }
+        return names;
     }
 
 }

@@ -8,7 +8,7 @@ import com.tencent.supersonic.headless.api.pojo.SchemaValueMap;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.api.pojo.SemanticSchema;
 import com.tencent.supersonic.headless.api.pojo.request.QueryFilters;
-import com.tencent.supersonic.headless.chat.QueryContext;
+import com.tencent.supersonic.headless.chat.ChatQueryContext;
 import com.tencent.supersonic.headless.chat.utils.QueryFilterParser;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.JSQLParserException;
@@ -29,17 +29,17 @@ import java.util.Objects;
 public class WhereCorrector extends BaseSemanticCorrector {
 
     @Override
-    public void doCorrect(QueryContext queryContext, SemanticParseInfo semanticParseInfo) {
+    public void doCorrect(ChatQueryContext chatQueryContext, SemanticParseInfo semanticParseInfo) {
 
-        addQueryFilter(queryContext, semanticParseInfo);
+        addQueryFilter(chatQueryContext, semanticParseInfo);
 
-        updateFieldValueByTechName(queryContext, semanticParseInfo);
+        updateFieldValueByTechName(chatQueryContext, semanticParseInfo);
     }
 
-    protected void addQueryFilter(QueryContext queryContext, SemanticParseInfo semanticParseInfo) {
-        String queryFilter = getQueryFilter(queryContext.getQueryFilters());
+    protected void addQueryFilter(ChatQueryContext chatQueryContext, SemanticParseInfo semanticParseInfo) {
+        String queryFilter = getQueryFilter(chatQueryContext.getQueryFilters());
 
-        String correctS2SQL = semanticParseInfo.getSqlInfo().getCorrectS2SQL();
+        String correctS2SQL = semanticParseInfo.getSqlInfo().getCorrectedS2SQL();
 
         if (StringUtils.isNotEmpty(queryFilter)) {
             log.info("add queryFilter to correctS2SQL :{}", queryFilter);
@@ -50,7 +50,7 @@ public class WhereCorrector extends BaseSemanticCorrector {
                 log.error("parseCondExpression", e);
             }
             correctS2SQL = SqlAddHelper.addWhere(correctS2SQL, expression);
-            semanticParseInfo.getSqlInfo().setCorrectS2SQL(correctS2SQL);
+            semanticParseInfo.getSqlInfo().setCorrectedS2SQL(correctS2SQL);
         }
     }
 
@@ -61,8 +61,8 @@ public class WhereCorrector extends BaseSemanticCorrector {
         return QueryFilterParser.parse(queryFilters);
     }
 
-    private void updateFieldValueByTechName(QueryContext queryContext, SemanticParseInfo semanticParseInfo) {
-        SemanticSchema semanticSchema = queryContext.getSemanticSchema();
+    private void updateFieldValueByTechName(ChatQueryContext chatQueryContext, SemanticParseInfo semanticParseInfo) {
+        SemanticSchema semanticSchema = chatQueryContext.getSemanticSchema();
         Long dataSetId = semanticParseInfo.getDataSetId();
         List<SchemaElement> dimensions = semanticSchema.getDimensions(dataSetId);
 
@@ -71,9 +71,9 @@ public class WhereCorrector extends BaseSemanticCorrector {
         }
 
         Map<String, Map<String, String>> aliasAndBizNameToTechName = getAliasAndBizNameToTechName(dimensions);
-        String correctS2SQL = SqlReplaceHelper.replaceValue(semanticParseInfo.getSqlInfo().getCorrectS2SQL(),
+        String correctS2SQL = SqlReplaceHelper.replaceValue(semanticParseInfo.getSqlInfo().getCorrectedS2SQL(),
                 aliasAndBizNameToTechName);
-        semanticParseInfo.getSqlInfo().setCorrectS2SQL(correctS2SQL);
+        semanticParseInfo.getSqlInfo().setCorrectedS2SQL(correctS2SQL);
     }
 
     private Map<String, Map<String, String>> getAliasAndBizNameToTechName(List<SchemaElement> dimensions) {

@@ -6,7 +6,7 @@ import com.tencent.supersonic.common.pojo.enums.TimeMode;
 import com.tencent.supersonic.headless.api.pojo.DataSetSchema;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementMatch;
 import com.tencent.supersonic.headless.api.pojo.TimeDefaultConfig;
-import com.tencent.supersonic.headless.chat.QueryContext;
+import com.tencent.supersonic.headless.chat.ChatQueryContext;
 import com.tencent.supersonic.headless.chat.query.rule.RuleSemanticQuery;
 import com.tencent.supersonic.headless.chat.ChatContext;
 import lombok.extern.slf4j.Slf4j;
@@ -31,17 +31,17 @@ public abstract class MetricSemanticQuery extends RuleSemanticQuery {
 
     @Override
     public List<SchemaElementMatch> match(List<SchemaElementMatch> candidateElementMatches,
-                                          QueryContext queryCtx) {
+                                          ChatQueryContext queryCtx) {
         return super.match(candidateElementMatches, queryCtx);
     }
 
     @Override
-    public void fillParseInfo(QueryContext queryContext, ChatContext chatContext) {
-        super.fillParseInfo(queryContext, chatContext);
+    public void fillParseInfo(ChatQueryContext chatQueryContext, ChatContext chatContext) {
+        super.fillParseInfo(chatQueryContext, chatContext);
         parseInfo.setLimit(METRIC_MAX_RESULTS);
         if (parseInfo.getDateInfo() == null) {
             DataSetSchema dataSetSchema =
-                    queryContext.getSemanticSchema().getDataSetSchemaMap().get(parseInfo.getDataSetId());
+                    chatQueryContext.getSemanticSchema().getDataSetSchemaMap().get(parseInfo.getDataSetId());
             TimeDefaultConfig timeDefaultConfig = dataSetSchema.getMetricTypeTimeDefaultConfig();
             DateConf dateInfo = new DateConf();
             if (Objects.nonNull(timeDefaultConfig) && Objects.nonNull(timeDefaultConfig.getUnit())) {

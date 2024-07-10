@@ -6,7 +6,7 @@ import com.tencent.supersonic.common.jsqlparser.SqlSelectFunctionHelper;
 import com.tencent.supersonic.common.jsqlparser.SqlSelectHelper;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.api.pojo.SemanticSchema;
-import com.tencent.supersonic.headless.chat.QueryContext;
+import com.tencent.supersonic.headless.chat.ChatQueryContext;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.expression.Expression;
 import org.apache.commons.lang3.StringUtils;
@@ -24,10 +24,10 @@ import java.util.stream.Collectors;
 public class HavingCorrector extends BaseSemanticCorrector {
 
     @Override
-    public void doCorrect(QueryContext queryContext, SemanticParseInfo semanticParseInfo) {
+    public void doCorrect(ChatQueryContext chatQueryContext, SemanticParseInfo semanticParseInfo) {
 
         //add aggregate to all metric
-        addHaving(queryContext, semanticParseInfo);
+        addHaving(chatQueryContext, semanticParseInfo);
 
         //decide whether add having expression field to select
         Environment environment = ContextUtils.getBean(Environment.class);
@@ -38,10 +38,10 @@ public class HavingCorrector extends BaseSemanticCorrector {
 
     }
 
-    private void addHaving(QueryContext queryContext, SemanticParseInfo semanticParseInfo) {
+    private void addHaving(ChatQueryContext chatQueryContext, SemanticParseInfo semanticParseInfo) {
         Long dataSet = semanticParseInfo.getDataSet().getDataSet();
 
-        SemanticSchema semanticSchema = queryContext.getSemanticSchema();
+        SemanticSchema semanticSchema = chatQueryContext.getSemanticSchema();
 
         Set<String> metrics = semanticSchema.getMetrics(dataSet).stream()
                 .map(schemaElement -> schemaElement.getName()).collect(Collectors.toSet());
@@ -49,19 +49,19 @@ public class HavingCorrector extends BaseSemanticCorrector {
         if (CollectionUtils.isEmpty(metrics)) {
             return;
         }
-        String havingSql = SqlAddHelper.addHaving(semanticParseInfo.getSqlInfo().getCorrectS2SQL(), metrics);
-        semanticParseInfo.getSqlInfo().setCorrectS2SQL(havingSql);
+        String havingSql = SqlAddHelper.addHaving(semanticParseInfo.getSqlInfo().getCorrectedS2SQL(), metrics);
+        semanticParseInfo.getSqlInfo().setCorrectedS2SQL(havingSql);
     }
 
     private void addHavingToSelect(SemanticParseInfo semanticParseInfo) {
-        String correctS2SQL = semanticParseInfo.getSqlInfo().getCorrectS2SQL();
+        String correctS2SQL = semanticParseInfo.getSqlInfo().getCorrectedS2SQL();
         if (!SqlSelectFunctionHelper.hasAggregateFunction(correctS2SQL)) {
             return;
         }
         List<Expression> havingExpressionList = SqlSelectHelper.getHavingExpression(correctS2SQL);
         if (!CollectionUtils.isEmpty(havingExpressionList)) {
             String replaceSql = SqlAddHelper.addFunctionToSelect(correctS2SQL, havingExpressionList);
-            semanticParseInfo.getSqlInfo().setCorrectS2SQL(replaceSql);
+            semanticParseInfo.getSqlInfo().setCorrectedS2SQL(replaceSql);
         }
         return;
     }

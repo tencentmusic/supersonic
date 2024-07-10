@@ -36,7 +36,6 @@ import com.tencent.supersonic.headless.server.web.service.ModelService;
 import com.tencent.supersonic.headless.server.web.service.TagMetaService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
@@ -438,7 +437,7 @@ public class DictUtils {
         }
 
         String dateFilter = generateDictDateFilter(dictItemResp);
-        if (Strings.isNotEmpty(dateFilter)) {
+        if (StringUtils.isNotEmpty(dateFilter)) {
             joiner.add(dateFilter);
         }
         return joiner.toString();
@@ -486,7 +485,7 @@ public class DictUtils {
             List<Dim> timeDims = model.getTimeDimension();
             if (!CollectionUtils.isEmpty(timeDims)) {
                 String dateFormat = timeDims.get(0).getDateFormat();
-                if (Strings.isEmpty(dateFormat)) {
+                if (StringUtils.isEmpty(dateFormat)) {
                     dateFormat = itemValueDateFormat;
                 }
                 String start = LocalDate.now().minusDays(dictItemResp.getConfig().getDateConf().getUnit())

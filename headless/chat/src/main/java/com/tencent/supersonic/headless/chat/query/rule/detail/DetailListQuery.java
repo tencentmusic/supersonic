@@ -8,7 +8,7 @@ import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.api.pojo.TagTypeDefaultConfig;
 import com.tencent.supersonic.headless.chat.ChatContext;
-import com.tencent.supersonic.headless.chat.QueryContext;
+import com.tencent.supersonic.headless.chat.ChatQueryContext;
 import org.apache.commons.collections.CollectionUtils;
 
 import java.util.LinkedHashSet;
@@ -19,15 +19,15 @@ import java.util.stream.Collectors;
 public abstract class DetailListQuery extends DetailSemanticQuery {
 
     @Override
-    public void fillParseInfo(QueryContext queryContext, ChatContext chatContext) {
-        super.fillParseInfo(queryContext, chatContext);
-        this.addEntityDetailAndOrderByMetric(queryContext, parseInfo);
+    public void fillParseInfo(ChatQueryContext chatQueryContext, ChatContext chatContext) {
+        super.fillParseInfo(chatQueryContext, chatContext);
+        this.addEntityDetailAndOrderByMetric(chatQueryContext, parseInfo);
     }
 
-    private void addEntityDetailAndOrderByMetric(QueryContext queryContext, SemanticParseInfo parseInfo) {
+    private void addEntityDetailAndOrderByMetric(ChatQueryContext chatQueryContext, SemanticParseInfo parseInfo) {
         Long dataSetId = parseInfo.getDataSetId();
         if (Objects.nonNull(dataSetId) && dataSetId > 0L) {
-            DataSetSchema dataSetSchema = queryContext.getSemanticSchema().getDataSetSchemaMap().get(dataSetId);
+            DataSetSchema dataSetSchema = chatQueryContext.getSemanticSchema().getDataSetSchemaMap().get(dataSetId);
             if (dataSetSchema != null && Objects.nonNull(dataSetSchema.getEntity())) {
                 Set<SchemaElement> dimensions = new LinkedHashSet<>();
                 Set<SchemaElement> metrics = new LinkedHashSet<>();

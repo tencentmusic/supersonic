@@ -3,7 +3,7 @@ package com.tencent.supersonic.headless.chat.parser.llm;
 
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.headless.chat.ChatContext;
-import com.tencent.supersonic.headless.chat.QueryContext;
+import com.tencent.supersonic.headless.chat.ChatQueryContext;
 import com.tencent.supersonic.headless.chat.parser.SemanticParser;
 import com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMReq;
 import com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMResp;
@@ -23,7 +23,7 @@ import org.apache.commons.collections.MapUtils;
 public class LLMSqlParser implements SemanticParser {
 
     @Override
-    public void parse(QueryContext queryCtx, ChatContext chatCtx) {
+    public void parse(ChatQueryContext queryCtx, ChatContext chatCtx) {
         try {
             LLMRequestService requestService = ContextUtils.getBean(LLMRequestService.class);
             //1.determine whether to skip this parser.
@@ -44,7 +44,7 @@ public class LLMSqlParser implements SemanticParser {
         }
     }
 
-    private void tryParse(QueryContext queryCtx, Long dataSetId) {
+    private void tryParse(ChatQueryContext queryCtx, Long dataSetId) {
         LLMRequestService requestService = ContextUtils.getBean(LLMRequestService.class);
         LLMResponseService responseService = ContextUtils.getBean(LLMResponseService.class);
         int maxRetries = ContextUtils.getBean(LLMParserConfig.class).getRecallMaxRetries();

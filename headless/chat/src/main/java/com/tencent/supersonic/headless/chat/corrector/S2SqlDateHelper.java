@@ -6,19 +6,19 @@ import com.tencent.supersonic.common.pojo.enums.DatePeriodEnum;
 import com.tencent.supersonic.common.util.DateUtils;
 import com.tencent.supersonic.headless.api.pojo.DataSetSchema;
 import com.tencent.supersonic.headless.api.pojo.TimeDefaultConfig;
-import com.tencent.supersonic.headless.chat.QueryContext;
+import com.tencent.supersonic.headless.chat.ChatQueryContext;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.Objects;
 
 public class S2SqlDateHelper {
 
-    public static String getReferenceDate(QueryContext queryContext, Long dataSetId) {
+    public static String getReferenceDate(ChatQueryContext chatQueryContext, Long dataSetId) {
         String defaultDate = DateUtils.getBeforeDate(0);
         if (Objects.isNull(dataSetId)) {
             return defaultDate;
         }
-        DataSetSchema dataSetSchema = queryContext.getSemanticSchema().getDataSetSchemaMap().get(dataSetId);
+        DataSetSchema dataSetSchema = chatQueryContext.getSemanticSchema().getDataSetSchemaMap().get(dataSetId);
         if (dataSetSchema == null || dataSetSchema.getTagTypeTimeDefaultConfig() == null) {
             return defaultDate;
         }
@@ -26,13 +26,13 @@ public class S2SqlDateHelper {
         return getDefaultDate(defaultDate, tagTypeTimeDefaultConfig).getLeft();
     }
 
-    public static Pair<String, String> getStartEndDate(QueryContext queryContext, Long dataSetId,
-            QueryType queryType) {
+    public static Pair<String, String> getStartEndDate(ChatQueryContext chatQueryContext, Long dataSetId,
+                                                       QueryType queryType) {
         String defaultDate = DateUtils.getBeforeDate(0);
         if (Objects.isNull(dataSetId)) {
             return Pair.of(defaultDate, defaultDate);
         }
-        DataSetSchema dataSetSchema = queryContext.getSemanticSchema().getDataSetSchemaMap().get(dataSetId);
+        DataSetSchema dataSetSchema = chatQueryContext.getSemanticSchema().getDataSetSchemaMap().get(dataSetId);
         if (dataSetSchema == null) {
             return Pair.of(defaultDate, defaultDate);
         }

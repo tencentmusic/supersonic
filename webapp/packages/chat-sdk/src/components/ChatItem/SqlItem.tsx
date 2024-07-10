@@ -38,7 +38,7 @@ const SqlItem: React.FC<Props> = ({
     setSqlType('');
   };
 
-  if (!llmReq && !sqlInfo.s2SQL && !sqlInfo.correctS2SQL && !sqlInfo.querySQL) {
+  if (!llmReq && !sqlInfo.parsedS2SQL && !sqlInfo.correctedS2SQL && !sqlInfo.querySQL) {
     return null;
   }
 
@@ -87,25 +87,25 @@ const SqlItem: React.FC<Props> = ({
               Few-shot示例
             </div>
           )}
-          {sqlInfo.s2SQL && (
+          {sqlInfo.parsedS2SQL && (
             <div
               className={`${tipPrefixCls}-content-option ${
-                sqlType === 's2SQL' ? `${tipPrefixCls}-content-option-active` : ''
+                sqlType === 'parsedS2SQL' ? `${tipPrefixCls}-content-option-active` : ''
               }`}
               onClick={() => {
-                setSqlType(sqlType === 's2SQL' ? '' : 's2SQL');
+                setSqlType(sqlType === 'parsedS2SQL' ? '' : 'parsedS2SQL');
               }}
             >
               {queryMode === 'LLM_S2SQL' || queryMode === 'PLAIN_TEXT' ? 'LLM' : 'Rule'}解析S2SQL
             </div>
           )}
-          {sqlInfo.correctS2SQL && (
+          {sqlInfo.correctedS2SQL && (
             <div
               className={`${tipPrefixCls}-content-option ${
-                sqlType === 'correctS2SQL' ? `${tipPrefixCls}-content-option-active` : ''
+                sqlType === 'correctedS2SQL' ? `${tipPrefixCls}-content-option-active` : ''
               }`}
               onClick={() => {
-                setSqlType(sqlType === 'correctS2SQL' ? '' : 'correctS2SQL');
+                setSqlType(sqlType === 'correctedS2SQL' ? '' : 'correctedS2SQL');
               }}
             >
               修正S2SQL

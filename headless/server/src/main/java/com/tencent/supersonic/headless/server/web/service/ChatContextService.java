@@ -9,7 +9,7 @@ public interface ChatContextService {
      * @param chatId
      * @return
      */
-    Long getContextModel(Integer chatId);
+    Long getContextDataset(Integer chatId);
 
     ChatContext getOrCreateContext(Integer chatId);
 

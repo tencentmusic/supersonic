@@ -5,7 +5,7 @@ import com.tencent.supersonic.common.pojo.Constants;
 import dev.langchain4j.store.embedding.Retrieval;
 import dev.langchain4j.store.embedding.RetrieveQuery;
 import dev.langchain4j.store.embedding.RetrieveQueryResult;
-import com.tencent.supersonic.headless.chat.QueryContext;
+import com.tencent.supersonic.headless.chat.ChatQueryContext;
 import com.tencent.supersonic.headless.chat.knowledge.EmbeddingResult;
 import com.tencent.supersonic.headless.chat.knowledge.MetaEmbeddingService;
 import lombok.extern.slf4j.Slf4j;
@@ -49,13 +49,13 @@ public class EmbeddingMatchStrategy extends BaseMatchStrategy<EmbeddingResult> {
     }
 
     @Override
-    public void detectByStep(QueryContext queryContext, Set<EmbeddingResult> existResults,
+    public void detectByStep(ChatQueryContext chatQueryContext, Set<EmbeddingResult> existResults,
                              Set<Long> detectDataSetIds, String detectSegment, int offset) {
 
     }
 
     @Override
-    protected void detectByBatch(QueryContext queryContext, Set<EmbeddingResult> results,
+    protected void detectByBatch(ChatQueryContext chatQueryContext, Set<EmbeddingResult> results,
                                  Set<Long> detectDataSetIds, Set<String> detectSegments) {
         int embedddingMapperMin = Integer.valueOf(mapperConfig.getParameterValue(MapperConfig.EMBEDDING_MAPPER_MIN));
         int embedddingMapperMax = Integer.valueOf(mapperConfig.getParameterValue(MapperConfig.EMBEDDING_MAPPER_MAX));
@@ -72,16 +72,16 @@ public class EmbeddingMatchStrategy extends BaseMatchStrategy<EmbeddingResult> {
                 embeddingMapperBatch);
 
         for (List<String> queryTextsSub : queryTextsSubList) {
-            detectByQueryTextsSub(results, detectDataSetIds, queryTextsSub, queryContext);
+            detectByQueryTextsSub(results, detectDataSetIds, queryTextsSub, chatQueryContext);
         }
     }
 
     private void detectByQueryTextsSub(Set<EmbeddingResult> results, Set<Long> detectDataSetIds,
-                                       List<String> queryTextsSub, QueryContext queryContext) {
-        Map<Long, List<Long>> modelIdToDataSetIds = queryContext.getModelIdToDataSetIds();
+                                       List<String> queryTextsSub, ChatQueryContext chatQueryContext) {
+        Map<Long, List<Long>> modelIdToDataSetIds = chatQueryContext.getModelIdToDataSetIds();
         double embeddingThreshold = Double.valueOf(mapperConfig.getParameterValue(EMBEDDING_MAPPER_THRESHOLD));
         double embeddingThresholdMin = Double.valueOf(mapperConfig.getParameterValue(EMBEDDING_MAPPER_THRESHOLD_MIN));
-        double threshold = getThreshold(embeddingThreshold, embeddingThresholdMin, queryContext.getMapModeEnum());
+        double threshold = getThreshold(embeddingThreshold, embeddingThresholdMin, chatQueryContext.getMapModeEnum());
 
         // step1. build query params
         RetrieveQuery retrieveQuery = RetrieveQuery.builder().queryTextsList(queryTextsSub).build();

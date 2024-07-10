@@ -4,8 +4,6 @@ package com.tencent.supersonic.chat.server.agent;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.tencent.supersonic.common.config.ChatModelConfig;
-import com.tencent.supersonic.common.config.EmbeddingStoreConfig;
 import com.tencent.supersonic.common.config.ModelConfig;
 import com.tencent.supersonic.common.config.PromptConfig;
 import com.tencent.supersonic.common.config.VisualConfig;
@@ -35,9 +33,7 @@ public class Agent extends RecordInfo {
     private Integer status;
     private List<String> examples;
     private String agentConfig;
-    private ChatModelConfig llmConfig;
     private ModelConfig modelConfig;
-    private EmbeddingStoreConfig embeddingStore;
     private PromptConfig promptConfig;
     private MultiTurnConfig multiTurnConfig;
     private VisualConfig visualConfig;

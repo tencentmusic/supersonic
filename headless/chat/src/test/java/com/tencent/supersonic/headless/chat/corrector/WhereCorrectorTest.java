@@ -6,7 +6,7 @@ import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.api.pojo.SqlInfo;
 import com.tencent.supersonic.headless.api.pojo.request.QueryFilter;
 import com.tencent.supersonic.headless.api.pojo.request.QueryFilters;
-import com.tencent.supersonic.headless.chat.QueryContext;
+import com.tencent.supersonic.headless.chat.ChatQueryContext;
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 
@@ -19,10 +19,10 @@ class WhereCorrectorTest {
         SqlInfo sqlInfo = new SqlInfo();
         String sql = "SELECT 维度1, SUM(播放量) FROM 数据库 "
                 + "WHERE (歌手名 = '张三') AND 数据日期 <= '2023-11-17' GROUP BY 维度1";
-        sqlInfo.setCorrectS2SQL(sql);
+        sqlInfo.setCorrectedS2SQL(sql);
         semanticParseInfo.setSqlInfo(sqlInfo);
 
-        QueryContext queryContext = new QueryContext();
+        ChatQueryContext chatQueryContext = new ChatQueryContext();
 
         QueryFilter filter1 = new QueryFilter();
         filter1.setName("age");
@@ -49,12 +49,12 @@ class WhereCorrectorTest {
         queryFilters.getFilters().add(filter2);
         queryFilters.getFilters().add(filter3);
         queryFilters.getFilters().add(filter4);
-        queryContext.setQueryFilters(queryFilters);
+        chatQueryContext.setQueryFilters(queryFilters);
 
         WhereCorrector whereCorrector = new WhereCorrector();
-        whereCorrector.addQueryFilter(queryContext, semanticParseInfo);
+        whereCorrector.addQueryFilter(chatQueryContext, semanticParseInfo);
 
-        String correctS2SQL = semanticParseInfo.getSqlInfo().getCorrectS2SQL();
+        String correctS2SQL = semanticParseInfo.getSqlInfo().getCorrectedS2SQL();
 
         Assert.assertEquals(correctS2SQL, "SELECT 维度1, SUM(播放量) FROM 数据库 WHERE "
                 + "(歌手名 = '张三') AND 数据日期 <= '2023-11-17' AND age > 30 AND "

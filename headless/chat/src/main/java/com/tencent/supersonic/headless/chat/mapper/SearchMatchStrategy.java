@@ -3,7 +3,7 @@ package com.tencent.supersonic.headless.chat.mapper;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.common.pojo.enums.DictWordType;
 import com.tencent.supersonic.headless.api.pojo.response.S2Term;
-import com.tencent.supersonic.headless.chat.QueryContext;
+import com.tencent.supersonic.headless.chat.ChatQueryContext;
 import com.tencent.supersonic.headless.chat.knowledge.HanlpMapResult;
 import com.tencent.supersonic.headless.chat.knowledge.KnowledgeBaseService;
 import com.tencent.supersonic.headless.chat.knowledge.SearchService;
@@ -32,9 +32,9 @@ public class SearchMatchStrategy extends BaseMatchStrategy<HanlpMapResult> {
     private KnowledgeBaseService knowledgeBaseService;
 
     @Override
-    public Map<MatchText, List<HanlpMapResult>> match(QueryContext queryContext, List<S2Term> originals,
+    public Map<MatchText, List<HanlpMapResult>> match(ChatQueryContext chatQueryContext, List<S2Term> originals,
                                                       Set<Long> detectDataSetIds) {
-        String text = queryContext.getQueryText();
+        String text = chatQueryContext.getQueryText();
         Map<Integer, Integer> regOffsetToLength = getRegOffsetToLength(originals);
 
         List<Integer> detectIndexList = Lists.newArrayList();
@@ -58,9 +58,14 @@ public class SearchMatchStrategy extends BaseMatchStrategy<HanlpMapResult> {
 
                     if (StringUtils.isNotEmpty(detectSegment)) {
                         List<HanlpMapResult> hanlpMapResults = knowledgeBaseService.prefixSearch(detectSegment,
-                                SearchService.SEARCH_SIZE, queryContext.getModelIdToDataSetIds(), detectDataSetIds);
+                                SearchService.SEARCH_SIZE,
+                                chatQueryContext.getModelIdToDataSetIds(),
+                                detectDataSetIds);
                         List<HanlpMapResult> suffixHanlpMapResults = knowledgeBaseService.suffixSearch(
-                                detectSegment, SEARCH_SIZE, queryContext.getModelIdToDataSetIds(), detectDataSetIds);
+                                detectSegment,
+                                SEARCH_SIZE,
+                                chatQueryContext.getModelIdToDataSetIds(),
+                                detectDataSetIds);
                         hanlpMapResults.addAll(suffixHanlpMapResults);
                         // remove entity name where search
                         hanlpMapResults = hanlpMapResults.stream().filter(entry -> {
@@ -94,8 +99,8 @@ public class SearchMatchStrategy extends BaseMatchStrategy<HanlpMapResult> {
     }
 
     @Override
-    public void detectByStep(QueryContext queryContext, Set<HanlpMapResult> existResults, Set<Long> detectDataSetIds,
-            String detectSegment, int offset) {
+    public void detectByStep(ChatQueryContext chatQueryContext, Set<HanlpMapResult> existResults,
+                             Set<Long> detectDataSetIds, String detectSegment, int offset) {
 
     }
 
