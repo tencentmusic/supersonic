@@ -13,6 +13,8 @@ public interface UserService {
 
     User getCurrentUser(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse);
 
+    List<String> getUserPermissions(User user);
+
     List<String> getUserNames();
 
     List<User> getUserList();

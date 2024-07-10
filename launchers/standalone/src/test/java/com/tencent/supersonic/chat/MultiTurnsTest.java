@@ -27,6 +27,7 @@ public class MultiTurnsTest extends BaseTest {
         expectedResult.setQueryMode(MetricFilterQuery.QUERY_MODE);
         expectedParseInfo.setAggType(NONE);
 
+        expectedParseInfo.getMetrics().add(DataUtils.getSchemaElement("访问用户数"));
         expectedParseInfo.getMetrics().add(DataUtils.getSchemaElement("访问次数"));
         expectedParseInfo.getMetrics().add(DataUtils.getSchemaElement("人均访问次数"));
 

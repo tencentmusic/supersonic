@@ -6,7 +6,7 @@ import com.tencent.supersonic.chat.server.agent.Agent;
 import com.tencent.supersonic.chat.server.agent.AgentToolType;
 import com.tencent.supersonic.chat.server.service.AgentService;
 import com.tencent.supersonic.chat.server.util.LLMConnHelper;
-import com.tencent.supersonic.common.config.LLMConfig;
+import com.tencent.supersonic.common.config.ModelConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -50,7 +50,7 @@ public class AgentController {
     }
 
     @PostMapping("/testLLMConn")
-    public boolean testLLMConn(@RequestBody LLMConfig llmConfig) {
+    public boolean testLLMConn(@RequestBody ModelConfig llmConfig) {
         return LLMConnHelper.testConnection(llmConfig);
     }
 

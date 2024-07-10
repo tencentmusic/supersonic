@@ -2,15 +2,16 @@ package com.tencent.supersonic.headless.chat;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
+import com.tencent.supersonic.common.config.ModelConfig;
+import com.tencent.supersonic.common.config.PromptConfig;
 import com.tencent.supersonic.common.pojo.enums.Text2SQLType;
 import com.tencent.supersonic.common.util.ContextUtils;
-import com.tencent.supersonic.common.config.LLMConfig;
 import com.tencent.supersonic.headless.api.pojo.QueryDataType;
 import com.tencent.supersonic.headless.api.pojo.SchemaMapInfo;
 import com.tencent.supersonic.headless.api.pojo.SemanticSchema;
 import com.tencent.supersonic.common.pojo.SqlExemplar;
 import com.tencent.supersonic.headless.api.pojo.enums.MapModeEnum;
-import com.tencent.supersonic.headless.api.pojo.enums.WorkflowState;
+import com.tencent.supersonic.headless.api.pojo.enums.ChatWorkflowState;
 import com.tencent.supersonic.headless.api.pojo.request.QueryFilters;
 import com.tencent.supersonic.headless.api.pojo.response.DimensionResp;
 import com.tencent.supersonic.headless.chat.parser.ParserConfig;
@@ -32,7 +33,7 @@ import java.util.stream.Collectors;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class QueryContext {
+public class ChatQueryContext {
 
     private String queryText;
     private Integer chatId;
@@ -40,6 +41,7 @@ public class QueryContext {
     private Map<Long, List<Long>> modelIdToDataSetIds;
     private User user;
     private boolean saveAnswer;
+    @Builder.Default
     private Text2SQLType text2SQLType = Text2SQLType.RULE_AND_LLM;
     private QueryFilters queryFilters;
     private List<SemanticQuery> candidateQueries = new ArrayList<>();
@@ -48,10 +50,11 @@ public class QueryContext {
     @JsonIgnore
     private SemanticSchema semanticSchema;
     @JsonIgnore
-    private WorkflowState workflowState;
+    private ChatWorkflowState chatWorkflowState;
     private QueryDataType queryDataType = QueryDataType.ALL;
-    private LLMConfig llmConfig;
-    private List<SqlExemplar> exemplars;
+    private ModelConfig modelConfig;
+    private PromptConfig promptConfig;
+    private List<SqlExemplar> dynamicExemplars;
     @JsonIgnore
     private List<DimensionResp> dimensions;
 

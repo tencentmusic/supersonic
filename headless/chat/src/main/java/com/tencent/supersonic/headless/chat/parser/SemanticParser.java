@@ -1,7 +1,7 @@
 package com.tencent.supersonic.headless.chat.parser;
 
 import com.tencent.supersonic.headless.chat.ChatContext;
-import com.tencent.supersonic.headless.chat.QueryContext;
+import com.tencent.supersonic.headless.chat.ChatQueryContext;
 
 /**
  * A semantic parser understands user queries and generates semantic query statement.
@@ -10,5 +10,5 @@ import com.tencent.supersonic.headless.chat.QueryContext;
  */
 public interface SemanticParser {
 
-    void parse(QueryContext queryContext, ChatContext chatContext);
+    void parse(ChatQueryContext chatQueryContext, ChatContext chatContext);
 }

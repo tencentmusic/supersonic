@@ -3,7 +3,7 @@ package com.tencent.supersonic.headless.chat.parser.rule;
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.headless.chat.ChatContext;
-import com.tencent.supersonic.headless.chat.QueryContext;
+import com.tencent.supersonic.headless.chat.ChatQueryContext;
 import com.tencent.supersonic.headless.chat.parser.SemanticParser;
 import com.tencent.supersonic.headless.chat.query.QueryManager;
 import com.tencent.supersonic.headless.chat.query.SemanticQuery;
@@ -42,7 +42,7 @@ public class TimeRangeParser implements SemanticParser {
     private static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
 
     @Override
-    public void parse(QueryContext queryContext, ChatContext chatContext) {
+    public void parse(ChatQueryContext queryContext, ChatContext chatContext) {
         String queryText = queryContext.getQueryText();
         DateConf dateConf = parseRecent(queryText);
         if (dateConf == null) {

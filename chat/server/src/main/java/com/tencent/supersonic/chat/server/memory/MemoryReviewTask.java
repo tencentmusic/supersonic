@@ -7,7 +7,7 @@ import com.tencent.supersonic.chat.server.service.MemoryService;
 import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.input.Prompt;
 import dev.langchain4j.model.input.PromptTemplate;
-import dev.langchain4j.model.provider.ChatLanguageModelProvider;
+import dev.langchain4j.provider.ModelProvider;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,7 +46,7 @@ public class MemoryReviewTask {
     @Autowired
     private AgentService agentService;
 
-    @Scheduled(fixedDelay = 60 * 1000)
+    @Scheduled(fixedDelay = 86400000)
     public void review() {
         memoryService.getMemoriesForLlmReview().stream()
                 .forEach(m -> {
@@ -56,8 +56,8 @@ public class MemoryReviewTask {
                         Prompt prompt = PromptTemplate.from(promptStr).apply(Collections.EMPTY_MAP);
 
                         keyPipelineLog.info("MemoryReviewTask reqPrompt:{}", promptStr);
-                        ChatLanguageModel chatLanguageModel = ChatLanguageModelProvider.provide(
-                                chatAgent.getLlmConfig());
+                        ChatLanguageModel chatLanguageModel = ModelProvider.getChatModel(
+                                chatAgent.getModelConfig());
                         if (Objects.nonNull(chatLanguageModel)) {
                             String response = chatLanguageModel.generate(prompt.toUserMessage()).content().text();
                             keyPipelineLog.info("MemoryReviewTask modelResp:{}", response);

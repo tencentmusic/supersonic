@@ -26,22 +26,20 @@ import com.tencent.supersonic.headless.api.pojo.SemanticSchema;
 import com.tencent.supersonic.headless.api.pojo.SqlEvaluation;
 import com.tencent.supersonic.headless.api.pojo.SqlInfo;
 import com.tencent.supersonic.headless.api.pojo.enums.CostType;
-import com.tencent.supersonic.headless.api.pojo.enums.QueryMethod;
 import com.tencent.supersonic.headless.api.pojo.request.DimensionValueReq;
 import com.tencent.supersonic.headless.api.pojo.request.ExecuteQueryReq;
-import com.tencent.supersonic.headless.api.pojo.request.ExplainSqlReq;
+import com.tencent.supersonic.headless.api.pojo.request.QueryNLReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryDataReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryDimValueReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryFilter;
 import com.tencent.supersonic.headless.api.pojo.request.QueryFilters;
 import com.tencent.supersonic.headless.api.pojo.request.QueryMapReq;
-import com.tencent.supersonic.headless.api.pojo.request.QueryReq;
 import com.tencent.supersonic.headless.api.pojo.request.QuerySqlReq;
 import com.tencent.supersonic.headless.api.pojo.request.SemanticQueryReq;
 import com.tencent.supersonic.headless.api.pojo.response.DataSetMapInfo;
 import com.tencent.supersonic.headless.api.pojo.response.DataSetResp;
 import com.tencent.supersonic.headless.api.pojo.response.DimensionResp;
-import com.tencent.supersonic.headless.api.pojo.response.ExplainResp;
+import com.tencent.supersonic.headless.api.pojo.response.SemanticTranslateResp;
 import com.tencent.supersonic.headless.api.pojo.response.MapInfoResp;
 import com.tencent.supersonic.headless.api.pojo.response.MapResp;
 import com.tencent.supersonic.headless.api.pojo.response.ParseResp;
@@ -49,7 +47,7 @@ import com.tencent.supersonic.headless.api.pojo.response.QueryResult;
 import com.tencent.supersonic.headless.api.pojo.response.QueryState;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
 import com.tencent.supersonic.headless.chat.ChatContext;
-import com.tencent.supersonic.headless.chat.QueryContext;
+import com.tencent.supersonic.headless.chat.ChatQueryContext;
 import com.tencent.supersonic.headless.chat.corrector.GrammarCorrector;
 import com.tencent.supersonic.headless.chat.corrector.SchemaCorrector;
 import com.tencent.supersonic.headless.chat.knowledge.HanlpMapResult;
@@ -63,13 +61,13 @@ import com.tencent.supersonic.headless.chat.query.SemanticQuery;
 import com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMSqlQuery;
 import com.tencent.supersonic.headless.server.facade.service.ChatQueryService;
 import com.tencent.supersonic.headless.server.facade.service.SemanticLayerService;
+import com.tencent.supersonic.headless.server.utils.ChatWorkflowEngine;
 import com.tencent.supersonic.headless.server.persistence.dataobject.StatisticsDO;
 import com.tencent.supersonic.headless.server.pojo.MetaFilter;
 import com.tencent.supersonic.headless.server.utils.ComponentFactory;
 import com.tencent.supersonic.headless.server.web.service.ChatContextService;
 import com.tencent.supersonic.headless.server.web.service.DataSetService;
 import com.tencent.supersonic.headless.server.web.service.SchemaService;
-import com.tencent.supersonic.headless.server.web.service.WorkflowService;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.LongValue;
@@ -115,45 +113,45 @@ public class ChatQueryServiceImpl implements ChatQueryService {
     @Autowired
     private DataSetService dataSetService;
     @Autowired
-    private WorkflowService workflowService;
+    private ChatWorkflowEngine chatWorkflowEngine;
 
     @Override
-    public MapResp performMapping(QueryReq queryReq) {
+    public MapResp performMapping(QueryNLReq queryNLReq) {
         MapResp mapResp = new MapResp();
-        QueryContext queryCtx = buildQueryContext(queryReq);
+        ChatQueryContext queryCtx = buildChatQueryContext(queryNLReq);
         ComponentFactory.getSchemaMappers().forEach(mapper -> {
             mapper.map(queryCtx);
         });
         SchemaMapInfo mapInfo = queryCtx.getMapInfo();
         mapResp.setMapInfo(mapInfo);
-        mapResp.setQueryText(queryReq.getQueryText());
+        mapResp.setQueryText(queryNLReq.getQueryText());
         return mapResp;
     }
 
     @Override
     public MapInfoResp map(QueryMapReq queryMapReq) {
 
-        QueryReq queryReq = new QueryReq();
-        BeanUtils.copyProperties(queryMapReq, queryReq);
+        QueryNLReq queryNLReq = new QueryNLReq();
+        BeanUtils.copyProperties(queryMapReq, queryNLReq);
         List<DataSetResp> dataSets = dataSetService.getDataSets(queryMapReq.getDataSetNames(), queryMapReq.getUser());
 
         Set<Long> dataSetIds = dataSets.stream().map(SchemaItem::getId).collect(Collectors.toSet());
-        queryReq.setDataSetIds(dataSetIds);
-        MapResp mapResp = performMapping(queryReq);
+        queryNLReq.setDataSetIds(dataSetIds);
+        MapResp mapResp = performMapping(queryNLReq);
         dataSetIds.retainAll(mapResp.getMapInfo().getDataSetElementMatches().keySet());
         return convert(mapResp, queryMapReq.getTopN(), dataSetIds);
     }
 
     @Override
-    public ParseResp performParsing(QueryReq queryReq) {
-        ParseResp parseResult = new ParseResp(queryReq.getChatId(), queryReq.getQueryText());
+    public ParseResp performParsing(QueryNLReq queryNLReq) {
+        ParseResp parseResult = new ParseResp(queryNLReq.getChatId(), queryNLReq.getQueryText());
         // build queryContext and chatContext
-        QueryContext queryCtx = buildQueryContext(queryReq);
+        ChatQueryContext queryCtx = buildChatQueryContext(queryNLReq);
 
         // in order to support multi-turn conversation, chat context is needed
-        ChatContext chatCtx = chatContextService.getOrCreateContext(queryReq.getChatId());
+        ChatContext chatCtx = chatContextService.getOrCreateContext(queryNLReq.getChatId());
 
-        workflowService.startWorkflow(queryCtx, chatCtx, parseResult);
+        chatWorkflowEngine.execute(queryCtx, chatCtx, parseResult);
 
         List<SemanticParseInfo> parseInfos = queryCtx.getCandidateQueries().stream()
                 .map(SemanticQuery::getParseInfo).collect(Collectors.toList());
@@ -161,25 +159,25 @@ public class ChatQueryServiceImpl implements ChatQueryService {
         return parseResult;
     }
 
-    public QueryContext buildQueryContext(QueryReq queryReq) {
-
+    public ChatQueryContext buildChatQueryContext(QueryNLReq queryNLReq) {
         SemanticSchema semanticSchema = schemaService.getSemanticSchema();
         Map<Long, List<Long>> modelIdToDataSetIds = dataSetService.getModelIdToDataSetIds();
-        QueryContext queryCtx = QueryContext.builder()
-                .queryFilters(queryReq.getQueryFilters())
+        ChatQueryContext queryCtx = ChatQueryContext.builder()
+                .queryFilters(queryNLReq.getQueryFilters())
                 .semanticSchema(semanticSchema)
                 .candidateQueries(new ArrayList<>())
                 .mapInfo(new SchemaMapInfo())
                 .modelIdToDataSetIds(modelIdToDataSetIds)
-                .text2SQLType(queryReq.getText2SQLType())
-                .mapModeEnum(queryReq.getMapModeEnum())
-                .dataSetIds(queryReq.getDataSetIds())
+                .text2SQLType(queryNLReq.getText2SQLType())
+                .mapModeEnum(queryNLReq.getMapModeEnum())
+                .dataSetIds(queryNLReq.getDataSetIds())
                 .build();
-        BeanUtils.copyProperties(queryReq, queryCtx);
+        BeanUtils.copyProperties(queryNLReq, queryCtx);
         return queryCtx;
     }
 
     @Override
+    @Deprecated
     public QueryResult performExecution(ExecuteQueryReq queryReq) throws Exception {
         List<StatisticsDO> timeCostDOList = new ArrayList<>();
         SemanticParseInfo parseInfo = queryReq.getParseInfo();
@@ -263,13 +261,8 @@ public class ChatQueryServiceImpl implements ChatQueryService {
 
             semanticQuery.setParseInfo(parseInfo);
             SemanticQueryReq semanticQueryReq = semanticQuery.buildSemanticQueryReq();
-            ExplainSqlReq<Object> explainSqlReq = ExplainSqlReq.builder().queryReq(semanticQueryReq)
-                    .queryTypeEnum(QueryMethod.SQL).build();
-            ExplainResp explain = semanticLayerService.explain(explainSqlReq, user);
-            if (StringUtils.isNotBlank(explain.getSql())) {
-                parseInfo.getSqlInfo().setQuerySQL(explain.getSql());
-                parseInfo.getSqlInfo().setSourceId(explain.getSourceId());
-            }
+            SemanticTranslateResp explain = semanticLayerService.translate(semanticQueryReq, user);
+            parseInfo.getSqlInfo().setQuerySQL(explain.getQuerySQL());
         } else {
             log.info("rule begin replace metrics and revise filters!");
             //remove unvalid filters
@@ -277,9 +270,9 @@ public class ChatQueryServiceImpl implements ChatQueryService {
             validFilter(semanticQuery.getParseInfo().getMetricFilters());
             //init s2sql
             semanticQuery.initS2Sql(semanticSchema, user);
-            QueryReq queryReq = new QueryReq();
-            queryReq.setQueryFilters(new QueryFilters());
-            queryReq.setUser(user);
+            QueryNLReq queryNLReq = new QueryNLReq();
+            queryNLReq.setQueryFilters(new QueryFilters());
+            queryNLReq.setUser(user);
         }
         SemanticQueryReq semanticQueryReq = semanticQuery.buildSemanticQueryReq();
         QueryResult queryResult = doExecution(semanticQueryReq, semanticQuery.getParseInfo(), user);
@@ -294,7 +287,7 @@ public class ChatQueryServiceImpl implements ChatQueryService {
     public void replaceFilter(QueryDataReq queryData, SemanticParseInfo parseInfo) {
         Map<String, Map<String, String>> filedNameToValueMap = new HashMap<>();
 
-        String correctorSql = parseInfo.getSqlInfo().getCorrectS2SQL();
+        String correctorSql = parseInfo.getSqlInfo().getCorrectedS2SQL();
         log.info("correctorSql before replacing:{}", correctorSql);
         // get where filter and having filter
         List<FieldExpression> whereExpressionList = SqlSelectHelper.getWhereExpressions(correctorSql);
@@ -310,23 +303,23 @@ public class ChatQueryServiceImpl implements ChatQueryService {
 
         correctorSql = SqlAddHelper.addWhere(correctorSql, addWhereConditions);
         log.info("correctorSql after replacing:{}", correctorSql);
-        parseInfo.getSqlInfo().setCorrectS2SQL(correctorSql);
+        parseInfo.getSqlInfo().setCorrectedS2SQL(correctorSql);
     }
 
     public void appendLimitToSQL(QueryDataReq queryData, SemanticParseInfo parseInfo) {
-        String correctorSql = parseInfo.getSqlInfo().getCorrectS2SQL();
+        String correctorSql = parseInfo.getSqlInfo().getCorrectedS2SQL();
         log.info("appendLimitToSQL before replacing:{}", correctorSql);
         //add limit
         correctorSql = SqlReplaceHelper.setLimit(correctorSql, queryData.getOffset(), queryData.getLimit());
         log.info("appendLimitToSQL after replacing:{}", correctorSql);
         parseInfo.setLimit(queryData.getLimit());
-        parseInfo.getSqlInfo().setCorrectS2SQL(correctorSql);
+        parseInfo.getSqlInfo().setCorrectedS2SQL(correctorSql);
     }
 
     private void replaceMetrics(SemanticParseInfo parseInfo, Set<SchemaElement> metrics) {
         List<String> oriMetrics = parseInfo.getMetrics().stream()
                 .map(SchemaElement::getName).collect(Collectors.toList());
-        String correctorSql = parseInfo.getSqlInfo().getCorrectS2SQL();
+        String correctorSql = parseInfo.getSqlInfo().getCorrectedS2SQL();
         log.info("before replaceMetrics:{}", correctorSql);
         log.info("filteredMetrics:{},metrics:{}", oriMetrics, metrics);
         Map<String, Pair<String, String>> fieldMap = new HashMap<>();
@@ -336,11 +329,11 @@ public class ChatQueryServiceImpl implements ChatQueryService {
         correctorSql = SqlReplaceHelper.replaceAggFields(correctorSql, fieldMap);
         log.info("after replaceMetrics:{}", correctorSql);
         parseInfo.setMetrics(metrics);
-        parseInfo.getSqlInfo().setCorrectS2SQL(correctorSql);
+        parseInfo.getSqlInfo().setCorrectedS2SQL(correctorSql);
     }
 
     private void replaceDimensions(SemanticParseInfo parseInfo, Set<SchemaElement> dimensions) {
-        String correctorSql = parseInfo.getSqlInfo().getCorrectS2SQL();
+        String correctorSql = parseInfo.getSqlInfo().getCorrectedS2SQL();
         log.info("before replaceDimensions:{}", correctorSql);
         Map<String, String> fieldMap = new HashMap<>();
         for (SchemaElement dimension : dimensions) {
@@ -349,7 +342,7 @@ public class ChatQueryServiceImpl implements ChatQueryService {
         String sql = SqlReplaceHelper.replaceSelectFields(correctorSql, fieldMap);
         log.info("after replaceDimensions:{}", sql);
         parseInfo.setDimensions(dimensions);
-        parseInfo.getSqlInfo().setCorrectS2SQL(sql);
+        parseInfo.getSqlInfo().setCorrectedS2SQL(sql);
     }
 
     private void updateDateInfo(QueryDataReq queryData, SemanticParseInfo parseInfo,
@@ -591,7 +584,7 @@ public class ChatQueryServiceImpl implements ChatQueryService {
 
     public void correct(QuerySqlReq querySqlReq, User user) {
         SemanticParseInfo semanticParseInfo = correctSqlReq(querySqlReq, user);
-        querySqlReq.setSql(semanticParseInfo.getSqlInfo().getCorrectS2SQL());
+        querySqlReq.setSql(semanticParseInfo.getSqlInfo().getCorrectedS2SQL());
     }
 
     @Override
@@ -601,13 +594,13 @@ public class ChatQueryServiceImpl implements ChatQueryService {
     }
 
     private SemanticParseInfo correctSqlReq(QuerySqlReq querySqlReq, User user) {
-        QueryContext queryCtx = new QueryContext();
+        ChatQueryContext queryCtx = new ChatQueryContext();
         SemanticSchema semanticSchema = schemaService.getSemanticSchema();
         queryCtx.setSemanticSchema(semanticSchema);
         SemanticParseInfo semanticParseInfo = new SemanticParseInfo();
         SqlInfo sqlInfo = new SqlInfo();
-        sqlInfo.setCorrectS2SQL(querySqlReq.getSql());
-        sqlInfo.setS2SQL(querySqlReq.getSql());
+        sqlInfo.setCorrectedS2SQL(querySqlReq.getSql());
+        sqlInfo.setParsedS2SQL(querySqlReq.getSql());
         semanticParseInfo.setSqlInfo(sqlInfo);
         semanticParseInfo.setQueryType(QueryType.DETAIL);
 
@@ -623,7 +616,7 @@ public class ChatQueryServiceImpl implements ChatQueryService {
                 corrector.correct(queryCtx, semanticParseInfo);
             }
         });
-        log.info("chatQueryServiceImpl correct:{}", sqlInfo.getCorrectS2SQL());
+        log.info("chatQueryServiceImpl correct:{}", sqlInfo.getCorrectedS2SQL());
         return semanticParseInfo;
     }
 

@@ -3,7 +3,7 @@ package com.tencent.supersonic.headless.chat.mapper;
 
 import com.tencent.supersonic.headless.api.pojo.enums.MapModeEnum;
 import com.tencent.supersonic.headless.api.pojo.response.S2Term;
-import com.tencent.supersonic.headless.chat.QueryContext;
+import com.tencent.supersonic.headless.chat.ChatQueryContext;
 import com.tencent.supersonic.headless.chat.knowledge.helper.NatureHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
@@ -33,25 +33,25 @@ public abstract class BaseMatchStrategy<T> implements MatchStrategy<T> {
     protected MapperConfig mapperConfig;
 
     @Override
-    public Map<MatchText, List<T>> match(QueryContext queryContext, List<S2Term> terms,
+    public Map<MatchText, List<T>> match(ChatQueryContext chatQueryContext, List<S2Term> terms,
                                          Set<Long> detectDataSetIds) {
-        String text = queryContext.getQueryText();
+        String text = chatQueryContext.getQueryText();
         if (Objects.isNull(terms) || StringUtils.isEmpty(text)) {
             return null;
         }
 
         log.debug("terms:{},,detectDataSetIds:{}", terms, detectDataSetIds);
 
-        List<T> detects = detect(queryContext, terms, detectDataSetIds);
+        List<T> detects = detect(chatQueryContext, terms, detectDataSetIds);
         Map<MatchText, List<T>> result = new HashMap<>();
 
         result.put(MatchText.builder().regText(text).detectSegment(text).build(), detects);
         return result;
     }
 
-    public List<T> detect(QueryContext queryContext, List<S2Term> terms, Set<Long> detectDataSetIds) {
+    public List<T> detect(ChatQueryContext chatQueryContext, List<S2Term> terms, Set<Long> detectDataSetIds) {
         Map<Integer, Integer> regOffsetToLength = getRegOffsetToLength(terms);
-        String text = queryContext.getQueryText();
+        String text = chatQueryContext.getQueryText();
         Set<T> results = new HashSet<>();
 
         Set<String> detectSegments = new HashSet<>();
@@ -64,16 +64,16 @@ public abstract class BaseMatchStrategy<T> implements MatchStrategy<T> {
                 if (index <= text.length()) {
                     String detectSegment = text.substring(startIndex, index).trim();
                     detectSegments.add(detectSegment);
-                    detectByStep(queryContext, results, detectDataSetIds, detectSegment, offset);
+                    detectByStep(chatQueryContext, results, detectDataSetIds, detectSegment, offset);
                 }
             }
             startIndex = mapperHelper.getStepIndex(regOffsetToLength, startIndex);
         }
-        detectByBatch(queryContext, results, detectDataSetIds, detectSegments);
+        detectByBatch(chatQueryContext, results, detectDataSetIds, detectSegments);
         return new ArrayList<>(results);
     }
 
-    protected void detectByBatch(QueryContext queryContext, Set<T> results, Set<Long> detectDataSetIds,
+    protected void detectByBatch(ChatQueryContext chatQueryContext, Set<T> results, Set<Long> detectDataSetIds,
                                  Set<String> detectSegments) {
     }
 
@@ -108,10 +108,10 @@ public abstract class BaseMatchStrategy<T> implements MatchStrategy<T> {
         }
     }
 
-    public List<T> getMatches(QueryContext queryContext, List<S2Term> terms) {
-        Set<Long> dataSetIds = queryContext.getDataSetIds();
+    public List<T> getMatches(ChatQueryContext chatQueryContext, List<S2Term> terms) {
+        Set<Long> dataSetIds = chatQueryContext.getDataSetIds();
         terms = filterByDataSetId(terms, dataSetIds);
-        Map<MatchText, List<T>> matchResult = match(queryContext, terms, dataSetIds);
+        Map<MatchText, List<T>> matchResult = match(chatQueryContext, terms, dataSetIds);
         List<T> matches = new ArrayList<>();
         if (Objects.isNull(matchResult)) {
             return matches;
@@ -155,8 +155,8 @@ public abstract class BaseMatchStrategy<T> implements MatchStrategy<T> {
 
     public abstract String getMapKey(T a);
 
-    public abstract void detectByStep(QueryContext queryContext, Set<T> existResults, Set<Long> detectDataSetIds,
-                                      String detectSegment, int offset);
+    public abstract void detectByStep(ChatQueryContext chatQueryContext, Set<T> existResults,
+                                      Set<Long> detectDataSetIds, String detectSegment, int offset);
 
     public double getThreshold(Double threshold, Double minThreshold, MapModeEnum mapModeEnum) {
         double decreaseAmount = (threshold - minThreshold) / 4;

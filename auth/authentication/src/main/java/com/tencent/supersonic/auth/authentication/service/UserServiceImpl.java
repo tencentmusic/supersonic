@@ -38,6 +38,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public List<String> getUserPermissions(User user) {
+        return ComponentFactory.getUserAdaptor().getUserPermissions(user.getName());
+    }
+
+    @Override
     public List<String> getUserNames() {
         return ComponentFactory.getUserAdaptor().getUserNames();
     }

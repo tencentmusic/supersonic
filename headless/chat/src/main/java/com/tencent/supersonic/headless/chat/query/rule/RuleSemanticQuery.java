@@ -12,7 +12,7 @@ import com.tencent.supersonic.headless.api.pojo.request.QueryFilter;
 import com.tencent.supersonic.headless.api.pojo.request.QueryMultiStructReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
 import com.tencent.supersonic.headless.api.pojo.request.SemanticQueryReq;
-import com.tencent.supersonic.headless.chat.QueryContext;
+import com.tencent.supersonic.headless.chat.ChatQueryContext;
 import com.tencent.supersonic.headless.chat.utils.QueryReqBuilder;
 import com.tencent.supersonic.headless.chat.query.BaseSemanticQuery;
 import com.tencent.supersonic.headless.chat.query.QueryManager;
@@ -40,7 +40,7 @@ public abstract class RuleSemanticQuery extends BaseSemanticQuery {
     }
 
     public List<SchemaElementMatch> match(List<SchemaElementMatch> candidateElementMatches,
-            QueryContext queryCtx) {
+            ChatQueryContext queryCtx) {
         return queryMatcher.match(candidateElementMatches);
     }
 
@@ -49,9 +49,9 @@ public abstract class RuleSemanticQuery extends BaseSemanticQuery {
         initS2SqlByStruct(semanticSchema);
     }
 
-    public void fillParseInfo(QueryContext queryContext, ChatContext chatContext) {
+    public void fillParseInfo(ChatQueryContext chatQueryContext, ChatContext chatContext) {
         parseInfo.setQueryMode(getQueryMode());
-        SemanticSchema semanticSchema = queryContext.getSemanticSchema();
+        SemanticSchema semanticSchema = chatQueryContext.getSemanticSchema();
 
         fillSchemaElement(parseInfo, semanticSchema);
         fillScore(parseInfo);
@@ -223,10 +223,10 @@ public abstract class RuleSemanticQuery extends BaseSemanticQuery {
     }
 
     public static List<RuleSemanticQuery> resolve(Long dataSetId, List<SchemaElementMatch> candidateElementMatches,
-            QueryContext queryContext) {
+            ChatQueryContext chatQueryContext) {
         List<RuleSemanticQuery> matchedQueries = new ArrayList<>();
         for (RuleSemanticQuery semanticQuery : QueryManager.getRuleQueries()) {
-            List<SchemaElementMatch> matches = semanticQuery.match(candidateElementMatches, queryContext);
+            List<SchemaElementMatch> matches = semanticQuery.match(candidateElementMatches, chatQueryContext);
 
             if (matches.size() > 0) {
                 RuleSemanticQuery query = QueryManager.createRuleQuery(semanticQuery.getQueryMode());

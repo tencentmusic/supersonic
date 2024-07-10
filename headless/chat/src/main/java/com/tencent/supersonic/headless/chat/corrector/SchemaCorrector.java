@@ -13,7 +13,7 @@ import com.tencent.supersonic.common.jsqlparser.SqlSelectHelper;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.api.pojo.SemanticSchema;
 import com.tencent.supersonic.headless.api.pojo.SqlInfo;
-import com.tencent.supersonic.headless.chat.QueryContext;
+import com.tencent.supersonic.headless.chat.ChatQueryContext;
 import com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMReq;
 import com.tencent.supersonic.headless.chat.parser.llm.ParseResult;
 import lombok.extern.slf4j.Slf4j;
@@ -34,7 +34,7 @@ import java.util.stream.Collectors;
 public class SchemaCorrector extends BaseSemanticCorrector {
 
     @Override
-    public void doCorrect(QueryContext queryContext, SemanticParseInfo semanticParseInfo) {
+    public void doCorrect(ChatQueryContext chatQueryContext, SemanticParseInfo semanticParseInfo) {
 
         correctAggFunction(semanticParseInfo);
 
@@ -44,27 +44,27 @@ public class SchemaCorrector extends BaseSemanticCorrector {
 
         updateFieldValueByLinkingValue(semanticParseInfo);
 
-        correctFieldName(queryContext, semanticParseInfo);
+        correctFieldName(chatQueryContext, semanticParseInfo);
     }
 
     private void correctAggFunction(SemanticParseInfo semanticParseInfo) {
         Map<String, String> aggregateEnum = AggregateEnum.getAggregateEnum();
         SqlInfo sqlInfo = semanticParseInfo.getSqlInfo();
-        String sql = SqlReplaceHelper.replaceFunction(sqlInfo.getCorrectS2SQL(), aggregateEnum);
-        sqlInfo.setCorrectS2SQL(sql);
+        String sql = SqlReplaceHelper.replaceFunction(sqlInfo.getCorrectedS2SQL(), aggregateEnum);
+        sqlInfo.setCorrectedS2SQL(sql);
     }
 
     private void replaceAlias(SemanticParseInfo semanticParseInfo) {
         SqlInfo sqlInfo = semanticParseInfo.getSqlInfo();
-        String replaceAlias = SqlReplaceHelper.replaceAlias(sqlInfo.getCorrectS2SQL());
-        sqlInfo.setCorrectS2SQL(replaceAlias);
+        String replaceAlias = SqlReplaceHelper.replaceAlias(sqlInfo.getCorrectedS2SQL());
+        sqlInfo.setCorrectedS2SQL(replaceAlias);
     }
 
-    private void correctFieldName(QueryContext queryContext, SemanticParseInfo semanticParseInfo) {
-        Map<String, String> fieldNameMap = getFieldNameMap(queryContext, semanticParseInfo.getDataSetId());
+    private void correctFieldName(ChatQueryContext chatQueryContext, SemanticParseInfo semanticParseInfo) {
+        Map<String, String> fieldNameMap = getFieldNameMap(chatQueryContext, semanticParseInfo.getDataSetId());
         SqlInfo sqlInfo = semanticParseInfo.getSqlInfo();
-        String sql = SqlReplaceHelper.replaceFields(sqlInfo.getCorrectS2SQL(), fieldNameMap);
-        sqlInfo.setCorrectS2SQL(sql);
+        String sql = SqlReplaceHelper.replaceFields(sqlInfo.getCorrectedS2SQL(), fieldNameMap);
+        sqlInfo.setCorrectedS2SQL(sql);
     }
 
     private void updateFieldNameByLinkingValue(SemanticParseInfo semanticParseInfo) {
@@ -79,8 +79,8 @@ public class SchemaCorrector extends BaseSemanticCorrector {
 
         SqlInfo sqlInfo = semanticParseInfo.getSqlInfo();
 
-        String sql = SqlReplaceHelper.replaceFieldNameByValue(sqlInfo.getCorrectS2SQL(), fieldValueToFieldNames);
-        sqlInfo.setCorrectS2SQL(sql);
+        String sql = SqlReplaceHelper.replaceFieldNameByValue(sqlInfo.getCorrectedS2SQL(), fieldValueToFieldNames);
+        sqlInfo.setCorrectedS2SQL(sql);
     }
 
     private List<LLMReq.ElementValue> getLinkingValues(SemanticParseInfo semanticParseInfo) {
@@ -111,19 +111,20 @@ public class SchemaCorrector extends BaseSemanticCorrector {
                         )));
 
         SqlInfo sqlInfo = semanticParseInfo.getSqlInfo();
-        String sql = SqlReplaceHelper.replaceValue(sqlInfo.getCorrectS2SQL(), filedNameToValueMap, false);
-        sqlInfo.setCorrectS2SQL(sql);
+        String sql = SqlReplaceHelper.replaceValue(sqlInfo.getCorrectedS2SQL(), filedNameToValueMap, false);
+        sqlInfo.setCorrectedS2SQL(sql);
     }
 
-    public void removeFilterIfNotInLinkingValue(QueryContext queryContext, SemanticParseInfo semanticParseInfo) {
+    public void removeFilterIfNotInLinkingValue(ChatQueryContext chatQueryContext,
+                                                SemanticParseInfo semanticParseInfo) {
         SqlInfo sqlInfo = semanticParseInfo.getSqlInfo();
-        String correctS2SQL = sqlInfo.getCorrectS2SQL();
+        String correctS2SQL = sqlInfo.getCorrectedS2SQL();
         List<FieldExpression> whereExpressionList = SqlSelectHelper.getWhereExpressions(correctS2SQL);
         if (CollectionUtils.isEmpty(whereExpressionList)) {
             return;
         }
         List<LLMReq.ElementValue> linkingValues = getLinkingValues(semanticParseInfo);
-        SemanticSchema semanticSchema = queryContext.getSemanticSchema();
+        SemanticSchema semanticSchema = chatQueryContext.getSemanticSchema();
         Set<String> dimensions = getDimensions(semanticParseInfo.getDataSetId(), semanticSchema);
 
         if (CollectionUtils.isEmpty(linkingValues)) {
@@ -142,7 +143,7 @@ public class SchemaCorrector extends BaseSemanticCorrector {
                 .map(fieldExpression -> fieldExpression.getFieldName()).collect(Collectors.toSet());
 
         String sql = SqlRemoveHelper.removeWhereCondition(correctS2SQL, removeFieldNames);
-        sqlInfo.setCorrectS2SQL(sql);
+        sqlInfo.setCorrectedS2SQL(sql);
     }
 
 }

@@ -21,7 +21,7 @@ import com.tencent.supersonic.common.util.BeanMapper;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.api.pojo.request.DimensionValueReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryDataReq;
-import com.tencent.supersonic.headless.api.pojo.request.QueryReq;
+import com.tencent.supersonic.headless.api.pojo.request.QueryNLReq;
 import com.tencent.supersonic.headless.api.pojo.response.MapResp;
 import com.tencent.supersonic.headless.api.pojo.response.ParseResp;
 import com.tencent.supersonic.headless.api.pojo.response.QueryResult;
@@ -60,8 +60,8 @@ public class ChatServiceImpl implements ChatService {
         if (!agent.enableSearch()) {
             return Lists.newArrayList();
         }
-        QueryReq queryReq = QueryReqConverter.buildText2SqlQueryReq(chatParseContext);
-        return retrieveService.retrieve(queryReq);
+        QueryNLReq queryNLReq = QueryReqConverter.buildText2SqlQueryReq(chatParseContext);
+        return retrieveService.retrieve(queryNLReq);
     }
 
     @Override
@@ -137,8 +137,8 @@ public class ChatServiceImpl implements ChatService {
     }
 
     private void supplyMapInfo(ChatParseContext chatParseContext) {
-        QueryReq queryReq = QueryReqConverter.buildText2SqlQueryReq(chatParseContext);
-        MapResp mapResp = chatQueryService.performMapping(queryReq);
+        QueryNLReq queryNLReq = QueryReqConverter.buildText2SqlQueryReq(chatParseContext);
+        MapResp mapResp = chatQueryService.performMapping(queryNLReq);
         chatParseContext.setMapInfo(mapResp.getMapInfo());
     }
 

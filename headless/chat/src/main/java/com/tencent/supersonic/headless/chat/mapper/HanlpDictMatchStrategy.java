@@ -2,7 +2,7 @@ package com.tencent.supersonic.headless.chat.mapper;
 
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.headless.api.pojo.response.S2Term;
-import com.tencent.supersonic.headless.chat.QueryContext;
+import com.tencent.supersonic.headless.chat.ChatQueryContext;
 import com.tencent.supersonic.headless.chat.knowledge.HanlpMapResult;
 import com.tencent.supersonic.headless.chat.knowledge.KnowledgeBaseService;
 import lombok.extern.slf4j.Slf4j;
@@ -37,16 +37,16 @@ public class HanlpDictMatchStrategy extends BaseMatchStrategy<HanlpMapResult> {
     private KnowledgeBaseService knowledgeBaseService;
 
     @Override
-    public Map<MatchText, List<HanlpMapResult>> match(QueryContext queryContext, List<S2Term> terms,
+    public Map<MatchText, List<HanlpMapResult>> match(ChatQueryContext chatQueryContext, List<S2Term> terms,
                                                       Set<Long> detectDataSetIds) {
-        String text = queryContext.getQueryText();
+        String text = chatQueryContext.getQueryText();
         if (Objects.isNull(terms) || StringUtils.isEmpty(text)) {
             return null;
         }
 
         log.debug("terms:{},detectModelIds:{}", terms, detectDataSetIds);
 
-        List<HanlpMapResult> detects = detect(queryContext, terms, detectDataSetIds);
+        List<HanlpMapResult> detects = detect(chatQueryContext, terms, detectDataSetIds);
         Map<MatchText, List<HanlpMapResult>> result = new HashMap<>();
 
         result.put(MatchText.builder().regText(text).detectSegment(text).build(), detects);
@@ -59,16 +59,17 @@ public class HanlpDictMatchStrategy extends BaseMatchStrategy<HanlpMapResult> {
                 && existResult.getDetectWord().length() < oneRoundResult.getDetectWord().length();
     }
 
-    public void detectByStep(QueryContext queryContext, Set<HanlpMapResult> existResults, Set<Long> detectDataSetIds,
-            String detectSegment, int offset) {
+    public void detectByStep(ChatQueryContext chatQueryContext, Set<HanlpMapResult> existResults,
+                             Set<Long> detectDataSetIds,
+                             String detectSegment, int offset) {
         // step1. pre search
         Integer oneDetectionMaxSize = Integer.valueOf(mapperConfig.getParameterValue(MAPPER_DETECTION_MAX_SIZE));
         LinkedHashSet<HanlpMapResult> hanlpMapResults = knowledgeBaseService.prefixSearch(detectSegment,
-                        oneDetectionMaxSize, queryContext.getModelIdToDataSetIds(), detectDataSetIds)
+                        oneDetectionMaxSize, chatQueryContext.getModelIdToDataSetIds(), detectDataSetIds)
                 .stream().collect(Collectors.toCollection(LinkedHashSet::new));
         // step2. suffix search
         LinkedHashSet<HanlpMapResult> suffixHanlpMapResults = knowledgeBaseService.suffixSearch(detectSegment,
-                        oneDetectionMaxSize, queryContext.getModelIdToDataSetIds(), detectDataSetIds)
+                        oneDetectionMaxSize, chatQueryContext.getModelIdToDataSetIds(), detectDataSetIds)
                 .stream().collect(Collectors.toCollection(LinkedHashSet::new));
 
         hanlpMapResults.addAll(suffixHanlpMapResults);
@@ -83,7 +84,7 @@ public class HanlpDictMatchStrategy extends BaseMatchStrategy<HanlpMapResult> {
         // step4. filter by similarity
         hanlpMapResults = hanlpMapResults.stream()
                 .filter(term -> mapperHelper.getSimilarity(detectSegment, term.getName())
-                        >= getThresholdMatch(term.getNatures(), queryContext))
+                        >= getThresholdMatch(term.getNatures(), chatQueryContext))
                 .filter(term -> CollectionUtils.isNotEmpty(term.getNatures()))
                 .collect(Collectors.toCollection(LinkedHashSet::new));
 
@@ -126,7 +127,7 @@ public class HanlpDictMatchStrategy extends BaseMatchStrategy<HanlpMapResult> {
         return a.getName() + Constants.UNDERLINE + String.join(Constants.UNDERLINE, a.getNatures());
     }
 
-    public double getThresholdMatch(List<String> natures, QueryContext queryContext) {
+    public double getThresholdMatch(List<String> natures, ChatQueryContext chatQueryContext) {
         Double threshold = Double.valueOf(mapperConfig.getParameterValue(MapperConfig.MAPPER_NAME_THRESHOLD));
         Double minThreshold = Double.valueOf(mapperConfig.getParameterValue(MapperConfig.MAPPER_NAME_THRESHOLD_MIN));
         if (mapperHelper.existDimensionValues(natures)) {
@@ -134,7 +135,7 @@ public class HanlpDictMatchStrategy extends BaseMatchStrategy<HanlpMapResult> {
             minThreshold = Double.valueOf(mapperConfig.getParameterValue(MapperConfig.MAPPER_VALUE_THRESHOLD_MIN));
         }
 
-        return getThreshold(threshold, minThreshold, queryContext.getMapModeEnum());
+        return getThreshold(threshold, minThreshold, chatQueryContext.getMapModeEnum());
     }
 
 }

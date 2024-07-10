@@ -6,7 +6,7 @@ import com.tencent.supersonic.headless.api.pojo.SchemaElementMatch;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
 import com.tencent.supersonic.headless.api.pojo.SchemaMapInfo;
 import com.tencent.supersonic.headless.api.pojo.SemanticSchema;
-import com.tencent.supersonic.headless.chat.QueryContext;
+import com.tencent.supersonic.headless.chat.ChatQueryContext;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.util.CollectionUtils;
@@ -21,14 +21,14 @@ import java.util.stream.Collectors;
 public class EntityMapper extends BaseMapper {
 
     @Override
-    public void doMap(QueryContext queryContext) {
-        SchemaMapInfo schemaMapInfo = queryContext.getMapInfo();
+    public void doMap(ChatQueryContext chatQueryContext) {
+        SchemaMapInfo schemaMapInfo = chatQueryContext.getMapInfo();
         for (Long dataSetId : schemaMapInfo.getMatchedDataSetInfos()) {
             List<SchemaElementMatch> schemaElementMatchList = schemaMapInfo.getMatchedElements(dataSetId);
             if (CollectionUtils.isEmpty(schemaElementMatchList)) {
                 continue;
             }
-            SchemaElement entity = getEntity(dataSetId, queryContext);
+            SchemaElement entity = getEntity(dataSetId, chatQueryContext);
             if (entity == null || entity.getId() == null) {
                 continue;
             }
@@ -64,8 +64,8 @@ public class EntityMapper extends BaseMapper {
         return false;
     }
 
-    private SchemaElement getEntity(Long dataSetId, QueryContext queryContext) {
-        SemanticSchema semanticSchema = queryContext.getSemanticSchema();
+    private SchemaElement getEntity(Long dataSetId, ChatQueryContext chatQueryContext) {
+        SemanticSchema semanticSchema = chatQueryContext.getSemanticSchema();
         DataSetSchema modelSchema = semanticSchema.getDataSetSchemaMap().get(dataSetId);
         if (modelSchema != null && modelSchema.getEntity() != null) {
             return modelSchema.getEntity();

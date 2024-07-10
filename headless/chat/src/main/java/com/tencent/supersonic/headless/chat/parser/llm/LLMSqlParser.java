@@ -5,7 +5,7 @@ import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.headless.api.pojo.DataSetSchema;
 import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.headless.chat.ChatContext;
-import com.tencent.supersonic.headless.chat.QueryContext;
+import com.tencent.supersonic.headless.chat.ChatQueryContext;
 import com.tencent.supersonic.headless.chat.parser.SemanticParser;
 import com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMReq;
 import com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMResp;
@@ -29,7 +29,7 @@ import org.apache.commons.collections.MapUtils;
 public class LLMSqlParser implements SemanticParser {
 
     @Override
-    public void parse(QueryContext queryCtx, ChatContext chatCtx) {
+    public void parse(ChatQueryContext queryCtx, ChatContext chatCtx) {
         try {
             LLMRequestService requestService = ContextUtils.getBean(LLMRequestService.class);
             //1.determine whether to skip this parser.
@@ -41,16 +41,16 @@ public class LLMSqlParser implements SemanticParser {
             if (dataSetId == null) {
                 return;
             }
-            log.info("Try generating query statement for dataSetId:{}", dataSetId);
+            log.info("try generating query statement for dataSetId:{}", dataSetId);
 
             //3.invoke LLM service to do parsing.
             tryParse(queryCtx, dataSetId);
         } catch (Exception e) {
-            log.error("Failed to parse query:", e);
+            log.error("failed to parse query:", e);
         }
     }
 
-    private void tryParse(QueryContext queryCtx, Long dataSetId) {
+    private void tryParse(ChatQueryContext queryCtx, Long dataSetId) {
         LLMRequestService requestService = ContextUtils.getBean(LLMRequestService.class);
         LLMResponseService responseService = ContextUtils.getBean(LLMResponseService.class);
         int maxRetries = ContextUtils.getBean(LLMParserConfig.class).getRecallMaxRetries();
@@ -89,7 +89,7 @@ public class LLMSqlParser implements SemanticParser {
         }
     }
 
-    private static List<SchemaElement> getSchemaElements(QueryContext queryContext, long dataSetId) {
+    private static List<SchemaElement> getSchemaElements(ChatQueryContext queryContext, long dataSetId) {
         DataSetSchema dataSetSchema = queryContext.getSemanticSchema().getDataSetSchemaMap().get(dataSetId);
         if (dataSetSchema == null) {
             return Collections.emptyList();

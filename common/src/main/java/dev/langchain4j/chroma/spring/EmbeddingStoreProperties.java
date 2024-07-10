@@ -7,7 +7,7 @@ import java.time.Duration;
 
 @Getter
 @Setter
-class EmbeddingStoreProperties {
+public class EmbeddingStoreProperties {
 
     private String baseUrl;
     private Duration timeout;

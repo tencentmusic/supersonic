@@ -83,8 +83,8 @@ public abstract class BaseSemanticQuery implements SemanticQuery, Serializable {
         QueryStructReq queryStructReq = convertQueryStruct();
         convertBizNameToName(semanticSchema, queryStructReq);
         QuerySqlReq querySQLReq = queryStructReq.convert();
-        parseInfo.getSqlInfo().setS2SQL(querySQLReq.getSql());
-        parseInfo.getSqlInfo().setCorrectS2SQL(querySQLReq.getSql());
+        parseInfo.getSqlInfo().setParsedS2SQL(querySQLReq.getSql());
+        parseInfo.getSqlInfo().setCorrectedS2SQL(querySQLReq.getSql());
     }
 
 }

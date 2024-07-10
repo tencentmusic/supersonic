@@ -28,9 +28,8 @@ public class DefaultSemanticTranslator implements SemanticTranslator {
         try {
             parse(queryStatement);
             optimize(queryStatement);
-            queryStatement.setOk(true);
         } catch (Exception e) {
-            queryStatement.setOk(false);
+            queryStatement.setErrMsg(e.getMessage());
         }
     }
 
@@ -63,8 +62,7 @@ public class DefaultSemanticTranslator implements SemanticTranslator {
             queryStatement.getMetricQueryParam().setNativeQuery(queryParam.getQueryType().isNativeAggQuery());
             doParse(queryStatement);
         }
-        if (StringUtils.isEmpty(queryStatement.getSql())
-                || StringUtils.isEmpty(queryStatement.getSourceId())) {
+        if (StringUtils.isEmpty(queryStatement.getSql())) {
             throw new RuntimeException("parse Exception: " + queryStatement.getErrMsg());
         }
         if (StringUtils.isNotBlank(queryStatement.getSql())
@@ -156,7 +154,6 @@ public class DefaultSemanticTranslator implements SemanticTranslator {
             throw new Exception(String.format("parser table [%s] error [%s]", metricTable.getAlias(),
                     tableSql.getErrMsg()));
         }
-        queryStatement.setSourceId(tableSql.getSourceId());
         return tableSql;
     }
 

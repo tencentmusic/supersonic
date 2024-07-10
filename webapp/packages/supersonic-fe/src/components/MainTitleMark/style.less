@@ -1,0 +1,25 @@
+.mainTitleMark {
+  margin-right: 24px;
+  margin-left: 8px;
+
+  .mark {
+    display: inline-block;
+    width: 4px;
+    height: 11px;
+    background: var(--tme-primary-color);
+    border-radius: 4px;
+    transform: rotate(15deg);
+
+    &:not(:last-of-type) {
+      margin-right: 4px;
+    }
+
+    &:nth-of-type(2) {
+      opacity: 0.6;
+    }
+
+    &:nth-of-type(3) {
+      opacity: 0.2;
+    }
+  }
+}
