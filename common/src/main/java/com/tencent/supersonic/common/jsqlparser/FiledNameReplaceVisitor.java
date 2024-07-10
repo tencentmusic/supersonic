@@ -49,10 +49,10 @@ public class FiledNameReplaceVisitor extends ExpressionVisitorAdapter {
         Column leftColumnName = (Column) leftExpression;
         StringValue rightStringValue = (StringValue) rightExpression;
 
-//        if (expr instanceof LikeExpression) {
-//            String value = getValue(rightStringValue.getValue());
-//            rightStringValue.setValue(value);
-//        }
+        //        if (expr instanceof LikeExpression) {
+        //            String value = getValue(rightStringValue.getValue());
+        //            rightStringValue.setValue(value);
+        //        }
 
         Set<String> fieldNames = fieldValueToFieldNames.get(rightStringValue.getValue());
         if (!CollectionUtils.isEmpty(fieldNames) && !fieldNames.contains(leftColumnName.getColumnName())) {

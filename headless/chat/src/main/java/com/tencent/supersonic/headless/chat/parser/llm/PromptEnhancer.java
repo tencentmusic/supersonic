@@ -1,12 +1,10 @@
 package com.tencent.supersonic.headless.chat.parser.llm;
 
 import com.tencent.supersonic.common.pojo.enums.DataTypeEnums;
-import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMReq;
 
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public class PromptEnhancer {
     public static String enhanceDDLInfo(String modelName, Map<String, DataTypeEnums> dataTypeEnumsMap,
@@ -49,20 +47,12 @@ public class PromptEnhancer {
         ddlInfo.append("#DDLInfo: \n");
         ddlInfo.append("CREATE TABLE " + modelName + " (\n");
 
-        // TODO 后续优化为从缓存中取值
-        List<SchemaElement> schemaElements = llmReq.getSchema().getDimensions();
-        Map<String, String> schemaElementMap = schemaElements.stream()
-                .filter(schemaElement -> schemaElement.getDescription() != null)
-                .collect(Collectors.toMap(SchemaElement::getName, SchemaElement::getDescription));
-
         dataTypeEnumsMap.entrySet().stream()
                 .forEach(entry -> {
                     String key = entry.getKey();
                     Object value = entry.getValue();
                     String type = (value != null) ? value.toString() : "NUMBERIC";
-                    String schemaElement = schemaElementMap.getOrDefault(key, null);
-                    ddlInfo.append(key + " " + type
-                            + (schemaElement != null ? " COMMENT '" + schemaElement + "'" : "") + ",\n");
+                    ddlInfo.append(key + " " + type + ",\n");
                 });
 
         ddlInfo.append(");\n");
