@@ -41,7 +41,8 @@
                           join s2_authority sa on sr.id = sa.role_id
                           join s2_agent s2a on s2a.id = sa.authority_entity_id and sr.id = sa.role_id
      where s2u.name = #{name}
-     and sr.is_enable = 1 and s2a.status  = 1
+       and sa.authority_entity_type = 1 and sa.authority_type = 1
+       and sr.is_enable = 1 and s2a.status  = 1
      )t
 
   </select>
