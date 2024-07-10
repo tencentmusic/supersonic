@@ -24,6 +24,7 @@ public class Agent extends RecordInfo {
 
     private Integer id;
     private Integer enableSearch;
+    private Integer enableMemoryReview;
     private String name;
     private String description;
 
@@ -58,6 +59,10 @@ public class Agent extends RecordInfo {
 
     public boolean enableSearch() {
         return enableSearch != null && enableSearch == 1;
+    }
+
+    public boolean enableMemoryReview() {
+        return enableMemoryReview != null && enableMemoryReview == 1;
     }
 
     public static boolean containsAllModel(Set<Long> detectViewIds) {

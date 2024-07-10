@@ -32,7 +32,7 @@ public class MemoryReviewTask {
             + "please take a review and give your opinion.\n"
             + "#Rules: "
             + "1.ALWAYS follow the output format: `opinion=(POSITIVE|NEGATIVE),comment=(your comment)`."
-            + "2.DO NOT check the usage of `数据日期` field and `datediff()` function.\n"
+            + "2.ALWAYS recognize `数据日期` as the date field.\n"
             + "#Question: %s\n"
             + "#Schema: %s\n"
             + "#SQL: %s\n"
@@ -51,7 +51,7 @@ public class MemoryReviewTask {
         memoryService.getMemoriesForLlmReview().stream()
                 .forEach(m -> {
                     Agent chatAgent = agentService.getAgent(m.getAgentId());
-                    if (Objects.nonNull(chatAgent)) {
+                    if (Objects.nonNull(chatAgent) && chatAgent.enableMemoryReview()) {
                         String promptStr = String.format(INSTRUCTION, m.getQuestion(), m.getDbSchema(), m.getS2sql());
                         Prompt prompt = PromptTemplate.from(promptStr).apply(Collections.EMPTY_MAP);
 
@@ -72,7 +72,7 @@ public class MemoryReviewTask {
                             log.debug("ChatLanguageModel not found for agent:{}", chatAgent.getId());
                         }
                     } else {
-                        log.debug("Agent not found for memory:{}", m.getAgentId());
+                        log.debug("Agent id {} not found or memory review disabled", m.getAgentId());
                     }
                 });
     }

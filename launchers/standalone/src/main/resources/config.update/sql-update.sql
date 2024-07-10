@@ -355,3 +355,6 @@ alter table s2_agent add column `prompt_config` varchar(6000) COLLATE utf8_unico
 --20240707
 alter table s2_agent add model_config varchar(6000) null;
 alter table s2_agent add `prompt_config` varchar(5000)  COLLATE utf8_unicode_ci DEFAULT NULL;
+
+--20240710
+alter table s2_agent add enable_memory_review tinyint DEFAULT 0;

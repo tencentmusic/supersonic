@@ -56,8 +56,8 @@ public class ParseInfoProcessor implements ResultProcessor {
         if (StringUtils.isBlank(correctS2SQL)) {
             return;
         }
-
         List<FieldExpression> expressions = SqlSelectHelper.getFilterExpression(correctS2SQL);
+
         //set dataInfo
         try {
             if (!org.apache.commons.collections.CollectionUtils.isEmpty(expressions)) {
@@ -70,6 +70,9 @@ public class ParseInfoProcessor implements ResultProcessor {
             log.error("set dateInfo error :", e);
         }
 
+        if (correctS2SQL.equals(sqlInfo.getParsedS2SQL())) {
+            return;
+        }
         //set filter
         Long dataSetId = parseInfo.getDataSetId();
         try {
