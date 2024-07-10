@@ -173,27 +173,6 @@ public class ChatQueryServiceImpl implements ChatQueryService {
         return queryCtx;
     }
 
-    private QueryResult doExecution(SemanticQueryReq semanticQueryReq,
-            SemanticParseInfo parseInfo, User user) throws Exception {
-        SemanticQueryResp queryResp = semanticLayerService.queryByReq(semanticQueryReq, user);
-        QueryResult queryResult = new QueryResult();
-        if (queryResp != null) {
-            queryResult.setQueryAuthorization(queryResp.getQueryAuthorization());
-        }
-
-        String sql = queryResp == null ? null : queryResp.getSql();
-        List<Map<String, Object>> resultList = queryResp == null ? new ArrayList<>()
-                : queryResp.getResultList();
-        List<QueryColumn> columns = queryResp == null ? new ArrayList<>() : queryResp.getColumns();
-        queryResult.setQuerySql(sql);
-        queryResult.setQueryResults(resultList);
-        queryResult.setQueryColumns(columns);
-        queryResult.setQueryMode(parseInfo.getQueryMode());
-        queryResult.setQueryState(QueryState.SUCCESS);
-
-        return queryResult;
-    }
-
     @Override
     public SemanticParseInfo queryContext(Integer chatId) {
         ChatContext context = chatContextService.getOrCreateContext(chatId);
@@ -251,6 +230,27 @@ public class ChatQueryServiceImpl implements ChatQueryService {
         return queryResult;
     }
 
+    private QueryResult doExecution(SemanticQueryReq semanticQueryReq,
+                                    SemanticParseInfo parseInfo, User user) throws Exception {
+        SemanticQueryResp queryResp = semanticLayerService.queryByReq(semanticQueryReq, user);
+        QueryResult queryResult = new QueryResult();
+        if (queryResp != null) {
+            queryResult.setQueryAuthorization(queryResp.getQueryAuthorization());
+        }
+
+        String sql = queryResp == null ? null : queryResp.getSql();
+        List<Map<String, Object>> resultList = queryResp == null ? new ArrayList<>()
+                : queryResp.getResultList();
+        List<QueryColumn> columns = queryResp == null ? new ArrayList<>() : queryResp.getColumns();
+        queryResult.setQuerySql(sql);
+        queryResult.setQueryResults(resultList);
+        queryResult.setQueryColumns(columns);
+        queryResult.setQueryMode(parseInfo.getQueryMode());
+        queryResult.setQueryState(QueryState.SUCCESS);
+
+        return queryResult;
+    }
+
     private boolean checkMetricReplace(List<String> oriFields, Set<SchemaElement> metrics) {
         if (CollectionUtils.isEmpty(oriFields)) {
             return false;
@@ -262,7 +262,7 @@ public class ChatQueryServiceImpl implements ChatQueryService {
         return !oriFields.containsAll(metricNames);
     }
 
-    public String reviseCorrectS2SQL(QueryDataReq queryData, SemanticParseInfo parseInfo) {
+    private String reviseCorrectS2SQL(QueryDataReq queryData, SemanticParseInfo parseInfo) {
         Map<String, Map<String, String>> filedNameToValueMap = new HashMap<>();
         Map<String, Map<String, String>> havingFiledNameToValueMap = new HashMap<>();
 

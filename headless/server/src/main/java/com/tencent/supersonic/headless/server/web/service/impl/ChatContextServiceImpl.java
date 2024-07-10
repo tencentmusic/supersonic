@@ -21,7 +21,7 @@ public class ChatContextServiceImpl implements ChatContextService {
     }
 
     @Override
-    public Long getContextModel(Integer chatId) {
+    public Long getContextDataset(Integer chatId) {
         if (Objects.isNull(chatId)) {
             return null;
         }
