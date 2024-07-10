@@ -16,6 +16,8 @@ public interface UserAdaptor {
 
     List<String> getUserNames();
 
+    List<String> getUserPermissions(String userName);
+
     List<User> getUserList();
 
     List<Organization> getOrganizationTree();

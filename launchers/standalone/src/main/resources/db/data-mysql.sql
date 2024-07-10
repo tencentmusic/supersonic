@@ -1227,7 +1227,10 @@ VALUES (DATE_SUB(CURRENT_DATE(), INTERVAL 0 DAY), '阿杰伊阿卡什', 'Topu', 
 -- 初始化角色
 INSERT INTO s2_role (id, creation_type, description, is_enable, last_operation_type, name, alias, tenant_id, create_time, update_time, create_by, update_by) VALUES
 (1, 1, 'System Admin Role', b'1', 1, '希沃助手', 'SysAdmin', 1, '2024-06-14 10:00:00', '2024-06-14 10:00:00', 'admin', 'admin'),
-(2, 2, 'User Role', b'1', 1, '财务助手', 'RegularUser', 1, '2024-06-14 10:05:00', '2024-06-14 10:05:00', 'admin', 'admin')
+(2, 2, 'User Role', b'1', 1, '财务助手', 'RegularUser', 1, '2024-06-14 10:05:00', '2024-06-14 10:05:00', 'admin', 'admin'),
+(3, 2, 'User Role', b'1', 1, '人事助手', 'RegularUser', 1, '2024-06-14 10:05:00', '2024-06-14 10:05:00', 'admin', 'admin'),
+(4, 2, 'User Role', b'1', 1, '算指标', 'RegularUser', 1, '2024-06-14 10:05:00', '2024-06-14 10:05:00', 'admin', 'admin'),
+(5, 2, 'User Role', b'1', 1, '圈选', 'RegularUser', 1, '2024-06-14 10:05:00', '2024-06-14 10:05:00', 'admin', 'admin')
 ;
 INSERT INTO s2_user_role_rela (id, role_id, role_type, user_id, tenant_id) VALUES
 (1, 1, 2, 5945, 1),
@@ -1239,18 +1242,6 @@ INSERT INTO s2_authority (id, authority, authority_entity_id, authority_entity_t
 (2, 2, 'entity2', 2, 2, 2, 2, 1, '2024-06-14 10:15:00', '2024-06-14 10:15:00', 'admin', 'admin')
 ;
 
--- 新增角色，默认角色名为Agent助手名
-INSERT INTO s2_role (
-    name,
-    alias,
-    tenant_id,
-    create_time,
-    update_time,
-    create_by,
-    update_by
-)VALUES
-    ('算指标', 'Agent', 1, CURRENT_TIME(), CURRENT_TIME(), 'admin', 'admin'),
-    ('圈选', 'Agent', 1, CURRENT_TIME(), CURRENT_TIME(), 'admin', 'admin');
 
 -- 将用户和角色关联
 INSERT INTO s2_user_role_rela (
@@ -1324,3 +1315,35 @@ where sr.name in ('算指标','圈选')
   and sa.name in ('算指标','圈选')
 ;
 
+
+-- 给角色授权菜单权限
+insert into s2_authority(
+    authority,
+    authority_entity_id,
+    authority_entity_type,
+    authority_type,
+    role_id,
+    role_type,
+    tenant_id,
+    create_time,
+    update_time,
+    create_by,
+    update_by
+)values(
+    2,1,1,0,1,1,1,CURRENT_TIME(),CURRENT_TIME(),'admin','admin'
+),(2,2,1,0,1,1,1,CURRENT_TIME(),CURRENT_TIME(),'admin','admin')
+      ,(2,3,1,0,1,1,1,CURRENT_TIME(),CURRENT_TIME(),'admin','admin')
+      ,(2,4,1,0,1,1,1,CURRENT_TIME(),CURRENT_TIME(),'admin','admin')
+      ,(2,5,1,0,1,1,1,CURRENT_TIME(),CURRENT_TIME(),'admin','admin')
+      ,(2,6,1,0,1,1,1,CURRENT_TIME(),CURRENT_TIME(),'admin','admin')
+
+;
+
+-- 初始化菜单权限表
+insert into s2_permission (id, parent_id, name, menu_type, perms, description, create_by, create_time, update_by, update_time)
+values (1, 0, '插件管理', 1, 'menu:plugin','插件管理', 'admin', '2020-06-01 00:00:00', 'admin', '2020-06-01 00:00:00')
+,(1, 0, '语义模型', 1, 'menu:model','语义模型', 'admin', '2020-06-01 00:00:00', 'admin', '2020-06-01 00:00:00')
+,(1, 0, '指标市场', 1, 'menu:metric:market','指标市场', 'admin', '2020-06-01 00:00:00', 'admin', '2020-06-01 00:00:00')
+,(1, 0, '标签市场', 1, 'menu:tag:market','标签市场', 'admin', '2020-06-01 00:00:00', 'admin', '2020-06-01 00:00:00')
+,(1, 0, '数据库管理', 1, 'menu:database','数据库管理', 'admin', '2020-06-01 00:00:00', 'admin', '2020-06-01 00:00:00')
+,(1, 0, '系统设置', 1, 'menu:system','系统设置', 'admin', '2020-06-01 00:00:00', 'admin', '2020-06-01 00:00:00');
