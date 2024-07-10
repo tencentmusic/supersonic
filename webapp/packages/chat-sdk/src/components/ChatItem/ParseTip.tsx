@@ -1,6 +1,4 @@
 import React, { ReactNode } from 'react';
-import { useState } from 'react';
-
 import { AGG_TYPE_MAP, PREFIX_CLS } from '../../common/constants';
 import { ChatContextType, DateInfoType, EntityInfoType, FilterItemType } from '../../common/type';
 import { Button, DatePicker,Row,Col } from 'antd';
@@ -45,56 +43,25 @@ type RangeKeys = '近7日' | '近14日' | '近30日' | '本周' | '本月' | '�
 
 
 const ParseTip: React.FC<Props> = ({
-                                       parseLoading,
-                                       parseInfoOptions,
-                                       parseTip,
-                                       currentParseInfo,
-                                       agentId,
-                                       dimensionFilters,
-                                       dateInfo,
-                                       entityInfo,
-                                       integrateSystem,
-                                       parseTimeCost,
-                                       isDeveloper,
-                                       isSimpleMode,
-                                       onSelectParseInfo,
-                                       onSwitchEntity,
-                                       onFiltersChange,
-                                       onDateInfoChange,
-                                       onRefresh,
-                                       handlePresetClick
-                                   }) => {
-
-
-
-    const [inputDate, setInputDate] = useState<string | null>(null);
-    const [selectedRange, setSelectedRange] = useState<RangeValue | null>(null);
-
-    const onChange = (date: Dayjs | null) => {
-        if (date) {
-            setInputDate(date.format('YYYYMMDD'));
-        } else {
-            setInputDate(null);
-        }
-    };
-
-    const onRangeChange = (dates: [Dayjs | null, Dayjs | null] | null, dateStrings: [string, string]) => {
-        if (dates) {
-            const [start, end] = dates;
-            if (start && end) {
-                setSelectedRange([start, end] as RangeValue);
-            } else {
-                setSelectedRange(null);
-            }
-        } else {
-            setSelectedRange(null);
-        }
-    };
-
-    // const handlePresetClick = (range: RangeValue) => {
-    //   setSelectedRange(range);
-    // };
-
+    parseLoading,
+    parseInfoOptions,
+    parseTip,
+    currentParseInfo,
+    agentId,
+    dimensionFilters,
+    dateInfo,
+    entityInfo,
+    integrateSystem,
+    parseTimeCost,
+    isDeveloper,
+    isSimpleMode,
+    onSelectParseInfo,
+    onSwitchEntity,
+    onFiltersChange,
+    onDateInfoChange,
+    onRefresh,
+    handlePresetClick
+}) => {
     const ranges: Record<RangeKeys, RangeValue> = {
         '近7日': [dayjs().subtract(7, 'day'), dayjs()],
         '近14日': [dayjs().subtract(14, 'day'), dayjs()],
@@ -105,10 +72,6 @@ const ParseTip: React.FC<Props> = ({
         '本季度': [dayjs().startOf('quarter'), dayjs().endOf('quarter')], // 使用 quarterOfYear 插件
         '本年': [dayjs().startOf('year'), dayjs().endOf('year')],
     };
-
-
-
-
     const prefixCls = `${PREFIX_CLS}-item`;
     const getNode = (tipTitle: ReactNode, tipNode?: ReactNode) => {
         return (
@@ -294,19 +257,9 @@ const ParseTip: React.FC<Props> = ({
               {startDate === endDate ? startDate : `${startDate} ~ ${endDate}`}
             </span>
                     ) : (
-
-                        // <RangePicker
-                        //   value={[dayjs(startDate), dayjs(endDate)]}
-                        //   onChange={onDateInfoChange}
-                        //   getPopupContainer={trigger => trigger.parentNode as HTMLElement}
-                        //   allowClear={false}
-                        // />
-
                         <RangePicker
                             value={[dayjs(startDate), dayjs(endDate)]}
                             onChange={onDateInfoChange}
-                            // style={{ width: 200 }}
-                            // showTime
                             format="YYYY/MM/DD"
                             renderExtraFooter={() => (
                                 <Row gutter={[28, 28]}>

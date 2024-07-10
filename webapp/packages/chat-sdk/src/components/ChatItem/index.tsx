@@ -43,25 +43,25 @@ type Props = {
 };
 
 const ChatItem: React.FC<Props> = ({
-                                     msg,
-                                     conversationId,
-                                     modelId,
-                                     agentId,
-                                     score,
-                                     filter,
-                                     triggerResize,
-                                     parseInfos,
-                                     parseTimeCostValue,
-                                     msgData,
-                                     isDeveloper,
-                                     integrateSystem,
-                                     executeItemNode,
-                                     renderCustomExecuteNode,
-                                     isSimpleMode,
-                                     isDebugMode,
-                                     onMsgDataLoaded,
-                                     onUpdateMessageScroll,
-                                     onSendMsg,
+  msg,
+  conversationId,
+  modelId,
+  agentId,
+  score,
+  filter,
+  triggerResize,
+  parseInfos,
+  parseTimeCostValue,
+  msgData,
+  isDeveloper,
+  integrateSystem,
+  executeItemNode,
+  renderCustomExecuteNode,
+  isSimpleMode,
+  isDebugMode,
+  onMsgDataLoaded,
+  onUpdateMessageScroll,
+  onSendMsg,
                                    }) => {
   const [parseLoading, setParseLoading] = useState(false);
   const [parseTimeCost, setParseTimeCost] = useState<ParseTimeCostType>();
@@ -233,16 +233,6 @@ const ChatItem: React.FC<Props> = ({
   const onFiltersChange = (dimensionFilters: FilterItemType[]) => {
     setDimensionFilters(dimensionFilters);
   };
-
-  // const onDateInfoChange = (dateRange: any) => {
-  //   setDateInfo({
-  //     ...(dateInfo || {}),
-  //     startDate: dayjs(dateRange[0]).format('YYYY-MM-DD'),
-  //     endDate: dayjs(dateRange[1]).format('YYYY-MM-DD'),
-  //     dateMode: 'BETWEEN',
-  //     unit: 0,
-  //   });
-  // };
 
   type RangeValue = [Dayjs, Dayjs];
   const [selectedRange, setSelectedRange] = useState<RangeValue | null>(null);
