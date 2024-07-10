@@ -1,6 +1,7 @@
 export const ROUTE_AUTH_CODES = {
   SYSTEM_ADMIN: 'SYSTEM_ADMIN',
   MENU_CHAT: 'menu:chat',
+  MENU_AGENT: 'menu:agent',
   MENU_PLUGIN: 'menu:plugin',
   MENU_MODEL: 'menu:model',
   MENU_METRIC_MARKET: 'menu:metric:market',
@@ -42,7 +43,7 @@ const ROUTES = [
     name: 'agent',
     component: './Agent',
     envEnableList: [ENV_KEY.CHAT],
-    access: ROUTE_AUTH_CODES.MENU_CHAT,
+    access: ROUTE_AUTH_CODES.MENU_AGENT,
   },
   {
     path: '/plugin',
