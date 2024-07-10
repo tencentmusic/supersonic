@@ -56,10 +56,7 @@ public class ParseInfoProcessor implements ResultProcessor {
         if (StringUtils.isBlank(correctS2SQL)) {
             return;
         }
-        // if S2SQL equals correctS2SQL, then not update the parseInfo.
-        if (correctS2SQL.equals(sqlInfo.getParsedS2SQL())) {
-            return;
-        }
+
         List<FieldExpression> expressions = SqlSelectHelper.getFilterExpression(correctS2SQL);
         //set dataInfo
         try {
