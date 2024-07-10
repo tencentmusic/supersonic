@@ -98,7 +98,7 @@ public class OnePassSCSqlGenStrategy extends SqlGenStrategy {
         if (promptConfig != null && StringUtils.isNotBlank(promptConfig.getPromptTemplate())) {
             prompTemplate = promptConfig.getPromptTemplate();
         }
-        return PromptTemplate.from(prompTemplate.replace("#DDLInfo:", ddlInfo)).apply(variable);
+        return PromptTemplate.from(prompTemplate).apply(variable);
     }
 
     @Override
