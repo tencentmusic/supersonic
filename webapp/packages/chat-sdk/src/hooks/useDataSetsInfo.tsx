@@ -1,4 +1,3 @@
-import * as React from 'react';
 import { Result, Spin } from 'antd';
 import { createContext, useContextSelector } from 'use-context-selector';
 import { useDataSetsFetch } from './useDataSetsFetch';
