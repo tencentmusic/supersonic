@@ -44,7 +44,8 @@ public abstract class MetricSemanticQuery extends RuleSemanticQuery {
                     chatQueryContext.getSemanticSchema().getDataSetSchemaMap().get(parseInfo.getDataSetId());
             TimeDefaultConfig timeDefaultConfig = dataSetSchema.getMetricTypeTimeDefaultConfig();
             DateConf dateInfo = new DateConf();
-            if (Objects.nonNull(timeDefaultConfig) && Objects.nonNull(timeDefaultConfig.getUnit())) {
+            //加上时间!=-1 判断
+            if (Objects.nonNull(timeDefaultConfig) && Objects.nonNull(timeDefaultConfig.getUnit()) && timeDefaultConfig.getUnit() != -1) {
                 int unit = timeDefaultConfig.getUnit();
                 String startDate = LocalDate.now().plusDays(-unit).toString();
                 String endDate = startDate;
@@ -58,8 +59,9 @@ public abstract class MetricSemanticQuery extends RuleSemanticQuery {
                 dateInfo.setPeriod(timeDefaultConfig.getPeriod());
                 dateInfo.setStartDate(startDate);
                 dateInfo.setEndDate(endDate);
+                // 时间不为-1才设置时间，所以移到这里
+                parseInfo.setDateInfo(dateInfo);
             }
-            parseInfo.setDateInfo(dateInfo);
         }
     }
 }
