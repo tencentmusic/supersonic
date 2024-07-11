@@ -81,8 +81,4 @@ SuperSonic自带样例的语义模型和问答对话，只需以下三步即可�
 
 欢迎关注微信公众号：
 
-<img src="https://github.com/supersonicbi/supersonic-website/blob/main/static/img/supersonic_wechat_oa.png" height="50%" width="50%" /> 
-
-欢迎加入微信社群：
-
-<img src="https://github.com/supersonicbi/supersonic-website/blob/main/static/img/supersonic_wechat.png" height="50%" width="50%" /> 
+<img src="https://github.com/supersonicbi/supersonic-website/blob/main/static/img/supersonic_wechat_oa.png" height="50%" width="50%" />
