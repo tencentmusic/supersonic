@@ -20,14 +20,15 @@ export function useDataSetsFetch(ids: number[]) {
     if (responseData && responseData.length) {
       let map = new Map<number, any>();
       responseData.forEach((res: any, index: number) => {
-        let dimensions: any[] = [];
-        let metrics: any[] = [];
+        let data = {
+          dimensions: [],
+          metrics: [],
+        };
         if (res?.code === 200) {
-          dimensions = res.data.dimensions;
-          metrics = res.data.metrics;
+          data = res.data;
         }
 
-        map.set(ids[index], { dimensions, metrics });
+        map.set(ids[index], data);
       });
 
       setDataSets(map);
