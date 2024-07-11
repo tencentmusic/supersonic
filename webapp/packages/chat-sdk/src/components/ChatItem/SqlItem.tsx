@@ -96,7 +96,7 @@ const SqlItem: React.FC<Props> = ({
           {sqlInfo.parsedS2SQL && (
             <div
               className={`${tipPrefixCls}-content-option ${
-                sqlType === 's2SQL' ? `${tipPrefixCls}-content-option-active` : ''
+                sqlType === 'parsedS2SQL' ? `${tipPrefixCls}-content-option-active` : ''
               }`}
               onClick={() => {
                 setSqlType(sqlType === 'parsedS2SQL' ? '' : 'parsedS2SQL');
@@ -108,7 +108,7 @@ const SqlItem: React.FC<Props> = ({
           {sqlInfo.correctedS2SQL && (
             <div
               className={`${tipPrefixCls}-content-option ${
-                sqlType === 'correctS2SQL' ? `${tipPrefixCls}-content-option-active` : ''
+                sqlType === 'correctedS2SQL' ? `${tipPrefixCls}-content-option-active` : ''
               }`}
               onClick={() => {
                 setSqlType(sqlType === 'correctedS2SQL' ? '' : 'correctedS2SQL');

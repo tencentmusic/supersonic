@@ -1,20 +1,22 @@
 import React, { ReactNode } from 'react';
 import { AGG_TYPE_MAP, PREFIX_CLS } from '../../common/constants';
 import { ChatContextType, DateInfoType, EntityInfoType, FilterItemType } from '../../common/type';
-import { DatePicker } from 'antd';
+import { Button, DatePicker, Row, Col  } from 'antd';
 import {
   CheckCircleFilled,
   ExclamationCircleFilled,
-  ExclamationCircleOutlined,
+  ExclamationCircleOutlined, ReloadOutlined
 } from '@ant-design/icons';
 import Loading from './Loading';
 import FilterItem from './FilterItem';
 import MarkDown from '../ChatMsg/MarkDown';
 import classNames from 'classnames';
 import { isMobile } from '../../utils/utils';
-import dayjs from 'dayjs';
+import dayjs, { Dayjs } from 'dayjs';
+import quarterOfYear from 'dayjs/plugin/quarterOfYear';
 import FiltersInfo from '../FiltersInfo';
 import { IPill } from '../FiltersInfo/types';
+dayjs.extend(quarterOfYear);
 
 const { RangePicker } = DatePicker;
 
@@ -37,6 +39,7 @@ type Props = {
   onFiltersChange: (filters: FilterItemType[]) => void;
   onDateInfoChange: (dateRange: any) => void;
   onRefresh: () => void;
+  handlePresetClick: any;
   onQueryConditionChange: (data: {
     pillData: IPill[];
     datasetId: number;
@@ -46,6 +49,11 @@ type Props = {
 };
 
 const MAX_OPTION_VALUES_COUNT = 2;
+
+
+type RangeValue = [Dayjs, Dayjs];
+type RangeKeys = '近7日' | '近14日' | '近30日' | '本周' | '本月' | '上月' | '本季度' | '本年';
+
 
 const ParseTip: React.FC<Props> = ({
   parseLoading,
@@ -67,7 +75,18 @@ const ParseTip: React.FC<Props> = ({
   onDateInfoChange,
   onRefresh,
   onQueryConditionChange,
+  handlePresetClick
 }) => {
+  const ranges: Record<RangeKeys, RangeValue> = {
+    '近7日': [dayjs().subtract(7, 'day'), dayjs()],
+    '近14日': [dayjs().subtract(14, 'day'), dayjs()],
+    '近30日': [dayjs().subtract(30, 'day'), dayjs()],
+    '本周': [dayjs().startOf('week'), dayjs().endOf('week')],
+    '本月': [dayjs().startOf('month'), dayjs().endOf('month')],
+    '上月': [dayjs().subtract(1, 'month').startOf('month'), dayjs().subtract(1, 'month').endOf('month')],
+    '本季度': [dayjs().startOf('quarter'), dayjs().endOf('quarter')], // 使用 quarterOfYear 插件
+    '本年': [dayjs().startOf('year'), dayjs().endOf('year')],
+  };
   const prefixCls = `${PREFIX_CLS}-item`;
 
   const getNode = (tipTitle: ReactNode, tipNode?: ReactNode, warning?: boolean) => {
@@ -172,9 +191,9 @@ const ParseTip: React.FC<Props> = ({
         ) : (
           <>
             {(queryMode?.includes('ENTITY') || queryMode === 'LLM_S2SQL') &&
-            typeof entityId === 'string' &&
-            !!entityAlias &&
-            !!entityName ? (
+              typeof entityId === 'string' &&
+              !!entityAlias &&
+              !!entityName ? (
               <div className={`${prefixCls}-tip-item`}>
                 <div className={`${prefixCls}-tip-item-name`}>{entityAlias}：</div>
                 <div className={itemValueClass}>{entityName}</div>
@@ -249,49 +268,68 @@ const ParseTip: React.FC<Props> = ({
     );
   };
 
-  const getFilterContent = (filters: any) => {
-    const itemValueClass = `${prefixCls}-tip-item-value`;
-    const { startDate, endDate } = dateInfo || {};
-    const tipItemOptionClass = classNames(`${prefixCls}-tip-item-option`, {
-      [`${prefixCls}-mobile-tip-item-option`]: isMobile,
-    });
-    return (
-      <div className={`${prefixCls}-tip-item-filter-content`}>
-        {(startDate || endDate) && (
-          <div className={tipItemOptionClass}>
-            <span className={`${prefixCls}-tip-item-filter-name`}>数据时间：</span>
-            {nativeQuery ? (
-              <span className={itemValueClass}>
-                {startDate === endDate ? startDate : `${startDate} ~ ${endDate}`}
-              </span>
-            ) : (
-              <RangePicker
-                value={[dayjs(startDate), dayjs(endDate)]}
-                onChange={onDateInfoChange}
-                getPopupContainer={trigger => trigger.parentNode as HTMLElement}
-                allowClear={false}
-              />
-            )}
-          </div>
-        )}
-        {filters?.map((filter: any, index: number) => (
-          <FilterItem
-            modelId={modelId!}
-            filters={dimensionFilters}
-            filter={filter}
-            index={index}
-            chatContext={currentParseInfo!}
-            entityAlias={entityAlias}
-            agentId={agentId}
-            integrateSystem={integrateSystem}
-            onFiltersChange={onFiltersChange}
-            onSwitchEntity={onSwitchEntity}
-            key={`${filter.name}_${index}`}
-          />
-        ))}
-      </div>
-    );
-  };
+    const getFilterContent = (filters: any) => {
+        const itemValueClass = `${prefixCls}-tip-item-value`;
+        const { startDate, endDate } = dateInfo || {};
+        const tipItemOptionClass = classNames(`${prefixCls}-tip-item-option`, {
+            [`${prefixCls}-mobile-tip-item-option`]: isMobile,
+        });
+        return (
+            <div className={`${prefixCls}-tip-item-filter-content`}>
+                <div className={tipItemOptionClass}>
+                    <span className={`${prefixCls}-tip-item-filter-name`}>数据时间：</span>
+                    {nativeQuery ? (
+                        <span className={itemValueClass}>
+              {startDate === endDate ? startDate : `${startDate} ~ ${endDate}`}
+            </span>
+                    ) : (
+                        <RangePicker
+                            value={[dayjs(startDate), dayjs(endDate)]}
+                            onChange={onDateInfoChange}
+                            format="YYYY/MM/DD"
+                            renderExtraFooter={() => (
+                                <Row gutter={[28, 28]}>
+                                    {Object.keys(ranges).map((key) => (
+                                        <Col key={key}>
+                                            <label
+                                                style={{
+                                                    backgroundColor: '#F0FDFF',
+                                                    borderColor: '#33BDFC',
+                                                    color: '#33BDFC',
+                                                    borderWidth: 1,
+                                                    borderStyle: 'solid',
+                                                    cursor: 'pointer'
+                                                }}
+                                                onClick={() => handlePresetClick(ranges[key as RangeKeys])}>
+                                                {key}
+                                            </label>
+                                        </Col>
+                                    ))}
+                                </Row>
+                            )}
+                        />
+
+
+                    )}
+                </div>
+                {filters?.map((filter: any, index: number) => (
+                    <FilterItem
+                        modelId={modelId!}
+                        filters={dimensionFilters}
+                        filter={filter}
+                        index={index}
+                        chatContext={currentParseInfo!}
+                        entityAlias={entityAlias}
+                        agentId={agentId}
+                        integrateSystem={integrateSystem}
+                        onFiltersChange={onFiltersChange}
+                        onSwitchEntity={onSwitchEntity}
+                        key={`${filter.name}_${index}`}
+                    />
+                ))}
+            </div>
+        );
+    };
 
   const getFiltersNode = () => {
     return currentParseInfo ? (
@@ -337,9 +375,8 @@ const ParseTip: React.FC<Props> = ({
         <div className={`${prefixCls}-content-options`}>
           {parseInfoOptions.map((parseInfo, index) => (
             <div
-              className={`${prefixCls}-content-option ${
-                parseInfo.id === currentParseInfo?.id ? `${prefixCls}-content-option-active` : ''
-              }`}
+              className={`${prefixCls}-content-option ${parseInfo.id === currentParseInfo?.id ? `${prefixCls}-content-option-active` : ''
+                }`}
               onClick={() => {
                 onSelectParseInfo(parseInfo);
               }}

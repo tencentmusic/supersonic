@@ -1,10 +1,14 @@
 package com.tencent.supersonic.headless.server.facade.rest;
 
+import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
+import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.api.pojo.request.QueryNLReq;
-import com.tencent.supersonic.headless.api.pojo.response.MapResp;
+import com.tencent.supersonic.headless.api.pojo.request.QuerySqlReq;
+import com.tencent.supersonic.headless.api.pojo.response.ParseResp;
 import com.tencent.supersonic.headless.server.facade.service.ChatQueryService;
 import com.tencent.supersonic.headless.server.facade.service.RetrieveService;
+import com.tencent.supersonic.headless.server.facade.service.SemanticLayerService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -25,6 +29,9 @@ public class ChatQueryApiController {
     @Autowired
     private RetrieveService retrieveService;
 
+    @Autowired
+    private SemanticLayerService semanticLayerService;
+
     @PostMapping("/chat/search")
     public Object search(@RequestBody QueryNLReq queryNLReq,
                         HttpServletRequest request,
@@ -34,9 +41,9 @@ public class ChatQueryApiController {
     }
 
     @PostMapping("/chat/map")
-    public MapResp map(@RequestBody QueryNLReq queryNLReq,
-                                  HttpServletRequest request,
-                                  HttpServletResponse response) {
+    public Object map(@RequestBody QueryNLReq queryNLReq,
+                             HttpServletRequest request,
+                             HttpServletResponse response) {
         queryNLReq.setUser(UserHolder.findUser(request, response));
         return chatQueryService.performMapping(queryNLReq);
     }
@@ -47,6 +54,23 @@ public class ChatQueryApiController {
             HttpServletResponse response) throws Exception {
         queryNLReq.setUser(UserHolder.findUser(request, response));
         return chatQueryService.performParsing(queryNLReq);
+    }
+
+    @PostMapping("/chat")
+    public Object queryByNL(@RequestBody QueryNLReq queryNLReq,
+                                 HttpServletRequest request,
+                                 HttpServletResponse response) throws Exception {
+        User user = UserHolder.findUser(request, response);
+        ParseResp parseResp = chatQueryService.performParsing(queryNLReq);
+        if (parseResp.getState().equals(ParseResp.ParseState.COMPLETED)) {
+            SemanticParseInfo parseInfo = parseResp.getSelectedParses().get(0);
+            QuerySqlReq sqlReq = new QuerySqlReq();
+            sqlReq.setSql(parseInfo.getSqlInfo().getCorrectedS2SQL());
+            sqlReq.setSqlInfo(parseInfo.getSqlInfo());
+            return semanticLayerService.queryByReq(sqlReq, user);
+        }
+
+        throw new RuntimeException("Failed to parse natural language query: " + queryNLReq.getQueryText());
     }
 
 }
