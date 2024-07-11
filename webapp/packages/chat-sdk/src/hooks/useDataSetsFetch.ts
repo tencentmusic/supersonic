@@ -1,10 +1,8 @@
 import { useRequest } from 'ahooks';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo } from 'react';
 import { getDataSetInfo } from '../service';
 
 export function useDataSetsFetch(ids: number[]) {
-  const [dataSets, setDataSets] = useState<Map<number, any>>(() => new Map<number, any>());
-
   const {
     data: responseData,
     loading,
@@ -16,7 +14,7 @@ export function useDataSetsFetch(ids: number[]) {
     staleTime: 1000 * 60 * 10,
   });
 
-  useEffect(() => {
+  const dataSets = useMemo(() => {
     if (responseData && responseData.length) {
       let map = new Map<number, any>();
       responseData.forEach((res: any, index: number) => {
@@ -30,8 +28,9 @@ export function useDataSetsFetch(ids: number[]) {
 
         map.set(ids[index], data);
       });
-
-      setDataSets(map);
+      return map;
+    } else {
+      return new Map();
     }
   }, [responseData]);
 
