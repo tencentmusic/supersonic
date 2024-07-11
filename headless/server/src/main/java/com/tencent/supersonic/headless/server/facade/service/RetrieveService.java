@@ -7,6 +7,6 @@ import java.util.List;
 
 public interface RetrieveService {
 
-    List<SearchResult> retrieve(QueryNLReq queryCtx);
+    List<SearchResult> retrieve(QueryNLReq queryNLReq);
 
 }

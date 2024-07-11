@@ -42,7 +42,7 @@ const LoginPage: React.FC = () => {
           const { data: codes } = await getUserPermissions();
           authCodes.push(...codes);
         } catch (error) {
-          message.error('获取权限失败');
+          message.error('权限接口调用失败');
         }
 
         if (queryUserData.superAdmin) {
@@ -97,7 +97,7 @@ const LoginPage: React.FC = () => {
           const { data: codes } = await getUserPermissions();
           authCodes.push(...codes);
         } catch (error) {
-          message.error('获取权限失败');
+          message.error('权限接口调用失败');
         }
 
         if (queryUserData.superAdmin) {

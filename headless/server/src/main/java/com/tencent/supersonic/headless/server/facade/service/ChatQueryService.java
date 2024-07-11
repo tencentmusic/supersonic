@@ -4,7 +4,6 @@ import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.api.pojo.SqlEvaluation;
 import com.tencent.supersonic.headless.api.pojo.request.DimensionValueReq;
-import com.tencent.supersonic.headless.api.pojo.request.ExecuteQueryReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryDataReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryMapReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryNLReq;
@@ -21,18 +20,15 @@ public interface ChatQueryService {
 
     MapResp performMapping(QueryNLReq queryNLReq);
 
-    MapInfoResp map(QueryMapReq queryMapReq);
-
     ParseResp performParsing(QueryNLReq queryNLReq);
-
-    @Deprecated
-    QueryResult performExecution(ExecuteQueryReq queryReq) throws Exception;
 
     SemanticParseInfo queryContext(Integer chatId);
 
     QueryResult executeDirectQuery(QueryDataReq queryData, User user) throws Exception;
 
     Object queryDimensionValue(DimensionValueReq dimensionValueReq, User user) throws Exception;
+
+    MapInfoResp map(QueryMapReq queryMapReq);
 
     void correct(QuerySqlReq querySqlReq, User user);
 

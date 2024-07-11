@@ -135,14 +135,14 @@ public class RetrieveServiceImpl implements RetrieveService {
 
         List<Long> possibleDataSets = NatureHelper.selectPossibleDataSets(originals);
 
-        Long contextModel = chatContextService.getContextModel(queryCtx.getChatId());
+        Long contextDataset = chatContextService.getContextDataset(queryCtx.getChatId());
 
-        log.debug("possibleDataSets:{},dataSetInfoStat:{},contextModel:{}",
-                possibleDataSets, dataSetInfoStat, contextModel);
+        log.debug("possibleDataSets:{},dataSetInfoStat:{},contextDataset:{}",
+                possibleDataSets, dataSetInfoStat, contextDataset);
 
-        // If nothing is recognized or only metric are present, then add the contextModel.
+        // If nothing is recognized or only metric are present, then add the contextDataset.
         if (nothingOrOnlyMetric(dataSetInfoStat)) {
-            return Lists.newArrayList(contextModel);
+            return Lists.newArrayList(contextDataset);
         }
         return possibleDataSets;
     }

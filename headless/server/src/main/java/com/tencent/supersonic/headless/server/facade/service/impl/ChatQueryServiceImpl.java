@@ -25,9 +25,7 @@ import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.api.pojo.SemanticSchema;
 import com.tencent.supersonic.headless.api.pojo.SqlEvaluation;
 import com.tencent.supersonic.headless.api.pojo.SqlInfo;
-import com.tencent.supersonic.headless.api.pojo.enums.CostType;
 import com.tencent.supersonic.headless.api.pojo.request.DimensionValueReq;
-import com.tencent.supersonic.headless.api.pojo.request.ExecuteQueryReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryNLReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryDataReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryDimValueReq;
@@ -62,7 +60,6 @@ import com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMSqlQuery;
 import com.tencent.supersonic.headless.server.facade.service.ChatQueryService;
 import com.tencent.supersonic.headless.server.facade.service.SemanticLayerService;
 import com.tencent.supersonic.headless.server.utils.ChatWorkflowEngine;
-import com.tencent.supersonic.headless.server.persistence.dataobject.StatisticsDO;
 import com.tencent.supersonic.headless.server.pojo.MetaFilter;
 import com.tencent.supersonic.headless.server.utils.ComponentFactory;
 import com.tencent.supersonic.headless.server.web.service.ChatContextService;
@@ -177,57 +174,6 @@ public class ChatQueryServiceImpl implements ChatQueryService {
     }
 
     @Override
-    @Deprecated
-    public QueryResult performExecution(ExecuteQueryReq queryReq) throws Exception {
-        List<StatisticsDO> timeCostDOList = new ArrayList<>();
-        SemanticParseInfo parseInfo = queryReq.getParseInfo();
-        SemanticQuery semanticQuery = QueryManager.createQuery(parseInfo.getQueryMode());
-        if (semanticQuery == null) {
-            return null;
-        }
-        semanticQuery.setParseInfo(parseInfo);
-
-        // in order to support multi-turn conversation, chat context is needed
-        ChatContext chatCtx = chatContextService.getOrCreateContext(queryReq.getChatId());
-        long startTime = System.currentTimeMillis();
-        SemanticQueryReq semanticQueryReq = semanticQuery.buildSemanticQueryReq();
-        QueryResult queryResult = doExecution(semanticQueryReq, parseInfo, queryReq.getUser());
-        timeCostDOList.add(StatisticsDO.builder().cost((int) (System.currentTimeMillis() - startTime))
-                .interfaceName(semanticQuery.getClass().getSimpleName()).type(CostType.QUERY.getType()).build());
-        queryResult.setQueryTimeCost(timeCostDOList.get(0).getCost().longValue());
-        queryResult.setChatContext(parseInfo);
-        // update chat context after a successful semantic query
-        if (QueryState.SUCCESS.equals(queryResult.getQueryState()) && queryReq.isSaveAnswer()) {
-            chatCtx.setParseInfo(parseInfo);
-            chatContextService.updateContext(chatCtx);
-        }
-        chatCtx.setQueryText(queryReq.getQueryText());
-        chatCtx.setUser(queryReq.getUser().getName());
-        return queryResult;
-    }
-
-    private QueryResult doExecution(SemanticQueryReq semanticQueryReq,
-            SemanticParseInfo parseInfo, User user) throws Exception {
-        SemanticQueryResp queryResp = semanticLayerService.queryByReq(semanticQueryReq, user);
-        QueryResult queryResult = new QueryResult();
-        if (queryResp != null) {
-            queryResult.setQueryAuthorization(queryResp.getQueryAuthorization());
-        }
-
-        String sql = queryResp == null ? null : queryResp.getSql();
-        List<Map<String, Object>> resultList = queryResp == null ? new ArrayList<>()
-                : queryResp.getResultList();
-        List<QueryColumn> columns = queryResp == null ? new ArrayList<>() : queryResp.getColumns();
-        queryResult.setQuerySql(sql);
-        queryResult.setQueryResults(resultList);
-        queryResult.setQueryColumns(columns);
-        queryResult.setQueryMode(parseInfo.getQueryMode());
-        queryResult.setQueryState(QueryState.SUCCESS);
-
-        return queryResult;
-    }
-
-    @Override
     public SemanticParseInfo queryContext(Integer chatId) {
         ChatContext context = chatContextService.getOrCreateContext(chatId);
         return context.getParseInfo();
@@ -281,6 +227,27 @@ public class ChatQueryServiceImpl implements ChatQueryService {
         SemanticLayerService semanticService = ContextUtils.getBean(SemanticLayerService.class);
         EntityInfo entityInfo = semanticService.getEntityInfo(parseInfo, dataSetSchema, user);
         queryResult.setEntityInfo(entityInfo);
+        return queryResult;
+    }
+
+    private QueryResult doExecution(SemanticQueryReq semanticQueryReq,
+                                    SemanticParseInfo parseInfo, User user) throws Exception {
+        SemanticQueryResp queryResp = semanticLayerService.queryByReq(semanticQueryReq, user);
+        QueryResult queryResult = new QueryResult();
+        if (queryResp != null) {
+            queryResult.setQueryAuthorization(queryResp.getQueryAuthorization());
+        }
+
+        String sql = queryResp == null ? null : queryResp.getSql();
+        List<Map<String, Object>> resultList = queryResp == null ? new ArrayList<>()
+                : queryResp.getResultList();
+        List<QueryColumn> columns = queryResp == null ? new ArrayList<>() : queryResp.getColumns();
+        queryResult.setQuerySql(sql);
+        queryResult.setQueryResults(resultList);
+        queryResult.setQueryColumns(columns);
+        queryResult.setQueryMode(parseInfo.getQueryMode());
+        queryResult.setQueryState(QueryState.SUCCESS);
+
         return queryResult;
     }
 
