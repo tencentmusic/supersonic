@@ -78,7 +78,3 @@ SuperSonicには、サンプルのセマンティックモデルとチャット�
 SuperSonicの公式WeChatアカウントをフォローしてください：
 
 ![SuperSonicのWeChat公式アカウント](https://github.com/supersonicbi/supersonic-website/blob/main/static/img/supersonic_wechat_oa.png)
-
-WeChatコミュニティに参加することを歓迎します：
-
-![SuperSonicのWeChatコミュニティ](https://github.com/supersonicbi/supersonic-website/blob/main/static/img/supersonic_wechat.png)

@@ -19,8 +19,7 @@ import classNames from 'classnames';
 import Tools from '../Tools';
 import SqlItem from './SqlItem';
 import SimilarQuestionItem from './SimilarQuestionItem';
-import dayjs from 'dayjs';
-
+import dayjs, { Dayjs } from 'dayjs';
 type Props = {
   msg: string;
   conversationId?: number;
@@ -235,15 +234,36 @@ const ChatItem: React.FC<Props> = ({
     setDimensionFilters(dimensionFilters);
   };
 
-  const onDateInfoChange = (dateRange: any) => {
+  type RangeValue = [Dayjs, Dayjs];
+  const [selectedRange, setSelectedRange] = useState<RangeValue | null>(null);
+
+  const onDateInfoChange = (dates: [Dayjs | null, Dayjs | null] | null) => {
+    if (dates && dates[0] && dates[1]) {
+      const [start, end] = dates;
+      setSelectedRange([start, end] as RangeValue);
+      setDateInfo({
+        ...(dateInfo || {}),
+        startDate: dayjs(start).format('YYYY-MM-DD'),
+        endDate: dayjs(end).format('YYYY-MM-DD'),
+        dateMode: 'BETWEEN',
+        unit: 0,
+      });
+    } else {
+      setSelectedRange(null);
+    }
+  };
+
+  const handlePresetClick = (range: RangeValue) => {
+    setSelectedRange(range);
     setDateInfo({
       ...(dateInfo || {}),
-      startDate: dayjs(dateRange[0]).format('YYYY-MM-DD'),
-      endDate: dayjs(dateRange[1]).format('YYYY-MM-DD'),
+      startDate: dayjs(range[0]).format('YYYY-MM-DD'),
+      endDate: dayjs(range[1]).format('YYYY-MM-DD'),
       dateMode: 'BETWEEN',
       unit: 0,
     });
   };
+
 
   const onRefresh = async () => {
     setEntitySwitchLoading(true);
@@ -341,6 +361,7 @@ const ChatItem: React.FC<Props> = ({
             onFiltersChange={onFiltersChange}
             onDateInfoChange={onDateInfoChange}
             onRefresh={onRefresh}
+            handlePresetClick={handlePresetClick}
           />
           {executeMode && (
             <>

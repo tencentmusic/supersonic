@@ -27,13 +27,13 @@ public class OnePassSCSqlGenStrategy extends SqlGenStrategy {
 
     private static final String INSTRUCTION = ""
             + "#Role: You are a data analyst experienced in SQL languages.\n"
-            + "#Task: You will be provided a natural language query asked by business users,"
-            + "please convert it to a SQL query so that relevant answer could be returned to the user "
+            + "#Task: You will be provided a natural language question asked by users,"
+            + "please convert it to a SQL query so that relevant data could be returned to the user "
             + "by executing the SQL query against underlying database.\n"
             + "#Rules:"
             + "1.ALWAYS use `数据日期` as the date field."
-            + "2.ALWAYS use `datediff()` as the date function."
-            + "3.DO NOT specify date filter in the where clause if not explicitly mentioned in the query."
+            + "2.ALWAYS specify date filter using `>`,`<`,`>=`,`<=` operator."
+            + "3.DO NOT include date filter in the where clause if not explicitly expressed in the query."
             + "4.ONLY respond with the converted SQL statement.\n"
             + "#Exemplars:\n{{exemplar}}"
             + "#Question:{{question}} #Schema:{{schema}} #SQL:";

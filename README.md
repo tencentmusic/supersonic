@@ -81,8 +81,4 @@ Please refer to project [Docs](https://supersonicbi.github.io/docs/%E7%B3%BB%E7%
 
 Please follow SuperSonic wechat official account:
 
-<img src="https://github.com/supersonicbi/supersonic-website/blob/main/static/img/supersonic_wechat_oa.png" height="50%" width="50%" /> 
-
-Welcome to join the WeChat community:
-
-<img src="https://github.com/supersonicbi/supersonic-website/blob/main/static/img/supersonic_wechat.png" height="50%" width="50%" /> 
+<img src="https://github.com/supersonicbi/supersonic-website/blob/main/static/img/supersonic_wechat_oa.png" height="50%" width="50%" />
