@@ -108,6 +108,7 @@ const AgentForm: React.FC<Props> = ({ editAgent, onSaveAgent, onCreateToolBtnCli
       }) as any,
       examples: examples.map((example) => example.question),
       enableSearch: values.enableSearch ? 1 : 0,
+      enableMemoryReview: values.enableMemoryReview ? 1 : 0,
     });
     setSaveLoading(false);
   };
@@ -155,17 +156,19 @@ const AgentForm: React.FC<Props> = ({ editAgent, onSaveAgent, onCreateToolBtnCli
               ]}
             />
           </FormItem> */}
-          <FormItem name="enableSearch" label="支持联想" valuePropName="checked">
+          <FormItem name="enableSearch" label="开启输入联想" valuePropName="checked">
             <Switch />
           </FormItem>
           <FormItem
             name={['multiTurnConfig', 'enableMultiTurn']}
-            label="开启多轮"
+            label="开启多轮对话"
             valuePropName="checked"
           >
             <Switch />
           </FormItem>
-
+          <FormItem name="enableMemoryReview" label="开启记忆评估" valuePropName="checked">
+            <Switch />
+          </FormItem>
           <FormItem
             name={['agentConfig', 'simpleMode']}
             label="开启精简模式"
@@ -177,7 +180,7 @@ const AgentForm: React.FC<Props> = ({ editAgent, onSaveAgent, onCreateToolBtnCli
 
           <FormItem
             name={['agentConfig', 'debugMode']}
-            label="显示调试信息"
+            label="开启调试信息"
             hidden={formData?.agentConfig?.simpleMode === true}
             tooltip="包含Schema映射、SQL生成每阶段的关键信息"
             valuePropName="checked"
