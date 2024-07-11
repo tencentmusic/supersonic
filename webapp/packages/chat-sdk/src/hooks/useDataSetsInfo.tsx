@@ -5,6 +5,9 @@ const DataSetsInfoContext = createContext<
   Map<
     number,
     {
+      id: number;
+      name: string;
+      description: string | null;
       dimensions: any[];
       metrics: any[];
     }
