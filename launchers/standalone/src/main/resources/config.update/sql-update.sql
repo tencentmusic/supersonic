@@ -332,8 +332,8 @@ alter table s2_term add column `related_dimensions` varchar(1000)  DEFAULT NULL 
 
 --20240627
 CREATE TABLE IF NOT EXISTS `s2_chat_memory` (
-                                                `id` INT NOT NULL AUTO_INCREMENT,
-                                                `question` varchar(655)    ,
+    `id` INT NOT NULL AUTO_INCREMENT,
+    `question` varchar(655),
     `agent_id`  INT    ,
     `db_schema`  TEXT    ,
     `s2_sql` TEXT   ,
@@ -350,11 +350,10 @@ CREATE TABLE IF NOT EXISTS `s2_chat_memory` (
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --20240705
-alter table s2_agent add column `prompt_config` varchar(6000) COLLATE utf8_unicode_ci DEFAULT NULL COMMENT '提示词配置';
+alter table s2_agent add column `prompt_config` text COLLATE utf8_unicode_ci DEFAULT NULL COMMENT '提示词配置';
 
 --20240707
-alter table s2_agent add model_config varchar(6000) null;
-alter table s2_agent add `prompt_config` varchar(5000)  COLLATE utf8_unicode_ci DEFAULT NULL;
+alter table s2_agent add `model_config` text null;
 
 --20240710
-alter table s2_agent add enable_memory_review tinyint DEFAULT 0;
+alter table s2_agent add `enable_memory_review` tinyint DEFAULT 0;
