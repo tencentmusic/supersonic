@@ -83,7 +83,7 @@ public class PlainTextExecutor implements ChatExecutor {
     private List<ParseResp> getHistoryParseResult(int chatId, int multiNum) {
         ChatQueryRepository chatQueryRepository = ContextUtils.getBean(ChatQueryRepository.class);
         List<ParseResp> contextualParseInfoList = chatQueryRepository.getContextualParseInfo(chatId)
-                .stream().filter(p -> p.getState() != ParseResp.ParseState.FAILED).collect(Collectors.toList());
+                .stream().filter(p -> p.getState() == ParseResp.ParseState.COMPLETED).collect(Collectors.toList());
 
         List<ParseResp> contextualList = contextualParseInfoList.subList(0,
                 Math.min(multiNum, contextualParseInfoList.size()));

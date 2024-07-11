@@ -45,11 +45,23 @@ public class ChatWorkflowEngine {
             switch (queryCtx.getChatWorkflowState()) {
                 case MAPPING:
                     performMapping(queryCtx);
-                    queryCtx.setChatWorkflowState(ChatWorkflowState.PARSING);
+                    if (queryCtx.getMapInfo().getMatchedDataSetInfos().size() == 0) {
+                        parseResult.setState(ParseResp.ParseState.FAILED);
+                        parseResult.setErrorMsg("No semantic entities can be mapped against user question.");
+                        queryCtx.setChatWorkflowState(ChatWorkflowState.FINISHED);
+                    } else {
+                        queryCtx.setChatWorkflowState(ChatWorkflowState.PARSING);
+                    }
                     break;
                 case PARSING:
                     performParsing(queryCtx, chatCtx);
-                    queryCtx.setChatWorkflowState(ChatWorkflowState.CORRECTING);
+                    if (queryCtx.getCandidateQueries().size() == 0) {
+                        parseResult.setState(ParseResp.ParseState.FAILED);
+                        parseResult.setErrorMsg("No semantic queries can be parsed out.");
+                        queryCtx.setChatWorkflowState(ChatWorkflowState.FINISHED);
+                    } else {
+                        queryCtx.setChatWorkflowState(ChatWorkflowState.CORRECTING);
+                    }
                     break;
                 case CORRECTING:
                     performCorrecting(queryCtx);
@@ -64,27 +76,30 @@ public class ChatWorkflowEngine {
                 case PROCESSING:
                 default:
                     performProcessing(queryCtx, chatCtx, parseResult);
+                    if (parseResult.getState().equals(ParseResp.ParseState.PENDING)) {
+                        parseResult.setState(ParseResp.ParseState.COMPLETED);
+                    }
                     queryCtx.setChatWorkflowState(ChatWorkflowState.FINISHED);
                     break;
             }
         }
     }
 
-    public void performMapping(ChatQueryContext queryCtx) {
+    private void performMapping(ChatQueryContext queryCtx) {
         if (Objects.isNull(queryCtx.getMapInfo())
                 || MapUtils.isEmpty(queryCtx.getMapInfo().getDataSetElementMatches())) {
             schemaMappers.forEach(mapper -> mapper.map(queryCtx));
         }
     }
 
-    public void performParsing(ChatQueryContext queryCtx, ChatContext chatCtx) {
+    private void performParsing(ChatQueryContext queryCtx, ChatContext chatCtx) {
         semanticParsers.forEach(parser -> {
             parser.parse(queryCtx, chatCtx);
             log.debug("{} result:{}", parser.getClass().getSimpleName(), JsonUtil.toString(queryCtx));
         });
     }
 
-    public void performCorrecting(ChatQueryContext queryCtx) {
+    private void performCorrecting(ChatQueryContext queryCtx) {
         List<SemanticQuery> candidateQueries = queryCtx.getCandidateQueries();
         if (CollectionUtils.isNotEmpty(candidateQueries)) {
             for (SemanticQuery semanticQuery : candidateQueries) {
@@ -101,7 +116,7 @@ public class ChatWorkflowEngine {
         }
     }
 
-    public void performProcessing(ChatQueryContext queryCtx, ChatContext chatCtx, ParseResp parseResult) {
+    private void performProcessing(ChatQueryContext queryCtx, ChatContext chatCtx, ParseResp parseResult) {
         resultProcessors.forEach(processor -> {
             processor.process(parseResult, queryCtx, chatCtx);
         });
