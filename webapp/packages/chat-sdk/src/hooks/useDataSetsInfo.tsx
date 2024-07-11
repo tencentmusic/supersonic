@@ -1,5 +1,5 @@
-import { Button, Result, Spin } from 'antd';
-import { history } from '@umijs/max';
+import * as React from 'react';
+import { Result, Spin } from 'antd';
 import { createContext, useContextSelector } from 'use-context-selector';
 import { useDataSetsFetch } from './useDataSetsFetch';
 import { LoadingOutlined } from '@ant-design/icons';
@@ -46,15 +46,7 @@ export function DataSetsInfoProvider({ children, ids }) {
         children
       ) : (
         <Container>
-          <Result
-            status="warning"
-            title="当前agent没有数据集，请先关联数据集"
-            extra={
-              <Button type="primary" key="console" onClick={() => history.push('/agent')}>
-                去关联
-              </Button>
-            }
-          />
+          <Result status="warning" title="当前agent没有数据集，请先关联数据集" />
         </Container>
       )}
     </DataSetsInfoContext.Provider>
