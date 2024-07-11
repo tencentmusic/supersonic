@@ -81,7 +81,13 @@ public class LLMRequestService {
         llmSchema.setDomainName(dataSetIdToName.get(dataSetId));
 
         List<String> fieldNameList = getFieldNameList(queryCtx, dataSetId, llmParserConfig);
-        fieldNameList.add(TimeDimensionEnum.DAY.getChName());
+        if(Objects.nonNull(semanticSchema.getDataSetSchemaMap()) && Objects.nonNull(semanticSchema.getDataSetSchemaMap().get(dataSetId))){
+            TimeDefaultConfig timeDefaultConfig = semanticSchema.getDataSetSchemaMap().get(dataSetId).getTagTypeTimeDefaultConfig();
+            if(!Objects.equals(timeDefaultConfig.getUnit(),-1)){
+                // 数据集查询设置 时间不为-1时才添加 '数据日期' 字段
+                fieldNameList.add(TimeDimensionEnum.DAY.getChName());
+            }
+        }
         llmSchema.setFieldNameList(fieldNameList);
 
         llmSchema.setMetrics(getMatchedMetrics(queryCtx, dataSetId));
