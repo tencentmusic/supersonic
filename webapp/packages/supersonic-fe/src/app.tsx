@@ -42,7 +42,7 @@ const getAuthCodes = async (params: any) => {
     }
     return codes;
   } catch (error) {
-    message.error('获取权限失败');
+    message.error('权限接口调用失败');
     return [];
   }
 };
