@@ -38,6 +38,16 @@ public class DifyServiceClient {
         return sendRequest(request, headers);
     }
 
+    public DifyResult generate(Map<String, String> inputs, String queryText, String user, String conversationId) {
+        Map<String, String> headers = defaultHeaders();
+        DifyRequest request = new DifyRequest();
+        request.setInputs(inputs);
+        request.setQuery(queryText);
+        request.setUser(user);
+        request.setConversationId(conversationId);
+        return sendRequest(request, headers);
+    }
+
     public DifyResult sendRequest(DifyRequest request, Map<String, String> headers) {
         try {
             return HttpUtils.post(difyURL, JsonUtil.toString(request), headers, DifyResult.class);
