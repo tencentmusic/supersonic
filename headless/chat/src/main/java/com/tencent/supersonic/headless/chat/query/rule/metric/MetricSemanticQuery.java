@@ -45,7 +45,8 @@ public abstract class MetricSemanticQuery extends RuleSemanticQuery {
             TimeDefaultConfig timeDefaultConfig = dataSetSchema.getMetricTypeTimeDefaultConfig();
             DateConf dateInfo = new DateConf();
             //加上时间!=-1 判断
-            if (Objects.nonNull(timeDefaultConfig) && Objects.nonNull(timeDefaultConfig.getUnit()) && timeDefaultConfig.getUnit() != -1) {
+            if (Objects.nonNull(timeDefaultConfig) && Objects.nonNull(timeDefaultConfig.getUnit())
+                    && timeDefaultConfig.getUnit() != -1) {
                 int unit = timeDefaultConfig.getUnit();
                 String startDate = LocalDate.now().plusDays(-unit).toString();
                 String endDate = startDate;

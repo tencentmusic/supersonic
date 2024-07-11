@@ -8,6 +8,7 @@ import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementMatch;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
 import com.tencent.supersonic.headless.api.pojo.SemanticSchema;
+import com.tencent.supersonic.headless.api.pojo.TimeDefaultConfig;
 import com.tencent.supersonic.headless.chat.ChatQueryContext;
 import com.tencent.supersonic.headless.chat.parser.ParserConfig;
 import com.tencent.supersonic.headless.chat.parser.SatisfactionChecker;
@@ -81,9 +82,11 @@ public class LLMRequestService {
         llmSchema.setDomainName(dataSetIdToName.get(dataSetId));
 
         List<String> fieldNameList = getFieldNameList(queryCtx, dataSetId, llmParserConfig);
-        if(Objects.nonNull(semanticSchema.getDataSetSchemaMap()) && Objects.nonNull(semanticSchema.getDataSetSchemaMap().get(dataSetId))){
-            TimeDefaultConfig timeDefaultConfig = semanticSchema.getDataSetSchemaMap().get(dataSetId).getTagTypeTimeDefaultConfig();
-            if(!Objects.equals(timeDefaultConfig.getUnit(),-1)){
+        if (Objects.nonNull(semanticSchema.getDataSetSchemaMap())
+                && Objects.nonNull(semanticSchema.getDataSetSchemaMap().get(dataSetId))) {
+            TimeDefaultConfig timeDefaultConfig = semanticSchema.getDataSetSchemaMap()
+                    .get(dataSetId).getTagTypeTimeDefaultConfig();
+            if (!Objects.equals(timeDefaultConfig.getUnit(), -1)) {
                 // 数据集查询设置 时间不为-1时才添加 '数据日期' 字段
                 fieldNameList.add(TimeDimensionEnum.DAY.getChName());
             }

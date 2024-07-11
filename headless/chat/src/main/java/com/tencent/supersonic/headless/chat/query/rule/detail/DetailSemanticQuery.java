@@ -45,7 +45,8 @@ public abstract class DetailSemanticQuery extends RuleSemanticQuery {
                     chatQueryContext.getSemanticSchema().getDataSetSchemaMap().get(parseInfo.getDataSetId());
             TimeDefaultConfig timeDefaultConfig = dataSetSchema.getTagTypeTimeDefaultConfig();
             DateConf dateInfo = new DateConf();
-            if (Objects.nonNull(timeDefaultConfig) && Objects.nonNull(timeDefaultConfig.getUnit()) && timeDefaultConfig.getUnit() != -1) {
+            if (Objects.nonNull(timeDefaultConfig) && Objects.nonNull(timeDefaultConfig.getUnit())
+                    && timeDefaultConfig.getUnit() != -1) {
                 int unit = timeDefaultConfig.getUnit();
                 String startDate = LocalDate.now().plusDays(-unit).toString();
                 String endDate = startDate;
