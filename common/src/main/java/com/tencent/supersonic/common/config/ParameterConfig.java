@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -21,7 +22,9 @@ public abstract class ParameterConfig {
     /**
      * @return system parameters to be set with user interface
      */
-    protected abstract List<Parameter> getSysParameters();
+    protected List<Parameter> getSysParameters() {
+        return Collections.EMPTY_LIST;
+    }
 
     /**
      * Parameter value will be derived in the following order:
