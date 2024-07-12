@@ -26,8 +26,7 @@ langchain4j:
 
   in-memory:
     embedding-model:
-      base-url: http://10.10.20.161:9997/
-      model: 12a22820-9888-11ee-b4f6-161d11c9987a
+      model-name: bge-small-zh
 
     embedding-store:
       persist-path: /tmp
