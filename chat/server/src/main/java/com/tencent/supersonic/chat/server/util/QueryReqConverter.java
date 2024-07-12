@@ -18,11 +18,18 @@ public class QueryReqConverter {
         if (agent == null) {
             return queryNLReq;
         }
-        if (agent.containsLLMParserTool() && agent.containsRuleTool()) {
-            queryNLReq.setText2SQLType(Text2SQLType.RULE_AND_LLM);
-        } else if (agent.containsLLMParserTool()) {
+
+        boolean hasLLMTool = agent.containsLLMParserTool();
+        boolean hasRuleTool = agent.containsRuleTool();
+        boolean hasLLMConfig = Objects.nonNull(agent.getModelConfig());
+
+        if (hasLLMTool && hasLLMConfig) {
             queryNLReq.setText2SQLType(Text2SQLType.ONLY_LLM);
-        } else if (agent.containsRuleTool()) {
+        } else if (hasLLMTool && hasRuleTool) {
+            queryNLReq.setText2SQLType(Text2SQLType.RULE_AND_LLM);
+        } else if (hasLLMTool) {
+            queryNLReq.setText2SQLType(Text2SQLType.ONLY_LLM);
+        } else if (hasRuleTool) {
             queryNLReq.setText2SQLType(Text2SQLType.ONLY_RULE);
         }
         queryNLReq.setDataSetIds(agent.getDataSetIds());

@@ -2,7 +2,7 @@ package com.tencent.supersonic.headless.chat;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
-import com.tencent.supersonic.common.config.ModelConfig;
+import com.tencent.supersonic.common.config.ChatModelConfig;
 import com.tencent.supersonic.common.config.PromptConfig;
 import com.tencent.supersonic.common.pojo.enums.Text2SQLType;
 import com.tencent.supersonic.common.util.ContextUtils;
@@ -51,7 +51,7 @@ public class ChatQueryContext {
     @JsonIgnore
     private ChatWorkflowState chatWorkflowState;
     private QueryDataType queryDataType = QueryDataType.ALL;
-    private ModelConfig modelConfig;
+    private ChatModelConfig modelConfig;
     private PromptConfig promptConfig;
     private List<SqlExemplar> dynamicExemplars;
 

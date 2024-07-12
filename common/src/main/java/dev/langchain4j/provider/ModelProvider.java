@@ -19,19 +19,18 @@ public class ModelProvider {
         factories.put(provider, modelFactory);
     }
 
-    public static ChatLanguageModel getChatModel(ModelConfig modelConfig) {
-        if (modelConfig == null || modelConfig.getChatModel() == null
-                || StringUtils.isBlank(modelConfig.getChatModel().getProvider())
-                || StringUtils.isBlank(modelConfig.getChatModel().getBaseUrl())) {
+    public static ChatLanguageModel getChatModel(ChatModelConfig modelConfig) {
+        if (modelConfig == null
+                || StringUtils.isBlank(modelConfig.getProvider())
+                || StringUtils.isBlank(modelConfig.getBaseUrl())) {
             return ContextUtils.getBean(ChatLanguageModel.class);
         }
-        ChatModelConfig chatModel = modelConfig.getChatModel();
-        ModelFactory modelFactory = factories.get(chatModel.getProvider().toUpperCase());
+        ModelFactory modelFactory = factories.get(modelConfig.getProvider().toUpperCase());
         if (modelFactory != null) {
-            return modelFactory.createChatModel(chatModel);
+            return modelFactory.createChatModel(modelConfig);
         }
 
-        throw new RuntimeException("Unsupported ChatLanguageModel provider: " + chatModel.getProvider());
+        throw new RuntimeException("Unsupported ChatLanguageModel provider: " + modelConfig.getProvider());
     }
 
     public static EmbeddingModel getEmbeddingModel(ModelConfig modelConfig) {

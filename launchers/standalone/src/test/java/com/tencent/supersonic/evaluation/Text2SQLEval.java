@@ -9,7 +9,6 @@ import com.tencent.supersonic.chat.server.agent.AgentToolType;
 import com.tencent.supersonic.chat.server.agent.MultiTurnConfig;
 import com.tencent.supersonic.chat.server.agent.RuleParserTool;
 import com.tencent.supersonic.common.config.ChatModelConfig;
-import com.tencent.supersonic.common.config.ModelConfig;
 import com.tencent.supersonic.headless.api.pojo.response.QueryResult;
 import com.tencent.supersonic.util.DataUtils;
 import org.junit.jupiter.api.BeforeAll;
@@ -109,7 +108,7 @@ public class Text2SQLEval extends BaseTest {
         GLM
     }
 
-    private static ModelConfig getLLMConfig(LLMType type) {
+    private static ChatModelConfig getLLMConfig(LLMType type) {
         String baseUrl;
         String apiKey;
         String modelName;
@@ -151,9 +150,7 @@ public class Text2SQLEval extends BaseTest {
         chatModel.setTemperature(temperature);
         chatModel.setProvider("open_ai");
 
-        ModelConfig modelConfig = new ModelConfig();
-        modelConfig.setChatModel(chatModel);
-        return modelConfig;
+        return chatModel;
     }
 
 }

@@ -141,7 +141,6 @@ public class S2VisitsDemo extends S2BaseDemo {
         chatService.parseAndExecute(chatId.intValue(), agentId, "按部门统计");
         chatService.parseAndExecute(chatId.intValue(), agentId, "查询近30天");
         chatService.parseAndExecute(chatId.intValue(), agentId, "alice 停留时长");
-        chatService.parseAndExecute(chatId.intValue(), agentId, "对比alice和lucy访问次数");
         chatService.parseAndExecute(chatId.intValue(), agentId, "访问次数最高的部门");
     }
 

@@ -1,6 +1,6 @@
 package com.tencent.supersonic.chat.server.util;
 
-import com.tencent.supersonic.common.config.ModelConfig;
+import com.tencent.supersonic.common.config.ChatModelConfig;
 import com.tencent.supersonic.common.pojo.exception.InvalidArgumentException;
 import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.provider.ModelProvider;
@@ -9,10 +9,9 @@ import org.apache.commons.lang3.StringUtils;
 
 @Slf4j
 public class LLMConnHelper {
-    public static boolean testConnection(ModelConfig modelConfig) {
+    public static boolean testConnection(ChatModelConfig modelConfig) {
         try {
-            if (modelConfig == null || modelConfig.getChatModel() == null
-                    || StringUtils.isBlank(modelConfig.getChatModel().getBaseUrl())) {
+            if (modelConfig == null || StringUtils.isBlank(modelConfig.getBaseUrl())) {
                 return false;
             }
             ChatLanguageModel chatLanguageModel = ModelProvider.getChatModel(modelConfig);
