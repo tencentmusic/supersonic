@@ -96,7 +96,9 @@ public class MemoryServiceImpl implements MemoryService {
         return chatMemoryRepository.getMemories(queryWrapper);
     }
 
-    private void enableMemory(ChatMemoryDO memory) {
+    @Override
+    public void enableMemory(ChatMemoryDO memory) {
+        memory.setStatus(MemoryStatus.ENABLED);
         exemplarService.storeExemplar(embeddingConfig.getMemoryCollectionName(memory.getAgentId()),
                 SqlExemplar.builder()
                         .question(memory.getQuestion())
@@ -105,7 +107,9 @@ public class MemoryServiceImpl implements MemoryService {
                         .build());
     }
 
-    private void disableMemory(ChatMemoryDO memory) {
+    @Override
+    public void disableMemory(ChatMemoryDO memory) {
+        memory.setStatus(MemoryStatus.DISABLED);
         exemplarService.removeExemplar(embeddingConfig.getMemoryCollectionName(memory.getAgentId()),
                 SqlExemplar.builder()
                         .question(memory.getQuestion())

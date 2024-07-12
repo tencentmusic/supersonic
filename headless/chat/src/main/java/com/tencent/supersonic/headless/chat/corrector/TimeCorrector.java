@@ -5,7 +5,6 @@ import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.jsqlparser.SqlAddHelper;
 import com.tencent.supersonic.common.jsqlparser.SqlDateSelectHelper;
-import com.tencent.supersonic.common.jsqlparser.SqlReplaceHelper;
 import com.tencent.supersonic.common.jsqlparser.SqlSelectHelper;
 import com.tencent.supersonic.common.jsqlparser.SqlRemoveHelper;
 import com.tencent.supersonic.common.jsqlparser.DateVisitor.DateBoundInfo;
@@ -37,8 +36,6 @@ public class TimeCorrector extends BaseSemanticCorrector {
         addDateIfNotExist(chatQueryContext, semanticParseInfo);
 
         removeDateIfExist(chatQueryContext, semanticParseInfo);
-
-        parserDateDiffFunction(semanticParseInfo);
 
         addLowerBoundDate(semanticParseInfo);
 
@@ -110,12 +107,6 @@ public class TimeCorrector extends BaseSemanticCorrector {
             }
             semanticParseInfo.getSqlInfo().setCorrectedS2SQL(correctS2SQL);
         }
-    }
-
-    private void parserDateDiffFunction(SemanticParseInfo semanticParseInfo) {
-        String correctS2SQL = semanticParseInfo.getSqlInfo().getCorrectedS2SQL();
-        correctS2SQL = SqlReplaceHelper.replaceFunction(correctS2SQL);
-        semanticParseInfo.getSqlInfo().setCorrectedS2SQL(correctS2SQL);
     }
 
 }

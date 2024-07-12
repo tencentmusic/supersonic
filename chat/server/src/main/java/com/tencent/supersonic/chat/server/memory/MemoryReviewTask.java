@@ -66,6 +66,10 @@ public class MemoryReviewTask {
                             if (matcher.find()) {
                                 m.setLlmReviewRet(MemoryReviewResult.valueOf(matcher.group(1)));
                                 m.setLlmReviewCmt(matcher.group(2));
+                                // directly enable memory if the LLM determines it positive
+                                if (MemoryReviewResult.POSITIVE.equals(m.getLlmReviewRet())) {
+                                    memoryService.enableMemory(m);
+                                }
                                 memoryService.updateMemory(m);
                             }
                         } else {

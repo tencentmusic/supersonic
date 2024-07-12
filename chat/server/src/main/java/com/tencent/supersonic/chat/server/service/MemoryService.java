@@ -16,6 +16,10 @@ public interface MemoryService {
 
     void updateMemory(ChatMemoryDO memory);
 
+    void enableMemory(ChatMemoryDO memory);
+
+    void disableMemory(ChatMemoryDO memory);
+
     PageInfo<ChatMemoryDO> pageMemories(PageMemoryReq pageMemoryReq);
 
     List<ChatMemoryDO> getMemories(ChatMemoryFilter chatMemoryFilter);
