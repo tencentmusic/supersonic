@@ -1,20 +1,25 @@
 package com.tencent.supersonic.chat.server.util;
 
 import com.tencent.supersonic.chat.server.agent.Agent;
-import com.tencent.supersonic.chat.server.pojo.ChatParseContext;
+import com.tencent.supersonic.chat.server.pojo.ParseContext;
 import com.tencent.supersonic.common.pojo.enums.Text2SQLType;
 import com.tencent.supersonic.common.util.BeanMapper;
 import com.tencent.supersonic.headless.api.pojo.request.QueryNLReq;
+import com.tencent.supersonic.chat.server.pojo.ChatContext;
 import org.apache.commons.collections.MapUtils;
 
 import java.util.Objects;
 
 public class QueryReqConverter {
 
-    public static QueryNLReq buildText2SqlQueryReq(ChatParseContext chatParseContext) {
+    public static QueryNLReq buildText2SqlQueryReq(ParseContext parseContext) {
+        return buildText2SqlQueryReq(parseContext, null);
+    }
+
+    public static QueryNLReq buildText2SqlQueryReq(ParseContext parseContext, ChatContext chatCtx) {
         QueryNLReq queryNLReq = new QueryNLReq();
-        BeanMapper.mapper(chatParseContext, queryNLReq);
-        Agent agent = chatParseContext.getAgent();
+        BeanMapper.mapper(parseContext, queryNLReq);
+        Agent agent = parseContext.getAgent();
         if (agent == null) {
             return queryNLReq;
         }
@@ -39,6 +44,9 @@ public class QueryReqConverter {
         }
         queryNLReq.setModelConfig(agent.getModelConfig());
         queryNLReq.setPromptConfig(agent.getPromptConfig());
+        if (chatCtx != null) {
+            queryNLReq.setContextParseInfo(chatCtx.getParseInfo());
+        }
         return queryNLReq;
     }
 

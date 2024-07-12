@@ -11,7 +11,7 @@ import com.tencent.supersonic.chat.server.plugin.build.WebBase;
 import com.tencent.supersonic.chat.server.plugin.event.PluginAddEvent;
 import com.tencent.supersonic.chat.server.plugin.event.PluginDelEvent;
 import com.tencent.supersonic.chat.server.plugin.event.PluginUpdateEvent;
-import com.tencent.supersonic.chat.server.pojo.ChatParseContext;
+import com.tencent.supersonic.chat.server.pojo.ParseContext;
 import com.tencent.supersonic.chat.server.service.PluginService;
 import com.tencent.supersonic.common.config.EmbeddingConfig;
 import com.tencent.supersonic.common.service.EmbeddingService;
@@ -52,9 +52,9 @@ public class PluginManager {
     @Autowired
     private EmbeddingService embeddingService;
 
-    public static List<ChatPlugin> getPluginAgentCanSupport(ChatParseContext chatParseContext) {
+    public static List<ChatPlugin> getPluginAgentCanSupport(ParseContext parseContext) {
         PluginService pluginService = ContextUtils.getBean(PluginService.class);
-        Agent agent = chatParseContext.getAgent();
+        Agent agent = parseContext.getAgent();
         List<ChatPlugin> plugins = pluginService.getPluginList();
         if (Objects.isNull(agent)) {
             return plugins;
@@ -191,9 +191,9 @@ public class PluginManager {
         return String.valueOf(Integer.parseInt(id) / 1000);
     }
 
-    public static Pair<Boolean, Set<Long>> resolve(ChatPlugin plugin, ChatParseContext chatParseContext) {
-        SchemaMapInfo schemaMapInfo = chatParseContext.getMapInfo();
-        Set<Long> pluginMatchedDataSet = getPluginMatchedDataSet(plugin, chatParseContext);
+    public static Pair<Boolean, Set<Long>> resolve(ChatPlugin plugin, ParseContext parseContext) {
+        SchemaMapInfo schemaMapInfo = parseContext.getMapInfo();
+        Set<Long> pluginMatchedDataSet = getPluginMatchedDataSet(plugin, parseContext);
         if (CollectionUtils.isEmpty(pluginMatchedDataSet) && !plugin.isContainsAllDataSet()) {
             return Pair.of(false, Sets.newHashSet());
         }
@@ -259,8 +259,8 @@ public class PluginManager {
                 .collect(Collectors.toList());
     }
 
-    private static Set<Long> getPluginMatchedDataSet(ChatPlugin plugin, ChatParseContext chatParseContext) {
-        Set<Long> matchedDataSets = chatParseContext.getMapInfo().getMatchedDataSetInfos();
+    private static Set<Long> getPluginMatchedDataSet(ChatPlugin plugin, ParseContext parseContext) {
+        Set<Long> matchedDataSets = parseContext.getMapInfo().getMatchedDataSetInfos();
         if (plugin.isContainsAllDataSet()) {
             return Sets.newHashSet(plugin.getDefaultMode());
         }

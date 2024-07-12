@@ -2,7 +2,7 @@ package com.tencent.supersonic.chat.server.executor;
 
 import com.tencent.supersonic.chat.api.pojo.enums.MemoryStatus;
 import com.tencent.supersonic.chat.server.persistence.dataobject.ChatMemoryDO;
-import com.tencent.supersonic.chat.server.pojo.ChatExecuteContext;
+import com.tencent.supersonic.chat.server.pojo.ExecuteContext;
 import com.tencent.supersonic.chat.server.service.MemoryService;
 import com.tencent.supersonic.chat.server.util.ResultFormatter;
 import com.tencent.supersonic.common.pojo.QueryColumn;
@@ -12,10 +12,10 @@ import com.tencent.supersonic.headless.api.pojo.request.QuerySqlReq;
 import com.tencent.supersonic.headless.api.pojo.response.QueryResult;
 import com.tencent.supersonic.headless.api.pojo.response.QueryState;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
-import com.tencent.supersonic.headless.chat.ChatContext;
+import com.tencent.supersonic.chat.server.pojo.ChatContext;
 import com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMSqlQuery;
 import com.tencent.supersonic.headless.server.facade.service.SemanticLayerService;
-import com.tencent.supersonic.headless.server.web.service.ChatContextService;
+import com.tencent.supersonic.chat.server.service.ChatContextService;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.StringUtils;
 
@@ -25,12 +25,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-public class SqlExecutor implements ChatExecutor {
+public class SqlExecutor implements ChatQueryExecutor {
 
     @SneakyThrows
     @Override
-    public QueryResult execute(ChatExecuteContext chatExecuteContext) {
-        QueryResult queryResult = doExecute(chatExecuteContext);
+    public QueryResult execute(ExecuteContext executeContext) {
+        QueryResult queryResult = doExecute(executeContext);
 
         if (queryResult != null) {
             String textResult = ResultFormatter.transform2TextNew(queryResult.getQueryColumns(),
@@ -41,13 +41,13 @@ public class SqlExecutor implements ChatExecutor {
                     && queryResult.getQueryMode().equals(LLMSqlQuery.QUERY_MODE)) {
                 MemoryService memoryService = ContextUtils.getBean(MemoryService.class);
                 memoryService.createMemory(ChatMemoryDO.builder()
-                        .agentId(chatExecuteContext.getAgentId())
+                        .agentId(executeContext.getAgent().getId())
                         .status(MemoryStatus.PENDING)
-                        .question(chatExecuteContext.getQueryText())
-                        .s2sql(chatExecuteContext.getParseInfo().getSqlInfo().getParsedS2SQL())
-                        .dbSchema(buildSchemaStr(chatExecuteContext.getParseInfo()))
-                        .createdBy(chatExecuteContext.getUser().getName())
-                        .updatedBy(chatExecuteContext.getUser().getName())
+                        .question(executeContext.getQueryText())
+                        .s2sql(executeContext.getParseInfo().getSqlInfo().getParsedS2SQL())
+                        .dbSchema(buildSchemaStr(executeContext.getParseInfo()))
+                        .createdBy(executeContext.getUser().getName())
+                        .updatedBy(executeContext.getUser().getName())
                         .createdAt(new Date())
                         .build());
             }
@@ -57,12 +57,12 @@ public class SqlExecutor implements ChatExecutor {
     }
 
     @SneakyThrows
-    private QueryResult doExecute(ChatExecuteContext chatExecuteContext) {
+    private QueryResult doExecute(ExecuteContext executeContext) {
         SemanticLayerService semanticLayer = ContextUtils.getBean(SemanticLayerService.class);
         ChatContextService chatContextService = ContextUtils.getBean(ChatContextService.class);
 
-        ChatContext chatCtx = chatContextService.getOrCreateContext(chatExecuteContext.getChatId());
-        SemanticParseInfo parseInfo = chatExecuteContext.getParseInfo();
+        ChatContext chatCtx = chatContextService.getOrCreateContext(executeContext.getChatId());
+        SemanticParseInfo parseInfo = executeContext.getParseInfo();
         if (Objects.isNull(parseInfo.getSqlInfo())
                 || StringUtils.isBlank(parseInfo.getSqlInfo().getCorrectedS2SQL())) {
             return null;
@@ -74,8 +74,10 @@ public class SqlExecutor implements ChatExecutor {
         sqlReq.setSqlInfo(parseInfo.getSqlInfo());
         sqlReq.setDataSetId(parseInfo.getDataSetId());
         long startTime = System.currentTimeMillis();
-        SemanticQueryResp queryResp = semanticLayer.queryByReq(sqlReq, chatExecuteContext.getUser());
+        SemanticQueryResp queryResp = semanticLayer.queryByReq(sqlReq, executeContext.getUser());
         QueryResult queryResult = new QueryResult();
+        queryResult.setChatContext(parseInfo);
+        queryResult.setQueryMode(parseInfo.getQueryMode());
         if (queryResp != null) {
             queryResult.setQueryAuthorization(queryResp.getQueryAuthorization());
             List<Map<String, Object>> resultList = queryResp == null ? new ArrayList<>()
@@ -85,7 +87,6 @@ public class SqlExecutor implements ChatExecutor {
             queryResult.setQuerySql(queryResp.getSql());
             queryResult.setQueryResults(resultList);
             queryResult.setQueryColumns(columns);
-            queryResult.setQueryMode(parseInfo.getQueryMode());
             queryResult.setQueryState(QueryState.SUCCESS);
 
             chatCtx.setParseInfo(parseInfo);
@@ -94,7 +95,6 @@ public class SqlExecutor implements ChatExecutor {
             queryResult.setQueryState(QueryState.INVALID);
             queryResult.setQueryMode(parseInfo.getQueryMode());
         }
-        queryResult.setChatContext(chatCtx.getParseInfo());
         return queryResult;
     }
 

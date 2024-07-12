@@ -5,7 +5,7 @@ import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.auth.api.authorization.service.AuthService;
 import com.tencent.supersonic.chat.server.service.AgentService;
 import com.tencent.supersonic.chat.server.service.ChatManageService;
-import com.tencent.supersonic.chat.server.service.ChatService;
+import com.tencent.supersonic.chat.server.service.ChatQueryService;
 import com.tencent.supersonic.chat.server.service.PluginService;
 import com.tencent.supersonic.common.service.SystemConfigService;
 import com.tencent.supersonic.headless.api.pojo.DataSetModelConfig;
@@ -75,7 +75,7 @@ public abstract class S2BaseDemo implements CommandLineRunner {
     @Autowired
     protected TagObjectService tagObjectService;
     @Autowired
-    protected ChatService chatService;
+    protected ChatQueryService chatQueryService;
     @Autowired
     protected ChatManageService chatManageService;
     @Autowired

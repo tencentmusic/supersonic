@@ -1,12 +1,12 @@
-package com.tencent.supersonic.headless.server.persistence.repository.impl;
+package com.tencent.supersonic.chat.server.persistence.repository.impl;
 
 import com.google.gson.Gson;
+import com.tencent.supersonic.chat.server.persistence.repository.ChatContextRepository;
+import com.tencent.supersonic.chat.server.pojo.ChatContext;
 import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
-import com.tencent.supersonic.headless.chat.ChatContext;
-import com.tencent.supersonic.headless.server.persistence.dataobject.ChatContextDO;
-import com.tencent.supersonic.headless.server.persistence.mapper.ChatContextMapper;
-import com.tencent.supersonic.headless.server.persistence.repository.ChatContextRepository;
+import com.tencent.supersonic.chat.server.persistence.dataobject.ChatContextDO;
+import com.tencent.supersonic.chat.server.persistence.mapper.ChatContextMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Repository;

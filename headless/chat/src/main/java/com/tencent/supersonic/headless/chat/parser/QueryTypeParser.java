@@ -11,7 +11,6 @@ import com.tencent.supersonic.headless.api.pojo.SqlInfo;
 import com.tencent.supersonic.headless.chat.query.SemanticQuery;
 import com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMSqlQuery;
 import com.tencent.supersonic.headless.chat.query.rule.RuleSemanticQuery;
-import com.tencent.supersonic.headless.chat.ChatContext;
 import com.tencent.supersonic.headless.chat.ChatQueryContext;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
@@ -29,7 +28,7 @@ import java.util.stream.Collectors;
 public class QueryTypeParser implements SemanticParser {
 
     @Override
-    public void parse(ChatQueryContext chatQueryContext, ChatContext chatContext) {
+    public void parse(ChatQueryContext chatQueryContext) {
 
         List<SemanticQuery> candidateQueries = chatQueryContext.getCandidateQueries();
         User user = chatQueryContext.getUser();

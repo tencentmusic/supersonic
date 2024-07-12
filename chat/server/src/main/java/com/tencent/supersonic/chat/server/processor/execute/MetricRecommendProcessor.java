@@ -1,7 +1,7 @@
 package com.tencent.supersonic.chat.server.processor.execute;
 
 import com.alibaba.fastjson.JSONObject;
-import com.tencent.supersonic.chat.server.pojo.ChatExecuteContext;
+import com.tencent.supersonic.chat.server.pojo.ExecuteContext;
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.enums.DictWordType;
 import com.tencent.supersonic.common.pojo.enums.QueryType;
@@ -34,8 +34,8 @@ public class MetricRecommendProcessor implements ExecuteResultProcessor {
     private static final int METRIC_RECOMMEND_SIZE = 5;
 
     @Override
-    public void process(ChatExecuteContext chatExecuteContext, QueryResult queryResult) {
-        fillSimilarMetric(chatExecuteContext.getParseInfo());
+    public void process(ExecuteContext executeContext, QueryResult queryResult) {
+        fillSimilarMetric(executeContext.getParseInfo());
     }
 
     private void fillSimilarMetric(SemanticParseInfo parseInfo) {

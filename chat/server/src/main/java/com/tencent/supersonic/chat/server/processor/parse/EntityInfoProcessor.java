@@ -1,6 +1,6 @@
 package com.tencent.supersonic.chat.server.processor.parse;
 
-import com.tencent.supersonic.chat.server.pojo.ChatParseContext;
+import com.tencent.supersonic.chat.server.pojo.ParseContext;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.headless.api.pojo.DataSetSchema;
 import com.tencent.supersonic.headless.api.pojo.EntityInfo;
@@ -19,7 +19,7 @@ import java.util.List;
 public class EntityInfoProcessor implements ParseResultProcessor {
 
     @Override
-    public void process(ChatParseContext chatParseContext, ParseResp parseResp) {
+    public void process(ParseContext parseContext, ParseResp parseResp) {
         List<SemanticParseInfo> selectedParses = parseResp.getSelectedParses();
         if (CollectionUtils.isEmpty(selectedParses)) {
             return;
@@ -33,7 +33,7 @@ public class EntityInfoProcessor implements ParseResultProcessor {
             //1. set entity info
             SemanticLayerService semanticService = ContextUtils.getBean(SemanticLayerService.class);
             DataSetSchema dataSetSchema = semanticService.getDataSetSchema(parseInfo.getDataSetId());
-            EntityInfo entityInfo = semanticService.getEntityInfo(parseInfo, dataSetSchema, chatParseContext.getUser());
+            EntityInfo entityInfo = semanticService.getEntityInfo(parseInfo, dataSetSchema, parseContext.getUser());
             if (QueryManager.isTagQuery(queryMode)
                     || QueryManager.isMetricQuery(queryMode)) {
                 parseInfo.setEntityInfo(entityInfo);

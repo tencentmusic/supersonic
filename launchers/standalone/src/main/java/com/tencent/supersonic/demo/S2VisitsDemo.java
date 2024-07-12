@@ -137,11 +137,11 @@ public class S2VisitsDemo extends S2BaseDemo {
     public void addSampleChats(Integer agentId) {
         Long chatId = chatManageService.addChat(user, "样例对话1", agentId);
 
-        chatService.parseAndExecute(chatId.intValue(), agentId, "超音数 访问次数");
-        chatService.parseAndExecute(chatId.intValue(), agentId, "按部门统计");
-        chatService.parseAndExecute(chatId.intValue(), agentId, "查询近30天");
-        chatService.parseAndExecute(chatId.intValue(), agentId, "alice 停留时长");
-        chatService.parseAndExecute(chatId.intValue(), agentId, "访问次数最高的部门");
+        chatQueryService.parseAndExecute(chatId.intValue(), agentId, "超音数 访问次数");
+        chatQueryService.parseAndExecute(chatId.intValue(), agentId, "按部门统计");
+        chatQueryService.parseAndExecute(chatId.intValue(), agentId, "查询近30天");
+        chatQueryService.parseAndExecute(chatId.intValue(), agentId, "alice 停留时长");
+        chatQueryService.parseAndExecute(chatId.intValue(), agentId, "访问次数最高的部门");
     }
 
     private Integer addAgent(long dataSetId) {

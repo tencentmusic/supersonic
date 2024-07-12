@@ -1,7 +1,7 @@
 package com.tencent.supersonic.chat.server.processor.execute;
 
 import com.google.common.collect.Lists;
-import com.tencent.supersonic.chat.server.pojo.ChatExecuteContext;
+import com.tencent.supersonic.chat.server.pojo.ExecuteContext;
 import com.tencent.supersonic.common.pojo.enums.QueryType;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.headless.api.pojo.DataSetSchema;
@@ -28,8 +28,8 @@ public class DimensionRecommendProcessor implements ExecuteResultProcessor {
     private static final int recommend_dimension_size = 5;
 
     @Override
-    public void process(ChatExecuteContext chatExecuteContext, QueryResult queryResult) {
-        SemanticParseInfo semanticParseInfo = chatExecuteContext.getParseInfo();
+    public void process(ExecuteContext executeContext, QueryResult queryResult) {
+        SemanticParseInfo semanticParseInfo = executeContext.getParseInfo();
         if (!QueryType.METRIC.equals(semanticParseInfo.getQueryType())
                 || CollectionUtils.isEmpty(semanticParseInfo.getMetrics())) {
             return;

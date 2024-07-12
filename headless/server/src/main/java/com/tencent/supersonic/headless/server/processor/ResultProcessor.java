@@ -1,7 +1,6 @@
 package com.tencent.supersonic.headless.server.processor;
 
 import com.tencent.supersonic.headless.api.pojo.response.ParseResp;
-import com.tencent.supersonic.headless.chat.ChatContext;
 import com.tencent.supersonic.headless.chat.ChatQueryContext;
 
 /**
@@ -9,6 +8,6 @@ import com.tencent.supersonic.headless.chat.ChatQueryContext;
  */
 public interface ResultProcessor {
 
-    void process(ParseResp parseResp, ChatQueryContext chatQueryContext, ChatContext chatContext);
+    void process(ParseResp parseResp, ChatQueryContext chatQueryContext);
 
 }

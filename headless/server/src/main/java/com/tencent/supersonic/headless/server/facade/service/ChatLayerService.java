@@ -1,7 +1,6 @@
 package com.tencent.supersonic.headless.server.facade.service;
 
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
-import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.api.pojo.SqlEvaluation;
 import com.tencent.supersonic.headless.api.pojo.request.DimensionValueReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryDataReq;
@@ -16,13 +15,11 @@ import com.tencent.supersonic.headless.api.pojo.response.QueryResult;
 /***dd
  * SemanticLayerService for query and search
  */
-public interface ChatQueryService {
+public interface ChatLayerService {
 
     MapResp performMapping(QueryNLReq queryNLReq);
 
     ParseResp performParsing(QueryNLReq queryNLReq);
-
-    SemanticParseInfo queryContext(Integer chatId);
 
     QueryResult executeDirectQuery(QueryDataReq queryData, User user) throws Exception;
 

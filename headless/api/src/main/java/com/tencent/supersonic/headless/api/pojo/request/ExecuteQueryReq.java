@@ -11,7 +11,6 @@ import lombok.Data;
 public class ExecuteQueryReq {
     private User user;
     private Long queryId;
-    private Integer chatId;
     private String queryText;
     private SemanticParseInfo parseInfo;
     private boolean saveAnswer;

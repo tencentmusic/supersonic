@@ -183,7 +183,7 @@ public class ChatQueryRepositoryImpl implements ChatQueryRepository {
     public List<ParseResp> getContextualParseInfo(Integer chatId) {
         List<ChatParseDO> chatParseDOList = chatParseMapper.getContextualParseInfo(chatId);
         List<ParseResp> semanticParseInfoList = chatParseDOList.stream().map(parseInfo -> {
-            ParseResp parseResp = new ParseResp(chatId, parseInfo.getQueryText());
+            ParseResp parseResp = new ParseResp(parseInfo.getQueryText());
             List<SemanticParseInfo> selectedParses = new ArrayList<>();
             selectedParses.add(JSONObject.parseObject(parseInfo.getParseInfo(), SemanticParseInfo.class));
             parseResp.setSelectedParses(selectedParses);

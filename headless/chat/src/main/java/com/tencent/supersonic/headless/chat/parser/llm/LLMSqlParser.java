@@ -2,7 +2,6 @@ package com.tencent.supersonic.headless.chat.parser.llm;
 
 
 import com.tencent.supersonic.common.util.ContextUtils;
-import com.tencent.supersonic.headless.chat.ChatContext;
 import com.tencent.supersonic.headless.chat.ChatQueryContext;
 import com.tencent.supersonic.headless.chat.parser.SemanticParser;
 import com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMReq;
@@ -23,7 +22,7 @@ import org.apache.commons.collections.MapUtils;
 public class LLMSqlParser implements SemanticParser {
 
     @Override
-    public void parse(ChatQueryContext queryCtx, ChatContext chatCtx) {
+    public void parse(ChatQueryContext queryCtx) {
         try {
             LLMRequestService requestService = ContextUtils.getBean(LLMRequestService.class);
             //1.determine whether to skip this parser.

@@ -1,17 +1,17 @@
 package com.tencent.supersonic.chat.server.pojo;
 
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
+import com.tencent.supersonic.chat.server.agent.Agent;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import lombok.Data;
 
 @Data
-public class ChatExecuteContext {
+public class ExecuteContext {
     private User user;
-    private Integer agentId;
-    private Long queryId;
-    private Integer chatId;
-    private int parseId;
     private String queryText;
+    private Agent agent;
+    private Integer chatId;
+    private Long queryId;
     private boolean saveAnswer;
     private SemanticParseInfo parseInfo;
 }

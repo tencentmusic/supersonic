@@ -4,7 +4,7 @@ import com.tencent.supersonic.chat.server.agent.Agent;
 import com.tencent.supersonic.chat.server.agent.MultiTurnConfig;
 import com.tencent.supersonic.chat.server.parser.ParserConfig;
 import com.tencent.supersonic.chat.server.persistence.repository.ChatQueryRepository;
-import com.tencent.supersonic.chat.server.pojo.ChatExecuteContext;
+import com.tencent.supersonic.chat.server.pojo.ExecuteContext;
 import com.tencent.supersonic.chat.server.service.AgentService;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.headless.api.pojo.response.ParseResp;
@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 
 import static com.tencent.supersonic.chat.server.parser.ParserConfig.PARSER_MULTI_TURN_ENABLE;
 
-public class PlainTextExecutor implements ChatExecutor {
+public class PlainTextExecutor implements ChatQueryExecutor {
 
     private static final String INSTRUCTION = ""
             + "#Role: You are a nice person to talk to.\n"
@@ -34,34 +34,34 @@ public class PlainTextExecutor implements ChatExecutor {
             + "#Your response: ";
 
     @Override
-    public QueryResult execute(ChatExecuteContext chatExecuteContext) {
-        if (!"PLAIN_TEXT".equals(chatExecuteContext.getParseInfo().getQueryMode())) {
+    public QueryResult execute(ExecuteContext executeContext) {
+        if (!"PLAIN_TEXT".equals(executeContext.getParseInfo().getQueryMode())) {
             return null;
         }
 
-        String promptStr = String.format(INSTRUCTION, getHistoryInputs(chatExecuteContext),
-                chatExecuteContext.getQueryText());
+        String promptStr = String.format(INSTRUCTION, getHistoryInputs(executeContext),
+                executeContext.getQueryText());
         Prompt prompt = PromptTemplate.from(promptStr).apply(Collections.EMPTY_MAP);
 
         AgentService agentService = ContextUtils.getBean(AgentService.class);
-        Agent chatAgent = agentService.getAgent(chatExecuteContext.getAgentId());
+        Agent chatAgent = agentService.getAgent(executeContext.getAgent().getId());
 
         ChatLanguageModel chatLanguageModel = ModelProvider.getChatModel(chatAgent.getModelConfig());
         Response<AiMessage> response = chatLanguageModel.generate(prompt.toUserMessage());
 
         QueryResult result = new QueryResult();
         result.setQueryState(QueryState.SUCCESS);
-        result.setQueryMode(chatExecuteContext.getParseInfo().getQueryMode());
+        result.setQueryMode(executeContext.getParseInfo().getQueryMode());
         result.setTextResult(response.content().text());
 
         return result;
     }
 
-    private String getHistoryInputs(ChatExecuteContext chatExecuteContext) {
+    private String getHistoryInputs(ExecuteContext executeContext) {
         StringBuilder historyInput = new StringBuilder();
 
         AgentService agentService = ContextUtils.getBean(AgentService.class);
-        Agent chatAgent = agentService.getAgent(chatExecuteContext.getAgentId());
+        Agent chatAgent = agentService.getAgent(executeContext.getAgent().getId());
 
         ParserConfig parserConfig = ContextUtils.getBean(ParserConfig.class);
         MultiTurnConfig agentMultiTurnConfig = chatAgent.getMultiTurnConfig();
@@ -70,7 +70,7 @@ public class PlainTextExecutor implements ChatExecutor {
                 ? agentMultiTurnConfig.isEnableMultiTurn() : globalMultiTurnConfig;
 
         if (Boolean.TRUE.equals(multiTurnConfig)) {
-            List<ParseResp> parseResps = getHistoryParseResult(chatExecuteContext.getChatId(), 5);
+            List<ParseResp> parseResps = getHistoryParseResult(executeContext.getChatId(), 5);
             parseResps.stream().forEach(p -> {
                 historyInput.append(p.getQueryText());
                 historyInput.append(";");

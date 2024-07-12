@@ -1,6 +1,6 @@
 package com.tencent.supersonic.chat.server.service;
 
-import com.tencent.supersonic.headless.server.persistence.dataobject.StatisticsDO;
+import com.tencent.supersonic.chat.server.persistence.dataobject.StatisticsDO;
 
 import java.util.List;
 

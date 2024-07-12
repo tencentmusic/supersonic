@@ -1,6 +1,6 @@
-package com.tencent.supersonic.headless.server.persistence.mapper;
+package com.tencent.supersonic.chat.server.persistence.mapper;
 
-import com.tencent.supersonic.headless.server.persistence.dataobject.ChatContextDO;
+import com.tencent.supersonic.chat.server.persistence.dataobject.ChatContextDO;
 import org.apache.ibatis.annotations.Mapper;
 
 @Mapper

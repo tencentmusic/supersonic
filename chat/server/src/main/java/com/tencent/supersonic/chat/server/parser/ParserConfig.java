@@ -5,7 +5,7 @@ import com.tencent.supersonic.common.pojo.Parameter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-@Service("ChatParserConfig")
+@Service("ChatQueryParserConfig")
 @Slf4j
 public class ParserConfig extends ParameterConfig {
 

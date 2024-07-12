@@ -1,8 +1,8 @@
 package com.tencent.supersonic.chat.server.service.impl;
 
-import com.tencent.supersonic.headless.server.persistence.dataobject.StatisticsDO;
+import com.tencent.supersonic.chat.server.persistence.dataobject.StatisticsDO;
 import com.tencent.supersonic.chat.server.service.StatisticsService;
-import com.tencent.supersonic.headless.server.persistence.mapper.StatisticsMapper;
+import com.tencent.supersonic.chat.server.persistence.mapper.StatisticsMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;

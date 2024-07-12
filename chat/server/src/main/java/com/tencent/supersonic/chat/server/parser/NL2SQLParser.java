@@ -3,7 +3,8 @@ package com.tencent.supersonic.chat.server.parser;
 import com.tencent.supersonic.chat.server.agent.MultiTurnConfig;
 import com.tencent.supersonic.chat.server.persistence.repository.ChatQueryRepository;
 import com.tencent.supersonic.chat.server.plugin.PluginQueryManager;
-import com.tencent.supersonic.chat.server.pojo.ChatParseContext;
+import com.tencent.supersonic.chat.server.pojo.ParseContext;
+import com.tencent.supersonic.chat.server.service.ChatContextService;
 import com.tencent.supersonic.chat.server.util.QueryReqConverter;
 import com.tencent.supersonic.common.config.EmbeddingConfig;
 import com.tencent.supersonic.common.pojo.SqlExemplar;
@@ -17,7 +18,8 @@ import com.tencent.supersonic.headless.api.pojo.request.QueryFilter;
 import com.tencent.supersonic.headless.api.pojo.request.QueryNLReq;
 import com.tencent.supersonic.headless.api.pojo.response.MapResp;
 import com.tencent.supersonic.headless.api.pojo.response.ParseResp;
-import com.tencent.supersonic.headless.server.facade.service.ChatQueryService;
+import com.tencent.supersonic.chat.server.pojo.ChatContext;
+import com.tencent.supersonic.headless.server.facade.service.ChatLayerService;
 import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.input.Prompt;
@@ -42,7 +44,7 @@ import java.util.stream.Collectors;
 import static com.tencent.supersonic.chat.server.parser.ParserConfig.PARSER_MULTI_TURN_ENABLE;
 
 @Slf4j
-public class NL2SQLParser implements ChatParser {
+public class NL2SQLParser implements ChatQueryParser {
 
     private static final Logger keyPipelineLog = LoggerFactory.getLogger("keyPipeline");
 
@@ -73,27 +75,30 @@ public class NL2SQLParser implements ChatParser {
             + "#Response: ";
 
     @Override
-    public void parse(ChatParseContext chatParseContext, ParseResp parseResp) {
-        if (!chatParseContext.enableNL2SQL() || checkSkip(parseResp)) {
+    public void parse(ParseContext parseContext, ParseResp parseResp) {
+        if (!parseContext.enableNL2SQL() || checkSkip(parseResp)) {
             return;
         }
+        ChatContextService chatContextService = ContextUtils.getBean(ChatContextService.class);
+        ChatContext chatCtx = chatContextService.getOrCreateContext(parseContext.getChatId());
+
         ChatLanguageModel chatLanguageModel = ModelProvider.getChatModel(
-                chatParseContext.getAgent().getModelConfig());
+                parseContext.getAgent().getModelConfig());
 
-        processMultiTurn(chatLanguageModel, chatParseContext);
-        QueryNLReq queryNLReq = QueryReqConverter.buildText2SqlQueryReq(chatParseContext);
-        addDynamicExemplars(chatParseContext.getAgent().getId(), queryNLReq);
+        processMultiTurn(chatLanguageModel, parseContext);
+        QueryNLReq queryNLReq = QueryReqConverter.buildText2SqlQueryReq(parseContext, chatCtx);
+        addDynamicExemplars(parseContext.getAgent().getId(), queryNLReq);
 
-        ChatQueryService chatQueryService = ContextUtils.getBean(ChatQueryService.class);
-        ParseResp text2SqlParseResp = chatQueryService.performParsing(queryNLReq);
+        ChatLayerService chatLayerService = ContextUtils.getBean(ChatLayerService.class);
+        ParseResp text2SqlParseResp = chatLayerService.performParsing(queryNLReq);
         if (ParseResp.ParseState.COMPLETED.equals(text2SqlParseResp.getState())) {
             parseResp.getSelectedParses().addAll(text2SqlParseResp.getSelectedParses());
         } else {
             parseResp.setErrorMsg(rewriteErrorMessage(chatLanguageModel,
-                    chatParseContext.getQueryText(),
+                    parseContext.getQueryText(),
                     text2SqlParseResp.getErrorMsg(),
                     queryNLReq.getDynamicExemplars(),
-                    chatParseContext.getAgent().getExamples()));
+                    parseContext.getAgent().getExamples()));
         }
         parseResp.setState(text2SqlParseResp.getState());
         parseResp.getParseTimeCost().setSqlTime(text2SqlParseResp.getParseTimeCost().getSqlTime());
@@ -155,9 +160,9 @@ public class NL2SQLParser implements ChatParser {
         parseInfo.setTextInfo(textBuilder.toString());
     }
 
-    private void processMultiTurn(ChatLanguageModel chatLanguageModel, ChatParseContext chatParseContext) {
+    private void processMultiTurn(ChatLanguageModel chatLanguageModel, ParseContext parseContext) {
         ParserConfig parserConfig = ContextUtils.getBean(ParserConfig.class);
-        MultiTurnConfig agentMultiTurnConfig = chatParseContext.getAgent().getMultiTurnConfig();
+        MultiTurnConfig agentMultiTurnConfig = parseContext.getAgent().getMultiTurnConfig();
         Boolean globalMultiTurnConfig = Boolean.valueOf(parserConfig.getParameterValue(PARSER_MULTI_TURN_ENABLE));
 
         Boolean multiTurnConfig = agentMultiTurnConfig != null
@@ -167,11 +172,11 @@ public class NL2SQLParser implements ChatParser {
         }
 
         // derive mapping result of current question and parsing result of last question.
-        ChatQueryService chatQueryService = ContextUtils.getBean(ChatQueryService.class);
-        QueryNLReq queryNLReq = QueryReqConverter.buildText2SqlQueryReq(chatParseContext);
-        MapResp currentMapResult = chatQueryService.performMapping(queryNLReq);
+        ChatLayerService chatLayerService = ContextUtils.getBean(ChatLayerService.class);
+        QueryNLReq queryNLReq = QueryReqConverter.buildText2SqlQueryReq(parseContext);
+        MapResp currentMapResult = chatLayerService.performMapping(queryNLReq);
 
-        List<ParseResp> historyParseResults = getHistoryParseResult(chatParseContext.getChatId(), 1);
+        List<ParseResp> historyParseResults = getHistoryParseResult(parseContext.getChatId(), 1);
         if (historyParseResults.size() == 0) {
             return;
         }
@@ -196,7 +201,7 @@ public class NL2SQLParser implements ChatParser {
         String rewrittenQuery = response.content().text();
         keyPipelineLog.info("NL2SQLParser modelResp:{}", rewrittenQuery);
 
-        chatParseContext.setQueryText(rewrittenQuery);
+        parseContext.setQueryText(rewrittenQuery);
         log.info("Last Query: {} Current Query: {}, Rewritten Query: {}",
                 lastParseResult.getQueryText(), currentMapResult.getQueryText(), rewrittenQuery);
     }

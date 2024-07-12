@@ -1,6 +1,5 @@
 package com.tencent.supersonic.headless.chat.parser;
 
-import com.tencent.supersonic.headless.chat.ChatContext;
 import com.tencent.supersonic.headless.chat.ChatQueryContext;
 
 /**
@@ -10,5 +9,5 @@ import com.tencent.supersonic.headless.chat.ChatQueryContext;
  */
 public interface SemanticParser {
 
-    void parse(ChatQueryContext chatQueryContext, ChatContext chatContext);
+    void parse(ChatQueryContext chatQueryContext);
 }

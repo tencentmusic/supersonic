@@ -7,7 +7,6 @@ import com.tencent.supersonic.headless.api.pojo.enums.ChatWorkflowState;
 import com.tencent.supersonic.headless.api.pojo.request.SemanticQueryReq;
 import com.tencent.supersonic.headless.api.pojo.response.ParseResp;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticTranslateResp;
-import com.tencent.supersonic.headless.chat.ChatContext;
 import com.tencent.supersonic.headless.chat.ChatQueryContext;
 import com.tencent.supersonic.headless.chat.corrector.SemanticCorrector;
 import com.tencent.supersonic.headless.chat.mapper.SchemaMapper;
@@ -39,7 +38,7 @@ public class ChatWorkflowEngine {
     private List<SemanticCorrector> semanticCorrectors = ComponentFactory.getSemanticCorrectors();
     private List<ResultProcessor> resultProcessors = ComponentFactory.getResultProcessors();
 
-    public void execute(ChatQueryContext queryCtx, ChatContext chatCtx, ParseResp parseResult) {
+    public void execute(ChatQueryContext queryCtx, ParseResp parseResult) {
         queryCtx.setChatWorkflowState(ChatWorkflowState.MAPPING);
         while (queryCtx.getChatWorkflowState() != ChatWorkflowState.FINISHED) {
             switch (queryCtx.getChatWorkflowState()) {
@@ -54,7 +53,7 @@ public class ChatWorkflowEngine {
                     }
                     break;
                 case PARSING:
-                    performParsing(queryCtx, chatCtx);
+                    performParsing(queryCtx);
                     if (queryCtx.getCandidateQueries().size() == 0) {
                         parseResult.setState(ParseResp.ParseState.FAILED);
                         parseResult.setErrorMsg("No semantic queries can be parsed out.");
@@ -75,7 +74,7 @@ public class ChatWorkflowEngine {
                     break;
                 case PROCESSING:
                 default:
-                    performProcessing(queryCtx, chatCtx, parseResult);
+                    performProcessing(queryCtx, parseResult);
                     if (parseResult.getState().equals(ParseResp.ParseState.PENDING)) {
                         parseResult.setState(ParseResp.ParseState.COMPLETED);
                     }
@@ -92,9 +91,9 @@ public class ChatWorkflowEngine {
         }
     }
 
-    private void performParsing(ChatQueryContext queryCtx, ChatContext chatCtx) {
+    private void performParsing(ChatQueryContext queryCtx) {
         semanticParsers.forEach(parser -> {
-            parser.parse(queryCtx, chatCtx);
+            parser.parse(queryCtx);
             log.debug("{} result:{}", parser.getClass().getSimpleName(), JsonUtil.toString(queryCtx));
         });
     }
@@ -116,9 +115,9 @@ public class ChatWorkflowEngine {
         }
     }
 
-    private void performProcessing(ChatQueryContext queryCtx, ChatContext chatCtx, ParseResp parseResult) {
+    private void performProcessing(ChatQueryContext queryCtx, ParseResp parseResult) {
         resultProcessors.forEach(processor -> {
-            processor.process(parseResult, queryCtx, chatCtx);
+            processor.process(parseResult, queryCtx);
         });
     }
 

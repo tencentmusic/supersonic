@@ -22,7 +22,6 @@ import com.tencent.supersonic.headless.chat.mapper.MatchText;
 import com.tencent.supersonic.headless.chat.mapper.ModelWithSemanticType;
 import com.tencent.supersonic.headless.chat.mapper.SearchMatchStrategy;
 import com.tencent.supersonic.headless.server.facade.service.RetrieveService;
-import com.tencent.supersonic.headless.server.web.service.ChatContextService;
 import com.tencent.supersonic.headless.server.web.service.DataSetService;
 import com.tencent.supersonic.headless.server.web.service.SchemaService;
 import lombok.extern.slf4j.Slf4j;
@@ -51,9 +50,6 @@ public class RetrieveServiceImpl implements RetrieveService {
 
     @Autowired
     private DataSetService dataSetService;
-
-    @Autowired
-    private ChatContextService chatContextService;
 
     @Autowired
     private SchemaService schemaService;
@@ -135,7 +131,7 @@ public class RetrieveServiceImpl implements RetrieveService {
 
         List<Long> possibleDataSets = NatureHelper.selectPossibleDataSets(originals);
 
-        Long contextDataset = chatContextService.getContextDataset(queryCtx.getChatId());
+        Long contextDataset = queryCtx.getContextParseInfo().getDataSetId();
 
         log.debug("possibleDataSets:{},dataSetInfoStat:{},contextDataset:{}",
                 possibleDataSets, dataSetInfoStat, contextDataset);

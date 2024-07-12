@@ -8,7 +8,6 @@ import com.tencent.supersonic.headless.api.pojo.SchemaElementMatch;
 import com.tencent.supersonic.headless.api.pojo.TimeDefaultConfig;
 import com.tencent.supersonic.headless.chat.ChatQueryContext;
 import com.tencent.supersonic.headless.chat.query.rule.RuleSemanticQuery;
-import com.tencent.supersonic.headless.chat.ChatContext;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDate;
@@ -36,8 +35,8 @@ public abstract class MetricSemanticQuery extends RuleSemanticQuery {
     }
 
     @Override
-    public void fillParseInfo(ChatQueryContext chatQueryContext, ChatContext chatContext) {
-        super.fillParseInfo(chatQueryContext, chatContext);
+    public void fillParseInfo(ChatQueryContext chatQueryContext) {
+        super.fillParseInfo(chatQueryContext);
         parseInfo.setLimit(METRIC_MAX_RESULTS);
         if (parseInfo.getDateInfo() == null) {
             DataSetSchema dataSetSchema =

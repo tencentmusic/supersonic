@@ -7,14 +7,14 @@ import com.tencent.supersonic.headless.api.pojo.request.QueryFilters;
 import lombok.Data;
 
 @Data
-public class ChatParseContext {
-    private String queryText;
-    private Integer chatId;
-    private Agent agent;
+public class ParseContext {
     private User user;
+    private String queryText;
+    private Agent agent;
+    private Integer chatId;
     private QueryFilters queryFilters;
     private boolean saveAnswer = true;
-    private SchemaMapInfo mapInfo = new SchemaMapInfo();
+    private SchemaMapInfo mapInfo;
 
     public boolean enableNL2SQL() {
         if (agent == null) {

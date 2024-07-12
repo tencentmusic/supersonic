@@ -10,7 +10,6 @@ import java.util.stream.Collectors;
 
 @Data
 public class ParseResp {
-    private Integer chatId;
     private String queryText;
     private Long queryId;
     private ParseState state = ParseState.PENDING;
@@ -24,8 +23,7 @@ public class ParseResp {
         FAILED
     }
 
-    public ParseResp(Integer chatId, String queryText) {
-        this.chatId = chatId;
+    public ParseResp(String queryText) {
         this.queryText = queryText;
         parseTimeCost.setParseStartTime(System.currentTimeMillis());
     }

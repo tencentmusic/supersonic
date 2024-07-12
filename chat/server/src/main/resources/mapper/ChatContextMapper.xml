@@ -3,10 +3,10 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 
-<mapper namespace="com.tencent.supersonic.headless.server.persistence.mapper.ChatContextMapper">
+<mapper namespace="com.tencent.supersonic.chat.server.persistence.mapper.ChatContextMapper">
 
     <resultMap id="ChatContextDO"
-               type="com.tencent.supersonic.headless.server.persistence.dataobject.ChatContextDO">
+               type="com.tencent.supersonic.chat.server.persistence.dataobject.ChatContextDO">
         <id column="chat_id" property="chatId"/>
         <result column="modified_at" property="modifiedAt"/>
         <result column="user" property="user"/>
@@ -20,7 +20,7 @@
         from s2_chat_context where chat_id=#{chatId} limit 1
     </select>
 
-    <insert id="addContext" parameterType="com.tencent.supersonic.headless.server.persistence.dataobject.ChatContextDO" >
+    <insert id="addContext" parameterType="com.tencent.supersonic.chat.server.persistence.dataobject.ChatContextDO" >
         insert into s2_chat_context  (chat_id,user,query_text,semantic_parse) values (#{chatId}, #{user},#{queryText}, #{semanticParse})
     </insert>
     <update id="updateContext">

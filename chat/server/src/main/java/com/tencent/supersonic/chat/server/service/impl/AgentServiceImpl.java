@@ -9,7 +9,7 @@ import com.tencent.supersonic.chat.server.persistence.dataobject.AgentDO;
 import com.tencent.supersonic.chat.server.persistence.dataobject.ChatMemoryDO;
 import com.tencent.supersonic.chat.server.persistence.mapper.AgentDOMapper;
 import com.tencent.supersonic.chat.server.service.AgentService;
-import com.tencent.supersonic.chat.server.service.ChatService;
+import com.tencent.supersonic.chat.server.service.ChatQueryService;
 import com.tencent.supersonic.chat.server.service.MemoryService;
 import com.tencent.supersonic.chat.server.util.LLMConnHelper;
 import com.tencent.supersonic.common.config.ChatModelConfig;
@@ -36,7 +36,7 @@ public class AgentServiceImpl extends ServiceImpl<AgentDOMapper, AgentDO>
     private MemoryService memoryService;
 
     @Autowired
-    private ChatService chatService;
+    private ChatQueryService chatQueryService;
 
     private ExecutorService executorService = Executors.newFixedThreadPool(1);
 
@@ -103,7 +103,7 @@ public class AgentServiceImpl extends ServiceImpl<AgentDOMapper, AgentDO>
                 continue;
             }
             try {
-                chatService.parseAndExecute(-1, agent.getId(), example);
+                chatQueryService.parseAndExecute(-1, agent.getId(), example);
             } catch (Exception e) {
                 log.warn("agent:{} example execute failed:{}", agent.getName(), example);
             }

@@ -44,7 +44,6 @@ import com.tencent.supersonic.headless.api.pojo.response.ParseResp;
 import com.tencent.supersonic.headless.api.pojo.response.QueryResult;
 import com.tencent.supersonic.headless.api.pojo.response.QueryState;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
-import com.tencent.supersonic.headless.chat.ChatContext;
 import com.tencent.supersonic.headless.chat.ChatQueryContext;
 import com.tencent.supersonic.headless.chat.corrector.GrammarCorrector;
 import com.tencent.supersonic.headless.chat.corrector.SchemaCorrector;
@@ -57,12 +56,11 @@ import com.tencent.supersonic.headless.chat.knowledge.helper.NatureHelper;
 import com.tencent.supersonic.headless.chat.query.QueryManager;
 import com.tencent.supersonic.headless.chat.query.SemanticQuery;
 import com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMSqlQuery;
-import com.tencent.supersonic.headless.server.facade.service.ChatQueryService;
+import com.tencent.supersonic.headless.server.facade.service.ChatLayerService;
 import com.tencent.supersonic.headless.server.facade.service.SemanticLayerService;
 import com.tencent.supersonic.headless.server.utils.ChatWorkflowEngine;
 import com.tencent.supersonic.headless.server.pojo.MetaFilter;
 import com.tencent.supersonic.headless.server.utils.ComponentFactory;
-import com.tencent.supersonic.headless.server.web.service.ChatContextService;
 import com.tencent.supersonic.headless.server.web.service.DataSetService;
 import com.tencent.supersonic.headless.server.web.service.SchemaService;
 import lombok.extern.slf4j.Slf4j;
@@ -98,13 +96,11 @@ import java.util.stream.Collectors;
 
 @Service
 @Slf4j
-public class ChatQueryServiceImpl implements ChatQueryService {
+public class S2ChatLayerService implements ChatLayerService {
     @Autowired
     private SemanticLayerService semanticLayerService;
     @Autowired
     private SchemaService schemaService;
-    @Autowired
-    private ChatContextService chatContextService;
     @Autowired
     private KnowledgeBaseService knowledgeBaseService;
     @Autowired
@@ -141,14 +137,11 @@ public class ChatQueryServiceImpl implements ChatQueryService {
 
     @Override
     public ParseResp performParsing(QueryNLReq queryNLReq) {
-        ParseResp parseResult = new ParseResp(queryNLReq.getChatId(), queryNLReq.getQueryText());
-        // build queryContext and chatContext
+        ParseResp parseResult = new ParseResp(queryNLReq.getQueryText());
+        // build queryContext
         ChatQueryContext queryCtx = buildChatQueryContext(queryNLReq);
 
-        // in order to support multi-turn conversation, chat context is needed
-        ChatContext chatCtx = chatContextService.getOrCreateContext(queryNLReq.getChatId());
-
-        chatWorkflowEngine.execute(queryCtx, chatCtx, parseResult);
+        chatWorkflowEngine.execute(queryCtx, parseResult);
 
         List<SemanticParseInfo> parseInfos = queryCtx.getCandidateQueries().stream()
                 .map(SemanticQuery::getParseInfo).collect(Collectors.toList());
@@ -171,12 +164,6 @@ public class ChatQueryServiceImpl implements ChatQueryService {
                 .build();
         BeanUtils.copyProperties(queryNLReq, queryCtx);
         return queryCtx;
-    }
-
-    @Override
-    public SemanticParseInfo queryContext(Integer chatId) {
-        ChatContext context = chatContextService.getOrCreateContext(chatId);
-        return context.getParseInfo();
     }
 
     //mainly used for executing after revising filters,for example:"fans_cnt>=100000"->"fans_cnt>500000",

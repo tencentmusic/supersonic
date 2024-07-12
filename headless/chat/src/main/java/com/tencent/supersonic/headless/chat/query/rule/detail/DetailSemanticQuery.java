@@ -10,7 +10,6 @@ import com.tencent.supersonic.headless.api.pojo.TimeDefaultConfig;
 import com.tencent.supersonic.headless.chat.ChatQueryContext;
 import com.tencent.supersonic.headless.chat.query.rule.QueryMatchOption;
 import com.tencent.supersonic.headless.chat.query.rule.RuleSemanticQuery;
-import com.tencent.supersonic.headless.chat.ChatContext;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDate;
@@ -35,8 +34,8 @@ public abstract class DetailSemanticQuery extends RuleSemanticQuery {
     }
 
     @Override
-    public void fillParseInfo(ChatQueryContext chatQueryContext, ChatContext chatContext) {
-        super.fillParseInfo(chatQueryContext, chatContext);
+    public void fillParseInfo(ChatQueryContext chatQueryContext) {
+        super.fillParseInfo(chatQueryContext);
 
         parseInfo.setQueryType(QueryType.DETAIL);
         parseInfo.setLimit(DETAIL_MAX_RESULTS);

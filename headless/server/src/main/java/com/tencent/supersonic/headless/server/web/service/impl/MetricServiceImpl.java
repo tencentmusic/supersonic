@@ -44,7 +44,7 @@ import com.tencent.supersonic.headless.api.pojo.response.MapInfoResp;
 import com.tencent.supersonic.headless.api.pojo.response.MetricResp;
 import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
 import com.tencent.supersonic.headless.api.pojo.response.TagItem;
-import com.tencent.supersonic.headless.server.facade.service.ChatQueryService;
+import com.tencent.supersonic.headless.server.facade.service.ChatLayerService;
 import com.tencent.supersonic.headless.server.persistence.dataobject.CollectDO;
 import com.tencent.supersonic.headless.server.persistence.dataobject.MetricDO;
 import com.tencent.supersonic.headless.server.persistence.dataobject.MetricQueryDefaultConfigDO;
@@ -111,7 +111,7 @@ public class MetricServiceImpl extends ServiceImpl<MetricDOMapper, MetricDO>
 
     private TagMetaService tagMetaService;
 
-    private ChatQueryService chatQueryService;
+    private ChatLayerService chatLayerService;
 
     public MetricServiceImpl(MetricRepository metricRepository,
                              ModelService modelService,
@@ -121,7 +121,7 @@ public class MetricServiceImpl extends ServiceImpl<MetricDOMapper, MetricDO>
                              ApplicationEventPublisher eventPublisher,
                              DimensionService dimensionService,
                              TagMetaService tagMetaService,
-                             @Lazy ChatQueryService chatQueryService) {
+                             @Lazy ChatLayerService chatLayerService) {
         this.metricRepository = metricRepository;
         this.modelService = modelService;
         this.aliasGenerateHelper = aliasGenerateHelper;
@@ -130,7 +130,7 @@ public class MetricServiceImpl extends ServiceImpl<MetricDOMapper, MetricDO>
         this.dataSetService = dataSetService;
         this.dimensionService = dimensionService;
         this.tagMetaService = tagMetaService;
-        this.chatQueryService = chatQueryService;
+        this.chatLayerService = chatLayerService;
     }
 
     @Override
@@ -299,7 +299,7 @@ public class MetricServiceImpl extends ServiceImpl<MetricDOMapper, MetricDO>
         queryMapReq.setQueryText(pageMetricReq.getKey());
         queryMapReq.setUser(user);
         queryMapReq.setMapModeEnum(MapModeEnum.LOOSE);
-        MapInfoResp mapMeta = chatQueryService.map(queryMapReq);
+        MapInfoResp mapMeta = chatLayerService.map(queryMapReq);
         Map<String, DataSetMapInfo> dataSetMapInfoMap = mapMeta.getDataSetMapInfo();
         if (CollectionUtils.isEmpty(dataSetMapInfoMap)) {
             return metricRespPageInfo;

@@ -16,7 +16,6 @@ import com.tencent.supersonic.headless.chat.ChatQueryContext;
 import com.tencent.supersonic.headless.chat.utils.QueryReqBuilder;
 import com.tencent.supersonic.headless.chat.query.BaseSemanticQuery;
 import com.tencent.supersonic.headless.chat.query.QueryManager;
-import com.tencent.supersonic.headless.chat.ChatContext;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -49,13 +48,13 @@ public abstract class RuleSemanticQuery extends BaseSemanticQuery {
         initS2SqlByStruct(semanticSchema);
     }
 
-    public void fillParseInfo(ChatQueryContext chatQueryContext, ChatContext chatContext) {
+    public void fillParseInfo(ChatQueryContext chatQueryContext) {
         parseInfo.setQueryMode(getQueryMode());
         SemanticSchema semanticSchema = chatQueryContext.getSemanticSchema();
 
         fillSchemaElement(parseInfo, semanticSchema);
         fillScore(parseInfo);
-        fillDateConf(parseInfo, chatContext.getParseInfo());
+        fillDateConf(parseInfo, chatQueryContext.getContextParseInfo());
     }
 
     private void fillDateConf(SemanticParseInfo queryParseInfo, SemanticParseInfo chatParseInfo) {
