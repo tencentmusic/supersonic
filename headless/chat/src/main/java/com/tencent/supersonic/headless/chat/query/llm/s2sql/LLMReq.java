@@ -51,6 +51,8 @@ public class LLMReq {
 
         private String dataSetName;
 
+        private String dbType;
+
         private Long dataSetId;
 
         private List<String> fieldNameList;
@@ -84,7 +86,8 @@ public class LLMReq {
 
     public enum SqlGenType {
 
-        ONE_PASS_SELF_CONSISTENCY("1_pass_self_consistency");
+        ONE_PASS_SELF_CONSISTENCY("1_pass_self_consistency"),
+        DIFY_SQL_GEN_STRATEGY("dify_sql_gen_strategy");
 
         private String name;
 

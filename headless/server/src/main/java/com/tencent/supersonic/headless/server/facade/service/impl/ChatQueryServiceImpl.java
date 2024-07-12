@@ -64,6 +64,7 @@ import com.tencent.supersonic.headless.server.pojo.MetaFilter;
 import com.tencent.supersonic.headless.server.utils.ComponentFactory;
 import com.tencent.supersonic.headless.server.web.service.ChatContextService;
 import com.tencent.supersonic.headless.server.web.service.DataSetService;
+import com.tencent.supersonic.headless.server.web.service.ModelService;
 import com.tencent.supersonic.headless.server.web.service.SchemaService;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.expression.Expression;
@@ -109,6 +110,8 @@ public class ChatQueryServiceImpl implements ChatQueryService {
     private KnowledgeBaseService knowledgeBaseService;
     @Autowired
     private DataSetService dataSetService;
+    @Autowired
+    private ModelService modelService;
     @Autowired
     private ChatWorkflowEngine chatWorkflowEngine;
 
