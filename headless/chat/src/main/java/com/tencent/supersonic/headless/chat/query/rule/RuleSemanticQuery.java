@@ -3,6 +3,7 @@ package com.tencent.supersonic.headless.chat.query.rule;
 
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
+import com.tencent.supersonic.headless.api.pojo.DataSetSchema;
 import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementMatch;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
@@ -13,9 +14,13 @@ import com.tencent.supersonic.headless.api.pojo.request.QueryMultiStructReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
 import com.tencent.supersonic.headless.api.pojo.request.SemanticQueryReq;
 import com.tencent.supersonic.headless.chat.ChatQueryContext;
-import com.tencent.supersonic.headless.chat.utils.QueryReqBuilder;
 import com.tencent.supersonic.headless.chat.query.BaseSemanticQuery;
 import com.tencent.supersonic.headless.chat.query.QueryManager;
+import com.tencent.supersonic.headless.chat.utils.QueryReqBuilder;
+import lombok.ToString;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -24,9 +29,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
-import lombok.ToString;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 
 @Slf4j
 @ToString
@@ -44,8 +46,8 @@ public abstract class RuleSemanticQuery extends BaseSemanticQuery {
     }
 
     @Override
-    public void initS2Sql(SemanticSchema semanticSchema, User user) {
-        initS2SqlByStruct(semanticSchema);
+    public void initS2Sql(DataSetSchema dataSetSchema, User user) {
+        initS2SqlByStruct(dataSetSchema);
     }
 
     public void fillParseInfo(ChatQueryContext chatQueryContext) {

@@ -1,14 +1,16 @@
 package com.tencent.supersonic.headless.api.pojo;
 
+import lombok.Data;
+import org.apache.commons.collections.CollectionUtils;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import lombok.Data;
-import org.apache.commons.collections.CollectionUtils;
 
 @Data
 public class DataSetSchema {
@@ -55,6 +57,14 @@ public class DataSetSchema {
         } else {
             return null;
         }
+    }
+
+    public Map<String, String> getBizNameToName() {
+        List<SchemaElement> allElements = new ArrayList<>();
+        allElements.addAll(getDimensions());
+        allElements.addAll(getMetrics());
+        return allElements.stream()
+                .collect(Collectors.toMap(SchemaElement::getBizName, SchemaElement::getName, (k1, k2) -> k1));
     }
 
     public TimeDefaultConfig getTagTypeTimeDefaultConfig() {

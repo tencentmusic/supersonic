@@ -1,6 +1,8 @@
 package com.tencent.supersonic.headless.api.pojo.request;
 
+import com.tencent.supersonic.common.pojo.DateConf;
 import lombok.Data;
+import org.apache.commons.lang3.StringUtils;
 import javax.validation.constraints.NotNull;
 import java.util.Set;
 
@@ -21,4 +23,11 @@ public class DimensionValueReq {
 
     private Set<Long> dataSetIds;
 
+    private DateConf dateInfo = new DateConf();
+
+    private String dimensionBizName;
+
+    public String getBizName() {
+        return StringUtils.isBlank(bizName) ? dimensionBizName : bizName;
+    }
 }
