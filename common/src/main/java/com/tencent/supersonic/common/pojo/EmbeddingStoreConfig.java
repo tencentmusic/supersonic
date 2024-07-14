@@ -1,10 +1,16 @@
-package com.tencent.supersonic.common.config;
+package com.tencent.supersonic.common.pojo;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 
 @Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class EmbeddingStoreConfig implements Serializable {
     private static final long serialVersionUID = 1L;
     private String provider;

@@ -1,4 +1,4 @@
-package com.tencent.supersonic.common.config;
+package com.tencent.supersonic.common.pojo;
 
 import com.tencent.supersonic.common.util.AESEncryptionUtil;
 import lombok.AllArgsConstructor;

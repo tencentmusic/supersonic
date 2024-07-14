@@ -1,4 +1,4 @@
-package com.tencent.supersonic.common.config;
+package com.tencent.supersonic.common.pojo;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
