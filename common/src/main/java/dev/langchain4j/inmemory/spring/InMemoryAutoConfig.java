@@ -24,7 +24,7 @@ public class InMemoryAutoConfig {
     @Bean
     @ConditionalOnProperty(PREFIX + ".embedding-store.persist-path")
     EmbeddingStoreFactory inMemoryChatModel(Properties properties) {
-        return new InMemoryEmbeddingStoreFactory(properties);
+        return new InMemoryEmbeddingStoreFactory(properties.getEmbeddingStore());
     }
 
     @Bean

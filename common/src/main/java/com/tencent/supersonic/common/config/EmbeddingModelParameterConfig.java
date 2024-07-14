@@ -20,7 +20,7 @@ import java.util.List;
 public class EmbeddingModelParameterConfig extends ParameterConfig {
 
     public static final Parameter EMBEDDING_MODEL_PROVIDER =
-            new Parameter("s2.embedding.model.provider", InMemoryModelFactory.PROVIDER,
+            new Parameter("s2.embedding.model.provider", "",
                     "接口协议", "",
                     "string", "向量模型配置",
                     Lists.newArrayList(InMemoryModelFactory.PROVIDER,

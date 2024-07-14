@@ -3,7 +3,6 @@ package com.tencent.supersonic.common.config;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.common.pojo.EmbeddingStoreConfig;
 import com.tencent.supersonic.common.pojo.Parameter;
-import dev.langchain4j.provider.InMemoryModelFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -13,7 +12,7 @@ import java.util.List;
 @Slf4j
 public class EmbeddingStoreParameterConfig extends ParameterConfig {
     public static final Parameter EMBEDDING_STORE_PROVIDER =
-            new Parameter("s2.embedding.store.provider", InMemoryModelFactory.PROVIDER,
+            new Parameter("s2.embedding.store.provider", "",
                     "向量库类型", "",
                     "string", "向量库配置");
 
