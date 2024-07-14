@@ -17,6 +17,8 @@ public class LLMReq {
 
     private String queryText;
 
+    private String queryUser;
+
     private FilterCondition filterCondition;
 
     private LLMSchema schema;
