@@ -799,6 +799,23 @@ public class SqlSelectHelper {
         return false;
     }
 
+    public static Limit getLimit(String querySql) {
+        Select selectStatement = SqlSelectHelper.getSelect(querySql);
+        if (selectStatement instanceof PlainSelect) {
+            PlainSelect plainSelect = selectStatement.getPlainSelect();
+            return plainSelect.getLimit();
+        } else if (selectStatement instanceof SetOperationList) {
+            SetOperationList setOperationList = (SetOperationList) selectStatement;
+            if (!CollectionUtils.isEmpty(setOperationList.getSelects())) {
+                for (Select select : setOperationList.getSelects()) {
+                    PlainSelect subPlainSelect = select.getPlainSelect();
+                    return subPlainSelect.getLimit();
+                }
+            }
+        }
+        return null;
+    }
+
     public static Map<String, Set<String>> getFieldsWithSubQuery(String sql) {
         List<PlainSelect> plainSelects = getPlainSelects(getPlainSelect(sql));
         Map<String, Set<String>> results = new HashMap<>();

@@ -72,8 +72,12 @@ public class SqlReplaceHelper {
         }
         ((PlainSelect) selectStatement).addSelectItems(columns);
 
-        GroupByElement groupBy = ((PlainSelect) selectStatement).getGroupBy();
-        ExpressionList groupByExpressionList = groupBy.getGroupByExpressionList();
+        ExpressionList groupByExpressionList;
+        if (((PlainSelect) selectStatement).getGroupBy() != null) {
+            groupByExpressionList = ((PlainSelect) selectStatement).getGroupBy().getGroupByExpressionList();
+        } else {
+            groupByExpressionList = new ExpressionList<>();
+        }
         groupByExpressionList.clear();
         if (!columns.isEmpty()) {
             groupByExpressionList.addAll(columns);
