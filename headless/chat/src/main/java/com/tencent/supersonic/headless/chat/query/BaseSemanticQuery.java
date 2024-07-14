@@ -6,8 +6,8 @@ import com.tencent.supersonic.common.pojo.Filter;
 import com.tencent.supersonic.common.pojo.Order;
 import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import com.tencent.supersonic.common.util.ContextUtils;
+import com.tencent.supersonic.headless.api.pojo.DataSetSchema;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
-import com.tencent.supersonic.headless.api.pojo.SemanticSchema;
 import com.tencent.supersonic.headless.api.pojo.request.QuerySqlReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
 import com.tencent.supersonic.headless.chat.parser.ParserConfig;
@@ -43,8 +43,8 @@ public abstract class BaseSemanticQuery implements SemanticQuery, Serializable {
         return QueryReqBuilder.buildStructReq(parseInfo);
     }
 
-    protected void convertBizNameToName(SemanticSchema semanticSchema, QueryStructReq queryStructReq) {
-        Map<String, String> bizNameToName = semanticSchema.getBizNameToName(queryStructReq.getDataSetId());
+    protected void convertBizNameToName(DataSetSchema dataSetSchema, QueryStructReq queryStructReq) {
+        Map<String, String> bizNameToName = dataSetSchema.getBizNameToName();
         bizNameToName.putAll(TimeDimensionEnum.getNameToNameMap());
 
         List<Order> orders = queryStructReq.getOrders();
@@ -74,14 +74,14 @@ public abstract class BaseSemanticQuery implements SemanticQuery, Serializable {
         }
     }
 
-    protected void initS2SqlByStruct(SemanticSchema semanticSchema) {
+    protected void initS2SqlByStruct(DataSetSchema dataSetSchema) {
         ParserConfig parserConfig = ContextUtils.getBean(ParserConfig.class);
         boolean s2sqlEnable = Boolean.valueOf(parserConfig.getParameterValue(PARSER_S2SQL_ENABLE));
         if (!s2sqlEnable) {
             return;
         }
         QueryStructReq queryStructReq = convertQueryStruct();
-        convertBizNameToName(semanticSchema, queryStructReq);
+        convertBizNameToName(dataSetSchema, queryStructReq);
         QuerySqlReq querySQLReq = queryStructReq.convert();
         parseInfo.getSqlInfo().setParsedS2SQL(querySQLReq.getSql());
         parseInfo.getSqlInfo().setCorrectedS2SQL(querySQLReq.getSql());

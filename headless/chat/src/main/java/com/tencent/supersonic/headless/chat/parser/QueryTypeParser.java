@@ -4,6 +4,7 @@ import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.common.pojo.enums.QueryType;
 import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import com.tencent.supersonic.common.jsqlparser.SqlSelectHelper;
+import com.tencent.supersonic.headless.api.pojo.DataSetSchema;
 import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.api.pojo.SemanticSchema;
@@ -35,7 +36,10 @@ public class QueryTypeParser implements SemanticParser {
 
         for (SemanticQuery semanticQuery : candidateQueries) {
             // 1.init S2SQL
-            semanticQuery.initS2Sql(chatQueryContext.getSemanticSchema(), user);
+            Long dataSetId = semanticQuery.getParseInfo().getDataSetId();
+            DataSetSchema dataSetSchema = chatQueryContext.getSemanticSchema()
+                    .getDataSetSchemaMap().get(dataSetId);
+            semanticQuery.initS2Sql(dataSetSchema, user);
             // 2.set queryType
             QueryType queryType = getQueryType(chatQueryContext, semanticQuery);
             semanticQuery.getParseInfo().setQueryType(queryType);

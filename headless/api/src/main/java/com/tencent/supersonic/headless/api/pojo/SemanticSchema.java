@@ -150,14 +150,6 @@ public class SemanticSchema implements Serializable {
         return dataSets;
     }
 
-    public Map<String, String> getBizNameToName(Long dataSetId) {
-        List<SchemaElement> allElements = new ArrayList<>();
-        allElements.addAll(getDimensions(dataSetId));
-        allElements.addAll(getMetrics(dataSetId));
-        return allElements.stream()
-                .collect(Collectors.toMap(SchemaElement::getBizName, SchemaElement::getName, (k1, k2) -> k1));
-    }
-
     public Map<Long, DataSetSchema> getDataSetSchemaMap() {
         if (CollectionUtils.isEmpty(dataSetSchemaList)) {
             return new HashMap<>();

@@ -1,8 +1,8 @@
 package com.tencent.supersonic.headless.chat.query;
 
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
+import com.tencent.supersonic.headless.api.pojo.DataSetSchema;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
-import com.tencent.supersonic.headless.api.pojo.SemanticSchema;
 import com.tencent.supersonic.headless.api.pojo.request.SemanticQueryReq;
 import org.apache.calcite.sql.parser.SqlParseException;
 
@@ -15,7 +15,7 @@ public interface SemanticQuery {
 
     SemanticQueryReq buildSemanticQueryReq() throws SqlParseException;
 
-    void initS2Sql(SemanticSchema semanticSchema, User user);
+    void initS2Sql(DataSetSchema dataSetSchema, User user);
 
     SemanticParseInfo getParseInfo();
 

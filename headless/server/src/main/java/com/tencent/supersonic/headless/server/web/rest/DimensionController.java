@@ -7,15 +7,15 @@ import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
 import com.tencent.supersonic.common.pojo.enums.SensitiveLevelEnum;
 import com.tencent.supersonic.headless.api.pojo.DimValueMap;
 import com.tencent.supersonic.headless.api.pojo.request.DimensionReq;
+import com.tencent.supersonic.headless.api.pojo.request.DimensionValueReq;
 import com.tencent.supersonic.headless.api.pojo.request.MetaBatchReq;
 import com.tencent.supersonic.headless.api.pojo.request.PageDimensionReq;
-import com.tencent.supersonic.headless.api.pojo.request.QueryDimValueReq;
 import com.tencent.supersonic.headless.api.pojo.response.DimensionResp;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
+import com.tencent.supersonic.headless.server.facade.service.SemanticLayerService;
 import com.tencent.supersonic.headless.server.pojo.DimensionFilter;
 import com.tencent.supersonic.headless.server.pojo.MetaFilter;
 import com.tencent.supersonic.headless.server.web.service.DimensionService;
-import com.tencent.supersonic.headless.server.facade.service.SemanticLayerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -121,11 +121,11 @@ public class DimensionController {
     }
 
     @PostMapping("/queryDimValue")
-    public SemanticQueryResp queryDimValue(@RequestBody QueryDimValueReq queryDimValueReq,
+    public SemanticQueryResp queryDimValue(@RequestBody DimensionValueReq dimensionValueReq,
                                            HttpServletRequest request,
                                            HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
-        return queryService.queryDimValue(queryDimValueReq, user);
+        return queryService.queryDimensionValue(dimensionValueReq, user);
     }
 
     @DeleteMapping("deleteDimension/{id}")
