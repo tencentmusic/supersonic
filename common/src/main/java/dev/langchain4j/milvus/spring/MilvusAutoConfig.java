@@ -15,6 +15,6 @@ public class MilvusAutoConfig {
     @Bean
     @ConditionalOnProperty(PREFIX + ".embedding-store.uri")
     EmbeddingStoreFactory milvusChatModel(Properties properties) {
-        return new MilvusEmbeddingStoreFactory(properties);
+        return new MilvusEmbeddingStoreFactory(properties.getEmbeddingStore());
     }
 }

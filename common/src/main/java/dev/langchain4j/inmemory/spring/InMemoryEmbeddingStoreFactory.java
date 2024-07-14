@@ -23,22 +23,20 @@ import java.util.concurrent.CopyOnWriteArraySet;
 public class InMemoryEmbeddingStoreFactory extends BaseEmbeddingStoreFactory {
 
     public static final String PERSISTENT_FILE_PRE = "InMemory.";
-    private Properties properties;
+    private EmbeddingStoreProperties embeddingStore;
 
     public InMemoryEmbeddingStoreFactory(EmbeddingStoreConfig storeConfig) {
         this(createPropertiesFromConfig(storeConfig));
     }
 
-    public InMemoryEmbeddingStoreFactory(Properties properties) {
-        this.properties = properties;
+    public InMemoryEmbeddingStoreFactory(EmbeddingStoreProperties embeddingStore) {
+        this.embeddingStore = embeddingStore;
     }
 
-    private static Properties createPropertiesFromConfig(EmbeddingStoreConfig storeConfig) {
-        Properties properties = new Properties();
+    private static EmbeddingStoreProperties createPropertiesFromConfig(EmbeddingStoreConfig storeConfig) {
         EmbeddingStoreProperties embeddingStore = new EmbeddingStoreProperties();
         BeanUtils.copyProperties(storeConfig, embeddingStore);
-        properties.setEmbeddingStore(embeddingStore);
-        return properties;
+        return embeddingStore;
     }
 
     @Override
@@ -97,7 +95,7 @@ public class InMemoryEmbeddingStoreFactory extends BaseEmbeddingStoreFactory {
 
     private Path getPersistPath(String collectionName) {
         String persistFile = PERSISTENT_FILE_PRE + collectionName;
-        String persistPath = properties.getEmbeddingStore().getPersistPath();
+        String persistPath = embeddingStore.getPersistPath();
         if (StringUtils.isEmpty(persistPath)) {
             return null;
         }

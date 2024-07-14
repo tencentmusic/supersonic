@@ -2,8 +2,6 @@ package com.tencent.supersonic.common.service.impl;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import com.tencent.supersonic.common.config.EmbeddingModelParameterConfig;
-import com.tencent.supersonic.common.pojo.EmbeddingModelConfig;
 import com.tencent.supersonic.common.service.EmbeddingService;
 import dev.langchain4j.data.embedding.Embedding;
 import dev.langchain4j.data.segment.TextSegment;
@@ -26,7 +24,6 @@ import dev.langchain4j.store.embedding.inmemory.InMemoryEmbeddingStore;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -41,8 +38,6 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 public class EmbeddingServiceImpl implements EmbeddingService {
-    @Autowired
-    private EmbeddingModelParameterConfig embeddingModelParameterConfig;
 
     private Cache<String, Boolean> cache = CacheBuilder.newBuilder()
             .maximumSize(10000)
@@ -57,7 +52,7 @@ public class EmbeddingServiceImpl implements EmbeddingService {
         for (TextSegment query : queries) {
             String question = query.text();
             try {
-                EmbeddingModel embeddingModel = getEmbeddingModel();
+                EmbeddingModel embeddingModel = ModelProvider.getEmbeddingModel();
                 Embedding embedding = embeddingModel.embed(question).content();
                 boolean existSegment = existSegment(embeddingStore, query, embedding);
                 if (existSegment) {
@@ -126,7 +121,7 @@ public class EmbeddingServiceImpl implements EmbeddingService {
         List<String> queryTextsList = retrieveQuery.getQueryTextsList();
         Map<String, String> filterCondition = retrieveQuery.getFilterCondition();
         for (String queryText : queryTextsList) {
-            EmbeddingModel embeddingModel = getEmbeddingModel();
+            EmbeddingModel embeddingModel = ModelProvider.getEmbeddingModel();
             Embedding embeddedText = embeddingModel.embed(queryText).content();
             Filter filter = createCombinedFilter(filterCondition);
             EmbeddingSearchRequest request = EmbeddingSearchRequest.builder()
@@ -173,10 +168,5 @@ public class EmbeddingServiceImpl implements EmbeddingService {
             result = (result == null) ? isEqualTo : Filter.and(result, isEqualTo);
         }
         return result;
-    }
-
-    private EmbeddingModel getEmbeddingModel() {
-        EmbeddingModelConfig embeddingModelConfig = embeddingModelParameterConfig.convert();
-        return ModelProvider.getEmbeddingModel(embeddingModelConfig);
     }
 }
