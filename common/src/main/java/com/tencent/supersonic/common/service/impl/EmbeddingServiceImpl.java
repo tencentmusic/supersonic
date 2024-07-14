@@ -14,6 +14,7 @@ import dev.langchain4j.store.embedding.EmbeddingSearchRequest;
 import dev.langchain4j.store.embedding.EmbeddingSearchResult;
 import dev.langchain4j.store.embedding.EmbeddingStore;
 import dev.langchain4j.store.embedding.EmbeddingStoreFactory;
+import dev.langchain4j.store.embedding.EmbeddingStoreFactoryProvider;
 import dev.langchain4j.store.embedding.Retrieval;
 import dev.langchain4j.store.embedding.RetrieveQuery;
 import dev.langchain4j.store.embedding.RetrieveQueryResult;
@@ -40,10 +41,6 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 public class EmbeddingServiceImpl implements EmbeddingService {
-
-    @Autowired
-    private EmbeddingStoreFactory embeddingStoreFactory;
-
     @Autowired
     private EmbeddingModelParameterConfig embeddingModelParameterConfig;
 
@@ -54,6 +51,7 @@ public class EmbeddingServiceImpl implements EmbeddingService {
 
     @Override
     public void addQuery(String collectionName, List<TextSegment> queries) {
+        EmbeddingStoreFactory embeddingStoreFactory = EmbeddingStoreFactoryProvider.getFactory();
         EmbeddingStore embeddingStore = embeddingStoreFactory.create(collectionName);
 
         for (TextSegment query : queries) {
@@ -102,6 +100,7 @@ public class EmbeddingServiceImpl implements EmbeddingService {
     @Override
     public void deleteQuery(String collectionName, List<TextSegment> queries) {
         //Not supported yet in Milvus and Chroma
+        EmbeddingStoreFactory embeddingStoreFactory = EmbeddingStoreFactoryProvider.getFactory();
         EmbeddingStore embeddingStore = embeddingStoreFactory.create(collectionName);
         try {
             if (embeddingStore instanceof InMemoryEmbeddingStore) {
@@ -122,7 +121,7 @@ public class EmbeddingServiceImpl implements EmbeddingService {
     @Override
     public List<RetrieveQueryResult> retrieveQuery(String collectionName, RetrieveQuery retrieveQuery, int num) {
         List<RetrieveQueryResult> results = new ArrayList<>();
-
+        EmbeddingStoreFactory embeddingStoreFactory = EmbeddingStoreFactoryProvider.getFactory();
         EmbeddingStore embeddingStore = embeddingStoreFactory.create(collectionName);
         List<String> queryTextsList = retrieveQuery.getQueryTextsList();
         Map<String, String> filterCondition = retrieveQuery.getFilterCondition();

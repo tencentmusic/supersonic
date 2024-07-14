@@ -12,19 +12,18 @@ import java.time.Duration;
 @Slf4j
 public class ChromaEmbeddingStoreFactory extends BaseEmbeddingStoreFactory {
 
-    private Properties properties;
+    private EmbeddingStoreProperties storeProperties;
 
     public ChromaEmbeddingStoreFactory(EmbeddingStoreConfig storeConfig) {
         this(createPropertiesFromConfig(storeConfig));
     }
 
-    public ChromaEmbeddingStoreFactory(Properties properties) {
-        this.properties = properties;
+    public ChromaEmbeddingStoreFactory(EmbeddingStoreProperties storeProperties) {
+        this.storeProperties = storeProperties;
     }
 
     @Override
     public EmbeddingStore createEmbeddingStore(String collectionName) {
-        EmbeddingStoreProperties storeProperties = properties.getEmbeddingStore();
         return ChromaEmbeddingStore.builder()
                 .baseUrl(storeProperties.getBaseUrl())
                 .collectionName(collectionName)
@@ -32,12 +31,10 @@ public class ChromaEmbeddingStoreFactory extends BaseEmbeddingStoreFactory {
                 .build();
     }
 
-    private static Properties createPropertiesFromConfig(EmbeddingStoreConfig storeConfig) {
-        Properties properties = new Properties();
+    private static EmbeddingStoreProperties createPropertiesFromConfig(EmbeddingStoreConfig storeConfig) {
         EmbeddingStoreProperties embeddingStore = new EmbeddingStoreProperties();
         BeanUtils.copyProperties(storeConfig, embeddingStore);
         embeddingStore.setTimeout(Duration.ofSeconds(storeConfig.getTimeOut()));
-        properties.setEmbeddingStore(embeddingStore);
-        return properties;
+        return embeddingStore;
     }
 }

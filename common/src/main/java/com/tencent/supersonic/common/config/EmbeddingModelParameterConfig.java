@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-@Service("EmbeddingModelConfig")
+@Service("EmbeddingModelParameterConfig")
 @Slf4j
 public class EmbeddingModelParameterConfig extends ParameterConfig {
 

@@ -3,6 +3,7 @@ package com.tencent.supersonic.common.pojo;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
@@ -11,6 +12,7 @@ import java.io.Serializable;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@EqualsAndHashCode
 public class EmbeddingStoreConfig implements Serializable {
     private static final long serialVersionUID = 1L;
     private String provider;
