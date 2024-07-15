@@ -124,8 +124,6 @@ export function onRouteChange() {
 export const layout: RunTimeLayoutConfig = (params) => {
   const { initialState } = params as any;
 
-  console.log('🚀 ~ initialState?.currentUser?.superAdmin:', initialState?.currentUser?.superAdmin);
-
   return {
     onMenuHeaderClick: (e) => {
       e.preventDefault();
@@ -163,7 +161,9 @@ export const layout: RunTimeLayoutConfig = (params) => {
               <Copilot
                 token={getToken() || ''}
                 isDeveloper={
-                  process.env.NODE_ENV === 'development' || initialState?.currentUser?.superAdmin
+                  process.env.NODE_ENV === 'development' ||
+                  initialState?.currentUser?.superAdmin ||
+                  initialState?.currentUser?.isDeveloper === 1
                 }
               />
             )}
