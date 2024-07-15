@@ -632,8 +632,8 @@ CREATE TABLE IF NOT EXISTS s2_authority (
     id bigint(20) NOT NULL AUTO_INCREMENT COMMENT '权限表主键',
     authority int(11) NOT NULL COMMENT '权限值,1:拒绝,2:允许',
     authority_entity_id int(20) NOT NULL COMMENT '权限实体ID',
-    authority_entity_type int(11) NOT NULL COMMENT '所关联的权限实体类型,0:菜单权限,1:助理管理,2:插件管理,3:语义模型,4:指标市场,5:标签市场,6:数据库管理,7:系统设置',
-    authority_type int(11) NOT NULL COMMENT '操作表示码',
+    authority_entity_type int(11) NOT NULL COMMENT '默认1，预留字段',
+    authority_type int(11) NOT NULL COMMENT '所关联的权限实体类型,0:菜单权限,1:助理管理,2:插件管理,3:语义模型,4:指标市场,5:标签市场,6:数据库管理,7:系统设置',
     role_id bigint(20) COLLATE utf8_bin NOT NULL COMMENT '所关联的角色ID，关联表:s2_custom_role->id,s2_dep_role->id,s2_dep_role->id',
     role_type int(11) NOT NULL COMMENT '角色类型,1:部门,2:自定义角色,3:用户,4:职位',
     tenant_id bigint(20) NOT NULL DEFAULT 1,
@@ -646,6 +646,33 @@ CREATE TABLE IF NOT EXISTS s2_authority (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT '权限表';
 
 
+select
+    s2a.id,
+    case when s2a.authority = 1 then '拒绝'
+         when s2a.authority = 2 then '允许'
+    end as "权限值",
+    case when s2a.authority_type = 1 then '拒绝'
+         when s2a.authority_type = 2 then '允许'
+    end as "操作表示码",
+    case when s2a.authority_entity_type = 0 then '菜单权限'
+         when s2a.authority_entity_type = 1 then '助理管理'
+         when s2a.authority_entity_type = 2 then '插件管理'
+         when s2a.authority_entity_type = 3 then '语义模型'
+         when s2a.authority_entity_type = 4 then '指标市场'
+         when s2a.authority_entity_type = 5 then '标签市场'
+         when s2a.authority_entity_type = 6 then '数据库管理'
+         when s2a.authority_entity_type = 7 then '系统设置'
+    end as "权限类型",
+    sa2.name as "菜单名称",
+    sr.name as "角色名称",
+    sr.is_enable as "角色是否启用",
+    su.name as "用户名称"
+from s2_authority s2a
+         join s2_permission sa2 on sa2.id = sa.authority_entity_id
+         join s2_role sr on sr.id = sa.role_id
+         join s2_user_role_rela surr on surr.role_id  = sr.id
+         join s2_user su on su.id = surr.user_id
+where authority_entity_type = 1  and authority_type = 0 and sr.is_enable = 1
 
 -- databin.sys_permission_v2 definition
 drop table if exists s2_permission;

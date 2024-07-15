@@ -35,14 +35,19 @@
     updated_by,
     enable_search
     FROM
-    (select DISTINCT s2a.*  from s2_user s2u
-                          join s2_user_role_rela surr on s2u.id = surr.user_id
-                          join s2_role sr on surr.role_id = sr.id
-                          join s2_authority sa on sr.id = sa.role_id
-                          join s2_agent s2a on s2a.id = sa.authority_entity_id and sr.id = sa.role_id
-     where s2u.name = #{name}
-       and sa.authority_entity_type = 1 and sa.authority_type = 1
-       and sr.is_enable = 1 and s2a.status  = 1
+    (select DISTINCT sa.*  from s2_agent sa where created_by = #{name}
+       select DISTINCT s2a.*  FROM s2_agent s2a
+       INNER JOIN s2_authority sa ON s2a.id = sa.authority_entity_id
+       INNER JOIN s2_role sr ON sa.role_id = sr.id
+       INNER JOIN s2_user_role_rela surr ON sr.id = surr.role_id
+       INNER JOIN s2_user s2u ON surr.user_id = s2u.id
+     WHERE
+         (s2u.name = #{name}
+       AND sa.authority_entity_type = 1
+       AND sa.authority_type = 1
+       AND sr.is_enable = 1
+       AND s2a.status = 1)
+        OR (s2a.created_by = #{name})
      )t
 
   </select>
