@@ -363,7 +363,6 @@ public class S2VisitsDemo extends S2BaseDemo {
         metricReq.setSensitiveLevel(SensitiveLevelEnum.HIGH.getCode());
         metricReq.setDescription("停留时长");
         metricReq.setClassifications(Collections.singletonList("核心指标"));
-        metricReq.setAlias("访问时长");
         MetricDefineByMeasureParams metricTypeParams = new MetricDefineByMeasureParams();
         metricTypeParams.setExpr("s2_stay_time_statis_stay_hours");
         List<MeasureParam> measures = new ArrayList<>();
