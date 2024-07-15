@@ -6,7 +6,6 @@ import com.tencent.supersonic.common.jsqlparser.SqlSelectHelper;
 import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
 import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
-import com.tencent.supersonic.common.pojo.enums.QueryType;
 import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.headless.api.pojo.SchemaElement;
@@ -19,11 +18,6 @@ import com.tencent.supersonic.headless.chat.ChatContext;
 import com.tencent.supersonic.headless.chat.ChatQueryContext;
 import com.tencent.supersonic.headless.chat.query.SemanticQuery;
 import com.tencent.supersonic.headless.server.web.service.SchemaService;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
-import org.springframework.util.CollectionUtils;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -32,6 +26,15 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
+import net.sf.jsqlparser.expression.Function;
+import net.sf.jsqlparser.statement.select.Limit;
+import net.sf.jsqlparser.statement.select.PlainSelect;
+import net.sf.jsqlparser.statement.select.Select;
+import net.sf.jsqlparser.statement.select.SelectItem;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
+import org.springframework.util.CollectionUtils;
 
 /**
  * ParseInfoProcessor extracts structured info from S2SQL so that
@@ -62,6 +65,75 @@ public class ParseInfoProcessor implements ResultProcessor {
         }
         List<FieldExpression> expressions = SqlSelectHelper.getFilterExpression(correctS2SQL);
         //set dataInfo
+        setDataInfo(parseInfo, expressions);
+        //set filter
+        setFilter(parseInfo, expressions);
+        //set dimensions
+        setDimensions(parseInfo, sqlInfo);
+        //set metrics
+        setMetrics(parseInfo, sqlInfo);
+        //set limit
+        setLimit(parseInfo, sqlInfo);
+    }
+
+    private void setLimit(SemanticParseInfo parseInfo, SqlInfo sqlInfo) {
+        Limit limit = SqlSelectHelper.getLimit(sqlInfo.getCorrectedS2SQL());
+        if (!Objects.isNull(limit)) {
+            parseInfo.setLimit(Long.parseLong(limit.getRowCount().toString()));
+        }
+    }
+
+    private void setDimensions(SemanticParseInfo parseInfo, SqlInfo sqlInfo) {
+        SemanticSchema semanticSchema = ContextUtils.getBean(SchemaService.class).getSemanticSchema();
+        if (Objects.isNull(semanticSchema)) {
+            return;
+        }
+
+        List<String> groupByFields = SqlSelectHelper.getGroupByFields(sqlInfo.getCorrectedS2SQL());
+        List<String> groupByDimensions = getFieldsExceptDate(groupByFields);
+        List<SchemaElement> dimensions = getAllFields(semanticSchema, parseInfo.getDataSetId());
+        parseInfo.setDimensions(getDimensionsElements(groupByDimensions, dimensions));
+    }
+
+    private void setMetrics(SemanticParseInfo parseInfo, SqlInfo sqlInfo) {
+        SemanticSchema semanticSchema = ContextUtils.getBean(SchemaService.class).getSemanticSchema();
+        if (Objects.isNull(semanticSchema)) {
+            return;
+        }
+        Select selectStatement = SqlSelectHelper.getSelect(sqlInfo.getCorrectedS2SQL());
+        if (!(selectStatement instanceof PlainSelect)) {
+            return;
+        }
+
+        List<SelectItem<?>> selectItems = ((PlainSelect) selectStatement).getSelectItems();
+        List<SelectItem<?>> functionList = selectItems.stream()
+                .filter(s -> s.getExpression() instanceof Function)
+                .collect(Collectors.toList());
+        List<SchemaElement> allFields = getAllFields(semanticSchema, parseInfo.getDataSetId());
+        Set<SchemaElement> metrics = getMetricsElements(functionList, allFields);
+        parseInfo.setMetrics(metrics);
+    }
+
+    private static List<SchemaElement> getAllFields(SemanticSchema semanticSchema, Long dataSetId) {
+        ArrayList<SchemaElement> schemaElements = new ArrayList<>();
+        schemaElements.addAll(semanticSchema.getMetrics());
+        schemaElements.addAll(semanticSchema.getDimensions());
+        return schemaElements.stream()
+                .filter(e -> Objects.equals(e.getDataSet(), dataSetId) || e.getDataSet() == 0L)
+                .collect(Collectors.toList());
+    }
+
+    private void setFilter(SemanticParseInfo parseInfo, List<FieldExpression> expressions) {
+        try {
+            Map<String, SchemaElement> fieldNameToElement = getNameToElement(parseInfo.getDataSetId());
+            List<QueryFilter> result = getDimensionFilter(fieldNameToElement, expressions);
+            parseInfo.getDimensionFilters().addAll(result);
+        } catch (Exception e) {
+            log.error("set dimensionFilter error :", e);
+        }
+    }
+
+    private void setDataInfo(SemanticParseInfo parseInfo, List<FieldExpression> expressions) {
         try {
             if (!org.apache.commons.collections.CollectionUtils.isEmpty(expressions)) {
                 DateConf dateInfo = getDateInfo(expressions);
@@ -72,64 +144,36 @@ public class ParseInfoProcessor implements ResultProcessor {
         } catch (Exception e) {
             log.error("set dateInfo error :", e);
         }
-
-        //set filter
-        Long dataSetId = parseInfo.getDataSetId();
-        try {
-            Map<String, SchemaElement> fieldNameToElement = getNameToElement(dataSetId);
-            List<QueryFilter> result = getDimensionFilter(fieldNameToElement, expressions);
-            parseInfo.getDimensionFilters().addAll(result);
-        } catch (Exception e) {
-            log.error("set dimensionFilter error :", e);
-        }
-
-        SemanticSchema semanticSchema = ContextUtils.getBean(SchemaService.class).getSemanticSchema();
-        if (Objects.isNull(semanticSchema)) {
-            return;
-        }
-        List<String> allFields = getFieldsExceptDate(SqlSelectHelper.getAllSelectFields(sqlInfo.getCorrectedS2SQL()));
-        Set<SchemaElement> metrics = getElements(dataSetId, allFields, semanticSchema.getMetrics());
-        Map<String, String> functionMap = SqlSelectHelper.getAggregate(sqlInfo.getCorrectedS2SQL())
-                .stream()
-                .collect(Collectors.toMap(
-                        func -> func.getParameters().get(0).toString(),
-                        func -> func.getMultipartName().get(0)));
-
-        for (SchemaElement metric : metrics) {
-            String aggregator = functionMap.get(metric.getName());
-            if (aggregator != null) {
-                metric.setAggregator(AggOperatorEnum.of(aggregator).name());
-            } else {
-                // 如果没有找到匹配的聚合函数，使用默认聚合器
-                metric.setAggregator(AggOperatorEnum.of(metric.getDefaultAgg()).name());
-            }
-        }
-
-        parseInfo.setMetrics(metrics);
-        if (QueryType.METRIC.equals(parseInfo.getQueryType())) {
-            List<String> groupByFields = SqlSelectHelper.getGroupByFields(sqlInfo.getCorrectedS2SQL());
-            List<String> groupByDimensions = getFieldsExceptDate(groupByFields);
-            parseInfo.setDimensions(getElements(dataSetId, groupByDimensions, semanticSchema.getDimensions()));
-        } else if (QueryType.DETAIL.equals(parseInfo.getQueryType())) {
-            List<String> selectFields = SqlSelectHelper.getSelectFields(sqlInfo.getCorrectedS2SQL());
-            List<String> selectDimensions = getFieldsExceptDate(selectFields);
-            parseInfo.setDimensions(getElements(dataSetId, selectDimensions, semanticSchema.getDimensions()));
-        }
     }
 
-    private Set<SchemaElement> getElements(Long dataSetId, List<String> allFields, List<SchemaElement> elements) {
+    private Set<SchemaElement> getMetricsElements(List<SelectItem<?>> functionList, List<SchemaElement> elements) {
+        HashSet<SchemaElement> metricsElements = new HashSet<>();
+        for (SelectItem<?> selectItem : functionList) {
+            Function function = (Function) selectItem.getExpression();
+            for (SchemaElement element : elements) {
+                if (element.getName().equals(function.getParameters().get(0).toString())
+                        || element.getAlias().contains(function.getParameters().get(0).toString())) {
+                    element.setAggregator(AggOperatorEnum.of(function.getName()).name());
+                    metricsElements.add(element);
+                    break;
+                }
+            }
+        }
+        return metricsElements;
+    }
+
+    private Set<SchemaElement> getDimensionsElements(List<String> allFields, List<SchemaElement> elements) {
         return elements.stream()
                 .filter(schemaElement -> {
                             if (CollectionUtils.isEmpty(schemaElement.getAlias())) {
-                                return dataSetId.equals(schemaElement.getDataSet()) && allFields.contains(
-                                        schemaElement.getName());
+                                return allFields.contains(schemaElement.getName());
                             }
                             Set<String> allFieldsSet = new HashSet<>(allFields);
                             Set<String> aliasSet = new HashSet<>(schemaElement.getAlias());
                             List<String> intersection = allFieldsSet.stream()
                                     .filter(aliasSet::contains).collect(Collectors.toList());
-                            return dataSetId.equals(schemaElement.getDataSet()) && (allFields.contains(
-                                    schemaElement.getName()) || !CollectionUtils.isEmpty(intersection));
+                            return (allFields.contains(schemaElement.getName())
+                                    || !CollectionUtils.isEmpty(intersection));
                         }
                 ).collect(Collectors.toSet());
     }

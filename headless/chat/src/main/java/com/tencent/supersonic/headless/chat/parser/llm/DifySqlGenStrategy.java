@@ -63,8 +63,8 @@ public class DifySqlGenStrategy extends SqlGenStrategy {
         Map<Prompt, String> prompt2Output = new ConcurrentHashMap<>();
         prompt2Exemplar.keySet().parallelStream().forEach(prompt -> {
                     keyPipelineLog.info("DifySqlGenStrategy reqPrompt:\n{}", prompt.toSystemMessage());
-                    DifyResult difyResult = difyServiceClient.generate(inputs, llmReq.getQueryText(), "default",
-                            "default-conversion-id-todo");
+                    DifyResult difyResult = difyServiceClient.generate(inputs, llmReq.getQueryText(),
+                            llmReq.getQueryUser(), "default-conversion-id-todo");
                     String result = difyResult.getAnswer();
 
                     //TODO：zds 后续存储会话ID，做多轮问答

@@ -109,6 +109,7 @@ public class LLMRequestService {
         llmReq.setModelConfig(queryCtx.getModelConfig());
         llmReq.setPromptConfig(queryCtx.getPromptConfig());
         llmReq.setDynamicExemplars(queryCtx.getDynamicExemplars());
+        llmReq.setQueryUser(queryCtx.getUser().getName());
 
         return llmReq;
     }

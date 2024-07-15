@@ -19,6 +19,7 @@ declare namespace API {
   export type CurrentUser = {
     name: string;
     superAdmin: boolean;
+    isDeveloper: boolean;
     staffid: string;
     staffName: string;
     orgName: string;
