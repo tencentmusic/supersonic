@@ -19,7 +19,7 @@ import com.tencent.supersonic.headless.api.pojo.response.MetricResp;
 import com.tencent.supersonic.headless.api.pojo.response.MetricSchemaResp;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticSchemaResp;
 import com.tencent.supersonic.headless.api.pojo.MetaFilter;
-import com.tencent.supersonic.headless.server.web.service.SchemaService;
+import com.tencent.supersonic.headless.server.service.SchemaService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Triple;
