@@ -1,4 +1,4 @@
-package com.tencent.supersonic.headless.server.facade.service;
+package com.tencent.supersonic.headless.server.web.service;
 
 import com.tencent.supersonic.headless.api.pojo.request.QueryNLReq;
 import com.tencent.supersonic.headless.api.pojo.response.SearchResult;

@@ -21,12 +21,14 @@ import com.tencent.supersonic.headless.api.pojo.response.DataSetResp;
 import com.tencent.supersonic.headless.api.pojo.response.MapInfoResp;
 import com.tencent.supersonic.headless.api.pojo.response.MapResp;
 import com.tencent.supersonic.headless.api.pojo.response.ParseResp;
+import com.tencent.supersonic.headless.api.pojo.response.SearchResult;
 import com.tencent.supersonic.headless.chat.ChatQueryContext;
 import com.tencent.supersonic.headless.chat.corrector.GrammarCorrector;
 import com.tencent.supersonic.headless.chat.corrector.SchemaCorrector;
 import com.tencent.supersonic.headless.chat.knowledge.builder.BaseWordBuilder;
 import com.tencent.supersonic.headless.chat.query.SemanticQuery;
 import com.tencent.supersonic.headless.server.facade.service.ChatLayerService;
+import com.tencent.supersonic.headless.server.web.service.RetrieveService;
 import com.tencent.supersonic.headless.server.pojo.MetaFilter;
 import com.tencent.supersonic.headless.server.utils.ChatWorkflowEngine;
 import com.tencent.supersonic.headless.server.utils.ComponentFactory;
@@ -55,6 +57,8 @@ public class S2ChatLayerService implements ChatLayerService {
     private SchemaService schemaService;
     @Autowired
     private DataSetService dataSetService;
+    @Autowired
+    private RetrieveService retrieveService;
     @Autowired
     private ChatWorkflowEngine chatWorkflowEngine;
 
@@ -125,6 +129,11 @@ public class S2ChatLayerService implements ChatLayerService {
     public SqlEvaluation validate(QuerySqlReq querySqlReq, User user) {
         SemanticParseInfo semanticParseInfo = correctSqlReq(querySqlReq, user);
         return semanticParseInfo.getSqlEvaluation();
+    }
+
+    @Override
+    public List<SearchResult> retrieve(QueryNLReq queryNLReq) {
+        return retrieveService.retrieve(queryNLReq);
     }
 
     private SemanticParseInfo correctSqlReq(QuerySqlReq querySqlReq, User user) {

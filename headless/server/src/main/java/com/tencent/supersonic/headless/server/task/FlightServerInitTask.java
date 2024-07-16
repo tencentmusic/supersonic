@@ -1,6 +1,6 @@
 package com.tencent.supersonic.headless.server.task;
 
-import com.tencent.supersonic.headless.server.facade.service.FlightService;
+import com.tencent.supersonic.headless.server.web.service.FlightService;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import lombok.extern.slf4j.Slf4j;

@@ -1,4 +1,4 @@
-package com.tencent.supersonic.headless.server.facade.service.impl;
+package com.tencent.supersonic.headless.server.web.service.impl;
 
 import static com.google.protobuf.Any.pack;
 import static com.google.protobuf.ByteString.copyFrom;
@@ -20,7 +20,7 @@ import com.tencent.supersonic.headless.api.pojo.Param;
 import com.tencent.supersonic.headless.api.pojo.request.QuerySqlReq;
 import com.tencent.supersonic.headless.api.pojo.request.SemanticQueryReq;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
-import com.tencent.supersonic.headless.server.facade.service.FlightService;
+import com.tencent.supersonic.headless.server.web.service.FlightService;
 import com.tencent.supersonic.headless.server.facade.service.SemanticLayerService;
 import com.tencent.supersonic.headless.server.utils.FlightUtils;
 import java.nio.charset.StandardCharsets;

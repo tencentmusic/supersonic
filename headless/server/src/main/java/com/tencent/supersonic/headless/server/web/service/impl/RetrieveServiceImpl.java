@@ -1,4 +1,4 @@
-package com.tencent.supersonic.headless.server.facade.service.impl;
+package com.tencent.supersonic.headless.server.web.service.impl;
 
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
@@ -21,7 +21,7 @@ import com.tencent.supersonic.headless.chat.knowledge.helper.NatureHelper;
 import com.tencent.supersonic.headless.chat.mapper.MatchText;
 import com.tencent.supersonic.headless.chat.mapper.ModelWithSemanticType;
 import com.tencent.supersonic.headless.chat.mapper.SearchMatchStrategy;
-import com.tencent.supersonic.headless.server.facade.service.RetrieveService;
+import com.tencent.supersonic.headless.server.web.service.RetrieveService;
 import com.tencent.supersonic.headless.server.web.service.DataSetService;
 import com.tencent.supersonic.headless.server.web.service.SchemaService;
 import lombok.extern.slf4j.Slf4j;
