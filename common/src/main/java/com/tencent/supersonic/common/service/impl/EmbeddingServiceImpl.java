@@ -79,15 +79,12 @@ public class EmbeddingServiceImpl implements EmbeddingService {
         Map<String, String> filterCondition = new HashMap<>();
         filterCondition.put(TextSegmentConvert.QUERY_ID, queryId);
         Filter filter = createCombinedFilter(filterCondition);
-
         EmbeddingSearchRequest request = EmbeddingSearchRequest.builder()
-                .queryEmbedding(embedding).filter(filter).maxResults(1).build();
+                .queryEmbedding(embedding).filter(filter).minScore(1.0d).maxResults(1).build();
 
         EmbeddingSearchResult result = embeddingStore.search(request);
         List<EmbeddingMatch<TextSegment>> relevant = result.matches();
-
         boolean exists = CollectionUtils.isNotEmpty(relevant);
-
         cache.put(queryId, exists);
         return exists;
     }
@@ -126,10 +123,8 @@ public class EmbeddingServiceImpl implements EmbeddingService {
             Filter filter = createCombinedFilter(filterCondition);
             EmbeddingSearchRequest request = EmbeddingSearchRequest.builder()
                     .queryEmbedding(embeddedText).filter(filter).maxResults(num).build();
-
             EmbeddingSearchResult result = embeddingStore.search(request);
             List<EmbeddingMatch<TextSegment>> relevant = result.matches();
-
             RetrieveQueryResult retrieveQueryResult = new RetrieveQueryResult();
             retrieveQueryResult.setQuery(queryText);
             List<Retrieval> retrievals = new ArrayList<>();
@@ -154,7 +149,6 @@ public class EmbeddingServiceImpl implements EmbeddingService {
             retrieveQueryResult.setRetrieval(retrievals);
             results.add(retrieveQueryResult);
         }
-
         return results;
     }
 
