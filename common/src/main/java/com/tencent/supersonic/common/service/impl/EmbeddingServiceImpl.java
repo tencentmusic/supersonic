@@ -3,7 +3,6 @@ package com.tencent.supersonic.common.service.impl;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.tencent.supersonic.common.service.EmbeddingService;
-import com.tencent.supersonic.common.util.ContextUtils;
 import dev.langchain4j.data.embedding.Embedding;
 import dev.langchain4j.data.segment.TextSegment;
 import dev.langchain4j.model.embedding.EmbeddingModel;
@@ -80,14 +79,12 @@ public class EmbeddingServiceImpl implements EmbeddingService {
         Map<String, String> filterCondition = new HashMap<>();
         filterCondition.put(TextSegmentConvert.QUERY_ID, queryId);
         Filter filter = createCombinedFilter(filterCondition);
-
         EmbeddingSearchRequest request = EmbeddingSearchRequest.builder()
                 .queryEmbedding(embedding).filter(filter).minScore(1.0d).maxResults(1).build();
 
         EmbeddingSearchResult result = embeddingStore.search(request);
         List<EmbeddingMatch<TextSegment>> relevant = result.matches();
         boolean exists = CollectionUtils.isNotEmpty(relevant);
-
         cache.put(queryId, exists);
         return exists;
     }
@@ -128,7 +125,6 @@ public class EmbeddingServiceImpl implements EmbeddingService {
                     .queryEmbedding(embeddedText).filter(filter).maxResults(num).build();
             EmbeddingSearchResult result = embeddingStore.search(request);
             List<EmbeddingMatch<TextSegment>> relevant = result.matches();
-
             RetrieveQueryResult retrieveQueryResult = new RetrieveQueryResult();
             retrieveQueryResult.setQuery(queryText);
             List<Retrieval> retrievals = new ArrayList<>();
