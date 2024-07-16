@@ -1,6 +1,7 @@
 services:
   chroma:
     image: chromadb/chroma:0.5.3
+    platform: linux/amd64
     container_name: supersonic_chroma
     ports:
       - "8000:8000"
@@ -20,6 +21,7 @@ services:
 
   mysql:
     image: mysql:8.0
+    platform: linux/amd64
     container_name: supersonic_mysql
     environment:
       LANG: 'C.UTF-8'  # 设置环境变量
@@ -48,6 +50,7 @@ services:
 
   db_init:
     image: supersonicbi/supersonic:${SUPERSONIC_VERSION:-latest}
+    platform: linux/amd64
     container_name: supersonic_db_init
     depends_on:
       mysql:
@@ -71,6 +74,7 @@ services:
 
   supersonic_standalone:
     image: supersonicbi/supersonic:${SUPERSONIC_VERSION:-latest}
+    platform: linux/amd64
     container_name: supersonic_standalone
     environment:
       DB_HOST: supersonic_mysql
