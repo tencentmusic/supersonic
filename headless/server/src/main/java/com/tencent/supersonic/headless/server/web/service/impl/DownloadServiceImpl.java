@@ -24,7 +24,7 @@ import com.tencent.supersonic.headless.api.pojo.response.MetricResp;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
 import com.tencent.supersonic.headless.core.utils.DataTransformUtils;
 import com.tencent.supersonic.headless.server.pojo.DataDownload;
-import com.tencent.supersonic.headless.server.pojo.MetaFilter;
+import com.tencent.supersonic.headless.api.pojo.MetaFilter;
 import com.tencent.supersonic.headless.server.web.service.DimensionService;
 import com.tencent.supersonic.headless.server.web.service.DownloadService;
 import com.tencent.supersonic.headless.server.web.service.MetricService;

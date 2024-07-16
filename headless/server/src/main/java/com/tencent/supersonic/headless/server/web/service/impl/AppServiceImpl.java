@@ -20,7 +20,7 @@ import com.tencent.supersonic.headless.api.pojo.response.DimensionResp;
 import com.tencent.supersonic.headless.api.pojo.response.MetricResp;
 import com.tencent.supersonic.headless.server.persistence.dataobject.AppDO;
 import com.tencent.supersonic.headless.server.persistence.mapper.AppMapper;
-import com.tencent.supersonic.headless.server.pojo.MetaFilter;
+import com.tencent.supersonic.headless.api.pojo.MetaFilter;
 import com.tencent.supersonic.headless.server.web.service.AppService;
 import com.tencent.supersonic.headless.server.web.service.DimensionService;
 import com.tencent.supersonic.headless.server.web.service.MetricService;

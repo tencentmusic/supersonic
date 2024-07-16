@@ -30,9 +30,7 @@ import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.headless.api.pojo.SchemaItem;
 import com.tencent.supersonic.headless.api.pojo.response.DimensionResp;
 import com.tencent.supersonic.headless.api.pojo.response.MetricResp;
-import com.tencent.supersonic.headless.server.pojo.MetaFilter;
-import com.tencent.supersonic.headless.server.web.service.DimensionService;
-import com.tencent.supersonic.headless.server.web.service.MetricService;
+import com.tencent.supersonic.headless.api.pojo.MetaFilter;
 import com.tencent.supersonic.headless.server.facade.service.SemanticLayerService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
@@ -53,18 +51,13 @@ public class ConfigServiceImpl implements ConfigService {
 
     private final ChatConfigRepository chatConfigRepository;
     private final ChatConfigHelper chatConfigHelper;
-    private final DimensionService dimensionService;
-    private final MetricService metricService;
     private final SemanticLayerService semanticLayerService;
 
 
     public ConfigServiceImpl(ChatConfigRepository chatConfigRepository,
-            ChatConfigHelper chatConfigHelper, DimensionService dimensionService,
-            MetricService metricService, SemanticLayerService semanticLayerService) {
+            ChatConfigHelper chatConfigHelper, SemanticLayerService semanticLayerService) {
         this.chatConfigRepository = chatConfigRepository;
         this.chatConfigHelper = chatConfigHelper;
-        this.dimensionService = dimensionService;
-        this.metricService = metricService;
         this.semanticLayerService = semanticLayerService;
     }
 
@@ -136,14 +129,14 @@ public class ConfigServiceImpl implements ConfigService {
         MetaFilter metaFilter = new MetaFilter();
         metaFilter.setModelIds(Lists.newArrayList(modelId));
         if (!CollectionUtils.isEmpty(blackDimIdList)) {
-            List<DimensionResp> dimensionRespList = dimensionService.getDimensions(metaFilter);
+            List<DimensionResp> dimensionRespList = semanticLayerService.getDimensions(metaFilter);
             List<String> blackDimNameList = dimensionRespList.stream().filter(o -> filterDimIdList.contains(o.getId()))
                     .map(SchemaItem::getName).collect(Collectors.toList());
             itemNameVisibility.setBlackDimNameList(blackDimNameList);
         }
         if (!CollectionUtils.isEmpty(blackMetricIdList)) {
 
-            List<MetricResp> metricRespList = metricService.getMetrics(metaFilter);
+            List<MetricResp> metricRespList = semanticLayerService.getMetrics(metaFilter);
             List<String> blackMetricList = metricRespList.stream().filter(o -> filterMetricIdList.contains(o.getId()))
                     .map(SchemaItem::getName).collect(Collectors.toList());
             itemNameVisibility.setBlackMetricNameList(blackMetricList);

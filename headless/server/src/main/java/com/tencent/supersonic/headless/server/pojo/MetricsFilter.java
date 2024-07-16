@@ -1,6 +1,8 @@
 package com.tencent.supersonic.headless.server.pojo;
 
 import java.util.List;
+
+import com.tencent.supersonic.headless.api.pojo.MetaFilter;
 import lombok.Data;
 
 @Data

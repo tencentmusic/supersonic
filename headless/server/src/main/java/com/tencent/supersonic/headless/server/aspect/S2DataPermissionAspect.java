@@ -22,7 +22,7 @@ import com.tencent.supersonic.headless.api.pojo.request.SemanticQueryReq;
 import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticSchemaResp;
-import com.tencent.supersonic.headless.server.pojo.MetaFilter;
+import com.tencent.supersonic.headless.api.pojo.MetaFilter;
 import com.tencent.supersonic.headless.server.utils.QueryStructUtils;
 import com.tencent.supersonic.headless.server.web.service.ModelService;
 import com.tencent.supersonic.headless.server.web.service.SchemaService;

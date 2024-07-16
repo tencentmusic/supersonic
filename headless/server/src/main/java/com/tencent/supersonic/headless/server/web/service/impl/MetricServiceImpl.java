@@ -52,7 +52,7 @@ import com.tencent.supersonic.headless.server.persistence.dataobject.TagDO;
 import com.tencent.supersonic.headless.server.persistence.mapper.MetricDOMapper;
 import com.tencent.supersonic.headless.server.persistence.repository.MetricRepository;
 import com.tencent.supersonic.headless.server.pojo.DimensionsFilter;
-import com.tencent.supersonic.headless.server.pojo.MetaFilter;
+import com.tencent.supersonic.headless.api.pojo.MetaFilter;
 import com.tencent.supersonic.headless.server.pojo.MetricFilter;
 import com.tencent.supersonic.headless.server.pojo.MetricsFilter;
 import com.tencent.supersonic.headless.server.pojo.ModelCluster;

@@ -29,7 +29,7 @@ import com.tencent.supersonic.headless.chat.knowledge.builder.BaseWordBuilder;
 import com.tencent.supersonic.headless.chat.query.SemanticQuery;
 import com.tencent.supersonic.headless.server.facade.service.ChatLayerService;
 import com.tencent.supersonic.headless.server.web.service.RetrieveService;
-import com.tencent.supersonic.headless.server.pojo.MetaFilter;
+import com.tencent.supersonic.headless.api.pojo.MetaFilter;
 import com.tencent.supersonic.headless.server.utils.ChatWorkflowEngine;
 import com.tencent.supersonic.headless.server.utils.ComponentFactory;
 import com.tencent.supersonic.headless.server.web.service.DataSetService;

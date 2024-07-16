@@ -13,7 +13,7 @@ import com.tencent.supersonic.headless.api.pojo.request.MetricBaseReq;
 import com.tencent.supersonic.headless.api.pojo.request.MetricReq;
 import com.tencent.supersonic.headless.api.pojo.request.PageMetricReq;
 import com.tencent.supersonic.headless.api.pojo.response.MetricResp;
-import com.tencent.supersonic.headless.server.pojo.MetaFilter;
+import com.tencent.supersonic.headless.api.pojo.MetaFilter;
 import com.tencent.supersonic.headless.server.pojo.MetricFilter;
 import com.tencent.supersonic.headless.server.web.service.MetricService;
 import org.springframework.web.bind.annotation.DeleteMapping;

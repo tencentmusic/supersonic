@@ -17,7 +17,7 @@ import com.tencent.supersonic.headless.api.pojo.response.MetricResp;
 import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
 import com.tencent.supersonic.headless.api.pojo.response.ModelSchemaResp;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticSchemaResp;
-import com.tencent.supersonic.headless.server.pojo.MetaFilter;
+import com.tencent.supersonic.headless.api.pojo.MetaFilter;
 import com.tencent.supersonic.headless.server.pojo.yaml.DataModelYamlTpl;
 import com.tencent.supersonic.headless.server.pojo.yaml.DimensionYamlTpl;
 import com.tencent.supersonic.headless.server.pojo.yaml.MetricYamlTpl;

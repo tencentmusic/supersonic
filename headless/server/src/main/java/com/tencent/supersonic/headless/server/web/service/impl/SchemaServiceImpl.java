@@ -35,7 +35,7 @@ import com.tencent.supersonic.headless.api.pojo.response.TermResp;
 import com.tencent.supersonic.headless.server.manager.DimensionYamlManager;
 import com.tencent.supersonic.headless.server.manager.MetricYamlManager;
 import com.tencent.supersonic.headless.server.manager.ModelYamlManager;
-import com.tencent.supersonic.headless.server.pojo.MetaFilter;
+import com.tencent.supersonic.headless.api.pojo.MetaFilter;
 import com.tencent.supersonic.headless.server.pojo.ModelFilter;
 import com.tencent.supersonic.headless.server.pojo.TagFilter;
 import com.tencent.supersonic.headless.server.pojo.yaml.DataModelYamlTpl;

@@ -14,6 +14,7 @@ import com.tencent.supersonic.headless.api.pojo.DataSetInfo;
 import com.tencent.supersonic.headless.api.pojo.DataSetSchema;
 import com.tencent.supersonic.headless.api.pojo.Dim;
 import com.tencent.supersonic.headless.api.pojo.EntityInfo;
+import com.tencent.supersonic.headless.api.pojo.MetaFilter;
 import com.tencent.supersonic.headless.api.pojo.QueryParam;
 import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
@@ -30,6 +31,7 @@ import com.tencent.supersonic.headless.api.pojo.request.SchemaFilterReq;
 import com.tencent.supersonic.headless.api.pojo.request.SemanticQueryReq;
 import com.tencent.supersonic.headless.api.pojo.response.DimensionResp;
 import com.tencent.supersonic.headless.api.pojo.response.ItemResp;
+import com.tencent.supersonic.headless.api.pojo.response.MetricResp;
 import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticSchemaResp;
@@ -55,6 +57,8 @@ import com.tencent.supersonic.headless.server.utils.QueryReqConverter;
 import com.tencent.supersonic.headless.server.utils.QueryUtils;
 import com.tencent.supersonic.headless.server.utils.StatUtils;
 import com.tencent.supersonic.headless.server.web.service.DataSetService;
+import com.tencent.supersonic.headless.server.web.service.DimensionService;
+import com.tencent.supersonic.headless.server.web.service.MetricService;
 import com.tencent.supersonic.headless.server.web.service.SchemaService;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -87,6 +91,8 @@ public class S2SemanticLayerService implements SemanticLayerService {
     private final SemanticTranslator semanticTranslator;
     private final MetricDrillDownChecker metricDrillDownChecker;
     private final KnowledgeBaseService knowledgeBaseService;
+    private final MetricService metricService;
+    private final DimensionService dimensionService;
     private QueryCache queryCache = ComponentFactory.getQueryCache();
     private List<QueryExecutor> queryExecutors = ComponentFactory.getQueryExecutors();
 
@@ -99,7 +105,9 @@ public class S2SemanticLayerService implements SemanticLayerService {
             SchemaService schemaService,
             SemanticTranslator semanticTranslator,
             MetricDrillDownChecker metricDrillDownChecker,
-            KnowledgeBaseService knowledgeBaseService) {
+            KnowledgeBaseService knowledgeBaseService,
+            MetricService metricService,
+            DimensionService dimensionService) {
         this.statUtils = statUtils;
         this.queryUtils = queryUtils;
         this.queryReqConverter = queryReqConverter;
@@ -109,6 +117,8 @@ public class S2SemanticLayerService implements SemanticLayerService {
         this.semanticTranslator = semanticTranslator;
         this.metricDrillDownChecker = metricDrillDownChecker;
         this.knowledgeBaseService = knowledgeBaseService;
+        this.metricService = metricService;
+        this.dimensionService = dimensionService;
     }
 
     public DataSetSchema getDataSetSchema(Long id) {
@@ -289,6 +299,36 @@ public class S2SemanticLayerService implements SemanticLayerService {
     @Override
     public List<ItemResp> getDomainDataSetTree() {
         return schemaService.getDomainDataSetTree();
+    }
+
+    @Override
+    public List<DimensionResp> getDimensions(MetaFilter metaFilter) {
+        return dimensionService.getDimensions(metaFilter);
+    }
+
+    private Set<SchemaElement> getDimensions(EntityInfo modelInfo) {
+        Set<SchemaElement> dimensions = new LinkedHashSet();
+        for (DataInfo mainEntityDimension : modelInfo.getDimensions()) {
+            SchemaElement dimension = new SchemaElement();
+            dimension.setBizName(mainEntityDimension.getBizName());
+            dimensions.add(dimension);
+        }
+        return dimensions;
+    }
+
+    @Override
+    public List<MetricResp> getMetrics(MetaFilter metaFilter) {
+        return metricService.getMetrics(metaFilter);
+    }
+
+    private Set<SchemaElement> getMetrics(EntityInfo modelInfo) {
+        Set<SchemaElement> metrics = new LinkedHashSet();
+        for (DataInfo metricValue : modelInfo.getMetrics()) {
+            SchemaElement metric = new SchemaElement();
+            BeanUtils.copyProperties(metricValue, metric);
+            metrics.add(metric);
+        }
+        return metrics;
     }
 
     private QueryStatement buildSqlQueryStatement(QuerySqlReq querySqlReq, User user) throws Exception {
@@ -501,16 +541,6 @@ public class S2SemanticLayerService implements SemanticLayerService {
         return chatFilter;
     }
 
-    private Set<SchemaElement> getDimensions(EntityInfo modelInfo) {
-        Set<SchemaElement> dimensions = new LinkedHashSet();
-        for (DataInfo mainEntityDimension : modelInfo.getDimensions()) {
-            SchemaElement dimension = new SchemaElement();
-            dimension.setBizName(mainEntityDimension.getBizName());
-            dimensions.add(dimension);
-        }
-        return dimensions;
-    }
-
     private String getEntryKey(Map.Entry<String, Object> entry) {
         // metric parser special handle, TODO delete
         String entryKey = entry.getKey();
@@ -518,16 +548,6 @@ public class S2SemanticLayerService implements SemanticLayerService {
             entryKey = entryKey.split("__")[1];
         }
         return entryKey;
-    }
-
-    private Set<SchemaElement> getMetrics(EntityInfo modelInfo) {
-        Set<SchemaElement> metrics = new LinkedHashSet();
-        for (DataInfo metricValue : modelInfo.getMetrics()) {
-            SchemaElement metric = new SchemaElement();
-            BeanUtils.copyProperties(metricValue, metric);
-            metrics.add(metric);
-        }
-        return metrics;
     }
 
     private String getEntityPrimaryName(EntityInfo entityInfo) {

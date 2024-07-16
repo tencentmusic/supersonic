@@ -3,10 +3,13 @@ package com.tencent.supersonic.headless.server.facade.service;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.headless.api.pojo.DataSetSchema;
 import com.tencent.supersonic.headless.api.pojo.EntityInfo;
+import com.tencent.supersonic.headless.api.pojo.MetaFilter;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.api.pojo.request.DimensionValueReq;
 import com.tencent.supersonic.headless.api.pojo.request.SemanticQueryReq;
+import com.tencent.supersonic.headless.api.pojo.response.DimensionResp;
 import com.tencent.supersonic.headless.api.pojo.response.ItemResp;
+import com.tencent.supersonic.headless.api.pojo.response.MetricResp;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticTranslateResp;
 
@@ -28,5 +31,9 @@ public interface SemanticLayerService {
     EntityInfo getEntityInfo(SemanticParseInfo parseInfo, DataSetSchema dataSetSchema, User user);
 
     List<ItemResp> getDomainDataSetTree();
+
+    List<DimensionResp> getDimensions(MetaFilter metaFilter);
+
+    List<MetricResp> getMetrics(MetaFilter metaFilter);
 
 }

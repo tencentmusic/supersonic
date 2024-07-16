@@ -34,7 +34,7 @@ import com.tencent.supersonic.headless.server.persistence.mapper.DimensionDOMapp
 import com.tencent.supersonic.headless.server.persistence.repository.DimensionRepository;
 import com.tencent.supersonic.headless.server.pojo.DimensionFilter;
 import com.tencent.supersonic.headless.server.pojo.DimensionsFilter;
-import com.tencent.supersonic.headless.server.pojo.MetaFilter;
+import com.tencent.supersonic.headless.api.pojo.MetaFilter;
 import com.tencent.supersonic.headless.server.pojo.ModelFilter;
 import com.tencent.supersonic.headless.server.pojo.TagFilter;
 import com.tencent.supersonic.headless.server.utils.AliasGenerateHelper;
