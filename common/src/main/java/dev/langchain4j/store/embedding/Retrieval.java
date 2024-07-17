@@ -14,6 +14,8 @@ public class Retrieval {
 
     protected double distance;
 
+    protected double score;
+
     protected String query;
 
     protected Map<String, Object> metadata;

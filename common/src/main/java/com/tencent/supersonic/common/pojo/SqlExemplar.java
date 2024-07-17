@@ -17,4 +17,6 @@ public class SqlExemplar {
 
     private String sql;
 
+    private double score;
+
 }

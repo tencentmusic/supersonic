@@ -122,7 +122,7 @@ public class EmbeddingServiceImpl implements EmbeddingService {
             Embedding embeddedText = embeddingModel.embed(queryText).content();
             Filter filter = createCombinedFilter(filterCondition);
             EmbeddingSearchRequest request = EmbeddingSearchRequest.builder()
-                    .queryEmbedding(embeddedText).filter(filter).maxResults(num).build();
+                    .queryEmbedding(embeddedText).filter(filter).maxResults(num).minScore(0.6).build();
             EmbeddingSearchResult result = embeddingStore.search(request);
             List<EmbeddingMatch<TextSegment>> relevant = result.matches();
             RetrieveQueryResult retrieveQueryResult = new RetrieveQueryResult();
@@ -131,6 +131,7 @@ public class EmbeddingServiceImpl implements EmbeddingService {
             for (EmbeddingMatch<TextSegment> embeddingMatch : relevant) {
                 Retrieval retrieval = new Retrieval();
                 TextSegment embedded = embeddingMatch.embedded();
+                retrieval.setScore(embeddingMatch.score());
                 retrieval.setDistance(1 - embeddingMatch.score());
                 retrieval.setId(TextSegmentConvert.getQueryId(embedded));
                 retrieval.setQuery(embedded.text());
@@ -142,10 +143,6 @@ public class EmbeddingServiceImpl implements EmbeddingService {
                 retrieval.setMetadata(metadata);
                 retrievals.add(retrieval);
             }
-            retrievals = retrievals.stream()
-                    .sorted(Comparator.comparingDouble(Retrieval::getDistance).reversed())
-                    .limit(num)
-                    .collect(Collectors.toList());
             retrieveQueryResult.setRetrieval(retrievals);
             results.add(retrieveQueryResult);
         }

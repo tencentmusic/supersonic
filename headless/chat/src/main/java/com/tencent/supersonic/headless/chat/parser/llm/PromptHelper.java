@@ -13,7 +13,9 @@ import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.tencent.supersonic.headless.chat.parser.ParserConfig.PARSER_EXEMPLAR_RECALL_NUMBER;
 import static com.tencent.supersonic.headless.chat.parser.ParserConfig.PARSER_FEW_SHOT_NUMBER;
@@ -47,9 +49,12 @@ public class PromptHelper {
         List<List<SqlExemplar>> results = new ArrayList<>();
         // use random collection of exemplars for each self-consistency inference
         for (int i = 0; i < selfConsistencyNumber; i++) {
-            List<SqlExemplar> shuffledList = new ArrayList<>(exemplars);
+            List<SqlExemplar> shuffledList = exemplars.stream()
+                    .sorted(Comparator.comparingDouble(SqlExemplar::getScore).reversed())
+                    .limit(fewShotNumber)
+                    .collect(Collectors.toList());
             Collections.shuffle(shuffledList);
-            results.add(shuffledList.subList(0, fewShotNumber));
+            results.add(shuffledList);
         }
 
         return results;

@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @Slf4j
@@ -72,7 +73,9 @@ public class ExemplarServiceImpl implements ExemplarService, CommandLineRunner {
         List<RetrieveQueryResult> results = embeddingService.retrieveQuery(collection, retrieveQuery, num);
         results.stream().forEach(ret -> {
             ret.getRetrieval().stream().forEach(r -> {
-                exemplars.add(JsonUtil.mapToObject(r.getMetadata(), SqlExemplar.class));
+                Map<String, Object> metadata = r.getMetadata();
+                metadata.put("score", r.getScore());
+                exemplars.add(JsonUtil.mapToObject(metadata, SqlExemplar.class));
             });
         });
 
