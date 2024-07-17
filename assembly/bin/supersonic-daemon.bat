@@ -54,7 +54,7 @@ if "%command%"=="restart" (
    set "webDir=%baseDir%\webapp"
    set "logDir=%baseDir%\logs"
    set "classpath=%baseDir%;%webDir%;%libDir%\*;%confDir%"
-   set "java-command=-Dfile.encoding=UTF-8 -Duser.language=Zh -Duser.region=CN -Duser.timezone=GMT+08 -Dspring.profiles.active=%profile% -Xms1024m -Xmx2048m -cp %CLASSPATH% %MAIN_CLASS%"
+   set "java-command=-Dfile.encoding=UTF-8 -Duser.language=Zh -Duser.region=CN -Duser.timezone=GMT+08 -Dspring.profiles.active=%profile% -Xms1024m -Xmx1024m -cp %CLASSPATH% %MAIN_CLASS%"
    if not exist %logDir% mkdir %logDir%
    start /B java %java-command% >nul 2>&1
    timeout /t 10 >nul
