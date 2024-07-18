@@ -89,6 +89,7 @@ CREATE TABLE IF NOT EXISTS `s2_chat_memory` (
     `agent_id`  INT    ,
     `db_schema`  TEXT    ,
     `s2_sql` TEXT   ,
+    `side_info` TEXT    ,
     `status` char(10)   ,
     `llm_review` char(10)   ,
     `llm_comment`   TEXT,
