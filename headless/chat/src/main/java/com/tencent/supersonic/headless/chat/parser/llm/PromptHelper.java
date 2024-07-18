@@ -73,6 +73,23 @@ public class PromptHelper {
                 linkingListStr, currentDataStr, termStr, priorExts);
     }
 
+    public String buildSideInformation(LLMReq llmReq) {
+        List<LLMReq.ElementValue> linkedValues = llmReq.getLinking();
+        String currentDate = llmReq.getCurrentDate();
+        String priorExts = llmReq.getPriorExts();
+
+        List<String> priorLinkingList = new ArrayList<>();
+        for (LLMReq.ElementValue value : linkedValues) {
+            String fieldName = value.getFieldName();
+            String fieldValue = value.getFieldValue();
+            priorLinkingList.add("‘" + fieldValue + "‘是一个‘" + fieldName + "‘");
+        }
+        String currentDataStr = "当前的日期是" + currentDate;
+        String linkingListStr = String.join("，", priorLinkingList);
+        String termStr = buildTermStr(llmReq);
+        return String.format("%s;%s;%s;%s", linkingListStr, currentDataStr, termStr, priorExts);
+    }
+
     public String buildSchemaStr(LLMReq llmReq) {
         String tableStr = llmReq.getSchema().getDataSetName();
         StringBuilder metricStr = new StringBuilder();

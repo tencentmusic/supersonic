@@ -11,7 +11,11 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class SqlExemplar {
 
+    public static final String PROPERTY_KEY = "sql_exemplar";
+
     private String question;
+
+    private String sideInfo;
 
     private String dbSchema;
 

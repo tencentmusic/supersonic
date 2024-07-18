@@ -20,11 +20,14 @@ public class ChatMemoryDO {
     @TableId(type = IdType.AUTO)
     private Long id;
 
+    @TableField("agent_id")
+    private Integer agentId;
+
     @TableField("question")
     private String question;
 
-    @TableField("agent_id")
-    private Integer agentId;
+    @TableField("side_info")
+    private String sideInfo;
 
     @TableField("db_schema")
     private String dbSchema;

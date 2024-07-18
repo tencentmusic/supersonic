@@ -142,6 +142,7 @@ CREATE TABLE IF NOT EXISTS `s2_chat_config` (
 CREATE TABLE IF NOT EXISTS `s2_chat_memory` (
     `id` INT NOT NULL AUTO_INCREMENT,
     `question` varchar(655)   COMMENT '用户问题' ,
+    `side_info` TEXT COMMENT '辅助信息' ,
     `agent_id`  INT    COMMENT '助理ID' ,
     `db_schema`  TEXT    COMMENT 'Schema映射' ,
     `s2_sql` TEXT   COMMENT '大模型解析SQL' ,

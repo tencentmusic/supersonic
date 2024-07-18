@@ -102,6 +102,7 @@ public class MemoryServiceImpl implements MemoryService {
         exemplarService.storeExemplar(embeddingConfig.getMemoryCollectionName(memory.getAgentId()),
                 SqlExemplar.builder()
                         .question(memory.getQuestion())
+                        .sideInfo(memory.getSideInfo())
                         .dbSchema(memory.getDbSchema())
                         .sql(memory.getS2sql())
                         .build());
@@ -113,6 +114,7 @@ public class MemoryServiceImpl implements MemoryService {
         exemplarService.removeExemplar(embeddingConfig.getMemoryCollectionName(memory.getAgentId()),
                 SqlExemplar.builder()
                         .question(memory.getQuestion())
+                        .sideInfo(memory.getSideInfo())
                         .dbSchema(memory.getDbSchema())
                         .sql(memory.getS2sql())
                         .build());

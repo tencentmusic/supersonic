@@ -35,6 +35,7 @@ public class MemoryReviewTask {
             + "2.ALWAYS recognize `数据日期` as the date field.\n"
             + "#Question: %s\n"
             + "#Schema: %s\n"
+            + "#SideInfo: %s\n"
             + "#SQL: %s\n"
             + "#Response: ";
 
@@ -52,7 +53,8 @@ public class MemoryReviewTask {
                 .forEach(m -> {
                     Agent chatAgent = agentService.getAgent(m.getAgentId());
                     if (Objects.nonNull(chatAgent) && chatAgent.enableMemoryReview()) {
-                        String promptStr = String.format(INSTRUCTION, m.getQuestion(), m.getDbSchema(), m.getS2sql());
+                        String promptStr = String.format(INSTRUCTION, m.getQuestion(), m.getDbSchema(),
+                                m.getSideInfo(), m.getS2sql());
                         Prompt prompt = PromptTemplate.from(promptStr).apply(Collections.EMPTY_MAP);
 
                         keyPipelineLog.info("MemoryReviewTask reqPrompt:{}", promptStr);
