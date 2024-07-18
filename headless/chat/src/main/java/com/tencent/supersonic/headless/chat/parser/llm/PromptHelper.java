@@ -50,7 +50,7 @@ public class PromptHelper {
         // use random collection of exemplars for each self-consistency inference
         for (int i = 0; i < selfConsistencyNumber; i++) {
             List<Text2SQLExemplar> shuffledList = exemplars.stream()
-                    .sorted(Comparator.comparingDouble(SqlExemplar::getScore).reversed())
+                    .sorted(Comparator.comparingDouble(Text2SQLExemplar::getScore).reversed())
                     .limit(fewShotNumber)
                     .collect(Collectors.toList());
             Collections.shuffle(shuffledList);
