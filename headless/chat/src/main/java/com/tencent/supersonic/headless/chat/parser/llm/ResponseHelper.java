@@ -1,6 +1,6 @@
 package com.tencent.supersonic.headless.chat.parser.llm;
 
-import com.tencent.supersonic.common.pojo.SqlExemplar;
+import com.tencent.supersonic.common.pojo.Text2SQLExemplar;
 import com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMSqlResp;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
@@ -54,7 +54,7 @@ public class ResponseHelper {
         return Pair.of(inputMax, votePercentage);
     }
 
-    public static Map<String, LLMSqlResp> buildSqlRespMap(List<SqlExemplar> sqlExamples,
+    public static Map<String, LLMSqlResp> buildSqlRespMap(List<Text2SQLExemplar> sqlExamples,
                                                           Map<String, Double> sqlMap) {
         if (sqlMap == null) {
             return new HashMap<>();

@@ -7,7 +7,7 @@ import com.tencent.supersonic.chat.server.pojo.ParseContext;
 import com.tencent.supersonic.chat.server.service.ChatContextService;
 import com.tencent.supersonic.chat.server.util.QueryReqConverter;
 import com.tencent.supersonic.common.config.EmbeddingConfig;
-import com.tencent.supersonic.common.pojo.SqlExemplar;
+import com.tencent.supersonic.common.pojo.Text2SQLExemplar;
 import com.tencent.supersonic.common.service.impl.ExemplarServiceImpl;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.headless.api.pojo.SchemaElement;
@@ -207,7 +207,7 @@ public class NL2SQLParser implements ChatQueryParser {
     }
 
     private String rewriteErrorMessage(ChatLanguageModel chatLanguageModel, String userQuestion,
-                                       String errMsg, List<SqlExemplar> similarExemplars,
+                                       String errMsg, List<Text2SQLExemplar> similarExemplars,
                                        List<String> agentExamples) {
         Map<String, Object> variables = new HashMap<>();
         variables.put("user_question", userQuestion);
@@ -276,7 +276,7 @@ public class NL2SQLParser implements ChatQueryParser {
         ExemplarServiceImpl exemplarManager = ContextUtils.getBean(ExemplarServiceImpl.class);
         EmbeddingConfig embeddingConfig = ContextUtils.getBean(EmbeddingConfig.class);
         String memoryCollectionName = embeddingConfig.getMemoryCollectionName(agentId);
-        List<SqlExemplar> exemplars = exemplarManager.recallExemplars(memoryCollectionName,
+        List<Text2SQLExemplar> exemplars = exemplarManager.recallExemplars(memoryCollectionName,
                 queryNLReq.getQueryText(), 5);
         queryNLReq.getDynamicExemplars().addAll(exemplars);
     }

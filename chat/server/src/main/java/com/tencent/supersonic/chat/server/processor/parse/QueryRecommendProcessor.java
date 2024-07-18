@@ -7,7 +7,7 @@ import com.tencent.supersonic.chat.server.persistence.dataobject.ChatQueryDO;
 import com.tencent.supersonic.chat.server.persistence.repository.ChatQueryRepository;
 import com.tencent.supersonic.chat.server.pojo.ParseContext;
 import com.tencent.supersonic.common.config.EmbeddingConfig;
-import com.tencent.supersonic.common.pojo.SqlExemplar;
+import com.tencent.supersonic.common.pojo.Text2SQLExemplar;
 import com.tencent.supersonic.common.service.ExemplarService;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.headless.api.pojo.response.ParseResp;
@@ -43,7 +43,7 @@ public class QueryRecommendProcessor implements ParseResultProcessor {
         ExemplarService exemplarService = ContextUtils.getBean(ExemplarService.class);
         EmbeddingConfig embeddingConfig = ContextUtils.getBean(EmbeddingConfig.class);
         String memoryCollectionName = embeddingConfig.getMemoryCollectionName(agentId);
-        List<SqlExemplar> exemplars = exemplarService.recallExemplars(memoryCollectionName, queryText, 5);
+        List<Text2SQLExemplar> exemplars = exemplarService.recallExemplars(memoryCollectionName, queryText, 5);
         return exemplars.stream().map(sqlExemplar ->
                         SimilarQueryRecallResp.builder().queryText(sqlExemplar.getQuestion()).build())
                 .collect(Collectors.toList());

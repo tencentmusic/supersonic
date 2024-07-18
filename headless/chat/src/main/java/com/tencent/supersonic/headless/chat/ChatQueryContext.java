@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.common.config.PromptConfig;
 import com.tencent.supersonic.common.pojo.ChatModelConfig;
-import com.tencent.supersonic.common.pojo.SqlExemplar;
+import com.tencent.supersonic.common.pojo.Text2SQLExemplar;
 import com.tencent.supersonic.common.pojo.enums.Text2SQLType;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.headless.api.pojo.QueryDataType;
@@ -52,7 +52,7 @@ public class ChatQueryContext {
     private QueryDataType queryDataType = QueryDataType.ALL;
     private ChatModelConfig modelConfig;
     private PromptConfig promptConfig;
-    private List<SqlExemplar> dynamicExemplars;
+    private List<Text2SQLExemplar> dynamicExemplars;
     private SemanticParseInfo contextParseInfo;
 
     public List<SemanticQuery> getCandidateQueries() {
