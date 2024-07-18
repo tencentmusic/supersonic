@@ -16,7 +16,10 @@ public class DataBaseConfig {
     @Primary
     @ConfigurationProperties("spring.datasource")
     public DataSource dataSource() {
-        return new DruidDataSource();
+        DruidDataSource druidDataSource = new DruidDataSource();
+        druidDataSource.setTestWhileIdle(true);
+        druidDataSource.setValidationQuery("select 1");
+        return druidDataSource;
     }
 
 }
