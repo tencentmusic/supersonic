@@ -2,7 +2,7 @@ package com.tencent.supersonic.headless.chat.parser.llm;
 
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.jsqlparser.SqlValidHelper;
-import com.tencent.supersonic.common.pojo.SqlExemplar;
+import com.tencent.supersonic.common.pojo.Text2SQLExemplar;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.chat.query.QueryManager;
 import com.tencent.supersonic.headless.chat.query.llm.LLMSemanticQuery;
@@ -36,13 +36,13 @@ public class LLMResponseService {
         Map<String, Object> properties = new HashMap<>();
         properties.put(Constants.CONTEXT, parseResult);
         properties.put("type", "internal");
-        SqlExemplar exemplar = SqlExemplar.builder()
+        Text2SQLExemplar exemplar = Text2SQLExemplar.builder()
                 .question(queryCtx.getQueryText())
                 .sideInfo(parseResult.getLlmResp().getSideInfo())
                 .dbSchema(parseResult.getLlmResp().getSchema())
                 .sql(parseResult.getLlmResp().getSqlOutput())
                 .build();
-        properties.put(SqlExemplar.PROPERTY_KEY, exemplar);
+        properties.put(Text2SQLExemplar.PROPERTY_KEY, exemplar);
         parseInfo.setProperties(properties);
         parseInfo.setScore(queryCtx.getQueryText().length() * (1 + weight));
         parseInfo.setQueryMode(semanticQuery.getQueryMode());

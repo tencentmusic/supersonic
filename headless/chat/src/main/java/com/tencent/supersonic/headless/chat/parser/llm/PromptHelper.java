@@ -1,7 +1,7 @@
 package com.tencent.supersonic.headless.chat.parser.llm;
 
 import com.google.common.collect.Lists;
-import com.tencent.supersonic.common.pojo.SqlExemplar;
+import com.tencent.supersonic.common.pojo.Text2SQLExemplar;
 import com.tencent.supersonic.common.service.ExemplarService;
 import com.tencent.supersonic.headless.chat.parser.ParserConfig;
 import com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMReq;
@@ -29,12 +29,12 @@ public class PromptHelper {
     @Autowired
     private ExemplarService exemplarService;
 
-    public List<List<SqlExemplar>> getFewShotExemplars(LLMReq llmReq) {
+    public List<List<Text2SQLExemplar>> getFewShotExemplars(LLMReq llmReq) {
         int exemplarRecallNumber = Integer.valueOf(parserConfig.getParameterValue(PARSER_EXEMPLAR_RECALL_NUMBER));
         int fewShotNumber = Integer.valueOf(parserConfig.getParameterValue(PARSER_FEW_SHOT_NUMBER));
         int selfConsistencyNumber = Integer.valueOf(parserConfig.getParameterValue(PARSER_SELF_CONSISTENCY_NUMBER));
 
-        List<SqlExemplar> exemplars = Lists.newArrayList();
+        List<Text2SQLExemplar> exemplars = Lists.newArrayList();
         llmReq.getDynamicExemplars().stream().forEach(e -> {
             exemplars.add(e);
         });
@@ -44,10 +44,10 @@ public class PromptHelper {
             exemplars.addAll(exemplarService.recallExemplars(llmReq.getQueryText(), recallSize));
         }
 
-        List<List<SqlExemplar>> results = new ArrayList<>();
+        List<List<Text2SQLExemplar>> results = new ArrayList<>();
         // use random collection of exemplars for each self-consistency inference
         for (int i = 0; i < selfConsistencyNumber; i++) {
-            List<SqlExemplar> shuffledList = new ArrayList<>(exemplars);
+            List<Text2SQLExemplar> shuffledList = new ArrayList<>(exemplars);
             Collections.shuffle(shuffledList);
             results.add(shuffledList.subList(0, fewShotNumber));
         }
