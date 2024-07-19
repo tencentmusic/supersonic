@@ -9,4 +9,6 @@ public class DimensionFilter extends MetaFilter {
 
     private Integer isTag;
 
+    private Integer isVector;
+
 }

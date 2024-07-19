@@ -14,4 +14,8 @@ public class MetricsFilter extends MetaFilter {
 
     private List<String> metricNames;
 
+    private Integer isVector;
+
+    private Integer isPublish;
+
 }

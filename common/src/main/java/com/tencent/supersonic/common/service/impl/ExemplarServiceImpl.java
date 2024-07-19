@@ -15,6 +15,7 @@ import dev.langchain4j.store.embedding.RetrieveQueryResult;
 import dev.langchain4j.store.embedding.TextSegmentConvert;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.io.ClassPathResource;
@@ -29,6 +30,9 @@ import java.util.Map;
 @Slf4j
 @Order(0)
 public class ExemplarServiceImpl implements ExemplarService, CommandLineRunner {
+
+    @Value("${s2.task.init-embedding-data:false}")
+    private Boolean initEmbeddingData;
 
     private static final String SYS_EXEMPLAR_FILE = "s2-exemplar.json";
 
@@ -85,7 +89,9 @@ public class ExemplarServiceImpl implements ExemplarService, CommandLineRunner {
     @Override
     public void run(String... args) {
         try {
-            loadSysExemplars();
+            if (initEmbeddingData) {
+                loadSysExemplars();
+            }
         } catch (IOException e) {
             log.error("Failed to load system exemplars", e);
         }

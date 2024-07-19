@@ -47,4 +47,6 @@ public interface DimensionService {
     void sendDimensionEventBatch(List<Long> modelIds, EventType eventType);
 
     DataEvent getDataEvent();
+
+    void batchVector(List<Long> ids, User user);
 }

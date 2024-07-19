@@ -124,6 +124,9 @@
              where type = 'DIMENSION'
         ) t1 on t.id = t1.item_id
         where status != 3
+        <if test="isVector != null">
+            and is_vector = #{isVector}
+        </if>
         <if test="key != null and key != ''">
             and ( t.id like CONCAT('%',#{key , jdbcType=VARCHAR},'%') or
             t.name like CONCAT('%',#{key , jdbcType=VARCHAR},'%') or
@@ -207,5 +210,15 @@
         </if>
     </select>
 
+
+    <update id="batchVector" parameterType="java.util.List">
+        <foreach collection="list" item="dimension" separator=";">
+            UPDATE s2_dimension
+            SET is_vector = #{dimension.isVector,jdbcType=BIGINT},
+            updated_at = #{dimension.updatedAt,jdbcType=TIMESTAMP},
+            updated_by = #{dimension.updatedBy,jdbcType=VARCHAR}
+            WHERE id = #{dimension.id,jdbcType=BIGINT}
+        </foreach>
+    </update>
 
 </mapper>

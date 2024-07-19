@@ -53,4 +53,6 @@ public class DimensionDO {
     private int isTag;
 
     private String ext;
+
+    private int isVector;
 }

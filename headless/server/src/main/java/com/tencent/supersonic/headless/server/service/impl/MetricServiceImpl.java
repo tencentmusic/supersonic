@@ -211,6 +211,25 @@ public class MetricServiceImpl extends ServiceImpl<MetricDOMapper, MetricDO>
     }
 
     @Override
+    public void batchVector(List<Long> ids, User user) {
+        if (ids.isEmpty()){
+            return;
+        }
+        Date date = new Date();
+        List<MetricDO> metrics = ids.stream().map(item -> {
+            MetricDO metricDO = new MetricDO();
+            metricDO.setId(item);
+            metricDO.setIsVector(1);
+            metricDO.setUpdatedAt(date);
+            metricDO.setUpdatedBy(user.getName());
+            return metricDO;
+        }).collect(Collectors.toList());
+
+        metricRepository.batchVector(metrics);
+    }
+
+
+    @Override
     public void batchPublish(List<Long> metricIds, User user) {
         List<MetricDO> metrics = getMetrics(metricIds);
         for (MetricDO metricDO : metrics) {
@@ -685,6 +704,8 @@ public class MetricServiceImpl extends ServiceImpl<MetricDOMapper, MetricDO>
     @Override
     public DataEvent getDataEvent() {
         MetricsFilter metricsFilter = new MetricsFilter();
+        metricsFilter.setIsVector(0);
+        metricsFilter.setIsPublish(1);
         List<MetricDO> metricDOS = metricRepository.getMetrics(metricsFilter);
         return getDataEvent(metricDOS, EventType.ADD);
     }

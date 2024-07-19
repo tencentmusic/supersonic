@@ -29,14 +29,12 @@ import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
 import com.tencent.supersonic.headless.api.pojo.response.TagItem;
 import com.tencent.supersonic.headless.server.persistence.dataobject.DimensionDO;
+import com.tencent.supersonic.headless.server.persistence.dataobject.MetricDO;
 import com.tencent.supersonic.headless.server.persistence.dataobject.TagDO;
 import com.tencent.supersonic.headless.server.persistence.mapper.DimensionDOMapper;
 import com.tencent.supersonic.headless.server.persistence.repository.DimensionRepository;
-import com.tencent.supersonic.headless.server.pojo.DimensionFilter;
-import com.tencent.supersonic.headless.server.pojo.DimensionsFilter;
+import com.tencent.supersonic.headless.server.pojo.*;
 import com.tencent.supersonic.headless.api.pojo.MetaFilter;
-import com.tencent.supersonic.headless.server.pojo.ModelFilter;
-import com.tencent.supersonic.headless.server.pojo.TagFilter;
 import com.tencent.supersonic.headless.server.service.DatabaseService;
 import com.tencent.supersonic.headless.server.service.DimensionService;
 import com.tencent.supersonic.headless.server.service.ModelRelaService;
@@ -456,6 +454,7 @@ public class DimensionServiceImpl extends ServiceImpl<DimensionDOMapper, Dimensi
 
     public DataEvent getDataEvent() {
         DimensionFilter dimensionFilter = new DimensionFilter();
+        dimensionFilter.setIsVector(0);
         List<DimensionDO> dimensionDOS = queryDimension(dimensionFilter);
         return getDataEvent(dimensionDOS, EventType.ADD);
     }
@@ -473,4 +472,23 @@ public class DimensionServiceImpl extends ServiceImpl<DimensionDOMapper, Dimensi
         eventPublisher.publishEvent(new DataEvent(this,
                 Lists.newArrayList(dataItem), eventType));
     }
+
+    @Override
+    public void batchVector(List<Long> ids, User user) {
+        if (ids.isEmpty()){
+            return;
+        }
+        Date date = new Date();
+        List<DimensionDO> dimensionDOS = ids.stream().map(item -> {
+            DimensionDO dimensionDO = new DimensionDO();
+            dimensionDO.setId(item);
+            dimensionDO.setIsVector(1);
+            dimensionDO.setUpdatedAt(date);
+            dimensionDO.setUpdatedBy(user.getName());
+            return dimensionDO;
+        }).collect(Collectors.toList());
+
+        dimensionRepository.batchVector(dimensionDOS);
+    }
+
 }

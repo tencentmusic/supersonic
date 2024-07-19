@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -25,6 +26,10 @@ import java.util.regex.Pattern;
 public class MemoryReviewTask {
 
     private static final Logger keyPipelineLog = LoggerFactory.getLogger("keyPipeline");
+
+
+    @Value(value = "${s2.task.vector.is-human-review:false}")
+    private Boolean isHumanReview;
 
     private static final String INSTRUCTION = ""
             + "#Role: You are a senior data engineer experienced in writing SQL.\n"
@@ -48,7 +53,7 @@ public class MemoryReviewTask {
     @Autowired
     private AgentService agentService;
 
-    @Scheduled(fixedDelay = 60 * 1000)
+    @Scheduled(fixedDelayString = "${s2.task.review.fixed-delay:60000}")
     public void review() {
         memoryService.getMemoriesForLlmReview().stream()
                 .forEach(m -> {
@@ -70,7 +75,7 @@ public class MemoryReviewTask {
                                 m.setLlmReviewRet(MemoryReviewResult.valueOf(matcher.group(1)));
                                 m.setLlmReviewCmt(matcher.group(2));
                                 // directly enable memory if the LLM determines it positive
-                                if (MemoryReviewResult.POSITIVE.equals(m.getLlmReviewRet())) {
+                                if (!isHumanReview && MemoryReviewResult.POSITIVE.equals(m.getLlmReviewRet())) {
                                     memoryService.enableMemory(m);
                                 }
                                 memoryService.updateMemory(m);

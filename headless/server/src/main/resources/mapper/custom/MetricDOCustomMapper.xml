@@ -107,6 +107,16 @@
         </foreach>
     </update>
 
+    <update id="batchVector" parameterType="java.util.List">
+        <foreach collection="list" item="metric" separator=";">
+            update s2_metric
+            set is_vector = #{metric.isVector,jdbcType=BIGINT},
+            updated_at = #{metric.updatedAt,jdbcType=TIMESTAMP},
+            updated_by = #{metric.updatedBy,jdbcType=VARCHAR}
+            where id = #{metric.id,jdbcType=BIGINT}
+        </foreach>
+    </update>
+
     <update id="batchUnPublish" parameterType="java.util.List">
         <foreach collection="list" item="metric" separator=";">
             update s2_metric
@@ -195,6 +205,12 @@
         select *
         from s2_metric
         where status != 3
+        <if test="isPublish != null">
+            and is_publish = #{isPublish}
+        </if>
+        <if test="isVector != null">
+            and is_vector = #{isVector}
+        </if>
         <if test="modelIds != null and modelIds.size >0">
             and model_id in
             <foreach collection="modelIds" index="index" item="model" open="(" close=")"

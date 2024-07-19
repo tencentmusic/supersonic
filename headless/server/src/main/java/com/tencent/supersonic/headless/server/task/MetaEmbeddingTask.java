@@ -1,6 +1,8 @@
 package com.tencent.supersonic.headless.server.task;
 
+import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.common.config.EmbeddingConfig;
+import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.DataItem;
 import com.tencent.supersonic.common.service.EmbeddingService;
 import com.tencent.supersonic.headless.server.service.DimensionService;
@@ -18,6 +20,7 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PreDestroy;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 @Slf4j
@@ -73,11 +76,15 @@ public class MetaEmbeddingTask implements CommandLineRunner {
             List<DataItem> dimensionDataItems = dimensionService.getDataEvent().getDataItems();
             embeddingService.addQuery(embeddingConfig.getMetaCollectionName(),
                     TextSegmentConvert.convertToEmbedding(dimensionDataItems));
+
+            //Batch update Vector Status
+            metricService.batchVector(metricDataItems.stream().map(item -> Long.parseLong(item.getId().replace(Constants.UNDERLINE, ""))).collect(Collectors.toList()), User.getFakeUser());
+            dimensionService.batchVector(dimensionDataItems.stream().map(item -> Long.parseLong(item.getId().replace(Constants.UNDERLINE, ""))).collect(Collectors.toList()), User.getFakeUser());
         } catch (Exception e) {
             log.error("Failed to reload meta embedding.", e);
         }
         long duration = System.currentTimeMillis() - startTime;
-        log.info("Embedding has been regularly reloaded  in {} milliseconds", duration);
+        log.info("Meta Embedding has been regularly reloaded  in {} milliseconds", duration);
     }
 
     @Override

@@ -19,4 +19,6 @@ public interface DimensionDOCustomMapper {
 
     List<DimensionDO> queryDimensions(DimensionsFilter dimensionsFilter);
 
+    void batchVector(List<DimensionDO> dimensionDOS);
+
 }

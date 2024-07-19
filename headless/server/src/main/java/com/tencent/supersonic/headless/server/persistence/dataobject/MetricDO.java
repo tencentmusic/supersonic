@@ -105,4 +105,6 @@ public class MetricDO {
 
     private Integer isPublish;
 
+    private Integer isVector;
+
 }
