@@ -4,7 +4,6 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
-import com.tencent.supersonic.chat.api.pojo.enums.MemoryReviewResult;
 import com.tencent.supersonic.chat.api.pojo.enums.MemoryStatus;
 import com.tencent.supersonic.chat.api.pojo.request.ChatMemoryFilter;
 import com.tencent.supersonic.chat.api.pojo.request.ChatMemoryUpdateReq;
@@ -92,10 +91,8 @@ public class MemoryServiceImpl implements MemoryService {
     @Override
     public List<ChatMemoryDO> getMemoriesForLlmReview() {
         QueryWrapper<ChatMemoryDO> queryWrapper = new QueryWrapper<>();
-        queryWrapper.lambda()
-                .eq(ChatMemoryDO::getStatus, MemoryStatus.PENDING)
-                .eq(ChatMemoryDO::getLlmReviewRet, MemoryReviewResult.POSITIVE)
-                .eq(ChatMemoryDO::getHumanReviewRet, MemoryReviewResult.POSITIVE);
+        queryWrapper.lambda().eq(ChatMemoryDO::getStatus, MemoryStatus.PENDING)
+                .isNull(ChatMemoryDO::getLlmReviewRet);
         return chatMemoryRepository.getMemories(queryWrapper);
     }
 
