@@ -1,11 +1,8 @@
 package com.tencent.supersonic.headless.chat.mapper;
 
-import com.google.common.collect.Lists;
 import com.tencent.supersonic.common.config.ParameterConfig;
 import com.tencent.supersonic.common.pojo.Parameter;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service("HeadlessMapperConfig")
 public class MapperConfig extends ParameterConfig {
@@ -93,18 +90,5 @@ public class MapperConfig extends ParameterConfig {
                     "向量召回最小相似度阈值",
                     "向量召回相似度阈值在动态调整中的最低值",
                     "number", "Mapper相关配置");
-
-    @Override
-    public List<Parameter> getSysParameters() {
-        return Lists.newArrayList(
-                MAPPER_DETECTION_SIZE,
-                MAPPER_DETECTION_MAX_SIZE,
-                MAPPER_NAME_THRESHOLD,
-                MAPPER_NAME_THRESHOLD_MIN,
-                MAPPER_DIMENSION_VALUE_SIZE,
-                MAPPER_VALUE_THRESHOLD,
-                MAPPER_VALUE_THRESHOLD_MIN
-        );
-    }
 
 }

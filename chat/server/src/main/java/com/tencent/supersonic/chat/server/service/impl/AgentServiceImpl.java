@@ -9,12 +9,12 @@ import com.tencent.supersonic.chat.server.persistence.dataobject.AgentDO;
 import com.tencent.supersonic.chat.server.persistence.dataobject.ChatMemoryDO;
 import com.tencent.supersonic.chat.server.persistence.mapper.AgentDOMapper;
 import com.tencent.supersonic.chat.server.service.AgentService;
-import com.tencent.supersonic.chat.server.service.ChatService;
+import com.tencent.supersonic.chat.server.service.ChatQueryService;
 import com.tencent.supersonic.chat.server.service.MemoryService;
 import com.tencent.supersonic.chat.server.util.LLMConnHelper;
-import com.tencent.supersonic.common.config.ModelConfig;
 import com.tencent.supersonic.common.config.PromptConfig;
 import com.tencent.supersonic.common.config.VisualConfig;
+import com.tencent.supersonic.common.pojo.ChatModelConfig;
 import com.tencent.supersonic.common.util.JsonUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
@@ -36,7 +36,7 @@ public class AgentServiceImpl extends ServiceImpl<AgentDOMapper, AgentDO>
     private MemoryService memoryService;
 
     @Autowired
-    private ChatService chatService;
+    private ChatQueryService chatQueryService;
 
     private ExecutorService executorService = Executors.newFixedThreadPool(1);
 
@@ -103,7 +103,7 @@ public class AgentServiceImpl extends ServiceImpl<AgentDOMapper, AgentDO>
                 continue;
             }
             try {
-                chatService.parseAndExecute(-1, agent.getId(), example);
+                chatQueryService.parseAndExecute(-1, agent.getId(), example);
             } catch (Exception e) {
                 log.warn("agent:{} example execute failed:{}", agent.getName(), example);
             }
@@ -122,7 +122,7 @@ public class AgentServiceImpl extends ServiceImpl<AgentDOMapper, AgentDO>
         BeanUtils.copyProperties(agentDO, agent);
         agent.setAgentConfig(agentDO.getConfig());
         agent.setExamples(JsonUtil.toList(agentDO.getExamples(), String.class));
-        agent.setModelConfig(JsonUtil.toObject(agentDO.getModelConfig(), ModelConfig.class));
+        agent.setModelConfig(JsonUtil.toObject(agentDO.getModelConfig(), ChatModelConfig.class));
         agent.setPromptConfig(JsonUtil.toObject(agentDO.getPromptConfig(), PromptConfig.class));
         agent.setMultiTurnConfig(JsonUtil.toObject(agentDO.getMultiTurnConfig(), MultiTurnConfig.class));
         agent.setVisualConfig(JsonUtil.toObject(agentDO.getVisualConfig(), VisualConfig.class));

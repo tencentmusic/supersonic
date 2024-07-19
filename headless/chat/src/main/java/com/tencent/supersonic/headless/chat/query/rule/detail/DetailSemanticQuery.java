@@ -10,7 +10,6 @@ import com.tencent.supersonic.headless.api.pojo.TimeDefaultConfig;
 import com.tencent.supersonic.headless.chat.ChatQueryContext;
 import com.tencent.supersonic.headless.chat.query.rule.QueryMatchOption;
 import com.tencent.supersonic.headless.chat.query.rule.RuleSemanticQuery;
-import com.tencent.supersonic.headless.chat.ChatContext;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDate;
@@ -35,8 +34,8 @@ public abstract class DetailSemanticQuery extends RuleSemanticQuery {
     }
 
     @Override
-    public void fillParseInfo(ChatQueryContext chatQueryContext, ChatContext chatContext) {
-        super.fillParseInfo(chatQueryContext, chatContext);
+    public void fillParseInfo(ChatQueryContext chatQueryContext) {
+        super.fillParseInfo(chatQueryContext);
 
         parseInfo.setQueryType(QueryType.DETAIL);
         parseInfo.setLimit(DETAIL_MAX_RESULTS);
@@ -45,7 +44,8 @@ public abstract class DetailSemanticQuery extends RuleSemanticQuery {
                     chatQueryContext.getSemanticSchema().getDataSetSchemaMap().get(parseInfo.getDataSetId());
             TimeDefaultConfig timeDefaultConfig = dataSetSchema.getTagTypeTimeDefaultConfig();
             DateConf dateInfo = new DateConf();
-            if (Objects.nonNull(timeDefaultConfig) && Objects.nonNull(timeDefaultConfig.getUnit())) {
+            if (Objects.nonNull(timeDefaultConfig) && Objects.nonNull(timeDefaultConfig.getUnit())
+                    && timeDefaultConfig.getUnit() != -1) {
                 int unit = timeDefaultConfig.getUnit();
                 String startDate = LocalDate.now().plusDays(-unit).toString();
                 String endDate = startDate;
@@ -59,8 +59,8 @@ public abstract class DetailSemanticQuery extends RuleSemanticQuery {
                 dateInfo.setPeriod(timeDefaultConfig.getPeriod());
                 dateInfo.setStartDate(startDate);
                 dateInfo.setEndDate(endDate);
+                parseInfo.setDateInfo(dateInfo);
             }
-            parseInfo.setDateInfo(dateInfo);
         }
     }
 

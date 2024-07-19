@@ -4,6 +4,7 @@ import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.common.pojo.enums.QueryType;
 import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import com.tencent.supersonic.common.jsqlparser.SqlSelectHelper;
+import com.tencent.supersonic.headless.api.pojo.DataSetSchema;
 import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.api.pojo.SemanticSchema;
@@ -11,7 +12,6 @@ import com.tencent.supersonic.headless.api.pojo.SqlInfo;
 import com.tencent.supersonic.headless.chat.query.SemanticQuery;
 import com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMSqlQuery;
 import com.tencent.supersonic.headless.chat.query.rule.RuleSemanticQuery;
-import com.tencent.supersonic.headless.chat.ChatContext;
 import com.tencent.supersonic.headless.chat.ChatQueryContext;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
@@ -29,14 +29,17 @@ import java.util.stream.Collectors;
 public class QueryTypeParser implements SemanticParser {
 
     @Override
-    public void parse(ChatQueryContext chatQueryContext, ChatContext chatContext) {
+    public void parse(ChatQueryContext chatQueryContext) {
 
         List<SemanticQuery> candidateQueries = chatQueryContext.getCandidateQueries();
         User user = chatQueryContext.getUser();
 
         for (SemanticQuery semanticQuery : candidateQueries) {
             // 1.init S2SQL
-            semanticQuery.initS2Sql(chatQueryContext.getSemanticSchema(), user);
+            Long dataSetId = semanticQuery.getParseInfo().getDataSetId();
+            DataSetSchema dataSetSchema = chatQueryContext.getSemanticSchema()
+                    .getDataSetSchemaMap().get(dataSetId);
+            semanticQuery.initS2Sql(dataSetSchema, user);
             // 2.set queryType
             QueryType queryType = getQueryType(chatQueryContext, semanticQuery);
             semanticQuery.getParseInfo().setQueryType(queryType);

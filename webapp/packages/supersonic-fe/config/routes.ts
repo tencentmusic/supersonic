@@ -17,6 +17,14 @@ const ROUTES = [
     envEnableList: [ENV_KEY.CHAT],
   },
   {
+    path: '/chat/external',
+    name: 'chat',
+    component: './ChatPage',
+    hideInMenu: true,
+    layout: false,
+    envEnableList: [ENV_KEY.CHAT],
+  },
+  {
     path: '/chat',
     name: 'chat',
     component: './ChatPage',

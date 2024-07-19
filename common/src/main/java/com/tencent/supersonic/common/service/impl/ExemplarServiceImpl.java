@@ -4,10 +4,10 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.common.config.EmbeddingConfig;
+import com.tencent.supersonic.common.pojo.Text2SQLExemplar;
 import com.tencent.supersonic.common.service.EmbeddingService;
 import com.tencent.supersonic.common.service.ExemplarService;
 import com.tencent.supersonic.common.util.JsonUtil;
-import com.tencent.supersonic.common.pojo.SqlExemplar;
 import dev.langchain4j.data.document.Metadata;
 import dev.langchain4j.data.segment.TextSegment;
 import dev.langchain4j.store.embedding.RetrieveQuery;
@@ -31,7 +31,7 @@ public class ExemplarServiceImpl implements ExemplarService, CommandLineRunner {
 
     private static final String SYS_EXEMPLAR_FILE = "s2-exemplar.json";
 
-    private TypeReference<List<SqlExemplar>> valueTypeRef = new TypeReference<List<SqlExemplar>>() {
+    private TypeReference<List<Text2SQLExemplar>> valueTypeRef = new TypeReference<List<Text2SQLExemplar>>() {
     };
 
     private final ObjectMapper objectMapper = JsonUtil.INSTANCE.getObjectMapper();
@@ -42,7 +42,7 @@ public class ExemplarServiceImpl implements ExemplarService, CommandLineRunner {
     @Autowired
     private EmbeddingService embeddingService;
 
-    public void storeExemplar(String collection, SqlExemplar exemplar) {
+    public void storeExemplar(String collection, Text2SQLExemplar exemplar) {
         Metadata metadata = Metadata.from(JsonUtil.toMap(JsonUtil.toString(exemplar),
                 String.class, Object.class));
         TextSegment segment = TextSegment.from(exemplar.getQuestion(), metadata);
@@ -51,7 +51,7 @@ public class ExemplarServiceImpl implements ExemplarService, CommandLineRunner {
         embeddingService.addQuery(collection, Lists.newArrayList(segment));
     }
 
-    public void removeExemplar(String collection, SqlExemplar exemplar) {
+    public void removeExemplar(String collection, Text2SQLExemplar exemplar) {
         Metadata metadata = Metadata.from(JsonUtil.toMap(JsonUtil.toString(exemplar),
                 String.class, Object.class));
         TextSegment segment = TextSegment.from(exemplar.getQuestion(), metadata);
@@ -59,20 +59,20 @@ public class ExemplarServiceImpl implements ExemplarService, CommandLineRunner {
         embeddingService.deleteQuery(collection, Lists.newArrayList(segment));
     }
 
-    public List<SqlExemplar> recallExemplars(String query, int num) {
+    public List<Text2SQLExemplar> recallExemplars(String query, int num) {
         String collection = embeddingConfig.getText2sqlCollectionName();
         return recallExemplars(collection, query, num);
     }
 
-    public List<SqlExemplar> recallExemplars(String collection, String query, int num) {
-        List<SqlExemplar> exemplars = Lists.newArrayList();
+    public List<Text2SQLExemplar> recallExemplars(String collection, String query, int num) {
+        List<Text2SQLExemplar> exemplars = Lists.newArrayList();
         RetrieveQuery retrieveQuery = RetrieveQuery.builder()
                 .queryTextsList(Lists.newArrayList(query))
                 .build();
         List<RetrieveQueryResult> results = embeddingService.retrieveQuery(collection, retrieveQuery, num);
         results.stream().forEach(ret -> {
             ret.getRetrieval().stream().forEach(r -> {
-                exemplars.add(JsonUtil.mapToObject(r.getMetadata(), SqlExemplar.class));
+                exemplars.add(JsonUtil.mapToObject(r.getMetadata(), Text2SQLExemplar.class));
             });
         });
 
@@ -91,7 +91,7 @@ public class ExemplarServiceImpl implements ExemplarService, CommandLineRunner {
     private void loadSysExemplars() throws IOException {
         ClassPathResource resource = new ClassPathResource(SYS_EXEMPLAR_FILE);
         InputStream inputStream = resource.getInputStream();
-        List<SqlExemplar> exemplars = objectMapper.readValue(inputStream, valueTypeRef);
+        List<Text2SQLExemplar> exemplars = objectMapper.readValue(inputStream, valueTypeRef);
         String collection = embeddingConfig.getText2sqlCollectionName();
         exemplars.stream().forEach(e -> storeExemplar(collection, e));
     }

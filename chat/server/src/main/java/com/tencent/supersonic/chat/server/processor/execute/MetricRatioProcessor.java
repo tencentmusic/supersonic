@@ -11,7 +11,7 @@ import static com.tencent.supersonic.common.pojo.Constants.TIME_FORMAT;
 import static com.tencent.supersonic.common.pojo.Constants.WEEK;
 
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
-import com.tencent.supersonic.chat.server.pojo.ChatExecuteContext;
+import com.tencent.supersonic.chat.server.pojo.ExecuteContext;
 import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.common.pojo.DateConf.DateMode;
 import com.tencent.supersonic.common.pojo.QueryColumn;
@@ -60,15 +60,15 @@ import org.springframework.util.CollectionUtils;
 public class MetricRatioProcessor implements ExecuteResultProcessor {
 
     @Override
-    public void process(ChatExecuteContext chatExecuteContext, QueryResult queryResult) {
-        SemanticParseInfo semanticParseInfo = chatExecuteContext.getParseInfo();
+    public void process(ExecuteContext executeContext, QueryResult queryResult) {
+        SemanticParseInfo semanticParseInfo = executeContext.getParseInfo();
         AggregatorConfig aggregatorConfig = ContextUtils.getBean(AggregatorConfig.class);
         if (CollectionUtils.isEmpty(semanticParseInfo.getMetrics())
                 || !aggregatorConfig.getEnableRatio()
                 || !QueryType.METRIC.equals(semanticParseInfo.getQueryType())) {
             return;
         }
-        AggregateInfo aggregateInfo = getAggregateInfo(chatExecuteContext.getUser(),
+        AggregateInfo aggregateInfo = getAggregateInfo(executeContext.getUser(),
                 semanticParseInfo, queryResult);
         queryResult.setAggregateInfo(aggregateInfo);
     }

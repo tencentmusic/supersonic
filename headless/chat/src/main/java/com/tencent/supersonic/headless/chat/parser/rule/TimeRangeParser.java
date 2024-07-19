@@ -2,7 +2,6 @@ package com.tencent.supersonic.headless.chat.parser.rule;
 
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.DateConf;
-import com.tencent.supersonic.headless.chat.ChatContext;
 import com.tencent.supersonic.headless.chat.ChatQueryContext;
 import com.tencent.supersonic.headless.chat.parser.SemanticParser;
 import com.tencent.supersonic.headless.chat.query.QueryManager;
@@ -42,7 +41,7 @@ public class TimeRangeParser implements SemanticParser {
     private static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
 
     @Override
-    public void parse(ChatQueryContext queryContext, ChatContext chatContext) {
+    public void parse(ChatQueryContext queryContext) {
         String queryText = queryContext.getQueryText();
         DateConf dateConf = parseRecent(queryText);
         if (dateConf == null) {
@@ -59,14 +58,14 @@ public class TimeRangeParser implements SemanticParser {
                     query.getParseInfo().setScore(query.getParseInfo().getScore()
                             + dateConf.getDetectWord().length());
                 }
-            } else if (QueryManager.containsRuleQuery(chatContext.getParseInfo().getQueryMode())) {
+            } else if (QueryManager.containsRuleQuery(queryContext.getContextParseInfo().getQueryMode())) {
                 RuleSemanticQuery semanticQuery = QueryManager.createRuleQuery(
-                        chatContext.getParseInfo().getQueryMode());
+                        queryContext.getContextParseInfo().getQueryMode());
                 // inherit parse info from context
-                chatContext.getParseInfo().setDateInfo(dateConf);
-                chatContext.getParseInfo().setScore(chatContext.getParseInfo().getScore()
+                queryContext.getContextParseInfo().setDateInfo(dateConf);
+                queryContext.getContextParseInfo().setScore(queryContext.getContextParseInfo().getScore()
                         + dateConf.getDetectWord().length());
-                semanticQuery.setParseInfo(chatContext.getParseInfo());
+                semanticQuery.setParseInfo(queryContext.getContextParseInfo());
                 queryContext.getCandidateQueries().add(semanticQuery);
             }
         }

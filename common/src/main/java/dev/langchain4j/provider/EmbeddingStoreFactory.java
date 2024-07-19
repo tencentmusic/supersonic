@@ -1,6 +1,6 @@
 package dev.langchain4j.provider;
 
-import com.tencent.supersonic.common.config.EmbeddingStoreConfig;
+import com.tencent.supersonic.common.pojo.EmbeddingStoreConfig;
 import dev.langchain4j.store.embedding.EmbeddingStore;
 
 public interface EmbeddingStoreFactory {

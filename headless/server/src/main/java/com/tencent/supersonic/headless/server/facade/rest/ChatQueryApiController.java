@@ -6,8 +6,7 @@ import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.api.pojo.request.QueryNLReq;
 import com.tencent.supersonic.headless.api.pojo.request.QuerySqlReq;
 import com.tencent.supersonic.headless.api.pojo.response.ParseResp;
-import com.tencent.supersonic.headless.server.facade.service.ChatQueryService;
-import com.tencent.supersonic.headless.server.facade.service.RetrieveService;
+import com.tencent.supersonic.headless.server.facade.service.ChatLayerService;
 import com.tencent.supersonic.headless.server.facade.service.SemanticLayerService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,10 +23,7 @@ import javax.servlet.http.HttpServletResponse;
 public class ChatQueryApiController {
 
     @Autowired
-    private ChatQueryService chatQueryService;
-
-    @Autowired
-    private RetrieveService retrieveService;
+    private ChatLayerService chatLayerService;
 
     @Autowired
     private SemanticLayerService semanticLayerService;
@@ -37,7 +33,7 @@ public class ChatQueryApiController {
                         HttpServletRequest request,
                         HttpServletResponse response) throws Exception {
         queryNLReq.setUser(UserHolder.findUser(request, response));
-        return retrieveService.retrieve(queryNLReq);
+        return chatLayerService.retrieve(queryNLReq);
     }
 
     @PostMapping("/chat/map")
@@ -45,7 +41,7 @@ public class ChatQueryApiController {
                              HttpServletRequest request,
                              HttpServletResponse response) {
         queryNLReq.setUser(UserHolder.findUser(request, response));
-        return chatQueryService.performMapping(queryNLReq);
+        return chatLayerService.performMapping(queryNLReq);
     }
 
     @PostMapping("/chat/parse")
@@ -53,7 +49,7 @@ public class ChatQueryApiController {
             HttpServletRequest request,
             HttpServletResponse response) throws Exception {
         queryNLReq.setUser(UserHolder.findUser(request, response));
-        return chatQueryService.performParsing(queryNLReq);
+        return chatLayerService.performParsing(queryNLReq);
     }
 
     @PostMapping("/chat")
@@ -61,7 +57,7 @@ public class ChatQueryApiController {
                                  HttpServletRequest request,
                                  HttpServletResponse response) throws Exception {
         User user = UserHolder.findUser(request, response);
-        ParseResp parseResp = chatQueryService.performParsing(queryNLReq);
+        ParseResp parseResp = chatLayerService.performParsing(queryNLReq);
         if (parseResp.getState().equals(ParseResp.ParseState.COMPLETED)) {
             SemanticParseInfo parseInfo = parseResp.getSelectedParses().get(0);
             QuerySqlReq sqlReq = new QuerySqlReq();

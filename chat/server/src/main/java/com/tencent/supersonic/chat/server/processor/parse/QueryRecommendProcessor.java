@@ -5,9 +5,9 @@ import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.tencent.supersonic.chat.api.pojo.response.SimilarQueryRecallResp;
 import com.tencent.supersonic.chat.server.persistence.dataobject.ChatQueryDO;
 import com.tencent.supersonic.chat.server.persistence.repository.ChatQueryRepository;
-import com.tencent.supersonic.chat.server.pojo.ChatParseContext;
+import com.tencent.supersonic.chat.server.pojo.ParseContext;
 import com.tencent.supersonic.common.config.EmbeddingConfig;
-import com.tencent.supersonic.common.pojo.SqlExemplar;
+import com.tencent.supersonic.common.pojo.Text2SQLExemplar;
 import com.tencent.supersonic.common.service.ExemplarService;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.headless.api.pojo.response.ParseResp;
@@ -25,15 +25,15 @@ import java.util.stream.Collectors;
 public class QueryRecommendProcessor implements ParseResultProcessor {
 
     @Override
-    public void process(ChatParseContext chatParseContext, ParseResp parseResp) {
-        CompletableFuture.runAsync(() -> doProcess(parseResp, chatParseContext));
+    public void process(ParseContext parseContext, ParseResp parseResp) {
+        CompletableFuture.runAsync(() -> doProcess(parseResp, parseContext));
     }
 
     @SneakyThrows
-    private void doProcess(ParseResp parseResp, ChatParseContext chatParseContext) {
+    private void doProcess(ParseResp parseResp, ParseContext parseContext) {
         Long queryId = parseResp.getQueryId();
-        List<SimilarQueryRecallResp> solvedQueries = getSimilarQueries(chatParseContext.getQueryText(),
-                chatParseContext.getAgent().getId());
+        List<SimilarQueryRecallResp> solvedQueries = getSimilarQueries(parseContext.getQueryText(),
+                parseContext.getAgent().getId());
         ChatQueryDO chatQueryDO = getChatQuery(queryId);
         chatQueryDO.setSimilarQueries(JSONObject.toJSONString(solvedQueries));
         updateChatQuery(chatQueryDO);
@@ -43,7 +43,7 @@ public class QueryRecommendProcessor implements ParseResultProcessor {
         ExemplarService exemplarService = ContextUtils.getBean(ExemplarService.class);
         EmbeddingConfig embeddingConfig = ContextUtils.getBean(EmbeddingConfig.class);
         String memoryCollectionName = embeddingConfig.getMemoryCollectionName(agentId);
-        List<SqlExemplar> exemplars = exemplarService.recallExemplars(memoryCollectionName, queryText, 5);
+        List<Text2SQLExemplar> exemplars = exemplarService.recallExemplars(memoryCollectionName, queryText, 5);
         return exemplars.stream().map(sqlExemplar ->
                         SimilarQueryRecallResp.builder().queryText(sqlExemplar.getQuestion()).build())
                 .collect(Collectors.toList());

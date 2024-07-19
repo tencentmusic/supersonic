@@ -57,15 +57,15 @@ public class EmbeddingMatchStrategy extends BaseMatchStrategy<EmbeddingResult> {
     @Override
     protected void detectByBatch(ChatQueryContext chatQueryContext, Set<EmbeddingResult> results,
                                  Set<Long> detectDataSetIds, Set<String> detectSegments) {
-        int embedddingMapperMin = Integer.valueOf(mapperConfig.getParameterValue(MapperConfig.EMBEDDING_MAPPER_MIN));
-        int embedddingMapperMax = Integer.valueOf(mapperConfig.getParameterValue(MapperConfig.EMBEDDING_MAPPER_MAX));
+        int embeddingMapperMin = Integer.valueOf(mapperConfig.getParameterValue(MapperConfig.EMBEDDING_MAPPER_MIN));
+        int embeddingMapperMax = Integer.valueOf(mapperConfig.getParameterValue(MapperConfig.EMBEDDING_MAPPER_MAX));
         int embeddingMapperBatch = Integer.valueOf(mapperConfig.getParameterValue(MapperConfig.EMBEDDING_MAPPER_BATCH));
 
         List<String> queryTextsList = detectSegments.stream()
                 .map(detectSegment -> detectSegment.trim())
                 .filter(detectSegment -> StringUtils.isNotBlank(detectSegment)
-                        && detectSegment.length() >= embedddingMapperMin
-                        && detectSegment.length() <= embedddingMapperMax)
+                        && detectSegment.length() >= embeddingMapperMin
+                        && detectSegment.length() <= embeddingMapperMax)
                 .collect(Collectors.toList());
 
         List<List<String>> queryTextsSubList = Lists.partition(queryTextsList,

@@ -5,7 +5,7 @@ import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.auth.api.authorization.service.AuthService;
 import com.tencent.supersonic.chat.server.service.AgentService;
 import com.tencent.supersonic.chat.server.service.ChatManageService;
-import com.tencent.supersonic.chat.server.service.ChatService;
+import com.tencent.supersonic.chat.server.service.ChatQueryService;
 import com.tencent.supersonic.chat.server.service.PluginService;
 import com.tencent.supersonic.common.service.SystemConfigService;
 import com.tencent.supersonic.headless.api.pojo.DataSetModelConfig;
@@ -19,19 +19,19 @@ import com.tencent.supersonic.headless.api.pojo.response.DatabaseResp;
 import com.tencent.supersonic.headless.api.pojo.response.DimensionResp;
 import com.tencent.supersonic.headless.api.pojo.response.MetricResp;
 import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
-import com.tencent.supersonic.headless.server.pojo.MetaFilter;
-import com.tencent.supersonic.headless.server.web.service.CanvasService;
-import com.tencent.supersonic.headless.server.web.service.DataSetService;
-import com.tencent.supersonic.headless.server.web.service.DatabaseService;
-import com.tencent.supersonic.headless.server.web.service.DimensionService;
-import com.tencent.supersonic.headless.server.web.service.DomainService;
-import com.tencent.supersonic.headless.server.web.service.MetricService;
-import com.tencent.supersonic.headless.server.web.service.ModelRelaService;
-import com.tencent.supersonic.headless.server.web.service.ModelService;
-import com.tencent.supersonic.headless.server.web.service.TagMetaService;
-import com.tencent.supersonic.headless.server.web.service.TagObjectService;
-import com.tencent.supersonic.headless.server.web.service.TermService;
-import com.tencent.supersonic.headless.server.web.service.impl.DictWordService;
+import com.tencent.supersonic.headless.api.pojo.MetaFilter;
+import com.tencent.supersonic.headless.server.service.CanvasService;
+import com.tencent.supersonic.headless.server.service.DataSetService;
+import com.tencent.supersonic.headless.server.service.DatabaseService;
+import com.tencent.supersonic.headless.server.service.DimensionService;
+import com.tencent.supersonic.headless.server.service.DomainService;
+import com.tencent.supersonic.headless.server.service.MetricService;
+import com.tencent.supersonic.headless.server.service.ModelRelaService;
+import com.tencent.supersonic.headless.server.service.ModelService;
+import com.tencent.supersonic.headless.server.service.TagMetaService;
+import com.tencent.supersonic.headless.server.service.TagObjectService;
+import com.tencent.supersonic.headless.server.service.TermService;
+import com.tencent.supersonic.headless.server.service.impl.DictWordService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -75,7 +75,7 @@ public abstract class S2BaseDemo implements CommandLineRunner {
     @Autowired
     protected TagObjectService tagObjectService;
     @Autowired
-    protected ChatService chatService;
+    protected ChatQueryService chatQueryService;
     @Autowired
     protected ChatManageService chatManageService;
     @Autowired

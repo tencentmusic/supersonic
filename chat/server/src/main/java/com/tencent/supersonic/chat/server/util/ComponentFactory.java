@@ -1,7 +1,7 @@
 package com.tencent.supersonic.chat.server.util;
 
-import com.tencent.supersonic.chat.server.executor.ChatExecutor;
-import com.tencent.supersonic.chat.server.parser.ChatParser;
+import com.tencent.supersonic.chat.server.executor.ChatQueryExecutor;
+import com.tencent.supersonic.chat.server.parser.ChatQueryParser;
 import com.tencent.supersonic.chat.server.plugin.recognize.PluginRecognizer;
 import com.tencent.supersonic.chat.server.processor.execute.ExecuteResultProcessor;
 import com.tencent.supersonic.chat.server.processor.parse.ParseResultProcessor;
@@ -16,8 +16,8 @@ import java.util.List;
 public class ComponentFactory {
     private static List<ParseResultProcessor> parseProcessors = new ArrayList<>();
     private static List<ExecuteResultProcessor> executeProcessors = new ArrayList<>();
-    private static List<ChatParser> chatParsers = new ArrayList<>();
-    private static List<ChatExecutor> chatExecutors = new ArrayList<>();
+    private static List<ChatQueryParser> chatQueryParsers = new ArrayList<>();
+    private static List<ChatQueryExecutor> chatQueryExecutors = new ArrayList<>();
     private static List<PluginRecognizer> pluginRecognizers = new ArrayList<>();
 
     public static List<ParseResultProcessor> getParseProcessors() {
@@ -30,14 +30,14 @@ public class ComponentFactory {
                 ? init(ExecuteResultProcessor.class, executeProcessors) : executeProcessors;
     }
 
-    public static List<ChatParser> getChatParsers() {
-        return CollectionUtils.isEmpty(chatParsers)
-                ? init(ChatParser.class, chatParsers) : chatParsers;
+    public static List<ChatQueryParser> getChatParsers() {
+        return CollectionUtils.isEmpty(chatQueryParsers)
+                ? init(ChatQueryParser.class, chatQueryParsers) : chatQueryParsers;
     }
 
-    public static List<ChatExecutor> getChatExecutors() {
-        return CollectionUtils.isEmpty(chatExecutors)
-                ? init(ChatExecutor.class, chatExecutors) : chatExecutors;
+    public static List<ChatQueryExecutor> getChatExecutors() {
+        return CollectionUtils.isEmpty(chatQueryExecutors)
+                ? init(ChatQueryExecutor.class, chatQueryExecutors) : chatQueryExecutors;
     }
 
     public static List<PluginRecognizer> getPluginRecognizers() {

@@ -6,7 +6,6 @@ import com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum;
 import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementMatch;
 import com.tencent.supersonic.headless.chat.ChatQueryContext;
-import com.tencent.supersonic.headless.chat.ChatContext;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -50,8 +49,8 @@ public class MetricTopNQuery extends MetricSemanticQuery {
     }
 
     @Override
-    public void fillParseInfo(ChatQueryContext chatQueryContext, ChatContext chatContext) {
-        super.fillParseInfo(chatQueryContext, chatContext);
+    public void fillParseInfo(ChatQueryContext chatQueryContext) {
+        super.fillParseInfo(chatQueryContext);
 
         parseInfo.setLimit(ORDERBY_MAX_RESULTS);
         parseInfo.setScore(parseInfo.getScore() + 2.0);

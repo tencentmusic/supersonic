@@ -16,6 +16,6 @@ public class ChromaAutoConfig {
     @Bean
     @ConditionalOnProperty(PREFIX + ".embedding-store.base-url")
     EmbeddingStoreFactory chromaChatModel(Properties properties) {
-        return new ChromaEmbeddingStoreFactory(properties);
+        return new ChromaEmbeddingStoreFactory(properties.getEmbeddingStore());
     }
 }

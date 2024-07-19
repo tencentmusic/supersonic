@@ -6,7 +6,7 @@ import com.tencent.supersonic.chat.server.plugin.ChatPlugin;
 import com.tencent.supersonic.chat.server.plugin.PluginManager;
 import com.tencent.supersonic.chat.server.plugin.PluginParseResult;
 import com.tencent.supersonic.chat.server.plugin.PluginRecallResult;
-import com.tencent.supersonic.chat.server.pojo.ChatParseContext;
+import com.tencent.supersonic.chat.server.pojo.ParseContext;
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
 import com.tencent.supersonic.headless.api.pojo.SchemaElement;
@@ -28,22 +28,22 @@ import java.util.Set;
  */
 public abstract class PluginRecognizer {
 
-    public void recognize(ChatParseContext chatParseContext, ParseResp parseResp) {
-        if (!checkPreCondition(chatParseContext)) {
+    public void recognize(ParseContext parseContext, ParseResp parseResp) {
+        if (!checkPreCondition(parseContext)) {
             return;
         }
-        PluginRecallResult pluginRecallResult = recallPlugin(chatParseContext);
+        PluginRecallResult pluginRecallResult = recallPlugin(parseContext);
         if (pluginRecallResult == null) {
             return;
         }
-        buildQuery(chatParseContext, parseResp, pluginRecallResult);
+        buildQuery(parseContext, parseResp, pluginRecallResult);
     }
 
-    public abstract boolean checkPreCondition(ChatParseContext chatParseContext);
+    public abstract boolean checkPreCondition(ParseContext parseContext);
 
-    public abstract PluginRecallResult recallPlugin(ChatParseContext chatParseContext);
+    public abstract PluginRecallResult recallPlugin(ParseContext parseContext);
 
-    public void buildQuery(ChatParseContext chatParseContext, ParseResp parseResp,
+    public void buildQuery(ParseContext parseContext, ParseResp parseResp,
                            PluginRecallResult pluginRecallResult) {
         ChatPlugin plugin = pluginRecallResult.getPlugin();
         Set<Long> dataSetIds = pluginRecallResult.getDataSetIds();
@@ -52,21 +52,21 @@ public abstract class PluginRecognizer {
         }
         for (Long dataSetId : dataSetIds) {
             SemanticParseInfo semanticParseInfo = buildSemanticParseInfo(dataSetId, plugin,
-                    chatParseContext, pluginRecallResult.getDistance());
+                    parseContext, pluginRecallResult.getDistance());
             semanticParseInfo.setQueryMode(plugin.getType());
             semanticParseInfo.setScore(pluginRecallResult.getScore());
             parseResp.getSelectedParses().add(semanticParseInfo);
         }
     }
 
-    protected List<ChatPlugin> getPluginList(ChatParseContext chatParseContext) {
-        return PluginManager.getPluginAgentCanSupport(chatParseContext);
+    protected List<ChatPlugin> getPluginList(ParseContext parseContext) {
+        return PluginManager.getPluginAgentCanSupport(parseContext);
     }
 
     protected SemanticParseInfo buildSemanticParseInfo(Long dataSetId, ChatPlugin plugin,
-                                                       ChatParseContext chatParseContext, double distance) {
-        List<SchemaElementMatch> schemaElementMatches = chatParseContext.getMapInfo().getMatchedElements(dataSetId);
-        QueryFilters queryFilters = chatParseContext.getQueryFilters();
+                                                       ParseContext parseContext, double distance) {
+        List<SchemaElementMatch> schemaElementMatches = parseContext.getMapInfo().getMatchedElements(dataSetId);
+        QueryFilters queryFilters = parseContext.getQueryFilters();
         if (schemaElementMatches == null) {
             schemaElementMatches = Lists.newArrayList();
         }
@@ -80,7 +80,7 @@ public abstract class PluginRecognizer {
         pluginParseResult.setPlugin(plugin);
         pluginParseResult.setQueryFilters(queryFilters);
         pluginParseResult.setDistance(distance);
-        pluginParseResult.setQueryText(chatParseContext.getQueryText());
+        pluginParseResult.setQueryText(parseContext.getQueryText());
         properties.put(Constants.CONTEXT, pluginParseResult);
         properties.put("type", "plugin");
         properties.put("name", plugin.getName());

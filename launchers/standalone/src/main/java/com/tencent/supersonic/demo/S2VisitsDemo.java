@@ -137,12 +137,11 @@ public class S2VisitsDemo extends S2BaseDemo {
     public void addSampleChats(Integer agentId) {
         Long chatId = chatManageService.addChat(user, "样例对话1", agentId);
 
-        chatService.parseAndExecute(chatId.intValue(), agentId, "超音数 访问次数");
-        chatService.parseAndExecute(chatId.intValue(), agentId, "按部门统计");
-        chatService.parseAndExecute(chatId.intValue(), agentId, "查询近30天");
-        chatService.parseAndExecute(chatId.intValue(), agentId, "alice 停留时长");
-        chatService.parseAndExecute(chatId.intValue(), agentId, "对比alice和lucy的访问次数");
-        chatService.parseAndExecute(chatId.intValue(), agentId, "访问次数最高的部门");
+        chatQueryService.parseAndExecute(chatId.intValue(), agentId, "超音数 访问次数");
+        chatQueryService.parseAndExecute(chatId.intValue(), agentId, "按部门统计");
+        chatQueryService.parseAndExecute(chatId.intValue(), agentId, "查询近30天");
+        chatQueryService.parseAndExecute(chatId.intValue(), agentId, "alice 停留时长");
+        chatQueryService.parseAndExecute(chatId.intValue(), agentId, "访问次数最高的部门");
     }
 
     private Integer addAgent(long dataSetId) {
@@ -151,8 +150,12 @@ public class S2VisitsDemo extends S2BaseDemo {
         agent.setDescription("帮助您用自然语言查询指标，支持时间限定、条件筛选、下钻维度以及聚合统计");
         agent.setStatus(1);
         agent.setEnableSearch(1);
-        agent.setExamples(Lists.newArrayList("超音数访问次数", "近15天超音数访问次数汇总", "按部门统计超音数的访问人数",
-                "对比alice和lucy的停留时长", "超音数访问次数最高的部门"));
+        agent.setExamples(Lists.newArrayList(
+                "超音数访问次数",
+                "近15天超音数访问次数汇总",
+                "按部门统计超音数的访问人数",
+                "对比alice和lucy的停留时长",
+                "超音数访问次数最高的部门"));
         AgentConfig agentConfig = new AgentConfig();
         RuleParserTool ruleQueryTool = new RuleParserTool();
         ruleQueryTool.setType(AgentToolType.NL2SQL_RULE);
@@ -360,7 +363,6 @@ public class S2VisitsDemo extends S2BaseDemo {
         metricReq.setSensitiveLevel(SensitiveLevelEnum.HIGH.getCode());
         metricReq.setDescription("停留时长");
         metricReq.setClassifications(Collections.singletonList("核心指标"));
-        metricReq.setAlias("访问时长");
         MetricDefineByMeasureParams metricTypeParams = new MetricDefineByMeasureParams();
         metricTypeParams.setExpr("s2_stay_time_statis_stay_hours");
         List<MeasureParam> measures = new ArrayList<>();

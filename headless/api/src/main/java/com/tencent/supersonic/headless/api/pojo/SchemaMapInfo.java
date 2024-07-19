@@ -23,10 +23,6 @@ public class SchemaMapInfo {
         return dataSetElementMatches;
     }
 
-    public void setDataSetElementMatches(Map<Long, List<SchemaElementMatch>> dataSetElementMatches) {
-        this.dataSetElementMatches = dataSetElementMatches;
-    }
-
     public void setMatchedElements(Long dataSet, List<SchemaElementMatch> elementMatches) {
         dataSetElementMatches.put(dataSet, elementMatches);
     }

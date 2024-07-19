@@ -7,7 +7,6 @@ import com.tencent.supersonic.headless.api.pojo.enums.ChatWorkflowState;
 import com.tencent.supersonic.headless.api.pojo.request.SemanticQueryReq;
 import com.tencent.supersonic.headless.api.pojo.response.ParseResp;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticTranslateResp;
-import com.tencent.supersonic.headless.chat.ChatContext;
 import com.tencent.supersonic.headless.chat.ChatQueryContext;
 import com.tencent.supersonic.headless.chat.corrector.SemanticCorrector;
 import com.tencent.supersonic.headless.chat.mapper.SchemaMapper;
@@ -39,17 +38,29 @@ public class ChatWorkflowEngine {
     private List<SemanticCorrector> semanticCorrectors = ComponentFactory.getSemanticCorrectors();
     private List<ResultProcessor> resultProcessors = ComponentFactory.getResultProcessors();
 
-    public void execute(ChatQueryContext queryCtx, ChatContext chatCtx, ParseResp parseResult) {
+    public void execute(ChatQueryContext queryCtx, ParseResp parseResult) {
         queryCtx.setChatWorkflowState(ChatWorkflowState.MAPPING);
         while (queryCtx.getChatWorkflowState() != ChatWorkflowState.FINISHED) {
             switch (queryCtx.getChatWorkflowState()) {
                 case MAPPING:
                     performMapping(queryCtx);
-                    queryCtx.setChatWorkflowState(ChatWorkflowState.PARSING);
+                    if (queryCtx.getMapInfo().getMatchedDataSetInfos().size() == 0) {
+                        parseResult.setState(ParseResp.ParseState.FAILED);
+                        parseResult.setErrorMsg("No semantic entities can be mapped against user question.");
+                        queryCtx.setChatWorkflowState(ChatWorkflowState.FINISHED);
+                    } else {
+                        queryCtx.setChatWorkflowState(ChatWorkflowState.PARSING);
+                    }
                     break;
                 case PARSING:
-                    performParsing(queryCtx, chatCtx);
-                    queryCtx.setChatWorkflowState(ChatWorkflowState.CORRECTING);
+                    performParsing(queryCtx);
+                    if (queryCtx.getCandidateQueries().size() == 0) {
+                        parseResult.setState(ParseResp.ParseState.FAILED);
+                        parseResult.setErrorMsg("No semantic queries can be parsed out.");
+                        queryCtx.setChatWorkflowState(ChatWorkflowState.FINISHED);
+                    } else {
+                        queryCtx.setChatWorkflowState(ChatWorkflowState.CORRECTING);
+                    }
                     break;
                 case CORRECTING:
                     performCorrecting(queryCtx);
@@ -63,28 +74,31 @@ public class ChatWorkflowEngine {
                     break;
                 case PROCESSING:
                 default:
-                    performProcessing(queryCtx, chatCtx, parseResult);
+                    performProcessing(queryCtx, parseResult);
+                    if (parseResult.getState().equals(ParseResp.ParseState.PENDING)) {
+                        parseResult.setState(ParseResp.ParseState.COMPLETED);
+                    }
                     queryCtx.setChatWorkflowState(ChatWorkflowState.FINISHED);
                     break;
             }
         }
     }
 
-    public void performMapping(ChatQueryContext queryCtx) {
+    private void performMapping(ChatQueryContext queryCtx) {
         if (Objects.isNull(queryCtx.getMapInfo())
                 || MapUtils.isEmpty(queryCtx.getMapInfo().getDataSetElementMatches())) {
             schemaMappers.forEach(mapper -> mapper.map(queryCtx));
         }
     }
 
-    public void performParsing(ChatQueryContext queryCtx, ChatContext chatCtx) {
+    private void performParsing(ChatQueryContext queryCtx) {
         semanticParsers.forEach(parser -> {
-            parser.parse(queryCtx, chatCtx);
+            parser.parse(queryCtx);
             log.debug("{} result:{}", parser.getClass().getSimpleName(), JsonUtil.toString(queryCtx));
         });
     }
 
-    public void performCorrecting(ChatQueryContext queryCtx) {
+    private void performCorrecting(ChatQueryContext queryCtx) {
         List<SemanticQuery> candidateQueries = queryCtx.getCandidateQueries();
         if (CollectionUtils.isNotEmpty(candidateQueries)) {
             for (SemanticQuery semanticQuery : candidateQueries) {
@@ -101,9 +115,9 @@ public class ChatWorkflowEngine {
         }
     }
 
-    public void performProcessing(ChatQueryContext queryCtx, ChatContext chatCtx, ParseResp parseResult) {
+    private void performProcessing(ChatQueryContext queryCtx, ParseResp parseResult) {
         resultProcessors.forEach(processor -> {
-            processor.process(parseResult, queryCtx, chatCtx);
+            processor.process(parseResult, queryCtx);
         });
     }
 

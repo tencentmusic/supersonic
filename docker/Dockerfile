@@ -12,6 +12,11 @@ RUN apt-get update && \
     apt-get install -y default-mysql-client unzip && \
     rm -rf /var/lib/apt/lists/*
 
+# Install the vim editor.
+RUN apt-get update && \
+    apt-get install -y vim && \
+    rm -rf /var/lib/apt/lists/*
+
 # Copy the supersonic standalone zip file into the container
 COPY assembly/build/supersonic-standalone-${SUPERSONIC_VERSION}.zip .
 

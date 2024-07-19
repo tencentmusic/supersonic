@@ -7,7 +7,6 @@ import com.tencent.supersonic.headless.chat.query.QueryManager;
 import com.tencent.supersonic.headless.chat.query.SemanticQuery;
 import com.tencent.supersonic.headless.chat.query.rule.RuleSemanticQuery;
 import com.tencent.supersonic.headless.chat.parser.SemanticParser;
-import com.tencent.supersonic.headless.chat.ChatContext;
 import com.tencent.supersonic.headless.chat.query.rule.metric.MetricModelQuery;
 import com.tencent.supersonic.headless.chat.query.rule.metric.MetricSemanticQuery;
 import com.tencent.supersonic.headless.chat.query.rule.metric.MetricIdQuery;
@@ -43,11 +42,11 @@ public class ContextInheritParser implements SemanticParser {
     ).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
     @Override
-    public void parse(ChatQueryContext chatQueryContext, ChatContext chatContext) {
+    public void parse(ChatQueryContext chatQueryContext) {
         if (!shouldInherit(chatQueryContext)) {
             return;
         }
-        Long dataSetId = getMatchedDataSet(chatQueryContext, chatContext);
+        Long dataSetId = getMatchedDataSet(chatQueryContext);
         if (dataSetId == null) {
             return;
         }
@@ -55,10 +54,11 @@ public class ContextInheritParser implements SemanticParser {
         List<SchemaElementMatch> elementMatches = chatQueryContext.getMapInfo().getMatchedElements(dataSetId);
 
         List<SchemaElementMatch> matchesToInherit = new ArrayList<>();
-        for (SchemaElementMatch match : chatContext.getParseInfo().getElementMatches()) {
+        for (SchemaElementMatch match : chatQueryContext.getContextParseInfo().getElementMatches()) {
             SchemaElementType matchType = match.getElement().getType();
             // mutual exclusive element types should not be inherited
-            RuleSemanticQuery ruleQuery = QueryManager.getRuleQuery(chatContext.getParseInfo().getQueryMode());
+            RuleSemanticQuery ruleQuery = QueryManager.getRuleQuery(
+                    chatQueryContext.getContextParseInfo().getQueryMode());
             if (!containsTypes(elementMatches, matchType, ruleQuery)) {
                 match.setInherited(true);
                 matchesToInherit.add(match);
@@ -68,7 +68,7 @@ public class ContextInheritParser implements SemanticParser {
 
         List<RuleSemanticQuery> queries = RuleSemanticQuery.resolve(dataSetId, elementMatches, chatQueryContext);
         for (RuleSemanticQuery query : queries) {
-            query.fillParseInfo(chatQueryContext, chatContext);
+            query.fillParseInfo(chatQueryContext);
             if (existSameQuery(query.getParseInfo().getDataSetId(), query.getQueryMode(), chatQueryContext)) {
                 continue;
             }
@@ -108,8 +108,8 @@ public class ContextInheritParser implements SemanticParser {
         return metricModelQueries.size() == chatQueryContext.getCandidateQueries().size();
     }
 
-    protected Long getMatchedDataSet(ChatQueryContext chatQueryContext, ChatContext chatContext) {
-        Long dataSetId = chatContext.getParseInfo().getDataSetId();
+    protected Long getMatchedDataSet(ChatQueryContext chatQueryContext) {
+        Long dataSetId = chatQueryContext.getContextParseInfo().getDataSetId();
         if (dataSetId == null) {
             return null;
         }

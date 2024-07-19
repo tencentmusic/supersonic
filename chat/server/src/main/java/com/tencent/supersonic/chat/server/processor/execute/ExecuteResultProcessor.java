@@ -1,6 +1,6 @@
 package com.tencent.supersonic.chat.server.processor.execute;
 
-import com.tencent.supersonic.chat.server.pojo.ChatExecuteContext;
+import com.tencent.supersonic.chat.server.pojo.ExecuteContext;
 import com.tencent.supersonic.chat.server.processor.ResultProcessor;
 import com.tencent.supersonic.headless.api.pojo.response.QueryResult;
 
@@ -9,6 +9,6 @@ import com.tencent.supersonic.headless.api.pojo.response.QueryResult;
  */
 public interface ExecuteResultProcessor extends ResultProcessor {
 
-    void process(ChatExecuteContext chatExecuteContext, QueryResult queryResult);
+    void process(ExecuteContext executeContext, QueryResult queryResult);
 
 }

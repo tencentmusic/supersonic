@@ -7,7 +7,6 @@ import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.api.pojo.TagTypeDefaultConfig;
-import com.tencent.supersonic.headless.chat.ChatContext;
 import com.tencent.supersonic.headless.chat.ChatQueryContext;
 import org.apache.commons.collections.CollectionUtils;
 
@@ -19,8 +18,8 @@ import java.util.stream.Collectors;
 public abstract class DetailListQuery extends DetailSemanticQuery {
 
     @Override
-    public void fillParseInfo(ChatQueryContext chatQueryContext, ChatContext chatContext) {
-        super.fillParseInfo(chatQueryContext, chatContext);
+    public void fillParseInfo(ChatQueryContext chatQueryContext) {
+        super.fillParseInfo(chatQueryContext);
         this.addEntityDetailAndOrderByMetric(chatQueryContext, parseInfo);
     }
 

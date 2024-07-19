@@ -30,7 +30,7 @@ import com.tencent.supersonic.headless.server.pojo.yaml.MetricParamYamlTpl;
 import com.tencent.supersonic.headless.server.pojo.yaml.MetricTypeParamsYamlTpl;
 import com.tencent.supersonic.headless.server.pojo.yaml.MetricYamlTpl;
 import com.tencent.supersonic.headless.server.utils.DatabaseConverter;
-import com.tencent.supersonic.headless.server.web.service.SchemaService;
+import com.tencent.supersonic.headless.server.service.SchemaService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Triple;
 import org.springframework.stereotype.Service;

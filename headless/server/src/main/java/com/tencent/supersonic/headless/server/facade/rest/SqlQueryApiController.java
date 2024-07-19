@@ -7,7 +7,7 @@ import com.tencent.supersonic.headless.api.pojo.request.QuerySqlReq;
 import com.tencent.supersonic.headless.api.pojo.request.QuerySqlsReq;
 import com.tencent.supersonic.headless.api.pojo.request.SemanticQueryReq;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
-import com.tencent.supersonic.headless.server.facade.service.ChatQueryService;
+import com.tencent.supersonic.headless.server.facade.service.ChatLayerService;
 import com.tencent.supersonic.headless.server.facade.service.SemanticLayerService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
@@ -33,7 +33,7 @@ public class SqlQueryApiController {
     private SemanticLayerService semanticLayerService;
 
     @Autowired
-    private ChatQueryService chatQueryService;
+    private ChatLayerService chatLayerService;
 
     @PostMapping("/sql")
     public Object queryBySql(@RequestBody QuerySqlReq querySqlReq,
@@ -42,7 +42,7 @@ public class SqlQueryApiController {
         User user = UserHolder.findUser(request, response);
         String sql = querySqlReq.getSql();
         querySqlReq.setSql(StringUtil.replaceBackticks(sql));
-        chatQueryService.correct(querySqlReq, user);
+        chatLayerService.correct(querySqlReq, user);
         return semanticLayerService.queryByReq(querySqlReq, user);
     }
 
@@ -56,7 +56,7 @@ public class SqlQueryApiController {
                     QuerySqlReq querySqlReq = new QuerySqlReq();
                     BeanUtils.copyProperties(querySqlsReq, querySqlReq);
                     querySqlReq.setSql(StringUtil.replaceBackticks(sql));
-                    chatQueryService.correct(querySqlReq, user);
+                    chatLayerService.correct(querySqlReq, user);
                     return querySqlReq;
                 }).collect(Collectors.toList());
 
@@ -82,7 +82,7 @@ public class SqlQueryApiController {
                     QuerySqlReq querySqlReq = new QuerySqlReq();
                     BeanUtils.copyProperties(querySqlsReq, querySqlReq);
                     querySqlReq.setSql(StringUtil.replaceBackticks(sql));
-                    chatQueryService.correct(querySqlReq, user);
+                    chatLayerService.correct(querySqlReq, user);
                     return querySqlReq;
                 }).collect(Collectors.toList());
         List<SemanticQueryResp> semanticQueryRespList = new ArrayList<>();
@@ -104,7 +104,7 @@ public class SqlQueryApiController {
         User user = UserHolder.findUser(request, response);
         String sql = querySqlReq.getSql();
         querySqlReq.setSql(StringUtil.replaceBackticks(sql));
-        return chatQueryService.validate(querySqlReq, user);
+        return chatLayerService.validate(querySqlReq, user);
     }
 
 }

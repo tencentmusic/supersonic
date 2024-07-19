@@ -5,7 +5,6 @@ import com.tencent.supersonic.headless.api.pojo.SchemaMapInfo;
 import com.tencent.supersonic.headless.chat.ChatQueryContext;
 import com.tencent.supersonic.headless.chat.query.rule.RuleSemanticQuery;
 import com.tencent.supersonic.headless.chat.parser.SemanticParser;
-import com.tencent.supersonic.headless.chat.ChatContext;
 import lombok.extern.slf4j.Slf4j;
 import java.util.Arrays;
 import java.util.List;
@@ -24,7 +23,7 @@ public class RuleSqlParser implements SemanticParser {
     );
 
     @Override
-    public void parse(ChatQueryContext chatQueryContext, ChatContext chatContext) {
+    public void parse(ChatQueryContext chatQueryContext) {
         if (!chatQueryContext.getText2SQLType().enableRule()) {
             return;
         }
@@ -34,11 +33,11 @@ public class RuleSqlParser implements SemanticParser {
             List<SchemaElementMatch> elementMatches = mapInfo.getMatchedElements(dataSetId);
             List<RuleSemanticQuery> queries = RuleSemanticQuery.resolve(dataSetId, elementMatches, chatQueryContext);
             for (RuleSemanticQuery query : queries) {
-                query.fillParseInfo(chatQueryContext, chatContext);
+                query.fillParseInfo(chatQueryContext);
                 chatQueryContext.getCandidateQueries().add(query);
             }
         }
 
-        auxiliaryParsers.stream().forEach(p -> p.parse(chatQueryContext, chatContext));
+        auxiliaryParsers.stream().forEach(p -> p.parse(chatQueryContext));
     }
 }

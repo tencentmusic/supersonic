@@ -3,10 +3,11 @@ package com.tencent.supersonic.headless.server.task;
 import com.tencent.supersonic.common.config.EmbeddingConfig;
 import com.tencent.supersonic.common.pojo.DataItem;
 import com.tencent.supersonic.common.service.EmbeddingService;
-import com.tencent.supersonic.headless.server.web.service.DimensionService;
-import com.tencent.supersonic.headless.server.web.service.MetricService;
+import com.tencent.supersonic.headless.server.service.DimensionService;
+import com.tencent.supersonic.headless.server.service.MetricService;
 import dev.langchain4j.inmemory.spring.InMemoryEmbeddingStoreFactory;
 import dev.langchain4j.store.embedding.EmbeddingStoreFactory;
+import dev.langchain4j.store.embedding.EmbeddingStoreFactoryProvider;
 import dev.langchain4j.store.embedding.TextSegmentConvert;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,15 +36,13 @@ public class MetaEmbeddingTask implements CommandLineRunner {
     @Autowired
     private DimensionService dimensionService;
 
-    @Autowired
-    private EmbeddingStoreFactory embeddingStoreFactory;
-
     @PreDestroy
     public void onShutdown() {
         embeddingStorePersistFile();
     }
 
     private void embeddingStorePersistFile() {
+        EmbeddingStoreFactory embeddingStoreFactory = EmbeddingStoreFactoryProvider.getFactory();
         if (embeddingStoreFactory instanceof InMemoryEmbeddingStoreFactory) {
             long startTime = System.currentTimeMillis();
             InMemoryEmbeddingStoreFactory inMemoryFactory =
