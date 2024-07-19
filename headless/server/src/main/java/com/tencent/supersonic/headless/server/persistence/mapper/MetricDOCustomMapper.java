@@ -22,4 +22,6 @@ public interface MetricDOCustomMapper {
     List<MetricDO> query(MetricFilter metricFilter);
 
     List<MetricDO> queryMetrics(MetricsFilter metricsFilter);
+
+    void batchVector(List<MetricDO> metricDOS);
 }

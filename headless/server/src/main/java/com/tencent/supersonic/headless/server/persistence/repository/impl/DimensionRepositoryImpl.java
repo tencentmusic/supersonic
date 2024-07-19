@@ -57,4 +57,8 @@ public class DimensionRepositoryImpl implements DimensionRepository {
         return dimensionDOCustomMapper.queryDimensions(dimensionsFilter);
     }
 
+    @Override
+    public void batchVector(List<DimensionDO> dimensionDOS) {
+        dimensionDOCustomMapper.batchVector(dimensionDOS);
+    }
 }

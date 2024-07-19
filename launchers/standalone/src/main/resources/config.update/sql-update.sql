@@ -360,3 +360,7 @@ alter table s2_agent add `enable_memory_review` tinyint DEFAULT 0;
 
 --20240718
 alter table s2_chat_memory add `side_info` TEXT DEFAULT NULL COMMENT '辅助信息';
+
+--20240720
+alter table s2_metric add `is_vector` int DEFAULT 0 COMMENT '是否向量'
+alter table s2_dimension add `is_vector` int DEFAULT 0 COMMENT '是否向量'

@@ -53,6 +53,11 @@ public class MetricRepositoryImpl implements MetricRepository {
     }
 
     @Override
+    public void batchVector(List<MetricDO> metricDOS) {
+        metricDOCustomMapper.batchVector(metricDOS);
+    }
+
+    @Override
     public void batchPublish(List<MetricDO> metricDOS) {
         metricDOCustomMapper.batchPublish(metricDOS);
     }

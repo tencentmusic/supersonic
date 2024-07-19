@@ -30,6 +30,8 @@ public interface MetricService {
 
     void batchUpdateStatus(MetaBatchReq metaBatchReq, User user);
 
+    void batchVector(List<Long> metricIds, User user);
+
     void batchPublish(List<Long> metricIds, User user);
 
     void batchUnPublish(List<Long> metricIds, User user);
