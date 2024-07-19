@@ -91,26 +91,12 @@ export type AgentType = {
   enableSearch: number;
   agentConfig: string;
   modelConfig: {
-    chatModel: {
-      provider: string;
-      baseUrl: string;
-      apiKey: string;
-      modelName: string;
-      temperature: number;
-      timeOut: number;
-    };
-    embeddingModel: {
-      apiKey: string;
-      baseUrl: string;
-      // logRequests: true,
-      // logResponses: true,
-      // maxRetries: number,
-      // maxToken: number,
-      modelName: string;
-      modelPath: string;
-      provider: string;
-      vocabularyPath: string;
-    };
+    provider: string;
+    baseUrl: string;
+    apiKey: string;
+    modelName: string;
+    temperature: number;
+    timeOut: number;
   };
   multiTurnConfig: {
     enableMultiTurn: boolean;

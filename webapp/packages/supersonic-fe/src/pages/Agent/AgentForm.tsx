@@ -45,14 +45,9 @@ const AgentForm: React.FC<Props> = ({ editAgent, onSaveAgent, onCreateToolBtnCli
   const [formData, setFormData] = useState<any>({
     enableSearch: true,
     modelConfig: {
-      chatModel: {
-        timeOut: 60,
-        provider: 'OPEN_AI',
-        temperature: 0,
-      },
-      embeddingModel: {
-        provider: 'OPEN_AI',
-      },
+      timeOut: 60,
+      provider: 'OPEN_AI',
+      temperature: 0,
     },
     // embeddingStore: {
     //   provider: 'MILVUS',
@@ -238,7 +233,7 @@ const AgentForm: React.FC<Props> = ({ editAgent, onSaveAgent, onCreateToolBtnCli
               对话模型 <MainTitleMark />
             </Space>
           </div>
-          <FormItem name={['modelConfig', 'chatModel', 'provider']} label="接口协议">
+          <FormItem name={['modelConfig', 'provider']} label="接口协议">
             <Select placeholder="">
               {['OPEN_AI', 'OLLAMA'].map((item) => (
                 <Select.Option key={item} value={item}>
@@ -247,16 +242,16 @@ const AgentForm: React.FC<Props> = ({ editAgent, onSaveAgent, onCreateToolBtnCli
               ))}
             </Select>
           </FormItem>
-          <FormItem name={['modelConfig', 'chatModel', 'modelName']} label="Model Name">
+          <FormItem name={['modelConfig', 'modelName']} label="Model Name">
             <Input placeholder="请输入语言模型名称" />
           </FormItem>
-          <FormItem name={['modelConfig', 'chatModel', 'baseUrl']} label="Base URL">
+          <FormItem name={['modelConfig', 'baseUrl']} label="Base URL">
             <Input placeholder="请输入Base URL" />
           </FormItem>
           <FormItem
-            name={['modelConfig', 'chatModel', 'apiKey']}
+            name={['modelConfig', 'apiKey']}
             label="API Key"
-            hidden={formData?.modelConfig?.chatModel?.provider === 'OLLAMA'}
+            hidden={formData?.modelConfig?.provider === 'OLLAMA'}
             getValueFromEvent={(event) => {
               const value = event.target.value;
               return encryptPassword(value);
@@ -270,7 +265,7 @@ const AgentForm: React.FC<Props> = ({ editAgent, onSaveAgent, onCreateToolBtnCli
             <Input.Password placeholder="请输入API Key" visibilityToggle />
           </FormItem>
 
-          <FormItem name={['modelConfig', 'chatModel', 'temperature']} label="Temperature">
+          <FormItem name={['modelConfig', 'temperature']} label="Temperature">
             <Slider
               min={0}
               max={1}
@@ -281,7 +276,7 @@ const AgentForm: React.FC<Props> = ({ editAgent, onSaveAgent, onCreateToolBtnCli
               }}
             />
           </FormItem>
-          <FormItem name={['modelConfig', 'chatModel', 'timeOut']} label="超时时间(秒)">
+          <FormItem name={['modelConfig', 'timeOut']} label="超时时间(秒)">
             <InputNumber />
           </FormItem>
 
@@ -465,7 +460,7 @@ const AgentForm: React.FC<Props> = ({ editAgent, onSaveAgent, onCreateToolBtnCli
                 type="primary"
                 loading={llmTestLoading}
                 onClick={() => {
-                  testLLMConnect(formData.modelConfig.chatModel);
+                  testLLMConnect(formData.modelConfig);
                 }}
               >
                 大模型连接测试
