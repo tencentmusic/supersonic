@@ -5,8 +5,8 @@ import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.data.message.SystemMessage;
 import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.output.Response;
+import dev.langchain4j.provider.ModelProvider;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 
@@ -14,11 +14,9 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class AliasGenerateHelper {
 
-    @Autowired
-    private ChatLanguageModel chatLanguageModel;
-
     public String getChatCompletion(String message) {
         SystemMessage from = SystemMessage.from(message);
+        ChatLanguageModel chatLanguageModel = ModelProvider.getChatModel();
         Response<AiMessage> response = chatLanguageModel.generate(from);
         log.info("message:{}\n response:{}", message, response);
         return response.content().text();

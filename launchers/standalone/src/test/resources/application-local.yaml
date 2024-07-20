@@ -12,6 +12,3 @@ spring:
     console:
       path: /h2-console/semantic
       enabled: true
-  config:
-    import:
-      - classpath:langchain4j-local.yaml

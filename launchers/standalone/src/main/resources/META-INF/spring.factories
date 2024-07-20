@@ -81,14 +81,3 @@ com.tencent.supersonic.auth.authentication.interceptor.AuthenticationInterceptor
 
 com.tencent.supersonic.auth.api.authentication.adaptor.UserAdaptor=\
     com.tencent.supersonic.auth.authentication.adaptor.DefaultUserAdaptor
-
-
-### common SPIs
-
-org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-    dev.langchain4j.spring.LangChain4jAutoConfig,\
-    dev.langchain4j.openai.spring.AutoConfig,\
-    dev.langchain4j.ollama.spring.AutoConfig,\
-    dev.langchain4j.azure.openai.spring.AutoConfig,\
-    dev.langchain4j.azure.aisearch.spring.AutoConfig,\
-    dev.langchain4j.anthropic.spring.AutoConfig
