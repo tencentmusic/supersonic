@@ -1,4 +1,4 @@
-name: supersonic RHEL/CentOS CI
+name: supersonic CentOS CI
 
 on:
   push:
@@ -14,31 +14,48 @@ jobs:
     container:
       image: quay.io/centos/centos:stream8  # 使用 CentOS Stream 8 容器
 
+    strategy:
+      matrix:
+        java-version: [8, 11]  # 定义要测试的JDK版本
+
     steps:
       - uses: actions/checkout@v2
+
       - name: Reset DNF repositories
         run: |
           cd /etc/yum.repos.d/
           sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-*
           sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-*
+
       - name: Update DNF package index
         run: dnf makecache
+
       - name: Install Java and Maven with retry
         run: |
-          for i in {1..5}; do
-            dnf install -y java-1.8.0-openjdk-devel maven && break || sleep 15
-          done
+          if [ ${{ matrix.java-version }} -eq 8 ]; then
+            for i in {1..5}; do
+              dnf install -y java-1.8.0-openjdk-devel maven && break || sleep 15
+            done
+          else
+            for i in {1..5}; do
+              dnf install -y java-11-openjdk-devel maven && break || sleep 15
+            done
+          fi
+
       - name: Verify Java and Maven installation
         run: |
           java -version
           mvn -version
+
       - name: Cache Maven packages
         uses: actions/cache@v2
         with:
           path: ~/.m2
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
+
       - name: Build with Maven
         run: mvn -B package --file pom.xml
+
       - name: Test with Maven
         run: mvn test
