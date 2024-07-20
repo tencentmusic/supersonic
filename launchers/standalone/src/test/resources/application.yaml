@@ -21,6 +21,11 @@ spring:
       - spring.dev.langchain4j.azure.openai.spring.AutoConfig
       - spring.dev.langchain4j.azure.aisearch.spring.AutoConfig
       - spring.dev.langchain4j.anthropic.spring.AutoConfig
+  main:
+    allow-circular-references: true
+  mvc:
+    pathmatch:
+      matching-strategy: ANT_PATH_MATCHER
 
 mybatis:
   mapper-locations=classpath:mappers/custom/*.xml,classpath*:/mappers/*.xml

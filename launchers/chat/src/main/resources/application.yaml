@@ -3,3 +3,8 @@ spring:
     active: local
   application:
     name: chat
+  main:
+    allow-circular-references: true
+  mvc:
+    pathmatch:
+      matching-strategy: ANT_PATH_MATCHER
