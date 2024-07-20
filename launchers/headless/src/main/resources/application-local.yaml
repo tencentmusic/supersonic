@@ -14,8 +14,10 @@ spring:
     url: jdbc:h2:mem:semantic;DATABASE_TO_UPPER=false
     username: root
     password: semantic
-    schema: classpath:db/semantic-schema-h2.sql
-    data: classpath:db/semantic-data-h2.sql
+  sql:
+    init:
+      schema-locations: classpath:db/semantic-schema-h2.sql
+      data-locations: classpath:db/semantic-data-h2.sql
 
 authentication:
   enable: true
