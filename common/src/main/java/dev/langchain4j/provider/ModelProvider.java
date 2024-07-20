@@ -1,5 +1,6 @@
 package dev.langchain4j.provider;
 
+import com.tencent.supersonic.common.config.ChatModelParameterConfig;
 import com.tencent.supersonic.common.config.EmbeddingModelParameterConfig;
 import com.tencent.supersonic.common.pojo.ChatModelConfig;
 import com.tencent.supersonic.common.pojo.EmbeddingModelConfig;
@@ -18,11 +19,16 @@ public class ModelProvider {
         factories.put(provider, modelFactory);
     }
 
+    public static ChatLanguageModel getChatModel() {
+        return getChatModel(null);
+    }
+
     public static ChatLanguageModel getChatModel(ChatModelConfig modelConfig) {
-        if (modelConfig == null
-                || StringUtils.isBlank(modelConfig.getProvider())
+        if (modelConfig == null || StringUtils.isBlank(modelConfig.getProvider())
                 || StringUtils.isBlank(modelConfig.getBaseUrl())) {
-            return ContextUtils.getBean(ChatLanguageModel.class);
+            ChatModelParameterConfig parameterConfig = ContextUtils.getBean(
+                    ChatModelParameterConfig.class);
+            modelConfig = parameterConfig.convert();
         }
         ModelFactory modelFactory = factories.get(modelConfig.getProvider().toUpperCase());
         if (modelFactory != null) {
@@ -33,15 +39,14 @@ public class ModelProvider {
     }
 
     public static EmbeddingModel getEmbeddingModel() {
-        EmbeddingModelParameterConfig parameterConfig = ContextUtils.getBean(
-                EmbeddingModelParameterConfig.class);
-        EmbeddingModelConfig embeddingModelConfig = parameterConfig.convert();
-        return getEmbeddingModel(embeddingModelConfig);
+        return getEmbeddingModel(null);
     }
 
     public static EmbeddingModel getEmbeddingModel(EmbeddingModelConfig embeddingModel) {
         if (embeddingModel == null || StringUtils.isBlank(embeddingModel.getProvider())) {
-            return ContextUtils.getBean(EmbeddingModel.class);
+            EmbeddingModelParameterConfig parameterConfig = ContextUtils.getBean(
+                    EmbeddingModelParameterConfig.class);
+            embeddingModel = parameterConfig.convert();
         }
         ModelFactory modelFactory = factories.get(embeddingModel.getProvider().toUpperCase());
         if (modelFactory != null) {

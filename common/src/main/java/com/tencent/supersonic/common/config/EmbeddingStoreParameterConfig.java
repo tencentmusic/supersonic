@@ -3,6 +3,7 @@ package com.tencent.supersonic.common.config;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.common.pojo.EmbeddingStoreConfig;
 import com.tencent.supersonic.common.pojo.Parameter;
+import dev.langchain4j.store.embedding.EmbeddingStoreType;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -12,9 +13,12 @@ import java.util.List;
 @Slf4j
 public class EmbeddingStoreParameterConfig extends ParameterConfig {
     public static final Parameter EMBEDDING_STORE_PROVIDER =
-            new Parameter("s2.embedding.store.provider", "",
+            new Parameter("s2.embedding.store.provider", EmbeddingStoreType.IN_MEMORY.name(),
                     "向量库类型", "",
-                    "string", "向量库配置");
+                    "string", "向量库配置",
+                    Lists.newArrayList(EmbeddingStoreType.IN_MEMORY.name(),
+                            EmbeddingStoreType.MILVUS.name(),
+                            EmbeddingStoreType.CHROMA.name()));
 
     public static final Parameter EMBEDDING_STORE_BASE_URL =
             new Parameter("s2.embedding.store.base.url", "",

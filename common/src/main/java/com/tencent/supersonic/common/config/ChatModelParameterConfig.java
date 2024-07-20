@@ -14,6 +14,8 @@ import java.util.List;
 @Slf4j
 public class ChatModelParameterConfig extends ParameterConfig {
 
+
+
     public static final Parameter CHAT_MODEL_PROVIDER =
             new Parameter("s2.chat.model.provider", OpenAiModelFactory.PROVIDER,
                     "接口协议", "",
@@ -21,17 +23,17 @@ public class ChatModelParameterConfig extends ParameterConfig {
                     Lists.newArrayList(OpenAiModelFactory.PROVIDER, OllamaModelFactory.PROVIDER));
 
     public static final Parameter CHAT_MODEL_BASE_URL =
-            new Parameter("s2.chat.model.base.url", "",
+            new Parameter("s2.chat.model.base.url", "https://api.openai.com/v1",
                     "BaseUrl", "",
                     "string", "对话模型配置");
 
     public static final Parameter CHAT_MODEL_API_KEY =
-            new Parameter("s2.chat.model.api.key", "",
+            new Parameter("s2.chat.model.api.key", "demo",
                     "ApiKey", "",
                     "string", "对话模型配置");
 
     public static final Parameter CHAT_MODEL_NAME =
-            new Parameter("s2.chat.model.name", "",
+            new Parameter("s2.chat.model.name", "gpt-3.5-turbo",
                     "ModelName", "",
                     "string", "对话模型配置");
 

@@ -4,6 +4,3 @@ spring:
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
     driver-class-name: com.mysql.jdbc.Driver
-  config:
-    import:
-      - classpath:langchain4j-prd.yaml
