@@ -59,7 +59,6 @@ public class EmbeddingServiceImpl implements EmbeddingService {
                     continue;
                 }
                 embeddingStore.add(embedding, query);
-                cache.put(TextSegmentConvert.getQueryId(query), true);
             } catch (Exception e) {
                 log.error("embeddingModel embed error question: {}, embeddingStore: {}", question,
                         embeddingStore.getClass().getSimpleName(), e);
@@ -86,6 +85,7 @@ public class EmbeddingServiceImpl implements EmbeddingService {
         EmbeddingSearchResult result = embeddingStore.search(request);
         List<EmbeddingMatch<TextSegment>> relevant = result.matches();
         boolean exists = CollectionUtils.isNotEmpty(relevant);
+        cache.put(queryId, exists);
         return exists;
     }
 
@@ -104,6 +104,8 @@ public class EmbeddingServiceImpl implements EmbeddingService {
                     Filter filter = filterBuilder.isIn(queryIds);
                     inMemoryEmbeddingStore.removeAll(filter);
                 }
+            } else {
+                throw new RuntimeException("Not supported yet.");
             }
         } catch (Exception e) {
             log.error("deleteQuery error,collectionName:{},queries:{}", collectionName, queries);
