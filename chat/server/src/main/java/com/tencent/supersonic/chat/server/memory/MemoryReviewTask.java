@@ -47,7 +47,7 @@ public class MemoryReviewTask {
     @Autowired
     private AgentService agentService;
 
-    @Scheduled(fixedDelay = 60 * 1000)
+    @Scheduled(fixedDelay = 86400000)
     public void review() {
         memoryService.getMemoriesForLlmReview().stream()
                 .forEach(m -> {

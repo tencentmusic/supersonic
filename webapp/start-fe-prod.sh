@@ -1,5 +1,7 @@
 #!/bin/bash
 
+export BUILD_ENV=$1
+
 start=$(date +%s)
 
 node_version=$(node -v)

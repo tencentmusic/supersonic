@@ -1,5 +1,7 @@
 #!/bin/bash
 
+export BUILD_ENV=$1
+
 node_version=$(node -v)
 
 major_version=$(echo $node_version | cut -d'.' -f1 | tr -d 'v')

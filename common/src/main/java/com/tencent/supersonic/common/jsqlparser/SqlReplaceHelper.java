@@ -11,6 +11,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.function.UnaryOperator;
 
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.Alias;
@@ -32,6 +33,7 @@ import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.GroupByElement;
 import net.sf.jsqlparser.statement.select.Join;
+import net.sf.jsqlparser.statement.select.Limit;
 import net.sf.jsqlparser.statement.select.OrderByElement;
 import net.sf.jsqlparser.statement.select.ParenthesedFromItem;
 import net.sf.jsqlparser.statement.select.ParenthesedSelect;
@@ -56,33 +58,44 @@ public class SqlReplaceHelper {
         if (!(selectStatement instanceof PlainSelect)) {
             return sql;
         }
-        ((PlainSelect) selectStatement).getSelectItems().stream().forEach(o -> {
-            SelectItem selectExpressionItem = (SelectItem) o;
-            String alias = "";
-            if (selectExpressionItem.getExpression() instanceof Function) {
-                Function function = (Function) selectExpressionItem.getExpression();
-                Column column = (Column) function.getParameters().getExpressions().get(0);
-                if (fieldNameMap.containsKey(column.getColumnName())) {
-                    String value = fieldNameMap.get(column.getColumnName());
-                    alias = value;
-                    function.withParameters(new Column(value));
-                }
-            }
-            if (selectExpressionItem.getExpression() instanceof Column) {
-                Column column = (Column) selectExpressionItem.getExpression();
-                String columnName = column.getColumnName();
-                if (fieldNameMap.containsKey(columnName)) {
-                    String value = fieldNameMap.get(columnName);
-                    alias = value;
-                    if (StringUtils.isNotBlank(value)) {
-                        selectExpressionItem.setExpression(new Column(value));
-                    }
-                }
-            }
-            if (Objects.nonNull(selectExpressionItem.getAlias()) && StringUtils.isNotBlank(alias)) {
-                selectExpressionItem.getAlias().setName(alias);
-            }
-        });
+        //移除旧的select字段
+        List<SelectItem<?>> selectItems = ((PlainSelect) selectStatement).getSelectItems();
+        List<SelectItem<?>> columnList = selectItems.stream()
+                .filter(s -> s.getExpression() instanceof Column)
+                .collect(Collectors.toList());
+        selectItems.removeAll(columnList);
+        //增加新的select字段
+        ArrayList<SelectItem<?>> columns = new ArrayList<>();
+        for (String fieldName : fieldNameMap.keySet()) {
+            String value = fieldNameMap.get(fieldName);
+            columns.add(SelectItem.from(new Column(value)));
+        }
+        ((PlainSelect) selectStatement).addSelectItems(columns);
+
+        ExpressionList groupByExpressionList;
+        if (((PlainSelect) selectStatement).getGroupBy() != null) {
+            groupByExpressionList = ((PlainSelect) selectStatement).getGroupBy().getGroupByExpressionList();
+        } else {
+            groupByExpressionList = new ExpressionList<>();
+        }
+        groupByExpressionList.clear();
+        if (!columns.isEmpty()) {
+            groupByExpressionList.addAll(columns);
+        } else {
+            ((PlainSelect) selectStatement).setGroupByElement(null);
+        }
+        return selectStatement.toString();
+    }
+
+    public static String setLimit(String sql, Long offset, Long rowCount) {
+        Select selectStatement = SqlSelectHelper.getSelect(sql);
+        if (!(selectStatement instanceof PlainSelect)) {
+            return sql;
+        }
+        Limit limit = new Limit();
+        limit.setOffset(new LongValue(offset));
+        limit.setRowCount(new LongValue(rowCount));
+        selectStatement.setLimit(limit);
         return selectStatement.toString();
     }
 
@@ -92,28 +105,30 @@ public class SqlReplaceHelper {
         if (!(selectStatement instanceof PlainSelect)) {
             return sql;
         }
-        ((PlainSelect) selectStatement).getSelectItems().stream().forEach(o -> {
-            SelectItem selectExpressionItem = (SelectItem) o;
-            if (selectExpressionItem.getExpression() instanceof Function) {
-                Function function = (Function) selectExpressionItem.getExpression();
-                Column column = (Column) function.getParameters().getExpressions().get(0);
-                if (fieldNameToAggMap.containsKey(column.getColumnName())) {
-                    Pair<String, String> agg = fieldNameToAggMap.get(column.getColumnName());
-                    String field = agg.getKey();
-                    String func = agg.getRight();
-                    if (AggOperatorEnum.isCountDistinct(func)) {
-                        function.setName("count");
-                        function.setDistinct(true);
-                    } else {
-                        function.setName(func);
-                    }
-                    function.withParameters(new Column(field));
-                    if (Objects.nonNull(selectExpressionItem.getAlias()) && StringUtils.isNotBlank(field)) {
-                        selectExpressionItem.getAlias().setName(field);
-                    }
-                }
+        //移除旧的aggField字段
+        List<SelectItem<?>> selectItems = ((PlainSelect) selectStatement).getSelectItems();
+        List<SelectItem<?>> functionList = selectItems.stream()
+                .filter(s -> s.getExpression() instanceof Function)
+                .collect(Collectors.toList());
+        selectItems.removeAll(functionList);
+        //增加新的aggField字段
+        for (String fieldName : fieldNameToAggMap.keySet()) {
+            Function function = new Function();
+
+            Pair<String, String> agg = fieldNameToAggMap.get(fieldName);
+            String field = agg.getKey();
+            String func = agg.getRight();
+
+            if (AggOperatorEnum.isCountDistinct(func)) {
+                function.setName("count");
+                function.setDistinct(true);
+            } else {
+                function.setName(func);
             }
-        });
+            function.withParameters(new Column(field));
+            ((PlainSelect) selectStatement).addSelectItem(function);
+
+        }
         return selectStatement.toString();
     }
 

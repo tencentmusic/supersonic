@@ -476,7 +476,26 @@ const encryptKey = CryptoJS.enc.Hex.parse(
   '9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08',
 );
 
-export const encryptPassword = (password: string, key?: string) => {
+export function ssoLogin() {
+  const opUrl =
+    process.env.OP.domain +
+    '/login?redirect=' +
+    encodeURIComponent(
+      `${process.env.OP.domain}/portal/app_oauth?appId=${
+        process.env.OP.appId
+      }&redirect=${decodeURIComponent(window.location.href)} `,
+    );
+  window.location.href = opUrl;
+}
+
+export function ssoLogout() {
+  const opUrl = `${process.env.OP.domain}/portal/logout?appId=${
+    process.env.OP.appId
+  }&redirect=${decodeURIComponent(window.location.href)} `;
+  window.location.href = opUrl;
+}
+
+export function encryptPassword(password: string, key?: any) {
   if (!password) {
     return password;
   }
@@ -486,7 +505,7 @@ export const encryptPassword = (password: string, key?: string) => {
     padding: CryptoJS.pad.Pkcs7,
   });
   return encrypted.toString();
-};
+}
 
 export function decryptPassword(encryptPassword: string) {
   if (!encryptPassword) {

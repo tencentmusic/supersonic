@@ -11,6 +11,7 @@ import {
   Row,
   message,
   Space,
+  Flex,
 } from 'antd';
 import MainTitleMark from '@/components/MainTitleMark';
 import { AgentType } from './type';
@@ -63,6 +64,16 @@ const AgentForm: React.FC<Props> = ({ editAgent, onSaveAgent, onCreateToolBtnCli
     },
   });
   const [form] = Form.useForm();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [batchAddQuestionText, setBatchAddQuestionText] = useState('');
+
+  const handleOk = () => {
+    setIsModalOpen(false);
+    // 按照换行符分割
+    const questions = batchAddQuestionText.split('\n').filter(Boolean);
+    setExamples([...examples, ...questions.map((question) => ({ id: uuid(), question }))]);
+    setBatchAddQuestionText('');
+  };
 
   useEffect(() => {
     if (editAgent) {
@@ -188,6 +199,15 @@ const AgentForm: React.FC<Props> = ({ editAgent, onSaveAgent, onCreateToolBtnCli
             <Switch />
           </FormItem>
 
+          <FormItem
+            name={['visualConfig', 'defaultShowTable']}
+            label="表格模式"
+            tooltip="回复结果默认打开表格模式"
+            valuePropName="checked"
+          >
+            <Switch />
+          </FormItem>
+
           <FormItem name="examples" label="示例问题">
             <div className={styles.paramsSection}>
               {examples.map((example) => {
@@ -212,14 +232,30 @@ const AgentForm: React.FC<Props> = ({ editAgent, onSaveAgent, onCreateToolBtnCli
                   </div>
                 );
               })}
-              <Button
-                onClick={() => {
-                  setExamples([...examples, { id: uuid() }]);
-                }}
-              >
-                <PlusOutlined />
-                新增示例问题
-              </Button>
+              <Flex gap={10}>
+                <Flex flex={1}>
+                  <Button
+                    block
+                    onClick={() => {
+                      setExamples([...examples, { id: uuid() }]);
+                    }}
+                  >
+                    <PlusOutlined />
+                    新增示例问题
+                  </Button>
+                </Flex>
+                <Flex flex={1}>
+                  <Button
+                    block
+                    onClick={() => {
+                      setIsModalOpen(true);
+                    }}
+                  >
+                    <PlusOutlined />
+                    批量新增示例问题
+                  </Button>
+                </Flex>
+              </Flex>
             </div>
           </FormItem>
           <FormItem name="description" label="描述">
@@ -480,6 +516,21 @@ const AgentForm: React.FC<Props> = ({ editAgent, onSaveAgent, onCreateToolBtnCli
         }}
         items={formTabList}
       />
+
+      <Modal
+        title="批量新增示例问题"
+        open={isModalOpen}
+        width={800}
+        onOk={handleOk}
+        onCancel={() => setIsModalOpen(false)}
+      >
+        <TextArea
+          placeholder="请输入问题，多个问题需换行区分"
+          rows={10}
+          value={batchAddQuestionText}
+          onChange={(e) => setBatchAddQuestionText(e.target.value)}
+        />
+      </Modal>
     </Form>
   );
 };

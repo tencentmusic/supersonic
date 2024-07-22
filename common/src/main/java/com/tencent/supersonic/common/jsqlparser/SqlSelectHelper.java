@@ -254,6 +254,18 @@ public class SqlSelectHelper {
         return new ArrayList<>(results);
     }
 
+    public static List<String> getAllSelectFields(String sql) {
+        List<PlainSelect> plainSelects = getPlainSelects(getPlainSelect(sql));
+        Set<String> results = new HashSet<>();
+        for (PlainSelect plainSelect : plainSelects) {
+            List<PlainSelect> plainSelectList = new ArrayList<>();
+            plainSelectList.add(plainSelect);
+            Set<String> fields = getSelectFields(plainSelectList);
+            results.addAll(fields);
+        }
+        return new ArrayList<>(results);
+    }
+
     private static List<String> getFieldsByPlainSelect(PlainSelect plainSelect) {
         if (Objects.isNull(plainSelect)) {
             return new ArrayList<>();
@@ -460,6 +472,28 @@ public class SqlSelectHelper {
                             && !CollectionUtils.isEmpty(function.getParameters().getExpressions())) {
                         String columnName = function.getParameters().getExpressions().get(0).toString();
                         result.add(columnName);
+                    }
+                }
+
+            }
+        }
+        return new ArrayList<>(result);
+    }
+
+    public static List<Function> getAggregate(String sql) {
+        List<PlainSelect> plainSelectList = getPlainSelect(sql);
+        Set<Function> result = new HashSet<>();
+        for (PlainSelect plainSelect : plainSelectList) {
+            if (Objects.isNull(plainSelect)) {
+                continue;
+            }
+            List<SelectItem<?>> selectItems = plainSelect.getSelectItems();
+            for (SelectItem selectItem : selectItems) {
+                if (selectItem.getExpression() instanceof Function) {
+                    Function function = (Function) selectItem.getExpression();
+                    if (Objects.nonNull(function.getParameters())
+                            && !CollectionUtils.isEmpty(function.getParameters().getExpressions())) {
+                        result.add(function);
                     }
                 }
 
@@ -763,6 +797,23 @@ public class SqlSelectHelper {
             return result;
         }
         return false;
+    }
+
+    public static Limit getLimit(String querySql) {
+        Select selectStatement = SqlSelectHelper.getSelect(querySql);
+        if (selectStatement instanceof PlainSelect) {
+            PlainSelect plainSelect = selectStatement.getPlainSelect();
+            return plainSelect.getLimit();
+        } else if (selectStatement instanceof SetOperationList) {
+            SetOperationList setOperationList = (SetOperationList) selectStatement;
+            if (!CollectionUtils.isEmpty(setOperationList.getSelects())) {
+                for (Select select : setOperationList.getSelects()) {
+                    PlainSelect subPlainSelect = select.getPlainSelect();
+                    return subPlainSelect.getLimit();
+                }
+            }
+        }
+        return null;
     }
 
     public static Map<String, Set<String>> getFieldsWithSubQuery(String sql) {

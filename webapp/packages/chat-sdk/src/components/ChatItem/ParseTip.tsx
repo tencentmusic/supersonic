@@ -1,8 +1,12 @@
 import React, { ReactNode } from 'react';
 import { AGG_TYPE_MAP, PREFIX_CLS } from '../../common/constants';
 import { ChatContextType, DateInfoType, EntityInfoType, FilterItemType } from '../../common/type';
-import { Button, DatePicker, Row, Col } from 'antd';
-import { CheckCircleFilled, ReloadOutlined } from '@ant-design/icons';
+import { Button, DatePicker, Row, Col  } from 'antd';
+import {
+  CheckCircleFilled,
+  ExclamationCircleFilled,
+  ExclamationCircleOutlined, ReloadOutlined
+} from '@ant-design/icons';
 import Loading from './Loading';
 import FilterItem from './FilterItem';
 import MarkDown from '../ChatMsg/MarkDown';
@@ -10,6 +14,8 @@ import classNames from 'classnames';
 import { isMobile } from '../../utils/utils';
 import dayjs, { Dayjs } from 'dayjs';
 import quarterOfYear from 'dayjs/plugin/quarterOfYear';
+import FiltersInfo from '../FiltersInfo';
+import { IPill } from '../FiltersInfo/types';
 dayjs.extend(quarterOfYear);
 
 const { RangePicker } = DatePicker;
@@ -25,6 +31,7 @@ type Props = {
   entityInfo: EntityInfoType;
   integrateSystem?: string;
   parseTimeCost?: number;
+  withOutLeftBorder?: boolean;
   isDeveloper?: boolean;
   isSimpleMode?: boolean;
   onSelectParseInfo: (parseInfo: ChatContextType) => void;
@@ -33,6 +40,12 @@ type Props = {
   onDateInfoChange: (dateRange: any) => void;
   onRefresh: () => void;
   handlePresetClick: any;
+  onQueryConditionChange: (data: {
+    pillData: IPill[];
+    datasetId: number;
+    dimensions: any[];
+    metrics: any[];
+  }) => void;
 };
 
 const MAX_OPTION_VALUES_COUNT = 2;
@@ -55,11 +68,13 @@ const ParseTip: React.FC<Props> = ({
   parseTimeCost,
   isDeveloper,
   isSimpleMode,
+  withOutLeftBorder = false,
   onSelectParseInfo,
   onSwitchEntity,
   onFiltersChange,
   onDateInfoChange,
   onRefresh,
+  onQueryConditionChange,
   handlePresetClick
 }) => {
   const ranges: Record<RangeKeys, RangeValue> = {
@@ -73,11 +88,17 @@ const ParseTip: React.FC<Props> = ({
     '本年': [dayjs().startOf('year'), dayjs().endOf('year')],
   };
   const prefixCls = `${PREFIX_CLS}-item`;
-  const getNode = (tipTitle: ReactNode, tipNode?: ReactNode) => {
+
+  const getNode = (tipTitle: ReactNode, tipNode?: ReactNode, warning?: boolean) => {
     return (
       <div className={`${prefixCls}-parse-tip`}>
         <div className={`${prefixCls}-title-bar`}>
-          <CheckCircleFilled className={`${prefixCls}-step-icon`} />
+          {warning ? (
+            <ExclamationCircleFilled className={`${prefixCls}-step-icon`} />
+          ) : (
+            <CheckCircleFilled className={`${prefixCls}-step-icon`} />
+          )}
+
           <div className={`${prefixCls}-step-title`}>
             {tipTitle}
             {tipNode === undefined && <Loading />}
@@ -85,8 +106,9 @@ const ParseTip: React.FC<Props> = ({
         </div>
         {(tipNode || tipNode === null) && (
           <div
-            className={`${prefixCls}-content-container ${tipNode === null ? `${prefixCls}-empty-content-container` : ''
-              }`}
+            className={`${prefixCls}-content-container ${
+              tipNode === null ? `${prefixCls}-empty-content-container` : ''
+            } ${withOutLeftBorder ? 'without-border' : ''}`}
           >
             {tipNode}
           </div>
@@ -96,7 +118,7 @@ const ParseTip: React.FC<Props> = ({
   };
 
   if (parseLoading) {
-    return getNode('意图解析中');
+    return getNode('正在为您查询中，请稍后');
   }
 
   if (parseTip) {
@@ -107,7 +129,8 @@ const ParseTip: React.FC<Props> = ({
           <span className={`${prefixCls}-title-tip`}>(耗时: {parseTimeCost}ms)</span>
         )}
       </>,
-      parseTip
+      parseTip,
+      true
     );
   }
 
@@ -155,6 +178,7 @@ const ParseTip: React.FC<Props> = ({
     const { type: agentType, name: agentName } = properties || {};
 
     const fields =
+      // @ts-ignore
       queryMode === 'TAG_DETAIL' ? dimensionItems?.concat(metrics || []) : dimensionItems;
 
     return (
@@ -180,6 +204,8 @@ const ParseTip: React.FC<Props> = ({
                 <div className={itemValueClass}>{dataSet?.name}</div>
               </div>
             )}
+
+            {/* 
             {(queryType === 'METRIC' || queryType === 'METRIC_TAG' || queryType === 'DETAIL') && (
               <div className={`${prefixCls}-tip-item`}>
                 <div className={`${prefixCls}-tip-item-name`}>查询模式：</div>
@@ -235,90 +261,96 @@ const ParseTip: React.FC<Props> = ({
                   <div className={itemValueClass}>{AGG_TYPE_MAP[aggType]}</div>
                 </div>
               )}
+             */}
           </>
         )}
       </div>
     );
   };
 
-  const getFilterContent = (filters: any) => {
-    const itemValueClass = `${prefixCls}-tip-item-value`;
-    const { startDate, endDate } = dateInfo || {};
-    const tipItemOptionClass = classNames(`${prefixCls}-tip-item-option`, {
-      [`${prefixCls}-mobile-tip-item-option`]: isMobile,
-    });
-    return (
-      <div className={`${prefixCls}-tip-item-filter-content`}>
-        <div className={tipItemOptionClass}>
-          <span className={`${prefixCls}-tip-item-filter-name`}>数据时间：</span>
-          {nativeQuery ? (
-            <span className={itemValueClass}>
+    const getFilterContent = (filters: any) => {
+        const itemValueClass = `${prefixCls}-tip-item-value`;
+        const { startDate, endDate } = dateInfo || {};
+        const tipItemOptionClass = classNames(`${prefixCls}-tip-item-option`, {
+            [`${prefixCls}-mobile-tip-item-option`]: isMobile,
+        });
+        return (
+            <div className={`${prefixCls}-tip-item-filter-content`}>
+                <div className={tipItemOptionClass}>
+                    <span className={`${prefixCls}-tip-item-filter-name`}>数据时间：</span>
+                    {nativeQuery ? (
+                        <span className={itemValueClass}>
               {startDate === endDate ? startDate : `${startDate} ~ ${endDate}`}
             </span>
-          ) : (
-            <RangePicker
-              value={[dayjs(startDate), dayjs(endDate)]}
-              onChange={onDateInfoChange}
-              format="YYYY/MM/DD"
-              renderExtraFooter={() => (
-                <Row gutter={[28, 28]}>
-                  {Object.keys(ranges).map((key) => (
-                    <Col key={key}>
-                      <label
-                        style={{
-                          backgroundColor: '#F0FDFF',
-                          borderColor: '#33BDFC',
-                          color: '#33BDFC',
-                          borderWidth: 1,
-                          borderStyle: 'solid',
-                          cursor: 'pointer'
-                        }}
-                        onClick={() => handlePresetClick(ranges[key as RangeKeys])}>
-                        {key}
-                      </label>
-                    </Col>
-                  ))}
-                </Row>
-              )}
-            />
+                    ) : (
+                        <RangePicker
+                            value={[dayjs(startDate), dayjs(endDate)]}
+                            onChange={onDateInfoChange}
+                            format="YYYY/MM/DD"
+                            renderExtraFooter={() => (
+                                <Row gutter={[28, 28]}>
+                                    {Object.keys(ranges).map((key) => (
+                                        <Col key={key}>
+                                            <label
+                                                style={{
+                                                    backgroundColor: '#F0FDFF',
+                                                    borderColor: '#33BDFC',
+                                                    color: '#33BDFC',
+                                                    borderWidth: 1,
+                                                    borderStyle: 'solid',
+                                                    cursor: 'pointer'
+                                                }}
+                                                onClick={() => handlePresetClick(ranges[key as RangeKeys])}>
+                                                {key}
+                                            </label>
+                                        </Col>
+                                    ))}
+                                </Row>
+                            )}
+                        />
 
 
-          )}
-        </div>
-        {filters?.map((filter: any, index: number) => (
-          <FilterItem
-            modelId={modelId!}
-            filters={dimensionFilters}
-            filter={filter}
-            index={index}
-            chatContext={currentParseInfo!}
-            entityAlias={entityAlias}
-            agentId={agentId}
-            integrateSystem={integrateSystem}
-            onFiltersChange={onFiltersChange}
-            onSwitchEntity={onSwitchEntity}
-            key={`${filter.name}_${index}`}
-          />
-        ))}
-      </div>
-    );
-  };
+                    )}
+                </div>
+                {filters?.map((filter: any, index: number) => (
+                    <FilterItem
+                        modelId={modelId!}
+                        filters={dimensionFilters}
+                        filter={filter}
+                        index={index}
+                        chatContext={currentParseInfo!}
+                        entityAlias={entityAlias}
+                        agentId={agentId}
+                        integrateSystem={integrateSystem}
+                        onFiltersChange={onFiltersChange}
+                        onSwitchEntity={onSwitchEntity}
+                        key={`${filter.name}_${index}`}
+                    />
+                ))}
+            </div>
+        );
+    };
 
   const getFiltersNode = () => {
-    return (
+    return currentParseInfo ? (
       <>
-        <div className={`${prefixCls}-tip-item`}>
+        <FiltersInfo
+          onConfirm={onQueryConditionChange}
+          agentId={agentId!}
+          chatContext={currentParseInfo}
+        />
+        {/* <div className={`${prefixCls}-tip-item`}>
           <div className={`${prefixCls}-tip-item-name`}>筛选条件：</div>
           <div className={`${prefixCls}-tip-item-content`}>
             {getFilterContent(dimensionFilters)}
           </div>
-        </div>
-        <Button className={`${prefixCls}-reload`} size="small" onClick={onRefresh}>
+        </div> */}
+        {/* <Button className={`${prefixCls}-reload`} size="small" onClick={onRefresh}>
           <ReloadOutlined />
           重新查询
-        </Button>
+        </Button> */}
       </>
-    );
+    ) : null;
   };
 
   const { type: agentType } = properties || {};
@@ -337,9 +369,9 @@ const ParseTip: React.FC<Props> = ({
         {parseTimeCost && isDeveloper && (
           <span className={`${prefixCls}-title-tip`}>(耗时: {parseTimeCost}ms)</span>
         )}
-        {parseInfoOptions?.length > 1 ? '：' : ''}
+        {/* {parseInfoOptions?.length > 1 ? '：' : ''} */}
       </div>
-      {!isSimpleMode && parseInfoOptions?.length > 1 && (
+      {/* {!isSimpleMode && parseInfoOptions?.length > 1 && (
         <div className={`${prefixCls}-content-options`}>
           {parseInfoOptions.map((parseInfo, index) => (
             <div
@@ -354,7 +386,7 @@ const ParseTip: React.FC<Props> = ({
             </div>
           ))}
         </div>
-      )}
+      )} */}
     </div>,
     isSimpleMode ? <MarkDown markdown={textInfo} /> : queryMode === 'PLAIN_TEXT' ? null : tipNode
   );

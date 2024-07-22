@@ -52,13 +52,16 @@ const settings = {
 export const configProviderTheme = {
   components: {
     Button: {
-      colorPrimary: '#3182ce',
+      // colorPrimary: '#3182ce',
+      colorPrimary: '#296df3',
     },
     Radio: {
-      colorPrimary: '#3182ce',
+      // colorPrimary: '#3182ce',
+      colorPrimary: '#296df3',
     },
     Checkbox: {
-      colorPrimary: '#3182ce',
+      // colorPrimary: '#3182ce',
+      colorPrimary: '#296df3',
       borderRadiusSM: 0,
       checkboxSize: 24,
     },

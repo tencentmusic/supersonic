@@ -20,6 +20,7 @@ import com.tencent.supersonic.headless.api.pojo.request.QueryDataSetReq;
 import com.tencent.supersonic.headless.api.pojo.request.QuerySqlReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
 import com.tencent.supersonic.headless.api.pojo.request.SemanticQueryReq;
+import com.tencent.supersonic.headless.api.pojo.response.DataSetDetailResp;
 import com.tencent.supersonic.headless.api.pojo.response.DataSetResp;
 import com.tencent.supersonic.headless.api.pojo.response.DimensionResp;
 import com.tencent.supersonic.headless.api.pojo.response.DomainResp;
@@ -102,6 +103,12 @@ public class DataSetServiceImpl
     }
 
     @Override
+    public DataSetDetailResp getDataDetailSet(Long id) {
+        DataSetDO dataSetDO = getById(id);
+        return convertDetail(dataSetDO);
+    }
+
+    @Override
     public List<DataSetResp> getDataSetList(MetaFilter metaFilter) {
         QueryWrapper<DataSetDO> wrapper = new QueryWrapper<>();
         if (metaFilter.getDomainId() != null) {
@@ -180,6 +187,35 @@ public class DataSetServiceImpl
         Set<Long> domainIds = domainResps.stream().map(DomainResp::getId).collect(Collectors.toSet());
         return dataSetResps.stream().filter(dataSetResp ->
                 domainIds.contains(dataSetResp.getDomainId())).collect(Collectors.toList());
+    }
+
+    private DataSetDetailResp convertDetail(DataSetDO dataSetDO) {
+        DataSetDetailResp dataSetDetailResp = new DataSetDetailResp();
+        BeanMapper.mapper(dataSetDO, dataSetDetailResp);
+        dataSetDetailResp.setDataSetDetail(JSONObject.parseObject(dataSetDO.getDataSetDetail(), DataSetDetail.class));
+        if (dataSetDO.getQueryConfig() != null) {
+            dataSetDetailResp.setQueryConfig(JSONObject.parseObject(dataSetDO.getQueryConfig(), QueryConfig.class));
+        }
+        dataSetDetailResp.setAdmins(StringUtils.isBlank(dataSetDO.getAdmin())
+                ? Lists.newArrayList() : Arrays.asList(dataSetDO.getAdmin().split(",")));
+        dataSetDetailResp.setAdminOrgs(StringUtils.isBlank(dataSetDO.getAdminOrg())
+                ? Lists.newArrayList() : Arrays.asList(dataSetDO.getAdminOrg().split(",")));
+        dataSetDetailResp.setTypeEnum(TypeEnums.DATASET);
+        List<Long> allDimensionIds = dataSetDetailResp.dimensionIds();
+        if (!CollectionUtils.isEmpty(allDimensionIds)) {
+            MetaFilter metaFilter = new MetaFilter();
+            metaFilter.setIds(allDimensionIds);
+            List<DimensionResp> dimensionResps = dimensionService.getDimensions(metaFilter);
+            dataSetDetailResp.setDimensions(dimensionResps);
+        }
+        List<Long> allMetricIds = dataSetDetailResp.metricIds();
+        if (!CollectionUtils.isEmpty(allMetricIds)) {
+            MetaFilter metaFilter = new MetaFilter();
+            metaFilter.setIds(allMetricIds);
+            List<MetricResp> metricResps = metricService.getMetrics(metaFilter);
+            dataSetDetailResp.setMetrics(metricResps);
+        }
+        return dataSetDetailResp;
     }
 
     private DataSetResp convert(DataSetDO dataSetDO) {

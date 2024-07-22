@@ -1,9 +1,9 @@
 package com.tencent.supersonic.headless.chat.parser.llm;
 
 import com.tencent.supersonic.common.pojo.enums.DataFormatTypeEnum;
+import com.tencent.supersonic.common.pojo.enums.DataTypeEnums;
 import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import com.tencent.supersonic.common.util.ContextUtils;
-import com.tencent.supersonic.common.util.DateUtils;
 import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementMatch;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
@@ -24,6 +24,7 @@ import org.springframework.util.CollectionUtils;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -96,6 +97,7 @@ public class LLMRequestService {
         llmSchema.setMetrics(getMatchedMetrics(queryCtx, dataSetId));
         llmSchema.setDimensions(getMatchedDimensions(queryCtx, dataSetId));
         llmSchema.setTerms(getTerms(queryCtx, dataSetId));
+        llmSchema.setFieldNameDataTypeMap(getFieldNameDataTypeMap(semanticSchema, dataSetId));
         llmReq.setSchema(llmSchema);
 
         String priorExts = getPriorExts(queryCtx, fieldNameList);
@@ -109,11 +111,14 @@ public class LLMRequestService {
         }
         llmReq.setLinking(linking);
 
-        llmReq.setCurrentDate(DateUtils.getBeforeDate(0));
+        //llmReq.setCurrentDate(DateUtils.getBeforeDate(0));
+        //String currentDate = S2SqlDateHelper.getReferenceDate(queryCtx, dataSetId);
+        //llmReq.setCurrentDate(currentDate);
         llmReq.setSqlGenType(LLMReq.SqlGenType.valueOf(parserConfig.getParameterValue(PARSER_STRATEGY_TYPE)));
         llmReq.setModelConfig(queryCtx.getModelConfig());
         llmReq.setPromptConfig(queryCtx.getPromptConfig());
         llmReq.setDynamicExemplars(queryCtx.getDynamicExemplars());
+        llmReq.setQueryUser(queryCtx.getUser().getName());
 
         return llmReq;
     }
@@ -289,5 +294,14 @@ public class LLMRequestService {
                 })
                 .collect(Collectors.toSet());
         return fieldNameList;
+    }
+
+    public Map<String, DataTypeEnums> getFieldNameDataTypeMap(SemanticSchema semanticSchema, Long dataSetId) {
+        Map<String, DataTypeEnums> fieldNameDataTypeMap = new HashMap<>();
+        List<SchemaElement> dimensionList = semanticSchema.getDimensions(dataSetId);
+        List<SchemaElement> metricList = semanticSchema.getMetrics(dataSetId);
+        dimensionList.forEach(dimension -> fieldNameDataTypeMap.put(dimension.getName(), dimension.getDataType()));
+        metricList.forEach(metric -> fieldNameDataTypeMap.put(metric.getName(), metric.getDataType()));
+        return fieldNameDataTypeMap;
     }
 }

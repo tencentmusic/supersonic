@@ -4,7 +4,7 @@ import { ChatContextType, FilterItemType } from '../../common/type';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { queryDimensionValues } from '../../service';
 import { debounce, isArray } from 'lodash';
-import SwicthEntity from './SwitchEntity';
+import SwitchEntity from './SwitchEntity';
 import dayjs from 'dayjs';
 
 type Props = {
@@ -182,7 +182,7 @@ const FilterItem: React.FC<Props> = ({
         ['歌曲', '艺人'].includes(entityAlias) &&
         filter.bizName?.includes('_id') ? (
         <>
-          <SwicthEntity
+          <SwitchEntity
             entityName={filter.value}
             chatContext={chatContext}
             onSwitchEntity={onSwitchEntity}

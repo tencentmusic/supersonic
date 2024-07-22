@@ -29,6 +29,7 @@ export type MessageItem = {
   score?: number;
   feedback?: string;
   filters?: any;
+  __finished__?: boolean;
 };
 
 export type ConversationDetailType = {
@@ -81,6 +82,7 @@ export type AgentType = {
   id: number;
   name: string;
   description: string;
+  dataSetIds: number[];
   examples: string[];
   status: 0 | 1;
   initialSendMsgParams?: SendMsgParamsType;
@@ -90,6 +92,15 @@ export type AgentType = {
   updatedAt: string;
   enableSearch: number;
   agentConfig: string;
+  visualConfig: Record<string, any> | null;
+  llmConfig: {
+    provider: string;
+    baseUrl: string;
+    apiKey: string;
+    modelName: string;
+    temperature: number;
+    timeOut: number;
+  }
   modelConfig: {
     chatModel: {
       provider: string;
@@ -115,5 +126,5 @@ export type AgentType = {
   multiTurnConfig: {
     enableMultiTurn: boolean;
   };
-  dataSetIds: number[];
 };
+

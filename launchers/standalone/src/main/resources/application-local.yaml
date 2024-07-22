@@ -1,15 +1,22 @@
 spring:
-  datasource:
-    driver-class-name: org.h2.Driver
-    schema: classpath:db/schema-h2.sql
-    data: classpath:db/data-h2.sql
-    url: jdbc:h2:mem:semantic;DATABASE_TO_UPPER=false
-    username: root
-    password: semantic
   h2:
     console:
       path: /h2-console/semantic
       enabled: true
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://mysql8-test01-mysql-master-3489.ot1.gz.paas.cvtecs.com:3489/chatdata
+    username: chatdata
+    password: Ae?15LjU
   config:
     import:
       - classpath:langchain4j-local.yaml
+
+#cas单点登录
+cas:
+  # prefixUrl: https://op.cvte.com/d72f1f3c12904d359e1de7e99cac61e8
+  prefixUrl: https://op-fat.cvte.com/b9114441c4544c5093ce5754a9f8b6c4
+
+dify:
+  url: https://dify.cvte.com/v1/chat-messages
+  key: Bearer app-UkfDVz6p0ICGVFhaGnPSYqRN

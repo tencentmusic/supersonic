@@ -2,18 +2,22 @@ package com.tencent.supersonic.headless.chat.query.llm.s2sql;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.google.common.collect.Lists;
+import com.tencent.supersonic.headless.api.pojo.SchemaElement;
+import com.tencent.supersonic.common.pojo.enums.DataTypeEnums;
 import com.tencent.supersonic.common.config.PromptConfig;
 import com.tencent.supersonic.common.pojo.ChatModelConfig;
 import com.tencent.supersonic.common.pojo.SqlExemplar;
-import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import lombok.Data;
 
 import java.util.List;
+import java.util.Map;
 
 @Data
 public class LLMReq {
 
     private String queryText;
+
+    private String queryUser;
 
     private FilterCondition filterCondition;
 
@@ -49,9 +53,13 @@ public class LLMReq {
 
         private String dataSetName;
 
+        private String dbType;
+
         private Long dataSetId;
 
         private List<String> fieldNameList;
+
+        private Map<String, DataTypeEnums> fieldNameDataTypeMap;
 
         private List<SchemaElement> metrics;
 
@@ -80,7 +88,8 @@ public class LLMReq {
 
     public enum SqlGenType {
 
-        ONE_PASS_SELF_CONSISTENCY("1_pass_self_consistency");
+        ONE_PASS_SELF_CONSISTENCY("1_pass_self_consistency"),
+        DIFY_SQL_GEN_STRATEGY("dify_sql_gen_strategy");
 
         private String name;
 

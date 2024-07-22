@@ -39,4 +39,9 @@ public class UserRepositoryImpl implements UserRepository {
         return userDOOptional.orElse(null);
     }
 
+    @Override
+    public List<String> getUserPermissions(String userName) {
+        return userDOMapper.getUserPermissions(userName);
+    }
+
 }

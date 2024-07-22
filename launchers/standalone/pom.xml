@@ -16,6 +16,48 @@
         <maven.compiler.target>8</maven.compiler.target>
         <start-class>com.tencent.supersonic.StandaloneLauncher</start-class>
     </properties>
+
+    <repositories>
+        <repository>
+            <id>jfrog-virtual</id>
+            <name>artifactory-releases</name>
+            <url>https://artifactory.gz.cvte.cn:443/artifactory/SR_maven_virtual/</url>
+            <releases>
+                <enabled>true</enabled>
+                <updatePolicy>always</updatePolicy>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+                <updatePolicy>always</updatePolicy>
+            </snapshots>
+        </repository>
+
+        <repository>
+            <id>nexus</id>
+            <name>nexus</name>
+            <url>https://mvn.gz.cvte.cn/nexus/content/groups/public/</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+                <updatePolicy>always</updatePolicy>
+            </snapshots>
+        </repository>
+        <repository>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+                <updatePolicy>always</updatePolicy>
+            </snapshots>
+            <id>alimaven</id>
+            <name>alimaven</name>
+            <url>https://maven.aliyun.com/repository/central</url>
+        </repository>
+    </repositories>
+
     <dependencies>
         <dependency>
             <groupId>com.tencent.supersonic</groupId>
@@ -84,9 +126,16 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
-            <scope>test</scope>
+            <groupId>com.cvte.psd</groupId>
+            <artifactId>spring-cloud-starter-cvte-conf</artifactId>
+            <version>1.3.2-SNAPSHOT</version>
+            <type>pom</type>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.springframework.cloud</groupId>
+                    <artifactId>spring-cloud-context</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <!-- Remove the SLF4J binding for Log4j2. -->
@@ -131,38 +180,30 @@
     </profiles>
 
     <build>
+        <finalName>launchers-standalone</finalName>
+        <resources>
+            <resource>
+                <directory>${basedir}/src/main/resources</directory>
+                <includes>
+                    <include>**/**</include>
+                </includes>
+            </resource>
+        </resources>
+
         <plugins>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <version>2.4</version>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
-                    <excludes>
-                        <exclude>*.*</exclude>
-                    </excludes>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <version>2.4</version>
-                <configuration>
-                    <skipAssembly>false</skipAssembly>
-                    <archive>
-                        <manifest>
-                            <mainClass>${start-class}</mainClass>
-                        </manifest>
-                    </archive>
-                    <descriptors>
-                        <descriptor>../../assembly/build/build.xml</descriptor>
-                    </descriptors>
+                    <mainClass>com.tencent.supersonic.StandaloneLauncher</mainClass>
+                    <layout>JAR</layout>
+                    <addResources>true</addResources>
+                    <includeSystemScope>true</includeSystemScope>
                 </configuration>
                 <executions>
                     <execution>
-                        <id>make-assembly</id>
-                        <phase>package</phase>
                         <goals>
-                            <goal>single</goal>
+                            <goal>repackage</goal>
                         </goals>
                     </execution>
                 </executions>

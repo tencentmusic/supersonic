@@ -167,4 +167,8 @@ public class UserTokenUtils {
         }
         return appKey;
     }
+
+    public String getDefaultAppKey() {
+        return authenticationConfig.getTokenDefaultAppKey();
+    }
 }

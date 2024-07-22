@@ -3,6 +3,7 @@ package com.tencent.supersonic.headless.server.utils;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
+import com.tencent.supersonic.common.pojo.enums.DataTypeEnums;
 import com.tencent.supersonic.common.pojo.enums.StatusEnum;
 import com.tencent.supersonic.common.util.BeanMapper;
 import com.tencent.supersonic.common.util.JsonUtil;
@@ -22,6 +23,8 @@ import com.tencent.supersonic.headless.api.pojo.request.ModelReq;
 import com.tencent.supersonic.headless.api.pojo.response.DomainResp;
 import com.tencent.supersonic.headless.api.pojo.response.MeasureResp;
 import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
+import com.tencent.supersonic.headless.api.pojo.Field;
+import com.tencent.supersonic.headless.server.persistence.dataobject.ModelCommentDO;
 import com.tencent.supersonic.headless.server.persistence.dataobject.ModelDO;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -78,8 +81,13 @@ public class ModelConverter {
         return modelResp;
     }
 
-    public static ModelDO convert(ModelDO modelDO, ModelReq modelReq, User user) {
+    public static ModelDO convert(ModelDO modelDO, ModelReq modelReq, User user,
+                                  List<ModelCommentDO> modelCommentDOList) {
         ModelDetail modelDetail = updateModelDetail(modelReq);
+
+        // 数据库中的字段注释导入
+        importComment(modelDetail, modelCommentDOList);
+
         BeanMapper.mapper(modelReq, modelDO);
         if (modelReq.getDrillDownDimensions() != null) {
             modelDO.setDrillDownDimensions(JSONObject.toJSONString(modelReq.getDrillDownDimensions()));
@@ -103,7 +111,7 @@ public class ModelConverter {
         return measureResp;
     }
 
-    public static DimensionReq convert(Dim dim, ModelDO modelDO) {
+    public static DimensionReq convert(Dim dim, ModelDO modelDO, ModelDetail modelDetail) {
         DimensionReq dimensionReq = new DimensionReq();
         dimensionReq.setName(dim.getName());
         dimensionReq.setBizName(dim.getBizName());
@@ -114,6 +122,10 @@ public class ModelConverter {
         dimensionReq.setType(DimensionType.categorical.name());
         dimensionReq.setDescription(Objects.isNull(dim.getDescription()) ? "" : dim.getDescription());
         dimensionReq.setIsTag(dim.getIsTag());
+        Field field = modelDetail.getFields().stream()
+                .filter(f -> f.getFieldName().equals(dim.getBizName()))
+                .findFirst().orElse(null);
+        dimensionReq.setDataType(DataTypeEnums.of(field.getDataType()));
         return dimensionReq;
     }
 
@@ -133,7 +145,7 @@ public class ModelConverter {
         return metricReq;
     }
 
-    public static DimensionReq convert(Identify identify, ModelDO modelDO) {
+    public static DimensionReq convert(Identify identify, ModelDO modelDO, ModelDetail modelDetail) {
         DimensionReq dimensionReq = new DimensionReq();
         dimensionReq.setName(identify.getName());
         dimensionReq.setBizName(identify.getBizName());
@@ -203,14 +215,14 @@ public class ModelConverter {
         List<Dim> dims = getDimToCreateDimension(modelDetail);
         if (!CollectionUtils.isEmpty(dims)) {
             dimensionReqs = dims.stream().filter(dim -> StringUtils.isNotBlank(dim.getName()))
-                    .map(dim -> convert(dim, modelDO)).collect(Collectors.toList());
+                    .map(dim -> convert(dim, modelDO, modelDetail)).collect(Collectors.toList());
         }
         List<Identify> identifies = getIdentityToCreateDimension(modelDetail);
         if (CollectionUtils.isEmpty(identifies)) {
             return dimensionReqs;
         }
         dimensionReqs.addAll(identifies.stream()
-                .map(identify -> convert(identify, modelDO)).collect(Collectors.toList()));
+                .map(identify -> convert(identify, modelDO, modelDetail)).collect(Collectors.toList()));
         return dimensionReqs;
     }
 
@@ -261,6 +273,43 @@ public class ModelConverter {
         }
         BeanMapper.mapper(modelReq.getModelDetail(), modelDetail);
         return modelDetail;
+    }
+
+    private static void importComment(ModelDetail modelDetail, List<ModelCommentDO> modelCommentDOList) {
+        if (!CollectionUtils.isEmpty(modelCommentDOList)) {
+
+            List<Field> fieldList = modelDetail.getFields().stream()
+                    .filter(field -> !modelDetail.getMeasures().stream().map(Measure::getFieldName)
+                            .collect(Collectors.toList()).contains(field.getFieldName()))
+                    .filter(field -> !modelDetail.getDimensions().stream().map(Dim::getFieldName)
+                            .collect(Collectors.toList()).contains(field.getFieldName()))
+                    .collect(Collectors.toList());
+
+            for (Field field : fieldList) {
+                for (ModelCommentDO modelCommentDO : modelCommentDOList) {
+                    if (field.getFieldName().equals(modelCommentDO.getFieldName())) {
+                        if ("D".equals(modelCommentDO.getFieldType())) {
+                            Dim dim = new Dim();
+                            dim.setBizName(modelCommentDO.getFieldName());
+                            dim.setExpr(modelCommentDO.getFieldName());
+                            dim.setName(modelCommentDO.getComment());
+                            dim.setType(DimensionType.categorical.name());
+                            dim.setIsCreateDimension(1);
+                            dim.setDateFormat("yyyy-MM-dd");
+                            modelDetail.getDimensions().add(dim);
+                        } else if ("M".equals(modelCommentDO.getFieldType())) {
+                            Measure measure = new Measure();
+                            measure.setBizName(modelCommentDO.getFieldName());
+                            measure.setExpr(modelCommentDO.getFieldName());
+                            measure.setName(modelCommentDO.getComment());
+                            measure.setIsCreateMetric(1);
+                            measure.setAgg("sum");
+                            modelDetail.getMeasures().add(measure);
+                        }
+                    }
+                }
+            }
+        }
     }
 
 }

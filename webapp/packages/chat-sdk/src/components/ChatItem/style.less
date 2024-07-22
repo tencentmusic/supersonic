@@ -85,12 +85,12 @@
     align-items: center;
     justify-content: center;
     font-size: 40px;
-    width: 40px;
-    height: 40px;
+    width: 34px;
+    height: 34px;
     margin-right: 6px;
-    border-radius: 50%;
+    // border-radius: 50%;
     color: var(--chat-blue);
-    background-color: #fff;
+    // background-color: #fff;
   }
 
   &-mobile-msg-card {
@@ -98,7 +98,10 @@
   }
 
   &-msg-card {
-    flex: 1;
+    flex-shrink: 0;
+    flex-grow: 0;
+    flex-basis: calc(100% - 42px);
+    width: calc(100% - 42px);
   }
 
   &-content {
@@ -108,7 +111,7 @@
     max-width: 100%;
     padding: 12px 16px;
     background: #fff;
-    min-height: 100px;
+    // min-height: 100px;
     border: 1px solid transparent;
     border-radius: 12px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.14), 0 0 2px rgba(0, 0, 0, 0.12);
@@ -146,6 +149,7 @@
 
   &-step-title {
     font-weight: 500;
+    line-height: 20px;
     color: var(--text-color);
   }
 
@@ -158,15 +162,19 @@
   }
 
   &-step-icon {
-    color: var(--green);
+    color: var(--blue);
     font-size: 16px;
   }
 
   &-content-container {
     margin: 2px 0 2px 7px;
     padding: 10px 0 4px 18px;
-    border-left: 1px solid var(--green);
+    border-left: 1px solid var(--blue);
     padding-bottom: 10px;
+
+    &.without-border {
+      border-left: 1px solid transparent;
+    }
   }
 
   &-empty-content-container {
@@ -400,7 +408,7 @@
   }
 
   &-operator-control {
-    min-width: 80px;
+    min-width: 110px;
     border-radius: 6px;
     margin-right: 8px;
   }
@@ -447,6 +455,12 @@
   padding: 2px 0 8px 18px;
   border-left: 1px solid var(--green);
   overflow: auto;
+
+  &.without-border {
+    border-left: 1px solid transparent!important;
+    margin: 0;
+    padding: 0;
+  }
 
   &-toggle-expand-btn {
     color: var(--text-color-fourth);

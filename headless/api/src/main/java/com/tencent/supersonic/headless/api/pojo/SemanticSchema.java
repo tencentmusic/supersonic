@@ -1,5 +1,7 @@
 package com.tencent.supersonic.headless.api.pojo;
 
+import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
+import com.tencent.supersonic.common.pojo.enums.DataTypeEnums;
 import org.springframework.util.CollectionUtils;
 
 import java.io.Serializable;
@@ -87,13 +89,31 @@ public class SemanticSchema implements Serializable {
 
     public List<SchemaElement> getMetrics() {
         List<SchemaElement> metrics = new ArrayList<>();
-        dataSetSchemaList.stream().forEach(d -> metrics.addAll(d.getMetrics()));
+        dataSetSchemaList.forEach(d -> metrics.addAll(d.getMetrics()));
+        List<SchemaElement> defaultMetrics = getDefaultMetrics();
+        metrics.addAll(defaultMetrics);
         return metrics;
     }
 
     public List<SchemaElement> getMetrics(Long dataSetId) {
         List<SchemaElement> metrics = getMetrics();
         return getElementsByDataSetId(dataSetId, metrics);
+    }
+
+    private static List<SchemaElement> getDefaultMetrics() {
+        List<SchemaElement> defaultMetrics = new ArrayList<>();
+        SchemaElement star = new SchemaElement();
+        star.setDataSet(0L);
+        star.setModel(0L);
+        star.setName("*");
+        star.setBizName("*");
+        star.setAlias(new ArrayList<>());
+        star.setType(SchemaElementType.METRIC);
+        star.setDefaultAgg(AggOperatorEnum.COUNT.name());
+        star.setAggregator(AggOperatorEnum.COUNT.name());
+        star.setDataType(DataTypeEnums.INT);
+        defaultMetrics.add(star);
+        return defaultMetrics;
     }
 
     public List<SchemaElement> getEntities() {

@@ -14,6 +14,7 @@ import com.tencent.supersonic.headless.api.pojo.SemanticSchema;
 import com.tencent.supersonic.headless.api.pojo.enums.ChatWorkflowState;
 import com.tencent.supersonic.headless.api.pojo.enums.MapModeEnum;
 import com.tencent.supersonic.headless.api.pojo.request.QueryFilters;
+import com.tencent.supersonic.headless.api.pojo.response.DimensionResp;
 import com.tencent.supersonic.headless.chat.parser.ParserConfig;
 import com.tencent.supersonic.headless.chat.query.SemanticQuery;
 import lombok.AllArgsConstructor;
@@ -54,6 +55,8 @@ public class ChatQueryContext {
     private PromptConfig promptConfig;
     private List<SqlExemplar> dynamicExemplars;
     private SemanticParseInfo contextParseInfo;
+    @JsonIgnore
+    private List<DimensionResp> dimensions;
 
     public List<SemanticQuery> getCandidateQueries() {
         ParserConfig parserConfig = ContextUtils.getBean(ParserConfig.class);

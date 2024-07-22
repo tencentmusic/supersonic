@@ -2,12 +2,18 @@ package com.tencent.supersonic.headless.chat.parser.llm;
 
 
 import com.tencent.supersonic.common.util.ContextUtils;
+import com.tencent.supersonic.headless.api.pojo.DataSetSchema;
+import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.headless.chat.ChatQueryContext;
 import com.tencent.supersonic.headless.chat.parser.SemanticParser;
 import com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMReq;
 import com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMResp;
 import com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMSqlResp;
+
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
@@ -49,6 +55,7 @@ public class LLMSqlParser implements SemanticParser {
         int maxRetries = ContextUtils.getBean(LLMParserConfig.class).getRecallMaxRetries();
 
         LLMReq llmReq = requestService.getLlmReq(queryCtx, dataSetId);
+        llmReq.getSchema().setDimensions(getSchemaElements(queryCtx, dataSetId));
 
         int currentRetry = 1;
         Map<String, LLMSqlResp> sqlRespMap = new HashMap<>();
@@ -78,6 +85,15 @@ public class LLMSqlParser implements SemanticParser {
             String sql = entry.getKey();
             double sqlWeight = entry.getValue().getSqlWeight();
             responseService.addParseInfo(queryCtx, parseResult, sql, sqlWeight);
+        }
+    }
+
+    private static List<SchemaElement> getSchemaElements(ChatQueryContext queryContext, long dataSetId) {
+        DataSetSchema dataSetSchema = queryContext.getSemanticSchema().getDataSetSchemaMap().get(dataSetId);
+        if (dataSetSchema == null) {
+            return Collections.emptyList();
+        } else {
+            return new ArrayList<>(dataSetSchema.getDimensions());
         }
     }
 

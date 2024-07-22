@@ -1,0 +1,1 @@
+alter table s2_user add column salt varchar(45) DEFAULT NULL COMMENT 'md5密码盐';
