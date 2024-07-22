@@ -362,7 +362,8 @@ public class DimensionServiceImpl extends ServiceImpl<DimensionDOMapper, Dimensi
     public List<String> mockAlias(DimensionReq dimensionReq, String mockType, User user) {
         String mockAlias = aliasGenerateHelper.generateAlias(mockType, dimensionReq.getName(),
                 dimensionReq.getBizName(), "", dimensionReq.getDescription(), false);
-        return JSONObject.parseObject(mockAlias, new TypeReference<List<String>>() {
+        String ret = mockAlias.replaceAll("`", "").replace("json", "").replace("\n", "").replace(" ", "");
+        return JSONObject.parseObject(ret, new TypeReference<List<String>>() {
         });
     }
 
@@ -380,13 +381,13 @@ public class DimensionServiceImpl extends ServiceImpl<DimensionDOMapper, Dimensi
         List<Map<String, Object>> resultList = semanticQueryResp.getResultList();
         List<String> valueList = new ArrayList<>();
         for (Map<String, Object> stringObjectMap : resultList) {
-            String value = (String) stringObjectMap.get(dimensionReq.getBizName());
+            String value = String.valueOf(stringObjectMap.get(dimensionReq.getBizName()));
             valueList.add(value);
         }
         String json = aliasGenerateHelper.generateDimensionValueAlias(JSON.toJSONString(valueList));
         log.info("return llm res is :{}", json);
-
-        JSONObject jsonObject = JSON.parseObject(json);
+        String ret = json.replaceAll("`", "").replace("json", "").replace("\n", "").replace(" ", "");
+        JSONObject jsonObject = JSON.parseObject(ret);
 
         List<DimValueMap> dimValueMapsResp = new ArrayList<>();
         int i = 0;
