@@ -64,12 +64,12 @@ public class AliasGenerateHelper {
                 + "\"additionalProperties\":false}\n"
                 + "Please double-check whether the answer conforms to the format described in the JSON-schema.\n"
                 + "回答格式示例:"
-                + "[\n" +
-                "  \"人数\",\n" +
-                "  \"员工人数\",\n" +
-                "  \"员工数量\",\n" +
-                "  \"员工总数\"\n" +
-                "]\n"
+                + "[\n"
+                + "  \"人数\",\n"
+                + "  \"员工人数\",\n"
+                + "  \"员工数量\",\n"
+                + "  \"员工总数\"\n"
+                + "]\n"
                 + "请严格按照示例格式进行生成。"
                 + "ANSWER JSON:";
         log.info("msg:{}", msg);
@@ -84,11 +84,14 @@ public class AliasGenerateHelper {
                 + "3. the array item > 1 and < 5,more alias,\n"
                 + "for example：\n"
                 + "input:[\"qq_music\",\"kugou_music\"],\n"
-                + "out:{\"tran\":[\"qq音乐\",\"酷狗音乐\"],\"alias\":{\"qq_music\":[\"q音\",\"qq音乐\"],\"kugou_music\":[\"kugou\",\"酷狗\"]}},\n"
+                + "out:{\"tran\":[\"qq音乐\",\"酷狗音乐\"],"
+                + "\"alias\":{\"qq_music\":[\"q音\",\"qq音乐\"],\"kugou_music\":[\"kugou\",\"酷狗\"]}},\n"
                 + "input:[\"qq_music\",\"kugou_music\"],\n"
-                + "out:{\"tran\":[\"qq音乐\",\"酷狗音乐\"],\"alias\":{\"qq_music\":[\"q音\",\"qq音乐\"],\"kugou_music\":[\"kugou\",\"酷狗\"]}},\n"
+                + "out:{\"tran\":[\"qq音乐\",\"酷狗音乐\"],"
+                + "\"alias\":{\"qq_music\":[\"q音\",\"qq音乐\"],\"kugou_music\":[\"kugou\",\"酷狗\"]}},\n"
                 + "input:[\"大专\",\"本科\",\"硕士研究生\"],\n"
-                + "out:{\"tran\":[\"大专\",\"本科\",\"硕士研究生\"],\"alias\":{\"大专\":[\"专科\",\"大学专科\"],\"本科\":[\"学士\",\"本科生\"],\"硕士研究生\":[\"硕士\",\"研究生\"]}},\n"
+                + "out:{\"tran\":[\"大专\",\"本科\",\"硕士研究生\"],"
+                + "\"alias\":{\"大专\":[\"专科\",\"大学专科\"],\"本科\":[\"学士\",\"本科生\"],\"硕士研究生\":[\"硕士\",\"研究生\"]}},\n"
                 + "now input: "
                 + json + ",\n"
                 + "answer json:";
