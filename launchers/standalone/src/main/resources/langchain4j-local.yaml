@@ -22,7 +22,7 @@ langchain4j:
   jina:
     embedding-model:
       base-url: http://10.10.20.161:9997/
-      model: 12a22820-9888-11ee-b4f6-161d11c9987a
+      model: 12a22820-9888-11ee
 
   in-memory:
     embedding-model:
