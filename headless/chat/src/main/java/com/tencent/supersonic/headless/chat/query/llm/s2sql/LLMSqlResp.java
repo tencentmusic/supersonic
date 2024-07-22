@@ -1,6 +1,6 @@
 package com.tencent.supersonic.headless.chat.query.llm.s2sql;
 
-import com.tencent.supersonic.common.pojo.SqlExemplar;
+import com.tencent.supersonic.common.pojo.Text2SQLExemplar;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -16,6 +16,6 @@ public class LLMSqlResp {
 
     private double sqlWeight;
 
-    private List<SqlExemplar> fewShots;
+    private List<Text2SQLExemplar> fewShots;
 
 }

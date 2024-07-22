@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class SqlExemplar {
+public class Text2SQLExemplar {
 
     public static final String PROPERTY_KEY = "sql_exemplar";
 

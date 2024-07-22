@@ -32,7 +32,8 @@ public class MemoryReviewTask {
             + "please take a review and give your opinion.\n"
             + "#Rules: "
             + "1.ALWAYS follow the output format: `opinion=(POSITIVE|NEGATIVE),comment=(your comment)`."
-            + "2.ALWAYS recognize `数据日期` as the date field.\n"
+            + "2.ALWAYS recognize `数据日期` as the date field."
+            + "3.IGNORE `数据日期` if not expressed in the `Question`."
             + "#Question: %s\n"
             + "#Schema: %s\n"
             + "#SideInfo: %s\n"
@@ -57,12 +58,12 @@ public class MemoryReviewTask {
                                 m.getSideInfo(), m.getS2sql());
                         Prompt prompt = PromptTemplate.from(promptStr).apply(Collections.EMPTY_MAP);
 
-                        keyPipelineLog.info("MemoryReviewTask reqPrompt:{}", promptStr);
+                        keyPipelineLog.info("MemoryReviewTask reqPrompt:\n{}", promptStr);
                         ChatLanguageModel chatLanguageModel = ModelProvider.getChatModel(
                                 chatAgent.getModelConfig());
                         if (Objects.nonNull(chatLanguageModel)) {
                             String response = chatLanguageModel.generate(prompt.toUserMessage()).content().text();
-                            keyPipelineLog.info("MemoryReviewTask modelResp:{}", response);
+                            keyPipelineLog.info("MemoryReviewTask modelResp:\n{}", response);
 
                             Matcher matcher = OUTPUT_PATTERN.matcher(response);
                             if (matcher.find()) {

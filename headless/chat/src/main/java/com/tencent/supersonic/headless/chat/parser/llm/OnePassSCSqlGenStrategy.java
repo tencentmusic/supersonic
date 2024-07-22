@@ -2,7 +2,7 @@ package com.tencent.supersonic.headless.chat.parser.llm;
 
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.common.config.PromptConfig;
-import com.tencent.supersonic.common.pojo.SqlExemplar;
+import com.tencent.supersonic.common.pojo.Text2SQLExemplar;
 import com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMReq;
 import com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMResp;
 import dev.langchain4j.data.message.AiMessage;
@@ -45,11 +45,11 @@ public class OnePassSCSqlGenStrategy extends SqlGenStrategy {
         llmResp.setQuery(llmReq.getQueryText());
         //1.recall exemplars
         keyPipelineLog.info("OnePassSCSqlGenStrategy llmReq:\n{}", llmReq);
-        List<List<SqlExemplar>> exemplarsList = promptHelper.getFewShotExemplars(llmReq);
+        List<List<Text2SQLExemplar>> exemplarsList = promptHelper.getFewShotExemplars(llmReq);
 
         //2.generate sql generation prompt for each self-consistency inference
-        Map<Prompt, List<SqlExemplar>> prompt2Exemplar = new HashMap<>();
-        for (List<SqlExemplar> exemplars : exemplarsList) {
+        Map<Prompt, List<Text2SQLExemplar>> prompt2Exemplar = new HashMap<>();
+        for (List<Text2SQLExemplar> exemplars : exemplarsList) {
             llmReq.setDynamicExemplars(exemplars);
             Prompt prompt = generatePrompt(llmReq, llmResp);
             prompt2Exemplar.put(prompt, exemplars);
@@ -61,9 +61,9 @@ public class OnePassSCSqlGenStrategy extends SqlGenStrategy {
                     keyPipelineLog.info("OnePassSCSqlGenStrategy reqPrompt:\n{}", prompt.toUserMessage());
                     ChatLanguageModel chatLanguageModel = getChatLanguageModel(llmReq.getModelConfig());
                     Response<AiMessage> response = chatLanguageModel.generate(prompt.toUserMessage());
-                    String result = response.content().text();
-                    output2Prompt.put(result, prompt);
-                    keyPipelineLog.info("OnePassSCSqlGenStrategy modelResp:\n{}", result);
+                    String sqlOutput = StringUtils.normalizeSpace(response.content().text());
+                    output2Prompt.put(sqlOutput, prompt);
+                    keyPipelineLog.info("OnePassSCSqlGenStrategy modelResp:\n{}", sqlOutput);
                 }
         );
 
@@ -71,7 +71,7 @@ public class OnePassSCSqlGenStrategy extends SqlGenStrategy {
         Pair<String, Map<String, Double>> sqlMapPair = ResponseHelper.selfConsistencyVote(
                 Lists.newArrayList(output2Prompt.keySet()));
         llmResp.setSqlOutput(sqlMapPair.getLeft());
-        List<SqlExemplar> usedExemplars = prompt2Exemplar.get(output2Prompt.get(sqlMapPair.getLeft()));
+        List<Text2SQLExemplar> usedExemplars = prompt2Exemplar.get(output2Prompt.get(sqlMapPair.getLeft()));
         llmResp.setSqlRespMap(ResponseHelper.buildSqlRespMap(usedExemplars, sqlMapPair.getRight()));
 
         return llmResp;
@@ -79,7 +79,7 @@ public class OnePassSCSqlGenStrategy extends SqlGenStrategy {
 
     private Prompt generatePrompt(LLMReq llmReq, LLMResp llmResp) {
         StringBuilder exemplars = new StringBuilder();
-        for (SqlExemplar exemplar : llmReq.getDynamicExemplars()) {
+        for (Text2SQLExemplar exemplar : llmReq.getDynamicExemplars()) {
             String exemplarStr = String.format("#Question:%s #Schema:%s #SideInfo:%s #SQL:%s\n",
                     exemplar.getQuestion(), exemplar.getDbSchema(),
                     exemplar.getSideInfo(), exemplar.getSql());

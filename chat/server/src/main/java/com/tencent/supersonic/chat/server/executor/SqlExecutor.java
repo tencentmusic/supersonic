@@ -6,7 +6,7 @@ import com.tencent.supersonic.chat.server.pojo.ExecuteContext;
 import com.tencent.supersonic.chat.server.service.MemoryService;
 import com.tencent.supersonic.chat.server.util.ResultFormatter;
 import com.tencent.supersonic.common.pojo.QueryColumn;
-import com.tencent.supersonic.common.pojo.SqlExemplar;
+import com.tencent.supersonic.common.pojo.Text2SQLExemplar;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
@@ -41,9 +41,9 @@ public class SqlExecutor implements ChatQueryExecutor {
 
             if (queryResult.getQueryState().equals(QueryState.SUCCESS)
                     && queryResult.getQueryMode().equals(LLMSqlQuery.QUERY_MODE)) {
-                SqlExemplar exemplar = JsonUtil.toObject(JsonUtil.toString(
+                Text2SQLExemplar exemplar = JsonUtil.toObject(JsonUtil.toString(
                         executeContext.getParseInfo().getProperties()
-                                .get(SqlExemplar.PROPERTY_KEY)), SqlExemplar.class);
+                                .get(Text2SQLExemplar.PROPERTY_KEY)), Text2SQLExemplar.class);
 
                 MemoryService memoryService = ContextUtils.getBean(MemoryService.class);
                 memoryService.createMemory(ChatMemoryDO.builder()

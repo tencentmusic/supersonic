@@ -12,7 +12,7 @@ import com.tencent.supersonic.chat.server.persistence.dataobject.ChatMemoryDO;
 import com.tencent.supersonic.chat.server.persistence.repository.ChatMemoryRepository;
 import com.tencent.supersonic.chat.server.service.MemoryService;
 import com.tencent.supersonic.common.config.EmbeddingConfig;
-import com.tencent.supersonic.common.pojo.SqlExemplar;
+import com.tencent.supersonic.common.pojo.Text2SQLExemplar;
 import com.tencent.supersonic.common.service.ExemplarService;
 import com.tencent.supersonic.common.util.BeanMapper;
 import java.util.List;
@@ -100,7 +100,7 @@ public class MemoryServiceImpl implements MemoryService {
     public void enableMemory(ChatMemoryDO memory) {
         memory.setStatus(MemoryStatus.ENABLED);
         exemplarService.storeExemplar(embeddingConfig.getMemoryCollectionName(memory.getAgentId()),
-                SqlExemplar.builder()
+                Text2SQLExemplar.builder()
                         .question(memory.getQuestion())
                         .sideInfo(memory.getSideInfo())
                         .dbSchema(memory.getDbSchema())
@@ -112,7 +112,7 @@ public class MemoryServiceImpl implements MemoryService {
     public void disableMemory(ChatMemoryDO memory) {
         memory.setStatus(MemoryStatus.DISABLED);
         exemplarService.removeExemplar(embeddingConfig.getMemoryCollectionName(memory.getAgentId()),
-                SqlExemplar.builder()
+                Text2SQLExemplar.builder()
                         .question(memory.getQuestion())
                         .sideInfo(memory.getSideInfo())
                         .dbSchema(memory.getDbSchema())
