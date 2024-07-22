@@ -6,12 +6,14 @@ import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.auth.api.authentication.request.UserReq;
 import com.tencent.supersonic.auth.api.authentication.service.UserService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -25,6 +27,9 @@ public class UserController {
 
     private UserService userService;
 
+    @Value("${cas.prefixUrl}")
+    private String prefixUrl;
+
     public UserController(UserService userService) {
         this.userService = userService;
     }
@@ -37,6 +42,13 @@ public class UserController {
     @GetMapping("/getUserNames")
     public List<String> getUserNames() {
         return userService.getUserNames();
+    }
+
+    @GetMapping("/getUserPermissions")
+    public List<String> getUserPermissions(HttpServletRequest request,
+                                           HttpServletResponse response) {
+        User user = userService.getCurrentUser(request, response);
+        return userService.getUserPermissions(user);
     }
 
     @GetMapping("/getUserList")
@@ -67,6 +79,12 @@ public class UserController {
     @PostMapping("/login")
     public String login(@RequestBody UserReq userCmd, HttpServletRequest request) {
         return userService.login(userCmd, request);
+    }
+
+    @GetMapping("/validateLogin")
+    public String validateLogin(@RequestParam(name = "ticket") String ticket,
+                                @RequestParam(name = "service") String service) {
+        return userService.casLogin(prefixUrl, ticket, service, "");
     }
 
 }

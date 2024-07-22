@@ -1,4 +1,4 @@
-import { request } from 'umi';
+import { request } from '@umijs/max';
 import { AgentType, MemoryType, MetricType, ModelType } from './type';
 
 export function getAgentList() {

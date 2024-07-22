@@ -1,5 +1,5 @@
-import { Spin, Row, Col, Switch } from 'antd';
-import { CheckCircleFilled } from '@ant-design/icons';
+import { Spin, Row, Col, Switch, Button, Tooltip, Dropdown, MenuProps } from 'antd';
+import { CheckCircleFilled, EllipsisOutlined } from '@ant-design/icons';
 import { PREFIX_CLS, MsgContentTypeEnum } from '../../common/constants';
 import { MsgDataType } from '../../common/type';
 import ChatMsg from '../ChatMsg';
@@ -16,10 +16,12 @@ type Props = {
   executeTip?: string;
   executeItemNode?: ReactNode;
   renderCustomExecuteNode?: boolean;
+  menu: MenuProps;
   data?: MsgDataType;
   triggerResize?: boolean;
   isDeveloper?: boolean;
   isSimpleMode?: boolean;
+  defaultShowTable?: boolean;
 };
 
 const ExecuteItem: React.FC<Props> = ({
@@ -35,10 +37,17 @@ const ExecuteItem: React.FC<Props> = ({
   triggerResize,
   isDeveloper,
   isSimpleMode,
+  defaultShowTable,
+  menu,
 }) => {
   const prefixCls = `${PREFIX_CLS}-item`;
-  const [showMsgContentTable, setShowMsgContentTable] = useState<boolean>(false);
   const [msgContentType, setMsgContentType] = useState<MsgContentTypeEnum>();
+  const isShowTableSwitch = [
+    MsgContentTypeEnum.METRIC_TREND,
+    MsgContentTypeEnum.METRIC_BAR,
+  ].includes(msgContentType as MsgContentTypeEnum);
+
+  const [showMsgContentTable, setShowMsgContentTable] = useState<boolean>(!!defaultShowTable);
 
   const titlePrefix = queryMode === 'PLAIN_TEXT' || queryMode === 'WEB_SERVICE' ? '问答' : '数据';
 
@@ -52,7 +61,7 @@ const ExecuteItem: React.FC<Props> = ({
             {!tip && <Loading />}
           </div>
         </div>
-        {tip && <div className={`${prefixCls}-content-container`}>{tip}</div>}
+        {tip && <div className={`${prefixCls}-content-container without-border`}>{tip}</div>}
       </>
     );
   };
@@ -82,31 +91,36 @@ const ExecuteItem: React.FC<Props> = ({
       <div className={`${prefixCls}-title-bar`}>
         <CheckCircleFilled className={`${prefixCls}-step-icon`} />
         <div className={`${prefixCls}-step-title`} style={{ width: '100%' }}>
-          <Row style={{ width: '100%' }}>
+          <Row style={{ width: '100%' }} align="middle" justify="center">
             <Col flex="1 1 auto">
               {titlePrefix}查询
               {data?.queryTimeCost && isDeveloper && (
                 <span className={`${prefixCls}-title-tip`}>(耗时: {data.queryTimeCost}ms)</span>
               )}
-            </Col>
-            <Col flex="0 1 70px">
-              {[MsgContentTypeEnum.METRIC_TREND, MsgContentTypeEnum.METRIC_BAR].includes(
-                msgContentType as MsgContentTypeEnum
-              ) && (
+              {isShowTableSwitch && (
                 <Switch
+                  style={{ marginLeft: '10px' }}
                   checkedChildren="表格"
                   unCheckedChildren="表格"
+                  checked={showMsgContentTable}
                   onChange={checked => {
                     setShowMsgContentTable(checked);
                   }}
                 />
               )}
             </Col>
+            <Col flex="0 1 30px">
+              <Dropdown trigger={['click']} menu={menu}>
+                <Tooltip title="更多操作">
+                  <EllipsisOutlined />
+                </Tooltip>
+              </Dropdown>
+            </Col>
           </Row>
         </div>
       </div>
       <div
-        className={`${prefixCls}-content-container`}
+        className={`${prefixCls}-content-container without-border`}
         style={{ borderLeft: queryMode === 'PLAIN_TEXT' ? 'none' : undefined }}
       >
         <Spin spinning={entitySwitchLoading}>
@@ -128,7 +142,16 @@ const ExecuteItem: React.FC<Props> = ({
               chartIndex={chartIndex}
               triggerResize={triggerResize}
               onMsgContentTypeChange={type => {
-                setMsgContentType(type);
+                if (msgContentType !== type) {
+                  setMsgContentType(type);
+                  if (
+                    [MsgContentTypeEnum.METRIC_TREND, MsgContentTypeEnum.METRIC_BAR].includes(
+                      type as MsgContentTypeEnum
+                    )
+                  ) {
+                    setShowMsgContentTable(!!defaultShowTable);
+                  }
+                }
               }}
             />
           )}

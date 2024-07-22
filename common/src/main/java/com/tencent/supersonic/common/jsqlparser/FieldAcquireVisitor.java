@@ -3,6 +3,7 @@ package com.tencent.supersonic.common.jsqlparser;
 import java.util.Set;
 import net.sf.jsqlparser.expression.ExpressionVisitorAdapter;
 import net.sf.jsqlparser.schema.Column;
+import net.sf.jsqlparser.statement.select.AllColumns;
 
 public class FieldAcquireVisitor extends ExpressionVisitorAdapter {
 
@@ -17,4 +18,10 @@ public class FieldAcquireVisitor extends ExpressionVisitorAdapter {
         String columnName = column.getColumnName();
         fields.add(columnName);
     }
+
+    @Override
+    public void visit(AllColumns allColumns) {
+        fields.add(allColumns.toString());
+    }
+
 }

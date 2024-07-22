@@ -288,6 +288,14 @@ public class DimensionServiceImpl extends ServiceImpl<DimensionDOMapper, Dimensi
         return dimensionResps;
     }
 
+    @Override
+    public List<DimensionResp> getDimensions(List<Long> dataSetIds) {
+        MetaFilter metaFilter = new MetaFilter();
+        metaFilter.setStatus(StatusEnum.ONLINE.getCode());
+        metaFilter.setModelIds(dataSetIds);
+        return getDimensions(metaFilter);
+    }
+
     private List<DimensionResp> getDimensions(Long modelId) {
         return getDimensions(new MetaFilter(Lists.newArrayList(modelId)));
     }

@@ -9,7 +9,11 @@ const ChatPage = () => {
   const { agentId } = query;
 
   return (
-    <Chat initialAgentId={agentId ? +agentId : undefined} token={getToken() || ''} isDeveloper />
+    <Chat
+      initialAgentId={agentId ? +agentId : undefined}
+      token={getToken() || ''}
+      isDeveloper={process.env.NODE_ENV === 'development'}
+    />
   );
 };
 

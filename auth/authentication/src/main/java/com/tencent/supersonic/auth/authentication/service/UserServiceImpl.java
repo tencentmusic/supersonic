@@ -38,6 +38,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public List<String> getUserPermissions(User user) {
+        return ComponentFactory.getUserAdaptor().getUserPermissions(user.getName());
+    }
+
+    @Override
     public List<String> getUserNames() {
         return ComponentFactory.getUserAdaptor().getUserNames();
     }
@@ -75,6 +80,11 @@ public class UserServiceImpl implements UserService {
     @Override
     public String login(UserReq userReq, String appKey) {
         return ComponentFactory.getUserAdaptor().login(userReq, appKey);
+    }
+
+    @Override
+    public String casLogin(String prefixUrl, String ticket, String service, String appKey) {
+        return ComponentFactory.getUserAdaptor().casLogin(prefixUrl, ticket, service, appKey);
     }
 
 }

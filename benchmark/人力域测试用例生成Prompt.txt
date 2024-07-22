@@ -1,0 +1,201 @@
+你是数据分析及数据自动化测试专家，请根据提供的数据测试用例生成规则、数据表字段信息以及示例生成数据分析测试问题。
+【测试用例生成规则】
+1、根据提供的规则，生成测试问题；
+2、测试用例包括两种模式，1）明细数据查询模式；分为单过滤条件查询及多过滤条件查询两类子查询模式，2）指标数据查询模式。分为单维度查询子模式（单过滤条件查询及多过滤条件查询）及多维度查询子模式（单过滤条件查询及多过滤条件查询）。根据数据表字段信息，按以上查询模式下的组合方式生成覆盖率100%的测试问题。其中字符串类型的字段作为维度，数值型字段作为指标。
+3、指标数据查询模式中，数值型字段作为指标，支持对指标的统计分析。
+4、单过滤条件明细查询，指查询的过滤条件中只有一个。例如：查询广东工业大学毕业的员工。是单过滤条件查询。广东工业大学，就是过滤条件，来自维度字段：university_college like '%广东工业大学%'.
+5、多过滤条件明细，指查询的过滤条件有一个以上。例如：查询广东工业大学毕业的、年龄大于20的在职员工。是多维度单过滤条件查询。广东工业大学、年龄大于20，且在职。就是三个过滤条件。来自维度字段：university_college like '%广东工业大学%' 且 age > 20 且
+
+【数据表字段信息】
+CREATE TABLE if not exists TEMP${db_para}.DIM_EMPLOYEE_REPAIR(
+  `emp_code` string COMMENT '员工工号',
+  `emp_name` string COMMENT '员工姓名',
+  `emp_source_id` string COMMENT '员工ID',
+  `sex` string COMMENT '员工性别',
+  `birth_place` string COMMENT '出生地',
+  `age` decimal(30,0) COMMENT '年龄',
+  `birth_date` string COMMENT '出生日期',
+  `cert_type` string COMMENT '证件类型',
+  `cert_code` string COMMENT '证件号码',
+  `nation` string COMMENT '民族',
+  `native_place` string COMMENT '籍贯',
+  `nationality` string COMMENT '国籍',
+  `status` string COMMENT '员工状态',
+  `marital_status` string COMMENT '婚姻状况',
+  `political_status` string COMMENT '政治面貌',
+  `first_work_date` string COMMENT '第一份工作时间',
+  `grp_labor_date` string COMMENT '集团入职时间',
+  `company_labor_date` string COMMENT '司龄计算开始时间',
+  `emp_salary` string COMMENT '薪资',
+  `source_code` string COMMENT '来源',
+  `w_insert_dt` string COMMENT '数据插入时间',
+  `domain_code` string  COMMENT '域账号',
+  `determine_posts` string COMMENT '是否定岗',
+  `determine_posts_date` string COMMENT '定岗时间',
+  `education_level_hig` string COMMENT '最高学历',
+  `emp_job` string COMMENT '岗位',
+  `job_level` string COMMENT '管理层级',
+  `company` string COMMENT '管理公司',
+  `dept` string COMMENT '管理部门',
+  `position` string COMMENT '职位',
+  `emp_job_family` string COMMENT '岗位族',
+  `emp_job_class` string COMMENT '岗位类',
+  `emp_job_sub_class` string COMMENT '岗位子类',
+  `grade_name` string COMMENT '职级',
+  `is_grade` string COMMENT '是否有职级',
+  `emp_status` string COMMENT '员工状态',
+  `exit_date` string COMMENT '离职时间',
+  `grade_type` string COMMENT '岗位子类',
+  `recruit_mode` string COMMENT '招聘渠道',
+  `emp_source` string COMMENT '招聘来源',
+  `exit_reason` string COMMENT '离职原因',
+  `exit_type` string COMMENT '离职类型，可选值：辞退（违反公司规章制度）、主动辞职-1、主动辞职、主动辞职-2、协商一致（包括公司主动发起的预警及TT）',
+  `company_age` string COMMENT '司龄',
+  `novice_begin_date` string COMMENT '试用期开始时间',
+  `novice_end_date` string COMMENT '试用期结束时间',
+  `manage_begin_date` string COMMENT '管理开始时间',
+  `manage_end_date` string COMMENT '管理结束时间',
+  `compesate_amount` string COMMENT '离职补偿金',
+  `subsidy_amount` string COMMENT '生活补助金',
+  `level_name` string COMMENT '职等',
+  `manage_age` string COMMENT '管理年限',
+  `is_c_group` string COMMENT '是否视源薪资组',
+  `career_path_name` string COMMENT '通道路径',
+  `tx_date` string COMMENT '批次日期',
+  `g1_age` string COMMENT 'g1管理年限',
+  `g2_age` string COMMENT 'g2管理年限',
+  `g3_age` string COMMENT 'g3管理年限',
+  `g4_age` string COMMENT 'g4管理年限',
+  `g5_age` string COMMENT 'g5管理年限',
+  `is_new_manager` string COMMENT '是否新任命管理层',
+  `entry_salary` string COMMENT '入职薪资',
+  `forg_id` string COMMENT '法人公司ID',
+  `forg_name` string COMMENT '法人公司',
+  `dept_id` string COMMENT '部门ID',
+  `emp_other_name` string COMMENT '别名',
+  `labor_company_age` 			string  comment '公司司龄',
+  `prof_type`			string  comment '专业构成类型',
+  `social_work_age`			string  comment '社会工龄',
+  `currency_type` 			string  comment '币种',
+  `graduation_Date` 			string  comment '毕业时间',
+  `university_college` 	string  comment '学校',
+  `major` 		string  comment '专业',
+  `birthday_type` 	string  comment '生日类型',
+  `black_list` 		string  comment '是否加入黑名单',
+  `black_reason`		string  comment '加入黑名单原因',
+  `non_competition_amount`		string  comment '竞业限制费',
+  `non_competition_end`           string  comment '竞业限制时间',
+  `exp_begin_date`          string  comment '专家认证开始时间'  ,
+  `exp_end_date` 			string  comment '专家认证结束时间' ,
+  `exp_type` 			string  comment '专家类型'
+)
+COMMENT '员工基础信息'
+
+【示例】
+1、明细查询-单过滤条件查询子模式（单过滤条件查询）：
+查询员工张浩威的基础信息
+查询广东工业大学毕业的员工信息
+查询信息中心部门的员工信息
+查询整机BG部门的员工信息
+查询社招渠道招聘的员工信息
+查询未婚员工信息
+查询已婚员工信息
+查询30岁以上员工信息
+查询身份证号为440582199001010101的员工信息
+查询已定岗的员工信息
+员工张浩威的绩效是多少？
+员工张浩威的的身份证号是多少？
+员工张浩威的的手机号是多少？
+员工张浩威的的邮箱是多少？
+员工张浩威的的籍贯是哪里？
+员工张浩威的的学历是什么？
+员工张浩威的的年龄是多少？
+员工张浩威的的性别是什么？
+员工张浩威的的婚姻状况是什么？
+员工张浩威的的薪资是多少？
+员工张浩威的的部门是什么？
+员工张浩威的的职位是什么？
+员工张浩威的的入职时间是什么？
+员工张浩威的的离职时间是什么？
+员工张浩威的的离职原因是什么？
+员工张浩威的的试用期是多久？
+员工张浩威的的试用期绩效是多少？
+员工张浩威的岗位是什么？
+员工张浩威的的职级是什么？
+员工张浩威的学历是什么？
+员工张浩威的毕业院校是什么？
+员工张浩威的专业是什么？
+员工张浩威的的生日是什么？
+全集团有多少在职员工？
+各BG有多少在职员工？
+全集团累计入职多少人？
+各BG累计入职多少人？
+全集团累计离职多少人？
+各BG累计离职多少人？
+全集团今年入职多少人？
+各BG2024年入职多少人？
+全集团2024年入职多少人？
+各BG2024年入职多少人？
+全集团2024年离职多少人？
+各BG今年入职多少人？
+全集团当月入职多少人？
+各BG当月入职多少人？
+全集团当月离职多少人？
+全集团当月净增长多少人？
+全集团当月离职率是多少？
+
+
+2、明细查询-多过滤条件查询子模式（单过滤条件查询）：
+查询广东工业大学毕业，且年龄大于20岁的员工信息
+查询广东工业大学毕业，且年龄大于20岁，且已婚的员工信息
+查询广东工业大学毕业，且年龄大于20岁，且已婚，且已定岗的员工信息
+查询广东工业大学毕业，且年龄大于20岁，且已婚，且已定岗，且在职的员工信息
+查询信息中心部门，职级T14以上的员工信息
+查询信息中心部门，且已婚，且已定岗，且在职的员工信息
+查询信息中心部门，全年绩效A级的员工信息
+查询信息中心部门，全年绩效A级，且已婚，且已定岗，且在职的员工信息
+查询信息中心部门，2024年各季度绩效A级，且入职时间在2023年的员工信息
+查询信息中心部门，2024年各季度绩效A级，且入职时间在2023年，且已婚，且已定岗，且在职的员工信息
+查询全集团，2024年各季度绩效A级，且工龄大于5年的员工信息
+
+3、指标查模式
+统计全集团未婚的员工有多少？
+统计全集团已婚的员工有多少？
+统计全集团未婚的离职员工有多少？
+统计全集团已婚的离职员工有多少？
+统计全集团未婚的离职员工中，离职原因是辞退的有多少？
+全集团累计管理层离职多少人？
+全集团近三年离职多少人？
+全集团近三年管理层离职多少人？
+全集团2024年离职员工平均年龄是多少？
+全集团2024年净增长多少人？
+全集团2024年离职率是多少？
+全集团2024年试用期内离职人数及占比是多少？
+全集团2024年绩效为B及以上离职人员分布如何？
+全集团2024年离职人员的绩效分布如何？
+全集团当月试用期内离职人数及占比是多少？
+全集团当月绩效为B及以上离职人员分布如何？
+全集团当月离职人员的绩效分布如何？
+全集团当月离职人员的司龄分布如何？
+全集团当月离职人员的薪资分布如何？
+全集团当月离职人员的年龄分布
+全集团当月离职人员的受教育结构分布如何？
+全集团当月离职人员的性别比例是多少？
+全集团当月离职人员的薪资结构分布如何？
+全集团当月离职人员的年龄结构分布如何？
+全集团当月离职人员的司龄结构分布如何？
+全集团当月离职人员的绩效结构分布如何？
+全集团主动离职人员是多少？
+全集团累计主动离职人员是多少？
+全集团被动离职人员是多少？
+全集团累计被动离职人员是多少？
+全集团今年主动离职人员是多少？
+全集团今年被动离职人员是多少？
+全集团当月主动离职人员是多少？
+全集团当月被动离职人员是多少？
+全集团有多少管理层人员？
+全集团有多少非管理层人员？
+各BG管理层人员占比是多少？
+各BG管理层人员有多少？
+各BG非管理层人员有多少？
+请参考以上规则和示例，按照提供的数据表字段信息，组合各种字段代表的维度和指标，生成数据分析测试问题。先输出500个明细查询-单过滤条件查询子模式测试问题，再输出500个明细查询-多过滤条件查询子模式测试问题，最后输出500个指标查模式测试问题。

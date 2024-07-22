@@ -1,6 +1,7 @@
 package com.tencent.supersonic.headless.api.pojo;
 
 import com.google.common.base.Objects;
+import com.tencent.supersonic.common.pojo.enums.DataTypeEnums;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -29,10 +30,12 @@ public class SchemaElement implements Serializable {
     private List<SchemaValueMap> schemaValueMaps;
     private List<RelatedSchemaElement> relatedSchemaElements;
     private String defaultAgg;
+    private String aggregator;
     private String dataFormatType;
     private double order;
     private int isTag;
     private String description;
+    private DataTypeEnums dataType;
 
     @Override
     public boolean equals(Object o) {

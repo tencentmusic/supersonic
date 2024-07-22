@@ -19,4 +19,6 @@ public interface UserDOMapper {
      */
     List<UserDO> selectByExample(UserDOExample example);
 
+    List<String> getUserPermissions(String userName);
+
 }

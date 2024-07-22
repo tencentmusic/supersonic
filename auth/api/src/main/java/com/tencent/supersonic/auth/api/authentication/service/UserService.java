@@ -13,6 +13,8 @@ public interface UserService {
 
     User getCurrentUser(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse);
 
+    List<String> getUserPermissions(User user);
+
     List<String> getUserNames();
 
     List<User> getUserList();
@@ -28,4 +30,6 @@ public interface UserService {
     List<User> getUserByOrg(String key);
 
     List<Organization> getOrganizationTree();
+
+    String casLogin(String prefixUrl, String ticket, String service, String appKey);
 }

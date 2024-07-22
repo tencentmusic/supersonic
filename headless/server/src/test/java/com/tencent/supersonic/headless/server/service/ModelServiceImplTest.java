@@ -78,7 +78,7 @@ class ModelServiceImplTest {
         DataSetService viewService = Mockito.mock(DataSetService.class);
         return new ModelServiceImpl(modelRepository, databaseService,
                 dimensionService, metricService, domainService, userService,
-                viewService, dateInfoRepository);
+                viewService, null, dateInfoRepository);
     }
 
     private ModelReq mockModelReq() {

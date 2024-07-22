@@ -27,16 +27,18 @@ import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
 import com.tencent.supersonic.headless.api.pojo.response.UnAvailableItemResp;
 import com.tencent.supersonic.headless.api.pojo.response.DataSetResp;
 import com.tencent.supersonic.headless.server.persistence.dataobject.DateInfoDO;
+import com.tencent.supersonic.headless.server.persistence.dataobject.ModelCommentDO;
 import com.tencent.supersonic.headless.server.persistence.dataobject.ModelDO;
 import com.tencent.supersonic.headless.server.persistence.repository.DateInfoRepository;
 import com.tencent.supersonic.headless.server.persistence.repository.ModelRepository;
 import com.tencent.supersonic.headless.api.pojo.MetaFilter;
 import com.tencent.supersonic.headless.server.pojo.ModelFilter;
+import com.tencent.supersonic.headless.server.service.ModelService;
+import com.tencent.supersonic.headless.server.service.DatabaseService;
 import com.tencent.supersonic.headless.server.service.DimensionService;
 import com.tencent.supersonic.headless.server.service.DomainService;
 import com.tencent.supersonic.headless.server.service.MetricService;
-import com.tencent.supersonic.headless.server.service.ModelService;
-import com.tencent.supersonic.headless.server.service.DatabaseService;
+import com.tencent.supersonic.headless.server.service.ModelCommentService;
 import com.tencent.supersonic.headless.server.service.DataSetService;
 import com.tencent.supersonic.headless.server.utils.ModelConverter;
 import com.tencent.supersonic.headless.server.utils.NameCheckUtils;
@@ -47,7 +49,6 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
-
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
@@ -79,6 +80,8 @@ public class ModelServiceImpl implements ModelService {
 
     private DateInfoRepository dateInfoRepository;
 
+    private ModelCommentService modelCommentService;
+
     public ModelServiceImpl(ModelRepository modelRepository,
                             DatabaseService databaseService,
                             @Lazy DimensionService dimensionService,
@@ -86,6 +89,7 @@ public class ModelServiceImpl implements ModelService {
                             DomainService domainService,
                             UserService userService,
                             DataSetService dataSetService,
+                            ModelCommentService modelCommentService,
                             DateInfoRepository dateInfoRepository) {
         this.modelRepository = modelRepository;
         this.databaseService = databaseService;
@@ -94,6 +98,7 @@ public class ModelServiceImpl implements ModelService {
         this.domainService = domainService;
         this.userService = userService;
         this.dataSetService = dataSetService;
+        this.modelCommentService = modelCommentService;
         this.dateInfoRepository = dateInfoRepository;
     }
 
@@ -113,7 +118,11 @@ public class ModelServiceImpl implements ModelService {
     public ModelResp updateModel(ModelReq modelReq, User user) throws Exception {
         checkName(modelReq);
         ModelDO modelDO = modelRepository.getModelById(modelReq.getId());
-        ModelConverter.convert(modelDO, modelReq, user);
+
+        // 根据注释信息，自动识别为维度和度量
+        List<ModelCommentDO> modelCommentDOList = modelCommentService.getModelCommentList(modelReq.getId());
+
+        ModelConverter.convert(modelDO, modelReq, user, modelCommentDOList);
         modelRepository.updateModel(modelDO);
         batchCreateDimension(modelDO, user);
         batchCreateMetric(modelDO, user);

@@ -242,6 +242,31 @@ const DimensionInfoModal: React.FC<CreateFormProps> = ({
           </Select>
         </FormItem>
         <FormItem
+          name="dataType"
+          label="数据类型"
+          rules={[{ required: true, message: '请选择维度数据类型' }]}
+        >
+          <Select placeholder="请选择维度数据类型">
+            {[
+              'ARRAY',
+              'MAP',
+              'JSON',
+              'VARCHAR',
+              'DATE',
+              'BIGINT',
+              'INT',
+              'DOUBLE',
+              'FLOAT',
+              'DECIMAL',
+              'unknown',
+            ].map((item) => (
+              <Option key={item} value={item}>
+                {item}
+              </Option>
+            ))}
+          </Select>
+        </FormItem>
+        <FormItem
           name="sensitiveLevel"
           label="敏感度"
           rules={[{ required: true, message: '请选择敏感度' }]}

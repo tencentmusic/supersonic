@@ -31,7 +31,7 @@ const MetricCard: React.FC<Props> = ({ data, loading, onApplyAuth }) => {
     [`${PREFIX_CLS}-metric-card-dsl`]: queryMode === 'LLM_S2SQL',
   });
 
-  const [isNumber, setIsNumber] = useState(false);
+  const [isNumber, setIsNumber] = useState(true);
   const handleNumberClick = () => {
     setIsNumber(!isNumber);
   };

@@ -15,6 +15,9 @@ type Props = {
   queryMode?: string;
   sqlInfo: SqlInfoType;
   sqlTimeCost?: number;
+  showIcon?: boolean;
+  defaultSqlType?: string;
+  showExpandIcon?: boolean;
 };
 
 const SqlItem: React.FC<Props> = ({
@@ -24,8 +27,11 @@ const SqlItem: React.FC<Props> = ({
   queryMode,
   sqlInfo,
   sqlTimeCost,
+  showIcon = true,
+  showExpandIcon = true,
+  defaultSqlType = '',
 }) => {
-  const [sqlType, setSqlType] = useState('');
+  const [sqlType, setSqlType] = useState(defaultSqlType);
 
   const tipPrefixCls = `${PREFIX_CLS}-item`;
   const prefixCls = `${PREFIX_CLS}-sql-item`;
@@ -49,14 +55,14 @@ const SqlItem: React.FC<Props> = ({
   return (
     <div className={`${tipPrefixCls}-parse-tip`}>
       <div className={`${tipPrefixCls}-title-bar`}>
-        <CheckCircleFilled className={`${tipPrefixCls}-step-icon`} />
+        {showIcon && <CheckCircleFilled className={`${tipPrefixCls}-step-icon`} />}
         <div className={`${tipPrefixCls}-step-title`}>
           SQL生成
           {sqlTimeCost && (
             <span className={`${tipPrefixCls}-title-tip`}>(耗时: {sqlTimeCost}ms)</span>
           )}
           ：
-          {sqlType && (
+          {sqlType && showExpandIcon && (
             <span className={`${prefixCls}-toggle-expand-btn`} onClick={onCollapse}>
               <UpOutlined />
             </span>
@@ -132,7 +138,7 @@ const SqlItem: React.FC<Props> = ({
           integrateSystem !== 'wiki'
             ? `${prefixCls}-copilot`
             : ''
-        }`}
+        } ${showIcon ? '' : 'without-border'}`}
       >
         {sqlType === 'schemaMap' && (
           <div className={`${prefixCls}-code`}>

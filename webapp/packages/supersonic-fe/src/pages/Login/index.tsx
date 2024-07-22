@@ -6,15 +6,19 @@ import RegisterForm from './components/RegisterForm';
 // import ForgetPwdForm from './components/ForgetPwdForm';
 import { ROUTE_AUTH_CODES } from '../../../config/routes';
 import S2Icon, { ICON } from '@/components/S2Icon';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm } from 'antd/lib/form/Form';
 import type { RegisterFormDetail } from './components/types';
 import { postUserLogin, userRegister } from './services';
 import { AUTH_TOKEN_KEY } from '@/common/constants';
-import { queryCurrentUser } from '@/services/user';
-import { history, useModel } from 'umi';
-import CryptoJS from 'crypto-js';
+import { getUserInfoByTicket, getUserPermissions, queryCurrentUser } from '@/services/user';
+import { history, useModel } from '@umijs/max';
 import { encryptPassword } from '@/utils/utils';
+import CryptoJS from 'crypto-js';
+import { TOKEN_KEY } from '@/services/request';
+import { ssoLogin } from '@/utils/utils';
+
+export const openSSO = true;
 
 const { Item } = Form;
 const LoginPage: React.FC = () => {
@@ -34,6 +38,13 @@ const LoginPage: React.FC = () => {
           staffName: queryUserData.staffName || queryUserData.name,
         };
         const authCodes = Array.isArray(initialState?.authCodes) ? initialState?.authCodes : [];
+        try {
+          const { data: codes } = await getUserPermissions();
+          authCodes.push(...codes);
+        } catch (error) {
+          message.error('权限接口调用失败');
+        }
+
         if (queryUserData.superAdmin) {
           authCodes.push(ROUTE_AUTH_CODES.SYSTEM_ADMIN);
         }
@@ -69,6 +80,49 @@ const LoginPage: React.FC = () => {
     setCreateModalVisible(true);
   };
 
+  async function loginWithTicket(ticket: string) {
+    const { code, data } = await getUserInfoByTicket(ticket);
+
+    if (code === 200) {
+      localStorage.setItem(TOKEN_KEY, data);
+      const { code: queryUserCode, data: queryUserData } = await queryCurrentUser();
+      if (queryUserCode === 200) {
+        const currentUser = {
+          ...queryUserData,
+          staffName: queryUserData.staffName || queryUserData.name,
+        };
+        const authCodes = Array.isArray(initialState?.authCodes) ? initialState?.authCodes : [];
+
+        try {
+          const { data: codes } = await getUserPermissions();
+          authCodes.push(...codes);
+        } catch (error) {
+          message.error('权限接口调用失败');
+        }
+
+        if (queryUserData.superAdmin) {
+          authCodes.push(ROUTE_AUTH_CODES.SYSTEM_ADMIN);
+        }
+        setInitialState({ ...initialState, currentUser, authCodes });
+      }
+
+      history.push('/');
+    } else {
+      ssoLogin();
+    }
+  }
+
+  async function login() {
+    // 判断是否存在ticket
+    const urlParams = new URL(window.location.href);
+    const tickets = urlParams.searchParams.getAll('ticket');
+    if (tickets.length > 0) {
+      await loginWithTicket(tickets[tickets.length - 1]);
+    } else {
+      ssoLogin();
+    }
+  }
+
   // // 忘记密码弹窗确定响应
   // const handleForgetPwd = async (values: RegisterFormDetail) => {
   //   await getUserForgetPwd({ ...values });
@@ -81,7 +135,11 @@ const LoginPage: React.FC = () => {
   //   setForgetModalVisible(true);
   // };
 
-  return (
+  useEffect(() => {
+    openSSO && login();
+  }, []);
+
+  return openSSO ? null : (
     <div className={styles.loginWarp}>
       <div className={styles.content}>
         <div className={styles.formContent}>
@@ -96,17 +154,17 @@ const LoginPage: React.FC = () => {
                       color="#296DF3"
                       style={{ display: 'inline-block', marginTop: 8 }}
                     />
-                    <div>SuperSonic</div>
+                    <div>ChatData</div>
                   </Space>
                 </h3>
                 <Item name="name" rules={[{ required: true }]} label="">
-                  <Input size="large" placeholder="用户名: admin" prefix={<UserOutlined />} />
+                  <Input size="large" placeholder="用户名: " prefix={<UserOutlined />} />
                 </Item>
                 <Item name="password" rules={[{ required: true }]} label="">
                   <Input
                     size="large"
                     type="password"
-                    placeholder="密码: 123456"
+                    placeholder="密码: "
                     onPressEnter={handleLogin}
                     prefix={<LockOutlined />}
                   />

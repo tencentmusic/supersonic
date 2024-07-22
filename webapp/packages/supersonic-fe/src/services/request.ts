@@ -16,7 +16,7 @@ export const TOKEN_KEY = AUTH_TOKEN_KEY;
 
 const authHeaderInterceptor = (url: string, options: RequestOptionsInit) => {
   const headers: any = {};
-  const query = queryString.parse(history.location.search) || {};
+  const query = queryString.parse(window.location.search) || {};
   const token = query[TOKEN_KEY] || localStorage.getItem(TOKEN_KEY);
   if (token) {
     headers.Authorization = `Bearer ${token}`;
@@ -42,7 +42,9 @@ const responseInterceptor = async (response: Response) => {
     try {
       const data: Result<any> = await response?.clone()?.json?.();
       if (Number(data.code) === 403) {
-        history.push('/login');
+        const ticket = queryString.parse(window.location.search).ticket;
+        history.push(ticket ? `/login?ticket=${ticket}` : '/login');
+        // jump2sso();
         return response;
       }
     } catch (e) {}

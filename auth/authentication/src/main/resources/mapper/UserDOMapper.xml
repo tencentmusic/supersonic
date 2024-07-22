@@ -122,4 +122,15 @@
       <include refid="Example_Where_Clause" />
     </if>
   </select>
+  <select id="getUserPermissions" resultType="java.lang.String">
+    select perms from s2_authority sa
+                        join s2_permission sp on sa.authority_entity_id = sp.id
+    where authority_type = 0 and sa.role_id in (
+      select DISTINCT role_id  from s2_user_role_rela sur
+                                      join s2_role sr on sur.role_id  =  sr.id
+                                      join s2_user su on su.id = sur.user_id
+      where su.name = #{userName,jdbcType=VARCHAR}
+    )
+  </select>
+
 </mapper>

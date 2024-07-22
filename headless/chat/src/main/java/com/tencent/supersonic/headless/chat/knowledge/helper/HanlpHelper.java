@@ -29,6 +29,8 @@ import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ResourceUtils;
 
@@ -165,7 +167,13 @@ public class HanlpHelper {
     }
 
     public static String getHanlpPropertiesPath() throws FileNotFoundException {
-        return ResourceUtils.getFile("classpath:hanlp.properties").getParent();
+        Resource resource = new ClassPathResource("hanlp.properties");
+        try {
+            String url = resource.getURL().toString();
+            return ResourceUtils.getFile(url).getParent();
+        } catch (IOException e) {
+            return "";
+        }
     }
 
     public static boolean addToCustomDictionary(DictWord dictWord) {

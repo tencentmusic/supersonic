@@ -78,6 +78,34 @@ export type SqlInfoType = {
   querySQL: string;
 };
 
+export type MetricsOrDimensionCommonType = {
+  aggregator: null | string;
+  alias: string[];
+  bizName: string;
+  dataFormatType: null | string; //
+  dataSet: number; //
+  dataSetName: string; //
+  dataType: null | string;
+  defaultAgg: string;
+  description: string;
+  id: number;
+  isTag: number;
+  model: number; // modelId
+  name: string;
+  order: number; //
+  relatedSchemaElements: any[]; //
+  schemaValueMaps: null | any; //
+  useCnt: number; //
+};
+
+export type DimensionType = MetricsOrDimensionCommonType & {
+  type: 'DIMENSION';
+};
+
+export type MetricType = MetricsOrDimensionCommonType & {
+  type: 'METRIC';
+};
+
 export type ChatContextType = {
   id: number;
   queryId: number;
@@ -86,9 +114,10 @@ export type ChatContextType = {
   modelName: string;
   dataSet: ModelType;
   dateInfo: DateInfoType;
-  dimensions: FieldType[];
-  metrics: FieldType[];
+  dimensions: DimensionType[];
+  metrics: MetricType[];
   entity: { alias: string[]; id: number };
+  limit: number | null;
   entityInfo: EntityInfoType;
   elementMatches: any[];
   nativeQuery: boolean;

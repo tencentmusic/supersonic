@@ -51,6 +51,37 @@ const getCreateFieldName = (type: EnumDataSourceType) => {
   return isCreateName;
 };
 
+export const getExtraRecordByType = (record: any, type: EnumDataSourceType) => {
+  let defaultParams = {};
+  if (type === EnumDataSourceType.MEASURES) {
+    defaultParams = {
+      agg: AGG_OPTIONS[0].value,
+    };
+  } else if (type === EnumDataSourceType.TIME) {
+    defaultParams = {
+      dateFormat: DATE_FORMATTER[0],
+      timeGranularity: 'day',
+    };
+  } else {
+    defaultParams = {
+      agg: undefined,
+      dateFormat: undefined,
+      timeGranularity: undefined,
+    };
+  }
+  const isCreateName = getCreateFieldName(type);
+  const editState = !isUndefined(record[isCreateName]) ? !!record[isCreateName] : true;
+  const { name, comment } = record;
+
+  return {
+    ...record,
+    type,
+    name: name || comment,
+    [isCreateName]: editState,
+    ...defaultParams,
+  };
+};
+
 const ModelFieldForm: React.FC<Props> = ({
   fields,
   sql,
@@ -91,33 +122,7 @@ const ModelFieldForm: React.FC<Props> = ({
             value={type}
             allowClear
             onChange={(value) => {
-              let defaultParams = {};
-              if (value === EnumDataSourceType.MEASURES) {
-                defaultParams = {
-                  agg: AGG_OPTIONS[0].value,
-                };
-              } else if (value === EnumDataSourceType.TIME) {
-                defaultParams = {
-                  dateFormat: DATE_FORMATTER[0],
-                  timeGranularity: 'day',
-                };
-              } else {
-                defaultParams = {
-                  agg: undefined,
-                  dateFormat: undefined,
-                  timeGranularity: undefined,
-                };
-              }
-              const isCreateName = getCreateFieldName(value);
-              const editState = !isUndefined(record[isCreateName]) ? !!record[isCreateName] : true;
-              const { name, comment } = record;
-              onFieldChange(record.bizName, {
-                ...record,
-                type: value,
-                name: name || comment,
-                [isCreateName]: editState,
-                ...defaultParams,
-              });
+              onFieldChange(record.bizName, getExtraRecordByType(record, value));
             }}
             style={{ width: '100%' }}
           >

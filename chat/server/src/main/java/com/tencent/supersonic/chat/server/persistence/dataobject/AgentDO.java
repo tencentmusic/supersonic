@@ -70,6 +70,7 @@ public class AgentDO {
     private String multiTurnConfig;
 
     private String visualConfig;
+    private String llmConfig;
 
     private String promptConfig;
 

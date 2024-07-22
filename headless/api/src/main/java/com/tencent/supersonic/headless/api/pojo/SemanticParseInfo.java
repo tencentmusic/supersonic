@@ -34,6 +34,7 @@ public class SemanticParseInfo {
     private DateConf dateInfo;
     private Long limit;
     private double score;
+    private boolean recommendParse = false;
     private List<SchemaElementMatch> elementMatches = new ArrayList<>();
     private Map<String, Object> properties = new HashMap<>();
     private SqlInfo sqlInfo = new SqlInfo();

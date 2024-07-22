@@ -1,6 +1,7 @@
 s2:
   parser:
-    strategy: ONE_PASS_SELF_CONSISTENCY
+    s2sql:
+      strategy: DIFY_SQL_GEN_STRATEGY
     exemplar-recall:
       number: 10
     few-shot:

@@ -1,10 +1,9 @@
 package com.tencent.supersonic.headless.server.utils;
 
 
-import dev.langchain4j.data.message.AiMessage;
+import com.tencent.supersonic.headless.chat.parser.llm.DifyResult;
+import com.tencent.supersonic.headless.chat.parser.llm.DifyServiceClient;
 import dev.langchain4j.data.message.SystemMessage;
-import dev.langchain4j.model.chat.ChatLanguageModel;
-import dev.langchain4j.model.output.Response;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -15,13 +14,13 @@ import org.springframework.stereotype.Component;
 public class AliasGenerateHelper {
 
     @Autowired
-    private ChatLanguageModel chatLanguageModel;
+    private DifyServiceClient difyServiceClient;
 
     public String getChatCompletion(String message) {
         SystemMessage from = SystemMessage.from(message);
-        Response<AiMessage> response = chatLanguageModel.generate(from);
-        log.info("message:{}\n response:{}", message, response);
-        return response.content().text();
+        DifyResult result = difyServiceClient.generate(from.text());
+        log.info("message:{}\n response:{}", message, result);
+        return result.getAnswer();
     }
 
     public String generateAlias(String mockType,

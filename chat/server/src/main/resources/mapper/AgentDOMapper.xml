@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tencent.supersonic.chat.server.persistence.mapper.AgentDOMapper">
+  <resultMap id="BaseResultMap" type="com.tencent.supersonic.chat.server.persistence.dataobject.AgentDO">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="name" jdbcType="VARCHAR" property="name" />
+    <result column="description" jdbcType="VARCHAR" property="description" />
+    <result column="examples" jdbcType="VARCHAR" property="examples" />
+    <result column="status" jdbcType="VARCHAR" property="status" />
+    <result column="model" jdbcType="VARCHAR" property="model" />
+    <result column="config" jdbcType="VARCHAR" property="config" />
+    <result column="llm_config" jdbcType="VARCHAR" property="llmConfig" />
+    <result column="multi_turn_config" jdbcType="VARCHAR" property="multiTurnConfig" />
+    <result column="created_at" jdbcType="TIMESTAMP" property="createdAt" />
+    <result column="updated_at" jdbcType="TIMESTAMP" property="updatedAt" />
+    <result column="created_by" jdbcType="VARCHAR" property="createdBy" />
+    <result column="updated_by" jdbcType="VARCHAR" property="updatedBy" />
+    <result column="enable_search" jdbcType="VARCHAR" property="enableSearch" />
+  </resultMap>
+
+  <select id="listAgentByAuth" parameterType="String" resultMap="BaseResultMap">
+    SELECT
+    id,
+    name,
+    description,
+    examples,
+    status,
+    model,
+    config,
+    llm_config,
+    multi_turn_config,
+    created_at,
+    updated_at,
+    created_by,
+    updated_by,
+    enable_search
+    FROM
+    (select DISTINCT sa.*  from s2_agent sa where created_by = #{name}
+       select DISTINCT s2a.*  FROM s2_agent s2a
+       INNER JOIN s2_authority sa ON s2a.id = sa.authority_entity_id
+       INNER JOIN s2_role sr ON sa.role_id = sr.id
+       INNER JOIN s2_user_role_rela surr ON sr.id = surr.role_id
+       INNER JOIN s2_user s2u ON surr.user_id = s2u.id
+     WHERE
+         (s2u.name = #{name}
+       AND sa.authority_entity_type = 1
+       AND sa.authority_type = 1
+       AND sr.is_enable = 1
+       AND s2a.status = 1)
+        OR (s2a.created_by = #{name})
+     )t
+
+  </select>
+
+
+</mapper>

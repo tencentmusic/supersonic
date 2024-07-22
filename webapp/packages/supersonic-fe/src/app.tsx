@@ -1,12 +1,12 @@
 import RightContent from '@/components/RightContent';
 import S2Icon, { ICON } from '@/components/S2Icon';
 import type { Settings as LayoutSettings } from '@ant-design/pro-components';
-import { Space, Spin, ConfigProvider } from 'antd';
+import { Space, Spin, ConfigProvider, message } from 'antd';
 import ScaleLoader from 'react-spinners/ScaleLoader';
 import { history, RunTimeLayoutConfig } from '@umijs/max';
 import defaultSettings from '../config/defaultSettings';
 import settings from '../config/themeSettings';
-import { queryCurrentUser } from './services/user';
+import { getUserPermissions, queryCurrentUser } from './services/user';
 import { deleteUrlQuery, isMobile, getToken } from '@/utils/utils';
 import { publicPath } from '../config/defaultSettings';
 import { Copilot } from 'supersonic-chat-sdk';
@@ -14,6 +14,8 @@ import { configProviderTheme } from '../config/themeSettings';
 export { request } from './services/request';
 import { ROUTE_AUTH_CODES } from '../config/routes';
 import AppPage from './pages/index';
+import type { API } from './services/API';
+import logoSrc from '@/assets/logo.png';
 
 const replaceRoute = '/';
 
@@ -31,13 +33,18 @@ Spin.setDefaultIndicator(
   <ScaleLoader color={settings['primary-color']} height={25} width={2} radius={2} margin={2} />,
 );
 
-const getAuthCodes = (params: any) => {
+const getAuthCodes = async (params: any) => {
   const { currentUser } = params;
-  const codes = [];
-  if (currentUser?.superAdmin) {
-    codes.push(ROUTE_AUTH_CODES.SYSTEM_ADMIN);
+  try {
+    const { data: codes } = await getUserPermissions();
+    if (currentUser?.superAdmin) {
+      codes.push(ROUTE_AUTH_CODES.SYSTEM_ADMIN);
+    }
+    return codes;
+  } catch (error) {
+    message.error('权限接口调用失败');
+    return [];
   }
-  return codes;
 };
 
 export async function getInitialState(): Promise<{
@@ -69,7 +76,7 @@ export async function getInitialState(): Promise<{
     }
   }
 
-  const authCodes = getAuthCodes({
+  const authCodes = await getAuthCodes({
     currentUser,
   });
 
@@ -106,16 +113,17 @@ export async function getInitialState(): Promise<{
 // }
 
 export function onRouteChange() {
-  const title = window.document.title.split('-SuperSonic')[0];
-  if (!title.includes('SuperSonic')) {
-    window.document.title = `${title}-SuperSonic`;
-  } else {
-    window.document.title = 'SuperSonic';
-  }
+  // const title = window.document.title.split('-SuperSonic')[0];
+  // if (!title.includes('SuperSonic')) {
+  //   window.document.title = `${title}-SuperSonic`;
+  // } else {
+  //   window.document.title = 'SuperSonic';
+  // }
 }
 
 export const layout: RunTimeLayoutConfig = (params) => {
   const { initialState } = params as any;
+
   return {
     onMenuHeaderClick: (e) => {
       e.preventDefault();
@@ -123,14 +131,15 @@ export const layout: RunTimeLayoutConfig = (params) => {
     },
     logo: (
       <Space>
-        <S2Icon
+        {/* <S2Icon
           icon={ICON.iconlogobiaoshi}
           size={30}
           color="#1672fa"
           style={{ display: 'inline-block', marginTop: 8 }}
-        />
+        /> */}
+        <img src={logoSrc} alt="logo" style={{ height: 34 }} />
         <div className="logo" style={{ position: 'relative', top: '-2px' }}>
-          SuperSonic
+          Chatdata
         </div>
       </Space>
     ),
@@ -149,7 +158,14 @@ export const layout: RunTimeLayoutConfig = (params) => {
             <AppPage dom={dom} />
             {/* {dom} */}
             {history.location.pathname !== '/chat' && !isMobile && (
-              <Copilot token={getToken() || ''} isDeveloper />
+              <Copilot
+                token={getToken() || ''}
+                isDeveloper={
+                  process.env.NODE_ENV === 'development' ||
+                  initialState?.currentUser?.superAdmin ||
+                  initialState?.currentUser?.isDeveloper === 1
+                }
+              />
             )}
           </div>
         </ConfigProvider>

@@ -1,11 +1,12 @@
 import React from 'react';
 import { LogoutOutlined } from '@ant-design/icons';
-import { useModel } from 'umi';
+import { useModel, history } from '@umijs/max';
 import HeaderDropdown from '../HeaderDropdown';
 import styles from './index.less';
 import TMEAvatar from '../TMEAvatar';
 import { AUTH_TOKEN_KEY } from '@/common/constants';
-import { history } from 'umi';
+import { ssoLogout } from '@/utils/utils';
+import { openSSO } from '@/pages/Login';
 
 export type GlobalHeaderRightProps = {
   menu?: boolean;
@@ -18,8 +19,12 @@ export type GlobalHeaderRightProps = {
  */
 const loginOut = async () => {
   localStorage.removeItem(AUTH_TOKEN_KEY);
-  history.push('/login');
-  window.location.reload();
+  if (openSSO) {
+    ssoLogout();
+  } else {
+    history.push('/login');
+    window.location.reload();
+  }
 };
 
 const { APP_TARGET } = process.env;

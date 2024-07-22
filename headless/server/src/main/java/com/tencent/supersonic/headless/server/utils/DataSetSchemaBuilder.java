@@ -167,6 +167,7 @@ public class DataSetSchemaBuilder {
                     .schemaValueMaps(schemaValueMaps)
                     .isTag(dim.getIsTag())
                     .description(dim.getDescription())
+                    .dataType(dim.getDataType())
                     .build();
             dimensions.add(dimToAdd);
         }

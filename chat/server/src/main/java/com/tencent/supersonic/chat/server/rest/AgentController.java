@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;
@@ -30,16 +29,16 @@ public class AgentController {
 
     @PostMapping
     public Agent createAgent(@RequestBody Agent agent,
-                             HttpServletRequest httpServletRequest,
-                             HttpServletResponse httpServletResponse) {
+                                HttpServletRequest httpServletRequest,
+                                HttpServletResponse httpServletResponse) {
         User user = UserHolder.findUser(httpServletRequest, httpServletResponse);
         return agentService.createAgent(agent, user);
     }
 
     @PutMapping
     public Agent updateAgent(@RequestBody Agent agent,
-                             HttpServletRequest httpServletRequest,
-                             HttpServletResponse httpServletResponse) {
+                                HttpServletRequest httpServletRequest,
+                                HttpServletResponse httpServletResponse) {
         User user = UserHolder.findUser(httpServletRequest, httpServletResponse);
         return agentService.updateAgent(agent, user);
     }
@@ -56,8 +55,10 @@ public class AgentController {
     }
 
     @RequestMapping("/getAgentList")
-    public List<Agent> getAgentList() {
-        return agentService.getAgents();
+    public List<Agent> getAgentList(HttpServletRequest httpServletRequest,
+                                    HttpServletResponse httpServletResponse) {
+        User user = UserHolder.findUser(httpServletRequest, httpServletResponse);
+        return agentService.getAgents(user);
     }
 
     @RequestMapping("/getToolTypes")
