@@ -120,10 +120,10 @@ public class LLMRequestService {
 
     public LLMResp runText2SQL(LLMReq llmReq) {
         SqlGenStrategy sqlGenStrategy = SqlGenStrategyFactory.get(llmReq.getSqlGenType());
-        String modelName = llmReq.getSchema().getDataSetName();
+        String dataSet = llmReq.getSchema().getDataSetName();
         LLMResp result = sqlGenStrategy.generate(llmReq);
         result.setQuery(llmReq.getQueryText());
-        result.setModelName(modelName);
+        result.setDataSet(dataSet);
         return result;
     }
 

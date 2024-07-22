@@ -12,13 +12,17 @@ jobs:
   build:
     runs-on: windows-latest  # Specify a Windows runner
 
+    strategy:
+      matrix:
+        java-version: [8, 11]
+
     steps:
       - uses: actions/checkout@v2
 
-      - name: Set up JDK 8
+      - name: Set up JDK ${{ matrix.java-version }}
         uses: actions/setup-java@v2
         with:
-          java-version: '8'
+          java-version: ${{ matrix.java-version }}
           distribution: 'adopt'
 
       - name: Cache Maven packages

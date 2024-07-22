@@ -104,6 +104,8 @@ public class EmbeddingServiceImpl implements EmbeddingService {
                     Filter filter = filterBuilder.isIn(queryIds);
                     inMemoryEmbeddingStore.removeAll(filter);
                 }
+            } else {
+                throw new RuntimeException("Not supported yet.");
             }
         } catch (Exception e) {
             log.error("deleteQuery error,collectionName:{},queries:{}", collectionName, queries);

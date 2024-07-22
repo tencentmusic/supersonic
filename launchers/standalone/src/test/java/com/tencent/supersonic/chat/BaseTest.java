@@ -78,15 +78,6 @@ public class BaseTest extends BaseApplication {
         return chatQueryService.performParsing(chatParseReq);
     }
 
-    protected ParseResp submitParse(String queryText, Integer agentId) {
-        return submitParse(queryText, agentId, 10);
-    }
-
-    protected ParseResp submitParseWithAgent(String queryText, Integer agentId) {
-        ChatParseReq chatParseReq = DataUtils.getChatParseReqWithAgent(10, queryText, agentId);
-        return chatQueryService.performParsing(chatParseReq);
-    }
-
     protected void assertSchemaElements(Set<SchemaElement> expected, Set<SchemaElement> actual) {
         Set<String> expectedNames = expected.stream().map(s -> s.getName())
                 .filter(s -> s != null).collect(Collectors.toSet());

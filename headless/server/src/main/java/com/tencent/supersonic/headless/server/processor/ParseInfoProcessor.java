@@ -16,7 +16,7 @@ import com.tencent.supersonic.headless.api.pojo.request.QueryFilter;
 import com.tencent.supersonic.headless.api.pojo.response.ParseResp;
 import com.tencent.supersonic.headless.chat.ChatQueryContext;
 import com.tencent.supersonic.headless.chat.query.SemanticQuery;
-import com.tencent.supersonic.headless.server.web.service.SchemaService;
+import com.tencent.supersonic.headless.server.service.SchemaService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;

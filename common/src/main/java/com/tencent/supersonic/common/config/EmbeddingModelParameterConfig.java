@@ -3,6 +3,7 @@ package com.tencent.supersonic.common.config;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.common.pojo.EmbeddingModelConfig;
 import com.tencent.supersonic.common.pojo.Parameter;
+import dev.langchain4j.inmemory.spring.InMemoryAutoConfig;
 import dev.langchain4j.provider.AzureModelFactory;
 import dev.langchain4j.provider.DashscopeModelFactory;
 import dev.langchain4j.provider.InMemoryModelFactory;
@@ -20,7 +21,7 @@ import java.util.List;
 public class EmbeddingModelParameterConfig extends ParameterConfig {
 
     public static final Parameter EMBEDDING_MODEL_PROVIDER =
-            new Parameter("s2.embedding.model.provider", "",
+            new Parameter("s2.embedding.model.provider", InMemoryModelFactory.PROVIDER,
                     "接口协议", "",
                     "string", "向量模型配置",
                     Lists.newArrayList(InMemoryModelFactory.PROVIDER,
@@ -43,9 +44,10 @@ public class EmbeddingModelParameterConfig extends ParameterConfig {
 
 
     public static final Parameter EMBEDDING_MODEL_NAME =
-            new Parameter("s2.embedding.model.name", "",
+            new Parameter("s2.embedding.model.name", InMemoryAutoConfig.BGE_SMALL_ZH,
                     "ModelName", "",
-                    "string", "向量模型配置");
+                    "string", "向量模型配置",
+                    Lists.newArrayList(InMemoryAutoConfig.BGE_SMALL_ZH, InMemoryAutoConfig.ALL_MINILM_L6_V2));
 
     public static final Parameter EMBEDDING_MODEL_PATH =
             new Parameter("s2.embedding.model.path", "",

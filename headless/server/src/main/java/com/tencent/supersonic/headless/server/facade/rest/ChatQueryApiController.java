@@ -7,7 +7,6 @@ import com.tencent.supersonic.headless.api.pojo.request.QueryNLReq;
 import com.tencent.supersonic.headless.api.pojo.request.QuerySqlReq;
 import com.tencent.supersonic.headless.api.pojo.response.ParseResp;
 import com.tencent.supersonic.headless.server.facade.service.ChatLayerService;
-import com.tencent.supersonic.headless.server.facade.service.RetrieveService;
 import com.tencent.supersonic.headless.server.facade.service.SemanticLayerService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,9 +26,6 @@ public class ChatQueryApiController {
     private ChatLayerService chatLayerService;
 
     @Autowired
-    private RetrieveService retrieveService;
-
-    @Autowired
     private SemanticLayerService semanticLayerService;
 
     @PostMapping("/chat/search")
@@ -37,7 +33,7 @@ public class ChatQueryApiController {
                         HttpServletRequest request,
                         HttpServletResponse response) throws Exception {
         queryNLReq.setUser(UserHolder.findUser(request, response));
-        return retrieveService.retrieve(queryNLReq);
+        return chatLayerService.retrieve(queryNLReq);
     }
 
     @PostMapping("/chat/map")

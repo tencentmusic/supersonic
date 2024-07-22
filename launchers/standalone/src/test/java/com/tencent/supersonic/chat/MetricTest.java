@@ -13,6 +13,7 @@ import com.tencent.supersonic.headless.chat.query.rule.metric.MetricTopNQuery;
 import com.tencent.supersonic.util.DataUtils;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -22,7 +23,7 @@ import java.util.List;
 import static com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum.NONE;
 import static com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum.SUM;
 
-
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class MetricTest extends BaseTest {
 
     @Test
