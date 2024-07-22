@@ -155,8 +155,7 @@ public class ModelConverter {
 
     private static boolean isCreateDimension(Dim dim) {
         return dim.getIsCreateDimension() == 1
-                && StringUtils.isNotBlank(dim.getName())
-                && !dim.getType().equalsIgnoreCase(DimensionType.time.name());
+                && StringUtils.isNotBlank(dim.getName());
     }
 
     private static boolean isCreateDimension(Identify identify) {
