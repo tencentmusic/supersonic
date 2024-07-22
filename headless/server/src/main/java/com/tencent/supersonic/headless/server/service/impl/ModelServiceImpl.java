@@ -100,7 +100,7 @@ public class ModelServiceImpl implements ModelService {
     @Override
     @Transactional
     public ModelResp createModel(ModelReq modelReq, User user) throws Exception {
-        checkName(modelReq);
+        checkParams(modelReq);
         ModelDO modelDO = ModelConverter.convert(modelReq, user);
         modelRepository.createModel(modelDO);
         batchCreateDimension(modelDO, user);
@@ -111,7 +111,7 @@ public class ModelServiceImpl implements ModelService {
     @Override
     @Transactional
     public ModelResp updateModel(ModelReq modelReq, User user) throws Exception {
-        checkName(modelReq);
+        checkParams(modelReq);
         ModelDO modelDO = modelRepository.getModelById(modelReq.getId());
         ModelConverter.convert(modelDO, modelReq, user);
         modelRepository.updateModel(modelDO);
@@ -196,7 +196,7 @@ public class ModelServiceImpl implements ModelService {
         metricService.createMetricBatch(metricReqs, user);
     }
 
-    private void checkName(ModelReq modelReq) {
+    private void checkParams(ModelReq modelReq) {
         String forbiddenCharacters = NameCheckUtils.findForbiddenCharacters(modelReq.getName());
         if (StringUtils.isNotBlank(forbiddenCharacters)) {
             String message = String.format("模型名称[%s]包含特殊字符(%s), 请修改", modelReq.getName(), forbiddenCharacters);
@@ -204,13 +204,9 @@ public class ModelServiceImpl implements ModelService {
         }
         List<Dim> dims = modelReq.getModelDetail().getDimensions();
         List<Measure> measures = modelReq.getModelDetail().getMeasures();
-        List<Dim> timeDims = modelReq.getTimeDimension();
         List<Identify> identifies = modelReq.getModelDetail().getIdentifiers();
         if (CollectionUtils.isEmpty(dims)) {
             throw new InvalidArgumentException("缺少维度信息");
-        }
-        if (!CollectionUtils.isEmpty(measures) && CollectionUtils.isEmpty(timeDims)) {
-            throw new InvalidArgumentException("有度量时, 不可缺少时间维度");
         }
         for (Measure measure : measures) {
             String measureForbiddenCharacters = NameCheckUtils.findForbiddenCharacters(measure.getName());
