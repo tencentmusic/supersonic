@@ -6,11 +6,13 @@ spring:
       enabled: true
   datasource:
     driver-class-name: org.h2.Driver
-    schema: classpath:db/chat-schema-h2.sql
-    data: classpath:db/chat-data-h2.sql
     url: jdbc:h2:mem:chat;DATABASE_TO_UPPER=false
     username: root
     password: chat
+  sql:
+    init:
+      schema-locations: classpath:db/chat-schema-h2.sql
+      data-locations: classpath:db/chat-data-h2.sql
 
 server:
   port: 9082

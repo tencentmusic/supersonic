@@ -11,7 +11,9 @@ import com.tencent.supersonic.headless.api.pojo.response.QueryResult;
 import com.tencent.supersonic.headless.chat.query.rule.detail.DetailFilterQuery;
 import com.tencent.supersonic.util.DataUtils;
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
 
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class TagTest extends BaseTest {
 
     @Test

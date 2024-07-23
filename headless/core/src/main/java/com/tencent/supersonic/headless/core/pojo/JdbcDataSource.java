@@ -30,6 +30,7 @@ public class JdbcDataSource {
     private static final Object lockLock = new Object();
     private static volatile Map<String, DruidDataSource> dataSourceMap = new ConcurrentHashMap<>();
     private static volatile Map<String, Lock> dataSourceLockMap = new ConcurrentHashMap<>();
+
     @Value("${source.lock-time:30}")
     @Getter
     protected Long lockTime;
@@ -94,11 +95,11 @@ public class JdbcDataSource {
     @Getter
     protected int validationQueryTimeout;
 
-    @Value("${source.validation-query:'select 1'}")
+    @Value("${source.validation-query:select 1}")
     @Getter
     protected String validationQuery;
 
-    @Value("${source.filters:'stat'}")
+    @Value("${source.filters:stat}")
     @Getter
     protected String filters;
     @Autowired
