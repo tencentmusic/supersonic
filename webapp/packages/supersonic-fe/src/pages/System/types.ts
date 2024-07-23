@@ -1,3 +1,11 @@
+export type dependenciesItem = {
+  name: string;
+  show: {
+    includesValue: string[];
+  };
+  setDefaultValue: Record<string, any>;
+};
+
 export type ConfigParametersItem = {
   dataType: string;
   name: string;
@@ -8,6 +16,7 @@ export type ConfigParametersItem = {
   description: string;
   require?: boolean;
   placeholder?: string;
+  dependencies: dependenciesItem[];
 };
 
 export type SystemConfig = {
