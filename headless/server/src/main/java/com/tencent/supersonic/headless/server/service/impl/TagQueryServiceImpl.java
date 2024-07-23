@@ -70,7 +70,7 @@ public class TagQueryServiceImpl implements TagQueryService {
         checkTag(tag);
         itemValueResp.setName(tag.getName());
         itemValueResp.setBizName(tag.getBizName());
-        correctDateConf(itemValueReq, tag, user);
+        //correctDateConf(itemValueReq, tag, user);
         // tag total count
         Long totalCount = queryTagTotalCount(tag, itemValueReq, user);
         // tag value
