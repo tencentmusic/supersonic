@@ -55,24 +55,6 @@ public class PromptHelper {
         return results;
     }
 
-    public String buildAugmentedQuestion(LLMReq llmReq) {
-        List<LLMReq.ElementValue> linkedValues = llmReq.getLinking();
-        String currentDate = llmReq.getCurrentDate();
-        String priorExts = llmReq.getPriorExts();
-
-        List<String> priorLinkingList = new ArrayList<>();
-        for (LLMReq.ElementValue value : linkedValues) {
-            String fieldName = value.getFieldName();
-            String fieldValue = value.getFieldValue();
-            priorLinkingList.add("‘" + fieldValue + "‘是一个‘" + fieldName + "‘");
-        }
-        String currentDataStr = "当前的日期是" + currentDate;
-        String linkingListStr = String.join("，", priorLinkingList);
-        String termStr = buildTermStr(llmReq);
-        return String.format("%s (补充信息:%s;%s;%s;%s)", llmReq.getQueryText(),
-                linkingListStr, currentDataStr, termStr, priorExts);
-    }
-
     public String buildSideInformation(LLMReq llmReq) {
         List<LLMReq.ElementValue> linkedValues = llmReq.getLinking();
         String currentDate = llmReq.getCurrentDate();
@@ -97,24 +79,36 @@ public class PromptHelper {
 
         llmReq.getSchema().getMetrics().stream().forEach(
                 metric -> {
+                    metricStr.append("<");
                     metricStr.append(metric.getName());
+                    if (!CollectionUtils.isEmpty(metric.getAlias())) {
+                        StringBuilder alias = new StringBuilder();
+                        metric.getAlias().stream().forEach(a -> alias.append(a + ","));
+                        metricStr.append(" ALIAS '" + alias + "'");
+                    }
                     if (StringUtils.isNotEmpty(metric.getDescription())) {
                         metricStr.append(" COMMENT '" + metric.getDescription() + "'");
                     }
                     if (StringUtils.isNotEmpty(metric.getDefaultAgg())) {
                         metricStr.append(" AGGREGATE '" + metric.getDefaultAgg().toUpperCase() + "'");
                     }
-                    metricStr.append(",");
+                    metricStr.append(">,");
                 }
         );
 
         llmReq.getSchema().getDimensions().stream().forEach(
                 dimension -> {
+                    dimensionStr.append("<");
                     dimensionStr.append(dimension.getName());
+                    if (!CollectionUtils.isEmpty(dimension.getAlias())) {
+                        StringBuilder alias = new StringBuilder();
+                        dimension.getAlias().stream().forEach(a -> alias.append(a + ","));
+                        metricStr.append(" ALIAS '" + alias + "'");
+                    }
                     if (StringUtils.isNotEmpty(dimension.getDescription())) {
                         dimensionStr.append(" COMMENT '" + dimension.getDescription() + "'");
                     }
-                    dimensionStr.append(",");
+                    dimensionStr.append(">,");
                 }
         );
 
@@ -134,8 +128,8 @@ public class PromptHelper {
                 String name = term.getName();
                 String description = term.getDescription();
                 List<String> alias = term.getAlias();
-                String descPart = StringUtils.isBlank(description) ? "" : String.format("，它通常是指<%s>", description);
-                String aliasPart = CollectionUtils.isEmpty(alias) ? "" : String.format("，类似的表达还有%s", alias);
+                String descPart = StringUtils.isBlank(description) ? "" : String.format("，它的涵义是<%s>", description);
+                String aliasPart = CollectionUtils.isEmpty(alias) ? "" : String.format("，类似表达还有<%s>", alias);
                 termsDesc.append(String.format("%d.<%s>是业务术语%s%s；", idx + 1, name, descPart, aliasPart));
             }
             if (termsDesc.length() > 0) {
