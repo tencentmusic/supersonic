@@ -60,7 +60,6 @@ public class MetricTest extends BaseTest {
 
         expectedResult.setQueryMode(MetricModelQuery.QUERY_MODE);
         expectedParseInfo.setAggType(NONE);
-        expectedParseInfo.getMetrics().add(DataUtils.getSchemaElement("访问用户数"));
         expectedParseInfo.getMetrics().add(DataUtils.getSchemaElement("访问次数"));
         expectedParseInfo.getMetrics().add(DataUtils.getSchemaElement("人均访问次数"));
         expectedParseInfo.setDateInfo(DataUtils.getDateConf(DateConf.DateMode.RECENT, unit, period, startDay, endDay));
@@ -80,7 +79,6 @@ public class MetricTest extends BaseTest {
         expectedResult.setQueryMode(MetricGroupByQuery.QUERY_MODE);
         expectedParseInfo.setAggType(NONE);
 
-        expectedParseInfo.getMetrics().add(DataUtils.getSchemaElement("访问用户数"));
         expectedParseInfo.getMetrics().add(DataUtils.getSchemaElement("访问次数"));
         expectedParseInfo.getMetrics().add(DataUtils.getSchemaElement("人均访问次数"));
         expectedParseInfo.getDimensions().add(DataUtils.getSchemaElement("部门"));
@@ -101,7 +99,6 @@ public class MetricTest extends BaseTest {
 
         expectedResult.setQueryMode(MetricFilterQuery.QUERY_MODE);
         expectedParseInfo.setAggType(NONE);
-        expectedParseInfo.getMetrics().add(DataUtils.getSchemaElement("访问用户数"));
         expectedParseInfo.getMetrics().add(DataUtils.getSchemaElement("访问次数"));
         expectedParseInfo.getMetrics().add(DataUtils.getSchemaElement("人均访问次数"));
         List<String> list = new ArrayList<>();
@@ -128,9 +125,9 @@ public class MetricTest extends BaseTest {
         expectedResult.setQueryMode(MetricTopNQuery.QUERY_MODE);
         expectedParseInfo.setAggType(SUM);
 
+        expectedParseInfo.getMetrics().add(DataUtils.getSchemaElement("访问用户数"));
         expectedParseInfo.getMetrics().add(DataUtils.getSchemaElement("访问次数"));
         expectedParseInfo.getMetrics().add(DataUtils.getSchemaElement("人均访问次数"));
-        expectedParseInfo.getMetrics().add(DataUtils.getSchemaElement("访问用户数"));
         expectedParseInfo.getDimensions().add(DataUtils.getSchemaElement("用户"));
 
         expectedParseInfo.setDateInfo(DataUtils.getDateConf(3, DateConf.DateMode.RECENT, "DAY"));
@@ -149,7 +146,6 @@ public class MetricTest extends BaseTest {
         expectedResult.setQueryMode(MetricGroupByQuery.QUERY_MODE);
         expectedParseInfo.setAggType(SUM);
 
-        expectedParseInfo.getMetrics().add(DataUtils.getSchemaElement("访问用户数"));
         expectedParseInfo.getMetrics().add(DataUtils.getSchemaElement("访问次数"));
         expectedParseInfo.getMetrics().add(DataUtils.getSchemaElement("人均访问次数"));
         expectedParseInfo.getDimensions().add(DataUtils.getSchemaElement("部门"));
@@ -175,7 +171,6 @@ public class MetricTest extends BaseTest {
         expectedResult.setQueryMode(MetricFilterQuery.QUERY_MODE);
         expectedParseInfo.setAggType(NONE);
 
-        expectedParseInfo.getMetrics().add(DataUtils.getSchemaElement("访问用户数"));
         expectedParseInfo.getMetrics().add(DataUtils.getSchemaElement("访问次数"));
         expectedParseInfo.getMetrics().add(DataUtils.getSchemaElement("人均访问次数"));
         expectedParseInfo.getDimensionFilters().add(DataUtils.getFilter("user_name",

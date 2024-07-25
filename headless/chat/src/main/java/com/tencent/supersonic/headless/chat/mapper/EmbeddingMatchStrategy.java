@@ -2,6 +2,7 @@ package com.tencent.supersonic.headless.chat.mapper;
 
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.common.pojo.Constants;
+import com.tencent.supersonic.headless.api.pojo.response.S2Term;
 import dev.langchain4j.store.embedding.Retrieval;
 import dev.langchain4j.store.embedding.RetrieveQuery;
 import dev.langchain4j.store.embedding.RetrieveQueryResult;
@@ -15,7 +16,9 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -55,17 +58,34 @@ public class EmbeddingMatchStrategy extends BaseMatchStrategy<EmbeddingResult> {
     }
 
     @Override
-    protected void detectByBatch(ChatQueryContext chatQueryContext, Set<EmbeddingResult> results,
-                                 Set<Long> detectDataSetIds, Set<String> detectSegments) {
-        int embeddingMapperMin = Integer.valueOf(mapperConfig.getParameterValue(MapperConfig.EMBEDDING_MAPPER_MIN));
-        int embeddingMapperMax = Integer.valueOf(mapperConfig.getParameterValue(MapperConfig.EMBEDDING_MAPPER_MAX));
+    public List<EmbeddingResult> detect(ChatQueryContext chatQueryContext, List<S2Term> terms,
+                                        Set<Long> detectDataSetIds) {
+        String text = chatQueryContext.getQueryText();
+        Set<String> detectSegments = new HashSet<>();
+
+        int embeddingTextSize = Integer.valueOf(
+                mapperConfig.getParameterValue(MapperConfig.EMBEDDING_MAPPER_TEXT_SIZE));
+
+        int embeddingTextStep = Integer.valueOf(
+                mapperConfig.getParameterValue(MapperConfig.EMBEDDING_MAPPER_TEXT_STEP));
+
+        for (int startIndex = 0; startIndex < text.length(); startIndex += embeddingTextStep) {
+            int endIndex = Math.min(startIndex + embeddingTextSize, text.length());
+            String detectSegment = text.substring(startIndex, endIndex).trim();
+            detectSegments.add(detectSegment);
+        }
+        Set<EmbeddingResult> results = detectByBatch(chatQueryContext, detectDataSetIds, detectSegments);
+        return new ArrayList<>(results);
+    }
+
+    protected Set<EmbeddingResult> detectByBatch(ChatQueryContext chatQueryContext,
+                                                 Set<Long> detectDataSetIds, Set<String> detectSegments) {
+        Set<EmbeddingResult> results = new HashSet<>();
         int embeddingMapperBatch = Integer.valueOf(mapperConfig.getParameterValue(MapperConfig.EMBEDDING_MAPPER_BATCH));
 
         List<String> queryTextsList = detectSegments.stream()
                 .map(detectSegment -> detectSegment.trim())
-                .filter(detectSegment -> StringUtils.isNotBlank(detectSegment)
-                        && detectSegment.length() >= embeddingMapperMin
-                        && detectSegment.length() <= embeddingMapperMax)
+                .filter(detectSegment -> StringUtils.isNotBlank(detectSegment))
                 .collect(Collectors.toList());
 
         List<List<String>> queryTextsSubList = Lists.partition(queryTextsList,
@@ -74,6 +94,7 @@ public class EmbeddingMatchStrategy extends BaseMatchStrategy<EmbeddingResult> {
         for (List<String> queryTextsSub : queryTextsSubList) {
             detectByQueryTextsSub(results, detectDataSetIds, queryTextsSub, chatQueryContext);
         }
+        return results;
     }
 
     private void detectByQueryTextsSub(Set<EmbeddingResult> results, Set<Long> detectDataSetIds,
