@@ -16,6 +16,7 @@ export type ConfigParametersItem = {
   description: string;
   require?: boolean;
   placeholder?: string;
+  visible?: boolean;
   dependencies: dependenciesItem[];
 };
 

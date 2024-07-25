@@ -152,6 +152,10 @@ export const genneratorFormItemList = (itemList: ConfigParametersItem[], form) =
         }
 
         break;
+      case 'password': {
+        defaultItem = <Input.Password placeholder={placeholder} />;
+        break;
+      }
       case 'longText':
         defaultItem = <TextArea placeholder={placeholder} style={{ height: 100 }} />;
         break;
