@@ -3,13 +3,53 @@ package com.tencent.supersonic.common.pojo;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
+import java.util.Map;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+/**
+ * 1.Password Field:
+ *
+ * dataType: string
+ * name: password
+ * require: true/false or any value/empty
+ * placeholder: 'Please enter the relevant configuration information'
+ * value: initial value
+ * Text Input Field:
+ *
+ * 2.dataType: string
+ * require: true/false or any value/empty
+ * placeholder: 'Please enter the relevant configuration information'
+ * value: initial value
+ * Long Text Input Field:
+ *
+ * 3.dataType: longText
+ * require: true/false or any value/empty
+ * placeholder: 'Please enter the relevant configuration information'
+ * value: initial value
+ * Number Input Field:
+ *
+ * 4.dataType: number
+ * require: true/false or any value/empty
+ * placeholder: 'Please enter the relevant configuration information'
+ * value: initial value
+ * Switch Component:
+ *
+ * 5.dataType: bool
+ * require: true/false or any value/empty
+ * value: initial value
+ * Select Dropdown Component:
+ *
+ * 6.dataType: list
+ * candidateValues: ["OPEN_AI", "OLLAMA"] or
+ *  [{label: 'Model Name 1', value: 'OPEN_AI'}, {label: 'Model Name 2', value: 'OLLAMA'}]
+ * require: true/false or any value/empty
+ * placeholder: 'Please enter the relevant configuration information'
+ * value: initial value
+ */
 public class Parameter {
     private String name;
     private String defaultValue;
@@ -18,15 +58,21 @@ public class Parameter {
     private String dataType;
     private String module;
     private String value;
-    private List<Object> candidateValues;
+    private List<String> candidateValues;
+    private List<Dependency> dependencies;
 
     public Parameter(String name, String defaultValue, String comment,
                      String description, String dataType, String module) {
-        this(name, defaultValue, comment, description, dataType, module, null);
+        this(name, defaultValue, comment, description, dataType, module, null, null);
     }
 
     public Parameter(String name, String defaultValue, String comment, String description,
-                     String dataType, String module, List<Object> candidateValues) {
+                     String dataType, String module, List<String> candidateValues) {
+        this(name, defaultValue, comment, description, dataType, module, candidateValues, null);
+    }
+
+    public Parameter(String name, String defaultValue, String comment, String description,
+                     String dataType, String module, List<String> candidateValues, List<Dependency> dependencies) {
         this.name = name;
         this.defaultValue = defaultValue;
         this.comment = comment;
@@ -34,13 +80,54 @@ public class Parameter {
         this.dataType = dataType;
         this.module = module;
         this.candidateValues = candidateValues;
+        this.dependencies = dependencies;
     }
 
     public String getValue() {
-        if (StringUtils.isBlank(value)) {
+        if (value == null || value.trim().isEmpty()) {
             return defaultValue;
         }
         return value;
     }
 
+    public void setValue(String value) {
+        this.value = value;
+    }
+
+    public boolean isVisible(Map<String, String> otherParameterValues) {
+        if (dependencies == null) {
+            return true;
+        }
+        for (Dependency dependency : dependencies) {
+            String dependentValue = otherParameterValues.get(dependency.getName());
+            if (dependentValue == null || !dependency.getShow().getIncludesValue().contains(dependentValue)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public void applyDefaultValue(Map<String, String> otherParameterValues) {
+        if (dependencies == null) {
+            return;
+        }
+        for (Dependency dependency : dependencies) {
+            String dependentValue = otherParameterValues.get(dependency.getName());
+            if (dependentValue != null && dependency.getSetDefaultValue().containsKey(dependentValue)) {
+                this.defaultValue = dependency.getSetDefaultValue().get(dependentValue);
+            }
+        }
+    }
+
+    @Data
+    public static class Dependency {
+        private String name;
+        private Show show;
+        private Map<String, String> setDefaultValue;
+
+        @Data
+        public static class Show {
+            private List<String> includesValue;
+        }
+    }
 }
