@@ -69,12 +69,7 @@ public abstract class BaseMatchStrategy<T> implements MatchStrategy<T> {
             }
             startIndex = mapperHelper.getStepIndex(regOffsetToLength, startIndex);
         }
-        detectByBatch(chatQueryContext, results, detectDataSetIds, detectSegments);
         return new ArrayList<>(results);
-    }
-
-    protected void detectByBatch(ChatQueryContext chatQueryContext, Set<T> results, Set<Long> detectDataSetIds,
-                                 Set<String> detectSegments) {
     }
 
     public Map<Integer, Integer> getRegOffsetToLength(List<S2Term> terms) {
