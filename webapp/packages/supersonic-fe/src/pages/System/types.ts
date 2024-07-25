@@ -18,6 +18,17 @@ export type ConfigParametersItem = {
   placeholder?: string;
   visible?: boolean;
   dependencies: dependenciesItem[];
+  sliderConfig?: {
+    start: {
+      text: string;
+      value: number;
+    };
+    end: {
+      text: string;
+      value: number;
+    };
+    unit: number;
+  };
 };
 
 export type SystemConfig = {

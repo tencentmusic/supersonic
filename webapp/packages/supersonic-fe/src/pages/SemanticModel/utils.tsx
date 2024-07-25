@@ -1,7 +1,7 @@
 import type { API } from '@/services/API';
 import { ISemantic } from './data';
 import type { DataNode } from 'antd/lib/tree';
-import { Form, Input, InputNumber, Switch, Select } from 'antd';
+import { Form, Input, InputNumber, Switch, Select, Slider } from 'antd';
 import FormItemTitle from '@/components/FormHelper/FormItemTitle';
 import DisabledWheelNumberInput from '@/components/DisabledWheelNumberInput';
 import { ConfigParametersItem } from '../System/types';
@@ -138,7 +138,8 @@ export const findLeafNodesFromDomainList = (
 
 export const genneratorFormItemList = (itemList: ConfigParametersItem[], form) => {
   const list = itemList.reduce((itemList: ReactNode[], item) => {
-    const { dataType, name, comment, placeholder, description, require, visible } = item;
+    const { dataType, name, comment, placeholder, description, require, visible, sliderConfig } =
+      item;
     if (visible === false) {
       return itemList;
     }
@@ -163,6 +164,23 @@ export const genneratorFormItemList = (itemList: ConfigParametersItem[], form) =
         // defaultItem = <InputNumber placeholder={placeholder} style={{ width: '100%' }} />;
         defaultItem = (
           <DisabledWheelNumberInput placeholder={placeholder} style={{ width: '100%' }} />
+        );
+        break;
+      case 'slider':
+        defaultItem = (
+          <Slider
+            min={sliderConfig?.start?.value ? Number(sliderConfig?.start?.value) : 0}
+            max={sliderConfig?.end?.value ? Number(sliderConfig?.end?.value) : 1}
+            step={sliderConfig?.unit ? Number(sliderConfig?.unit) : 0.1}
+            marks={
+              // sliderConfig?.start?.text && sliderConfig?.end?.text?
+              {
+                0: sliderConfig?.start?.text || '精确',
+                1: sliderConfig?.end?.text || '随机',
+              }
+              // : undefined
+            }
+          />
         );
         break;
       case 'bool':
