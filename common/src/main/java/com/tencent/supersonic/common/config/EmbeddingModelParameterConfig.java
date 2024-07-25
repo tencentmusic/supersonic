@@ -109,7 +109,7 @@ public class EmbeddingModelParameterConfig extends ParameterConfig {
                             InMemoryModelFactory.PROVIDER
                     ),
                     ImmutableMap.of(
-                            InMemoryModelFactory.PROVIDER, "/tmp"
+                            InMemoryModelFactory.PROVIDER, ""
                     )
             ));
 
@@ -122,7 +122,7 @@ public class EmbeddingModelParameterConfig extends ParameterConfig {
                             InMemoryModelFactory.PROVIDER
                     ),
                     ImmutableMap.of(
-                            InMemoryModelFactory.PROVIDER, "/tmp"
+                            InMemoryModelFactory.PROVIDER, ""
                     )));
 
     @Override

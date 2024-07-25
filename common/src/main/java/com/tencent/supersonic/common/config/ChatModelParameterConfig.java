@@ -57,7 +57,7 @@ public class ChatModelParameterConfig extends ParameterConfig {
     public static final Parameter CHAT_MODEL_TEMPERATURE =
             new Parameter("s2.chat.model.temperature", "0.0",
                     "Temperature", "",
-                    "number", "对话模型配置", null,
+                    "slider", "对话模型配置", null,
                     getDependency(CHAT_MODEL_PROVIDER.getName(),
                             getCandidateValues(),
                             ImmutableMap.of(OpenAiModelFactory.PROVIDER, "0.0", OllamaModelFactory.PROVIDER, "0.0")));
