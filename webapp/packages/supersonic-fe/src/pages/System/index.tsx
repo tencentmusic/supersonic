@@ -22,7 +22,8 @@ const System: React.FC = () => {
 
   const configMap = useRef<Record<string, ConfigParametersItem>>();
 
-  const [configIocDepMap, setConfigIocDepMap] = useState<any>({});
+  const configIocDepMap = useRef<Record<string, any>>();
+  // const [configIocDepMap, setConfigIocDepMap] = useState<any>({});
 
   useEffect(() => {
     querySystemConfig();
@@ -30,6 +31,7 @@ const System: React.FC = () => {
   const [form] = Form.useForm();
   const querySystemConfig = async () => {
     const { code, data, msg } = await getSystemConfig();
+
     if (code === 200 && data) {
       const { parameters = [], admins = [] } = data;
 
@@ -57,6 +59,7 @@ const System: React.FC = () => {
 
   const initDepConfig = (parameters: ConfigParametersItem[], admins: Admin) => {
     const iocMap = getDepIoc(parameters);
+    configIocDepMap.current = iocMap;
     const initFormValues = setInitData(admins, parameters);
     Object.keys(initFormValues).forEach((itemName) => {
       const targetDep = iocMap[itemName] || {};
@@ -65,8 +68,6 @@ const System: React.FC = () => {
         excuteDepConfig(itemName, initFormValues);
       }
     });
-
-    setConfigIocDepMap(iocMap);
   };
 
   const groupConfigAndSet = (parameters: ConfigParametersItem[]) => {
@@ -145,16 +146,20 @@ const System: React.FC = () => {
   };
 
   const excuteDepConfig = (itemName: string, formValues: Record<string, any>) => {
-    const targetDep = configIocDepMap[itemName] || {};
+    const targetDep = configIocDepMap?.current?.[itemName];
+    if (!targetDep) {
+      return;
+    }
     const excuteStack = Object.values(targetDep);
     if (!Array.isArray(excuteStack)) {
       return;
     }
     const tempConfigMap: any = { ...configMap.current };
     const currentFormValues = formValues;
-    const showStateList: boolean[] = [];
-    const hasValueFieldsSetDefaultValueList: any[] = [];
+
     excuteStack.forEach((configItem: any) => {
+      const showStateList: boolean[] = [];
+      const hasValueFieldsSetDefaultValueList: any[] = [];
       const { dependencies, name: configItemName } = configItem;
       dependencies.forEach((item: dependenciesItem) => {
         const { name, setDefaultValue } = item;
@@ -170,20 +175,21 @@ const System: React.FC = () => {
           });
         }
       });
+
       const visible = showStateList.every((item) => item);
       tempConfigMap[configItemName].visible = visible;
+      const lastSetDefaultValueItem =
+        hasValueFieldsSetDefaultValueList[hasValueFieldsSetDefaultValueList.length - 1];
+      const lastSetDefaultValue = lastSetDefaultValueItem?.setDefaultValue;
+
+      if (lastSetDefaultValue) {
+        const targetValue = lastSetDefaultValue[currentFormValues[lastSetDefaultValueItem.name]];
+        if (targetValue) {
+          form.setFieldValue(lastSetDefaultValueItem.excuteItem, targetValue);
+        }
+      }
     });
 
-    const lastSetDefaultValueItem =
-      hasValueFieldsSetDefaultValueList[hasValueFieldsSetDefaultValueList.length - 1];
-    const lastSetDefaultValue = lastSetDefaultValueItem?.setDefaultValue;
-
-    if (lastSetDefaultValue) {
-      const targetValue = lastSetDefaultValue[currentFormValues[lastSetDefaultValueItem.name]];
-      if (targetValue) {
-        form.setFieldValue(lastSetDefaultValueItem.excuteItem, targetValue);
-      }
-    }
     groupConfigAndSet(Object.values(tempConfigMap));
   };
 
