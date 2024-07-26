@@ -470,7 +470,7 @@ public class S2VisitsDemo extends S2BaseDemo {
     public void addTerm_1(DomainResp s2Domain) {
         TermReq termReq = new TermReq();
         termReq.setName("核心用户");
-        termReq.setDescription("核心用户指tom和lucy");
+        termReq.setDescription("用户为tom和lucy");
         termReq.setAlias(Lists.newArrayList("VIP用户"));
         termReq.setDomainId(s2Domain.getId());
         termService.saveOrUpdate(termReq, User.getFakeUser());

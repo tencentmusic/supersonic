@@ -61,6 +61,14 @@ public class AliasGenerateHelper {
                 + "},\n"
                 + "\"additionalProperties\":false}\n"
                 + "Please double-check whether the answer conforms to the format described in the JSON-schema.\n"
+                + "回答格式示例:"
+                + "[\n"
+                + "  \"人数\",\n"
+                + "  \"员工人数\",\n"
+                + "  \"员工数量\",\n"
+                + "  \"员工总数\"\n"
+                + "]\n"
+                + "请严格按照示例格式进行生成。"
                 + "ANSWER JSON:";
         log.info("msg:{}", msg);
         return getChatCompletion(msg);
@@ -68,15 +76,22 @@ public class AliasGenerateHelper {
 
     public String generateDimensionValueAlias(String json) {
         String msg = "Assuming you are a professional data analyst specializing in indicators,for you a json list，"
-                + "the required content to follow is as follows: "
-                + "1. The format of JSON,"
-                + "2. Only return in JSON format,"
-                + "3. the array item > 1 and < 5,more alias,"
-                + "for example：input:[\"qq_music\",\"kugou_music\"],"
-                + "out:{\"tran\":[\"qq音乐\",\"酷狗音乐\"],\"alias\":{\"qq_music\":[\"q音\",\"qq音乐\"],"
-                + "\"kugou_music\":[\"kugou\",\"酷狗\"]}},"
+                + "the required content to follow is as follows: \n"
+                + "1. The format of JSON,\n"
+                + "2. Only return in JSON format,\n"
+                + "3. the array item > 1 and < 5,more alias,\n"
+                + "for example：\n"
+                + "input:[\"qq_music\",\"kugou_music\"],\n"
+                + "out:{\"tran\":[\"qq音乐\",\"酷狗音乐\"],"
+                + "\"alias\":{\"qq_music\":[\"q音\",\"qq音乐\"],\"kugou_music\":[\"kugou\",\"酷狗\"]}},\n"
+                + "input:[\"qq_music\",\"kugou_music\"],\n"
+                + "out:{\"tran\":[\"qq音乐\",\"酷狗音乐\"],"
+                + "\"alias\":{\"qq_music\":[\"q音\",\"qq音乐\"],\"kugou_music\":[\"kugou\",\"酷狗\"]}},\n"
+                + "input:[\"大专\",\"本科\",\"硕士研究生\"],\n"
+                + "out:{\"tran\":[\"大专\",\"本科\",\"硕士研究生\"],"
+                + "\"alias\":{\"大专\":[\"专科\",\"大学专科\"],\"本科\":[\"学士\",\"本科生\"],\"硕士研究生\":[\"硕士\",\"研究生\"]}},\n"
                 + "now input: "
-                + json + ","
+                + json + ",\n"
                 + "answer json:";
         log.info("msg:{}", msg);
         return getChatCompletion(msg);

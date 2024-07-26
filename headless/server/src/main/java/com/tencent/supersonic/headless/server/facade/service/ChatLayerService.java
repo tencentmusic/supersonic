@@ -12,8 +12,8 @@ import com.tencent.supersonic.headless.api.pojo.response.SearchResult;
 
 import java.util.List;
 
-/***dd
- * SemanticLayerService for query and search
+/**
+ * This interface adds natural language support to the semantic layer.
  */
 public interface ChatLayerService {
 

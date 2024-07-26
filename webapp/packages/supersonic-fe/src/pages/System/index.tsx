@@ -1,29 +1,18 @@
 import styles from './style.less';
-import {
-  Button,
-  Form,
-  Input,
-  InputNumber,
-  message,
-  Space,
-  Switch,
-  Select,
-  Divider,
-  Anchor,
-  Row,
-  Col,
-} from 'antd';
-import React, { useState, useEffect } from 'react';
+import { Button, Form, message, Space, Divider, Anchor, Row, Col } from 'antd';
+import React, { useState, useEffect, useRef } from 'react';
 import { getSystemConfig, saveSystemConfig } from '@/services/user';
 import { ProCard } from '@ant-design/pro-components';
 import SelectTMEPerson from '@/components/SelectTMEPerson';
-import { ConfigParametersItem, SystemConfig } from './types';
-import FormItemTitle from '@/components/FormHelper/FormItemTitle';
+import { ConfigParametersItem, SystemConfig, dependenciesItem } from './types';
+
 import { groupBy } from 'lodash';
 import { genneratorFormItemList } from '../SemanticModel/utils';
 
 const FormItem = Form.Item;
-const { TextArea } = Input;
+
+type Admin = string[];
+
 const System: React.FC = () => {
   const [systemConfig, setSystemConfig] = useState<Record<string, ConfigParametersItem[]>>({});
   const [anchorItems, setAnchorItems] = useState<{ key: string; href: string; title: string }[]>(
@@ -31,29 +20,91 @@ const System: React.FC = () => {
   );
   const [configSource, setConfigSource] = useState<SystemConfig>();
 
+  const configMap = useRef<Record<string, ConfigParametersItem>>();
+
+  const configIocDepMap = useRef<Record<string, any>>();
+  // const [configIocDepMap, setConfigIocDepMap] = useState<any>({});
+
   useEffect(() => {
     querySystemConfig();
   }, []);
   const [form] = Form.useForm();
   const querySystemConfig = async () => {
     const { code, data, msg } = await getSystemConfig();
+
     if (code === 200 && data) {
       const { parameters = [], admins = [] } = data;
-      const groupByConfig = groupBy(parameters, 'module');
-      const anchor = Object.keys(groupByConfig).map((key: string) => {
-        return {
-          key,
-          href: `#${key}`,
-          title: key,
-        };
-      });
-      setAnchorItems(anchor);
-      setSystemConfig(groupByConfig);
-      setInitData(admins, parameters);
+
+      const parametersMap = parameters.reduce(
+        (configReduceMap: Record<string, ConfigParametersItem>, item: ConfigParametersItem) => {
+          return {
+            ...configReduceMap,
+            [item.name]: item,
+          };
+        },
+        {},
+      );
+
+      configMap.current = parametersMap;
+
+      groupConfigAndSet(parameters);
+
+      initDepConfig(parameters, admins);
+
       setConfigSource(data);
     } else {
       message.error(msg);
     }
+  };
+
+  const initDepConfig = (parameters: ConfigParametersItem[], admins: Admin) => {
+    const iocMap = getDepIoc(parameters);
+    configIocDepMap.current = iocMap;
+    const initFormValues = setInitData(admins, parameters);
+    Object.keys(initFormValues).forEach((itemName) => {
+      const targetDep = iocMap[itemName] || {};
+      const excuteStack = Object.values(targetDep);
+      if (Array.isArray(excuteStack)) {
+        excuteDepConfig(itemName, initFormValues);
+      }
+    });
+  };
+
+  const groupConfigAndSet = (parameters: ConfigParametersItem[]) => {
+    const groupByConfig = groupBy(parameters, 'module');
+    const anchor = Object.keys(groupByConfig).map((key: string) => {
+      return {
+        key,
+        href: `#${key}`,
+        title: key,
+      };
+    });
+    setAnchorItems(anchor);
+    setSystemConfig(groupByConfig);
+  };
+
+  const getDepIoc = (parameters: ConfigParametersItem[]) => {
+    const iocMap: Record<string, Record<string, ConfigParametersItem>> = {};
+    parameters.forEach((item) => {
+      const { name: itemName, dependencies } = item;
+      if (Array.isArray(dependencies)) {
+        dependencies.forEach((depItem) => {
+          const { name } = depItem;
+
+          if (iocMap[name]) {
+            iocMap[name] = {
+              ...iocMap[name],
+              [itemName]: item,
+            };
+          } else {
+            iocMap[name] = {
+              [itemName]: item,
+            };
+          }
+        });
+      }
+    });
+    return iocMap;
   };
 
   const setInitData = (admins: string[], systemConfigParameters: ConfigParametersItem[]) => {
@@ -68,6 +119,7 @@ const System: React.FC = () => {
       { admins },
     );
     form.setFieldsValue(fieldsValue);
+    return fieldsValue;
   };
 
   const querySaveSystemConfig = async () => {
@@ -93,6 +145,54 @@ const System: React.FC = () => {
     }
   };
 
+  const excuteDepConfig = (itemName: string, formValues: Record<string, any>) => {
+    const targetDep = configIocDepMap?.current?.[itemName];
+    if (!targetDep) {
+      return;
+    }
+    const excuteStack = Object.values(targetDep);
+    if (!Array.isArray(excuteStack)) {
+      return;
+    }
+    const tempConfigMap: any = { ...configMap.current };
+    const currentFormValues = formValues;
+
+    excuteStack.forEach((configItem: any) => {
+      const showStateList: boolean[] = [];
+      const hasValueFieldsSetDefaultValueList: any[] = [];
+      const { dependencies, name: configItemName } = configItem;
+      dependencies.forEach((item: dependenciesItem) => {
+        const { name, setDefaultValue } = item;
+        const currentDepValue = currentFormValues[name];
+        const showIncludesValue = item.show?.includesValue;
+        if (Array.isArray(showIncludesValue)) {
+          showStateList.push(showIncludesValue.includes(currentDepValue));
+        }
+        if (setDefaultValue && currentDepValue) {
+          hasValueFieldsSetDefaultValueList.push({
+            excuteItem: configItemName,
+            ...item,
+          });
+        }
+      });
+
+      const visible = showStateList.every((item) => item);
+      tempConfigMap[configItemName].visible = visible;
+      const lastSetDefaultValueItem =
+        hasValueFieldsSetDefaultValueList[hasValueFieldsSetDefaultValueList.length - 1];
+      const lastSetDefaultValue = lastSetDefaultValueItem?.setDefaultValue;
+
+      if (lastSetDefaultValue) {
+        const targetValue = lastSetDefaultValue[currentFormValues[lastSetDefaultValueItem.name]];
+        if (targetValue) {
+          form.setFieldValue(lastSetDefaultValueItem.excuteItem, targetValue);
+        }
+      }
+    });
+
+    groupConfigAndSet(Object.values(tempConfigMap));
+  };
+
   return (
     <>
       <div style={{ margin: '40px auto', width: 1200 }}>
@@ -113,11 +213,21 @@ const System: React.FC = () => {
                 </Space>
               }
             >
-              <Form form={form} layout="vertical" className={styles.form}>
+              <Form
+                form={form}
+                layout="vertical"
+                className={styles.form}
+                onValuesChange={(value, values) => {
+                  const valueKey = Object.keys(value)[0];
+                  excuteDepConfig(valueKey, values);
+                }}
+              >
                 <FormItem name="admins" label="管理员">
                   <SelectTMEPerson placeholder="请邀请团队成员" />
                 </FormItem>
+
                 <Divider />
+
                 <Space direction="vertical" style={{ width: '100%' }} size={35}>
                   {Object.keys(systemConfig).map((key: string) => {
                     const itemList = systemConfig[key];
@@ -128,7 +238,7 @@ const System: React.FC = () => {
                         bordered
                         id={key}
                       >
-                        {genneratorFormItemList(itemList)}
+                        {genneratorFormItemList(itemList, form)}
                       </ProCard>
                     );
                   })}

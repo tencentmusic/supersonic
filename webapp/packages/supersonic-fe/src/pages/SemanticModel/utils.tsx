@@ -1,11 +1,13 @@
 import type { API } from '@/services/API';
 import { ISemantic } from './data';
 import type { DataNode } from 'antd/lib/tree';
-import { Form, Input, InputNumber, Switch, Select } from 'antd';
+import { Form, Input, InputNumber, Switch, Select, Slider } from 'antd';
 import FormItemTitle from '@/components/FormHelper/FormItemTitle';
 import DisabledWheelNumberInput from '@/components/DisabledWheelNumberInput';
 import { ConfigParametersItem } from '../System/types';
 import { TransType } from './enum';
+import { isString, isBoolean } from 'lodash';
+import { ReactNode } from 'react';
 
 const FormItem = Form.Item;
 const { TextArea } = Input;
@@ -134,10 +136,13 @@ export const findLeafNodesFromDomainList = (
   return leafNodes;
 };
 
-export const genneratorFormItemList = (itemList: ConfigParametersItem[]) => {
-  return itemList.map((item) => {
-    const { dataType, name, comment, placeholder, description, require, value } = item;
-
+export const genneratorFormItemList = (itemList: ConfigParametersItem[], form) => {
+  const list = itemList.reduce((itemList: ReactNode[], item) => {
+    const { dataType, name, comment, placeholder, description, require, visible, sliderConfig } =
+      item;
+    if (visible === false) {
+      return itemList;
+    }
     let defaultItem = <Input />;
     switch (dataType) {
       case 'string':
@@ -148,6 +153,10 @@ export const genneratorFormItemList = (itemList: ConfigParametersItem[]) => {
         }
 
         break;
+      case 'password': {
+        defaultItem = <Input.Password placeholder={placeholder} />;
+        break;
+      }
       case 'longText':
         defaultItem = <TextArea placeholder={placeholder} style={{ height: 100 }} />;
         break;
@@ -157,8 +166,25 @@ export const genneratorFormItemList = (itemList: ConfigParametersItem[]) => {
           <DisabledWheelNumberInput placeholder={placeholder} style={{ width: '100%' }} />
         );
         break;
+      case 'slider':
+        defaultItem = (
+          <Slider
+            min={sliderConfig?.start?.value ? Number(sliderConfig?.start?.value) : 0}
+            max={sliderConfig?.end?.value ? Number(sliderConfig?.end?.value) : 1}
+            step={sliderConfig?.unit ? Number(sliderConfig?.unit) : 0.1}
+            marks={
+              // sliderConfig?.start?.text && sliderConfig?.end?.text?
+              {
+                0: sliderConfig?.start?.text || '精确',
+                1: sliderConfig?.end?.text || '随机',
+              }
+              // : undefined
+            }
+          />
+        );
+        break;
       case 'bool':
-        return (
+        itemList.push(
           <FormItem
             name={name}
             label={comment}
@@ -174,12 +200,19 @@ export const genneratorFormItemList = (itemList: ConfigParametersItem[]) => {
             }}
           >
             <Switch />
-          </FormItem>
+          </FormItem>,
         );
+        return itemList;
       case 'list': {
         const { candidateValues = [] } = item;
-        const options = candidateValues.map((value) => {
-          return { label: value, value };
+        const options = candidateValues.map((item: string | { label: string; value: string }) => {
+          if (isString(item)) {
+            return { label: item, value: item };
+          }
+          if (item?.label) {
+            return item;
+          }
+          return { label: item, value: item };
         });
         defaultItem = (
           <Select style={{ width: '100%' }} options={options} placeholder={placeholder} />
@@ -190,7 +223,8 @@ export const genneratorFormItemList = (itemList: ConfigParametersItem[]) => {
         defaultItem = <Input placeholder={placeholder} />;
         break;
     }
-    return (
+
+    itemList.push(
       <FormItem
         name={name}
         key={name}
@@ -198,9 +232,11 @@ export const genneratorFormItemList = (itemList: ConfigParametersItem[]) => {
         label={<FormItemTitle title={comment} subTitle={description} />}
       >
         {defaultItem}
-      </FormItem>
+      </FormItem>,
     );
-  });
+    return itemList;
+  }, []);
+  return [...list];
 };
 
 export const wrapperTransTypeAndId = (exTransType: TransType, id: number) => {
