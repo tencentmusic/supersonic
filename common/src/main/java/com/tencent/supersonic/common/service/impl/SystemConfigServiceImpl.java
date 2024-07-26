@@ -3,17 +3,19 @@ package com.tencent.supersonic.common.service.impl;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.tencent.supersonic.common.config.SystemConfig;
 import com.tencent.supersonic.common.persistence.dataobject.SystemConfigDO;
 import com.tencent.supersonic.common.persistence.mapper.SystemConfigMapper;
 import com.tencent.supersonic.common.pojo.Parameter;
-import com.tencent.supersonic.common.config.SystemConfig;
 import com.tencent.supersonic.common.service.SystemConfigService;
 import com.tencent.supersonic.common.util.JsonUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 @Service
 public class SystemConfigServiceImpl
@@ -22,8 +24,21 @@ public class SystemConfigServiceImpl
     @Autowired
     private Environment environment;
 
+    // Cache field to store the system configuration
+    private AtomicReference<SystemConfig> cachedSystemConfig = new AtomicReference<>();
+
     @Override
     public SystemConfig getSystemConfig() {
+        SystemConfig cachedConfig = cachedSystemConfig.get();
+        if (cachedConfig != null) {
+            return cachedConfig;
+        }
+        SystemConfig systemConfigDb = getSystemConfigFromDB();
+        cachedSystemConfig.set(systemConfigDb);
+        return systemConfigDb;
+    }
+
+    private SystemConfig getSystemConfigFromDB() {
         List<SystemConfigDO> list = list();
         if (CollectionUtils.isEmpty(list)) {
             SystemConfig systemConfig = new SystemConfig();
@@ -46,6 +61,7 @@ public class SystemConfigServiceImpl
     public void save(SystemConfig sysConfig) {
         SystemConfigDO systemConfigDO = convert(sysConfig);
         saveOrUpdate(systemConfigDO);
+        cachedSystemConfig.set(sysConfig);
     }
 
     private SystemConfig convert(SystemConfigDO systemConfigDO) {
