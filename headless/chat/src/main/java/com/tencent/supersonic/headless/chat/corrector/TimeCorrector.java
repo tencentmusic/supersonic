@@ -108,5 +108,4 @@ public class TimeCorrector extends BaseSemanticCorrector {
             semanticParseInfo.getSqlInfo().setCorrectedS2SQL(correctS2SQL);
         }
     }
-
 }
