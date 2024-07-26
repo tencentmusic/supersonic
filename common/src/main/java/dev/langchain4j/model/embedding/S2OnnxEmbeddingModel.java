@@ -33,7 +33,7 @@ public class S2OnnxEmbeddingModel extends AbstractInProcessEmbeddingModel {
                 throw new RuntimeException(e);
             }
         }
-        if (model == null){
+        if (model == null) {
             model = loadFromFileSystem(Paths.get(pathToModel), resource);
         }
     }
