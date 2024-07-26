@@ -19,13 +19,13 @@
     },
     {
         "question": "超音数访问时长小于1小时，且来自美术部的用户是哪些",
-        "sideInfo": "CurrentDate=[2023-07-31],DomainTerms=[<核心用户 COMMENT '核心用户指tom和lucy'>]",
+        "sideInfo": "CurrentDate=[2023-07-31],DomainTerms=[<核心用户 COMMENT '用户为tom和lucy'>]",
         "dbSchema": "Table:[超音数产品], Metrics:[<访问时长 COMMENT '一段时间内用户的访问时长' AGGREGATE 'SUM'>], Dimensions:[<用户>], Values:[<部门='美术部'>]",
         "sql": "SELECT 用户 FROM 超音数产品 WHERE 部门 = '美术部' AND 访问时长 < 1"
     },
     {
         "question": "超音数本月pv最高的用户有哪些",
-        "sideInfo": "CurrentDate=[2023-08-31],DomainTerms=[<核心用户 COMMENT '核心用户指tom和lucy'>]",
+        "sideInfo": "CurrentDate=[2023-08-31],DomainTerms=[<核心用户 COMMENT '用户为tom和lucy'>]",
         "dbSchema": "Table=[超音数产品], Metrics=[<访问次数 ALIAS 'pv' COMMENT '一段时间内用户的访问次数' AGGREGATE 'SUM'>], Dimensions=[<用户>], Values=[]",
         "sql": "SELECT 用户 FROM 超音数产品 WHERE 数据日期 >= '2023-08-01' AND 数据日期 <= '2023-08-31' ORDER BY 访问次数 DESC LIMIT 1"
     },
@@ -34,5 +34,17 @@
         "sideInfo": "CurrentDate=[2023-09-14]",
         "dbSchema": "Table=[超音数产品], Metrics=[<访问次数 ALIAS 'pv' COMMENT '一段时间内用户的访问次数' AGGREGATE 'SUM'>], Dimensions=[<部门>], Values=[]",
         "sql": "SELECT 部门 FROM 超音数产品 WHERE 访问次数 > 1000"
+    },
+    {
+        "question": "过去半个月核心用户的访问次数",
+        "sideInfo": "CurrentDate=[2023-09-15],DomainTerms=[<核心用户 COMMENT '用户为alice'>]",
+        "dbSchema": "Table=[超音数产品], Metrics=[<访问次数 ALIAS 'pv' COMMENT '一段时间内用户的访问次数' AGGREGATE 'SUM'>], Dimensions=[<部门>], Values=[]",
+        "sql": "SELECT 用户,SUM(访问次数) FROM 超音数产品 WHERE 用户='alice' AND 数据日期 >= '2023-09-01' AND 数据日期 <= '2023-09-15'"
+    },
+    {
+        "question": "过去半个月忠实用户有哪一些",
+        "sideInfo": "CurrentDate=[2023-09-15],DomainTerms=[<忠实用户 COMMENT '一段时间内总访问次数大于100的用户'>]",
+        "dbSchema": "Table=[超音数产品], Metrics=[<访问次数 ALIAS 'pv' COMMENT '一段时间内用户的访问次数' AGGREGATE 'SUM'>], Dimensions=[<用户>], Values=[]",
+        "sql": "SELECT 用户 FROM 超音数产品 WHERE 数据日期 >= '2023-09-01' AND 数据日期 <= '2023-09-15' GROUP BY 用户 HAVING SUM(访问次数) > 100"
     }
 ]
