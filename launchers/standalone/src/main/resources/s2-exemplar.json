@@ -1,62 +1,38 @@
 [
     {
-        "question": "比较jackjchen和robinlee在超音数的访问次数",
-        "sideInfo": "'jackjchen'是一个'用户名'，'robinlee'是一个'用户名'。当前的日期是2020-12-01",
-        "dbSchema": "Table: 超音数产品, Columns = [\"部门\", \"模块\", \"用户名\", \"访问次数\", \"访问人数\", \"访问时长\", \"数据日期\"]",
-        "sql": "SELECT 用户名, 访问次数 FROM 超音数产品 WHERE 用户名 IN ('jackjchen', 'robinlee')"
+        "question": "比较jackjchen和robinlee今年以来的访问次数",
+        "sideInfo": "CurrentDate=[2020-12-01],DomainTerms=[<核心用户 COMMENT '核心用户指tom和lucy'>]",
+        "dbSchema": "Table=[超音数产品], Metrics=[<访问次数 ALIAS 'pv' COMMENT '一段时间内用户的访问次数' AGGREGATE 'SUM'>,<访问用户数 ALIAS 'UV,访问人数,' COMMENT '访问的用户个数' AGGREGATE 'COUNT'>,<人均访问次数 ALIAS '平均访问次数,' COMMENT '每个用户平均访问的次数'>], Dimensions=[], Values[<用户='jackjchen'>,<用户='robinlee'>]",
+        "sql": "SELECT 用户, 访问次数 FROM 超音数产品 WHERE 用户 IN ('jackjchen', 'robinlee') AND 数据日期 >= '2020-01-01' AND 数据日期 <= '2020-12-01'"
     },
     {
         "question": "超音数近12个月访问人数 按部门",
-        "sideInfo": "当前的日期是2022-11-06",
-        "dbSchema": "Table: 超音数产品, Columns = [\"部门\", \"模块\", \"用户名\", \"访问次数\", \"访问人数\", \"访问时长\", \"数据日期\"]",
+        "sideInfo": "CurrentDate=[2022-11-06]",
+        "dbSchema": "Table=[超音数产品], Metrics=[<访问次数 ALIAS 'pv' COMMENT '一段时间内用户的访问次数' AGGREGATE 'SUM'>,<访问用户数 ALIAS 'UV,访问人数,' COMMENT '访问的用户个数' AGGREGATE 'COUNT'>,<人均访问次数 ALIAS '平均访问次数,' COMMENT '每个用户平均访问的次数'>], Dimensions=[<部门>], Values=[]",
         "sql": "SELECT 部门, 数据日期, 访问人数 FROM 超音数产品 WHERE 数据日期 >= '2021-11-06' AND 数据日期 <= '2022-11-06'"
     },
     {
-        "question": "超音数美术部、技术研发部的访问时长",
-        "sideInfo": "’'美术部'‘是一个’部门‘，’ '技术研发部'‘是一个’部门‘。当前的日期是2023-04-21",
-        "dbSchema": "Table: 超音数产品, Columns = [\"部门\", \"模块\", \"用户名\", \"访问次数\", \"访问人数\", \"访问时长\", \"数据日期\"]",
-        "sql": "SELECT 部门, 访问时长 FROM 超音数产品 WHERE 部门 IN ('美术部', '技术研发部')"
-    },
-    {
-        "question": "近3天海田飞系MPPM结算播放份额",
-        "sideInfo": "'海田飞系'是一个'严选版权归属系'。当前的日期是2023-08-21",
-        "dbSchema": "Table: 严选, Columns = [\"严选版权归属系\", \"付费模式\", \"结算播放份额\", \"付费用户结算播放份额\", \"数据日期\"]",
-        "sql": "SELECT 严选版权归属系, 结算播放份额 FROM 严选 WHERE 严选版权归属系 = '海田飞系' AND 数据日期 >= '2023-08-19' AND 数据日期 <= '2023-08-21' "
-    },
-    {
-        "question": "对比近7天翻唱版和纯音乐的歌曲播放量",
-        "sideInfo": "'纯音乐'是一个'语种'，'翻唱版'是一个'歌曲版本'。当前的日期是2023-05-22",
-        "dbSchema": "Table: 歌曲库, Columns = [\"是否潮流人歌曲\", \"C音歌曲ID\", \"C音歌曲MID\", \"歌曲名\", \"歌曲版本\", \"语种\", \"歌曲类型\", \"翻唱类型\", \"MPPM歌曲ID\", \"是否严选窄口径歌曲\", \"是否严选宽口径歌曲\", \"结算播放量\", \"运营播放量\", \"付费用户结算播放量\", \"历史累计结算播放量\", \"运营搜播量\", \"结算搜播量\", \"运营完播量\", \"运营推播量\", \"近7日复播率\", \"日均搜播量\", \"数据日期\"]",
-        "sql": "SELECT 歌曲版本, 语种, 结算播放量 FROM 歌曲库 WHERE 歌曲版本 = '翻唱版' AND 语种 = '纯音乐' AND 数据日期 >= '2023-05-16' AND 数据日期 <= '2023-05-22' "
-    },
-    {
-        "question": "对比一下陈拙悬、孟梅琦、赖媚韵的粉丝数",
-        "sideInfo": "'1527896'是一个'MPPM歌手ID'，'1565463'是一个'MPPM歌手ID'，'2141459'是一个'MPPM歌手ID'。当前的日期是2023-05-31",
-        "dbSchema": "Table: 艺人库, Columns = [\"上下架状态\", \"歌手名\", \"歌手等级\", \"歌手类型\", \"歌手来源\", \"MPPM潮流人等级\", \"活跃区域\", \"年龄\", \"歌手才能\", \"歌手风格\", \"粉丝数\", \"潮音粉丝数\", \"超声波粉丝数\", \"推博粉丝数\", \"超声波歌曲数\", \"在架歌曲数\", \"超声波分享数\", \"独占歌曲数\", \"超声波在架歌曲评论数\", \"有播放量歌曲数\", \"数据日期\"]",
-        "sql": "SELECT 歌手名, 粉丝数 FROM 艺人库 WHERE 歌手名 IN ('陈拙悬', '孟梅琦', '赖媚韵')"
-    },
-    {
-        "question": "播放量大于1万的歌曲有多少",
-        "sideInfo": "当前的日期是2023-07-31",
-        "dbSchema": "Table: 歌曲库, Columns = [\"歌曲名\", \"歌曲版本\", \"歌曲类型\", \"MPPM歌曲ID\", \"是否严选窄口径歌曲\", \"是否严选宽口径歌曲\", \"是否潮流人歌曲\", \"超声波歌曲ID\", \"C音歌曲ID\", \"C音歌曲MID\", \"结算播放量\", \"运营播放量\", \"分享量\", \"收藏量\", \"运营搜播量\", \"结算搜播量\", \"拉新用户数\", \"拉活用户数\", \"分享率\", \"结算播放份额\", \"数据日期\"]",
-        "sql": "SELECT 歌曲名 FROM 歌曲库 WHERE 结算播放量 > 10000"
+        "question": "超音数过去90天美术部、技术研发部的访问时长",
+        "sideInfo": "CurrentDate=[2023-04-21]",
+        "dbSchema": "Table=[超音数产品], Metrics=[<访问时长 COMMENT '一段时间内用户的访问时长' AGGREGATE 'SUM'>], Dimensions=[], Values=[<部门='美术部'>,<部门='技术研发部'>]",
+        "sql": "SELECT 部门, 访问时长 FROM 超音数产品 WHERE 部门 IN ('美术部', '技术研发部') AND 数据日期 >= '2023-01-20' AND 数据日期 <= '2023-04-21'"
     },
     {
         "question": "超音数访问时长小于1小时，且来自美术部的用户是哪些",
-        "sideInfo": "'美术部'‘是一个’部门‘。当前的日期是2023-07-31",
-        "dbSchema": "Table: 超音数产品, Columns = [\"用户名\", \"部门\", \"模块\", \"访问时长\", \"访问次数\", \"访问人数\", \"数据日期\"]",
-        "sql": "SELECT 用户名 FROM 超音数产品 WHERE 部门 = '美术部' AND 访问时长 < 1"
+        "sideInfo": "CurrentDate=[2023-07-31],DomainTerms=[<核心用户 COMMENT '核心用户指tom和lucy'>]",
+        "dbSchema": "Table:[超音数产品], Metrics:[<访问时长 COMMENT '一段时间内用户的访问时长' AGGREGATE 'SUM'>], Dimensions:[<用户>], Values:[<部门='美术部'>]",
+        "sql": "SELECT 用户 FROM 超音数产品 WHERE 部门 = '美术部' AND 访问时长 < 1"
     },
     {
-        "question": "超音数pv最高的用户有哪些",
-        "sideInfo": "当前的日期是2023-08-31",
-        "dbSchema": "Table: 超音数产品, Columns = [\"用户名\", \"部门\", \"模块\", \"访问时长\", \"访问次数\", \"访问人数\", \"数据日期\"]",
-        "sql": "SELECT 用户名 FROM 超音数产品 ORDER BY 访问次数 DESC LIMIT 1"
+        "question": "超音数本月pv最高的用户有哪些",
+        "sideInfo": "CurrentDate=[2023-08-31],DomainTerms=[<核心用户 COMMENT '核心用户指tom和lucy'>]",
+        "dbSchema": "Table=[超音数产品], Metrics=[<访问次数 ALIAS 'pv' COMMENT '一段时间内用户的访问次数' AGGREGATE 'SUM'>], Dimensions=[<用户>], Values=[]",
+        "sql": "SELECT 用户 FROM 超音数产品 WHERE 数据日期 >= '2023-08-01' AND 数据日期 <= '2023-08-31' ORDER BY 访问次数 DESC LIMIT 1"
     },
     {
         "question": "超音数访问次数大于1k的部门是哪些",
-        "sideInfo": "当前的日期是2023-09-14",
-        "dbSchema": "Table: 超音数产品, Columns = [\"部门\", \"模块\", \"用户名\", \"访问次数\", \"访问人数\", \"访问时长\", \"数据日期\"]",
+        "sideInfo": "CurrentDate=[2023-09-14]",
+        "dbSchema": "Table=[超音数产品], Metrics=[<访问次数 ALIAS 'pv' COMMENT '一段时间内用户的访问次数' AGGREGATE 'SUM'>], Dimensions=[<部门>], Values=[]",
         "sql": "SELECT 部门 FROM 超音数产品 WHERE 访问次数 > 1000"
     }
 ]
