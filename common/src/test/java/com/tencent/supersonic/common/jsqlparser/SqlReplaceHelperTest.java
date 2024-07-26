@@ -1,14 +1,15 @@
 package com.tencent.supersonic.common.jsqlparser;
 
 import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
+import org.apache.commons.lang3.tuple.Pair;
+import org.junit.Assert;
+import org.junit.jupiter.api.Test;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import org.apache.commons.lang3.tuple.Pair;
-import org.junit.Assert;
-import org.junit.jupiter.api.Test;
 
 /**
  * SqlParserReplaceHelperTest
@@ -111,6 +112,20 @@ class SqlReplaceHelperTest {
                         + "歌手名 = '周杰伦' AND 歌手名 = '林俊杰' AND 歌手名 = '陈奕迅' AND 歌曲发布时 = '2023-08-01' "
                         + "AND 播放量 < (SELECT min(播放量) FROM 歌曲库 WHERE 语种 = '英文')) AND 数据日期 = '2023-08-09' "
                         + "ORDER BY 播放量 DESC LIMIT 11", replaceSql);
+
+
+        Map<String, Map<String, String>> filedNameToValueMap3 = new HashMap<>();
+
+        Map<String, String> valueMap3 = new HashMap<>();
+        valueMap3.put("周杰伦", "1");
+        valueMap3.put("林俊杰", "2");
+        valueMap3.put("陈奕迅", "3");
+        filedNameToValueMap3.put("歌手名", valueMap3);
+        replaceSql = "SELECT 歌曲名 FROM 歌曲库 WHERE  歌手名 in ('周杰伦','林俊杰','陈奕迅') ";
+        replaceSql = SqlReplaceHelper.replaceValue(replaceSql, filedNameToValueMap3, true);
+
+        Assert.assertEquals(
+                "SELECT 歌曲名 FROM 歌曲库 WHERE 歌手名 IN ('1', '2', '3')", replaceSql);
     }
 
     @Test

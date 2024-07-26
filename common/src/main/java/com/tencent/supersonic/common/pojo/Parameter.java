@@ -94,31 +94,6 @@ public class Parameter {
         this.value = value;
     }
 
-    public boolean isVisible(Map<String, String> otherParameterValues) {
-        if (dependencies == null) {
-            return true;
-        }
-        for (Dependency dependency : dependencies) {
-            String dependentValue = otherParameterValues.get(dependency.getName());
-            if (dependentValue == null || !dependency.getShow().getIncludesValue().contains(dependentValue)) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    public void applyDefaultValue(Map<String, String> otherParameterValues) {
-        if (dependencies == null) {
-            return;
-        }
-        for (Dependency dependency : dependencies) {
-            String dependentValue = otherParameterValues.get(dependency.getName());
-            if (dependentValue != null && dependency.getSetDefaultValue().containsKey(dependentValue)) {
-                this.defaultValue = dependency.getSetDefaultValue().get(dependentValue);
-            }
-        }
-    }
-
     @Data
     public static class Dependency {
         private String name;
