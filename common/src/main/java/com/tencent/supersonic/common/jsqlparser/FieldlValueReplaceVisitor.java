@@ -1,10 +1,5 @@
 package com.tencent.supersonic.common.jsqlparser;
 
-import com.tencent.supersonic.common.util.JsonUtil;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.expression.DoubleValue;
 import net.sf.jsqlparser.expression.Expression;
@@ -23,6 +18,11 @@ import net.sf.jsqlparser.expression.operators.relational.MinorThanEquals;
 import net.sf.jsqlparser.schema.Column;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.CollectionUtils;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 @Slf4j
 public class FieldlValueReplaceVisitor extends ExpressionVisitorAdapter {
@@ -71,17 +71,13 @@ public class FieldlValueReplaceVisitor extends ExpressionVisitorAdapter {
                 values.add(((StringValue) o).getValue());
             }
         });
-        if (valueMap == null) {
+        if (valueMap == null || CollectionUtils.isEmpty(values)) {
             return;
         }
-        String value = valueMap.get(JsonUtil.toString(values));
-        if (StringUtils.isBlank(value)) {
-            return;
-        }
-        List<String> valueList = JsonUtil.toList(value, String.class);
         List<Expression> newExpressions = new ArrayList<>();
-        valueList.stream().forEach(o -> {
-            StringValue stringValue = new StringValue(o);
+        values.stream().forEach(o -> {
+            String replaceValue = valueMap.getOrDefault(o, o);
+            StringValue stringValue = new StringValue(replaceValue);
             newExpressions.add(stringValue);
         });
         rightItemsList.setExpressions(newExpressions);

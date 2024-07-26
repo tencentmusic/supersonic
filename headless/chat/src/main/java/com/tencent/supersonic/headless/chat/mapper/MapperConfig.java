@@ -49,16 +49,16 @@ public class MapperConfig extends ParameterConfig {
                     "维度值相似度阈值在动态调整中的最低值",
                     "number", "Mapper相关配置");
 
-    public static final Parameter EMBEDDING_MAPPER_MIN =
-            new Parameter("s2.mapper.embedding.word.min", "4",
-                    "用于向量召回最小的文本长度",
-                    "为提高向量召回效率, 小于该长度的文本不进行向量语义召回",
+    public static final Parameter EMBEDDING_MAPPER_TEXT_SIZE =
+            new Parameter("s2.mapper.embedding.word.size", "4",
+                    "用于向量召回文本长度",
+                    "为提高向量召回效率, 按指定长度进行向量语义召回",
                     "number", "Mapper相关配置");
 
-    public static final Parameter EMBEDDING_MAPPER_MAX =
-            new Parameter("s2.mapper.embedding.word.max", "5",
-                    "用于向量召回最大的文本长度",
-                    "为提高向量召回效率, 大于该长度的文本不进行向量语义召回",
+    public static final Parameter EMBEDDING_MAPPER_TEXT_STEP =
+            new Parameter("s2.mapper.embedding.word.step", "3",
+                    "向量召回文本每步长度",
+                    "为提高向量召回效率, 按指定每步长度进行召回",
                     "number", "Mapper相关配置");
 
     public static final Parameter EMBEDDING_MAPPER_BATCH =

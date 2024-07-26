@@ -56,29 +56,29 @@ public class PromptHelper {
     }
 
     public String buildSideInformation(LLMReq llmReq) {
-        List<LLMReq.ElementValue> linkedValues = llmReq.getLinking();
         String currentDate = llmReq.getCurrentDate();
-        String priorExts = llmReq.getPriorExts();
+        List<String> sideInfos = Lists.newArrayList();
+        sideInfos.add(String.format("CurrentDate=[%s]", currentDate));
 
-        List<String> priorLinkingList = new ArrayList<>();
-        for (LLMReq.ElementValue value : linkedValues) {
-            String fieldName = value.getFieldName();
-            String fieldValue = value.getFieldValue();
-            priorLinkingList.add("‘" + fieldValue + "‘是一个‘" + fieldName + "‘");
+        if (StringUtils.isNotEmpty(llmReq.getPriorExts())) {
+            sideInfos.add(String.format("PriorKnowledge=[%s]", llmReq.getPriorExts()));
         }
-        String currentDataStr = "当前的日期是" + currentDate;
-        String linkingListStr = String.join("，", priorLinkingList);
+
         String termStr = buildTermStr(llmReq);
-        return String.format("%s;%s;%s;%s", linkingListStr, currentDataStr, termStr, priorExts);
+        if (StringUtils.isNotEmpty(termStr)) {
+            sideInfos.add(String.format("DomainTerms=[%s]", termStr));
+        }
+
+        return String.join(",", sideInfos);
     }
 
     public String buildSchemaStr(LLMReq llmReq) {
         String tableStr = llmReq.getSchema().getDataSetName();
-        StringBuilder metricStr = new StringBuilder();
-        StringBuilder dimensionStr = new StringBuilder();
 
+        List<String> metrics = Lists.newArrayList();
         llmReq.getSchema().getMetrics().stream().forEach(
                 metric -> {
+                    StringBuilder metricStr = new StringBuilder();
                     metricStr.append("<");
                     metricStr.append(metric.getName());
                     if (!CollectionUtils.isEmpty(metric.getAlias())) {
@@ -92,52 +92,63 @@ public class PromptHelper {
                     if (StringUtils.isNotEmpty(metric.getDefaultAgg())) {
                         metricStr.append(" AGGREGATE '" + metric.getDefaultAgg().toUpperCase() + "'");
                     }
-                    metricStr.append(">,");
+                    metricStr.append(">");
+                    metrics.add(metricStr.toString());
                 }
         );
 
+        List<String> dimensions = Lists.newArrayList();
         llmReq.getSchema().getDimensions().stream().forEach(
                 dimension -> {
+                    StringBuilder dimensionStr = new StringBuilder();
                     dimensionStr.append("<");
                     dimensionStr.append(dimension.getName());
                     if (!CollectionUtils.isEmpty(dimension.getAlias())) {
                         StringBuilder alias = new StringBuilder();
                         dimension.getAlias().stream().forEach(a -> alias.append(a + ","));
-                        metricStr.append(" ALIAS '" + alias + "'");
+                        dimensionStr.append(" ALIAS '" + alias + "'");
                     }
                     if (StringUtils.isNotEmpty(dimension.getDescription())) {
                         dimensionStr.append(" COMMENT '" + dimension.getDescription() + "'");
                     }
-                    dimensionStr.append(">,");
+                    dimensionStr.append(">");
+                    dimensions.add(dimensionStr.toString());
                 }
         );
 
-        String template = "Table: %s, Metrics: [%s], Dimensions: [%s]";
+        List<String> values = Lists.newArrayList();
+        llmReq.getLinking().stream().forEach(
+                value -> {
+                    StringBuilder valueStr = new StringBuilder();
+                    String fieldName = value.getFieldName();
+                    String fieldValue = value.getFieldValue();
+                    valueStr.append(String.format("<%s='%s'>", fieldName, fieldValue));
+                    values.add(valueStr.toString());
+                }
+        );
 
-
-        return String.format(template, tableStr, metricStr, dimensionStr);
+        String template = "Table=[%s], Metrics=[%s], Dimensions=[%s], Values=[%s]";
+        return String.format(template, tableStr, String.join(",", metrics),
+                String.join(",", dimensions), String.join(",", values));
     }
 
     private String buildTermStr(LLMReq llmReq) {
         List<LLMReq.Term> terms = llmReq.getSchema().getTerms();
-        StringBuilder termsDesc = new StringBuilder();
-        if (!CollectionUtils.isEmpty(terms)) {
-            termsDesc.append("相关业务术语：");
-            for (int idx = 0; idx < terms.size(); idx++) {
-                LLMReq.Term term = terms.get(idx);
-                String name = term.getName();
-                String description = term.getDescription();
-                List<String> alias = term.getAlias();
-                String descPart = StringUtils.isBlank(description) ? "" : String.format("，它的涵义是<%s>", description);
-                String aliasPart = CollectionUtils.isEmpty(alias) ? "" : String.format("，类似表达还有<%s>", alias);
-                termsDesc.append(String.format("%d.<%s>是业务术语%s%s；", idx + 1, name, descPart, aliasPart));
-            }
-            if (termsDesc.length() > 0) {
-                termsDesc.setLength(termsDesc.length() - 1);
-            }
+        List<String> termStr = Lists.newArrayList();
+        terms.stream().forEach(
+                term -> {
+                    StringBuilder termsDesc = new StringBuilder();
+                    String description = term.getDescription();
+                    termsDesc.append(String.format("<%s COMMENT '%s'>", term.getName(), description));
+                    termStr.add(termsDesc.toString());
+                }
+        );
+        String ret = "";
+        if (termStr.size() > 0) {
+            ret = String.join(",", termStr);
         }
 
-        return termsDesc.toString();
+        return ret;
     }
 
 }
