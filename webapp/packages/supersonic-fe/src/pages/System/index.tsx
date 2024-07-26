@@ -65,7 +65,7 @@ const System: React.FC = () => {
       const targetDep = iocMap[itemName] || {};
       const excuteStack = Object.values(targetDep);
       if (Array.isArray(excuteStack)) {
-        excuteDepConfig(itemName, initFormValues);
+        excuteDepConfig(itemName, initFormValues, true);
       }
     });
   };
@@ -145,7 +145,11 @@ const System: React.FC = () => {
     }
   };
 
-  const excuteDepConfig = (itemName: string, formValues: Record<string, any>) => {
+  const excuteDepConfig = (
+    itemName: string,
+    formValues: Record<string, any>,
+    isInit: boolean = false,
+  ) => {
     const targetDep = configIocDepMap?.current?.[itemName];
     if (!targetDep) {
       return;
@@ -184,7 +188,7 @@ const System: React.FC = () => {
 
       if (lastSetDefaultValue) {
         const targetValue = lastSetDefaultValue[currentFormValues[lastSetDefaultValueItem.name]];
-        if (targetValue) {
+        if (targetValue && !isInit) {
           form.setFieldValue(lastSetDefaultValueItem.excuteItem, targetValue);
         }
       }
