@@ -19,7 +19,7 @@ import java.nio.file.Paths;
  */
 public class S2OnnxEmbeddingModel extends AbstractInProcessEmbeddingModel {
 
-    private final OnnxBertBiEncoder model;
+    private static OnnxBertBiEncoder model = null;
 
     /**
      * @param pathToModel The path to the .onnx model file (e.g., "/home/me/model.onnx").
@@ -33,7 +33,9 @@ public class S2OnnxEmbeddingModel extends AbstractInProcessEmbeddingModel {
                 throw new RuntimeException(e);
             }
         }
-        model = loadFromFileSystem(Paths.get(pathToModel), resource);
+        if (model == null) {
+            model = loadFromFileSystem(Paths.get(pathToModel), resource);
+        }
     }
 
     /**
