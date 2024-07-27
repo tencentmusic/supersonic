@@ -213,7 +213,7 @@ public class ChatQueryServiceImpl implements ChatQueryService {
         if (Objects.nonNull(parseInfo.getSqlInfo())
                 && StringUtils.isNotBlank(parseInfo.getSqlInfo().getCorrectedS2SQL())) {
             String correctorSql = parseInfo.getSqlInfo().getCorrectedS2SQL();
-            fields = SqlSelectHelper.getAllFields(correctorSql);
+            fields = SqlSelectHelper.getAllSelectFields(correctorSql);
         }
         if (LLMSqlQuery.QUERY_MODE.equalsIgnoreCase(parseInfo.getQueryMode())
                 && checkMetricReplace(fields, chatQueryDataReq.getMetrics())) {

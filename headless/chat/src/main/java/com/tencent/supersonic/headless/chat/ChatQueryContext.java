@@ -57,7 +57,7 @@ public class ChatQueryContext {
 
     public List<SemanticQuery> getCandidateQueries() {
         ParserConfig parserConfig = ContextUtils.getBean(ParserConfig.class);
-        int parseShowCount = Integer.valueOf(parserConfig.getParameterValue(ParserConfig.PARSER_SHOW_COUNT));
+        int parseShowCount = Integer.parseInt(parserConfig.getParameterValue(ParserConfig.PARSER_SHOW_COUNT));
         candidateQueries = candidateQueries.stream()
                 .sorted(Comparator.comparing(semanticQuery -> semanticQuery.getParseInfo().getScore(),
                         Comparator.reverseOrder()))

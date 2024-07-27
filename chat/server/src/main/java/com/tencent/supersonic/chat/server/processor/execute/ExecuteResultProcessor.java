@@ -5,7 +5,8 @@ import com.tencent.supersonic.chat.server.processor.ResultProcessor;
 import com.tencent.supersonic.headless.api.pojo.response.QueryResult;
 
 /**
- * A ExecuteResultProcessor wraps things up before returning results to users in execute stage.
+ * A ExecuteResultProcessor wraps things up before returning
+ * execution results to the users.
  */
 public interface ExecuteResultProcessor extends ResultProcessor {
 

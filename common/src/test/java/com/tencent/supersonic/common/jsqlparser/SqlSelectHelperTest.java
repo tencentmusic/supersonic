@@ -131,55 +131,55 @@ class SqlSelectHelperTest {
     @Test
     void testGetAllFields() {
 
-        List<String> allFields = SqlSelectHelper.getAllFields(
+        List<String> allFields = SqlSelectHelper.getAllSelectFields(
                 "SELECT department, user_id, field_a FROM s2 WHERE sys_imp_date = '2023-08-08'"
                         + " AND user_id = 'alice' AND publish_date = '11' ORDER BY pv DESC LIMIT 1");
 
         Assert.assertEquals(allFields.size(), 6);
 
-        allFields = SqlSelectHelper.getAllFields(
+        allFields = SqlSelectHelper.getAllSelectFields(
                 "SELECT department, user_id, field_a FROM s2 WHERE sys_imp_date >= '2023-08-08'"
                         + " AND user_id = 'alice' AND publish_date = '11' ORDER BY pv DESC LIMIT 1");
 
         Assert.assertEquals(allFields.size(), 6);
 
-        allFields = SqlSelectHelper.getAllFields(
+        allFields = SqlSelectHelper.getAllSelectFields(
                 "select 部门,sum (访问次数) from 超音数 where 数据日期 = '2023-08-08' and 用户 = 'alice'"
                         + " and 发布日期 ='11' group by 部门 limit 1");
 
         Assert.assertEquals(allFields.size(), 5);
 
-        allFields = SqlSelectHelper.getAllFields(
+        allFields = SqlSelectHelper.getAllSelectFields(
                 "SELECT user_name FROM 超音数 WHERE sys_imp_date <= '2023-09-03' AND "
                         + "sys_imp_date >= '2023-08-04' GROUP BY user_name ORDER BY sum(pv) DESC LIMIT 10 ");
 
         Assert.assertEquals(allFields.size(), 3);
 
-        allFields = SqlSelectHelper.getAllFields(
+        allFields = SqlSelectHelper.getAllSelectFields(
                 "SELECT user_name FROM 超音数 WHERE sys_imp_date <= '2023-09-03' AND "
                         + "sys_imp_date >= '2023-08-04' GROUP BY user_name HAVING sum(pv) > 1000");
 
         Assert.assertEquals(allFields.size(), 3);
 
-        allFields = SqlSelectHelper.getAllFields(
+        allFields = SqlSelectHelper.getAllSelectFields(
                 "SELECT department, user_id, field_a FROM s2 WHERE "
                         + "(user_id = 'alice' AND publish_date = '11') and sys_imp_date "
                         + "= '2023-08-08' ORDER BY pv DESC LIMIT 1");
 
         Assert.assertEquals(allFields.size(), 6);
 
-        allFields = SqlSelectHelper.getAllFields(
+        allFields = SqlSelectHelper.getAllSelectFields(
                 "SELECT * FROM CSpider  WHERE (评分 < (SELECT min(评分) FROM CSpider WHERE 语种 = '英文' ))"
                         + " AND 数据日期 = '2023-10-12'");
 
         Assert.assertEquals(allFields.size(), 3);
 
-        allFields = SqlSelectHelper.getAllFields("SELECT sum(销量) / (SELECT sum(销量) FROM 营销 "
+        allFields = SqlSelectHelper.getAllSelectFields("SELECT sum(销量) / (SELECT sum(销量) FROM 营销 "
                 + "WHERE MONTH(数据日期) = 9) FROM 营销 WHERE 国家中文名 = '中国' AND MONTH(数据日期) = 9");
 
         Assert.assertEquals(allFields.size(), 3);
 
-        allFields = SqlSelectHelper.getAllFields(
+        allFields = SqlSelectHelper.getAllSelectFields(
                 "SELECT 用户, 页面  FROM 超音数用户部门 GROUP BY 用户, 页面 ORDER BY count(*) DESC");
 
         Assert.assertEquals(allFields.size(), 2);

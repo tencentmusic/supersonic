@@ -478,8 +478,7 @@ public class S2SemanticLayerService implements SemanticLayerService {
         SemanticQueryResp queryResultWithColumns =
                 getQueryResultWithSchemaResp(entityInfo, dataSetSchema, user);
         if (queryResultWithColumns != null) {
-            if (!org.springframework.util.CollectionUtils.isEmpty(queryResultWithColumns.getResultList())
-                    && queryResultWithColumns.getResultList().size() > 0) {
+            if (!CollectionUtils.isEmpty(queryResultWithColumns.getResultList())) {
                 Map<String, Object> result = queryResultWithColumns.getResultList().get(0);
                 for (Map.Entry<String, Object> entry : result.entrySet()) {
                     String entryKey = getEntryKey(entry);

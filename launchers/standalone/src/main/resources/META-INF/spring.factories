@@ -47,7 +47,8 @@ com.tencent.supersonic.headless.core.cache.QueryCache=\
 ### headless-server SPIs
 
 com.tencent.supersonic.headless.server.processor.ResultProcessor=\
-    com.tencent.supersonic.headless.server.processor.ParseInfoProcessor
+    com.tencent.supersonic.headless.server.processor.ParseInfoProcessor,\
+    com.tencent.supersonic.headless.server.processor.EntityInfoProcessor
 
 ### chat-server SPIs
 
@@ -66,7 +67,6 @@ com.tencent.supersonic.chat.server.plugin.recognize.PluginRecognizer=\
 
 com.tencent.supersonic.chat.server.processor.parse.ParseResultProcessor=\
     com.tencent.supersonic.chat.server.processor.parse.QueryRecommendProcessor,\
-    com.tencent.supersonic.chat.server.processor.parse.EntityInfoProcessor,\
     com.tencent.supersonic.chat.server.processor.parse.TimeCostProcessor
 
 com.tencent.supersonic.chat.server.processor.execute.ExecuteResultProcessor=\

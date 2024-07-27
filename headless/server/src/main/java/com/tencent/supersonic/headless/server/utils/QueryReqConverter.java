@@ -78,7 +78,7 @@ public class QueryReqConverter {
         querySQLReq.setSql(SqlReplaceHelper.replaceAggAliasOrderItem(querySQLReq.getSql()));
         log.debug("replaceOrderAggSameAlias {} -> {}", reqSql, querySQLReq.getSql());
         //4.build MetricTables
-        List<String> allFields = SqlSelectHelper.getAllFields(querySQLReq.getSql());
+        List<String> allFields = SqlSelectHelper.getAllSelectFields(querySQLReq.getSql());
         List<MetricSchemaResp> metricSchemas = getMetrics(semanticSchemaResp, allFields);
         List<String> metrics = metricSchemas.stream().map(m -> m.getBizName()).collect(Collectors.toList());
         QueryStructReq queryStructReq = new QueryStructReq();
