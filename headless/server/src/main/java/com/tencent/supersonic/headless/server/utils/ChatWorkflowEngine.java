@@ -59,6 +59,9 @@ public class ChatWorkflowEngine {
                         parseResult.setErrorMsg("No semantic queries can be parsed out.");
                         queryCtx.setChatWorkflowState(ChatWorkflowState.FINISHED);
                     } else {
+                        List<SemanticParseInfo> parseInfos = queryCtx.getCandidateQueries().stream()
+                                .map(SemanticQuery::getParseInfo).collect(Collectors.toList());
+                        parseResult.setSelectedParses(parseInfos);
                         queryCtx.setChatWorkflowState(ChatWorkflowState.CORRECTING);
                     }
                     break;

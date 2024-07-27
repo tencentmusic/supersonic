@@ -2,7 +2,7 @@ package com.tencent.supersonic.chat.server.processor.execute;
 
 import com.tencent.supersonic.chat.server.pojo.ExecuteContext;
 import com.tencent.supersonic.chat.server.processor.ResultProcessor;
-import com.tencent.supersonic.headless.api.pojo.response.QueryResult;
+import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 
 /**
  * A ExecuteResultProcessor wraps things up before returning

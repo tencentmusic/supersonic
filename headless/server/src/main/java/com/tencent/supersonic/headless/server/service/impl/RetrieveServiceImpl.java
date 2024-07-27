@@ -64,7 +64,7 @@ public class RetrieveServiceImpl implements RetrieveService {
 
         String queryText = queryNLReq.getQueryText();
         // 1.get meta info
-        SemanticSchema semanticSchemaDb = schemaService.getSemanticSchema();
+        SemanticSchema semanticSchemaDb = schemaService.getSemanticSchema(queryNLReq.getDataSetIds());
         List<SchemaElement> metricsDb = semanticSchemaDb.getMetrics();
         final Map<Long, String> dataSetIdToName = semanticSchemaDb.getDataSetIdToName();
         Map<Long, List<Long>> modelIdToDataSetIds =
@@ -228,7 +228,7 @@ public class RetrieveServiceImpl implements RetrieveService {
             return Lists.newArrayList();
         }
         return metricsDb.stream()
-                .filter(mapDO -> Objects.nonNull(mapDO) && model.equals(mapDO.getDataSet()))
+                .filter(mapDO -> Objects.nonNull(mapDO) && model.equals(mapDO.getDataSetId()))
                 .sorted(Comparator.comparing(SchemaElement::getUseCnt).reversed())
                 .flatMap(entry -> {
                     List<String> result = new ArrayList<>();

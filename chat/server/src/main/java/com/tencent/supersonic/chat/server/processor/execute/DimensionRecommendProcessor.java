@@ -8,7 +8,7 @@ import com.tencent.supersonic.headless.api.pojo.DataSetSchema;
 import com.tencent.supersonic.headless.api.pojo.RelatedSchemaElement;
 import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
-import com.tencent.supersonic.headless.api.pojo.response.QueryResult;
+import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.headless.server.facade.service.SemanticLayerService;
 import org.springframework.util.CollectionUtils;
 
@@ -35,7 +35,7 @@ public class DimensionRecommendProcessor implements ExecuteResultProcessor {
             return;
         }
         SchemaElement element = semanticParseInfo.getMetrics().iterator().next();
-        List<SchemaElement> dimensionRecommended = getDimensions(element.getId(), element.getDataSet());
+        List<SchemaElement> dimensionRecommended = getDimensions(element.getId(), element.getDataSetId());
         queryResult.setRecommendedDimensions(dimensionRecommended);
     }
 

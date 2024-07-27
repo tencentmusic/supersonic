@@ -24,6 +24,7 @@ import com.tencent.supersonic.headless.server.pojo.yaml.MetricYamlTpl;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
 public interface SchemaService {
@@ -31,6 +32,8 @@ public interface SchemaService {
     DataSetSchema getDataSetSchema(Long dataSetId);
 
     SemanticSchema getSemanticSchema();
+
+    SemanticSchema getSemanticSchema(Set<Long> dataSetIds);
 
     SemanticSchemaResp fetchSemanticSchema(SchemaFilterReq schemaFilterReq);
 

@@ -44,6 +44,7 @@ public class ChatQueryContext {
     private QueryFilters queryFilters;
     private List<SemanticQuery> candidateQueries = new ArrayList<>();
     private SchemaMapInfo mapInfo = new SchemaMapInfo();
+    private SemanticParseInfo contextParseInfo;
     private MapModeEnum mapModeEnum = MapModeEnum.STRICT;
     @JsonIgnore
     private SemanticSchema semanticSchema;
@@ -53,7 +54,6 @@ public class ChatQueryContext {
     private ChatModelConfig modelConfig;
     private PromptConfig promptConfig;
     private List<Text2SQLExemplar> dynamicExemplars;
-    private SemanticParseInfo contextParseInfo;
 
     public List<SemanticQuery> getCandidateQueries() {
         ParserConfig parserConfig = ContextUtils.getBean(ParserConfig.class);

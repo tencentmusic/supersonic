@@ -3,6 +3,7 @@ package com.tencent.supersonic.headless.server.service.impl;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.common.pojo.ItemDateResp;
 import com.tencent.supersonic.common.pojo.ModelRela;
@@ -64,6 +65,7 @@ import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -140,15 +142,15 @@ public class SchemaServiceImpl implements SchemaService {
         return fetchDataSetSchema(new DataSetFilterReq(dataSetId)).stream().findFirst().orElse(null);
     }
 
-    private List<DataSetSchemaResp> fetchDataSetSchema(List<Long> ids) {
+    private List<DataSetSchemaResp> fetchDataSetSchema(Set<Long> ids) {
         DataSetFilterReq dataSetFilterReq = new DataSetFilterReq();
-        dataSetFilterReq.setDataSetIds(ids);
+        dataSetFilterReq.setDataSetIds(new ArrayList(ids));
         return fetchDataSetSchema(dataSetFilterReq);
     }
 
     @Override
     public DataSetSchema getDataSetSchema(Long dataSetId) {
-        List<Long> ids = new ArrayList<>();
+        Set<Long> ids = Sets.newHashSet();
         ids.add(dataSetId);
         List<DataSetSchemaResp> dataSetSchemaResps = fetchDataSetSchema(ids);
         if (!CollectionUtils.isEmpty(dataSetSchemaResps)) {
@@ -162,7 +164,7 @@ public class SchemaServiceImpl implements SchemaService {
         return null;
     }
 
-    public List<DataSetSchema> getDataSetSchema(List<Long> ids) {
+    public List<DataSetSchema> getDataSetSchema(Set<Long> ids) {
         List<DataSetSchema> domainSchemaList = new ArrayList<>();
 
         for (DataSetSchemaResp resp : fetchDataSetSchema(ids)) {
@@ -174,7 +176,12 @@ public class SchemaServiceImpl implements SchemaService {
 
     @Override
     public SemanticSchema getSemanticSchema() {
-        return new SemanticSchema(getDataSetSchema(new ArrayList<>()));
+        return new SemanticSchema(getDataSetSchema(Collections.EMPTY_SET));
+    }
+
+    @Override
+    public SemanticSchema getSemanticSchema(Set<Long> dataSetIds) {
+        return new SemanticSchema(getDataSetSchema(dataSetIds));
     }
 
     public List<DataSetSchemaResp> buildDataSetSchema(DataSetFilterReq filter) {

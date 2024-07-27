@@ -116,7 +116,7 @@ public class SemanticSchema implements Serializable {
     public List<SchemaElement> getTags(Long dataSetId) {
         List<SchemaElement> tags = new ArrayList<>();
         dataSetSchemaList.stream().filter(schemaElement ->
-                        dataSetId.equals(schemaElement.getDataSet().getDataSet()))
+                        dataSetId.equals(schemaElement.getDataSet().getDataSetId()))
                 .forEach(d -> tags.addAll(d.getTags()));
         return tags;
     }
@@ -129,7 +129,7 @@ public class SemanticSchema implements Serializable {
 
     private List<SchemaElement> getElementsByDataSetId(Long dataSetId, List<SchemaElement> elements) {
         return elements.stream()
-                .filter(schemaElement -> dataSetId.equals(schemaElement.getDataSet()))
+                .filter(schemaElement -> dataSetId.equals(schemaElement.getDataSetId()))
                 .collect(Collectors.toList());
     }
 
@@ -155,6 +155,6 @@ public class SemanticSchema implements Serializable {
             return new HashMap<>();
         }
         return dataSetSchemaList.stream().collect(Collectors.toMap(dataSetSchema
-                -> dataSetSchema.getDataSet().getDataSet(), dataSetSchema -> dataSetSchema));
+                -> dataSetSchema.getDataSet().getDataSetId(), dataSetSchema -> dataSetSchema));
     }
 }

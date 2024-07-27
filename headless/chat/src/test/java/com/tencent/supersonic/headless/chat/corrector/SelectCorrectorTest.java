@@ -39,7 +39,7 @@ class SelectCorrectorTest {
         ChatQueryContext chatQueryContext = buildQueryContext(dataSetId);
         SemanticParseInfo semanticParseInfo = new SemanticParseInfo();
         SchemaElement dataSet = new SchemaElement();
-        dataSet.setDataSet(dataSetId);
+        dataSet.setDataSetId(dataSetId);
         semanticParseInfo.setDataSet(dataSet);
         semanticParseInfo.setQueryType(QueryType.DETAIL);
         SqlInfo sqlInfo = new SqlInfo();
@@ -74,23 +74,23 @@ class SelectCorrectorTest {
 
         dataSetSchema.setQueryConfig(queryConfig);
         SchemaElement schemaElement = new SchemaElement();
-        schemaElement.setDataSet(dataSetId);
+        schemaElement.setDataSetId(dataSetId);
         dataSetSchema.setDataSet(schemaElement);
         Set<SchemaElement> dimensions = new HashSet<>();
         SchemaElement element1 = new SchemaElement();
-        element1.setDataSet(dataSetId);
+        element1.setDataSetId(dataSetId);
         element1.setId(1L);
         element1.setName("艺人名");
         dimensions.add(element1);
 
         SchemaElement element2 = new SchemaElement();
-        element2.setDataSet(dataSetId);
+        element2.setDataSetId(dataSetId);
         element2.setId(2L);
         element2.setName("性别");
         dimensions.add(element2);
 
         SchemaElement element3 = new SchemaElement();
-        element3.setDataSet(dataSetId);
+        element3.setDataSetId(dataSetId);
         element3.setId(3L);
         element3.setName("国籍");
         dimensions.add(element3);
@@ -99,7 +99,7 @@ class SelectCorrectorTest {
 
         Set<SchemaElement> metrics = new HashSet<>();
         SchemaElement metric1 = new SchemaElement();
-        metric1.setDataSet(dataSetId);
+        metric1.setDataSetId(dataSetId);
         metric1.setId(4L);
         metric1.setName("粉丝数");
         metrics.add(metric1);

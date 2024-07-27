@@ -5,13 +5,12 @@ import com.tencent.supersonic.chat.server.persistence.dataobject.ChatMemoryDO;
 import com.tencent.supersonic.chat.server.pojo.ExecuteContext;
 import com.tencent.supersonic.chat.server.service.MemoryService;
 import com.tencent.supersonic.chat.server.util.ResultFormatter;
-import com.tencent.supersonic.common.pojo.QueryColumn;
 import com.tencent.supersonic.common.pojo.Text2SQLExemplar;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.api.pojo.request.QuerySqlReq;
-import com.tencent.supersonic.headless.api.pojo.response.QueryResult;
+import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.headless.api.pojo.response.QueryState;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
 import com.tencent.supersonic.chat.server.pojo.ChatContext;
@@ -21,10 +20,7 @@ import com.tencent.supersonic.chat.server.service.ChatContextService;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 public class SqlExecutor implements ChatQueryExecutor {
@@ -80,27 +76,24 @@ public class SqlExecutor implements ChatQueryExecutor {
                 .build();
         sqlReq.setSqlInfo(parseInfo.getSqlInfo());
         sqlReq.setDataSetId(parseInfo.getDataSetId());
+
         long startTime = System.currentTimeMillis();
         SemanticQueryResp queryResp = semanticLayer.queryByReq(sqlReq, executeContext.getUser());
         QueryResult queryResult = new QueryResult();
         queryResult.setChatContext(parseInfo);
         queryResult.setQueryMode(parseInfo.getQueryMode());
+        queryResult.setQueryTimeCost(System.currentTimeMillis() - startTime);
         if (queryResp != null) {
             queryResult.setQueryAuthorization(queryResp.getQueryAuthorization());
-            List<Map<String, Object>> resultList = queryResp == null ? new ArrayList<>()
-                    : queryResp.getResultList();
-            List<QueryColumn> columns = queryResp == null ? new ArrayList<>() : queryResp.getColumns();
-            queryResult.setQueryTimeCost(System.currentTimeMillis() - startTime);
             queryResult.setQuerySql(queryResp.getSql());
-            queryResult.setQueryResults(resultList);
-            queryResult.setQueryColumns(columns);
+            queryResult.setQueryResults(queryResp.getResultList());
+            queryResult.setQueryColumns(queryResp.getColumns());
             queryResult.setQueryState(QueryState.SUCCESS);
 
             chatCtx.setParseInfo(parseInfo);
             chatContextService.updateContext(chatCtx);
         } else {
             queryResult.setQueryState(QueryState.INVALID);
-            queryResult.setQueryMode(parseInfo.getQueryMode());
         }
         return queryResult;
     }

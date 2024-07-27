@@ -31,7 +31,7 @@ public class ModelWordBuilder extends BaseWordWithAliasBuilder {
     public DictWord getOneWordNature(String word, SchemaElement schemaElement, boolean isSuffix) {
         DictWord dictWord = new DictWord();
         dictWord.setWord(word);
-        String nature = DictWordType.NATURE_SPILT + schemaElement.getDataSet();
+        String nature = DictWordType.NATURE_SPILT + schemaElement.getDataSetId();
         dictWord.setNatureWithFrequency(String.format("%s " + DEFAULT_FREQUENCY, nature));
         return dictWord;
     }

@@ -17,7 +17,7 @@ import java.util.List;
 @NoArgsConstructor
 public class SchemaElement implements Serializable {
 
-    private Long dataSet;
+    private Long dataSetId;
     private String dataSetName;
     private Long model;
     private Long id;
@@ -43,7 +43,7 @@ public class SchemaElement implements Serializable {
             return false;
         }
         SchemaElement schemaElement = (SchemaElement) o;
-        return Objects.equal(dataSet, schemaElement.dataSet) && Objects.equal(id,
+        return Objects.equal(dataSetId, schemaElement.dataSetId) && Objects.equal(id,
                 schemaElement.id) && Objects.equal(name, schemaElement.name)
                 && Objects.equal(bizName, schemaElement.bizName)
                 && Objects.equal(type, schemaElement.type);
@@ -51,7 +51,7 @@ public class SchemaElement implements Serializable {
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(dataSet, id, name, bizName, type);
+        return Objects.hashCode(dataSetId, id, name, bizName, type);
     }
 
 }
