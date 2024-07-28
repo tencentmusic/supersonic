@@ -33,6 +33,7 @@ public class SchemaElement implements Serializable {
     private double order;
     private int isTag;
     private String description;
+    private boolean descriptionMapped;
 
     @Override
     public boolean equals(Object o) {
