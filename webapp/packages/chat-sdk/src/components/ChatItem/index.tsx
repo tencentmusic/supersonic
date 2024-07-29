@@ -6,6 +6,7 @@ import {
   MsgDataType,
   ParseStateEnum,
   ParseTimeCostType,
+  RangeValue,
   SimilarQuestionType,
 } from '../../common/type';
 import { useEffect, useState } from 'react';
@@ -79,6 +80,7 @@ const ChatItem: React.FC<Props> = ({
   const [dataCache, setDataCache] = useState<Record<number, { tip: string; data?: MsgDataType }>>(
     {}
   );
+  const [selectedRange, setSelectedRange] = useState<RangeValue | null>(null);
 
   const prefixCls = `${PREFIX_CLS}-item`;
 
@@ -167,7 +169,7 @@ const ChatItem: React.FC<Props> = ({
     const parseData: any = await chatParse(msg, conversationId, modelId, agentId, filter);
     setParseLoading(false);
     const { code, data } = parseData || {};
-    const { state, selectedParses, candidateParses, queryId, parseTimeCost } = data || {};
+    const { state, selectedParses, candidateParses, queryId, parseTimeCost, errorMsg } = data || {};
     const parses = selectedParses?.concat(candidateParses || []) || [];
     if (
       code !== 200 ||
@@ -175,7 +177,7 @@ const ChatItem: React.FC<Props> = ({
       !parses.length ||
       (!parses[0]?.properties?.type && !parses[0]?.queryMode)
     ) {
-      setParseTip(PARSE_ERROR_TIP);
+      setParseTip(state === ParseStateEnum.FAILED && errorMsg ? errorMsg : PARSE_ERROR_TIP);
       setParseInfo({ queryId } as any);
       return;
     }
@@ -234,9 +236,6 @@ const ChatItem: React.FC<Props> = ({
     setDimensionFilters(dimensionFilters);
   };
 
-  type RangeValue = [Dayjs, Dayjs];
-  const [selectedRange, setSelectedRange] = useState<RangeValue | null>(null);
-
   const onDateInfoChange = (dates: [Dayjs | null, Dayjs | null] | null) => {
     if (dates && dates[0] && dates[1]) {
       const [start, end] = dates;
@@ -263,7 +262,6 @@ const ChatItem: React.FC<Props> = ({
       unit: 0,
     });
   };
-
 
   const onRefresh = async () => {
     setEntitySwitchLoading(true);
@@ -391,7 +389,8 @@ const ChatItem: React.FC<Props> = ({
               />
             </>
           )}
-          {(parseTip !== '' || (executeMode && !executeLoading)) &&
+          {executeMode &&
+            !executeLoading &&
             !isSimpleMode &&
             parseInfo?.queryMode !== 'PLAIN_TEXT' && (
               <SimilarQuestionItem
