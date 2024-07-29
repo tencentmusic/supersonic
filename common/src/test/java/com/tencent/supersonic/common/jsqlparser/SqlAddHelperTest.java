@@ -24,12 +24,12 @@ class SqlAddHelperTest {
         String sql = "select 部门,sum (访问次数) from 超音数 where 数据日期 = '2023-08-08' "
                 + "and 用户 =alice and 发布日期 ='11' group by 部门 limit 1";
         sql = SqlAddHelper.addWhere(sql, "column_a", 123444555);
-        List<String> selectFields = SqlSelectHelper.getAllFields(sql);
+        List<String> selectFields = SqlSelectHelper.getAllSelectFields(sql);
 
         Assert.assertEquals(selectFields.contains("column_a"), true);
 
         sql = SqlAddHelper.addWhere(sql, "column_b", "123456666");
-        selectFields = SqlSelectHelper.getAllFields(sql);
+        selectFields = SqlSelectHelper.getAllSelectFields(sql);
 
         Assert.assertEquals(selectFields.contains("column_b"), true);
 

@@ -5,5 +5,4 @@ package com.tencent.supersonic.chat.server.processor;
  */
 public interface ResultProcessor {
 
-
 }

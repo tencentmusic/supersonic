@@ -24,7 +24,7 @@ class AggCorrectorTest {
         ChatQueryContext chatQueryContext = buildQueryContext(dataSetId);
         SemanticParseInfo semanticParseInfo = new SemanticParseInfo();
         SchemaElement dataSet = new SchemaElement();
-        dataSet.setDataSet(dataSetId);
+        dataSet.setDataSetId(dataSetId);
         semanticParseInfo.setDataSet(dataSet);
         SqlInfo sqlInfo = new SqlInfo();
         String sql = "SELECT 用户, 访问次数 FROM 超音数数据集 WHERE 部门 = 'sales' AND"
@@ -47,11 +47,11 @@ class AggCorrectorTest {
         QueryConfig queryConfig = new QueryConfig();
         dataSetSchema.setQueryConfig(queryConfig);
         SchemaElement schemaElement = new SchemaElement();
-        schemaElement.setDataSet(dataSetId);
+        schemaElement.setDataSetId(dataSetId);
         dataSetSchema.setDataSet(schemaElement);
         Set<SchemaElement> dimensions = new HashSet<>();
         SchemaElement element1 = new SchemaElement();
-        element1.setDataSet(1L);
+        element1.setDataSetId(1L);
         element1.setName("部门");
         dimensions.add(element1);
 
@@ -59,7 +59,7 @@ class AggCorrectorTest {
 
         Set<SchemaElement> metrics = new HashSet<>();
         SchemaElement metric1 = new SchemaElement();
-        metric1.setDataSet(1L);
+        metric1.setDataSetId(1L);
         metric1.setName("访问次数");
         metrics.add(metric1);
 

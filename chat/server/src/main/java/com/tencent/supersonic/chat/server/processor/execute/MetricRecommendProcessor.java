@@ -12,7 +12,7 @@ import dev.langchain4j.store.embedding.RetrieveQueryResult;
 import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
-import com.tencent.supersonic.headless.api.pojo.response.QueryResult;
+import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.headless.chat.knowledge.MetaEmbeddingService;
 import java.util.Objects;
 import org.springframework.util.CollectionUtils;
@@ -46,7 +46,7 @@ public class MetricRecommendProcessor implements ExecuteResultProcessor {
         }
         List<String> metricNames = Collections.singletonList(parseInfo.getMetrics().iterator().next().getName());
         Map<String, String> filterCondition = new HashMap<>();
-        filterCondition.put("modelId", parseInfo.getMetrics().iterator().next().getDataSet().toString());
+        filterCondition.put("modelId", parseInfo.getMetrics().iterator().next().getDataSetId().toString());
         filterCondition.put("type", SchemaElementType.METRIC.name());
         RetrieveQuery retrieveQuery = RetrieveQuery.builder().queryTextsList(metricNames)
                 .filterCondition(filterCondition).queryEmbeddings(null).build();
@@ -78,7 +78,7 @@ public class MetricRecommendProcessor implements ExecuteResultProcessor {
                 if (retrieval.getMetadata().containsKey("dataSetId")) {
                     String dataSetId = retrieval.getMetadata().get("dataSetId").toString()
                             .replace(Constants.UNDERLINE, "");
-                    schemaElement.setDataSet(Long.parseLong(dataSetId));
+                    schemaElement.setDataSetId(Long.parseLong(dataSetId));
                 }
                 schemaElement.setOrder(++metricOrder);
                 parseInfo.getMetrics().add(schemaElement);

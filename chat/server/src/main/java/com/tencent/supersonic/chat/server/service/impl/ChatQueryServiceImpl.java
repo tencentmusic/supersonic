@@ -39,7 +39,7 @@ import com.tencent.supersonic.headless.api.pojo.request.QueryNLReq;
 import com.tencent.supersonic.headless.api.pojo.request.SemanticQueryReq;
 import com.tencent.supersonic.headless.api.pojo.response.MapResp;
 import com.tencent.supersonic.headless.api.pojo.response.ParseResp;
-import com.tencent.supersonic.headless.api.pojo.response.QueryResult;
+import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.headless.api.pojo.response.QueryState;
 import com.tencent.supersonic.headless.api.pojo.response.SearchResult;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
@@ -120,7 +120,6 @@ public class ChatQueryServiceImpl implements ChatQueryService {
             processor.process(parseContext, parseResp);
         }
         chatParseReq.setQueryText(parseContext.getQueryText());
-        parseResp.setQueryText(parseContext.getQueryText());
         chatManageService.batchAddParse(chatParseReq, parseResp);
         chatManageService.updateParseCostTime(parseResp);
         return parseResp;
@@ -213,7 +212,7 @@ public class ChatQueryServiceImpl implements ChatQueryService {
         if (Objects.nonNull(parseInfo.getSqlInfo())
                 && StringUtils.isNotBlank(parseInfo.getSqlInfo().getCorrectedS2SQL())) {
             String correctorSql = parseInfo.getSqlInfo().getCorrectedS2SQL();
-            fields = SqlSelectHelper.getAllFields(correctorSql);
+            fields = SqlSelectHelper.getAllSelectFields(correctorSql);
         }
         if (LLMSqlQuery.QUERY_MODE.equalsIgnoreCase(parseInfo.getQueryMode())
                 && checkMetricReplace(fields, chatQueryDataReq.getMetrics())) {
@@ -352,8 +351,8 @@ public class ChatQueryServiceImpl implements ChatQueryService {
         for (FieldExpression fieldExpression : fieldExpressionList) {
             for (QueryFilter queryFilter : queryData.getDimensionFilters()) {
                 if (queryFilter.getOperator().equals(FilterOperatorEnum.LIKE)
-                        && FilterOperatorEnum.LIKE.getValue().toLowerCase().equals(
-                        fieldExpression.getOperator().toLowerCase())) {
+                        && FilterOperatorEnum.LIKE.getValue().equalsIgnoreCase(
+                        fieldExpression.getOperator())) {
                     Map<String, String> replaceMap = new HashMap<>();
                     String preValue = fieldExpression.getFieldValue().toString();
                     String curValue = queryFilter.getValue().toString();

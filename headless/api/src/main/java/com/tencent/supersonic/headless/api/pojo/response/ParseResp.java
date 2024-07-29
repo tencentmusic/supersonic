@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 
 @Data
 public class ParseResp {
-    private String queryText;
+    private final String queryText;
     private Long queryId;
     private ParseState state = ParseState.PENDING;
     private String errorMsg;

@@ -56,7 +56,7 @@
         <dozer.verson>7.0.0</dozer.verson>
         <httpmime.version>4.5.6</httpmime.version>
         <transmittable.version>2.12.1</transmittable.version>
-        <commons.compress.version>1.21</commons.compress.version>
+        <commons.compress.version>1.26.0</commons.compress.version>
         <jetty.util.version>6.1.26</jetty.util.version>
         <!--<spring.version>2.7.2</spring.version>-->
         <jsonpath.version>2.8.0</jsonpath.version>

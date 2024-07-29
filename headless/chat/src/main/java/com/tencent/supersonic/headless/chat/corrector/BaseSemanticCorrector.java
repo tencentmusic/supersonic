@@ -51,7 +51,7 @@ public abstract class BaseSemanticCorrector implements SemanticCorrector {
 
         // support fieldName and field alias
         Map<String, String> result = dbAllFields.stream()
-                .filter(entry -> dataSetId.equals(entry.getDataSet()))
+                .filter(entry -> dataSetId.equals(entry.getDataSetId()))
                 .flatMap(schemaElement -> {
                     Set<String> elements = new HashSet<>();
                     elements.add(schemaElement.getName());
@@ -75,7 +75,7 @@ public abstract class BaseSemanticCorrector implements SemanticCorrector {
     protected void addAggregateToMetric(ChatQueryContext chatQueryContext, SemanticParseInfo semanticParseInfo) {
         //add aggregate to all metric
         String correctS2SQL = semanticParseInfo.getSqlInfo().getCorrectedS2SQL();
-        Long dataSetId = semanticParseInfo.getDataSet().getDataSet();
+        Long dataSetId = semanticParseInfo.getDataSet().getDataSetId();
         List<SchemaElement> metrics = getMetricElements(chatQueryContext, dataSetId);
 
         Map<String, String> metricToAggregate = metrics.stream()

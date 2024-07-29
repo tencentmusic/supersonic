@@ -114,7 +114,7 @@ class S2SqlDateHelperTest {
         QueryConfig queryConfig = new QueryConfig();
         dataSetSchema.setQueryConfig(queryConfig);
         SchemaElement schemaElement = new SchemaElement();
-        schemaElement.setDataSet(dataSetId);
+        schemaElement.setDataSetId(dataSetId);
         dataSetSchema.setDataSet(schemaElement);
         dataSetSchemaList.add(dataSetSchema);
 

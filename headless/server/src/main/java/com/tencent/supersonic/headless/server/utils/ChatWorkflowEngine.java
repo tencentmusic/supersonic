@@ -33,10 +33,10 @@ import java.util.stream.Collectors;
 public class ChatWorkflowEngine {
 
     private static final Logger keyPipelineLog = LoggerFactory.getLogger("keyPipeline");
-    private List<SchemaMapper> schemaMappers = ComponentFactory.getSchemaMappers();
-    private List<SemanticParser> semanticParsers = ComponentFactory.getSemanticParsers();
-    private List<SemanticCorrector> semanticCorrectors = ComponentFactory.getSemanticCorrectors();
-    private List<ResultProcessor> resultProcessors = ComponentFactory.getResultProcessors();
+    private final List<SchemaMapper> schemaMappers = ComponentFactory.getSchemaMappers();
+    private final List<SemanticParser> semanticParsers = ComponentFactory.getSemanticParsers();
+    private final List<SemanticCorrector> semanticCorrectors = ComponentFactory.getSemanticCorrectors();
+    private final List<ResultProcessor> resultProcessors = ComponentFactory.getResultProcessors();
 
     public void execute(ChatQueryContext queryCtx, ParseResp parseResult) {
         queryCtx.setChatWorkflowState(ChatWorkflowState.MAPPING);
@@ -44,21 +44,26 @@ public class ChatWorkflowEngine {
             switch (queryCtx.getChatWorkflowState()) {
                 case MAPPING:
                     performMapping(queryCtx);
-                    if (queryCtx.getMapInfo().getMatchedDataSetInfos().size() == 0) {
+                    if (queryCtx.getMapInfo().getMatchedDataSetInfos().isEmpty()) {
                         parseResult.setState(ParseResp.ParseState.FAILED);
                         parseResult.setErrorMsg("No semantic entities can be mapped against user question.");
                         queryCtx.setChatWorkflowState(ChatWorkflowState.FINISHED);
+                    } else if (queryCtx.getMapInfo().needContinueMap()) {
+                        queryCtx.setChatWorkflowState(ChatWorkflowState.MAPPING);
                     } else {
                         queryCtx.setChatWorkflowState(ChatWorkflowState.PARSING);
                     }
                     break;
                 case PARSING:
                     performParsing(queryCtx);
-                    if (queryCtx.getCandidateQueries().size() == 0) {
+                    if (queryCtx.getCandidateQueries().isEmpty()) {
                         parseResult.setState(ParseResp.ParseState.FAILED);
                         parseResult.setErrorMsg("No semantic queries can be parsed out.");
                         queryCtx.setChatWorkflowState(ChatWorkflowState.FINISHED);
                     } else {
+                        List<SemanticParseInfo> parseInfos = queryCtx.getCandidateQueries().stream()
+                                .map(SemanticQuery::getParseInfo).collect(Collectors.toList());
+                        parseResult.setSelectedParses(parseInfos);
                         queryCtx.setChatWorkflowState(ChatWorkflowState.CORRECTING);
                     }
                     break;
@@ -86,7 +91,8 @@ public class ChatWorkflowEngine {
 
     private void performMapping(ChatQueryContext queryCtx) {
         if (Objects.isNull(queryCtx.getMapInfo())
-                || MapUtils.isEmpty(queryCtx.getMapInfo().getDataSetElementMatches())) {
+                || MapUtils.isEmpty(queryCtx.getMapInfo().getDataSetElementMatches())
+                || queryCtx.getMapInfo().needContinueMap()) {
             schemaMappers.forEach(mapper -> mapper.map(queryCtx));
         }
     }

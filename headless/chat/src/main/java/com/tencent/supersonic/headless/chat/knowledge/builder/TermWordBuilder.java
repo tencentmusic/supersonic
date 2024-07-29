@@ -30,7 +30,7 @@ public class TermWordBuilder extends BaseWordWithAliasBuilder {
     public DictWord getOneWordNature(String word, SchemaElement schemaElement, boolean isSuffix) {
         DictWord dictWord = new DictWord();
         dictWord.setWord(word);
-        Long dataSet = schemaElement.getDataSet();
+        Long dataSet = schemaElement.getDataSetId();
         String nature = DictWordType.NATURE_SPILT + dataSet + DictWordType.NATURE_SPILT + schemaElement.getId()
                 + DictWordType.TERM.getType();
         if (isSuffix) {

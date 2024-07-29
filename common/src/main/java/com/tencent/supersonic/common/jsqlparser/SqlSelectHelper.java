@@ -244,7 +244,7 @@ public class SqlSelectHelper {
         return plainSelects;
     }
 
-    public static List<String> getAllFields(String sql) {
+    public static List<String> getAllSelectFields(String sql) {
         List<PlainSelect> plainSelects = getPlainSelects(getPlainSelect(sql));
         Set<String> results = new HashSet<>();
         for (PlainSelect plainSelect : plainSelects) {
