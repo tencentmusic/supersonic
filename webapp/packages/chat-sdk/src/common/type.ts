@@ -1,3 +1,5 @@
+import { Dayjs } from 'dayjs';
+
 export type SearchRecommendItem = {
   complete: boolean;
   modelId: number;
@@ -257,3 +259,5 @@ export type ParseTimeCostType = {
   parseTime: number;
   sqlTime: number;
 };
+
+export type RangeValue = [Dayjs, Dayjs];
