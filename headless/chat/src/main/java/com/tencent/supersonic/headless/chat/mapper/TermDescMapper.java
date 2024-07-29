@@ -17,9 +17,6 @@ public class TermDescMapper extends BaseMapper {
     public void doMap(ChatQueryContext chatQueryContext) {
         List<SchemaElement> termDescriptionToMap = chatQueryContext.getMapInfo().getTermDescriptionToMap();
         if (CollectionUtils.isEmpty(termDescriptionToMap)) {
-            if (StringUtils.isNotBlank(chatQueryContext.getOriQueryText())) {
-                chatQueryContext.setQueryText(chatQueryContext.getOriQueryText());
-            }
             return;
         }
         if (StringUtils.isBlank(chatQueryContext.getOriQueryText())) {
@@ -31,6 +28,9 @@ public class TermDescMapper extends BaseMapper {
                 continue;
             }
             chatQueryContext.setQueryText(schemaElement.getDescription());
+        }
+        if (CollectionUtils.isEmpty(chatQueryContext.getMapInfo().getTermDescriptionToMap())) {
+            chatQueryContext.setQueryText(chatQueryContext.getOriQueryText());
         }
     }
 
