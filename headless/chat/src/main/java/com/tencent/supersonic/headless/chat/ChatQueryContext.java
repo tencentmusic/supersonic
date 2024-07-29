@@ -35,6 +35,7 @@ import java.util.stream.Collectors;
 public class ChatQueryContext {
 
     private String queryText;
+    private String oriQueryText;
     private Set<Long> dataSetIds;
     private Map<Long, List<Long>> modelIdToDataSetIds;
     private User user;
