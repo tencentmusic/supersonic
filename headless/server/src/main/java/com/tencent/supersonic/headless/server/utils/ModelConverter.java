@@ -108,7 +108,11 @@ public class ModelConverter {
         dimensionReq.setName(dim.getName());
         dimensionReq.setBizName(dim.getBizName());
         dimensionReq.setDescription(dim.getName());
-        dimensionReq.setSemanticType(SemanticType.CATEGORY.name());
+        if (Objects.equals(dim.getType(), DimensionType.time.name())) {
+            dimensionReq.setSemanticType(SemanticType.DATE.name());
+        } else {
+            dimensionReq.setSemanticType(SemanticType.CATEGORY.name());
+        }
         dimensionReq.setModelId(modelDO.getId());
         dimensionReq.setExpr(dim.getBizName());
         dimensionReq.setType(DimensionType.categorical.name());
@@ -138,7 +142,11 @@ public class ModelConverter {
         dimensionReq.setName(identify.getName());
         dimensionReq.setBizName(identify.getBizName());
         dimensionReq.setDescription(identify.getName());
-        dimensionReq.setSemanticType(SemanticType.CATEGORY.name());
+        if (Objects.equals(identify.getType(), DimensionType.time.name())) {
+            dimensionReq.setSemanticType(SemanticType.DATE.name());
+        } else {
+            dimensionReq.setSemanticType(SemanticType.CATEGORY.name());
+        }
         dimensionReq.setModelId(modelDO.getId());
         dimensionReq.setExpr(identify.getBizName());
         dimensionReq.setType(identify.getType());

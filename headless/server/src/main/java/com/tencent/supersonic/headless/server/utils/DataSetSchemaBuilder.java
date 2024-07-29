@@ -9,6 +9,7 @@ import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
 import com.tencent.supersonic.headless.api.pojo.SchemaItem;
 import com.tencent.supersonic.headless.api.pojo.SchemaValueMap;
+import com.tencent.supersonic.headless.api.pojo.enums.SemanticType;
 import com.tencent.supersonic.headless.api.pojo.response.DataSetSchemaResp;
 import com.tencent.supersonic.headless.api.pojo.response.DimSchemaResp;
 import com.tencent.supersonic.headless.api.pojo.response.MetricSchemaResp;
@@ -154,6 +155,7 @@ public class DataSetSchemaBuilder {
                     schemaValueMaps.add(schemaValueMap);
                 }
             }
+            SemanticType semanticType = SemanticType.valueOf(dim.getSemanticType());
             SchemaElement dimToAdd = SchemaElement.builder()
                     .dataSetId(resp.getId())
                     .dataSetName(resp.getName())
@@ -162,6 +164,7 @@ public class DataSetSchemaBuilder {
                     .name(dim.getName())
                     .bizName(dim.getBizName())
                     .type(SchemaElementType.DIMENSION)
+                    .semanticType(semanticType)
                     .useCnt(dim.getUseCnt())
                     .alias(alias)
                     .schemaValueMaps(schemaValueMaps)
