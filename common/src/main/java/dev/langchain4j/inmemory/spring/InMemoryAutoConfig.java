@@ -5,6 +5,7 @@ import dev.langchain4j.model.embedding.AllMiniLmL6V2QuantizedEmbeddingModel;
 import dev.langchain4j.model.embedding.BgeSmallZhEmbeddingModel;
 import dev.langchain4j.model.embedding.EmbeddingModel;
 import dev.langchain4j.model.embedding.S2OnnxEmbeddingModel;
+import dev.langchain4j.provider.EmbeddingModelConstant;
 import dev.langchain4j.store.embedding.EmbeddingStoreFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -17,10 +18,6 @@ import static dev.langchain4j.inmemory.spring.Properties.PREFIX;
 @Configuration
 @EnableConfigurationProperties(Properties.class)
 public class InMemoryAutoConfig {
-
-    public static final String BGE_SMALL_ZH = "bge-small-zh";
-    public static final String ALL_MINILM_L6_V2 = "all-minilm-l6-v2-q";
-
     @Bean
     @ConditionalOnProperty(PREFIX + ".embedding-store.persist-path")
     EmbeddingStoreFactory inMemoryChatModel(Properties properties) {
@@ -37,10 +34,10 @@ public class InMemoryAutoConfig {
             return new S2OnnxEmbeddingModel(modelPath, vocabularyPath);
         }
         String modelName = embeddingModelProperties.getModelName();
-        if (BGE_SMALL_ZH.equalsIgnoreCase(modelName)) {
+        if (EmbeddingModelConstant.BGE_SMALL_ZH.equalsIgnoreCase(modelName)) {
             return new BgeSmallZhEmbeddingModel();
         }
-        if (ALL_MINILM_L6_V2.equalsIgnoreCase(modelName)) {
+        if (EmbeddingModelConstant.ALL_MINILM_L6_V2.equalsIgnoreCase(modelName)) {
             return new AllMiniLmL6V2QuantizedEmbeddingModel();
         }
         return new BgeSmallZhEmbeddingModel();
