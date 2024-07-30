@@ -358,6 +358,8 @@ const ChatItem: React.FC<Props> = ({
             <>
               {!isMobile && parseInfo?.sqlInfo && isDeveloper && isDebugMode && !isSimpleMode && (
                 <SqlItem
+                  agentId={agentId}
+                  queryId={parseInfo.queryId}
                   llmReq={llmReq}
                   llmResp={llmResp}
                   integrateSystem={integrateSystem}

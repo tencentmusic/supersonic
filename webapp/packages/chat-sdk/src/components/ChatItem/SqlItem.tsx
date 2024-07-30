@@ -10,6 +10,8 @@ import { SqlInfoType } from '../../common/type';
 import { exportTextFile } from '../../utils/utils';
 
 type Props = {
+  agentId?: number;
+  queryId: number;
   llmReq?: any;
   llmResp?: any;
   integrateSystem?: string;
@@ -19,6 +21,8 @@ type Props = {
 };
 
 const SqlItem: React.FC<Props> = ({
+  agentId,
+  queryId,
   llmReq,
   llmResp,
   integrateSystem,
@@ -137,7 +141,7 @@ ${format(sqlInfo.querySQL)}
     if (sqlInfo.querySQL) {
       text += getQuerySQLText();
     }
-    exportTextFile(text, 'file.txt');
+    exportTextFile(text, `supersonic-debug-${agentId}-${queryId}.log`);
   };
 
   return (
