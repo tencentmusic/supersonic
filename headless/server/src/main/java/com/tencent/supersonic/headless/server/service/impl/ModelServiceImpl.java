@@ -202,6 +202,12 @@ public class ModelServiceImpl implements ModelService {
             String message = String.format("模型名称[%s]包含特殊字符(%s), 请修改", modelReq.getName(), forbiddenCharacters);
             throw new InvalidArgumentException(message);
         }
+
+        if (!NameCheckUtils.isValidIdentifier(modelReq.getBizName())) {
+            String message = String.format("模型英文名[%s]需要为下划线字母数字组合, 请修改", modelReq.getBizName());
+            throw new InvalidArgumentException(message);
+        }
+
         List<Dim> dims = modelReq.getModelDetail().getDimensions();
         List<Measure> measures = modelReq.getModelDetail().getMeasures();
         List<Identify> identifies = modelReq.getModelDetail().getIdentifiers();
