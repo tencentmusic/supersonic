@@ -6,7 +6,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class NameCheckUtils {
+
     public static final String forbiddenCharactersRegex = "[（）%#()]";
+    public static final String identifierRegex = "^[_a-zA-Z0-9]+$";
 
     public static String findForbiddenCharacters(String str) {
         if (StringUtils.isBlank(str)) {
@@ -20,6 +22,15 @@ public class NameCheckUtils {
             foundCharacters.append(matcher.group()).append(" ");
         }
         return foundCharacters.toString().trim();
+    }
+
+    public static Boolean isValidIdentifier(String str) {
+        if (StringUtils.isBlank(str)) {
+            return false;
+        }
+        Pattern pattern = Pattern.compile(identifierRegex);
+        Matcher matcher = pattern.matcher(str);
+        return matcher.find();
     }
 
 }
