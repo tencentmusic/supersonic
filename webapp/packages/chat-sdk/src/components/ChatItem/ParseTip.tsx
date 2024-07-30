@@ -9,8 +9,13 @@ import MarkDown from '../ChatMsg/MarkDown';
 import classNames from 'classnames';
 import { isMobile } from '../../utils/utils';
 import dayjs, { Dayjs } from 'dayjs';
+import locale from 'antd/locale/zh_CN';
 import quarterOfYear from 'dayjs/plugin/quarterOfYear';
+
+import 'dayjs/locale/zh-cn';
+
 dayjs.extend(quarterOfYear);
+dayjs.locale('zh-cn');
 
 const { RangePicker } = DatePicker;
 
@@ -257,24 +262,17 @@ const ParseTip: React.FC<Props> = ({
             <RangePicker
               value={[dayjs(startDate), dayjs(endDate)]}
               onChange={onDateInfoChange}
-              format="YYYY/MM/DD"
+              format="YYYY-MM-DD"
               renderExtraFooter={() => (
                 <Row gutter={[28, 28]}>
                   {Object.keys(ranges).map(key => (
                     <Col key={key}>
-                      <label
-                        style={{
-                          backgroundColor: '#F0FDFF',
-                          borderColor: '#33BDFC',
-                          color: '#33BDFC',
-                          borderWidth: 1,
-                          borderStyle: 'solid',
-                          cursor: 'pointer',
-                        }}
+                      <Button
+                        size="small"
                         onClick={() => handlePresetClick(ranges[key as RangeKeys])}
                       >
                         {key}
-                      </label>
+                      </Button>
                     </Col>
                   ))}
                 </Row>
