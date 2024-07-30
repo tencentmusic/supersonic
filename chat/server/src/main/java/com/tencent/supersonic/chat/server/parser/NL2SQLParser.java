@@ -67,8 +67,8 @@ public class NL2SQLParser implements ChatQueryParser {
             + "#Role: You are a data business partner who closely interacts with business people.\n"
             + "#Task: Your will be provided with user input, system output and some examples, "
             + "please respond shortly to teach user how to ask the right question, "
-            + "using `Examples` as references."
-            + "#Rules: ALWAYS use the same language as the `Input`.\n"
+            + "by using `Examples` as references."
+            + "#Rules: ALWAYS respond with the same language as the `Input`.\n"
             + "#Input: {{user_question}}\n"
             + "#Output: {{system_message}}\n"
             + "#Examples: {{examples}}\n"
@@ -214,26 +214,20 @@ public class NL2SQLParser implements ChatQueryParser {
         variables.put("system_message", errMsg);
 
         StringBuilder exampleStr = new StringBuilder();
-        if (similarExemplars.size() > 0) {
-            similarExemplars.stream().forEach(e ->
-                    exampleStr.append(String.format("<Question:{%s},Schema:{%s}> ",
-                            e.getQuestion(), e.getDbSchema()))
-            );
-        } else {
-            agentExamples.stream().forEach(e ->
-                    exampleStr.append(String.format("<Question:{%s}> ",
-                            e)));
-        }
+        similarExemplars.forEach(e ->
+                exampleStr.append(String.format("<Question:{%s},Schema:{%s}> ", e.getQuestion(), e.getDbSchema())));
+        agentExamples.forEach(e ->
+                exampleStr.append(String.format("<Question:{%s}> ", e)));
         variables.put("examples", exampleStr);
 
         Prompt prompt = PromptTemplate.from(REWRITE_ERROR_MESSAGE_INSTRUCTION).apply(variables);
         keyPipelineLog.info("NL2SQLParser reqPrompt:{}", prompt.text());
         Response<AiMessage> response = chatLanguageModel.generate(prompt.toUserMessage());
 
-        String result = response.content().text();
-        keyPipelineLog.info("NL2SQLParser modelResp:{}", result);
+        String rewrittenMsg = response.content().text();
+        keyPipelineLog.info("NL2SQLParser modelResp:{}", rewrittenMsg);
 
-        return response.content().text();
+        return rewrittenMsg;
     }
 
     private String generateSchemaPrompt(List<SchemaElementMatch> elementMatches) {
