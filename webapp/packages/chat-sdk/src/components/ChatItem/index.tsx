@@ -10,7 +10,7 @@ import {
   SimilarQuestionType,
 } from '../../common/type';
 import { useEffect, useState } from 'react';
-import { chatExecute, chatParse, queryData, queryEntityInfo, switchEntity } from '../../service';
+import { chatExecute, chatParse, queryData, switchEntity } from '../../service';
 import { PARSE_ERROR_TIP, PREFIX_CLS, SEARCH_EXCEPTION_TIP } from '../../common/constants';
 import IconFont from '../IconFont';
 import ParseTip from './ParseTip';
@@ -292,19 +292,12 @@ const ChatItem: React.FC<Props> = ({
     }
   };
 
-  const getEntityInfo = async (parseInfoValue: ChatContextType) => {
-    const res = await queryEntityInfo(parseInfoValue.queryId, parseInfoValue.id);
-    setEntityInfo(res.data);
-  };
-
   const onSelectParseInfo = async (parseInfoValue: ChatContextType) => {
     setParseInfo(parseInfoValue);
     updateDimensionFitlers(parseInfoValue.dimensionFilters || []);
     setDateInfo(parseInfoValue.dateInfo);
     if (parseInfoValue.entityInfo) {
       setEntityInfo(parseInfoValue.entityInfo);
-    } else {
-      getEntityInfo(parseInfoValue);
     }
     if (dataCache[parseInfoValue.id!]) {
       const { tip, data } = dataCache[parseInfoValue.id!];

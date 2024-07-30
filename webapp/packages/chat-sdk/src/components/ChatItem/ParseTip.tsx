@@ -143,19 +143,6 @@ const ParseTip: React.FC<Props> = ({
 
   const entityAlias = entity?.alias?.[0]?.split('.')?.[0];
 
-  const entityDimensions = entityInfo?.dimensions?.filter(
-    item =>
-      !['zyqk_song_id', 'song_name', 'singer_id', 'zyqk_cmpny_id'].includes(item.bizName) &&
-      !(
-        entityInfo?.dimensions?.some(dimension => dimension.bizName === 'singer_id') &&
-        item.bizName === 'singer_name'
-      ) &&
-      !(
-        entityInfo?.dimensions?.some(dimension => dimension.bizName === 'zyqk_cmpny_id') &&
-        item.bizName === 'cmpny_name'
-      )
-  );
-
   const getTipNode = () => {
     const dimensionItems = dimensions?.filter(item => item.type === 'DIMENSION');
     const itemValueClass = `${prefixCls}-tip-item-value`;
@@ -230,7 +217,7 @@ const ParseTip: React.FC<Props> = ({
               )}
             {queryMode !== 'TAG_ID' &&
               !dimensions?.some(item => item.bizName?.includes('_id')) &&
-              entityDimensions
+              entityInfo?.dimensions
                 ?.filter(dimension => dimension.value != null)
                 .map(dimension => (
                   <div className={`${prefixCls}-tip-item`} key={dimension.itemId}>
