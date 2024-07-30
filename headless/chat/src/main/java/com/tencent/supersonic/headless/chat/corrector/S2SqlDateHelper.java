@@ -33,7 +33,7 @@ public class S2SqlDateHelper {
             return Pair.of(defaultDate, defaultDate);
         }
         DataSetSchema dataSetSchema = chatQueryContext.getSemanticSchema().getDataSetSchemaMap().get(dataSetId);
-        if (dataSetSchema == null) {
+        if (Objects.isNull(dataSetSchema)) {
             return Pair.of(defaultDate, defaultDate);
         }
         TimeDefaultConfig defaultConfig = dataSetSchema.getMetricTypeTimeDefaultConfig();
@@ -57,7 +57,7 @@ public class S2SqlDateHelper {
             }
             DatePeriodEnum datePeriodEnum = DatePeriodEnum.get(period);
             String startDate = DateUtils.getBeforeDate(unit, datePeriodEnum);
-            String endDate = DateUtils.getBeforeDate(1, datePeriodEnum);
+            String endDate = DateUtils.getBeforeDate(0, DatePeriodEnum.DAY);
             if (unit == 0) {
                 endDate = startDate;
             }
