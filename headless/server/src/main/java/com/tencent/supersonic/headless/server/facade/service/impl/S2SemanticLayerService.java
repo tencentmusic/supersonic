@@ -150,8 +150,8 @@ public class S2SemanticLayerService implements SemanticLayerService {
             //2.query from cache
 
             String cacheKey = queryCache.getCacheKey(queryReq);
-            log.debug("cacheKey:{}", cacheKey);
             Object query = queryCache.query(queryReq, cacheKey);
+            log.info("cacheKey:{},query:{}", cacheKey, query);
             if (Objects.nonNull(query)) {
                 SemanticQueryResp queryResp = (SemanticQueryResp) query;
                 queryResp.setUseCache(true);
@@ -495,7 +495,7 @@ public class S2SemanticLayerService implements SemanticLayerService {
     }
 
     private SemanticQueryResp getQueryResultWithSchemaResp(EntityInfo entityInfo,
-            DataSetSchema dataSetSchema, User user) {
+                                                           DataSetSchema dataSetSchema, User user) {
         SemanticParseInfo semanticParseInfo = new SemanticParseInfo();
         semanticParseInfo.setDataSet(dataSetSchema.getDataSet());
         semanticParseInfo.setQueryType(QueryType.DETAIL);
