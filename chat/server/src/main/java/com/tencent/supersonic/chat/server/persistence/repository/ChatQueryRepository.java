@@ -18,6 +18,8 @@ public interface ChatQueryRepository {
 
     QueryResp getChatQuery(Long queryId);
 
+    List<QueryResp> getChatQueries(Integer chatId);
+
     ChatQueryDO getChatQueryDO(Long queryId);
 
     List<QueryResp> queryShowCase(PageQueryInfoReq pageQueryInfoCommend, int agentId);
@@ -34,7 +36,5 @@ public interface ChatQueryRepository {
     ChatParseDO getParseInfo(Long questionId, int parseId);
 
     List<ChatParseDO> getParseInfoList(List<Long> questionIds);
-
-    List<ParseResp> getContextualParseInfo(Integer chatId);
 
 }

@@ -16,6 +16,7 @@ public class PlainTextParser implements ChatQueryParser {
         SemanticParseInfo parseInfo = new SemanticParseInfo();
         parseInfo.setQueryMode("PLAIN_TEXT");
         parseResp.getSelectedParses().add(parseInfo);
+        parseResp.setState(ParseResp.ParseState.COMPLETED);
     }
 
 }

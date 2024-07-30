@@ -1,13 +1,13 @@
 package com.tencent.supersonic.chat.server.executor;
 
+import com.tencent.supersonic.chat.api.pojo.response.QueryResp;
 import com.tencent.supersonic.chat.server.agent.Agent;
 import com.tencent.supersonic.chat.server.agent.MultiTurnConfig;
 import com.tencent.supersonic.chat.server.parser.ParserConfig;
-import com.tencent.supersonic.chat.server.persistence.repository.ChatQueryRepository;
 import com.tencent.supersonic.chat.server.pojo.ExecuteContext;
 import com.tencent.supersonic.chat.server.service.AgentService;
+import com.tencent.supersonic.chat.server.service.ChatManageService;
 import com.tencent.supersonic.common.util.ContextUtils;
-import com.tencent.supersonic.headless.api.pojo.response.ParseResp;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.headless.api.pojo.response.QueryState;
 import dev.langchain4j.data.message.AiMessage;
@@ -19,6 +19,7 @@ import dev.langchain4j.provider.ModelProvider;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static com.tencent.supersonic.chat.server.parser.ParserConfig.PARSER_MULTI_TURN_ENABLE;
@@ -70,8 +71,8 @@ public class PlainTextExecutor implements ChatQueryExecutor {
                 ? agentMultiTurnConfig.isEnableMultiTurn() : globalMultiTurnConfig;
 
         if (Boolean.TRUE.equals(multiTurnConfig)) {
-            List<ParseResp> parseResps = getHistoryParseResult(executeContext.getChatId(), 5);
-            parseResps.stream().forEach(p -> {
+            List<QueryResp> queryResps = getHistoryQueries(executeContext.getChatId(), 5);
+            queryResps.stream().forEach(p -> {
                 historyInput.append(p.getQueryText());
                 historyInput.append(";");
             });
@@ -80,12 +81,15 @@ public class PlainTextExecutor implements ChatQueryExecutor {
         return historyInput.toString();
     }
 
-    private List<ParseResp> getHistoryParseResult(int chatId, int multiNum) {
-        ChatQueryRepository chatQueryRepository = ContextUtils.getBean(ChatQueryRepository.class);
-        List<ParseResp> contextualParseInfoList = chatQueryRepository.getContextualParseInfo(chatId)
-                .stream().filter(p -> p.getState() == ParseResp.ParseState.COMPLETED).collect(Collectors.toList());
+    private List<QueryResp> getHistoryQueries(int chatId, int multiNum) {
+        ChatManageService chatManageService = ContextUtils.getBean(ChatManageService.class);
+        List<QueryResp> contextualParseInfoList = chatManageService.getChatQueries(chatId)
+                .stream()
+                .filter(q -> Objects.nonNull(q.getQueryResult())
+                        && q.getQueryResult().getQueryState() == QueryState.SUCCESS)
+                .collect(Collectors.toList());
 
-        List<ParseResp> contextualList = contextualParseInfoList.subList(0,
+        List<QueryResp> contextualList = contextualParseInfoList.subList(0,
                 Math.min(multiNum, contextualParseInfoList.size()));
         Collections.reverse(contextualList);
 

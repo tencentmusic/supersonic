@@ -169,8 +169,8 @@ CREATE TABLE IF NOT EXISTS `s2_chat_context` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE IF NOT EXISTS `s2_chat_parse` (
-     `question_id` bigint(20) NOT NULL,
-     `chat_id` bigint(20) NOT NULL,
+     `question_id` bigint NOT NULL,
+     `chat_id` int(11) NOT NULL,
      `parse_id` int(11) NOT NULL,
      `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
      `query_text` varchar(500) DEFAULT NULL,

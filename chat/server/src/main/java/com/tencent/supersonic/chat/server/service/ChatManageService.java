@@ -35,6 +35,8 @@ public interface ChatManageService {
 
     QueryResp getChatQuery(Long queryId);
 
+    List<QueryResp> getChatQueries(Integer chatId);
+
     ShowCaseResp queryShowCase(PageQueryInfoReq pageQueryInfoReq, int agentId);
 
     ChatQueryDO saveQueryResult(ChatExecuteReq chatExecuteReq, QueryResult queryResult);

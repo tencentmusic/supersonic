@@ -376,7 +376,7 @@ public class SchemaServiceImpl implements SchemaService {
             semanticSchemaResp.setModelResps(modelList);
             semanticSchemaResp.setModelRelas(modelRelas);
             semanticSchemaResp.setModelIds(modelIds);
-            semanticSchemaResp.setSchemaType(SchemaType.VIEW);
+            semanticSchemaResp.setSchemaType(SchemaType.DATASET);
         } else if (!CollectionUtils.isEmpty(schemaFilterReq.getModelIds())) {
             List<ModelSchemaResp> modelSchemaResps = fetchModelSchemaResps(schemaFilterReq.getModelIds());
             semanticSchemaResp.setMetrics(modelSchemaResps.stream().map(ModelSchemaResp::getMetrics)

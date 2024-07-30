@@ -1,10 +1,11 @@
 package com.tencent.supersonic.chat.server.parser;
 
+import com.tencent.supersonic.chat.api.pojo.response.QueryResp;
 import com.tencent.supersonic.chat.server.agent.MultiTurnConfig;
-import com.tencent.supersonic.chat.server.persistence.repository.ChatQueryRepository;
 import com.tencent.supersonic.chat.server.plugin.PluginQueryManager;
 import com.tencent.supersonic.chat.server.pojo.ParseContext;
 import com.tencent.supersonic.chat.server.service.ChatContextService;
+import com.tencent.supersonic.chat.server.service.ChatManageService;
 import com.tencent.supersonic.chat.server.util.QueryReqConverter;
 import com.tencent.supersonic.common.config.EmbeddingConfig;
 import com.tencent.supersonic.common.pojo.Text2SQLExemplar;
@@ -19,6 +20,7 @@ import com.tencent.supersonic.headless.api.pojo.request.QueryNLReq;
 import com.tencent.supersonic.headless.api.pojo.response.MapResp;
 import com.tencent.supersonic.headless.api.pojo.response.ParseResp;
 import com.tencent.supersonic.chat.server.pojo.ChatContext;
+import com.tencent.supersonic.headless.api.pojo.response.QueryState;
 import com.tencent.supersonic.headless.server.facade.service.ChatLayerService;
 import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.model.chat.ChatLanguageModel;
@@ -176,21 +178,22 @@ public class NL2SQLParser implements ChatQueryParser {
         QueryNLReq queryNLReq = QueryReqConverter.buildText2SqlQueryReq(parseContext);
         MapResp currentMapResult = chatLayerService.performMapping(queryNLReq);
 
-        List<ParseResp> historyParseResults = getHistoryParseResult(parseContext.getChatId(), 1);
-        if (historyParseResults.size() == 0) {
+        List<QueryResp> historyQueries = getHistoryQueries(parseContext.getChatId(), 1);
+        if (historyQueries.size() == 0) {
             return;
         }
-        ParseResp lastParseResult = historyParseResults.get(0);
-        Long dataId = lastParseResult.getSelectedParses().get(0).getDataSetId();
+        QueryResp lastQuery = historyQueries.get(0);
+        SemanticParseInfo lastParseInfo = lastQuery.getParseInfos().get(0);
+        Long dataId = lastParseInfo.getDataSetId();
 
         String curtMapStr = generateSchemaPrompt(currentMapResult.getMapInfo().getMatchedElements(dataId));
-        String histMapStr = generateSchemaPrompt(lastParseResult.getSelectedParses().get(0).getElementMatches());
-        String histSQL = lastParseResult.getSelectedParses().get(0).getSqlInfo().getCorrectedS2SQL();
+        String histMapStr = generateSchemaPrompt(lastParseInfo.getElementMatches());
+        String histSQL = lastParseInfo.getSqlInfo().getCorrectedS2SQL();
 
         Map<String, Object> variables = new HashMap<>();
         variables.put("current_question", currentMapResult.getQueryText());
         variables.put("current_schema", curtMapStr);
-        variables.put("history_question", lastParseResult.getQueryText());
+        variables.put("history_question", lastQuery.getQueryText());
         variables.put("history_schema", histMapStr);
         variables.put("history_sql", histSQL);
 
@@ -203,7 +206,7 @@ public class NL2SQLParser implements ChatQueryParser {
 
         parseContext.setQueryText(rewrittenQuery);
         log.info("Last Query: {} Current Query: {}, Rewritten Query: {}",
-                lastParseResult.getQueryText(), currentMapResult.getQueryText(), rewrittenQuery);
+                lastQuery.getQueryText(), currentMapResult.getQueryText(), rewrittenQuery);
     }
 
     private String rewriteErrorMessage(ChatLanguageModel chatLanguageModel, String userQuestion,
@@ -255,12 +258,15 @@ public class NL2SQLParser implements ChatQueryParser {
         return prompt.toString();
     }
 
-    private List<ParseResp> getHistoryParseResult(int chatId, int multiNum) {
-        ChatQueryRepository chatQueryRepository = ContextUtils.getBean(ChatQueryRepository.class);
-        List<ParseResp> contextualParseInfoList = chatQueryRepository.getContextualParseInfo(chatId)
-                .stream().filter(p -> p.getState() == ParseResp.ParseState.COMPLETED).collect(Collectors.toList());
+    private List<QueryResp> getHistoryQueries(int chatId, int multiNum) {
+        ChatManageService chatManageService = ContextUtils.getBean(ChatManageService.class);
+        List<QueryResp> contextualParseInfoList = chatManageService.getChatQueries(chatId)
+                .stream()
+                .filter(q -> Objects.nonNull(q.getQueryResult())
+                        && q.getQueryResult().getQueryState() == QueryState.SUCCESS)
+                .collect(Collectors.toList());
 
-        List<ParseResp> contextualList = contextualParseInfoList.subList(0,
+        List<QueryResp> contextualList = contextualParseInfoList.subList(0,
                 Math.min(multiNum, contextualParseInfoList.size()));
         Collections.reverse(contextualList);
         return contextualList;
