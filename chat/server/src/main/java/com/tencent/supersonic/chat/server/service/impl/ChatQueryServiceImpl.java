@@ -5,9 +5,11 @@ import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.chat.api.pojo.request.ChatExecuteReq;
 import com.tencent.supersonic.chat.api.pojo.request.ChatParseReq;
 import com.tencent.supersonic.chat.api.pojo.request.ChatQueryDataReq;
+import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.chat.server.agent.Agent;
 import com.tencent.supersonic.chat.server.executor.ChatQueryExecutor;
 import com.tencent.supersonic.chat.server.parser.ChatQueryParser;
+import com.tencent.supersonic.chat.server.parser.PlainTextParser;
 import com.tencent.supersonic.chat.server.pojo.ExecuteContext;
 import com.tencent.supersonic.chat.server.pojo.ParseContext;
 import com.tencent.supersonic.chat.server.processor.execute.ExecuteResultProcessor;
@@ -17,11 +19,8 @@ import com.tencent.supersonic.chat.server.service.ChatManageService;
 import com.tencent.supersonic.chat.server.service.ChatQueryService;
 import com.tencent.supersonic.chat.server.util.ComponentFactory;
 import com.tencent.supersonic.chat.server.util.QueryReqConverter;
-import com.tencent.supersonic.common.jsqlparser.FieldExpression;
-import com.tencent.supersonic.common.jsqlparser.SqlAddHelper;
-import com.tencent.supersonic.common.jsqlparser.SqlRemoveHelper;
-import com.tencent.supersonic.common.jsqlparser.SqlReplaceHelper;
-import com.tencent.supersonic.common.jsqlparser.SqlSelectHelper;
+import com.tencent.supersonic.common.jsqlparser.*;
+import com.tencent.supersonic.common.pojo.DataItem;
 import com.tencent.supersonic.common.pojo.QueryColumn;
 import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
 import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
@@ -37,44 +36,29 @@ import com.tencent.supersonic.headless.api.pojo.request.DimensionValueReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryFilter;
 import com.tencent.supersonic.headless.api.pojo.request.QueryNLReq;
 import com.tencent.supersonic.headless.api.pojo.request.SemanticQueryReq;
-import com.tencent.supersonic.headless.api.pojo.response.MapResp;
-import com.tencent.supersonic.headless.api.pojo.response.ParseResp;
-import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
-import com.tencent.supersonic.headless.api.pojo.response.QueryState;
-import com.tencent.supersonic.headless.api.pojo.response.SearchResult;
-import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
-import com.tencent.supersonic.headless.api.pojo.response.SemanticTranslateResp;
+import com.tencent.supersonic.headless.api.pojo.response.*;
 import com.tencent.supersonic.headless.chat.query.QueryManager;
 import com.tencent.supersonic.headless.chat.query.SemanticQuery;
 import com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMSqlQuery;
 import com.tencent.supersonic.headless.server.facade.service.ChatLayerService;
 import com.tencent.supersonic.headless.server.facade.service.SemanticLayerService;
+import com.tencent.supersonic.headless.server.service.DimensionService;
+import com.tencent.supersonic.headless.server.service.MetricService;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.LongValue;
 import net.sf.jsqlparser.expression.StringValue;
-import net.sf.jsqlparser.expression.operators.relational.ComparisonOperator;
-import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
-import net.sf.jsqlparser.expression.operators.relational.GreaterThan;
-import net.sf.jsqlparser.expression.operators.relational.GreaterThanEquals;
-import net.sf.jsqlparser.expression.operators.relational.InExpression;
-import net.sf.jsqlparser.expression.operators.relational.MinorThan;
-import net.sf.jsqlparser.expression.operators.relational.MinorThanEquals;
-import net.sf.jsqlparser.expression.operators.relational.ParenthesedExpressionList;
+import net.sf.jsqlparser.expression.operators.relational.*;
 import net.sf.jsqlparser.schema.Column;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -91,10 +75,20 @@ public class ChatQueryServiceImpl implements ChatQueryService {
     @Autowired
     private AgentService agentService;
 
+    @Autowired
+    private MetricService metricService;
+
+    @Autowired
+    private DimensionService dimensionService;
+
     private List<ChatQueryParser> chatQueryParsers = ComponentFactory.getChatParsers();
     private List<ChatQueryExecutor> chatQueryExecutors = ComponentFactory.getChatExecutors();
     private List<ParseResultProcessor> parseResultProcessors = ComponentFactory.getParseProcessors();
     private List<ExecuteResultProcessor> executeResultProcessors = ComponentFactory.getExecuteProcessors();
+
+    @Value("${s2.agent.plain-text-agent-id:5}")
+    private Integer plainTextAgentId;
+
 
     @Override
     public List<SearchResult> search(ChatParseReq chatParseReq) {
@@ -116,6 +110,15 @@ public class ChatQueryServiceImpl implements ChatQueryService {
         for (ChatQueryParser chatQueryParser : chatQueryParsers) {
             chatQueryParser.parse(parseContext, parseResp);
         }
+        // 如果text2SQL解析失败就走PlainTextParse
+        if (ParseResp.ParseState.FAILED.equals(parseResp.getState())) {
+            parseResp.setState(ParseResp.ParseState.PENDING);
+            parseResp.setErrorMsg(null);
+            SemanticParseInfo parseInfo = new SemanticParseInfo();
+            parseInfo.setQueryMode("PLAIN_TEXT");
+            parseResp.getSelectedParses().add(parseInfo);
+        }
+
         for (ParseResultProcessor processor : parseResultProcessors) {
             processor.process(parseContext, parseResp);
         }
@@ -124,6 +127,7 @@ public class ChatQueryServiceImpl implements ChatQueryService {
         chatManageService.updateParseCostTime(parseResp);
         return parseResp;
     }
+
 
     @Override
     public QueryResult performExecution(ChatExecuteReq chatExecuteReq) {
