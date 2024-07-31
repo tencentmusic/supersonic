@@ -776,24 +776,25 @@ public class SqlSelectHelper {
 
     private static void getFieldsWithSubQuery(PlainSelect plainSelect, Map<String, Set<String>> fields) {
         if (plainSelect.getFromItem() instanceof Table) {
-            boolean isWith = false;
+            List<String> withAlias = new ArrayList<>();
             if (!CollectionUtils.isEmpty(plainSelect.getWithItemsList())) {
                 for (WithItem withItem : plainSelect.getWithItemsList()) {
                     if (Objects.nonNull(withItem.getSelect())) {
                         getFieldsWithSubQuery(withItem.getSelect().getPlainSelect(), fields);
-                        isWith = true;
+                        withAlias.add(withItem.getAlias().getName());
                     }
                 }
             }
-            if (!isWith) {
-                Table table = (Table) plainSelect.getFromItem();
+            Table table = (Table) plainSelect.getFromItem();
+            String tableName = table.getFullyQualifiedName();
+            if (!withAlias.contains(tableName)) {
                 if (!fields.containsKey(table.getFullyQualifiedName())) {
-                    fields.put(table.getFullyQualifiedName(), new HashSet<>());
+                    fields.put(tableName, new HashSet<>());
                 }
                 List<String> sqlFields = getFieldsByPlainSelect(plainSelect).stream().map(f -> f.replaceAll("`", ""))
                         .collect(
                                 Collectors.toList());
-                fields.get(table.getFullyQualifiedName()).addAll(sqlFields);
+                fields.get(tableName).addAll(sqlFields);
             }
         }
         if (plainSelect.getFromItem() instanceof ParenthesedSelect) {
