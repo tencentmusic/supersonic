@@ -39,7 +39,7 @@ public class HavingCorrector extends BaseSemanticCorrector {
     }
 
     private void addHaving(ChatQueryContext chatQueryContext, SemanticParseInfo semanticParseInfo) {
-        Long dataSet = semanticParseInfo.getDataSet().getDataSet();
+        Long dataSet = semanticParseInfo.getDataSet().getDataSetId();
 
         SemanticSchema semanticSchema = chatQueryContext.getSemanticSchema();
 

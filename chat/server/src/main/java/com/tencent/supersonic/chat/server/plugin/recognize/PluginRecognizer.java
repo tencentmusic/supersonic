@@ -73,7 +73,7 @@ public abstract class PluginRecognizer {
         SemanticParseInfo semanticParseInfo = new SemanticParseInfo();
         semanticParseInfo.setElementMatches(schemaElementMatches);
         SchemaElement schemaElement = new SchemaElement();
-        schemaElement.setDataSet(dataSetId);
+        schemaElement.setDataSetId(dataSetId);
         semanticParseInfo.setDataSet(schemaElement);
         Map<String, Object> properties = new HashMap<>();
         PluginParseResult pluginParseResult = new PluginParseResult();

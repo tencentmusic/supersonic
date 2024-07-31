@@ -31,7 +31,7 @@ public class DataSetSchemaBuilder {
         DataSetSchema dataSetSchema = new DataSetSchema();
         dataSetSchema.setQueryConfig(resp.getQueryConfig());
         SchemaElement dataSet = SchemaElement.builder()
-                .dataSet(resp.getId())
+                .dataSetId(resp.getId())
                 .dataSetName(resp.getName())
                 .id(resp.getId())
                 .name(resp.getName())
@@ -71,7 +71,7 @@ public class DataSetSchemaBuilder {
             List<String> alias = SchemaItem.getAliasList(metric.getAlias());
             if (metric.getIsTag() == 1) {
                 SchemaElement tagToAdd = SchemaElement.builder()
-                        .dataSet(resp.getId())
+                        .dataSetId(resp.getId())
                         .dataSetName(resp.getName())
                         .model(metric.getModelId())
                         .id(metric.getId())
@@ -105,7 +105,7 @@ public class DataSetSchemaBuilder {
             }
             if (dim.getIsTag() == 1) {
                 SchemaElement tagToAdd = SchemaElement.builder()
-                        .dataSet(resp.getId())
+                        .dataSetId(resp.getId())
                         .dataSetName(resp.getName())
                         .model(dim.getModelId())
                         .id(dim.getId())
@@ -130,7 +130,7 @@ public class DataSetSchemaBuilder {
             return null;
         }
         return SchemaElement.builder()
-                .dataSet(resp.getId())
+                .dataSetId(resp.getId())
                 .model(dim.getModelId())
                 .id(dim.getId())
                 .name(dim.getName())
@@ -155,7 +155,7 @@ public class DataSetSchemaBuilder {
                 }
             }
             SchemaElement dimToAdd = SchemaElement.builder()
-                    .dataSet(resp.getId())
+                    .dataSetId(resp.getId())
                     .dataSetName(resp.getName())
                     .model(dim.getModelId())
                     .id(dim.getId())
@@ -189,7 +189,7 @@ public class DataSetSchemaBuilder {
                 }
             }
             SchemaElement dimValueToAdd = SchemaElement.builder()
-                    .dataSet(resp.getId())
+                    .dataSetId(resp.getId())
                     .dataSetName(resp.getName())
                     .model(dim.getModelId())
                     .id(dim.getId())
@@ -213,7 +213,7 @@ public class DataSetSchemaBuilder {
             List<String> alias = SchemaItem.getAliasList(metric.getAlias());
 
             SchemaElement metricToAdd = SchemaElement.builder()
-                    .dataSet(resp.getId())
+                    .dataSetId(resp.getId())
                     .dataSetName(resp.getName())
                     .model(metric.getModelId())
                     .id(metric.getId())
@@ -239,7 +239,7 @@ public class DataSetSchemaBuilder {
         for (TermResp termResp : resp.getTermResps()) {
             List<String> alias = termResp.getAlias();
             SchemaElement metricToAdd = SchemaElement.builder()
-                    .dataSet(resp.getId())
+                    .dataSetId(resp.getId())
                     .dataSetName(resp.getName())
                     .model(-1L)
                     .id(termResp.getId())

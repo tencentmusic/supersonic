@@ -28,8 +28,8 @@ public class SqlValidHelper {
         }
 
         //2. all fields
-        List<String> thisAllFields = SqlSelectHelper.getAllFields(thisSql);
-        List<String> otherAllFields = SqlSelectHelper.getAllFields(otherSql);
+        List<String> thisAllFields = SqlSelectHelper.getAllSelectFields(thisSql);
+        List<String> otherAllFields = SqlSelectHelper.getAllSelectFields(otherSql);
 
         if (!CollectionUtils.isEqualCollection(thisAllFields, otherAllFields)) {
             return false;

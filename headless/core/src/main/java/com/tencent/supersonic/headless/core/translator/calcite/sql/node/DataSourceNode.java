@@ -67,8 +67,8 @@ public class DataSourceNode extends SemanticNode {
             String tb = entry.getKey();
             String db = "";
             if (entry.getKey().indexOf(".") > 0) {
-                db = entry.getKey().substring(0, entry.getKey().indexOf("."));
-                tb = entry.getKey().substring(entry.getKey().indexOf(".") + 1);
+                db = entry.getKey().substring(0, entry.getKey().lastIndexOf("."));
+                tb = entry.getKey().substring(entry.getKey().lastIndexOf(".") + 1);
             }
             addSchemaTable(scope, datasource, db, tb, entry.getValue());
         }

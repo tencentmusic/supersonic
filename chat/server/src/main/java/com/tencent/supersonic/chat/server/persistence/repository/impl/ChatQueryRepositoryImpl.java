@@ -20,7 +20,7 @@ import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.api.pojo.response.ParseResp;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResp;
 import com.tencent.supersonic.headless.api.pojo.response.ParseTimeCostResp;
-import com.tencent.supersonic.headless.api.pojo.response.QueryResult;
+import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -91,6 +91,16 @@ public class ChatQueryRepositoryImpl implements ChatQueryRepository {
     }
 
     @Override
+    public List<QueryResp> getChatQueries(Integer chatId) {
+        QueryWrapper<ChatQueryDO> queryWrapper = new QueryWrapper<>();
+        queryWrapper.lambda().eq(ChatQueryDO::getChatId, chatId);
+        queryWrapper.lambda().orderByDesc(ChatQueryDO::getQuestionId);
+        return chatQueryDOMapper.selectList(queryWrapper).stream()
+                .map(q -> convertTo(q))
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public List<QueryResp> queryShowCase(PageQueryInfoReq pageQueryInfoReq, int agentId) {
         return showCaseCustomMapper.queryShowCase(pageQueryInfoReq.getLimitStart(),
                         pageQueryInfoReq.getPageSize(), agentId, pageQueryInfoReq.getUserName())
@@ -145,7 +155,7 @@ public class ChatQueryRepositoryImpl implements ChatQueryRepository {
                                List<SemanticParseInfo> parses, List<ChatParseDO> chatParseDOList) {
         for (int i = 0; i < parses.size(); i++) {
             ChatParseDO chatParseDO = new ChatParseDO();
-            chatParseDO.setChatId(Long.valueOf(chatParseReq.getChatId()));
+            chatParseDO.setChatId(chatParseReq.getChatId());
             chatParseDO.setQuestionId(queryId);
             chatParseDO.setQueryText(chatParseReq.getQueryText());
             chatParseDO.setParseInfo(JsonUtil.toString(parses.get(i)));
@@ -177,19 +187,6 @@ public class ChatQueryRepositoryImpl implements ChatQueryRepository {
     @Override
     public List<ChatParseDO> getParseInfoList(List<Long> questionIds) {
         return chatParseMapper.getParseInfoList(questionIds);
-    }
-
-    @Override
-    public List<ParseResp> getContextualParseInfo(Integer chatId) {
-        List<ChatParseDO> chatParseDOList = chatParseMapper.getContextualParseInfo(chatId);
-        List<ParseResp> semanticParseInfoList = chatParseDOList.stream().map(parseInfo -> {
-            ParseResp parseResp = new ParseResp(parseInfo.getQueryText());
-            List<SemanticParseInfo> selectedParses = new ArrayList<>();
-            selectedParses.add(JSONObject.parseObject(parseInfo.getParseInfo(), SemanticParseInfo.class));
-            parseResp.setSelectedParses(selectedParses);
-            return parseResp;
-        }).collect(Collectors.toList());
-        return semanticParseInfoList;
     }
 
 }

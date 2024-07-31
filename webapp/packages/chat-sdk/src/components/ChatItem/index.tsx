@@ -6,10 +6,11 @@ import {
   MsgDataType,
   ParseStateEnum,
   ParseTimeCostType,
+  RangeValue,
   SimilarQuestionType,
 } from '../../common/type';
 import { useEffect, useState } from 'react';
-import { chatExecute, chatParse, queryData, queryEntityInfo, switchEntity } from '../../service';
+import { chatExecute, chatParse, queryData, switchEntity } from '../../service';
 import { PARSE_ERROR_TIP, PREFIX_CLS, SEARCH_EXCEPTION_TIP } from '../../common/constants';
 import IconFont from '../IconFont';
 import ParseTip from './ParseTip';
@@ -85,7 +86,7 @@ const ChatItem: React.FC<Props> = ({
   const updateData = (res: Result<MsgDataType>) => {
     let tip: string = '';
     let data: MsgDataType | undefined = undefined;
-    const { queryColumns, queryResults, queryState, queryMode, response, chatContext, textResult } =
+    const { queryColumns, queryResults, queryState, queryMode, response, chatContext } =
       res.data || {};
     if (res.code === 400 || res.code === 401 || res.code === 412) {
       tip = res.msg;
@@ -167,7 +168,7 @@ const ChatItem: React.FC<Props> = ({
     const parseData: any = await chatParse(msg, conversationId, modelId, agentId, filter);
     setParseLoading(false);
     const { code, data } = parseData || {};
-    const { state, selectedParses, candidateParses, queryId, parseTimeCost } = data || {};
+    const { state, selectedParses, candidateParses, queryId, parseTimeCost, errorMsg } = data || {};
     const parses = selectedParses?.concat(candidateParses || []) || [];
     if (
       code !== 200 ||
@@ -175,7 +176,7 @@ const ChatItem: React.FC<Props> = ({
       !parses.length ||
       (!parses[0]?.properties?.type && !parses[0]?.queryMode)
     ) {
-      setParseTip(PARSE_ERROR_TIP);
+      setParseTip(state === ParseStateEnum.FAILED && errorMsg ? errorMsg : PARSE_ERROR_TIP);
       setParseInfo({ queryId } as any);
       return;
     }
@@ -234,13 +235,9 @@ const ChatItem: React.FC<Props> = ({
     setDimensionFilters(dimensionFilters);
   };
 
-  type RangeValue = [Dayjs, Dayjs];
-  const [selectedRange, setSelectedRange] = useState<RangeValue | null>(null);
-
   const onDateInfoChange = (dates: [Dayjs | null, Dayjs | null] | null) => {
     if (dates && dates[0] && dates[1]) {
       const [start, end] = dates;
-      setSelectedRange([start, end] as RangeValue);
       setDateInfo({
         ...(dateInfo || {}),
         startDate: dayjs(start).format('YYYY-MM-DD'),
@@ -248,13 +245,10 @@ const ChatItem: React.FC<Props> = ({
         dateMode: 'BETWEEN',
         unit: 0,
       });
-    } else {
-      setSelectedRange(null);
     }
   };
 
   const handlePresetClick = (range: RangeValue) => {
-    setSelectedRange(range);
     setDateInfo({
       ...(dateInfo || {}),
       startDate: dayjs(range[0]).format('YYYY-MM-DD'),
@@ -263,7 +257,6 @@ const ChatItem: React.FC<Props> = ({
       unit: 0,
     });
   };
-
 
   const onRefresh = async () => {
     setEntitySwitchLoading(true);
@@ -294,19 +287,12 @@ const ChatItem: React.FC<Props> = ({
     }
   };
 
-  const getEntityInfo = async (parseInfoValue: ChatContextType) => {
-    const res = await queryEntityInfo(parseInfoValue.queryId, parseInfoValue.id);
-    setEntityInfo(res.data);
-  };
-
   const onSelectParseInfo = async (parseInfoValue: ChatContextType) => {
     setParseInfo(parseInfoValue);
     updateDimensionFitlers(parseInfoValue.dimensionFilters || []);
     setDateInfo(parseInfoValue.dateInfo);
     if (parseInfoValue.entityInfo) {
       setEntityInfo(parseInfoValue.entityInfo);
-    } else {
-      getEntityInfo(parseInfoValue);
     }
     if (dataCache[parseInfoValue.id!]) {
       const { tip, data } = dataCache[parseInfoValue.id!];
@@ -338,10 +324,8 @@ const ChatItem: React.FC<Props> = ({
 
   return (
     <div className={prefixCls}>
-      {!isMobile && integrateSystem !== 'wiki' && (
-        <IconFont type="icon-zhinengsuanfa" className={`${prefixCls}-avatar`} />
-      )}
-      <div className={isMobile ? `${prefixCls}-mobile-msg-card` : `${prefixCls}-msg-card`}>
+      {!isMobile && <IconFont type="icon-zhinengsuanfa" className={`${prefixCls}-avatar`} />}
+      <div className={isMobile ? `${prefixCls}-mobile-msg-card` : ''}>
         <div className={contentClass}>
           <ParseTip
             isSimpleMode={isSimpleMode}
@@ -367,6 +351,8 @@ const ChatItem: React.FC<Props> = ({
             <>
               {!isMobile && parseInfo?.sqlInfo && isDeveloper && isDebugMode && !isSimpleMode && (
                 <SqlItem
+                  agentId={agentId}
+                  queryId={parseInfo.queryId}
                   llmReq={llmReq}
                   llmResp={llmResp}
                   integrateSystem={integrateSystem}
@@ -391,7 +377,8 @@ const ChatItem: React.FC<Props> = ({
               />
             </>
           )}
-          {(parseTip !== '' || (executeMode && !executeLoading)) &&
+          {executeMode &&
+            !executeLoading &&
             !isSimpleMode &&
             parseInfo?.queryMode !== 'PLAIN_TEXT' && (
               <SimilarQuestionItem

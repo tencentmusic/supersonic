@@ -1,7 +1,6 @@
 import axios from './axiosInstance';
 import {
   ChatContextType,
-  EntityInfoType,
   HistoryMsgItemType,
   HistoryType,
   MsgDataType,
@@ -130,10 +129,4 @@ export function queryDimensionValues(
     elementID,
     value,
   });
-}
-
-export function queryEntityInfo(queryId: number, parseId: number) {
-  return axios.get<EntityInfoType>(
-    `${prefix}/chat/query/getEntityInfo?queryId=${queryId}&parseId=${parseId}`
-  );
 }

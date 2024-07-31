@@ -1,8 +1,7 @@
 package com.tencent.supersonic.headless.server.pojo.yaml;
 
+import com.google.common.collect.Lists;
 import lombok.Data;
-import org.apache.commons.compress.utils.Lists;
-
 import java.util.List;
 
 @Data

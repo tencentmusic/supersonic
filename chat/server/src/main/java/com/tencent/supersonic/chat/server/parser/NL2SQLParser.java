@@ -1,10 +1,11 @@
 package com.tencent.supersonic.chat.server.parser;
 
+import com.tencent.supersonic.chat.api.pojo.response.QueryResp;
 import com.tencent.supersonic.chat.server.agent.MultiTurnConfig;
-import com.tencent.supersonic.chat.server.persistence.repository.ChatQueryRepository;
 import com.tencent.supersonic.chat.server.plugin.PluginQueryManager;
 import com.tencent.supersonic.chat.server.pojo.ParseContext;
 import com.tencent.supersonic.chat.server.service.ChatContextService;
+import com.tencent.supersonic.chat.server.service.ChatManageService;
 import com.tencent.supersonic.chat.server.util.QueryReqConverter;
 import com.tencent.supersonic.common.config.EmbeddingConfig;
 import com.tencent.supersonic.common.pojo.Text2SQLExemplar;
@@ -19,6 +20,7 @@ import com.tencent.supersonic.headless.api.pojo.request.QueryNLReq;
 import com.tencent.supersonic.headless.api.pojo.response.MapResp;
 import com.tencent.supersonic.headless.api.pojo.response.ParseResp;
 import com.tencent.supersonic.chat.server.pojo.ChatContext;
+import com.tencent.supersonic.headless.api.pojo.response.QueryState;
 import com.tencent.supersonic.headless.server.facade.service.ChatLayerService;
 import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.model.chat.ChatLanguageModel;
@@ -67,8 +69,8 @@ public class NL2SQLParser implements ChatQueryParser {
             + "#Role: You are a data business partner who closely interacts with business people.\n"
             + "#Task: Your will be provided with user input, system output and some examples, "
             + "please respond shortly to teach user how to ask the right question, "
-            + "using `Examples` as references."
-            + "#Rules: ALWAYS use the same language as the `Input`.\n"
+            + "by using `Examples` as references."
+            + "#Rules: ALWAYS respond with the same language as the `Input`.\n"
             + "#Input: {{user_question}}\n"
             + "#Output: {{system_message}}\n"
             + "#Examples: {{examples}}\n"
@@ -176,21 +178,22 @@ public class NL2SQLParser implements ChatQueryParser {
         QueryNLReq queryNLReq = QueryReqConverter.buildText2SqlQueryReq(parseContext);
         MapResp currentMapResult = chatLayerService.performMapping(queryNLReq);
 
-        List<ParseResp> historyParseResults = getHistoryParseResult(parseContext.getChatId(), 1);
-        if (historyParseResults.size() == 0) {
+        List<QueryResp> historyQueries = getHistoryQueries(parseContext.getChatId(), 1);
+        if (historyQueries.size() == 0) {
             return;
         }
-        ParseResp lastParseResult = historyParseResults.get(0);
-        Long dataId = lastParseResult.getSelectedParses().get(0).getDataSetId();
+        QueryResp lastQuery = historyQueries.get(0);
+        SemanticParseInfo lastParseInfo = lastQuery.getParseInfos().get(0);
+        Long dataId = lastParseInfo.getDataSetId();
 
         String curtMapStr = generateSchemaPrompt(currentMapResult.getMapInfo().getMatchedElements(dataId));
-        String histMapStr = generateSchemaPrompt(lastParseResult.getSelectedParses().get(0).getElementMatches());
-        String histSQL = lastParseResult.getSelectedParses().get(0).getSqlInfo().getCorrectedS2SQL();
+        String histMapStr = generateSchemaPrompt(lastParseInfo.getElementMatches());
+        String histSQL = lastParseInfo.getSqlInfo().getCorrectedS2SQL();
 
         Map<String, Object> variables = new HashMap<>();
         variables.put("current_question", currentMapResult.getQueryText());
         variables.put("current_schema", curtMapStr);
-        variables.put("history_question", lastParseResult.getQueryText());
+        variables.put("history_question", lastQuery.getQueryText());
         variables.put("history_schema", histMapStr);
         variables.put("history_sql", histSQL);
 
@@ -203,7 +206,7 @@ public class NL2SQLParser implements ChatQueryParser {
 
         parseContext.setQueryText(rewrittenQuery);
         log.info("Last Query: {} Current Query: {}, Rewritten Query: {}",
-                lastParseResult.getQueryText(), currentMapResult.getQueryText(), rewrittenQuery);
+                lastQuery.getQueryText(), currentMapResult.getQueryText(), rewrittenQuery);
     }
 
     private String rewriteErrorMessage(ChatLanguageModel chatLanguageModel, String userQuestion,
@@ -214,26 +217,20 @@ public class NL2SQLParser implements ChatQueryParser {
         variables.put("system_message", errMsg);
 
         StringBuilder exampleStr = new StringBuilder();
-        if (similarExemplars.size() > 0) {
-            similarExemplars.stream().forEach(e ->
-                    exampleStr.append(String.format("<Question:{%s},Schema:{%s}> ",
-                            e.getQuestion(), e.getDbSchema()))
-            );
-        } else {
-            agentExamples.stream().forEach(e ->
-                    exampleStr.append(String.format("<Question:{%s}> ",
-                            e)));
-        }
+        similarExemplars.forEach(e ->
+                exampleStr.append(String.format("<Question:{%s},Schema:{%s}> ", e.getQuestion(), e.getDbSchema())));
+        agentExamples.forEach(e ->
+                exampleStr.append(String.format("<Question:{%s}> ", e)));
         variables.put("examples", exampleStr);
 
         Prompt prompt = PromptTemplate.from(REWRITE_ERROR_MESSAGE_INSTRUCTION).apply(variables);
         keyPipelineLog.info("NL2SQLParser reqPrompt:{}", prompt.text());
         Response<AiMessage> response = chatLanguageModel.generate(prompt.toUserMessage());
 
-        String result = response.content().text();
-        keyPipelineLog.info("NL2SQLParser modelResp:{}", result);
+        String rewrittenMsg = response.content().text();
+        keyPipelineLog.info("NL2SQLParser modelResp:{}", rewrittenMsg);
 
-        return response.content().text();
+        return rewrittenMsg;
     }
 
     private String generateSchemaPrompt(List<SchemaElementMatch> elementMatches) {
@@ -261,12 +258,15 @@ public class NL2SQLParser implements ChatQueryParser {
         return prompt.toString();
     }
 
-    private List<ParseResp> getHistoryParseResult(int chatId, int multiNum) {
-        ChatQueryRepository chatQueryRepository = ContextUtils.getBean(ChatQueryRepository.class);
-        List<ParseResp> contextualParseInfoList = chatQueryRepository.getContextualParseInfo(chatId)
-                .stream().filter(p -> p.getState() == ParseResp.ParseState.COMPLETED).collect(Collectors.toList());
+    private List<QueryResp> getHistoryQueries(int chatId, int multiNum) {
+        ChatManageService chatManageService = ContextUtils.getBean(ChatManageService.class);
+        List<QueryResp> contextualParseInfoList = chatManageService.getChatQueries(chatId)
+                .stream()
+                .filter(q -> Objects.nonNull(q.getQueryResult())
+                        && q.getQueryResult().getQueryState() == QueryState.SUCCESS)
+                .collect(Collectors.toList());
 
-        List<ParseResp> contextualList = contextualParseInfoList.subList(0,
+        List<QueryResp> contextualList = contextualParseInfoList.subList(0,
                 Math.min(multiNum, contextualParseInfoList.size()));
         Collections.reverse(contextualList);
         return contextualList;

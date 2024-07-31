@@ -64,7 +64,7 @@ public class QueryFilterMapper extends BaseMapper {
                     .name(String.valueOf(filter.getValue()))
                     .type(SchemaElementType.VALUE)
                     .bizName(filter.getBizName())
-                    .dataSet(dataSetId)
+                    .dataSetId(dataSetId)
                     .build();
             SchemaElementMatch schemaElementMatch = SchemaElementMatch.builder()
                     .element(element)

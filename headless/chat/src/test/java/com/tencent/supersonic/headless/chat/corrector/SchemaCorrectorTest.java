@@ -70,7 +70,7 @@ class SchemaCorrectorTest {
         semanticParseInfo.setSqlInfo(sqlInfo);
 
         SchemaElement schemaElement = new SchemaElement();
-        schemaElement.setDataSet(dataSetId);
+        schemaElement.setDataSetId(dataSetId);
         semanticParseInfo.setDataSet(schemaElement);
 
 
@@ -107,21 +107,21 @@ class SchemaCorrectorTest {
         QueryConfig queryConfig = new QueryConfig();
         dataSetSchema.setQueryConfig(queryConfig);
         SchemaElement schemaElement = new SchemaElement();
-        schemaElement.setDataSet(dataSetId);
+        schemaElement.setDataSetId(dataSetId);
         dataSetSchema.setDataSet(schemaElement);
         Set<SchemaElement> dimensions = new HashSet<>();
         SchemaElement element1 = new SchemaElement();
-        element1.setDataSet(1L);
+        element1.setDataSetId(1L);
         element1.setName("歌曲名");
         dimensions.add(element1);
 
         SchemaElement element2 = new SchemaElement();
-        element2.setDataSet(1L);
+        element2.setDataSetId(1L);
         element2.setName("商务组");
         dimensions.add(element2);
 
         SchemaElement element3 = new SchemaElement();
-        element3.setDataSet(1L);
+        element3.setDataSetId(1L);
         element3.setName("发行日期");
         dimensions.add(element3);
 

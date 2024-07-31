@@ -1,6 +1,7 @@
 package com.tencent.supersonic.headless.server.facade.service.impl;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.common.pojo.enums.QueryType;
 import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
@@ -26,7 +27,6 @@ import com.tencent.supersonic.headless.chat.ChatQueryContext;
 import com.tencent.supersonic.headless.chat.corrector.GrammarCorrector;
 import com.tencent.supersonic.headless.chat.corrector.SchemaCorrector;
 import com.tencent.supersonic.headless.chat.knowledge.builder.BaseWordBuilder;
-import com.tencent.supersonic.headless.chat.query.SemanticQuery;
 import com.tencent.supersonic.headless.server.facade.service.ChatLayerService;
 import com.tencent.supersonic.headless.server.service.RetrieveService;
 import com.tencent.supersonic.headless.api.pojo.MetaFilter;
@@ -64,20 +64,17 @@ public class S2ChatLayerService implements ChatLayerService {
 
     @Override
     public MapResp performMapping(QueryNLReq queryNLReq) {
-        MapResp mapResp = new MapResp();
+        MapResp mapResp = new MapResp(queryNLReq.getQueryText());
         ChatQueryContext queryCtx = buildChatQueryContext(queryNLReq);
         ComponentFactory.getSchemaMappers().forEach(mapper -> {
             mapper.map(queryCtx);
         });
-        SchemaMapInfo mapInfo = queryCtx.getMapInfo();
-        mapResp.setMapInfo(mapInfo);
-        mapResp.setQueryText(queryNLReq.getQueryText());
+        mapResp.setMapInfo(queryCtx.getMapInfo());
         return mapResp;
     }
 
     @Override
     public MapInfoResp map(QueryMapReq queryMapReq) {
-
         QueryNLReq queryNLReq = new QueryNLReq();
         BeanUtils.copyProperties(queryMapReq, queryNLReq);
         List<DataSetResp> dataSets = dataSetService.getDataSets(queryMapReq.getDataSetNames(), queryMapReq.getUser());
@@ -92,19 +89,13 @@ public class S2ChatLayerService implements ChatLayerService {
     @Override
     public ParseResp performParsing(QueryNLReq queryNLReq) {
         ParseResp parseResult = new ParseResp(queryNLReq.getQueryText());
-        // build queryContext
         ChatQueryContext queryCtx = buildChatQueryContext(queryNLReq);
-
         chatWorkflowEngine.execute(queryCtx, parseResult);
-
-        List<SemanticParseInfo> parseInfos = queryCtx.getCandidateQueries().stream()
-                .map(SemanticQuery::getParseInfo).collect(Collectors.toList());
-        parseResult.setSelectedParses(parseInfos);
         return parseResult;
     }
 
-    public ChatQueryContext buildChatQueryContext(QueryNLReq queryNLReq) {
-        SemanticSchema semanticSchema = schemaService.getSemanticSchema();
+    private ChatQueryContext buildChatQueryContext(QueryNLReq queryNLReq) {
+        SemanticSchema semanticSchema = schemaService.getSemanticSchema(queryNLReq.getDataSetIds());
         Map<Long, List<Long>> modelIdToDataSetIds = dataSetService.getModelIdToDataSetIds();
         ChatQueryContext queryCtx = ChatQueryContext.builder()
                 .queryFilters(queryNLReq.getQueryFilters())
@@ -138,7 +129,8 @@ public class S2ChatLayerService implements ChatLayerService {
 
     private SemanticParseInfo correctSqlReq(QuerySqlReq querySqlReq, User user) {
         ChatQueryContext queryCtx = new ChatQueryContext();
-        SemanticSchema semanticSchema = schemaService.getSemanticSchema();
+        SemanticSchema semanticSchema = schemaService.getSemanticSchema(
+                Sets.newHashSet(querySqlReq.getDataSetId()));
         queryCtx.setSemanticSchema(semanticSchema);
         SemanticParseInfo semanticParseInfo = new SemanticParseInfo();
         SqlInfo sqlInfo = new SqlInfo();
@@ -277,7 +269,7 @@ public class S2ChatLayerService implements ChatLayerService {
      * @return
      */
     private SchemaElementMatch getTimeDimension(Long dataSetId, String dataSetName) {
-        SchemaElement element = SchemaElement.builder().dataSet(dataSetId).dataSetName(dataSetName)
+        SchemaElement element = SchemaElement.builder().dataSetId(dataSetId).dataSetName(dataSetName)
                 .type(SchemaElementType.DIMENSION).bizName(TimeDimensionEnum.DAY.getName()).build();
 
         SchemaElementMatch timeDimensionMatch = SchemaElementMatch.builder().element(element)

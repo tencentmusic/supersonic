@@ -4,9 +4,9 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.common.pojo.EmbeddingModelConfig;
 import com.tencent.supersonic.common.pojo.Parameter;
-import dev.langchain4j.inmemory.spring.InMemoryAutoConfig;
 import dev.langchain4j.provider.AzureModelFactory;
 import dev.langchain4j.provider.DashscopeModelFactory;
+import dev.langchain4j.provider.EmbeddingModelConstant;
 import dev.langchain4j.provider.InMemoryModelFactory;
 import dev.langchain4j.provider.OllamaModelFactory;
 import dev.langchain4j.provider.OpenAiModelFactory;
@@ -76,7 +76,7 @@ public class EmbeddingModelParameterConfig extends ParameterConfig {
 
 
     public static final Parameter EMBEDDING_MODEL_NAME =
-            new Parameter("s2.embedding.model.name", InMemoryAutoConfig.BGE_SMALL_ZH,
+            new Parameter("s2.embedding.model.name", EmbeddingModelConstant.BGE_SMALL_ZH,
                     "ModelName", "",
                     "string", "向量模型配置", null,
                     getDependency(EMBEDDING_MODEL_PROVIDER.getName(),
@@ -90,7 +90,7 @@ public class EmbeddingModelParameterConfig extends ParameterConfig {
                             ZhipuModelFactory.PROVIDER
                     ),
                     ImmutableMap.of(
-                            InMemoryModelFactory.PROVIDER, InMemoryAutoConfig.BGE_SMALL_ZH,
+                            InMemoryModelFactory.PROVIDER, EmbeddingModelConstant.BGE_SMALL_ZH,
                             OpenAiModelFactory.PROVIDER, "text-embedding-ada-002",
                             OllamaModelFactory.PROVIDER, "all-minilm",
                             AzureModelFactory.PROVIDER, "text-embedding-ada-002",

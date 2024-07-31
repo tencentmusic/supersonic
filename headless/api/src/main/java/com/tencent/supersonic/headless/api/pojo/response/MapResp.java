@@ -6,8 +6,11 @@ import lombok.Data;
 @Data
 public class MapResp {
 
-    private String queryText;
+    private final String queryText;
 
     private SchemaMapInfo mapInfo = new SchemaMapInfo();
 
+    public MapResp(String queryText) {
+        this.queryText = queryText;
+    }
 }

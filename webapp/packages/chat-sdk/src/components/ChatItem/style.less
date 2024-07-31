@@ -97,18 +97,13 @@
     width: 100%;
   }
 
-  &-msg-card {
-    flex: 1;
-  }
-
   &-content {
     position: relative;
     box-sizing: border-box;
     min-width: 1px;
     max-width: 100%;
-    padding: 12px 16px;
+    padding: 12px 20px 12px 16px;
     background: #fff;
-    min-height: 100px;
     border: 1px solid transparent;
     border-radius: 12px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.14), 0 0 2px rgba(0, 0, 0, 0.12);
@@ -162,6 +157,11 @@
     font-size: 16px;
   }
 
+  &-step-error-icon {
+    color: var(--error-color);
+    font-size: 16px;
+  }
+
   &-content-container {
     margin: 2px 0 2px 7px;
     padding: 10px 0 4px 18px;
@@ -171,6 +171,10 @@
 
   &-empty-content-container {
     padding-bottom: 0;
+  }
+
+  &-content-container-failed {
+    border-left: 1px solid transparent;
   }
 
   &-auth-tip {
@@ -531,6 +535,14 @@
   &-few-shot-code {
     padding: 0 !important;
     background-color: transparent !important;
+  }
+
+  &-export-log {
+    margin-left: 20px;
+    width: fit-content;
+    font-weight: normal;
+    color: var(--text-color-secondary);
+    font-size: 13px !important;
   }
 }
 

@@ -82,7 +82,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class S2SemanticLayerService implements SemanticLayerService {
 
-    private StatUtils statUtils;
+    private final StatUtils statUtils;
     private final QueryUtils queryUtils;
     private final QueryReqConverter queryReqConverter;
     private final SemanticSchemaManager semanticSchemaManager;
@@ -93,8 +93,8 @@ public class S2SemanticLayerService implements SemanticLayerService {
     private final KnowledgeBaseService knowledgeBaseService;
     private final MetricService metricService;
     private final DimensionService dimensionService;
-    private QueryCache queryCache = ComponentFactory.getQueryCache();
-    private List<QueryExecutor> queryExecutors = ComponentFactory.getQueryExecutors();
+    private final QueryCache queryCache = ComponentFactory.getQueryCache();
+    private final List<QueryExecutor> queryExecutors = ComponentFactory.getQueryExecutors();
 
     public S2SemanticLayerService(
             StatUtils statUtils,
@@ -150,8 +150,8 @@ public class S2SemanticLayerService implements SemanticLayerService {
             //2.query from cache
 
             String cacheKey = queryCache.getCacheKey(queryReq);
-            log.debug("cacheKey:{}", cacheKey);
             Object query = queryCache.query(queryReq, cacheKey);
+            log.info("cacheKey:{},query:{}", cacheKey, query);
             if (Objects.nonNull(query)) {
                 SemanticQueryResp queryResp = (SemanticQueryResp) query;
                 queryResp.setUseCache(true);
@@ -322,7 +322,7 @@ public class S2SemanticLayerService implements SemanticLayerService {
     }
 
     private Set<SchemaElement> getMetrics(EntityInfo modelInfo) {
-        Set<SchemaElement> metrics = new LinkedHashSet();
+        Set<SchemaElement> metrics = Sets.newHashSet();
         for (DataInfo metricValue : modelInfo.getMetrics()) {
             SchemaElement metric = new SchemaElement();
             BeanUtils.copyProperties(metricValue, metric);
@@ -439,7 +439,7 @@ public class S2SemanticLayerService implements SemanticLayerService {
         if (dataSetSchema == null) {
             return entityInfo;
         }
-        Long dataSetId = dataSetSchema.getDataSet().getDataSet();
+        Long dataSetId = dataSetSchema.getDataSet().getDataSetId();
         DataSetInfo dataSetInfo = new DataSetInfo();
         dataSetInfo.setItemId(dataSetId.intValue());
         dataSetInfo.setName(dataSetSchema.getDataSet().getName());
@@ -478,8 +478,7 @@ public class S2SemanticLayerService implements SemanticLayerService {
         SemanticQueryResp queryResultWithColumns =
                 getQueryResultWithSchemaResp(entityInfo, dataSetSchema, user);
         if (queryResultWithColumns != null) {
-            if (!org.springframework.util.CollectionUtils.isEmpty(queryResultWithColumns.getResultList())
-                    && queryResultWithColumns.getResultList().size() > 0) {
+            if (!CollectionUtils.isEmpty(queryResultWithColumns.getResultList())) {
                 Map<String, Object> result = queryResultWithColumns.getResultList().get(0);
                 for (Map.Entry<String, Object> entry : result.entrySet()) {
                     String entryKey = getEntryKey(entry);
@@ -496,7 +495,7 @@ public class S2SemanticLayerService implements SemanticLayerService {
     }
 
     private SemanticQueryResp getQueryResultWithSchemaResp(EntityInfo entityInfo,
-            DataSetSchema dataSetSchema, User user) {
+                                                           DataSetSchema dataSetSchema, User user) {
         SemanticParseInfo semanticParseInfo = new SemanticParseInfo();
         semanticParseInfo.setDataSet(dataSetSchema.getDataSet());
         semanticParseInfo.setQueryType(QueryType.DETAIL);
@@ -519,7 +518,7 @@ public class S2SemanticLayerService implements SemanticLayerService {
 
         //add filter
         QueryFilter chatFilter = getQueryFilter(entityInfo);
-        Set<QueryFilter> chatFilters = new LinkedHashSet();
+        Set<QueryFilter> chatFilters = Sets.newHashSet();
         chatFilters.add(chatFilter);
         semanticParseInfo.setDimensionFilters(chatFilters);
 

@@ -36,6 +36,7 @@ import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.calcite.sql.SqlNode;
 import org.apache.calcite.sql.validate.SqlValidatorScope;
+import org.apache.calcite.util.Litmus;
 import org.springframework.util.CollectionUtils;
 
 /**
@@ -91,12 +92,34 @@ public class SourceRender extends Renderer {
                     scope);
         }
 
+        output.setMeasure(deduplicateNode(output.getMeasure()));
+        dataSet.setMeasure(deduplicateNode(dataSet.getMeasure()));
+
         SqlNode tableNode = DataSourceNode.buildExtend(datasource, extendFields, scope);
         dataSet.setTable(tableNode);
         output.setTable(SemanticNode.buildAs(
                 Constants.DATASOURCE_TABLE_OUT_PREFIX + datasource.getName() + "_" + UUID.randomUUID().toString()
                         .substring(32), dataSet.build()));
         return output;
+    }
+
+    private static List<SqlNode> deduplicateNode(List<SqlNode> listNode) {  //List<SqlNode>去重
+        List<SqlNode> uniqueElements = new ArrayList<>();
+        for (SqlNode element : listNode) {
+            if (!containsElement(uniqueElements, element)) {
+                uniqueElements.add(element);
+            }
+        }
+        return uniqueElements;
+    }
+
+    private static boolean containsElement(List<SqlNode> list, SqlNode element) {   //检查List<SqlNode>中是否含有某element
+        for (SqlNode i : list) {
+            if (i.equalsDeep(element, Litmus.IGNORE)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private static void buildDimension(String alias, String dimension, DataSource datasource, SemanticSchema schema,

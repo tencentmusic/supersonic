@@ -103,12 +103,12 @@ public class KeywordMapper extends BaseMapper {
                     .similarity(mapperHelper.getSimilarity(match.getDetectWord(), schemaElement.getName()))
                     .build();
             log.info("add to schema, elementMatch {}", schemaElementMatch);
-            addToSchemaMap(chatQueryContext.getMapInfo(), schemaElement.getDataSet(), schemaElementMatch);
+            addToSchemaMap(chatQueryContext.getMapInfo(), schemaElement.getDataSetId(), schemaElementMatch);
         }
     }
 
     private Set<Long> getRegElementSet(SchemaMapInfo schemaMap, SchemaElement schemaElement) {
-        List<SchemaElementMatch> elements = schemaMap.getMatchedElements(schemaElement.getDataSet());
+        List<SchemaElementMatch> elements = schemaMap.getMatchedElements(schemaElement.getDataSetId());
         if (CollectionUtils.isEmpty(elements)) {
             return new HashSet<>();
         }

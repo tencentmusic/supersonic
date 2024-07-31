@@ -124,7 +124,7 @@ public class QueryStructUtils {
     }
 
     public Set<String> getResName(QuerySqlReq querySqlReq) {
-        return new HashSet<>(SqlSelectHelper.getAllFields(querySqlReq.getSql()));
+        return new HashSet<>(SqlSelectHelper.getAllSelectFields(querySqlReq.getSql()));
     }
 
     public Set<String> getBizNameFromSql(QuerySqlReq querySqlReq,

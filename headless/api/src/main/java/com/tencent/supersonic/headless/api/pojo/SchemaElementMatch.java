@@ -20,4 +20,8 @@ public class SchemaElementMatch {
     Long frequency;
     boolean isInherited;
 
+    public boolean isFullMatched() {
+        return 1.0 == similarity;
+    }
+
 }

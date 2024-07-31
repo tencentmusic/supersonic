@@ -18,7 +18,7 @@ import com.tencent.supersonic.chat.server.service.ChatManageService;
 import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.api.pojo.response.ParseResp;
-import com.tencent.supersonic.headless.api.pojo.response.QueryResult;
+import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -105,6 +105,13 @@ public class ChatManageServiceImpl implements ChatManageService {
     @Override
     public QueryResp getChatQuery(Long queryId) {
         return chatQueryRepository.getChatQuery(queryId);
+    }
+
+    @Override
+    public List<QueryResp> getChatQueries(Integer chatId) {
+        List<QueryResp> queries = chatQueryRepository.getChatQueries(chatId);
+        fillParseInfo(queries);
+        return queries;
     }
 
     @Override

@@ -67,7 +67,7 @@ public class DatabaseMatchStrategy extends BaseMatchStrategy<DatabaseMapResult> 
             Set<SchemaElement> schemaElements = entry.getValue();
             if (!CollectionUtils.isEmpty(detectDataSetIds)) {
                 schemaElements = schemaElements.stream()
-                        .filter(schemaElement -> detectDataSetIds.contains(schemaElement.getDataSet()))
+                        .filter(schemaElement -> detectDataSetIds.contains(schemaElement.getDataSetId()))
                         .collect(Collectors.toSet());
             }
             for (SchemaElement schemaElement : schemaElements) {

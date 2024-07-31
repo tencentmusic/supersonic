@@ -95,7 +95,7 @@ public abstract class RuleSemanticQuery extends BaseSemanticQuery {
 
     private void fillSchemaElement(SemanticParseInfo parseInfo, SemanticSchema semanticSchema) {
         Set<Long> dataSetIds = parseInfo.getElementMatches().stream().map(SchemaElementMatch::getElement)
-                .map(SchemaElement::getDataSet).collect(Collectors.toSet());
+                .map(SchemaElement::getDataSetId).collect(Collectors.toSet());
         Long dataSetId = dataSetIds.iterator().next();
         parseInfo.setDataSet(semanticSchema.getDataSet(dataSetId));
         Map<Long, List<SchemaElementMatch>> dim2Values = new HashMap<>();
