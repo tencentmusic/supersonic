@@ -9,7 +9,6 @@ import MarkDown from '../ChatMsg/MarkDown';
 import classNames from 'classnames';
 import { isMobile } from '../../utils/utils';
 import dayjs, { Dayjs } from 'dayjs';
-import locale from 'antd/locale/zh_CN';
 import quarterOfYear from 'dayjs/plugin/quarterOfYear';
 
 import 'dayjs/locale/zh-cn';

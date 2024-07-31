@@ -127,9 +127,7 @@ const ExecuteItem: React.FC<Props> = ({
               data={data}
               chartIndex={chartIndex}
               triggerResize={triggerResize}
-              onMsgContentTypeChange={type => {
-                setMsgContentType(type);
-              }}
+              onMsgContentTypeChange={setMsgContentType}
             />
           )}
         </Spin>

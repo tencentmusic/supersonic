@@ -80,14 +80,13 @@ const ChatItem: React.FC<Props> = ({
   const [dataCache, setDataCache] = useState<Record<number, { tip: string; data?: MsgDataType }>>(
     {}
   );
-  const [selectedRange, setSelectedRange] = useState<RangeValue | null>(null);
 
   const prefixCls = `${PREFIX_CLS}-item`;
 
   const updateData = (res: Result<MsgDataType>) => {
     let tip: string = '';
     let data: MsgDataType | undefined = undefined;
-    const { queryColumns, queryResults, queryState, queryMode, response, chatContext, textResult } =
+    const { queryColumns, queryResults, queryState, queryMode, response, chatContext } =
       res.data || {};
     if (res.code === 400 || res.code === 401 || res.code === 412) {
       tip = res.msg;
@@ -239,7 +238,6 @@ const ChatItem: React.FC<Props> = ({
   const onDateInfoChange = (dates: [Dayjs | null, Dayjs | null] | null) => {
     if (dates && dates[0] && dates[1]) {
       const [start, end] = dates;
-      setSelectedRange([start, end] as RangeValue);
       setDateInfo({
         ...(dateInfo || {}),
         startDate: dayjs(start).format('YYYY-MM-DD'),
@@ -247,13 +245,10 @@ const ChatItem: React.FC<Props> = ({
         dateMode: 'BETWEEN',
         unit: 0,
       });
-    } else {
-      setSelectedRange(null);
     }
   };
 
   const handlePresetClick = (range: RangeValue) => {
-    setSelectedRange(range);
     setDateInfo({
       ...(dateInfo || {}),
       startDate: dayjs(range[0]).format('YYYY-MM-DD'),
@@ -329,10 +324,8 @@ const ChatItem: React.FC<Props> = ({
 
   return (
     <div className={prefixCls}>
-      {!isMobile && integrateSystem !== 'wiki' && (
-        <IconFont type="icon-zhinengsuanfa" className={`${prefixCls}-avatar`} />
-      )}
-      <div className={isMobile ? `${prefixCls}-mobile-msg-card` : `${prefixCls}-msg-card`}>
+      {!isMobile && <IconFont type="icon-zhinengsuanfa" className={`${prefixCls}-avatar`} />}
+      <div className={isMobile ? `${prefixCls}-mobile-msg-card` : ''}>
         <div className={contentClass}>
           <ParseTip
             isSimpleMode={isSimpleMode}
