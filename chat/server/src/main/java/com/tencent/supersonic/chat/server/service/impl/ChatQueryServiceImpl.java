@@ -49,8 +49,6 @@ import com.tencent.supersonic.headless.chat.query.SemanticQuery;
 import com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMSqlQuery;
 import com.tencent.supersonic.headless.server.facade.service.ChatLayerService;
 import com.tencent.supersonic.headless.server.facade.service.SemanticLayerService;
-import com.tencent.supersonic.headless.server.service.DimensionService;
-import com.tencent.supersonic.headless.server.service.MetricService;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.LongValue;
@@ -92,13 +90,6 @@ public class ChatQueryServiceImpl implements ChatQueryService {
     private SemanticLayerService semanticLayerService;
     @Autowired
     private AgentService agentService;
-
-    @Autowired
-    private MetricService metricService;
-
-    @Autowired
-    private DimensionService dimensionService;
-
     private List<ChatQueryParser> chatQueryParsers = ComponentFactory.getChatParsers();
     private List<ChatQueryExecutor> chatQueryExecutors = ComponentFactory.getChatExecutors();
     private List<ParseResultProcessor> parseResultProcessors = ComponentFactory.getParseProcessors();
