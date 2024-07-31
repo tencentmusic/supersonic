@@ -150,7 +150,6 @@ public class TagController {
                                        HttpServletRequest request,
                                        HttpServletResponse response) throws Exception {
         User user = UserHolder.findUser(request, response);
-        itemValueReq.setDateConf(null);
         return tagQueryService.queryTagValue(itemValueReq, user);
     }
 
