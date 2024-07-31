@@ -1,7 +1,6 @@
 import axios from './axiosInstance';
 import {
   ChatContextType,
-  EntityInfoType,
   HistoryMsgItemType,
   HistoryType,
   MsgDataType,

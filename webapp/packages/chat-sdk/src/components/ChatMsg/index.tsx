@@ -20,7 +20,7 @@ type Props = {
   triggerResize?: boolean;
   forceShowTable?: boolean;
   isSimpleMode?: boolean;
-  onMsgContentTypeChange?: (MsgContentTypeEnum) => void;
+  onMsgContentTypeChange: (msgContentType: MsgContentTypeEnum) => void;
 };
 
 const ChatMsg: React.FC<Props> = ({
@@ -65,7 +65,9 @@ const ChatMsg: React.FC<Props> = ({
     setDrillDownDimension(undefined);
     setSecondDrillDownDimension(undefined);
   }, [data]);
+
   const metricFields = columns.filter(item => item.showType === 'NUMBER');
+
   const getMsgContentType = () => {
     const singleData = dataSource.length === 1;
     const dateField = columns.find(item => item.showType === 'DATE' || item.type === 'DATE');
@@ -123,13 +125,35 @@ const ChatMsg: React.FC<Props> = ({
 
     const isMetricBar =
       categoryField?.length > 0 &&
-      metricFields?.length > 0 &&
+      metricFields?.length === 1 &&
       (isMobile ? dataSource?.length <= 5 : dataSource?.length <= 50);
 
     if (isMetricBar) {
       return MsgContentTypeEnum.METRIC_BAR;
     }
     return MsgContentTypeEnum.TABLE;
+  };
+
+  const getMsgStyle = (type: MsgContentTypeEnum) => {
+    if (isMobile) {
+      return { maxWidth: 'calc(100vw - 20px)' };
+    }
+    if (!queryResults?.length || !queryColumns.length) {
+      return;
+    }
+    if (type === MsgContentTypeEnum.METRIC_BAR) {
+      return {
+        [queryResults.length > 5 ? 'width' : 'minWidth']: queryResults.length * 150,
+      };
+    }
+    if (type === MsgContentTypeEnum.TABLE) {
+      return {
+        [queryColumns.length > 5 ? 'width' : 'minWidth']: queryColumns.length * 150,
+      };
+    }
+    if (type === MsgContentTypeEnum.METRIC_TREND) {
+      return { width: 'calc(100vw - 410px)' };
+    }
   };
 
   useEffect(() => {
@@ -312,8 +336,11 @@ const ChatMsg: React.FC<Props> = ({
     recommendMetrics?.length > 0 &&
     queryColumns?.filter(column => column.showType === 'NUMBER').length === 1;
 
+  const type = getMsgContentType();
+  const style = type ? getMsgStyle(type) : undefined;
+
   return (
-    <div className={chartMsgClass}>
+    <div className={chartMsgClass} style={style}>
       {dataSource?.length === 0 ? (
         <div>暂无数据，如有疑问请联系管理员</div>
       ) : (
