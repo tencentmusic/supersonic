@@ -117,11 +117,11 @@ public class ChatQueryServiceImpl implements ChatQueryService {
         }
         // 如果text2SQL解析失败就走PlainTextParse
         if (ParseResp.ParseState.FAILED.equals(parseResp.getState())) {
-            parseResp.setState(ParseResp.ParseState.PENDING);
             parseResp.setErrorMsg(null);
             SemanticParseInfo parseInfo = new SemanticParseInfo();
             parseInfo.setQueryMode("PLAIN_TEXT");
             parseResp.getSelectedParses().add(parseInfo);
+            parseResp.setState(ParseResp.ParseState.COMPLETED);
         }
 
         for (ParseResultProcessor processor : parseResultProcessors) {
