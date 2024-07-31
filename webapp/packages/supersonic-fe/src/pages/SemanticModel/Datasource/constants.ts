@@ -64,4 +64,4 @@ export const AGG_OPTIONS = [
 
 export const DATE_OPTIONS = ['day', 'week', 'month'];
 
-export const DATE_FORMATTER = ['YYYY-MM-DD', 'YYYYMMDD', 'YYYY-MM', 'YYYYMM'];
+export const DATE_FORMATTER = ['yyyy-MM-dd', 'yyyyMMdd', 'yyyy-MM', 'yyyyMM'];
