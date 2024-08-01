@@ -116,6 +116,11 @@
             <artifactId>duckdb_jdbc</artifactId>
             <version>${duckdb_jdbc.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.dameng</groupId>
+            <artifactId>DmJdbcDriver18</artifactId>
+            <version>8.1.2.192</version>
+        </dependency>
     </dependencies>
 
 

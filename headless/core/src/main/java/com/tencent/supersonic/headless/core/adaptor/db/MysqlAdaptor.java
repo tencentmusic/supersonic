@@ -4,8 +4,7 @@ import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import com.tencent.supersonic.common.pojo.Constants;
 
 
-public class MysqlAdaptor extends DbAdaptor {
-
+public class MysqlAdaptor extends BaseDbAdaptor {
 
     /**
      * transform YYYYMMDD to YYYY-MM-DD YYYY-MM YYYY-MM-DD(MONDAY)
@@ -33,25 +32,8 @@ public class MysqlAdaptor extends DbAdaptor {
     }
 
     @Override
-    public String getDbMetaQueryTpl() {
-        return "select distinct TABLE_SCHEMA as name from information_schema.tables "
-                + "where TABLE_SCHEMA not in ('information_schema','mysql','performance_schema','sys');";
-    }
-
-    @Override
-    public String getTableMetaQueryTpl() {
-        return "select TABLE_NAME as name from information_schema.tables where TABLE_SCHEMA = '%s';";
-    }
-
-    @Override
     public String functionNameCorrector(String sql) {
         return sql;
-    }
-
-    @Override
-    public String getColumnMetaQueryTpl() {
-        return "SELECT COLUMN_NAME as name, DATA_TYPE as dataType, COLUMN_COMMENT as comment "
-                + "FROM information_schema.columns WHERE table_schema ='%s' AND  table_name = '%s'";
     }
 
 }
