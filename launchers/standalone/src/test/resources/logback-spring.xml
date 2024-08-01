@@ -87,7 +87,7 @@
         </encoder>
     </appender>
 
-    <logger name="com.tencent.supersonic" level="INFO" additivity="true">
+    <logger name="com.tencent.supersonic" level="DEBUG" additivity="true">
         <appender-ref ref="serviceLog"/>
     </logger>
 </configuration>

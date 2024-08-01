@@ -189,6 +189,7 @@ public class ChatQueryServiceImpl implements ChatQueryService {
         BeanMapper.mapper(chatExecuteReq, executeContext);
         SemanticParseInfo parseInfo = chatManageService.getParseInfo(
                 chatExecuteReq.getQueryId(), chatExecuteReq.getParseId());
+        log.info("buildExecuteContext:{}", parseInfo);
         Agent agent = agentService.getAgent(chatExecuteReq.getAgentId());
         executeContext.setAgent(agent);
         executeContext.setParseInfo(parseInfo);

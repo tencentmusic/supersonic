@@ -166,6 +166,7 @@ public class ChatQueryRepositoryImpl implements ChatQueryRepository {
             chatParseDO.setParseId(parses.get(i).getId());
             chatParseDO.setCreateTime(new java.util.Date());
             chatParseDO.setUserName(chatParseReq.getUser().getName());
+            log.info("setQuestionId:{},setParseId:{} chatParseDO:{}", queryId, parses.get(i).getId(), chatParseDO);
             chatParseDOList.add(chatParseDO);
         }
     }
