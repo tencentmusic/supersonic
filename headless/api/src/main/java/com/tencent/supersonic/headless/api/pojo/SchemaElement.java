@@ -1,6 +1,7 @@
 package com.tencent.supersonic.headless.api.pojo;
 
 import com.google.common.base.Objects;
+import com.tencent.supersonic.headless.api.pojo.enums.SemanticType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -25,6 +26,7 @@ public class SchemaElement implements Serializable {
     private String bizName;
     private Long useCnt;
     private SchemaElementType type;
+    private SemanticType semanticType;
     private List<String> alias;
     private List<SchemaValueMap> schemaValueMaps;
     private List<RelatedSchemaElement> relatedSchemaElements;

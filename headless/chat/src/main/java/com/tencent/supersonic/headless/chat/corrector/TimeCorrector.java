@@ -8,6 +8,8 @@ import com.tencent.supersonic.common.jsqlparser.SqlDateSelectHelper;
 import com.tencent.supersonic.common.jsqlparser.SqlSelectHelper;
 import com.tencent.supersonic.common.jsqlparser.SqlRemoveHelper;
 import com.tencent.supersonic.common.jsqlparser.DateVisitor.DateBoundInfo;
+import com.tencent.supersonic.headless.api.pojo.DataSetSchema;
+import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.chat.ChatQueryContext;
 import lombok.extern.slf4j.Slf4j;
@@ -56,6 +58,15 @@ public class TimeCorrector extends BaseSemanticCorrector {
         }
     }
 
+    private boolean checkIfNameInWhereFields(Set<SchemaElement> dims, List<String> whereFields) {
+        for (SchemaElement element : dims) {
+            if (whereFields.contains(element.getName())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private void addDateIfNotExist(ChatQueryContext chatQueryContext, SemanticParseInfo semanticParseInfo) {
         String correctS2SQL = semanticParseInfo.getSqlInfo().getCorrectedS2SQL();
         List<String> whereFields = SqlSelectHelper.getWhereFields(correctS2SQL);
@@ -64,6 +75,12 @@ public class TimeCorrector extends BaseSemanticCorrector {
         Environment environment = ContextUtils.getBean(Environment.class);
         String correctorDate = environment.getProperty("s2.corrector.date");
         if (StringUtils.isNotBlank(correctorDate) && !Boolean.parseBoolean(correctorDate)) {
+            return;
+        }
+        Long dataSetId = semanticParseInfo.getDataSetId();
+        DataSetSchema dataSetSchema = chatQueryContext.getSemanticSchema().getDataSetSchemaMap().get(dataSetId);
+        boolean isDateInWhere = checkIfNameInWhereFields(dataSetSchema.getDimensions(), whereFields);
+        if (isDateInWhere) {
             return;
         }
         if (CollectionUtils.isEmpty(whereFields) || !TimeDimensionEnum.containsZhTimeDimension(whereFields)) {
