@@ -1,7 +1,5 @@
 package com.tencent.supersonic.util;
 
-import static java.time.LocalDate.now;
-
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
@@ -15,13 +13,17 @@ import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
 import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.headless.api.pojo.request.QueryFilter;
+
 import java.util.HashSet;
 import java.util.Set;
+
+import static java.time.LocalDate.now;
 
 public class DataUtils {
 
     public static final Integer metricAgentId = 1;
     public static final Integer tagAgentId = 2;
+    public static final Integer ONE_TURNS_CHAT_ID = 10;
     public static final Integer MULTI_TURNS_CHAT_ID = 11;
     private static final User user_test = User.getFakeUser();
 
