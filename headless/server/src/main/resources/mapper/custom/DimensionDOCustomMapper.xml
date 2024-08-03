@@ -67,7 +67,7 @@
         insert into s2_dimension (name, biz_name,
         description, status, model_id,
         type, type_params, expr,created_at, created_by,
-        updated_by, updated_at, semantic_type,sensitive_level, is_tag)
+        updated_by, updated_at, semantic_type,sensitive_level, is_tag, ext)
         values
         <foreach collection="list" item="dimension" separator=",">
             (#{dimension.name,jdbcType=VARCHAR}, #{dimension.bizName,jdbcType=VARCHAR},
@@ -78,7 +78,8 @@
             #{dimension.createdBy,jdbcType=VARCHAR},
             #{dimension.updatedBy,jdbcType=VARCHAR}, #{dimension.updatedAt,jdbcType=TIMESTAMP},
             #{dimension.semanticType,jdbcType=VARCHAR},
-            #{dimension.sensitiveLevel,jdbcType=INTEGER}, #{dimension.isTag, jdbcType=INTEGER})
+            #{dimension.sensitiveLevel,jdbcType=INTEGER}, #{dimension.isTag, jdbcType=INTEGER},
+            #{dimension.ext, jdbcType=VARCHAR})
         </foreach>
     </insert>
 
