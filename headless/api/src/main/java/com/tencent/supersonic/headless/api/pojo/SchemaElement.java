@@ -1,7 +1,6 @@
 package com.tencent.supersonic.headless.api.pojo;
 
 import com.google.common.base.Objects;
-import com.tencent.supersonic.headless.api.pojo.enums.SemanticType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -9,7 +8,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Data
 @Getter
@@ -26,7 +27,6 @@ public class SchemaElement implements Serializable {
     private String bizName;
     private Long useCnt;
     private SchemaElementType type;
-    private SemanticType semanticType;
     private List<String> alias;
     private List<SchemaValueMap> schemaValueMaps;
     private List<RelatedSchemaElement> relatedSchemaElements;
@@ -36,6 +36,8 @@ public class SchemaElement implements Serializable {
     private int isTag;
     private String description;
     private boolean descriptionMapped;
+    @Builder.Default
+    private Map<String, Object> extInfo = new HashMap<>();
 
     @Override
     public boolean equals(Object o) {
