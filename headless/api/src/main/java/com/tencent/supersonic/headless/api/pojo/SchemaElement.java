@@ -1,16 +1,18 @@
 package com.tencent.supersonic.headless.api.pojo;
 
 import com.google.common.base.Objects;
+import com.tencent.supersonic.common.pojo.DimensionConstants;
+import com.tencent.supersonic.headless.api.pojo.enums.DimensionType;
+import java.io.Serializable;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import java.io.Serializable;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import org.apache.commons.collections4.MapUtils;
 
 @Data
 @Getter
@@ -57,6 +59,14 @@ public class SchemaElement implements Serializable {
     @Override
     public int hashCode() {
         return Objects.hashCode(dataSetId, id, name, bizName, type);
+    }
+
+    public boolean containsPartitionTime() {
+        if (MapUtils.isEmpty(extInfo)) {
+            return false;
+        }
+        DimensionType dimensionTYpe = (DimensionType) extInfo.get(DimensionConstants.DIMENSION_TYPE);
+        return DimensionType.isPartitionTime(dimensionTYpe);
     }
 
 }

@@ -122,4 +122,8 @@ public class DataSetSchema {
         return new ArrayList<>();
     }
 
+    public boolean containsPartitionDimensions() {
+        return dimensions.stream().anyMatch(SchemaElement::containsPartitionTime);
+    }
+
 }
