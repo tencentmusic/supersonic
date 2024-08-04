@@ -33,7 +33,7 @@ public class TagTest extends BaseTest {
         expectedParseInfo.setAggType(AggregateTypeEnum.NONE);
 
         QueryFilter dimensionFilter = DataUtils.getFilter("genre", FilterOperatorEnum.EQUALS,
-                "流行", "风格", 6L);
+                "流行", "风格", 7L);
         expectedParseInfo.getDimensionFilters().add(dimensionFilter);
 
         SchemaElement metric = SchemaElement.builder().name("播放量").build();
