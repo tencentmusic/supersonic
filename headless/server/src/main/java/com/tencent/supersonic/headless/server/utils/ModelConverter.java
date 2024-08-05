@@ -3,12 +3,10 @@ package com.tencent.supersonic.headless.server.utils;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
+import com.tencent.supersonic.common.pojo.DimensionConstants;
 import com.tencent.supersonic.common.pojo.enums.StatusEnum;
 import com.tencent.supersonic.common.util.BeanMapper;
 import com.tencent.supersonic.common.util.JsonUtil;
-import com.tencent.supersonic.headless.api.pojo.enums.DimensionType;
-import com.tencent.supersonic.headless.api.pojo.enums.MetricDefineType;
-import com.tencent.supersonic.headless.api.pojo.enums.SemanticType;
 import com.tencent.supersonic.headless.api.pojo.Dim;
 import com.tencent.supersonic.headless.api.pojo.DrillDownDimension;
 import com.tencent.supersonic.headless.api.pojo.Identify;
@@ -16,6 +14,9 @@ import com.tencent.supersonic.headless.api.pojo.Measure;
 import com.tencent.supersonic.headless.api.pojo.MeasureParam;
 import com.tencent.supersonic.headless.api.pojo.MetricDefineByMeasureParams;
 import com.tencent.supersonic.headless.api.pojo.ModelDetail;
+import com.tencent.supersonic.headless.api.pojo.enums.DimensionType;
+import com.tencent.supersonic.headless.api.pojo.enums.MetricDefineType;
+import com.tencent.supersonic.headless.api.pojo.enums.SemanticType;
 import com.tencent.supersonic.headless.api.pojo.request.DimensionReq;
 import com.tencent.supersonic.headless.api.pojo.request.MetricReq;
 import com.tencent.supersonic.headless.api.pojo.request.ModelReq;
@@ -29,6 +30,7 @@ import org.springframework.util.CollectionUtils;
 
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -108,10 +110,17 @@ public class ModelConverter {
         dimensionReq.setName(dim.getName());
         dimensionReq.setBizName(dim.getBizName());
         dimensionReq.setDescription(dim.getName());
-        dimensionReq.setSemanticType(SemanticType.CATEGORY.name());
+        if (DimensionType.isTimeDimension(dim.getType())) {
+            dimensionReq.setSemanticType(SemanticType.DATE.name());
+            Map<String, Object> map = new HashMap<>();
+            map.put(DimensionConstants.DIMENSION_TIME_FORMAT, dim.getDateFormat());
+            dimensionReq.setExt(map);
+        } else {
+            dimensionReq.setSemanticType(SemanticType.CATEGORY.name());
+        }
         dimensionReq.setModelId(modelDO.getId());
         dimensionReq.setExpr(dim.getBizName());
-        dimensionReq.setType(DimensionType.categorical.name());
+        dimensionReq.setType(dim.getType());
         dimensionReq.setDescription(Objects.isNull(dim.getDescription()) ? "" : dim.getDescription());
         dimensionReq.setIsTag(dim.getIsTag());
         return dimensionReq;
@@ -141,7 +150,7 @@ public class ModelConverter {
         dimensionReq.setSemanticType(SemanticType.CATEGORY.name());
         dimensionReq.setModelId(modelDO.getId());
         dimensionReq.setExpr(identify.getBizName());
-        dimensionReq.setType(identify.getType());
+        dimensionReq.setType(DimensionType.identify.name());
         return dimensionReq;
     }
 

@@ -1,6 +1,7 @@
 package com.tencent.supersonic.headless.server.utils;
 
 import com.google.common.collect.Lists;
+import com.tencent.supersonic.common.pojo.DimensionConstants;
 import com.tencent.supersonic.headless.api.pojo.DataSetSchema;
 import com.tencent.supersonic.headless.api.pojo.DimValueMap;
 import com.tencent.supersonic.headless.api.pojo.RelateDimension;
@@ -161,13 +162,18 @@ public class DataSetSchemaBuilder {
                     .id(dim.getId())
                     .name(dim.getName())
                     .bizName(dim.getBizName())
-                    .type(SchemaElementType.DIMENSION)
                     .useCnt(dim.getUseCnt())
                     .alias(alias)
                     .schemaValueMaps(schemaValueMaps)
                     .isTag(dim.getIsTag())
                     .description(dim.getDescription())
+                    .type(SchemaElementType.DIMENSION)
                     .build();
+            dimToAdd.getExtInfo().put(DimensionConstants.DIMENSION_TYPE, dim.getType());
+            if (dim.isTimeDimension()) {
+                String timeFormat = String.valueOf(dim.getExt().get(DimensionConstants.DIMENSION_TIME_FORMAT));
+                dimToAdd.getExtInfo().put(DimensionConstants.DIMENSION_TIME_FORMAT, timeFormat);
+            }
             dimensions.add(dimToAdd);
         }
         return dimensions;

@@ -62,8 +62,10 @@ public class OnePassSCSqlGenStrategy extends SqlGenStrategy {
                     ChatLanguageModel chatLanguageModel = getChatLanguageModel(llmReq.getModelConfig());
                     Response<AiMessage> response = chatLanguageModel.generate(prompt.toUserMessage());
                     String sqlOutput = StringUtils.normalizeSpace(response.content().text());
-                    output2Prompt.put(sqlOutput, prompt);
-                    keyPipelineLog.info("OnePassSCSqlGenStrategy modelResp:\n{}", sqlOutput);
+                    // replace ```
+                    String sqlOutputFormat = sqlOutput.replaceAll("(?s)```sql\\s*(.*?)\\s*```", "$1").trim();
+                    output2Prompt.put(sqlOutputFormat, prompt);
+                    keyPipelineLog.info("OnePassSCSqlGenStrategy modelResp:\n{}", sqlOutputFormat);
                 }
         );
 

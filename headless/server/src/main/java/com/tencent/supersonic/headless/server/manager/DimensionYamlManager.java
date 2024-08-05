@@ -25,7 +25,7 @@ public class DimensionYamlManager {
             return new ArrayList<>();
         }
         return dimensions.stream()
-                .filter(dimension -> !dimension.getType().equalsIgnoreCase(IdentifyType.primary.name()))
+                .filter(dimension -> !dimension.getType().name().equalsIgnoreCase(IdentifyType.primary.name()))
                 .map(DimensionYamlManager::convert2DimensionYamlTpl).collect(Collectors.toList());
     }
 
