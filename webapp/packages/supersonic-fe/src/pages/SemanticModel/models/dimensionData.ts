@@ -1,7 +1,7 @@
 import { message } from 'antd';
 import { ISemantic } from '../data';
 import { useState } from 'react';
-import { getDimensionList, queryMetric, excuteSql, getDatabaseList } from '../service';
+import { getDimensionList } from '../service';
 
 export default function Dimension() {
   const [dimensionList, setDimensionList] = useState<ISemantic.IDimensionItem[]>([]);
