@@ -359,26 +359,44 @@ type ExcuteSqlParams = {
 };
 
 // 执行脚本
-export async function excuteSql(params: ExcuteSqlParams) {
+export async function executeSql(params: ExcuteSqlParams) {
   const data = { ...params };
   return request.post(`${process.env.API_BASE_URL}database/executeSql`, { data });
 }
 
+export async function getColumnsBySql(params: { databaseId: number; sql: string }) {
+  return request.get(`${process.env.API_BASE_URL}database/getColumnsBySql`, {
+    params,
+  });
+}
+
 export function getDbNames(dbId: number): Promise<any> {
-  return request(`${process.env.API_BASE_URL}database/getDbNames/${dbId}`, {
+  return request(`${process.env.API_BASE_URL}database/getDbNames`, {
     method: 'GET',
+    params: {
+      id: dbId,
+    },
   });
 }
 
-export function getTables(dbId: number, dbName: string): Promise<any> {
-  return request(`${process.env.API_BASE_URL}database/getTables/${dbId}/${dbName}`, {
+export function getTables(databaseId: number, dbName: string): Promise<any> {
+  return request(`${process.env.API_BASE_URL}database/getTables`, {
     method: 'GET',
+    params: {
+      databaseId,
+      db: dbName,
+    },
   });
 }
 
-export function getColumns(dbId: number, dbName: string, tableName: string): Promise<any> {
-  return request(`${process.env.API_BASE_URL}database/getColumns/${dbId}/${dbName}/${tableName}`, {
+export function getColumns(databaseId: number, dbName: string, tableName: string): Promise<any> {
+  return request(`${process.env.API_BASE_URL}database/getColumnsByName`, {
     method: 'GET',
+    params: {
+      databaseId,
+      db: dbName,
+      table: tableName,
+    },
   });
 }
 

@@ -18,8 +18,8 @@ import { isFunction } from 'lodash';
 import FullScreen from '@/components/FullScreen';
 import SqlEditor from '@/components/SqlEditor';
 import type { TaskResultItem, TaskResultColumn } from '../data';
-import { excuteSql } from '@/pages/SemanticModel/service';
-import type { StateType } from '../../model';
+import { executeSql, getColumnsBySql } from '@/pages/SemanticModel/service';
+
 import SqlParams from './SqlParams';
 import styles from '../style.less';
 import 'ace-builds/src-min-noconflict/ext-searchbox';
@@ -104,7 +104,7 @@ const SqlDetail: React.FC<IProps> = ({
   const [variableCollapsed, setVariableCollapsed] = useState<boolean>(true);
   const [sqlParams, setSqlParams] = useState<IDataSource.ISqlParamsItem[]>([]);
 
-  const [scriptColumns, setScriptColumns] = useState<any[]>([]);
+  const [scriptColumns, setScriptColumns] = useState<TaskResultColumn[]>([]);
 
   useEffect(() => {
     const list = databaseConfigList.map((item: ISemantic.IDatabaseItem) => {
@@ -186,21 +186,21 @@ const SqlDetail: React.FC<IProps> = ({
   const updateResultCols = (list: TaskResultItem[], columns: TaskResultColumn[]) => {
     if (list.length) {
       const widthMap = getKeyWidthMap(list);
-      const cols = columns.map(({ nameEn }) => {
+      const cols = columns.map(({ columnName }) => {
         return {
-          key: nameEn,
-          title: nameEn,
-          dataIndex: nameEn,
-          width: `${(widthMap[nameEn] as number) + 22}px`, // 字宽度 + 20px(比左右padding宽几像素，作为一个buffer值)
+          key: columnName,
+          title: columnName,
+          dataIndex: columnName,
+          width: `${(widthMap[columnName] as number) + 22}px`, // 字宽度 + 20px(比左右padding宽几像素，作为一个buffer值)
         };
       });
       setResultCols(cols);
     }
   };
 
-  const fetchTaskResult = (params) => {
+  const fetchTaskResult = (params: any, columnData = []) => {
     setResultTable(
-      params.resultList.map((item, index) => {
+      params.resultList.map((item: Record<string, string>, index: number) => {
         return {
           ...item,
           index,
@@ -212,8 +212,8 @@ const SqlDetail: React.FC<IProps> = ({
       pageSize: 20,
       total: params.resultList.length,
     });
-    setScriptColumns(params.columns);
-    updateResultCols(params.resultList, params.columns);
+    setScriptColumns(columnData);
+    updateResultCols(params.resultList, columnData);
   };
 
   const changePaging = (paging: Pagination) => {
@@ -243,14 +243,27 @@ const SqlDetail: React.FC<IProps> = ({
       return;
     }
     setResultTableLoading(true);
-    const { code, data, msg } = await excuteSql({
+    const { code, data, msg } = await executeSql({
       sql: value,
       id: currentDatabaseItem.key,
       sqlVariables: sqlParams,
     });
+
+    const { code: getColumnCode, data: getColumnData } = await getColumnsBySql({
+      sql: value,
+      databaseId: currentDatabaseItem.key,
+    });
+
     setResultTableLoading(false);
-    if (code === 200) {
-      fetchTaskResult(data);
+    if (code === 200 && getColumnCode === 200) {
+      const columnData = getColumnData.map((item) => {
+        return {
+          ...item,
+          nameEn: item.columnName,
+          type: item.dataType,
+        };
+      });
+      fetchTaskResult(data, columnData);
       setRunState(true);
     } else {
       setRunState(false);

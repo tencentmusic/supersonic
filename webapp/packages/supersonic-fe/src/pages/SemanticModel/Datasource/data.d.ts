@@ -1,7 +1,7 @@
 // 任务查询结果列
 export type TaskResultColumn = {
-  name: string;
-  type: string;
+  columnName: string;
+  dataType: string;
 };
 
 // 任务查询结果

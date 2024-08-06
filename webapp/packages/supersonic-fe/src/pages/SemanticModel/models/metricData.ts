@@ -1,7 +1,7 @@
 import { message } from 'antd';
 import { ISemantic } from '../data';
 import { useState } from 'react';
-import { queryMetric, excuteSql, getDatabaseList } from '../service';
+import { queryMetric } from '../service';
 
 export default function Metric() {
   const [metricList, setMetricList] = useState<ISemantic.IMetricItem[]>([]);

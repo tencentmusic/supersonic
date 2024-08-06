@@ -285,6 +285,7 @@ const ModelCreateForm: React.FC<CreateFormProps> = ({
       setFields(fieldsClassifyList || []);
       return;
     }
+
     const columnFields: any[] = columns.map((item: IDataSource.IExecuteSqlColumn) => {
       const { type, nameEn, comment } = item;
       const oldItem =
@@ -404,12 +405,12 @@ const ModelCreateForm: React.FC<CreateFormProps> = ({
   const queryTableColumnList = async (databaseId: number, dbName: string, tableName: string) => {
     const { code, data, msg } = await getColumns(databaseId, dbName, tableName);
     if (code === 200) {
-      const list = data?.resultList || [];
+      const list = data || [];
       const columns = list.map((item: any, index: number) => {
-        const { dataType, name, comment } = item;
+        const { dataType, columnName, comment } = item;
         return {
           comment,
-          nameEn: name,
+          nameEn: columnName,
           type: dataType,
         };
       });
