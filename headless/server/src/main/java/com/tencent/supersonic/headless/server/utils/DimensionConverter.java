@@ -8,10 +8,11 @@ import com.tencent.supersonic.common.util.BeanMapper;
 import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.headless.api.pojo.DimValueMap;
 import com.tencent.supersonic.headless.api.pojo.enums.DimensionType;
+import com.tencent.supersonic.headless.api.pojo.enums.IdentifyType;
 import com.tencent.supersonic.headless.api.pojo.request.DimensionReq;
+import com.tencent.supersonic.headless.api.pojo.response.DataSetResp;
 import com.tencent.supersonic.headless.api.pojo.response.DimensionResp;
 import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
-import com.tencent.supersonic.headless.api.pojo.response.DataSetResp;
 import com.tencent.supersonic.headless.server.persistence.dataobject.DimensionDO;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -86,7 +87,7 @@ public class DimensionConverter {
         if (dimensionDO.getExt() != null) {
             dimensionResp.setExt(JSONObject.parseObject(dimensionDO.getExt(), Map.class));
         }
-        dimensionResp.setType(DimensionType.valueOf(dimensionDO.getType()));
+        dimensionResp.setType(getType(dimensionDO.getType()));
         dimensionResp.setTypeEnum(TypeEnums.DIMENSION);
         return dimensionResp;
     }
@@ -95,10 +96,20 @@ public class DimensionConverter {
         return convert2DimensionResp(dimensionDO, new HashMap<>());
     }
 
+    private static DimensionType getType(String type) {
+        try {
+            //Support compatibility with legacy data.
+            IdentifyType.valueOf(type.toLowerCase());
+            return DimensionType.identify;
+        } catch (IllegalArgumentException e) {
+            return DimensionType.valueOf(type);
+        }
+    }
+
     public static List<DimensionResp> filterByDataSet(List<DimensionResp> dimensionResps, DataSetResp dataSetResp) {
         return dimensionResps.stream().filter(dimensionResp ->
-                dataSetResp.dimensionIds().contains(dimensionResp.getId())
-                        || dataSetResp.getAllIncludeAllModels().contains(dimensionResp.getModelId()))
+                        dataSetResp.dimensionIds().contains(dimensionResp.getId())
+                                || dataSetResp.getAllIncludeAllModels().contains(dimensionResp.getModelId()))
                 .collect(Collectors.toList());
     }
 

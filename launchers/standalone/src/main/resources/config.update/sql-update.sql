@@ -363,3 +363,6 @@ alter table s2_chat_memory add `side_info` TEXT DEFAULT NULL COMMENT '辅助信�
 
 --20240730
 alter table s2_chat_parse modify column `chat_id` int(11);
+
+--20240806
+UPDATE `s2_dimension` SET `type` = 'identify' WHERE `type` in ('primary','foreign');
