@@ -37,7 +37,7 @@ public class S2SqlDateHelper {
             return Pair.of(defaultDate, defaultDate);
         }
         TimeDefaultConfig defaultConfig = dataSetSchema.getMetricTypeTimeDefaultConfig();
-        if (QueryType.DETAIL.equals(queryType)) {
+        if (QueryType.DETAIL.equals(queryType) && defaultConfig.getUnit() >= 0) {
             defaultConfig = dataSetSchema.getTagTypeTimeDefaultConfig();
         }
         return getDefaultDate(defaultDate, defaultConfig);
