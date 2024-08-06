@@ -1,17 +1,23 @@
 package com.tencent.supersonic.headless.core.adaptor.db;
 
+import com.tencent.supersonic.headless.api.pojo.DBColumn;
+import com.tencent.supersonic.headless.core.pojo.ConnectInfo;
+import java.sql.SQLException;
+import java.util.List;
+
 /**
  * Adapters for different query engines to obtain table, field, and time formatting methods
  */
-public abstract class DbAdaptor {
+public interface DbAdaptor {
 
-    public abstract String getDateFormat(String dateType, String dateFormat, String column);
+    String getDateFormat(String dateType, String dateFormat, String column);
 
-    public abstract String getColumnMetaQueryTpl();
+    String functionNameCorrector(String sql);
 
-    public abstract String getDbMetaQueryTpl();
+    List<String> getDBs(ConnectInfo connectInfo) throws SQLException;
 
-    public abstract String getTableMetaQueryTpl();
+    List<String> getTables(ConnectInfo connectInfo, String schemaName) throws SQLException;
 
-    public abstract String functionNameCorrector(String sql);
+    List<DBColumn> getColumns(ConnectInfo connectInfo, String schemaName, String tableName) throws SQLException;
+
 }

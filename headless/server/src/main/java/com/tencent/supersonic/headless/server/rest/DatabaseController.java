@@ -2,6 +2,7 @@ package com.tencent.supersonic.headless.server.rest;
 
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
+import com.tencent.supersonic.headless.api.pojo.DBColumn;
 import com.tencent.supersonic.headless.api.pojo.request.DatabaseReq;
 import com.tencent.supersonic.headless.api.pojo.request.SqlExecuteReq;
 import com.tencent.supersonic.headless.api.pojo.response.DatabaseResp;
@@ -14,10 +15,12 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
@@ -76,22 +79,27 @@ public class DatabaseController {
         return databaseService.executeSql(sqlExecuteReq, sqlExecuteReq.getId(), user);
     }
 
-    @RequestMapping("/getDbNames/{id}")
-    public SemanticQueryResp getDbNames(@PathVariable("id") Long id) {
-        return databaseService.getDbNames(id);
+    @RequestMapping("/getDbNames")
+    public List<String> getDbNames(@RequestParam("id") Long databaseId) throws SQLException {
+        return databaseService.getDbNames(databaseId);
     }
 
-    @RequestMapping("/getTables/{id}/{db}")
-    public SemanticQueryResp getTables(@PathVariable("id") Long id,
-            @PathVariable("db") String db) {
-        return databaseService.getTables(id, db);
+    @RequestMapping("/getTables")
+    public List<String> getTables(@RequestParam("databaseId") Long databaseId,
+            @RequestParam("db") String db) throws SQLException {
+        return databaseService.getTables(databaseId, db);
     }
 
-    @RequestMapping("/getColumns/{id}/{db}/{table}")
-    public SemanticQueryResp getColumns(@PathVariable("id") Long id,
-            @PathVariable("db") String db,
-            @PathVariable("table") String table) {
-        return databaseService.getColumns(id, db, table);
+    @RequestMapping("/getColumnsByName")
+    public List<DBColumn> getColumnsByName(@RequestParam("databaseId") Long databaseId, @RequestParam("db") String db,
+                                     @RequestParam("table") String table) throws SQLException {
+        return databaseService.getColumns(databaseId, db, table);
+    }
+
+    @RequestMapping("/getColumnsBySql")
+    public List<DBColumn> getColumnsBySql(@RequestParam("databaseId") Long databaseId,
+                                     @RequestParam("sql") String sql) throws SQLException {
+        return databaseService.getColumns(databaseId, sql);
     }
 
     @GetMapping("/getDatabaseParameters")
