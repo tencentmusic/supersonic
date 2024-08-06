@@ -11,9 +11,10 @@ import com.tencent.supersonic.headless.api.pojo.request.DictValueReq;
 import com.tencent.supersonic.headless.api.pojo.response.DictItemResp;
 import com.tencent.supersonic.headless.api.pojo.response.DictTaskResp;
 import com.tencent.supersonic.headless.api.pojo.response.DictValueResp;
-import com.tencent.supersonic.headless.server.task.MetaEmbeddingTask;
 import com.tencent.supersonic.headless.server.service.DictConfService;
 import com.tencent.supersonic.headless.server.service.DictTaskService;
+import com.tencent.supersonic.headless.server.task.DictionaryReloadTask;
+import com.tencent.supersonic.headless.server.task.MetaEmbeddingTask;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -40,6 +41,9 @@ public class KnowledgeController {
 
     @Autowired
     private MetaEmbeddingTask embeddingTask;
+
+    @Autowired
+    private DictionaryReloadTask dictionaryReloadTask;
 
     /**
      * addDictConf-新增item的字典配置
@@ -173,4 +177,11 @@ public class KnowledgeController {
         return taskService.queryDictFilePath(dictValueReq, user);
     }
 
+    @PostMapping("/dict/reload")
+    public boolean reloadKnowledge(@RequestBody @Valid DictValueReq dictValueReq,
+                                   HttpServletRequest request,
+                                   HttpServletResponse response) {
+        dictionaryReloadTask.reloadKnowledge();
+        return true;
+    }
 }
