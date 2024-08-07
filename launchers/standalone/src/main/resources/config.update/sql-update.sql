@@ -366,3 +366,4 @@ alter table s2_chat_parse modify column `chat_id` int(11);
 
 --20240806
 UPDATE `s2_dimension` SET `type` = 'identify' WHERE `type` in ('primary','foreign');
+alter table singer drop column imp_date;

@@ -88,8 +88,8 @@ CREATE TABLE IF NOT EXISTS `s2_chat_memory` (
     `question` varchar(655)    ,
     `agent_id`  INT    ,
     `db_schema`  TEXT    ,
-    `side_info` TEXT    ,
     `s2_sql` TEXT   ,
+    `side_info` TEXT    ,
     `status` char(10)   ,
     `llm_review` char(10)   ,
     `llm_comment`   TEXT,
@@ -271,39 +271,39 @@ COMMENT ON TABLE s2_canvas IS 'canvas table';
 
 
 CREATE TABLE IF NOT EXISTS `s2_query_stat_info` (
-      `id` INT NOT NULL AUTO_INCREMENT,
-      `trace_id` varchar(200) DEFAULT NULL, -- query unique identifier
-      `model_id` INT DEFAULT NULL,
-      `data_set_id` INT DEFAULT NULL,
-      `user`    varchar(200) DEFAULT NULL,
-      `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ,
-      `query_type` varchar(200) DEFAULT NULL, -- the corresponding scene
-      `query_type_back` INT DEFAULT '0' , -- query type, 0-normal query, 1-pre-refresh type
-      `query_sql_cmd`LONGVARCHAR , -- sql type request parameter
-      `sql_cmd_md5` varchar(200) DEFAULT NULL, -- sql type request parameter md5
-      `query_struct_cmd`LONGVARCHAR , -- struct type request parameter
-      `struct_cmd_md5` varchar(200) DEFAULT NULL, -- struct type request parameter md5值
-      `sql`LONGVARCHAR ,
-      `sql_md5` varchar(200) DEFAULT NULL, -- sql md5
-      `query_engine` varchar(20) DEFAULT NULL,
-      `elapsed_ms` bigINT DEFAULT NULL,
-      `query_state` varchar(20) DEFAULT NULL,
-      `native_query` INT DEFAULT NULL, -- 1-detail query, 0-aggregation query
-      `start_date` varchar(50) DEFAULT NULL,
-      `end_date` varchar(50) DEFAULT NULL,
-      `dimensions`LONGVARCHAR , -- dimensions involved in sql
-      `metrics`LONGVARCHAR , -- metric  involved in sql
-      `select_cols`LONGVARCHAR ,
-      `agg_cols`LONGVARCHAR ,
-      `filter_cols`LONGVARCHAR ,
-      `group_by_cols`LONGVARCHAR ,
-      `order_by_cols`LONGVARCHAR ,
-      `use_result_cache` TINYINT DEFAULT '-1' , -- whether to hit the result cache
-      `use_sql_cache` TINYINT DEFAULT '-1' , -- whether to hit the sql cache
-      `sql_cache_key`LONGVARCHAR , -- sql cache key
-      `result_cache_key`LONGVARCHAR , -- result cache key
-      `query_opt_mode` varchar(50) DEFAULT NULL ,
-      PRIMARY KEY (`id`)
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `trace_id` varchar(200) DEFAULT NULL, -- query unique identifier
+  `model_id` INT DEFAULT NULL,
+  `data_set_id` INT DEFAULT NULL,
+  `user`    varchar(200) DEFAULT NULL,
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ,
+  `query_type` varchar(200) DEFAULT NULL, -- the corresponding scene
+  `query_type_back` INT DEFAULT '0' , -- query type, 0-normal query, 1-pre-refresh type
+  `query_sql_cmd`LONGVARCHAR , -- sql type request parameter
+  `sql_cmd_md5` varchar(200) DEFAULT NULL, -- sql type request parameter md5
+  `query_struct_cmd`LONGVARCHAR , -- struct type request parameter
+  `struct_cmd_md5` varchar(200) DEFAULT NULL, -- struct type request parameter md5值
+  `sql`LONGVARCHAR ,
+  `sql_md5` varchar(200) DEFAULT NULL, -- sql md5
+  `query_engine` varchar(20) DEFAULT NULL,
+  `elapsed_ms` bigINT DEFAULT NULL,
+  `query_state` varchar(20) DEFAULT NULL,
+  `native_query` INT DEFAULT NULL, -- 1-detail query, 0-aggregation query
+  `start_date` varchar(50) DEFAULT NULL,
+  `end_date` varchar(50) DEFAULT NULL,
+  `dimensions`LONGVARCHAR , -- dimensions involved in sql
+  `metrics`LONGVARCHAR , -- metric  involved in sql
+  `select_cols`LONGVARCHAR ,
+  `agg_cols`LONGVARCHAR ,
+  `filter_cols`LONGVARCHAR ,
+  `group_by_cols`LONGVARCHAR ,
+  `order_by_cols`LONGVARCHAR ,
+  `use_result_cache` TINYINT DEFAULT '-1' , -- whether to hit the result cache
+  `use_sql_cache` TINYINT DEFAULT '-1' , -- whether to hit the sql cache
+  `sql_cache_key`LONGVARCHAR , -- sql cache key
+  `result_cache_key`LONGVARCHAR , -- result cache key
+  `query_opt_mode` varchar(50) DEFAULT NULL ,
+  PRIMARY KEY (`id`)
 ) ;
 COMMENT ON TABLE s2_query_stat_info IS 'query statistics table';
 
@@ -386,7 +386,7 @@ CREATE TABLE IF NOT EXISTS s2_agent
     enable_search int null,
     enable_memory_review int null,
     PRIMARY KEY (`id`)
-    ); COMMENT ON TABLE s2_agent IS 'agent information table';
+); COMMENT ON TABLE s2_agent IS 'agent information table';
 
 
 -------demo for semantic and chat
@@ -413,7 +413,6 @@ CREATE TABLE IF NOT EXISTS `s2_stay_time_statis` (
 COMMENT ON TABLE s2_stay_time_statis IS 's2_stay_time_statis_info';
 
 CREATE TABLE IF NOT EXISTS `singer` (
-    `imp_date` varchar(200) NOT NULL,
     `singer_name` varchar(200) NOT NULL,
     `act_area` varchar(200) NOT NULL,
     `song_name` varchar(200) NOT NULL,
@@ -421,7 +420,7 @@ CREATE TABLE IF NOT EXISTS `singer` (
     `js_play_cnt` bigINT DEFAULT NULL,
     `down_cnt` bigINT DEFAULT NULL,
     `favor_cnt` bigINT DEFAULT NULL,
-     PRIMARY KEY (`imp_date`, `singer_name`)
+     PRIMARY KEY (`singer_name`)
     );
 COMMENT ON TABLE singer IS 'singer_info';
 
@@ -466,10 +465,10 @@ COMMENT ON TABLE genre IS 'genre';
 
 CREATE TABLE IF NOT EXISTS `artist` (
     `artist_name` varchar(50) NOT NULL , -- genre name
-    `country` varchar(20) ,
+    `citizenship` varchar(20) ,
     `gender` varchar(20) ,
     `g_name` varchar(50),
-    PRIMARY KEY (`artist_name`,`country`)
+    PRIMARY KEY (`artist_name`,`citizenship`)
     );
 COMMENT ON TABLE artist IS 'artist';
 

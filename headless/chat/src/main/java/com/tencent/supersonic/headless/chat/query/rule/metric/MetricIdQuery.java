@@ -1,24 +1,24 @@
 package com.tencent.supersonic.headless.chat.query.rule.metric;
 
-import static com.tencent.supersonic.headless.api.pojo.SchemaElementType.ENTITY;
-import static com.tencent.supersonic.headless.api.pojo.SchemaElementType.ID;
-import static com.tencent.supersonic.headless.chat.query.rule.QueryMatchOption.OptionType.REQUIRED;
-import static com.tencent.supersonic.headless.chat.query.rule.QueryMatchOption.RequireNumberType.AT_LEAST;
-
 import com.tencent.supersonic.common.pojo.Filter;
 import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
 import com.tencent.supersonic.common.pojo.enums.FilterType;
 import com.tencent.supersonic.headless.api.pojo.request.QueryMultiStructReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
 import com.tencent.supersonic.headless.api.pojo.request.SemanticQueryReq;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
+import static com.tencent.supersonic.headless.api.pojo.SchemaElementType.ENTITY;
+import static com.tencent.supersonic.headless.api.pojo.SchemaElementType.ID;
+import static com.tencent.supersonic.headless.chat.query.rule.QueryMatchOption.OptionType.REQUIRED;
+import static com.tencent.supersonic.headless.chat.query.rule.QueryMatchOption.RequireNumberType.AT_LEAST;
 
 @Slf4j
 @Component

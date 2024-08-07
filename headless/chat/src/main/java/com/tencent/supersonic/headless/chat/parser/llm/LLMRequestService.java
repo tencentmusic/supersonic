@@ -86,8 +86,9 @@ public class LLMRequestService {
                 && Objects.nonNull(semanticSchema.getDataSetSchemaMap().get(dataSetId))) {
             TimeDefaultConfig timeDefaultConfig = semanticSchema.getDataSetSchemaMap()
                     .get(dataSetId).getTagTypeTimeDefaultConfig();
-            if (!Objects.equals(timeDefaultConfig.getUnit(), -1)) {
-                // 数据集查询设置 时间不为-1时才添加 '数据日期' 字段
+            if (!Objects.equals(timeDefaultConfig.getUnit(), -1)
+                    && queryCtx.containsPartitionDimensions(dataSetId)) {
+                // 数据集配置了数据日期字段，并查询设置 时间不为-1时才添加 '数据日期' 字段
                 fieldNameList.add(TimeDimensionEnum.DAY.getChName());
             }
         }

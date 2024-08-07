@@ -15,7 +15,6 @@ import com.tencent.supersonic.headless.api.pojo.DataSetDetail;
 import com.tencent.supersonic.headless.api.pojo.DataSetModelConfig;
 import com.tencent.supersonic.headless.api.pojo.DefaultDisplayInfo;
 import com.tencent.supersonic.headless.api.pojo.Dim;
-import com.tencent.supersonic.headless.api.pojo.DimensionTimeTypeParams;
 import com.tencent.supersonic.headless.api.pojo.Identify;
 import com.tencent.supersonic.headless.api.pojo.Measure;
 import com.tencent.supersonic.headless.api.pojo.MetricTypeDefaultConfig;
@@ -119,9 +118,6 @@ public class S2ArtistDemo extends S2BaseDemo {
         modelDetail.setIdentifiers(identifiers);
 
         List<Dim> dimensions = new ArrayList<>();
-        Dim dimension1 = new Dim("", "imp_date", DimensionType.time.name(), 0);
-        dimension1.setTypeParams(new DimensionTimeTypeParams());
-        dimensions.add(dimension1);
         dimensions.add(new Dim("活跃区域", "act_area",
                 DimensionType.categorical.name(), 1, 1));
         dimensions.add(new Dim("代表作", "song_name",
@@ -135,7 +131,7 @@ public class S2ArtistDemo extends S2BaseDemo {
         Measure measure3 = new Measure("收藏量", "favor_cnt", "sum", 1);
         modelDetail.setMeasures(Lists.newArrayList(measure1, measure2, measure3));
         modelDetail.setQueryType("sql_query");
-        modelDetail.setSqlQuery("select imp_date, singer_name, act_area, song_name, genre, "
+        modelDetail.setSqlQuery("select singer_name, act_area, song_name, genre, "
                 + "js_play_cnt, down_cnt, favor_cnt from singer");
         modelReq.setModelDetail(modelDetail);
         return modelService.createModel(modelReq, user);

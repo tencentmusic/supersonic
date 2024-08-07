@@ -14,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 @Slf4j
@@ -39,28 +40,31 @@ public abstract class DetailSemanticQuery extends RuleSemanticQuery {
 
         parseInfo.setQueryType(QueryType.DETAIL);
         parseInfo.setLimit(DETAIL_MAX_RESULTS);
-        if (parseInfo.getDateInfo() == null) {
-            DataSetSchema dataSetSchema =
-                    chatQueryContext.getSemanticSchema().getDataSetSchemaMap().get(parseInfo.getDataSetId());
-            TimeDefaultConfig timeDefaultConfig = dataSetSchema.getTagTypeTimeDefaultConfig();
+        if (!needFillDateConf(chatQueryContext)) {
+            return;
+        }
+        Map<Long, DataSetSchema> dataSetSchemaMap = chatQueryContext.getSemanticSchema().getDataSetSchemaMap();
+        DataSetSchema dataSetSchema = dataSetSchemaMap.get(parseInfo.getDataSetId());
+        TimeDefaultConfig timeDefaultConfig = dataSetSchema.getTagTypeTimeDefaultConfig();
+
+        if (Objects.nonNull(timeDefaultConfig)
+                && Objects.nonNull(timeDefaultConfig.getUnit())
+                && timeDefaultConfig.getUnit() != -1) {
             DateConf dateInfo = new DateConf();
-            if (Objects.nonNull(timeDefaultConfig) && Objects.nonNull(timeDefaultConfig.getUnit())
-                    && timeDefaultConfig.getUnit() != -1) {
-                int unit = timeDefaultConfig.getUnit();
-                String startDate = LocalDate.now().plusDays(-unit).toString();
-                String endDate = startDate;
-                if (TimeMode.LAST.equals(timeDefaultConfig.getTimeMode())) {
-                    dateInfo.setDateMode(DateConf.DateMode.BETWEEN);
-                } else if (TimeMode.RECENT.equals(timeDefaultConfig.getTimeMode())) {
-                    dateInfo.setDateMode(DateConf.DateMode.RECENT);
-                    endDate = LocalDate.now().plusDays(-1).toString();
-                }
-                dateInfo.setUnit(unit);
-                dateInfo.setPeriod(timeDefaultConfig.getPeriod());
-                dateInfo.setStartDate(startDate);
-                dateInfo.setEndDate(endDate);
-                parseInfo.setDateInfo(dateInfo);
+            int unit = timeDefaultConfig.getUnit();
+            String startDate = LocalDate.now().plusDays(-unit).toString();
+            String endDate = startDate;
+            if (TimeMode.LAST.equals(timeDefaultConfig.getTimeMode())) {
+                dateInfo.setDateMode(DateConf.DateMode.BETWEEN);
+            } else if (TimeMode.RECENT.equals(timeDefaultConfig.getTimeMode())) {
+                dateInfo.setDateMode(DateConf.DateMode.RECENT);
+                endDate = LocalDate.now().plusDays(-1).toString();
             }
+            dateInfo.setUnit(unit);
+            dateInfo.setPeriod(timeDefaultConfig.getPeriod());
+            dateInfo.setStartDate(startDate);
+            dateInfo.setEndDate(endDate);
+            parseInfo.setDateInfo(dateInfo);
         }
     }
 

@@ -116,7 +116,7 @@ public class ParseInfoProcessor implements ResultProcessor {
             QueryFilter dimensionFilter = new QueryFilter();
             dimensionFilter.setValue(expression.getFieldValue());
             SchemaElement schemaElement = fieldNameToElement.get(expression.getFieldName());
-            if (Objects.isNull(schemaElement)) {
+            if (Objects.isNull(schemaElement) || schemaElement.containsPartitionTime()) {
                 continue;
             }
             dimensionFilter.setName(schemaElement.getName());
@@ -167,7 +167,7 @@ public class ParseInfoProcessor implements ResultProcessor {
     }
 
     private boolean containOperators(FieldExpression expression, FilterOperatorEnum firstOperator,
-            FilterOperatorEnum... operatorEnums) {
+                                     FilterOperatorEnum... operatorEnums) {
         return (Arrays.asList(operatorEnums).contains(firstOperator) && Objects.nonNull(
                 expression.getFieldValue()));
     }

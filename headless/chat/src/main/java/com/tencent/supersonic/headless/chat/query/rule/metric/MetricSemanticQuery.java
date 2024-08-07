@@ -38,30 +38,35 @@ public abstract class MetricSemanticQuery extends RuleSemanticQuery {
     public void fillParseInfo(ChatQueryContext chatQueryContext) {
         super.fillParseInfo(chatQueryContext);
         parseInfo.setLimit(METRIC_MAX_RESULTS);
-        if (parseInfo.getDateInfo() == null) {
-            DataSetSchema dataSetSchema =
-                    chatQueryContext.getSemanticSchema().getDataSetSchemaMap().get(parseInfo.getDataSetId());
-            TimeDefaultConfig timeDefaultConfig = dataSetSchema.getMetricTypeTimeDefaultConfig();
-            DateConf dateInfo = new DateConf();
-            //加上时间!=-1 判断
-            if (Objects.nonNull(timeDefaultConfig) && Objects.nonNull(timeDefaultConfig.getUnit())
-                    && timeDefaultConfig.getUnit() != -1) {
-                int unit = timeDefaultConfig.getUnit();
-                String startDate = LocalDate.now().plusDays(-unit).toString();
-                String endDate = startDate;
-                if (TimeMode.LAST.equals(timeDefaultConfig.getTimeMode())) {
-                    dateInfo.setDateMode(DateConf.DateMode.BETWEEN);
-                } else if (TimeMode.RECENT.equals(timeDefaultConfig.getTimeMode())) {
-                    dateInfo.setDateMode(DateConf.DateMode.RECENT);
-                    endDate = LocalDate.now().plusDays(-1).toString();
-                }
-                dateInfo.setUnit(unit);
-                dateInfo.setPeriod(timeDefaultConfig.getPeriod());
-                dateInfo.setStartDate(startDate);
-                dateInfo.setEndDate(endDate);
-                // 时间不为-1才设置时间，所以移到这里
-                parseInfo.setDateInfo(dateInfo);
+        fillDateInfo(chatQueryContext);
+    }
+
+    private void fillDateInfo(ChatQueryContext chatQueryContext) {
+        if (parseInfo.getDateInfo() != null || !needFillDateConf(chatQueryContext)) {
+            return;
+        }
+        DataSetSchema dataSetSchema =
+                chatQueryContext.getSemanticSchema().getDataSetSchemaMap().get(parseInfo.getDataSetId());
+        TimeDefaultConfig timeDefaultConfig = dataSetSchema.getMetricTypeTimeDefaultConfig();
+        DateConf dateInfo = new DateConf();
+        //加上时间!=-1 判断
+        if (Objects.nonNull(timeDefaultConfig) && Objects.nonNull(timeDefaultConfig.getUnit())
+                && timeDefaultConfig.getUnit() != -1) {
+            int unit = timeDefaultConfig.getUnit();
+            String startDate = LocalDate.now().plusDays(-unit).toString();
+            String endDate = startDate;
+            if (TimeMode.LAST.equals(timeDefaultConfig.getTimeMode())) {
+                dateInfo.setDateMode(DateConf.DateMode.BETWEEN);
+            } else if (TimeMode.RECENT.equals(timeDefaultConfig.getTimeMode())) {
+                dateInfo.setDateMode(DateConf.DateMode.RECENT);
+                endDate = LocalDate.now().plusDays(-1).toString();
             }
+            dateInfo.setUnit(unit);
+            dateInfo.setPeriod(timeDefaultConfig.getPeriod());
+            dateInfo.setStartDate(startDate);
+            dateInfo.setEndDate(endDate);
+            // 时间不为-1才设置时间，所以移到这里
+            parseInfo.setDateInfo(dateInfo);
         }
     }
 }
