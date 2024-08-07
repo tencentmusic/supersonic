@@ -2,6 +2,7 @@ package com.tencent.supersonic.headless.chat.parser.rule;
 
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.DateConf;
+import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.chat.ChatQueryContext;
 import com.tencent.supersonic.headless.chat.parser.SemanticParser;
 import com.tencent.supersonic.headless.chat.query.QueryManager;
@@ -10,7 +11,6 @@ import com.tencent.supersonic.headless.chat.query.rule.RuleSemanticQuery;
 import com.xkzhangsan.time.nlp.TimeNLP;
 import com.xkzhangsan.time.nlp.TimeNLPUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -21,8 +21,6 @@ import java.util.List;
 import java.util.Stack;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-;
 
 /**
  * TimeRangeParser extracts time range specified in the user query
@@ -52,123 +50,127 @@ public class TimeRangeParser implements SemanticParser {
         }
 
         if (dateConf != null) {
-            if (queryContext.getCandidateQueries().size() > 0) {
-                for (SemanticQuery query : queryContext.getCandidateQueries()) {
-                    query.getParseInfo().setDateInfo(dateConf);
-                    query.getParseInfo().setScore(query.getParseInfo().getScore()
-                            + dateConf.getDetectWord().length());
-                }
-            } else if (QueryManager.containsRuleQuery(queryContext.getContextParseInfo().getQueryMode())) {
-                RuleSemanticQuery semanticQuery = QueryManager.createRuleQuery(
-                        queryContext.getContextParseInfo().getQueryMode());
-                // inherit parse info from context
-                queryContext.getContextParseInfo().setDateInfo(dateConf);
-                queryContext.getContextParseInfo().setScore(queryContext.getContextParseInfo().getScore()
-                        + dateConf.getDetectWord().length());
-                semanticQuery.setParseInfo(queryContext.getContextParseInfo());
+            updateQueryContext(queryContext, dateConf);
+        }
+    }
+
+    private void updateQueryContext(ChatQueryContext queryContext, DateConf dateConf) {
+        if (!queryContext.getCandidateQueries().isEmpty()) {
+            for (SemanticQuery query : queryContext.getCandidateQueries()) {
+                query.getParseInfo().setDateInfo(dateConf);
+                query.getParseInfo().setScore(query.getParseInfo().getScore() + dateConf.getDetectWord().length());
+            }
+        } else {
+            SemanticParseInfo contextParseInfo = queryContext.getContextParseInfo();
+            if (QueryManager.containsRuleQuery(contextParseInfo.getQueryMode())) {
+                RuleSemanticQuery semanticQuery = QueryManager.createRuleQuery(contextParseInfo.getQueryMode());
+                contextParseInfo.setDateInfo(dateConf);
+                contextParseInfo.setScore(contextParseInfo.getScore() + dateConf.getDetectWord().length());
+                semanticQuery.setParseInfo(contextParseInfo);
                 queryContext.getCandidateQueries().add(semanticQuery);
             }
         }
     }
 
     private DateConf parseDateCN(String queryText) {
-        Date startDate = null;
-        Date endDate;
-        String detectWord = null;
-
         List<TimeNLP> times = TimeNLPUtil.parse(queryText);
-        if (times.size() > 0) {
-            startDate = times.get(0).getTime();
-            detectWord = times.get(0).getTimeExpression();
-        } else {
+        if (times.isEmpty()) {
             return null;
         }
 
+        Date startDate = times.get(0).getTime();
+        String detectWord = times.get(0).getTimeExpression();
+        Date endDate = times.size() > 1 ? times.get(1).getTime() : startDate;
+
         if (times.size() > 1) {
-            endDate = times.get(1).getTime();
-            detectWord += "~" + times.get(0).getTimeExpression();
-        } else {
-            endDate = startDate;
+            detectWord += "~" + times.get(1).getTimeExpression();
         }
 
         return getDateConf(startDate, endDate, detectWord);
     }
 
     private DateConf parseDateNumber(String queryText) {
-        String startDate;
-        String endDate = null;
-        String detectWord = null;
-
         Matcher dateMatcher = DATE_PATTERN_NUMBER.matcher(queryText);
-        if (dateMatcher.find()) {
-            startDate = dateMatcher.group();
-            detectWord = startDate;
-        } else {
+        if (!dateMatcher.find()) {
             return null;
         }
 
-        if (dateMatcher.find()) {
-            endDate = dateMatcher.group();
-            detectWord += "~" + endDate;
+        String startDateStr = dateMatcher.group();
+        String detectWord = startDateStr;
+        String endDateStr = dateMatcher.find() ? dateMatcher.group() : startDateStr;
+
+        if (!startDateStr.equals(endDateStr)) {
+            detectWord += "~" + endDateStr;
         }
 
-        endDate = endDate != null ? endDate : startDate;
-
         try {
-            return getDateConf(DATE_FORMAT_NUMBER.parse(startDate), DATE_FORMAT_NUMBER.parse(endDate), detectWord);
+            Date startDate = DATE_FORMAT_NUMBER.parse(startDateStr);
+            Date endDate = DATE_FORMAT_NUMBER.parse(endDateStr);
+            return getDateConf(startDate, endDate, detectWord);
         } catch (ParseException e) {
             return null;
         }
     }
 
     private DateConf parseRecent(String queryText) {
-        Matcher m = RECENT_PATTERN_CN.matcher(queryText);
-        if (m.matches()) {
-            int num = 0;
-            String enNum = m.group("enNum");
-            String zhNum = m.group("zhNum");
-            if (enNum != null) {
-                num = Integer.parseInt(enNum);
-            } else if (zhNum != null) {
-                num = zhNumParse(zhNum);
-            }
-            if (num > 0) {
-                DateConf info = new DateConf();
-                String zhPeriod = m.group("zhPeriod");
-                int days;
-                switch (zhPeriod) {
-                    case "周":
-                        days = 7;
-                        info.setPeriod(Constants.WEEK);
-                        break;
-                    case "月":
-                        days = 30;
-                        info.setPeriod(Constants.MONTH);
-                        break;
-                    case "年":
-                        days = 365;
-                        info.setPeriod(Constants.YEAR);
-                        break;
-                    default:
-                        days = 1;
-                        info.setPeriod(Constants.DAY);
-                }
-                days = days * num;
-                info.setDateMode(DateConf.DateMode.RECENT);
-                String detectWord = "近" + num + zhPeriod;
-                if (StringUtils.isNotEmpty(m.group("periodStr"))) {
-                    detectWord = m.group("periodStr");
-                }
-                info.setDetectWord(detectWord);
-                info.setStartDate(LocalDate.now().minusDays(days).toString());
-                info.setEndDate(LocalDate.now().minusDays(1).toString());
-                info.setUnit(num);
-
-                return info;
-            }
+        Matcher matcher = RECENT_PATTERN_CN.matcher(queryText);
+        if (!matcher.matches()) {
+            return null;
         }
+        int num = parseNumber(matcher);
+        if (num <= 0) {
+            return null;
+        }
+        String zhPeriod = matcher.group("zhPeriod");
+        int days = getDaysByPeriod(zhPeriod) * num;
+        String detectWord = matcher.group("periodStr");
 
-        return null;
+        DateConf info = new DateConf();
+        info.setPeriod(getPeriodConstant(zhPeriod));
+        info.setDateMode(DateConf.DateMode.RECENT);
+        info.setDetectWord(detectWord);
+        info.setStartDate(LocalDate.now().minusDays(days).toString());
+        info.setEndDate(LocalDate.now().minusDays(1).toString());
+        info.setUnit(num);
+
+        return info;
+    }
+
+    private int parseNumber(Matcher matcher) {
+        String enNum = matcher.group("enNum");
+        String zhNum = matcher.group("zhNum");
+        if (enNum != null) {
+            return Integer.parseInt(enNum);
+        } else if (zhNum != null) {
+            return zhNumParse(zhNum);
+        }
+        return 0;
+    }
+
+    private int getDaysByPeriod(String zhPeriod) {
+        switch (zhPeriod) {
+            case "周":
+                return 7;
+            case "月":
+                return 30;
+            case "年":
+                return 365;
+            default:
+                return 1;
+        }
+    }
+
+    private String getPeriodConstant(String zhPeriod) {
+        switch (zhPeriod) {
+            case "周":
+                return Constants.WEEK;
+            case "月":
+                return Constants.MONTH;
+            case "年":
+                return Constants.YEAR;
+            default:
+                return Constants.DAY;
+        }
     }
 
     private int zhNumParse(String zhNumStr) {
@@ -176,10 +178,9 @@ public class TimeRangeParser implements SemanticParser {
         String numStr = "一二三四五六七八九";
         String unitStr = "十百千万亿";
 
-        String[] ssArr = zhNumStr.split("");
-        for (String e : ssArr) {
-            int numIndex = numStr.indexOf(e);
-            int unitIndex = unitStr.indexOf(e);
+        for (char c : zhNumStr.toCharArray()) {
+            int numIndex = numStr.indexOf(c);
+            int unitIndex = unitStr.indexOf(c);
             if (numIndex != -1) {
                 stack.push(numIndex + 1);
             } else if (unitIndex != -1) {
@@ -192,7 +193,7 @@ public class TimeRangeParser implements SemanticParser {
             }
         }
 
-        return stack.stream().mapToInt(s -> s).sum();
+        return stack.stream().mapToInt(Integer::intValue).sum();
     }
 
     private DateConf getDateConf(Date startDate, Date endDate, String detectWord) {
@@ -207,5 +208,4 @@ public class TimeRangeParser implements SemanticParser {
         info.setDetectWord(detectWord);
         return info;
     }
-
 }

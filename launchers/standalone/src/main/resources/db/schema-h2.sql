@@ -413,7 +413,6 @@ CREATE TABLE IF NOT EXISTS `s2_stay_time_statis` (
 COMMENT ON TABLE s2_stay_time_statis IS 's2_stay_time_statis_info';
 
 CREATE TABLE IF NOT EXISTS `singer` (
-    `imp_date` varchar(200) NOT NULL,
     `singer_name` varchar(200) NOT NULL,
     `act_area` varchar(200) NOT NULL,
     `song_name` varchar(200) NOT NULL,
@@ -421,7 +420,7 @@ CREATE TABLE IF NOT EXISTS `singer` (
     `js_play_cnt` bigINT DEFAULT NULL,
     `down_cnt` bigINT DEFAULT NULL,
     `favor_cnt` bigINT DEFAULT NULL,
-     PRIMARY KEY (`imp_date`, `singer_name`)
+     PRIMARY KEY (`singer_name`)
     );
 COMMENT ON TABLE singer IS 'singer_info';
 

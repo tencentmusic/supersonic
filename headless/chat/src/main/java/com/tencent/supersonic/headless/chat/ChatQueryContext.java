@@ -7,6 +7,7 @@ import com.tencent.supersonic.common.pojo.ChatModelConfig;
 import com.tencent.supersonic.common.pojo.Text2SQLExemplar;
 import com.tencent.supersonic.common.pojo.enums.Text2SQLType;
 import com.tencent.supersonic.common.util.ContextUtils;
+import com.tencent.supersonic.headless.api.pojo.DataSetSchema;
 import com.tencent.supersonic.headless.api.pojo.QueryDataType;
 import com.tencent.supersonic.headless.api.pojo.SchemaMapInfo;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
@@ -65,5 +66,11 @@ public class ChatQueryContext {
                 .limit(parseShowCount)
                 .collect(Collectors.toList());
         return candidateQueries;
+    }
+
+    public boolean containsPartitionDimensions(Long dataSetId) {
+        SemanticSchema semanticSchema = this.getSemanticSchema();
+        DataSetSchema dataSetSchema = semanticSchema.getDataSetSchemaMap().get(dataSetId);
+        return dataSetSchema.containsPartitionDimensions();
     }
 }

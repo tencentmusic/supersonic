@@ -17,7 +17,6 @@ CREATE TABLE IF NOT EXISTS `s2_stay_time_statis` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `singer` (
-    `imp_date` varchar(200) NOT NULL,
     `singer_name` varchar(200) NOT NULL,
     `act_area` varchar(200) NOT NULL,
     `song_name` varchar(200) NOT NULL,

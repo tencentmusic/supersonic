@@ -188,7 +188,7 @@ public class S2SemanticLayerService implements SemanticLayerService {
 
             return queryResp;
         } catch (Exception e) {
-            log.error("exception in queryByStruct, e: ", e);
+            log.error("exception in queryByReq:{}, e: ", queryReq, e);
             state = TaskStatusEnum.ERROR;
             throw e;
         } finally {
@@ -205,8 +205,7 @@ public class S2SemanticLayerService implements SemanticLayerService {
         List<String> dimensionValues = getDimensionValuesFromDict(dimensionValueReq, dataSetIds);
         // if the search results is null,search dimensionValue from database
         if (CollectionUtils.isEmpty(dimensionValues)) {
-            semanticQueryResp = getDimensionValuesFromDb(dimensionValueReq, user);
-            return semanticQueryResp;
+            return getDimensionValuesFromDb(dimensionValueReq, user);
         }
         List<QueryColumn> columns = new ArrayList<>();
         QueryColumn queryColumn = new QueryColumn();
@@ -501,20 +500,23 @@ public class S2SemanticLayerService implements SemanticLayerService {
         semanticParseInfo.setQueryType(QueryType.DETAIL);
         semanticParseInfo.setMetrics(getMetrics(entityInfo));
         semanticParseInfo.setDimensions(getDimensions(entityInfo));
-        DateConf dateInfo = new DateConf();
-        int unit = 1;
-        TimeDefaultConfig timeDefaultConfig = dataSetSchema.getTagTypeTimeDefaultConfig();
-        if (Objects.nonNull(timeDefaultConfig)) {
-            unit = timeDefaultConfig.getUnit();
-            String date = LocalDate.now().plusDays(-unit).toString();
-            dateInfo.setDateMode(DateConf.DateMode.BETWEEN);
-            dateInfo.setStartDate(date);
-            dateInfo.setEndDate(date);
-        } else {
-            dateInfo.setUnit(unit);
-            dateInfo.setDateMode(DateConf.DateMode.RECENT);
+
+        if (dataSetSchema.containsPartitionDimensions()) {
+            DateConf dateInfo = new DateConf();
+            int unit = 1;
+            TimeDefaultConfig timeDefaultConfig = dataSetSchema.getTagTypeTimeDefaultConfig();
+            if (Objects.nonNull(timeDefaultConfig)) {
+                unit = timeDefaultConfig.getUnit();
+                String date = LocalDate.now().plusDays(-unit).toString();
+                dateInfo.setDateMode(DateConf.DateMode.BETWEEN);
+                dateInfo.setStartDate(date);
+                dateInfo.setEndDate(date);
+            } else {
+                dateInfo.setUnit(unit);
+                dateInfo.setDateMode(DateConf.DateMode.RECENT);
+            }
+            semanticParseInfo.setDateInfo(dateInfo);
         }
-        semanticParseInfo.setDateInfo(dateInfo);
 
         //add filter
         QueryFilter chatFilter = getQueryFilter(entityInfo);
@@ -524,8 +526,8 @@ public class S2SemanticLayerService implements SemanticLayerService {
 
         SemanticQueryResp queryResultWithColumns = null;
         try {
-            QueryStructReq queryStructReq = QueryReqBuilder.buildStructReq(semanticParseInfo);
-            queryResultWithColumns = queryByReq(queryStructReq, user);
+            QuerySqlReq querySqlReq = QueryReqBuilder.buildStructReq(semanticParseInfo).convert();
+            queryResultWithColumns = queryByReq(querySqlReq, user);
         } catch (Exception e) {
             log.warn("setMainModel queryByStruct error, e:", e);
         }
