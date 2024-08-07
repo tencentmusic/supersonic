@@ -18,6 +18,7 @@ import com.tencent.supersonic.common.pojo.enums.TypeEnums;
 import com.tencent.supersonic.common.pojo.exception.InvalidArgumentException;
 import com.tencent.supersonic.headless.api.pojo.DimValueMap;
 import com.tencent.supersonic.headless.api.pojo.ModelDetail;
+import com.tencent.supersonic.headless.api.pojo.enums.ModelDefineType;
 import com.tencent.supersonic.headless.api.pojo.enums.TagDefineType;
 import com.tencent.supersonic.headless.api.pojo.request.DimensionReq;
 import com.tencent.supersonic.headless.api.pojo.request.MetaBatchReq;
@@ -371,8 +372,11 @@ public class DimensionServiceImpl extends ServiceImpl<DimensionDOMapper, Dimensi
     public List<DimValueMap> mockDimensionValueAlias(DimensionReq dimensionReq, User user) {
         ModelResp modelResp = modelService.getModel(dimensionReq.getModelId());
         ModelDetail modelDetail = modelResp.getModelDetail();
-        String tableQuery = modelDetail.getTableQuery();
-        String sqlQuery = "SELECT * FROM " + tableQuery;
+        String sqlQuery = modelDetail.getSqlQuery();
+        if (ModelDefineType.TABLE_QUERY.getName().equals(modelDetail.getQueryType())) {
+            String tableQuery = modelDetail.getTableQuery();
+            sqlQuery = "SELECT * FROM " + tableQuery;
+        }
         DatabaseResp database = databaseService.getDatabase(modelResp.getDatabaseId());
 
         String sql = "select ai_talk." + dimensionReq.getBizName() + " from (" + sqlQuery
