@@ -7,16 +7,18 @@ import com.tencent.supersonic.common.pojo.enums.PublishEnum;
 import com.tencent.supersonic.common.pojo.enums.StatusEnum;
 import com.tencent.supersonic.common.pojo.enums.TypeEnums;
 import com.tencent.supersonic.common.util.BeanMapper;
-import com.tencent.supersonic.headless.api.pojo.enums.MetricDefineType;
+import com.tencent.supersonic.headless.api.pojo.Dim;
 import com.tencent.supersonic.headless.api.pojo.MetricDefineByFieldParams;
 import com.tencent.supersonic.headless.api.pojo.MetricDefineByMeasureParams;
 import com.tencent.supersonic.headless.api.pojo.MetricDefineByMetricParams;
 import com.tencent.supersonic.headless.api.pojo.RelateDimension;
+import com.tencent.supersonic.headless.api.pojo.enums.MetricDefineType;
 import com.tencent.supersonic.headless.api.pojo.request.MetricReq;
+import com.tencent.supersonic.headless.api.pojo.response.DataSetResp;
 import com.tencent.supersonic.headless.api.pojo.response.MetricResp;
 import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
-import com.tencent.supersonic.headless.api.pojo.response.DataSetResp;
 import com.tencent.supersonic.headless.server.persistence.dataobject.MetricDO;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.BeanUtils;
 
 import java.util.HashMap;
@@ -78,7 +80,12 @@ public class MetricConverter {
             metricResp.setModelName(modelResp.getName());
             metricResp.setModelBizName(modelResp.getBizName());
             metricResp.setDomainId(modelResp.getDomainId());
+            List<Dim> timeDims = modelResp.getTimeDimension();
+            if (CollectionUtils.isNotEmpty(timeDims)) {
+                metricResp.setContainsPartitionDimensions(true);
+            }
         }
+
         metricResp.setIsCollect(collect != null && collect.contains(metricDO.getId()));
         metricResp.setClassifications(metricDO.getClassifications());
         metricResp.setRelateDimension(JSONObject.parseObject(metricDO.getRelateDimensions(),

@@ -529,7 +529,7 @@ public class MetricServiceImpl extends ServiceImpl<MetricDOMapper, MetricDO>
         if (metricDO == null) {
             return null;
         }
-        ModelFilter modelFilter = new ModelFilter(false,
+        ModelFilter modelFilter = new ModelFilter(true,
                 Lists.newArrayList(metricDO.getModelId()));
         Map<Long, ModelResp> modelMap = modelService.getModelMap(modelFilter);
         List<CollectDO> collectList = collectService.getCollectionList(user.getName(), TypeEnums.METRIC);
