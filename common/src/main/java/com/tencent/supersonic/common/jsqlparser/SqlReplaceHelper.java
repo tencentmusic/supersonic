@@ -2,15 +2,6 @@ package com.tencent.supersonic.common.jsqlparser;
 
 import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
 import com.tencent.supersonic.common.util.StringUtil;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.function.UnaryOperator;
-
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.Alias;
@@ -30,6 +21,7 @@ import net.sf.jsqlparser.expression.operators.relational.NotEqualsTo;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
+import net.sf.jsqlparser.statement.select.FromItem;
 import net.sf.jsqlparser.statement.select.GroupByElement;
 import net.sf.jsqlparser.statement.select.Join;
 import net.sf.jsqlparser.statement.select.OrderByElement;
@@ -40,10 +32,17 @@ import net.sf.jsqlparser.statement.select.Select;
 import net.sf.jsqlparser.statement.select.SelectItem;
 import net.sf.jsqlparser.statement.select.SelectVisitorAdapter;
 import net.sf.jsqlparser.statement.select.SetOperationList;
-import net.sf.jsqlparser.statement.select.FromItem;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.util.CollectionUtils;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.function.UnaryOperator;
 
 /**
  * Sql Parser replace Helper
@@ -132,7 +131,7 @@ public class SqlReplaceHelper {
         List<PlainSelect> plainSelects = SqlSelectHelper.getPlainSelect(selectStatement);
         for (PlainSelect plainSelect : plainSelects) {
             Expression where = plainSelect.getWhere();
-            FieldlValueReplaceVisitor visitor = new FieldlValueReplaceVisitor(exactReplace, filedNameToValueMap);
+            FieldValueReplaceVisitor visitor = new FieldValueReplaceVisitor(exactReplace, filedNameToValueMap);
             if (Objects.nonNull(where)) {
                 where.accept(visitor);
             }
@@ -546,7 +545,7 @@ public class SqlReplaceHelper {
         }
         PlainSelect plainSelect = (PlainSelect) selectStatement;
         Expression having = plainSelect.getHaving();
-        FieldlValueReplaceVisitor visitor = new FieldlValueReplaceVisitor(false, filedNameToValueMap);
+        FieldValueReplaceVisitor visitor = new FieldValueReplaceVisitor(false, filedNameToValueMap);
         if (Objects.nonNull(having)) {
             having.accept(visitor);
         }
