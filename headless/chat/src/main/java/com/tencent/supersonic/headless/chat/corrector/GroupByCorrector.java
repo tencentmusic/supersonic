@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.env.Environment;
 import org.springframework.util.CollectionUtils;
+
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -72,7 +73,7 @@ public class GroupByCorrector extends BaseSemanticCorrector {
         SemanticSchema semanticSchema = chatQueryContext.getSemanticSchema();
         //add alias field name
         Set<String> dimensions = getDimensions(dataSetId, semanticSchema);
-        List<String> selectFields = SqlSelectHelper.getSelectFields(correctS2SQL);
+        List<String> selectFields = SqlSelectHelper.gePureSelectFields(correctS2SQL);
         List<String> aggregateFields = SqlSelectHelper.getAggregateFields(correctS2SQL);
         Set<String> groupByFields = selectFields.stream()
                 .filter(field -> dimensions.contains(field))

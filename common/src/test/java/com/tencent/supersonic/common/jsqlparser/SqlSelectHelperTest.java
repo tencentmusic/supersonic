@@ -282,4 +282,23 @@ class SqlSelectHelperTest {
         Assert.assertEquals(tableName, "超音数");
     }
 
+    @Test
+    void testGetPureSelectFields() {
+
+        String sql = "select TIMESTAMPDIFF(MONTH, 发布日期, '2018-06-01')  from `超音数` "
+                + "where 数据日期 = '2023-08-08' and 用户 = 'alice'";
+        List<String> selectFields = SqlSelectHelper.gePureSelectFields(sql);
+        Assert.assertEquals(selectFields.size(), 0);
+
+        sql = "select 发布日期,数据日期  from `超音数` where "
+                + "数据日期 = '2023-08-08' and 用户 = 'alice'";
+        selectFields = SqlSelectHelper.gePureSelectFields(sql);
+        Assert.assertEquals(selectFields.size(), 2);
+
+        sql = "select 发布日期,数据日期,TIMESTAMPDIFF(MONTH, 发布日期, '2018-06-01')  from `超音数` where "
+                + "数据日期 = '2023-08-08' and 用户 = 'alice'";
+        selectFields = SqlSelectHelper.gePureSelectFields(sql);
+        Assert.assertEquals(selectFields.size(), 2);
+    }
+
 }
