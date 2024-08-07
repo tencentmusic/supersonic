@@ -202,50 +202,39 @@ public class S2SemanticLayerService implements SemanticLayerService {
         DimensionResp dimensionResp = getDimension(dimensionValueReq);
         Set<Long> dataSetIds = dimensionValueReq.getDataSetIds();
         dimensionValueReq.setModelId(dimensionResp.getModelId());
+
         List<String> dimensionValues = getDimensionValuesFromDict(dimensionValueReq, dataSetIds);
-        // if the search results is null,search dimensionValue from database
+
+        // If the search results are null, search dimensionValue from the database
         if (CollectionUtils.isEmpty(dimensionValues)) {
             return getDimensionValuesFromDb(dimensionValueReq, user);
         }
-        List<QueryColumn> columns = new ArrayList<>();
-        QueryColumn queryColumn = new QueryColumn();
-        queryColumn.setNameEn(dimensionValueReq.getBizName());
-        queryColumn.setShowType(SemanticType.CATEGORY.name());
-        queryColumn.setAuthorized(true);
-        queryColumn.setType("CHAR");
-        columns.add(queryColumn);
-        List<Map<String, Object>> resultList = new ArrayList<>();
-        dimensionValues.stream().forEach(o -> {
-            Map<String, Object> map = new HashMap<>();
-            map.put(dimensionValueReq.getBizName(), o);
-            resultList.add(map);
-        });
+
+        List<QueryColumn> columns = createQueryColumns(dimensionValueReq);
+        List<Map<String, Object>> resultList = createResultList(dimensionValueReq, dimensionValues);
+
         semanticQueryResp.setColumns(columns);
         semanticQueryResp.setResultList(resultList);
         return semanticQueryResp;
     }
 
     private List<String> getDimensionValuesFromDict(DimensionValueReq dimensionValueReq, Set<Long> dataSetIds) {
-        //if value is null ,then search from NATURE_TO_VALUES
         if (StringUtils.isBlank(dimensionValueReq.getValue())) {
             return SearchService.getDimensionValue(dimensionValueReq);
         }
+
         Map<Long, List<Long>> modelIdToDataSetIds = new HashMap<>();
         modelIdToDataSetIds.put(dimensionValueReq.getModelId(), new ArrayList<>(dataSetIds));
-        //search from prefixSearch
-        List<HanlpMapResult> hanlpMapResultList = knowledgeBaseService.prefixSearch(dimensionValueReq.getValue(),
-                2000, modelIdToDataSetIds, dataSetIds);
+
+        List<HanlpMapResult> hanlpMapResultList = knowledgeBaseService.prefixSearch(
+                dimensionValueReq.getValue(), 2000, modelIdToDataSetIds, dataSetIds);
+
         HanlpHelper.transLetterOriginal(hanlpMapResultList);
+
         return hanlpMapResultList.stream()
-                .filter(o -> {
-                    for (String nature : o.getNatures()) {
-                        Long elementID = NatureHelper.getElementID(nature);
-                        if (dimensionValueReq.getElementID().equals(elementID)) {
-                            return true;
-                        }
-                    }
-                    return false;
-                })
+                .filter(o -> o.getNatures().stream()
+                        .map(NatureHelper::getElementID)
+                        .anyMatch(elementID -> dimensionValueReq.getElementID().equals(elementID)))
                 .map(MapResult::getName)
                 .collect(Collectors.toList());
     }
@@ -255,11 +244,36 @@ public class S2SemanticLayerService implements SemanticLayerService {
         return queryByReq(querySqlReq, user);
     }
 
+    private List<QueryColumn> createQueryColumns(DimensionValueReq dimensionValueReq) {
+        QueryColumn queryColumn = new QueryColumn();
+        queryColumn.setNameEn(dimensionValueReq.getBizName());
+        queryColumn.setShowType(SemanticType.CATEGORY.name());
+        queryColumn.setAuthorized(true);
+        queryColumn.setType("CHAR");
+
+        List<QueryColumn> columns = new ArrayList<>();
+        columns.add(queryColumn);
+        return columns;
+    }
+
+    private List<Map<String, Object>> createResultList(DimensionValueReq dimensionValueReq,
+                                                       List<String> dimensionValues) {
+        return dimensionValues.stream()
+                .map(value -> {
+                    Map<String, Object> map = new HashMap<>();
+                    map.put(dimensionValueReq.getBizName(), value);
+                    return map;
+                })
+                .collect(Collectors.toList());
+    }
+
     private DimensionResp getDimension(DimensionValueReq dimensionValueReq) {
-        DimensionResp dimensionResp = schemaService.getDimension(dimensionValueReq.getElementID());
+        Long elementID = dimensionValueReq.getElementID();
+        DimensionResp dimensionResp = schemaService.getDimension(elementID);
         if (dimensionResp == null) {
-            return schemaService.getDimension(dimensionValueReq.getBizName(),
-                    dimensionValueReq.getModelId());
+            String bizName = dimensionValueReq.getBizName();
+            Long modelId = dimensionValueReq.getModelId();
+            return schemaService.getDimension(bizName, modelId);
         }
         return dimensionResp;
     }
