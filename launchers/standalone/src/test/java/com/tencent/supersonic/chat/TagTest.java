@@ -10,15 +10,20 @@ import com.tencent.supersonic.headless.api.pojo.request.QueryFilter;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.headless.chat.query.rule.detail.DetailFilterQuery;
 import com.tencent.supersonic.util.DataUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@Slf4j
 public class TagTest extends BaseTest {
 
     @Test
     public void queryTest_tag_list_filter() throws Exception {
+
+        log.info("queryTest_tag_list_filter start");
         QueryResult actualResult = submitNewChat("爱情、流行类型的艺人", DataUtils.tagAgentId);
+        log.info("actualResult:{}", actualResult);
 
         QueryResult expectedResult = new QueryResult();
         SemanticParseInfo expectedParseInfo = new SemanticParseInfo();
@@ -28,7 +33,7 @@ public class TagTest extends BaseTest {
         expectedParseInfo.setAggType(AggregateTypeEnum.NONE);
 
         QueryFilter dimensionFilter = DataUtils.getFilter("genre", FilterOperatorEnum.EQUALS,
-                "流行", "风格", 6L);
+                "流行", "风格", 7L);
         expectedParseInfo.getDimensionFilters().add(dimensionFilter);
 
         SchemaElement metric = SchemaElement.builder().name("播放量").build();
