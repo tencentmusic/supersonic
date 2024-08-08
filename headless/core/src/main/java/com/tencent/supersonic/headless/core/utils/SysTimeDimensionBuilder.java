@@ -18,7 +18,9 @@ import java.util.regex.Pattern;
 public class SysTimeDimensionBuilder {
 
     // Defines the regular expression pattern for the time keyword
-    private static final Pattern TIME_KEYWORD_PATTERN = Pattern.compile("\\b(DATE|TIME|TIMESTAMP|YEAR|MONTH|DAY|HOUR|MINUTE|SECOND)\\b", Pattern.CASE_INSENSITIVE);
+    private static final Pattern TIME_KEYWORD_PATTERN =
+            Pattern.compile("\\b(DATE|TIME|TIMESTAMP|YEAR|MONTH|DAY|HOUR|MINUTE|SECOND)\\b",
+                    Pattern.CASE_INSENSITIVE);
 
     public static void addSysTimeDimension(List<Dim> dims, DbAdaptor engineAdaptor) {
         log.debug("addSysTimeDimension before:{}, engineAdaptor:{}", dims, engineAdaptor);
