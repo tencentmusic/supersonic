@@ -20,4 +20,5 @@ public class EmbeddingStoreConfig implements Serializable {
     private String baseUrl;
     private String apiKey;
     private Long timeOut = 60L;
+    private Integer dimension;
 }
