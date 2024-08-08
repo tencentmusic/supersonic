@@ -13,7 +13,6 @@ import com.tencent.supersonic.headless.chat.mapper.SchemaMapper;
 import com.tencent.supersonic.headless.chat.parser.SemanticParser;
 import com.tencent.supersonic.headless.chat.query.QueryManager;
 import com.tencent.supersonic.headless.chat.query.SemanticQuery;
-import com.tencent.supersonic.headless.chat.query.rule.RuleSemanticQuery;
 import com.tencent.supersonic.headless.server.facade.service.SemanticLayerService;
 import com.tencent.supersonic.headless.server.processor.ResultProcessor;
 import lombok.extern.slf4j.Slf4j;
@@ -108,9 +107,6 @@ public class ChatWorkflowEngine {
         List<SemanticQuery> candidateQueries = queryCtx.getCandidateQueries();
         if (CollectionUtils.isNotEmpty(candidateQueries)) {
             for (SemanticQuery semanticQuery : candidateQueries) {
-                if (semanticQuery instanceof RuleSemanticQuery) {
-                    continue;
-                }
                 for (SemanticCorrector corrector : semanticCorrectors) {
                     corrector.correct(queryCtx, semanticQuery.getParseInfo());
                     if (!ChatWorkflowState.CORRECTING.equals(queryCtx.getChatWorkflowState())) {

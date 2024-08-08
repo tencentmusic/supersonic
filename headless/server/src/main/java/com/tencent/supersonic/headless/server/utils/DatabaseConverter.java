@@ -15,11 +15,7 @@ public class DatabaseConverter {
     public static Database convert(DatabaseResp databaseResp) {
         Database database = new Database();
         BeanUtils.copyProperties(databaseResp, database);
-        ConnectInfo connectInfo = new ConnectInfo();
-        connectInfo.setUserName(databaseResp.getUsername());
-        connectInfo.setPassword(databaseResp.getPassword());
-        connectInfo.setUrl(databaseResp.getUrl());
-        connectInfo.setDatabase(databaseResp.getDatabase());
+        ConnectInfo connectInfo = getConnectInfo(databaseResp);
         database.setConnectInfo(connectInfo);
         database.setVersion(databaseResp.getVersion());
         return database;
@@ -79,6 +75,15 @@ public class DatabaseConverter {
         ConnectInfo connectInfo = JSONObject.parseObject(databaseDO.getConfig(), ConnectInfo.class);
         databaseResp.setPassword(connectInfo.getPassword());
         return databaseResp;
+    }
+
+    public static ConnectInfo getConnectInfo(DatabaseResp databaseResp) {
+        ConnectInfo connectInfo = new ConnectInfo();
+        connectInfo.setUserName(databaseResp.getUsername());
+        connectInfo.setPassword(databaseResp.getPassword());
+        connectInfo.setUrl(databaseResp.getUrl());
+        connectInfo.setDatabase(databaseResp.getDatabase());
+        return connectInfo;
     }
 
 }

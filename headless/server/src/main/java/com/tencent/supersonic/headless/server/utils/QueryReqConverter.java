@@ -22,12 +22,14 @@ import com.tencent.supersonic.headless.api.pojo.response.DatabaseResp;
 import com.tencent.supersonic.headless.api.pojo.response.DimSchemaResp;
 import com.tencent.supersonic.headless.api.pojo.response.MetricResp;
 import com.tencent.supersonic.headless.api.pojo.response.MetricSchemaResp;
+import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticSchemaResp;
 import com.tencent.supersonic.headless.core.adaptor.db.DbAdaptor;
 import com.tencent.supersonic.headless.core.adaptor.db.DbAdaptorFactory;
 import com.tencent.supersonic.headless.core.pojo.DataSetQueryParam;
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;
 import com.tencent.supersonic.headless.core.utils.SqlGenerateUtils;
+import java.util.Comparator;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -269,6 +271,11 @@ public class QueryReqConverter {
                 // metricTable use measures replace metric
                 if (!CollectionUtils.isEmpty(measures)) {
                     metricTable.setMetrics(new ArrayList<>(measures));
+                } else {
+                    // empty measure , fill default
+                    metricTable.setMetrics(new ArrayList<>());
+                    metricTable.getMetrics().add(sqlGenerateUtils.generateInternalMetricName(
+                            getDefaultModel(semanticSchemaResp, metricTable.getDimensions())));
                 }
             }
         }
@@ -319,6 +326,19 @@ public class QueryReqConverter {
         }
         measures.addAll(deriveMetric);
         deriveDimension.stream().filter(d -> !dimensions.contains(d)).forEach(d -> dimensions.add(d));
+    }
+
+    private String getDefaultModel(SemanticSchemaResp semanticSchemaResp, List<String> dimensions) {
+        if (!CollectionUtils.isEmpty(dimensions)) {
+            Map<String, Long> modelMatchCnt = new HashMap<>();
+            for (ModelResp modelResp : semanticSchemaResp.getModelResps()) {
+                modelMatchCnt.put(modelResp.getBizName(), modelResp.getModelDetail().getDimensions().stream()
+                        .filter(d -> dimensions.contains(d.getBizName())).count());
+            }
+            return modelMatchCnt.entrySet().stream().sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
+                    .map(m -> m.getKey()).findFirst().orElse("");
+        }
+        return semanticSchemaResp.getModelResps().get(0).getBizName();
     }
 
 }

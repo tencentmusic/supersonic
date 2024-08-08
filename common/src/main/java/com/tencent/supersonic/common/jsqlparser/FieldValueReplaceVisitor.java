@@ -25,13 +25,13 @@ import java.util.Map;
 import java.util.Objects;
 
 @Slf4j
-public class FieldlValueReplaceVisitor extends ExpressionVisitorAdapter {
+public class FieldValueReplaceVisitor extends ExpressionVisitorAdapter {
 
     ParseVisitorHelper parseVisitorHelper = new ParseVisitorHelper();
     private boolean exactReplace;
     private Map<String, Map<String, String>> filedNameToValueMap;
 
-    public FieldlValueReplaceVisitor(boolean exactReplace, Map<String, Map<String, String>> filedNameToValueMap) {
+    public FieldValueReplaceVisitor(boolean exactReplace, Map<String, Map<String, String>> filedNameToValueMap) {
         this.exactReplace = exactReplace;
         this.filedNameToValueMap = filedNameToValueMap;
     }

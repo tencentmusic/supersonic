@@ -3,10 +3,11 @@ package com.tencent.supersonic.headless.server.service.impl;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
+import com.tencent.supersonic.common.jsqlparser.SqlSelectHelper;
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.Pair;
 import com.tencent.supersonic.common.pojo.QueryColumn;
-import com.tencent.supersonic.common.jsqlparser.SqlSelectHelper;
+import com.tencent.supersonic.headless.api.pojo.DBColumn;
 import com.tencent.supersonic.headless.api.pojo.request.DatabaseReq;
 import com.tencent.supersonic.headless.api.pojo.request.SqlExecuteReq;
 import com.tencent.supersonic.headless.api.pojo.response.DatabaseResp;
@@ -27,13 +28,16 @@ import com.tencent.supersonic.headless.server.service.DatabaseService;
 import com.tencent.supersonic.headless.server.service.ModelService;
 import com.tencent.supersonic.headless.server.utils.DatabaseConverter;
 import lombok.extern.slf4j.Slf4j;
+import net.sf.jsqlparser.parser.CCJSqlParserUtil;
+import net.sf.jsqlparser.statement.Statement;
+import net.sf.jsqlparser.util.TablesNamesFinder;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-import java.util.HashMap;
+import java.sql.SQLException;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -134,38 +138,12 @@ public class DatabaseServiceImpl extends ServiceImpl<DatabaseDOMapper, DatabaseD
         checkPermission(databaseResp, user);
         String sql = sqlExecuteReq.getSql();
         sql = SqlVariableParseUtils.parse(sql, sqlExecuteReq.getSqlVariables(), Lists.newArrayList());
-        SemanticQueryResp semanticQueryResp = executeSql(sql, databaseResp);
-        fillColumnComment(sql, databaseResp, semanticQueryResp);
-        return semanticQueryResp;
+        return executeSql(sql, databaseResp);
     }
 
     @Override
     public SemanticQueryResp executeSql(String sql, DatabaseResp databaseResp) {
         return queryWithColumns(sql, DatabaseConverter.convert(databaseResp));
-    }
-
-    private void fillColumnComment(String sql, DatabaseResp databaseResp,
-                                   SemanticQueryResp semanticQueryResp) {
-        Pair<String, String> dbTableName = getDbTableName(sql, databaseResp);
-        String db = dbTableName.first;
-        String table = dbTableName.second;
-        if (StringUtils.isBlank(db) || StringUtils.isBlank(table)) {
-            return;
-        }
-        SemanticQueryResp columnsWithComment = getColumns(databaseResp, db, table);
-        Map<String, String> columnCommentMap = getColumnCommentMap(columnsWithComment.getResultList());
-        List<QueryColumn> columns = semanticQueryResp.getColumns();
-        for (QueryColumn column : columns) {
-            column.setComment(columnCommentMap.get(column.getNameEn()));
-        }
-    }
-
-    private Map<String, String> getColumnCommentMap(List<Map<String, Object>> resultList) {
-        Map<String, String> map = new HashMap<>();
-        for (Map<String, Object> result : resultList) {
-            map.put(String.valueOf(result.get("name")), String.valueOf(result.get("comment")));
-        }
-        return map;
     }
 
     private Pair<String, String> getDbTableName(String sql, DatabaseResp databaseResp) {
@@ -201,36 +179,63 @@ public class DatabaseServiceImpl extends ServiceImpl<DatabaseDOMapper, DatabaseD
     }
 
     @Override
-    public SemanticQueryResp getDbNames(Long id) {
+    public List<String> getDbNames(Long id) throws SQLException {
         DatabaseResp databaseResp = getDatabase(id);
-        DbAdaptor engineAdaptor = DbAdaptorFactory.getEngineAdaptor(databaseResp.getType());
-        String metaQueryTpl = engineAdaptor.getDbMetaQueryTpl();
-        return queryWithColumns(metaQueryTpl, DatabaseConverter.convert(databaseResp));
+        DbAdaptor dbAdaptor = DbAdaptorFactory.getEngineAdaptor(databaseResp.getType());
+        return dbAdaptor.getDBs(DatabaseConverter.getConnectInfo(databaseResp));
     }
 
     @Override
-    public SemanticQueryResp getTables(Long id, String db) {
+    public List<String> getTables(Long id, String db) throws SQLException {
         DatabaseResp databaseResp = getDatabase(id);
-        DbAdaptor engineAdaptor = DbAdaptorFactory.getEngineAdaptor(databaseResp.getType());
-        String metaQueryTpl = engineAdaptor.getTableMetaQueryTpl();
-        String metaQuerySql = String.format(metaQueryTpl, db);
-        return queryWithColumns(metaQuerySql, DatabaseConverter.convert(databaseResp));
+        DbAdaptor dbAdaptor = DbAdaptorFactory.getEngineAdaptor(databaseResp.getType());
+        return dbAdaptor.getTables(DatabaseConverter.getConnectInfo(databaseResp), db);
     }
 
     @Override
-    public SemanticQueryResp getColumns(Long id, String db, String table) {
+    public List<DBColumn> getColumns(Long id, String db, String table) throws SQLException {
         DatabaseResp databaseResp = getDatabase(id);
-        DbAdaptor engineAdaptor = DbAdaptorFactory.getEngineAdaptor(databaseResp.getType());
-        String metaQueryTpl = engineAdaptor.getColumnMetaQueryTpl();
-        String metaQuerySql = String.format(metaQueryTpl, db, table);
-        return queryWithColumns(metaQuerySql, DatabaseConverter.convert(databaseResp));
+        return getColumns(databaseResp, db, table);
     }
 
-    public SemanticQueryResp getColumns(DatabaseResp databaseResp, String db, String table) {
+    public List<DBColumn> getColumns(DatabaseResp databaseResp, String db, String table) throws SQLException {
         DbAdaptor engineAdaptor = DbAdaptorFactory.getEngineAdaptor(databaseResp.getType());
-        String metaQueryTpl = engineAdaptor.getColumnMetaQueryTpl();
-        String metaQuerySql = String.format(metaQueryTpl, db, table);
-        return queryWithColumns(metaQuerySql, DatabaseConverter.convert(databaseResp));
+        return engineAdaptor.getColumns(DatabaseConverter.getConnectInfo(databaseResp), db, table);
+    }
+
+    @Override
+    public List<DBColumn> getColumns(Long id, String sql) throws SQLException {
+        String wrapSql = String.format("select * from (%s) a limit 1", sql);
+        DatabaseResp databaseResp = getDatabase(id);
+        SemanticQueryResp semanticQueryResp = executeSql(wrapSql, databaseResp);
+        List<DBColumn> dbColumns = Lists.newArrayList();
+        for (QueryColumn queryColumn : semanticQueryResp.getColumns()) {
+            DBColumn dbColumn = new DBColumn();
+            dbColumn.setColumnName(queryColumn.getNameEn());
+            dbColumn.setDataType(queryColumn.getType());
+            dbColumns.add(dbColumn);
+        }
+        return dbColumns;
+    }
+
+    public static void main(String[] args) {
+        try {
+            String sql = "SELECT * FROM mydatabase.mytable JOIN otherdatabase.othertable ON mytable.id = othertable.id";
+
+            // 解析SQL语句
+            Statement statement = CCJSqlParserUtil.parse(sql);
+
+            // 提取库表名
+            TablesNamesFinder tablesNamesFinder = new TablesNamesFinder();
+            List<String> tableNames = tablesNamesFinder.getTableList(statement);
+
+            // 打印库表名
+            for (String tableName : tableNames) {
+                System.out.println("Table Name: " + tableName);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private void checkPermission(DatabaseResp databaseResp, User user) {

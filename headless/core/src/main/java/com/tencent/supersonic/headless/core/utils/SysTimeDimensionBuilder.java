@@ -34,7 +34,7 @@ public class SysTimeDimensionBuilder {
     private static Dim generateSysDayDimension(Dim timeDim, DbAdaptor engineAdaptor) {
         Dim dim = new Dim();
         dim.setBizName(TimeDimensionEnum.DAY.getName());
-        dim.setType(DimensionType.time.name());
+        dim.setType(DimensionType.partition_time.name());
         dim.setExpr(generateTimeExpr(timeDim, TimeDimensionEnum.DAY.name().toLowerCase(), engineAdaptor));
         DimensionTimeTypeParams typeParams = new DimensionTimeTypeParams();
         typeParams.setTimeGranularity(TimeDimensionEnum.DAY.name().toLowerCase());
@@ -46,7 +46,7 @@ public class SysTimeDimensionBuilder {
     private static Dim generateSysWeekDimension(Dim timeDim, DbAdaptor engineAdaptor) {
         Dim dim = new Dim();
         dim.setBizName(TimeDimensionEnum.WEEK.getName());
-        dim.setType(DimensionType.time.name());
+        dim.setType(DimensionType.partition_time.name());
         dim.setExpr(generateTimeExpr(timeDim, TimeDimensionEnum.WEEK.name().toLowerCase(), engineAdaptor));
         DimensionTimeTypeParams typeParams = new DimensionTimeTypeParams();
         typeParams.setTimeGranularity(TimeDimensionEnum.WEEK.name().toLowerCase());
@@ -58,7 +58,7 @@ public class SysTimeDimensionBuilder {
     private static Dim generateSysMonthDimension(Dim timeDim, DbAdaptor engineAdaptor) {
         Dim dim = new Dim();
         dim.setBizName(TimeDimensionEnum.MONTH.getName());
-        dim.setType(DimensionType.time.name());
+        dim.setType(DimensionType.partition_time.name());
         dim.setExpr(generateTimeExpr(timeDim, TimeDimensionEnum.MONTH.name().toLowerCase(), engineAdaptor));
         DimensionTimeTypeParams typeParams = new DimensionTimeTypeParams();
         typeParams.setTimeGranularity(TimeDimensionEnum.MONTH.name().toLowerCase());
@@ -91,7 +91,7 @@ public class SysTimeDimensionBuilder {
 
     private static Dim getTimeDim(List<Dim> timeDims) {
         for (Dim dim : timeDims) {
-            if (dim.getType().equalsIgnoreCase(DimensionType.time.name())) {
+            if (dim.getType().equalsIgnoreCase(DimensionType.partition_time.name())) {
                 return dim;
             }
         }

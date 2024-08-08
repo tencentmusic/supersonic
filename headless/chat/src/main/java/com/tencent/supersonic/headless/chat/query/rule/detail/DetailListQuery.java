@@ -25,34 +25,35 @@ public abstract class DetailListQuery extends DetailSemanticQuery {
 
     private void addEntityDetailAndOrderByMetric(ChatQueryContext chatQueryContext, SemanticParseInfo parseInfo) {
         Long dataSetId = parseInfo.getDataSetId();
-        if (Objects.nonNull(dataSetId) && dataSetId > 0L) {
-            DataSetSchema dataSetSchema = chatQueryContext.getSemanticSchema().getDataSetSchemaMap().get(dataSetId);
-            if (dataSetSchema != null && Objects.nonNull(dataSetSchema.getEntity())) {
-                Set<SchemaElement> dimensions = new LinkedHashSet<>();
-                Set<SchemaElement> metrics = new LinkedHashSet<>();
-                Set<Order> orders = new LinkedHashSet<>();
-                TagTypeDefaultConfig tagTypeDefaultConfig = dataSetSchema.getTagTypeDefaultConfig();
-                if (tagTypeDefaultConfig != null && tagTypeDefaultConfig.getDefaultDisplayInfo() != null) {
-                    if (CollectionUtils.isNotEmpty(tagTypeDefaultConfig.getDefaultDisplayInfo().getMetricIds())) {
-                        metrics = tagTypeDefaultConfig.getDefaultDisplayInfo().getMetricIds()
-                                .stream().map(id -> {
-                                    SchemaElement metric = dataSetSchema.getElement(SchemaElementType.METRIC, id);
-                                    if (metric != null) {
-                                        orders.add(new Order(metric.getBizName(), Constants.DESC_UPPER));
-                                    }
-                                    return metric;
-                                }).filter(Objects::nonNull).collect(Collectors.toSet());
-                    }
-                    if (CollectionUtils.isNotEmpty(tagTypeDefaultConfig.getDefaultDisplayInfo().getDimensionIds())) {
-                        dimensions = tagTypeDefaultConfig.getDefaultDisplayInfo().getDimensionIds().stream()
-                                .map(id -> dataSetSchema.getElement(SchemaElementType.DIMENSION, id))
-                                .filter(Objects::nonNull).collect(Collectors.toSet());
-                    }
+        if (Objects.isNull(dataSetId) || dataSetId <= 0L) {
+            return;
+        }
+        DataSetSchema dataSetSchema = chatQueryContext.getSemanticSchema().getDataSetSchemaMap().get(dataSetId);
+        if (dataSetSchema != null && Objects.nonNull(dataSetSchema.getEntity())) {
+            Set<SchemaElement> dimensions = new LinkedHashSet<>();
+            Set<SchemaElement> metrics = new LinkedHashSet<>();
+            Set<Order> orders = new LinkedHashSet<>();
+            TagTypeDefaultConfig tagTypeDefaultConfig = dataSetSchema.getTagTypeDefaultConfig();
+            if (tagTypeDefaultConfig != null && tagTypeDefaultConfig.getDefaultDisplayInfo() != null) {
+                if (CollectionUtils.isNotEmpty(tagTypeDefaultConfig.getDefaultDisplayInfo().getMetricIds())) {
+                    metrics = tagTypeDefaultConfig.getDefaultDisplayInfo().getMetricIds()
+                            .stream().map(id -> {
+                                SchemaElement metric = dataSetSchema.getElement(SchemaElementType.METRIC, id);
+                                if (metric != null) {
+                                    orders.add(new Order(metric.getBizName(), Constants.DESC_UPPER));
+                                }
+                                return metric;
+                            }).filter(Objects::nonNull).collect(Collectors.toSet());
                 }
-                parseInfo.setDimensions(dimensions);
-                parseInfo.setMetrics(metrics);
-                parseInfo.setOrders(orders);
+                if (CollectionUtils.isNotEmpty(tagTypeDefaultConfig.getDefaultDisplayInfo().getDimensionIds())) {
+                    dimensions = tagTypeDefaultConfig.getDefaultDisplayInfo().getDimensionIds().stream()
+                            .map(id -> dataSetSchema.getElement(SchemaElementType.DIMENSION, id))
+                            .filter(Objects::nonNull).collect(Collectors.toSet());
+                }
             }
+            parseInfo.setDimensions(dimensions);
+            parseInfo.setMetrics(metrics);
+            parseInfo.setOrders(orders);
         }
     }
 

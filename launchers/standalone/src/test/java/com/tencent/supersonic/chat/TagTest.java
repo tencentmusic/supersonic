@@ -1,13 +1,12 @@
 package com.tencent.supersonic.chat;
 
-import com.tencent.supersonic.common.pojo.DateConf;
+import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum;
 import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
 import com.tencent.supersonic.common.pojo.enums.QueryType;
 import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.api.pojo.request.QueryFilter;
-import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.headless.chat.query.rule.detail.DetailFilterQuery;
 import com.tencent.supersonic.util.DataUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -48,7 +47,6 @@ public class TagTest extends BaseTest {
         expectedParseInfo.getDimensions().add(dim3);
         expectedParseInfo.getDimensions().add(dim4);
 
-        expectedParseInfo.setDateInfo(DataUtils.getDateConf(DateConf.DateMode.BETWEEN, startDay, startDay, 7));
         expectedParseInfo.setQueryType(QueryType.DETAIL);
 
         assertQueryResult(expectedResult, actualResult);

@@ -61,11 +61,6 @@ public class ParserConfig extends ParameterConfig {
                     "解析结果展示个数", "前端展示的解析个数",
                     "number", "Parser相关配置");
 
-    public static final Parameter PARSER_S2SQL_ENABLE =
-            new Parameter("s2.parser.s2sql.switch", "true",
-                    "", "",
-                    "bool", "Parser相关配置");
-
     @Override
     public List<Parameter> getSysParameters() {
         return Lists.newArrayList(

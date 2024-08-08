@@ -1,14 +1,6 @@
 package com.tencent.supersonic.common.jsqlparser;
 
 import com.tencent.supersonic.common.util.StringUtil;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.Alias;
@@ -49,6 +41,15 @@ import net.sf.jsqlparser.statement.select.SetOperationList;
 import net.sf.jsqlparser.statement.select.WithItem;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.CollectionUtils;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Sql Parser Select Helper
@@ -95,6 +96,22 @@ public class SqlSelectHelper {
                 where.accept(new FieldAcquireVisitor(result));
             }
         });
+    }
+
+    public static List<String> gePureSelectFields(String sql) {
+        List<PlainSelect> plainSelectList = getPlainSelect(sql);
+        Set<String> result = new HashSet<>();
+        plainSelectList.stream().forEach(plainSelect -> {
+            List<SelectItem<?>> selectItems = plainSelect.getSelectItems();
+            for (SelectItem selectItem : selectItems) {
+                if (!(selectItem.getExpression() instanceof Column)) {
+                    continue;
+                }
+                Column column = (Column) selectItem.getExpression();
+                result.add(column.getColumnName());
+            }
+        });
+        return new ArrayList<>(result);
     }
 
     public static List<String> getSelectFields(String sql) {

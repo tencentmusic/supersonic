@@ -27,6 +27,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -41,7 +42,7 @@ public abstract class RuleSemanticQuery extends BaseSemanticQuery {
     }
 
     public List<SchemaElementMatch> match(List<SchemaElementMatch> candidateElementMatches,
-            ChatQueryContext queryCtx) {
+                                          ChatQueryContext queryCtx) {
         return queryMatcher.match(candidateElementMatches);
     }
 
@@ -56,20 +57,30 @@ public abstract class RuleSemanticQuery extends BaseSemanticQuery {
 
         fillSchemaElement(parseInfo, semanticSchema);
         fillScore(parseInfo);
-        fillDateConf(parseInfo, chatQueryContext.getContextParseInfo());
+        fillDateConfByInherited(parseInfo, chatQueryContext);
     }
 
-    private void fillDateConf(SemanticParseInfo queryParseInfo, SemanticParseInfo chatParseInfo) {
-        if (queryParseInfo.getDateInfo() != null || chatParseInfo.getDateInfo() == null) {
+    public boolean needFillDateConf(ChatQueryContext chatQueryContext) {
+        Long dataSetId = parseInfo.getDataSetId();
+        if (Objects.isNull(dataSetId) || dataSetId <= 0L) {
+            return false;
+        }
+        return chatQueryContext.containsPartitionDimensions(dataSetId);
+    }
+
+    private void fillDateConfByInherited(SemanticParseInfo queryParseInfo, ChatQueryContext chatQueryContext) {
+        SemanticParseInfo contextParseInfo = chatQueryContext.getContextParseInfo();
+        if (queryParseInfo.getDateInfo() != null || contextParseInfo.getDateInfo() == null
+                || needFillDateConf(chatQueryContext)) {
             return;
         }
 
         if ((QueryManager.isTagQuery(queryParseInfo.getQueryMode())
-                && QueryManager.isTagQuery(chatParseInfo.getQueryMode()))
+                && QueryManager.isTagQuery(contextParseInfo.getQueryMode()))
                 || (QueryManager.isMetricQuery(queryParseInfo.getQueryMode())
-                && QueryManager.isMetricQuery(chatParseInfo.getQueryMode()))) {
+                && QueryManager.isMetricQuery(contextParseInfo.getQueryMode()))) {
             // inherit date info from context
-            queryParseInfo.setDateInfo(chatParseInfo.getDateInfo());
+            queryParseInfo.setDateInfo(contextParseInfo.getDateInfo());
             queryParseInfo.getDateInfo().setInherited(true);
         }
     }
@@ -142,13 +153,15 @@ public abstract class RuleSemanticQuery extends BaseSemanticQuery {
     }
 
     private void addToFilters(Map<Long, List<SchemaElementMatch>> id2Values, SemanticParseInfo parseInfo,
-            SemanticSchema semanticSchema, SchemaElementType entity) {
+                              SemanticSchema semanticSchema, SchemaElementType entity) {
         if (id2Values == null || id2Values.isEmpty()) {
             return;
         }
         for (Entry<Long, List<SchemaElementMatch>> entry : id2Values.entrySet()) {
             SchemaElement dimension = semanticSchema.getElement(entity, entry.getKey());
-
+            if (dimension.containsPartitionTime()) {
+                continue;
+            }
             if (entry.getValue().size() == 1) {
                 SchemaElementMatch schemaMatch = entry.getValue().get(0);
                 QueryFilter dimensionFilter = new QueryFilter();
@@ -171,34 +184,6 @@ public abstract class RuleSemanticQuery extends BaseSemanticQuery {
                 parseInfo.getDimensionFilters().add(dimensionFilter);
             }
         }
-    }
-
-    private void addToValues(SemanticSchema semanticSchema, SchemaElementType entity,
-            Map<Long, List<SchemaElementMatch>> id2Values, SchemaElementMatch schemaMatch) {
-        SchemaElement element = schemaMatch.getElement();
-        SchemaElement entityElement = semanticSchema.getElement(entity, element.getId());
-        if (entityElement != null) {
-            if (id2Values.containsKey(element.getId())) {
-                id2Values.get(element.getId()).add(schemaMatch);
-            } else {
-                id2Values.put(element.getId(), new ArrayList<>(Arrays.asList(schemaMatch)));
-            }
-        }
-    }
-
-    @Override
-    public SemanticQueryReq buildSemanticQueryReq() {
-        String queryMode = parseInfo.getQueryMode();
-
-        if (parseInfo.getDataSetId() == null || StringUtils.isEmpty(queryMode)
-                || !QueryManager.containsRuleQuery(queryMode)) {
-            // reach here some error may happen
-            log.error("not find QueryMode");
-            throw new RuntimeException("not find QueryMode");
-        }
-
-        QueryStructReq queryStructReq = convertQueryStruct();
-        return queryStructReq.convert(true);
     }
 
     protected boolean isMultiStructQuery() {
@@ -224,7 +209,7 @@ public abstract class RuleSemanticQuery extends BaseSemanticQuery {
     }
 
     public static List<RuleSemanticQuery> resolve(Long dataSetId, List<SchemaElementMatch> candidateElementMatches,
-            ChatQueryContext chatQueryContext) {
+                                                  ChatQueryContext chatQueryContext) {
         List<RuleSemanticQuery> matchedQueries = new ArrayList<>();
         for (RuleSemanticQuery semanticQuery : QueryManager.getRuleQueries()) {
             List<SchemaElementMatch> matches = semanticQuery.match(candidateElementMatches, chatQueryContext);

@@ -69,6 +69,8 @@ public class MetricResp extends SchemaItem {
 
     private String defaultAgg;
 
+    private boolean containsPartitionDimensions;
+
     public void setClassifications(String tag) {
         if (StringUtils.isBlank(tag)) {
             classifications = Lists.newArrayList();
