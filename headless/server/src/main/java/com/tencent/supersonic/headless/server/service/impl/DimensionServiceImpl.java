@@ -19,7 +19,6 @@ import com.tencent.supersonic.common.pojo.exception.InvalidArgumentException;
 import com.tencent.supersonic.headless.api.pojo.DimValueMap;
 import com.tencent.supersonic.headless.api.pojo.ModelDetail;
 import com.tencent.supersonic.headless.api.pojo.enums.ModelDefineType;
-import com.tencent.supersonic.headless.api.pojo.enums.TagDefineType;
 import com.tencent.supersonic.headless.api.pojo.request.DimensionReq;
 import com.tencent.supersonic.headless.api.pojo.request.MetaBatchReq;
 import com.tencent.supersonic.headless.api.pojo.request.PageDimensionReq;
@@ -28,16 +27,13 @@ import com.tencent.supersonic.headless.api.pojo.response.DatabaseResp;
 import com.tencent.supersonic.headless.api.pojo.response.DimensionResp;
 import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
-import com.tencent.supersonic.headless.api.pojo.response.TagItem;
 import com.tencent.supersonic.headless.server.persistence.dataobject.DimensionDO;
-import com.tencent.supersonic.headless.server.persistence.dataobject.TagDO;
 import com.tencent.supersonic.headless.server.persistence.mapper.DimensionDOMapper;
 import com.tencent.supersonic.headless.server.persistence.repository.DimensionRepository;
 import com.tencent.supersonic.headless.server.pojo.DimensionFilter;
 import com.tencent.supersonic.headless.server.pojo.DimensionsFilter;
 import com.tencent.supersonic.headless.api.pojo.MetaFilter;
 import com.tencent.supersonic.headless.server.pojo.ModelFilter;
-import com.tencent.supersonic.headless.server.pojo.TagFilter;
 import com.tencent.supersonic.headless.server.service.DatabaseService;
 import com.tencent.supersonic.headless.server.service.DimensionService;
 import com.tencent.supersonic.headless.server.service.ModelRelaService;
@@ -60,7 +56,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -264,21 +259,6 @@ public class DimensionServiceImpl extends ServiceImpl<DimensionDOMapper, Dimensi
         List<DimensionDO> dimensionDOS = dimensionRepository.getDimension(dimensionFilter);
         List<DimensionResp> dimensionResps = convertList(dimensionDOS);
 
-        List<Long> dimensionIds = dimensionResps.stream().map(dimensionResp -> dimensionResp.getId())
-                .collect(Collectors.toList());
-        List<TagItem> tagItems = tagMetaService.getTagItems(dimensionIds, TagDefineType.DIMENSION);
-        Map<Long, TagItem> itemIdToTagItem = tagItems.stream()
-                .collect(Collectors.toMap(tag -> tag.getItemId(), tag -> tag, (newTag, oldTag) -> newTag));
-
-        if (Objects.nonNull(itemIdToTagItem)) {
-            dimensionResps.stream().forEach(dimensionResp -> {
-                Long metricRespId = dimensionResp.getId();
-                if (itemIdToTagItem.containsKey(metricRespId)) {
-                    dimensionResp.setIsTag(itemIdToTagItem.get(metricRespId).getIsTag());
-                }
-            });
-        }
-
         if (!CollectionUtils.isEmpty(metaFilter.getFieldsDepend())) {
             return filterByField(dimensionResps, metaFilter.getFieldsDepend());
         }
@@ -332,31 +312,7 @@ public class DimensionServiceImpl extends ServiceImpl<DimensionDOMapper, Dimensi
                             .convert2DimensionResp(dimensionDO, modelMap))
                     .collect(Collectors.toList());
         }
-        fillTagInfo(dimensionResps);
         return dimensionResps;
-    }
-
-    private void fillTagInfo(List<DimensionResp> dimensionResps) {
-        if (CollectionUtils.isEmpty(dimensionResps)) {
-            return;
-        }
-        TagFilter tagFilter = new TagFilter();
-        tagFilter.setTagDefineType(TagDefineType.DIMENSION);
-        List<Long> dimensionIds = dimensionResps.stream().map(dimension -> dimension.getId())
-                .collect(Collectors.toList());
-        tagFilter.setItemIds(dimensionIds);
-        Map<Long, TagDO> keyAndTagMap = tagMetaService.getTagDOList(tagFilter).stream()
-                .collect(Collectors.toMap(tag -> tag.getItemId(), tag -> tag,
-                        (newTag, oldTag) -> newTag));
-        if (Objects.nonNull(keyAndTagMap)) {
-            dimensionResps.stream().forEach(dim -> {
-                if (keyAndTagMap.containsKey(dim.getId())) {
-                    dim.setIsTag(1);
-                } else {
-                    dim.setIsTag(0);
-                }
-            });
-        }
     }
 
     @Override

@@ -107,6 +107,7 @@ public class MetricConverter {
         if (metricDO.getDefineType() != null) {
             metricResp.setMetricDefineType(MetricDefineType.valueOf(metricDO.getDefineType()));
         }
+        metricResp.setIsTag(metricDO.getIsTag());
         return metricResp;
     }
 
