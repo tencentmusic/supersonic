@@ -61,7 +61,8 @@ public class ChatQueryRepositoryImpl implements ChatQueryRepository {
         if (!CollectionUtils.isEmpty(pageQueryInfoReq.getIds())) {
             queryWrapper.lambda().in(ChatQueryDO::getQuestionId, pageQueryInfoReq.getIds());
         }
-
+        queryWrapper.lambda().isNotNull(ChatQueryDO::getQueryResult);
+        queryWrapper.lambda().ne(ChatQueryDO::getQueryResult, "");
         queryWrapper.lambda().orderByDesc(ChatQueryDO::getQuestionId);
 
         PageInfo<ChatQueryDO> pageInfo = PageHelper.startPage(pageQueryInfoReq.getCurrent(),
@@ -70,8 +71,9 @@ public class ChatQueryRepositoryImpl implements ChatQueryRepository {
 
         PageInfo<QueryResp> chatQueryVOPageInfo = PageUtils.pageInfo2PageInfoVo(pageInfo);
         chatQueryVOPageInfo.setList(
-                pageInfo.getList().stream().filter(o -> !StringUtils.isEmpty(o.getQueryResult())).map(this::convertTo)
+                pageInfo.getList().stream()
                         .sorted(Comparator.comparingInt(o -> o.getQuestionId().intValue()))
+                        .map(this::convertTo)
                         .collect(Collectors.toList()));
         return chatQueryVOPageInfo;
     }
