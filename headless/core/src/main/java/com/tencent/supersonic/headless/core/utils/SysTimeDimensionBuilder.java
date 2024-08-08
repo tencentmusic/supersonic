@@ -17,6 +17,10 @@ import java.util.regex.Pattern;
 @Slf4j
 public class SysTimeDimensionBuilder {
 
+    // Defines the regular expression pattern for the time keyword
+    private static final Pattern TIME_KEYWORD_PATTERN = Pattern.compile(
+            "\\b(DATE|TIME|TIMESTAMP|YEAR|MONTH|DAY|HOUR|MINUTE|SECOND)\\b", Pattern.CASE_INSENSITIVE);
+
     public static void addSysTimeDimension(List<Dim> dims, DbAdaptor engineAdaptor) {
         log.debug("addSysTimeDimension before:{}, engineAdaptor:{}", dims, engineAdaptor);
         Dim timeDim = getTimeDim(dims);
@@ -67,9 +71,6 @@ public class SysTimeDimensionBuilder {
         return dim;
     }
 
-    // Defines the regular expression pattern for the time keyword
-    private static final Pattern TIME_KEYWORD_PATTERN = Pattern.compile(
-            "\\b(DATE|TIME|TIMESTAMP|YEAR|MONTH|DAY|HOUR|MINUTE|SECOND)\\b", Pattern.CASE_INSENSITIVE);
 
     public static boolean containsTimeKeyword(String fieldName) {
         Matcher matcher = TIME_KEYWORD_PATTERN.matcher(fieldName);
