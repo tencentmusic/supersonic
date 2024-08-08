@@ -94,7 +94,7 @@ public class DuSQLDemo extends S2BaseDemo {
         modelReq.setAdminOrgs(Collections.emptyList());
         ModelDetail modelDetail = new ModelDetail();
         List<Dim> dimensions = new ArrayList<>();
-        Dim dimension1 = new Dim("", "imp_date", DimensionType.time.name(), 0);
+        Dim dimension1 = new Dim("", "imp_date", DimensionType.partition_time.name(), 0);
         DimensionTimeTypeParams dimensionTimeTypeParams = new DimensionTimeTypeParams("false", "none");
         dimension1.setTypeParams(dimensionTimeTypeParams);
         dimensions.add(dimension1);
@@ -136,7 +136,7 @@ public class DuSQLDemo extends S2BaseDemo {
         modelReq.setAdminOrgs(Collections.emptyList());
         ModelDetail modelDetail = new ModelDetail();
         List<Dim> dimensions = new ArrayList<>();
-        Dim dimension1 = new Dim("", "imp_date", DimensionType.time.name(), 0);
+        Dim dimension1 = new Dim("", "imp_date", DimensionType.partition_time.name(), 0);
         DimensionTimeTypeParams dimensionTimeTypeParams = new DimensionTimeTypeParams("false", "none");
         dimension1.setTypeParams(dimensionTimeTypeParams);
         dimensions.add(dimension1);
@@ -175,7 +175,7 @@ public class DuSQLDemo extends S2BaseDemo {
         modelReq.setAdminOrgs(Collections.emptyList());
         ModelDetail modelDetail = new ModelDetail();
         List<Dim> dimensions = new ArrayList<>();
-        Dim dimension1 = new Dim("", "imp_date", DimensionType.time.name(), 0);
+        Dim dimension1 = new Dim("", "imp_date", DimensionType.partition_time.name(), 0);
         DimensionTimeTypeParams dimensionTimeTypeParams = new DimensionTimeTypeParams("false", "none");
         dimension1.setTypeParams(dimensionTimeTypeParams);
         dimensions.add(dimension1);
@@ -220,7 +220,7 @@ public class DuSQLDemo extends S2BaseDemo {
         modelReq.setAdminOrgs(Collections.emptyList());
         ModelDetail modelDetail = new ModelDetail();
         List<Dim> dimensions = new ArrayList<>();
-        Dim dimension1 = new Dim("", "imp_date", DimensionType.time.name(), 0);
+        Dim dimension1 = new Dim("", "imp_date", DimensionType.partition_time.name(), 0);
         DimensionTimeTypeParams dimensionTimeTypeParams = new DimensionTimeTypeParams("false", "none");
         dimension1.setTypeParams(dimensionTimeTypeParams);
         dimensions.add(dimension1);

@@ -96,7 +96,7 @@ class ModelServiceImplTest {
         identifiers.add(new Identify("用户名", IdentifyType.primary.name(), "user_name"));
         modelDetail.setIdentifiers(identifiers);
         List<Dim> dimensions = new ArrayList<>();
-        Dim dimension1 = new Dim("", "imp_date", DimensionType.time.name(), 0);
+        Dim dimension1 = new Dim("", "imp_date", DimensionType.partition_time.name(), 0);
         dimension1.setTypeParams(new DimensionTimeTypeParams());
         dimensions.add(dimension1);
         Dim dimension2 = new Dim("", "page", DimensionType.categorical.name(), 0);
@@ -134,7 +134,7 @@ class ModelServiceImplTest {
         modelDetail.setIdentifiers(identifiers);
 
         List<Dim> dimensions = new ArrayList<>();
-        Dim dimension1 = new Dim("", "imp_date_a", DimensionType.time.name(), 0);
+        Dim dimension1 = new Dim("", "imp_date_a", DimensionType.partition_time.name(), 0);
         dimension1.setTypeParams(new DimensionTimeTypeParams());
         dimensions.add(dimension1);
         Dim dimension2 = new Dim("", "page_a", DimensionType.categorical.name(), 0);
@@ -169,7 +169,7 @@ class ModelServiceImplTest {
         identifiers.add(new Identify("用户名", IdentifyType.primary.name(), "user_name"));
         modelDetail.setIdentifiers(identifiers);
         List<Dim> dimensions = new ArrayList<>();
-        Dim dimension1 = new Dim("", "imp_date", DimensionType.time.name(), 0);
+        Dim dimension1 = new Dim("", "imp_date", DimensionType.partition_time.name(), 0);
         dimension1.setTypeParams(new DimensionTimeTypeParams());
         dimensions.add(dimension1);
         Dim dimension2 = new Dim("", "page", DimensionType.categorical.name(), 0);
@@ -207,7 +207,7 @@ class ModelServiceImplTest {
         modelDetail.setIdentifiers(identifiers);
 
         List<Dim> dimensions = new ArrayList<>();
-        Dim dimension1 = new Dim("", "imp_date", DimensionType.time.name(), 0);
+        Dim dimension1 = new Dim("", "imp_date", DimensionType.partition_time.name(), 0);
         dimension1.setTypeParams(new DimensionTimeTypeParams());
         dimensions.add(dimension1);
         Dim dimension2 = new Dim("", "page", DimensionType.categorical.name(), 0);
@@ -250,7 +250,7 @@ class ModelServiceImplTest {
         modelDetail.setIdentifiers(identifiers);
 
         List<Dim> dimensions = new ArrayList<>();
-        Dim dimension1 = new Dim("", "imp_date_a", DimensionType.time.name(), 0);
+        Dim dimension1 = new Dim("", "imp_date_a", DimensionType.partition_time.name(), 0);
         dimension1.setTypeParams(new DimensionTimeTypeParams());
         dimensions.add(dimension1);
         Dim dimension2 = new Dim("", "page_a", DimensionType.categorical.name(), 0);
