@@ -119,23 +119,19 @@ public class DomainServiceImpl implements DomainService {
     public Set<DomainResp> getDomainAuthSet(User user, AuthType authTypeEnum) {
         List<DomainResp> domainResps = getDomainList();
         Set<String> orgIds = userService.getUserAllOrgId(user.getName());
-        List<DomainResp> domainWithAuth = Lists.newArrayList();
+        Set<DomainResp> domainWithAuth = Sets.newHashSet();
         if (authTypeEnum.equals(AuthType.ADMIN)) {
             domainWithAuth = domainResps.stream()
                     .filter(domainResp -> checkAdminPermission(orgIds, user, domainResp))
-                    .collect(Collectors.toList());
+                    .collect(Collectors.toSet());
         }
         if (authTypeEnum.equals(AuthType.VISIBLE)) {
             domainWithAuth = domainResps.stream()
                     .filter(domainResp -> checkViewPermission(orgIds, user, domainResp))
-                    .collect(Collectors.toList());
+                    .collect(Collectors.toSet());
         }
-        List<Long> domainIds = domainWithAuth.stream().map(DomainResp::getId)
-                .collect(Collectors.toList());
-        //get all child domain
-        return getDomainChildren(domainIds).stream()
-                .peek(domainResp -> domainResp.setHasEditPermission(true))
-                .collect(Collectors.toSet());
+
+        return domainWithAuth;
     }
 
     private Set<DomainResp> getParentDomain(List<Long> ids) {

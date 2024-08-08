@@ -1,4 +1,9 @@
 s2:
+
+  schema:
+    cache:
+      enable: true
+
   parser:
     strategy: ONE_PASS_SELF_CONSISTENCY
     exemplar-recall:

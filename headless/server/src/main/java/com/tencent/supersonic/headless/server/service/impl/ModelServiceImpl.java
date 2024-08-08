@@ -358,9 +358,9 @@ public class ModelServiceImpl implements ModelService {
         if (modelDO == null) {
             return null;
         }
-        Map<Long, DomainResp> domainRespMap = domainService.getDomainList().stream()
-                .collect(Collectors.toMap(DomainResp::getId, d -> d));
-        return ModelConverter.convert(modelDO, domainRespMap);
+
+        DomainResp domainResp = domainService.getDomain(modelDO.getDomainId());
+        return ModelConverter.convert(modelDO, domainResp);
     }
 
     @Override
