@@ -1,6 +1,7 @@
 package com.tencent.supersonic.headless.server.service.impl;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.auth.api.authentication.service.UserService;
 import com.tencent.supersonic.common.pojo.enums.AuthType;
@@ -16,7 +17,6 @@ import com.tencent.supersonic.headless.server.service.DomainService;
 import com.tencent.supersonic.headless.server.service.ModelService;
 import com.tencent.supersonic.headless.server.utils.DomainConvert;
 import lombok.extern.slf4j.Slf4j;
-import org.assertj.core.util.Sets;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
