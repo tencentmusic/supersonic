@@ -8,12 +8,19 @@ import com.tencent.supersonic.headless.core.adaptor.db.DbAdaptor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * generate system time dimension tools
  */
 @Slf4j
 public class SysTimeDimensionBuilder {
+
+    // Defines the regular expression pattern for the time keyword
+    private static final Pattern TIME_KEYWORD_PATTERN =
+            Pattern.compile("\\b(DATE|TIME|TIMESTAMP|YEAR|MONTH|DAY|HOUR|MINUTE|SECOND)\\b",
+                    Pattern.CASE_INSENSITIVE);
 
     public static void addSysTimeDimension(List<Dim> dims, DbAdaptor engineAdaptor) {
         log.debug("addSysTimeDimension before:{}, engineAdaptor:{}", dims, engineAdaptor);
@@ -65,10 +72,22 @@ public class SysTimeDimensionBuilder {
         return dim;
     }
 
+    private static boolean containsTimeKeyword(String fieldName) {
+        Matcher matcher = TIME_KEYWORD_PATTERN.matcher(fieldName);
+        return matcher.find();
+    }
+
+    // Check whether the time field contains keywords,Generation time expression
     private static String generateTimeExpr(Dim timeDim, String dateType, DbAdaptor engineAdaptor) {
         String bizName = timeDim.getBizName();
         String dateFormat = timeDim.getDateFormat();
-        return engineAdaptor.getDateFormat(dateType, dateFormat, bizName);
+        if (containsTimeKeyword(bizName)) {
+            String bizNameWithBackticks = String.format("`%s`", bizName);
+            return engineAdaptor.getDateFormat(dateType, dateFormat, bizNameWithBackticks);
+        } else {
+            return engineAdaptor.getDateFormat(dateType, dateFormat, bizName);
+        }
+
     }
 
     private static Dim getTimeDim(List<Dim> timeDims) {
