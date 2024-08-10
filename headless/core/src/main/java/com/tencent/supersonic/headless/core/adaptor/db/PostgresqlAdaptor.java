@@ -6,6 +6,7 @@ import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import com.tencent.supersonic.headless.api.pojo.DBColumn;
 import com.tencent.supersonic.headless.core.pojo.ConnectInfo;
+import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.expression.StringValue;
 import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
 
@@ -18,6 +19,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.function.UnaryOperator;
 
+@Slf4j
 public class PostgresqlAdaptor extends BaseDbAdaptor {
 
     @Override
@@ -77,14 +79,18 @@ public class PostgresqlAdaptor extends BaseDbAdaptor {
     }
 
     public List<String> getTables(ConnectInfo connectionInfo, String schemaName) throws SQLException {
-        List<String> tables = Lists.newArrayList();
+        List<String> tablesAndViews = Lists.newArrayList();
         DatabaseMetaData metaData = getDatabaseMetaData(connectionInfo);
-        ResultSet tableSet = metaData.getTables(null, null, null, new String[]{"TABLE"});
-        while (tableSet.next()) {
-            String tableName = tableSet.getString("TABLE_NAME");
-            tables.add(tableName);
+        try (ResultSet resultSet = metaData.getTables(null, null, null,
+                new String[]{"TABLE", "VIEW"})) {
+            while (resultSet.next()) {
+                String name = resultSet.getString("TABLE_NAME");
+                tablesAndViews.add(name);
+            }
+        } catch (SQLException e) {
+            log.error("Failed to get tables and views", e);
         }
-        return tables;
+        return tablesAndViews;
     }
 
     public List<DBColumn> getColumns(ConnectInfo connectInfo, String schemaName, String tableName) throws SQLException {

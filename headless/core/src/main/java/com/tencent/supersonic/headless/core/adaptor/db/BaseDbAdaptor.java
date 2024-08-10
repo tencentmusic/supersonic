@@ -10,6 +10,7 @@ import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -40,14 +41,19 @@ public abstract class BaseDbAdaptor implements DbAdaptor {
     }
 
     public List<String> getTables(ConnectInfo connectionInfo, String schemaName) throws SQLException {
-        List<String> tables = Lists.newArrayList();
+        List<String> tablesAndViews = new ArrayList<>();
         DatabaseMetaData metaData = getDatabaseMetaData(connectionInfo);
-        ResultSet tableSet = metaData.getTables(schemaName, schemaName, null, new String[]{"TABLE"});
-        while (tableSet.next()) {
-            String tableName = tableSet.getString("TABLE_NAME");
-            tables.add(tableName);
+
+        try (ResultSet resultSet = metaData.getTables(null, schemaName, null,
+                new String[]{"TABLE", "VIEW"})) {
+            while (resultSet.next()) {
+                String name = resultSet.getString("TABLE_NAME");
+                tablesAndViews.add(name);
+            }
+        } catch (SQLException e) {
+            log.error("Failed to get tables and views", e);
         }
-        return tables;
+        return tablesAndViews;
     }
 
     public List<DBColumn> getColumns(ConnectInfo connectInfo, String schemaName, String tableName) throws SQLException {
