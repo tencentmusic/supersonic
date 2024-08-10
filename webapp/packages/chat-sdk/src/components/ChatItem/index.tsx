@@ -353,6 +353,7 @@ const ChatItem: React.FC<Props> = ({
                 <SqlItem
                   agentId={agentId}
                   queryId={parseInfo.queryId}
+                  question={msg}
                   llmReq={llmReq}
                   llmResp={llmResp}
                   integrateSystem={integrateSystem}
