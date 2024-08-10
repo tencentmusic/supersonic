@@ -66,7 +66,7 @@ public class QueryManager {
         return ruleQueryMap.get(queryMode) instanceof MetricSemanticQuery;
     }
 
-    public static boolean isTagQuery(String queryMode) {
+    public static boolean isDetailQuery(String queryMode) {
         if (queryMode == null || !ruleQueryMap.containsKey(queryMode)) {
             return false;
         }

@@ -34,12 +34,13 @@ public class JdbcExecutor implements QueryExecutor {
         }
 
         SqlUtils sqlUtils = ContextUtils.getBean(SqlUtils.class);
-        log.info("executing SQL: {}", StringUtils.normalizeSpace(queryStatement.getSql()));
+        String sql = StringUtils.normalizeSpace(queryStatement.getSql());
+        log.info("executing SQL: {}", sql);
         Database database = queryStatement.getSemanticModel().getDatabase();
         SemanticQueryResp queryResultWithColumns = new SemanticQueryResp();
         SqlUtils sqlUtil = sqlUtils.init(database);
         sqlUtil.queryInternal(queryStatement.getSql(), queryResultWithColumns);
-        queryResultWithColumns.setSql(queryStatement.getSql());
+        queryResultWithColumns.setSql(sql);
         return queryResultWithColumns;
     }
 

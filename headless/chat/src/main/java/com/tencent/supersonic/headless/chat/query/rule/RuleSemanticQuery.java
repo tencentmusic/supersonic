@@ -75,8 +75,8 @@ public abstract class RuleSemanticQuery extends BaseSemanticQuery {
             return;
         }
 
-        if ((QueryManager.isTagQuery(queryParseInfo.getQueryMode())
-                && QueryManager.isTagQuery(contextParseInfo.getQueryMode()))
+        if ((QueryManager.isDetailQuery(queryParseInfo.getQueryMode())
+                && QueryManager.isDetailQuery(contextParseInfo.getQueryMode()))
                 || (QueryManager.isMetricQuery(queryParseInfo.getQueryMode())
                 && QueryManager.isMetricQuery(contextParseInfo.getQueryMode()))) {
             // inherit date info from context

@@ -18,7 +18,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Slf4j
-public class TagTest extends BaseTest {
+public class DetailTest extends BaseTest {
 
     @Test
     public void test_detail_dimension() throws Exception {
@@ -72,7 +72,7 @@ public class TagTest extends BaseTest {
 
     @Test
     public void test_detail_list_filter() throws Exception {
-        QueryResult actualResult = submitNewChat("国风艺人", DataUtils.tagAgentId);
+        QueryResult actualResult = submitNewChat("国风歌手", DataUtils.tagAgentId);
 
         QueryResult expectedResult = new QueryResult();
         SemanticParseInfo expectedParseInfo = new SemanticParseInfo();
