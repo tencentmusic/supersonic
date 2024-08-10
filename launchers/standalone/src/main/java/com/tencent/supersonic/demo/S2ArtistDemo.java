@@ -122,7 +122,7 @@ public class S2ArtistDemo extends S2BaseDemo {
                 DimensionType.categorical.name(), 1, 1));
         dimensions.add(new Dim("代表作", "song_name",
                 DimensionType.categorical.name(), 1));
-        dimensions.add(new Dim("风格", "genre",
+        dimensions.add(new Dim("流派", "genre",
                 DimensionType.categorical.name(), 1, 1));
         modelDetail.setDimensions(dimensions);
 
@@ -191,7 +191,7 @@ public class S2ArtistDemo extends S2BaseDemo {
         agent.setDescription("帮助您用自然语言进行圈选，支持多条件组合筛选");
         agent.setStatus(1);
         agent.setEnableSearch(1);
-        agent.setExamples(Lists.newArrayList("国风风格艺人", "港台地区的艺人", "风格为流行的艺人"));
+        agent.setExamples(Lists.newArrayList("国风流派艺人", "港台地区的艺人", "流派为流行的艺人"));
         AgentConfig agentConfig = new AgentConfig();
         RuleParserTool ruleQueryTool = new RuleParserTool();
         ruleQueryTool.setId("0");
