@@ -252,34 +252,36 @@ const ParseTip: React.FC<Props> = ({
     });
     return (
       <div className={`${prefixCls}-tip-item-filter-content`}>
-        <div className={tipItemOptionClass}>
-          <span className={`${prefixCls}-tip-item-filter-name`}>数据时间：</span>
-          {nativeQuery ? (
-            <span className={itemValueClass}>
-              {startDate === endDate ? startDate : `${startDate} ~ ${endDate}`}
-            </span>
-          ) : (
-            <RangePicker
-              value={[dayjs(startDate), dayjs(endDate)]}
-              onChange={onDateInfoChange}
-              format="YYYY-MM-DD"
-              renderExtraFooter={() => (
-                <Row gutter={[28, 28]}>
-                  {Object.keys(ranges).map(key => (
-                    <Col key={key}>
-                      <Button
-                        size="small"
-                        onClick={() => handlePresetClick(ranges[key as RangeKeys])}
-                      >
-                        {key}
-                      </Button>
-                    </Col>
-                  ))}
-                </Row>
-              )}
-            />
-          )}
-        </div>
+        {!!dateInfo && (
+          <div className={tipItemOptionClass}>
+            <span className={`${prefixCls}-tip-item-filter-name`}>数据时间：</span>
+            {nativeQuery ? (
+              <span className={itemValueClass}>
+                {startDate === endDate ? startDate : `${startDate} ~ ${endDate}`}
+              </span>
+            ) : (
+              <RangePicker
+                value={[dayjs(startDate), dayjs(endDate)]}
+                onChange={onDateInfoChange}
+                format="YYYY-MM-DD"
+                renderExtraFooter={() => (
+                  <Row gutter={[28, 28]}>
+                    {Object.keys(ranges).map(key => (
+                      <Col key={key}>
+                        <Button
+                          size="small"
+                          onClick={() => handlePresetClick(ranges[key as RangeKeys])}
+                        >
+                          {key}
+                        </Button>
+                      </Col>
+                    ))}
+                  </Row>
+                )}
+              />
+            )}
+          </div>
+        )}
         {filters?.map((filter: any, index: number) => (
           <FilterItem
             modelId={modelId!}
