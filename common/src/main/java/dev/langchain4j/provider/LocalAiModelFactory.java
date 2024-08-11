@@ -14,7 +14,7 @@ import java.time.Duration;
 @Service
 public class LocalAiModelFactory implements ModelFactory, InitializingBean {
     public static final String PROVIDER = "LOCAL_AI";
-
+    public static final String DEFAULT_BASE_URL = "http://localhost:8080";
     @Override
     public ChatLanguageModel createChatModel(ChatModelConfig modelConfig) {
         return LocalAiChatModel
@@ -23,6 +23,10 @@ public class LocalAiModelFactory implements ModelFactory, InitializingBean {
                 .modelName(modelConfig.getModelName())
                 .temperature(modelConfig.getTemperature())
                 .timeout(Duration.ofSeconds(modelConfig.getTimeOut()))
+                .topP(modelConfig.getTopP())
+                .logRequests(modelConfig.getLogRequests())
+                .logResponses(modelConfig.getLogResponses())
+                .maxRetries(modelConfig.getMaxRetries())
                 .build();
     }
 
@@ -31,6 +35,9 @@ public class LocalAiModelFactory implements ModelFactory, InitializingBean {
         return LocalAiEmbeddingModel.builder()
                 .baseUrl(embeddingModel.getBaseUrl())
                 .modelName(embeddingModel.getModelName())
+                .maxRetries(embeddingModel.getMaxRetries())
+                .logRequests(embeddingModel.getLogRequests())
+                .logResponses(embeddingModel.getLogResponses())
                 .build();
     }
 

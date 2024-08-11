@@ -14,15 +14,19 @@ import java.time.Duration;
 @Service
 public class AzureModelFactory implements ModelFactory, InitializingBean {
     public static final String PROVIDER = "AZURE";
+    public static final String DEFAULT_BASE_URL = "https://xxxx.openai.azure.com/";
 
     @Override
     public ChatLanguageModel createChatModel(ChatModelConfig modelConfig) {
         AzureOpenAiChatModel.Builder builder = AzureOpenAiChatModel.builder()
-                .endpoint(modelConfig.getBaseUrl())
+                .endpoint(modelConfig.getEndpoint())
                 .apiKey(modelConfig.getApiKey())
                 .deploymentName(modelConfig.getModelName())
                 .temperature(modelConfig.getTemperature())
-                .timeout(Duration.ofSeconds(modelConfig.getTimeOut() == null ? 0L : modelConfig.getTimeOut()));
+                .maxRetries(modelConfig.getMaxRetries())
+                .topP(modelConfig.getTopP())
+                .timeout(Duration.ofSeconds(modelConfig.getTimeOut() == null ? 0L : modelConfig.getTimeOut()))
+                .logRequestsAndResponses(modelConfig.getLogRequests() != null && modelConfig.getLogResponses());
         return builder.build();
     }
 

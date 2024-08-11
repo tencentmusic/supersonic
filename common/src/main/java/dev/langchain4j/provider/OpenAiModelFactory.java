@@ -13,7 +13,9 @@ import java.time.Duration;
 
 @Service
 public class OpenAiModelFactory implements ModelFactory, InitializingBean {
+
     public static final String PROVIDER = "OPEN_AI";
+    public static final String DEFAULT_BASE_URL = "https://api.openai.com/v1";
 
     @Override
     public ChatLanguageModel createChatModel(ChatModelConfig modelConfig) {
@@ -23,7 +25,11 @@ public class OpenAiModelFactory implements ModelFactory, InitializingBean {
                 .modelName(modelConfig.getModelName())
                 .apiKey(modelConfig.keyDecrypt())
                 .temperature(modelConfig.getTemperature())
+                .topP(modelConfig.getTopP())
+                .maxRetries(modelConfig.getMaxRetries())
                 .timeout(Duration.ofSeconds(modelConfig.getTimeOut()))
+                .logRequests(modelConfig.getLogRequests())
+                .logResponses(modelConfig.getLogResponses())
                 .build();
     }
 
