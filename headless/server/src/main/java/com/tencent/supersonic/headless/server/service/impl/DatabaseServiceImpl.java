@@ -3,9 +3,6 @@ package com.tencent.supersonic.headless.server.service.impl;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
-import com.tencent.supersonic.common.jsqlparser.SqlSelectHelper;
-import com.tencent.supersonic.common.pojo.Constants;
-import com.tencent.supersonic.common.pojo.Pair;
 import com.tencent.supersonic.common.pojo.QueryColumn;
 import com.tencent.supersonic.headless.api.pojo.DBColumn;
 import com.tencent.supersonic.headless.api.pojo.request.DatabaseReq;
@@ -31,7 +28,6 @@ import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.util.TablesNamesFinder;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
@@ -64,16 +60,15 @@ public class DatabaseServiceImpl extends ServiceImpl<DatabaseDOMapper, DatabaseD
 
     @Override
     public DatabaseResp createOrUpdateDatabase(DatabaseReq databaseReq, User user) {
-        Database database = DatabaseConverter.convert(databaseReq);
         DatabaseDO databaseDO = getDatabaseDO(databaseReq.getId());
         if (databaseDO != null) {
-            database.updatedBy(user.getName());
-            DatabaseConverter.convert(database, databaseDO);
+            databaseReq.updatedBy(user.getName());
+            DatabaseConverter.convert(databaseReq, databaseDO);
             updateById(databaseDO);
             return DatabaseConverter.convertWithPassword(databaseDO);
         }
-        database.createdBy(user.getName());
-        databaseDO = DatabaseConverter.convert(database);
+        databaseReq.createdBy(user.getName());
+        databaseDO = DatabaseConverter.convertDO(databaseReq);
         save(databaseDO);
         return DatabaseConverter.convertWithPassword(databaseDO);
     }
@@ -144,19 +139,6 @@ public class DatabaseServiceImpl extends ServiceImpl<DatabaseDOMapper, DatabaseD
     @Override
     public SemanticQueryResp executeSql(String sql, DatabaseResp databaseResp) {
         return queryWithColumns(sql, DatabaseConverter.convert(databaseResp));
-    }
-
-    private Pair<String, String> getDbTableName(String sql, DatabaseResp databaseResp) {
-        String dbTableName = SqlSelectHelper.getDbTableName(sql);
-        if (StringUtils.isBlank(dbTableName)) {
-            return Pair.pair("", "");
-        }
-        if (dbTableName.contains(Constants.DOT)) {
-            String db = dbTableName.split("\\.")[0];
-            String table = dbTableName.split("\\.")[1];
-            return Pair.pair(db, table);
-        }
-        return Pair.pair(databaseResp.getDatabase(), dbTableName);
     }
 
     @Override

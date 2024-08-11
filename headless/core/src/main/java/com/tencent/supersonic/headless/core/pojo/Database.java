@@ -3,6 +3,7 @@ package com.tencent.supersonic.headless.core.pojo;
 
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.common.pojo.RecordInfo;
+import com.tencent.supersonic.common.util.AESEncryptionUtil;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -40,10 +41,12 @@ public class Database extends RecordInfo {
      */
     private String type;
 
-    private ConnectInfo connectInfo;
-
     private List<String> admins = Lists.newArrayList();
 
     private List<String> viewers = Lists.newArrayList();
+
+    public String passwordDecrypt() {
+        return AESEncryptionUtil.aesDecryptCBC(password);
+    }
 
 }
