@@ -72,7 +72,7 @@ public class SqlUtils {
                 .withType(database.getType())
                 .withJdbcUrl(database.getUrl())
                 .withUsername(database.getUsername())
-                .withPassword(database.getPassword())
+                .withPassword(database.passwordDecrypt())
                 .withJdbcDataSource(this.jdbcDataSource)
                 .withResultLimit(this.resultLimit)
                 .withIsQueryLogEnable(this.isQueryLogEnable)

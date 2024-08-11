@@ -73,7 +73,6 @@ public class AESEncryptionUtil {
 
             return new String(decryptedBytes, ENCODE);
         } catch (Exception e) {
-            log.warn("encryptStr decrypt failed:{}", encryptStr);
             return encryptStr;
         }
     }

@@ -15,42 +15,21 @@ public class DatabaseConverter {
     public static Database convert(DatabaseResp databaseResp) {
         Database database = new Database();
         BeanUtils.copyProperties(databaseResp, database);
-        ConnectInfo connectInfo = getConnectInfo(databaseResp);
-        database.setConnectInfo(connectInfo);
-        database.setVersion(databaseResp.getVersion());
         return database;
     }
 
     public static Database convert(DatabaseReq databaseReq) {
         Database database = new Database();
         BeanUtils.copyProperties(databaseReq, database);
-        ConnectInfo connectInfo = new ConnectInfo();
-        connectInfo.setUserName(databaseReq.getUsername());
-        connectInfo.setPassword(databaseReq.getPassword());
-        connectInfo.setUrl(databaseReq.getConnectUrl());
-        connectInfo.setDatabase(databaseReq.getDatabase());
-        database.setConnectInfo(connectInfo);
-        database.setVersion(databaseReq.getVersion());
         return database;
     }
 
-    public static DatabaseDO convert(Database database, DatabaseDO databaseDO) {
-        database.setId(databaseDO.getId());
-        database.setCreatedBy(databaseDO.getCreatedBy());
-        database.setCreatedAt(databaseDO.getCreatedAt());
-        BeanUtils.copyProperties(database, databaseDO);
-        databaseDO.setConfig(JSONObject.toJSONString(database.getConnectInfo()));
-        databaseDO.setAdmin(String.join(",", database.getAdmins()));
-        databaseDO.setViewer(String.join(",", database.getViewers()));
-        return databaseDO;
-    }
-
-    public static DatabaseDO convert(Database database) {
-        DatabaseDO databaseDO = new DatabaseDO();
-        BeanUtils.copyProperties(database, databaseDO);
-        databaseDO.setConfig(JSONObject.toJSONString(database.getConnectInfo()));
-        databaseDO.setAdmin(String.join(",", database.getAdmins()));
-        databaseDO.setViewer(String.join(",", database.getViewers()));
+    public static DatabaseDO convert(DatabaseReq databaseReq, DatabaseDO databaseDO) {
+        BeanUtils.copyProperties(databaseReq, databaseDO);
+        ConnectInfo connectInfo = getConnectInfo(databaseReq);
+        databaseDO.setConfig(JSONObject.toJSONString(connectInfo));
+        databaseDO.setAdmin(String.join(",", databaseReq.getAdmins()));
+        databaseDO.setViewer(String.join(",", databaseReq.getViewers()));
         return databaseDO;
     }
 
@@ -70,6 +49,16 @@ public class DatabaseConverter {
         return databaseResp;
     }
 
+    public static DatabaseDO convertDO(DatabaseReq databaseReq) {
+        DatabaseDO databaseDO = new DatabaseDO();
+        BeanUtils.copyProperties(databaseReq, databaseDO);
+        ConnectInfo connectInfo = getConnectInfo(databaseReq);
+        databaseDO.setConfig(JSONObject.toJSONString(connectInfo));
+        databaseDO.setAdmin(String.join(",", databaseReq.getAdmins()));
+        databaseDO.setViewer(String.join(",", databaseReq.getViewers()));
+        return databaseDO;
+    }
+
     public static DatabaseResp convertWithPassword(DatabaseDO databaseDO) {
         DatabaseResp databaseResp = convert(databaseDO);
         ConnectInfo connectInfo = JSONObject.parseObject(databaseDO.getConfig(), ConnectInfo.class);
@@ -83,6 +72,15 @@ public class DatabaseConverter {
         connectInfo.setPassword(databaseResp.getPassword());
         connectInfo.setUrl(databaseResp.getUrl());
         connectInfo.setDatabase(databaseResp.getDatabase());
+        return connectInfo;
+    }
+
+    public static ConnectInfo getConnectInfo(DatabaseReq databaseReq) {
+        ConnectInfo connectInfo = new ConnectInfo();
+        connectInfo.setUserName(databaseReq.getUsername());
+        connectInfo.setPassword(databaseReq.getPassword());
+        connectInfo.setUrl(databaseReq.getUrl());
+        connectInfo.setDatabase(databaseReq.getDatabase());
         return connectInfo;
     }
 
