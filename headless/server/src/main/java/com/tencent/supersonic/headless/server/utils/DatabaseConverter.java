@@ -33,16 +33,6 @@ public class DatabaseConverter {
         return databaseDO;
     }
 
-    public static DatabaseDO convertDO(DatabaseReq databaseReq) {
-        DatabaseDO databaseDO = new DatabaseDO();
-        BeanUtils.copyProperties(databaseReq, databaseDO);
-        ConnectInfo connectInfo = getConnectInfo(databaseReq);
-        databaseDO.setConfig(JSONObject.toJSONString(connectInfo));
-        databaseDO.setAdmin(String.join(",", databaseReq.getAdmins()));
-        databaseDO.setViewer(String.join(",", databaseReq.getViewers()));
-        return databaseDO;
-    }
-
     public static DatabaseResp convert(DatabaseDO databaseDO) {
         DatabaseResp databaseResp = new DatabaseResp();
         BeanUtils.copyProperties(databaseDO, databaseResp);
@@ -57,6 +47,16 @@ public class DatabaseConverter {
             databaseResp.setViewers(Arrays.asList(databaseDO.getViewer().split(",")));
         }
         return databaseResp;
+    }
+
+    public static DatabaseDO convertDO(DatabaseReq databaseReq) {
+        DatabaseDO databaseDO = new DatabaseDO();
+        BeanUtils.copyProperties(databaseReq, databaseDO);
+        ConnectInfo connectInfo = getConnectInfo(databaseReq);
+        databaseDO.setConfig(JSONObject.toJSONString(connectInfo));
+        databaseDO.setAdmin(String.join(",", databaseReq.getAdmins()));
+        databaseDO.setViewer(String.join(",", databaseReq.getViewers()));
+        return databaseDO;
     }
 
     public static DatabaseResp convertWithPassword(DatabaseDO databaseDO) {
