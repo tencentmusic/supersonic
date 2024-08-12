@@ -90,12 +90,16 @@ public class AESEncryptionUtil {
         return Base64.getEncoder().encodeToString(combined);
     }
 
-    public static String aesEncryptECB(String content) throws Exception {
-        Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
-        SecretKeySpec secretKeySpec = new SecretKeySpec(hexStringToByteArray(KEY), "AES");
-        cipher.init(Cipher.ENCRYPT_MODE, secretKeySpec);
-        byte[] encryptEncode = cipher.doFinal(content.getBytes(ENCODE));
-        return getStringFromBytes(encryptEncode);
+    public static String aesEncryptECB(String content) {
+        try {
+            Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
+            SecretKeySpec secretKeySpec = new SecretKeySpec(hexStringToByteArray(KEY), "AES");
+            cipher.init(Cipher.ENCRYPT_MODE, secretKeySpec);
+            byte[] encryptEncode = cipher.doFinal(content.getBytes(ENCODE));
+            return getStringFromBytes(encryptEncode);
+        } catch (Exception e) {
+            return content;
+        }
     }
 
     public static String aesDecryptECB(String encryptStr) {

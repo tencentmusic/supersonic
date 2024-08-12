@@ -46,7 +46,7 @@ public class Database extends RecordInfo {
     private List<String> viewers = Lists.newArrayList();
 
     public String passwordDecrypt() {
-        return AESEncryptionUtil.aesDecryptCBC(password);
+        return AESEncryptionUtil.aesDecryptECB(password);
     }
 
 }

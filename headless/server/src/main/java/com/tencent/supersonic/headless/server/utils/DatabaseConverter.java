@@ -67,11 +67,12 @@ public class DatabaseConverter {
     }
 
     public static ConnectInfo getConnectInfo(DatabaseResp databaseResp) {
+        Database database = convert(databaseResp);
         ConnectInfo connectInfo = new ConnectInfo();
-        connectInfo.setUserName(databaseResp.getUsername());
-        connectInfo.setPassword(databaseResp.getPassword());
-        connectInfo.setUrl(databaseResp.getUrl());
-        connectInfo.setDatabase(databaseResp.getDatabase());
+        connectInfo.setUserName(database.getUsername());
+        connectInfo.setPassword(database.passwordDecrypt());
+        connectInfo.setUrl(database.getUrl());
+        connectInfo.setDatabase(database.getDatabase());
         return connectInfo;
     }
 
