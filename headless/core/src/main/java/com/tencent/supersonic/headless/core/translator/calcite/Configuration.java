@@ -84,10 +84,8 @@ public class Configuration {
                 .setUnquotedCasing(Casing.TO_UPPER)
                 .setConformance(sqlDialect.getConformance())
                 .setLex(Lex.BIG_QUERY);
-        if (!EngineType.CLICKHOUSE.equals(engineType)) {
-            parserConfig = parserConfig.setQuotedCasing(Casing.TO_LOWER);
-            parserConfig = parserConfig.setUnquotedCasing(Casing.TO_LOWER);
-        }
+        parserConfig = parserConfig.setQuotedCasing(Casing.UNCHANGED);
+        parserConfig = parserConfig.setUnquotedCasing(Casing.UNCHANGED);
         return parserConfig.build();
     }
 
