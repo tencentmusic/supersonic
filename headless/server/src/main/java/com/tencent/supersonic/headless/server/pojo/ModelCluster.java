@@ -12,10 +12,13 @@ public class ModelCluster {
     private static final String split = "_";
     private Set<Long> modelIds = new LinkedHashSet<>();
     private String key;
-    public static ModelCluster build(Set<Long> modelIds) {
+    private boolean containsPartitionDimensions;
+
+    public static ModelCluster build(Set<Long> modelIds, Boolean containsPartitionDimensions) {
         ModelCluster modelCluster = new ModelCluster();
         modelCluster.setModelIds(modelIds);
         modelCluster.setKey(StringUtils.join(modelIds, split));
+        modelCluster.setContainsPartitionDimensions(containsPartitionDimensions);
         return modelCluster;
     }
 }

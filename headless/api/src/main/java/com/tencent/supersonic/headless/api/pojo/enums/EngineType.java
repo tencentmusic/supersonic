@@ -9,7 +9,8 @@ public enum EngineType {
     CLICKHOUSE(3, "clickhouse"),
     KAFKA(4, "kafka"),
     H2(5, "h2"),
-    POSTGRESQL(6, "postgresql");
+    POSTGRESQL(6, "postgresql"),
+    OTHER(7, "other");
 
 
     private Integer code;

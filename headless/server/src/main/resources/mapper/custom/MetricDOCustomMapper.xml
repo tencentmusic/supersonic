@@ -128,7 +128,7 @@
     </update>
 
     <select id="query" resultMap="ResultMapWithBLOBs">
-        select t.*
+        select t.*, (case when t1.id is not null then 1 else 0 end) as isTag
         from s2_metric t
         left join (
            select *

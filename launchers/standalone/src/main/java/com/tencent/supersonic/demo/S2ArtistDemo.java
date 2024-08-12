@@ -15,7 +15,6 @@ import com.tencent.supersonic.headless.api.pojo.DataSetDetail;
 import com.tencent.supersonic.headless.api.pojo.DataSetModelConfig;
 import com.tencent.supersonic.headless.api.pojo.DefaultDisplayInfo;
 import com.tencent.supersonic.headless.api.pojo.Dim;
-import com.tencent.supersonic.headless.api.pojo.DimensionTimeTypeParams;
 import com.tencent.supersonic.headless.api.pojo.Identify;
 import com.tencent.supersonic.headless.api.pojo.Measure;
 import com.tencent.supersonic.headless.api.pojo.MetricTypeDefaultConfig;
@@ -78,7 +77,7 @@ public class S2ArtistDemo extends S2BaseDemo {
     private TagObjectResp addTagObjectSinger(DomainResp singerDomain) throws Exception {
         TagObjectReq tagObjectReq = new TagObjectReq();
         tagObjectReq.setDomainId(singerDomain.getId());
-        tagObjectReq.setName("艺人");
+        tagObjectReq.setName("歌手");
         tagObjectReq.setBizName("singer");
         User user = User.getFakeUser();
         return tagObjectService.create(tagObjectReq, user);
@@ -86,7 +85,7 @@ public class S2ArtistDemo extends S2BaseDemo {
 
     public DomainResp addDomain() {
         DomainReq domainReq = new DomainReq();
-        domainReq.setName("艺人库");
+        domainReq.setName("歌手库");
         domainReq.setBizName("singer");
         domainReq.setParentId(0L);
         domainReq.setStatus(StatusEnum.ONLINE.getCode());
@@ -101,9 +100,9 @@ public class S2ArtistDemo extends S2BaseDemo {
     public ModelResp addModel(DomainResp singerDomain,
                               DatabaseResp s2Database, TagObjectResp singerTagObject) throws Exception {
         ModelReq modelReq = new ModelReq();
-        modelReq.setName("艺人库");
+        modelReq.setName("歌手库");
         modelReq.setBizName("singer");
-        modelReq.setDescription("艺人库");
+        modelReq.setDescription("歌手库");
         modelReq.setDatabaseId(s2Database.getId());
         modelReq.setDomainId(singerDomain.getId());
         modelReq.setTagObjectId(singerTagObject.getId());
@@ -114,19 +113,16 @@ public class S2ArtistDemo extends S2BaseDemo {
         ModelDetail modelDetail = new ModelDetail();
         List<Identify> identifiers = new ArrayList<>();
         Identify identify = new Identify("歌手名", IdentifyType.primary.name(), "singer_name", 1);
-        identify.setEntityNames(Lists.newArrayList("歌手", "艺人"));
+        identify.setEntityNames(Lists.newArrayList("歌手"));
         identifiers.add(identify);
         modelDetail.setIdentifiers(identifiers);
 
         List<Dim> dimensions = new ArrayList<>();
-        Dim dimension1 = new Dim("", "imp_date", DimensionType.time.name(), 0);
-        dimension1.setTypeParams(new DimensionTimeTypeParams());
-        dimensions.add(dimension1);
         dimensions.add(new Dim("活跃区域", "act_area",
                 DimensionType.categorical.name(), 1, 1));
         dimensions.add(new Dim("代表作", "song_name",
                 DimensionType.categorical.name(), 1));
-        dimensions.add(new Dim("风格", "genre",
+        dimensions.add(new Dim("流派", "genre",
                 DimensionType.categorical.name(), 1, 1));
         modelDetail.setDimensions(dimensions);
 
@@ -135,7 +131,7 @@ public class S2ArtistDemo extends S2BaseDemo {
         Measure measure3 = new Measure("收藏量", "favor_cnt", "sum", 1);
         modelDetail.setMeasures(Lists.newArrayList(measure1, measure2, measure3));
         modelDetail.setQueryType("sql_query");
-        modelDetail.setSqlQuery("select imp_date, singer_name, act_area, song_name, genre, "
+        modelDetail.setSqlQuery("select singer_name, act_area, song_name, genre, "
                 + "js_play_cnt, down_cnt, favor_cnt from singer");
         modelReq.setModelDetail(modelDetail);
         return modelService.createModel(modelReq, user);
@@ -156,10 +152,10 @@ public class S2ArtistDemo extends S2BaseDemo {
 
     public long addDataSet(DomainResp singerDomain, ModelResp singerModel) {
         DataSetReq dataSetReq = new DataSetReq();
-        dataSetReq.setName("艺人库数据集");
+        dataSetReq.setName("歌手库数据集");
         dataSetReq.setBizName("singer");
         dataSetReq.setDomainId(singerDomain.getId());
-        dataSetReq.setDescription("包含艺人相关标签和指标信息");
+        dataSetReq.setDescription("包含歌手相关标签和指标信息");
         dataSetReq.setAdmins(Lists.newArrayList("admin", "jack"));
         List<DataSetModelConfig> dataSetModelConfigs = getDataSetModelConfigs(singerDomain.getId());
         DataSetDetail dataSetDetail = new DataSetDetail();
@@ -195,7 +191,7 @@ public class S2ArtistDemo extends S2BaseDemo {
         agent.setDescription("帮助您用自然语言进行圈选，支持多条件组合筛选");
         agent.setStatus(1);
         agent.setEnableSearch(1);
-        agent.setExamples(Lists.newArrayList("国风风格艺人", "港台地区的艺人", "风格为流行的艺人"));
+        agent.setExamples(Lists.newArrayList("国风流派歌手", "港台歌手", "周杰伦流派"));
         AgentConfig agentConfig = new AgentConfig();
         RuleParserTool ruleQueryTool = new RuleParserTool();
         ruleQueryTool.setId("0");

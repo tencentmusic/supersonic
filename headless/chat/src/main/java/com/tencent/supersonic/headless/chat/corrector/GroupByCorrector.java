@@ -1,5 +1,6 @@
 package com.tencent.supersonic.headless.chat.corrector;
 
+import com.tencent.supersonic.common.pojo.enums.QueryType;
 import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.jsqlparser.SqlAddHelper;
@@ -12,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.env.Environment;
 import org.springframework.util.CollectionUtils;
+
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -32,6 +34,10 @@ public class GroupByCorrector extends BaseSemanticCorrector {
     }
 
     private Boolean needAddGroupBy(ChatQueryContext chatQueryContext, SemanticParseInfo semanticParseInfo) {
+        if (!QueryType.METRIC.equals(semanticParseInfo.getQueryType())) {
+            return false;
+        }
+
         Long dataSetId = semanticParseInfo.getDataSetId();
         //add dimension group by
         SqlInfo sqlInfo = semanticParseInfo.getSqlInfo();
@@ -72,7 +78,7 @@ public class GroupByCorrector extends BaseSemanticCorrector {
         SemanticSchema semanticSchema = chatQueryContext.getSemanticSchema();
         //add alias field name
         Set<String> dimensions = getDimensions(dataSetId, semanticSchema);
-        List<String> selectFields = SqlSelectHelper.getSelectFields(correctS2SQL);
+        List<String> selectFields = SqlSelectHelper.gePureSelectFields(correctS2SQL);
         List<String> aggregateFields = SqlSelectHelper.getAggregateFields(correctS2SQL);
         Set<String> groupByFields = selectFields.stream()
                 .filter(field -> dimensions.contains(field))

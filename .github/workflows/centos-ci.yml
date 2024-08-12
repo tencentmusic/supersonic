@@ -1,5 +1,4 @@
 name: supersonic CentOS CI
-
 on:
   push:
     branches:
@@ -16,7 +15,7 @@ jobs:
 
     strategy:
       matrix:
-        java-version: [8, 11]  # 定义要测试的JDK版本
+        java-version: [8, 11, 21]  # 定义要测试的JDK版本
 
     steps:
       - uses: actions/checkout@v2
@@ -36,9 +35,13 @@ jobs:
             for i in {1..5}; do
               dnf install -y java-1.8.0-openjdk-devel maven && break || sleep 15
             done
-          else
+          elif [ ${{ matrix.java-version }} -eq 11 ]; then
             for i in {1..5}; do
               dnf install -y java-11-openjdk-devel maven && break || sleep 15
+            done
+          elif [ ${{ matrix.java-version }} -eq 21 ]; then
+            for i in {1..5}; do
+              dnf install -y java-21-openjdk-devel maven && break || sleep 15
             done
           fi
 

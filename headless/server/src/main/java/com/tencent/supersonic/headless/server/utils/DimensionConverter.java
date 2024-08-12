@@ -89,6 +89,7 @@ public class DimensionConverter {
         }
         dimensionResp.setType(getType(dimensionDO.getType()));
         dimensionResp.setTypeEnum(TypeEnums.DIMENSION);
+        dimensionResp.setIsTag(dimensionDO.getIsTag());
         return dimensionResp;
     }
 

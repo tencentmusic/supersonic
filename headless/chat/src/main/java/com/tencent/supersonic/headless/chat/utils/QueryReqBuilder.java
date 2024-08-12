@@ -18,6 +18,11 @@ import com.tencent.supersonic.headless.api.pojo.request.QueryMultiStructReq;
 import com.tencent.supersonic.headless.api.pojo.request.QuerySqlReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
 import com.tencent.supersonic.headless.chat.query.QueryManager;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
+import org.springframework.util.CollectionUtils;
+
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -28,10 +33,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.BeanUtils;
-import org.springframework.util.CollectionUtils;
 
 @Slf4j
 public class QueryReqBuilder {
@@ -88,9 +89,12 @@ public class QueryReqBuilder {
     }
 
     private static DateConf rewrite2Between(DateConf dateInfo) {
+        if (Objects.isNull(dateInfo)) {
+            return null;
+        }
         DateConf dateInfoNew = new DateConf();
         BeanUtils.copyProperties(dateInfo, dateInfoNew);
-        if (Objects.nonNull(dateInfo) && DateConf.DateMode.RECENT.equals(dateInfo.getDateMode())) {
+        if (DateConf.DateMode.RECENT.equals(dateInfo.getDateMode())) {
             int unit = dateInfo.getUnit();
             int days = 1;
             switch (dateInfo.getPeriod()) {
@@ -222,7 +226,7 @@ public class QueryReqBuilder {
     }
 
     public static Set<Order> getOrder(Set<Order> existingOrders,
-            AggregateTypeEnum aggregator, SchemaElement metric) {
+                                      AggregateTypeEnum aggregator, SchemaElement metric) {
         if (existingOrders != null && !existingOrders.isEmpty()) {
             return existingOrders;
         }
@@ -259,7 +263,7 @@ public class QueryReqBuilder {
     }
 
     public static QueryStructReq buildStructRatioReq(SemanticParseInfo parseInfo, SchemaElement metric,
-            AggOperatorEnum aggOperatorEnum) {
+                                                     AggOperatorEnum aggOperatorEnum) {
         QueryStructReq queryStructReq = buildStructReq(parseInfo);
         queryStructReq.setQueryType(QueryType.METRIC);
         queryStructReq.setOrders(new ArrayList<>());

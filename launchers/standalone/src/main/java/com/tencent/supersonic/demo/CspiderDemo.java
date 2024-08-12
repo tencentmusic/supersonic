@@ -89,7 +89,7 @@ public class CspiderDemo extends S2BaseDemo {
         modelReq.setAdminOrgs(Collections.emptyList());
         ModelDetail modelDetail = new ModelDetail();
         List<Dim> dimensions = new ArrayList<>();
-        Dim dimension1 = new Dim("", "imp_date", DimensionType.time.name(), 0);
+        Dim dimension1 = new Dim("", "imp_date", DimensionType.partition_time.name(), 0);
         dimension1.setTypeParams(new DimensionTimeTypeParams());
         dimensions.add(dimension1);
         dimensions.add(new Dim("活跃区域", "most_popular_in", DimensionType.categorical.name(), 1));
@@ -174,7 +174,7 @@ public class CspiderDemo extends S2BaseDemo {
         modelReq.setDatabaseId(s2Database.getId());
         ModelDetail modelDetail = new ModelDetail();
         List<Dim> dimensions = new ArrayList<>();
-        Dim dimension1 = new Dim("", "imp_date", DimensionType.time.name(), 0);
+        Dim dimension1 = new Dim("", "imp_date", DimensionType.partition_time.name(), 0);
         dimension1.setTypeParams(new DimensionTimeTypeParams());
         dimensions.add(dimension1);
         dimensions.add(new Dim("歌曲名称", "song_name", DimensionType.categorical.name(), 1));

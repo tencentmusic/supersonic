@@ -189,7 +189,7 @@ public class S2VisitsDemo extends S2BaseDemo {
     }
 
     public ModelResp addModel_1(DomainResp s2Domain, DatabaseResp s2Database,
-            TagObjectResp s2TagObject) throws Exception {
+                                TagObjectResp s2TagObject) throws Exception {
         ModelReq modelReq = new ModelReq();
         modelReq.setName("用户部门");
         modelReq.setBizName("user_department");
@@ -238,7 +238,7 @@ public class S2VisitsDemo extends S2BaseDemo {
         modelDetail.setIdentifiers(identifiers);
 
         List<Dim> dimensions = new ArrayList<>();
-        Dim dimension1 = new Dim("", "imp_date", DimensionType.time.name(), 0);
+        Dim dimension1 = new Dim("", "imp_date", DimensionType.partition_time.name(), 0);
         dimension1.setTypeParams(new DimensionTimeTypeParams());
         dimensions.add(dimension1);
         Dim dimension2 = new Dim("", "page", DimensionType.categorical.name(), 0);
@@ -352,7 +352,7 @@ public class S2VisitsDemo extends S2BaseDemo {
     }
 
     public void updateMetric(ModelResp stayTimeModel, DimensionResp departmentDimension,
-            DimensionResp userDimension) throws Exception {
+                             DimensionResp userDimension) throws Exception {
         MetricResp stayHoursMetric =
                 metricService.getMetric(stayTimeModel.getId(), "stay_hours");
         MetricReq metricReq = new MetricReq();
@@ -378,7 +378,7 @@ public class S2VisitsDemo extends S2BaseDemo {
     }
 
     public void updateMetric_pv(ModelResp pvUvModel, DimensionResp departmentDimension,
-            DimensionResp userDimension, MetricResp metricPv) throws Exception {
+                                DimensionResp userDimension, MetricResp metricPv) throws Exception {
         MetricReq metricReq = new MetricReq();
         metricReq.setModelId(pvUvModel.getId());
         metricReq.setId(metricPv.getId());
@@ -420,7 +420,7 @@ public class S2VisitsDemo extends S2BaseDemo {
     }
 
     public MetricResp addMetric_pv_avg(MetricResp metricPv, MetricResp metricUv,
-            DimensionResp departmentDimension, ModelResp pvModel) throws Exception {
+                                       DimensionResp departmentDimension, ModelResp pvModel) throws Exception {
         MetricReq metricReq = new MetricReq();
         metricReq.setModelId(pvModel.getId());
         metricReq.setName("人均访问次数");

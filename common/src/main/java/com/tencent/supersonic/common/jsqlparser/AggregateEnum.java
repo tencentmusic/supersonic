@@ -29,8 +29,7 @@ public enum AggregateEnum {
     }
 
     public static Map<String, String> getAggregateEnum() {
-        Map<String, String> aggregateMap = Arrays.stream(AggregateEnum.values())
+        return Arrays.stream(AggregateEnum.values())
                 .collect(Collectors.toMap(AggregateEnum::getAggregateCh, AggregateEnum::getAggregateEN));
-        return aggregateMap;
     }
 }

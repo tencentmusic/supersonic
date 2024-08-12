@@ -31,11 +31,12 @@ public class OnePassSCSqlGenStrategy extends SqlGenStrategy {
             + "please convert it to a SQL query so that relevant data could be returned "
             + "by executing the SQL query against underlying database.\n"
             + "#Rules:"
-            + "1.ALWAYS specify date filter using `>`,`<`,`>=`,`<=` operator."
-            + "2.ALWAYS calculate the absolute date range by yourself."
-            + "3.DO NOT include date filter in the where clause if not explicitly expressed in the `Question`."
-            + "4.DO NOT miss the AGGREGATE operator of metrics, always add it if needed."
-            + "5.ONLY respond with the converted SQL statement.\n"
+            + "1.ALWAYS generate column specified in the `Schema`, DO NOT hallucinate."
+            + "2.ALWAYS specify date filter using `>`,`<`,`>=`,`<=` operator."
+            + "3.ALWAYS calculate the absolute date range by yourself."
+            + "4.DO NOT include date filter in the where clause if not explicitly expressed in the `Question`."
+            + "5.DO NOT miss the AGGREGATE operator of metrics, always add it if needed."
+            + "6.ONLY respond with the converted SQL statement.\n"
             + "#Exemplars:\n{{exemplar}}"
             + "#Question:{{question}} #Schema:{{schema}} #SideInfo:{{information}} #SQL:";
 

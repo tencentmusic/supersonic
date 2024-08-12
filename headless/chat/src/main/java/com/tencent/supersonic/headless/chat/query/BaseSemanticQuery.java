@@ -5,12 +5,11 @@ import com.tencent.supersonic.common.pojo.Aggregator;
 import com.tencent.supersonic.common.pojo.Filter;
 import com.tencent.supersonic.common.pojo.Order;
 import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
-import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.headless.api.pojo.DataSetSchema;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.api.pojo.request.QuerySqlReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
-import com.tencent.supersonic.headless.chat.parser.ParserConfig;
+import com.tencent.supersonic.headless.api.pojo.request.SemanticQueryReq;
 import com.tencent.supersonic.headless.chat.utils.QueryReqBuilder;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
@@ -20,8 +19,6 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
-import static com.tencent.supersonic.headless.chat.parser.ParserConfig.PARSER_S2SQL_ENABLE;
 
 @Slf4j
 @ToString
@@ -41,6 +38,19 @@ public abstract class BaseSemanticQuery implements SemanticQuery, Serializable {
 
     protected QueryStructReq convertQueryStruct() {
         return QueryReqBuilder.buildStructReq(parseInfo);
+    }
+
+    @Override
+    public SemanticQueryReq buildSemanticQueryReq() {
+        return QueryReqBuilder.buildS2SQLReq(parseInfo.getSqlInfo(), parseInfo.getDataSetId());
+    }
+
+    protected void initS2SqlByStruct(DataSetSchema dataSetSchema) {
+        QueryStructReq queryStructReq = convertQueryStruct();
+        convertBizNameToName(dataSetSchema, queryStructReq);
+        QuerySqlReq querySQLReq = queryStructReq.convert();
+        parseInfo.getSqlInfo().setParsedS2SQL(querySQLReq.getSql());
+        parseInfo.getSqlInfo().setCorrectedS2SQL(querySQLReq.getSql());
     }
 
     protected void convertBizNameToName(DataSetSchema dataSetSchema, QueryStructReq queryStructReq) {
@@ -72,19 +82,6 @@ public abstract class BaseSemanticQuery implements SemanticQuery, Serializable {
         if (CollectionUtils.isNotEmpty(dimensionFilters)) {
             metricFilters.forEach(filter -> filter.setName(bizNameToName.get(filter.getBizName())));
         }
-    }
-
-    protected void initS2SqlByStruct(DataSetSchema dataSetSchema) {
-        ParserConfig parserConfig = ContextUtils.getBean(ParserConfig.class);
-        boolean s2sqlEnable = Boolean.valueOf(parserConfig.getParameterValue(PARSER_S2SQL_ENABLE));
-        if (!s2sqlEnable) {
-            return;
-        }
-        QueryStructReq queryStructReq = convertQueryStruct();
-        convertBizNameToName(dataSetSchema, queryStructReq);
-        QuerySqlReq querySQLReq = queryStructReq.convert();
-        parseInfo.getSqlInfo().setParsedS2SQL(querySQLReq.getSql());
-        parseInfo.getSqlInfo().setCorrectedS2SQL(querySQLReq.getSql());
     }
 
 }

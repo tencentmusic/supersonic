@@ -13,6 +13,7 @@ import com.tencent.supersonic.common.pojo.Aggregator;
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.DataEvent;
 import com.tencent.supersonic.common.pojo.DataItem;
+import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.common.pojo.Filter;
 import com.tencent.supersonic.common.pojo.enums.AuthType;
 import com.tencent.supersonic.common.pojo.enums.EventType;
@@ -29,7 +30,6 @@ import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
 import com.tencent.supersonic.headless.api.pojo.SchemaItem;
 import com.tencent.supersonic.headless.api.pojo.enums.MapModeEnum;
 import com.tencent.supersonic.headless.api.pojo.enums.MetricDefineType;
-import com.tencent.supersonic.headless.api.pojo.enums.TagDefineType;
 import com.tencent.supersonic.headless.api.pojo.request.MetaBatchReq;
 import com.tencent.supersonic.headless.api.pojo.request.MetricBaseReq;
 import com.tencent.supersonic.headless.api.pojo.request.MetricReq;
@@ -43,12 +43,10 @@ import com.tencent.supersonic.headless.api.pojo.response.DimensionResp;
 import com.tencent.supersonic.headless.api.pojo.response.MapInfoResp;
 import com.tencent.supersonic.headless.api.pojo.response.MetricResp;
 import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
-import com.tencent.supersonic.headless.api.pojo.response.TagItem;
 import com.tencent.supersonic.headless.server.facade.service.ChatLayerService;
 import com.tencent.supersonic.headless.server.persistence.dataobject.CollectDO;
 import com.tencent.supersonic.headless.server.persistence.dataobject.MetricDO;
 import com.tencent.supersonic.headless.server.persistence.dataobject.MetricQueryDefaultConfigDO;
-import com.tencent.supersonic.headless.server.persistence.dataobject.TagDO;
 import com.tencent.supersonic.headless.server.persistence.mapper.MetricDOMapper;
 import com.tencent.supersonic.headless.server.persistence.repository.MetricRepository;
 import com.tencent.supersonic.headless.server.pojo.DimensionsFilter;
@@ -57,7 +55,6 @@ import com.tencent.supersonic.headless.server.pojo.MetricFilter;
 import com.tencent.supersonic.headless.server.pojo.MetricsFilter;
 import com.tencent.supersonic.headless.server.pojo.ModelCluster;
 import com.tencent.supersonic.headless.server.pojo.ModelFilter;
-import com.tencent.supersonic.headless.server.pojo.TagFilter;
 import com.tencent.supersonic.headless.server.service.DimensionService;
 import com.tencent.supersonic.headless.server.service.MetricService;
 import com.tencent.supersonic.headless.server.service.ModelService;
@@ -347,7 +344,6 @@ public class MetricServiceImpl extends ServiceImpl<MetricDOMapper, MetricDO>
         BeanUtils.copyProperties(metricDOPageInfo, pageInfo);
         List<MetricResp> metricResps = convertList(metricDOPageInfo.getList(), collectIds);
         fillAdminRes(metricResps, user);
-        fillTagInfo(metricResps);
         pageInfo.setList(metricResps);
         return pageInfo;
     }
@@ -370,20 +366,7 @@ public class MetricServiceImpl extends ServiceImpl<MetricDOMapper, MetricDO>
         MetricFilter metricFilter = new MetricFilter();
         BeanUtils.copyProperties(metaFilter, metricFilter);
         List<MetricResp> metricResps = convertList(queryMetric(metricFilter));
-        List<Long> metricIds = metricResps.stream().map(metricResp -> metricResp.getId()).collect(Collectors.toList());
 
-        List<TagItem> tagItems = tagMetaService.getTagItems(metricIds, TagDefineType.METRIC);
-        Map<Long, TagItem> itemIdToTagItem = tagItems.stream()
-                .collect(Collectors.toMap(tag -> tag.getItemId(), tag -> tag, (newTag, oldTag) -> newTag));
-
-        if (Objects.nonNull(itemIdToTagItem)) {
-            metricResps.stream().forEach(metricResp -> {
-                Long metricRespId = metricResp.getId();
-                if (itemIdToTagItem.containsKey(metricRespId)) {
-                    metricResp.setIsTag(itemIdToTagItem.get(metricRespId).getIsTag());
-                }
-            });
-        }
         if (!CollectionUtils.isEmpty(metaFilter.getFieldsDepend())) {
             return filterByField(metricResps, metaFilter.getFieldsDepend());
         }
@@ -418,30 +401,6 @@ public class MetricServiceImpl extends ServiceImpl<MetricDOMapper, MetricDO>
         idsToFilter.retainAll(pageMetricReq.getIds());
         idsToFilter.add(-1L);
         return idsToFilter;
-    }
-
-    private void fillTagInfo(List<MetricResp> metricRespList) {
-        if (CollectionUtils.isEmpty(metricRespList)) {
-            return;
-        }
-
-        TagFilter tagFilter = new TagFilter();
-        tagFilter.setTagDefineType(TagDefineType.METRIC);
-        List<Long> metricIds = metricRespList.stream().map(metric -> metric.getId())
-                .collect(Collectors.toList());
-        tagFilter.setItemIds(metricIds);
-        Map<Long, TagDO> keyAndTagMap = tagMetaService.getTagDOList(tagFilter).stream()
-                .collect(Collectors.toMap(tag -> tag.getItemId(), tag -> tag,
-                        (newTag, oldTag) -> newTag));
-        if (Objects.nonNull(keyAndTagMap)) {
-            metricRespList.stream().forEach(metric -> {
-                if (keyAndTagMap.containsKey(metric.getId())) {
-                    metric.setIsTag(1);
-                } else {
-                    metric.setIsTag(0);
-                }
-            });
-        }
     }
 
     private List<MetricResp> filterByField(List<MetricResp> metricResps, List<String> fields) {
@@ -529,7 +488,7 @@ public class MetricServiceImpl extends ServiceImpl<MetricDOMapper, MetricDO>
         if (metricDO == null) {
             return null;
         }
-        ModelFilter modelFilter = new ModelFilter(false,
+        ModelFilter modelFilter = new ModelFilter(true,
                 Lists.newArrayList(metricDO.getModelId()));
         Map<Long, ModelResp> modelMap = modelService.getModelMap(modelFilter);
         List<CollectDO> collectList = collectService.getCollectionList(user.getName(), TypeEnums.METRIC);
@@ -792,6 +751,9 @@ public class MetricServiceImpl extends ServiceImpl<MetricDOMapper, MetricDO>
         if (modelCluster == null) {
             throw new IllegalArgumentException("Invalid input parameters, unable to obtain valid metrics");
         }
+        if (!modelCluster.isContainsPartitionDimensions()) {
+            queryMetricReq.setDateInfo(null);
+        }
         //4. set groups
         List<String> dimensionBizNames = dimensionResps.stream()
                 .filter(entry -> modelCluster.getModelIds().contains(entry.getModelId()))
@@ -801,8 +763,9 @@ public class MetricServiceImpl extends ServiceImpl<MetricDOMapper, MetricDO>
                 .map(SchemaItem::getBizName).collect(Collectors.toList());
 
         QueryStructReq queryStructReq = new QueryStructReq();
-        if (queryMetricReq.getDateInfo().isGroupByDate()) {
-            queryStructReq.getGroups().add(queryMetricReq.getDateInfo().getGroupByTimeDimension());
+        DateConf dateInfo = queryMetricReq.getDateInfo();
+        if (Objects.nonNull(dateInfo) && dateInfo.isGroupByDate()) {
+            queryStructReq.getGroups().add(dateInfo.getGroupByTimeDimension());
         }
         if (!CollectionUtils.isEmpty(dimensionBizNames)) {
             queryStructReq.getGroups().addAll(dimensionBizNames);
@@ -837,7 +800,7 @@ public class MetricServiceImpl extends ServiceImpl<MetricDOMapper, MetricDO>
         }
         queryStructReq.setDimensionFilters(filters);
         //7. set dateInfo
-        queryStructReq.setDateInfo(queryMetricReq.getDateInfo());
+        queryStructReq.setDateInfo(dateInfo);
         return queryStructReq;
     }
 

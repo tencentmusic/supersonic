@@ -1,6 +1,7 @@
 package com.tencent.supersonic.headless.server.service.impl;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.auth.api.authentication.service.UserService;
 import com.tencent.supersonic.common.pojo.enums.AuthType;
@@ -16,7 +17,6 @@ import com.tencent.supersonic.headless.server.service.DomainService;
 import com.tencent.supersonic.headless.server.service.ModelService;
 import com.tencent.supersonic.headless.server.utils.DomainConvert;
 import lombok.extern.slf4j.Slf4j;
-import org.assertj.core.util.Sets;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -119,23 +119,19 @@ public class DomainServiceImpl implements DomainService {
     public Set<DomainResp> getDomainAuthSet(User user, AuthType authTypeEnum) {
         List<DomainResp> domainResps = getDomainList();
         Set<String> orgIds = userService.getUserAllOrgId(user.getName());
-        List<DomainResp> domainWithAuth = Lists.newArrayList();
+        Set<DomainResp> domainWithAuth = Sets.newHashSet();
         if (authTypeEnum.equals(AuthType.ADMIN)) {
             domainWithAuth = domainResps.stream()
                     .filter(domainResp -> checkAdminPermission(orgIds, user, domainResp))
-                    .collect(Collectors.toList());
+                    .collect(Collectors.toSet());
         }
         if (authTypeEnum.equals(AuthType.VISIBLE)) {
             domainWithAuth = domainResps.stream()
                     .filter(domainResp -> checkViewPermission(orgIds, user, domainResp))
-                    .collect(Collectors.toList());
+                    .collect(Collectors.toSet());
         }
-        List<Long> domainIds = domainWithAuth.stream().map(DomainResp::getId)
-                .collect(Collectors.toList());
-        //get all child domain
-        return getDomainChildren(domainIds).stream()
-                .peek(domainResp -> domainResp.setHasEditPermission(true))
-                .collect(Collectors.toSet());
+
+        return domainWithAuth;
     }
 
     private Set<DomainResp> getParentDomain(List<Long> ids) {

@@ -383,7 +383,6 @@ public class DictUtils {
             fillStructDateBetween(queryStructReq, model, config.getDateConf().getUnit() - 1, 0);
             return;
         }
-        return;
     }
 
     private void fillStructDateBetween(QueryStructReq queryStructReq, ModelResp model,

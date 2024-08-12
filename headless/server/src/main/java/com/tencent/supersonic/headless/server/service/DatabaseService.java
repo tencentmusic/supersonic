@@ -1,11 +1,14 @@
 package com.tencent.supersonic.headless.server.service;
 
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
+import com.tencent.supersonic.headless.api.pojo.DBColumn;
 import com.tencent.supersonic.headless.api.pojo.request.DatabaseReq;
 import com.tencent.supersonic.headless.api.pojo.request.SqlExecuteReq;
 import com.tencent.supersonic.headless.api.pojo.response.DatabaseResp;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
 import com.tencent.supersonic.headless.server.pojo.DatabaseParameter;
+
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
@@ -30,9 +33,11 @@ public interface DatabaseService {
 
     void deleteDatabase(Long databaseId);
 
-    SemanticQueryResp getDbNames(Long id);
+    List<String> getDbNames(Long id) throws SQLException;
 
-    SemanticQueryResp getTables(Long id, String db);
+    List<String> getTables(Long id, String db) throws SQLException;
 
-    SemanticQueryResp getColumns(Long id, String db, String table);
+    List<DBColumn> getColumns(Long id, String db, String table) throws SQLException;
+
+    List<DBColumn> getColumns(Long id, String sql) throws SQLException;
 }
