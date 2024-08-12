@@ -250,7 +250,7 @@ const ChatMsg: React.FC<Props> = ({
       dateInfo: {
         ...chatContext.dateInfo,
         dateMode: dateModeValue,
-        unit: currentDateOption || chatContext.dateInfo.unit,
+        unit: currentDateOption || chatContext.dateInfo?.unit,
       },
       dimensions: dimension
         ? [...(chatContext.dimensions || []), dimension]
