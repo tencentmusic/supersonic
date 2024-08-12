@@ -3,7 +3,7 @@ import { Form, Button, Modal, Steps, message } from 'antd';
 import ModelBasicForm from './ModelBasicForm';
 import ModelFieldForm from './ModelFieldForm';
 import { formLayout } from '@/components/FormHelper/utils';
-import { EnumDataSourceType } from '../constants';
+import { EnumDataSourceType, EnumModelDataType } from '../constants';
 import styles from '../style.less';
 import {
   updateModel,
@@ -203,6 +203,19 @@ const ModelCreateForm: React.FC<CreateFormProps> = ({
               },
             });
             break;
+          case EnumDataSourceType.PARTITION_TIME:
+            fieldsClassify.dimensions.push({
+              bizName: fieldName,
+              type,
+              isCreateDimension,
+              name,
+              dateFormat,
+              typeParams: {
+                isPrimary: true,
+                timeGranularity: timeGranularity || '',
+              },
+            });
+            break;
           case EnumDataSourceType.FOREIGN:
           case EnumDataSourceType.PRIMARY:
             fieldsClassify.identifiers.push({
@@ -303,11 +316,21 @@ const ModelCreateForm: React.FC<CreateFormProps> = ({
     setFields(columnFields || []);
   };
 
+  const formatterIdentifiers = (identifiersList: any[] = []) => {
+    return identifiersList.map((identifiers: any) => {
+      return {
+        ...identifiers,
+        classType: EnumModelDataType.IDENTIFIERS,
+      };
+    });
+  };
+
   const formatterMeasures = (measuresList: any[] = []) => {
     return measuresList.map((measures: any) => {
       return {
         ...measures,
         type: EnumDataSourceType.MEASURES,
+        classType: EnumModelDataType.MEASURES,
       };
     });
   };
@@ -317,6 +340,7 @@ const ModelCreateForm: React.FC<CreateFormProps> = ({
       return {
         ...dimension,
         timeGranularity: typeParams?.timeGranularity || '',
+        classType: EnumModelDataType.DIMENSION,
       };
     });
   };
@@ -358,7 +382,7 @@ const ModelCreateForm: React.FC<CreateFormProps> = ({
     form.setFieldsValue(initValue);
     const formatFields = [
       ...formatterDimensions(dimensions || []),
-      ...(identifiers || []),
+      ...formatterIdentifiers(identifiers || []),
       ...formatterMeasures(measures || []),
     ];
     initFields(formatFields, columns);
@@ -517,7 +541,7 @@ const ModelCreateForm: React.FC<CreateFormProps> = ({
   return (
     <Modal
       forceRender
-      width={currentStep ? 1300 : 800}
+      width={currentStep ? 1400 : 800}
       destroyOnClose
       title={`${isEdit ? '编辑' : '新建'}模型`}
       maskClosable={false}

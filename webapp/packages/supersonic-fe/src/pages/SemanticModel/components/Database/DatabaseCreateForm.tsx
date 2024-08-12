@@ -12,7 +12,8 @@ import SelectTMEPerson from '@/components/SelectTMEPerson';
 import { ConfigParametersItem } from '../../../System/types';
 import { genneratorFormItemList } from '../../utils';
 import { ISemantic } from '../../data';
-
+import { encryptPassword, decryptPassword } from '@/utils/utils';
+import CryptoJS from 'crypto-js';
 import styles from '../style.less';
 type Props = {
   domainId?: number;
@@ -28,6 +29,7 @@ const DatabaseCreateForm: ForwardRefRenderFunction<any, Props> = (
   { domainId, databaseId, onSubmit, hideSubmitBtn = false },
   ref,
 ) => {
+  const encryptKey = CryptoJS.enc.Utf8.parse('supersonic@2024');
   const [form] = Form.useForm();
   const [selectedDbType, setSelectedDbType] = useState<string>('');
   const [databaseOptions, setDatabaseOptions] = useState<{ value: string; label: string }[]>([]);
@@ -57,7 +59,7 @@ const DatabaseCreateForm: ForwardRefRenderFunction<any, Props> = (
   const queryDatabaseDetail = async (id: number) => {
     const { code, msg, data } = await getDatabaseDetail(id);
     if (code === 200) {
-      setDataBaseDetail(data);
+      setDataBaseDetail({ ...data, password: data.password ? decryptPassword(data.password) : '' });
       return;
     }
     message.error(msg);
@@ -91,10 +93,12 @@ const DatabaseCreateForm: ForwardRefRenderFunction<any, Props> = (
 
   const saveDatabaseConfig = async () => {
     const values = await form.validateFields();
+    const { password } = values;
     const { code, msg } = await saveDatabase({
       ...(dataBaseDetail || {}),
       ...values,
       domainId,
+      password: encryptPassword(password),
     });
 
     if (code === 200) {
@@ -106,10 +110,12 @@ const DatabaseCreateForm: ForwardRefRenderFunction<any, Props> = (
   };
   const testDatabaseConnection = async () => {
     const values = await form.validateFields();
+    const { password } = values;
     setTestLoading(true);
     const { code, data } = await testDatabaseConnect({
       ...values,
       domainId,
+      password: encryptPassword(password),
     });
     setTestLoading(false);
     if (code === 200 && data) {
