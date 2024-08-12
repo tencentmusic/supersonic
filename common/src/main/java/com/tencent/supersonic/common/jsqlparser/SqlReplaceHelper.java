@@ -126,8 +126,6 @@ public class SqlReplaceHelper {
         if (!(selectStatement instanceof PlainSelect)) {
             return sql;
         }
-        //List<PlainSelect> plainSelectList = new ArrayList<>();
-        //plainSelectList.add((PlainSelect) selectStatement);
         List<PlainSelect> plainSelects = SqlSelectHelper.getPlainSelect(selectStatement);
         for (PlainSelect plainSelect : plainSelects) {
             Expression where = plainSelect.getWhere();
@@ -186,18 +184,14 @@ public class SqlReplaceHelper {
     public static String replaceFields(String sql, Map<String, String> fieldNameMap, boolean exactReplace) {
         Select selectStatement = SqlSelectHelper.getSelect(sql);
         List<PlainSelect> plainSelectList = SqlSelectHelper.getWithItem(selectStatement);
-        //plainSelectList.add(selectStatement.getPlainSelect());
         if (selectStatement instanceof PlainSelect) {
             PlainSelect plainSelect = (PlainSelect) selectStatement;
             plainSelectList.add(plainSelect);
             getFromSelect(plainSelect.getFromItem(), plainSelectList);
-            //plainSelectList.add((PlainSelect) selectStatement);
         } else if (selectStatement instanceof SetOperationList) {
             SetOperationList setOperationList = (SetOperationList) selectStatement;
             if (!CollectionUtils.isEmpty(setOperationList.getSelects())) {
                 setOperationList.getSelects().forEach(subSelectBody -> {
-                    //PlainSelect subPlainSelect = (PlainSelect) subSelectBody;
-                    //plainSelectList.add(subPlainSelect);
                     PlainSelect subPlainSelect = (PlainSelect) subSelectBody;
                     plainSelectList.add(subPlainSelect);
                     getFromSelect(subPlainSelect.getFromItem(), plainSelectList);

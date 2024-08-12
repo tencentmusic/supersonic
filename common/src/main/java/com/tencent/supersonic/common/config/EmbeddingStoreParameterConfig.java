@@ -101,12 +101,8 @@ public class EmbeddingStoreParameterConfig extends ParameterConfig {
 
     private static List<Parameter.Dependency> getDimensionDependency() {
         return getDependency(EMBEDDING_STORE_PROVIDER.getName(),
-                Lists.newArrayList(
-                        EmbeddingStoreType.MILVUS.name()
-                ),
-                ImmutableMap.of(
-                        EmbeddingStoreType.MILVUS.name(), "384"
-                )
+                Lists.newArrayList(EmbeddingStoreType.MILVUS.name()),
+                ImmutableMap.of(EmbeddingStoreType.MILVUS.name(), "384")
         );
     }
 }

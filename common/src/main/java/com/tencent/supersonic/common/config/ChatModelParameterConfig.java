@@ -158,10 +158,7 @@ public class ChatModelParameterConfig extends ParameterConfig {
 
     private static List<Parameter.Dependency> getEndpointDependency() {
         return getDependency(CHAT_MODEL_PROVIDER.getName(),
-                Lists.newArrayList(
-                        AzureModelFactory.PROVIDER,
-                        QianfanModelFactory.PROVIDER
-                ),
+                Lists.newArrayList(AzureModelFactory.PROVIDER, QianfanModelFactory.PROVIDER),
                 ImmutableMap.of(
                         AzureModelFactory.PROVIDER, AzureModelFactory.DEFAULT_BASE_URL,
                         QianfanModelFactory.PROVIDER, "llama_2_70b"
@@ -172,9 +169,7 @@ public class ChatModelParameterConfig extends ParameterConfig {
     private static List<Parameter.Dependency> getSecretKeyDependency() {
         return getDependency(CHAT_MODEL_PROVIDER.getName(),
                 Lists.newArrayList(QianfanModelFactory.PROVIDER),
-                ImmutableMap.of(
-                        QianfanModelFactory.PROVIDER, DEMO
-                )
+                ImmutableMap.of(QianfanModelFactory.PROVIDER, DEMO)
         );
     }
 }

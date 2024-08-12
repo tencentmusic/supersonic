@@ -252,8 +252,8 @@ class SqlReplaceHelperTest {
         replaceSql = SqlReplaceHelper.replaceFunction(replaceSql);
 
         Assert.assertEquals(
-                "SELECT YEAR(publish_date), count(song_name) FROM 歌曲库 "
-                        + "WHERE YEAR(publish_date) IN (2022, 2023) AND sys_imp_date = '2023-08-14' "
+                "SELECT YEAR(发行日期), count(song_name) FROM 歌曲库 "
+                        + "WHERE YEAR(发行日期) IN (2022, 2023) AND sys_imp_date = '2023-08-14' "
                         + "GROUP BY YEAR(publish_date)",
                 replaceSql);
 
@@ -265,8 +265,8 @@ class SqlReplaceHelperTest {
         replaceSql = SqlReplaceHelper.replaceFunction(replaceSql);
 
         Assert.assertEquals(
-                "SELECT YEAR(publish_date), count(song_name) FROM 歌曲库 "
-                        + "WHERE YEAR(publish_date) IN (2022, 2023) AND sys_imp_date = '2023-08-14'"
+                "SELECT YEAR(发行日期), count(song_name) FROM 歌曲库 "
+                        + "WHERE YEAR(发行日期) IN (2022, 2023) AND sys_imp_date = '2023-08-14'"
                         + " GROUP BY publish_date",
                 replaceSql);
 
@@ -360,9 +360,9 @@ class SqlReplaceHelperTest {
         replaceSql = SqlReplaceHelper.replaceFunction(replaceSql);
 
         Assert.assertEquals(
-                "SELECT song_name, sum(user_id) FROM CSpider WHERE (1 < 2) AND "
+                "SELECT song_name, sum(评分) FROM CSpider WHERE (1 < 2) AND "
                         + "sys_imp_date = '2023-10-15' GROUP BY song_name HAVING "
-                        + "sum(user_id) < (SELECT min(user_id) FROM CSpider WHERE user_id = '英文')", replaceSql);
+                        + "sum(评分) < (SELECT min(评分) FROM CSpider WHERE user_id = '英文')", replaceSql);
 
         replaceSql = "SELECT sum(评分)/ (SELECT sum(评分) FROM CSpider WHERE  数据日期 = '2023-10-15')"
                 + " FROM CSpider WHERE  数据日期 = '2023-10-15' "
@@ -371,9 +371,21 @@ class SqlReplaceHelperTest {
         replaceSql = SqlReplaceHelper.replaceFunction(replaceSql);
 
         Assert.assertEquals(
-                "SELECT sum(user_id) / (SELECT sum(user_id) FROM CSpider WHERE sys_imp_date = '2023-10-15') "
+                "SELECT sum(评分) / (SELECT sum(评分) FROM CSpider WHERE sys_imp_date = '2023-10-15') "
                         + "FROM CSpider WHERE sys_imp_date = '2023-10-15' GROUP BY song_name HAVING "
-                        + "sum(user_id) < (SELECT min(user_id) FROM CSpider WHERE user_id = '英文')", replaceSql);
+                        + "sum(评分) < (SELECT min(评分) FROM CSpider WHERE user_id = '英文')", replaceSql);
+    }
+
+    @Test
+    void testReplaceFunctionField() {
+        Map<String, String> fieldToBizName = initParams();
+        String replaceSql = "SELECT TIMESTAMPDIFF (MONTH,歌曲发布时间,CURDATE()) AS 发布月数 FROM 歌曲库 WHERE  歌手名 = '邓紫棋' ";
+
+        replaceSql = SqlReplaceHelper.replaceFields(replaceSql, fieldToBizName);
+        replaceSql = SqlReplaceHelper.replaceFunction(replaceSql);
+        Assert.assertEquals(
+                "SELECT TIMESTAMPDIFF(MONTH, song_publis_date, CURDATE()) AS 发布月数 "
+                        + "FROM 歌曲库 WHERE singer_name = '邓紫棋'", replaceSql);
     }
 
     @Test
