@@ -12,7 +12,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class DashscopeModelFactory implements ModelFactory, InitializingBean {
     public static final String PROVIDER = "DASHSCOPE";
-    public static final String DEFAULT_BASE_URL = "https://dashscope.aliyuncs.com/compatible-mode/v1";
+    public static final String DEFAULT_BASE_URL = "https://dashscope.aliyuncs.com/api/v1";
+    public static final String DEFAULT_COMPATIBLE_BASE_URL = "https://dashscope.aliyuncs.com/compatible-mode/v1";
 
     @Override
     public ChatLanguageModel createChatModel(ChatModelConfig modelConfig) {
