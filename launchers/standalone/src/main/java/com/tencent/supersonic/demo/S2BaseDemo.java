@@ -8,6 +8,7 @@ import com.tencent.supersonic.chat.server.service.ChatManageService;
 import com.tencent.supersonic.chat.server.service.ChatQueryService;
 import com.tencent.supersonic.chat.server.service.PluginService;
 import com.tencent.supersonic.common.service.SystemConfigService;
+import com.tencent.supersonic.common.util.AESEncryptionUtil;
 import com.tencent.supersonic.headless.api.pojo.DataSetModelConfig;
 import com.tencent.supersonic.headless.api.pojo.DrillDownDimension;
 import com.tencent.supersonic.headless.api.pojo.RelateDimension;
@@ -122,7 +123,7 @@ public abstract class S2BaseDemo implements CommandLineRunner {
         }
         databaseReq.setUrl(url);
         databaseReq.setUsername(dataSourceProperties.getUsername());
-        databaseReq.setPassword(dataSourceProperties.getPassword());
+        databaseReq.setPassword(AESEncryptionUtil.aesEncryptECB(dataSourceProperties.getPassword()));
         return databaseService.createOrUpdateDatabase(databaseReq, user);
     }
 
