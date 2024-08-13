@@ -44,7 +44,7 @@ public abstract class BaseDbAdaptor implements DbAdaptor {
         List<String> tablesAndViews = new ArrayList<>();
         DatabaseMetaData metaData = getDatabaseMetaData(connectionInfo);
 
-        try (ResultSet resultSet = metaData.getTables(null, schemaName, null,
+        try (ResultSet resultSet = metaData.getTables(schemaName, schemaName, null,
                 new String[]{"TABLE", "VIEW"})) {
             while (resultSet.next()) {
                 String name = resultSet.getString("TABLE_NAME");
