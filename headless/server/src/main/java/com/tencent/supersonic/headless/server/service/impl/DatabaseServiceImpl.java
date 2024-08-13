@@ -25,9 +25,6 @@ import com.tencent.supersonic.headless.server.service.DatabaseService;
 import com.tencent.supersonic.headless.server.service.ModelService;
 import com.tencent.supersonic.headless.server.utils.DatabaseConverter;
 import lombok.extern.slf4j.Slf4j;
-import net.sf.jsqlparser.parser.CCJSqlParserUtil;
-import net.sf.jsqlparser.statement.Statement;
-import net.sf.jsqlparser.util.TablesNamesFinder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
@@ -198,26 +195,6 @@ public class DatabaseServiceImpl extends ServiceImpl<DatabaseDOMapper, DatabaseD
             dbColumns.add(dbColumn);
         }
         return dbColumns;
-    }
-
-    public static void main(String[] args) {
-        try {
-            String sql = "SELECT * FROM mydatabase.mytable JOIN otherdatabase.othertable ON mytable.id = othertable.id";
-
-            // 解析SQL语句
-            Statement statement = CCJSqlParserUtil.parse(sql);
-
-            // 提取库表名
-            TablesNamesFinder tablesNamesFinder = new TablesNamesFinder();
-            List<String> tableNames = tablesNamesFinder.getTableList(statement);
-
-            // 打印库表名
-            for (String tableName : tableNames) {
-                System.out.println("Table Name: " + tableName);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
     private void checkPermission(DatabaseResp databaseResp, User user) {

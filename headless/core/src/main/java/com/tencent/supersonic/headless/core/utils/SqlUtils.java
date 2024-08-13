@@ -65,14 +65,13 @@ public class SqlUtils {
     }
 
     public SqlUtils init(Database database) {
-        //todo Password decryption
         return SqlUtilsBuilder
                 .getBuilder()
                 .withName(database.getId() + AT_SYMBOL + database.getName())
                 .withType(database.getType())
                 .withJdbcUrl(database.getUrl())
                 .withUsername(database.getUsername())
-                .withPassword(database.passwordDecrypt())
+                .withPassword(database.getPassword())
                 .withJdbcDataSource(this.jdbcDataSource)
                 .withResultLimit(this.resultLimit)
                 .withIsQueryLogEnable(this.isQueryLogEnable)
