@@ -2,6 +2,7 @@ package com.tencent.supersonic.headless.chat.knowledge;
 
 import com.tencent.supersonic.common.config.EmbeddingConfig;
 import com.tencent.supersonic.common.pojo.Constants;
+import com.tencent.supersonic.common.pojo.enums.DictWordType;
 import com.tencent.supersonic.common.service.EmbeddingService;
 import com.tencent.supersonic.headless.chat.knowledge.helper.NatureHelper;
 import dev.langchain4j.store.embedding.Retrieval;
@@ -37,7 +38,8 @@ public class MetaEmbeddingService {
 
         if (CollectionUtils.isNotEmpty(allModels) && allModels.size() == 1) {
             Map<String, String> filterCondition = new HashMap<>();
-            filterCondition.put("modelId", allModels.stream().findFirst().get().toString());
+            String modelId = allModels.stream().findFirst().get().toString();
+            filterCondition.put("modelId", modelId + DictWordType.NATURE_SPILT);
             retrieveQuery.setFilterCondition(filterCondition);
         }
 
