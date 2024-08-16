@@ -17,7 +17,7 @@ import java.util.List;
 public class EmbeddingStoreParameterConfig extends ParameterConfig {
     public static final Parameter EMBEDDING_STORE_PROVIDER =
             new Parameter("s2.embedding.store.provider", EmbeddingStoreType.IN_MEMORY.name(),
-                    "向量库类型", "", "list",
+                    "向量库类型", "目前支持三种类型：IN_MEMORY、MILVUS、CHROMA", "list",
                     "向量库配置", getCandidateValues());
 
     public static final Parameter EMBEDDING_STORE_BASE_URL =
@@ -31,8 +31,9 @@ public class EmbeddingStoreParameterConfig extends ParameterConfig {
                     "向量库配置", null, getApiKeyDependency());
 
     public static final Parameter EMBEDDING_STORE_PERSIST_PATH =
-            new Parameter("s2.embedding.store.persist.path", "/tmp",
-                    "持久化路径", "", "string",
+            new Parameter("s2.embedding.store.persist.path", "",
+                    "持久化路径", "默认不持久化，如需持久化请填写持久化路径。"
+                    + "注意：如果变更了向量模型需删除该路径下已保存的文件或修改持久化路径", "string",
                     "向量库配置", null, getPathDependency());
 
     public static final Parameter EMBEDDING_STORE_TIMEOUT =
@@ -96,7 +97,7 @@ public class EmbeddingStoreParameterConfig extends ParameterConfig {
     private static List<Parameter.Dependency> getPathDependency() {
         return getDependency(EMBEDDING_STORE_PROVIDER.getName(),
                 Lists.newArrayList(EmbeddingStoreType.IN_MEMORY.name()),
-                ImmutableMap.of(EmbeddingStoreType.IN_MEMORY.name(), "/tmp"));
+                ImmutableMap.of(EmbeddingStoreType.IN_MEMORY.name(), ""));
     }
 
     private static List<Parameter.Dependency> getDimensionDependency() {

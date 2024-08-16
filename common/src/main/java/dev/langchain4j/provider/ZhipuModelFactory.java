@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 public class ZhipuModelFactory implements ModelFactory, InitializingBean {
     public static final String PROVIDER = "ZHIPU";
     public static final String DEFAULT_BASE_URL = "https://open.bigmodel.cn/api/paas/v4";
+    public static final String DEFAULT_EMBEDDING_BASE_URL = "https://open.bigmodel.cn/";
 
     @Override
     public ChatLanguageModel createChatModel(ChatModelConfig modelConfig) {

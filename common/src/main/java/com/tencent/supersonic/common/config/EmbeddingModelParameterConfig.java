@@ -102,7 +102,7 @@ public class EmbeddingModelParameterConfig extends ParameterConfig {
                         AzureModelFactory.PROVIDER, AzureModelFactory.DEFAULT_BASE_URL,
                         DashscopeModelFactory.PROVIDER, DashscopeModelFactory.DEFAULT_BASE_URL,
                         QianfanModelFactory.PROVIDER, QianfanModelFactory.DEFAULT_BASE_URL,
-                        ZhipuModelFactory.PROVIDER, ZhipuModelFactory.DEFAULT_BASE_URL
+                        ZhipuModelFactory.PROVIDER, ZhipuModelFactory.DEFAULT_EMBEDDING_BASE_URL
                 )
         );
     }
@@ -110,13 +110,11 @@ public class EmbeddingModelParameterConfig extends ParameterConfig {
     private static List<Parameter.Dependency> getApiKeyDependency() {
         return getDependency(EMBEDDING_MODEL_PROVIDER.getName(),
                 Lists.newArrayList(OpenAiModelFactory.PROVIDER,
-                        OllamaModelFactory.PROVIDER,
                         AzureModelFactory.PROVIDER,
                         DashscopeModelFactory.PROVIDER,
                         QianfanModelFactory.PROVIDER,
                         ZhipuModelFactory.PROVIDER),
                 ImmutableMap.of(OpenAiModelFactory.PROVIDER, DEMO,
-                        OllamaModelFactory.PROVIDER, DEMO,
                         AzureModelFactory.PROVIDER, DEMO,
                         DashscopeModelFactory.PROVIDER, DEMO,
                         QianfanModelFactory.PROVIDER, DEMO,
@@ -140,9 +138,9 @@ public class EmbeddingModelParameterConfig extends ParameterConfig {
                         OpenAiModelFactory.PROVIDER, "text-embedding-ada-002",
                         OllamaModelFactory.PROVIDER, "all-minilm",
                         AzureModelFactory.PROVIDER, "text-embedding-ada-002",
-                        DashscopeModelFactory.PROVIDER, "text-embedding-ada-002",
-                        QianfanModelFactory.PROVIDER, "text-embedding-ada-002",
-                        ZhipuModelFactory.PROVIDER, "text-embedding-ada-002"
+                        DashscopeModelFactory.PROVIDER, "text-embedding-v2",
+                        QianfanModelFactory.PROVIDER, "Embedding-V1",
+                        ZhipuModelFactory.PROVIDER, "embedding-2"
                 )
         );
     }
