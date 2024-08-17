@@ -95,43 +95,41 @@ public abstract class BaseMapper implements SchemaMapper {
 
     private static void filterByQueryDataType(ChatQueryContext chatQueryContext,
                                               Predicate<SchemaElement> needRemovePredicate) {
-        chatQueryContext.getMapInfo().getDataSetElementMatches().values().stream().forEach(
-                schemaElementMatches -> schemaElementMatches.removeIf(
-                        schemaElementMatch -> {
-                            SchemaElement element = schemaElementMatch.getElement();
-                            SchemaElementType type = element.getType();
-                            if (SchemaElementType.ENTITY.equals(type) || SchemaElementType.DATASET.equals(type)
-                                    || SchemaElementType.ID.equals(type)) {
-                                return false;
-                            }
-                            return needRemovePredicate.test(element);
-                        }
-                ));
+        chatQueryContext.getMapInfo().getDataSetElementMatches().values().forEach(schemaElementMatches -> {
+            schemaElementMatches.removeIf(schemaElementMatch -> {
+                SchemaElement element = schemaElementMatch.getElement();
+                SchemaElementType type = element.getType();
+
+                boolean isEntityOrDatasetOrId = SchemaElementType.ENTITY.equals(type)
+                        || SchemaElementType.DATASET.equals(type)
+                        || SchemaElementType.ID.equals(type);
+
+                return !isEntityOrDatasetOrId && needRemovePredicate.test(element);
+            });
+        });
     }
 
     public abstract void doMap(ChatQueryContext chatQueryContext);
 
     public void addToSchemaMap(SchemaMapInfo schemaMap, Long dataSetId, SchemaElementMatch newElementMatch) {
         Map<Long, List<SchemaElementMatch>> dataSetElementMatches = schemaMap.getDataSetElementMatches();
-        List<SchemaElementMatch> schemaElementMatches = dataSetElementMatches.putIfAbsent(dataSetId, new ArrayList<>());
-        if (schemaElementMatches == null) {
-            schemaElementMatches = dataSetElementMatches.get(dataSetId);
-        }
-        //remove duplication
-        AtomicBoolean needAddNew = new AtomicBoolean(true);
-        schemaElementMatches.removeIf(
-                existElementMatch -> {
-                    if (isEquals(existElementMatch, newElementMatch)) {
-                        if (newElementMatch.getSimilarity() > existElementMatch.getSimilarity()) {
-                            return true;
-                        } else {
-                            needAddNew.set(false);
-                        }
-                    }
-                    return false;
+        List<SchemaElementMatch> schemaElementMatches = dataSetElementMatches.computeIfAbsent(dataSetId,
+                k -> new ArrayList<>());
+
+        AtomicBoolean shouldAddNew = new AtomicBoolean(true);
+
+        schemaElementMatches.removeIf(existingElementMatch -> {
+            if (isEquals(existingElementMatch, newElementMatch)) {
+                if (newElementMatch.getSimilarity() > existingElementMatch.getSimilarity()) {
+                    return true;
+                } else {
+                    shouldAddNew.set(false);
                 }
-        );
-        if (needAddNew.get()) {
+            }
+            return false;
+        });
+
+        if (shouldAddNew.get()) {
             schemaElementMatches.add(newElementMatch);
         }
     }
