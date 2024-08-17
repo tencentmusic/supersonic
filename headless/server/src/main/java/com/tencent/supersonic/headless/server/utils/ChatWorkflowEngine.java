@@ -47,8 +47,6 @@ public class ChatWorkflowEngine {
                         parseResult.setState(ParseResp.ParseState.FAILED);
                         parseResult.setErrorMsg("No semantic entities can be mapped against user question.");
                         queryCtx.setChatWorkflowState(ChatWorkflowState.FINISHED);
-                    } else if (queryCtx.getMapInfo().needContinueMap()) {
-                        queryCtx.setChatWorkflowState(ChatWorkflowState.MAPPING);
                     } else {
                         queryCtx.setChatWorkflowState(ChatWorkflowState.PARSING);
                     }
