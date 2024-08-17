@@ -1,6 +1,5 @@
 package dev.langchain4j.model.zhipu;
 
-import dev.ai4j.openai4j.chat.ChatCompletionModel;
 import dev.langchain4j.agent.tool.ToolSpecification;
 import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.data.message.ChatMessage;
@@ -55,7 +54,7 @@ public class ZhipuAiChatModel implements ChatLanguageModel {
         this.baseUrl = getOrDefault(baseUrl, "https://open.bigmodel.cn/");
         this.temperature = getOrDefault(temperature, 0.7);
         this.topP = topP;
-        this.model = getOrDefault(model, ChatCompletionModel.GPT_4.toString());
+        this.model = getOrDefault(model, ChatCompletionModel.GLM_4.toString());
         this.maxRetries = getOrDefault(maxRetries, 3);
         this.maxToken = getOrDefault(maxToken, 512);
         this.client = ZhipuAiClient.builder()

@@ -102,7 +102,7 @@ public class EmbeddingModelParameterConfig extends ParameterConfig {
                         AzureModelFactory.PROVIDER, AzureModelFactory.DEFAULT_BASE_URL,
                         DashscopeModelFactory.PROVIDER, DashscopeModelFactory.DEFAULT_BASE_URL,
                         QianfanModelFactory.PROVIDER, QianfanModelFactory.DEFAULT_BASE_URL,
-                        ZhipuModelFactory.PROVIDER, ZhipuModelFactory.DEFAULT_EMBEDDING_BASE_URL
+                        ZhipuModelFactory.PROVIDER, ZhipuModelFactory.DEFAULT_BASE_URL
                 )
         );
     }
