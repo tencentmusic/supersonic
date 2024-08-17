@@ -4,8 +4,8 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.common.pojo.ChatModelConfig;
 import com.tencent.supersonic.common.pojo.Parameter;
-import dev.ai4j.openai4j.chat.ChatCompletionModel;
 import dev.langchain4j.model.dashscope.QwenModelName;
+import dev.langchain4j.model.zhipu.ChatCompletionModel;
 import dev.langchain4j.provider.AzureModelFactory;
 import dev.langchain4j.provider.DashscopeModelFactory;
 import dev.langchain4j.provider.LocalAiModelFactory;
@@ -51,6 +51,11 @@ public class ChatModelParameterConfig extends ParameterConfig {
                     "ModelName", "", "string",
                     "对话模型配置", null, getModelNameDependency());
 
+    public static final Parameter CHAT_MODEL_ENABLE_SEARCH =
+            new Parameter("s2.chat.model.enableSearch", "false",
+                    "是否启用搜索增强功能，设为false表示不启用", "", "bool",
+                    "对话模型配置", null, getEnableSearchDependency());
+
     public static final Parameter CHAT_MODEL_TEMPERATURE =
             new Parameter("s2.chat.model.temperature", "0.0",
                     "Temperature", "",
@@ -66,7 +71,7 @@ public class ChatModelParameterConfig extends ParameterConfig {
         return Lists.newArrayList(
                 CHAT_MODEL_PROVIDER, CHAT_MODEL_BASE_URL, CHAT_MODEL_ENDPOINT,
                 CHAT_MODEL_API_KEY, CHAT_MODEL_SECRET_KEY, CHAT_MODEL_NAME,
-                CHAT_MODEL_TEMPERATURE, CHAT_MODEL_TIMEOUT
+                CHAT_MODEL_ENABLE_SEARCH, CHAT_MODEL_TEMPERATURE, CHAT_MODEL_TIMEOUT
         );
     }
 
@@ -79,12 +84,14 @@ public class ChatModelParameterConfig extends ParameterConfig {
         String chatModelTimeout = getParameterValue(CHAT_MODEL_TIMEOUT);
         String endpoint = getParameterValue(CHAT_MODEL_ENDPOINT);
         String secretKey = getParameterValue(CHAT_MODEL_SECRET_KEY);
+        String enableSearch = getParameterValue(CHAT_MODEL_ENABLE_SEARCH);
 
         return ChatModelConfig.builder()
                 .provider(chatModelProvider)
                 .baseUrl(chatModelBaseUrl)
                 .apiKey(chatModelApiKey)
                 .modelName(chatModelName)
+                .enableSearch(Boolean.valueOf(enableSearch))
                 .temperature(Double.valueOf(chatModelTemperature))
                 .timeOut(Long.valueOf(chatModelTimeout))
                 .endpoint(endpoint)
@@ -148,7 +155,7 @@ public class ChatModelParameterConfig extends ParameterConfig {
                         OpenAiModelFactory.PROVIDER, "gpt-3.5-turbo",
                         OllamaModelFactory.PROVIDER, "qwen:0.5b",
                         QianfanModelFactory.PROVIDER, "Llama-2-70b-chat",
-                        ZhipuModelFactory.PROVIDER, ChatCompletionModel.GPT_4.toString(),
+                        ZhipuModelFactory.PROVIDER, ChatCompletionModel.GLM_4.toString(),
                         LocalAiModelFactory.PROVIDER, "ggml-gpt4all-j",
                         AzureModelFactory.PROVIDER, "gpt-35-turbo",
                         DashscopeModelFactory.PROVIDER, QwenModelName.QWEN_PLUS
@@ -163,6 +170,13 @@ public class ChatModelParameterConfig extends ParameterConfig {
                         AzureModelFactory.PROVIDER, AzureModelFactory.DEFAULT_BASE_URL,
                         QianfanModelFactory.PROVIDER, "llama_2_70b"
                 )
+        );
+    }
+
+    private static List<Parameter.Dependency> getEnableSearchDependency() {
+        return getDependency(CHAT_MODEL_PROVIDER.getName(),
+                Lists.newArrayList(DashscopeModelFactory.PROVIDER),
+                ImmutableMap.of(DashscopeModelFactory.PROVIDER, "false")
         );
     }
 
