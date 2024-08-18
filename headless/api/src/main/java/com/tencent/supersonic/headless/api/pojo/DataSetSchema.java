@@ -2,6 +2,7 @@ package com.tencent.supersonic.headless.api.pojo;
 
 import lombok.Data;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -126,4 +127,13 @@ public class DataSetSchema {
         return dimensions.stream().anyMatch(SchemaElement::containsPartitionTime);
     }
 
+    public String getPartitionTimeFormat() {
+        for (SchemaElement dimension : dimensions) {
+            String partitionTimeFormat = dimension.getPartitionTimeFormat();
+            if (StringUtils.isNotBlank(partitionTimeFormat)) {
+                return partitionTimeFormat;
+            }
+        }
+        return null;
+    }
 }

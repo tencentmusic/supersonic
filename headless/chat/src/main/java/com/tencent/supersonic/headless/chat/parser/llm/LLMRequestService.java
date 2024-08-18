@@ -16,6 +16,7 @@ import com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMReq;
 import com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMResp;
 import com.tencent.supersonic.headless.chat.utils.ComponentFactory;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -76,7 +77,7 @@ public class LLMRequestService {
         llmSchema.setDataSetName(dataSetIdToName.get(dataSetId));
         llmSchema.setDomainName(dataSetIdToName.get(dataSetId));
 
-        List<String> fieldNameList = getMatchedFieldNames(queryCtx, dataSetId);
+        Set<String> fieldNameList = getMatchedFieldNames(queryCtx, dataSetId);
         if (Objects.nonNull(semanticSchema.getDataSetSchemaMap())
                 && Objects.nonNull(semanticSchema.getDataSetSchemaMap().get(dataSetId))) {
             TimeDefaultConfig timeDefaultConfig = semanticSchema.getDataSetSchemaMap()
@@ -87,14 +88,14 @@ public class LLMRequestService {
                 fieldNameList.add(TimeDimensionEnum.DAY.getChName());
             }
         }
-        llmSchema.setFieldNameList(fieldNameList);
+        llmSchema.setFieldNameList(new ArrayList<>(fieldNameList));
 
         llmSchema.setMetrics(getMatchedMetrics(queryCtx, dataSetId));
         llmSchema.setDimensions(getMatchedDimensions(queryCtx, dataSetId));
         llmSchema.setTerms(getTerms(queryCtx, dataSetId));
         llmReq.setSchema(llmSchema);
 
-        String priorExts = getPriorExts(queryCtx, fieldNameList);
+        String priorExts = getPriorExts(queryCtx, new ArrayList<>(fieldNameList));
         llmReq.setPriorExts(priorExts);
 
         List<LLMReq.ElementValue> linking = new ArrayList<>();
@@ -144,27 +145,41 @@ public class LLMRequestService {
     private String getPriorExts(ChatQueryContext queryContext, List<String> fieldNameList) {
         StringBuilder extraInfoSb = new StringBuilder();
         SemanticSchema semanticSchema = queryContext.getSemanticSchema();
-        Map<String, String> fieldNameToDataFormatType = semanticSchema.getMetrics()
-                .stream().filter(metricSchemaResp -> Objects.nonNull(metricSchemaResp.getDataFormatType()))
-                .flatMap(metricSchemaResp -> {
-                    Set<Pair<String, String>> result = new HashSet<>();
-                    String dataFormatType = metricSchemaResp.getDataFormatType();
-                    result.add(Pair.of(metricSchemaResp.getName(), dataFormatType));
-                    List<String> aliasList = metricSchemaResp.getAlias();
-                    if (!CollectionUtils.isEmpty(aliasList)) {
-                        for (String alias : aliasList) {
-                            result.add(Pair.of(alias, dataFormatType));
-                        }
-                    }
-                    return result.stream();
-                }).collect(Collectors.toMap(Pair::getLeft, Pair::getRight, (k1, k2) -> k1));
 
+        // 获取字段名到数据格式类型的映射
+        Map<String, String> fieldNameToDataFormatType = semanticSchema.getMetrics().stream()
+                .filter(metric -> Objects.nonNull(metric.getDataFormatType()))
+                .flatMap(metric -> {
+                    Set<Pair<String, String>> fieldFormatPairs = new HashSet<>();
+                    String dataFormatType = metric.getDataFormatType();
+                    fieldFormatPairs.add(Pair.of(metric.getName(), dataFormatType));
+                    List<String> aliasList = metric.getAlias();
+                    if (!CollectionUtils.isEmpty(aliasList)) {
+                        aliasList.forEach(alias -> fieldFormatPairs.add(Pair.of(alias, dataFormatType)));
+                    }
+                    return fieldFormatPairs.stream();
+                })
+                .collect(Collectors.toMap(Pair::getLeft, Pair::getRight, (existing, replacement) -> existing));
+
+        Map<String, String> fieldNameToDateFormat = semanticSchema.getDimensions().stream()
+                .filter(dimension -> StringUtils.isNotBlank(dimension.getTimeFormat()))
+                .collect(Collectors.toMap(
+                        SchemaElement::getName, SchemaElement::getPartitionTimeFormat, (k1, k2) -> k1)
+                );
+
+        // 构建额外信息字符串
         for (String fieldName : fieldNameList) {
             String dataFormatType = fieldNameToDataFormatType.get(fieldName);
             if (DataFormatTypeEnum.DECIMAL.getName().equalsIgnoreCase(dataFormatType)
                     || DataFormatTypeEnum.PERCENT.getName().equalsIgnoreCase(dataFormatType)) {
-                String format = String.format("%s的计量单位是%s", fieldName, "小数; ");
-                extraInfoSb.append(format);
+                extraInfoSb.append(String.format("%s的计量单位是%s; ", fieldName, "小数"));
+            }
+        }
+        // 构建分区日期格式化信息
+        for (String fieldName : fieldNameList) {
+            String timeFormat = fieldNameToDateFormat.get(fieldName);
+            if (StringUtils.isNotBlank(timeFormat)) {
+                extraInfoSb.append(String.format("%s的日期Format格式是%s; ", fieldName, timeFormat));
             }
         }
         return extraInfoSb.toString();
@@ -195,8 +210,8 @@ public class LLMRequestService {
     protected Map<Long, String> getItemIdToName(ChatQueryContext queryCtx, Long dataSetId) {
         SemanticSchema semanticSchema = queryCtx.getSemanticSchema();
         List<SchemaElement> elements = semanticSchema.getDimensions(dataSetId);
-        return elements.stream()
-                .collect(Collectors.toMap(SchemaElement::getId, SchemaElement::getName, (value1, value2) -> value2));
+        return elements.stream().collect(
+                Collectors.toMap(SchemaElement::getId, SchemaElement::getName, (value1, value2) -> value2));
     }
 
     protected List<SchemaElement> getMatchedMetrics(ChatQueryContext queryCtx, Long dataSetId) {
@@ -230,13 +245,13 @@ public class LLMRequestService {
                 .collect(Collectors.toList());
     }
 
-    protected List<String> getMatchedFieldNames(ChatQueryContext queryCtx, Long dataSetId) {
+    protected Set<String> getMatchedFieldNames(ChatQueryContext queryCtx, Long dataSetId) {
         Map<Long, String> itemIdToName = getItemIdToName(queryCtx, dataSetId);
         List<SchemaElementMatch> matchedElements = queryCtx.getMapInfo().getMatchedElements(dataSetId);
         if (CollectionUtils.isEmpty(matchedElements)) {
-            return new ArrayList<>();
+            return new HashSet<>();
         }
-        Set<String> fieldNameList = matchedElements.stream()
+        return matchedElements.stream()
                 .filter(schemaElementMatch -> {
                     SchemaElementType elementType = schemaElementMatch.getElement().getType();
                     return SchemaElementType.METRIC.equals(elementType)
@@ -252,7 +267,5 @@ public class LLMRequestService {
                     return schemaElementMatch.getWord();
                 })
                 .collect(Collectors.toSet());
-
-        return new ArrayList<>(fieldNameList);
     }
 }
