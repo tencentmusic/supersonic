@@ -170,6 +170,7 @@ public class DataSetSchemaBuilder {
                     .type(SchemaElementType.DIMENSION)
                     .build();
             dimToAdd.getExtInfo().put(DimensionConstants.DIMENSION_TYPE, dim.getType());
+
             if (dim.isTimeDimension()) {
                 String timeFormat = String.valueOf(dim.getExt().get(DimensionConstants.DIMENSION_TIME_FORMAT));
                 dimToAdd.getExtInfo().put(DimensionConstants.DIMENSION_TIME_FORMAT, timeFormat);

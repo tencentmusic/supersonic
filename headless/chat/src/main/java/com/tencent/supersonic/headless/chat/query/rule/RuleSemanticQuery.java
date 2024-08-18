@@ -174,9 +174,9 @@ public abstract class RuleSemanticQuery extends BaseSemanticQuery {
                 parseInfo.getDimensionFilters().add(dimensionFilter);
             } else {
                 QueryFilter dimensionFilter = new QueryFilter();
-                List<String> vals = new ArrayList<>();
-                entry.getValue().stream().forEach(i -> vals.add(i.getWord()));
-                dimensionFilter.setValue(vals);
+                List<String> values = new ArrayList<>();
+                entry.getValue().stream().forEach(i -> values.add(i.getWord()));
+                dimensionFilter.setValue(values);
                 dimensionFilter.setBizName(dimension.getBizName());
                 dimensionFilter.setName(dimension.getName());
                 dimensionFilter.setOperator(FilterOperatorEnum.IN);

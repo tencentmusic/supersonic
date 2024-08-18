@@ -3,16 +3,18 @@ package com.tencent.supersonic.headless.api.pojo;
 import com.google.common.base.Objects;
 import com.tencent.supersonic.common.pojo.DimensionConstants;
 import com.tencent.supersonic.headless.api.pojo.enums.DimensionType;
-import java.io.Serializable;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
+
+import java.io.Serializable;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Data
 @Getter
@@ -65,8 +67,29 @@ public class SchemaElement implements Serializable {
         if (MapUtils.isEmpty(extInfo)) {
             return false;
         }
-        DimensionType dimensionTYpe = (DimensionType) extInfo.get(DimensionConstants.DIMENSION_TYPE);
+        Object o = extInfo.get(DimensionConstants.DIMENSION_TYPE);
+        DimensionType dimensionTYpe = null;
+        if (o instanceof DimensionType) {
+            dimensionTYpe = (DimensionType) o;
+        }
+        if (o instanceof String) {
+            dimensionTYpe = DimensionType.valueOf((String) o);
+        }
         return DimensionType.isPartitionTime(dimensionTYpe);
     }
 
+    public String getTimeFormat() {
+        if (MapUtils.isEmpty(extInfo)) {
+            return null;
+        }
+        return (String) extInfo.get(DimensionConstants.DIMENSION_TIME_FORMAT);
+    }
+
+    public String getPartitionTimeFormat() {
+        String timeFormat = getTimeFormat();
+        if (StringUtils.isNotBlank(timeFormat) && containsPartitionTime()) {
+            return timeFormat;
+        }
+        return null;
+    }
 }
