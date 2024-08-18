@@ -4,6 +4,7 @@ import com.tencent.supersonic.common.pojo.ChatModelConfig;
 import com.tencent.supersonic.common.pojo.EmbeddingModelConfig;
 import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.embedding.EmbeddingModel;
+import dev.langchain4j.model.zhipu.ChatCompletionModel;
 import dev.langchain4j.model.zhipu.ZhipuAiChatModel;
 import dev.langchain4j.model.zhipu.ZhipuAiEmbeddingModel;
 import org.springframework.beans.factory.InitializingBean;
@@ -13,7 +14,8 @@ import org.springframework.stereotype.Service;
 public class ZhipuModelFactory implements ModelFactory, InitializingBean {
     public static final String PROVIDER = "ZHIPU";
     public static final String DEFAULT_BASE_URL = "https://open.bigmodel.cn/";
-
+    public static final String DEFAULT_MODEL_NAME = ChatCompletionModel.GLM_4.toString();
+    public static final String DEFAULT_EMBEDDING_MODEL_NAME = "embedding-2";
     @Override
     public ChatLanguageModel createChatModel(ChatModelConfig modelConfig) {
         return ZhipuAiChatModel.builder()

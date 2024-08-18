@@ -4,8 +4,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.common.pojo.ChatModelConfig;
 import com.tencent.supersonic.common.pojo.Parameter;
-import dev.langchain4j.model.dashscope.QwenModelName;
-import dev.langchain4j.model.zhipu.ChatCompletionModel;
 import dev.langchain4j.provider.AzureModelFactory;
 import dev.langchain4j.provider.DashscopeModelFactory;
 import dev.langchain4j.provider.LocalAiModelFactory;
@@ -16,7 +14,6 @@ import dev.langchain4j.provider.ZhipuModelFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service("ChatModelParameterConfig")
@@ -100,14 +97,9 @@ public class ChatModelParameterConfig extends ParameterConfig {
     }
 
     private static List<String> getCandidateValues() {
-        List<String> candidateValues = getBaseUrlCandidateValues();
-        candidateValues.add(AzureModelFactory.PROVIDER);
-        return candidateValues;
-    }
-
-    private static ArrayList<String> getBaseUrlCandidateValues() {
         return Lists.newArrayList(
                 OpenAiModelFactory.PROVIDER,
+                AzureModelFactory.PROVIDER,
                 OllamaModelFactory.PROVIDER,
                 QianfanModelFactory.PROVIDER,
                 ZhipuModelFactory.PROVIDER,
@@ -117,9 +109,10 @@ public class ChatModelParameterConfig extends ParameterConfig {
 
     private static List<Parameter.Dependency> getBaseUrlDependency() {
         return getDependency(CHAT_MODEL_PROVIDER.getName(),
-                getBaseUrlCandidateValues(),
+                getCandidateValues(),
                 ImmutableMap.of(
                         OpenAiModelFactory.PROVIDER, OpenAiModelFactory.DEFAULT_BASE_URL,
+                        AzureModelFactory.PROVIDER, AzureModelFactory.DEFAULT_BASE_URL,
                         OllamaModelFactory.PROVIDER, OllamaModelFactory.DEFAULT_BASE_URL,
                         QianfanModelFactory.PROVIDER, QianfanModelFactory.DEFAULT_BASE_URL,
                         ZhipuModelFactory.PROVIDER, ZhipuModelFactory.DEFAULT_BASE_URL,
@@ -152,24 +145,21 @@ public class ChatModelParameterConfig extends ParameterConfig {
         return getDependency(CHAT_MODEL_PROVIDER.getName(),
                 getCandidateValues(),
                 ImmutableMap.of(
-                        OpenAiModelFactory.PROVIDER, "gpt-3.5-turbo",
-                        OllamaModelFactory.PROVIDER, "qwen:0.5b",
-                        QianfanModelFactory.PROVIDER, "Llama-2-70b-chat",
-                        ZhipuModelFactory.PROVIDER, ChatCompletionModel.GLM_4.toString(),
-                        LocalAiModelFactory.PROVIDER, "ggml-gpt4all-j",
-                        AzureModelFactory.PROVIDER, "gpt-35-turbo",
-                        DashscopeModelFactory.PROVIDER, QwenModelName.QWEN_PLUS
+                        OpenAiModelFactory.PROVIDER, OpenAiModelFactory.DEFAULT_MODEL_NAME,
+                        OllamaModelFactory.PROVIDER, OllamaModelFactory.DEFAULT_MODEL_NAME,
+                        QianfanModelFactory.PROVIDER, QianfanModelFactory.DEFAULT_MODEL_NAME,
+                        ZhipuModelFactory.PROVIDER, ZhipuModelFactory.DEFAULT_MODEL_NAME,
+                        LocalAiModelFactory.PROVIDER, LocalAiModelFactory.DEFAULT_MODEL_NAME,
+                        AzureModelFactory.PROVIDER, AzureModelFactory.DEFAULT_MODEL_NAME,
+                        DashscopeModelFactory.PROVIDER, DashscopeModelFactory.DEFAULT_MODEL_NAME
                 )
         );
     }
 
     private static List<Parameter.Dependency> getEndpointDependency() {
         return getDependency(CHAT_MODEL_PROVIDER.getName(),
-                Lists.newArrayList(AzureModelFactory.PROVIDER, QianfanModelFactory.PROVIDER),
-                ImmutableMap.of(
-                        AzureModelFactory.PROVIDER, AzureModelFactory.DEFAULT_BASE_URL,
-                        QianfanModelFactory.PROVIDER, "llama_2_70b"
-                )
+                Lists.newArrayList(QianfanModelFactory.PROVIDER),
+                ImmutableMap.of(QianfanModelFactory.PROVIDER, QianfanModelFactory.DEFAULT_ENDPOINT)
         );
     }
 

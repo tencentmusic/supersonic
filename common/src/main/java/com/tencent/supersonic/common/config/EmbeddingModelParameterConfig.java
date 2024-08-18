@@ -36,6 +36,11 @@ public class EmbeddingModelParameterConfig extends ParameterConfig {
                     "ApiKey", "", "password",
                     "向量模型配置", null, getApiKeyDependency());
 
+    public static final Parameter EMBEDDING_MODEL_SECRET_KEY =
+            new Parameter("s2.embedding.model.secretKey", "demo",
+                    "SecretKey", "", "password",
+                    "向量模型配置", null, getSecretKeyDependency());
+
     public static final Parameter EMBEDDING_MODEL_NAME =
             new Parameter("s2.embedding.model.name", EmbeddingModelConstant.BGE_SMALL_ZH,
                     "ModelName", "", "string",
@@ -54,7 +59,8 @@ public class EmbeddingModelParameterConfig extends ParameterConfig {
     public List<Parameter> getSysParameters() {
         return Lists.newArrayList(
                 EMBEDDING_MODEL_PROVIDER, EMBEDDING_MODEL_BASE_URL, EMBEDDING_MODEL_API_KEY,
-                EMBEDDING_MODEL_NAME, EMBEDDING_MODEL_PATH, EMBEDDING_MODEL_VOCABULARY_PATH
+                EMBEDDING_MODEL_SECRET_KEY, EMBEDDING_MODEL_NAME, EMBEDDING_MODEL_PATH,
+                EMBEDDING_MODEL_VOCABULARY_PATH
         );
     }
 
@@ -65,11 +71,12 @@ public class EmbeddingModelParameterConfig extends ParameterConfig {
         String modelName = getParameterValue(EMBEDDING_MODEL_NAME);
         String modelPath = getParameterValue(EMBEDDING_MODEL_PATH);
         String vocabularyPath = getParameterValue(EMBEDDING_MODEL_VOCABULARY_PATH);
-
+        String secretKey = getParameterValue(EMBEDDING_MODEL_SECRET_KEY);
         return EmbeddingModelConfig.builder()
                 .provider(provider)
                 .baseUrl(baseUrl)
                 .apiKey(apiKey)
+                .secretKey(secretKey)
                 .modelName(modelName)
                 .modelPath(modelPath)
                 .vocabularyPath(vocabularyPath)
@@ -135,12 +142,12 @@ public class EmbeddingModelParameterConfig extends ParameterConfig {
                 ),
                 ImmutableMap.of(
                         InMemoryModelFactory.PROVIDER, EmbeddingModelConstant.BGE_SMALL_ZH,
-                        OpenAiModelFactory.PROVIDER, "text-embedding-ada-002",
-                        OllamaModelFactory.PROVIDER, "all-minilm",
-                        AzureModelFactory.PROVIDER, "text-embedding-ada-002",
-                        DashscopeModelFactory.PROVIDER, "text-embedding-v2",
-                        QianfanModelFactory.PROVIDER, "Embedding-V1",
-                        ZhipuModelFactory.PROVIDER, "embedding-2"
+                        OpenAiModelFactory.PROVIDER, OpenAiModelFactory.DEFAULT_EMBEDDING_MODEL_NAME,
+                        OllamaModelFactory.PROVIDER, OllamaModelFactory.DEFAULT_EMBEDDING_MODEL_NAME,
+                        AzureModelFactory.PROVIDER, AzureModelFactory.DEFAULT_EMBEDDING_MODEL_NAME,
+                        DashscopeModelFactory.PROVIDER, DashscopeModelFactory.DEFAULT_EMBEDDING_MODEL_NAME,
+                        QianfanModelFactory.PROVIDER, QianfanModelFactory.DEFAULT_EMBEDDING_MODEL_NAME,
+                        ZhipuModelFactory.PROVIDER, ZhipuModelFactory.DEFAULT_EMBEDDING_MODEL_NAME
                 )
         );
     }
@@ -149,6 +156,13 @@ public class EmbeddingModelParameterConfig extends ParameterConfig {
         return getDependency(EMBEDDING_MODEL_PROVIDER.getName(),
                 Lists.newArrayList(InMemoryModelFactory.PROVIDER),
                 ImmutableMap.of(InMemoryModelFactory.PROVIDER, "")
+        );
+    }
+
+    private static List<Parameter.Dependency> getSecretKeyDependency() {
+        return getDependency(EMBEDDING_MODEL_PROVIDER.getName(),
+                Lists.newArrayList(QianfanModelFactory.PROVIDER),
+                ImmutableMap.of(QianfanModelFactory.PROVIDER, DEMO)
         );
     }
 }
