@@ -9,7 +9,7 @@ public enum DimensionType {
 
     public static boolean isTimeDimension(String type) {
         try {
-            return isTimeDimension(DimensionType.valueOf(type.toUpperCase()));
+            return isTimeDimension(DimensionType.valueOf(type.toLowerCase()));
         } catch (IllegalArgumentException e) {
             return false;
         }
