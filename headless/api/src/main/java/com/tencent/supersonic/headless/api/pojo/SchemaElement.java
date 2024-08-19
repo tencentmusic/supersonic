@@ -90,6 +90,6 @@ public class SchemaElement implements Serializable {
         if (StringUtils.isNotBlank(timeFormat) && containsPartitionTime()) {
             return timeFormat;
         }
-        return null;
+        return "";
     }
 }
