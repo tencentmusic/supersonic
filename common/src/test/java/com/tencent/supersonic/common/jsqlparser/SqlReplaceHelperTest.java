@@ -153,7 +153,7 @@ class SqlReplaceHelperTest {
 
         Assert.assertEquals(
                 "SELECT 歌曲名 FROM 歌曲库 WHERE datediff('day', 发布日期, '2023-08-09') <= 1 "
-                        + "AND 歌手名 LIKE '邓紫棋' AND 数据日期 = '2023-08-09' AND 歌曲发布时 = "
+                        + "AND 歌曲名 LIKE '%邓紫棋%' AND 数据日期 = '2023-08-09' AND 歌曲发布时 = "
                         + "'2023-08-01' ORDER BY 播放量 DESC LIMIT 11", replaceSql);
 
         Set<String> fieldNames = new HashSet<>();

@@ -1,8 +1,5 @@
 package com.tencent.supersonic.common.jsqlparser;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.Expression;
@@ -13,6 +10,10 @@ import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.statement.select.GroupByElement;
 import net.sf.jsqlparser.statement.select.GroupByVisitor;
 import org.apache.commons.lang3.StringUtils;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 @Slf4j
 public class GroupByReplaceVisitor implements GroupByVisitor {
@@ -27,38 +28,51 @@ public class GroupByReplaceVisitor implements GroupByVisitor {
     }
 
     public void visit(GroupByElement groupByElement) {
-        groupByElement.getGroupByExpressionList();
         ExpressionList groupByExpressionList = groupByElement.getGroupByExpressionList();
         List<Expression> groupByExpressions = groupByExpressionList.getExpressions();
 
         for (int i = 0; i < groupByExpressions.size(); i++) {
             Expression expression = groupByExpressions.get(i);
-            String columnName = expression.toString();
-            if (expression instanceof Function && Objects.nonNull(
-                    ((Function) expression).getParameters().getExpressions().get(0))) {
-                columnName = ((Function) expression).getParameters().getExpressions().get(0).toString();
-            }
-            String replaceColumn = parseVisitorHelper.getReplaceValue(columnName, fieldNameMap,
-                    exactReplace);
+            String columnName = getColumnName(expression);
+
+            String replaceColumn = parseVisitorHelper.getReplaceValue(columnName, fieldNameMap, exactReplace);
             if (StringUtils.isNotEmpty(replaceColumn)) {
-                if (expression instanceof Column) {
-                    groupByExpressions.set(i, new Column(replaceColumn));
+                replaceExpression(groupByExpressions, i, expression, replaceColumn);
+            }
+        }
+    }
+
+    private String getColumnName(Expression expression) {
+        if (expression instanceof Function) {
+            Function function = (Function) expression;
+            if (Objects.nonNull(function.getParameters().getExpressions().get(0))) {
+                return function.getParameters().getExpressions().get(0).toString();
+            }
+        }
+        return expression.toString();
+    }
+
+    private void replaceExpression(List<Expression> groupByExpressions,
+                                   int index,
+                                   Expression expression,
+                                   String replaceColumn) {
+        if (expression instanceof Column) {
+            groupByExpressions.set(index, new Column(replaceColumn));
+        } else if (expression instanceof Function) {
+            try {
+                Expression newExpression = CCJSqlParserUtil.parseExpression(replaceColumn);
+                ExpressionList<Expression> newExpressionList = new ExpressionList<>();
+                newExpressionList.add(newExpression);
+
+                Function function = (Function) expression;
+                if (function.getParameters().size() > 1) {
+                    function.getParameters().stream().skip(1).forEach(
+                            e -> newExpressionList.add((Function) e)
+                    );
                 }
-                if (expression instanceof Function) {
-                    try {
-                        Expression element = CCJSqlParserUtil.parseExpression(replaceColumn);
-                        ExpressionList<Expression> expressionList = new ExpressionList<Expression>();
-                        expressionList.add(element);
-                        if (((Function) expression).getParameters().size() > 1) {
-                            ((Function) expression).getParameters().stream().skip(1).forEach(e -> {
-                                expressionList.add((Function) e);
-                            });
-                        }
-                        ((Function) expression).setParameters(expressionList);
-                    } catch (JSQLParserException e) {
-                        log.error("e", e);
-                    }
-                }
+                function.setParameters(newExpressionList);
+            } catch (JSQLParserException e) {
+                log.error("Error parsing expression: {}", replaceColumn, e);
             }
         }
     }
