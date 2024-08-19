@@ -28,6 +28,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -164,7 +165,9 @@ public class LLMRequestService {
         Map<String, String> fieldNameToDateFormat = semanticSchema.getDimensions().stream()
                 .filter(dimension -> StringUtils.isNotBlank(dimension.getTimeFormat()))
                 .collect(Collectors.toMap(
-                        SchemaElement::getName, SchemaElement::getPartitionTimeFormat, (k1, k2) -> k1)
+                        SchemaElement::getName,
+                        value -> Optional.ofNullable(value.getPartitionTimeFormat()).orElse(""),
+                        (k1, k2) -> k1)
                 );
 
         // 构建额外信息字符串
@@ -175,7 +178,7 @@ public class LLMRequestService {
                 extraInfoSb.append(String.format("%s的计量单位是%s; ", fieldName, "小数"));
             }
         }
-        // 构建分区日期格式化信息
+        // 构建日期格式化信息
         for (String fieldName : fieldNameList) {
             String timeFormat = fieldNameToDateFormat.get(fieldName);
             if (StringUtils.isNotBlank(timeFormat)) {
