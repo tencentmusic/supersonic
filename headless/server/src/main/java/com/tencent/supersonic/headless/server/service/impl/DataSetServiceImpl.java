@@ -260,25 +260,16 @@ public class DataSetServiceImpl
             metaFilter.setIds(allDimensionIds);
             List<DimensionResp> dimensionResps = dimensionService.getDimensions(metaFilter);
             List<String> duplicateDimensionNames = findDuplicates(dimensionResps, DimensionResp::getName);
-            List<String> duplicateDimensionBizNames = findDuplicates(dimensionResps, DimensionResp::getBizName);
             if (!duplicateDimensionNames.isEmpty()) {
                 throw new InvalidArgumentException("存在相同的维度名: " + duplicateDimensionNames);
-            }
-            if (!duplicateDimensionBizNames.isEmpty()) {
-                throw new InvalidArgumentException("存在相同的维度英文名: " + duplicateDimensionBizNames);
             }
         }
         if (!CollectionUtils.isEmpty(allMetricIds)) {
             metaFilter.setIds(allMetricIds);
             List<MetricResp> metricResps = metricService.getMetrics(metaFilter);
             List<String> duplicateMetricNames = findDuplicates(metricResps, MetricResp::getName);
-            List<String> duplicateMetricBizNames = findDuplicates(metricResps, MetricResp::getBizName);
-
             if (!duplicateMetricNames.isEmpty()) {
                 throw new InvalidArgumentException("存在相同的指标名: " + duplicateMetricNames);
-            }
-            if (!duplicateMetricBizNames.isEmpty()) {
-                throw new InvalidArgumentException("存在相同的指标英文名: " + duplicateMetricBizNames);
             }
         }
     }
