@@ -49,7 +49,7 @@ public class PromptHelper {
         for (int i = 0; i < selfConsistencyNumber; i++) {
             List<Text2SQLExemplar> shuffledList = new ArrayList<>(exemplars);
             Collections.shuffle(shuffledList);
-            results.add(shuffledList.subList(0, fewShotNumber));
+            results.add(shuffledList.subList(0, Math.min(shuffledList.size(), fewShotNumber)));
         }
 
         return results;
