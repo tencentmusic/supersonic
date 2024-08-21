@@ -45,12 +45,17 @@ public class EmbeddingStoreParameterConfig extends ParameterConfig {
             new Parameter("s2.embedding.store.dimension", "",
                     "纬度", "", "number",
                     "向量库配置", null, getDimensionDependency());
+    public static final Parameter EMBEDDING_STORE_DATABASE_NAME =
+            new Parameter("s2.embedding.store.databaseName", "",
+                    "DatabaseName", "", "string",
+                    "向量库配置", null, getDatabaseNameDependency());
 
     @Override
     public List<Parameter> getSysParameters() {
         return Lists.newArrayList(
                 EMBEDDING_STORE_PROVIDER, EMBEDDING_STORE_BASE_URL, EMBEDDING_STORE_API_KEY,
-                EMBEDDING_STORE_PERSIST_PATH, EMBEDDING_STORE_TIMEOUT, EMBEDDING_STORE_DIMENSION
+                EMBEDDING_STORE_DATABASE_NAME, EMBEDDING_STORE_PERSIST_PATH,
+                EMBEDDING_STORE_TIMEOUT, EMBEDDING_STORE_DIMENSION
         );
     }
 
@@ -60,12 +65,13 @@ public class EmbeddingStoreParameterConfig extends ParameterConfig {
         String apiKey = getParameterValue(EMBEDDING_STORE_API_KEY);
         String persistPath = getParameterValue(EMBEDDING_STORE_PERSIST_PATH);
         String timeOut = getParameterValue(EMBEDDING_STORE_TIMEOUT);
+        String databaseName = getParameterValue(EMBEDDING_STORE_DATABASE_NAME);
         Integer dimension = null;
         if (StringUtils.isNumeric(getParameterValue(EMBEDDING_STORE_DIMENSION))) {
             dimension = Integer.valueOf(getParameterValue(EMBEDDING_STORE_DIMENSION));
         }
-        return EmbeddingStoreConfig.builder().provider(provider)
-                .baseUrl(baseUrl).apiKey(apiKey).persistPath(persistPath)
+        return EmbeddingStoreConfig.builder().provider(provider).baseUrl(baseUrl)
+                .apiKey(apiKey).persistPath(persistPath).databaseName(databaseName)
                 .timeOut(Long.valueOf(timeOut)).dimension(dimension).build();
     }
 
@@ -104,6 +110,13 @@ public class EmbeddingStoreParameterConfig extends ParameterConfig {
         return getDependency(EMBEDDING_STORE_PROVIDER.getName(),
                 Lists.newArrayList(EmbeddingStoreType.MILVUS.name()),
                 ImmutableMap.of(EmbeddingStoreType.MILVUS.name(), "384")
+        );
+    }
+
+    private static List<Parameter.Dependency> getDatabaseNameDependency() {
+        return getDependency(EMBEDDING_STORE_PROVIDER.getName(),
+                Lists.newArrayList(EmbeddingStoreType.MILVUS.name()),
+                ImmutableMap.of(EmbeddingStoreType.MILVUS.name(), "")
         );
     }
 }
