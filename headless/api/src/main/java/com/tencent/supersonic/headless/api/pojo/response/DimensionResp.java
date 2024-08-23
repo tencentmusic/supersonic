@@ -47,4 +47,8 @@ public class DimensionResp extends SchemaItem {
         return DimensionType.isTimeDimension(type);
     }
 
+    public boolean isPartitionTime() {
+        return DimensionType.isPartitionTime(type);
+    }
+
 }
