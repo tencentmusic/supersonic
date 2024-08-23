@@ -16,7 +16,6 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.StringJoiner;
@@ -251,7 +250,7 @@ public class DateModeUtils {
      * @param dateInfo
      * @return
      */
-    public String betweenDateStr(ItemDateResp dateDate, DateConf dateInfo) {
+    public String betweenDateStr(DateConf dateInfo) {
         if (MONTH.equalsIgnoreCase(dateInfo.getPeriod())) {
             // startDate YYYYMM
             if (!dateInfo.getStartDate().contains(Constants.MINUS)) {
@@ -280,7 +279,7 @@ public class DateModeUtils {
      * @param dateInfo
      * @return
      */
-    public String listDateStr(ItemDateResp dateDate, DateConf dateInfo) {
+    public String listDateStr(DateConf dateInfo) {
         StringJoiner joiner = new StringJoiner(COMMA);
         dateInfo.getDateList().stream().forEach(date -> joiner.add(APOSTROPHE + date + APOSTROPHE));
         String dateCol = sysDateCol;
@@ -330,8 +329,7 @@ public class DateModeUtils {
     }
 
     public String getDateWhereStr(DateConf dateInfo) {
-        ItemDateResp dateDate = null;
-        return getDateWhereStr(dateInfo, dateDate);
+        return getDateWhereStr(dateInfo, null);
     }
 
     public String getDateWhereStr(DateConf dateInfo, ItemDateResp dateDate) {
@@ -341,10 +339,10 @@ public class DateModeUtils {
         String dateStr = "";
         switch (dateInfo.getDateMode()) {
             case BETWEEN:
-                dateStr = betweenDateStr(dateDate, dateInfo);
+                dateStr = betweenDateStr(dateInfo);
                 break;
             case LIST:
-                dateStr = listDateStr(dateDate, dateInfo);
+                dateStr = listDateStr(dateInfo);
                 break;
             case RECENT:
                 dateStr = recentDateStr(dateDate, dateInfo);
@@ -356,30 +354,7 @@ public class DateModeUtils {
                 break;
 
         }
-
         return dateStr;
-    }
-
-    public String getDateWhereStr(DateConf dateConf, ImmutablePair<String, String> range) {
-        if (DAY.equalsIgnoreCase(dateConf.getPeriod()) || WEEK.equalsIgnoreCase(dateConf.getPeriod())) {
-            if (range.left.equals(range.right)) {
-                return String.format("(%s <= '%s' and %s > '%s')", sysZipperDateColBegin + sysDateCol, range.left,
-                        sysZipperDateColEnd + sysDateCol, range.left);
-            }
-            return String.format("( '%s' <= %s and '%s' >= %s)", range.left, sysZipperDateColEnd + sysDateCol,
-                    range.right, sysZipperDateColBegin + sysDateCol);
-        }
-
-        if (MONTH.equalsIgnoreCase(dateConf.getPeriod())) {
-            if (range.left.equals(range.right)) {
-                return String.format("(%s <= '%s' and %s > '%s')", sysZipperDateColBegin + sysDateMonthCol, range.left,
-                        sysZipperDateColEnd + sysDateMonthCol, range.left);
-            }
-            return String.format("( '%s' <= %s and '%s' >= %s)", range.left, sysZipperDateColEnd + sysDateMonthCol,
-                    range.right, sysZipperDateColBegin + sysDateMonthCol);
-
-        }
-        return "";
     }
 
     public String getSysDateCol(DateConf dateInfo) {
@@ -410,18 +385,6 @@ public class DateModeUtils {
             return MONTH;
         }
         return "";
-    }
-
-    public String getDateColBegin(DateConf dateInfo) {
-        return sysZipperDateColBegin + getSysDateCol(dateInfo);
-    }
-
-    public String getDateColEnd(DateConf dateInfo) {
-        return sysZipperDateColEnd + getSysDateCol(dateInfo);
-    }
-
-    public List<String> getDateCol() {
-        return Arrays.asList(sysDateCol, sysDateMonthCol, sysDateWeekCol);
     }
 
 }
