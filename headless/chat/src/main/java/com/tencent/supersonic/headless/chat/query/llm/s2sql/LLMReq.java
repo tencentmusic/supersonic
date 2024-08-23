@@ -7,81 +7,61 @@ import com.tencent.supersonic.common.pojo.ChatModelConfig;
 import com.tencent.supersonic.common.pojo.Text2SQLExemplar;
 import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import lombok.Data;
+import org.apache.commons.collections4.CollectionUtils;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Data
 public class LLMReq {
-
     private String queryText;
-
-    private FilterCondition filterCondition;
-
     private LLMSchema schema;
-
     private List<ElementValue> linking;
-
     private String currentDate;
-
     private String priorExts;
-
     private SqlGenType sqlGenType;
-
     private ChatModelConfig modelConfig;
     private PromptConfig promptConfig;
-
     private List<Text2SQLExemplar> dynamicExemplars;
-
 
     @Data
     public static class ElementValue {
-
         private String fieldName;
-
         private String fieldValue;
 
     }
 
     @Data
     public static class LLMSchema {
-
-        private String domainName;
-
-        private String dataSetName;
-
         private Long dataSetId;
-
+        private String dataSetName;
         private List<String> fieldNameList;
-
         private List<SchemaElement> metrics;
-
         private List<SchemaElement> dimensions;
-
         private List<Term> terms;
 
-    }
-
-    @Data
-    public static class FilterCondition {
-
-        private String tableName;
+        public List<String> getFieldNameList() {
+            List<String> fieldNameList = new ArrayList<>();
+            if (CollectionUtils.isNotEmpty(metrics)) {
+                fieldNameList.addAll(metrics.stream().map(metric -> metric.getName()).collect(Collectors.toList()));
+            }
+            if (CollectionUtils.isNotEmpty(dimensions)) {
+                fieldNameList.addAll(dimensions.stream().map(metric -> metric.getName()).collect(Collectors.toList()));
+            }
+            return fieldNameList;
+        }
     }
 
     @Data
     public static class Term {
-
         private String name;
-
         private String description;
-
         private List<String> alias = Lists.newArrayList();
-
     }
 
     public enum SqlGenType {
-
         ONE_PASS_SELF_CONSISTENCY("1_pass_self_consistency");
-
         private String name;
 
         SqlGenType(String name) {

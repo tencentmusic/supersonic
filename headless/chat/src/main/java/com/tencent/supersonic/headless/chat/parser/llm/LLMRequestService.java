@@ -1,9 +1,8 @@
 package com.tencent.supersonic.headless.chat.parser.llm;
 
 import com.tencent.supersonic.common.pojo.enums.DataFormatTypeEnum;
-import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
-import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.DateUtils;
+import com.tencent.supersonic.headless.api.pojo.DataSetSchema;
 import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementMatch;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
@@ -61,43 +60,24 @@ public class LLMRequestService {
     }
 
     public LLMReq getLlmReq(ChatQueryContext queryCtx, Long dataSetId) {
-        LLMRequestService requestService = ContextUtils.getBean(LLMRequestService.class);
-        List<LLMReq.ElementValue> linkingValues = requestService.getValues(queryCtx, dataSetId);
-        SemanticSchema semanticSchema = queryCtx.getSemanticSchema();
-        Map<Long, String> dataSetIdToName = semanticSchema.getDataSetIdToName();
+        List<LLMReq.ElementValue> linkingValues = getValues(queryCtx, dataSetId);
+        Map<Long, String> dataSetIdToName = queryCtx.getSemanticSchema().getDataSetIdToName();
         String queryText = queryCtx.getQueryText();
 
         LLMReq llmReq = new LLMReq();
 
         llmReq.setQueryText(queryText);
-        LLMReq.FilterCondition filterCondition = new LLMReq.FilterCondition();
-        llmReq.setFilterCondition(filterCondition);
-
         LLMReq.LLMSchema llmSchema = new LLMReq.LLMSchema();
         llmSchema.setDataSetId(dataSetId);
         llmSchema.setDataSetName(dataSetIdToName.get(dataSetId));
-        llmSchema.setDomainName(dataSetIdToName.get(dataSetId));
-
-        Set<String> fieldNameList = getMatchedFieldNames(queryCtx, dataSetId);
-        if (Objects.nonNull(semanticSchema.getDataSetSchemaMap())
-                && Objects.nonNull(semanticSchema.getDataSetSchemaMap().get(dataSetId))) {
-            TimeDefaultConfig timeDefaultConfig = semanticSchema.getDataSetSchemaMap()
-                    .get(dataSetId).getTagTypeTimeDefaultConfig();
-            if (!Objects.equals(timeDefaultConfig.getUnit(), -1)
-                    && queryCtx.containsPartitionDimensions(dataSetId)) {
-                // 数据集配置了数据日期字段，并查询设置 时间不为-1时才添加 '数据日期' 字段
-                fieldNameList.add(TimeDimensionEnum.DAY.getChName());
-            }
-        }
-        llmSchema.setFieldNameList(new ArrayList<>(fieldNameList));
 
         llmSchema.setMetrics(getMatchedMetrics(queryCtx, dataSetId));
         llmSchema.setDimensions(getMatchedDimensions(queryCtx, dataSetId));
         llmSchema.setTerms(getTerms(queryCtx, dataSetId));
         llmReq.setSchema(llmSchema);
 
-        String priorExts = getPriorExts(queryCtx, new ArrayList<>(fieldNameList));
-        llmReq.setPriorExts(priorExts);
+        String priorKnowledge = getPriorKnowledge(queryCtx, llmSchema);
+        llmReq.setPriorExts(priorKnowledge);
 
         List<LLMReq.ElementValue> linking = new ArrayList<>();
         boolean linkingValueEnabled = Boolean.valueOf(parserConfig.getParameterValue(PARSER_LINKING_VALUE_ENABLE));
@@ -143,12 +123,20 @@ public class LLMRequestService {
                 }).collect(Collectors.toList());
     }
 
-    private String getPriorExts(ChatQueryContext queryContext, List<String> fieldNameList) {
-        StringBuilder extraInfoSb = new StringBuilder();
+    private String getPriorKnowledge(ChatQueryContext queryContext, LLMReq.LLMSchema llmSchema) {
+        StringBuilder priorKnowledgeBuilder = new StringBuilder();
         SemanticSchema semanticSchema = queryContext.getSemanticSchema();
 
-        // 获取字段名到数据格式类型的映射
-        Map<String, String> fieldNameToDataFormatType = semanticSchema.getMetrics().stream()
+        appendMetricPriorKnowledge(llmSchema, priorKnowledgeBuilder, semanticSchema);
+
+        // 处理维度字段
+        appendDimensionPriorKnowledge(llmSchema, priorKnowledgeBuilder, semanticSchema);
+
+        return priorKnowledgeBuilder.toString();
+    }
+
+    private Map<String, String> getFieldNameToDataFormatTypeMap(SemanticSchema semanticSchema) {
+        return semanticSchema.getMetrics().stream()
                 .filter(metric -> Objects.nonNull(metric.getDataFormatType()))
                 .flatMap(metric -> {
                     Set<Pair<String, String>> fieldFormatPairs = new HashSet<>();
@@ -161,35 +149,48 @@ public class LLMRequestService {
                     return fieldFormatPairs.stream();
                 })
                 .collect(Collectors.toMap(Pair::getLeft, Pair::getRight, (existing, replacement) -> existing));
+    }
 
-        Map<String, String> fieldNameToDateFormat = semanticSchema.getDimensions().stream()
+    private void appendMetricPriorKnowledge(LLMReq.LLMSchema llmSchema,
+                                            StringBuilder priorKnowledgeBuilder,
+                                            SemanticSchema semanticSchema) {
+        Map<String, String> fieldNameToDataFormatType = getFieldNameToDataFormatTypeMap(semanticSchema);
+
+        for (SchemaElement schemaElement : llmSchema.getMetrics()) {
+            String fieldName = schemaElement.getName();
+            String dataFormatType = fieldNameToDataFormatType.get(fieldName);
+            if (DataFormatTypeEnum.DECIMAL.getName().equalsIgnoreCase(dataFormatType)
+                    || DataFormatTypeEnum.PERCENT.getName().equalsIgnoreCase(dataFormatType)) {
+                priorKnowledgeBuilder.append(String.format("%s的计量单位是%s; ", fieldName, "小数"));
+            }
+        }
+    }
+
+    private Map<String, String> getFieldNameToDateFormatMap(SemanticSchema semanticSchema) {
+        return semanticSchema.getDimensions().stream()
                 .filter(dimension -> StringUtils.isNotBlank(dimension.getTimeFormat()))
                 .collect(Collectors.toMap(
                         SchemaElement::getName,
                         value -> Optional.ofNullable(value.getPartitionTimeFormat()).orElse(""),
                         (k1, k2) -> k1)
                 );
+    }
 
-        // 构建额外信息字符串
-        for (String fieldName : fieldNameList) {
-            String dataFormatType = fieldNameToDataFormatType.get(fieldName);
-            if (DataFormatTypeEnum.DECIMAL.getName().equalsIgnoreCase(dataFormatType)
-                    || DataFormatTypeEnum.PERCENT.getName().equalsIgnoreCase(dataFormatType)) {
-                extraInfoSb.append(String.format("%s的计量单位是%s; ", fieldName, "小数"));
-            }
-        }
-        // 构建日期格式化信息
-        for (String fieldName : fieldNameList) {
+    private void appendDimensionPriorKnowledge(LLMReq.LLMSchema llmSchema,
+                                               StringBuilder priorKnowledgeBuilder,
+                                               SemanticSchema semanticSchema) {
+        Map<String, String> fieldNameToDateFormat = getFieldNameToDateFormatMap(semanticSchema);
+
+        for (SchemaElement schemaElement : llmSchema.getDimensions()) {
+            String fieldName = schemaElement.getName();
             String timeFormat = fieldNameToDateFormat.get(fieldName);
             if (StringUtils.isNotBlank(timeFormat)) {
-                extraInfoSb.append(String.format("%s的日期Format格式是%s; ", fieldName, timeFormat));
+                priorKnowledgeBuilder.append(String.format("%s是分区时间且格式是%s", fieldName, timeFormat));
             }
         }
-        return extraInfoSb.toString();
     }
 
     public List<LLMReq.ElementValue> getValues(ChatQueryContext queryCtx, Long dataSetId) {
-        Map<Long, String> itemIdToName = getItemIdToName(queryCtx, dataSetId);
         List<SchemaElementMatch> matchedElements = queryCtx.getMapInfo().getMatchedElements(dataSetId);
         if (CollectionUtils.isEmpty(matchedElements)) {
             return new ArrayList<>();
@@ -203,18 +204,11 @@ public class LLMRequestService {
                 })
                 .map(elementMatch -> {
                     LLMReq.ElementValue elementValue = new LLMReq.ElementValue();
-                    elementValue.setFieldName(itemIdToName.get(elementMatch.getElement().getId()));
+                    elementValue.setFieldName(elementMatch.getElement().getName());
                     elementValue.setFieldValue(elementMatch.getWord());
                     return elementValue;
                 }).collect(Collectors.toSet());
         return new ArrayList<>(valueMatches);
-    }
-
-    protected Map<Long, String> getItemIdToName(ChatQueryContext queryCtx, Long dataSetId) {
-        SemanticSchema semanticSchema = queryCtx.getSemanticSchema();
-        List<SchemaElement> elements = semanticSchema.getDimensions(dataSetId);
-        return elements.stream().collect(
-                Collectors.toMap(SchemaElement::getId, SchemaElement::getName, (value1, value2) -> value2));
     }
 
     protected List<SchemaElement> getMatchedMetrics(ChatQueryContext queryCtx, Long dataSetId) {
@@ -235,40 +229,40 @@ public class LLMRequestService {
     }
 
     protected List<SchemaElement> getMatchedDimensions(ChatQueryContext queryCtx, Long dataSetId) {
-        List<SchemaElementMatch> matchedElements = queryCtx.getMapInfo().getMatchedElements(dataSetId);
-        if (CollectionUtils.isEmpty(matchedElements)) {
-            return Collections.emptyList();
-        }
-        return matchedElements.stream()
-                .filter(schemaElementMatch -> {
-                    SchemaElementType elementType = schemaElementMatch.getElement().getType();
-                    return SchemaElementType.DIMENSION.equals(elementType);
-                })
-                .map(schemaElementMatch -> schemaElementMatch.getElement())
-                .collect(Collectors.toList());
-    }
 
-    protected Set<String> getMatchedFieldNames(ChatQueryContext queryCtx, Long dataSetId) {
-        Map<Long, String> itemIdToName = getItemIdToName(queryCtx, dataSetId);
         List<SchemaElementMatch> matchedElements = queryCtx.getMapInfo().getMatchedElements(dataSetId);
-        if (CollectionUtils.isEmpty(matchedElements)) {
-            return new HashSet<>();
+        Set<SchemaElement> results = new HashSet<>();
+
+        if (!CollectionUtils.isEmpty(matchedElements)) {
+            results = matchedElements.stream()
+                    .filter(element -> SchemaElementType.DIMENSION.equals(element.getElement().getType()))
+                    .map(SchemaElementMatch::getElement)
+                    .collect(Collectors.toSet());
         }
-        return matchedElements.stream()
-                .filter(schemaElementMatch -> {
-                    SchemaElementType elementType = schemaElementMatch.getElement().getType();
-                    return SchemaElementType.METRIC.equals(elementType)
-                            || SchemaElementType.DIMENSION.equals(elementType)
-                            || SchemaElementType.VALUE.equals(elementType);
-                })
-                .map(schemaElementMatch -> {
-                    SchemaElement element = schemaElementMatch.getElement();
-                    SchemaElementType elementType = element.getType();
-                    if (SchemaElementType.VALUE.equals(elementType)) {
-                        return itemIdToName.get(element.getId());
-                    }
-                    return schemaElementMatch.getWord();
-                })
-                .collect(Collectors.toSet());
+
+        SemanticSchema semanticSchema = queryCtx.getSemanticSchema();
+        if (semanticSchema == null || semanticSchema.getDataSetSchemaMap() == null) {
+            return new ArrayList<>(results);
+        }
+
+        DataSetSchema dataSetSchema = semanticSchema.getDataSetSchemaMap().get(dataSetId);
+        if (dataSetSchema == null) {
+            return new ArrayList<>(results);
+        }
+
+        TimeDefaultConfig timeDefaultConfig = dataSetSchema.getTagTypeTimeDefaultConfig();
+        SchemaElement partitionDimension = dataSetSchema.getPartitionDimension();
+
+        if (timeDefaultConfig == null || partitionDimension == null) {
+            return new ArrayList<>(results);
+        }
+
+        if (Objects.equals(timeDefaultConfig.getUnit(), -1)) {
+            results.remove(partitionDimension);
+        } else {
+            results.add(partitionDimension);
+        }
+
+        return new ArrayList<>(results);
     }
 }
