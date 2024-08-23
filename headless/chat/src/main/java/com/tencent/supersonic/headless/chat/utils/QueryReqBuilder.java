@@ -212,7 +212,8 @@ public class QueryReqBuilder {
 
     private static boolean isDateFieldAlreadyPresent(SemanticParseInfo parseInfo, String dateField) {
         return parseInfo.getDimensions().stream()
-                .anyMatch(dimension -> dimension.getBizName().equalsIgnoreCase(dateField));
+                .anyMatch(dimension -> dimension.getBizName().equalsIgnoreCase(dateField)
+                        || dimension.containsPartitionTime());
     }
 
     private static void addDimension(SemanticParseInfo parseInfo, SchemaElement dimension) {

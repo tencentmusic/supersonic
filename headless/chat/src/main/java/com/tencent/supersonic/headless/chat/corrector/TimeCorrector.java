@@ -57,7 +57,8 @@ public class TimeCorrector extends BaseSemanticCorrector {
         DataSetSchema dataSetSchema = chatQueryContext.getSemanticSchema().getDataSetSchemaMap().get(dataSetId);
         if (Objects.isNull(dataSetSchema)
                 || Objects.isNull(dataSetSchema.getPartitionDimension())
-                || Objects.isNull(dataSetSchema.getPartitionDimension().getName())) {
+                || Objects.isNull(dataSetSchema.getPartitionDimension().getName())
+                || TimeDimensionEnum.containsZhTimeDimension(whereFields)) {
             return;
         }
         String partitionDimension = dataSetSchema.getPartitionDimension().getName();
