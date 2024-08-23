@@ -57,14 +57,19 @@ public class TimeRangeParser implements SemanticParser {
     private void updateQueryContext(ChatQueryContext queryContext, DateConf dateConf) {
         if (!queryContext.getCandidateQueries().isEmpty()) {
             for (SemanticQuery query : queryContext.getCandidateQueries()) {
-                query.getParseInfo().setDateInfo(dateConf);
-                query.getParseInfo().setScore(query.getParseInfo().getScore() + dateConf.getDetectWord().length());
+                SemanticParseInfo parseInfo = query.getParseInfo();
+                if (queryContext.containsPartitionDimensions(parseInfo.getDataSetId())) {
+                    parseInfo.setDateInfo(dateConf);
+                }
+                parseInfo.setScore(parseInfo.getScore() + dateConf.getDetectWord().length());
             }
         } else {
             SemanticParseInfo contextParseInfo = queryContext.getContextParseInfo();
             if (QueryManager.containsRuleQuery(contextParseInfo.getQueryMode())) {
                 RuleSemanticQuery semanticQuery = QueryManager.createRuleQuery(contextParseInfo.getQueryMode());
-                contextParseInfo.setDateInfo(dateConf);
+                if (queryContext.containsPartitionDimensions(contextParseInfo.getDataSetId())) {
+                    contextParseInfo.setDateInfo(dateConf);
+                }
                 contextParseInfo.setScore(contextParseInfo.getScore() + dateConf.getDetectWord().length());
                 semanticQuery.setParseInfo(contextParseInfo);
                 queryContext.getCandidateQueries().add(semanticQuery);
