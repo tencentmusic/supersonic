@@ -21,6 +21,7 @@ import org.springframework.util.CollectionUtils;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -53,19 +54,24 @@ public class TimeCorrector extends BaseSemanticCorrector {
         String correctS2SQL = semanticParseInfo.getSqlInfo().getCorrectedS2SQL();
         List<String> whereFields = SqlSelectHelper.getWhereFields(correctS2SQL);
         Long dataSetId = semanticParseInfo.getDataSetId();
-
-        if (CollectionUtils.isEmpty(whereFields) || !TimeDimensionEnum.containsZhTimeDimension(whereFields)) {
+        DataSetSchema dataSetSchema = chatQueryContext.getSemanticSchema().getDataSetSchemaMap().get(dataSetId);
+        if (Objects.isNull(dataSetSchema)
+                || Objects.isNull(dataSetSchema.getPartitionDimension())
+                || Objects.isNull(dataSetSchema.getPartitionDimension().getName())) {
+            return;
+        }
+        String partitionDimension = dataSetSchema.getPartitionDimension().getName();
+        if (CollectionUtils.isEmpty(whereFields) || !whereFields.contains(partitionDimension)) {
             Pair<String, String> startEndDate = S2SqlDateHelper.getStartEndDate(chatQueryContext, dataSetId,
                     semanticParseInfo.getQueryType());
 
             if (isValidDateRange(startEndDate)) {
                 correctS2SQL = SqlAddHelper.addParenthesisToWhere(correctS2SQL);
-                String dateChName = TimeDimensionEnum.DAY.getChName();
                 String startDateLeft = startEndDate.getLeft();
                 String endDateRight = startEndDate.getRight();
 
                 String condExpr = String.format(" ( %s >= '%s'  and %s <= '%s' )",
-                        dateChName, startDateLeft, dateChName, endDateRight);
+                        partitionDimension, startDateLeft, partitionDimension, endDateRight);
                 correctS2SQL = addConditionToSQL(correctS2SQL, condExpr);
             }
         }

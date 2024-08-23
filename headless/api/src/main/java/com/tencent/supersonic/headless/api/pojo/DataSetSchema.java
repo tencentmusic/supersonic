@@ -127,6 +127,16 @@ public class DataSetSchema {
         return dimensions.stream().anyMatch(SchemaElement::containsPartitionTime);
     }
 
+    public SchemaElement getPartitionDimension() {
+        for (SchemaElement dimension : dimensions) {
+            String partitionTimeFormat = dimension.getPartitionTimeFormat();
+            if (StringUtils.isNotBlank(partitionTimeFormat)) {
+                return dimension;
+            }
+        }
+        return null;
+    }
+
     public String getPartitionTimeFormat() {
         for (SchemaElement dimension : dimensions) {
             String partitionTimeFormat = dimension.getPartitionTimeFormat();
