@@ -26,7 +26,7 @@
     </parent>
 
     <properties>
-        <revision>0.9.6-SNAPSHOT</revision>
+        <revision>0.9.6</revision>
         <java.source.version>1.8</java.source.version>
         <java.target.version>1.8</java.target.version>
         <maven.compiler.source>8</maven.compiler.source>

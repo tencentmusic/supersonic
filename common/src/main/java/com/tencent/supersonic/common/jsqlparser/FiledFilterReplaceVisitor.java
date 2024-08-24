@@ -1,9 +1,5 @@
 package com.tencent.supersonic.common.jsqlparser;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.Expression;
@@ -19,6 +15,11 @@ import net.sf.jsqlparser.expression.operators.relational.MinorThanEquals;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.schema.Column;
 import org.apache.commons.collections.CollectionUtils;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 
 @Slf4j
 public class FiledFilterReplaceVisitor extends ExpressionVisitorAdapter {
@@ -76,37 +77,39 @@ public class FiledFilterReplaceVisitor extends ExpressionVisitorAdapter {
 
     public List<Expression> parserFilter(ComparisonOperator comparisonOperator, String condExpr) {
         List<Expression> result = new ArrayList<>();
-        String toString = comparisonOperator.toString();
+        String comparisonOperatorStr = comparisonOperator.toString();
         Expression leftExpression = comparisonOperator.getLeftExpression();
+
         if (!(leftExpression instanceof Function)) {
             return result;
         }
-        Function leftExpressionFunction = (Function) leftExpression;
-        if (leftExpressionFunction.toString().contains(JsqlConstants.DATE_FUNCTION)) {
+
+        Function leftFunction = (Function) leftExpression;
+        if (leftFunction.toString().contains(JsqlConstants.DATE_FUNCTION)) {
             return result;
         }
 
-        //List<Expression> leftExpressions = leftExpressionFunction.getParameters().getExpressions();
-        ExpressionList<?> leftExpressions = leftExpressionFunction.getParameters();
-        if (CollectionUtils.isEmpty(leftExpressions)) {
+        ExpressionList<?> leftFunctionParams = leftFunction.getParameters();
+        if (CollectionUtils.isEmpty(leftFunctionParams)) {
             return result;
         }
-        Column field = (Column) leftExpressions.get(0);
+
+        Column field = (Column) leftFunctionParams.get(0);
         String columnName = field.getColumnName();
         if (!fieldNames.contains(columnName)) {
             return null;
         }
+
         try {
-            ComparisonOperator expression = (ComparisonOperator) CCJSqlParserUtil.parseCondExpression(condExpr);
-            comparisonOperator.setLeftExpression(expression.getLeftExpression());
-            comparisonOperator.setRightExpression(expression.getRightExpression());
-            comparisonOperator.setASTNode(expression.getASTNode());
-            result.add(CCJSqlParserUtil.parseCondExpression(toString));
+            ComparisonOperator parsedExpression = (ComparisonOperator) CCJSqlParserUtil.parseCondExpression(condExpr);
+            comparisonOperator.setLeftExpression(parsedExpression.getLeftExpression());
+            comparisonOperator.setRightExpression(parsedExpression.getRightExpression());
+            comparisonOperator.setASTNode(parsedExpression.getASTNode());
+            result.add(CCJSqlParserUtil.parseCondExpression(comparisonOperatorStr));
             return result;
         } catch (JSQLParserException e) {
             log.error("JSQLParserException", e);
         }
         return null;
     }
-
 }

@@ -52,6 +52,7 @@ public class QueryTypeParser implements SemanticParser {
         if (Objects.isNull(sqlInfo) || StringUtils.isBlank(sqlInfo.getParsedS2SQL())) {
             return QueryType.DETAIL;
         }
+
         //1. entity queryType
         Long dataSetId = parseInfo.getDataSetId();
         SemanticSchema semanticSchema = chatQueryContext.getSemanticSchema();
@@ -66,23 +67,13 @@ public class QueryTypeParser implements SemanticParser {
                     return QueryType.ID;
                 }
             }
-            List<String> selectFields = SqlSelectHelper.getSelectFields(sqlInfo.getParsedS2SQL());
-            selectFields.addAll(whereFields);
-            List<String> selectWhereFilterByTimeFields = filterByTimeFields(selectFields);
-            if (CollectionUtils.isNotEmpty(selectWhereFilterByTimeFields)) {
-                Set<String> tags = semanticSchema.getTags(dataSetId).stream().map(SchemaElement::getName)
-                        .collect(Collectors.toSet());
-                //If all the fields in the SELECT/WHERE statement are of tag type.
-                if (CollectionUtils.isNotEmpty(tags)
-                        && tags.containsAll(selectWhereFilterByTimeFields)) {
-                    return QueryType.DETAIL;
-                }
-            }
         }
+
         //2. metric queryType
         if (selectContainsMetric(sqlInfo, dataSetId, semanticSchema)) {
             return QueryType.METRIC;
         }
+
         return QueryType.DETAIL;
     }
 

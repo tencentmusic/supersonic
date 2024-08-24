@@ -53,9 +53,12 @@ public class QueryReqBuilder {
         queryStructReq.setMetricFilters(metricFilters);
 
         addDateDimension(parseInfo);
-        List<String> dimensions = parseInfo.getDimensions().stream().map(SchemaElement::getBizName)
-                .collect(Collectors.toList());
-        queryStructReq.setGroups(dimensions);
+
+        if (isDateFieldAlreadyPresent(parseInfo, getDateField(parseInfo.getDateInfo()))) {
+            parseInfo.getDimensions().removeIf(schemaElement -> schemaElement.containsPartitionTime());
+        }
+        queryStructReq.setGroups(parseInfo.getDimensions().stream().map(SchemaElement::getBizName)
+                .collect(Collectors.toList()));
         queryStructReq.setLimit(parseInfo.getLimit());
         // only one metric is queried at once
         Set<SchemaElement> metrics = parseInfo.getMetrics();

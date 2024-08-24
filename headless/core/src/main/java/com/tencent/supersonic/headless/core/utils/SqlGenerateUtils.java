@@ -62,7 +62,7 @@ public class SqlGenerateUtils {
     private final ExecutorConfig executorConfig;
 
     public SqlGenerateUtils(SqlFilterUtils sqlFilterUtils,
-            DateModeUtils dateModeUtils, ExecutorConfig executorConfig) {
+                            DateModeUtils dateModeUtils, ExecutorConfig executorConfig) {
         this.sqlFilterUtils = sqlFilterUtils;
         this.dateModeUtils = dateModeUtils;
         this.executorConfig = executorConfig;
@@ -168,7 +168,7 @@ public class SqlGenerateUtils {
     }
 
     private String mergeDateWhereClause(QueryParam queryParam, String whereClauseFromFilter,
-            String whereFromDate) {
+                                        String whereFromDate) {
         if (StringUtils.isNotEmpty(whereFromDate) && StringUtils.isNotEmpty(whereClauseFromFilter)) {
             return String.format("%s AND (%s)", whereFromDate, whereClauseFromFilter);
         } else if (StringUtils.isEmpty(whereFromDate) && StringUtils.isNotEmpty(whereClauseFromFilter)) {
@@ -187,10 +187,10 @@ public class SqlGenerateUtils {
                 || StringUtils.isEmpty(dateDate.getStartDate())
                 && StringUtils.isEmpty(dateDate.getEndDate())) {
             if (dateInfo.getDateMode().equals(DateConf.DateMode.LIST)) {
-                return dateModeUtils.listDateStr(dateDate, dateInfo);
+                return dateModeUtils.listDateStr(dateInfo);
             }
             if (dateInfo.getDateMode().equals(DateConf.DateMode.BETWEEN)) {
-                return dateModeUtils.betweenDateStr(dateDate, dateInfo);
+                return dateModeUtils.betweenDateStr(dateInfo);
             }
             if (dateModeUtils.hasAvailableDataMode(dateInfo)) {
                 return dateModeUtils.hasDataModeStr(dateDate, dateInfo);
@@ -270,13 +270,13 @@ public class SqlGenerateUtils {
     }
 
     public String generateDerivedMetric(final List<MetricSchemaResp> metricResps, final Set<String> allFields,
-            final Map<String, Measure> allMeasures,
-            final List<DimSchemaResp> dimensionResps,
-            final String expression, final MetricDefineType metricDefineType,
-            AggOption aggOption,
-            Set<String> visitedMetric,
-            Set<String> measures,
-            Set<String> dimensions) {
+                                        final Map<String, Measure> allMeasures,
+                                        final List<DimSchemaResp> dimensionResps,
+                                        final String expression, final MetricDefineType metricDefineType,
+                                        AggOption aggOption,
+                                        Set<String> visitedMetric,
+                                        Set<String> measures,
+                                        Set<String> dimensions) {
         Set<String> fields = SqlSelectHelper.getColumnFromExpr(expression);
         if (!CollectionUtils.isEmpty(fields)) {
             Map<String, String> replace = new HashMap<>();
@@ -331,8 +331,8 @@ public class SqlGenerateUtils {
         if (AggOperatorEnum.COUNT_DISTINCT.getOperator().equalsIgnoreCase(measure.getAgg())) {
             return AggOption.NATIVE.equals(aggOption) ? measure.getBizName()
                     : AggOperatorEnum.COUNT.getOperator() + " ( " + AggOperatorEnum.DISTINCT + " "
-                            + measure.getBizName()
-                            + " ) ";
+                    + measure.getBizName()
+                    + " ) ";
         }
         return AggOption.NATIVE.equals(aggOption) ? measure.getBizName()
                 : measure.getAgg() + " ( " + measure.getBizName() + " ) ";

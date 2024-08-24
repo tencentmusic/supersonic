@@ -74,7 +74,7 @@ public class MapperConfig extends ParameterConfig {
                     "number", "Mapper相关配置");
 
     public static final Parameter EMBEDDING_MAPPER_THRESHOLD =
-            new Parameter("s2.mapper.embedding.threshold", "0.99",
+            new Parameter("s2.mapper.embedding.threshold", "0.98",
                     "向量召回相似度阈值",
                     "相似度小于该阈值的则舍弃",
                     "number", "Mapper相关配置");

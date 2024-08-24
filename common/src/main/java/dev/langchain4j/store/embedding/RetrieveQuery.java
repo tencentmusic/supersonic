@@ -12,7 +12,7 @@ public class RetrieveQuery {
 
     private List<String> queryTextsList;
 
-    private Map<String, String> filterCondition;
+    private Map<String, Object> filterCondition;
 
     private List<List<Double>> queryEmbeddings;
 

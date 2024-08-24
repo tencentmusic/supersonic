@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ModelProvider {
+
     private static final Map<String, ModelFactory> factories = new HashMap<>();
 
     public static void add(String provider, ModelFactory modelFactory) {

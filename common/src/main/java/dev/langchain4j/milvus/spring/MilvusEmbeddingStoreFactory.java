@@ -22,6 +22,7 @@ public class MilvusEmbeddingStoreFactory extends BaseEmbeddingStoreFactory {
         EmbeddingStoreProperties embeddingStore = new EmbeddingStoreProperties();
         BeanUtils.copyProperties(storeConfig, embeddingStore);
         embeddingStore.setUri(storeConfig.getBaseUrl());
+        embeddingStore.setToken(storeConfig.getApiKey());
         return embeddingStore;
     }
 

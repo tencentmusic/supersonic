@@ -71,7 +71,6 @@ public class QueryExpressionReplaceVisitor extends ExpressionVisitorAdapter {
                 }
             }
         }
-        //selectExpressionItem.getExpression().accept(this);
     }
 
     public static Expression replace(Expression expression, Map<String, String> fieldExprMap) {

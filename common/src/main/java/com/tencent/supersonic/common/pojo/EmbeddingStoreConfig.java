@@ -21,4 +21,5 @@ public class EmbeddingStoreConfig implements Serializable {
     private String apiKey;
     private Long timeOut = 60L;
     private Integer dimension;
+    private String databaseName;
 }

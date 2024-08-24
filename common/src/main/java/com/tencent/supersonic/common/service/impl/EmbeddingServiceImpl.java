@@ -26,7 +26,6 @@ import org.apache.commons.collections.MapUtils;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -76,7 +75,7 @@ public class EmbeddingServiceImpl implements EmbeddingService {
         if (cachedResult != null) {
             return cachedResult;
         }
-        Map<String, String> filterCondition = new HashMap<>();
+        Map<String, Object> filterCondition = new HashMap<>();
         filterCondition.put(TextSegmentConvert.QUERY_ID, queryId);
         Filter filter = createCombinedFilter(filterCondition);
         EmbeddingSearchRequest request = EmbeddingSearchRequest.builder()
@@ -114,54 +113,73 @@ public class EmbeddingServiceImpl implements EmbeddingService {
 
     @Override
     public List<RetrieveQueryResult> retrieveQuery(String collectionName, RetrieveQuery retrieveQuery, int num) {
-        List<RetrieveQueryResult> results = new ArrayList<>();
-        EmbeddingStoreFactory embeddingStoreFactory = EmbeddingStoreFactoryProvider.getFactory();
-        EmbeddingStore embeddingStore = embeddingStoreFactory.create(collectionName);
-        List<String> queryTextsList = retrieveQuery.getQueryTextsList();
-        Map<String, String> filterCondition = retrieveQuery.getFilterCondition();
-        for (String queryText : queryTextsList) {
-            EmbeddingModel embeddingModel = ModelProvider.getEmbeddingModel();
-            Embedding embeddedText = embeddingModel.embed(queryText).content();
-            Filter filter = createCombinedFilter(filterCondition);
-            EmbeddingSearchRequest request = EmbeddingSearchRequest.builder()
-                    .queryEmbedding(embeddedText).filter(filter).maxResults(num).build();
-            EmbeddingSearchResult result = embeddingStore.search(request);
-            List<EmbeddingMatch<TextSegment>> relevant = result.matches();
-            RetrieveQueryResult retrieveQueryResult = new RetrieveQueryResult();
-            retrieveQueryResult.setQuery(queryText);
-            List<Retrieval> retrievals = new ArrayList<>();
-            for (EmbeddingMatch<TextSegment> embeddingMatch : relevant) {
-                Retrieval retrieval = new Retrieval();
-                TextSegment embedded = embeddingMatch.embedded();
-                retrieval.setDistance(1 - embeddingMatch.score());
-                retrieval.setId(TextSegmentConvert.getQueryId(embedded));
-                retrieval.setQuery(embedded.text());
-                Map<String, Object> metadata = new HashMap<>();
-                if (Objects.nonNull(embedded)
-                        && MapUtils.isNotEmpty(embedded.metadata().toMap())) {
-                    metadata.putAll(embedded.metadata().toMap());
-                }
-                retrieval.setMetadata(metadata);
-                retrievals.add(retrieval);
-            }
-            retrievals = retrievals.stream()
-                    .sorted(Comparator.comparingDouble(Retrieval::getDistance).reversed())
-                    .limit(num)
-                    .collect(Collectors.toList());
-            retrieveQueryResult.setRetrieval(retrievals);
-            results.add(retrieveQueryResult);
-        }
-        return results;
+        EmbeddingStore embeddingStore = EmbeddingStoreFactoryProvider.getFactory().create(collectionName);
+        EmbeddingModel embeddingModel = ModelProvider.getEmbeddingModel();
+        Map<String, Object> filterCondition = retrieveQuery.getFilterCondition();
+        return retrieveQuery.getQueryTextsList().stream()
+                .map(queryText -> retrieveSingleQuery(queryText, embeddingModel, embeddingStore, filterCondition, num))
+                .collect(Collectors.toList());
     }
 
-    private static Filter createCombinedFilter(Map<String, String> map) {
-        Filter result = null;
+    private RetrieveQueryResult retrieveSingleQuery(String queryText,
+                                                    EmbeddingModel embeddingModel,
+                                                    EmbeddingStore embeddingStore,
+                                                    Map<String, Object> filterCondition,
+                                                    int num) {
+        Embedding embeddedText = embeddingModel.embed(queryText).content();
+        Filter filter = createCombinedFilter(filterCondition);
+        EmbeddingSearchRequest request = EmbeddingSearchRequest.builder()
+                .queryEmbedding(embeddedText).filter(filter).maxResults(num).build();
+        EmbeddingSearchResult<TextSegment> result = embeddingStore.search(request);
+
+        List<Retrieval> retrievals = result.matches().stream()
+                .map(this::convertToRetrieval)
+                .sorted(Comparator.comparingDouble(Retrieval::getDistance).reversed())
+                .limit(num)
+                .collect(Collectors.toList());
+
+        RetrieveQueryResult retrieveQueryResult = new RetrieveQueryResult();
+        retrieveQueryResult.setQuery(queryText);
+        retrieveQueryResult.setRetrieval(retrievals);
+        return retrieveQueryResult;
+    }
+
+    private Retrieval convertToRetrieval(EmbeddingMatch<TextSegment> embeddingMatch) {
+        Retrieval retrieval = new Retrieval();
+        TextSegment embedded = embeddingMatch.embedded();
+        retrieval.setDistance(1 - embeddingMatch.score());
+        retrieval.setId(TextSegmentConvert.getQueryId(embedded));
+        retrieval.setQuery(embedded.text());
+
+        Map<String, Object> metadata = new HashMap<>();
+        if (Objects.nonNull(embedded) && MapUtils.isNotEmpty(embedded.metadata().toMap())) {
+            metadata.putAll(embedded.metadata().toMap());
+        }
+        retrieval.setMetadata(metadata);
+        return retrieval;
+    }
+
+    public static Filter createCombinedFilter(Map<String, Object> map) {
         if (MapUtils.isEmpty(map)) {
             return null;
         }
-        for (Map.Entry<String, String> entry : map.entrySet()) {
-            IsEqualTo isEqualTo = new IsEqualTo(entry.getKey(), entry.getValue());
-            result = (result == null) ? isEqualTo : Filter.and(result, isEqualTo);
+        Filter result = null;
+        for (Map.Entry<String, Object> entry : map.entrySet()) {
+            String key = entry.getKey();
+            Object value = entry.getValue();
+            Filter orFilter = null;
+
+            if (value instanceof List) {
+                for (String val : (List<String>) value) {
+                    IsEqualTo isEqualTo = new IsEqualTo(key, val);
+                    orFilter = (orFilter == null) ? isEqualTo : Filter.or(orFilter, isEqualTo);
+                }
+            } else if (value instanceof String) {
+                orFilter = new IsEqualTo(key, value);
+            }
+            if (orFilter != null) {
+                result = (result == null) ? orFilter : Filter.and(result, orFilter);
+            }
         }
         return result;
     }

@@ -1,10 +1,5 @@
 package com.tencent.supersonic.common.jsqlparser;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.BinaryExpression;
@@ -32,6 +27,12 @@ import net.sf.jsqlparser.statement.select.Select;
 import net.sf.jsqlparser.statement.select.SelectItem;
 import net.sf.jsqlparser.statement.select.SelectVisitorAdapter;
 import org.springframework.util.CollectionUtils;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 
 /**
  * Sql Parser remove Helper
@@ -228,7 +229,6 @@ public class SqlRemoveHelper {
         if (selectStatement == null) {
             return sql;
         }
-        //SelectBody selectBody = selectStatement.getSelectBody();
         if (!(selectStatement instanceof PlainSelect)) {
             return sql;
         }

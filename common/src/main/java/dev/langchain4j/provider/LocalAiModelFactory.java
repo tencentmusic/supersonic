@@ -15,6 +15,7 @@ import java.time.Duration;
 public class LocalAiModelFactory implements ModelFactory, InitializingBean {
     public static final String PROVIDER = "LOCAL_AI";
     public static final String DEFAULT_BASE_URL = "http://localhost:8080";
+    public static final String DEFAULT_MODEL_NAME = "ggml-gpt4all-j";
     @Override
     public ChatLanguageModel createChatModel(ChatModelConfig modelConfig) {
         return LocalAiChatModel

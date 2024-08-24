@@ -61,7 +61,6 @@ public abstract class BaseSemanticCorrector implements SemanticCorrector {
                     return elements.stream();
                 })
                 .collect(Collectors.toMap(a -> a, a -> a, (k1, k2) -> k1));
-
         if (chatQueryContext.containsPartitionDimensions(dataSetId)) {
             result.put(TimeDimensionEnum.DAY.getChName(), TimeDimensionEnum.DAY.getChName());
             result.put(TimeDimensionEnum.MONTH.getChName(), TimeDimensionEnum.MONTH.getChName());

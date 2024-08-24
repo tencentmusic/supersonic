@@ -26,6 +26,7 @@ public class ChatModelConfig implements Serializable {
     private Integer maxRetries = 3;
     private Boolean logRequests = false;
     private Boolean logResponses = false;
+    private Boolean enableSearch = false;
 
     public String keyDecrypt() {
         return AESEncryptionUtil.aesDecryptECB(getApiKey());

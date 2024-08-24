@@ -16,6 +16,7 @@ public class EmbeddingModelConfig implements Serializable {
     private String provider;
     private String baseUrl;
     private String apiKey;
+    private String secretKey;
     private String modelName;
     private String modelPath;
     private String vocabularyPath;

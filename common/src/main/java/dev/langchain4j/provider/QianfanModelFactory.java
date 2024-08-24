@@ -14,6 +14,10 @@ public class QianfanModelFactory implements ModelFactory, InitializingBean {
 
     public static final String PROVIDER = "QIANFAN";
     public static final String DEFAULT_BASE_URL = "https://aip.baidubce.com";
+    public static final String DEFAULT_MODEL_NAME = "Llama-2-70b-chat";
+
+    public static final String DEFAULT_EMBEDDING_MODEL_NAME = "Embedding-V1";
+    public static final String DEFAULT_ENDPOINT = "llama_2_70b";
 
     @Override
     public ChatLanguageModel createChatModel(ChatModelConfig modelConfig) {
@@ -36,6 +40,7 @@ public class QianfanModelFactory implements ModelFactory, InitializingBean {
         return QianfanEmbeddingModel.builder()
                 .baseUrl(embeddingModelConfig.getBaseUrl())
                 .apiKey(embeddingModelConfig.getApiKey())
+                .secretKey(embeddingModelConfig.getSecretKey())
                 .modelName(embeddingModelConfig.getModelName())
                 .maxRetries(embeddingModelConfig.getMaxRetries())
                 .logRequests(embeddingModelConfig.getLogRequests())
