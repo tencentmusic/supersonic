@@ -61,14 +61,15 @@ public abstract class BaseSemanticCorrector implements SemanticCorrector {
                     return elements.stream();
                 })
                 .collect(Collectors.toMap(a -> a, a -> a, (k1, k2) -> k1));
+        if (chatQueryContext.containsPartitionDimensions(dataSetId)) {
+            result.put(TimeDimensionEnum.DAY.getChName(), TimeDimensionEnum.DAY.getChName());
+            result.put(TimeDimensionEnum.MONTH.getChName(), TimeDimensionEnum.MONTH.getChName());
+            result.put(TimeDimensionEnum.WEEK.getChName(), TimeDimensionEnum.WEEK.getChName());
 
-        result.put(TimeDimensionEnum.DAY.getChName(), TimeDimensionEnum.DAY.getChName());
-        result.put(TimeDimensionEnum.MONTH.getChName(), TimeDimensionEnum.MONTH.getChName());
-        result.put(TimeDimensionEnum.WEEK.getChName(), TimeDimensionEnum.WEEK.getChName());
-
-        result.put(TimeDimensionEnum.DAY.getName(), TimeDimensionEnum.DAY.getChName());
-        result.put(TimeDimensionEnum.MONTH.getName(), TimeDimensionEnum.MONTH.getChName());
-        result.put(TimeDimensionEnum.WEEK.getName(), TimeDimensionEnum.WEEK.getChName());
+            result.put(TimeDimensionEnum.DAY.getName(), TimeDimensionEnum.DAY.getChName());
+            result.put(TimeDimensionEnum.MONTH.getName(), TimeDimensionEnum.MONTH.getChName());
+            result.put(TimeDimensionEnum.WEEK.getName(), TimeDimensionEnum.WEEK.getChName());
+        }
         return result;
     }
 
