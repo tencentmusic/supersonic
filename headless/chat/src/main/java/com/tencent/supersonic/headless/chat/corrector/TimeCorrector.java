@@ -47,6 +47,7 @@ public class TimeCorrector extends BaseSemanticCorrector {
         removeFieldNames.add(TimeDimensionEnum.WEEK.getChName());
         removeFieldNames.add(TimeDimensionEnum.MONTH.getChName());
         correctS2SQL = SqlRemoveHelper.removeWhereCondition(correctS2SQL, removeFieldNames);
+        correctS2SQL = SqlRemoveHelper.removeGroupBy(correctS2SQL, removeFieldNames);
         semanticParseInfo.getSqlInfo().setCorrectedS2SQL(correctS2SQL);
     }
 

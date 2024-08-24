@@ -7,7 +7,6 @@ import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementMatch;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
 import com.tencent.supersonic.headless.api.pojo.SemanticSchema;
-import com.tencent.supersonic.headless.api.pojo.TimeDefaultConfig;
 import com.tencent.supersonic.headless.chat.ChatQueryContext;
 import com.tencent.supersonic.headless.chat.parser.ParserConfig;
 import com.tencent.supersonic.headless.chat.parser.SatisfactionChecker;
@@ -231,38 +230,24 @@ public class LLMRequestService {
     protected List<SchemaElement> getMatchedDimensions(ChatQueryContext queryCtx, Long dataSetId) {
 
         List<SchemaElementMatch> matchedElements = queryCtx.getMapInfo().getMatchedElements(dataSetId);
-        Set<SchemaElement> results = new HashSet<>();
-
-        if (!CollectionUtils.isEmpty(matchedElements)) {
-            results = matchedElements.stream()
-                    .filter(element -> SchemaElementType.DIMENSION.equals(element.getElement().getType()))
-                    .map(SchemaElementMatch::getElement)
-                    .collect(Collectors.toSet());
-        }
-
+        Set<SchemaElement> dimensionElements = matchedElements.stream()
+                .filter(element -> SchemaElementType.DIMENSION.equals(element.getElement().getType()))
+                .map(SchemaElementMatch::getElement)
+                .collect(Collectors.toSet());
         SemanticSchema semanticSchema = queryCtx.getSemanticSchema();
         if (semanticSchema == null || semanticSchema.getDataSetSchemaMap() == null) {
-            return new ArrayList<>(results);
+            return new ArrayList<>(dimensionElements);
         }
 
-        DataSetSchema dataSetSchema = semanticSchema.getDataSetSchemaMap().get(dataSetId);
+        Map<Long, DataSetSchema> dataSetSchemaMap = semanticSchema.getDataSetSchemaMap();
+        DataSetSchema dataSetSchema = dataSetSchemaMap.get(dataSetId);
         if (dataSetSchema == null) {
-            return new ArrayList<>(results);
+            return new ArrayList<>(dimensionElements);
         }
-
-        TimeDefaultConfig timeDefaultConfig = dataSetSchema.getTagTypeTimeDefaultConfig();
         SchemaElement partitionDimension = dataSetSchema.getPartitionDimension();
-
-        if (timeDefaultConfig == null || partitionDimension == null) {
-            return new ArrayList<>(results);
+        if (partitionDimension != null) {
+            dimensionElements.add(partitionDimension);
         }
-
-        if (Objects.equals(timeDefaultConfig.getUnit(), -1)) {
-            results.remove(partitionDimension);
-        } else {
-            results.add(partitionDimension);
-        }
-
-        return new ArrayList<>(results);
+        return new ArrayList<>(dimensionElements);
     }
 }
