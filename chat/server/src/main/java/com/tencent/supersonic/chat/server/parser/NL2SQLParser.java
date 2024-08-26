@@ -203,8 +203,10 @@ public class NL2SQLParser implements ChatQueryParser {
         Response<AiMessage> response = chatLanguageModel.generate(prompt.toUserMessage());
         String rewrittenQuery = response.content().text();
         keyPipelineLog.info("NL2SQLParser modelResp:{}", rewrittenQuery);
-
         parseContext.setQueryText(rewrittenQuery);
+        QueryNLReq rewrittenQueryNLReq = QueryReqConverter.buildText2SqlQueryReq(parseContext);
+        MapResp rewrittenQueryMapResult = chatLayerService.performMapping(rewrittenQueryNLReq);
+        parseContext.setMapInfo(rewrittenQueryMapResult.getMapInfo());
         log.info("Last Query: {} Current Query: {}, Rewritten Query: {}",
                 lastQuery.getQueryText(), currentMapResult.getQueryText(), rewrittenQuery);
     }
