@@ -16,6 +16,6 @@ public enum MemoryReviewResult {
                 return reviewRet;
             }
         }
-        throw new InvalidArgumentException("Invalid MemoryReviewResult type:[" + value +"]");
+        throw new InvalidArgumentException("Invalid MemoryReviewResult type:[" + value + "]");
     }
 }
