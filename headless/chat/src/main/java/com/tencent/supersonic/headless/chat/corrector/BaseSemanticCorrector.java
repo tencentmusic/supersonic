@@ -1,8 +1,10 @@
 package com.tencent.supersonic.headless.chat.corrector;
 
 import com.tencent.supersonic.common.jsqlparser.SqlAddHelper;
+import com.tencent.supersonic.common.jsqlparser.SqlRemoveHelper;
 import com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum;
 import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
+import com.tencent.supersonic.headless.api.pojo.DataSetSchema;
 import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.api.pojo.SemanticSchema;
@@ -61,15 +63,13 @@ public abstract class BaseSemanticCorrector implements SemanticCorrector {
                     return elements.stream();
                 })
                 .collect(Collectors.toMap(a -> a, a -> a, (k1, k2) -> k1));
-        if (chatQueryContext.containsPartitionDimensions(dataSetId)) {
-            result.put(TimeDimensionEnum.DAY.getChName(), TimeDimensionEnum.DAY.getChName());
-            result.put(TimeDimensionEnum.MONTH.getChName(), TimeDimensionEnum.MONTH.getChName());
-            result.put(TimeDimensionEnum.WEEK.getChName(), TimeDimensionEnum.WEEK.getChName());
+        result.put(TimeDimensionEnum.DAY.getChName(), TimeDimensionEnum.DAY.getChName());
+        result.put(TimeDimensionEnum.MONTH.getChName(), TimeDimensionEnum.MONTH.getChName());
+        result.put(TimeDimensionEnum.WEEK.getChName(), TimeDimensionEnum.WEEK.getChName());
 
-            result.put(TimeDimensionEnum.DAY.getName(), TimeDimensionEnum.DAY.getChName());
-            result.put(TimeDimensionEnum.MONTH.getName(), TimeDimensionEnum.MONTH.getChName());
-            result.put(TimeDimensionEnum.WEEK.getName(), TimeDimensionEnum.WEEK.getChName());
-        }
+        result.put(TimeDimensionEnum.DAY.getName(), TimeDimensionEnum.DAY.getChName());
+        result.put(TimeDimensionEnum.MONTH.getName(), TimeDimensionEnum.MONTH.getChName());
+        result.put(TimeDimensionEnum.WEEK.getName(), TimeDimensionEnum.WEEK.getChName());
         return result;
     }
 
@@ -121,5 +121,25 @@ public abstract class BaseSemanticCorrector implements SemanticCorrector {
                 ).collect(Collectors.toSet());
         dimensions.add(TimeDimensionEnum.DAY.getChName());
         return dimensions;
+    }
+
+    protected boolean containsPartitionDimensions(ChatQueryContext chatQueryContext,
+                                                  SemanticParseInfo semanticParseInfo) {
+        Long dataSetId = semanticParseInfo.getDataSetId();
+        SemanticSchema semanticSchema = chatQueryContext.getSemanticSchema();
+        DataSetSchema dataSetSchema = semanticSchema.getDataSetSchemaMap().get(dataSetId);
+        return dataSetSchema.containsPartitionDimensions();
+    }
+
+    protected void removeDateIfExist(SemanticParseInfo semanticParseInfo) {
+        String correctS2SQL = semanticParseInfo.getSqlInfo().getCorrectedS2SQL();
+        Set<String> removeFieldNames = new HashSet<>();
+        removeFieldNames.add(TimeDimensionEnum.DAY.getChName());
+        removeFieldNames.add(TimeDimensionEnum.WEEK.getChName());
+        removeFieldNames.add(TimeDimensionEnum.MONTH.getChName());
+        correctS2SQL = SqlRemoveHelper.removeWhereCondition(correctS2SQL, removeFieldNames);
+        correctS2SQL = SqlRemoveHelper.removeSelect(correctS2SQL, removeFieldNames);
+        correctS2SQL = SqlRemoveHelper.removeGroupBy(correctS2SQL, removeFieldNames);
+        semanticParseInfo.getSqlInfo().setCorrectedS2SQL(correctS2SQL);
     }
 }

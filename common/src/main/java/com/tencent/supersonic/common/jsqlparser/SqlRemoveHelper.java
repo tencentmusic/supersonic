@@ -25,11 +25,13 @@ import net.sf.jsqlparser.statement.select.GroupByElement;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.Select;
 import net.sf.jsqlparser.statement.select.SelectItem;
+import net.sf.jsqlparser.statement.select.SelectItemVisitorAdapter;
 import net.sf.jsqlparser.statement.select.SelectVisitorAdapter;
 import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -42,10 +44,7 @@ public class SqlRemoveHelper {
 
     public static String removeAsteriskAndAddFields(String sql, Set<String> needAddDefaultFields) {
         Select selectStatement = SqlSelectHelper.getSelect(sql);
-        if (Objects.isNull(selectStatement)) {
-            return sql;
-        }
-        if (!(selectStatement instanceof PlainSelect)) {
+        if (isInvalidSelect(selectStatement)) {
             return sql;
         }
         List<SelectItem<?>> selectItems = ((PlainSelect) selectStatement).getSelectItems();
@@ -63,10 +62,7 @@ public class SqlRemoveHelper {
 
     public static String removeSameFieldFromSelect(String sql) {
         Select selectStatement = SqlSelectHelper.getSelect(sql);
-        if (selectStatement == null) {
-            return sql;
-        }
-        if (!(selectStatement instanceof PlainSelect)) {
+        if (isInvalidSelect(selectStatement)) {
             return sql;
         }
         List<SelectItem<?>> selectItems = ((PlainSelect) selectStatement).getSelectItems();
@@ -106,10 +102,7 @@ public class SqlRemoveHelper {
 
     public static String removeNumberFilter(String sql) {
         Select selectStatement = SqlSelectHelper.getSelect(sql);
-        if (selectStatement == null) {
-            return sql;
-        }
-        if (!(selectStatement instanceof PlainSelect)) {
+        if (isInvalidSelect(selectStatement)) {
             return sql;
         }
         Expression where = ((PlainSelect) selectStatement).getWhere();
@@ -226,10 +219,7 @@ public class SqlRemoveHelper {
 
     public static String removeGroupBy(String sql, Set<String> fields) {
         Select selectStatement = SqlSelectHelper.getSelect(sql);
-        if (selectStatement == null) {
-            return sql;
-        }
-        if (!(selectStatement instanceof PlainSelect)) {
+        if (isInvalidSelect(selectStatement)) {
             return sql;
         }
         GroupByElement groupByElement = ((PlainSelect) selectStatement).getGroupBy();
@@ -246,6 +236,30 @@ public class SqlRemoveHelper {
         });
         if (CollectionUtils.isEmpty(groupByExpressionList.getExpressions())) {
             ((PlainSelect) selectStatement).setGroupByElement(null);
+        }
+        return selectStatement.toString();
+    }
+
+    public static String removeSelect(String sql, Set<String> fields) {
+        Select selectStatement = SqlSelectHelper.getSelect(sql);
+        if (isInvalidSelect(selectStatement)) {
+            return sql;
+        }
+        List<SelectItem<?>> selectItems = ((PlainSelect) selectStatement).getSelectItems();
+        Iterator<SelectItem<?>> iterator = selectItems.iterator();
+        while (iterator.hasNext()) {
+            SelectItem selectItem = iterator.next();
+            selectItem.accept(new SelectItemVisitorAdapter() {
+                @Override
+                public void visit(SelectItem item) {
+                    if (fields.contains(item.getExpression().toString())) {
+                        iterator.remove();
+                    }
+                }
+            });
+        }
+        if (selectItems.isEmpty()) {
+            selectItems.add(new SelectItem(new AllColumns()));
         }
         return selectStatement.toString();
     }
@@ -337,6 +351,10 @@ public class SqlRemoveHelper {
         } else {
             return expression;
         }
+    }
+
+    private static boolean isInvalidSelect(Select selectStatement) {
+        return Objects.isNull(selectStatement) || !(selectStatement instanceof PlainSelect);
     }
 
 }
