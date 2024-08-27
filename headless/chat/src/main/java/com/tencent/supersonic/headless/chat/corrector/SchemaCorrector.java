@@ -36,6 +36,8 @@ public class SchemaCorrector extends BaseSemanticCorrector {
     @Override
     public void doCorrect(ChatQueryContext chatQueryContext, SemanticParseInfo semanticParseInfo) {
 
+        removeDateFields(chatQueryContext, semanticParseInfo);
+
         correctAggFunction(semanticParseInfo);
 
         replaceAlias(semanticParseInfo);
@@ -45,6 +47,13 @@ public class SchemaCorrector extends BaseSemanticCorrector {
         updateFieldValueByLinkingValue(semanticParseInfo);
 
         correctFieldName(chatQueryContext, semanticParseInfo);
+    }
+
+    private void removeDateFields(ChatQueryContext chatQueryContext, SemanticParseInfo semanticParseInfo) {
+        if (containsPartitionDimensions(chatQueryContext, semanticParseInfo)) {
+            return;
+        }
+        removeDateIfExist(semanticParseInfo);
     }
 
     private void correctAggFunction(SemanticParseInfo semanticParseInfo) {

@@ -1,10 +1,11 @@
 package com.tencent.supersonic.common.jsqlparser;
 
+import org.junit.Assert;
+import org.junit.jupiter.api.Test;
+
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import org.junit.Assert;
-import org.junit.jupiter.api.Test;
 
 /**
  * SqlParser Remove Helper Test
@@ -128,4 +129,38 @@ class SqlRemoveHelperTest {
                 replaceSql);
     }
 
+    @Test
+    void testRemoveSelect() {
+        String sql = "select 数据日期,歌曲名 from 歌曲库 where 歌曲名 = '邓紫棋' and 数据日期 = '2023-08-09' and 歌曲发布时间 = '2023-08-01'";
+
+        Set<String> removeFieldNames = new HashSet<>();
+        removeFieldNames.add("数据日期");
+        String replaceSql = SqlRemoveHelper.removeSelect(sql, removeFieldNames);
+
+        Assert.assertEquals(
+                "SELECT 歌曲名 FROM 歌曲库 WHERE 歌曲名 = '邓紫棋' AND 数据日期 = '2023-08-09' AND 歌曲发布时间 = '2023-08-01'",
+                replaceSql);
+
+        sql = "select 数据日期 from 歌曲库 where 歌曲名 = '邓紫棋' and 数据日期 = '2023-08-09' and 歌曲发布时间 = '2023-08-01'";
+
+        replaceSql = SqlRemoveHelper.removeSelect(sql, removeFieldNames);
+
+        Assert.assertEquals(
+                "SELECT * FROM 歌曲库 WHERE 歌曲名 = '邓紫棋' AND 数据日期 = '2023-08-09' AND 歌曲发布时间 = '2023-08-01'",
+                replaceSql);
+    }
+
+    @Test
+    void testRemoveGroupBy() {
+        String sql = "select 数据日期 from 歌曲库 where 歌曲名 = '邓紫棋' and 数据日期 = '2023-08-09' and "
+                + "歌曲发布时间 = '2023-08-01' group by 数据日期";
+
+        Set<String> removeFieldNames = new HashSet<>();
+        removeFieldNames.add("数据日期");
+        String replaceSql = SqlRemoveHelper.removeGroupBy(sql, removeFieldNames);
+
+        Assert.assertEquals(
+                "SELECT 数据日期 FROM 歌曲库 WHERE 歌曲名 = '邓紫棋' AND 数据日期 = '2023-08-09' AND 歌曲发布时间 = '2023-08-01'",
+                replaceSql);
+    }
 }

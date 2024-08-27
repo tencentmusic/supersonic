@@ -4,12 +4,10 @@ package com.tencent.supersonic.headless.chat.corrector;
 import com.tencent.supersonic.common.jsqlparser.DateVisitor.DateBoundInfo;
 import com.tencent.supersonic.common.jsqlparser.SqlAddHelper;
 import com.tencent.supersonic.common.jsqlparser.SqlDateSelectHelper;
-import com.tencent.supersonic.common.jsqlparser.SqlRemoveHelper;
 import com.tencent.supersonic.common.jsqlparser.SqlSelectHelper;
 import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import com.tencent.supersonic.headless.api.pojo.DataSetSchema;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
-import com.tencent.supersonic.headless.api.pojo.SemanticSchema;
 import com.tencent.supersonic.headless.chat.ChatQueryContext;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.JSQLParserException;
@@ -19,10 +17,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.util.CollectionUtils;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 
 /**
  * Perform SQL corrections on the time in S2SQL.
@@ -38,17 +34,6 @@ public class TimeCorrector extends BaseSemanticCorrector {
             removeDateIfExist(semanticParseInfo);
         }
         addLowerBoundDate(semanticParseInfo);
-    }
-
-    private void removeDateIfExist(SemanticParseInfo semanticParseInfo) {
-        String correctS2SQL = semanticParseInfo.getSqlInfo().getCorrectedS2SQL();
-        Set<String> removeFieldNames = new HashSet<>();
-        removeFieldNames.add(TimeDimensionEnum.DAY.getChName());
-        removeFieldNames.add(TimeDimensionEnum.WEEK.getChName());
-        removeFieldNames.add(TimeDimensionEnum.MONTH.getChName());
-        correctS2SQL = SqlRemoveHelper.removeWhereCondition(correctS2SQL, removeFieldNames);
-        correctS2SQL = SqlRemoveHelper.removeGroupBy(correctS2SQL, removeFieldNames);
-        semanticParseInfo.getSqlInfo().setCorrectedS2SQL(correctS2SQL);
     }
 
     private void addDateIfNotExist(ChatQueryContext chatQueryContext, SemanticParseInfo semanticParseInfo) {
@@ -78,14 +63,6 @@ public class TimeCorrector extends BaseSemanticCorrector {
             }
         }
         semanticParseInfo.getSqlInfo().setCorrectedS2SQL(correctS2SQL);
-    }
-
-    private boolean containsPartitionDimensions(ChatQueryContext chatQueryContext,
-                                                SemanticParseInfo semanticParseInfo) {
-        Long dataSetId = semanticParseInfo.getDataSetId();
-        SemanticSchema semanticSchema = chatQueryContext.getSemanticSchema();
-        DataSetSchema dataSetSchema = semanticSchema.getDataSetSchemaMap().get(dataSetId);
-        return dataSetSchema.containsPartitionDimensions();
     }
 
     private void addLowerBoundDate(SemanticParseInfo semanticParseInfo) {
