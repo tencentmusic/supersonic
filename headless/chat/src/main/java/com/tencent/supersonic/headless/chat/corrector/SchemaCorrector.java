@@ -53,7 +53,7 @@ public class SchemaCorrector extends BaseSemanticCorrector {
         if (containsPartitionDimensions(chatQueryContext, semanticParseInfo)) {
             return;
         }
-        removeDateIfExist(semanticParseInfo);
+        removeDateIfExist(chatQueryContext, semanticParseInfo);
     }
 
     private void correctAggFunction(SemanticParseInfo semanticParseInfo) {
