@@ -1,7 +1,6 @@
 services:
   chroma:
     image: chromadb/chroma:0.5.3
-    platform: linux/amd64
     privileged: true
     container_name: supersonic_chroma
     ports:
@@ -23,7 +22,6 @@ services:
   mysql:
     image: mysql:8.0
     privileged: true
-    platform: linux/amd64
     container_name: supersonic_mysql
     environment:
       LANG: 'C.UTF-8'  # 设置环境变量
@@ -51,9 +49,8 @@ services:
       retries: 5
 
   db_init:
-    image: supersonicbi/supersonic:${SUPERSONIC_VERSION:-0.9.6}
+    image: supersonicbi/supersonic:${SUPERSONIC_VERSION:-latest}
     privileged: true
-    platform: linux/amd64
     container_name: supersonic_db_init
     depends_on:
       mysql:
@@ -64,8 +61,8 @@ services:
       sh -c "
       sleep 15 &&
       if ! mysql -h supersonic_mysql -usupersonic_user -psupersonic_password -e 'use supersonic_db; show tables;' | grep -q 's2_database'; then
-        mysql -h supersonic_mysql -usupersonic_user -psupersonic_password supersonic_db < /usr/src/app/supersonic-standalone-${SUPERSONIC_VERSION:-0.9.6}/conf/db/schema-mysql.sql &&
-        mysql -h supersonic_mysql -usupersonic_user -psupersonic_password supersonic_db < /usr/src/app/supersonic-standalone-${SUPERSONIC_VERSION:-0.9.6}/conf/db/data-mysql.sql
+        mysql -h supersonic_mysql -usupersonic_user -psupersonic_password supersonic_db < /usr/src/app/supersonic-standalone-${SUPERSONIC_VERSION:-latest}/conf/db/schema-mysql.sql &&
+        mysql -h supersonic_mysql -usupersonic_user -psupersonic_password supersonic_db < /usr/src/app/supersonic-standalone-${SUPERSONIC_VERSION:-latest}/conf/db/data-mysql.sql
       else
         echo 'Database already initialized.'
       fi
@@ -76,9 +73,8 @@ services:
       - 8.8.4.4
 
   supersonic_standalone:
-    image: supersonicbi/supersonic:${SUPERSONIC_VERSION:-0.9.6}
+    image: supersonicbi/supersonic:${SUPERSONIC_VERSION:-latest}
     privileged: true
-    platform: linux/amd64
     container_name: supersonic_standalone
     environment:
       DB_HOST: supersonic_mysql
@@ -103,9 +99,9 @@ services:
       - 8.8.4.4
     volumes:
       #1.Named Volumes are best for persistent data managed by Docker.
-      - supersonic_data:/usr/src/app/supersonic-standalone-${SUPERSONIC_VERSION:-0.9.6}
+      - supersonic_data:/usr/src/app/supersonic-standalone-${SUPERSONIC_VERSION:-latest}
       #2.Bind Mounts are suitable for frequent modifications and debugging.
-      #      - ./conf/langchain4j-prd.yaml:/usr/src/app/supersonic-standalone-${SUPERSONIC_VERSION:-latest}/conf/langchain4j-prd.yaml
+      #      - ./conf/application-prd.yaml:/usr/src/app/supersonic-standalone-${SUPERSONIC_VERSION:-latest}/conf/application-prd.yaml
       #3.Detailed Bind Mounts offer more control over the mount behavior.
       #      - type: bind
       #        source: ./supersonic-standalone-${SUPERSONIC_VERSION:-latest}/logs

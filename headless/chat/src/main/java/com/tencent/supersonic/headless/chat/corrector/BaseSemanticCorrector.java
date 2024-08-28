@@ -45,6 +45,20 @@ public abstract class BaseSemanticCorrector implements SemanticCorrector {
 
     protected Map<String, String> getFieldNameMap(ChatQueryContext chatQueryContext, Long dataSetId) {
 
+        Map<String, String> result = getFieldNameMapFromDB(chatQueryContext, dataSetId);
+        if (chatQueryContext.containsPartitionDimensions(dataSetId)) {
+            result.put(TimeDimensionEnum.DAY.getChName(), TimeDimensionEnum.DAY.getChName());
+            result.put(TimeDimensionEnum.MONTH.getChName(), TimeDimensionEnum.MONTH.getChName());
+            result.put(TimeDimensionEnum.WEEK.getChName(), TimeDimensionEnum.WEEK.getChName());
+
+            result.put(TimeDimensionEnum.DAY.getName(), TimeDimensionEnum.DAY.getChName());
+            result.put(TimeDimensionEnum.MONTH.getName(), TimeDimensionEnum.MONTH.getChName());
+            result.put(TimeDimensionEnum.WEEK.getName(), TimeDimensionEnum.WEEK.getChName());
+        }
+        return result;
+    }
+
+    private static Map<String, String> getFieldNameMapFromDB(ChatQueryContext chatQueryContext, Long dataSetId) {
         SemanticSchema semanticSchema = chatQueryContext.getSemanticSchema();
 
         List<SchemaElement> dbAllFields = new ArrayList<>();
@@ -52,7 +66,7 @@ public abstract class BaseSemanticCorrector implements SemanticCorrector {
         dbAllFields.addAll(semanticSchema.getDimensions());
 
         // support fieldName and field alias
-        Map<String, String> result = dbAllFields.stream()
+        return dbAllFields.stream()
                 .filter(entry -> dataSetId.equals(entry.getDataSetId()))
                 .flatMap(schemaElement -> {
                     Set<String> elements = new HashSet<>();
@@ -63,14 +77,6 @@ public abstract class BaseSemanticCorrector implements SemanticCorrector {
                     return elements.stream();
                 })
                 .collect(Collectors.toMap(a -> a, a -> a, (k1, k2) -> k1));
-        result.put(TimeDimensionEnum.DAY.getChName(), TimeDimensionEnum.DAY.getChName());
-        result.put(TimeDimensionEnum.MONTH.getChName(), TimeDimensionEnum.MONTH.getChName());
-        result.put(TimeDimensionEnum.WEEK.getChName(), TimeDimensionEnum.WEEK.getChName());
-
-        result.put(TimeDimensionEnum.DAY.getName(), TimeDimensionEnum.DAY.getChName());
-        result.put(TimeDimensionEnum.MONTH.getName(), TimeDimensionEnum.MONTH.getChName());
-        result.put(TimeDimensionEnum.WEEK.getName(), TimeDimensionEnum.WEEK.getChName());
-        return result;
     }
 
     protected void addAggregateToMetric(ChatQueryContext chatQueryContext, SemanticParseInfo semanticParseInfo) {
@@ -131,15 +137,18 @@ public abstract class BaseSemanticCorrector implements SemanticCorrector {
         return dataSetSchema.containsPartitionDimensions();
     }
 
-    protected void removeDateIfExist(SemanticParseInfo semanticParseInfo) {
+    protected void removeDateIfExist(ChatQueryContext chatQueryContext, SemanticParseInfo semanticParseInfo) {
         String correctS2SQL = semanticParseInfo.getSqlInfo().getCorrectedS2SQL();
         Set<String> removeFieldNames = new HashSet<>();
-        removeFieldNames.add(TimeDimensionEnum.DAY.getChName());
-        removeFieldNames.add(TimeDimensionEnum.WEEK.getChName());
-        removeFieldNames.add(TimeDimensionEnum.MONTH.getChName());
-        correctS2SQL = SqlRemoveHelper.removeWhereCondition(correctS2SQL, removeFieldNames);
-        correctS2SQL = SqlRemoveHelper.removeSelect(correctS2SQL, removeFieldNames);
-        correctS2SQL = SqlRemoveHelper.removeGroupBy(correctS2SQL, removeFieldNames);
+        removeFieldNames.addAll(TimeDimensionEnum.getChNameList());
+        removeFieldNames.addAll(TimeDimensionEnum.getNameList());
+        Map<String, String> fieldNameMap = getFieldNameMapFromDB(chatQueryContext, semanticParseInfo.getDataSetId());
+        removeFieldNames.removeIf(fieldName -> fieldNameMap.containsKey(fieldName));
+        if (!CollectionUtils.isEmpty(removeFieldNames)) {
+            correctS2SQL = SqlRemoveHelper.removeWhereCondition(correctS2SQL, removeFieldNames);
+            correctS2SQL = SqlRemoveHelper.removeSelect(correctS2SQL, removeFieldNames);
+            correctS2SQL = SqlRemoveHelper.removeGroupBy(correctS2SQL, removeFieldNames);
+        }
         semanticParseInfo.getSqlInfo().setCorrectedS2SQL(correctS2SQL);
     }
 }

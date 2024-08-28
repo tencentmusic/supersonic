@@ -31,7 +31,7 @@ public class TimeCorrector extends BaseSemanticCorrector {
         if (containsPartitionDimensions(chatQueryContext, semanticParseInfo)) {
             addDateIfNotExist(chatQueryContext, semanticParseInfo);
         } else {
-            removeDateIfExist(semanticParseInfo);
+            removeDateIfExist(chatQueryContext, semanticParseInfo);
         }
         addLowerBoundDate(semanticParseInfo);
     }
