@@ -21,6 +21,20 @@ import java.util.stream.Collectors;
 @Slf4j
 public class HeuristicDataSetResolver implements DataSetResolver {
 
+    //filter schemaMapInfo !type =VALUE
+    public static SchemaMapInfo filterSchemaMapInfo(SchemaMapInfo originalSchemaMapInfo) {
+        SchemaMapInfo filteredSchemaMapInfo = new SchemaMapInfo();
+        for (Long dataSetId : originalSchemaMapInfo.getMatchedDataSetInfos()) {
+            List<SchemaElementMatch> originalMatches = originalSchemaMapInfo.getMatchedElements(dataSetId);
+            // filter !type =VALUE
+            List<SchemaElementMatch> filteredMatches = originalMatches.stream()
+                    .filter(match -> !SchemaElementType.VALUE.equals(match.getElement().getType()))
+                    .collect(Collectors.toList());
+            filteredSchemaMapInfo.setMatchedElements(dataSetId, filteredMatches);
+        }
+        return filteredSchemaMapInfo;
+    }
+
     protected static Long selectDataSetBySchemaElementMatchScore(Map<Long, SemanticQuery> dataSetQueryModes,
             SchemaMapInfo schemaMap) {
         //dataSet count priority
@@ -41,7 +55,19 @@ public class HeuristicDataSetResolver implements DataSetResolver {
             Entry<Long, DataSetMatchResult> maxDataSet = dataSetTypeMap.entrySet().stream()
                     .filter(entry -> dataSetQueryModes.containsKey(entry.getKey()))
                     .sorted((o1, o2) -> {
-                        int difference = o2.getValue().getCount() - o1.getValue().getCount();
+
+                        int difference = (int) (o2.getValue().getTotalSimilarity()
+                                - o1.getValue().getTotalSimilarity());
+                        if (difference != 0) {
+                            return difference;
+                        }
+
+                        difference = o2.getValue().getCountOfOneSimilarity() - o1.getValue().getCountOfOneSimilarity();
+                        if (difference != 0) {
+                            return difference;
+                        }
+
+                         difference = o2.getValue().getCount() - o1.getValue().getCount();
                         if (difference == 0) {
                             return (int) ((o2.getValue().getMaxSimilarity()
                                     - o1.getValue().getMaxSimilarity()) * 100);
@@ -94,9 +120,19 @@ public class HeuristicDataSetResolver implements DataSetResolver {
                 }
                 DataSetMatchResult dataSetMatchResult = dataSetCount.get(entry.getKey());
                 Set<SchemaElementType> schemaElementTypes = new HashSet<>();
-                schemaElementMatches.stream()
+              /*  schemaElementMatches.stream()
                         .forEach(schemaElementMatch -> schemaElementTypes.add(
-                                schemaElementMatch.getElement().getType()));
+                                schemaElementMatch.getElement().getType()));*/
+                schemaElementMatches.forEach(schemaElementMatch -> {
+                    schemaElementTypes.add(schemaElementMatch.getElement().getType());
+                    double similarity = schemaElementMatch.getSimilarity();
+                    //Calculate the total similarity
+                    dataSetMatchResult.addSimilarity(similarity);
+                    if (similarity == 1.0) {
+                        //count the number of 1.0
+                        dataSetMatchResult.incrementCountOfOneSimilarity();
+                    }
+                });
                 SchemaElementMatch schemaElementMatchMax = schemaElementMatches.stream()
                         .sorted((o1, o2) ->
                                 ((int) ((o2.getSimilarity() - o1.getSimilarity()) * 100))
