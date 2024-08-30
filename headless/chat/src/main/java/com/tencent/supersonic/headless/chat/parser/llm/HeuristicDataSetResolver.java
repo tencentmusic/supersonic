@@ -44,7 +44,7 @@ public class HeuristicDataSetResolver implements DataSetResolver {
             return dataSetIdByDataSetCount;
         }
 
-        Map<Long, DataSetMatchResult> dataSetTypeMap = getDataSetTypeMap(schemaMap);
+        Map<Long, DataSetMatchResult> dataSetTypeMap = getDataSetTypeMap(filterSchemaMapInfo(schemaMap));
         if (dataSetTypeMap.size() == 1) {
             Long dataSetSelect = new ArrayList<>(dataSetTypeMap.entrySet()).get(0).getKey();
             if (dataSetQueryModes.containsKey(dataSetSelect)) {
