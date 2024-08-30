@@ -23,11 +23,15 @@ public class TermDescMapper extends BaseMapper {
             chatQueryContext.setOriQueryText(chatQueryContext.getQueryText());
         }
         for (SchemaElement schemaElement : termDescriptionToMap) {
+            if (schemaElement.isDescriptionMapped()) {
+                continue;
+            }
             if (chatQueryContext.getQueryText().equals(schemaElement.getDescription())) {
                 schemaElement.setDescriptionMapped(true);
                 continue;
             }
             chatQueryContext.setQueryText(schemaElement.getDescription());
+            break;
         }
         if (CollectionUtils.isEmpty(chatQueryContext.getMapInfo().getTermDescriptionToMap())) {
             chatQueryContext.setQueryText(chatQueryContext.getOriQueryText());
