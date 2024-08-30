@@ -20,6 +20,13 @@ public class ChatModelConfig implements Serializable {
     private String modelName;
     private Double temperature = 0.0d;
     private Long timeOut = 60L;
+    private String endpoint;
+    private String secretKey;
+    private Double topP;
+    private Integer maxRetries = 3;
+    private Boolean logRequests = false;
+    private Boolean logResponses = false;
+    private Boolean enableSearch = false;
 
     public String keyDecrypt() {
         return AESEncryptionUtil.aesDecryptECB(getApiKey());

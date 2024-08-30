@@ -1,6 +1,8 @@
 package com.tencent.supersonic.headless.server.utils;
 
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONException;
 import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.data.message.SystemMessage;
 import dev.langchain4j.model.chat.ChatLanguageModel;
@@ -95,5 +97,88 @@ public class AliasGenerateHelper {
                 + "answer json:";
         log.info("msg:{}", msg);
         return getChatCompletion(msg);
+    }
+
+    private static String extractString(String targetString, String left, String right, Boolean exclusionFlag) {
+        if (targetString == null || left == null || right == null || exclusionFlag == null) {
+            return targetString;
+        }
+        if (left.equals(right)) {
+            int firstIndex = targetString.indexOf(left);
+            if (firstIndex == -1) {
+                return null;
+            }
+            int secondIndex = targetString.indexOf(left, firstIndex + left.length());
+            if (secondIndex == -1) {
+                return null;
+            }
+            String extractedString = targetString.substring(firstIndex + left.length(), secondIndex);
+            if (!exclusionFlag) {
+                extractedString = left + extractedString + right;
+            }
+            return extractedString;
+        } else {
+            int leftIndex = targetString.indexOf(left);
+            if (leftIndex == -1) {
+                return null;
+            }
+            int start = leftIndex + left.length();
+            int rightIndex = targetString.indexOf(right, start);
+            if (rightIndex == -1) {
+                return null;
+            }
+            String extractedString = targetString.substring(start, rightIndex);
+            if (!exclusionFlag) {
+                extractedString = left + extractedString + right;
+            }
+            return extractedString;
+        }
+    }
+
+    public static String extractJsonStringFromAiMessage(String aiMessage) {
+        class BoundaryPattern {
+            final String left;
+            final String right;
+            final Boolean exclusionFlag;
+            public BoundaryPattern(String start, String end, Boolean includeMarkers) {
+                this.left = start;
+                this.right = end;
+                this.exclusionFlag = includeMarkers;
+            }
+        }
+        BoundaryPattern[] patterns = {
+                //不做任何匹配
+                new BoundaryPattern(null, null, null),
+                //```{"name":"Alice","age":25,"city":"NewYork"}```
+                new BoundaryPattern("```", "```", true),
+                //```json {"name":"Alice","age":25,"city":"NewYork"}```
+                new BoundaryPattern("```json", "```", true),
+                //```JSON {"name":"Alice","age":25,"city":"NewYork"}```
+                new BoundaryPattern("```JSON", "```", true),
+                //{"name":"Alice","age":25,"city":"NewYork"}
+                new BoundaryPattern("{", "}", false),
+                //["Alice", "Bob"]
+                new BoundaryPattern("[", "]", false)
+        };
+        for (BoundaryPattern pattern : patterns) {
+            String extracted = extractString(aiMessage, pattern.left, pattern.right, pattern.exclusionFlag);
+            if (extracted == null) {
+                continue;
+            }
+            //判断是否能解析为Object或者Array
+            try {
+                JSON.parseObject(extracted);
+                return extracted;
+            } catch (JSONException ignored) {
+                //ignored
+            }
+            try {
+                JSON.parseArray(extracted);
+                return extracted;
+            } catch (JSONException ignored) {
+                //ignored
+            }
+        }
+        throw new JSONException("json extract failed");
     }
 }

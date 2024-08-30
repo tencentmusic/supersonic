@@ -75,8 +75,8 @@ public abstract class RuleSemanticQuery extends BaseSemanticQuery {
             return;
         }
 
-        if ((QueryManager.isTagQuery(queryParseInfo.getQueryMode())
-                && QueryManager.isTagQuery(contextParseInfo.getQueryMode()))
+        if ((QueryManager.isDetailQuery(queryParseInfo.getQueryMode())
+                && QueryManager.isDetailQuery(contextParseInfo.getQueryMode()))
                 || (QueryManager.isMetricQuery(queryParseInfo.getQueryMode())
                 && QueryManager.isMetricQuery(contextParseInfo.getQueryMode()))) {
             // inherit date info from context
@@ -174,9 +174,9 @@ public abstract class RuleSemanticQuery extends BaseSemanticQuery {
                 parseInfo.getDimensionFilters().add(dimensionFilter);
             } else {
                 QueryFilter dimensionFilter = new QueryFilter();
-                List<String> vals = new ArrayList<>();
-                entry.getValue().stream().forEach(i -> vals.add(i.getWord()));
-                dimensionFilter.setValue(vals);
+                List<String> values = new ArrayList<>();
+                entry.getValue().stream().forEach(i -> values.add(i.getWord()));
+                dimensionFilter.setValue(values);
                 dimensionFilter.setBizName(dimension.getBizName());
                 dimensionFilter.setName(dimension.getName());
                 dimensionFilter.setOperator(FilterOperatorEnum.IN);

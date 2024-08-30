@@ -1,27 +1,19 @@
 package com.tencent.supersonic.headless.core.pojo;
 
-import static com.tencent.supersonic.common.pojo.Constants.STATISTIC;
-
-import com.alibaba.druid.filter.Filter;
 import com.alibaba.druid.pool.DruidDataSource;
-import com.alibaba.druid.wall.WallConfig;
-import com.alibaba.druid.wall.WallFilter;
 import com.tencent.supersonic.headless.api.pojo.enums.DataType;
 import com.tencent.supersonic.headless.core.utils.JdbcDataSourceUtils;
-import java.util.Arrays;
+import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import lombok.Getter;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.DependsOn;
-import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
@@ -99,45 +91,6 @@ public class JdbcDataSource {
     @Getter
     protected String validationQuery;
 
-    @Value("${source.filters:stat}")
-    @Getter
-    protected String filters;
-    @Autowired
-    WallFilter wallFilter;
-
-    @Bean(name = "wallConfig")
-    WallConfig wallConfig() {
-        WallConfig config = new WallConfig();
-        config.setDeleteAllow(false);
-        config.setUpdateAllow(false);
-        config.setInsertAllow(false);
-        config.setReplaceAllow(false);
-        config.setMergeAllow(false);
-        config.setTruncateAllow(false);
-        config.setCreateTableAllow(false);
-        config.setAlterTableAllow(false);
-        config.setDropTableAllow(false);
-        config.setCommentAllow(true);
-        config.setUseAllow(false);
-        config.setDescribeAllow(false);
-        config.setShowAllow(false);
-        config.setSelectWhereAlwayTrueCheck(false);
-        config.setSelectHavingAlwayTrueCheck(false);
-        config.setSelectUnionCheck(false);
-        config.setConditionDoubleConstAllow(true);
-        config.setConditionAndAlwayTrueAllow(true);
-        config.setConditionAndAlwayFalseAllow(true);
-        return config;
-    }
-
-    @Bean(name = "wallFilter")
-    @DependsOn("wallConfig")
-    WallFilter wallFilter(WallConfig wallConfig) {
-        WallFilter wfilter = new WallFilter();
-        wfilter.setConfig(wallConfig);
-        return wfilter;
-    }
-
     private Lock getDataSourceLock(String key) {
         if (dataSourceLockMap.containsKey(key)) {
             return dataSourceLockMap.get(key);
@@ -178,10 +131,9 @@ public class JdbcDataSource {
     public DruidDataSource getDataSource(Database database) throws RuntimeException {
 
         String name = database.getName();
-        String type = database.getType();
         String jdbcUrl = database.getUrl();
         String username = database.getUsername();
-        String password = database.getPassword();
+        String password = database.passwordDecrypt();
 
         String key = getDataSourceKey(database);
 
@@ -264,19 +216,6 @@ public class JdbcDataSource {
                 druidDataSource.setValidationQuery(null);
             }
 
-            // druid wall filter not support some database so set type mysql
-            if (DataType.MOONBOX == DataType.urlOf(jdbcUrl)
-                    || DataType.MONGODB == DataType.urlOf(jdbcUrl)
-                    || DataType.ELASTICSEARCH == DataType.urlOf(jdbcUrl)
-                    || DataType.CASSANDRA == DataType.urlOf(jdbcUrl)
-                    || DataType.VERTICA == DataType.urlOf(jdbcUrl)
-                    || DataType.KYLIN == DataType.urlOf(jdbcUrl)
-                    || DataType.HANA == DataType.urlOf(jdbcUrl)
-                    || DataType.IMPALA == DataType.urlOf(jdbcUrl)
-                    || DataType.TDENGINE == DataType.urlOf(jdbcUrl)) {
-                wallFilter.setDbType(DataType.MYSQL.getFeature());
-            }
-
             Properties properties = new Properties();
             if (driverName.indexOf("mysql") != -1) {
                 properties.setProperty("druid.mysql.usePingMethod", "false");
@@ -285,11 +224,6 @@ public class JdbcDataSource {
             druidDataSource.setConnectProperties(properties);
 
             try {
-                // statistic and ck source don't need wall filter
-                if (!STATISTIC.equals(name) && !DataType.CLICKHOUSE.getFeature().equalsIgnoreCase(type)) {
-                    druidDataSource.setProxyFilters(Arrays.asList(new Filter[]{wallFilter}));
-                }
-                druidDataSource.setFilters(filters);
                 druidDataSource.init();
             } catch (Exception e) {
                 log.error("Exception during pool initialization", e);
@@ -309,6 +243,6 @@ public class JdbcDataSource {
         return JdbcDataSourceUtils.getKey(database.getName(),
                 database.getUrl(),
                 database.getUsername(),
-                database.getPassword(), "", false);
+                database.passwordDecrypt(), "", false);
     }
 }

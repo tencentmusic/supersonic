@@ -12,6 +12,7 @@ import { exportTextFile } from '../../utils/utils';
 type Props = {
   agentId?: number;
   queryId: number;
+  question: string;
   llmReq?: any;
   llmResp?: any;
   integrateSystem?: string;
@@ -23,6 +24,7 @@ type Props = {
 const SqlItem: React.FC<Props> = ({
   agentId,
   queryId,
+  question,
   llmReq,
   llmResp,
   integrateSystem,
@@ -126,6 +128,11 @@ ${format(sqlInfo.querySQL)}
 
   const onExportLog = () => {
     let text = '';
+    if (question) {
+      text += `
+问题：${question}
+`;
+    }
     if (llmReq) {
       text += getSchemaMapText();
     }

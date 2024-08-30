@@ -5,10 +5,8 @@ import com.tencent.supersonic.common.pojo.enums.QueryType;
 import com.tencent.supersonic.common.pojo.enums.TimeMode;
 import com.tencent.supersonic.headless.api.pojo.DataSetSchema;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementMatch;
-import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
 import com.tencent.supersonic.headless.api.pojo.TimeDefaultConfig;
 import com.tencent.supersonic.headless.chat.ChatQueryContext;
-import com.tencent.supersonic.headless.chat.query.rule.QueryMatchOption;
 import com.tencent.supersonic.headless.chat.query.rule.RuleSemanticQuery;
 import lombok.extern.slf4j.Slf4j;
 
@@ -24,8 +22,6 @@ public abstract class DetailSemanticQuery extends RuleSemanticQuery {
 
     public DetailSemanticQuery() {
         super();
-        queryMatcher.addOption(SchemaElementType.ENTITY, QueryMatchOption.OptionType.REQUIRED,
-                QueryMatchOption.RequireNumberType.AT_LEAST, 1);
     }
 
     @Override

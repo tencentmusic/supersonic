@@ -6,6 +6,12 @@ import { formLayout } from '@/components/FormHelper/utils';
 import SqlEditor from '@/components/SqlEditor';
 import InfoTagList from './InfoTagList';
 import { ISemantic } from '../data';
+import {
+  DIM_OPTIONS,
+  EnumDataSourceType,
+  PARTITION_TIME_FORMATTER,
+  DATE_FORMATTER,
+} from '@/pages/SemanticModel/Datasource/constants';
 import { InfoCircleOutlined } from '@ant-design/icons';
 import {
   createDimension,
@@ -17,6 +23,7 @@ import {
 import FormItemTitle from '@/components/FormHelper/FormItemTitle';
 
 import { message } from 'antd';
+import { values } from 'lodash';
 
 export type CreateFormProps = {
   modelId: number;
@@ -49,6 +56,7 @@ const DimensionInfoModal: React.FC<CreateFormProps> = ({
   const [form] = Form.useForm();
   const { setFieldsValue, resetFields } = form;
   const [llmLoading, setLlmLoading] = useState<boolean>(false);
+  const [formData, setFormData] = useState<ISemantic.IDimensionItem>();
 
   const handleSubmit = async (
     isSilenceSubmit = false,
@@ -119,7 +127,12 @@ const DimensionInfoModal: React.FC<CreateFormProps> = ({
   const setFormVal = () => {
     if (dimensionItem) {
       const { alias } = dimensionItem;
-      setFieldsValue({ ...dimensionItem, alias: alias && alias.trim() ? alias.split(',') : [] });
+      const dimensionData = {
+        ...dimensionItem,
+        alias: alias && alias.trim() ? alias.split(',') : [],
+      };
+      setFieldsValue(dimensionData);
+      setFormData(dimensionData);
     }
   };
 
@@ -228,9 +241,40 @@ const DimensionInfoModal: React.FC<CreateFormProps> = ({
             )}
           </Row>
         </FormItem>
+        <FormItem name="type" label="类型" rules={[{ required: true, message: '请选择维度类型' }]}>
+          <Select placeholder="请选择维度类型">
+            {DIM_OPTIONS.map((item) => (
+              <Option key={item.value} value={item.value}>
+                {item.label}
+              </Option>
+            ))}
+          </Select>
+        </FormItem>
+        {formData?.type &&
+          [EnumDataSourceType.PARTITION_TIME, EnumDataSourceType.TIME].includes(formData.type) && (
+            <FormItem
+              name={['ext', 'time_format']}
+              label="时间格式"
+              rules={[{ required: true, message: '请选择时间格式' }]}
+              tooltip="请选择数据库中时间字段对应格式"
+            >
+              <Select placeholder="请选择维度类型">
+                {(formData?.type === EnumDataSourceType.TIME
+                  ? DATE_FORMATTER
+                  : PARTITION_TIME_FORMATTER
+                ).map((item) => (
+                  <Option key={item} value={item}>
+                    {item}
+                  </Option>
+                ))}
+              </Select>
+            </FormItem>
+          )}
+
         <FormItem
           name="semanticType"
           label="类型"
+          hidden={true}
           rules={[{ required: true, message: '请选择维度类型' }]}
         >
           <Select placeholder="请选择维度类型">
@@ -311,7 +355,13 @@ const DimensionInfoModal: React.FC<CreateFormProps> = ({
         footer={renderFooter()}
         onCancel={onCancel}
       >
-        <Form {...formLayout} form={form}>
+        <Form
+          {...formLayout}
+          form={form}
+          onValuesChange={(value, values) => {
+            setFormData(values);
+          }}
+        >
           {renderContent()}
         </Form>
       </Modal>

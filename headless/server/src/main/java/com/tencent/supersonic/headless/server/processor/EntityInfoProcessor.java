@@ -18,7 +18,7 @@ public class EntityInfoProcessor implements ResultProcessor {
     public void process(ParseResp parseResp, ChatQueryContext chatQueryContext) {
         parseResp.getSelectedParses().forEach(parseInfo -> {
             String queryMode = parseInfo.getQueryMode();
-            if (!QueryManager.isTagQuery(queryMode) && !QueryManager.isMetricQuery(queryMode)) {
+            if (!QueryManager.isDetailQuery(queryMode) && !QueryManager.isMetricQuery(queryMode)) {
                 return;
             }
 

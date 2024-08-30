@@ -11,12 +11,6 @@ public class LLMParserConfig {
     @Value("${s2.recall.max.retries:3}")
     private int recallMaxRetries;
 
-    @Value("${s2.dimension.topn:10}")
-    private Integer dimensionTopN;
-
-    @Value("${s2.metric.topn:10}")
-    private Integer metricTopN;
-
     @Value("${s2.tag.topn:20}")
     private Integer tagTopN;
 

@@ -136,7 +136,7 @@ export const findLeafNodesFromDomainList = (
   return leafNodes;
 };
 
-export const genneratorFormItemList = (itemList: ConfigParametersItem[], form) => {
+export const genneratorFormItemList = (itemList: ConfigParametersItem[]) => {
   const list = itemList.reduce((itemList: ReactNode[], item) => {
     const { dataType, name, comment, placeholder, description, require, visible, sliderConfig } =
       item;

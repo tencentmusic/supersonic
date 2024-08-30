@@ -649,22 +649,6 @@ public class SqlSelectHelper {
         return withNameList;
     }
 
-    public static Map<String, WithItem> getWith(String sql) {
-        Select selectStatement = getSelect(sql);
-        if (selectStatement == null) {
-            return new HashMap<>();
-        }
-        Map<String, WithItem> withMap = new HashMap<>();
-        List<WithItem> withItemList = selectStatement.getWithItemsList();
-        if (!CollectionUtils.isEmpty(withItemList)) {
-            for (int i = 0; i < withItemList.size(); i++) {
-                WithItem withItem = withItemList.get(i);
-                withMap.put(withItem.getAlias().getName(), withItem);
-            }
-        }
-        return withMap;
-    }
-
     public static Table getTable(String sql) {
         Select selectStatement = getSelect(sql);
         if (selectStatement == null) {

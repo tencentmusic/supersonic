@@ -17,6 +17,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
+
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
@@ -63,6 +64,9 @@ public class MetricDrillDownChecker {
             List<MetricResp> metricResps = getMetrics(metricFields, semanticSchemaResp);
             if (!checkDrillDownDimension(dimensionBizName, metricResps, semanticSchemaResp)) {
                 DimSchemaResp dimSchemaResp = semanticSchemaResp.getDimension(dimensionBizName);
+                if (Objects.nonNull(dimSchemaResp) && dimSchemaResp.isPartitionTime()) {
+                    continue;
+                }
                 String errMsg = String.format("维度:%s, 不在当前查询指标的下钻维度配置中, 请检查", dimSchemaResp.getName());
                 throw new InvalidArgumentException(errMsg);
             }

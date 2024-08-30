@@ -1,5 +1,6 @@
 package com.tencent.supersonic.headless.chat.corrector;
 
+import com.tencent.supersonic.common.pojo.enums.QueryType;
 import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.jsqlparser.SqlAddHelper;
@@ -33,6 +34,10 @@ public class GroupByCorrector extends BaseSemanticCorrector {
     }
 
     private Boolean needAddGroupBy(ChatQueryContext chatQueryContext, SemanticParseInfo semanticParseInfo) {
+        if (!QueryType.METRIC.equals(semanticParseInfo.getQueryType())) {
+            return false;
+        }
+
         Long dataSetId = semanticParseInfo.getDataSetId();
         //add dimension group by
         SqlInfo sqlInfo = semanticParseInfo.getSqlInfo();

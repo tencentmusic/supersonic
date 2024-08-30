@@ -1,23 +1,20 @@
 package com.tencent.supersonic.common.jsqlparser;
 
-import java.util.Map;
-import java.util.Objects;
-import java.util.function.UnaryOperator;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.expression.ExpressionVisitorAdapter;
 import net.sf.jsqlparser.expression.Function;
 import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.Map;
+import java.util.Objects;
+import java.util.function.UnaryOperator;
+
 @Slf4j
 public class FunctionNameReplaceVisitor extends ExpressionVisitorAdapter {
 
     private Map<String, String> functionMap;
     private Map<String, UnaryOperator> functionCallMap;
-
-    public FunctionNameReplaceVisitor(Map<String, String> functionMap) {
-        this.functionMap = functionMap;
-    }
 
     public FunctionNameReplaceVisitor(Map<String, String> functionMap, Map<String, UnaryOperator> functionCallMap) {
         this.functionMap = functionMap;

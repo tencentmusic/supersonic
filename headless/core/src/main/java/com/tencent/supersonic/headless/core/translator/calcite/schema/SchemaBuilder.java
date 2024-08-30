@@ -64,8 +64,8 @@ public class SchemaBuilder {
 
     public static void addSourceView(CalciteSchema dataSetSchema, String dbSrc, String tbSrc, Set<String> dates,
             Set<String> dimensions, Set<String> metrics) {
-        String tb = tbSrc.toLowerCase();
-        String db = dbSrc.toLowerCase();
+        String tb = tbSrc;
+        String db = dbSrc;
         DataSourceTable.Builder builder = DataSourceTable.newBuilder(tb);
         for (String date : dates) {
             builder.addField(date, SqlTypeName.VARCHAR);

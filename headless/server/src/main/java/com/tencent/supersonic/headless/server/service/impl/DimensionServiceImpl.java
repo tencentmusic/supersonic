@@ -319,7 +319,7 @@ public class DimensionServiceImpl extends ServiceImpl<DimensionDOMapper, Dimensi
     public List<String> mockAlias(DimensionReq dimensionReq, String mockType, User user) {
         String mockAlias = aliasGenerateHelper.generateAlias(mockType, dimensionReq.getName(),
                 dimensionReq.getBizName(), "", dimensionReq.getDescription(), false);
-        String ret = mockAlias.replaceAll("`", "").replace("json", "").replace("\n", "").replace(" ", "");
+        String ret = aliasGenerateHelper.extractJsonStringFromAiMessage(mockAlias);
         return JSONObject.parseObject(ret, new TypeReference<List<String>>() {
         });
     }
@@ -346,9 +346,8 @@ public class DimensionServiceImpl extends ServiceImpl<DimensionDOMapper, Dimensi
         }
         String json = aliasGenerateHelper.generateDimensionValueAlias(JSON.toJSONString(valueList));
         log.info("return llm res is :{}", json);
-        String ret = json.replaceAll("`", "").replace("json", "").replace("\n", "").replace(" ", "");
+        String ret = aliasGenerateHelper.extractJsonStringFromAiMessage(json);
         JSONObject jsonObject = JSON.parseObject(ret);
-
         List<DimValueMap> dimValueMapsResp = new ArrayList<>();
         int i = 0;
         for (Map<String, Object> stringObjectMap : resultList) {

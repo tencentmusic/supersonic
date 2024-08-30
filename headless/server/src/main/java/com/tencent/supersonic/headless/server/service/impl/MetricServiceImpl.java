@@ -13,6 +13,7 @@ import com.tencent.supersonic.common.pojo.Aggregator;
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.DataEvent;
 import com.tencent.supersonic.common.pojo.DataItem;
+import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.common.pojo.Filter;
 import com.tencent.supersonic.common.pojo.enums.AuthType;
 import com.tencent.supersonic.common.pojo.enums.EventType;
@@ -750,6 +751,9 @@ public class MetricServiceImpl extends ServiceImpl<MetricDOMapper, MetricDO>
         if (modelCluster == null) {
             throw new IllegalArgumentException("Invalid input parameters, unable to obtain valid metrics");
         }
+        if (!modelCluster.isContainsPartitionDimensions()) {
+            queryMetricReq.setDateInfo(null);
+        }
         //4. set groups
         List<String> dimensionBizNames = dimensionResps.stream()
                 .filter(entry -> modelCluster.getModelIds().contains(entry.getModelId()))
@@ -759,8 +763,9 @@ public class MetricServiceImpl extends ServiceImpl<MetricDOMapper, MetricDO>
                 .map(SchemaItem::getBizName).collect(Collectors.toList());
 
         QueryStructReq queryStructReq = new QueryStructReq();
-        if (queryMetricReq.getDateInfo().isGroupByDate()) {
-            queryStructReq.getGroups().add(queryMetricReq.getDateInfo().getGroupByTimeDimension());
+        DateConf dateInfo = queryMetricReq.getDateInfo();
+        if (Objects.nonNull(dateInfo) && dateInfo.isGroupByDate()) {
+            queryStructReq.getGroups().add(dateInfo.getGroupByTimeDimension());
         }
         if (!CollectionUtils.isEmpty(dimensionBizNames)) {
             queryStructReq.getGroups().addAll(dimensionBizNames);
@@ -795,7 +800,7 @@ public class MetricServiceImpl extends ServiceImpl<MetricDOMapper, MetricDO>
         }
         queryStructReq.setDimensionFilters(filters);
         //7. set dateInfo
-        queryStructReq.setDateInfo(queryMetricReq.getDateInfo());
+        queryStructReq.setDateInfo(dateInfo);
         return queryStructReq;
     }
 

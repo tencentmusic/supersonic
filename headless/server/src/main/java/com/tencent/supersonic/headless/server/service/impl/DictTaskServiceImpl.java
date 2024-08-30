@@ -11,9 +11,7 @@ import com.tencent.supersonic.headless.api.pojo.request.DictValueReq;
 import com.tencent.supersonic.headless.api.pojo.response.DictItemResp;
 import com.tencent.supersonic.headless.api.pojo.response.DictTaskResp;
 import com.tencent.supersonic.headless.api.pojo.response.DictValueResp;
-import com.tencent.supersonic.headless.chat.knowledge.KnowledgeBaseService;
 import com.tencent.supersonic.headless.chat.knowledge.file.FileHandler;
-import com.tencent.supersonic.headless.chat.knowledge.helper.HanlpHelper;
 import com.tencent.supersonic.headless.server.persistence.dataobject.DictTaskDO;
 import com.tencent.supersonic.headless.server.persistence.repository.DictRepository;
 import com.tencent.supersonic.headless.server.service.DictTaskService;
@@ -24,7 +22,6 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
 
@@ -44,16 +41,18 @@ public class DictTaskServiceImpl implements DictTaskService {
     private final DictUtils dictConverter;
     private final DictUtils dictUtils;
     private final FileHandler fileHandler;
+    private final DictWordService dictWordService;
 
     public DictTaskServiceImpl(DictRepository dictRepository,
                                DictUtils dictConverter,
                                DictUtils dictUtils,
                                FileHandler fileHandler,
-                               KnowledgeBaseService knowledgeBaseService) {
+                               DictWordService dictWordService) {
         this.dictRepository = dictRepository;
         this.dictConverter = dictConverter;
         this.dictUtils = dictUtils;
         this.fileHandler = fileHandler;
+        this.dictWordService = dictWordService;
     }
 
     @Override
@@ -105,10 +104,11 @@ public class DictTaskServiceImpl implements DictTaskService {
 
         // 3.Change in-memory dictionary data in real time
         try {
-            HanlpHelper.reloadCustomDictionary();
+            dictWordService.loadDictWord();
+
             dictTaskDO.setStatus(TaskStatusEnum.SUCCESS.getStatus());
             dictRepository.editDictTask(dictTaskDO);
-        } catch (IOException e) {
+        } catch (Exception e) {
             log.error("reloadCustomDictionary error", e);
         }
 
@@ -121,7 +121,7 @@ public class DictTaskServiceImpl implements DictTaskService {
         fileHandler.deleteDictFile(fileName);
 
         try {
-            HanlpHelper.reloadCustomDictionary();
+            dictWordService.loadDictWord();
         } catch (Exception e) {
             log.error("reloadCustomDictionary error", e);
         }

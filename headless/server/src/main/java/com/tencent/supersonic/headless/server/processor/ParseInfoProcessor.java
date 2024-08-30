@@ -48,41 +48,40 @@ public class ParseInfoProcessor implements ResultProcessor {
             return;
         }
         List<FieldExpression> expressions = SqlSelectHelper.getFilterExpression(s2SQL);
+        Long dataSetId = parseInfo.getDataSetId();
+        SemanticLayerService semanticLayerService = ContextUtils.getBean(SemanticLayerService.class);
+        DataSetSchema dsSchema = semanticLayerService.getDataSetSchema(dataSetId);
 
         //extract date filter from S2SQL
         try {
             if (parseInfo.getDateInfo() == null && !CollectionUtils.isEmpty(expressions)) {
-                parseInfo.setDateInfo(extractDateFilter(expressions));
+                parseInfo.setDateInfo(extractDateFilter(expressions, dsSchema));
             }
         } catch (Exception e) {
             log.error("failed to extract date range:", e);
         }
 
         //extract dimension filters from S2SQL
-        Long dataSetId = parseInfo.getDataSetId();
-        SemanticLayerService semanticLayerService = ContextUtils.getBean(SemanticLayerService.class);
-        DataSetSchema dsSchema = semanticLayerService.getDataSetSchema(dataSetId);
-
         try {
-            Map<String, SchemaElement> fieldNameToElement = getNameToElement(dsSchema);
-            parseInfo.getDimensionFilters().addAll(extractDimensionFilter(fieldNameToElement, expressions));
+            List<QueryFilter> queryFilters = extractDimensionFilter(dsSchema, expressions);
+            parseInfo.getDimensionFilters().addAll(queryFilters);
         } catch (Exception e) {
             log.error("failed to extract dimension filters:", e);
         }
 
         //extract metrics from S2SQL
-        List<String> allFields = filterDateField(SqlSelectHelper.getAllSelectFields(s2SQL));
+        List<String> allFields = filterDateField(dsSchema, SqlSelectHelper.getAllSelectFields(s2SQL));
         Set<SchemaElement> metrics = matchSchemaElements(allFields, dsSchema.getMetrics());
         parseInfo.setMetrics(metrics);
 
         //extract dimensions from S2SQL
         if (QueryType.METRIC.equals(parseInfo.getQueryType())) {
             List<String> groupByFields = SqlSelectHelper.getGroupByFields(s2SQL);
-            List<String> groupByDimensions = filterDateField(groupByFields);
+            List<String> groupByDimensions = filterDateField(dsSchema, groupByFields);
             parseInfo.setDimensions(matchSchemaElements(groupByDimensions, dsSchema.getDimensions()));
         } else if (QueryType.DETAIL.equals(parseInfo.getQueryType())) {
             List<String> selectFields = SqlSelectHelper.getSelectFields(s2SQL);
-            List<String> selectDimensions = filterDateField(selectFields);
+            List<String> selectDimensions = filterDateField(dsSchema, selectFields);
             parseInfo.setDimensions(matchSchemaElements(selectDimensions, dsSchema.getDimensions()));
         }
     }
@@ -103,20 +102,22 @@ public class ParseInfoProcessor implements ResultProcessor {
                 ).collect(Collectors.toSet());
     }
 
-    private List<String> filterDateField(List<String> allFields) {
+    private List<String> filterDateField(DataSetSchema dataSetSchema, List<String> allFields) {
         return allFields.stream()
-                .filter(entry -> !TimeDimensionEnum.DAY.getChName().equalsIgnoreCase(entry))
+                .filter(entry -> !isPartitionDimension(dataSetSchema, entry))
                 .collect(Collectors.toList());
     }
 
-    private List<QueryFilter> extractDimensionFilter(Map<String, SchemaElement> fieldNameToElement,
+    private List<QueryFilter> extractDimensionFilter(DataSetSchema dsSchema,
                                                      List<FieldExpression> fieldExpressions) {
+
+        Map<String, SchemaElement> fieldNameToElement = getNameToElement(dsSchema);
         List<QueryFilter> result = Lists.newArrayList();
         for (FieldExpression expression : fieldExpressions) {
             QueryFilter dimensionFilter = new QueryFilter();
             dimensionFilter.setValue(expression.getFieldValue());
             SchemaElement schemaElement = fieldNameToElement.get(expression.getFieldName());
-            if (Objects.isNull(schemaElement) || schemaElement.containsPartitionTime()) {
+            if (Objects.isNull(schemaElement) || isPartitionDimension(dsSchema, schemaElement.getName())) {
                 continue;
             }
             dimensionFilter.setName(schemaElement.getName());
@@ -131,11 +132,12 @@ public class ParseInfoProcessor implements ResultProcessor {
         return result;
     }
 
-    private DateConf extractDateFilter(List<FieldExpression> fieldExpressions) {
+    private DateConf extractDateFilter(List<FieldExpression> fieldExpressions,
+                                       DataSetSchema dataSetSchema) {
         List<FieldExpression> dateExpressions = fieldExpressions.stream()
-                .filter(expression -> TimeDimensionEnum.DAY.getChName().equalsIgnoreCase(expression.getFieldName()))
+                .filter(expression -> isPartitionDimension(dataSetSchema, expression.getFieldName()))
                 .collect(Collectors.toList());
-        if (org.apache.commons.collections.CollectionUtils.isEmpty(dateExpressions)) {
+        if (CollectionUtils.isEmpty(dateExpressions)) {
             return null;
         }
         DateConf dateInfo = new DateConf();
@@ -164,6 +166,18 @@ public class ParseInfoProcessor implements ResultProcessor {
             }
         }
         return dateInfo;
+    }
+
+    private static boolean isPartitionDimension(DataSetSchema dataSetSchema, String sqlFieldName) {
+        if (TimeDimensionEnum.containsTimeDimension(sqlFieldName)) {
+            return true;
+        }
+        if (Objects.isNull(dataSetSchema)
+                || Objects.isNull(dataSetSchema.getPartitionDimension())
+                || Objects.isNull(dataSetSchema.getPartitionDimension().getName())) {
+            return false;
+        }
+        return sqlFieldName.equalsIgnoreCase(dataSetSchema.getPartitionDimension().getName());
     }
 
     private boolean containOperators(FieldExpression expression, FilterOperatorEnum firstOperator,

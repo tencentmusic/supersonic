@@ -70,9 +70,8 @@ public class ModelConverter {
         return modelResp;
     }
 
-    public static ModelResp convert(ModelDO modelDO, Map<Long, DomainResp> domainRespMap) {
+    public static ModelResp convert(ModelDO modelDO, DomainResp domainResp) {
         ModelResp modelResp = convert(modelDO);
-        DomainResp domainResp = domainRespMap.get(modelResp.getDomainId());
         if (domainResp != null) {
             String fullBizNamePath = domainResp.getFullPath() + modelResp.getBizName();
             modelResp.setFullPath(fullBizNamePath);

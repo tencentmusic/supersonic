@@ -7,6 +7,7 @@ import com.tencent.supersonic.headless.chat.query.QueryManager;
 import com.tencent.supersonic.headless.chat.query.SemanticQuery;
 import com.tencent.supersonic.headless.chat.query.rule.RuleSemanticQuery;
 import com.tencent.supersonic.headless.chat.parser.SemanticParser;
+import com.tencent.supersonic.headless.chat.query.rule.detail.DetailDimensionQuery;
 import com.tencent.supersonic.headless.chat.query.rule.metric.MetricModelQuery;
 import com.tencent.supersonic.headless.chat.query.rule.metric.MetricSemanticQuery;
 import com.tencent.supersonic.headless.chat.query.rule.metric.MetricIdQuery;
@@ -103,7 +104,8 @@ public class ContextInheritParser implements SemanticParser {
     protected boolean shouldInherit(ChatQueryContext chatQueryContext) {
         // if candidates only have MetricModel mode, count in context
         List<SemanticQuery> metricModelQueries = chatQueryContext.getCandidateQueries().stream()
-                .filter(query -> query instanceof MetricModelQuery).collect(
+                .filter(query -> query instanceof MetricModelQuery
+                        || query instanceof DetailDimensionQuery).collect(
                         Collectors.toList());
         return metricModelQueries.size() == chatQueryContext.getCandidateQueries().size();
     }

@@ -65,7 +65,6 @@ public class SqlUtils {
     }
 
     public SqlUtils init(Database database) {
-        //todo Password decryption
         return SqlUtilsBuilder
                 .getBuilder()
                 .withName(database.getId() + AT_SYMBOL + database.getName())

@@ -14,7 +14,7 @@ import java.util.Map;
 
 @Service
 public abstract class ParameterConfig {
-
+    public static final String DEMO = "demo";
     @Autowired
     private SystemConfigService sysConfigService;
 

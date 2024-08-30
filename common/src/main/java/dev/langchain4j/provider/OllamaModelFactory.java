@@ -13,7 +13,11 @@ import java.time.Duration;
 
 @Service
 public class OllamaModelFactory implements ModelFactory, InitializingBean {
+
     public static final String PROVIDER = "OLLAMA";
+    public static final String DEFAULT_BASE_URL = "http://localhost:11434";
+    public static final String DEFAULT_MODEL_NAME = "qwen:0.5b";
+    public static final String DEFAULT_EMBEDDING_MODEL_NAME = "all-minilm";
 
     @Override
     public ChatLanguageModel createChatModel(ChatModelConfig modelConfig) {
@@ -23,6 +27,10 @@ public class OllamaModelFactory implements ModelFactory, InitializingBean {
                 .modelName(modelConfig.getModelName())
                 .temperature(modelConfig.getTemperature())
                 .timeout(Duration.ofSeconds(modelConfig.getTimeOut()))
+                .topP(modelConfig.getTopP())
+                .maxRetries(modelConfig.getMaxRetries())
+                .logRequests(modelConfig.getLogRequests())
+                .logResponses(modelConfig.getLogResponses())
                 .build();
     }
 

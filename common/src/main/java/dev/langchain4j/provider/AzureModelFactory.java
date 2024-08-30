@@ -14,6 +14,9 @@ import java.time.Duration;
 @Service
 public class AzureModelFactory implements ModelFactory, InitializingBean {
     public static final String PROVIDER = "AZURE";
+    public static final String DEFAULT_BASE_URL = "https://your-resource-name.openai.azure.com/";
+    public static final String DEFAULT_MODEL_NAME = "gpt-35-turbo";
+    public static final String DEFAULT_EMBEDDING_MODEL_NAME = "text-embedding-ada-002";
 
     @Override
     public ChatLanguageModel createChatModel(ChatModelConfig modelConfig) {
@@ -22,7 +25,10 @@ public class AzureModelFactory implements ModelFactory, InitializingBean {
                 .apiKey(modelConfig.getApiKey())
                 .deploymentName(modelConfig.getModelName())
                 .temperature(modelConfig.getTemperature())
-                .timeout(Duration.ofSeconds(modelConfig.getTimeOut() == null ? 0L : modelConfig.getTimeOut()));
+                .maxRetries(modelConfig.getMaxRetries())
+                .topP(modelConfig.getTopP())
+                .timeout(Duration.ofSeconds(modelConfig.getTimeOut() == null ? 0L : modelConfig.getTimeOut()))
+                .logRequestsAndResponses(modelConfig.getLogRequests() != null && modelConfig.getLogResponses());
         return builder.build();
     }
 
