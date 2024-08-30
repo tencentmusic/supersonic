@@ -67,7 +67,7 @@ public class HeuristicDataSetResolver implements DataSetResolver {
                             return difference;
                         }
 
-                         difference = o2.getValue().getCount() - o1.getValue().getCount();
+                        difference = o2.getValue().getCount() - o1.getValue().getCount();
                         if (difference == 0) {
                             return (int) ((o2.getValue().getMaxSimilarity()
                                     - o1.getValue().getMaxSimilarity()) * 100);
@@ -120,7 +120,7 @@ public class HeuristicDataSetResolver implements DataSetResolver {
                 }
                 DataSetMatchResult dataSetMatchResult = dataSetCount.get(entry.getKey());
                 Set<SchemaElementType> schemaElementTypes = new HashSet<>();
-              /*  schemaElementMatches.stream()
+                /*schemaElementMatches.stream()
                         .forEach(schemaElementMatch -> schemaElementTypes.add(
                                 schemaElementMatch.getElement().getType()));*/
                 schemaElementMatches.forEach(schemaElementMatch -> {
