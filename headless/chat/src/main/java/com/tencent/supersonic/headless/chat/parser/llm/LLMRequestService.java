@@ -1,5 +1,8 @@
 package com.tencent.supersonic.headless.chat.parser.llm;
 
+import static com.tencent.supersonic.headless.chat.parser.ParserConfig.PARSER_LINKING_VALUE_ENABLE;
+import static com.tencent.supersonic.headless.chat.parser.ParserConfig.PARSER_STRATEGY_TYPE;
+
 import com.tencent.supersonic.common.pojo.enums.DataFormatTypeEnum;
 import com.tencent.supersonic.common.util.DateUtils;
 import com.tencent.supersonic.headless.api.pojo.DataSetSchema;
@@ -13,13 +16,6 @@ import com.tencent.supersonic.headless.chat.parser.SatisfactionChecker;
 import com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMReq;
 import com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMResp;
 import com.tencent.supersonic.headless.chat.utils.ComponentFactory;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -29,13 +25,17 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import static com.tencent.supersonic.headless.chat.parser.ParserConfig.PARSER_LINKING_VALUE_ENABLE;
-import static com.tencent.supersonic.headless.chat.parser.ParserConfig.PARSER_STRATEGY_TYPE;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 @Slf4j
 @Service
 public class LLMRequestService {
+
     @Autowired
     private ParserConfig parserConfig;
 
@@ -151,8 +151,8 @@ public class LLMRequestService {
     }
 
     private void appendMetricPriorKnowledge(LLMReq.LLMSchema llmSchema,
-                                            StringBuilder priorKnowledgeBuilder,
-                                            SemanticSchema semanticSchema) {
+            StringBuilder priorKnowledgeBuilder,
+            SemanticSchema semanticSchema) {
         Map<String, String> fieldNameToDataFormatType = getFieldNameToDataFormatTypeMap(semanticSchema);
 
         for (SchemaElement schemaElement : llmSchema.getMetrics()) {
@@ -170,21 +170,26 @@ public class LLMRequestService {
                 .filter(dimension -> StringUtils.isNotBlank(dimension.getTimeFormat()))
                 .collect(Collectors.toMap(
                         SchemaElement::getName,
-                        value -> Optional.ofNullable(value.getPartitionTimeFormat()).orElse(""),
+                        value -> Optional.ofNullable(value.getTimeFormat()).orElse(""),
                         (k1, k2) -> k1)
                 );
     }
 
     private void appendDimensionPriorKnowledge(LLMReq.LLMSchema llmSchema,
-                                               StringBuilder priorKnowledgeBuilder,
-                                               SemanticSchema semanticSchema) {
+            StringBuilder priorKnowledgeBuilder,
+            SemanticSchema semanticSchema) {
         Map<String, String> fieldNameToDateFormat = getFieldNameToDateFormatMap(semanticSchema);
 
         for (SchemaElement schemaElement : llmSchema.getDimensions()) {
             String fieldName = schemaElement.getName();
             String timeFormat = fieldNameToDateFormat.get(fieldName);
-            if (StringUtils.isNotBlank(timeFormat)) {
-                priorKnowledgeBuilder.append(String.format("%s是分区时间且格式是%s", fieldName, timeFormat));
+            if (StringUtils.isBlank(timeFormat)) {
+                continue;
+            }
+            if (schemaElement.containsPartitionTime()) {
+                priorKnowledgeBuilder.append(String.format("%s 是分区时间且格式是%s", fieldName, timeFormat));
+            } else {
+                priorKnowledgeBuilder.append(String.format("%s 的时间格式是%s", fieldName, timeFormat));
             }
         }
     }
