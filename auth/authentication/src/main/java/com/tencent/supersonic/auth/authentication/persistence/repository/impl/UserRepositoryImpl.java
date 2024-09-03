@@ -3,11 +3,12 @@ package com.tencent.supersonic.auth.authentication.persistence.repository.impl;
 
 import com.tencent.supersonic.auth.authentication.persistence.dataobject.UserDO;
 import com.tencent.supersonic.auth.authentication.persistence.dataobject.UserDOExample;
-import com.tencent.supersonic.auth.authentication.persistence.repository.UserRepository;
 import com.tencent.supersonic.auth.authentication.persistence.mapper.UserDOMapper;
+import com.tencent.supersonic.auth.authentication.persistence.repository.UserRepository;
+import org.springframework.stereotype.Component;
+
 import java.util.List;
 import java.util.Optional;
-import org.springframework.stereotype.Component;
 
 @Component
 public class UserRepositoryImpl implements UserRepository {
