@@ -1,3 +1,23 @@
+SuperSonic is licensed under the MIT License, with the following additional conditions:
+
+1. You may provide SuperSonic to third parties as a commercial software or service. However,
+   when the following conditions are met, you must contact the producer to obtain a commercial license:
+
+a. Multi-tenant SaaS service: Unless explicitly authorized by SuperSonic in writing, you may not use the
+   SuperSonic source code to operate a multi-tenant SaaS service.
+b. LOGO and copyright information: In the process of using SuperSonic, you may not remove or modify
+   the LOGO or copyright information on the SuperSonic UI. This restriction is inapplicable to uses of
+   SuperSonic that do not involve its frontend components.
+
+Please contact jerryjzhang@tencent.com by email to inquire about licensing matters.
+
+2. As a contributor, you should agree that:
+
+a. The producer can adjust the open-source agreement to be more strict or relaxed as deemed necessary.
+b. Your contributed code may be used for commercial purposes, including but not limited to its business operations.
+
+Terms of the MIT License:
+--------------------------------------------------------------------
 MIT License
 
 Copyright (c) 2023 Tencent Music Entertainment
@@ -20,6 +40,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
+END OF TERMS AND CONDITIONS
 
 
 Other dependencies and licenses:
