@@ -124,10 +124,7 @@ public class DomainServiceImpl implements DomainService {
             domainWithAuth = domainResps.stream()
                     .filter(domainResp -> checkAdminPermission(orgIds, user, domainResp))
                     .collect(Collectors.toSet());
-
-            List<Long> domainIds = domainWithAuth.stream().map(DomainResp::getId)
-                    .collect(Collectors.toList());
-            return getDomainChildren(domainIds).stream()
+            return domainWithAuth.stream()
                     .peek(domainResp -> domainResp.setHasEditPermission(true))
                     .collect(Collectors.toSet());
         }
