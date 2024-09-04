@@ -34,8 +34,13 @@ public class DimensionRecommendProcessor implements ExecuteResultProcessor {
                 || CollectionUtils.isEmpty(semanticParseInfo.getMetrics())) {
             return;
         }
-        SchemaElement element = semanticParseInfo.getMetrics().iterator().next();
-        List<SchemaElement> dimensionRecommended = getDimensions(element.getId(), element.getDataSetId());
+        Long dataSetId = semanticParseInfo.getDataSetId();
+        Optional<SchemaElement> firstMetric = semanticParseInfo.getMetrics().stream().findFirst();
+        if (!firstMetric.isPresent()) {
+            return;
+        }
+        SchemaElement element = firstMetric.get();
+        List<SchemaElement> dimensionRecommended = getDimensions(element.getId(), dataSetId);
         queryResult.setRecommendedDimensions(dimensionRecommended);
     }
 
