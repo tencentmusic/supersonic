@@ -101,11 +101,11 @@ public class OnePassSCSqlGenStrategy extends SqlGenStrategy {
 
         // use custom prompt template if provided.
         PromptConfig promptConfig = llmReq.getPromptConfig();
-        String prompTemplate = INSTRUCTION;
+        String promptTemplate = INSTRUCTION;
         if (promptConfig != null && StringUtils.isNotBlank(promptConfig.getPromptTemplate())) {
-            prompTemplate = promptConfig.getPromptTemplate();
+            promptTemplate = promptConfig.getPromptTemplate();
         }
-        return PromptTemplate.from(prompTemplate).apply(variable);
+        return PromptTemplate.from(promptTemplate).apply(variable);
     }
 
     @Override
