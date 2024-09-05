@@ -172,7 +172,7 @@ public class S2SemanticLayerService implements SemanticLayerService {
             for (QueryExecutor queryExecutor : queryExecutors) {
                 if (queryExecutor.accept(queryStatement)) {
                     queryResp = queryExecutor.execute(queryStatement);
-                    queryUtils.fillItemNameInfo(queryResp, queryStatement.getSemanticSchemaResp());
+                    queryUtils.populateQueryColumns(queryResp, queryStatement.getSemanticSchemaResp());
                 }
             }
 
