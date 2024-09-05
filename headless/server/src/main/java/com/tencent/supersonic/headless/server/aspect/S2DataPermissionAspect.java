@@ -191,6 +191,7 @@ public class S2DataPermissionAspect {
                 String sql = SqlAddHelper.addWhere(querySqlReq.getSql(), expression);
                 log.info("before doRowPermission, queryS2SQLReq:{}", querySqlReq.getSql());
                 querySqlReq.setSql(sql);
+                querySqlReq.getSqlInfo().setQuerySQL(sql);
                 log.info("after doRowPermission, queryS2SQLReq:{}", querySqlReq.getSql());
             }
         } catch (JSQLParserException jsqlParserException) {
