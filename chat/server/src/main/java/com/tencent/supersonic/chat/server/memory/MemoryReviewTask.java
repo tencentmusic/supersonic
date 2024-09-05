@@ -2,6 +2,7 @@ package com.tencent.supersonic.chat.server.memory;
 
 import com.tencent.supersonic.chat.api.pojo.enums.MemoryReviewResult;
 import com.tencent.supersonic.chat.server.agent.Agent;
+import com.tencent.supersonic.chat.server.persistence.dataobject.ChatMemoryDO;
 import com.tencent.supersonic.chat.server.service.AgentService;
 import com.tencent.supersonic.chat.server.service.MemoryService;
 import dev.langchain4j.model.chat.ChatLanguageModel;
@@ -50,37 +51,47 @@ public class MemoryReviewTask {
 
     @Scheduled(fixedDelay = 60 * 1000)
     public void review() {
-        memoryService.getMemoriesForLlmReview().stream()
-                .forEach(m -> {
-                    Agent chatAgent = agentService.getAgent(m.getAgentId());
-                    if (Objects.nonNull(chatAgent) && chatAgent.enableMemoryReview()) {
-                        String promptStr = String.format(INSTRUCTION, m.getQuestion(), m.getDbSchema(),
-                                m.getSideInfo(), m.getS2sql());
-                        Prompt prompt = PromptTemplate.from(promptStr).apply(Collections.EMPTY_MAP);
+        try {
+            memoryService.getMemoriesForLlmReview().stream().forEach(this::processMemory);
+        } catch (Exception e) {
+            log.error("Exception occurred during memory review task", e);
+        }
+    }
 
-                        keyPipelineLog.info("MemoryReviewTask reqPrompt:\n{}", promptStr);
-                        ChatLanguageModel chatLanguageModel = ModelProvider.getChatModel(
-                                chatAgent.getModelConfig());
-                        if (Objects.nonNull(chatLanguageModel)) {
-                            String response = chatLanguageModel.generate(prompt.toUserMessage()).content().text();
-                            keyPipelineLog.info("MemoryReviewTask modelResp:\n{}", response);
+    private void processMemory(ChatMemoryDO m) {
+        Agent chatAgent = agentService.getAgent(m.getAgentId());
+        if (Objects.isNull(chatAgent) || !chatAgent.enableMemoryReview()) {
+            log.debug("Agent id {} not found or memory review disabled", m.getAgentId());
+            return;
+        }
+        String promptStr = createPromptString(m);
+        Prompt prompt = PromptTemplate.from(promptStr).apply(Collections.EMPTY_MAP);
 
-                            Matcher matcher = OUTPUT_PATTERN.matcher(response);
-                            if (matcher.find()) {
-                                m.setLlmReviewRet(MemoryReviewResult.getMemoryReviewResult(matcher.group(1)));
-                                m.setLlmReviewCmt(matcher.group(2));
-                                // directly enable memory if the LLM determines it positive
-                                if (MemoryReviewResult.POSITIVE.equals(m.getLlmReviewRet())) {
-                                    memoryService.enableMemory(m);
-                                }
-                                memoryService.updateMemory(m);
-                            }
-                        } else {
-                            log.debug("ChatLanguageModel not found for agent:{}", chatAgent.getId());
-                        }
-                    } else {
-                        log.debug("Agent id {} not found or memory review disabled", m.getAgentId());
-                    }
-                });
+        keyPipelineLog.info("MemoryReviewTask reqPrompt:\n{}", promptStr);
+        ChatLanguageModel chatLanguageModel = ModelProvider.getChatModel(chatAgent.getModelConfig());
+        if (Objects.nonNull(chatLanguageModel)) {
+            String response = chatLanguageModel.generate(prompt.toUserMessage()).content().text();
+            keyPipelineLog.info("MemoryReviewTask modelResp:\n{}", response);
+            processResponse(response, m);
+        } else {
+            log.debug("ChatLanguageModel not found for agent:{}", chatAgent.getId());
+        }
+    }
+
+    private String createPromptString(ChatMemoryDO m) {
+        return String.format(INSTRUCTION, m.getQuestion(), m.getDbSchema(), m.getSideInfo(), m.getS2sql());
+    }
+
+    private void processResponse(String response, ChatMemoryDO m) {
+        Matcher matcher = OUTPUT_PATTERN.matcher(response);
+        if (matcher.find()) {
+            m.setLlmReviewRet(MemoryReviewResult.getMemoryReviewResult(matcher.group(1)));
+            m.setLlmReviewCmt(matcher.group(2));
+            // directly enable memory if the LLM determines it positive
+            if (MemoryReviewResult.POSITIVE.equals(m.getLlmReviewRet())) {
+                memoryService.enableMemory(m);
+            }
+            memoryService.updateMemory(m);
+        }
     }
 }

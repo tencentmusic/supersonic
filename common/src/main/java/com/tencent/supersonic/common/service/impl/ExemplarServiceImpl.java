@@ -83,7 +83,7 @@ public class ExemplarServiceImpl implements ExemplarService, CommandLineRunner {
     public void run(String... args) {
         try {
             loadSysExemplars();
-        } catch (IOException e) {
+        } catch (Exception e) {
             log.error("Failed to load system exemplars", e);
         }
     }
