@@ -81,7 +81,9 @@ public class PostgresqlAdaptor extends BaseDbAdaptor {
     public List<String> getTables(ConnectInfo connectionInfo, String schemaName) throws SQLException {
         List<String> tablesAndViews = Lists.newArrayList();
         DatabaseMetaData metaData = getDatabaseMetaData(connectionInfo);
-        try (ResultSet resultSet = metaData.getTables(null, null, null,
+        //TODO oracle查询表 需要根据用户查询 否则查询出的表是所有用户的表
+        String querySchemaName = (metaData instanceof OracleDatabaseMetaData) ? schemaName : null;
+        try (ResultSet resultSet = metaData.getTables(null, querySchemaName, null,
                 new String[]{"TABLE", "VIEW"})) {
             while (resultSet.next()) {
                 String name = resultSet.getString("TABLE_NAME");
