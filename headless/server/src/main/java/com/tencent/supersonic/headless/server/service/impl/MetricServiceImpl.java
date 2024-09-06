@@ -511,7 +511,7 @@ public class MetricServiceImpl extends ServiceImpl<MetricDOMapper, MetricDO>
     public List<String> mockAlias(MetricBaseReq metricReq, String mockType, User user) {
 
         String mockAlias = aliasGenerateHelper.generateAlias(mockType, metricReq.getName(), metricReq.getBizName(), "",
-                metricReq.getDescription(), !"".equals(metricReq.getDataFormatType()));
+                metricReq.getDescription());
         String ret = mockAlias.replaceAll("`", "").replace("json", "").replace("\n", "").replace(" ", "");
         return JSONObject.parseObject(ret, new TypeReference<List<String>>() {
         });

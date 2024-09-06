@@ -318,7 +318,7 @@ public class DimensionServiceImpl extends ServiceImpl<DimensionDOMapper, Dimensi
     @Override
     public List<String> mockAlias(DimensionReq dimensionReq, String mockType, User user) {
         String mockAlias = aliasGenerateHelper.generateAlias(mockType, dimensionReq.getName(),
-                dimensionReq.getBizName(), "", dimensionReq.getDescription(), false);
+                dimensionReq.getBizName(), "", dimensionReq.getDescription());
         String ret = aliasGenerateHelper.extractJsonStringFromAiMessage(mockAlias);
         return JSONObject.parseObject(ret, new TypeReference<List<String>>() {
         });

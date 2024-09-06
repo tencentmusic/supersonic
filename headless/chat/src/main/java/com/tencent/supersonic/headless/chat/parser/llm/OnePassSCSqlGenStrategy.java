@@ -26,19 +26,19 @@ import java.util.concurrent.ConcurrentHashMap;
 public class OnePassSCSqlGenStrategy extends SqlGenStrategy {
 
     private static final String INSTRUCTION = ""
-            + "#Role: You are a data analyst experienced in SQL languages.\n"
-            + "#Task: You will be provided a natural language question asked by users,"
+            + "\n#Role: You are a data analyst experienced in SQL languages."
+            + "#Task: You will be provided with a natural language question asked by users,"
             + "please convert it to a SQL query so that relevant data could be returned "
-            + "by executing the SQL query against underlying database.\n"
-            + "#Rules:"
+            + "by executing the SQL query against underlying database."
+            + "\n#Rules:"
             + "1.ALWAYS generate column specified in the `Schema`, DO NOT hallucinate."
             + "2.ALWAYS specify date filter using `>`,`<`,`>=`,`<=` operator."
             + "3.ALWAYS calculate the absolute date range by yourself."
             + "4.DO NOT include date filter in the where clause if not explicitly expressed in the `Question`."
             + "5.DO NOT miss the AGGREGATE operator of metrics, always add it if needed."
-            + "6.ONLY respond with the converted SQL statement.\n"
-            + "#Exemplars:\n{{exemplar}}"
-            + "#Question:{{question}} #Schema:{{schema}} #SideInfo:{{information}} #SQL:";
+            + "6.ONLY respond with the converted SQL statement."
+            + "\n#Exemplars:\n{{exemplar}}"
+            + "Question:{{question}},Schema:{{schema}},SideInfo:{{information}},SQL:";
 
     @Override
     public LLMResp generate(LLMReq llmReq) {
@@ -83,7 +83,7 @@ public class OnePassSCSqlGenStrategy extends SqlGenStrategy {
     private Prompt generatePrompt(LLMReq llmReq, LLMResp llmResp) {
         StringBuilder exemplars = new StringBuilder();
         for (Text2SQLExemplar exemplar : llmReq.getDynamicExemplars()) {
-            String exemplarStr = String.format("#Question:%s #Schema:%s #SideInfo:%s #SQL:%s\n",
+            String exemplarStr = String.format("Question:%s,Schema:%s,SideInfo:%s,SQL:%s\n",
                     exemplar.getQuestion(), exemplar.getDbSchema(),
                     exemplar.getSideInfo(), exemplar.getSql());
             exemplars.append(exemplarStr);
