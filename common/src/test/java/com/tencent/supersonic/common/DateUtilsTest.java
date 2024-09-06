@@ -48,8 +48,14 @@ class DateUtilsTest {
         String startDate = "2023-07-29";
         String endDate = "2023-08-03";
         List<String> actualDateList = DateUtils.getDateList(startDate, endDate, Constants.DAY);
-        List<String> expectedDateList = Lists.newArrayList("2023-07-29", "2023-07-30",
-                "2023-07-31", "2023-08-01", "2023-08-02", "2023-08-03");
+        List<String> expectedDateList =
+                Lists.newArrayList(
+                        "2023-07-29",
+                        "2023-07-30",
+                        "2023-07-31",
+                        "2023-08-01",
+                        "2023-08-02",
+                        "2023-08-03");
         Assertions.assertEquals(actualDateList, expectedDateList);
     }
 
@@ -58,8 +64,8 @@ class DateUtilsTest {
         String startDate = "2023-10-30";
         String endDate = "2023-11-13";
         List<String> actualDateList = DateUtils.getDateList(startDate, endDate, Constants.WEEK);
-        List<String> expectedDateList = Lists.newArrayList("2023-10-30", "2023-11-06",
-                "2023-11-13");
+        List<String> expectedDateList =
+                Lists.newArrayList("2023-10-30", "2023-11-06", "2023-11-13");
         Assertions.assertEquals(actualDateList, expectedDateList);
     }
 
@@ -68,7 +74,8 @@ class DateUtilsTest {
         String startDate = "2023-07-01";
         String endDate = "2023-10-01";
         List<String> actualDateList = DateUtils.getDateList(startDate, endDate, Constants.MONTH);
-        List<String> expectedDateList = Lists.newArrayList("2023-07", "2023-08", "2023-09", "2023-10");
+        List<String> expectedDateList =
+                Lists.newArrayList("2023-07", "2023-08", "2023-09", "2023-10");
         Assertions.assertEquals(actualDateList, expectedDateList);
     }
 }

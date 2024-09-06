@@ -1,8 +1,8 @@
 package com.tencent.supersonic.headless.server.task;
 
+import javax.annotation.PreDestroy;
+
 import com.tencent.supersonic.headless.server.service.FlightService;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.arrow.flight.FlightServer;
 import org.apache.arrow.flight.Location;
@@ -12,25 +12,29 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PreDestroy;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
-/**
- * Initialize flight jdbc server
- */
+/** Initialize flight jdbc server */
 @Component
 @Slf4j
 public class FlightServerInitTask implements CommandLineRunner {
 
     @Value("${s2.flightSql.enable:false}")
     private Boolean enable = false;
+
     @Value("${s2.flightSql.host:localhost}")
     private String host = "localhost";
+
     @Value("${s2.flightSql.port:9081}")
     private Integer port = 9081;
+
     @Value("${s2.flightSql.executor:4}")
     private Integer executor = 4;
+
     @Value("${s2.flightSql.queue:128}")
     private Integer queue = 128;
+
     @Value("${s2.flightSql.expireMinute:10}")
     private Integer expireMinute = 10;
 
@@ -47,8 +51,7 @@ public class FlightServerInitTask implements CommandLineRunner {
         executorService = Executors.newFixedThreadPool(executor);
         this.flightService.setExecutorService(executorService, queue, expireMinute);
         Location listenLocation = Location.forGrpcInsecure(host, port);
-        flightServer = FlightServer.builder(allocator, listenLocation, this.flightService)
-                .build();
+        flightServer = FlightServer.builder(allocator, listenLocation, this.flightService).build();
     }
 
     public String getHost() {
@@ -67,7 +70,6 @@ public class FlightServerInitTask implements CommandLineRunner {
         } catch (Exception e) {
             log.error("FlightServerInitTask start error {}", e);
         }
-
     }
 
     public Boolean isRunning() {
@@ -93,15 +95,18 @@ public class FlightServerInitTask implements CommandLineRunner {
                 public void run() {
                     try {
                         startServer();
-                        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-                            try {
-                                flightServer.close();
-                                allocator.close();
-                            } catch (Exception e) {
-                                log.error("flightServer close error {}", e);
-                            }
-                        }));
-                        //flightServer.awaitTermination();
+                        Runtime.getRuntime()
+                                .addShutdownHook(
+                                        new Thread(
+                                                () -> {
+                                                    try {
+                                                        flightServer.close();
+                                                        allocator.close();
+                                                    } catch (Exception e) {
+                                                        log.error("flightServer close error {}", e);
+                                                    }
+                                                }));
+                        // flightServer.awaitTermination();
                     } catch (Exception e) {
                         log.error("run error {}", e);
                     }

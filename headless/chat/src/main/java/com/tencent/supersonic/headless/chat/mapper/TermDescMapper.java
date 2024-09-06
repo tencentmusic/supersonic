@@ -5,17 +5,17 @@ import com.tencent.supersonic.headless.chat.ChatQueryContext;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+
 import java.util.List;
 
-/***
- * A mapper that map the description of the term.
- */
+/** * A mapper that map the description of the term. */
 @Slf4j
 public class TermDescMapper extends BaseMapper {
 
     @Override
     public void doMap(ChatQueryContext chatQueryContext) {
-        List<SchemaElement> termDescriptionToMap = chatQueryContext.getMapInfo().getTermDescriptionToMap();
+        List<SchemaElement> termDescriptionToMap =
+                chatQueryContext.getMapInfo().getTermDescriptionToMap();
         if (CollectionUtils.isEmpty(termDescriptionToMap)) {
             return;
         }
@@ -37,5 +37,4 @@ public class TermDescMapper extends BaseMapper {
             chatQueryContext.setQueryText(chatQueryContext.getOriQueryText());
         }
     }
-
 }

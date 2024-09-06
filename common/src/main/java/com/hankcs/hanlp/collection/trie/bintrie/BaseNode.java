@@ -20,26 +20,16 @@ import java.util.Set;
 @Slf4j
 public abstract class BaseNode<V> implements Comparable<BaseNode> {
 
-    /**
-     * 状态数组，方便读取的时候用
-     */
+    /** 状态数组，方便读取的时候用 */
     static final Status[] ARRAY_STATUS = Status.values();
 
-    /**
-     * 子节点
-     */
+    /** 子节点 */
     protected BaseNode[] child;
-    /**
-     * 节点状态
-     */
+    /** 节点状态 */
     protected Status status;
-    /**
-     * 节点代表的字符
-     */
+    /** 节点代表的字符 */
     protected char c;
-    /**
-     * 节点代表的值
-     */
+    /** 节点代表的值 */
     protected V value;
 
     protected String prefix = null;
@@ -238,25 +228,18 @@ public abstract class BaseNode<V> implements Comparable<BaseNode> {
     }
 
     public enum Status {
-        /**
-         * 未指定，用于删除词条
-         */
+        /** 未指定，用于删除词条 */
         UNDEFINED_0,
-        /**
-         * 不是词语的结尾
-         */
+        /** 不是词语的结尾 */
         NOT_WORD_1,
-        /**
-         * 是个词语的结尾，并且还可以继续
-         */
+        /** 是个词语的结尾，并且还可以继续 */
         WORD_MIDDLE_2,
-        /**
-         * 是个词语的结尾，并且没有继续
-         */
+        /** 是个词语的结尾，并且没有继续 */
         WORD_END_3,
     }
 
-    public class TrieEntry extends AbstractMap.SimpleEntry<String, V> implements Comparable<TrieEntry> {
+    public class TrieEntry extends AbstractMap.SimpleEntry<String, V>
+            implements Comparable<TrieEntry> {
 
         public TrieEntry(String key, V value) {
             super(key, value);
@@ -295,8 +278,9 @@ public abstract class BaseNode<V> implements Comparable<BaseNode> {
         }
     }
 
-    /***
-     * walk limit
+    /**
+     * * walk limit
+     *
      * @param sb
      * @param entrySet
      */
@@ -322,5 +306,4 @@ public abstract class BaseNode<V> implements Comparable<BaseNode> {
             }
         }
     }
-
 }

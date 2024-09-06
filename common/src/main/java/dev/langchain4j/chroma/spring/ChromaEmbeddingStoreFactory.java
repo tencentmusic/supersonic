@@ -31,7 +31,8 @@ public class ChromaEmbeddingStoreFactory extends BaseEmbeddingStoreFactory {
                 .build();
     }
 
-    private static EmbeddingStoreProperties createPropertiesFromConfig(EmbeddingStoreConfig storeConfig) {
+    private static EmbeddingStoreProperties createPropertiesFromConfig(
+            EmbeddingStoreConfig storeConfig) {
         EmbeddingStoreProperties embeddingStore = new EmbeddingStoreProperties();
         BeanUtils.copyProperties(storeConfig, embeddingStore);
         embeddingStore.setTimeout(Duration.ofSeconds(storeConfig.getTimeOut()));

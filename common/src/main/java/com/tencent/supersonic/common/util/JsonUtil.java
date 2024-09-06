@@ -13,6 +13,10 @@ import com.fasterxml.jackson.databind.type.CollectionType;
 import com.fasterxml.jackson.databind.type.MapType;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.security.InvalidParameterException;
@@ -20,29 +24,24 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import lombok.Getter;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-
 
 @Slf4j
 public class JsonUtil {
 
     public static final JsonUtil INSTANCE = new JsonUtil();
 
-    @Getter
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    @Getter private final ObjectMapper objectMapper = new ObjectMapper();
 
     public JsonUtil() {
         // 当属性为null时不参与序列化
         objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-        //允许使用未带引号的字段名
+        // 允许使用未带引号的字段名
         objectMapper.configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true);
-        //忽略未知enum字段，置为null
+        // 忽略未知enum字段，置为null
         objectMapper.configure(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL, true);
-        //反序列化忽略未知字段
+        // 反序列化忽略未知字段
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        //允许使用单引号
+        // 允许使用单引号
         objectMapper.configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true);
         // 遇到空对象不抛异常
         objectMapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
@@ -298,7 +297,8 @@ public class JsonUtil {
         try {
             notNull(wrapperClass, "wrapperClass is null");
             notNull(typeClass, "typeClass is null");
-            JavaType type = objectMapper.getTypeFactory().constructParametricType(wrapperClass, typeClass);
+            JavaType type =
+                    objectMapper.getTypeFactory().constructParametricType(wrapperClass, typeClass);
             return objectMapper.readValue(json, type);
         } catch (Exception e) {
             throw new JsonException(e);
@@ -354,7 +354,8 @@ public class JsonUtil {
         }
         try {
             notNull(clazz, "class is null");
-            JavaType type = objectMapper.getTypeFactory().constructCollectionType(List.class, clazz);
+            JavaType type =
+                    objectMapper.getTypeFactory().constructCollectionType(List.class, clazz);
             return objectMapper.readValue(json, type);
         } catch (Exception e) {
             throw new JsonException(e);
@@ -400,33 +401,29 @@ public class JsonUtil {
             notNull(keyClass, "key class is null");
             notNull(valueClass, "value class is null");
             JavaType type =
-                    objectMapper.getTypeFactory().constructParametricType(Map.class, keyClass, valueClass);
+                    objectMapper
+                            .getTypeFactory()
+                            .constructParametricType(Map.class, keyClass, valueClass);
             return objectMapper.readValue(json, type);
         } catch (Exception e) {
             throw new JsonException(e);
         }
     }
 
-    /**
-     * 对象转换成Map
-     */
+    /** 对象转换成Map */
     public Map<String, Object> asobjectToMap(Object obj) {
         if (obj == null) {
             return null;
         }
-        return objectMapper.convertValue(obj, new TypeReference<Map<String, Object>>() {
-        });
+        return objectMapper.convertValue(obj, new TypeReference<Map<String, Object>>() {});
     }
 
-    /**
-     * 对象转换成Map
-     */
+    /** 对象转换成Map */
     public Map<String, String> asObjectToMapString(Object obj) {
         if (obj == null) {
             return null;
         }
-        return objectMapper.convertValue(obj, new TypeReference<Map<String, String>>() {
-        });
+        return objectMapper.convertValue(obj, new TypeReference<Map<String, String>>() {});
     }
 
     /**
@@ -455,7 +452,8 @@ public class JsonUtil {
         try {
             final TypeFactory typeFactory = getObjectMapper().getTypeFactory();
             final MapType mapType = typeFactory.constructMapType(Map.class, String.class, clazz);
-            final CollectionType collectionType = typeFactory.constructCollectionType(List.class, mapType);
+            final CollectionType collectionType =
+                    typeFactory.constructCollectionType(List.class, mapType);
             return getObjectMapper().readValue(json, collectionType);
         } catch (Exception e) {
             log.error("json:{} to listMap error:", json, e);
@@ -505,7 +503,9 @@ public class JsonUtil {
                 }
                 try {
                     JsonNode jsonNode = readTree(string);
-                    return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonNode);
+                    return objectMapper
+                            .writerWithDefaultPrettyPrinter()
+                            .writeValueAsString(jsonNode);
                 } catch (Exception e) {
                     return string;
                 }
@@ -554,8 +554,8 @@ public class JsonUtil {
         }
     }
 
-    /***
-     * 判断字符串是否合格的json格式
+    /**
+     * * 判断字符串是否合格的json格式
      *
      * @param json
      * @return
@@ -598,15 +598,12 @@ public class JsonUtil {
         }
     }
 
-    /**
-     * json序列化,或者反序列化发生的异常
-     */
+    /** json序列化,或者反序列化发生的异常 */
     public static class JsonException extends RuntimeException {
 
         private static final long serialVersionUID = 1L;
 
-        private JsonException() {
-        }
+        private JsonException() {}
 
         private JsonException(String message) {
             super(message);
@@ -620,7 +617,10 @@ public class JsonUtil {
             super(cause);
         }
 
-        private JsonException(String message, Throwable cause, boolean enableSuppression,
+        private JsonException(
+                String message,
+                Throwable cause,
+                boolean enableSuppression,
                 boolean writableStackTrace) {
             super(message, cause, enableSuppression, writableStackTrace);
         }

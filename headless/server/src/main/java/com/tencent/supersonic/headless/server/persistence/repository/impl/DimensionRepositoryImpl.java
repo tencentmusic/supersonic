@@ -6,8 +6,9 @@ import com.tencent.supersonic.headless.server.persistence.mapper.DimensionDOMapp
 import com.tencent.supersonic.headless.server.persistence.repository.DimensionRepository;
 import com.tencent.supersonic.headless.server.pojo.DimensionFilter;
 import com.tencent.supersonic.headless.server.pojo.DimensionsFilter;
-import java.util.List;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class DimensionRepositoryImpl implements DimensionRepository {
@@ -16,8 +17,8 @@ public class DimensionRepositoryImpl implements DimensionRepository {
 
     private DimensionDOCustomMapper dimensionDOCustomMapper;
 
-    public DimensionRepositoryImpl(DimensionDOMapper dimensionDOMapper,
-                                   DimensionDOCustomMapper dimensionDOCustomMapper) {
+    public DimensionRepositoryImpl(
+            DimensionDOMapper dimensionDOMapper, DimensionDOCustomMapper dimensionDOCustomMapper) {
         this.dimensionDOMapper = dimensionDOMapper;
         this.dimensionDOCustomMapper = dimensionDOCustomMapper;
     }
@@ -56,5 +57,4 @@ public class DimensionRepositoryImpl implements DimensionRepository {
     public List<DimensionDO> getDimensions(DimensionsFilter dimensionsFilter) {
         return dimensionDOCustomMapper.queryDimensions(dimensionsFilter);
     }
-
 }

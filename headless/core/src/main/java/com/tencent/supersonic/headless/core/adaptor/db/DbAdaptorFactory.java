@@ -5,7 +5,6 @@ import com.tencent.supersonic.headless.api.pojo.enums.EngineType;
 import java.util.HashMap;
 import java.util.Map;
 
-
 public class DbAdaptorFactory {
 
     private static Map<String, DbAdaptor> dbAdaptorMap;
@@ -22,5 +21,4 @@ public class DbAdaptorFactory {
     public static DbAdaptor getEngineAdaptor(String engineType) {
         return dbAdaptorMap.get(engineType);
     }
-
 }

@@ -1,8 +1,5 @@
 package com.tencent.supersonic.headless;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
 import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
 import com.tencent.supersonic.auth.authentication.strategy.FakeUserStrategy;
 import com.tencent.supersonic.headless.server.task.FlightServerInitTask;
@@ -19,36 +16,37 @@ import org.apache.arrow.memory.RootAllocator;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 @Slf4j
 public class FlightSqlTest extends BaseTest {
 
-
-    @Autowired
-    private FlightServerInitTask flightSqlListener;
-    @Autowired
-    private FakeUserStrategy fakeUserStrategy;
+    @Autowired private FlightServerInitTask flightSqlListener;
+    @Autowired private FakeUserStrategy fakeUserStrategy;
 
     @Test
     void test01() throws Exception {
         startServer();
         String host = flightSqlListener.getHost();
         Integer port = flightSqlListener.getPort();
-        FlightSqlClient sqlClient = new FlightSqlClient(
-                FlightClient.builder(new RootAllocator(Integer.MAX_VALUE), Location.forGrpcInsecure(host, port))
-                        .build());
+        FlightSqlClient sqlClient =
+                new FlightSqlClient(
+                        FlightClient.builder(
+                                        new RootAllocator(Integer.MAX_VALUE),
+                                        Location.forGrpcInsecure(host, port))
+                                .build());
 
         CallHeaders headers = new FlightCallHeaders();
         headers.insert("dataSetId", "1");
         headers.insert("name", "admin");
         headers.insert("password", "admin");
         HeaderCallOption headerOption = new HeaderCallOption(headers);
-        try (final FlightSqlClient.PreparedStatement preparedStatement = sqlClient.prepare(
-                "SELECT 部门, SUM(访问次数) AS 访问次数 FROM 超音数PVUV统计  GROUP BY 部门",
-                headerOption)) {
+        try (final FlightSqlClient.PreparedStatement preparedStatement =
+                sqlClient.prepare(
+                        "SELECT 部门, SUM(访问次数) AS 访问次数 FROM 超音数PVUV统计  GROUP BY 部门", headerOption)) {
             final FlightInfo info = preparedStatement.execute();
-            FlightStream stream = sqlClient.getStream(info
-                    .getEndpoints()
-                    .get(0).getTicket());
+            FlightStream stream = sqlClient.getStream(info.getEndpoints().get(0).getTicket());
             int rowCnt = 0;
             int colCnt = 0;
             while (stream.next()) {
@@ -69,9 +67,12 @@ public class FlightSqlTest extends BaseTest {
         startServer();
         String host = flightSqlListener.getHost();
         Integer port = flightSqlListener.getPort();
-        FlightSqlClient sqlClient = new FlightSqlClient(
-                FlightClient.builder(new RootAllocator(Integer.MAX_VALUE), Location.forGrpcInsecure(host, port))
-                        .build());
+        FlightSqlClient sqlClient =
+                new FlightSqlClient(
+                        FlightClient.builder(
+                                        new RootAllocator(Integer.MAX_VALUE),
+                                        Location.forGrpcInsecure(host, port))
+                                .build());
 
         CallHeaders headers = new FlightCallHeaders();
         headers.insert("dataSetId", "1");
@@ -79,12 +80,11 @@ public class FlightSqlTest extends BaseTest {
         headers.insert("password", "admin");
         HeaderCallOption headerOption = new HeaderCallOption(headers);
         try {
-            FlightInfo flightInfo = sqlClient.execute(
-                    "SELECT 部门, SUM(访问次数) AS 访问次数 FROM 超音数PVUV统计  GROUP BY 部门",
-                    headerOption);
-            FlightStream stream = sqlClient.getStream(flightInfo
-                    .getEndpoints()
-                    .get(0).getTicket());
+            FlightInfo flightInfo =
+                    sqlClient.execute(
+                            "SELECT 部门, SUM(访问次数) AS 访问次数 FROM 超音数PVUV统计  GROUP BY 部门",
+                            headerOption);
+            FlightStream stream = sqlClient.getStream(flightInfo.getEndpoints().get(0).getTicket());
             int rowCnt = 0;
             int colCnt = 0;
             while (stream.next()) {

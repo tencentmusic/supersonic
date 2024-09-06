@@ -24,5 +24,4 @@ public enum DatePeriodEnum {
         }
         return null;
     }
-
 }

@@ -1,20 +1,20 @@
 package com.tencent.supersonic.headless.chat.parser.llm;
 
-import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.jsqlparser.SqlValidHelper;
+import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.Text2SQLExemplar;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
+import com.tencent.supersonic.headless.chat.ChatQueryContext;
 import com.tencent.supersonic.headless.chat.query.QueryManager;
 import com.tencent.supersonic.headless.chat.query.llm.LLMSemanticQuery;
 import com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMResp;
 import com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMSqlQuery;
 import com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMSqlResp;
-import com.tencent.supersonic.headless.chat.ChatQueryContext;
-import java.util.ArrayList;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.MapUtils;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -23,25 +23,28 @@ import java.util.Objects;
 @Service
 public class LLMResponseService {
 
-    public SemanticParseInfo addParseInfo(ChatQueryContext queryCtx, ParseResult parseResult,
-                                          String s2SQL, Double weight) {
+    public SemanticParseInfo addParseInfo(
+            ChatQueryContext queryCtx, ParseResult parseResult, String s2SQL, Double weight) {
         if (Objects.isNull(weight)) {
             weight = 0D;
         }
         LLMSemanticQuery semanticQuery = QueryManager.createLLMQuery(LLMSqlQuery.QUERY_MODE);
         SemanticParseInfo parseInfo = semanticQuery.getParseInfo();
         parseInfo.setDataSet(queryCtx.getSemanticSchema().getDataSet(parseResult.getDataSetId()));
-        parseInfo.getElementMatches().addAll(queryCtx.getMapInfo().getMatchedElements(parseInfo.getDataSetId()));
+        parseInfo
+                .getElementMatches()
+                .addAll(queryCtx.getMapInfo().getMatchedElements(parseInfo.getDataSetId()));
 
         Map<String, Object> properties = new HashMap<>();
         properties.put(Constants.CONTEXT, parseResult);
         properties.put("type", "internal");
-        Text2SQLExemplar exemplar = Text2SQLExemplar.builder()
-                .question(queryCtx.getQueryText())
-                .sideInfo(parseResult.getLlmResp().getSideInfo())
-                .dbSchema(parseResult.getLlmResp().getSchema())
-                .sql(parseResult.getLlmResp().getSqlOutput())
-                .build();
+        Text2SQLExemplar exemplar =
+                Text2SQLExemplar.builder()
+                        .question(queryCtx.getQueryText())
+                        .sideInfo(parseResult.getLlmResp().getSideInfo())
+                        .dbSchema(parseResult.getLlmResp().getSchema())
+                        .sql(parseResult.getLlmResp().getSqlOutput())
+                        .build();
         properties.put(Text2SQLExemplar.PROPERTY_KEY, exemplar);
         parseInfo.setProperties(properties);
         parseInfo.setScore(queryCtx.getQueryText().length() * (1 + weight));
@@ -60,7 +63,8 @@ public class LLMResponseService {
         Map<String, LLMSqlResp> result = new HashMap<>();
         for (Map.Entry<String, LLMSqlResp> entry : sqlRespMap.entrySet()) {
             String key = entry.getKey();
-            if (result.keySet().stream().anyMatch(existKey -> SqlValidHelper.equals(existKey, key))) {
+            if (result.keySet().stream()
+                    .anyMatch(existKey -> SqlValidHelper.equals(existKey, key))) {
                 continue;
             }
             if (!SqlValidHelper.isValidSQL(key)) {

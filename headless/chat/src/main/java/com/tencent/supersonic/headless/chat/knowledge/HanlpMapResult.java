@@ -1,9 +1,10 @@
 package com.tencent.supersonic.headless.chat.knowledge;
 
 import com.google.common.base.Objects;
-import java.util.List;
 import lombok.Data;
 import lombok.ToString;
+
+import java.util.List;
 
 @Data
 @ToString
@@ -29,7 +30,8 @@ public class HanlpMapResult extends MapResult {
             return false;
         }
         HanlpMapResult hanlpMapResult = (HanlpMapResult) o;
-        return Objects.equal(name, hanlpMapResult.name) && Objects.equal(natures, hanlpMapResult.natures);
+        return Objects.equal(name, hanlpMapResult.name)
+                && Objects.equal(natures, hanlpMapResult.natures);
     }
 
     @Override
@@ -40,5 +42,4 @@ public class HanlpMapResult extends MapResult {
     public void setOffset(int offset) {
         this.offset = offset;
     }
-
 }

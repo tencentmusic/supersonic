@@ -7,13 +7,15 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class SqlGenStrategyFactory {
 
-    private static Map<LLMReq.SqlGenType, SqlGenStrategy> sqlGenStrategyMap = new ConcurrentHashMap<>();
+    private static Map<LLMReq.SqlGenType, SqlGenStrategy> sqlGenStrategyMap =
+            new ConcurrentHashMap<>();
 
     public static SqlGenStrategy get(LLMReq.SqlGenType strategyType) {
         return sqlGenStrategyMap.get(strategyType);
     }
 
-    public static void addSqlGenerationForFactory(LLMReq.SqlGenType strategy, SqlGenStrategy sqlGenStrategy) {
+    public static void addSqlGenerationForFactory(
+            LLMReq.SqlGenType strategy, SqlGenStrategy sqlGenStrategy) {
         sqlGenStrategyMap.put(strategy, sqlGenStrategy);
     }
 }

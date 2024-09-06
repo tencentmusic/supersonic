@@ -1,9 +1,6 @@
 package com.tencent.supersonic.headless.core.translator.calcite.sql.node.extend;
 
 import com.tencent.supersonic.headless.core.translator.calcite.sql.node.ExtendNode;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Objects;
 import org.apache.calcite.linq4j.Ord;
 import org.apache.calcite.sql.SqlCall;
 import org.apache.calcite.sql.SqlIdentifier;
@@ -13,9 +10,11 @@ import org.apache.calcite.sql.SqlNodeList;
 import org.apache.calcite.sql.SqlOperator;
 import org.apache.calcite.sql.SqlWriter;
 
-/**
- * extend node to handle lateral explode dataSet
- */
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Objects;
+
+/** extend node to handle lateral explode dataSet */
 public class LateralViewExplodeNode extends ExtendNode {
 
     public final String sqlNameView = "view";
@@ -61,8 +60,9 @@ public class LateralViewExplodeNode extends ExtendNode {
 
     public void explode(SqlWriter writer, SqlNode sqlNode) {
         String delimiter =
-                Objects.nonNull(delimiterMap) && delimiterMap.containsKey(sqlNode.toString()) ? delimiterMap.get(
-                        sqlNode.toString()) : "";
+                Objects.nonNull(delimiterMap) && delimiterMap.containsKey(sqlNode.toString())
+                        ? delimiterMap.get(sqlNode.toString())
+                        : "";
         if (delimiter.isEmpty()) {
             writer.sep(sqlNameExplode);
         } else {

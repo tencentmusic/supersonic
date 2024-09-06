@@ -11,11 +11,9 @@ import static com.tencent.supersonic.headless.chat.parser.ParserConfig.PARSER_TE
 import static com.tencent.supersonic.headless.chat.parser.ParserConfig.PARSER_TEXT_LENGTH_THRESHOLD_LONG;
 import static com.tencent.supersonic.headless.chat.parser.ParserConfig.PARSER_TEXT_LENGTH_THRESHOLD_SHORT;
 
-
 /**
- * This checker can be used by semantic parsers to check if query intent
- * has already been satisfied by current candidate queries. If so, current
- * parser could be skipped.
+ * This checker can be used by semantic parsers to check if query intent has already been satisfied
+ * by current candidate queries. If so, current parser could be skipped.
  */
 @Slf4j
 public class SatisfactionChecker {
@@ -51,9 +49,11 @@ public class SatisfactionChecker {
         } else if (degree < shortTextLengthThreshold) {
             return false;
         }
-        log.info("queryMode:{}, degree:{}, parse info:{}",
-                semanticParseInfo.getQueryMode(), degree, semanticParseInfo);
+        log.info(
+                "queryMode:{}, degree:{}, parse info:{}",
+                semanticParseInfo.getQueryMode(),
+                degree,
+                semanticParseInfo);
         return true;
     }
-
 }

@@ -12,5 +12,3 @@ public class SqlVariable {
     private VariableValueType valueType;
     private List<Object> defaultValues = Lists.newArrayList();
 }
-
-

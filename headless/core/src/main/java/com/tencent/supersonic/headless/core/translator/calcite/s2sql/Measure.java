@@ -5,7 +5,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -14,7 +13,7 @@ public class Measure {
 
     private String name;
 
-    //sum max min avg count distinct
+    // sum max min avg count distinct
     private String agg;
 
     private String expr;

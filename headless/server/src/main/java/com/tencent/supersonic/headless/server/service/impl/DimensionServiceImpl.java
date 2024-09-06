@@ -17,6 +17,7 @@ import com.tencent.supersonic.common.pojo.enums.StatusEnum;
 import com.tencent.supersonic.common.pojo.enums.TypeEnums;
 import com.tencent.supersonic.common.pojo.exception.InvalidArgumentException;
 import com.tencent.supersonic.headless.api.pojo.DimValueMap;
+import com.tencent.supersonic.headless.api.pojo.MetaFilter;
 import com.tencent.supersonic.headless.api.pojo.ModelDetail;
 import com.tencent.supersonic.headless.api.pojo.enums.ModelDefineType;
 import com.tencent.supersonic.headless.api.pojo.request.DimensionReq;
@@ -32,8 +33,8 @@ import com.tencent.supersonic.headless.server.persistence.mapper.DimensionDOMapp
 import com.tencent.supersonic.headless.server.persistence.repository.DimensionRepository;
 import com.tencent.supersonic.headless.server.pojo.DimensionFilter;
 import com.tencent.supersonic.headless.server.pojo.DimensionsFilter;
-import com.tencent.supersonic.headless.api.pojo.MetaFilter;
 import com.tencent.supersonic.headless.server.pojo.ModelFilter;
+import com.tencent.supersonic.headless.server.service.DataSetService;
 import com.tencent.supersonic.headless.server.service.DatabaseService;
 import com.tencent.supersonic.headless.server.service.DimensionService;
 import com.tencent.supersonic.headless.server.service.ModelRelaService;
@@ -42,7 +43,6 @@ import com.tencent.supersonic.headless.server.service.TagMetaService;
 import com.tencent.supersonic.headless.server.utils.AliasGenerateHelper;
 import com.tencent.supersonic.headless.server.utils.DimensionConverter;
 import com.tencent.supersonic.headless.server.utils.NameCheckUtils;
-import com.tencent.supersonic.headless.server.service.DataSetService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -63,7 +63,6 @@ import java.util.stream.Collectors;
 public class DimensionServiceImpl extends ServiceImpl<DimensionDOMapper, DimensionDO>
         implements DimensionService {
 
-
     private DimensionRepository dimensionRepository;
 
     private ModelService modelService;
@@ -78,17 +77,16 @@ public class DimensionServiceImpl extends ServiceImpl<DimensionDOMapper, Dimensi
 
     private TagMetaService tagMetaService;
 
-    @Autowired
-    private ApplicationEventPublisher eventPublisher;
+    @Autowired private ApplicationEventPublisher eventPublisher;
 
-
-    public DimensionServiceImpl(DimensionRepository dimensionRepository,
-                                ModelService modelService,
-                                AliasGenerateHelper aliasGenerateHelper,
-                                DatabaseService databaseService,
-                                ModelRelaService modelRelaService,
-                                DataSetService dataSetService,
-                                TagMetaService tagMetaService) {
+    public DimensionServiceImpl(
+            DimensionRepository dimensionRepository,
+            ModelService modelService,
+            AliasGenerateHelper aliasGenerateHelper,
+            DatabaseService databaseService,
+            ModelRelaService modelRelaService,
+            DataSetService dataSetService,
+            TagMetaService tagMetaService) {
         this.modelService = modelService;
         this.dimensionRepository = dimensionRepository;
         this.aliasGenerateHelper = aliasGenerateHelper;
@@ -115,21 +113,29 @@ public class DimensionServiceImpl extends ServiceImpl<DimensionDOMapper, Dimensi
         }
         Long modelId = dimensionReqs.get(0).getModelId();
         List<DimensionResp> dimensionResps = getDimensions(modelId);
-        Map<String, DimensionResp> bizNameMap = dimensionResps.stream()
-                .collect(Collectors.toMap(DimensionResp::getBizName, a -> a, (k1, k2) -> k1));
-        Map<String, DimensionResp> nameMap = dimensionResps.stream()
-                .collect(Collectors.toMap(DimensionResp::getName, a -> a, (k1, k2) -> k1));
-        List<DimensionReq> dimensionToInsert = dimensionReqs.stream()
-                .filter(dimension -> !bizNameMap.containsKey(dimension.getBizName())
-                        && !nameMap.containsKey(dimension.getName()))
-                .collect(Collectors.toList());
+        Map<String, DimensionResp> bizNameMap =
+                dimensionResps.stream()
+                        .collect(
+                                Collectors.toMap(
+                                        DimensionResp::getBizName, a -> a, (k1, k2) -> k1));
+        Map<String, DimensionResp> nameMap =
+                dimensionResps.stream()
+                        .collect(Collectors.toMap(DimensionResp::getName, a -> a, (k1, k2) -> k1));
+        List<DimensionReq> dimensionToInsert =
+                dimensionReqs.stream()
+                        .filter(
+                                dimension ->
+                                        !bizNameMap.containsKey(dimension.getBizName())
+                                                && !nameMap.containsKey(dimension.getName()))
+                        .collect(Collectors.toList());
         if (CollectionUtils.isEmpty(dimensionToInsert)) {
             return;
         }
-        List<DimensionDO> dimensionDOS = dimensionToInsert.stream().peek(dimension ->
-                        dimension.createdBy(user.getName()))
-                .map(DimensionConverter::convert2DimensionDO)
-                .collect(Collectors.toList());
+        List<DimensionDO> dimensionDOS =
+                dimensionToInsert.stream()
+                        .peek(dimension -> dimension.createdBy(user.getName()))
+                        .map(DimensionConverter::convert2DimensionDO)
+                        .collect(Collectors.toList());
         dimensionRepository.createDimensionBatch(dimensionDOS);
         sendEventBatch(dimensionDOS, EventType.ADD);
     }
@@ -143,9 +149,15 @@ public class DimensionServiceImpl extends ServiceImpl<DimensionDOMapper, Dimensi
         DimensionConverter.convert(dimensionDO, dimensionReq);
         dimensionRepository.updateDimension(dimensionDO);
         if (!oldName.equals(dimensionDO.getName())) {
-            sendEvent(DataItem.builder().modelId(dimensionDO.getModelId() + Constants.UNDERLINE)
-                    .newName(dimensionReq.getName()).name(oldName).type(TypeEnums.DIMENSION)
-                    .id(dimensionDO.getId() + Constants.UNDERLINE).build(), EventType.UPDATE);
+            sendEvent(
+                    DataItem.builder()
+                            .modelId(dimensionDO.getModelId() + Constants.UNDERLINE)
+                            .newName(dimensionReq.getName())
+                            .name(oldName)
+                            .type(TypeEnums.DIMENSION)
+                            .id(dimensionDO.getId() + Constants.UNDERLINE)
+                            .build(),
+                    EventType.UPDATE);
         }
     }
 
@@ -160,13 +172,15 @@ public class DimensionServiceImpl extends ServiceImpl<DimensionDOMapper, Dimensi
         if (CollectionUtils.isEmpty(dimensionDOS)) {
             return;
         }
-        dimensionDOS = dimensionDOS.stream()
-                .peek(dimensionDO -> {
-                    dimensionDO.setStatus(metaBatchReq.getStatus());
-                    dimensionDO.setUpdatedAt(new Date());
-                    dimensionDO.setUpdatedBy(user.getName());
-                })
-                .collect(Collectors.toList());
+        dimensionDOS =
+                dimensionDOS.stream()
+                        .peek(
+                                dimensionDO -> {
+                                    dimensionDO.setStatus(metaBatchReq.getStatus());
+                                    dimensionDO.setUpdatedAt(new Date());
+                                    dimensionDO.setUpdatedBy(user.getName());
+                                })
+                        .collect(Collectors.toList());
         dimensionRepository.batchUpdateStatus(dimensionDOS);
         if (StatusEnum.OFFLINE.getCode().equals(metaBatchReq.getStatus())
                 || StatusEnum.DELETED.getCode().equals(metaBatchReq.getStatus())) {
@@ -233,9 +247,9 @@ public class DimensionServiceImpl extends ServiceImpl<DimensionDOMapper, Dimensi
         DimensionFilter dimensionFilter = new DimensionFilter();
         BeanUtils.copyProperties(pageDimensionReq, dimensionFilter);
         dimensionFilter.setModelIds(pageDimensionReq.getModelIds());
-        PageInfo<DimensionDO> dimensionDOPageInfo = PageHelper.startPage(pageDimensionReq.getCurrent(),
-                        pageDimensionReq.getPageSize())
-                .doSelectPageInfo(() -> queryDimension(dimensionFilter));
+        PageInfo<DimensionDO> dimensionDOPageInfo =
+                PageHelper.startPage(pageDimensionReq.getCurrent(), pageDimensionReq.getPageSize())
+                        .doSelectPageInfo(() -> queryDimension(dimensionFilter));
         PageInfo<DimensionResp> pageInfo = new PageInfo<>();
         BeanUtils.copyProperties(dimensionDOPageInfo, pageInfo);
         pageInfo.setList(convertList(dimensionDOPageInfo.getList()));
@@ -273,7 +287,8 @@ public class DimensionServiceImpl extends ServiceImpl<DimensionDOMapper, Dimensi
         return getDimensions(new MetaFilter(Lists.newArrayList(modelId)));
     }
 
-    private List<DimensionResp> filterByField(List<DimensionResp> dimensionResps, List<String> fields) {
+    private List<DimensionResp> filterByField(
+            List<DimensionResp> dimensionResps, List<String> fields) {
         List<DimensionResp> dimensionFiltered = Lists.newArrayList();
         for (DimensionResp dimensionResp : dimensionResps) {
             for (String field : fields) {
@@ -301,27 +316,34 @@ public class DimensionServiceImpl extends ServiceImpl<DimensionDOMapper, Dimensi
     }
 
     private List<DimensionResp> convertList(List<DimensionDO> dimensionDOS) {
-        List<Long> modelIds = dimensionDOS.stream().map(DimensionDO::getModelId)
-                .collect(Collectors.toList());
+        List<Long> modelIds =
+                dimensionDOS.stream().map(DimensionDO::getModelId).collect(Collectors.toList());
         ModelFilter modelFilter = new ModelFilter(false, modelIds);
         Map<Long, ModelResp> modelMap = modelService.getModelMap(modelFilter);
         List<DimensionResp> dimensionResps = Lists.newArrayList();
         if (!CollectionUtils.isEmpty(dimensionDOS)) {
-            dimensionResps = dimensionDOS.stream()
-                    .map(dimensionDO -> DimensionConverter
-                            .convert2DimensionResp(dimensionDO, modelMap))
-                    .collect(Collectors.toList());
+            dimensionResps =
+                    dimensionDOS.stream()
+                            .map(
+                                    dimensionDO ->
+                                            DimensionConverter.convert2DimensionResp(
+                                                    dimensionDO, modelMap))
+                            .collect(Collectors.toList());
         }
         return dimensionResps;
     }
 
     @Override
     public List<String> mockAlias(DimensionReq dimensionReq, String mockType, User user) {
-        String mockAlias = aliasGenerateHelper.generateAlias(mockType, dimensionReq.getName(),
-                dimensionReq.getBizName(), "", dimensionReq.getDescription());
+        String mockAlias =
+                aliasGenerateHelper.generateAlias(
+                        mockType,
+                        dimensionReq.getName(),
+                        dimensionReq.getBizName(),
+                        "",
+                        dimensionReq.getDescription());
         String ret = aliasGenerateHelper.extractJsonStringFromAiMessage(mockAlias);
-        return JSONObject.parseObject(ret, new TypeReference<List<String>>() {
-        });
+        return JSONObject.parseObject(ret, new TypeReference<List<String>>() {});
     }
 
     @Override
@@ -335,8 +357,13 @@ public class DimensionServiceImpl extends ServiceImpl<DimensionDOMapper, Dimensi
         }
         DatabaseResp database = databaseService.getDatabase(modelResp.getDatabaseId());
 
-        String sql = "select ai_talk." + dimensionReq.getBizName() + " from (" + sqlQuery
-                + ") as ai_talk group by ai_talk." + dimensionReq.getBizName();
+        String sql =
+                "select ai_talk."
+                        + dimensionReq.getBizName()
+                        + " from ("
+                        + sqlQuery
+                        + ") as ai_talk group by ai_talk."
+                        + dimensionReq.getBizName();
         SemanticQueryResp semanticQueryResp = databaseService.executeSql(sql, database);
         List<Map<String, Object>> resultList = semanticQueryResp.getResultList();
         List<String> valueList = new ArrayList<>();
@@ -360,8 +387,11 @@ public class DimensionServiceImpl extends ServiceImpl<DimensionDOMapper, Dimensi
                 dimValueMap.setBizName("");
             }
             try {
-                dimValueMap.setAlias(jsonObject.getJSONObject("alias")
-                        .getJSONArray(stringObjectMap.get(dimensionReq.getBizName()) + "").toJavaList(String.class));
+                dimValueMap.setAlias(
+                        jsonObject
+                                .getJSONObject("alias")
+                                .getJSONArray(stringObjectMap.get(dimensionReq.getBizName()) + "")
+                                .toJavaList(String.class));
             } catch (Exception exception) {
                 dimValueMap.setAlias(null);
             }
@@ -374,28 +404,39 @@ public class DimensionServiceImpl extends ServiceImpl<DimensionDOMapper, Dimensi
     private void checkExist(List<DimensionReq> dimensionReqs) {
         Long modelId = dimensionReqs.get(0).getModelId();
         List<DimensionResp> dimensionResps = getDimensions(modelId);
-        Map<String, DimensionResp> bizNameMap = dimensionResps.stream()
-                .collect(Collectors.toMap(DimensionResp::getBizName, a -> a, (k1, k2) -> k1));
-        Map<String, DimensionResp> nameMap = dimensionResps.stream()
-                .collect(Collectors.toMap(DimensionResp::getName, a -> a, (k1, k2) -> k1));
+        Map<String, DimensionResp> bizNameMap =
+                dimensionResps.stream()
+                        .collect(
+                                Collectors.toMap(
+                                        DimensionResp::getBizName, a -> a, (k1, k2) -> k1));
+        Map<String, DimensionResp> nameMap =
+                dimensionResps.stream()
+                        .collect(Collectors.toMap(DimensionResp::getName, a -> a, (k1, k2) -> k1));
         for (DimensionReq dimensionReq : dimensionReqs) {
-            String forbiddenCharacters = NameCheckUtils.findForbiddenCharacters(dimensionReq.getName());
+            String forbiddenCharacters =
+                    NameCheckUtils.findForbiddenCharacters(dimensionReq.getName());
             if (StringUtils.isNotBlank(forbiddenCharacters)) {
-                throw new InvalidArgumentException(String.format("名称包含特殊字符, 请修改: %s，特殊字符: %s",
-                        dimensionReq.getName(), forbiddenCharacters));
+                throw new InvalidArgumentException(
+                        String.format(
+                                "名称包含特殊字符, 请修改: %s，特殊字符: %s",
+                                dimensionReq.getName(), forbiddenCharacters));
             }
             if (bizNameMap.containsKey(dimensionReq.getBizName())) {
                 DimensionResp dimensionResp = bizNameMap.get(dimensionReq.getBizName());
                 if (!dimensionResp.getId().equals(dimensionReq.getId())) {
-                    throw new RuntimeException(String.format("该主题域下存在相同的维度字段名:%s 创建人:%s",
-                            dimensionReq.getBizName(), dimensionResp.getCreatedBy()));
+                    throw new RuntimeException(
+                            String.format(
+                                    "该主题域下存在相同的维度字段名:%s 创建人:%s",
+                                    dimensionReq.getBizName(), dimensionResp.getCreatedBy()));
                 }
             }
             if (nameMap.containsKey(dimensionReq.getName())) {
                 DimensionResp dimensionResp = nameMap.get(dimensionReq.getName());
                 if (!dimensionResp.getId().equals(dimensionReq.getId())) {
-                    throw new RuntimeException(String.format("该主题域下存在相同的维度名:%s 创建人:%s",
-                            dimensionReq.getName(), dimensionResp.getCreatedBy()));
+                    throw new RuntimeException(
+                            String.format(
+                                    "该主题域下存在相同的维度名:%s 创建人:%s",
+                                    dimensionReq.getName(), dimensionResp.getCreatedBy()));
                 }
             }
         }
@@ -421,16 +462,23 @@ public class DimensionServiceImpl extends ServiceImpl<DimensionDOMapper, Dimensi
     }
 
     private DataEvent getDataEvent(List<DimensionDO> dimensionDOS, EventType eventType) {
-        List<DataItem> dataItems = dimensionDOS.stream()
-                .map(dimensionDO -> DataItem.builder().id(dimensionDO.getId() + Constants.UNDERLINE)
-                        .name(dimensionDO.getName()).modelId(dimensionDO.getModelId() + Constants.UNDERLINE)
-                        .type(TypeEnums.DIMENSION).build())
-                .collect(Collectors.toList());
+        List<DataItem> dataItems =
+                dimensionDOS.stream()
+                        .map(
+                                dimensionDO ->
+                                        DataItem.builder()
+                                                .id(dimensionDO.getId() + Constants.UNDERLINE)
+                                                .name(dimensionDO.getName())
+                                                .modelId(
+                                                        dimensionDO.getModelId()
+                                                                + Constants.UNDERLINE)
+                                                .type(TypeEnums.DIMENSION)
+                                                .build())
+                        .collect(Collectors.toList());
         return new DataEvent(this, dataItems, eventType);
     }
 
     private void sendEvent(DataItem dataItem, EventType eventType) {
-        eventPublisher.publishEvent(new DataEvent(this,
-                Lists.newArrayList(dataItem), eventType));
+        eventPublisher.publishEvent(new DataEvent(this, Lists.newArrayList(dataItem), eventType));
     }
 }

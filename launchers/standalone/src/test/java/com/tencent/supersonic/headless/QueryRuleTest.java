@@ -19,8 +19,7 @@ import java.util.List;
 
 public class QueryRuleTest extends BaseTest {
 
-    @Autowired
-    private QueryRuleService queryRuleService;
+    @Autowired private QueryRuleService queryRuleService;
 
     private User user = User.getFakeUser();
 
@@ -93,7 +92,8 @@ public class QueryRuleTest extends BaseTest {
         queryRuleService.addQueryRule(queryRuleReq2, user);
 
         QueryRuleFilter queryRuleFilter = new QueryRuleFilter();
-        List<QueryRuleResp> queryRuleList = queryRuleService.getQueryRuleList(queryRuleFilter, user);
+        List<QueryRuleResp> queryRuleList =
+                queryRuleService.getQueryRuleList(queryRuleFilter, user);
         queryRuleList.size();
     }
 }

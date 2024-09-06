@@ -15,8 +15,7 @@ import java.util.stream.Collectors;
 
 public class ModelSchemaTest extends BaseTest {
 
-    @Autowired
-    private ModelService modelService;
+    @Autowired private ModelService modelService;
 
     @Test
     void testGetUnAvailableItem() {
@@ -25,9 +24,11 @@ public class ModelSchemaTest extends BaseTest {
         fieldRemovedReq.setFields(Lists.newArrayList("pv"));
         UnAvailableItemResp unAvailableItemResp = modelService.getUnAvailableItem(fieldRemovedReq);
         List<Long> expectedUnAvailableMetricId = Lists.newArrayList(1L, 4L);
-        List<Long> actualUnAvailableMetricId = unAvailableItemResp.getMetricResps()
-                .stream().map(MetricResp::getId).sorted(Comparator.naturalOrder()).collect(Collectors.toList());
+        List<Long> actualUnAvailableMetricId =
+                unAvailableItemResp.getMetricResps().stream()
+                        .map(MetricResp::getId)
+                        .sorted(Comparator.naturalOrder())
+                        .collect(Collectors.toList());
         Assertions.assertEquals(expectedUnAvailableMetricId, actualUnAvailableMetricId);
     }
-
 }

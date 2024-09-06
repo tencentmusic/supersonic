@@ -12,5 +12,4 @@ public class FieldExpression {
     private Object fieldValue;
 
     private String function;
-
 }

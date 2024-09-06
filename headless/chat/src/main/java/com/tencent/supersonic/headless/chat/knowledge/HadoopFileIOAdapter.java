@@ -1,15 +1,15 @@
 package com.tencent.supersonic.headless.chat.knowledge;
 
 import com.hankcs.hanlp.corpus.io.IIOAdapter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.URI;
-
 import lombok.extern.slf4j.Slf4j;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.URI;
 
 @Slf4j
 public class HadoopFileIOAdapter implements IIOAdapter {

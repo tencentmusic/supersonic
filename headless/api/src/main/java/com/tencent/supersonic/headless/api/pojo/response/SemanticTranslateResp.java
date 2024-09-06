@@ -20,5 +20,4 @@ public class SemanticTranslateResp implements Serializable {
     private boolean isOk;
 
     private String errMsg;
-
 }

@@ -19,14 +19,11 @@ public class QueryStat {
     private Long dataSetId;
     private String user;
     private String createdAt;
-    /**
-     * corresponding type, such as sql, struct, etc
-     */
+    /** corresponding type, such as sql, struct, etc */
     private String queryType;
-    /**
-     * NORMAL, PRE_FLUSH
-     */
+    /** NORMAL, PRE_FLUSH */
     private Integer queryTypeBack;
+
     private String querySqlCmd;
     private String querySqlCmdMd5;
     private String queryStructCmd;
@@ -228,5 +225,4 @@ public class QueryStat {
     public List<String> getDimensionListBizName() {
         return JSONObject.parseArray(dimensions, String.class);
     }
-
 }

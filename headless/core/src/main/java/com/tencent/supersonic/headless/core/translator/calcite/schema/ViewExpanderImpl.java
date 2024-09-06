@@ -6,15 +6,15 @@ import org.apache.calcite.rel.type.RelDataType;
 
 import java.util.List;
 
-/**
- * customize the  ViewExpander
- */
+/** customize the ViewExpander */
 public class ViewExpanderImpl implements RelOptTable.ViewExpander {
-    public ViewExpanderImpl() {
-    }
+    public ViewExpanderImpl() {}
 
     @Override
-    public RelRoot expandView(RelDataType rowType, String queryString, List<String> schemaPath,
+    public RelRoot expandView(
+            RelDataType rowType,
+            String queryString,
+            List<String> schemaPath,
             List<String> dataSetPath) {
         return null;
     }

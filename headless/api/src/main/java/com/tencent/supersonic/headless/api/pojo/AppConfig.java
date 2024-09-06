@@ -9,5 +9,4 @@ import java.util.List;
 public class AppConfig {
 
     private List<Item> items = Lists.newArrayList();
-
 }

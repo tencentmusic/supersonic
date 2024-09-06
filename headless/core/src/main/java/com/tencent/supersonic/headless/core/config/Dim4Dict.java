@@ -18,5 +18,4 @@ public class Dim4Dict {
     private List<String> blackList;
     private List<String> whiteList;
     private List<String> ruleList;
-
 }

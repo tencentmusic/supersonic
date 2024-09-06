@@ -13,15 +13,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class TagTest extends BaseTest {
 
-    @Autowired
-    private TagQueryService tagQueryService;
+    @Autowired private TagQueryService tagQueryService;
 
     @Test
     public void testQueryTagValue() throws Exception {
         ItemValueReq itemValueReq = new ItemValueReq();
         itemValueReq.setId(1L);
-        ItemValueResp itemValueResp = tagQueryService.queryTagValue(itemValueReq, User.getFakeUser());
+        ItemValueResp itemValueResp =
+                tagQueryService.queryTagValue(itemValueReq, User.getFakeUser());
         Assertions.assertNotNull(itemValueResp);
     }
-
 }

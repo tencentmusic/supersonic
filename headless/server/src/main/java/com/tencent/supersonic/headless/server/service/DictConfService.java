@@ -7,9 +7,7 @@ import com.tencent.supersonic.headless.api.pojo.response.DictItemResp;
 
 import java.util.List;
 
-/**
- * Make relevant settings for the dictionary
- */
+/** Make relevant settings for the dictionary */
 public interface DictConfService {
 
     DictItemResp addDictConf(DictItemReq itemValueReq, User user);

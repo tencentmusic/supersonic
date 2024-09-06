@@ -14,5 +14,4 @@ public class Field {
     private String fieldName;
 
     private String dataType;
-
 }

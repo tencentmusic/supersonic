@@ -10,13 +10,9 @@ import java.util.Map;
 @ToString(callSuper = true)
 public class TagObjectResp extends SchemaItem {
 
-    /**
-     * 关联到某个主题域下
-     */
+    /** 关联到某个主题域下 */
     private Long domainId;
 
-    /**
-     * 扩展信息
-     */
+    /** 扩展信息 */
     private Map<String, String> ext;
 }

@@ -13,11 +13,11 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.HashSet;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -30,7 +30,9 @@ public abstract class BaseMapper implements SchemaMapper {
 
         String simpleName = this.getClass().getSimpleName();
         long startTime = System.currentTimeMillis();
-        log.debug("before {},mapInfo:{}", simpleName,
+        log.debug(
+                "before {},mapInfo:{}",
+                simpleName,
                 chatQueryContext.getMapInfo().getDataSetElementMatches());
 
         try {
@@ -41,7 +43,10 @@ public abstract class BaseMapper implements SchemaMapper {
         }
 
         long cost = System.currentTimeMillis() - startTime;
-        log.debug("after {},cost:{},mapInfo:{}", simpleName, cost,
+        log.debug(
+                "after {},cost:{},mapInfo:{}",
+                simpleName,
+                cost,
                 chatQueryContext.getMapInfo().getDataSetElementMatches());
     }
 
@@ -53,14 +58,19 @@ public abstract class BaseMapper implements SchemaMapper {
                 filterByQueryDataType(chatQueryContext, element -> !(element.getIsTag() > 0));
                 break;
             case METRIC:
-                filterByQueryDataType(chatQueryContext, element -> !SchemaElementType.METRIC.equals(element.getType()));
+                filterByQueryDataType(
+                        chatQueryContext,
+                        element -> !SchemaElementType.METRIC.equals(element.getType()));
                 break;
             case DIMENSION:
-                filterByQueryDataType(chatQueryContext, element -> {
-                    boolean isDimensionOrValue = SchemaElementType.DIMENSION.equals(element.getType())
-                            || SchemaElementType.VALUE.equals(element.getType());
-                    return !isDimensionOrValue;
-                });
+                filterByQueryDataType(
+                        chatQueryContext,
+                        element -> {
+                            boolean isDimensionOrValue =
+                                    SchemaElementType.DIMENSION.equals(element.getType())
+                                            || SchemaElementType.VALUE.equals(element.getType());
+                            return !isDimensionOrValue;
+                        });
                 break;
             case ALL:
             default:
@@ -73,7 +83,8 @@ public abstract class BaseMapper implements SchemaMapper {
         if (CollectionUtils.isEmpty(dataSetIds)) {
             return;
         }
-        Set<Long> dataSetIdInMapInfo = new HashSet<>(chatQueryContext.getMapInfo().getDataSetElementMatches().keySet());
+        Set<Long> dataSetIdInMapInfo =
+                new HashSet<>(chatQueryContext.getMapInfo().getDataSetElementMatches().keySet());
         for (Long dataSetId : dataSetIdInMapInfo) {
             if (!dataSetIds.contains(dataSetId)) {
                 chatQueryContext.getMapInfo().getDataSetElementMatches().remove(dataSetId);
@@ -87,54 +98,68 @@ public abstract class BaseMapper implements SchemaMapper {
         for (Map.Entry<Long, List<SchemaElementMatch>> entry : dataSetElementMatches.entrySet()) {
             List<SchemaElementMatch> value = entry.getValue();
             if (!CollectionUtils.isEmpty(value)) {
-                value.removeIf(schemaElementMatch ->
-                        StringUtils.length(schemaElementMatch.getDetectWord()) <= 1);
+                value.removeIf(
+                        schemaElementMatch ->
+                                StringUtils.length(schemaElementMatch.getDetectWord()) <= 1);
             }
         }
     }
 
-    private static void filterByQueryDataType(ChatQueryContext chatQueryContext,
-                                              Predicate<SchemaElement> needRemovePredicate) {
-        chatQueryContext.getMapInfo().getDataSetElementMatches().values().forEach(schemaElementMatches -> {
-            schemaElementMatches.removeIf(schemaElementMatch -> {
-                SchemaElement element = schemaElementMatch.getElement();
-                SchemaElementType type = element.getType();
+    private static void filterByQueryDataType(
+            ChatQueryContext chatQueryContext, Predicate<SchemaElement> needRemovePredicate) {
+        chatQueryContext
+                .getMapInfo()
+                .getDataSetElementMatches()
+                .values()
+                .forEach(
+                        schemaElementMatches -> {
+                            schemaElementMatches.removeIf(
+                                    schemaElementMatch -> {
+                                        SchemaElement element = schemaElementMatch.getElement();
+                                        SchemaElementType type = element.getType();
 
-                boolean isEntityOrDatasetOrId = SchemaElementType.ENTITY.equals(type)
-                        || SchemaElementType.DATASET.equals(type)
-                        || SchemaElementType.ID.equals(type);
+                                        boolean isEntityOrDatasetOrId =
+                                                SchemaElementType.ENTITY.equals(type)
+                                                        || SchemaElementType.DATASET.equals(type)
+                                                        || SchemaElementType.ID.equals(type);
 
-                return !isEntityOrDatasetOrId && needRemovePredicate.test(element);
-            });
-        });
+                                        return !isEntityOrDatasetOrId
+                                                && needRemovePredicate.test(element);
+                                    });
+                        });
     }
 
     public abstract void doMap(ChatQueryContext chatQueryContext);
 
-    public void addToSchemaMap(SchemaMapInfo schemaMap, Long dataSetId, SchemaElementMatch newElementMatch) {
-        Map<Long, List<SchemaElementMatch>> dataSetElementMatches = schemaMap.getDataSetElementMatches();
-        List<SchemaElementMatch> schemaElementMatches = dataSetElementMatches.computeIfAbsent(dataSetId,
-                k -> new ArrayList<>());
+    public void addToSchemaMap(
+            SchemaMapInfo schemaMap, Long dataSetId, SchemaElementMatch newElementMatch) {
+        Map<Long, List<SchemaElementMatch>> dataSetElementMatches =
+                schemaMap.getDataSetElementMatches();
+        List<SchemaElementMatch> schemaElementMatches =
+                dataSetElementMatches.computeIfAbsent(dataSetId, k -> new ArrayList<>());
 
         AtomicBoolean shouldAddNew = new AtomicBoolean(true);
 
-        schemaElementMatches.removeIf(existingElementMatch -> {
-            if (isEquals(existingElementMatch, newElementMatch)) {
-                if (newElementMatch.getSimilarity() > existingElementMatch.getSimilarity()) {
-                    return true;
-                } else {
-                    shouldAddNew.set(false);
-                }
-            }
-            return false;
-        });
+        schemaElementMatches.removeIf(
+                existingElementMatch -> {
+                    if (isEquals(existingElementMatch, newElementMatch)) {
+                        if (newElementMatch.getSimilarity()
+                                > existingElementMatch.getSimilarity()) {
+                            return true;
+                        } else {
+                            shouldAddNew.set(false);
+                        }
+                    }
+                    return false;
+                });
 
         if (shouldAddNew.get()) {
             schemaElementMatches.add(newElementMatch);
         }
     }
 
-    private static boolean isEquals(SchemaElementMatch existElementMatch, SchemaElementMatch newElementMatch) {
+    private static boolean isEquals(
+            SchemaElementMatch existElementMatch, SchemaElementMatch newElementMatch) {
         SchemaElement existElement = existElementMatch.getElement();
         SchemaElement newElement = newElementMatch.getElement();
         if (!existElement.equals(newElement)) {
@@ -146,8 +171,11 @@ public abstract class BaseMapper implements SchemaMapper {
         return true;
     }
 
-    public SchemaElement getSchemaElement(Long dataSetId, SchemaElementType elementType, Long elementID,
-                                          SemanticSchema semanticSchema) {
+    public SchemaElement getSchemaElement(
+            Long dataSetId,
+            SchemaElementType elementType,
+            Long elementID,
+            SemanticSchema semanticSchema) {
         SchemaElement element = new SchemaElement();
         DataSetSchema dataSetSchema = semanticSchema.getDataSetSchemaMap().get(dataSetId);
         if (Objects.isNull(dataSetSchema)) {
@@ -166,8 +194,8 @@ public abstract class BaseMapper implements SchemaMapper {
         if (!SchemaElementType.VALUE.equals(element.getType())) {
             return element.getAlias();
         }
-        if (org.apache.commons.collections.CollectionUtils.isNotEmpty(element.getAlias()) && StringUtils.isNotEmpty(
-                element.getName())) {
+        if (org.apache.commons.collections.CollectionUtils.isNotEmpty(element.getAlias())
+                && StringUtils.isNotEmpty(element.getName())) {
             return element.getAlias().stream()
                     .filter(aliasItem -> aliasItem.contains(element.getName()))
                     .collect(Collectors.toList());

@@ -2,14 +2,12 @@ package com.tencent.supersonic.headless.chat.knowledge.builder;
 
 import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.headless.chat.knowledge.DictWord;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.List;
-import lombok.extern.slf4j.Slf4j;
 
-/**
- * base word nature
- */
+/** base word nature */
 @Slf4j
 public abstract class BaseWordBuilder {
 
@@ -36,5 +34,4 @@ public abstract class BaseWordBuilder {
     }
 
     protected abstract List<DictWord> doGet(String word, SchemaElement schemaElement);
-
 }

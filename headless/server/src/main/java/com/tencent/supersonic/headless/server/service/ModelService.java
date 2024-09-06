@@ -4,13 +4,13 @@ import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.common.pojo.ItemDateResp;
 import com.tencent.supersonic.common.pojo.enums.AuthType;
 import com.tencent.supersonic.headless.api.pojo.ItemDateFilter;
+import com.tencent.supersonic.headless.api.pojo.MetaFilter;
 import com.tencent.supersonic.headless.api.pojo.request.FieldRemovedReq;
 import com.tencent.supersonic.headless.api.pojo.request.MetaBatchReq;
 import com.tencent.supersonic.headless.api.pojo.request.ModelReq;
 import com.tencent.supersonic.headless.api.pojo.response.DatabaseResp;
 import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
 import com.tencent.supersonic.headless.api.pojo.response.UnAvailableItemResp;
-import com.tencent.supersonic.headless.api.pojo.MetaFilter;
 import com.tencent.supersonic.headless.server.pojo.ModelFilter;
 
 import java.util.List;
@@ -47,5 +47,4 @@ public interface ModelService {
     DatabaseResp getDatabaseByModelId(Long modelId);
 
     void batchUpdateStatus(MetaBatchReq metaBatchReq, User user);
-
 }

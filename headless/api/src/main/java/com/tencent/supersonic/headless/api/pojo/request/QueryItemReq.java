@@ -1,9 +1,10 @@
 package com.tencent.supersonic.headless.api.pojo.request;
 
+import javax.validation.constraints.Size;
+
 import com.tencent.supersonic.common.pojo.DateConf;
 import lombok.Data;
 
-import javax.validation.constraints.Size;
 import java.util.List;
 
 @Data
@@ -14,7 +15,7 @@ public class QueryItemReq {
 
     private DateConf dateConf = new DateConf();
 
-    //result size of single id
+    // result size of single id
     private Long limit = 1000L;
 
     public Long getLimit() {
@@ -23,5 +24,4 @@ public class QueryItemReq {
         }
         return limit;
     }
-
 }

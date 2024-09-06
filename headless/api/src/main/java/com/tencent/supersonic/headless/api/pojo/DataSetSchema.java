@@ -65,7 +65,9 @@ public class DataSetSchema {
         allElements.addAll(getDimensions());
         allElements.addAll(getMetrics());
         return allElements.stream()
-                .collect(Collectors.toMap(SchemaElement::getBizName, SchemaElement::getName, (k1, k2) -> k1));
+                .collect(
+                        Collectors.toMap(
+                                SchemaElement::getBizName, SchemaElement::getName, (k1, k2) -> k1));
     }
 
     public TimeDefaultConfig getTagTypeTimeDefaultConfig() {
@@ -97,28 +99,36 @@ public class DataSetSchema {
 
     public List<SchemaElement> getTagDefaultDimensions() {
         TagTypeDefaultConfig tagTypeDefaultConfig = getTagTypeDefaultConfig();
-        if (Objects.isNull(tagTypeDefaultConfig) || Objects.isNull(tagTypeDefaultConfig.getDefaultDisplayInfo())) {
+        if (Objects.isNull(tagTypeDefaultConfig)
+                || Objects.isNull(tagTypeDefaultConfig.getDefaultDisplayInfo())) {
             return new ArrayList<>();
         }
-        if (CollectionUtils.isNotEmpty(tagTypeDefaultConfig.getDefaultDisplayInfo().getMetricIds())) {
-            return tagTypeDefaultConfig.getDefaultDisplayInfo().getMetricIds()
-                    .stream().map(id -> {
-                        SchemaElement metric = getElement(SchemaElementType.METRIC, id);
-                        return metric;
-                    }).filter(Objects::nonNull).collect(Collectors.toList());
+        if (CollectionUtils.isNotEmpty(
+                tagTypeDefaultConfig.getDefaultDisplayInfo().getMetricIds())) {
+            return tagTypeDefaultConfig.getDefaultDisplayInfo().getMetricIds().stream()
+                    .map(
+                            id -> {
+                                SchemaElement metric = getElement(SchemaElementType.METRIC, id);
+                                return metric;
+                            })
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toList());
         }
         return new ArrayList<>();
     }
 
     public List<SchemaElement> getTagDefaultMetrics() {
         TagTypeDefaultConfig tagTypeDefaultConfig = getTagTypeDefaultConfig();
-        if (Objects.isNull(tagTypeDefaultConfig) || Objects.isNull(tagTypeDefaultConfig.getDefaultDisplayInfo())) {
+        if (Objects.isNull(tagTypeDefaultConfig)
+                || Objects.isNull(tagTypeDefaultConfig.getDefaultDisplayInfo())) {
             return new ArrayList<>();
         }
-        if (CollectionUtils.isNotEmpty(tagTypeDefaultConfig.getDefaultDisplayInfo().getDimensionIds())) {
+        if (CollectionUtils.isNotEmpty(
+                tagTypeDefaultConfig.getDefaultDisplayInfo().getDimensionIds())) {
             return tagTypeDefaultConfig.getDefaultDisplayInfo().getDimensionIds().stream()
                     .map(id -> getElement(SchemaElementType.DIMENSION, id))
-                    .filter(Objects::nonNull).collect(Collectors.toList());
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toList());
         }
         return new ArrayList<>();
     }

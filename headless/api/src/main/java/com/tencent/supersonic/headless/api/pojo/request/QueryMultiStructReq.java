@@ -36,5 +36,4 @@ public class QueryMultiStructReq extends SemanticQueryReq {
         }
         return this.getQueryStructReqs().get(0).getCacheInfo();
     }
-
 }

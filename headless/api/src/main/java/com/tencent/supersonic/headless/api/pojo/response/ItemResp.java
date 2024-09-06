@@ -33,5 +33,4 @@ public class ItemResp {
     public boolean isRoot() {
         return parentId == null || parentId == 0;
     }
-
 }

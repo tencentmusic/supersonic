@@ -2,6 +2,7 @@ package com.tencent.supersonic.headless.core.pojo;
 
 import com.tencent.supersonic.common.pojo.ColumnOrder;
 import lombok.Data;
+
 import java.util.List;
 
 @Data
@@ -13,5 +14,4 @@ public class MetricQueryParam {
     private Long limit;
     private List<ColumnOrder> order;
     private boolean nativeQuery = false;
-
 }

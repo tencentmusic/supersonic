@@ -1,8 +1,9 @@
 package com.tencent.supersonic.headless.core.pojo;
 
-import java.util.List;
 import lombok.Builder;
 import lombok.Data;
+
+import java.util.List;
 
 @Data
 @Builder

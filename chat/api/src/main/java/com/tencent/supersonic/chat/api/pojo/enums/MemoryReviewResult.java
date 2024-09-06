@@ -1,11 +1,9 @@
 package com.tencent.supersonic.chat.api.pojo.enums;
 
-
 import com.tencent.supersonic.common.pojo.exception.InvalidArgumentException;
 import org.apache.commons.lang3.StringUtils;
 
 public enum MemoryReviewResult {
-
     POSITIVE,
     NEGATIVE;
 

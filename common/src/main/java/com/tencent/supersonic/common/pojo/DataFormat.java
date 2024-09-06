@@ -8,6 +8,4 @@ public class DataFormat {
     private boolean needMultiply100;
 
     private Integer decimalPlaces;
-
-
 }

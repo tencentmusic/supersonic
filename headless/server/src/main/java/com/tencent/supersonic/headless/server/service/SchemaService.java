@@ -5,6 +5,7 @@ import com.tencent.supersonic.common.pojo.ItemDateResp;
 import com.tencent.supersonic.common.pojo.enums.AuthType;
 import com.tencent.supersonic.headless.api.pojo.DataSetSchema;
 import com.tencent.supersonic.headless.api.pojo.ItemDateFilter;
+import com.tencent.supersonic.headless.api.pojo.MetaFilter;
 import com.tencent.supersonic.headless.api.pojo.SemanticSchema;
 import com.tencent.supersonic.headless.api.pojo.request.ItemUseReq;
 import com.tencent.supersonic.headless.api.pojo.request.SchemaFilterReq;
@@ -17,7 +18,6 @@ import com.tencent.supersonic.headless.api.pojo.response.MetricResp;
 import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
 import com.tencent.supersonic.headless.api.pojo.response.ModelSchemaResp;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticSchemaResp;
-import com.tencent.supersonic.headless.api.pojo.MetaFilter;
 import com.tencent.supersonic.headless.server.pojo.yaml.DataModelYamlTpl;
 import com.tencent.supersonic.headless.server.pojo.yaml.DimensionYamlTpl;
 import com.tencent.supersonic.headless.server.pojo.yaml.MetricYamlTpl;
@@ -57,11 +57,12 @@ public interface SchemaService {
 
     List<ItemResp> getDomainDataSetTree();
 
-    void getSchemaYamlTpl(SemanticSchemaResp semanticSchemaResp,
-                          Map<String, List<DimensionYamlTpl>> dimensionYamlMap,
-                          List<DataModelYamlTpl> dataModelYamlTplList,
-                          List<MetricYamlTpl> metricYamlTplList,
-                          Map<Long, String> modelIdName);
+    void getSchemaYamlTpl(
+            SemanticSchemaResp semanticSchemaResp,
+            Map<String, List<DimensionYamlTpl>> dimensionYamlMap,
+            List<DataModelYamlTpl> dataModelYamlTplList,
+            List<MetricYamlTpl> metricYamlTplList,
+            Map<Long, String> modelIdName);
 
     ItemDateResp getItemDate(ItemDateFilter dimension, ItemDateFilter metric);
 

@@ -10,7 +10,6 @@ import org.springframework.util.CollectionUtils;
 import java.util.List;
 import java.util.Map;
 
-
 @Data
 public class MetricBaseReq extends SchemaItem {
 
@@ -39,5 +38,4 @@ public class MetricBaseReq extends SchemaItem {
         }
         return StringUtils.join(classifications, ",");
     }
-
 }

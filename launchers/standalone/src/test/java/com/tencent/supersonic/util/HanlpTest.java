@@ -6,10 +6,11 @@ import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.headless.chat.knowledge.DatabaseMapResult;
 import com.tencent.supersonic.headless.chat.knowledge.MapResult;
 import com.tencent.supersonic.headless.chat.knowledge.helper.HanlpHelper;
-import java.util.ArrayList;
-import java.util.List;
 import org.junit.Assert;
 import org.junit.Test;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class HanlpTest {
 

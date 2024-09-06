@@ -1,6 +1,5 @@
 package dev.langchain4j.chroma.spring;
 
-
 import dev.langchain4j.store.embedding.EmbeddingStoreFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;

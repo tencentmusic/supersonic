@@ -10,8 +10,9 @@ import com.tencent.supersonic.common.pojo.exception.InvalidArgumentException;
 import com.tencent.supersonic.common.pojo.exception.InvalidPermissionException;
 import com.tencent.supersonic.common.util.BeanMapper;
 import com.tencent.supersonic.common.util.PageUtils;
-import com.tencent.supersonic.headless.api.pojo.enums.AppStatus;
 import com.tencent.supersonic.headless.api.pojo.AppConfig;
+import com.tencent.supersonic.headless.api.pojo.MetaFilter;
+import com.tencent.supersonic.headless.api.pojo.enums.AppStatus;
 import com.tencent.supersonic.headless.api.pojo.request.AppQueryReq;
 import com.tencent.supersonic.headless.api.pojo.request.AppReq;
 import com.tencent.supersonic.headless.api.pojo.response.AppDetailResp;
@@ -20,7 +21,6 @@ import com.tencent.supersonic.headless.api.pojo.response.DimensionResp;
 import com.tencent.supersonic.headless.api.pojo.response.MetricResp;
 import com.tencent.supersonic.headless.server.persistence.dataobject.AppDO;
 import com.tencent.supersonic.headless.server.persistence.mapper.AppMapper;
-import com.tencent.supersonic.headless.api.pojo.MetaFilter;
 import com.tencent.supersonic.headless.server.service.AppService;
 import com.tencent.supersonic.headless.server.service.DimensionService;
 import com.tencent.supersonic.headless.server.service.MetricService;
@@ -35,7 +35,6 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-
 @Service
 public class AppServiceImpl extends ServiceImpl<AppMapper, AppDO> implements AppService {
 
@@ -45,8 +44,8 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, AppDO> implements App
 
     private DimensionService dimensionService;
 
-    public AppServiceImpl(AppMapper appMapper, MetricService metricService,
-                          DimensionService dimensionService) {
+    public AppServiceImpl(
+            AppMapper appMapper, MetricService metricService, DimensionService dimensionService) {
         this.appMapper = appMapper;
         this.metricService = metricService;
         this.dimensionService = dimensionService;
@@ -107,17 +106,20 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, AppDO> implements App
 
     @Override
     public PageInfo<AppResp> pageApp(AppQueryReq appQueryReq, User user) {
-        PageInfo<AppDO> appDOPageInfo = PageHelper.startPage(appQueryReq.getCurrent(),
-                        appQueryReq.getPageSize())
-                .doSelectPageInfo(() -> queryApp(appQueryReq));
+        PageInfo<AppDO> appDOPageInfo =
+                PageHelper.startPage(appQueryReq.getCurrent(), appQueryReq.getPageSize())
+                        .doSelectPageInfo(() -> queryApp(appQueryReq));
         PageInfo<AppResp> appPageInfo = PageUtils.pageInfo2PageInfoVo(appDOPageInfo);
-        Map<Long, MetricResp> metricResps = metricService.getMetrics(new MetaFilter())
-                .stream().collect(Collectors.toMap(MetricResp::getId, m -> m));
-        Map<Long, DimensionResp> dimensionResps = dimensionService.getDimensions(new MetaFilter())
-                .stream().collect(Collectors.toMap(DimensionResp::getId, m -> m));
-        appPageInfo.setList(appDOPageInfo.getList().stream().map(appDO
-                        -> convert(appDO, dimensionResps, metricResps, user))
-                .collect(Collectors.toList()));
+        Map<Long, MetricResp> metricResps =
+                metricService.getMetrics(new MetaFilter()).stream()
+                        .collect(Collectors.toMap(MetricResp::getId, m -> m));
+        Map<Long, DimensionResp> dimensionResps =
+                dimensionService.getDimensions(new MetaFilter()).stream()
+                        .collect(Collectors.toMap(DimensionResp::getId, m -> m));
+        appPageInfo.setList(
+                appDOPageInfo.getList().stream()
+                        .map(appDO -> convert(appDO, dimensionResps, metricResps, user))
+                        .collect(Collectors.toList()));
         return appPageInfo;
     }
 
@@ -139,10 +141,12 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, AppDO> implements App
     @Override
     public AppDetailResp getApp(Integer id, User user) {
         AppDO appDO = getAppDO(id);
-        Map<Long, MetricResp> metricResps = metricService.getMetrics(new MetaFilter())
-                .stream().collect(Collectors.toMap(MetricResp::getId, m -> m));
-        Map<Long, DimensionResp> dimensionResps = dimensionService.getDimensions(new MetaFilter())
-                .stream().collect(Collectors.toMap(DimensionResp::getId, m -> m));
+        Map<Long, MetricResp> metricResps =
+                metricService.getMetrics(new MetaFilter()).stream()
+                        .collect(Collectors.toMap(MetricResp::getId, m -> m));
+        Map<Long, DimensionResp> dimensionResps =
+                dimensionService.getDimensions(new MetaFilter()).stream()
+                        .collect(Collectors.toMap(DimensionResp::getId, m -> m));
         checkAuth(appDO, user);
         return convertDetail(appDO, dimensionResps, metricResps);
     }
@@ -175,8 +179,11 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, AppDO> implements App
                 && appDO.getOwner().contains(user.getName());
     }
 
-    private AppResp convert(AppDO appDO, Map<Long, DimensionResp> dimensionMap,
-                            Map<Long, MetricResp> metricMap, User user) {
+    private AppResp convert(
+            AppDO appDO,
+            Map<Long, DimensionResp> dimensionMap,
+            Map<Long, MetricResp> metricMap,
+            User user) {
         AppResp app = new AppResp();
         BeanMapper.mapper(appDO, app);
         AppConfig appConfig = JSONObject.parseObject(appDO.getConfig(), AppConfig.class);
@@ -191,8 +198,8 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, AppDO> implements App
         return convertDetail(appDO, new HashMap<>(), new HashMap<>());
     }
 
-    private AppDetailResp convertDetail(AppDO appDO, Map<Long, DimensionResp> dimensionMap,
-                                        Map<Long, MetricResp> metricMap) {
+    private AppDetailResp convertDetail(
+            AppDO appDO, Map<Long, DimensionResp> dimensionMap, Map<Long, MetricResp> metricMap) {
         AppDetailResp app = new AppDetailResp();
         BeanMapper.mapper(appDO, app);
         AppConfig appConfig = JSONObject.parseObject(appDO.getConfig(), AppConfig.class);
@@ -202,24 +209,53 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, AppDO> implements App
         return app;
     }
 
-    private void fillItemName(AppConfig appConfig, Map<Long, DimensionResp> dimensionMap,
-                              Map<Long, MetricResp> metricMap) {
-        appConfig.getItems().forEach(metricItem -> {
-            metricItem.setName(metricMap.getOrDefault(metricItem.getId(), new MetricResp()).getName());
-            metricItem.setBizName(metricMap.getOrDefault(metricItem.getId(), new MetricResp()).getBizName());
-            metricItem.setCreatedBy(metricMap.getOrDefault(metricItem.getId(), new MetricResp()).getCreatedBy());
-            metricItem.getRelateItems().forEach(dimensionItem -> {
-                dimensionItem.setName(dimensionMap.getOrDefault(dimensionItem.getId(), new DimensionResp()).getName());
-                dimensionItem.setBizName(dimensionMap.getOrDefault(dimensionItem.getId(),
-                        new DimensionResp()).getBizName());
-                dimensionItem.setCreatedBy(dimensionMap.getOrDefault(dimensionItem.getId(),
-                        new DimensionResp()).getCreatedBy());
-            });
-        });
+    private void fillItemName(
+            AppConfig appConfig,
+            Map<Long, DimensionResp> dimensionMap,
+            Map<Long, MetricResp> metricMap) {
+        appConfig
+                .getItems()
+                .forEach(
+                        metricItem -> {
+                            metricItem.setName(
+                                    metricMap
+                                            .getOrDefault(metricItem.getId(), new MetricResp())
+                                            .getName());
+                            metricItem.setBizName(
+                                    metricMap
+                                            .getOrDefault(metricItem.getId(), new MetricResp())
+                                            .getBizName());
+                            metricItem.setCreatedBy(
+                                    metricMap
+                                            .getOrDefault(metricItem.getId(), new MetricResp())
+                                            .getCreatedBy());
+                            metricItem
+                                    .getRelateItems()
+                                    .forEach(
+                                            dimensionItem -> {
+                                                dimensionItem.setName(
+                                                        dimensionMap
+                                                                .getOrDefault(
+                                                                        dimensionItem.getId(),
+                                                                        new DimensionResp())
+                                                                .getName());
+                                                dimensionItem.setBizName(
+                                                        dimensionMap
+                                                                .getOrDefault(
+                                                                        dimensionItem.getId(),
+                                                                        new DimensionResp())
+                                                                .getBizName());
+                                                dimensionItem.setCreatedBy(
+                                                        dimensionMap
+                                                                .getOrDefault(
+                                                                        dimensionItem.getId(),
+                                                                        new DimensionResp())
+                                                                .getCreatedBy());
+                                            });
+                        });
     }
 
     private String getUniqueId() {
         return UUID.randomUUID().toString().replaceAll("_", "");
     }
-
 }

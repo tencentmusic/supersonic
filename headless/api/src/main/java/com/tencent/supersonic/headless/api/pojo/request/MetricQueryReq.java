@@ -16,5 +16,4 @@ public class MetricQueryReq {
     private Long limit;
     private List<ColumnOrder> order;
     private boolean nativeQuery = false;
-
 }

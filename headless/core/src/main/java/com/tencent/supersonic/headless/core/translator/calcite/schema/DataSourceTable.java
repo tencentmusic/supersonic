@@ -1,8 +1,5 @@
 package com.tencent.supersonic.headless.core.translator.calcite.schema;
 
-
-import java.util.ArrayList;
-import java.util.List;
 import org.apache.calcite.DataContext;
 import org.apache.calcite.linq4j.Enumerable;
 import org.apache.calcite.plan.RelOptTable;
@@ -22,9 +19,10 @@ import org.apache.calcite.schema.TranslatableTable;
 import org.apache.calcite.schema.impl.AbstractTable;
 import org.apache.calcite.sql.type.SqlTypeName;
 
-/**
- * customize the  AbstractTable
- */
+import java.util.ArrayList;
+import java.util.List;
+
+/** customize the AbstractTable */
 public class DataSourceTable extends AbstractTable implements ScannableTable, TranslatableTable {
 
     private final String tableName;
@@ -34,7 +32,10 @@ public class DataSourceTable extends AbstractTable implements ScannableTable, Tr
 
     private RelDataType rowType;
 
-    private DataSourceTable(String tableName, List<String> fieldNames, List<SqlTypeName> fieldTypes,
+    private DataSourceTable(
+            String tableName,
+            List<String> fieldNames,
+            List<SqlTypeName> fieldTypes,
             Statistic statistic) {
         this.tableName = tableName;
         this.fieldNames = fieldNames;
@@ -79,9 +80,9 @@ public class DataSourceTable extends AbstractTable implements ScannableTable, Tr
 
     public RelNode toRel(RelOptTable.ToRelContext toRelContext, RelOptTable relOptTable) {
         List<RelHint> hint = new ArrayList<>();
-        return new LogicalTableScan(toRelContext.getCluster(), toRelContext.getCluster().traitSet(), hint, relOptTable);
+        return new LogicalTableScan(
+                toRelContext.getCluster(), toRelContext.getCluster().traitSet(), hint, relOptTable);
     }
-
 
     public static final class Builder {
 
@@ -127,8 +128,8 @@ public class DataSourceTable extends AbstractTable implements ScannableTable, Tr
                 throw new IllegalStateException("Table must have positive row count");
             }
 
-            return new DataSourceTable(tableName, fieldNames, fieldTypes, Statistics.of(rowCount, null));
+            return new DataSourceTable(
+                    tableName, fieldNames, fieldTypes, Statistics.of(rowCount, null));
         }
     }
 }
-

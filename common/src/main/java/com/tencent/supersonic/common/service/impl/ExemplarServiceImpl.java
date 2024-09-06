@@ -31,20 +31,19 @@ public class ExemplarServiceImpl implements ExemplarService, CommandLineRunner {
 
     private static final String SYS_EXEMPLAR_FILE = "s2-exemplar.json";
 
-    private TypeReference<List<Text2SQLExemplar>> valueTypeRef = new TypeReference<List<Text2SQLExemplar>>() {
-    };
+    private TypeReference<List<Text2SQLExemplar>> valueTypeRef =
+            new TypeReference<List<Text2SQLExemplar>>() {};
 
     private final ObjectMapper objectMapper = JsonUtil.INSTANCE.getObjectMapper();
 
-    @Autowired
-    private EmbeddingConfig embeddingConfig;
+    @Autowired private EmbeddingConfig embeddingConfig;
 
-    @Autowired
-    private EmbeddingService embeddingService;
+    @Autowired private EmbeddingService embeddingService;
 
     public void storeExemplar(String collection, Text2SQLExemplar exemplar) {
-        Metadata metadata = Metadata.from(JsonUtil.toMap(JsonUtil.toString(exemplar),
-                String.class, Object.class));
+        Metadata metadata =
+                Metadata.from(
+                        JsonUtil.toMap(JsonUtil.toString(exemplar), String.class, Object.class));
         TextSegment segment = TextSegment.from(exemplar.getQuestion(), metadata);
         TextSegmentConvert.addQueryId(segment, exemplar.getQuestion());
 
@@ -52,8 +51,9 @@ public class ExemplarServiceImpl implements ExemplarService, CommandLineRunner {
     }
 
     public void removeExemplar(String collection, Text2SQLExemplar exemplar) {
-        Metadata metadata = Metadata.from(JsonUtil.toMap(JsonUtil.toString(exemplar),
-                String.class, Object.class));
+        Metadata metadata =
+                Metadata.from(
+                        JsonUtil.toMap(JsonUtil.toString(exemplar), String.class, Object.class));
         TextSegment segment = TextSegment.from(exemplar.getQuestion(), metadata);
 
         embeddingService.deleteQuery(collection, Lists.newArrayList(segment));
@@ -66,15 +66,22 @@ public class ExemplarServiceImpl implements ExemplarService, CommandLineRunner {
 
     public List<Text2SQLExemplar> recallExemplars(String collection, String query, int num) {
         List<Text2SQLExemplar> exemplars = Lists.newArrayList();
-        RetrieveQuery retrieveQuery = RetrieveQuery.builder()
-                .queryTextsList(Lists.newArrayList(query))
-                .build();
-        List<RetrieveQueryResult> results = embeddingService.retrieveQuery(collection, retrieveQuery, num);
-        results.stream().forEach(ret -> {
-            ret.getRetrieval().stream().forEach(r -> {
-                exemplars.add(JsonUtil.mapToObject(r.getMetadata(), Text2SQLExemplar.class));
-            });
-        });
+        RetrieveQuery retrieveQuery =
+                RetrieveQuery.builder().queryTextsList(Lists.newArrayList(query)).build();
+        List<RetrieveQueryResult> results =
+                embeddingService.retrieveQuery(collection, retrieveQuery, num);
+        results.stream()
+                .forEach(
+                        ret -> {
+                            ret.getRetrieval().stream()
+                                    .forEach(
+                                            r -> {
+                                                exemplars.add(
+                                                        JsonUtil.mapToObject(
+                                                                r.getMetadata(),
+                                                                Text2SQLExemplar.class));
+                                            });
+                        });
 
         return exemplars;
     }
@@ -95,5 +102,4 @@ public class ExemplarServiceImpl implements ExemplarService, CommandLineRunner {
         String collection = embeddingConfig.getText2sqlCollectionName();
         exemplars.stream().forEach(e -> storeExemplar(collection, e));
     }
-
 }

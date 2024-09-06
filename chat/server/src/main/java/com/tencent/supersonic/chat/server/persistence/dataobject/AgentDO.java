@@ -10,61 +10,40 @@ import java.util.Date;
 @Data
 @TableName("s2_agent")
 public class AgentDO {
-    /**
-     *
-     */
+    /** */
     @TableId(type = IdType.AUTO)
     private Integer id;
 
-    /**
-     *
-     */
+    /** */
     private String name;
 
-    /**
-     *
-     */
+    /** */
     private String description;
 
-    /**
-     * 0 offline, 1 online
-     */
+    /** 0 offline, 1 online */
     private Integer status;
 
-    /**
-     *
-     */
+    /** */
     private String examples;
 
-    /**
-     *
-     */
+    /** */
     private String config;
 
-    /**
-     *
-     */
+    /** */
     private String createdBy;
 
-    /**
-     *
-     */
+    /** */
     private Date createdAt;
 
-    /**
-     *
-     */
+    /** */
     private String updatedBy;
 
-    /**
-     *
-     */
+    /** */
     private Date updatedAt;
 
-    /**
-     *
-     */
+    /** */
     private Integer enableSearch;
+
     private Integer enableMemoryReview;
     private String modelConfig;
     private String multiTurnConfig;
@@ -72,5 +51,4 @@ public class AgentDO {
     private String visualConfig;
 
     private String promptConfig;
-
 }

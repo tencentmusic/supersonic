@@ -29,9 +29,10 @@ public class ParseResp {
     }
 
     public List<SemanticParseInfo> getSelectedParses() {
-        selectedParses = selectedParses.stream()
-                .sorted(Comparator.comparingDouble(SemanticParseInfo::getScore).reversed())
-                .collect(Collectors.toList());
+        selectedParses =
+                selectedParses.stream()
+                        .sorted(Comparator.comparingDouble(SemanticParseInfo::getScore).reversed())
+                        .collect(Collectors.toList());
         generateParseInfoId(selectedParses);
         return selectedParses;
     }
@@ -42,5 +43,4 @@ public class ParseResp {
             parseInfo.setId(i + 1);
         }
     }
-
 }

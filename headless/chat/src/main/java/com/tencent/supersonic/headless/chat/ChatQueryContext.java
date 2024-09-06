@@ -41,17 +41,14 @@ public class ChatQueryContext {
     private Map<Long, List<Long>> modelIdToDataSetIds;
     private User user;
     private boolean saveAnswer;
-    @Builder.Default
-    private Text2SQLType text2SQLType = Text2SQLType.RULE_AND_LLM;
+    @Builder.Default private Text2SQLType text2SQLType = Text2SQLType.RULE_AND_LLM;
     private QueryFilters queryFilters;
     private List<SemanticQuery> candidateQueries = new ArrayList<>();
     private SchemaMapInfo mapInfo = new SchemaMapInfo();
     private SemanticParseInfo contextParseInfo;
     private MapModeEnum mapModeEnum = MapModeEnum.STRICT;
-    @JsonIgnore
-    private SemanticSchema semanticSchema;
-    @JsonIgnore
-    private ChatWorkflowState chatWorkflowState;
+    @JsonIgnore private SemanticSchema semanticSchema;
+    @JsonIgnore private ChatWorkflowState chatWorkflowState;
     private QueryDataType queryDataType = QueryDataType.ALL;
     private ChatModelConfig modelConfig;
     private PromptConfig promptConfig;
@@ -59,12 +56,16 @@ public class ChatQueryContext {
 
     public List<SemanticQuery> getCandidateQueries() {
         ParserConfig parserConfig = ContextUtils.getBean(ParserConfig.class);
-        int parseShowCount = Integer.parseInt(parserConfig.getParameterValue(ParserConfig.PARSER_SHOW_COUNT));
-        candidateQueries = candidateQueries.stream()
-                .sorted(Comparator.comparing(semanticQuery -> semanticQuery.getParseInfo().getScore(),
-                        Comparator.reverseOrder()))
-                .limit(parseShowCount)
-                .collect(Collectors.toList());
+        int parseShowCount =
+                Integer.parseInt(parserConfig.getParameterValue(ParserConfig.PARSER_SHOW_COUNT));
+        candidateQueries =
+                candidateQueries.stream()
+                        .sorted(
+                                Comparator.comparing(
+                                        semanticQuery -> semanticQuery.getParseInfo().getScore(),
+                                        Comparator.reverseOrder()))
+                        .limit(parseShowCount)
+                        .collect(Collectors.toList());
         return candidateQueries;
     }
 

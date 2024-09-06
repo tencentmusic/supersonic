@@ -1,7 +1,8 @@
 package com.tencent.supersonic.headless.core.translator.calcite.s2sql;
 
-import java.util.List;
 import lombok.Data;
+
+import java.util.List;
 
 @Data
 public class MetricTypeParams {
@@ -11,5 +12,4 @@ public class MetricTypeParams {
     private List<Measure> fields;
     private boolean isFieldMetric = false;
     private String expr;
-
 }

@@ -1,9 +1,9 @@
 package com.tencent.supersonic.headless.chat.corrector;
 
-import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.jsqlparser.SqlAddHelper;
 import com.tencent.supersonic.common.jsqlparser.SqlSelectFunctionHelper;
 import com.tencent.supersonic.common.jsqlparser.SqlSelectHelper;
+import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.api.pojo.SemanticSchema;
 import com.tencent.supersonic.headless.chat.ChatQueryContext;
@@ -17,25 +17,24 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-/**
- * Perform SQL corrections on the "Having" section in S2SQL.
- */
+/** Perform SQL corrections on the "Having" section in S2SQL. */
 @Slf4j
 public class HavingCorrector extends BaseSemanticCorrector {
 
     @Override
     public void doCorrect(ChatQueryContext chatQueryContext, SemanticParseInfo semanticParseInfo) {
 
-        //add aggregate to all metric
+        // add aggregate to all metric
         addHaving(chatQueryContext, semanticParseInfo);
 
-        //decide whether add having expression field to select
+        // decide whether add having expression field to select
         Environment environment = ContextUtils.getBean(Environment.class);
-        String correctorAdditionalInfo = environment.getProperty("s2.corrector.additional.information");
-        if (StringUtils.isNotBlank(correctorAdditionalInfo) && Boolean.parseBoolean(correctorAdditionalInfo)) {
+        String correctorAdditionalInfo =
+                environment.getProperty("s2.corrector.additional.information");
+        if (StringUtils.isNotBlank(correctorAdditionalInfo)
+                && Boolean.parseBoolean(correctorAdditionalInfo)) {
             addHavingToSelect(semanticParseInfo);
         }
-
     }
 
     private void addHaving(ChatQueryContext chatQueryContext, SemanticParseInfo semanticParseInfo) {
@@ -43,13 +42,16 @@ public class HavingCorrector extends BaseSemanticCorrector {
 
         SemanticSchema semanticSchema = chatQueryContext.getSemanticSchema();
 
-        Set<String> metrics = semanticSchema.getMetrics(dataSet).stream()
-                .map(schemaElement -> schemaElement.getName()).collect(Collectors.toSet());
+        Set<String> metrics =
+                semanticSchema.getMetrics(dataSet).stream()
+                        .map(schemaElement -> schemaElement.getName())
+                        .collect(Collectors.toSet());
 
         if (CollectionUtils.isEmpty(metrics)) {
             return;
         }
-        String havingSql = SqlAddHelper.addHaving(semanticParseInfo.getSqlInfo().getCorrectedS2SQL(), metrics);
+        String havingSql =
+                SqlAddHelper.addHaving(semanticParseInfo.getSqlInfo().getCorrectedS2SQL(), metrics);
         semanticParseInfo.getSqlInfo().setCorrectedS2SQL(havingSql);
     }
 
@@ -60,10 +62,10 @@ public class HavingCorrector extends BaseSemanticCorrector {
         }
         List<Expression> havingExpressionList = SqlSelectHelper.getHavingExpression(correctS2SQL);
         if (!CollectionUtils.isEmpty(havingExpressionList)) {
-            String replaceSql = SqlAddHelper.addFunctionToSelect(correctS2SQL, havingExpressionList);
+            String replaceSql =
+                    SqlAddHelper.addFunctionToSelect(correctS2SQL, havingExpressionList);
             semanticParseInfo.getSqlInfo().setCorrectedS2SQL(replaceSql);
         }
         return;
     }
-
 }

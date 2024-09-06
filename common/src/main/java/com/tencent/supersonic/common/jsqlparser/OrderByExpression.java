@@ -12,5 +12,4 @@ public class OrderByExpression {
     private Object fieldValue;
 
     private String function;
-
 }

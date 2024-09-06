@@ -2,13 +2,12 @@ package com.tencent.supersonic.headless.api.pojo.response;
 
 import lombok.Data;
 
-
 @Data
 public class MeasureResp {
 
     private String name;
 
-    //sum max min avg count distinct
+    // sum max min avg count distinct
     private String agg;
 
     private String expr;

@@ -33,24 +33,15 @@ public class QueryTagReq extends SemanticQueryReq {
     @Override
     public String toCustomizedString() {
         StringBuilder stringBuilder = new StringBuilder("{");
-        stringBuilder.append("\"dataSetId\":")
-                .append(dataSetId);
-        stringBuilder.append("\"modelIds\":")
-                .append(modelIds);
-        stringBuilder.append(",\"groups\":")
-                .append(groups);
-        stringBuilder.append(",\"aggregators\":")
-                .append(aggregators);
-        stringBuilder.append(",\"orders\":")
-                .append(orders);
-        stringBuilder.append(",\"tagFilters\":")
-                .append(tagFilters);
-        stringBuilder.append(",\"dateInfo\":")
-                .append(dateInfo);
-        stringBuilder.append(",\"params\":")
-                .append(params);
-        stringBuilder.append(",\"limit\":")
-                .append(limit);
+        stringBuilder.append("\"dataSetId\":").append(dataSetId);
+        stringBuilder.append("\"modelIds\":").append(modelIds);
+        stringBuilder.append(",\"groups\":").append(groups);
+        stringBuilder.append(",\"aggregators\":").append(aggregators);
+        stringBuilder.append(",\"orders\":").append(orders);
+        stringBuilder.append(",\"tagFilters\":").append(tagFilters);
+        stringBuilder.append(",\"dateInfo\":").append(dateInfo);
+        stringBuilder.append(",\"params\":").append(params);
+        stringBuilder.append(",\"limit\":").append(limit);
         stringBuilder.append('}');
         return stringBuilder.toString();
     }

@@ -52,14 +52,14 @@ import com.tencent.supersonic.headless.core.utils.ComponentFactory;
 import com.tencent.supersonic.headless.server.annotation.S2DataPermission;
 import com.tencent.supersonic.headless.server.facade.service.SemanticLayerService;
 import com.tencent.supersonic.headless.server.manager.SemanticSchemaManager;
-import com.tencent.supersonic.headless.server.utils.MetricDrillDownChecker;
-import com.tencent.supersonic.headless.server.utils.QueryReqConverter;
-import com.tencent.supersonic.headless.server.utils.QueryUtils;
-import com.tencent.supersonic.headless.server.utils.StatUtils;
 import com.tencent.supersonic.headless.server.service.DataSetService;
 import com.tencent.supersonic.headless.server.service.DimensionService;
 import com.tencent.supersonic.headless.server.service.MetricService;
 import com.tencent.supersonic.headless.server.service.SchemaService;
+import com.tencent.supersonic.headless.server.utils.MetricDrillDownChecker;
+import com.tencent.supersonic.headless.server.utils.QueryReqConverter;
+import com.tencent.supersonic.headless.server.utils.QueryUtils;
+import com.tencent.supersonic.headless.server.utils.StatUtils;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
@@ -76,7 +76,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
-
 
 @Service
 @Slf4j
@@ -144,10 +143,10 @@ public class S2SemanticLayerService implements SemanticLayerService {
         TaskStatusEnum state = TaskStatusEnum.SUCCESS;
         log.info("[queryReq:{}]", queryReq);
         try {
-            //1.initStatInfo
+            // 1.initStatInfo
             statUtils.initStatInfo(queryReq, user);
 
-            //2.query from cache
+            // 2.query from cache
 
             String cacheKey = queryCache.getCacheKey(queryReq);
             Object query = queryCache.query(queryReq, cacheKey);
@@ -159,7 +158,7 @@ public class S2SemanticLayerService implements SemanticLayerService {
             }
             StatUtils.get().setUseResultCache(false);
 
-            //3 query
+            // 3 query
             QueryStatement queryStatement = buildQueryStatement(queryReq, user);
             SemanticQueryResp queryResp = null;
 
@@ -172,11 +171,12 @@ public class S2SemanticLayerService implements SemanticLayerService {
             for (QueryExecutor queryExecutor : queryExecutors) {
                 if (queryExecutor.accept(queryStatement)) {
                     queryResp = queryExecutor.execute(queryStatement);
-                    queryUtils.populateQueryColumns(queryResp, queryStatement.getSemanticSchemaResp());
+                    queryUtils.populateQueryColumns(
+                            queryResp, queryStatement.getSemanticSchemaResp());
                 }
             }
 
-            //4 reset cache and set stateInfo
+            // 4 reset cache and set stateInfo
             Boolean setCacheSuccess = queryCache.put(cacheKey, queryResp);
             if (setCacheSuccess) {
                 // if result is not null, update cache data
@@ -218,7 +218,8 @@ public class S2SemanticLayerService implements SemanticLayerService {
         return semanticQueryResp;
     }
 
-    private List<String> getDimensionValuesFromDict(DimensionValueReq dimensionValueReq, Set<Long> dataSetIds) {
+    private List<String> getDimensionValuesFromDict(
+            DimensionValueReq dimensionValueReq, Set<Long> dataSetIds) {
         if (StringUtils.isBlank(dimensionValueReq.getValue())) {
             return SearchService.getDimensionValue(dimensionValueReq);
         }
@@ -226,20 +227,28 @@ public class S2SemanticLayerService implements SemanticLayerService {
         Map<Long, List<Long>> modelIdToDataSetIds = new HashMap<>();
         modelIdToDataSetIds.put(dimensionValueReq.getModelId(), new ArrayList<>(dataSetIds));
 
-        List<HanlpMapResult> hanlpMapResultList = knowledgeBaseService.prefixSearch(
-                dimensionValueReq.getValue(), 2000, modelIdToDataSetIds, dataSetIds);
+        List<HanlpMapResult> hanlpMapResultList =
+                knowledgeBaseService.prefixSearch(
+                        dimensionValueReq.getValue(), 2000, modelIdToDataSetIds, dataSetIds);
 
         HanlpHelper.transLetterOriginal(hanlpMapResultList);
 
         return hanlpMapResultList.stream()
-                .filter(o -> o.getNatures().stream()
-                        .map(NatureHelper::getElementID)
-                        .anyMatch(elementID -> dimensionValueReq.getElementID().equals(elementID)))
+                .filter(
+                        o ->
+                                o.getNatures().stream()
+                                        .map(NatureHelper::getElementID)
+                                        .anyMatch(
+                                                elementID ->
+                                                        dimensionValueReq
+                                                                .getElementID()
+                                                                .equals(elementID)))
                 .map(MapResult::getName)
                 .collect(Collectors.toList());
     }
 
-    private SemanticQueryResp getDimensionValuesFromDb(DimensionValueReq dimensionValueReq, User user) {
+    private SemanticQueryResp getDimensionValuesFromDb(
+            DimensionValueReq dimensionValueReq, User user) {
         QuerySqlReq querySqlReq = buildQuerySqlReq(dimensionValueReq);
         return queryByReq(querySqlReq, user);
     }
@@ -256,14 +265,15 @@ public class S2SemanticLayerService implements SemanticLayerService {
         return columns;
     }
 
-    private List<Map<String, Object>> createResultList(DimensionValueReq dimensionValueReq,
-                                                       List<String> dimensionValues) {
+    private List<Map<String, Object>> createResultList(
+            DimensionValueReq dimensionValueReq, List<String> dimensionValues) {
         return dimensionValues.stream()
-                .map(value -> {
-                    Map<String, Object> map = new HashMap<>();
-                    map.put(dimensionValueReq.getBizName(), value);
-                    return map;
-                })
+                .map(
+                        value -> {
+                            Map<String, Object> map = new HashMap<>();
+                            map.put(dimensionValueReq.getBizName(), value);
+                            return map;
+                        })
                 .collect(Collectors.toList());
     }
 
@@ -278,10 +288,12 @@ public class S2SemanticLayerService implements SemanticLayerService {
         return dimensionResp;
     }
 
-    public EntityInfo getEntityInfo(SemanticParseInfo parseInfo, DataSetSchema dataSetSchema, User user) {
+    public EntityInfo getEntityInfo(
+            SemanticParseInfo parseInfo, DataSetSchema dataSetSchema, User user) {
         if (parseInfo != null && parseInfo.getDataSetId() != null && parseInfo.getDataSetId() > 0) {
             EntityInfo entityInfo = getEntityBasicInfo(dataSetSchema);
-            if (parseInfo.getDimensionFilters().size() <= 0 || entityInfo.getDataSetInfo() == null) {
+            if (parseInfo.getDimensionFilters().size() <= 0
+                    || entityInfo.getDataSetInfo() == null) {
                 entityInfo.setMetrics(null);
                 entityInfo.setDimensions(null);
                 return entityInfo;
@@ -290,8 +302,9 @@ public class S2SemanticLayerService implements SemanticLayerService {
             if (StringUtils.isNotBlank(primaryKey)) {
                 String entityId = "";
                 for (QueryFilter chatFilter : parseInfo.getDimensionFilters()) {
-                    if (chatFilter != null && chatFilter.getBizName() != null && chatFilter.getBizName()
-                            .equals(primaryKey)) {
+                    if (chatFilter != null
+                            && chatFilter.getBizName() != null
+                            && chatFilter.getBizName().equals(primaryKey)) {
                         if (chatFilter.getOperator().equals(FilterOperatorEnum.EQUALS)) {
                             entityId = chatFilter.getValue().toString();
                         }
@@ -344,8 +357,9 @@ public class S2SemanticLayerService implements SemanticLayerService {
         return metrics;
     }
 
-    private QueryStatement buildSqlQueryStatement(QuerySqlReq querySqlReq, User user) throws Exception {
-        //If dataSetId or DataSetName is empty, parse dataSetId from the SQL
+    private QueryStatement buildSqlQueryStatement(QuerySqlReq querySqlReq, User user)
+            throws Exception {
+        // If dataSetId or DataSetName is empty, parse dataSetId from the SQL
         if (querySqlReq.needGetDataSetId()) {
             Long dataSetId = dataSetService.getDataSetIdFromSql(querySqlReq.getSql(), user);
             querySqlReq.setDataSetId(dataSetId);
@@ -360,7 +374,8 @@ public class S2SemanticLayerService implements SemanticLayerService {
         return queryStatement;
     }
 
-    private QueryStatement buildQueryStatement(SemanticQueryReq semanticQueryReq, User user) throws Exception {
+    private QueryStatement buildQueryStatement(SemanticQueryReq semanticQueryReq, User user)
+            throws Exception {
         QueryStatement queryStatement = null;
         if (semanticQueryReq instanceof QuerySqlReq) {
             queryStatement = buildSqlQueryStatement((QuerySqlReq) semanticQueryReq, user);
@@ -369,9 +384,11 @@ public class S2SemanticLayerService implements SemanticLayerService {
             queryStatement = buildStructQueryStatement((QueryStructReq) semanticQueryReq);
         }
         if (semanticQueryReq instanceof QueryMultiStructReq) {
-            queryStatement = buildMultiStructQueryStatement((QueryMultiStructReq) semanticQueryReq, user);
+            queryStatement =
+                    buildMultiStructQueryStatement((QueryMultiStructReq) semanticQueryReq, user);
         }
-        if (Objects.nonNull(queryStatement) && Objects.nonNull(semanticQueryReq.getSqlInfo())
+        if (Objects.nonNull(queryStatement)
+                && Objects.nonNull(semanticQueryReq.getSqlInfo())
                 && StringUtils.isNotBlank(semanticQueryReq.getSqlInfo().getQuerySQL())) {
             queryStatement.setSql(semanticQueryReq.getSqlInfo().getQuerySQL());
             queryStatement.setDataSetId(semanticQueryReq.getDataSetId());
@@ -395,8 +412,8 @@ public class S2SemanticLayerService implements SemanticLayerService {
         return queryStatement;
     }
 
-    private QueryStatement buildMultiStructQueryStatement(QueryMultiStructReq queryMultiStructReq, User user)
-            throws Exception {
+    private QueryStatement buildMultiStructQueryStatement(
+            QueryMultiStructReq queryMultiStructReq, User user) throws Exception {
         List<QueryStatement> sqlParsers = new ArrayList<>();
         for (QueryStructReq queryStructReq : queryMultiStructReq.getQueryStructReqs()) {
             QueryStatement queryStatement = buildQueryStatement(queryStructReq, user);
@@ -420,20 +437,34 @@ public class S2SemanticLayerService implements SemanticLayerService {
 
     private QuerySqlReq buildQuerySqlReq(DimensionValueReq queryDimValueReq) {
         QuerySqlReq querySqlReq = new QuerySqlReq();
-        List<ModelResp> modelResps = schemaService.getModelList(Lists.newArrayList(queryDimValueReq.getModelId()));
-        DimensionResp dimensionResp = schemaService.getDimension(queryDimValueReq.getBizName(),
-                queryDimValueReq.getModelId());
+        List<ModelResp> modelResps =
+                schemaService.getModelList(Lists.newArrayList(queryDimValueReq.getModelId()));
+        DimensionResp dimensionResp =
+                schemaService.getDimension(
+                        queryDimValueReq.getBizName(), queryDimValueReq.getModelId());
         ModelResp modelResp = modelResps.get(0);
-        String sql = String.format("select distinct %s from %s where 1=1",
-                dimensionResp.getName(), modelResp.getName());
+        String sql =
+                String.format(
+                        "select distinct %s from %s where 1=1",
+                        dimensionResp.getName(), modelResp.getName());
         List<Dim> timeDims = modelResp.getTimeDimension();
         if (CollectionUtils.isNotEmpty(timeDims)) {
-            sql = String.format("%s and %s >= '%s' and %s <= '%s'", sql, TimeDimensionEnum.DAY.getName(),
-                    queryDimValueReq.getDateInfo().getStartDate(), TimeDimensionEnum.DAY.getName(),
-                    queryDimValueReq.getDateInfo().getEndDate());
+            sql =
+                    String.format(
+                            "%s and %s >= '%s' and %s <= '%s'",
+                            sql,
+                            TimeDimensionEnum.DAY.getName(),
+                            queryDimValueReq.getDateInfo().getStartDate(),
+                            TimeDimensionEnum.DAY.getName(),
+                            queryDimValueReq.getDateInfo().getEndDate());
         }
         if (StringUtils.isNotBlank(queryDimValueReq.getValue())) {
-            sql += " AND " + queryDimValueReq.getBizName() + " LIKE '%" + queryDimValueReq.getValue() + "%'";
+            sql +=
+                    " AND "
+                            + queryDimValueReq.getBizName()
+                            + " LIKE '%"
+                            + queryDimValueReq.getValue()
+                            + "%'";
         }
         querySqlReq.setModelIds(Sets.newHashSet(queryDimValueReq.getModelId()));
         querySqlReq.setSql(sql);
@@ -441,8 +472,8 @@ public class S2SemanticLayerService implements SemanticLayerService {
     }
 
     private void queryPreCheck(QueryStatement queryStatement) {
-        //Check whether the dimensions of the metric drill-down are correct temporarily,
-        //add the abstraction of a validator later.
+        // Check whether the dimensions of the metric drill-down are correct temporarily,
+        // add the abstraction of a validator later.
         metricDrillDownChecker.checkQuery(queryStatement);
     }
 
@@ -466,28 +497,48 @@ public class S2SemanticLayerService implements SemanticLayerService {
         if (tagTypeDefaultConfig == null || tagTypeDefaultConfig.getDefaultDisplayInfo() == null) {
             return entityInfo;
         }
-        List<DataInfo> dimensions = tagTypeDefaultConfig.getDefaultDisplayInfo().getDimensionIds().stream()
-                .map(id -> {
-                    SchemaElement element = dataSetSchema.getElement(SchemaElementType.DIMENSION, id);
-                    if (element == null) {
-                        return null;
-                    }
-                    return new DataInfo(element.getId().intValue(), element.getName(), element.getBizName(), null);
-                }).filter(Objects::nonNull).collect(Collectors.toList());
-        List<DataInfo> metrics = tagTypeDefaultConfig.getDefaultDisplayInfo().getDimensionIds().stream()
-                .map(id -> {
-                    SchemaElement element = dataSetSchema.getElement(SchemaElementType.METRIC, id);
-                    if (element == null) {
-                        return null;
-                    }
-                    return new DataInfo(element.getId().intValue(), element.getName(), element.getBizName(), null);
-                }).filter(Objects::nonNull).collect(Collectors.toList());
+        List<DataInfo> dimensions =
+                tagTypeDefaultConfig.getDefaultDisplayInfo().getDimensionIds().stream()
+                        .map(
+                                id -> {
+                                    SchemaElement element =
+                                            dataSetSchema.getElement(
+                                                    SchemaElementType.DIMENSION, id);
+                                    if (element == null) {
+                                        return null;
+                                    }
+                                    return new DataInfo(
+                                            element.getId().intValue(),
+                                            element.getName(),
+                                            element.getBizName(),
+                                            null);
+                                })
+                        .filter(Objects::nonNull)
+                        .collect(Collectors.toList());
+        List<DataInfo> metrics =
+                tagTypeDefaultConfig.getDefaultDisplayInfo().getDimensionIds().stream()
+                        .map(
+                                id -> {
+                                    SchemaElement element =
+                                            dataSetSchema.getElement(SchemaElementType.METRIC, id);
+                                    if (element == null) {
+                                        return null;
+                                    }
+                                    return new DataInfo(
+                                            element.getId().intValue(),
+                                            element.getName(),
+                                            element.getBizName(),
+                                            null);
+                                })
+                        .filter(Objects::nonNull)
+                        .collect(Collectors.toList());
         entityInfo.setDimensions(dimensions);
         entityInfo.setMetrics(metrics);
         return entityInfo;
     }
 
-    private void fillEntityInfoValue(EntityInfo entityInfo, DataSetSchema dataSetSchema, User user) {
+    private void fillEntityInfoValue(
+            EntityInfo entityInfo, DataSetSchema dataSetSchema, User user) {
         SemanticQueryResp queryResultWithColumns =
                 getQueryResultWithSchemaResp(entityInfo, dataSetSchema, user);
         if (queryResultWithColumns != null) {
@@ -498,17 +549,19 @@ public class S2SemanticLayerService implements SemanticLayerService {
                     if (entry.getValue() == null || entryKey == null) {
                         continue;
                     }
-                    entityInfo.getDimensions().stream().filter(i -> entryKey.equals(i.getBizName()))
+                    entityInfo.getDimensions().stream()
+                            .filter(i -> entryKey.equals(i.getBizName()))
                             .forEach(i -> i.setValue(entry.getValue().toString()));
-                    entityInfo.getMetrics().stream().filter(i -> entryKey.equals(i.getBizName()))
+                    entityInfo.getMetrics().stream()
+                            .filter(i -> entryKey.equals(i.getBizName()))
                             .forEach(i -> i.setValue(entry.getValue().toString()));
                 }
             }
         }
     }
 
-    private SemanticQueryResp getQueryResultWithSchemaResp(EntityInfo entityInfo,
-                                                           DataSetSchema dataSetSchema, User user) {
+    private SemanticQueryResp getQueryResultWithSchemaResp(
+            EntityInfo entityInfo, DataSetSchema dataSetSchema, User user) {
         SemanticParseInfo semanticParseInfo = new SemanticParseInfo();
         semanticParseInfo.setDataSet(dataSetSchema.getDataSet());
         semanticParseInfo.setQueryType(QueryType.DETAIL);
@@ -532,7 +585,7 @@ public class S2SemanticLayerService implements SemanticLayerService {
             semanticParseInfo.setDateInfo(dateInfo);
         }
 
-        //add filter
+        // add filter
         QueryFilter chatFilter = getQueryFilter(entityInfo);
         Set<QueryFilter> chatFilters = Sets.newHashSet();
         chatFilters.add(chatFilter);
@@ -568,5 +621,4 @@ public class S2SemanticLayerService implements SemanticLayerService {
     private String getEntityPrimaryName(EntityInfo entityInfo) {
         return entityInfo.getDataSetInfo().getPrimaryKey();
     }
-
 }

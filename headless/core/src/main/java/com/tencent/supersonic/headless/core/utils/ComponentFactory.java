@@ -2,23 +2,21 @@ package com.tencent.supersonic.headless.core.utils;
 
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.headless.core.cache.QueryCache;
-import com.tencent.supersonic.headless.core.executor.QueryExecutor;
 import com.tencent.supersonic.headless.core.executor.QueryAccelerator;
+import com.tencent.supersonic.headless.core.executor.QueryExecutor;
+import com.tencent.supersonic.headless.core.translator.QueryOptimizer;
 import com.tencent.supersonic.headless.core.translator.QueryParser;
 import com.tencent.supersonic.headless.core.translator.converter.QueryConverter;
-import com.tencent.supersonic.headless.core.translator.QueryOptimizer;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.support.SpringFactoriesLoader;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.core.io.support.SpringFactoriesLoader;
-
-/**
- * QueryConverter QueryOptimizer QueryExecutor object factory
- */
+/** QueryConverter QueryOptimizer QueryExecutor object factory */
 @Slf4j
 public class ComponentFactory {
 
@@ -88,17 +86,20 @@ public class ComponentFactory {
         List<QueryOptimizer> queryOptimizerList = new ArrayList<>();
         init(QueryOptimizer.class, queryOptimizerList);
         if (!queryOptimizerList.isEmpty()) {
-            queryOptimizerList.stream().forEach(q -> addQueryOptimizer(q.getClass().getSimpleName(), q));
+            queryOptimizerList.stream()
+                    .forEach(q -> addQueryOptimizer(q.getClass().getSimpleName(), q));
         }
     }
 
     private static void initQueryExecutors() {
-        //queryExecutors.add(ContextUtils.getContext().getBean("JdbcExecutor", JdbcExecutor.class));
+        // queryExecutors.add(ContextUtils.getContext().getBean("JdbcExecutor",
+        // JdbcExecutor.class));
         init(QueryExecutor.class, queryExecutors);
     }
 
     private static void initQueryAccelerators() {
-        //queryExecutors.add(ContextUtils.getContext().getBean("JdbcExecutor", JdbcExecutor.class));
+        // queryExecutors.add(ContextUtils.getContext().getBean("JdbcExecutor",
+        // JdbcExecutor.class));
         init(QueryAccelerator.class, queryAccelerators);
     }
 
@@ -119,14 +120,15 @@ public class ComponentFactory {
     }
 
     private static <T> List<T> init(Class<T> factoryType, List list) {
-        list.addAll(SpringFactoriesLoader.loadFactories(factoryType,
-                Thread.currentThread().getContextClassLoader()));
+        list.addAll(
+                SpringFactoriesLoader.loadFactories(
+                        factoryType, Thread.currentThread().getContextClassLoader()));
         return list;
     }
 
     private static <T> T init(Class<T> factoryType) {
-        return SpringFactoriesLoader.loadFactories(factoryType,
-                Thread.currentThread().getContextClassLoader()).get(0);
+        return SpringFactoriesLoader.loadFactories(
+                        factoryType, Thread.currentThread().getContextClassLoader())
+                .get(0);
     }
-
 }

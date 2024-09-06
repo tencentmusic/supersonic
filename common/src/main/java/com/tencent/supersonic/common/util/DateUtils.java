@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.enums.DatePeriodEnum;
 import lombok.extern.slf4j.Slf4j;
+
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
@@ -80,7 +81,8 @@ public class DateUtils {
         return getBeforeDate(currentDate, intervalDay, datePeriodEnum);
     }
 
-    public static String getBeforeDate(String date, int intervalDay, DatePeriodEnum datePeriodEnum) {
+    public static String getBeforeDate(
+            String date, int intervalDay, DatePeriodEnum datePeriodEnum) {
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(DATE_FORMAT);
         LocalDate currentDate = LocalDate.parse(date, dateTimeFormatter);
         LocalDate result = null;
@@ -91,7 +93,9 @@ public class DateUtils {
             case WEEK:
                 result = currentDate.minusWeeks(intervalDay);
                 if (intervalDay == 0) {
-                    result = result.with(TemporalAdjusters.previousOrSame(java.time.DayOfWeek.MONDAY));
+                    result =
+                            result.with(
+                                    TemporalAdjusters.previousOrSame(java.time.DayOfWeek.MONDAY));
                 }
                 break;
             case MONTH:
@@ -103,13 +107,14 @@ public class DateUtils {
             case QUARTER:
                 result = currentDate.minusMonths(intervalDay * 3L);
                 if (intervalDay == 0) {
-                    TemporalAdjuster firstDayOfQuarter = temporal -> {
-                        LocalDate tempDate = LocalDate.from(temporal);
-                        int month = tempDate.get(ChronoField.MONTH_OF_YEAR);
-                        int firstMonthOfQuarter = ((month - 1) / 3) * 3 + 1;
-                        return tempDate.with(ChronoField.MONTH_OF_YEAR, firstMonthOfQuarter)
-                                .with(TemporalAdjusters.firstDayOfMonth());
-                    };
+                    TemporalAdjuster firstDayOfQuarter =
+                            temporal -> {
+                                LocalDate tempDate = LocalDate.from(temporal);
+                                int month = tempDate.get(ChronoField.MONTH_OF_YEAR);
+                                int firstMonthOfQuarter = ((month - 1) / 3) * 3 + 1;
+                                return tempDate.with(ChronoField.MONTH_OF_YEAR, firstMonthOfQuarter)
+                                        .with(TemporalAdjusters.firstDayOfMonth());
+                            };
                     result = result.with(firstDayOfQuarter);
                 }
                 break;

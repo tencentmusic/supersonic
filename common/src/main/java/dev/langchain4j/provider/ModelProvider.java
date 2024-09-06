@@ -25,10 +25,11 @@ public class ModelProvider {
     }
 
     public static ChatLanguageModel getChatModel(ChatModelConfig modelConfig) {
-        if (modelConfig == null || StringUtils.isBlank(modelConfig.getProvider())
+        if (modelConfig == null
+                || StringUtils.isBlank(modelConfig.getProvider())
                 || StringUtils.isBlank(modelConfig.getBaseUrl())) {
-            ChatModelParameterConfig parameterConfig = ContextUtils.getBean(
-                    ChatModelParameterConfig.class);
+            ChatModelParameterConfig parameterConfig =
+                    ContextUtils.getBean(ChatModelParameterConfig.class);
             modelConfig = parameterConfig.convert();
         }
         ModelFactory modelFactory = factories.get(modelConfig.getProvider().toUpperCase());
@@ -36,7 +37,8 @@ public class ModelProvider {
             return modelFactory.createChatModel(modelConfig);
         }
 
-        throw new RuntimeException("Unsupported ChatLanguageModel provider: " + modelConfig.getProvider());
+        throw new RuntimeException(
+                "Unsupported ChatLanguageModel provider: " + modelConfig.getProvider());
     }
 
     public static EmbeddingModel getEmbeddingModel() {
@@ -45,8 +47,8 @@ public class ModelProvider {
 
     public static EmbeddingModel getEmbeddingModel(EmbeddingModelConfig embeddingModel) {
         if (embeddingModel == null || StringUtils.isBlank(embeddingModel.getProvider())) {
-            EmbeddingModelParameterConfig parameterConfig = ContextUtils.getBean(
-                    EmbeddingModelParameterConfig.class);
+            EmbeddingModelParameterConfig parameterConfig =
+                    ContextUtils.getBean(EmbeddingModelParameterConfig.class);
             embeddingModel = parameterConfig.convert();
         }
         ModelFactory modelFactory = factories.get(embeddingModel.getProvider().toUpperCase());
@@ -54,6 +56,7 @@ public class ModelProvider {
             return modelFactory.createEmbeddingModel(embeddingModel);
         }
 
-        throw new RuntimeException("Unsupported EmbeddingModel provider: " + embeddingModel.getProvider());
+        throw new RuntimeException(
+                "Unsupported EmbeddingModel provider: " + embeddingModel.getProvider());
     }
 }

@@ -23,5 +23,4 @@ public interface TagObjectService {
     List<TagObjectResp> getTagObjects(TagObjectFilter filter, User user);
 
     Map<Long, TagObjectResp> getAllTagObjectMap();
-
 }

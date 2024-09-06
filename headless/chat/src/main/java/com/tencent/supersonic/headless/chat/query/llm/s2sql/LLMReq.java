@@ -29,7 +29,6 @@ public class LLMReq {
     public static class ElementValue {
         private String fieldName;
         private String fieldValue;
-
     }
 
     @Data
@@ -44,10 +43,16 @@ public class LLMReq {
         public List<String> getFieldNameList() {
             List<String> fieldNameList = new ArrayList<>();
             if (CollectionUtils.isNotEmpty(metrics)) {
-                fieldNameList.addAll(metrics.stream().map(metric -> metric.getName()).collect(Collectors.toList()));
+                fieldNameList.addAll(
+                        metrics.stream()
+                                .map(metric -> metric.getName())
+                                .collect(Collectors.toList()));
             }
             if (CollectionUtils.isNotEmpty(dimensions)) {
-                fieldNameList.addAll(dimensions.stream().map(metric -> metric.getName()).collect(Collectors.toList()));
+                fieldNameList.addAll(
+                        dimensions.stream()
+                                .map(metric -> metric.getName())
+                                .collect(Collectors.toList()));
             }
             return fieldNameList;
         }
@@ -72,6 +77,5 @@ public class LLMReq {
         public String getName() {
             return name;
         }
-
     }
 }

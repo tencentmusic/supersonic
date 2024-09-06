@@ -6,7 +6,8 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public abstract class BaseEmbeddingStoreFactory implements EmbeddingStoreFactory {
-    protected final Map<String, EmbeddingStore<TextSegment>> collectionNameToStore = new ConcurrentHashMap<>();
+    protected final Map<String, EmbeddingStore<TextSegment>> collectionNameToStore =
+            new ConcurrentHashMap<>();
 
     public EmbeddingStore<TextSegment> create(String collectionName) {
         return collectionNameToStore.computeIfAbsent(collectionName, this::createEmbeddingStore);

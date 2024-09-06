@@ -1,6 +1,5 @@
 package com.tencent.supersonic.headless.chat.query.rule.detail;
 
-
 import org.springframework.stereotype.Component;
 
 import static com.tencent.supersonic.headless.api.pojo.SchemaElementType.DIMENSION;
@@ -26,5 +25,4 @@ public class DetailDimensionQuery extends DetailSemanticQuery {
     public String getQueryMode() {
         return QUERY_MODE;
     }
-
 }

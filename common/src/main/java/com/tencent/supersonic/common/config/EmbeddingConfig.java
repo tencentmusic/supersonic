@@ -32,5 +32,4 @@ public class EmbeddingConfig {
     public String getMemoryCollectionName(Integer agentId) {
         return memoryCollectionPrefix + agentId;
     }
-
 }

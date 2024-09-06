@@ -46,11 +46,7 @@ import static com.tencent.supersonic.common.pojo.Constants.MONTH;
 import static com.tencent.supersonic.common.pojo.Constants.UNDERLINE;
 import static com.tencent.supersonic.common.pojo.Constants.WEEK;
 
-;
-
-/**
- * tools functions to analyze queryStructReq
- */
+/** tools functions to analyze queryStructReq */
 @Component
 @Slf4j
 public class SqlGenerateUtils {
@@ -61,8 +57,10 @@ public class SqlGenerateUtils {
 
     private final ExecutorConfig executorConfig;
 
-    public SqlGenerateUtils(SqlFilterUtils sqlFilterUtils,
-                            DateModeUtils dateModeUtils, ExecutorConfig executorConfig) {
+    public SqlGenerateUtils(
+            SqlFilterUtils sqlFilterUtils,
+            DateModeUtils dateModeUtils,
+            ExecutorConfig executorConfig) {
         this.sqlFilterUtils = sqlFilterUtils;
         this.dateModeUtils = dateModeUtils;
         this.executorConfig = executorConfig;
@@ -100,16 +98,22 @@ public class SqlGenerateUtils {
     }
 
     public String getSelect(QueryParam queryParam) {
-        String aggStr = queryParam.getAggregators().stream().map(this::getSelectField)
-                .collect(Collectors.joining(","));
-        return CollectionUtils.isEmpty(queryParam.getGroups()) ? aggStr
+        String aggStr =
+                queryParam.getAggregators().stream()
+                        .map(this::getSelectField)
+                        .collect(Collectors.joining(","));
+        return CollectionUtils.isEmpty(queryParam.getGroups())
+                ? aggStr
                 : String.join(",", queryParam.getGroups()) + "," + aggStr;
     }
 
     public String getSelect(QueryParam queryParam, Map<String, String> deriveMetrics) {
-        String aggStr = queryParam.getAggregators().stream().map(a -> getSelectField(a, deriveMetrics))
-                .collect(Collectors.joining(","));
-        return CollectionUtils.isEmpty(queryParam.getGroups()) ? aggStr
+        String aggStr =
+                queryParam.getAggregators().stream()
+                        .map(a -> getSelectField(a, deriveMetrics))
+                        .collect(Collectors.joining(","));
+        return CollectionUtils.isEmpty(queryParam.getGroups())
+                ? aggStr
                 : String.join(",", queryParam.getGroups()) + "," + aggStr;
     }
 
@@ -120,9 +124,20 @@ public class SqlGenerateUtils {
         if (CollectionUtils.isEmpty(agg.getArgs())) {
             return agg.getFunc() + "( " + agg.getColumn() + " ) AS " + agg.getColumn() + " ";
         }
-        return agg.getFunc() + "( " + agg.getArgs().stream().map(arg ->
-                arg.equals(agg.getColumn()) ? arg : (StringUtils.isNumeric(arg) ? arg : ("'" + arg + "'"))
-        ).collect(Collectors.joining(",")) + " ) AS " + agg.getColumn() + " ";
+        return agg.getFunc()
+                + "( "
+                + agg.getArgs().stream()
+                        .map(
+                                arg ->
+                                        arg.equals(agg.getColumn())
+                                                ? arg
+                                                : (StringUtils.isNumeric(arg)
+                                                        ? arg
+                                                        : ("'" + arg + "'")))
+                        .collect(Collectors.joining(","))
+                + " ) AS "
+                + agg.getColumn()
+                + " ";
     }
 
     public String getSelectField(final Aggregator agg, Map<String, String> deriveMetrics) {
@@ -143,37 +158,51 @@ public class SqlGenerateUtils {
         if (CollectionUtils.isEmpty(queryParam.getOrders())) {
             return "";
         }
-        return "order by " + queryParam.getOrders().stream()
-                .map(order -> " " + order.getColumn() + " " + order.getDirection() + " ")
-                .collect(Collectors.joining(","));
+        return "order by "
+                + queryParam.getOrders().stream()
+                        .map(order -> " " + order.getColumn() + " " + order.getDirection() + " ")
+                        .collect(Collectors.joining(","));
     }
 
     public String getOrderBy(QueryParam queryParam, Map<String, String> deriveMetrics) {
         if (CollectionUtils.isEmpty(queryParam.getOrders())) {
             return "";
         }
-        if (!queryParam.getOrders().stream().anyMatch(o -> deriveMetrics.containsKey(o.getColumn()))) {
+        if (!queryParam.getOrders().stream()
+                .anyMatch(o -> deriveMetrics.containsKey(o.getColumn()))) {
             return getOrderBy(queryParam);
         }
-        return "order by " + queryParam.getOrders().stream()
-                .map(order -> " " + (deriveMetrics.containsKey(order.getColumn()) ? deriveMetrics.get(order.getColumn())
-                        : order.getColumn()) + " " + order.getDirection() + " ")
-                .collect(Collectors.joining(","));
+        return "order by "
+                + queryParam.getOrders().stream()
+                        .map(
+                                order ->
+                                        " "
+                                                + (deriveMetrics.containsKey(order.getColumn())
+                                                        ? deriveMetrics.get(order.getColumn())
+                                                        : order.getColumn())
+                                                + " "
+                                                + order.getDirection()
+                                                + " ")
+                        .collect(Collectors.joining(","));
     }
 
     public String generateWhere(QueryParam queryParam, ItemDateResp itemDateResp) {
-        String whereClauseFromFilter = sqlFilterUtils.getWhereClause(queryParam.getDimensionFilters());
+        String whereClauseFromFilter =
+                sqlFilterUtils.getWhereClause(queryParam.getDimensionFilters());
         String whereFromDate = getDateWhereClause(queryParam.getDateInfo(), itemDateResp);
         return mergeDateWhereClause(queryParam, whereClauseFromFilter, whereFromDate);
     }
 
-    private String mergeDateWhereClause(QueryParam queryParam, String whereClauseFromFilter,
-                                        String whereFromDate) {
-        if (StringUtils.isNotEmpty(whereFromDate) && StringUtils.isNotEmpty(whereClauseFromFilter)) {
+    private String mergeDateWhereClause(
+            QueryParam queryParam, String whereClauseFromFilter, String whereFromDate) {
+        if (StringUtils.isNotEmpty(whereFromDate)
+                && StringUtils.isNotEmpty(whereClauseFromFilter)) {
             return String.format("%s AND (%s)", whereFromDate, whereClauseFromFilter);
-        } else if (StringUtils.isEmpty(whereFromDate) && StringUtils.isNotEmpty(whereClauseFromFilter)) {
+        } else if (StringUtils.isEmpty(whereFromDate)
+                && StringUtils.isNotEmpty(whereClauseFromFilter)) {
             return whereClauseFromFilter;
-        } else if (StringUtils.isNotEmpty(whereFromDate) && StringUtils.isEmpty(whereClauseFromFilter)) {
+        } else if (StringUtils.isNotEmpty(whereFromDate)
+                && StringUtils.isEmpty(whereClauseFromFilter)) {
             return whereFromDate;
         } else if (Objects.isNull(whereFromDate) && StringUtils.isEmpty(whereClauseFromFilter)) {
             log.debug("the current date information is empty, enter the date initialization logic");
@@ -185,7 +214,7 @@ public class SqlGenerateUtils {
     public String getDateWhereClause(DateConf dateInfo, ItemDateResp dateDate) {
         if (Objects.isNull(dateDate)
                 || StringUtils.isEmpty(dateDate.getStartDate())
-                && StringUtils.isEmpty(dateDate.getEndDate())) {
+                        && StringUtils.isEmpty(dateDate.getEndDate())) {
             if (dateInfo.getDateMode().equals(DateConf.DateMode.LIST)) {
                 return dateModeUtils.listDateStr(dateInfo);
             }
@@ -202,7 +231,8 @@ public class SqlGenerateUtils {
         return dateModeUtils.getDateWhereStr(dateInfo, dateDate);
     }
 
-    public Triple<String, String, String> getBeginEndTime(QueryParam queryParam, ItemDateResp dataDate) {
+    public Triple<String, String, String> getBeginEndTime(
+            QueryParam queryParam, ItemDateResp dataDate) {
         if (Objects.isNull(queryParam.getDateInfo())) {
             return Triple.of("", "", "");
         }
@@ -216,27 +246,38 @@ public class SqlGenerateUtils {
             case BETWEEN:
                 return Triple.of(dateInfo, dateConf.getStartDate(), dateConf.getEndDate());
             case LIST:
-                return Triple.of(dateInfo, Collections.min(dateConf.getDateList()),
+                return Triple.of(
+                        dateInfo,
+                        Collections.min(dateConf.getDateList()),
                         Collections.max(dateConf.getDateList()));
             case RECENT:
                 LocalDate dateMax = LocalDate.now().minusDays(1);
                 LocalDate dateMin = dateMax.minusDays(dateConf.getUnit() - 1);
                 if (Objects.isNull(dataDate)) {
-                    return Triple.of(dateInfo, dateMin.format(DateTimeFormatter.ofPattern(DAY_FORMAT)),
+                    return Triple.of(
+                            dateInfo,
+                            dateMin.format(DateTimeFormatter.ofPattern(DAY_FORMAT)),
                             dateMax.format(DateTimeFormatter.ofPattern(DAY_FORMAT)));
                 }
                 switch (dateConf.getPeriod()) {
                     case DAY:
-                        ImmutablePair<String, String> dayInfo = dateModeUtils.recentDay(dataDate, dateConf);
+                        ImmutablePair<String, String> dayInfo =
+                                dateModeUtils.recentDay(dataDate, dateConf);
                         return Triple.of(dateInfo, dayInfo.left, dayInfo.right);
                     case WEEK:
-                        ImmutablePair<String, String> weekInfo = dateModeUtils.recentWeek(dataDate, dateConf);
+                        ImmutablePair<String, String> weekInfo =
+                                dateModeUtils.recentWeek(dataDate, dateConf);
                         return Triple.of(dateInfo, weekInfo.left, weekInfo.right);
                     case MONTH:
-                        List<ImmutablePair<String, String>> rets = dateModeUtils.recentMonth(dataDate, dateConf);
-                        Optional<String> minBegins = rets.stream().map(i -> i.left).sorted().findFirst();
-                        Optional<String> maxBegins = rets.stream().map(i -> i.right).sorted(Comparator.reverseOrder())
-                                .findFirst();
+                        List<ImmutablePair<String, String>> rets =
+                                dateModeUtils.recentMonth(dataDate, dateConf);
+                        Optional<String> minBegins =
+                                rets.stream().map(i -> i.left).sorted().findFirst();
+                        Optional<String> maxBegins =
+                                rets.stream()
+                                        .map(i -> i.right)
+                                        .sorted(Comparator.reverseOrder())
+                                        .findFirst();
                         if (minBegins.isPresent() && maxBegins.isPresent()) {
                             return Triple.of(dateInfo, minBegins.get(), maxBegins.get());
                         }
@@ -247,19 +288,19 @@ public class SqlGenerateUtils {
                 break;
             default:
                 break;
-
         }
         return Triple.of("", "", "");
     }
 
     public boolean isSupportWith(EngineType engineTypeEnum, String version) {
-        if (engineTypeEnum.equals(EngineType.MYSQL) && Objects.nonNull(version) && version.startsWith(
-                executorConfig.getMysqlLowVersion())) {
+        if (engineTypeEnum.equals(EngineType.MYSQL)
+                && Objects.nonNull(version)
+                && version.startsWith(executorConfig.getMysqlLowVersion())) {
             return false;
         }
-        if (engineTypeEnum.equals(EngineType.CLICKHOUSE) && Objects.nonNull(version)
-                && StringUtil.compareVersion(version,
-                executorConfig.getCkLowVersion()) < 0) {
+        if (engineTypeEnum.equals(EngineType.CLICKHOUSE)
+                && Objects.nonNull(version)
+                && StringUtil.compareVersion(version, executorConfig.getCkLowVersion()) < 0) {
             return false;
         }
         return true;
@@ -269,30 +310,44 @@ public class SqlGenerateUtils {
         return modelBizName + UNDERLINE + executorConfig.getInternalMetricNameSuffix();
     }
 
-    public String generateDerivedMetric(final List<MetricSchemaResp> metricResps, final Set<String> allFields,
-                                        final Map<String, Measure> allMeasures,
-                                        final List<DimSchemaResp> dimensionResps,
-                                        final String expression, final MetricDefineType metricDefineType,
-                                        AggOption aggOption,
-                                        Set<String> visitedMetric,
-                                        Set<String> measures,
-                                        Set<String> dimensions) {
+    public String generateDerivedMetric(
+            final List<MetricSchemaResp> metricResps,
+            final Set<String> allFields,
+            final Map<String, Measure> allMeasures,
+            final List<DimSchemaResp> dimensionResps,
+            final String expression,
+            final MetricDefineType metricDefineType,
+            AggOption aggOption,
+            Set<String> visitedMetric,
+            Set<String> measures,
+            Set<String> dimensions) {
         Set<String> fields = SqlSelectHelper.getColumnFromExpr(expression);
         if (!CollectionUtils.isEmpty(fields)) {
             Map<String, String> replace = new HashMap<>();
             for (String field : fields) {
                 switch (metricDefineType) {
                     case METRIC:
-                        Optional<MetricSchemaResp> metricItem = metricResps.stream()
-                                .filter(m -> m.getBizName().equalsIgnoreCase(field)).findFirst();
+                        Optional<MetricSchemaResp> metricItem =
+                                metricResps.stream()
+                                        .filter(m -> m.getBizName().equalsIgnoreCase(field))
+                                        .findFirst();
                         if (metricItem.isPresent()) {
                             if (visitedMetric.contains(field)) {
                                 break;
                             }
-                            replace.put(field,
-                                    generateDerivedMetric(metricResps, allFields, allMeasures, dimensionResps,
-                                            getExpr(metricItem.get()), metricItem.get().getMetricDefineType(),
-                                            aggOption, visitedMetric, measures, dimensions));
+                            replace.put(
+                                    field,
+                                    generateDerivedMetric(
+                                            metricResps,
+                                            allFields,
+                                            allMeasures,
+                                            dimensionResps,
+                                            getExpr(metricItem.get()),
+                                            metricItem.get().getMetricDefineType(),
+                                            aggOption,
+                                            visitedMetric,
+                                            measures,
+                                            dimensions));
                             visitedMetric.add(field);
                         }
                         break;
@@ -304,8 +359,10 @@ public class SqlGenerateUtils {
                         break;
                     case FIELD:
                         if (allFields.contains(field)) {
-                            Optional<DimSchemaResp> dimensionItem = dimensionResps.stream()
-                                    .filter(d -> d.getBizName().equals(field)).findFirst();
+                            Optional<DimSchemaResp> dimensionItem =
+                                    dimensionResps.stream()
+                                            .filter(d -> d.getBizName().equals(field))
+                                            .findFirst();
                             if (dimensionItem.isPresent()) {
                                 dimensions.add(field);
                             } else {
@@ -315,7 +372,6 @@ public class SqlGenerateUtils {
                         break;
                     default:
                         break;
-
                 }
             }
             if (!CollectionUtils.isEmpty(replace)) {
@@ -329,12 +385,17 @@ public class SqlGenerateUtils {
 
     public String getExpr(Measure measure, AggOption aggOption) {
         if (AggOperatorEnum.COUNT_DISTINCT.getOperator().equalsIgnoreCase(measure.getAgg())) {
-            return AggOption.NATIVE.equals(aggOption) ? measure.getBizName()
-                    : AggOperatorEnum.COUNT.getOperator() + " ( " + AggOperatorEnum.DISTINCT + " "
-                    + measure.getBizName()
-                    + " ) ";
+            return AggOption.NATIVE.equals(aggOption)
+                    ? measure.getBizName()
+                    : AggOperatorEnum.COUNT.getOperator()
+                            + " ( "
+                            + AggOperatorEnum.DISTINCT
+                            + " "
+                            + measure.getBizName()
+                            + " ) ";
         }
-        return AggOption.NATIVE.equals(aggOption) ? measure.getBizName()
+        return AggOption.NATIVE.equals(aggOption)
+                ? measure.getBizName()
                 : measure.getAgg() + " ( " + measure.getBizName() + " ) ";
     }
 

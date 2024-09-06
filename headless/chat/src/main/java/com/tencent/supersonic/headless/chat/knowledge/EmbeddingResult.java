@@ -1,9 +1,10 @@
 package com.tencent.supersonic.headless.chat.knowledge;
 
 import com.google.common.base.Objects;
-import java.util.Map;
 import lombok.Data;
 import lombok.ToString;
+
+import java.util.Map;
 
 @Data
 @ToString

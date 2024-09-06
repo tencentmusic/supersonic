@@ -18,5 +18,4 @@ public class PageBaseReq {
     public Integer getLimitSize() {
         return this.pageSize;
     }
-
 }

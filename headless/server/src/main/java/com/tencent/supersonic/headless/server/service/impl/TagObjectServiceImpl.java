@@ -34,8 +34,10 @@ public class TagObjectServiceImpl implements TagObjectService {
     private final ModelService modelService;
     private final TagMetaService tagMetaService;
 
-    public TagObjectServiceImpl(TagObjectRepository tagObjectRepository, ModelService modelService,
-                                @Lazy TagMetaService tagMetaService) {
+    public TagObjectServiceImpl(
+            TagObjectRepository tagObjectRepository,
+            ModelService modelService,
+            @Lazy TagMetaService tagMetaService) {
         this.tagObjectRepository = tagObjectRepository;
         this.modelService = modelService;
         this.tagMetaService = tagMetaService;
@@ -64,12 +66,18 @@ public class TagObjectServiceImpl implements TagObjectService {
         if (CollectionUtils.isEmpty(tagObjectRespList)) {
             return;
         }
-        tagObjectRespList = tagObjectRespList.stream()
-                .filter(tagObjectResp -> StatusEnum.ONLINE.getCode().equals(tagObjectResp.getStatus()))
-                .collect(Collectors.toList());
+        tagObjectRespList =
+                tagObjectRespList.stream()
+                        .filter(
+                                tagObjectResp ->
+                                        StatusEnum.ONLINE
+                                                .getCode()
+                                                .equals(tagObjectResp.getStatus()))
+                        .collect(Collectors.toList());
         for (TagObjectResp tagObject : tagObjectRespList) {
             if (tagObject.getBizName().equalsIgnoreCase(tagObjectReq.getBizName())) {
-                throw new Exception(String.format("the bizName %s is exist", tagObjectReq.getBizName()));
+                throw new Exception(
+                        String.format("the bizName %s is exist", tagObjectReq.getBizName()));
             }
             if (tagObject.getName().equalsIgnoreCase(tagObjectReq.getName())) {
                 throw new Exception(String.format("the name %s is exist", tagObjectReq.getName()));
@@ -115,11 +123,14 @@ public class TagObjectServiceImpl implements TagObjectService {
     }
 
     private void checkTagObjectStatus(TagObjectDO tagObjectDO, User user) throws Exception {
-        List<ModelResp> allModelByDomainIds = modelService.getAllModelByDomainIds(
-                Arrays.asList(tagObjectDO.getDomainId()));
+        List<ModelResp> allModelByDomainIds =
+                modelService.getAllModelByDomainIds(Arrays.asList(tagObjectDO.getDomainId()));
         if (!CollectionUtils.isEmpty(allModelByDomainIds)) {
-            List<Long> modelIds = allModelByDomainIds.stream().map(ModelResp::getId).collect(Collectors.toList());
-            throw new Exception("delete operation is not supported at the moment. related modelIds:" + modelIds);
+            List<Long> modelIds =
+                    allModelByDomainIds.stream().map(ModelResp::getId).collect(Collectors.toList());
+            throw new Exception(
+                    "delete operation is not supported at the moment. related modelIds:"
+                            + modelIds);
         }
         TagFilterPageReq tagMarketPageReq = new TagFilterPageReq();
         tagMarketPageReq.setTagObjectId(tagObjectDO.getId());
@@ -127,18 +138,21 @@ public class TagObjectServiceImpl implements TagObjectService {
         if (Objects.nonNull(respPageInfo)) {
             List<TagResp> tagRespList = respPageInfo.getList();
             if (!CollectionUtils.isEmpty(tagRespList)) {
-                List<Long> tagIds = tagRespList.stream().map(TagResp::getId).collect(Collectors.toList());
-                throw new Exception("delete operation is not supported at the moment. related tagIds:" + tagIds);
+                List<Long> tagIds =
+                        tagRespList.stream().map(TagResp::getId).collect(Collectors.toList());
+                throw new Exception(
+                        "delete operation is not supported at the moment. related tagIds:"
+                                + tagIds);
             }
         }
-
     }
 
     private void checkDeletePermission(TagObjectDO tagObjectDO, User user) throws Exception {
         if (user.getName().equalsIgnoreCase(tagObjectDO.getCreatedBy()) || user.isSuperAdmin()) {
             return;
         }
-        throw new Exception("delete operation is not supported at the moment. Please contact the admin.");
+        throw new Exception(
+                "delete operation is not supported at the moment. Please contact the admin.");
     }
 
     @Override
@@ -157,9 +171,11 @@ public class TagObjectServiceImpl implements TagObjectService {
     public Map<Long, TagObjectResp> getAllTagObjectMap() {
         TagObjectFilter filter = new TagObjectFilter();
         List<TagObjectDO> tagObjectDOList = tagObjectRepository.query(filter);
-        List<TagObjectResp> tagObjectRespList = TagObjectConverter.convert2RespList(tagObjectDOList);
+        List<TagObjectResp> tagObjectRespList =
+                TagObjectConverter.convert2RespList(tagObjectDOList);
         Map<Long, TagObjectResp> map =
-                tagObjectRespList.stream().collect(Collectors.toMap(TagObjectResp::getId, a -> a, (k1, k2) -> k1));
+                tagObjectRespList.stream()
+                        .collect(Collectors.toMap(TagObjectResp::getId, a -> a, (k1, k2) -> k1));
         return map;
     }
 }

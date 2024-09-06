@@ -1,11 +1,12 @@
 package com.tencent.supersonic.headless.api.pojo.request;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
 import com.tencent.supersonic.headless.api.pojo.SqlVariable;
 import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
+
 import java.util.List;
 
 @Data
@@ -28,5 +29,4 @@ public class SqlExecuteReq {
         }
         return String.format(LIMIT_WRAPPER, sql, limit);
     }
-
 }

@@ -1,12 +1,11 @@
 package com.tencent.supersonic.headless.chat.knowledge;
 
-import java.util.Objects;
 import lombok.Data;
 import lombok.ToString;
 
-/***
- * word nature
- */
+import java.util.Objects;
+
+/** * word nature */
 @Data
 @ToString
 public class DictWord {
@@ -24,7 +23,8 @@ public class DictWord {
             return false;
         }
         DictWord that = (DictWord) o;
-        return Objects.equals(word, that.word) && Objects.equals(natureWithFrequency, that.natureWithFrequency);
+        return Objects.equals(word, that.word)
+                && Objects.equals(natureWithFrequency, that.natureWithFrequency);
     }
 
     @Override

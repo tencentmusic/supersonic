@@ -1,13 +1,8 @@
 package com.hankcs.hanlp.seg.common;
 
 import com.hankcs.hanlp.corpus.tag.Nature;
-//import com.hankcs.hanlp.dictionary.CoreDictionary;
-//import com.hankcs.hanlp.dictionary.CustomDictionary;
-//import com.hankcs.hanlp.dictionary.DynamicCustomDictionary;
 import lombok.Data;
 import lombok.ToString;
-
-//import static com.hankcs.hanlp.HanLP.Config.CustomDictionaryPath;
 
 @Data
 @ToString
@@ -72,5 +67,4 @@ public class Term {
         }
         return super.equals(obj);
     }
-
 }

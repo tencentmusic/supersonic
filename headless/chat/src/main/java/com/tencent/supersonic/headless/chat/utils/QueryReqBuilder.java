@@ -47,25 +47,37 @@ public class QueryReqBuilder {
         List<Filter> dimensionFilters = getFilters(parseInfo.getDimensionFilters());
         queryStructReq.setDimensionFilters(dimensionFilters);
 
-        List<Filter> metricFilters = parseInfo.getMetricFilters().stream()
-                .map(chatFilter -> new Filter(chatFilter.getBizName(), chatFilter.getOperator(), chatFilter.getValue()))
-                .collect(Collectors.toList());
+        List<Filter> metricFilters =
+                parseInfo.getMetricFilters().stream()
+                        .map(
+                                chatFilter ->
+                                        new Filter(
+                                                chatFilter.getBizName(),
+                                                chatFilter.getOperator(),
+                                                chatFilter.getValue()))
+                        .collect(Collectors.toList());
         queryStructReq.setMetricFilters(metricFilters);
 
         addDateDimension(parseInfo);
 
         if (isDateFieldAlreadyPresent(parseInfo, getDateField(parseInfo.getDateInfo()))) {
-            parseInfo.getDimensions().removeIf(schemaElement -> schemaElement.containsPartitionTime());
+            parseInfo
+                    .getDimensions()
+                    .removeIf(schemaElement -> schemaElement.containsPartitionTime());
         }
-        queryStructReq.setGroups(parseInfo.getDimensions().stream().map(SchemaElement::getBizName)
-                .collect(Collectors.toList()));
+        queryStructReq.setGroups(
+                parseInfo.getDimensions().stream()
+                        .map(SchemaElement::getBizName)
+                        .collect(Collectors.toList()));
         queryStructReq.setLimit(parseInfo.getLimit());
         // only one metric is queried at once
         Set<SchemaElement> metrics = parseInfo.getMetrics();
         if (!CollectionUtils.isEmpty(metrics)) {
             SchemaElement metricElement = parseInfo.getMetrics().iterator().next();
-            Set<Order> order = getOrder(parseInfo.getOrders(), parseInfo.getAggType(), metricElement);
-            queryStructReq.setAggregators(getAggregatorByMetric(parseInfo.getAggType(), metricElement));
+            Set<Order> order =
+                    getOrder(parseInfo.getOrders(), parseInfo.getAggType(), metricElement);
+            queryStructReq.setAggregators(
+                    getAggregatorByMetric(parseInfo.getAggType(), metricElement));
             queryStructReq.setOrders(new ArrayList<>(order));
         }
 
@@ -75,15 +87,22 @@ public class QueryReqBuilder {
     }
 
     private static List<Filter> getFilters(Set<QueryFilter> queryFilters) {
-        List<Filter> dimensionFilters = queryFilters.stream()
-                .filter(chatFilter -> StringUtils.isNotEmpty(chatFilter.getBizName()))
-                .map(chatFilter -> new Filter(chatFilter.getBizName(), chatFilter.getOperator(), chatFilter.getValue()))
-                .collect(Collectors.toList());
+        List<Filter> dimensionFilters =
+                queryFilters.stream()
+                        .filter(chatFilter -> StringUtils.isNotEmpty(chatFilter.getBizName()))
+                        .map(
+                                chatFilter ->
+                                        new Filter(
+                                                chatFilter.getBizName(),
+                                                chatFilter.getOperator(),
+                                                chatFilter.getValue()))
+                        .collect(Collectors.toList());
         return dimensionFilters;
     }
 
     private static void deletionDuplicated(QueryStructReq queryStructReq) {
-        if (!CollectionUtils.isEmpty(queryStructReq.getGroups()) && queryStructReq.getGroups().size() > 1) {
+        if (!CollectionUtils.isEmpty(queryStructReq.getGroups())
+                && queryStructReq.getGroups().size() > 1) {
             Set<String> groups = new HashSet<>();
             groups.addAll(queryStructReq.getGroups());
             queryStructReq.getGroups().clear();
@@ -167,17 +186,21 @@ public class QueryReqBuilder {
         return querySQLReq;
     }
 
-    private static List<Aggregator> getAggregatorByMetric(AggregateTypeEnum aggregateType, SchemaElement metric) {
+    private static List<Aggregator> getAggregatorByMetric(
+            AggregateTypeEnum aggregateType, SchemaElement metric) {
         if (metric == null) {
             return Collections.emptyList();
         }
 
         String agg = determineAggregator(aggregateType, metric);
-        return Collections.singletonList(new Aggregator(metric.getBizName(), AggOperatorEnum.of(agg)));
+        return Collections.singletonList(
+                new Aggregator(metric.getBizName(), AggOperatorEnum.of(agg)));
     }
 
-    private static String determineAggregator(AggregateTypeEnum aggregateType, SchemaElement metric) {
-        if (aggregateType == null || aggregateType.equals(AggregateTypeEnum.NONE)
+    private static String determineAggregator(
+            AggregateTypeEnum aggregateType, SchemaElement metric) {
+        if (aggregateType == null
+                || aggregateType.equals(AggregateTypeEnum.NONE)
                 || AggOperatorEnum.COUNT_DISTINCT.name().equalsIgnoreCase(metric.getDefaultAgg())) {
             return StringUtils.defaultIfBlank(metric.getDefaultAgg(), "");
         }
@@ -209,27 +232,32 @@ public class QueryReqBuilder {
     private static boolean shouldSkipAddingDateDimension(SemanticParseInfo parseInfo) {
         return parseInfo.getAggType() != null
                 && (parseInfo.getAggType().equals(AggregateTypeEnum.MAX)
-                || parseInfo.getAggType().equals(AggregateTypeEnum.MIN))
+                        || parseInfo.getAggType().equals(AggregateTypeEnum.MIN))
                 && !CollectionUtils.isEmpty(parseInfo.getDimensions());
     }
 
-    private static boolean isDateFieldAlreadyPresent(SemanticParseInfo parseInfo, String dateField) {
+    private static boolean isDateFieldAlreadyPresent(
+            SemanticParseInfo parseInfo, String dateField) {
         return parseInfo.getDimensions().stream()
                 .anyMatch(dimension -> dimension.getBizName().equalsIgnoreCase(dateField));
     }
 
     private static void addDimension(SemanticParseInfo parseInfo, SchemaElement dimension) {
-        List<String> timeDimensions = Arrays.asList(TimeDimensionEnum.DAY.getName(),
-                TimeDimensionEnum.WEEK.getName(), TimeDimensionEnum.MONTH.getName());
-        Set<SchemaElement> dimensions = parseInfo.getDimensions().stream()
-                .filter(d -> !timeDimensions.contains(d.getBizName().toLowerCase()))
-                .collect(Collectors.toSet());
+        List<String> timeDimensions =
+                Arrays.asList(
+                        TimeDimensionEnum.DAY.getName(),
+                        TimeDimensionEnum.WEEK.getName(),
+                        TimeDimensionEnum.MONTH.getName());
+        Set<SchemaElement> dimensions =
+                parseInfo.getDimensions().stream()
+                        .filter(d -> !timeDimensions.contains(d.getBizName().toLowerCase()))
+                        .collect(Collectors.toSet());
         dimensions.add(dimension);
         parseInfo.setDimensions(dimensions);
     }
 
-    public static Set<Order> getOrder(Set<Order> existingOrders,
-                                      AggregateTypeEnum aggregator, SchemaElement metric) {
+    public static Set<Order> getOrder(
+            Set<Order> existingOrders, AggregateTypeEnum aggregator, SchemaElement metric) {
         if (existingOrders != null && !existingOrders.isEmpty()) {
             return existingOrders;
         }
@@ -265,8 +293,8 @@ public class QueryReqBuilder {
         return dateField;
     }
 
-    public static QueryStructReq buildStructRatioReq(SemanticParseInfo parseInfo, SchemaElement metric,
-                                                     AggOperatorEnum aggOperatorEnum) {
+    public static QueryStructReq buildStructRatioReq(
+            SemanticParseInfo parseInfo, SchemaElement metric, AggOperatorEnum aggOperatorEnum) {
         QueryStructReq queryStructReq = buildStructReq(parseInfo);
         queryStructReq.setQueryType(QueryType.METRIC);
         queryStructReq.setOrders(new ArrayList<>());
@@ -276,5 +304,4 @@ public class QueryReqBuilder {
         queryStructReq.setAggregators(aggregators);
         return queryStructReq;
     }
-
 }

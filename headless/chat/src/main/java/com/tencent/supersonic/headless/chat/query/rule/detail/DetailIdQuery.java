@@ -20,5 +20,4 @@ public class DetailIdQuery extends DetailListQuery {
     public String getQueryMode() {
         return QUERY_MODE;
     }
-
 }

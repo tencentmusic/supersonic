@@ -44,6 +44,5 @@ public class AESEncryptionUtilTest {
         System.out.println("after AES/ECB encrypt：" + encryptStr);
         String decryptStr = AESEncryptionUtil.aesDecryptECB(encryptStr);
         System.out.println("after AES/ECB decrypt：" + decryptStr);
-
     }
 }

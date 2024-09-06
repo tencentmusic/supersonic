@@ -89,8 +89,10 @@ public class ModelResp extends SchemaItem {
             return fieldSet;
         }
         if (!CollectionUtils.isEmpty(modelDetail.getFields())) {
-            fieldSet.addAll(modelDetail.getFields().stream()
-                    .map(Field::getFieldName).collect(Collectors.toSet()));
+            fieldSet.addAll(
+                    modelDetail.getFields().stream()
+                            .map(Field::getFieldName)
+                            .collect(Collectors.toSet()));
         }
         return fieldSet;
     }

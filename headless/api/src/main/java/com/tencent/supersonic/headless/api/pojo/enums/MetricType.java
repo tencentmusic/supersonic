@@ -1,13 +1,12 @@
 package com.tencent.supersonic.headless.api.pojo.enums;
 
-
 import com.tencent.supersonic.headless.api.pojo.MeasureParam;
 import com.tencent.supersonic.headless.api.pojo.MetricDefineByMeasureParams;
+
 import java.util.List;
 import java.util.Objects;
 
 public enum MetricType {
-
     ATOMIC,
     DERIVED;
 
@@ -25,7 +24,8 @@ public enum MetricType {
         return Objects.nonNull(metricType) && metricType.equals(DERIVED);
     }
 
-    public static Boolean isDerived(MetricDefineType metricDefineType, MetricDefineByMeasureParams typeParams) {
+    public static Boolean isDerived(
+            MetricDefineType metricDefineType, MetricDefineByMeasureParams typeParams) {
         if (MetricDefineType.METRIC.equals(metricDefineType)) {
             return true;
         }
@@ -37,8 +37,8 @@ public enum MetricType {
             if (measures.size() > 1) {
                 return true;
             }
-            if (measures.size() == 1 && measures.get(0).getBizName()
-                    .equalsIgnoreCase(typeParams.getExpr())) {
+            if (measures.size() == 1
+                    && measures.get(0).getBizName().equalsIgnoreCase(typeParams.getExpr())) {
                 return false;
             }
         }

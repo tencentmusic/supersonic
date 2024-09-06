@@ -59,5 +59,4 @@ public class ModelDO {
     private String sourceType;
 
     private String ext;
-
 }

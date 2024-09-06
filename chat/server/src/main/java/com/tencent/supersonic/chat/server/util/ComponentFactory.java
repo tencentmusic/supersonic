@@ -21,39 +21,45 @@ public class ComponentFactory {
     private static List<PluginRecognizer> pluginRecognizers = new ArrayList<>();
 
     public static List<ParseResultProcessor> getParseProcessors() {
-        return CollectionUtils.isEmpty(parseProcessors) ? init(ParseResultProcessor.class,
-                parseProcessors) : parseProcessors;
+        return CollectionUtils.isEmpty(parseProcessors)
+                ? init(ParseResultProcessor.class, parseProcessors)
+                : parseProcessors;
     }
 
     public static List<ExecuteResultProcessor> getExecuteProcessors() {
         return CollectionUtils.isEmpty(executeProcessors)
-                ? init(ExecuteResultProcessor.class, executeProcessors) : executeProcessors;
+                ? init(ExecuteResultProcessor.class, executeProcessors)
+                : executeProcessors;
     }
 
     public static List<ChatQueryParser> getChatParsers() {
         return CollectionUtils.isEmpty(chatQueryParsers)
-                ? init(ChatQueryParser.class, chatQueryParsers) : chatQueryParsers;
+                ? init(ChatQueryParser.class, chatQueryParsers)
+                : chatQueryParsers;
     }
 
     public static List<ChatQueryExecutor> getChatExecutors() {
         return CollectionUtils.isEmpty(chatQueryExecutors)
-                ? init(ChatQueryExecutor.class, chatQueryExecutors) : chatQueryExecutors;
+                ? init(ChatQueryExecutor.class, chatQueryExecutors)
+                : chatQueryExecutors;
     }
 
     public static List<PluginRecognizer> getPluginRecognizers() {
         return CollectionUtils.isEmpty(pluginRecognizers)
-                ? init(PluginRecognizer.class, pluginRecognizers) : pluginRecognizers;
+                ? init(PluginRecognizer.class, pluginRecognizers)
+                : pluginRecognizers;
     }
 
     private static <T> List<T> init(Class<T> factoryType, List list) {
-        list.addAll(SpringFactoriesLoader.loadFactories(factoryType,
-                Thread.currentThread().getContextClassLoader()));
+        list.addAll(
+                SpringFactoriesLoader.loadFactories(
+                        factoryType, Thread.currentThread().getContextClassLoader()));
         return list;
     }
 
     private static <T> T init(Class<T> factoryType) {
-        return SpringFactoriesLoader.loadFactories(factoryType,
-                Thread.currentThread().getContextClassLoader()).get(0);
+        return SpringFactoriesLoader.loadFactories(
+                        factoryType, Thread.currentThread().getContextClassLoader())
+                .get(0);
     }
-
 }

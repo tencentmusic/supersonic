@@ -1,11 +1,10 @@
 package com.tencent.supersonic.headless.server.pojo.yaml;
 
-import com.tencent.supersonic.headless.api.pojo.enums.ModelSourceType;
 import com.tencent.supersonic.headless.api.pojo.Field;
+import com.tencent.supersonic.headless.api.pojo.enums.ModelSourceType;
 import lombok.Data;
 
 import java.util.List;
-
 
 @Data
 public class DataModelYamlTpl {
@@ -31,7 +30,4 @@ public class DataModelYamlTpl {
     private List<Field> fields;
 
     private ModelSourceType modelSourceTypeEnum;
-
-
-
 }

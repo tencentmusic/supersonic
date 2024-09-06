@@ -1,6 +1,5 @@
 package com.tencent.supersonic.headless.core.cache;
 
-
 public interface CacheManager {
 
     Boolean put(String key, Object value);
@@ -10,5 +9,4 @@ public interface CacheManager {
     String generateCacheKey(String prefix, String body);
 
     Boolean removeCache(String key);
-
 }

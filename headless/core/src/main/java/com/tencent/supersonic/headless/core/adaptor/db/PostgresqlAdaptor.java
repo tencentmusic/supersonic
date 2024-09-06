@@ -26,9 +26,11 @@ public class PostgresqlAdaptor extends BaseDbAdaptor {
     public String getDateFormat(String dateType, String dateFormat, String column) {
         if (dateFormat.equalsIgnoreCase(Constants.DAY_FORMAT_INT)) {
             if (TimeDimensionEnum.MONTH.name().equalsIgnoreCase(dateType)) {
-                return "formatDateTime(toDate(parseDateTimeBestEffort(toString(%s))),'%Y-%m')".replace("%s", column);
+                return "formatDateTime(toDate(parseDateTimeBestEffort(toString(%s))),'%Y-%m')"
+                        .replace("%s", column);
             } else if (TimeDimensionEnum.WEEK.name().equalsIgnoreCase(dateType)) {
-                return "toMonday(toDate(parseDateTimeBestEffort(toString(%s))))".replace("%s", column);
+                return "toMonday(toDate(parseDateTimeBestEffort(toString(%s))))"
+                        .replace("%s", column);
             } else {
                 return "toDate(parseDateTimeBestEffort(toString(%s)))".replace("%s", column);
             }
@@ -51,38 +53,45 @@ public class PostgresqlAdaptor extends BaseDbAdaptor {
         functionMap.put("DAY".toLowerCase(), "TO_CHAR");
         functionMap.put("YEAR".toLowerCase(), "TO_CHAR");
         Map<String, UnaryOperator> functionCall = new HashMap<>();
-        functionCall.put("MONTH".toLowerCase(), o -> {
-            if (Objects.nonNull(o) && o instanceof ExpressionList) {
-                ExpressionList expressionList = (ExpressionList) o;
-                expressionList.add(new StringValue("MM"));
-                return expressionList;
-            }
-            return o;
-        });
-        functionCall.put("DAY".toLowerCase(), o -> {
-            if (Objects.nonNull(o) && o instanceof ExpressionList) {
-                ExpressionList expressionList = (ExpressionList) o;
-                expressionList.add(new StringValue("dd"));
-                return expressionList;
-            }
-            return o;
-        });
-        functionCall.put("YEAR".toLowerCase(), o -> {
-            if (Objects.nonNull(o) && o instanceof ExpressionList) {
-                ExpressionList expressionList = (ExpressionList) o;
-                expressionList.add(new StringValue("YYYY"));
-                return expressionList;
-            }
-            return o;
-        });
+        functionCall.put(
+                "MONTH".toLowerCase(),
+                o -> {
+                    if (Objects.nonNull(o) && o instanceof ExpressionList) {
+                        ExpressionList expressionList = (ExpressionList) o;
+                        expressionList.add(new StringValue("MM"));
+                        return expressionList;
+                    }
+                    return o;
+                });
+        functionCall.put(
+                "DAY".toLowerCase(),
+                o -> {
+                    if (Objects.nonNull(o) && o instanceof ExpressionList) {
+                        ExpressionList expressionList = (ExpressionList) o;
+                        expressionList.add(new StringValue("dd"));
+                        return expressionList;
+                    }
+                    return o;
+                });
+        functionCall.put(
+                "YEAR".toLowerCase(),
+                o -> {
+                    if (Objects.nonNull(o) && o instanceof ExpressionList) {
+                        ExpressionList expressionList = (ExpressionList) o;
+                        expressionList.add(new StringValue("YYYY"));
+                        return expressionList;
+                    }
+                    return o;
+                });
         return SqlReplaceHelper.replaceFunction(sql, functionMap, functionCall);
     }
 
-    public List<String> getTables(ConnectInfo connectionInfo, String schemaName) throws SQLException {
+    public List<String> getTables(ConnectInfo connectionInfo, String schemaName)
+            throws SQLException {
         List<String> tablesAndViews = Lists.newArrayList();
         DatabaseMetaData metaData = getDatabaseMetaData(connectionInfo);
-        try (ResultSet resultSet = metaData.getTables(null, null, null,
-                new String[]{"TABLE", "VIEW"})) {
+        try (ResultSet resultSet =
+                metaData.getTables(null, null, null, new String[] {"TABLE", "VIEW"})) {
             while (resultSet.next()) {
                 String name = resultSet.getString("TABLE_NAME");
                 tablesAndViews.add(name);
@@ -93,7 +102,8 @@ public class PostgresqlAdaptor extends BaseDbAdaptor {
         return tablesAndViews;
     }
 
-    public List<DBColumn> getColumns(ConnectInfo connectInfo, String schemaName, String tableName) throws SQLException {
+    public List<DBColumn> getColumns(ConnectInfo connectInfo, String schemaName, String tableName)
+            throws SQLException {
         List<DBColumn> dbColumns = Lists.newArrayList();
         DatabaseMetaData metaData = getDatabaseMetaData(connectInfo);
         ResultSet columns = metaData.getColumns(null, null, tableName, null);
@@ -105,5 +115,4 @@ public class PostgresqlAdaptor extends BaseDbAdaptor {
         }
         return dbColumns;
     }
-
 }

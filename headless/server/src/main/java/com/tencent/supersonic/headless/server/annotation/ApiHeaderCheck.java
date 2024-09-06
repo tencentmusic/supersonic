@@ -7,6 +7,4 @@ import java.lang.annotation.Target;
 
 @Target({ElementType.PARAMETER, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface ApiHeaderCheck {
-
-}
+public @interface ApiHeaderCheck {}

@@ -10,5 +10,4 @@ public class DownloadMetricReq extends QueryMetricReq {
     public void setIsTransform(boolean isTransform) {
         this.isTransform = isTransform;
     }
-
 }

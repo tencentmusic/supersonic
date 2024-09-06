@@ -15,5 +15,4 @@ public class WebBase {
     public List<ParamOption> getParams() {
         return paramOptions;
     }
-
 }

@@ -29,8 +29,11 @@ public class MapperHelper {
     }
 
     public Integer getStepOffset(List<S2Term> termList, Integer index) {
-        List<Integer> offsetList = termList.stream().sorted(Comparator.comparing(S2Term::getOffset))
-                .map(term -> term.getOffset()).collect(Collectors.toList());
+        List<Integer> offsetList =
+                termList.stream()
+                        .sorted(Comparator.comparing(S2Term::getOffset))
+                        .map(term -> term.getOffset())
+                        .collect(Collectors.toList());
 
         for (int j = 0; j < termList.size() - 1; j++) {
             if (offsetList.get(j) <= index && offsetList.get(j + 1) > index) {
@@ -40,8 +43,9 @@ public class MapperHelper {
         return index;
     }
 
-    /***
-     * exist dimension values
+    /**
+     * * exist dimension values
+     *
      * @param natures
      * @return
      */
@@ -63,8 +67,9 @@ public class MapperHelper {
         return false;
     }
 
-    /***
-     * get similarity
+    /**
+     * * get similarity
+     *
      * @param detectSegment
      * @param matchName
      * @return
@@ -72,7 +77,8 @@ public class MapperHelper {
     public double getSimilarity(String detectSegment, String matchName) {
         String detectSegmentLower = detectSegment == null ? null : detectSegment.toLowerCase();
         String matchNameLower = matchName == null ? null : matchName.toLowerCase();
-        return 1 - (double) EditDistance.compute(detectSegmentLower, matchNameLower) / Math.max(matchName.length(),
-                detectSegment.length());
+        return 1
+                - (double) EditDistance.compute(detectSegmentLower, matchNameLower)
+                        / Math.max(matchName.length(), detectSegment.length());
     }
 }

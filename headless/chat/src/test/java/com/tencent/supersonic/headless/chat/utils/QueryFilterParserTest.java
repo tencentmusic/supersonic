@@ -7,7 +7,6 @@ import com.tencent.supersonic.headless.api.pojo.request.QueryFilters;
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 
-
 class QueryFilterParserTest {
 
     @Test
@@ -41,8 +40,9 @@ class QueryFilterParserTest {
 
         String parse = QueryFilterParser.parse(queryFilters);
 
-        Assert.assertEquals(parse, "age > 30 AND name LIKE 'John%' AND id IN (1, 2, 3, 4)"
-                + " AND status NOT_IN ('inactive', 'deleted')");
+        Assert.assertEquals(
+                parse,
+                "age > 30 AND name LIKE 'John%' AND id IN (1, 2, 3, 4)"
+                        + " AND status NOT_IN ('inactive', 'deleted')");
     }
-
 }

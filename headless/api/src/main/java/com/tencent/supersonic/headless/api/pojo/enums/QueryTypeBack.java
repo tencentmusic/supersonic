@@ -1,6 +1,5 @@
 package com.tencent.supersonic.headless.api.pojo.enums;
 
-
 public enum QueryTypeBack {
     NORMAL("NORMAL", 0),
 
@@ -30,5 +29,4 @@ public enum QueryTypeBack {
     public Integer getState() {
         return state;
     }
-
 }

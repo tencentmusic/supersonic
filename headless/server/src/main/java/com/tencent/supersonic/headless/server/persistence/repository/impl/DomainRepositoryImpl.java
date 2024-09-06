@@ -9,7 +9,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-
 @Component
 @Slf4j
 public class DomainRepositoryImpl implements DomainRepository {
@@ -44,5 +43,4 @@ public class DomainRepositoryImpl implements DomainRepository {
     public DomainDO getDomainById(Long id) {
         return domainDOMapper.selectById(id);
     }
-
 }

@@ -1,11 +1,10 @@
 package com.tencent.supersonic.headless.api.pojo.response;
 
-
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.common.pojo.RecordInfo;
-import com.tencent.supersonic.headless.api.pojo.enums.AppStatus;
 import com.tencent.supersonic.headless.api.pojo.AppConfig;
 import com.tencent.supersonic.headless.api.pojo.Item;
+import com.tencent.supersonic.headless.api.pojo.enums.AppStatus;
 import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
 
@@ -52,5 +51,4 @@ public class AppResp extends RecordInfo {
         }
         return itemSet;
     }
-
 }

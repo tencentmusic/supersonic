@@ -1,11 +1,10 @@
 package com.tencent.supersonic.headless.server.pojo.yaml;
 
-
 import com.tencent.supersonic.common.pojo.enums.DataTypeEnums;
-import java.util.List;
-import java.util.Map;
 import lombok.Data;
 
+import java.util.List;
+import java.util.Map;
 
 @Data
 public class DimensionYamlTpl {

@@ -4,7 +4,8 @@ import com.alibaba.ttl.TransmittableThreadLocal;
 
 public class S2ThreadContext {
 
-    private static final TransmittableThreadLocal<ThreadContext> context = new TransmittableThreadLocal<>();
+    private static final TransmittableThreadLocal<ThreadContext> context =
+            new TransmittableThreadLocal<>();
 
     public ThreadContext get() {
         return context.get();

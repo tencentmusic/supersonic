@@ -23,5 +23,4 @@ public class SchemaElementMatch {
     public boolean isFullMatched() {
         return 1.0 == similarity;
     }
-
 }

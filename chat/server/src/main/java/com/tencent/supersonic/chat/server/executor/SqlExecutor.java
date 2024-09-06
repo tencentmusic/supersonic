@@ -1,8 +1,11 @@
 package com.tencent.supersonic.chat.server.executor;
 
 import com.tencent.supersonic.chat.api.pojo.enums.MemoryStatus;
+import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.chat.server.persistence.dataobject.ChatMemoryDO;
+import com.tencent.supersonic.chat.server.pojo.ChatContext;
 import com.tencent.supersonic.chat.server.pojo.ExecuteContext;
+import com.tencent.supersonic.chat.server.service.ChatContextService;
 import com.tencent.supersonic.chat.server.service.MemoryService;
 import com.tencent.supersonic.chat.server.util.ResultFormatter;
 import com.tencent.supersonic.common.pojo.Text2SQLExemplar;
@@ -10,13 +13,10 @@ import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.api.pojo.request.QuerySqlReq;
-import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.headless.api.pojo.response.QueryState;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
-import com.tencent.supersonic.chat.server.pojo.ChatContext;
 import com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMSqlQuery;
 import com.tencent.supersonic.headless.server.facade.service.SemanticLayerService;
-import com.tencent.supersonic.chat.server.service.ChatContextService;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.StringUtils;
 
@@ -31,28 +31,35 @@ public class SqlExecutor implements ChatQueryExecutor {
         QueryResult queryResult = doExecute(executeContext);
 
         if (queryResult != null) {
-            String textResult = ResultFormatter.transform2TextNew(queryResult.getQueryColumns(),
-                    queryResult.getQueryResults());
+            String textResult =
+                    ResultFormatter.transform2TextNew(
+                            queryResult.getQueryColumns(), queryResult.getQueryResults());
             queryResult.setTextResult(textResult);
 
             if (queryResult.getQueryState().equals(QueryState.SUCCESS)
                     && queryResult.getQueryMode().equals(LLMSqlQuery.QUERY_MODE)) {
-                Text2SQLExemplar exemplar = JsonUtil.toObject(JsonUtil.toString(
-                        executeContext.getParseInfo().getProperties()
-                                .get(Text2SQLExemplar.PROPERTY_KEY)), Text2SQLExemplar.class);
+                Text2SQLExemplar exemplar =
+                        JsonUtil.toObject(
+                                JsonUtil.toString(
+                                        executeContext
+                                                .getParseInfo()
+                                                .getProperties()
+                                                .get(Text2SQLExemplar.PROPERTY_KEY)),
+                                Text2SQLExemplar.class);
 
                 MemoryService memoryService = ContextUtils.getBean(MemoryService.class);
-                memoryService.createMemory(ChatMemoryDO.builder()
-                        .agentId(executeContext.getAgent().getId())
-                        .status(MemoryStatus.PENDING)
-                        .question(exemplar.getQuestion())
-                        .sideInfo(exemplar.getSideInfo())
-                        .dbSchema(exemplar.getDbSchema())
-                        .s2sql(exemplar.getSql())
-                        .createdBy(executeContext.getUser().getName())
-                        .updatedBy(executeContext.getUser().getName())
-                        .createdAt(new Date())
-                        .build());
+                memoryService.createMemory(
+                        ChatMemoryDO.builder()
+                                .agentId(executeContext.getAgent().getId())
+                                .status(MemoryStatus.PENDING)
+                                .question(exemplar.getQuestion())
+                                .sideInfo(exemplar.getSideInfo())
+                                .dbSchema(exemplar.getDbSchema())
+                                .s2sql(exemplar.getSql())
+                                .createdBy(executeContext.getUser().getName())
+                                .updatedBy(executeContext.getUser().getName())
+                                .createdAt(new Date())
+                                .build());
             }
         }
 
@@ -71,9 +78,8 @@ public class SqlExecutor implements ChatQueryExecutor {
             return null;
         }
 
-        QuerySqlReq sqlReq = QuerySqlReq.builder()
-                .sql(parseInfo.getSqlInfo().getCorrectedS2SQL())
-                .build();
+        QuerySqlReq sqlReq =
+                QuerySqlReq.builder().sql(parseInfo.getSqlInfo().getCorrectedS2SQL()).build();
         sqlReq.setSqlInfo(parseInfo.getSqlInfo());
         sqlReq.setDataSetId(parseInfo.getDataSetId());
 
@@ -97,5 +103,4 @@ public class SqlExecutor implements ChatQueryExecutor {
         }
         return queryResult;
     }
-
 }

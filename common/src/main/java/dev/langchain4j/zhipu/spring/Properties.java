@@ -12,12 +12,9 @@ public class Properties {
 
     static final String PREFIX = "langchain4j.zhipu";
 
-    @NestedConfigurationProperty
-    ChatModelProperties chatModel;
+    @NestedConfigurationProperty ChatModelProperties chatModel;
 
-    @NestedConfigurationProperty
-    ChatModelProperties streamingChatModel;
+    @NestedConfigurationProperty ChatModelProperties streamingChatModel;
 
-    @NestedConfigurationProperty
-    EmbeddingModelProperties embeddingModel;
+    @NestedConfigurationProperty EmbeddingModelProperties embeddingModel;
 }

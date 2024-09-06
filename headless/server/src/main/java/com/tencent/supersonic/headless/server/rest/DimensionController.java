@@ -1,11 +1,15 @@
 package com.tencent.supersonic.headless.server.rest;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import com.github.pagehelper.PageInfo;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
 import com.tencent.supersonic.common.pojo.enums.SensitiveLevelEnum;
 import com.tencent.supersonic.headless.api.pojo.DimValueMap;
+import com.tencent.supersonic.headless.api.pojo.MetaFilter;
 import com.tencent.supersonic.headless.api.pojo.request.DimensionReq;
 import com.tencent.supersonic.headless.api.pojo.request.DimensionValueReq;
 import com.tencent.supersonic.headless.api.pojo.request.MetaBatchReq;
@@ -14,7 +18,6 @@ import com.tencent.supersonic.headless.api.pojo.response.DimensionResp;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
 import com.tencent.supersonic.headless.server.facade.service.SemanticLayerService;
 import com.tencent.supersonic.headless.server.pojo.DimensionFilter;
-import com.tencent.supersonic.headless.api.pojo.MetaFilter;
 import com.tencent.supersonic.headless.server.service.DimensionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -25,21 +28,15 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.util.List;
-
 
 @RestController
 @RequestMapping("/api/semantic/dimension")
 public class DimensionController {
 
-    @Autowired
-    private DimensionService dimensionService;
+    @Autowired private DimensionService dimensionService;
 
-    @Autowired
-    private SemanticLayerService queryService;
-
+    @Autowired private SemanticLayerService queryService;
 
     /**
      * 创建维度
@@ -47,52 +44,60 @@ public class DimensionController {
      * @param dimensionReq
      */
     @PostMapping("/createDimension")
-    public DimensionResp createDimension(@RequestBody DimensionReq dimensionReq,
-                                   HttpServletRequest request,
-                                   HttpServletResponse response) throws Exception {
+    public DimensionResp createDimension(
+            @RequestBody DimensionReq dimensionReq,
+            HttpServletRequest request,
+            HttpServletResponse response)
+            throws Exception {
         User user = UserHolder.findUser(request, response);
         return dimensionService.createDimension(dimensionReq, user);
     }
 
     @PostMapping("/updateDimension")
-    public Boolean updateDimension(@RequestBody DimensionReq dimensionReq,
-                                   HttpServletRequest request,
-                                   HttpServletResponse response) throws Exception {
+    public Boolean updateDimension(
+            @RequestBody DimensionReq dimensionReq,
+            HttpServletRequest request,
+            HttpServletResponse response)
+            throws Exception {
         User user = UserHolder.findUser(request, response);
         dimensionService.updateDimension(dimensionReq, user);
         return true;
     }
 
     @PostMapping("/batchUpdateStatus")
-    public Boolean batchUpdateStatus(@RequestBody MetaBatchReq metaBatchReq,
-                                     HttpServletRequest request,
-                                     HttpServletResponse response) {
+    public Boolean batchUpdateStatus(
+            @RequestBody MetaBatchReq metaBatchReq,
+            HttpServletRequest request,
+            HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
         dimensionService.batchUpdateStatus(metaBatchReq, user);
         return true;
     }
 
     @PostMapping("/batchUpdateSensitiveLevel")
-    public Boolean batchUpdateSensitiveLevel(@RequestBody MetaBatchReq metaBatchReq,
-                                             HttpServletRequest request,
-                                             HttpServletResponse response) {
+    public Boolean batchUpdateSensitiveLevel(
+            @RequestBody MetaBatchReq metaBatchReq,
+            HttpServletRequest request,
+            HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
         dimensionService.batchUpdateSensitiveLevel(metaBatchReq, user);
         return true;
     }
 
     @PostMapping("/mockDimensionAlias")
-    public List<String> mockMetricAlias(@RequestBody DimensionReq dimensionReq,
-                                        HttpServletRequest request,
-                                        HttpServletResponse response) {
+    public List<String> mockMetricAlias(
+            @RequestBody DimensionReq dimensionReq,
+            HttpServletRequest request,
+            HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
         return dimensionService.mockAlias(dimensionReq, "dimension", user);
     }
 
     @PostMapping("/mockDimensionValuesAlias")
-    public List<DimValueMap> mockDimensionValuesAlias(@RequestBody DimensionReq dimensionReq,
-                                                      HttpServletRequest request,
-                                                      HttpServletResponse response) {
+    public List<DimValueMap> mockDimensionValuesAlias(
+            @RequestBody DimensionReq dimensionReq,
+            HttpServletRequest request,
+            HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
         return dimensionService.mockDimensionValueAlias(dimensionReq, user);
     }
@@ -110,8 +115,9 @@ public class DimensionController {
     }
 
     @GetMapping("/{modelId}/{dimensionName}")
-    public DimensionResp getDimensionDescByNameAndId(@PathVariable("modelId") Long modelId,
-                                                     @PathVariable("dimensionName") String dimensionBizName) {
+    public DimensionResp getDimensionDescByNameAndId(
+            @PathVariable("modelId") Long modelId,
+            @PathVariable("dimensionName") String dimensionBizName) {
         return dimensionService.getDimension(dimensionBizName, modelId);
     }
 
@@ -121,17 +127,17 @@ public class DimensionController {
     }
 
     @PostMapping("/queryDimValue")
-    public SemanticQueryResp queryDimValue(@RequestBody DimensionValueReq dimensionValueReq,
-                                           HttpServletRequest request,
-                                           HttpServletResponse response) {
+    public SemanticQueryResp queryDimValue(
+            @RequestBody DimensionValueReq dimensionValueReq,
+            HttpServletRequest request,
+            HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
         return queryService.queryDimensionValue(dimensionValueReq, user);
     }
 
     @DeleteMapping("deleteDimension/{id}")
-    public Boolean deleteDimension(@PathVariable("id") Long id,
-                                   HttpServletRequest request,
-                                   HttpServletResponse response) {
+    public Boolean deleteDimension(
+            @PathVariable("id") Long id, HttpServletRequest request, HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
         dimensionService.deleteDimension(id, user);
         return true;
@@ -143,5 +149,4 @@ public class DimensionController {
         metaFilter.setSensitiveLevel(SensitiveLevelEnum.HIGH.getCode());
         return dimensionService.getDimensions(metaFilter);
     }
-
 }

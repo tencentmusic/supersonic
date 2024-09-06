@@ -40,12 +40,13 @@ public abstract class BaseDbAdaptor implements DbAdaptor {
         return dbs;
     }
 
-    public List<String> getTables(ConnectInfo connectionInfo, String schemaName) throws SQLException {
+    public List<String> getTables(ConnectInfo connectionInfo, String schemaName)
+            throws SQLException {
         List<String> tablesAndViews = new ArrayList<>();
         DatabaseMetaData metaData = getDatabaseMetaData(connectionInfo);
 
-        try (ResultSet resultSet = metaData.getTables(schemaName, schemaName, null,
-                new String[]{"TABLE", "VIEW"})) {
+        try (ResultSet resultSet =
+                metaData.getTables(schemaName, schemaName, null, new String[] {"TABLE", "VIEW"})) {
             while (resultSet.next()) {
                 String name = resultSet.getString("TABLE_NAME");
                 tablesAndViews.add(name);
@@ -56,7 +57,8 @@ public abstract class BaseDbAdaptor implements DbAdaptor {
         return tablesAndViews;
     }
 
-    public List<DBColumn> getColumns(ConnectInfo connectInfo, String schemaName, String tableName) throws SQLException {
+    public List<DBColumn> getColumns(ConnectInfo connectInfo, String schemaName, String tableName)
+            throws SQLException {
         List<DBColumn> dbColumns = Lists.newArrayList();
         DatabaseMetaData metaData = getDatabaseMetaData(connectInfo);
         ResultSet columns = metaData.getColumns(schemaName, schemaName, tableName, null);
@@ -70,9 +72,11 @@ public abstract class BaseDbAdaptor implements DbAdaptor {
     }
 
     protected DatabaseMetaData getDatabaseMetaData(ConnectInfo connectionInfo) throws SQLException {
-        Connection connection = DriverManager.getConnection(connectionInfo.getUrl(),
-                connectionInfo.getUserName(), connectionInfo.getPassword());
+        Connection connection =
+                DriverManager.getConnection(
+                        connectionInfo.getUrl(),
+                        connectionInfo.getUserName(),
+                        connectionInfo.getPassword());
         return connection.getMetaData();
     }
-
 }

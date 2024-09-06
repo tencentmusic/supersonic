@@ -1,6 +1,5 @@
 package dev.langchain4j.store.embedding;
 
-
 import lombok.Data;
 
 import java.util.Map;
@@ -13,5 +12,4 @@ public class EmbeddingCollection {
     private String name;
 
     private Map<String, String> metaData;
-
 }

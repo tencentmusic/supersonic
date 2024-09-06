@@ -7,8 +7,8 @@ import dev.langchain4j.store.embedding.RetrieveQueryResult;
 import java.util.List;
 
 /**
- * Supersonic EmbeddingStore
- * Enhanced the functionality by enabling the addition and querying of collection names.
+ * Supersonic EmbeddingStore Enhanced the functionality by enabling the addition and querying of
+ * collection names.
  */
 public interface EmbeddingService {
 
@@ -16,6 +16,6 @@ public interface EmbeddingService {
 
     void deleteQuery(String collectionName, List<TextSegment> queries);
 
-    List<RetrieveQueryResult> retrieveQuery(String collectionName, RetrieveQuery retrieveQuery, int num);
-
+    List<RetrieveQueryResult> retrieveQuery(
+            String collectionName, RetrieveQuery retrieveQuery, int num);
 }

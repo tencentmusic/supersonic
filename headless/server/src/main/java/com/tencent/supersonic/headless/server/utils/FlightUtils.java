@@ -5,9 +5,7 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.regex.Pattern;
 
-/**
- * tools for arrow flight sql
- */
+/** tools for arrow flight sql */
 public class FlightUtils {
 
     public static int resolveType(Object value) {

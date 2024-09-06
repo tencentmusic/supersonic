@@ -6,18 +6,13 @@ import lombok.ToString;
 import java.util.ArrayList;
 import java.util.List;
 
-
 @Data
 @ToString
 public class ItemNameVisibilityInfo {
 
-    /**
-     * invisible dimensions
-     */
+    /** invisible dimensions */
     private List<String> blackDimNameList = new ArrayList<>();
 
-    /**
-     * invisible metrics
-     */
+    /** invisible metrics */
     private List<String> blackMetricNameList = new ArrayList<>();
 }

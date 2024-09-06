@@ -1,6 +1,5 @@
 package com.tencent.supersonic.common.pojo;
 
-
 import lombok.Data;
 
 import java.util.List;
@@ -16,9 +15,8 @@ public class ModelRela extends RecordInfo {
 
     private Long toModelId;
 
-    //left join, inner join, right join, outer join
+    // left join, inner join, right join, outer join
     private String joinType;
 
     private List<JoinCondition> joinConditions;
-
 }

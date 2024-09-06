@@ -1,6 +1,5 @@
 package com.tencent.supersonic.headless.api.pojo.enums;
 
-
 public enum QueryMethod {
     SQL("SQL"),
 
@@ -24,5 +23,4 @@ public enum QueryMethod {
     public String getValue() {
         return value;
     }
-
 }

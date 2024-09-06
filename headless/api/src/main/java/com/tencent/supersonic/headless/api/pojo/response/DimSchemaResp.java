@@ -12,5 +12,4 @@ public class DimSchemaResp extends DimensionResp {
     private Long useCnt = 0L;
 
     private List<String> entityAlias;
-
 }

@@ -21,7 +21,8 @@ public enum TagType {
     }
 
     public static TagType getType(TagDefineType tagDefineType) {
-        return Objects.nonNull(tagDefineType) && TagDefineType.TAG.equals(tagDefineType) ? TagType.DERIVED
+        return Objects.nonNull(tagDefineType) && TagDefineType.TAG.equals(tagDefineType)
+                ? TagType.DERIVED
                 : TagType.ATOMIC;
     }
 }

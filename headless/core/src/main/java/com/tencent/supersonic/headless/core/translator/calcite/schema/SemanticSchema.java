@@ -1,12 +1,11 @@
 package com.tencent.supersonic.headless.core.translator.calcite.schema;
 
-
-import com.tencent.supersonic.headless.core.translator.calcite.s2sql.Materialization;
-import com.tencent.supersonic.headless.core.translator.calcite.s2sql.Metric;
-import com.tencent.supersonic.headless.core.translator.calcite.s2sql.SemanticModel;
 import com.tencent.supersonic.headless.core.translator.calcite.s2sql.DataSource;
 import com.tencent.supersonic.headless.core.translator.calcite.s2sql.Dimension;
 import com.tencent.supersonic.headless.core.translator.calcite.s2sql.JoinRelation;
+import com.tencent.supersonic.headless.core.translator.calcite.s2sql.Materialization;
+import com.tencent.supersonic.headless.core.translator.calcite.s2sql.Metric;
+import com.tencent.supersonic.headless.core.translator.calcite.s2sql.SemanticModel;
 import org.apache.calcite.schema.Schema;
 import org.apache.calcite.schema.SchemaVersion;
 import org.apache.calcite.schema.Table;
@@ -15,7 +14,6 @@ import org.apache.calcite.schema.impl.AbstractSchema;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 
 public class SemanticSchema extends AbstractSchema {
 
@@ -27,7 +25,6 @@ public class SemanticSchema extends AbstractSchema {
     private List<JoinRelation> joinRelations;
 
     private RuntimeOptions runtimeOptions;
-
 
     private SemanticSchema(String schemaKey, Map<String, Table> tableMap) {
         this.schemaKey = schemaKey;
@@ -123,7 +120,8 @@ public class SemanticSchema extends AbstractSchema {
 
         public Builder addTable(DataSourceTable table) {
             if (tableMap.containsKey(table.getTableName())) {
-                throw new IllegalArgumentException("Table already defined: " + table.getTableName());
+                throw new IllegalArgumentException(
+                        "Table already defined: " + table.getTableName());
             }
 
             tableMap.put(table.getTableName(), table);
@@ -135,5 +133,4 @@ public class SemanticSchema extends AbstractSchema {
             return new SemanticSchema(schemaKey, tableMap);
         }
     }
-
 }

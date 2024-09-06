@@ -6,5 +6,4 @@ import com.tencent.supersonic.headless.api.pojo.response.ParseResp;
 public interface ChatQueryParser {
 
     void parse(ParseContext parseContext, ParseResp parseResp);
-
 }

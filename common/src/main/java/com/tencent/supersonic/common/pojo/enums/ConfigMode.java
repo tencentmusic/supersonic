@@ -1,8 +1,6 @@
 package com.tencent.supersonic.common.pojo.enums;
 
 public enum ConfigMode {
-
-
     DETAIL("DETAIL"),
     AGG("AGG"),
     UNKNOWN("UNKNOWN");

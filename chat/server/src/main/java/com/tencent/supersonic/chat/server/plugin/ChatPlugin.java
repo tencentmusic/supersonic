@@ -1,12 +1,12 @@
 package com.tencent.supersonic.chat.server.plugin;
 
-
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.common.pojo.RecordInfo;
 import lombok.Data;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+
 import java.util.List;
 
 @Data
@@ -14,37 +14,30 @@ public class ChatPlugin extends RecordInfo {
 
     private Long id;
 
-    /***
-     * plugin type WEB_PAGE WEB_SERVICE
-     */
+    /** * plugin type WEB_PAGE WEB_SERVICE */
     private String type;
 
     private List<Long> dataSetList = Lists.newArrayList();
 
-    /**
-     * description, for parsing
-     */
+    /** description, for parsing */
     private String pattern;
 
-    /**
-     * parse
-     */
+    /** parse */
     private ParseMode parseMode;
 
     private String parseModeConfig;
 
     private String name;
 
-    /**
-     * config for different plugin type
-     */
+    /** config for different plugin type */
     private String config;
 
     private String comment;
 
     public List<String> getExampleQuestionList() {
         if (StringUtils.isNotBlank(parseModeConfig)) {
-            PluginParseConfig pluginParseConfig = JSONObject.parseObject(parseModeConfig, PluginParseConfig.class);
+            PluginParseConfig pluginParseConfig =
+                    JSONObject.parseObject(parseModeConfig, PluginParseConfig.class);
             return pluginParseConfig.getExamples();
         }
         return Lists.newArrayList();
@@ -57,5 +50,4 @@ public class ChatPlugin extends RecordInfo {
     public Long getDefaultMode() {
         return -1L;
     }
-
 }

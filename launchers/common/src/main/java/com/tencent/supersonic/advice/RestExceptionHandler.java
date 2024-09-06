@@ -1,11 +1,11 @@
 package com.tencent.supersonic.advice;
 
+import com.tencent.supersonic.common.pojo.ResultData;
+import com.tencent.supersonic.common.pojo.enums.ReturnCode;
 import com.tencent.supersonic.common.pojo.exception.AccessException;
 import com.tencent.supersonic.common.pojo.exception.CommonException;
 import com.tencent.supersonic.common.pojo.exception.InvalidArgumentException;
 import com.tencent.supersonic.common.pojo.exception.InvalidPermissionException;
-import com.tencent.supersonic.common.pojo.ResultData;
-import com.tencent.supersonic.common.pojo.enums.ReturnCode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -16,9 +16,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class RestExceptionHandler {
 
-    /**
-     * default global exception handler
-     */
+    /** default global exception handler */
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.OK)
     public ResultData<String> exception(Exception e) {
@@ -53,5 +51,4 @@ public class RestExceptionHandler {
         log.error("default global exception", e);
         return ResultData.fail(e.getCode(), e.getMessage());
     }
-
 }

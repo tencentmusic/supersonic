@@ -1,16 +1,14 @@
 package com.tencent.supersonic.headless.api.pojo.request;
 
+import javax.validation.constraints.NotNull;
+
 import com.tencent.supersonic.common.pojo.enums.TypeEnums;
 import lombok.Builder;
 import lombok.Data;
 
-import javax.validation.constraints.NotNull;
-
 @Data
 @Builder
 public class DictSingleTaskReq {
-    @NotNull
-    private TypeEnums type;
-    @NotNull
-    private Long itemId;
+    @NotNull private TypeEnums type;
+    @NotNull private Long itemId;
 }

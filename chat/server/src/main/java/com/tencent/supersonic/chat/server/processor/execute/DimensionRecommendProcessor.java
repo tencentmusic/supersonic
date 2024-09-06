@@ -1,6 +1,7 @@
 package com.tencent.supersonic.chat.server.processor.execute;
 
 import com.google.common.collect.Lists;
+import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.chat.server.pojo.ExecuteContext;
 import com.tencent.supersonic.common.pojo.enums.QueryType;
 import com.tencent.supersonic.common.util.ContextUtils;
@@ -8,7 +9,6 @@ import com.tencent.supersonic.headless.api.pojo.DataSetSchema;
 import com.tencent.supersonic.headless.api.pojo.RelatedSchemaElement;
 import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
-import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.headless.server.facade.service.SemanticLayerService;
 import org.springframework.util.CollectionUtils;
 
@@ -20,8 +20,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * DimensionRecommendProcessor recommend some dimensions
- * related to metrics based on configuration
+ * DimensionRecommendProcessor recommend some dimensions related to metrics based on configuration
  */
 public class DimensionRecommendProcessor implements ExecuteResultProcessor {
 
@@ -50,13 +49,20 @@ public class DimensionRecommendProcessor implements ExecuteResultProcessor {
         List<Long> drillDownDimensions = Lists.newArrayList();
         Set<SchemaElement> metricElements = dataSetSchema.getMetrics();
         if (!CollectionUtils.isEmpty(metricElements)) {
-            Optional<SchemaElement> metric = metricElements.stream().filter(schemaElement ->
-                            metricId.equals(schemaElement.getId())
-                                    && !CollectionUtils.isEmpty(schemaElement.getRelatedSchemaElements()))
-                    .findFirst();
+            Optional<SchemaElement> metric =
+                    metricElements.stream()
+                            .filter(
+                                    schemaElement ->
+                                            metricId.equals(schemaElement.getId())
+                                                    && !CollectionUtils.isEmpty(
+                                                            schemaElement
+                                                                    .getRelatedSchemaElements()))
+                            .findFirst();
             if (metric.isPresent()) {
-                drillDownDimensions = metric.get().getRelatedSchemaElements().stream()
-                        .map(RelatedSchemaElement::getDimensionId).collect(Collectors.toList());
+                drillDownDimensions =
+                        metric.get().getRelatedSchemaElements().stream()
+                                .map(RelatedSchemaElement::getDimensionId)
+                                .collect(Collectors.toList());
             }
         }
         final List<Long> drillDownDimensionsFinal = drillDownDimensions;
@@ -76,5 +82,4 @@ public class DimensionRecommendProcessor implements ExecuteResultProcessor {
         }
         return Objects.nonNull(dimension.getUseCnt());
     }
-
 }

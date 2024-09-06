@@ -10,12 +10,11 @@ import com.tencent.supersonic.headless.server.persistence.repository.MetricRepos
 import com.tencent.supersonic.headless.server.pojo.MetricFilter;
 import com.tencent.supersonic.headless.server.pojo.MetricsFilter;
 import org.springframework.stereotype.Component;
-import java.util.List;
 
+import java.util.List;
 
 @Component
 public class MetricRepositoryImpl implements MetricRepository {
-
 
     private MetricDOMapper metricDOMapper;
 
@@ -23,9 +22,10 @@ public class MetricRepositoryImpl implements MetricRepository {
 
     private MetricQueryDefaultConfigDOMapper metricQueryDefaultConfigDOMapper;
 
-    public MetricRepositoryImpl(MetricDOMapper metricDOMapper,
-                                MetricDOCustomMapper metricDOCustomMapper,
-                                MetricQueryDefaultConfigDOMapper metricQueryDefaultConfigDOMapper) {
+    public MetricRepositoryImpl(
+            MetricDOMapper metricDOMapper,
+            MetricDOCustomMapper metricDOCustomMapper,
+            MetricQueryDefaultConfigDOMapper metricQueryDefaultConfigDOMapper) {
         this.metricDOMapper = metricDOMapper;
         this.metricDOCustomMapper = metricDOCustomMapper;
         this.metricQueryDefaultConfigDOMapper = metricQueryDefaultConfigDOMapper;
@@ -95,9 +95,10 @@ public class MetricRepositoryImpl implements MetricRepository {
     @Override
     public MetricQueryDefaultConfigDO getDefaultQueryConfig(Long metricId, String userName) {
         QueryWrapper<MetricQueryDefaultConfigDO> queryWrapper = new QueryWrapper<>();
-        queryWrapper.lambda().eq(MetricQueryDefaultConfigDO::getMetricId, metricId)
+        queryWrapper
+                .lambda()
+                .eq(MetricQueryDefaultConfigDO::getMetricId, metricId)
                 .eq(MetricQueryDefaultConfigDO::getCreatedBy, userName);
         return metricQueryDefaultConfigDOMapper.selectOne(queryWrapper);
     }
-
 }

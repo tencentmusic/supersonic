@@ -1,10 +1,11 @@
 package com.tencent.supersonic.headless.api.pojo;
 
-import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NonNull;
 import lombok.ToString;
+
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -12,6 +13,5 @@ import lombok.ToString;
 public class ItemDateFilter {
 
     private List<Long> itemIds;
-    @NonNull
-    private String type;
+    @NonNull private String type;
 }

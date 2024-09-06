@@ -5,6 +5,4 @@ import com.tencent.supersonic.headless.server.persistence.dataobject.MetricDO;
 import org.apache.ibatis.annotations.Mapper;
 
 @Mapper
-public interface MetricDOMapper extends BaseMapper<MetricDO> {
-
-}
+public interface MetricDOMapper extends BaseMapper<MetricDO> {}

@@ -9,7 +9,8 @@ class NameCheckUtilsTest {
     @Test
     void findForbiddenCharacters() {
         Assert.assertTrue(StringUtils.isBlank(NameCheckUtils.findForbiddenCharacters("访问时长")));
-        Assert.assertTrue(StringUtils.isNotBlank(NameCheckUtils.findForbiddenCharacters("访问时长(秒)")));
+        Assert.assertTrue(
+                StringUtils.isNotBlank(NameCheckUtils.findForbiddenCharacters("访问时长(秒)")));
         Assert.assertTrue(StringUtils.isNotBlank(NameCheckUtils.findForbiddenCharacters("访问时长#")));
         Assert.assertTrue(StringUtils.isNotBlank(NameCheckUtils.findForbiddenCharacters("访问时长%")));
         Assert.assertTrue(StringUtils.isNotBlank(NameCheckUtils.findForbiddenCharacters("访问时长(")));

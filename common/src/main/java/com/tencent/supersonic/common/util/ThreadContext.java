@@ -1,9 +1,9 @@
 package com.tencent.supersonic.common.util;
 
-
 import lombok.Builder;
 import lombok.Data;
 import lombok.ToString;
+
 import java.util.Map;
 
 @Builder
@@ -18,5 +18,4 @@ public class ThreadContext {
     private String token;
 
     private Map<String, String> extendInfo;
-
 }

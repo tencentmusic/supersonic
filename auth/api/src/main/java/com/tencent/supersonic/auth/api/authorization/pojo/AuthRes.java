@@ -10,8 +10,7 @@ public class AuthRes {
     private Long modelId;
     private String name;
 
-    public AuthRes() {
-    }
+    public AuthRes() {}
 
     public AuthRes(Long modelId, String name) {
         this.modelId = modelId;

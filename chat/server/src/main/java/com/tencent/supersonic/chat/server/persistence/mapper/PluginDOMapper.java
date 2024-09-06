@@ -5,6 +5,4 @@ import com.tencent.supersonic.chat.server.persistence.dataobject.PluginDO;
 import org.apache.ibatis.annotations.Mapper;
 
 @Mapper
-public interface PluginDOMapper extends BaseMapper<PluginDO> {
-
-}
+public interface PluginDOMapper extends BaseMapper<PluginDO> {}

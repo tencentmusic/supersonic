@@ -12,5 +12,4 @@ public class MetricInfo {
     private String value;
     private String date;
     private Map<String, String> statistics;
-
 }

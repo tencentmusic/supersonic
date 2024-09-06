@@ -13,9 +13,7 @@ public class Identify {
 
     private String name;
 
-    /**
-     * primary, foreign
-     */
+    /** primary, foreign */
     private String type;
 
     private String bizName;
@@ -40,5 +38,4 @@ public class Identify {
     public String getFieldName() {
         return bizName;
     }
-
 }

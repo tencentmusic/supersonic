@@ -38,10 +38,11 @@ import java.util.stream.Collectors;
 @Slf4j
 public class EmbeddingServiceImpl implements EmbeddingService {
 
-    private Cache<String, Boolean> cache = CacheBuilder.newBuilder()
-            .maximumSize(10000)
-            .expireAfterWrite(10, TimeUnit.HOURS)
-            .build();
+    private Cache<String, Boolean> cache =
+            CacheBuilder.newBuilder()
+                    .maximumSize(10000)
+                    .expireAfterWrite(10, TimeUnit.HOURS)
+                    .build();
 
     @Override
     public void addQuery(String collectionName, List<TextSegment> queries) {
@@ -59,13 +60,17 @@ public class EmbeddingServiceImpl implements EmbeddingService {
                 }
                 embeddingStore.add(embedding, query);
             } catch (Exception e) {
-                log.error("embeddingModel embed error question: {}, embeddingStore: {}", question,
-                        embeddingStore.getClass().getSimpleName(), e);
+                log.error(
+                        "embeddingModel embed error question: {}, embeddingStore: {}",
+                        question,
+                        embeddingStore.getClass().getSimpleName(),
+                        e);
             }
         }
     }
 
-    private boolean existSegment(EmbeddingStore embeddingStore, TextSegment query, Embedding embedding) {
+    private boolean existSegment(
+            EmbeddingStore embeddingStore, TextSegment query, Embedding embedding) {
         String queryId = TextSegmentConvert.getQueryId(query);
         if (queryId == null) {
             return false;
@@ -78,8 +83,13 @@ public class EmbeddingServiceImpl implements EmbeddingService {
         Map<String, Object> filterCondition = new HashMap<>();
         filterCondition.put(TextSegmentConvert.QUERY_ID, queryId);
         Filter filter = createCombinedFilter(filterCondition);
-        EmbeddingSearchRequest request = EmbeddingSearchRequest.builder()
-                .queryEmbedding(embedding).filter(filter).minScore(1.0d).maxResults(1).build();
+        EmbeddingSearchRequest request =
+                EmbeddingSearchRequest.builder()
+                        .queryEmbedding(embedding)
+                        .filter(filter)
+                        .minScore(1.0d)
+                        .maxResults(1)
+                        .build();
 
         EmbeddingSearchResult result = embeddingStore.search(request);
         List<EmbeddingMatch<TextSegment>> relevant = result.matches();
@@ -90,16 +100,21 @@ public class EmbeddingServiceImpl implements EmbeddingService {
 
     @Override
     public void deleteQuery(String collectionName, List<TextSegment> queries) {
-        //Not supported yet in Milvus and Chroma
+        // Not supported yet in Milvus and Chroma
         EmbeddingStoreFactory embeddingStoreFactory = EmbeddingStoreFactoryProvider.getFactory();
         EmbeddingStore embeddingStore = embeddingStoreFactory.create(collectionName);
         try {
             if (embeddingStore instanceof InMemoryEmbeddingStore) {
-                InMemoryEmbeddingStore inMemoryEmbeddingStore = (InMemoryEmbeddingStore) embeddingStore;
-                List<String> queryIds = queries.stream().map(textSegment -> TextSegmentConvert.getQueryId(textSegment))
-                        .filter(Objects::nonNull).collect(Collectors.toList());
+                InMemoryEmbeddingStore inMemoryEmbeddingStore =
+                        (InMemoryEmbeddingStore) embeddingStore;
+                List<String> queryIds =
+                        queries.stream()
+                                .map(textSegment -> TextSegmentConvert.getQueryId(textSegment))
+                                .filter(Objects::nonNull)
+                                .collect(Collectors.toList());
                 if (CollectionUtils.isNotEmpty(queryIds)) {
-                    MetadataFilterBuilder filterBuilder = new MetadataFilterBuilder(TextSegmentConvert.QUERY_ID);
+                    MetadataFilterBuilder filterBuilder =
+                            new MetadataFilterBuilder(TextSegmentConvert.QUERY_ID);
                     Filter filter = filterBuilder.isIn(queryIds);
                     inMemoryEmbeddingStore.removeAll(filter);
                 }
@@ -112,31 +127,46 @@ public class EmbeddingServiceImpl implements EmbeddingService {
     }
 
     @Override
-    public List<RetrieveQueryResult> retrieveQuery(String collectionName, RetrieveQuery retrieveQuery, int num) {
-        EmbeddingStore embeddingStore = EmbeddingStoreFactoryProvider.getFactory().create(collectionName);
+    public List<RetrieveQueryResult> retrieveQuery(
+            String collectionName, RetrieveQuery retrieveQuery, int num) {
+        EmbeddingStore embeddingStore =
+                EmbeddingStoreFactoryProvider.getFactory().create(collectionName);
         EmbeddingModel embeddingModel = ModelProvider.getEmbeddingModel();
         Map<String, Object> filterCondition = retrieveQuery.getFilterCondition();
         return retrieveQuery.getQueryTextsList().stream()
-                .map(queryText -> retrieveSingleQuery(queryText, embeddingModel, embeddingStore, filterCondition, num))
+                .map(
+                        queryText ->
+                                retrieveSingleQuery(
+                                        queryText,
+                                        embeddingModel,
+                                        embeddingStore,
+                                        filterCondition,
+                                        num))
                 .collect(Collectors.toList());
     }
 
-    private RetrieveQueryResult retrieveSingleQuery(String queryText,
-                                                    EmbeddingModel embeddingModel,
-                                                    EmbeddingStore embeddingStore,
-                                                    Map<String, Object> filterCondition,
-                                                    int num) {
+    private RetrieveQueryResult retrieveSingleQuery(
+            String queryText,
+            EmbeddingModel embeddingModel,
+            EmbeddingStore embeddingStore,
+            Map<String, Object> filterCondition,
+            int num) {
         Embedding embeddedText = embeddingModel.embed(queryText).content();
         Filter filter = createCombinedFilter(filterCondition);
-        EmbeddingSearchRequest request = EmbeddingSearchRequest.builder()
-                .queryEmbedding(embeddedText).filter(filter).maxResults(num).build();
+        EmbeddingSearchRequest request =
+                EmbeddingSearchRequest.builder()
+                        .queryEmbedding(embeddedText)
+                        .filter(filter)
+                        .maxResults(num)
+                        .build();
         EmbeddingSearchResult<TextSegment> result = embeddingStore.search(request);
 
-        List<Retrieval> retrievals = result.matches().stream()
-                .map(this::convertToRetrieval)
-                .sorted(Comparator.comparingDouble(Retrieval::getDistance).reversed())
-                .limit(num)
-                .collect(Collectors.toList());
+        List<Retrieval> retrievals =
+                result.matches().stream()
+                        .map(this::convertToRetrieval)
+                        .sorted(Comparator.comparingDouble(Retrieval::getDistance).reversed())
+                        .limit(num)
+                        .collect(Collectors.toList());
 
         RetrieveQueryResult retrieveQueryResult = new RetrieveQueryResult();
         retrieveQueryResult.setQuery(queryText);

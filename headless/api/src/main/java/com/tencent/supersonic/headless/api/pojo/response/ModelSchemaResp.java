@@ -25,12 +25,12 @@ public class ModelSchemaResp extends ModelResp {
             return Sets.newHashSet();
         } else {
             Set<Long> modelClusterSet = new HashSet();
-            this.modelRelas.forEach((modelRela) -> {
-                modelClusterSet.add(modelRela.getToModelId());
-                modelClusterSet.add(modelRela.getFromModelId());
-            });
+            this.modelRelas.forEach(
+                    (modelRela) -> {
+                        modelClusterSet.add(modelRela.getToModelId());
+                        modelClusterSet.add(modelRela.getFromModelId());
+                    });
             return modelClusterSet;
         }
     }
-
 }

@@ -18,8 +18,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-public class ModelRelaServiceImpl
-        extends ServiceImpl<ModelRelaDOMapper, ModelRelaDO> implements ModelRelaService {
+public class ModelRelaServiceImpl extends ServiceImpl<ModelRelaDOMapper, ModelRelaDO>
+        implements ModelRelaService {
 
     @Override
     public void save(ModelRela modelRela, User user) {
@@ -48,7 +48,9 @@ public class ModelRelaServiceImpl
         if (CollectionUtils.isEmpty(modelIds)) {
             return Lists.newArrayList();
         }
-        wrapper.lambda().in(ModelRelaDO::getFromModelId, modelIds).or()
+        wrapper.lambda()
+                .in(ModelRelaDO::getFromModelId, modelIds)
+                .or()
                 .in(ModelRelaDO::getToModelId, modelIds);
         return list(wrapper).stream().map(this::convert).collect(Collectors.toList());
     }
@@ -61,7 +63,8 @@ public class ModelRelaServiceImpl
     private ModelRela convert(ModelRelaDO modelRelaDO) {
         ModelRela modelRela = new ModelRela();
         BeanMapper.mapper(modelRelaDO, modelRela);
-        modelRela.setJoinConditions(JSONObject.parseArray(modelRelaDO.getJoinCondition(), JoinCondition.class));
+        modelRela.setJoinConditions(
+                JSONObject.parseArray(modelRelaDO.getJoinCondition(), JoinCondition.class));
         return modelRela;
     }
 
@@ -71,5 +74,4 @@ public class ModelRelaServiceImpl
         modelRelaDO.setJoinCondition(JSONObject.toJSONString(modelRelaReq.getJoinConditions()));
         return modelRelaDO;
     }
-
 }

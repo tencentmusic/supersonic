@@ -1,5 +1,8 @@
 package com.tencent.supersonic.headless.server.rest;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
 import com.tencent.supersonic.headless.api.pojo.request.DomainReq;
@@ -14,12 +17,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
-
 
 @RestController
 @RequestMapping("/api/semantic/domain")
@@ -32,17 +32,19 @@ public class DomainController {
     }
 
     @PostMapping("/createDomain")
-    public DomainResp createDomain(@RequestBody DomainReq domainReq,
-                                HttpServletRequest request,
-                                HttpServletResponse response) {
+    public DomainResp createDomain(
+            @RequestBody DomainReq domainReq,
+            HttpServletRequest request,
+            HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
         return domainService.createDomain(domainReq, user);
     }
 
     @PostMapping("/updateDomain")
-    public DomainResp updateDomain(@RequestBody DomainUpdateReq domainUpdateReq,
-                                HttpServletRequest request,
-                                HttpServletResponse response) {
+    public DomainResp updateDomain(
+            @RequestBody DomainUpdateReq domainUpdateReq,
+            HttpServletRequest request,
+            HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
         return domainService.updateDomain(domainUpdateReq, user);
     }
@@ -54,8 +56,8 @@ public class DomainController {
     }
 
     @GetMapping("/getDomainList")
-    public List<DomainResp> getDomainList(HttpServletRequest request,
-                                          HttpServletResponse response) {
+    public List<DomainResp> getDomainList(
+            HttpServletRequest request, HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
         return domainService.getDomainListWithAdminAuth(user);
     }
@@ -67,8 +69,9 @@ public class DomainController {
 
     @GetMapping("/getDomainListByIds/{domainIds}")
     public List<DomainResp> getDomainListByIds(@PathVariable("domainIds") String domainIds) {
-        return domainService.getDomainList(Arrays.stream(domainIds.split(",")).map(Long::parseLong)
-                .collect(Collectors.toList()));
+        return domainService.getDomainList(
+                Arrays.stream(domainIds.split(","))
+                        .map(Long::parseLong)
+                        .collect(Collectors.toList()));
     }
-
 }

@@ -1,6 +1,5 @@
 package com.tencent.supersonic.chat.server.pojo;
 
-
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import lombok.Data;
 

@@ -1,6 +1,5 @@
 package com.tencent.supersonic.headless.core.pojo;
 
-
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.common.pojo.RecordInfo;
 import com.tencent.supersonic.common.util.AESEncryptionUtil;
@@ -36,9 +35,7 @@ public class Database extends RecordInfo {
     private String database;
 
     private String schema;
-    /**
-     * mysql,clickhouse
-     */
+    /** mysql,clickhouse */
     private String type;
 
     private List<String> admins = Lists.newArrayList();
@@ -48,5 +45,4 @@ public class Database extends RecordInfo {
     public String passwordDecrypt() {
         return AESEncryptionUtil.aesDecryptECB(password);
     }
-
 }

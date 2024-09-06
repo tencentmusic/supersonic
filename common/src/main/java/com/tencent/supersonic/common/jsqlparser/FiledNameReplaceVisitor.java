@@ -34,9 +34,11 @@ public class FiledNameReplaceVisitor extends ExpressionVisitorAdapter {
         Expression leftExpression = expr.getLeftExpression();
         Expression rightExpression = expr.getRightExpression();
 
-        if (!(rightExpression instanceof StringValue) || !(leftExpression instanceof Column)
+        if (!(rightExpression instanceof StringValue)
+                || !(leftExpression instanceof Column)
                 || CollectionUtils.isEmpty(fieldValueToFieldNames)
-                || Objects.isNull(rightExpression) || Objects.isNull(leftExpression)) {
+                || Objects.isNull(rightExpression)
+                || Objects.isNull(leftExpression)) {
             return;
         }
 
@@ -44,9 +46,9 @@ public class FiledNameReplaceVisitor extends ExpressionVisitorAdapter {
         StringValue rightStringValue = (StringValue) rightExpression;
 
         Set<String> fieldNames = fieldValueToFieldNames.get(rightStringValue.getValue());
-        if (!CollectionUtils.isEmpty(fieldNames) && !fieldNames.contains(leftColumn.getColumnName())) {
+        if (!CollectionUtils.isEmpty(fieldNames)
+                && !fieldNames.contains(leftColumn.getColumnName())) {
             leftColumn.setColumnName(fieldNames.stream().findFirst().get());
         }
     }
-
 }

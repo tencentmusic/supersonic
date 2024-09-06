@@ -3,12 +3,10 @@ package com.tencent.supersonic.headless.server.service;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.common.pojo.enums.TypeEnums;
 import com.tencent.supersonic.headless.server.persistence.dataobject.CollectDO;
+
 import java.util.List;
 
-/**
- * @author yannsu
- */
-
+/** @author yannsu */
 public interface CollectService {
 
     Boolean collect(User user, CollectDO collectDO);

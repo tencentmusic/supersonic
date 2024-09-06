@@ -36,7 +36,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-
 public class ModelConverter {
 
     public static ModelDO convert(ModelReq modelReq, User user) {
@@ -56,15 +55,24 @@ public class ModelConverter {
     public static ModelResp convert(ModelDO modelDO) {
         ModelResp modelResp = new ModelResp();
         BeanUtils.copyProperties(modelDO, modelResp);
-        modelResp.setAdmins(StringUtils.isBlank(modelDO.getAdmin())
-                ? Lists.newArrayList() : Arrays.asList(modelDO.getAdmin().split(",")));
-        modelResp.setAdminOrgs(StringUtils.isBlank(modelDO.getAdminOrg())
-                ? Lists.newArrayList() : Arrays.asList(modelDO.getAdminOrg().split(",")));
-        modelResp.setViewers(StringUtils.isBlank(modelDO.getViewer())
-                ? Lists.newArrayList() : Arrays.asList(modelDO.getViewer().split(",")));
-        modelResp.setViewOrgs(StringUtils.isBlank(modelDO.getViewOrg())
-                ? Lists.newArrayList() : Arrays.asList(modelDO.getViewOrg().split(",")));
-        modelResp.setDrillDownDimensions(JsonUtil.toList(modelDO.getDrillDownDimensions(), DrillDownDimension.class));
+        modelResp.setAdmins(
+                StringUtils.isBlank(modelDO.getAdmin())
+                        ? Lists.newArrayList()
+                        : Arrays.asList(modelDO.getAdmin().split(",")));
+        modelResp.setAdminOrgs(
+                StringUtils.isBlank(modelDO.getAdminOrg())
+                        ? Lists.newArrayList()
+                        : Arrays.asList(modelDO.getAdminOrg().split(",")));
+        modelResp.setViewers(
+                StringUtils.isBlank(modelDO.getViewer())
+                        ? Lists.newArrayList()
+                        : Arrays.asList(modelDO.getViewer().split(",")));
+        modelResp.setViewOrgs(
+                StringUtils.isBlank(modelDO.getViewOrg())
+                        ? Lists.newArrayList()
+                        : Arrays.asList(modelDO.getViewOrg().split(",")));
+        modelResp.setDrillDownDimensions(
+                JsonUtil.toList(modelDO.getDrillDownDimensions(), DrillDownDimension.class));
         modelResp.setModelDetail(JsonUtil.toObject(modelDO.getModelDetail(), ModelDetail.class));
         modelResp.setExt(JsonUtil.toObject(modelDO.getExt(), Map.class));
         return modelResp;
@@ -83,7 +91,8 @@ public class ModelConverter {
         ModelDetail modelDetail = updateModelDetail(modelReq);
         BeanMapper.mapper(modelReq, modelDO);
         if (modelReq.getDrillDownDimensions() != null) {
-            modelDO.setDrillDownDimensions(JSONObject.toJSONString(modelReq.getDrillDownDimensions()));
+            modelDO.setDrillDownDimensions(
+                    JSONObject.toJSONString(modelReq.getDrillDownDimensions()));
         }
         modelDO.setModelDetail(JSONObject.toJSONString((modelDetail)));
         if (modelReq.getExt() != null) {
@@ -120,7 +129,8 @@ public class ModelConverter {
         dimensionReq.setModelId(modelDO.getId());
         dimensionReq.setExpr(dim.getBizName());
         dimensionReq.setType(dim.getType());
-        dimensionReq.setDescription(Objects.isNull(dim.getDescription()) ? "" : dim.getDescription());
+        dimensionReq.setDescription(
+                Objects.isNull(dim.getDescription()) ? "" : dim.getDescription());
         dimensionReq.setIsTag(dim.getIsTag());
         return dimensionReq;
     }
@@ -156,24 +166,22 @@ public class ModelConverter {
     public static List<ModelResp> convertList(List<ModelDO> modelDOS) {
         List<ModelResp> modelDescs = Lists.newArrayList();
         if (!CollectionUtils.isEmpty(modelDOS)) {
-            modelDescs = modelDOS.stream().map(ModelConverter::convert).collect(Collectors.toList());
+            modelDescs =
+                    modelDOS.stream().map(ModelConverter::convert).collect(Collectors.toList());
         }
         return modelDescs;
     }
 
     private static boolean isCreateDimension(Dim dim) {
-        return dim.getIsCreateDimension() == 1
-                && StringUtils.isNotBlank(dim.getName());
+        return dim.getIsCreateDimension() == 1 && StringUtils.isNotBlank(dim.getName());
     }
 
     private static boolean isCreateDimension(Identify identify) {
-        return identify.getIsCreateDimension() == 1
-                && StringUtils.isNotBlank(identify.getName());
+        return identify.getIsCreateDimension() == 1 && StringUtils.isNotBlank(identify.getName());
     }
 
     private static boolean isCreateMetric(Measure measure) {
-        return measure.getIsCreateMetric() == 1
-                && StringUtils.isNotBlank(measure.getName());
+        return measure.getIsCreateMetric() == 1 && StringUtils.isNotBlank(measure.getName());
     }
 
     public static List<Dim> getDimToCreateDimension(ModelDetail modelDetail) {
@@ -205,30 +213,37 @@ public class ModelConverter {
 
     public static List<DimensionReq> convertDimensionList(ModelDO modelDO) {
         List<DimensionReq> dimensionReqs = Lists.newArrayList();
-        ModelDetail modelDetail = JSONObject.parseObject(modelDO.getModelDetail(),
-                ModelDetail.class);
+        ModelDetail modelDetail =
+                JSONObject.parseObject(modelDO.getModelDetail(), ModelDetail.class);
         List<Dim> dims = getDimToCreateDimension(modelDetail);
         if (!CollectionUtils.isEmpty(dims)) {
-            dimensionReqs = dims.stream().filter(dim -> StringUtils.isNotBlank(dim.getName()))
-                    .map(dim -> convert(dim, modelDO)).collect(Collectors.toList());
+            dimensionReqs =
+                    dims.stream()
+                            .filter(dim -> StringUtils.isNotBlank(dim.getName()))
+                            .map(dim -> convert(dim, modelDO))
+                            .collect(Collectors.toList());
         }
         List<Identify> identifies = getIdentityToCreateDimension(modelDetail);
         if (CollectionUtils.isEmpty(identifies)) {
             return dimensionReqs;
         }
-        dimensionReqs.addAll(identifies.stream()
-                .map(identify -> convert(identify, modelDO)).collect(Collectors.toList()));
+        dimensionReqs.addAll(
+                identifies.stream()
+                        .map(identify -> convert(identify, modelDO))
+                        .collect(Collectors.toList()));
         return dimensionReqs;
     }
 
     public static List<MetricReq> convertMetricList(ModelDO modelDO) {
-        ModelDetail modelDetail = JSONObject.parseObject(modelDO.getModelDetail(),
-                ModelDetail.class);
+        ModelDetail modelDetail =
+                JSONObject.parseObject(modelDO.getModelDetail(), ModelDetail.class);
         List<Measure> measures = getMeasureToCreateMetric(modelDetail);
         if (CollectionUtils.isEmpty(measures)) {
             return Lists.newArrayList();
         }
-        return measures.stream().map(measure -> convert(measure, modelDO)).collect(Collectors.toList());
+        return measures.stream()
+                .map(measure -> convert(measure, modelDO))
+                .collect(Collectors.toList());
     }
 
     private static ModelDetail createModelDetail(ModelReq modelReq) {
@@ -258,9 +273,9 @@ public class ModelConverter {
             if (StringUtils.isBlank(measure.getBizName())) {
                 continue;
             }
-            //Compatible with front-end tmp
-            String oriFieldName = measure.getBizName()
-                    .replaceFirst(modelReq.getBizName() + "_", "");
+            // Compatible with front-end tmp
+            String oriFieldName =
+                    measure.getBizName().replaceFirst(modelReq.getBizName() + "_", "");
             measure.setExpr(oriFieldName);
             if (!measure.getBizName().startsWith(modelReq.getBizName())) {
                 measure.setBizName(String.format("%s_%s", modelReq.getBizName(), oriFieldName));
@@ -269,5 +284,4 @@ public class ModelConverter {
         BeanMapper.mapper(modelReq.getModelDetail(), modelDetail);
         return modelDetail;
     }
-
 }

@@ -1,6 +1,5 @@
 package com.tencent.supersonic.headless.server.service.impl;
 
-
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.headless.api.pojo.request.DictItemFilter;
 import com.tencent.supersonic.headless.api.pojo.request.DictItemReq;
@@ -23,8 +22,7 @@ public class DictConfServiceImpl implements DictConfService {
     private final DictRepository dictRepository;
     private final DictUtils dictConverter;
 
-    public DictConfServiceImpl(DictRepository dictRepository,
-                               DictUtils dictConverter) {
+    public DictConfServiceImpl(DictRepository dictRepository, DictUtils dictConverter) {
         this.dictRepository = dictRepository;
         this.dictConverter = dictConverter;
     }
@@ -39,10 +37,8 @@ public class DictConfServiceImpl implements DictConfService {
         Long id = dictRepository.addDictConf(dictConfDO);
         log.debug("dictConfDO:{}", dictConfDO);
 
-        DictItemFilter filter = DictItemFilter.builder()
-                .id(id)
-                .status(itemValueReq.getStatus())
-                .build();
+        DictItemFilter filter =
+                DictItemFilter.builder().id(id).status(itemValueReq.getStatus()).build();
         Optional<DictItemResp> dictItemResp = queryDictConf(filter, user).stream().findFirst();
         if (dictItemResp.isPresent()) {
             return dictItemResp.get();
@@ -54,8 +50,7 @@ public class DictConfServiceImpl implements DictConfService {
         DictItemFilter filter = DictItemFilter.builder().build();
         BeanUtils.copyProperties(itemValueReq, filter);
         filter.setStatus(null);
-        Optional<DictItemResp> dictItemResp = queryDictConf(filter, user).stream()
-                .findFirst();
+        Optional<DictItemResp> dictItemResp = queryDictConf(filter, user).stream().findFirst();
         if (dictItemResp.isPresent()) {
             return true;
         }

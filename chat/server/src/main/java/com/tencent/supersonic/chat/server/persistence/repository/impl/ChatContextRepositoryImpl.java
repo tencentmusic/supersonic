@@ -1,12 +1,12 @@
 package com.tencent.supersonic.chat.server.persistence.repository.impl;
 
 import com.google.gson.Gson;
+import com.tencent.supersonic.chat.server.persistence.dataobject.ChatContextDO;
+import com.tencent.supersonic.chat.server.persistence.mapper.ChatContextMapper;
 import com.tencent.supersonic.chat.server.persistence.repository.ChatContextRepository;
 import com.tencent.supersonic.chat.server.pojo.ChatContext;
 import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
-import com.tencent.supersonic.chat.server.persistence.dataobject.ChatContextDO;
-import com.tencent.supersonic.chat.server.persistence.mapper.ChatContextMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Repository;
@@ -15,7 +15,6 @@ import org.springframework.stereotype.Repository;
 @Primary
 @Slf4j
 public class ChatContextRepositoryImpl implements ChatContextRepository {
-
 
     private final ChatContextMapper chatContextMapper;
 
@@ -50,8 +49,8 @@ public class ChatContextRepositoryImpl implements ChatContextRepository {
         chatContext.setUser(contextDO.getUser());
         chatContext.setQueryText(contextDO.getQueryText());
         if (contextDO.getSemanticParse() != null && !contextDO.getSemanticParse().isEmpty()) {
-            SemanticParseInfo semanticParseInfo = JsonUtil.toObject(contextDO.getSemanticParse(),
-                    SemanticParseInfo.class);
+            SemanticParseInfo semanticParseInfo =
+                    JsonUtil.toObject(contextDO.getSemanticParse(), SemanticParseInfo.class);
             chatContext.setParseInfo(semanticParseInfo);
         }
         return chatContext;

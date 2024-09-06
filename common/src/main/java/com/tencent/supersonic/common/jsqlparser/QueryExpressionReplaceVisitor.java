@@ -1,7 +1,5 @@
 package com.tencent.supersonic.common.jsqlparser;
 
-import java.util.Map;
-import java.util.Objects;
 import net.sf.jsqlparser.expression.Alias;
 import net.sf.jsqlparser.expression.BinaryExpression;
 import net.sf.jsqlparser.expression.Expression;
@@ -10,6 +8,9 @@ import net.sf.jsqlparser.expression.Function;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.statement.select.SelectItem;
+
+import java.util.Map;
+import java.util.Objects;
 
 public class QueryExpressionReplaceVisitor extends ExpressionVisitorAdapter {
 
@@ -40,7 +41,6 @@ public class QueryExpressionReplaceVisitor extends ExpressionVisitorAdapter {
         }
         expr.getLeftExpression().accept(this);
         expr.getRightExpression().accept(this);
-
     }
 
     public void visit(SelectItem selectExpressionItem) {
@@ -55,7 +55,6 @@ public class QueryExpressionReplaceVisitor extends ExpressionVisitorAdapter {
                 columnName = column.getColumnName();
                 toReplace = getReplaceExpr(leftFunc, fieldExprMap);
             }
-
         }
         if (expression instanceof Column) {
             Column column = (Column) expression;
@@ -103,12 +102,13 @@ public class QueryExpressionReplaceVisitor extends ExpressionVisitorAdapter {
     }
 
     public static String getReplaceExpr(Column column, Map<String, String> fieldExprMap) {
-        return fieldExprMap.containsKey(column.getColumnName()) ? fieldExprMap.get(column.getColumnName()) : "";
+        return fieldExprMap.containsKey(column.getColumnName())
+                ? fieldExprMap.get(column.getColumnName())
+                : "";
     }
 
     public static String getReplaceExpr(Function function, Map<String, String> fieldExprMap) {
         Column column = (Column) function.getParameters().getExpressions().get(0);
         return getReplaceExpr(column, fieldExprMap);
     }
-
 }

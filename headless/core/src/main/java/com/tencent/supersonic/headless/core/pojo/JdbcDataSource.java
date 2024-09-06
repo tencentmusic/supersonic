@@ -203,8 +203,10 @@ public class JdbcDataSource {
 
             // default validation query
             String driverName = druidDataSource.getDriverClassName();
-            if (driverName.indexOf("sqlserver") != -1 || driverName.indexOf("mysql") != -1
-                    || driverName.indexOf("h2") != -1 || driverName.indexOf("moonbox") != -1) {
+            if (driverName.indexOf("sqlserver") != -1
+                    || driverName.indexOf("mysql") != -1
+                    || driverName.indexOf("h2") != -1
+                    || driverName.indexOf("moonbox") != -1) {
                 druidDataSource.setValidationQuery("select 1");
             }
 
@@ -240,9 +242,12 @@ public class JdbcDataSource {
     }
 
     private String getDataSourceKey(Database database) {
-        return JdbcDataSourceUtils.getKey(database.getName(),
+        return JdbcDataSourceUtils.getKey(
+                database.getName(),
                 database.getUrl(),
                 database.getUsername(),
-                database.passwordDecrypt(), "", false);
+                database.passwordDecrypt(),
+                "",
+                false);
     }
 }

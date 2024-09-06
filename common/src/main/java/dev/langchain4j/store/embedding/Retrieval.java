@@ -35,8 +35,9 @@ public class Retrieval {
             return false;
         }
         Retrieval retrieval = (Retrieval) o;
-        return Double.compare(retrieval.distance, distance) == 0 && Objects.equal(id,
-                retrieval.id) && Objects.equal(query, retrieval.query)
+        return Double.compare(retrieval.distance, distance) == 0
+                && Objects.equal(id, retrieval.id)
+                && Objects.equal(query, retrieval.query)
                 && Objects.equal(metadata, retrieval.metadata);
     }
 

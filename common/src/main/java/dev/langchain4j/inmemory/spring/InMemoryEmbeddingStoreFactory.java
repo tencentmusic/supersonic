@@ -33,7 +33,8 @@ public class InMemoryEmbeddingStoreFactory extends BaseEmbeddingStoreFactory {
         this.embeddingStore = embeddingStore;
     }
 
-    private static EmbeddingStoreProperties createPropertiesFromConfig(EmbeddingStoreConfig storeConfig) {
+    private static EmbeddingStoreProperties createPropertiesFromConfig(
+            EmbeddingStoreConfig storeConfig) {
         EmbeddingStoreProperties embeddingStore = new EmbeddingStoreProperties();
         BeanUtils.copyProperties(storeConfig, embeddingStore);
         return embeddingStore;
@@ -56,7 +57,8 @@ public class InMemoryEmbeddingStoreFactory extends BaseEmbeddingStoreFactory {
         InMemoryEmbeddingStore<TextSegment> embeddingStore = null;
         try {
             EmbeddingConfig embeddingConfig = ContextUtils.getBean(EmbeddingConfig.class);
-            if (Files.exists(filePath) && !collectionName.equals(embeddingConfig.getMetaCollectionName())
+            if (Files.exists(filePath)
+                    && !collectionName.equals(embeddingConfig.getMetaCollectionName())
                     && !collectionName.equals(embeddingConfig.getText2sqlCollectionName())) {
                 embeddingStore = InMemoryEmbeddingStore.fromFile(filePath);
                 embeddingStore.entries = new CopyOnWriteArraySet<>(embeddingStore.entries);
@@ -72,7 +74,8 @@ public class InMemoryEmbeddingStoreFactory extends BaseEmbeddingStoreFactory {
         if (MapUtils.isEmpty(super.collectionNameToStore)) {
             return;
         }
-        for (Map.Entry<String, EmbeddingStore<TextSegment>> entry : collectionNameToStore.entrySet()) {
+        for (Map.Entry<String, EmbeddingStore<TextSegment>> entry :
+                collectionNameToStore.entrySet()) {
             Path filePath = getPersistPath(entry.getKey());
             if (Objects.isNull(filePath)) {
                 continue;
@@ -101,5 +104,4 @@ public class InMemoryEmbeddingStoreFactory extends BaseEmbeddingStoreFactory {
         }
         return Paths.get(persistPath, persistFile);
     }
-
 }

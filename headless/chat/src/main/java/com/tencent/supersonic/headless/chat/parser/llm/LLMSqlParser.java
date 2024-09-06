@@ -1,22 +1,22 @@
 package com.tencent.supersonic.headless.chat.parser.llm;
 
-
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.headless.chat.ChatQueryContext;
 import com.tencent.supersonic.headless.chat.parser.SemanticParser;
 import com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMReq;
 import com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMResp;
 import com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMSqlResp;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.MapUtils;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections.MapUtils;
 
 /**
- * LLMSqlParser uses large language model to understand query semantics and
- * generate S2SQL statements to be executed by the semantic query engine.
+ * LLMSqlParser uses large language model to understand query semantics and generate S2SQL
+ * statements to be executed by the semantic query engine.
  */
 @Slf4j
 public class LLMSqlParser implements SemanticParser {
@@ -25,18 +25,18 @@ public class LLMSqlParser implements SemanticParser {
     public void parse(ChatQueryContext queryCtx) {
         try {
             LLMRequestService requestService = ContextUtils.getBean(LLMRequestService.class);
-            //1.determine whether to skip this parser.
+            // 1.determine whether to skip this parser.
             if (requestService.isSkip(queryCtx)) {
                 return;
             }
-            //2.get dataSetId from queryCtx and chatCtx.
+            // 2.get dataSetId from queryCtx and chatCtx.
             Long dataSetId = requestService.getDataSetId(queryCtx);
             if (dataSetId == null) {
                 return;
             }
             log.info("try generating query statement for dataSetId:{}", dataSetId);
 
-            //3.invoke LLM service to do parsing.
+            // 3.invoke LLM service to do parsing.
             tryParse(queryCtx, dataSetId);
         } catch (Exception e) {
             log.error("failed to parse query:", e);
@@ -58,11 +58,16 @@ public class LLMSqlParser implements SemanticParser {
             try {
                 LLMResp llmResp = requestService.runText2SQL(llmReq);
                 if (Objects.nonNull(llmResp)) {
-                    //deduplicate the S2SQL result list and build parserInfo
+                    // deduplicate the S2SQL result list and build parserInfo
                     sqlRespMap = responseService.getDeduplicationSqlResp(currentRetry, llmResp);
                     if (MapUtils.isNotEmpty(sqlRespMap)) {
-                        parseResult = ParseResult.builder().dataSetId(dataSetId).llmReq(llmReq)
-                                .llmResp(llmResp).linkingValues(llmReq.getLinking()).build();
+                        parseResult =
+                                ParseResult.builder()
+                                        .dataSetId(dataSetId)
+                                        .llmReq(llmReq)
+                                        .llmResp(llmResp)
+                                        .linkingValues(llmReq.getLinking())
+                                        .build();
                         break;
                     }
                 }
@@ -80,5 +85,4 @@ public class LLMSqlParser implements SemanticParser {
             responseService.addParseInfo(queryCtx, parseResult, sql, sqlWeight);
         }
     }
-
 }

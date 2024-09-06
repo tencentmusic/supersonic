@@ -1,7 +1,5 @@
 package dev.langchain4j.qianfan.spring;
 
-import static dev.langchain4j.qianfan.spring.Properties.PREFIX;
-
 import dev.langchain4j.model.qianfan.QianfanChatModel;
 import dev.langchain4j.model.qianfan.QianfanEmbeddingModel;
 import dev.langchain4j.model.qianfan.QianfanLanguageModel;
@@ -11,6 +9,8 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import static dev.langchain4j.qianfan.spring.Properties.PREFIX;
 
 @Configuration
 @EnableConfigurationProperties(Properties.class)

@@ -1,6 +1,5 @@
 package com.tencent.supersonic.common.util;
 
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -10,9 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-/**
- * * tools functions to file
- */
+/** * tools functions to file */
 public class FileUtils {
 
     public static Boolean exit(String path) {
@@ -25,8 +22,12 @@ public class FileUtils {
             return -1;
         }
         File file = new File(path);
-        Optional<Long> lastModified = Arrays.stream(file.listFiles()).filter(f -> f.isFile())
-                .map(f -> f.lastModified()).sorted(Collections.reverseOrder()).findFirst();
+        Optional<Long> lastModified =
+                Arrays.stream(file.listFiles())
+                        .filter(f -> f.isFile())
+                        .map(f -> f.lastModified())
+                        .sorted(Collections.reverseOrder())
+                        .findFirst();
 
         if (lastModified.isPresent()) {
             return lastModified.get();
@@ -41,7 +42,8 @@ public class FileUtils {
         return null;
     }
 
-    public static void scanDirectory(File file, int maxLevel, Map<Integer, List<File>> directories) {
+    public static void scanDirectory(
+            File file, int maxLevel, Map<Integer, List<File>> directories) {
         if (maxLevel < 0) {
             return;
         }
@@ -78,12 +80,12 @@ public class FileUtils {
                     continue;
                 }
                 String parent = f.getParentFile().getParentFile().getName();
-                if (result.containsKey(parent) && result.get(parent).containsKey(f.getParentFile().getName())) {
+                if (result.containsKey(parent)
+                        && result.get(parent).containsKey(f.getParentFile().getName())) {
                     result.get(parent).get(f.getParentFile().getName()).add(f.getName());
                 }
             }
         }
         return result;
     }
-
 }

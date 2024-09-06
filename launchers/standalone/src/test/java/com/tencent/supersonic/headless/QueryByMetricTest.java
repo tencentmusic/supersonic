@@ -15,8 +15,7 @@ import static org.junit.Assert.assertThrows;
 
 public class QueryByMetricTest extends BaseTest {
 
-    @Autowired
-    protected MetricService metricService;
+    @Autowired protected MetricService metricService;
 
     @Test
     public void testWithMetricAndDimensionBizNames() throws Exception {
@@ -51,7 +50,8 @@ public class QueryByMetricTest extends BaseTest {
         queryMetricReq.setDomainId(2L);
         queryMetricReq.setMetricNames(Arrays.asList("stay_hours", "pv"));
         queryMetricReq.setDimensionNames(Arrays.asList("user_name", "department"));
-        assertThrows(IllegalArgumentException.class,
+        assertThrows(
+                IllegalArgumentException.class,
                 () -> queryByMetric(queryMetricReq, User.getFakeUser()));
     }
 
@@ -66,7 +66,8 @@ public class QueryByMetricTest extends BaseTest {
         Assert.assertEquals(6, queryResp.getResultList().size());
     }
 
-    private SemanticQueryResp queryByMetric(QueryMetricReq queryMetricReq, User user) throws Exception {
+    private SemanticQueryResp queryByMetric(QueryMetricReq queryMetricReq, User user)
+            throws Exception {
         QueryStructReq convert = metricService.convert(queryMetricReq);
         return semanticLayerService.queryByReq(convert.convert(), user);
     }

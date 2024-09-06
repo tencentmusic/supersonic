@@ -30,7 +30,6 @@ import static com.tencent.supersonic.common.pojo.Constants.MONTH_FORMAT;
 import static com.tencent.supersonic.common.pojo.Constants.WEEK;
 import static com.tencent.supersonic.common.pojo.Constants.YEAR;
 
-
 @Slf4j
 @Component
 @Data
@@ -38,19 +37,24 @@ public class DateModeUtils {
 
     @Value("${s2.query.parameter.sys.date:sys_imp_date}")
     private String sysDateCol;
+
     @Value("${s2.query.parameter.sys.month:sys_imp_month}")
     private String sysDateMonthCol;
+
     @Value("${s2.query.parameter.sys.month:sys_imp_week}")
     private String sysDateWeekCol;
 
     @Value("${s2.query.parameter.sys.zipper.begin:start_}")
     private String sysZipperDateColBegin;
+
     @Value("${s2.query.parameter.sys.zipper.end:end_}")
     private String sysZipperDateColEnd;
 
     public Boolean recentMode(DateConf dateInfo) {
-        if (Objects.nonNull(dateInfo) && DateConf.DateMode.RECENT == dateInfo.getDateMode()
-                && DAY.equalsIgnoreCase(dateInfo.getPeriod()) && Objects.nonNull(dateInfo.getUnit())) {
+        if (Objects.nonNull(dateInfo)
+                && DateConf.DateMode.RECENT == dateInfo.getDateMode()
+                && DAY.equalsIgnoreCase(dateInfo.getPeriod())
+                && Objects.nonNull(dateInfo.getUnit())) {
             return true;
         }
         return false;
@@ -73,10 +77,10 @@ public class DateModeUtils {
     public String hasDataModeStr(ItemDateResp dateDate, DateConf dateInfo) {
         if (Objects.isNull(dateDate)
                 || StringUtils.isEmpty(dateDate.getStartDate())
-                || StringUtils.isEmpty(dateDate.getStartDate())
-        ) {
-            return String.format("(%s >= '%s' and %s <= '%s')", sysDateCol, dateInfo.getStartDate(), sysDateCol,
-                    dateInfo.getEndDate());
+                || StringUtils.isEmpty(dateDate.getStartDate())) {
+            return String.format(
+                    "(%s >= '%s' and %s <= '%s')",
+                    sysDateCol, dateInfo.getStartDate(), sysDateCol, dateInfo.getEndDate());
         } else {
             log.info("dateDate:{}", dateDate);
         }
@@ -90,21 +94,31 @@ public class DateModeUtils {
 
         if (endReq.isAfter(endData)) {
             if (DAY.equalsIgnoreCase(dateInfo.getPeriod())) {
-                Long unit = getInterval(dateInfo.getStartDate(), dateInfo.getEndDate(), dateFormatStr, ChronoUnit.DAYS);
+                Long unit =
+                        getInterval(
+                                dateInfo.getStartDate(),
+                                dateInfo.getEndDate(),
+                                dateFormatStr,
+                                ChronoUnit.DAYS);
                 LocalDate dateMax = endData;
                 LocalDate dateMin = dateMax.minusDays(unit - 1);
-                return String.format("(%s >= '%s' and %s <= '%s')", sysDateCol, dateMin, sysDateCol, dateMax);
+                return String.format(
+                        "(%s >= '%s' and %s <= '%s')", sysDateCol, dateMin, sysDateCol, dateMax);
             }
 
             if (MONTH.equalsIgnoreCase(dateInfo.getPeriod())) {
-                Long unit = getInterval(dateInfo.getStartDate(), dateInfo.getEndDate(), dateFormatStr,
-                        ChronoUnit.MONTHS);
+                Long unit =
+                        getInterval(
+                                dateInfo.getStartDate(),
+                                dateInfo.getEndDate(),
+                                dateFormatStr,
+                                ChronoUnit.MONTHS);
                 return generateMonthSql(endData, unit, dateFormatStr);
             }
-
         }
-        return String.format("(%s >= '%s' and %s <= '%s')", sysDateCol, dateInfo.getStartDate(), sysDateCol,
-                dateInfo.getEndDate());
+        return String.format(
+                "(%s >= '%s' and %s <= '%s')",
+                sysDateCol, dateInfo.getStartDate(), sysDateCol, dateInfo.getEndDate());
     }
 
     public String generateMonthSql(LocalDate endData, Long unit, String dateFormatStr) {
@@ -130,7 +144,9 @@ public class DateModeUtils {
 
     public String recentDayStr(ItemDateResp dateDate, DateConf dateInfo) {
         ImmutablePair<String, String> dayRange = recentDay(dateDate, dateInfo);
-        return String.format("(%s >= '%s' and %s <= '%s')", sysDateCol, dayRange.left, sysDateCol, dayRange.right);
+        return String.format(
+                "(%s >= '%s' and %s <= '%s')",
+                sysDateCol, dayRange.left, sysDateCol, dayRange.right);
     }
 
     public ImmutablePair<String, String> recentDay(ItemDateResp dateDate, DateConf dateInfo) {
@@ -151,14 +167,16 @@ public class DateModeUtils {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern(dateFormatStr);
         String endStr = endData.format(formatter);
         String start = endData.minusMonths(unit).format(formatter);
-        return String.format("(%s >= '%s' and %s <= '%s')", sysDateMonthCol, start, sysDateMonthCol, endStr);
+        return String.format(
+                "(%s >= '%s' and %s <= '%s')", sysDateMonthCol, start, sysDateMonthCol, endStr);
     }
 
     public String recentMonthStr(ItemDateResp dateDate, DateConf dateInfo) {
         List<ImmutablePair<String, String>> range = recentMonth(dateDate, dateInfo);
         if (range.size() == 1) {
-            return String.format("(%s >= '%s' and %s <= '%s')", sysDateMonthCol, range.get(0).left, sysDateMonthCol,
-                    range.get(0).right);
+            return String.format(
+                    "(%s >= '%s' and %s <= '%s')",
+                    sysDateMonthCol, range.get(0).left, sysDateMonthCol, range.get(0).right);
         }
         if (range.size() > 0) {
             StringJoiner joiner = new StringJoiner(",");
@@ -168,13 +186,20 @@ public class DateModeUtils {
         return "";
     }
 
-    public List<ImmutablePair<String, String>> recentMonth(ItemDateResp dateDate, DateConf dateInfo) {
-        LocalDate endData = LocalDate.parse(dateDate.getEndDate(),
-                DateTimeFormatter.ofPattern(dateDate.getDateFormat()));
+    public List<ImmutablePair<String, String>> recentMonth(
+            ItemDateResp dateDate, DateConf dateInfo) {
+        LocalDate endData =
+                LocalDate.parse(
+                        dateDate.getEndDate(),
+                        DateTimeFormatter.ofPattern(dateDate.getDateFormat()));
         List<ImmutablePair<String, String>> ret = new ArrayList<>();
         if (dateDate.getDatePeriod() != null && MONTH.equalsIgnoreCase(dateDate.getDatePeriod())) {
-            Long unit = getInterval(dateInfo.getStartDate(), dateInfo.getEndDate(), dateDate.getDateFormat(),
-                    ChronoUnit.MONTHS);
+            Long unit =
+                    getInterval(
+                            dateInfo.getStartDate(),
+                            dateInfo.getEndDate(),
+                            dateDate.getDateFormat(),
+                            ChronoUnit.MONTHS);
             LocalDate dateMax = endData;
             List<String> months = generateMonthStr(dateMax, unit, dateDate.getDateFormat());
             if (!CollectionUtils.isEmpty(months)) {
@@ -194,14 +219,16 @@ public class DateModeUtils {
     public String recentWeekStr(LocalDate endData, Long unit) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DAY_FORMAT);
         String start = endData.minusDays(unit * 7).format(formatter);
-        return String.format("(%s >= '%s' and %s <= '%s')", sysDateWeekCol, start, sysDateWeekCol,
-                endData.format(formatter));
+        return String.format(
+                "(%s >= '%s' and %s <= '%s')",
+                sysDateWeekCol, start, sysDateWeekCol, endData.format(formatter));
     }
 
     public String recentWeekStr(ItemDateResp dateDate, DateConf dateInfo) {
         ImmutablePair<String, String> dayRange = recentWeek(dateDate, dateInfo);
-        return String.format("(%s >= '%s' and %s <= '%s')", sysDateWeekCol, dayRange.left, sysDateWeekCol,
-                dayRange.right);
+        return String.format(
+                "(%s >= '%s' and %s <= '%s')",
+                sysDateWeekCol, dayRange.left, sysDateWeekCol, dayRange.right);
     }
 
     public ImmutablePair<String, String> recentWeek(ItemDateResp dateDate, DateConf dateInfo) {
@@ -216,7 +243,8 @@ public class DateModeUtils {
         return ImmutablePair.of(start, end.format(formatter));
     }
 
-    private Long getInterval(String startDate, String endDate, String dateFormat, ChronoUnit chronoUnit) {
+    private Long getInterval(
+            String startDate, String endDate, String dateFormat, ChronoUnit chronoUnit) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern(dateFormat);
         try {
             LocalDate start = LocalDate.parse(startDate, formatter);
@@ -254,22 +282,33 @@ public class DateModeUtils {
         if (MONTH.equalsIgnoreCase(dateInfo.getPeriod())) {
             // startDate YYYYMM
             if (!dateInfo.getStartDate().contains(Constants.MINUS)) {
-                return String.format("%s >= '%s' and %s <= '%s'",
-                        sysDateMonthCol, dateInfo.getStartDate(), sysDateMonthCol, dateInfo.getEndDate());
+                return String.format(
+                        "%s >= '%s' and %s <= '%s'",
+                        sysDateMonthCol,
+                        dateInfo.getStartDate(),
+                        sysDateMonthCol,
+                        dateInfo.getEndDate());
             }
-            LocalDate endData = LocalDate.parse(dateInfo.getEndDate(),
-                    DateTimeFormatter.ofPattern(DAY_FORMAT));
-            LocalDate startData = LocalDate.parse(dateInfo.getStartDate(),
-                    DateTimeFormatter.ofPattern(DAY_FORMAT));
+            LocalDate endData =
+                    LocalDate.parse(dateInfo.getEndDate(), DateTimeFormatter.ofPattern(DAY_FORMAT));
+            LocalDate startData =
+                    LocalDate.parse(
+                            dateInfo.getStartDate(), DateTimeFormatter.ofPattern(DAY_FORMAT));
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern(MONTH_FORMAT);
-            return String.format("%s >= '%s' and %s <= '%s'",
-                    sysDateMonthCol, startData.format(formatter), sysDateMonthCol, endData.format(formatter));
+            return String.format(
+                    "%s >= '%s' and %s <= '%s'",
+                    sysDateMonthCol,
+                    startData.format(formatter),
+                    sysDateMonthCol,
+                    endData.format(formatter));
         }
         if (WEEK.equalsIgnoreCase(dateInfo.getPeriod())) {
-            return String.format("%s >= '%s' and %s <= '%s'",
+            return String.format(
+                    "%s >= '%s' and %s <= '%s'",
                     sysDateWeekCol, dateInfo.getStartDate(), sysDateWeekCol, dateInfo.getEndDate());
         }
-        return String.format("%s >= '%s' and %s <= '%s'",
+        return String.format(
+                "%s >= '%s' and %s <= '%s'",
                 sysDateCol, dateInfo.getStartDate(), sysDateCol, dateInfo.getEndDate());
     }
 
@@ -308,7 +347,8 @@ public class DateModeUtils {
         if (DAY.equalsIgnoreCase(dateInfo.getPeriod())) {
             LocalDate dateMax = LocalDate.now().minusDays(1);
             LocalDate dateMin = dateMax.minusDays(unit - 1);
-            return String.format("(%s >= '%s' and %s <= '%s')", sysDateCol, dateMin, sysDateCol, dateMax);
+            return String.format(
+                    "(%s >= '%s' and %s <= '%s')", sysDateCol, dateMin, sysDateCol, dateMax);
         }
 
         if (WEEK.equalsIgnoreCase(dateInfo.getPeriod())) {
@@ -324,8 +364,9 @@ public class DateModeUtils {
             return recentMonthStr(dateMax, unit.longValue() * 12, MONTH_FORMAT);
         }
 
-        return String.format("(%s >= '%s' and %s <= '%s')", sysDateCol, LocalDate.now().minusDays(2), sysDateCol,
-                LocalDate.now().minusDays(1));
+        return String.format(
+                "(%s >= '%s' and %s <= '%s')",
+                sysDateCol, LocalDate.now().minusDays(2), sysDateCol, LocalDate.now().minusDays(1));
     }
 
     public String getDateWhereStr(DateConf dateInfo) {
@@ -352,7 +393,6 @@ public class DateModeUtils {
                 break;
             default:
                 break;
-
         }
         return dateStr;
     }
@@ -386,5 +426,4 @@ public class DateModeUtils {
         }
         return "";
     }
-
 }

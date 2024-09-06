@@ -12,9 +12,7 @@ import com.tencent.supersonic.headless.api.pojo.response.SearchResult;
 
 import java.util.List;
 
-/**
- * This interface adds natural language support to the semantic layer.
- */
+/** This interface adds natural language support to the semantic layer. */
 public interface ChatLayerService {
 
     MapResp performMapping(QueryNLReq queryNLReq);
@@ -29,4 +27,3 @@ public interface ChatLayerService {
 
     SqlEvaluation validate(QuerySqlReq querySqlReq, User user);
 }
-

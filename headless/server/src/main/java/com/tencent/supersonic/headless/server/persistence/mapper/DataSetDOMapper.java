@@ -5,7 +5,4 @@ import com.tencent.supersonic.headless.server.persistence.dataobject.DataSetDO;
 import org.apache.ibatis.annotations.Mapper;
 
 @Mapper
-public interface DataSetDOMapper extends BaseMapper<DataSetDO> {
-
-
-}
+public interface DataSetDOMapper extends BaseMapper<DataSetDO> {}

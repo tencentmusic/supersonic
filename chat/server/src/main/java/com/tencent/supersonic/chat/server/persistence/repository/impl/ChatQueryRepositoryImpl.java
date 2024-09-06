@@ -7,6 +7,8 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.tencent.supersonic.chat.api.pojo.request.ChatParseReq;
 import com.tencent.supersonic.chat.api.pojo.request.PageQueryInfoReq;
+import com.tencent.supersonic.chat.api.pojo.response.QueryResp;
+import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.chat.api.pojo.response.SimilarQueryRecallResp;
 import com.tencent.supersonic.chat.server.persistence.dataobject.ChatParseDO;
 import com.tencent.supersonic.chat.server.persistence.dataobject.ChatQueryDO;
@@ -18,9 +20,7 @@ import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.common.util.PageUtils;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.api.pojo.response.ParseResp;
-import com.tencent.supersonic.chat.api.pojo.response.QueryResp;
 import com.tencent.supersonic.headless.api.pojo.response.ParseTimeCostResp;
-import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -40,14 +40,11 @@ import java.util.stream.Collectors;
 @Slf4j
 public class ChatQueryRepositoryImpl implements ChatQueryRepository {
 
-    @Autowired
-    private ChatQueryDOMapper chatQueryDOMapper;
+    @Autowired private ChatQueryDOMapper chatQueryDOMapper;
 
-    @Autowired
-    private ChatParseMapper chatParseMapper;
+    @Autowired private ChatParseMapper chatParseMapper;
 
-    @Autowired
-    private ShowCaseCustomMapper showCaseCustomMapper;
+    @Autowired private ShowCaseCustomMapper showCaseCustomMapper;
 
     @Override
     public PageInfo<QueryResp> getChatQuery(PageQueryInfoReq pageQueryInfoReq, Long chatId) {
@@ -65,9 +62,9 @@ public class ChatQueryRepositoryImpl implements ChatQueryRepository {
         queryWrapper.lambda().ne(ChatQueryDO::getQueryResult, "");
         queryWrapper.lambda().orderByDesc(ChatQueryDO::getQuestionId);
 
-        PageInfo<ChatQueryDO> pageInfo = PageHelper.startPage(pageQueryInfoReq.getCurrent(),
-                        pageQueryInfoReq.getPageSize())
-                .doSelectPageInfo(() -> chatQueryDOMapper.selectList(queryWrapper));
+        PageInfo<ChatQueryDO> pageInfo =
+                PageHelper.startPage(pageQueryInfoReq.getCurrent(), pageQueryInfoReq.getPageSize())
+                        .doSelectPageInfo(() -> chatQueryDOMapper.selectList(queryWrapper));
 
         PageInfo<QueryResp> chatQueryVOPageInfo = PageUtils.pageInfo2PageInfoVo(pageInfo);
         chatQueryVOPageInfo.setList(
@@ -104,24 +101,31 @@ public class ChatQueryRepositoryImpl implements ChatQueryRepository {
 
     @Override
     public List<QueryResp> queryShowCase(PageQueryInfoReq pageQueryInfoReq, int agentId) {
-        return showCaseCustomMapper.queryShowCase(pageQueryInfoReq.getLimitStart(),
-                        pageQueryInfoReq.getPageSize(), agentId, pageQueryInfoReq.getUserName())
-                .stream().map(this::convertTo)
+        return showCaseCustomMapper
+                .queryShowCase(
+                        pageQueryInfoReq.getLimitStart(),
+                        pageQueryInfoReq.getPageSize(),
+                        agentId,
+                        pageQueryInfoReq.getUserName())
+                .stream()
+                .map(this::convertTo)
                 .collect(Collectors.toList());
     }
 
     private QueryResp convertTo(ChatQueryDO chatQueryDO) {
         QueryResp queryResp = new QueryResp();
         BeanUtils.copyProperties(chatQueryDO, queryResp);
-        QueryResult queryResult = JsonUtil.toObject(chatQueryDO.getQueryResult(), QueryResult.class);
+        QueryResult queryResult =
+                JsonUtil.toObject(chatQueryDO.getQueryResult(), QueryResult.class);
         if (queryResult != null) {
             queryResult.setQueryId(chatQueryDO.getQuestionId());
             queryResp.setQueryResult(queryResult);
         }
-        queryResp.setSimilarQueries(JSONObject.parseArray(chatQueryDO.getSimilarQueries(),
-                SimilarQueryRecallResp.class));
-        queryResp.setParseTimeCost(JsonUtil.toObject(chatQueryDO.getParseTimeCost(),
-                ParseTimeCostResp.class));
+        queryResp.setSimilarQueries(
+                JSONObject.parseArray(
+                        chatQueryDO.getSimilarQueries(), SimilarQueryRecallResp.class));
+        queryResp.setParseTimeCost(
+                JsonUtil.toObject(chatQueryDO.getParseTimeCost(), ParseTimeCostResp.class));
         return queryResp;
     }
 
@@ -143,8 +147,10 @@ public class ChatQueryRepositoryImpl implements ChatQueryRepository {
     }
 
     @Override
-    public List<ChatParseDO> batchSaveParseInfo(ChatParseReq chatParseReq,
-                                                ParseResp parseResult, List<SemanticParseInfo> candidateParses) {
+    public List<ChatParseDO> batchSaveParseInfo(
+            ChatParseReq chatParseReq,
+            ParseResp parseResult,
+            List<SemanticParseInfo> candidateParses) {
         List<ChatParseDO> chatParseDOList = new ArrayList<>();
         getChatParseDO(chatParseReq, parseResult.getQueryId(), candidateParses, chatParseDOList);
         if (!CollectionUtils.isEmpty(candidateParses)) {
@@ -153,8 +159,11 @@ public class ChatQueryRepositoryImpl implements ChatQueryRepository {
         return chatParseDOList;
     }
 
-    public void getChatParseDO(ChatParseReq chatParseReq, Long queryId,
-                               List<SemanticParseInfo> parses, List<ChatParseDO> chatParseDOList) {
+    public void getChatParseDO(
+            ChatParseReq chatParseReq,
+            Long queryId,
+            List<SemanticParseInfo> parses,
+            List<ChatParseDO> chatParseDOList) {
         for (int i = 0; i < parses.size(); i++) {
             ChatParseDO chatParseDO = new ChatParseDO();
             chatParseDO.setChatId(chatParseReq.getChatId());
@@ -190,5 +199,4 @@ public class ChatQueryRepositoryImpl implements ChatQueryRepository {
     public List<ChatParseDO> getParseInfoList(List<Long> questionIds) {
         return chatParseMapper.getParseInfoList(questionIds);
     }
-
 }

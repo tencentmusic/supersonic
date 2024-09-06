@@ -5,5 +5,4 @@ import com.tencent.supersonic.headless.server.persistence.dataobject.TagObjectDO
 import org.apache.ibatis.annotations.Mapper;
 
 @Mapper
-public interface TagObjectMapper extends BaseMapper<TagObjectDO> {
-}
+public interface TagObjectMapper extends BaseMapper<TagObjectDO> {}

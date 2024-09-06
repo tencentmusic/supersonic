@@ -12,5 +12,4 @@ public class UnAvailableItemResp {
     private List<MetricResp> metricResps;
 
     private List<DimensionResp> dimensionResps;
-
 }

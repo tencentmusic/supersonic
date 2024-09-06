@@ -1,5 +1,8 @@
 package com.tencent.supersonic.chat.server.rest;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
 import com.tencent.supersonic.chat.server.agent.Agent;
@@ -16,8 +19,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 import java.util.Map;
 
@@ -25,21 +26,22 @@ import java.util.Map;
 @RequestMapping({"/api/chat/agent", "/openapi/chat/agent"})
 public class AgentController {
 
-    @Autowired
-    private AgentService agentService;
+    @Autowired private AgentService agentService;
 
     @PostMapping
-    public Agent createAgent(@RequestBody Agent agent,
-                             HttpServletRequest httpServletRequest,
-                             HttpServletResponse httpServletResponse) {
+    public Agent createAgent(
+            @RequestBody Agent agent,
+            HttpServletRequest httpServletRequest,
+            HttpServletResponse httpServletResponse) {
         User user = UserHolder.findUser(httpServletRequest, httpServletResponse);
         return agentService.createAgent(agent, user);
     }
 
     @PutMapping
-    public Agent updateAgent(@RequestBody Agent agent,
-                             HttpServletRequest httpServletRequest,
-                             HttpServletResponse httpServletResponse) {
+    public Agent updateAgent(
+            @RequestBody Agent agent,
+            HttpServletRequest httpServletRequest,
+            HttpServletResponse httpServletResponse) {
         User user = UserHolder.findUser(httpServletRequest, httpServletResponse);
         return agentService.updateAgent(agent, user);
     }
@@ -64,5 +66,4 @@ public class AgentController {
     public Map<AgentToolType, String> getToolTypes() {
         return AgentToolType.getToolTypes();
     }
-
 }

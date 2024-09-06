@@ -13,7 +13,8 @@ import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
 @Slf4j
 public class DateFunctionHelper {
 
-    public static String getStartDateStr(ComparisonOperator minorThanEquals, ExpressionList<?> expressions) {
+    public static String getStartDateStr(
+            ComparisonOperator minorThanEquals, ExpressionList<?> expressions) {
         String unitValue = getUnit(expressions);
         String dateValue = getEndDateValue(expressions);
         String dateStr = "";
@@ -22,9 +23,11 @@ public class DateFunctionHelper {
         if (rightExpression instanceof DoubleValue) {
             DoubleValue value = (DoubleValue) rightExpression;
             double doubleValue = value.getValue();
-            if (DatePeriodEnum.YEAR.equals(datePeriodEnum) && doubleValue == JsqlConstants.HALF_YEAR) {
+            if (DatePeriodEnum.YEAR.equals(datePeriodEnum)
+                    && doubleValue == JsqlConstants.HALF_YEAR) {
                 datePeriodEnum = DatePeriodEnum.MONTH;
-                dateStr = DateUtils.getBeforeDate(dateValue, JsqlConstants.SIX_MONTH, datePeriodEnum);
+                dateStr =
+                        DateUtils.getBeforeDate(dateValue, JsqlConstants.SIX_MONTH, datePeriodEnum);
             }
         } else if (rightExpression instanceof LongValue) {
             LongValue value = (LongValue) rightExpression;
@@ -47,5 +50,4 @@ public class DateFunctionHelper {
         StringValue unit = (StringValue) expressions.get(0);
         return unit.getValue();
     }
-
 }

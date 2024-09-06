@@ -1,9 +1,10 @@
 package com.tencent.supersonic.headless.api.pojo.request;
 
-import java.util.List;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+
+import java.util.List;
 
 @Data
 @ToString
@@ -20,6 +21,7 @@ public class ItemUseReq {
         this.startTime = startTime;
         this.modelId = modelId;
     }
+
     public ItemUseReq(String startTime, List<Long> modelIds) {
         this.startTime = startTime;
         this.modelIds = modelIds;

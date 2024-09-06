@@ -23,5 +23,4 @@ public class DrillDownDimension {
         this.dimensionId = dimensionId;
         this.necessary = necessary;
     }
-
 }

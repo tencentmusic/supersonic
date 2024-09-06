@@ -1,16 +1,13 @@
 package com.tencent.supersonic.common.pojo.enums;
 
 public enum SinkDbEnum {
-
     TDW("TDW"),
 
     DORIS("DORIS"),
 
     ICEBERY("ICEBERY"),
 
-
     NOT_SUPPORT("NOT_SUPPORT");
-
 
     private String db;
 

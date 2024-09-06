@@ -38,5 +38,4 @@ public class Measure {
     public String getFieldName() {
         return expr;
     }
-
 }

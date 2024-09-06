@@ -6,5 +6,4 @@ import lombok.Data;
 public class AppDetailResp extends AppResp {
 
     private String appSecret;
-
 }

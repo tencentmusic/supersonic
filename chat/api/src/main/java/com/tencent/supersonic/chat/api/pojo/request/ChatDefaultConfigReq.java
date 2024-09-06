@@ -1,6 +1,5 @@
 package com.tencent.supersonic.chat.api.pojo.request;
 
-
 import lombok.Data;
 
 import java.util.ArrayList;
@@ -11,6 +10,4 @@ public class ChatDefaultConfigReq {
 
     private List<Long> dimensionIds = new ArrayList<>();
     private List<Long> metricIds = new ArrayList<>();
-
-
 }

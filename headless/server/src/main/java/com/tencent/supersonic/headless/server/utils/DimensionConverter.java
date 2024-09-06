@@ -65,21 +65,27 @@ public class DimensionConverter {
         return dimensionDO;
     }
 
-    public static DimensionResp convert2DimensionResp(DimensionDO dimensionDO,
-                                                      Map<Long, ModelResp> modelRespMap) {
+    public static DimensionResp convert2DimensionResp(
+            DimensionDO dimensionDO, Map<Long, ModelResp> modelRespMap) {
         DimensionResp dimensionResp = new DimensionResp();
         BeanUtils.copyProperties(dimensionDO, dimensionResp);
         dimensionResp.setModelName(
                 modelRespMap.getOrDefault(dimensionResp.getModelId(), new ModelResp()).getName());
         dimensionResp.setModelBizName(
-                modelRespMap.getOrDefault(dimensionResp.getModelId(), new ModelResp()).getBizName());
+                modelRespMap
+                        .getOrDefault(dimensionResp.getModelId(), new ModelResp())
+                        .getBizName());
         if (dimensionDO.getDefaultValues() != null) {
-            dimensionResp.setDefaultValues(JSONObject.parseObject(dimensionDO.getDefaultValues(), List.class));
+            dimensionResp.setDefaultValues(
+                    JSONObject.parseObject(dimensionDO.getDefaultValues(), List.class));
         }
         dimensionResp.setModelFilterSql(
-                modelRespMap.getOrDefault(dimensionResp.getModelId(), new ModelResp()).getFilterSql());
+                modelRespMap
+                        .getOrDefault(dimensionResp.getModelId(), new ModelResp())
+                        .getFilterSql());
         if (StringUtils.isNotEmpty(dimensionDO.getDimValueMaps())) {
-            dimensionResp.setDimValueMaps(JsonUtil.toList(dimensionDO.getDimValueMaps(), DimValueMap.class));
+            dimensionResp.setDimValueMaps(
+                    JsonUtil.toList(dimensionDO.getDimValueMaps(), DimValueMap.class));
         }
         if (StringUtils.isNotEmpty(dimensionDO.getDataType())) {
             dimensionResp.setDataType(DataTypeEnums.of(dimensionDO.getDataType()));
@@ -99,7 +105,7 @@ public class DimensionConverter {
 
     private static DimensionType getType(String type) {
         try {
-            //Support compatibility with legacy data.
+            // Support compatibility with legacy data.
             IdentifyType.valueOf(type.toLowerCase());
             return DimensionType.identify;
         } catch (IllegalArgumentException e) {
@@ -107,11 +113,15 @@ public class DimensionConverter {
         }
     }
 
-    public static List<DimensionResp> filterByDataSet(List<DimensionResp> dimensionResps, DataSetResp dataSetResp) {
-        return dimensionResps.stream().filter(dimensionResp ->
-                        dataSetResp.dimensionIds().contains(dimensionResp.getId())
-                                || dataSetResp.getAllIncludeAllModels().contains(dimensionResp.getModelId()))
+    public static List<DimensionResp> filterByDataSet(
+            List<DimensionResp> dimensionResps, DataSetResp dataSetResp) {
+        return dimensionResps.stream()
+                .filter(
+                        dimensionResp ->
+                                dataSetResp.dimensionIds().contains(dimensionResp.getId())
+                                        || dataSetResp
+                                                .getAllIncludeAllModels()
+                                                .contains(dimensionResp.getModelId()))
                 .collect(Collectors.toList());
     }
-
 }

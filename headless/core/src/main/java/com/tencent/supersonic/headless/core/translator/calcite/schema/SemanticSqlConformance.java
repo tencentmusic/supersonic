@@ -4,9 +4,7 @@ import org.apache.calcite.sql.fun.SqlLibrary;
 import org.apache.calcite.sql.validate.SqlConformance;
 import org.apache.calcite.sql.validate.SqlConformanceEnum;
 
-/**
- * customize the  SqlConformance
- */
+/** customize the SqlConformance */
 public class SemanticSqlConformance implements SqlConformance {
 
     @Override

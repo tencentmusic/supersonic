@@ -12,8 +12,8 @@ public class SignatureUtils {
         return DigestUtils.sha1Hex(psw);
     }
 
-    public static Pair<Boolean, String> isValidSignature(String appKey, String appSecret,
-                                                         long timestamp, String signatureToCheck) {
+    public static Pair<Boolean, String> isValidSignature(
+            String appKey, String appSecret, long timestamp, String signatureToCheck) {
         long currentTimeMillis = System.currentTimeMillis();
 
         if (currentTimeMillis < timestamp) {
@@ -34,16 +34,16 @@ public class SignatureUtils {
     }
 
     public static void main(String[] args) throws InterruptedException {
-        //生成的密钥
+        // 生成的密钥
         String appSecret = "38f2857c-d9ee-4c3a-bcc2-2cdb62fda5aa";
         long timestamp = 1706504908126L;
         System.out.println("timeStamp:" + timestamp);
-        //生成的签名
+        // 生成的签名
         String serverSignature = generateSignature(appSecret, timestamp);
         System.out.println("Server Signature: " + serverSignature);
-        //用户需要的入参
-        Pair<Boolean, String> isValid = isValidSignature("1", appSecret, timestamp, serverSignature);
+        // 用户需要的入参
+        Pair<Boolean, String> isValid =
+                isValidSignature("1", appSecret, timestamp, serverSignature);
         System.out.println("Is Signature Valid? " + isValid.first);
     }
-
 }

@@ -2,8 +2,9 @@ package com.tencent.supersonic.chat.server.persistence.mapper;
 
 import com.tencent.supersonic.chat.server.persistence.dataobject.ChatDO;
 import com.tencent.supersonic.chat.server.persistence.dataobject.QueryDO;
-import java.util.List;
 import org.apache.ibatis.annotations.Mapper;
+
+import java.util.List;
 
 @Mapper
 public interface ChatMapper {
@@ -21,5 +22,4 @@ public interface ChatMapper {
     boolean updateFeedback(QueryDO queryDO);
 
     Boolean deleteChat(Long chatId, String userName);
-
 }

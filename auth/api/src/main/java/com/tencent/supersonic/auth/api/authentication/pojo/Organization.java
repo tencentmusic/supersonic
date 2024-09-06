@@ -23,5 +23,4 @@ public class Organization {
     private List<Organization> subOrganizations = Lists.newArrayList();
 
     private boolean isRoot;
-
 }

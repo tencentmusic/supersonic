@@ -19,7 +19,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-
 @Service
 public class TermServiceImpl extends ServiceImpl<TermMapper, TermDO> implements TermService {
 
@@ -58,8 +57,9 @@ public class TermServiceImpl extends ServiceImpl<TermMapper, TermDO> implements 
         QueryWrapper<TermDO> queryWrapper = new QueryWrapper<>();
         queryWrapper.lambda().in(TermDO::getDomainId, domainIds);
         List<TermDO> list = list(queryWrapper);
-        return list.stream().map(this::convert).collect(
-                Collectors.groupingBy(TermResp::getDomainId));
+        return list.stream()
+                .map(this::convert)
+                .collect(Collectors.groupingBy(TermResp::getDomainId));
     }
 
     private TermResp convert(TermDO termDO) {
@@ -77,5 +77,4 @@ public class TermServiceImpl extends ServiceImpl<TermMapper, TermDO> implements 
         termDO.setRelatedDimensions(JsonUtil.toString(termReq.getRelateDimensions()));
         termDO.setRelatedMetrics(JsonUtil.toString(termReq.getRelatedMetrics()));
     }
-
 }

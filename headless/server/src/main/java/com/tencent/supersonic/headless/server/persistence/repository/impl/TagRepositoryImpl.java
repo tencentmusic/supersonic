@@ -20,8 +20,7 @@ public class TagRepositoryImpl implements TagRepository {
     private final TagMapper mapper;
     private final TagCustomMapper tagCustomMapper;
 
-    public TagRepositoryImpl(TagMapper mapper,
-                             TagCustomMapper tagCustomMapper) {
+    public TagRepositoryImpl(TagMapper mapper, TagCustomMapper tagCustomMapper) {
         this.mapper = mapper;
         this.tagCustomMapper = tagCustomMapper;
     }
@@ -62,8 +61,10 @@ public class TagRepositoryImpl implements TagRepository {
         if (CollectionUtils.isNotEmpty(tagDeleteReq.getIds())) {
             tagCustomMapper.deleteBatchByIds(tagDeleteReq.getIds());
         }
-        if (Objects.nonNull(tagDeleteReq.getTagDefineType()) && CollectionUtils.isNotEmpty(tagDeleteReq.getItemIds())) {
-            tagCustomMapper.deleteBatchByType(tagDeleteReq.getItemIds(), tagDeleteReq.getTagDefineType().name());
+        if (Objects.nonNull(tagDeleteReq.getTagDefineType())
+                && CollectionUtils.isNotEmpty(tagDeleteReq.getItemIds())) {
+            tagCustomMapper.deleteBatchByType(
+                    tagDeleteReq.getItemIds(), tagDeleteReq.getTagDefineType().name());
         }
     }
 }
