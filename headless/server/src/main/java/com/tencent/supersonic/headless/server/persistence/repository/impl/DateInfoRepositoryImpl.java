@@ -24,11 +24,9 @@ import java.util.concurrent.TimeUnit;
 @Repository
 public class DateInfoRepositoryImpl implements DateInfoRepository {
 
-
     private ObjectMapper mapper = new ObjectMapper();
 
-    @Autowired
-    private DateInfoMapper dateInfoMapper;
+    @Autowired private DateInfoMapper dateInfoMapper;
 
     @Override
     public Integer upsertDateInfo(List<DateInfoReq> dateInfoCommends) {
@@ -38,25 +36,30 @@ public class DateInfoRepositoryImpl implements DateInfoRepository {
             return 0;
         }
 
-        dateInfoCommends.stream().forEach(commend -> {
-            DateInfoDO dateInfoDO = new DateInfoDO();
-            BeanUtils.copyProperties(commend, dateInfoDO);
-            try {
-                dateInfoDO.setUnavailableDateList(mapper.writeValueAsString(commend.getUnavailableDateList()));
-                dateInfoDO.setCreatedBy(Constants.ADMIN_LOWER);
-                dateInfoDO.setUpdatedBy(Constants.ADMIN_LOWER);
-            } catch (JsonProcessingException e) {
-                log.info("e,", e);
-            }
-            dateInfoDOList.add(dateInfoDO);
-        });
+        dateInfoCommends.stream()
+                .forEach(
+                        commend -> {
+                            DateInfoDO dateInfoDO = new DateInfoDO();
+                            BeanUtils.copyProperties(commend, dateInfoDO);
+                            try {
+                                dateInfoDO.setUnavailableDateList(
+                                        mapper.writeValueAsString(
+                                                commend.getUnavailableDateList()));
+                                dateInfoDO.setCreatedBy(Constants.ADMIN_LOWER);
+                                dateInfoDO.setUpdatedBy(Constants.ADMIN_LOWER);
+                            } catch (JsonProcessingException e) {
+                                log.info("e,", e);
+                            }
+                            dateInfoDOList.add(dateInfoDO);
+                        });
 
         return batchUpsert(dateInfoDOList);
     }
 
     @Override
     public List<DateInfoDO> getDateInfos(ItemDateFilter itemDateFilter) {
-        if (Objects.nonNull(itemDateFilter) && CollectionUtils.isEmpty(itemDateFilter.getItemIds())) {
+        if (Objects.nonNull(itemDateFilter)
+                && CollectionUtils.isEmpty(itemDateFilter.getItemIds())) {
             return new ArrayList<>();
         }
         return dateInfoMapper.getDateInfos(itemDateFilter);

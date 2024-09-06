@@ -1,4 +1,3 @@
-
 package com.tencent.supersonic.headless.chat.query.rule;
 
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
@@ -41,8 +40,8 @@ public abstract class RuleSemanticQuery extends BaseSemanticQuery {
         QueryManager.register(this);
     }
 
-    public List<SchemaElementMatch> match(List<SchemaElementMatch> candidateElementMatches,
-                                          ChatQueryContext queryCtx) {
+    public List<SchemaElementMatch> match(
+            List<SchemaElementMatch> candidateElementMatches, ChatQueryContext queryCtx) {
         return queryMatcher.match(candidateElementMatches);
     }
 
@@ -68,17 +67,19 @@ public abstract class RuleSemanticQuery extends BaseSemanticQuery {
         return chatQueryContext.containsPartitionDimensions(dataSetId);
     }
 
-    private void fillDateConfByInherited(SemanticParseInfo queryParseInfo, ChatQueryContext chatQueryContext) {
+    private void fillDateConfByInherited(
+            SemanticParseInfo queryParseInfo, ChatQueryContext chatQueryContext) {
         SemanticParseInfo contextParseInfo = chatQueryContext.getContextParseInfo();
-        if (queryParseInfo.getDateInfo() != null || contextParseInfo.getDateInfo() == null
+        if (queryParseInfo.getDateInfo() != null
+                || contextParseInfo.getDateInfo() == null
                 || needFillDateConf(chatQueryContext)) {
             return;
         }
 
         if ((QueryManager.isDetailQuery(queryParseInfo.getQueryMode())
-                && QueryManager.isDetailQuery(contextParseInfo.getQueryMode()))
+                        && QueryManager.isDetailQuery(contextParseInfo.getQueryMode()))
                 || (QueryManager.isMetricQuery(queryParseInfo.getQueryMode())
-                && QueryManager.isMetricQuery(contextParseInfo.getQueryMode()))) {
+                        && QueryManager.isMetricQuery(contextParseInfo.getQueryMode()))) {
             // inherit date info from context
             queryParseInfo.setDateInfo(contextParseInfo.getDateInfo());
             queryParseInfo.getDateInfo().setInherited(true);
@@ -105,8 +106,11 @@ public abstract class RuleSemanticQuery extends BaseSemanticQuery {
     }
 
     private void fillSchemaElement(SemanticParseInfo parseInfo, SemanticSchema semanticSchema) {
-        Set<Long> dataSetIds = parseInfo.getElementMatches().stream().map(SchemaElementMatch::getElement)
-                .map(SchemaElement::getDataSetId).collect(Collectors.toSet());
+        Set<Long> dataSetIds =
+                parseInfo.getElementMatches().stream()
+                        .map(SchemaElementMatch::getElement)
+                        .map(SchemaElement::getDataSetId)
+                        .collect(Collectors.toSet());
         Long dataSetId = dataSetIds.iterator().next();
         parseInfo.setDataSet(semanticSchema.getDataSet(dataSetId));
         Map<Long, List<SchemaElementMatch>> dim2Values = new HashMap<>();
@@ -117,22 +121,26 @@ public abstract class RuleSemanticQuery extends BaseSemanticQuery {
             element.setOrder(1 - schemaMatch.getSimilarity());
             switch (element.getType()) {
                 case ID:
-                    SchemaElement entityElement = semanticSchema.getElement(SchemaElementType.ENTITY, element.getId());
+                    SchemaElement entityElement =
+                            semanticSchema.getElement(SchemaElementType.ENTITY, element.getId());
                     if (entityElement != null) {
                         if (id2Values.containsKey(element.getId())) {
                             id2Values.get(element.getId()).add(schemaMatch);
                         } else {
-                            id2Values.put(element.getId(), new ArrayList<>(Arrays.asList(schemaMatch)));
+                            id2Values.put(
+                                    element.getId(), new ArrayList<>(Arrays.asList(schemaMatch)));
                         }
                     }
                     break;
                 case VALUE:
-                    SchemaElement dimElement = semanticSchema.getElement(SchemaElementType.DIMENSION, element.getId());
+                    SchemaElement dimElement =
+                            semanticSchema.getElement(SchemaElementType.DIMENSION, element.getId());
                     if (dimElement != null) {
                         if (dim2Values.containsKey(element.getId())) {
                             dim2Values.get(element.getId()).add(schemaMatch);
                         } else {
-                            dim2Values.put(element.getId(), new ArrayList<>(Arrays.asList(schemaMatch)));
+                            dim2Values.put(
+                                    element.getId(), new ArrayList<>(Arrays.asList(schemaMatch)));
                         }
                     }
                     break;
@@ -152,8 +160,11 @@ public abstract class RuleSemanticQuery extends BaseSemanticQuery {
         addToFilters(dim2Values, parseInfo, semanticSchema, SchemaElementType.DIMENSION);
     }
 
-    private void addToFilters(Map<Long, List<SchemaElementMatch>> id2Values, SemanticParseInfo parseInfo,
-                              SemanticSchema semanticSchema, SchemaElementType entity) {
+    private void addToFilters(
+            Map<Long, List<SchemaElementMatch>> id2Values,
+            SemanticParseInfo parseInfo,
+            SemanticSchema semanticSchema,
+            SchemaElementType entity) {
         if (id2Values == null || id2Values.isEmpty()) {
             return;
         }
@@ -170,7 +181,8 @@ public abstract class RuleSemanticQuery extends BaseSemanticQuery {
                 dimensionFilter.setName(dimension.getName());
                 dimensionFilter.setOperator(FilterOperatorEnum.EQUALS);
                 dimensionFilter.setElementID(schemaMatch.getElement().getId());
-                parseInfo.setEntity(semanticSchema.getElement(SchemaElementType.ENTITY, entry.getKey()));
+                parseInfo.setEntity(
+                        semanticSchema.getElement(SchemaElementType.ENTITY, entry.getKey()));
                 parseInfo.getDimensionFilters().add(dimensionFilter);
             } else {
                 QueryFilter dimensionFilter = new QueryFilter();
@@ -193,7 +205,8 @@ public abstract class RuleSemanticQuery extends BaseSemanticQuery {
     public SemanticQueryReq multiStructExecute() {
         String queryMode = parseInfo.getQueryMode();
 
-        if (parseInfo.getDataSetId() != null || StringUtils.isEmpty(queryMode)
+        if (parseInfo.getDataSetId() != null
+                || StringUtils.isEmpty(queryMode)
                 || !QueryManager.containsRuleQuery(queryMode)) {
             // reach here some error may happen
             log.error("not find QueryMode");
@@ -208,14 +221,18 @@ public abstract class RuleSemanticQuery extends BaseSemanticQuery {
         this.parseInfo = parseInfo;
     }
 
-    public static List<RuleSemanticQuery> resolve(Long dataSetId, List<SchemaElementMatch> candidateElementMatches,
-                                                  ChatQueryContext chatQueryContext) {
+    public static List<RuleSemanticQuery> resolve(
+            Long dataSetId,
+            List<SchemaElementMatch> candidateElementMatches,
+            ChatQueryContext chatQueryContext) {
         List<RuleSemanticQuery> matchedQueries = new ArrayList<>();
         for (RuleSemanticQuery semanticQuery : QueryManager.getRuleQueries()) {
-            List<SchemaElementMatch> matches = semanticQuery.match(candidateElementMatches, chatQueryContext);
+            List<SchemaElementMatch> matches =
+                    semanticQuery.match(candidateElementMatches, chatQueryContext);
 
             if (matches.size() > 0) {
-                RuleSemanticQuery query = QueryManager.createRuleQuery(semanticQuery.getQueryMode());
+                RuleSemanticQuery query =
+                        QueryManager.createRuleQuery(semanticQuery.getQueryMode());
                 query.getParseInfo().getElementMatches().addAll(matches);
                 matchedQueries.add(query);
             }
@@ -230,5 +247,4 @@ public abstract class RuleSemanticQuery extends BaseSemanticQuery {
     protected QueryMultiStructReq convertQueryMultiStruct() {
         return QueryReqBuilder.buildMultiStructReq(parseInfo);
     }
-
 }

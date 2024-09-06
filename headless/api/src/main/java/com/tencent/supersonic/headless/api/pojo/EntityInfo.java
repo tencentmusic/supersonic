@@ -12,5 +12,4 @@ public class EntityInfo {
     private List<DataInfo> dimensions = new ArrayList<>();
     private List<DataInfo> metrics = new ArrayList<>();
     private String entityId;
-
 }

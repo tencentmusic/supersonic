@@ -2,13 +2,12 @@ package com.tencent.supersonic.headless.chat.knowledge.helper;
 
 import com.hankcs.hanlp.HanLP.Config;
 import com.hankcs.hanlp.dictionary.DynamicCustomDictionary;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-
-import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class FileHelper {
@@ -33,15 +32,17 @@ public class FileHelper {
     }
 
     private static File[] getFileList(File customFolder, String suffix) {
-        File[] customSubFiles = customFolder.listFiles(file -> {
-            if (file.isDirectory()) {
-                return false;
-            }
-            if (file.getName().toLowerCase().endsWith(suffix)) {
-                return true;
-            }
-            return false;
-        });
+        File[] customSubFiles =
+                customFolder.listFiles(
+                        file -> {
+                            if (file.isDirectory()) {
+                                return false;
+                            }
+                            if (file.getName().toLowerCase().endsWith(suffix)) {
+                                return true;
+                            }
+                            return false;
+                        });
         return customSubFiles;
     }
 
@@ -72,8 +73,10 @@ public class FileHelper {
 
         log.debug("CustomDictionaryPath:{}", fileList);
         Config.CustomDictionaryPath = fileList.toArray(new String[0]);
-        customDictionary.path = (Config.CustomDictionaryPath == null || Config.CustomDictionaryPath.length == 0) ? path
-                : Config.CustomDictionaryPath;
+        customDictionary.path =
+                (Config.CustomDictionaryPath == null || Config.CustomDictionaryPath.length == 0)
+                        ? path
+                        : Config.CustomDictionaryPath;
         if (Config.CustomDictionaryPath == null || Config.CustomDictionaryPath.length == 0) {
             Config.CustomDictionaryPath = path;
         }

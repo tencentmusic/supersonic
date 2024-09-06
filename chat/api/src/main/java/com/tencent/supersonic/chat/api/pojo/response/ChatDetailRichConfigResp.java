@@ -9,19 +9,13 @@ import java.util.List;
 @Data
 public class ChatDetailRichConfigResp {
 
-    /**
-     * invisible dimensions/metrics
-     */
+    /** invisible dimensions/metrics */
     private ItemVisibilityInfo visibility;
 
-    /**
-     * information about dictionary about the model
-     */
+    /** information about dictionary about the model */
     private List<KnowledgeInfoReq> knowledgeInfos;
 
     private KnowledgeAdvancedConfig globalKnowledgeConfig;
 
     private ChatDefaultRichConfigResp chatDefaultConfig;
-
-
 }

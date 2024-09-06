@@ -12,5 +12,4 @@ public class MetricParam {
     private Long id;
 
     private String bizName;
-
 }

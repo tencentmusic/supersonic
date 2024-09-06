@@ -1,6 +1,5 @@
 package com.tencent.supersonic.headless.chat.corrector;
 
-
 import com.tencent.supersonic.common.jsqlparser.DateVisitor.DateBoundInfo;
 import com.tencent.supersonic.common.jsqlparser.SqlAddHelper;
 import com.tencent.supersonic.common.jsqlparser.SqlDateSelectHelper;
@@ -20,9 +19,7 @@ import org.springframework.util.CollectionUtils;
 import java.util.List;
 import java.util.Objects;
 
-/**
- * Perform SQL corrections on the time in S2SQL.
- */
+/** Perform SQL corrections on the time in S2SQL. */
 @Slf4j
 public class TimeCorrector extends BaseSemanticCorrector {
 
@@ -36,11 +33,13 @@ public class TimeCorrector extends BaseSemanticCorrector {
         addLowerBoundDate(semanticParseInfo);
     }
 
-    private void addDateIfNotExist(ChatQueryContext chatQueryContext, SemanticParseInfo semanticParseInfo) {
+    private void addDateIfNotExist(
+            ChatQueryContext chatQueryContext, SemanticParseInfo semanticParseInfo) {
         String correctS2SQL = semanticParseInfo.getSqlInfo().getCorrectedS2SQL();
         List<String> whereFields = SqlSelectHelper.getWhereFields(correctS2SQL);
         Long dataSetId = semanticParseInfo.getDataSetId();
-        DataSetSchema dataSetSchema = chatQueryContext.getSemanticSchema().getDataSetSchemaMap().get(dataSetId);
+        DataSetSchema dataSetSchema =
+                chatQueryContext.getSemanticSchema().getDataSetSchemaMap().get(dataSetId);
         if (Objects.isNull(dataSetSchema)
                 || Objects.isNull(dataSetSchema.getPartitionDimension())
                 || Objects.isNull(dataSetSchema.getPartitionDimension().getName())
@@ -49,16 +48,22 @@ public class TimeCorrector extends BaseSemanticCorrector {
         }
         String partitionDimension = dataSetSchema.getPartitionDimension().getName();
         if (CollectionUtils.isEmpty(whereFields) || !whereFields.contains(partitionDimension)) {
-            Pair<String, String> startEndDate = S2SqlDateHelper.getStartEndDate(chatQueryContext, dataSetId,
-                    semanticParseInfo.getQueryType());
+            Pair<String, String> startEndDate =
+                    S2SqlDateHelper.getStartEndDate(
+                            chatQueryContext, dataSetId, semanticParseInfo.getQueryType());
 
             if (isValidDateRange(startEndDate)) {
                 correctS2SQL = SqlAddHelper.addParenthesisToWhere(correctS2SQL);
                 String startDateLeft = startEndDate.getLeft();
                 String endDateRight = startEndDate.getRight();
 
-                String condExpr = String.format(" ( %s >= '%s'  and %s <= '%s' )",
-                        partitionDimension, startDateLeft, partitionDimension, endDateRight);
+                String condExpr =
+                        String.format(
+                                " ( %s >= '%s'  and %s <= '%s' )",
+                                partitionDimension,
+                                startDateLeft,
+                                partitionDimension,
+                                endDateRight);
                 correctS2SQL = addConditionToSQL(correctS2SQL, condExpr);
             }
         }

@@ -10,9 +10,7 @@ import org.springframework.util.CollectionUtils;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-/**
- * Remove the default metric added by the system when the query only has dimensions
- */
+/** Remove the default metric added by the system when the query only has dimensions */
 @Slf4j
 @Component("DetailQueryOptimizer")
 public class DetailQueryOptimizer implements QueryOptimizer {
@@ -26,10 +24,14 @@ public class DetailQueryOptimizer implements QueryOptimizer {
         }
         log.debug("before handleNoMetric, sql:{}", sqlRaw);
         if (isDetailQuery(queryParam)) {
-            if (queryParam.getMetrics().size() == 0 && !CollectionUtils.isEmpty(queryParam.getGroups())) {
+            if (queryParam.getMetrics().size() == 0
+                    && !CollectionUtils.isEmpty(queryParam.getGroups())) {
                 String sqlForm = "select %s from ( %s ) src_no_metric";
-                String sql = String.format(sqlForm, queryParam.getGroups().stream().collect(
-                        Collectors.joining(",")), sqlRaw);
+                String sql =
+                        String.format(
+                                sqlForm,
+                                queryParam.getGroups().stream().collect(Collectors.joining(",")),
+                                sqlRaw);
                 queryStatement.setSql(sql);
             }
         }
@@ -37,7 +39,8 @@ public class DetailQueryOptimizer implements QueryOptimizer {
     }
 
     public boolean isDetailQuery(QueryParam queryParam) {
-        return Objects.nonNull(queryParam) && queryParam.getQueryType().isNativeAggQuery()
+        return Objects.nonNull(queryParam)
+                && queryParam.getQueryType().isNativeAggQuery()
                 && CollectionUtils.isEmpty(queryParam.getMetrics());
     }
 }

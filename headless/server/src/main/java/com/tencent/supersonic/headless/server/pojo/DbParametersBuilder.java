@@ -5,5 +5,4 @@ import java.util.List;
 public interface DbParametersBuilder {
 
     List<DatabaseParameter> build();
-
 }

@@ -1,6 +1,5 @@
 package com.tencent.supersonic.chat.server.plugin.event;
 
-
 import com.tencent.supersonic.chat.server.plugin.ChatPlugin;
 import org.springframework.context.ApplicationEvent;
 

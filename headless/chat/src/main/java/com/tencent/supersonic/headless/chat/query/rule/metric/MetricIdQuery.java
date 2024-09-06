@@ -28,8 +28,7 @@ public class MetricIdQuery extends MetricSemanticQuery {
 
     public MetricIdQuery() {
         super();
-        queryMatcher.addOption(ID, REQUIRED, AT_LEAST, 1)
-                .addOption(ENTITY, REQUIRED, AT_LEAST, 1);
+        queryMatcher.addOption(ID, REQUIRED, AT_LEAST, 1).addOption(ENTITY, REQUIRED, AT_LEAST, 1);
     }
 
     @Override
@@ -75,17 +74,21 @@ public class MetricIdQuery extends MetricSemanticQuery {
             log.info("addDimension before [{}]", queryStructReq.getGroups());
             List<Filter> filters = new ArrayList<>(queryStructReq.getDimensionFilters());
             if (onlyOperateInFilter) {
-                filters = filters.stream().filter(filter
-                        -> filter.getOperator().equals(FilterOperatorEnum.IN)).collect(Collectors.toList());
+                filters =
+                        filters.stream()
+                                .filter(
+                                        filter ->
+                                                filter.getOperator().equals(FilterOperatorEnum.IN))
+                                .collect(Collectors.toList());
             }
-            filters.forEach(d -> {
-                if (!dimensions.contains(d.getBizName())) {
-                    dimensions.add(d.getBizName());
-                }
-            });
+            filters.forEach(
+                    d -> {
+                        if (!dimensions.contains(d.getBizName())) {
+                            dimensions.add(d.getBizName());
+                        }
+                    });
             queryStructReq.setGroups(dimensions);
             log.info("addDimension after [{}]", queryStructReq.getGroups());
         }
     }
-
 }

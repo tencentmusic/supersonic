@@ -21,7 +21,8 @@ public class S2SqlDateHelper {
         if (Objects.isNull(dataSetId)) {
             return defaultDate;
         }
-        DataSetSchema dataSetSchema = chatQueryContext.getSemanticSchema().getDataSetSchemaMap().get(dataSetId);
+        DataSetSchema dataSetSchema =
+                chatQueryContext.getSemanticSchema().getDataSetSchemaMap().get(dataSetId);
         if (dataSetSchema == null || dataSetSchema.getTagTypeTimeDefaultConfig() == null) {
             return defaultDate;
         }
@@ -30,13 +31,14 @@ public class S2SqlDateHelper {
         return getDefaultDate(defaultDate, tagTypeTimeDefaultConfig, partitionTimeFormat).getLeft();
     }
 
-    public static Pair<String, String> getStartEndDate(ChatQueryContext chatQueryContext, Long dataSetId,
-                                                       QueryType queryType) {
+    public static Pair<String, String> getStartEndDate(
+            ChatQueryContext chatQueryContext, Long dataSetId, QueryType queryType) {
         String defaultDate = DateUtils.getBeforeDate(0);
         if (Objects.isNull(dataSetId)) {
             return Pair.of(defaultDate, defaultDate);
         }
-        DataSetSchema dataSetSchema = chatQueryContext.getSemanticSchema().getDataSetSchemaMap().get(dataSetId);
+        DataSetSchema dataSetSchema =
+                chatQueryContext.getSemanticSchema().getDataSetSchemaMap().get(dataSetId);
         if (Objects.isNull(dataSetSchema)) {
             return Pair.of(defaultDate, defaultDate);
         }
@@ -48,9 +50,8 @@ public class S2SqlDateHelper {
         return getDefaultDate(defaultDate, defaultConfig, partitionTimeFormat);
     }
 
-    private static Pair<String, String> getDefaultDate(String defaultDate,
-                                                       TimeDefaultConfig defaultConfig,
-                                                       String partitionTimeFormat) {
+    private static Pair<String, String> getDefaultDate(
+            String defaultDate, TimeDefaultConfig defaultConfig, String partitionTimeFormat) {
         if (defaultConfig == null) {
             return Pair.of(null, null);
         }

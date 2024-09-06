@@ -1,12 +1,11 @@
 package com.tencent.supersonic.headless.core.translator.calcite.sql.node;
 
-
 import com.tencent.supersonic.headless.api.pojo.enums.EngineType;
+import com.tencent.supersonic.headless.core.translator.calcite.Configuration;
 import com.tencent.supersonic.headless.core.translator.calcite.s2sql.Constants;
 import com.tencent.supersonic.headless.core.translator.calcite.schema.SemanticSchema;
-import com.tencent.supersonic.headless.core.translator.calcite.sql.optimizer.FilterToGroupScanRule;
-import com.tencent.supersonic.headless.core.translator.calcite.Configuration;
 import com.tencent.supersonic.headless.core.translator.calcite.schema.SemanticSqlDialect;
+import com.tencent.supersonic.headless.core.translator.calcite.sql.optimizer.FilterToGroupScanRule;
 import com.tencent.supersonic.headless.core.utils.SqlDialectFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.calcite.plan.RelOptPlanner;
@@ -52,15 +51,14 @@ import java.util.function.UnaryOperator;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-/**
- * model item node
- */
+/** model item node */
 @Slf4j
 public abstract class SemanticNode {
 
     public static Set<SqlKind> AGGREGATION_KIND = new HashSet<>();
     public static Set<String> AGGREGATION_FUNC = new HashSet<>();
-    public static List<String> groupHints = new ArrayList<>(Arrays.asList("1", "2", "3", "4", "5", "6", "7", "8", "9"));
+    public static List<String> groupHints =
+            new ArrayList<>(Arrays.asList("1", "2", "3", "4", "5", "6", "7", "8", "9"));
 
     static {
         AGGREGATION_KIND.add(SqlKind.AVG);
@@ -76,14 +74,18 @@ public abstract class SemanticNode {
         AGGREGATION_FUNC.add("min");
     }
 
-    public static SqlNode parse(String expression, SqlValidatorScope scope, EngineType engineType) throws Exception {
-        SqlValidatorWithHints sqlValidatorWithHints = Configuration.getSqlValidatorWithHints(
-                scope.getValidator().getCatalogReader().getRootSchema(), engineType);
-        if (Configuration.getSqlAdvisor(sqlValidatorWithHints, engineType).getReservedAndKeyWords()
+    public static SqlNode parse(String expression, SqlValidatorScope scope, EngineType engineType)
+            throws Exception {
+        SqlValidatorWithHints sqlValidatorWithHints =
+                Configuration.getSqlValidatorWithHints(
+                        scope.getValidator().getCatalogReader().getRootSchema(), engineType);
+        if (Configuration.getSqlAdvisor(sqlValidatorWithHints, engineType)
+                .getReservedAndKeyWords()
                 .contains(expression.toUpperCase())) {
             expression = String.format("`%s`", expression);
         }
-        SqlParser sqlParser = SqlParser.create(expression, Configuration.getParserConfig(engineType));
+        SqlParser sqlParser =
+                SqlParser.create(expression, Configuration.getParserConfig(engineType));
         SqlNode sqlNode = sqlParser.parseExpression();
         scope.validateExpr(sqlNode);
         return sqlNode;
@@ -92,12 +94,15 @@ public abstract class SemanticNode {
     public static SqlNode buildAs(String asName, SqlNode sqlNode) throws Exception {
         SqlAsOperator sqlAsOperator = new SqlAsOperator();
         SqlIdentifier sqlIdentifier = new SqlIdentifier(asName, SqlParserPos.ZERO);
-        return new SqlBasicCall(sqlAsOperator, new ArrayList<>(Arrays.asList(sqlNode, sqlIdentifier)),
+        return new SqlBasicCall(
+                sqlAsOperator,
+                new ArrayList<>(Arrays.asList(sqlNode, sqlIdentifier)),
                 SqlParserPos.ZERO);
     }
 
     public static String getSql(SqlNode sqlNode, EngineType engineType) {
-        UnaryOperator<SqlWriterConfig> sqlWriterConfigUnaryOperator = (c) -> getSqlWriterConfig(engineType);
+        UnaryOperator<SqlWriterConfig> sqlWriterConfigUnaryOperator =
+                (c) -> getSqlWriterConfig(engineType);
         return sqlNode.toSqlString(sqlWriterConfigUnaryOperator).getSql();
     }
 
@@ -134,7 +139,8 @@ public abstract class SemanticNode {
     public static SqlNode getAlias(SqlNode sqlNode, SqlValidatorScope scope) throws Exception {
         if (sqlNode instanceof SqlBasicCall) {
             SqlBasicCall sqlBasicCall = (SqlBasicCall) sqlNode;
-            if (sqlBasicCall.getKind().equals(SqlKind.AS) && sqlBasicCall.getOperandList().size() > 1) {
+            if (sqlBasicCall.getKind().equals(SqlKind.AS)
+                    && sqlBasicCall.getOperandList().size() > 1) {
                 return sqlBasicCall.getOperandList().get(1);
             }
         }
@@ -149,9 +155,17 @@ public abstract class SemanticNode {
         if (table instanceof SqlSelect) {
             SqlSelect tableSelect = (SqlSelect) table;
             return tableSelect.getSelectList().stream()
-                    .map(s -> (s instanceof SqlIdentifier) ? ((SqlIdentifier) s).names.get(0)
-                            : (((s instanceof SqlBasicCall) && s.getKind().equals(SqlKind.AS))
-                                    ? ((SqlBasicCall) s).getOperandList().get(1).toString() : ""))
+                    .map(
+                            s ->
+                                    (s instanceof SqlIdentifier)
+                                            ? ((SqlIdentifier) s).names.get(0)
+                                            : (((s instanceof SqlBasicCall)
+                                                            && s.getKind().equals(SqlKind.AS))
+                                                    ? ((SqlBasicCall) s)
+                                                            .getOperandList()
+                                                            .get(1)
+                                                            .toString()
+                                                    : ""))
                     .collect(Collectors.toSet());
         }
         return new HashSet<>();
@@ -172,11 +186,17 @@ public abstract class SemanticNode {
 
     private static SqlWriterConfig getSqlWriterConfig(EngineType engineType) {
         SemanticSqlDialect sqlDialect = SqlDialectFactory.getSqlDialect(engineType);
-        SqlWriterConfig config = SqlPrettyWriter.config().withDialect(sqlDialect)
-                .withKeywordsLowerCase(false).withClauseEndsLine(true).withAlwaysUseParentheses(false)
-                .withSelectListItemsOnSeparateLines(false).withUpdateSetListNewline(false).withIndentation(0);
+        SqlWriterConfig config =
+                SqlPrettyWriter.config()
+                        .withDialect(sqlDialect)
+                        .withKeywordsLowerCase(false)
+                        .withClauseEndsLine(true)
+                        .withAlwaysUseParentheses(false)
+                        .withSelectListItemsOnSeparateLines(false)
+                        .withUpdateSetListNewline(false)
+                        .withIndentation(0);
         if (EngineType.MYSQL.equals(engineType)) {
-            //no backticks around function name
+            // no backticks around function name
             config = config.withQuoteAllIdentifiers(false);
         }
         return config;
@@ -191,8 +211,10 @@ public abstract class SemanticNode {
             case AS:
                 SqlBasicCall sqlBasicCall = (SqlBasicCall) sqlNode;
                 if (sqlBasicCall.getOperandList().get(0).getKind().equals(SqlKind.IDENTIFIER)) {
-                    addTableName(sqlBasicCall.getOperandList().get(0).toString(),
-                            sqlBasicCall.getOperandList().get(1).toString(), parseInfo);
+                    addTableName(
+                            sqlBasicCall.getOperandList().get(0).toString(),
+                            sqlBasicCall.getOperandList().get(1).toString(),
+                            parseInfo);
                 } else {
                     sqlVisit(sqlBasicCall.getOperandList().get(0), parseInfo);
                 }
@@ -203,13 +225,17 @@ public abstract class SemanticNode {
                 sqlVisit(sqlJoin.getRight(), parseInfo);
                 SqlBasicCall condition = (SqlBasicCall) sqlJoin.getCondition();
                 if (Objects.nonNull(condition)) {
-                    condition.getOperandList().stream().forEach(c -> addTagField(c.toString(), parseInfo, ""));
+                    condition.getOperandList().stream()
+                            .forEach(c -> addTagField(c.toString(), parseInfo, ""));
                 }
                 break;
             case UNION:
-                ((SqlBasicCall) sqlNode).getOperandList().forEach(node -> {
-                    sqlVisit(node, parseInfo);
-                });
+                ((SqlBasicCall) sqlNode)
+                        .getOperandList()
+                        .forEach(
+                                node -> {
+                                    sqlVisit(node, parseInfo);
+                                });
                 break;
             case WITH:
                 SqlWith sqlWith = (SqlWith) sqlNode;
@@ -226,9 +252,12 @@ public abstract class SemanticNode {
         }
         SqlSelect sqlSelect = (SqlSelect) select;
         SqlNodeList selectList = sqlSelect.getSelectList();
-        selectList.getList().forEach(list -> {
-            fieldVisit(list, parseInfo, "");
-        });
+        selectList
+                .getList()
+                .forEach(
+                        list -> {
+                            fieldVisit(list, parseInfo, "");
+                        });
         fromVisit(sqlSelect.getFrom(), parseInfo);
         if (sqlSelect.hasWhere()) {
             whereVisit((SqlBasicCall) sqlSelect.getWhere(), parseInfo);
@@ -238,16 +267,17 @@ public abstract class SemanticNode {
         }
         SqlNodeList group = sqlSelect.getGroup();
         if (group != null) {
-            group.forEach(groupField -> {
-                if (groupHints.contains(groupField.toString())) {
-                    int groupIdx = Integer.valueOf(groupField.toString()) - 1;
-                    if (selectList.getList().size() > groupIdx) {
-                        fieldVisit(selectList.get(groupIdx), parseInfo, "");
-                    }
-                } else {
-                    fieldVisit(groupField, parseInfo, "");
-                }
-            });
+            group.forEach(
+                    groupField -> {
+                        if (groupHints.contains(groupField.toString())) {
+                            int groupIdx = Integer.valueOf(groupField.toString()) - 1;
+                            if (selectList.getList().size() > groupIdx) {
+                                fieldVisit(selectList.get(groupIdx), parseInfo, "");
+                            }
+                        } else {
+                            fieldVisit(groupField, parseInfo, "");
+                        }
+                    });
         }
     }
 
@@ -255,7 +285,8 @@ public abstract class SemanticNode {
         if (where == null) {
             return;
         }
-        if (where.operandCount() == 2 && where.operand(0).getKind().equals(SqlKind.IDENTIFIER)
+        if (where.operandCount() == 2
+                && where.operand(0).getKind().equals(SqlKind.IDENTIFIER)
                 && where.operand(1).getKind().equals(SqlKind.LITERAL)) {
             fieldVisit(where.operand(0), parseInfo, "");
             return;
@@ -263,21 +294,21 @@ public abstract class SemanticNode {
         // 子查询
         if (where.operandCount() == 2
                 && (where.operand(0).getKind().equals(SqlKind.IDENTIFIER)
-                && (where.operand(1).getKind().equals(SqlKind.SELECT)
-                || where.operand(1).getKind().equals(SqlKind.ORDER_BY)))
-        ) {
+                        && (where.operand(1).getKind().equals(SqlKind.SELECT)
+                                || where.operand(1).getKind().equals(SqlKind.ORDER_BY)))) {
             fieldVisit(where.operand(0), parseInfo, "");
             sqlVisit((SqlNode) (where.operand(1)), parseInfo);
             return;
         }
-        if (CollectionUtils.isNotEmpty(where.getOperandList()) && where.operand(0).getKind()
-                .equals(SqlKind.IDENTIFIER)) {
+        if (CollectionUtils.isNotEmpty(where.getOperandList())
+                && where.operand(0).getKind().equals(SqlKind.IDENTIFIER)) {
             fieldVisit(where.operand(0), parseInfo, "");
         }
         if (where.operandCount() >= 2 && where.operand(1).getKind().equals(SqlKind.IDENTIFIER)) {
             fieldVisit(where.operand(1), parseInfo, "");
         }
-        if (CollectionUtils.isNotEmpty(where.getOperandList()) && where.operand(0) instanceof SqlBasicCall) {
+        if (CollectionUtils.isNotEmpty(where.getOperandList())
+                && where.operand(0) instanceof SqlBasicCall) {
             whereVisit(where.operand(0), parseInfo);
         }
         if (where.operandCount() >= 2 && where.operand(1) instanceof SqlBasicCall) {
@@ -290,7 +321,7 @@ public abstract class SemanticNode {
             return;
         }
         SqlKind kind = field.getKind();
-        //System.out.println(kind);
+        // System.out.println(kind);
         // aggfunction
         if (AGGREGATION_KIND.contains(kind)) {
             SqlOperator sqlCall = ((SqlCall) field).getOperator();
@@ -319,9 +350,12 @@ public abstract class SemanticNode {
             }
         }
         if (field instanceof SqlNodeList) {
-            ((SqlNodeList) field).getList().forEach(node -> {
-                fieldVisit(node, parseInfo, "");
-            });
+            ((SqlNodeList) field)
+                    .getList()
+                    .forEach(
+                            node -> {
+                                fieldVisit(node, parseInfo, "");
+                            });
         }
     }
 
@@ -330,7 +364,8 @@ public abstract class SemanticNode {
         if (!parseInfo.containsKey(Constants.SQL_PARSER_FIELD)) {
             parseInfo.put(Constants.SQL_PARSER_FIELD, new HashMap<>());
         }
-        Map<String, Set<String>> fields = (Map<String, Set<String>>) parseInfo.get(Constants.SQL_PARSER_FIELD);
+        Map<String, Set<String>> fields =
+                (Map<String, Set<String>>) parseInfo.get(Constants.SQL_PARSER_FIELD);
 
         if (Pattern.matches("(?i)[a-z\\d_\\.]+", exp)) {
             if (exp.contains(".")) {
@@ -345,9 +380,7 @@ public abstract class SemanticNode {
                 }
                 fields.get("").add(exp);
             }
-
         }
-
     }
 
     private static void fromVisit(SqlNode from, Map<String, Object> parseInfo) {
@@ -374,7 +407,8 @@ public abstract class SemanticNode {
                 sqlVisit(sqlJoin.getRight(), parseInfo);
                 SqlBasicCall condition = (SqlBasicCall) sqlJoin.getCondition();
                 if (Objects.nonNull(condition)) {
-                    condition.getOperandList().stream().forEach(c -> addTagField(c.toString(), parseInfo, ""));
+                    condition.getOperandList().stream()
+                            .forEach(c -> addTagField(c.toString(), parseInfo, ""));
                 }
                 break;
             case SELECT:
@@ -392,12 +426,12 @@ public abstract class SemanticNode {
         if (!parseInfo.containsKey(Constants.SQL_PARSER_TABLE)) {
             parseInfo.put(Constants.SQL_PARSER_TABLE, new HashMap<>());
         }
-        Map<String, Set<String>> dbTbs = (Map<String, Set<String>>) parseInfo.get(Constants.SQL_PARSER_TABLE);
+        Map<String, Set<String>> dbTbs =
+                (Map<String, Set<String>>) parseInfo.get(Constants.SQL_PARSER_TABLE);
         if (!dbTbs.containsKey(alias)) {
             dbTbs.put(alias, new HashSet<>());
         }
         dbTbs.get(alias).add(exp);
-
     }
 
     public static Map<String, Object> getDbTable(SqlNode sqlNode) {
@@ -406,21 +440,28 @@ public abstract class SemanticNode {
         return parseInfo;
     }
 
-    public static SqlNode optimize(SqlValidatorScope scope, SemanticSchema schema, SqlNode sqlNode,
-                                   EngineType engineType) {
+    public static SqlNode optimize(
+            SqlValidatorScope scope,
+            SemanticSchema schema,
+            SqlNode sqlNode,
+            EngineType engineType) {
         try {
             HepProgramBuilder hepProgramBuilder = new HepProgramBuilder();
             SemanticSqlDialect sqlDialect = SqlDialectFactory.getSqlDialect(engineType);
-            hepProgramBuilder.addRuleInstance(new FilterToGroupScanRule(FilterToGroupScanRule.DEFAULT, schema));
+            hepProgramBuilder.addRuleInstance(
+                    new FilterToGroupScanRule(FilterToGroupScanRule.DEFAULT, schema));
             RelOptPlanner relOptPlanner = new HepPlanner(hepProgramBuilder.build());
             RelToSqlConverter converter = new RelToSqlConverter(sqlDialect);
-            SqlValidator sqlValidator = Configuration.getSqlValidator(
-                    scope.getValidator().getCatalogReader().getRootSchema(), engineType);
-            SqlToRelConverter sqlToRelConverter = Configuration.getSqlToRelConverter(scope, sqlValidator,
-                    relOptPlanner, engineType);
-            RelNode sqlRel = sqlToRelConverter.convertQuery(
-                    sqlValidator.validate(sqlNode), false, true).rel;
-            log.debug("RelNode optimize {}",
+            SqlValidator sqlValidator =
+                    Configuration.getSqlValidator(
+                            scope.getValidator().getCatalogReader().getRootSchema(), engineType);
+            SqlToRelConverter sqlToRelConverter =
+                    Configuration.getSqlToRelConverter(
+                            scope, sqlValidator, relOptPlanner, engineType);
+            RelNode sqlRel =
+                    sqlToRelConverter.convertQuery(sqlValidator.validate(sqlNode), false, true).rel;
+            log.debug(
+                    "RelNode optimize {}",
                     SemanticNode.getSql(converter.visitRoot(sqlRel).asStatement(), engineType));
             relOptPlanner.setRoot(sqlRel);
             RelNode relNode = relOptPlanner.findBestExp();
@@ -470,5 +511,4 @@ public abstract class SemanticNode {
         }
         return SqlLiteral.createSymbol(JoinType.INNER, SqlParserPos.ZERO);
     }
-
 }

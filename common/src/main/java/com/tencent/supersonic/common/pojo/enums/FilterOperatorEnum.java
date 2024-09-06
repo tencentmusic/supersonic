@@ -1,6 +1,5 @@
 package com.tencent.supersonic.common.pojo.enums;
 
-
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import net.sf.jsqlparser.expression.operators.relational.ComparisonOperator;
@@ -35,7 +34,8 @@ public enum FilterOperatorEnum {
     @JsonCreator
     public static FilterOperatorEnum getSqlOperator(String type) {
         for (FilterOperatorEnum operatorEnum : FilterOperatorEnum.values()) {
-            if (operatorEnum.value.equalsIgnoreCase(type) || operatorEnum.name().equalsIgnoreCase(type)) {
+            if (operatorEnum.value.equalsIgnoreCase(type)
+                    || operatorEnum.name().equalsIgnoreCase(type)) {
                 return operatorEnum;
             }
         }
@@ -48,9 +48,12 @@ public enum FilterOperatorEnum {
     }
 
     public static boolean isValueCompare(FilterOperatorEnum filterOperatorEnum) {
-        return EQUALS.equals(filterOperatorEnum) || GREATER_THAN.equals(filterOperatorEnum)
-                || GREATER_THAN_EQUALS.equals(filterOperatorEnum) || MINOR_THAN.equals(filterOperatorEnum)
-                || MINOR_THAN_EQUALS.equals(filterOperatorEnum) || NOT_EQUALS.equals(filterOperatorEnum);
+        return EQUALS.equals(filterOperatorEnum)
+                || GREATER_THAN.equals(filterOperatorEnum)
+                || GREATER_THAN_EQUALS.equals(filterOperatorEnum)
+                || MINOR_THAN.equals(filterOperatorEnum)
+                || MINOR_THAN_EQUALS.equals(filterOperatorEnum)
+                || NOT_EQUALS.equals(filterOperatorEnum);
     }
 
     public static ComparisonOperator createExpression(FilterOperatorEnum operator) {

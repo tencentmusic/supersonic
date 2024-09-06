@@ -38,5 +38,4 @@ public class ChatMemoryRepositoryImpl implements ChatMemoryRepository {
     public List<ChatMemoryDO> getMemories(QueryWrapper<ChatMemoryDO> queryWrapper) {
         return chatMemoryMapper.selectList(queryWrapper);
     }
-
 }

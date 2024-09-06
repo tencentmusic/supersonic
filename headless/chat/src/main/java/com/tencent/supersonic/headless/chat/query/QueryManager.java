@@ -2,8 +2,9 @@ package com.tencent.supersonic.headless.chat.query;
 
 import com.tencent.supersonic.headless.chat.query.llm.LLMSemanticQuery;
 import com.tencent.supersonic.headless.chat.query.rule.RuleSemanticQuery;
-import com.tencent.supersonic.headless.chat.query.rule.metric.MetricSemanticQuery;
 import com.tencent.supersonic.headless.chat.query.rule.detail.DetailSemanticQuery;
+import com.tencent.supersonic.headless.chat.query.rule.metric.MetricSemanticQuery;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -28,7 +29,6 @@ public class QueryManager {
             return createRuleQuery(queryMode);
         }
         return createLLMQuery(queryMode);
-
     }
 
     public static RuleSemanticQuery createRuleQuery(String queryMode) {
@@ -83,5 +83,4 @@ public class QueryManager {
     public static List<RuleSemanticQuery> getRuleQueries() {
         return new ArrayList<>(ruleQueryMap.values());
     }
-
 }

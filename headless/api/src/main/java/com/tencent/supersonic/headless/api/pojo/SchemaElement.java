@@ -40,8 +40,7 @@ public class SchemaElement implements Serializable {
     private int isTag;
     private String description;
     private boolean descriptionMapped;
-    @Builder.Default
-    private Map<String, Object> extInfo = new HashMap<>();
+    @Builder.Default private Map<String, Object> extInfo = new HashMap<>();
 
     @Override
     public boolean equals(Object o) {
@@ -52,8 +51,9 @@ public class SchemaElement implements Serializable {
             return false;
         }
         SchemaElement schemaElement = (SchemaElement) o;
-        return Objects.equal(dataSetId, schemaElement.dataSetId) && Objects.equal(id,
-                schemaElement.id) && Objects.equal(name, schemaElement.name)
+        return Objects.equal(dataSetId, schemaElement.dataSetId)
+                && Objects.equal(id, schemaElement.id)
+                && Objects.equal(name, schemaElement.name)
                 && Objects.equal(bizName, schemaElement.bizName)
                 && Objects.equal(type, schemaElement.type);
     }

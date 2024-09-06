@@ -5,7 +5,4 @@ import com.tencent.supersonic.common.persistence.dataobject.SystemConfigDO;
 import org.apache.ibatis.annotations.Mapper;
 
 @Mapper
-public interface SystemConfigMapper extends BaseMapper<SystemConfigDO> {
-
-
-}
+public interface SystemConfigMapper extends BaseMapper<SystemConfigDO> {}

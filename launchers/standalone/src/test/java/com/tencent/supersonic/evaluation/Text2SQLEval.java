@@ -95,7 +95,10 @@ public class Text2SQLEval extends BaseTest {
         QueryResult result = submitNewChat("过去半个月核心用户的总停留时长", agentId);
         assert result.getQueryColumns().size() >= 1;
         assert result.getQueryColumns().stream()
-                .filter(c -> c.getName().contains("停留时长")).collect(Collectors.toList()).size() == 1;
+                        .filter(c -> c.getName().contains("停留时长"))
+                        .collect(Collectors.toList())
+                        .size()
+                == 1;
         assert result.getQueryResults().size() >= 1;
     }
 

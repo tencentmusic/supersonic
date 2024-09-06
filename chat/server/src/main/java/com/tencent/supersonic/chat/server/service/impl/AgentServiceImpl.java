@@ -29,21 +29,17 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Service
-public class AgentServiceImpl extends ServiceImpl<AgentDOMapper, AgentDO>
-        implements AgentService {
+public class AgentServiceImpl extends ServiceImpl<AgentDOMapper, AgentDO> implements AgentService {
 
-    @Autowired
-    private MemoryService memoryService;
+    @Autowired private MemoryService memoryService;
 
-    @Autowired
-    private ChatQueryService chatQueryService;
+    @Autowired private ChatQueryService chatQueryService;
 
     private ExecutorService executorService = Executors.newFixedThreadPool(1);
 
     @Override
     public List<Agent> getAgents() {
-        return getAgentDOList().stream()
-                .map(this::convert).collect(Collectors.toList());
+        return getAgentDOList().stream().map(this::convert).collect(Collectors.toList());
     }
 
     @Override
@@ -78,8 +74,8 @@ public class AgentServiceImpl extends ServiceImpl<AgentDOMapper, AgentDO>
     }
 
     /**
-     * the example in the agent will be executed by default,
-     * if the result is correct, it will be put into memory as a reference for LLM
+     * the example in the agent will be executed by default, if the result is correct, it will be
+     * put into memory as a reference for LLM
      *
      * @param agent
      */
@@ -88,16 +84,19 @@ public class AgentServiceImpl extends ServiceImpl<AgentDOMapper, AgentDO>
     }
 
     private synchronized void doExecuteAgentExamples(Agent agent) {
-        if (!agent.containsLLMParserTool() || !LLMConnHelper.testConnection(agent.getModelConfig())
+        if (!agent.containsLLMParserTool()
+                || !LLMConnHelper.testConnection(agent.getModelConfig())
                 || CollectionUtils.isEmpty(agent.getExamples())) {
             return;
         }
 
         List<String> examples = agent.getExamples();
-        ChatMemoryFilter chatMemoryFilter = ChatMemoryFilter.builder().agentId(agent.getId())
-                .questions(examples).build();
-        List<String> memoriesExisted = memoryService.getMemories(chatMemoryFilter)
-                .stream().map(ChatMemoryDO::getQuestion).collect(Collectors.toList());
+        ChatMemoryFilter chatMemoryFilter =
+                ChatMemoryFilter.builder().agentId(agent.getId()).questions(examples).build();
+        List<String> memoriesExisted =
+                memoryService.getMemories(chatMemoryFilter).stream()
+                        .map(ChatMemoryDO::getQuestion)
+                        .collect(Collectors.toList());
         for (String example : examples) {
             if (memoriesExisted.contains(example)) {
                 continue;
@@ -124,7 +123,8 @@ public class AgentServiceImpl extends ServiceImpl<AgentDOMapper, AgentDO>
         agent.setExamples(JsonUtil.toList(agentDO.getExamples(), String.class));
         agent.setModelConfig(JsonUtil.toObject(agentDO.getModelConfig(), ChatModelConfig.class));
         agent.setPromptConfig(JsonUtil.toObject(agentDO.getPromptConfig(), PromptConfig.class));
-        agent.setMultiTurnConfig(JsonUtil.toObject(agentDO.getMultiTurnConfig(), MultiTurnConfig.class));
+        agent.setMultiTurnConfig(
+                JsonUtil.toObject(agentDO.getMultiTurnConfig(), MultiTurnConfig.class));
         agent.setVisualConfig(JsonUtil.toObject(agentDO.getVisualConfig(), VisualConfig.class));
         return agent;
     }
@@ -143,5 +143,4 @@ public class AgentServiceImpl extends ServiceImpl<AgentDOMapper, AgentDO>
         }
         return agentDO;
     }
-
 }

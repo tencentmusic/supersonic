@@ -1,12 +1,13 @@
 package com.tencent.supersonic.auth.api.authentication.utils;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.auth.api.authentication.service.UserStrategy;
 import com.tencent.supersonic.common.config.SystemConfig;
 import com.tencent.supersonic.common.service.SystemConfigService;
 import com.tencent.supersonic.common.util.ContextUtils;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import org.springframework.util.CollectionUtils;
 
 public final class UserHolder {
@@ -36,5 +37,4 @@ public final class UserHolder {
         }
         return user;
     }
-
 }

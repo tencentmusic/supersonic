@@ -26,7 +26,8 @@ public class QueryRuleServiceImpl implements QueryRuleService {
     private final QueryRuleRepository queryRuleRepository;
     private final DataSetService dataSetService;
 
-    public QueryRuleServiceImpl(QueryRuleRepository queryRuleRepository, DataSetService dataSetService) {
+    public QueryRuleServiceImpl(
+            QueryRuleRepository queryRuleRepository, DataSetService dataSetService) {
         this.queryRuleRepository = queryRuleRepository;
         this.dataSetService = dataSetService;
     }
@@ -87,7 +88,8 @@ public class QueryRuleServiceImpl implements QueryRuleService {
         String userName = user.getName();
         if (Objects.nonNull(queryRuleReq.getDataSetId())) {
             DataSetResp dataSet = dataSetService.getDataSet(queryRuleReq.getDataSetId());
-            if (dataSet.getAdmins().contains(userName) || dataSet.getCreatedBy().equalsIgnoreCase(userName)) {
+            if (dataSet.getAdmins().contains(userName)
+                    || dataSet.getCreatedBy().equalsIgnoreCase(userName)) {
                 log.debug(String.format("user:%s, queryRuleReq:%s", userName, queryRuleReq));
                 return;
             }
@@ -99,12 +101,12 @@ public class QueryRuleServiceImpl implements QueryRuleService {
         String userName = user.getName();
         if (Objects.nonNull(queryRuleDO.getDataSetId())) {
             DataSetResp dataSet = dataSetService.getDataSet(queryRuleDO.getDataSetId());
-            if (dataSet.getAdmins().contains(userName) || dataSet.getCreatedBy().equalsIgnoreCase(userName)) {
+            if (dataSet.getAdmins().contains(userName)
+                    || dataSet.getCreatedBy().equalsIgnoreCase(userName)) {
                 log.debug(String.format("user:%s, queryRuleDO:%s", userName, queryRuleDO));
                 return;
             }
             throw new RuntimeException("用户暂无权限变更数据集的规则, 请确认");
         }
     }
-
 }

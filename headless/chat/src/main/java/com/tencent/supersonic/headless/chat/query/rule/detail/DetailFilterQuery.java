@@ -24,5 +24,4 @@ public class DetailFilterQuery extends DetailListQuery {
     public String getQueryMode() {
         return QUERY_MODE;
     }
-
 }

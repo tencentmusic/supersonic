@@ -1,6 +1,5 @@
 package com.tencent.supersonic.headless.core.cache;
 
-
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.headless.api.pojo.request.SemanticQueryReq;
 import lombok.extern.slf4j.Slf4j;
@@ -30,10 +29,11 @@ public class DefaultQueryCache implements QueryCache {
         CacheCommonConfig cacheCommonConfig = ContextUtils.getBean(CacheCommonConfig.class);
         if (cacheCommonConfig.getCacheEnable() && Objects.nonNull(value)) {
             CompletableFuture.supplyAsync(() -> cacheManager.put(cacheKey, value))
-                    .exceptionally(exception -> {
-                        log.warn("exception:", exception);
-                        return null;
-                    });
+                    .exceptionally(
+                            exception -> {
+                                log.warn("exception:", exception);
+                                return null;
+                            });
             log.debug("put to cache, key: {}", cacheKey);
             return true;
         }
@@ -48,7 +48,8 @@ public class DefaultQueryCache implements QueryCache {
     }
 
     private String getKeyByModelIds(List<Long> modelIds) {
-        return String.join(",", modelIds.stream().map(Object::toString).collect(Collectors.toList()));
+        return String.join(
+                ",", modelIds.stream().map(Object::toString).collect(Collectors.toList()));
     }
 
     private boolean isCache(SemanticQueryReq semanticQueryReq) {
@@ -61,5 +62,4 @@ public class DefaultQueryCache implements QueryCache {
         }
         return false;
     }
-
 }

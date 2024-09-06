@@ -19,5 +19,4 @@ public class MeasureParam {
         this.bizName = bizName;
         this.constraint = constraint;
     }
-
 }

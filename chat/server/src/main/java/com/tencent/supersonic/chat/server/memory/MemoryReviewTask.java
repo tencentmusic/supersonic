@@ -27,27 +27,26 @@ public class MemoryReviewTask {
 
     private static final Logger keyPipelineLog = LoggerFactory.getLogger("keyPipeline");
 
-    private static final String INSTRUCTION = ""
-            + "#Role: You are a senior data engineer experienced in writing SQL.\n"
-            + "#Task: Your will be provided with a user question and the SQL written by junior engineer,"
-            + "please take a review and give your opinion.\n"
-            + "#Rules: "
-            + "1.ALWAYS follow the output format: `opinion=(POSITIVE|NEGATIVE),comment=(your comment)`."
-            + "2.ALWAYS recognize `数据日期` as the date field."
-            + "3.IGNORE `数据日期` if not expressed in the `Question`."
-            + "#Question: %s\n"
-            + "#Schema: %s\n"
-            + "#SideInfo: %s\n"
-            + "#SQL: %s\n"
-            + "#Response: ";
+    private static final String INSTRUCTION =
+            ""
+                    + "#Role: You are a senior data engineer experienced in writing SQL.\n"
+                    + "#Task: Your will be provided with a user question and the SQL written by junior engineer,"
+                    + "please take a review and give your opinion.\n"
+                    + "#Rules: "
+                    + "1.ALWAYS follow the output format: `opinion=(POSITIVE|NEGATIVE),comment=(your comment)`."
+                    + "2.ALWAYS recognize `数据日期` as the date field."
+                    + "3.IGNORE `数据日期` if not expressed in the `Question`."
+                    + "#Question: %s\n"
+                    + "#Schema: %s\n"
+                    + "#SideInfo: %s\n"
+                    + "#SQL: %s\n"
+                    + "#Response: ";
 
     private static final Pattern OUTPUT_PATTERN = Pattern.compile("opinion=(.*),.*comment=(.*)");
 
-    @Autowired
-    private MemoryService memoryService;
+    @Autowired private MemoryService memoryService;
 
-    @Autowired
-    private AgentService agentService;
+    @Autowired private AgentService agentService;
 
     @Scheduled(fixedDelay = 60 * 1000)
     public void review() {
@@ -68,7 +67,8 @@ public class MemoryReviewTask {
         Prompt prompt = PromptTemplate.from(promptStr).apply(Collections.EMPTY_MAP);
 
         keyPipelineLog.info("MemoryReviewTask reqPrompt:\n{}", promptStr);
-        ChatLanguageModel chatLanguageModel = ModelProvider.getChatModel(chatAgent.getModelConfig());
+        ChatLanguageModel chatLanguageModel =
+                ModelProvider.getChatModel(chatAgent.getModelConfig());
         if (Objects.nonNull(chatLanguageModel)) {
             String response = chatLanguageModel.generate(prompt.toUserMessage()).content().text();
             keyPipelineLog.info("MemoryReviewTask modelResp:\n{}", response);
@@ -79,7 +79,8 @@ public class MemoryReviewTask {
     }
 
     private String createPromptString(ChatMemoryDO m) {
-        return String.format(INSTRUCTION, m.getQuestion(), m.getDbSchema(), m.getSideInfo(), m.getS2sql());
+        return String.format(
+                INSTRUCTION, m.getQuestion(), m.getDbSchema(), m.getSideInfo(), m.getS2sql());
     }
 
     private void processResponse(String response, ChatMemoryDO m) {

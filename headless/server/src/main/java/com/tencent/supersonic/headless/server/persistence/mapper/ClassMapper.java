@@ -5,5 +5,4 @@ import com.tencent.supersonic.headless.server.persistence.dataobject.ClassDO;
 import org.apache.ibatis.annotations.Mapper;
 
 @Mapper
-public interface ClassMapper extends BaseMapper<ClassDO> {
-}
+public interface ClassMapper extends BaseMapper<ClassDO> {}

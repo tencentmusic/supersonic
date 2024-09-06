@@ -1,10 +1,11 @@
 package com.tencent.supersonic.headless.api.pojo.request;
 
+import javax.validation.constraints.NotNull;
+
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.common.pojo.RecordInfo;
 import lombok.Data;
 
-import javax.validation.constraints.NotNull;
 import java.util.List;
 
 @Data
@@ -24,5 +25,4 @@ public class TermReq extends RecordInfo {
     private List<Long> relatedMetrics = Lists.newArrayList();
 
     private List<Long> relateDimensions = Lists.newArrayList();
-
 }

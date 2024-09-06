@@ -41,8 +41,7 @@ public class RecordInfo {
             return false;
         }
         RecordInfo that = (RecordInfo) o;
-        return Objects.equal(createdBy, that.createdBy) && Objects.equal(
-                updatedBy, that.updatedBy);
+        return Objects.equal(createdBy, that.createdBy) && Objects.equal(updatedBy, that.updatedBy);
     }
 
     @Override

@@ -77,5 +77,4 @@ public class PluginRepositoryImpl implements PluginRepository {
     public void deletePlugin(Long id) {
         pluginDOMapper.deleteById(id);
     }
-
 }

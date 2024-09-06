@@ -1,5 +1,7 @@
 package com.tencent.supersonic.headless.server.task;
 
+import javax.annotation.PreDestroy;
+
 import com.tencent.supersonic.common.config.EmbeddingConfig;
 import com.tencent.supersonic.common.pojo.DataItem;
 import com.tencent.supersonic.common.service.EmbeddingService;
@@ -16,7 +18,6 @@ import org.springframework.core.annotation.Order;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PreDestroy;
 import java.util.List;
 
 @Component
@@ -24,17 +25,13 @@ import java.util.List;
 @Order(2)
 public class MetaEmbeddingTask implements CommandLineRunner {
 
-    @Autowired
-    private EmbeddingService embeddingService;
+    @Autowired private EmbeddingService embeddingService;
 
-    @Autowired
-    private EmbeddingConfig embeddingConfig;
+    @Autowired private EmbeddingConfig embeddingConfig;
 
-    @Autowired
-    private MetricService metricService;
+    @Autowired private MetricService metricService;
 
-    @Autowired
-    private DimensionService dimensionService;
+    @Autowired private DimensionService dimensionService;
 
     @PreDestroy
     public void onShutdown() {
@@ -58,20 +55,20 @@ public class MetaEmbeddingTask implements CommandLineRunner {
         embeddingStorePersistFile();
     }
 
-    /***
-     * reload meta embedding
-     */
+    /** * reload meta embedding */
     @Scheduled(cron = "${s2.reload.meta.embedding.corn:0 0 */2 * * ?}")
     public void reloadMetaEmbedding() {
         long startTime = System.currentTimeMillis();
         try {
             List<DataItem> metricDataItems = metricService.getDataEvent().getDataItems();
 
-            embeddingService.addQuery(embeddingConfig.getMetaCollectionName(),
+            embeddingService.addQuery(
+                    embeddingConfig.getMetaCollectionName(),
                     TextSegmentConvert.convertToEmbedding(metricDataItems));
 
             List<DataItem> dimensionDataItems = dimensionService.getDataEvent().getDataItems();
-            embeddingService.addQuery(embeddingConfig.getMetaCollectionName(),
+            embeddingService.addQuery(
+                    embeddingConfig.getMetaCollectionName(),
                     TextSegmentConvert.convertToEmbedding(dimensionDataItems));
         } catch (Exception e) {
             log.error("Failed to reload meta embedding.", e);

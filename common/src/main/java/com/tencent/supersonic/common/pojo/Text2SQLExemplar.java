@@ -20,5 +20,4 @@ public class Text2SQLExemplar {
     private String dbSchema;
 
     private String sql;
-
 }

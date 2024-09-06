@@ -1,5 +1,9 @@
 package com.tencent.supersonic.headless.server.rest;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
+
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
 import com.tencent.supersonic.headless.api.pojo.request.ClassReq;
@@ -15,9 +19,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -39,9 +40,10 @@ public class ClassController {
      * @return
      */
     @PostMapping("/create")
-    public ClassResp create(@RequestBody @Valid ClassReq classReq,
-                            HttpServletRequest request,
-                            HttpServletResponse response) {
+    public ClassResp create(
+            @RequestBody @Valid ClassReq classReq,
+            HttpServletRequest request,
+            HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
         return classService.create(classReq, user);
     }
@@ -55,9 +57,10 @@ public class ClassController {
      * @return
      */
     @PutMapping("/update")
-    public ClassResp update(@RequestBody @Valid ClassReq classReq,
-                            HttpServletRequest request,
-                            HttpServletResponse response) {
+    public ClassResp update(
+            @RequestBody @Valid ClassReq classReq,
+            HttpServletRequest request,
+            HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
         return classService.update(classReq, user);
     }
@@ -72,10 +75,12 @@ public class ClassController {
      * @throws Exception
      */
     @DeleteMapping("delete/{id}/{force}")
-    public Boolean delete(@PathVariable("id") Long id,
-                          @PathVariable("force") Boolean force,
-                          HttpServletRequest request,
-                          HttpServletResponse response) throws Exception {
+    public Boolean delete(
+            @PathVariable("id") Long id,
+            @PathVariable("force") Boolean force,
+            HttpServletRequest request,
+            HttpServletResponse response)
+            throws Exception {
         User user = UserHolder.findUser(request, response);
         return classService.delete(id, force, user);
     }
@@ -90,11 +95,11 @@ public class ClassController {
      * @throws Exception
      */
     @GetMapping("delete/{id}/{force}")
-    public List<ClassResp> get(@RequestBody @Valid ClassFilter filter,
-                               HttpServletRequest request,
-                               HttpServletResponse response) {
+    public List<ClassResp> get(
+            @RequestBody @Valid ClassFilter filter,
+            HttpServletRequest request,
+            HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
         return classService.getClassList(filter, user);
     }
-
 }

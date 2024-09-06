@@ -4,14 +4,12 @@ import com.google.common.collect.Lists;
 import com.tencent.supersonic.common.pojo.enums.DictWordType;
 import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.headless.chat.knowledge.DictWord;
-
-import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
-/**
- * dimension word nature
- */
+import java.util.List;
+
+/** dimension word nature */
 @Service
 public class DimensionWordBuilder extends BaseWordWithAliasBuilder {
 
@@ -31,14 +29,22 @@ public class DimensionWordBuilder extends BaseWordWithAliasBuilder {
         DictWord dictWord = new DictWord();
         dictWord.setWord(word);
         Long modelId = schemaElement.getModel();
-        String nature = DictWordType.NATURE_SPILT + modelId + DictWordType.NATURE_SPILT + schemaElement.getId()
-                + DictWordType.DIMENSION.getType();
+        String nature =
+                DictWordType.NATURE_SPILT
+                        + modelId
+                        + DictWordType.NATURE_SPILT
+                        + schemaElement.getId()
+                        + DictWordType.DIMENSION.getType();
         if (isSuffix) {
-            nature = DictWordType.NATURE_SPILT + modelId + DictWordType.NATURE_SPILT + schemaElement.getId()
-                    + DictWordType.SUFFIX.getType() + DictWordType.DIMENSION.getType();
+            nature =
+                    DictWordType.NATURE_SPILT
+                            + modelId
+                            + DictWordType.NATURE_SPILT
+                            + schemaElement.getId()
+                            + DictWordType.SUFFIX.getType()
+                            + DictWordType.DIMENSION.getType();
         }
         dictWord.setNatureWithFrequency(String.format("%s " + DEFAULT_FREQUENCY, nature));
         return dictWord;
     }
-
 }

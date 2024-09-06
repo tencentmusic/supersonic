@@ -1,10 +1,9 @@
 package com.tencent.supersonic.common.pojo;
 
-
 import com.tencent.supersonic.common.pojo.enums.EventType;
 import org.springframework.context.ApplicationEvent;
-import java.util.List;
 
+import java.util.List;
 
 public class DataEvent extends ApplicationEvent {
 

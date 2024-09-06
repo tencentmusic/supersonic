@@ -1,6 +1,5 @@
 package com.tencent.supersonic.headless.server.service.impl;
 
-
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.common.pojo.enums.StatusEnum;
 import com.tencent.supersonic.common.util.BeanMapper;
@@ -99,7 +98,8 @@ public class ClassServiceImpl implements ClassService {
         if (user.getName().equalsIgnoreCase(classDO.getCreatedBy()) || user.isSuperAdmin()) {
             return;
         }
-        throw new Exception("delete operation is not supported at the moment. Please contact the admin.");
+        throw new Exception(
+                "delete operation is not supported at the moment. Please contact the admin.");
     }
 
     @Override
@@ -107,5 +107,4 @@ public class ClassServiceImpl implements ClassService {
         List<ClassDO> classDOList = classRepository.getClassDOList(filter);
         return converter.convert2RespList(classDOList);
     }
-
 }

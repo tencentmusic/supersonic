@@ -12,7 +12,8 @@ public class ThreadMdcUtil {
         }
     }
 
-    public static <T> Callable<T> wrap(final Callable<T> callable, final Map<String, String> context) {
+    public static <T> Callable<T> wrap(
+            final Callable<T> callable, final Map<String, String> context) {
         return () -> {
             if (context == null) {
                 MDC.clear();
@@ -35,7 +36,7 @@ public class ThreadMdcUtil {
             } else {
                 MDC.setContextMap(context);
             }
-            //设置traceId
+            // 设置traceId
             setTraceIdIfAbsent();
             try {
                 runnable.run();
@@ -45,5 +46,3 @@ public class ThreadMdcUtil {
         };
     }
 }
-
-

@@ -2,7 +2,6 @@ package com.tencent.supersonic.common.pojo;
 
 import java.util.regex.Pattern;
 
-
 public class Constants {
 
     public static final String COMMA = ",";

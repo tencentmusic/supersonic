@@ -9,8 +9,7 @@ import java.util.List;
 public interface FileHandler {
 
     /**
-     * backup files to a specific directory
-     * config: dict.directory.backup
+     * backup files to a specific directory config: dict.directory.backup
      *
      * @param fileName
      */
@@ -26,8 +25,7 @@ public interface FileHandler {
     Boolean existPath(String path);
 
     /**
-     * write data to a specific file,
-     * config dir: dict.directory.latest
+     * write data to a specific file, config dir: dict.directory.latest
      *
      * @param data
      * @param fileName
@@ -43,8 +41,7 @@ public interface FileHandler {
     String getDictRootPath();
 
     /**
-     * delete dictionary file
-     * automatic backup
+     * delete dictionary file automatic backup
      *
      * @param fileName
      * @return

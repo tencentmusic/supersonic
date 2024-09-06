@@ -1,8 +1,8 @@
 package com.tencent.supersonic.chat.server.persistence.dataobject;
 
-import java.util.Date;
-
 import lombok.Data;
+
+import java.util.Date;
 
 @Data
 public class DictConfDO {
@@ -17,5 +17,4 @@ public class DictConfDO {
     private String updatedBy;
     private Date createdAt;
     private Date updatedAt;
-
 }

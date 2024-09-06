@@ -23,8 +23,10 @@ public class DashscopeModelFactory implements ModelFactory, InitializingBean {
                 .baseUrl(modelConfig.getBaseUrl())
                 .apiKey(modelConfig.getApiKey())
                 .modelName(modelConfig.getModelName())
-                .temperature(modelConfig.getTemperature() == null ? 0L :
-                        modelConfig.getTemperature().floatValue())
+                .temperature(
+                        modelConfig.getTemperature() == null
+                                ? 0L
+                                : modelConfig.getTemperature().floatValue())
                 .topP(modelConfig.getTopP())
                 .enableSearch(modelConfig.getEnableSearch())
                 .build();

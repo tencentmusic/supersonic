@@ -1,6 +1,5 @@
 package com.tencent.supersonic.headless.chat.mapper;
 
-
 import com.tencent.supersonic.headless.api.pojo.enums.MapModeEnum;
 import com.tencent.supersonic.headless.api.pojo.response.S2Term;
 import com.tencent.supersonic.headless.chat.ChatQueryContext;
@@ -26,15 +25,13 @@ import java.util.stream.Collectors;
 @Slf4j
 public abstract class BaseMatchStrategy<T> implements MatchStrategy<T> {
 
-    @Autowired
-    protected MapperHelper mapperHelper;
+    @Autowired protected MapperHelper mapperHelper;
 
-    @Autowired
-    protected MapperConfig mapperConfig;
+    @Autowired protected MapperConfig mapperConfig;
 
     @Override
-    public Map<MatchText, List<T>> match(ChatQueryContext chatQueryContext, List<S2Term> terms,
-                                         Set<Long> detectDataSetIds) {
+    public Map<MatchText, List<T>> match(
+            ChatQueryContext chatQueryContext, List<S2Term> terms, Set<Long> detectDataSetIds) {
         String text = chatQueryContext.getQueryText();
         if (Objects.isNull(terms) || StringUtils.isEmpty(text)) {
             return null;
@@ -49,7 +46,8 @@ public abstract class BaseMatchStrategy<T> implements MatchStrategy<T> {
         return result;
     }
 
-    public List<T> detect(ChatQueryContext chatQueryContext, List<S2Term> terms, Set<Long> detectDataSetIds) {
+    public List<T> detect(
+            ChatQueryContext chatQueryContext, List<S2Term> terms, Set<Long> detectDataSetIds) {
         Map<Integer, Integer> regOffsetToLength = getRegOffsetToLength(terms);
         String text = chatQueryContext.getQueryText();
         Set<T> results = new HashSet<>();
@@ -64,7 +62,8 @@ public abstract class BaseMatchStrategy<T> implements MatchStrategy<T> {
                 if (index <= text.length()) {
                     String detectSegment = text.substring(startIndex, index).trim();
                     detectSegments.add(detectSegment);
-                    detectByStep(chatQueryContext, results, detectDataSetIds, detectSegment, offset);
+                    detectByStep(
+                            chatQueryContext, results, detectDataSetIds, detectSegment, offset);
                 }
             }
             startIndex = mapperHelper.getStepIndex(regOffsetToLength, startIndex);
@@ -73,9 +72,13 @@ public abstract class BaseMatchStrategy<T> implements MatchStrategy<T> {
     }
 
     public Map<Integer, Integer> getRegOffsetToLength(List<S2Term> terms) {
-        return terms.stream().sorted(Comparator.comparing(S2Term::length))
-                .collect(Collectors.toMap(S2Term::getOffset, term -> term.word.length(),
-                        (value1, value2) -> value2));
+        return terms.stream()
+                .sorted(Comparator.comparing(S2Term::length))
+                .collect(
+                        Collectors.toMap(
+                                S2Term::getOffset,
+                                term -> term.word.length(),
+                                (value1, value2) -> value2));
     }
 
     public void selectResultInOneRound(Set<T> existResults, List<T> oneRoundResults) {
@@ -84,15 +87,15 @@ public abstract class BaseMatchStrategy<T> implements MatchStrategy<T> {
         }
         for (T oneRoundResult : oneRoundResults) {
             if (existResults.contains(oneRoundResult)) {
-                boolean isDeleted = existResults.removeIf(
-                        existResult -> {
-                            boolean delete = needDelete(oneRoundResult, existResult);
-                            if (delete) {
-                                log.info("deleted existResult:{}", existResult);
-                            }
-                            return delete;
-                        }
-                );
+                boolean isDeleted =
+                        existResults.removeIf(
+                                existResult -> {
+                                    boolean delete = needDelete(oneRoundResult, existResult);
+                                    if (delete) {
+                                        log.info("deleted existResult:{}", existResult);
+                                    }
+                                    return delete;
+                                });
                 if (isDeleted) {
                     log.info("deleted, add oneRoundResult:{}", oneRoundResult);
                     existResults.add(oneRoundResult);
@@ -111,9 +114,11 @@ public abstract class BaseMatchStrategy<T> implements MatchStrategy<T> {
         if (Objects.isNull(matchResult)) {
             return matches;
         }
-        Optional<List<T>> first = matchResult.entrySet().stream()
-                .filter(entry -> CollectionUtils.isNotEmpty(entry.getValue()))
-                .map(entry -> entry.getValue()).findFirst();
+        Optional<List<T>> first =
+                matchResult.entrySet().stream()
+                        .filter(entry -> CollectionUtils.isNotEmpty(entry.getValue()))
+                        .map(entry -> entry.getValue())
+                        .findFirst();
 
         if (first.isPresent()) {
             matches = first.get();
@@ -124,13 +129,19 @@ public abstract class BaseMatchStrategy<T> implements MatchStrategy<T> {
     public List<S2Term> filterByDataSetId(List<S2Term> terms, Set<Long> dataSetIds) {
         logTerms(terms);
         if (CollectionUtils.isNotEmpty(dataSetIds)) {
-            terms = terms.stream().filter(term -> {
-                Long dataSetId = NatureHelper.getDataSetId(term.getNature().toString());
-                if (Objects.nonNull(dataSetId)) {
-                    return dataSetIds.contains(dataSetId);
-                }
-                return false;
-            }).collect(Collectors.toList());
+            terms =
+                    terms.stream()
+                            .filter(
+                                    term -> {
+                                        Long dataSetId =
+                                                NatureHelper.getDataSetId(
+                                                        term.getNature().toString());
+                                        if (Objects.nonNull(dataSetId)) {
+                                            return dataSetIds.contains(dataSetId);
+                                        }
+                                        return false;
+                                    })
+                            .collect(Collectors.toList());
             log.debug("terms filter by dataSetId:{}", dataSetIds);
             logTerms(terms);
         }
@@ -142,7 +153,11 @@ public abstract class BaseMatchStrategy<T> implements MatchStrategy<T> {
             return;
         }
         for (S2Term term : terms) {
-            log.debug("word:{},nature:{},frequency:{}", term.word, term.nature.toString(), term.getFrequency());
+            log.debug(
+                    "word:{},nature:{},frequency:{}",
+                    term.word,
+                    term.nature.toString(),
+                    term.getFrequency());
         }
     }
 
@@ -150,8 +165,12 @@ public abstract class BaseMatchStrategy<T> implements MatchStrategy<T> {
 
     public abstract String getMapKey(T a);
 
-    public abstract void detectByStep(ChatQueryContext chatQueryContext, Set<T> existResults,
-                                      Set<Long> detectDataSetIds, String detectSegment, int offset);
+    public abstract void detectByStep(
+            ChatQueryContext chatQueryContext,
+            Set<T> existResults,
+            Set<Long> detectDataSetIds,
+            String detectSegment,
+            int offset);
 
     public double getThreshold(Double threshold, Double minThreshold, MapModeEnum mapModeEnum) {
         double decreaseAmount = (threshold - minThreshold) / 4;

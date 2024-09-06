@@ -1,10 +1,10 @@
 package com.tencent.supersonic.chat.server.executor;
 
+import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.chat.server.plugin.PluginQueryManager;
 import com.tencent.supersonic.chat.server.plugin.build.PluginSemanticQuery;
 import com.tencent.supersonic.chat.server.pojo.ExecuteContext;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
-import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 
 public class PluginExecutor implements ChatQueryExecutor {
 
@@ -18,5 +18,4 @@ public class PluginExecutor implements ChatQueryExecutor {
         query.setParseInfo(parseInfo);
         return query.build();
     }
-
 }

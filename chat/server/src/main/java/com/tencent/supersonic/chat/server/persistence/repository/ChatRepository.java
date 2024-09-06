@@ -1,7 +1,8 @@
 package com.tencent.supersonic.chat.server.persistence.repository;
 
-import com.tencent.supersonic.chat.server.persistence.dataobject.QueryDO;
 import com.tencent.supersonic.chat.server.persistence.dataobject.ChatDO;
+import com.tencent.supersonic.chat.server.persistence.dataobject.QueryDO;
+
 import java.util.List;
 
 public interface ChatRepository {

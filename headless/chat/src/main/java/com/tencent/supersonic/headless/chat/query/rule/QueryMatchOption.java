@@ -9,8 +9,10 @@ public class QueryMatchOption {
     private RequireNumberType requireNumberType;
     private Integer requireNumber;
 
-    public static QueryMatchOption build(OptionType schemaElementOption,
-            RequireNumberType requireNumberType, Integer requireNumber) {
+    public static QueryMatchOption build(
+            OptionType schemaElementOption,
+            RequireNumberType requireNumberType,
+            Integer requireNumber) {
         QueryMatchOption queryMatchOption = new QueryMatchOption();
         queryMatchOption.requireNumber = requireNumber;
         queryMatchOption.requireNumberType = requireNumberType;
@@ -35,11 +37,14 @@ public class QueryMatchOption {
     }
 
     public enum RequireNumberType {
-        AT_MOST, AT_LEAST, EQUAL
+        AT_MOST,
+        AT_LEAST,
+        EQUAL
     }
 
     public enum OptionType {
-        REQUIRED, OPTIONAL, UNUSED
+        REQUIRED,
+        OPTIONAL,
+        UNUSED
     }
-
 }

@@ -3,6 +3,7 @@ package com.tencent.supersonic.headless.api.pojo.request;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.common.pojo.PageBaseReq;
 import lombok.Data;
+
 import java.util.List;
 
 @Data

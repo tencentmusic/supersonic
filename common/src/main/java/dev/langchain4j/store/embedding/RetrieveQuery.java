@@ -15,6 +15,4 @@ public class RetrieveQuery {
     private Map<String, Object> filterCondition;
 
     private List<List<Double>> queryEmbeddings;
-
-
 }

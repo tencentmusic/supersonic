@@ -1,10 +1,10 @@
 package com.tencent.supersonic.chat.server.persistence.dataobject;
 
 import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 import lombok.Builder;
+import lombok.Data;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.util.Date;
 
@@ -14,40 +14,25 @@ import java.util.Date;
 @Getter
 @AllArgsConstructor
 public class StatisticsDO {
-    /**
-     * questionId
-     */
+    /** questionId */
     private Long questionId;
 
-    /**
-     * chatId
-     */
+    /** chatId */
     private Long chatId;
 
-    /**
-     * createTime
-     */
+    /** createTime */
     private Date createTime;
 
-    /**
-     * queryText
-     */
+    /** queryText */
     private String queryText;
 
-    /**
-     * userName
-     */
+    /** userName */
     private String userName;
 
-
-    /**
-     * interface
-     */
+    /** interface */
     private String interfaceName;
 
-    /**
-     * cost
-     */
+    /** cost */
     private Integer cost;
 
     private Integer type;

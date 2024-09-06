@@ -1,6 +1,5 @@
 package com.tencent.supersonic.headless.api.pojo.request;
 
-
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.common.pojo.PageBaseReq;
 import com.tencent.supersonic.headless.api.pojo.enums.AppStatus;
@@ -25,5 +24,4 @@ public class AppQueryReq extends PageBaseReq {
         }
         return appStatus.stream().map(AppStatus::getCode).collect(Collectors.toList());
     }
-
 }

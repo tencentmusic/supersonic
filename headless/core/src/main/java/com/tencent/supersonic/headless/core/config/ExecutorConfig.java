@@ -10,8 +10,10 @@ public class ExecutorConfig {
 
     @Value("${s2.metricParser.agg.mysql.lowVersion:5.7}")
     private String mysqlLowVersion;
+
     @Value("${s2.metricParser.agg.ck.lowVersion:20.4}")
     private String ckLowVersion;
+
     @Value("${s2.internal.metric.cnt.suffix:internal_cnt}")
     private String internalMetricNameSuffix;
 

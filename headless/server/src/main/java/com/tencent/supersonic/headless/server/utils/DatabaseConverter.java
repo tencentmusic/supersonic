@@ -3,11 +3,12 @@ package com.tencent.supersonic.headless.server.utils;
 import com.alibaba.fastjson.JSONObject;
 import com.tencent.supersonic.headless.api.pojo.request.DatabaseReq;
 import com.tencent.supersonic.headless.api.pojo.response.DatabaseResp;
-import com.tencent.supersonic.headless.server.persistence.dataobject.DatabaseDO;
 import com.tencent.supersonic.headless.core.pojo.ConnectInfo;
 import com.tencent.supersonic.headless.core.pojo.Database;
+import com.tencent.supersonic.headless.server.persistence.dataobject.DatabaseDO;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
+
 import java.util.Arrays;
 
 public class DatabaseConverter {
@@ -84,5 +85,4 @@ public class DatabaseConverter {
         connectInfo.setDatabase(databaseReq.getDatabase());
         return connectInfo;
     }
-
 }

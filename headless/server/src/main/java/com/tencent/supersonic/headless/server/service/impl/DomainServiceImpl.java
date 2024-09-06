@@ -33,7 +33,6 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-
 @Service
 @Slf4j
 public class DomainServiceImpl implements DomainService {
@@ -42,9 +41,10 @@ public class DomainServiceImpl implements DomainService {
     private final ModelService modelService;
     private final UserService userService;
 
-    public DomainServiceImpl(DomainRepository domainRepository,
-                             @Lazy ModelService modelService,
-                             UserService userService) {
+    public DomainServiceImpl(
+            DomainRepository domainRepository,
+            @Lazy ModelService modelService,
+            UserService userService) {
         this.domainRepository = domainRepository;
         this.modelService = modelService;
         this.userService = userService;
@@ -98,11 +98,13 @@ public class DomainServiceImpl implements DomainService {
     public List<DomainResp> getDomainListWithAdminAuth(User user) {
         Set<DomainResp> domainWithAuthAll = getDomainAuthSet(user, AuthType.ADMIN);
         if (!CollectionUtils.isEmpty(domainWithAuthAll)) {
-            List<Long> domainIds = domainWithAuthAll.stream().map(DomainResp::getId).collect(Collectors.toList());
+            List<Long> domainIds =
+                    domainWithAuthAll.stream().map(DomainResp::getId).collect(Collectors.toList());
             domainWithAuthAll.addAll(getParentDomain(domainIds));
         }
         List<ModelResp> modelResps = modelService.getModelAuthList(user, null, AuthType.ADMIN);
-        List<Long> domainIdsFromModel = modelResps.stream().map(ModelResp::getDomainId).collect(Collectors.toList());
+        List<Long> domainIdsFromModel =
+                modelResps.stream().map(ModelResp::getDomainId).collect(Collectors.toList());
         if (!CollectionUtils.isEmpty(modelResps)) {
             domainWithAuthAll.addAll(getParentDomain(domainIdsFromModel));
         }
@@ -111,8 +113,10 @@ public class DomainServiceImpl implements DomainService {
                 domainResp.setHasModel(true);
             }
         }
-        return new ArrayList<>(domainWithAuthAll).stream()
-                .sorted(Comparator.comparingLong(DomainResp::getId)).collect(Collectors.toList());
+        return new ArrayList<>(domainWithAuthAll)
+                .stream()
+                        .sorted(Comparator.comparingLong(DomainResp::getId))
+                        .collect(Collectors.toList());
     }
 
     @Override
@@ -121,17 +125,19 @@ public class DomainServiceImpl implements DomainService {
         Set<String> orgIds = userService.getUserAllOrgId(user.getName());
         Set<DomainResp> domainWithAuth = Sets.newHashSet();
         if (authTypeEnum.equals(AuthType.ADMIN)) {
-            domainWithAuth = domainResps.stream()
-                    .filter(domainResp -> checkAdminPermission(orgIds, user, domainResp))
-                    .collect(Collectors.toSet());
+            domainWithAuth =
+                    domainResps.stream()
+                            .filter(domainResp -> checkAdminPermission(orgIds, user, domainResp))
+                            .collect(Collectors.toSet());
             return domainWithAuth.stream()
                     .peek(domainResp -> domainResp.setHasEditPermission(true))
                     .collect(Collectors.toSet());
         }
         if (authTypeEnum.equals(AuthType.VISIBLE)) {
-            domainWithAuth = domainResps.stream()
-                    .filter(domainResp -> checkViewPermission(orgIds, user, domainResp))
-                    .collect(Collectors.toSet());
+            domainWithAuth =
+                    domainResps.stream()
+                            .filter(domainResp -> checkViewPermission(orgIds, user, domainResp))
+                            .collect(Collectors.toSet());
         }
 
         return domainWithAuth;
@@ -177,7 +183,8 @@ public class DomainServiceImpl implements DomainService {
 
     @Override
     public Map<Long, DomainResp> getDomainMap() {
-        return getDomainList().stream().collect(Collectors.toMap(DomainResp::getId, a -> a, (k1, k2) -> k1));
+        return getDomainList().stream()
+                .collect(Collectors.toMap(DomainResp::getId, a -> a, (k1, k2) -> k1));
     }
 
     @Override
@@ -210,8 +217,9 @@ public class DomainServiceImpl implements DomainService {
     public Map<Long, String> getDomainFullPathMap() {
         Map<Long, String> domainFullPathMap = new HashMap<>();
         List<DomainDO> domainDOList = domainRepository.getDomainList();
-        Map<Long, DomainDO> domainDOMap = domainDOList.stream()
-                .collect(Collectors.toMap(DomainDO::getId, a -> a, (k1, k2) -> k1));
+        Map<Long, DomainDO> domainDOMap =
+                domainDOList.stream()
+                        .collect(Collectors.toMap(DomainDO::getId, a -> a, (k1, k2) -> k1));
         for (DomainDO domainDO : domainDOList) {
             final Long domainId = domainDO.getId();
             StringBuilder fullPath = new StringBuilder(domainDO.getBizName() + "/");

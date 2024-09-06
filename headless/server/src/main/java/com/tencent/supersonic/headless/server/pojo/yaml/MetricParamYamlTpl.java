@@ -8,5 +8,4 @@ public class MetricParamYamlTpl {
     private Long id;
 
     private String bizName;
-
 }

@@ -25,8 +25,8 @@ public abstract class DetailSemanticQuery extends RuleSemanticQuery {
     }
 
     @Override
-    public List<SchemaElementMatch> match(List<SchemaElementMatch> candidateElementMatches,
-                                          ChatQueryContext queryCtx) {
+    public List<SchemaElementMatch> match(
+            List<SchemaElementMatch> candidateElementMatches, ChatQueryContext queryCtx) {
         return super.match(candidateElementMatches, queryCtx);
     }
 
@@ -39,7 +39,8 @@ public abstract class DetailSemanticQuery extends RuleSemanticQuery {
         if (!needFillDateConf(chatQueryContext)) {
             return;
         }
-        Map<Long, DataSetSchema> dataSetSchemaMap = chatQueryContext.getSemanticSchema().getDataSetSchemaMap();
+        Map<Long, DataSetSchema> dataSetSchemaMap =
+                chatQueryContext.getSemanticSchema().getDataSetSchemaMap();
         DataSetSchema dataSetSchema = dataSetSchemaMap.get(parseInfo.getDataSetId());
         TimeDefaultConfig timeDefaultConfig = dataSetSchema.getTagTypeTimeDefaultConfig();
 
@@ -63,5 +64,4 @@ public abstract class DetailSemanticQuery extends RuleSemanticQuery {
             parseInfo.setDateInfo(dateInfo);
         }
     }
-
 }

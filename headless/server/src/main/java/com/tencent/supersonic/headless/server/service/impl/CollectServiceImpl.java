@@ -1,5 +1,7 @@
 package com.tencent.supersonic.headless.server.service.impl;
 
+import javax.annotation.Resource;
+
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.common.pojo.enums.TypeEnums;
@@ -10,17 +12,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
 import java.util.List;
-
 
 @Slf4j
 @Service
 public class CollectServiceImpl implements CollectService {
 
     public static final String type = "metric";
-    @Resource
-    private CollectMapper collectMapper;
+    @Resource private CollectMapper collectMapper;
 
     @Override
     public Boolean collect(User user, CollectDO collectReq) {
@@ -70,5 +69,4 @@ public class CollectServiceImpl implements CollectService {
         queryWrapper.lambda().eq(CollectDO::getType, typeEnums.name().toLowerCase());
         return collectMapper.selectList(queryWrapper);
     }
-
 }

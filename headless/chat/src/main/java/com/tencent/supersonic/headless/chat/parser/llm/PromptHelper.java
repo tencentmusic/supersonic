@@ -23,21 +23,23 @@ import static com.tencent.supersonic.headless.chat.parser.ParserConfig.PARSER_SE
 @Slf4j
 public class PromptHelper {
 
-    @Autowired
-    private ParserConfig parserConfig;
+    @Autowired private ParserConfig parserConfig;
 
-    @Autowired
-    private ExemplarService exemplarService;
+    @Autowired private ExemplarService exemplarService;
 
     public List<List<Text2SQLExemplar>> getFewShotExemplars(LLMReq llmReq) {
-        int exemplarRecallNumber = Integer.valueOf(parserConfig.getParameterValue(PARSER_EXEMPLAR_RECALL_NUMBER));
+        int exemplarRecallNumber =
+                Integer.valueOf(parserConfig.getParameterValue(PARSER_EXEMPLAR_RECALL_NUMBER));
         int fewShotNumber = Integer.valueOf(parserConfig.getParameterValue(PARSER_FEW_SHOT_NUMBER));
-        int selfConsistencyNumber = Integer.valueOf(parserConfig.getParameterValue(PARSER_SELF_CONSISTENCY_NUMBER));
+        int selfConsistencyNumber =
+                Integer.valueOf(parserConfig.getParameterValue(PARSER_SELF_CONSISTENCY_NUMBER));
 
         List<Text2SQLExemplar> exemplars = Lists.newArrayList();
-        llmReq.getDynamicExemplars().stream().forEach(e -> {
-            exemplars.add(e);
-        });
+        llmReq.getDynamicExemplars().stream()
+                .forEach(
+                        e -> {
+                            exemplars.add(e);
+                        });
 
         int recallSize = exemplarRecallNumber - llmReq.getDynamicExemplars().size();
         if (recallSize > 0) {
@@ -76,73 +78,83 @@ public class PromptHelper {
         String tableStr = llmReq.getSchema().getDataSetName();
 
         List<String> metrics = Lists.newArrayList();
-        llmReq.getSchema().getMetrics().stream().forEach(
-                metric -> {
-                    StringBuilder metricStr = new StringBuilder();
-                    metricStr.append("<");
-                    metricStr.append(metric.getName());
-                    if (!CollectionUtils.isEmpty(metric.getAlias())) {
-                        StringBuilder alias = new StringBuilder();
-                        metric.getAlias().stream().forEach(a -> alias.append(a + ","));
-                        metricStr.append(" ALIAS '" + alias + "'");
-                    }
-                    if (StringUtils.isNotEmpty(metric.getDescription())) {
-                        metricStr.append(" COMMENT '" + metric.getDescription() + "'");
-                    }
-                    if (StringUtils.isNotEmpty(metric.getDefaultAgg())) {
-                        metricStr.append(" AGGREGATE '" + metric.getDefaultAgg().toUpperCase() + "'");
-                    }
-                    metricStr.append(">");
-                    metrics.add(metricStr.toString());
-                }
-        );
+        llmReq.getSchema().getMetrics().stream()
+                .forEach(
+                        metric -> {
+                            StringBuilder metricStr = new StringBuilder();
+                            metricStr.append("<");
+                            metricStr.append(metric.getName());
+                            if (!CollectionUtils.isEmpty(metric.getAlias())) {
+                                StringBuilder alias = new StringBuilder();
+                                metric.getAlias().stream().forEach(a -> alias.append(a + ","));
+                                metricStr.append(" ALIAS '" + alias + "'");
+                            }
+                            if (StringUtils.isNotEmpty(metric.getDescription())) {
+                                metricStr.append(" COMMENT '" + metric.getDescription() + "'");
+                            }
+                            if (StringUtils.isNotEmpty(metric.getDefaultAgg())) {
+                                metricStr.append(
+                                        " AGGREGATE '"
+                                                + metric.getDefaultAgg().toUpperCase()
+                                                + "'");
+                            }
+                            metricStr.append(">");
+                            metrics.add(metricStr.toString());
+                        });
 
         List<String> dimensions = Lists.newArrayList();
-        llmReq.getSchema().getDimensions().stream().forEach(
-                dimension -> {
-                    StringBuilder dimensionStr = new StringBuilder();
-                    dimensionStr.append("<");
-                    dimensionStr.append(dimension.getName());
-                    if (!CollectionUtils.isEmpty(dimension.getAlias())) {
-                        StringBuilder alias = new StringBuilder();
-                        dimension.getAlias().stream().forEach(a -> alias.append(a + ","));
-                        dimensionStr.append(" ALIAS '" + alias + "'");
-                    }
-                    if (StringUtils.isNotEmpty(dimension.getDescription())) {
-                        dimensionStr.append(" COMMENT '" + dimension.getDescription() + "'");
-                    }
-                    dimensionStr.append(">");
-                    dimensions.add(dimensionStr.toString());
-                }
-        );
+        llmReq.getSchema().getDimensions().stream()
+                .forEach(
+                        dimension -> {
+                            StringBuilder dimensionStr = new StringBuilder();
+                            dimensionStr.append("<");
+                            dimensionStr.append(dimension.getName());
+                            if (!CollectionUtils.isEmpty(dimension.getAlias())) {
+                                StringBuilder alias = new StringBuilder();
+                                dimension.getAlias().stream().forEach(a -> alias.append(a + ","));
+                                dimensionStr.append(" ALIAS '" + alias + "'");
+                            }
+                            if (StringUtils.isNotEmpty(dimension.getDescription())) {
+                                dimensionStr.append(
+                                        " COMMENT '" + dimension.getDescription() + "'");
+                            }
+                            dimensionStr.append(">");
+                            dimensions.add(dimensionStr.toString());
+                        });
 
         List<String> values = Lists.newArrayList();
-        llmReq.getLinking().stream().forEach(
-                value -> {
-                    StringBuilder valueStr = new StringBuilder();
-                    String fieldName = value.getFieldName();
-                    String fieldValue = value.getFieldValue();
-                    valueStr.append(String.format("<%s='%s'>", fieldName, fieldValue));
-                    values.add(valueStr.toString());
-                }
-        );
+        llmReq.getLinking().stream()
+                .forEach(
+                        value -> {
+                            StringBuilder valueStr = new StringBuilder();
+                            String fieldName = value.getFieldName();
+                            String fieldValue = value.getFieldValue();
+                            valueStr.append(String.format("<%s='%s'>", fieldName, fieldValue));
+                            values.add(valueStr.toString());
+                        });
 
         String template = "Table=[%s], Metrics=[%s], Dimensions=[%s], Values=[%s]";
-        return String.format(template, tableStr, String.join(",", metrics),
-                String.join(",", dimensions), String.join(",", values));
+        return String.format(
+                template,
+                tableStr,
+                String.join(",", metrics),
+                String.join(",", dimensions),
+                String.join(",", values));
     }
 
     private String buildTermStr(LLMReq llmReq) {
         List<LLMReq.Term> terms = llmReq.getSchema().getTerms();
         List<String> termStr = Lists.newArrayList();
-        terms.stream().forEach(
-                term -> {
-                    StringBuilder termsDesc = new StringBuilder();
-                    String description = term.getDescription();
-                    termsDesc.append(String.format("<%s COMMENT '%s'>", term.getName(), description));
-                    termStr.add(termsDesc.toString());
-                }
-        );
+        terms.stream()
+                .forEach(
+                        term -> {
+                            StringBuilder termsDesc = new StringBuilder();
+                            String description = term.getDescription();
+                            termsDesc.append(
+                                    String.format(
+                                            "<%s COMMENT '%s'>", term.getName(), description));
+                            termStr.add(termsDesc.toString());
+                        });
         String ret = "";
         if (termStr.size() > 0) {
             ret = String.join(",", termStr);
@@ -150,5 +162,4 @@ public class PromptHelper {
 
         return ret;
     }
-
 }

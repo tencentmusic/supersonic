@@ -1,12 +1,11 @@
 package com.tencent.supersonic.chat.api.pojo.request;
 
+import javax.validation.constraints.NotNull;
 
 import com.tencent.supersonic.chat.api.pojo.enums.MemoryReviewResult;
 import com.tencent.supersonic.chat.api.pojo.enums.MemoryStatus;
 import com.tencent.supersonic.common.pojo.RecordInfo;
 import lombok.Data;
-
-import javax.validation.constraints.NotNull;
 
 @Data
 public class ChatMemoryUpdateReq extends RecordInfo {
@@ -23,5 +22,4 @@ public class ChatMemoryUpdateReq extends RecordInfo {
     private MemoryReviewResult humanReviewRet;
 
     private String humanReviewCmt;
-
 }

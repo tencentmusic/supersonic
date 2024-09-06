@@ -1,8 +1,9 @@
 package com.tencent.supersonic.common.jsqlparser;
 
-import java.util.Set;
 import net.sf.jsqlparser.expression.ExpressionVisitorAdapter;
 import net.sf.jsqlparser.schema.Column;
+
+import java.util.Set;
 
 public class FieldAcquireVisitor extends ExpressionVisitorAdapter {
 

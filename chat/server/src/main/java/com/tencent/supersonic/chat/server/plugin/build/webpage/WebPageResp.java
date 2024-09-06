@@ -1,11 +1,9 @@
 package com.tencent.supersonic.chat.server.plugin.build.webpage;
 
-
 import com.tencent.supersonic.chat.server.plugin.build.WebBase;
 import lombok.Data;
 
 import java.util.List;
-
 
 @Data
 public class WebPageResp {
@@ -21,5 +19,4 @@ public class WebPageResp {
     private WebBase webPage;
 
     private List<WebBase> moreWebPage;
-
 }

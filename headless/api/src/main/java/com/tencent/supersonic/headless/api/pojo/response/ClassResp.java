@@ -20,20 +20,16 @@ public class ClassResp {
 
     private String fullPath;
 
-    /**
-     * 分类状态
-     */
+    /** 分类状态 */
     private Integer status;
 
-    /**
-     * METRIC、DIMENSION、TAG
-     */
+    /** METRIC、DIMENSION、TAG */
     private String type;
+
     private List<Long> itemIds;
 
     private Date createdAt;
     private String createdBy;
     private Date updatedAt;
     private String updatedBy;
-
 }

@@ -5,9 +5,7 @@ import com.tencent.supersonic.common.util.TraceIdUtil;
 import lombok.Data;
 import org.slf4j.MDC;
 
-/***
- * result data
- */
+/** * result data */
 @Data
 public class ResultData<T> {
     private int code;
@@ -36,5 +34,4 @@ public class ResultData<T> {
         resultData.setTraceId(MDC.get(TraceIdUtil.TRACE_ID));
         return resultData;
     }
-
 }

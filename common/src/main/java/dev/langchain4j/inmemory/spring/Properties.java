@@ -12,9 +12,7 @@ public class Properties {
 
     static final String PREFIX = "langchain4j.in-memory";
 
-    @NestedConfigurationProperty
-    EmbeddingStoreProperties embeddingStore;
+    @NestedConfigurationProperty EmbeddingStoreProperties embeddingStore;
 
-    @NestedConfigurationProperty
-    EmbeddingModelProperties embeddingModel;
+    @NestedConfigurationProperty EmbeddingModelProperties embeddingModel;
 }

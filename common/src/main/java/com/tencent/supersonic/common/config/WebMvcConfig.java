@@ -13,4 +13,3 @@ public class WebMvcConfig implements WebMvcConfigurer {
         registry.addInterceptor(new LogInterceptor()).addPathPatterns("/**");
     }
 }
-

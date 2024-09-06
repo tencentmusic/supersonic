@@ -48,5 +48,4 @@ public class SchemaMapInfo {
     public boolean needContinueMap() {
         return CollectionUtils.isNotEmpty(getTermDescriptionToMap());
     }
-
 }

@@ -15,23 +15,21 @@ import com.tencent.supersonic.common.config.EmbeddingConfig;
 import com.tencent.supersonic.common.pojo.Text2SQLExemplar;
 import com.tencent.supersonic.common.service.ExemplarService;
 import com.tencent.supersonic.common.util.BeanMapper;
-import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+import java.util.List;
+
 @Service
 public class MemoryServiceImpl implements MemoryService {
 
-    @Autowired
-    private ChatMemoryRepository chatMemoryRepository;
+    @Autowired private ChatMemoryRepository chatMemoryRepository;
 
-    @Autowired
-    private ExemplarService exemplarService;
+    @Autowired private ExemplarService exemplarService;
 
-    @Autowired
-    private EmbeddingConfig embeddingConfig;
+    @Autowired private EmbeddingConfig embeddingConfig;
 
     @Override
     public void createMemory(ChatMemoryDO memory) {
@@ -59,8 +57,7 @@ public class MemoryServiceImpl implements MemoryService {
 
     @Override
     public PageInfo<ChatMemoryDO> pageMemories(PageMemoryReq pageMemoryReq) {
-        return PageHelper.startPage(pageMemoryReq.getCurrent(),
-                        pageMemoryReq.getPageSize())
+        return PageHelper.startPage(pageMemoryReq.getCurrent(), pageMemoryReq.getPageSize())
                 .doSelectPageInfo(() -> getMemories(pageMemoryReq.getChatMemoryFilter()));
     }
 
@@ -80,10 +77,14 @@ public class MemoryServiceImpl implements MemoryService {
             queryWrapper.lambda().eq(ChatMemoryDO::getStatus, chatMemoryFilter.getStatus());
         }
         if (chatMemoryFilter.getHumanReviewRet() != null) {
-            queryWrapper.lambda().eq(ChatMemoryDO::getHumanReviewRet, chatMemoryFilter.getHumanReviewRet());
+            queryWrapper
+                    .lambda()
+                    .eq(ChatMemoryDO::getHumanReviewRet, chatMemoryFilter.getHumanReviewRet());
         }
         if (chatMemoryFilter.getLlmReviewRet() != null) {
-            queryWrapper.lambda().eq(ChatMemoryDO::getLlmReviewRet, chatMemoryFilter.getLlmReviewRet());
+            queryWrapper
+                    .lambda()
+                    .eq(ChatMemoryDO::getLlmReviewRet, chatMemoryFilter.getLlmReviewRet());
         }
         return chatMemoryRepository.getMemories(queryWrapper);
     }
@@ -91,7 +92,9 @@ public class MemoryServiceImpl implements MemoryService {
     @Override
     public List<ChatMemoryDO> getMemoriesForLlmReview() {
         QueryWrapper<ChatMemoryDO> queryWrapper = new QueryWrapper<>();
-        queryWrapper.lambda().eq(ChatMemoryDO::getStatus, MemoryStatus.PENDING)
+        queryWrapper
+                .lambda()
+                .eq(ChatMemoryDO::getStatus, MemoryStatus.PENDING)
                 .isNull(ChatMemoryDO::getLlmReviewRet);
         return chatMemoryRepository.getMemories(queryWrapper);
     }
@@ -99,7 +102,8 @@ public class MemoryServiceImpl implements MemoryService {
     @Override
     public void enableMemory(ChatMemoryDO memory) {
         memory.setStatus(MemoryStatus.ENABLED);
-        exemplarService.storeExemplar(embeddingConfig.getMemoryCollectionName(memory.getAgentId()),
+        exemplarService.storeExemplar(
+                embeddingConfig.getMemoryCollectionName(memory.getAgentId()),
                 Text2SQLExemplar.builder()
                         .question(memory.getQuestion())
                         .sideInfo(memory.getSideInfo())
@@ -111,7 +115,8 @@ public class MemoryServiceImpl implements MemoryService {
     @Override
     public void disableMemory(ChatMemoryDO memory) {
         memory.setStatus(MemoryStatus.DISABLED);
-        exemplarService.removeExemplar(embeddingConfig.getMemoryCollectionName(memory.getAgentId()),
+        exemplarService.removeExemplar(
+                embeddingConfig.getMemoryCollectionName(memory.getAgentId()),
                 Text2SQLExemplar.builder()
                         .question(memory.getQuestion())
                         .sideInfo(memory.getSideInfo())
@@ -119,5 +124,4 @@ public class MemoryServiceImpl implements MemoryService {
                         .sql(memory.getS2sql())
                         .build());
     }
-
 }

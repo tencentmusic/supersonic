@@ -12,18 +12,13 @@ public class Properties {
 
     static final String PREFIX = "langchain4j.local-ai";
 
-    @NestedConfigurationProperty
-    ChatModelProperties chatModel;
+    @NestedConfigurationProperty ChatModelProperties chatModel;
 
-    @NestedConfigurationProperty
-    ChatModelProperties streamingChatModel;
+    @NestedConfigurationProperty ChatModelProperties streamingChatModel;
 
-    @NestedConfigurationProperty
-    LanguageModelProperties languageModel;
+    @NestedConfigurationProperty LanguageModelProperties languageModel;
 
-    @NestedConfigurationProperty
-    LanguageModelProperties streamingLanguageModel;
+    @NestedConfigurationProperty LanguageModelProperties streamingLanguageModel;
 
-    @NestedConfigurationProperty
-    EmbeddingModelProperties embeddingModel;
+    @NestedConfigurationProperty EmbeddingModelProperties embeddingModel;
 }

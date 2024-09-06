@@ -1,5 +1,7 @@
 package com.tencent.supersonic.headless.core.utils;
 
+import javax.sql.DataSource;
+
 import com.alibaba.druid.util.StringUtils;
 import com.tencent.supersonic.common.util.MD5Util;
 import com.tencent.supersonic.headless.api.pojo.enums.DataType;
@@ -7,7 +9,7 @@ import com.tencent.supersonic.headless.core.pojo.Database;
 import com.tencent.supersonic.headless.core.pojo.JdbcDataSource;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import javax.sql.DataSource;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -15,6 +17,7 @@ import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Matcher;
+
 import static com.tencent.supersonic.common.pojo.Constants.AT_SYMBOL;
 import static com.tencent.supersonic.common.pojo.Constants.COLON;
 import static com.tencent.supersonic.common.pojo.Constants.DOUBLE_SLASH;
@@ -24,14 +27,11 @@ import static com.tencent.supersonic.common.pojo.Constants.NEW_LINE_CHAR;
 import static com.tencent.supersonic.common.pojo.Constants.PATTERN_JDBC_TYPE;
 import static com.tencent.supersonic.common.pojo.Constants.SPACE;
 
-/**
- * tools functions about jdbc
- */
+/** tools functions about jdbc */
 @Slf4j
 public class JdbcDataSourceUtils {
 
-    @Getter
-    private static Set releaseSourceSet = new HashSet();
+    @Getter private static Set releaseSourceSet = new HashSet();
     private JdbcDataSource jdbcDataSource;
 
     public JdbcDataSourceUtils(JdbcDataSource jdbcDataSource) {
@@ -46,8 +46,9 @@ public class JdbcDataSourceUtils {
             log.error(e.toString(), e);
             return false;
         }
-        try (Connection con = DriverManager.getConnection(database.getUrl(),
-                database.getUsername(), database.passwordDecrypt())) {
+        try (Connection con =
+                DriverManager.getConnection(
+                        database.getUrl(), database.getUsername(), database.passwordDecrypt())) {
             return con != null;
         } catch (SQLException e) {
             log.error(e.toString(), e);
@@ -115,7 +116,8 @@ public class JdbcDataSourceUtils {
             log.error("e", e);
         }
 
-        if (!StringUtils.isEmpty(className) && !className.contains("com.sun.proxy")
+        if (!StringUtils.isEmpty(className)
+                && !className.contains("com.sun.proxy")
                 && !className.contains("net.sf.cglib.proxy")) {
             return className;
         }
@@ -127,7 +129,12 @@ public class JdbcDataSourceUtils {
         throw new RuntimeException("Not supported data type: jdbcUrl=" + jdbcUrl);
     }
 
-    public static String getKey(String name, String jdbcUrl, String username, String password, String version,
+    public static String getKey(
+            String name,
+            String jdbcUrl,
+            String username,
+            String password,
+            String version,
             boolean isExt) {
 
         StringBuilder sb = new StringBuilder();
@@ -158,8 +165,10 @@ public class JdbcDataSourceUtils {
                 return dataSource.getConnection();
             } catch (Exception e) {
                 log.error("Get connection error, jdbcUrl:{}, e:{}", database.getUrl(), e);
-                throw new RuntimeException("Get connection error, jdbcUrl:" + database.getUrl()
-                        + " you can try again later or reset datasource");
+                throw new RuntimeException(
+                        "Get connection error, jdbcUrl:"
+                                + database.getUrl()
+                                + " you can try again later or reset datasource");
             }
         }
         return conn;

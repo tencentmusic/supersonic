@@ -11,5 +11,4 @@ import java.util.List;
 public class ItemQueryResultResp {
 
     private List<SingleItemQueryResult> results;
-
 }

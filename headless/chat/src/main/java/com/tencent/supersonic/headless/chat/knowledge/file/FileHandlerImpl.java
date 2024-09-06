@@ -8,16 +8,15 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
-
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -52,7 +51,6 @@ public class FileHandlerImpl implements FileHandler {
         } catch (IOException e) {
             log.info("Failed to copy file: " + e.getMessage());
         }
-
     }
 
     @Override
@@ -83,8 +81,12 @@ public class FileHandlerImpl implements FileHandler {
         String filePath = localFileConfig.getDictDirectoryLatest() + FILE_SPILT + fileName;
         Long fileLineNum = getFileLineNum(filePath);
         Integer startLine = (dictValueReq.getCurrent() - 1) * dictValueReq.getPageSize() + 1;
-        Integer endLine = Integer.valueOf(
-                Math.min(dictValueReq.getCurrent() * dictValueReq.getPageSize(), fileLineNum) + "");
+        Integer endLine =
+                Integer.valueOf(
+                        Math.min(
+                                        dictValueReq.getCurrent() * dictValueReq.getPageSize(),
+                                        fileLineNum)
+                                + "");
         List<DictValueResp> dictValueRespList = getFileData(filePath, startLine, endLine);
 
         dictValueRespPageInfo.setPageSize(dictValueReq.getPageSize());
@@ -110,17 +112,16 @@ public class FileHandlerImpl implements FileHandler {
         List<DictValueResp> fileData = new ArrayList<>();
 
         try (Stream<String> lines = Files.lines(Paths.get(filePath))) {
-            fileData = lines
-                    .skip(startLine - 1)
-                    .limit(endLine - startLine + 1)
-                    .map(lineStr -> convert2Resp(lineStr))
-                    .filter(line -> Objects.nonNull(line))
-                    .collect(Collectors.toList());
+            fileData =
+                    lines.skip(startLine - 1)
+                            .limit(endLine - startLine + 1)
+                            .map(lineStr -> convert2Resp(lineStr))
+                            .filter(line -> Objects.nonNull(line))
+                            .collect(Collectors.toList());
         } catch (IOException e) {
             log.warn("[getFileData] e:{}", e);
         }
         return fileData;
-
     }
 
     private DictValueResp convert2Resp(String lineStr) {
@@ -138,8 +139,7 @@ public class FileHandlerImpl implements FileHandler {
 
     private Long getFileLineNum(String filePath) {
         try (Stream<String> lines = Files.lines(Paths.get(filePath))) {
-            Long lineCount = lines
-                    .count();
+            Long lineCount = lines.count();
             return lineCount;
         } catch (IOException e) {
             e.printStackTrace();
@@ -204,7 +204,8 @@ public class FileHandlerImpl implements FileHandler {
 
     private BufferedWriter getWriter(String filePath, Boolean append) throws IOException {
         if (append) {
-            return Files.newBufferedWriter(Paths.get(filePath), StandardCharsets.UTF_8, StandardOpenOption.APPEND);
+            return Files.newBufferedWriter(
+                    Paths.get(filePath), StandardCharsets.UTF_8, StandardOpenOption.APPEND);
         }
         return Files.newBufferedWriter(Paths.get(filePath), StandardCharsets.UTF_8);
     }

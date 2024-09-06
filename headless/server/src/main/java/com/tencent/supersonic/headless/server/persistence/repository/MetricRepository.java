@@ -1,11 +1,10 @@
 package com.tencent.supersonic.headless.server.persistence.repository;
 
-
 import com.tencent.supersonic.headless.server.persistence.dataobject.MetricDO;
 import com.tencent.supersonic.headless.server.persistence.dataobject.MetricQueryDefaultConfigDO;
 import com.tencent.supersonic.headless.server.pojo.MetricFilter;
-
 import com.tencent.supersonic.headless.server.pojo.MetricsFilter;
+
 import java.util.List;
 
 public interface MetricRepository {

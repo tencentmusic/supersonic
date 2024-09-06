@@ -9,9 +9,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-/**
- * Schema Match Helper
- */
+/** Schema Match Helper */
 @Slf4j
 public class SchemaMatchHelper {
 
@@ -20,22 +18,25 @@ public class SchemaMatchHelper {
             return;
         }
 
-        Set<String> metricDimensionDetectWordSet = matches.stream()
-                .filter(SchemaMatchHelper::isMetricOrDimension)
-                .map(SchemaElementMatch::getDetectWord).collect(Collectors.toSet());
+        Set<String> metricDimensionDetectWordSet =
+                matches.stream()
+                        .filter(SchemaMatchHelper::isMetricOrDimension)
+                        .map(SchemaElementMatch::getDetectWord)
+                        .collect(Collectors.toSet());
 
-        matches.removeIf(elementMatch -> {
-            if (!isMetricOrDimension(elementMatch)) {
-                return false;
-            }
-            for (String detectWord : metricDimensionDetectWordSet) {
-                if (detectWord.startsWith(elementMatch.getDetectWord())
-                        && detectWord.length() > elementMatch.getDetectWord().length()) {
-                    return true;
-                }
-            }
-            return false;
-        });
+        matches.removeIf(
+                elementMatch -> {
+                    if (!isMetricOrDimension(elementMatch)) {
+                        return false;
+                    }
+                    for (String detectWord : metricDimensionDetectWordSet) {
+                        if (detectWord.startsWith(elementMatch.getDetectWord())
+                                && detectWord.length() > elementMatch.getDetectWord().length()) {
+                            return true;
+                        }
+                    }
+                    return false;
+                });
     }
 
     private static boolean isMetricOrDimension(SchemaElementMatch elementMatch) {

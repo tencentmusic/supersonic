@@ -3,8 +3,8 @@ package com.tencent.supersonic.headless.api.pojo.request;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.common.pojo.RecordInfo;
 import lombok.Data;
-import java.util.List;
 
+import java.util.List;
 
 @Data
 public class DatabaseReq extends RecordInfo {
@@ -35,5 +35,4 @@ public class DatabaseReq extends RecordInfo {
     private List<String> admins = Lists.newArrayList();
 
     private List<String> viewers = Lists.newArrayList();
-
 }

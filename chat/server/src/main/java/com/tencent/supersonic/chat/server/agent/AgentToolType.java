@@ -21,5 +21,4 @@ public enum AgentToolType {
         map.put(PLUGIN, PLUGIN.title);
         return map;
     }
-
 }

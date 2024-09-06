@@ -1,12 +1,10 @@
 package com.tencent.supersonic.headless.api.pojo.request;
 
-
 import com.tencent.supersonic.headless.api.pojo.SchemaItem;
 import lombok.Data;
 
 import java.util.ArrayList;
 import java.util.List;
-
 
 @Data
 public class DomainReq extends SchemaItem {
@@ -38,5 +36,4 @@ public class DomainReq extends SchemaItem {
     public String getAdminOrg() {
         return String.join(",", adminOrgs);
     }
-
 }

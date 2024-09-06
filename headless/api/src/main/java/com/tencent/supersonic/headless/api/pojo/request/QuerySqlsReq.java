@@ -13,18 +13,12 @@ public class QuerySqlsReq extends SemanticQueryReq {
     @Override
     public String toCustomizedString() {
         StringBuilder stringBuilder = new StringBuilder("{");
-        stringBuilder.append("\"dataSetId\":")
-                .append(dataSetId);
-        stringBuilder.append("\"modelIds\":")
-                .append(modelIds);
-        stringBuilder.append(",\"params\":")
-                .append(params);
-        stringBuilder.append(",\"cacheInfo\":")
-                .append(cacheInfo);
-        stringBuilder.append(",\"sqls\":")
-                .append(sqls);
+        stringBuilder.append("\"dataSetId\":").append(dataSetId);
+        stringBuilder.append("\"modelIds\":").append(modelIds);
+        stringBuilder.append(",\"params\":").append(params);
+        stringBuilder.append(",\"cacheInfo\":").append(cacheInfo);
+        stringBuilder.append(",\"sqls\":").append(sqls);
         stringBuilder.append('}');
         return stringBuilder.toString();
     }
-
 }

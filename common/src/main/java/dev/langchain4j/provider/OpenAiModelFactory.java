@@ -21,8 +21,7 @@ public class OpenAiModelFactory implements ModelFactory, InitializingBean {
 
     @Override
     public ChatLanguageModel createChatModel(ChatModelConfig modelConfig) {
-        return OpenAiChatModel
-                .builder()
+        return OpenAiChatModel.builder()
                 .baseUrl(modelConfig.getBaseUrl())
                 .modelName(modelConfig.getModelName())
                 .apiKey(modelConfig.keyDecrypt())

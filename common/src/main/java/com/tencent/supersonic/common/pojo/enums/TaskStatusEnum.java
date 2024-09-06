@@ -1,7 +1,6 @@
 package com.tencent.supersonic.common.pojo.enums;
 
 public enum TaskStatusEnum {
-
     INITIAL("initial", -2),
 
     ERROR("error", -1),
@@ -47,5 +46,4 @@ public enum TaskStatusEnum {
         }
         return TaskStatusEnum.UNKNOWN;
     }
-
 }

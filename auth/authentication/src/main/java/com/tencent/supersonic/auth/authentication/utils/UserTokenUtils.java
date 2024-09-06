@@ -1,5 +1,8 @@
 package com.tencent.supersonic.auth.authentication.utils;
 
+import javax.crypto.spec.SecretKeySpec;
+import javax.servlet.http.HttpServletRequest;
+
 import com.tencent.supersonic.auth.api.authentication.config.AuthenticationConfig;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.auth.api.authentication.pojo.UserWithPassword;
@@ -11,8 +14,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
-import javax.crypto.spec.SecretKeySpec;
-import javax.servlet.http.HttpServletRequest;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.HashMap;
@@ -46,7 +47,9 @@ public class UserTokenUtils {
         Map<String, Object> claims = new HashMap<>(5);
         claims.put(TOKEN_USER_ID, user.getId());
         claims.put(TOKEN_USER_NAME, StringUtils.isEmpty(user.getName()) ? "" : user.getName());
-        claims.put(TOKEN_USER_PASSWORD, StringUtils.isEmpty(user.getPassword()) ? "" : user.getPassword());
+        claims.put(
+                TOKEN_USER_PASSWORD,
+                StringUtils.isEmpty(user.getPassword()) ? "" : user.getPassword());
         claims.put(TOKEN_USER_DISPLAY_NAME, user.getDisplayName());
         claims.put(TOKEN_CREATE_TIME, System.currentTimeMillis());
         claims.put(TOKEN_IS_ADMIN, user.getIsAdmin());
@@ -79,8 +82,10 @@ public class UserTokenUtils {
         String userName = String.valueOf(claims.get(TOKEN_USER_NAME));
         String email = String.valueOf(claims.get(TOKEN_USER_EMAIL));
         String displayName = String.valueOf(claims.get(TOKEN_USER_DISPLAY_NAME));
-        Integer isAdmin = claims.get(TOKEN_IS_ADMIN) == null
-                ? 0 : Integer.parseInt(claims.get(TOKEN_IS_ADMIN).toString());
+        Integer isAdmin =
+                claims.get(TOKEN_IS_ADMIN) == null
+                        ? 0
+                        : Integer.parseInt(claims.get(TOKEN_IS_ADMIN).toString());
         return User.get(userId, userName, displayName, email, isAdmin);
     }
 
@@ -97,8 +102,10 @@ public class UserTokenUtils {
         String email = String.valueOf(claims.get(TOKEN_USER_EMAIL));
         String displayName = String.valueOf(claims.get(TOKEN_USER_DISPLAY_NAME));
         String password = String.valueOf(claims.get(TOKEN_USER_PASSWORD));
-        Integer isAdmin = claims.get(TOKEN_IS_ADMIN) == null
-                ? 0 : Integer.parseInt(claims.get(TOKEN_IS_ADMIN).toString());
+        Integer isAdmin =
+                claims.get(TOKEN_IS_ADMIN) == null
+                        ? 0
+                        : Integer.parseInt(claims.get(TOKEN_IS_ADMIN).toString());
         return UserWithPassword.get(userId, userName, displayName, email, password, isAdmin);
     }
 
@@ -117,9 +124,12 @@ public class UserTokenUtils {
         Claims claims;
         try {
             String tokenSecret = getTokenSecret(appKey);
-            claims = Jwts.parser()
-                    .setSigningKey(tokenSecret.getBytes(StandardCharsets.UTF_8))
-                    .build().parseClaimsJws(getTokenString(token)).getBody();
+            claims =
+                    Jwts.parser()
+                            .setSigningKey(tokenSecret.getBytes(StandardCharsets.UTF_8))
+                            .build()
+                            .parseClaimsJws(getTokenString(token))
+                            .getBody();
         } catch (Exception e) {
             log.error("getClaims", e);
             throw new AccessException("parse user info from token failed :" + token);
@@ -128,8 +138,9 @@ public class UserTokenUtils {
     }
 
     private static String getTokenString(String token) {
-        return token.startsWith(TOKEN_PREFIX) ? token.substring(token.indexOf(TOKEN_PREFIX)
-                + TOKEN_PREFIX.length()).trim() : token.trim();
+        return token.startsWith(TOKEN_PREFIX)
+                ? token.substring(token.indexOf(TOKEN_PREFIX) + TOKEN_PREFIX.length()).trim()
+                : token.trim();
     }
 
     private String generate(Map<String, Object> claims, String appKey) {
@@ -146,8 +157,11 @@ public class UserTokenUtils {
                 .setClaims(claims)
                 .setSubject(claims.get(TOKEN_USER_NAME).toString())
                 .setExpiration(expirationDate)
-                .signWith(new SecretKeySpec(tokenSecret.getBytes(StandardCharsets.UTF_8),
-                        SignatureAlgorithm.HS512.getJcaName()), SignatureAlgorithm.HS512)
+                .signWith(
+                        new SecretKeySpec(
+                                tokenSecret.getBytes(StandardCharsets.UTF_8),
+                                SignatureAlgorithm.HS512.getJcaName()),
+                        SignatureAlgorithm.HS512)
                 .compact();
     }
 

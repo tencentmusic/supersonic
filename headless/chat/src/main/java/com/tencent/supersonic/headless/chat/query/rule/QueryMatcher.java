@@ -1,6 +1,5 @@
 package com.tencent.supersonic.headless.chat.query.rule;
 
-
 import com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementMatch;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
@@ -21,8 +20,8 @@ public class QueryMatcher {
     private HashMap<SchemaElementType, QueryMatchOption> elementOptionMap = new HashMap<>();
     private boolean supportCompare;
     private boolean supportOrderBy;
-    private List<AggregateTypeEnum> orderByTypes = Arrays.asList(AggregateTypeEnum.MAX, AggregateTypeEnum.MIN,
-            AggregateTypeEnum.TOPN);
+    private List<AggregateTypeEnum> orderByTypes =
+            Arrays.asList(AggregateTypeEnum.MAX, AggregateTypeEnum.MIN, AggregateTypeEnum.TOPN);
 
     public QueryMatcher() {
         for (SchemaElementType type : SchemaElementType.values()) {
@@ -34,9 +33,13 @@ public class QueryMatcher {
         }
     }
 
-    public QueryMatcher addOption(SchemaElementType type, QueryMatchOption.OptionType option,
-            QueryMatchOption.RequireNumberType requireNumberType, Integer requireNumber) {
-        elementOptionMap.put(type, QueryMatchOption.build(option, requireNumberType, requireNumber));
+    public QueryMatcher addOption(
+            SchemaElementType type,
+            QueryMatchOption.OptionType option,
+            QueryMatchOption.RequireNumberType requireNumberType,
+            Integer requireNumber) {
+        elementOptionMap.put(
+                type, QueryMatchOption.build(option, requireNumberType, requireNumber));
         return this;
     }
 
@@ -44,8 +47,7 @@ public class QueryMatcher {
      * Match schema element with current query according to the options.
      *
      * @param candidateElementMatches
-     * @return a list of all matched schema elements,
-     *         empty list if no matches can be found
+     * @return a list of all matched schema elements, empty list if no matches can be found
      */
     public List<SchemaElementMatch> match(List<SchemaElementMatch> candidateElementMatches) {
         List<SchemaElementMatch> elementMatches = new ArrayList<>();
@@ -53,7 +55,8 @@ public class QueryMatcher {
         for (SchemaElementMatch schemaElementMatch : candidateElementMatches) {
             SchemaElementType schemaElementType = schemaElementMatch.getElement().getType();
             if (schemaElementTypeCount.containsKey(schemaElementType)) {
-                schemaElementTypeCount.put(schemaElementType, schemaElementTypeCount.get(schemaElementType) + 1);
+                schemaElementTypeCount.put(
+                        schemaElementType, schemaElementTypeCount.get(schemaElementType) + 1);
             } else {
                 schemaElementTypeCount.put(schemaElementType, 1);
             }
@@ -70,9 +73,12 @@ public class QueryMatcher {
 
         // add element match if its element type is not declared as unused
         for (SchemaElementMatch elementMatch : candidateElementMatches) {
-            QueryMatchOption elementOption = elementOptionMap.get(elementMatch.getElement().getType());
-            if (Objects.nonNull(elementOption) && !elementOption.getSchemaElementOption()
-                    .equals(QueryMatchOption.OptionType.UNUSED)) {
+            QueryMatchOption elementOption =
+                    elementOptionMap.get(elementMatch.getElement().getType());
+            if (Objects.nonNull(elementOption)
+                    && !elementOption
+                            .getSchemaElementOption()
+                            .equals(QueryMatchOption.OptionType.UNUSED)) {
                 elementMatches.add(elementMatch);
             }
         }
@@ -80,7 +86,8 @@ public class QueryMatcher {
         return elementMatches;
     }
 
-    private int getCount(HashMap<SchemaElementType, Integer> schemaElementTypeCount,
+    private int getCount(
+            HashMap<SchemaElementType, Integer> schemaElementTypeCount,
             SchemaElementType schemaElementType) {
         if (schemaElementTypeCount.containsKey(schemaElementType)) {
             return schemaElementTypeCount.get(schemaElementType);
@@ -90,14 +97,19 @@ public class QueryMatcher {
 
     private boolean isMatch(QueryMatchOption queryMatchOption, int count) {
         // check if required but empty
-        if (queryMatchOption.getSchemaElementOption().equals(QueryMatchOption.OptionType.REQUIRED) && count <= 0) {
+        if (queryMatchOption.getSchemaElementOption().equals(QueryMatchOption.OptionType.REQUIRED)
+                && count <= 0) {
             return false;
         }
-        if (queryMatchOption.getRequireNumberType().equals(QueryMatchOption.RequireNumberType.AT_LEAST)
+        if (queryMatchOption
+                        .getRequireNumberType()
+                        .equals(QueryMatchOption.RequireNumberType.AT_LEAST)
                 && count < queryMatchOption.getRequireNumber()) {
             return false;
         }
-        if (queryMatchOption.getRequireNumberType().equals(QueryMatchOption.RequireNumberType.AT_MOST)
+        if (queryMatchOption
+                        .getRequireNumberType()
+                        .equals(QueryMatchOption.RequireNumberType.AT_MOST)
                 && count > queryMatchOption.getRequireNumber()) {
             return false;
         }

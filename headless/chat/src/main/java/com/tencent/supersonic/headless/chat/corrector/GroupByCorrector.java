@@ -1,10 +1,10 @@
 package com.tencent.supersonic.headless.chat.corrector;
 
+import com.tencent.supersonic.common.jsqlparser.SqlAddHelper;
+import com.tencent.supersonic.common.jsqlparser.SqlSelectHelper;
 import com.tencent.supersonic.common.pojo.enums.QueryType;
 import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import com.tencent.supersonic.common.util.ContextUtils;
-import com.tencent.supersonic.common.jsqlparser.SqlAddHelper;
-import com.tencent.supersonic.common.jsqlparser.SqlSelectHelper;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.api.pojo.SemanticSchema;
 import com.tencent.supersonic.headless.api.pojo.SqlInfo;
@@ -18,9 +18,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-/**
- * Perform SQL corrections on the "Group by" section in S2SQL.
- */
+/** Perform SQL corrections on the "Group by" section in S2SQL. */
 @Slf4j
 public class GroupByCorrector extends BaseSemanticCorrector {
 
@@ -33,13 +31,14 @@ public class GroupByCorrector extends BaseSemanticCorrector {
         addGroupByFields(chatQueryContext, semanticParseInfo);
     }
 
-    private Boolean needAddGroupBy(ChatQueryContext chatQueryContext, SemanticParseInfo semanticParseInfo) {
+    private Boolean needAddGroupBy(
+            ChatQueryContext chatQueryContext, SemanticParseInfo semanticParseInfo) {
         if (!QueryType.METRIC.equals(semanticParseInfo.getQueryType())) {
             return false;
         }
 
         Long dataSetId = semanticParseInfo.getDataSetId();
-        //add dimension group by
+        // add dimension group by
         SqlInfo sqlInfo = semanticParseInfo.getSqlInfo();
         String correctS2SQL = sqlInfo.getCorrectedS2SQL();
         SemanticSchema semanticSchema = chatQueryContext.getSemanticSchema();
@@ -48,7 +47,7 @@ public class GroupByCorrector extends BaseSemanticCorrector {
             log.debug("no need to add groupby ,existed distinct in s2sql:{}", correctS2SQL);
             return false;
         }
-        //add alias field name
+        // add alias field name
         Set<String> dimensions = getDimensions(dataSetId, semanticSchema);
         List<String> selectFields = SqlSelectHelper.getSelectFields(correctS2SQL);
         if (CollectionUtils.isEmpty(selectFields) || CollectionUtils.isEmpty(dimensions)) {
@@ -63,33 +62,40 @@ public class GroupByCorrector extends BaseSemanticCorrector {
             return false;
         }
         Environment environment = ContextUtils.getBean(Environment.class);
-        String correctorAdditionalInfo = environment.getProperty("s2.corrector.additional.information");
-        if (StringUtils.isNotBlank(correctorAdditionalInfo) && !Boolean.parseBoolean(correctorAdditionalInfo)) {
+        String correctorAdditionalInfo =
+                environment.getProperty("s2.corrector.additional.information");
+        if (StringUtils.isNotBlank(correctorAdditionalInfo)
+                && !Boolean.parseBoolean(correctorAdditionalInfo)) {
             return false;
         }
         return true;
     }
 
-    private void addGroupByFields(ChatQueryContext chatQueryContext, SemanticParseInfo semanticParseInfo) {
+    private void addGroupByFields(
+            ChatQueryContext chatQueryContext, SemanticParseInfo semanticParseInfo) {
         Long dataSetId = semanticParseInfo.getDataSetId();
-        //add dimension group by
+        // add dimension group by
         SqlInfo sqlInfo = semanticParseInfo.getSqlInfo();
         String correctS2SQL = sqlInfo.getCorrectedS2SQL();
         SemanticSchema semanticSchema = chatQueryContext.getSemanticSchema();
-        //add alias field name
+        // add alias field name
         Set<String> dimensions = getDimensions(dataSetId, semanticSchema);
         List<String> selectFields = SqlSelectHelper.gePureSelectFields(correctS2SQL);
         List<String> aggregateFields = SqlSelectHelper.getAggregateFields(correctS2SQL);
-        Set<String> groupByFields = selectFields.stream()
-                .filter(field -> dimensions.contains(field))
-                .filter(field -> {
-                    if (!CollectionUtils.isEmpty(aggregateFields) && aggregateFields.contains(field)) {
-                        return false;
-                    }
-                    return true;
-                })
-                .collect(Collectors.toSet());
-        semanticParseInfo.getSqlInfo().setCorrectedS2SQL(SqlAddHelper.addGroupBy(correctS2SQL, groupByFields));
+        Set<String> groupByFields =
+                selectFields.stream()
+                        .filter(field -> dimensions.contains(field))
+                        .filter(
+                                field -> {
+                                    if (!CollectionUtils.isEmpty(aggregateFields)
+                                            && aggregateFields.contains(field)) {
+                                        return false;
+                                    }
+                                    return true;
+                                })
+                        .collect(Collectors.toSet());
+        semanticParseInfo
+                .getSqlInfo()
+                .setCorrectedS2SQL(SqlAddHelper.addGroupBy(correctS2SQL, groupByFields));
     }
-
 }

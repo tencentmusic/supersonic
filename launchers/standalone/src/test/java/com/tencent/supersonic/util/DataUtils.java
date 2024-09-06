@@ -61,13 +61,15 @@ public class DataUtils {
     }
 
     public static SchemaElement getSchemaElement(String name) {
-        return SchemaElement.builder()
-                .name(name)
-                .build();
+        return SchemaElement.builder().name(name).build();
     }
 
-    public static QueryFilter getFilter(String bizName, FilterOperatorEnum filterOperatorEnum,
-            Object value, String name, Long elementId) {
+    public static QueryFilter getFilter(
+            String bizName,
+            FilterOperatorEnum filterOperatorEnum,
+            Object value,
+            String name,
+            Long elementId) {
         QueryFilter filter = new QueryFilter();
         filter.setBizName(bizName);
         filter.setOperator(filterOperatorEnum);
@@ -87,8 +89,12 @@ public class DataUtils {
         return dateInfo;
     }
 
-    public static DateConf getDateConf(DateConf.DateMode dateMode, Integer unit,
-            String period, String startDate, String endDate) {
+    public static DateConf getDateConf(
+            DateConf.DateMode dateMode,
+            Integer unit,
+            String period,
+            String startDate,
+            String endDate) {
         DateConf dateInfo = new DateConf();
         dateInfo.setUnit(unit);
         dateInfo.setDateMode(dateMode);
@@ -98,7 +104,8 @@ public class DataUtils {
         return dateInfo;
     }
 
-    public static DateConf getDateConf(DateConf.DateMode dateMode, String startDate, String endDate) {
+    public static DateConf getDateConf(
+            DateConf.DateMode dateMode, String startDate, String endDate) {
         DateConf dateInfo = new DateConf();
         dateInfo.setDateMode(dateMode);
         dateInfo.setStartDate(startDate);
@@ -106,7 +113,8 @@ public class DataUtils {
         return dateInfo;
     }
 
-    public static DateConf getDateConf(DateConf.DateMode dateMode, String startDate, String endDate, int unit) {
+    public static DateConf getDateConf(
+            DateConf.DateMode dateMode, String startDate, String endDate, int unit) {
         DateConf dateInfo = new DateConf();
         dateInfo.setDateMode(dateMode);
         dateInfo.setStartDate(startDate);
@@ -141,8 +149,14 @@ public class DataUtils {
         RuleParserTool ruleQueryTool = new RuleParserTool();
         ruleQueryTool.setType(AgentToolType.NL2SQL_RULE);
         ruleQueryTool.setDataSetIds(Lists.newArrayList(-1L));
-        ruleQueryTool.setQueryModes(Lists.newArrayList("METRIC_ID", "METRIC_FILTER", "METRIC_MODEL",
-                "TAG_DETAIL", "TAG_LIST_FILTER", "TAG_ID"));
+        ruleQueryTool.setQueryModes(
+                Lists.newArrayList(
+                        "METRIC_ID",
+                        "METRIC_FILTER",
+                        "METRIC_MODEL",
+                        "TAG_DETAIL",
+                        "TAG_LIST_FILTER",
+                        "TAG_ID"));
         return ruleQueryTool;
     }
 

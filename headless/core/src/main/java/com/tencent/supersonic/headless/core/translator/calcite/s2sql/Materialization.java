@@ -1,9 +1,10 @@
 package com.tencent.supersonic.headless.core.translator.calcite.s2sql;
 
-import java.util.ArrayList;
-import java.util.List;
 import lombok.Builder;
 import lombok.Data;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @Builder
@@ -11,10 +12,8 @@ public class Materialization {
 
     public enum TimePartType {
         /**
-         * partition time type
-         * 1 - FULL, not use partition
-         * 2 - PARTITION , use  time list
-         * 3 - ZIPPER, use [startDate, endDate]  range time
+         * partition time type 1 - FULL, not use partition 2 - PARTITION , use time list 3 - ZIPPER,
+         * use [startDate, endDate] range time
          */
         FULL("FULL"),
         PARTITION("PARTITION"),
@@ -46,6 +45,4 @@ public class Materialization {
     private Integer level;
     private List<MaterializationElement> dimensions = new ArrayList<>();
     private List<MaterializationElement> metrics = new ArrayList<>();
-
-
 }

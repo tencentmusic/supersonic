@@ -1,7 +1,8 @@
 package com.tencent.supersonic.auth.api.authorization.request;
 
-import java.util.List;
 import lombok.Data;
+
+import java.util.List;
 
 @Data
 public class RemoveUsersFromGroupReq {

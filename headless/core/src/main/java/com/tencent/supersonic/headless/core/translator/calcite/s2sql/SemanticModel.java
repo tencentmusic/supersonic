@@ -22,11 +22,13 @@ public class SemanticModel {
     private Database database;
 
     public List<Dimension> getDimensions() {
-        return dimensionMap.values().stream().flatMap(Collection::stream).collect(Collectors.toList());
+        return dimensionMap.values().stream()
+                .flatMap(Collection::stream)
+                .collect(Collectors.toList());
     }
 
     public Map<Long, DataSource> getModelMap() {
-        return datasourceMap.values().stream().collect(Collectors.toMap(DataSource::getId, dataSource -> dataSource));
+        return datasourceMap.values().stream()
+                .collect(Collectors.toMap(DataSource::getId, dataSource -> dataSource));
     }
-
 }

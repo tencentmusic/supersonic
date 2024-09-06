@@ -18,5 +18,4 @@ public interface QueryRuleService {
     QueryRuleResp getQueryRuleById(Long id, User user);
 
     List<QueryRuleResp> getQueryRuleList(QueryRuleFilter queryRuleFilter, User user);
-
 }

@@ -9,8 +9,8 @@ import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.api.pojo.SemanticSchema;
 import com.tencent.supersonic.headless.api.pojo.SqlInfo;
-import com.tencent.supersonic.headless.chat.parser.llm.ParseResult;
 import com.tencent.supersonic.headless.chat.ChatQueryContext;
+import com.tencent.supersonic.headless.chat.parser.llm.ParseResult;
 import com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMReq;
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;
@@ -22,32 +22,33 @@ import java.util.Set;
 
 class SchemaCorrectorTest {
 
-    private String json = "{\n"
-            + "          \"dataSetId\":  1,\n"
-            + "          \"llmReq\":  {\n"
-            + "                    \"queryText\":  \"xxx2024年播放量最高的十首歌\",\n"
-            + "                    \"schema\":  {\n"
-            + "                              \"dataSetName\":  \"歌曲\",\n"
-            + "                              \"fieldNameList\":  [\n"
-            + "                                        \"商务组\",\n"
-            + "                                        \"歌曲名\",\n"
-            + "                                        \"播放量\",\n"
-            + "                                        \"播放份额\",\n"
-            + "                                        \"数据日期\"\n"
-            + "                              ]\n"
-            + "                    },\n"
-            + "                    \"linking\":  [\n"
-            + "\n"
-            + "                    ],\n"
-            + "                    \"currentDate\":  \"2024-02-24\",\n"
-            + "                    \"priorExts\":  \"播放份额是小数; \",\n"
-            + "                    \"sqlGenType\":  \"1_pass_self_consistency\"\n"
-            + "          },\n"
-            + "          \"request\":  null,\n"
-            + "          \"linkingValues\":  [\n"
-            + "\n"
-            + "          ]\n"
-            + "}";
+    private String json =
+            "{\n"
+                    + "          \"dataSetId\":  1,\n"
+                    + "          \"llmReq\":  {\n"
+                    + "                    \"queryText\":  \"xxx2024年播放量最高的十首歌\",\n"
+                    + "                    \"schema\":  {\n"
+                    + "                              \"dataSetName\":  \"歌曲\",\n"
+                    + "                              \"fieldNameList\":  [\n"
+                    + "                                        \"商务组\",\n"
+                    + "                                        \"歌曲名\",\n"
+                    + "                                        \"播放量\",\n"
+                    + "                                        \"播放份额\",\n"
+                    + "                                        \"数据日期\"\n"
+                    + "                              ]\n"
+                    + "                    },\n"
+                    + "                    \"linking\":  [\n"
+                    + "\n"
+                    + "                    ],\n"
+                    + "                    \"currentDate\":  \"2024-02-24\",\n"
+                    + "                    \"priorExts\":  \"播放份额是小数; \",\n"
+                    + "                    \"sqlGenType\":  \"1_pass_self_consistency\"\n"
+                    + "          },\n"
+                    + "          \"request\":  null,\n"
+                    + "          \"linkingValues\":  [\n"
+                    + "\n"
+                    + "          ]\n"
+                    + "}";
 
     @Test
     void doCorrect() throws JsonProcessingException {
@@ -56,9 +57,9 @@ class SchemaCorrectorTest {
         ObjectMapper objectMapper = new ObjectMapper();
         ParseResult parseResult = objectMapper.readValue(json, ParseResult.class);
 
-
-        String sql = "select  歌曲名 from 歌曲 where 发行日期 >= '2024-01-01' "
-                + "and 商务组 = 'xxx' order by 播放量 desc  limit 10";
+        String sql =
+                "select  歌曲名 from 歌曲 where 发行日期 >= '2024-01-01' "
+                        + "and 商务组 = 'xxx' order by 播放量 desc  limit 10";
         SemanticParseInfo semanticParseInfo = new SemanticParseInfo();
         SqlInfo sqlInfo = new SqlInfo();
         sqlInfo.setParsedS2SQL(sql);
@@ -69,14 +70,14 @@ class SchemaCorrectorTest {
         schemaElement.setDataSetId(dataSetId);
         semanticParseInfo.setDataSet(schemaElement);
 
-
         semanticParseInfo.getProperties().put(Constants.CONTEXT, parseResult);
 
         SchemaCorrector schemaCorrector = new SchemaCorrector();
         schemaCorrector.removeFilterIfNotInLinkingValue(chatQueryContext, semanticParseInfo);
 
-        Assert.assertEquals("SELECT 歌曲名 FROM 歌曲 WHERE 发行日期 >= '2024-01-01' "
-                + "ORDER BY 播放量 DESC LIMIT 10", semanticParseInfo.getSqlInfo().getCorrectedS2SQL());
+        Assert.assertEquals(
+                "SELECT 歌曲名 FROM 歌曲 WHERE 发行日期 >= '2024-01-01' " + "ORDER BY 播放量 DESC LIMIT 10",
+                semanticParseInfo.getSqlInfo().getCorrectedS2SQL());
 
         parseResult = objectMapper.readValue(json, ParseResult.class);
 
@@ -91,9 +92,10 @@ class SchemaCorrectorTest {
         semanticParseInfo.getSqlInfo().setCorrectedS2SQL(sql);
         semanticParseInfo.getSqlInfo().setParsedS2SQL(sql);
         schemaCorrector.removeFilterIfNotInLinkingValue(chatQueryContext, semanticParseInfo);
-        Assert.assertEquals("SELECT 歌曲名 FROM 歌曲 WHERE 发行日期 >= '2024-01-01' "
-                + "AND 商务组 = 'xxx' ORDER BY 播放量 DESC LIMIT 10", semanticParseInfo.getSqlInfo().getCorrectedS2SQL());
-
+        Assert.assertEquals(
+                "SELECT 歌曲名 FROM 歌曲 WHERE 发行日期 >= '2024-01-01' "
+                        + "AND 商务组 = 'xxx' ORDER BY 播放量 DESC LIMIT 10",
+                semanticParseInfo.getSqlInfo().getCorrectedS2SQL());
     }
 
     private ChatQueryContext buildQueryContext(Long dataSetId) {

@@ -8,9 +8,7 @@ import org.springframework.core.io.support.SpringFactoriesLoader;
 import java.util.List;
 import java.util.Objects;
 
-/**
- * HeadlessConverter QueryOptimizer QueryExecutor object factory
- */
+/** HeadlessConverter QueryOptimizer QueryExecutor object factory */
 @Slf4j
 public class ComponentFactory {
 
@@ -28,14 +26,15 @@ public class ComponentFactory {
     }
 
     private static <T> List<T> init(Class<T> factoryType, List list) {
-        list.addAll(SpringFactoriesLoader.loadFactories(factoryType,
-                Thread.currentThread().getContextClassLoader()));
+        list.addAll(
+                SpringFactoriesLoader.loadFactories(
+                        factoryType, Thread.currentThread().getContextClassLoader()));
         return list;
     }
 
     private static <T> T init(Class<T> factoryType) {
-        return SpringFactoriesLoader.loadFactories(factoryType,
-                Thread.currentThread().getContextClassLoader()).get(0);
+        return SpringFactoriesLoader.loadFactories(
+                        factoryType, Thread.currentThread().getContextClassLoader())
+                .get(0);
     }
-
 }

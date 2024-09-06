@@ -2,10 +2,10 @@ package com.tencent.supersonic.chat.api.pojo.response;
 
 import com.tencent.supersonic.chat.api.pojo.request.RecommendedQuestionReq;
 import com.tencent.supersonic.common.pojo.enums.StatusEnum;
+import lombok.Data;
+
 import java.util.Date;
 import java.util.List;
-
-import lombok.Data;
 
 @Data
 public class ChatConfigRichResp {
@@ -23,9 +23,7 @@ public class ChatConfigRichResp {
 
     private List<RecommendedQuestionReq> recommendedQuestions;
 
-    /**
-     * available status
-     */
+    /** available status */
     private StatusEnum statusEnum;
 
     private String createdBy;

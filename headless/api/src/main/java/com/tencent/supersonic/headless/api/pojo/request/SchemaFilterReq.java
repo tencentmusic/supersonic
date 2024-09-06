@@ -11,5 +11,4 @@ public class SchemaFilterReq {
     private Long dataSetId;
 
     private List<Long> modelIds = Lists.newArrayList();
-
 }

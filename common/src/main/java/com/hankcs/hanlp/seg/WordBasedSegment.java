@@ -1,16 +1,15 @@
 package com.hankcs.hanlp.seg;
 
-
 import com.hankcs.hanlp.algorithm.Viterbi;
 import com.hankcs.hanlp.collection.AhoCorasick.AhoCorasickDoubleArrayTrie;
 import com.hankcs.hanlp.collection.trie.DoubleArrayTrie;
 import com.hankcs.hanlp.corpus.tag.Nature;
 import com.hankcs.hanlp.dictionary.CoreDictionary;
-import com.hankcs.hanlp.seg.common.Term;
 import com.hankcs.hanlp.dictionary.CoreDictionaryTransformMatrixDictionary;
 import com.hankcs.hanlp.dictionary.other.CharType;
 import com.hankcs.hanlp.seg.NShort.Path.AtomNode;
 import com.hankcs.hanlp.seg.common.Graph;
+import com.hankcs.hanlp.seg.common.Term;
 import com.hankcs.hanlp.seg.common.Vertex;
 import com.hankcs.hanlp.seg.common.WordNet;
 import com.hankcs.hanlp.utility.TextUtility;
@@ -21,11 +20,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
 
-
 public abstract class WordBasedSegment extends Segment {
 
-    public WordBasedSegment() {
-    }
+    public WordBasedSegment() {}
 
     protected static void generateWord(List<Vertex> linkedArray, WordNet wordNetOptimum) {
         fixResultByRule(linkedArray);
@@ -50,7 +47,9 @@ public abstract class WordBasedSegment extends Segment {
                 }
 
                 vertex = (Vertex) var1.next();
-            } while (!vertex.realWord.equals("－－") && !vertex.realWord.equals("—") && !vertex.realWord.equals("-"));
+            } while (!vertex.realWord.equals("－－")
+                    && !vertex.realWord.equals("—")
+                    && !vertex.realWord.equals("-"));
 
             vertex.confirmNature(Nature.w);
         }
@@ -64,9 +63,12 @@ public abstract class WordBasedSegment extends Segment {
             for (Vertex current = next; listIterator.hasNext(); current = next) {
                 next = (Vertex) listIterator.next();
                 Nature currentNature = current.getNature();
-                if (currentNature == Nature.nx && (next.hasNature(Nature.q) || next.hasNature(Nature.n))) {
+                if (currentNature == Nature.nx
+                        && (next.hasNature(Nature.q) || next.hasNature(Nature.n))) {
                     String[] param = current.realWord.split("-", 1);
-                    if (param.length == 2 && TextUtility.isAllNum(param[0]) && TextUtility.isAllNum(param[1])) {
+                    if (param.length == 2
+                            && TextUtility.isAllNum(param[0])
+                            && TextUtility.isAllNum(param[1])) {
                         current = current.copy();
                         current.realWord = param[0];
                         current.confirmNature(Nature.m);
@@ -79,7 +81,6 @@ public abstract class WordBasedSegment extends Segment {
                     }
                 }
             }
-
         }
     }
 
@@ -90,7 +91,8 @@ public abstract class WordBasedSegment extends Segment {
 
             for (Vertex current = next; listIterator.hasNext(); current = next) {
                 next = (Vertex) listIterator.next();
-                if (TextUtility.isAllNum(current.realWord) || TextUtility.isAllChineseNum(current.realWord)) {
+                if (TextUtility.isAllNum(current.realWord)
+                        || TextUtility.isAllChineseNum(current.realWord)) {
                     String nextWord = next.realWord;
                     if (nextWord.length() == 1 && "月日时分秒".contains(nextWord)
                             || nextWord.length() == 2 && nextWord.equals("月份")) {
@@ -110,8 +112,10 @@ public abstract class WordBasedSegment extends Segment {
                             current.confirmNature(Nature.m, true);
                         } else if (current.realWord.length() > 1) {
                             char last = current.realWord.charAt(current.realWord.length() - 1);
-                            current = Vertex.newNumberInstance(
-                                    current.realWord.substring(0, current.realWord.length() - 1));
+                            current =
+                                    Vertex.newNumberInstance(
+                                            current.realWord.substring(
+                                                    0, current.realWord.length() - 1));
                             listIterator.previous();
                             listIterator.previous();
                             listIterator.set(current);
@@ -121,7 +125,6 @@ public abstract class WordBasedSegment extends Segment {
                     }
                 }
             }
-
         }
     }
 
@@ -143,9 +146,7 @@ public abstract class WordBasedSegment extends Segment {
         return wordNet.toGraph();
     }
 
-    /**
-     * @deprecated
-     */
+    /** @deprecated */
     private static List<AtomNode> atomSegment(String sSentence, int start, int end) {
         if (end < start) {
             throw new RuntimeException("start=" + start + " < end=" + end);
@@ -161,7 +162,10 @@ public abstract class WordBasedSegment extends Segment {
                 charTypeArray[i] = CharType.get(c);
                 if (c == '.' && i < charArray.length - 1 && CharType.get(charArray[i + 1]) == 9) {
                     charTypeArray[i] = 9;
-                } else if (c == '.' && i < charArray.length - 1 && charArray[i + 1] >= '0' && charArray[i + 1] <= '9') {
+                } else if (c == '.'
+                        && i < charArray.length - 1
+                        && charArray[i + 1] >= '0'
+                        && charArray[i + 1] <= '9') {
                     charTypeArray[i] = 5;
                 } else if (charTypeArray[i] == 8) {
                     charTypeArray[i] = 5;
@@ -222,8 +226,10 @@ public abstract class WordBasedSegment extends Segment {
             while (true) {
                 while (listIterator.hasNext()) {
                     next = (Vertex) listIterator.next();
-                    if (!TextUtility.isAllNum(current.realWord) && !TextUtility.isAllChineseNum(current.realWord)
-                            || !TextUtility.isAllNum(next.realWord) && !TextUtility.isAllChineseNum(next.realWord)) {
+                    if (!TextUtility.isAllNum(current.realWord)
+                                    && !TextUtility.isAllChineseNum(current.realWord)
+                            || !TextUtility.isAllNum(next.realWord)
+                                    && !TextUtility.isAllChineseNum(next.realWord)) {
                         current = next;
                     } else {
                         current = Vertex.newNumberInstance(current.realWord + next.realWord);
@@ -246,16 +252,24 @@ public abstract class WordBasedSegment extends Segment {
         DoubleArrayTrie.Searcher searcher = CoreDictionary.trie.getSearcher(charArray, 0);
 
         while (searcher.next()) {
-            wordNetStorage.add(searcher.begin + 1, new Vertex(new String(charArray, searcher.begin, searcher.length),
-                    (CoreDictionary.Attribute) searcher.value, searcher.index));
+            wordNetStorage.add(
+                    searcher.begin + 1,
+                    new Vertex(
+                            new String(charArray, searcher.begin, searcher.length),
+                            (CoreDictionary.Attribute) searcher.value,
+                            searcher.index));
         }
 
         if (this.config.forceCustomDictionary) {
-            this.customDictionary.parseText(charArray, new AhoCorasickDoubleArrayTrie.IHit<CoreDictionary.Attribute>() {
-                public void hit(int begin, int end, CoreDictionary.Attribute value) {
-                    wordNetStorage.add(begin + 1, new Vertex(new String(charArray, begin, end - begin), value));
-                }
-            });
+            this.customDictionary.parseText(
+                    charArray,
+                    new AhoCorasickDoubleArrayTrie.IHit<CoreDictionary.Attribute>() {
+                        public void hit(int begin, int end, CoreDictionary.Attribute value) {
+                            wordNetStorage.add(
+                                    begin + 1,
+                                    new Vertex(new String(charArray, begin, end - begin), value));
+                        }
+                    });
         }
 
         LinkedList<Vertex>[] vertexes = wordNetStorage.getVertexes();
@@ -266,9 +280,10 @@ public abstract class WordBasedSegment extends Segment {
                 if (vertexes[i].isEmpty()) {
                     int j;
                     for (j = i + 1;
-                            j < vertexes.length - 1 && (vertexes[j].isEmpty() || CharType.get(charArray[j - 1]) == 11);
-                            ++j) {
-                    }
+                            j < vertexes.length - 1
+                                    && (vertexes[j].isEmpty()
+                                            || CharType.get(charArray[j - 1]) == 11);
+                            ++j) {}
 
                     wordNetStorage.add(i, Segment.quickAtomSegment(charArray, i - 1, j - 1));
                     i = j;
@@ -291,12 +306,14 @@ public abstract class WordBasedSegment extends Segment {
         for (int i = 0; i < length; ++i) {
             Vertex vertex = (Vertex) listIterator.next();
             Term termMain = Segment.convert(vertex);
-            //termList.add(termMain);
+            // termList.add(termMain);
             addTerms(termList, vertex, line - 1);
             termMain.offset = line - 1;
             if (vertex.realWord.length() > 2) {
                 label43:
-                for (int currentLine = line; currentLine < line + vertex.realWord.length(); ++currentLine) {
+                for (int currentLine = line;
+                        currentLine < line + vertex.realWord.length();
+                        ++currentLine) {
                     Iterator iterator = wordNetAll.descendingIterator(currentLine);
 
                     while (true) {
@@ -310,11 +327,12 @@ public abstract class WordBasedSegment extends Segment {
                                 && smallVertex.realWord.length() < this.config.indexMode);
 
                         if (smallVertex != vertex
-                                && currentLine + smallVertex.realWord.length() <= line + vertex.realWord.length()) {
+                                && currentLine + smallVertex.realWord.length()
+                                        <= line + vertex.realWord.length()) {
                             listIterator.add(smallVertex);
-                            //Term termSub = convert(smallVertex);
-                            //termSub.offset = currentLine - 1;
-                            //termList.add(termSub);
+                            // Term termSub = convert(smallVertex);
+                            // termSub.offset = currentLine - 1;
+                            // termList.add(termSub);
                             addTerms(termList, smallVertex, currentLine - 1);
                         }
                     }
@@ -328,7 +346,8 @@ public abstract class WordBasedSegment extends Segment {
     }
 
     protected static void speechTagging(List<Vertex> vertexList) {
-        Viterbi.compute(vertexList, CoreDictionaryTransformMatrixDictionary.transformMatrixDictionary);
+        Viterbi.compute(
+                vertexList, CoreDictionaryTransformMatrixDictionary.transformMatrixDictionary);
     }
 
     protected void addTerms(List<Term> terms, Vertex vertex, int offset) {

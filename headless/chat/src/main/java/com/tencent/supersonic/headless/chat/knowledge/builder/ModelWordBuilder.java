@@ -4,15 +4,13 @@ import com.google.common.collect.Lists;
 import com.tencent.supersonic.common.pojo.enums.DictWordType;
 import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.headless.chat.knowledge.DictWord;
-
-import java.util.List;
-import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-/**
- * model word nature
- */
+import java.util.List;
+import java.util.Objects;
+
+/** model word nature */
 @Service
 @Slf4j
 public class ModelWordBuilder extends BaseWordWithAliasBuilder {
@@ -35,5 +33,4 @@ public class ModelWordBuilder extends BaseWordWithAliasBuilder {
         dictWord.setNatureWithFrequency(String.format("%s " + DEFAULT_FREQUENCY, nature));
         return dictWord;
     }
-
 }

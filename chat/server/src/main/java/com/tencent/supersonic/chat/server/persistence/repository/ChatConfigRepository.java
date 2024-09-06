@@ -1,9 +1,8 @@
 package com.tencent.supersonic.chat.server.persistence.repository;
 
-
-import com.tencent.supersonic.chat.server.config.ChatConfig;
 import com.tencent.supersonic.chat.api.pojo.request.ChatConfigFilter;
 import com.tencent.supersonic.chat.api.pojo.response.ChatConfigResp;
+import com.tencent.supersonic.chat.server.config.ChatConfig;
 
 import java.util.List;
 

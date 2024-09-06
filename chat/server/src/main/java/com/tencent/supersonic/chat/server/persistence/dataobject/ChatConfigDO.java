@@ -1,18 +1,15 @@
 package com.tencent.supersonic.chat.server.persistence.dataobject;
 
-import java.util.Date;
-
 import lombok.Data;
 import lombok.ToString;
 
+import java.util.Date;
 
 @Data
 @ToString
 public class ChatConfigDO {
 
-    /**
-     * database auto-increment primary key
-     */
+    /** database auto-increment primary key */
     private Long id;
 
     private Long modelId;
@@ -27,12 +24,10 @@ public class ChatConfigDO {
 
     private String llmExamples;
 
-    /**
-     * record info
-     */
+    /** record info */
     private String createdBy;
+
     private String updatedBy;
     private Date createdAt;
     private Date updatedAt;
-
 }

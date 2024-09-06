@@ -1,6 +1,5 @@
 package com.tencent.supersonic.headless.server.utils;
 
-
 import com.tencent.supersonic.common.pojo.Aggregator;
 import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.common.pojo.DateConf.DateMode;
@@ -21,9 +20,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-/**
- * QueryNLReqBuilderTest
- */
+/** QueryNLReqBuilderTest */
 class QueryNLReqBuilderTest {
 
     @Test
@@ -56,7 +53,8 @@ class QueryNLReqBuilderTest {
         Assert.assertEquals(
                 "SELECT department, SUM(pv) AS pv FROM 内容库 "
                         + "WHERE (sys_imp_date IN ('2023-08-01')) GROUP "
-                        + "BY department ORDER BY uv LIMIT 2000", querySQLReq.getSql());
+                        + "BY department ORDER BY uv LIMIT 2000",
+                querySQLReq.getSql());
 
         queryStructReq.setQueryType(QueryType.DETAIL);
         querySQLReq = queryStructReq.convert();
@@ -64,15 +62,18 @@ class QueryNLReqBuilderTest {
                 "SELECT department, pv FROM 内容库 WHERE (sys_imp_date IN ('2023-08-01')) "
                         + "ORDER BY uv LIMIT 2000",
                 querySQLReq.getSql());
-
     }
 
     private void init() {
         MockedStatic<ContextUtils> mockContextUtils = Mockito.mockStatic(ContextUtils.class);
         SqlFilterUtils sqlFilterUtils = new SqlFilterUtils();
-        mockContextUtils.when(() -> ContextUtils.getBean(SqlFilterUtils.class)).thenReturn(sqlFilterUtils);
+        mockContextUtils
+                .when(() -> ContextUtils.getBean(SqlFilterUtils.class))
+                .thenReturn(sqlFilterUtils);
         DateModeUtils dateModeUtils = new DateModeUtils();
-        mockContextUtils.when(() -> ContextUtils.getBean(DateModeUtils.class)).thenReturn(dateModeUtils);
+        mockContextUtils
+                .when(() -> ContextUtils.getBean(DateModeUtils.class))
+                .thenReturn(dateModeUtils);
         dateModeUtils.setSysDateCol("sys_imp_date");
         dateModeUtils.setSysDateWeekCol("sys_imp_week");
         dateModeUtils.setSysDateMonthCol("sys_imp_month");

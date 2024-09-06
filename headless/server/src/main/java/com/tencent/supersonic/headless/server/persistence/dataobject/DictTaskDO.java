@@ -12,6 +12,7 @@ import java.util.Date;
 public class DictTaskDO {
     @TableId(type = IdType.AUTO)
     private Long id;
+
     private String name;
     private String description;
     private String type;
@@ -21,5 +22,4 @@ public class DictTaskDO {
     private Date createdAt;
     private String createdBy;
     private Long elapsedMs;
-
 }

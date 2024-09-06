@@ -15,5 +15,4 @@ class EmbeddingModelProperties {
     private String user;
     private Boolean logRequests;
     private Boolean logResponses;
-
 }

@@ -1,9 +1,10 @@
 package com.tencent.supersonic.common.jsqlparser;
 
-import java.util.HashSet;
-import java.util.Set;
 import net.sf.jsqlparser.expression.ExpressionVisitorAdapter;
 import net.sf.jsqlparser.expression.Function;
+
+import java.util.HashSet;
+import java.util.Set;
 
 public class FunctionVisitor extends ExpressionVisitorAdapter {
 

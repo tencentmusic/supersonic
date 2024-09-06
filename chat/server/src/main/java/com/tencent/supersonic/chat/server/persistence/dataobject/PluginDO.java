@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
+
 import java.util.Date;
 
 @Data
@@ -36,5 +37,4 @@ public class PluginDO {
     private String config;
 
     private String comment;
-
 }

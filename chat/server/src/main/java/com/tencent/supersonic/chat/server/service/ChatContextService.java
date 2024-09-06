@@ -7,5 +7,4 @@ public interface ChatContextService {
     ChatContext getOrCreateContext(Integer chatId);
 
     void updateContext(ChatContext chatCtx);
-
 }

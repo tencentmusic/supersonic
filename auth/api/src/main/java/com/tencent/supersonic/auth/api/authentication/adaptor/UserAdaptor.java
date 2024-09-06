@@ -1,16 +1,15 @@
 package com.tencent.supersonic.auth.api.authentication.adaptor;
 
+import javax.servlet.http.HttpServletRequest;
+
 import com.tencent.supersonic.auth.api.authentication.pojo.Organization;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.auth.api.authentication.request.UserReq;
 
 import java.util.List;
 import java.util.Set;
-import javax.servlet.http.HttpServletRequest;
 
-/**
- * UserAdaptor defines some interfaces for obtaining user and organization information
- */
+/** UserAdaptor defines some interfaces for obtaining user and organization information */
 public interface UserAdaptor {
 
     List<String> getUserNames();

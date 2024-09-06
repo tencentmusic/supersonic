@@ -12,17 +12,15 @@ import org.springframework.util.CollectionUtils;
 
 import java.util.List;
 
-
 @Component
 public class ModelRepositoryImpl implements ModelRepository {
-
 
     private ModelDOMapper modelDOMapper;
 
     private ModelDOCustomMapper modelDOCustomMapper;
 
-    public ModelRepositoryImpl(ModelDOMapper modelDOMapper,
-                               ModelDOCustomMapper modelDOCustomMapper) {
+    public ModelRepositoryImpl(
+            ModelDOMapper modelDOMapper, ModelDOCustomMapper modelDOCustomMapper) {
         this.modelDOMapper = modelDOMapper;
         this.modelDOCustomMapper = modelDOCustomMapper;
     }
@@ -71,5 +69,4 @@ public class ModelRepositoryImpl implements ModelRepository {
     public void batchUpdate(List<ModelDO> modelDOS) {
         modelDOCustomMapper.batchUpdateStatus(modelDOS);
     }
-
 }

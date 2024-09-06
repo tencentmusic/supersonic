@@ -8,5 +8,4 @@ import lombok.ToString;
 public class MetricSchemaResp extends MetricResp {
 
     private Long useCnt = 0L;
-
 }

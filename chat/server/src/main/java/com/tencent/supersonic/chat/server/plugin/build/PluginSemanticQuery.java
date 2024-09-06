@@ -1,13 +1,13 @@
 package com.tencent.supersonic.chat.server.plugin.build;
 
 import com.google.common.collect.Lists;
+import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.chat.server.plugin.PluginParseResult;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementMatch;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.api.pojo.request.QueryFilter;
 import com.tencent.supersonic.headless.api.pojo.request.QueryFilters;
-import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.CollectionUtils;
 
@@ -43,29 +43,40 @@ public abstract class PluginSemanticQuery {
     protected Map<String, Object> getElementMap(PluginParseResult pluginParseResult) {
         Map<String, Object> elementValueMap = new HashMap<>();
         Map<Long, Object> filterValueMap = getFilterMap(pluginParseResult);
-        List<SchemaElementMatch> schemaElementMatchList = parseInfo.getElementMatches()
-                .stream().filter(schemaElementMatch -> schemaElementMatch.getFrequency() != null)
-                .sorted(Comparator.comparingLong(SchemaElementMatch::getFrequency).reversed())
-                .collect(Collectors.toList());
+        List<SchemaElementMatch> schemaElementMatchList =
+                parseInfo.getElementMatches().stream()
+                        .filter(schemaElementMatch -> schemaElementMatch.getFrequency() != null)
+                        .sorted(
+                                Comparator.comparingLong(SchemaElementMatch::getFrequency)
+                                        .reversed())
+                        .collect(Collectors.toList());
         if (!CollectionUtils.isEmpty(schemaElementMatchList)) {
-            schemaElementMatchList.stream().filter(schemaElementMatch ->
-                            SchemaElementType.VALUE.equals(schemaElementMatch.getElement().getType())
-                                    || SchemaElementType.ID.equals(schemaElementMatch.getElement().getType()))
+            schemaElementMatchList.stream()
+                    .filter(
+                            schemaElementMatch ->
+                                    SchemaElementType.VALUE.equals(
+                                                    schemaElementMatch.getElement().getType())
+                                            || SchemaElementType.ID.equals(
+                                                    schemaElementMatch.getElement().getType()))
                     .filter(schemaElementMatch -> schemaElementMatch.getSimilarity() == 1.0)
-                    .forEach(schemaElementMatch -> {
-                        Object queryFilterValue = filterValueMap.get(schemaElementMatch.getElement().getId());
-                        if (queryFilterValue != null) {
-                            if (String.valueOf(queryFilterValue).equals(String.valueOf(schemaElementMatch.getWord()))) {
-                                elementValueMap.put(
-                                        String.valueOf(schemaElementMatch.getElement().getId()),
-                                        schemaElementMatch.getWord());
-                            }
-                        } else {
-                            elementValueMap.computeIfAbsent(
-                                    String.valueOf(schemaElementMatch.getElement().getId()),
-                                    k -> schemaElementMatch.getWord());
-                        }
-                    });
+                    .forEach(
+                            schemaElementMatch -> {
+                                Object queryFilterValue =
+                                        filterValueMap.get(schemaElementMatch.getElement().getId());
+                                if (queryFilterValue != null) {
+                                    if (String.valueOf(queryFilterValue)
+                                            .equals(String.valueOf(schemaElementMatch.getWord()))) {
+                                        elementValueMap.put(
+                                                String.valueOf(
+                                                        schemaElementMatch.getElement().getId()),
+                                                schemaElementMatch.getWord());
+                                    }
+                                } else {
+                                    elementValueMap.computeIfAbsent(
+                                            String.valueOf(schemaElementMatch.getElement().getId()),
+                                            k -> schemaElementMatch.getWord());
+                                }
+                            });
         }
         return elementValueMap;
     }
@@ -97,5 +108,4 @@ public abstract class PluginSemanticQuery {
     public void setParseInfo(SemanticParseInfo parseInfo) {
         this.parseInfo = parseInfo;
     }
-
 }

@@ -7,9 +7,7 @@ import com.tencent.supersonic.headless.api.pojo.request.DictValueReq;
 import com.tencent.supersonic.headless.api.pojo.response.DictTaskResp;
 import com.tencent.supersonic.headless.api.pojo.response.DictValueResp;
 
-/**
- * Manage dictionary tasks
- */
+/** Manage dictionary tasks */
 public interface DictTaskService {
     Long addDictTask(DictSingleTaskReq taskReq, User user);
 

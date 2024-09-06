@@ -5,9 +5,7 @@ import lombok.Data;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * advanced knowledge config
- */
+/** advanced knowledge config */
 @Data
 public class KnowledgeAdvancedConfig {
 

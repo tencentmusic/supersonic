@@ -4,8 +4,8 @@ import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;
 
 /**
- * customize various query media ( like duckDb redis) to improved query performance
- * check ok and query successful , return SemanticQueryResp to interface immediately
+ * customize various query media ( like duckDb redis) to improved query performance check ok and
+ * query successful , return SemanticQueryResp to interface immediately
  */
 public interface QueryAccelerator {
 

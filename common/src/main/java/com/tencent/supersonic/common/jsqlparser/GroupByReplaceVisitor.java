@@ -35,7 +35,8 @@ public class GroupByReplaceVisitor implements GroupByVisitor {
             Expression expression = groupByExpressions.get(i);
             String columnName = getColumnName(expression);
 
-            String replaceColumn = parseVisitorHelper.getReplaceValue(columnName, fieldNameMap, exactReplace);
+            String replaceColumn =
+                    parseVisitorHelper.getReplaceValue(columnName, fieldNameMap, exactReplace);
             if (StringUtils.isNotEmpty(replaceColumn)) {
                 replaceExpression(groupByExpressions, i, expression, replaceColumn);
             }
@@ -52,10 +53,11 @@ public class GroupByReplaceVisitor implements GroupByVisitor {
         return expression.toString();
     }
 
-    private void replaceExpression(List<Expression> groupByExpressions,
-                                   int index,
-                                   Expression expression,
-                                   String replaceColumn) {
+    private void replaceExpression(
+            List<Expression> groupByExpressions,
+            int index,
+            Expression expression,
+            String replaceColumn) {
         if (expression instanceof Column) {
             groupByExpressions.set(index, new Column(replaceColumn));
         } else if (expression instanceof Function) {
@@ -66,9 +68,9 @@ public class GroupByReplaceVisitor implements GroupByVisitor {
 
                 Function function = (Function) expression;
                 if (function.getParameters().size() > 1) {
-                    function.getParameters().stream().skip(1).forEach(
-                            e -> newExpressionList.add((Function) e)
-                    );
+                    function.getParameters().stream()
+                            .skip(1)
+                            .forEach(e -> newExpressionList.add((Function) e));
                 }
                 function.setParameters(newExpressionList);
             } catch (JSQLParserException e) {

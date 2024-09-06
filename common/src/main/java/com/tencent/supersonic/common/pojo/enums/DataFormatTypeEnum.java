@@ -1,7 +1,6 @@
 package com.tencent.supersonic.common.pojo.enums;
 
 public enum DataFormatTypeEnum {
-
     PERCENT("percent"),
 
     DECIMAL("decimal");
@@ -15,5 +14,4 @@ public enum DataFormatTypeEnum {
     public String getName() {
         return name;
     }
-
 }

@@ -8,5 +8,4 @@ public class FiledExpression {
     private String operator;
 
     private String fieldName;
-
 }

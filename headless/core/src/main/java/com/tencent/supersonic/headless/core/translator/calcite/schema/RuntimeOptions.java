@@ -9,5 +9,4 @@ import org.apache.commons.lang3.tuple.Triple;
 public class RuntimeOptions {
     private Triple<String, String, String> minMaxTime;
     private Boolean enableOptimize;
-
 }

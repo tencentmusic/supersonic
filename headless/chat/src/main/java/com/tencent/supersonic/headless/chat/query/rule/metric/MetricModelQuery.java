@@ -20,5 +20,4 @@ public class MetricModelQuery extends MetricSemanticQuery {
     public String getQueryMode() {
         return QUERY_MODE;
     }
-
 }

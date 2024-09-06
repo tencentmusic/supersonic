@@ -15,6 +15,4 @@ public class DateInfoDO {
     private String createdBy;
     private String updatedBy;
     private String datePeriod;
-
-
 }

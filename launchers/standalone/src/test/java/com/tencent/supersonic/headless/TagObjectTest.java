@@ -13,8 +13,7 @@ import java.util.List;
 
 public class TagObjectTest extends BaseTest {
 
-    @Autowired
-    private TagObjectService tagObjectService;
+    @Autowired private TagObjectService tagObjectService;
 
     @Test
     void testCreateTagObject() throws Exception {
@@ -32,7 +31,8 @@ public class TagObjectTest extends BaseTest {
         BeanUtils.copyProperties(tagObjectResp, tagObjectReqUpdate);
         tagObjectReqUpdate.setName("艺人1");
         tagObjectService.update(tagObjectReqUpdate, User.getFakeUser());
-        TagObjectResp tagObject = tagObjectService.getTagObject(tagObjectReqUpdate.getId(), User.getFakeUser());
+        TagObjectResp tagObject =
+                tagObjectService.getTagObject(tagObjectReqUpdate.getId(), User.getFakeUser());
         tagObjectService.delete(tagObject.getId(), User.getFakeUser(), false);
     }
 
@@ -53,5 +53,4 @@ public class TagObjectTest extends BaseTest {
         tagObjectReq.setBizName("new_singer");
         return tagObjectReq;
     }
-
 }

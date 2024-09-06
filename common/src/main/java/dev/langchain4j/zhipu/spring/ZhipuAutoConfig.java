@@ -1,7 +1,5 @@
 package dev.langchain4j.zhipu.spring;
 
-import static dev.langchain4j.zhipu.spring.Properties.PREFIX;
-
 import dev.langchain4j.model.zhipu.ZhipuAiChatModel;
 import dev.langchain4j.model.zhipu.ZhipuAiEmbeddingModel;
 import dev.langchain4j.model.zhipu.ZhipuAiStreamingChatModel;
@@ -9,6 +7,8 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import static dev.langchain4j.zhipu.spring.Properties.PREFIX;
 
 @Configuration
 @EnableConfigurationProperties(Properties.class)

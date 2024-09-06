@@ -17,17 +17,25 @@ public class KnowledgeBaseService {
 
     public void updateSemanticKnowledge(List<DictWord> natures) {
 
-        List<DictWord> prefixes = natures.stream()
-                .filter(entry -> !entry.getNatureWithFrequency().contains(DictWordType.SUFFIX.getType()))
-                .collect(Collectors.toList());
+        List<DictWord> prefixes =
+                natures.stream()
+                        .filter(
+                                entry ->
+                                        !entry.getNatureWithFrequency()
+                                                .contains(DictWordType.SUFFIX.getType()))
+                        .collect(Collectors.toList());
 
         for (DictWord nature : prefixes) {
             HanlpHelper.addToCustomDictionary(nature);
         }
 
-        List<DictWord> suffixes = natures.stream()
-                .filter(entry -> entry.getNatureWithFrequency().contains(DictWordType.SUFFIX.getType()))
-                .collect(Collectors.toList());
+        List<DictWord> suffixes =
+                natures.stream()
+                        .filter(
+                                entry ->
+                                        entry.getNatureWithFrequency()
+                                                .contains(DictWordType.SUFFIX.getType()))
+                        .collect(Collectors.toList());
 
         SearchService.loadSuffix(suffixes);
     }
@@ -56,26 +64,35 @@ public class KnowledgeBaseService {
         return HanlpHelper.getTerms(text, modelIdToDataSetIds);
     }
 
-    public List<HanlpMapResult> prefixSearch(String key, int limit,
-                                             Map<Long, List<Long>> modelIdToDataSetIds,
-                                             Set<Long> detectDataSetIds) {
+    public List<HanlpMapResult> prefixSearch(
+            String key,
+            int limit,
+            Map<Long, List<Long>> modelIdToDataSetIds,
+            Set<Long> detectDataSetIds) {
         return prefixSearchByModel(key, limit, modelIdToDataSetIds, detectDataSetIds);
     }
 
-    public List<HanlpMapResult> prefixSearchByModel(String key, int limit,
-                                                    Map<Long, List<Long>> modelIdToDataSetIds,
-                                                    Set<Long> detectDataSetIds) {
+    public List<HanlpMapResult> prefixSearchByModel(
+            String key,
+            int limit,
+            Map<Long, List<Long>> modelIdToDataSetIds,
+            Set<Long> detectDataSetIds) {
         return SearchService.prefixSearch(key, limit, modelIdToDataSetIds, detectDataSetIds);
     }
 
-    public List<HanlpMapResult> suffixSearch(String key, int limit, Map<Long,
-            List<Long>> modelIdToDataSetIds, Set<Long> detectDataSetIds) {
+    public List<HanlpMapResult> suffixSearch(
+            String key,
+            int limit,
+            Map<Long, List<Long>> modelIdToDataSetIds,
+            Set<Long> detectDataSetIds) {
         return suffixSearchByModel(key, limit, modelIdToDataSetIds, detectDataSetIds);
     }
 
-    public List<HanlpMapResult> suffixSearchByModel(String key, int limit, Map<Long,
-            List<Long>> modelIdToDataSetIds, Set<Long> detectDataSetIds) {
+    public List<HanlpMapResult> suffixSearchByModel(
+            String key,
+            int limit,
+            Map<Long, List<Long>> modelIdToDataSetIds,
+            Set<Long> detectDataSetIds) {
         return SearchService.suffixSearch(key, limit, modelIdToDataSetIds, detectDataSetIds);
     }
-
 }

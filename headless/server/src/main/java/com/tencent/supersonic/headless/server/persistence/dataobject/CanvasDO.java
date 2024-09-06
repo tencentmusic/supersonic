@@ -10,38 +10,28 @@ import java.util.Date;
 @Data
 @TableName("s2_canvas")
 public class CanvasDO {
-    /**
-     */
+    /** */
     @TableId(type = IdType.AUTO)
     private Long id;
 
-    /**
-     */
+    /** */
     private Long domainId;
 
-    /**
-     * datasource、dimension、metric
-     */
+    /** datasource、dimension、metric */
     private String type;
 
-    /**
-     */
+    /** */
     private Date createdAt;
 
-    /**
-     */
+    /** */
     private String createdBy;
 
-    /**
-     */
+    /** */
     private Date updatedAt;
 
-    /**
-     */
+    /** */
     private String updatedBy;
 
-    /**
-     * config detail
-     */
+    /** config detail */
     private String config;
 }

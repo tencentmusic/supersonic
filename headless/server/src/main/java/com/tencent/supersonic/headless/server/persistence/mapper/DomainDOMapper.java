@@ -5,6 +5,4 @@ import com.tencent.supersonic.headless.server.persistence.dataobject.DomainDO;
 import org.apache.ibatis.annotations.Mapper;
 
 @Mapper
-public interface DomainDOMapper extends BaseMapper<DomainDO> {
-
-}
+public interface DomainDOMapper extends BaseMapper<DomainDO> {}

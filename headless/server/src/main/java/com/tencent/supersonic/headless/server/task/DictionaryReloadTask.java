@@ -13,8 +13,7 @@ import org.springframework.stereotype.Component;
 @Order(2)
 public class DictionaryReloadTask implements CommandLineRunner {
 
-    @Autowired
-    private DictWordService dictWordService;
+    @Autowired private DictWordService dictWordService;
 
     @Override
     public void run(String... args) {
@@ -31,9 +30,7 @@ public class DictionaryReloadTask implements CommandLineRunner {
         }
     }
 
-    /***
-     * reload knowledge task
-     */
+    /** * reload knowledge task */
     @Scheduled(cron = "${reload.knowledge.corn:0 0/1 * * * ?}")
     public void reloadKnowledge() {
         log.debug("reloadKnowledge start");

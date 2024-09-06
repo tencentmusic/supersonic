@@ -10,8 +10,7 @@ public class Cache {
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("{");
-        sb.append("\"cache\":")
-                .append(cache);
+        sb.append("\"cache\":").append(cache);
         sb.append('}');
         return sb.toString();
     }

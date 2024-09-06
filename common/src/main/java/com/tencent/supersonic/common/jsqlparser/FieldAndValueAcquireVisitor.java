@@ -1,12 +1,6 @@
 package com.tencent.supersonic.common.jsqlparser;
 
 import com.tencent.supersonic.common.pojo.enums.DatePeriodEnum;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
 import net.sf.jsqlparser.expression.DoubleValue;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.ExpressionVisitorAdapter;
@@ -24,6 +18,13 @@ import net.sf.jsqlparser.expression.operators.relational.MinorThan;
 import net.sf.jsqlparser.expression.operators.relational.MinorThanEquals;
 import net.sf.jsqlparser.schema.Column;
 import org.apache.commons.collections.CollectionUtils;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class FieldAndValueAcquireVisitor extends ExpressionVisitorAdapter {
 
@@ -124,14 +125,16 @@ public class FieldAndValueAcquireVisitor extends ExpressionVisitorAdapter {
             fieldExpression.setFieldName(field.getColumnName());
             fieldExpression.setFunction(functionName);
             fieldExpression.setOperator(expr.getStringExpression());
-            //deal with DAY/WEEK function
-            List<DatePeriodEnum> collect = Arrays.stream(DatePeriodEnum.values()).collect(Collectors.toList());
+            // deal with DAY/WEEK function
+            List<DatePeriodEnum> collect =
+                    Arrays.stream(DatePeriodEnum.values()).collect(Collectors.toList());
             DatePeriodEnum periodEnum = DatePeriodEnum.get(functionName);
             if (Objects.nonNull(periodEnum) && collect.contains(periodEnum)) {
-                fieldExpression.setFieldValue(getFieldValue(rightExpression) + periodEnum.getChName());
+                fieldExpression.setFieldValue(
+                        getFieldValue(rightExpression) + periodEnum.getChName());
                 return fieldExpression;
             } else {
-                //deal with aggregate function
+                // deal with aggregate function
                 fieldExpression.setFieldValue(getFieldValue(rightExpression));
                 return fieldExpression;
             }
@@ -142,7 +145,8 @@ public class FieldAndValueAcquireVisitor extends ExpressionVisitorAdapter {
     }
 
     private Column getColumn(Function leftExpressionFunction) {
-        //List<Expression> leftExpressions = leftExpressionFunction.getParameters().getExpressions();
+        // List<Expression> leftExpressions =
+        // leftExpressionFunction.getParameters().getExpressions();
         ExpressionList<?> leftExpressions = leftExpressionFunction.getParameters();
         if (CollectionUtils.isEmpty(leftExpressions)) {
             return null;

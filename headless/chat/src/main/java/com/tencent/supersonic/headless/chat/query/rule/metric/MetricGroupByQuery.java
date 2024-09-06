@@ -23,5 +23,4 @@ public class MetricGroupByQuery extends MetricSemanticQuery {
     public String getQueryMode() {
         return QUERY_MODE;
     }
-
 }

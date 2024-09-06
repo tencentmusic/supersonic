@@ -1,11 +1,9 @@
 package com.tencent.supersonic.headless.core.pojo;
 
-
 import lombok.Data;
 
 @Data
 public class ConnectInfo {
-
 
     private String url;
 
@@ -14,5 +12,4 @@ public class ConnectInfo {
     private String password;
 
     private String database;
-
 }

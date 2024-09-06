@@ -11,6 +11,7 @@ import com.tencent.supersonic.common.service.SystemConfigService;
 import com.tencent.supersonic.common.util.AESEncryptionUtil;
 import com.tencent.supersonic.headless.api.pojo.DataSetModelConfig;
 import com.tencent.supersonic.headless.api.pojo.DrillDownDimension;
+import com.tencent.supersonic.headless.api.pojo.MetaFilter;
 import com.tencent.supersonic.headless.api.pojo.RelateDimension;
 import com.tencent.supersonic.headless.api.pojo.enums.DataType;
 import com.tencent.supersonic.headless.api.pojo.enums.TagDefineType;
@@ -20,7 +21,6 @@ import com.tencent.supersonic.headless.api.pojo.response.DatabaseResp;
 import com.tencent.supersonic.headless.api.pojo.response.DimensionResp;
 import com.tencent.supersonic.headless.api.pojo.response.MetricResp;
 import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
-import com.tencent.supersonic.headless.api.pojo.MetaFilter;
 import com.tencent.supersonic.headless.server.service.CanvasService;
 import com.tencent.supersonic.headless.server.service.DataSetService;
 import com.tencent.supersonic.headless.server.service.DatabaseService;
@@ -49,46 +49,29 @@ public abstract class S2BaseDemo implements CommandLineRunner {
     protected DatabaseResp demoDatabaseResp;
 
     protected User user = User.getFakeUser();
-    @Autowired
-    protected DatabaseService databaseService;
-    @Autowired
-    protected DomainService domainService;
-    @Autowired
-    protected ModelService modelService;
-    @Autowired
-    protected ModelRelaService modelRelaService;
-    @Autowired
-    protected DimensionService dimensionService;
-    @Autowired
-    protected MetricService metricService;
-    @Autowired
-    protected TagMetaService tagMetaService;
-    @Autowired
-    protected AuthService authService;
-    @Autowired
-    protected DataSetService dataSetService;
-    @Autowired
-    protected TermService termService;
-    @Autowired
-    protected PluginService pluginService;
-    @Autowired
-    protected DataSourceProperties dataSourceProperties;
-    @Autowired
-    protected TagObjectService tagObjectService;
-    @Autowired
-    protected ChatQueryService chatQueryService;
-    @Autowired
-    protected ChatManageService chatManageService;
-    @Autowired
-    protected AgentService agentService;
-    @Autowired
-    protected SystemConfigService sysParameterService;
-    @Autowired
-    protected CanvasService canvasService;
-    @Autowired
-    protected DictWordService dictWordService;
+    @Autowired protected DatabaseService databaseService;
+    @Autowired protected DomainService domainService;
+    @Autowired protected ModelService modelService;
+    @Autowired protected ModelRelaService modelRelaService;
+    @Autowired protected DimensionService dimensionService;
+    @Autowired protected MetricService metricService;
+    @Autowired protected TagMetaService tagMetaService;
+    @Autowired protected AuthService authService;
+    @Autowired protected DataSetService dataSetService;
+    @Autowired protected TermService termService;
+    @Autowired protected PluginService pluginService;
+    @Autowired protected DataSourceProperties dataSourceProperties;
+    @Autowired protected TagObjectService tagObjectService;
+    @Autowired protected ChatQueryService chatQueryService;
+    @Autowired protected ChatManageService chatManageService;
+    @Autowired protected AgentService agentService;
+    @Autowired protected SystemConfigService sysParameterService;
+    @Autowired protected CanvasService canvasService;
+    @Autowired protected DictWordService dictWordService;
+
     @Value("${s2.demo.names:S2VisitsDemo}")
     protected List<String> demoList;
+
     @Value("${s2.demo.enableLLM:true}")
     protected boolean demoEnableLlm;
 
@@ -123,7 +106,8 @@ public abstract class S2BaseDemo implements CommandLineRunner {
         }
         databaseReq.setUrl(url);
         databaseReq.setUsername(dataSourceProperties.getUsername());
-        databaseReq.setPassword(AESEncryptionUtil.aesEncryptECB(dataSourceProperties.getPassword()));
+        databaseReq.setPassword(
+                AESEncryptionUtil.aesEncryptECB(dataSourceProperties.getPassword()));
         return databaseService.createOrUpdateDatabase(databaseReq, user);
     }
 
@@ -141,11 +125,15 @@ public abstract class S2BaseDemo implements CommandLineRunner {
             dataSetModelConfig.setId(modelResp.getId());
             MetaFilter metaFilter = new MetaFilter();
             metaFilter.setModelIds(Lists.newArrayList(modelResp.getId()));
-            List<Long> metrics = metricService.getMetrics(metaFilter)
-                    .stream().map(MetricResp::getId).collect(Collectors.toList());
+            List<Long> metrics =
+                    metricService.getMetrics(metaFilter).stream()
+                            .map(MetricResp::getId)
+                            .collect(Collectors.toList());
             dataSetModelConfig.setMetrics(metrics);
-            List<Long> dimensions = dimensionService.getDimensions(metaFilter)
-                    .stream().map(DimensionResp::getId).collect(Collectors.toList());
+            List<Long> dimensions =
+                    dimensionService.getDimensions(metaFilter).stream()
+                            .map(DimensionResp::getId)
+                            .collect(Collectors.toList());
             dataSetModelConfig.setMetrics(metrics);
             dataSetModelConfig.setDimensions(dimensions);
             dataSetModelConfigs.add(dataSetModelConfig);
@@ -175,5 +163,4 @@ public abstract class S2BaseDemo implements CommandLineRunner {
     protected void updateQueryScore(Integer queryId) {
         chatManageService.updateFeedback(queryId, 5, "");
     }
-
 }

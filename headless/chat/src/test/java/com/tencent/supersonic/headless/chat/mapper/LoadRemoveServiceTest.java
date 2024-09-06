@@ -1,6 +1,5 @@
 package com.tencent.supersonic.headless.chat.mapper;
 
-
 import com.hankcs.hanlp.algorithm.EditDistance;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;

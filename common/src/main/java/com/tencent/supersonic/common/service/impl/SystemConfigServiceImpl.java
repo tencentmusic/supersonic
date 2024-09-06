@@ -18,11 +18,10 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 @Service
-public class SystemConfigServiceImpl
-        extends ServiceImpl<SystemConfigMapper, SystemConfigDO> implements SystemConfigService {
+public class SystemConfigServiceImpl extends ServiceImpl<SystemConfigMapper, SystemConfigDO>
+        implements SystemConfigService {
 
-    @Autowired
-    private Environment environment;
+    @Autowired private Environment environment;
 
     // Cache field to store the system configuration
     private AtomicReference<SystemConfig> cachedSystemConfig = new AtomicReference<>();
@@ -45,11 +44,13 @@ public class SystemConfigServiceImpl
             systemConfig.setId(1);
             systemConfig.init();
             // use system property to initialize system parameter
-            systemConfig.getParameters().stream().forEach(p -> {
-                if (environment.containsProperty(p.getName())) {
-                    p.setValue(environment.getProperty(p.getName()));
-                }
-            });
+            systemConfig.getParameters().stream()
+                    .forEach(
+                            p -> {
+                                if (environment.containsProperty(p.getName())) {
+                                    p.setValue(environment.getProperty(p.getName()));
+                                }
+                            });
             save(systemConfig);
             return systemConfig;
         }
@@ -67,9 +68,9 @@ public class SystemConfigServiceImpl
     private SystemConfig convert(SystemConfigDO systemConfigDO) {
         SystemConfig sysParameter = new SystemConfig();
         sysParameter.setId(systemConfigDO.getId());
-        List<Parameter> parameters = JsonUtil.toObject(systemConfigDO.getParameters(),
-                new TypeReference<List<Parameter>>() {
-                });
+        List<Parameter> parameters =
+                JsonUtil.toObject(
+                        systemConfigDO.getParameters(), new TypeReference<List<Parameter>>() {});
         sysParameter.setParameters(parameters);
         sysParameter.setAdminList(systemConfigDO.getAdmin());
         return sysParameter;
@@ -82,5 +83,4 @@ public class SystemConfigServiceImpl
         sysParameterDO.setAdmin(sysParameter.getAdmin());
         return sysParameterDO;
     }
-
 }

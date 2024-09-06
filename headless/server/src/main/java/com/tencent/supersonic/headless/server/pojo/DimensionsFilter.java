@@ -1,7 +1,8 @@
 package com.tencent.supersonic.headless.server.pojo;
 
-import java.util.List;
 import lombok.Data;
+
+import java.util.List;
 
 @Data
 public class DimensionsFilter {
@@ -11,5 +12,4 @@ public class DimensionsFilter {
     private List<Long> dimensionIds;
 
     private List<String> dimensionNames;
-
 }

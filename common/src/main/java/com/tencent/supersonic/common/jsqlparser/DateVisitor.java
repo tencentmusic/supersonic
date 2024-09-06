@@ -1,6 +1,5 @@
 package com.tencent.supersonic.common.jsqlparser;
 
-import java.util.List;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.expression.Expression;
@@ -11,6 +10,8 @@ import net.sf.jsqlparser.expression.operators.relational.MinorThan;
 import net.sf.jsqlparser.expression.operators.relational.MinorThanEquals;
 import net.sf.jsqlparser.schema.Column;
 import org.springframework.util.CollectionUtils;
+
+import java.util.List;
 
 @Slf4j
 public class DateVisitor extends ExpressionVisitorAdapter {
