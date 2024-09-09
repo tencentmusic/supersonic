@@ -74,7 +74,7 @@ public class ChatModelParameterConfig extends ParameterConfig {
     public static final Parameter CHAT_MODEL_NAME =
             new Parameter(
                     "s2.chat.model.name",
-                    "gpt-3.5-turbo",
+                    "gpt-4o-mini",
                     "ModelName",
                     "",
                     "string",
