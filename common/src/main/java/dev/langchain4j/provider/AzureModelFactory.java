@@ -23,7 +23,7 @@ public class AzureModelFactory implements ModelFactory, InitializingBean {
         AzureOpenAiChatModel.Builder builder =
                 AzureOpenAiChatModel.builder()
                         .endpoint(modelConfig.getBaseUrl())
-                        .apiKey(modelConfig.getApiKey())
+                        .apiKey(modelConfig.keyDecrypt())
                         .deploymentName(modelConfig.getModelName())
                         .temperature(modelConfig.getTemperature())
                         .maxRetries(modelConfig.getMaxRetries())

@@ -23,7 +23,7 @@ public class QianfanModelFactory implements ModelFactory, InitializingBean {
     public ChatLanguageModel createChatModel(ChatModelConfig modelConfig) {
         return QianfanChatModel.builder()
                 .baseUrl(modelConfig.getBaseUrl())
-                .apiKey(modelConfig.getApiKey())
+                .apiKey(modelConfig.keyDecrypt())
                 .secretKey(modelConfig.getSecretKey())
                 .endpoint(modelConfig.getEndpoint())
                 .modelName(modelConfig.getModelName())

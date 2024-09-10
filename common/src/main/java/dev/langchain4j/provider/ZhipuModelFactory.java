@@ -21,7 +21,7 @@ public class ZhipuModelFactory implements ModelFactory, InitializingBean {
     public ChatLanguageModel createChatModel(ChatModelConfig modelConfig) {
         return ZhipuAiChatModel.builder()
                 .baseUrl(modelConfig.getBaseUrl())
-                .apiKey(modelConfig.getApiKey())
+                .apiKey(modelConfig.keyDecrypt())
                 .model(modelConfig.getModelName())
                 .temperature(modelConfig.getTemperature())
                 .topP(modelConfig.getTopP())

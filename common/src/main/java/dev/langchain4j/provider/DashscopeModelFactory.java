@@ -21,7 +21,7 @@ public class DashscopeModelFactory implements ModelFactory, InitializingBean {
     public ChatLanguageModel createChatModel(ChatModelConfig modelConfig) {
         return QwenChatModel.builder()
                 .baseUrl(modelConfig.getBaseUrl())
-                .apiKey(modelConfig.getApiKey())
+                .apiKey(modelConfig.keyDecrypt())
                 .modelName(modelConfig.getModelName())
                 .temperature(
                         modelConfig.getTemperature() == null
