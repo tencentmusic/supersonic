@@ -164,7 +164,7 @@ public class EmbeddingServiceImpl implements EmbeddingService {
         List<Retrieval> retrievals =
                 result.matches().stream()
                         .map(this::convertToRetrieval)
-                        .sorted(Comparator.comparingDouble(Retrieval::getDistance).reversed())
+                        .sorted(Comparator.comparingDouble(Retrieval::getSimilarity))
                         .limit(num)
                         .collect(Collectors.toList());
 
@@ -177,7 +177,7 @@ public class EmbeddingServiceImpl implements EmbeddingService {
     private Retrieval convertToRetrieval(EmbeddingMatch<TextSegment> embeddingMatch) {
         Retrieval retrieval = new Retrieval();
         TextSegment embedded = embeddingMatch.embedded();
-        retrieval.setDistance(1 - embeddingMatch.score());
+        retrieval.setSimilarity(embeddingMatch.score());
         retrieval.setId(TextSegmentConvert.getQueryId(embedded));
         retrieval.setQuery(embedded.text());
 

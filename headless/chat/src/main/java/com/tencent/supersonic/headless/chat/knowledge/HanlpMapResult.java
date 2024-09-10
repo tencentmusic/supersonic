@@ -10,16 +10,13 @@ import java.util.List;
 @Data
 @ToString
 public class HanlpMapResult extends MapResult {
-
     private List<String> natures;
-    private int offset = 0;
 
-    private double similarity;
-
-    public HanlpMapResult(String name, List<String> natures, String detectWord) {
+    public HanlpMapResult(String name, List<String> natures, String detectWord, double similarity) {
         this.name = name;
         this.natures = natures;
         this.detectWord = detectWord;
+        this.similarity = similarity;
     }
 
     @Override

@@ -1,6 +1,5 @@
 package com.tencent.supersonic.headless.chat.mapper;
 
-import com.hankcs.hanlp.algorithm.EditDistance;
 import com.tencent.supersonic.headless.api.pojo.response.S2Term;
 import com.tencent.supersonic.headless.chat.knowledge.helper.NatureHelper;
 import lombok.Data;
@@ -66,20 +65,5 @@ public class MapperHelper {
             }
         }
         return false;
-    }
-
-    /**
-     * * get similarity
-     *
-     * @param detectSegment
-     * @param matchName
-     * @return
-     */
-    public double getSimilarity(String detectSegment, String matchName) {
-        String detectSegmentLower = detectSegment == null ? null : detectSegment.toLowerCase();
-        String matchNameLower = matchName == null ? null : matchName.toLowerCase();
-        return 1
-                - (double) EditDistance.compute(detectSegmentLower, matchNameLower)
-                        / Math.max(matchName.length(), detectSegment.length());
     }
 }

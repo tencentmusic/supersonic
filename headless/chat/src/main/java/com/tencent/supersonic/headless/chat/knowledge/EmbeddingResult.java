@@ -12,9 +12,6 @@ import java.util.Map;
 public class EmbeddingResult extends MapResult {
 
     private String id;
-
-    private double distance;
-
     private Map<String, String> metadata;
 
     @Override

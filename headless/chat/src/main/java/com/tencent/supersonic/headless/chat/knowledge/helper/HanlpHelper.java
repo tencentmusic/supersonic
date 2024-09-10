@@ -270,7 +270,10 @@ public class HanlpHelper {
                 if (orig != null) {
                     MapResult addMapResult =
                             new HanlpMapResult(
-                                    orig, Arrays.asList(nature), hanlpMapResult.getDetectWord());
+                                    orig,
+                                    Arrays.asList(nature),
+                                    hanlpMapResult.getDetectWord(),
+                                    hanlpMapResult.getSimilarity());
                     mapResults.add((T) addMapResult);
                     isAdd = true;
                 }
@@ -301,7 +304,7 @@ public class HanlpHelper {
                 addMapResult.setDetectWord(embeddingResult.getDetectWord());
                 addMapResult.setId(embeddingResult.getId());
                 addMapResult.setMetadata(embeddingResult.getMetadata());
-                addMapResult.setDistance(embeddingResult.getDistance());
+                addMapResult.setSimilarity(embeddingResult.getSimilarity());
                 mapResults.add((T) addMapResult);
                 isAdd = true;
             }

@@ -49,7 +49,7 @@ public class EmbeddingMapper extends BaseMapper {
                             .element(schemaElement)
                             .frequency(BaseWordBuilder.DEFAULT_FREQUENCY)
                             .word(matchResult.getName())
-                            .similarity(1 - matchResult.getDistance())
+                            .similarity(matchResult.getSimilarity())
                             .detectWord(matchResult.getDetectWord())
                             .build();
             // 3. add to mapInfo

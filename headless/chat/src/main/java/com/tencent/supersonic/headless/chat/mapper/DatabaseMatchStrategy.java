@@ -5,6 +5,7 @@ import com.tencent.supersonic.headless.api.pojo.SchemaElementMatch;
 import com.tencent.supersonic.headless.api.pojo.response.S2Term;
 import com.tencent.supersonic.headless.chat.ChatQueryContext;
 import com.tencent.supersonic.headless.chat.knowledge.DatabaseMapResult;
+import com.tencent.supersonic.headless.chat.utils.EditDistanceUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -49,9 +50,8 @@ public class DatabaseMatchStrategy extends SingleMatchStrategy<DatabaseMapResult
         List<DatabaseMapResult> results = new ArrayList<>();
         for (Entry<String, Set<SchemaElement>> entry : nameToItems.entrySet()) {
             String name = entry.getKey();
-            if (!name.contains(detectSegment)
-                    || mapperHelper.getSimilarity(detectSegment, name)
-                            < metricDimensionThresholdConfig) {
+            double similarity = EditDistanceUtils.getSimilarity(detectSegment, name);
+            if (!name.contains(detectSegment) || similarity < metricDimensionThresholdConfig) {
                 continue;
             }
             Set<SchemaElement> schemaElements = entry.getValue();
@@ -68,6 +68,7 @@ public class DatabaseMatchStrategy extends SingleMatchStrategy<DatabaseMapResult
                 DatabaseMapResult databaseMapResult = new DatabaseMapResult();
                 databaseMapResult.setDetectWord(detectSegment);
                 databaseMapResult.setName(schemaElement.getName());
+                databaseMapResult.setSimilarity(similarity);
                 databaseMapResult.setSchemaElement(schemaElement);
                 results.add(databaseMapResult);
             }

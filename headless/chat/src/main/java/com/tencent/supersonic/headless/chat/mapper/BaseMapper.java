@@ -37,7 +37,7 @@ public abstract class BaseMapper implements SchemaMapper {
 
         try {
             doMap(chatQueryContext);
-            filter(chatQueryContext);
+            MapFilter.filter(chatQueryContext);
         } catch (Exception e) {
             log.error("work error", e);
         }
@@ -146,34 +146,5 @@ public abstract class BaseMapper implements SchemaMapper {
             matches = first.get();
         }
         return matches;
-    }
-
-    private void filter(ChatQueryContext chatQueryContext) {
-        MapFilter.filterByDataSetId(chatQueryContext);
-        MapFilter.filterByDetectWordLenLessThanOne(chatQueryContext);
-        switch (chatQueryContext.getQueryDataType()) {
-            case TAG:
-                MapFilter.filterByQueryDataType(
-                        chatQueryContext, element -> !(element.getIsTag() > 0));
-                break;
-            case METRIC:
-                MapFilter.filterByQueryDataType(
-                        chatQueryContext,
-                        element -> !SchemaElementType.METRIC.equals(element.getType()));
-                break;
-            case DIMENSION:
-                MapFilter.filterByQueryDataType(
-                        chatQueryContext,
-                        element -> {
-                            boolean isDimensionOrValue =
-                                    SchemaElementType.DIMENSION.equals(element.getType())
-                                            || SchemaElementType.VALUE.equals(element.getType());
-                            return !isDimensionOrValue;
-                        });
-                break;
-            case ALL:
-            default:
-                break;
-        }
     }
 }

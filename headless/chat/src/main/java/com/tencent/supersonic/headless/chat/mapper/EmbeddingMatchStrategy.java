@@ -57,13 +57,14 @@ public class EmbeddingMatchStrategy extends BatchMatchStrategy<EmbeddingResult> 
                 Lists.partition(queryTextsList, embeddingMapperBatch);
 
         for (List<String> queryTextsSub : queryTextsSubList) {
-            detectByQueryTextsSub(results, detectDataSetIds, queryTextsSub, chatQueryContext);
+            List<EmbeddingResult> oneRoundResults =
+                    detectByQueryTextsSub(detectDataSetIds, queryTextsSub, chatQueryContext);
+            selectResultInOneRound(results, oneRoundResults);
         }
         return new ArrayList<>(results);
     }
 
-    private void detectByQueryTextsSub(
-            Set<EmbeddingResult> results,
+    private List<EmbeddingResult> detectByQueryTextsSub(
             Set<Long> detectDataSetIds,
             List<String> queryTextsSub,
             ChatQueryContext chatQueryContext) {
@@ -89,7 +90,7 @@ public class EmbeddingMatchStrategy extends BatchMatchStrategy<EmbeddingResult> 
                         retrieveQuery, embeddingNumber, modelIdToDataSetIds, detectDataSetIds);
 
         if (CollectionUtils.isEmpty(retrieveQueryResults)) {
-            return;
+            return new ArrayList<>();
         }
         // step3. build EmbeddingResults
         List<EmbeddingResult> collect =
@@ -103,8 +104,8 @@ public class EmbeddingMatchStrategy extends BatchMatchStrategy<EmbeddingResult> 
                                                     if (!retrieveQueryResult
                                                             .getQuery()
                                                             .contains(retrieval.getQuery())) {
-                                                        return retrieval.getDistance()
-                                                                > 1 - threshold;
+                                                        return retrieval.getSimilarity()
+                                                                < threshold;
                                                     }
                                                     return false;
                                                 });
@@ -150,11 +151,9 @@ public class EmbeddingMatchStrategy extends BatchMatchStrategy<EmbeddingResult> 
         int embeddingRoundNumber =
                 Integer.valueOf(mapperConfig.getParameterValue(EMBEDDING_MAPPER_ROUND_NUMBER));
         int roundNumber = embeddingRoundNumber * queryTextsSub.size();
-        List<EmbeddingResult> oneRoundResults =
-                collect.stream()
-                        .sorted(Comparator.comparingDouble(EmbeddingResult::getDistance))
-                        .limit(roundNumber)
-                        .collect(Collectors.toList());
-        selectResultInOneRound(results, oneRoundResults);
+        return collect.stream()
+                .sorted(Comparator.comparingDouble(EmbeddingResult::getSimilarity))
+                .limit(roundNumber)
+                .collect(Collectors.toList());
     }
 }
