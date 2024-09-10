@@ -31,6 +31,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /** HanLP helper */
@@ -87,7 +89,7 @@ public class HanlpHelper {
         return CustomDictionary;
     }
 
-    /** * reload custom dictionary */
+    /** reload custom dictionary */
     public static boolean reloadCustomDictionary() throws IOException {
 
         final long startTime = System.currentTimeMillis();
@@ -316,6 +318,28 @@ public class HanlpHelper {
                 .collect(Collectors.toList());
     }
 
+    public static List<S2Term> getTerms(List<S2Term> terms, Set<Long> dataSetIds) {
+        logTerms(terms);
+        if (!CollectionUtils.isEmpty(dataSetIds)) {
+            terms =
+                    terms.stream()
+                            .filter(
+                                    term -> {
+                                        Long dataSetId =
+                                                NatureHelper.getDataSetId(
+                                                        term.getNature().toString());
+                                        if (Objects.nonNull(dataSetId)) {
+                                            return dataSetIds.contains(dataSetId);
+                                        }
+                                        return false;
+                                    })
+                            .collect(Collectors.toList());
+            log.debug("terms filter by dataSetId:{}", dataSetIds);
+            logTerms(terms);
+        }
+        return terms;
+    }
+
     public static List<S2Term> transform2ApiTerm(
             Term term, Map<Long, List<Long>> modelIdToDataSetIds) {
         List<S2Term> s2Terms = Lists.newArrayList();
@@ -330,5 +354,18 @@ public class HanlpHelper {
             s2Terms.add(s2Term);
         }
         return s2Terms;
+    }
+
+    private static void logTerms(List<S2Term> terms) {
+        if (CollectionUtils.isEmpty(terms)) {
+            return;
+        }
+        for (S2Term term : terms) {
+            log.debug(
+                    "word:{},nature:{},frequency:{}",
+                    term.word,
+                    term.nature.toString(),
+                    term.getFrequency());
+        }
     }
 }

@@ -1,22 +1,16 @@
 package com.tencent.supersonic.headless.chat.mapper;
 
-import com.tencent.supersonic.common.pojo.Constants;
-import com.tencent.supersonic.headless.api.pojo.response.S2Term;
 import com.tencent.supersonic.headless.chat.ChatQueryContext;
 import com.tencent.supersonic.headless.chat.knowledge.HanlpMapResult;
 import com.tencent.supersonic.headless.chat.knowledge.KnowledgeBaseService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -30,36 +24,12 @@ import static com.tencent.supersonic.headless.chat.mapper.MapperConfig.MAPPER_DI
  */
 @Service
 @Slf4j
-public class HanlpDictMatchStrategy extends BaseMatchStrategy<HanlpMapResult> {
+public class HanlpDictMatchStrategy extends SingleMatchStrategy<HanlpMapResult> {
 
     @Autowired private KnowledgeBaseService knowledgeBaseService;
 
-    @Override
-    public Map<MatchText, List<HanlpMapResult>> match(
-            ChatQueryContext chatQueryContext, List<S2Term> terms, Set<Long> detectDataSetIds) {
-        String text = chatQueryContext.getQueryText();
-        if (Objects.isNull(terms) || StringUtils.isEmpty(text)) {
-            return null;
-        }
-
-        log.debug("terms:{},detectModelIds:{}", terms, detectDataSetIds);
-
-        List<HanlpMapResult> detects = detect(chatQueryContext, terms, detectDataSetIds);
-        Map<MatchText, List<HanlpMapResult>> result = new HashMap<>();
-
-        result.put(MatchText.builder().regText(text).detectSegment(text).build(), detects);
-        return result;
-    }
-
-    @Override
-    public boolean needDelete(HanlpMapResult oneRoundResult, HanlpMapResult existResult) {
-        return getMapKey(oneRoundResult).equals(getMapKey(existResult))
-                && existResult.getDetectWord().length() < oneRoundResult.getDetectWord().length();
-    }
-
-    public void detectByStep(
+    public List<HanlpMapResult> detectByStep(
             ChatQueryContext chatQueryContext,
-            Set<HanlpMapResult> existResults,
             Set<Long> detectDataSetIds,
             String detectSegment,
             int offset) {
@@ -89,7 +59,7 @@ public class HanlpDictMatchStrategy extends BaseMatchStrategy<HanlpMapResult> {
         hanlpMapResults.addAll(suffixHanlpMapResults);
 
         if (CollectionUtils.isEmpty(hanlpMapResults)) {
-            return;
+            return new ArrayList<>();
         }
         // step3. merge pre/suffix result
         hanlpMapResults =
@@ -155,12 +125,7 @@ public class HanlpDictMatchStrategy extends BaseMatchStrategy<HanlpMapResult> {
                             .collect(Collectors.toList());
             oneRoundResults.addAll(additionalResults);
         }
-        // step6. select mapResul in one round
-        selectResultInOneRound(existResults, oneRoundResults);
-    }
-
-    public String getMapKey(HanlpMapResult a) {
-        return a.getName() + Constants.UNDERLINE + String.join(Constants.UNDERLINE, a.getNatures());
+        return oneRoundResults;
     }
 
     public double getThresholdMatch(List<String> natures, ChatQueryContext chatQueryContext) {

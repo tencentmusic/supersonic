@@ -1,6 +1,7 @@
 package com.tencent.supersonic.headless.chat.knowledge;
 
 import com.google.common.base.Objects;
+import com.tencent.supersonic.common.pojo.Constants;
 import lombok.Data;
 import lombok.ToString;
 
@@ -31,5 +32,10 @@ public class EmbeddingResult extends MapResult {
     @Override
     public int hashCode() {
         return Objects.hashCode(id);
+    }
+
+    @Override
+    public String getMapKey() {
+        return this.getName() + Constants.UNDERLINE + this.getId();
     }
 }

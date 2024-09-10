@@ -38,16 +38,15 @@ public class KeywordMapper extends BaseMapper {
         HanlpDictMatchStrategy hanlpMatchStrategy =
                 ContextUtils.getBean(HanlpDictMatchStrategy.class);
 
-        List<HanlpMapResult> hanlpMapResults =
-                hanlpMatchStrategy.getMatches(chatQueryContext, terms);
-        convertHanlpMapResultToMapInfo(hanlpMapResults, chatQueryContext, terms);
+        List<HanlpMapResult> matchResults = getMatches(chatQueryContext, hanlpMatchStrategy);
+
+        convertHanlpMapResultToMapInfo(matchResults, chatQueryContext, terms);
 
         // 2.database Match
         DatabaseMatchStrategy databaseMatchStrategy =
                 ContextUtils.getBean(DatabaseMatchStrategy.class);
-
         List<DatabaseMapResult> databaseResults =
-                databaseMatchStrategy.getMatches(chatQueryContext, terms);
+                getMatches(chatQueryContext, databaseMatchStrategy);
         convertDatabaseMapResultToMapInfo(chatQueryContext, databaseResults);
     }
 

@@ -1,6 +1,7 @@
 package com.tencent.supersonic.headless.chat.knowledge;
 
 import com.google.common.base.Objects;
+import com.tencent.supersonic.common.pojo.Constants;
 import lombok.Data;
 import lombok.ToString;
 
@@ -41,5 +42,12 @@ public class HanlpMapResult extends MapResult {
 
     public void setOffset(int offset) {
         this.offset = offset;
+    }
+
+    @Override
+    public String getMapKey() {
+        return this.getName()
+                + Constants.UNDERLINE
+                + String.join(Constants.UNDERLINE, this.getNatures());
     }
 }
