@@ -98,14 +98,14 @@ public class MapFilter {
     public static void filterByRules(ChatQueryContext chatQueryContext) {
         Map<Long, List<SchemaElementMatch>> dataSetElementMatches =
                 chatQueryContext.getMapInfo().getDataSetElementMatches();
+
         for (Map.Entry<Long, List<SchemaElementMatch>> entry : dataSetElementMatches.entrySet()) {
-            List<SchemaElementMatch> elementMatches = entry.getValue();
-            filterByExactMatch(elementMatches);
-            filterInExactMatch(elementMatches);
+            filterByExactMatch(entry.getValue());
+            filterInExactMatch(entry.getValue());
         }
     }
 
-    public static List<SchemaElementMatch> filterByExactMatch(List<SchemaElementMatch> matches) {
+    public static void filterByExactMatch(List<SchemaElementMatch> matches) {
         // Group by detectWord
         Map<String, List<SchemaElementMatch>> groupedByDetectWord =
                 matches.stream().collect(Collectors.groupingBy(SchemaElementMatch::getDetectWord));
@@ -139,14 +139,15 @@ public class MapFilter {
                 result.addAll(group);
             }
         }
-        return result;
+        matches.clear();
+        matches.addAll(result);
     }
 
-    public static List<SchemaElementMatch> filterInExactMatch(List<SchemaElementMatch> matches) {
+    public static void filterInExactMatch(List<SchemaElementMatch> matches) {
         Map<String, List<SchemaElementMatch>> fullMatches =
                 matches.stream()
                         .filter(schemaElementMatch -> schemaElementMatch.isFullMatched())
-                        .collect(Collectors.groupingBy(SchemaElementMatch::getDetectWord));
+                        .collect(Collectors.groupingBy(SchemaElementMatch::getWord));
         Set<String> keys = new HashSet<>(fullMatches.keySet());
         for (String key1 : keys) {
             for (String key2 : keys) {
@@ -163,6 +164,7 @@ public class MapFilter {
         List<SchemaElementMatch> mergedMatches = new ArrayList<>();
         fullMatches.values().forEach(mergedMatches::addAll);
         mergedMatches.addAll(notFullMatches);
-        return mergedMatches;
+        matches.clear();
+        matches.addAll(mergedMatches);
     }
 }
