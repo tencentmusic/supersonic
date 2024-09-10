@@ -72,28 +72,21 @@ public class HanlpDictMatchStrategy extends SingleMatchStrategy<HanlpMapResult> 
                 hanlpMapResults.stream()
                         .filter(
                                 term ->
-                                        mapperHelper.getSimilarity(detectSegment, term.getName())
+                                        term.getSimilarity()
                                                 >= getThresholdMatch(
                                                         term.getNatures(), chatQueryContext))
                         .filter(term -> CollectionUtils.isNotEmpty(term.getNatures()))
+                        .map(
+                                parseResult -> {
+                                    parseResult.setOffset(offset);
+                                    return parseResult;
+                                })
                         .collect(Collectors.toCollection(LinkedHashSet::new));
 
         log.debug(
                 "detectSegment:{},after isSimilarity parseResults:{}",
                 detectSegment,
                 hanlpMapResults);
-
-        hanlpMapResults =
-                hanlpMapResults.stream()
-                        .map(
-                                parseResult -> {
-                                    parseResult.setOffset(offset);
-                                    parseResult.setSimilarity(
-                                            mapperHelper.getSimilarity(
-                                                    detectSegment, parseResult.getName()));
-                                    return parseResult;
-                                })
-                        .collect(Collectors.toCollection(LinkedHashSet::new));
 
         // step5. take only M dimensionValue or N-M metric/dimension value per rond.
         int oneDetectionValueSize =

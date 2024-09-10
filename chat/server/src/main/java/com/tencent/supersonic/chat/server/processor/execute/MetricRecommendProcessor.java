@@ -65,7 +65,7 @@ public class MetricRecommendProcessor implements ExecuteResultProcessor {
         List<Retrieval> retrievals =
                 retrieveQueryResults.stream()
                         .flatMap(retrieveQueryResult -> retrieveQueryResult.getRetrieval().stream())
-                        .sorted(Comparator.comparingDouble(Retrieval::getDistance))
+                        .sorted(Comparator.comparingDouble(Retrieval::getSimilarity))
                         .distinct()
                         .collect(Collectors.toList());
         Set<Long> metricIds =

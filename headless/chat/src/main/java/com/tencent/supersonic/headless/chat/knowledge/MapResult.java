@@ -10,16 +10,17 @@ import java.io.Serializable;
 public abstract class MapResult implements Serializable {
 
     protected String name;
+    protected int offset;
 
-    protected int index;
     protected String detectWord;
+
+    protected double similarity;
 
     public abstract String getMapKey();
 
     public Boolean lessSimilar(MapResult otherResult) {
         String mapKey = this.getMapKey();
         String otherMapKey = otherResult.getMapKey();
-        return mapKey.equals(otherMapKey)
-                && otherResult.getDetectWord().length() < otherResult.getDetectWord().length();
+        return mapKey.equals(otherMapKey) && otherResult.similarity < otherResult.similarity;
     }
 }

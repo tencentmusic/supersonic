@@ -49,7 +49,7 @@ public abstract class BaseMatchStrategy<T extends MapResult> implements MatchStr
                 boolean isDeleted =
                         existResults.removeIf(
                                 existResult -> {
-                                    boolean delete = oneRoundResult.lessSimilar(existResult);
+                                    boolean delete = existResult.lessSimilar(oneRoundResult);
                                     if (delete) {
                                         log.info("deleted existResult:{}", existResult);
                                     }

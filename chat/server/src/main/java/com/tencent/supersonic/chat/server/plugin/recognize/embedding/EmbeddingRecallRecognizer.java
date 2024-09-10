@@ -51,13 +51,13 @@ public class EmbeddingRecallRecognizer extends PluginRecognizer {
                     continue;
                 }
                 plugin.setParseMode(ParseMode.EMBEDDING_RECALL);
-                double distance = embeddingRetrieval.getDistance();
-                double score = parseContext.getQueryText().length() * (1 - distance);
+                double similarity = embeddingRetrieval.getSimilarity();
+                double score = parseContext.getQueryText().length() * similarity;
                 return PluginRecallResult.builder()
                         .plugin(plugin)
                         .dataSetIds(dataSetList)
                         .score(score)
-                        .distance(distance)
+                        .distance(similarity)
                         .build();
             }
         }
@@ -73,7 +73,9 @@ public class EmbeddingRecallRecognizer extends PluginRecognizer {
             if (!CollectionUtils.isEmpty(embeddingRetrievals)) {
                 embeddingRetrievals =
                         embeddingRetrievals.stream()
-                                .sorted(Comparator.comparingDouble(o -> Math.abs(o.getDistance())))
+                                .sorted(
+                                        Comparator.comparingDouble(
+                                                o -> Math.abs(o.getSimilarity())))
                                 .collect(Collectors.toList());
                 embeddingResp.setRetrieval(embeddingRetrievals);
             }
