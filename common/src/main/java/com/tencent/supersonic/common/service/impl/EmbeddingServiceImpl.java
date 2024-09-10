@@ -59,6 +59,7 @@ public class EmbeddingServiceImpl implements EmbeddingService {
                     continue;
                 }
                 embeddingStore.add(embedding, query);
+                cache.put(TextSegmentConvert.getQueryId(query), true);
             } catch (Exception e) {
                 log.error(
                         "embeddingModel embed error question: {}, embeddingStore: {}",
@@ -117,6 +118,9 @@ public class EmbeddingServiceImpl implements EmbeddingService {
                             new MetadataFilterBuilder(TextSegmentConvert.QUERY_ID);
                     Filter filter = filterBuilder.isIn(queryIds);
                     inMemoryEmbeddingStore.removeAll(filter);
+                    for (String queryId : queryIds) {
+                        cache.put(queryId, false);
+                    }
                 }
             } else {
                 throw new RuntimeException("Not supported yet.");
