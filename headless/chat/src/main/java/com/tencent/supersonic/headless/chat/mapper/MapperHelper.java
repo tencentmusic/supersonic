@@ -43,6 +43,16 @@ public class MapperHelper {
         return index;
     }
 
+    public Map<Integer, Integer> getRegOffsetToLength(List<S2Term> terms) {
+        return terms.stream()
+                .sorted(Comparator.comparing(S2Term::length))
+                .collect(
+                        Collectors.toMap(
+                                S2Term::getOffset,
+                                term -> term.word.length(),
+                                (value1, value2) -> value2));
+    }
+
     /**
      * * exist dimension values
      *
@@ -52,15 +62,6 @@ public class MapperHelper {
     public boolean existDimensionValues(List<String> natures) {
         for (String nature : natures) {
             if (NatureHelper.isDimensionValueDataSetId(nature)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public boolean existTerms(List<String> natures) {
-        for (String nature : natures) {
-            if (NatureHelper.isTermNature(nature)) {
                 return true;
             }
         }

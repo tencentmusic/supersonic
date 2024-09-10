@@ -3,32 +3,21 @@ package com.tencent.supersonic.headless.chat.mapper;
 import com.tencent.supersonic.headless.api.pojo.enums.MapModeEnum;
 import com.tencent.supersonic.headless.api.pojo.response.S2Term;
 import com.tencent.supersonic.headless.chat.ChatQueryContext;
-import com.tencent.supersonic.headless.chat.knowledge.helper.NatureHelper;
+import com.tencent.supersonic.headless.chat.knowledge.MapResult;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
-public abstract class BaseMatchStrategy<T> implements MatchStrategy<T> {
-
-    @Autowired protected MapperHelper mapperHelper;
-
-    @Autowired protected MapperConfig mapperConfig;
-
+public abstract class BaseMatchStrategy<T extends MapResult> implements MatchStrategy<T> {
     @Override
     public Map<MatchText, List<T>> match(
             ChatQueryContext chatQueryContext, List<S2Term> terms, Set<Long> detectDataSetIds) {
@@ -48,37 +37,7 @@ public abstract class BaseMatchStrategy<T> implements MatchStrategy<T> {
 
     public List<T> detect(
             ChatQueryContext chatQueryContext, List<S2Term> terms, Set<Long> detectDataSetIds) {
-        Map<Integer, Integer> regOffsetToLength = getRegOffsetToLength(terms);
-        String text = chatQueryContext.getQueryText();
-        Set<T> results = new HashSet<>();
-
-        Set<String> detectSegments = new HashSet<>();
-
-        for (Integer startIndex = 0; startIndex <= text.length() - 1; ) {
-
-            for (Integer index = startIndex; index <= text.length(); ) {
-                int offset = mapperHelper.getStepOffset(terms, startIndex);
-                index = mapperHelper.getStepIndex(regOffsetToLength, index);
-                if (index <= text.length()) {
-                    String detectSegment = text.substring(startIndex, index).trim();
-                    detectSegments.add(detectSegment);
-                    detectByStep(
-                            chatQueryContext, results, detectDataSetIds, detectSegment, offset);
-                }
-            }
-            startIndex = mapperHelper.getStepIndex(regOffsetToLength, startIndex);
-        }
-        return new ArrayList<>(results);
-    }
-
-    public Map<Integer, Integer> getRegOffsetToLength(List<S2Term> terms) {
-        return terms.stream()
-                .sorted(Comparator.comparing(S2Term::length))
-                .collect(
-                        Collectors.toMap(
-                                S2Term::getOffset,
-                                term -> term.word.length(),
-                                (value1, value2) -> value2));
+        throw new RuntimeException("Not implemented");
     }
 
     public void selectResultInOneRound(Set<T> existResults, List<T> oneRoundResults) {
@@ -90,7 +49,7 @@ public abstract class BaseMatchStrategy<T> implements MatchStrategy<T> {
                 boolean isDeleted =
                         existResults.removeIf(
                                 existResult -> {
-                                    boolean delete = needDelete(oneRoundResult, existResult);
+                                    boolean delete = oneRoundResult.lessSimilar(existResult);
                                     if (delete) {
                                         log.info("deleted existResult:{}", existResult);
                                     }
@@ -105,72 +64,6 @@ public abstract class BaseMatchStrategy<T> implements MatchStrategy<T> {
             }
         }
     }
-
-    public List<T> getMatches(ChatQueryContext chatQueryContext, List<S2Term> terms) {
-        Set<Long> dataSetIds = chatQueryContext.getDataSetIds();
-        terms = filterByDataSetId(terms, dataSetIds);
-        Map<MatchText, List<T>> matchResult = match(chatQueryContext, terms, dataSetIds);
-        List<T> matches = new ArrayList<>();
-        if (Objects.isNull(matchResult)) {
-            return matches;
-        }
-        Optional<List<T>> first =
-                matchResult.entrySet().stream()
-                        .filter(entry -> CollectionUtils.isNotEmpty(entry.getValue()))
-                        .map(entry -> entry.getValue())
-                        .findFirst();
-
-        if (first.isPresent()) {
-            matches = first.get();
-        }
-        return matches;
-    }
-
-    public List<S2Term> filterByDataSetId(List<S2Term> terms, Set<Long> dataSetIds) {
-        logTerms(terms);
-        if (CollectionUtils.isNotEmpty(dataSetIds)) {
-            terms =
-                    terms.stream()
-                            .filter(
-                                    term -> {
-                                        Long dataSetId =
-                                                NatureHelper.getDataSetId(
-                                                        term.getNature().toString());
-                                        if (Objects.nonNull(dataSetId)) {
-                                            return dataSetIds.contains(dataSetId);
-                                        }
-                                        return false;
-                                    })
-                            .collect(Collectors.toList());
-            log.debug("terms filter by dataSetId:{}", dataSetIds);
-            logTerms(terms);
-        }
-        return terms;
-    }
-
-    public void logTerms(List<S2Term> terms) {
-        if (CollectionUtils.isEmpty(terms)) {
-            return;
-        }
-        for (S2Term term : terms) {
-            log.debug(
-                    "word:{},nature:{},frequency:{}",
-                    term.word,
-                    term.nature.toString(),
-                    term.getFrequency());
-        }
-    }
-
-    public abstract boolean needDelete(T oneRoundResult, T existResult);
-
-    public abstract String getMapKey(T a);
-
-    public abstract void detectByStep(
-            ChatQueryContext chatQueryContext,
-            Set<T> existResults,
-            Set<Long> detectDataSetIds,
-            String detectSegment,
-            int offset);
 
     public double getThreshold(Double threshold, Double minThreshold, MapModeEnum mapModeEnum) {
         double decreaseAmount = (threshold - minThreshold) / 4;

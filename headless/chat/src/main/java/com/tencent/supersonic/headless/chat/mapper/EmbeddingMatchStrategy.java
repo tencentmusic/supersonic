@@ -1,8 +1,6 @@
 package com.tencent.supersonic.headless.chat.mapper;
 
 import com.google.common.collect.Lists;
-import com.tencent.supersonic.common.pojo.Constants;
-import com.tencent.supersonic.headless.api.pojo.response.S2Term;
 import com.tencent.supersonic.headless.chat.ChatQueryContext;
 import com.tencent.supersonic.headless.chat.knowledge.EmbeddingResult;
 import com.tencent.supersonic.headless.chat.knowledge.MetaEmbeddingService;
@@ -35,54 +33,12 @@ import static com.tencent.supersonic.headless.chat.mapper.MapperConfig.EMBEDDING
  */
 @Service
 @Slf4j
-public class EmbeddingMatchStrategy extends BaseMatchStrategy<EmbeddingResult> {
+public class EmbeddingMatchStrategy extends BatchMatchStrategy<EmbeddingResult> {
 
     @Autowired private MetaEmbeddingService metaEmbeddingService;
 
     @Override
-    public boolean needDelete(EmbeddingResult oneRoundResult, EmbeddingResult existResult) {
-        return getMapKey(oneRoundResult).equals(getMapKey(existResult))
-                && existResult.getDistance() > oneRoundResult.getDistance();
-    }
-
-    @Override
-    public String getMapKey(EmbeddingResult a) {
-        return a.getName() + Constants.UNDERLINE + a.getId();
-    }
-
-    @Override
-    public void detectByStep(
-            ChatQueryContext chatQueryContext,
-            Set<EmbeddingResult> existResults,
-            Set<Long> detectDataSetIds,
-            String detectSegment,
-            int offset) {}
-
-    @Override
-    public List<EmbeddingResult> detect(
-            ChatQueryContext chatQueryContext, List<S2Term> terms, Set<Long> detectDataSetIds) {
-        String text = chatQueryContext.getQueryText();
-        Set<String> detectSegments = new HashSet<>();
-
-        int embeddingTextSize =
-                Integer.valueOf(
-                        mapperConfig.getParameterValue(MapperConfig.EMBEDDING_MAPPER_TEXT_SIZE));
-
-        int embeddingTextStep =
-                Integer.valueOf(
-                        mapperConfig.getParameterValue(MapperConfig.EMBEDDING_MAPPER_TEXT_STEP));
-
-        for (int startIndex = 0; startIndex < text.length(); startIndex += embeddingTextStep) {
-            int endIndex = Math.min(startIndex + embeddingTextSize, text.length());
-            String detectSegment = text.substring(startIndex, endIndex).trim();
-            detectSegments.add(detectSegment);
-        }
-        Set<EmbeddingResult> results =
-                detectByBatch(chatQueryContext, detectDataSetIds, detectSegments);
-        return new ArrayList<>(results);
-    }
-
-    protected Set<EmbeddingResult> detectByBatch(
+    public List<EmbeddingResult> detectByBatch(
             ChatQueryContext chatQueryContext,
             Set<Long> detectDataSetIds,
             Set<String> detectSegments) {
@@ -103,7 +59,7 @@ public class EmbeddingMatchStrategy extends BaseMatchStrategy<EmbeddingResult> {
         for (List<String> queryTextsSub : queryTextsSubList) {
             detectByQueryTextsSub(results, detectDataSetIds, queryTextsSub, chatQueryContext);
         }
-        return results;
+        return new ArrayList<>(results);
     }
 
     private void detectByQueryTextsSub(
