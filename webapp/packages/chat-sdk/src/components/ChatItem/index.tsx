@@ -365,6 +365,7 @@ const ChatItem: React.FC<Props> = ({
               <ExecuteItem
                 isSimpleMode={isSimpleMode}
                 queryId={parseInfo?.queryId}
+                question={msg}
                 queryMode={parseInfo?.queryMode}
                 executeLoading={executeLoading}
                 entitySwitchLoading={entitySwitchLoading}
