@@ -21,4 +21,8 @@ public enum DimensionType {
     public static boolean isPartitionTime(DimensionType type) {
         return type == partition_time;
     }
+
+    public static boolean isIdentity(DimensionType type) {
+        return type == identify;
+    }
 }

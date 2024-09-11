@@ -133,10 +133,28 @@ public class PromptHelper {
                             values.add(valueStr.toString());
                         });
 
-        String template = "Table=[%s], Metrics=[%s], Dimensions=[%s], Values=[%s]";
+        String partitionTimeStr = "";
+        if (llmReq.getSchema().getPartitionTime() != null) {
+            partitionTimeStr =
+                    String.format(
+                            "%s FORMAT '%s'",
+                            llmReq.getSchema().getPartitionTime().getName(),
+                            llmReq.getSchema().getPartitionTime().getTimeFormat());
+        }
+
+        String primaryKeyStr = "";
+        if (llmReq.getSchema().getPrimaryKey() != null) {
+            primaryKeyStr = String.format("%s", llmReq.getSchema().getPrimaryKey().getName());
+        }
+
+        String template =
+                "Table=[%s], PartitionTimeField=[%s], PrimaryKeyField=[%s], "
+                        + "Metrics=[%s], Dimensions=[%s], Values=[%s]";
         return String.format(
                 template,
                 tableStr,
+                partitionTimeStr,
+                primaryKeyStr,
                 String.join(",", metrics),
                 String.join(",", dimensions),
                 String.join(",", values));

@@ -61,9 +61,7 @@ public class QueryReqBuilder {
         addDateDimension(parseInfo);
 
         if (isDateFieldAlreadyPresent(parseInfo, getDateField(parseInfo.getDateInfo()))) {
-            parseInfo
-                    .getDimensions()
-                    .removeIf(schemaElement -> schemaElement.containsPartitionTime());
+            parseInfo.getDimensions().removeIf(schemaElement -> schemaElement.isPartitionTime());
         }
         queryStructReq.setGroups(
                 parseInfo.getDimensions().stream()

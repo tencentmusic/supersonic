@@ -7,11 +7,8 @@ import com.tencent.supersonic.common.pojo.ChatModelConfig;
 import com.tencent.supersonic.common.pojo.Text2SQLExemplar;
 import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import lombok.Data;
-import org.apache.commons.collections4.CollectionUtils;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Data
 public class LLMReq {
@@ -38,24 +35,9 @@ public class LLMReq {
         private List<String> fieldNameList;
         private List<SchemaElement> metrics;
         private List<SchemaElement> dimensions;
+        private SchemaElement partitionTime;
+        private SchemaElement primaryKey;
         private List<Term> terms;
-
-        public List<String> getFieldNameList() {
-            List<String> fieldNameList = new ArrayList<>();
-            if (CollectionUtils.isNotEmpty(metrics)) {
-                fieldNameList.addAll(
-                        metrics.stream()
-                                .map(metric -> metric.getName())
-                                .collect(Collectors.toList()));
-            }
-            if (CollectionUtils.isNotEmpty(dimensions)) {
-                fieldNameList.addAll(
-                        dimensions.stream()
-                                .map(metric -> metric.getName())
-                                .collect(Collectors.toList()));
-            }
-            return fieldNameList;
-        }
     }
 
     @Data

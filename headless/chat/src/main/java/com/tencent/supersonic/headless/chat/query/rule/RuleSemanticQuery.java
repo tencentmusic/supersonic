@@ -170,7 +170,7 @@ public abstract class RuleSemanticQuery extends BaseSemanticQuery {
         }
         for (Entry<Long, List<SchemaElementMatch>> entry : id2Values.entrySet()) {
             SchemaElement dimension = semanticSchema.getElement(entity, entry.getKey());
-            if (dimension.containsPartitionTime()) {
+            if (dimension.isPartitionTime()) {
                 continue;
             }
             if (entry.getValue().size() == 1) {
