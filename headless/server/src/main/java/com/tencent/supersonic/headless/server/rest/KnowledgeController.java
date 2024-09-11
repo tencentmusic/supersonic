@@ -7,6 +7,7 @@ import javax.validation.Valid;
 import com.github.pagehelper.PageInfo;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
+import com.tencent.supersonic.common.service.ExemplarService;
 import com.tencent.supersonic.headless.api.pojo.request.DictItemFilter;
 import com.tencent.supersonic.headless.api.pojo.request.DictItemReq;
 import com.tencent.supersonic.headless.api.pojo.request.DictSingleTaskReq;
@@ -36,9 +37,11 @@ public class KnowledgeController {
 
     @Autowired private DictConfService confService;
 
-    @Autowired private MetaEmbeddingTask embeddingTask;
+    @Autowired private MetaEmbeddingTask metaEmbeddingTask;
 
     @Autowired private DictionaryReloadTask dictionaryReloadTask;
+
+    @Autowired private ExemplarService exemplarService;
 
     /**
      * addDictConf-新增item的字典配置 Add configuration information for dictionary entries
@@ -130,15 +133,16 @@ public class KnowledgeController {
         return taskService.queryLatestDictTask(taskReq, user);
     }
 
-    @GetMapping("/meta/embedding/reload")
-    public Object reloadMetaEmbedding() {
-        embeddingTask.reloadMetaEmbedding();
+    @GetMapping("/embedding/reload")
+    public Object reloadEmbedding() {
+        metaEmbeddingTask.reloadMetaEmbedding();
+        exemplarService.loadSysExemplars();
         return true;
     }
 
     @GetMapping("/embedding/persistFile")
     public Object executePersistFileTask() {
-        embeddingTask.executePersistFileTask();
+        metaEmbeddingTask.executePersistFileTask();
         return true;
     }
 
