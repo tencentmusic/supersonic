@@ -197,6 +197,7 @@ const ChatMsg: React.FC<Props> = ({
               queryColumns: columns,
               queryResults: dataSource,
             }}
+            question={question}
             loading={loading}
             chartIndex={chartIndex}
             triggerResize={triggerResize}
@@ -210,6 +211,7 @@ const ChatMsg: React.FC<Props> = ({
         return (
           <Bar
             data={{ ...data, queryColumns: columns, queryResults: dataSource }}
+            question={question}
             triggerResize={triggerResize}
             loading={loading}
             metricField={metricFields[0]}
