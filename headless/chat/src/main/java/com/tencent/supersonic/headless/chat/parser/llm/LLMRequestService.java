@@ -13,7 +13,6 @@ import com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMReq;
 import com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMResp;
 import com.tencent.supersonic.headless.chat.utils.ComponentFactory;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,10 +20,8 @@ import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -39,7 +36,7 @@ public class LLMRequestService {
 
     public boolean isSkip(ChatQueryContext queryCtx) {
         if (!queryCtx.getText2SQLType().enableLLM()) {
-            log.info("not enable llm, skip");
+            log.info("LLM disabled, skip");
             return true;
         }
 
@@ -57,33 +54,28 @@ public class LLMRequestService {
     }
 
     public LLMReq getLlmReq(ChatQueryContext queryCtx, Long dataSetId) {
-        List<LLMReq.ElementValue> linkingValues = getValues(queryCtx, dataSetId);
         Map<Long, String> dataSetIdToName = queryCtx.getSemanticSchema().getDataSetIdToName();
         String queryText = queryCtx.getQueryText();
 
         LLMReq llmReq = new LLMReq();
-
         llmReq.setQueryText(queryText);
         LLMReq.LLMSchema llmSchema = new LLMReq.LLMSchema();
+        llmReq.setSchema(llmSchema);
         llmSchema.setDataSetId(dataSetId);
         llmSchema.setDataSetName(dataSetIdToName.get(dataSetId));
-        llmSchema.setMetrics(getMatchedMetrics(queryCtx, dataSetId));
-        llmSchema.setDimensions(getMatchedDimensions(queryCtx, dataSetId));
+        llmSchema.setMetrics(getMappedMetrics(queryCtx, dataSetId));
+        llmSchema.setDimensions(getMappedDimensions(queryCtx, dataSetId));
         llmSchema.setPartitionTime(getPartitionTime(queryCtx, dataSetId));
         llmSchema.setPrimaryKey(getPrimaryKey(queryCtx, dataSetId));
-        llmSchema.setTerms(getTerms(queryCtx, dataSetId));
-        llmReq.setSchema(llmSchema);
 
-        List<LLMReq.ElementValue> linking = new ArrayList<>();
         boolean linkingValueEnabled =
                 Boolean.valueOf(parserConfig.getParameterValue(PARSER_LINKING_VALUE_ENABLE));
-
         if (linkingValueEnabled) {
-            linking.addAll(linkingValues);
+            llmSchema.setValues(getMappedValues(queryCtx, dataSetId));
         }
-        llmReq.setLinking(linking);
 
         llmReq.setCurrentDate(DateUtils.getBeforeDate(0));
+        llmReq.setTerms(getMappedTerms(queryCtx, dataSetId));
         llmReq.setSqlGenType(
                 LLMReq.SqlGenType.valueOf(parserConfig.getParameterValue(PARSER_STRATEGY_TYPE)));
         llmReq.setModelConfig(queryCtx.getModelConfig());
@@ -102,7 +94,7 @@ public class LLMRequestService {
         return result;
     }
 
-    protected List<LLMReq.Term> getTerms(ChatQueryContext queryCtx, Long dataSetId) {
+    protected List<LLMReq.Term> getMappedTerms(ChatQueryContext queryCtx, Long dataSetId) {
         List<SchemaElementMatch> matchedElements =
                 queryCtx.getMapInfo().getMatchedElements(dataSetId);
         if (CollectionUtils.isEmpty(matchedElements)) {
@@ -126,31 +118,8 @@ public class LLMRequestService {
                 .collect(Collectors.toList());
     }
 
-    private Map<String, String> getFieldNameToDataFormatTypeMap(SemanticSchema semanticSchema) {
-        return semanticSchema.getMetrics().stream()
-                .filter(metric -> Objects.nonNull(metric.getDataFormatType()))
-                .flatMap(
-                        metric -> {
-                            Set<Pair<String, String>> fieldFormatPairs = new HashSet<>();
-                            String dataFormatType = metric.getDataFormatType();
-                            fieldFormatPairs.add(Pair.of(metric.getName(), dataFormatType));
-                            List<String> aliasList = metric.getAlias();
-                            if (!CollectionUtils.isEmpty(aliasList)) {
-                                aliasList.forEach(
-                                        alias ->
-                                                fieldFormatPairs.add(
-                                                        Pair.of(alias, dataFormatType)));
-                            }
-                            return fieldFormatPairs.stream();
-                        })
-                .collect(
-                        Collectors.toMap(
-                                Pair::getLeft,
-                                Pair::getRight,
-                                (existing, replacement) -> existing));
-    }
-
-    public List<LLMReq.ElementValue> getValues(@NotNull ChatQueryContext queryCtx, Long dataSetId) {
+    protected List<LLMReq.ElementValue> getMappedValues(
+            @NotNull ChatQueryContext queryCtx, Long dataSetId) {
         List<SchemaElementMatch> matchedElements =
                 queryCtx.getMapInfo().getMatchedElements(dataSetId);
         if (CollectionUtils.isEmpty(matchedElements)) {
@@ -177,7 +146,7 @@ public class LLMRequestService {
         return new ArrayList<>(valueMatches);
     }
 
-    protected List<SchemaElement> getMatchedMetrics(
+    protected List<SchemaElement> getMappedMetrics(
             @NotNull ChatQueryContext queryCtx, Long dataSetId) {
         List<SchemaElementMatch> matchedElements =
                 queryCtx.getMapInfo().getMatchedElements(dataSetId);
@@ -200,7 +169,7 @@ public class LLMRequestService {
         return schemaElements;
     }
 
-    protected List<SchemaElement> getMatchedDimensions(
+    protected List<SchemaElement> getMappedDimensions(
             @NotNull ChatQueryContext queryCtx, Long dataSetId) {
 
         List<SchemaElementMatch> matchedElements =

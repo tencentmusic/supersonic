@@ -66,7 +66,6 @@ public class LLMSqlParser implements SemanticParser {
                                         .dataSetId(dataSetId)
                                         .llmReq(llmReq)
                                         .llmResp(llmResp)
-                                        .linkingValues(llmReq.getLinking())
                                         .build();
                         break;
                     }

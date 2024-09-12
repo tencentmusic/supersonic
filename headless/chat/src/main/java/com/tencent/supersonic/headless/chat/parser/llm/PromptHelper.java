@@ -138,7 +138,7 @@ public class PromptHelper {
                         });
 
         List<String> values = Lists.newArrayList();
-        llmReq.getLinking().stream()
+        llmReq.getSchema().getValues().stream()
                 .forEach(
                         value -> {
                             StringBuilder valueStr = new StringBuilder();
@@ -176,7 +176,7 @@ public class PromptHelper {
     }
 
     private String buildTermStr(LLMReq llmReq) {
-        List<LLMReq.Term> terms = llmReq.getSchema().getTerms();
+        List<LLMReq.Term> terms = llmReq.getTerms();
         List<String> termStr = Lists.newArrayList();
         terms.stream()
                 .forEach(
