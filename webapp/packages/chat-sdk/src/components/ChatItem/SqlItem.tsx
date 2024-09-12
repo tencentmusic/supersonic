@@ -49,7 +49,7 @@ const SqlItem: React.FC<Props> = ({
     return null;
   }
 
-  const { schema, linking, priorExts } = llmReq || {};
+  const { schema, priorExts } = llmReq || {};
 
   const fewShots = (Object.values(llmResp?.sqlRespMap || {})[0] as any)?.fewShots || [];
 
@@ -57,9 +57,9 @@ const SqlItem: React.FC<Props> = ({
     return `
 Schema映射
 ${schema?.fieldNameList?.length > 0 ? `名称：${schema.fieldNameList.join('、')}` : ''}${
-      linking?.length > 0
+      schema?.values?.length > 0
         ? `
-取值：${linking
+取值：${schema.values
             .map((item: any) => {
               return `${item.fieldName}: ${item.fieldValue}`;
             })
@@ -253,11 +253,11 @@ ${format(sqlInfo.querySQL)}
                 </div>
               </div>
             )}
-            {linking?.length > 0 && (
+            {schema?.values?.length > 0 && (
               <div className={`${prefixCls}-schema-row`}>
                 <div className={`${prefixCls}-schema-title`}>取值：</div>
                 <div className={`${prefixCls}-schema-content`}>
-                  {linking
+                  {schema.values
                     .map((item: any) => {
                       return `${item.fieldName}: ${item.fieldValue}`;
                     })
