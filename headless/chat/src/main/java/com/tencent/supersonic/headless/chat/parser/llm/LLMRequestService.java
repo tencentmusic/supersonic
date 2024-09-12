@@ -1,6 +1,5 @@
 package com.tencent.supersonic.headless.chat.parser.llm;
 
-import com.tencent.supersonic.common.pojo.enums.DataFormatTypeEnum;
 import com.tencent.supersonic.common.util.DateUtils;
 import com.tencent.supersonic.headless.api.pojo.DataSetSchema;
 import com.tencent.supersonic.headless.api.pojo.SchemaElement;
@@ -14,8 +13,8 @@ import com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMReq;
 import com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMResp;
 import com.tencent.supersonic.headless.chat.utils.ComponentFactory;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -26,7 +25,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -69,16 +67,12 @@ public class LLMRequestService {
         LLMReq.LLMSchema llmSchema = new LLMReq.LLMSchema();
         llmSchema.setDataSetId(dataSetId);
         llmSchema.setDataSetName(dataSetIdToName.get(dataSetId));
-
         llmSchema.setMetrics(getMatchedMetrics(queryCtx, dataSetId));
         llmSchema.setDimensions(getMatchedDimensions(queryCtx, dataSetId));
         llmSchema.setPartitionTime(getPartitionTime(queryCtx, dataSetId));
         llmSchema.setPrimaryKey(getPrimaryKey(queryCtx, dataSetId));
         llmSchema.setTerms(getTerms(queryCtx, dataSetId));
         llmReq.setSchema(llmSchema);
-
-        String priorKnowledge = getPriorKnowledge(queryCtx, llmSchema);
-        llmReq.setPriorExts(priorKnowledge);
 
         List<LLMReq.ElementValue> linking = new ArrayList<>();
         boolean linkingValueEnabled =
@@ -132,14 +126,6 @@ public class LLMRequestService {
                 .collect(Collectors.toList());
     }
 
-    private String getPriorKnowledge(ChatQueryContext queryContext, LLMReq.LLMSchema llmSchema) {
-        StringBuilder priorKnowledgeBuilder = new StringBuilder();
-        SemanticSchema semanticSchema = queryContext.getSemanticSchema();
-        appendMetricPriorKnowledge(llmSchema, priorKnowledgeBuilder, semanticSchema);
-
-        return priorKnowledgeBuilder.toString();
-    }
-
     private Map<String, String> getFieldNameToDataFormatTypeMap(SemanticSchema semanticSchema) {
         return semanticSchema.getMetrics().stream()
                 .filter(metric -> Objects.nonNull(metric.getDataFormatType()))
@@ -164,34 +150,7 @@ public class LLMRequestService {
                                 (existing, replacement) -> existing));
     }
 
-    private void appendMetricPriorKnowledge(
-            LLMReq.LLMSchema llmSchema,
-            StringBuilder priorKnowledgeBuilder,
-            SemanticSchema semanticSchema) {
-        Map<String, String> fieldNameToDataFormatType =
-                getFieldNameToDataFormatTypeMap(semanticSchema);
-
-        for (SchemaElement schemaElement : llmSchema.getMetrics()) {
-            String fieldName = schemaElement.getName();
-            String dataFormatType = fieldNameToDataFormatType.get(fieldName);
-            if (DataFormatTypeEnum.DECIMAL.getName().equalsIgnoreCase(dataFormatType)
-                    || DataFormatTypeEnum.PERCENT.getName().equalsIgnoreCase(dataFormatType)) {
-                priorKnowledgeBuilder.append(String.format("%s的计量单位是%s; ", fieldName, "小数"));
-            }
-        }
-    }
-
-    private Map<String, String> getFieldNameToDateFormatMap(SemanticSchema semanticSchema) {
-        return semanticSchema.getDimensions().stream()
-                .filter(dimension -> StringUtils.isNotBlank(dimension.getTimeFormat()))
-                .collect(
-                        Collectors.toMap(
-                                SchemaElement::getName,
-                                value -> Optional.ofNullable(value.getTimeFormat()).orElse(""),
-                                (k1, k2) -> k1));
-    }
-
-    public List<LLMReq.ElementValue> getValues(ChatQueryContext queryCtx, Long dataSetId) {
+    public List<LLMReq.ElementValue> getValues(@NotNull ChatQueryContext queryCtx, Long dataSetId) {
         List<SchemaElementMatch> matchedElements =
                 queryCtx.getMapInfo().getMatchedElements(dataSetId);
         if (CollectionUtils.isEmpty(matchedElements)) {
@@ -218,7 +177,8 @@ public class LLMRequestService {
         return new ArrayList<>(valueMatches);
     }
 
-    protected List<SchemaElement> getMatchedMetrics(ChatQueryContext queryCtx, Long dataSetId) {
+    protected List<SchemaElement> getMatchedMetrics(
+            @NotNull ChatQueryContext queryCtx, Long dataSetId) {
         List<SchemaElementMatch> matchedElements =
                 queryCtx.getMapInfo().getMatchedElements(dataSetId);
         if (CollectionUtils.isEmpty(matchedElements)) {
@@ -240,27 +200,8 @@ public class LLMRequestService {
         return schemaElements;
     }
 
-    protected SchemaElement getPartitionTime(ChatQueryContext queryCtx, Long dataSetId) {
-        SemanticSchema semanticSchema = queryCtx.getSemanticSchema();
-        if (semanticSchema == null || semanticSchema.getDataSetSchemaMap() == null) {
-            return null;
-        }
-        Map<Long, DataSetSchema> dataSetSchemaMap = semanticSchema.getDataSetSchemaMap();
-        DataSetSchema dataSetSchema = dataSetSchemaMap.get(dataSetId);
-        return dataSetSchema.getPartitionDimension();
-    }
-
-    protected SchemaElement getPrimaryKey(ChatQueryContext queryCtx, Long dataSetId) {
-        SemanticSchema semanticSchema = queryCtx.getSemanticSchema();
-        if (semanticSchema == null || semanticSchema.getDataSetSchemaMap() == null) {
-            return null;
-        }
-        Map<Long, DataSetSchema> dataSetSchemaMap = semanticSchema.getDataSetSchemaMap();
-        DataSetSchema dataSetSchema = dataSetSchemaMap.get(dataSetId);
-        return dataSetSchema.getPrimaryKey();
-    }
-
-    protected List<SchemaElement> getMatchedDimensions(ChatQueryContext queryCtx, Long dataSetId) {
+    protected List<SchemaElement> getMatchedDimensions(
+            @NotNull ChatQueryContext queryCtx, Long dataSetId) {
 
         List<SchemaElementMatch> matchedElements =
                 queryCtx.getMapInfo().getMatchedElements(dataSetId);
@@ -274,5 +215,25 @@ public class LLMRequestService {
                         .collect(Collectors.toList());
 
         return new ArrayList<>(dimensionElements);
+    }
+
+    protected SchemaElement getPartitionTime(@NotNull ChatQueryContext queryCtx, Long dataSetId) {
+        SemanticSchema semanticSchema = queryCtx.getSemanticSchema();
+        if (semanticSchema == null || semanticSchema.getDataSetSchemaMap() == null) {
+            return null;
+        }
+        Map<Long, DataSetSchema> dataSetSchemaMap = semanticSchema.getDataSetSchemaMap();
+        DataSetSchema dataSetSchema = dataSetSchemaMap.get(dataSetId);
+        return dataSetSchema.getPartitionDimension();
+    }
+
+    protected SchemaElement getPrimaryKey(@NotNull ChatQueryContext queryCtx, Long dataSetId) {
+        SemanticSchema semanticSchema = queryCtx.getSemanticSchema();
+        if (semanticSchema == null || semanticSchema.getDataSetSchemaMap() == null) {
+            return null;
+        }
+        Map<Long, DataSetSchema> dataSetSchemaMap = semanticSchema.getDataSetSchemaMap();
+        DataSetSchema dataSetSchema = dataSetSchemaMap.get(dataSetId);
+        return dataSetSchema.getPrimaryKey();
     }
 }

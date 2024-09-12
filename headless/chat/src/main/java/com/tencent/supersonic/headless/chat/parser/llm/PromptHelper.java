@@ -2,6 +2,7 @@ package com.tencent.supersonic.headless.chat.parser.llm;
 
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.common.pojo.Text2SQLExemplar;
+import com.tencent.supersonic.common.pojo.enums.DataFormatTypeEnum;
 import com.tencent.supersonic.common.service.ExemplarService;
 import com.tencent.supersonic.headless.chat.parser.ParserConfig;
 import com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMReq;
@@ -88,6 +89,17 @@ public class PromptHelper {
                                 StringBuilder alias = new StringBuilder();
                                 metric.getAlias().stream().forEach(a -> alias.append(a + ","));
                                 metricStr.append(" ALIAS '" + alias + "'");
+                            }
+                            if (StringUtils.isNotEmpty(metric.getDataFormatType())) {
+                                String dataFormatType = metric.getDataFormatType();
+                                if (DataFormatTypeEnum.DECIMAL
+                                                .getName()
+                                                .equalsIgnoreCase(dataFormatType)
+                                        || DataFormatTypeEnum.PERCENT
+                                                .getName()
+                                                .equalsIgnoreCase(dataFormatType)) {
+                                    metricStr.append(" FORMAT '" + dataFormatType + "'");
+                                }
                             }
                             if (StringUtils.isNotEmpty(metric.getDescription())) {
                                 metricStr.append(" COMMENT '" + metric.getDescription() + "'");
