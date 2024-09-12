@@ -61,6 +61,7 @@ public class LLMRequestService {
         llmReq.setQueryText(queryText);
         LLMReq.LLMSchema llmSchema = new LLMReq.LLMSchema();
         llmReq.setSchema(llmSchema);
+        llmSchema.setDatabaseType(getDatabaseType(queryCtx, dataSetId));
         llmSchema.setDataSetId(dataSetId);
         llmSchema.setDataSetName(dataSetIdToName.get(dataSetId));
         llmSchema.setMetrics(getMappedMetrics(queryCtx, dataSetId));
@@ -204,5 +205,15 @@ public class LLMRequestService {
         Map<Long, DataSetSchema> dataSetSchemaMap = semanticSchema.getDataSetSchemaMap();
         DataSetSchema dataSetSchema = dataSetSchemaMap.get(dataSetId);
         return dataSetSchema.getPrimaryKey();
+    }
+
+    protected String getDatabaseType(@NotNull ChatQueryContext queryCtx, Long dataSetId) {
+        SemanticSchema semanticSchema = queryCtx.getSemanticSchema();
+        if (semanticSchema == null || semanticSchema.getDataSetSchemaMap() == null) {
+            return null;
+        }
+        Map<Long, DataSetSchema> dataSetSchemaMap = semanticSchema.getDataSetSchemaMap();
+        DataSetSchema dataSetSchema = dataSetSchemaMap.get(dataSetId);
+        return dataSetSchema.getDatabaseType();
     }
 }

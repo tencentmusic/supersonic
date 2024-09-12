@@ -162,11 +162,17 @@ public class PromptHelper {
             primaryKeyStr = String.format("%s", llmReq.getSchema().getPrimaryKey().getName());
         }
 
+        String databaseTypeStr = "";
+        if (llmReq.getSchema().getDatabaseType() != null) {
+            databaseTypeStr = llmReq.getSchema().getDatabaseType();
+        }
+
         String template =
-                "Table=[%s], PartitionTimeField=[%s], PrimaryKeyField=[%s], "
+                "DatabaseType=[%s], Table=[%s], PartitionTimeField=[%s], PrimaryKeyField=[%s], "
                         + "Metrics=[%s], Dimensions=[%s], Values=[%s]";
         return String.format(
                 template,
+                databaseTypeStr,
                 tableStr,
                 partitionTimeStr,
                 primaryKeyStr,

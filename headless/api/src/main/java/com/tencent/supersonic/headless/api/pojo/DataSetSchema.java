@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 @Data
 public class DataSetSchema {
 
+    private String databaseType;
     private SchemaElement dataSet;
     private Set<SchemaElement> metrics = new HashSet<>();
     private Set<SchemaElement> dimensions = new HashSet<>();
