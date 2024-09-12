@@ -18,4 +18,6 @@ public interface EmbeddingService {
 
     List<RetrieveQueryResult> retrieveQuery(
             String collectionName, RetrieveQuery retrieveQuery, int num);
+
+    void removeAll();
 }

@@ -14,4 +14,8 @@ public abstract class BaseEmbeddingStoreFactory implements EmbeddingStoreFactory
     }
 
     public abstract EmbeddingStore<TextSegment> createEmbeddingStore(String collectionName);
+
+    public Map<String, EmbeddingStore<TextSegment>> getCollectionNameToStore() {
+        return collectionNameToStore;
+    }
 }

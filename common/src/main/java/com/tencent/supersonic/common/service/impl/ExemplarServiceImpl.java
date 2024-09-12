@@ -54,6 +54,7 @@ public class ExemplarServiceImpl implements ExemplarService, CommandLineRunner {
                 Metadata.from(
                         JsonUtil.toMap(JsonUtil.toString(exemplar), String.class, Object.class));
         TextSegment segment = TextSegment.from(exemplar.getQuestion(), metadata);
+        TextSegmentConvert.addQueryId(segment, exemplar.getQuestion());
 
         embeddingService.deleteQuery(collection, Lists.newArrayList(segment));
     }
