@@ -36,18 +36,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-
 @Slf4j
 @Service
 public class DatabaseServiceImpl extends ServiceImpl<DatabaseDOMapper, DatabaseDO>
         implements DatabaseService {
 
-    @Autowired
-    private SqlUtils sqlUtils;
+    @Autowired private SqlUtils sqlUtils;
 
-    @Lazy
-    @Autowired
-    private ModelService datasourceService;
+    @Lazy @Autowired private ModelService datasourceService;
 
     @Override
     public boolean testConnect(DatabaseReq databaseReq, User user) {
@@ -72,25 +68,26 @@ public class DatabaseServiceImpl extends ServiceImpl<DatabaseDOMapper, DatabaseD
 
     @Override
     public List<DatabaseResp> getDatabaseList(User user) {
-        List<DatabaseResp> databaseResps = list().stream().map(DatabaseConverter::convert)
-                .collect(Collectors.toList());
+        List<DatabaseResp> databaseResps =
+                list().stream().map(DatabaseConverter::convert).collect(Collectors.toList());
         fillPermission(databaseResps, user);
         return databaseResps;
     }
 
     private void fillPermission(List<DatabaseResp> databaseResps, User user) {
-        databaseResps.forEach(databaseResp -> {
-            if (databaseResp.getAdmins().contains(user.getName())
-                    || user.getName().equalsIgnoreCase(databaseResp.getCreatedBy())
-                    || user.isSuperAdmin()) {
-                databaseResp.setHasPermission(true);
-                databaseResp.setHasEditPermission(true);
-                databaseResp.setHasUsePermission(true);
-            }
-            if (databaseResp.getViewers().contains(user.getName())) {
-                databaseResp.setHasUsePermission(true);
-            }
-        });
+        databaseResps.forEach(
+                databaseResp -> {
+                    if (databaseResp.getAdmins().contains(user.getName())
+                            || user.getName().equalsIgnoreCase(databaseResp.getCreatedBy())
+                            || user.isSuperAdmin()) {
+                        databaseResp.setHasPermission(true);
+                        databaseResp.setHasEditPermission(true);
+                        databaseResp.setHasUsePermission(true);
+                    }
+                    if (databaseResp.getViewers().contains(user.getName())) {
+                        databaseResp.setHasUsePermission(true);
+                    }
+                });
     }
 
     @Override
@@ -100,8 +97,8 @@ public class DatabaseServiceImpl extends ServiceImpl<DatabaseDOMapper, DatabaseD
         modelFilter.setIncludesDetail(false);
         List<ModelResp> modelResps = datasourceService.getModelList(modelFilter);
         if (!CollectionUtils.isEmpty(modelResps)) {
-            List<String> datasourceNames = modelResps.stream()
-                    .map(ModelResp::getName).collect(Collectors.toList());
+            List<String> datasourceNames =
+                    modelResps.stream().map(ModelResp::getName).collect(Collectors.toList());
             String message = String.format("该数据库被模型%s使用，无法删除", datasourceNames);
             throw new RuntimeException(message);
         }
@@ -129,7 +126,9 @@ public class DatabaseServiceImpl extends ServiceImpl<DatabaseDOMapper, DatabaseD
         }
         checkPermission(databaseResp, user);
         String sql = sqlExecuteReq.getSql();
-        sql = SqlVariableParseUtils.parse(sql, sqlExecuteReq.getSqlVariables(), Lists.newArrayList());
+        sql =
+                SqlVariableParseUtils.parse(
+                        sql, sqlExecuteReq.getSqlVariables(), Lists.newArrayList());
         return executeSql(sql, databaseResp);
     }
 
@@ -140,9 +139,11 @@ public class DatabaseServiceImpl extends ServiceImpl<DatabaseDOMapper, DatabaseD
 
     @Override
     public Map<String, List<DatabaseParameter>> getDatabaseParameters() {
-        return DbParameterFactory.getMap().entrySet().stream().collect(LinkedHashMap::new,
-                (map, entry) -> map.put(entry.getKey(), entry.getValue().build()),
-                LinkedHashMap::putAll);
+        return DbParameterFactory.getMap().entrySet().stream()
+                .collect(
+                        LinkedHashMap::new,
+                        (map, entry) -> map.put(entry.getKey(), entry.getValue().build()),
+                        LinkedHashMap::putAll);
     }
 
     private SemanticQueryResp queryWithColumns(String sql, Database database) {
@@ -177,7 +178,8 @@ public class DatabaseServiceImpl extends ServiceImpl<DatabaseDOMapper, DatabaseD
         return getColumns(databaseResp, db, table);
     }
 
-    public List<DBColumn> getColumns(DatabaseResp databaseResp, String db, String table) throws SQLException {
+    public List<DBColumn> getColumns(DatabaseResp databaseResp, String db, String table)
+            throws SQLException {
         DbAdaptor engineAdaptor = DbAdaptorFactory.getEngineAdaptor(databaseResp.getType());
         return engineAdaptor.getColumns(DatabaseConverter.getConnectInfo(databaseResp), db, table);
     }
@@ -204,11 +206,11 @@ public class DatabaseServiceImpl extends ServiceImpl<DatabaseDOMapper, DatabaseD
                 && !viewers.contains(user.getName())
                 && !databaseResp.getCreatedBy().equalsIgnoreCase(user.getName())
                 && !user.isSuperAdmin()) {
-            String message = String.format("您暂无当前数据库%s权限, 请联系数据库创建人:%s开通",
-                    databaseResp.getName(),
-                    databaseResp.getCreatedBy());
+            String message =
+                    String.format(
+                            "您暂无当前数据库%s权限, 请联系数据库创建人:%s开通",
+                            databaseResp.getName(), databaseResp.getCreatedBy());
             throw new RuntimeException(message);
         }
     }
-
 }

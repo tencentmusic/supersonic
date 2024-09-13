@@ -5,12 +5,12 @@ import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.common.pojo.DataEvent;
 import com.tencent.supersonic.common.pojo.enums.EventType;
 import com.tencent.supersonic.headless.api.pojo.DimValueMap;
+import com.tencent.supersonic.headless.api.pojo.MetaFilter;
 import com.tencent.supersonic.headless.api.pojo.request.DimensionReq;
 import com.tencent.supersonic.headless.api.pojo.request.MetaBatchReq;
 import com.tencent.supersonic.headless.api.pojo.request.PageDimensionReq;
 import com.tencent.supersonic.headless.api.pojo.response.DimensionResp;
 import com.tencent.supersonic.headless.server.pojo.DimensionsFilter;
-import com.tencent.supersonic.headless.api.pojo.MetaFilter;
 
 import java.util.List;
 

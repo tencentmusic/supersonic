@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -65,5 +64,4 @@ public class DatabaseResp extends RecordInfo {
         }
         return "";
     }
-
 }

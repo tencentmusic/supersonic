@@ -13,9 +13,10 @@ public class QueryFilterParser {
 
     public static String parse(QueryFilters queryFilters) {
         try {
-            List<String> conditions = queryFilters.getFilters().stream()
-                    .map(QueryFilterParser::parseFilter)
-                    .collect(Collectors.toList());
+            List<String> conditions =
+                    queryFilters.getFilters().stream()
+                            .map(QueryFilterParser::parseFilter)
+                            .collect(Collectors.toList());
             return String.join(" AND ", conditions);
         } catch (Exception e) {
             log.error("", e);
@@ -35,9 +36,14 @@ public class QueryFilterParser {
             case BETWEEN:
                 if (value instanceof List && ((List<?>) value).size() == 2) {
                     List<?> values = (List<?>) value;
-                    return column + " BETWEEN " + formatValue(values.get(0)) + " AND " + formatValue(values.get(1));
+                    return column
+                            + " BETWEEN "
+                            + formatValue(values.get(0))
+                            + " AND "
+                            + formatValue(values.get(1));
                 }
-                throw new IllegalArgumentException("BETWEEN operator requires a list of two values");
+                throw new IllegalArgumentException(
+                        "BETWEEN operator requires a list of two values");
             case IS_NULL:
             case IS_NOT_NULL:
                 return column + " " + operator.getValue();
@@ -52,9 +58,8 @@ public class QueryFilterParser {
 
     private static String parseList(Object value) {
         if (value instanceof List) {
-            return ((List<?>) value).stream()
-                    .map(QueryFilterParser::formatValue)
-                    .collect(Collectors.joining(", "));
+            return ((List<?>) value)
+                    .stream().map(QueryFilterParser::formatValue).collect(Collectors.joining(", "));
         }
         throw new IllegalArgumentException("IN and NOT IN operators require a list of values");
     }

@@ -1,23 +1,27 @@
 package com.tencent.supersonic.headless.core.translator.calcite.planner;
 
-
 import com.tencent.supersonic.headless.api.pojo.enums.AggOption;
 import com.tencent.supersonic.headless.api.pojo.enums.EngineType;
+import com.tencent.supersonic.headless.core.pojo.Database;
+import com.tencent.supersonic.headless.core.pojo.MetricQueryParam;
+import com.tencent.supersonic.headless.core.pojo.QueryStatement;
+import com.tencent.supersonic.headless.core.translator.calcite.Configuration;
 import com.tencent.supersonic.headless.core.translator.calcite.s2sql.Constants;
+import com.tencent.supersonic.headless.core.translator.calcite.s2sql.DataSource;
 import com.tencent.supersonic.headless.core.translator.calcite.schema.SchemaBuilder;
 import com.tencent.supersonic.headless.core.translator.calcite.schema.SemanticSchema;
+import com.tencent.supersonic.headless.core.translator.calcite.sql.Renderer;
+import com.tencent.supersonic.headless.core.translator.calcite.sql.TableView;
+import com.tencent.supersonic.headless.core.translator.calcite.sql.node.DataSourceNode;
 import com.tencent.supersonic.headless.core.translator.calcite.sql.node.SemanticNode;
 import com.tencent.supersonic.headless.core.translator.calcite.sql.render.FilterRender;
 import com.tencent.supersonic.headless.core.translator.calcite.sql.render.OutputRender;
 import com.tencent.supersonic.headless.core.translator.calcite.sql.render.SourceRender;
-import com.tencent.supersonic.headless.core.translator.calcite.Configuration;
-import com.tencent.supersonic.headless.core.translator.calcite.s2sql.DataSource;
-import com.tencent.supersonic.headless.core.translator.calcite.sql.Renderer;
-import com.tencent.supersonic.headless.core.translator.calcite.sql.TableView;
-import com.tencent.supersonic.headless.core.translator.calcite.sql.node.DataSourceNode;
-import com.tencent.supersonic.headless.core.pojo.Database;
-import com.tencent.supersonic.headless.core.pojo.MetricQueryParam;
-import com.tencent.supersonic.headless.core.pojo.QueryStatement;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.calcite.sql.SqlNode;
+import org.apache.calcite.sql.parser.SqlParser;
+import org.apache.calcite.sql.validate.SqlValidatorScope;
+
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -25,14 +29,7 @@ import java.util.ListIterator;
 import java.util.Objects;
 import java.util.Stack;
 
-import lombok.extern.slf4j.Slf4j;
-import org.apache.calcite.sql.SqlNode;
-import org.apache.calcite.sql.parser.SqlParser;
-import org.apache.calcite.sql.validate.SqlValidatorScope;
-
-/**
- * parsing from query dimensions and metrics
- */
+/** parsing from query dimensions and metrics */
 @Slf4j
 public class AggPlanner implements Planner {
 
@@ -71,15 +68,15 @@ public class AggPlanner implements Planner {
             Renderer renderer = it.next();
             if (previous != null) {
                 previous.render(metricReq, datasource, scope, schema, !isAgg);
-                renderer.setTable(previous.builderAs(DataSourceNode.getNames(datasource) + "_" + String.valueOf(i)));
+                renderer.setTable(
+                        previous.builderAs(
+                                DataSourceNode.getNames(datasource) + "_" + String.valueOf(i)));
                 i++;
             }
             previous = renderer;
         }
         builders.getLast().render(metricReq, datasource, scope, schema, !isAgg);
         parserNode = builders.getLast().builder();
-
-
     }
 
     private List<DataSource> getMatchDataSource(SqlValidatorScope scope) throws Exception {
@@ -91,8 +88,10 @@ public class AggPlanner implements Planner {
             return AggOption.isAgg(aggOption);
         }
         // default by dataSource time aggregation
-        if (Objects.nonNull(dataSource.getAggTime()) && !dataSource.getAggTime().equalsIgnoreCase(
-                Constants.DIMENSION_TYPE_TIME_GRANULARITY_NONE)) {
+        if (Objects.nonNull(dataSource.getAggTime())
+                && !dataSource
+                        .getAggTime()
+                        .equalsIgnoreCase(Constants.DIMENSION_TYPE_TIME_GRANULARITY_NONE)) {
             if (!metricReq.isNativeQuery()) {
                 return true;
             }
@@ -137,7 +136,8 @@ public class AggPlanner implements Planner {
     }
 
     public void optimize(EngineType engineType) {
-        if (Objects.isNull(schema.getRuntimeOptions()) || Objects.isNull(schema.getRuntimeOptions().getEnableOptimize())
+        if (Objects.isNull(schema.getRuntimeOptions())
+                || Objects.isNull(schema.getRuntimeOptions().getEnableOptimize())
                 || !schema.getRuntimeOptions().getEnableOptimize()) {
             return;
         }
@@ -149,9 +149,11 @@ public class AggPlanner implements Planner {
 
     public String optimize(String sql, EngineType engineType) {
         try {
-            SqlNode sqlNode = SqlParser.create(sql, Configuration.getParserConfig(engineType)).parseStmt();
+            SqlNode sqlNode =
+                    SqlParser.create(sql, Configuration.getParserConfig(engineType)).parseStmt();
             if (Objects.nonNull(sqlNode)) {
-                return SemanticNode.getSql(SemanticNode.optimize(scope, schema, sqlNode, engineType), engineType);
+                return SemanticNode.getSql(
+                        SemanticNode.optimize(scope, schema, sqlNode, engineType), engineType);
             }
         } catch (Exception e) {
             log.error("optimize error {}", e);
@@ -161,7 +163,8 @@ public class AggPlanner implements Planner {
 
     private SqlNode optimizeSql(String sql, EngineType engineType) {
         try {
-            SqlNode sqlNode = SqlParser.create(sql, Configuration.getParserConfig(engineType)).parseStmt();
+            SqlNode sqlNode =
+                    SqlParser.create(sql, Configuration.getParserConfig(engineType)).parseStmt();
             if (Objects.nonNull(sqlNode)) {
                 return SemanticNode.optimize(scope, schema, sqlNode, engineType);
             }

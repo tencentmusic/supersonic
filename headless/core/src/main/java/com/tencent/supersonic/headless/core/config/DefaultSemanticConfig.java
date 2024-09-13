@@ -40,5 +40,4 @@ public class DefaultSemanticConfig {
 
     @Value("${s2.explain.path:/api/semantic/query/explain}")
     private String explainPath;
-
 }

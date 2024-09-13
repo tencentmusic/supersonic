@@ -37,5 +37,4 @@ public class AppDO {
     private Date createdAt;
 
     private Date updatedAt;
-
 }

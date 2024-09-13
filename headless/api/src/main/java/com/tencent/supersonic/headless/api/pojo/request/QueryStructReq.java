@@ -1,6 +1,5 @@
 package com.tencent.supersonic.headless.api.pojo.request;
 
-
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.common.jsqlparser.SqlAddHelper;
 import com.tencent.supersonic.common.pojo.Aggregator;
@@ -39,7 +38,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-
 @Data
 @Slf4j
 public class QueryStructReq extends SemanticQueryReq {
@@ -56,7 +54,10 @@ public class QueryStructReq extends SemanticQueryReq {
 
     public List<String> getGroups() {
         if (!CollectionUtils.isEmpty(this.groups)) {
-            this.groups = groups.stream().filter(group -> !StringUtils.isEmpty(group)).collect(Collectors.toList());
+            this.groups =
+                    groups.stream()
+                            .filter(group -> !StringUtils.isEmpty(group))
+                            .collect(Collectors.toList());
         }
 
         if (CollectionUtils.isEmpty(this.groups)) {
@@ -83,24 +84,15 @@ public class QueryStructReq extends SemanticQueryReq {
 
     public String toCustomizedString() {
         StringBuilder stringBuilder = new StringBuilder("{");
-        stringBuilder.append("\"dataSetId\":")
-                .append(dataSetId);
-        stringBuilder.append("\"modelIds\":")
-                .append(modelIds);
-        stringBuilder.append(",\"groups\":")
-                .append(groups);
-        stringBuilder.append(",\"aggregators\":")
-                .append(aggregators);
-        stringBuilder.append(",\"orders\":")
-                .append(orders);
-        stringBuilder.append(",\"filters\":")
-                .append(dimensionFilters);
-        stringBuilder.append(",\"dateInfo\":")
-                .append(dateInfo);
-        stringBuilder.append(",\"params\":")
-                .append(params);
-        stringBuilder.append(",\"limit\":")
-                .append(limit);
+        stringBuilder.append("\"dataSetId\":").append(dataSetId);
+        stringBuilder.append("\"modelIds\":").append(modelIds);
+        stringBuilder.append(",\"groups\":").append(groups);
+        stringBuilder.append(",\"aggregators\":").append(aggregators);
+        stringBuilder.append(",\"orders\":").append(orders);
+        stringBuilder.append(",\"filters\":").append(dimensionFilters);
+        stringBuilder.append(",\"dateInfo\":").append(dateInfo);
+        stringBuilder.append(",\"params\":").append(params);
+        stringBuilder.append(",\"limit\":").append(limit);
         stringBuilder.append('}');
         return stringBuilder.toString();
     }
@@ -116,28 +108,17 @@ public class QueryStructReq extends SemanticQueryReq {
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("{");
-        sb.append("\"dataSetId\":")
-                .append(dataSetId);
-        sb.append("\"modelIds\":")
-                .append(modelIds);
-        sb.append(",\"groups\":")
-                .append(groups);
-        sb.append(",\"aggregators\":")
-                .append(aggregators);
-        sb.append(",\"orders\":")
-                .append(orders);
-        sb.append(",\"dimensionFilters\":")
-                .append(dimensionFilters);
-        sb.append(",\"metricFilters\":")
-                .append(metricFilters);
-        sb.append(",\"params\":")
-                .append(params);
-        sb.append(",\"dateInfo\":")
-                .append(dateInfo);
-        sb.append(",\"limit\":")
-                .append(limit);
-        sb.append(",\"cacheInfo\":")
-                .append(cacheInfo);
+        sb.append("\"dataSetId\":").append(dataSetId);
+        sb.append("\"modelIds\":").append(modelIds);
+        sb.append(",\"groups\":").append(groups);
+        sb.append(",\"aggregators\":").append(aggregators);
+        sb.append(",\"orders\":").append(orders);
+        sb.append(",\"dimensionFilters\":").append(dimensionFilters);
+        sb.append(",\"metricFilters\":").append(metricFilters);
+        sb.append(",\"params\":").append(params);
+        sb.append(",\"dateInfo\":").append(dateInfo);
+        sb.append(",\"limit\":").append(limit);
+        sb.append(",\"cacheInfo\":").append(cacheInfo);
         sb.append('}');
         return sb.toString();
     }
@@ -214,7 +195,8 @@ public class QueryStructReq extends SemanticQueryReq {
         return selectItems;
     }
 
-    private SelectItem buildAggregatorSelectItem(Aggregator aggregator, QueryStructReq queryStructReq) {
+    private SelectItem buildAggregatorSelectItem(
+            Aggregator aggregator, QueryStructReq queryStructReq) {
         String columnName = aggregator.getColumn();
         if (queryStructReq.getQueryType().isNativeAggQuery()) {
             return new SelectItem(new Column(columnName));
@@ -231,7 +213,10 @@ public class QueryStructReq extends SemanticQueryReq {
             }
             function.setParameters(new ExpressionList(new Column(columnName)));
             SelectItem selectExpressionItem = new SelectItem(function);
-            String alias = StringUtils.isNotBlank(aggregator.getAlias()) ? aggregator.getAlias() : columnName;
+            String alias =
+                    StringUtils.isNotBlank(aggregator.getAlias())
+                            ? aggregator.getAlias()
+                            : columnName;
             selectExpressionItem.setAlias(new Alias(alias));
             return selectExpressionItem;
         }
@@ -280,7 +265,8 @@ public class QueryStructReq extends SemanticQueryReq {
     private String addWhereClauses(String sql, QueryStructReq queryStructReq, boolean isBizName)
             throws JSQLParserException {
         SqlFilterUtils sqlFilterUtils = ContextUtils.getBean(SqlFilterUtils.class);
-        String whereClause = sqlFilterUtils.getWhereClause(queryStructReq.getDimensionFilters(), isBizName);
+        String whereClause =
+                sqlFilterUtils.getWhereClause(queryStructReq.getDimensionFilters(), isBizName);
 
         if (StringUtils.isNotBlank(whereClause)) {
             Expression expression = CCJSqlParserUtil.parseCondExpression(whereClause);
@@ -307,5 +293,4 @@ public class QueryStructReq extends SemanticQueryReq {
         }
         return Constants.TABLE_PREFIX + StringUtils.join(modelIds, "_");
     }
-
 }

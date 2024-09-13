@@ -20,7 +20,8 @@ public class User {
 
     private Integer isAdmin;
 
-    public static User get(Long id, String name, String displayName, String email, Integer isAdmin) {
+    public static User get(
+            Long id, String name, String displayName, String email, Integer isAdmin) {
         return new User(id, name, displayName, email, isAdmin);
     }
 
@@ -44,5 +45,4 @@ public class User {
     public boolean isSuperAdmin() {
         return isAdmin != null && isAdmin == 1;
     }
-
 }

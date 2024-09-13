@@ -1,6 +1,5 @@
 package com.tencent.supersonic.chat.server.agent;
 
-
 import lombok.Data;
 
 import java.util.List;
@@ -9,5 +8,4 @@ import java.util.List;
 public class PluginTool extends AgentTool {
 
     private List<Long> plugins;
-
 }

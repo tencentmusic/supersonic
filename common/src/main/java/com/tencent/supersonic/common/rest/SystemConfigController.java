@@ -13,8 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping({"/api/semantic/parameter"})
 public class SystemConfigController {
 
-    @Autowired
-    private SystemConfigService sysConfigService;
+    @Autowired private SystemConfigService sysConfigService;
 
     @PostMapping
     public Boolean save(@RequestBody SystemConfig systemConfig) {
@@ -26,5 +25,4 @@ public class SystemConfigController {
     public SystemConfig get() {
         return sysConfigService.getSystemConfig();
     }
-
 }

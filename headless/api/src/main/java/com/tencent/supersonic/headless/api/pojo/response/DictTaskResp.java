@@ -1,6 +1,5 @@
 package com.tencent.supersonic.headless.api.pojo.response;
 
-
 import lombok.Data;
 import lombok.ToString;
 
@@ -16,5 +15,4 @@ public class DictTaskResp extends DictItemResp {
     private Date createdAt;
     private String createdBy;
     private Long elapsedMs;
-
 }

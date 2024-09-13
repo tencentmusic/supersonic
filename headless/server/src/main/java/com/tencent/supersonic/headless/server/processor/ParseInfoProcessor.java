@@ -29,10 +29,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-/**
- * ParseInfoProcessor extracts structured info from S2SQL so that
- * users get to know the details.
- **/
+/** ParseInfoProcessor extracts structured info from S2SQL so that users get to know the details. */
 @Slf4j
 public class ParseInfoProcessor implements ResultProcessor {
 
@@ -49,10 +46,11 @@ public class ParseInfoProcessor implements ResultProcessor {
         }
         List<FieldExpression> expressions = SqlSelectHelper.getFilterExpression(s2SQL);
         Long dataSetId = parseInfo.getDataSetId();
-        SemanticLayerService semanticLayerService = ContextUtils.getBean(SemanticLayerService.class);
+        SemanticLayerService semanticLayerService =
+                ContextUtils.getBean(SemanticLayerService.class);
         DataSetSchema dsSchema = semanticLayerService.getDataSetSchema(dataSetId);
 
-        //extract date filter from S2SQL
+        // extract date filter from S2SQL
         try {
             if (parseInfo.getDateInfo() == null && !CollectionUtils.isEmpty(expressions)) {
                 parseInfo.setDateInfo(extractDateFilter(expressions, dsSchema));
@@ -61,7 +59,7 @@ public class ParseInfoProcessor implements ResultProcessor {
             log.error("failed to extract date range:", e);
         }
 
-        //extract dimension filters from S2SQL
+        // extract dimension filters from S2SQL
         try {
             List<QueryFilter> queryFilters = extractDimensionFilter(dsSchema, expressions);
             parseInfo.getDimensionFilters().addAll(queryFilters);
@@ -69,37 +67,44 @@ public class ParseInfoProcessor implements ResultProcessor {
             log.error("failed to extract dimension filters:", e);
         }
 
-        //extract metrics from S2SQL
-        List<String> allFields = filterDateField(dsSchema, SqlSelectHelper.getAllSelectFields(s2SQL));
+        // extract metrics from S2SQL
+        List<String> allFields =
+                filterDateField(dsSchema, SqlSelectHelper.getAllSelectFields(s2SQL));
         Set<SchemaElement> metrics = matchSchemaElements(allFields, dsSchema.getMetrics());
         parseInfo.setMetrics(metrics);
 
-        //extract dimensions from S2SQL
+        // extract dimensions from S2SQL
         if (QueryType.METRIC.equals(parseInfo.getQueryType())) {
             List<String> groupByFields = SqlSelectHelper.getGroupByFields(s2SQL);
             List<String> groupByDimensions = filterDateField(dsSchema, groupByFields);
-            parseInfo.setDimensions(matchSchemaElements(groupByDimensions, dsSchema.getDimensions()));
+            parseInfo.setDimensions(
+                    matchSchemaElements(groupByDimensions, dsSchema.getDimensions()));
         } else if (QueryType.DETAIL.equals(parseInfo.getQueryType())) {
             List<String> selectFields = SqlSelectHelper.getSelectFields(s2SQL);
             List<String> selectDimensions = filterDateField(dsSchema, selectFields);
-            parseInfo.setDimensions(matchSchemaElements(selectDimensions, dsSchema.getDimensions()));
+            parseInfo.setDimensions(
+                    matchSchemaElements(selectDimensions, dsSchema.getDimensions()));
         }
     }
 
-    private Set<SchemaElement> matchSchemaElements(List<String> allFields, Set<SchemaElement> elements) {
+    private Set<SchemaElement> matchSchemaElements(
+            List<String> allFields, Set<SchemaElement> elements) {
         return elements.stream()
-                .filter(schemaElement -> {
+                .filter(
+                        schemaElement -> {
                             if (CollectionUtils.isEmpty(schemaElement.getAlias())) {
                                 return allFields.contains(schemaElement.getName());
                             }
                             Set<String> allFieldsSet = new HashSet<>(allFields);
                             Set<String> aliasSet = new HashSet<>(schemaElement.getAlias());
-                            List<String> intersection = allFieldsSet.stream()
-                                    .filter(aliasSet::contains).collect(Collectors.toList());
+                            List<String> intersection =
+                                    allFieldsSet.stream()
+                                            .filter(aliasSet::contains)
+                                            .collect(Collectors.toList());
                             return allFields.contains(schemaElement.getName())
                                     || !CollectionUtils.isEmpty(intersection);
-                        }
-                ).collect(Collectors.toSet());
+                        })
+                .collect(Collectors.toSet());
     }
 
     private List<String> filterDateField(DataSetSchema dataSetSchema, List<String> allFields) {
@@ -108,8 +113,8 @@ public class ParseInfoProcessor implements ResultProcessor {
                 .collect(Collectors.toList());
     }
 
-    private List<QueryFilter> extractDimensionFilter(DataSetSchema dsSchema,
-                                                     List<FieldExpression> fieldExpressions) {
+    private List<QueryFilter> extractDimensionFilter(
+            DataSetSchema dsSchema, List<FieldExpression> fieldExpressions) {
 
         Map<String, SchemaElement> fieldNameToElement = getNameToElement(dsSchema);
         List<QueryFilter> result = Lists.newArrayList();
@@ -117,14 +122,16 @@ public class ParseInfoProcessor implements ResultProcessor {
             QueryFilter dimensionFilter = new QueryFilter();
             dimensionFilter.setValue(expression.getFieldValue());
             SchemaElement schemaElement = fieldNameToElement.get(expression.getFieldName());
-            if (Objects.isNull(schemaElement) || isPartitionDimension(dsSchema, schemaElement.getName())) {
+            if (Objects.isNull(schemaElement)
+                    || isPartitionDimension(dsSchema, schemaElement.getName())) {
                 continue;
             }
             dimensionFilter.setName(schemaElement.getName());
             dimensionFilter.setBizName(schemaElement.getBizName());
             dimensionFilter.setElementID(schemaElement.getId());
 
-            FilterOperatorEnum operatorEnum = FilterOperatorEnum.getSqlOperator(expression.getOperator());
+            FilterOperatorEnum operatorEnum =
+                    FilterOperatorEnum.getSqlOperator(expression.getOperator());
             dimensionFilter.setOperator(operatorEnum);
             dimensionFilter.setFunction(expression.getFunction());
             result.add(dimensionFilter);
@@ -132,11 +139,15 @@ public class ParseInfoProcessor implements ResultProcessor {
         return result;
     }
 
-    private DateConf extractDateFilter(List<FieldExpression> fieldExpressions,
-                                       DataSetSchema dataSetSchema) {
-        List<FieldExpression> dateExpressions = fieldExpressions.stream()
-                .filter(expression -> isPartitionDimension(dataSetSchema, expression.getFieldName()))
-                .collect(Collectors.toList());
+    private DateConf extractDateFilter(
+            List<FieldExpression> fieldExpressions, DataSetSchema dataSetSchema) {
+        List<FieldExpression> dateExpressions =
+                fieldExpressions.stream()
+                        .filter(
+                                expression ->
+                                        isPartitionDimension(
+                                                dataSetSchema, expression.getFieldName()))
+                        .collect(Collectors.toList());
         if (CollectionUtils.isEmpty(dateExpressions)) {
             return null;
         }
@@ -144,21 +155,29 @@ public class ParseInfoProcessor implements ResultProcessor {
         dateInfo.setDateMode(DateConf.DateMode.BETWEEN);
         FieldExpression firstExpression = dateExpressions.get(0);
 
-        FilterOperatorEnum firstOperator = FilterOperatorEnum.getSqlOperator(firstExpression.getOperator());
-        if (FilterOperatorEnum.EQUALS.equals(firstOperator) && Objects.nonNull(firstExpression.getFieldValue())) {
+        FilterOperatorEnum firstOperator =
+                FilterOperatorEnum.getSqlOperator(firstExpression.getOperator());
+        if (FilterOperatorEnum.EQUALS.equals(firstOperator)
+                && Objects.nonNull(firstExpression.getFieldValue())) {
             dateInfo.setStartDate(firstExpression.getFieldValue().toString());
             dateInfo.setEndDate(firstExpression.getFieldValue().toString());
             dateInfo.setDateMode(DateConf.DateMode.BETWEEN);
             return dateInfo;
         }
-        if (containOperators(firstExpression, firstOperator, FilterOperatorEnum.GREATER_THAN,
+        if (containOperators(
+                firstExpression,
+                firstOperator,
+                FilterOperatorEnum.GREATER_THAN,
                 FilterOperatorEnum.GREATER_THAN_EQUALS)) {
             dateInfo.setStartDate(firstExpression.getFieldValue().toString());
             if (hasSecondDate(dateExpressions)) {
                 dateInfo.setEndDate(dateExpressions.get(1).getFieldValue().toString());
             }
         }
-        if (containOperators(firstExpression, firstOperator, FilterOperatorEnum.MINOR_THAN,
+        if (containOperators(
+                firstExpression,
+                firstOperator,
+                FilterOperatorEnum.MINOR_THAN,
                 FilterOperatorEnum.MINOR_THAN_EQUALS)) {
             dateInfo.setEndDate(firstExpression.getFieldValue().toString());
             if (hasSecondDate(dateExpressions)) {
@@ -180,14 +199,17 @@ public class ParseInfoProcessor implements ResultProcessor {
         return sqlFieldName.equalsIgnoreCase(dataSetSchema.getPartitionDimension().getName());
     }
 
-    private boolean containOperators(FieldExpression expression, FilterOperatorEnum firstOperator,
-                                     FilterOperatorEnum... operatorEnums) {
-        return (Arrays.asList(operatorEnums).contains(firstOperator) && Objects.nonNull(
-                expression.getFieldValue()));
+    private boolean containOperators(
+            FieldExpression expression,
+            FilterOperatorEnum firstOperator,
+            FilterOperatorEnum... operatorEnums) {
+        return (Arrays.asList(operatorEnums).contains(firstOperator)
+                && Objects.nonNull(expression.getFieldValue()));
     }
 
     private boolean hasSecondDate(List<FieldExpression> dateExpressions) {
-        return dateExpressions.size() > 1 && Objects.nonNull(dateExpressions.get(1).getFieldValue());
+        return dateExpressions.size() > 1
+                && Objects.nonNull(dateExpressions.get(1).getFieldValue());
     }
 
     protected Map<String, SchemaElement> getNameToElement(DataSetSchema dsSchema) {
@@ -197,21 +219,22 @@ public class ParseInfoProcessor implements ResultProcessor {
         List<SchemaElement> allElements = Lists.newArrayList();
         allElements.addAll(dimensions);
         allElements.addAll(metrics);
-        //support alias
+        // support alias
         return allElements.stream()
-                .flatMap(schemaElement -> {
-                    Set<Pair<String, SchemaElement>> result = new HashSet<>();
-                    result.add(Pair.of(schemaElement.getName(), schemaElement));
-                    List<String> aliasList = schemaElement.getAlias();
-                    if (!org.springframework.util.CollectionUtils.isEmpty(aliasList)) {
-                        for (String alias : aliasList) {
-                            result.add(Pair.of(alias, schemaElement));
-                        }
-                    }
-                    return result.stream();
-                })
-                .collect(Collectors.toMap(Pair::getLeft, Pair::getRight,
-                        (value1, value2) -> value2));
+                .flatMap(
+                        schemaElement -> {
+                            Set<Pair<String, SchemaElement>> result = new HashSet<>();
+                            result.add(Pair.of(schemaElement.getName(), schemaElement));
+                            List<String> aliasList = schemaElement.getAlias();
+                            if (!org.springframework.util.CollectionUtils.isEmpty(aliasList)) {
+                                for (String alias : aliasList) {
+                                    result.add(Pair.of(alias, schemaElement));
+                                }
+                            }
+                            return result.stream();
+                        })
+                .collect(
+                        Collectors.toMap(
+                                Pair::getLeft, Pair::getRight, (value1, value2) -> value2));
     }
-
 }

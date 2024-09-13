@@ -13,7 +13,6 @@ import java.io.FileNotFoundException;
 @Slf4j
 public class LocalFileConfig {
 
-
     @Value("${s2.dict.directory.latest:/data/dictionary/custom}")
     private String dictDirectoryLatest;
 
@@ -36,5 +35,4 @@ public class LocalFileConfig {
         }
         return "";
     }
-
 }

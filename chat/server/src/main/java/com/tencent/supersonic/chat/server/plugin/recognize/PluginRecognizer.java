@@ -23,9 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-/**
- * PluginParser defines the basic process and common methods for recalling plugins.
- */
+/** PluginParser defines the basic process and common methods for recalling plugins. */
 public abstract class PluginRecognizer {
 
     public void recognize(ParseContext parseContext, ParseResp parseResp) {
@@ -43,16 +41,17 @@ public abstract class PluginRecognizer {
 
     public abstract PluginRecallResult recallPlugin(ParseContext parseContext);
 
-    public void buildQuery(ParseContext parseContext, ParseResp parseResp,
-                           PluginRecallResult pluginRecallResult) {
+    public void buildQuery(
+            ParseContext parseContext, ParseResp parseResp, PluginRecallResult pluginRecallResult) {
         ChatPlugin plugin = pluginRecallResult.getPlugin();
         Set<Long> dataSetIds = pluginRecallResult.getDataSetIds();
         if (plugin.isContainsAllDataSet()) {
             dataSetIds = Sets.newHashSet(-1L);
         }
         for (Long dataSetId : dataSetIds) {
-            SemanticParseInfo semanticParseInfo = buildSemanticParseInfo(dataSetId, plugin,
-                    parseContext, pluginRecallResult.getDistance());
+            SemanticParseInfo semanticParseInfo =
+                    buildSemanticParseInfo(
+                            dataSetId, plugin, parseContext, pluginRecallResult.getDistance());
             semanticParseInfo.setQueryMode(plugin.getType());
             semanticParseInfo.setScore(pluginRecallResult.getScore());
             parseResp.getSelectedParses().add(semanticParseInfo);
@@ -63,9 +62,10 @@ public abstract class PluginRecognizer {
         return PluginManager.getPluginAgentCanSupport(parseContext);
     }
 
-    protected SemanticParseInfo buildSemanticParseInfo(Long dataSetId, ChatPlugin plugin,
-                                                       ParseContext parseContext, double distance) {
-        List<SchemaElementMatch> schemaElementMatches = parseContext.getMapInfo().getMatchedElements(dataSetId);
+    protected SemanticParseInfo buildSemanticParseInfo(
+            Long dataSetId, ChatPlugin plugin, ParseContext parseContext, double distance) {
+        List<SchemaElementMatch> schemaElementMatches =
+                parseContext.getMapInfo().getMatchedElements(dataSetId);
         QueryFilters queryFilters = parseContext.getQueryFilters();
         if (schemaElementMatches == null) {
             schemaElementMatches = Lists.newArrayList();
@@ -96,18 +96,22 @@ public abstract class PluginRecognizer {
         if (CollectionUtils.isEmpty(schemaElementMatches)) {
             return;
         }
-        schemaElementMatches.stream().filter(schemaElementMatch ->
-                        SchemaElementType.VALUE.equals(schemaElementMatch.getElement().getType())
-                                || SchemaElementType.ID.equals(schemaElementMatch.getElement().getType()))
-                .forEach(schemaElementMatch -> {
-                    QueryFilter queryFilter = new QueryFilter();
-                    queryFilter.setValue(schemaElementMatch.getWord());
-                    queryFilter.setElementID(schemaElementMatch.getElement().getId());
-                    queryFilter.setName(schemaElementMatch.getElement().getName());
-                    queryFilter.setOperator(FilterOperatorEnum.EQUALS);
-                    queryFilter.setBizName(schemaElementMatch.getElement().getBizName());
-                    semanticParseInfo.getDimensionFilters().add(queryFilter);
-                });
+        schemaElementMatches.stream()
+                .filter(
+                        schemaElementMatch ->
+                                SchemaElementType.VALUE.equals(
+                                                schemaElementMatch.getElement().getType())
+                                        || SchemaElementType.ID.equals(
+                                                schemaElementMatch.getElement().getType()))
+                .forEach(
+                        schemaElementMatch -> {
+                            QueryFilter queryFilter = new QueryFilter();
+                            queryFilter.setValue(schemaElementMatch.getWord());
+                            queryFilter.setElementID(schemaElementMatch.getElement().getId());
+                            queryFilter.setName(schemaElementMatch.getElement().getName());
+                            queryFilter.setOperator(FilterOperatorEnum.EQUALS);
+                            queryFilter.setBizName(schemaElementMatch.getElement().getBizName());
+                            semanticParseInfo.getDimensionFilters().add(queryFilter);
+                        });
     }
-
 }

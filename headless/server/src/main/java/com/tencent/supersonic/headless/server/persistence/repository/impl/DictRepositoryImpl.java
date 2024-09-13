@@ -1,6 +1,5 @@
 package com.tencent.supersonic.headless.server.persistence.repository.impl;
 
-
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.tencent.supersonic.common.pojo.enums.TypeEnums;
 import com.tencent.supersonic.headless.api.pojo.request.DictItemFilter;
@@ -37,8 +36,11 @@ public class DictRepositoryImpl implements DictRepository {
     private final DictUtils dictConverter;
     private final DimensionService dimensionService;
 
-    public DictRepositoryImpl(DictTaskMapper dictTaskMapper, DictConfMapper dictConfMapper,
-                              DictUtils dictConverter, DimensionService dimensionService) {
+    public DictRepositoryImpl(
+            DictTaskMapper dictTaskMapper,
+            DictConfMapper dictConfMapper,
+            DictUtils dictConverter,
+            DimensionService dimensionService) {
         this.dictTaskMapper = dictTaskMapper;
         this.dictConfMapper = dictConfMapper;
         this.dictConverter = dictConverter;
@@ -88,9 +90,11 @@ public class DictRepositoryImpl implements DictRepository {
         QueryWrapper<DictTaskDO> wrapper = new QueryWrapper<>();
         wrapper.lambda().eq(DictTaskDO::getItemId, taskReq.getItemId());
         wrapper.lambda().eq(DictTaskDO::getType, taskReq.getType());
-        List<DictTaskDO> dictTaskDOList = dictTaskMapper.selectList(wrapper).stream()
-                .sorted(Comparator.comparing(DictTaskDO::getCreatedAt).reversed())
-                .limit(dictTaskNum).collect(Collectors.toList());
+        List<DictTaskDO> dictTaskDOList =
+                dictTaskMapper.selectList(wrapper).stream()
+                        .sorted(Comparator.comparing(DictTaskDO::getCreatedAt).reversed())
+                        .limit(dictTaskNum)
+                        .collect(Collectors.toList());
         if (CollectionUtils.isEmpty(dictTaskDOList)) {
             return taskResp;
         }
@@ -109,10 +113,11 @@ public class DictRepositoryImpl implements DictRepository {
 
     @Override
     public Long editDictConf(DictConfDO dictConfDO) {
-        DictItemFilter filter = DictItemFilter.builder()
-                .type(TypeEnums.valueOf(dictConfDO.getType()))
-                .itemId(dictConfDO.getItemId())
-                .build();
+        DictItemFilter filter =
+                DictItemFilter.builder()
+                        .type(TypeEnums.valueOf(dictConfDO.getType()))
+                        .itemId(dictConfDO.getItemId())
+                        .build();
 
         List<DictConfDO> dictConfDOList = getDictConfDOList(filter);
         if (CollectionUtils.isEmpty(dictConfDOList)) {

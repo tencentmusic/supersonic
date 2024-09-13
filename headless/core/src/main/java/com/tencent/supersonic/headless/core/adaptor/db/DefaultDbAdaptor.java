@@ -1,6 +1,5 @@
 package com.tencent.supersonic.headless.core.adaptor.db;
 
-
 public class DefaultDbAdaptor extends BaseDbAdaptor {
 
     @Override
@@ -12,5 +11,4 @@ public class DefaultDbAdaptor extends BaseDbAdaptor {
     public String functionNameCorrector(String sql) {
         return sql;
     }
-
 }

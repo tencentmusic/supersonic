@@ -8,5 +8,4 @@ public class VisualConfig {
     private boolean enableSimpleMode;
 
     private boolean showDebugInfo;
-
 }

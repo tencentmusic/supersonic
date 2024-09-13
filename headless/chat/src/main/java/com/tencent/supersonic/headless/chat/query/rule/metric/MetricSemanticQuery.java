@@ -1,6 +1,5 @@
 package com.tencent.supersonic.headless.chat.query.rule.metric;
 
-
 import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.common.pojo.enums.TimeMode;
 import com.tencent.supersonic.headless.api.pojo.DataSetSchema;
@@ -29,8 +28,8 @@ public abstract class MetricSemanticQuery extends RuleSemanticQuery {
     }
 
     @Override
-    public List<SchemaElementMatch> match(List<SchemaElementMatch> candidateElementMatches,
-                                          ChatQueryContext queryCtx) {
+    public List<SchemaElementMatch> match(
+            List<SchemaElementMatch> candidateElementMatches, ChatQueryContext queryCtx) {
         return super.match(candidateElementMatches, queryCtx);
     }
 
@@ -46,11 +45,15 @@ public abstract class MetricSemanticQuery extends RuleSemanticQuery {
             return;
         }
         DataSetSchema dataSetSchema =
-                chatQueryContext.getSemanticSchema().getDataSetSchemaMap().get(parseInfo.getDataSetId());
+                chatQueryContext
+                        .getSemanticSchema()
+                        .getDataSetSchemaMap()
+                        .get(parseInfo.getDataSetId());
         TimeDefaultConfig timeDefaultConfig = dataSetSchema.getMetricTypeTimeDefaultConfig();
         DateConf dateInfo = new DateConf();
-        //加上时间!=-1 判断
-        if (Objects.nonNull(timeDefaultConfig) && Objects.nonNull(timeDefaultConfig.getUnit())
+        // 加上时间!=-1 判断
+        if (Objects.nonNull(timeDefaultConfig)
+                && Objects.nonNull(timeDefaultConfig.getUnit())
                 && timeDefaultConfig.getUnit() != -1) {
             int unit = timeDefaultConfig.getUnit();
             String startDate = LocalDate.now().plusDays(-unit).toString();

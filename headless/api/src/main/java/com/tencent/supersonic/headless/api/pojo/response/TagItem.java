@@ -8,5 +8,4 @@ public class TagItem {
     private Long itemId;
 
     private int isTag;
-
 }

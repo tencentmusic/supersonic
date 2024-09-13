@@ -3,6 +3,7 @@ package com.tencent.supersonic.headless.api.pojo;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.common.pojo.enums.ApiItemType;
 import lombok.Data;
+
 import java.util.List;
 
 @Data
@@ -23,5 +24,4 @@ public class Item {
     public String getValue() {
         return name;
     }
-
 }

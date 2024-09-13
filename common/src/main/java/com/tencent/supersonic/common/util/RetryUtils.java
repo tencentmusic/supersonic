@@ -1,13 +1,11 @@
 package com.tencent.supersonic.common.util;
 
-
-import java.util.function.Supplier;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.function.Supplier;
 
 @Slf4j
 public class RetryUtils {
-
 
     private static final int RETRY_NUM = 3;
 
@@ -38,5 +36,4 @@ public class RetryUtils {
 
         return result;
     }
-
 }

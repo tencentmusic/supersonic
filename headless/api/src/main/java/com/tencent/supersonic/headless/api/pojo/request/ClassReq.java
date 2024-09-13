@@ -12,5 +12,4 @@ public class ClassReq extends SchemaItem {
     private Long tagObjectId;
     private Long parentId;
     private List<Long> itemIds;
-
 }

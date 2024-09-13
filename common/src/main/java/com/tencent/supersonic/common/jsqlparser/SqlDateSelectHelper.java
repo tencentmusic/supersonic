@@ -1,16 +1,14 @@
 package com.tencent.supersonic.common.jsqlparser;
 
 import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
-
-import java.util.List;
-import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 
-/**
- * Date field parsing helper class
- */
+import java.util.List;
+import java.util.Objects;
+
+/** Date field parsing helper class */
 @Slf4j
 public class SqlDateSelectHelper {
 
@@ -32,4 +30,3 @@ public class SqlDateSelectHelper {
         return dateVisitor.getDateBoundInfo();
     }
 }
-

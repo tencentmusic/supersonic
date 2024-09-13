@@ -1,7 +1,8 @@
 package com.tencent.supersonic.headless.api.pojo.request;
 
-import com.tencent.supersonic.common.pojo.DateConf;
 import javax.validation.constraints.NotNull;
+
+import com.tencent.supersonic.common.pojo.DateConf;
 import lombok.Data;
 import lombok.ToString;
 
@@ -9,8 +10,7 @@ import lombok.ToString;
 @ToString
 public class ItemValueReq {
 
-    @NotNull
-    private Long id;
+    @NotNull private Long id;
 
     private DateConf dateConf;
 

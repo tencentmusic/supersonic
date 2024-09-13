@@ -1,6 +1,5 @@
 package com.tencent.supersonic.headless.server.manager;
 
-
 import com.tencent.supersonic.headless.api.pojo.enums.IdentifyType;
 import com.tencent.supersonic.headless.api.pojo.response.DimensionResp;
 import com.tencent.supersonic.headless.server.pojo.yaml.DimensionYamlTpl;
@@ -13,9 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-/**
- *  manager to handle the dimension
- */
+/** manager to handle the dimension */
 @Slf4j
 @Service
 public class DimensionYamlManager {
@@ -25,8 +22,14 @@ public class DimensionYamlManager {
             return new ArrayList<>();
         }
         return dimensions.stream()
-                .filter(dimension -> !dimension.getType().name().equalsIgnoreCase(IdentifyType.primary.name()))
-                .map(DimensionYamlManager::convert2DimensionYamlTpl).collect(Collectors.toList());
+                .filter(
+                        dimension ->
+                                !dimension
+                                        .getType()
+                                        .name()
+                                        .equalsIgnoreCase(IdentifyType.primary.name()))
+                .map(DimensionYamlManager::convert2DimensionYamlTpl)
+                .collect(Collectors.toList());
     }
 
     public static DimensionYamlTpl convert2DimensionYamlTpl(DimensionResp dimension) {
@@ -36,5 +39,4 @@ public class DimensionYamlManager {
         dimensionYamlTpl.setOwners(dimension.getCreatedBy());
         return dimensionYamlTpl;
     }
-
 }

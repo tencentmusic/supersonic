@@ -15,5 +15,4 @@ public class JoinCondition {
     private String rightField;
 
     private FilterOperatorEnum operator;
-
 }

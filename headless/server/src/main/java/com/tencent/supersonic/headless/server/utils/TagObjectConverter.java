@@ -33,7 +33,8 @@ public class TagObjectConverter {
     public static List<TagObjectResp> convert2RespList(List<TagObjectDO> tagObjectDOList) {
         List<TagObjectResp> tagObjectRespList = new ArrayList<>();
         if (!CollectionUtils.isEmpty(tagObjectDOList)) {
-            tagObjectDOList.stream().forEach(tagObjectDO -> tagObjectRespList.add(convert2Resp(tagObjectDO)));
+            tagObjectDOList.stream()
+                    .forEach(tagObjectDO -> tagObjectRespList.add(convert2Resp(tagObjectDO)));
         }
         return tagObjectRespList;
     }

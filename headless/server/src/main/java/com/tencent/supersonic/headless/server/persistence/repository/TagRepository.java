@@ -1,12 +1,11 @@
 package com.tencent.supersonic.headless.server.persistence.repository;
 
-
 import com.tencent.supersonic.headless.api.pojo.request.TagDeleteReq;
 import com.tencent.supersonic.headless.api.pojo.response.TagResp;
 import com.tencent.supersonic.headless.server.persistence.dataobject.TagDO;
 import com.tencent.supersonic.headless.server.pojo.TagFilter;
-import java.util.List;
 
+import java.util.List;
 
 public interface TagRepository {
 

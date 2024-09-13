@@ -1,9 +1,9 @@
 package com.tencent.supersonic.headless.server.pojo;
 
 import com.tencent.supersonic.headless.api.pojo.enums.EngineType;
+
 import java.util.LinkedHashMap;
 import java.util.Map;
-
 
 public class DbParameterFactory {
 
@@ -25,5 +25,4 @@ public class DbParameterFactory {
     public static Map<String, DbParametersBuilder> getMap() {
         return parametersBuilder;
     }
-
 }

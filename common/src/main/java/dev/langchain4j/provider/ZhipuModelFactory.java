@@ -16,6 +16,7 @@ public class ZhipuModelFactory implements ModelFactory, InitializingBean {
     public static final String DEFAULT_BASE_URL = "https://open.bigmodel.cn/";
     public static final String DEFAULT_MODEL_NAME = ChatCompletionModel.GLM_4.toString();
     public static final String DEFAULT_EMBEDDING_MODEL_NAME = "embedding-2";
+
     @Override
     public ChatLanguageModel createChatModel(ChatModelConfig modelConfig) {
         return ZhipuAiChatModel.builder()

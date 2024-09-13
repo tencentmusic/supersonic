@@ -3,7 +3,6 @@ package com.tencent.supersonic.headless.core.translator.calcite.s2sql;
 import java.util.Arrays;
 
 public enum DataType {
-
     ARRAY("ARRAY"),
 
     MAP("MAP"),

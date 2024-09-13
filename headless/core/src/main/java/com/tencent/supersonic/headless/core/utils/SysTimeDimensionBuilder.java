@@ -1,9 +1,9 @@
 package com.tencent.supersonic.headless.core.utils;
 
 import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
-import com.tencent.supersonic.headless.api.pojo.enums.DimensionType;
 import com.tencent.supersonic.headless.api.pojo.Dim;
 import com.tencent.supersonic.headless.api.pojo.DimensionTimeTypeParams;
+import com.tencent.supersonic.headless.api.pojo.enums.DimensionType;
 import com.tencent.supersonic.headless.core.adaptor.db.DbAdaptor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -11,15 +11,14 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/**
- * generate system time dimension tools
- */
+/** generate system time dimension tools */
 @Slf4j
 public class SysTimeDimensionBuilder {
 
     // Defines the regular expression pattern for the time keyword
     private static final Pattern TIME_KEYWORD_PATTERN =
-            Pattern.compile("\\b(DATE|TIME|TIMESTAMP|YEAR|MONTH|DAY|HOUR|MINUTE|SECOND)\\b",
+            Pattern.compile(
+                    "\\b(DATE|TIME|TIMESTAMP|YEAR|MONTH|DAY|HOUR|MINUTE|SECOND)\\b",
                     Pattern.CASE_INSENSITIVE);
 
     public static void addSysTimeDimension(List<Dim> dims, DbAdaptor engineAdaptor) {
@@ -27,7 +26,7 @@ public class SysTimeDimensionBuilder {
         Dim timeDim = getTimeDim(dims);
         if (timeDim == null) {
             timeDim = Dim.getDefault();
-            //todo not find the time dimension
+            // todo not find the time dimension
             return;
         }
         dims.add(generateSysDayDimension(timeDim, engineAdaptor));
@@ -40,7 +39,9 @@ public class SysTimeDimensionBuilder {
         Dim dim = new Dim();
         dim.setBizName(TimeDimensionEnum.DAY.getName());
         dim.setType(DimensionType.partition_time.name());
-        dim.setExpr(generateTimeExpr(timeDim, TimeDimensionEnum.DAY.name().toLowerCase(), engineAdaptor));
+        dim.setExpr(
+                generateTimeExpr(
+                        timeDim, TimeDimensionEnum.DAY.name().toLowerCase(), engineAdaptor));
         DimensionTimeTypeParams typeParams = new DimensionTimeTypeParams();
         typeParams.setTimeGranularity(TimeDimensionEnum.DAY.name().toLowerCase());
         typeParams.setIsPrimary("true");
@@ -52,7 +53,9 @@ public class SysTimeDimensionBuilder {
         Dim dim = new Dim();
         dim.setBizName(TimeDimensionEnum.WEEK.getName());
         dim.setType(DimensionType.partition_time.name());
-        dim.setExpr(generateTimeExpr(timeDim, TimeDimensionEnum.WEEK.name().toLowerCase(), engineAdaptor));
+        dim.setExpr(
+                generateTimeExpr(
+                        timeDim, TimeDimensionEnum.WEEK.name().toLowerCase(), engineAdaptor));
         DimensionTimeTypeParams typeParams = new DimensionTimeTypeParams();
         typeParams.setTimeGranularity(TimeDimensionEnum.WEEK.name().toLowerCase());
         typeParams.setIsPrimary("false");
@@ -64,7 +67,9 @@ public class SysTimeDimensionBuilder {
         Dim dim = new Dim();
         dim.setBizName(TimeDimensionEnum.MONTH.getName());
         dim.setType(DimensionType.partition_time.name());
-        dim.setExpr(generateTimeExpr(timeDim, TimeDimensionEnum.MONTH.name().toLowerCase(), engineAdaptor));
+        dim.setExpr(
+                generateTimeExpr(
+                        timeDim, TimeDimensionEnum.MONTH.name().toLowerCase(), engineAdaptor));
         DimensionTimeTypeParams typeParams = new DimensionTimeTypeParams();
         typeParams.setTimeGranularity(TimeDimensionEnum.MONTH.name().toLowerCase());
         typeParams.setIsPrimary("false");
@@ -87,7 +92,6 @@ public class SysTimeDimensionBuilder {
         } else {
             return engineAdaptor.getDateFormat(dateType, dateFormat, bizName);
         }
-
     }
 
     private static Dim getTimeDim(List<Dim> timeDims) {
@@ -98,5 +102,4 @@ public class SysTimeDimensionBuilder {
         }
         return null;
     }
-
 }

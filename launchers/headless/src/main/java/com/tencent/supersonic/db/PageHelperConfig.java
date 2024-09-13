@@ -1,10 +1,10 @@
 package com.tencent.supersonic.db;
 
 import com.github.pagehelper.PageInterceptor;
-import java.util.Properties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.util.Properties;
 
 @Configuration
 public class PageHelperConfig {

@@ -1,14 +1,6 @@
 package com.tencent.supersonic.common.jsqlparser;
 
 import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.Function;
@@ -21,13 +13,21 @@ import net.sf.jsqlparser.statement.select.SelectItem;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.CollectionUtils;
 
-/**
- * Sql Parser Select function Helper
- */
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+/** Sql Parser Select function Helper */
 @Slf4j
 public class SqlSelectFunctionHelper {
 
-    public static List<String> aggregateFunctionName = Arrays.asList("SUM", "COUNT", "MAX", "MIN", "AVG");
+    public static List<String> aggregateFunctionName =
+            Arrays.asList("SUM", "COUNT", "MAX", "MIN", "AVG");
 
     public static boolean hasAggregateFunction(String sql) {
         if (!CollectionUtils.isEmpty(getFunctions(sql))) {
@@ -58,7 +58,8 @@ public class SqlSelectFunctionHelper {
         return visitor.getFunctionNames();
     }
 
-    public static Function getFunction(Expression expression, Map<String, String> fieldNameToAggregate) {
+    public static Function getFunction(
+            Expression expression, Map<String, String> fieldNameToAggregate) {
         if (!(expression instanceof Column)) {
             return null;
         }
@@ -100,7 +101,8 @@ public class SqlSelectFunctionHelper {
             expression.accept(visitor);
             Set<String> functions = visitor.getFunctionNames();
             return functions.stream()
-                    .filter(t -> aggregateFunctionName.contains(t.toUpperCase())).collect(Collectors.toList());
+                    .filter(t -> aggregateFunctionName.contains(t.toUpperCase()))
+                    .collect(Collectors.toList());
         }
         return new ArrayList<>();
     }
@@ -119,4 +121,3 @@ public class SqlSelectFunctionHelper {
         return false;
     }
 }
-

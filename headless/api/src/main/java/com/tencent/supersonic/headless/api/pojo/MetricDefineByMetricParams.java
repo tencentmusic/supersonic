@@ -9,5 +9,4 @@ import java.util.List;
 public class MetricDefineByMetricParams extends MetricDefineParams {
 
     private List<MetricParam> metrics = Lists.newArrayList();
-
 }

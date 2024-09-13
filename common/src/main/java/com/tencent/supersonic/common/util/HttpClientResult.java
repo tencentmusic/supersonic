@@ -2,23 +2,17 @@ package com.tencent.supersonic.common.util;
 
 import java.io.Serializable;
 
-
 public class HttpClientResult implements Serializable {
 
     private static final long serialVersionUID = 2168152194164783950L;
 
-    /**
-     * 响应状态码
-     */
+    /** 响应状态码 */
     private int code;
 
-    /**
-     * 响应数据
-     */
+    /** 响应数据 */
     private String content;
 
-    public HttpClientResult() {
-    }
+    public HttpClientResult() {}
 
     public HttpClientResult(int code) {
         this.code = code;
@@ -53,5 +47,4 @@ public class HttpClientResult implements Serializable {
     public String toString() {
         return "HttpClientResult [code=" + code + ", content=" + content + "]";
     }
-
 }

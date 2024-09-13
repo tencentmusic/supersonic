@@ -10,7 +10,8 @@ class AggregateTypeParserTest {
     @Test
     void getAggregateParser() {
         AggregateTypeParser aggregateParser = new AggregateTypeParser();
-        AggregateTypeEnum aggregateType = aggregateParser.resolveAggregateType("supsersonic产品访问次数最大值");
+        AggregateTypeEnum aggregateType =
+                aggregateParser.resolveAggregateType("supsersonic产品访问次数最大值");
         Assert.assertEquals(aggregateType, AggregateTypeEnum.MAX);
 
         aggregateType = aggregateParser.resolveAggregateType("supsersonic产品pv");

@@ -31,5 +31,4 @@ public class AppReq extends RecordInfo {
         }
         return String.join(",", owners);
     }
-
 }

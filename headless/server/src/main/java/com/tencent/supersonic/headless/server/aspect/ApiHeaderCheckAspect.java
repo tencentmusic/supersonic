@@ -1,5 +1,7 @@
 package com.tencent.supersonic.headless.server.aspect;
 
+import javax.servlet.http.HttpServletRequest;
+
 import com.tencent.supersonic.common.pojo.Pair;
 import com.tencent.supersonic.common.pojo.exception.InvalidArgumentException;
 import com.tencent.supersonic.common.util.SignatureUtils;
@@ -16,8 +18,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
-import javax.servlet.http.HttpServletRequest;
-
 @Component
 @Aspect
 @Order(1)
@@ -30,12 +30,10 @@ public class ApiHeaderCheckAspect {
 
     private static final String SIGNATURE = "signature";
 
-    @Autowired
-    private AppService appService;
+    @Autowired private AppService appService;
 
     @Pointcut("@annotation(com.tencent.supersonic.headless.server.annotation.ApiHeaderCheck)")
-    private void apiPermissionCheck() {
-    }
+    private void apiPermissionCheck() {}
 
     @Around("apiPermissionCheck()")
     public Object doAround(ProceedingJoinPoint joinPoint) throws Throwable {
@@ -65,8 +63,12 @@ public class ApiHeaderCheckAspect {
         if (!AppStatus.ONLINE.equals(appDetailResp.getAppStatus())) {
             throw new InvalidArgumentException("该应用暂时为非在线状态");
         }
-        Pair<Boolean, String> checkResult = SignatureUtils.isValidSignature(appId, appDetailResp.getAppSecret(),
-                Long.parseLong(timestampStr), signature);
+        Pair<Boolean, String> checkResult =
+                SignatureUtils.isValidSignature(
+                        appId,
+                        appDetailResp.getAppSecret(),
+                        Long.parseLong(timestampStr),
+                        signature);
         if (!checkResult.first) {
             throw new InvalidArgumentException(checkResult.second);
         }

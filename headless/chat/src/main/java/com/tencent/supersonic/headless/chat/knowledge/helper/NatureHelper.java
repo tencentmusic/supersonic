@@ -5,6 +5,10 @@ import com.tencent.supersonic.common.pojo.enums.DictWordType;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
 import com.tencent.supersonic.headless.api.pojo.response.S2Term;
 import com.tencent.supersonic.headless.chat.knowledge.DataSetInfoStat;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.util.CollectionUtils;
+
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -13,13 +17,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.util.CollectionUtils;
 
-/**
- * nature parse helper
- */
+/** nature parse helper */
 @Slf4j
 public class NatureHelper {
 
@@ -56,8 +55,8 @@ public class NatureHelper {
 
     private static boolean isDataSetOrEntity(S2Term term, Integer model) {
         String natureStr = term.nature.toString();
-        return (DictWordType.NATURE_SPILT + model).equals(natureStr) || natureStr.endsWith(
-                DictWordType.ENTITY.getType());
+        return (DictWordType.NATURE_SPILT + model).equals(natureStr)
+                || natureStr.endsWith(DictWordType.ENTITY.getType());
     }
 
     public static Integer getDataSetByNature(Nature nature) {
@@ -90,7 +89,8 @@ public class NatureHelper {
         return null;
     }
 
-    public static List<String> changeModel2DataSet(String nature, Map<Long, List<Long>> modelIdToDataSetIds) {
+    public static List<String> changeModel2DataSet(
+            String nature, Map<Long, List<Long>> modelIdToDataSetIds) {
         if (SchemaElementType.TERM.equals(NatureHelper.convertToElementType(nature))) {
             return Collections.singletonList(nature);
         }
@@ -107,8 +107,10 @@ public class NatureHelper {
     }
 
     public static boolean isDimensionValueDataSetId(String nature) {
-        return isNatureValid(nature) && !isNatureType(nature, DictWordType.METRIC, DictWordType.DIMENSION,
-                DictWordType.TERM) && StringUtils.isNumeric(nature.split(DictWordType.NATURE_SPILT)[1]);
+        return isNatureValid(nature)
+                && !isNatureType(
+                        nature, DictWordType.METRIC, DictWordType.DIMENSION, DictWordType.TERM)
+                && StringUtils.isNumeric(nature.split(DictWordType.NATURE_SPILT)[1]);
     }
 
     public static boolean isTermNature(String nature) {
@@ -125,34 +127,53 @@ public class NatureHelper {
     }
 
     private static long getDataSetCount(List<S2Term> terms) {
-        return terms.stream().filter(term -> isDataSetOrEntity(term, getDataSetByNature(term.nature))).count();
+        return terms.stream()
+                .filter(term -> isDataSetOrEntity(term, getDataSetByNature(term.nature)))
+                .count();
     }
 
     private static long getDimensionValueCount(List<S2Term> terms) {
-        return terms.stream().filter(term -> isDimensionValueDataSetId(term.nature.toString())).count();
+        return terms.stream()
+                .filter(term -> isDimensionValueDataSetId(term.nature.toString()))
+                .count();
     }
 
     private static long getDimensionCount(List<S2Term> terms) {
-        return terms.stream().filter(term -> term.nature.startsWith(DictWordType.NATURE_SPILT) && term.nature.toString()
-                .endsWith(DictWordType.DIMENSION.getType())).count();
+        return terms.stream()
+                .filter(
+                        term ->
+                                term.nature.startsWith(DictWordType.NATURE_SPILT)
+                                        && term.nature
+                                                .toString()
+                                                .endsWith(DictWordType.DIMENSION.getType()))
+                .count();
     }
 
     private static long getMetricCount(List<S2Term> terms) {
-        return terms.stream().filter(term -> term.nature.startsWith(DictWordType.NATURE_SPILT) && term.nature.toString()
-                .endsWith(DictWordType.METRIC.getType())).count();
+        return terms.stream()
+                .filter(
+                        term ->
+                                term.nature.startsWith(DictWordType.NATURE_SPILT)
+                                        && term.nature
+                                                .toString()
+                                                .endsWith(DictWordType.METRIC.getType()))
+                .count();
     }
 
     public static Map<Long, Map<DictWordType, Integer>> getDataSetToNatureStat(List<S2Term> terms) {
         Map<Long, Map<DictWordType, Integer>> modelToNature = new HashMap<>();
         terms.stream()
                 .filter(term -> term.nature.startsWith(DictWordType.NATURE_SPILT))
-                .forEach(term -> {
-                    DictWordType dictWordType = DictWordType.getNatureType(term.nature.toString());
-                    Long model = getDataSetId(term.nature.toString());
+                .forEach(
+                        term -> {
+                            DictWordType dictWordType =
+                                    DictWordType.getNatureType(term.nature.toString());
+                            Long model = getDataSetId(term.nature.toString());
 
-                    modelToNature.computeIfAbsent(model, k -> new HashMap<>())
-                            .merge(dictWordType, 1, Integer::sum);
-                });
+                            modelToNature
+                                    .computeIfAbsent(model, k -> new HashMap<>())
+                                    .merge(dictWordType, 1, Integer::sum);
+                        });
         return modelToNature;
     }
 
@@ -160,10 +181,12 @@ public class NatureHelper {
         Map<Long, Map<DictWordType, Integer>> modelToNatureStat = getDataSetToNatureStat(terms);
         return modelToNatureStat.entrySet().stream()
                 .max(Comparator.comparingInt(entry -> entry.getValue().size()))
-                .map(entry -> modelToNatureStat.entrySet().stream()
-                        .filter(e -> e.getValue().size() == entry.getValue().size())
-                        .map(Map.Entry::getKey)
-                        .collect(Collectors.toList()))
+                .map(
+                        entry ->
+                                modelToNatureStat.entrySet().stream()
+                                        .filter(e -> e.getValue().size() == entry.getValue().size())
+                                        .map(Map.Entry::getKey)
+                                        .collect(Collectors.toList()))
                 .orElse(Collections.emptyList());
     }
 
@@ -171,7 +194,8 @@ public class NatureHelper {
         return parseIdFromNature(nature, 2);
     }
 
-    public static Set<Long> getModelIds(Map<Long, List<Long>> modelIdToDataSetIds, Set<Long> detectDataSetIds) {
+    public static Set<Long> getModelIds(
+            Map<Long, List<Long>> modelIdToDataSetIds, Set<Long> detectDataSetIds) {
         if (CollectionUtils.isEmpty(detectDataSetIds)) {
             return modelIdToDataSetIds.keySet();
         }

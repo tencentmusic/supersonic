@@ -38,9 +38,10 @@ class BatchTest:
         response = requests.post(url, headers=headers, data=json.dumps(data))
         return response.json()
 
-    def execute(self, query_text, queryId):
+    def execute(self, agentId, query_text, queryId):
         url = self.base_url + 'execute'
         data = {
+            'agentId': agentId,
             'queryText': query_text,
             'parseId': 1,
             'chatId': self.chatId,
@@ -75,7 +76,7 @@ def benchmark(url:str, agentId:str, chatId:str, filePath:str, userName:str):
         # 捕获异常，防止程序中断
         try:
             parse_resp = batch_test.parse(question)
-            batch_test.execute(question, parse_resp['data']['queryId'])
+            batch_test.execute(agentId, question, parse_resp['data']['queryId'])
         except Exception as e:
             print('error:', e)
             traceback.print_exc()

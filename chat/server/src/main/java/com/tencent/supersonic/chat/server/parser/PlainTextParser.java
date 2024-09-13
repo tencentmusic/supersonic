@@ -4,7 +4,6 @@ import com.tencent.supersonic.chat.server.pojo.ParseContext;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.api.pojo.response.ParseResp;
 
-
 public class PlainTextParser implements ChatQueryParser {
 
     @Override
@@ -18,5 +17,4 @@ public class PlainTextParser implements ChatQueryParser {
         parseResp.getSelectedParses().add(parseInfo);
         parseResp.setState(ParseResp.ParseState.COMPLETED);
     }
-
 }

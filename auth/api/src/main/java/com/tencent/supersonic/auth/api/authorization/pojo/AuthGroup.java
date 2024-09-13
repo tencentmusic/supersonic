@@ -1,7 +1,8 @@
 package com.tencent.supersonic.auth.api.authorization.pojo;
 
-import java.util.List;
 import lombok.Data;
+
+import java.util.List;
 
 @Data
 public class AuthGroup {
@@ -10,18 +11,12 @@ public class AuthGroup {
     private String name;
     private Integer groupId;
     private List<AuthRule> authRules;
-    /**
-     * row permission expression
-     */
+    /** row permission expression */
     private List<String> dimensionFilters;
-    /**
-     * row permission expression description information
-     */
+    /** row permission expression description information */
     private String dimensionFilterDescription;
 
     private List<String> authorizedUsers;
-    /**
-     * authorization Department Id
-     */
+    /** authorization Department Id */
     private List<String> authorizedDepartmentIds;
 }

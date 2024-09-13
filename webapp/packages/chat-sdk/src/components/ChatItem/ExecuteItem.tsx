@@ -9,6 +9,7 @@ import React, { ReactNode, useState } from 'react';
 
 type Props = {
   queryId?: number;
+  question: string;
   queryMode?: string;
   executeLoading: boolean;
   entitySwitchLoading: boolean;
@@ -24,6 +25,7 @@ type Props = {
 
 const ExecuteItem: React.FC<Props> = ({
   queryId,
+  question,
   queryMode,
   executeLoading,
   entitySwitchLoading,
@@ -124,6 +126,7 @@ const ExecuteItem: React.FC<Props> = ({
               isSimpleMode={isSimpleMode}
               forceShowTable={showMsgContentTable}
               queryId={queryId}
+              question={question}
               data={data}
               chartIndex={chartIndex}
               triggerResize={triggerResize}

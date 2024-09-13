@@ -5,101 +5,64 @@ import java.util.Date;
 import java.util.List;
 
 public class DatabaseDOExample {
-    /**
-     * s2_database
-     */
+    /** s2_database */
     protected String orderByClause;
 
-    /**
-     * s2_database
-     */
+    /** s2_database */
     protected boolean distinct;
 
-    /**
-     * s2_database
-     */
+    /** s2_database */
     protected List<Criteria> oredCriteria;
 
-    /**
-     * s2_database
-     */
+    /** s2_database */
     protected Integer limitStart;
 
-    /**
-     * s2_database
-     */
+    /** s2_database */
     protected Integer limitEnd;
 
-    /**
-     *
-     * @mbg.generated
-     */
+    /** @mbg.generated */
     public DatabaseDOExample() {
         oredCriteria = new ArrayList<Criteria>();
     }
 
-    /**
-     *
-     * @mbg.generated
-     */
+    /** @mbg.generated */
     public void setOrderByClause(String orderByClause) {
         this.orderByClause = orderByClause;
     }
 
-    /**
-     *
-     * @mbg.generated
-     */
+    /** @mbg.generated */
     public String getOrderByClause() {
         return orderByClause;
     }
 
-    /**
-     *
-     * @mbg.generated
-     */
+    /** @mbg.generated */
     public void setDistinct(boolean distinct) {
         this.distinct = distinct;
     }
 
-    /**
-     *
-     * @mbg.generated
-     */
+    /** @mbg.generated */
     public boolean isDistinct() {
         return distinct;
     }
 
-    /**
-     *
-     * @mbg.generated
-     */
+    /** @mbg.generated */
     public List<Criteria> getOredCriteria() {
         return oredCriteria;
     }
 
-    /**
-     *
-     * @mbg.generated
-     */
+    /** @mbg.generated */
     public void or(Criteria criteria) {
         oredCriteria.add(criteria);
     }
 
-    /**
-     *
-     * @mbg.generated
-     */
+    /** @mbg.generated */
     public Criteria or() {
         Criteria criteria = createCriteriaInternal();
         oredCriteria.add(criteria);
         return criteria;
     }
 
-    /**
-     *
-     * @mbg.generated
-     */
+    /** @mbg.generated */
     public Criteria createCriteria() {
         Criteria criteria = createCriteriaInternal();
         if (oredCriteria.size() == 0) {
@@ -108,60 +71,40 @@ public class DatabaseDOExample {
         return criteria;
     }
 
-    /**
-     *
-     * @mbg.generated
-     */
+    /** @mbg.generated */
     protected Criteria createCriteriaInternal() {
         Criteria criteria = new Criteria();
         return criteria;
     }
 
-    /**
-     *
-     * @mbg.generated
-     */
+    /** @mbg.generated */
     public void clear() {
         oredCriteria.clear();
         orderByClause = null;
         distinct = false;
     }
 
-    /**
-     *
-     * @mbg.generated
-     */
+    /** @mbg.generated */
     public void setLimitStart(Integer limitStart) {
-        this.limitStart=limitStart;
+        this.limitStart = limitStart;
     }
 
-    /**
-     *
-     * @mbg.generated
-     */
+    /** @mbg.generated */
     public Integer getLimitStart() {
         return limitStart;
     }
 
-    /**
-     *
-     * @mbg.generated
-     */
+    /** @mbg.generated */
     public void setLimitEnd(Integer limitEnd) {
-        this.limitEnd=limitEnd;
+        this.limitEnd = limitEnd;
     }
 
-    /**
-     *
-     * @mbg.generated
-     */
+    /** @mbg.generated */
     public Integer getLimitEnd() {
         return limitEnd;
     }
 
-    /**
-     * s2_database null
-     */
+    /** s2_database null */
     protected abstract static class GeneratedCriteria {
         protected List<Criterion> criteria;
 
@@ -196,7 +139,8 @@ public class DatabaseDOExample {
             criteria.add(new Criterion(condition, value));
         }
 
-        protected void addCriterion(String condition, Object value1, Object value2, String property) {
+        protected void addCriterion(
+                String condition, Object value1, Object value2, String property) {
             if (value1 == null || value2 == null) {
                 throw new RuntimeException("Between values for " + property + " cannot be null");
             }
@@ -944,9 +888,7 @@ public class DatabaseDOExample {
         }
     }
 
-    /**
-     * s2_database
-     */
+    /** s2_database */
     public static class Criteria extends GeneratedCriteria {
 
         protected Criteria() {
@@ -954,9 +896,7 @@ public class DatabaseDOExample {
         }
     }
 
-    /**
-     * s2_database null
-     */
+    /** s2_database null */
     public static class Criterion {
         private String condition;
 
@@ -1029,7 +969,8 @@ public class DatabaseDOExample {
             this(condition, value, null);
         }
 
-        protected Criterion(String condition, Object value, Object secondValue, String typeHandler) {
+        protected Criterion(
+                String condition, Object value, Object secondValue, String typeHandler) {
             super();
             this.condition = condition;
             this.value = value;

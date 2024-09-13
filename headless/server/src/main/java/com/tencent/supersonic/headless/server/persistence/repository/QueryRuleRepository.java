@@ -14,5 +14,4 @@ public interface QueryRuleRepository {
     QueryRuleDO getQueryRuleById(Long id);
 
     List<QueryRuleDO> getQueryRules(QueryRuleFilter filter);
-
 }

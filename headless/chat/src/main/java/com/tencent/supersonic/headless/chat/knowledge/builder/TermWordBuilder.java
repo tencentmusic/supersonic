@@ -9,9 +9,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-/**
- * Metric DictWord
- */
+/** Metric DictWord */
 @Service
 public class TermWordBuilder extends BaseWordWithAliasBuilder {
 
@@ -31,14 +29,22 @@ public class TermWordBuilder extends BaseWordWithAliasBuilder {
         DictWord dictWord = new DictWord();
         dictWord.setWord(word);
         Long dataSet = schemaElement.getDataSetId();
-        String nature = DictWordType.NATURE_SPILT + dataSet + DictWordType.NATURE_SPILT + schemaElement.getId()
-                + DictWordType.TERM.getType();
+        String nature =
+                DictWordType.NATURE_SPILT
+                        + dataSet
+                        + DictWordType.NATURE_SPILT
+                        + schemaElement.getId()
+                        + DictWordType.TERM.getType();
         if (isSuffix) {
-            nature = DictWordType.NATURE_SPILT + dataSet + DictWordType.NATURE_SPILT + schemaElement.getId()
-                    + DictWordType.SUFFIX.getType() + DictWordType.TERM.getType();
+            nature =
+                    DictWordType.NATURE_SPILT
+                            + dataSet
+                            + DictWordType.NATURE_SPILT
+                            + schemaElement.getId()
+                            + DictWordType.SUFFIX.getType()
+                            + DictWordType.TERM.getType();
         }
         dictWord.setNatureWithFrequency(String.format("%s " + DEFAULT_FREQUENCY, nature));
         return dictWord;
     }
-
 }

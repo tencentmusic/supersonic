@@ -1,17 +1,15 @@
 package com.tencent.supersonic.headless.core.translator.calcite.sql.node;
 
-
 import com.tencent.supersonic.headless.api.pojo.enums.EngineType;
 import com.tencent.supersonic.headless.core.translator.calcite.s2sql.Metric;
 import com.tencent.supersonic.headless.core.translator.calcite.schema.SemanticSchema;
+import lombok.Data;
+import org.apache.calcite.sql.SqlNode;
+import org.apache.calcite.sql.validate.SqlValidatorScope;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-
-import lombok.Data;
-import org.apache.calcite.sql.SqlNode;
-import org.apache.calcite.sql.validate.SqlValidatorScope;
 
 @Data
 public class MetricNode extends SemanticNode {
@@ -22,8 +20,10 @@ public class MetricNode extends SemanticNode {
     private Map<String, SqlNode> measureFilter = new HashMap<>();
     private Map<String, String> aggFunction = new HashMap<>();
 
-    public static SqlNode build(Metric metric, SqlValidatorScope scope, EngineType engineType) throws Exception {
-        if (metric.getMetricTypeParams() == null || metric.getMetricTypeParams().getExpr() == null
+    public static SqlNode build(Metric metric, SqlValidatorScope scope, EngineType engineType)
+            throws Exception {
+        if (metric.getMetricTypeParams() == null
+                || metric.getMetricTypeParams().getExpr() == null
                 || metric.getMetricTypeParams().getExpr().isEmpty()) {
             return parse(metric.getName(), scope, engineType);
         }
@@ -32,13 +32,14 @@ public class MetricNode extends SemanticNode {
     }
 
     public static Boolean isMetricField(String name, SemanticSchema schema) {
-        Optional<Metric> metric = schema.getMetrics().stream().filter(m -> m.getName().equalsIgnoreCase(name))
-                .findFirst();
+        Optional<Metric> metric =
+                schema.getMetrics().stream()
+                        .filter(m -> m.getName().equalsIgnoreCase(name))
+                        .findFirst();
         return metric.isPresent() && metric.get().getMetricTypeParams().isFieldMetric();
     }
 
     public static Boolean isMetricField(Metric metric) {
         return metric.getMetricTypeParams().isFieldMetric();
     }
-
 }

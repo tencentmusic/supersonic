@@ -12,7 +12,6 @@ public class MetricQueryDefaultConfig extends RecordInfo {
 
     private String userName;
 
-    //string of queryStruct
+    // string of queryStruct
     private String defaultConfig;
-
 }

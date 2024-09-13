@@ -35,8 +35,8 @@ public class SearchResult {
             return false;
         }
         SearchResult searchResult1 = (SearchResult) o;
-        return Objects.equals(recommend, searchResult1.recommend) && Objects.equals(modelName,
-                searchResult1.modelName);
+        return Objects.equals(recommend, searchResult1.recommend)
+                && Objects.equals(modelName, searchResult1.modelName);
     }
 
     @Override

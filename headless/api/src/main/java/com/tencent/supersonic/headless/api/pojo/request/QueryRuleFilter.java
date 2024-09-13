@@ -12,5 +12,4 @@ public class QueryRuleFilter {
     private List<Long> ruleIds;
 
     private List<Long> dataSetIds;
-
 }

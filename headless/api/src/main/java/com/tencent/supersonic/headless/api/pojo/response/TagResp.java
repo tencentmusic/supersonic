@@ -42,5 +42,4 @@ public class TagResp extends RecordInfo {
     private Integer sensitiveLevel;
 
     private Map<String, Object> ext = new HashMap();
-
 }

@@ -1,11 +1,12 @@
 package com.tencent.supersonic.headless.api.pojo.request;
 
+import javax.validation.constraints.NotNull;
+
 import com.tencent.supersonic.common.pojo.enums.DataTypeEnums;
 import com.tencent.supersonic.headless.api.pojo.DimValueMap;
 import com.tencent.supersonic.headless.api.pojo.SchemaItem;
 import lombok.Data;
 
-import javax.validation.constraints.NotNull;
 import java.util.List;
 import java.util.Map;
 
@@ -19,7 +20,7 @@ public class DimensionReq extends SchemaItem {
     @NotNull(message = "expr can not be null")
     private String expr;
 
-    //DATE ID CATEGORY
+    // DATE ID CATEGORY
     private String semanticType = "CATEGORY";
 
     private String alias;

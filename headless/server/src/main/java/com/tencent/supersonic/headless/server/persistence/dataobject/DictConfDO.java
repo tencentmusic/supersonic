@@ -12,6 +12,7 @@ import java.util.Date;
 public class DictConfDO {
     @TableId(type = IdType.AUTO)
     private Long id;
+
     private String description;
     private String type;
     private Long itemId;

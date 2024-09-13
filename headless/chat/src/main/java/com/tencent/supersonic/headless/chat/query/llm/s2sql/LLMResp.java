@@ -21,5 +21,4 @@ public class LLMResp {
     private List<String> fields;
 
     private Map<String, LLMSqlResp> sqlRespMap;
-
 }

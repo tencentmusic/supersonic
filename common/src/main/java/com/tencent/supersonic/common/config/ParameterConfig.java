@@ -15,24 +15,19 @@ import java.util.Map;
 @Service
 public abstract class ParameterConfig {
     public static final String DEMO = "demo";
-    @Autowired
-    private SystemConfigService sysConfigService;
+    @Autowired private SystemConfigService sysConfigService;
 
-    @Autowired
-    private Environment environment;
+    @Autowired private Environment environment;
 
-    /**
-     * @return system parameters to be set with user interface
-     */
+    /** @return system parameters to be set with user interface */
     protected List<Parameter> getSysParameters() {
         return Collections.EMPTY_LIST;
     }
 
     /**
-     * Parameter value will be derived in the following order:
-     * 1. `system config` set with user interface
-     * 2. `system property` set with application.yaml file
-     * 3. `default value` set with parameter declaration
+     * Parameter value will be derived in the following order: 1. `system config` set with user
+     * interface 2. `system property` set with application.yaml file 3. `default value` set with
+     * parameter declaration
      *
      * @param parameter instance
      * @return parameter value
@@ -67,5 +62,4 @@ public abstract class ParameterConfig {
         dependencies.add(dependency);
         return dependencies;
     }
-
 }

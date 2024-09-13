@@ -1,5 +1,8 @@
 package com.tencent.supersonic.auth.authentication.service;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import com.tencent.supersonic.auth.api.authentication.pojo.Organization;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.auth.api.authentication.request.UserReq;
@@ -10,8 +13,7 @@ import com.tencent.supersonic.common.config.SystemConfig;
 import com.tencent.supersonic.common.service.SystemConfigService;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+
 import java.util.List;
 import java.util.Set;
 
@@ -25,7 +27,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User getCurrentUser(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {
+    public User getCurrentUser(
+            HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {
         User user = UserHolder.findUser(httpServletRequest, httpServletResponse);
         if (user != null) {
             SystemConfig systemConfig = sysParameterService.getSystemConfig();
@@ -76,5 +79,4 @@ public class UserServiceImpl implements UserService {
     public String login(UserReq userReq, String appKey) {
         return ComponentFactory.getUserAdaptor().login(userReq, appKey);
     }
-
 }

@@ -20,5 +20,4 @@ public class PluginQueryManager {
     public static PluginSemanticQuery getPluginQuery(String queryMode) {
         return pluginQueries.get(queryMode);
     }
-
 }

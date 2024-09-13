@@ -1,9 +1,6 @@
 package com.tencent.supersonic.headless.core.translator.calcite.sql;
 
 import com.tencent.supersonic.headless.core.translator.calcite.s2sql.DataSource;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
 import lombok.Data;
 import org.apache.calcite.sql.SqlBasicCall;
 import org.apache.calcite.sql.SqlKind;
@@ -12,9 +9,11 @@ import org.apache.calcite.sql.SqlNodeList;
 import org.apache.calcite.sql.SqlSelect;
 import org.apache.calcite.sql.parser.SqlParserPos;
 
-/**
- * basic query project
- */
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
+/** basic query project */
 @Data
 public class TableView {
 
@@ -40,15 +39,29 @@ public class TableView {
         if (filter.size() > 0) {
             filterNodeList = new SqlNodeList(filter, SqlParserPos.ZERO);
         }
-        return new SqlSelect(SqlParserPos.ZERO, null, new SqlNodeList(measure, SqlParserPos.ZERO), table,
-                filterNodeList, dimensionNodeList, null, null, null, order, offset, fetch, null);
+        return new SqlSelect(
+                SqlParserPos.ZERO,
+                null,
+                new SqlNodeList(measure, SqlParserPos.ZERO),
+                table,
+                filterNodeList,
+                dimensionNodeList,
+                null,
+                null,
+                null,
+                order,
+                offset,
+                fetch,
+                null);
     }
 
     private List<SqlNode> getGroup(List<SqlNode> sqlNodeList) {
         return sqlNodeList.stream()
-                .map(s -> (s.getKind().equals(SqlKind.AS) ? ((SqlBasicCall) s).getOperandList().get(0) : s))
-                .collect(
-                        Collectors.toList());
+                .map(
+                        s ->
+                                (s.getKind().equals(SqlKind.AS)
+                                        ? ((SqlBasicCall) s).getOperandList().get(0)
+                                        : s))
+                .collect(Collectors.toList());
     }
-
 }

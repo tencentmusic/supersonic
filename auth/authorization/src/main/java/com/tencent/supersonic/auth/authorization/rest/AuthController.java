@@ -1,14 +1,14 @@
 package com.tencent.supersonic.auth.authorization.rest;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
+import com.tencent.supersonic.auth.api.authorization.pojo.AuthGroup;
 import com.tencent.supersonic.auth.api.authorization.request.QueryAuthResReq;
 import com.tencent.supersonic.auth.api.authorization.response.AuthorizedResourceResp;
 import com.tencent.supersonic.auth.api.authorization.service.AuthService;
-import com.tencent.supersonic.auth.api.authorization.pojo.AuthGroup;
-import java.util.List;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -29,14 +31,13 @@ public class AuthController {
     }
 
     @GetMapping("/queryGroup")
-    public List<AuthGroup> queryAuthGroup(@RequestParam("modelId") String modelId,
+    public List<AuthGroup> queryAuthGroup(
+            @RequestParam("modelId") String modelId,
             @RequestParam(value = "groupId", required = false) Integer groupId) {
         return authService.queryAuthGroups(modelId, groupId);
     }
 
-    /**
-     * 新建权限组
-     */
+    /** 新建权限组 */
     @PostMapping("/createGroup")
     public void newAuthGroup(@RequestBody AuthGroup group) {
         group.setGroupId(null);
@@ -68,9 +69,10 @@ public class AuthController {
      * @return
      */
     @PostMapping("/queryAuthorizedRes")
-    public AuthorizedResourceResp queryAuthorizedResources(@RequestBody QueryAuthResReq req,
-                                                           HttpServletRequest request,
-                                                           HttpServletResponse response) {
+    public AuthorizedResourceResp queryAuthorizedResources(
+            @RequestBody QueryAuthResReq req,
+            HttpServletRequest request,
+            HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
         return authService.queryAuthorizedResources(req, user);
     }

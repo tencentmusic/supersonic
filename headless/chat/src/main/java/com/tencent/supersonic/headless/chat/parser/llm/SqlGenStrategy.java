@@ -12,16 +12,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
- * SqlGenStrategy abstracts generation step so that
- * different LLM prompting strategies can be implemented.
+ * SqlGenStrategy abstracts generation step so that different LLM prompting strategies can be
+ * implemented.
  */
 @Service
 public abstract class SqlGenStrategy implements InitializingBean {
 
     protected static final Logger keyPipelineLog = LoggerFactory.getLogger("keyPipeline");
 
-    @Autowired
-    protected PromptHelper promptHelper;
+    @Autowired protected PromptHelper promptHelper;
 
     protected ChatLanguageModel getChatLanguageModel(ChatModelConfig modelConfig) {
         return ModelProvider.getChatModel(modelConfig);

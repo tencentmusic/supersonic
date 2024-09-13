@@ -32,5 +32,4 @@ public class NameCheckUtils {
         Matcher matcher = pattern.matcher(str);
         return matcher.find();
     }
-
 }

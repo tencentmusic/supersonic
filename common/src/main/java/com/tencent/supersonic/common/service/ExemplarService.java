@@ -13,4 +13,5 @@ public interface ExemplarService {
 
     List<Text2SQLExemplar> recallExemplars(String query, int num);
 
+    void loadSysExemplars();
 }

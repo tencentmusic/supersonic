@@ -9,5 +9,4 @@ import java.util.List;
 public class MetricDefineByFieldParams extends MetricDefineParams {
 
     private List<FieldParam> fields = Lists.newArrayList();
-
 }

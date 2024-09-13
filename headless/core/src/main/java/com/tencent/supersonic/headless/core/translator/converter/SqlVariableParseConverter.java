@@ -3,8 +3,8 @@ package com.tencent.supersonic.headless.core.translator.converter;
 import com.tencent.supersonic.headless.api.pojo.enums.ModelDefineType;
 import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticSchemaResp;
-import com.tencent.supersonic.headless.core.translator.calcite.s2sql.DataSource;
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;
+import com.tencent.supersonic.headless.core.translator.calcite.s2sql.DataSource;
 import com.tencent.supersonic.headless.core.utils.SqlVariableParseUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -33,15 +33,19 @@ public class SqlVariableParseConverter implements QueryConverter {
             return;
         }
         for (ModelResp modelResp : modelResps) {
-            if (ModelDefineType.SQL_QUERY.getName()
+            if (ModelDefineType.SQL_QUERY
+                    .getName()
                     .equalsIgnoreCase(modelResp.getModelDetail().getQueryType())) {
-                String sqlParsed = SqlVariableParseUtils.parse(
-                        modelResp.getModelDetail().getSqlQuery(),
-                        modelResp.getModelDetail().getSqlVariables(),
-                        queryStatement.getQueryParam().getParams()
-                );
-                DataSource dataSource = queryStatement.getSemanticModel()
-                        .getDatasourceMap().get(modelResp.getBizName());
+                String sqlParsed =
+                        SqlVariableParseUtils.parse(
+                                modelResp.getModelDetail().getSqlQuery(),
+                                modelResp.getModelDetail().getSqlVariables(),
+                                queryStatement.getQueryParam().getParams());
+                DataSource dataSource =
+                        queryStatement
+                                .getSemanticModel()
+                                .getDatasourceMap()
+                                .get(modelResp.getBizName());
                 dataSource.setSqlQuery(sqlParsed);
             }
         }

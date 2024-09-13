@@ -61,5 +61,4 @@ public class ChatMemoryDO {
 
     @TableField("updated_at")
     private Date updatedAt;
-
 }

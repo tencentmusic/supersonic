@@ -5,5 +5,4 @@ import com.tencent.supersonic.headless.server.persistence.dataobject.DictConfDO;
 import org.apache.ibatis.annotations.Mapper;
 
 @Mapper
-public interface DictConfMapper extends BaseMapper<DictConfDO> {
-}
+public interface DictConfMapper extends BaseMapper<DictConfDO> {}

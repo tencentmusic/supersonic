@@ -13,14 +13,9 @@ import java.util.List;
 @NoArgsConstructor
 public class Entity {
 
-
-    /**
-     * uniquely identifies an entity
-     */
+    /** uniquely identifies an entity */
     private Long entityId;
 
-    /**
-     * entity name list
-     */
+    /** entity name list */
     private List<String> names;
 }

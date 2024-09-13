@@ -1,5 +1,8 @@
 package com.tencent.supersonic.headless.server.rest;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
 import com.tencent.supersonic.headless.api.pojo.request.TermReq;
@@ -15,21 +18,19 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/semantic/term")
 public class TermController {
 
-    @Autowired
-    private TermService termService;
+    @Autowired private TermService termService;
 
     @PostMapping("/saveOrUpdate")
-    public boolean saveOrUpdate(@RequestBody TermReq termReq,
-                             HttpServletRequest request,
-                             HttpServletResponse response) {
+    public boolean saveOrUpdate(
+            @RequestBody TermReq termReq,
+            HttpServletRequest request,
+            HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
         termService.saveOrUpdate(termReq, user);
         return true;
@@ -45,5 +46,4 @@ public class TermController {
         termService.delete(id);
         return true;
     }
-
 }

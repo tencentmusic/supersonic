@@ -22,5 +22,4 @@ public class PluginUpdateEvent extends ApplicationEvent {
     public ChatPlugin getNewPlugin() {
         return newPlugin;
     }
-
 }

@@ -1,6 +1,5 @@
 package com.tencent.supersonic.chat.server.plugin;
 
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -22,5 +21,4 @@ public class PluginParseConfig implements Serializable {
     private String name;
 
     private String description;
-
 }

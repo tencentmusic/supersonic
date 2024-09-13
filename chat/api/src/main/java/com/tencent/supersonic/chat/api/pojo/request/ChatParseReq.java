@@ -15,5 +15,4 @@ public class ChatParseReq {
     private QueryFilters queryFilters;
     private boolean saveAnswer = true;
     private SchemaMapInfo mapInfo = new SchemaMapInfo();
-
 }

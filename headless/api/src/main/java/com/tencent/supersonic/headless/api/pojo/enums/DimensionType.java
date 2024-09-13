@@ -1,7 +1,6 @@
 package com.tencent.supersonic.headless.api.pojo.enums;
 
 public enum DimensionType {
-
     categorical,
     time,
     partition_time,
@@ -21,5 +20,9 @@ public enum DimensionType {
 
     public static boolean isPartitionTime(DimensionType type) {
         return type == partition_time;
+    }
+
+    public static boolean isIdentity(DimensionType type) {
+        return type == identify;
     }
 }

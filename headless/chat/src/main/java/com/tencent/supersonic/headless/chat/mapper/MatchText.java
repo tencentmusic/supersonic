@@ -24,7 +24,8 @@ public class MatchText {
             return false;
         }
         MatchText that = (MatchText) o;
-        return Objects.equals(regText, that.regText) && Objects.equals(detectSegment, that.detectSegment);
+        return Objects.equals(regText, that.regText)
+                && Objects.equals(detectSegment, that.detectSegment);
     }
 
     @Override

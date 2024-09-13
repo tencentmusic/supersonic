@@ -4,8 +4,8 @@ import com.google.common.collect.Lists;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import java.util.List;
 
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -13,5 +13,4 @@ import java.util.List;
 public class AgentConfig {
 
     List<AgentTool> tools = Lists.newArrayList();
-
 }

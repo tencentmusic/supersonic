@@ -20,7 +20,6 @@ public class TraceIdUtil {
 
     public static void remove() {
         MDC.remove(TRACE_ID);
-
     }
 
     public static void clear() {

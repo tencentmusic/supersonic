@@ -68,5 +68,4 @@ public class SemanticParseInfo {
         }
         return dataSet.getDataSetId();
     }
-
 }

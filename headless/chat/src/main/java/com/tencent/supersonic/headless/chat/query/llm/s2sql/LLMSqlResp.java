@@ -17,5 +17,4 @@ public class LLMSqlResp {
     private double sqlWeight;
 
     private List<Text2SQLExemplar> fewShots;
-
 }

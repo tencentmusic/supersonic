@@ -26,5 +26,4 @@ public class TermResp extends RecordInfo {
     private List<Long> relatedMetrics = Lists.newArrayList();
 
     private List<Long> relateDimensions = Lists.newArrayList();
-
 }

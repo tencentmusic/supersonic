@@ -33,5 +33,4 @@ public interface DomainService {
     Set<DomainResp> getDomainAuthSet(User user, AuthType authTypeEnum);
 
     Set<DomainResp> getDomainChildren(List<Long> domainId);
-
 }

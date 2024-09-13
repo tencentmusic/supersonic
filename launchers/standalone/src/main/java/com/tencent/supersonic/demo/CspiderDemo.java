@@ -8,23 +8,23 @@ import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
 import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
 import com.tencent.supersonic.common.pojo.enums.TimeMode;
 import com.tencent.supersonic.common.pojo.enums.TypeEnums;
-import com.tencent.supersonic.headless.api.pojo.DefaultDisplayInfo;
-import com.tencent.supersonic.headless.api.pojo.TimeDefaultConfig;
-import com.tencent.supersonic.headless.api.pojo.ModelDetail;
-import com.tencent.supersonic.headless.api.pojo.Dim;
-import com.tencent.supersonic.headless.api.pojo.DimensionTimeTypeParams;
 import com.tencent.supersonic.headless.api.pojo.DataSetDetail;
 import com.tencent.supersonic.headless.api.pojo.DataSetModelConfig;
+import com.tencent.supersonic.headless.api.pojo.DefaultDisplayInfo;
+import com.tencent.supersonic.headless.api.pojo.Dim;
+import com.tencent.supersonic.headless.api.pojo.DimensionTimeTypeParams;
 import com.tencent.supersonic.headless.api.pojo.Identify;
 import com.tencent.supersonic.headless.api.pojo.Measure;
+import com.tencent.supersonic.headless.api.pojo.MetricTypeDefaultConfig;
+import com.tencent.supersonic.headless.api.pojo.ModelDetail;
 import com.tencent.supersonic.headless.api.pojo.QueryConfig;
 import com.tencent.supersonic.headless.api.pojo.TagTypeDefaultConfig;
-import com.tencent.supersonic.headless.api.pojo.MetricTypeDefaultConfig;
+import com.tencent.supersonic.headless.api.pojo.TimeDefaultConfig;
 import com.tencent.supersonic.headless.api.pojo.enums.DimensionType;
 import com.tencent.supersonic.headless.api.pojo.enums.IdentifyType;
+import com.tencent.supersonic.headless.api.pojo.request.DataSetReq;
 import com.tencent.supersonic.headless.api.pojo.request.DomainReq;
 import com.tencent.supersonic.headless.api.pojo.request.ModelReq;
-import com.tencent.supersonic.headless.api.pojo.request.DataSetReq;
 import com.tencent.supersonic.headless.api.pojo.response.DatabaseResp;
 import com.tencent.supersonic.headless.api.pojo.response.DomainResp;
 import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
@@ -53,7 +53,7 @@ public class CspiderDemo extends S2BaseDemo {
             addModelRela_3(s2Domain, songModelResp, artistModelResp);
             addModelRela_4(s2Domain, songModelResp, genreModelResp);
             addModelRela_5(s2Domain, songModelResp, filesModelResp);
-            //batchPushlishMetric();
+            // batchPushlishMetric();
         } catch (Exception e) {
             log.error("Failed to add bench mark demo data", e);
         }
@@ -149,7 +149,7 @@ public class CspiderDemo extends S2BaseDemo {
         List<Dim> dimensions = new ArrayList<>();
         dimensions.add(new Dim("持续时间", "duration", DimensionType.categorical.name(), 1));
         dimensions.add(new Dim("文件格式", "formats", DimensionType.categorical.name(), 1));
-        //dimensions.add(new Dim("艺术家名称", "artist_name", DimensionType.categorical.name(), 1));
+        // dimensions.add(new Dim("艺术家名称", "artist_name", DimensionType.categorical.name(), 1));
         modelDetail.setDimensions(dimensions);
 
         List<Identify> identifiers = new ArrayList<>();
@@ -160,7 +160,8 @@ public class CspiderDemo extends S2BaseDemo {
         modelDetail.setMeasures(Collections.emptyList());
 
         modelDetail.setQueryType("sql_query");
-        modelDetail.setSqlQuery("SELECT f_id, artist_name, file_size, duration, formats FROM files");
+        modelDetail.setSqlQuery(
+                "SELECT f_id, artist_name, file_size, duration, formats FROM files");
         modelReq.setModelDetail(modelDetail);
         return modelService.createModel(modelReq, user);
     }
@@ -187,7 +188,7 @@ public class CspiderDemo extends S2BaseDemo {
         identifiers.add(new Identify("歌曲名称", IdentifyType.primary.name(), "song_name"));
         identifiers.add(new Identify("歌曲ID", IdentifyType.foreign.name(), "f_id"));
         identifiers.add(new Identify("艺术家名称", IdentifyType.foreign.name(), "artist_name"));
-        //identifiers.add(new Identify("艺术家名称", IdentifyType.foreign.name(), "artist_name"));
+        // identifiers.add(new Identify("艺术家名称", IdentifyType.foreign.name(), "artist_name"));
 
         modelDetail.setIdentifiers(identifiers);
 
@@ -197,8 +198,9 @@ public class CspiderDemo extends S2BaseDemo {
         modelDetail.setMeasures(measures);
 
         modelDetail.setQueryType("sql_query");
-        modelDetail.setSqlQuery("SELECT imp_date, song_name, artist_name, country, f_id, g_name, "
-                + " rating, languages, releasedate, resolution FROM song");
+        modelDetail.setSqlQuery(
+                "SELECT imp_date, song_name, artist_name, country, f_id, g_name, "
+                        + " rating, languages, releasedate, resolution FROM song");
         modelReq.setModelDetail(modelDetail);
         return modelService.createModel(modelReq, user);
     }
@@ -236,7 +238,8 @@ public class CspiderDemo extends S2BaseDemo {
         dataSetService.save(dataSetReq, User.getFakeUser());
     }
 
-    public void addModelRela_1(DomainResp s2Domain, ModelResp genreModelResp, ModelResp artistModelResp) {
+    public void addModelRela_1(
+            DomainResp s2Domain, ModelResp genreModelResp, ModelResp artistModelResp) {
         List<JoinCondition> joinConditions = Lists.newArrayList();
         joinConditions.add(new JoinCondition("g_name", "g_name", FilterOperatorEnum.EQUALS));
         ModelRela modelRelaReq = new ModelRela();
@@ -248,9 +251,11 @@ public class CspiderDemo extends S2BaseDemo {
         modelRelaService.save(modelRelaReq, user);
     }
 
-    public void addModelRela_2(DomainResp s2Domain, ModelResp filesModelResp, ModelResp artistModelResp) {
+    public void addModelRela_2(
+            DomainResp s2Domain, ModelResp filesModelResp, ModelResp artistModelResp) {
         List<JoinCondition> joinConditions = Lists.newArrayList();
-        joinConditions.add(new JoinCondition("artist_name", "artist_name", FilterOperatorEnum.EQUALS));
+        joinConditions.add(
+                new JoinCondition("artist_name", "artist_name", FilterOperatorEnum.EQUALS));
         ModelRela modelRelaReq = new ModelRela();
         modelRelaReq.setDomainId(s2Domain.getId());
         modelRelaReq.setFromModelId(filesModelResp.getId());
@@ -260,9 +265,11 @@ public class CspiderDemo extends S2BaseDemo {
         modelRelaService.save(modelRelaReq, user);
     }
 
-    public void addModelRela_3(DomainResp s2Domain, ModelResp songModelResp, ModelResp artistModelResp) {
+    public void addModelRela_3(
+            DomainResp s2Domain, ModelResp songModelResp, ModelResp artistModelResp) {
         List<JoinCondition> joinConditions = Lists.newArrayList();
-        joinConditions.add(new JoinCondition("artist_name", "artist_name", FilterOperatorEnum.EQUALS));
+        joinConditions.add(
+                new JoinCondition("artist_name", "artist_name", FilterOperatorEnum.EQUALS));
         ModelRela modelRelaReq = new ModelRela();
         modelRelaReq.setDomainId(s2Domain.getId());
         modelRelaReq.setFromModelId(songModelResp.getId());
@@ -272,7 +279,8 @@ public class CspiderDemo extends S2BaseDemo {
         modelRelaService.save(modelRelaReq, user);
     }
 
-    public void addModelRela_4(DomainResp s2Domain, ModelResp songModelResp, ModelResp genreModelResp) {
+    public void addModelRela_4(
+            DomainResp s2Domain, ModelResp songModelResp, ModelResp genreModelResp) {
         List<JoinCondition> joinConditions = Lists.newArrayList();
         joinConditions.add(new JoinCondition("g_name", "g_name", FilterOperatorEnum.EQUALS));
         ModelRela modelRelaReq = new ModelRela();
@@ -284,7 +292,8 @@ public class CspiderDemo extends S2BaseDemo {
         modelRelaService.save(modelRelaReq, user);
     }
 
-    public void addModelRela_5(DomainResp s2Domain, ModelResp songModelResp, ModelResp filesModelResp) {
+    public void addModelRela_5(
+            DomainResp s2Domain, ModelResp songModelResp, ModelResp filesModelResp) {
         List<JoinCondition> joinConditions = Lists.newArrayList();
         joinConditions.add(new JoinCondition("f_id", "f_id", FilterOperatorEnum.EQUALS));
         ModelRela modelRelaReq = new ModelRela();
@@ -300,5 +309,4 @@ public class CspiderDemo extends S2BaseDemo {
         List<Long> ids = Lists.newArrayList(1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L);
         metricService.batchPublish(ids, User.getFakeUser());
     }
-
 }

@@ -21,8 +21,7 @@ public class OllamaModelFactory implements ModelFactory, InitializingBean {
 
     @Override
     public ChatLanguageModel createChatModel(ChatModelConfig modelConfig) {
-        return OllamaChatModel
-                .builder()
+        return OllamaChatModel.builder()
                 .baseUrl(modelConfig.getBaseUrl())
                 .modelName(modelConfig.getModelName())
                 .temperature(modelConfig.getTemperature())

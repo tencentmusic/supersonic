@@ -5,19 +5,21 @@ import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import org.apache.commons.lang3.StringUtils;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-/**
- * transform query results to return the users
- */
+/** transform query results to return the users */
 public class DataTransformUtils {
 
-    public static List<Map<String, Object>> transform(List<Map<String, Object>> originalData, String metric,
-                                                      List<String> groups, DateConf dateConf) {
+    public static List<Map<String, Object>> transform(
+            List<Map<String, Object>> originalData,
+            String metric,
+            List<String> groups,
+            DateConf dateConf) {
         List<String> dateList = dateConf.getDateList();
         List<Map<String, Object>> transposedData = new ArrayList<>();
         for (Map<String, Object> originalRow : originalData) {
@@ -27,12 +29,14 @@ public class DataTransformUtils {
                     transposedRow.put(key, originalRow.get(key));
                 }
             }
-            transposedRow.put(String.valueOf(originalRow.get(getTimeDimension(dateConf))),
+            transposedRow.put(
+                    String.valueOf(originalRow.get(getTimeDimension(dateConf))),
                     originalRow.get(metric));
             transposedData.add(transposedRow);
         }
-        Map<String, List<Map<String, Object>>> dataMerge = transposedData.stream()
-                .collect(Collectors.groupingBy(row -> getRowKey(row, groups)));
+        Map<String, List<Map<String, Object>>> dataMerge =
+                transposedData.stream()
+                        .collect(Collectors.groupingBy(row -> getRowKey(row, groups)));
         List<Map<String, Object>> resultData = Lists.newArrayList();
         for (List<Map<String, Object>> data : dataMerge.values()) {
             Map<String, Object> rowData = new HashMap<>();
@@ -70,5 +74,4 @@ public class DataTransformUtils {
             return TimeDimensionEnum.DAY.getName();
         }
     }
-
 }

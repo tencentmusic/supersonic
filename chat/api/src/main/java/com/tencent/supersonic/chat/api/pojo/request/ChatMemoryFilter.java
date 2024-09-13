@@ -26,5 +26,4 @@ public class ChatMemoryFilter {
     private MemoryReviewResult llmReviewRet;
 
     private MemoryReviewResult humanReviewRet;
-
 }

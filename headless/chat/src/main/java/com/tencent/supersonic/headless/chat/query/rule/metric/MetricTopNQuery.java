@@ -34,8 +34,8 @@ public class MetricTopNQuery extends MetricSemanticQuery {
     }
 
     @Override
-    public List<SchemaElementMatch> match(List<SchemaElementMatch> candidateElementMatches,
-                                          ChatQueryContext queryCtx) {
+    public List<SchemaElementMatch> match(
+            List<SchemaElementMatch> candidateElementMatches, ChatQueryContext queryCtx) {
         Matcher matcher = INTENT_PATTERN.matcher(queryCtx.getQueryText());
         if (matcher.matches()) {
             return super.match(candidateElementMatches, queryCtx);
@@ -59,5 +59,4 @@ public class MetricTopNQuery extends MetricSemanticQuery {
         SchemaElement metric = parseInfo.getMetrics().iterator().next();
         parseInfo.getOrders().add(new Order(metric.getBizName(), Constants.DESC_UPPER));
     }
-
 }

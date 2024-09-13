@@ -1,6 +1,5 @@
 package com.tencent.supersonic.chat.api.pojo.request;
 
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -21,5 +20,4 @@ public class SimilarQueryReq {
     private Long dataSetId;
 
     private Integer agentId;
-
 }

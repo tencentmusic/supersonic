@@ -13,8 +13,7 @@ public class S2Term {
     public int offset;
     public int frequency = 0;
 
-    public S2Term() {
-    }
+    public S2Term() {}
 
     public S2Term(String word, Nature nature) {
         this.word = word;

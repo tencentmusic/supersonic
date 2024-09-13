@@ -33,5 +33,4 @@ public class TermDO {
     private Date updatedAt;
 
     private String updatedBy;
-
 }

@@ -22,16 +22,17 @@ public class ParamOption {
     private Object value;
 
     /**
-     * CUSTOM: the value is specified by the user
-     * SEMANTIC: the value of element
-     * FORWARD: only forward
+     * CUSTOM: the value is specified by the user SEMANTIC: the value of element FORWARD: only
+     * forward
      */
     public enum ParamType {
-        CUSTOM, SEMANTIC, FORWARD
+        CUSTOM,
+        SEMANTIC,
+        FORWARD
     }
 
     public enum OptionType {
-        REQUIRED, OPTIONAL
+        REQUIRED,
+        OPTIONAL
     }
-
 }

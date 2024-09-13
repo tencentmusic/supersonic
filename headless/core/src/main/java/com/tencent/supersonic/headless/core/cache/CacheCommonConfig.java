@@ -22,6 +22,4 @@ public class CacheCommonConfig {
 
     @Value("${s2.query.cache.enable:true}")
     private Boolean cacheEnable;
-
-
 }

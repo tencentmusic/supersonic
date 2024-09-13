@@ -20,5 +20,4 @@ public class PluginRecallResult {
     private double score;
 
     private double distance;
-
 }

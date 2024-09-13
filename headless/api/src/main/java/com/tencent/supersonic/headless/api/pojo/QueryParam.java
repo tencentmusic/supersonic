@@ -7,6 +7,7 @@ import com.tencent.supersonic.common.pojo.Filter;
 import com.tencent.supersonic.common.pojo.Order;
 import com.tencent.supersonic.common.pojo.enums.QueryType;
 import lombok.Data;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -36,5 +37,4 @@ public class QueryParam {
     private String where;
     private List<ColumnOrder> order;
     private boolean nativeQuery = false;
-
 }

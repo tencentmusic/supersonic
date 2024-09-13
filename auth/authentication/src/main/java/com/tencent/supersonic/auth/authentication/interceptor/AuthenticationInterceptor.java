@@ -1,5 +1,7 @@
 package com.tencent.supersonic.auth.authentication.interceptor;
 
+import javax.servlet.http.HttpServletRequest;
+
 import com.tencent.supersonic.auth.api.authentication.config.AuthenticationConfig;
 import com.tencent.supersonic.auth.api.authentication.constant.UserConstants;
 import com.tencent.supersonic.auth.authentication.service.UserServiceImpl;
@@ -13,7 +15,6 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.support.StandardMultipartHttpServletRequest;
 import org.springframework.web.servlet.HandlerInterceptor;
 
-import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.List;
@@ -21,13 +22,11 @@ import java.util.List;
 @Slf4j
 public abstract class AuthenticationInterceptor implements HandlerInterceptor {
 
-
     protected AuthenticationConfig authenticationConfig;
 
     protected UserServiceImpl userServiceImpl;
 
     protected UserTokenUtils userTokenUtils;
-
 
     protected S2ThreadContext s2ThreadContext;
 
@@ -69,7 +68,8 @@ public abstract class AuthenticationInterceptor implements HandlerInterceptor {
         try {
             if (request instanceof StandardMultipartHttpServletRequest) {
                 RequestFacade servletRequest =
-                        (RequestFacade) ((StandardMultipartHttpServletRequest) request).getRequest();
+                        (RequestFacade)
+                                ((StandardMultipartHttpServletRequest) request).getRequest();
                 Class<? extends HttpServletRequest> servletRequestClazz = servletRequest.getClass();
                 Field request1 = servletRequestClazz.getDeclaredField("request");
                 request1.setAccessible(true);

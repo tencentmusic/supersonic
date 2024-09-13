@@ -14,5 +14,4 @@ public class SystemConfigDO {
     private String parameters;
 
     private String admin;
-
 }

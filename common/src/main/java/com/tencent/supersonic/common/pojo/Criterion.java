@@ -1,10 +1,10 @@
 package com.tencent.supersonic.common.pojo;
 
-
 import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
+import lombok.Data;
+
 import java.util.Arrays;
 import java.util.List;
-import lombok.Data;
 
 @Data
 public class Criterion {
@@ -26,7 +26,8 @@ public class Criterion {
         this.value = value;
         this.dataType = dataType;
 
-        if (FilterOperatorEnum.BETWEEN.name().equals(operator) || FilterOperatorEnum.IN.name().equals(operator)
+        if (FilterOperatorEnum.BETWEEN.name().equals(operator)
+                || FilterOperatorEnum.IN.name().equals(operator)
                 || FilterOperatorEnum.NOT_IN.name().equals(operator)) {
             this.values = (List) value;
         }
@@ -34,10 +35,10 @@ public class Criterion {
 
     public boolean isNeedApostrophe() {
         return Arrays.stream(StringDataType.values())
-                .filter(value -> this.dataType.equalsIgnoreCase(value.getType())).findFirst()
+                .filter(value -> this.dataType.equalsIgnoreCase(value.getType()))
+                .findFirst()
                 .isPresent();
     }
-
 
     public enum NumericDataType {
         TINYINT("TINYINT"),
@@ -62,7 +63,6 @@ public class Criterion {
         }
     }
 
-
     public enum StringDataType {
         VARCHAR("VARCHAR"),
         STRING("STRING"),
@@ -77,6 +77,4 @@ public class Criterion {
             return type;
         }
     }
-
-
 }

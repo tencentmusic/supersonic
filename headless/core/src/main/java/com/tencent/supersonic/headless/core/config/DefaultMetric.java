@@ -9,20 +9,13 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class DefaultMetric {
 
-    /**
-     * default metrics
-     */
+    /** default metrics */
     private Long metricId;
 
-    /**
-     * default time span unit
-     */
+    /** default time span unit */
     private Integer unit;
 
-    /**
-     * default time type: DAY
-     * DAY, WEEK, MONTH, YEAR
-     */
+    /** default time type: DAY DAY, WEEK, MONTH, YEAR */
     private String period;
 
     private String bizName;

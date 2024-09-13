@@ -65,7 +65,8 @@ public class FiledFilterReplaceVisitor extends ExpressionVisitorAdapter {
 
     @Override
     public void visit(GreaterThanEquals expr) {
-        List<Expression> expressions = parserFilter(expr, JsqlConstants.GREATER_THAN_EQUALS_CONSTANT);
+        List<Expression> expressions =
+                parserFilter(expr, JsqlConstants.GREATER_THAN_EQUALS_CONSTANT);
         if (Objects.nonNull(expressions)) {
             waitingForAdds.addAll(expressions);
         }
@@ -101,7 +102,8 @@ public class FiledFilterReplaceVisitor extends ExpressionVisitorAdapter {
         }
 
         try {
-            ComparisonOperator parsedExpression = (ComparisonOperator) CCJSqlParserUtil.parseCondExpression(condExpr);
+            ComparisonOperator parsedExpression =
+                    (ComparisonOperator) CCJSqlParserUtil.parseCondExpression(condExpr);
             comparisonOperator.setLeftExpression(parsedExpression.getLeftExpression());
             comparisonOperator.setRightExpression(parsedExpression.getRightExpression());
             comparisonOperator.setASTNode(parsedExpression.getASTNode());

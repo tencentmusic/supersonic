@@ -30,23 +30,27 @@ public class AuthServiceImpl implements AuthService {
 
     private UserService userService;
 
-    public AuthServiceImpl(JdbcTemplate jdbcTemplate,
-                           UserService userService) {
+    public AuthServiceImpl(JdbcTemplate jdbcTemplate, UserService userService) {
         this.jdbcTemplate = jdbcTemplate;
         this.userService = userService;
     }
 
     private List<AuthGroup> load() {
-        List<String> rows = jdbcTemplate.queryForList("select config from s2_auth_groups", String.class);
+        List<String> rows =
+                jdbcTemplate.queryForList("select config from s2_auth_groups", String.class);
         Gson g = new Gson();
-        return rows.stream().map(row -> g.fromJson(row, AuthGroup.class)).collect(Collectors.toList());
+        return rows.stream()
+                .map(row -> g.fromJson(row, AuthGroup.class))
+                .collect(Collectors.toList());
     }
 
     @Override
     public List<AuthGroup> queryAuthGroups(String modelId, Integer groupId) {
         return load().stream()
-                .filter(group -> (Objects.isNull(groupId) || groupId.equals(group.getGroupId()))
-                        && modelId.equals(group.getModelId().toString()))
+                .filter(
+                        group ->
+                                (Objects.isNull(groupId) || groupId.equals(group.getGroupId()))
+                                        && modelId.equals(group.getModelId().toString()))
                 .collect(Collectors.toList());
     }
 
@@ -61,10 +65,14 @@ public class AuthServiceImpl implements AuthService {
                 nextGroupId = obj + 1;
             }
             group.setGroupId(nextGroupId);
-            jdbcTemplate.update("insert into s2_auth_groups (group_id, config) values (?, ?);", nextGroupId,
+            jdbcTemplate.update(
+                    "insert into s2_auth_groups (group_id, config) values (?, ?);",
+                    nextGroupId,
                     g.toJson(group));
         } else {
-            jdbcTemplate.update("update s2_auth_groups set config = ? where group_id = ?;", g.toJson(group),
+            jdbcTemplate.update(
+                    "update s2_auth_groups set config = ? where group_id = ?;",
+                    g.toJson(group),
                     group.getGroupId());
         }
     }
@@ -80,10 +88,11 @@ public class AuthServiceImpl implements AuthService {
             return new AuthorizedResourceResp();
         }
         Set<String> userOrgIds = userService.getUserAllOrgId(user.getName());
-        List<AuthGroup> groups = getAuthGroups(req.getModelIds(), user.getName(), new ArrayList<>(userOrgIds));
+        List<AuthGroup> groups =
+                getAuthGroups(req.getModelIds(), user.getName(), new ArrayList<>(userOrgIds));
         AuthorizedResourceResp resource = new AuthorizedResourceResp();
-        Map<Long, List<AuthGroup>> authGroupsByModelId = groups.stream()
-                .collect(Collectors.groupingBy(AuthGroup::getModelId));
+        Map<Long, List<AuthGroup>> authGroupsByModelId =
+                groups.stream().collect(Collectors.groupingBy(AuthGroup::getModelId));
         for (Long modelId : req.getModelIds()) {
             if (authGroupsByModelId.containsKey(modelId)) {
                 List<AuthGroup> authGroups = authGroupsByModelId.get(modelId);
@@ -110,26 +119,31 @@ public class AuthServiceImpl implements AuthService {
         return resource;
     }
 
-    private List<AuthGroup> getAuthGroups(List<Long> modelIds, String userName, List<String> departmentIds) {
-        List<AuthGroup> groups = load().stream()
-                .filter(group -> {
-                    if (!modelIds.contains(group.getModelId())) {
-                        return false;
-                    }
-                    if (!CollectionUtils.isEmpty(group.getAuthorizedUsers())
-                            && group.getAuthorizedUsers().contains(userName)) {
-                        return true;
-                    }
-                    for (String departmentId : departmentIds) {
-                        if (!CollectionUtils.isEmpty(group.getAuthorizedDepartmentIds())
-                                && group.getAuthorizedDepartmentIds().contains(departmentId)) {
-                            return true;
-                        }
-                    }
-                    return false;
-                }).collect(Collectors.toList());
+    private List<AuthGroup> getAuthGroups(
+            List<Long> modelIds, String userName, List<String> departmentIds) {
+        List<AuthGroup> groups =
+                load().stream()
+                        .filter(
+                                group -> {
+                                    if (!modelIds.contains(group.getModelId())) {
+                                        return false;
+                                    }
+                                    if (!CollectionUtils.isEmpty(group.getAuthorizedUsers())
+                                            && group.getAuthorizedUsers().contains(userName)) {
+                                        return true;
+                                    }
+                                    for (String departmentId : departmentIds) {
+                                        if (!CollectionUtils.isEmpty(
+                                                        group.getAuthorizedDepartmentIds())
+                                                && group.getAuthorizedDepartmentIds()
+                                                        .contains(departmentId)) {
+                                            return true;
+                                        }
+                                    }
+                                    return false;
+                                })
+                        .collect(Collectors.toList());
         log.info("user:{} department:{} authGroups:{}", userName, departmentIds, groups);
         return groups;
     }
-
 }

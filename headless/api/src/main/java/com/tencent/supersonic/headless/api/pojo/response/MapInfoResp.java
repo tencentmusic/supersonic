@@ -15,5 +15,4 @@ public class MapInfoResp {
     private Map<String, DataSetMapInfo> dataSetMapInfo = new HashMap<>();
 
     private Map<String, List<SchemaElementMatch>> terms = new HashMap<>();
-
 }

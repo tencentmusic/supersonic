@@ -5,7 +5,6 @@ import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.chat.server.agent.Agent;
 import com.tencent.supersonic.chat.server.agent.AgentConfig;
-
 import com.tencent.supersonic.chat.server.agent.MultiTurnConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.annotation.Order;
@@ -27,8 +26,7 @@ public class SmallTalkDemo extends S2BaseDemo {
         agent.setEnableSearch(0);
         AgentConfig agentConfig = new AgentConfig();
         agent.setAgentConfig(JSONObject.toJSONString(agentConfig));
-        agent.setExamples(Lists.newArrayList("如何才能变帅",
-                "如何才能赚更多钱", "如何才能世界和平"));
+        agent.setExamples(Lists.newArrayList("如何才能变帅", "如何才能赚更多钱", "如何才能世界和平"));
         MultiTurnConfig multiTurnConfig = new MultiTurnConfig();
         multiTurnConfig.setEnableMultiTurn(true);
         agent.setMultiTurnConfig(multiTurnConfig);
@@ -38,9 +36,8 @@ public class SmallTalkDemo extends S2BaseDemo {
 
     @Override
     boolean checkNeedToRun() {
-        List<String> agentNames = agentService.getAgents()
-                .stream().map(Agent::getName).collect(Collectors.toList());
+        List<String> agentNames =
+                agentService.getAgents().stream().map(Agent::getName).collect(Collectors.toList());
         return !agentNames.contains("来闲聊");
     }
-
 }

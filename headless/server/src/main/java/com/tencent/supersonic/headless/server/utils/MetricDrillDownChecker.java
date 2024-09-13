@@ -27,8 +27,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class MetricDrillDownChecker {
 
-    @Autowired
-    private MetricService metricService;
+    @Autowired private MetricService metricService;
 
     public void checkQuery(QueryStatement queryStatement) {
         SemanticSchemaResp semanticSchemaResp = queryStatement.getSemanticSchemaResp();
@@ -49,11 +48,18 @@ public class MetricDrillDownChecker {
         }
         for (String metricName : metricFields) {
             MetricSchemaResp metric = semanticSchemaResp.getMetric(metricName);
-            List<DimensionResp> necessaryDimensions = getNecessaryDimensions(metric, semanticSchemaResp);
-            List<DimensionResp> dimensionsMissing = getNecessaryDimensionMissing(necessaryDimensions, dimensionFields);
+            List<DimensionResp> necessaryDimensions =
+                    getNecessaryDimensions(metric, semanticSchemaResp);
+            List<DimensionResp> dimensionsMissing =
+                    getNecessaryDimensionMissing(necessaryDimensions, dimensionFields);
             if (!CollectionUtils.isEmpty(dimensionsMissing)) {
-                String errMsg = String.format("指标:%s 缺失必要下钻维度:%s", metric.getName(),
-                        dimensionsMissing.stream().map(DimensionResp::getName).collect(Collectors.toList()));
+                String errMsg =
+                        String.format(
+                                "指标:%s 缺失必要下钻维度:%s",
+                                metric.getName(),
+                                dimensionsMissing.stream()
+                                        .map(DimensionResp::getName)
+                                        .collect(Collectors.toList()));
                 throw new InvalidArgumentException(errMsg);
             }
         }
@@ -67,51 +73,60 @@ public class MetricDrillDownChecker {
                 if (Objects.nonNull(dimSchemaResp) && dimSchemaResp.isPartitionTime()) {
                     continue;
                 }
-                String errMsg = String.format("维度:%s, 不在当前查询指标的下钻维度配置中, 请检查", dimSchemaResp.getName());
+                String errMsg =
+                        String.format("维度:%s, 不在当前查询指标的下钻维度配置中, 请检查", dimSchemaResp.getName());
                 throw new InvalidArgumentException(errMsg);
             }
         }
     }
 
     /**
-     * To check whether the dimension bound to the metric exists,
-     * eg: metric like UV is calculated in a certain dimension, it cannot be used on other dimensions.
+     * To check whether the dimension bound to the metric exists, eg: metric like UV is calculated
+     * in a certain dimension, it cannot be used on other dimensions.
      */
-    private List<DimensionResp> getNecessaryDimensionMissing(List<DimensionResp> necessaryDimensions,
-                                                             List<String> dimensionFields) {
+    private List<DimensionResp> getNecessaryDimensionMissing(
+            List<DimensionResp> necessaryDimensions, List<String> dimensionFields) {
         return necessaryDimensions.stream()
                 .filter(dimension -> !dimensionFields.contains(dimension.getBizName()))
                 .collect(Collectors.toList());
     }
 
     /**
-     * To check whether the dimension can drill down the metric,
-     * eg: some descriptive dimensions are not suitable as drill-down dimensions
+     * To check whether the dimension can drill down the metric, eg: some descriptive dimensions are
+     * not suitable as drill-down dimensions
      */
-    private boolean checkDrillDownDimension(String dimensionName,
-                                            List<MetricResp> metricResps,
-                                            SemanticSchemaResp semanticSchemaResp) {
+    private boolean checkDrillDownDimension(
+            String dimensionName,
+            List<MetricResp> metricResps,
+            SemanticSchemaResp semanticSchemaResp) {
         if (CollectionUtils.isEmpty(metricResps)) {
             return true;
         }
-        List<String> relateDimensions = metricResps.stream()
-                .map(this::getDrillDownDimensions)
-                .filter(drillDownDimensions -> !CollectionUtils.isEmpty(drillDownDimensions))
-                .map(drillDownDimensions -> drillDownDimensions.stream()
-                        .map(DrillDownDimension::getDimensionId).collect(Collectors.toList()))
-                .flatMap(Collection::stream)
-                .map(id -> convertDimensionIdToBizName(id, semanticSchemaResp))
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
-        //if no metric has drill down dimension, return true
+        List<String> relateDimensions =
+                metricResps.stream()
+                        .map(this::getDrillDownDimensions)
+                        .filter(
+                                drillDownDimensions ->
+                                        !CollectionUtils.isEmpty(drillDownDimensions))
+                        .map(
+                                drillDownDimensions ->
+                                        drillDownDimensions.stream()
+                                                .map(DrillDownDimension::getDimensionId)
+                                                .collect(Collectors.toList()))
+                        .flatMap(Collection::stream)
+                        .map(id -> convertDimensionIdToBizName(id, semanticSchemaResp))
+                        .filter(Objects::nonNull)
+                        .collect(Collectors.toList());
+        // if no metric has drill down dimension, return true
         if (CollectionUtils.isEmpty(relateDimensions)) {
             return true;
         }
-        //if this dimension not in relate drill-down dimensions, return false
+        // if this dimension not in relate drill-down dimensions, return false
         return relateDimensions.contains(dimensionName);
     }
 
-    private List<DimensionResp> getNecessaryDimensions(MetricSchemaResp metric, SemanticSchemaResp semanticSchemaResp) {
+    private List<DimensionResp> getNecessaryDimensions(
+            MetricSchemaResp metric, SemanticSchemaResp semanticSchemaResp) {
         if (metric == null) {
             return Lists.newArrayList();
         }
@@ -120,7 +135,8 @@ public class MetricDrillDownChecker {
             return Lists.newArrayList();
         }
         return drillDownDimensions.stream()
-                .filter(DrillDownDimension::isNecessary).map(DrillDownDimension::getDimensionId)
+                .filter(DrillDownDimension::isNecessary)
+                .map(DrillDownDimension::getDimensionId)
                 .map(semanticSchemaResp::getDimension)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
@@ -137,7 +153,8 @@ public class MetricDrillDownChecker {
         return dimensionFields;
     }
 
-    private List<MetricResp> getMetrics(List<String> metricFields, SemanticSchemaResp semanticSchemaResp) {
+    private List<MetricResp> getMetrics(
+            List<String> metricFields, SemanticSchemaResp semanticSchemaResp) {
         return semanticSchemaResp.getMetrics().stream()
                 .filter(metricSchemaResp -> metricFields.contains(metricSchemaResp.getBizName()))
                 .collect(Collectors.toList());
@@ -154,5 +171,4 @@ public class MetricDrillDownChecker {
     private List<DrillDownDimension> getDrillDownDimensions(MetricResp metricResp) {
         return metricService.getDrillDownDimension(metricResp.getId());
     }
-
 }

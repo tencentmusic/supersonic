@@ -2,7 +2,6 @@ package com.tencent.supersonic.headless.core.translator.calcite.s2sql;
 
 import lombok.Data;
 
-
 @Data
 public class DimensionTimeTypeParams {
 

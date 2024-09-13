@@ -18,5 +18,4 @@ public class ChatExecuteReq {
     private int parseId;
     private String queryText;
     private boolean saveAnswer;
-
 }

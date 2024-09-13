@@ -56,5 +56,4 @@ public class ChatRepositoryImpl implements ChatRepository {
     public Boolean deleteChat(Long chatId, String userName) {
         return chatMapper.deleteChat(chatId, userName);
     }
-
 }

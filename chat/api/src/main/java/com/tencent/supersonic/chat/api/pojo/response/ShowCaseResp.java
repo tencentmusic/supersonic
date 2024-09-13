@@ -1,6 +1,5 @@
 package com.tencent.supersonic.chat.api.pojo.response;
 
-
 import lombok.Data;
 
 import java.util.List;
@@ -14,5 +13,4 @@ public class ShowCaseResp {
     private int pageSize;
 
     private int current;
-
 }

@@ -285,7 +285,7 @@ const ParseTip: React.FC<Props> = ({
         {filters?.map((filter: any, index: number) => (
           <FilterItem
             modelId={modelId!}
-            filters={dimensionFilters}
+            filters={filters}
             filter={filter}
             index={index}
             chatContext={currentParseInfo!}
@@ -304,12 +304,14 @@ const ParseTip: React.FC<Props> = ({
   const getFiltersNode = () => {
     return (
       <>
-        <div className={`${prefixCls}-tip-item`}>
-          <div className={`${prefixCls}-tip-item-name`}>筛选条件：</div>
-          <div className={`${prefixCls}-tip-item-content`}>
-            {getFilterContent(dimensionFilters)}
+        {(!!dateInfo || !!dimensionFilters?.length) && (
+          <div className={`${prefixCls}-tip-item`}>
+            <div className={`${prefixCls}-tip-item-name`}>筛选条件：</div>
+            <div className={`${prefixCls}-tip-item-content`}>
+              {getFilterContent(dimensionFilters)}
+            </div>
           </div>
-        </div>
+        )}
         <Button className={`${prefixCls}-reload`} size="small" onClick={onRefresh}>
           <ReloadOutlined />
           重新查询

@@ -31,11 +31,11 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
-/**
- * HanLP helper
- */
+/** HanLP helper */
 @Slf4j
 public class HanlpHelper {
 
@@ -57,14 +57,21 @@ public class HanlpHelper {
         if (segment == null) {
             synchronized (HanlpHelper.class) {
                 if (segment == null) {
-                    segment = HanLP.newSegment()
-                            .enableIndexMode(true).enableIndexMode(4)
-                            .enableCustomDictionary(true).enableCustomDictionaryForcing(true).enableOffset(true)
-                            .enableJapaneseNameRecognize(false).enableNameRecognize(false)
-                            .enableAllNamedEntityRecognize(false)
-                            .enableJapaneseNameRecognize(false).enableNumberQuantifierRecognize(false)
-                            .enablePlaceRecognize(false)
-                            .enableOrganizationRecognize(false).enableCustomDictionary(getDynamicCustomDictionary());
+                    segment =
+                            HanLP.newSegment()
+                                    .enableIndexMode(true)
+                                    .enableIndexMode(4)
+                                    .enableCustomDictionary(true)
+                                    .enableCustomDictionaryForcing(true)
+                                    .enableOffset(true)
+                                    .enableJapaneseNameRecognize(false)
+                                    .enableNameRecognize(false)
+                                    .enableAllNamedEntityRecognize(false)
+                                    .enableJapaneseNameRecognize(false)
+                                    .enableNumberQuantifierRecognize(false)
+                                    .enablePlaceRecognize(false)
+                                    .enableOrganizationRecognize(false)
+                                    .enableCustomDictionary(getDynamicCustomDictionary());
                 }
             }
         }
@@ -82,14 +89,13 @@ public class HanlpHelper {
         return CustomDictionary;
     }
 
-    /***
-     * reload custom dictionary
-     */
+    /** reload custom dictionary */
     public static boolean reloadCustomDictionary() throws IOException {
 
         final long startTime = System.currentTimeMillis();
 
-        if (HanLP.Config.CustomDictionaryPath == null || HanLP.Config.CustomDictionaryPath.length == 0) {
+        if (HanLP.Config.CustomDictionaryPath == null
+                || HanLP.Config.CustomDictionaryPath.length == 0) {
             return false;
         }
         if (HanLP.Config.IOAdapter instanceof HadoopFileIOAdapter) {
@@ -106,7 +112,8 @@ public class HanlpHelper {
 
         boolean reload = getDynamicCustomDictionary().reload();
         if (reload) {
-            log.info("Custom dictionary has been reloaded in {} milliseconds",
+            log.info(
+                    "Custom dictionary has been reloaded in {} milliseconds",
                     System.currentTimeMillis() - startTime);
         }
         return reload;
@@ -118,51 +125,74 @@ public class HanlpHelper {
         }
         String hanlpPropertiesPath = getHanlpPropertiesPath();
 
-        HanLP.Config.CustomDictionaryPath = Arrays.stream(HanLP.Config.CustomDictionaryPath)
-                .map(path -> hanlpPropertiesPath + FILE_SPILT + path)
-                .toArray(String[]::new);
-        log.info("hanlpPropertiesPath:{},CustomDictionaryPath:{}", hanlpPropertiesPath,
+        HanLP.Config.CustomDictionaryPath =
+                Arrays.stream(HanLP.Config.CustomDictionaryPath)
+                        .map(path -> hanlpPropertiesPath + FILE_SPILT + path)
+                        .toArray(String[]::new);
+        log.info(
+                "hanlpPropertiesPath:{},CustomDictionaryPath:{}",
+                hanlpPropertiesPath,
                 HanLP.Config.CustomDictionaryPath);
 
-        HanLP.Config.CoreDictionaryPath = hanlpPropertiesPath + FILE_SPILT + HanLP.Config.BiGramDictionaryPath;
-        HanLP.Config.CoreDictionaryTransformMatrixDictionaryPath = hanlpPropertiesPath + FILE_SPILT
-                + HanLP.Config.CoreDictionaryTransformMatrixDictionaryPath;
-        HanLP.Config.BiGramDictionaryPath = hanlpPropertiesPath + FILE_SPILT + HanLP.Config.BiGramDictionaryPath;
+        HanLP.Config.CoreDictionaryPath =
+                hanlpPropertiesPath + FILE_SPILT + HanLP.Config.BiGramDictionaryPath;
+        HanLP.Config.CoreDictionaryTransformMatrixDictionaryPath =
+                hanlpPropertiesPath
+                        + FILE_SPILT
+                        + HanLP.Config.CoreDictionaryTransformMatrixDictionaryPath;
+        HanLP.Config.BiGramDictionaryPath =
+                hanlpPropertiesPath + FILE_SPILT + HanLP.Config.BiGramDictionaryPath;
         HanLP.Config.CoreStopWordDictionaryPath =
                 hanlpPropertiesPath + FILE_SPILT + HanLP.Config.CoreStopWordDictionaryPath;
-        HanLP.Config.CoreSynonymDictionaryDictionaryPath = hanlpPropertiesPath + FILE_SPILT
-                + HanLP.Config.CoreSynonymDictionaryDictionaryPath;
-        HanLP.Config.PersonDictionaryPath = hanlpPropertiesPath + FILE_SPILT + HanLP.Config.PersonDictionaryPath;
-        HanLP.Config.PersonDictionaryTrPath = hanlpPropertiesPath + FILE_SPILT + HanLP.Config.PersonDictionaryTrPath;
+        HanLP.Config.CoreSynonymDictionaryDictionaryPath =
+                hanlpPropertiesPath + FILE_SPILT + HanLP.Config.CoreSynonymDictionaryDictionaryPath;
+        HanLP.Config.PersonDictionaryPath =
+                hanlpPropertiesPath + FILE_SPILT + HanLP.Config.PersonDictionaryPath;
+        HanLP.Config.PersonDictionaryTrPath =
+                hanlpPropertiesPath + FILE_SPILT + HanLP.Config.PersonDictionaryTrPath;
 
-        HanLP.Config.PinyinDictionaryPath = hanlpPropertiesPath + FILE_SPILT + HanLP.Config.PinyinDictionaryPath;
-        HanLP.Config.TranslatedPersonDictionaryPath = hanlpPropertiesPath + FILE_SPILT
-                + HanLP.Config.TranslatedPersonDictionaryPath;
-        HanLP.Config.JapanesePersonDictionaryPath = hanlpPropertiesPath + FILE_SPILT
-                + HanLP.Config.JapanesePersonDictionaryPath;
-        HanLP.Config.PlaceDictionaryPath = hanlpPropertiesPath + FILE_SPILT + HanLP.Config.PlaceDictionaryPath;
-        HanLP.Config.PlaceDictionaryTrPath = hanlpPropertiesPath + FILE_SPILT + HanLP.Config.PlaceDictionaryTrPath;
-        HanLP.Config.OrganizationDictionaryPath = hanlpPropertiesPath + FILE_SPILT
-                + HanLP.Config.OrganizationDictionaryPath;
-        HanLP.Config.OrganizationDictionaryTrPath = hanlpPropertiesPath + FILE_SPILT
-                + HanLP.Config.OrganizationDictionaryTrPath;
+        HanLP.Config.PinyinDictionaryPath =
+                hanlpPropertiesPath + FILE_SPILT + HanLP.Config.PinyinDictionaryPath;
+        HanLP.Config.TranslatedPersonDictionaryPath =
+                hanlpPropertiesPath + FILE_SPILT + HanLP.Config.TranslatedPersonDictionaryPath;
+        HanLP.Config.JapanesePersonDictionaryPath =
+                hanlpPropertiesPath + FILE_SPILT + HanLP.Config.JapanesePersonDictionaryPath;
+        HanLP.Config.PlaceDictionaryPath =
+                hanlpPropertiesPath + FILE_SPILT + HanLP.Config.PlaceDictionaryPath;
+        HanLP.Config.PlaceDictionaryTrPath =
+                hanlpPropertiesPath + FILE_SPILT + HanLP.Config.PlaceDictionaryTrPath;
+        HanLP.Config.OrganizationDictionaryPath =
+                hanlpPropertiesPath + FILE_SPILT + HanLP.Config.OrganizationDictionaryPath;
+        HanLP.Config.OrganizationDictionaryTrPath =
+                hanlpPropertiesPath + FILE_SPILT + HanLP.Config.OrganizationDictionaryTrPath;
         HanLP.Config.CharTypePath = hanlpPropertiesPath + FILE_SPILT + HanLP.Config.CharTypePath;
         HanLP.Config.CharTablePath = hanlpPropertiesPath + FILE_SPILT + HanLP.Config.CharTablePath;
         HanLP.Config.PartOfSpeechTagDictionary =
                 hanlpPropertiesPath + FILE_SPILT + HanLP.Config.PartOfSpeechTagDictionary;
-        HanLP.Config.WordNatureModelPath = hanlpPropertiesPath + FILE_SPILT + HanLP.Config.WordNatureModelPath;
-        HanLP.Config.MaxEntModelPath = hanlpPropertiesPath + FILE_SPILT + HanLP.Config.MaxEntModelPath;
-        HanLP.Config.NNParserModelPath = hanlpPropertiesPath + FILE_SPILT + HanLP.Config.NNParserModelPath;
+        HanLP.Config.WordNatureModelPath =
+                hanlpPropertiesPath + FILE_SPILT + HanLP.Config.WordNatureModelPath;
+        HanLP.Config.MaxEntModelPath =
+                hanlpPropertiesPath + FILE_SPILT + HanLP.Config.MaxEntModelPath;
+        HanLP.Config.NNParserModelPath =
+                hanlpPropertiesPath + FILE_SPILT + HanLP.Config.NNParserModelPath;
         HanLP.Config.PerceptronParserModelPath =
                 hanlpPropertiesPath + FILE_SPILT + HanLP.Config.PerceptronParserModelPath;
-        HanLP.Config.CRFSegmentModelPath = hanlpPropertiesPath + FILE_SPILT + HanLP.Config.CRFSegmentModelPath;
-        HanLP.Config.HMMSegmentModelPath = hanlpPropertiesPath + FILE_SPILT + HanLP.Config.HMMSegmentModelPath;
-        HanLP.Config.CRFCWSModelPath = hanlpPropertiesPath + FILE_SPILT + HanLP.Config.CRFCWSModelPath;
-        HanLP.Config.CRFPOSModelPath = hanlpPropertiesPath + FILE_SPILT + HanLP.Config.CRFPOSModelPath;
-        HanLP.Config.CRFNERModelPath = hanlpPropertiesPath + FILE_SPILT + HanLP.Config.CRFNERModelPath;
-        HanLP.Config.PerceptronCWSModelPath = hanlpPropertiesPath + FILE_SPILT + HanLP.Config.PerceptronCWSModelPath;
-        HanLP.Config.PerceptronPOSModelPath = hanlpPropertiesPath + FILE_SPILT + HanLP.Config.PerceptronPOSModelPath;
-        HanLP.Config.PerceptronNERModelPath = hanlpPropertiesPath + FILE_SPILT + HanLP.Config.PerceptronNERModelPath;
+        HanLP.Config.CRFSegmentModelPath =
+                hanlpPropertiesPath + FILE_SPILT + HanLP.Config.CRFSegmentModelPath;
+        HanLP.Config.HMMSegmentModelPath =
+                hanlpPropertiesPath + FILE_SPILT + HanLP.Config.HMMSegmentModelPath;
+        HanLP.Config.CRFCWSModelPath =
+                hanlpPropertiesPath + FILE_SPILT + HanLP.Config.CRFCWSModelPath;
+        HanLP.Config.CRFPOSModelPath =
+                hanlpPropertiesPath + FILE_SPILT + HanLP.Config.CRFPOSModelPath;
+        HanLP.Config.CRFNERModelPath =
+                hanlpPropertiesPath + FILE_SPILT + HanLP.Config.CRFNERModelPath;
+        HanLP.Config.PerceptronCWSModelPath =
+                hanlpPropertiesPath + FILE_SPILT + HanLP.Config.PerceptronCWSModelPath;
+        HanLP.Config.PerceptronPOSModelPath =
+                hanlpPropertiesPath + FILE_SPILT + HanLP.Config.PerceptronPOSModelPath;
+        HanLP.Config.PerceptronNERModelPath =
+                hanlpPropertiesPath + FILE_SPILT + HanLP.Config.PerceptronNERModelPath;
     }
 
     public static String getHanlpPropertiesPath() throws FileNotFoundException {
@@ -171,7 +201,8 @@ public class HanlpHelper {
 
     public static boolean addToCustomDictionary(DictWord dictWord) {
         log.debug("dictWord:{}", dictWord);
-        return getDynamicCustomDictionary().insert(dictWord.getWord(), dictWord.getNatureWithFrequency());
+        return getDynamicCustomDictionary()
+                .insert(dictWord.getWord(), dictWord.getNatureWithFrequency());
     }
 
     public static void removeFromCustomDictionary(DictWord dictWord) {
@@ -195,7 +226,8 @@ public class HanlpHelper {
         int len = natureWithFrequency.length();
         log.info("filtered natureWithFrequency:{}", natureWithFrequency);
         if (StringUtils.isNotBlank(natureWithFrequency)) {
-            getDynamicCustomDictionary().add(dictWord.getWord(), natureWithFrequency.substring(0, len - 1));
+            getDynamicCustomDictionary()
+                    .add(dictWord.getWord(), natureWithFrequency.substring(0, len - 1));
         }
         SearchService.remove(dictWord, natureList.toArray(new Nature[0]));
     }
@@ -225,8 +257,8 @@ public class HanlpHelper {
         mapResults.addAll(newResults);
     }
 
-    public static <T extends MapResult> boolean addLetterOriginal(List<T> mapResults, T mapResult,
-                                                                  CoreDictionary.Attribute attribute) {
+    public static <T extends MapResult> boolean addLetterOriginal(
+            List<T> mapResults, T mapResult, CoreDictionary.Attribute attribute) {
         if (attribute == null) {
             return false;
         }
@@ -236,8 +268,12 @@ public class HanlpHelper {
             for (String nature : hanlpMapResult.getNatures()) {
                 String orig = attribute.getOriginal(Nature.fromString(nature));
                 if (orig != null) {
-                    MapResult addMapResult = new HanlpMapResult(
-                            orig, Arrays.asList(nature), hanlpMapResult.getDetectWord());
+                    MapResult addMapResult =
+                            new HanlpMapResult(
+                                    orig,
+                                    Arrays.asList(nature),
+                                    hanlpMapResult.getDetectWord(),
+                                    hanlpMapResult.getSimilarity());
                     mapResults.add((T) addMapResult);
                     isAdd = true;
                 }
@@ -268,7 +304,7 @@ public class HanlpHelper {
                 addMapResult.setDetectWord(embeddingResult.getDetectWord());
                 addMapResult.setId(embeddingResult.getId());
                 addMapResult.setMetadata(embeddingResult.getMetadata());
-                addMapResult.setDistance(embeddingResult.getDistance());
+                addMapResult.setSimilarity(embeddingResult.getSimilarity());
                 mapResults.add((T) addMapResult);
                 isAdd = true;
             }
@@ -285,9 +321,34 @@ public class HanlpHelper {
                 .collect(Collectors.toList());
     }
 
-    public static List<S2Term> transform2ApiTerm(Term term, Map<Long, List<Long>> modelIdToDataSetIds) {
+    public static List<S2Term> getTerms(List<S2Term> terms, Set<Long> dataSetIds) {
+        logTerms(terms);
+        if (!CollectionUtils.isEmpty(dataSetIds)) {
+            terms =
+                    terms.stream()
+                            .filter(
+                                    term -> {
+                                        Long dataSetId =
+                                                NatureHelper.getDataSetId(
+                                                        term.getNature().toString());
+                                        if (Objects.nonNull(dataSetId)) {
+                                            return dataSetIds.contains(dataSetId);
+                                        }
+                                        return false;
+                                    })
+                            .collect(Collectors.toList());
+            log.debug("terms filter by dataSetId:{}", dataSetIds);
+            logTerms(terms);
+        }
+        return terms;
+    }
+
+    public static List<S2Term> transform2ApiTerm(
+            Term term, Map<Long, List<Long>> modelIdToDataSetIds) {
         List<S2Term> s2Terms = Lists.newArrayList();
-        List<String> natures = NatureHelper.changeModel2DataSet(String.valueOf(term.getNature()), modelIdToDataSetIds);
+        List<String> natures =
+                NatureHelper.changeModel2DataSet(
+                        String.valueOf(term.getNature()), modelIdToDataSetIds);
         for (String nature : natures) {
             S2Term s2Term = new S2Term();
             BeanUtils.copyProperties(term, s2Term);
@@ -298,4 +359,16 @@ public class HanlpHelper {
         return s2Terms;
     }
 
+    private static void logTerms(List<S2Term> terms) {
+        if (CollectionUtils.isEmpty(terms)) {
+            return;
+        }
+        for (S2Term term : terms) {
+            log.debug(
+                    "word:{},nature:{},frequency:{}",
+                    term.word,
+                    term.nature.toString(),
+                    term.getFrequency());
+        }
+    }
 }

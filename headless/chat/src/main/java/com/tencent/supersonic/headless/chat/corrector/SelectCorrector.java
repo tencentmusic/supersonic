@@ -1,6 +1,5 @@
 package com.tencent.supersonic.headless.chat.corrector;
 
-
 import com.tencent.supersonic.common.jsqlparser.SqlAddHelper;
 import com.tencent.supersonic.common.jsqlparser.SqlRemoveHelper;
 import com.tencent.supersonic.common.jsqlparser.SqlReplaceHelper;
@@ -23,9 +22,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-/**
- * Perform SQL corrections on the "Select" section in S2SQL.
- */
+/** Perform SQL corrections on the "Select" section in S2SQL. */
 @Slf4j
 public class SelectCorrector extends BaseSemanticCorrector {
 
@@ -36,7 +33,8 @@ public class SelectCorrector extends BaseSemanticCorrector {
         String correctS2SQL = semanticParseInfo.getSqlInfo().getCorrectedS2SQL();
         List<String> aggregateFields = SqlSelectHelper.getAggregateFields(correctS2SQL);
         List<String> selectFields = SqlSelectHelper.getSelectFields(correctS2SQL);
-        // If the number of aggregated fields is equal to the number of queried fields, do not add fields to select.
+        // If the number of aggregated fields is equal to the number of queried fields, do not add
+        // fields to select.
         if (!CollectionUtils.isEmpty(aggregateFields)
                 && !CollectionUtils.isEmpty(selectFields)
                 && aggregateFields.size() == selectFields.size()) {
@@ -47,55 +45,65 @@ public class SelectCorrector extends BaseSemanticCorrector {
         semanticParseInfo.getSqlInfo().setCorrectedS2SQL(querySql);
     }
 
-    protected String addFieldsToSelect(ChatQueryContext chatQueryContext, SemanticParseInfo semanticParseInfo,
-                                       String correctS2SQL) {
+    protected String addFieldsToSelect(
+            ChatQueryContext chatQueryContext,
+            SemanticParseInfo semanticParseInfo,
+            String correctS2SQL) {
         correctS2SQL = addTagDefaultFields(chatQueryContext, semanticParseInfo, correctS2SQL);
 
         Set<String> selectFields = new HashSet<>(SqlSelectHelper.getSelectFields(correctS2SQL));
         Set<String> needAddFields = new HashSet<>(SqlSelectHelper.getGroupByFields(correctS2SQL));
 
-        //decide whether add order by expression field to select
+        // decide whether add order by expression field to select
         Environment environment = ContextUtils.getBean(Environment.class);
         String correctorAdditionalInfo = environment.getProperty(ADDITIONAL_INFORMATION);
-        if (StringUtils.isNotBlank(correctorAdditionalInfo) && Boolean.parseBoolean(correctorAdditionalInfo)) {
+        if (StringUtils.isNotBlank(correctorAdditionalInfo)
+                && Boolean.parseBoolean(correctorAdditionalInfo)) {
             needAddFields.addAll(SqlSelectHelper.getOrderByFields(correctS2SQL));
         }
         if (CollectionUtils.isEmpty(selectFields) || CollectionUtils.isEmpty(needAddFields)) {
             return correctS2SQL;
         }
         needAddFields.removeAll(selectFields);
-        String addFieldsToSelectSql = SqlAddHelper.addFieldsToSelect(correctS2SQL, new ArrayList<>(needAddFields));
+        String addFieldsToSelectSql =
+                SqlAddHelper.addFieldsToSelect(correctS2SQL, new ArrayList<>(needAddFields));
         semanticParseInfo.getSqlInfo().setCorrectedS2SQL(addFieldsToSelectSql);
         return addFieldsToSelectSql;
     }
 
-    private String addTagDefaultFields(ChatQueryContext chatQueryContext, SemanticParseInfo semanticParseInfo,
-                                       String correctS2SQL) {
-        //If it is in DETAIL mode and select *, add default metrics and dimensions.
+    private String addTagDefaultFields(
+            ChatQueryContext chatQueryContext,
+            SemanticParseInfo semanticParseInfo,
+            String correctS2SQL) {
+        // If it is in DETAIL mode and select *, add default metrics and dimensions.
         boolean hasAsterisk = SqlSelectFunctionHelper.hasAsterisk(correctS2SQL);
         if (!(hasAsterisk && QueryType.DETAIL.equals(semanticParseInfo.getQueryType()))) {
             return correctS2SQL;
         }
         Long dataSetId = semanticParseInfo.getDataSetId();
-        DataSetSchema dataSetSchema = chatQueryContext.getSemanticSchema().getDataSetSchemaMap().get(dataSetId);
+        DataSetSchema dataSetSchema =
+                chatQueryContext.getSemanticSchema().getDataSetSchemaMap().get(dataSetId);
         Set<String> needAddDefaultFields = new HashSet<>();
         if (Objects.nonNull(dataSetSchema)) {
             if (!CollectionUtils.isEmpty(dataSetSchema.getTagDefaultMetrics())) {
-                Set<String> metrics = dataSetSchema.getTagDefaultMetrics()
-                        .stream().map(schemaElement -> schemaElement.getName())
-                        .collect(Collectors.toSet());
+                Set<String> metrics =
+                        dataSetSchema.getTagDefaultMetrics().stream()
+                                .map(schemaElement -> schemaElement.getName())
+                                .collect(Collectors.toSet());
                 needAddDefaultFields.addAll(metrics);
             }
             if (!CollectionUtils.isEmpty(dataSetSchema.getTagDefaultDimensions())) {
-                Set<String> dimensions = dataSetSchema.getTagDefaultDimensions()
-                        .stream().map(schemaElement -> schemaElement.getName())
-                        .collect(Collectors.toSet());
+                Set<String> dimensions =
+                        dataSetSchema.getTagDefaultDimensions().stream()
+                                .map(schemaElement -> schemaElement.getName())
+                                .collect(Collectors.toSet());
                 needAddDefaultFields.addAll(dimensions);
             }
         }
         // remove * in sql and add default fields.
         if (!CollectionUtils.isEmpty(needAddDefaultFields)) {
-            correctS2SQL = SqlRemoveHelper.removeAsteriskAndAddFields(correctS2SQL, needAddDefaultFields);
+            correctS2SQL =
+                    SqlRemoveHelper.removeAsteriskAndAddFields(correctS2SQL, needAddDefaultFields);
         }
         return correctS2SQL;
     }

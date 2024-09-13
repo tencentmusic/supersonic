@@ -29,7 +29,6 @@ import java.util.stream.Collectors;
 
 import static com.tencent.supersonic.common.pojo.Constants.ADMIN_LOWER;
 
-
 @Component
 @Slf4j
 public class ChatConfigHelper {
@@ -38,7 +37,10 @@ public class ChatConfigHelper {
         ChatConfig chatConfig = new ChatConfig();
         BeanUtils.copyProperties(extendBaseCmd, chatConfig);
         RecordInfo recordInfo = new RecordInfo();
-        String creator = (Objects.isNull(user) || StringUtils.isEmpty(user.getName())) ? ADMIN_LOWER : user.getName();
+        String creator =
+                (Objects.isNull(user) || StringUtils.isEmpty(user.getName()))
+                        ? ADMIN_LOWER
+                        : user.getName();
         recordInfo.createdBy(creator);
         chatConfig.setRecordInfo(recordInfo);
         chatConfig.setStatus(StatusEnum.ONLINE);
@@ -50,8 +52,10 @@ public class ChatConfigHelper {
 
         BeanUtils.copyProperties(extendEditCmd, chatConfig);
         RecordInfo recordInfo = new RecordInfo();
-        String user = (Objects.isNull(facadeUser) || StringUtils.isEmpty(facadeUser.getName()))
-                ? ADMIN_LOWER : facadeUser.getName();
+        String user =
+                (Objects.isNull(facadeUser) || StringUtils.isEmpty(facadeUser.getName()))
+                        ? ADMIN_LOWER
+                        : facadeUser.getName();
         recordInfo.updatedBy(user);
         chatConfig.setRecordInfo(recordInfo);
         return chatConfig;
@@ -61,8 +65,9 @@ public class ChatConfigHelper {
         if (Objects.isNull(modelSchema) || CollectionUtils.isEmpty(modelSchema.getDimensions())) {
             return new ArrayList<>();
         }
-        Map<Long, List<SchemaElement>> dimIdAndDescPair = modelSchema.getDimensions()
-                .stream().collect(Collectors.groupingBy(SchemaElement::getId));
+        Map<Long, List<SchemaElement>> dimIdAndDescPair =
+                modelSchema.getDimensions().stream()
+                        .collect(Collectors.groupingBy(SchemaElement::getId));
         return new ArrayList<>(dimIdAndDescPair.keySet());
     }
 
@@ -70,8 +75,9 @@ public class ChatConfigHelper {
         if (Objects.isNull(modelSchema) || CollectionUtils.isEmpty(modelSchema.getMetrics())) {
             return new ArrayList<>();
         }
-        Map<Long, List<SchemaElement>> metricIdAndDescPair = modelSchema.getMetrics()
-                .stream().collect(Collectors.groupingBy(SchemaElement::getId));
+        Map<Long, List<SchemaElement>> metricIdAndDescPair =
+                modelSchema.getMetrics().stream()
+                        .collect(Collectors.groupingBy(SchemaElement::getId));
         return new ArrayList<>(metricIdAndDescPair.keySet());
     }
 
@@ -81,7 +87,8 @@ public class ChatConfigHelper {
 
         chatConfigDO.setChatAggConfig(JsonUtil.toString(chatConfig.getChatAggConfig()));
         chatConfigDO.setChatDetailConfig(JsonUtil.toString(chatConfig.getChatDetailConfig()));
-        chatConfigDO.setRecommendedQuestions(JsonUtil.toString(chatConfig.getRecommendedQuestions()));
+        chatConfigDO.setRecommendedQuestions(
+                JsonUtil.toString(chatConfig.getRecommendedQuestions()));
 
         if (Objects.isNull(chatConfig.getStatus())) {
             chatConfigDO.setStatus(null);
@@ -112,14 +119,14 @@ public class ChatConfigHelper {
         chatConfigDescriptor.setChatAggConfig(
                 JsonUtil.toObject(chatConfigDO.getChatAggConfig(), ChatAggConfigReq.class));
         chatConfigDescriptor.setRecommendedQuestions(
-                JsonUtil.toList(chatConfigDO.getRecommendedQuestions(), RecommendedQuestionReq.class));
+                JsonUtil.toList(
+                        chatConfigDO.getRecommendedQuestions(), RecommendedQuestionReq.class));
         chatConfigDescriptor.setStatusEnum(StatusEnum.of(chatConfigDO.getStatus()));
 
         chatConfigDescriptor.setCreatedBy(chatConfigDO.getCreatedBy());
         chatConfigDescriptor.setCreatedAt(chatConfigDO.getCreatedAt());
         chatConfigDescriptor.setUpdatedBy(chatConfigDO.getUpdatedBy());
         chatConfigDescriptor.setUpdatedAt(chatConfigDO.getUpdatedAt());
-
 
         if (StringUtils.isEmpty(chatConfigDO.getChatAggConfig())) {
             chatConfigDescriptor.setChatAggConfig(generateEmptyChatAggConfigResp());

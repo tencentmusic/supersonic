@@ -26,8 +26,10 @@ public class JdbcExecutor implements QueryExecutor {
         for (QueryAccelerator queryAccelerator : ComponentFactory.getQueryAccelerators()) {
             if (queryAccelerator.check(queryStatement)) {
                 SemanticQueryResp semanticQueryResp = queryAccelerator.query(queryStatement);
-                if (Objects.nonNull(semanticQueryResp) && !semanticQueryResp.getResultList().isEmpty()) {
-                    log.info("query by Accelerator {}", queryAccelerator.getClass().getSimpleName());
+                if (Objects.nonNull(semanticQueryResp)
+                        && !semanticQueryResp.getResultList().isEmpty()) {
+                    log.info(
+                            "query by Accelerator {}", queryAccelerator.getClass().getSimpleName());
                     return semanticQueryResp;
                 }
             }
@@ -43,5 +45,4 @@ public class JdbcExecutor implements QueryExecutor {
         queryResultWithColumns.setSql(sql);
         return queryResultWithColumns;
     }
-
 }

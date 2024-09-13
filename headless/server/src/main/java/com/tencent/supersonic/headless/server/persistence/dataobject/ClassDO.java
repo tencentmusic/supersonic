@@ -22,21 +22,16 @@ public class ClassDO {
     private String description;
     private Long parentId;
 
-    /**
-     * 分类状态
-     */
+    /** 分类状态 */
     private Integer status;
 
-    /**
-     * METRIC、DIMENSION、TAG
-     */
+    /** METRIC、DIMENSION、TAG */
     private String type;
+
     private String itemIds;
 
     private Date createdAt;
     private String createdBy;
     private Date updatedAt;
     private String updatedBy;
-
-
 }

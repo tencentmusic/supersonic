@@ -10,85 +10,56 @@ import java.util.Date;
 @Data
 @TableName("s2_database")
 public class DatabaseDO {
-    /**
-     * 
-     */
+    /** */
     @TableId(type = IdType.AUTO)
     private Long id;
 
-    /**
-     * 名称
-     */
+    /** 名称 */
     private String name;
 
-    /**
-     * 描述
-     */
+    /** 描述 */
     private String description;
 
-    /**
-     * 
-     */
+    /** */
     private String version;
 
-    /**
-     * 类型 mysql,clickhouse,tdw
-     */
+    /** 类型 mysql,clickhouse,tdw */
     private String type;
 
-    /**
-     * 创建时间
-     */
+    /** 创建时间 */
     private Date createdAt;
 
-    /**
-     * 创建人
-     */
+    /** 创建人 */
     private String createdBy;
 
-    /**
-     * 更新时间
-     */
+    /** 更新时间 */
     private Date updatedAt;
 
-    /**
-     * 更新人
-     */
+    /** 更新人 */
     private String updatedBy;
 
-    /**
-     * 
-     */
+    /** */
     private String admin;
 
-    /**
-     * 
-     */
+    /** */
     private String viewer;
 
-    /**
-     * 配置信息
-     */
+    /** 配置信息 */
     private String config;
 
-    /**
-     * 
-     * @return id 
-     */
+    /** @return id */
     public Long getId() {
         return id;
     }
 
-    /**
-     * 
-     * @param id 
-     */
+    /** @param id */
     public void setId(Long id) {
         this.id = id;
     }
 
     /**
      * 名称
+     *
      * @return name 名称
      */
     public String getName() {
@@ -97,6 +68,7 @@ public class DatabaseDO {
 
     /**
      * 名称
+     *
      * @param name 名称
      */
     public void setName(String name) {
@@ -105,6 +77,7 @@ public class DatabaseDO {
 
     /**
      * 描述
+     *
      * @return description 描述
      */
     public String getDescription() {
@@ -113,30 +86,26 @@ public class DatabaseDO {
 
     /**
      * 描述
+     *
      * @param description 描述
      */
     public void setDescription(String description) {
         this.description = description == null ? null : description.trim();
     }
 
-    /**
-     * 
-     * @return version 
-     */
+    /** @return version */
     public String getVersion() {
         return version;
     }
 
-    /**
-     * 
-     * @param version 
-     */
+    /** @param version */
     public void setVersion(String version) {
         this.version = version == null ? null : version.trim();
     }
 
     /**
      * 类型 mysql,clickhouse,tdw
+     *
      * @return type 类型 mysql,clickhouse,tdw
      */
     public String getType() {
@@ -145,6 +114,7 @@ public class DatabaseDO {
 
     /**
      * 类型 mysql,clickhouse,tdw
+     *
      * @param type 类型 mysql,clickhouse,tdw
      */
     public void setType(String type) {
@@ -153,6 +123,7 @@ public class DatabaseDO {
 
     /**
      * 创建时间
+     *
      * @return created_at 创建时间
      */
     public Date getCreatedAt() {
@@ -161,6 +132,7 @@ public class DatabaseDO {
 
     /**
      * 创建时间
+     *
      * @param createdAt 创建时间
      */
     public void setCreatedAt(Date createdAt) {
@@ -169,6 +141,7 @@ public class DatabaseDO {
 
     /**
      * 创建人
+     *
      * @return created_by 创建人
      */
     public String getCreatedBy() {
@@ -177,6 +150,7 @@ public class DatabaseDO {
 
     /**
      * 创建人
+     *
      * @param createdBy 创建人
      */
     public void setCreatedBy(String createdBy) {
@@ -185,6 +159,7 @@ public class DatabaseDO {
 
     /**
      * 更新时间
+     *
      * @return updated_at 更新时间
      */
     public Date getUpdatedAt() {
@@ -193,6 +168,7 @@ public class DatabaseDO {
 
     /**
      * 更新时间
+     *
      * @param updatedAt 更新时间
      */
     public void setUpdatedAt(Date updatedAt) {
@@ -201,6 +177,7 @@ public class DatabaseDO {
 
     /**
      * 更新人
+     *
      * @return updated_by 更新人
      */
     public String getUpdatedBy() {
@@ -209,46 +186,36 @@ public class DatabaseDO {
 
     /**
      * 更新人
+     *
      * @param updatedBy 更新人
      */
     public void setUpdatedBy(String updatedBy) {
         this.updatedBy = updatedBy == null ? null : updatedBy.trim();
     }
 
-    /**
-     * 
-     * @return admin 
-     */
+    /** @return admin */
     public String getAdmin() {
         return admin;
     }
 
-    /**
-     * 
-     * @param admin 
-     */
+    /** @param admin */
     public void setAdmin(String admin) {
         this.admin = admin == null ? null : admin.trim();
     }
 
-    /**
-     * 
-     * @return viewer 
-     */
+    /** @return viewer */
     public String getViewer() {
         return viewer;
     }
 
-    /**
-     * 
-     * @param viewer 
-     */
+    /** @param viewer */
     public void setViewer(String viewer) {
         this.viewer = viewer == null ? null : viewer.trim();
     }
 
     /**
      * 配置信息
+     *
      * @return config 配置信息
      */
     public String getConfig() {
@@ -257,6 +224,7 @@ public class DatabaseDO {
 
     /**
      * 配置信息
+     *
      * @param config 配置信息
      */
     public void setConfig(String config) {

@@ -1,11 +1,11 @@
 package com.tencent.supersonic.headless.server.utils;
 
-import com.tencent.supersonic.common.pojo.exception.InvalidArgumentException;
 import com.tencent.supersonic.common.jsqlparser.SqlSelectFunctionHelper;
-import com.tencent.supersonic.headless.api.pojo.enums.MetricDefineType;
+import com.tencent.supersonic.common.pojo.exception.InvalidArgumentException;
 import com.tencent.supersonic.headless.api.pojo.MetricDefineByFieldParams;
 import com.tencent.supersonic.headless.api.pojo.MetricDefineByMeasureParams;
 import com.tencent.supersonic.headless.api.pojo.MetricDefineByMetricParams;
+import com.tencent.supersonic.headless.api.pojo.enums.MetricDefineType;
 import com.tencent.supersonic.headless.api.pojo.request.MetricReq;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.CollectionUtils;
@@ -58,7 +58,8 @@ public class MetricCheckUtils {
         }
         String forbiddenCharacters = NameCheckUtils.findForbiddenCharacters(metricReq.getName());
         if (StringUtils.isNotBlank(forbiddenCharacters)) {
-            throw new InvalidArgumentException(String.format("名称包含特殊字符%s, 请修改", forbiddenCharacters));
+            throw new InvalidArgumentException(
+                    String.format("名称包含特殊字符%s, 请修改", forbiddenCharacters));
         }
     }
 
@@ -66,5 +67,4 @@ public class MetricCheckUtils {
         String sql = String.format("select %s from table", expr);
         return SqlSelectFunctionHelper.hasAggregateFunction(sql);
     }
-
 }

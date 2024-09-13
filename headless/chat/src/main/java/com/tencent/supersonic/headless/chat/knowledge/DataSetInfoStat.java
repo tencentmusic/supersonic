@@ -18,5 +18,4 @@ public class DataSetInfoStat implements Serializable {
     private long dimensionDataSetCount;
 
     private long dimensionValueDataSetCount;
-
 }

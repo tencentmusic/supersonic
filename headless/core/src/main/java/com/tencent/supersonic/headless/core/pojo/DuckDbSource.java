@@ -1,25 +1,24 @@
 package com.tencent.supersonic.headless.core.pojo;
 
+import javax.sql.DataSource;
 
 import com.tencent.supersonic.common.pojo.QueryColumn;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
 import com.tencent.supersonic.headless.core.config.ExecutorConfig;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Component;
+
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javax.sql.DataSource;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.stereotype.Component;
 
-/**
- * duckDb connection session object
- */
+/** duckDb connection session object */
 @Component
 @Slf4j
 public class DuckDbSource {
@@ -62,8 +61,10 @@ public class DuckDbSource {
     }
 
     protected void init(JdbcTemplate jdbcTemplate) {
-        jdbcTemplate.execute(String.format("SET memory_limit = '%sGB';", executorConfig.getMemoryLimit()));
-        jdbcTemplate.execute(String.format("SET temp_directory='%s';", executorConfig.getDuckDbTemp()));
+        jdbcTemplate.execute(
+                String.format("SET memory_limit = '%sGB';", executorConfig.getMemoryLimit()));
+        jdbcTemplate.execute(
+                String.format("SET temp_directory='%s';", executorConfig.getDuckDbTemp()));
         jdbcTemplate.execute(String.format("SET threads TO %s;", executorConfig.getThreads()));
         jdbcTemplate.execute("SET enable_object_cache = true;");
     }
@@ -81,21 +82,23 @@ public class DuckDbSource {
     }
 
     public void query(String sql, SemanticQueryResp queryResultWithColumns) {
-        duckDbJdbcTemplate.query(sql, rs -> {
-            if (null == rs) {
-                return queryResultWithColumns;
-            }
-            ResultSetMetaData metaData = rs.getMetaData();
-            List<QueryColumn> queryColumns = new ArrayList<>();
-            for (int i = 1; i <= metaData.getColumnCount(); i++) {
-                String key = metaData.getColumnLabel(i);
-                queryColumns.add(new QueryColumn(key, metaData.getColumnTypeName(i)));
-            }
-            queryResultWithColumns.setColumns(queryColumns);
-            List<Map<String, Object>> resultList = buildResult(rs);
-            queryResultWithColumns.setResultList(resultList);
-            return queryResultWithColumns;
-        });
+        duckDbJdbcTemplate.query(
+                sql,
+                rs -> {
+                    if (null == rs) {
+                        return queryResultWithColumns;
+                    }
+                    ResultSetMetaData metaData = rs.getMetaData();
+                    List<QueryColumn> queryColumns = new ArrayList<>();
+                    for (int i = 1; i <= metaData.getColumnCount(); i++) {
+                        String key = metaData.getColumnLabel(i);
+                        queryColumns.add(new QueryColumn(key, metaData.getColumnTypeName(i)));
+                    }
+                    queryResultWithColumns.setColumns(queryColumns);
+                    List<Map<String, Object>> resultList = buildResult(rs);
+                    queryResultWithColumns.setResultList(resultList);
+                    return queryResultWithColumns;
+                });
     }
 
     public static List<Map<String, Object>> buildResult(ResultSet resultSet) {
@@ -148,7 +151,8 @@ public class DuckDbSource {
                             row.put(column, resultSet.getObject(i));
                             break;
                         default:
-                            throw new Exception("get result row type not found :" + rsMeta.getColumnType(i));
+                            throw new Exception(
+                                    "get result row type not found :" + rsMeta.getColumnType(i));
                     }
                 }
                 list.add(row);

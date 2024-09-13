@@ -6,5 +6,4 @@ import lombok.Data;
 public class FieldParamYamlTpl {
 
     private String fieldName;
-
 }

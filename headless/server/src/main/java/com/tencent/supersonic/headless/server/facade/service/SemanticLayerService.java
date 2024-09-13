@@ -15,9 +15,7 @@ import com.tencent.supersonic.headless.api.pojo.response.SemanticTranslateResp;
 
 import java.util.List;
 
-/**
- * This interface abstracts functionalities provided by a semantic layer.
- */
+/** This interface abstracts functionalities provided by a semantic layer. */
 public interface SemanticLayerService {
 
     DataSetSchema getDataSetSchema(Long id);
@@ -35,5 +33,4 @@ public interface SemanticLayerService {
     List<DimensionResp> getDimensions(MetaFilter metaFilter);
 
     List<MetricResp> getMetrics(MetaFilter metaFilter);
-
 }

@@ -8,6 +8,7 @@ import com.hankcs.hanlp.seg.common.Term;
 import com.tencent.supersonic.common.pojo.enums.DictWordType;
 import com.tencent.supersonic.headless.api.pojo.request.DimensionValueReq;
 import com.tencent.supersonic.headless.chat.knowledge.helper.NatureHelper;
+import com.tencent.supersonic.headless.chat.utils.EditDistanceUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.CollectionUtils;
@@ -36,85 +37,134 @@ public class SearchService {
         suffixTrie = new BinTrie<>();
     }
 
-    /***
-     * prefix Search
+    /**
+     * * prefix Search
+     *
      * @param key
      * @return
      */
-    public static List<HanlpMapResult> prefixSearch(String key, int limit, Map<Long, List<Long>> modelIdToDataSetIds,
+    public static List<HanlpMapResult> prefixSearch(
+            String key,
+            int limit,
+            Map<Long, List<Long>> modelIdToDataSetIds,
             Set<Long> detectDataSetIds) {
         return prefixSearch(key, limit, trie, modelIdToDataSetIds, detectDataSetIds);
     }
 
-    public static List<HanlpMapResult> prefixSearch(String key, int limit, BinTrie<List<String>> binTrie,
-            Map<Long, List<Long>> modelIdToDataSetIds, Set<Long> detectDataSetIds) {
+    public static List<HanlpMapResult> prefixSearch(
+            String key,
+            int limit,
+            BinTrie<List<String>> binTrie,
+            Map<Long, List<Long>> modelIdToDataSetIds,
+            Set<Long> detectDataSetIds) {
         Set<Map.Entry<String, List<String>>> result = search(key, binTrie);
-        List<HanlpMapResult> hanlpMapResults = result.stream().map(
-                        entry -> {
-                            String name = entry.getKey().replace("#", " ");
-                            return new HanlpMapResult(name, entry.getValue(), key);
-                        }
-                ).sorted((a, b) -> -(b.getName().length() - a.getName().length()))
-                .collect(Collectors.toList());
-        hanlpMapResults = transformAndFilterByDataSet(hanlpMapResults, modelIdToDataSetIds,
-                detectDataSetIds, limit);
+        List<HanlpMapResult> hanlpMapResults =
+                result.stream()
+                        .map(
+                                entry -> {
+                                    String name = entry.getKey().replace("#", " ");
+                                    double similarity = EditDistanceUtils.getSimilarity(name, key);
+                                    return new HanlpMapResult(
+                                            name, entry.getValue(), key, similarity);
+                                })
+                        .sorted((a, b) -> -(b.getName().length() - a.getName().length()))
+                        .collect(Collectors.toList());
+        hanlpMapResults =
+                transformAndFilterByDataSet(
+                        hanlpMapResults, modelIdToDataSetIds, detectDataSetIds, limit);
         return hanlpMapResults;
     }
 
-    /***
-     * suffix Search
+    /**
+     * * suffix Search
+     *
      * @param key
      * @return
      */
-    public static List<HanlpMapResult> suffixSearch(String key, int limit, Map<Long, List<Long>> modelIdToDataSetIds,
+    public static List<HanlpMapResult> suffixSearch(
+            String key,
+            int limit,
+            Map<Long, List<Long>> modelIdToDataSetIds,
             Set<Long> detectDataSetIds) {
         String reverseDetectSegment = StringUtils.reverse(key);
-        return suffixSearch(reverseDetectSegment, limit, suffixTrie, modelIdToDataSetIds, detectDataSetIds);
+        return suffixSearch(
+                reverseDetectSegment, limit, suffixTrie, modelIdToDataSetIds, detectDataSetIds);
     }
 
-    public static List<HanlpMapResult> suffixSearch(String key, int limit, BinTrie<List<String>> binTrie,
-            Map<Long, List<Long>> modelIdToDataSetIds, Set<Long> detectDataSetIds) {
+    public static List<HanlpMapResult> suffixSearch(
+            String key,
+            int limit,
+            BinTrie<List<String>> binTrie,
+            Map<Long, List<Long>> modelIdToDataSetIds,
+            Set<Long> detectDataSetIds) {
         Set<Map.Entry<String, List<String>>> result = search(key, binTrie);
-        List<HanlpMapResult> hanlpMapResults = result.stream().map(
-                        entry -> {
-                            String name = entry.getKey().replace("#", " ");
-                            List<String> natures = entry.getValue().stream()
-                                    .map(nature -> nature.replaceAll(DictWordType.SUFFIX.getType(), ""))
-                                    .collect(Collectors.toList());
-                            name = StringUtils.reverse(name);
-                            return new HanlpMapResult(name, natures, key);
-                        }
-                ).sorted((a, b) -> -(b.getName().length() - a.getName().length()))
+        List<HanlpMapResult> hanlpMapResults =
+                result.stream()
+                        .map(
+                                entry -> {
+                                    String name = entry.getKey().replace("#", " ");
+                                    List<String> natures =
+                                            entry.getValue().stream()
+                                                    .map(
+                                                            nature ->
+                                                                    nature.replaceAll(
+                                                                            DictWordType.SUFFIX
+                                                                                    .getType(),
+                                                                            ""))
+                                                    .collect(Collectors.toList());
+
+                                    name = StringUtils.reverse(name);
+                                    double similarity = EditDistanceUtils.getSimilarity(name, key);
+                                    return new HanlpMapResult(name, natures, key, similarity);
+                                })
+                        .sorted((a, b) -> -(b.getName().length() - a.getName().length()))
+                        .collect(Collectors.toList());
+        return transformAndFilterByDataSet(
+                hanlpMapResults, modelIdToDataSetIds, detectDataSetIds, limit);
+    }
+
+    private static List<HanlpMapResult> transformAndFilterByDataSet(
+            List<HanlpMapResult> hanlpMapResults,
+            Map<Long, List<Long>> modelIdToDataSetIds,
+            Set<Long> detectDataSetIds,
+            int limit) {
+        return hanlpMapResults.stream()
+                .peek(
+                        hanlpMapResult -> {
+                            List<String> natures =
+                                    hanlpMapResult.getNatures().stream()
+                                            .map(
+                                                    nature ->
+                                                            NatureHelper.changeModel2DataSet(
+                                                                    nature, modelIdToDataSetIds))
+                                            .flatMap(Collection::stream)
+                                            .filter(
+                                                    nature -> {
+                                                        if (CollectionUtils.isEmpty(
+                                                                detectDataSetIds)) {
+                                                            return true;
+                                                        }
+                                                        Long dataSetId =
+                                                                NatureHelper.getDataSetId(nature);
+                                                        if (dataSetId != null) {
+                                                            return detectDataSetIds.contains(
+                                                                    dataSetId);
+                                                        }
+                                                        return false;
+                                                    })
+                                            .collect(Collectors.toList());
+                            hanlpMapResult.setNatures(natures);
+                        })
+                .filter(hanlpMapResult -> !CollectionUtils.isEmpty(hanlpMapResult.getNatures()))
+                .limit(limit)
                 .collect(Collectors.toList());
-        return transformAndFilterByDataSet(hanlpMapResults, modelIdToDataSetIds, detectDataSetIds, limit);
     }
 
-    private static List<HanlpMapResult> transformAndFilterByDataSet(List<HanlpMapResult> hanlpMapResults,
-                                                             Map<Long, List<Long>> modelIdToDataSetIds,
-                                                             Set<Long> detectDataSetIds, int limit) {
-        return hanlpMapResults.stream().peek(hanlpMapResult -> {
-            List<String> natures = hanlpMapResult.getNatures().stream()
-                    .map(nature -> NatureHelper.changeModel2DataSet(nature, modelIdToDataSetIds))
-                    .flatMap(Collection::stream)
-                    .filter(nature -> {
-                        if (CollectionUtils.isEmpty(detectDataSetIds)) {
-                            return true;
-                        }
-                        Long dataSetId = NatureHelper.getDataSetId(nature);
-                        if (dataSetId != null) {
-                            return detectDataSetIds.contains(dataSetId);
-                        }
-                        return false;
-                    }).collect(Collectors.toList());
-            hanlpMapResult.setNatures(natures);
-        }).filter(hanlpMapResult -> !CollectionUtils.isEmpty(hanlpMapResult.getNatures()))
-                .limit(limit).collect(Collectors.toList());
-    }
-
-    private static Set<Map.Entry<String, List<String>>> search(String key,
-                                                                          BinTrie<List<String>> binTrie) {
+    private static Set<Map.Entry<String, List<String>>> search(
+            String key, BinTrie<List<String>> binTrie) {
         key = key.toLowerCase();
-        Set<Map.Entry<String, List<String>>> entrySet = new TreeSet<Map.Entry<String, List<String>>>();
+        Set<Map.Entry<String, List<String>>> entrySet =
+                new TreeSet<Map.Entry<String, List<String>>>();
 
         StringBuilder sb = new StringBuilder();
         if (StringUtils.isNotBlank(key)) {
@@ -152,11 +202,14 @@ public class SearchService {
         }
         TreeMap<String, CoreDictionary.Attribute> map = new TreeMap();
         for (DictWord suffix : suffixes) {
-            CoreDictionary.Attribute attributeNew = suffix.getNatureWithFrequency() == null
-                    ? new CoreDictionary.Attribute(Nature.nz, 1)
-                    : CoreDictionary.Attribute.create(suffix.getNatureWithFrequency());
+            CoreDictionary.Attribute attributeNew =
+                    suffix.getNatureWithFrequency() == null
+                            ? new CoreDictionary.Attribute(Nature.nz, 1)
+                            : CoreDictionary.Attribute.create(suffix.getNatureWithFrequency());
             if (map.containsKey(suffix.getWord())) {
-                attributeNew = DictionaryAttributeUtil.getAttribute(map.get(suffix.getWord()), attributeNew);
+                attributeNew =
+                        DictionaryAttributeUtil.getAttribute(
+                                map.get(suffix.getWord()), attributeNew);
             }
             map.put(suffix.getWord(), attributeNew);
         }
@@ -179,15 +232,18 @@ public class SearchService {
         if (Objects.nonNull(natures) && natures.length > 0) {
             trie.put(dictWord.getWord(), getValue(natures));
         }
-        if (dictWord.getNature().contains(DictWordType.METRIC.getType()) || dictWord.getNature()
-                .contains(DictWordType.DIMENSION.getType())) {
+        if (dictWord.getNature().contains(DictWordType.METRIC.getType())
+                || dictWord.getNature().contains(DictWordType.DIMENSION.getType())) {
             suffixTrie.remove(dictWord.getWord());
         }
     }
 
     public static List<String> getDimensionValue(DimensionValueReq dimensionValueReq) {
-        String nature = DictWordType.NATURE_SPILT + dimensionValueReq.getModelId() + DictWordType.NATURE_SPILT
-                + dimensionValueReq.getElementID();
+        String nature =
+                DictWordType.NATURE_SPILT
+                        + dimensionValueReq.getModelId()
+                        + DictWordType.NATURE_SPILT
+                        + dimensionValueReq.getElementID();
         PriorityQueue<Term> terms = MultiCustomDictionary.NATURE_TO_VALUES.get(nature);
         if (CollectionUtils.isEmpty(terms)) {
             return new ArrayList<>();
@@ -195,4 +251,3 @@ public class SearchService {
         return terms.stream().map(term -> term.getWord()).collect(Collectors.toList());
     }
 }
-

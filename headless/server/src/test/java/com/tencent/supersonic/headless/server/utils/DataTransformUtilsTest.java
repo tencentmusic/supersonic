@@ -23,12 +23,13 @@ class DataTransformUtilsTest {
         inputData.add(createMap("2023/10/15", "b", "b", "5"));
         List<String> groups = Lists.newArrayList("d1", "d2");
         String metric = "m1";
-        List<Map<String, Object>> resultData = DataTransformUtils.transform(inputData,
-                metric, groups, new DateConf());
+        List<Map<String, Object>> resultData =
+                DataTransformUtils.transform(inputData, metric, groups, new DateConf());
         Assertions.assertEquals(3, resultData.size());
     }
 
-    private static Map<String, Object> createMap(String sysImpDate, String d1, String d2, String m1) {
+    private static Map<String, Object> createMap(
+            String sysImpDate, String d1, String d2, String m1) {
         Map<String, Object> map = new HashMap<>();
         map.put("sys_imp_date", sysImpDate);
         map.put("d1", d1);
@@ -36,5 +37,4 @@ class DataTransformUtilsTest {
         map.put("m1", m1);
         return map;
     }
-
 }

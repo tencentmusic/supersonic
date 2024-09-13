@@ -6,10 +6,7 @@ import lombok.Data;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * 导入字典的可选配置
- */
-
+/** 导入字典的可选配置 */
 @Data
 public class ItemValueConfig {
 

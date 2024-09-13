@@ -6,11 +6,10 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.data.mongo.MongoDataAutoConfiguration;
 import org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration;
 
-/**
- * Headless Launcher
- **/
+/** Headless Launcher */
 @Slf4j
-@SpringBootApplication(scanBasePackages = {"com.tencent.supersonic"},
+@SpringBootApplication(
+        scanBasePackages = {"com.tencent.supersonic"},
         exclude = {MongoAutoConfiguration.class, MongoDataAutoConfiguration.class})
 public class HeadlessLauncher {
 

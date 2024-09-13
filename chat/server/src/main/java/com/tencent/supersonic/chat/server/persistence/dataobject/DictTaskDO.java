@@ -1,10 +1,10 @@
 package com.tencent.supersonic.chat.server.persistence.dataobject;
 
-import java.util.Date;
-
 import lombok.Data;
 import lombok.ToString;
 import org.apache.commons.codec.digest.DigestUtils;
+
+import java.util.Date;
 
 @Data
 @ToString

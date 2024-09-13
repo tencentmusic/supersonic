@@ -1,7 +1,6 @@
 package com.tencent.supersonic.common.pojo.enums;
 
 public enum ErrorCode {
-
     MULTIPLE_ERRORS_PLACEHOLDER,
     MULTIPLE_ERRORS,
     NULL_POINTER,
@@ -12,6 +11,5 @@ public enum ErrorCode {
     DUPLICATED_THEME,
     UNKNOWN;
 
-    private ErrorCode() {
-    }
+    private ErrorCode() {}
 }

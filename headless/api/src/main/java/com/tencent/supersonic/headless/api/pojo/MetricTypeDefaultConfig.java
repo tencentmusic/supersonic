@@ -9,5 +9,4 @@ public class MetricTypeDefaultConfig {
 
     private TimeDefaultConfig timeDefaultConfig =
             new TimeDefaultConfig(7, Constants.DAY, TimeMode.RECENT);
-
 }

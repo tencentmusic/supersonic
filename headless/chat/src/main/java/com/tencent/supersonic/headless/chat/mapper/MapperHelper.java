@@ -1,6 +1,5 @@
 package com.tencent.supersonic.headless.chat.mapper;
 
-import com.hankcs.hanlp.algorithm.EditDistance;
 import com.tencent.supersonic.headless.api.pojo.response.S2Term;
 import com.tencent.supersonic.headless.chat.knowledge.helper.NatureHelper;
 import lombok.Data;
@@ -29,8 +28,11 @@ public class MapperHelper {
     }
 
     public Integer getStepOffset(List<S2Term> termList, Integer index) {
-        List<Integer> offsetList = termList.stream().sorted(Comparator.comparing(S2Term::getOffset))
-                .map(term -> term.getOffset()).collect(Collectors.toList());
+        List<Integer> offsetList =
+                termList.stream()
+                        .sorted(Comparator.comparing(S2Term::getOffset))
+                        .map(term -> term.getOffset())
+                        .collect(Collectors.toList());
 
         for (int j = 0; j < termList.size() - 1; j++) {
             if (offsetList.get(j) <= index && offsetList.get(j + 1) > index) {
@@ -40,8 +42,19 @@ public class MapperHelper {
         return index;
     }
 
-    /***
-     * exist dimension values
+    public Map<Integer, Integer> getRegOffsetToLength(List<S2Term> terms) {
+        return terms.stream()
+                .sorted(Comparator.comparing(S2Term::length))
+                .collect(
+                        Collectors.toMap(
+                                S2Term::getOffset,
+                                term -> term.word.length(),
+                                (value1, value2) -> value2));
+    }
+
+    /**
+     * * exist dimension values
+     *
      * @param natures
      * @return
      */
@@ -52,27 +65,5 @@ public class MapperHelper {
             }
         }
         return false;
-    }
-
-    public boolean existTerms(List<String> natures) {
-        for (String nature : natures) {
-            if (NatureHelper.isTermNature(nature)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /***
-     * get similarity
-     * @param detectSegment
-     * @param matchName
-     * @return
-     */
-    public double getSimilarity(String detectSegment, String matchName) {
-        String detectSegmentLower = detectSegment == null ? null : detectSegment.toLowerCase();
-        String matchNameLower = matchName == null ? null : matchName.toLowerCase();
-        return 1 - (double) EditDistance.compute(detectSegmentLower, matchNameLower) / Math.max(matchName.length(),
-                detectSegment.length());
     }
 }

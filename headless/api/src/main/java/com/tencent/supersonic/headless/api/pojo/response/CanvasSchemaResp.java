@@ -14,6 +14,4 @@ public class CanvasSchemaResp {
     private List<MetricResp> metrics;
 
     private List<DimensionResp> dimensions;
-
-
 }

@@ -1,6 +1,5 @@
 package com.tencent.supersonic.headless.server.persistence.mapper;
 
-
 import com.tencent.supersonic.headless.server.persistence.dataobject.ModelDO;
 import org.apache.ibatis.annotations.Mapper;
 
@@ -10,5 +9,4 @@ import java.util.List;
 public interface ModelDOCustomMapper {
 
     void batchUpdateStatus(List<ModelDO> modelDOS);
-
 }

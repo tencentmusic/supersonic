@@ -8,12 +8,10 @@ import org.springframework.context.annotation.Configuration;
 
 import java.io.FileNotFoundException;
 
-
 @Data
 @Configuration
 @Slf4j
 public class ChatLocalFileConfig {
-
 
     @Value("${s2.dict.directory.latest:/data/dictionary/custom}")
     private String dictDirectoryLatest;

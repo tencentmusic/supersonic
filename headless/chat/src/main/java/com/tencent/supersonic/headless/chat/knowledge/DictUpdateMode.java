@@ -1,8 +1,6 @@
-
 package com.tencent.supersonic.headless.chat.knowledge;
 
 public enum DictUpdateMode {
-
     OFFLINE_FULL("OFFLINE_FULL"),
     OFFLINE_MODEL("OFFLINE_MODEL"),
     REALTIME_ADD("REALTIME_ADD"),
@@ -27,5 +25,4 @@ public enum DictUpdateMode {
     public String getValue() {
         return value;
     }
-
 }

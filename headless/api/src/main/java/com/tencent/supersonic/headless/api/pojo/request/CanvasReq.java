@@ -13,5 +13,4 @@ public class CanvasReq extends RecordInfo {
     private String type;
 
     private String config;
-
 }

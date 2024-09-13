@@ -4,7 +4,6 @@ import com.tencent.supersonic.common.pojo.enums.StatusEnum;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-
 @NoArgsConstructor
 @Data
 public class ChatConfigFilter {

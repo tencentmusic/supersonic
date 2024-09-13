@@ -14,5 +14,4 @@ public class MetricTable {
     private List<String> dimensions = Lists.newArrayList();
     private String where;
     private AggOption aggOption = AggOption.DEFAULT;
-
 }

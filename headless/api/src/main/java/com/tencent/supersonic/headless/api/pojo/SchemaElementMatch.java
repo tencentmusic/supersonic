@@ -12,8 +12,8 @@ import lombok.ToString;
 @AllArgsConstructor
 @NoArgsConstructor
 public class SchemaElementMatch {
-
     SchemaElement element;
+    double offset;
     double similarity;
     String detectWord;
     String word;
@@ -23,5 +23,4 @@ public class SchemaElementMatch {
     public boolean isFullMatched() {
         return 1.0 == similarity;
     }
-
 }

@@ -17,5 +17,4 @@ public class UserConstants {
 
     public static final String TOKEN_PREFIX = "Bearer";
     public static final String INTERNAL = "internal";
-
 }

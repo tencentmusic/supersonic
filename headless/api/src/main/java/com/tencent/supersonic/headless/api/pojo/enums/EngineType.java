@@ -1,8 +1,6 @@
 package com.tencent.supersonic.headless.api.pojo.enums;
 
-
 public enum EngineType {
-
     TDW(0, "tdw"),
     MYSQL(1, "mysql"),
     DORIS(2, "doris"),
@@ -11,7 +9,6 @@ public enum EngineType {
     H2(5, "h2"),
     POSTGRESQL(6, "postgresql"),
     OTHER(7, "other");
-
 
     private Integer code;
 
@@ -38,5 +35,4 @@ public enum EngineType {
         }
         throw new IllegalArgumentException("Invalid value: " + value);
     }
-
 }

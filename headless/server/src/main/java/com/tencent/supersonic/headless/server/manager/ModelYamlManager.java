@@ -23,14 +23,13 @@ import org.springframework.util.CollectionUtils;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-/**
- * manager to handle the model
- */
+/** manager to handle the model */
 @Service
 @Slf4j
 public class ModelYamlManager {
 
-    public static synchronized DataModelYamlTpl convert2YamlObj(ModelResp modelResp, DatabaseResp databaseResp) {
+    public static synchronized DataModelYamlTpl convert2YamlObj(
+            ModelResp modelResp, DatabaseResp databaseResp) {
         ModelDetail modelDetail = modelResp.getModelDetail();
         DbAdaptor engineAdaptor = DbAdaptorFactory.getEngineAdaptor(databaseResp.getType());
         SysTimeDimensionBuilder.addSysTimeDimension(modelDetail.getDimensions(), engineAdaptor);
@@ -38,12 +37,18 @@ public class ModelYamlManager {
         DataModelYamlTpl dataModelYamlTpl = new DataModelYamlTpl();
         dataModelYamlTpl.setType(databaseResp.getType());
         BeanUtils.copyProperties(modelDetail, dataModelYamlTpl);
-        dataModelYamlTpl.setIdentifiers(modelDetail.getIdentifiers().stream().map(ModelYamlManager::convert)
-                .collect(Collectors.toList()));
-        dataModelYamlTpl.setDimensions(modelDetail.getDimensions().stream().map(ModelYamlManager::convert)
-                .collect(Collectors.toList()));
-        dataModelYamlTpl.setMeasures(modelDetail.getMeasures().stream().map(ModelYamlManager::convert)
-                .collect(Collectors.toList()));
+        dataModelYamlTpl.setIdentifiers(
+                modelDetail.getIdentifiers().stream()
+                        .map(ModelYamlManager::convert)
+                        .collect(Collectors.toList()));
+        dataModelYamlTpl.setDimensions(
+                modelDetail.getDimensions().stream()
+                        .map(ModelYamlManager::convert)
+                        .collect(Collectors.toList()));
+        dataModelYamlTpl.setMeasures(
+                modelDetail.getMeasures().stream()
+                        .map(ModelYamlManager::convert)
+                        .collect(Collectors.toList()));
         dataModelYamlTpl.setName(modelResp.getBizName());
         dataModelYamlTpl.setSourceId(modelResp.getDatabaseId());
         if (modelDetail.getQueryType().equalsIgnoreCase(ModelDefineType.SQL_QUERY.getName())) {
@@ -64,7 +69,8 @@ public class ModelYamlManager {
             dimensionYamlTpl.setExpr(dim.getBizName());
         }
         if (dim.getTypeParams() != null) {
-            DimensionTimeTypeParamsTpl dimensionTimeTypeParamsTpl = new DimensionTimeTypeParamsTpl();
+            DimensionTimeTypeParamsTpl dimensionTimeTypeParamsTpl =
+                    new DimensionTimeTypeParamsTpl();
             dimensionTimeTypeParamsTpl.setIsPrimary(dim.getTypeParams().getIsPrimary());
             dimensionTimeTypeParamsTpl.setTimeGranularity(dim.getTypeParams().getTimeGranularity());
             dimensionYamlTpl.setTypeParams(dimensionTimeTypeParamsTpl);
@@ -97,5 +103,4 @@ public class ModelYamlManager {
         measure.setIsCreateMetric(1);
         datasourceDetail.getMeasures().add(measure);
     }
-
 }

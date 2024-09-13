@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { MsgDataType } from '../../../common/type';
-import { getToken, isProd } from '../../../utils/utils';
+import { getToken, isMobile, isProd } from '../../../utils/utils';
 import { webPageHost } from '../../../common/env';
 
 type Props = {
@@ -111,7 +111,11 @@ const WebPage: React.FC<Props> = ({ id, data }) => {
       id={`reportIframe_${id}`}
       name={`reportIframe_${id}`}
       src={pluginUrl}
-      style={{ width: '100%', height, border: 'none' }}
+      style={{
+        width: isMobile ? 'calc(100vw - 20px)' : 'calc(100vw - 410px)',
+        height,
+        border: 'none',
+      }}
       title="reportIframe"
       allowFullScreen
     />

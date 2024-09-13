@@ -8,5 +8,4 @@ import java.util.List;
 public class LLMParserTool extends NL2SQLTool {
 
     private List<String> exampleQuestions;
-
 }

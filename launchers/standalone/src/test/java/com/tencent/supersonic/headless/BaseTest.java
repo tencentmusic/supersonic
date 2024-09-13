@@ -12,9 +12,9 @@ import com.tencent.supersonic.headless.api.pojo.request.QuerySqlReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
 import com.tencent.supersonic.headless.api.pojo.request.SemanticQueryReq;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
+import com.tencent.supersonic.headless.server.facade.service.SemanticLayerService;
 import com.tencent.supersonic.headless.server.persistence.dataobject.DomainDO;
 import com.tencent.supersonic.headless.server.persistence.repository.DomainRepository;
-import com.tencent.supersonic.headless.server.facade.service.SemanticLayerService;
 import com.tencent.supersonic.util.DataUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,11 +27,9 @@ import static java.time.LocalDate.now;
 
 public class BaseTest extends BaseApplication {
 
-    @Autowired
-    protected SemanticLayerService semanticLayerService;
+    @Autowired protected SemanticLayerService semanticLayerService;
 
-    @Autowired
-    private DomainRepository domainRepository;
+    @Autowired private DomainRepository domainRepository;
 
     protected SemanticQueryResp queryBySql(String sql) throws Exception {
         return queryBySql(sql, User.getFakeUser());
@@ -81,8 +79,7 @@ public class BaseTest extends BaseApplication {
         return queryStructReq;
     }
 
-    protected QueryStructReq buildQueryStructReq(List<String> groups,
-                                                 Aggregator aggregator) {
+    protected QueryStructReq buildQueryStructReq(List<String> groups, Aggregator aggregator) {
         QueryStructReq queryStructReq = new QueryStructReq();
         for (Long modelId : DataUtils.getMetricAgentIModelIds()) {
             queryStructReq.addModelId(modelId);
@@ -108,5 +105,4 @@ public class BaseTest extends BaseApplication {
         domainDO.setIsOpen(0);
         domainRepository.updateDomain(domainDO);
     }
-
 }

@@ -1,8 +1,5 @@
 package dev.langchain4j.dashscope.spring;
 
-
-import static dev.langchain4j.dashscope.spring.Properties.PREFIX;
-
 import dev.langchain4j.model.dashscope.QwenChatModel;
 import dev.langchain4j.model.dashscope.QwenEmbeddingModel;
 import dev.langchain4j.model.dashscope.QwenLanguageModel;
@@ -12,6 +9,8 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import static dev.langchain4j.dashscope.spring.Properties.PREFIX;
 
 @Configuration
 @EnableConfigurationProperties(Properties.class)

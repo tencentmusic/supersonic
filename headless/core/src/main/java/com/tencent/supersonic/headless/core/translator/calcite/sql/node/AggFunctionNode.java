@@ -1,19 +1,28 @@
 package com.tencent.supersonic.headless.core.translator.calcite.sql.node;
 
 import com.tencent.supersonic.headless.api.pojo.enums.EngineType;
-import java.util.Objects;
 import org.apache.calcite.sql.SqlNode;
 import org.apache.calcite.sql.validate.SqlValidatorScope;
 
+import java.util.Objects;
+
 public class AggFunctionNode extends SemanticNode {
 
-    public static SqlNode build(String agg, String name, SqlValidatorScope scope, EngineType engineType)
+    public static SqlNode build(
+            String agg, String name, SqlValidatorScope scope, EngineType engineType)
             throws Exception {
         if (Objects.isNull(agg) || agg.isEmpty()) {
             return parse(name, scope, engineType);
         }
         if (AggFunction.COUNT_DISTINCT.name().equalsIgnoreCase(agg)) {
-            return parse(AggFunction.COUNT.name() + " ( " + AggFunction.DISTINCT.name() + " " + name + " ) ", scope,
+            return parse(
+                    AggFunction.COUNT.name()
+                            + " ( "
+                            + AggFunction.DISTINCT.name()
+                            + " "
+                            + name
+                            + " ) ",
+                    scope,
                     engineType);
         }
         return parse(agg + " ( " + name + " ) ", scope, engineType);
@@ -28,6 +37,4 @@ public class AggFunctionNode extends SemanticNode {
         COUNT,
         DISTINCT
     }
-
-
 }

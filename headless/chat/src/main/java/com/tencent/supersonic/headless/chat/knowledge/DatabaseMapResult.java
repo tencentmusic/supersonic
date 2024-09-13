@@ -1,6 +1,7 @@
 package com.tencent.supersonic.headless.chat.knowledge;
 
 import com.google.common.base.Objects;
+import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import lombok.Data;
 import lombok.ToString;
@@ -26,5 +27,14 @@ public class DatabaseMapResult extends MapResult {
     @Override
     public int hashCode() {
         return Objects.hashCode(name, schemaElement);
+    }
+
+    @Override
+    public String getMapKey() {
+        return this.getName()
+                + Constants.UNDERLINE
+                + this.getSchemaElement().getId()
+                + Constants.UNDERLINE
+                + this.getSchemaElement().getName();
     }
 }

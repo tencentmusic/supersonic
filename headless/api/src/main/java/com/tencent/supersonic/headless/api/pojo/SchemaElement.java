@@ -40,8 +40,7 @@ public class SchemaElement implements Serializable {
     private int isTag;
     private String description;
     private boolean descriptionMapped;
-    @Builder.Default
-    private Map<String, Object> extInfo = new HashMap<>();
+    @Builder.Default private Map<String, Object> extInfo = new HashMap<>();
 
     @Override
     public boolean equals(Object o) {
@@ -52,8 +51,9 @@ public class SchemaElement implements Serializable {
             return false;
         }
         SchemaElement schemaElement = (SchemaElement) o;
-        return Objects.equal(dataSetId, schemaElement.dataSetId) && Objects.equal(id,
-                schemaElement.id) && Objects.equal(name, schemaElement.name)
+        return Objects.equal(dataSetId, schemaElement.dataSetId)
+                && Objects.equal(id, schemaElement.id)
+                && Objects.equal(name, schemaElement.name)
                 && Objects.equal(bizName, schemaElement.bizName)
                 && Objects.equal(type, schemaElement.type);
     }
@@ -63,7 +63,7 @@ public class SchemaElement implements Serializable {
         return Objects.hashCode(dataSetId, id, name, bizName, type);
     }
 
-    public boolean containsPartitionTime() {
+    public boolean isPartitionTime() {
         if (MapUtils.isEmpty(extInfo)) {
             return false;
         }
@@ -78,6 +78,21 @@ public class SchemaElement implements Serializable {
         return DimensionType.isPartitionTime(dimensionTYpe);
     }
 
+    public boolean isPrimaryKey() {
+        if (MapUtils.isEmpty(extInfo)) {
+            return false;
+        }
+        Object o = extInfo.get(DimensionConstants.DIMENSION_TYPE);
+        DimensionType dimensionTYpe = null;
+        if (o instanceof DimensionType) {
+            dimensionTYpe = (DimensionType) o;
+        }
+        if (o instanceof String) {
+            dimensionTYpe = DimensionType.valueOf((String) o);
+        }
+        return DimensionType.isIdentity(dimensionTYpe);
+    }
+
     public String getTimeFormat() {
         if (MapUtils.isEmpty(extInfo)) {
             return null;
@@ -87,7 +102,7 @@ public class SchemaElement implements Serializable {
 
     public String getPartitionTimeFormat() {
         String timeFormat = getTimeFormat();
-        if (StringUtils.isNotBlank(timeFormat) && containsPartitionTime()) {
+        if (StringUtils.isNotBlank(timeFormat) && isPartitionTime()) {
             return timeFormat;
         }
         return "";

@@ -1,5 +1,7 @@
 package com.tencent.supersonic.headless.core.utils;
 
+import javax.sql.DataSource;
+
 import com.tencent.supersonic.common.pojo.QueryColumn;
 import com.tencent.supersonic.common.util.DateUtils;
 import com.tencent.supersonic.headless.api.pojo.enums.DataType;
@@ -13,7 +15,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
-import javax.sql.DataSource;
 import java.rmi.ServerException;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -30,18 +31,14 @@ import java.util.Map;
 
 import static com.tencent.supersonic.common.pojo.Constants.AT_SYMBOL;
 
-/**
- * tools functions about sql query
- */
+/** tools functions about sql query */
 @Slf4j
 @Component
 public class SqlUtils {
 
-    @Getter
-    private Database database;
+    @Getter private Database database;
 
-    @Autowired
-    private JdbcDataSource jdbcDataSource;
+    @Autowired private JdbcDataSource jdbcDataSource;
 
     @Value("${s2.source.result-limit:1000000}")
     private int resultLimit;
@@ -49,15 +46,11 @@ public class SqlUtils {
     @Value("${s2.source.enable-query-log:false}")
     private boolean isQueryLogEnable;
 
-    @Getter
-    private DataType dataTypeEnum;
+    @Getter private DataType dataTypeEnum;
 
-    @Getter
-    private JdbcDataSourceUtils jdbcDataSourceUtils;
+    @Getter private JdbcDataSourceUtils jdbcDataSourceUtils;
 
-    public SqlUtils() {
-
-    }
+    public SqlUtils() {}
 
     public SqlUtils(Database database) {
         this.database = database;
@@ -65,8 +58,7 @@ public class SqlUtils {
     }
 
     public SqlUtils init(Database database) {
-        return SqlUtilsBuilder
-                .getBuilder()
+        return SqlUtilsBuilder.getBuilder()
                 .withName(database.getId() + AT_SYMBOL + database.getName())
                 .withType(database.getType())
                 .withJdbcUrl(database.getUrl())
@@ -113,25 +105,27 @@ public class SqlUtils {
         getResult(sql, queryResultWithColumns, jdbcTemplate());
     }
 
-    private SemanticQueryResp getResult(String sql, SemanticQueryResp queryResultWithColumns,
-            JdbcTemplate jdbcTemplate) {
-        jdbcTemplate.query(sql, rs -> {
-            if (null == rs) {
-                return queryResultWithColumns;
-            }
+    private SemanticQueryResp getResult(
+            String sql, SemanticQueryResp queryResultWithColumns, JdbcTemplate jdbcTemplate) {
+        jdbcTemplate.query(
+                sql,
+                rs -> {
+                    if (null == rs) {
+                        return queryResultWithColumns;
+                    }
 
-            ResultSetMetaData metaData = rs.getMetaData();
-            List<QueryColumn> queryColumns = new ArrayList<>();
-            for (int i = 1; i <= metaData.getColumnCount(); i++) {
-                String key = metaData.getColumnLabel(i);
-                queryColumns.add(new QueryColumn(key, metaData.getColumnTypeName(i)));
-            }
-            queryResultWithColumns.setColumns(queryColumns);
+                    ResultSetMetaData metaData = rs.getMetaData();
+                    List<QueryColumn> queryColumns = new ArrayList<>();
+                    for (int i = 1; i <= metaData.getColumnCount(); i++) {
+                        String key = metaData.getColumnLabel(i);
+                        queryColumns.add(new QueryColumn(key, metaData.getColumnTypeName(i)));
+                    }
+                    queryResultWithColumns.setColumns(queryColumns);
 
-            List<Map<String, Object>> resultList = getAllData(rs, queryColumns);
-            queryResultWithColumns.setResultList(resultList);
-            return queryResultWithColumns;
-        });
+                    List<Map<String, Object>> resultList = getAllData(rs, queryColumns);
+                    queryResultWithColumns.setResultList(resultList);
+                    return queryResultWithColumns;
+                });
         return queryResultWithColumns;
     }
 
@@ -147,7 +141,8 @@ public class SqlUtils {
         return data;
     }
 
-    private Map<String, Object> getLineData(ResultSet rs, List<QueryColumn> queryColumns) throws SQLException {
+    private Map<String, Object> getLineData(ResultSet rs, List<QueryColumn> queryColumns)
+            throws SQLException {
         Map<String, Object> map = new LinkedHashMap<>();
         for (QueryColumn queryColumn : queryColumns) {
             String colName = queryColumn.getNameEn();
@@ -184,9 +179,7 @@ public class SqlUtils {
         private String username;
         private String password;
 
-        private SqlUtilsBuilder() {
-
-        }
+        private SqlUtilsBuilder() {}
 
         public static SqlUtilsBuilder getBuilder() {
             return new SqlUtilsBuilder();
@@ -233,13 +226,14 @@ public class SqlUtils {
         }
 
         public SqlUtils build() {
-            Database database = Database.builder()
-                    .name(this.name)
-                    .type(this.type)
-                    .url(this.jdbcUrl)
-                    .username(this.username)
-                    .password(this.password)
-                    .build();
+            Database database =
+                    Database.builder()
+                            .name(this.name)
+                            .type(this.type)
+                            .url(this.jdbcUrl)
+                            .username(this.username)
+                            .password(this.password)
+                            .build();
 
             SqlUtils sqlUtils = new SqlUtils(database);
             sqlUtils.jdbcDataSource = this.jdbcDataSource;

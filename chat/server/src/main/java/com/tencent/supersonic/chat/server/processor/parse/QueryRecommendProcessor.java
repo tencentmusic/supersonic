@@ -18,9 +18,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
-/**
- * MetricRecommendProcessor fills recommended query based on embedding similarity.
- */
+/** MetricRecommendProcessor fills recommended query based on embedding similarity. */
 @Slf4j
 public class QueryRecommendProcessor implements ParseResultProcessor {
 
@@ -32,8 +30,8 @@ public class QueryRecommendProcessor implements ParseResultProcessor {
     @SneakyThrows
     private void doProcess(ParseResp parseResp, ParseContext parseContext) {
         Long queryId = parseResp.getQueryId();
-        List<SimilarQueryRecallResp> solvedQueries = getSimilarQueries(parseContext.getQueryText(),
-                parseContext.getAgent().getId());
+        List<SimilarQueryRecallResp> solvedQueries =
+                getSimilarQueries(parseContext.getQueryText(), parseContext.getAgent().getId());
         ChatQueryDO chatQueryDO = getChatQuery(queryId);
         chatQueryDO.setSimilarQueries(JSONObject.toJSONString(solvedQueries));
         updateChatQuery(chatQueryDO);
@@ -43,9 +41,14 @@ public class QueryRecommendProcessor implements ParseResultProcessor {
         ExemplarService exemplarService = ContextUtils.getBean(ExemplarService.class);
         EmbeddingConfig embeddingConfig = ContextUtils.getBean(EmbeddingConfig.class);
         String memoryCollectionName = embeddingConfig.getMemoryCollectionName(agentId);
-        List<Text2SQLExemplar> exemplars = exemplarService.recallExemplars(memoryCollectionName, queryText, 5);
-        return exemplars.stream().map(sqlExemplar ->
-                        SimilarQueryRecallResp.builder().queryText(sqlExemplar.getQuestion()).build())
+        List<Text2SQLExemplar> exemplars =
+                exemplarService.recallExemplars(memoryCollectionName, queryText, 5);
+        return exemplars.stream()
+                .map(
+                        sqlExemplar ->
+                                SimilarQueryRecallResp.builder()
+                                        .queryText(sqlExemplar.getQuestion())
+                                        .build())
                 .collect(Collectors.toList());
     }
 
@@ -61,5 +64,4 @@ public class QueryRecommendProcessor implements ParseResultProcessor {
         updateWrapper.set("similar_queries", chatQueryDO.getSimilarQueries());
         chatQueryRepository.updateChatQuery(chatQueryDO, updateWrapper);
     }
-
 }

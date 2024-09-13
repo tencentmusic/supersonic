@@ -18,5 +18,4 @@ class LanguageModelProperties {
     private Double penaltyScore;
     private Boolean logRequests;
     private Boolean logResponses;
-
 }

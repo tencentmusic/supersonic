@@ -30,6 +30,8 @@ public enum AggregateEnum {
 
     public static Map<String, String> getAggregateEnum() {
         return Arrays.stream(AggregateEnum.values())
-                .collect(Collectors.toMap(AggregateEnum::getAggregateCh, AggregateEnum::getAggregateEN));
+                .collect(
+                        Collectors.toMap(
+                                AggregateEnum::getAggregateCh, AggregateEnum::getAggregateEN));
     }
 }

@@ -1,6 +1,5 @@
 package com.tencent.supersonic.chat.server.service;
 
-
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.chat.api.pojo.request.ChatConfigBaseReq;
 import com.tencent.supersonic.chat.api.pojo.request.ChatConfigEditReqReq;
@@ -27,5 +26,4 @@ public interface ConfigService {
     ChatConfigResp fetchConfigByModelId(Long modelId);
 
     List<ChatConfigRichResp> getAllChatRichConfig();
-
 }
