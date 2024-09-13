@@ -11,6 +11,7 @@ import org.apache.commons.collections4.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Data
@@ -56,8 +57,12 @@ public class LLMReq {
                                 .map(dimension -> dimension.getName())
                                 .collect(Collectors.toList()));
             }
-            fieldNameList.add(partitionTime.getName());
-            fieldNameList.add(primaryKey.getName());
+            if (Objects.nonNull(partitionTime)) {
+                fieldNameList.add(partitionTime.getName());
+            }
+            if (Objects.nonNull(primaryKey)) {
+                fieldNameList.add(primaryKey.getName());
+            }
             return fieldNameList;
         }
     }
