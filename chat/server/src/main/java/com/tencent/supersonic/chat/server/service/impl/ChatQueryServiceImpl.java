@@ -200,6 +200,7 @@ public class ChatQueryServiceImpl implements ChatQueryService {
         SemanticParseInfo parseInfo =
                 chatManageService.getParseInfo(chatQueryDataReq.getQueryId(), parseId);
         parseInfo = mergeParseInfo(parseInfo, chatQueryDataReq);
+        parseInfo.setSqlInfo(new SqlInfo());
         DataSetSchema dataSetSchema =
                 semanticLayerService.getDataSetSchema(parseInfo.getDataSetId());
 
