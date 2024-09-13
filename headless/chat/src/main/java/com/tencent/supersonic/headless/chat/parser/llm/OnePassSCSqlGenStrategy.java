@@ -25,6 +25,21 @@ import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 public class OnePassSCSqlGenStrategy extends SqlGenStrategy {
 
+    private static final String INSTRUCTION =
+            ""
+                    + "\n#Role: You are a data analyst experienced in SQL languages."
+                    + "\n#Task: You will be provided with a natural language question asked by users,"
+                    + "please convert it to a SQL query so that relevant data could be returned "
+                    + "by executing the SQL query against underlying database."
+                    + "\n#Rules:"
+                    + "\n1.ALWAYS generate columns and values specified in the `Schema`, DO NOT hallucinate."
+                    + "\n2.ALWAYS specify date filter using `>`,`<`,`>=`,`<=` operator."
+                    + "\n3.DO NOT include date filter in the where clause if not explicitly expressed in the `Question`."
+                    + "\n4.DO NOT calculate date range using functions."
+                    + "\n5.DO NOT miss the AGGREGATE operator of metrics, always add it as needed."
+                    + "\n#Exemplars:\n{{exemplar}}"
+                    + "#Question:\nQuestion:{{question}},Schema:{{schema}},SideInfo:{{information}}";
+
     @Data
     static class SemanticSql {
         @Description("thought or remarks to tell users about the sql, make it short.")
@@ -37,22 +52,6 @@ public class OnePassSCSqlGenStrategy extends SqlGenStrategy {
     interface SemanticSqlExtractor {
         SemanticSql generateSemanticSql(String text);
     }
-
-    private static final String INSTRUCTION =
-            ""
-                    + "\n#Role: You are a data analyst experienced in SQL languages."
-                    + "#Task: You will be provided with a natural language question asked by users,"
-                    + "please convert it to a SQL query so that relevant data could be returned "
-                    + "by executing the SQL query against underlying database."
-                    + "\n#Rules:"
-                    + "1.ALWAYS generate columns and values specified in the `Schema`, DO NOT hallucinate."
-                    + "2.ALWAYS specify date filter using `>`,`<`,`>=`,`<=` operator."
-                    + "3.DO NOT include date filter in the where clause if not explicitly expressed in the `Question`."
-                    + "4.DO NOT calculate date range using functions."
-                    + "5.DO NOT miss the AGGREGATE operator of metrics, always add it as needed."
-                    + "\n#Exemplars:\n{{exemplar}}"
-                    + "\n#Question:"
-                    + "Question:{{question}},Schema:{{schema}},SideInfo:{{information}}";
 
     @Override
     public LLMResp generate(LLMReq llmReq) {
