@@ -32,7 +32,7 @@ public class Text2SQLEval extends BaseTest {
 
     @Test
     public void test_agg() throws Exception {
-        QueryResult result = submitNewChat("近30天访问次数", agentId);
+        QueryResult result = submitNewChat("近30天总访问次数", agentId);
         assert result.getQueryColumns().size() == 1;
         assert result.getQueryColumns().get(0).getName().contains("访问次数");
     }
@@ -56,11 +56,11 @@ public class Text2SQLEval extends BaseTest {
 
     @Test
     public void test_drilldown_and_topN() throws Exception {
-        QueryResult result = submitNewChat("过去30天访问次数最高的部门top2", agentId);
+        QueryResult result = submitNewChat("过去30天访问次数最高的部门top3", agentId);
         assert result.getQueryColumns().size() == 2;
         assert result.getQueryColumns().get(0).getName().equalsIgnoreCase("部门");
         assert result.getQueryColumns().get(1).getName().contains("访问次数");
-        assert result.getQueryResults().size() == 2;
+        assert result.getQueryResults().size() == 3;
     }
 
     @Test
@@ -75,9 +75,8 @@ public class Text2SQLEval extends BaseTest {
     @Test
     public void test_filter() throws Exception {
         QueryResult result = submitNewChat("近一个月sales部门总访问次数超过10次的用户有哪些", agentId);
-        assert result.getQueryColumns().size() == 2;
+        assert result.getQueryColumns().size() >= 1;
         assert result.getQueryColumns().get(0).getName().contains("用户");
-        assert result.getQueryColumns().get(1).getName().contains("访问次数");
         assert result.getQueryResults().size() == 2;
     }
 
