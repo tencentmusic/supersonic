@@ -6,6 +6,7 @@
 @similar-questions-prefix-cls: ~'@{supersonic-chat-prefix}-similar-questions';
 
 .@{chat-item-prefix-cls} {
+  position: relative;
   display: flex;
   width: 100%;
 
@@ -91,6 +92,12 @@
     border-radius: 50%;
     color: var(--chat-blue);
     background-color: #fff;
+  }
+
+  &-time {
+    position: absolute;
+    top: -22px;
+    color: var(--text-color-fourth);
   }
 
   &-mobile-msg-card {

@@ -21,6 +21,7 @@ import Tools from '../Tools';
 import SqlItem from './SqlItem';
 import SimilarQuestionItem from './SimilarQuestionItem';
 import dayjs, { Dayjs } from 'dayjs';
+
 type Props = {
   msg: string;
   conversationId?: number;
@@ -326,6 +327,11 @@ const ChatItem: React.FC<Props> = ({
     <div className={prefixCls}>
       {!isMobile && <IconFont type="icon-zhinengsuanfa" className={`${prefixCls}-avatar`} />}
       <div className={isMobile ? `${prefixCls}-mobile-msg-card` : ''}>
+        <div className={`${prefixCls}-time`}>
+          {parseTimeCost?.parseStartTime
+            ? dayjs(parseTimeCost.parseStartTime).format('M月D日 HH:mm')
+            : ''}
+        </div>
         <div className={contentClass}>
           <ParseTip
             isSimpleMode={isSimpleMode}
