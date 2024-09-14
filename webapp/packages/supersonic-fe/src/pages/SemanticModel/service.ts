@@ -364,8 +364,8 @@ export async function executeSql(params: ExcuteSqlParams) {
   return request.post(`${process.env.API_BASE_URL}database/executeSql`, { data });
 }
 
-export async function getColumnsBySql(params: { databaseId: number; sql: string }) {
-  return request.get(`${process.env.API_BASE_URL}database/getColumnsBySql`, {
+export async function listColumnsBySql(params: { databaseId: number; sql: string }) {
+  return request.get(`${process.env.API_BASE_URL}database/listColumnsBySql`, {
     params,
   });
 }
