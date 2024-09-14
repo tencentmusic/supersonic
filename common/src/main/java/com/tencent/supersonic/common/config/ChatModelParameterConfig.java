@@ -141,12 +141,12 @@ public class ChatModelParameterConfig extends ParameterConfig {
     private static List<String> getCandidateValues() {
         return Lists.newArrayList(
                 OpenAiModelFactory.PROVIDER,
-                AzureModelFactory.PROVIDER,
                 OllamaModelFactory.PROVIDER,
                 QianfanModelFactory.PROVIDER,
                 ZhipuModelFactory.PROVIDER,
                 LocalAiModelFactory.PROVIDER,
-                DashscopeModelFactory.PROVIDER);
+                DashscopeModelFactory.PROVIDER,
+                AzureModelFactory.PROVIDER);
     }
 
     private static List<Parameter.Dependency> getBaseUrlDependency() {
