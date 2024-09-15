@@ -406,9 +406,18 @@ public class SqlRemoveHelper {
         SelectDeParser selectDeParser = new SelectDeParser(expressionDeParser, buffer);
         expressionDeParser.setSelectVisitor(selectDeParser);
         expressionDeParser.setBuffer(buffer);
-
-        selectStatement.accept(selectDeParser);
-        return buffer.toString();
+        PlainSelect plainSelect = (PlainSelect) selectStatement.getSelectBody();
+        if (plainSelect.getWhere() != null) {
+            plainSelect.getWhere().accept(expressionDeParser);
+        }
+        // Parse the modified WHERE clause back to an Expression
+        try {
+            Expression newWhere = CCJSqlParserUtil.parseCondExpression(buffer.toString());
+            plainSelect.setWhere(newWhere);
+        } catch (Exception e) {
+            log.error("parseCondExpression error:{}", buffer, e);
+        }
+        return selectStatement.toString();
     }
 
     private static boolean isInvalidSelect(Select selectStatement) {
