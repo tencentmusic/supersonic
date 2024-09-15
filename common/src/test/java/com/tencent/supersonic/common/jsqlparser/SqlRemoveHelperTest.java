@@ -185,6 +185,16 @@ class SqlRemoveHelperTest {
         Assert.assertEquals(
                 "SELECT 数据日期 FROM 歌曲库 WHERE 数据日期 = '2023-08-09' AND 歌曲发布时间 = '2023-08-01' GROUP BY 数据日期",
                 replaceSql);
+
+        sql =
+                "select 数据日期 from 歌曲库 where 歌曲名 is null and 数据日期 = '2023-08-09' and "
+                        + "歌曲发布时间 = '2023-08-01' group by 数据日期 having 歌曲名 is null";
+
+        replaceSql = SqlRemoveHelper.removeIsNullInWhere(sql, removeFieldNames);
+
+        Assert.assertEquals(
+                "SELECT 数据日期 FROM 歌曲库 WHERE 数据日期 = '2023-08-09' AND 歌曲发布时间 = '2023-08-01' GROUP BY 数据日期 HAVING 歌曲名 IS NULL",
+                replaceSql);
     }
 
     @Test
@@ -199,6 +209,16 @@ class SqlRemoveHelperTest {
 
         Assert.assertEquals(
                 "SELECT 数据日期 FROM 歌曲库 WHERE 数据日期 = '2023-08-09' AND 歌曲发布时间 = '2023-08-01' GROUP BY 数据日期",
+                replaceSql);
+
+        sql =
+                "select 数据日期 from 歌曲库 where 歌曲名 is not null and 数据日期 = '2023-08-09' and "
+                        + "歌曲发布时间 = '2023-08-01' group by 数据日期 having 歌曲名 is not null";
+
+        replaceSql = SqlRemoveHelper.removeNotNullInWhere(sql, removeFieldNames);
+
+        Assert.assertEquals(
+                "SELECT 数据日期 FROM 歌曲库 WHERE 数据日期 = '2023-08-09' AND 歌曲发布时间 = '2023-08-01' GROUP BY 数据日期 HAVING 歌曲名 IS NOT NULL",
                 replaceSql);
     }
 }
