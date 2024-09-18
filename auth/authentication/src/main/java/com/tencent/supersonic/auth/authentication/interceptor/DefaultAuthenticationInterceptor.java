@@ -14,7 +14,6 @@ import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.S2ThreadContext;
 import com.tencent.supersonic.common.util.ThreadContext;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.method.HandlerMethod;
 
 import java.lang.reflect.Method;
@@ -61,7 +60,7 @@ public class DefaultAuthenticationInterceptor extends AuthenticationInterceptor 
         }
 
         UserWithPassword user = userTokenUtils.getUserWithPassword(request);
-        if (StringUtils.isNotBlank(user.getName())) {
+        if (user != null) {
             setContext(user.getName(), request);
             return true;
         }
