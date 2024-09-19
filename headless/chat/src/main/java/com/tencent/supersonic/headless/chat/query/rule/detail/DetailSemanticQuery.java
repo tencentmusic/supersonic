@@ -18,8 +18,6 @@ import java.util.Objects;
 @Slf4j
 public abstract class DetailSemanticQuery extends RuleSemanticQuery {
 
-    private static final Long DETAIL_MAX_RESULTS = 500L;
-
     public DetailSemanticQuery() {
         super();
     }
@@ -35,7 +33,9 @@ public abstract class DetailSemanticQuery extends RuleSemanticQuery {
         super.fillParseInfo(chatQueryContext);
 
         parseInfo.setQueryType(QueryType.DETAIL);
-        parseInfo.setLimit(DETAIL_MAX_RESULTS);
+        if (Objects.isNull(parseInfo.getLimit())) {
+            parseInfo.setLimit(parseInfo.getDetailLimit());
+        }
         if (!needFillDateConf(chatQueryContext)) {
             return;
         }

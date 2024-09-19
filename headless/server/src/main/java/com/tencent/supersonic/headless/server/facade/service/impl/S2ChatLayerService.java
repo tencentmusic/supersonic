@@ -145,7 +145,7 @@ public class S2ChatLayerService implements ChatLayerService {
         }
         SchemaElement dataSet = semanticSchema.getDataSet(dataSetId);
         semanticParseInfo.setDataSet(dataSet);
-
+        semanticParseInfo.setQueryConfig(semanticSchema.getQueryConfig(dataSetId));
         ComponentFactory.getSemanticCorrectors()
                 .forEach(
                         corrector -> {

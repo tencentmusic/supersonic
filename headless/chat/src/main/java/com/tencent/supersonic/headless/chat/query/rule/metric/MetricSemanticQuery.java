@@ -20,7 +20,6 @@ import static com.tencent.supersonic.headless.chat.query.rule.QueryMatchOption.R
 @Slf4j
 public abstract class MetricSemanticQuery extends RuleSemanticQuery {
 
-    private static final Long METRIC_MAX_RESULTS = 365L;
 
     public MetricSemanticQuery() {
         super();
@@ -36,7 +35,9 @@ public abstract class MetricSemanticQuery extends RuleSemanticQuery {
     @Override
     public void fillParseInfo(ChatQueryContext chatQueryContext) {
         super.fillParseInfo(chatQueryContext);
-        parseInfo.setLimit(METRIC_MAX_RESULTS);
+        if (Objects.isNull(parseInfo.getLimit())) {
+            parseInfo.setLimit(parseInfo.getMetricLimit());
+        }
         fillDateInfo(chatQueryContext);
     }
 

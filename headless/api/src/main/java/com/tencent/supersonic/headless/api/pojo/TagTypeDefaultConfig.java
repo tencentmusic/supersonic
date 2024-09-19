@@ -9,4 +9,6 @@ public class TagTypeDefaultConfig {
 
     // default time to filter tag selection results
     private TimeDefaultConfig timeDefaultConfig = new TimeDefaultConfig();
+
+    private Long limit;
 }
