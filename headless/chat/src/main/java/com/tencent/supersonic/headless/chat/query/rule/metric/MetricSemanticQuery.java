@@ -20,7 +20,6 @@ import static com.tencent.supersonic.headless.chat.query.rule.QueryMatchOption.R
 @Slf4j
 public abstract class MetricSemanticQuery extends RuleSemanticQuery {
 
-
     public MetricSemanticQuery() {
         super();
         queryMatcher.addOption(METRIC, REQUIRED, AT_LEAST, 1);

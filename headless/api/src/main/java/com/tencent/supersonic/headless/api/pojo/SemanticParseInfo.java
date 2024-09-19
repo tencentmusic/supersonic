@@ -76,8 +76,9 @@ public class SemanticParseInfo {
 
     public Long getDetailLimit() {
         Long limit = DEFAULT_DETAIL_LIMIT;
-        if (Objects.nonNull(queryConfig) && Objects.nonNull(queryConfig.getTagTypeDefaultConfig()) &&
-                Objects.nonNull(queryConfig.getTagTypeDefaultConfig().getLimit())) {
+        if (Objects.nonNull(queryConfig)
+                && Objects.nonNull(queryConfig.getTagTypeDefaultConfig())
+                && Objects.nonNull(queryConfig.getTagTypeDefaultConfig().getLimit())) {
             limit = queryConfig.getTagTypeDefaultConfig().getLimit();
         }
         return limit;
@@ -85,8 +86,9 @@ public class SemanticParseInfo {
 
     public Long getMetricLimit() {
         Long limit = DEFAULT_METRIC_LIMIT;
-        if (Objects.nonNull(queryConfig) && Objects.nonNull(queryConfig.getMetricTypeDefaultConfig()) &&
-                Objects.nonNull(queryConfig.getMetricTypeDefaultConfig().getLimit())) {
+        if (Objects.nonNull(queryConfig)
+                && Objects.nonNull(queryConfig.getMetricTypeDefaultConfig())
+                && Objects.nonNull(queryConfig.getMetricTypeDefaultConfig().getLimit())) {
             limit = queryConfig.getMetricTypeDefaultConfig().getLimit();
         }
         return limit;

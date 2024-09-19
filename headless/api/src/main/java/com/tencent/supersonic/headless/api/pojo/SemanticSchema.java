@@ -152,11 +152,14 @@ public class SemanticSchema implements Serializable {
         return getElementsById(dataSetId, dataSets).orElse(null);
     }
 
-
     public QueryConfig getQueryConfig(Long dataSetId) {
-        DataSetSchema first = dataSetSchemaList.stream()
-                .filter(dataSetSchema -> dataSetId.equals(dataSetSchema.getDataSet().getDataSetId()))
-                .findFirst().orElse(null);
+        DataSetSchema first =
+                dataSetSchemaList.stream()
+                        .filter(
+                                dataSetSchema ->
+                                        dataSetId.equals(dataSetSchema.getDataSet().getDataSetId()))
+                        .findFirst()
+                        .orElse(null);
         if (Objects.nonNull(first)) {
             return first.getQueryConfig();
         }
