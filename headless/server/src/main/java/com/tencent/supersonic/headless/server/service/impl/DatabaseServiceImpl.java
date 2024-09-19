@@ -186,6 +186,9 @@ public class DatabaseServiceImpl extends ServiceImpl<DatabaseDOMapper, DatabaseD
 
     @Override
     public List<DBColumn> getColumns(Long id, String sql) throws SQLException {
+        if (sql.endsWith(";")) {
+            sql = sql.substring(0, sql.length() - 1);
+        }
         String wrapSql = String.format("select * from (%s) a limit 1", sql);
         DatabaseResp databaseResp = getDatabase(id);
         SemanticQueryResp semanticQueryResp = executeSql(wrapSql, databaseResp);

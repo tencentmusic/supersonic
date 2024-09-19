@@ -131,10 +131,10 @@ public class EmbeddingModelParameterConfig extends ParameterConfig {
                 InMemoryModelFactory.PROVIDER,
                 OpenAiModelFactory.PROVIDER,
                 OllamaModelFactory.PROVIDER,
-                AzureModelFactory.PROVIDER,
                 DashscopeModelFactory.PROVIDER,
                 QianfanModelFactory.PROVIDER,
-                ZhipuModelFactory.PROVIDER);
+                ZhipuModelFactory.PROVIDER,
+                AzureModelFactory.PROVIDER);
     }
 
     private static List<Parameter.Dependency> getBaseUrlDependency() {

@@ -15,6 +15,7 @@ import { isMobile } from '../../utils/utils';
 
 type Props = {
   queryId?: number;
+  question: string;
   data: MsgDataType;
   chartIndex: number;
   triggerResize?: boolean;
@@ -25,6 +26,7 @@ type Props = {
 
 const ChatMsg: React.FC<Props> = ({
   queryId,
+  question,
   data,
   chartIndex,
   triggerResize,
@@ -176,6 +178,7 @@ const ChatMsg: React.FC<Props> = ({
         return (
           <MetricCard
             data={{ ...data, queryColumns: columns, queryResults: dataSource }}
+            question={question}
             loading={loading}
           />
         );
@@ -194,6 +197,7 @@ const ChatMsg: React.FC<Props> = ({
               queryColumns: columns,
               queryResults: dataSource,
             }}
+            question={question}
             loading={loading}
             chartIndex={chartIndex}
             triggerResize={triggerResize}
@@ -207,6 +211,7 @@ const ChatMsg: React.FC<Props> = ({
         return (
           <Bar
             data={{ ...data, queryColumns: columns, queryResults: dataSource }}
+            question={question}
             triggerResize={triggerResize}
             loading={loading}
             metricField={metricFields[0]}
@@ -342,7 +347,7 @@ const ChatMsg: React.FC<Props> = ({
   return (
     <div className={chartMsgClass} style={style}>
       {dataSource?.length === 0 ? (
-        <div>暂无数据，如有疑问请联系管理员</div>
+        <div>暂无数据</div>
       ) : (
         <div>
           {getMsgContent()}

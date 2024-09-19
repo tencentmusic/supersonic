@@ -200,6 +200,7 @@ public class ChatQueryServiceImpl implements ChatQueryService {
         SemanticParseInfo parseInfo =
                 chatManageService.getParseInfo(chatQueryDataReq.getQueryId(), parseId);
         parseInfo = mergeParseInfo(parseInfo, chatQueryDataReq);
+        parseInfo.setSqlInfo(new SqlInfo());
         DataSetSchema dataSetSchema =
                 semanticLayerService.getDataSetSchema(parseInfo.getDataSetId());
 
@@ -559,8 +560,12 @@ public class ChatQueryServiceImpl implements ChatQueryService {
                 iterator.remove();
                 continue;
             }
-            List<String> collection =
-                    JsonUtil.toList(JsonUtil.toString(queryFilterValue), String.class);
+            List<String> collection = new ArrayList<>();
+            if (queryFilterValue instanceof List) {
+                collection.addAll((List) queryFilterValue);
+            } else if (queryFilterValue instanceof String) {
+                collection.add((String) queryFilterValue);
+            }
             if (FilterOperatorEnum.IN.equals(queryFilter.getOperator())
                     && CollectionUtils.isEmpty(collection)) {
                 iterator.remove();

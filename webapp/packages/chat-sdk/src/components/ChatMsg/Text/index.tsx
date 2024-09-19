@@ -18,7 +18,7 @@ const Text: React.FC<Props> = ({ columns, referenceColumn, dataSource }) => {
 
   const initData = () => {
     let textValue = dataSource[0][columns[0].nameEn];
-    setText(textValue === undefined ? '暂无数据，如有疑问请联系管理员' : textValue);
+    setText(textValue === undefined ? '暂无数据' : textValue);
     if (referenceColumn) {
       const referenceDataValue = dataSource[0][referenceColumn.nameEn];
       setReferenceData(referenceDataValue || []);

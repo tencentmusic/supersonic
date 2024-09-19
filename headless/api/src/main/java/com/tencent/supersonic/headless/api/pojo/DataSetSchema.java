@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 @Data
 public class DataSetSchema {
 
+    private String databaseType;
     private SchemaElement dataSet;
     private Set<SchemaElement> metrics = new HashSet<>();
     private Set<SchemaElement> dimensions = new HashSet<>();
@@ -134,13 +135,21 @@ public class DataSetSchema {
     }
 
     public boolean containsPartitionDimensions() {
-        return dimensions.stream().anyMatch(SchemaElement::containsPartitionTime);
+        return dimensions.stream().anyMatch(SchemaElement::isPartitionTime);
     }
 
     public SchemaElement getPartitionDimension() {
         for (SchemaElement dimension : dimensions) {
-            String partitionTimeFormat = dimension.getPartitionTimeFormat();
-            if (StringUtils.isNotBlank(partitionTimeFormat)) {
+            if (dimension.isPartitionTime()) {
+                return dimension;
+            }
+        }
+        return null;
+    }
+
+    public SchemaElement getPrimaryKey() {
+        for (SchemaElement dimension : dimensions) {
+            if (dimension.isPrimaryKey()) {
                 return dimension;
             }
         }

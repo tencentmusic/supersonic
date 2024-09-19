@@ -18,6 +18,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import static com.tencent.supersonic.auth.api.authentication.constant.UserConstants.TOKEN_CREATE_TIME;
 import static com.tencent.supersonic.auth.api.authentication.constant.UserConstants.TOKEN_IS_ADMIN;
@@ -68,13 +69,13 @@ public class UserTokenUtils {
 
     public User getUser(HttpServletRequest request) {
         String token = request.getHeader(authenticationConfig.getTokenHttpHeaderKey());
-        final Claims claims = getClaims(token, request);
-        return getUser(claims);
+        final Optional<Claims> claimsOptional = getClaims(token, request);
+        return claimsOptional.map(this::getUser).orElse(User.getVisitUser());
     }
 
     public User getUser(String token, String appKey) {
-        final Claims claims = getClaims(token, appKey);
-        return getUser(claims);
+        final Optional<Claims> claimsOptional = getClaims(token, appKey);
+        return claimsOptional.map(this::getUser).orElse(User.getVisitUser());
     }
 
     private User getUser(Claims claims) {
@@ -92,11 +93,13 @@ public class UserTokenUtils {
     public UserWithPassword getUserWithPassword(HttpServletRequest request) {
         String token = request.getHeader(authenticationConfig.getTokenHttpHeaderKey());
         if (StringUtils.isBlank(token)) {
-            String message = "token is blank, get user failed";
-            log.warn("{}, uri: {}", message, request.getServletPath());
-            throw new AccessException(message);
+            return null;
         }
-        final Claims claims = getClaims(token, request);
+        final Optional<Claims> claimsOptional = getClaims(token, request);
+        if (!claimsOptional.isPresent()) {
+            return null;
+        }
+        final Claims claims = claimsOptional.get();
         Long userId = Long.parseLong(claims.getOrDefault(TOKEN_USER_ID, 0).toString());
         String userName = String.valueOf(claims.get(TOKEN_USER_NAME));
         String email = String.valueOf(claims.get(TOKEN_USER_EMAIL));
@@ -109,32 +112,25 @@ public class UserTokenUtils {
         return UserWithPassword.get(userId, userName, displayName, email, password, isAdmin);
     }
 
-    private Claims getClaims(String token, HttpServletRequest request) {
-        Claims claims;
-        try {
-            String appKey = getAppKey(request);
-            claims = getClaims(token, appKey);
-        } catch (Exception e) {
-            throw new AccessException("parse user info from token failed :" + token);
-        }
-        return claims;
+    private Optional<Claims> getClaims(String token, HttpServletRequest request) {
+        String appKey = getAppKey(request);
+        return getClaims(token, appKey);
     }
 
-    private Claims getClaims(String token, String appKey) {
-        Claims claims;
+    private Optional<Claims> getClaims(String token, String appKey) {
         try {
             String tokenSecret = getTokenSecret(appKey);
-            claims =
+            Claims claims =
                     Jwts.parser()
                             .setSigningKey(tokenSecret.getBytes(StandardCharsets.UTF_8))
                             .build()
                             .parseClaimsJws(getTokenString(token))
                             .getBody();
+            return Optional.of(claims);
         } catch (Exception e) {
-            log.error("getClaims", e);
-            throw new AccessException("parse user info from token failed :" + token);
+            log.info("can not getClaims from appKey:{} token:{}, please login", appKey, token);
         }
-        return claims;
+        return Optional.empty();
     }
 
     private static String getTokenString(String token) {

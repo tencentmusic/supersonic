@@ -1,11 +1,11 @@
 package com.tencent.supersonic.headless.chat.mapper;
 
-import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementMatch;
 import com.tencent.supersonic.headless.api.pojo.response.S2Term;
 import com.tencent.supersonic.headless.chat.ChatQueryContext;
 import com.tencent.supersonic.headless.chat.knowledge.DatabaseMapResult;
+import com.tencent.supersonic.headless.chat.utils.EditDistanceUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
  */
 @Service
 @Slf4j
-public class DatabaseMatchStrategy extends BaseMatchStrategy<DatabaseMapResult> {
+public class DatabaseMatchStrategy extends SingleMatchStrategy<DatabaseMapResult> {
 
     private List<SchemaElement> allElements;
 
@@ -36,39 +36,22 @@ public class DatabaseMatchStrategy extends BaseMatchStrategy<DatabaseMapResult> 
         return super.match(chatQueryContext, terms, detectDataSetIds);
     }
 
-    @Override
-    public boolean needDelete(DatabaseMapResult oneRoundResult, DatabaseMapResult existResult) {
-        return getMapKey(oneRoundResult).equals(getMapKey(existResult))
-                && existResult.getDetectWord().length() < oneRoundResult.getDetectWord().length();
-    }
-
-    @Override
-    public String getMapKey(DatabaseMapResult a) {
-        return a.getName()
-                + Constants.UNDERLINE
-                + a.getSchemaElement().getId()
-                + Constants.UNDERLINE
-                + a.getSchemaElement().getName();
-    }
-
-    public void detectByStep(
+    public List<DatabaseMapResult> detectByStep(
             ChatQueryContext chatQueryContext,
-            Set<DatabaseMapResult> existResults,
             Set<Long> detectDataSetIds,
             String detectSegment,
             int offset) {
         if (StringUtils.isBlank(detectSegment)) {
-            return;
+            return new ArrayList<>();
         }
 
         Double metricDimensionThresholdConfig = getThreshold(chatQueryContext);
         Map<String, Set<SchemaElement>> nameToItems = getNameToItems(allElements);
-
+        List<DatabaseMapResult> results = new ArrayList<>();
         for (Entry<String, Set<SchemaElement>> entry : nameToItems.entrySet()) {
             String name = entry.getKey();
-            if (!name.contains(detectSegment)
-                    || mapperHelper.getSimilarity(detectSegment, name)
-                            < metricDimensionThresholdConfig) {
+            double similarity = EditDistanceUtils.getSimilarity(detectSegment, name);
+            if (!name.contains(detectSegment) || similarity < metricDimensionThresholdConfig) {
                 continue;
             }
             Set<SchemaElement> schemaElements = entry.getValue();
@@ -85,10 +68,12 @@ public class DatabaseMatchStrategy extends BaseMatchStrategy<DatabaseMapResult> 
                 DatabaseMapResult databaseMapResult = new DatabaseMapResult();
                 databaseMapResult.setDetectWord(detectSegment);
                 databaseMapResult.setName(schemaElement.getName());
+                databaseMapResult.setSimilarity(similarity);
                 databaseMapResult.setSchemaElement(schemaElement);
-                existResults.add(databaseMapResult);
+                results.add(databaseMapResult);
             }
         }
+        return results;
     }
 
     private List<SchemaElement> getSchemaElements(ChatQueryContext chatQueryContext) {

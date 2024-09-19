@@ -29,11 +29,13 @@ public class SearchMatchStrategy extends BaseMatchStrategy<HanlpMapResult> {
 
     @Autowired private KnowledgeBaseService knowledgeBaseService;
 
+    @Autowired private MapperHelper mapperHelper;
+
     @Override
     public Map<MatchText, List<HanlpMapResult>> match(
             ChatQueryContext chatQueryContext, List<S2Term> originals, Set<Long> detectDataSetIds) {
         String text = chatQueryContext.getQueryText();
-        Map<Integer, Integer> regOffsetToLength = getRegOffsetToLength(originals);
+        Map<Integer, Integer> regOffsetToLength = mapperHelper.getRegOffsetToLength(originals);
 
         List<Integer> detectIndexList = Lists.newArrayList();
 
@@ -104,22 +106,4 @@ public class SearchMatchStrategy extends BaseMatchStrategy<HanlpMapResult> {
                         });
         return regTextMap;
     }
-
-    @Override
-    public boolean needDelete(HanlpMapResult oneRoundResult, HanlpMapResult existResult) {
-        return false;
-    }
-
-    @Override
-    public String getMapKey(HanlpMapResult a) {
-        return null;
-    }
-
-    @Override
-    public void detectByStep(
-            ChatQueryContext chatQueryContext,
-            Set<HanlpMapResult> existResults,
-            Set<Long> detectDataSetIds,
-            String detectSegment,
-            int offset) {}
 }

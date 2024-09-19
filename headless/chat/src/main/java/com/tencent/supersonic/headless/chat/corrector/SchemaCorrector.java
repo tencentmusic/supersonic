@@ -110,7 +110,7 @@ public class SchemaCorrector extends BaseSemanticCorrector {
         if (Objects.isNull(parseResult) || Objects.isNull(parseResult.getLlmReq())) {
             return null;
         }
-        return parseResult.getLinkingValues();
+        return parseResult.getLlmReq().getSchema().getValues();
     }
 
     private void updateFieldValueByLinkingValue(SemanticParseInfo semanticParseInfo) {

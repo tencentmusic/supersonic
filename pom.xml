@@ -66,7 +66,7 @@
         <mockito-inline.version>4.5.1</mockito-inline.version>
         <easyexcel.version>2.2.6</easyexcel.version>
         <poi.version>3.17</poi.version>
-        <langchain4j.version>0.31.0</langchain4j.version>
+        <langchain4j.version>0.34.0</langchain4j.version>
         <langchain4j.embedding.version>0.27.1</langchain4j.embedding.version>
         <postgresql.version>42.7.1</postgresql.version>
         <st.version>4.0.8</st.version>
@@ -76,6 +76,7 @@
         <flight-sql-jdbc-driver.version>15.0.2</flight-sql-jdbc-driver.version>
         <gson.version>2.10.1</gson.version>
         <spotless.version>2.27.1</spotless.version>
+        <stax2.version>4.2.1</stax2.version>
     </properties>
 
     <dependencyManagement>
@@ -147,36 +148,6 @@
             </dependency>
             <dependency>
                 <groupId>dev.langchain4j</groupId>
-                <artifactId>langchain4j-spring-boot-starter</artifactId>
-                <version>${langchain4j.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>dev.langchain4j</groupId>
-                <artifactId>langchain4j-anthropic-spring-boot-starter</artifactId>
-                <version>${langchain4j.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>dev.langchain4j</groupId>
-                <artifactId>langchain4j-ollama-spring-boot-starter</artifactId>
-                <version>${langchain4j.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>dev.langchain4j</groupId>
-                <artifactId>langchain4j-open-ai-spring-boot-starter</artifactId>
-                <version>${langchain4j.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>dev.langchain4j</groupId>
-                <artifactId>langchain4j-azure-ai-search-spring-boot-starter</artifactId>
-                <version>${langchain4j.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>dev.langchain4j</groupId>
-                <artifactId>langchain4j-azure-open-ai-spring-boot-starter</artifactId>
-                <version>${langchain4j.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>dev.langchain4j</groupId>
                 <artifactId>langchain4j-embeddings-all-minilm-l6-v2-q</artifactId>
                 <version>${langchain4j.embedding.version}</version>
             </dependency>
@@ -206,9 +177,19 @@
                 <version>${langchain4j.version}</version>
             </dependency>
             <dependency>
+                <groupId>dev.langchain4j</groupId>
+                <artifactId>langchain4j-ollama</artifactId>
+                <version>${langchain4j.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>com.google.code.gson</groupId>
                 <artifactId>gson</artifactId>
                 <version>${gson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.codehaus.woodstox</groupId>
+                <artifactId>stax2-api</artifactId>
+                <version>${stax2.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

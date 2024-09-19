@@ -246,6 +246,12 @@ public class SchemaServiceImpl implements SchemaService {
                             .collect(Collectors.toList()));
             dataSetSchemaResp.setTermResps(
                     termMaps.getOrDefault(dataSetResp.getDomainId(), Lists.newArrayList()));
+            if (!CollectionUtils.isEmpty(dataSetSchemaResp.getModelResps())) {
+                DatabaseResp databaseResp =
+                        databaseService.getDatabase(
+                                dataSetSchemaResp.getModelResps().get(0).getDatabaseId());
+                dataSetSchemaResp.setDatabaseType(databaseResp.getType());
+            }
             dataSetSchemaResps.add(dataSetSchemaResp);
         }
         fillStaticInfo(dataSetSchemaResps);

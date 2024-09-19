@@ -20,7 +20,6 @@ import org.springframework.core.annotation.Order;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
@@ -55,6 +54,7 @@ public class ExemplarServiceImpl implements ExemplarService, CommandLineRunner {
                 Metadata.from(
                         JsonUtil.toMap(JsonUtil.toString(exemplar), String.class, Object.class));
         TextSegment segment = TextSegment.from(exemplar.getQuestion(), metadata);
+        TextSegmentConvert.addQueryId(segment, exemplar.getQuestion());
 
         embeddingService.deleteQuery(collection, Lists.newArrayList(segment));
     }
@@ -88,18 +88,18 @@ public class ExemplarServiceImpl implements ExemplarService, CommandLineRunner {
 
     @Override
     public void run(String... args) {
+        loadSysExemplars();
+    }
+
+    public void loadSysExemplars() {
         try {
-            loadSysExemplars();
+            ClassPathResource resource = new ClassPathResource(SYS_EXEMPLAR_FILE);
+            InputStream inputStream = resource.getInputStream();
+            List<Text2SQLExemplar> exemplars = objectMapper.readValue(inputStream, valueTypeRef);
+            String collection = embeddingConfig.getText2sqlCollectionName();
+            exemplars.stream().forEach(e -> storeExemplar(collection, e));
         } catch (Exception e) {
             log.error("Failed to load system exemplars", e);
         }
-    }
-
-    private void loadSysExemplars() throws IOException {
-        ClassPathResource resource = new ClassPathResource(SYS_EXEMPLAR_FILE);
-        InputStream inputStream = resource.getInputStream();
-        List<Text2SQLExemplar> exemplars = objectMapper.readValue(inputStream, valueTypeRef);
-        String collection = embeddingConfig.getText2sqlCollectionName();
-        exemplars.stream().forEach(e -> storeExemplar(collection, e));
     }
 }

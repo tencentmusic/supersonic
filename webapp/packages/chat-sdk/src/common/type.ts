@@ -256,6 +256,7 @@ export type SimilarQuestionType = {
 };
 
 export type ParseTimeCostType = {
+  parseStartTime: number;
   parseTime: number;
   sqlTime: number;
 };

@@ -11,13 +11,14 @@ import org.apache.commons.collections4.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Data
 public class LLMReq {
     private String queryText;
     private LLMSchema schema;
-    private List<ElementValue> linking;
+    private List<Term> terms;
     private String currentDate;
     private String priorExts;
     private SqlGenType sqlGenType;
@@ -33,12 +34,14 @@ public class LLMReq {
 
     @Data
     public static class LLMSchema {
+        private String databaseType;
         private Long dataSetId;
         private String dataSetName;
-        private List<String> fieldNameList;
         private List<SchemaElement> metrics;
         private List<SchemaElement> dimensions;
-        private List<Term> terms;
+        private List<ElementValue> values;
+        private SchemaElement partitionTime;
+        private SchemaElement primaryKey;
 
         public List<String> getFieldNameList() {
             List<String> fieldNameList = new ArrayList<>();
@@ -51,8 +54,14 @@ public class LLMReq {
             if (CollectionUtils.isNotEmpty(dimensions)) {
                 fieldNameList.addAll(
                         dimensions.stream()
-                                .map(metric -> metric.getName())
+                                .map(dimension -> dimension.getName())
                                 .collect(Collectors.toList()));
+            }
+            if (Objects.nonNull(partitionTime)) {
+                fieldNameList.add(partitionTime.getName());
+            }
+            if (Objects.nonNull(primaryKey)) {
+                fieldNameList.add(primaryKey.getName());
             }
             return fieldNameList;
         }
