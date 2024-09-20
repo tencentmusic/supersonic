@@ -25,7 +25,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 public class OnePassSCSqlGenStrategy extends SqlGenStrategy {
 
-    private static final String INSTRUCTION =
+    public static final String INSTRUCTION =
             ""
                     + "\n#Role: You are a data analyst experienced in SQL languages."
                     + "\n#Task: You will be provided with a natural language question asked by users,"

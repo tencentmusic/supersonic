@@ -16,6 +16,7 @@ import com.tencent.supersonic.common.config.PromptConfig;
 import com.tencent.supersonic.common.config.VisualConfig;
 import com.tencent.supersonic.common.pojo.ChatModelConfig;
 import com.tencent.supersonic.common.util.JsonUtil;
+import com.tencent.supersonic.headless.chat.parser.llm.OnePassSCSqlGenStrategy;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
@@ -44,6 +46,12 @@ public class AgentServiceImpl extends ServiceImpl<AgentDOMapper, AgentDO> implem
 
     @Override
     public Agent createAgent(Agent agent, User user) {
+        if (Objects.isNull(agent.getPromptConfig())
+                || Objects.isNull(agent.getPromptConfig().getPromptTemplate())) {
+            PromptConfig promptConfig = new PromptConfig();
+            promptConfig.setPromptTemplate(OnePassSCSqlGenStrategy.INSTRUCTION.trim());
+            agent.setPromptConfig(promptConfig);
+        }
         agent.createdBy(user.getName());
         AgentDO agentDO = convert(agent);
         save(agentDO);
@@ -54,6 +62,12 @@ public class AgentServiceImpl extends ServiceImpl<AgentDOMapper, AgentDO> implem
 
     @Override
     public Agent updateAgent(Agent agent, User user) {
+        if (Objects.isNull(agent.getPromptConfig())
+                || Objects.isNull(agent.getPromptConfig().getPromptTemplate())) {
+            PromptConfig promptConfig = new PromptConfig();
+            promptConfig.setPromptTemplate(OnePassSCSqlGenStrategy.INSTRUCTION.trim());
+            agent.setPromptConfig(promptConfig);
+        }
         agent.updatedBy(user.getName());
         updateById(convert(agent));
         executeAgentExamplesAsync(agent);

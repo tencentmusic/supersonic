@@ -52,11 +52,6 @@ public class AgentController {
         return true;
     }
 
-    @PostMapping("/testLLMConn")
-    public boolean testLLMConn(@RequestBody ChatModelConfig modelConfig) {
-        return LLMConnHelper.testConnection(modelConfig);
-    }
-
     @RequestMapping("/getAgentList")
     public List<Agent> getAgentList() {
         return agentService.getAgents();
@@ -65,5 +60,10 @@ public class AgentController {
     @RequestMapping("/getToolTypes")
     public Map<AgentToolType, String> getToolTypes() {
         return AgentToolType.getToolTypes();
+    }
+
+    @PostMapping("/testLLMConn")
+    public boolean testLLMConn(@RequestBody ChatModelConfig modelConfig) {
+        return LLMConnHelper.testConnection(modelConfig);
     }
 }
