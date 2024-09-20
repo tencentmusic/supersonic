@@ -256,10 +256,10 @@
                 </configuration>
                 <executions>
                     <execution>
-                        <id>spotless-check</id>
+                        <id>spotless-apply-auto</id>
                         <phase>validate</phase>
                         <goals>
-                            <goal>check</goal>
+                            <goal>apply</goal>
                         </goals>
                     </execution>
                 </executions>
