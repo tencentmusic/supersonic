@@ -113,10 +113,6 @@ public class NatureHelper {
                 && StringUtils.isNumeric(nature.split(DictWordType.NATURE_SPILT)[1]);
     }
 
-    public static boolean isTermNature(String nature) {
-        return isNatureValid(nature) && nature.endsWith(DictWordType.TERM.getType());
-    }
-
     public static DataSetInfoStat getDataSetStat(List<S2Term> terms) {
         return DataSetInfoStat.builder()
                 .dataSetCount(getDataSetCount(terms))
