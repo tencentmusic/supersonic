@@ -66,4 +66,7 @@ public class Constants {
     public static final Long DEFAULT_FREQUENCY = 100000L;
 
     public static final String TABLE_PREFIX = "t_";
+
+    public static final Long DEFAULT_DETAIL_LIMIT = 500L;
+    public static final Long DEFAULT_METRIC_LIMIT = 200L;
 }

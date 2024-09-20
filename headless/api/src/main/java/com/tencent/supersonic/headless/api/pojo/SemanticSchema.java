@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -149,6 +150,20 @@ public class SemanticSchema implements Serializable {
     public SchemaElement getDataSet(Long dataSetId) {
         List<SchemaElement> dataSets = getDataSets();
         return getElementsById(dataSetId, dataSets).orElse(null);
+    }
+
+    public QueryConfig getQueryConfig(Long dataSetId) {
+        DataSetSchema first =
+                dataSetSchemaList.stream()
+                        .filter(
+                                dataSetSchema ->
+                                        dataSetId.equals(dataSetSchema.getDataSet().getDataSetId()))
+                        .findFirst()
+                        .orElse(null);
+        if (Objects.nonNull(first)) {
+            return first.getQueryConfig();
+        }
+        return null;
     }
 
     public List<SchemaElement> getDataSets() {

@@ -31,6 +31,8 @@ public class LLMResponseService {
         LLMSemanticQuery semanticQuery = QueryManager.createLLMQuery(LLMSqlQuery.QUERY_MODE);
         SemanticParseInfo parseInfo = semanticQuery.getParseInfo();
         parseInfo.setDataSet(queryCtx.getSemanticSchema().getDataSet(parseResult.getDataSetId()));
+        parseInfo.setQueryConfig(
+                queryCtx.getSemanticSchema().getQueryConfig(parseResult.getDataSetId()));
         parseInfo
                 .getElementMatches()
                 .addAll(queryCtx.getMapInfo().getMatchedElements(parseInfo.getDataSetId()));
