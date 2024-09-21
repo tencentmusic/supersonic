@@ -60,6 +60,8 @@ public class DownloadServiceImpl implements DownloadService {
 
     private static final long downloadSize = 10000;
 
+    private static final String dateFormat = "yyyyMMddHHmmss";
+
     private MetricService metricService;
 
     private DimensionService dimensionService;
@@ -80,8 +82,7 @@ public class DownloadServiceImpl implements DownloadService {
             DownloadMetricReq downloadMetricReq, User user, HttpServletResponse response)
             throws Exception {
         String fileName =
-                String.format(
-                        "%s_%s.xlsx", "supersonic", DateUtils.format(new Date(), DateUtils.FORMAT));
+                String.format("%s_%s.xlsx", "supersonic", DateUtils.format(new Date(), dateFormat));
         File file = FileUtils.createTmpFile(fileName);
         try {
             QueryStructReq queryStructReq = metricService.convert(downloadMetricReq);
@@ -108,8 +109,7 @@ public class DownloadServiceImpl implements DownloadService {
             BatchDownloadReq batchDownloadReq, User user, HttpServletResponse response)
             throws Exception {
         String fileName =
-                String.format(
-                        "%s_%s.xlsx", "supersonic", DateUtils.format(new Date(), DateUtils.FORMAT));
+                String.format("%s_%s.xlsx", "supersonic", DateUtils.format(new Date(), dateFormat));
         File file = FileUtils.createTmpFile(fileName);
         List<Long> metricIds = batchDownloadReq.getMetricIds();
         if (CollectionUtils.isEmpty(metricIds)) {

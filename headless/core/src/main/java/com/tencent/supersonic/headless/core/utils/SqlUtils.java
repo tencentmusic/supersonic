@@ -155,10 +155,10 @@ public class SqlUtils {
     private Object getValue(Object value) {
         if (value instanceof LocalDate) {
             LocalDate localDate = (LocalDate) value;
-            return localDate.format(DateTimeFormatter.ofPattern(DateUtils.DATE_FORMAT));
+            return localDate.format(DateTimeFormatter.ofPattern(DateUtils.DEFAULT_DATE_FORMAT));
         } else if (value instanceof LocalDateTime) {
             LocalDateTime localDateTime = (LocalDateTime) value;
-            return localDateTime.format(DateTimeFormatter.ofPattern(DateUtils.TIME_FORMAT));
+            return localDateTime.format(DateTimeFormatter.ofPattern(DateUtils.DEFAULT_TIME_FORMAT));
         } else if (value instanceof Date) {
             Date date = (Date) value;
             return DateUtils.format(date);

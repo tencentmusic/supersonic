@@ -55,7 +55,7 @@ public class S2SqlDateHelper {
     private static String reformatDate(String dateStr, String format) {
         try {
             // Assuming the input date format is "yyyy-MM-dd"
-            SimpleDateFormat inputFormat = new SimpleDateFormat(DateUtils.DATE_FORMAT);
+            SimpleDateFormat inputFormat = new SimpleDateFormat(DateUtils.DEFAULT_DATE_FORMAT);
             Date date = inputFormat.parse(dateStr);
             SimpleDateFormat outputFormat = new SimpleDateFormat(format);
             return outputFormat.format(date);

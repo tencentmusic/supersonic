@@ -24,11 +24,14 @@ import java.util.Objects;
 @Slf4j
 public class DateUtils {
 
-    public static final String DATE_FORMAT = "yyyy-MM-dd";
-    public static final String TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
-    public static final String FORMAT = "yyyyMMddHHmmss";
-    private static final DateTimeFormatter dateTimeFormatter =
-            DateTimeFormatter.ofPattern(DATE_FORMAT);
+    public static final String DEFAULT_DATE_FORMAT = "yyyy-MM-dd";
+    public static final String DEFAULT_TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
+    private static final DateTimeFormatter DEFAULT_DATE_FORMATTER2 =
+            DateTimeFormatter.ofPattern(DEFAULT_DATE_FORMAT);
+    private static final SimpleDateFormat DEFAULT_DATE_FORMATTER =
+            new SimpleDateFormat(DEFAULT_DATE_FORMAT);
+    private static final SimpleDateFormat DEFAULT_TIME_FORMATTER =
+            new SimpleDateFormat(DEFAULT_DATE_FORMAT);
 
     public static DateTimeFormatter getDateFormatter(String date, String[] formats) {
         for (int i = 0; i < formats.length; i++) {
@@ -66,13 +69,13 @@ public class DateUtils {
         if (Objects.isNull(datePeriodEnum)) {
             datePeriodEnum = DatePeriodEnum.DAY;
         }
-        SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT);
+        SimpleDateFormat dateFormat = new SimpleDateFormat(DEFAULT_DATE_FORMAT);
         String currentDate = dateFormat.format(new Date());
         return getBeforeDate(currentDate, intervalDay, datePeriodEnum);
     }
 
     public static String getBeforeDate(String currentDate, DatePeriodEnum datePeriodEnum) {
-        LocalDate specifiedDate = LocalDate.parse(currentDate, dateTimeFormatter);
+        LocalDate specifiedDate = LocalDate.parse(currentDate, DEFAULT_DATE_FORMATTER2);
         LocalDate startDate;
         switch (datePeriodEnum) {
             case MONTH:
@@ -85,12 +88,12 @@ public class DateUtils {
                 startDate = specifiedDate;
         }
 
-        return startDate.format(dateTimeFormatter);
+        return startDate.format(DEFAULT_DATE_FORMATTER2);
     }
 
     public static String getBeforeDate(
             String currentDate, int intervalDay, DatePeriodEnum datePeriodEnum) {
-        LocalDate specifiedDate = LocalDate.parse(currentDate, dateTimeFormatter);
+        LocalDate specifiedDate = LocalDate.parse(currentDate, DEFAULT_DATE_FORMATTER2);
         LocalDate result = null;
         switch (datePeriodEnum) {
             case DAY:
@@ -133,7 +136,7 @@ public class DateUtils {
             default:
         }
         if (Objects.nonNull(result)) {
-            return result.format(DateTimeFormatter.ofPattern(DATE_FORMAT));
+            return result.format(DEFAULT_DATE_FORMATTER2);
         }
 
         return null;
@@ -142,9 +145,9 @@ public class DateUtils {
     public static String format(Date date) {
         DateFormat dateFormat;
         if (containsTime(date)) {
-            dateFormat = new SimpleDateFormat(DateUtils.TIME_FORMAT);
+            dateFormat = DEFAULT_TIME_FORMATTER;
         } else {
-            dateFormat = new SimpleDateFormat(DateUtils.DATE_FORMAT);
+            dateFormat = DEFAULT_DATE_FORMATTER;
         }
         return dateFormat.format(date);
     }
