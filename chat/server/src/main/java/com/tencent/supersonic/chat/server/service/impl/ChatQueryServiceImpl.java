@@ -24,7 +24,6 @@ import com.tencent.supersonic.common.jsqlparser.SqlRemoveHelper;
 import com.tencent.supersonic.common.jsqlparser.SqlReplaceHelper;
 import com.tencent.supersonic.common.jsqlparser.SqlSelectHelper;
 import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
-import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import com.tencent.supersonic.common.util.BeanMapper;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.DateUtils;
@@ -49,6 +48,15 @@ import com.tencent.supersonic.headless.chat.query.SemanticQuery;
 import com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMSqlQuery;
 import com.tencent.supersonic.headless.server.facade.service.ChatLayerService;
 import com.tencent.supersonic.headless.server.facade.service.SemanticLayerService;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.LongValue;
@@ -64,16 +72,6 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -200,7 +198,6 @@ public class ChatQueryServiceImpl implements ChatQueryService {
         SemanticParseInfo parseInfo =
                 chatManageService.getParseInfo(chatQueryDataReq.getQueryId(), parseId);
         parseInfo = mergeParseInfo(parseInfo, chatQueryDataReq);
-        parseInfo.setSqlInfo(new SqlInfo());
         DataSetSchema dataSetSchema =
                 semanticLayerService.getDataSetSchema(parseInfo.getDataSetId());
 
@@ -208,7 +205,7 @@ public class ChatQueryServiceImpl implements ChatQueryService {
         semanticQuery.setParseInfo(parseInfo);
 
         if (LLMSqlQuery.QUERY_MODE.equalsIgnoreCase(parseInfo.getQueryMode())) {
-            handleLLMQueryMode(chatQueryDataReq, semanticQuery, user);
+            handleLLMQueryMode(chatQueryDataReq, semanticQuery, dataSetSchema, user);
         } else {
             handleRuleQueryMode(semanticQuery, dataSetSchema, user);
         }
@@ -225,7 +222,7 @@ public class ChatQueryServiceImpl implements ChatQueryService {
     }
 
     private void handleLLMQueryMode(
-            ChatQueryDataReq chatQueryDataReq, SemanticQuery semanticQuery, User user)
+            ChatQueryDataReq chatQueryDataReq, SemanticQuery semanticQuery, DataSetSchema dataSetSchema, User user)
             throws Exception {
         SemanticParseInfo parseInfo = semanticQuery.getParseInfo();
         List<String> fields = getFieldsFromSql(parseInfo);
@@ -235,7 +232,7 @@ public class ChatQueryServiceImpl implements ChatQueryService {
             replaceMetrics(parseInfo, metricToReplace);
         } else {
             log.info("llm begin revise filters!");
-            String correctorSql = reviseCorrectS2SQL(chatQueryDataReq, parseInfo);
+            String correctorSql = reviseCorrectS2SQL(chatQueryDataReq, parseInfo, dataSetSchema);
             parseInfo.getSqlInfo().setCorrectedS2SQL(correctorSql);
             semanticQuery.setParseInfo(parseInfo);
             SemanticQueryReq semanticQueryReq = semanticQuery.buildSemanticQueryReq();
@@ -261,6 +258,7 @@ public class ChatQueryServiceImpl implements ChatQueryService {
         SemanticLayerService semanticService = ContextUtils.getBean(SemanticLayerService.class);
         EntityInfo entityInfo = semanticService.getEntityInfo(parseInfo, dataSetSchema, user);
         queryResult.setEntityInfo(entityInfo);
+        parseInfo.getSqlInfo().setQuerySQL(queryResult.getQuerySql());
         return queryResult;
     }
 
@@ -273,7 +271,7 @@ public class ChatQueryServiceImpl implements ChatQueryService {
         return !oriFields.containsAll(metricNames);
     }
 
-    private String reviseCorrectS2SQL(ChatQueryDataReq queryData, SemanticParseInfo parseInfo) {
+    private String reviseCorrectS2SQL(ChatQueryDataReq queryData, SemanticParseInfo parseInfo, DataSetSchema dataSetSchema) {
         String correctorSql = parseInfo.getSqlInfo().getCorrectedS2SQL();
         log.info("correctorSql before replacing:{}", correctorSql);
         // get where filter and having filter
@@ -294,6 +292,7 @@ public class ChatQueryServiceImpl implements ChatQueryService {
                 updateDateInfo(
                         queryData,
                         parseInfo,
+                        dataSetSchema,
                         filedNameToValueMap,
                         whereExpressionList,
                         addWhereConditions);
@@ -361,6 +360,7 @@ public class ChatQueryServiceImpl implements ChatQueryService {
     private Set<String> updateDateInfo(
             ChatQueryDataReq queryData,
             SemanticParseInfo parseInfo,
+            DataSetSchema dataSetSchema,
             Map<String, Map<String, String>> filedNameToValueMap,
             List<FieldExpression> fieldExpressionList,
             List<Expression> addConditions) {
@@ -374,17 +374,18 @@ public class ChatQueryServiceImpl implements ChatQueryService {
                     .setStartDate(DateUtils.getBeforeDate(queryData.getDateInfo().getUnit() + 1));
             queryData.getDateInfo().setEndDate(DateUtils.getBeforeDate(1));
         }
+        SchemaElement partitionDimension = dataSetSchema.getPartitionDimension();
         // startDate equals to endDate
         for (FieldExpression fieldExpression : fieldExpressionList) {
-            if (TimeDimensionEnum.DAY.getChName().equals(fieldExpression.getFieldName())) {
+            if (partitionDimension.getName().equals(fieldExpression.getFieldName())) {
                 // first remove,then add
-                removeFieldNames.add(TimeDimensionEnum.DAY.getChName());
+                removeFieldNames.add(partitionDimension.getName());
                 GreaterThanEquals greaterThanEquals = new GreaterThanEquals();
                 addTimeFilters(
-                        queryData.getDateInfo().getStartDate(), greaterThanEquals, addConditions);
+                        queryData.getDateInfo().getStartDate(), greaterThanEquals, addConditions, partitionDimension);
                 MinorThanEquals minorThanEquals = new MinorThanEquals();
                 addTimeFilters(
-                        queryData.getDateInfo().getEndDate(), minorThanEquals, addConditions);
+                        queryData.getDateInfo().getEndDate(), minorThanEquals, addConditions, partitionDimension);
                 break;
             }
         }
@@ -414,8 +415,8 @@ public class ChatQueryServiceImpl implements ChatQueryService {
     }
 
     private <T extends ComparisonOperator> void addTimeFilters(
-            String date, T comparisonExpression, List<Expression> addConditions) {
-        Column column = new Column(TimeDimensionEnum.DAY.getChName());
+            String date, T comparisonExpression, List<Expression> addConditions, SchemaElement partitionDimension) {
+        Column column = new Column(partitionDimension.getName());
         StringValue stringValue = new StringValue(date);
         comparisonExpression.setLeftExpression(column);
         comparisonExpression.setRightExpression(stringValue);
@@ -548,6 +549,7 @@ public class ChatQueryServiceImpl implements ChatQueryService {
         if (Objects.nonNull(queryData.getDateInfo())) {
             parseInfo.setDateInfo(queryData.getDateInfo());
         }
+        parseInfo.setSqlInfo(new SqlInfo());
         return parseInfo;
     }
 
