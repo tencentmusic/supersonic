@@ -36,7 +36,8 @@ public class OnePassSCSqlGenStrategy extends SqlGenStrategy {
                     + "\n2.ALWAYS specify date filter using `>`,`<`,`>=`,`<=` operator."
                     + "\n3.DO NOT include date filter in the where clause if not explicitly expressed in the `Question`."
                     + "\n4.DO NOT calculate date range using functions."
-                    + "\n5.DO NOT miss the AGGREGATE operator of metrics, always add it as needed."
+                    + "\n5.DO NOT calculate date range using DATE_SUB."
+                    + "\n6.DO NOT miss the AGGREGATE operator of metrics, always add it as needed."
                     + "\n#Exemplars:\n{{exemplar}}"
                     + "#Question:\nQuestion:{{question}},Schema:{{schema}},SideInfo:{{information}}";
 
