@@ -6,6 +6,7 @@ import com.tencent.supersonic.common.pojo.enums.DatePeriodEnum;
 import lombok.extern.slf4j.Slf4j;
 
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -16,7 +17,6 @@ import java.time.temporal.TemporalAdjuster;
 import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -27,14 +27,8 @@ public class DateUtils {
     public static final String DATE_FORMAT = "yyyy-MM-dd";
     public static final String TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
     public static final String FORMAT = "yyyyMMddHHmmss";
-
-    public static Integer currentYear() {
-        Date date = new Date();
-        SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT);
-        String time = dateFormat.format(date).replaceAll("-", "");
-        int year = Integer.parseInt(time.substring(0, 4));
-        return year;
-    }
+    private static final DateTimeFormatter dateTimeFormatter =
+            DateTimeFormatter.ofPattern(DATE_FORMAT);
 
     public static DateTimeFormatter getDateFormatter(String date, String[] formats) {
         for (int i = 0; i < formats.length; i++) {
@@ -43,8 +37,8 @@ public class DateUtils {
             try {
                 dateFormat.parse(date);
                 return DateTimeFormatter.ofPattern(format);
-            } catch (Exception e) {
-                log.info("date parse has a exception:{}", e.toString());
+            } catch (ParseException e) {
+                log.warn("date parse has a exception:{}", e.toString());
             }
         }
         return DateTimeFormatter.ofPattern(formats[0]);
@@ -57,41 +51,53 @@ public class DateUtils {
                 DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(format);
                 LocalDateTime.parse(date, dateTimeFormatter);
                 return dateTimeFormatter;
-            } catch (Exception e) {
-                log.info("date parse has a exception:{}", e.toString());
+            } catch (DateTimeParseException e) {
+                log.warn("date parse has a exception:{}", e.toString());
             }
         }
         return DateTimeFormatter.ofPattern(formats[0]);
     }
 
     public static String getBeforeDate(int intervalDay) {
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(new Date());
-        calendar.add(Calendar.DAY_OF_MONTH, -intervalDay);
-        SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT);
-        return dateFormat.format(calendar.getTime());
+        return getBeforeDate(intervalDay, DatePeriodEnum.DAY);
     }
 
     public static String getBeforeDate(int intervalDay, DatePeriodEnum datePeriodEnum) {
         if (Objects.isNull(datePeriodEnum)) {
-            return getBeforeDate(intervalDay);
+            datePeriodEnum = DatePeriodEnum.DAY;
         }
         SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT);
         String currentDate = dateFormat.format(new Date());
         return getBeforeDate(currentDate, intervalDay, datePeriodEnum);
     }
 
+    public static String getBeforeDate(String currentDate, DatePeriodEnum datePeriodEnum) {
+        LocalDate specifiedDate = LocalDate.parse(currentDate, dateTimeFormatter);
+        LocalDate startDate;
+        switch (datePeriodEnum) {
+            case MONTH:
+                startDate = specifiedDate.withDayOfMonth(1);
+                break;
+            case YEAR:
+                startDate = specifiedDate.withDayOfYear(1);
+                break;
+            default:
+                startDate = specifiedDate;
+        }
+
+        return startDate.format(dateTimeFormatter);
+    }
+
     public static String getBeforeDate(
-            String date, int intervalDay, DatePeriodEnum datePeriodEnum) {
-        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(DATE_FORMAT);
-        LocalDate currentDate = LocalDate.parse(date, dateTimeFormatter);
+            String currentDate, int intervalDay, DatePeriodEnum datePeriodEnum) {
+        LocalDate specifiedDate = LocalDate.parse(currentDate, dateTimeFormatter);
         LocalDate result = null;
         switch (datePeriodEnum) {
             case DAY:
-                result = currentDate.minusDays(intervalDay);
+                result = specifiedDate.minusDays(intervalDay);
                 break;
             case WEEK:
-                result = currentDate.minusWeeks(intervalDay);
+                result = specifiedDate.minusWeeks(intervalDay);
                 if (intervalDay == 0) {
                     result =
                             result.with(
@@ -99,13 +105,13 @@ public class DateUtils {
                 }
                 break;
             case MONTH:
-                result = currentDate.minusMonths(intervalDay);
+                result = specifiedDate.minusMonths(intervalDay);
                 if (intervalDay == 0) {
                     result = result.with(TemporalAdjusters.firstDayOfMonth());
                 }
                 break;
             case QUARTER:
-                result = currentDate.minusMonths(intervalDay * 3L);
+                result = specifiedDate.minusMonths(intervalDay * 3L);
                 if (intervalDay == 0) {
                     TemporalAdjuster firstDayOfQuarter =
                             temporal -> {
@@ -119,7 +125,7 @@ public class DateUtils {
                 }
                 break;
             case YEAR:
-                result = currentDate.minusYears(intervalDay);
+                result = specifiedDate.minusYears(intervalDay);
                 if (intervalDay == 0) {
                     result = result.with(TemporalAdjusters.firstDayOfYear());
                 }
@@ -129,6 +135,7 @@ public class DateUtils {
         if (Objects.nonNull(result)) {
             return result.format(DateTimeFormatter.ofPattern(DATE_FORMAT));
         }
+
         return null;
     }
 

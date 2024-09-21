@@ -4,9 +4,12 @@ import com.tencent.supersonic.common.jsqlparser.DateVisitor.DateBoundInfo;
 import com.tencent.supersonic.common.jsqlparser.SqlAddHelper;
 import com.tencent.supersonic.common.jsqlparser.SqlDateSelectHelper;
 import com.tencent.supersonic.common.jsqlparser.SqlSelectHelper;
+import com.tencent.supersonic.common.pojo.enums.QueryType;
 import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import com.tencent.supersonic.headless.api.pojo.DataSetSchema;
+import com.tencent.supersonic.headless.api.pojo.QueryConfig;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
+import com.tencent.supersonic.headless.api.pojo.TimeDefaultConfig;
 import com.tencent.supersonic.headless.chat.ChatQueryContext;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.JSQLParserException;
@@ -27,10 +30,10 @@ public class TimeCorrector extends BaseSemanticCorrector {
     public void doCorrect(ChatQueryContext chatQueryContext, SemanticParseInfo semanticParseInfo) {
         if (containsPartitionDimensions(chatQueryContext, semanticParseInfo)) {
             addDateIfNotExist(chatQueryContext, semanticParseInfo);
+            addLowerBoundDate(semanticParseInfo);
         } else {
             removeDateIfExist(chatQueryContext, semanticParseInfo);
         }
-        addLowerBoundDate(semanticParseInfo);
     }
 
     private void addDateIfNotExist(
@@ -48,15 +51,21 @@ public class TimeCorrector extends BaseSemanticCorrector {
         }
         String partitionDimension = dataSetSchema.getPartitionDimension().getName();
         if (CollectionUtils.isEmpty(whereFields) || !whereFields.contains(partitionDimension)) {
-            Pair<String, String> startEndDate =
-                    S2SqlDateHelper.getStartEndDate(
-                            chatQueryContext, dataSetId, semanticParseInfo.getQueryType());
+            TimeDefaultConfig timeConfig;
+            QueryConfig queryConfig = dataSetSchema.getQueryConfig();
+            if (QueryType.METRIC.equals(semanticParseInfo.getQueryType())) {
+                timeConfig = queryConfig.getMetricTypeDefaultConfig().getTimeDefaultConfig();
+            } else {
+                timeConfig = queryConfig.getTagTypeDefaultConfig().getTimeDefaultConfig();
+            }
 
-            if (isValidDateRange(startEndDate)) {
+            String timeFormat = dataSetSchema.getPartitionTimeFormat();
+            Pair<String, String> dateRange =
+                    S2SqlDateHelper.calculateDateRange(timeConfig, timeFormat);
+            if (isValidDateRange(dateRange)) {
                 correctS2SQL = SqlAddHelper.addParenthesisToWhere(correctS2SQL);
-                String startDateLeft = startEndDate.getLeft();
-                String endDateRight = startEndDate.getRight();
-
+                String startDateLeft = dateRange.getLeft();
+                String endDateRight = dateRange.getRight();
                 String condExpr =
                         String.format(
                                 " ( %s >= '%s'  and %s <= '%s' )",

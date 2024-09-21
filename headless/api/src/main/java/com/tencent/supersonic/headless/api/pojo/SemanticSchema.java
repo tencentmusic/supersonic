@@ -118,16 +118,6 @@ public class SemanticSchema implements Serializable {
         return tags;
     }
 
-    public List<SchemaElement> getTags(Long dataSetId) {
-        List<SchemaElement> tags = new ArrayList<>();
-        dataSetSchemaList.stream()
-                .filter(
-                        schemaElement ->
-                                dataSetId.equals(schemaElement.getDataSet().getDataSetId()))
-                .forEach(d -> tags.addAll(d.getTags()));
-        return tags;
-    }
-
     public List<SchemaElement> getTerms() {
         List<SchemaElement> terms = new ArrayList<>();
         dataSetSchemaList.stream().forEach(d -> terms.addAll(d.getTerms()));
