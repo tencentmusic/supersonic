@@ -1,7 +1,6 @@
 package com.tencent.supersonic.common.util;
 
 import com.google.common.collect.Lists;
-import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.enums.DatePeriodEnum;
 import lombok.extern.slf4j.Slf4j;
 
@@ -163,7 +162,8 @@ public class DateUtils {
         return !timeString.equals("00:00:00");
     }
 
-    public static List<String> getDateList(String startDateStr, String endDateStr, String period) {
+    public static List<String> getDateList(
+            String startDateStr, String endDateStr, DatePeriodEnum period) {
         try {
             LocalDate startDate = LocalDate.parse(startDateStr);
             LocalDate endDate = LocalDate.parse(endDateStr);
@@ -171,10 +171,10 @@ public class DateUtils {
             LocalDate currentDate = startDate;
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM");
             while (!currentDate.isAfter(endDate)) {
-                if (Constants.MONTH.equals(period)) {
+                if (DatePeriodEnum.MONTH.equals(period)) {
                     datesInRange.add(currentDate.format(formatter));
                     currentDate = currentDate.plusMonths(1);
-                } else if (Constants.WEEK.equals(period)) {
+                } else if (DatePeriodEnum.WEEK.equals((period))) {
                     datesInRange.add(currentDate.format(DateTimeFormatter.ISO_DATE));
                     currentDate = currentDate.plusWeeks(1);
                 } else {

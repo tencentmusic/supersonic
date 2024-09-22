@@ -1,7 +1,7 @@
 package com.tencent.supersonic.headless.chat.parser.rule;
 
-import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.DateConf;
+import com.tencent.supersonic.common.pojo.enums.DatePeriodEnum;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.chat.ChatQueryContext;
 import com.tencent.supersonic.headless.chat.parser.SemanticParser;
@@ -132,11 +132,11 @@ public class TimeRangeParser implements SemanticParser {
         String detectWord = matcher.group("periodStr");
 
         DateConf info = new DateConf();
-        info.setPeriod(getPeriodConstant(zhPeriod));
-        info.setDateMode(DateConf.DateMode.RECENT);
+        info.setPeriod(DatePeriodEnum.fromChName(zhPeriod));
+        info.setDateMode(DateConf.DateMode.BETWEEN);
         info.setDetectWord(detectWord);
         info.setStartDate(LocalDate.now().minusDays(days).toString());
-        info.setEndDate(LocalDate.now().minusDays(1).toString());
+        info.setEndDate(LocalDate.now().toString());
         info.setUnit(num);
 
         return info;
@@ -163,19 +163,6 @@ public class TimeRangeParser implements SemanticParser {
                 return 365;
             default:
                 return 1;
-        }
-    }
-
-    private String getPeriodConstant(String zhPeriod) {
-        switch (zhPeriod) {
-            case "周":
-                return Constants.WEEK;
-            case "月":
-                return Constants.MONTH;
-            case "年":
-                return Constants.YEAR;
-            default:
-                return Constants.DAY;
         }
     }
 

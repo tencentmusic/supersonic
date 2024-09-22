@@ -9,9 +9,9 @@ import com.alibaba.excel.write.metadata.WriteSheet;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.common.pojo.Aggregator;
-import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.common.pojo.QueryColumn;
+import com.tencent.supersonic.common.pojo.enums.DatePeriodEnum;
 import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import com.tencent.supersonic.common.util.DateUtils;
 import com.tencent.supersonic.headless.api.pojo.DrillDownDimension;
@@ -298,9 +298,9 @@ public class DownloadServiceImpl implements DownloadService {
     }
 
     private String getTimeDimension(DateConf dateConf) {
-        if (Constants.MONTH.equals(dateConf.getPeriod())) {
+        if (DatePeriodEnum.MONTH.equals(dateConf.getPeriod())) {
             return TimeDimensionEnum.MONTH.getName();
-        } else if (Constants.WEEK.equals(dateConf.getPeriod())) {
+        } else if (DatePeriodEnum.WEEK.equals(dateConf.getPeriod())) {
             return TimeDimensionEnum.WEEK.getName();
         } else {
             return TimeDimensionEnum.DAY.getName();

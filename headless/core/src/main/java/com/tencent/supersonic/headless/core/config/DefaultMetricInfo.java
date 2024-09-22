@@ -1,6 +1,6 @@
 package com.tencent.supersonic.headless.core.config;
 
-import com.tencent.supersonic.common.pojo.Constants;
+import com.tencent.supersonic.common.pojo.enums.DatePeriodEnum;
 import lombok.Data;
 import lombok.ToString;
 
@@ -16,5 +16,5 @@ public class DefaultMetricInfo {
     private Integer unit = 1;
 
     /** default time type: day DAY, WEEK, MONTH, YEAR */
-    private String period = Constants.DAY;
+    private DatePeriodEnum period = DatePeriodEnum.DAY;
 }

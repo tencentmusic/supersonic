@@ -26,7 +26,7 @@ public class S2SqlDateHelper {
         }
 
         TimeMode timeMode = timeConfig.getTimeMode();
-        DatePeriodEnum datePeriod = DatePeriodEnum.get(timeConfig.getPeriod());
+        DatePeriodEnum datePeriod = timeConfig.getPeriod();
         String startDate;
         String endDate;
         switch (timeMode) {

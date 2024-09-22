@@ -39,12 +39,9 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static com.tencent.supersonic.common.pojo.Constants.DAY;
 import static com.tencent.supersonic.common.pojo.Constants.DAY_FORMAT;
 import static com.tencent.supersonic.common.pojo.Constants.JOIN_UNDERLINE;
-import static com.tencent.supersonic.common.pojo.Constants.MONTH;
 import static com.tencent.supersonic.common.pojo.Constants.UNDERLINE;
-import static com.tencent.supersonic.common.pojo.Constants.WEEK;
 
 /** tools functions to analyze queryStructReq */
 @Component

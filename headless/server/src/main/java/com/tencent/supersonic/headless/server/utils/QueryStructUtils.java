@@ -6,6 +6,7 @@ import com.tencent.supersonic.common.pojo.Aggregator;
 import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.common.pojo.DateConf.DateMode;
 import com.tencent.supersonic.common.pojo.ItemDateResp;
+import com.tencent.supersonic.common.pojo.enums.DatePeriodEnum;
 import com.tencent.supersonic.common.pojo.enums.TypeEnums;
 import com.tencent.supersonic.common.util.DateModeUtils;
 import com.tencent.supersonic.common.util.SqlFilterUtils;
@@ -40,10 +41,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static com.tencent.supersonic.common.pojo.Constants.DAY;
 import static com.tencent.supersonic.common.pojo.Constants.DAY_FORMAT;
-import static com.tencent.supersonic.common.pojo.Constants.MONTH;
-import static com.tencent.supersonic.common.pojo.Constants.WEEK;
 
 @Slf4j
 @Component
@@ -236,7 +234,7 @@ public class QueryStructUtils {
             Set<String> dateList = new HashSet<>();
             String startDate = "";
             String endDate = "";
-            String period = "";
+            DatePeriodEnum period = null;
             for (FieldExpression f : fieldExpressions) {
                 if (Objects.isNull(f.getFieldName())
                         || !internalCols.contains(f.getFieldName().toLowerCase())) {
@@ -247,7 +245,7 @@ public class QueryStructUtils {
                     continue;
                 }
                 period = dateModeUtils.getPeriodByCol(f.getFieldName().toLowerCase());
-                if ("".equals(period)) {
+                if (period == null) {
                     continue;
                 }
                 if ("=".equals(f.getOperator())) {
@@ -263,7 +261,7 @@ public class QueryStructUtils {
                     }
                 }
             }
-            if (!"".equals(period)) {
+            if (period != null) {
                 DateConf dateConf = new DateConf();
                 dateConf.setPeriod(period);
                 if (!CollectionUtils.isEmpty(dateList)) {

@@ -2,12 +2,12 @@ package com.tencent.supersonic.headless.chat.utils;
 
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.common.pojo.Aggregator;
-import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.common.pojo.Filter;
 import com.tencent.supersonic.common.pojo.Order;
 import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
 import com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum;
+import com.tencent.supersonic.common.pojo.enums.DatePeriodEnum;
 import com.tencent.supersonic.common.pojo.enums.QueryType;
 import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import com.tencent.supersonic.headless.api.pojo.SchemaElement;
@@ -23,7 +23,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.util.CollectionUtils;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -42,7 +41,7 @@ public class QueryReqBuilder {
         queryStructReq.setDataSetId(parseInfo.getDataSetId());
         queryStructReq.setDataSetName(parseInfo.getDataSet().getName());
         queryStructReq.setQueryType(parseInfo.getQueryType());
-        queryStructReq.setDateInfo(rewrite2Between(parseInfo.getDateInfo()));
+        queryStructReq.setDateInfo(parseInfo.getDateInfo());
 
         List<Filter> dimensionFilters = getFilters(parseInfo.getDimensionFilters());
         queryStructReq.setDimensionFilters(dimensionFilters);
@@ -106,40 +105,6 @@ public class QueryReqBuilder {
             queryStructReq.getGroups().clear();
             queryStructReq.getGroups().addAll(groups);
         }
-    }
-
-    private static DateConf rewrite2Between(DateConf dateInfo) {
-        if (Objects.isNull(dateInfo)) {
-            return null;
-        }
-        DateConf dateInfoNew = new DateConf();
-        BeanUtils.copyProperties(dateInfo, dateInfoNew);
-        if (DateConf.DateMode.RECENT.equals(dateInfo.getDateMode())) {
-            int unit = dateInfo.getUnit();
-            int days = 1;
-            switch (dateInfo.getPeriod()) {
-                case Constants.DAY:
-                    days = 1;
-                    break;
-                case Constants.WEEK:
-                    days = 7;
-                    break;
-                case Constants.MONTH:
-                    days = 30;
-                    break;
-                case Constants.YEAR:
-                    days = 365;
-                    break;
-                default:
-                    break;
-            }
-            String startDate = LocalDate.now().plusDays(-(unit * days)).toString();
-            String endDate = LocalDate.now().plusDays(-1).toString();
-            dateInfoNew.setDateMode(DateConf.DateMode.BETWEEN);
-            dateInfoNew.setStartDate(startDate);
-            dateInfoNew.setEndDate(endDate);
-        }
-        return dateInfoNew;
     }
 
     public static QueryMultiStructReq buildMultiStructReq(SemanticParseInfo parseInfo) {
@@ -282,10 +247,10 @@ public class QueryReqBuilder {
             return "";
         }
         String dateField = TimeDimensionEnum.DAY.getName();
-        if (Constants.MONTH.equals(dateConf.getPeriod())) {
+        if (DatePeriodEnum.MONTH.equals(dateConf.getPeriod())) {
             dateField = TimeDimensionEnum.MONTH.getName();
         }
-        if (Constants.WEEK.equals(dateConf.getPeriod())) {
+        if (DatePeriodEnum.WEEK.equals(dateConf.getPeriod())) {
             dateField = TimeDimensionEnum.WEEK.getName();
         }
         return dateField;

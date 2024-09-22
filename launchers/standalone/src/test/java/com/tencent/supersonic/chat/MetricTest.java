@@ -2,13 +2,13 @@ package com.tencent.supersonic.chat;
 
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.common.pojo.DateConf;
+import com.tencent.supersonic.common.pojo.enums.DatePeriodEnum;
 import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
 import com.tencent.supersonic.common.pojo.enums.QueryType;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.api.pojo.request.QueryFilter;
 import com.tencent.supersonic.headless.chat.query.rule.metric.MetricFilterQuery;
 import com.tencent.supersonic.headless.chat.query.rule.metric.MetricGroupByQuery;
-import com.tencent.supersonic.headless.chat.query.rule.metric.MetricModelQuery;
 import com.tencent.supersonic.headless.chat.query.rule.metric.MetricTopNQuery;
 import com.tencent.supersonic.util.DataUtils;
 import org.junit.jupiter.api.Order;
@@ -45,25 +45,7 @@ public class MetricTest extends BaseTest {
                                 "user_name", FilterOperatorEnum.EQUALS, "alice", "用户", 2L));
 
         expectedParseInfo.setDateInfo(
-                DataUtils.getDateConf(DateConf.DateMode.RECENT, unit, period, startDay, endDay));
-        expectedParseInfo.setQueryType(QueryType.METRIC);
-
-        assertQueryResult(expectedResult, actualResult);
-    }
-
-    // @Test
-    public void testMetricDomain() throws Exception {
-        QueryResult actualResult = submitNewChat("超音数总访问次数", DataUtils.metricAgentId);
-
-        QueryResult expectedResult = new QueryResult();
-        SemanticParseInfo expectedParseInfo = new SemanticParseInfo();
-        expectedResult.setChatContext(expectedParseInfo);
-
-        expectedResult.setQueryMode(MetricModelQuery.QUERY_MODE);
-        expectedParseInfo.setAggType(NONE);
-        expectedParseInfo.getMetrics().add(DataUtils.getSchemaElement("访问次数"));
-        expectedParseInfo.setDateInfo(
-                DataUtils.getDateConf(DateConf.DateMode.RECENT, unit, period, startDay, endDay));
+                DataUtils.getDateConf(DateConf.DateMode.BETWEEN, unit, period, startDay, endDay));
         expectedParseInfo.setQueryType(QueryType.METRIC);
 
         assertQueryResult(expectedResult, actualResult);
@@ -84,7 +66,8 @@ public class MetricTest extends BaseTest {
         expectedParseInfo.getDimensions().add(DataUtils.getSchemaElement("部门"));
 
         expectedParseInfo.setDateInfo(
-                DataUtils.getDateConf(DateConf.DateMode.RECENT, unit, period, startDay, endDay));
+                DataUtils.getDateConf(
+                        DateConf.DateMode.BETWEEN, 7, DatePeriodEnum.DAY, startDay, endDay));
         expectedParseInfo.setQueryType(QueryType.METRIC);
 
         assertQueryResult(expectedResult, actualResult);
@@ -110,7 +93,7 @@ public class MetricTest extends BaseTest {
         expectedParseInfo.getDimensionFilters().add(dimensionFilter);
 
         expectedParseInfo.setDateInfo(
-                DataUtils.getDateConf(DateConf.DateMode.RECENT, unit, period, startDay, endDay));
+                DataUtils.getDateConf(DateConf.DateMode.BETWEEN, unit, period, startDay, endDay));
         expectedParseInfo.setQueryType(QueryType.METRIC);
 
         assertQueryResult(expectedResult, actualResult);
@@ -131,7 +114,8 @@ public class MetricTest extends BaseTest {
         expectedParseInfo.getMetrics().add(DataUtils.getSchemaElement("访问次数"));
         expectedParseInfo.getDimensions().add(DataUtils.getSchemaElement("用户"));
 
-        expectedParseInfo.setDateInfo(DataUtils.getDateConf(3, DateConf.DateMode.RECENT, "DAY"));
+        expectedParseInfo.setDateInfo(
+                DataUtils.getDateConf(3, DateConf.DateMode.BETWEEN, DatePeriodEnum.DAY));
         expectedParseInfo.setQueryType(QueryType.METRIC);
 
         assertQueryResult(expectedResult, actualResult);
@@ -151,7 +135,7 @@ public class MetricTest extends BaseTest {
         expectedParseInfo.getDimensions().add(DataUtils.getSchemaElement("部门"));
 
         expectedParseInfo.setDateInfo(
-                DataUtils.getDateConf(DateConf.DateMode.RECENT, unit, period, startDay, endDay));
+                DataUtils.getDateConf(DateConf.DateMode.BETWEEN, unit, period, startDay, endDay));
         expectedParseInfo.setQueryType(QueryType.METRIC);
 
         assertQueryResult(expectedResult, actualResult);
