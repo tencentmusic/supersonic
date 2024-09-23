@@ -1,6 +1,7 @@
 package com.tencent.supersonic.headless.chat.parser;
 
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
+import com.tencent.supersonic.common.jsqlparser.SqlSelectFunctionHelper;
 import com.tencent.supersonic.common.jsqlparser.SqlSelectHelper;
 import com.tencent.supersonic.common.pojo.enums.QueryType;
 import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
@@ -70,7 +71,8 @@ public class QueryTypeParser implements SemanticParser {
         }
 
         // 2. metric queryType
-        if (selectContainsMetric(sqlInfo, dataSetId, semanticSchema)) {
+        if (selectContainsMetric(sqlInfo, dataSetId, semanticSchema)
+                || SqlSelectFunctionHelper.hasAggregateFunction(sqlInfo.getParsedS2SQL())) {
             return QueryType.METRIC;
         }
 
