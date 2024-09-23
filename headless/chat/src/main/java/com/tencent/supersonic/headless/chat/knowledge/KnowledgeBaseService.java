@@ -52,7 +52,7 @@ public class KnowledgeBaseService {
         updateOnlineKnowledge(natures);
     }
 
-    public void updateOnlineKnowledge(List<DictWord> natures) {
+    private void updateOnlineKnowledge(List<DictWord> natures) {
         try {
             updateSemanticKnowledge(natures);
         } catch (Exception e) {
