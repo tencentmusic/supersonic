@@ -59,7 +59,6 @@ public class QueryStructUtils {
     private final DateModeUtils dateModeUtils;
     private final SqlFilterUtils sqlFilterUtils;
     private final SchemaService schemaService;
-    private String variablePrefix = "'${";
 
     public QueryStructUtils(
             DateModeUtils dateModeUtils,

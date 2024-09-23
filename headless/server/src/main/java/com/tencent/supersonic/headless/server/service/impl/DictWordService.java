@@ -6,7 +6,6 @@ import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
 import com.tencent.supersonic.headless.api.pojo.SemanticSchema;
 import com.tencent.supersonic.headless.chat.knowledge.DictWord;
 import com.tencent.supersonic.headless.chat.knowledge.KnowledgeBaseService;
-import com.tencent.supersonic.headless.chat.knowledge.SearchService;
 import com.tencent.supersonic.headless.chat.knowledge.builder.WordBuilderFactory;
 import com.tencent.supersonic.headless.server.service.SchemaService;
 import lombok.extern.slf4j.Slf4j;
@@ -44,8 +43,7 @@ public class DictWordService {
             return;
         }
         setPreDictWords(dictWords);
-        SearchService.clear();
-        knowledgeBaseService.updateOnlineKnowledge(getAllDictWords());
+        knowledgeBaseService.reloadAllData(getAllDictWords());
         long duration = System.currentTimeMillis() - startTime;
         log.info("Dictionary has been regularly reloaded in {} milliseconds", duration);
     }
