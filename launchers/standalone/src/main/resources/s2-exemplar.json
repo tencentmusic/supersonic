@@ -39,7 +39,7 @@
         "question": "过去半个月核心用户的访问次数",
         "sideInfo": "CurrentDate=[2023-09-15],DomainTerms=[<核心用户 COMMENT '用户为alice'>]",
         "dbSchema": "DatabaseType=[h2], Table=[超音数产品], PartitionTimeField=[数据日期 FORMAT 'yyyy-MM-dd'], Metrics=[<访问次数 ALIAS 'pv' COMMENT '一段时间内用户的访问次数' AGGREGATE 'SUM'>], Dimensions=[<部门>,<数据日期>], Values=[]",
-        "sql": "SELECT 用户,SUM(访问次数) FROM 超音数产品 WHERE 用户='alice' AND 数据日期 >= '2023-09-01' AND 数据日期 <= '2023-09-15'"
+        "sql": "SELECT 用户,SUM(访问次数) FROM 超音数产品 WHERE 用户='alice' AND 数据日期 >= '2023-09-01' AND 数据日期 <= '2023-09-15' GROUP BY 用户"
     },
     {
         "question": "过去半个月忠实用户有哪一些",
