@@ -127,6 +127,7 @@ public class QueryUtils {
                 || type.equalsIgnoreCase("float")
                 || type.equalsIgnoreCase("double")
                 || type.equalsIgnoreCase("numeric")
+                || type.toLowerCase().startsWith("decimal")
                 || type.toLowerCase().startsWith("uint")
                 || type.toLowerCase().startsWith("int");
     }
