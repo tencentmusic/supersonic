@@ -97,7 +97,8 @@ public class QueryReqConverter {
                     .getMetrics()
                     .add(
                             sqlGenerateUtils.generateInternalMetricName(
-                                    semanticSchemaResp.getModelResps().get(0).getBizName()));
+                                    getDefaultModel(
+                                            semanticSchemaResp, metricTable.getDimensions())));
         } else {
             queryStructReq.setAggregators(
                     metricTable.getMetrics().stream()
