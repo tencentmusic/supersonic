@@ -46,6 +46,9 @@ public class StringUtil {
     }
 
     public static String replaceBackticks(String sql) {
+        if (StringUtils.isBlank(sql)) {
+            return sql;
+        }
         return sql.replaceAll("`", "");
     }
 }

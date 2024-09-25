@@ -1,5 +1,6 @@
 package com.tencent.supersonic.common.jsqlparser;
 
+import com.tencent.supersonic.common.util.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.schema.Column;
 import org.apache.commons.lang3.StringUtils;
@@ -14,7 +15,7 @@ public class ParseVisitorHelper {
 
     public void replaceColumn(
             Column column, Map<String, String> fieldNameMap, boolean exactReplace) {
-        String columnName = column.getColumnName();
+        String columnName = StringUtil.replaceBackticks(column.getColumnName());
         String replaceColumn = getReplaceValue(columnName, fieldNameMap, exactReplace);
         if (StringUtils.isNotBlank(replaceColumn)) {
             column.setColumnName(replaceColumn);
