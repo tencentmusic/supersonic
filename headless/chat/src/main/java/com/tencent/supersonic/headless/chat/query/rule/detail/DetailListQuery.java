@@ -2,11 +2,8 @@ package com.tencent.supersonic.headless.chat.query.rule.detail;
 
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.Order;
-import com.tencent.supersonic.headless.api.pojo.DataSetSchema;
-import com.tencent.supersonic.headless.api.pojo.SchemaElement;
-import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
-import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
-import com.tencent.supersonic.headless.api.pojo.TagTypeDefaultConfig;
+import com.tencent.supersonic.headless.api.pojo.*;
+import com.tencent.supersonic.headless.api.pojo.DetailTypeDefaultConfig;
 import com.tencent.supersonic.headless.chat.ChatQueryContext;
 import org.apache.commons.collections.CollectionUtils;
 
@@ -35,13 +32,14 @@ public abstract class DetailListQuery extends DetailSemanticQuery {
             Set<SchemaElement> dimensions = new LinkedHashSet<>();
             Set<SchemaElement> metrics = new LinkedHashSet<>();
             Set<Order> orders = new LinkedHashSet<>();
-            TagTypeDefaultConfig tagTypeDefaultConfig = dataSetSchema.getTagTypeDefaultConfig();
-            if (tagTypeDefaultConfig != null
-                    && tagTypeDefaultConfig.getDefaultDisplayInfo() != null) {
+            DetailTypeDefaultConfig detailTypeDefaultConfig =
+                    dataSetSchema.getTagTypeDefaultConfig();
+            if (detailTypeDefaultConfig != null
+                    && detailTypeDefaultConfig.getDefaultDisplayInfo() != null) {
                 if (CollectionUtils.isNotEmpty(
-                        tagTypeDefaultConfig.getDefaultDisplayInfo().getMetricIds())) {
+                        detailTypeDefaultConfig.getDefaultDisplayInfo().getMetricIds())) {
                     metrics =
-                            tagTypeDefaultConfig.getDefaultDisplayInfo().getMetricIds().stream()
+                            detailTypeDefaultConfig.getDefaultDisplayInfo().getMetricIds().stream()
                                     .map(
                                             id -> {
                                                 SchemaElement metric =
@@ -59,9 +57,10 @@ public abstract class DetailListQuery extends DetailSemanticQuery {
                                     .collect(Collectors.toSet());
                 }
                 if (CollectionUtils.isNotEmpty(
-                        tagTypeDefaultConfig.getDefaultDisplayInfo().getDimensionIds())) {
+                        detailTypeDefaultConfig.getDefaultDisplayInfo().getDimensionIds())) {
                     dimensions =
-                            tagTypeDefaultConfig.getDefaultDisplayInfo().getDimensionIds().stream()
+                            detailTypeDefaultConfig.getDefaultDisplayInfo().getDimensionIds()
+                                    .stream()
                                     .map(
                                             id ->
                                                     dataSetSchema.getElement(

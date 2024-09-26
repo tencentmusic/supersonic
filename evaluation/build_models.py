@@ -250,8 +250,8 @@ def build_dataSet(domain_id,model_id1,model_id2,model_id3,model_id4):
     {"viewModelConfigs":[{"id":model_id1,"includesAll":False,"metrics":metric_list1,
     "dimensions":dimension_list1},{"id":model_id2,"includesAll":False,
     "metrics":metric_list2,"dimensions":dimension_list2},{"id":model_id3,"includesAll":False,"metrics":metric_list3,"dimensions":dimension_list3},
-    {"id":model_id4,"includesAll":False,"metrics":metric_list4,"dimensions":dimension_list4}]},"queryConfig":{"tagTypeDefaultConfig":
-    {"dimensionIds":[],"metricIds":[]},"metricTypeDefaultConfig":{"timeDefaultConfig":{"unit":1,"period":"DAY","timeMode":"RECENT"}}},"admins":["admin"],"admin":"admin"}
+    {"id":model_id4,"includesAll":False,"metrics":metric_list4,"dimensions":dimension_list4}]},"queryConfig":{"detailTypeDefaultConfig":
+    {"dimensionIds":[],"metricIds":[]},"aggregateTypeDefaultConfig":{"timeDefaultConfig":{"unit":1,"period":"DAY","timeMode":"RECENT"}}},"admins":["admin"],"admin":"admin"}
 
     json_dict={"name":"DuSQL 互联网企业","bizName":"internet","description":"DuSQL互联网企业数据源相关的指标和维度等","typeEnum":"DATASET","sensitiveLevel":0,"domainId":domain_id,
                "dataSetDetail":{"dataSetModelConfigs":[
@@ -260,7 +260,7 @@ def build_dataSet(domain_id,model_id1,model_id2,model_id3,model_id4):
                    {"id":model_id3,"includesAll":False,"metrics":metric_list3,"dimensions":dimension_list3},
                    {"id":model_id4,"includesAll":False,"metrics":metric_list4,"dimensions":dimension_list4}
                ]},
-               "queryConfig":{"tagTypeDefaultConfig":{},"metricTypeDefaultConfig":{"timeDefaultConfig":{"unit":0,"period":"DAY","timeMode":"RECENT"}}},"admins":["admin"],"admin":"admin"}
+               "queryConfig":{"detailTypeDefaultConfig":{},"aggregateTypeDefaultConfig":{"timeDefaultConfig":{"unit":0,"period":"DAY","timeMode":"RECENT"}}},"admins":["admin"],"admin":"admin"}
     url=get_url_pre()+"/api/semantic/dataSet"
     authorization=get_authorization()
     header = {}
