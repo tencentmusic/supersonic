@@ -42,11 +42,6 @@ public class GroupByCorrector extends BaseSemanticCorrector {
         SqlInfo sqlInfo = semanticParseInfo.getSqlInfo();
         String correctS2SQL = sqlInfo.getCorrectedS2SQL();
         SemanticSchema semanticSchema = chatQueryContext.getSemanticSchema();
-        // check has distinct
-        if (SqlSelectHelper.hasDistinct(correctS2SQL)) {
-            log.debug("no need to add groupby ,existed distinct in s2sql:{}", correctS2SQL);
-            return false;
-        }
         // add alias field name
         Set<String> dimensions = getDimensions(dataSetId, semanticSchema);
         List<String> selectFields = SqlSelectHelper.getSelectFields(correctS2SQL);
@@ -54,11 +49,11 @@ public class GroupByCorrector extends BaseSemanticCorrector {
             return false;
         }
         // if only date in select not add group by.
-        if (selectFields.size() == 1 && selectFields.contains(TimeDimensionEnum.DAY.getChName())) {
+        if (selectFields.size() == 1 && TimeDimensionEnum.containsZhTimeDimension(selectFields)) {
             return false;
         }
         if (SqlSelectHelper.hasGroupBy(correctS2SQL)) {
-            log.debug("No need to add groupby, existed groupby in s2sql:{}", correctS2SQL);
+            log.debug("No need to add 'group by', existed 'group by' in s2sql:{}", correctS2SQL);
             return false;
         }
         Environment environment = ContextUtils.getBean(Environment.class);

@@ -8,6 +8,7 @@ import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.common.pojo.DateConf.DateMode;
 import com.tencent.supersonic.common.pojo.QueryColumn;
 import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
+import com.tencent.supersonic.common.pojo.enums.DatePeriodEnum;
 import com.tencent.supersonic.common.pojo.enums.QueryType;
 import com.tencent.supersonic.common.pojo.enums.RatioOverType;
 import com.tencent.supersonic.common.util.ContextUtils;
@@ -43,15 +44,12 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
-import static com.tencent.supersonic.common.pojo.Constants.DAY;
 import static com.tencent.supersonic.common.pojo.Constants.DAY_FORMAT;
 import static com.tencent.supersonic.common.pojo.Constants.DAY_FORMAT_INT;
-import static com.tencent.supersonic.common.pojo.Constants.MONTH;
 import static com.tencent.supersonic.common.pojo.Constants.MONTH_FORMAT;
 import static com.tencent.supersonic.common.pojo.Constants.MONTH_FORMAT_INT;
 import static com.tencent.supersonic.common.pojo.Constants.TIMES_FORMAT;
 import static com.tencent.supersonic.common.pojo.Constants.TIME_FORMAT;
-import static com.tencent.supersonic.common.pojo.Constants.WEEK;
 
 /** Add ratio queries for metric queries. */
 @Slf4j
@@ -193,11 +191,11 @@ public class MetricRatioProcessor implements ExecuteResultProcessor {
         }
         String statisticsRollName = RatioOverType.DAY_ON_DAY.getShowName();
         String statisticsOverName = RatioOverType.WEEK_ON_DAY.getShowName();
-        if (MONTH.equals(semanticParseInfo.getDateInfo().getPeriod())) {
+        if (DatePeriodEnum.MONTH.equals(semanticParseInfo.getDateInfo().getPeriod())) {
             statisticsRollName = RatioOverType.MONTH_ON_MONTH.getShowName();
             statisticsOverName = RatioOverType.YEAR_ON_MONTH.getShowName();
         }
-        if (WEEK.equals(semanticParseInfo.getDateInfo().getPeriod())) {
+        if (DatePeriodEnum.WEEK.equals(semanticParseInfo.getDateInfo().getPeriod())) {
             statisticsRollName = RatioOverType.WEEK_ON_WEEK.getShowName();
             statisticsOverName = RatioOverType.MONTH_ON_WEEK.getShowName();
         }
@@ -234,7 +232,7 @@ public class MetricRatioProcessor implements ExecuteResultProcessor {
         List<String> dayList = new ArrayList<>();
         dayList.add(lastDay);
         String start = "";
-        if (DAY.equalsIgnoreCase(semanticParseInfo.getDateInfo().getPeriod())) {
+        if (DatePeriodEnum.DAY.equals(semanticParseInfo.getDateInfo().getPeriod())) {
             DateTimeFormatter formatter =
                     DateUtils.getDateFormatter(lastDay, new String[] {DAY_FORMAT, DAY_FORMAT_INT});
             LocalDate end = LocalDate.parse(lastDay, formatter);
@@ -243,7 +241,7 @@ public class MetricRatioProcessor implements ExecuteResultProcessor {
                             ? end.minusDays(1).format(formatter)
                             : end.minusWeeks(1).format(formatter);
         }
-        if (WEEK.equalsIgnoreCase(semanticParseInfo.getDateInfo().getPeriod())) {
+        if (DatePeriodEnum.WEEK.equals(semanticParseInfo.getDateInfo().getPeriod())) {
             DateTimeFormatter formatter =
                     DateUtils.getTimeFormatter(
                             lastDay,
@@ -254,7 +252,7 @@ public class MetricRatioProcessor implements ExecuteResultProcessor {
                             ? end.minusWeeks(1).format(formatter)
                             : end.minusMonths(1).with(DayOfWeek.MONDAY).format(formatter);
         }
-        if (MONTH.equalsIgnoreCase(semanticParseInfo.getDateInfo().getPeriod())) {
+        if (DatePeriodEnum.MONTH.equals(semanticParseInfo.getDateInfo().getPeriod())) {
             DateTimeFormatter formatter =
                     DateUtils.getDateFormatter(
                             lastDay, new String[] {MONTH_FORMAT, MONTH_FORMAT_INT});

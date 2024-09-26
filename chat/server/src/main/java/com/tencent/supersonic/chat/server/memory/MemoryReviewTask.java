@@ -29,18 +29,17 @@ public class MemoryReviewTask {
 
     private static final String INSTRUCTION =
             ""
-                    + "#Role: You are a senior data engineer experienced in writing SQL.\n"
-                    + "#Task: Your will be provided with a user question and the SQL written by junior engineer,"
-                    + "please take a review and give your opinion.\n"
-                    + "#Rules: "
+                    + "\n#Role: You are a senior data engineer experienced in writing SQL."
+                    + "\n#Task: Your will be provided with a user question and the SQL written by junior engineer,"
+                    + "please take a review and give your opinion."
+                    + "\n#Rules: "
                     + "1.ALWAYS follow the output format: `opinion=(POSITIVE|NEGATIVE),comment=(your comment)`."
-                    + "2.ALWAYS recognize `数据日期` as the date field."
-                    + "3.IGNORE `数据日期` if not expressed in the `Question`."
-                    + "#Question: %s\n"
-                    + "#Schema: %s\n"
-                    + "#SideInfo: %s\n"
-                    + "#SQL: %s\n"
-                    + "#Response: ";
+                    + "2.NO NEED to include date filter in the where clause if not explicitly expressed in the `Question`."
+                    + "\n#Question: %s"
+                    + "\n#Schema: %s"
+                    + "\n#SideInfo: %s"
+                    + "\n#SQL: %s"
+                    + "\n#Response: ";
 
     private static final Pattern OUTPUT_PATTERN = Pattern.compile("opinion=(.*),.*comment=(.*)");
 

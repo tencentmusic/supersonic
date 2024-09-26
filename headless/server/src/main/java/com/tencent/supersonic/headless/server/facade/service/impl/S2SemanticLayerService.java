@@ -574,7 +574,7 @@ public class S2SemanticLayerService implements SemanticLayerService {
             TimeDefaultConfig timeDefaultConfig = dataSetSchema.getTagTypeTimeDefaultConfig();
             if (Objects.nonNull(timeDefaultConfig)) {
                 unit = timeDefaultConfig.getUnit();
-                String date = LocalDate.now().plusDays(-unit).toString();
+                String date = LocalDate.now().minusDays(unit).toString();
                 dateInfo.setDateMode(DateConf.DateMode.BETWEEN);
                 dateInfo.setStartDate(date);
                 dateInfo.setEndDate(date);

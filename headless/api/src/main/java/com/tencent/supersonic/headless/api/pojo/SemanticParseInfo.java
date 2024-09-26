@@ -14,7 +14,11 @@ import lombok.Data;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
+
+import static com.tencent.supersonic.common.pojo.Constants.DEFAULT_DETAIL_LIMIT;
+import static com.tencent.supersonic.common.pojo.Constants.DEFAULT_METRIC_LIMIT;
 
 @Data
 public class SemanticParseInfo {
@@ -22,6 +26,7 @@ public class SemanticParseInfo {
     private Integer id;
     private String queryMode = "PLAIN_TEXT";
     private SchemaElement dataSet;
+    private QueryConfig queryConfig;
     private Set<SchemaElement> metrics = Sets.newTreeSet(new SchemaNameLengthComparator());
     private Set<SchemaElement> dimensions = Sets.newTreeSet(new SchemaNameLengthComparator());
     private SchemaElement entity;
@@ -67,5 +72,25 @@ public class SemanticParseInfo {
             return null;
         }
         return dataSet.getDataSetId();
+    }
+
+    public Long getDetailLimit() {
+        Long limit = DEFAULT_DETAIL_LIMIT;
+        if (Objects.nonNull(queryConfig)
+                && Objects.nonNull(queryConfig.getTagTypeDefaultConfig())
+                && Objects.nonNull(queryConfig.getTagTypeDefaultConfig().getLimit())) {
+            limit = queryConfig.getTagTypeDefaultConfig().getLimit();
+        }
+        return limit;
+    }
+
+    public Long getMetricLimit() {
+        Long limit = DEFAULT_METRIC_LIMIT;
+        if (Objects.nonNull(queryConfig)
+                && Objects.nonNull(queryConfig.getMetricTypeDefaultConfig())
+                && Objects.nonNull(queryConfig.getMetricTypeDefaultConfig().getLimit())) {
+            limit = queryConfig.getMetricTypeDefaultConfig().getLimit();
+        }
+        return limit;
     }
 }

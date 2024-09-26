@@ -1,8 +1,10 @@
 package com.tencent.supersonic.common.pojo.enums;
 
 public enum TimeMode {
-
-    /** date mode LAST - a certain time RECENT - a period time */
+    // a single date at N days ago
     LAST,
-    RECENT
+    // a period of date from N days ago to today
+    RECENT,
+    // a period of date from the first day of current month/year to today
+    CURRENT
 }

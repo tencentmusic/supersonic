@@ -9,9 +9,9 @@ import com.alibaba.excel.write.metadata.WriteSheet;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.common.pojo.Aggregator;
-import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.common.pojo.QueryColumn;
+import com.tencent.supersonic.common.pojo.enums.DatePeriodEnum;
 import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import com.tencent.supersonic.common.util.DateUtils;
 import com.tencent.supersonic.headless.api.pojo.DrillDownDimension;
@@ -60,6 +60,8 @@ public class DownloadServiceImpl implements DownloadService {
 
     private static final long downloadSize = 10000;
 
+    private static final String dateFormat = "yyyyMMddHHmmss";
+
     private MetricService metricService;
 
     private DimensionService dimensionService;
@@ -80,8 +82,7 @@ public class DownloadServiceImpl implements DownloadService {
             DownloadMetricReq downloadMetricReq, User user, HttpServletResponse response)
             throws Exception {
         String fileName =
-                String.format(
-                        "%s_%s.xlsx", "supersonic", DateUtils.format(new Date(), DateUtils.FORMAT));
+                String.format("%s_%s.xlsx", "supersonic", DateUtils.format(new Date(), dateFormat));
         File file = FileUtils.createTmpFile(fileName);
         try {
             QueryStructReq queryStructReq = metricService.convert(downloadMetricReq);
@@ -108,8 +109,7 @@ public class DownloadServiceImpl implements DownloadService {
             BatchDownloadReq batchDownloadReq, User user, HttpServletResponse response)
             throws Exception {
         String fileName =
-                String.format(
-                        "%s_%s.xlsx", "supersonic", DateUtils.format(new Date(), DateUtils.FORMAT));
+                String.format("%s_%s.xlsx", "supersonic", DateUtils.format(new Date(), dateFormat));
         File file = FileUtils.createTmpFile(fileName);
         List<Long> metricIds = batchDownloadReq.getMetricIds();
         if (CollectionUtils.isEmpty(metricIds)) {
@@ -298,9 +298,9 @@ public class DownloadServiceImpl implements DownloadService {
     }
 
     private String getTimeDimension(DateConf dateConf) {
-        if (Constants.MONTH.equals(dateConf.getPeriod())) {
+        if (DatePeriodEnum.MONTH.equals(dateConf.getPeriod())) {
             return TimeDimensionEnum.MONTH.getName();
-        } else if (Constants.WEEK.equals(dateConf.getPeriod())) {
+        } else if (DatePeriodEnum.WEEK.equals(dateConf.getPeriod())) {
             return TimeDimensionEnum.WEEK.getName();
         } else {
             return TimeDimensionEnum.DAY.getName();

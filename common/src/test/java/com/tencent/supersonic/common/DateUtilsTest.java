@@ -1,6 +1,5 @@
 package com.tencent.supersonic.common;
 
-import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.enums.DatePeriodEnum;
 import com.tencent.supersonic.common.util.DateUtils;
 import org.assertj.core.util.Lists;
@@ -47,7 +46,7 @@ class DateUtilsTest {
     void testDayDateList() {
         String startDate = "2023-07-29";
         String endDate = "2023-08-03";
-        List<String> actualDateList = DateUtils.getDateList(startDate, endDate, Constants.DAY);
+        List<String> actualDateList = DateUtils.getDateList(startDate, endDate, DatePeriodEnum.DAY);
         List<String> expectedDateList =
                 Lists.newArrayList(
                         "2023-07-29",
@@ -56,14 +55,15 @@ class DateUtilsTest {
                         "2023-08-01",
                         "2023-08-02",
                         "2023-08-03");
-        Assertions.assertEquals(actualDateList, expectedDateList);
+        Assertions.assertEquals(expectedDateList, actualDateList);
     }
 
     @Test
     void testWeekDateList() {
         String startDate = "2023-10-30";
         String endDate = "2023-11-13";
-        List<String> actualDateList = DateUtils.getDateList(startDate, endDate, Constants.WEEK);
+        List<String> actualDateList =
+                DateUtils.getDateList(startDate, endDate, DatePeriodEnum.WEEK);
         List<String> expectedDateList =
                 Lists.newArrayList("2023-10-30", "2023-11-06", "2023-11-13");
         Assertions.assertEquals(actualDateList, expectedDateList);
@@ -73,7 +73,8 @@ class DateUtilsTest {
     void testMonthDateList() {
         String startDate = "2023-07-01";
         String endDate = "2023-10-01";
-        List<String> actualDateList = DateUtils.getDateList(startDate, endDate, Constants.MONTH);
+        List<String> actualDateList =
+                DateUtils.getDateList(startDate, endDate, DatePeriodEnum.MONTH);
         List<String> expectedDateList =
                 Lists.newArrayList("2023-07", "2023-08", "2023-09", "2023-10");
         Assertions.assertEquals(actualDateList, expectedDateList);

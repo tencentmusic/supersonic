@@ -1,5 +1,6 @@
 package com.tencent.supersonic.common.pojo;
 
+import com.tencent.supersonic.common.pojo.enums.DatePeriodEnum;
 import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import com.tencent.supersonic.common.util.DateUtils;
 import lombok.Data;
@@ -29,8 +30,8 @@ public class DateConf {
     /** the last unit time unit, such as the last 7 days, unit = 7 */
     private Integer unit = 1;
 
-    /** DAY,WEEK,MONTH */
-    private String period = Constants.DAY;
+    /** DAY,WEEK,MONTH,QUARTER,YEAR */
+    private DatePeriodEnum period = DatePeriodEnum.DAY;
 
     /** the text parse from , example "last 7 days" , "last mouth" */
     private String detectWord;
@@ -49,11 +50,11 @@ public class DateConf {
     }
 
     public String getGroupByTimeDimension() {
-        if (Constants.DAY.equals(period)) {
+        if (DatePeriodEnum.DAY.equals(period)) {
             return TimeDimensionEnum.DAY.getName();
-        } else if (Constants.WEEK.equals(period)) {
+        } else if (DatePeriodEnum.WEEK.equals(period)) {
             return TimeDimensionEnum.WEEK.getName();
-        } else if (Constants.MONTH.equals(period)) {
+        } else if (DatePeriodEnum.MONTH.equals(period)) {
             return TimeDimensionEnum.MONTH.getName();
         } else {
             return TimeDimensionEnum.DAY.getName();

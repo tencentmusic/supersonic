@@ -1,6 +1,6 @@
 package com.tencent.supersonic.chat.api.pojo.response;
 
-import com.tencent.supersonic.common.pojo.Constants;
+import com.tencent.supersonic.common.pojo.enums.DatePeriodEnum;
 import com.tencent.supersonic.common.pojo.enums.TimeMode;
 import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import lombok.Data;
@@ -17,7 +17,7 @@ public class ChatDefaultRichConfigResp {
     private Integer unit = 1;
 
     /** default time type: DAY, WEEK, MONTH, YEAR */
-    private String period = Constants.DAY;
+    private DatePeriodEnum period = DatePeriodEnum.DAY;
 
     private TimeMode timeMode;
 }

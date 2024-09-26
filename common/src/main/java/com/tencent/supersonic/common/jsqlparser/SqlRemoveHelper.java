@@ -27,6 +27,8 @@ import net.sf.jsqlparser.statement.select.Select;
 import net.sf.jsqlparser.statement.select.SelectItem;
 import net.sf.jsqlparser.statement.select.SelectItemVisitorAdapter;
 import net.sf.jsqlparser.statement.select.SelectVisitorAdapter;
+import net.sf.jsqlparser.util.deparser.ExpressionDeParser;
+import net.sf.jsqlparser.util.deparser.SelectDeParser;
 import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
@@ -380,6 +382,42 @@ public class SqlRemoveHelper {
         } else {
             return expression;
         }
+    }
+
+    public static String removeIsNullInWhere(String sql, Set<String> removeFieldNames) {
+        return removeIsNullOrNotNullInWhere(true, false, sql, removeFieldNames);
+    }
+
+    public static String removeNotNullInWhere(String sql, Set<String> removeFieldNames) {
+        return removeIsNullOrNotNullInWhere(false, true, sql, removeFieldNames);
+    }
+
+    public static String removeIsNullOrNotNullInWhere(
+            boolean dealNull, boolean dealNotNull, String sql, Set<String> removeFieldNames) {
+        Select selectStatement = SqlSelectHelper.getSelect(sql);
+        if (!(selectStatement instanceof PlainSelect)) {
+            return sql;
+        }
+        // Create a custom ExpressionDeParser to remove specific IS NULL and IS NOT NULL conditions
+        ExpressionDeParser expressionDeParser =
+                new CustomExpressionDeParser(removeFieldNames, dealNull, dealNotNull);
+
+        StringBuilder buffer = new StringBuilder();
+        SelectDeParser selectDeParser = new SelectDeParser(expressionDeParser, buffer);
+        expressionDeParser.setSelectVisitor(selectDeParser);
+        expressionDeParser.setBuffer(buffer);
+        PlainSelect plainSelect = (PlainSelect) selectStatement.getSelectBody();
+        if (plainSelect.getWhere() != null) {
+            plainSelect.getWhere().accept(expressionDeParser);
+        }
+        // Parse the modified WHERE clause back to an Expression
+        try {
+            Expression newWhere = CCJSqlParserUtil.parseCondExpression(buffer.toString());
+            plainSelect.setWhere(newWhere);
+        } catch (Exception e) {
+            log.error("parseCondExpression error:{}", buffer, e);
+        }
+        return selectStatement.toString();
     }
 
     private static boolean isInvalidSelect(Select selectStatement) {

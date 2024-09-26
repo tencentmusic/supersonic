@@ -44,6 +44,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.tencent.supersonic.chat.server.parser.ParserConfig.PARSER_MULTI_TURN_ENABLE;
+import static com.tencent.supersonic.headless.chat.parser.ParserConfig.PARSER_EXEMPLAR_RECALL_NUMBER;
 
 @Slf4j
 public class NL2SQLParser implements ChatQueryParser {
@@ -310,8 +311,12 @@ public class NL2SQLParser implements ChatQueryParser {
         ExemplarServiceImpl exemplarManager = ContextUtils.getBean(ExemplarServiceImpl.class);
         EmbeddingConfig embeddingConfig = ContextUtils.getBean(EmbeddingConfig.class);
         String memoryCollectionName = embeddingConfig.getMemoryCollectionName(agentId);
+        ParserConfig parserConfig = ContextUtils.getBean(ParserConfig.class);
+        int exemplarRecallNumber =
+                Integer.valueOf(parserConfig.getParameterValue(PARSER_EXEMPLAR_RECALL_NUMBER));
         List<Text2SQLExemplar> exemplars =
-                exemplarManager.recallExemplars(memoryCollectionName, queryNLReq.getQueryText(), 5);
+                exemplarManager.recallExemplars(
+                        memoryCollectionName, queryNLReq.getQueryText(), exemplarRecallNumber);
         queryNLReq.getDynamicExemplars().addAll(exemplars);
     }
 }

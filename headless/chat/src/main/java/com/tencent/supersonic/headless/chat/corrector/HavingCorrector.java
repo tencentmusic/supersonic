@@ -66,6 +66,5 @@ public class HavingCorrector extends BaseSemanticCorrector {
                     SqlAddHelper.addFunctionToSelect(correctS2SQL, havingExpressionList);
             semanticParseInfo.getSqlInfo().setCorrectedS2SQL(replaceSql);
         }
-        return;
     }
 }
