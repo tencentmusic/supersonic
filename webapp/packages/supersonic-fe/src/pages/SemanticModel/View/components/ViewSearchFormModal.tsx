@@ -157,10 +157,12 @@ const ViewSearchFormModal: React.FC<ModelCreateFormModalProps> = ({
               ?.timeDefaultConfig;
           if (target?.timeMode) {
             if (target?.timeMode === TimeModeEnum.CURRENT) {
-              values.queryConfig[
-                DetailTypeDefaultConfig[ChatConfigType.METRIC]
-              ].timeDefaultConfig.period = DatePeriod.MONTH;
-              form.setFieldsValue({ ...values });
+              if (![DatePeriod.MONTH, DatePeriod.YEAR].includes(target.period)) {
+                values.queryConfig[
+                  DetailTypeDefaultConfig[ChatConfigType.METRIC]
+                ].timeDefaultConfig.period = DatePeriod.MONTH;
+                form.setFieldsValue({ ...values });
+              }
             } else {
               values.queryConfig[
                 DetailTypeDefaultConfig[ChatConfigType.METRIC]

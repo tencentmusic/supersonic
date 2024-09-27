@@ -192,7 +192,42 @@ const DefaultSettingForm: ForwardRefRenderFunction<any, Props> = (
               <InputNumber style={{ width: '120px' }} />
             </FormItem>
           )}
-
+          {/* {formData?.queryConfig?.[DetailTypeDefaultConfig[chatConfigType]]?.timeDefaultConfig
+            ?.timeMode !== 'CURRENT' ? (
+            <FormItem
+              key="notCurrent"
+              name={[
+                'queryConfig',
+                DetailTypeDefaultConfig[chatConfigType],
+                'timeDefaultConfig',
+                'period',
+              ]}
+              noStyle
+            >
+              <Select style={{ width: '90px' }}>
+                <Option value={DatePeriod.DAY}>日</Option>
+                <Option value={DatePeriod.WEEK}>周</Option>
+                <Option value={DatePeriod.MONTH}>月</Option>
+                <Option value={DatePeriod.YEAR}>年</Option>
+              </Select>
+            </FormItem>
+          ) : (
+            <FormItem
+              key="isCurrent"
+              name={[
+                'queryConfig',
+                DetailTypeDefaultConfig[chatConfigType],
+                'timeDefaultConfig',
+                'period',
+              ]}
+              noStyle
+            >
+              <Select style={{ width: '90px' }} defaultValue={DatePeriod.MONTH}>
+                <Option value={DatePeriod.MONTH}>月</Option>
+                <Option value={DatePeriod.YEAR}>年</Option>
+              </Select>
+            </FormItem>
+          )} */}
           <FormItem
             name={[
               'queryConfig',
