@@ -26,19 +26,19 @@ public class PostgresqlAdaptor extends BaseDbAdaptor {
     public String getDateFormat(String dateType, String dateFormat, String column) {
         if (dateFormat.equalsIgnoreCase(Constants.DAY_FORMAT_INT)) {
             if (TimeDimensionEnum.MONTH.name().equalsIgnoreCase(dateType)) {
-                return "formatDateTime(toDate(parseDateTimeBestEffort(toString(%s))),'%Y-%m')"
-                        .replace("%s", column);
+                return "to_char(to_date(%s,'yyyymmdd'), 'yyyy-mm')".replace("%s", column);
             } else if (TimeDimensionEnum.WEEK.name().equalsIgnoreCase(dateType)) {
-                return "toMonday(toDate(parseDateTimeBestEffort(toString(%s))))"
+                return "to_char(date_trunc('week',to_date(%s, 'yyyymmdd')),'yyyy-mm-dd')"
                         .replace("%s", column);
             } else {
-                return "toDate(parseDateTimeBestEffort(toString(%s)))".replace("%s", column);
+                return "to_char(to_date(%s,'yyyymmdd'), 'yyyy-mm-dd')".replace("%s", column);
             }
         } else if (dateFormat.equalsIgnoreCase(Constants.DAY_FORMAT)) {
             if (TimeDimensionEnum.MONTH.name().equalsIgnoreCase(dateType)) {
-                return "formatDateTime(toDate(%s),'%Y-%m')".replace("%s", column);
+                return "to_char(to_date(%s,'yyyy-mm-dd'), 'yyyy-mm')".replace("%s", column);
             } else if (TimeDimensionEnum.WEEK.name().equalsIgnoreCase(dateType)) {
-                return "toMonday(toDate(%s))".replace("%s", column);
+                return "to_char(date_trunc('week',to_date(%s, 'yyyy-mm-dd')),'yyyy-mm-dd')"
+                        .replace("%s", column);
             } else {
                 return column;
             }
