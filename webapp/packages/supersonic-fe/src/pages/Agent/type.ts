@@ -32,7 +32,7 @@ export enum QueryModeEnum {
 
 export const QUERY_MODE_LIST = [
   {
-    label: '指标模式',
+    label: '聚合模式',
     value: QueryModeEnum.METRIC,
   },
   {

@@ -35,13 +35,6 @@ export function getMetricList(modelId: number) {
   });
 }
 
-export function testLLMConn(data: any) {
-  return request<Result<{ list: MetricType[] }>>('/api/chat/agent/testLLMConn', {
-    method: 'POST',
-    data,
-  });
-}
-
 export function getMemeoryList(agentId: number, chatMemoryFilter: any, current: number) {
   return request<Result<{ list: MetricType[] }>>('/api/chat/memory/pageMemories', {
     method: 'POST',

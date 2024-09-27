@@ -156,7 +156,7 @@ export declare namespace ISemantic {
     updatedAt: ISODateString;
   }
 
-  interface IViewModelConfigItem {
+  interface IDatasetModelConfigItem {
     id: number;
     includesAll: boolean;
     metrics: number[];
@@ -164,7 +164,7 @@ export declare namespace ISemantic {
     tagIds: number[];
   }
 
-  interface IViewItem {
+  interface IDatasetItem {
     createdBy: UserName;
     updatedBy: UserName;
     createdAt: ISODateString;
@@ -178,7 +178,7 @@ export declare namespace ISemantic {
     sensitiveLevel: number;
     domainId: number;
     dataSetDetail: {
-      dataSetModelConfigs: IViewModelConfigItem[];
+      dataSetModelConfigs: IDatasetModelConfigItem[];
     };
   }
 

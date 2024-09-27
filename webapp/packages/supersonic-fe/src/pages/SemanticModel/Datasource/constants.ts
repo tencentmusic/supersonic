@@ -39,7 +39,7 @@ export const DIM_OPTIONS = [
     value: EnumDataSourceType.TIME,
   },
   {
-    label: '分区时间',
+    label: '数据时间',
     value: EnumDataSourceType.PARTITION_TIME,
   },
 ];
