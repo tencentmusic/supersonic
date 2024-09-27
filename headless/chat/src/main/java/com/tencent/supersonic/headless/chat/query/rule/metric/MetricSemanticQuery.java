@@ -34,9 +34,7 @@ public abstract class MetricSemanticQuery extends RuleSemanticQuery {
     @Override
     public void fillParseInfo(ChatQueryContext chatQueryContext) {
         super.fillParseInfo(chatQueryContext);
-        if (Objects.isNull(parseInfo.getLimit())) {
-            parseInfo.setLimit(parseInfo.getMetricLimit());
-        }
+        parseInfo.setLimit(parseInfo.getMetricLimit());
         fillDateInfo(chatQueryContext);
     }
 

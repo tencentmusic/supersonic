@@ -33,9 +33,8 @@ public abstract class DetailSemanticQuery extends RuleSemanticQuery {
         super.fillParseInfo(chatQueryContext);
 
         parseInfo.setQueryType(QueryType.DETAIL);
-        if (Objects.isNull(parseInfo.getLimit())) {
-            parseInfo.setLimit(parseInfo.getDetailLimit());
-        }
+        parseInfo.setLimit(parseInfo.getDetailLimit());
+
         if (!needFillDateConf(chatQueryContext)) {
             return;
         }
