@@ -14,6 +14,6 @@ public class ItemValueConfig {
     private List<String> blackList = new ArrayList<>();
     private List<String> whiteList = new ArrayList<>();
     private List<String> ruleList = new ArrayList<>();
-    private Long limit;
+    private int limit;
     private DateConf dateConf;
 }

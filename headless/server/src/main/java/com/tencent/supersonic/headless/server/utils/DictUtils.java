@@ -68,7 +68,7 @@ public class DictUtils {
     private String dimMultiValueSplit;
 
     @Value("${s2.item.value.max.count:100000}")
-    private Long itemValueMaxCount;
+    private int itemValueMaxCount;
 
     @Value("${s2.item.value.white.frequency:999999}")
     private Long itemValueWhiteFrequency;
@@ -285,7 +285,7 @@ public class DictUtils {
         String whereStr = generateWhereStr(dictItemResp);
         String where = StringUtils.isEmpty(whereStr) ? "" : "WHERE" + whereStr;
         ItemValueConfig config = dictItemResp.getConfig();
-        Long limit =
+        int limit =
                 (Objects.isNull(config) || Objects.isNull(config.getLimit()))
                         ? itemValueMaxCount
                         : dictItemResp.getConfig().getLimit();
@@ -331,7 +331,7 @@ public class DictUtils {
         String whereStr = generateWhereStr(dictItemResp);
         String where = StringUtils.isEmpty(whereStr) ? "" : "WHERE" + whereStr;
         ItemValueConfig config = dictItemResp.getConfig();
-        Long limit =
+        long limit =
                 (Objects.isNull(config) || Objects.isNull(config.getLimit()))
                         ? itemValueMaxCount
                         : dictItemResp.getConfig().getLimit();
@@ -371,7 +371,7 @@ public class DictUtils {
 
         fillStructDateInfo(queryStructReq, dictItemResp);
 
-        Long limit =
+        int limit =
                 Objects.isNull(dictItemResp.getConfig().getLimit())
                         ? itemValueMaxCount
                         : dictItemResp.getConfig().getLimit();

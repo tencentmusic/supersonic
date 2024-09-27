@@ -9,6 +9,7 @@ import com.alibaba.excel.write.metadata.WriteSheet;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.common.pojo.Aggregator;
+import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.common.pojo.QueryColumn;
 import com.tencent.supersonic.common.pojo.enums.DatePeriodEnum;
@@ -58,7 +59,7 @@ public class DownloadServiceImpl implements DownloadService {
 
     private static final String internMetricCol = "指标名称";
 
-    private static final long downloadSize = 10000;
+    private static final long downloadLimit = Constants.DEFAULT_DOWNLOAD_LIMIT;
 
     private static final String dateFormat = "yyyyMMddHHmmss";
 
@@ -293,7 +294,7 @@ public class DownloadServiceImpl implements DownloadService {
         queryStructReq.setAggregators(Lists.newArrayList(aggregator));
         queryStructReq.setDateInfo(dateConf);
         queryStructReq.setModelIds(modelIds);
-        queryStructReq.setLimit(downloadSize);
+        queryStructReq.setLimit(downloadLimit);
         return queryStructReq;
     }
 
