@@ -14,7 +14,11 @@ import lombok.Data;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
+
+import static com.tencent.supersonic.common.pojo.Constants.DEFAULT_DETAIL_LIMIT;
+import static com.tencent.supersonic.common.pojo.Constants.DEFAULT_METRIC_LIMIT;
 
 @Data
 public class SemanticParseInfo {
@@ -22,6 +26,7 @@ public class SemanticParseInfo {
     private Integer id;
     private String queryMode = "PLAIN_TEXT";
     private SchemaElement dataSet;
+    private QueryConfig queryConfig;
     private Set<SchemaElement> metrics = Sets.newTreeSet(new SchemaNameLengthComparator());
     private Set<SchemaElement> dimensions = Sets.newTreeSet(new SchemaNameLengthComparator());
     private SchemaElement entity;
@@ -31,7 +36,7 @@ public class SemanticParseInfo {
     private Set<QueryFilter> metricFilters = Sets.newHashSet();
     private Set<Order> orders = Sets.newHashSet();
     private DateConf dateInfo;
-    private Long limit;
+    private long limit = DEFAULT_DETAIL_LIMIT;
     private double score;
     private List<SchemaElementMatch> elementMatches = Lists.newArrayList();
     private SqlInfo sqlInfo = new SqlInfo();
@@ -67,5 +72,25 @@ public class SemanticParseInfo {
             return null;
         }
         return dataSet.getDataSetId();
+    }
+
+    public long getDetailLimit() {
+        long limit = DEFAULT_DETAIL_LIMIT;
+        if (Objects.nonNull(queryConfig)
+                && Objects.nonNull(queryConfig.getDetailTypeDefaultConfig())
+                && Objects.nonNull(queryConfig.getDetailTypeDefaultConfig().getLimit())) {
+            limit = queryConfig.getDetailTypeDefaultConfig().getLimit();
+        }
+        return limit;
+    }
+
+    public long getMetricLimit() {
+        long limit = DEFAULT_METRIC_LIMIT;
+        if (Objects.nonNull(queryConfig)
+                && Objects.nonNull(queryConfig.getAggregateTypeDefaultConfig())
+                && Objects.nonNull(queryConfig.getAggregateTypeDefaultConfig().getLimit())) {
+            limit = queryConfig.getAggregateTypeDefaultConfig().getLimit();
+        }
+        return limit;
     }
 }

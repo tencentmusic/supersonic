@@ -1,23 +1,60 @@
+### headless-chat SPIs
+
+com.tencent.supersonic.headless.chat.mapper.SchemaMapper=\
+    com.tencent.supersonic.headless.chat.mapper.EmbeddingMapper, \
+    com.tencent.supersonic.headless.chat.mapper.KeywordMapper, \
+    com.tencent.supersonic.headless.chat.mapper.QueryFilterMapper, \
+    com.tencent.supersonic.headless.chat.mapper.EntityMapper, \
+    com.tencent.supersonic.headless.chat.mapper.TermDescMapper
+
+com.tencent.supersonic.headless.chat.parser.SemanticParser=\
+    com.tencent.supersonic.headless.chat.parser.llm.LLMSqlParser,\
+    com.tencent.supersonic.headless.chat.parser.rule.RuleSqlParser,\
+    com.tencent.supersonic.headless.chat.parser.QueryTypeParser
+
+com.tencent.supersonic.headless.chat.corrector.SemanticCorrector=\
+    com.tencent.supersonic.headless.chat.corrector.SchemaCorrector, \
+    com.tencent.supersonic.headless.chat.corrector.TimeCorrector, \
+    com.tencent.supersonic.headless.chat.corrector.GrammarCorrector
+
+com.tencent.supersonic.headless.chat.knowledge.file.FileHandler=\
+    com.tencent.supersonic.headless.chat.knowledge.file.FileHandlerImpl
+
+com.tencent.supersonic.headless.chat.parser.llm.DataSetResolver=\
+  com.tencent.supersonic.headless.chat.parser.llm.HeuristicDataSetResolver
+
+
+### headless-core SPIs
+
+com.tencent.supersonic.headless.core.translator.converter.QueryConverter=\
+    com.tencent.supersonic.headless.core.translator.converter.DefaultDimValueConverter,\
+    com.tencent.supersonic.headless.core.translator.converter.SqlVariableParseConverter,\
+    com.tencent.supersonic.headless.core.translator.converter.CalculateAggConverter,\
+    com.tencent.supersonic.headless.core.translator.converter.ParserDefaultConverter
+
+com.tencent.supersonic.headless.core.translator.QueryOptimizer=\
+    com.tencent.supersonic.headless.core.translator.DetailQueryOptimizer
+
+com.tencent.supersonic.headless.core.translator.QueryParser=\
+    com.tencent.supersonic.headless.core.translator.calcite.CalciteQueryParser
+
+com.tencent.supersonic.headless.core.executor.QueryExecutor=\
+    com.tencent.supersonic.headless.core.executor.JdbcExecutor
+
+com.tencent.supersonic.headless.core.cache.QueryCache=\
+    com.tencent.supersonic.headless.core.cache.DefaultQueryCache
+
+
+### headless-server SPIs
+
+com.tencent.supersonic.headless.server.processor.ResultProcessor=\
+    com.tencent.supersonic.headless.server.processor.ParseInfoProcessor,\
+    com.tencent.supersonic.headless.server.processor.EntityInfoProcessor
+
+### auth-authentication SPIs
+
 com.tencent.supersonic.auth.authentication.interceptor.AuthenticationInterceptor=\
     com.tencent.supersonic.auth.authentication.interceptor.DefaultAuthenticationInterceptor
 
 com.tencent.supersonic.auth.api.authentication.adaptor.UserAdaptor=\
     com.tencent.supersonic.auth.authentication.adaptor.DefaultUserAdaptor
-
-com.tencent.supersonic.headless.core.parser.converter.HeadlessConverter=\
-    com.tencent.supersonic.headless.core.parser.converter.DefaultDimValueConverter,\
-    com.tencent.supersonic.headless.core.parser.converter.SqlVariableParseConverter,\
-    com.tencent.supersonic.headless.core.parser.converter.CalculateAggConverter,\
-    com.tencent.supersonic.headless.core.parser.converter.ParserDefaultConverter
-
-com.tencent.supersonic.headless.core.planner.QueryOptimizer=\
-    com.tencent.supersonic.headless.core.planner.DetailQueryOptimizer
-
-com.tencent.supersonic.headless.core.executor.QueryExecutor=\
-    com.tencent.supersonic.headless.core.executor.JdbcExecutor
-
-com.tencent.supersonic.headless.core.parser.SqlParser=\
-    com.tencent.supersonic.headless.core.parser.calcite.CalciteSqlParser
-
-com.tencent.supersonic.headless.core.cache.QueryCache=\
-    com.tencent.supersonic.headless.core.cache.DefaultQueryCache

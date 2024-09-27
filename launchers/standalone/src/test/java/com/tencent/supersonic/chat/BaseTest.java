@@ -6,6 +6,7 @@ import com.tencent.supersonic.chat.api.pojo.request.ChatParseReq;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.chat.server.service.AgentService;
 import com.tencent.supersonic.chat.server.service.ChatQueryService;
+import com.tencent.supersonic.common.pojo.enums.DatePeriodEnum;
 import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.api.pojo.response.ParseResp;
@@ -22,9 +23,9 @@ import static org.junit.Assert.assertEquals;
 public class BaseTest extends BaseApplication {
 
     protected final int unit = 7;
-    protected final String startDay = LocalDate.now().plusDays(-unit).toString();
-    protected final String endDay = LocalDate.now().plusDays(-1).toString();
-    protected final String period = "DAY";
+    protected final String startDay = LocalDate.now().minusDays(unit).toString();
+    protected final String endDay = LocalDate.now().toString();
+    protected final DatePeriodEnum period = DatePeriodEnum.DAY;
 
     @Autowired protected ChatQueryService chatQueryService;
     @Autowired protected AgentService agentService;

@@ -20,7 +20,7 @@ import { DeleteOutlined, PlusOutlined } from '@ant-design/icons';
 import { uuid, jsonParse, encryptPassword, decryptPassword } from '@/utils/utils';
 import ToolsSection from './ToolsSection';
 import globalStyles from '@/global.less';
-import { testLLMConn } from './service';
+import { testLLMConn } from '../../services/system';
 import MemorySection from './MemorySection';
 
 const FormItem = Form.Item;

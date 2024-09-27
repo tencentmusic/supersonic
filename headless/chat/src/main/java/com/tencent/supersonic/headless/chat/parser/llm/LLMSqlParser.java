@@ -66,13 +66,17 @@ public class LLMSqlParser implements SemanticParser {
                                         .dataSetId(dataSetId)
                                         .llmReq(llmReq)
                                         .llmResp(llmResp)
-                                        .linkingValues(llmReq.getLinking())
                                         .build();
                         break;
                     }
                 }
             } catch (Exception e) {
                 log.error("currentRetryRound:{}, runText2SQL failed", currentRetry, e);
+            }
+            Double temperature = llmReq.getModelConfig().getTemperature();
+            if (temperature == 0) {
+                // 报错时增加随机性，减少无效重试
+                llmReq.getModelConfig().setTemperature(0.5);
             }
             currentRetry++;
         }

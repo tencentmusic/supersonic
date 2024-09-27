@@ -4,20 +4,15 @@ import DataSetTable from './components/DataSetTable';
 
 type Props = {
   disabledEdit?: boolean;
-  modelList: ISemantic.IModelItem[];
-  onModelChange?: (model?: ISemantic.IModelItem) => void;
+  dataSetList: ISemantic.IDatasetItem[];
 };
 
-const View: React.FC<Props> = ({ modelList, disabledEdit = false, onModelChange }) => {
+const View: React.FC<Props> = ({ dataSetList, disabledEdit = false }) => {
   return (
     <div style={{ padding: '15px 20px' }}>
-      <DataSetTable
-        modelList={modelList}
-        disabledEdit={disabledEdit}
-        onModelChange={onModelChange}
-      />
+      <DataSetTable disabledEdit={disabledEdit} dataSetList={dataSetList} />
     </div>
   );
 };
 
-export default View
+export default View;

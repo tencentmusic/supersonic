@@ -1,8 +1,8 @@
 package com.tencent.supersonic.headless.core.utils;
 
 import com.google.common.collect.Lists;
-import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.DateConf;
+import com.tencent.supersonic.common.pojo.enums.DatePeriodEnum;
 import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import org.apache.commons.lang3.StringUtils;
 
@@ -66,9 +66,9 @@ public class DataTransformUtils {
     }
 
     private static String getTimeDimension(DateConf dateConf) {
-        if (Constants.MONTH.equals(dateConf.getPeriod())) {
+        if (DatePeriodEnum.MONTH.equals(dateConf.getPeriod())) {
             return TimeDimensionEnum.MONTH.getName();
-        } else if (Constants.WEEK.equals(dateConf.getPeriod())) {
+        } else if (DatePeriodEnum.WEEK.equals(dateConf.getPeriod())) {
             return TimeDimensionEnum.WEEK.getName();
         } else {
             return TimeDimensionEnum.DAY.getName();

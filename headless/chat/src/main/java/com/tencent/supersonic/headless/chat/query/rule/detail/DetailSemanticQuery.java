@@ -18,8 +18,6 @@ import java.util.Objects;
 @Slf4j
 public abstract class DetailSemanticQuery extends RuleSemanticQuery {
 
-    private static final Long DETAIL_MAX_RESULTS = 500L;
-
     public DetailSemanticQuery() {
         super();
     }
@@ -35,7 +33,8 @@ public abstract class DetailSemanticQuery extends RuleSemanticQuery {
         super.fillParseInfo(chatQueryContext);
 
         parseInfo.setQueryType(QueryType.DETAIL);
-        parseInfo.setLimit(DETAIL_MAX_RESULTS);
+        parseInfo.setLimit(parseInfo.getDetailLimit());
+
         if (!needFillDateConf(chatQueryContext)) {
             return;
         }
@@ -49,13 +48,11 @@ public abstract class DetailSemanticQuery extends RuleSemanticQuery {
                 && timeDefaultConfig.getUnit() != -1) {
             DateConf dateInfo = new DateConf();
             int unit = timeDefaultConfig.getUnit();
-            String startDate = LocalDate.now().plusDays(-unit).toString();
+            String startDate = LocalDate.now().minusDays(unit).toString();
             String endDate = startDate;
-            if (TimeMode.LAST.equals(timeDefaultConfig.getTimeMode())) {
-                dateInfo.setDateMode(DateConf.DateMode.BETWEEN);
-            } else if (TimeMode.RECENT.equals(timeDefaultConfig.getTimeMode())) {
-                dateInfo.setDateMode(DateConf.DateMode.RECENT);
-                endDate = LocalDate.now().plusDays(-1).toString();
+            dateInfo.setDateMode(DateConf.DateMode.BETWEEN);
+            if (TimeMode.RECENT.equals(timeDefaultConfig.getTimeMode())) {
+                endDate = LocalDate.now().toString();
             }
             dateInfo.setUnit(unit);
             dateInfo.setPeriod(timeDefaultConfig.getPeriod());

@@ -82,3 +82,11 @@ export enum MsgContentTypeEnum {
   METRIC_BAR = 'METRIC_BAR',
   MARKDOWN = 'MARKDOWN',
 }
+
+export enum ChatContextTypeQueryTypeEnum {
+  AGGREGATE = 'AGGREGATE',
+  METRIC_TAG = 'METRIC_TAG',
+  ID = 'ID',
+  DETAIL = 'DETAIL',
+  OTHER = 'OTHER',
+}

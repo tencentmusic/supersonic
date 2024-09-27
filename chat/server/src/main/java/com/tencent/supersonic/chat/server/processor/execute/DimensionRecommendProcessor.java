@@ -29,7 +29,7 @@ public class DimensionRecommendProcessor implements ExecuteResultProcessor {
     @Override
     public void process(ExecuteContext executeContext, QueryResult queryResult) {
         SemanticParseInfo semanticParseInfo = executeContext.getParseInfo();
-        if (!QueryType.METRIC.equals(semanticParseInfo.getQueryType())
+        if (!QueryType.AGGREGATE.equals(semanticParseInfo.getQueryType())
                 || CollectionUtils.isEmpty(semanticParseInfo.getMetrics())) {
             return;
         }
@@ -46,6 +46,9 @@ public class DimensionRecommendProcessor implements ExecuteResultProcessor {
     private List<SchemaElement> getDimensions(Long metricId, Long dataSetId) {
         SemanticLayerService semanticService = ContextUtils.getBean(SemanticLayerService.class);
         DataSetSchema dataSetSchema = semanticService.getDataSetSchema(dataSetId);
+        if (dataSetSchema == null) {
+            return Lists.newArrayList();
+        }
         List<Long> drillDownDimensions = Lists.newArrayList();
         Set<SchemaElement> metricElements = dataSetSchema.getMetrics();
         if (!CollectionUtils.isEmpty(metricElements)) {

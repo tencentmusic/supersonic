@@ -1,8 +1,8 @@
 package com.tencent.supersonic.headless.core.translator.converter;
 
 import com.tencent.supersonic.common.pojo.Aggregator;
-import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
+import com.tencent.supersonic.common.pojo.enums.DatePeriodEnum;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.DateModeUtils;
 import com.tencent.supersonic.headless.api.pojo.MetricTable;
@@ -214,13 +214,13 @@ public class CalculateAggConverter implements QueryConverter {
         public String getTimeSpan(QueryParam queryParam, boolean isOver, boolean isAdd) {
             if (Objects.nonNull(queryParam.getDateInfo())) {
                 String addStr = isAdd ? "" : "-";
-                if (queryParam.getDateInfo().getPeriod().equalsIgnoreCase(Constants.DAY)) {
+                if (queryParam.getDateInfo().getPeriod().equals(DatePeriodEnum.DAY)) {
                     return "day," + (isOver ? addStr + "7" : addStr + "1");
                 }
-                if (queryParam.getDateInfo().getPeriod().equalsIgnoreCase(Constants.WEEK)) {
+                if (queryParam.getDateInfo().getPeriod().equals(DatePeriodEnum.MONTH)) {
                     return isOver ? "month," + addStr + "1" : "day," + addStr + "7";
                 }
-                if (queryParam.getDateInfo().getPeriod().equalsIgnoreCase(Constants.MONTH)) {
+                if (queryParam.getDateInfo().getPeriod().equals(DatePeriodEnum.MONTH.MONTH)) {
                     return isOver ? "year," + addStr + "1" : "month," + addStr + "1";
                 }
             }
@@ -240,7 +240,7 @@ public class CalculateAggConverter implements QueryConverter {
                                             if (queryParam
                                                     .getDateInfo()
                                                     .getPeriod()
-                                                    .equals(Constants.MONTH)) {
+                                                    .equals(DatePeriodEnum.MONTH)) {
                                                 return String.format(
                                                         "%s is not null and %s = FORMATDATETIME(DATEADD(%s,CONCAT(%s,'-01')),'yyyy-MM') ",
                                                         aliasRight + timeDim,
@@ -251,7 +251,7 @@ public class CalculateAggConverter implements QueryConverter {
                                             if (queryParam
                                                             .getDateInfo()
                                                             .getPeriod()
-                                                            .equals(Constants.WEEK)
+                                                            .equals(DatePeriodEnum.WEEK)
                                                     && isOver) {
                                                 return String.format(
                                                         " DATE_TRUNC('week',DATEADD(%s,%s) ) = %s ",
@@ -313,7 +313,7 @@ public class CalculateAggConverter implements QueryConverter {
                                             if (queryParam
                                                     .getDateInfo()
                                                     .getPeriod()
-                                                    .equals(Constants.MONTH)) {
+                                                    .equals(DatePeriodEnum.MONTH)) {
                                                 return String.format(
                                                         "toDate(CONCAT(%s,'-01')) = date_add(toDate(CONCAT(%s,'-01')),%s)  ",
                                                         aliasLeft + timeDim,
@@ -323,7 +323,7 @@ public class CalculateAggConverter implements QueryConverter {
                                             if (queryParam
                                                             .getDateInfo()
                                                             .getPeriod()
-                                                            .equals(Constants.WEEK)
+                                                            .equals(DatePeriodEnum.WEEK)
                                                     && isOver) {
                                                 return String.format(
                                                         "toMonday(date_add(%s ,INTERVAL %s) ) = %s",
@@ -386,13 +386,13 @@ public class CalculateAggConverter implements QueryConverter {
         public String getTimeSpan(QueryParam queryParam, boolean isOver, boolean isAdd) {
             if (Objects.nonNull(queryParam.getDateInfo())) {
                 String addStr = isAdd ? "" : "-";
-                if (queryParam.getDateInfo().getPeriod().equalsIgnoreCase(Constants.DAY)) {
+                if (queryParam.getDateInfo().getPeriod().equals(DatePeriodEnum.DAY)) {
                     return isOver ? addStr + "7 day" : addStr + "1 day";
                 }
-                if (queryParam.getDateInfo().getPeriod().equalsIgnoreCase(Constants.WEEK)) {
+                if (queryParam.getDateInfo().getPeriod().equals(DatePeriodEnum.WEEK)) {
                     return isOver ? addStr + "1 month" : addStr + "7 day";
                 }
-                if (queryParam.getDateInfo().getPeriod().equalsIgnoreCase(Constants.MONTH)) {
+                if (queryParam.getDateInfo().getPeriod().equals(DatePeriodEnum.MONTH)) {
                     return isOver ? addStr + "1 year" : addStr + "1 month";
                 }
             }
@@ -438,7 +438,7 @@ public class CalculateAggConverter implements QueryConverter {
                                             if (queryParam
                                                     .getDateInfo()
                                                     .getPeriod()
-                                                    .equals(Constants.MONTH)) {
+                                                    .equals(DatePeriodEnum.MONTH)) {
                                                 return String.format(
                                                         "%s = DATE_FORMAT(date_add(CONCAT(%s,'-01'), %s),'%%Y-%%m') ",
                                                         aliasLeft + timeDim,
@@ -448,7 +448,7 @@ public class CalculateAggConverter implements QueryConverter {
                                             if (queryParam
                                                             .getDateInfo()
                                                             .getPeriod()
-                                                            .equals(Constants.WEEK)
+                                                            .equals(DatePeriodEnum.WEEK)
                                                     && isOver) {
                                                 return String.format(
                                                         "to_monday(date_add(%s ,INTERVAL %s) ) = %s",

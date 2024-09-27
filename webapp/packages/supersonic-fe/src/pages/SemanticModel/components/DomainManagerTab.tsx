@@ -11,13 +11,13 @@ import styles from './style.less';
 import { HomeOutlined, FundViewOutlined } from '@ant-design/icons';
 import { ISemantic } from '../data';
 import SemanticGraphCanvas from '../SemanticGraphCanvas';
-import RecommendedQuestionsSection from '../components/Entity/RecommendedQuestionsSection';
 import View from '../View';
 
 type Props = {
   isModel: boolean;
   activeKey: string;
   modelList: ISemantic.IModelItem[];
+  dataSetList: ISemantic.IDatasetItem[];
   handleModelChange: (model?: ISemantic.IModelItem) => void;
   onBackDomainBtnClick?: () => void;
   onMenuChange?: (menuKey: string) => void;
@@ -26,6 +26,7 @@ const DomainManagerTab: React.FC<Props> = ({
   isModel,
   activeKey,
   modelList,
+  dataSetList,
   handleModelChange,
   onBackDomainBtnClick,
   onMenuChange,
@@ -44,16 +45,16 @@ const DomainManagerTab: React.FC<Props> = ({
   }, [selectModelId]);
 
   const [showModelType, setShowModelType] = useState<string>('list');
-
-  const domainListParentIdList: number[] = Array.isArray(domainList)
-    ? Array.from(new Set(domainList.map((item) => item.parentId)))
-    : [];
-
   const tabItem = [
+    {
+      label: '数据集管理',
+      key: 'dataSetManage',
+      hidden: !!domainData?.parentId,
+      children: <View dataSetList={dataSetList} />,
+    },
     {
       label: '模型管理',
       key: 'overview',
-      // hidden: domainData && domainListParentIdList.includes(domainData.id),
       children:
         showModelType === 'list' ? (
           <OverView
@@ -65,23 +66,10 @@ const DomainManagerTab: React.FC<Props> = ({
         ) : (
           <div style={{ width: '100%' }} key={selectDomainId}>
             <SemanticGraphCanvas />
-            {/* <HeadlessFlows /> */}
           </div>
         ),
     },
-    {
-      label: '数据集管理',
-      key: 'dataSetManage',
-      hidden: !!domainData?.parentId,
-      children: (
-        <View
-          modelList={modelList}
-          onModelChange={(model) => {
-            handleModelChange(model);
-          }}
-        />
-      ),
-    },
+
     {
       label: '标签对象管理',
       key: 'tagObjectManage',
@@ -145,11 +133,6 @@ const DomainManagerTab: React.FC<Props> = ({
       label: '权限管理',
       key: 'permissonSetting',
       children: <PermissionSection permissionTarget={'model'} />,
-    },
-    {
-      label: '推荐问题',
-      key: 'recommendedQuestions',
-      children: <RecommendedQuestionsSection />,
     },
   ];
 

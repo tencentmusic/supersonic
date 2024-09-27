@@ -13,14 +13,6 @@ spring:
   config:
     import:
       - classpath:s2-config.yaml
-  autoconfigure:
-    exclude:
-      - spring.dev.langchain4j.spring.LangChain4jAutoConfig
-      - spring.dev.langchain4j.openai.spring.AutoConfig
-      - spring.dev.langchain4j.ollama.spring.AutoConfig
-      - spring.dev.langchain4j.azure.openai.spring.AutoConfig
-      - spring.dev.langchain4j.azure.aisearch.spring.AutoConfig
-      - spring.dev.langchain4j.anthropic.spring.AutoConfig
   main:
     allow-circular-references: true
   mvc:

@@ -11,7 +11,7 @@ import { isArrayOfValues } from '@/utils/utils';
 
 type Props = {
   queryType?: string;
-  viewItem: ISemantic.IViewItem;
+  viewItem: ISemantic.IDatasetItem;
   modelItem?: ISemantic.IModelItem;
   dimensionList?: ISemantic.IDimensionItem[];
   metricList?: ISemantic.IMetricItem[];
@@ -133,7 +133,7 @@ const ViewModelConfigTransfer: React.FC<Props> = forwardRef(
         const idList: number[] = [];
         const transferKeys: React.Key[] = [];
         const viewConfigMap: any = {};
-        dataSetModelConfigs.forEach((item: ISemantic.IViewModelConfigItem) => {
+        dataSetModelConfigs.forEach((item: ISemantic.IDatasetModelConfigItem) => {
           const { id, metrics, dimensions, tagIds } = item;
           idList.push(id);
           viewConfigMap[id] = { ...item };
@@ -171,15 +171,15 @@ const ViewModelConfigTransfer: React.FC<Props> = forwardRef(
         return;
       }
       // const dataSetModelConfigs = isArrayOfValues(Object.values(viewModelConfigsMap))
-      //   ? (Object.values(viewModelConfigsMap) as ISemantic.IViewModelConfigItem[])
+      //   ? (Object.values(viewModelConfigsMap) as ISemantic.IDatasetModelConfigItem[])
       //   : viewItem?.dataSetDetail?.dataSetModelConfigs;
       const dataSetModelConfigs = Object.values(
         viewModelConfigsMap,
-      ) as ISemantic.IViewModelConfigItem[];
+      ) as ISemantic.IDatasetModelConfigItem[];
       if (isArrayOfValues(dataSetModelConfigs)) {
         const allMetrics: number[] = [];
         const allDimensions: number[] = [];
-        dataSetModelConfigs.forEach((item: ISemantic.IViewModelConfigItem) => {
+        dataSetModelConfigs.forEach((item: ISemantic.IDatasetModelConfigItem) => {
           const { metrics, dimensions } = item;
           allMetrics.push(...metrics);
           allDimensions.push(...dimensions);
@@ -200,11 +200,11 @@ const ViewModelConfigTransfer: React.FC<Props> = forwardRef(
         return;
       }
       const dataSetModelConfigs = isArrayOfValues(Object.values(viewModelConfigsMap))
-        ? (Object.values(viewModelConfigsMap) as ISemantic.IViewModelConfigItem[])
+        ? (Object.values(viewModelConfigsMap) as ISemantic.IDatasetModelConfigItem[])
         : viewItem?.dataSetDetail?.dataSetModelConfigs;
       if (isArrayOfValues(dataSetModelConfigs)) {
         const allTags: number[] = [];
-        dataSetModelConfigs.forEach((item: ISemantic.IViewModelConfigItem) => {
+        dataSetModelConfigs.forEach((item: ISemantic.IDatasetModelConfigItem) => {
           const { tagIds } = item;
           allTags.push(...tagIds);
         });
@@ -224,17 +224,17 @@ const ViewModelConfigTransfer: React.FC<Props> = forwardRef(
             metricList={mergeMetricList}
             selectedTransferKeys={selectedTransferKeys}
             onSubmit={(
-              submitData: Record<string, ISemantic.IViewModelConfigItem>,
+              submitData: Record<string, ISemantic.IDatasetModelConfigItem>,
               selectedKeys: React.Key[],
             ) => {
               const dataSetModelConfigs = Object.values(
                 submitData,
-              ) as ISemantic.IViewModelConfigItem[];
+              ) as ISemantic.IDatasetModelConfigItem[];
 
               if (isArrayOfValues(dataSetModelConfigs)) {
                 const allMetrics: number[] = [];
                 const allDimensions: number[] = [];
-                dataSetModelConfigs.forEach((item: ISemantic.IViewModelConfigItem) => {
+                dataSetModelConfigs.forEach((item: ISemantic.IDatasetModelConfigItem) => {
                   const { metrics, dimensions } = item;
                   allMetrics.push(...metrics);
                   allDimensions.push(...dimensions);
@@ -255,16 +255,16 @@ const ViewModelConfigTransfer: React.FC<Props> = forwardRef(
             tagList={mergeTagList}
             selectedTransferKeys={selectedTransferKeys}
             onSubmit={(
-              submitData: Record<string, ISemantic.IViewModelConfigItem>,
+              submitData: Record<string, ISemantic.IDatasetModelConfigItem>,
               selectedKeys: React.Key[],
             ) => {
               const dataSetModelConfigs = Object.values(
                 submitData,
-              ) as ISemantic.IViewModelConfigItem[];
+              ) as ISemantic.IDatasetModelConfigItem[];
 
               if (isArrayOfValues(dataSetModelConfigs)) {
                 const allTags: number[] = [];
-                dataSetModelConfigs.forEach((item: ISemantic.IViewModelConfigItem) => {
+                dataSetModelConfigs.forEach((item: ISemantic.IDatasetModelConfigItem) => {
                   const { tagIds } = item;
                   allTags.push(...tagIds);
                 });

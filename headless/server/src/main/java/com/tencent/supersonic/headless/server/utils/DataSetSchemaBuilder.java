@@ -41,6 +41,7 @@ public class DataSetSchemaBuilder {
                         .type(SchemaElementType.DATASET)
                         .build();
         dataSetSchema.setDataSet(dataSet);
+        dataSetSchema.setDatabaseType(resp.getDatabaseType());
 
         Set<SchemaElement> metrics = getMetrics(resp);
         dataSetSchema.getMetrics().addAll(metrics);

@@ -48,7 +48,7 @@ public class QueryStructReq extends SemanticQueryReq {
     private List<Filter> dimensionFilters = new ArrayList<>();
     private List<Filter> metricFilters = new ArrayList<>();
     private DateConf dateInfo;
-    private Long limit = 2000L;
+    private long limit = Constants.DEFAULT_DETAIL_LIMIT;
     private QueryType queryType = QueryType.ID;
     private boolean convertToSql = true;
 

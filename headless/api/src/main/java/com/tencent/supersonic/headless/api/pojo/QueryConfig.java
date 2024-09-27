@@ -5,7 +5,8 @@ import lombok.Data;
 @Data
 public class QueryConfig {
 
-    private TagTypeDefaultConfig tagTypeDefaultConfig = new TagTypeDefaultConfig();
+    private DetailTypeDefaultConfig detailTypeDefaultConfig = new DetailTypeDefaultConfig();
 
-    private MetricTypeDefaultConfig metricTypeDefaultConfig = new MetricTypeDefaultConfig();
+    private AggregateTypeDefaultConfig aggregateTypeDefaultConfig =
+            new AggregateTypeDefaultConfig();
 }

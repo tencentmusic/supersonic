@@ -6,6 +6,7 @@ import javax.servlet.http.HttpServletResponse;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
 import com.tencent.supersonic.headless.api.pojo.DBColumn;
+import com.tencent.supersonic.headless.api.pojo.request.ColumnReq;
 import com.tencent.supersonic.headless.api.pojo.request.DatabaseReq;
 import com.tencent.supersonic.headless.api.pojo.request.SqlExecuteReq;
 import com.tencent.supersonic.headless.api.pojo.response.DatabaseResp;
@@ -103,11 +104,9 @@ public class DatabaseController {
         return databaseService.getColumns(databaseId, db, table);
     }
 
-    @RequestMapping("/getColumnsBySql")
-    public List<DBColumn> getColumnsBySql(
-            @RequestParam("databaseId") Long databaseId, @RequestParam("sql") String sql)
-            throws SQLException {
-        return databaseService.getColumns(databaseId, sql);
+    @PostMapping("/listColumnsBySql")
+    public List<DBColumn> listColumnsBySql(@RequestBody ColumnReq columnReq) throws SQLException {
+        return databaseService.getColumns(columnReq.getDatabaseId(), columnReq.getSql());
     }
 
     @GetMapping("/getDatabaseParameters")

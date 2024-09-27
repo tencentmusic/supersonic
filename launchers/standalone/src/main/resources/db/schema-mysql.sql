@@ -345,7 +345,7 @@ CREATE TABLE IF NOT EXISTS `s2_model` (
     `updated_by` varchar(100) COLLATE utf8_unicode_ci DEFAULT NULL,
     `updated_at` datetime DEFAULT NULL,
     `entity` text COLLATE utf8_unicode_ci,
-    `drill_down_dimensions` varchar(500) DEFAULT NULL,
+    `drill_down_dimensions` TEXT DEFAULT NULL,
     `database_id` INT NOT  NULL ,
     `model_detail` text NOT  NULL ,
     `source_type` varchar(128) DEFAULT NULL ,

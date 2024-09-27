@@ -275,7 +275,7 @@ const DimensionInfoModal: React.FC<CreateFormProps> = ({
           name="semanticType"
           label="类型"
           hidden={true}
-          rules={[{ required: true, message: '请选择维度类型' }]}
+          // rules={[{ required: true, message: '请选择维度类型' }]}
         >
           <Select placeholder="请选择维度类型">
             {['CATEGORY', 'ID', 'DATE'].map((item) => (

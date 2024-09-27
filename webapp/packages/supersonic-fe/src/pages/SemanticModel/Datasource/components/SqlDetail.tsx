@@ -18,7 +18,7 @@ import { isFunction } from 'lodash';
 import FullScreen from '@/components/FullScreen';
 import SqlEditor from '@/components/SqlEditor';
 import type { TaskResultItem, TaskResultColumn } from '../data';
-import { executeSql, getColumnsBySql } from '@/pages/SemanticModel/service';
+import { executeSql, listColumnsBySql } from '@/pages/SemanticModel/service';
 
 import SqlParams from './SqlParams';
 import styles from '../style.less';
@@ -249,7 +249,7 @@ const SqlDetail: React.FC<IProps> = ({
       sqlVariables: sqlParams,
     });
 
-    const { code: getColumnCode, data: getColumnData } = await getColumnsBySql({
+    const { code: getColumnCode, data: getColumnData } = await listColumnsBySql({
       sql: value,
       databaseId: currentDatabaseItem.key,
     });

@@ -8,6 +8,7 @@ import com.hankcs.hanlp.seg.common.Term;
 import com.tencent.supersonic.common.pojo.enums.DictWordType;
 import com.tencent.supersonic.headless.api.pojo.request.DimensionValueReq;
 import com.tencent.supersonic.headless.chat.knowledge.helper.NatureHelper;
+import com.tencent.supersonic.headless.chat.utils.EditDistanceUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.CollectionUtils;
@@ -62,7 +63,9 @@ public class SearchService {
                         .map(
                                 entry -> {
                                     String name = entry.getKey().replace("#", " ");
-                                    return new HanlpMapResult(name, entry.getValue(), key);
+                                    double similarity = EditDistanceUtils.getSimilarity(name, key);
+                                    return new HanlpMapResult(
+                                            name, entry.getValue(), key, similarity);
                                 })
                         .sorted((a, b) -> -(b.getName().length() - a.getName().length()))
                         .collect(Collectors.toList());
@@ -109,8 +112,10 @@ public class SearchService {
                                                                                     .getType(),
                                                                             ""))
                                                     .collect(Collectors.toList());
+
                                     name = StringUtils.reverse(name);
-                                    return new HanlpMapResult(name, natures, key);
+                                    double similarity = EditDistanceUtils.getSimilarity(name, key);
+                                    return new HanlpMapResult(name, natures, key, similarity);
                                 })
                         .sorted((a, b) -> -(b.getName().length() - a.getName().length()))
                         .collect(Collectors.toList());

@@ -1,4 +1,5 @@
 import { Dayjs } from 'dayjs';
+import { ChatContextTypeQueryTypeEnum } from './constants';
 
 export type SearchRecommendItem = {
   complete: boolean;
@@ -95,7 +96,7 @@ export type ChatContextType = {
   elementMatches: any[];
   nativeQuery: boolean;
   queryMode: string;
-  queryType: 'METRIC' | 'METRIC_TAG' | 'ID' | 'DETAIL' | 'OTHER';
+  queryType: ChatContextTypeQueryTypeEnum;
   dimensionFilters: FilterItemType[];
   properties: any;
   sqlInfo: SqlInfoType;
@@ -256,6 +257,7 @@ export type SimilarQuestionType = {
 };
 
 export type ParseTimeCostType = {
+  parseStartTime: number;
   parseTime: number;
   sqlTime: number;
 };

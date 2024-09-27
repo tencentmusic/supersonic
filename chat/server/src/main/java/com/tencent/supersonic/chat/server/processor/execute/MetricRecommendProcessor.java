@@ -37,7 +37,7 @@ public class MetricRecommendProcessor implements ExecuteResultProcessor {
     }
 
     private void fillSimilarMetric(SemanticParseInfo parseInfo) {
-        if (!parseInfo.getQueryType().equals(QueryType.METRIC)
+        if (!parseInfo.getQueryType().equals(QueryType.AGGREGATE)
                 || parseInfo.getMetrics().size() > METRIC_RECOMMEND_SIZE
                 || CollectionUtils.isEmpty(parseInfo.getMetrics())) {
             return;
@@ -65,7 +65,7 @@ public class MetricRecommendProcessor implements ExecuteResultProcessor {
         List<Retrieval> retrievals =
                 retrieveQueryResults.stream()
                         .flatMap(retrieveQueryResult -> retrieveQueryResult.getRetrieval().stream())
-                        .sorted(Comparator.comparingDouble(Retrieval::getDistance))
+                        .sorted(Comparator.comparingDouble(Retrieval::getSimilarity))
                         .distinct()
                         .collect(Collectors.toList());
         Set<Long> metricIds =

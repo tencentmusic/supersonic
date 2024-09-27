@@ -113,6 +113,7 @@ public abstract class RuleSemanticQuery extends BaseSemanticQuery {
                         .collect(Collectors.toSet());
         Long dataSetId = dataSetIds.iterator().next();
         parseInfo.setDataSet(semanticSchema.getDataSet(dataSetId));
+        parseInfo.setQueryConfig(semanticSchema.getQueryConfig(dataSetId));
         Map<Long, List<SchemaElementMatch>> dim2Values = new HashMap<>();
         Map<Long, List<SchemaElementMatch>> id2Values = new HashMap<>();
 
@@ -170,7 +171,7 @@ public abstract class RuleSemanticQuery extends BaseSemanticQuery {
         }
         for (Entry<Long, List<SchemaElementMatch>> entry : id2Values.entrySet()) {
             SchemaElement dimension = semanticSchema.getElement(entity, entry.getKey());
-            if (dimension.containsPartitionTime()) {
+            if (dimension.isPartitionTime()) {
                 continue;
             }
             if (entry.getValue().size() == 1) {

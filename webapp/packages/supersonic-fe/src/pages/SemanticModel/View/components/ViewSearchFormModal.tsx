@@ -8,7 +8,7 @@ import { ISemantic } from '../../data';
 import DefaultSettingForm from './DefaultSettingForm';
 import { isArrayOfValues } from '@/utils/utils';
 import { ProCard } from '@ant-design/pro-components';
-import { ChatConfigType } from '../../enum';
+import { ChatConfigType, DetailTypeDefaultConfig, TimeModeEnum, DatePeriod } from '../../enum';
 
 export type ModelCreateFormModalProps = {
   domainId: number;
@@ -31,12 +31,14 @@ const ViewSearchFormModal: React.FC<ModelCreateFormModalProps> = ({
   const [dimensionList, setDimensionList] = useState<ISemantic.IDimensionItem[]>();
   const [metricList, setMetricList] = useState<ISemantic.IMetricItem[]>();
 
+  const [formData, setFormData] = useState(viewItem);
+
   useEffect(() => {
     const dataSetModelConfigs = viewItem?.dataSetDetail?.dataSetModelConfigs;
     if (Array.isArray(dataSetModelConfigs)) {
       const allMetrics: number[] = [];
       const allDimensions: number[] = [];
-      dataSetModelConfigs.forEach((item: ISemantic.IViewModelConfigItem) => {
+      dataSetModelConfigs.forEach((item: ISemantic.IDatasetModelConfigItem) => {
         const { metrics, dimensions } = item;
         allMetrics.push(...metrics);
         allDimensions.push(...dimensions);
@@ -96,6 +98,7 @@ const ViewSearchFormModal: React.FC<ModelCreateFormModalProps> = ({
         <Button onClick={onCancel}>取消</Button>
         <Button
           type="primary"
+          loading={saveLoading}
           onClick={() => {
             handleConfirm();
           }}
@@ -109,9 +112,10 @@ const ViewSearchFormModal: React.FC<ModelCreateFormModalProps> = ({
   const renderContent = () => {
     return (
       <div className={styles.viewSearchFormContainer}>
-        <ProCard title="指标模式" style={{ marginBottom: 10, borderBottom: '1px solid #eee' }}>
+        <ProCard title="聚合模式" style={{ marginBottom: 10, borderBottom: '1px solid #eee' }}>
           <DefaultSettingForm
             form={form}
+            formData={formData}
             dimensionList={dimensionList}
             metricList={metricList}
             chatConfigType={ChatConfigType.METRIC}
@@ -121,6 +125,7 @@ const ViewSearchFormModal: React.FC<ModelCreateFormModalProps> = ({
         <ProCard title="明细模式">
           <DefaultSettingForm
             form={form}
+            formData={formData}
             dimensionList={dimensionList}
             metricList={metricList}
             chatConfigType={ChatConfigType.TAG}
@@ -146,7 +151,28 @@ const ViewSearchFormModal: React.FC<ModelCreateFormModalProps> = ({
         initialValues={{
           ...viewItem,
         }}
-        onValuesChange={(value, values) => {}}
+        onValuesChange={(value, values) => {
+          const target =
+            values?.queryConfig?.[DetailTypeDefaultConfig[ChatConfigType.METRIC]]
+              ?.timeDefaultConfig;
+          if (target?.timeMode) {
+            if (target?.timeMode === TimeModeEnum.CURRENT) {
+              if (![DatePeriod.MONTH, DatePeriod.YEAR].includes(target.period)) {
+                values.queryConfig[
+                  DetailTypeDefaultConfig[ChatConfigType.METRIC]
+                ].timeDefaultConfig.period = DatePeriod.MONTH;
+                form.setFieldsValue({ ...values });
+              }
+            } else {
+              values.queryConfig[
+                DetailTypeDefaultConfig[ChatConfigType.METRIC]
+              ].timeDefaultConfig.period = DatePeriod.DAY;
+              form.setFieldsValue({ ...values });
+            }
+          }
+
+          setFormData({ ...values });
+        }}
       >
         <FormItem hidden={true} name="id" label="ID">
           <Input placeholder="id" />

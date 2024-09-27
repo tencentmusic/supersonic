@@ -113,7 +113,6 @@ public class AESEncryptionUtil {
             byte[] decryptedBytes = cipher.doFinal(encryptBytes);
             return new String(decryptedBytes, ENCODE);
         } catch (Exception e) {
-            log.warn("encryptStr decrypt failed:{}", encryptStr);
             return encryptStr;
         }
     }

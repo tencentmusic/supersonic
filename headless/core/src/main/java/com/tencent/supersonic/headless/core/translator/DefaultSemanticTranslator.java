@@ -89,9 +89,7 @@ public class DefaultSemanticTranslator implements SemanticTranslator {
                     QueryStatement tableSql =
                             parserSql(
                                     metricTable, isSingleTable, dataSetQueryParam, queryStatement);
-                    if (isSingleTable
-                            && Objects.nonNull(tableSql.getDataSetQueryParam())
-                            && !tableSql.getDataSetSimplifySql().isEmpty()) {
+                    if (isSingleTable && StringUtils.isNotBlank(tableSql.getDataSetSimplifySql())) {
                         queryStatement.setSql(tableSql.getDataSetSimplifySql());
                         queryStatement.setDataSetQueryParam(dataSetQueryParam);
                         return queryStatement;

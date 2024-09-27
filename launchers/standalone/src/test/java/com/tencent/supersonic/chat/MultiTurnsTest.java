@@ -37,8 +37,8 @@ public class MultiTurnsTest extends BaseTest {
                                 "user_name", FilterOperatorEnum.EQUALS, "alice", "用户", 2L));
 
         expectedParseInfo.setDateInfo(
-                DataUtils.getDateConf(DateConf.DateMode.RECENT, unit, period, startDay, endDay));
-        expectedParseInfo.setQueryType(QueryType.METRIC);
+                DataUtils.getDateConf(DateConf.DateMode.BETWEEN, unit, period, startDay, endDay));
+        expectedParseInfo.setQueryType(QueryType.AGGREGATE);
 
         assertQueryResult(expectedResult, actualResult);
     }
@@ -66,8 +66,8 @@ public class MultiTurnsTest extends BaseTest {
                                 "user_name", FilterOperatorEnum.EQUALS, "alice", "用户", 2L));
 
         expectedParseInfo.setDateInfo(
-                DataUtils.getDateConf(DateConf.DateMode.RECENT, unit, period, startDay, endDay));
-        expectedParseInfo.setQueryType(QueryType.METRIC);
+                DataUtils.getDateConf(DateConf.DateMode.BETWEEN, unit, period, startDay, endDay));
+        expectedParseInfo.setQueryType(QueryType.AGGREGATE);
 
         assertQueryResult(expectedResult, actualResult);
     }
@@ -93,8 +93,8 @@ public class MultiTurnsTest extends BaseTest {
                 .add(DataUtils.getFilter("user_name", FilterOperatorEnum.EQUALS, "lucy", "用户", 2L));
 
         expectedParseInfo.setDateInfo(
-                DataUtils.getDateConf(DateConf.DateMode.RECENT, unit, period, startDay, endDay));
-        expectedParseInfo.setQueryType(QueryType.METRIC);
+                DataUtils.getDateConf(DateConf.DateMode.BETWEEN, unit, period, startDay, endDay));
+        expectedParseInfo.setQueryType(QueryType.AGGREGATE);
 
         assertQueryResult(expectedResult, actualResult);
     }

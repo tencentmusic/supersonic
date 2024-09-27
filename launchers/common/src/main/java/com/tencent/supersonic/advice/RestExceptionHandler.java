@@ -27,7 +27,6 @@ public class RestExceptionHandler {
     @ExceptionHandler(AccessException.class)
     @ResponseStatus(HttpStatus.OK)
     public ResultData<String> accessException(Exception e) {
-        log.error("default global exception", e);
         return ResultData.fail(ReturnCode.ACCESS_ERROR.getCode(), e.getMessage());
     }
 

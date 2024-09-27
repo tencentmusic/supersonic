@@ -13,6 +13,7 @@ import java.util.List;
 @NoArgsConstructor
 public class DataSetSchemaResp extends DataSetResp {
 
+    private String databaseType;
     private List<MetricSchemaResp> metrics = Lists.newArrayList();
     private List<DimSchemaResp> dimensions = Lists.newArrayList();
     private List<ModelResp> modelResps = Lists.newArrayList();

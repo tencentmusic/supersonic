@@ -16,6 +16,7 @@ import static com.tencent.supersonic.headless.chat.parser.ParserConfig.PARSER_TE
  * by current candidate queries. If so, current parser could be skipped.
  */
 @Slf4j
+@Deprecated
 public class SatisfactionChecker {
 
     // check all the parse info in candidate

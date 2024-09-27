@@ -2,6 +2,7 @@ package com.tencent.supersonic.headless.chat.parser.llm;
 
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.common.pojo.Text2SQLExemplar;
+import com.tencent.supersonic.common.pojo.enums.DataFormatTypeEnum;
 import com.tencent.supersonic.common.service.ExemplarService;
 import com.tencent.supersonic.headless.chat.parser.ParserConfig;
 import com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMReq;
@@ -89,6 +90,17 @@ public class PromptHelper {
                                 metric.getAlias().stream().forEach(a -> alias.append(a + ","));
                                 metricStr.append(" ALIAS '" + alias + "'");
                             }
+                            if (StringUtils.isNotEmpty(metric.getDataFormatType())) {
+                                String dataFormatType = metric.getDataFormatType();
+                                if (DataFormatTypeEnum.DECIMAL
+                                                .getName()
+                                                .equalsIgnoreCase(dataFormatType)
+                                        || DataFormatTypeEnum.PERCENT
+                                                .getName()
+                                                .equalsIgnoreCase(dataFormatType)) {
+                                    metricStr.append(" FORMAT '" + dataFormatType + "'");
+                                }
+                            }
                             if (StringUtils.isNotEmpty(metric.getDescription())) {
                                 metricStr.append(" COMMENT '" + metric.getDescription() + "'");
                             }
@@ -114,6 +126,9 @@ public class PromptHelper {
                                 dimension.getAlias().stream().forEach(a -> alias.append(a + ","));
                                 dimensionStr.append(" ALIAS '" + alias + "'");
                             }
+                            if (StringUtils.isNotEmpty(dimension.getTimeFormat())) {
+                                dimensionStr.append(" FORMAT '" + dimension.getTimeFormat() + "'");
+                            }
                             if (StringUtils.isNotEmpty(dimension.getDescription())) {
                                 dimensionStr.append(
                                         " COMMENT '" + dimension.getDescription() + "'");
@@ -123,7 +138,7 @@ public class PromptHelper {
                         });
 
         List<String> values = Lists.newArrayList();
-        llmReq.getLinking().stream()
+        llmReq.getSchema().getValues().stream()
                 .forEach(
                         value -> {
                             StringBuilder valueStr = new StringBuilder();
@@ -133,17 +148,41 @@ public class PromptHelper {
                             values.add(valueStr.toString());
                         });
 
-        String template = "Table=[%s], Metrics=[%s], Dimensions=[%s], Values=[%s]";
+        String partitionTimeStr = "";
+        if (llmReq.getSchema().getPartitionTime() != null) {
+            partitionTimeStr =
+                    String.format(
+                            "%s FORMAT '%s'",
+                            llmReq.getSchema().getPartitionTime().getName(),
+                            llmReq.getSchema().getPartitionTime().getTimeFormat());
+        }
+
+        String primaryKeyStr = "";
+        if (llmReq.getSchema().getPrimaryKey() != null) {
+            primaryKeyStr = String.format("%s", llmReq.getSchema().getPrimaryKey().getName());
+        }
+
+        String databaseTypeStr = "";
+        if (llmReq.getSchema().getDatabaseType() != null) {
+            databaseTypeStr = llmReq.getSchema().getDatabaseType();
+        }
+
+        String template =
+                "DatabaseType=[%s], Table=[%s], PartitionTimeField=[%s], PrimaryKeyField=[%s], "
+                        + "Metrics=[%s], Dimensions=[%s], Values=[%s]";
         return String.format(
                 template,
+                databaseTypeStr,
                 tableStr,
+                partitionTimeStr,
+                primaryKeyStr,
                 String.join(",", metrics),
                 String.join(",", dimensions),
                 String.join(",", values));
     }
 
     private String buildTermStr(LLMReq llmReq) {
-        List<LLMReq.Term> terms = llmReq.getSchema().getTerms();
+        List<LLMReq.Term> terms = llmReq.getTerms();
         List<String> termStr = Lists.newArrayList();
         terms.stream()
                 .forEach(

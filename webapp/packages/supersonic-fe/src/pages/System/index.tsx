@@ -5,7 +5,7 @@ import { getSystemConfig, saveSystemConfig } from '@/services/user';
 import { ProCard } from '@ant-design/pro-components';
 import SelectTMEPerson from '@/components/SelectTMEPerson';
 import { ConfigParametersItem, SystemConfig, dependenciesItem } from './types';
-
+import { testLLMConn } from '../../services/system';
 import { groupBy } from 'lodash';
 import { genneratorFormItemList } from '../SemanticModel/utils';
 
@@ -23,7 +23,8 @@ const System: React.FC = () => {
   const configMap = useRef<Record<string, ConfigParametersItem>>();
 
   const configIocDepMap = useRef<Record<string, any>>();
-  // const [configIocDepMap, setConfigIocDepMap] = useState<any>({});
+  const [llmTestLoading, setLlmTestLoading] = useState<boolean>(false);
+  const [formData, setFormData] = useState({});
 
   useEffect(() => {
     querySystemConfig();
@@ -197,6 +198,17 @@ const System: React.FC = () => {
     groupConfigAndSet(Object.values(tempConfigMap));
   };
 
+  const testLLMConnect = async (params: any) => {
+    setLlmTestLoading(true);
+    const { code, data } = await testLLMConn(params);
+    setLlmTestLoading(false);
+    if (code === 200 && data) {
+      message.success('连接成功');
+    } else {
+      message.error('模型连接失败');
+    }
+  };
+
   return (
     <>
       <div style={{ margin: '40px auto', width: 1200 }}>
@@ -214,6 +226,28 @@ const System: React.FC = () => {
                   >
                     保 存
                   </Button>
+                  <Button
+                    type="primary"
+                    loading={llmTestLoading}
+                    onClick={() => {
+                      const submitData = form.getFieldsValue();
+                      const params = {
+                        provider: submitData['s2.chat.model.provider'],
+                        baseUrl: submitData['s2.chat.model.base.url'],
+                        apiKey: submitData['s2.chat.model.api.key'],
+                        modelName: submitData['s2.chat.model.name'],
+                        temperature: submitData['s2.chat.model.temperature'],
+                        timeOut: submitData['s2.chat.model.timeout'],
+                        endpoint: submitData['s2.chat.model.endpoint'],
+                        secretKey: submitData['s2.chat.model.secretKey'],
+                        logRequests: submitData['s2.chat.model.enableSearch'],
+                        enableSearch: submitData['s2.chat.model.enableSearch'],
+                      };
+                      testLLMConnect(params);
+                    }}
+                  >
+                    大模型连接测试
+                  </Button>
                 </Space>
               }
             >
@@ -222,6 +256,7 @@ const System: React.FC = () => {
                 layout="vertical"
                 className={styles.form}
                 onValuesChange={(value, values) => {
+                  setFormData(values);
                   const valueKey = Object.keys(value)[0];
                   excuteDepConfig(valueKey, values);
                 }}

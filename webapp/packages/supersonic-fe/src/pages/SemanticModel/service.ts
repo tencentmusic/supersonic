@@ -364,9 +364,9 @@ export async function executeSql(params: ExcuteSqlParams) {
   return request.post(`${process.env.API_BASE_URL}database/executeSql`, { data });
 }
 
-export async function getColumnsBySql(params: { databaseId: number; sql: string }) {
-  return request.get(`${process.env.API_BASE_URL}database/getColumnsBySql`, {
-    params,
+export async function listColumnsBySql(data: { databaseId: number; sql: string }) {
+  return request.post(`${process.env.API_BASE_URL}database/listColumnsBySql`, {
+    data,
   });
 }
 
@@ -606,7 +606,7 @@ export function getDatabaseDetail(id: number): Promise<any> {
   return request.get(`${process.env.API_BASE_URL}database/${id}`);
 }
 
-export function getViewList(domainId: number): Promise<any> {
+export function getDataSetList(domainId: number): Promise<any> {
   return request(`${process.env.API_BASE_URL}dataSet/getDataSetList`, {
     method: 'GET',
     params: { domainId },

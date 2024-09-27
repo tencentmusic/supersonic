@@ -105,8 +105,7 @@ public class RetrieveServiceImpl implements RetrieveService {
         Set<SearchResult> searchResults = new LinkedHashSet();
         DataSetInfoStat dataSetInfoStat = NatureHelper.getDataSetStat(originals);
 
-        List<Long> possibleDataSets =
-                getPossibleDataSets(queryNLReq, originals, dataSetInfoStat, dataSetIds);
+        List<Long> possibleDataSets = getPossibleDataSets(queryNLReq, originals, dataSetIds);
 
         // 5.1 priority dimension metric
         boolean existMetricAndDimension =
@@ -141,36 +140,19 @@ public class RetrieveServiceImpl implements RetrieveService {
     }
 
     private List<Long> getPossibleDataSets(
-            QueryNLReq queryCtx,
-            List<S2Term> originals,
-            DataSetInfoStat dataSetInfoStat,
-            Set<Long> dataSetIds) {
+            QueryNLReq queryCtx, List<S2Term> originals, Set<Long> dataSetIds) {
         if (CollectionUtils.isNotEmpty(dataSetIds)) {
             return new ArrayList<>(dataSetIds);
         }
 
         List<Long> possibleDataSets = NatureHelper.selectPossibleDataSets(originals);
-
-        Long contextDataset = queryCtx.getContextParseInfo().getDataSetId();
-
-        log.debug(
-                "possibleDataSets:{},dataSetInfoStat:{},contextDataset:{}",
-                possibleDataSets,
-                dataSetInfoStat,
-                contextDataset);
-
-        // If nothing is recognized or only metric are present, then add the contextDataset.
-        if (nothingOrOnlyMetric(dataSetInfoStat)) {
-            return Lists.newArrayList(contextDataset);
+        if (possibleDataSets.isEmpty()) {
+            if (Objects.nonNull(queryCtx.getContextParseInfo())) {
+                possibleDataSets.add(queryCtx.getContextParseInfo().getDataSetId());
+            }
         }
-        return possibleDataSets;
-    }
 
-    private boolean nothingOrOnlyMetric(DataSetInfoStat modelStat) {
-        return modelStat.getMetricDataSetCount() >= 0
-                && modelStat.getDimensionDataSetCount() <= 0
-                && modelStat.getDimensionValueDataSetCount() <= 0
-                && modelStat.getDataSetCount() <= 0;
+        return possibleDataSets;
     }
 
     private Set<SearchResult> searchDimensionValue(

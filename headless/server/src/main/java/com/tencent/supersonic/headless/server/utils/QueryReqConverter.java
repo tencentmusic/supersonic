@@ -97,7 +97,8 @@ public class QueryReqConverter {
                     .getMetrics()
                     .add(
                             sqlGenerateUtils.generateInternalMetricName(
-                                    semanticSchemaResp.getModelResps().get(0).getBizName()));
+                                    getDefaultModel(
+                                            semanticSchemaResp, metricTable.getDimensions())));
         } else {
             queryStructReq.setAggregators(
                     metricTable.getMetrics().stream()
@@ -293,7 +294,7 @@ public class QueryReqConverter {
         boolean isAgg = AggOption.isAgg(aggOption);
         QueryType queryType = QueryType.DETAIL;
         if (isAgg) {
-            queryType = QueryType.METRIC;
+            queryType = QueryType.AGGREGATE;
         }
         return queryType;
     }

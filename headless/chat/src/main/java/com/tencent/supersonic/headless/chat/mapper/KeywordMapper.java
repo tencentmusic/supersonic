@@ -12,6 +12,7 @@ import com.tencent.supersonic.headless.chat.knowledge.HanlpMapResult;
 import com.tencent.supersonic.headless.chat.knowledge.builder.BaseWordBuilder;
 import com.tencent.supersonic.headless.chat.knowledge.helper.HanlpHelper;
 import com.tencent.supersonic.headless.chat.knowledge.helper.NatureHelper;
+import com.tencent.supersonic.headless.chat.utils.EditDistanceUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.CollectionUtils;
 
@@ -38,16 +39,15 @@ public class KeywordMapper extends BaseMapper {
         HanlpDictMatchStrategy hanlpMatchStrategy =
                 ContextUtils.getBean(HanlpDictMatchStrategy.class);
 
-        List<HanlpMapResult> hanlpMapResults =
-                hanlpMatchStrategy.getMatches(chatQueryContext, terms);
-        convertHanlpMapResultToMapInfo(hanlpMapResults, chatQueryContext, terms);
+        List<HanlpMapResult> matchResults = getMatches(chatQueryContext, hanlpMatchStrategy);
+
+        convertHanlpMapResultToMapInfo(matchResults, chatQueryContext, terms);
 
         // 2.database Match
         DatabaseMatchStrategy databaseMatchStrategy =
                 ContextUtils.getBean(DatabaseMatchStrategy.class);
-
         List<DatabaseMapResult> databaseResults =
-                databaseMatchStrategy.getMatches(chatQueryContext, terms);
+                getMatches(chatQueryContext, databaseMatchStrategy);
         convertDatabaseMapResultToMapInfo(chatQueryContext, databaseResults);
     }
 
@@ -104,7 +104,6 @@ public class KeywordMapper extends BaseMapper {
 
     private void convertDatabaseMapResultToMapInfo(
             ChatQueryContext chatQueryContext, List<DatabaseMapResult> mapResults) {
-        MapperHelper mapperHelper = ContextUtils.getBean(MapperHelper.class);
         for (DatabaseMapResult match : mapResults) {
             SchemaElement schemaElement = match.getSchemaElement();
             Set<Long> regElementSet =
@@ -119,7 +118,7 @@ public class KeywordMapper extends BaseMapper {
                             .detectWord(match.getDetectWord())
                             .frequency(BaseWordBuilder.DEFAULT_FREQUENCY)
                             .similarity(
-                                    mapperHelper.getSimilarity(
+                                    EditDistanceUtils.getSimilarity(
                                             match.getDetectWord(), schemaElement.getName()))
                             .build();
             log.info("add to schema, elementMatch {}", schemaElementMatch);
