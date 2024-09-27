@@ -9,7 +9,7 @@ import MarkDown from '../ChatMsg/MarkDown';
 import classNames from 'classnames';
 import { isMobile } from '../../utils/utils';
 import dayjs, { Dayjs } from 'dayjs';
-import locale from 'antd/locale/zh_CN';
+import { ChatContextTypeQueryTypeEnum } from '../../common/constants';
 import quarterOfYear from 'dayjs/plugin/quarterOfYear';
 
 import 'dayjs/locale/zh-cn';
@@ -183,11 +183,16 @@ const ParseTip: React.FC<Props> = ({
                 <div className={itemValueClass}>{dataSet?.name}</div>
               </div>
             )}
-            {(queryType === 'METRIC' || queryType === 'METRIC_TAG' || queryType === 'DETAIL') && (
+            {(queryType === ChatContextTypeQueryTypeEnum.AGGREGATE ||
+              queryType === 'METRIC_TAG' ||
+              queryType === 'DETAIL') && (
               <div className={`${prefixCls}-tip-item`}>
                 <div className={`${prefixCls}-tip-item-name`}>查询模式：</div>
                 <div className={itemValueClass}>
-                  {queryType === 'METRIC' || queryType === 'METRIC_TAG' ? '聚合模式' : '明细模式'}
+                  {queryType === ChatContextTypeQueryTypeEnum.AGGREGATE ||
+                  queryType === 'METRIC_TAG'
+                    ? '聚合模式'
+                    : '明细模式'}
                 </div>
               </div>
             )}
@@ -198,7 +203,7 @@ const ParseTip: React.FC<Props> = ({
                 <div className={`${prefixCls}-tip-item`}>
                   <div className={`${prefixCls}-tip-item-name`}>指标：</div>
                   <div className={itemValueClass}>
-                    {queryType === 'METRIC' || queryType === 'ID'
+                    {queryType === ChatContextTypeQueryTypeEnum.AGGREGATE || queryType === 'ID'
                       ? metrics[0].name
                       : metrics.map(metric => metric.name).join('、')}
                   </div>
