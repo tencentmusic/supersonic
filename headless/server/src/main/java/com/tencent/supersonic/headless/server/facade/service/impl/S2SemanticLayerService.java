@@ -9,18 +9,8 @@ import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
 import com.tencent.supersonic.common.pojo.enums.QueryType;
 import com.tencent.supersonic.common.pojo.enums.TaskStatusEnum;
 import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
-import com.tencent.supersonic.headless.api.pojo.DataInfo;
-import com.tencent.supersonic.headless.api.pojo.DataSetInfo;
-import com.tencent.supersonic.headless.api.pojo.DataSetSchema;
-import com.tencent.supersonic.headless.api.pojo.Dim;
-import com.tencent.supersonic.headless.api.pojo.EntityInfo;
-import com.tencent.supersonic.headless.api.pojo.MetaFilter;
-import com.tencent.supersonic.headless.api.pojo.QueryParam;
-import com.tencent.supersonic.headless.api.pojo.SchemaElement;
-import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
-import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
-import com.tencent.supersonic.headless.api.pojo.TagTypeDefaultConfig;
-import com.tencent.supersonic.headless.api.pojo.TimeDefaultConfig;
+import com.tencent.supersonic.headless.api.pojo.*;
+import com.tencent.supersonic.headless.api.pojo.DetailTypeDefaultConfig;
 import com.tencent.supersonic.headless.api.pojo.enums.SemanticType;
 import com.tencent.supersonic.headless.api.pojo.request.DimensionValueReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryFilter;
@@ -493,12 +483,13 @@ public class S2SemanticLayerService implements SemanticLayerService {
             dataSetInfo.setPrimaryKey(dataSetSchema.getEntity().getBizName());
         }
         entityInfo.setDataSetInfo(dataSetInfo);
-        TagTypeDefaultConfig tagTypeDefaultConfig = dataSetSchema.getTagTypeDefaultConfig();
-        if (tagTypeDefaultConfig == null || tagTypeDefaultConfig.getDefaultDisplayInfo() == null) {
+        DetailTypeDefaultConfig detailTypeDefaultConfig = dataSetSchema.getTagTypeDefaultConfig();
+        if (detailTypeDefaultConfig == null
+                || detailTypeDefaultConfig.getDefaultDisplayInfo() == null) {
             return entityInfo;
         }
         List<DataInfo> dimensions =
-                tagTypeDefaultConfig.getDefaultDisplayInfo().getDimensionIds().stream()
+                detailTypeDefaultConfig.getDefaultDisplayInfo().getDimensionIds().stream()
                         .map(
                                 id -> {
                                     SchemaElement element =
@@ -516,7 +507,7 @@ public class S2SemanticLayerService implements SemanticLayerService {
                         .filter(Objects::nonNull)
                         .collect(Collectors.toList());
         List<DataInfo> metrics =
-                tagTypeDefaultConfig.getDefaultDisplayInfo().getDimensionIds().stream()
+                detailTypeDefaultConfig.getDefaultDisplayInfo().getDimensionIds().stream()
                         .map(
                                 id -> {
                                     SchemaElement element =

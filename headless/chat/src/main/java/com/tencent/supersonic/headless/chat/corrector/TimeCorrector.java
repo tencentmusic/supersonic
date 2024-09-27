@@ -54,9 +54,9 @@ public class TimeCorrector extends BaseSemanticCorrector {
             TimeDefaultConfig timeConfig;
             QueryConfig queryConfig = dataSetSchema.getQueryConfig();
             if (QueryType.METRIC.equals(semanticParseInfo.getQueryType())) {
-                timeConfig = queryConfig.getMetricTypeDefaultConfig().getTimeDefaultConfig();
+                timeConfig = queryConfig.getAggregateTypeDefaultConfig().getTimeDefaultConfig();
             } else {
-                timeConfig = queryConfig.getTagTypeDefaultConfig().getTimeDefaultConfig();
+                timeConfig = queryConfig.getDetailTypeDefaultConfig().getTimeDefaultConfig();
             }
 
             String timeFormat = dataSetSchema.getPartitionTimeFormat();

@@ -5,7 +5,7 @@ import com.tencent.supersonic.common.pojo.enums.TimeMode;
 import lombok.Data;
 
 @Data
-public class MetricTypeDefaultConfig {
+public class AggregateTypeDefaultConfig {
 
     private TimeDefaultConfig timeDefaultConfig =
             new TimeDefaultConfig(7, DatePeriodEnum.DAY, TimeMode.RECENT);
