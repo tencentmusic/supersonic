@@ -2,6 +2,7 @@ package com.tencent.supersonic.headless.api.pojo.response;
 
 import com.tencent.supersonic.common.pojo.enums.DataTypeEnums;
 import com.tencent.supersonic.headless.api.pojo.DimValueMap;
+import com.tencent.supersonic.headless.api.pojo.DimensionTimeTypeParams;
 import com.tencent.supersonic.headless.api.pojo.SchemaItem;
 import com.tencent.supersonic.headless.api.pojo.enums.DimensionType;
 import lombok.Data;
@@ -38,6 +39,8 @@ public class DimensionResp extends SchemaItem {
     private DataTypeEnums dataType;
 
     private int isTag;
+
+    private DimensionTimeTypeParams typeParams;
 
     private Map<String, Object> ext = new HashMap<>();
 

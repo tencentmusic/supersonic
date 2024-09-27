@@ -4,6 +4,7 @@ import javax.validation.constraints.NotNull;
 
 import com.tencent.supersonic.common.pojo.enums.DataTypeEnums;
 import com.tencent.supersonic.headless.api.pojo.DimValueMap;
+import com.tencent.supersonic.headless.api.pojo.DimensionTimeTypeParams;
 import com.tencent.supersonic.headless.api.pojo.SchemaItem;
 import lombok.Data;
 
@@ -34,4 +35,6 @@ public class DimensionReq extends SchemaItem {
     private int isTag;
 
     private Map<String, Object> ext;
+
+    private DimensionTimeTypeParams typeParams;
 }

@@ -7,6 +7,7 @@ import com.tencent.supersonic.common.pojo.enums.TypeEnums;
 import com.tencent.supersonic.common.util.BeanMapper;
 import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.headless.api.pojo.DimValueMap;
+import com.tencent.supersonic.headless.api.pojo.DimensionTimeTypeParams;
 import com.tencent.supersonic.headless.api.pojo.enums.DimensionType;
 import com.tencent.supersonic.headless.api.pojo.enums.IdentifyType;
 import com.tencent.supersonic.headless.api.pojo.request.DimensionReq;
@@ -42,6 +43,9 @@ public class DimensionConverter {
         }
         if (dimensionReq.getExt() != null) {
             dimensionDO.setExt(JSONObject.toJSONString(dimensionReq.getExt()));
+        }
+        if (Objects.nonNull(dimensionReq.getTypeParams())) {
+            dimensionDO.setTypeParams(JSONObject.toJSONString(dimensionReq.getTypeParams()));
         }
         return dimensionDO;
     }
@@ -92,6 +96,11 @@ public class DimensionConverter {
         }
         if (dimensionDO.getExt() != null) {
             dimensionResp.setExt(JSONObject.parseObject(dimensionDO.getExt(), Map.class));
+        }
+        if (StringUtils.isNoneBlank(dimensionDO.getTypeParams())) {
+            dimensionResp.setTypeParams(
+                    JSONObject.parseObject(
+                            dimensionDO.getTypeParams(), DimensionTimeTypeParams.class));
         }
         dimensionResp.setType(getType(dimensionDO.getType()));
         dimensionResp.setTypeEnum(TypeEnums.DIMENSION);
