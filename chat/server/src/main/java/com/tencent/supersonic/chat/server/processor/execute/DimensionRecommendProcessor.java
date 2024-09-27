@@ -29,7 +29,7 @@ public class DimensionRecommendProcessor implements ExecuteResultProcessor {
     @Override
     public void process(ExecuteContext executeContext, QueryResult queryResult) {
         SemanticParseInfo semanticParseInfo = executeContext.getParseInfo();
-        if (!QueryType.METRIC.equals(semanticParseInfo.getQueryType())
+        if (!QueryType.AGGREGATE.equals(semanticParseInfo.getQueryType())
                 || CollectionUtils.isEmpty(semanticParseInfo.getMetrics())) {
             return;
         }

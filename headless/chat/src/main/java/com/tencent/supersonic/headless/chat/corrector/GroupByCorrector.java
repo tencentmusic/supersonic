@@ -33,7 +33,7 @@ public class GroupByCorrector extends BaseSemanticCorrector {
 
     private Boolean needAddGroupBy(
             ChatQueryContext chatQueryContext, SemanticParseInfo semanticParseInfo) {
-        if (!QueryType.METRIC.equals(semanticParseInfo.getQueryType())) {
+        if (!QueryType.AGGREGATE.equals(semanticParseInfo.getQueryType())) {
             return false;
         }
 

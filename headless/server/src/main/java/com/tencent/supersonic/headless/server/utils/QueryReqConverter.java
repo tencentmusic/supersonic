@@ -294,7 +294,7 @@ public class QueryReqConverter {
         boolean isAgg = AggOption.isAgg(aggOption);
         QueryType queryType = QueryType.DETAIL;
         if (isAgg) {
-            queryType = QueryType.METRIC;
+            queryType = QueryType.AGGREGATE;
         }
         return queryType;
     }

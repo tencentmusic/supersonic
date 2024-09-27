@@ -46,7 +46,7 @@ public class MetricTest extends BaseTest {
 
         expectedParseInfo.setDateInfo(
                 DataUtils.getDateConf(DateConf.DateMode.BETWEEN, unit, period, startDay, endDay));
-        expectedParseInfo.setQueryType(QueryType.METRIC);
+        expectedParseInfo.setQueryType(QueryType.AGGREGATE);
 
         assertQueryResult(expectedResult, actualResult);
     }
@@ -68,7 +68,7 @@ public class MetricTest extends BaseTest {
         expectedParseInfo.setDateInfo(
                 DataUtils.getDateConf(
                         DateConf.DateMode.BETWEEN, 7, DatePeriodEnum.DAY, startDay, endDay));
-        expectedParseInfo.setQueryType(QueryType.METRIC);
+        expectedParseInfo.setQueryType(QueryType.AGGREGATE);
 
         assertQueryResult(expectedResult, actualResult);
     }
@@ -94,7 +94,7 @@ public class MetricTest extends BaseTest {
 
         expectedParseInfo.setDateInfo(
                 DataUtils.getDateConf(DateConf.DateMode.BETWEEN, unit, period, startDay, endDay));
-        expectedParseInfo.setQueryType(QueryType.METRIC);
+        expectedParseInfo.setQueryType(QueryType.AGGREGATE);
 
         assertQueryResult(expectedResult, actualResult);
     }
@@ -116,7 +116,7 @@ public class MetricTest extends BaseTest {
 
         expectedParseInfo.setDateInfo(
                 DataUtils.getDateConf(3, DateConf.DateMode.BETWEEN, DatePeriodEnum.DAY));
-        expectedParseInfo.setQueryType(QueryType.METRIC);
+        expectedParseInfo.setQueryType(QueryType.AGGREGATE);
 
         assertQueryResult(expectedResult, actualResult);
     }
@@ -136,7 +136,7 @@ public class MetricTest extends BaseTest {
 
         expectedParseInfo.setDateInfo(
                 DataUtils.getDateConf(DateConf.DateMode.BETWEEN, unit, period, startDay, endDay));
-        expectedParseInfo.setQueryType(QueryType.METRIC);
+        expectedParseInfo.setQueryType(QueryType.AGGREGATE);
 
         assertQueryResult(expectedResult, actualResult);
     }
@@ -166,7 +166,7 @@ public class MetricTest extends BaseTest {
 
         expectedParseInfo.setDateInfo(
                 DataUtils.getDateConf(DateConf.DateMode.BETWEEN, 1, period, startDay, startDay));
-        expectedParseInfo.setQueryType(QueryType.METRIC);
+        expectedParseInfo.setQueryType(QueryType.AGGREGATE);
 
         assertQueryResult(expectedResult, actualResult);
     }

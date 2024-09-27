@@ -259,7 +259,7 @@ public class QueryReqBuilder {
     public static QueryStructReq buildStructRatioReq(
             SemanticParseInfo parseInfo, SchemaElement metric, AggOperatorEnum aggOperatorEnum) {
         QueryStructReq queryStructReq = buildStructReq(parseInfo);
-        queryStructReq.setQueryType(QueryType.METRIC);
+        queryStructReq.setQueryType(QueryType.AGGREGATE);
         queryStructReq.setOrders(new ArrayList<>());
         List<Aggregator> aggregators = new ArrayList<>();
         Aggregator ratioRoll = new Aggregator(metric.getBizName(), aggOperatorEnum);
