@@ -61,7 +61,7 @@ public class MetricRatioProcessor implements ExecuteResultProcessor {
         AggregatorConfig aggregatorConfig = ContextUtils.getBean(AggregatorConfig.class);
         if (CollectionUtils.isEmpty(semanticParseInfo.getMetrics())
                 || !aggregatorConfig.getEnableRatio()
-                || !QueryType.METRIC.equals(semanticParseInfo.getQueryType())) {
+                || !QueryType.AGGREGATE.equals(semanticParseInfo.getQueryType())) {
             return;
         }
         AggregateInfo aggregateInfo =

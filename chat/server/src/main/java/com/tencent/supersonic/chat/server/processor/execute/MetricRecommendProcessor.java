@@ -37,7 +37,7 @@ public class MetricRecommendProcessor implements ExecuteResultProcessor {
     }
 
     private void fillSimilarMetric(SemanticParseInfo parseInfo) {
-        if (!parseInfo.getQueryType().equals(QueryType.METRIC)
+        if (!parseInfo.getQueryType().equals(QueryType.AGGREGATE)
                 || parseInfo.getMetrics().size() > METRIC_RECOMMEND_SIZE
                 || CollectionUtils.isEmpty(parseInfo.getMetrics())) {
             return;

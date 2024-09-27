@@ -47,7 +47,7 @@ public class BaseTest extends BaseApplication {
     }
 
     protected QueryStructReq buildQueryStructReq(List<String> groups) {
-        return buildQueryStructReq(groups, QueryType.METRIC);
+        return buildQueryStructReq(groups, QueryType.AGGREGATE);
     }
 
     protected QueryStructReq buildQueryStructReq(List<String> groups, QueryType queryType) {
@@ -84,7 +84,7 @@ public class BaseTest extends BaseApplication {
         for (Long modelId : DataUtils.getMetricAgentIModelIds()) {
             queryStructReq.addModelId(modelId);
         }
-        queryStructReq.setQueryType(QueryType.METRIC);
+        queryStructReq.setQueryType(QueryType.AGGREGATE);
         queryStructReq.setAggregators(Arrays.asList(aggregator));
 
         if (CollectionUtils.isNotEmpty(groups)) {

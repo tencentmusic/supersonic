@@ -29,7 +29,7 @@ class QueryNLReqBuilderTest {
         QueryStructReq queryStructReq = new QueryStructReq();
         queryStructReq.setDataSetId(1L);
         queryStructReq.setDataSetName("内容库");
-        queryStructReq.setQueryType(QueryType.METRIC);
+        queryStructReq.setQueryType(QueryType.AGGREGATE);
 
         Aggregator aggregator = new Aggregator();
         aggregator.setFunc(AggOperatorEnum.UNKNOWN);

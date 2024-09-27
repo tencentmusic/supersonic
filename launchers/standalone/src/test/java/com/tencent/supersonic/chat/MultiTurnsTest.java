@@ -38,7 +38,7 @@ public class MultiTurnsTest extends BaseTest {
 
         expectedParseInfo.setDateInfo(
                 DataUtils.getDateConf(DateConf.DateMode.BETWEEN, unit, period, startDay, endDay));
-        expectedParseInfo.setQueryType(QueryType.METRIC);
+        expectedParseInfo.setQueryType(QueryType.AGGREGATE);
 
         assertQueryResult(expectedResult, actualResult);
     }
@@ -67,7 +67,7 @@ public class MultiTurnsTest extends BaseTest {
 
         expectedParseInfo.setDateInfo(
                 DataUtils.getDateConf(DateConf.DateMode.BETWEEN, unit, period, startDay, endDay));
-        expectedParseInfo.setQueryType(QueryType.METRIC);
+        expectedParseInfo.setQueryType(QueryType.AGGREGATE);
 
         assertQueryResult(expectedResult, actualResult);
     }
@@ -94,7 +94,7 @@ public class MultiTurnsTest extends BaseTest {
 
         expectedParseInfo.setDateInfo(
                 DataUtils.getDateConf(DateConf.DateMode.BETWEEN, unit, period, startDay, endDay));
-        expectedParseInfo.setQueryType(QueryType.METRIC);
+        expectedParseInfo.setQueryType(QueryType.AGGREGATE);
 
         assertQueryResult(expectedResult, actualResult);
     }

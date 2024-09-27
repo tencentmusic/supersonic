@@ -74,7 +74,7 @@ public class ParseInfoProcessor implements ResultProcessor {
         parseInfo.setMetrics(metrics);
 
         // extract dimensions from S2SQL
-        if (QueryType.METRIC.equals(parseInfo.getQueryType())) {
+        if (QueryType.AGGREGATE.equals(parseInfo.getQueryType())) {
             List<String> groupByFields = SqlSelectHelper.getGroupByFields(s2SQL);
             List<String> groupByDimensions = filterDateField(dsSchema, groupByFields);
             parseInfo.setDimensions(
