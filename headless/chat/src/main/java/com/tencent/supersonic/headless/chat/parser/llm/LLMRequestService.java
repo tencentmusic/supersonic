@@ -8,7 +8,6 @@ import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
 import com.tencent.supersonic.headless.api.pojo.SemanticSchema;
 import com.tencent.supersonic.headless.chat.ChatQueryContext;
 import com.tencent.supersonic.headless.chat.parser.ParserConfig;
-import com.tencent.supersonic.headless.chat.parser.SatisfactionChecker;
 import com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMReq;
 import com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMResp;
 import com.tencent.supersonic.headless.chat.utils.ComponentFactory;
@@ -37,11 +36,6 @@ public class LLMRequestService {
     public boolean isSkip(ChatQueryContext queryCtx) {
         if (!queryCtx.getText2SQLType().enableLLM()) {
             log.info("LLM disabled, skip");
-            return true;
-        }
-
-        if (SatisfactionChecker.isSkip(queryCtx)) {
-            log.info("skip {}, queryText:{}", LLMSqlParser.class, queryCtx.getQueryText());
             return true;
         }
 
