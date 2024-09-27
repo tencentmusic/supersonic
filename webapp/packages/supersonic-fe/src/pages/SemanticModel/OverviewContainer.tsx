@@ -5,14 +5,17 @@ import DomainListTree from './components/DomainList';
 import styles from './components/style.less';
 import { LeftOutlined, RightOutlined } from '@ant-design/icons';
 import { ISemantic } from './data';
-import { getDomainList } from './service';
+import { getDomainList, getDataSetList } from './service';
 import DomainManagerTab from './components/DomainManagerTab';
+import { isArrayOfValues } from '@/utils/utils';
 
 type Props = {
   mode: 'domain';
 };
 
 const OverviewContainer: React.FC<Props> = ({ mode }) => {
+  const defaultTabKey = 'dataSetManage';
+  // 'overview'
   const params: any = useParams();
   const domainId = params.domainId;
   const modelId = params.modelId;
@@ -32,10 +35,11 @@ const OverviewContainer: React.FC<Props> = ({ mode }) => {
   const { MrefreshDimensionList } = dimensionModel;
   const { MrefreshMetricList } = metricModel;
   const { MrefreshDatabaseList } = databaseModel;
-  const menuKey = params.menuKey ? params.menuKey : !Number(modelId) ? 'overview' : '';
+  const menuKey = params.menuKey ? params.menuKey : !Number(modelId) ? defaultTabKey : '';
   const [isModel, setIsModel] = useState<boolean>(false);
   const [collapsedState, setCollapsedState] = useState(true);
   const [activeKey, setActiveKey] = useState<string>(menuKey);
+  const [dataSetList, setDataSetList] = useState<ISemantic.IDatasetItem[]>([]);
 
   const initSelectedDomain = (domainList: ISemantic.IDomainItem[]) => {
     const targetNode = domainList.filter((item: any) => {
@@ -80,19 +84,23 @@ const OverviewContainer: React.FC<Props> = ({ mode }) => {
       return;
     }
     queryModelList();
+    queryDataSetList();
   }, [selectDomainId]);
 
-  const queryModelList = async () => {
-    const list = await MrefreshModelList(selectDomainId);
-    const model = list.filter((item: any) => {
-      return `${item.id}` === modelId;
-    })[0];
-    if (model) {
-      setSelectModel(model);
-      setActiveKey(menuKey);
-      setIsModel(true);
-      pushUrlMenu(model.domainId, model.id, menuKey);
+  const queryDataSetList = async () => {
+    const { code, data, msg } = await getDataSetList(selectDomainId);
+    if (code === 200) {
+      setDataSetList(data);
+      if (!isArrayOfValues(data)) {
+        setActiveKey('overview');
+      }
+    } else {
+      message.error(msg);
     }
+  };
+
+  const queryModelList = async () => {
+    await MrefreshModelList(selectDomainId);
   };
 
   useEffect(() => {
@@ -134,8 +142,8 @@ const OverviewContainer: React.FC<Props> = ({ mode }) => {
 
   const cleanModelInfo = (domainId) => {
     setIsModel(false);
-    setActiveKey('overview');
-    pushUrlMenu(domainId, 0, 'overview');
+    setActiveKey(defaultTabKey);
+    pushUrlMenu(domainId, 0, defaultTabKey);
     setSelectModel(undefined);
   };
 
@@ -180,6 +188,7 @@ const OverviewContainer: React.FC<Props> = ({ mode }) => {
                 isModel={isModel}
                 activeKey={activeKey}
                 modelList={modelList}
+                dataSetList={dataSetList}
                 handleModelChange={(model) => {
                   handleModelChange(model);
                   MrefreshModelList(selectDomainId);

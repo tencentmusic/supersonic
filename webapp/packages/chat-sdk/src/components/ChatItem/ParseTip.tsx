@@ -187,7 +187,7 @@ const ParseTip: React.FC<Props> = ({
               <div className={`${prefixCls}-tip-item`}>
                 <div className={`${prefixCls}-tip-item-name`}>查询模式：</div>
                 <div className={itemValueClass}>
-                  {queryType === 'METRIC' || queryType === 'METRIC_TAG' ? '指标模式' : '明细模式'}
+                  {queryType === 'METRIC' || queryType === 'METRIC_TAG' ? '聚合模式' : '明细模式'}
                 </div>
               </div>
             )}
