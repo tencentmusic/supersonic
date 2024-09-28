@@ -154,68 +154,79 @@ public class SqlRemoveHelper {
 
     private static void removeExpressionWithConstant(
             Expression expression, Set<String> removeFieldNames) {
-        if (expression instanceof EqualsTo
-                || expression instanceof GreaterThanEquals
-                || expression instanceof GreaterThan
-                || expression instanceof MinorThanEquals
-                || expression instanceof MinorThan) {
-            ComparisonOperator comparisonOperator = (ComparisonOperator) expression;
-            String columnName =
-                    SqlSelectHelper.getColumnName(
-                            comparisonOperator.getLeftExpression(),
-                            comparisonOperator.getRightExpression());
-            if (!removeFieldNames.contains(columnName)) {
-                return;
+        try {
+            if (expression instanceof ComparisonOperator) {
+                handleComparisonOperator((ComparisonOperator) expression, removeFieldNames);
+            } else if (expression instanceof InExpression) {
+                handleInExpression((InExpression) expression, removeFieldNames);
+            } else if (expression instanceof LikeExpression) {
+                handleLikeExpression((LikeExpression) expression, removeFieldNames);
             }
-            String constant = getConstant(expression);
-            try {
-                ComparisonOperator constantExpression =
-                        (ComparisonOperator) CCJSqlParserUtil.parseCondExpression(constant);
-                comparisonOperator.setLeftExpression(constantExpression.getLeftExpression());
-                comparisonOperator.setRightExpression(constantExpression.getRightExpression());
-                comparisonOperator.setASTNode(constantExpression.getASTNode());
-            } catch (JSQLParserException e) {
-                log.error("JSQLParserException", e);
-            }
+        } catch (JSQLParserException e) {
+            log.error("JSQLParserException", e);
         }
-        if (expression instanceof InExpression) {
-            InExpression inExpression = (InExpression) expression;
-            String columnName =
-                    SqlSelectHelper.getColumnName(
-                            inExpression.getLeftExpression(), inExpression.getRightExpression());
-            if (!removeFieldNames.contains(columnName)) {
-                return;
-            }
-            try {
-                InExpression constantExpression =
-                        (InExpression)
-                                CCJSqlParserUtil.parseCondExpression(JsqlConstants.IN_CONSTANT);
-                inExpression.setLeftExpression(constantExpression.getLeftExpression());
-                inExpression.setRightExpression(constantExpression.getRightExpression());
-                inExpression.setASTNode(constantExpression.getASTNode());
-            } catch (JSQLParserException e) {
-                log.error("JSQLParserException", e);
-            }
+    }
+
+    private static void handleComparisonOperator(
+            ComparisonOperator comparisonOperator, Set<String> removeFieldNames)
+            throws JSQLParserException {
+        String columnName =
+                SqlSelectHelper.getColumnName(
+                        comparisonOperator.getLeftExpression(),
+                        comparisonOperator.getRightExpression());
+        if (!removeFieldNames.contains(columnName)) {
+            return;
         }
-        if (expression instanceof LikeExpression) {
-            LikeExpression likeExpression = (LikeExpression) expression;
-            String columnName =
-                    SqlSelectHelper.getColumnName(
-                            likeExpression.getLeftExpression(),
-                            likeExpression.getRightExpression());
-            if (!removeFieldNames.contains(columnName)) {
-                return;
-            }
-            try {
-                LikeExpression constantExpression =
-                        (LikeExpression)
-                                CCJSqlParserUtil.parseCondExpression(JsqlConstants.LIKE_CONSTANT);
-                likeExpression.setLeftExpression(constantExpression.getLeftExpression());
-                likeExpression.setRightExpression(constantExpression.getRightExpression());
-            } catch (JSQLParserException e) {
-                log.error("JSQLParserException", e);
-            }
+        String constant = getConstant(comparisonOperator);
+        ComparisonOperator constantExpression =
+                (ComparisonOperator) CCJSqlParserUtil.parseCondExpression(constant);
+        updateComparisonOperator(comparisonOperator, constantExpression);
+    }
+
+    private static void handleInExpression(InExpression inExpression, Set<String> removeFieldNames)
+            throws JSQLParserException {
+        String columnName =
+                SqlSelectHelper.getColumnName(
+                        inExpression.getLeftExpression(), inExpression.getRightExpression());
+        if (!removeFieldNames.contains(columnName)) {
+            return;
         }
+        InExpression constantExpression =
+                (InExpression) CCJSqlParserUtil.parseCondExpression(JsqlConstants.IN_CONSTANT);
+        updateInExpression(inExpression, constantExpression);
+    }
+
+    private static void handleLikeExpression(
+            LikeExpression likeExpression, Set<String> removeFieldNames)
+            throws JSQLParserException {
+        String columnName =
+                SqlSelectHelper.getColumnName(
+                        likeExpression.getLeftExpression(), likeExpression.getRightExpression());
+        if (!removeFieldNames.contains(columnName)) {
+            return;
+        }
+        LikeExpression constantExpression =
+                (LikeExpression) CCJSqlParserUtil.parseCondExpression(JsqlConstants.LIKE_CONSTANT);
+        updateLikeExpression(likeExpression, constantExpression);
+    }
+
+    private static void updateComparisonOperator(
+            ComparisonOperator original, ComparisonOperator constantExpression) {
+        original.setLeftExpression(constantExpression.getLeftExpression());
+        original.setRightExpression(constantExpression.getRightExpression());
+        original.setASTNode(constantExpression.getASTNode());
+    }
+
+    private static void updateInExpression(InExpression original, InExpression constantExpression) {
+        original.setLeftExpression(constantExpression.getLeftExpression());
+        original.setRightExpression(constantExpression.getRightExpression());
+        original.setASTNode(constantExpression.getASTNode());
+    }
+
+    private static void updateLikeExpression(
+            LikeExpression original, LikeExpression constantExpression) {
+        original.setLeftExpression(constantExpression.getLeftExpression());
+        original.setRightExpression(constantExpression.getRightExpression());
     }
 
     public static String removeHavingCondition(String sql, Set<String> removeFieldNames) {
