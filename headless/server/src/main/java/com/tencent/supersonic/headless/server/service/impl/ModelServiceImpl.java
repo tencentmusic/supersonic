@@ -214,7 +214,9 @@ public class ModelServiceImpl implements ModelService {
             String message = String.format("模型英文名[%s]需要为下划线字母数字组合, 请修改", modelReq.getBizName());
             throw new InvalidArgumentException(message);
         }
-
+        if (modelReq.getModelDetail() == null) {
+            return;
+        }
         List<Dim> dims = modelReq.getModelDetail().getDimensions();
         List<Measure> measures = modelReq.getModelDetail().getMeasures();
         List<Identify> identifies = modelReq.getModelDetail().getIdentifiers();
