@@ -43,8 +43,10 @@ public class TagQueryServiceImpl implements TagQueryService {
     @Value("${s2.item.value.date.format:yyyy-MM-dd}")
     private String itemValueDateFormat;
 
-    private final String tagValueAlias = "internalTagCount";
-    private final String maxDateAlias = "internalMaxDate";
+    //因有些数据库(如Postgresql)不支持列名大小写，所以列名统一使用小写，以兼容更多数据库
+    //private final String tagValueAlias = "internalTagCount";
+    private final String tagValueAlias = "internal_tag_count";
+    private final String maxDateAlias = "internal_max_date";
     private final TagMetaService tagMetaService;
     private final SemanticLayerService queryService;
     private final ModelService modelService;
