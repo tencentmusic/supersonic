@@ -132,6 +132,7 @@ public class ModelConverter {
         dimensionReq.setDescription(
                 Objects.isNull(dim.getDescription()) ? "" : dim.getDescription());
         dimensionReq.setIsTag(dim.getIsTag());
+        dimensionReq.setTypeParams(dim.getTypeParams());
         return dimensionReq;
     }
 
