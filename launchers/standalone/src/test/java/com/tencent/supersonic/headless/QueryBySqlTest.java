@@ -31,23 +31,23 @@ public class QueryBySqlTest extends BaseTest {
     @Test
     public void testSumQuery() throws Exception {
         SemanticQueryResp semanticQueryResp =
-                queryBySql("SELECT SUM(访问次数) AS 访问次数 FROM 超音数PVUV统计 ");
+                queryBySql("SELECT SUM(访问次数) AS 总访问次数 FROM 超音数PVUV统计 ");
 
         assertEquals(1, semanticQueryResp.getColumns().size());
         QueryColumn queryColumn = semanticQueryResp.getColumns().get(0);
-        assertEquals("访问次数", queryColumn.getName());
+        assertEquals("总访问次数", queryColumn.getName());
         assertEquals(1, semanticQueryResp.getResultList().size());
     }
 
     @Test
     public void testGroupByQuery() throws Exception {
         SemanticQueryResp result =
-                queryBySql("SELECT 部门, SUM(访问次数) AS 访问次数 FROM 超音数PVUV统计  GROUP BY 部门 ");
+                queryBySql("SELECT 部门, SUM(访问次数) AS 总访问次数 FROM 超音数PVUV统计  GROUP BY 部门 ");
         assertEquals(2, result.getColumns().size());
         QueryColumn firstColumn = result.getColumns().get(0);
         QueryColumn secondColumn = result.getColumns().get(1);
         assertEquals("部门", firstColumn.getName());
-        assertEquals("访问次数", secondColumn.getName());
+        assertEquals("总访问次数", secondColumn.getName());
         assertEquals(4, result.getResultList().size());
     }
 
@@ -55,12 +55,12 @@ public class QueryBySqlTest extends BaseTest {
     public void testFilterQuery() throws Exception {
         SemanticQueryResp result =
                 queryBySql(
-                        "SELECT 部门, SUM(访问次数) AS 访问次数 FROM 超音数PVUV统计 WHERE 部门 ='HR' GROUP BY 部门 ");
+                        "SELECT 部门, SUM(访问次数) AS 总访问次数 FROM 超音数PVUV统计 WHERE 部门 ='HR' GROUP BY 部门 ");
         assertEquals(2, result.getColumns().size());
         QueryColumn firstColumn = result.getColumns().get(0);
         QueryColumn secondColumn = result.getColumns().get(1);
         assertEquals("部门", firstColumn.getName());
-        assertEquals("访问次数", secondColumn.getName());
+        assertEquals("总访问次数", secondColumn.getName());
         assertEquals(1, result.getResultList().size());
         assertEquals("HR", result.getResultList().get(0).get("department").toString());
     }
@@ -69,11 +69,12 @@ public class QueryBySqlTest extends BaseTest {
     public void testDateSumQuery() throws Exception {
         String startDate = now().plusDays(-365).toString();
         String endDate = now().plusDays(0).toString();
-        String sql = "SELECT SUM(访问次数) AS 访问次数 FROM 超音数PVUV统计 WHERE 数据日期 >= '%s' AND 数据日期 <= '%s' ";
+        String sql =
+                "SELECT SUM(访问次数) AS 总访问次数 FROM 超音数PVUV统计 WHERE 数据日期 >= '%s' AND 数据日期 <= '%s' ";
         SemanticQueryResp semanticQueryResp = queryBySql(String.format(sql, startDate, endDate));
         assertEquals(1, semanticQueryResp.getColumns().size());
         QueryColumn queryColumn = semanticQueryResp.getColumns().get(0);
-        assertEquals("访问次数", queryColumn.getName());
+        assertEquals("总访问次数", queryColumn.getName());
         assertEquals(1, semanticQueryResp.getResultList().size());
     }
 

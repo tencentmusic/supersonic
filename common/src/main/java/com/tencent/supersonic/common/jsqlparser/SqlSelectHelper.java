@@ -26,7 +26,6 @@ import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.Statement;
-import net.sf.jsqlparser.statement.select.Distinct;
 import net.sf.jsqlparser.statement.select.GroupByElement;
 import net.sf.jsqlparser.statement.select.Join;
 import net.sf.jsqlparser.statement.select.LateralView;
@@ -545,17 +544,6 @@ public class SqlSelectHelper {
             return replaceVisitor.isHasAggregateFunction();
         }
         return false;
-    }
-
-    public static boolean hasDistinct(String sql) {
-        Select selectStatement = getSelect(sql);
-
-        if (!(selectStatement instanceof PlainSelect)) {
-            return false;
-        }
-        PlainSelect plainSelect = (PlainSelect) selectStatement;
-        Distinct distinct = plainSelect.getDistinct();
-        return Objects.nonNull(distinct);
     }
 
     public static boolean isLogicExpression(Expression whereExpression) {

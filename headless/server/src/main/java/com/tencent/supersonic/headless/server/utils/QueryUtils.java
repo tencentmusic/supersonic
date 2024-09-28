@@ -116,6 +116,10 @@ public class QueryUtils {
             column.setDataFormatType(metricRespMap.get(nameEn).getDataFormatType());
             column.setDataFormat(metricRespMap.get(nameEn).getDataFormat());
         }
+        // set name by NameEn
+        if (StringUtils.isBlank(column.getName()) && StringUtils.isNotBlank(column.getNameEn())) {
+            column.setName(column.getNameEn());
+        }
     }
 
     private boolean isNumberType(String type) {
