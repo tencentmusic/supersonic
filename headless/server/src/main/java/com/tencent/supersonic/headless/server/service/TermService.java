@@ -1,6 +1,7 @@
 package com.tencent.supersonic.headless.server.service;
 
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
+import com.tencent.supersonic.headless.api.pojo.request.MetaBatchReq;
 import com.tencent.supersonic.headless.api.pojo.request.TermReq;
 import com.tencent.supersonic.headless.api.pojo.response.TermResp;
 
@@ -14,7 +15,9 @@ public interface TermService {
 
     void delete(Long id);
 
-    List<TermResp> getTerms(Long domainId);
+    void deleteBatch(MetaBatchReq metaBatchReq);
+
+    List<TermResp> getTerms(Long domainId, String queryKey);
 
     Map<Long, List<TermResp>> getTermSets(Set<Long> domainIds);
 }

@@ -1,5 +1,6 @@
 package com.tencent.supersonic.headless.server.rest;
 
+import com.tencent.supersonic.headless.api.pojo.request.MetaBatchReq;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -37,13 +38,22 @@ public class TermController {
     }
 
     @GetMapping
-    public List<TermResp> getTerms(@RequestParam("domainId") Long domainId) {
-        return termService.getTerms(domainId);
+    public List<TermResp> getTerms(@RequestParam("domainId") Long domainId,
+                                   @RequestParam(name = "queryKey", required = false) String queryKey) {
+        return termService.getTerms(domainId, queryKey);
     }
 
+    @Deprecated
     @DeleteMapping("/{id}")
     public boolean delete(@PathVariable("id") Long id) {
         termService.delete(id);
         return true;
     }
+
+    @PostMapping("/deleteBatch")
+    public boolean deleteBatch(@RequestBody MetaBatchReq metaBatchReq) {
+        termService.deleteBatch(metaBatchReq);
+        return true;
+    }
+
 }

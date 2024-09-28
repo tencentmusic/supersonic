@@ -5,11 +5,13 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.common.util.BeanMapper;
 import com.tencent.supersonic.common.util.JsonUtil;
+import com.tencent.supersonic.headless.api.pojo.request.MetaBatchReq;
 import com.tencent.supersonic.headless.api.pojo.request.TermReq;
 import com.tencent.supersonic.headless.api.pojo.response.TermResp;
 import com.tencent.supersonic.headless.server.persistence.dataobject.TermDO;
 import com.tencent.supersonic.headless.server.persistence.mapper.TermMapper;
 import com.tencent.supersonic.headless.server.service.TermService;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -42,9 +44,26 @@ public class TermServiceImpl extends ServiceImpl<TermMapper, TermDO> implements 
     }
 
     @Override
-    public List<TermResp> getTerms(Long domainId) {
+    public void deleteBatch(MetaBatchReq metaBatchReq) {
+        if (CollectionUtils.isEmpty(metaBatchReq.getIds())) {
+            throw new RuntimeException("术语ID不可为空");
+        }
+        removeBatchByIds(metaBatchReq.getIds());
+    }
+
+    @Override
+    public List<TermResp> getTerms(Long domainId, String queryKey) {
         QueryWrapper<TermDO> queryWrapper = new QueryWrapper<>();
         queryWrapper.lambda().eq(TermDO::getDomainId, domainId);
+        if (StringUtils.isNotBlank(queryKey)) {
+            queryWrapper.lambda().and(i ->
+                    i.like(TermDO::getName, queryKey)
+                            .or()
+                            .like(TermDO::getDescription, queryKey)
+                            .or()
+                            .like(TermDO::getAlias, queryKey)
+            );
+        }
         List<TermDO> termDOS = list(queryWrapper);
         return termDOS.stream().map(this::convert).collect(Collectors.toList());
     }
