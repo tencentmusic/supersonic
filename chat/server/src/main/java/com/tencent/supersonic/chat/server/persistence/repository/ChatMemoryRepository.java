@@ -10,6 +10,8 @@ public interface ChatMemoryRepository {
 
     void updateMemory(ChatMemoryDO chatMemoryDO);
 
+    void batchDelete(List<Long> ids);
+
     ChatMemoryDO getMemory(Long id);
 
     List<ChatMemoryDO> getMemories(QueryWrapper<ChatMemoryDO> queryWrapper);
