@@ -7,7 +7,7 @@ import { useModel } from '@umijs/max';
 import { deleteModel, batchUpdateModelStatus } from '../service';
 import ClassModelTypeModal from './ClassModelTypeModal';
 import { ColumnsConfig } from './TableColumnRender';
-import TableHeaderFilter from './TableHeaderFilter';
+import TableHeaderFilter from '@/components/TableHeaderFilter';
 import moment from 'moment';
 import styles from './style.less';
 import { ISemantic } from '../data';

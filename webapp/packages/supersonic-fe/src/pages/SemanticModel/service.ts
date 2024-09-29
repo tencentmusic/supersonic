@@ -760,12 +760,10 @@ export function batchUpdateMetricSensitiveLevel(data: any): Promise<any> {
   });
 }
 
-export function getTermList(domainId: number): Promise<any> {
+export function getTermList(data: any): Promise<any> {
   return request(`${process.env.API_BASE_URL}term`, {
     method: 'GET',
-    params: {
-      domainId,
-    },
+    params: data,
   });
 }
 
@@ -776,8 +774,9 @@ export function saveOrUpdate(data: any): Promise<any> {
   });
 }
 
-export function deleteTerm(id: number): Promise<any> {
-  return request(`${process.env.API_BASE_URL}term/${id}`, {
-    method: 'DELETE',
+export function deleteTerm(data: any): Promise<any> {
+  return request(`${process.env.API_BASE_URL}term/deleteBatch`, {
+    method: 'POST',
+    data: { ...data },
   });
 }

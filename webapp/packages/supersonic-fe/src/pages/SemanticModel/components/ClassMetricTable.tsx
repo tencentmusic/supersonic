@@ -17,7 +17,7 @@ import {
 import MetricInfoCreateForm from './MetricInfoCreateForm';
 import BatchCtrlDropDownButton from '@/components/BatchCtrlDropDownButton';
 import BatchSensitiveLevelModal from '@/components/BatchCtrlDropDownButton/BatchSensitiveLevelModal';
-import TableHeaderFilter from './TableHeaderFilter';
+import TableHeaderFilter from '@/components/TableHeaderFilter';
 import styles from './style.less';
 import { ISemantic } from '../data';
 import { ColumnsConfig } from './TableColumnRender';
