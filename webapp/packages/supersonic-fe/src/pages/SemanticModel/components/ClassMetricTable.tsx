@@ -222,6 +222,7 @@ const ClassMetricTable: React.FC<Props> = ({ onEmptyMetricData }) => {
     {
       ...columnsConfig.createInfo,
     },
+
     {
       title: '操作',
       dataIndex: 'x',
