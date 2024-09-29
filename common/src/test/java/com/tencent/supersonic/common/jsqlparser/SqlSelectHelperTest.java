@@ -333,4 +333,13 @@ class SqlSelectHelperTest {
         selectFields = SqlSelectHelper.gePureSelectFields(sql);
         Assert.assertEquals(selectFields.size(), 2);
     }
+
+    @Test
+    void testHasGroupBy() {
+        String sql =
+                "WITH DepartmentVisits AS (SELECT 部门, SUM(访问次数) AS pv FROM 超音数数据集 WHERE 数据日期 >= '2024-08-29' "
+                        + "AND 数据日期 <= '2024-09-29' GROUP BY 部门) SELECT COUNT(*) FROM DepartmentVisits WHERE pv > 100";
+        Boolean hasGroupBy = SqlSelectHelper.hasGroupBy(sql);
+        Assert.assertEquals(hasGroupBy, true);
+    }
 }

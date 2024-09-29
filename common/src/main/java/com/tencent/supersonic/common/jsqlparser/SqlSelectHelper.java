@@ -536,12 +536,17 @@ public class SqlSelectHelper {
         if (!(selectStatement instanceof PlainSelect)) {
             return false;
         }
-        PlainSelect plainSelect = (PlainSelect) selectStatement;
-        GroupByElement groupBy = plainSelect.getGroupBy();
-        if (Objects.nonNull(groupBy)) {
-            GroupByVisitor replaceVisitor = new GroupByVisitor();
-            groupBy.accept(replaceVisitor);
-            return replaceVisitor.isHasAggregateFunction();
+
+        List<PlainSelect> withItem = getWithItem(selectStatement);
+        withItem.add((PlainSelect) selectStatement);
+
+        for (PlainSelect plainSelect : withItem) {
+            GroupByElement groupBy = plainSelect.getGroupBy();
+            if (Objects.nonNull(groupBy)) {
+                GroupByVisitor replaceVisitor = new GroupByVisitor();
+                groupBy.accept(replaceVisitor);
+                return replaceVisitor.isHasAggregateFunction();
+            }
         }
         return false;
     }
