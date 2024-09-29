@@ -204,9 +204,14 @@ const MemorySection = ({ agentId }: Props) => {
     },
   ];
 
-  const sortMap = {
+  const sortValueMap: any = {
     ascend: 'asc',
     descend: 'desc',
+  };
+
+  const sortKeyMap: any = {
+    updatedAt: 'updated_at',
+    createdAt: 'created_at',
   };
 
   const loadMemoryList = async (
@@ -221,7 +226,7 @@ const MemorySection = ({ agentId }: Props) => {
       };
     }
     let sortParams: { orderCondition: string; sort: 'desc' | 'asc' } = {
-      orderCondition: 'updatedAt',
+      orderCondition: 'updated_at',
       sort: 'desc',
     };
 
@@ -231,8 +236,8 @@ const MemorySection = ({ agentId }: Props) => {
         const [sortKey, sortValue] = target;
         if (sortKey && sortValue) {
           sortParams = {
-            orderCondition: sortKey,
-            sort: sortMap[sortValue] || 'desc',
+            orderCondition: sortKeyMap[sortKey] || sortKey,
+            sort: sortValueMap[sortValue] || 'desc',
           };
         }
       }

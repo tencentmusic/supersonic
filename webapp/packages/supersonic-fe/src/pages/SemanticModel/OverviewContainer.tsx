@@ -14,8 +14,8 @@ type Props = {
 };
 
 const OverviewContainer: React.FC<Props> = ({ mode }) => {
-  const defaultTabKey = 'dataSetManage';
-  // 'overview'
+  const defaultTabKey = 'overview';
+  // 'overview'  dataSetManage
   const params: any = useParams();
   const domainId = params.domainId;
   const modelId = params.modelId;
@@ -92,7 +92,7 @@ const OverviewContainer: React.FC<Props> = ({ mode }) => {
     if (code === 200) {
       setDataSetList(data);
       if (!isArrayOfValues(data)) {
-        setActiveKey('overview');
+        setActiveKey(defaultTabKey);
       }
     } else {
       message.error(msg);
@@ -112,7 +112,7 @@ const OverviewContainer: React.FC<Props> = ({ mode }) => {
 
   const initModelConfig = () => {
     setIsModel(true);
-    const currentMenuKey = menuKey === 'overview' ? '' : menuKey;
+    const currentMenuKey = menuKey === defaultTabKey ? '' : menuKey;
     pushUrlMenu(selectDomainId, selectModelId, currentMenuKey);
     setActiveKey(currentMenuKey);
   };
