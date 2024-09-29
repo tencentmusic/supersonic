@@ -167,7 +167,6 @@ const TermTable: React.FC<Props> = ({}) => {
                   <Input.Search
                     style={{ width: 280 }}
                     placeholder="请输入术语名称"
-                    // defaultValue={params?.key}
                     onSearch={(value) => {
                       queryTermList(value);
                     }}

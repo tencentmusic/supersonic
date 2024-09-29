@@ -2,10 +2,11 @@ import type { ProColumns } from '@ant-design/pro-components';
 import { EditableProTable } from '@ant-design/pro-components';
 import React, { useState } from 'react';
 import { MemoryType, ReviewEnum, StatusEnum } from './type';
-import { getMemeoryList, saveMemory } from './service';
-import { Popover, Input, Badge, Radio, Select, Button } from 'antd';
+import { getMemeoryList, saveMemory, batchDeleteMemory } from './service';
+import { Popover, Input, Badge, Radio, Select, Button, message } from 'antd';
 import styles from './style.less';
-
+import { isArrayOfValues } from '@/utils/utils';
+import dayjs from 'dayjs';
 const { TextArea } = Input;
 const RadioGroup = Radio.Group;
 
@@ -19,6 +20,24 @@ const MemorySection = ({ agentId }: Props) => {
   const [loading, setLoading] = useState(false);
   const [filters, setFilters] = useState<any>({});
   const { question, status, llmReviewRet, humanReviewRet } = filters;
+  const [selectedRowKeys, setSelectedRowKeys] = useState<number[]>([]);
+
+  const defaultPagination = {
+    current: 1,
+    pageSize: 10,
+    total: 0,
+  };
+  const [pagination, setPagination] = useState(defaultPagination);
+
+  const deleteTermConfig = async (ids: number[]) => {
+    const { code, msg } = await batchDeleteMemory(ids);
+    if (code === 200) {
+      loadMemoryList();
+      setSelectedRowKeys([]);
+    } else {
+      message.error(msg);
+    }
+  };
 
   const columns: ProColumns<MemoryType>[] = [
     {
@@ -73,6 +92,7 @@ const MemorySection = ({ agentId }: Props) => {
           status: 'Error',
         },
       },
+      sorter: true,
     },
     {
       title: '管理员评估意见',
@@ -96,6 +116,7 @@ const MemorySection = ({ agentId }: Props) => {
       key: 'humanReviewRet',
       dataIndex: 'humanReviewRet',
       width: 150,
+      sorter: true,
       valueType: 'radio',
       renderFormItem: (_, { record }) => (
         <RadioGroup
@@ -123,6 +144,7 @@ const MemorySection = ({ agentId }: Props) => {
       dataIndex: 'status',
       valueType: 'radio',
       width: 120,
+      sorter: true,
       tooltip:
         '若启用，将会把这条记录加入到向量库中作为样例召回供大模型参考以及作为相似问题推荐给用户',
       valueEnum: {
@@ -146,6 +168,26 @@ const MemorySection = ({ agentId }: Props) => {
       },
     },
     {
+      dataIndex: 'updatedAt',
+      title: '更新时间',
+      editable: false,
+      search: false,
+      sorter: true,
+      render: (value: any) => {
+        return value && value !== '-' ? dayjs(value).format('YYYY-MM-DD HH:mm:ss') : '-';
+      },
+    },
+    {
+      dataIndex: 'createdAt',
+      title: '创建时间',
+      search: false,
+      editable: false,
+      sorter: true,
+      render: (value: any) => {
+        return value && value !== '-' ? dayjs(value).format('YYYY-MM-DD HH:mm:ss') : '-';
+      },
+    },
+    {
       title: '操作',
       valueType: 'option',
       width: 150,
@@ -162,10 +204,15 @@ const MemorySection = ({ agentId }: Props) => {
     },
   ];
 
-  const loadMemoryList = async ({
-    filtersValue,
-    current,
-  }: { filtersValue?: any; current?: number } = {}) => {
+  const sortMap = {
+    ascend: 'asc',
+    descend: 'desc',
+  };
+
+  const loadMemoryList = async (
+    { filtersValue, current }: { filtersValue?: any; current?: number } = {},
+    sort?: any,
+  ) => {
     if (!agentId) {
       return {
         data: [],
@@ -173,16 +220,48 @@ const MemorySection = ({ agentId }: Props) => {
         success: true,
       };
     }
+    let sortParams: { orderCondition: string; sort: 'desc' | 'asc' } = {
+      orderCondition: 'updatedAt',
+      sort: 'desc',
+    };
+
+    if (sort) {
+      const target = Object.entries(sort)[0];
+      if (target) {
+        const [sortKey, sortValue] = target;
+        if (sortKey && sortValue) {
+          sortParams = {
+            orderCondition: sortKey,
+            sort: sortMap[sortValue] || 'desc',
+          };
+        }
+      }
+    }
     setLoading(true);
-    const res = await getMemeoryList(agentId, filtersValue || filters, current || 1);
+    const res = await getMemeoryList({
+      agentId,
+      chatMemoryFilter: filtersValue || filters,
+      current: current || 1,
+      ...sortParams,
+    });
     setLoading(false);
-    const { list, total } = res.data;
+    const { list, total, pageSize, pageNum } = res.data;
     setDataSource(list);
+    setPagination({
+      pageSize,
+      current: pageNum,
+      total,
+    });
     return {
       data: list,
       total: total,
       success: true,
     };
+  };
+  const rowSelection = {
+    onChange: (selectedRowKeys: React.Key[]) => {
+      setSelectedRowKeys(selectedRowKeys as number[]);
+    },
   };
 
   const onSave = async (_: any, data: any) => {
@@ -258,6 +337,16 @@ const MemorySection = ({ agentId }: Props) => {
         <Button type="primary" onClick={() => loadMemoryList()}>
           查询
         </Button>
+        <Button
+          key="batchDelete"
+          type="primary"
+          disabled={!isArrayOfValues(selectedRowKeys)}
+          onClick={() => {
+            deleteTermConfig(selectedRowKeys);
+          }}
+        >
+          批量删除
+        </Button>
       </div>
       <EditableProTable<MemoryType>
         rowKey="id"
@@ -265,9 +354,14 @@ const MemorySection = ({ agentId }: Props) => {
         loading={loading}
         columns={columns}
         request={loadMemoryList}
+        rowSelection={{
+          type: 'checkbox',
+          ...rowSelection,
+        }}
         value={dataSource}
         onChange={setDataSource}
-        pagination={{ pageSize: 10 }}
+        // pagination={{ pageSize: 10 }}
+        pagination={pagination}
         sticky={{ offsetHeader: 0 }}
         editable={{
           type: 'multiple',

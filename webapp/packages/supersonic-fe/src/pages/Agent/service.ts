@@ -35,13 +35,17 @@ export function getMetricList(modelId: number) {
   });
 }
 
-export function getMemeoryList(agentId: number, chatMemoryFilter: any, current: number) {
+export function getMemeoryList(data: { agentId: number; chatMemoryFilter: any; current: number }) {
+  const { agentId, chatMemoryFilter, current } = data;
   return request<Result<{ list: MetricType[] }>>('/api/chat/memory/pageMemories', {
     method: 'POST',
     data: {
+      ...data,
       chatMemoryFilter: { agentId, ...chatMemoryFilter },
       current,
       pageSize: 10,
+      sort: 'desc',
+      // orderCondition: 'updatedAt',
     },
   });
 }
@@ -50,5 +54,12 @@ export function saveMemory(data: MemoryType) {
   return request<Result<string>>('/api/chat/memory/updateMemory', {
     method: 'POST',
     data,
+  });
+}
+
+export function batchDeleteMemory(ids: number[]) {
+  return request<Result<string>>('/api/chat/memory/batchDelete', {
+    method: 'POST',
+    data: { ids },
   });
 }
