@@ -98,7 +98,7 @@ public class AgentServiceImpl extends ServiceImpl<AgentDOMapper, AgentDO> implem
     }
 
     private synchronized void doExecuteAgentExamples(Agent agent) {
-        if (!agent.containsLLMParserTool()
+        if (!agent.containsLLMTool()
                 || !LLMConnHelper.testConnection(agent.getModelConfig())
                 || CollectionUtils.isEmpty(agent.getExamples())) {
             return;

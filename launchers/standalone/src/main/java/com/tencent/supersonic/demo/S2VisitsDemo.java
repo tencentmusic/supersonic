@@ -171,7 +171,7 @@ public class S2VisitsDemo extends S2BaseDemo {
             agentConfig.getTools().add(llmParserTool);
         }
         agent.setAgentConfig(JSONObject.toJSONString(agentConfig));
-        MultiTurnConfig multiTurnConfig = new MultiTurnConfig(false);
+        MultiTurnConfig multiTurnConfig = new MultiTurnConfig(true);
         agent.setMultiTurnConfig(multiTurnConfig);
         Agent agentCreated = agentService.createAgent(agent, User.getFakeUser());
         return agentCreated.getId();

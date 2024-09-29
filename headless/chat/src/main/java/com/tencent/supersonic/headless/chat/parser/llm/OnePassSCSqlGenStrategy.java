@@ -38,9 +38,8 @@ public class OnePassSCSqlGenStrategy extends SqlGenStrategy {
                     + "\n4.DO NOT calculate date range using functions."
                     + "\n5.DO NOT calculate date range using DATE_SUB."
                     + "\n6.DO NOT miss the AGGREGATE operator of metrics, always add it as needed."
-                    + "\n7.ALWAYS USE `with` statement to handle secondary calculation scenario."
                     + "\n#Exemplars:\n{{exemplar}}"
-                    + "#Question:\nQuestion:{{question}},Schema:{{schema}},SideInfo:{{information}}";
+                    + "\n#Question:\nQuestion:{{question}},Schema:{{schema}},SideInfo:{{information}}";
 
     @Data
     static class SemanticSql {

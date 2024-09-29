@@ -1,11 +1,11 @@
 package com.tencent.supersonic.headless.server.rest;
 
-import com.tencent.supersonic.headless.api.pojo.request.MetaBatchReq;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
+import com.tencent.supersonic.headless.api.pojo.request.MetaBatchReq;
 import com.tencent.supersonic.headless.api.pojo.request.TermReq;
 import com.tencent.supersonic.headless.api.pojo.response.TermResp;
 import com.tencent.supersonic.headless.server.service.TermService;
@@ -38,8 +38,9 @@ public class TermController {
     }
 
     @GetMapping
-    public List<TermResp> getTerms(@RequestParam("domainId") Long domainId,
-                                   @RequestParam(name = "queryKey", required = false) String queryKey) {
+    public List<TermResp> getTerms(
+            @RequestParam("domainId") Long domainId,
+            @RequestParam(name = "queryKey", required = false) String queryKey) {
         return termService.getTerms(domainId, queryKey);
     }
 
@@ -55,5 +56,4 @@ public class TermController {
         termService.deleteBatch(metaBatchReq);
         return true;
     }
-
 }

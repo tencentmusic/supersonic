@@ -81,7 +81,7 @@ public class Agent extends RecordInfo {
         return !CollectionUtils.isEmpty(getParserTools(AgentToolType.PLUGIN));
     }
 
-    public boolean containsLLMParserTool() {
+    public boolean containsLLMTool() {
         return !CollectionUtils.isEmpty(getParserTools(AgentToolType.NL2SQL_LLM));
     }
 
