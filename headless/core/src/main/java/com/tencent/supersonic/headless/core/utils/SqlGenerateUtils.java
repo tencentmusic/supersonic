@@ -315,7 +315,7 @@ public class SqlGenerateUtils {
             final String expression,
             final MetricDefineType metricDefineType,
             AggOption aggOption,
-            Set<String> visitedMetric,
+            Map<String, String> visitedMetric,
             Set<String> measures,
             Set<String> dimensions) {
         Set<String> fields = SqlSelectHelper.getColumnFromExpr(expression);
@@ -329,7 +329,8 @@ public class SqlGenerateUtils {
                                         .filter(m -> m.getBizName().equalsIgnoreCase(field))
                                         .findFirst();
                         if (metricItem.isPresent()) {
-                            if (visitedMetric.contains(field)) {
+                            if (visitedMetric.keySet().contains(field)) {
+                                replace.put(field, visitedMetric.get(field));
                                 break;
                             }
                             replace.put(
@@ -345,7 +346,7 @@ public class SqlGenerateUtils {
                                             visitedMetric,
                                             measures,
                                             dimensions));
-                            visitedMetric.add(field);
+                            visitedMetric.put(field, replace.get(field));
                         }
                         break;
                     case MEASURE:
