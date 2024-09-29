@@ -1,8 +1,5 @@
 package com.tencent.supersonic.headless.server.rest;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
 import com.tencent.supersonic.headless.api.pojo.DBColumn;
@@ -22,6 +19,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
@@ -110,8 +109,7 @@ public class DatabaseController {
     }
 
     @GetMapping("/getDatabaseParameters")
-    public Map<String, List<DatabaseParameter>> getDatabaseParameters(
-            HttpServletRequest request, HttpServletResponse response) {
+    public Map<String, List<DatabaseParameter>> getDatabaseParameters() {
         return databaseService.getDatabaseParameters();
     }
 }
