@@ -56,13 +56,15 @@ public class TermServiceImpl extends ServiceImpl<TermMapper, TermDO> implements 
         QueryWrapper<TermDO> queryWrapper = new QueryWrapper<>();
         queryWrapper.lambda().eq(TermDO::getDomainId, domainId);
         if (StringUtils.isNotBlank(queryKey)) {
-            queryWrapper.lambda().and(i ->
-                    i.like(TermDO::getName, queryKey)
-                            .or()
-                            .like(TermDO::getDescription, queryKey)
-                            .or()
-                            .like(TermDO::getAlias, queryKey)
-            );
+            queryWrapper
+                    .lambda()
+                    .and(
+                            i ->
+                                    i.like(TermDO::getName, queryKey)
+                                            .or()
+                                            .like(TermDO::getDescription, queryKey)
+                                            .or()
+                                            .like(TermDO::getAlias, queryKey));
         }
         List<TermDO> termDOS = list(queryWrapper);
         return termDOS.stream().map(this::convert).collect(Collectors.toList());

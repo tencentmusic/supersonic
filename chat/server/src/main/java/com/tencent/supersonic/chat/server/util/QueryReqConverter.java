@@ -24,7 +24,7 @@ public class QueryReqConverter {
             return queryNLReq;
         }
 
-        boolean hasLLMTool = agent.containsLLMParserTool();
+        boolean hasLLMTool = agent.containsLLMTool();
         boolean hasRuleTool = agent.containsRuleTool();
         boolean hasLLMConfig = Objects.nonNull(agent.getModelConfig());
 
