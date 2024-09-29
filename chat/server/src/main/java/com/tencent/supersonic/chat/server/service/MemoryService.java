@@ -20,6 +20,8 @@ public interface MemoryService {
 
     void disableMemory(ChatMemoryDO memory);
 
+    void batchDelete(List<Long> ids);
+
     PageInfo<ChatMemoryDO> pageMemories(PageMemoryReq pageMemoryReq);
 
     List<ChatMemoryDO> getMemories(ChatMemoryFilter chatMemoryFilter);

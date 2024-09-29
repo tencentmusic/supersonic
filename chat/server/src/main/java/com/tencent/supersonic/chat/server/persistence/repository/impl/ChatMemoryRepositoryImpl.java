@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import org.springframework.util.CollectionUtils;
 
 @Repository
 @Primary
@@ -28,6 +29,17 @@ public class ChatMemoryRepositoryImpl implements ChatMemoryRepository {
     public void updateMemory(ChatMemoryDO chatMemoryDO) {
         chatMemoryMapper.updateById(chatMemoryDO);
     }
+
+    @Override
+    public void batchDelete(List<Long> ids) {
+        if (CollectionUtils.isEmpty(ids)) {
+            return;
+        }
+        for (Long id : ids) {
+            chatMemoryMapper.deleteById(id);
+        }
+    }
+
 
     @Override
     public ChatMemoryDO getMemory(Long id) {

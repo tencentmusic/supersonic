@@ -56,7 +56,15 @@ public class MemoryServiceImpl implements MemoryService {
     }
 
     @Override
+    public void batchDelete(List<Long> ids) {
+        chatMemoryRepository.batchDelete(ids);
+    }
+
+    @Override
     public PageInfo<ChatMemoryDO> pageMemories(PageMemoryReq pageMemoryReq) {
+        ChatMemoryFilter chatMemoryFilter = pageMemoryReq.getChatMemoryFilter();
+        chatMemoryFilter.setSort(pageMemoryReq.getSort());
+        chatMemoryFilter.setOrderCondition(pageMemoryReq.getOrderCondition());
         return PageHelper.startPage(pageMemoryReq.getCurrent(), pageMemoryReq.getPageSize())
                 .doSelectPageInfo(() -> getMemories(pageMemoryReq.getChatMemoryFilter()));
     }
@@ -85,6 +93,11 @@ public class MemoryServiceImpl implements MemoryService {
             queryWrapper
                     .lambda()
                     .eq(ChatMemoryDO::getLlmReviewRet, chatMemoryFilter.getLlmReviewRet());
+        }
+        if (StringUtils.isBlank(chatMemoryFilter.getOrderCondition())) {
+            queryWrapper.orderByDesc("id");
+        } else {
+            queryWrapper.orderBy(true, chatMemoryFilter.isAsc(), chatMemoryFilter.getOrderCondition());
         }
         return chatMemoryRepository.getMemories(queryWrapper);
     }
