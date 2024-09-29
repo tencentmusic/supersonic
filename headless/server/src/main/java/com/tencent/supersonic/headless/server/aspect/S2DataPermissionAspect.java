@@ -1,5 +1,6 @@
 package com.tencent.supersonic.headless.server.aspect;
 
+import com.google.common.collect.Sets;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.auth.api.authorization.pojo.AuthRes;
 import com.tencent.supersonic.auth.api.authorization.pojo.DimensionFilter;
@@ -81,7 +82,7 @@ public class S2DataPermissionAspect {
         }
 
         SemanticSchemaResp semanticSchemaResp = getSemanticSchemaResp(queryReq);
-        List<Long> modelIds = getModelIds(semanticSchemaResp);
+        Set<Long> modelIds = getModelIdInQuery(queryReq, semanticSchemaResp);
 
         // 2. determine whether admin of the model
         if (checkModelAdmin(user, modelIds)) {
@@ -111,7 +112,7 @@ public class S2DataPermissionAspect {
     private void checkColPermission(
             SemanticQueryReq semanticQueryReq,
             AuthorizedResourceResp authorizedResource,
-            List<Long> modelIds,
+            Set<Long> modelIds,
             SemanticSchemaResp semanticSchemaResp) {
         // get high sensitive fields in query
         Set<String> bizNamesInQueryReq = getBizNameInQueryReq(semanticQueryReq, semanticSchemaResp);
@@ -132,11 +133,24 @@ public class S2DataPermissionAspect {
         if (!CollectionUtils.isEmpty(sensitiveBizNameInQuery)) {
             Set<String> sensitiveResNames =
                     semanticSchemaResp.getNameFromBizNames(sensitiveBizNameInQuery);
-            List<String> modelAdmin = modelService.getModelAdmin(modelIds.get(0));
+            List<String> modelAdmin = modelService.getModelAdmin(modelIds.iterator().next());
             String message =
                     String.format("存在以下敏感资源:%s您暂无权限，请联系管理员%s申请", sensitiveResNames, modelAdmin);
             throw new InvalidPermissionException(message);
         }
+    }
+
+    private Set<Long> getModelIdInQuery(
+            SemanticQueryReq semanticQueryReq, SemanticSchemaResp semanticSchemaResp) {
+        if (semanticQueryReq instanceof QuerySqlReq) {
+            QuerySqlReq querySqlReq = (QuerySqlReq) semanticQueryReq;
+            return queryStructUtils.getModelIdFromSql(querySqlReq, semanticSchemaResp);
+        }
+        if (semanticQueryReq instanceof QueryStructReq) {
+            QueryStructReq queryStructReq = (QueryStructReq) semanticQueryReq;
+            return queryStructUtils.getModelIdsFromStruct(queryStructReq, semanticSchemaResp);
+        }
+        return Sets.newHashSet();
     }
 
     private void checkRowPermission(
@@ -165,12 +179,6 @@ public class S2DataPermissionAspect {
         filter.setModelIds(semanticQueryReq.getModelIds());
         filter.setDataSetId(semanticQueryReq.getDataSetId());
         return schemaService.fetchSemanticSchema(filter);
-    }
-
-    private List<Long> getModelIds(SemanticSchemaResp semanticSchemaResp) {
-        return semanticSchemaResp.getModelResps().stream()
-                .map(ModelResp::getId)
-                .collect(Collectors.toList());
     }
 
     private void doRowPermission(
@@ -246,7 +254,7 @@ public class S2DataPermissionAspect {
         }
     }
 
-    public boolean checkModelAdmin(User user, List<Long> modelIds) {
+    public boolean checkModelAdmin(User user, Set<Long> modelIds) {
         List<ModelResp> modelListAdmin =
                 modelService.getModelListWithAuth(user, null, AuthType.ADMIN);
         if (CollectionUtils.isEmpty(modelListAdmin)) {
@@ -258,7 +266,7 @@ public class S2DataPermissionAspect {
         }
     }
 
-    public void checkModelVisible(User user, List<Long> modelIds) {
+    public void checkModelVisible(User user, Set<Long> modelIds) {
         List<Long> modelListVisible =
                 modelService.getModelListWithAuth(user, null, AuthType.VISIBLE).stream()
                         .map(ModelResp::getId)
@@ -303,9 +311,9 @@ public class S2DataPermissionAspect {
         return highSensitiveCols;
     }
 
-    public AuthorizedResourceResp getAuthorizedResource(User user, List<Long> modelIds) {
+    public AuthorizedResourceResp getAuthorizedResource(User user, Set<Long> modelIds) {
         QueryAuthResReq queryAuthResReq = new QueryAuthResReq();
-        queryAuthResReq.setModelIds(modelIds);
+        queryAuthResReq.setModelIds(new ArrayList<>(modelIds));
         AuthorizedResourceResp authorizedResource = fetchAuthRes(queryAuthResReq, user);
         log.info(
                 "user:{}, domainId:{}, after queryAuthorizedResources:{}",
@@ -321,17 +329,17 @@ public class S2DataPermissionAspect {
     }
 
     public void addHint(
-            List<Long> modelIds,
+            Set<Long> modelIds,
             SemanticQueryResp queryResultWithColumns,
             AuthorizedResourceResp authorizedResource) {
         List<DimensionFilter> filters = authorizedResource.getFilters();
         if (CollectionUtils.isEmpty(filters)) {
             return;
         }
-        List<String> admins = modelService.getModelAdmin(modelIds.get(0));
+        List<String> admins = modelService.getModelAdmin(modelIds.iterator().next());
 
         if (!CollectionUtils.isEmpty(filters)) {
-            ModelResp modelResp = modelService.getModel(modelIds.get(0));
+            ModelResp modelResp = modelService.getModel(modelIds.iterator().next());
             List<String> exprList = new ArrayList<>();
             List<String> descList = new ArrayList<>();
             filters.stream()

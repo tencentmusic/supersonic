@@ -2,6 +2,7 @@ package com.tencent.supersonic.headless.chat.corrector;
 
 import com.tencent.supersonic.common.jsqlparser.AggregateEnum;
 import com.tencent.supersonic.common.jsqlparser.FieldExpression;
+import com.tencent.supersonic.common.jsqlparser.SqlAsHelper;
 import com.tencent.supersonic.common.jsqlparser.SqlRemoveHelper;
 import com.tencent.supersonic.common.jsqlparser.SqlReplaceHelper;
 import com.tencent.supersonic.common.jsqlparser.SqlSelectHelper;
@@ -38,8 +39,6 @@ public class SchemaCorrector extends BaseSemanticCorrector {
 
         correctAggFunction(semanticParseInfo);
 
-        replaceAlias(semanticParseInfo);
-
         updateFieldNameByLinkingValue(semanticParseInfo);
 
         updateFieldValueByLinkingValue(semanticParseInfo);
@@ -62,17 +61,16 @@ public class SchemaCorrector extends BaseSemanticCorrector {
         sqlInfo.setCorrectedS2SQL(sql);
     }
 
-    private void replaceAlias(SemanticParseInfo semanticParseInfo) {
-        SqlInfo sqlInfo = semanticParseInfo.getSqlInfo();
-        String replaceAlias = SqlReplaceHelper.replaceAlias(sqlInfo.getCorrectedS2SQL());
-        sqlInfo.setCorrectedS2SQL(replaceAlias);
-    }
-
     private void correctFieldName(
             ChatQueryContext chatQueryContext, SemanticParseInfo semanticParseInfo) {
         Map<String, String> fieldNameMap =
                 getFieldNameMap(chatQueryContext, semanticParseInfo.getDataSetId());
+        // add as fieldName
         SqlInfo sqlInfo = semanticParseInfo.getSqlInfo();
+        List<String> asFields = SqlAsHelper.getAsFields(sqlInfo.getCorrectedS2SQL());
+        for (String asField : asFields) {
+            fieldNameMap.put(asField, asField);
+        }
         String sql = SqlReplaceHelper.replaceFields(sqlInfo.getCorrectedS2SQL(), fieldNameMap);
         sqlInfo.setCorrectedS2SQL(sql);
     }

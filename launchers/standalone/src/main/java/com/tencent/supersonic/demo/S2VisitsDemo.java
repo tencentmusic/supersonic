@@ -101,7 +101,7 @@ public class S2VisitsDemo extends S2BaseDemo {
             // create data set
             DataSetResp s2DataSet = addDataSet(s2Domain);
             addAuthGroup_1(stayTimeModel);
-            addAuthGroup_2(stayTimeModel);
+            addAuthGroup_2(pvUvModel);
 
             // create terms and plugin
             addTerm(s2Domain);
@@ -513,9 +513,9 @@ public class S2VisitsDemo extends S2BaseDemo {
         authService.addOrUpdateAuthGroup(authGroupReq);
     }
 
-    public void addAuthGroup_2(ModelResp stayTimeModel) {
+    public void addAuthGroup_2(ModelResp pvuvModel) {
         AuthGroup authGroupReq = new AuthGroup();
-        authGroupReq.setModelId(stayTimeModel.getId());
+        authGroupReq.setModelId(pvuvModel.getId());
         authGroupReq.setName("tom_row_permission");
 
         List<AuthRule> authRules = new ArrayList<>();

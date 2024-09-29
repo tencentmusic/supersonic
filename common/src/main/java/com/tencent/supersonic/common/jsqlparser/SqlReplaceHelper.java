@@ -4,7 +4,6 @@ import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
 import com.tencent.supersonic.common.util.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.JSQLParserException;
-import net.sf.jsqlparser.expression.Alias;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.Function;
 import net.sf.jsqlparser.expression.LongValue;
@@ -47,53 +46,6 @@ import java.util.function.UnaryOperator;
 /** Sql Parser replace Helper */
 @Slf4j
 public class SqlReplaceHelper {
-
-    public static String replaceSelectFields(String sql, Map<String, String> fieldNameMap) {
-        Select selectStatement = SqlSelectHelper.getSelect(sql);
-        if (!(selectStatement instanceof PlainSelect)) {
-            return sql;
-        }
-        ((PlainSelect) selectStatement)
-                .getSelectItems().stream()
-                        .forEach(
-                                o -> {
-                                    SelectItem selectExpressionItem = (SelectItem) o;
-                                    String alias = "";
-                                    if (selectExpressionItem.getExpression() instanceof Function) {
-                                        Function function =
-                                                (Function) selectExpressionItem.getExpression();
-                                        Column column =
-                                                (Column)
-                                                        function.getParameters()
-                                                                .getExpressions()
-                                                                .get(0);
-                                        if (fieldNameMap.containsKey(column.getColumnName())) {
-                                            String value = fieldNameMap.get(column.getColumnName());
-                                            alias = value;
-                                            function.withParameters(new Column(value));
-                                        }
-                                    }
-                                    if (selectExpressionItem.getExpression() instanceof Column) {
-                                        Column column =
-                                                (Column) selectExpressionItem.getExpression();
-                                        String columnName = column.getColumnName();
-                                        if (fieldNameMap.containsKey(columnName)) {
-                                            String value = fieldNameMap.get(columnName);
-                                            alias = value;
-                                            if (StringUtils.isNotBlank(value)) {
-                                                selectExpressionItem.setExpression(
-                                                        new Column(value));
-                                            }
-                                        }
-                                    }
-                                    if (Objects.nonNull(selectExpressionItem.getAlias())
-                                            && StringUtils.isNotBlank(alias)) {
-                                        selectExpressionItem.getAlias().setName(alias);
-                                    }
-                                });
-        return selectStatement.toString();
-    }
-
     public static String replaceAggFields(
             String sql, Map<String, Pair<String, String>> fieldNameToAggMap) {
         Select selectStatement = SqlSelectHelper.getSelect(sql);
@@ -257,7 +209,6 @@ public class SqlReplaceHelper {
         // 2. replace select fields
         for (SelectItem selectItem : plainSelect.getSelectItems()) {
             selectItem.accept(visitor);
-            replaceAsName(fieldNameMap, selectItem);
         }
 
         if (plainSelect.getFromItem() instanceof ParenthesedSelect) {
@@ -320,19 +271,6 @@ public class SqlReplaceHelper {
                     replaceFieldsInPlainOneSelect(fieldNameMap, exactReplace, subPlainSelect);
                 }
             }
-        }
-    }
-
-    private static void replaceAsName(Map<String, String> fieldNameMap, SelectItem selectItem) {
-
-        Alias alias = selectItem.getAlias();
-        if (Objects.isNull(alias)) {
-            return;
-        }
-        String aliasName = alias.getName();
-        String replaceFieldName = fieldNameMap.get(aliasName);
-        if (StringUtils.isNotBlank(replaceFieldName)) {
-            alias.setName(replaceFieldName);
         }
     }
 

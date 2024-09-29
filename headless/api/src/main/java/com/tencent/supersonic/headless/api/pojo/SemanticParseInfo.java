@@ -36,7 +36,7 @@ public class SemanticParseInfo {
     private Set<QueryFilter> metricFilters = Sets.newHashSet();
     private Set<Order> orders = Sets.newHashSet();
     private DateConf dateInfo;
-    private Long limit;
+    private long limit = DEFAULT_DETAIL_LIMIT;
     private double score;
     private List<SchemaElementMatch> elementMatches = Lists.newArrayList();
     private SqlInfo sqlInfo = new SqlInfo();
@@ -74,8 +74,8 @@ public class SemanticParseInfo {
         return dataSet.getDataSetId();
     }
 
-    public Long getDetailLimit() {
-        Long limit = DEFAULT_DETAIL_LIMIT;
+    public long getDetailLimit() {
+        long limit = DEFAULT_DETAIL_LIMIT;
         if (Objects.nonNull(queryConfig)
                 && Objects.nonNull(queryConfig.getDetailTypeDefaultConfig())
                 && Objects.nonNull(queryConfig.getDetailTypeDefaultConfig().getLimit())) {
@@ -84,8 +84,8 @@ public class SemanticParseInfo {
         return limit;
     }
 
-    public Long getMetricLimit() {
-        Long limit = DEFAULT_METRIC_LIMIT;
+    public long getMetricLimit() {
+        long limit = DEFAULT_METRIC_LIMIT;
         if (Objects.nonNull(queryConfig)
                 && Objects.nonNull(queryConfig.getAggregateTypeDefaultConfig())
                 && Objects.nonNull(queryConfig.getAggregateTypeDefaultConfig().getLimit())) {

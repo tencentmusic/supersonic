@@ -41,6 +41,7 @@ public class SchemaElement implements Serializable {
     private String description;
     private boolean descriptionMapped;
     @Builder.Default private Map<String, Object> extInfo = new HashMap<>();
+    private DimensionTimeTypeParams typeParams;
 
     @Override
     public boolean equals(Object o) {

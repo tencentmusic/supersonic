@@ -2,14 +2,9 @@ package com.tencent.supersonic.headless.server.utils;
 
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.common.pojo.DimensionConstants;
-import com.tencent.supersonic.headless.api.pojo.DataSetSchema;
-import com.tencent.supersonic.headless.api.pojo.DimValueMap;
-import com.tencent.supersonic.headless.api.pojo.RelateDimension;
-import com.tencent.supersonic.headless.api.pojo.RelatedSchemaElement;
-import com.tencent.supersonic.headless.api.pojo.SchemaElement;
-import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
-import com.tencent.supersonic.headless.api.pojo.SchemaItem;
-import com.tencent.supersonic.headless.api.pojo.SchemaValueMap;
+import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
+import com.tencent.supersonic.common.util.DateUtils;
+import com.tencent.supersonic.headless.api.pojo.*;
 import com.tencent.supersonic.headless.api.pojo.response.DataSetSchemaResp;
 import com.tencent.supersonic.headless.api.pojo.response.DimSchemaResp;
 import com.tencent.supersonic.headless.api.pojo.response.MetricSchemaResp;
@@ -179,7 +174,7 @@ public class DataSetSchemaBuilder {
             if (dim.isTimeDimension()) {
                 String timeFormat =
                         String.valueOf(dim.getExt().get(DimensionConstants.DIMENSION_TIME_FORMAT));
-                dimToAdd.getExtInfo().put(DimensionConstants.DIMENSION_TIME_FORMAT, timeFormat);
+                setDefaultTimeFormat(dimToAdd, dim.getTypeParams(), timeFormat);
             }
             dimensions.add(dimToAdd);
         }
@@ -287,5 +282,20 @@ public class DataSetSchemaBuilder {
                             return relateSchemaElement;
                         })
                 .collect(Collectors.toList());
+    }
+
+    private static void setDefaultTimeFormat(
+            SchemaElement dimToAdd,
+            DimensionTimeTypeParams dimensionTimeTypeParams,
+            String timeFormat) {
+        if (null != dimensionTimeTypeParams
+                && TimeDimensionEnum.DAY
+                        .name()
+                        .equalsIgnoreCase(dimensionTimeTypeParams.getTimeGranularity())) {
+            dimToAdd.getExtInfo()
+                    .put(DimensionConstants.DIMENSION_TIME_FORMAT, DateUtils.DEFAULT_DATE_FORMAT);
+        } else {
+            dimToAdd.getExtInfo().put(DimensionConstants.DIMENSION_TIME_FORMAT, timeFormat);
+        }
     }
 }

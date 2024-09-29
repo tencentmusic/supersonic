@@ -8,8 +8,8 @@ com.tencent.supersonic.headless.chat.mapper.SchemaMapper=\
     com.tencent.supersonic.headless.chat.mapper.TermDescMapper
 
 com.tencent.supersonic.headless.chat.parser.SemanticParser=\
-    com.tencent.supersonic.headless.chat.parser.rule.RuleSqlParser, \
-    com.tencent.supersonic.headless.chat.parser.llm.LLMSqlParser, \
+    com.tencent.supersonic.headless.chat.parser.llm.LLMSqlParser,\
+    com.tencent.supersonic.headless.chat.parser.rule.RuleSqlParser,\
     com.tencent.supersonic.headless.chat.parser.QueryTypeParser
 
 com.tencent.supersonic.headless.chat.corrector.SemanticCorrector=\

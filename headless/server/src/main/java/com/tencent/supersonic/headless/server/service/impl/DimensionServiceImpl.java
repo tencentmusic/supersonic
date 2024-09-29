@@ -45,17 +45,14 @@ import com.tencent.supersonic.headless.server.utils.DimensionConverter;
 import com.tencent.supersonic.headless.server.utils.NameCheckUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -121,13 +118,32 @@ public class DimensionServiceImpl extends ServiceImpl<DimensionDOMapper, Dimensi
         Map<String, DimensionResp> nameMap =
                 dimensionResps.stream()
                         .collect(Collectors.toMap(DimensionResp::getName, a -> a, (k1, k2) -> k1));
-        List<DimensionReq> dimensionToInsert =
-                dimensionReqs.stream()
-                        .filter(
-                                dimension ->
-                                        !bizNameMap.containsKey(dimension.getBizName())
-                                                && !nameMap.containsKey(dimension.getName()))
-                        .collect(Collectors.toList());
+
+        List<DimensionReq> dimensionToInsert = Lists.newArrayList();
+        dimensionReqs.stream()
+                .forEach(
+                        dimension -> {
+                            if (!bizNameMap.containsKey(dimension.getBizName())
+                                    && !nameMap.containsKey(dimension.getName())) {
+                                dimensionToInsert.add(dimension);
+                            } else {
+                                DimensionResp dimensionRespByBizName =
+                                        bizNameMap.get(dimension.getBizName());
+                                DimensionResp dimensionRespByName =
+                                        nameMap.get(dimension.getName());
+                                if (null != dimensionRespByBizName
+                                        && isChange(dimension, dimensionRespByBizName)) {
+                                    dimension.setId(dimensionRespByBizName.getId());
+                                    this.updateDimension(dimension, user);
+                                } else {
+                                    if (null != dimensionRespByName
+                                            && isChange(dimension, dimensionRespByName)) {
+                                        dimension.setId(dimensionRespByName.getId());
+                                        this.updateDimension(dimension, user);
+                                    }
+                                }
+                            }
+                        });
         if (CollectionUtils.isEmpty(dimensionToInsert)) {
             return;
         }
@@ -480,5 +496,15 @@ public class DimensionServiceImpl extends ServiceImpl<DimensionDOMapper, Dimensi
 
     private void sendEvent(DataItem dataItem, EventType eventType) {
         eventPublisher.publishEvent(new DataEvent(this, Lists.newArrayList(dataItem), eventType));
+    }
+
+    private boolean isChange(DimensionReq dimensionReq, DimensionResp dimensionResp) {
+        boolean isExtChange =
+                !new EqualsBuilder()
+                        .append(dimensionReq.getExt(), dimensionResp.getExt())
+                        .isEquals();
+        boolean isTypeParamChange =
+                !Objects.equals(dimensionReq.getTypeParams(), dimensionResp.getTypeParams());
+        return isExtChange || isTypeParamChange;
     }
 }
