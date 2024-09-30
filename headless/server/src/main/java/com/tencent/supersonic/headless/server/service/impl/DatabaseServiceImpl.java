@@ -5,6 +5,7 @@ import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.common.pojo.QueryColumn;
 import com.tencent.supersonic.headless.api.pojo.DBColumn;
+import com.tencent.supersonic.headless.api.pojo.enums.EngineType;
 import com.tencent.supersonic.headless.api.pojo.request.DatabaseReq;
 import com.tencent.supersonic.headless.api.pojo.request.SqlExecuteReq;
 import com.tencent.supersonic.headless.api.pojo.response.DatabaseResp;
@@ -20,11 +21,14 @@ import com.tencent.supersonic.headless.server.persistence.dataobject.DatabaseDO;
 import com.tencent.supersonic.headless.server.persistence.mapper.DatabaseDOMapper;
 import com.tencent.supersonic.headless.server.pojo.DatabaseParameter;
 import com.tencent.supersonic.headless.server.pojo.DbParameterFactory;
+import com.tencent.supersonic.headless.server.pojo.DbParametersBuilder;
+import com.tencent.supersonic.headless.server.pojo.DefaultParametersBuilder;
 import com.tencent.supersonic.headless.server.pojo.ModelFilter;
 import com.tencent.supersonic.headless.server.service.DatabaseService;
 import com.tencent.supersonic.headless.server.service.ModelService;
 import com.tencent.supersonic.headless.server.utils.DatabaseConverter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
@@ -53,6 +57,11 @@ public class DatabaseServiceImpl extends ServiceImpl<DatabaseDOMapper, DatabaseD
 
     @Override
     public DatabaseResp createOrUpdateDatabase(DatabaseReq databaseReq, User user) {
+        if (StringUtils.isNotBlank(databaseReq.getDatabaseType())
+                && EngineType.OTHER.getName().equalsIgnoreCase(databaseReq.getType())) {
+            databaseReq.setType(databaseReq.getDatabaseType());
+        }
+
         DatabaseDO databaseDO = getDatabaseDO(databaseReq.getId());
         if (databaseDO != null) {
             databaseReq.updatedBy(user.getName());
@@ -138,12 +147,38 @@ public class DatabaseServiceImpl extends ServiceImpl<DatabaseDOMapper, DatabaseD
     }
 
     @Override
-    public Map<String, List<DatabaseParameter>> getDatabaseParameters() {
-        return DbParameterFactory.getMap().entrySet().stream()
-                .collect(
-                        LinkedHashMap::new,
-                        (map, entry) -> map.put(entry.getKey(), entry.getValue().build()),
-                        LinkedHashMap::putAll);
+    public Map<String, List<DatabaseParameter>> getDatabaseParameters(User user) {
+        List<DatabaseResp> databaseList = getDatabaseList(user);
+
+        Map<String, DbParametersBuilder> parametersBuilderMap = DbParameterFactory.getMap();
+        Map<String, List<DatabaseParameter>> result = new LinkedHashMap<>();
+
+        // Add all known database parameters
+        for (Map.Entry<String, DbParametersBuilder> entry : parametersBuilderMap.entrySet()) {
+            if (!entry.getKey().equals(EngineType.OTHER.getName())) {
+                result.put(entry.getKey(), entry.getValue().build());
+            }
+        }
+        // Add default parameters for unknown databases
+        if (!CollectionUtils.isEmpty(databaseList)) {
+            List<String> databaseTypeList =
+                    databaseList.stream()
+                            .map(databaseResp -> databaseResp.getType())
+                            .collect(Collectors.toList());
+            DefaultParametersBuilder defaultParametersBuilder = new DefaultParametersBuilder();
+            for (String dbType : databaseTypeList) {
+                if (!parametersBuilderMap.containsKey(dbType)) {
+                    result.put(dbType, defaultParametersBuilder.build());
+                }
+            }
+        }
+        // Add the OTHER type at the end
+        if (parametersBuilderMap.containsKey(EngineType.OTHER.getName())) {
+            result.put(
+                    EngineType.OTHER.getName(),
+                    parametersBuilderMap.get(EngineType.OTHER.getName()).build());
+        }
+        return result;
     }
 
     private SemanticQueryResp queryWithColumns(String sql, Database database) {

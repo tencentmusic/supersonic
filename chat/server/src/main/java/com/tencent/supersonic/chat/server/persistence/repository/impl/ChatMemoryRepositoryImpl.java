@@ -6,9 +6,9 @@ import com.tencent.supersonic.chat.server.persistence.mapper.ChatMemoryMapper;
 import com.tencent.supersonic.chat.server.persistence.repository.ChatMemoryRepository;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Repository;
+import org.springframework.util.CollectionUtils;
 
 import java.util.List;
-import org.springframework.util.CollectionUtils;
 
 @Repository
 @Primary
@@ -39,7 +39,6 @@ public class ChatMemoryRepositoryImpl implements ChatMemoryRepository {
             chatMemoryMapper.deleteById(id);
         }
     }
-
 
     @Override
     public ChatMemoryDO getMemory(Long id) {
