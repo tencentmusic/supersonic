@@ -3,7 +3,6 @@ package com.tencent.supersonic.common.calcite;
 import com.tencent.supersonic.common.pojo.enums.EngineType;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.calcite.sql.parser.SqlParseException;
-import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collections;
