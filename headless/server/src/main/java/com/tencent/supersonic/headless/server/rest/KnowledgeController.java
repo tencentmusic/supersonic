@@ -13,9 +13,9 @@ import com.tencent.supersonic.headless.api.pojo.request.DictItemFilter;
 import com.tencent.supersonic.headless.api.pojo.request.DictItemReq;
 import com.tencent.supersonic.headless.api.pojo.request.DictSingleTaskReq;
 import com.tencent.supersonic.headless.api.pojo.request.DictValueReq;
+import com.tencent.supersonic.headless.api.pojo.response.DictValueDimResp;
 import com.tencent.supersonic.headless.api.pojo.response.DictItemResp;
 import com.tencent.supersonic.headless.api.pojo.response.DictTaskResp;
-import com.tencent.supersonic.headless.api.pojo.response.DictValueResp;
 import com.tencent.supersonic.headless.server.service.DictConfService;
 import com.tencent.supersonic.headless.server.service.DictTaskService;
 import com.tencent.supersonic.headless.server.task.DictionaryReloadTask;
@@ -161,7 +161,7 @@ public class KnowledgeController {
      * @param dictValueReq
      */
     @PostMapping("/dict/data")
-    public PageInfo<DictValueResp> queryDictValue(
+    public PageInfo<DictValueDimResp> queryDictValue(
             @RequestBody @Valid DictValueReq dictValueReq,
             HttpServletRequest request,
             HttpServletResponse response) {

@@ -5,6 +5,7 @@ import com.tencent.supersonic.headless.api.pojo.request.DictValueReq;
 import com.tencent.supersonic.headless.api.pojo.response.DictValueResp;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
@@ -77,15 +78,56 @@ public class FileHandlerImpl implements FileHandler {
 
     @Override
     public PageInfo<DictValueResp> queryDictValue(String fileName, DictValueReq dictValueReq) {
+        if (StringUtils.isEmpty(dictValueReq.getKeyValue())) {
+           return getDictValueRespPagWithoutKey(fileName, dictValueReq);
+        }
+        return getDictValueRespPagWithKey(fileName, dictValueReq);
+    }
+
+    private PageInfo<DictValueResp> getDictValueRespPagWithKey(String fileName, DictValueReq dictValueReq) {
+        PageInfo<DictValueResp> dictValueRespPageInfo = new PageInfo<>();
+        dictValueRespPageInfo.setPageSize(dictValueReq.getPageSize());
+        dictValueRespPageInfo.setPageNum(dictValueReq.getCurrent());
+        String filePath = localFileConfig.getDictDirectoryLatest() + FILE_SPILT + fileName;
+        Long fileLineNum = getFileLineNum(filePath);
+        Integer startLine = 1;
+        List<DictValueResp> dictValueRespList = getFileData(filePath, startLine, fileLineNum.intValue());
+        dictValueRespList = dictValueRespList.stream()
+                .filter(dictValue -> dictValue.getValue().contains(dictValueReq.getKeyValue()))
+                .collect(Collectors.toList());
+        if (CollectionUtils.isEmpty(dictValueRespList)) {
+            dictValueRespPageInfo.setList(new ArrayList<>());
+            return dictValueRespPageInfo;
+        }
+
+        Integer startIndex = Math.max((dictValueReq.getCurrent() - 1) * dictValueReq.getPageSize(), 0);
+        Integer endIndex =
+                Integer.valueOf(
+                        Math.min(
+                                dictValueReq.getCurrent() * dictValueReq.getPageSize(),
+                                dictValueRespList.size())
+                                + "");
+        List<DictValueResp> list = dictValueRespList.subList(startIndex, endIndex);
+        dictValueRespPageInfo.setPageSize(dictValueReq.getPageSize());
+        dictValueRespPageInfo.setPageNum(dictValueReq.getCurrent());
+        dictValueRespPageInfo.setTotal(dictValueRespList.size());
+        dictValueRespPageInfo.setList(list);
+        dictValueRespPageInfo.setHasNextPage(endIndex >= dictValueRespList.size() ? false : true);
+        dictValueRespPageInfo.setHasPreviousPage(startLine <= 0 ? false : true);
+        return dictValueRespPageInfo;
+
+    }
+
+    private PageInfo<DictValueResp> getDictValueRespPagWithoutKey(String fileName, DictValueReq dictValueReq) {
         PageInfo<DictValueResp> dictValueRespPageInfo = new PageInfo<>();
         String filePath = localFileConfig.getDictDirectoryLatest() + FILE_SPILT + fileName;
         Long fileLineNum = getFileLineNum(filePath);
-        Integer startLine = (dictValueReq.getCurrent() - 1) * dictValueReq.getPageSize() + 1;
+        Integer startLine = 1;
         Integer endLine =
                 Integer.valueOf(
                         Math.min(
-                                        dictValueReq.getCurrent() * dictValueReq.getPageSize(),
-                                        fileLineNum)
+                                dictValueReq.getCurrent() * dictValueReq.getPageSize(),
+                                fileLineNum)
                                 + "");
         List<DictValueResp> dictValueRespList = getFileData(filePath, startLine, endLine);
 
