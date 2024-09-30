@@ -14,7 +14,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-/** Sql Parser Select Helper */
 @Slf4j
 public class SqlAsHelper {
 

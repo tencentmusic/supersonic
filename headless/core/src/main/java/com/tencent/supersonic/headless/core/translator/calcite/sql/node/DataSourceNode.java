@@ -1,10 +1,10 @@
 package com.tencent.supersonic.headless.core.translator.calcite.sql.node;
 
 import com.google.common.collect.Lists;
+import com.tencent.supersonic.common.calcite.Configuration;
 import com.tencent.supersonic.common.jsqlparser.SqlSelectHelper;
-import com.tencent.supersonic.headless.api.pojo.enums.EngineType;
+import com.tencent.supersonic.common.pojo.enums.EngineType;
 import com.tencent.supersonic.headless.core.pojo.MetricQueryParam;
-import com.tencent.supersonic.headless.core.translator.calcite.Configuration;
 import com.tencent.supersonic.headless.core.translator.calcite.s2sql.Constants;
 import com.tencent.supersonic.headless.core.translator.calcite.s2sql.DataSource;
 import com.tencent.supersonic.headless.core.translator.calcite.s2sql.Dimension;

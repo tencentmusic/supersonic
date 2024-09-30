@@ -1,12 +1,12 @@
 package com.tencent.supersonic.headless.core.translator.calcite.sql.node;
 
-import com.tencent.supersonic.headless.api.pojo.enums.EngineType;
-import com.tencent.supersonic.headless.core.translator.calcite.Configuration;
+import com.tencent.supersonic.common.calcite.Configuration;
+import com.tencent.supersonic.common.calcite.SemanticSqlDialect;
+import com.tencent.supersonic.common.calcite.SqlDialectFactory;
+import com.tencent.supersonic.common.pojo.enums.EngineType;
 import com.tencent.supersonic.headless.core.translator.calcite.s2sql.Constants;
 import com.tencent.supersonic.headless.core.translator.calcite.schema.SemanticSchema;
-import com.tencent.supersonic.headless.core.translator.calcite.schema.SemanticSqlDialect;
 import com.tencent.supersonic.headless.core.translator.calcite.sql.optimizer.FilterToGroupScanRule;
-import com.tencent.supersonic.headless.core.utils.SqlDialectFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.calcite.plan.RelOptPlanner;
 import org.apache.calcite.plan.hep.HepPlanner;
@@ -31,7 +31,6 @@ import org.apache.calcite.sql.SqlWriterConfig;
 import org.apache.calcite.sql.fun.SqlStdOperatorTable;
 import org.apache.calcite.sql.parser.SqlParser;
 import org.apache.calcite.sql.parser.SqlParserPos;
-import org.apache.calcite.sql.pretty.SqlPrettyWriter;
 import org.apache.calcite.sql.validate.SqlValidator;
 import org.apache.calcite.sql.validate.SqlValidatorScope;
 import org.apache.calcite.sql.validate.SqlValidatorWithHints;
@@ -102,7 +101,7 @@ public abstract class SemanticNode {
 
     public static String getSql(SqlNode sqlNode, EngineType engineType) {
         UnaryOperator<SqlWriterConfig> sqlWriterConfigUnaryOperator =
-                (c) -> getSqlWriterConfig(engineType);
+                (c) -> Configuration.getSqlWriterConfig(engineType);
         return sqlNode.toSqlString(sqlWriterConfigUnaryOperator).getSql();
     }
 
@@ -182,24 +181,6 @@ public abstract class SemanticNode {
             }
         }
         return sqlNode;
-    }
-
-    private static SqlWriterConfig getSqlWriterConfig(EngineType engineType) {
-        SemanticSqlDialect sqlDialect = SqlDialectFactory.getSqlDialect(engineType);
-        SqlWriterConfig config =
-                SqlPrettyWriter.config()
-                        .withDialect(sqlDialect)
-                        .withKeywordsLowerCase(false)
-                        .withClauseEndsLine(true)
-                        .withAlwaysUseParentheses(false)
-                        .withSelectListItemsOnSeparateLines(false)
-                        .withUpdateSetListNewline(false)
-                        .withIndentation(0);
-        if (EngineType.MYSQL.equals(engineType)) {
-            // no backticks around function name
-            config = config.withQuoteAllIdentifiers(false);
-        }
-        return config;
     }
 
     private static void sqlVisit(SqlNode sqlNode, Map<String, Object> parseInfo) {

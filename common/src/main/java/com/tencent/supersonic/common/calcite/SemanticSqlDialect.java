@@ -1,4 +1,4 @@
-package com.tencent.supersonic.headless.core.translator.calcite.schema;
+package com.tencent.supersonic.common.calcite;
 
 import com.google.common.base.Preconditions;
 import org.apache.calcite.sql.SqlDialect;

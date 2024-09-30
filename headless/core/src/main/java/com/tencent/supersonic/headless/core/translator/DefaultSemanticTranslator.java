@@ -1,6 +1,8 @@
 package com.tencent.supersonic.headless.core.translator;
 
+import com.tencent.supersonic.common.calcite.SqlMergeWithUtils;
 import com.tencent.supersonic.common.jsqlparser.SqlSelectHelper;
+import com.tencent.supersonic.common.pojo.enums.EngineType;
 import com.tencent.supersonic.common.util.StringUtil;
 import com.tencent.supersonic.headless.api.pojo.MetricTable;
 import com.tencent.supersonic.headless.api.pojo.QueryParam;
@@ -8,6 +10,7 @@ import com.tencent.supersonic.headless.api.pojo.enums.AggOption;
 import com.tencent.supersonic.headless.core.pojo.DataSetQueryParam;
 import com.tencent.supersonic.headless.core.pojo.MetricQueryParam;
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;
+import com.tencent.supersonic.headless.core.translator.calcite.s2sql.SemanticModel;
 import com.tencent.supersonic.headless.core.translator.converter.QueryConverter;
 import com.tencent.supersonic.headless.core.utils.ComponentFactory;
 import lombok.extern.slf4j.Slf4j;
@@ -81,6 +84,8 @@ public class DefaultSemanticTranslator implements SemanticTranslator {
     public QueryStatement doParse(
             DataSetQueryParam dataSetQueryParam, QueryStatement queryStatement) {
         log.info("parse dataSetQuery [{}] ", dataSetQueryParam);
+        SemanticModel semanticModel = queryStatement.getSemanticModel();
+        EngineType engineType = EngineType.fromString(semanticModel.getDatabase().getType());
         try {
             if (!CollectionUtils.isEmpty(dataSetQueryParam.getTables())) {
                 List<String[]> tables = new ArrayList<>();
@@ -99,13 +104,16 @@ public class DefaultSemanticTranslator implements SemanticTranslator {
                 if (!tables.isEmpty()) {
                     String sql;
                     if (dataSetQueryParam.isSupportWith()) {
+                        List<String> parentWithNameList =
+                                tables.stream().map(table -> table[0]).collect(Collectors.toList());
+                        List<String> parentSqlList =
+                                tables.stream().map(table -> table[1]).collect(Collectors.toList());
                         sql =
-                                "with "
-                                        + tables.stream()
-                                                .map(t -> String.format("%s as (%s)", t[0], t[1]))
-                                                .collect(Collectors.joining(","))
-                                        + "\n"
-                                        + dataSetQueryParam.getSql();
+                                SqlMergeWithUtils.mergeWith(
+                                        engineType,
+                                        dataSetQueryParam.getSql(),
+                                        parentSqlList,
+                                        parentWithNameList);
                     } else {
                         sql = dataSetQueryParam.getSql();
                         for (String[] tb : tables) {

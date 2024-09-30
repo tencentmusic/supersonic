@@ -1,10 +1,6 @@
-package com.tencent.supersonic.headless.core.translator.calcite;
+package com.tencent.supersonic.common.calcite;
 
-import com.tencent.supersonic.headless.api.pojo.enums.EngineType;
-import com.tencent.supersonic.headless.core.translator.calcite.schema.SemanticSqlDialect;
-import com.tencent.supersonic.headless.core.translator.calcite.schema.SemanticSqlTypeFactoryImpl;
-import com.tencent.supersonic.headless.core.translator.calcite.schema.ViewExpanderImpl;
-import com.tencent.supersonic.headless.core.utils.SqlDialectFactory;
+import com.tencent.supersonic.common.pojo.enums.EngineType;
 import org.apache.calcite.avatica.util.Casing;
 import org.apache.calcite.avatica.util.Quoting;
 import org.apache.calcite.config.CalciteConnectionConfig;
@@ -22,11 +18,13 @@ import org.apache.calcite.rel.type.RelDataTypeFactory;
 import org.apache.calcite.rel.type.RelDataTypeSystem;
 import org.apache.calcite.rex.RexBuilder;
 import org.apache.calcite.sql.SqlOperatorTable;
+import org.apache.calcite.sql.SqlWriterConfig;
 import org.apache.calcite.sql.advise.SqlAdvisor;
 import org.apache.calcite.sql.advise.SqlAdvisorValidator;
 import org.apache.calcite.sql.fun.SqlStdOperatorTable;
 import org.apache.calcite.sql.parser.SqlParser;
 import org.apache.calcite.sql.parser.impl.SqlParserImpl;
+import org.apache.calcite.sql.pretty.SqlPrettyWriter;
 import org.apache.calcite.sql.util.ChainedSqlOperatorTable;
 import org.apache.calcite.sql.validate.SqlValidator;
 import org.apache.calcite.sql.validate.SqlValidatorScope;
@@ -157,5 +155,23 @@ public class Configuration {
 
     public static SqlAdvisor getSqlAdvisor(SqlValidatorWithHints validator, EngineType engineType) {
         return new SqlAdvisor(validator, getParserConfig(engineType));
+    }
+
+    public static SqlWriterConfig getSqlWriterConfig(EngineType engineType) {
+        SemanticSqlDialect sqlDialect = SqlDialectFactory.getSqlDialect(engineType);
+        SqlWriterConfig config =
+                SqlPrettyWriter.config()
+                        .withDialect(sqlDialect)
+                        .withKeywordsLowerCase(false)
+                        .withClauseEndsLine(true)
+                        .withAlwaysUseParentheses(false)
+                        .withSelectListItemsOnSeparateLines(false)
+                        .withUpdateSetListNewline(false)
+                        .withIndentation(0);
+        if (EngineType.MYSQL.equals(engineType)) {
+            // no backticks around function name
+            config = config.withQuoteAllIdentifiers(false);
+        }
+        return config;
     }
 }

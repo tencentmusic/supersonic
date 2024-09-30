@@ -1,7 +1,7 @@
 package com.tencent.supersonic.headless.core.translator.calcite.schema;
 
-import com.tencent.supersonic.headless.api.pojo.enums.EngineType;
-import com.tencent.supersonic.headless.core.translator.calcite.Configuration;
+import com.tencent.supersonic.common.calcite.Configuration;
+import com.tencent.supersonic.common.pojo.enums.EngineType;
 import com.tencent.supersonic.headless.core.translator.calcite.sql.S2SQLSqlValidatorImpl;
 import org.apache.calcite.jdbc.CalciteSchema;
 import org.apache.calcite.prepare.CalciteCatalogReader;

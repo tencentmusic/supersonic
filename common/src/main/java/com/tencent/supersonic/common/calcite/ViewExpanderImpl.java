@@ -1,4 +1,4 @@
-package com.tencent.supersonic.headless.core.translator.calcite.schema;
+package com.tencent.supersonic.common.calcite;
 
 import org.apache.calcite.plan.RelOptTable;
 import org.apache.calcite.rel.RelRoot;

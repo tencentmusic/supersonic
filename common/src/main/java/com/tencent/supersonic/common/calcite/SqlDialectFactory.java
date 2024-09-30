@@ -1,7 +1,6 @@
-package com.tencent.supersonic.headless.core.utils;
+package com.tencent.supersonic.common.calcite;
 
-import com.tencent.supersonic.headless.api.pojo.enums.EngineType;
-import com.tencent.supersonic.headless.core.translator.calcite.schema.SemanticSqlDialect;
+import com.tencent.supersonic.common.pojo.enums.EngineType;
 import org.apache.calcite.avatica.util.Casing;
 import org.apache.calcite.sql.SqlDialect;
 import org.apache.calcite.sql.SqlDialect.Context;

@@ -8,7 +8,7 @@ import java.util.List;
 class SqlAsHelperTest {
 
     @Test
-    void testReplaceAggField() {
+    void getAsFields() {
         String sql =
                 "WITH SalesData AS (\n"
                         + "    SELECT \n"

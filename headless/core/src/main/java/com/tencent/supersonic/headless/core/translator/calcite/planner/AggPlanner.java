@@ -1,11 +1,11 @@
 package com.tencent.supersonic.headless.core.translator.calcite.planner;
 
+import com.tencent.supersonic.common.calcite.Configuration;
+import com.tencent.supersonic.common.pojo.enums.EngineType;
 import com.tencent.supersonic.headless.api.pojo.enums.AggOption;
-import com.tencent.supersonic.headless.api.pojo.enums.EngineType;
 import com.tencent.supersonic.headless.core.pojo.Database;
 import com.tencent.supersonic.headless.core.pojo.MetricQueryParam;
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;
-import com.tencent.supersonic.headless.core.translator.calcite.Configuration;
 import com.tencent.supersonic.headless.core.translator.calcite.s2sql.Constants;
 import com.tencent.supersonic.headless.core.translator.calcite.s2sql.DataSource;
 import com.tencent.supersonic.headless.core.translator.calcite.schema.SchemaBuilder;
