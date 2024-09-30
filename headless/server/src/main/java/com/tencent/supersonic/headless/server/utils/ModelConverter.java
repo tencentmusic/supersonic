@@ -275,6 +275,7 @@ public class ModelConverter {
                 continue;
             }
             // Compatible with front-end tmp
+
             String oriFieldName =
                     measure.getBizName().replaceFirst(modelReq.getBizName() + "_", "");
             measure.setExpr(oriFieldName);

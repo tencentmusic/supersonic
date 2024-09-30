@@ -2,7 +2,6 @@ package com.tencent.supersonic.headless.chat.corrector;
 
 import com.tencent.supersonic.common.jsqlparser.SqlAddHelper;
 import com.tencent.supersonic.common.jsqlparser.SqlRemoveHelper;
-import com.tencent.supersonic.common.jsqlparser.SqlReplaceHelper;
 import com.tencent.supersonic.common.jsqlparser.SqlSelectFunctionHelper;
 import com.tencent.supersonic.common.jsqlparser.SqlSelectHelper;
 import com.tencent.supersonic.common.pojo.enums.QueryType;
@@ -41,8 +40,7 @@ public class SelectCorrector extends BaseSemanticCorrector {
             return;
         }
         correctS2SQL = addFieldsToSelect(chatQueryContext, semanticParseInfo, correctS2SQL);
-        String querySql = SqlReplaceHelper.dealAliasToOrderBy(correctS2SQL);
-        semanticParseInfo.getSqlInfo().setCorrectedS2SQL(querySql);
+        semanticParseInfo.getSqlInfo().setCorrectedS2SQL(correctS2SQL);
     }
 
     protected String addFieldsToSelect(

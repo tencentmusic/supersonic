@@ -1,4 +1,4 @@
-package com.tencent.supersonic.headless.api.pojo.enums;
+package com.tencent.supersonic.common.pojo.enums;
 
 public enum EngineType {
     TDW(0, "tdw"),

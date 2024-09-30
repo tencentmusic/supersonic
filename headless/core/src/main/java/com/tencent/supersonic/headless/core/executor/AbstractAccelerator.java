@@ -1,8 +1,8 @@
 package com.tencent.supersonic.headless.core.executor;
 
+import com.tencent.supersonic.common.calcite.Configuration;
 import com.tencent.supersonic.common.jsqlparser.SqlSelectHelper;
 import com.tencent.supersonic.headless.core.pojo.Materialization;
-import com.tencent.supersonic.headless.core.translator.calcite.Configuration;
 import com.tencent.supersonic.headless.core.translator.calcite.s2sql.TimeRange;
 import com.tencent.supersonic.headless.core.translator.calcite.schema.DataSourceTable;
 import com.tencent.supersonic.headless.core.translator.calcite.schema.DataSourceTable.Builder;
