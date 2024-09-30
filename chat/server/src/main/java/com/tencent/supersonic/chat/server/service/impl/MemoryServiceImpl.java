@@ -97,7 +97,8 @@ public class MemoryServiceImpl implements MemoryService {
         if (StringUtils.isBlank(chatMemoryFilter.getOrderCondition())) {
             queryWrapper.orderByDesc("id");
         } else {
-            queryWrapper.orderBy(true, chatMemoryFilter.isAsc(), chatMemoryFilter.getOrderCondition());
+            queryWrapper.orderBy(
+                    true, chatMemoryFilter.isAsc(), chatMemoryFilter.getOrderCondition());
         }
         return chatMemoryRepository.getMemories(queryWrapper);
     }
