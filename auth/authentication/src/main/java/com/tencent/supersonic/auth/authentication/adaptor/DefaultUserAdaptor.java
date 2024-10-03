@@ -52,12 +52,10 @@ public class DefaultUserAdaptor implements UserAdaptor {
                 new Organization("1", "0", "SuperSonic", "SuperSonic", Lists.newArrayList(), true);
         Organization hr =
                 new Organization("2", "1", "Hr", "SuperSonic/Hr", Lists.newArrayList(), false);
-        Organization sales =
-                new Organization(
-                        "3", "1", "Sales", "SuperSonic/Sales", Lists.newArrayList(), false);
-        Organization marketing =
-                new Organization(
-                        "4", "1", "Marketing", "SuperSonic/Marketing", Lists.newArrayList(), false);
+        Organization sales = new Organization("3", "1", "Sales", "SuperSonic/Sales",
+                Lists.newArrayList(), false);
+        Organization marketing = new Organization("4", "1", "Marketing", "SuperSonic/Marketing",
+                Lists.newArrayList(), false);
         List<Organization> subOrganization = Lists.newArrayList(hr, sales, marketing);
         superSonic.setSubOrganizations(subOrganization);
         return Lists.newArrayList(superSonic);
@@ -113,19 +111,12 @@ public class DefaultUserAdaptor implements UserAdaptor {
             throw new RuntimeException("user not exist,please register");
         }
         try {
-            String password =
-                    AESEncryptionUtil.encrypt(
-                            userReq.getPassword(),
-                            AESEncryptionUtil.getBytesFromString(userDO.getSalt()));
+            String password = AESEncryptionUtil.encrypt(userReq.getPassword(),
+                    AESEncryptionUtil.getBytesFromString(userDO.getSalt()));
             if (userDO.getPassword().equals(password)) {
-                UserWithPassword user =
-                        UserWithPassword.get(
-                                userDO.getId(),
-                                userDO.getName(),
-                                userDO.getDisplayName(),
-                                userDO.getEmail(),
-                                userDO.getPassword(),
-                                userDO.getIsAdmin());
+                UserWithPassword user = UserWithPassword.get(userDO.getId(), userDO.getName(),
+                        userDO.getDisplayName(), userDO.getEmail(), userDO.getPassword(),
+                        userDO.getIsAdmin());
                 return user;
             } else {
                 throw new RuntimeException("password not correct, please try again");

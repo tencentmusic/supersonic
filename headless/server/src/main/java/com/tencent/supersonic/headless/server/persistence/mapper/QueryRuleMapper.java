@@ -5,4 +5,5 @@ import com.tencent.supersonic.headless.server.persistence.dataobject.QueryRuleDO
 import org.apache.ibatis.annotations.Mapper;
 
 @Mapper
-public interface QueryRuleMapper extends BaseMapper<QueryRuleDO> {}
+public interface QueryRuleMapper extends BaseMapper<QueryRuleDO> {
+}

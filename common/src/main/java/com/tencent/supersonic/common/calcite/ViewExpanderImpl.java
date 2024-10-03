@@ -11,10 +11,7 @@ public class ViewExpanderImpl implements RelOptTable.ViewExpander {
     public ViewExpanderImpl() {}
 
     @Override
-    public RelRoot expandView(
-            RelDataType rowType,
-            String queryString,
-            List<String> schemaPath,
+    public RelRoot expandView(RelDataType rowType, String queryString, List<String> schemaPath,
             List<String> dataSetPath) {
         return null;
     }

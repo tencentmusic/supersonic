@@ -10,8 +10,7 @@ import lombok.NoArgsConstructor;
 public class Identify {
 
     public enum Type {
-        PRIMARY,
-        FOREIGN
+        PRIMARY, FOREIGN
     }
 
     private String name;

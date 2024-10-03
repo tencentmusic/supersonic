@@ -59,10 +59,8 @@ public class QueryTypeParser implements SemanticParser {
             List<String> whereFields = SqlSelectHelper.getWhereFields(sqlInfo.getParsedS2SQL());
             List<String> whereFilterByTimeFields = filterByTimeFields(whereFields);
             if (CollectionUtils.isNotEmpty(whereFilterByTimeFields)) {
-                Set<String> ids =
-                        semanticSchema.getEntities(dataSetId).stream()
-                                .map(SchemaElement::getName)
-                                .collect(Collectors.toSet());
+                Set<String> ids = semanticSchema.getEntities(dataSetId).stream()
+                        .map(SchemaElement::getName).collect(Collectors.toSet());
                 if (CollectionUtils.isNotEmpty(ids)
                         && ids.stream().anyMatch(whereFilterByTimeFields::contains)) {
                     return QueryType.ID;
@@ -80,15 +78,14 @@ public class QueryTypeParser implements SemanticParser {
     }
 
     private static List<String> filterByTimeFields(List<String> whereFields) {
-        List<String> selectAndWhereFilterByTimeFields =
-                whereFields.stream()
-                        .filter(field -> !TimeDimensionEnum.containsTimeDimension(field))
-                        .collect(Collectors.toList());
+        List<String> selectAndWhereFilterByTimeFields = whereFields.stream()
+                .filter(field -> !TimeDimensionEnum.containsTimeDimension(field))
+                .collect(Collectors.toList());
         return selectAndWhereFilterByTimeFields;
     }
 
-    private static boolean selectContainsMetric(
-            SqlInfo sqlInfo, Long dataSetId, SemanticSchema semanticSchema) {
+    private static boolean selectContainsMetric(SqlInfo sqlInfo, Long dataSetId,
+            SemanticSchema semanticSchema) {
         List<String> selectFields = SqlSelectHelper.getSelectFields(sqlInfo.getParsedS2SQL());
         List<SchemaElement> metrics = semanticSchema.getMetrics(dataSetId);
         if (CollectionUtils.isNotEmpty(metrics)) {

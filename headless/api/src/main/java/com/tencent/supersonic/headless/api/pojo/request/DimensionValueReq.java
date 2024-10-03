@@ -13,13 +13,15 @@ public class DimensionValueReq {
 
     private Integer agentId;
 
-    @NotNull private Long elementID;
+    @NotNull
+    private Long elementID;
 
     private Long modelId;
 
     private String bizName;
 
-    @NotNull private String value;
+    @NotNull
+    private String value;
 
     private Set<Long> dataSetIds;
 

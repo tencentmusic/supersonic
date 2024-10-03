@@ -42,10 +42,8 @@ public class HavingCorrector extends BaseSemanticCorrector {
 
         SemanticSchema semanticSchema = chatQueryContext.getSemanticSchema();
 
-        Set<String> metrics =
-                semanticSchema.getMetrics(dataSet).stream()
-                        .map(schemaElement -> schemaElement.getName())
-                        .collect(Collectors.toSet());
+        Set<String> metrics = semanticSchema.getMetrics(dataSet).stream()
+                .map(schemaElement -> schemaElement.getName()).collect(Collectors.toSet());
 
         if (CollectionUtils.isEmpty(metrics)) {
             return;

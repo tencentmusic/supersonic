@@ -19,8 +19,8 @@ public class GroupByFunctionReplaceVisitor implements GroupByVisitor {
     private Map<String, String> functionMap;
     private Map<String, UnaryOperator> functionCallMap;
 
-    public GroupByFunctionReplaceVisitor(
-            Map<String, String> functionMap, Map<String, UnaryOperator> functionCallMap) {
+    public GroupByFunctionReplaceVisitor(Map<String, String> functionMap,
+            Map<String, UnaryOperator> functionCallMap) {
         this.functionMap = functionMap;
         this.functionCallMap = functionCallMap;
     }

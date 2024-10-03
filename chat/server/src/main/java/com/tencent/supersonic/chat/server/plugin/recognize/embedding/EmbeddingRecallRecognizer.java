@@ -53,12 +53,8 @@ public class EmbeddingRecallRecognizer extends PluginRecognizer {
                 plugin.setParseMode(ParseMode.EMBEDDING_RECALL);
                 double similarity = embeddingRetrieval.getSimilarity();
                 double score = parseContext.getQueryText().length() * similarity;
-                return PluginRecallResult.builder()
-                        .plugin(plugin)
-                        .dataSetIds(dataSetList)
-                        .score(score)
-                        .distance(similarity)
-                        .build();
+                return PluginRecallResult.builder().plugin(plugin).dataSetIds(dataSetList)
+                        .score(score).distance(similarity).build();
             }
         }
         return null;
@@ -71,12 +67,9 @@ public class EmbeddingRecallRecognizer extends PluginRecognizer {
 
             List<Retrieval> embeddingRetrievals = embeddingResp.getRetrieval();
             if (!CollectionUtils.isEmpty(embeddingRetrievals)) {
-                embeddingRetrievals =
-                        embeddingRetrievals.stream()
-                                .sorted(
-                                        Comparator.comparingDouble(
-                                                o -> Math.abs(o.getSimilarity())))
-                                .collect(Collectors.toList());
+                embeddingRetrievals = embeddingRetrievals.stream()
+                        .sorted(Comparator.comparingDouble(o -> Math.abs(o.getSimilarity())))
+                        .collect(Collectors.toList());
                 embeddingResp.setRetrieval(embeddingRetrievals);
             }
             return embeddingRetrievals;

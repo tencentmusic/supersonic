@@ -63,8 +63,8 @@ public class TagRepositoryImpl implements TagRepository {
         }
         if (Objects.nonNull(tagDeleteReq.getTagDefineType())
                 && CollectionUtils.isNotEmpty(tagDeleteReq.getItemIds())) {
-            tagCustomMapper.deleteBatchByType(
-                    tagDeleteReq.getItemIds(), tagDeleteReq.getTagDefineType().name());
+            tagCustomMapper.deleteBatchByType(tagDeleteReq.getItemIds(),
+                    tagDeleteReq.getTagDefineType().name());
         }
     }
 }

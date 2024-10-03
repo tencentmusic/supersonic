@@ -18,12 +18,15 @@ public class DictItemResp {
 
     private String bizName;
 
-    @NotNull private TypeEnums type;
-    @NotNull private Long itemId;
+    @NotNull
+    private TypeEnums type;
+    @NotNull
+    private Long itemId;
     private ItemValueConfig config;
 
     /** ONLINE - 正常更新 OFFLINE - 停止更新,但字典文件不删除 DELETED - 停止更新,且删除字典文件 */
-    @NotNull private StatusEnum status;
+    @NotNull
+    private StatusEnum status;
 
     public String getNature() {
         return UNDERLINE + modelId + UNDERLINE + itemId;

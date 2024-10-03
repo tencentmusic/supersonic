@@ -10,20 +10,10 @@ import net.sf.jsqlparser.expression.operators.relational.MinorThan;
 import net.sf.jsqlparser.expression.operators.relational.MinorThanEquals;
 
 public enum FilterOperatorEnum {
-    IN("IN"),
-    NOT_IN("NOT_IN"),
-    EQUALS("="),
-    BETWEEN("BETWEEN"),
-    GREATER_THAN(">"),
-    GREATER_THAN_EQUALS(">="),
-    IS_NULL("IS_NULL"),
-    IS_NOT_NULL("IS_NOT_NULL"),
-    LIKE("LIKE"),
-    MINOR_THAN("<"),
-    MINOR_THAN_EQUALS("<="),
-    NOT_EQUALS("!="),
-    SQL_PART("SQL_PART"),
-    EXISTS("EXISTS");
+    IN("IN"), NOT_IN("NOT_IN"), EQUALS("="), BETWEEN("BETWEEN"), GREATER_THAN(
+            ">"), GREATER_THAN_EQUALS(">="), IS_NULL("IS_NULL"), IS_NOT_NULL("IS_NOT_NULL"), LIKE(
+                    "LIKE"), MINOR_THAN("<"), MINOR_THAN_EQUALS(
+                            "<="), NOT_EQUALS("!="), SQL_PART("SQL_PART"), EXISTS("EXISTS");
 
     private String value;
 
@@ -48,8 +38,7 @@ public enum FilterOperatorEnum {
     }
 
     public static boolean isValueCompare(FilterOperatorEnum filterOperatorEnum) {
-        return EQUALS.equals(filterOperatorEnum)
-                || GREATER_THAN.equals(filterOperatorEnum)
+        return EQUALS.equals(filterOperatorEnum) || GREATER_THAN.equals(filterOperatorEnum)
                 || GREATER_THAN_EQUALS.equals(filterOperatorEnum)
                 || MINOR_THAN.equals(filterOperatorEnum)
                 || MINOR_THAN_EQUALS.equals(filterOperatorEnum)

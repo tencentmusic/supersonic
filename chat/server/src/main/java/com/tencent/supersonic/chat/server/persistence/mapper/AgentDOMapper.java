@@ -5,4 +5,5 @@ import com.tencent.supersonic.chat.server.persistence.dataobject.AgentDO;
 import org.apache.ibatis.annotations.Mapper;
 
 @Mapper
-public interface AgentDOMapper extends BaseMapper<AgentDO> {}
+public interface AgentDOMapper extends BaseMapper<AgentDO> {
+}

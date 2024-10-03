@@ -25,11 +25,14 @@ import java.util.List;
 @Service
 public class MemoryServiceImpl implements MemoryService {
 
-    @Autowired private ChatMemoryRepository chatMemoryRepository;
+    @Autowired
+    private ChatMemoryRepository chatMemoryRepository;
 
-    @Autowired private ExemplarService exemplarService;
+    @Autowired
+    private ExemplarService exemplarService;
 
-    @Autowired private EmbeddingConfig embeddingConfig;
+    @Autowired
+    private EmbeddingConfig embeddingConfig;
 
     @Override
     public void createMemory(ChatMemoryDO memory) {
@@ -85,20 +88,18 @@ public class MemoryServiceImpl implements MemoryService {
             queryWrapper.lambda().eq(ChatMemoryDO::getStatus, chatMemoryFilter.getStatus());
         }
         if (chatMemoryFilter.getHumanReviewRet() != null) {
-            queryWrapper
-                    .lambda()
-                    .eq(ChatMemoryDO::getHumanReviewRet, chatMemoryFilter.getHumanReviewRet());
+            queryWrapper.lambda().eq(ChatMemoryDO::getHumanReviewRet,
+                    chatMemoryFilter.getHumanReviewRet());
         }
         if (chatMemoryFilter.getLlmReviewRet() != null) {
-            queryWrapper
-                    .lambda()
-                    .eq(ChatMemoryDO::getLlmReviewRet, chatMemoryFilter.getLlmReviewRet());
+            queryWrapper.lambda().eq(ChatMemoryDO::getLlmReviewRet,
+                    chatMemoryFilter.getLlmReviewRet());
         }
         if (StringUtils.isBlank(chatMemoryFilter.getOrderCondition())) {
             queryWrapper.orderByDesc("id");
         } else {
-            queryWrapper.orderBy(
-                    true, chatMemoryFilter.isAsc(), chatMemoryFilter.getOrderCondition());
+            queryWrapper.orderBy(true, chatMemoryFilter.isAsc(),
+                    chatMemoryFilter.getOrderCondition());
         }
         return chatMemoryRepository.getMemories(queryWrapper);
     }
@@ -106,9 +107,7 @@ public class MemoryServiceImpl implements MemoryService {
     @Override
     public List<ChatMemoryDO> getMemoriesForLlmReview() {
         QueryWrapper<ChatMemoryDO> queryWrapper = new QueryWrapper<>();
-        queryWrapper
-                .lambda()
-                .eq(ChatMemoryDO::getStatus, MemoryStatus.PENDING)
+        queryWrapper.lambda().eq(ChatMemoryDO::getStatus, MemoryStatus.PENDING)
                 .isNull(ChatMemoryDO::getLlmReviewRet);
         return chatMemoryRepository.getMemories(queryWrapper);
     }
@@ -116,26 +115,18 @@ public class MemoryServiceImpl implements MemoryService {
     @Override
     public void enableMemory(ChatMemoryDO memory) {
         memory.setStatus(MemoryStatus.ENABLED);
-        exemplarService.storeExemplar(
-                embeddingConfig.getMemoryCollectionName(memory.getAgentId()),
-                Text2SQLExemplar.builder()
-                        .question(memory.getQuestion())
-                        .sideInfo(memory.getSideInfo())
-                        .dbSchema(memory.getDbSchema())
-                        .sql(memory.getS2sql())
-                        .build());
+        exemplarService.storeExemplar(embeddingConfig.getMemoryCollectionName(memory.getAgentId()),
+                Text2SQLExemplar.builder().question(memory.getQuestion())
+                        .sideInfo(memory.getSideInfo()).dbSchema(memory.getDbSchema())
+                        .sql(memory.getS2sql()).build());
     }
 
     @Override
     public void disableMemory(ChatMemoryDO memory) {
         memory.setStatus(MemoryStatus.DISABLED);
-        exemplarService.removeExemplar(
-                embeddingConfig.getMemoryCollectionName(memory.getAgentId()),
-                Text2SQLExemplar.builder()
-                        .question(memory.getQuestion())
-                        .sideInfo(memory.getSideInfo())
-                        .dbSchema(memory.getDbSchema())
-                        .sql(memory.getS2sql())
-                        .build());
+        exemplarService.removeExemplar(embeddingConfig.getMemoryCollectionName(memory.getAgentId()),
+                Text2SQLExemplar.builder().question(memory.getQuestion())
+                        .sideInfo(memory.getSideInfo()).dbSchema(memory.getDbSchema())
+                        .sql(memory.getS2sql()).build());
     }
 }

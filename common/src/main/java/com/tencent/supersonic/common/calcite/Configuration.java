@@ -51,19 +51,18 @@ public class Configuration {
 
     public static SqlValidator.Config getValidatorConfig(EngineType engineType) {
         SemanticSqlDialect sqlDialect = SqlDialectFactory.getSqlDialect(engineType);
-        return SqlValidator.Config.DEFAULT
-                .withConformance(sqlDialect.getConformance())
+        return SqlValidator.Config.DEFAULT.withConformance(sqlDialect.getConformance())
                 .withDefaultNullCollation(config.defaultNullCollation())
                 .withLenientOperatorLookup(true);
     }
 
     static {
-        configProperties.put(
-                CalciteConnectionProperty.CASE_SENSITIVE.camelName(), Boolean.TRUE.toString());
-        configProperties.put(
-                CalciteConnectionProperty.UNQUOTED_CASING.camelName(), Casing.UNCHANGED.toString());
-        configProperties.put(
-                CalciteConnectionProperty.QUOTED_CASING.camelName(), Casing.TO_LOWER.toString());
+        configProperties.put(CalciteConnectionProperty.CASE_SENSITIVE.camelName(),
+                Boolean.TRUE.toString());
+        configProperties.put(CalciteConnectionProperty.UNQUOTED_CASING.camelName(),
+                Casing.UNCHANGED.toString());
+        configProperties.put(CalciteConnectionProperty.QUOTED_CASING.camelName(),
+                Casing.TO_LOWER.toString());
     }
 
     public static SqlParser.Config getParserConfig(EngineType engineType) {
@@ -76,15 +75,10 @@ public class Configuration {
         parserConfig.setQuotedCasing(config.quotedCasing());
         parserConfig.setConformance(config.conformance());
         parserConfig.setLex(Lex.BIG_QUERY);
-        parserConfig
-                .setParserFactory(SqlParserImpl.FACTORY)
-                .setCaseSensitive(false)
-                .setIdentifierMaxLength(Integer.MAX_VALUE)
-                .setQuoting(Quoting.BACK_TICK)
-                .setQuoting(Quoting.SINGLE_QUOTE)
-                .setQuotedCasing(Casing.TO_UPPER)
-                .setUnquotedCasing(Casing.TO_UPPER)
-                .setConformance(sqlDialect.getConformance())
+        parserConfig.setParserFactory(SqlParserImpl.FACTORY).setCaseSensitive(false)
+                .setIdentifierMaxLength(Integer.MAX_VALUE).setQuoting(Quoting.BACK_TICK)
+                .setQuoting(Quoting.SINGLE_QUOTE).setQuotedCasing(Casing.TO_UPPER)
+                .setUnquotedCasing(Casing.TO_UPPER).setConformance(sqlDialect.getConformance())
                 .setLex(Lex.BIG_QUERY);
         parserConfig = parserConfig.setQuotedCasing(Casing.UNCHANGED);
         parserConfig = parserConfig.setUnquotedCasing(Casing.UNCHANGED);
@@ -96,61 +90,39 @@ public class Configuration {
         tables.add(SqlStdOperatorTable.instance());
         SqlOperatorTable operatorTable = new ChainedSqlOperatorTable(tables);
         // operatorTable.
-        Prepare.CatalogReader catalogReader =
-                new CalciteCatalogReader(
-                        rootSchema,
-                        Collections.singletonList(rootSchema.getName()),
-                        typeFactory,
-                        config);
-        return SqlValidatorUtil.newValidator(
-                operatorTable,
-                catalogReader,
-                typeFactory,
+        Prepare.CatalogReader catalogReader = new CalciteCatalogReader(rootSchema,
+                Collections.singletonList(rootSchema.getName()), typeFactory, config);
+        return SqlValidatorUtil.newValidator(operatorTable, catalogReader, typeFactory,
                 Configuration.getValidatorConfig(engineType));
     }
 
-    public static SqlValidatorWithHints getSqlValidatorWithHints(
-            CalciteSchema rootSchema, EngineType engineTyp) {
-        return new SqlAdvisorValidator(
-                SqlStdOperatorTable.instance(),
-                new CalciteCatalogReader(
-                        rootSchema,
-                        Collections.singletonList(rootSchema.getName()),
-                        typeFactory,
-                        config),
-                typeFactory,
-                SqlValidator.Config.DEFAULT);
+    public static SqlValidatorWithHints getSqlValidatorWithHints(CalciteSchema rootSchema,
+            EngineType engineTyp) {
+        return new SqlAdvisorValidator(SqlStdOperatorTable.instance(),
+                new CalciteCatalogReader(rootSchema,
+                        Collections.singletonList(rootSchema.getName()), typeFactory, config),
+                typeFactory, SqlValidator.Config.DEFAULT);
     }
 
     public static SqlToRelConverter.Config getConverterConfig() {
         HintStrategyTable strategies = HintStrategyTable.builder().build();
-        return SqlToRelConverter.config()
-                .withHintStrategyTable(strategies)
-                .withTrimUnusedFields(true)
-                .withExpand(true)
+        return SqlToRelConverter.config().withHintStrategyTable(strategies)
+                .withTrimUnusedFields(true).withExpand(true)
                 .addRelBuilderConfigTransform(c -> c.withSimplify(false));
     }
 
-    public static SqlToRelConverter getSqlToRelConverter(
-            SqlValidatorScope scope,
-            SqlValidator sqlValidator,
-            RelOptPlanner relOptPlanner,
-            EngineType engineType) {
+    public static SqlToRelConverter getSqlToRelConverter(SqlValidatorScope scope,
+            SqlValidator sqlValidator, RelOptPlanner relOptPlanner, EngineType engineType) {
         RexBuilder rexBuilder = new RexBuilder(typeFactory);
         RelOptCluster cluster = RelOptCluster.create(relOptPlanner, rexBuilder);
         FrameworkConfig fromworkConfig =
-                Frameworks.newConfigBuilder()
-                        .parserConfig(getParserConfig(engineType))
+                Frameworks.newConfigBuilder().parserConfig(getParserConfig(engineType))
                         .defaultSchema(
                                 scope.getValidator().getCatalogReader().getRootSchema().plus())
                         .build();
-        return new SqlToRelConverter(
-                new ViewExpanderImpl(),
-                sqlValidator,
-                (CatalogReader) scope.getValidator().getCatalogReader(),
-                cluster,
-                fromworkConfig.getConvertletTable(),
-                getConverterConfig());
+        return new SqlToRelConverter(new ViewExpanderImpl(), sqlValidator,
+                (CatalogReader) scope.getValidator().getCatalogReader(), cluster,
+                fromworkConfig.getConvertletTable(), getConverterConfig());
     }
 
     public static SqlAdvisor getSqlAdvisor(SqlValidatorWithHints validator, EngineType engineType) {
@@ -159,15 +131,10 @@ public class Configuration {
 
     public static SqlWriterConfig getSqlWriterConfig(EngineType engineType) {
         SemanticSqlDialect sqlDialect = SqlDialectFactory.getSqlDialect(engineType);
-        SqlWriterConfig config =
-                SqlPrettyWriter.config()
-                        .withDialect(sqlDialect)
-                        .withKeywordsLowerCase(false)
-                        .withClauseEndsLine(true)
-                        .withAlwaysUseParentheses(false)
-                        .withSelectListItemsOnSeparateLines(false)
-                        .withUpdateSetListNewline(false)
-                        .withIndentation(0);
+        SqlWriterConfig config = SqlPrettyWriter.config().withDialect(sqlDialect)
+                .withKeywordsLowerCase(false).withClauseEndsLine(true)
+                .withAlwaysUseParentheses(false).withSelectListItemsOnSeparateLines(false)
+                .withUpdateSetListNewline(false).withIndentation(0);
         if (EngineType.MYSQL.equals(engineType)) {
             // no backticks around function name
             config = config.withQuoteAllIdentifiers(false);

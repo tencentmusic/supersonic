@@ -74,8 +74,8 @@ public class InMemoryEmbeddingStoreFactory extends BaseEmbeddingStoreFactory {
         if (MapUtils.isEmpty(super.collectionNameToStore)) {
             return;
         }
-        for (Map.Entry<String, EmbeddingStore<TextSegment>> entry :
-                collectionNameToStore.entrySet()) {
+        for (Map.Entry<String, EmbeddingStore<TextSegment>> entry : collectionNameToStore
+                .entrySet()) {
             Path filePath = getPersistPath(entry.getKey());
             if (Objects.isNull(filePath)) {
                 continue;

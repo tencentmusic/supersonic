@@ -103,17 +103,10 @@ public class SchemaServiceImpl implements SchemaService {
     @Value("${s2.schema.cache.enable:true}")
     private boolean schemaCacheEnable;
 
-    public SchemaServiceImpl(
-            ModelService modelService,
-            DimensionService dimensionService,
-            MetricService metricService,
-            DomainService domainService,
-            DataSetService dataSetService,
-            ModelRelaService modelRelaService,
-            StatUtils statUtils,
-            TagMetaService tagService,
-            TermService termService,
-            DatabaseService databaseService) {
+    public SchemaServiceImpl(ModelService modelService, DimensionService dimensionService,
+            MetricService metricService, DomainService domainService, DataSetService dataSetService,
+            ModelRelaService modelRelaService, StatUtils statUtils, TagMetaService tagService,
+            TermService termService, DatabaseService databaseService) {
         this.modelService = modelService;
         this.dimensionService = dimensionService;
         this.metricService = metricService;
@@ -142,8 +135,7 @@ public class SchemaServiceImpl implements SchemaService {
         if (dataSetId == null) {
             return null;
         }
-        return fetchDataSetSchema(new DataSetFilterReq(dataSetId)).stream()
-                .findFirst()
+        return fetchDataSetSchema(new DataSetFilterReq(dataSetId)).stream().findFirst()
                 .orElse(null);
     }
 
@@ -159,10 +151,8 @@ public class SchemaServiceImpl implements SchemaService {
         ids.add(dataSetId);
         List<DataSetSchemaResp> dataSetSchemaResps = fetchDataSetSchema(ids);
         if (!CollectionUtils.isEmpty(dataSetSchemaResps)) {
-            Optional<DataSetSchemaResp> dataSetSchemaResp =
-                    dataSetSchemaResps.stream()
-                            .filter(d -> d.getId().equals(dataSetId))
-                            .findFirst();
+            Optional<DataSetSchemaResp> dataSetSchemaResp = dataSetSchemaResps.stream()
+                    .filter(d -> d.getId().equals(dataSetId)).findFirst();
             if (dataSetSchemaResp.isPresent()) {
                 DataSetSchemaResp dataSetSchema = dataSetSchemaResp.get();
                 return DataSetSchemaBuilder.build(dataSetSchema);
@@ -199,11 +189,8 @@ public class SchemaServiceImpl implements SchemaService {
         Map<Long, DataSetResp> dataSetRespMap = getDataSetMap(dataSetResps);
         Set<Long> domainIds =
                 dataSetResps.stream().map(DataSetResp::getDomainId).collect(Collectors.toSet());
-        List<Long> modelIds =
-                dataSetRespMap.values().stream()
-                        .map(DataSetResp::getAllModels)
-                        .flatMap(Collection::stream)
-                        .collect(Collectors.toList());
+        List<Long> modelIds = dataSetRespMap.values().stream().map(DataSetResp::getAllModels)
+                .flatMap(Collection::stream).collect(Collectors.toList());
         Map<Long, List<TermResp>> termMaps = termService.getTermSets(domainIds);
 
         metaFilter.setModelIds(modelIds);
@@ -228,28 +215,22 @@ public class SchemaServiceImpl implements SchemaService {
             }
             List<MetricSchemaResp> metricSchemaResps =
                     MetricConverter.filterByDataSet(metricResps, dataSetResp).stream()
-                            .map(this::convert)
-                            .collect(Collectors.toList());
+                            .map(this::convert).collect(Collectors.toList());
             List<DimSchemaResp> dimSchemaResps =
                     DimensionConverter.filterByDataSet(dimensionResps, dataSetResp).stream()
-                            .map(this::convert)
-                            .collect(Collectors.toList());
+                            .map(this::convert).collect(Collectors.toList());
             DataSetSchemaResp dataSetSchemaResp = new DataSetSchemaResp();
             BeanUtils.copyProperties(dataSetResp, dataSetSchemaResp);
             dataSetSchemaResp.setDimensions(dimSchemaResps);
             dataSetSchemaResp.setMetrics(metricSchemaResps);
-            dataSetSchemaResp.setModelResps(
-                    modelResps.stream()
-                            .filter(
-                                    modelResp ->
-                                            dataSetResp.getAllModels().contains(modelResp.getId()))
-                            .collect(Collectors.toList()));
+            dataSetSchemaResp.setModelResps(modelResps.stream()
+                    .filter(modelResp -> dataSetResp.getAllModels().contains(modelResp.getId()))
+                    .collect(Collectors.toList()));
             dataSetSchemaResp.setTermResps(
                     termMaps.getOrDefault(dataSetResp.getDomainId(), Lists.newArrayList()));
             if (!CollectionUtils.isEmpty(dataSetSchemaResp.getModelResps())) {
-                DatabaseResp databaseResp =
-                        databaseService.getDatabase(
-                                dataSetSchemaResp.getModelResps().get(0).getDatabaseId());
+                DatabaseResp databaseResp = databaseService
+                        .getDatabase(dataSetSchemaResp.getModelResps().get(0).getDatabaseId());
                 dataSetSchemaResp.setDatabaseType(databaseResp.getType());
             }
             dataSetSchemaResps.add(dataSetSchemaResp);
@@ -265,9 +246,8 @@ public class SchemaServiceImpl implements SchemaService {
         }
         MetaFilter metaFilter = new MetaFilter(modelIds);
         metaFilter.setStatus(StatusEnum.ONLINE.getCode());
-        Map<Long, List<MetricResp>> metricRespMap =
-                metricService.getMetrics(metaFilter).stream()
-                        .collect(Collectors.groupingBy(MetricResp::getModelId));
+        Map<Long, List<MetricResp>> metricRespMap = metricService.getMetrics(metaFilter).stream()
+                .collect(Collectors.groupingBy(MetricResp::getModelId));
         Map<Long, List<DimensionResp>> dimensionRespsMap =
                 dimensionService.getDimensions(metaFilter).stream()
                         .collect(Collectors.groupingBy(DimensionResp::getModelId));
@@ -285,19 +265,15 @@ public class SchemaServiceImpl implements SchemaService {
                     metricResps.stream().map(this::convert).collect(Collectors.toList());
             List<DimSchemaResp> dimensionResps =
                     dimensionRespsMap.getOrDefault(modelId, Lists.newArrayList()).stream()
-                            .map(this::convert)
-                            .collect(Collectors.toList());
+                            .map(this::convert).collect(Collectors.toList());
             ModelSchemaResp modelSchemaResp = new ModelSchemaResp();
             BeanUtils.copyProperties(modelResp, modelSchemaResp);
             modelSchemaResp.setDimensions(dimensionResps);
             modelSchemaResp.setMetrics(metricSchemaResps);
-            modelSchemaResp.setModelRelas(
-                    modelRelas.stream()
-                            .filter(
-                                    modelRela ->
-                                            modelRela.getFromModelId().equals(modelId)
-                                                    || modelRela.getToModelId().equals(modelId))
-                            .collect(Collectors.toList()));
+            modelSchemaResp.setModelRelas(modelRelas.stream()
+                    .filter(modelRela -> modelRela.getFromModelId().equals(modelId)
+                            || modelRela.getToModelId().equals(modelId))
+                    .collect(Collectors.toList()));
             modelSchemaResps.add(modelSchemaResp);
         }
         return modelSchemaResps;
@@ -305,17 +281,11 @@ public class SchemaServiceImpl implements SchemaService {
 
     private void fillCnt(List<DataSetSchemaResp> dataSetSchemaResps, List<ItemUseResp> statInfos) {
 
-        Map<String, ItemUseResp> typeIdAndStatPair =
-                statInfos.stream()
-                        .collect(
-                                Collectors.toMap(
-                                        itemUseInfo ->
-                                                itemUseInfo.getType()
-                                                        + AT_SYMBOL
-                                                        + AT_SYMBOL
-                                                        + itemUseInfo.getBizName(),
-                                        itemUseInfo -> itemUseInfo,
-                                        (item1, item2) -> item1));
+        Map<String, ItemUseResp> typeIdAndStatPair = statInfos.stream()
+                .collect(Collectors.toMap(
+                        itemUseInfo -> itemUseInfo.getType() + AT_SYMBOL + AT_SYMBOL
+                                + itemUseInfo.getBizName(),
+                        itemUseInfo -> itemUseInfo, (item1, item2) -> item1));
         log.debug("typeIdAndStatPair:{}", typeIdAndStatPair);
         for (DataSetSchemaResp dataSetSchemaResp : dataSetSchemaResps) {
             fillDimCnt(dataSetSchemaResp, typeIdAndStatPair);
@@ -323,49 +293,39 @@ public class SchemaServiceImpl implements SchemaService {
         }
     }
 
-    private void fillMetricCnt(
-            DataSetSchemaResp dataSetSchemaResp, Map<String, ItemUseResp> typeIdAndStatPair) {
+    private void fillMetricCnt(DataSetSchemaResp dataSetSchemaResp,
+            Map<String, ItemUseResp> typeIdAndStatPair) {
         List<MetricSchemaResp> metrics = dataSetSchemaResp.getMetrics();
         if (CollectionUtils.isEmpty(dataSetSchemaResp.getMetrics())) {
             return;
         }
 
         if (!CollectionUtils.isEmpty(metrics)) {
-            metrics.stream()
-                    .forEach(
-                            metric -> {
-                                String key =
-                                        TypeEnums.METRIC.name().toLowerCase()
-                                                + AT_SYMBOL
-                                                + AT_SYMBOL
-                                                + metric.getBizName();
-                                if (typeIdAndStatPair.containsKey(key)) {
-                                    metric.setUseCnt(typeIdAndStatPair.get(key).getUseCnt());
-                                }
-                            });
+            metrics.stream().forEach(metric -> {
+                String key = TypeEnums.METRIC.name().toLowerCase() + AT_SYMBOL + AT_SYMBOL
+                        + metric.getBizName();
+                if (typeIdAndStatPair.containsKey(key)) {
+                    metric.setUseCnt(typeIdAndStatPair.get(key).getUseCnt());
+                }
+            });
         }
         dataSetSchemaResp.setMetrics(metrics);
     }
 
-    private void fillDimCnt(
-            DataSetSchemaResp dataSetSchemaResp, Map<String, ItemUseResp> typeIdAndStatPair) {
+    private void fillDimCnt(DataSetSchemaResp dataSetSchemaResp,
+            Map<String, ItemUseResp> typeIdAndStatPair) {
         List<DimSchemaResp> dimensions = dataSetSchemaResp.getDimensions();
         if (CollectionUtils.isEmpty(dataSetSchemaResp.getDimensions())) {
             return;
         }
         if (!CollectionUtils.isEmpty(dimensions)) {
-            dimensions.stream()
-                    .forEach(
-                            dim -> {
-                                String key =
-                                        TypeEnums.DIMENSION.name().toLowerCase()
-                                                + AT_SYMBOL
-                                                + AT_SYMBOL
-                                                + dim.getBizName();
-                                if (typeIdAndStatPair.containsKey(key)) {
-                                    dim.setUseCnt(typeIdAndStatPair.get(key).getUseCnt());
-                                }
-                            });
+            dimensions.stream().forEach(dim -> {
+                String key = TypeEnums.DIMENSION.name().toLowerCase() + AT_SYMBOL + AT_SYMBOL
+                        + dim.getBizName();
+                if (typeIdAndStatPair.containsKey(key)) {
+                    dim.setUseCnt(typeIdAndStatPair.get(key).getUseCnt());
+                }
+            });
         }
         dataSetSchemaResp.setDimensions(dimensions);
     }
@@ -404,11 +364,9 @@ public class SchemaServiceImpl implements SchemaService {
     public List<ModelResp> getModelList(List<Long> modelIds) {
         List<ModelResp> modelRespList = new ArrayList<>();
         if (!org.apache.commons.collections.CollectionUtils.isEmpty(modelIds)) {
-            modelIds.stream()
-                    .forEach(
-                            m -> {
-                                modelRespList.add(modelService.getModel(m));
-                            });
+            modelIds.stream().forEach(m -> {
+                modelRespList.add(modelService.getModel(m));
+            });
         }
         return modelRespList;
     }
@@ -434,21 +392,14 @@ public class SchemaServiceImpl implements SchemaService {
         } else if (!CollectionUtils.isEmpty(schemaFilterReq.getModelIds())) {
             List<ModelSchemaResp> modelSchemaResps =
                     fetchModelSchemaResps(schemaFilterReq.getModelIds());
-            semanticSchemaResp.setMetrics(
-                    modelSchemaResps.stream()
-                            .map(ModelSchemaResp::getMetrics)
-                            .flatMap(Collection::stream)
-                            .collect(Collectors.toList()));
-            semanticSchemaResp.setDimensions(
-                    modelSchemaResps.stream()
-                            .map(ModelSchemaResp::getDimensions)
-                            .flatMap(Collection::stream)
-                            .collect(Collectors.toList()));
-            semanticSchemaResp.setModelRelas(
-                    modelSchemaResps.stream()
-                            .map(ModelSchemaResp::getModelRelas)
-                            .flatMap(Collection::stream)
-                            .collect(Collectors.toList()));
+            semanticSchemaResp.setMetrics(modelSchemaResps.stream().map(ModelSchemaResp::getMetrics)
+                    .flatMap(Collection::stream).collect(Collectors.toList()));
+            semanticSchemaResp
+                    .setDimensions(modelSchemaResps.stream().map(ModelSchemaResp::getDimensions)
+                            .flatMap(Collection::stream).collect(Collectors.toList()));
+            semanticSchemaResp
+                    .setModelRelas(modelSchemaResps.stream().map(ModelSchemaResp::getModelRelas)
+                            .flatMap(Collection::stream).collect(Collectors.toList()));
             semanticSchemaResp.setModelResps(
                     modelSchemaResps.stream().map(this::convert).collect(Collectors.toList()));
             semanticSchemaResp.setSchemaType(SchemaType.MODEL);
@@ -485,13 +436,11 @@ public class SchemaServiceImpl implements SchemaService {
     @Override
     public List<ItemUseResp> getStatInfo(ItemUseReq itemUseReq) {
         if (itemUseReq.getCacheEnable()) {
-            return itemUseCache.get(
-                    JsonUtil.toString(itemUseReq),
-                    () -> {
-                        List<ItemUseResp> data = statUtils.getStatInfo(itemUseReq);
-                        itemUseCache.put(JsonUtil.toString(itemUseReq), data);
-                        return data;
-                    });
+            return itemUseCache.get(JsonUtil.toString(itemUseReq), () -> {
+                List<ItemUseResp> data = statUtils.getStatInfo(itemUseReq);
+                itemUseCache.put(JsonUtil.toString(itemUseReq), data);
+                return data;
+            });
         }
         return statUtils.getStatInfo(itemUseReq);
     }
@@ -499,28 +448,17 @@ public class SchemaServiceImpl implements SchemaService {
     @Override
     public List<ItemResp> getDomainDataSetTree() {
         List<DomainResp> domainResps = domainService.getDomainList();
-        List<ItemResp> itemResps =
-                domainResps.stream()
-                        .map(
-                                domain ->
-                                        new ItemResp(
-                                                domain.getId(),
-                                                domain.getParentId(),
-                                                domain.getName(),
-                                                TypeEnums.DOMAIN))
-                        .collect(Collectors.toList());
+        List<ItemResp> itemResps = domainResps.stream().map(domain -> new ItemResp(domain.getId(),
+                domain.getParentId(), domain.getName(), TypeEnums.DOMAIN))
+                .collect(Collectors.toList());
         Map<Long, ItemResp> itemRespMap =
                 itemResps.stream().collect(Collectors.toMap(ItemResp::getId, item -> item));
         List<DataSetResp> dataSetResps = dataSetService.getDataSetList(new MetaFilter());
         for (DataSetResp dataSetResp : dataSetResps) {
             ItemResp itemResp = itemRespMap.get(dataSetResp.getDomainId());
             if (itemResp != null) {
-                ItemResp dataSet =
-                        new ItemResp(
-                                dataSetResp.getId(),
-                                dataSetResp.getDomainId(),
-                                dataSetResp.getName(),
-                                TypeEnums.DATASET);
+                ItemResp dataSet = new ItemResp(dataSetResp.getId(), dataSetResp.getDomainId(),
+                        dataSetResp.getName(), TypeEnums.DATASET);
                 itemResp.getChildren().add(dataSet);
             }
         }
@@ -528,10 +466,8 @@ public class SchemaServiceImpl implements SchemaService {
     }
 
     private void fillStaticInfo(List<DataSetSchemaResp> dataSetSchemaResps) {
-        List<Long> dataSetIds =
-                dataSetSchemaResps.stream()
-                        .map(DataSetSchemaResp::getId)
-                        .collect(Collectors.toList());
+        List<Long> dataSetIds = dataSetSchemaResps.stream().map(DataSetSchemaResp::getId)
+                .collect(Collectors.toList());
         ItemUseReq itemUseReq = new ItemUseReq();
         itemUseReq.setModelIds(dataSetIds);
 
@@ -567,11 +503,9 @@ public class SchemaServiceImpl implements SchemaService {
     }
 
     @Override
-    public void getSchemaYamlTpl(
-            SemanticSchemaResp semanticSchemaResp,
+    public void getSchemaYamlTpl(SemanticSchemaResp semanticSchemaResp,
             Map<String, List<DimensionYamlTpl>> dimensionYamlMap,
-            List<DataModelYamlTpl> dataModelYamlTplList,
-            List<MetricYamlTpl> metricYamlTplList,
+            List<DataModelYamlTpl> dataModelYamlTplList, List<MetricYamlTpl> metricYamlTplList,
             Map<Long, String> modelIdName) {
 
         List<ModelResp> modelResps = semanticSchemaResp.getModelResps();
@@ -587,15 +521,10 @@ public class SchemaServiceImpl implements SchemaService {
             if (!dimensionYamlMap.containsKey(modelResp.getBizName())) {
                 dimensionYamlMap.put(modelResp.getBizName(), new ArrayList<>());
             }
-            List<DimensionResp> dimensionRespList =
-                    dimensionResps.stream()
-                            .filter(
-                                    d ->
-                                            d.getModelBizName()
-                                                    .equalsIgnoreCase(modelResp.getBizName()))
-                            .collect(Collectors.toList());
-            dimensionYamlMap
-                    .get(modelResp.getBizName())
+            List<DimensionResp> dimensionRespList = dimensionResps.stream()
+                    .filter(d -> d.getModelBizName().equalsIgnoreCase(modelResp.getBizName()))
+                    .collect(Collectors.toList());
+            dimensionYamlMap.get(modelResp.getBizName())
                     .addAll(DimensionYamlManager.convert2DimensionYaml(dimensionRespList));
         }
         List<MetricResp> metricResps = new ArrayList<>(semanticSchemaResp.getMetrics());

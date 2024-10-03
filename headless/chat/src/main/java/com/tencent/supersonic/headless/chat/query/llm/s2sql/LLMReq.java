@@ -46,16 +46,12 @@ public class LLMReq {
         public List<String> getFieldNameList() {
             List<String> fieldNameList = new ArrayList<>();
             if (CollectionUtils.isNotEmpty(metrics)) {
-                fieldNameList.addAll(
-                        metrics.stream()
-                                .map(metric -> metric.getName())
-                                .collect(Collectors.toList()));
+                fieldNameList.addAll(metrics.stream().map(metric -> metric.getName())
+                        .collect(Collectors.toList()));
             }
             if (CollectionUtils.isNotEmpty(dimensions)) {
-                fieldNameList.addAll(
-                        dimensions.stream()
-                                .map(dimension -> dimension.getName())
-                                .collect(Collectors.toList()));
+                fieldNameList.addAll(dimensions.stream().map(dimension -> dimension.getName())
+                        .collect(Collectors.toList()));
             }
             if (Objects.nonNull(partitionTime)) {
                 fieldNameList.add(partitionTime.getName());
@@ -76,6 +72,7 @@ public class LLMReq {
 
     public enum SqlGenType {
         ONE_PASS_SELF_CONSISTENCY("1_pass_self_consistency");
+
         private String name;
 
         SqlGenType(String name) {

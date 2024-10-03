@@ -30,9 +30,7 @@ public abstract class BaseMapper implements SchemaMapper {
 
         String simpleName = this.getClass().getSimpleName();
         long startTime = System.currentTimeMillis();
-        log.debug(
-                "before {},mapInfo:{}",
-                simpleName,
+        log.debug("before {},mapInfo:{}", simpleName,
                 chatQueryContext.getMapInfo().getDataSetElementMatches());
 
         try {
@@ -43,17 +41,14 @@ public abstract class BaseMapper implements SchemaMapper {
         }
 
         long cost = System.currentTimeMillis() - startTime;
-        log.debug(
-                "after {},cost:{},mapInfo:{}",
-                simpleName,
-                cost,
+        log.debug("after {},cost:{},mapInfo:{}", simpleName, cost,
                 chatQueryContext.getMapInfo().getDataSetElementMatches());
     }
 
     public abstract void doMap(ChatQueryContext chatQueryContext);
 
-    public void addToSchemaMap(
-            SchemaMapInfo schemaMap, Long dataSetId, SchemaElementMatch newElementMatch) {
+    public void addToSchemaMap(SchemaMapInfo schemaMap, Long dataSetId,
+            SchemaElementMatch newElementMatch) {
         Map<Long, List<SchemaElementMatch>> dataSetElementMatches =
                 schemaMap.getDataSetElementMatches();
         List<SchemaElementMatch> schemaElementMatches =
@@ -61,26 +56,24 @@ public abstract class BaseMapper implements SchemaMapper {
 
         AtomicBoolean shouldAddNew = new AtomicBoolean(true);
 
-        schemaElementMatches.removeIf(
-                existingElementMatch -> {
-                    if (isEquals(existingElementMatch, newElementMatch)) {
-                        if (newElementMatch.getSimilarity()
-                                > existingElementMatch.getSimilarity()) {
-                            return true;
-                        } else {
-                            shouldAddNew.set(false);
-                        }
-                    }
-                    return false;
-                });
+        schemaElementMatches.removeIf(existingElementMatch -> {
+            if (isEquals(existingElementMatch, newElementMatch)) {
+                if (newElementMatch.getSimilarity() > existingElementMatch.getSimilarity()) {
+                    return true;
+                } else {
+                    shouldAddNew.set(false);
+                }
+            }
+            return false;
+        });
 
         if (shouldAddNew.get()) {
             schemaElementMatches.add(newElementMatch);
         }
     }
 
-    private static boolean isEquals(
-            SchemaElementMatch existElementMatch, SchemaElementMatch newElementMatch) {
+    private static boolean isEquals(SchemaElementMatch existElementMatch,
+            SchemaElementMatch newElementMatch) {
         SchemaElement existElement = existElementMatch.getElement();
         SchemaElement newElement = newElementMatch.getElement();
         if (!existElement.equals(newElement)) {
@@ -92,11 +85,8 @@ public abstract class BaseMapper implements SchemaMapper {
         return true;
     }
 
-    public SchemaElement getSchemaElement(
-            Long dataSetId,
-            SchemaElementType elementType,
-            Long elementID,
-            SemanticSchema semanticSchema) {
+    public SchemaElement getSchemaElement(Long dataSetId, SchemaElementType elementType,
+            Long elementID, SemanticSchema semanticSchema) {
         SchemaElement element = new SchemaElement();
         DataSetSchema dataSetSchema = semanticSchema.getDataSetSchemaMap().get(dataSetId);
         if (Objects.isNull(dataSetSchema)) {
@@ -124,8 +114,8 @@ public abstract class BaseMapper implements SchemaMapper {
         return element.getAlias();
     }
 
-    public <T> List<T> getMatches(
-            ChatQueryContext chatQueryContext, BaseMatchStrategy matchStrategy) {
+    public <T> List<T> getMatches(ChatQueryContext chatQueryContext,
+            BaseMatchStrategy matchStrategy) {
         String queryText = chatQueryContext.getQueryText();
         List<S2Term> terms =
                 HanlpHelper.getTerms(queryText, chatQueryContext.getModelIdToDataSetIds());
@@ -136,11 +126,9 @@ public abstract class BaseMapper implements SchemaMapper {
         if (Objects.isNull(matchResult)) {
             return matches;
         }
-        Optional<List<T>> first =
-                matchResult.entrySet().stream()
-                        .filter(entry -> CollectionUtils.isNotEmpty(entry.getValue()))
-                        .map(entry -> entry.getValue())
-                        .findFirst();
+        Optional<List<T>> first = matchResult.entrySet().stream()
+                .filter(entry -> CollectionUtils.isNotEmpty(entry.getValue()))
+                .map(entry -> entry.getValue()).findFirst();
 
         if (first.isPresent()) {
             matches = first.get();

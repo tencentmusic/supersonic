@@ -245,10 +245,9 @@
                 <version>${spotless.version}</version>
                 <configuration>
                     <java>
-                        <googleJavaFormat>
-                            <version>1.7</version>
-                            <style>AOSP</style>
-                        </googleJavaFormat>
+                        <eclipse>
+                            <file>java-formatter.xml</file>
+                        </eclipse>
                         <importOrder>
                             <order>javax,java,scala,\#</order>
                         </importOrder>

@@ -14,8 +14,8 @@ import org.springframework.web.servlet.ModelAndView;
 @Slf4j
 public class LogInterceptor implements HandlerInterceptor {
     @Override
-    public boolean preHandle(
-            HttpServletRequest request, HttpServletResponse response, Object handler) {
+    public boolean preHandle(HttpServletRequest request, HttpServletResponse response,
+            Object handler) {
         // use previous traceId
         String traceId = request.getHeader(TraceIdUtil.TRACE_ID);
         if (StringUtils.isBlank(traceId)) {
@@ -27,17 +27,12 @@ public class LogInterceptor implements HandlerInterceptor {
     }
 
     @Override
-    public void postHandle(
-            HttpServletRequest request,
-            HttpServletResponse response,
-            Object handler,
-            ModelAndView modelAndView)
-            throws Exception {}
+    public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler,
+            ModelAndView modelAndView) throws Exception {}
 
     @Override
-    public void afterCompletion(
-            HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex)
-            throws Exception {
+    public void afterCompletion(HttpServletRequest request, HttpServletResponse response,
+            Object handler, Exception ex) throws Exception {
         // remove after Completing
         TraceIdUtil.remove();
     }

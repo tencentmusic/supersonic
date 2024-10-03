@@ -21,15 +21,14 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 public class DataSetQueryApiController {
 
-    @Autowired private DataSetService dataSetService;
-    @Autowired private SemanticLayerService semanticLayerService;
+    @Autowired
+    private DataSetService dataSetService;
+    @Autowired
+    private SemanticLayerService semanticLayerService;
 
     @PostMapping("/dataSet")
-    public Object queryByDataSet(
-            @RequestBody QueryDataSetReq queryDataSetReq,
-            HttpServletRequest request,
-            HttpServletResponse response)
-            throws Exception {
+    public Object queryByDataSet(@RequestBody QueryDataSetReq queryDataSetReq,
+            HttpServletRequest request, HttpServletResponse response) throws Exception {
         User user = UserHolder.findUser(request, response);
         SemanticQueryReq queryReq = dataSetService.convert(queryDataSetReq);
         return semanticLayerService.queryByReq(queryReq, user);

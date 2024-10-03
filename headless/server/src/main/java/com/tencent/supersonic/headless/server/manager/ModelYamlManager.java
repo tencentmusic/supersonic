@@ -28,8 +28,8 @@ import java.util.stream.Collectors;
 @Slf4j
 public class ModelYamlManager {
 
-    public static synchronized DataModelYamlTpl convert2YamlObj(
-            ModelResp modelResp, DatabaseResp databaseResp) {
+    public static synchronized DataModelYamlTpl convert2YamlObj(ModelResp modelResp,
+            DatabaseResp databaseResp) {
         ModelDetail modelDetail = modelResp.getModelDetail();
         DbAdaptor engineAdaptor = DbAdaptorFactory.getEngineAdaptor(databaseResp.getType());
         SysTimeDimensionBuilder.addSysTimeDimension(modelDetail.getDimensions(), engineAdaptor);
@@ -37,18 +37,12 @@ public class ModelYamlManager {
         DataModelYamlTpl dataModelYamlTpl = new DataModelYamlTpl();
         dataModelYamlTpl.setType(databaseResp.getType());
         BeanUtils.copyProperties(modelDetail, dataModelYamlTpl);
-        dataModelYamlTpl.setIdentifiers(
-                modelDetail.getIdentifiers().stream()
-                        .map(ModelYamlManager::convert)
-                        .collect(Collectors.toList()));
-        dataModelYamlTpl.setDimensions(
-                modelDetail.getDimensions().stream()
-                        .map(ModelYamlManager::convert)
-                        .collect(Collectors.toList()));
-        dataModelYamlTpl.setMeasures(
-                modelDetail.getMeasures().stream()
-                        .map(ModelYamlManager::convert)
-                        .collect(Collectors.toList()));
+        dataModelYamlTpl.setIdentifiers(modelDetail.getIdentifiers().stream()
+                .map(ModelYamlManager::convert).collect(Collectors.toList()));
+        dataModelYamlTpl.setDimensions(modelDetail.getDimensions().stream()
+                .map(ModelYamlManager::convert).collect(Collectors.toList()));
+        dataModelYamlTpl.setMeasures(modelDetail.getMeasures().stream()
+                .map(ModelYamlManager::convert).collect(Collectors.toList()));
         dataModelYamlTpl.setName(modelResp.getBizName());
         dataModelYamlTpl.setSourceId(modelResp.getDatabaseId());
         if (modelDetail.getQueryType().equalsIgnoreCase(ModelDefineType.SQL_QUERY.getName())) {

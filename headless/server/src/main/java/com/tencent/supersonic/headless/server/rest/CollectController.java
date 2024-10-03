@@ -26,27 +26,23 @@ public class CollectController {
     }
 
     @PostMapping("/createCollectionIndicators")
-    public boolean createCollectionIndicators(
-            @RequestBody CollectDO collectDO,
-            HttpServletRequest request,
-            HttpServletResponse response) {
+    public boolean createCollectionIndicators(@RequestBody CollectDO collectDO,
+            HttpServletRequest request, HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
         return collectService.collect(user, collectDO);
     }
 
     @Deprecated
     @DeleteMapping("/deleteCollectionIndicators/{id}")
-    public boolean deleteCollectionIndicators(
-            @PathVariable Long id, HttpServletRequest request, HttpServletResponse response) {
+    public boolean deleteCollectionIndicators(@PathVariable Long id, HttpServletRequest request,
+            HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
         return collectService.unCollect(user, id);
     }
 
     @PostMapping("/deleteCollectionIndicators")
-    public boolean deleteCollectionIndicators(
-            @RequestBody CollectDO collectDO,
-            HttpServletRequest request,
-            HttpServletResponse response) {
+    public boolean deleteCollectionIndicators(@RequestBody CollectDO collectDO,
+            HttpServletRequest request, HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
         return collectService.unCollect(user, collectDO);
     }

@@ -4,14 +4,9 @@ import com.tencent.supersonic.common.pojo.ChatModelConfig;
 
 public class LLMConfigUtils {
     public enum LLMType {
-        OPENAI_GPT(false),
-        OPENAI_MOONSHOT(false),
-        OPENAI_DEEPSEEK(false),
-        OPENAI_QWEN(false),
-        OPENAI_GLM(false),
-        OLLAMA_LLAMA3(true),
-        OLLAMA_QWEN2(true),
-        OLLAMA_QWEN25(true);
+        OPENAI_GPT(false), OPENAI_MOONSHOT(false), OPENAI_DEEPSEEK(false), OPENAI_QWEN(
+                false), OPENAI_GLM(
+                        false), OLLAMA_LLAMA3(true), OLLAMA_QWEN2(true), OLLAMA_QWEN25(true);
 
         private boolean isOllam;
 
@@ -70,24 +65,12 @@ public class LLMConfigUtils {
 
         ChatModelConfig chatModelConfig;
         if (type.isOllam) {
-            chatModelConfig =
-                    ChatModelConfig.builder()
-                            .provider("ollama")
-                            .baseUrl(baseUrl)
-                            .modelName(modelName)
-                            .temperature(temperature)
-                            .timeOut(60000L)
-                            .build();
+            chatModelConfig = ChatModelConfig.builder().provider("ollama").baseUrl(baseUrl)
+                    .modelName(modelName).temperature(temperature).timeOut(60000L).build();
         } else {
             chatModelConfig =
-                    ChatModelConfig.builder()
-                            .provider("open_ai")
-                            .baseUrl(baseUrl)
-                            .apiKey(apiKey)
-                            .modelName(modelName)
-                            .temperature(temperature)
-                            .timeOut(60000L)
-                            .build();
+                    ChatModelConfig.builder().provider("open_ai").baseUrl(baseUrl).apiKey(apiKey)
+                            .modelName(modelName).temperature(temperature).timeOut(60000L).build();
         }
 
         return chatModelConfig;

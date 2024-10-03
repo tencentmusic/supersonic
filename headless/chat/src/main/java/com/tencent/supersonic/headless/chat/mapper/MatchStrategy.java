@@ -13,6 +13,6 @@ import java.util.Set;
  */
 public interface MatchStrategy<T extends MapResult> {
 
-    Map<MatchText, List<T>> match(
-            ChatQueryContext chatQueryContext, List<S2Term> terms, Set<Long> detectDataSetIds);
+    Map<MatchText, List<T>> match(ChatQueryContext chatQueryContext, List<S2Term> terms,
+            Set<Long> detectDataSetIds);
 }

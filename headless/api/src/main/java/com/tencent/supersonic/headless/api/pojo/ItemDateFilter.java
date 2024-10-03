@@ -13,5 +13,6 @@ import java.util.List;
 public class ItemDateFilter {
 
     private List<Long> itemIds;
-    @NonNull private String type;
+    @NonNull
+    private String type;
 }

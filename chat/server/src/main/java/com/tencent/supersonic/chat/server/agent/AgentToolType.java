@@ -4,9 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public enum AgentToolType {
-    NL2SQL_RULE("基于规则Text-to-SQL"),
-    NL2SQL_LLM("基于大模型Text-to-SQL"),
-    PLUGIN("第三方插件");
+    NL2SQL_RULE("基于规则Text-to-SQL"), NL2SQL_LLM("基于大模型Text-to-SQL"), PLUGIN("第三方插件");
 
     private String title;
 

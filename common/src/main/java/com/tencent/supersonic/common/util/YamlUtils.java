@@ -51,10 +51,8 @@ public class YamlUtils {
                 .disable(YAMLGenerator.Feature.LITERAL_BLOCK_STYLE);
         try {
             String yaml = mapper.writeValueAsString(object);
-            return yaml.replaceAll("\"True\"", "true")
-                    .replaceAll("\"true\"", "true")
-                    .replaceAll("\"false\"", "false")
-                    .replaceAll("\"False\"", "false");
+            return yaml.replaceAll("\"True\"", "true").replaceAll("\"true\"", "true")
+                    .replaceAll("\"false\"", "false").replaceAll("\"False\"", "false");
         } catch (IOException e) {
             log.error("", e);
         }

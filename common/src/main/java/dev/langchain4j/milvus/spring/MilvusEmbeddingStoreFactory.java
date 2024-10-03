@@ -29,21 +29,15 @@ public class MilvusEmbeddingStoreFactory extends BaseEmbeddingStoreFactory {
 
     @Override
     public EmbeddingStore<TextSegment> createEmbeddingStore(String collectionName) {
-        return MilvusEmbeddingStore.builder()
-                .host(storeProperties.getHost())
-                .port(storeProperties.getPort())
-                .collectionName(collectionName)
-                .dimension(storeProperties.getDimension())
-                .indexType(storeProperties.getIndexType())
-                .metricType(storeProperties.getMetricType())
-                .uri(storeProperties.getUri())
-                .token(storeProperties.getToken())
-                .username(storeProperties.getUsername())
+        return MilvusEmbeddingStore.builder().host(storeProperties.getHost())
+                .port(storeProperties.getPort()).collectionName(collectionName)
+                .dimension(storeProperties.getDimension()).indexType(storeProperties.getIndexType())
+                .metricType(storeProperties.getMetricType()).uri(storeProperties.getUri())
+                .token(storeProperties.getToken()).username(storeProperties.getUsername())
                 .password(storeProperties.getPassword())
                 .consistencyLevel(storeProperties.getConsistencyLevel())
                 .retrieveEmbeddingsOnSearch(storeProperties.getRetrieveEmbeddingsOnSearch())
                 .autoFlushOnInsert(storeProperties.getAutoFlushOnInsert())
-                .databaseName(storeProperties.getDatabaseName())
-                .build();
+                .databaseName(storeProperties.getDatabaseName()).build();
     }
 }

@@ -11,7 +11,9 @@ public class TagReq extends RecordInfo {
 
     private Long id;
 
-    @NotNull private TagDefineType tagDefineType;
+    @NotNull
+    private TagDefineType tagDefineType;
 
-    @NotNull private Long itemId;
+    @NotNull
+    private Long itemId;
 }

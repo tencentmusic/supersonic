@@ -14,7 +14,8 @@ import java.util.List;
 @Slf4j
 public class StatisticsServiceImpl implements StatisticsService {
 
-    @Autowired private StatisticsMapper statisticsMapper;
+    @Autowired
+    private StatisticsMapper statisticsMapper;
 
     @Async
     @Override

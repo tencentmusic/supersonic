@@ -43,13 +43,8 @@ public class QueryRecommendProcessor implements ParseResultProcessor {
         String memoryCollectionName = embeddingConfig.getMemoryCollectionName(agentId);
         List<Text2SQLExemplar> exemplars =
                 exemplarService.recallExemplars(memoryCollectionName, queryText, 5);
-        return exemplars.stream()
-                .map(
-                        sqlExemplar ->
-                                SimilarQueryRecallResp.builder()
-                                        .queryText(sqlExemplar.getQuestion())
-                                        .build())
-                .collect(Collectors.toList());
+        return exemplars.stream().map(sqlExemplar -> SimilarQueryRecallResp.builder()
+                .queryText(sqlExemplar.getQuestion()).build()).collect(Collectors.toList());
     }
 
     private ChatQueryDO getChatQuery(Long queryId) {

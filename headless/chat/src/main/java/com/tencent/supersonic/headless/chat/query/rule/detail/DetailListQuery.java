@@ -20,8 +20,8 @@ public abstract class DetailListQuery extends DetailSemanticQuery {
         this.addEntityDetailAndOrderByMetric(chatQueryContext, parseInfo);
     }
 
-    private void addEntityDetailAndOrderByMetric(
-            ChatQueryContext chatQueryContext, SemanticParseInfo parseInfo) {
+    private void addEntityDetailAndOrderByMetric(ChatQueryContext chatQueryContext,
+            SemanticParseInfo parseInfo) {
         Long dataSetId = parseInfo.getDataSetId();
         if (Objects.isNull(dataSetId) || dataSetId <= 0L) {
             return;
@@ -38,35 +38,23 @@ public abstract class DetailListQuery extends DetailSemanticQuery {
                     && detailTypeDefaultConfig.getDefaultDisplayInfo() != null) {
                 if (CollectionUtils.isNotEmpty(
                         detailTypeDefaultConfig.getDefaultDisplayInfo().getMetricIds())) {
-                    metrics =
-                            detailTypeDefaultConfig.getDefaultDisplayInfo().getMetricIds().stream()
-                                    .map(
-                                            id -> {
-                                                SchemaElement metric =
-                                                        dataSetSchema.getElement(
-                                                                SchemaElementType.METRIC, id);
-                                                if (metric != null) {
-                                                    orders.add(
-                                                            new Order(
-                                                                    metric.getBizName(),
-                                                                    Constants.DESC_UPPER));
-                                                }
-                                                return metric;
-                                            })
-                                    .filter(Objects::nonNull)
-                                    .collect(Collectors.toSet());
+                    metrics = detailTypeDefaultConfig.getDefaultDisplayInfo().getMetricIds()
+                            .stream().map(id -> {
+                                SchemaElement metric =
+                                        dataSetSchema.getElement(SchemaElementType.METRIC, id);
+                                if (metric != null) {
+                                    orders.add(
+                                            new Order(metric.getBizName(), Constants.DESC_UPPER));
+                                }
+                                return metric;
+                            }).filter(Objects::nonNull).collect(Collectors.toSet());
                 }
                 if (CollectionUtils.isNotEmpty(
                         detailTypeDefaultConfig.getDefaultDisplayInfo().getDimensionIds())) {
-                    dimensions =
-                            detailTypeDefaultConfig.getDefaultDisplayInfo().getDimensionIds()
-                                    .stream()
-                                    .map(
-                                            id ->
-                                                    dataSetSchema.getElement(
-                                                            SchemaElementType.DIMENSION, id))
-                                    .filter(Objects::nonNull)
-                                    .collect(Collectors.toSet());
+                    dimensions = detailTypeDefaultConfig.getDefaultDisplayInfo().getDimensionIds()
+                            .stream()
+                            .map(id -> dataSetSchema.getElement(SchemaElementType.DIMENSION, id))
+                            .filter(Objects::nonNull).collect(Collectors.toSet());
                 }
             }
             parseInfo.setDimensions(dimensions);

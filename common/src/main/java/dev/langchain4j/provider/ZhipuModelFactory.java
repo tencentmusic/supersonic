@@ -19,28 +19,20 @@ public class ZhipuModelFactory implements ModelFactory, InitializingBean {
 
     @Override
     public ChatLanguageModel createChatModel(ChatModelConfig modelConfig) {
-        return ZhipuAiChatModel.builder()
-                .baseUrl(modelConfig.getBaseUrl())
-                .apiKey(modelConfig.getApiKey())
-                .model(modelConfig.getModelName())
-                .temperature(modelConfig.getTemperature())
-                .topP(modelConfig.getTopP())
-                .maxRetries(modelConfig.getMaxRetries())
-                .logRequests(modelConfig.getLogRequests())
-                .logResponses(modelConfig.getLogResponses())
-                .build();
+        return ZhipuAiChatModel.builder().baseUrl(modelConfig.getBaseUrl())
+                .apiKey(modelConfig.getApiKey()).model(modelConfig.getModelName())
+                .temperature(modelConfig.getTemperature()).topP(modelConfig.getTopP())
+                .maxRetries(modelConfig.getMaxRetries()).logRequests(modelConfig.getLogRequests())
+                .logResponses(modelConfig.getLogResponses()).build();
     }
 
     @Override
     public EmbeddingModel createEmbeddingModel(EmbeddingModelConfig embeddingModelConfig) {
-        return ZhipuAiEmbeddingModel.builder()
-                .baseUrl(embeddingModelConfig.getBaseUrl())
-                .apiKey(embeddingModelConfig.getApiKey())
-                .model(embeddingModelConfig.getModelName())
+        return ZhipuAiEmbeddingModel.builder().baseUrl(embeddingModelConfig.getBaseUrl())
+                .apiKey(embeddingModelConfig.getApiKey()).model(embeddingModelConfig.getModelName())
                 .maxRetries(embeddingModelConfig.getMaxRetries())
                 .logRequests(embeddingModelConfig.getLogRequests())
-                .logResponses(embeddingModelConfig.getLogResponses())
-                .build();
+                .logResponses(embeddingModelConfig.getLogResponses()).build();
     }
 
     @Override

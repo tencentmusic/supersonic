@@ -33,13 +33,10 @@ public class QueryMatcher {
         }
     }
 
-    public QueryMatcher addOption(
-            SchemaElementType type,
-            QueryMatchOption.OptionType option,
-            QueryMatchOption.RequireNumberType requireNumberType,
-            Integer requireNumber) {
-        elementOptionMap.put(
-                type, QueryMatchOption.build(option, requireNumberType, requireNumber));
+    public QueryMatcher addOption(SchemaElementType type, QueryMatchOption.OptionType option,
+            QueryMatchOption.RequireNumberType requireNumberType, Integer requireNumber) {
+        elementOptionMap.put(type,
+                QueryMatchOption.build(option, requireNumberType, requireNumber));
         return this;
     }
 
@@ -55,8 +52,8 @@ public class QueryMatcher {
         for (SchemaElementMatch schemaElementMatch : candidateElementMatches) {
             SchemaElementType schemaElementType = schemaElementMatch.getElement().getType();
             if (schemaElementTypeCount.containsKey(schemaElementType)) {
-                schemaElementTypeCount.put(
-                        schemaElementType, schemaElementTypeCount.get(schemaElementType) + 1);
+                schemaElementTypeCount.put(schemaElementType,
+                        schemaElementTypeCount.get(schemaElementType) + 1);
             } else {
                 schemaElementTypeCount.put(schemaElementType, 1);
             }
@@ -75,10 +72,8 @@ public class QueryMatcher {
         for (SchemaElementMatch elementMatch : candidateElementMatches) {
             QueryMatchOption elementOption =
                     elementOptionMap.get(elementMatch.getElement().getType());
-            if (Objects.nonNull(elementOption)
-                    && !elementOption
-                            .getSchemaElementOption()
-                            .equals(QueryMatchOption.OptionType.UNUSED)) {
+            if (Objects.nonNull(elementOption) && !elementOption.getSchemaElementOption()
+                    .equals(QueryMatchOption.OptionType.UNUSED)) {
                 elementMatches.add(elementMatch);
             }
         }
@@ -86,8 +81,7 @@ public class QueryMatcher {
         return elementMatches;
     }
 
-    private int getCount(
-            HashMap<SchemaElementType, Integer> schemaElementTypeCount,
+    private int getCount(HashMap<SchemaElementType, Integer> schemaElementTypeCount,
             SchemaElementType schemaElementType) {
         if (schemaElementTypeCount.containsKey(schemaElementType)) {
             return schemaElementTypeCount.get(schemaElementType);
@@ -101,15 +95,13 @@ public class QueryMatcher {
                 && count <= 0) {
             return false;
         }
-        if (queryMatchOption
-                        .getRequireNumberType()
-                        .equals(QueryMatchOption.RequireNumberType.AT_LEAST)
+        if (queryMatchOption.getRequireNumberType()
+                .equals(QueryMatchOption.RequireNumberType.AT_LEAST)
                 && count < queryMatchOption.getRequireNumber()) {
             return false;
         }
-        if (queryMatchOption
-                        .getRequireNumberType()
-                        .equals(QueryMatchOption.RequireNumberType.AT_MOST)
+        if (queryMatchOption.getRequireNumberType()
+                .equals(QueryMatchOption.RequireNumberType.AT_MOST)
                 && count > queryMatchOption.getRequireNumber()) {
             return false;
         }

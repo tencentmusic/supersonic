@@ -18,10 +18,8 @@ public class IdentifyNode extends SemanticNode {
     }
 
     public static Set<String> getIdentifyNames(List<Identify> identifies, Identify.Type type) {
-        return identifies.stream()
-                .filter(i -> type.name().equalsIgnoreCase(i.getType()))
-                .map(i -> i.getName())
-                .collect(Collectors.toSet());
+        return identifies.stream().filter(i -> type.name().equalsIgnoreCase(i.getType()))
+                .map(i -> i.getName()).collect(Collectors.toSet());
     }
 
     public static boolean isForeign(String name, List<Identify> identifies) {

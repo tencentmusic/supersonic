@@ -36,12 +36,9 @@ public class DetailTest extends BaseTest {
                 DataUtils.getFilter("singer_name", FilterOperatorEnum.EQUALS, "周杰伦", "歌手名", 8L);
         expectedParseInfo.getDimensionFilters().add(dimensionFilter);
 
-        expectedParseInfo
-                .getDimensions()
-                .addAll(
-                        Lists.newArrayList(
-                                SchemaElement.builder().name("流派").build(),
-                                SchemaElement.builder().name("代表作").build()));
+        expectedParseInfo.getDimensions()
+                .addAll(Lists.newArrayList(SchemaElement.builder().name("流派").build(),
+                        SchemaElement.builder().name("代表作").build()));
 
         assertQueryResult(expectedResult, actualResult);
     }
@@ -63,14 +60,11 @@ public class DetailTest extends BaseTest {
         expectedParseInfo.getDimensionFilters().add(dimensionFilter);
 
         expectedParseInfo.getMetrics().add(SchemaElement.builder().name("播放量").build());
-        expectedParseInfo
-                .getDimensions()
-                .addAll(
-                        Lists.newArrayList(
-                                SchemaElement.builder().name("歌手名").build(),
-                                SchemaElement.builder().name("活跃区域").build(),
-                                SchemaElement.builder().name("流派").build(),
-                                SchemaElement.builder().name("代表作").build()));
+        expectedParseInfo.getDimensions()
+                .addAll(Lists.newArrayList(SchemaElement.builder().name("歌手名").build(),
+                        SchemaElement.builder().name("活跃区域").build(),
+                        SchemaElement.builder().name("流派").build(),
+                        SchemaElement.builder().name("代表作").build()));
 
         assertQueryResult(expectedResult, actualResult);
     }
@@ -92,14 +86,11 @@ public class DetailTest extends BaseTest {
         expectedParseInfo.getDimensionFilters().add(dimensionFilter);
 
         expectedParseInfo.getMetrics().add(SchemaElement.builder().name("播放量").build());
-        expectedParseInfo
-                .getDimensions()
-                .addAll(
-                        Lists.newArrayList(
-                                SchemaElement.builder().name("歌手名").build(),
-                                SchemaElement.builder().name("活跃区域").build(),
-                                SchemaElement.builder().name("流派").build(),
-                                SchemaElement.builder().name("代表作").build()));
+        expectedParseInfo.getDimensions()
+                .addAll(Lists.newArrayList(SchemaElement.builder().name("歌手名").build(),
+                        SchemaElement.builder().name("活跃区域").build(),
+                        SchemaElement.builder().name("流派").build(),
+                        SchemaElement.builder().name("代表作").build()));
 
         assertQueryResult(expectedResult, actualResult);
     }

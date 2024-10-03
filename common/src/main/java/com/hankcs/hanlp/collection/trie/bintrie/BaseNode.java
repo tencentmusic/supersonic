@@ -253,19 +253,8 @@ public abstract class BaseNode<V> implements Comparable<BaseNode> {
 
     @Override
     public String toString() {
-        return "BaseNode{"
-                + "child="
-                + Arrays.toString(child)
-                + ", status="
-                + status
-                + ", c="
-                + c
-                + ", value="
-                + value
-                + ", prefix='"
-                + prefix
-                + '\''
-                + '}';
+        return "BaseNode{" + "child=" + Arrays.toString(child) + ", status=" + status + ", c=" + c
+                + ", value=" + value + ", prefix='" + prefix + '\'' + '}';
     }
 
     public void walkNode(Set<Map.Entry<String, V>> entrySet) {

@@ -21,27 +21,20 @@ public class OllamaModelFactory implements ModelFactory, InitializingBean {
 
     @Override
     public ChatLanguageModel createChatModel(ChatModelConfig modelConfig) {
-        return OllamaChatModel.builder()
-                .baseUrl(modelConfig.getBaseUrl())
-                .modelName(modelConfig.getModelName())
-                .temperature(modelConfig.getTemperature())
-                .timeout(Duration.ofSeconds(modelConfig.getTimeOut()))
-                .topP(modelConfig.getTopP())
-                .maxRetries(modelConfig.getMaxRetries())
-                .logRequests(modelConfig.getLogRequests())
-                .logResponses(modelConfig.getLogResponses())
-                .build();
+        return OllamaChatModel.builder().baseUrl(modelConfig.getBaseUrl())
+                .modelName(modelConfig.getModelName()).temperature(modelConfig.getTemperature())
+                .timeout(Duration.ofSeconds(modelConfig.getTimeOut())).topP(modelConfig.getTopP())
+                .maxRetries(modelConfig.getMaxRetries()).logRequests(modelConfig.getLogRequests())
+                .logResponses(modelConfig.getLogResponses()).build();
     }
 
     @Override
     public EmbeddingModel createEmbeddingModel(EmbeddingModelConfig embeddingModelConfig) {
-        return OllamaEmbeddingModel.builder()
-                .baseUrl(embeddingModelConfig.getBaseUrl())
+        return OllamaEmbeddingModel.builder().baseUrl(embeddingModelConfig.getBaseUrl())
                 .modelName(embeddingModelConfig.getModelName())
                 .maxRetries(embeddingModelConfig.getMaxRetries())
                 .logRequests(embeddingModelConfig.getLogRequests())
-                .logResponses(embeddingModelConfig.getLogResponses())
-                .build();
+                .logResponses(embeddingModelConfig.getLogResponses()).build();
     }
 
     @Override

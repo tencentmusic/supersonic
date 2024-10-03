@@ -56,7 +56,7 @@ public class AggPlanner implements Planner {
         isAgg = getAgg(datasource.get(0));
         sourceId = String.valueOf(datasource.get(0).getSourceId());
 
-        // build  level by level
+        // build level by level
         LinkedList<Renderer> builders = new LinkedList<>();
         builders.add(new SourceRender());
         builders.add(new FilterRender());
@@ -68,9 +68,8 @@ public class AggPlanner implements Planner {
             Renderer renderer = it.next();
             if (previous != null) {
                 previous.render(metricReq, datasource, scope, schema, !isAgg);
-                renderer.setTable(
-                        previous.builderAs(
-                                DataSourceNode.getNames(datasource) + "_" + String.valueOf(i)));
+                renderer.setTable(previous
+                        .builderAs(DataSourceNode.getNames(datasource) + "_" + String.valueOf(i)));
                 i++;
             }
             previous = renderer;
@@ -88,10 +87,8 @@ public class AggPlanner implements Planner {
             return AggOption.isAgg(aggOption);
         }
         // default by dataSource time aggregation
-        if (Objects.nonNull(dataSource.getAggTime())
-                && !dataSource
-                        .getAggTime()
-                        .equalsIgnoreCase(Constants.DIMENSION_TYPE_TIME_GRANULARITY_NONE)) {
+        if (Objects.nonNull(dataSource.getAggTime()) && !dataSource.getAggTime()
+                .equalsIgnoreCase(Constants.DIMENSION_TYPE_TIME_GRANULARITY_NONE)) {
             if (!metricReq.isNativeQuery()) {
                 return true;
             }

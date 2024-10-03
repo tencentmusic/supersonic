@@ -17,8 +17,7 @@ public class SysTimeDimensionBuilder {
 
     // Defines the regular expression pattern for the time keyword
     private static final Pattern TIME_KEYWORD_PATTERN =
-            Pattern.compile(
-                    "\\b(DATE|TIME|TIMESTAMP|YEAR|MONTH|DAY|HOUR|MINUTE|SECOND)\\b",
+            Pattern.compile("\\b(DATE|TIME|TIMESTAMP|YEAR|MONTH|DAY|HOUR|MINUTE|SECOND)\\b",
                     Pattern.CASE_INSENSITIVE);
 
     public static void addSysTimeDimension(List<Dim> dims, DbAdaptor engineAdaptor) {
@@ -39,9 +38,8 @@ public class SysTimeDimensionBuilder {
         Dim dim = new Dim();
         dim.setBizName(TimeDimensionEnum.DAY.getName());
         dim.setType(DimensionType.partition_time.name());
-        dim.setExpr(
-                generateTimeExpr(
-                        timeDim, TimeDimensionEnum.DAY.name().toLowerCase(), engineAdaptor));
+        dim.setExpr(generateTimeExpr(timeDim, TimeDimensionEnum.DAY.name().toLowerCase(),
+                engineAdaptor));
         DimensionTimeTypeParams typeParams = new DimensionTimeTypeParams();
         typeParams.setTimeGranularity(TimeDimensionEnum.DAY.name().toLowerCase());
         typeParams.setIsPrimary("true");
@@ -53,9 +51,8 @@ public class SysTimeDimensionBuilder {
         Dim dim = new Dim();
         dim.setBizName(TimeDimensionEnum.WEEK.getName());
         dim.setType(DimensionType.partition_time.name());
-        dim.setExpr(
-                generateTimeExpr(
-                        timeDim, TimeDimensionEnum.WEEK.name().toLowerCase(), engineAdaptor));
+        dim.setExpr(generateTimeExpr(timeDim, TimeDimensionEnum.WEEK.name().toLowerCase(),
+                engineAdaptor));
         DimensionTimeTypeParams typeParams = new DimensionTimeTypeParams();
         typeParams.setTimeGranularity(TimeDimensionEnum.WEEK.name().toLowerCase());
         typeParams.setIsPrimary("false");
@@ -67,9 +64,8 @@ public class SysTimeDimensionBuilder {
         Dim dim = new Dim();
         dim.setBizName(TimeDimensionEnum.MONTH.getName());
         dim.setType(DimensionType.partition_time.name());
-        dim.setExpr(
-                generateTimeExpr(
-                        timeDim, TimeDimensionEnum.MONTH.name().toLowerCase(), engineAdaptor));
+        dim.setExpr(generateTimeExpr(timeDim, TimeDimensionEnum.MONTH.name().toLowerCase(),
+                engineAdaptor));
         DimensionTimeTypeParams typeParams = new DimensionTimeTypeParams();
         typeParams.setTimeGranularity(TimeDimensionEnum.MONTH.name().toLowerCase());
         typeParams.setIsPrimary("false");

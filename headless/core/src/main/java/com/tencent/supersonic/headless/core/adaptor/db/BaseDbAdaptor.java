@@ -72,11 +72,8 @@ public abstract class BaseDbAdaptor implements DbAdaptor {
     }
 
     protected DatabaseMetaData getDatabaseMetaData(ConnectInfo connectionInfo) throws SQLException {
-        Connection connection =
-                DriverManager.getConnection(
-                        connectionInfo.getUrl(),
-                        connectionInfo.getUserName(),
-                        connectionInfo.getPassword());
+        Connection connection = DriverManager.getConnection(connectionInfo.getUrl(),
+                connectionInfo.getUserName(), connectionInfo.getPassword());
         return connection.getMetaData();
     }
 }

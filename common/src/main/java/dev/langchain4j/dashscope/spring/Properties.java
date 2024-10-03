@@ -12,13 +12,18 @@ public class Properties {
 
     static final String PREFIX = "langchain4j.dashscope";
 
-    @NestedConfigurationProperty ChatModelProperties chatModel;
+    @NestedConfigurationProperty
+    ChatModelProperties chatModel;
 
-    @NestedConfigurationProperty ChatModelProperties streamingChatModel;
+    @NestedConfigurationProperty
+    ChatModelProperties streamingChatModel;
 
-    @NestedConfigurationProperty ChatModelProperties languageModel;
+    @NestedConfigurationProperty
+    ChatModelProperties languageModel;
 
-    @NestedConfigurationProperty ChatModelProperties streamingLanguageModel;
+    @NestedConfigurationProperty
+    ChatModelProperties streamingLanguageModel;
 
-    @NestedConfigurationProperty EmbeddingModelProperties embeddingModel;
+    @NestedConfigurationProperty
+    EmbeddingModelProperties embeddingModel;
 }

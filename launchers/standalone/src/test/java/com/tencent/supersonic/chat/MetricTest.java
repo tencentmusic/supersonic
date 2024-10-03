@@ -38,11 +38,8 @@ public class MetricTest extends BaseTest {
         expectedParseInfo.setAggType(NONE);
 
         expectedParseInfo.getMetrics().add(DataUtils.getSchemaElement("访问次数"));
-        expectedParseInfo
-                .getDimensionFilters()
-                .add(
-                        DataUtils.getFilter(
-                                "user_name", FilterOperatorEnum.EQUALS, "alice", "用户", 2L));
+        expectedParseInfo.getDimensionFilters().add(
+                DataUtils.getFilter("user_name", FilterOperatorEnum.EQUALS, "alice", "用户", 2L));
 
         expectedParseInfo.setDateInfo(
                 DataUtils.getDateConf(DateConf.DateMode.BETWEEN, unit, period, startDay, endDay));
@@ -65,9 +62,8 @@ public class MetricTest extends BaseTest {
         expectedParseInfo.getMetrics().add(DataUtils.getSchemaElement("访问次数"));
         expectedParseInfo.getDimensions().add(DataUtils.getSchemaElement("部门"));
 
-        expectedParseInfo.setDateInfo(
-                DataUtils.getDateConf(
-                        DateConf.DateMode.BETWEEN, 7, DatePeriodEnum.DAY, startDay, endDay));
+        expectedParseInfo.setDateInfo(DataUtils.getDateConf(DateConf.DateMode.BETWEEN, 7,
+                DatePeriodEnum.DAY, startDay, endDay));
         expectedParseInfo.setQueryType(QueryType.AGGREGATE);
 
         assertQueryResult(expectedResult, actualResult);
@@ -158,11 +154,8 @@ public class MetricTest extends BaseTest {
         expectedParseInfo.setAggType(NONE);
 
         expectedParseInfo.getMetrics().add(DataUtils.getSchemaElement("访问次数"));
-        expectedParseInfo
-                .getDimensionFilters()
-                .add(
-                        DataUtils.getFilter(
-                                "user_name", FilterOperatorEnum.EQUALS, "alice", "用户", 2L));
+        expectedParseInfo.getDimensionFilters().add(
+                DataUtils.getFilter("user_name", FilterOperatorEnum.EQUALS, "alice", "用户", 2L));
 
         expectedParseInfo.setDateInfo(
                 DataUtils.getDateConf(DateConf.DateMode.BETWEEN, 1, period, startDay, startDay));

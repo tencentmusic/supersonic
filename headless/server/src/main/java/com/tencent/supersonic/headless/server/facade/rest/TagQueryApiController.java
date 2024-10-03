@@ -19,14 +19,12 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 public class TagQueryApiController {
 
-    @Autowired private SemanticLayerService semanticLayerService;
+    @Autowired
+    private SemanticLayerService semanticLayerService;
 
     @PostMapping("/tag")
-    public Object queryByTag(
-            @RequestBody QueryStructReq queryStructReq,
-            HttpServletRequest request,
-            HttpServletResponse response)
-            throws Exception {
+    public Object queryByTag(@RequestBody QueryStructReq queryStructReq, HttpServletRequest request,
+            HttpServletResponse response) throws Exception {
         User user = UserHolder.findUser(request, response);
         return semanticLayerService.queryByReq(queryStructReq.convert(), user);
     }

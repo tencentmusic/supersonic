@@ -29,9 +29,7 @@ public class ClassConverter {
     private final DomainService domainService;
     private final TagObjectService tagObjectService;
 
-    public ClassConverter(
-            ClassRepository classRepository,
-            DomainService domainService,
+    public ClassConverter(ClassRepository classRepository, DomainService domainService,
             TagObjectService tagObjectService) {
         this.classRepository = classRepository;
         this.domainService = domainService;
@@ -57,16 +55,13 @@ public class ClassConverter {
         return convert2RespInternal(classDO, idAndDomain, classFullPathMap);
     }
 
-    private ClassResp convert2RespInternal(
-            ClassDO classDO,
-            Map<Long, DomainResp> idAndDomain,
+    private ClassResp convert2RespInternal(ClassDO classDO, Map<Long, DomainResp> idAndDomain,
             Map<Long, String> classFullPathMap) {
         ClassResp classResp = new ClassResp();
         BeanUtils.copyProperties(classDO, classResp);
 
         Long domainId = classResp.getDomainId();
-        if (Objects.nonNull(idAndDomain)
-                && idAndDomain.containsKey(domainId)
+        if (Objects.nonNull(idAndDomain) && idAndDomain.containsKey(domainId)
                 && Objects.nonNull(idAndDomain.get(domainId))) {
             classResp.setDomainName(idAndDomain.get(domainId).getName());
         }
@@ -94,9 +89,8 @@ public class ClassConverter {
     public Map<Long, String> getClassFullPathMap() {
         Map<Long, String> classFullPathMap = new HashMap<>();
         List<ClassDO> classDOList = classRepository.getAllClassDOList();
-        Map<Long, ClassDO> classDOMap =
-                classDOList.stream()
-                        .collect(Collectors.toMap(ClassDO::getId, a -> a, (k1, k2) -> k1));
+        Map<Long, ClassDO> classDOMap = classDOList.stream()
+                .collect(Collectors.toMap(ClassDO::getId, a -> a, (k1, k2) -> k1));
         for (ClassDO classDO : classDOList) {
             final Long domainId = classDO.getId();
             StringBuilder fullPath = new StringBuilder(classDO.getBizName() + "/");

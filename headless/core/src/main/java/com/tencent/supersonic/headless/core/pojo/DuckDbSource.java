@@ -63,8 +63,8 @@ public class DuckDbSource {
     protected void init(JdbcTemplate jdbcTemplate) {
         jdbcTemplate.execute(
                 String.format("SET memory_limit = '%sGB';", executorConfig.getMemoryLimit()));
-        jdbcTemplate.execute(
-                String.format("SET temp_directory='%s';", executorConfig.getDuckDbTemp()));
+        jdbcTemplate
+                .execute(String.format("SET temp_directory='%s';", executorConfig.getDuckDbTemp()));
         jdbcTemplate.execute(String.format("SET threads TO %s;", executorConfig.getThreads()));
         jdbcTemplate.execute("SET enable_object_cache = true;");
     }
@@ -82,23 +82,21 @@ public class DuckDbSource {
     }
 
     public void query(String sql, SemanticQueryResp queryResultWithColumns) {
-        duckDbJdbcTemplate.query(
-                sql,
-                rs -> {
-                    if (null == rs) {
-                        return queryResultWithColumns;
-                    }
-                    ResultSetMetaData metaData = rs.getMetaData();
-                    List<QueryColumn> queryColumns = new ArrayList<>();
-                    for (int i = 1; i <= metaData.getColumnCount(); i++) {
-                        String key = metaData.getColumnLabel(i);
-                        queryColumns.add(new QueryColumn(key, metaData.getColumnTypeName(i)));
-                    }
-                    queryResultWithColumns.setColumns(queryColumns);
-                    List<Map<String, Object>> resultList = buildResult(rs);
-                    queryResultWithColumns.setResultList(resultList);
-                    return queryResultWithColumns;
-                });
+        duckDbJdbcTemplate.query(sql, rs -> {
+            if (null == rs) {
+                return queryResultWithColumns;
+            }
+            ResultSetMetaData metaData = rs.getMetaData();
+            List<QueryColumn> queryColumns = new ArrayList<>();
+            for (int i = 1; i <= metaData.getColumnCount(); i++) {
+                String key = metaData.getColumnLabel(i);
+                queryColumns.add(new QueryColumn(key, metaData.getColumnTypeName(i)));
+            }
+            queryResultWithColumns.setColumns(queryColumns);
+            List<Map<String, Object>> resultList = buildResult(rs);
+            queryResultWithColumns.setResultList(resultList);
+            return queryResultWithColumns;
+        });
     }
 
     public static List<Map<String, Object>> buildResult(ResultSet resultSet) {

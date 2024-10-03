@@ -23,8 +23,8 @@ import java.util.Objects;
 @Service
 public class LLMResponseService {
 
-    public SemanticParseInfo addParseInfo(
-            ChatQueryContext queryCtx, ParseResult parseResult, String s2SQL, Double weight) {
+    public SemanticParseInfo addParseInfo(ChatQueryContext queryCtx, ParseResult parseResult,
+            String s2SQL, Double weight) {
         if (Objects.isNull(weight)) {
             weight = 0D;
         }
@@ -33,20 +33,16 @@ public class LLMResponseService {
         parseInfo.setDataSet(queryCtx.getSemanticSchema().getDataSet(parseResult.getDataSetId()));
         parseInfo.setQueryConfig(
                 queryCtx.getSemanticSchema().getQueryConfig(parseResult.getDataSetId()));
-        parseInfo
-                .getElementMatches()
+        parseInfo.getElementMatches()
                 .addAll(queryCtx.getMapInfo().getMatchedElements(parseInfo.getDataSetId()));
 
         Map<String, Object> properties = new HashMap<>();
         properties.put(Constants.CONTEXT, parseResult);
         properties.put("type", "internal");
-        Text2SQLExemplar exemplar =
-                Text2SQLExemplar.builder()
-                        .question(queryCtx.getQueryText())
-                        .sideInfo(parseResult.getLlmResp().getSideInfo())
-                        .dbSchema(parseResult.getLlmResp().getSchema())
-                        .sql(parseResult.getLlmResp().getSqlOutput())
-                        .build();
+        Text2SQLExemplar exemplar = Text2SQLExemplar.builder().question(queryCtx.getQueryText())
+                .sideInfo(parseResult.getLlmResp().getSideInfo())
+                .dbSchema(parseResult.getLlmResp().getSchema())
+                .sql(parseResult.getLlmResp().getSqlOutput()).build();
         properties.put(Text2SQLExemplar.PROPERTY_KEY, exemplar);
         parseInfo.setProperties(properties);
         parseInfo.setScore(queryCtx.getQueryText().length() * (1 + weight));

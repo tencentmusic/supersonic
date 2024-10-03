@@ -32,25 +32,18 @@ public class ContextInheritParser implements SemanticParser {
 
     private static final Map<SchemaElementType, List<SchemaElementType>> MUTUAL_EXCLUSIVE_MAP =
             Stream.of(
-                            new AbstractMap.SimpleEntry<>(
-                                    SchemaElementType.METRIC,
-                                    Arrays.asList(SchemaElementType.METRIC)),
-                            new AbstractMap.SimpleEntry<>(
-                                    SchemaElementType.DIMENSION,
-                                    Arrays.asList(
-                                            SchemaElementType.DIMENSION, SchemaElementType.VALUE)),
-                            new AbstractMap.SimpleEntry<>(
-                                    SchemaElementType.VALUE,
-                                    Arrays.asList(
-                                            SchemaElementType.VALUE, SchemaElementType.DIMENSION)),
-                            new AbstractMap.SimpleEntry<>(
-                                    SchemaElementType.ENTITY,
-                                    Arrays.asList(SchemaElementType.ENTITY)),
-                            new AbstractMap.SimpleEntry<>(
-                                    SchemaElementType.DATASET,
-                                    Arrays.asList(SchemaElementType.DATASET)),
-                            new AbstractMap.SimpleEntry<>(
-                                    SchemaElementType.ID, Arrays.asList(SchemaElementType.ID)))
+                    new AbstractMap.SimpleEntry<>(SchemaElementType.METRIC,
+                            Arrays.asList(SchemaElementType.METRIC)),
+                    new AbstractMap.SimpleEntry<>(SchemaElementType.DIMENSION,
+                            Arrays.asList(SchemaElementType.DIMENSION, SchemaElementType.VALUE)),
+                    new AbstractMap.SimpleEntry<>(SchemaElementType.VALUE,
+                            Arrays.asList(SchemaElementType.VALUE, SchemaElementType.DIMENSION)),
+                    new AbstractMap.SimpleEntry<>(SchemaElementType.ENTITY,
+                            Arrays.asList(SchemaElementType.ENTITY)),
+                    new AbstractMap.SimpleEntry<>(SchemaElementType.DATASET,
+                            Arrays.asList(SchemaElementType.DATASET)),
+                    new AbstractMap.SimpleEntry<>(SchemaElementType.ID,
+                            Arrays.asList(SchemaElementType.ID)))
                     .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
     @Override
@@ -67,13 +60,12 @@ public class ContextInheritParser implements SemanticParser {
                 chatQueryContext.getMapInfo().getMatchedElements(dataSetId);
 
         List<SchemaElementMatch> matchesToInherit = new ArrayList<>();
-        for (SchemaElementMatch match :
-                chatQueryContext.getContextParseInfo().getElementMatches()) {
+        for (SchemaElementMatch match : chatQueryContext.getContextParseInfo()
+                .getElementMatches()) {
             SchemaElementType matchType = match.getElement().getType();
             // mutual exclusive element types should not be inherited
-            RuleSemanticQuery ruleQuery =
-                    QueryManager.getRuleQuery(
-                            chatQueryContext.getContextParseInfo().getQueryMode());
+            RuleSemanticQuery ruleQuery = QueryManager
+                    .getRuleQuery(chatQueryContext.getContextParseInfo().getQueryMode());
             if (!containsTypes(elementMatches, matchType, ruleQuery)) {
                 match.setInherited(true);
                 matchesToInherit.add(match);
@@ -85,16 +77,16 @@ public class ContextInheritParser implements SemanticParser {
                 RuleSemanticQuery.resolve(dataSetId, elementMatches, chatQueryContext);
         for (RuleSemanticQuery query : queries) {
             query.fillParseInfo(chatQueryContext);
-            if (existSameQuery(
-                    query.getParseInfo().getDataSetId(), query.getQueryMode(), chatQueryContext)) {
+            if (existSameQuery(query.getParseInfo().getDataSetId(), query.getQueryMode(),
+                    chatQueryContext)) {
                 continue;
             }
             chatQueryContext.getCandidateQueries().add(query);
         }
     }
 
-    private boolean existSameQuery(
-            Long dataSetId, String queryMode, ChatQueryContext chatQueryContext) {
+    private boolean existSameQuery(Long dataSetId, String queryMode,
+            ChatQueryContext chatQueryContext) {
         for (SemanticQuery semanticQuery : chatQueryContext.getCandidateQueries()) {
             if (semanticQuery.getQueryMode().equals(queryMode)
                     && semanticQuery.getParseInfo().getDataSetId().equals(dataSetId)) {
@@ -104,33 +96,26 @@ public class ContextInheritParser implements SemanticParser {
         return false;
     }
 
-    private boolean containsTypes(
-            List<SchemaElementMatch> matches,
-            SchemaElementType matchType,
+    private boolean containsTypes(List<SchemaElementMatch> matches, SchemaElementType matchType,
             RuleSemanticQuery ruleQuery) {
         List<SchemaElementType> types = MUTUAL_EXCLUSIVE_MAP.get(matchType);
 
-        return matches.stream()
-                .anyMatch(
-                        m -> {
-                            SchemaElementType type = m.getElement().getType();
-                            if (Objects.nonNull(ruleQuery)
-                                    && ruleQuery instanceof MetricSemanticQuery
-                                    && !(ruleQuery instanceof MetricIdQuery)) {
-                                return types.contains(type);
-                            }
-                            return type.equals(matchType);
-                        });
+        return matches.stream().anyMatch(m -> {
+            SchemaElementType type = m.getElement().getType();
+            if (Objects.nonNull(ruleQuery) && ruleQuery instanceof MetricSemanticQuery
+                    && !(ruleQuery instanceof MetricIdQuery)) {
+                return types.contains(type);
+            }
+            return type.equals(matchType);
+        });
     }
 
     protected boolean shouldInherit(ChatQueryContext chatQueryContext) {
         // if candidates only have MetricModel mode, count in context
         List<SemanticQuery> metricModelQueries =
                 chatQueryContext.getCandidateQueries().stream()
-                        .filter(
-                                query ->
-                                        query instanceof MetricModelQuery
-                                                || query instanceof DetailDimensionQuery)
+                        .filter(query -> query instanceof MetricModelQuery
+                                || query instanceof DetailDimensionQuery)
                         .collect(Collectors.toList());
         return metricModelQueries.size() == chatQueryContext.getCandidateQueries().size();
     }

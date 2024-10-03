@@ -45,9 +45,12 @@ import java.util.stream.Collectors;
 public class DatabaseServiceImpl extends ServiceImpl<DatabaseDOMapper, DatabaseDO>
         implements DatabaseService {
 
-    @Autowired private SqlUtils sqlUtils;
+    @Autowired
+    private SqlUtils sqlUtils;
 
-    @Lazy @Autowired private ModelService datasourceService;
+    @Lazy
+    @Autowired
+    private ModelService datasourceService;
 
     @Override
     public boolean testConnect(DatabaseReq databaseReq, User user) {
@@ -84,19 +87,18 @@ public class DatabaseServiceImpl extends ServiceImpl<DatabaseDOMapper, DatabaseD
     }
 
     private void fillPermission(List<DatabaseResp> databaseResps, User user) {
-        databaseResps.forEach(
-                databaseResp -> {
-                    if (databaseResp.getAdmins().contains(user.getName())
-                            || user.getName().equalsIgnoreCase(databaseResp.getCreatedBy())
-                            || user.isSuperAdmin()) {
-                        databaseResp.setHasPermission(true);
-                        databaseResp.setHasEditPermission(true);
-                        databaseResp.setHasUsePermission(true);
-                    }
-                    if (databaseResp.getViewers().contains(user.getName())) {
-                        databaseResp.setHasUsePermission(true);
-                    }
-                });
+        databaseResps.forEach(databaseResp -> {
+            if (databaseResp.getAdmins().contains(user.getName())
+                    || user.getName().equalsIgnoreCase(databaseResp.getCreatedBy())
+                    || user.isSuperAdmin()) {
+                databaseResp.setHasPermission(true);
+                databaseResp.setHasEditPermission(true);
+                databaseResp.setHasUsePermission(true);
+            }
+            if (databaseResp.getViewers().contains(user.getName())) {
+                databaseResp.setHasUsePermission(true);
+            }
+        });
     }
 
     @Override
@@ -135,9 +137,8 @@ public class DatabaseServiceImpl extends ServiceImpl<DatabaseDOMapper, DatabaseD
         }
         checkPermission(databaseResp, user);
         String sql = sqlExecuteReq.getSql();
-        sql =
-                SqlVariableParseUtils.parse(
-                        sql, sqlExecuteReq.getSqlVariables(), Lists.newArrayList());
+        sql = SqlVariableParseUtils.parse(sql, sqlExecuteReq.getSqlVariables(),
+                Lists.newArrayList());
         return executeSql(sql, databaseResp);
     }
 
@@ -161,10 +162,8 @@ public class DatabaseServiceImpl extends ServiceImpl<DatabaseDOMapper, DatabaseD
         }
         // Add default parameters for unknown databases
         if (!CollectionUtils.isEmpty(databaseList)) {
-            List<String> databaseTypeList =
-                    databaseList.stream()
-                            .map(databaseResp -> databaseResp.getType())
-                            .collect(Collectors.toList());
+            List<String> databaseTypeList = databaseList.stream()
+                    .map(databaseResp -> databaseResp.getType()).collect(Collectors.toList());
             DefaultParametersBuilder defaultParametersBuilder = new DefaultParametersBuilder();
             for (String dbType : databaseTypeList) {
                 if (!parametersBuilderMap.containsKey(dbType)) {
@@ -174,8 +173,7 @@ public class DatabaseServiceImpl extends ServiceImpl<DatabaseDOMapper, DatabaseD
         }
         // Add the OTHER type at the end
         if (parametersBuilderMap.containsKey(EngineType.OTHER.getName())) {
-            result.put(
-                    EngineType.OTHER.getName(),
+            result.put(EngineType.OTHER.getName(),
                     parametersBuilderMap.get(EngineType.OTHER.getName()).build());
         }
         return result;
@@ -240,14 +238,11 @@ public class DatabaseServiceImpl extends ServiceImpl<DatabaseDOMapper, DatabaseD
     private void checkPermission(DatabaseResp databaseResp, User user) {
         List<String> admins = databaseResp.getAdmins();
         List<String> viewers = databaseResp.getViewers();
-        if (!admins.contains(user.getName())
-                && !viewers.contains(user.getName())
+        if (!admins.contains(user.getName()) && !viewers.contains(user.getName())
                 && !databaseResp.getCreatedBy().equalsIgnoreCase(user.getName())
                 && !user.isSuperAdmin()) {
-            String message =
-                    String.format(
-                            "您暂无当前数据库%s权限, 请联系数据库创建人:%s开通",
-                            databaseResp.getName(), databaseResp.getCreatedBy());
+            String message = String.format("您暂无当前数据库%s权限, 请联系数据库创建人:%s开通", databaseResp.getName(),
+                    databaseResp.getCreatedBy());
             throw new RuntimeException(message);
         }
     }

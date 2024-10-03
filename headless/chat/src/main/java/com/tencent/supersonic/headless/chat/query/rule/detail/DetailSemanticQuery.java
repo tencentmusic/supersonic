@@ -23,8 +23,8 @@ public abstract class DetailSemanticQuery extends RuleSemanticQuery {
     }
 
     @Override
-    public List<SchemaElementMatch> match(
-            List<SchemaElementMatch> candidateElementMatches, ChatQueryContext queryCtx) {
+    public List<SchemaElementMatch> match(List<SchemaElementMatch> candidateElementMatches,
+            ChatQueryContext queryCtx) {
         return super.match(candidateElementMatches, queryCtx);
     }
 
@@ -43,8 +43,7 @@ public abstract class DetailSemanticQuery extends RuleSemanticQuery {
         DataSetSchema dataSetSchema = dataSetSchemaMap.get(parseInfo.getDataSetId());
         TimeDefaultConfig timeDefaultConfig = dataSetSchema.getTagTypeTimeDefaultConfig();
 
-        if (Objects.nonNull(timeDefaultConfig)
-                && Objects.nonNull(timeDefaultConfig.getUnit())
+        if (Objects.nonNull(timeDefaultConfig) && Objects.nonNull(timeDefaultConfig.getUnit())
                 && timeDefaultConfig.getUnit() != -1) {
             DateConf dateInfo = new DateConf();
             int unit = timeDefaultConfig.getUnit();

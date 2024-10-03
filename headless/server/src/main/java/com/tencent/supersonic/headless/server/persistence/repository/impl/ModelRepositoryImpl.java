@@ -19,8 +19,8 @@ public class ModelRepositoryImpl implements ModelRepository {
 
     private ModelDOCustomMapper modelDOCustomMapper;
 
-    public ModelRepositoryImpl(
-            ModelDOMapper modelDOMapper, ModelDOCustomMapper modelDOCustomMapper) {
+    public ModelRepositoryImpl(ModelDOMapper modelDOMapper,
+            ModelDOCustomMapper modelDOCustomMapper) {
         this.modelDOMapper = modelDOMapper;
         this.modelDOCustomMapper = modelDOCustomMapper;
     }

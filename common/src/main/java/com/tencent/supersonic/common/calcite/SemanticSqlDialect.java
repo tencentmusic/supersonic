@@ -17,8 +17,8 @@ public class SemanticSqlDialect extends SqlDialect {
         super(context);
     }
 
-    public static void unparseFetchUsingAnsi(
-            SqlWriter writer, @Nullable SqlNode offset, @Nullable SqlNode fetch) {
+    public static void unparseFetchUsingAnsi(SqlWriter writer, @Nullable SqlNode offset,
+            @Nullable SqlNode fetch) {
         Preconditions.checkArgument(fetch != null || offset != null);
         SqlWriter.Frame fetchFrame;
         writer.newlineAndIndent();
@@ -74,11 +74,11 @@ public class SemanticSqlDialect extends SqlDialect {
         return true;
     }
 
-    public void unparseSqlIntervalLiteral(
-            SqlWriter writer, SqlIntervalLiteral literal, int leftPrec, int rightPrec) {}
+    public void unparseSqlIntervalLiteral(SqlWriter writer, SqlIntervalLiteral literal,
+            int leftPrec, int rightPrec) {}
 
-    public void unparseOffsetFetch(
-            SqlWriter writer, @Nullable SqlNode offset, @Nullable SqlNode fetch) {
+    public void unparseOffsetFetch(SqlWriter writer, @Nullable SqlNode offset,
+            @Nullable SqlNode fetch) {
         unparseFetchUsingAnsi(writer, offset, fetch);
     }
 }

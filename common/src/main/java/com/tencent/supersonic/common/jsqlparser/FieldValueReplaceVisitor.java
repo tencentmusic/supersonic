@@ -31,8 +31,8 @@ public class FieldValueReplaceVisitor extends ExpressionVisitorAdapter {
     private boolean exactReplace;
     private Map<String, Map<String, String>> filedNameToValueMap;
 
-    public FieldValueReplaceVisitor(
-            boolean exactReplace, Map<String, Map<String, String>> filedNameToValueMap) {
+    public FieldValueReplaceVisitor(boolean exactReplace,
+            Map<String, Map<String, String>> filedNameToValueMap) {
         this.exactReplace = exactReplace;
         this.filedNameToValueMap = filedNameToValueMap;
     }
@@ -67,24 +67,20 @@ public class FieldValueReplaceVisitor extends ExpressionVisitorAdapter {
         ExpressionList rightItemsList = (ExpressionList) inExpression.getRightExpression();
         List<Expression> expressions = rightItemsList.getExpressions();
         List<String> values = new ArrayList<>();
-        expressions.stream()
-                .forEach(
-                        o -> {
-                            if (o instanceof StringValue) {
-                                values.add(((StringValue) o).getValue());
-                            }
-                        });
+        expressions.stream().forEach(o -> {
+            if (o instanceof StringValue) {
+                values.add(((StringValue) o).getValue());
+            }
+        });
         if (valueMap == null || CollectionUtils.isEmpty(values)) {
             return;
         }
         List<Expression> newExpressions = new ArrayList<>();
-        values.stream()
-                .forEach(
-                        o -> {
-                            String replaceValue = valueMap.getOrDefault(o, o);
-                            StringValue stringValue = new StringValue(replaceValue);
-                            newExpressions.add(stringValue);
-                        });
+        values.stream().forEach(o -> {
+            String replaceValue = valueMap.getOrDefault(o, o);
+            StringValue stringValue = new StringValue(replaceValue);
+            newExpressions.add(stringValue);
+        });
         rightItemsList.setExpressions(newExpressions);
         inExpression.setRightExpression(rightItemsList);
     }

@@ -42,8 +42,8 @@ public class ParserDefaultConverter implements QueryConverter {
         BeanUtils.copyProperties(metricReq, metricQueryParam);
     }
 
-    public MetricQueryParam generateSqlCommand(
-            QueryParam queryParam, QueryStatement queryStatement) {
+    public MetricQueryParam generateSqlCommand(QueryParam queryParam,
+            QueryStatement queryStatement) {
         SqlGenerateUtils sqlGenerateUtils = ContextUtils.getBean(SqlGenerateUtils.class);
         MetricQueryParam metricQueryParam = new MetricQueryParam();
         metricQueryParam.setMetrics(queryParam.getMetrics());
@@ -52,10 +52,9 @@ public class ParserDefaultConverter implements QueryConverter {
         log.info("in generateSqlCommend, complete where:{}", where);
 
         metricQueryParam.setWhere(where);
-        metricQueryParam.setOrder(
-                queryParam.getOrders().stream()
-                        .map(order -> new ColumnOrder(order.getColumn(), order.getDirection()))
-                        .collect(Collectors.toList()));
+        metricQueryParam.setOrder(queryParam.getOrders().stream()
+                .map(order -> new ColumnOrder(order.getColumn(), order.getDirection()))
+                .collect(Collectors.toList()));
         metricQueryParam.setLimit(queryParam.getLimit());
 
         // support detail query
