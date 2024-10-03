@@ -40,9 +40,7 @@ class QueryFilterParserTest {
 
         String parse = QueryFilterParser.parse(queryFilters);
 
-        Assert.assertEquals(
-                parse,
-                "age > 30 AND name LIKE 'John%' AND id IN (1, 2, 3, 4)"
-                        + " AND status NOT_IN ('inactive', 'deleted')");
+        Assert.assertEquals(parse, "age > 30 AND name LIKE 'John%' AND id IN (1, 2, 3, 4)"
+                + " AND status NOT_IN ('inactive', 'deleted')");
     }
 }

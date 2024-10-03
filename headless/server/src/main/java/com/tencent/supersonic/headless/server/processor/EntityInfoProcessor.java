@@ -16,24 +16,18 @@ public class EntityInfoProcessor implements ResultProcessor {
 
     @Override
     public void process(ParseResp parseResp, ChatQueryContext chatQueryContext) {
-        parseResp
-                .getSelectedParses()
-                .forEach(
-                        parseInfo -> {
-                            String queryMode = parseInfo.getQueryMode();
-                            if (!QueryManager.isDetailQuery(queryMode)
-                                    && !QueryManager.isMetricQuery(queryMode)) {
-                                return;
-                            }
+        parseResp.getSelectedParses().forEach(parseInfo -> {
+            String queryMode = parseInfo.getQueryMode();
+            if (!QueryManager.isDetailQuery(queryMode) && !QueryManager.isMetricQuery(queryMode)) {
+                return;
+            }
 
-                            SemanticLayerService semanticService =
-                                    ContextUtils.getBean(SemanticLayerService.class);
-                            DataSetSchema dataSetSchema =
-                                    semanticService.getDataSetSchema(parseInfo.getDataSetId());
-                            EntityInfo entityInfo =
-                                    semanticService.getEntityInfo(
-                                            parseInfo, dataSetSchema, chatQueryContext.getUser());
-                            parseInfo.setEntityInfo(entityInfo);
-                        });
+            SemanticLayerService semanticService = ContextUtils.getBean(SemanticLayerService.class);
+            DataSetSchema dataSetSchema =
+                    semanticService.getDataSetSchema(parseInfo.getDataSetId());
+            EntityInfo entityInfo = semanticService.getEntityInfo(parseInfo, dataSetSchema,
+                    chatQueryContext.getUser());
+            parseInfo.setEntityInfo(entityInfo);
+        });
     }
 }

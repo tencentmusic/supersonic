@@ -31,8 +31,7 @@ public class MetricDrillDownCheckerTest {
         MetricDrillDownChecker metricDrillDownChecker = new MetricDrillDownChecker();
         String sql = "select page, sum(pv) from t_1 group by page";
         SemanticSchemaResp semanticSchemaResp = mockModelSchemaResp();
-        assertThrows(
-                InvalidArgumentException.class,
+        assertThrows(InvalidArgumentException.class,
                 () -> metricDrillDownChecker.checkQuery(semanticSchemaResp, sql));
     }
 
@@ -41,8 +40,7 @@ public class MetricDrillDownCheckerTest {
         MetricDrillDownChecker metricDrillDownChecker = new MetricDrillDownChecker();
         String sql = "select user_name, count(distinct uv) from t_1 group by user_name";
         SemanticSchemaResp semanticSchemaResp = mockModelSchemaResp();
-        assertThrows(
-                InvalidArgumentException.class,
+        assertThrows(InvalidArgumentException.class,
                 () -> metricDrillDownChecker.checkQuery(semanticSchemaResp, sql));
     }
 
@@ -79,26 +77,23 @@ public class MetricDrillDownCheckerTest {
     }
 
     private List<DimSchemaResp> mockDimensions() {
-        return Lists.newArrayList(
-                DataUtils.mockDimension(1L, "user_name", "用户名"),
+        return Lists.newArrayList(DataUtils.mockDimension(1L, "user_name", "用户名"),
                 DataUtils.mockDimension(2L, "department", "部门"),
                 DataUtils.mockDimension(3L, "page", "页面"));
     }
 
     private List<MetricSchemaResp> mockMetrics() {
-        return Lists.newArrayList(
-                DataUtils.mockMetric(
-                        1L,
-                        "pv",
-                        "访问次数",
-                        Lists.newArrayList(new DrillDownDimension(1L), new DrillDownDimension(2L))),
-                DataUtils.mockMetric(
-                        2L, "uv", "访问用户数", Lists.newArrayList(new DrillDownDimension(2L, true))));
+        return Lists
+                .newArrayList(
+                        DataUtils.mockMetric(1L, "pv", "访问次数",
+                                Lists.newArrayList(new DrillDownDimension(1L),
+                                        new DrillDownDimension(2L))),
+                        DataUtils.mockMetric(2L, "uv", "访问用户数",
+                                Lists.newArrayList(new DrillDownDimension(2L, true))));
     }
 
     private List<MetricSchemaResp> mockMetricsNoDrillDownSetting() {
-        return Lists.newArrayList(
-                DataUtils.mockMetric(1L, "pv", Lists.newArrayList()),
+        return Lists.newArrayList(DataUtils.mockMetric(1L, "pv", Lists.newArrayList()),
                 DataUtils.mockMetric(2L, "uv", Lists.newArrayList()));
     }
 }

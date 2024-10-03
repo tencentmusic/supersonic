@@ -30,7 +30,8 @@ public class JsonUtil {
 
     public static final JsonUtil INSTANCE = new JsonUtil();
 
-    @Getter private final ObjectMapper objectMapper = new ObjectMapper();
+    @Getter
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     public JsonUtil() {
         // 当属性为null时不参与序列化
@@ -400,10 +401,8 @@ public class JsonUtil {
         try {
             notNull(keyClass, "key class is null");
             notNull(valueClass, "value class is null");
-            JavaType type =
-                    objectMapper
-                            .getTypeFactory()
-                            .constructParametricType(Map.class, keyClass, valueClass);
+            JavaType type = objectMapper.getTypeFactory().constructParametricType(Map.class,
+                    keyClass, valueClass);
             return objectMapper.readValue(json, type);
         } catch (Exception e) {
             throw new JsonException(e);
@@ -503,8 +502,7 @@ public class JsonUtil {
                 }
                 try {
                     JsonNode jsonNode = readTree(string);
-                    return objectMapper
-                            .writerWithDefaultPrettyPrinter()
+                    return objectMapper.writerWithDefaultPrettyPrinter()
                             .writeValueAsString(jsonNode);
                 } catch (Exception e) {
                     return string;
@@ -617,10 +615,7 @@ public class JsonUtil {
             super(cause);
         }
 
-        private JsonException(
-                String message,
-                Throwable cause,
-                boolean enableSuppression,
+        private JsonException(String message, Throwable cause, boolean enableSuppression,
                 boolean writableStackTrace) {
             super(message, cause, enableSuppression, writableStackTrace);
         }

@@ -17,8 +17,8 @@ public class DimensionRepositoryImpl implements DimensionRepository {
 
     private DimensionDOCustomMapper dimensionDOCustomMapper;
 
-    public DimensionRepositoryImpl(
-            DimensionDOMapper dimensionDOMapper, DimensionDOCustomMapper dimensionDOCustomMapper) {
+    public DimensionRepositoryImpl(DimensionDOMapper dimensionDOMapper,
+            DimensionDOCustomMapper dimensionDOCustomMapper) {
         this.dimensionDOMapper = dimensionDOMapper;
         this.dimensionDOCustomMapper = dimensionDOCustomMapper;
     }

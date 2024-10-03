@@ -150,13 +150,8 @@ public class S2VisitsDemo extends S2BaseDemo {
         agent.setDescription("帮助您用自然语言查询指标，支持时间限定、条件筛选、下钻维度以及聚合统计");
         agent.setStatus(1);
         agent.setEnableSearch(1);
-        agent.setExamples(
-                Lists.newArrayList(
-                        "超音数访问次数",
-                        "近15天超音数访问次数汇总",
-                        "按部门统计超音数的访问人数",
-                        "对比alice和lucy的停留时长",
-                        "超音数访问次数最高的部门"));
+        agent.setExamples(Lists.newArrayList("超音数访问次数", "近15天超音数访问次数汇总", "按部门统计超音数的访问人数",
+                "对比alice和lucy的停留时长", "超音数访问次数最高的部门"));
         AgentConfig agentConfig = new AgentConfig();
         RuleParserTool ruleQueryTool = new RuleParserTool();
         ruleQueryTool.setType(AgentToolType.NL2SQL_RULE);
@@ -189,9 +184,8 @@ public class S2VisitsDemo extends S2BaseDemo {
         return domainService.createDomain(domainReq, user);
     }
 
-    public ModelResp addModel_1(
-            DomainResp s2Domain, DatabaseResp s2Database, TagObjectResp s2TagObject)
-            throws Exception {
+    public ModelResp addModel_1(DomainResp s2Domain, DatabaseResp s2Database,
+            TagObjectResp s2TagObject) throws Exception {
         ModelReq modelReq = new ModelReq();
         modelReq.setName("用户部门");
         modelReq.setBizName("user_department");
@@ -259,9 +253,8 @@ public class S2VisitsDemo extends S2BaseDemo {
         fields.add(Field.builder().fieldName("pv").dataType("Long").build());
         fields.add(Field.builder().fieldName("user_id").dataType("Varchar").build());
         modelDetail.setFields(fields);
-        modelDetail.setSqlQuery(
-                "SELECT imp_date, user_name, page, 1 as pv, "
-                        + "user_name as user_id FROM s2_pv_uv_statis");
+        modelDetail.setSqlQuery("SELECT imp_date, user_name, page, 1 as pv, "
+                + "user_name as user_id FROM s2_pv_uv_statis");
         modelDetail.setQueryType("sql_query");
         modelReq.setModelDetail(modelDetail);
         return modelService.createModel(modelReq, user);
@@ -302,15 +295,15 @@ public class S2VisitsDemo extends S2BaseDemo {
         fields.add(Field.builder().fieldName("page").dataType("Varchar").build());
         fields.add(Field.builder().fieldName("stay_hours").dataType("Double").build());
         modelDetail.setFields(fields);
-        modelDetail.setSqlQuery(
-                "select imp_date,user_name,stay_hours,page from s2_stay_time_statis");
+        modelDetail
+                .setSqlQuery("select imp_date,user_name,stay_hours,page from s2_stay_time_statis");
         modelDetail.setQueryType("sql_query");
         modelReq.setModelDetail(modelDetail);
         return modelService.createModel(modelReq, user);
     }
 
-    public void addModelRela_1(
-            DomainResp s2Domain, ModelResp userDepartmentModel, ModelResp pvUvModel) {
+    public void addModelRela_1(DomainResp s2Domain, ModelResp userDepartmentModel,
+            ModelResp pvUvModel) {
         List<JoinCondition> joinConditions = Lists.newArrayList();
         joinConditions.add(new JoinCondition("user_name", "user_name", FilterOperatorEnum.EQUALS));
         ModelRela modelRelaReq = new ModelRela();
@@ -322,8 +315,8 @@ public class S2VisitsDemo extends S2BaseDemo {
         modelRelaService.save(modelRelaReq, user);
     }
 
-    public void addModelRela_2(
-            DomainResp s2Domain, ModelResp userDepartmentModel, ModelResp stayTimeModel) {
+    public void addModelRela_2(DomainResp s2Domain, ModelResp userDepartmentModel,
+            ModelResp stayTimeModel) {
         List<JoinCondition> joinConditions = Lists.newArrayList();
         joinConditions.add(new JoinCondition("user_name", "user_name", FilterOperatorEnum.EQUALS));
         ModelRela modelRelaReq = new ModelRela();
@@ -336,8 +329,7 @@ public class S2VisitsDemo extends S2BaseDemo {
     }
 
     private void addTags(ModelResp model) {
-        addTag(
-                dimensionService.getDimension("department", model.getId()).getId(),
+        addTag(dimensionService.getDimension("department", model.getId()).getId(),
                 TagDefineType.DIMENSION);
     }
 
@@ -358,9 +350,8 @@ public class S2VisitsDemo extends S2BaseDemo {
         dimensionService.updateDimension(dimensionReq, user);
     }
 
-    public void updateMetric(
-            ModelResp stayTimeModel, DimensionResp departmentDimension, DimensionResp userDimension)
-            throws Exception {
+    public void updateMetric(ModelResp stayTimeModel, DimensionResp departmentDimension,
+            DimensionResp userDimension) throws Exception {
         MetricResp stayHoursMetric = metricService.getMetric(stayTimeModel.getId(), "stay_hours");
         MetricReq metricReq = new MetricReq();
         metricReq.setModelId(stayTimeModel.getId());
@@ -373,25 +364,19 @@ public class S2VisitsDemo extends S2BaseDemo {
         MetricDefineByMeasureParams metricTypeParams = new MetricDefineByMeasureParams();
         metricTypeParams.setExpr("s2_stay_time_statis_stay_hours");
         List<MeasureParam> measures = new ArrayList<>();
-        MeasureParam measure =
-                new MeasureParam(
-                        "s2_stay_time_statis_stay_hours", "", AggOperatorEnum.SUM.getOperator());
+        MeasureParam measure = new MeasureParam("s2_stay_time_statis_stay_hours", "",
+                AggOperatorEnum.SUM.getOperator());
         measures.add(measure);
         metricTypeParams.setMeasures(measures);
         metricReq.setMetricDefineByMeasureParams(metricTypeParams);
         metricReq.setMetricDefineType(MetricDefineType.MEASURE);
-        metricReq.setRelateDimension(
-                getRelateDimension(
-                        Lists.newArrayList(departmentDimension.getId(), userDimension.getId())));
+        metricReq.setRelateDimension(getRelateDimension(
+                Lists.newArrayList(departmentDimension.getId(), userDimension.getId())));
         metricService.updateMetric(metricReq, user);
     }
 
-    public void updateMetric_pv(
-            ModelResp pvUvModel,
-            DimensionResp departmentDimension,
-            DimensionResp userDimension,
-            MetricResp metricPv)
-            throws Exception {
+    public void updateMetric_pv(ModelResp pvUvModel, DimensionResp departmentDimension,
+            DimensionResp userDimension, MetricResp metricPv) throws Exception {
         MetricReq metricReq = new MetricReq();
         metricReq.setModelId(pvUvModel.getId());
         metricReq.setId(metricPv.getId());
@@ -407,9 +392,8 @@ public class S2VisitsDemo extends S2BaseDemo {
         metricTypeParams.setMeasures(measures);
         metricReq.setMetricDefineByMeasureParams(metricTypeParams);
         metricReq.setMetricDefineType(MetricDefineType.MEASURE);
-        metricReq.setRelateDimension(
-                getRelateDimension(
-                        Lists.newArrayList(departmentDimension.getId(), userDimension.getId())));
+        metricReq.setRelateDimension(getRelateDimension(
+                Lists.newArrayList(departmentDimension.getId(), userDimension.getId())));
         metricService.updateMetric(metricReq, user);
     }
 
@@ -434,12 +418,8 @@ public class S2VisitsDemo extends S2BaseDemo {
         return metricService.createMetric(metricReq, user);
     }
 
-    public MetricResp addMetric_pv_avg(
-            MetricResp metricPv,
-            MetricResp metricUv,
-            DimensionResp departmentDimension,
-            ModelResp pvModel)
-            throws Exception {
+    public MetricResp addMetric_pv_avg(MetricResp metricPv, MetricResp metricUv,
+            DimensionResp departmentDimension, ModelResp pvModel) throws Exception {
         MetricReq metricReq = new MetricReq();
         metricReq.setModelId(pvModel.getId());
         metricReq.setName("人均访问次数");

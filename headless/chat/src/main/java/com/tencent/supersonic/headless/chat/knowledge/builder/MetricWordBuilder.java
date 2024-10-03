@@ -29,20 +29,12 @@ public class MetricWordBuilder extends BaseWordWithAliasBuilder {
         DictWord dictWord = new DictWord();
         dictWord.setWord(word);
         Long modelId = schemaElement.getModel();
-        String nature =
-                DictWordType.NATURE_SPILT
-                        + modelId
-                        + DictWordType.NATURE_SPILT
-                        + schemaElement.getId()
-                        + DictWordType.METRIC.getType();
+        String nature = DictWordType.NATURE_SPILT + modelId + DictWordType.NATURE_SPILT
+                + schemaElement.getId() + DictWordType.METRIC.getType();
         if (isSuffix) {
-            nature =
-                    DictWordType.NATURE_SPILT
-                            + modelId
-                            + DictWordType.NATURE_SPILT
-                            + schemaElement.getId()
-                            + DictWordType.SUFFIX.getType()
-                            + DictWordType.METRIC.getType();
+            nature = DictWordType.NATURE_SPILT + modelId + DictWordType.NATURE_SPILT
+                    + schemaElement.getId() + DictWordType.SUFFIX.getType()
+                    + DictWordType.METRIC.getType();
         }
         dictWord.setNatureWithFrequency(String.format("%s " + DEFAULT_FREQUENCY, nature));
         return dictWord;

@@ -32,17 +32,15 @@ public class FileHelper {
     }
 
     private static File[] getFileList(File customFolder, String suffix) {
-        File[] customSubFiles =
-                customFolder.listFiles(
-                        file -> {
-                            if (file.isDirectory()) {
-                                return false;
-                            }
-                            if (file.getName().toLowerCase().endsWith(suffix)) {
-                                return true;
-                            }
-                            return false;
-                        });
+        File[] customSubFiles = customFolder.listFiles(file -> {
+            if (file.isDirectory()) {
+                return false;
+            }
+            if (file.getName().toLowerCase().endsWith(suffix)) {
+                return true;
+            }
+            return false;
+        });
         return customSubFiles;
     }
 

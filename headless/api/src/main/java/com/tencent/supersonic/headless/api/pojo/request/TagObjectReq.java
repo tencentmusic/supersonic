@@ -13,7 +13,8 @@ import java.util.Objects;
 @Data
 public class TagObjectReq extends SchemaItem {
 
-    @NotNull private Long domainId;
+    @NotNull
+    private Long domainId;
     private Map<String, Object> ext = new HashMap<>();
 
     public String getExtJson() {

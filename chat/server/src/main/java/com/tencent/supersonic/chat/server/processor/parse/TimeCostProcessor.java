@@ -11,11 +11,7 @@ public class TimeCostProcessor implements ParseResultProcessor {
     @Override
     public void process(ParseContext parseContext, ParseResp parseResp) {
         long parseStartTime = parseResp.getParseTimeCost().getParseStartTime();
-        parseResp
-                .getParseTimeCost()
-                .setParseTime(
-                        System.currentTimeMillis()
-                                - parseStartTime
-                                - parseResp.getParseTimeCost().getSqlTime());
+        parseResp.getParseTimeCost().setParseTime(System.currentTimeMillis() - parseStartTime
+                - parseResp.getParseTimeCost().getSqlTime());
     }
 }

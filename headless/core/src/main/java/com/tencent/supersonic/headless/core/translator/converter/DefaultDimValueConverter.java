@@ -34,18 +34,16 @@ public class DefaultDimValueConverter implements QueryConverter {
 
     @Override
     public void convert(QueryStatement queryStatement) {
-        List<Dimension> dimensions =
-                queryStatement.getSemanticModel().getDimensions().stream()
-                        .filter(dimension -> !CollectionUtils.isEmpty(dimension.getDefaultValues()))
-                        .collect(Collectors.toList());
+        List<Dimension> dimensions = queryStatement.getSemanticModel().getDimensions().stream()
+                .filter(dimension -> !CollectionUtils.isEmpty(dimension.getDefaultValues()))
+                .collect(Collectors.toList());
         if (CollectionUtils.isEmpty(dimensions)) {
             return;
         }
         String sql = queryStatement.getDataSetQueryParam().getSql();
-        List<String> whereFields =
-                SqlSelectHelper.getWhereFields(sql).stream()
-                        .filter(field -> !TimeDimensionEnum.containsTimeDimension(field))
-                        .collect(Collectors.toList());
+        List<String> whereFields = SqlSelectHelper.getWhereFields(sql).stream()
+                .filter(field -> !TimeDimensionEnum.containsTimeDimension(field))
+                .collect(Collectors.toList());
         if (!CollectionUtils.isEmpty(whereFields)) {
             return;
         }

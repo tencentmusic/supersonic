@@ -46,12 +46,8 @@ public class DictTaskServiceImpl implements DictTaskService {
     private final FileHandler fileHandler;
     private final DictWordService dictWordService;
 
-    public DictTaskServiceImpl(
-            DictRepository dictRepository,
-            DictUtils dictConverter,
-            DictUtils dictUtils,
-            FileHandler fileHandler,
-            DictWordService dictWordService) {
+    public DictTaskServiceImpl(DictRepository dictRepository, DictUtils dictConverter,
+            DictUtils dictUtils, FileHandler fileHandler, DictWordService dictWordService) {
         this.dictRepository = dictRepository;
         this.dictConverter = dictConverter;
         this.dictUtils = dictUtils;
@@ -80,11 +76,8 @@ public class DictTaskServiceImpl implements DictTaskService {
     }
 
     private DictItemResp fetchDictItemResp(DictSingleTaskReq taskReq) {
-        DictItemFilter dictItemFilter =
-                DictItemFilter.builder()
-                        .itemId(taskReq.getItemId())
-                        .type(taskReq.getType())
-                        .build();
+        DictItemFilter dictItemFilter = DictItemFilter.builder().itemId(taskReq.getItemId())
+                .type(taskReq.getType()).build();
         List<DictItemResp> dictItemRespList = dictRepository.queryDictConf(dictItemFilter);
         if (!CollectionUtils.isEmpty(dictItemRespList)) {
             return dictItemRespList.get(0);
@@ -159,14 +152,9 @@ public class DictTaskServiceImpl implements DictTaskService {
 
     @Override
     public PageInfo<DictValueResp> queryDictValue(DictValueReq dictValueReq, User user) {
-        String fileName =
-                String.format(
-                                "dic_value_%d_%s_%s",
-                                dictValueReq.getModelId(),
-                                dictValueReq.getType().name(),
-                                dictValueReq.getItemId())
-                        + Constants.DOT
-                        + dictFileType;
+        String fileName = String.format("dic_value_%d_%s_%s", dictValueReq.getModelId(),
+                dictValueReq.getType().name(), dictValueReq.getItemId()) + Constants.DOT
+                + dictFileType;
         PageInfo<DictValueResp> dictValueRespList =
                 fileHandler.queryDictValue(fileName, dictValueReq);
         return dictValueRespList;
@@ -174,14 +162,9 @@ public class DictTaskServiceImpl implements DictTaskService {
 
     @Override
     public String queryDictFilePath(DictValueReq dictValueReq, User user) {
-        String fileName =
-                String.format(
-                                "dic_value_%d_%s_%s",
-                                dictValueReq.getModelId(),
-                                dictValueReq.getType().name(),
-                                dictValueReq.getItemId())
-                        + Constants.DOT
-                        + dictFileType;
+        String fileName = String.format("dic_value_%d_%s_%s", dictValueReq.getModelId(),
+                dictValueReq.getType().name(), dictValueReq.getItemId()) + Constants.DOT
+                + dictFileType;
         return fileHandler.queryDictFilePath(fileName);
     }
 }

@@ -19,25 +19,17 @@ public class DashscopeModelFactory implements ModelFactory, InitializingBean {
 
     @Override
     public ChatLanguageModel createChatModel(ChatModelConfig modelConfig) {
-        return QwenChatModel.builder()
-                .baseUrl(modelConfig.getBaseUrl())
-                .apiKey(modelConfig.getApiKey())
-                .modelName(modelConfig.getModelName())
-                .temperature(
-                        modelConfig.getTemperature() == null
-                                ? 0L
-                                : modelConfig.getTemperature().floatValue())
-                .topP(modelConfig.getTopP())
-                .enableSearch(modelConfig.getEnableSearch())
-                .build();
+        return QwenChatModel.builder().baseUrl(modelConfig.getBaseUrl())
+                .apiKey(modelConfig.getApiKey()).modelName(modelConfig.getModelName())
+                .temperature(modelConfig.getTemperature() == null ? 0L
+                        : modelConfig.getTemperature().floatValue())
+                .topP(modelConfig.getTopP()).enableSearch(modelConfig.getEnableSearch()).build();
     }
 
     @Override
     public EmbeddingModel createEmbeddingModel(EmbeddingModelConfig embeddingModelConfig) {
-        return QwenEmbeddingModel.builder()
-                .apiKey(embeddingModelConfig.getApiKey())
-                .modelName(embeddingModelConfig.getModelName())
-                .build();
+        return QwenEmbeddingModel.builder().apiKey(embeddingModelConfig.getApiKey())
+                .modelName(embeddingModelConfig.getModelName()).build();
     }
 
     @Override

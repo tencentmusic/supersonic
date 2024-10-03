@@ -44,10 +44,10 @@ public class DimValueAspect {
     @Value("${s2.dimension.value.map.enable:true}")
     private Boolean dimensionValueMapEnable;
 
-    @Autowired private DimensionService dimensionService;
+    @Autowired
+    private DimensionService dimensionService;
 
-    @Around(
-            "execution(* com.tencent.supersonic.headless.server.facade.service.SemanticLayerService.queryByReq(..))")
+    @Around("execution(* com.tencent.supersonic.headless.server.facade.service.SemanticLayerService.queryByReq(..))")
     public Object handleDimValue(ProceedingJoinPoint joinPoint) throws Throwable {
         if (!dimensionValueMapEnable) {
             log.debug("dimensionValueMapEnable is false, skip dimensionValueMap");
@@ -108,22 +108,14 @@ public class DimValueAspect {
                 }
                 // consider '=' filter
                 if (expression.getOperator().equals(FilterOperatorEnum.EQUALS.getValue())) {
-                    dimension.getDimValueMaps().stream()
-                            .forEach(
-                                    dimValue -> {
-                                        if (!CollectionUtils.isEmpty(dimValue.getAlias())
-                                                && dimValue.getAlias()
-                                                        .contains(
-                                                                expression
-                                                                        .getFieldValue()
-                                                                        .toString())) {
-                                            getFiledNameToValueMap(
-                                                    filedNameToValueMap,
-                                                    expression.getFieldValue().toString(),
-                                                    dimValue.getTechName(),
-                                                    expression.getFieldName());
-                                        }
-                                    });
+                    dimension.getDimValueMaps().stream().forEach(dimValue -> {
+                        if (!CollectionUtils.isEmpty(dimValue.getAlias()) && dimValue.getAlias()
+                                .contains(expression.getFieldValue().toString())) {
+                            getFiledNameToValueMap(filedNameToValueMap,
+                                    expression.getFieldValue().toString(), dimValue.getTechName(),
+                                    expression.getFieldName());
+                        }
+                    });
                 }
                 // consider 'in' filter,each element needs to judge.
                 replaceInCondition(expression, dimension, filedNameToValueMap);
@@ -141,9 +133,7 @@ public class DimValueAspect {
         return queryResultWithColumns;
     }
 
-    public void replaceInCondition(
-            FieldExpression expression,
-            DimensionResp dimension,
+    public void replaceInCondition(FieldExpression expression, DimensionResp dimension,
             Map<String, Map<String, String>> filedNameToValueMap) {
         if (expression.getOperator().equals(FilterOperatorEnum.IN.getValue())) {
             String fieldValue = JsonUtil.toString(expression.getFieldValue());
@@ -165,27 +155,20 @@ public class DimValueAspect {
                 }
             }
             if (!revisedValues.equals(values)) {
-                getFiledNameToValueMap(
-                        filedNameToValueMap,
-                        JsonUtil.toString(values),
-                        JsonUtil.toString(revisedValues),
-                        expression.getFieldName());
+                getFiledNameToValueMap(filedNameToValueMap, JsonUtil.toString(values),
+                        JsonUtil.toString(revisedValues), expression.getFieldName());
             }
         }
     }
 
-    public void getFiledNameToValueMap(
-            Map<String, Map<String, String>> filedNameToValueMap,
-            String oldValue,
-            String newValue,
-            String fieldName) {
+    public void getFiledNameToValueMap(Map<String, Map<String, String>> filedNameToValueMap,
+            String oldValue, String newValue, String fieldName) {
         Map<String, String> map = new HashMap<>();
         map.put(oldValue, newValue);
         filedNameToValueMap.put(fieldName, map);
     }
 
-    private void rewriteDimValue(
-            SemanticQueryResp semanticQueryResp,
+    private void rewriteDimValue(SemanticQueryResp semanticQueryResp,
             Map<String, Map<String, String>> dimAndTechNameAndBizNamePair) {
         if (!selectDimValueMap(semanticQueryResp.getColumns(), dimAndTechNameAndBizNamePair)) {
             return;
@@ -209,8 +192,7 @@ public class DimValueAspect {
         }
     }
 
-    private boolean selectDimValueMap(
-            List<QueryColumn> columns,
+    private boolean selectDimValueMap(List<QueryColumn> columns,
             Map<String, Map<String, String>> dimAndTechNameAndBizNamePair) {
         if (CollectionUtils.isEmpty(dimAndTechNameAndBizNamePair)
                 || CollectionUtils.isEmpty(dimAndTechNameAndBizNamePair)) {
@@ -225,8 +207,8 @@ public class DimValueAspect {
         return false;
     }
 
-    private void rewriteFilter(
-            List<Filter> dimensionFilters, Map<String, Map<String, String>> aliasAndTechNamePair) {
+    private void rewriteFilter(List<Filter> dimensionFilters,
+            Map<String, Map<String, String>> aliasAndTechNamePair) {
         for (Filter filter : dimensionFilters) {
             if (Objects.isNull(filter)) {
                 continue;
@@ -283,18 +265,15 @@ public class DimValueAspect {
                     continue;
                 }
                 if (StringUtils.isNotEmpty(dimValueMap.getBizName())) {
-                    aliasAndBizNameToTechName.put(
-                            dimValueMap.getBizName(), dimValueMap.getTechName());
+                    aliasAndBizNameToTechName.put(dimValueMap.getBizName(),
+                            dimValueMap.getTechName());
                 }
                 if (!CollectionUtils.isEmpty(dimValueMap.getAlias())) {
-                    dimValueMap.getAlias().stream()
-                            .forEach(
-                                    alias -> {
-                                        if (StringUtils.isNotEmpty(alias)) {
-                                            aliasAndBizNameToTechName.put(
-                                                    alias, dimValueMap.getTechName());
-                                        }
-                                    });
+                    dimValueMap.getAlias().stream().forEach(alias -> {
+                        if (StringUtils.isNotEmpty(alias)) {
+                            aliasAndBizNameToTechName.put(alias, dimValueMap.getTechName());
+                        }
+                    });
                 }
             }
 
@@ -339,8 +318,7 @@ public class DimValueAspect {
     }
 
     private boolean needSkipDimension(DimensionResp dimension) {
-        return Objects.isNull(dimension)
-                || StringUtils.isEmpty(dimension.getBizName())
+        return Objects.isNull(dimension) || StringUtils.isEmpty(dimension.getBizName())
                 || CollectionUtils.isEmpty(dimension.getDimValueMaps());
     }
 }

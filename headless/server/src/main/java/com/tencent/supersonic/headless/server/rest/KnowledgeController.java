@@ -34,17 +34,23 @@ import java.util.List;
 @RequestMapping("/api/semantic/knowledge")
 public class KnowledgeController {
 
-    @Autowired private DictTaskService taskService;
+    @Autowired
+    private DictTaskService taskService;
 
-    @Autowired private DictConfService confService;
+    @Autowired
+    private DictConfService confService;
 
-    @Autowired private MetaEmbeddingTask metaEmbeddingTask;
+    @Autowired
+    private MetaEmbeddingTask metaEmbeddingTask;
 
-    @Autowired private DictionaryReloadTask dictionaryReloadTask;
+    @Autowired
+    private DictionaryReloadTask dictionaryReloadTask;
 
-    @Autowired private ExemplarService exemplarService;
+    @Autowired
+    private ExemplarService exemplarService;
 
-    @Autowired private EmbeddingService embeddingService;
+    @Autowired
+    private EmbeddingService embeddingService;
 
     /**
      * addDictConf-新增item的字典配置 Add configuration information for dictionary entries
@@ -52,10 +58,8 @@ public class KnowledgeController {
      * @param dictItemReq
      */
     @PostMapping("/conf")
-    public DictItemResp addDictConf(
-            @RequestBody @Valid DictItemReq dictItemReq,
-            HttpServletRequest request,
-            HttpServletResponse response) {
+    public DictItemResp addDictConf(@RequestBody @Valid DictItemReq dictItemReq,
+            HttpServletRequest request, HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
         return confService.addDictConf(dictItemReq, user);
     }
@@ -66,10 +70,8 @@ public class KnowledgeController {
      * @param dictItemReq
      */
     @PutMapping("/conf")
-    public DictItemResp editDictConf(
-            @RequestBody @Valid DictItemReq dictItemReq,
-            HttpServletRequest request,
-            HttpServletResponse response) {
+    public DictItemResp editDictConf(@RequestBody @Valid DictItemReq dictItemReq,
+            HttpServletRequest request, HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
         return confService.editDictConf(dictItemReq, user);
     }
@@ -80,10 +82,8 @@ public class KnowledgeController {
      * @param filter
      */
     @PostMapping("/conf/query")
-    public List<DictItemResp> queryDictConf(
-            @RequestBody @Valid DictItemFilter filter,
-            HttpServletRequest request,
-            HttpServletResponse response) {
+    public List<DictItemResp> queryDictConf(@RequestBody @Valid DictItemFilter filter,
+            HttpServletRequest request, HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
         return confService.queryDictConf(filter, user);
     }
@@ -94,9 +94,7 @@ public class KnowledgeController {
      * @param taskReq
      */
     @PostMapping("/task")
-    public Long addDictTask(
-            @RequestBody DictSingleTaskReq taskReq,
-            HttpServletRequest request,
+    public Long addDictTask(@RequestBody DictSingleTaskReq taskReq, HttpServletRequest request,
             HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
         return taskService.addDictTask(taskReq, user);
@@ -108,9 +106,7 @@ public class KnowledgeController {
      * @param taskReq
      */
     @PutMapping("/task/delete")
-    public Long deleteDictTask(
-            @RequestBody DictSingleTaskReq taskReq,
-            HttpServletRequest request,
+    public Long deleteDictTask(@RequestBody DictSingleTaskReq taskReq, HttpServletRequest request,
             HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
         return taskService.deleteDictTask(taskReq, user);
@@ -128,10 +124,8 @@ public class KnowledgeController {
      * @param taskReq
      */
     @PostMapping("/task/search")
-    public DictTaskResp queryLatestDictTask(
-            @RequestBody DictSingleTaskReq taskReq,
-            HttpServletRequest request,
-            HttpServletResponse response) {
+    public DictTaskResp queryLatestDictTask(@RequestBody DictSingleTaskReq taskReq,
+            HttpServletRequest request, HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
         return taskService.queryLatestDictTask(taskReq, user);
     }
@@ -161,10 +155,8 @@ public class KnowledgeController {
      * @param dictValueReq
      */
     @PostMapping("/dict/data")
-    public PageInfo<DictValueResp> queryDictValue(
-            @RequestBody @Valid DictValueReq dictValueReq,
-            HttpServletRequest request,
-            HttpServletResponse response) {
+    public PageInfo<DictValueResp> queryDictValue(@RequestBody @Valid DictValueReq dictValueReq,
+            HttpServletRequest request, HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
         return taskService.queryDictValue(dictValueReq, user);
     }
@@ -175,10 +167,8 @@ public class KnowledgeController {
      * @param dictValueReq
      */
     @PostMapping("/dict/file")
-    public String queryDictFilePath(
-            @RequestBody @Valid DictValueReq dictValueReq,
-            HttpServletRequest request,
-            HttpServletResponse response) {
+    public String queryDictFilePath(@RequestBody @Valid DictValueReq dictValueReq,
+            HttpServletRequest request, HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
         return taskService.queryDictFilePath(dictValueReq, user);
     }

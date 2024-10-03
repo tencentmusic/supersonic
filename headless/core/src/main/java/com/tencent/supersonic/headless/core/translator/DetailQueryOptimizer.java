@@ -27,11 +27,8 @@ public class DetailQueryOptimizer implements QueryOptimizer {
             if (queryParam.getMetrics().size() == 0
                     && !CollectionUtils.isEmpty(queryParam.getGroups())) {
                 String sqlForm = "select %s from ( %s ) src_no_metric";
-                String sql =
-                        String.format(
-                                sqlForm,
-                                queryParam.getGroups().stream().collect(Collectors.joining(",")),
-                                sqlRaw);
+                String sql = String.format(sqlForm,
+                        queryParam.getGroups().stream().collect(Collectors.joining(",")), sqlRaw);
                 queryStatement.setSql(sql);
             }
         }
@@ -39,8 +36,7 @@ public class DetailQueryOptimizer implements QueryOptimizer {
     }
 
     public boolean isDetailQuery(QueryParam queryParam) {
-        return Objects.nonNull(queryParam)
-                && queryParam.getQueryType().isNativeAggQuery()
+        return Objects.nonNull(queryParam) && queryParam.getQueryType().isNativeAggQuery()
                 && CollectionUtils.isEmpty(queryParam.getMetrics());
     }
 }

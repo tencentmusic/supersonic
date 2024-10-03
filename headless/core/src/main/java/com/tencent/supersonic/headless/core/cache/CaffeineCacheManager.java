@@ -12,7 +12,8 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class CaffeineCacheManager implements CacheManager {
 
-    @Autowired private CacheCommonConfig cacheCommonConfig;
+    @Autowired
+    private CacheCommonConfig cacheCommonConfig;
 
     @Autowired
     @Qualifier("caffeineCache")
@@ -37,13 +38,9 @@ public class CaffeineCacheManager implements CacheManager {
         if (StringUtils.isEmpty(prefix)) {
             prefix = "-1";
         }
-        return Joiner.on(":")
-                .join(
-                        cacheCommonConfig.getCacheCommonApp(),
-                        cacheCommonConfig.getCacheCommonEnv(),
-                        cacheCommonConfig.getCacheCommonVersion(),
-                        prefix,
-                        body);
+        return Joiner.on(":").join(cacheCommonConfig.getCacheCommonApp(),
+                cacheCommonConfig.getCacheCommonEnv(), cacheCommonConfig.getCacheCommonVersion(),
+                prefix, body);
     }
 
     @Override

@@ -87,9 +87,8 @@ public class S2ArtistDemo extends S2BaseDemo {
         return domainService.createDomain(domainReq, user);
     }
 
-    public ModelResp addModel(
-            DomainResp singerDomain, DatabaseResp s2Database, TagObjectResp singerTagObject)
-            throws Exception {
+    public ModelResp addModel(DomainResp singerDomain, DatabaseResp s2Database,
+            TagObjectResp singerTagObject) throws Exception {
         ModelReq modelReq = new ModelReq();
         modelReq.setName("歌手库");
         modelReq.setBizName("singer");
@@ -119,25 +118,20 @@ public class S2ArtistDemo extends S2BaseDemo {
         Measure measure3 = new Measure("收藏量", "favor_cnt", "sum", 1);
         modelDetail.setMeasures(Lists.newArrayList(measure1, measure2, measure3));
         modelDetail.setQueryType("sql_query");
-        modelDetail.setSqlQuery(
-                "select singer_name, act_area, song_name, genre, "
-                        + "js_play_cnt, down_cnt, favor_cnt from singer");
+        modelDetail.setSqlQuery("select singer_name, act_area, song_name, genre, "
+                + "js_play_cnt, down_cnt, favor_cnt from singer");
         modelReq.setModelDetail(modelDetail);
         return modelService.createModel(modelReq, user);
     }
 
     private void addTags(ModelResp model) {
-        addTag(
-                dimensionService.getDimension("act_area", model.getId()).getId(),
+        addTag(dimensionService.getDimension("act_area", model.getId()).getId(),
                 TagDefineType.DIMENSION);
-        addTag(
-                dimensionService.getDimension("song_name", model.getId()).getId(),
+        addTag(dimensionService.getDimension("song_name", model.getId()).getId(),
                 TagDefineType.DIMENSION);
-        addTag(
-                dimensionService.getDimension("genre", model.getId()).getId(),
+        addTag(dimensionService.getDimension("genre", model.getId()).getId(),
                 TagDefineType.DIMENSION);
-        addTag(
-                dimensionService.getDimension("singer_name", model.getId()).getId(),
+        addTag(dimensionService.getDimension("singer_name", model.getId()).getId(),
                 TagDefineType.DIMENSION);
         addTag(metricService.getMetric(model.getId(), "js_play_cnt").getId(), TagDefineType.METRIC);
     }

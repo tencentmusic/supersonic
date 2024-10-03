@@ -35,20 +35,18 @@ public abstract class BaseSemanticCorrector implements SemanticCorrector {
                 return;
             }
             doCorrect(chatQueryContext, semanticParseInfo);
-            log.debug(
-                    "sqlCorrection:{} sql:{}",
-                    this.getClass().getSimpleName(),
+            log.debug("sqlCorrection:{} sql:{}", this.getClass().getSimpleName(),
                     semanticParseInfo.getSqlInfo());
         } catch (Exception e) {
             log.error(String.format("correct error,sqlInfo:%s", semanticParseInfo.getSqlInfo()), e);
         }
     }
 
-    public abstract void doCorrect(
-            ChatQueryContext chatQueryContext, SemanticParseInfo semanticParseInfo);
+    public abstract void doCorrect(ChatQueryContext chatQueryContext,
+            SemanticParseInfo semanticParseInfo);
 
-    protected Map<String, String> getFieldNameMap(
-            ChatQueryContext chatQueryContext, Long dataSetId) {
+    protected Map<String, String> getFieldNameMap(ChatQueryContext chatQueryContext,
+            Long dataSetId) {
 
         Map<String, String> result = getFieldNameMapFromDB(chatQueryContext, dataSetId);
         if (chatQueryContext.containsPartitionDimensions(dataSetId)) {
@@ -63,8 +61,8 @@ public abstract class BaseSemanticCorrector implements SemanticCorrector {
         return result;
     }
 
-    private static Map<String, String> getFieldNameMapFromDB(
-            ChatQueryContext chatQueryContext, Long dataSetId) {
+    private static Map<String, String> getFieldNameMapFromDB(ChatQueryContext chatQueryContext,
+            Long dataSetId) {
         SemanticSchema semanticSchema = chatQueryContext.getSemanticSchema();
 
         List<SchemaElement> dbAllFields = new ArrayList<>();
@@ -72,51 +70,38 @@ public abstract class BaseSemanticCorrector implements SemanticCorrector {
         dbAllFields.addAll(semanticSchema.getDimensions());
 
         // support fieldName and field alias
-        return dbAllFields.stream()
-                .filter(entry -> dataSetId.equals(entry.getDataSetId()))
-                .flatMap(
-                        schemaElement -> {
-                            Set<String> elements = new HashSet<>();
-                            elements.add(schemaElement.getName());
-                            if (!CollectionUtils.isEmpty(schemaElement.getAlias())) {
-                                elements.addAll(schemaElement.getAlias());
-                            }
-                            return elements.stream();
-                        })
-                .collect(Collectors.toMap(a -> a, a -> a, (k1, k2) -> k1));
+        return dbAllFields.stream().filter(entry -> dataSetId.equals(entry.getDataSetId()))
+                .flatMap(schemaElement -> {
+                    Set<String> elements = new HashSet<>();
+                    elements.add(schemaElement.getName());
+                    if (!CollectionUtils.isEmpty(schemaElement.getAlias())) {
+                        elements.addAll(schemaElement.getAlias());
+                    }
+                    return elements.stream();
+                }).collect(Collectors.toMap(a -> a, a -> a, (k1, k2) -> k1));
     }
 
-    protected void addAggregateToMetric(
-            ChatQueryContext chatQueryContext, SemanticParseInfo semanticParseInfo) {
+    protected void addAggregateToMetric(ChatQueryContext chatQueryContext,
+            SemanticParseInfo semanticParseInfo) {
         // add aggregate to all metric
         String correctS2SQL = semanticParseInfo.getSqlInfo().getCorrectedS2SQL();
         Long dataSetId = semanticParseInfo.getDataSet().getDataSetId();
         List<SchemaElement> metrics = getMetricElements(chatQueryContext, dataSetId);
 
-        Map<String, String> metricToAggregate =
-                metrics.stream()
-                        .map(
-                                schemaElement -> {
-                                    if (Objects.isNull(schemaElement.getDefaultAgg())) {
-                                        schemaElement.setDefaultAgg(AggregateTypeEnum.SUM.name());
-                                    }
-                                    return schemaElement;
-                                })
-                        .flatMap(
-                                schemaElement -> {
-                                    Set<String> elements = new HashSet<>();
-                                    elements.add(schemaElement.getName());
-                                    if (!CollectionUtils.isEmpty(schemaElement.getAlias())) {
-                                        elements.addAll(schemaElement.getAlias());
-                                    }
-                                    return elements.stream()
-                                            .map(
-                                                    element ->
-                                                            Pair.of(
-                                                                    element,
-                                                                    schemaElement.getDefaultAgg()));
-                                })
-                        .collect(Collectors.toMap(Pair::getLeft, Pair::getRight, (k1, k2) -> k1));
+        Map<String, String> metricToAggregate = metrics.stream().map(schemaElement -> {
+            if (Objects.isNull(schemaElement.getDefaultAgg())) {
+                schemaElement.setDefaultAgg(AggregateTypeEnum.SUM.name());
+            }
+            return schemaElement;
+        }).flatMap(schemaElement -> {
+            Set<String> elements = new HashSet<>();
+            elements.add(schemaElement.getName());
+            if (!CollectionUtils.isEmpty(schemaElement.getAlias())) {
+                elements.addAll(schemaElement.getAlias());
+            }
+            return elements.stream()
+                    .map(element -> Pair.of(element, schemaElement.getDefaultAgg()));
+        }).collect(Collectors.toMap(Pair::getLeft, Pair::getRight, (k1, k2) -> k1));
 
         if (CollectionUtils.isEmpty(metricToAggregate)) {
             return;
@@ -125,39 +110,36 @@ public abstract class BaseSemanticCorrector implements SemanticCorrector {
         semanticParseInfo.getSqlInfo().setCorrectedS2SQL(aggregateSql);
     }
 
-    protected List<SchemaElement> getMetricElements(
-            ChatQueryContext chatQueryContext, Long dataSetId) {
+    protected List<SchemaElement> getMetricElements(ChatQueryContext chatQueryContext,
+            Long dataSetId) {
         SemanticSchema semanticSchema = chatQueryContext.getSemanticSchema();
         return semanticSchema.getMetrics(dataSetId);
     }
 
     protected Set<String> getDimensions(Long dataSetId, SemanticSchema semanticSchema) {
         Set<String> dimensions =
-                semanticSchema.getDimensions(dataSetId).stream()
-                        .flatMap(
-                                schemaElement -> {
-                                    Set<String> elements = new HashSet<>();
-                                    elements.add(schemaElement.getName());
-                                    if (!CollectionUtils.isEmpty(schemaElement.getAlias())) {
-                                        elements.addAll(schemaElement.getAlias());
-                                    }
-                                    return elements.stream();
-                                })
-                        .collect(Collectors.toSet());
+                semanticSchema.getDimensions(dataSetId).stream().flatMap(schemaElement -> {
+                    Set<String> elements = new HashSet<>();
+                    elements.add(schemaElement.getName());
+                    if (!CollectionUtils.isEmpty(schemaElement.getAlias())) {
+                        elements.addAll(schemaElement.getAlias());
+                    }
+                    return elements.stream();
+                }).collect(Collectors.toSet());
         dimensions.add(TimeDimensionEnum.DAY.getChName());
         return dimensions;
     }
 
-    protected boolean containsPartitionDimensions(
-            ChatQueryContext chatQueryContext, SemanticParseInfo semanticParseInfo) {
+    protected boolean containsPartitionDimensions(ChatQueryContext chatQueryContext,
+            SemanticParseInfo semanticParseInfo) {
         Long dataSetId = semanticParseInfo.getDataSetId();
         SemanticSchema semanticSchema = chatQueryContext.getSemanticSchema();
         DataSetSchema dataSetSchema = semanticSchema.getDataSetSchemaMap().get(dataSetId);
         return dataSetSchema.containsPartitionDimensions();
     }
 
-    protected void removeDateIfExist(
-            ChatQueryContext chatQueryContext, SemanticParseInfo semanticParseInfo) {
+    protected void removeDateIfExist(ChatQueryContext chatQueryContext,
+            SemanticParseInfo semanticParseInfo) {
         String correctS2SQL = semanticParseInfo.getSqlInfo().getCorrectedS2SQL();
         Set<String> removeFieldNames = new HashSet<>();
         removeFieldNames.addAll(TimeDimensionEnum.getChNameList());

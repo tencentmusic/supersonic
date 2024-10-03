@@ -20,27 +20,23 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 @RestControllerAdvice(annotations = RestController.class)
 public class ResponseAdvice implements ResponseBodyAdvice<Object> {
 
-    @Autowired private ObjectMapper objectMapper;
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @Override
-    public boolean supports(
-            MethodParameter methodParameter, Class<? extends HttpMessageConverter<?>> aClass) {
+    public boolean supports(MethodParameter methodParameter,
+            Class<? extends HttpMessageConverter<?>> aClass) {
         return !methodParameter.getDeclaringClass().isAssignableFrom(BasicErrorController.class);
     }
 
     @SneakyThrows
     @Override
-    public Object beforeBodyWrite(
-            Object result,
-            MethodParameter methodParameter,
-            MediaType mediaType,
-            Class<? extends HttpMessageConverter<?>> aClass,
-            ServerHttpRequest serverHttpRequest,
-            ServerHttpResponse serverHttpResponse) {
+    public Object beforeBodyWrite(Object result, MethodParameter methodParameter,
+            MediaType mediaType, Class<? extends HttpMessageConverter<?>> aClass,
+            ServerHttpRequest serverHttpRequest, ServerHttpResponse serverHttpResponse) {
         // 判断当前请求是否是 Swagger 相关的请求
         String path = serverHttpRequest.getURI().getPath();
-        if (path.startsWith("/swagger")
-                || path.startsWith("/v3/api-docs")
+        if (path.startsWith("/swagger") || path.startsWith("/v3/api-docs")
                 || path.startsWith("/v2/api-docs")) {
             return result;
         }

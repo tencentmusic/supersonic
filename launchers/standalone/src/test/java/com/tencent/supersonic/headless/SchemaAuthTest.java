@@ -19,11 +19,14 @@ import java.util.stream.Collectors;
 
 public class SchemaAuthTest extends BaseTest {
 
-    @Autowired private DomainService domainService;
+    @Autowired
+    private DomainService domainService;
 
-    @Autowired private DataSetService dataSetService;
+    @Autowired
+    private DataSetService dataSetService;
 
-    @Autowired private ModelService modelService;
+    @Autowired
+    private ModelService modelService;
 
     @Test
     public void test_getDomainList_alice() {
@@ -31,8 +34,7 @@ public class SchemaAuthTest extends BaseTest {
         setDomainNotOpenToAll();
         List<DomainResp> domainResps = domainService.getDomainListWithAdminAuth(user);
         List<String> expectedDomainBizNames = Lists.newArrayList("supersonic", "singer");
-        Assertions.assertEquals(
-                expectedDomainBizNames,
+        Assertions.assertEquals(expectedDomainBizNames,
                 domainResps.stream().map(DomainResp::getBizName).collect(Collectors.toList()));
     }
 
@@ -41,8 +43,7 @@ public class SchemaAuthTest extends BaseTest {
         User user = DataUtils.getUserAlice();
         List<ModelResp> modelResps = modelService.getModelListWithAuth(user, null, AuthType.ADMIN);
         List<String> expectedModelBizNames = Lists.newArrayList("user_department", "singer");
-        Assertions.assertEquals(
-                expectedModelBizNames,
+        Assertions.assertEquals(expectedModelBizNames,
                 modelResps.stream().map(ModelResp::getBizName).collect(Collectors.toList()));
     }
 
@@ -52,8 +53,7 @@ public class SchemaAuthTest extends BaseTest {
         List<ModelResp> modelResps =
                 modelService.getModelListWithAuth(user, null, AuthType.VISIBLE);
         List<String> expectedModelBizNames = Lists.newArrayList("user_department", "singer");
-        Assertions.assertEquals(
-                expectedModelBizNames,
+        Assertions.assertEquals(expectedModelBizNames,
                 modelResps.stream().map(ModelResp::getBizName).collect(Collectors.toList()));
     }
 
@@ -62,8 +62,7 @@ public class SchemaAuthTest extends BaseTest {
         User user = DataUtils.getUserAlice();
         List<DataSetResp> dataSetResps = dataSetService.getDataSetsInheritAuth(user, 0L);
         List<String> expectedDataSetBizNames = Lists.newArrayList("singer");
-        Assertions.assertEquals(
-                expectedDataSetBizNames,
+        Assertions.assertEquals(expectedDataSetBizNames,
                 dataSetResps.stream().map(DataSetResp::getBizName).collect(Collectors.toList()));
     }
 
@@ -72,8 +71,7 @@ public class SchemaAuthTest extends BaseTest {
         User user = DataUtils.getUserJack();
         List<DomainResp> domainResps = domainService.getDomainListWithAdminAuth(user);
         List<String> expectedDomainBizNames = Lists.newArrayList("supersonic");
-        Assertions.assertEquals(
-                expectedDomainBizNames,
+        Assertions.assertEquals(expectedDomainBizNames,
                 domainResps.stream().map(DomainResp::getBizName).collect(Collectors.toList()));
     }
 
@@ -83,8 +81,7 @@ public class SchemaAuthTest extends BaseTest {
         List<ModelResp> modelResps = modelService.getModelListWithAuth(user, null, AuthType.ADMIN);
         List<String> expectedModelBizNames =
                 Lists.newArrayList("user_department", "s2_pv_uv_statis", "s2_stay_time_statis");
-        Assertions.assertEquals(
-                expectedModelBizNames,
+        Assertions.assertEquals(expectedModelBizNames,
                 modelResps.stream().map(ModelResp::getBizName).collect(Collectors.toList()));
     }
 
@@ -93,8 +90,7 @@ public class SchemaAuthTest extends BaseTest {
         User user = DataUtils.getUserJack();
         List<DataSetResp> dataSetResps = dataSetService.getDataSetsInheritAuth(user, 0L);
         List<String> expectedDataSetBizNames = Lists.newArrayList("s2", "singer");
-        Assertions.assertEquals(
-                expectedDataSetBizNames,
+        Assertions.assertEquals(expectedDataSetBizNames,
                 dataSetResps.stream().map(DataSetResp::getBizName).collect(Collectors.toList()));
     }
 }

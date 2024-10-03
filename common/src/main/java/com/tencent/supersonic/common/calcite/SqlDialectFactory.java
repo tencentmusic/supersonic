@@ -13,22 +13,14 @@ import java.util.Objects;
 public class SqlDialectFactory {
 
     public static final Context DEFAULT_CONTEXT =
-            SqlDialect.EMPTY_CONTEXT
-                    .withDatabaseProduct(DatabaseProduct.BIG_QUERY)
-                    .withLiteralQuoteString("'")
-                    .withLiteralEscapedQuoteString("''")
-                    .withIdentifierQuoteString("`")
-                    .withUnquotedCasing(Casing.UNCHANGED)
-                    .withQuotedCasing(Casing.UNCHANGED)
-                    .withCaseSensitive(false);
-    public static final Context POSTGRESQL_CONTEXT =
-            SqlDialect.EMPTY_CONTEXT
-                    .withDatabaseProduct(DatabaseProduct.BIG_QUERY)
-                    .withLiteralQuoteString("'")
-                    .withLiteralEscapedQuoteString("''")
-                    .withUnquotedCasing(Casing.UNCHANGED)
-                    .withQuotedCasing(Casing.UNCHANGED)
-                    .withCaseSensitive(false);
+            SqlDialect.EMPTY_CONTEXT.withDatabaseProduct(DatabaseProduct.BIG_QUERY)
+                    .withLiteralQuoteString("'").withLiteralEscapedQuoteString("''")
+                    .withIdentifierQuoteString("`").withUnquotedCasing(Casing.UNCHANGED)
+                    .withQuotedCasing(Casing.UNCHANGED).withCaseSensitive(false);
+    public static final Context POSTGRESQL_CONTEXT = SqlDialect.EMPTY_CONTEXT
+            .withDatabaseProduct(DatabaseProduct.BIG_QUERY).withLiteralQuoteString("'")
+            .withLiteralEscapedQuoteString("''").withUnquotedCasing(Casing.UNCHANGED)
+            .withQuotedCasing(Casing.UNCHANGED).withCaseSensitive(false);
     private static Map<EngineType, SemanticSqlDialect> sqlDialectMap;
 
     static {

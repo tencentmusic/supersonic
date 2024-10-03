@@ -27,10 +27,9 @@ class AggCorrectorTest {
         dataSet.setDataSetId(dataSetId);
         semanticParseInfo.setDataSet(dataSet);
         SqlInfo sqlInfo = new SqlInfo();
-        String sql =
-                "SELECT 用户, 访问次数 FROM 超音数数据集 WHERE 部门 = 'sales' AND"
-                        + " datediff('day', 数据日期, '2024-06-04') <= 7"
-                        + " GROUP BY 用户 ORDER BY SUM(访问次数) DESC LIMIT 1";
+        String sql = "SELECT 用户, 访问次数 FROM 超音数数据集 WHERE 部门 = 'sales' AND"
+                + " datediff('day', 数据日期, '2024-06-04') <= 7"
+                + " GROUP BY 用户 ORDER BY SUM(访问次数) DESC LIMIT 1";
         sqlInfo.setParsedS2SQL(sql);
         sqlInfo.setCorrectedS2SQL(sql);
         semanticParseInfo.setSqlInfo(sqlInfo);

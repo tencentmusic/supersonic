@@ -16,9 +16,8 @@ class WhereCorrectorTest {
     void addQueryFilter() {
         SemanticParseInfo semanticParseInfo = new SemanticParseInfo();
         SqlInfo sqlInfo = new SqlInfo();
-        String sql =
-                "SELECT 维度1, SUM(播放量) FROM 数据库 "
-                        + "WHERE (歌手名 = '张三') AND 数据日期 <= '2023-11-17' GROUP BY 维度1";
+        String sql = "SELECT 维度1, SUM(播放量) FROM 数据库 "
+                + "WHERE (歌手名 = '张三') AND 数据日期 <= '2023-11-17' GROUP BY 维度1";
         sqlInfo.setCorrectedS2SQL(sql);
         semanticParseInfo.setSqlInfo(sqlInfo);
 
@@ -56,8 +55,7 @@ class WhereCorrectorTest {
 
         String correctS2SQL = semanticParseInfo.getSqlInfo().getCorrectedS2SQL();
 
-        Assert.assertEquals(
-                correctS2SQL,
+        Assert.assertEquals(correctS2SQL,
                 "SELECT 维度1, SUM(播放量) FROM 数据库 WHERE "
                         + "(歌手名 = '张三') AND 数据日期 <= '2023-11-17' AND age > 30 AND "
                         + "name LIKE 'John%' AND id IN (1, 2, 3, 4) AND status GROUP BY 维度1");

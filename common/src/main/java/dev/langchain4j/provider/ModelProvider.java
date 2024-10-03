@@ -25,8 +25,7 @@ public class ModelProvider {
     }
 
     public static ChatLanguageModel getChatModel(ChatModelConfig modelConfig) {
-        if (modelConfig == null
-                || StringUtils.isBlank(modelConfig.getProvider())
+        if (modelConfig == null || StringUtils.isBlank(modelConfig.getProvider())
                 || StringUtils.isBlank(modelConfig.getBaseUrl())) {
             ChatModelParameterConfig parameterConfig =
                     ContextUtils.getBean(ChatModelParameterConfig.class);

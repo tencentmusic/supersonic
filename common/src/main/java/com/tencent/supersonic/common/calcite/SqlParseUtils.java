@@ -45,10 +45,8 @@ public class SqlParseUtils {
             sqlParserInfo.setAllFields(
                     sqlParserInfo.getAllFields().stream().distinct().collect(Collectors.toList()));
 
-            sqlParserInfo.setSelectFields(
-                    sqlParserInfo.getSelectFields().stream()
-                            .distinct()
-                            .collect(Collectors.toList()));
+            sqlParserInfo.setSelectFields(sqlParserInfo.getSelectFields().stream().distinct()
+                    .collect(Collectors.toList()));
 
             return sqlParserInfo;
         } catch (SqlParseException e) {
@@ -108,13 +106,10 @@ public class SqlParseUtils {
         SqlSelect sqlSelect = (SqlSelect) select;
         SqlNodeList selectList = sqlSelect.getSelectList();
 
-        selectList
-                .getList()
-                .forEach(
-                        list -> {
-                            Set<String> selectFields = handlerField(list);
-                            sqlParserInfo.getSelectFields().addAll(selectFields);
-                        });
+        selectList.getList().forEach(list -> {
+            Set<String> selectFields = handlerField(list);
+            sqlParserInfo.getSelectFields().addAll(selectFields);
+        });
         String tableName = handlerFrom(sqlSelect.getFrom());
         sqlParserInfo.setTableName(tableName);
 
@@ -129,14 +124,10 @@ public class SqlParseUtils {
             results.addAll(formFields);
         }
 
-        sqlSelect
-                .getSelectList()
-                .getList()
-                .forEach(
-                        list -> {
-                            Set<String> selectFields = handlerField(list);
-                            results.addAll(selectFields);
-                        });
+        sqlSelect.getSelectList().getList().forEach(list -> {
+            Set<String> selectFields = handlerField(list);
+            results.addAll(selectFields);
+        });
 
         if (sqlSelect.hasWhere()) {
             Set<String> whereFields = handlerField(sqlSelect.getWhere());
@@ -148,11 +139,10 @@ public class SqlParseUtils {
         }
         SqlNodeList group = sqlSelect.getGroup();
         if (group != null) {
-            group.forEach(
-                    groupField -> {
-                        Set<String> groupByFields = handlerField(groupField);
-                        results.addAll(groupByFields);
-                    });
+            group.forEach(groupField -> {
+                Set<String> groupByFields = handlerField(groupField);
+                results.addAll(groupByFields);
+            });
         }
         return results;
     }
@@ -213,12 +203,9 @@ public class SqlParseUtils {
                     }
                 }
                 if (field instanceof SqlNodeList) {
-                    ((SqlNodeList) field)
-                            .getList()
-                            .forEach(
-                                    node -> {
-                                        fields.addAll(handlerField(node));
-                                    });
+                    ((SqlNodeList) field).getList().forEach(node -> {
+                        fields.addAll(handlerField(node));
+                    });
                 }
                 break;
         }
@@ -243,12 +230,9 @@ public class SqlParseUtils {
                     SqlIdentifier sqlIdentifier = (SqlIdentifier) operandList.get(0);
                     String simple = sqlIdentifier.getSimple();
                     SqlBasicCall aliasedNode =
-                            new SqlBasicCall(
-                                    SqlStdOperatorTable.AS,
-                                    new SqlNode[] {
-                                        sqlBasicCall,
-                                        new SqlIdentifier(simple.toLowerCase(), SqlParserPos.ZERO)
-                                    },
+                            new SqlBasicCall(SqlStdOperatorTable.AS,
+                                    new SqlNode[] {sqlBasicCall, new SqlIdentifier(
+                                            simple.toLowerCase(), SqlParserPos.ZERO)},
                                     SqlParserPos.ZERO);
                     selectList.set(selectList.indexOf(node), aliasedNode);
                 }

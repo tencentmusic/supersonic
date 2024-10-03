@@ -1,9 +1,7 @@
 package dev.langchain4j.model.zhipu;
 
 public enum ChatCompletionModel {
-    GLM_4("glm-4"),
-    GLM_3_TURBO("glm-3-turbo"),
-    CHATGLM_TURBO("chatglm_turbo");
+    GLM_4("glm-4"), GLM_3_TURBO("glm-3-turbo"), CHATGLM_TURBO("chatglm_turbo");
 
     private final String value;
 

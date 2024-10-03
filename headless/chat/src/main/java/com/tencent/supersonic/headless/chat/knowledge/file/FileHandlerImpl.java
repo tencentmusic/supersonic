@@ -81,12 +81,8 @@ public class FileHandlerImpl implements FileHandler {
         String filePath = localFileConfig.getDictDirectoryLatest() + FILE_SPILT + fileName;
         Long fileLineNum = getFileLineNum(filePath);
         Integer startLine = (dictValueReq.getCurrent() - 1) * dictValueReq.getPageSize() + 1;
-        Integer endLine =
-                Integer.valueOf(
-                        Math.min(
-                                        dictValueReq.getCurrent() * dictValueReq.getPageSize(),
-                                        fileLineNum)
-                                + "");
+        Integer endLine = Integer.valueOf(
+                Math.min(dictValueReq.getCurrent() * dictValueReq.getPageSize(), fileLineNum) + "");
         List<DictValueResp> dictValueRespList = getFileData(filePath, startLine, endLine);
 
         dictValueRespPageInfo.setPageSize(dictValueReq.getPageSize());
@@ -112,12 +108,9 @@ public class FileHandlerImpl implements FileHandler {
         List<DictValueResp> fileData = new ArrayList<>();
 
         try (Stream<String> lines = Files.lines(Paths.get(filePath))) {
-            fileData =
-                    lines.skip(startLine - 1)
-                            .limit(endLine - startLine + 1)
-                            .map(lineStr -> convert2Resp(lineStr))
-                            .filter(line -> Objects.nonNull(line))
-                            .collect(Collectors.toList());
+            fileData = lines.skip(startLine - 1).limit(endLine - startLine + 1)
+                    .map(lineStr -> convert2Resp(lineStr)).filter(line -> Objects.nonNull(line))
+                    .collect(Collectors.toList());
         } catch (IOException e) {
             log.warn("[getFileData] e:{}", e);
         }
@@ -204,8 +197,8 @@ public class FileHandlerImpl implements FileHandler {
 
     private BufferedWriter getWriter(String filePath, Boolean append) throws IOException {
         if (append) {
-            return Files.newBufferedWriter(
-                    Paths.get(filePath), StandardCharsets.UTF_8, StandardOpenOption.APPEND);
+            return Files.newBufferedWriter(Paths.get(filePath), StandardCharsets.UTF_8,
+                    StandardOpenOption.APPEND);
         }
         return Files.newBufferedWriter(Paths.get(filePath), StandardCharsets.UTF_8);
     }

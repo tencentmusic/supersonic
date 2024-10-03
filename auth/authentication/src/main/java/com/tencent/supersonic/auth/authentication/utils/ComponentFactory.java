@@ -17,8 +17,7 @@ public class ComponentFactory {
     }
 
     private static <T> T init(Class<T> factoryType) {
-        return SpringFactoriesLoader.loadFactories(
-                        factoryType, Thread.currentThread().getContextClassLoader())
-                .get(0);
+        return SpringFactoriesLoader
+                .loadFactories(factoryType, Thread.currentThread().getContextClassLoader()).get(0);
     }
 }

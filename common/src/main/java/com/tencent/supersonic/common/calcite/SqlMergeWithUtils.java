@@ -20,12 +20,8 @@ import java.util.List;
 @Slf4j
 public class SqlMergeWithUtils {
 
-    public static String mergeWith(
-            EngineType engineType,
-            String sql,
-            List<String> parentSqlList,
-            List<String> parentWithNameList)
-            throws SqlParseException {
+    public static String mergeWith(EngineType engineType, String sql, List<String> parentSqlList,
+            List<String> parentWithNameList) throws SqlParseException {
         SqlParser.Config parserConfig = Configuration.getParserConfig(engineType);
 
         // Parse the main SQL statement
@@ -45,14 +41,12 @@ public class SqlMergeWithUtils {
             SqlNode sqlNode2 = parser.parseQuery();
 
             // Create a new WITH item for parentWithName without quotes
-            SqlWithItem withItem =
-                    new SqlWithItem(
-                            SqlParserPos.ZERO,
-                            new SqlIdentifier(
-                                    parentWithName, SqlParserPos.ZERO), // false to avoid quotes
-                            null,
-                            sqlNode2,
-                            SqlLiteral.createBoolean(false, SqlParserPos.ZERO));
+            SqlWithItem withItem = new SqlWithItem(SqlParserPos.ZERO,
+                    new SqlIdentifier(parentWithName, SqlParserPos.ZERO), // false
+                                                                          // to
+                                                                          // avoid
+                                                                          // quotes
+                    null, sqlNode2, SqlLiteral.createBoolean(false, SqlParserPos.ZERO));
 
             // Add the new WITH item to the list
             withItemList.add(withItem);
@@ -66,11 +60,8 @@ public class SqlMergeWithUtils {
         }
 
         // Create a new SqlWith node
-        SqlWith finalSqlNode =
-                new SqlWith(
-                        SqlParserPos.ZERO,
-                        new SqlNodeList(withItemList, SqlParserPos.ZERO),
-                        sqlNode1);
+        SqlWith finalSqlNode = new SqlWith(SqlParserPos.ZERO,
+                new SqlNodeList(withItemList, SqlParserPos.ZERO), sqlNode1);
         // Custom SqlPrettyWriter configuration to avoid quoting identifiers
         SqlWriterConfig config = Configuration.getSqlWriterConfig(engineType);
         // Pretty print the final SQL

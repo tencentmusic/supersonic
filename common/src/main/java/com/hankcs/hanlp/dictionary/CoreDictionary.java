@@ -34,13 +34,8 @@ public class CoreDictionary {
         if (!load(PATH)) {
             throw new IllegalArgumentException("核心词典" + PATH + "加载失败");
         } else {
-            Predefine.logger.info(
-                    PATH
-                            + "加载成功，"
-                            + trie.size()
-                            + "个词条，耗时"
-                            + (System.currentTimeMillis() - start)
-                            + "ms");
+            Predefine.logger.info(PATH + "加载成功，" + trie.size() + "个词条，耗时"
+                    + (System.currentTimeMillis() - start) + "ms");
         }
     }
 
@@ -77,22 +72,14 @@ public class CoreDictionary {
                 map.put(param[0], attribute);
                 totalFrequency += attribute.totalFrequency;
             }
-            Predefine.logger.info(
-                    "核心词典读入词条"
-                            + map.size()
-                            + " 全部频次"
-                            + totalFrequency
-                            + "，耗时"
-                            + (System.currentTimeMillis() - start)
-                            + "ms");
+            Predefine.logger.info("核心词典读入词条" + map.size() + " 全部频次" + totalFrequency + "，耗时"
+                    + (System.currentTimeMillis() - start) + "ms");
             br.close();
             trie.build(map);
             Predefine.logger.info("核心词典加载成功:" + trie.size() + "个词条，下面将写入缓存……");
             try {
-                DataOutputStream out =
-                        new DataOutputStream(
-                                new BufferedOutputStream(
-                                        IOUtil.newOutputStream(path + Predefine.BIN_EXT)));
+                DataOutputStream out = new DataOutputStream(
+                        new BufferedOutputStream(IOUtil.newOutputStream(path + Predefine.BIN_EXT)));
                 Collection<Attribute> attributeList = map.values();
                 out.writeInt(attributeList.size());
                 for (Attribute attribute : attributeList) {
@@ -278,11 +265,8 @@ public class CoreDictionary {
                 }
                 return attribute;
             } catch (Exception e) {
-                Predefine.logger.warning(
-                        "使用字符串"
-                                + natureWithFrequency
-                                + "创建词条属性失败！"
-                                + TextUtility.exceptionToString(e));
+                Predefine.logger.warning("使用字符串" + natureWithFrequency + "创建词条属性失败！"
+                        + TextUtility.exceptionToString(e));
                 return null;
             }
         }
@@ -409,9 +393,7 @@ public class CoreDictionary {
             if (originals == null || originals.length == 0) {
                 return null;
             }
-            return Arrays.stream(originals)
-                    .filter(o -> o != null)
-                    .distinct()
+            return Arrays.stream(originals).filter(o -> o != null).distinct()
                     .collect(Collectors.toList());
         }
     }

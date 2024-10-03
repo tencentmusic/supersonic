@@ -63,8 +63,8 @@ public class MetricServiceImplTest {
         Assertions.assertEquals(expectedMetricResp, actualMetricResp);
     }
 
-    private MetricService mockMetricService(
-            MetricRepository metricRepository, ModelService modelService) {
+    private MetricService mockMetricService(MetricRepository metricRepository,
+            ModelService modelService) {
         AliasGenerateHelper aliasGenerateHelper = Mockito.mock(AliasGenerateHelper.class);
         CollectService collectService = Mockito.mock(CollectService.class);
         ApplicationEventPublisher eventPublisher = Mockito.mock(ApplicationEventPublisher.class);
@@ -72,15 +72,8 @@ public class MetricServiceImplTest {
         DimensionService dimensionService = Mockito.mock(DimensionService.class);
         TagMetaService tagMetaService = Mockito.mock(TagMetaService.class);
         ChatLayerService chatLayerService = Mockito.mock(ChatLayerService.class);
-        return new MetricServiceImpl(
-                metricRepository,
-                modelService,
-                aliasGenerateHelper,
-                collectService,
-                dataSetService,
-                eventPublisher,
-                dimensionService,
-                tagMetaService,
+        return new MetricServiceImpl(metricRepository, modelService, aliasGenerateHelper,
+                collectService, dataSetService, eventPublisher, dimensionService, tagMetaService,
                 chatLayerService);
     }
 
@@ -99,20 +92,14 @@ public class MetricServiceImplTest {
         dataFormat.setNeedMultiply100(false);
         metricReq.setDataFormat(dataFormat);
         MetricDefineByMeasureParams typeParams = new MetricDefineByMeasureParams();
-        typeParams.setMeasures(
-                Lists.newArrayList(
-                        new MeasureParam("s2_pv", "department='hr'"),
-                        new MeasureParam("s2_uv", "department='hr'")));
+        typeParams.setMeasures(Lists.newArrayList(new MeasureParam("s2_pv", "department='hr'"),
+                new MeasureParam("s2_uv", "department='hr'")));
         typeParams.setExpr("s2_pv/s2_uv");
         metricReq.setMetricDefineByMeasureParams(typeParams);
         metricReq.setClassifications(Lists.newArrayList("核心指标"));
-        metricReq.setRelateDimension(
-                RelateDimension.builder()
-                        .drillDownDimensions(
-                                Lists.newArrayList(
-                                        new DrillDownDimension(1L),
-                                        new DrillDownDimension(1L, false)))
-                        .build());
+        metricReq.setRelateDimension(RelateDimension.builder().drillDownDimensions(
+                Lists.newArrayList(new DrillDownDimension(1L), new DrillDownDimension(1L, false)))
+                .build());
         metricReq.setSensitiveLevel(SensitiveLevelEnum.LOW.getCode());
         metricReq.setExt(new HashMap<>());
         return metricReq;
@@ -133,20 +120,14 @@ public class MetricServiceImplTest {
         dataFormat.setNeedMultiply100(false);
         metricResp.setDataFormat(dataFormat);
         MetricDefineByMeasureParams typeParams = new MetricDefineByMeasureParams();
-        typeParams.setMeasures(
-                Lists.newArrayList(
-                        new MeasureParam("s2_pv", "department='hr'"),
-                        new MeasureParam("s2_uv", "department='hr'")));
+        typeParams.setMeasures(Lists.newArrayList(new MeasureParam("s2_pv", "department='hr'"),
+                new MeasureParam("s2_uv", "department='hr'")));
         typeParams.setExpr("s2_pv/s2_uv");
         metricResp.setMetricDefineByMeasureParams(typeParams);
         metricResp.setClassifications("核心指标");
-        metricResp.setRelateDimension(
-                RelateDimension.builder()
-                        .drillDownDimensions(
-                                Lists.newArrayList(
-                                        new DrillDownDimension(1L),
-                                        new DrillDownDimension(1L, false)))
-                        .build());
+        metricResp.setRelateDimension(RelateDimension.builder().drillDownDimensions(
+                Lists.newArrayList(new DrillDownDimension(1L), new DrillDownDimension(1L, false)))
+                .build());
         metricResp.setSensitiveLevel(SensitiveLevelEnum.LOW.getCode());
         metricResp.setExt(new HashMap<>());
         metricResp.setTypeEnum(TypeEnums.METRIC);
@@ -163,10 +144,8 @@ public class MetricServiceImplTest {
         metricReq.setBizName("pv");
         metricReq.setMetricDefineType(MetricDefineType.MEASURE);
         MetricDefineByMeasureParams typeParams = new MetricDefineByMeasureParams();
-        typeParams.setMeasures(
-                Lists.newArrayList(
-                        new MeasureParam("s2_pv", "department='hr'"),
-                        new MeasureParam("s2_uv", "department='hr'")));
+        typeParams.setMeasures(Lists.newArrayList(new MeasureParam("s2_pv", "department='hr'"),
+                new MeasureParam("s2_uv", "department='hr'")));
         typeParams.setExpr("s2_pv/s2_uv");
         metricReq.setMetricDefineByMeasureParams(typeParams);
         return metricReq;

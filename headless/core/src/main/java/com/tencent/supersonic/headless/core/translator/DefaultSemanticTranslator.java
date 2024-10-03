@@ -57,16 +57,12 @@ public class DefaultSemanticTranslator implements SemanticTranslator {
                 headlessConverter.convert(queryStatement);
             }
         }
-        log.debug(
-                "SemanticConverter after {} {} {}",
-                queryParam,
-                queryStatement.getDataSetQueryParam(),
-                queryStatement.getMetricQueryParam());
+        log.debug("SemanticConverter after {} {} {}", queryParam,
+                queryStatement.getDataSetQueryParam(), queryStatement.getMetricQueryParam());
         if (!queryStatement.getDataSetQueryParam().getSql().isEmpty()) {
             doParse(queryStatement.getDataSetQueryParam(), queryStatement);
         } else {
-            queryStatement
-                    .getMetricQueryParam()
+            queryStatement.getMetricQueryParam()
                     .setNativeQuery(queryParam.getQueryType().isNativeAggQuery());
             doParse(queryStatement);
         }
@@ -81,8 +77,8 @@ public class DefaultSemanticTranslator implements SemanticTranslator {
         }
     }
 
-    public QueryStatement doParse(
-            DataSetQueryParam dataSetQueryParam, QueryStatement queryStatement) {
+    public QueryStatement doParse(DataSetQueryParam dataSetQueryParam,
+            QueryStatement queryStatement) {
         log.info("parse dataSetQuery [{}] ", dataSetQueryParam);
         SemanticModel semanticModel = queryStatement.getSemanticModel();
         EngineType engineType = EngineType.fromString(semanticModel.getDatabase().getType());
@@ -91,9 +87,8 @@ public class DefaultSemanticTranslator implements SemanticTranslator {
                 List<String[]> tables = new ArrayList<>();
                 boolean isSingleTable = dataSetQueryParam.getTables().size() == 1;
                 for (MetricTable metricTable : dataSetQueryParam.getTables()) {
-                    QueryStatement tableSql =
-                            parserSql(
-                                    metricTable, isSingleTable, dataSetQueryParam, queryStatement);
+                    QueryStatement tableSql = parserSql(metricTable, isSingleTable,
+                            dataSetQueryParam, queryStatement);
                     if (isSingleTable && StringUtils.isNotBlank(tableSql.getDataSetSimplifySql())) {
                         queryStatement.setSql(tableSql.getDataSetSimplifySql());
                         queryStatement.setDataSetQueryParam(dataSetQueryParam);
@@ -108,26 +103,13 @@ public class DefaultSemanticTranslator implements SemanticTranslator {
                                 tables.stream().map(table -> table[0]).collect(Collectors.toList());
                         List<String> parentSqlList =
                                 tables.stream().map(table -> table[1]).collect(Collectors.toList());
-                        sql =
-                                SqlMergeWithUtils.mergeWith(
-                                        engineType,
-                                        dataSetQueryParam.getSql(),
-                                        parentSqlList,
-                                        parentWithNameList);
+                        sql = SqlMergeWithUtils.mergeWith(engineType, dataSetQueryParam.getSql(),
+                                parentSqlList, parentWithNameList);
                     } else {
                         sql = dataSetQueryParam.getSql();
                         for (String[] tb : tables) {
-                            sql =
-                                    StringUtils.replace(
-                                            sql,
-                                            tb[0],
-                                            "("
-                                                    + tb[1]
-                                                    + ") "
-                                                    + (dataSetQueryParam.isWithAlias()
-                                                            ? ""
-                                                            : tb[0]),
-                                            -1);
+                            sql = StringUtils.replace(sql, tb[0], "(" + tb[1] + ") "
+                                    + (dataSetQueryParam.isWithAlias() ? "" : tb[0]), -1);
                         }
                     }
                     queryStatement.setSql(sql);
@@ -143,8 +125,7 @@ public class DefaultSemanticTranslator implements SemanticTranslator {
     }
 
     public QueryStatement doParse(QueryStatement queryStatement) {
-        return doParse(
-                queryStatement,
+        return doParse(queryStatement,
                 AggOption.getAggregation(queryStatement.getMetricQueryParam().isNativeQuery()));
     }
 
@@ -160,12 +141,8 @@ public class DefaultSemanticTranslator implements SemanticTranslator {
         return queryStatement;
     }
 
-    private QueryStatement parserSql(
-            MetricTable metricTable,
-            Boolean isSingleMetricTable,
-            DataSetQueryParam dataSetQueryParam,
-            QueryStatement queryStatement)
-            throws Exception {
+    private QueryStatement parserSql(MetricTable metricTable, Boolean isSingleMetricTable,
+            DataSetQueryParam dataSetQueryParam, QueryStatement queryStatement) throws Exception {
         MetricQueryParam metricReq = new MetricQueryParam();
         metricReq.setMetrics(metricTable.getMetrics());
         metricReq.setDimensions(metricTable.getDimensions());
@@ -184,10 +161,8 @@ public class DefaultSemanticTranslator implements SemanticTranslator {
         }
         tableSql = doParse(tableSql, metricTable.getAggOption());
         if (!tableSql.isOk()) {
-            throw new Exception(
-                    String.format(
-                            "parser table [%s] error [%s]",
-                            metricTable.getAlias(), tableSql.getErrMsg()));
+            throw new Exception(String.format("parser table [%s] error [%s]",
+                    metricTable.getAlias(), tableSql.getErrMsg()));
         }
         return tableSql;
     }

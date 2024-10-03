@@ -14,7 +14,8 @@ import java.util.Collections;
 
 public class MetaDiscoveryTest extends BaseTest {
 
-    @Autowired protected ChatLayerService chatLayerService;
+    @Autowired
+    protected ChatLayerService chatLayerService;
 
     @Test
     public void testGetMapMeta() throws Exception {

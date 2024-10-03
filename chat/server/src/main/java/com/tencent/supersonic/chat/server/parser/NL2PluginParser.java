@@ -21,13 +21,10 @@ public class NL2PluginParser implements ChatQueryParser {
             return;
         }
 
-        pluginRecognizers.forEach(
-                pluginRecognizer -> {
-                    pluginRecognizer.recognize(parseContext, parseResp);
-                    log.info(
-                            "{} recallResult:{}",
-                            pluginRecognizer.getClass().getSimpleName(),
-                            JsonUtil.toString(parseResp));
-                });
+        pluginRecognizers.forEach(pluginRecognizer -> {
+            pluginRecognizer.recognize(parseContext, parseResp);
+            log.info("{} recallResult:{}", pluginRecognizer.getClass().getSimpleName(),
+                    JsonUtil.toString(parseResp));
+        });
     }
 }

@@ -70,13 +70,13 @@ public class MetricConverter {
         return convert2MetricResp(metricDO, new HashMap<>(), Lists.newArrayList());
     }
 
-    public static MetricResp convert2MetricResp(
-            MetricDO metricDO, Map<Long, ModelResp> modelMap, List<Long> collect) {
+    public static MetricResp convert2MetricResp(MetricDO metricDO, Map<Long, ModelResp> modelMap,
+            List<Long> collect) {
         MetricResp metricResp = new MetricResp();
         BeanUtils.copyProperties(metricDO, metricResp);
 
-        metricResp.setDataFormat(
-                JSONObject.parseObject(metricDO.getDataFormat(), DataFormat.class));
+        metricResp
+                .setDataFormat(JSONObject.parseObject(metricDO.getDataFormat(), DataFormat.class));
         ModelResp modelResp = modelMap.get(metricDO.getModelId());
         if (modelResp != null) {
             metricResp.setModelName(modelResp.getName());
@@ -97,17 +97,14 @@ public class MetricConverter {
         }
         metricResp.setTypeEnum(TypeEnums.METRIC);
         if (MetricDefineType.MEASURE.name().equalsIgnoreCase(metricDO.getDefineType())) {
-            metricResp.setMetricDefineByMeasureParams(
-                    JSONObject.parseObject(
-                            metricDO.getTypeParams(), MetricDefineByMeasureParams.class));
+            metricResp.setMetricDefineByMeasureParams(JSONObject
+                    .parseObject(metricDO.getTypeParams(), MetricDefineByMeasureParams.class));
         } else if (MetricDefineType.METRIC.name().equalsIgnoreCase(metricDO.getDefineType())) {
-            metricResp.setMetricDefineByMetricParams(
-                    JSONObject.parseObject(
-                            metricDO.getTypeParams(), MetricDefineByMetricParams.class));
+            metricResp.setMetricDefineByMetricParams(JSONObject
+                    .parseObject(metricDO.getTypeParams(), MetricDefineByMetricParams.class));
         } else if (MetricDefineType.FIELD.name().equalsIgnoreCase(metricDO.getDefineType())) {
-            metricResp.setMetricDefineByFieldParams(
-                    JSONObject.parseObject(
-                            metricDO.getTypeParams(), MetricDefineByFieldParams.class));
+            metricResp.setMetricDefineByFieldParams(JSONObject.parseObject(metricDO.getTypeParams(),
+                    MetricDefineByFieldParams.class));
         }
         if (metricDO.getDefineType() != null) {
             metricResp.setMetricDefineType(MetricDefineType.valueOf(metricDO.getDefineType()));
@@ -116,15 +113,11 @@ public class MetricConverter {
         return metricResp;
     }
 
-    public static List<MetricResp> filterByDataSet(
-            List<MetricResp> metricResps, DataSetResp dataSetResp) {
+    public static List<MetricResp> filterByDataSet(List<MetricResp> metricResps,
+            DataSetResp dataSetResp) {
         return metricResps.stream()
-                .filter(
-                        metricResp ->
-                                dataSetResp.metricIds().contains(metricResp.getId())
-                                        || dataSetResp
-                                                .getAllIncludeAllModels()
-                                                .contains(metricResp.getModelId()))
+                .filter(metricResp -> dataSetResp.metricIds().contains(metricResp.getId())
+                        || dataSetResp.getAllIncludeAllModels().contains(metricResp.getModelId()))
                 .collect(Collectors.toList());
     }
 }

@@ -39,31 +39,23 @@ public class ModelController {
     }
 
     @PostMapping("/createModel")
-    public Boolean createModel(
-            @RequestBody ModelReq modelReq,
-            HttpServletRequest request,
-            HttpServletResponse response)
-            throws Exception {
+    public Boolean createModel(@RequestBody ModelReq modelReq, HttpServletRequest request,
+            HttpServletResponse response) throws Exception {
         User user = UserHolder.findUser(request, response);
         modelService.createModel(modelReq, user);
         return true;
     }
 
     @PostMapping("/updateModel")
-    public Boolean updateModel(
-            @RequestBody ModelReq modelReq,
-            HttpServletRequest request,
-            HttpServletResponse response)
-            throws Exception {
+    public Boolean updateModel(@RequestBody ModelReq modelReq, HttpServletRequest request,
+            HttpServletResponse response) throws Exception {
         User user = UserHolder.findUser(request, response);
         modelService.updateModel(modelReq, user);
         return true;
     }
 
     @DeleteMapping("/deleteModel/{modelId}")
-    public Boolean deleteModel(
-            @PathVariable("modelId") Long modelId,
-            HttpServletRequest request,
+    public Boolean deleteModel(@PathVariable("modelId") Long modelId, HttpServletRequest request,
             HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
         modelService.deleteModel(modelId, user);
@@ -71,10 +63,8 @@ public class ModelController {
     }
 
     @GetMapping("/getModelList/{domainId}")
-    public List<ModelResp> getModelList(
-            @PathVariable("domainId") Long domainId,
-            HttpServletRequest request,
-            HttpServletResponse response) {
+    public List<ModelResp> getModelList(@PathVariable("domainId") Long domainId,
+            HttpServletRequest request, HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
         return modelService.getModelListWithAuth(user, domainId, AuthType.ADMIN);
     }
@@ -86,10 +76,8 @@ public class ModelController {
 
     @GetMapping("/getModelListByIds/{modelIds}")
     public List<ModelResp> getModelListByIds(@PathVariable("modelIds") String modelIds) {
-        List<Long> ids =
-                Arrays.stream(modelIds.split(","))
-                        .map(Long::parseLong)
-                        .collect(Collectors.toList());
+        List<Long> ids = Arrays.stream(modelIds.split(",")).map(Long::parseLong)
+                .collect(Collectors.toList());
         ModelFilter modelFilter = new ModelFilter();
         modelFilter.setIds(ids);
         return modelService.getModelList(modelFilter);
@@ -106,10 +94,8 @@ public class ModelController {
     }
 
     @PostMapping("/batchUpdateStatus")
-    public Boolean batchUpdateStatus(
-            @RequestBody MetaBatchReq metaBatchReq,
-            HttpServletRequest request,
-            HttpServletResponse response) {
+    public Boolean batchUpdateStatus(@RequestBody MetaBatchReq metaBatchReq,
+            HttpServletRequest request, HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
         modelService.batchUpdateStatus(metaBatchReq, user);
         return true;

@@ -40,9 +40,7 @@ public class ClassController {
      * @return
      */
     @PostMapping("/create")
-    public ClassResp create(
-            @RequestBody @Valid ClassReq classReq,
-            HttpServletRequest request,
+    public ClassResp create(@RequestBody @Valid ClassReq classReq, HttpServletRequest request,
             HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
         return classService.create(classReq, user);
@@ -57,9 +55,7 @@ public class ClassController {
      * @return
      */
     @PutMapping("/update")
-    public ClassResp update(
-            @RequestBody @Valid ClassReq classReq,
-            HttpServletRequest request,
+    public ClassResp update(@RequestBody @Valid ClassReq classReq, HttpServletRequest request,
             HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
         return classService.update(classReq, user);
@@ -75,12 +71,8 @@ public class ClassController {
      * @throws Exception
      */
     @DeleteMapping("delete/{id}/{force}")
-    public Boolean delete(
-            @PathVariable("id") Long id,
-            @PathVariable("force") Boolean force,
-            HttpServletRequest request,
-            HttpServletResponse response)
-            throws Exception {
+    public Boolean delete(@PathVariable("id") Long id, @PathVariable("force") Boolean force,
+            HttpServletRequest request, HttpServletResponse response) throws Exception {
         User user = UserHolder.findUser(request, response);
         return classService.delete(id, force, user);
     }
@@ -95,9 +87,7 @@ public class ClassController {
      * @throws Exception
      */
     @GetMapping("delete/{id}/{force}")
-    public List<ClassResp> get(
-            @RequestBody @Valid ClassFilter filter,
-            HttpServletRequest request,
+    public List<ClassResp> get(@RequestBody @Valid ClassFilter filter, HttpServletRequest request,
             HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
         return classService.getClassList(filter, user);

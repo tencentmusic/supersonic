@@ -33,19 +33,14 @@ public class SqlVariableParseConverter implements QueryConverter {
             return;
         }
         for (ModelResp modelResp : modelResps) {
-            if (ModelDefineType.SQL_QUERY
-                    .getName()
+            if (ModelDefineType.SQL_QUERY.getName()
                     .equalsIgnoreCase(modelResp.getModelDetail().getQueryType())) {
                 String sqlParsed =
-                        SqlVariableParseUtils.parse(
-                                modelResp.getModelDetail().getSqlQuery(),
+                        SqlVariableParseUtils.parse(modelResp.getModelDetail().getSqlQuery(),
                                 modelResp.getModelDetail().getSqlVariables(),
                                 queryStatement.getQueryParam().getParams());
-                DataSource dataSource =
-                        queryStatement
-                                .getSemanticModel()
-                                .getDatasourceMap()
-                                .get(modelResp.getBizName());
+                DataSource dataSource = queryStatement.getSemanticModel().getDatasourceMap()
+                        .get(modelResp.getBizName());
                 dataSource.setSqlQuery(sqlParsed);
             }
         }

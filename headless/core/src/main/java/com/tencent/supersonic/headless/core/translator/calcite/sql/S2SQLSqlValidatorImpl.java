@@ -8,11 +8,8 @@ import org.apache.calcite.sql.validate.SqlValidatorImpl;
 /** customize the SqlValidatorImpl */
 public class S2SQLSqlValidatorImpl extends SqlValidatorImpl {
 
-    public S2SQLSqlValidatorImpl(
-            SqlOperatorTable opTab,
-            SqlValidatorCatalogReader catalogReader,
-            RelDataTypeFactory typeFactory,
-            Config config) {
+    public S2SQLSqlValidatorImpl(SqlOperatorTable opTab, SqlValidatorCatalogReader catalogReader,
+            RelDataTypeFactory typeFactory, Config config) {
         super(opTab, catalogReader, typeFactory, config);
     }
 }

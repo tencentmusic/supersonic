@@ -27,18 +27,17 @@ public class SqlAsHelper {
             if (plainSelect instanceof Select) {
                 Select select = plainSelect;
                 Select selectBody = select.getSelectBody();
-                selectBody.accept(
-                        new SelectVisitorAdapter() {
-                            @Override
-                            public void visit(PlainSelect plainSelect) {
-                                extractAliasesFromSelect(plainSelect, aliases);
-                            }
+                selectBody.accept(new SelectVisitorAdapter() {
+                    @Override
+                    public void visit(PlainSelect plainSelect) {
+                        extractAliasesFromSelect(plainSelect, aliases);
+                    }
 
-                            @Override
-                            public void visit(WithItem withItem) {
-                                withItem.getSelectBody().accept(this);
-                            }
-                        });
+                    @Override
+                    public void visit(WithItem withItem) {
+                        withItem.getSelectBody().accept(this);
+                    }
+                });
             }
         }
         return new ArrayList<>(aliases);

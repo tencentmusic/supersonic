@@ -20,7 +20,8 @@ public abstract class SqlGenStrategy implements InitializingBean {
 
     protected static final Logger keyPipelineLog = LoggerFactory.getLogger("keyPipeline");
 
-    @Autowired protected PromptHelper promptHelper;
+    @Autowired
+    protected PromptHelper promptHelper;
 
     protected ChatLanguageModel getChatLanguageModel(ChatModelConfig modelConfig) {
         return ModelProvider.getChatModel(modelConfig);

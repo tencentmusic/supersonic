@@ -41,14 +41,10 @@ public class CalciteQueryParser implements QueryParser {
                 && Objects.nonNull(queryStatement.getDataSetAlias())
                 && !queryStatement.getDataSetAlias().isEmpty()) {
             // simplify model sql with query sql
-            String simplifySql =
-                    aggBuilder.simplify(
-                            getSqlByDataSet(
-                                    engineType,
-                                    aggBuilder.getSql(engineType),
-                                    queryStatement.getDataSetSql(),
-                                    queryStatement.getDataSetAlias()),
-                            engineType);
+            String simplifySql = aggBuilder.simplify(
+                    getSqlByDataSet(engineType, aggBuilder.getSql(engineType),
+                            queryStatement.getDataSetSql(), queryStatement.getDataSetAlias()),
+                    engineType);
             if (Objects.nonNull(simplifySql) && !simplifySql.isEmpty()) {
                 log.debug("simplifySql [{}]", simplifySql);
                 queryStatement.setDataSetSimplifySql(simplifySql);
@@ -56,8 +52,8 @@ public class CalciteQueryParser implements QueryParser {
         }
     }
 
-    private SemanticSchema getSemanticSchema(
-            SemanticModel semanticModel, QueryStatement queryStatement) {
+    private SemanticSchema getSemanticSchema(SemanticModel semanticModel,
+            QueryStatement queryStatement) {
         SemanticSchema semanticSchema =
                 SemanticSchema.newBuilder(semanticModel.getSchemaKey()).build();
         semanticSchema.setSemanticModel(semanticModel);
@@ -66,20 +62,14 @@ public class CalciteQueryParser implements QueryParser {
         semanticSchema.setMetric(semanticModel.getMetrics());
         semanticSchema.setJoinRelations(semanticModel.getJoinRelations());
         semanticSchema.setRuntimeOptions(
-                RuntimeOptions.builder()
-                        .minMaxTime(queryStatement.getMinMaxTime())
-                        .enableOptimize(queryStatement.getEnableOptimize())
-                        .build());
+                RuntimeOptions.builder().minMaxTime(queryStatement.getMinMaxTime())
+                        .enableOptimize(queryStatement.getEnableOptimize()).build());
         return semanticSchema;
     }
 
-    private String getSqlByDataSet(
-            EngineType engineType, String parentSql, String dataSetSql, String parentAlias)
-            throws SqlParseException {
-        return SqlMergeWithUtils.mergeWith(
-                engineType,
-                dataSetSql,
-                Collections.singletonList(parentSql),
-                Collections.singletonList(parentAlias));
+    private String getSqlByDataSet(EngineType engineType, String parentSql, String dataSetSql,
+            String parentAlias) throws SqlParseException {
+        return SqlMergeWithUtils.mergeWith(engineType, dataSetSql,
+                Collections.singletonList(parentSql), Collections.singletonList(parentAlias));
     }
 }

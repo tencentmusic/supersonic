@@ -27,8 +27,7 @@ public class ComponentFactory {
     }
 
     public static List<SchemaMapper> getSchemaMappers() {
-        return CollectionUtils.isEmpty(schemaMappers)
-                ? init(SchemaMapper.class, schemaMappers)
+        return CollectionUtils.isEmpty(schemaMappers) ? init(SchemaMapper.class, schemaMappers)
                 : schemaMappers;
     }
 
@@ -49,15 +48,13 @@ public class ComponentFactory {
     }
 
     private static <T> List<T> init(Class<T> factoryType, List list) {
-        list.addAll(
-                SpringFactoriesLoader.loadFactories(
-                        factoryType, Thread.currentThread().getContextClassLoader()));
+        list.addAll(SpringFactoriesLoader.loadFactories(factoryType,
+                Thread.currentThread().getContextClassLoader()));
         return list;
     }
 
     private static <T> T init(Class<T> factoryType) {
-        return SpringFactoriesLoader.loadFactories(
-                        factoryType, Thread.currentThread().getContextClassLoader())
-                .get(0);
+        return SpringFactoriesLoader
+                .loadFactories(factoryType, Thread.currentThread().getContextClassLoader()).get(0);
     }
 }

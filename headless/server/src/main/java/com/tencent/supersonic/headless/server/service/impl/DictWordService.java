@@ -22,8 +22,10 @@ import java.util.stream.Collectors;
 @Slf4j
 public class DictWordService {
 
-    @Autowired private SchemaService schemaService;
-    @Autowired private KnowledgeBaseService knowledgeBaseService;
+    @Autowired
+    private SchemaService schemaService;
+    @Autowired
+    private KnowledgeBaseService knowledgeBaseService;
 
     private List<DictWord> preDictWords = new ArrayList<>();
 
@@ -37,8 +39,8 @@ public class DictWordService {
         long startTime = System.currentTimeMillis();
         List<DictWord> dictWords = getAllDictWords();
         List<DictWord> preDictWords = getPreDictWords();
-        if (org.apache.commons.collections.CollectionUtils.isEqualCollection(
-                dictWords, preDictWords)) {
+        if (org.apache.commons.collections.CollectionUtils.isEqualCollection(dictWords,
+                preDictWords)) {
             log.debug("Dictionary hasn't been reloaded.");
             return;
         }
@@ -61,8 +63,8 @@ public class DictWordService {
         return words;
     }
 
-    private void addWordsByType(
-            DictWordType value, List<SchemaElement> metas, List<DictWord> natures) {
+    private void addWordsByType(DictWordType value, List<SchemaElement> metas,
+            List<DictWord> natures) {
         metas = distinct(metas);
         List<DictWord> natureList = WordBuilderFactory.get(value).getDictWords(metas);
         log.debug("nature type:{} , nature size:{}", value.name(), natureList.size());
@@ -87,8 +89,6 @@ public class DictWordService {
         return metas.stream()
                 .collect(
                         Collectors.toMap(SchemaElement::getId, Function.identity(), (e1, e2) -> e1))
-                .values()
-                .stream()
-                .collect(Collectors.toList());
+                .values().stream().collect(Collectors.toList());
     }
 }

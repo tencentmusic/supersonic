@@ -83,8 +83,7 @@ public class MetricResp extends SchemaItem {
             return "";
         }
         return relateDimension.getDrillDownDimensions().stream()
-                .map(DrillDownDimension::getDimensionId)
-                .map(String::valueOf)
+                .map(DrillDownDimension::getDimensionId).map(String::valueOf)
                 .collect(Collectors.joining(","));
     }
 

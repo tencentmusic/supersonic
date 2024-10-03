@@ -42,19 +42,13 @@ public class Term {
         }
         // todo opt
         /*
-        String wordOri = word.toLowerCase();
-        CoreDictionary.Attribute attribute = getDynamicCustomDictionary().get(wordOri);
-        if (attribute == null) {
-            attribute = CoreDictionary.get(wordOri);
-            if (attribute == null) {
-                attribute = CustomDictionary.get(wordOri);
-            }
-        }
-        if (attribute != null && nature != null && attribute.hasNature(nature)) {
-            return attribute.getNatureFrequency(nature);
-        }
-        return attribute == null ? 0 : attribute.totalFrequency;
-        */
+         * String wordOri = word.toLowerCase(); CoreDictionary.Attribute attribute =
+         * getDynamicCustomDictionary().get(wordOri); if (attribute == null) { attribute =
+         * CoreDictionary.get(wordOri); if (attribute == null) { attribute =
+         * CustomDictionary.get(wordOri); } } if (attribute != null && nature != null &&
+         * attribute.hasNature(nature)) { return attribute.getNatureFrequency(nature); } return
+         * attribute == null ? 0 : attribute.totalFrequency;
+         */
         return 0;
     }
 

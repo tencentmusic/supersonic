@@ -12,5 +12,6 @@ public class Properties {
 
     static final String PREFIX = "langchain4j.chroma";
 
-    @NestedConfigurationProperty EmbeddingStoreProperties embeddingStore;
+    @NestedConfigurationProperty
+    EmbeddingStoreProperties embeddingStore;
 }

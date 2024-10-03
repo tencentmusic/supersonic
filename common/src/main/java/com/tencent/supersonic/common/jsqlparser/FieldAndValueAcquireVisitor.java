@@ -130,8 +130,8 @@ public class FieldAndValueAcquireVisitor extends ExpressionVisitorAdapter {
                     Arrays.stream(DatePeriodEnum.values()).collect(Collectors.toList());
             DatePeriodEnum periodEnum = DatePeriodEnum.get(functionName);
             if (Objects.nonNull(periodEnum) && collect.contains(periodEnum)) {
-                fieldExpression.setFieldValue(
-                        getFieldValue(rightExpression) + periodEnum.getChName());
+                fieldExpression
+                        .setFieldValue(getFieldValue(rightExpression) + periodEnum.getChName());
                 return fieldExpression;
             } else {
                 // deal with aggregate function

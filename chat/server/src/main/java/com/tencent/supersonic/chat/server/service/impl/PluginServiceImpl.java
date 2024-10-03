@@ -36,8 +36,8 @@ public class PluginServiceImpl implements PluginService {
 
     private ApplicationEventPublisher publisher;
 
-    public PluginServiceImpl(
-            PluginRepository pluginRepository, ApplicationEventPublisher publisher) {
+    public PluginServiceImpl(PluginRepository pluginRepository,
+            ApplicationEventPublisher publisher) {
         this.pluginRepository = pluginRepository;
         this.publisher = publisher;
     }
@@ -110,18 +110,11 @@ public class PluginServiceImpl implements PluginService {
         }
         List<PluginDO> pluginDOS = pluginRepository.query(queryWrapper);
         if (StringUtils.isNotBlank(pluginQueryReq.getPattern())) {
-            pluginDOS =
-                    pluginDOS.stream()
-                            .filter(
-                                    pluginDO ->
-                                            pluginDO.getPattern()
-                                                            .contains(pluginQueryReq.getPattern())
-                                                    || (pluginDO.getName() != null
-                                                            && pluginDO.getName()
-                                                                    .contains(
-                                                                            pluginQueryReq
-                                                                                    .getPattern())))
-                            .collect(Collectors.toList());
+            pluginDOS = pluginDOS.stream()
+                    .filter(pluginDO -> pluginDO.getPattern().contains(pluginQueryReq.getPattern())
+                            || (pluginDO.getName() != null
+                                    && pluginDO.getName().contains(pluginQueryReq.getPattern())))
+                    .collect(Collectors.toList());
         }
         return convertList(pluginDOS);
     }
@@ -129,16 +122,13 @@ public class PluginServiceImpl implements PluginService {
     @Override
     public Optional<ChatPlugin> getPluginByName(String name) {
         log.info("name:{}", name);
-        return getPluginList().stream()
-                .filter(
-                        plugin -> {
-                            PluginParseConfig functionCallConfig = getPluginParseConfig(plugin);
-                            if (functionCallConfig == null) {
-                                return false;
-                            }
-                            return functionCallConfig.getName().equalsIgnoreCase(name);
-                        })
-                .findFirst();
+        return getPluginList().stream().filter(plugin -> {
+            PluginParseConfig functionCallConfig = getPluginParseConfig(plugin);
+            if (functionCallConfig == null) {
+                return false;
+            }
+            return functionCallConfig.getName().equalsIgnoreCase(name);
+        }).findFirst();
     }
 
     private PluginParseConfig getPluginParseConfig(ChatPlugin plugin) {
@@ -166,26 +156,17 @@ public class PluginServiceImpl implements PluginService {
     public Map<String, ChatPlugin> getNameToPlugin() {
         List<ChatPlugin> pluginList = getPluginList();
 
-        return pluginList.stream()
-                .filter(
-                        plugin -> {
-                            PluginParseConfig functionCallConfig = getPluginParseConfig(plugin);
-                            if (functionCallConfig == null) {
-                                return false;
-                            }
-                            return true;
-                        })
-                .collect(
-                        Collectors.toMap(
-                                a -> {
-                                    PluginParseConfig functionCallConfig =
-                                            JsonUtil.toObject(
-                                                    a.getParseModeConfig(),
-                                                    PluginParseConfig.class);
-                                    return functionCallConfig.getName();
-                                },
-                                a -> a,
-                                (k1, k2) -> k1));
+        return pluginList.stream().filter(plugin -> {
+            PluginParseConfig functionCallConfig = getPluginParseConfig(plugin);
+            if (functionCallConfig == null) {
+                return false;
+            }
+            return true;
+        }).collect(Collectors.toMap(a -> {
+            PluginParseConfig functionCallConfig =
+                    JsonUtil.toObject(a.getParseModeConfig(), PluginParseConfig.class);
+            return functionCallConfig.getName();
+        }, a -> a, (k1, k2) -> k1));
     }
 
     // todo
@@ -197,10 +178,8 @@ public class PluginServiceImpl implements PluginService {
         ChatPlugin plugin = new ChatPlugin();
         BeanUtils.copyProperties(pluginDO, plugin);
         if (StringUtils.isNotBlank(pluginDO.getDataSet())) {
-            plugin.setDataSetList(
-                    Arrays.stream(pluginDO.getDataSet().split(","))
-                            .map(Long::parseLong)
-                            .collect(Collectors.toList()));
+            plugin.setDataSetList(Arrays.stream(pluginDO.getDataSet().split(","))
+                    .map(Long::parseLong).collect(Collectors.toList()));
         }
         return plugin;
     }

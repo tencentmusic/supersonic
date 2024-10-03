@@ -11,8 +11,8 @@ public class DataUpdateEvent extends ApplicationEvent {
     private Long id;
     private TypeEnums type;
 
-    public DataUpdateEvent(
-            Object source, String name, String newName, Long modelId, Long id, TypeEnums type) {
+    public DataUpdateEvent(Object source, String name, String newName, Long modelId, Long id,
+            TypeEnums type) {
         super(source);
         this.name = name;
         this.newName = newName;

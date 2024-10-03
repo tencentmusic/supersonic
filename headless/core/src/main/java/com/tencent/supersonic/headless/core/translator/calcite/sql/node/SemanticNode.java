@@ -65,7 +65,7 @@ public abstract class SemanticNode {
         AGGREGATION_KIND.add(SqlKind.SUM);
         AGGREGATION_KIND.add(SqlKind.MAX);
         AGGREGATION_KIND.add(SqlKind.MIN);
-        AGGREGATION_KIND.add(SqlKind.OTHER_FUNCTION); //  more
+        AGGREGATION_KIND.add(SqlKind.OTHER_FUNCTION); // more
         AGGREGATION_FUNC.add("sum");
         AGGREGATION_FUNC.add("count");
         AGGREGATION_FUNC.add("max");
@@ -75,11 +75,9 @@ public abstract class SemanticNode {
 
     public static SqlNode parse(String expression, SqlValidatorScope scope, EngineType engineType)
             throws Exception {
-        SqlValidatorWithHints sqlValidatorWithHints =
-                Configuration.getSqlValidatorWithHints(
-                        scope.getValidator().getCatalogReader().getRootSchema(), engineType);
-        if (Configuration.getSqlAdvisor(sqlValidatorWithHints, engineType)
-                .getReservedAndKeyWords()
+        SqlValidatorWithHints sqlValidatorWithHints = Configuration.getSqlValidatorWithHints(
+                scope.getValidator().getCatalogReader().getRootSchema(), engineType);
+        if (Configuration.getSqlAdvisor(sqlValidatorWithHints, engineType).getReservedAndKeyWords()
                 .contains(expression.toUpperCase())) {
             expression = String.format("`%s`", expression);
         }
@@ -93,10 +91,8 @@ public abstract class SemanticNode {
     public static SqlNode buildAs(String asName, SqlNode sqlNode) throws Exception {
         SqlAsOperator sqlAsOperator = new SqlAsOperator();
         SqlIdentifier sqlIdentifier = new SqlIdentifier(asName, SqlParserPos.ZERO);
-        return new SqlBasicCall(
-                sqlAsOperator,
-                new ArrayList<>(Arrays.asList(sqlNode, sqlIdentifier)),
-                SqlParserPos.ZERO);
+        return new SqlBasicCall(sqlAsOperator,
+                new ArrayList<>(Arrays.asList(sqlNode, sqlIdentifier)), SqlParserPos.ZERO);
     }
 
     public static String getSql(SqlNode sqlNode, EngineType engineType) {
@@ -154,17 +150,10 @@ public abstract class SemanticNode {
         if (table instanceof SqlSelect) {
             SqlSelect tableSelect = (SqlSelect) table;
             return tableSelect.getSelectList().stream()
-                    .map(
-                            s ->
-                                    (s instanceof SqlIdentifier)
-                                            ? ((SqlIdentifier) s).names.get(0)
-                                            : (((s instanceof SqlBasicCall)
-                                                            && s.getKind().equals(SqlKind.AS))
-                                                    ? ((SqlBasicCall) s)
-                                                            .getOperandList()
-                                                            .get(1)
-                                                            .toString()
-                                                    : ""))
+                    .map(s -> (s instanceof SqlIdentifier) ? ((SqlIdentifier) s).names.get(0)
+                            : (((s instanceof SqlBasicCall) && s.getKind().equals(SqlKind.AS))
+                                    ? ((SqlBasicCall) s).getOperandList().get(1).toString()
+                                    : ""))
                     .collect(Collectors.toSet());
         }
         return new HashSet<>();
@@ -192,10 +181,8 @@ public abstract class SemanticNode {
             case AS:
                 SqlBasicCall sqlBasicCall = (SqlBasicCall) sqlNode;
                 if (sqlBasicCall.getOperandList().get(0).getKind().equals(SqlKind.IDENTIFIER)) {
-                    addTableName(
-                            sqlBasicCall.getOperandList().get(0).toString(),
-                            sqlBasicCall.getOperandList().get(1).toString(),
-                            parseInfo);
+                    addTableName(sqlBasicCall.getOperandList().get(0).toString(),
+                            sqlBasicCall.getOperandList().get(1).toString(), parseInfo);
                 } else {
                     sqlVisit(sqlBasicCall.getOperandList().get(0), parseInfo);
                 }
@@ -211,12 +198,9 @@ public abstract class SemanticNode {
                 }
                 break;
             case UNION:
-                ((SqlBasicCall) sqlNode)
-                        .getOperandList()
-                        .forEach(
-                                node -> {
-                                    sqlVisit(node, parseInfo);
-                                });
+                ((SqlBasicCall) sqlNode).getOperandList().forEach(node -> {
+                    sqlVisit(node, parseInfo);
+                });
                 break;
             case WITH:
                 SqlWith sqlWith = (SqlWith) sqlNode;
@@ -233,12 +217,9 @@ public abstract class SemanticNode {
         }
         SqlSelect sqlSelect = (SqlSelect) select;
         SqlNodeList selectList = sqlSelect.getSelectList();
-        selectList
-                .getList()
-                .forEach(
-                        list -> {
-                            fieldVisit(list, parseInfo, "");
-                        });
+        selectList.getList().forEach(list -> {
+            fieldVisit(list, parseInfo, "");
+        });
         fromVisit(sqlSelect.getFrom(), parseInfo);
         if (sqlSelect.hasWhere()) {
             whereVisit((SqlBasicCall) sqlSelect.getWhere(), parseInfo);
@@ -248,17 +229,16 @@ public abstract class SemanticNode {
         }
         SqlNodeList group = sqlSelect.getGroup();
         if (group != null) {
-            group.forEach(
-                    groupField -> {
-                        if (groupHints.contains(groupField.toString())) {
-                            int groupIdx = Integer.valueOf(groupField.toString()) - 1;
-                            if (selectList.getList().size() > groupIdx) {
-                                fieldVisit(selectList.get(groupIdx), parseInfo, "");
-                            }
-                        } else {
-                            fieldVisit(groupField, parseInfo, "");
-                        }
-                    });
+            group.forEach(groupField -> {
+                if (groupHints.contains(groupField.toString())) {
+                    int groupIdx = Integer.valueOf(groupField.toString()) - 1;
+                    if (selectList.getList().size() > groupIdx) {
+                        fieldVisit(selectList.get(groupIdx), parseInfo, "");
+                    }
+                } else {
+                    fieldVisit(groupField, parseInfo, "");
+                }
+            });
         }
     }
 
@@ -266,17 +246,15 @@ public abstract class SemanticNode {
         if (where == null) {
             return;
         }
-        if (where.operandCount() == 2
-                && where.operand(0).getKind().equals(SqlKind.IDENTIFIER)
+        if (where.operandCount() == 2 && where.operand(0).getKind().equals(SqlKind.IDENTIFIER)
                 && where.operand(1).getKind().equals(SqlKind.LITERAL)) {
             fieldVisit(where.operand(0), parseInfo, "");
             return;
         }
         // 子查询
-        if (where.operandCount() == 2
-                && (where.operand(0).getKind().equals(SqlKind.IDENTIFIER)
-                        && (where.operand(1).getKind().equals(SqlKind.SELECT)
-                                || where.operand(1).getKind().equals(SqlKind.ORDER_BY)))) {
+        if (where.operandCount() == 2 && (where.operand(0).getKind().equals(SqlKind.IDENTIFIER)
+                && (where.operand(1).getKind().equals(SqlKind.SELECT)
+                        || where.operand(1).getKind().equals(SqlKind.ORDER_BY)))) {
             fieldVisit(where.operand(0), parseInfo, "");
             sqlVisit((SqlNode) (where.operand(1)), parseInfo);
             return;
@@ -331,12 +309,9 @@ public abstract class SemanticNode {
             }
         }
         if (field instanceof SqlNodeList) {
-            ((SqlNodeList) field)
-                    .getList()
-                    .forEach(
-                            node -> {
-                                fieldVisit(node, parseInfo, "");
-                            });
+            ((SqlNodeList) field).getList().forEach(node -> {
+                fieldVisit(node, parseInfo, "");
+            });
         }
     }
 
@@ -421,10 +396,7 @@ public abstract class SemanticNode {
         return parseInfo;
     }
 
-    public static SqlNode optimize(
-            SqlValidatorScope scope,
-            SemanticSchema schema,
-            SqlNode sqlNode,
+    public static SqlNode optimize(SqlValidatorScope scope, SemanticSchema schema, SqlNode sqlNode,
             EngineType engineType) {
         try {
             HepProgramBuilder hepProgramBuilder = new HepProgramBuilder();
@@ -433,16 +405,13 @@ public abstract class SemanticNode {
                     new FilterToGroupScanRule(FilterToGroupScanRule.DEFAULT, schema));
             RelOptPlanner relOptPlanner = new HepPlanner(hepProgramBuilder.build());
             RelToSqlConverter converter = new RelToSqlConverter(sqlDialect);
-            SqlValidator sqlValidator =
-                    Configuration.getSqlValidator(
-                            scope.getValidator().getCatalogReader().getRootSchema(), engineType);
-            SqlToRelConverter sqlToRelConverter =
-                    Configuration.getSqlToRelConverter(
-                            scope, sqlValidator, relOptPlanner, engineType);
+            SqlValidator sqlValidator = Configuration.getSqlValidator(
+                    scope.getValidator().getCatalogReader().getRootSchema(), engineType);
+            SqlToRelConverter sqlToRelConverter = Configuration.getSqlToRelConverter(scope,
+                    sqlValidator, relOptPlanner, engineType);
             RelNode sqlRel =
                     sqlToRelConverter.convertQuery(sqlValidator.validate(sqlNode), false, true).rel;
-            log.debug(
-                    "RelNode optimize {}",
+            log.debug("RelNode optimize {}",
                     SemanticNode.getSql(converter.visitRoot(sqlRel).asStatement(), engineType));
             relOptPlanner.setRoot(sqlRel);
             RelNode relNode = relOptPlanner.findBestExp();

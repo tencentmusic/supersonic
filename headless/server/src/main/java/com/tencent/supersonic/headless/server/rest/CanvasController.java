@@ -24,13 +24,12 @@ import java.util.List;
 @RequestMapping("/api/semantic/viewInfo")
 public class CanvasController {
 
-    @Autowired private CanvasService canvasService;
+    @Autowired
+    private CanvasService canvasService;
 
     @PostMapping("/createOrUpdateViewInfo")
-    public CanvasDO createOrUpdateCanvas(
-            @RequestBody CanvasReq canvasReq,
-            HttpServletRequest request,
-            HttpServletResponse response) {
+    public CanvasDO createOrUpdateCanvas(@RequestBody CanvasReq canvasReq,
+            HttpServletRequest request, HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
         return canvasService.createOrUpdateCanvas(canvasReq, user);
     }
@@ -46,10 +45,8 @@ public class CanvasController {
     }
 
     @GetMapping("/getDomainSchemaRela/{domainId}")
-    public List<CanvasSchemaResp> getDomainSchema(
-            @PathVariable("domainId") Long domainId,
-            HttpServletRequest request,
-            HttpServletResponse response) {
+    public List<CanvasSchemaResp> getDomainSchema(@PathVariable("domainId") Long domainId,
+            HttpServletRequest request, HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
         return canvasService.getCanvasSchema(domainId, user);
     }

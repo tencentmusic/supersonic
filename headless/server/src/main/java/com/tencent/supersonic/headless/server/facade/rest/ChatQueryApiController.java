@@ -23,45 +23,36 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 public class ChatQueryApiController {
 
-    @Autowired private ChatLayerService chatLayerService;
+    @Autowired
+    private ChatLayerService chatLayerService;
 
-    @Autowired private SemanticLayerService semanticLayerService;
+    @Autowired
+    private SemanticLayerService semanticLayerService;
 
     @PostMapping("/chat/search")
-    public Object search(
-            @RequestBody QueryNLReq queryNLReq,
-            HttpServletRequest request,
-            HttpServletResponse response)
-            throws Exception {
+    public Object search(@RequestBody QueryNLReq queryNLReq, HttpServletRequest request,
+            HttpServletResponse response) throws Exception {
         queryNLReq.setUser(UserHolder.findUser(request, response));
         return chatLayerService.retrieve(queryNLReq);
     }
 
     @PostMapping("/chat/map")
-    public Object map(
-            @RequestBody QueryNLReq queryNLReq,
-            HttpServletRequest request,
+    public Object map(@RequestBody QueryNLReq queryNLReq, HttpServletRequest request,
             HttpServletResponse response) {
         queryNLReq.setUser(UserHolder.findUser(request, response));
         return chatLayerService.performMapping(queryNLReq);
     }
 
     @PostMapping("/chat/parse")
-    public Object parse(
-            @RequestBody QueryNLReq queryNLReq,
-            HttpServletRequest request,
-            HttpServletResponse response)
-            throws Exception {
+    public Object parse(@RequestBody QueryNLReq queryNLReq, HttpServletRequest request,
+            HttpServletResponse response) throws Exception {
         queryNLReq.setUser(UserHolder.findUser(request, response));
         return chatLayerService.performParsing(queryNLReq);
     }
 
     @PostMapping("/chat")
-    public Object queryByNL(
-            @RequestBody QueryNLReq queryNLReq,
-            HttpServletRequest request,
-            HttpServletResponse response)
-            throws Exception {
+    public Object queryByNL(@RequestBody QueryNLReq queryNLReq, HttpServletRequest request,
+            HttpServletResponse response) throws Exception {
         User user = UserHolder.findUser(request, response);
         ParseResp parseResp = chatLayerService.performParsing(queryNLReq);
         if (parseResp.getState().equals(ParseResp.ParseState.COMPLETED)) {

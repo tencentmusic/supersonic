@@ -5,10 +5,7 @@ package com.tencent.supersonic.headless.api.pojo.enums;
  * Aggregation DEFAULT: will use the aggregation method define in the model
  */
 public enum AggOption {
-    NATIVE,
-    AGGREGATION,
-    OUTER,
-    DEFAULT;
+    NATIVE, AGGREGATION, OUTER, DEFAULT;
 
     public static AggOption getAggregation(boolean isNativeQuery) {
         return isNativeQuery ? NATIVE : AGGREGATION;

@@ -13,13 +13,13 @@ import java.util.Date;
 
 public class S2SqlDateHelper {
 
-    public static Pair<String, String> calculateDateRange(
-            TimeDefaultConfig timeConfig, String timeFormat) {
+    public static Pair<String, String> calculateDateRange(TimeDefaultConfig timeConfig,
+            String timeFormat) {
         return calculateDateRange(DateUtils.getBeforeDate(0), timeConfig, timeFormat);
     }
 
-    public static Pair<String, String> calculateDateRange(
-            String currentDate, TimeDefaultConfig timeConfig, String timeFormat) {
+    public static Pair<String, String> calculateDateRange(String currentDate,
+            TimeDefaultConfig timeConfig, String timeFormat) {
         Integer unit = timeConfig.getUnit();
         if (timeConfig == null || unit == null || unit < 0) {
             return Pair.of(null, null);

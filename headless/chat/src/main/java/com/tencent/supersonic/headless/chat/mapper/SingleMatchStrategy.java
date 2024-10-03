@@ -16,20 +16,22 @@ import java.util.Set;
 @Service
 @Slf4j
 public abstract class SingleMatchStrategy<T extends MapResult> extends BaseMatchStrategy<T> {
-    @Autowired protected MapperConfig mapperConfig;
-    @Autowired protected MapperHelper mapperHelper;
+    @Autowired
+    protected MapperConfig mapperConfig;
+    @Autowired
+    protected MapperHelper mapperHelper;
 
-    public List<T> detect(
-            ChatQueryContext chatQueryContext, List<S2Term> terms, Set<Long> detectDataSetIds) {
+    public List<T> detect(ChatQueryContext chatQueryContext, List<S2Term> terms,
+            Set<Long> detectDataSetIds) {
         Map<Integer, Integer> regOffsetToLength = mapperHelper.getRegOffsetToLength(terms);
         String text = chatQueryContext.getQueryText();
         Set<T> results = new HashSet<>();
 
         Set<String> detectSegments = new HashSet<>();
 
-        for (Integer startIndex = 0; startIndex <= text.length() - 1; ) {
+        for (Integer startIndex = 0; startIndex <= text.length() - 1;) {
 
-            for (Integer index = startIndex; index <= text.length(); ) {
+            for (Integer index = startIndex; index <= text.length();) {
                 int offset = mapperHelper.getStepOffset(terms, startIndex);
                 index = mapperHelper.getStepIndex(regOffsetToLength, index);
                 if (index <= text.length()) {
@@ -45,9 +47,6 @@ public abstract class SingleMatchStrategy<T extends MapResult> extends BaseMatch
         return new ArrayList<>(results);
     }
 
-    public abstract List<T> detectByStep(
-            ChatQueryContext chatQueryContext,
-            Set<Long> detectDataSetIds,
-            String detectSegment,
-            int offset);
+    public abstract List<T> detectByStep(ChatQueryContext chatQueryContext,
+            Set<Long> detectDataSetIds, String detectSegment, int offset);
 }

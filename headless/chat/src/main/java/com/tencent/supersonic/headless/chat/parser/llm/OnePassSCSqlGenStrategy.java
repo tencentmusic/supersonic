@@ -25,21 +25,19 @@ import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 public class OnePassSCSqlGenStrategy extends SqlGenStrategy {
 
-    public static final String INSTRUCTION =
-            ""
-                    + "\n#Role: You are a data analyst experienced in SQL languages."
-                    + "\n#Task: You will be provided with a natural language question asked by users,"
-                    + "please convert it to a SQL query so that relevant data could be returned "
-                    + "by executing the SQL query against underlying database."
-                    + "\n#Rules:"
-                    + "\n1.ALWAYS generate columns and values specified in the `Schema`, DO NOT hallucinate."
-                    + "\n2.ALWAYS specify date filter using `>`,`<`,`>=`,`<=` operator."
-                    + "\n3.DO NOT include date filter in the where clause if not explicitly expressed in the `Question`."
-                    + "\n4.DO NOT calculate date range using functions."
-                    + "\n5.DO NOT calculate date range using DATE_SUB."
-                    + "\n6.DO NOT miss the AGGREGATE operator of metrics, always add it as needed."
-                    + "\n#Exemplars:\n{{exemplar}}"
-                    + "\n#Question:\nQuestion:{{question}},Schema:{{schema}},SideInfo:{{information}}";
+    public static final String INSTRUCTION = ""
+            + "\n#Role: You are a data analyst experienced in SQL languages."
+            + "\n#Task: You will be provided with a natural language question asked by users,"
+            + "please convert it to a SQL query so that relevant data could be returned "
+            + "by executing the SQL query against underlying database." + "\n#Rules:"
+            + "\n1.ALWAYS generate columns and values specified in the `Schema`, DO NOT hallucinate."
+            + "\n2.ALWAYS specify date filter using `>`,`<`,`>=`,`<=` operator."
+            + "\n3.DO NOT include date filter in the where clause if not explicitly expressed in the `Question`."
+            + "\n4.DO NOT calculate date range using functions."
+            + "\n5.DO NOT calculate date range using DATE_SUB."
+            + "\n6.DO NOT miss the AGGREGATE operator of metrics, always add it as needed."
+            + "\n#Exemplars:\n{{exemplar}}"
+            + "\n#Question:\nQuestion:{{question}},Schema:{{schema}},SideInfo:{{information}}";
 
     @Data
     static class SemanticSql {
@@ -75,21 +73,12 @@ public class OnePassSCSqlGenStrategy extends SqlGenStrategy {
 
         // 3.perform multiple self-consistency inferences parallelly
         Map<String, Prompt> output2Prompt = new ConcurrentHashMap<>();
-        prompt2Exemplar
-                .keySet()
-                .parallelStream()
-                .forEach(
-                        prompt -> {
-                            keyPipelineLog.info(
-                                    "OnePassSCSqlGenStrategy reqPrompt:\n{}",
-                                    prompt.toUserMessage());
-                            SemanticSql s2Sql =
-                                    extractor.generateSemanticSql(
-                                            prompt.toUserMessage().singleText());
-                            output2Prompt.put(s2Sql.getSql(), prompt);
-                            keyPipelineLog.info(
-                                    "OnePassSCSqlGenStrategy modelResp:\n{}", s2Sql.getSql());
-                        });
+        prompt2Exemplar.keySet().parallelStream().forEach(prompt -> {
+            keyPipelineLog.info("OnePassSCSqlGenStrategy reqPrompt:\n{}", prompt.toUserMessage());
+            SemanticSql s2Sql = extractor.generateSemanticSql(prompt.toUserMessage().singleText());
+            output2Prompt.put(s2Sql.getSql(), prompt);
+            keyPipelineLog.info("OnePassSCSqlGenStrategy modelResp:\n{}", s2Sql.getSql());
+        });
 
         // 4.format response.
         Pair<String, Map<String, Double>> sqlMapPair =
@@ -105,13 +94,9 @@ public class OnePassSCSqlGenStrategy extends SqlGenStrategy {
     private Prompt generatePrompt(LLMReq llmReq, LLMResp llmResp) {
         StringBuilder exemplars = new StringBuilder();
         for (Text2SQLExemplar exemplar : llmReq.getDynamicExemplars()) {
-            String exemplarStr =
-                    String.format(
-                            "Question:%s,Schema:%s,SideInfo:%s,SQL:%s\n",
-                            exemplar.getQuestion(),
-                            exemplar.getDbSchema(),
-                            exemplar.getSideInfo(),
-                            exemplar.getSql());
+            String exemplarStr = String.format("Question:%s,Schema:%s,SideInfo:%s,SQL:%s\n",
+                    exemplar.getQuestion(), exemplar.getDbSchema(), exemplar.getSideInfo(),
+                    exemplar.getSql());
             exemplars.append(exemplarStr);
         }
         String dataSemantics = promptHelper.buildSchemaStr(llmReq);
@@ -136,7 +121,7 @@ public class OnePassSCSqlGenStrategy extends SqlGenStrategy {
 
     @Override
     public void afterPropertiesSet() {
-        SqlGenStrategyFactory.addSqlGenerationForFactory(
-                LLMReq.SqlGenType.ONE_PASS_SELF_CONSISTENCY, this);
+        SqlGenStrategyFactory
+                .addSqlGenerationForFactory(LLMReq.SqlGenType.ONE_PASS_SELF_CONSISTENCY, this);
     }
 }

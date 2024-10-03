@@ -21,13 +21,12 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping({"/api/chat/memory"})
 public class MemoryController {
 
-    @Autowired private MemoryService memoryService;
+    @Autowired
+    private MemoryService memoryService;
 
     @PostMapping("/updateMemory")
-    public Boolean updateMemory(
-            @RequestBody ChatMemoryUpdateReq chatMemoryUpdateReq,
-            HttpServletRequest request,
-            HttpServletResponse response) {
+    public Boolean updateMemory(@RequestBody ChatMemoryUpdateReq chatMemoryUpdateReq,
+            HttpServletRequest request, HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
         memoryService.updateMemory(chatMemoryUpdateReq, user);
         return true;

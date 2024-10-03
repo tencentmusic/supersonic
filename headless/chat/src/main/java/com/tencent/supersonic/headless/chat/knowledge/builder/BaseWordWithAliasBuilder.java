@@ -9,8 +9,8 @@ import java.util.List;
 
 public abstract class BaseWordWithAliasBuilder extends BaseWordBuilder {
 
-    public abstract DictWord getOneWordNature(
-            String word, SchemaElement schemaElement, boolean isSuffix);
+    public abstract DictWord getOneWordNature(String word, SchemaElement schemaElement,
+            boolean isSuffix);
 
     public List<DictWord> getOneWordNatureAlias(SchemaElement schemaElement, boolean isSuffix) {
         List<DictWord> dictWords = new ArrayList<>();
