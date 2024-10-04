@@ -30,9 +30,7 @@ public interface ChatQueryRepository {
 
     Long createChatQuery(ChatParseReq chatParseReq);
 
-    List<ChatParseDO> batchSaveParseInfo(
-            ChatParseReq chatParseReq,
-            ParseResp parseResult,
+    List<ChatParseDO> batchSaveParseInfo(ChatParseReq chatParseReq, ParseResp parseResult,
             List<SemanticParseInfo> candidateParses);
 
     ChatParseDO getParseInfo(Long questionId, int parseId);

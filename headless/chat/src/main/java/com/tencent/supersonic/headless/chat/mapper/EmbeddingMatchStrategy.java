@@ -35,21 +35,18 @@ import static com.tencent.supersonic.headless.chat.mapper.MapperConfig.EMBEDDING
 @Slf4j
 public class EmbeddingMatchStrategy extends BatchMatchStrategy<EmbeddingResult> {
 
-    @Autowired private MetaEmbeddingService metaEmbeddingService;
+    @Autowired
+    private MetaEmbeddingService metaEmbeddingService;
 
     @Override
-    public List<EmbeddingResult> detectByBatch(
-            ChatQueryContext chatQueryContext,
-            Set<Long> detectDataSetIds,
-            Set<String> detectSegments) {
+    public List<EmbeddingResult> detectByBatch(ChatQueryContext chatQueryContext,
+            Set<Long> detectDataSetIds, Set<String> detectSegments) {
         Set<EmbeddingResult> results = new HashSet<>();
-        int embeddingMapperBatch =
-                Integer.valueOf(
-                        mapperConfig.getParameterValue(MapperConfig.EMBEDDING_MAPPER_BATCH));
+        int embeddingMapperBatch = Integer
+                .valueOf(mapperConfig.getParameterValue(MapperConfig.EMBEDDING_MAPPER_BATCH));
 
         List<String> queryTextsList =
-                detectSegments.stream()
-                        .map(detectSegment -> detectSegment.trim())
+                detectSegments.stream().map(detectSegment -> detectSegment.trim())
                         .filter(detectSegment -> StringUtils.isNotBlank(detectSegment))
                         .collect(Collectors.toList());
 
@@ -64,20 +61,15 @@ public class EmbeddingMatchStrategy extends BatchMatchStrategy<EmbeddingResult> 
         return new ArrayList<>(results);
     }
 
-    private List<EmbeddingResult> detectByQueryTextsSub(
-            Set<Long> detectDataSetIds,
-            List<String> queryTextsSub,
-            ChatQueryContext chatQueryContext) {
+    private List<EmbeddingResult> detectByQueryTextsSub(Set<Long> detectDataSetIds,
+            List<String> queryTextsSub, ChatQueryContext chatQueryContext) {
         Map<Long, List<Long>> modelIdToDataSetIds = chatQueryContext.getModelIdToDataSetIds();
         double embeddingThreshold =
                 Double.valueOf(mapperConfig.getParameterValue(EMBEDDING_MAPPER_THRESHOLD));
         double embeddingThresholdMin =
                 Double.valueOf(mapperConfig.getParameterValue(EMBEDDING_MAPPER_THRESHOLD_MIN));
-        double threshold =
-                getThreshold(
-                        embeddingThreshold,
-                        embeddingThresholdMin,
-                        chatQueryContext.getMapModeEnum());
+        double threshold = getThreshold(embeddingThreshold, embeddingThresholdMin,
+                chatQueryContext.getMapModeEnum());
 
         // step1. build query params
         RetrieveQuery retrieveQuery = RetrieveQuery.builder().queryTextsList(queryTextsSub).build();
@@ -85,75 +77,45 @@ public class EmbeddingMatchStrategy extends BatchMatchStrategy<EmbeddingResult> 
         // step2. retrieveQuery by detectSegment
         int embeddingNumber =
                 Integer.valueOf(mapperConfig.getParameterValue(EMBEDDING_MAPPER_NUMBER));
-        List<RetrieveQueryResult> retrieveQueryResults =
-                metaEmbeddingService.retrieveQuery(
-                        retrieveQuery, embeddingNumber, modelIdToDataSetIds, detectDataSetIds);
+        List<RetrieveQueryResult> retrieveQueryResults = metaEmbeddingService.retrieveQuery(
+                retrieveQuery, embeddingNumber, modelIdToDataSetIds, detectDataSetIds);
 
         if (CollectionUtils.isEmpty(retrieveQueryResults)) {
             return new ArrayList<>();
         }
         // step3. build EmbeddingResults
-        List<EmbeddingResult> collect =
-                retrieveQueryResults.stream()
-                        .map(
-                                retrieveQueryResult -> {
-                                    List<Retrieval> retrievals = retrieveQueryResult.getRetrieval();
-                                    if (CollectionUtils.isNotEmpty(retrievals)) {
-                                        retrievals.removeIf(
-                                                retrieval -> {
-                                                    if (!retrieveQueryResult
-                                                            .getQuery()
-                                                            .contains(retrieval.getQuery())) {
-                                                        return retrieval.getSimilarity()
-                                                                < threshold;
-                                                    }
-                                                    return false;
-                                                });
-                                    }
-                                    return retrieveQueryResult;
-                                })
-                        .filter(
-                                retrieveQueryResult ->
-                                        CollectionUtils.isNotEmpty(
-                                                retrieveQueryResult.getRetrieval()))
-                        .flatMap(
-                                retrieveQueryResult ->
-                                        retrieveQueryResult.getRetrieval().stream()
-                                                .map(
-                                                        retrieval -> {
-                                                            EmbeddingResult embeddingResult =
-                                                                    new EmbeddingResult();
-                                                            BeanUtils.copyProperties(
-                                                                    retrieval, embeddingResult);
-                                                            embeddingResult.setDetectWord(
-                                                                    retrieveQueryResult.getQuery());
-                                                            embeddingResult.setName(
-                                                                    retrieval.getQuery());
-                                                            Map<String, String> convertedMap =
-                                                                    retrieval.getMetadata()
-                                                                            .entrySet().stream()
-                                                                            .collect(
-                                                                                    Collectors
-                                                                                            .toMap(
-                                                                                                    Map
-                                                                                                                    .Entry
-                                                                                                            ::getKey,
-                                                                                                    entry ->
-                                                                                                            entry.getValue()
-                                                                                                                    .toString()));
-                                                            embeddingResult.setMetadata(
-                                                                    convertedMap);
-                                                            return embeddingResult;
-                                                        }))
-                        .collect(Collectors.toList());
+        List<EmbeddingResult> collect = retrieveQueryResults.stream().map(retrieveQueryResult -> {
+            List<Retrieval> retrievals = retrieveQueryResult.getRetrieval();
+            if (CollectionUtils.isNotEmpty(retrievals)) {
+                retrievals.removeIf(retrieval -> {
+                    if (!retrieveQueryResult.getQuery().contains(retrieval.getQuery())) {
+                        return retrieval.getSimilarity() < threshold;
+                    }
+                    return false;
+                });
+            }
+            return retrieveQueryResult;
+        }).filter(retrieveQueryResult -> CollectionUtils
+                .isNotEmpty(retrieveQueryResult.getRetrieval()))
+                .flatMap(retrieveQueryResult -> retrieveQueryResult.getRetrieval().stream()
+                        .map(retrieval -> {
+                            EmbeddingResult embeddingResult = new EmbeddingResult();
+                            BeanUtils.copyProperties(retrieval, embeddingResult);
+                            embeddingResult.setDetectWord(retrieveQueryResult.getQuery());
+                            embeddingResult.setName(retrieval.getQuery());
+                            Map<String, String> convertedMap = retrieval.getMetadata().entrySet()
+                                    .stream().collect(Collectors.toMap(Map.Entry::getKey,
+                                            entry -> entry.getValue().toString()));
+                            embeddingResult.setMetadata(convertedMap);
+                            return embeddingResult;
+                        }))
+                .collect(Collectors.toList());
 
         // step4. select mapResul in one round
         int embeddingRoundNumber =
                 Integer.valueOf(mapperConfig.getParameterValue(EMBEDDING_MAPPER_ROUND_NUMBER));
         int roundNumber = embeddingRoundNumber * queryTextsSub.size();
-        return collect.stream()
-                .sorted(Comparator.comparingDouble(EmbeddingResult::getSimilarity))
-                .limit(roundNumber)
-                .collect(Collectors.toList());
+        return collect.stream().sorted(Comparator.comparingDouble(EmbeddingResult::getSimilarity))
+                .limit(roundNumber).collect(Collectors.toList());
     }
 }

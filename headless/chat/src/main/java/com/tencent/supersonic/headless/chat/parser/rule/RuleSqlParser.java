@@ -17,9 +17,8 @@ import java.util.List;
 @Slf4j
 public class RuleSqlParser implements SemanticParser {
 
-    private static List<SemanticParser> auxiliaryParsers =
-            Arrays.asList(
-                    new ContextInheritParser(), new TimeRangeParser(), new AggregateTypeParser());
+    private static List<SemanticParser> auxiliaryParsers = Arrays.asList(new ContextInheritParser(),
+            new TimeRangeParser(), new AggregateTypeParser());
 
     @Override
     public void parse(ChatQueryContext chatQueryContext) {

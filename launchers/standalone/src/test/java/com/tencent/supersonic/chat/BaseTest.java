@@ -13,6 +13,7 @@ import com.tencent.supersonic.headless.api.pojo.response.ParseResp;
 import com.tencent.supersonic.headless.api.pojo.response.QueryState;
 import com.tencent.supersonic.util.DataUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.TestPropertySource;
 
 import java.time.LocalDate;
 import java.util.Set;
@@ -20,6 +21,7 @@ import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
 
+@TestPropertySource(properties = {"s2.demo.enableLLM = false"})
 public class BaseTest extends BaseApplication {
 
     protected final int unit = 7;
@@ -27,23 +29,19 @@ public class BaseTest extends BaseApplication {
     protected final String endDay = LocalDate.now().toString();
     protected final DatePeriodEnum period = DatePeriodEnum.DAY;
 
-    @Autowired protected ChatQueryService chatQueryService;
-    @Autowired protected AgentService agentService;
+    @Autowired
+    protected ChatQueryService chatQueryService;
+    @Autowired
+    protected AgentService agentService;
 
     protected QueryResult submitMultiTurnChat(String queryText, Integer agentId, Integer chatId)
             throws Exception {
         ParseResp parseResp = submitParse(queryText, agentId, chatId);
 
         SemanticParseInfo semanticParseInfo = parseResp.getSelectedParses().get(0);
-        ChatExecuteReq request =
-                ChatExecuteReq.builder()
-                        .queryText(parseResp.getQueryText())
-                        .user(DataUtils.getUser())
-                        .parseId(semanticParseInfo.getId())
-                        .queryId(parseResp.getQueryId())
-                        .chatId(chatId)
-                        .saveAnswer(true)
-                        .build();
+        ChatExecuteReq request = ChatExecuteReq.builder().queryText(parseResp.getQueryText())
+                .user(DataUtils.getUser()).parseId(semanticParseInfo.getId())
+                .queryId(parseResp.getQueryId()).chatId(chatId).saveAnswer(true).build();
         QueryResult queryResult = chatQueryService.performExecution(request);
         queryResult.setChatContext(semanticParseInfo);
         return queryResult;
@@ -54,16 +52,9 @@ public class BaseTest extends BaseApplication {
         ParseResp parseResp = submitParse(queryText, agentId, chatId);
 
         SemanticParseInfo parseInfo = parseResp.getSelectedParses().get(0);
-        ChatExecuteReq request =
-                ChatExecuteReq.builder()
-                        .queryText(parseResp.getQueryText())
-                        .user(DataUtils.getUser())
-                        .parseId(parseInfo.getId())
-                        .agentId(agentId)
-                        .chatId(chatId)
-                        .queryId(parseResp.getQueryId())
-                        .saveAnswer(false)
-                        .build();
+        ChatExecuteReq request = ChatExecuteReq.builder().queryText(parseResp.getQueryText())
+                .user(DataUtils.getUser()).parseId(parseInfo.getId()).agentId(agentId)
+                .chatId(chatId).queryId(parseResp.getQueryId()).saveAnswer(false).build();
 
         QueryResult result = chatQueryService.performExecution(request);
         result.setChatContext(parseInfo);
@@ -77,16 +68,10 @@ public class BaseTest extends BaseApplication {
     }
 
     protected void assertSchemaElements(Set<SchemaElement> expected, Set<SchemaElement> actual) {
-        Set<String> expectedNames =
-                expected.stream()
-                        .map(s -> s.getName())
-                        .filter(s -> s != null)
-                        .collect(Collectors.toSet());
-        Set<String> actualNames =
-                actual.stream()
-                        .map(s -> s.getName())
-                        .filter(s -> s != null)
-                        .collect(Collectors.toSet());
+        Set<String> expectedNames = expected.stream().map(s -> s.getName()).filter(s -> s != null)
+                .collect(Collectors.toSet());
+        Set<String> actualNames = actual.stream().map(s -> s.getName()).filter(s -> s != null)
+                .collect(Collectors.toSet());
 
         assertEquals(expectedNames, actualNames);
     }
@@ -102,8 +87,8 @@ public class BaseTest extends BaseApplication {
         assertSchemaElements(expectedParseInfo.getMetrics(), actualParseInfo.getMetrics());
         assertSchemaElements(expectedParseInfo.getDimensions(), actualParseInfo.getDimensions());
 
-        assertEquals(
-                expectedParseInfo.getDimensionFilters(), actualParseInfo.getDimensionFilters());
+        assertEquals(expectedParseInfo.getDimensionFilters(),
+                actualParseInfo.getDimensionFilters());
         assertEquals(expectedParseInfo.getMetricFilters(), actualParseInfo.getMetricFilters());
 
         assertEquals(expectedParseInfo.getDateInfo(), actualParseInfo.getDateInfo());

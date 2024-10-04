@@ -49,25 +49,44 @@ public abstract class S2BaseDemo implements CommandLineRunner {
     protected DatabaseResp demoDatabaseResp;
 
     protected User user = User.getFakeUser();
-    @Autowired protected DatabaseService databaseService;
-    @Autowired protected DomainService domainService;
-    @Autowired protected ModelService modelService;
-    @Autowired protected ModelRelaService modelRelaService;
-    @Autowired protected DimensionService dimensionService;
-    @Autowired protected MetricService metricService;
-    @Autowired protected TagMetaService tagMetaService;
-    @Autowired protected AuthService authService;
-    @Autowired protected DataSetService dataSetService;
-    @Autowired protected TermService termService;
-    @Autowired protected PluginService pluginService;
-    @Autowired protected DataSourceProperties dataSourceProperties;
-    @Autowired protected TagObjectService tagObjectService;
-    @Autowired protected ChatQueryService chatQueryService;
-    @Autowired protected ChatManageService chatManageService;
-    @Autowired protected AgentService agentService;
-    @Autowired protected SystemConfigService sysParameterService;
-    @Autowired protected CanvasService canvasService;
-    @Autowired protected DictWordService dictWordService;
+    @Autowired
+    protected DatabaseService databaseService;
+    @Autowired
+    protected DomainService domainService;
+    @Autowired
+    protected ModelService modelService;
+    @Autowired
+    protected ModelRelaService modelRelaService;
+    @Autowired
+    protected DimensionService dimensionService;
+    @Autowired
+    protected MetricService metricService;
+    @Autowired
+    protected TagMetaService tagMetaService;
+    @Autowired
+    protected AuthService authService;
+    @Autowired
+    protected DataSetService dataSetService;
+    @Autowired
+    protected TermService termService;
+    @Autowired
+    protected PluginService pluginService;
+    @Autowired
+    protected DataSourceProperties dataSourceProperties;
+    @Autowired
+    protected TagObjectService tagObjectService;
+    @Autowired
+    protected ChatQueryService chatQueryService;
+    @Autowired
+    protected ChatManageService chatManageService;
+    @Autowired
+    protected AgentService agentService;
+    @Autowired
+    protected SystemConfigService sysParameterService;
+    @Autowired
+    protected CanvasService canvasService;
+    @Autowired
+    protected DictWordService dictWordService;
 
     @Value("${s2.demo.names:S2VisitsDemo}")
     protected List<String> demoList;
@@ -106,8 +125,8 @@ public abstract class S2BaseDemo implements CommandLineRunner {
         }
         databaseReq.setUrl(url);
         databaseReq.setUsername(dataSourceProperties.getUsername());
-        databaseReq.setPassword(
-                AESEncryptionUtil.aesEncryptECB(dataSourceProperties.getPassword()));
+        databaseReq
+                .setPassword(AESEncryptionUtil.aesEncryptECB(dataSourceProperties.getPassword()));
         return databaseService.createOrUpdateDatabase(databaseReq, user);
     }
 
@@ -125,15 +144,11 @@ public abstract class S2BaseDemo implements CommandLineRunner {
             dataSetModelConfig.setId(modelResp.getId());
             MetaFilter metaFilter = new MetaFilter();
             metaFilter.setModelIds(Lists.newArrayList(modelResp.getId()));
-            List<Long> metrics =
-                    metricService.getMetrics(metaFilter).stream()
-                            .map(MetricResp::getId)
-                            .collect(Collectors.toList());
+            List<Long> metrics = metricService.getMetrics(metaFilter).stream()
+                    .map(MetricResp::getId).collect(Collectors.toList());
             dataSetModelConfig.setMetrics(metrics);
-            List<Long> dimensions =
-                    dimensionService.getDimensions(metaFilter).stream()
-                            .map(DimensionResp::getId)
-                            .collect(Collectors.toList());
+            List<Long> dimensions = dimensionService.getDimensions(metaFilter).stream()
+                    .map(DimensionResp::getId).collect(Collectors.toList());
             dataSetModelConfig.setMetrics(metrics);
             dataSetModelConfig.setDimensions(dimensions);
             dataSetModelConfigs.add(dataSetModelConfig);

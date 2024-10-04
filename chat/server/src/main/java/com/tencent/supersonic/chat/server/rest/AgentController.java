@@ -26,21 +26,18 @@ import java.util.Map;
 @RequestMapping({"/api/chat/agent", "/openapi/chat/agent"})
 public class AgentController {
 
-    @Autowired private AgentService agentService;
+    @Autowired
+    private AgentService agentService;
 
     @PostMapping
-    public Agent createAgent(
-            @RequestBody Agent agent,
-            HttpServletRequest httpServletRequest,
+    public Agent createAgent(@RequestBody Agent agent, HttpServletRequest httpServletRequest,
             HttpServletResponse httpServletResponse) {
         User user = UserHolder.findUser(httpServletRequest, httpServletResponse);
         return agentService.createAgent(agent, user);
     }
 
     @PutMapping
-    public Agent updateAgent(
-            @RequestBody Agent agent,
-            HttpServletRequest httpServletRequest,
+    public Agent updateAgent(@RequestBody Agent agent, HttpServletRequest httpServletRequest,
             HttpServletResponse httpServletResponse) {
         User user = UserHolder.findUser(httpServletRequest, httpServletResponse);
         return agentService.updateAgent(agent, user);

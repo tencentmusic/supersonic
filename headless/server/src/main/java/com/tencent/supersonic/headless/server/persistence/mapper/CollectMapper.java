@@ -11,4 +11,5 @@ import org.apache.ibatis.annotations.Mapper;
  * @since 2023-11-09 03:49:33
  */
 @Mapper
-public interface CollectMapper extends BaseMapper<CollectDO> {}
+public interface CollectMapper extends BaseMapper<CollectDO> {
+}

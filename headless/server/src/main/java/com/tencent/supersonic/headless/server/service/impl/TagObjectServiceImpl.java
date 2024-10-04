@@ -34,9 +34,7 @@ public class TagObjectServiceImpl implements TagObjectService {
     private final ModelService modelService;
     private final TagMetaService tagMetaService;
 
-    public TagObjectServiceImpl(
-            TagObjectRepository tagObjectRepository,
-            ModelService modelService,
+    public TagObjectServiceImpl(TagObjectRepository tagObjectRepository, ModelService modelService,
             @Lazy TagMetaService tagMetaService) {
         this.tagObjectRepository = tagObjectRepository;
         this.modelService = modelService;
@@ -66,14 +64,9 @@ public class TagObjectServiceImpl implements TagObjectService {
         if (CollectionUtils.isEmpty(tagObjectRespList)) {
             return;
         }
-        tagObjectRespList =
-                tagObjectRespList.stream()
-                        .filter(
-                                tagObjectResp ->
-                                        StatusEnum.ONLINE
-                                                .getCode()
-                                                .equals(tagObjectResp.getStatus()))
-                        .collect(Collectors.toList());
+        tagObjectRespList = tagObjectRespList.stream().filter(
+                tagObjectResp -> StatusEnum.ONLINE.getCode().equals(tagObjectResp.getStatus()))
+                .collect(Collectors.toList());
         for (TagObjectResp tagObject : tagObjectRespList) {
             if (tagObject.getBizName().equalsIgnoreCase(tagObjectReq.getBizName())) {
                 throw new Exception(
@@ -128,9 +121,8 @@ public class TagObjectServiceImpl implements TagObjectService {
         if (!CollectionUtils.isEmpty(allModelByDomainIds)) {
             List<Long> modelIds =
                     allModelByDomainIds.stream().map(ModelResp::getId).collect(Collectors.toList());
-            throw new Exception(
-                    "delete operation is not supported at the moment. related modelIds:"
-                            + modelIds);
+            throw new Exception("delete operation is not supported at the moment. related modelIds:"
+                    + modelIds);
         }
         TagFilterPageReq tagMarketPageReq = new TagFilterPageReq();
         tagMarketPageReq.setTagObjectId(tagObjectDO.getId());
@@ -173,9 +165,8 @@ public class TagObjectServiceImpl implements TagObjectService {
         List<TagObjectDO> tagObjectDOList = tagObjectRepository.query(filter);
         List<TagObjectResp> tagObjectRespList =
                 TagObjectConverter.convert2RespList(tagObjectDOList);
-        Map<Long, TagObjectResp> map =
-                tagObjectRespList.stream()
-                        .collect(Collectors.toMap(TagObjectResp::getId, a -> a, (k1, k2) -> k1));
+        Map<Long, TagObjectResp> map = tagObjectRespList.stream()
+                .collect(Collectors.toMap(TagObjectResp::getId, a -> a, (k1, k2) -> k1));
         return map;
     }
 }

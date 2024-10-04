@@ -13,7 +13,8 @@ import org.springframework.stereotype.Component;
 @Order(2)
 public class DictionaryReloadTask implements CommandLineRunner {
 
-    @Autowired private DictWordService dictWordService;
+    @Autowired
+    private DictWordService dictWordService;
 
     @Override
     public void run(String... args) {

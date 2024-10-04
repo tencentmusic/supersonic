@@ -38,38 +38,32 @@ public class SqlVariableParseUtils {
             return sql;
         }
         // 1. handle default variable value
-        sqlVariables.forEach(
-                variable -> {
-                    variables.put(
-                            variable.getName().trim(),
-                            getValues(variable.getValueType(), variable.getDefaultValues()));
-                });
+        sqlVariables.forEach(variable -> {
+            variables.put(variable.getName().trim(),
+                    getValues(variable.getValueType(), variable.getDefaultValues()));
+        });
 
         // override by variable param
         if (!CollectionUtils.isEmpty(params)) {
             Map<String, List<SqlVariable>> map =
                     sqlVariables.stream().collect(Collectors.groupingBy(SqlVariable::getName));
-            params.forEach(
-                    p -> {
-                        if (map.containsKey(p.getName())) {
-                            List<SqlVariable> list = map.get(p.getName());
-                            if (!CollectionUtils.isEmpty(list)) {
-                                SqlVariable v = list.get(list.size() - 1);
-                                variables.put(
-                                        p.getName().trim(),
-                                        getValue(v.getValueType(), p.getValue()));
-                            }
-                        }
-                    });
+            params.forEach(p -> {
+                if (map.containsKey(p.getName())) {
+                    List<SqlVariable> list = map.get(p.getName());
+                    if (!CollectionUtils.isEmpty(list)) {
+                        SqlVariable v = list.get(list.size() - 1);
+                        variables.put(p.getName().trim(), getValue(v.getValueType(), p.getValue()));
+                    }
+                }
+            });
         }
 
-        variables.forEach(
-                (k, v) -> {
-                    if (v instanceof List && ((List) v).size() > 0) {
-                        v = ((List) v).stream().collect(Collectors.joining(COMMA)).toString();
-                    }
-                    variables.put(k, v);
-                });
+        variables.forEach((k, v) -> {
+            if (v instanceof List && ((List) v).size() > 0) {
+                v = ((List) v).stream().collect(Collectors.joining(COMMA)).toString();
+            }
+            variables.put(k, v);
+        });
         return parse(sql, variables);
     }
 
@@ -88,17 +82,12 @@ public class SqlVariableParseUtils {
         if (null != valueType) {
             switch (valueType) {
                 case STRING:
-                    return values.stream()
-                            .map(String::valueOf)
-                            .map(
-                                    s ->
-                                            s.startsWith(APOSTROPHE) && s.endsWith(APOSTROPHE)
-                                                    ? s
-                                                    : String.join(EMPTY, APOSTROPHE, s, APOSTROPHE))
+                    return values.stream().map(String::valueOf)
+                            .map(s -> s.startsWith(APOSTROPHE) && s.endsWith(APOSTROPHE) ? s
+                                    : String.join(EMPTY, APOSTROPHE, s, APOSTROPHE))
                             .collect(Collectors.toList());
                 case EXPR:
-                    values.stream()
-                            .map(String::valueOf)
+                    values.stream().map(String::valueOf)
                             .forEach(SqlVariableParseUtils::checkSensitiveSql);
                     return values.stream().map(String::valueOf).collect(Collectors.toList());
                 case NUMBER:
@@ -115,11 +104,8 @@ public class SqlVariableParseUtils {
             if (null != valueType) {
                 switch (valueType) {
                     case STRING:
-                        return String.join(
-                                EMPTY,
-                                value.startsWith(APOSTROPHE) ? EMPTY : APOSTROPHE,
-                                value,
-                                value.endsWith(APOSTROPHE) ? EMPTY : APOSTROPHE);
+                        return String.join(EMPTY, value.startsWith(APOSTROPHE) ? EMPTY : APOSTROPHE,
+                                value, value.endsWith(APOSTROPHE) ? EMPTY : APOSTROPHE);
                     case NUMBER:
                     case EXPR:
                     default:

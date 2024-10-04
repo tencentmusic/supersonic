@@ -38,11 +38,8 @@ public class SystemConfig {
         if (StringUtils.isBlank(name)) {
             return "";
         }
-        Map<String, String> nameToValue =
-                getParameters().stream()
-                        .collect(
-                                Collectors.toMap(
-                                        Parameter::getName, Parameter::getValue, (k1, k2) -> k1));
+        Map<String, String> nameToValue = getParameters().stream()
+                .collect(Collectors.toMap(Parameter::getName, Parameter::getValue, (k1, k2) -> k1));
         return nameToValue.get(name);
     }
 
@@ -69,15 +66,11 @@ public class SystemConfig {
         if (CollectionUtils.isEmpty(parameters)) {
             return defaultParameters;
         }
-        Map<String, String> parameterNameValueMap =
-                parameters.stream()
-                        .collect(
-                                Collectors.toMap(
-                                        Parameter::getName, Parameter::getValue, (v1, v2) -> v2));
+        Map<String, String> parameterNameValueMap = parameters.stream()
+                .collect(Collectors.toMap(Parameter::getName, Parameter::getValue, (v1, v2) -> v2));
         for (Parameter parameter : defaultParameters) {
-            parameter.setValue(
-                    parameterNameValueMap.getOrDefault(
-                            parameter.getName(), parameter.getDefaultValue()));
+            parameter.setValue(parameterNameValueMap.getOrDefault(parameter.getName(),
+                    parameter.getDefaultValue()));
         }
         return defaultParameters;
     }

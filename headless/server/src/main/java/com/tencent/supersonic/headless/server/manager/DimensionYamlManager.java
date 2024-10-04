@@ -22,14 +22,9 @@ public class DimensionYamlManager {
             return new ArrayList<>();
         }
         return dimensions.stream()
-                .filter(
-                        dimension ->
-                                !dimension
-                                        .getType()
-                                        .name()
-                                        .equalsIgnoreCase(IdentifyType.primary.name()))
-                .map(DimensionYamlManager::convert2DimensionYamlTpl)
-                .collect(Collectors.toList());
+                .filter(dimension -> !dimension.getType().name()
+                        .equalsIgnoreCase(IdentifyType.primary.name()))
+                .map(DimensionYamlManager::convert2DimensionYamlTpl).collect(Collectors.toList());
     }
 
     public static DimensionYamlTpl convert2DimensionYamlTpl(DimensionResp dimension) {

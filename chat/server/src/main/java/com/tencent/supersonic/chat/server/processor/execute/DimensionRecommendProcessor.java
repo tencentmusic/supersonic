@@ -52,28 +52,20 @@ public class DimensionRecommendProcessor implements ExecuteResultProcessor {
         List<Long> drillDownDimensions = Lists.newArrayList();
         Set<SchemaElement> metricElements = dataSetSchema.getMetrics();
         if (!CollectionUtils.isEmpty(metricElements)) {
-            Optional<SchemaElement> metric =
-                    metricElements.stream()
-                            .filter(
-                                    schemaElement ->
-                                            metricId.equals(schemaElement.getId())
-                                                    && !CollectionUtils.isEmpty(
-                                                            schemaElement
-                                                                    .getRelatedSchemaElements()))
-                            .findFirst();
+            Optional<SchemaElement> metric = metricElements.stream()
+                    .filter(schemaElement -> metricId.equals(schemaElement.getId())
+                            && !CollectionUtils.isEmpty(schemaElement.getRelatedSchemaElements()))
+                    .findFirst();
             if (metric.isPresent()) {
-                drillDownDimensions =
-                        metric.get().getRelatedSchemaElements().stream()
-                                .map(RelatedSchemaElement::getDimensionId)
-                                .collect(Collectors.toList());
+                drillDownDimensions = metric.get().getRelatedSchemaElements().stream()
+                        .map(RelatedSchemaElement::getDimensionId).collect(Collectors.toList());
             }
         }
         final List<Long> drillDownDimensionsFinal = drillDownDimensions;
         return dataSetSchema.getDimensions().stream()
                 .filter(dim -> filterDimension(drillDownDimensionsFinal, dim))
                 .sorted(Comparator.comparing(SchemaElement::getUseCnt).reversed())
-                .limit(recommend_dimension_size)
-                .collect(Collectors.toList());
+                .limit(recommend_dimension_size).collect(Collectors.toList());
     }
 
     private boolean filterDimension(List<Long> drillDownDimensions, SchemaElement dimension) {

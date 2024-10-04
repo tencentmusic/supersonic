@@ -90,11 +90,8 @@ public class DictUtils {
     private final ModelService modelService;
     private final TagMetaService tagMetaService;
 
-    public DictUtils(
-            DimensionService dimensionService,
-            MetricService metricService,
-            SemanticLayerService queryService,
-            ModelService modelService,
+    public DictUtils(DimensionService dimensionService, MetricService metricService,
+            SemanticLayerService queryService, ModelService modelService,
             @Lazy TagMetaService tagMetaService) {
         this.dimensionService = dimensionService;
         this.metricService = metricService;
@@ -104,13 +101,12 @@ public class DictUtils {
     }
 
     public String fetchDictFileName(DictItemResp dictItemResp) {
-        return String.format(
-                "dic_value_%d_%s_%s",
-                dictItemResp.getModelId(), dictItemResp.getType().name(), dictItemResp.getItemId());
+        return String.format("dic_value_%d_%s_%s", dictItemResp.getModelId(),
+                dictItemResp.getType().name(), dictItemResp.getItemId());
     }
 
-    public DictTaskDO generateDictTaskDO(
-            DictItemResp dictItemResp, User user, TaskStatusEnum status) {
+    public DictTaskDO generateDictTaskDO(DictItemResp dictItemResp, User user,
+            TaskStatusEnum status) {
         DictTaskDO taskDO = new DictTaskDO();
         Date createAt = new Date();
         String name = dictItemResp.fetchDictFileName();
@@ -141,14 +137,12 @@ public class DictUtils {
 
     public List<DictItemResp> dictDOList2Req(List<DictConfDO> dictConfDOList) {
         List<DictItemResp> dictItemReqList = new ArrayList<>();
-        dictConfDOList.stream()
-                .forEach(
-                        conf -> {
-                            DictItemResp dictItemResp = dictDO2Req(conf);
-                            if (Objects.nonNull(dictItemResp)) {
-                                dictItemReqList.add(dictDO2Req(conf));
-                            }
-                        });
+        dictConfDOList.stream().forEach(conf -> {
+            DictItemResp dictItemResp = dictDO2Req(conf);
+            if (Objects.nonNull(dictItemResp)) {
+                dictItemReqList.add(dictDO2Req(conf));
+            }
+        });
         return dictItemReqList;
     }
 
@@ -190,10 +184,8 @@ public class DictUtils {
             Map<String, Long> valueAndFrequencyPair = new HashMap<>(2000);
             for (Map<String, Object> line : semanticQueryResp.getResultList()) {
 
-                if (CollectionUtils.isEmpty(line)
-                        || !line.containsKey(bizName)
-                        || line.get(bizName) == null
-                        || line.size() != 2) {
+                if (CollectionUtils.isEmpty(line) || !line.containsKey(bizName)
+                        || line.get(bizName) == null || line.size() != 2) {
                     continue;
                 }
                 String dimValue = line.get(bizName).toString();
@@ -218,38 +210,35 @@ public class DictUtils {
     }
 
     private void addWhiteValueLines(DictItemResp dictItemResp, List<String> lines, String nature) {
-        if (Objects.isNull(dictItemResp)
-                || Objects.isNull(dictItemResp.getConfig())
+        if (Objects.isNull(dictItemResp) || Objects.isNull(dictItemResp.getConfig())
                 || CollectionUtils.isEmpty(dictItemResp.getConfig().getWhiteList())) {
             return;
         }
         List<String> whiteList = dictItemResp.getConfig().getWhiteList();
-        whiteList.forEach(
-                white -> {
-                    if (!StringUtils.isEmpty(white)) {
-                        white = white.replace(SPACE, POUND);
-                    }
-                    lines.add(String.format("%s %s %s", white, nature, itemValueWhiteFrequency));
-                });
+        whiteList.forEach(white -> {
+            if (!StringUtils.isEmpty(white)) {
+                white = white.replace(SPACE, POUND);
+            }
+            lines.add(String.format("%s %s %s", white, nature, itemValueWhiteFrequency));
+        });
     }
 
-    private void constructDictLines(
-            Map<String, Long> valueAndFrequencyPair, List<String> lines, String nature) {
+    private void constructDictLines(Map<String, Long> valueAndFrequencyPair, List<String> lines,
+            String nature) {
         if (CollectionUtils.isEmpty(valueAndFrequencyPair)) {
             return;
         }
 
-        valueAndFrequencyPair.forEach(
-                (value, frequency) -> {
-                    if (!StringUtils.isEmpty(value)) {
-                        value = value.replace(SPACE, POUND);
-                    }
-                    lines.add(String.format("%s %s %s", value, nature, frequency));
-                });
+        valueAndFrequencyPair.forEach((value, frequency) -> {
+            if (!StringUtils.isEmpty(value)) {
+                value = value.replace(SPACE, POUND);
+            }
+            lines.add(String.format("%s %s %s", value, nature, frequency));
+        });
     }
 
-    private void mergeMultivaluedValue(
-            Map<String, Long> valueAndFrequencyPair, String dimValue, Long metric) {
+    private void mergeMultivaluedValue(Map<String, Long> valueAndFrequencyPair, String dimValue,
+            Long metric) {
         if (StringUtils.isEmpty(dimValue)) {
             return;
         }
@@ -263,8 +252,7 @@ public class DictUtils {
 
         for (String value : tmp.keySet()) {
             long metricOld =
-                    valueAndFrequencyPair.containsKey(value)
-                            ? valueAndFrequencyPair.get(value)
+                    valueAndFrequencyPair.containsKey(value) ? valueAndFrequencyPair.get(value)
                             : 0L;
             valueAndFrequencyPair.put(value, metric + metricOld);
         }
@@ -286,8 +274,7 @@ public class DictUtils {
         String where = StringUtils.isEmpty(whereStr) ? "" : "WHERE" + whereStr;
         ItemValueConfig config = dictItemResp.getConfig();
         int limit =
-                (Objects.isNull(config) || Objects.isNull(config.getLimit()))
-                        ? itemValueMaxCount
+                (Objects.isNull(config) || Objects.isNull(config.getLimit())) ? itemValueMaxCount
                         : dictItemResp.getConfig().getLimit();
 
         // todo 自定义指标
@@ -312,8 +299,7 @@ public class DictUtils {
     }
 
     private QuerySqlReq constructDimQueryReq(DictItemResp dictItemResp) {
-        if (Objects.nonNull(dictItemResp)
-                && Objects.nonNull(dictItemResp.getConfig())
+        if (Objects.nonNull(dictItemResp) && Objects.nonNull(dictItemResp.getConfig())
                 && Objects.nonNull(dictItemResp.getConfig().getMetricId())) {
             // 查询默认指标
             QueryStructReq queryStructReq = generateQueryStruct(dictItemResp);
@@ -332,8 +318,7 @@ public class DictUtils {
         String where = StringUtils.isEmpty(whereStr) ? "" : "WHERE" + whereStr;
         ItemValueConfig config = dictItemResp.getConfig();
         long limit =
-                (Objects.isNull(config) || Objects.isNull(config.getLimit()))
-                        ? itemValueMaxCount
+                (Objects.isNull(config) || Objects.isNull(config.getLimit())) ? itemValueMaxCount
                         : dictItemResp.getConfig().getLimit();
         String sql = String.format(sqlPattern, bizName, where, bizName, limit);
         Set<Long> modelIds = new HashSet<>();
@@ -371,10 +356,8 @@ public class DictUtils {
 
         fillStructDateInfo(queryStructReq, dictItemResp);
 
-        int limit =
-                Objects.isNull(dictItemResp.getConfig().getLimit())
-                        ? itemValueMaxCount
-                        : dictItemResp.getConfig().getLimit();
+        int limit = Objects.isNull(dictItemResp.getConfig().getLimit()) ? itemValueMaxCount
+                : dictItemResp.getConfig().getLimit();
         queryStructReq.setLimit(limit);
         queryStructReq.setNeedAuth(false);
         return queryStructReq;
@@ -410,25 +393,18 @@ public class DictUtils {
         }
     }
 
-    private void fillStructDateBetween(
-            QueryStructReq queryStructReq,
-            ModelResp model,
-            Integer itemValueDateStart,
-            Integer itemValueDateEnd) {
+    private void fillStructDateBetween(QueryStructReq queryStructReq, ModelResp model,
+            Integer itemValueDateStart, Integer itemValueDateEnd) {
         if (Objects.nonNull(model)) {
             List<Dim> timeDims = model.getTimeDimension();
             if (!CollectionUtils.isEmpty(timeDims)) {
                 DateConf dateConf = new DateConf();
                 dateConf.setDateMode(DateConf.DateMode.BETWEEN);
                 String format = timeDims.get(0).getDateFormat();
-                String start =
-                        LocalDate.now()
-                                .minusDays(itemValueDateStart)
-                                .format(DateTimeFormatter.ofPattern(format));
-                String end =
-                        LocalDate.now()
-                                .minusDays(itemValueDateEnd)
-                                .format(DateTimeFormatter.ofPattern(format));
+                String start = LocalDate.now().minusDays(itemValueDateStart)
+                        .format(DateTimeFormatter.ofPattern(format));
+                String end = LocalDate.now().minusDays(itemValueDateEnd)
+                        .format(DateTimeFormatter.ofPattern(format));
                 dateConf.setStartDate(start);
                 dateConf.setEndDate(end);
                 queryStructReq.setDateInfo(dateConf);
@@ -477,17 +453,12 @@ public class DictUtils {
 
     public String defaultDateFilter() {
         String format = itemValueDateFormat;
-        String start =
-                LocalDate.now()
-                        .minusDays(itemValueDateStart)
-                        .format(DateTimeFormatter.ofPattern(format));
-        String end =
-                LocalDate.now()
-                        .minusDays(itemValueDateEnd)
-                        .format(DateTimeFormatter.ofPattern(format));
-        return String.format(
-                "( %s >= '%s' and %s <= '%s' )",
-                TimeDimensionEnum.DAY.getName(), start, TimeDimensionEnum.DAY.getName(), end);
+        String start = LocalDate.now().minusDays(itemValueDateStart)
+                .format(DateTimeFormatter.ofPattern(format));
+        String end = LocalDate.now().minusDays(itemValueDateEnd)
+                .format(DateTimeFormatter.ofPattern(format));
+        return String.format("( %s >= '%s' and %s <= '%s' )", TimeDimensionEnum.DAY.getName(),
+                start, TimeDimensionEnum.DAY.getName(), end);
     }
 
     private String generateDictDateFilter(DictItemResp dictItemResp) {
@@ -502,11 +473,8 @@ public class DictUtils {
         }
         // 静态日期
         if (DateConf.DateMode.BETWEEN.equals(config.getDateConf().getDateMode())) {
-            return String.format(
-                    "( %s >= '%s' and %s <= '%s' )",
-                    TimeDimensionEnum.DAY.getName(),
-                    config.getDateConf().getStartDate(),
-                    TimeDimensionEnum.DAY.getName(),
+            return String.format("( %s >= '%s' and %s <= '%s' )", TimeDimensionEnum.DAY.getName(),
+                    config.getDateConf().getStartDate(), TimeDimensionEnum.DAY.getName(),
                     config.getDateConf().getEndDate());
         }
         // 动态日期
@@ -527,18 +495,12 @@ public class DictUtils {
                     dateFormat = itemValueDateFormat;
                 }
                 String start =
-                        LocalDate.now()
-                                .minusDays(dictItemResp.getConfig().getDateConf().getUnit())
+                        LocalDate.now().minusDays(dictItemResp.getConfig().getDateConf().getUnit())
                                 .format(DateTimeFormatter.ofPattern(dateFormat));
-                String end =
-                        LocalDate.now()
-                                .minusDays(0)
-                                .format(DateTimeFormatter.ofPattern(dateFormat));
-                return String.format(
-                        "( %s > '%s' and %s <= '%s' )",
-                        TimeDimensionEnum.DAY.getName(),
-                        start,
-                        TimeDimensionEnum.DAY.getName(),
+                String end = LocalDate.now().minusDays(0)
+                        .format(DateTimeFormatter.ofPattern(dateFormat));
+                return String.format("( %s > '%s' and %s <= '%s' )",
+                        TimeDimensionEnum.DAY.getName(), start, TimeDimensionEnum.DAY.getName(),
                         end);
             }
         }

@@ -30,29 +30,15 @@ import java.util.Optional;
 public class FilterToGroupScanRule extends RelRule<Config> implements TransformationRule {
 
     public static FilterTableScanRule.Config DEFAULT =
-            FilterTableScanRule.Config.DEFAULT
-                    .withOperandSupplier(
-                            (b0) -> {
-                                return b0.operand(LogicalFilter.class)
-                                        .oneInput(
-                                                (b1) -> {
-                                                    return b1.operand(LogicalProject.class)
-                                                            .oneInput(
-                                                                    (b2) -> {
-                                                                        return b2.operand(
-                                                                                        LogicalAggregate
-                                                                                                .class)
-                                                                                .oneInput(
-                                                                                        (b3) -> {
-                                                                                            return b3.operand(
-                                                                                                            LogicalProject
-                                                                                                                    .class)
-                                                                                                    .anyInputs();
-                                                                                        });
-                                                                    });
-                                                });
-                            })
-                    .as(FilterTableScanRule.Config.class);
+            FilterTableScanRule.Config.DEFAULT.withOperandSupplier((b0) -> {
+                return b0.operand(LogicalFilter.class).oneInput((b1) -> {
+                    return b1.operand(LogicalProject.class).oneInput((b2) -> {
+                        return b2.operand(LogicalAggregate.class).oneInput((b3) -> {
+                            return b3.operand(LogicalProject.class).anyInputs();
+                        });
+                    });
+                });
+            }).as(FilterTableScanRule.Config.class);
 
     private SemanticSchema semanticSchema;
 
@@ -75,19 +61,16 @@ public class FilterToGroupScanRule extends RelRule<Config> implements Transforma
         Project project0 = (Project) call.rel(1);
         Project project1 = (Project) call.rel(3);
         Aggregate logicalAggregate = (Aggregate) call.rel(2);
-        Optional<Pair<RexNode, String>> isIn =
-                project1.getNamedProjects().stream()
-                        .filter(i -> i.right.equalsIgnoreCase(minMax.getLeft()))
-                        .findFirst();
+        Optional<Pair<RexNode, String>> isIn = project1.getNamedProjects().stream()
+                .filter(i -> i.right.equalsIgnoreCase(minMax.getLeft())).findFirst();
         if (!isIn.isPresent()) {
             return;
         }
 
         RelBuilder relBuilder = call.builder();
         relBuilder.push(project1);
-        RexNode addPartitionCondition =
-                getRexNodeByTimeRange(
-                        relBuilder, minMax.getLeft(), minMax.getMiddle(), minMax.getRight());
+        RexNode addPartitionCondition = getRexNodeByTimeRange(relBuilder, minMax.getLeft(),
+                minMax.getMiddle(), minMax.getRight());
         relBuilder.filter(new RexNode[] {addPartitionCondition});
         relBuilder.project(project1.getProjects());
         ImmutableBitSet newGroupSet = logicalAggregate.getGroupSet();
@@ -97,13 +80,8 @@ public class FilterToGroupScanRule extends RelRule<Config> implements Transforma
         Iterator var = logicalAggregate.getAggCallList().iterator();
         while (var.hasNext()) {
             AggregateCall aggCall = (AggregateCall) var.next();
-            newAggCalls.add(
-                    aggCall.adaptTo(
-                            project1,
-                            aggCall.getArgList(),
-                            aggCall.filterArg,
-                            groupCount,
-                            newGroupCount));
+            newAggCalls.add(aggCall.adaptTo(project1, aggCall.getArgList(), aggCall.filterArg,
+                    groupCount, newGroupCount));
         }
         relBuilder.aggregate(relBuilder.groupKey(newGroupSet), newAggCalls);
         relBuilder.project(project0.getProjects());
@@ -111,17 +89,12 @@ public class FilterToGroupScanRule extends RelRule<Config> implements Transforma
         call.transformTo(relBuilder.build());
     }
 
-    private RexNode getRexNodeByTimeRange(
-            RelBuilder relBuilder, String dateField, String start, String end) {
-        return relBuilder.call(
-                SqlStdOperatorTable.AND,
-                relBuilder.call(
-                        SqlStdOperatorTable.GREATER_THAN_OR_EQUAL,
-                        relBuilder.field(dateField),
-                        relBuilder.literal(start)),
-                relBuilder.call(
-                        SqlStdOperatorTable.LESS_THAN_OR_EQUAL,
-                        relBuilder.field(dateField),
+    private RexNode getRexNodeByTimeRange(RelBuilder relBuilder, String dateField, String start,
+            String end) {
+        return relBuilder.call(SqlStdOperatorTable.AND,
+                relBuilder.call(SqlStdOperatorTable.GREATER_THAN_OR_EQUAL,
+                        relBuilder.field(dateField), relBuilder.literal(start)),
+                relBuilder.call(SqlStdOperatorTable.LESS_THAN_OR_EQUAL, relBuilder.field(dateField),
                         relBuilder.literal(end)));
     }
 }

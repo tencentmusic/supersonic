@@ -27,9 +27,11 @@ import static java.time.LocalDate.now;
 
 public class BaseTest extends BaseApplication {
 
-    @Autowired protected SemanticLayerService semanticLayerService;
+    @Autowired
+    protected SemanticLayerService semanticLayerService;
 
-    @Autowired private DomainRepository domainRepository;
+    @Autowired
+    private DomainRepository domainRepository;
 
     protected SemanticQueryResp queryBySql(String sql) throws Exception {
         return queryBySql(sql, User.getFakeUser());

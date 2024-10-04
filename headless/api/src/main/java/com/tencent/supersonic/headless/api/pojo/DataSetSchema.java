@@ -65,10 +65,8 @@ public class DataSetSchema {
         List<SchemaElement> allElements = new ArrayList<>();
         allElements.addAll(getDimensions());
         allElements.addAll(getMetrics());
-        return allElements.stream()
-                .collect(
-                        Collectors.toMap(
-                                SchemaElement::getBizName, SchemaElement::getName, (k1, k2) -> k1));
+        return allElements.stream().collect(Collectors.toMap(SchemaElement::getBizName,
+                SchemaElement::getName, (k1, k2) -> k1));
     }
 
     public TimeDefaultConfig getTagTypeTimeDefaultConfig() {
@@ -104,16 +102,13 @@ public class DataSetSchema {
                 || Objects.isNull(detailTypeDefaultConfig.getDefaultDisplayInfo())) {
             return new ArrayList<>();
         }
-        if (CollectionUtils.isNotEmpty(
-                detailTypeDefaultConfig.getDefaultDisplayInfo().getMetricIds())) {
+        if (CollectionUtils
+                .isNotEmpty(detailTypeDefaultConfig.getDefaultDisplayInfo().getMetricIds())) {
             return detailTypeDefaultConfig.getDefaultDisplayInfo().getMetricIds().stream()
-                    .map(
-                            id -> {
-                                SchemaElement metric = getElement(SchemaElementType.METRIC, id);
-                                return metric;
-                            })
-                    .filter(Objects::nonNull)
-                    .collect(Collectors.toList());
+                    .map(id -> {
+                        SchemaElement metric = getElement(SchemaElementType.METRIC, id);
+                        return metric;
+                    }).filter(Objects::nonNull).collect(Collectors.toList());
         }
         return new ArrayList<>();
     }
@@ -124,11 +119,10 @@ public class DataSetSchema {
                 || Objects.isNull(detailTypeDefaultConfig.getDefaultDisplayInfo())) {
             return new ArrayList<>();
         }
-        if (CollectionUtils.isNotEmpty(
-                detailTypeDefaultConfig.getDefaultDisplayInfo().getDimensionIds())) {
+        if (CollectionUtils
+                .isNotEmpty(detailTypeDefaultConfig.getDefaultDisplayInfo().getDimensionIds())) {
             return detailTypeDefaultConfig.getDefaultDisplayInfo().getDimensionIds().stream()
-                    .map(id -> getElement(SchemaElementType.DIMENSION, id))
-                    .filter(Objects::nonNull)
+                    .map(id -> getElement(SchemaElementType.DIMENSION, id)).filter(Objects::nonNull)
                     .collect(Collectors.toList());
         }
         return new ArrayList<>();

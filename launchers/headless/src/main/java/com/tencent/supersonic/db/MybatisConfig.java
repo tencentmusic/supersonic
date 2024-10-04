@@ -19,8 +19,8 @@ public class MybatisConfig {
     private static final String MAPPER_LOCATION = "classpath*:mapper/**/*.xml";
 
     @Bean
-    public SqlSessionFactory sqlSessionFactory(
-            DataSource dataSource, PageInterceptor pageInterceptor) throws Exception {
+    public SqlSessionFactory sqlSessionFactory(DataSource dataSource,
+            PageInterceptor pageInterceptor) throws Exception {
         SqlSessionFactoryBean bean = new SqlSessionFactoryBean();
         org.apache.ibatis.session.Configuration configuration =
                 new org.apache.ibatis.session.Configuration();

@@ -24,11 +24,8 @@ public class ChromaEmbeddingStoreFactory extends BaseEmbeddingStoreFactory {
 
     @Override
     public EmbeddingStore createEmbeddingStore(String collectionName) {
-        return ChromaEmbeddingStore.builder()
-                .baseUrl(storeProperties.getBaseUrl())
-                .collectionName(collectionName)
-                .timeout(storeProperties.getTimeout())
-                .build();
+        return ChromaEmbeddingStore.builder().baseUrl(storeProperties.getBaseUrl())
+                .collectionName(collectionName).timeout(storeProperties.getTimeout()).build();
     }
 
     private static EmbeddingStoreProperties createPropertiesFromConfig(

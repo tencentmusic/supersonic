@@ -10,7 +10,8 @@ import lombok.ToString;
 @ToString
 public class ItemValueReq {
 
-    @NotNull private Long id;
+    @NotNull
+    private Long id;
 
     private DateConf dateConf;
 

@@ -20,36 +20,27 @@ public class AzureModelFactory implements ModelFactory, InitializingBean {
 
     @Override
     public ChatLanguageModel createChatModel(ChatModelConfig modelConfig) {
-        AzureOpenAiChatModel.Builder builder =
-                AzureOpenAiChatModel.builder()
-                        .endpoint(modelConfig.getBaseUrl())
-                        .apiKey(modelConfig.getApiKey())
-                        .deploymentName(modelConfig.getModelName())
-                        .temperature(modelConfig.getTemperature())
-                        .maxRetries(modelConfig.getMaxRetries())
-                        .topP(modelConfig.getTopP())
-                        .timeout(
-                                Duration.ofSeconds(
-                                        modelConfig.getTimeOut() == null
-                                                ? 0L
-                                                : modelConfig.getTimeOut()))
-                        .logRequestsAndResponses(
-                                modelConfig.getLogRequests() != null
-                                        && modelConfig.getLogResponses());
+        AzureOpenAiChatModel.Builder builder = AzureOpenAiChatModel.builder()
+                .endpoint(modelConfig.getBaseUrl()).apiKey(modelConfig.getApiKey())
+                .deploymentName(modelConfig.getModelName())
+                .temperature(modelConfig.getTemperature()).maxRetries(modelConfig.getMaxRetries())
+                .topP(modelConfig.getTopP())
+                .timeout(Duration.ofSeconds(
+                        modelConfig.getTimeOut() == null ? 0L : modelConfig.getTimeOut()))
+                .logRequestsAndResponses(
+                        modelConfig.getLogRequests() != null && modelConfig.getLogResponses());
         return builder.build();
     }
 
     @Override
     public EmbeddingModel createEmbeddingModel(EmbeddingModelConfig embeddingModelConfig) {
         AzureOpenAiEmbeddingModel.Builder builder =
-                AzureOpenAiEmbeddingModel.builder()
-                        .endpoint(embeddingModelConfig.getBaseUrl())
+                AzureOpenAiEmbeddingModel.builder().endpoint(embeddingModelConfig.getBaseUrl())
                         .apiKey(embeddingModelConfig.getApiKey())
                         .deploymentName(embeddingModelConfig.getModelName())
                         .maxRetries(embeddingModelConfig.getMaxRetries())
-                        .logRequestsAndResponses(
-                                embeddingModelConfig.getLogRequests() != null
-                                        && embeddingModelConfig.getLogResponses());
+                        .logRequestsAndResponses(embeddingModelConfig.getLogRequests() != null
+                                && embeddingModelConfig.getLogResponses());
         return builder.build();
     }
 

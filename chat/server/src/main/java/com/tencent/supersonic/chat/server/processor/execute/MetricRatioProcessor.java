@@ -69,19 +69,14 @@ public class MetricRatioProcessor implements ExecuteResultProcessor {
         queryResult.setAggregateInfo(aggregateInfo);
     }
 
-    public AggregateInfo getAggregateInfo(
-            User user, SemanticParseInfo semanticParseInfo, QueryResult queryResult) {
+    public AggregateInfo getAggregateInfo(User user, SemanticParseInfo semanticParseInfo,
+            QueryResult queryResult) {
 
         Set<String> resultMetricNames = new HashSet<>();
-        queryResult.getQueryColumns().stream()
-                .forEach(
-                        c ->
-                                resultMetricNames.addAll(
-                                        SqlSelectHelper.getColumnFromExpr(c.getNameEn())));
-        Optional<SchemaElement> ratioMetric =
-                semanticParseInfo.getMetrics().stream()
-                        .filter(m -> resultMetricNames.contains(m.getBizName()))
-                        .findFirst();
+        queryResult.getQueryColumns().stream().forEach(
+                c -> resultMetricNames.addAll(SqlSelectHelper.getColumnFromExpr(c.getNameEn())));
+        Optional<SchemaElement> ratioMetric = semanticParseInfo.getMetrics().stream()
+                .filter(m -> resultMetricNames.contains(m.getBizName())).findFirst();
 
         AggregateInfo aggregateInfo = new AggregateInfo();
         if (!ratioMetric.isPresent()) {
@@ -90,20 +85,15 @@ public class MetricRatioProcessor implements ExecuteResultProcessor {
 
         try {
             String dateField = QueryReqBuilder.getDateField(semanticParseInfo.getDateInfo());
-            Optional<String> lastDayOp =
-                    queryResult.getQueryResults().stream()
-                            .filter(r -> r.containsKey(dateField))
-                            .map(r -> r.get(dateField).toString())
-                            .sorted(Comparator.reverseOrder())
-                            .findFirst();
+            Optional<String> lastDayOp = queryResult.getQueryResults().stream()
+                    .filter(r -> r.containsKey(dateField)).map(r -> r.get(dateField).toString())
+                    .sorted(Comparator.reverseOrder()).findFirst();
 
             if (!lastDayOp.isPresent()) {
                 return new AggregateInfo();
             }
-            Optional<Map<String, Object>> lastValue =
-                    queryResult.getQueryResults().stream()
-                            .filter(r -> r.get(dateField).toString().equals(lastDayOp.get()))
-                            .findFirst();
+            Optional<Map<String, Object>> lastValue = queryResult.getQueryResults().stream()
+                    .filter(r -> r.get(dateField).toString().equals(lastDayOp.get())).findFirst();
 
             MetricInfo metricInfo = new MetricInfo();
             metricInfo.setStatistics(new HashMap<>());
@@ -115,23 +105,11 @@ public class MetricRatioProcessor implements ExecuteResultProcessor {
             metricInfo.setDate(lastValue.get().get(dateField).toString());
 
             CompletableFuture<MetricInfo> metricInfoRoll =
-                    CompletableFuture.supplyAsync(
-                            () ->
-                                    queryRatio(
-                                            user,
-                                            semanticParseInfo,
-                                            ratioMetric.get(),
-                                            AggOperatorEnum.RATIO_ROLL,
-                                            queryResult));
+                    CompletableFuture.supplyAsync(() -> queryRatio(user, semanticParseInfo,
+                            ratioMetric.get(), AggOperatorEnum.RATIO_ROLL, queryResult));
             CompletableFuture<MetricInfo> metricInfoOver =
-                    CompletableFuture.supplyAsync(
-                            () ->
-                                    queryRatio(
-                                            user,
-                                            semanticParseInfo,
-                                            ratioMetric.get(),
-                                            AggOperatorEnum.RATIO_OVER,
-                                            queryResult));
+                    CompletableFuture.supplyAsync(() -> queryRatio(user, semanticParseInfo,
+                            ratioMetric.get(), AggOperatorEnum.RATIO_OVER, queryResult));
             CompletableFuture.allOf(metricInfoRoll, metricInfoOver);
             metricInfo.setName(metricInfoRoll.get().getName());
             metricInfo.setValue(metricInfoRoll.get().getValue());
@@ -145,19 +123,15 @@ public class MetricRatioProcessor implements ExecuteResultProcessor {
     }
 
     @SneakyThrows
-    private MetricInfo queryRatio(
-            User user,
-            SemanticParseInfo semanticParseInfo,
-            SchemaElement metric,
-            AggOperatorEnum aggOperatorEnum,
-            QueryResult queryResult) {
+    private MetricInfo queryRatio(User user, SemanticParseInfo semanticParseInfo,
+            SchemaElement metric, AggOperatorEnum aggOperatorEnum, QueryResult queryResult) {
 
         QueryStructReq queryStructReq =
                 QueryReqBuilder.buildStructRatioReq(semanticParseInfo, metric, aggOperatorEnum);
         String dateField = QueryReqBuilder.getDateField(semanticParseInfo.getDateInfo());
         queryStructReq.setGroups(new ArrayList<>(Arrays.asList(dateField)));
-        queryStructReq.setDateInfo(
-                getRatioDateConf(aggOperatorEnum, semanticParseInfo, queryResult));
+        queryStructReq
+                .setDateInfo(getRatioDateConf(aggOperatorEnum, semanticParseInfo, queryResult));
         queryStructReq.setConvertToSql(false);
         SemanticLayerService queryService = ContextUtils.getBean(SemanticLayerService.class);
         SemanticQueryResp queryResp = queryService.queryByReq(queryStructReq, user);
@@ -168,26 +142,22 @@ public class MetricRatioProcessor implements ExecuteResultProcessor {
         }
 
         Map<String, Object> result = queryResp.getResultList().get(0);
-        Optional<QueryColumn> valueColumn =
-                queryResp.getColumns().stream()
-                        .filter(c -> c.getNameEn().equals(metric.getBizName()))
-                        .findFirst();
+        Optional<QueryColumn> valueColumn = queryResp.getColumns().stream()
+                .filter(c -> c.getNameEn().equals(metric.getBizName())).findFirst();
 
         if (!valueColumn.isPresent()) {
             return metricInfo;
         }
-        String valueField =
-                String.format(
-                        "%s_%s", valueColumn.get().getNameEn(), aggOperatorEnum.getOperator());
+        String valueField = String.format("%s_%s", valueColumn.get().getNameEn(),
+                aggOperatorEnum.getOperator());
         if (result.containsKey(valueColumn.get().getNameEn())) {
             DecimalFormat df = new DecimalFormat("#.####");
             metricInfo.setValue(df.format(result.get(valueColumn.get().getNameEn())));
         }
         String ratio = "";
         if (Objects.nonNull(result.get(valueField))) {
-            ratio =
-                    String.format("%.2f", (Double.valueOf(result.get(valueField).toString()) * 100))
-                            + "%";
+            ratio = String.format("%.2f", (Double.valueOf(result.get(valueField).toString()) * 100))
+                    + "%";
         }
         String statisticsRollName = RatioOverType.DAY_ON_DAY.getShowName();
         String statisticsOverName = RatioOverType.WEEK_ON_DAY.getShowName();
@@ -199,28 +169,20 @@ public class MetricRatioProcessor implements ExecuteResultProcessor {
             statisticsRollName = RatioOverType.WEEK_ON_WEEK.getShowName();
             statisticsOverName = RatioOverType.MONTH_ON_WEEK.getShowName();
         }
-        metricInfo
-                .getStatistics()
-                .put(
-                        aggOperatorEnum.equals(AggOperatorEnum.RATIO_ROLL)
-                                ? statisticsRollName
-                                : statisticsOverName,
-                        ratio);
+        metricInfo.getStatistics()
+                .put(aggOperatorEnum.equals(AggOperatorEnum.RATIO_ROLL) ? statisticsRollName
+                        : statisticsOverName, ratio);
         metricInfo.setName(metric.getName());
         return metricInfo;
     }
 
-    private DateConf getRatioDateConf(
-            AggOperatorEnum aggOperatorEnum,
-            SemanticParseInfo semanticParseInfo,
-            QueryResult queryResult) {
+    private DateConf getRatioDateConf(AggOperatorEnum aggOperatorEnum,
+            SemanticParseInfo semanticParseInfo, QueryResult queryResult) {
         String dateField = QueryReqBuilder.getDateField(semanticParseInfo.getDateInfo());
 
         Optional<String> lastDayOp =
-                queryResult.getQueryResults().stream()
-                        .map(r -> r.get(dateField).toString())
-                        .sorted(Comparator.reverseOrder())
-                        .findFirst();
+                queryResult.getQueryResults().stream().map(r -> r.get(dateField).toString())
+                        .sorted(Comparator.reverseOrder()).findFirst();
 
         if (!lastDayOp.isPresent()) {
             return semanticParseInfo.getDateInfo();
@@ -236,31 +198,25 @@ public class MetricRatioProcessor implements ExecuteResultProcessor {
             DateTimeFormatter formatter =
                     DateUtils.getDateFormatter(lastDay, new String[] {DAY_FORMAT, DAY_FORMAT_INT});
             LocalDate end = LocalDate.parse(lastDay, formatter);
-            start =
-                    aggOperatorEnum.equals(AggOperatorEnum.RATIO_ROLL)
-                            ? end.minusDays(1).format(formatter)
-                            : end.minusWeeks(1).format(formatter);
+            start = aggOperatorEnum.equals(AggOperatorEnum.RATIO_ROLL)
+                    ? end.minusDays(1).format(formatter)
+                    : end.minusWeeks(1).format(formatter);
         }
         if (DatePeriodEnum.WEEK.equals(semanticParseInfo.getDateInfo().getPeriod())) {
-            DateTimeFormatter formatter =
-                    DateUtils.getTimeFormatter(
-                            lastDay,
-                            new String[] {TIMES_FORMAT, DAY_FORMAT, TIME_FORMAT, DAY_FORMAT_INT});
+            DateTimeFormatter formatter = DateUtils.getTimeFormatter(lastDay,
+                    new String[] {TIMES_FORMAT, DAY_FORMAT, TIME_FORMAT, DAY_FORMAT_INT});
             LocalDateTime end = LocalDateTime.parse(lastDay, formatter);
-            start =
-                    aggOperatorEnum.equals(AggOperatorEnum.RATIO_ROLL)
-                            ? end.minusWeeks(1).format(formatter)
-                            : end.minusMonths(1).with(DayOfWeek.MONDAY).format(formatter);
+            start = aggOperatorEnum.equals(AggOperatorEnum.RATIO_ROLL)
+                    ? end.minusWeeks(1).format(formatter)
+                    : end.minusMonths(1).with(DayOfWeek.MONDAY).format(formatter);
         }
         if (DatePeriodEnum.MONTH.equals(semanticParseInfo.getDateInfo().getPeriod())) {
-            DateTimeFormatter formatter =
-                    DateUtils.getDateFormatter(
-                            lastDay, new String[] {MONTH_FORMAT, MONTH_FORMAT_INT});
+            DateTimeFormatter formatter = DateUtils.getDateFormatter(lastDay,
+                    new String[] {MONTH_FORMAT, MONTH_FORMAT_INT});
             YearMonth end = YearMonth.parse(lastDay, formatter);
-            start =
-                    aggOperatorEnum.equals(AggOperatorEnum.RATIO_ROLL)
-                            ? end.minusMonths(1).format(formatter)
-                            : end.minusYears(1).format(formatter);
+            start = aggOperatorEnum.equals(AggOperatorEnum.RATIO_ROLL)
+                    ? end.minusMonths(1).format(formatter)
+                    : end.minusYears(1).format(formatter);
         }
         dayList.add(start);
         dateConf.setDateList(dayList);

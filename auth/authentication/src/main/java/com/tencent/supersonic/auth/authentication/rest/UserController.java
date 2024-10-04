@@ -30,8 +30,8 @@ public class UserController {
     }
 
     @GetMapping("/getCurrentUser")
-    public User getCurrentUser(
-            HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {
+    public User getCurrentUser(HttpServletRequest httpServletRequest,
+            HttpServletResponse httpServletResponse) {
         return userService.getCurrentUser(httpServletRequest, httpServletResponse);
     }
 

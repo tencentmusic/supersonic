@@ -11,7 +11,8 @@ import java.util.List;
 @ToString
 @Data
 public class TagBatchCreateReq {
-    @NotNull private Long modelId;
+    @NotNull
+    private Long modelId;
     private SchemaElementType type;
     private List<Long> itemIds;
 }

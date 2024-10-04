@@ -150,8 +150,8 @@ public class CspiderDemo extends S2BaseDemo {
         modelDetail.setMeasures(Collections.emptyList());
 
         modelDetail.setQueryType("sql_query");
-        modelDetail.setSqlQuery(
-                "SELECT f_id, artist_name, file_size, duration, formats FROM files");
+        modelDetail
+                .setSqlQuery("SELECT f_id, artist_name, file_size, duration, formats FROM files");
         modelReq.setModelDetail(modelDetail);
         return modelService.createModel(modelReq, user);
     }
@@ -188,9 +188,8 @@ public class CspiderDemo extends S2BaseDemo {
         modelDetail.setMeasures(measures);
 
         modelDetail.setQueryType("sql_query");
-        modelDetail.setSqlQuery(
-                "SELECT imp_date, song_name, artist_name, country, f_id, g_name, "
-                        + " rating, languages, releasedate, resolution FROM song");
+        modelDetail.setSqlQuery("SELECT imp_date, song_name, artist_name, country, f_id, g_name, "
+                + " rating, languages, releasedate, resolution FROM song");
         modelReq.setModelDetail(modelDetail);
         return modelService.createModel(modelReq, user);
     }
@@ -228,8 +227,8 @@ public class CspiderDemo extends S2BaseDemo {
         dataSetService.save(dataSetReq, User.getFakeUser());
     }
 
-    public void addModelRela_1(
-            DomainResp s2Domain, ModelResp genreModelResp, ModelResp artistModelResp) {
+    public void addModelRela_1(DomainResp s2Domain, ModelResp genreModelResp,
+            ModelResp artistModelResp) {
         List<JoinCondition> joinConditions = Lists.newArrayList();
         joinConditions.add(new JoinCondition("g_name", "g_name", FilterOperatorEnum.EQUALS));
         ModelRela modelRelaReq = new ModelRela();
@@ -241,11 +240,11 @@ public class CspiderDemo extends S2BaseDemo {
         modelRelaService.save(modelRelaReq, user);
     }
 
-    public void addModelRela_2(
-            DomainResp s2Domain, ModelResp filesModelResp, ModelResp artistModelResp) {
+    public void addModelRela_2(DomainResp s2Domain, ModelResp filesModelResp,
+            ModelResp artistModelResp) {
         List<JoinCondition> joinConditions = Lists.newArrayList();
-        joinConditions.add(
-                new JoinCondition("artist_name", "artist_name", FilterOperatorEnum.EQUALS));
+        joinConditions
+                .add(new JoinCondition("artist_name", "artist_name", FilterOperatorEnum.EQUALS));
         ModelRela modelRelaReq = new ModelRela();
         modelRelaReq.setDomainId(s2Domain.getId());
         modelRelaReq.setFromModelId(filesModelResp.getId());
@@ -255,11 +254,11 @@ public class CspiderDemo extends S2BaseDemo {
         modelRelaService.save(modelRelaReq, user);
     }
 
-    public void addModelRela_3(
-            DomainResp s2Domain, ModelResp songModelResp, ModelResp artistModelResp) {
+    public void addModelRela_3(DomainResp s2Domain, ModelResp songModelResp,
+            ModelResp artistModelResp) {
         List<JoinCondition> joinConditions = Lists.newArrayList();
-        joinConditions.add(
-                new JoinCondition("artist_name", "artist_name", FilterOperatorEnum.EQUALS));
+        joinConditions
+                .add(new JoinCondition("artist_name", "artist_name", FilterOperatorEnum.EQUALS));
         ModelRela modelRelaReq = new ModelRela();
         modelRelaReq.setDomainId(s2Domain.getId());
         modelRelaReq.setFromModelId(songModelResp.getId());
@@ -269,8 +268,8 @@ public class CspiderDemo extends S2BaseDemo {
         modelRelaService.save(modelRelaReq, user);
     }
 
-    public void addModelRela_4(
-            DomainResp s2Domain, ModelResp songModelResp, ModelResp genreModelResp) {
+    public void addModelRela_4(DomainResp s2Domain, ModelResp songModelResp,
+            ModelResp genreModelResp) {
         List<JoinCondition> joinConditions = Lists.newArrayList();
         joinConditions.add(new JoinCondition("g_name", "g_name", FilterOperatorEnum.EQUALS));
         ModelRela modelRelaReq = new ModelRela();
@@ -282,8 +281,8 @@ public class CspiderDemo extends S2BaseDemo {
         modelRelaService.save(modelRelaReq, user);
     }
 
-    public void addModelRela_5(
-            DomainResp s2Domain, ModelResp songModelResp, ModelResp filesModelResp) {
+    public void addModelRela_5(DomainResp s2Domain, ModelResp songModelResp,
+            ModelResp filesModelResp) {
         List<JoinCondition> joinConditions = Lists.newArrayList();
         joinConditions.add(new JoinCondition("f_id", "f_id", FilterOperatorEnum.EQUALS));
         ModelRela modelRelaReq = new ModelRela();

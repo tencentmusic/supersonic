@@ -1,6 +1,6 @@
 package com.tencent.supersonic.headless.core.translator.calcite.sql.render;
 
-import com.tencent.supersonic.headless.api.pojo.enums.EngineType;
+import com.tencent.supersonic.common.pojo.enums.EngineType;
 import com.tencent.supersonic.headless.core.pojo.MetricQueryParam;
 import com.tencent.supersonic.headless.core.translator.calcite.s2sql.Constants;
 import com.tencent.supersonic.headless.core.translator.calcite.s2sql.DataSource;
@@ -27,13 +27,8 @@ import java.util.stream.Collectors;
 public class FilterRender extends Renderer {
 
     @Override
-    public void render(
-            MetricQueryParam metricCommand,
-            List<DataSource> dataSources,
-            SqlValidatorScope scope,
-            SemanticSchema schema,
-            boolean nonAgg)
-            throws Exception {
+    public void render(MetricQueryParam metricCommand, List<DataSource> dataSources,
+            SqlValidatorScope scope, SemanticSchema schema, boolean nonAgg) throws Exception {
         TableView tableView = super.tableView;
         SqlNode filterNode = null;
         List<String> queryMetrics = new ArrayList<>(metricCommand.getMetrics());
@@ -49,14 +44,8 @@ public class FilterRender extends Renderer {
             Set<String> dimensions = new HashSet<>();
             Set<String> metrics = new HashSet<>();
             for (DataSource dataSource : dataSources) {
-                SourceRender.whereDimMetric(
-                        fieldWhere,
-                        metricCommand.getMetrics(),
-                        metricCommand.getDimensions(),
-                        dataSource,
-                        schema,
-                        dimensions,
-                        metrics);
+                SourceRender.whereDimMetric(fieldWhere, metricCommand.getMetrics(),
+                        metricCommand.getDimensions(), dataSource, schema, dimensions, metrics);
             }
             queryMetrics.addAll(metrics);
             queryDimensions.addAll(dimensions);
@@ -71,8 +60,7 @@ public class FilterRender extends Renderer {
                 continue;
             }
             if (optionalMetric.isPresent()) {
-                tableView
-                        .getMeasure()
+                tableView.getMeasure()
                         .add(MetricNode.build(optionalMetric.get(), scope, engineType));
             } else {
                 tableView.getMeasure().add(SemanticNode.parse(metric, scope, engineType));
@@ -80,9 +68,8 @@ public class FilterRender extends Renderer {
         }
         if (filterNode != null) {
             TableView filterView = new TableView();
-            filterView.setTable(
-                    SemanticNode.buildAs(
-                            Constants.DATASOURCE_TABLE_FILTER_PREFIX, tableView.build()));
+            filterView.setTable(SemanticNode.buildAs(Constants.DATASOURCE_TABLE_FILTER_PREFIX,
+                    tableView.build()));
             filterView.getFilter().add(filterNode);
             filterView.getMeasure().add(SqlIdentifier.star(SqlParserPos.ZERO));
             super.tableView = filterView;

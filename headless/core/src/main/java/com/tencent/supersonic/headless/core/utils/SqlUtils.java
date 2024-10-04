@@ -36,9 +36,11 @@ import static com.tencent.supersonic.common.pojo.Constants.AT_SYMBOL;
 @Component
 public class SqlUtils {
 
-    @Getter private Database database;
+    @Getter
+    private Database database;
 
-    @Autowired private JdbcDataSource jdbcDataSource;
+    @Autowired
+    private JdbcDataSource jdbcDataSource;
 
     @Value("${s2.source.result-limit:1000000}")
     private int resultLimit;
@@ -46,9 +48,11 @@ public class SqlUtils {
     @Value("${s2.source.enable-query-log:false}")
     private boolean isQueryLogEnable;
 
-    @Getter private DataType dataTypeEnum;
+    @Getter
+    private DataType dataTypeEnum;
 
-    @Getter private JdbcDataSourceUtils jdbcDataSourceUtils;
+    @Getter
+    private JdbcDataSourceUtils jdbcDataSourceUtils;
 
     public SqlUtils() {}
 
@@ -60,14 +64,10 @@ public class SqlUtils {
     public SqlUtils init(Database database) {
         return SqlUtilsBuilder.getBuilder()
                 .withName(database.getId() + AT_SYMBOL + database.getName())
-                .withType(database.getType())
-                .withJdbcUrl(database.getUrl())
-                .withUsername(database.getUsername())
-                .withPassword(database.getPassword())
-                .withJdbcDataSource(this.jdbcDataSource)
-                .withResultLimit(this.resultLimit)
-                .withIsQueryLogEnable(this.isQueryLogEnable)
-                .build();
+                .withType(database.getType()).withJdbcUrl(database.getUrl())
+                .withUsername(database.getUsername()).withPassword(database.getPassword())
+                .withJdbcDataSource(this.jdbcDataSource).withResultLimit(this.resultLimit)
+                .withIsQueryLogEnable(this.isQueryLogEnable).build();
     }
 
     public List<Map<String, Object>> execute(String sql) throws ServerException {
@@ -105,27 +105,25 @@ public class SqlUtils {
         getResult(sql, queryResultWithColumns, jdbcTemplate());
     }
 
-    private SemanticQueryResp getResult(
-            String sql, SemanticQueryResp queryResultWithColumns, JdbcTemplate jdbcTemplate) {
-        jdbcTemplate.query(
-                sql,
-                rs -> {
-                    if (null == rs) {
-                        return queryResultWithColumns;
-                    }
+    private SemanticQueryResp getResult(String sql, SemanticQueryResp queryResultWithColumns,
+            JdbcTemplate jdbcTemplate) {
+        jdbcTemplate.query(sql, rs -> {
+            if (null == rs) {
+                return queryResultWithColumns;
+            }
 
-                    ResultSetMetaData metaData = rs.getMetaData();
-                    List<QueryColumn> queryColumns = new ArrayList<>();
-                    for (int i = 1; i <= metaData.getColumnCount(); i++) {
-                        String key = metaData.getColumnLabel(i);
-                        queryColumns.add(new QueryColumn(key, metaData.getColumnTypeName(i)));
-                    }
-                    queryResultWithColumns.setColumns(queryColumns);
+            ResultSetMetaData metaData = rs.getMetaData();
+            List<QueryColumn> queryColumns = new ArrayList<>();
+            for (int i = 1; i <= metaData.getColumnCount(); i++) {
+                String key = metaData.getColumnLabel(i);
+                queryColumns.add(new QueryColumn(key, metaData.getColumnTypeName(i)));
+            }
+            queryResultWithColumns.setColumns(queryColumns);
 
-                    List<Map<String, Object>> resultList = getAllData(rs, queryColumns);
-                    queryResultWithColumns.setResultList(resultList);
-                    return queryResultWithColumns;
-                });
+            List<Map<String, Object>> resultList = getAllData(rs, queryColumns);
+            queryResultWithColumns.setResultList(resultList);
+            return queryResultWithColumns;
+        });
         return queryResultWithColumns;
     }
 
@@ -226,14 +224,8 @@ public class SqlUtils {
         }
 
         public SqlUtils build() {
-            Database database =
-                    Database.builder()
-                            .name(this.name)
-                            .type(this.type)
-                            .url(this.jdbcUrl)
-                            .username(this.username)
-                            .password(this.password)
-                            .build();
+            Database database = Database.builder().name(this.name).type(this.type).url(this.jdbcUrl)
+                    .username(this.username).password(this.password).build();
 
             SqlUtils sqlUtils = new SqlUtils(database);
             sqlUtils.jdbcDataSource = this.jdbcDataSource;

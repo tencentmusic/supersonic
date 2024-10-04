@@ -24,39 +24,33 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 public class MetricQueryApiController {
 
-    @Autowired private SemanticLayerService semanticLayerService;
+    @Autowired
+    private SemanticLayerService semanticLayerService;
 
-    @Autowired private MetricService metricService;
+    @Autowired
+    private MetricService metricService;
 
-    @Autowired private DownloadService downloadService;
+    @Autowired
+    private DownloadService downloadService;
 
     @PostMapping("/metric")
-    public Object queryByMetric(
-            @RequestBody QueryMetricReq queryMetricReq,
-            HttpServletRequest request,
-            HttpServletResponse response)
-            throws Exception {
+    public Object queryByMetric(@RequestBody QueryMetricReq queryMetricReq,
+            HttpServletRequest request, HttpServletResponse response) throws Exception {
         User user = UserHolder.findUser(request, response);
         QueryStructReq queryStructReq = metricService.convert(queryMetricReq);
         return semanticLayerService.queryByReq(queryStructReq.convert(true), user);
     }
 
     @PostMapping("/download/metric")
-    public void downloadMetric(
-            @RequestBody DownloadMetricReq downloadMetricReq,
-            HttpServletRequest request,
-            HttpServletResponse response)
-            throws Exception {
+    public void downloadMetric(@RequestBody DownloadMetricReq downloadMetricReq,
+            HttpServletRequest request, HttpServletResponse response) throws Exception {
         User user = UserHolder.findUser(request, response);
         downloadService.downloadByStruct(downloadMetricReq, user, response);
     }
 
     @PostMapping("/downloadBatch/metric")
-    public void downloadBatch(
-            @RequestBody BatchDownloadReq batchDownloadReq,
-            HttpServletRequest request,
-            HttpServletResponse response)
-            throws Exception {
+    public void downloadBatch(@RequestBody BatchDownloadReq batchDownloadReq,
+            HttpServletRequest request, HttpServletResponse response) throws Exception {
         User user = UserHolder.findUser(request, response);
         downloadService.batchDownload(batchDownloadReq, user, response);
     }

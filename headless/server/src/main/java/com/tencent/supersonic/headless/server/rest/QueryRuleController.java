@@ -39,10 +39,8 @@ public class QueryRuleController {
      * @throws Exception
      */
     @PostMapping("/create")
-    public QueryRuleResp create(
-            @RequestBody @Validated QueryRuleReq queryRuleReq,
-            HttpServletRequest request,
-            HttpServletResponse response) {
+    public QueryRuleResp create(@RequestBody @Validated QueryRuleReq queryRuleReq,
+            HttpServletRequest request, HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
         return queryRuleService.addQueryRule(queryRuleReq, user);
     }
@@ -57,10 +55,8 @@ public class QueryRuleController {
      * @throws Exception
      */
     @PostMapping("/update")
-    public QueryRuleResp update(
-            @RequestBody @Validated QueryRuleReq queryRuleReq,
-            HttpServletRequest request,
-            HttpServletResponse response) {
+    public QueryRuleResp update(@RequestBody @Validated QueryRuleReq queryRuleReq,
+            HttpServletRequest request, HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
         return queryRuleService.updateQueryRule(queryRuleReq, user);
     }
@@ -74,8 +70,8 @@ public class QueryRuleController {
      * @return
      */
     @DeleteMapping("delete/{id}")
-    public Boolean delete(
-            @PathVariable("id") Long id, HttpServletRequest request, HttpServletResponse response) {
+    public Boolean delete(@PathVariable("id") Long id, HttpServletRequest request,
+            HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
         return queryRuleService.dropQueryRule(id, user);
     }
@@ -88,10 +84,8 @@ public class QueryRuleController {
      * @return
      */
     @PostMapping("query")
-    public List<QueryRuleResp> query(
-            @RequestBody @Validated QueryRuleFilter queryRuleFilter,
-            HttpServletRequest request,
-            HttpServletResponse response) {
+    public List<QueryRuleResp> query(@RequestBody @Validated QueryRuleFilter queryRuleFilter,
+            HttpServletRequest request, HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
         return queryRuleService.getQueryRuleList(queryRuleFilter, user);
     }

@@ -19,7 +19,8 @@ import java.util.List;
 public class CollectServiceImpl implements CollectService {
 
     public static final String type = "metric";
-    @Resource private CollectMapper collectMapper;
+    @Resource
+    private CollectMapper collectMapper;
 
     @Override
     public Boolean collect(User user, CollectDO collectReq) {

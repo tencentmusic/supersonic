@@ -5,4 +5,5 @@ import com.tencent.supersonic.headless.server.persistence.dataobject.DictTaskDO;
 import org.apache.ibatis.annotations.Mapper;
 
 @Mapper
-public interface DictTaskMapper extends BaseMapper<DictTaskDO> {}
+public interface DictTaskMapper extends BaseMapper<DictTaskDO> {
+}

@@ -40,10 +40,8 @@ public class SchemaItem extends RecordInfo {
             return false;
         }
         SchemaItem that = (SchemaItem) o;
-        return Objects.equal(id, that.id)
-                && Objects.equal(name, that.name)
-                && Objects.equal(bizName, that.bizName)
-                && typeEnum == that.typeEnum;
+        return Objects.equal(id, that.id) && Objects.equal(name, that.name)
+                && Objects.equal(bizName, that.bizName) && typeEnum == that.typeEnum;
     }
 
     @Override

@@ -22,8 +22,7 @@ public class SemanticModel {
     private Database database;
 
     public List<Dimension> getDimensions() {
-        return dimensionMap.values().stream()
-                .flatMap(Collection::stream)
+        return dimensionMap.values().stream().flatMap(Collection::stream)
                 .collect(Collectors.toList());
     }
 

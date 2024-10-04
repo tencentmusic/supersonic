@@ -53,11 +53,8 @@ public class GroupByReplaceVisitor implements GroupByVisitor {
         return expression.toString();
     }
 
-    private void replaceExpression(
-            List<Expression> groupByExpressions,
-            int index,
-            Expression expression,
-            String replaceColumn) {
+    private void replaceExpression(List<Expression> groupByExpressions, int index,
+            Expression expression, String replaceColumn) {
         if (expression instanceof Column) {
             groupByExpressions.set(index, new Column(replaceColumn));
         } else if (expression instanceof Function) {
@@ -68,8 +65,7 @@ public class GroupByReplaceVisitor implements GroupByVisitor {
 
                 Function function = (Function) expression;
                 if (function.getParameters().size() > 1) {
-                    function.getParameters().stream()
-                            .skip(1)
+                    function.getParameters().stream().skip(1)
                             .forEach(e -> newExpressionList.add((Function) e));
                 }
                 function.setParameters(newExpressionList);

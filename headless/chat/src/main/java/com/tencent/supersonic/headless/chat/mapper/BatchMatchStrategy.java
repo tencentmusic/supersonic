@@ -15,22 +15,21 @@ import java.util.Set;
 @Slf4j
 public abstract class BatchMatchStrategy<T extends MapResult> extends BaseMatchStrategy<T> {
 
-    @Autowired protected MapperConfig mapperConfig;
+    @Autowired
+    protected MapperConfig mapperConfig;
 
     @Override
-    public List<T> detect(
-            ChatQueryContext chatQueryContext, List<S2Term> terms, Set<Long> detectDataSetIds) {
+    public List<T> detect(ChatQueryContext chatQueryContext, List<S2Term> terms,
+            Set<Long> detectDataSetIds) {
 
         String text = chatQueryContext.getQueryText();
         Set<String> detectSegments = new HashSet<>();
 
-        int embeddingTextSize =
-                Integer.valueOf(
-                        mapperConfig.getParameterValue(MapperConfig.EMBEDDING_MAPPER_TEXT_SIZE));
+        int embeddingTextSize = Integer
+                .valueOf(mapperConfig.getParameterValue(MapperConfig.EMBEDDING_MAPPER_TEXT_SIZE));
 
-        int embeddingTextStep =
-                Integer.valueOf(
-                        mapperConfig.getParameterValue(MapperConfig.EMBEDDING_MAPPER_TEXT_STEP));
+        int embeddingTextStep = Integer
+                .valueOf(mapperConfig.getParameterValue(MapperConfig.EMBEDDING_MAPPER_TEXT_STEP));
 
         for (int startIndex = 0; startIndex < text.length(); startIndex += embeddingTextStep) {
             int endIndex = Math.min(startIndex + embeddingTextSize, text.length());
@@ -40,8 +39,6 @@ public abstract class BatchMatchStrategy<T extends MapResult> extends BaseMatchS
         return detectByBatch(chatQueryContext, detectDataSetIds, detectSegments);
     }
 
-    public abstract List<T> detectByBatch(
-            ChatQueryContext chatQueryContext,
-            Set<Long> detectDataSetIds,
-            Set<String> detectSegments);
+    public abstract List<T> detectByBatch(ChatQueryContext chatQueryContext,
+            Set<Long> detectDataSetIds, Set<String> detectSegments);
 }

@@ -57,11 +57,9 @@ public interface SchemaService {
 
     List<ItemResp> getDomainDataSetTree();
 
-    void getSchemaYamlTpl(
-            SemanticSchemaResp semanticSchemaResp,
+    void getSchemaYamlTpl(SemanticSchemaResp semanticSchemaResp,
             Map<String, List<DimensionYamlTpl>> dimensionYamlMap,
-            List<DataModelYamlTpl> dataModelYamlTplList,
-            List<MetricYamlTpl> metricYamlTplList,
+            List<DataModelYamlTpl> dataModelYamlTplList, List<MetricYamlTpl> metricYamlTplList,
             Map<Long, String> modelIdName);
 
     ItemDateResp getItemDate(ItemDateFilter dimension, ItemDateFilter metric);

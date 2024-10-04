@@ -50,29 +50,23 @@ class QueryNLReqBuilderTest {
         queryStructReq.setOrders(orders);
 
         QuerySqlReq querySQLReq = queryStructReq.convert();
-        Assert.assertEquals(
-                "SELECT department, SUM(pv) AS pv FROM 内容库 "
-                        + "WHERE (sys_imp_date IN ('2023-08-01')) GROUP "
-                        + "BY department ORDER BY uv LIMIT 2000",
-                querySQLReq.getSql());
+        Assert.assertEquals("SELECT department, SUM(pv) AS pv FROM 内容库 "
+                + "WHERE (sys_imp_date IN ('2023-08-01')) GROUP "
+                + "BY department ORDER BY uv LIMIT 2000", querySQLReq.getSql());
 
         queryStructReq.setQueryType(QueryType.DETAIL);
         querySQLReq = queryStructReq.convert();
-        Assert.assertEquals(
-                "SELECT department, pv FROM 内容库 WHERE (sys_imp_date IN ('2023-08-01')) "
-                        + "ORDER BY uv LIMIT 2000",
-                querySQLReq.getSql());
+        Assert.assertEquals("SELECT department, pv FROM 内容库 WHERE (sys_imp_date IN ('2023-08-01')) "
+                + "ORDER BY uv LIMIT 2000", querySQLReq.getSql());
     }
 
     private void init() {
         MockedStatic<ContextUtils> mockContextUtils = Mockito.mockStatic(ContextUtils.class);
         SqlFilterUtils sqlFilterUtils = new SqlFilterUtils();
-        mockContextUtils
-                .when(() -> ContextUtils.getBean(SqlFilterUtils.class))
+        mockContextUtils.when(() -> ContextUtils.getBean(SqlFilterUtils.class))
                 .thenReturn(sqlFilterUtils);
         DateModeUtils dateModeUtils = new DateModeUtils();
-        mockContextUtils
-                .when(() -> ContextUtils.getBean(DateModeUtils.class))
+        mockContextUtils.when(() -> ContextUtils.getBean(DateModeUtils.class))
                 .thenReturn(dateModeUtils);
         dateModeUtils.setSysDateCol("sys_imp_date");
         dateModeUtils.setSysDateWeekCol("sys_imp_week");

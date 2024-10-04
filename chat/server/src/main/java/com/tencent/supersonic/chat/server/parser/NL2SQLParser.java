@@ -9,6 +9,7 @@ import com.tencent.supersonic.chat.server.service.ChatContextService;
 import com.tencent.supersonic.chat.server.service.ChatManageService;
 import com.tencent.supersonic.chat.server.util.QueryReqConverter;
 import com.tencent.supersonic.common.config.EmbeddingConfig;
+import com.tencent.supersonic.common.pojo.ChatModelConfig;
 import com.tencent.supersonic.common.pojo.Text2SQLExemplar;
 import com.tencent.supersonic.common.service.impl.ExemplarServiceImpl;
 import com.tencent.supersonic.common.util.ContextUtils;
@@ -51,33 +52,27 @@ public class NL2SQLParser implements ChatQueryParser {
 
     private static final Logger keyPipelineLog = LoggerFactory.getLogger("keyPipeline");
 
-    private static final String REWRITE_USER_QUESTION_INSTRUCTION =
-            ""
-                    + "#Role: You are a data product manager experienced in data requirements."
-                    + "#Task: Your will be provided with current and history questions asked by a user,"
-                    + "along with their mapped schema elements(metric, dimension and value),"
-                    + "please try understanding the semantics and rewrite a question."
-                    + "#Rules: "
-                    + "1.ALWAYS keep relevant entities, metrics, dimensions, values and date ranges."
-                    + "2.ONLY respond with the rewritten question."
-                    + "#Current Question: {{current_question}}"
-                    + "#Current Mapped Schema: {{current_schema}}"
-                    + "#History Question: {{history_question}}"
-                    + "#History Mapped Schema: {{history_schema}}"
-                    + "#History SQL: {{history_sql}}"
-                    + "#Rewritten Question: ";
+    private static final String REWRITE_USER_QUESTION_INSTRUCTION = ""
+            + "#Role: You are a data product manager experienced in data requirements."
+            + "#Task: Your will be provided with current and history questions asked by a user,"
+            + "along with their mapped schema elements(metric, dimension and value),"
+            + "please try understanding the semantics and rewrite a question." + "#Rules: "
+            + "1.ALWAYS keep relevant entities, metrics, dimensions, values and date ranges."
+            + "2.ONLY respond with the rewritten question."
+            + "#Current Question: {{current_question}}"
+            + "#Current Mapped Schema: {{current_schema}}"
+            + "#History Question: {{history_question}}"
+            + "#History Mapped Schema: {{history_schema}}" + "#History SQL: {{history_sql}}"
+            + "#Rewritten Question: ";
 
-    private static final String REWRITE_ERROR_MESSAGE_INSTRUCTION =
-            ""
-                    + "#Role: You are a data business partner who closely interacts with business people.\n"
-                    + "#Task: Your will be provided with user input, system output and some examples, "
-                    + "please respond shortly to teach user how to ask the right question, "
-                    + "by using `Examples` as references."
-                    + "#Rules: ALWAYS respond with the same language as the `Input`.\n"
-                    + "#Input: {{user_question}}\n"
-                    + "#Output: {{system_message}}\n"
-                    + "#Examples: {{examples}}\n"
-                    + "#Response: ";
+    private static final String REWRITE_ERROR_MESSAGE_INSTRUCTION = ""
+            + "#Role: You are a data business partner who closely interacts with business people.\n"
+            + "#Task: Your will be provided with user input, system output and some examples, "
+            + "please respond shortly to teach user how to ask the right question, "
+            + "by using `Examples` as references."
+            + "#Rules: ALWAYS respond with the same language as the `Input`.\n"
+            + "#Input: {{user_question}}\n" + "#Output: {{system_message}}\n"
+            + "#Examples: {{examples}}\n" + "#Response: ";
 
     @Override
     public void parse(ParseContext parseContext, ParseResp parseResp) {
@@ -87,10 +82,9 @@ public class NL2SQLParser implements ChatQueryParser {
         ChatContextService chatContextService = ContextUtils.getBean(ChatContextService.class);
         ChatContext chatCtx = chatContextService.getOrCreateContext(parseContext.getChatId());
 
-        ChatLanguageModel chatLanguageModel =
-                ModelProvider.getChatModel(parseContext.getAgent().getModelConfig());
-
-        processMultiTurn(chatLanguageModel, parseContext);
+        if (parseContext.enbaleLLM()) {
+            processMultiTurn(parseContext);
+        }
         QueryNLReq queryNLReq = QueryReqConverter.buildText2SqlQueryReq(parseContext, chatCtx);
         addDynamicExemplars(parseContext.getAgent().getId(), queryNLReq);
 
@@ -99,13 +93,12 @@ public class NL2SQLParser implements ChatQueryParser {
         if (ParseResp.ParseState.COMPLETED.equals(text2SqlParseResp.getState())) {
             parseResp.getSelectedParses().addAll(text2SqlParseResp.getSelectedParses());
         } else {
-            parseResp.setErrorMsg(
-                    rewriteErrorMessage(
-                            chatLanguageModel,
-                            parseContext.getQueryText(),
-                            text2SqlParseResp.getErrorMsg(),
-                            queryNLReq.getDynamicExemplars(),
-                            parseContext.getAgent().getExamples()));
+            if (parseContext.enbaleLLM()) {
+                parseResp.setErrorMsg(rewriteErrorMessage(parseContext.getQueryText(),
+                        text2SqlParseResp.getErrorMsg(), queryNLReq.getDynamicExemplars(),
+                        parseContext.getAgent().getExamples(),
+                        parseContext.getAgent().getModelConfig()));
+            }
         }
         parseResp.setState(text2SqlParseResp.getState());
         parseResp.getParseTimeCost().setSqlTime(text2SqlParseResp.getParseTimeCost().getSqlTime());
@@ -139,58 +132,46 @@ public class NL2SQLParser implements ChatQueryParser {
         StringBuilder textBuilder = new StringBuilder();
         textBuilder.append("**数据集:** ").append(parseInfo.getDataSet().getName()).append(" ");
         Optional<SchemaElement> metric = parseInfo.getMetrics().stream().findFirst();
-        metric.ifPresent(
-                schemaElement ->
-                        textBuilder.append("**指标:** ").append(schemaElement.getName()).append(" "));
-        List<String> dimensionNames =
-                parseInfo.getDimensions().stream()
-                        .map(SchemaElement::getName)
-                        .filter(Objects::nonNull)
-                        .collect(Collectors.toList());
+        metric.ifPresent(schemaElement -> textBuilder.append("**指标:** ")
+                .append(schemaElement.getName()).append(" "));
+        List<String> dimensionNames = parseInfo.getDimensions().stream().map(SchemaElement::getName)
+                .filter(Objects::nonNull).collect(Collectors.toList());
         if (!CollectionUtils.isEmpty(dimensionNames)) {
             textBuilder.append("**维度:** ").append(String.join(",", dimensionNames));
         }
         textBuilder.append("\n\n**筛选条件:** \n");
         if (parseInfo.getDateInfo() != null) {
-            textBuilder
-                    .append("**数据时间:** ")
-                    .append(parseInfo.getDateInfo().getStartDate())
-                    .append("~")
-                    .append(parseInfo.getDateInfo().getEndDate())
-                    .append(" ");
+            textBuilder.append("**数据时间:** ").append(parseInfo.getDateInfo().getStartDate())
+                    .append("~").append(parseInfo.getDateInfo().getEndDate()).append(" ");
         }
         if (!CollectionUtils.isEmpty(parseInfo.getDimensionFilters())
                 || CollectionUtils.isEmpty(parseInfo.getMetricFilters())) {
             Set<QueryFilter> queryFilters = parseInfo.getDimensionFilters();
             queryFilters.addAll(parseInfo.getMetricFilters());
             for (QueryFilter queryFilter : queryFilters) {
-                textBuilder
-                        .append("**")
-                        .append(queryFilter.getName())
-                        .append("**")
-                        .append(" ")
-                        .append(queryFilter.getOperator().getValue())
-                        .append(" ")
-                        .append(queryFilter.getValue())
-                        .append(" ");
+                textBuilder.append("**").append(queryFilter.getName()).append("**").append(" ")
+                        .append(queryFilter.getOperator().getValue()).append(" ")
+                        .append(queryFilter.getValue()).append(" ");
             }
         }
         parseInfo.setTextInfo(textBuilder.toString());
     }
 
-    private void processMultiTurn(ChatLanguageModel chatLanguageModel, ParseContext parseContext) {
+    private void processMultiTurn(ParseContext parseContext) {
         ParserConfig parserConfig = ContextUtils.getBean(ParserConfig.class);
         MultiTurnConfig agentMultiTurnConfig = parseContext.getAgent().getMultiTurnConfig();
         Boolean globalMultiTurnConfig =
                 Boolean.valueOf(parserConfig.getParameterValue(PARSER_MULTI_TURN_ENABLE));
 
         Boolean multiTurnConfig =
-                agentMultiTurnConfig != null
-                        ? agentMultiTurnConfig.isEnableMultiTurn()
+                agentMultiTurnConfig != null ? agentMultiTurnConfig.isEnableMultiTurn()
                         : globalMultiTurnConfig;
         if (!Boolean.TRUE.equals(multiTurnConfig)) {
             return;
         }
+
+        ChatLanguageModel chatLanguageModel =
+                ModelProvider.getChatModel(parseContext.getAgent().getModelConfig());
 
         // derive mapping result of current question and parsing result of last question.
         ChatLayerService chatLayerService = ContextUtils.getBean(ChatLayerService.class);
@@ -227,35 +208,26 @@ public class NL2SQLParser implements ChatQueryParser {
         QueryNLReq rewrittenQueryNLReq = QueryReqConverter.buildText2SqlQueryReq(parseContext);
         MapResp rewrittenQueryMapResult = chatLayerService.performMapping(rewrittenQueryNLReq);
         parseContext.setMapInfo(rewrittenQueryMapResult.getMapInfo());
-        log.info(
-                "Last Query: {} Current Query: {}, Rewritten Query: {}",
-                lastQuery.getQueryText(),
-                currentMapResult.getQueryText(),
-                rewrittenQuery);
+        log.info("Last Query: {} Current Query: {}, Rewritten Query: {}", lastQuery.getQueryText(),
+                currentMapResult.getQueryText(), rewrittenQuery);
     }
 
-    private String rewriteErrorMessage(
-            ChatLanguageModel chatLanguageModel,
-            String userQuestion,
-            String errMsg,
-            List<Text2SQLExemplar> similarExemplars,
-            List<String> agentExamples) {
+    private String rewriteErrorMessage(String userQuestion, String errMsg,
+            List<Text2SQLExemplar> similarExemplars, List<String> agentExamples,
+            ChatModelConfig modelConfig) {
         Map<String, Object> variables = new HashMap<>();
         variables.put("user_question", userQuestion);
         variables.put("system_message", errMsg);
 
         StringBuilder exampleStr = new StringBuilder();
-        similarExemplars.forEach(
-                e ->
-                        exampleStr.append(
-                                String.format(
-                                        "<Question:{%s},Schema:{%s}> ",
-                                        e.getQuestion(), e.getDbSchema())));
+        similarExemplars.forEach(e -> exampleStr.append(
+                String.format("<Question:{%s},Schema:{%s}> ", e.getQuestion(), e.getDbSchema())));
         agentExamples.forEach(e -> exampleStr.append(String.format("<Question:{%s}> ", e)));
         variables.put("examples", exampleStr);
 
         Prompt prompt = PromptTemplate.from(REWRITE_ERROR_MESSAGE_INSTRUCTION).apply(variables);
         keyPipelineLog.info("NL2SQLParser reqPrompt:{}", prompt.text());
+        ChatLanguageModel chatLanguageModel = ModelProvider.getChatModel(modelConfig);
         Response<AiMessage> response = chatLanguageModel.generate(prompt.toUserMessage());
 
         String rewrittenMsg = response.content().text();
@@ -291,18 +263,13 @@ public class NL2SQLParser implements ChatQueryParser {
 
     private List<QueryResp> getHistoryQueries(int chatId, int multiNum) {
         ChatManageService chatManageService = ContextUtils.getBean(ChatManageService.class);
-        List<QueryResp> contextualParseInfoList =
-                chatManageService.getChatQueries(chatId).stream()
-                        .filter(
-                                q ->
-                                        Objects.nonNull(q.getQueryResult())
-                                                && q.getQueryResult().getQueryState()
-                                                        == QueryState.SUCCESS)
-                        .collect(Collectors.toList());
+        List<QueryResp> contextualParseInfoList = chatManageService.getChatQueries(chatId).stream()
+                .filter(q -> Objects.nonNull(q.getQueryResult())
+                        && q.getQueryResult().getQueryState() == QueryState.SUCCESS)
+                .collect(Collectors.toList());
 
-        List<QueryResp> contextualList =
-                contextualParseInfoList.subList(
-                        0, Math.min(multiNum, contextualParseInfoList.size()));
+        List<QueryResp> contextualList = contextualParseInfoList.subList(0,
+                Math.min(multiNum, contextualParseInfoList.size()));
         Collections.reverse(contextualList);
         return contextualList;
     }
@@ -314,9 +281,8 @@ public class NL2SQLParser implements ChatQueryParser {
         ParserConfig parserConfig = ContextUtils.getBean(ParserConfig.class);
         int exemplarRecallNumber =
                 Integer.valueOf(parserConfig.getParameterValue(PARSER_EXEMPLAR_RECALL_NUMBER));
-        List<Text2SQLExemplar> exemplars =
-                exemplarManager.recallExemplars(
-                        memoryCollectionName, queryNLReq.getQueryText(), exemplarRecallNumber);
+        List<Text2SQLExemplar> exemplars = exemplarManager.recallExemplars(memoryCollectionName,
+                queryNLReq.getQueryText(), exemplarRecallNumber);
         queryNLReq.getDynamicExemplars().addAll(exemplars);
     }
 }

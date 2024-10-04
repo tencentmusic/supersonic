@@ -71,19 +71,15 @@ public class MetricFilterQuery extends MetricSemanticQuery {
             log.debug("addDimension before [{}]", queryStructReq.getGroups());
             List<Filter> filters = new ArrayList<>(queryStructReq.getDimensionFilters());
             if (onlyOperateInFilter) {
-                filters =
-                        filters.stream()
-                                .filter(
-                                        filter ->
-                                                filter.getOperator().equals(FilterOperatorEnum.IN))
-                                .collect(Collectors.toList());
+                filters = filters.stream()
+                        .filter(filter -> filter.getOperator().equals(FilterOperatorEnum.IN))
+                        .collect(Collectors.toList());
             }
-            filters.forEach(
-                    d -> {
-                        if (!dimensions.contains(d.getBizName())) {
-                            dimensions.add(d.getBizName());
-                        }
-                    });
+            filters.forEach(d -> {
+                if (!dimensions.contains(d.getBizName())) {
+                    dimensions.add(d.getBizName());
+                }
+            });
             queryStructReq.setGroups(dimensions);
             log.debug("addDimension after [{}]", queryStructReq.getGroups());
         }

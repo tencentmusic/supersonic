@@ -42,8 +42,7 @@ class SelectCorrectorTest {
         sqlInfo.setCorrectedS2SQL(sql);
         semanticParseInfo.setSqlInfo(sqlInfo);
         corrector.correct(chatQueryContext, semanticParseInfo);
-        Assert.assertEquals(
-                "SELECT 粉丝数, 国籍, 艺人名, 性别 FROM 艺人库 WHERE 艺人名 = '周杰伦'",
+        Assert.assertEquals("SELECT 粉丝数, 国籍, 艺人名, 性别 FROM 艺人库 WHERE 艺人名 = '周杰伦'",
                 semanticParseInfo.getSqlInfo().getCorrectedS2SQL());
     }
 

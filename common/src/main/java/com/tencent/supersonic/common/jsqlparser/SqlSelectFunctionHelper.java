@@ -58,8 +58,8 @@ public class SqlSelectFunctionHelper {
         return visitor.getFunctionNames();
     }
 
-    public static Function getFunction(
-            Expression expression, Map<String, String> fieldNameToAggregate) {
+    public static Function getFunction(Expression expression,
+            Map<String, String> fieldNameToAggregate) {
         if (!(expression instanceof Column)) {
             return null;
         }
@@ -100,8 +100,7 @@ public class SqlSelectFunctionHelper {
             FunctionVisitor visitor = new FunctionVisitor();
             expression.accept(visitor);
             Set<String> functions = visitor.getFunctionNames();
-            return functions.stream()
-                    .filter(t -> aggregateFunctionName.contains(t.toUpperCase()))
+            return functions.stream().filter(t -> aggregateFunctionName.contains(t.toUpperCase()))
                     .collect(Collectors.toList());
         }
         return new ArrayList<>();

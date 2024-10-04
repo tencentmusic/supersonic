@@ -1,6 +1,6 @@
 import type { ActionType, ProColumns } from '@ant-design/pro-components';
 import { ProTable } from '@ant-design/pro-components';
-import { message, Button, Space, Popconfirm, Typography } from 'antd';
+import { message, Button, Space, Popconfirm, Typography, Input } from 'antd';
 import React, { useRef, useState, useEffect } from 'react';
 import { useModel } from '@umijs/max';
 import { getTermList, saveOrUpdate, deleteTerm } from '../../service';
@@ -8,6 +8,8 @@ import dayjs from 'dayjs';
 import styles from '../style.less';
 import { ISemantic } from '../../data';
 import TermCreateForm from './TermCreateForm';
+import { isArrayOfValues } from '@/utils/utils';
+import TableHeaderFilter from '@/components/TableHeaderFilter';
 
 const { Paragraph } = Typography;
 
@@ -21,16 +23,19 @@ const TermTable: React.FC<Props> = ({}) => {
 
   const [tableData, setTableData] = useState<ISemantic.ITermItem[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
-
+  const [selectedRowKeys, setSelectedRowKeys] = useState<number[]>([]);
   const actionRef = useRef<ActionType>();
 
   useEffect(() => {
     queryTermList();
   }, [selectDomainId]);
 
-  const queryTermList = async () => {
+  const queryTermList = async (queryKey?: string) => {
     setLoading(true);
-    const { code, data, msg } = await getTermList(selectDomainId);
+    const { code, data, msg } = await getTermList({
+      domainId: selectDomainId,
+      queryKey,
+    });
     setLoading(false);
     if (code === 200) {
       setTableData(data || []);
@@ -53,10 +58,11 @@ const TermTable: React.FC<Props> = ({}) => {
     }
   };
 
-  const deleteTermConfig = async (termItem: ISemantic.ITermItem) => {
-    const { code, msg } = await deleteTerm(termItem.id);
+  const deleteTermConfig = async (ids: number[]) => {
+    const { code, msg } = await deleteTerm({ ids });
     if (code === 200) {
       queryTermList();
+      setSelectedRowKeys([]);
     } else {
       message.error(msg);
     }
@@ -125,7 +131,7 @@ const TermTable: React.FC<Props> = ({}) => {
               okText="是"
               cancelText="否"
               onConfirm={() => {
-                deleteTermConfig(record);
+                deleteTermConfig([record.id]);
               }}
             >
               <Button type="link" key="metricDeleteBtn">
@@ -137,6 +143,11 @@ const TermTable: React.FC<Props> = ({}) => {
       },
     },
   ];
+  const rowSelection = {
+    onChange: (selectedRowKeys: React.Key[]) => {
+      setSelectedRowKeys(selectedRowKeys);
+    },
+  };
 
   return (
     <>
@@ -146,11 +157,34 @@ const TermTable: React.FC<Props> = ({}) => {
         rowKey="id"
         size="small"
         loading={loading}
+        pagination={{ pageSize: 20 }}
+        headerTitle={
+          <TableHeaderFilter
+            components={[
+              {
+                label: '术语搜索',
+                component: (
+                  <Input.Search
+                    style={{ width: 280 }}
+                    placeholder="请输入术语名称"
+                    onSearch={(value) => {
+                      queryTermList(value);
+                    }}
+                  />
+                ),
+              },
+            ]}
+          />
+        }
         search={false}
         columns={columns}
         dataSource={tableData}
         tableAlertRender={() => {
           return false;
+        }}
+        rowSelection={{
+          type: 'checkbox',
+          ...rowSelection,
         }}
         sticky={{ offsetHeader: 0 }}
         options={false}
@@ -164,6 +198,16 @@ const TermTable: React.FC<Props> = ({}) => {
             }}
           >
             创建术语
+          </Button>,
+          <Button
+            key="batchDelete"
+            type="primary"
+            disabled={!isArrayOfValues(selectedRowKeys)}
+            onClick={() => {
+              deleteTermConfig(selectedRowKeys);
+            }}
+          >
+            批量删除
           </Button>,
         ]}
       />

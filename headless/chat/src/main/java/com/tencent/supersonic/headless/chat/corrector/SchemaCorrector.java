@@ -2,6 +2,7 @@ package com.tencent.supersonic.headless.chat.corrector;
 
 import com.tencent.supersonic.common.jsqlparser.AggregateEnum;
 import com.tencent.supersonic.common.jsqlparser.FieldExpression;
+import com.tencent.supersonic.common.jsqlparser.SqlAsHelper;
 import com.tencent.supersonic.common.jsqlparser.SqlRemoveHelper;
 import com.tencent.supersonic.common.jsqlparser.SqlReplaceHelper;
 import com.tencent.supersonic.common.jsqlparser.SqlSelectHelper;
@@ -38,8 +39,6 @@ public class SchemaCorrector extends BaseSemanticCorrector {
 
         correctAggFunction(semanticParseInfo);
 
-        replaceAlias(semanticParseInfo);
-
         updateFieldNameByLinkingValue(semanticParseInfo);
 
         updateFieldValueByLinkingValue(semanticParseInfo);
@@ -47,8 +46,8 @@ public class SchemaCorrector extends BaseSemanticCorrector {
         correctFieldName(chatQueryContext, semanticParseInfo);
     }
 
-    private void removeDateFields(
-            ChatQueryContext chatQueryContext, SemanticParseInfo semanticParseInfo) {
+    private void removeDateFields(ChatQueryContext chatQueryContext,
+            SemanticParseInfo semanticParseInfo) {
         if (containsPartitionDimensions(chatQueryContext, semanticParseInfo)) {
             return;
         }
@@ -62,17 +61,16 @@ public class SchemaCorrector extends BaseSemanticCorrector {
         sqlInfo.setCorrectedS2SQL(sql);
     }
 
-    private void replaceAlias(SemanticParseInfo semanticParseInfo) {
-        SqlInfo sqlInfo = semanticParseInfo.getSqlInfo();
-        String replaceAlias = SqlReplaceHelper.replaceAlias(sqlInfo.getCorrectedS2SQL());
-        sqlInfo.setCorrectedS2SQL(replaceAlias);
-    }
-
-    private void correctFieldName(
-            ChatQueryContext chatQueryContext, SemanticParseInfo semanticParseInfo) {
+    private void correctFieldName(ChatQueryContext chatQueryContext,
+            SemanticParseInfo semanticParseInfo) {
         Map<String, String> fieldNameMap =
                 getFieldNameMap(chatQueryContext, semanticParseInfo.getDataSetId());
+        // add as fieldName
         SqlInfo sqlInfo = semanticParseInfo.getSqlInfo();
+        List<String> asFields = SqlAsHelper.getAsFields(sqlInfo.getCorrectedS2SQL());
+        for (String asField : asFields) {
+            fieldNameMap.put(asField, asField);
+        }
         String sql = SqlReplaceHelper.replaceFields(sqlInfo.getCorrectedS2SQL(), fieldNameMap);
         sqlInfo.setCorrectedS2SQL(sql);
     }
@@ -84,19 +82,13 @@ public class SchemaCorrector extends BaseSemanticCorrector {
         }
 
         Map<String, Set<String>> fieldValueToFieldNames =
-                linking.stream()
-                        .collect(
-                                Collectors.groupingBy(
-                                        LLMReq.ElementValue::getFieldValue,
-                                        Collectors.mapping(
-                                                LLMReq.ElementValue::getFieldName,
-                                                Collectors.toSet())));
+                linking.stream().collect(Collectors.groupingBy(LLMReq.ElementValue::getFieldValue,
+                        Collectors.mapping(LLMReq.ElementValue::getFieldName, Collectors.toSet())));
 
         SqlInfo sqlInfo = semanticParseInfo.getSqlInfo();
 
-        String sql =
-                SqlReplaceHelper.replaceFieldNameByValue(
-                        sqlInfo.getCorrectedS2SQL(), fieldValueToFieldNames);
+        String sql = SqlReplaceHelper.replaceFieldNameByValue(sqlInfo.getCorrectedS2SQL(),
+                fieldValueToFieldNames);
         sqlInfo.setCorrectedS2SQL(sql);
     }
 
@@ -119,27 +111,20 @@ public class SchemaCorrector extends BaseSemanticCorrector {
             return;
         }
 
-        Map<String, Map<String, String>> filedNameToValueMap =
-                linking.stream()
-                        .collect(
-                                Collectors.groupingBy(
-                                        LLMReq.ElementValue::getFieldName,
-                                        Collectors.mapping(
-                                                LLMReq.ElementValue::getFieldValue,
-                                                Collectors.toMap(
-                                                        oldValue -> oldValue,
-                                                        newValue -> newValue,
-                                                        (existingValue, newValue) -> newValue))));
+        Map<String, Map<String, String>> filedNameToValueMap = linking.stream()
+                .collect(Collectors.groupingBy(LLMReq.ElementValue::getFieldName,
+                        Collectors.mapping(LLMReq.ElementValue::getFieldValue,
+                                Collectors.toMap(oldValue -> oldValue, newValue -> newValue,
+                                        (existingValue, newValue) -> newValue))));
 
         SqlInfo sqlInfo = semanticParseInfo.getSqlInfo();
-        String sql =
-                SqlReplaceHelper.replaceValue(
-                        sqlInfo.getCorrectedS2SQL(), filedNameToValueMap, false);
+        String sql = SqlReplaceHelper.replaceValue(sqlInfo.getCorrectedS2SQL(), filedNameToValueMap,
+                false);
         sqlInfo.setCorrectedS2SQL(sql);
     }
 
-    public void removeFilterIfNotInLinkingValue(
-            ChatQueryContext chatQueryContext, SemanticParseInfo semanticParseInfo) {
+    public void removeFilterIfNotInLinkingValue(ChatQueryContext chatQueryContext,
+            SemanticParseInfo semanticParseInfo) {
         SqlInfo sqlInfo = semanticParseInfo.getSqlInfo();
         String correctS2SQL = sqlInfo.getCorrectedS2SQL();
         List<FieldExpression> whereExpressionList =
@@ -154,37 +139,21 @@ public class SchemaCorrector extends BaseSemanticCorrector {
         if (CollectionUtils.isEmpty(linkingValues)) {
             linkingValues = new ArrayList<>();
         }
-        Set<String> linkingFieldNames =
-                linkingValues.stream()
-                        .map(linking -> linking.getFieldName())
-                        .collect(Collectors.toSet());
+        Set<String> linkingFieldNames = linkingValues.stream()
+                .map(linking -> linking.getFieldName()).collect(Collectors.toSet());
 
-        Set<String> removeFieldNames =
-                whereExpressionList.stream()
-                        .filter(
-                                fieldExpression ->
-                                        StringUtils.isBlank(fieldExpression.getFunction()))
-                        .filter(
-                                fieldExpression ->
-                                        !TimeDimensionEnum.containsTimeDimension(
-                                                fieldExpression.getFieldName()))
-                        .filter(
-                                fieldExpression ->
-                                        FilterOperatorEnum.EQUALS
-                                                .getValue()
-                                                .equals(fieldExpression.getOperator()))
-                        .filter(
-                                fieldExpression ->
-                                        dimensions.contains(fieldExpression.getFieldName()))
-                        .filter(
-                                fieldExpression ->
-                                        !DateUtils.isAnyDateString(
-                                                fieldExpression.getFieldValue().toString()))
-                        .filter(
-                                fieldExpression ->
-                                        !linkingFieldNames.contains(fieldExpression.getFieldName()))
-                        .map(fieldExpression -> fieldExpression.getFieldName())
-                        .collect(Collectors.toSet());
+        Set<String> removeFieldNames = whereExpressionList.stream()
+                .filter(fieldExpression -> StringUtils.isBlank(fieldExpression.getFunction()))
+                .filter(fieldExpression -> !TimeDimensionEnum
+                        .containsTimeDimension(fieldExpression.getFieldName()))
+                .filter(fieldExpression -> FilterOperatorEnum.EQUALS.getValue()
+                        .equals(fieldExpression.getOperator()))
+                .filter(fieldExpression -> dimensions.contains(fieldExpression.getFieldName()))
+                .filter(fieldExpression -> !DateUtils
+                        .isAnyDateString(fieldExpression.getFieldValue().toString()))
+                .filter(fieldExpression -> !linkingFieldNames
+                        .contains(fieldExpression.getFieldName()))
+                .map(fieldExpression -> fieldExpression.getFieldName()).collect(Collectors.toSet());
 
         String sql = SqlRemoveHelper.removeWhereCondition(correctS2SQL, removeFieldNames);
         sqlInfo.setCorrectedS2SQL(sql);

@@ -29,33 +29,29 @@ import java.util.List;
 @RequestMapping({"/api/chat/conf", "/openapi/chat/conf"})
 public class ChatConfigController {
 
-    @Autowired private ConfigService configService;
+    @Autowired
+    private ConfigService configService;
 
-    @Autowired private SemanticLayerService semanticLayerService;
+    @Autowired
+    private SemanticLayerService semanticLayerService;
 
     @PostMapping
-    public Long addChatConfig(
-            @RequestBody ChatConfigBaseReq extendBaseCmd,
-            HttpServletRequest request,
-            HttpServletResponse response) {
+    public Long addChatConfig(@RequestBody ChatConfigBaseReq extendBaseCmd,
+            HttpServletRequest request, HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
         return configService.addConfig(extendBaseCmd, user);
     }
 
     @PutMapping
-    public Long editModelExtend(
-            @RequestBody ChatConfigEditReqReq extendEditCmd,
-            HttpServletRequest request,
-            HttpServletResponse response) {
+    public Long editModelExtend(@RequestBody ChatConfigEditReqReq extendEditCmd,
+            HttpServletRequest request, HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
         return configService.editConfig(extendEditCmd, user);
     }
 
     @PostMapping("/search")
-    public List<ChatConfigResp> search(
-            @RequestBody ChatConfigFilter filter,
-            HttpServletRequest request,
-            HttpServletResponse response) {
+    public List<ChatConfigResp> search(@RequestBody ChatConfigFilter filter,
+            HttpServletRequest request, HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
         return configService.search(filter, user);
     }

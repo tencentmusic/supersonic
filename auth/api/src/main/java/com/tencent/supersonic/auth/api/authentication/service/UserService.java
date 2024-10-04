@@ -12,8 +12,8 @@ import java.util.Set;
 
 public interface UserService {
 
-    User getCurrentUser(
-            HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse);
+    User getCurrentUser(HttpServletRequest httpServletRequest,
+            HttpServletResponse httpServletResponse);
 
     List<String> getUserNames();
 

@@ -5,6 +5,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
+import com.tencent.supersonic.headless.api.pojo.request.MetaBatchReq;
 import com.tencent.supersonic.headless.api.pojo.request.TermReq;
 import com.tencent.supersonic.headless.api.pojo.response.TermResp;
 import com.tencent.supersonic.headless.server.service.TermService;
@@ -24,12 +25,11 @@ import java.util.List;
 @RequestMapping("/api/semantic/term")
 public class TermController {
 
-    @Autowired private TermService termService;
+    @Autowired
+    private TermService termService;
 
     @PostMapping("/saveOrUpdate")
-    public boolean saveOrUpdate(
-            @RequestBody TermReq termReq,
-            HttpServletRequest request,
+    public boolean saveOrUpdate(@RequestBody TermReq termReq, HttpServletRequest request,
             HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
         termService.saveOrUpdate(termReq, user);
@@ -37,13 +37,21 @@ public class TermController {
     }
 
     @GetMapping
-    public List<TermResp> getTerms(@RequestParam("domainId") Long domainId) {
-        return termService.getTerms(domainId);
+    public List<TermResp> getTerms(@RequestParam("domainId") Long domainId,
+            @RequestParam(name = "queryKey", required = false) String queryKey) {
+        return termService.getTerms(domainId, queryKey);
     }
 
+    @Deprecated
     @DeleteMapping("/{id}")
     public boolean delete(@PathVariable("id") Long id) {
         termService.delete(id);
+        return true;
+    }
+
+    @PostMapping("/deleteBatch")
+    public boolean deleteBatch(@RequestBody MetaBatchReq metaBatchReq) {
+        termService.deleteBatch(metaBatchReq);
         return true;
     }
 }

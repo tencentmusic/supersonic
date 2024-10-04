@@ -3,8 +3,7 @@ package com.tencent.supersonic.headless.api.pojo.enums;
 import java.util.Objects;
 
 public enum TagType {
-    ATOMIC,
-    DERIVED;
+    ATOMIC, DERIVED;
 
     public static TagType of(String src) {
         for (TagType tagType : TagType.values()) {

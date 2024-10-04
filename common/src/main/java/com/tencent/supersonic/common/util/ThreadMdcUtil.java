@@ -12,8 +12,8 @@ public class ThreadMdcUtil {
         }
     }
 
-    public static <T> Callable<T> wrap(
-            final Callable<T> callable, final Map<String, String> context) {
+    public static <T> Callable<T> wrap(final Callable<T> callable,
+            final Map<String, String> context) {
         return () -> {
             if (context == null) {
                 MDC.clear();

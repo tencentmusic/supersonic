@@ -35,23 +35,15 @@ public class EmbeddingMapper extends BaseMapper {
             }
             SchemaElementType elementType =
                     SchemaElementType.valueOf(matchResult.getMetadata().get("type"));
-            SchemaElement schemaElement =
-                    getSchemaElement(
-                            dataSetId,
-                            elementType,
-                            elementId,
-                            chatQueryContext.getSemanticSchema());
+            SchemaElement schemaElement = getSchemaElement(dataSetId, elementType, elementId,
+                    chatQueryContext.getSemanticSchema());
             if (schemaElement == null) {
                 continue;
             }
-            SchemaElementMatch schemaElementMatch =
-                    SchemaElementMatch.builder()
-                            .element(schemaElement)
-                            .frequency(BaseWordBuilder.DEFAULT_FREQUENCY)
-                            .word(matchResult.getName())
-                            .similarity(matchResult.getSimilarity())
-                            .detectWord(matchResult.getDetectWord())
-                            .build();
+            SchemaElementMatch schemaElementMatch = SchemaElementMatch.builder()
+                    .element(schemaElement).frequency(BaseWordBuilder.DEFAULT_FREQUENCY)
+                    .word(matchResult.getName()).similarity(matchResult.getSimilarity())
+                    .detectWord(matchResult.getDetectWord()).build();
             // 3. add to mapInfo
             addToSchemaMap(chatQueryContext.getMapInfo(), dataSetId, schemaElementMatch);
         }

@@ -22,4 +22,11 @@ public class ParseContext {
         }
         return agent.containsNL2SQLTool();
     }
+
+    public boolean enbaleLLM() {
+        if (agent == null) {
+            return true;
+        }
+        return agent.containsLLMTool();
+    }
 }

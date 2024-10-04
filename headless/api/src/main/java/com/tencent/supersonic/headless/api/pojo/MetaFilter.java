@@ -51,34 +51,18 @@ public class MetaFilter {
             return false;
         }
         MetaFilter that = (MetaFilter) o;
-        return Objects.equal(id, that.id)
-                && Objects.equal(name, that.name)
-                && Objects.equal(bizName, that.bizName)
-                && Objects.equal(createdBy, that.createdBy)
-                && Objects.equal(modelIds, that.modelIds)
-                && Objects.equal(domainId, that.domainId)
+        return Objects.equal(id, that.id) && Objects.equal(name, that.name)
+                && Objects.equal(bizName, that.bizName) && Objects.equal(createdBy, that.createdBy)
+                && Objects.equal(modelIds, that.modelIds) && Objects.equal(domainId, that.domainId)
                 && Objects.equal(dataSetId, that.dataSetId)
                 && Objects.equal(sensitiveLevel, that.sensitiveLevel)
-                && Objects.equal(status, that.status)
-                && Objects.equal(key, that.key)
-                && Objects.equal(ids, that.ids)
-                && Objects.equal(fieldsDepend, that.fieldsDepend);
+                && Objects.equal(status, that.status) && Objects.equal(key, that.key)
+                && Objects.equal(ids, that.ids) && Objects.equal(fieldsDepend, that.fieldsDepend);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(
-                id,
-                name,
-                bizName,
-                createdBy,
-                modelIds,
-                domainId,
-                dataSetId,
-                sensitiveLevel,
-                status,
-                key,
-                ids,
-                fieldsDepend);
+        return Objects.hashCode(id, name, bizName, createdBy, modelIds, domainId, dataSetId,
+                sensitiveLevel, status, key, ids, fieldsDepend);
     }
 }

@@ -7,9 +7,7 @@ import java.util.Objects;
  * ZIPPER: table with slowly changing dimension
  */
 public enum ModelSourceType {
-    FULL,
-    PARTITION,
-    ZIPPER;
+    FULL, PARTITION, ZIPPER;
 
     public static ModelSourceType of(String src) {
         for (ModelSourceType modelSourceTypeEnum : ModelSourceType.values()) {

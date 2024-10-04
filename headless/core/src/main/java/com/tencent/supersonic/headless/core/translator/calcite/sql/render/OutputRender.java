@@ -1,7 +1,7 @@
 package com.tencent.supersonic.headless.core.translator.calcite.sql.render;
 
 import com.tencent.supersonic.common.pojo.ColumnOrder;
-import com.tencent.supersonic.headless.api.pojo.enums.EngineType;
+import com.tencent.supersonic.common.pojo.enums.EngineType;
 import com.tencent.supersonic.headless.core.pojo.MetricQueryParam;
 import com.tencent.supersonic.headless.core.translator.calcite.s2sql.DataSource;
 import com.tencent.supersonic.headless.core.translator.calcite.schema.SemanticSchema;
@@ -23,13 +23,8 @@ import java.util.List;
 public class OutputRender extends Renderer {
 
     @Override
-    public void render(
-            MetricQueryParam metricCommand,
-            List<DataSource> dataSources,
-            SqlValidatorScope scope,
-            SemanticSchema schema,
-            boolean nonAgg)
-            throws Exception {
+    public void render(MetricQueryParam metricCommand, List<DataSource> dataSources,
+            SqlValidatorScope scope, SemanticSchema schema, boolean nonAgg) throws Exception {
         TableView selectDataSet = super.tableView;
         EngineType engineType =
                 EngineType.fromString(schema.getSemanticModel().getDatabase().getType());
@@ -53,12 +48,9 @@ public class OutputRender extends Renderer {
             List<SqlNode> orderList = new ArrayList<>();
             for (ColumnOrder columnOrder : metricCommand.getOrder()) {
                 if (SqlStdOperatorTable.DESC.getName().equalsIgnoreCase(columnOrder.getOrder())) {
-                    orderList.add(
-                            SqlStdOperatorTable.DESC.createCall(
-                                    SqlParserPos.ZERO,
-                                    new SqlNode[] {
-                                        SemanticNode.parse(columnOrder.getCol(), scope, engineType)
-                                    }));
+                    orderList.add(SqlStdOperatorTable.DESC.createCall(SqlParserPos.ZERO,
+                            new SqlNode[] {SemanticNode.parse(columnOrder.getCol(), scope,
+                                    engineType)}));
                 } else {
                     orderList.add(SemanticNode.parse(columnOrder.getCol(), scope, engineType));
                 }

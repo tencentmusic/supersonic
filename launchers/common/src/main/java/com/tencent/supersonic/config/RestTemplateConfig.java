@@ -25,9 +25,8 @@ public class RestTemplateConfig {
                 HttpClientBuilder.create().setRedirectStrategy(new LaxRedirectStrategy()).build();
         httpRequestFactory.setHttpClient(httpClient);
         RestTemplate restTemplate = new RestTemplate(httpRequestFactory);
-        restTemplate
-                .getMessageConverters()
-                .set(1, new StringHttpMessageConverter(StandardCharsets.UTF_8));
+        restTemplate.getMessageConverters().set(1,
+                new StringHttpMessageConverter(StandardCharsets.UTF_8));
         return restTemplate;
     }
 }

@@ -26,19 +26,19 @@ public class PostgresqlAdaptor extends BaseDbAdaptor {
     public String getDateFormat(String dateType, String dateFormat, String column) {
         if (dateFormat.equalsIgnoreCase(Constants.DAY_FORMAT_INT)) {
             if (TimeDimensionEnum.MONTH.name().equalsIgnoreCase(dateType)) {
-                return "formatDateTime(toDate(parseDateTimeBestEffort(toString(%s))),'%Y-%m')"
-                        .replace("%s", column);
+                return "to_char(to_date(%s,'yyyymmdd'), 'yyyy-mm')".replace("%s", column);
             } else if (TimeDimensionEnum.WEEK.name().equalsIgnoreCase(dateType)) {
-                return "toMonday(toDate(parseDateTimeBestEffort(toString(%s))))"
+                return "to_char(date_trunc('week',to_date(%s, 'yyyymmdd')),'yyyy-mm-dd')"
                         .replace("%s", column);
             } else {
-                return "toDate(parseDateTimeBestEffort(toString(%s)))".replace("%s", column);
+                return "to_char(to_date(%s,'yyyymmdd'), 'yyyy-mm-dd')".replace("%s", column);
             }
         } else if (dateFormat.equalsIgnoreCase(Constants.DAY_FORMAT)) {
             if (TimeDimensionEnum.MONTH.name().equalsIgnoreCase(dateType)) {
-                return "formatDateTime(toDate(%s),'%Y-%m')".replace("%s", column);
+                return "to_char(to_date(%s,'yyyy-mm-dd'), 'yyyy-mm')".replace("%s", column);
             } else if (TimeDimensionEnum.WEEK.name().equalsIgnoreCase(dateType)) {
-                return "toMonday(toDate(%s))".replace("%s", column);
+                return "to_char(date_trunc('week',to_date(%s, 'yyyy-mm-dd')),'yyyy-mm-dd')"
+                        .replace("%s", column);
             } else {
                 return column;
             }
@@ -53,36 +53,30 @@ public class PostgresqlAdaptor extends BaseDbAdaptor {
         functionMap.put("DAY".toLowerCase(), "TO_CHAR");
         functionMap.put("YEAR".toLowerCase(), "TO_CHAR");
         Map<String, UnaryOperator> functionCall = new HashMap<>();
-        functionCall.put(
-                "MONTH".toLowerCase(),
-                o -> {
-                    if (Objects.nonNull(o) && o instanceof ExpressionList) {
-                        ExpressionList expressionList = (ExpressionList) o;
-                        expressionList.add(new StringValue("MM"));
-                        return expressionList;
-                    }
-                    return o;
-                });
-        functionCall.put(
-                "DAY".toLowerCase(),
-                o -> {
-                    if (Objects.nonNull(o) && o instanceof ExpressionList) {
-                        ExpressionList expressionList = (ExpressionList) o;
-                        expressionList.add(new StringValue("dd"));
-                        return expressionList;
-                    }
-                    return o;
-                });
-        functionCall.put(
-                "YEAR".toLowerCase(),
-                o -> {
-                    if (Objects.nonNull(o) && o instanceof ExpressionList) {
-                        ExpressionList expressionList = (ExpressionList) o;
-                        expressionList.add(new StringValue("YYYY"));
-                        return expressionList;
-                    }
-                    return o;
-                });
+        functionCall.put("MONTH".toLowerCase(), o -> {
+            if (Objects.nonNull(o) && o instanceof ExpressionList) {
+                ExpressionList expressionList = (ExpressionList) o;
+                expressionList.add(new StringValue("MM"));
+                return expressionList;
+            }
+            return o;
+        });
+        functionCall.put("DAY".toLowerCase(), o -> {
+            if (Objects.nonNull(o) && o instanceof ExpressionList) {
+                ExpressionList expressionList = (ExpressionList) o;
+                expressionList.add(new StringValue("dd"));
+                return expressionList;
+            }
+            return o;
+        });
+        functionCall.put("YEAR".toLowerCase(), o -> {
+            if (Objects.nonNull(o) && o instanceof ExpressionList) {
+                ExpressionList expressionList = (ExpressionList) o;
+                expressionList.add(new StringValue("YYYY"));
+                return expressionList;
+            }
+            return o;
+        });
         return SqlReplaceHelper.replaceFunction(sql, functionMap, functionCall);
     }
 
