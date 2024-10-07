@@ -64,8 +64,10 @@ public class DictWordService {
 
     public List<DictWord> getDimDictWords(Set<Long> dimIds) {
         SemanticSchema semanticSchema = schemaService.getSemanticSchema();
-        List<SchemaElement> requiredDims = semanticSchema.getDimensionValues().stream().filter(dim -> dimIds.contains(dim.getId()))
-                .collect(Collectors.toList());
+        List<SchemaElement> requiredDims =
+                semanticSchema.getDimensionValues().stream()
+                        .filter(dim -> dimIds.contains(dim.getId()))
+                        .collect(Collectors.toList());
         List<DictWord> words = new ArrayList<>();
         addWordsByType(DictWordType.VALUE, requiredDims, words);
         return words;

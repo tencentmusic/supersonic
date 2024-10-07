@@ -10,18 +10,12 @@ import java.util.List;
  * @author: kanedai
  * @date: 2024/9/29
  */
-
 @Data
 @ToString
 public class DictValueDimResp extends DictValueResp {
-    /**
-     * dimension value for result show
-     */
+    /** dimension value for result show */
     private String bizName;
 
-    /**
-     * dimension value for user query
-     */
+    /** dimension value for user query */
     private List<String> alias = new ArrayList<>();
-
 }

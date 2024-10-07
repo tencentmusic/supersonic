@@ -335,7 +335,7 @@ public class DictUtils {
                 (Objects.isNull(config) || Objects.isNull(config.getLimit()))
                         ? itemValueMaxCount
                         : dictItemResp.getConfig().getLimit();
-        if(limit <= 0) {
+        if (limit <= 0) {
             limit = Integer.MAX_VALUE;
         }
 

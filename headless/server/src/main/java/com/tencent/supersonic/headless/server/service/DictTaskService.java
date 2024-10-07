@@ -4,9 +4,8 @@ import com.github.pagehelper.PageInfo;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.headless.api.pojo.request.DictSingleTaskReq;
 import com.tencent.supersonic.headless.api.pojo.request.DictValueReq;
-import com.tencent.supersonic.headless.api.pojo.response.DictValueDimResp;
 import com.tencent.supersonic.headless.api.pojo.response.DictTaskResp;
-
+import com.tencent.supersonic.headless.api.pojo.response.DictValueDimResp;
 
 /** Manage dictionary tasks */
 public interface DictTaskService {
