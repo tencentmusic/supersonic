@@ -37,8 +37,7 @@ public class TermController {
     }
 
     @GetMapping
-    public List<TermResp> getTerms(
-            @RequestParam("domainId") Long domainId,
+    public List<TermResp> getTerms(@RequestParam("domainId") Long domainId,
             @RequestParam(name = "queryKey", required = false) String queryKey) {
         return termService.getTerms(domainId, queryKey);
     }

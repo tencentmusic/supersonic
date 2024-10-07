@@ -83,8 +83,8 @@ public class FileHandlerImpl implements FileHandler {
         return getDictValueRespPagWithKey(fileName, dictValueReq);
     }
 
-    private PageInfo<DictValueResp> getDictValueRespPagWithKey(
-            String fileName, DictValueReq dictValueReq) {
+    private PageInfo<DictValueResp> getDictValueRespPagWithKey(String fileName,
+            DictValueReq dictValueReq) {
         PageInfo<DictValueResp> dictValueRespPageInfo = new PageInfo<>();
         dictValueRespPageInfo.setPageSize(dictValueReq.getPageSize());
         dictValueRespPageInfo.setPageNum(dictValueReq.getCurrent());
@@ -93,12 +93,9 @@ public class FileHandlerImpl implements FileHandler {
         Integer startLine = 1;
         List<DictValueResp> dictValueRespList =
                 getFileData(filePath, startLine, fileLineNum.intValue());
-        dictValueRespList =
-                dictValueRespList.stream()
-                        .filter(
-                                dictValue ->
-                                        dictValue.getValue().contains(dictValueReq.getKeyValue()))
-                        .collect(Collectors.toList());
+        dictValueRespList = dictValueRespList.stream()
+                .filter(dictValue -> dictValue.getValue().contains(dictValueReq.getKeyValue()))
+                .collect(Collectors.toList());
         if (CollectionUtils.isEmpty(dictValueRespList)) {
             dictValueRespPageInfo.setList(new ArrayList<>());
             return dictValueRespPageInfo;
@@ -107,11 +104,8 @@ public class FileHandlerImpl implements FileHandler {
         Integer startIndex =
                 Math.max((dictValueReq.getCurrent() - 1) * dictValueReq.getPageSize(), 0);
         Integer endIndex =
-                Integer.valueOf(
-                        Math.min(
-                                        dictValueReq.getCurrent() * dictValueReq.getPageSize(),
-                                        dictValueRespList.size())
-                                + "");
+                Integer.valueOf(Math.min(dictValueReq.getCurrent() * dictValueReq.getPageSize(),
+                        dictValueRespList.size()) + "");
         List<DictValueResp> list = dictValueRespList.subList(startIndex, endIndex);
         dictValueRespPageInfo.setPageSize(dictValueReq.getPageSize());
         dictValueRespPageInfo.setPageNum(dictValueReq.getCurrent());
@@ -122,18 +116,14 @@ public class FileHandlerImpl implements FileHandler {
         return dictValueRespPageInfo;
     }
 
-    private PageInfo<DictValueResp> getDictValueRespPagWithoutKey(
-            String fileName, DictValueReq dictValueReq) {
+    private PageInfo<DictValueResp> getDictValueRespPagWithoutKey(String fileName,
+            DictValueReq dictValueReq) {
         PageInfo<DictValueResp> dictValueRespPageInfo = new PageInfo<>();
         String filePath = localFileConfig.getDictDirectoryLatest() + FILE_SPILT + fileName;
         Long fileLineNum = getFileLineNum(filePath);
         Integer startLine = 1;
-        Integer endLine =
-                Integer.valueOf(
-                        Math.min(
-                                        dictValueReq.getCurrent() * dictValueReq.getPageSize(),
-                                        fileLineNum)
-                                + "");
+        Integer endLine = Integer.valueOf(
+                Math.min(dictValueReq.getCurrent() * dictValueReq.getPageSize(), fileLineNum) + "");
         List<DictValueResp> dictValueRespList = getFileData(filePath, startLine, endLine);
 
         dictValueRespPageInfo.setPageSize(dictValueReq.getPageSize());
@@ -159,12 +149,9 @@ public class FileHandlerImpl implements FileHandler {
         List<DictValueResp> fileData = new ArrayList<>();
 
         try (Stream<String> lines = Files.lines(Paths.get(filePath))) {
-            fileData =
-                    lines.skip(startLine - 1)
-                            .limit(endLine - startLine + 1)
-                            .map(lineStr -> convert2Resp(lineStr))
-                            .filter(line -> Objects.nonNull(line))
-                            .collect(Collectors.toList());
+            fileData = lines.skip(startLine - 1).limit(endLine - startLine + 1)
+                    .map(lineStr -> convert2Resp(lineStr)).filter(line -> Objects.nonNull(line))
+                    .collect(Collectors.toList());
         } catch (IOException e) {
             log.warn("[getFileData] e:{}", e);
         }
@@ -251,8 +238,8 @@ public class FileHandlerImpl implements FileHandler {
 
     private BufferedWriter getWriter(String filePath, Boolean append) throws IOException {
         if (append) {
-            return Files.newBufferedWriter(
-                    Paths.get(filePath), StandardCharsets.UTF_8, StandardOpenOption.APPEND);
+            return Files.newBufferedWriter(Paths.get(filePath), StandardCharsets.UTF_8,
+                    StandardOpenOption.APPEND);
         }
         return Files.newBufferedWriter(Paths.get(filePath), StandardCharsets.UTF_8);
     }

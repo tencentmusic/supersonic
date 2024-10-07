@@ -58,12 +58,8 @@ public class DictTaskServiceImpl implements DictTaskService {
     private final DictWordService dictWordService;
     private final DimensionService dimensionService;
 
-    public DictTaskServiceImpl(
-            DictRepository dictRepository,
-            DictUtils dictConverter,
-            DictUtils dictUtils,
-            FileHandler fileHandler,
-            DictWordService dictWordService,
+    public DictTaskServiceImpl(DictRepository dictRepository, DictUtils dictConverter,
+            DictUtils dictUtils, FileHandler fileHandler, DictWordService dictWordService,
             DimensionService dimensionService) {
         this.dictRepository = dictRepository;
         this.dictConverter = dictConverter;
@@ -94,11 +90,8 @@ public class DictTaskServiceImpl implements DictTaskService {
     }
 
     private DictItemResp fetchDictItemResp(DictSingleTaskReq taskReq) {
-        DictItemFilter dictItemFilter =
-                DictItemFilter.builder()
-                        .itemId(taskReq.getItemId())
-                        .type(taskReq.getType())
-                        .build();
+        DictItemFilter dictItemFilter = DictItemFilter.builder().itemId(taskReq.getItemId())
+                .type(taskReq.getType()).build();
         List<DictItemResp> dictItemRespList = dictRepository.queryDictConf(dictItemFilter);
         if (!CollectionUtils.isEmpty(dictItemRespList)) {
             return dictItemRespList.get(0);
@@ -174,19 +167,14 @@ public class DictTaskServiceImpl implements DictTaskService {
     @Override
     public PageInfo<DictValueDimResp> queryDictValue(DictValueReq dictValueReq, User user) {
         // todo 优化读取内存结构
-        //        return getDictValuePageFromMemory(dictValueReq);
+        // return getDictValuePageFromMemory(dictValueReq);
         return getDictValuePageFromFile(dictValueReq);
     }
 
     private PageInfo<DictValueDimResp> getDictValuePageFromFile(DictValueReq dictValueReq) {
-        String fileName =
-                String.format(
-                                "dic_value_%d_%s_%s",
-                                dictValueReq.getModelId(),
-                                dictValueReq.getType().name(),
-                                dictValueReq.getItemId())
-                        + Constants.DOT
-                        + dictFileType;
+        String fileName = String.format("dic_value_%d_%s_%s", dictValueReq.getModelId(),
+                dictValueReq.getType().name(), dictValueReq.getItemId()) + Constants.DOT
+                + dictFileType;
         PageInfo<DictValueResp> dictValueRespList =
                 fileHandler.queryDictValue(fileName, dictValueReq);
         PageInfo<DictValueDimResp> result = convert2DictValueDimRespPage(dictValueRespList);
@@ -208,8 +196,7 @@ public class DictTaskServiceImpl implements DictTaskService {
 
     private List<DictValueDimResp> getDictValueDimRespList(List<DictValueResp> dictValueRespList) {
         List<DictValueDimResp> list =
-                dictValueRespList.stream()
-                        .map(dictValue -> convert2DictValueInternal(dictValue))
+                dictValueRespList.stream().map(dictValue -> convert2DictValueInternal(dictValue))
                         .collect(Collectors.toList());
         return list;
     }
@@ -217,8 +204,7 @@ public class DictTaskServiceImpl implements DictTaskService {
     private List<DictValueDimResp> getDictValueDimRespList(List<DictWord> dictWords, Long dimId) {
         DimensionResp dimResp = dimensionService.getDimension(dimId);
         List<DictValueDimResp> list =
-                dictWords.stream()
-                        .map(dictWord -> convert2DictValueInternal(dictWord, dimResp))
+                dictWords.stream().map(dictWord -> convert2DictValueInternal(dictWord, dimResp))
                         .collect(Collectors.toList());
         return list;
     }
@@ -227,13 +213,8 @@ public class DictTaskServiceImpl implements DictTaskService {
         DictValueDimResp dictValueDimResp = new DictValueDimResp();
         BeanMapper.mapper(dictWord, dictValueDimResp);
         if (Objects.nonNull(dimResp.getDimValueMaps())) {
-            Map<String, DimValueMap> techAndAliasMap =
-                    dimResp.getDimValueMaps().stream()
-                            .collect(
-                                    Collectors.toMap(
-                                            dimValue -> dimValue.getTechName(),
-                                            v -> v,
-                                            (v1, v2) -> v2));
+            Map<String, DimValueMap> techAndAliasMap = dimResp.getDimValueMaps().stream().collect(
+                    Collectors.toMap(dimValue -> dimValue.getTechName(), v -> v, (v1, v2) -> v2));
             if (techAndAliasMap.containsKey(dictWord.getWord())) {
                 DimValueMap dimValueMap = techAndAliasMap.get(dictWord.getWord());
                 BeanMapper.mapper(dimValueMap, dictValueDimResp);
@@ -257,12 +238,9 @@ public class DictTaskServiceImpl implements DictTaskService {
             return dictValueRespPageInfo;
         }
         if (StringUtils.isNotEmpty(dictValueReq.getKeyValue())) {
-            dimDictWords =
-                    dimDictWords.stream()
-                            .filter(
-                                    dimValue ->
-                                            dimValue.getWord().contains(dictValueReq.getKeyValue()))
-                            .collect(Collectors.toList());
+            dimDictWords = dimDictWords.stream()
+                    .filter(dimValue -> dimValue.getWord().contains(dictValueReq.getKeyValue()))
+                    .collect(Collectors.toList());
         }
 
         Integer pageSize = dictValueReq.getPageSize();
@@ -281,14 +259,9 @@ public class DictTaskServiceImpl implements DictTaskService {
 
     @Override
     public String queryDictFilePath(DictValueReq dictValueReq, User user) {
-        String fileName =
-                String.format(
-                                "dic_value_%d_%s_%s",
-                                dictValueReq.getModelId(),
-                                dictValueReq.getType().name(),
-                                dictValueReq.getItemId())
-                        + Constants.DOT
-                        + dictFileType;
+        String fileName = String.format("dic_value_%d_%s_%s", dictValueReq.getModelId(),
+                dictValueReq.getType().name(), dictValueReq.getItemId()) + Constants.DOT
+                + dictFileType;
         return fileHandler.queryDictFilePath(fileName);
     }
 }
