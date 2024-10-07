@@ -5,25 +5,36 @@ import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.enums.StatusEnum;
 import com.tencent.supersonic.common.pojo.enums.TaskStatusEnum;
+import com.tencent.supersonic.common.util.BeanMapper;
+import com.tencent.supersonic.headless.api.pojo.DimValueMap;
 import com.tencent.supersonic.headless.api.pojo.request.DictItemFilter;
 import com.tencent.supersonic.headless.api.pojo.request.DictSingleTaskReq;
 import com.tencent.supersonic.headless.api.pojo.request.DictValueReq;
 import com.tencent.supersonic.headless.api.pojo.response.DictItemResp;
 import com.tencent.supersonic.headless.api.pojo.response.DictTaskResp;
+import com.tencent.supersonic.headless.api.pojo.response.DictValueDimResp;
 import com.tencent.supersonic.headless.api.pojo.response.DictValueResp;
+import com.tencent.supersonic.headless.api.pojo.response.DimensionResp;
+import com.tencent.supersonic.headless.chat.knowledge.DictWord;
 import com.tencent.supersonic.headless.chat.knowledge.file.FileHandler;
 import com.tencent.supersonic.headless.server.persistence.dataobject.DictTaskDO;
 import com.tencent.supersonic.headless.server.persistence.repository.DictRepository;
 import com.tencent.supersonic.headless.server.service.DictTaskService;
+import com.tencent.supersonic.headless.server.service.DimensionService;
 import com.tencent.supersonic.headless.server.utils.DictUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -45,14 +56,17 @@ public class DictTaskServiceImpl implements DictTaskService {
     private final DictUtils dictUtils;
     private final FileHandler fileHandler;
     private final DictWordService dictWordService;
+    private final DimensionService dimensionService;
 
     public DictTaskServiceImpl(DictRepository dictRepository, DictUtils dictConverter,
-            DictUtils dictUtils, FileHandler fileHandler, DictWordService dictWordService) {
+            DictUtils dictUtils, FileHandler fileHandler, DictWordService dictWordService,
+            DimensionService dimensionService) {
         this.dictRepository = dictRepository;
         this.dictConverter = dictConverter;
         this.dictUtils = dictUtils;
         this.fileHandler = fileHandler;
         this.dictWordService = dictWordService;
+        this.dimensionService = dimensionService;
     }
 
     @Override
@@ -151,13 +165,96 @@ public class DictTaskServiceImpl implements DictTaskService {
     }
 
     @Override
-    public PageInfo<DictValueResp> queryDictValue(DictValueReq dictValueReq, User user) {
+    public PageInfo<DictValueDimResp> queryDictValue(DictValueReq dictValueReq, User user) {
+        // todo 优化读取内存结构
+        // return getDictValuePageFromMemory(dictValueReq);
+        return getDictValuePageFromFile(dictValueReq);
+    }
+
+    private PageInfo<DictValueDimResp> getDictValuePageFromFile(DictValueReq dictValueReq) {
         String fileName = String.format("dic_value_%d_%s_%s", dictValueReq.getModelId(),
                 dictValueReq.getType().name(), dictValueReq.getItemId()) + Constants.DOT
                 + dictFileType;
         PageInfo<DictValueResp> dictValueRespList =
                 fileHandler.queryDictValue(fileName, dictValueReq);
-        return dictValueRespList;
+        PageInfo<DictValueDimResp> result = convert2DictValueDimRespPage(dictValueRespList);
+        return result;
+    }
+
+    private PageInfo<DictValueDimResp> convert2DictValueDimRespPage(
+            PageInfo<DictValueResp> dictValueRespPage) {
+        PageInfo<DictValueDimResp> result = new PageInfo<>();
+        BeanMapper.mapper(dictValueRespPage, result);
+        if (CollectionUtils.isEmpty(dictValueRespPage.getList())) {
+            return result;
+        }
+
+        List<DictValueDimResp> list = getDictValueDimRespList(dictValueRespPage.getList());
+        result.setList(list);
+        return result;
+    }
+
+    private List<DictValueDimResp> getDictValueDimRespList(List<DictValueResp> dictValueRespList) {
+        List<DictValueDimResp> list =
+                dictValueRespList.stream().map(dictValue -> convert2DictValueInternal(dictValue))
+                        .collect(Collectors.toList());
+        return list;
+    }
+
+    private List<DictValueDimResp> getDictValueDimRespList(List<DictWord> dictWords, Long dimId) {
+        DimensionResp dimResp = dimensionService.getDimension(dimId);
+        List<DictValueDimResp> list =
+                dictWords.stream().map(dictWord -> convert2DictValueInternal(dictWord, dimResp))
+                        .collect(Collectors.toList());
+        return list;
+    }
+
+    private DictValueDimResp convert2DictValueInternal(DictWord dictWord, DimensionResp dimResp) {
+        DictValueDimResp dictValueDimResp = new DictValueDimResp();
+        BeanMapper.mapper(dictWord, dictValueDimResp);
+        if (Objects.nonNull(dimResp.getDimValueMaps())) {
+            Map<String, DimValueMap> techAndAliasMap = dimResp.getDimValueMaps().stream().collect(
+                    Collectors.toMap(dimValue -> dimValue.getTechName(), v -> v, (v1, v2) -> v2));
+            if (techAndAliasMap.containsKey(dictWord.getWord())) {
+                DimValueMap dimValueMap = techAndAliasMap.get(dictWord.getWord());
+                BeanMapper.mapper(dimValueMap, dictValueDimResp);
+            }
+        }
+        return dictValueDimResp;
+    }
+
+    private DictValueDimResp convert2DictValueInternal(DictValueResp dictValue) {
+        DictValueDimResp dictValueDimResp = new DictValueDimResp();
+        BeanMapper.mapper(dictValue, dictValueDimResp);
+        return dictValueDimResp;
+    }
+
+    private PageInfo<DictValueDimResp> getDictValuePageFromMemory(DictValueReq dictValueReq) {
+        PageInfo<DictValueDimResp> dictValueRespPageInfo = new PageInfo<>();
+        Set<Long> dimSet = new HashSet<>();
+        dimSet.add(dictValueReq.getItemId());
+        List<DictWord> dimDictWords = dictWordService.getDimDictWords(dimSet);
+        if (CollectionUtils.isEmpty(dimDictWords)) {
+            return dictValueRespPageInfo;
+        }
+        if (StringUtils.isNotEmpty(dictValueReq.getKeyValue())) {
+            dimDictWords = dimDictWords.stream()
+                    .filter(dimValue -> dimValue.getWord().contains(dictValueReq.getKeyValue()))
+                    .collect(Collectors.toList());
+        }
+
+        Integer pageSize = dictValueReq.getPageSize();
+        Integer current = dictValueReq.getCurrent();
+        dictValueRespPageInfo.setTotal(dimDictWords.size());
+        dictValueRespPageInfo.setPageSize(pageSize);
+        dictValueRespPageInfo.setPageNum(dictValueReq.getCurrent());
+
+        // 分页
+        int startIndex = (current - 1) * pageSize;
+        int endIndex = Math.min(startIndex + pageSize, dimDictWords.size());
+        List<DictWord> data = dimDictWords.subList(startIndex, endIndex);
+        dictValueRespPageInfo.setList(getDictValueDimRespList(data, dictValueReq.getItemId()));
+        return dictValueRespPageInfo;
     }
 
     @Override

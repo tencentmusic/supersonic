@@ -320,6 +320,10 @@ public class DictUtils {
         long limit =
                 (Objects.isNull(config) || Objects.isNull(config.getLimit())) ? itemValueMaxCount
                         : dictItemResp.getConfig().getLimit();
+        if (limit <= 0) {
+            limit = Integer.MAX_VALUE;
+        }
+
         String sql = String.format(sqlPattern, bizName, where, bizName, limit);
         Set<Long> modelIds = new HashSet<>();
         modelIds.add(dictItemResp.getModelId());
