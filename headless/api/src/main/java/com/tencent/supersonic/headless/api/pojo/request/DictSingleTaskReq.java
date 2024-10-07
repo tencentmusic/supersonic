@@ -9,6 +9,8 @@ import lombok.Data;
 @Data
 @Builder
 public class DictSingleTaskReq {
-    @NotNull private TypeEnums type;
-    @NotNull private Long itemId;
+    @NotNull
+    private TypeEnums type;
+    @NotNull
+    private Long itemId;
 }

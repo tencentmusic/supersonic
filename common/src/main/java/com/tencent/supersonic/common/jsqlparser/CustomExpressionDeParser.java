@@ -15,8 +15,8 @@ public class CustomExpressionDeParser extends ExpressionDeParser {
     private boolean dealNull;
     private boolean dealNotNull;
 
-    public CustomExpressionDeParser(
-            Set<String> removeFieldNames, boolean dealNull, boolean dealNotNull) {
+    public CustomExpressionDeParser(Set<String> removeFieldNames, boolean dealNull,
+            boolean dealNotNull) {
         this.removeFieldNames = removeFieldNames;
         this.dealNull = dealNull;
         this.dealNotNull = dealNotNull;
@@ -45,12 +45,10 @@ public class CustomExpressionDeParser extends ExpressionDeParser {
         Expression leftExpression = ((AndExpression) binaryExpression).getLeftExpression();
         Expression rightExpression = ((AndExpression) binaryExpression).getRightExpression();
 
-        boolean leftIsNull =
-                leftExpression instanceof IsNullExpression
-                        && shouldSkip((IsNullExpression) leftExpression);
-        boolean rightIsNull =
-                rightExpression instanceof IsNullExpression
-                        && shouldSkip((IsNullExpression) rightExpression);
+        boolean leftIsNull = leftExpression instanceof IsNullExpression
+                && shouldSkip((IsNullExpression) leftExpression);
+        boolean rightIsNull = rightExpression instanceof IsNullExpression
+                && shouldSkip((IsNullExpression) rightExpression);
 
         if (leftIsNull && rightIsNull) {
             // Skip both expressions

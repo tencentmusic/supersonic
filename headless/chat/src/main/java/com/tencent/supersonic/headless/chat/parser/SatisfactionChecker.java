@@ -50,10 +50,7 @@ public class SatisfactionChecker {
         } else if (degree < shortTextLengthThreshold) {
             return false;
         }
-        log.info(
-                "queryMode:{}, degree:{}, parse info:{}",
-                semanticParseInfo.getQueryMode(),
-                degree,
+        log.info("queryMode:{}, degree:{}, parse info:{}", semanticParseInfo.getQueryMode(), degree,
                 semanticParseInfo);
         return true;
     }

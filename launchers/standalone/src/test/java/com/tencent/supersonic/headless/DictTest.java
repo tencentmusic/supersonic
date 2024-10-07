@@ -19,9 +19,11 @@ import java.util.Date;
 import java.util.List;
 
 public class DictTest extends BaseTest {
-    @Autowired private DictConfMapper confMapper;
+    @Autowired
+    private DictConfMapper confMapper;
 
-    @Autowired private DictTaskService taskService;
+    @Autowired
+    private DictTaskService taskService;
 
     @Test
     public void insertConf() {
@@ -80,11 +82,8 @@ public class DictTest extends BaseTest {
     void testAddTask() {
         editConf();
         DictConfDO confDODb = confMapper.selectById(1L);
-        DictSingleTaskReq dictTask =
-                DictSingleTaskReq.builder()
-                        .itemId(confDODb.getItemId())
-                        .type(TypeEnums.DIMENSION)
-                        .build();
+        DictSingleTaskReq dictTask = DictSingleTaskReq.builder().itemId(confDODb.getItemId())
+                .type(TypeEnums.DIMENSION).build();
         taskService.addDictTask(dictTask, null);
         DictSingleTaskReq taskReq =
                 DictSingleTaskReq.builder().itemId(3L).type(TypeEnums.DIMENSION).build();

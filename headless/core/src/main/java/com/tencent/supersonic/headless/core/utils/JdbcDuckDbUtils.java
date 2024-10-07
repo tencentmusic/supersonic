@@ -11,14 +11,8 @@ import java.util.stream.Collectors;
 /** tools functions to duckDb query */
 public class JdbcDuckDbUtils {
 
-    public static void attachMysql(
-            DuckDbSource duckDbSource,
-            String host,
-            Integer port,
-            String user,
-            String password,
-            String database)
-            throws Exception {
+    public static void attachMysql(DuckDbSource duckDbSource, String host, Integer port,
+            String user, String password, String database) throws Exception {
         try {
             duckDbSource.execute("INSTALL mysql");
             duckDbSource.execute("load mysql");
@@ -40,25 +34,20 @@ public class JdbcDuckDbUtils {
         if (!queryResultWithColumns.getResultList().isEmpty()) {
             return queryResultWithColumns.getResultList().stream()
                     .filter(l -> l.containsKey("name") && Objects.nonNull(l.get("name")))
-                    .map(l -> (String) l.get("name"))
-                    .collect(Collectors.toList());
+                    .map(l -> (String) l.get("name")).collect(Collectors.toList());
         }
         return new ArrayList<>();
     }
 
-    public static List<String> getParquetPartition(
-            DuckDbSource duckDbSource, String parquetPath, String partitionName) throws Exception {
+    public static List<String> getParquetPartition(DuckDbSource duckDbSource, String parquetPath,
+            String partitionName) throws Exception {
         SemanticQueryResp queryResultWithColumns = new SemanticQueryResp();
-        duckDbSource.query(
-                String.format(
-                        "SELECT distinct %s as partition FROM read_parquet('%s')",
-                        partitionName, parquetPath),
-                queryResultWithColumns);
+        duckDbSource.query(String.format("SELECT distinct %s as partition FROM read_parquet('%s')",
+                partitionName, parquetPath), queryResultWithColumns);
         if (!queryResultWithColumns.getResultList().isEmpty()) {
             return queryResultWithColumns.getResultList().stream()
                     .filter(l -> l.containsKey("partition") && Objects.nonNull(l.get("partition")))
-                    .map(l -> (String) l.get("partition"))
-                    .collect(Collectors.toList());
+                    .map(l -> (String) l.get("partition")).collect(Collectors.toList());
         }
         return new ArrayList<>();
     }

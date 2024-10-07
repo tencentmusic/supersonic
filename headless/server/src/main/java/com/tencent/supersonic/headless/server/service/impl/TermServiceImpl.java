@@ -78,8 +78,7 @@ public class TermServiceImpl extends ServiceImpl<TermMapper, TermDO> implements 
         QueryWrapper<TermDO> queryWrapper = new QueryWrapper<>();
         queryWrapper.lambda().in(TermDO::getDomainId, domainIds);
         List<TermDO> list = list(queryWrapper);
-        return list.stream()
-                .map(this::convert)
+        return list.stream().map(this::convert)
                 .collect(Collectors.groupingBy(TermResp::getDomainId));
     }
 

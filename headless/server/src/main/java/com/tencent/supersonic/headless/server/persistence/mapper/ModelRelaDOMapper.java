@@ -5,4 +5,5 @@ import com.tencent.supersonic.headless.server.persistence.dataobject.ModelRelaDO
 import org.apache.ibatis.annotations.Mapper;
 
 @Mapper
-public interface ModelRelaDOMapper extends BaseMapper<ModelRelaDO> {}
+public interface ModelRelaDOMapper extends BaseMapper<ModelRelaDO> {
+}

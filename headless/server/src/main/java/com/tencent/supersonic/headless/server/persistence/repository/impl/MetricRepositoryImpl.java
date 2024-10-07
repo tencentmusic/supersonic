@@ -22,8 +22,7 @@ public class MetricRepositoryImpl implements MetricRepository {
 
     private MetricQueryDefaultConfigDOMapper metricQueryDefaultConfigDOMapper;
 
-    public MetricRepositoryImpl(
-            MetricDOMapper metricDOMapper,
+    public MetricRepositoryImpl(MetricDOMapper metricDOMapper,
             MetricDOCustomMapper metricDOCustomMapper,
             MetricQueryDefaultConfigDOMapper metricQueryDefaultConfigDOMapper) {
         this.metricDOMapper = metricDOMapper;
@@ -95,9 +94,7 @@ public class MetricRepositoryImpl implements MetricRepository {
     @Override
     public MetricQueryDefaultConfigDO getDefaultQueryConfig(Long metricId, String userName) {
         QueryWrapper<MetricQueryDefaultConfigDO> queryWrapper = new QueryWrapper<>();
-        queryWrapper
-                .lambda()
-                .eq(MetricQueryDefaultConfigDO::getMetricId, metricId)
+        queryWrapper.lambda().eq(MetricQueryDefaultConfigDO::getMetricId, metricId)
                 .eq(MetricQueryDefaultConfigDO::getCreatedBy, userName);
         return metricQueryDefaultConfigDOMapper.selectOne(queryWrapper);
     }

@@ -15,7 +15,7 @@ import {
 import DimensionInfoModal from './DimensionInfoModal';
 import DimensionValueSettingModal from './DimensionValueSettingModal';
 import { ISemantic, IDataSource } from '../data';
-import TableHeaderFilter from './TableHeaderFilter';
+import TableHeaderFilter from '@/components/TableHeaderFilter';
 import BatchCtrlDropDownButton from '@/components/BatchCtrlDropDownButton';
 import { ColumnsConfig } from './TableColumnRender';
 import BatchSensitiveLevelModal from '@/components/BatchCtrlDropDownButton/BatchSensitiveLevelModal';

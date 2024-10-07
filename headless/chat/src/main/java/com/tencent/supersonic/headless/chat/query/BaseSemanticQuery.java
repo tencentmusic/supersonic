@@ -52,8 +52,8 @@ public abstract class BaseSemanticQuery implements SemanticQuery, Serializable {
         parseInfo.getSqlInfo().setCorrectedS2SQL(querySQLReq.getSql());
     }
 
-    protected void convertBizNameToName(
-            DataSetSchema dataSetSchema, QueryStructReq queryStructReq) {
+    protected void convertBizNameToName(DataSetSchema dataSetSchema,
+            QueryStructReq queryStructReq) {
         Map<String, String> bizNameToName = dataSetSchema.getBizNameToName();
         bizNameToName.putAll(TimeDimensionEnum.getNameToNameMap());
 
@@ -76,8 +76,8 @@ public abstract class BaseSemanticQuery implements SemanticQuery, Serializable {
         }
         List<Filter> dimensionFilters = queryStructReq.getDimensionFilters();
         if (CollectionUtils.isNotEmpty(dimensionFilters)) {
-            dimensionFilters.forEach(
-                    filter -> filter.setName(bizNameToName.get(filter.getBizName())));
+            dimensionFilters
+                    .forEach(filter -> filter.setName(bizNameToName.get(filter.getBizName())));
         }
         List<Filter> metricFilters = queryStructReq.getMetricFilters();
         if (CollectionUtils.isNotEmpty(dimensionFilters)) {

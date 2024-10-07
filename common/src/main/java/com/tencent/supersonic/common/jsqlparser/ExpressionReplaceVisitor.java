@@ -23,9 +23,8 @@ public class ExpressionReplaceVisitor extends ExpressionVisitorAdapter {
         expr.getWhenExpression().accept(this);
         if (expr.getThenExpression() instanceof Column) {
             Column column = (Column) expr.getThenExpression();
-            Expression expression =
-                    QueryExpressionReplaceVisitor.getExpression(
-                            QueryExpressionReplaceVisitor.getReplaceExpr(column, fieldExprMap));
+            Expression expression = QueryExpressionReplaceVisitor.getExpression(
+                    QueryExpressionReplaceVisitor.getReplaceExpr(column, fieldExprMap));
             if (Objects.nonNull(expression)) {
                 expr.setThenExpression(expression);
             }
@@ -52,20 +51,16 @@ public class ExpressionReplaceVisitor extends ExpressionVisitorAdapter {
             }
         }
         if (left instanceof Column) {
-            Expression expression =
-                    QueryExpressionReplaceVisitor.getExpression(
-                            QueryExpressionReplaceVisitor.getReplaceExpr(
-                                    (Column) left, fieldExprMap));
+            Expression expression = QueryExpressionReplaceVisitor.getExpression(
+                    QueryExpressionReplaceVisitor.getReplaceExpr((Column) left, fieldExprMap));
             if (Objects.nonNull(expression)) {
                 expr.setLeftExpression(expression);
                 leftVisited = true;
             }
         }
         if (right instanceof Column) {
-            Expression expression =
-                    QueryExpressionReplaceVisitor.getExpression(
-                            QueryExpressionReplaceVisitor.getReplaceExpr(
-                                    (Column) right, fieldExprMap));
+            Expression expression = QueryExpressionReplaceVisitor.getExpression(
+                    QueryExpressionReplaceVisitor.getReplaceExpr((Column) right, fieldExprMap));
             if (Objects.nonNull(expression)) {
                 expr.setRightExpression(expression);
                 rightVisited = true;
@@ -81,9 +76,8 @@ public class ExpressionReplaceVisitor extends ExpressionVisitorAdapter {
 
     private boolean visitFunction(Function function) {
         if (function.getParameters().getExpressions().get(0) instanceof Column) {
-            Expression expression =
-                    QueryExpressionReplaceVisitor.getExpression(
-                            QueryExpressionReplaceVisitor.getReplaceExpr(function, fieldExprMap));
+            Expression expression = QueryExpressionReplaceVisitor.getExpression(
+                    QueryExpressionReplaceVisitor.getReplaceExpr(function, fieldExprMap));
             if (Objects.nonNull(expression)) {
                 ExpressionList<Expression> expressions = new ExpressionList<>();
                 expressions.add(expression);

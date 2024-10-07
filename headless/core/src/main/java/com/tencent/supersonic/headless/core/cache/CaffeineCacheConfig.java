@@ -12,7 +12,8 @@ import java.util.concurrent.TimeUnit;
 @Configuration
 public class CaffeineCacheConfig {
 
-    @Autowired private CacheCommonConfig cacheCommonConfig;
+    @Autowired
+    private CacheCommonConfig cacheCommonConfig;
 
     @Value("${s2.caffeine.initial.capacity:500}")
     private Integer caffeineInitialCapacity;
@@ -23,19 +24,14 @@ public class CaffeineCacheConfig {
     @Bean(name = "caffeineCache")
     public Cache<String, Object> caffeineCache() {
         return Caffeine.newBuilder()
-                .expireAfterWrite(
-                        cacheCommonConfig.getCacheCommonExpireAfterWrite(), TimeUnit.MINUTES)
-                .initialCapacity(caffeineInitialCapacity)
-                .maximumSize(caffeineMaximumSize)
-                .build();
+                .expireAfterWrite(cacheCommonConfig.getCacheCommonExpireAfterWrite(),
+                        TimeUnit.MINUTES)
+                .initialCapacity(caffeineInitialCapacity).maximumSize(caffeineMaximumSize).build();
     }
 
     @Bean(name = "searchCaffeineCache")
     public Cache<Long, Object> searchCaffeineCache() {
-        return Caffeine.newBuilder()
-                .expireAfterWrite(10000, TimeUnit.MINUTES)
-                .initialCapacity(caffeineInitialCapacity)
-                .maximumSize(caffeineMaximumSize)
-                .build();
+        return Caffeine.newBuilder().expireAfterWrite(10000, TimeUnit.MINUTES)
+                .initialCapacity(caffeineInitialCapacity).maximumSize(caffeineMaximumSize).build();
     }
 }

@@ -48,9 +48,7 @@ public class ModelRelaServiceImpl extends ServiceImpl<ModelRelaDOMapper, ModelRe
         if (CollectionUtils.isEmpty(modelIds)) {
             return Lists.newArrayList();
         }
-        wrapper.lambda()
-                .in(ModelRelaDO::getFromModelId, modelIds)
-                .or()
+        wrapper.lambda().in(ModelRelaDO::getFromModelId, modelIds).or()
                 .in(ModelRelaDO::getToModelId, modelIds);
         return list(wrapper).stream().map(this::convert).collect(Collectors.toList());
     }

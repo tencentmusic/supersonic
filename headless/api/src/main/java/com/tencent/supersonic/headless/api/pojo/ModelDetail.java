@@ -55,30 +55,19 @@ public class ModelDetail {
         List<Field> fieldList = Lists.newArrayList();
         // Compatible with older versions
         if (!CollectionUtils.isEmpty(identifiers)) {
-            fieldList.addAll(
-                    identifiers.stream()
-                            .map(
-                                    identify ->
-                                            Field.builder()
-                                                    .fieldName(identify.getFieldName())
-                                                    .build())
-                            .collect(Collectors.toSet()));
+            fieldList.addAll(identifiers.stream()
+                    .map(identify -> Field.builder().fieldName(identify.getFieldName()).build())
+                    .collect(Collectors.toSet()));
         }
         if (!CollectionUtils.isEmpty(dimensions)) {
-            fieldList.addAll(
-                    dimensions.stream()
-                            .map(dim -> Field.builder().fieldName(dim.getFieldName()).build())
-                            .collect(Collectors.toSet()));
+            fieldList.addAll(dimensions.stream()
+                    .map(dim -> Field.builder().fieldName(dim.getFieldName()).build())
+                    .collect(Collectors.toSet()));
         }
         if (!CollectionUtils.isEmpty(measures)) {
-            fieldList.addAll(
-                    measures.stream()
-                            .map(
-                                    measure ->
-                                            Field.builder()
-                                                    .fieldName(measure.getFieldName())
-                                                    .build())
-                            .collect(Collectors.toSet()));
+            fieldList.addAll(measures.stream()
+                    .map(measure -> Field.builder().fieldName(measure.getFieldName()).build())
+                    .collect(Collectors.toSet()));
         }
         return fieldList;
     }

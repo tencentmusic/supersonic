@@ -112,8 +112,7 @@ public class QueryByStructTest extends BaseTest {
         User alice = DataUtils.getUserAlice();
         setDomainNotOpenToAll();
         QueryStructReq queryStructReq1 = buildQueryStructReq(Arrays.asList("department"));
-        assertThrows(
-                InvalidPermissionException.class,
+        assertThrows(InvalidPermissionException.class,
                 () -> semanticLayerService.queryByReq(queryStructReq1, alice));
     }
 
@@ -125,8 +124,7 @@ public class QueryByStructTest extends BaseTest {
         aggregator.setColumn("stay_hours");
         QueryStructReq queryStructReq =
                 buildQueryStructReq(Arrays.asList("department"), aggregator);
-        assertThrows(
-                InvalidPermissionException.class,
+        assertThrows(InvalidPermissionException.class,
                 () -> semanticLayerService.queryByReq(queryStructReq, tom));
     }
 

@@ -1,8 +1,8 @@
 package com.tencent.supersonic.headless.core.executor;
 
+import com.tencent.supersonic.common.calcite.Configuration;
 import com.tencent.supersonic.common.jsqlparser.SqlSelectHelper;
 import com.tencent.supersonic.headless.core.pojo.Materialization;
-import com.tencent.supersonic.headless.core.translator.calcite.Configuration;
 import com.tencent.supersonic.headless.core.translator.calcite.s2sql.TimeRange;
 import com.tencent.supersonic.headless.core.translator.calcite.schema.DataSourceTable;
 import com.tencent.supersonic.headless.core.translator.calcite.schema.DataSourceTable.Builder;
@@ -56,13 +56,9 @@ public abstract class AbstractAccelerator implements QueryAccelerator {
     public static final String MATERIALIZATION_SYS_PARTITION = "sys_partition";
 
     /** check if a materialization match the fields and partitions */
-    protected boolean check(
-            RelOptPlanner relOptPlanner,
-            RelBuilder relBuilder,
-            CalciteCatalogReader calciteCatalogReader,
-            Materialization materialization,
-            List<String> fields,
-            List<ImmutablePair<String, String>> partitions) {
+    protected boolean check(RelOptPlanner relOptPlanner, RelBuilder relBuilder,
+            CalciteCatalogReader calciteCatalogReader, Materialization materialization,
+            List<String> fields, List<ImmutablePair<String, String>> partitions) {
         if (!materialization.isPartitioned()) {
             return fields.stream().allMatch(f -> materialization.getColumns().contains(f));
         }
@@ -85,8 +81,8 @@ public abstract class AbstractAccelerator implements QueryAccelerator {
         }
 
         Materialization viewMaterialization = Materialization.builder().build();
-        viewMaterialization.setName(
-                String.format("%s.%s", MATERIALIZATION_SYS_DB, MATERIALIZATION_SYS_VIEW));
+        viewMaterialization
+                .setName(String.format("%s.%s", MATERIALIZATION_SYS_DB, MATERIALIZATION_SYS_VIEW));
         viewMaterialization.setColumns(viewFieldList);
         addMaterialization(calciteCatalogReader.getRootSchema(), viewMaterialization);
 
@@ -97,10 +93,8 @@ public abstract class AbstractAccelerator implements QueryAccelerator {
         queryMaterialization.setColumns(materializationFieldList);
         addMaterialization(calciteCatalogReader.getRootSchema(), queryMaterialization);
 
-        RelNode replacement =
-                relBuilder
-                        .scan(Arrays.asList(MATERIALIZATION_SYS_DB, MATERIALIZATION_SYS_VIEW))
-                        .build();
+        RelNode replacement = relBuilder
+                .scan(Arrays.asList(MATERIALIZATION_SYS_DB, MATERIALIZATION_SYS_VIEW)).build();
         RelBuilder viewBuilder =
                 relBuilder.scan(Arrays.asList(MATERIALIZATION_SYS_DB, MATERIALIZATION_SYS_SOURCE));
         if (materialization.isPartitioned()) {
@@ -117,9 +111,8 @@ public abstract class AbstractAccelerator implements QueryAccelerator {
         RelBuilder checkBuilder =
                 relBuilder.scan(Arrays.asList(MATERIALIZATION_SYS_DB, MATERIALIZATION_SYS_SOURCE));
         if (materialization.isPartitioned()) {
-            checkBuilder =
-                    checkBuilder.filter(
-                            getRexNode(checkBuilder, partitions, MATERIALIZATION_SYS_PARTITION));
+            checkBuilder = checkBuilder
+                    .filter(getRexNode(checkBuilder, partitions, MATERIALIZATION_SYS_PARTITION));
         }
         RelNode checkRel = project(checkBuilder, queryFieldList).build();
         relOptPlanner.setRoot(checkRel);
@@ -135,12 +128,9 @@ public abstract class AbstractAccelerator implements QueryAccelerator {
     protected CalciteCatalogReader getCalciteCatalogReader() {
         CalciteCatalogReader calciteCatalogReader;
         CalciteSchema viewSchema = SchemaBuilder.getMaterializationSchema();
-        calciteCatalogReader =
-                new CalciteCatalogReader(
-                        CalciteSchema.from(viewSchema.plus()),
-                        CalciteSchema.from(viewSchema.plus()).path(null),
-                        Configuration.typeFactory,
-                        new CalciteConnectionConfigImpl(new Properties()));
+        calciteCatalogReader = new CalciteCatalogReader(CalciteSchema.from(viewSchema.plus()),
+                CalciteSchema.from(viewSchema.plus()).path(null), Configuration.typeFactory,
+                new CalciteConnectionConfigImpl(new Properties()));
         return calciteCatalogReader;
     }
 
@@ -151,8 +141,8 @@ public abstract class AbstractAccelerator implements QueryAccelerator {
         return relOptPlanner;
     }
 
-    protected RelBuilder builderMaterializationPlan(
-            CalciteCatalogReader calciteCatalogReader, RelOptPlanner relOptPlanner) {
+    protected RelBuilder builderMaterializationPlan(CalciteCatalogReader calciteCatalogReader,
+            RelOptPlanner relOptPlanner) {
         relOptPlanner.addRelTraitDef(ConventionTraitDef.INSTANCE);
         relOptPlanner.addRelTraitDef(RelDistributionTraitDef.INSTANCE);
         EnumerableRules.rules().forEach(relOptPlanner::addRule);
@@ -161,8 +151,8 @@ public abstract class AbstractAccelerator implements QueryAccelerator {
         return RelFactories.LOGICAL_BUILDER.create(relOptCluster, calciteCatalogReader);
     }
 
-    protected void addMaterialization(
-            CalciteSchema dataSetSchema, Materialization materialization) {
+    protected void addMaterialization(CalciteSchema dataSetSchema,
+            Materialization materialization) {
         String[] dbTable = materialization.getName().split("\\.");
         String tb = dbTable[1].toLowerCase();
         String db = dbTable[0].toLowerCase();
@@ -188,34 +178,28 @@ public abstract class AbstractAccelerator implements QueryAccelerator {
 
     protected Set<String> extractTableNames(RelNode relNode) {
         Set<String> tableNames = new HashSet<>();
-        RelShuttle shuttle =
-                new RelHomogeneousShuttle() {
-                    public RelNode visit(TableScan scan) {
-                        RelOptTable table = scan.getTable();
-                        tableNames.addAll(table.getQualifiedName());
-                        return scan;
-                    }
-                };
+        RelShuttle shuttle = new RelHomogeneousShuttle() {
+            public RelNode visit(TableScan scan) {
+                RelOptTable table = scan.getTable();
+                tableNames.addAll(table.getQualifiedName());
+                return scan;
+            }
+        };
         relNode.accept(shuttle);
         return tableNames;
     }
 
-    protected RexNode getRexNodeByTimeRange(
-            RelBuilder relBuilder, TimeRange timeRange, String field) {
-        return relBuilder.call(
-                SqlStdOperatorTable.AND,
-                relBuilder.call(
-                        SqlStdOperatorTable.GREATER_THAN_OR_EQUAL,
-                        relBuilder.field(field),
+    protected RexNode getRexNodeByTimeRange(RelBuilder relBuilder, TimeRange timeRange,
+            String field) {
+        return relBuilder.call(SqlStdOperatorTable.AND,
+                relBuilder.call(SqlStdOperatorTable.GREATER_THAN_OR_EQUAL, relBuilder.field(field),
                         relBuilder.literal(timeRange.getStart())),
-                relBuilder.call(
-                        SqlStdOperatorTable.LESS_THAN_OR_EQUAL,
-                        relBuilder.field(field),
+                relBuilder.call(SqlStdOperatorTable.LESS_THAN_OR_EQUAL, relBuilder.field(field),
                         relBuilder.literal(timeRange.getEnd())));
     }
 
-    protected RexNode getRexNode(
-            RelBuilder relBuilder, Materialization materialization, String viewField) {
+    protected RexNode getRexNode(RelBuilder relBuilder, Materialization materialization,
+            String viewField) {
         RexNode rexNode = null;
         for (String partition : materialization.getPartitions()) {
             TimeRange timeRange = TimeRange.builder().start(partition).end(partition).build();
@@ -223,43 +207,26 @@ public abstract class AbstractAccelerator implements QueryAccelerator {
                 rexNode = getRexNodeByTimeRange(relBuilder, timeRange, viewField);
                 continue;
             }
-            rexNode =
-                    relBuilder.call(
-                            SqlStdOperatorTable.OR,
-                            rexNode,
-                            getRexNodeByTimeRange(relBuilder, timeRange, viewField));
+            rexNode = relBuilder.call(SqlStdOperatorTable.OR, rexNode,
+                    getRexNodeByTimeRange(relBuilder, timeRange, viewField));
         }
         return rexNode;
     }
 
-    protected RexNode getRexNode(
-            RelBuilder relBuilder,
-            List<ImmutablePair<String, String>> timeRanges,
-            String viewField) {
+    protected RexNode getRexNode(RelBuilder relBuilder,
+            List<ImmutablePair<String, String>> timeRanges, String viewField) {
         RexNode rexNode = null;
         for (ImmutablePair<String, String> timeRange : timeRanges) {
             if (rexNode == null) {
-                rexNode =
-                        getRexNodeByTimeRange(
-                                relBuilder,
-                                TimeRange.builder()
-                                        .start(timeRange.left)
-                                        .end(timeRange.right)
-                                        .build(),
-                                viewField);
+                rexNode = getRexNodeByTimeRange(relBuilder,
+                        TimeRange.builder().start(timeRange.left).end(timeRange.right).build(),
+                        viewField);
                 continue;
             }
-            rexNode =
-                    relBuilder.call(
-                            SqlStdOperatorTable.OR,
-                            rexNode,
-                            getRexNodeByTimeRange(
-                                    relBuilder,
-                                    TimeRange.builder()
-                                            .start(timeRange.left)
-                                            .end(timeRange.right)
-                                            .build(),
-                                    viewField));
+            rexNode = relBuilder.call(SqlStdOperatorTable.OR, rexNode,
+                    getRexNodeByTimeRange(relBuilder,
+                            TimeRange.builder().start(timeRange.left).end(timeRange.right).build(),
+                            viewField));
         }
         return rexNode;
     }

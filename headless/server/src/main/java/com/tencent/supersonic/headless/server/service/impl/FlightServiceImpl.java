@@ -88,10 +88,8 @@ public class FlightServiceImpl extends BasicFlightSqlProducer implements FlightS
     private final AuthenticationConfig authenticationConfig;
     private final UserService userService;
 
-    public FlightServiceImpl(
-            SemanticLayerService queryService,
-            AuthenticationConfig authenticationConfig,
-            UserService userService) {
+    public FlightServiceImpl(SemanticLayerService queryService,
+            AuthenticationConfig authenticationConfig, UserService userService) {
         this.queryService = queryService;
         this.authenticationConfig = authenticationConfig;
 
@@ -104,14 +102,11 @@ public class FlightServiceImpl extends BasicFlightSqlProducer implements FlightS
     }
 
     @Override
-    public void setExecutorService(
-            ExecutorService executorService, Integer queue, Integer expireMinute) {
+    public void setExecutorService(ExecutorService executorService, Integer queue,
+            Integer expireMinute) {
         this.executorService = executorService;
-        this.preparedStatementCache =
-                CacheBuilder.newBuilder()
-                        .maximumSize(queue)
-                        .expireAfterWrite(expireMinute, TimeUnit.MINUTES)
-                        .build();
+        this.preparedStatementCache = CacheBuilder.newBuilder().maximumSize(queue)
+                .expireAfterWrite(expireMinute, TimeUnit.MINUTES).build();
     }
 
     @Override
@@ -120,26 +115,20 @@ public class FlightServiceImpl extends BasicFlightSqlProducer implements FlightS
     }
 
     @Override
-    public void getStreamStatement(
-            final TicketStatementQuery ticketStatementQuery,
-            final CallContext context,
-            final ServerStreamListener listener) {
+    public void getStreamStatement(final TicketStatementQuery ticketStatementQuery,
+            final CallContext context, final ServerStreamListener listener) {
         final ByteString handle = ticketStatementQuery.getStatementHandle();
         log.info("getStreamStatement {} ", handle);
         executeQuery(handle, listener);
     }
 
     @Override
-    public FlightInfo getFlightInfoStatement(
-            final CommandStatementQuery request,
-            final CallContext context,
-            final FlightDescriptor descriptor) {
+    public FlightInfo getFlightInfoStatement(final CommandStatementQuery request,
+            final CallContext context, final FlightDescriptor descriptor) {
         try {
             ByteString preparedStatementHandle = addPrepared(context, request.getQuery());
-            TicketStatementQuery ticket =
-                    TicketStatementQuery.newBuilder()
-                            .setStatementHandle(preparedStatementHandle)
-                            .build();
+            TicketStatementQuery ticket = TicketStatementQuery.newBuilder()
+                    .setStatementHandle(preparedStatementHandle).build();
             return getFlightInfoForSchema(ticket, descriptor, null);
         } catch (Exception e) {
             log.error("getFlightInfoStatement error {}", e);
@@ -148,10 +137,8 @@ public class FlightServiceImpl extends BasicFlightSqlProducer implements FlightS
     }
 
     @Override
-    public void getStreamPreparedStatement(
-            final CommandPreparedStatementQuery command,
-            final CallContext context,
-            final ServerStreamListener listener) {
+    public void getStreamPreparedStatement(final CommandPreparedStatementQuery command,
+            final CallContext context, final ServerStreamListener listener) {
         log.info("getStreamPreparedStatement {}", command.getPreparedStatementHandle());
         executeQuery(command.getPreparedStatementHandle(), listener);
     }
@@ -160,117 +147,88 @@ public class FlightServiceImpl extends BasicFlightSqlProducer implements FlightS
         SemanticQueryReq semanticQueryReq = preparedStatementCache.getIfPresent(hander);
         if (Objects.isNull(semanticQueryReq)) {
             listener.error(
-                    CallStatus.INTERNAL
-                            .withDescription("Failed to get prepared statement: empty")
+                    CallStatus.INTERNAL.withDescription("Failed to get prepared statement: empty")
                             .toRuntimeException());
             log.error("getStreamPreparedStatement error {}", hander);
             listener.completed();
             return;
         }
-        executorService.submit(
-                () -> {
-                    BufferAllocator rootAllocator = new RootAllocator();
-                    try {
-                        Optional<Param> authOpt =
-                                semanticQueryReq.getParams().stream()
-                                        .filter(
-                                                p ->
-                                                        p.getName()
-                                                                .equals(
-                                                                        authenticationConfig
-                                                                                .getTokenHttpHeaderKey()))
-                                        .findFirst();
-                        if (authOpt.isPresent()) {
-                            User user =
-                                    UserHolder.findUser(
-                                            authOpt.get().getValue(),
-                                            authenticationConfig.getTokenHttpHeaderAppKey());
-                            SemanticQueryResp resp =
-                                    queryService.queryByReq(semanticQueryReq, user);
-                            ResultSet resultSet =
-                                    semanticQueryRespToResultSet(
-                                            resp, semanticQueryReq.getDataSetId());
-                            final Schema schema =
-                                    jdbcToArrowSchema(resultSet.getMetaData(), defaultCalendar);
-                            try (final VectorSchemaRoot vectorSchemaRoot =
-                                    VectorSchemaRoot.create(schema, rootAllocator)) {
-                                final VectorLoader loader = new VectorLoader(vectorSchemaRoot);
-                                listener.start(vectorSchemaRoot);
-                                final ArrowVectorIterator iterator =
-                                        sqlToArrowVectorIterator(resultSet, rootAllocator);
-                                while (iterator.hasNext()) {
-                                    final VectorSchemaRoot batch = iterator.next();
-                                    if (batch.getRowCount() == 0) {
-                                        break;
-                                    }
-                                    final VectorUnloader unloader = new VectorUnloader(batch);
-                                    loader.load(unloader.getRecordBatch());
-                                    listener.putNext();
-                                    vectorSchemaRoot.clear();
-                                }
-
-                                listener.putNext();
+        executorService.submit(() -> {
+            BufferAllocator rootAllocator = new RootAllocator();
+            try {
+                Optional<Param> authOpt = semanticQueryReq.getParams().stream().filter(
+                        p -> p.getName().equals(authenticationConfig.getTokenHttpHeaderKey()))
+                        .findFirst();
+                if (authOpt.isPresent()) {
+                    User user = UserHolder.findUser(authOpt.get().getValue(),
+                            authenticationConfig.getTokenHttpHeaderAppKey());
+                    SemanticQueryResp resp = queryService.queryByReq(semanticQueryReq, user);
+                    ResultSet resultSet =
+                            semanticQueryRespToResultSet(resp, semanticQueryReq.getDataSetId());
+                    final Schema schema =
+                            jdbcToArrowSchema(resultSet.getMetaData(), defaultCalendar);
+                    try (final VectorSchemaRoot vectorSchemaRoot =
+                            VectorSchemaRoot.create(schema, rootAllocator)) {
+                        final VectorLoader loader = new VectorLoader(vectorSchemaRoot);
+                        listener.start(vectorSchemaRoot);
+                        final ArrowVectorIterator iterator =
+                                sqlToArrowVectorIterator(resultSet, rootAllocator);
+                        while (iterator.hasNext()) {
+                            final VectorSchemaRoot batch = iterator.next();
+                            if (batch.getRowCount() == 0) {
+                                break;
                             }
+                            final VectorUnloader unloader = new VectorUnloader(batch);
+                            loader.load(unloader.getRecordBatch());
+                            listener.putNext();
+                            vectorSchemaRoot.clear();
                         }
-                    } catch (Exception e) {
-                        listener.error(
-                                CallStatus.INTERNAL
-                                        .withDescription(
-                                                String.format(
-                                                        "Failed to get exec statement %s",
-                                                        e.getMessage()))
-                                        .toRuntimeException());
-                        log.error("getStreamPreparedStatement error {}", hander);
-                    } finally {
-                        preparedStatementCache.invalidate(hander);
-                        listener.completed();
-                        rootAllocator.close();
+
+                        listener.putNext();
                     }
-                });
+                }
+            } catch (Exception e) {
+                listener.error(CallStatus.INTERNAL
+                        .withDescription(
+                                String.format("Failed to get exec statement %s", e.getMessage()))
+                        .toRuntimeException());
+                log.error("getStreamPreparedStatement error {}", hander);
+            } finally {
+                preparedStatementCache.invalidate(hander);
+                listener.completed();
+                rootAllocator.close();
+            }
+        });
     }
 
     @Override
-    public void closePreparedStatement(
-            final ActionClosePreparedStatementRequest request,
-            final CallContext context,
-            final StreamListener<Result> listener) {
+    public void closePreparedStatement(final ActionClosePreparedStatementRequest request,
+            final CallContext context, final StreamListener<Result> listener) {
         log.info("closePreparedStatement {}", request.getPreparedStatementHandle());
         listener.onCompleted();
     }
 
     @Override
-    public FlightInfo getFlightInfoPreparedStatement(
-            final CommandPreparedStatementQuery command,
-            final CallContext context,
-            final FlightDescriptor descriptor) {
+    public FlightInfo getFlightInfoPreparedStatement(final CommandPreparedStatementQuery command,
+            final CallContext context, final FlightDescriptor descriptor) {
         return getFlightInfoForSchema(command, descriptor, null);
     }
 
     @Override
-    public void createPreparedStatement(
-            final ActionCreatePreparedStatementRequest request,
-            final CallContext context,
-            final StreamListener<Result> listener) {
+    public void createPreparedStatement(final ActionCreatePreparedStatementRequest request,
+            final CallContext context, final StreamListener<Result> listener) {
         prepared(request, context, listener);
     }
 
     private ByteString addPrepared(final CallContext context, String query) throws Exception {
-        if (Arrays.asList(dataSetIdHeaderKey, nameHeaderKey, passwordHeaderKey).stream()
-                .anyMatch(
-                        h ->
-                                !context.getMiddleware(FlightConstants.HEADER_KEY)
-                                        .headers()
-                                        .containsKey(h))) {
-            throw new Exception(
-                    String.format(
-                            "Failed to create prepared statement: HeaderCallOption miss %s %s %s",
-                            dataSetIdHeaderKey, nameHeaderKey, passwordHeaderKey));
+        if (Arrays.asList(dataSetIdHeaderKey, nameHeaderKey, passwordHeaderKey).stream().anyMatch(
+                h -> !context.getMiddleware(FlightConstants.HEADER_KEY).headers().containsKey(h))) {
+            throw new Exception(String.format(
+                    "Failed to create prepared statement: HeaderCallOption miss %s %s %s",
+                    dataSetIdHeaderKey, nameHeaderKey, passwordHeaderKey));
         }
-        Long dataSetId =
-                Long.valueOf(
-                        context.getMiddleware(FlightConstants.HEADER_KEY)
-                                .headers()
-                                .get(dataSetIdHeaderKey));
+        Long dataSetId = Long.valueOf(context.getMiddleware(FlightConstants.HEADER_KEY).headers()
+                .get(dataSetIdHeaderKey));
         if (StringUtils.isBlank(query)) {
             throw new Exception("Failed to create prepared statement: query is empty");
         }
@@ -287,34 +245,28 @@ public class FlightServiceImpl extends BasicFlightSqlProducer implements FlightS
             querySqlReq.setParams(
                     Arrays.asList(new Param(authenticationConfig.getTokenHttpHeaderKey(), auth)));
             preparedStatementCache.put(preparedStatementHandle, querySqlReq);
-            log.info(
-                    "createPreparedStatement {} {} {} ", preparedStatementHandle, dataSetId, query);
+            log.info("createPreparedStatement {} {} {} ", preparedStatementHandle, dataSetId,
+                    query);
             return preparedStatementHandle;
         } catch (Exception e) {
             throw e;
         }
     }
 
-    private void prepared(
-            final ActionCreatePreparedStatementRequest request,
-            final CallContext context,
-            final StreamListener<Result> listener) {
+    private void prepared(final ActionCreatePreparedStatementRequest request,
+            final CallContext context, final StreamListener<Result> listener) {
         try {
             ByteString preparedStatementHandle = addPrepared(context, request.getQuery());
-            final ActionCreatePreparedStatementResult result =
-                    ActionCreatePreparedStatementResult.newBuilder()
-                            .setDatasetSchema(ByteString.EMPTY)
-                            .setParameterSchema(ByteString.empty())
-                            .setPreparedStatementHandle(preparedStatementHandle)
-                            .build();
+            final ActionCreatePreparedStatementResult result = ActionCreatePreparedStatementResult
+                    .newBuilder().setDatasetSchema(ByteString.EMPTY)
+                    .setParameterSchema(ByteString.empty())
+                    .setPreparedStatementHandle(preparedStatementHandle).build();
             listener.onNext(new Result(pack(result).toByteArray()));
         } catch (Exception e) {
             listener.onError(
                     CallStatus.INTERNAL
-                            .withDescription(
-                                    String.format(
-                                            "Failed to create prepared statement: %s",
-                                            e.getMessage()))
+                            .withDescription(String.format(
+                                    "Failed to create prepared statement: %s", e.getMessage()))
                             .toRuntimeException());
         } finally {
             listener.onCompleted();
@@ -322,13 +274,13 @@ public class FlightServiceImpl extends BasicFlightSqlProducer implements FlightS
     }
 
     @Override
-    protected <T extends Message> List<FlightEndpoint> determineEndpoints(
-            T t, FlightDescriptor flightDescriptor, Schema schema) {
+    protected <T extends Message> List<FlightEndpoint> determineEndpoints(T t,
+            FlightDescriptor flightDescriptor, Schema schema) {
         throw CallStatus.UNIMPLEMENTED.withDescription("Not implemented.").toRuntimeException();
     }
 
-    private <T extends Message> FlightInfo getFlightInfoForSchema(
-            final T request, final FlightDescriptor descriptor, final Schema schema) {
+    private <T extends Message> FlightInfo getFlightInfoForSchema(final T request,
+            final FlightDescriptor descriptor, final Schema schema) {
         final Ticket ticket = new Ticket(pack(request).toByteArray());
         Location listenLocation = Location.forGrpcInsecure(host, port);
         final List<FlightEndpoint> endpoints =
@@ -359,13 +311,9 @@ public class FlightServiceImpl extends BasicFlightSqlProducer implements FlightS
         for (int i = 1; i <= columnNum; i++) {
             String columnName = resp.getColumns().get(i - 1).getNameEn();
             rowSetMetaData.setColumnName(i, columnName);
-            Optional<Map<String, Object>> valOpt =
-                    resp.getResultList().stream()
-                            .filter(
-                                    r ->
-                                            r.containsKey(columnName)
-                                                    && Objects.nonNull(r.get(columnName)))
-                            .findFirst();
+            Optional<Map<String, Object>> valOpt = resp.getResultList().stream()
+                    .filter(r -> r.containsKey(columnName) && Objects.nonNull(r.get(columnName)))
+                    .findFirst();
             if (valOpt.isPresent()) {
                 int type = FlightUtils.resolveType(valOpt.get());
                 rowSetMetaData.setColumnType(i, type);

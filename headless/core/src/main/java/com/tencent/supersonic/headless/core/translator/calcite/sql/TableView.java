@@ -39,29 +39,16 @@ public class TableView {
         if (filter.size() > 0) {
             filterNodeList = new SqlNodeList(filter, SqlParserPos.ZERO);
         }
-        return new SqlSelect(
-                SqlParserPos.ZERO,
-                null,
-                new SqlNodeList(measure, SqlParserPos.ZERO),
-                table,
-                filterNodeList,
-                dimensionNodeList,
-                null,
-                null,
-                null,
-                order,
-                offset,
-                fetch,
+        return new SqlSelect(SqlParserPos.ZERO, null, new SqlNodeList(measure, SqlParserPos.ZERO),
+                table, filterNodeList, dimensionNodeList, null, null, null, order, offset, fetch,
                 null);
     }
 
     private List<SqlNode> getGroup(List<SqlNode> sqlNodeList) {
         return sqlNodeList.stream()
-                .map(
-                        s ->
-                                (s.getKind().equals(SqlKind.AS)
-                                        ? ((SqlBasicCall) s).getOperandList().get(0)
-                                        : s))
+                .map(s -> (s.getKind().equals(SqlKind.AS)
+                        ? ((SqlBasicCall) s).getOperandList().get(0)
+                        : s))
                 .collect(Collectors.toList());
     }
 }

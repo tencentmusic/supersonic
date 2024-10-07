@@ -48,13 +48,13 @@ const DomainManagerTab: React.FC<Props> = ({
   const tabItem = [
     {
       label: '数据集管理',
-      key: 'dataSetManage',
+      key: 'overview',
       hidden: !!domainData?.parentId,
       children: <View dataSetList={dataSetList} />,
     },
     {
       label: '模型管理',
-      key: 'overview',
+      key: 'modelManage',
       children:
         showModelType === 'list' ? (
           <OverView

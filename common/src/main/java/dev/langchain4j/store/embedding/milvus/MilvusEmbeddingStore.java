@@ -58,27 +58,13 @@ public class MilvusEmbeddingStore implements EmbeddingStore<TextSegment> {
     private final boolean retrieveEmbeddingsOnSearch;
     private final boolean autoFlushOnInsert;
 
-    public MilvusEmbeddingStore(
-            String host,
-            Integer port,
-            String collectionName,
-            Integer dimension,
-            IndexType indexType,
-            MetricType metricType,
-            String uri,
-            String token,
-            String username,
-            String password,
-            ConsistencyLevelEnum consistencyLevel,
-            Boolean retrieveEmbeddingsOnSearch,
-            Boolean autoFlushOnInsert,
-            String databaseName) {
+    public MilvusEmbeddingStore(String host, Integer port, String collectionName, Integer dimension,
+            IndexType indexType, MetricType metricType, String uri, String token, String username,
+            String password, ConsistencyLevelEnum consistencyLevel,
+            Boolean retrieveEmbeddingsOnSearch, Boolean autoFlushOnInsert, String databaseName) {
         ConnectParam.Builder connectBuilder =
-                ConnectParam.newBuilder()
-                        .withHost(getOrDefault(host, "localhost"))
-                        .withPort(getOrDefault(port, 19530))
-                        .withUri(uri)
-                        .withToken(token)
+                ConnectParam.newBuilder().withHost(getOrDefault(host, "localhost"))
+                        .withPort(getOrDefault(port, 19530)).withUri(uri).withToken(token)
                         .withAuthorization(getOrDefault(username, ""), getOrDefault(password, ""));
 
         if (databaseName != null) {
@@ -93,12 +79,9 @@ public class MilvusEmbeddingStore implements EmbeddingStore<TextSegment> {
         this.autoFlushOnInsert = getOrDefault(autoFlushOnInsert, false);
 
         if (!hasCollection(this.milvusClient, this.collectionName)) {
-            createCollection(
-                    this.milvusClient, this.collectionName, ensureNotNull(dimension, "dimension"));
-            createIndex(
-                    this.milvusClient,
-                    this.collectionName,
-                    getOrDefault(indexType, FLAT),
+            createCollection(this.milvusClient, this.collectionName,
+                    ensureNotNull(dimension, "dimension"));
+            createIndex(this.milvusClient, this.collectionName, getOrDefault(indexType, FLAT),
                     this.metricType);
         }
 
@@ -145,49 +128,36 @@ public class MilvusEmbeddingStore implements EmbeddingStore<TextSegment> {
     public EmbeddingSearchResult<TextSegment> search(
             EmbeddingSearchRequest embeddingSearchRequest) {
 
-        SearchParam searchParam =
-                buildSearchRequest(
-                        collectionName,
-                        embeddingSearchRequest.queryEmbedding().vectorAsList(),
-                        embeddingSearchRequest.filter(),
-                        embeddingSearchRequest.maxResults(),
-                        metricType,
-                        consistencyLevel);
+        SearchParam searchParam = buildSearchRequest(collectionName,
+                embeddingSearchRequest.queryEmbedding().vectorAsList(),
+                embeddingSearchRequest.filter(), embeddingSearchRequest.maxResults(), metricType,
+                consistencyLevel);
 
         SearchResultsWrapper resultsWrapper =
                 CollectionOperationsExecutor.search(milvusClient, searchParam);
 
-        List<EmbeddingMatch<TextSegment>> matches =
-                toEmbeddingMatches(
-                        milvusClient,
-                        resultsWrapper,
-                        collectionName,
-                        consistencyLevel,
-                        retrieveEmbeddingsOnSearch);
+        List<EmbeddingMatch<TextSegment>> matches = toEmbeddingMatches(milvusClient, resultsWrapper,
+                collectionName, consistencyLevel, retrieveEmbeddingsOnSearch);
 
         List<EmbeddingMatch<TextSegment>> result =
-                matches.stream()
-                        .filter(match -> match.score() >= embeddingSearchRequest.minScore())
+                matches.stream().filter(match -> match.score() >= embeddingSearchRequest.minScore())
                         .collect(toList());
 
         return new EmbeddingSearchResult<>(result);
     }
 
     private void addInternal(String id, Embedding embedding, TextSegment textSegment) {
-        addAllInternal(
-                singletonList(id),
-                singletonList(embedding),
+        addAllInternal(singletonList(id), singletonList(embedding),
                 textSegment == null ? null : singletonList(textSegment));
     }
 
-    private void addAllInternal(
-            List<String> ids, List<Embedding> embeddings, List<TextSegment> textSegments) {
+    private void addAllInternal(List<String> ids, List<Embedding> embeddings,
+            List<TextSegment> textSegments) {
         List<InsertParam.Field> fields = new ArrayList<>();
         fields.add(new InsertParam.Field(ID_FIELD_NAME, ids));
         fields.add(new InsertParam.Field(TEXT_FIELD_NAME, toScalars(textSegments, ids.size())));
-        fields.add(
-                new InsertParam.Field(
-                        METADATA_FIELD_NAME, toMetadataJsons(textSegments, ids.size())));
+        fields.add(new InsertParam.Field(METADATA_FIELD_NAME,
+                toMetadataJsons(textSegments, ids.size())));
         fields.add(new InsertParam.Field(VECTOR_FIELD_NAME, toVectors(embeddings)));
 
         insert(this.milvusClient, this.collectionName, fields);
@@ -199,22 +169,22 @@ public class MilvusEmbeddingStore implements EmbeddingStore<TextSegment> {
     /**
      * Removes a single embedding from the store by ID.
      *
-     * <p>CAUTION
+     * <p>
+     * CAUTION
      *
      * <ul>
-     *   <li>Deleted entities can still be retrieved immediately after the deletion if the
-     *       consistency level is set lower than {@code Strong}
-     *   <li>Entities deleted beyond the pre-specified span of time for Time Travel cannot be
-     *       retrieved again.
-     *   <li>Frequent deletion operations will impact the system performance.
-     *   <li>Before deleting entities by comlpex boolean expressions, make sure the collection has
-     *       been loaded.
-     *   <li>Deleting entities by complex boolean expressions is not an atomic operation. Therefore,
-     *       if it fails halfway through, some data may still be deleted.
-     *   <li>Deleting entities by complex boolean expressions is supported only when the consistency
-     *       is set to Bounded. For details, <a
-     *       href="https://milvus.io/docs/v2.3.x/consistency.md#Consistency-levels">see
-     *       Consistency</a>
+     * <li>Deleted entities can still be retrieved immediately after the deletion if the consistency
+     * level is set lower than {@code Strong}
+     * <li>Entities deleted beyond the pre-specified span of time for Time Travel cannot be
+     * retrieved again.
+     * <li>Frequent deletion operations will impact the system performance.
+     * <li>Before deleting entities by comlpex boolean expressions, make sure the collection has
+     * been loaded.
+     * <li>Deleting entities by complex boolean expressions is not an atomic operation. Therefore,
+     * if it fails halfway through, some data may still be deleted.
+     * <li>Deleting entities by complex boolean expressions is supported only when the consistency
+     * is set to Bounded. For details,
+     * <a href="https://milvus.io/docs/v2.3.x/consistency.md#Consistency-levels">see Consistency</a>
      * </ul>
      *
      * @param ids A collection of unique IDs of the embeddings to be removed.
@@ -223,36 +193,34 @@ public class MilvusEmbeddingStore implements EmbeddingStore<TextSegment> {
     @Override
     public void removeAll(Collection<String> ids) {
         ensureNotEmpty(ids, "ids");
-        removeForVector(
-                this.milvusClient,
-                this.collectionName,
+        removeForVector(this.milvusClient, this.collectionName,
                 format("%s in %s", ID_FIELD_NAME, formatValues(ids)));
     }
 
     /**
      * Removes all embeddings that match the specified {@link Filter} from the store.
      *
-     * <p>CAUTION
+     * <p>
+     * CAUTION
      *
      * <ul>
-     *   <li>Deleted entities can still be retrieved immediately after the deletion if the
-     *       consistency level is set lower than {@code Strong}
-     *   <li>Entities deleted beyond the pre-specified span of time for Time Travel cannot be
-     *       retrieved again.
-     *   <li>Frequent deletion operations will impact the system performance.
-     *   <li>Before deleting entities by comlpex boolean expressions, make sure the collection has
-     *       been loaded.
-     *   <li>Deleting entities by complex boolean expressions is not an atomic operation. Therefore,
-     *       if it fails halfway through, some data may still be deleted.
-     *   <li>Deleting entities by complex boolean expressions is supported only when the consistency
-     *       is set to Bounded. For details, <a
-     *       href="https://milvus.io/docs/v2.3.x/consistency.md#Consistency-levels">see
-     *       Consistency</a>
+     * <li>Deleted entities can still be retrieved immediately after the deletion if the consistency
+     * level is set lower than {@code Strong}
+     * <li>Entities deleted beyond the pre-specified span of time for Time Travel cannot be
+     * retrieved again.
+     * <li>Frequent deletion operations will impact the system performance.
+     * <li>Before deleting entities by comlpex boolean expressions, make sure the collection has
+     * been loaded.
+     * <li>Deleting entities by complex boolean expressions is not an atomic operation. Therefore,
+     * if it fails halfway through, some data may still be deleted.
+     * <li>Deleting entities by complex boolean expressions is supported only when the consistency
+     * is set to Bounded. For details,
+     * <a href="https://milvus.io/docs/v2.3.x/consistency.md#Consistency-levels">see Consistency</a>
      * </ul>
      *
      * @param filter The filter to be applied to the {@link Metadata} of the {@link TextSegment}
-     *     during removal. Only embeddings whose {@code TextSegment}'s {@code Metadata} match the
-     *     {@code Filter} will be removed.
+     *        during removal. Only embeddings whose {@code TextSegment}'s {@code Metadata} match the
+     *        {@code Filter} will be removed.
      * @since Milvus version 2.3.x
      */
     @Override
@@ -264,30 +232,30 @@ public class MilvusEmbeddingStore implements EmbeddingStore<TextSegment> {
     /**
      * Removes all embeddings from the store.
      *
-     * <p>CAUTION
+     * <p>
+     * CAUTION
      *
      * <ul>
-     *   <li>Deleted entities can still be retrieved immediately after the deletion if the
-     *       consistency level is set lower than {@code Strong}
-     *   <li>Entities deleted beyond the pre-specified span of time for Time Travel cannot be
-     *       retrieved again.
-     *   <li>Frequent deletion operations will impact the system performance.
-     *   <li>Before deleting entities by comlpex boolean expressions, make sure the collection has
-     *       been loaded.
-     *   <li>Deleting entities by complex boolean expressions is not an atomic operation. Therefore,
-     *       if it fails halfway through, some data may still be deleted.
-     *   <li>Deleting entities by complex boolean expressions is supported only when the consistency
-     *       is set to Bounded. For details, <a
-     *       href="https://milvus.io/docs/v2.3.x/consistency.md#Consistency-levels">see
-     *       Consistency</a>
+     * <li>Deleted entities can still be retrieved immediately after the deletion if the consistency
+     * level is set lower than {@code Strong}
+     * <li>Entities deleted beyond the pre-specified span of time for Time Travel cannot be
+     * retrieved again.
+     * <li>Frequent deletion operations will impact the system performance.
+     * <li>Before deleting entities by comlpex boolean expressions, make sure the collection has
+     * been loaded.
+     * <li>Deleting entities by complex boolean expressions is not an atomic operation. Therefore,
+     * if it fails halfway through, some data may still be deleted.
+     * <li>Deleting entities by complex boolean expressions is supported only when the consistency
+     * is set to Bounded. For details,
+     * <a href="https://milvus.io/docs/v2.3.x/consistency.md#Consistency-levels">see Consistency</a>
      * </ul>
      *
      * @since Milvus version 2.3.x
      */
     @Override
     public void removeAll() {
-        removeForVector(
-                this.milvusClient, this.collectionName, format("%s != \"\"", ID_FIELD_NAME));
+        removeForVector(this.milvusClient, this.collectionName,
+                format("%s != \"\"", ID_FIELD_NAME));
     }
 
     public static class Builder {
@@ -327,7 +295,7 @@ public class MilvusEmbeddingStore implements EmbeddingStore<TextSegment> {
 
         /**
          * @param collectionName The name of the Milvus collection. If there is no such collection
-         *     yet, it will be created automatically. Default value: "default".
+         *        yet, it will be created automatically. Default value: "default".
          * @return builder
          */
         public Builder collectionName(String collectionName) {
@@ -337,7 +305,7 @@ public class MilvusEmbeddingStore implements EmbeddingStore<TextSegment> {
 
         /**
          * @param dimension The dimension of the embedding vector. (e.g. 384) Mandatory if a new
-         *     collection should be created.
+         *        collection should be created.
          * @return builder
          */
         public Builder dimension(Integer dimension) {
@@ -356,7 +324,7 @@ public class MilvusEmbeddingStore implements EmbeddingStore<TextSegment> {
 
         /**
          * @param metricType The type of the metric used for similarity search. Default value:
-         *     COSINE.
+         *        COSINE.
          * @return builder
          */
         public Builder metricType(MetricType metricType) {
@@ -366,7 +334,7 @@ public class MilvusEmbeddingStore implements EmbeddingStore<TextSegment> {
 
         /**
          * @param uri The URI of the managed Milvus instance. (e.g.
-         *     "https://xxx.api.gcp-us-west1.zillizcloud.com")
+         *        "https://xxx.api.gcp-us-west1.zillizcloud.com")
          * @return builder
          */
         public Builder uri(String uri) {
@@ -384,8 +352,8 @@ public class MilvusEmbeddingStore implements EmbeddingStore<TextSegment> {
         }
 
         /**
-         * @param username The username. See details <a
-         *     href="https://milvus.io/docs/authenticate.md">here</a>.
+         * @param username The username. See details
+         *        <a href="https://milvus.io/docs/authenticate.md">here</a>.
          * @return builder
          */
         public Builder username(String username) {
@@ -394,8 +362,8 @@ public class MilvusEmbeddingStore implements EmbeddingStore<TextSegment> {
         }
 
         /**
-         * @param password The password. See details <a
-         *     href="https://milvus.io/docs/authenticate.md">here</a>.
+         * @param password The password. See details
+         *        <a href="https://milvus.io/docs/authenticate.md">here</a>.
          * @return builder
          */
         public Builder password(String password) {
@@ -414,10 +382,10 @@ public class MilvusEmbeddingStore implements EmbeddingStore<TextSegment> {
 
         /**
          * @param retrieveEmbeddingsOnSearch During a similarity search in Milvus (when calling
-         *     findRelevant()), the embedding itself is not retrieved. To retrieve the embedding, an
-         *     additional query is required. Setting this parameter to "true" will ensure that
-         *     embedding is retrieved. Be aware that this will impact the performance of the search.
-         *     Default value: false.
+         *        findRelevant()), the embedding itself is not retrieved. To retrieve the embedding,
+         *        an additional query is required. Setting this parameter to "true" will ensure that
+         *        embedding is retrieved. Be aware that this will impact the performance of the
+         *        search. Default value: false.
          * @return builder
          */
         public Builder retrieveEmbeddingsOnSearch(Boolean retrieveEmbeddingsOnSearch) {
@@ -428,8 +396,8 @@ public class MilvusEmbeddingStore implements EmbeddingStore<TextSegment> {
         /**
          * @param autoFlushOnInsert Whether to automatically flush after each insert ({@code
          *     add(...)} or {@code addAll(...)} methods). Default value: false. More info can be
-         *     found <a
-         *     href="https://milvus.io/api-reference/pymilvus/v2.4.x/ORM/Collection/flush.md">here</a>.
+         *        found <a href=
+         *        "https://milvus.io/api-reference/pymilvus/v2.4.x/ORM/Collection/flush.md">here</a>.
          * @return builder
          */
         public Builder autoFlushOnInsert(Boolean autoFlushOnInsert) {
@@ -439,7 +407,7 @@ public class MilvusEmbeddingStore implements EmbeddingStore<TextSegment> {
 
         /**
          * @param databaseName Milvus name of database. Default value: null. In this case default
-         *     Milvus database name will be used.
+         *        Milvus database name will be used.
          * @return builder
          */
         public Builder databaseName(String databaseName) {
@@ -448,21 +416,9 @@ public class MilvusEmbeddingStore implements EmbeddingStore<TextSegment> {
         }
 
         public MilvusEmbeddingStore build() {
-            return new MilvusEmbeddingStore(
-                    host,
-                    port,
-                    collectionName,
-                    dimension,
-                    indexType,
-                    metricType,
-                    uri,
-                    token,
-                    username,
-                    password,
-                    consistencyLevel,
-                    retrieveEmbeddingsOnSearch,
-                    autoFlushOnInsert,
-                    databaseName);
+            return new MilvusEmbeddingStore(host, port, collectionName, dimension, indexType,
+                    metricType, uri, token, username, password, consistencyLevel,
+                    retrieveEmbeddingsOnSearch, autoFlushOnInsert, databaseName);
         }
     }
 }

@@ -6,6 +6,7 @@ import com.tencent.supersonic.chat.server.persistence.mapper.ChatMemoryMapper;
 import com.tencent.supersonic.chat.server.persistence.repository.ChatMemoryRepository;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Repository;
+import org.springframework.util.CollectionUtils;
 
 import java.util.List;
 
@@ -27,6 +28,16 @@ public class ChatMemoryRepositoryImpl implements ChatMemoryRepository {
     @Override
     public void updateMemory(ChatMemoryDO chatMemoryDO) {
         chatMemoryMapper.updateById(chatMemoryDO);
+    }
+
+    @Override
+    public void batchDelete(List<Long> ids) {
+        if (CollectionUtils.isEmpty(ids)) {
+            return;
+        }
+        for (Long id : ids) {
+            chatMemoryMapper.deleteById(id);
+        }
     }
 
     @Override

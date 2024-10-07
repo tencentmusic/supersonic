@@ -8,8 +8,8 @@ import java.util.Map;
 
 public class ResultFormatter {
 
-    public static String transform2TextNew(
-            List<QueryColumn> queryColumns, List<Map<String, Object>> queryResults) {
+    public static String transform2TextNew(List<QueryColumn> queryColumns,
+            List<Map<String, Object>> queryResults) {
         if (CollectionUtils.isEmpty(queryColumns)) {
             return "";
         }

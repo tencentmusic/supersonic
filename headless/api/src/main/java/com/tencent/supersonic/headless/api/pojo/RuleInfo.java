@@ -12,8 +12,6 @@ public class RuleInfo {
 
     public enum Mode {
         /** BEFORE, some days ago RECENT, the last few days EXIST, there was some information */
-        BEFORE,
-        RECENT,
-        EXIST
+        BEFORE, RECENT, EXIST
     }
 }

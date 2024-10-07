@@ -31,8 +31,7 @@ public class AuthController {
     }
 
     @GetMapping("/queryGroup")
-    public List<AuthGroup> queryAuthGroup(
-            @RequestParam("modelId") String modelId,
+    public List<AuthGroup> queryAuthGroup(@RequestParam("modelId") String modelId,
             @RequestParam(value = "groupId", required = false) Integer groupId) {
         return authService.queryAuthGroups(modelId, groupId);
     }
@@ -69,10 +68,8 @@ public class AuthController {
      * @return
      */
     @PostMapping("/queryAuthorizedRes")
-    public AuthorizedResourceResp queryAuthorizedResources(
-            @RequestBody QueryAuthResReq req,
-            HttpServletRequest request,
-            HttpServletResponse response) {
+    public AuthorizedResourceResp queryAuthorizedResources(@RequestBody QueryAuthResReq req,
+            HttpServletRequest request, HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
         return authService.queryAuthorizedResources(req, user);
     }

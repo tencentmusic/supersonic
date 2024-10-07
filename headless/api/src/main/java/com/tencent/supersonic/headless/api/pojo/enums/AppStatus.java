@@ -1,11 +1,7 @@
 package com.tencent.supersonic.headless.api.pojo.enums;
 
 public enum AppStatus {
-    INIT(0),
-    ONLINE(1),
-    OFFLINE(2),
-    DELETED(3),
-    UNKNOWN(4);
+    INIT(0), ONLINE(1), OFFLINE(2), DELETED(3), UNKNOWN(4);
 
     private Integer code;
 

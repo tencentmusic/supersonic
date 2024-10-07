@@ -58,13 +58,9 @@ public class TagMetaServiceImpl implements TagMetaService {
     private final TagObjectService tagObjectService;
     private final DomainService domainService;
 
-    public TagMetaServiceImpl(
-            TagRepository tagRepository,
-            ModelService modelService,
-            CollectService collectService,
-            @Lazy DimensionService dimensionService,
-            @Lazy MetricService metricService,
-            TagObjectService tagObjectService,
+    public TagMetaServiceImpl(TagRepository tagRepository, ModelService modelService,
+            CollectService collectService, @Lazy DimensionService dimensionService,
+            @Lazy MetricService metricService, TagObjectService tagObjectService,
             DomainService domainService) {
         this.tagRepository = tagRepository;
         this.modelService = modelService;
@@ -162,11 +158,8 @@ public class TagMetaServiceImpl implements TagMetaService {
         if (Objects.nonNull(tagMarketPageReq.getTagObjectId())) {
             modelRespList =
                     modelRespList.stream()
-                            .filter(
-                                    modelResp ->
-                                            tagMarketPageReq
-                                                    .getTagObjectId()
-                                                    .equals(modelResp.getTagObjectId()))
+                            .filter(modelResp -> tagMarketPageReq.getTagObjectId()
+                                    .equals(modelResp.getTagObjectId()))
                             .collect(Collectors.toList());
         }
         if (CollectionUtils.isEmpty(modelRespList)) {
@@ -179,15 +172,9 @@ public class TagMetaServiceImpl implements TagMetaService {
         BeanUtils.copyProperties(tagMarketPageReq, tagFilter);
         List<CollectDO> collectList = collectService.getCollectionList(user.getName());
         if (tagMarketPageReq.isHasCollect()) {
-            List<Long> collectIds =
-                    collectList.stream()
-                            .filter(
-                                    collectDO ->
-                                            SchemaElementType.TAG
-                                                    .name()
-                                                    .equalsIgnoreCase(collectDO.getType()))
-                            .map(CollectDO::getCollectId)
-                            .collect(Collectors.toList());
+            List<Long> collectIds = collectList.stream().filter(
+                    collectDO -> SchemaElementType.TAG.name().equalsIgnoreCase(collectDO.getType()))
+                    .map(CollectDO::getCollectId).collect(Collectors.toList());
             if (CollectionUtils.isEmpty(collectIds)) {
                 tagFilter.setIds(Lists.newArrayList(-1L));
             } else {
@@ -217,22 +204,14 @@ public class TagMetaServiceImpl implements TagMetaService {
         if (CollectionUtils.isEmpty(tagObjects)) {
             return;
         }
-        Map<Long, TagObjectResp> tagObjectMap =
-                tagObjects.stream()
-                        .collect(
-                                Collectors.toMap(
-                                        TagObjectResp::getId,
-                                        tagObject -> tagObject,
-                                        (v1, v2) -> v2));
+        Map<Long, TagObjectResp> tagObjectMap = tagObjects.stream().collect(
+                Collectors.toMap(TagObjectResp::getId, tagObject -> tagObject, (v1, v2) -> v2));
         if (CollectionUtils.isNotEmpty(tagRespList)) {
-            tagRespList.stream()
-                    .forEach(
-                            tagResp -> {
-                                if (tagObjectMap.containsKey(tagResp.getTagObjectId())) {
-                                    tagResp.setTagObjectName(
-                                            tagObjectMap.get(tagResp.getTagObjectId()).getName());
-                                }
-                            });
+            tagRespList.stream().forEach(tagResp -> {
+                if (tagObjectMap.containsKey(tagResp.getTagObjectId())) {
+                    tagResp.setTagObjectName(tagObjectMap.get(tagResp.getTagObjectId()).getName());
+                }
+            });
         }
     }
 
@@ -246,20 +225,14 @@ public class TagMetaServiceImpl implements TagMetaService {
     }
 
     private void fillDomainInfo(List<TagResp> tagRespList) {
-        Map<Long, DomainResp> domainMap =
-                domainService.getDomainList().stream()
-                        .collect(
-                                Collectors.toMap(
-                                        DomainResp::getId, domain -> domain, (v1, v2) -> v2));
+        Map<Long, DomainResp> domainMap = domainService.getDomainList().stream()
+                .collect(Collectors.toMap(DomainResp::getId, domain -> domain, (v1, v2) -> v2));
         if (CollectionUtils.isNotEmpty(tagRespList) && Objects.nonNull(domainMap)) {
-            tagRespList.stream()
-                    .forEach(
-                            tagResp -> {
-                                if (domainMap.containsKey(tagResp.getDomainId())) {
-                                    tagResp.setDomainName(
-                                            domainMap.get(tagResp.getDomainId()).getName());
-                                }
-                            });
+            tagRespList.stream().forEach(tagResp -> {
+                if (domainMap.containsKey(tagResp.getDomainId())) {
+                    tagResp.setDomainName(domainMap.get(tagResp.getDomainId()).getName());
+                }
+            });
         }
     }
 
@@ -321,31 +294,21 @@ public class TagMetaServiceImpl implements TagMetaService {
                 tagRespList.stream().map(TagResp::getModelId).collect(Collectors.toList());
         ModelFilter modelFilter = new ModelFilter(false, modelIds);
         Map<Long, ModelResp> modelIdAndRespMap = modelService.getModelMap(modelFilter);
-        tagRespList.stream()
-                .forEach(
-                        tagResp -> {
-                            if (Objects.nonNull(modelIdAndRespMap)
-                                    && modelIdAndRespMap.containsKey(tagResp.getModelId())) {
-                                tagResp.setModelName(
-                                        modelIdAndRespMap.get(tagResp.getModelId()).getName());
-                                tagResp.setDomainId(
-                                        modelIdAndRespMap.get(tagResp.getModelId()).getDomainId());
-                                tagResp.setTagObjectId(
-                                        modelIdAndRespMap
-                                                .get(tagResp.getModelId())
-                                                .getTagObjectId());
-                            }
-                        });
+        tagRespList.stream().forEach(tagResp -> {
+            if (Objects.nonNull(modelIdAndRespMap)
+                    && modelIdAndRespMap.containsKey(tagResp.getModelId())) {
+                tagResp.setModelName(modelIdAndRespMap.get(tagResp.getModelId()).getName());
+                tagResp.setDomainId(modelIdAndRespMap.get(tagResp.getModelId()).getDomainId());
+                tagResp.setTagObjectId(
+                        modelIdAndRespMap.get(tagResp.getModelId()).getTagObjectId());
+            }
+        });
     }
 
     private TagResp fillCollectAndAdminInfo(TagResp tagResp, User user) {
-        List<Long> collectIds =
-                collectService.getCollectionList(user.getName()).stream()
-                        .filter(
-                                collectDO ->
-                                        TypeEnums.TAG.name().equalsIgnoreCase(collectDO.getType()))
-                        .map(CollectDO::getCollectId)
-                        .collect(Collectors.toList());
+        List<Long> collectIds = collectService.getCollectionList(user.getName()).stream()
+                .filter(collectDO -> TypeEnums.TAG.name().equalsIgnoreCase(collectDO.getType()))
+                .map(CollectDO::getCollectId).collect(Collectors.toList());
         if (CollectionUtils.isNotEmpty(collectIds) && collectIds.contains(tagResp.getId())) {
             tagResp.setIsCollect(true);
         } else {
@@ -357,24 +320,17 @@ public class TagMetaServiceImpl implements TagMetaService {
     }
 
     private TagResp fillCollectAndAdminInfo(List<TagResp> tagRespList, User user) {
-        List<Long> collectIds =
-                collectService.getCollectionList(user.getName()).stream()
-                        .filter(
-                                collectDO ->
-                                        TypeEnums.TAG.name().equalsIgnoreCase(collectDO.getType()))
-                        .map(CollectDO::getCollectId)
-                        .collect(Collectors.toList());
+        List<Long> collectIds = collectService.getCollectionList(user.getName()).stream()
+                .filter(collectDO -> TypeEnums.TAG.name().equalsIgnoreCase(collectDO.getType()))
+                .map(CollectDO::getCollectId).collect(Collectors.toList());
 
-        tagRespList.stream()
-                .forEach(
-                        tagResp -> {
-                            if (CollectionUtils.isNotEmpty(collectIds)
-                                    && collectIds.contains(tagResp.getId())) {
-                                tagResp.setIsCollect(true);
-                            } else {
-                                tagResp.setIsCollect(false);
-                            }
-                        });
+        tagRespList.stream().forEach(tagResp -> {
+            if (CollectionUtils.isNotEmpty(collectIds) && collectIds.contains(tagResp.getId())) {
+                tagResp.setIsCollect(true);
+            } else {
+                tagResp.setIsCollect(false);
+            }
+        });
 
         fillAdminRes(tagRespList, user);
         return tagRespList.get(0);
@@ -418,21 +374,17 @@ public class TagMetaServiceImpl implements TagMetaService {
             ModelResp model = modelService.getModel(dimension.getModelId());
             if (Objects.isNull(model.getTagObjectId())) {
                 throw new RuntimeException(
-                        String.format(
-                                "this dimension:%s is not supported to create tag,"
-                                        + " no related tag object",
-                                tagReq.getItemId()));
+                        String.format("this dimension:%s is not supported to create tag,"
+                                + " no related tag object", tagReq.getItemId()));
             }
         }
         if (TagDefineType.METRIC.equals(tagReq.getTagDefineType())) {
             MetricResp metric = metricService.getMetric(tagReq.getItemId());
             ModelResp model = modelService.getModel(metric.getModelId());
             if (Objects.isNull(model.getTagObjectId())) {
-                throw new RuntimeException(
-                        String.format(
-                                "this metric:%s is not supported to create tag,"
-                                        + " no related tag object",
-                                tagReq.getItemId()));
+                throw new RuntimeException(String.format(
+                        "this metric:%s is not supported to create tag," + " no related tag object",
+                        tagReq.getItemId()));
             }
         }
     }
@@ -451,15 +403,11 @@ public class TagMetaServiceImpl implements TagMetaService {
         tagFilter.setItemIds(itemIds);
         Set<Long> dimensionItemSet =
                 getTagDOList(tagFilter).stream().map(TagDO::getItemId).collect(Collectors.toSet());
-        return itemIds.stream()
-                .map(
-                        entry -> {
-                            TagItem tagItem = new TagItem();
-                            tagItem.setIsTag(
-                                    Boolean.compare(dimensionItemSet.contains(entry), false));
-                            tagItem.setItemId(entry);
-                            return tagItem;
-                        })
-                .collect(Collectors.toList());
+        return itemIds.stream().map(entry -> {
+            TagItem tagItem = new TagItem();
+            tagItem.setIsTag(Boolean.compare(dimensionItemSet.contains(entry), false));
+            tagItem.setItemId(entry);
+            return tagItem;
+        }).collect(Collectors.toList());
     }
 }

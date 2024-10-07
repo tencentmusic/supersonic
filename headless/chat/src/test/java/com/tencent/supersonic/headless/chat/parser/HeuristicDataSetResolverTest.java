@@ -25,49 +25,17 @@ public class HeuristicDataSetResolverTest {
         Map<Long, List<SchemaElementMatch>> dataSet2Matches =
                 chatQueryContext.getMapInfo().getDataSetElementMatches();
         List<SchemaElementMatch> matches = Lists.newArrayList();
-        matches.add(
-                SchemaElementMatch.builder()
-                        .element(
-                                SchemaElement.builder()
-                                        .dataSetId(1L)
-                                        .name("超音数")
-                                        .type(SchemaElementType.DATASET)
-                                        .build())
-                        .similarity(1)
-                        .build());
-        matches.add(
-                SchemaElementMatch.builder()
-                        .element(
-                                SchemaElement.builder()
-                                        .dataSetId(1L)
-                                        .name("访问次数")
-                                        .type(SchemaElementType.METRIC)
-                                        .build())
-                        .similarity(0.5)
-                        .build());
+        matches.add(SchemaElementMatch.builder().element(SchemaElement.builder().dataSetId(1L)
+                .name("超音数").type(SchemaElementType.DATASET).build()).similarity(1).build());
+        matches.add(SchemaElementMatch.builder().element(SchemaElement.builder().dataSetId(1L)
+                .name("访问次数").type(SchemaElementType.METRIC).build()).similarity(0.5).build());
         dataSet2Matches.put(1L, matches);
 
         List<SchemaElementMatch> matches2 = Lists.newArrayList();
-        matches2.add(
-                SchemaElementMatch.builder()
-                        .element(
-                                SchemaElement.builder()
-                                        .dataSetId(2L)
-                                        .name("访问用户数")
-                                        .type(SchemaElementType.METRIC)
-                                        .build())
-                        .similarity(1)
-                        .build());
-        matches2.add(
-                SchemaElementMatch.builder()
-                        .element(
-                                SchemaElement.builder()
-                                        .dataSetId(2L)
-                                        .name("用户")
-                                        .type(SchemaElementType.DIMENSION)
-                                        .build())
-                        .similarity(1)
-                        .build());
+        matches2.add(SchemaElementMatch.builder().element(SchemaElement.builder().dataSetId(2L)
+                .name("访问用户数").type(SchemaElementType.METRIC).build()).similarity(1).build());
+        matches2.add(SchemaElementMatch.builder().element(SchemaElement.builder().dataSetId(2L)
+                .name("用户").type(SchemaElementType.DIMENSION).build()).similarity(1).build());
         dataSet2Matches.put(2L, matches2);
 
         Long resolvedDataset = resolver.resolve(chatQueryContext, dataSets);
@@ -81,39 +49,15 @@ public class HeuristicDataSetResolverTest {
         Map<Long, List<SchemaElementMatch>> dataSet2Matches =
                 chatQueryContext.getMapInfo().getDataSetElementMatches();
         List<SchemaElementMatch> matches = Lists.newArrayList();
-        matches.add(
-                SchemaElementMatch.builder()
-                        .element(
-                                SchemaElement.builder()
-                                        .dataSetId(1L)
-                                        .name("访问次数")
-                                        .type(SchemaElementType.METRIC)
-                                        .build())
-                        .similarity(1)
-                        .build());
+        matches.add(SchemaElementMatch.builder().element(SchemaElement.builder().dataSetId(1L)
+                .name("访问次数").type(SchemaElementType.METRIC).build()).similarity(1).build());
         dataSet2Matches.put(1L, matches);
 
         List<SchemaElementMatch> matches2 = Lists.newArrayList();
-        matches2.add(
-                SchemaElementMatch.builder()
-                        .element(
-                                SchemaElement.builder()
-                                        .dataSetId(2L)
-                                        .name("访问用户数")
-                                        .type(SchemaElementType.METRIC)
-                                        .build())
-                        .similarity(0.6)
-                        .build());
-        matches2.add(
-                SchemaElementMatch.builder()
-                        .element(
-                                SchemaElement.builder()
-                                        .dataSetId(2L)
-                                        .name("用户")
-                                        .type(SchemaElementType.DIMENSION)
-                                        .build())
-                        .similarity(1)
-                        .build());
+        matches2.add(SchemaElementMatch.builder().element(SchemaElement.builder().dataSetId(2L)
+                .name("访问用户数").type(SchemaElementType.METRIC).build()).similarity(0.6).build());
+        matches2.add(SchemaElementMatch.builder().element(SchemaElement.builder().dataSetId(2L)
+                .name("用户").type(SchemaElementType.DIMENSION).build()).similarity(1).build());
         dataSet2Matches.put(2L, matches2);
 
         Long resolvedDataset = resolver.resolve(chatQueryContext, dataSets);
@@ -127,49 +71,17 @@ public class HeuristicDataSetResolverTest {
         Map<Long, List<SchemaElementMatch>> dataSet2Matches =
                 chatQueryContext.getMapInfo().getDataSetElementMatches();
         List<SchemaElementMatch> matches = Lists.newArrayList();
-        matches.add(
-                SchemaElementMatch.builder()
-                        .element(
-                                SchemaElement.builder()
-                                        .dataSetId(1L)
-                                        .name("访问次数")
-                                        .type(SchemaElementType.METRIC)
-                                        .build())
-                        .similarity(0.8)
-                        .build());
-        matches.add(
-                SchemaElementMatch.builder()
-                        .element(
-                                SchemaElement.builder()
-                                        .dataSetId(1L)
-                                        .name("部门")
-                                        .type(SchemaElementType.METRIC)
-                                        .build())
-                        .similarity(0.7)
-                        .build());
+        matches.add(SchemaElementMatch.builder().element(SchemaElement.builder().dataSetId(1L)
+                .name("访问次数").type(SchemaElementType.METRIC).build()).similarity(0.8).build());
+        matches.add(SchemaElementMatch.builder().element(SchemaElement.builder().dataSetId(1L)
+                .name("部门").type(SchemaElementType.METRIC).build()).similarity(0.7).build());
         dataSet2Matches.put(1L, matches);
 
         List<SchemaElementMatch> matches2 = Lists.newArrayList();
-        matches2.add(
-                SchemaElementMatch.builder()
-                        .element(
-                                SchemaElement.builder()
-                                        .dataSetId(2L)
-                                        .name("访问用户数")
-                                        .type(SchemaElementType.METRIC)
-                                        .build())
-                        .similarity(0.8)
-                        .build());
-        matches2.add(
-                SchemaElementMatch.builder()
-                        .element(
-                                SchemaElement.builder()
-                                        .dataSetId(2L)
-                                        .name("用户")
-                                        .type(SchemaElementType.DIMENSION)
-                                        .build())
-                        .similarity(1)
-                        .build());
+        matches2.add(SchemaElementMatch.builder().element(SchemaElement.builder().dataSetId(2L)
+                .name("访问用户数").type(SchemaElementType.METRIC).build()).similarity(0.8).build());
+        matches2.add(SchemaElementMatch.builder().element(SchemaElement.builder().dataSetId(2L)
+                .name("用户").type(SchemaElementType.DIMENSION).build()).similarity(1).build());
         dataSet2Matches.put(2L, matches2);
 
         Long resolvedDataset = resolver.resolve(chatQueryContext, dataSets);

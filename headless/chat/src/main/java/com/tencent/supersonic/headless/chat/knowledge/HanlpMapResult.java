@@ -43,8 +43,7 @@ public class HanlpMapResult extends MapResult {
 
     @Override
     public String getMapKey() {
-        return this.getName()
-                + Constants.UNDERLINE
+        return this.getName() + Constants.UNDERLINE
                 + String.join(Constants.UNDERLINE, this.getNatures());
     }
 }

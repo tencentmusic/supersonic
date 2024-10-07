@@ -5,4 +5,5 @@ import com.tencent.supersonic.chat.server.persistence.dataobject.ChatQueryDO;
 import org.apache.ibatis.annotations.Mapper;
 
 @Mapper
-public interface ChatQueryDOMapper extends BaseMapper<ChatQueryDO> {}
+public interface ChatQueryDOMapper extends BaseMapper<ChatQueryDO> {
+}

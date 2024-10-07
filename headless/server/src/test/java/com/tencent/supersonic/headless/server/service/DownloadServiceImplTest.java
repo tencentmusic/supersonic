@@ -35,17 +35,15 @@ class DownloadServiceImplTest {
         return modelSchemaResp;
     }
 
-    private MetricSchemaResp mockMetric(
-            Long id, String bizName, String name, List<Long> drillDownloadDimensions) {
+    private MetricSchemaResp mockMetric(Long id, String bizName, String name,
+            List<Long> drillDownloadDimensions) {
         MetricSchemaResp metricResp = new MetricSchemaResp();
         metricResp.setId(id);
         metricResp.setBizName(bizName);
         metricResp.setName(name);
         RelateDimension relateDimension = new RelateDimension();
-        relateDimension.setDrillDownDimensions(
-                drillDownloadDimensions.stream()
-                        .map(DrillDownDimension::new)
-                        .collect(Collectors.toList()));
+        relateDimension.setDrillDownDimensions(drillDownloadDimensions.stream()
+                .map(DrillDownDimension::new).collect(Collectors.toList()));
         metricResp.setRelateDimension(relateDimension);
         return metricResp;
     }
@@ -93,8 +91,8 @@ class DownloadServiceImplTest {
         return semanticQueryResp;
     }
 
-    private static Map<String, Object> createMap(
-            String sysImpDate, String d1, String d2, String m1) {
+    private static Map<String, Object> createMap(String sysImpDate, String d1, String d2,
+            String m1) {
         Map<String, Object> map = new HashMap<>();
         map.put("sys_imp_date", sysImpDate);
         map.put("user_name", d1);

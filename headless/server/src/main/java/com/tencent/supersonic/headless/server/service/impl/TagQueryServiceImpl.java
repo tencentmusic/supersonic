@@ -52,11 +52,8 @@ public class TagQueryServiceImpl implements TagQueryService {
     private final ModelService modelService;
     private final SqlGenerateUtils sqlGenerateUtils;
 
-    public TagQueryServiceImpl(
-            TagMetaService tagMetaService,
-            SemanticLayerService queryService,
-            ModelService modelService,
-            SqlGenerateUtils sqlGenerateUtils) {
+    public TagQueryServiceImpl(TagMetaService tagMetaService, SemanticLayerService queryService,
+            ModelService modelService, SqlGenerateUtils sqlGenerateUtils) {
         this.tagMetaService = tagMetaService;
         this.queryService = queryService;
         this.modelService = modelService;
@@ -88,9 +85,8 @@ public class TagQueryServiceImpl implements TagQueryService {
     private void checkTag(TagResp tag) throws Exception {
         if (Objects.nonNull(tag)
                 && TagDefineType.METRIC.name().equalsIgnoreCase(tag.getTagDefineType())) {
-            throw new Exception(
-                    "do not support value distribution query for tag (from metric): "
-                            + tag.getBizName());
+            throw new Exception("do not support value distribution query for tag (from metric): "
+                    + tag.getBizName());
         }
     }
 
@@ -121,16 +117,12 @@ public class TagQueryServiceImpl implements TagQueryService {
         return LocalDate.now().plusDays(-dayBefore).format(formatter);
     }
 
-    private String queryTagDateFromDbBySql(
-            Dim dim, TagResp tag, ItemValueReq itemValueReq, User user) {
+    private String queryTagDateFromDbBySql(Dim dim, TagResp tag, ItemValueReq itemValueReq,
+            User user) {
 
         String sqlPattern = "select max(%s)  as %s from tbl where %s is not null";
-        String sql =
-                String.format(
-                        sqlPattern,
-                        TimeDimensionEnum.DAY.getName(),
-                        maxDateAlias,
-                        tag.getBizName());
+        String sql = String.format(sqlPattern, TimeDimensionEnum.DAY.getName(), maxDateAlias,
+                tag.getBizName());
 
         // 添加时间过滤信息
         log.info("[queryTagDateFromDbBySql] calculate the maximum time start");
@@ -143,22 +135,13 @@ public class TagQueryServiceImpl implements TagQueryService {
                     if (StringUtils.isEmpty(dateFormat)) {
                         dateFormat = itemValueDateFormat;
                     }
-                    String start =
-                            LocalDate.now()
-                                    .minusDays(itemValueReq.getDateConf().getUnit())
-                                    .format(DateTimeFormatter.ofPattern(dateFormat));
-                    String end =
-                            LocalDate.now()
-                                    .minusDays(0)
-                                    .format(DateTimeFormatter.ofPattern(dateFormat));
-                    sql =
-                            sql
-                                    + String.format(
-                                            " and ( %s > '%s' and %s <= '%s' )",
-                                            TimeDimensionEnum.DAY.getName(),
-                                            start,
-                                            TimeDimensionEnum.DAY.getName(),
-                                            end);
+                    String start = LocalDate.now().minusDays(itemValueReq.getDateConf().getUnit())
+                            .format(DateTimeFormatter.ofPattern(dateFormat));
+                    String end = LocalDate.now().minusDays(0)
+                            .format(DateTimeFormatter.ofPattern(dateFormat));
+                    sql = sql + String.format(" and ( %s > '%s' and %s <= '%s' )",
+                            TimeDimensionEnum.DAY.getName(), start, TimeDimensionEnum.DAY.getName(),
+                            end);
                 }
             }
         }
@@ -219,42 +202,27 @@ public class TagQueryServiceImpl implements TagQueryService {
         return " and " + dateWhereClause;
     }
 
-    private void fillTagValueInfo(
-            ItemValueResp itemValueResp, SemanticQueryResp semanticQueryResp, Long totalCount) {
+    private void fillTagValueInfo(ItemValueResp itemValueResp, SemanticQueryResp semanticQueryResp,
+            Long totalCount) {
         List<ValueDistribution> valueDistributionList = new ArrayList<>();
         List<Map<String, Object>> resultList = semanticQueryResp.getResultList();
         if (!CollectionUtils.isEmpty(resultList)) {
-            resultList.stream()
-                    .forEach(
-                            line -> {
-                                Object tagValue = line.get(itemValueResp.getBizName());
-                                Long tagValueCount =
-                                        Long.parseLong(line.get(tagValueAlias).toString());
-                                valueDistributionList.add(
-                                        ValueDistribution.builder()
-                                                .totalCount(totalCount)
-                                                .valueMap(tagValue)
-                                                .valueCount(tagValueCount)
-                                                .ratio(1.0 * tagValueCount / totalCount)
-                                                .build());
-                            });
+            resultList.stream().forEach(line -> {
+                Object tagValue = line.get(itemValueResp.getBizName());
+                Long tagValueCount = Long.parseLong(line.get(tagValueAlias).toString());
+                valueDistributionList.add(ValueDistribution.builder().totalCount(totalCount)
+                        .valueMap(tagValue).valueCount(tagValueCount)
+                        .ratio(1.0 * tagValueCount / totalCount).build());
+            });
         }
         itemValueResp.setValueDistributionList(valueDistributionList);
     }
 
     private QuerySqlReq generateReq(TagResp tag, ItemValueReq itemValueReq) {
-        String sqlPattern =
-                "select %s, count(1)  as %s from tbl where %s is not null %s "
-                        + "group by %s order by %s desc";
-        String sql =
-                String.format(
-                        sqlPattern,
-                        tag.getBizName(),
-                        tagValueAlias,
-                        tag.getBizName(),
-                        getDateFilter(itemValueReq),
-                        tag.getBizName(),
-                        tag.getBizName());
+        String sqlPattern = "select %s, count(1)  as %s from tbl where %s is not null %s "
+                + "group by %s order by %s desc";
+        String sql = String.format(sqlPattern, tag.getBizName(), tagValueAlias, tag.getBizName(),
+                getDateFilter(itemValueReq), tag.getBizName(), tag.getBizName());
 
         Set<Long> modelIds = new HashSet<>();
         modelIds.add(tag.getModelId());

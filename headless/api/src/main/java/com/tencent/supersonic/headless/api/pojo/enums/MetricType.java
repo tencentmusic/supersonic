@@ -7,8 +7,7 @@ import java.util.List;
 import java.util.Objects;
 
 public enum MetricType {
-    ATOMIC,
-    DERIVED;
+    ATOMIC, DERIVED;
 
     public static MetricType of(String src) {
         for (MetricType metricType : MetricType.values()) {
@@ -24,8 +23,8 @@ public enum MetricType {
         return Objects.nonNull(metricType) && metricType.equals(DERIVED);
     }
 
-    public static Boolean isDerived(
-            MetricDefineType metricDefineType, MetricDefineByMeasureParams typeParams) {
+    public static Boolean isDerived(MetricDefineType metricDefineType,
+            MetricDefineByMeasureParams typeParams) {
         if (MetricDefineType.METRIC.equals(metricDefineType)) {
             return true;
         }

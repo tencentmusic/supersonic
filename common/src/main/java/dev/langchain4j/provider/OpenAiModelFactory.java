@@ -21,29 +21,22 @@ public class OpenAiModelFactory implements ModelFactory, InitializingBean {
 
     @Override
     public ChatLanguageModel createChatModel(ChatModelConfig modelConfig) {
-        return OpenAiChatModel.builder()
-                .baseUrl(modelConfig.getBaseUrl())
-                .modelName(modelConfig.getModelName())
-                .apiKey(modelConfig.keyDecrypt())
-                .temperature(modelConfig.getTemperature())
-                .topP(modelConfig.getTopP())
+        return OpenAiChatModel.builder().baseUrl(modelConfig.getBaseUrl())
+                .modelName(modelConfig.getModelName()).apiKey(modelConfig.keyDecrypt())
+                .temperature(modelConfig.getTemperature()).topP(modelConfig.getTopP())
                 .maxRetries(modelConfig.getMaxRetries())
                 .timeout(Duration.ofSeconds(modelConfig.getTimeOut()))
                 .logRequests(modelConfig.getLogRequests())
-                .logResponses(modelConfig.getLogResponses())
-                .build();
+                .logResponses(modelConfig.getLogResponses()).build();
     }
 
     @Override
     public EmbeddingModel createEmbeddingModel(EmbeddingModelConfig embeddingModel) {
-        return OpenAiEmbeddingModel.builder()
-                .baseUrl(embeddingModel.getBaseUrl())
-                .apiKey(embeddingModel.getApiKey())
-                .modelName(embeddingModel.getModelName())
+        return OpenAiEmbeddingModel.builder().baseUrl(embeddingModel.getBaseUrl())
+                .apiKey(embeddingModel.getApiKey()).modelName(embeddingModel.getModelName())
                 .maxRetries(embeddingModel.getMaxRetries())
                 .logRequests(embeddingModel.getLogRequests())
-                .logResponses(embeddingModel.getLogResponses())
-                .build();
+                .logResponses(embeddingModel.getLogResponses()).build();
     }
 
     @Override

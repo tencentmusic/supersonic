@@ -18,8 +18,8 @@ public class UserStrategyFactory {
 
     private AuthenticationConfig authenticationConfig;
 
-    public UserStrategyFactory(
-            AuthenticationConfig authenticationConfig, List<UserStrategy> userStrategyList) {
+    public UserStrategyFactory(AuthenticationConfig authenticationConfig,
+            List<UserStrategy> userStrategyList) {
         this.authenticationConfig = authenticationConfig;
         this.userStrategyList = userStrategyList;
     }

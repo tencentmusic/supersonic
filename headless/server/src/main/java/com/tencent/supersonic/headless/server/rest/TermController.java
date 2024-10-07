@@ -25,12 +25,11 @@ import java.util.List;
 @RequestMapping("/api/semantic/term")
 public class TermController {
 
-    @Autowired private TermService termService;
+    @Autowired
+    private TermService termService;
 
     @PostMapping("/saveOrUpdate")
-    public boolean saveOrUpdate(
-            @RequestBody TermReq termReq,
-            HttpServletRequest request,
+    public boolean saveOrUpdate(@RequestBody TermReq termReq, HttpServletRequest request,
             HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
         termService.saveOrUpdate(termReq, user);

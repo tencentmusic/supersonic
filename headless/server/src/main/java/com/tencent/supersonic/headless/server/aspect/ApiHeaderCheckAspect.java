@@ -30,7 +30,8 @@ public class ApiHeaderCheckAspect {
 
     private static final String SIGNATURE = "signature";
 
-    @Autowired private AppService appService;
+    @Autowired
+    private AppService appService;
 
     @Pointcut("@annotation(com.tencent.supersonic.headless.server.annotation.ApiHeaderCheck)")
     private void apiPermissionCheck() {}
@@ -63,12 +64,8 @@ public class ApiHeaderCheckAspect {
         if (!AppStatus.ONLINE.equals(appDetailResp.getAppStatus())) {
             throw new InvalidArgumentException("该应用暂时为非在线状态");
         }
-        Pair<Boolean, String> checkResult =
-                SignatureUtils.isValidSignature(
-                        appId,
-                        appDetailResp.getAppSecret(),
-                        Long.parseLong(timestampStr),
-                        signature);
+        Pair<Boolean, String> checkResult = SignatureUtils.isValidSignature(appId,
+                appDetailResp.getAppSecret(), Long.parseLong(timestampStr), signature);
         if (!checkResult.first) {
             throw new InvalidArgumentException(checkResult.second);
         }

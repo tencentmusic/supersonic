@@ -19,27 +19,20 @@ public class LocalAiModelFactory implements ModelFactory, InitializingBean {
 
     @Override
     public ChatLanguageModel createChatModel(ChatModelConfig modelConfig) {
-        return LocalAiChatModel.builder()
-                .baseUrl(modelConfig.getBaseUrl())
-                .modelName(modelConfig.getModelName())
-                .temperature(modelConfig.getTemperature())
-                .timeout(Duration.ofSeconds(modelConfig.getTimeOut()))
-                .topP(modelConfig.getTopP())
+        return LocalAiChatModel.builder().baseUrl(modelConfig.getBaseUrl())
+                .modelName(modelConfig.getModelName()).temperature(modelConfig.getTemperature())
+                .timeout(Duration.ofSeconds(modelConfig.getTimeOut())).topP(modelConfig.getTopP())
                 .logRequests(modelConfig.getLogRequests())
-                .logResponses(modelConfig.getLogResponses())
-                .maxRetries(modelConfig.getMaxRetries())
+                .logResponses(modelConfig.getLogResponses()).maxRetries(modelConfig.getMaxRetries())
                 .build();
     }
 
     @Override
     public EmbeddingModel createEmbeddingModel(EmbeddingModelConfig embeddingModel) {
-        return LocalAiEmbeddingModel.builder()
-                .baseUrl(embeddingModel.getBaseUrl())
-                .modelName(embeddingModel.getModelName())
-                .maxRetries(embeddingModel.getMaxRetries())
+        return LocalAiEmbeddingModel.builder().baseUrl(embeddingModel.getBaseUrl())
+                .modelName(embeddingModel.getModelName()).maxRetries(embeddingModel.getMaxRetries())
                 .logRequests(embeddingModel.getLogRequests())
-                .logResponses(embeddingModel.getLogResponses())
-                .build();
+                .logResponses(embeddingModel.getLogResponses()).build();
     }
 
     @Override

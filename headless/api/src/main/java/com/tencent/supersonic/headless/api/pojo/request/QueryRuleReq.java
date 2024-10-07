@@ -23,10 +23,12 @@ public class QueryRuleReq extends SchemaItem {
     private Integer priority = 1;
 
     /** 规则类型 */
-    @NotNull private QueryRuleType ruleType;
+    @NotNull
+    private QueryRuleType ruleType;
 
     /** 具体规则信息 */
-    @NotNull private RuleInfo rule;
+    @NotNull
+    private RuleInfo rule;
 
     /** 规则输出信息 */
     private ActionInfo action;

@@ -22,7 +22,7 @@ public interface DatabaseService {
 
     DatabaseResp getDatabase(Long id);
 
-    Map<String, List<DatabaseParameter>> getDatabaseParameters();
+    Map<String, List<DatabaseParameter>> getDatabaseParameters(User user);
 
     boolean testConnect(DatabaseReq databaseReq, User user);
 

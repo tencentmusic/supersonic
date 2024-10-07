@@ -25,13 +25,17 @@ import java.util.List;
 @Order(2)
 public class MetaEmbeddingTask implements CommandLineRunner {
 
-    @Autowired private EmbeddingService embeddingService;
+    @Autowired
+    private EmbeddingService embeddingService;
 
-    @Autowired private EmbeddingConfig embeddingConfig;
+    @Autowired
+    private EmbeddingConfig embeddingConfig;
 
-    @Autowired private MetricService metricService;
+    @Autowired
+    private MetricService metricService;
 
-    @Autowired private DimensionService dimensionService;
+    @Autowired
+    private DimensionService dimensionService;
 
     @PreDestroy
     public void onShutdown() {
@@ -62,13 +66,11 @@ public class MetaEmbeddingTask implements CommandLineRunner {
         try {
             List<DataItem> metricDataItems = metricService.getDataEvent().getDataItems();
 
-            embeddingService.addQuery(
-                    embeddingConfig.getMetaCollectionName(),
+            embeddingService.addQuery(embeddingConfig.getMetaCollectionName(),
                     TextSegmentConvert.convertToEmbedding(metricDataItems));
 
             List<DataItem> dimensionDataItems = dimensionService.getDataEvent().getDataItems();
-            embeddingService.addQuery(
-                    embeddingConfig.getMetaCollectionName(),
+            embeddingService.addQuery(embeddingConfig.getMetaCollectionName(),
                     TextSegmentConvert.convertToEmbedding(dimensionDataItems));
         } catch (Exception e) {
             log.error("Failed to reload meta embedding.", e);

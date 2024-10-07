@@ -1,7 +1,7 @@
 package com.tencent.supersonic.headless.core.translator.calcite.schema;
 
-import com.tencent.supersonic.headless.api.pojo.enums.EngineType;
-import com.tencent.supersonic.headless.core.translator.calcite.Configuration;
+import com.tencent.supersonic.common.calcite.Configuration;
+import com.tencent.supersonic.common.pojo.enums.EngineType;
 import com.tencent.supersonic.headless.core.translator.calcite.sql.S2SQLSqlValidatorImpl;
 import org.apache.calcite.jdbc.CalciteSchema;
 import org.apache.calcite.prepare.CalciteCatalogReader;
@@ -31,50 +31,35 @@ public class SchemaBuilder {
         Map<String, RelDataType> nameToTypeMap = new HashMap<>();
         CalciteSchema rootSchema = CalciteSchema.createRootSchema(true, false);
         rootSchema.add(schema.getSchemaKey(), schema);
-        Prepare.CatalogReader catalogReader =
-                new CalciteCatalogReader(
-                        rootSchema,
-                        Collections.singletonList(schema.getSchemaKey()),
-                        Configuration.typeFactory,
-                        Configuration.config);
+        Prepare.CatalogReader catalogReader = new CalciteCatalogReader(rootSchema,
+                Collections.singletonList(schema.getSchemaKey()), Configuration.typeFactory,
+                Configuration.config);
         EngineType engineType =
                 EngineType.fromString(schema.getSemanticModel().getDatabase().getType());
         S2SQLSqlValidatorImpl s2SQLSqlValidator =
-                new S2SQLSqlValidatorImpl(
-                        Configuration.operatorTable,
-                        catalogReader,
-                        Configuration.typeFactory,
-                        Configuration.getValidatorConfig(engineType));
+                new S2SQLSqlValidatorImpl(Configuration.operatorTable, catalogReader,
+                        Configuration.typeFactory, Configuration.getValidatorConfig(engineType));
         return new ParameterScope(s2SQLSqlValidator, nameToTypeMap);
     }
 
     public static CalciteSchema getMaterializationSchema() {
         CalciteSchema rootSchema = CalciteSchema.createRootSchema(true, false);
         SchemaPlus schema = rootSchema.plus().add(MATERIALIZATION_SYS_DB, new AbstractSchema());
-        DataSourceTable srcTable =
-                DataSourceTable.newBuilder(MATERIALIZATION_SYS_SOURCE)
-                        .addField(MATERIALIZATION_SYS_FIELD_DATE, SqlTypeName.DATE)
-                        .addField(MATERIALIZATION_SYS_FIELD_DATA, SqlTypeName.BIGINT)
-                        .withRowCount(1)
-                        .build();
+        DataSourceTable srcTable = DataSourceTable.newBuilder(MATERIALIZATION_SYS_SOURCE)
+                .addField(MATERIALIZATION_SYS_FIELD_DATE, SqlTypeName.DATE)
+                .addField(MATERIALIZATION_SYS_FIELD_DATA, SqlTypeName.BIGINT).withRowCount(1)
+                .build();
         schema.add(MATERIALIZATION_SYS_SOURCE, srcTable);
-        DataSourceTable dataSetTable =
-                DataSourceTable.newBuilder(MATERIALIZATION_SYS_VIEW)
-                        .addField(MATERIALIZATION_SYS_FIELD_DATE, SqlTypeName.DATE)
-                        .addField(MATERIALIZATION_SYS_FIELD_DATA, SqlTypeName.BIGINT)
-                        .withRowCount(1)
-                        .build();
+        DataSourceTable dataSetTable = DataSourceTable.newBuilder(MATERIALIZATION_SYS_VIEW)
+                .addField(MATERIALIZATION_SYS_FIELD_DATE, SqlTypeName.DATE)
+                .addField(MATERIALIZATION_SYS_FIELD_DATA, SqlTypeName.BIGINT).withRowCount(1)
+                .build();
         schema.add(MATERIALIZATION_SYS_VIEW, dataSetTable);
         return rootSchema;
     }
 
-    public static void addSourceView(
-            CalciteSchema dataSetSchema,
-            String dbSrc,
-            String tbSrc,
-            Set<String> dates,
-            Set<String> dimensions,
-            Set<String> metrics) {
+    public static void addSourceView(CalciteSchema dataSetSchema, String dbSrc, String tbSrc,
+            Set<String> dates, Set<String> dimensions, Set<String> metrics) {
         String tb = tbSrc;
         String db = dbSrc;
         DataSourceTable.Builder builder = DataSourceTable.newBuilder(tb);

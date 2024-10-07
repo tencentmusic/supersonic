@@ -43,16 +43,12 @@ public class Agent extends RecordInfo {
             return Lists.newArrayList();
         }
         List<Map> toolList = (List) map.get("tools");
-        return toolList.stream()
-                .filter(
-                        tool -> {
-                            if (Objects.isNull(type)) {
-                                return true;
-                            }
-                            return type.name().equals(tool.get("type"));
-                        })
-                .map(JSONObject::toJSONString)
-                .collect(Collectors.toList());
+        return toolList.stream().filter(tool -> {
+            if (Objects.isNull(type)) {
+                return true;
+            }
+            return type.name().equals(tool.get("type"));
+        }).map(JSONObject::toJSONString).collect(Collectors.toList());
     }
 
     public boolean enableSearch() {
@@ -72,8 +68,7 @@ public class Agent extends RecordInfo {
         if (CollectionUtils.isEmpty(tools)) {
             return Lists.newArrayList();
         }
-        return tools.stream()
-                .map(tool -> JSONObject.parseObject(tool, NL2SQLTool.class))
+        return tools.stream().map(tool -> JSONObject.parseObject(tool, NL2SQLTool.class))
                 .collect(Collectors.toList());
     }
 
@@ -81,7 +76,7 @@ public class Agent extends RecordInfo {
         return !CollectionUtils.isEmpty(getParserTools(AgentToolType.PLUGIN));
     }
 
-    public boolean containsLLMParserTool() {
+    public boolean containsLLMTool() {
         return !CollectionUtils.isEmpty(getParserTools(AgentToolType.NL2SQL_LLM));
     }
 
@@ -120,10 +115,8 @@ public class Agent extends RecordInfo {
         if (CollectionUtils.isEmpty(commonAgentTools)) {
             return new HashSet<>();
         }
-        return commonAgentTools.stream()
-                .map(NL2SQLTool::getDataSetIds)
-                .filter(modelIds -> !CollectionUtils.isEmpty(modelIds))
-                .flatMap(Collection::stream)
+        return commonAgentTools.stream().map(NL2SQLTool::getDataSetIds)
+                .filter(modelIds -> !CollectionUtils.isEmpty(modelIds)).flatMap(Collection::stream)
                 .collect(Collectors.toSet());
     }
 }

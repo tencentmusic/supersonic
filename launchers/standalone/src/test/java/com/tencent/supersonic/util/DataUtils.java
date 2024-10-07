@@ -49,12 +49,8 @@ public class DataUtils {
         return SchemaElement.builder().name(name).build();
     }
 
-    public static QueryFilter getFilter(
-            String bizName,
-            FilterOperatorEnum filterOperatorEnum,
-            Object value,
-            String name,
-            Long elementId) {
+    public static QueryFilter getFilter(String bizName, FilterOperatorEnum filterOperatorEnum,
+            Object value, String name, Long elementId) {
         QueryFilter filter = new QueryFilter();
         filter.setBizName(bizName);
         filter.setOperator(filterOperatorEnum);
@@ -64,8 +60,8 @@ public class DataUtils {
         return filter;
     }
 
-    public static DateConf getDateConf(
-            Integer unit, DateConf.DateMode dateMode, DatePeriodEnum period) {
+    public static DateConf getDateConf(Integer unit, DateConf.DateMode dateMode,
+            DatePeriodEnum period) {
         DateConf dateInfo = new DateConf();
         dateInfo.setUnit(unit);
         dateInfo.setDateMode(dateMode);
@@ -75,12 +71,8 @@ public class DataUtils {
         return dateInfo;
     }
 
-    public static DateConf getDateConf(
-            DateConf.DateMode dateMode,
-            Integer unit,
-            DatePeriodEnum period,
-            String startDate,
-            String endDate) {
+    public static DateConf getDateConf(DateConf.DateMode dateMode, Integer unit,
+            DatePeriodEnum period, String startDate, String endDate) {
         DateConf dateInfo = new DateConf();
         dateInfo.setUnit(unit);
         dateInfo.setDateMode(dateMode);

@@ -54,34 +54,25 @@ public class SwaggerConfiguration {
     @Value("${swagger.version}")
     private String version;
 
-    @Autowired private AuthenticationConfig authenticationConfig;
+    @Autowired
+    private AuthenticationConfig authenticationConfig;
 
     @Bean
     public Docket createRestApi() {
 
-        return new Docket(DocumentationType.OAS_30)
-                .apiInfo(apiInfo())
-                .select()
-                .apis(RequestHandlerSelectors.basePackage(basePackage))
-                .paths(PathSelectors.any())
-                .build()
-                .securitySchemes(Lists.newArrayList(apiKey()));
+        return new Docket(DocumentationType.OAS_30).apiInfo(apiInfo()).select()
+                .apis(RequestHandlerSelectors.basePackage(basePackage)).paths(PathSelectors.any())
+                .build().securitySchemes(Lists.newArrayList(apiKey()));
     }
 
     private ApiKey apiKey() {
-        return new ApiKey(
-                authenticationConfig.getTokenHttpHeaderKey(),
-                authenticationConfig.getTokenHttpHeaderKey(),
-                "header");
+        return new ApiKey(authenticationConfig.getTokenHttpHeaderKey(),
+                authenticationConfig.getTokenHttpHeaderKey(), "header");
     }
 
     private ApiInfo apiInfo() {
-        return new ApiInfoBuilder()
-                .title(title)
-                .description(description)
-                .termsOfServiceUrl(url)
-                .contact(new Contact(contactName, contactUrl, contactEmail))
-                .version(version)
+        return new ApiInfoBuilder().title(title).description(description).termsOfServiceUrl(url)
+                .contact(new Contact(contactName, contactUrl, contactEmail)).version(version)
                 .build();
     }
 }

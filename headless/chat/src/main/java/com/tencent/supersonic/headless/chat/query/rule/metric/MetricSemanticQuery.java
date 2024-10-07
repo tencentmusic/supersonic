@@ -26,8 +26,8 @@ public abstract class MetricSemanticQuery extends RuleSemanticQuery {
     }
 
     @Override
-    public List<SchemaElementMatch> match(
-            List<SchemaElementMatch> candidateElementMatches, ChatQueryContext queryCtx) {
+    public List<SchemaElementMatch> match(List<SchemaElementMatch> candidateElementMatches,
+            ChatQueryContext queryCtx) {
         return super.match(candidateElementMatches, queryCtx);
     }
 
@@ -42,16 +42,12 @@ public abstract class MetricSemanticQuery extends RuleSemanticQuery {
         if (parseInfo.getDateInfo() != null || !needFillDateConf(chatQueryContext)) {
             return;
         }
-        DataSetSchema dataSetSchema =
-                chatQueryContext
-                        .getSemanticSchema()
-                        .getDataSetSchemaMap()
-                        .get(parseInfo.getDataSetId());
+        DataSetSchema dataSetSchema = chatQueryContext.getSemanticSchema().getDataSetSchemaMap()
+                .get(parseInfo.getDataSetId());
         TimeDefaultConfig timeDefaultConfig = dataSetSchema.getMetricTypeTimeDefaultConfig();
         DateConf dateInfo = new DateConf();
         // 加上时间!=-1 判断
-        if (Objects.nonNull(timeDefaultConfig)
-                && Objects.nonNull(timeDefaultConfig.getUnit())
+        if (Objects.nonNull(timeDefaultConfig) && Objects.nonNull(timeDefaultConfig.getUnit())
                 && timeDefaultConfig.getUnit() != -1) {
             int unit = timeDefaultConfig.getUnit();
             String startDate = LocalDate.now().minusDays(unit).toString();

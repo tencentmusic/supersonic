@@ -30,10 +30,8 @@ public class QueryFilter {
             return false;
         }
         QueryFilter that = (QueryFilter) o;
-        return Objects.equal(bizName, that.bizName)
-                && Objects.equal(name, that.name)
-                && operator == that.operator
-                && Objects.equal(value, that.value)
+        return Objects.equal(bizName, that.bizName) && Objects.equal(name, that.name)
+                && operator == that.operator && Objects.equal(value, that.value)
                 && Objects.equal(elementID, that.elementID)
                 && Objects.equal(function, that.function);
     }

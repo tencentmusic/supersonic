@@ -1,4 +1,4 @@
-package com.tencent.supersonic.headless.core.translator.calcite.schema;
+package com.tencent.supersonic.common.calcite;
 
 import org.apache.calcite.plan.RelOptTable;
 import org.apache.calcite.rel.RelRoot;
@@ -11,10 +11,7 @@ public class ViewExpanderImpl implements RelOptTable.ViewExpander {
     public ViewExpanderImpl() {}
 
     @Override
-    public RelRoot expandView(
-            RelDataType rowType,
-            String queryString,
-            List<String> schemaPath,
+    public RelRoot expandView(RelDataType rowType, String queryString, List<String> schemaPath,
             List<String> dataSetPath) {
         return null;
     }

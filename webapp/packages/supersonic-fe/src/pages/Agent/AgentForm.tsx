@@ -11,6 +11,7 @@ import {
   Row,
   message,
   Space,
+  Tooltip,
 } from 'antd';
 import MainTitleMark from '@/components/MainTitleMark';
 import { AgentType } from './type';
@@ -20,6 +21,7 @@ import { DeleteOutlined, PlusOutlined } from '@ant-design/icons';
 import { uuid, jsonParse, encryptPassword, decryptPassword } from '@/utils/utils';
 import ToolsSection from './ToolsSection';
 import globalStyles from '@/global.less';
+import { QuestionCircleOutlined } from '@ant-design/icons';
 import { testLLMConn } from '../../services/system';
 import MemorySection from './MemorySection';
 
@@ -118,6 +120,12 @@ const AgentForm: React.FC<Props> = ({ editAgent, onSaveAgent, onCreateToolBtnCli
       message.error('模型连接失败');
     }
   };
+  const tips = [
+    '自定义提示词模板可嵌入以下变量，将由系统自动进行替换：',
+    '-{{exemplar}} :替换成few-shot示例，示例个数由系统配置',
+    '-{{question}} :替换成用户问题，拼接了一定的补充信息',
+    '-{{schema}} :替换成数据语义信息，根据用户问题映射而来',
+  ];
 
   const formTabList = [
     {
@@ -397,14 +405,29 @@ const AgentForm: React.FC<Props> = ({ editAgent, onSaveAgent, onCreateToolBtnCli
       key: 'promptConfig',
       children: (
         <div className={styles.agentFormContainer}>
-          <FormItem name={['promptConfig', 'promptTemplate']} label="提示词模板">
-            <Input.TextArea
-              style={{ minHeight: 600 }}
-              placeholder=" &nbsp;自定义提示词模板可嵌入以下变量，将由系统自动进行替换：&#13;&#10;
-                    -&nbsp;{{exemplar}} &nbsp;:替换成few-shot示例，示例个数由系统配置&#13;&#10;
-                    -&nbsp;{{question}} &nbsp;:替换成用户问题，拼接了一定的补充信息&#13;&#10;
-                    -&nbsp;{{schema}} &nbsp;:替换成数据语义信息，根据用户问题映射而来"
-            />
+          <FormItem
+            name={['promptConfig', 'promptTemplate']}
+            label={
+              <>
+                <Space>
+                  提示词模板
+                  <Tooltip
+                    overlayInnerStyle={{ width: 400 }}
+                    title={
+                      <>
+                        {tips.map((tip) => (
+                          <div>{tip}</div>
+                        ))}
+                      </>
+                    }
+                  >
+                    <QuestionCircleOutlined />
+                  </Tooltip>
+                </Space>
+              </>
+            }
+          >
+            <Input.TextArea style={{ minHeight: 600 }} />
           </FormItem>
         </div>
       ),

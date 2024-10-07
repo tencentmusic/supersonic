@@ -26,11 +26,8 @@ public class ValueWordBuilder extends BaseWordWithAliasBuilder {
     public DictWord getOneWordNature(String word, SchemaElement schemaElement, boolean isSuffix) {
         DictWord dictWord = new DictWord();
         Long modelId = schemaElement.getModel();
-        String nature =
-                DictWordType.NATURE_SPILT
-                        + modelId
-                        + DictWordType.NATURE_SPILT
-                        + schemaElement.getId();
+        String nature = DictWordType.NATURE_SPILT + modelId + DictWordType.NATURE_SPILT
+                + schemaElement.getId();
         dictWord.setNatureWithFrequency(String.format("%s " + DEFAULT_FREQUENCY, nature));
         dictWord.setWord(word);
         return dictWord;

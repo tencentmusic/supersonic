@@ -51,11 +51,9 @@ public class ModelProviderTest extends BaseApplication {
         modelConfig.setEndpoint(QianfanModelFactory.DEFAULT_ENDPOINT);
 
         ChatLanguageModel chatModel = ModelProvider.getChatModel(modelConfig);
-        assertThrows(
-                RuntimeException.class,
-                () -> {
-                    chatModel.generate("hi");
-                });
+        assertThrows(RuntimeException.class, () -> {
+            chatModel.generate("hi");
+        });
     }
 
     @Test
@@ -67,11 +65,9 @@ public class ModelProviderTest extends BaseApplication {
         modelConfig.setApiKey("e2724491714b3b2a0274e987905f1001.5JyHgf4vbZVJ7gC5");
 
         ChatLanguageModel chatModel = ModelProvider.getChatModel(modelConfig);
-        assertThrows(
-                RuntimeException.class,
-                () -> {
-                    chatModel.generate("hi");
-                });
+        assertThrows(RuntimeException.class, () -> {
+            chatModel.generate("hi");
+        });
     }
 
     @Test
@@ -84,11 +80,9 @@ public class ModelProviderTest extends BaseApplication {
         modelConfig.setApiKey(ParameterConfig.DEMO);
 
         ChatLanguageModel chatModel = ModelProvider.getChatModel(modelConfig);
-        assertThrows(
-                RuntimeException.class,
-                () -> {
-                    chatModel.generate("hi");
-                });
+        assertThrows(RuntimeException.class, () -> {
+            chatModel.generate("hi");
+        });
     }
 
     @Test
@@ -100,11 +94,9 @@ public class ModelProviderTest extends BaseApplication {
         modelConfig.setApiKey(ParameterConfig.DEMO);
 
         ChatLanguageModel chatModel = ModelProvider.getChatModel(modelConfig);
-        assertThrows(
-                RuntimeException.class,
-                () -> {
-                    chatModel.generate("hi");
-                });
+        assertThrows(RuntimeException.class, () -> {
+            chatModel.generate("hi");
+        });
     }
 
     @Test
@@ -140,11 +132,9 @@ public class ModelProviderTest extends BaseApplication {
         modelConfig.setApiKey(ParameterConfig.DEMO);
 
         EmbeddingModel embeddingModel = ModelProvider.getEmbeddingModel(modelConfig);
-        assertThrows(
-                RuntimeException.class,
-                () -> {
-                    embeddingModel.embed("hi");
-                });
+        assertThrows(RuntimeException.class, () -> {
+            embeddingModel.embed("hi");
+        });
     }
 
     @Test
@@ -156,11 +146,9 @@ public class ModelProviderTest extends BaseApplication {
         modelConfig.setApiKey(ParameterConfig.DEMO);
 
         EmbeddingModel embeddingModel = ModelProvider.getEmbeddingModel(modelConfig);
-        assertThrows(
-                RuntimeException.class,
-                () -> {
-                    embeddingModel.embed("hi");
-                });
+        assertThrows(RuntimeException.class, () -> {
+            embeddingModel.embed("hi");
+        });
     }
 
     @Test
@@ -173,11 +161,9 @@ public class ModelProviderTest extends BaseApplication {
         modelConfig.setSecretKey(ParameterConfig.DEMO);
 
         EmbeddingModel embeddingModel = ModelProvider.getEmbeddingModel(modelConfig);
-        assertThrows(
-                RuntimeException.class,
-                () -> {
-                    embeddingModel.embed("hi");
-                });
+        assertThrows(RuntimeException.class, () -> {
+            embeddingModel.embed("hi");
+        });
     }
 
     @Test
@@ -189,10 +175,8 @@ public class ModelProviderTest extends BaseApplication {
         modelConfig.setApiKey("e2724491714b3b2a0274e987905f1001.5JyHgf4vbZVJ7gC5");
 
         EmbeddingModel embeddingModel = ModelProvider.getEmbeddingModel(modelConfig);
-        assertThrows(
-                RuntimeException.class,
-                () -> {
-                    embeddingModel.embed("hi");
-                });
+        assertThrows(RuntimeException.class, () -> {
+            embeddingModel.embed("hi");
+        });
     }
 }

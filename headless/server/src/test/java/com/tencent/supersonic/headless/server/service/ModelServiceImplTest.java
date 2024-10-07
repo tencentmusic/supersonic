@@ -75,15 +75,8 @@ class ModelServiceImplTest {
         UserService userService = Mockito.mock(UserService.class);
         DateInfoRepository dateInfoRepository = Mockito.mock(DateInfoRepository.class);
         DataSetService viewService = Mockito.mock(DataSetService.class);
-        return new ModelServiceImpl(
-                modelRepository,
-                databaseService,
-                dimensionService,
-                metricService,
-                domainService,
-                userService,
-                viewService,
-                dateInfoRepository);
+        return new ModelServiceImpl(modelRepository, databaseService, dimensionService,
+                metricService, domainService, userService, viewService, dateInfoRepository);
     }
 
     private ModelReq mockModelReq() {
@@ -156,9 +149,8 @@ class ModelServiceImplTest {
         measures.add(measure2);
 
         modelDetail.setMeasures(measures);
-        modelDetail.setSqlQuery(
-                "SELECT imp_date_a, user_name_a, page_a, 1 as pv_a,"
-                        + " user_name as uv_a FROM s2_pv_uv_statis");
+        modelDetail.setSqlQuery("SELECT imp_date_a, user_name_a, page_a, 1 as pv_a,"
+                + " user_name as uv_a FROM s2_pv_uv_statis");
         modelDetail.setQueryType("sql_query");
         modelReq.setDomainId(1L);
         modelReq.setFilterSql("where user_name = 'tom'");
@@ -189,9 +181,8 @@ class ModelServiceImplTest {
         Measure measure2 = new Measure("访问人数", "uv", AggOperatorEnum.COUNT_DISTINCT.name(), 1);
         measures.add(measure2);
         modelDetail.setMeasures(measures);
-        modelDetail.setSqlQuery(
-                "SELECT imp_date, user_name, page, 1 as pv, "
-                        + "user_name as uv FROM s2_pv_uv_statis");
+        modelDetail.setSqlQuery("SELECT imp_date, user_name, page, 1 as pv, "
+                + "user_name as uv FROM s2_pv_uv_statis");
         modelDetail.setQueryType("sql_query");
         modelReq.setModelDetail(modelDetail);
         return modelReq;
@@ -274,19 +265,14 @@ class ModelServiceImplTest {
         measure1.setExpr("pv_a");
         measures.add(measure1);
 
-        Measure measure2 =
-                new Measure(
-                        "访问人数_a",
-                        "s2_pv_uv_statis_a_uv_a",
-                        AggOperatorEnum.COUNT_DISTINCT.name(),
-                        1);
+        Measure measure2 = new Measure("访问人数_a", "s2_pv_uv_statis_a_uv_a",
+                AggOperatorEnum.COUNT_DISTINCT.name(), 1);
         measure2.setExpr("uv_a");
         measures.add(measure2);
 
         modelDetail.setMeasures(measures);
-        modelDetail.setSqlQuery(
-                "SELECT imp_date_a, user_name_a, page_a, 1 as pv_a, "
-                        + "user_name as uv_a FROM s2_pv_uv_statis");
+        modelDetail.setSqlQuery("SELECT imp_date_a, user_name_a, page_a, 1 as pv_a, "
+                + "user_name as uv_a FROM s2_pv_uv_statis");
         modelDetail.setQueryType("sql_query");
         modelResp.setModelDetail(modelDetail);
         modelResp.setId(1L);

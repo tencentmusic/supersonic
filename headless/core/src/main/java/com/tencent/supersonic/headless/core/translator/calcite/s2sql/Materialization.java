@@ -15,10 +15,8 @@ public class Materialization {
          * partition time type 1 - FULL, not use partition 2 - PARTITION , use time list 3 - ZIPPER,
          * use [startDate, endDate] range time
          */
-        FULL("FULL"),
-        PARTITION("PARTITION"),
-        ZIPPER("ZIPPER"),
-        None("");
+        FULL("FULL"), PARTITION("PARTITION"), ZIPPER("ZIPPER"), None("");
+
         private String name;
 
         TimePartType(String name) {

@@ -43,14 +43,8 @@ public class Dim {
         this.isTag = isTag;
     }
 
-    public Dim(
-            String name,
-            String type,
-            String expr,
-            String dateFormat,
-            DimensionTimeTypeParams typeParams,
-            Integer isCreateDimension,
-            String bizName) {
+    public Dim(String name, String type, String expr, String dateFormat,
+            DimensionTimeTypeParams typeParams, Integer isCreateDimension, String bizName) {
         this.name = name;
         this.type = type;
         this.expr = expr;
@@ -61,14 +55,8 @@ public class Dim {
     }
 
     public static Dim getDefault() {
-        return new Dim(
-                "日期",
-                "time",
-                "2023-05-28",
-                Constants.DAY_FORMAT,
-                new DimensionTimeTypeParams("true", "day"),
-                0,
-                "imp_date");
+        return new Dim("日期", "time", "2023-05-28", Constants.DAY_FORMAT,
+                new DimensionTimeTypeParams("true", "day"), 0, "imp_date");
     }
 
     public String getFieldName() {

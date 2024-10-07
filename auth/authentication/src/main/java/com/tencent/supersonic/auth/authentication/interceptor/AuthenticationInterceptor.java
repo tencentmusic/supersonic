@@ -68,8 +68,8 @@ public abstract class AuthenticationInterceptor implements HandlerInterceptor {
         try {
             if (request instanceof StandardMultipartHttpServletRequest) {
                 RequestFacade servletRequest =
-                        (RequestFacade)
-                                ((StandardMultipartHttpServletRequest) request).getRequest();
+                        (RequestFacade) ((StandardMultipartHttpServletRequest) request)
+                                .getRequest();
                 Class<? extends HttpServletRequest> servletRequestClazz = servletRequest.getClass();
                 Field request1 = servletRequestClazz.getDeclaredField("request");
                 request1.setAccessible(true);
