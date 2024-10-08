@@ -59,7 +59,7 @@ public class LLMConfigUtils {
             default:
                 baseUrl = "https://api.openai.com/v1";
                 apiKey = "REPLACE_WITH_YOUR_KEY";
-                modelName = "gpt-3.5-turbo";
+                modelName = "gpt-4o";
                 temperature = 0.0;
         }
 

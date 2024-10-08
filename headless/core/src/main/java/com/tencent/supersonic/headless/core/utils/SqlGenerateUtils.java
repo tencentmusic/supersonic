@@ -274,17 +274,11 @@ public class SqlGenerateUtils {
         return modelBizName + UNDERLINE + executorConfig.getInternalMetricNameSuffix();
     }
 
-    public String generateDerivedMetric(
-            final List<MetricSchemaResp> metricResps,
-            final Set<String> allFields,
-            final Map<String, Measure> allMeasures,
-            final List<DimSchemaResp> dimensionResps,
-            final String expression,
-            final MetricDefineType metricDefineType,
-            AggOption aggOption,
-            Map<String, String> visitedMetric,
-            Set<String> measures,
-            Set<String> dimensions) {
+    public String generateDerivedMetric(final List<MetricSchemaResp> metricResps,
+            final Set<String> allFields, final Map<String, Measure> allMeasures,
+            final List<DimSchemaResp> dimensionResps, final String expression,
+            final MetricDefineType metricDefineType, AggOption aggOption,
+            Map<String, String> visitedMetric, Set<String> measures, Set<String> dimensions) {
         Set<String> fields = SqlSelectHelper.getColumnFromExpr(expression);
         if (!CollectionUtils.isEmpty(fields)) {
             Map<String, String> replace = new HashMap<>();
@@ -298,19 +292,11 @@ public class SqlGenerateUtils {
                                 replace.put(field, visitedMetric.get(field));
                                 break;
                             }
-                            replace.put(
-                                    field,
-                                    generateDerivedMetric(
-                                            metricResps,
-                                            allFields,
-                                            allMeasures,
-                                            dimensionResps,
-                                            getExpr(metricItem.get()),
-                                            metricItem.get().getMetricDefineType(),
-                                            aggOption,
-                                            visitedMetric,
-                                            measures,
-                                            dimensions));
+                            replace.put(field,
+                                    generateDerivedMetric(metricResps, allFields, allMeasures,
+                                            dimensionResps, getExpr(metricItem.get()),
+                                            metricItem.get().getMetricDefineType(), aggOption,
+                                            visitedMetric, measures, dimensions));
                             visitedMetric.put(field, replace.get(field));
                         }
                         break;

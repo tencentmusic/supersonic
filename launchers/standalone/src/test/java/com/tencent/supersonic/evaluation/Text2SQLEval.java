@@ -74,21 +74,19 @@ public class Text2SQLEval extends BaseTest {
         long start = System.currentTimeMillis();
         QueryResult result = submitNewChat("过去30天访问次数最高的部门top3", agentId);
         durations.add(System.currentTimeMillis() - start);
-        assert result.getQueryColumns().size() == 2;
-        assert result.getQueryColumns().get(0).getName().equalsIgnoreCase("部门");
-        assert result.getQueryColumns().get(1).getName().contains("访问次数");
         assert result.getQueryResults().size() == 3;
+        assert result.getTextResult().contains("marketing");
+        assert result.getTextResult().contains("sales");
+        assert result.getTextResult().contains("strategy");
     }
 
     @Test
     public void test_filter_and_top() throws Exception {
         long start = System.currentTimeMillis();
-        QueryResult result = submitNewChat("近半个月sales部门访问量最高的用户是谁", agentId);
+        QueryResult result = submitNewChat("近半个月来sales部门访问量最高的用户是谁", agentId);
         durations.add(System.currentTimeMillis() - start);
-        assert result.getQueryColumns().size() == 2;
-        assert result.getQueryColumns().get(0).getName().contains("用户");
-        assert result.getQueryColumns().get(1).getName().contains("访问次数");
         assert result.getQueryResults().size() == 1;
+        assert result.getTextResult().contains("tom");
     }
 
     @Test
@@ -96,31 +94,37 @@ public class Text2SQLEval extends BaseTest {
         long start = System.currentTimeMillis();
         QueryResult result = submitNewChat("近一个月sales部门总访问次数超过10次的用户有哪些", agentId);
         durations.add(System.currentTimeMillis() - start);
-        assert result.getQueryColumns().size() >= 1;
-        assert result.getQueryColumns().get(0).getName().contains("用户");
         assert result.getQueryResults().size() == 2;
+        assert result.getTextResult().contains("alice");
+        assert result.getTextResult().contains("tom");
     }
 
     @Test
     public void test_filter_compare() throws Exception {
         long start = System.currentTimeMillis();
-        QueryResult result = submitNewChat("alice和lucy过去半个月哪一位的总停留时长更高", agentId);
+        QueryResult result = submitNewChat("alice和lucy过去半个月谁的总停留时长更多", agentId);
         durations.add(System.currentTimeMillis() - start);
-        assert result.getQueryColumns().size() == 2;
-        assert result.getQueryColumns().get(0).getName().contains("用户");
-        assert result.getQueryColumns().get(1).getName().contains("停留时长");
         assert result.getQueryResults().size() >= 1;
+        assert result.getTextResult().contains("alice");
     }
 
     @Test
     public void test_term() throws Exception {
         long start = System.currentTimeMillis();
-        QueryResult result = submitNewChat("过去半个月核心用户的总停留时长", agentId);
+        QueryResult result = submitNewChat("过去半个月每个核心用户的总停留时长", agentId);
         durations.add(System.currentTimeMillis() - start);
-        assert result.getQueryColumns().size() >= 1;
-        assert result.getQueryColumns().stream().filter(c -> c.getName().contains("停留时长"))
-                .collect(Collectors.toList()).size() == 1;
-        assert result.getQueryResults().size() >= 1;
+        assert result.getQueryResults().size() == 2;
+        assert result.getTextResult().contains("tom");
+        assert result.getTextResult().contains("lucy");
+    }
+
+    @Test
+    public void test_second_calculation() throws Exception {
+        long start = System.currentTimeMillis();
+        QueryResult result = submitNewChat("近1个月总访问次数超过100次的部门有几个", agentId);
+        durations.add(System.currentTimeMillis() - start);
+        assert result.getQueryColumns().size() == 1;
+        assert result.getTextResult().contains("3");
     }
 
     public Agent getLLMAgent(boolean enableMultiturn) {
