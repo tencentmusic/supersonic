@@ -5,6 +5,7 @@ import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.auth.api.authorization.pojo.AuthGroup;
 import com.tencent.supersonic.auth.api.authorization.pojo.AuthRule;
+import com.tencent.supersonic.chat.api.pojo.request.ChatParseReq;
 import com.tencent.supersonic.chat.server.agent.Agent;
 import com.tencent.supersonic.chat.server.agent.AgentConfig;
 import com.tencent.supersonic.chat.server.agent.AgentToolType;
@@ -136,12 +137,16 @@ public class S2VisitsDemo extends S2BaseDemo {
 
     public void addSampleChats(Integer agentId) {
         Long chatId = chatManageService.addChat(user, "样例对话1", agentId);
+        submitText(chatId.intValue(), agentId, "超音数 访问次数");
+        submitText(chatId.intValue(), agentId, "按部门统计");
+        submitText(chatId.intValue(), agentId, "查询近30天");
+        submitText(chatId.intValue(), agentId, "alice 停留时长");
+        submitText(chatId.intValue(), agentId, "访问次数最高的部门");
+    }
 
-        chatQueryService.parseAndExecute(chatId.intValue(), agentId, "超音数 访问次数");
-        chatQueryService.parseAndExecute(chatId.intValue(), agentId, "按部门统计");
-        chatQueryService.parseAndExecute(chatId.intValue(), agentId, "查询近30天");
-        chatQueryService.parseAndExecute(chatId.intValue(), agentId, "alice 停留时长");
-        chatQueryService.parseAndExecute(chatId.intValue(), agentId, "访问次数最高的部门");
+    private void submitText(int chatId, int agentId, String queryText) {
+        chatQueryService.parseAndExecute(ChatParseReq.builder().chatId(chatId).agentId(agentId)
+                .queryText(queryText).user(User.getFakeUser()).disableLLM(true).build());
     }
 
     private Integer addAgent(long dataSetId) {

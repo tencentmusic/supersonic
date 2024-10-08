@@ -15,17 +15,18 @@ public class ParseContext {
     private QueryFilters queryFilters;
     private boolean saveAnswer = true;
     private SchemaMapInfo mapInfo;
+    private boolean disableLLM = false;
 
     public boolean enableNL2SQL() {
         if (agent == null) {
-            return true;
+            return false;
         }
         return agent.containsNL2SQLTool();
     }
 
     public boolean enbaleLLM() {
-        if (agent == null) {
-            return true;
+        if (agent == null || disableLLM) {
+            return false;
         }
         return agent.containsLLMTool();
     }

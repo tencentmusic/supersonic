@@ -28,7 +28,9 @@ public class QueryReqConverter {
         boolean hasRuleTool = agent.containsRuleTool();
         boolean hasLLMConfig = Objects.nonNull(agent.getModelConfig());
 
-        if (hasLLMTool && hasLLMConfig) {
+        if (parseContext.isDisableLLM()) {
+            queryNLReq.setText2SQLType(Text2SQLType.ONLY_RULE);
+        } else if (hasLLMTool && hasLLMConfig) {
             queryNLReq.setText2SQLType(Text2SQLType.ONLY_LLM);
         } else if (hasLLMTool && hasRuleTool) {
             queryNLReq.setText2SQLType(Text2SQLType.RULE_AND_LLM);
@@ -37,6 +39,7 @@ public class QueryReqConverter {
         } else if (hasRuleTool) {
             queryNLReq.setText2SQLType(Text2SQLType.ONLY_RULE);
         }
+
         queryNLReq.setDataSetIds(agent.getDataSetIds());
         if (Objects.nonNull(queryNLReq.getMapInfo())
                 && MapUtils.isNotEmpty(queryNLReq.getMapInfo().getDataSetElementMatches())) {

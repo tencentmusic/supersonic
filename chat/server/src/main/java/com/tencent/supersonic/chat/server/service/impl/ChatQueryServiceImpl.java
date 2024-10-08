@@ -145,25 +145,21 @@ public class ChatQueryServiceImpl implements ChatQueryService {
     }
 
     @Override
-    public QueryResult parseAndExecute(int chatId, int agentId, String queryText) {
-        ChatParseReq chatParseReq = new ChatParseReq();
-        chatParseReq.setQueryText(queryText);
-        chatParseReq.setChatId(chatId);
-        chatParseReq.setAgentId(agentId);
-        chatParseReq.setUser(User.getFakeUser());
+    public QueryResult parseAndExecute(ChatParseReq chatParseReq) {
         ParseResp parseResp = performParsing(chatParseReq);
         if (CollectionUtils.isEmpty(parseResp.getSelectedParses())) {
             log.debug("chatId:{}, agentId:{}, queryText:{}, parseResp.getSelectedParses() is empty",
-                    chatId, agentId, queryText);
+                    chatParseReq.getChatId(), chatParseReq.getAgentId(),
+                    chatParseReq.getQueryText());
             return null;
         }
         ChatExecuteReq executeReq = new ChatExecuteReq();
         executeReq.setQueryId(parseResp.getQueryId());
         executeReq.setParseId(parseResp.getSelectedParses().get(0).getId());
-        executeReq.setQueryText(queryText);
-        executeReq.setChatId(chatId);
+        executeReq.setQueryText(chatParseReq.getQueryText());
+        executeReq.setChatId(chatParseReq.getChatId());
         executeReq.setUser(User.getFakeUser());
-        executeReq.setAgentId(agentId);
+        executeReq.setAgentId(chatParseReq.getAgentId());
         executeReq.setSaveAnswer(true);
         return performExecution(executeReq);
     }
