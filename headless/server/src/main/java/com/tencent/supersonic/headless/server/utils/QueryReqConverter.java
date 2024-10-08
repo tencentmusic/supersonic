@@ -317,7 +317,7 @@ public class QueryReqConverter {
         });
         Set<String> deriveDimension = new HashSet<>();
         Set<String> deriveMetric = new HashSet<>();
-        Set<String> visitedMetric = new HashSet<>();
+        Map<String, String> visitedMetric = new HashMap<>();
         if (!CollectionUtils.isEmpty(metricResps)) {
             for (MetricResp metricResp : metricResps) {
                 if (metrics.contains(metricResp.getBizName())) {
