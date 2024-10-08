@@ -1,7 +1,6 @@
-package com.tencent.supersonic.headless.core.utils;
+package com.tencent.supersonic.common.calcite;
 
-import com.tencent.supersonic.headless.api.pojo.enums.EngineType;
-import com.tencent.supersonic.headless.core.translator.calcite.schema.SemanticSqlDialect;
+import com.tencent.supersonic.common.pojo.enums.EngineType;
 import org.apache.calcite.avatica.util.Casing;
 import org.apache.calcite.sql.SqlDialect;
 import org.apache.calcite.sql.SqlDialect.Context;
@@ -14,22 +13,14 @@ import java.util.Objects;
 public class SqlDialectFactory {
 
     public static final Context DEFAULT_CONTEXT =
-            SqlDialect.EMPTY_CONTEXT
-                    .withDatabaseProduct(DatabaseProduct.BIG_QUERY)
-                    .withLiteralQuoteString("'")
-                    .withLiteralEscapedQuoteString("''")
-                    .withIdentifierQuoteString("`")
-                    .withUnquotedCasing(Casing.UNCHANGED)
-                    .withQuotedCasing(Casing.UNCHANGED)
-                    .withCaseSensitive(false);
-    public static final Context POSTGRESQL_CONTEXT =
-            SqlDialect.EMPTY_CONTEXT
-                    .withDatabaseProduct(DatabaseProduct.BIG_QUERY)
-                    .withLiteralQuoteString("'")
-                    .withLiteralEscapedQuoteString("''")
-                    .withUnquotedCasing(Casing.UNCHANGED)
-                    .withQuotedCasing(Casing.UNCHANGED)
-                    .withCaseSensitive(false);
+            SqlDialect.EMPTY_CONTEXT.withDatabaseProduct(DatabaseProduct.BIG_QUERY)
+                    .withLiteralQuoteString("'").withLiteralEscapedQuoteString("''")
+                    .withIdentifierQuoteString("`").withUnquotedCasing(Casing.UNCHANGED)
+                    .withQuotedCasing(Casing.UNCHANGED).withCaseSensitive(false);
+    public static final Context POSTGRESQL_CONTEXT = SqlDialect.EMPTY_CONTEXT
+            .withDatabaseProduct(DatabaseProduct.BIG_QUERY).withLiteralQuoteString("'")
+            .withLiteralEscapedQuoteString("''").withUnquotedCasing(Casing.UNCHANGED)
+            .withQuotedCasing(Casing.UNCHANGED).withCaseSensitive(false);
     private static Map<EngineType, SemanticSqlDialect> sqlDialectMap;
 
     static {

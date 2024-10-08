@@ -28,8 +28,8 @@ public class JdbcExecutor implements QueryExecutor {
                 SemanticQueryResp semanticQueryResp = queryAccelerator.query(queryStatement);
                 if (Objects.nonNull(semanticQueryResp)
                         && !semanticQueryResp.getResultList().isEmpty()) {
-                    log.info(
-                            "query by Accelerator {}", queryAccelerator.getClass().getSimpleName());
+                    log.info("query by Accelerator {}",
+                            queryAccelerator.getClass().getSimpleName());
                     return semanticQueryResp;
                 }
             }

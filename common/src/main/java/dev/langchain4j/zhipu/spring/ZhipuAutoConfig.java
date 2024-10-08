@@ -18,46 +18,36 @@ public class ZhipuAutoConfig {
     @ConditionalOnProperty(PREFIX + ".chat-model.api-key")
     ZhipuAiChatModel zhipuAiChatModel(Properties properties) {
         ChatModelProperties chatModelProperties = properties.getChatModel();
-        return ZhipuAiChatModel.builder()
-                .baseUrl(chatModelProperties.getBaseUrl())
-                .apiKey(chatModelProperties.getApiKey())
-                .model(chatModelProperties.getModelName())
+        return ZhipuAiChatModel.builder().baseUrl(chatModelProperties.getBaseUrl())
+                .apiKey(chatModelProperties.getApiKey()).model(chatModelProperties.getModelName())
                 .temperature(chatModelProperties.getTemperature())
-                .topP(chatModelProperties.getTopP())
-                .maxRetries(chatModelProperties.getMaxRetries())
+                .topP(chatModelProperties.getTopP()).maxRetries(chatModelProperties.getMaxRetries())
                 .maxToken(chatModelProperties.getMaxToken())
                 .logRequests(chatModelProperties.getLogRequests())
-                .logResponses(chatModelProperties.getLogResponses())
-                .build();
+                .logResponses(chatModelProperties.getLogResponses()).build();
     }
 
     @Bean
     @ConditionalOnProperty(PREFIX + ".streaming-chat-model.api-key")
     ZhipuAiStreamingChatModel zhipuStreamingChatModel(Properties properties) {
         ChatModelProperties chatModelProperties = properties.getStreamingChatModel();
-        return ZhipuAiStreamingChatModel.builder()
-                .baseUrl(chatModelProperties.getBaseUrl())
-                .apiKey(chatModelProperties.getApiKey())
-                .model(chatModelProperties.getModelName())
+        return ZhipuAiStreamingChatModel.builder().baseUrl(chatModelProperties.getBaseUrl())
+                .apiKey(chatModelProperties.getApiKey()).model(chatModelProperties.getModelName())
                 .temperature(chatModelProperties.getTemperature())
-                .topP(chatModelProperties.getTopP())
-                .maxToken(chatModelProperties.getMaxToken())
+                .topP(chatModelProperties.getTopP()).maxToken(chatModelProperties.getMaxToken())
                 .logRequests(chatModelProperties.getLogRequests())
-                .logResponses(chatModelProperties.getLogResponses())
-                .build();
+                .logResponses(chatModelProperties.getLogResponses()).build();
     }
 
     @Bean
     @ConditionalOnProperty(PREFIX + ".embedding-model.api-key")
     ZhipuAiEmbeddingModel zhipuEmbeddingModel(Properties properties) {
         EmbeddingModelProperties embeddingModelProperties = properties.getEmbeddingModel();
-        return ZhipuAiEmbeddingModel.builder()
-                .baseUrl(embeddingModelProperties.getBaseUrl())
+        return ZhipuAiEmbeddingModel.builder().baseUrl(embeddingModelProperties.getBaseUrl())
                 .apiKey(embeddingModelProperties.getApiKey())
                 .model(embeddingModelProperties.getModel())
                 .maxRetries(embeddingModelProperties.getMaxRetries())
                 .logRequests(embeddingModelProperties.getLogRequests())
-                .logResponses(embeddingModelProperties.getLogResponses())
-                .build();
+                .logResponses(embeddingModelProperties.getLogResponses()).build();
     }
 }

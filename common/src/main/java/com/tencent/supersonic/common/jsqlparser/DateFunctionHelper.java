@@ -13,8 +13,8 @@ import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
 @Slf4j
 public class DateFunctionHelper {
 
-    public static String getStartDateStr(
-            ComparisonOperator minorThanEquals, ExpressionList<?> expressions) {
+    public static String getStartDateStr(ComparisonOperator minorThanEquals,
+            ExpressionList<?> expressions) {
         String unitValue = getUnit(expressions);
         String dateValue = getEndDateValue(expressions);
         String dateStr = "";

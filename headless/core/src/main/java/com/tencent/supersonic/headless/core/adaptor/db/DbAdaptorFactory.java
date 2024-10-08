@@ -1,6 +1,6 @@
 package com.tencent.supersonic.headless.core.adaptor.db;
 
-import com.tencent.supersonic.headless.api.pojo.enums.EngineType;
+import com.tencent.supersonic.common.pojo.enums.EngineType;
 
 import java.util.HashMap;
 import java.util.Map;

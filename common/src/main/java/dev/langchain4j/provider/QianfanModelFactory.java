@@ -21,31 +21,23 @@ public class QianfanModelFactory implements ModelFactory, InitializingBean {
 
     @Override
     public ChatLanguageModel createChatModel(ChatModelConfig modelConfig) {
-        return QianfanChatModel.builder()
-                .baseUrl(modelConfig.getBaseUrl())
-                .apiKey(modelConfig.getApiKey())
-                .secretKey(modelConfig.getSecretKey())
-                .endpoint(modelConfig.getEndpoint())
-                .modelName(modelConfig.getModelName())
-                .temperature(modelConfig.getTemperature())
-                .topP(modelConfig.getTopP())
-                .maxRetries(modelConfig.getMaxRetries())
-                .logRequests(modelConfig.getLogRequests())
-                .logResponses(modelConfig.getLogResponses())
-                .build();
+        return QianfanChatModel.builder().baseUrl(modelConfig.getBaseUrl())
+                .apiKey(modelConfig.getApiKey()).secretKey(modelConfig.getSecretKey())
+                .endpoint(modelConfig.getEndpoint()).modelName(modelConfig.getModelName())
+                .temperature(modelConfig.getTemperature()).topP(modelConfig.getTopP())
+                .maxRetries(modelConfig.getMaxRetries()).logRequests(modelConfig.getLogRequests())
+                .logResponses(modelConfig.getLogResponses()).build();
     }
 
     @Override
     public EmbeddingModel createEmbeddingModel(EmbeddingModelConfig embeddingModelConfig) {
-        return QianfanEmbeddingModel.builder()
-                .baseUrl(embeddingModelConfig.getBaseUrl())
+        return QianfanEmbeddingModel.builder().baseUrl(embeddingModelConfig.getBaseUrl())
                 .apiKey(embeddingModelConfig.getApiKey())
                 .secretKey(embeddingModelConfig.getSecretKey())
                 .modelName(embeddingModelConfig.getModelName())
                 .maxRetries(embeddingModelConfig.getMaxRetries())
                 .logRequests(embeddingModelConfig.getLogRequests())
-                .logResponses(embeddingModelConfig.getLogResponses())
-                .build();
+                .logResponses(embeddingModelConfig.getLogResponses()).build();
     }
 
     @Override

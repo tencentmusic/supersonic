@@ -5,4 +5,5 @@ import com.tencent.supersonic.headless.server.persistence.dataobject.DimensionDO
 import org.apache.ibatis.annotations.Mapper;
 
 @Mapper
-public interface DimensionDOMapper extends BaseMapper<DimensionDO> {}
+public interface DimensionDOMapper extends BaseMapper<DimensionDO> {
+}

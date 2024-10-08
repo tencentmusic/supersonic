@@ -5,4 +5,5 @@ import com.tencent.supersonic.headless.server.persistence.dataobject.TermDO;
 import org.apache.ibatis.annotations.Mapper;
 
 @Mapper
-public interface TermMapper extends BaseMapper<TermDO> {}
+public interface TermMapper extends BaseMapper<TermDO> {
+}

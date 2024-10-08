@@ -45,10 +45,8 @@ public class WebServiceQuery extends PluginSemanticQuery {
         QueryResult queryResult = new QueryResult();
         queryResult.setQueryMode(QUERY_MODE);
         Map<String, Object> properties = parseInfo.getProperties();
-        PluginParseResult pluginParseResult =
-                JsonUtil.toObject(
-                        JsonUtil.toString(properties.get(Constants.CONTEXT)),
-                        PluginParseResult.class);
+        PluginParseResult pluginParseResult = JsonUtil.toObject(
+                JsonUtil.toString(properties.get(Constants.CONTEXT)), PluginParseResult.class);
         WebServiceResp webServiceResponse = buildResponse(pluginParseResult);
         Object object = webServiceResponse.getResult();
         // in order to show webServiceQuery result int frontend conveniently,
@@ -74,9 +72,8 @@ public class WebServiceQuery extends PluginSemanticQuery {
     protected WebServiceResp buildResponse(PluginParseResult pluginParseResult) {
         WebServiceResp webServiceResponse = new WebServiceResp();
         ChatPlugin plugin = pluginParseResult.getPlugin();
-        WebBase webBase =
-                fillWebBaseResult(
-                        JsonUtil.toObject(plugin.getConfig(), WebBase.class), pluginParseResult);
+        WebBase webBase = fillWebBaseResult(JsonUtil.toObject(plugin.getConfig(), WebBase.class),
+                pluginParseResult);
         webServiceResponse.setWebBase(webBase);
         List<ParamOption> paramOptions = webBase.getParamOptions();
         Map<String, Object> params = new HashMap<>();

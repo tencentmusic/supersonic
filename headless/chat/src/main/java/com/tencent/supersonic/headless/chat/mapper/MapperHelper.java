@@ -28,11 +28,8 @@ public class MapperHelper {
     }
 
     public Integer getStepOffset(List<S2Term> termList, Integer index) {
-        List<Integer> offsetList =
-                termList.stream()
-                        .sorted(Comparator.comparing(S2Term::getOffset))
-                        .map(term -> term.getOffset())
-                        .collect(Collectors.toList());
+        List<Integer> offsetList = termList.stream().sorted(Comparator.comparing(S2Term::getOffset))
+                .map(term -> term.getOffset()).collect(Collectors.toList());
 
         for (int j = 0; j < termList.size() - 1; j++) {
             if (offsetList.get(j) <= index && offsetList.get(j + 1) > index) {
@@ -43,13 +40,8 @@ public class MapperHelper {
     }
 
     public Map<Integer, Integer> getRegOffsetToLength(List<S2Term> terms) {
-        return terms.stream()
-                .sorted(Comparator.comparing(S2Term::length))
-                .collect(
-                        Collectors.toMap(
-                                S2Term::getOffset,
-                                term -> term.word.length(),
-                                (value1, value2) -> value2));
+        return terms.stream().sorted(Comparator.comparing(S2Term::length)).collect(Collectors
+                .toMap(S2Term::getOffset, term -> term.word.length(), (value1, value2) -> value2));
     }
 
     /**

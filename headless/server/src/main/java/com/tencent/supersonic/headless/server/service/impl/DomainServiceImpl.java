@@ -41,9 +41,7 @@ public class DomainServiceImpl implements DomainService {
     private final ModelService modelService;
     private final UserService userService;
 
-    public DomainServiceImpl(
-            DomainRepository domainRepository,
-            @Lazy ModelService modelService,
+    public DomainServiceImpl(DomainRepository domainRepository, @Lazy ModelService modelService,
             UserService userService) {
         this.domainRepository = domainRepository;
         this.modelService = modelService;
@@ -89,8 +87,7 @@ public class DomainServiceImpl implements DomainService {
 
     @Override
     public List<DomainResp> getDomainList(List<Long> domainIds) {
-        return getDomainList().stream()
-                .filter(domainDO -> domainIds.contains(domainDO.getId()))
+        return getDomainList().stream().filter(domainDO -> domainIds.contains(domainDO.getId()))
                 .collect(Collectors.toList());
     }
 
@@ -113,10 +110,8 @@ public class DomainServiceImpl implements DomainService {
                 domainResp.setHasModel(true);
             }
         }
-        return new ArrayList<>(domainWithAuthAll)
-                .stream()
-                        .sorted(Comparator.comparingLong(DomainResp::getId))
-                        .collect(Collectors.toList());
+        return new ArrayList<>(domainWithAuthAll).stream()
+                .sorted(Comparator.comparingLong(DomainResp::getId)).collect(Collectors.toList());
     }
 
     @Override
@@ -125,19 +120,16 @@ public class DomainServiceImpl implements DomainService {
         Set<String> orgIds = userService.getUserAllOrgId(user.getName());
         Set<DomainResp> domainWithAuth = Sets.newHashSet();
         if (authTypeEnum.equals(AuthType.ADMIN)) {
-            domainWithAuth =
-                    domainResps.stream()
-                            .filter(domainResp -> checkAdminPermission(orgIds, user, domainResp))
-                            .collect(Collectors.toSet());
-            return domainWithAuth.stream()
-                    .peek(domainResp -> domainResp.setHasEditPermission(true))
+            domainWithAuth = domainResps.stream()
+                    .filter(domainResp -> checkAdminPermission(orgIds, user, domainResp))
+                    .collect(Collectors.toSet());
+            return domainWithAuth.stream().peek(domainResp -> domainResp.setHasEditPermission(true))
                     .collect(Collectors.toSet());
         }
         if (authTypeEnum.equals(AuthType.VISIBLE)) {
-            domainWithAuth =
-                    domainResps.stream()
-                            .filter(domainResp -> checkViewPermission(orgIds, user, domainResp))
-                            .collect(Collectors.toSet());
+            domainWithAuth = domainResps.stream()
+                    .filter(domainResp -> checkViewPermission(orgIds, user, domainResp))
+                    .collect(Collectors.toSet());
         }
 
         return domainWithAuth;
@@ -217,9 +209,8 @@ public class DomainServiceImpl implements DomainService {
     public Map<Long, String> getDomainFullPathMap() {
         Map<Long, String> domainFullPathMap = new HashMap<>();
         List<DomainDO> domainDOList = domainRepository.getDomainList();
-        Map<Long, DomainDO> domainDOMap =
-                domainDOList.stream()
-                        .collect(Collectors.toMap(DomainDO::getId, a -> a, (k1, k2) -> k1));
+        Map<Long, DomainDO> domainDOMap = domainDOList.stream()
+                .collect(Collectors.toMap(DomainDO::getId, a -> a, (k1, k2) -> k1));
         for (DomainDO domainDO : domainDOList) {
             final Long domainId = domainDO.getId();
             StringBuilder fullPath = new StringBuilder(domainDO.getBizName() + "/");

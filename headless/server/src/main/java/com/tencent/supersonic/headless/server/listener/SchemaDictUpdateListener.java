@@ -22,28 +22,24 @@ public class SchemaDictUpdateListener implements ApplicationListener<DataEvent> 
         if (CollectionUtils.isEmpty(dataEvent.getDataItems())) {
             return;
         }
-        dataEvent
-                .getDataItems()
-                .forEach(
-                        dataItem -> {
-                            DictWord dictWord = new DictWord();
-                            dictWord.setWord(dataItem.getName());
-                            String sign = DictWordType.NATURE_SPILT;
-                            String suffixNature = DictWordType.getSuffixNature(dataItem.getType());
-                            String nature =
-                                    sign + dataItem.getModelId() + dataItem.getId() + suffixNature;
-                            String natureWithFrequency = nature + " " + Constants.DEFAULT_FREQUENCY;
-                            dictWord.setNature(nature);
-                            dictWord.setNatureWithFrequency(natureWithFrequency);
-                            if (EventType.ADD.equals(dataEvent.getEventType())) {
-                                HanlpHelper.addToCustomDictionary(dictWord);
-                            } else if (EventType.DELETE.equals(dataEvent.getEventType())) {
-                                HanlpHelper.removeFromCustomDictionary(dictWord);
-                            } else if (EventType.UPDATE.equals(dataEvent.getEventType())) {
-                                HanlpHelper.removeFromCustomDictionary(dictWord);
-                                dictWord.setWord(dataItem.getNewName());
-                                HanlpHelper.addToCustomDictionary(dictWord);
-                            }
-                        });
+        dataEvent.getDataItems().forEach(dataItem -> {
+            DictWord dictWord = new DictWord();
+            dictWord.setWord(dataItem.getName());
+            String sign = DictWordType.NATURE_SPILT;
+            String suffixNature = DictWordType.getSuffixNature(dataItem.getType());
+            String nature = sign + dataItem.getModelId() + dataItem.getId() + suffixNature;
+            String natureWithFrequency = nature + " " + Constants.DEFAULT_FREQUENCY;
+            dictWord.setNature(nature);
+            dictWord.setNatureWithFrequency(natureWithFrequency);
+            if (EventType.ADD.equals(dataEvent.getEventType())) {
+                HanlpHelper.addToCustomDictionary(dictWord);
+            } else if (EventType.DELETE.equals(dataEvent.getEventType())) {
+                HanlpHelper.removeFromCustomDictionary(dictWord);
+            } else if (EventType.UPDATE.equals(dataEvent.getEventType())) {
+                HanlpHelper.removeFromCustomDictionary(dictWord);
+                dictWord.setWord(dataItem.getNewName());
+                HanlpHelper.addToCustomDictionary(dictWord);
+            }
+        });
     }
 }

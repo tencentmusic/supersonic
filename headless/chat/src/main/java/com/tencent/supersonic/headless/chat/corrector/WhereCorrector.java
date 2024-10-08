@@ -31,8 +31,8 @@ public class WhereCorrector extends BaseSemanticCorrector {
         updateFieldValueByTechName(chatQueryContext, semanticParseInfo);
     }
 
-    protected void addQueryFilter(
-            ChatQueryContext chatQueryContext, SemanticParseInfo semanticParseInfo) {
+    protected void addQueryFilter(ChatQueryContext chatQueryContext,
+            SemanticParseInfo semanticParseInfo) {
         String queryFilter = getQueryFilter(chatQueryContext.getQueryFilters());
         String correctS2SQL = semanticParseInfo.getSqlInfo().getCorrectedS2SQL();
 
@@ -55,8 +55,8 @@ public class WhereCorrector extends BaseSemanticCorrector {
         return QueryFilterParser.parse(queryFilters);
     }
 
-    private void updateFieldValueByTechName(
-            ChatQueryContext chatQueryContext, SemanticParseInfo semanticParseInfo) {
+    private void updateFieldValueByTechName(ChatQueryContext chatQueryContext,
+            SemanticParseInfo semanticParseInfo) {
         SemanticSchema semanticSchema = chatQueryContext.getSemanticSchema();
         Long dataSetId = semanticParseInfo.getDataSetId();
         List<SchemaElement> dimensions = semanticSchema.getDimensions(dataSetId);
@@ -75,50 +75,25 @@ public class WhereCorrector extends BaseSemanticCorrector {
     private Map<String, Map<String, String>> getAliasAndBizNameToTechName(
             List<SchemaElement> dimensions) {
         return dimensions.stream()
-                .filter(
-                        dimension ->
-                                Objects.nonNull(dimension)
-                                        && StringUtils.isNotEmpty(dimension.getName())
-                                        && !CollectionUtils.isEmpty(dimension.getSchemaValueMaps()))
-                .collect(
-                        Collectors.toMap(
-                                SchemaElement::getName,
-                                dimension ->
-                                        dimension.getSchemaValueMaps().stream()
-                                                .filter(
-                                                        valueMap ->
-                                                                Objects.nonNull(valueMap)
-                                                                        && StringUtils.isNotEmpty(
-                                                                                valueMap
-                                                                                        .getTechName()))
-                                                .flatMap(
-                                                        valueMap -> {
-                                                            Map<String, String> map =
-                                                                    new HashMap<>();
-                                                            if (StringUtils.isNotEmpty(
-                                                                    valueMap.getBizName())) {
-                                                                map.put(
-                                                                        valueMap.getBizName(),
-                                                                        valueMap.getTechName());
-                                                            }
-                                                            if (!CollectionUtils.isEmpty(
-                                                                    valueMap.getAlias())) {
-                                                                valueMap.getAlias().stream()
-                                                                        .filter(
-                                                                                StringUtils
-                                                                                        ::isNotEmpty)
-                                                                        .forEach(
-                                                                                alias ->
-                                                                                        map.put(
-                                                                                                alias,
-                                                                                                valueMap
-                                                                                                        .getTechName()));
-                                                            }
-                                                            return map.entrySet().stream();
-                                                        })
-                                                .collect(
-                                                        Collectors.toMap(
-                                                                Map.Entry::getKey,
-                                                                Map.Entry::getValue))));
+                .filter(dimension -> Objects.nonNull(dimension)
+                        && StringUtils.isNotEmpty(dimension.getName())
+                        && !CollectionUtils.isEmpty(dimension.getSchemaValueMaps()))
+                .collect(Collectors.toMap(SchemaElement::getName,
+                        dimension -> dimension.getSchemaValueMaps().stream()
+                                .filter(valueMap -> Objects.nonNull(valueMap)
+                                        && StringUtils.isNotEmpty(valueMap.getTechName()))
+                                .flatMap(valueMap -> {
+                                    Map<String, String> map = new HashMap<>();
+                                    if (StringUtils.isNotEmpty(valueMap.getBizName())) {
+                                        map.put(valueMap.getBizName(), valueMap.getTechName());
+                                    }
+                                    if (!CollectionUtils.isEmpty(valueMap.getAlias())) {
+                                        valueMap.getAlias().stream().filter(StringUtils::isNotEmpty)
+                                                .forEach(alias -> map.put(alias,
+                                                        valueMap.getTechName()));
+                                    }
+                                    return map.entrySet().stream();
+                                }).collect(
+                                        Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue))));
     }
 }

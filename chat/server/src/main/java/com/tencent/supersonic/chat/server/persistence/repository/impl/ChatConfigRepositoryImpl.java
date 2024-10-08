@@ -23,8 +23,8 @@ public class ChatConfigRepositoryImpl implements ChatConfigRepository {
     private final ChatConfigHelper chatConfigHelper;
     private final ChatConfigMapper chatConfigMapper;
 
-    public ChatConfigRepositoryImpl(
-            ChatConfigHelper chatConfigHelper, ChatConfigMapper chatConfigMapper) {
+    public ChatConfigRepositoryImpl(ChatConfigHelper chatConfigHelper,
+            ChatConfigMapper chatConfigMapper) {
         this.chatConfigHelper = chatConfigHelper;
         this.chatConfigMapper = chatConfigMapper;
     }
@@ -52,11 +52,8 @@ public class ChatConfigRepositoryImpl implements ChatConfigRepository {
         List<ChatConfigDO> chaConfigDOList = chatConfigMapper.search(filterInternal);
         if (!CollectionUtils.isEmpty(chaConfigDOList)) {
             chaConfigDOList.stream()
-                    .forEach(
-                            chaConfigDO ->
-                                    chaConfigDescriptorList.add(
-                                            chatConfigHelper.chatConfigDO2Descriptor(
-                                                    chaConfigDO.getModelId(), chaConfigDO)));
+                    .forEach(chaConfigDO -> chaConfigDescriptorList.add(chatConfigHelper
+                            .chatConfigDO2Descriptor(chaConfigDO.getModelId(), chaConfigDO)));
         }
         return chaConfigDescriptorList;
     }

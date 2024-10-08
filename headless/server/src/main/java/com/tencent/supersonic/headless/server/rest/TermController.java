@@ -25,12 +25,11 @@ import java.util.List;
 @RequestMapping("/api/semantic/term")
 public class TermController {
 
-    @Autowired private TermService termService;
+    @Autowired
+    private TermService termService;
 
     @PostMapping("/saveOrUpdate")
-    public boolean saveOrUpdate(
-            @RequestBody TermReq termReq,
-            HttpServletRequest request,
+    public boolean saveOrUpdate(@RequestBody TermReq termReq, HttpServletRequest request,
             HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
         termService.saveOrUpdate(termReq, user);
@@ -38,8 +37,7 @@ public class TermController {
     }
 
     @GetMapping
-    public List<TermResp> getTerms(
-            @RequestParam("domainId") Long domainId,
+    public List<TermResp> getTerms(@RequestParam("domainId") Long domainId,
             @RequestParam(name = "queryKey", required = false) String queryKey) {
         return termService.getTerms(domainId, queryKey);
     }

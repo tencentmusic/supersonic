@@ -22,12 +22,8 @@ public class FileUtils {
             return -1;
         }
         File file = new File(path);
-        Optional<Long> lastModified =
-                Arrays.stream(file.listFiles())
-                        .filter(f -> f.isFile())
-                        .map(f -> f.lastModified())
-                        .sorted(Collections.reverseOrder())
-                        .findFirst();
+        Optional<Long> lastModified = Arrays.stream(file.listFiles()).filter(f -> f.isFile())
+                .map(f -> f.lastModified()).sorted(Collections.reverseOrder()).findFirst();
 
         if (lastModified.isPresent()) {
             return lastModified.get();
@@ -42,8 +38,8 @@ public class FileUtils {
         return null;
     }
 
-    public static void scanDirectory(
-            File file, int maxLevel, Map<Integer, List<File>> directories) {
+    public static void scanDirectory(File file, int maxLevel,
+            Map<Integer, List<File>> directories) {
         if (maxLevel < 0) {
             return;
         }

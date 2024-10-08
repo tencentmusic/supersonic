@@ -17,20 +17,12 @@ public class TextSegmentConvert {
     public static final String QUERY_ID = "queryId";
 
     public static List<TextSegment> convertToEmbedding(List<DataItem> dataItems) {
-        return dataItems.stream()
-                .map(
-                        dataItem -> {
-                            Map meta =
-                                    JSONObject.parseObject(
-                                            JSONObject.toJSONString(dataItem), Map.class);
-                            TextSegment textSegment =
-                                    TextSegment.from(dataItem.getName(), new Metadata(meta));
-                            addQueryId(
-                                    textSegment,
-                                    dataItem.getId() + dataItem.getType().name().toLowerCase());
-                            return textSegment;
-                        })
-                .collect(Collectors.toList());
+        return dataItems.stream().map(dataItem -> {
+            Map meta = JSONObject.parseObject(JSONObject.toJSONString(dataItem), Map.class);
+            TextSegment textSegment = TextSegment.from(dataItem.getName(), new Metadata(meta));
+            addQueryId(textSegment, dataItem.getId() + dataItem.getType().name().toLowerCase());
+            return textSegment;
+        }).collect(Collectors.toList());
     }
 
     public static void addQueryId(TextSegment textSegment, String queryId) {

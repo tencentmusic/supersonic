@@ -47,14 +47,8 @@ class DateUtilsTest {
         String startDate = "2023-07-29";
         String endDate = "2023-08-03";
         List<String> actualDateList = DateUtils.getDateList(startDate, endDate, DatePeriodEnum.DAY);
-        List<String> expectedDateList =
-                Lists.newArrayList(
-                        "2023-07-29",
-                        "2023-07-30",
-                        "2023-07-31",
-                        "2023-08-01",
-                        "2023-08-02",
-                        "2023-08-03");
+        List<String> expectedDateList = Lists.newArrayList("2023-07-29", "2023-07-30", "2023-07-31",
+                "2023-08-01", "2023-08-02", "2023-08-03");
         Assertions.assertEquals(expectedDateList, actualDateList);
     }
 

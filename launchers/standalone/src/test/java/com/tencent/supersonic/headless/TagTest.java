@@ -13,7 +13,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class TagTest extends BaseTest {
 
-    @Autowired private TagQueryService tagQueryService;
+    @Autowired
+    private TagQueryService tagQueryService;
 
     @Test
     public void testQueryTagValue() throws Exception {

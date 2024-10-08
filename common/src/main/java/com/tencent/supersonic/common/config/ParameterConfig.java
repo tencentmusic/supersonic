@@ -15,9 +15,11 @@ import java.util.Map;
 @Service
 public abstract class ParameterConfig {
     public static final String DEMO = "demo";
-    @Autowired private SystemConfigService sysConfigService;
+    @Autowired
+    private SystemConfigService sysConfigService;
 
-    @Autowired private Environment environment;
+    @Autowired
+    private Environment environment;
 
     /** @return system parameters to be set with user interface */
     protected List<Parameter> getSysParameters() {
@@ -46,10 +48,8 @@ public abstract class ParameterConfig {
         return value;
     }
 
-    protected static List<Parameter.Dependency> getDependency(
-            String dependencyParameterName,
-            List<String> includesValue,
-            Map<String, String> setDefaultValue) {
+    protected static List<Parameter.Dependency> getDependency(String dependencyParameterName,
+            List<String> includesValue, Map<String, String> setDefaultValue) {
 
         Parameter.Dependency.Show show = new Parameter.Dependency.Show();
         show.setIncludesValue(includesValue);

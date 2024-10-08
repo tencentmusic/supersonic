@@ -29,8 +29,8 @@ public class ChatMemoryFilter {
 
     private String sort = "desc";
     private String orderCondition;
+
     public boolean isAsc() {
         return "asc".equalsIgnoreCase(sort);
     }
-
 }

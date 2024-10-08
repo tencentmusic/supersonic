@@ -33,9 +33,11 @@ import java.util.stream.Collectors;
 @Service
 public class AgentServiceImpl extends ServiceImpl<AgentDOMapper, AgentDO> implements AgentService {
 
-    @Autowired private MemoryService memoryService;
+    @Autowired
+    private MemoryService memoryService;
 
-    @Autowired private ChatQueryService chatQueryService;
+    @Autowired
+    private ChatQueryService chatQueryService;
 
     private ExecutorService executorService = Executors.newFixedThreadPool(1);
 
@@ -98,8 +100,7 @@ public class AgentServiceImpl extends ServiceImpl<AgentDOMapper, AgentDO> implem
     }
 
     private synchronized void doExecuteAgentExamples(Agent agent) {
-        if (!agent.containsLLMTool()
-                || !LLMConnHelper.testConnection(agent.getModelConfig())
+        if (!agent.containsLLMTool() || !LLMConnHelper.testConnection(agent.getModelConfig())
                 || CollectionUtils.isEmpty(agent.getExamples())) {
             return;
         }
@@ -107,10 +108,8 @@ public class AgentServiceImpl extends ServiceImpl<AgentDOMapper, AgentDO> implem
         List<String> examples = agent.getExamples();
         ChatMemoryFilter chatMemoryFilter =
                 ChatMemoryFilter.builder().agentId(agent.getId()).questions(examples).build();
-        List<String> memoriesExisted =
-                memoryService.getMemories(chatMemoryFilter).stream()
-                        .map(ChatMemoryDO::getQuestion)
-                        .collect(Collectors.toList());
+        List<String> memoriesExisted = memoryService.getMemories(chatMemoryFilter).stream()
+                .map(ChatMemoryDO::getQuestion).collect(Collectors.toList());
         for (String example : examples) {
             if (memoriesExisted.contains(example)) {
                 continue;

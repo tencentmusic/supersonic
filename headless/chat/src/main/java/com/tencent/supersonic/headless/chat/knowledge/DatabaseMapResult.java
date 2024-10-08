@@ -31,10 +31,7 @@ public class DatabaseMapResult extends MapResult {
 
     @Override
     public String getMapKey() {
-        return this.getName()
-                + Constants.UNDERLINE
-                + this.getSchemaElement().getId()
-                + Constants.UNDERLINE
-                + this.getSchemaElement().getName();
+        return this.getName() + Constants.UNDERLINE + this.getSchemaElement().getId()
+                + Constants.UNDERLINE + this.getSchemaElement().getName();
     }
 }

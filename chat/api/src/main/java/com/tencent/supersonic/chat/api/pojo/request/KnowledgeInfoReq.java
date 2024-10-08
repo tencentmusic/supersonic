@@ -14,7 +14,8 @@ public class KnowledgeInfoReq {
 
     private String bizName;
     /** type: IntentionTypeEnum temporarily only supports dimension-related information */
-    @NotNull private TypeEnums type = TypeEnums.DIMENSION;
+    @NotNull
+    private TypeEnums type = TypeEnums.DIMENSION;
 
     private Boolean searchEnable = false;
 

@@ -27,11 +27,14 @@ import java.util.List;
 public class CanvasServiceImpl extends ServiceImpl<CanvasDOMapper, CanvasDO>
         implements CanvasService {
 
-    @Autowired private ModelService modelService;
+    @Autowired
+    private ModelService modelService;
 
-    @Autowired private DimensionService dimensionService;
+    @Autowired
+    private DimensionService dimensionService;
 
-    @Autowired private MetricService metricService;
+    @Autowired
+    private MetricService metricService;
 
     @Override
     public List<CanvasDO> getCanvasList(Long domainId) {

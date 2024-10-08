@@ -65,15 +65,12 @@ public class StatUtils {
         QueryStat queryStatInfo = get();
         queryStatInfo.setElapsedMs(System.currentTimeMillis() - queryStatInfo.getStartTime());
         queryStatInfo.setQueryState(state.getStatus());
-        CompletableFuture.runAsync(
-                        () -> {
-                            statRepository.createRecord(queryStatInfo);
-                        })
-                .exceptionally(
-                        exception -> {
-                            log.warn("queryStatInfo, exception:", exception);
-                            return null;
-                        });
+        CompletableFuture.runAsync(() -> {
+            statRepository.createRecord(queryStatInfo);
+        }).exceptionally(exception -> {
+            log.warn("queryStatInfo, exception:", exception);
+            return null;
+        });
 
         remove();
     }
@@ -111,10 +108,7 @@ public class StatUtils {
         String user = getUserName(facadeUser);
 
         try {
-            queryStatInfo
-                    .setTraceId(traceId)
-                    .setDataSetId(queryTagReq.getDataSetId())
-                    .setUser(user)
+            queryStatInfo.setTraceId(traceId).setDataSetId(queryTagReq.getDataSetId()).setUser(user)
                     .setQueryType(QueryMethod.STRUCT.getValue())
                     .setQueryTypeBack(QueryTypeBack.NORMAL.getState())
                     .setQueryStructCmd(queryTagReq.toString())
@@ -124,11 +118,9 @@ public class StatUtils {
                     .setGroupByCols(objectMapper.writeValueAsString(queryTagReq.getGroups()))
                     .setAggCols(objectMapper.writeValueAsString(queryTagReq.getAggregators()))
                     .setOrderByCols(objectMapper.writeValueAsString(queryTagReq.getOrders()))
-                    .setFilterCols(
-                            objectMapper.writeValueAsString(
-                                    sqlFilterUtils.getFiltersCol(queryTagReq.getTagFilters())))
-                    .setUseResultCache(true)
-                    .setUseSqlCache(true)
+                    .setFilterCols(objectMapper.writeValueAsString(
+                            sqlFilterUtils.getFiltersCol(queryTagReq.getTagFilters())))
+                    .setUseResultCache(true).setUseSqlCache(true)
                     .setMetrics(objectMapper.writeValueAsString(metrics))
                     .setDimensions(objectMapper.writeValueAsString(dimensions))
                     .setQueryOptMode(QueryOptMode.NONE.name());
@@ -150,18 +142,13 @@ public class StatUtils {
 
         String userName = getUserName(facadeUser);
         try {
-            queryStatInfo
-                    .setTraceId("")
-                    .setUser(userName)
-                    .setDataSetId(querySqlReq.getDataSetId())
+            queryStatInfo.setTraceId("").setUser(userName).setDataSetId(querySqlReq.getDataSetId())
                     .setQueryType(QueryMethod.SQL.getValue())
                     .setQueryTypeBack(QueryTypeBack.NORMAL.getState())
                     .setQuerySqlCmd(querySqlReq.toString())
                     .setQuerySqlCmdMd5(DigestUtils.md5Hex(querySqlReq.toString()))
-                    .setStartTime(System.currentTimeMillis())
-                    .setUseResultCache(true)
-                    .setUseSqlCache(true)
-                    .setMetrics(objectMapper.writeValueAsString(aggFields))
+                    .setStartTime(System.currentTimeMillis()).setUseResultCache(true)
+                    .setUseSqlCache(true).setMetrics(objectMapper.writeValueAsString(aggFields))
                     .setDimensions(objectMapper.writeValueAsString(dimensions));
             if (!CollectionUtils.isEmpty(querySqlReq.getModelIds())) {
                 queryStatInfo.setModelId(querySqlReq.getModelIds().get(0));
@@ -183,11 +170,8 @@ public class StatUtils {
         String user = getUserName(facadeUser);
 
         try {
-            queryStatInfo
-                    .setTraceId(traceId)
-                    .setDataSetId(queryStructReq.getDataSetId())
-                    .setUser(user)
-                    .setQueryType(QueryMethod.STRUCT.getValue())
+            queryStatInfo.setTraceId(traceId).setDataSetId(queryStructReq.getDataSetId())
+                    .setUser(user).setQueryType(QueryMethod.STRUCT.getValue())
                     .setQueryTypeBack(QueryTypeBack.NORMAL.getState())
                     .setQueryStructCmd(queryStructReq.toString())
                     .setQueryStructCmdMd5(DigestUtils.md5Hex(queryStructReq.toString()))
@@ -196,12 +180,9 @@ public class StatUtils {
                     .setGroupByCols(objectMapper.writeValueAsString(queryStructReq.getGroups()))
                     .setAggCols(objectMapper.writeValueAsString(queryStructReq.getAggregators()))
                     .setOrderByCols(objectMapper.writeValueAsString(queryStructReq.getOrders()))
-                    .setFilterCols(
-                            objectMapper.writeValueAsString(
-                                    sqlFilterUtils.getFiltersCol(
-                                            queryStructReq.getOriginalFilter())))
-                    .setUseResultCache(true)
-                    .setUseSqlCache(true)
+                    .setFilterCols(objectMapper.writeValueAsString(
+                            sqlFilterUtils.getFiltersCol(queryStructReq.getOriginalFilter())))
+                    .setUseResultCache(true).setUseSqlCache(true)
                     .setMetrics(objectMapper.writeValueAsString(metrics))
                     .setDimensions(objectMapper.writeValueAsString(dimensions))
                     .setQueryOptMode(QueryOptMode.NONE.name());
@@ -214,15 +195,12 @@ public class StatUtils {
         StatUtils.set(queryStatInfo);
     }
 
-    private List<String> getFieldNames(
-            List<String> allFields, List<? extends SchemaItem> schemaItems) {
-        Set<String> fieldNames =
-                schemaItems.stream()
-                        .map(dimSchemaResp -> dimSchemaResp.getBizName())
-                        .collect(Collectors.toSet());
+    private List<String> getFieldNames(List<String> allFields,
+            List<? extends SchemaItem> schemaItems) {
+        Set<String> fieldNames = schemaItems.stream()
+                .map(dimSchemaResp -> dimSchemaResp.getBizName()).collect(Collectors.toSet());
         if (!CollectionUtils.isEmpty(fieldNames)) {
-            return allFields.stream()
-                    .filter(fieldName -> fieldNames.contains(fieldName))
+            return allFields.stream().filter(fieldName -> fieldNames.contains(fieldName))
                     .collect(Collectors.toList());
         }
         return new ArrayList<>();

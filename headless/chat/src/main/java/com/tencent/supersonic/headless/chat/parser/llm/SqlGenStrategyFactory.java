@@ -14,8 +14,8 @@ public class SqlGenStrategyFactory {
         return sqlGenStrategyMap.get(strategyType);
     }
 
-    public static void addSqlGenerationForFactory(
-            LLMReq.SqlGenType strategy, SqlGenStrategy sqlGenStrategy) {
+    public static void addSqlGenerationForFactory(LLMReq.SqlGenType strategy,
+            SqlGenStrategy sqlGenStrategy) {
         sqlGenStrategyMap.put(strategy, sqlGenStrategy);
     }
 }

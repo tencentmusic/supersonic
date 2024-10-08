@@ -17,11 +17,10 @@ public class AggCorrector extends BaseSemanticCorrector {
         addAggregate(chatQueryContext, semanticParseInfo);
     }
 
-    private void addAggregate(
-            ChatQueryContext chatQueryContext, SemanticParseInfo semanticParseInfo) {
-        List<String> sqlGroupByFields =
-                SqlSelectHelper.getGroupByFields(
-                        semanticParseInfo.getSqlInfo().getCorrectedS2SQL());
+    private void addAggregate(ChatQueryContext chatQueryContext,
+            SemanticParseInfo semanticParseInfo) {
+        List<String> sqlGroupByFields = SqlSelectHelper
+                .getGroupByFields(semanticParseInfo.getSqlInfo().getCorrectedS2SQL());
         if (CollectionUtils.isEmpty(sqlGroupByFields)) {
             return;
         }

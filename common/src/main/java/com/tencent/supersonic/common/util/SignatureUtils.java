@@ -12,8 +12,8 @@ public class SignatureUtils {
         return DigestUtils.sha1Hex(psw);
     }
 
-    public static Pair<Boolean, String> isValidSignature(
-            String appKey, String appSecret, long timestamp, String signatureToCheck) {
+    public static Pair<Boolean, String> isValidSignature(String appKey, String appSecret,
+            long timestamp, String signatureToCheck) {
         long currentTimeMillis = System.currentTimeMillis();
 
         if (currentTimeMillis < timestamp) {

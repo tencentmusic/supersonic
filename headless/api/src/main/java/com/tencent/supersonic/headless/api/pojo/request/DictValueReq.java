@@ -13,4 +13,6 @@ public class DictValueReq extends PageBaseReq {
     private Long itemId;
 
     private TypeEnums type = TypeEnums.DIMENSION;
+
+    private String keyValue;
 }

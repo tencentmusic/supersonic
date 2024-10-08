@@ -24,26 +24,20 @@ import java.util.Set;
 @Disabled
 class SchemaCorrectorTest {
 
-    private String json =
-            "{\n"
-                    + "          \"dataSetId\":  1,\n"
-                    + "          \"llmReq\":  {\n"
-                    + "                    \"queryText\":  \"xxx2024年播放量最高的十首歌\",\n"
-                    + "                    \"schema\":  {\n"
-                    + "                              \"dataSetName\":  \"歌曲\",\n"
-                    + "                              \"fieldNameList\":  [\n"
-                    + "                                        \"商务组\",\n"
-                    + "                                        \"歌曲名\",\n"
-                    + "                                        \"播放量\",\n"
-                    + "                                        \"播放份额\",\n"
-                    + "                                        \"数据日期\"\n"
-                    + "                              ]\n"
-                    + "                    },\n"
-                    + "                    \"currentDate\":  \"2024-02-24\",\n"
-                    + "                    \"sqlGenType\":  \"1_pass_self_consistency\"\n"
-                    + "          },\n"
-                    + "          \"request\":  null\n"
-                    + "}";
+    private String json = "{\n" + "          \"dataSetId\":  1,\n" + "          \"llmReq\":  {\n"
+            + "                    \"queryText\":  \"xxx2024年播放量最高的十首歌\",\n"
+            + "                    \"schema\":  {\n"
+            + "                              \"dataSetName\":  \"歌曲\",\n"
+            + "                              \"fieldNameList\":  [\n"
+            + "                                        \"商务组\",\n"
+            + "                                        \"歌曲名\",\n"
+            + "                                        \"播放量\",\n"
+            + "                                        \"播放份额\",\n"
+            + "                                        \"数据日期\"\n"
+            + "                              ]\n" + "                    },\n"
+            + "                    \"currentDate\":  \"2024-02-24\",\n"
+            + "                    \"sqlGenType\":  \"1_pass_self_consistency\"\n"
+            + "          },\n" + "          \"request\":  null\n" + "}";
 
     @Test
     void doCorrect() throws JsonProcessingException {
@@ -52,9 +46,8 @@ class SchemaCorrectorTest {
         ObjectMapper objectMapper = new ObjectMapper();
         ParseResult parseResult = objectMapper.readValue(json, ParseResult.class);
 
-        String sql =
-                "select  歌曲名 from 歌曲 where 发行日期 >= '2024-01-01' "
-                        + "and 商务组 = 'xxx' order by 播放量 desc  limit 10";
+        String sql = "select  歌曲名 from 歌曲 where 发行日期 >= '2024-01-01' "
+                + "and 商务组 = 'xxx' order by 播放量 desc  limit 10";
         SemanticParseInfo semanticParseInfo = new SemanticParseInfo();
         SqlInfo sqlInfo = new SqlInfo();
         sqlInfo.setParsedS2SQL(sql);

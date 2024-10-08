@@ -5,4 +5,5 @@ import com.tencent.supersonic.chat.server.persistence.dataobject.ChatMemoryDO;
 import org.apache.ibatis.annotations.Mapper;
 
 @Mapper
-public interface ChatMemoryMapper extends BaseMapper<ChatMemoryDO> {}
+public interface ChatMemoryMapper extends BaseMapper<ChatMemoryDO> {
+}

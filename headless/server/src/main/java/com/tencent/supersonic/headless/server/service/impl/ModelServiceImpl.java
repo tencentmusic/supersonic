@@ -78,14 +78,9 @@ public class ModelServiceImpl implements ModelService {
 
     private DateInfoRepository dateInfoRepository;
 
-    public ModelServiceImpl(
-            ModelRepository modelRepository,
-            DatabaseService databaseService,
-            @Lazy DimensionService dimensionService,
-            @Lazy MetricService metricService,
-            DomainService domainService,
-            UserService userService,
-            DataSetService dataSetService,
+    public ModelServiceImpl(ModelRepository modelRepository, DatabaseService databaseService,
+            @Lazy DimensionService dimensionService, @Lazy MetricService metricService,
+            DomainService domainService, UserService userService, DataSetService dataSetService,
             DateInfoRepository dateInfoRepository) {
         this.modelRepository = modelRepository;
         this.databaseService = databaseService;
@@ -185,9 +180,7 @@ public class ModelServiceImpl implements ModelService {
         metaFilter.setFieldsDepend(fieldRemovedReq.getFields());
         List<MetricResp> metricResps = metricService.getMetrics(metaFilter);
         List<DimensionResp> dimensionResps = dimensionService.getDimensions(metaFilter);
-        return UnAvailableItemResp.builder()
-                .dimensionResps(dimensionResps)
-                .metricResps(metricResps)
+        return UnAvailableItemResp.builder().dimensionResps(dimensionResps).metricResps(metricResps)
                 .build();
     }
 
@@ -204,9 +197,8 @@ public class ModelServiceImpl implements ModelService {
     private void checkParams(ModelReq modelReq) {
         String forbiddenCharacters = NameCheckUtils.findForbiddenCharacters(modelReq.getName());
         if (StringUtils.isNotBlank(forbiddenCharacters)) {
-            String message =
-                    String.format(
-                            "模型名称[%s]包含特殊字符(%s), 请修改", modelReq.getName(), forbiddenCharacters);
+            String message = String.format("模型名称[%s]包含特殊字符(%s), 请修改", modelReq.getName(),
+                    forbiddenCharacters);
             throw new InvalidArgumentException(message);
         }
 
@@ -228,10 +220,8 @@ public class ModelServiceImpl implements ModelService {
                     NameCheckUtils.findForbiddenCharacters(measure.getName());
             if (StringUtils.isNotBlank(measure.getName())
                     && StringUtils.isNotBlank(measureForbiddenCharacters)) {
-                String message =
-                        String.format(
-                                "度量[%s]包含特殊字符(%s), 请修改",
-                                measure.getName(), measureForbiddenCharacters);
+                String message = String.format("度量[%s]包含特殊字符(%s), 请修改", measure.getName(),
+                        measureForbiddenCharacters);
                 throw new InvalidArgumentException(message);
             }
         }
@@ -239,9 +229,8 @@ public class ModelServiceImpl implements ModelService {
             String dimForbiddenCharacters = NameCheckUtils.findForbiddenCharacters(dim.getName());
             if (StringUtils.isNotBlank(dim.getName())
                     && StringUtils.isNotBlank(dimForbiddenCharacters)) {
-                String message =
-                        String.format(
-                                "维度[%s]包含特殊字符(%s), 请修改", dim.getName(), dimForbiddenCharacters);
+                String message = String.format("维度[%s]包含特殊字符(%s), 请修改", dim.getName(),
+                        dimForbiddenCharacters);
                 throw new InvalidArgumentException(message);
             }
         }
@@ -250,10 +239,8 @@ public class ModelServiceImpl implements ModelService {
                     NameCheckUtils.findForbiddenCharacters(identify.getName());
             if (StringUtils.isNotBlank(identify.getName())
                     && StringUtils.isNotBlank(identifyForbiddenCharacters)) {
-                String message =
-                        String.format(
-                                "主键/外键[%s]包含特殊字符(%s), 请修改",
-                                identify.getName(), identifyForbiddenCharacters);
+                String message = String.format("主键/外键[%s]包含特殊字符(%s), 请修改", identify.getName(),
+                        identifyForbiddenCharacters);
                 throw new InvalidArgumentException(message);
             }
         }
@@ -304,26 +291,21 @@ public class ModelServiceImpl implements ModelService {
         List<ModelResp> modelRespsAuthInheritDomain =
                 getModelRespAuthInheritDomain(user, domainId, authType);
         modelRespSet.addAll(modelRespsAuthInheritDomain);
-        return modelRespSet.stream()
-                .sorted(Comparator.comparingLong(ModelResp::getId))
+        return modelRespSet.stream().sorted(Comparator.comparingLong(ModelResp::getId))
                 .collect(Collectors.toList());
     }
 
-    public List<ModelResp> getModelRespAuthInheritDomain(
-            User user, Long domainId, AuthType authType) {
+    public List<ModelResp> getModelRespAuthInheritDomain(User user, Long domainId,
+            AuthType authType) {
         List<Long> domainIds =
-                domainService.getDomainAuthSet(user, authType).stream()
-                        .filter(
-                                domainResp -> {
-                                    if (domainId == null) {
-                                        return true;
-                                    } else {
-                                        return domainId.equals(domainResp.getId())
-                                                || domainId.equals(domainResp.getParentId());
-                                    }
-                                })
-                        .map(DomainResp::getId)
-                        .collect(Collectors.toList());
+                domainService.getDomainAuthSet(user, authType).stream().filter(domainResp -> {
+                    if (domainId == null) {
+                        return true;
+                    } else {
+                        return domainId.equals(domainResp.getId())
+                                || domainId.equals(domainResp.getParentId());
+                    }
+                }).map(DomainResp::getId).collect(Collectors.toList());
         if (CollectionUtils.isEmpty(domainIds)) {
             return Lists.newArrayList();
         }
@@ -342,16 +324,14 @@ public class ModelServiceImpl implements ModelService {
         Set<String> orgIds = userService.getUserAllOrgId(user.getName());
         List<ModelResp> modelWithAuth = Lists.newArrayList();
         if (authTypeEnum.equals(AuthType.ADMIN)) {
-            modelWithAuth =
-                    modelResps.stream()
-                            .filter(modelResp -> checkAdminPermission(orgIds, user, modelResp))
-                            .collect(Collectors.toList());
+            modelWithAuth = modelResps.stream()
+                    .filter(modelResp -> checkAdminPermission(orgIds, user, modelResp))
+                    .collect(Collectors.toList());
         }
         if (authTypeEnum.equals(AuthType.VISIBLE)) {
-            modelWithAuth =
-                    modelResps.stream()
-                            .filter(domainResp -> checkDataSetPermission(orgIds, user, domainResp))
-                            .collect(Collectors.toList());
+            modelWithAuth = modelResps.stream()
+                    .filter(domainResp -> checkDataSetPermission(orgIds, user, domainResp))
+                    .collect(Collectors.toList());
         }
         return modelWithAuth;
     }
@@ -368,8 +348,7 @@ public class ModelServiceImpl implements ModelService {
         if (CollectionUtils.isEmpty(modelResps)) {
             return modelResps;
         }
-        return modelResps.stream()
-                .filter(modelResp -> domainIds.contains(modelResp.getDomainId()))
+        return modelResps.stream().filter(modelResp -> domainIds.contains(modelResp.getDomainId()))
                 .collect(Collectors.toList());
     }
 
@@ -434,35 +413,23 @@ public class ModelServiceImpl implements ModelService {
         if (CollectionUtils.isEmpty(modelDOS)) {
             return;
         }
-        modelDOS =
-                modelDOS.stream()
-                        .peek(
-                                modelDO -> {
-                                    modelDO.setStatus(metaBatchReq.getStatus());
-                                    modelDO.setUpdatedAt(new Date());
-                                    modelDO.setUpdatedBy(user.getName());
-                                    if (StatusEnum.OFFLINE
-                                                    .getCode()
-                                                    .equals(metaBatchReq.getStatus())
-                                            || StatusEnum.DELETED
-                                                    .getCode()
-                                                    .equals(metaBatchReq.getStatus())) {
-                                        metricService.sendMetricEventBatch(
-                                                Lists.newArrayList(modelDO.getId()),
-                                                EventType.DELETE);
-                                        dimensionService.sendDimensionEventBatch(
-                                                Lists.newArrayList(modelDO.getId()),
-                                                EventType.DELETE);
-                                    } else if (StatusEnum.ONLINE
-                                            .getCode()
-                                            .equals(metaBatchReq.getStatus())) {
-                                        metricService.sendMetricEventBatch(
-                                                Lists.newArrayList(modelDO.getId()), EventType.ADD);
-                                        dimensionService.sendDimensionEventBatch(
-                                                Lists.newArrayList(modelDO.getId()), EventType.ADD);
-                                    }
-                                })
-                        .collect(Collectors.toList());
+        modelDOS = modelDOS.stream().peek(modelDO -> {
+            modelDO.setStatus(metaBatchReq.getStatus());
+            modelDO.setUpdatedAt(new Date());
+            modelDO.setUpdatedBy(user.getName());
+            if (StatusEnum.OFFLINE.getCode().equals(metaBatchReq.getStatus())
+                    || StatusEnum.DELETED.getCode().equals(metaBatchReq.getStatus())) {
+                metricService.sendMetricEventBatch(Lists.newArrayList(modelDO.getId()),
+                        EventType.DELETE);
+                dimensionService.sendDimensionEventBatch(Lists.newArrayList(modelDO.getId()),
+                        EventType.DELETE);
+            } else if (StatusEnum.ONLINE.getCode().equals(metaBatchReq.getStatus())) {
+                metricService.sendMetricEventBatch(Lists.newArrayList(modelDO.getId()),
+                        EventType.ADD);
+                dimensionService.sendDimensionEventBatch(Lists.newArrayList(modelDO.getId()),
+                        EventType.ADD);
+            }
+        }).collect(Collectors.toList());
         modelRepository.batchUpdate(modelDOS);
     }
 
@@ -472,14 +439,13 @@ public class ModelServiceImpl implements ModelService {
 
     private List<DateInfoReq> convert(List<DateInfoDO> dateInfoDOList) {
         List<DateInfoReq> dateInfoCommendList = new ArrayList<>();
-        dateInfoDOList.forEach(
-                dateInfoDO -> {
-                    DateInfoReq dateInfoCommend = new DateInfoReq();
-                    BeanUtils.copyProperties(dateInfoDO, dateInfoCommend);
-                    dateInfoCommend.setUnavailableDateList(
-                            JsonUtil.toList(dateInfoDO.getUnavailableDateList(), String.class));
-                    dateInfoCommendList.add(dateInfoCommend);
-                });
+        dateInfoDOList.forEach(dateInfoDO -> {
+            DateInfoReq dateInfoCommend = new DateInfoReq();
+            BeanUtils.copyProperties(dateInfoDO, dateInfoCommend);
+            dateInfoCommend.setUnavailableDateList(
+                    JsonUtil.toList(dateInfoDO.getUnavailableDateList(), String.class));
+            dateInfoCommendList.add(dateInfoCommend);
+        });
         return dateInfoCommendList;
     }
 
@@ -504,8 +470,8 @@ public class ModelServiceImpl implements ModelService {
         return false;
     }
 
-    public static boolean checkDataSetPermission(
-            Set<String> orgIds, User user, ModelResp modelResp) {
+    public static boolean checkDataSetPermission(Set<String> orgIds, User user,
+            ModelResp modelResp) {
         if (checkAdminPermission(orgIds, user, modelResp)) {
             return true;
         }

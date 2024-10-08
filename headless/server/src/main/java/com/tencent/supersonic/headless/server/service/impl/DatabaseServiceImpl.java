@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.common.pojo.QueryColumn;
+import com.tencent.supersonic.common.pojo.enums.EngineType;
 import com.tencent.supersonic.headless.api.pojo.DBColumn;
 import com.tencent.supersonic.headless.api.pojo.request.DatabaseReq;
 import com.tencent.supersonic.headless.api.pojo.request.SqlExecuteReq;
@@ -20,11 +21,14 @@ import com.tencent.supersonic.headless.server.persistence.dataobject.DatabaseDO;
 import com.tencent.supersonic.headless.server.persistence.mapper.DatabaseDOMapper;
 import com.tencent.supersonic.headless.server.pojo.DatabaseParameter;
 import com.tencent.supersonic.headless.server.pojo.DbParameterFactory;
+import com.tencent.supersonic.headless.server.pojo.DbParametersBuilder;
+import com.tencent.supersonic.headless.server.pojo.DefaultParametersBuilder;
 import com.tencent.supersonic.headless.server.pojo.ModelFilter;
 import com.tencent.supersonic.headless.server.service.DatabaseService;
 import com.tencent.supersonic.headless.server.service.ModelService;
 import com.tencent.supersonic.headless.server.utils.DatabaseConverter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
@@ -41,9 +45,12 @@ import java.util.stream.Collectors;
 public class DatabaseServiceImpl extends ServiceImpl<DatabaseDOMapper, DatabaseDO>
         implements DatabaseService {
 
-    @Autowired private SqlUtils sqlUtils;
+    @Autowired
+    private SqlUtils sqlUtils;
 
-    @Lazy @Autowired private ModelService datasourceService;
+    @Lazy
+    @Autowired
+    private ModelService datasourceService;
 
     @Override
     public boolean testConnect(DatabaseReq databaseReq, User user) {
@@ -53,6 +60,11 @@ public class DatabaseServiceImpl extends ServiceImpl<DatabaseDOMapper, DatabaseD
 
     @Override
     public DatabaseResp createOrUpdateDatabase(DatabaseReq databaseReq, User user) {
+        if (StringUtils.isNotBlank(databaseReq.getDatabaseType())
+                && EngineType.OTHER.getName().equalsIgnoreCase(databaseReq.getType())) {
+            databaseReq.setType(databaseReq.getDatabaseType());
+        }
+
         DatabaseDO databaseDO = getDatabaseDO(databaseReq.getId());
         if (databaseDO != null) {
             databaseReq.updatedBy(user.getName());
@@ -75,19 +87,18 @@ public class DatabaseServiceImpl extends ServiceImpl<DatabaseDOMapper, DatabaseD
     }
 
     private void fillPermission(List<DatabaseResp> databaseResps, User user) {
-        databaseResps.forEach(
-                databaseResp -> {
-                    if (databaseResp.getAdmins().contains(user.getName())
-                            || user.getName().equalsIgnoreCase(databaseResp.getCreatedBy())
-                            || user.isSuperAdmin()) {
-                        databaseResp.setHasPermission(true);
-                        databaseResp.setHasEditPermission(true);
-                        databaseResp.setHasUsePermission(true);
-                    }
-                    if (databaseResp.getViewers().contains(user.getName())) {
-                        databaseResp.setHasUsePermission(true);
-                    }
-                });
+        databaseResps.forEach(databaseResp -> {
+            if (databaseResp.getAdmins().contains(user.getName())
+                    || user.getName().equalsIgnoreCase(databaseResp.getCreatedBy())
+                    || user.isSuperAdmin()) {
+                databaseResp.setHasPermission(true);
+                databaseResp.setHasEditPermission(true);
+                databaseResp.setHasUsePermission(true);
+            }
+            if (databaseResp.getViewers().contains(user.getName())) {
+                databaseResp.setHasUsePermission(true);
+            }
+        });
     }
 
     @Override
@@ -126,9 +137,8 @@ public class DatabaseServiceImpl extends ServiceImpl<DatabaseDOMapper, DatabaseD
         }
         checkPermission(databaseResp, user);
         String sql = sqlExecuteReq.getSql();
-        sql =
-                SqlVariableParseUtils.parse(
-                        sql, sqlExecuteReq.getSqlVariables(), Lists.newArrayList());
+        sql = SqlVariableParseUtils.parse(sql, sqlExecuteReq.getSqlVariables(),
+                Lists.newArrayList());
         return executeSql(sql, databaseResp);
     }
 
@@ -138,12 +148,35 @@ public class DatabaseServiceImpl extends ServiceImpl<DatabaseDOMapper, DatabaseD
     }
 
     @Override
-    public Map<String, List<DatabaseParameter>> getDatabaseParameters() {
-        return DbParameterFactory.getMap().entrySet().stream()
-                .collect(
-                        LinkedHashMap::new,
-                        (map, entry) -> map.put(entry.getKey(), entry.getValue().build()),
-                        LinkedHashMap::putAll);
+    public Map<String, List<DatabaseParameter>> getDatabaseParameters(User user) {
+        List<DatabaseResp> databaseList = getDatabaseList(user);
+
+        Map<String, DbParametersBuilder> parametersBuilderMap = DbParameterFactory.getMap();
+        Map<String, List<DatabaseParameter>> result = new LinkedHashMap<>();
+
+        // Add all known database parameters
+        for (Map.Entry<String, DbParametersBuilder> entry : parametersBuilderMap.entrySet()) {
+            if (!entry.getKey().equals(EngineType.OTHER.getName())) {
+                result.put(entry.getKey(), entry.getValue().build());
+            }
+        }
+        // Add default parameters for unknown databases
+        if (!CollectionUtils.isEmpty(databaseList)) {
+            List<String> databaseTypeList = databaseList.stream()
+                    .map(databaseResp -> databaseResp.getType()).collect(Collectors.toList());
+            DefaultParametersBuilder defaultParametersBuilder = new DefaultParametersBuilder();
+            for (String dbType : databaseTypeList) {
+                if (!parametersBuilderMap.containsKey(dbType)) {
+                    result.put(dbType, defaultParametersBuilder.build());
+                }
+            }
+        }
+        // Add the OTHER type at the end
+        if (parametersBuilderMap.containsKey(EngineType.OTHER.getName())) {
+            result.put(EngineType.OTHER.getName(),
+                    parametersBuilderMap.get(EngineType.OTHER.getName()).build());
+        }
+        return result;
     }
 
     private SemanticQueryResp queryWithColumns(String sql, Database database) {
@@ -205,14 +238,11 @@ public class DatabaseServiceImpl extends ServiceImpl<DatabaseDOMapper, DatabaseD
     private void checkPermission(DatabaseResp databaseResp, User user) {
         List<String> admins = databaseResp.getAdmins();
         List<String> viewers = databaseResp.getViewers();
-        if (!admins.contains(user.getName())
-                && !viewers.contains(user.getName())
+        if (!admins.contains(user.getName()) && !viewers.contains(user.getName())
                 && !databaseResp.getCreatedBy().equalsIgnoreCase(user.getName())
                 && !user.isSuperAdmin()) {
-            String message =
-                    String.format(
-                            "您暂无当前数据库%s权限, 请联系数据库创建人:%s开通",
-                            databaseResp.getName(), databaseResp.getCreatedBy());
+            String message = String.format("您暂无当前数据库%s权限, 请联系数据库创建人:%s开通", databaseResp.getName(),
+                    databaseResp.getCreatedBy());
             throw new RuntimeException(message);
         }
     }

@@ -28,8 +28,8 @@ class DataTransformUtilsTest {
         Assertions.assertEquals(3, resultData.size());
     }
 
-    private static Map<String, Object> createMap(
-            String sysImpDate, String d1, String d2, String m1) {
+    private static Map<String, Object> createMap(String sysImpDate, String d1, String d2,
+            String m1) {
         Map<String, Object> map = new HashMap<>();
         map.put("sys_imp_date", sysImpDate);
         map.put("d1", d1);

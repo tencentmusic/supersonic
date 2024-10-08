@@ -30,17 +30,14 @@ public class DatabaseMatchStrategy extends SingleMatchStrategy<DatabaseMapResult
     private List<SchemaElement> allElements;
 
     @Override
-    public Map<MatchText, List<DatabaseMapResult>> match(
-            ChatQueryContext chatQueryContext, List<S2Term> terms, Set<Long> detectDataSetIds) {
+    public Map<MatchText, List<DatabaseMapResult>> match(ChatQueryContext chatQueryContext,
+            List<S2Term> terms, Set<Long> detectDataSetIds) {
         this.allElements = getSchemaElements(chatQueryContext);
         return super.match(chatQueryContext, terms, detectDataSetIds);
     }
 
-    public List<DatabaseMapResult> detectByStep(
-            ChatQueryContext chatQueryContext,
-            Set<Long> detectDataSetIds,
-            String detectSegment,
-            int offset) {
+    public List<DatabaseMapResult> detectByStep(ChatQueryContext chatQueryContext,
+            Set<Long> detectDataSetIds, String detectSegment, int offset) {
         if (StringUtils.isBlank(detectSegment)) {
             return new ArrayList<>();
         }
@@ -56,13 +53,9 @@ public class DatabaseMatchStrategy extends SingleMatchStrategy<DatabaseMapResult
             }
             Set<SchemaElement> schemaElements = entry.getValue();
             if (!CollectionUtils.isEmpty(detectDataSetIds)) {
-                schemaElements =
-                        schemaElements.stream()
-                                .filter(
-                                        schemaElement ->
-                                                detectDataSetIds.contains(
-                                                        schemaElement.getDataSetId()))
-                                .collect(Collectors.toSet());
+                schemaElements = schemaElements.stream().filter(
+                        schemaElement -> detectDataSetIds.contains(schemaElement.getDataSetId()))
+                        .collect(Collectors.toSet());
             }
             for (SchemaElement schemaElement : schemaElements) {
                 DatabaseMapResult databaseMapResult = new DatabaseMapResult();
@@ -86,40 +79,31 @@ public class DatabaseMatchStrategy extends SingleMatchStrategy<DatabaseMapResult
     private Double getThreshold(ChatQueryContext chatQueryContext) {
         Double threshold =
                 Double.valueOf(mapperConfig.getParameterValue(MapperConfig.MAPPER_NAME_THRESHOLD));
-        Double minThreshold =
-                Double.valueOf(
-                        mapperConfig.getParameterValue(MapperConfig.MAPPER_NAME_THRESHOLD_MIN));
+        Double minThreshold = Double
+                .valueOf(mapperConfig.getParameterValue(MapperConfig.MAPPER_NAME_THRESHOLD_MIN));
 
         Map<Long, List<SchemaElementMatch>> modelElementMatches =
                 chatQueryContext.getMapInfo().getDataSetElementMatches();
 
-        boolean existElement =
-                modelElementMatches.entrySet().stream()
-                        .anyMatch(entry -> entry.getValue().size() >= 1);
+        boolean existElement = modelElementMatches.entrySet().stream()
+                .anyMatch(entry -> entry.getValue().size() >= 1);
 
         if (!existElement) {
             threshold = threshold / 2;
-            log.debug(
-                    "ModelElementMatches:{},not exist Element threshold reduce by half:{}",
-                    modelElementMatches,
-                    threshold);
+            log.debug("ModelElementMatches:{},not exist Element threshold reduce by half:{}",
+                    modelElementMatches, threshold);
         }
         return getThreshold(threshold, minThreshold, chatQueryContext.getMapModeEnum());
     }
 
     private Map<String, Set<SchemaElement>> getNameToItems(List<SchemaElement> models) {
-        return models.stream()
-                .collect(
-                        Collectors.toMap(
-                                SchemaElement::getName,
-                                a -> {
-                                    Set<SchemaElement> result = new HashSet<>();
-                                    result.add(a);
-                                    return result;
-                                },
-                                (k1, k2) -> {
-                                    k1.addAll(k2);
-                                    return k1;
-                                }));
+        return models.stream().collect(Collectors.toMap(SchemaElement::getName, a -> {
+            Set<SchemaElement> result = new HashSet<>();
+            result.add(a);
+            return result;
+        }, (k1, k2) -> {
+            k1.addAll(k2);
+            return k1;
+        }));
     }
 }

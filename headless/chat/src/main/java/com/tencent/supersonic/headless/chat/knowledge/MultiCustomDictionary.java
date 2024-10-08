@@ -60,12 +60,9 @@ public class MultiCustomDictionary extends DynamicCustomDictionary {
      * @param addToSuggeterTrie
      * @return
      */
-    public static boolean load(
-            String path,
-            Nature defaultNature,
+    public static boolean load(String path, Nature defaultNature,
             TreeMap<String, CoreDictionary.Attribute> map,
-            LinkedHashSet<Nature> customNatureCollector,
-            boolean addToSuggeterTrie) {
+            LinkedHashSet<Nature> customNatureCollector, boolean addToSuggeterTrie) {
         try {
             String splitter = "\\s";
             if (path.endsWith(".csv")) {
@@ -112,9 +109,8 @@ public class MultiCustomDictionary extends DynamicCustomDictionary {
                     attribute = new CoreDictionary.Attribute(natureCount);
 
                     for (int i = 0; i < natureCount; ++i) {
-                        attribute.nature[i] =
-                                LexiconUtility.convertStringToNature(
-                                        param[1 + 2 * i], customNatureCollector);
+                        attribute.nature[i] = LexiconUtility.convertStringToNature(param[1 + 2 * i],
+                                customNatureCollector);
                         attribute.frequency[i] = Integer.parseInt(param[2 + 2 * i]);
                         attribute.originals[i] = original;
                         attribute.totalFrequency += attribute.frequency[i];
@@ -133,10 +129,8 @@ public class MultiCustomDictionary extends DynamicCustomDictionary {
                     Nature nature = attribute.nature[i];
                     PriorityQueue<Term> priorityQueue = NATURE_TO_VALUES.get(nature.toString());
                     if (Objects.isNull(priorityQueue)) {
-                        priorityQueue =
-                                new PriorityQueue<>(
-                                        MAX_SIZE,
-                                        Comparator.comparingInt(Term::getFrequency).reversed());
+                        priorityQueue = new PriorityQueue<>(MAX_SIZE,
+                                Comparator.comparingInt(Term::getFrequency).reversed());
                         NATURE_TO_VALUES.put(nature.toString(), priorityQueue);
                     }
                     Term term = new Term(word, nature);
@@ -159,12 +153,8 @@ public class MultiCustomDictionary extends DynamicCustomDictionary {
             logger.warning("自定义词典" + Arrays.toString(path) + "加载失败");
             return false;
         } else {
-            logger.info(
-                    "自定义词典加载成功:"
-                            + this.dat.size()
-                            + "个词条，耗时"
-                            + (System.currentTimeMillis() - start)
-                            + "ms");
+            logger.info("自定义词典加载成功:" + this.dat.size() + "个词条，耗时"
+                    + (System.currentTimeMillis() - start) + "ms");
             this.path = path;
             return true;
         }
@@ -180,11 +170,8 @@ public class MultiCustomDictionary extends DynamicCustomDictionary {
      * @param addToSuggestTrie
      * @return
      */
-    public static boolean loadMainDictionary(
-            String mainPath,
-            String[] path,
-            DoubleArrayTrie<CoreDictionary.Attribute> dat,
-            boolean isCache,
+    public static boolean loadMainDictionary(String mainPath, String[] path,
+            DoubleArrayTrie<CoreDictionary.Attribute> dat, boolean isCache,
             boolean addToSuggestTrie) {
         logger.info("自定义词典开始加载:" + mainPath);
         if (loadDat(mainPath, dat)) {
@@ -204,9 +191,8 @@ public class MultiCustomDictionary extends DynamicCustomDictionary {
                         p = file.getParent() + File.separator + fileName.substring(0, cut);
 
                         try {
-                            defaultNature =
-                                    LexiconUtility.convertStringToNature(
-                                            nature, customNatureCollector);
+                            defaultNature = LexiconUtility.convertStringToNature(nature,
+                                    customNatureCollector);
                         } catch (Exception var16) {
                             logger.severe("配置文件【" + p + "】写错了！" + var16);
                             continue;
@@ -241,10 +227,8 @@ public class MultiCustomDictionary extends DynamicCustomDictionary {
                         attributeList.add(entry.getValue());
                     }
 
-                    DataOutputStream out =
-                            new DataOutputStream(
-                                    new BufferedOutputStream(
-                                            IOUtil.newOutputStream(mainPath + ".bin")));
+                    DataOutputStream out = new DataOutputStream(
+                            new BufferedOutputStream(IOUtil.newOutputStream(mainPath + ".bin")));
                     if (customNatureCollector.isEmpty()) {
                         for (int i = Nature.begin.ordinal() + 1; i < Nature.values().length; ++i) {
                             Nature nature = Nature.values()[i];
@@ -287,8 +271,8 @@ public class MultiCustomDictionary extends DynamicCustomDictionary {
         return loadDat(path, HanLP.Config.CustomDictionaryPath, dat);
     }
 
-    public static boolean loadDat(
-            String path, String[] customDicPath, DoubleArrayTrie<CoreDictionary.Attribute> dat) {
+    public static boolean loadDat(String path, String[] customDicPath,
+            DoubleArrayTrie<CoreDictionary.Attribute> dat) {
         try {
             if (HanLP.Config.CustomDictionaryAutoRefreshCache
                     && DynamicCustomDictionary.isDicNeedUpdate(path, customDicPath)) {
@@ -374,8 +358,8 @@ public class MultiCustomDictionary extends DynamicCustomDictionary {
             IOUtil.deleteFile(this.path[0] + ".bin");
             Boolean loadCacheOk = this.loadDat(this.path[0], this.path, this.dat);
             if (!loadCacheOk) {
-                return this.loadMainDictionary(
-                        this.path[0], this.path, this.dat, true, addToSuggesterTrie);
+                return this.loadMainDictionary(this.path[0], this.path, this.dat, true,
+                        addToSuggesterTrie);
             }
         }
         return false;
@@ -389,8 +373,7 @@ public class MultiCustomDictionary extends DynamicCustomDictionary {
                 word = CharTable.convert(word);
             }
             CoreDictionary.Attribute att =
-                    natureWithFrequency == null
-                            ? new CoreDictionary.Attribute(Nature.nz, 1)
+                    natureWithFrequency == null ? new CoreDictionary.Attribute(Nature.nz, 1)
                             : CoreDictionary.Attribute.create(natureWithFrequency);
             boolean isLetters = isLetters(word);
             word = getWordBySpace(word);

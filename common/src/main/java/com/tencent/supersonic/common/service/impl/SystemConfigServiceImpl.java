@@ -21,7 +21,8 @@ import java.util.concurrent.atomic.AtomicReference;
 public class SystemConfigServiceImpl extends ServiceImpl<SystemConfigMapper, SystemConfigDO>
         implements SystemConfigService {
 
-    @Autowired private Environment environment;
+    @Autowired
+    private Environment environment;
 
     // Cache field to store the system configuration
     private AtomicReference<SystemConfig> cachedSystemConfig = new AtomicReference<>();
@@ -44,13 +45,11 @@ public class SystemConfigServiceImpl extends ServiceImpl<SystemConfigMapper, Sys
             systemConfig.setId(1);
             systemConfig.init();
             // use system property to initialize system parameter
-            systemConfig.getParameters().stream()
-                    .forEach(
-                            p -> {
-                                if (environment.containsProperty(p.getName())) {
-                                    p.setValue(environment.getProperty(p.getName()));
-                                }
-                            });
+            systemConfig.getParameters().stream().forEach(p -> {
+                if (environment.containsProperty(p.getName())) {
+                    p.setValue(environment.getProperty(p.getName()));
+                }
+            });
             save(systemConfig);
             return systemConfig;
         }
@@ -68,9 +67,8 @@ public class SystemConfigServiceImpl extends ServiceImpl<SystemConfigMapper, Sys
     private SystemConfig convert(SystemConfigDO systemConfigDO) {
         SystemConfig sysParameter = new SystemConfig();
         sysParameter.setId(systemConfigDO.getId());
-        List<Parameter> parameters =
-                JsonUtil.toObject(
-                        systemConfigDO.getParameters(), new TypeReference<List<Parameter>>() {});
+        List<Parameter> parameters = JsonUtil.toObject(systemConfigDO.getParameters(),
+                new TypeReference<List<Parameter>>() {});
         sysParameter.setParameters(parameters);
         sysParameter.setAdminList(systemConfigDO.getAdmin());
         return sysParameter;

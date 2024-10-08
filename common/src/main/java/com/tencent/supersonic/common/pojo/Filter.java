@@ -47,8 +47,6 @@ public class Filter {
     }
 
     public enum Relation {
-        FILTER,
-        OR,
-        AND
+        FILTER, OR, AND
     }
 }

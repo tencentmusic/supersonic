@@ -138,8 +138,8 @@ public class UserDOExample {
             criteria.add(new Criterion(condition, value));
         }
 
-        protected void addCriterion(
-                String condition, Object value1, Object value2, String property) {
+        protected void addCriterion(String condition, Object value1, Object value2,
+                String property) {
             if (value1 == null || value2 == null) {
                 throw new RuntimeException("Between values for " + property + " cannot be null");
             }
@@ -628,8 +628,8 @@ public class UserDOExample {
             this(condition, value, null);
         }
 
-        protected Criterion(
-                String condition, Object value, Object secondValue, String typeHandler) {
+        protected Criterion(String condition, Object value, Object secondValue,
+                String typeHandler) {
             super();
             this.condition = condition;
             this.value = value;

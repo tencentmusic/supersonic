@@ -13,7 +13,8 @@ import java.util.List;
 
 public class TagObjectTest extends BaseTest {
 
-    @Autowired private TagObjectService tagObjectService;
+    @Autowired
+    private TagObjectService tagObjectService;
 
     @Test
     void testCreateTagObject() throws Exception {

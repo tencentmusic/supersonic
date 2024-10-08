@@ -20,8 +20,7 @@ public class QianfanAutoConfig {
     @ConditionalOnProperty(PREFIX + ".chat-model.api-key")
     QianfanChatModel qianfanChatModel(Properties properties) {
         ChatModelProperties chatModelProperties = properties.getChatModel();
-        return QianfanChatModel.builder()
-                .baseUrl(chatModelProperties.getBaseUrl())
+        return QianfanChatModel.builder().baseUrl(chatModelProperties.getBaseUrl())
                 .apiKey(chatModelProperties.getApiKey())
                 .secretKey(chatModelProperties.getSecretKey())
                 .endpoint(chatModelProperties.getEndpoint())
@@ -32,38 +31,32 @@ public class QianfanAutoConfig {
                 .responseFormat(chatModelProperties.getResponseFormat())
                 .maxRetries(chatModelProperties.getMaxRetries())
                 .logRequests(chatModelProperties.getLogRequests())
-                .logResponses(chatModelProperties.getLogResponses())
-                .build();
+                .logResponses(chatModelProperties.getLogResponses()).build();
     }
 
     @Bean
     @ConditionalOnProperty(PREFIX + ".streaming-chat-model.api-key")
     QianfanStreamingChatModel qianfanStreamingChatModel(Properties properties) {
         ChatModelProperties chatModelProperties = properties.getStreamingChatModel();
-        return QianfanStreamingChatModel.builder()
-                .endpoint(chatModelProperties.getEndpoint())
+        return QianfanStreamingChatModel.builder().endpoint(chatModelProperties.getEndpoint())
                 .penaltyScore(chatModelProperties.getPenaltyScore())
                 .temperature(chatModelProperties.getTemperature())
-                .topP(chatModelProperties.getTopP())
-                .baseUrl(chatModelProperties.getBaseUrl())
+                .topP(chatModelProperties.getTopP()).baseUrl(chatModelProperties.getBaseUrl())
                 .apiKey(chatModelProperties.getApiKey())
                 .secretKey(chatModelProperties.getSecretKey())
                 .modelName(chatModelProperties.getModelName())
                 .responseFormat(chatModelProperties.getResponseFormat())
                 .logRequests(chatModelProperties.getLogRequests())
-                .logResponses(chatModelProperties.getLogResponses())
-                .build();
+                .logResponses(chatModelProperties.getLogResponses()).build();
     }
 
     @Bean
     @ConditionalOnProperty(PREFIX + ".language-model.api-key")
     QianfanLanguageModel qianfanLanguageModel(Properties properties) {
         LanguageModelProperties languageModelProperties = properties.getLanguageModel();
-        return QianfanLanguageModel.builder()
-                .endpoint(languageModelProperties.getEndpoint())
+        return QianfanLanguageModel.builder().endpoint(languageModelProperties.getEndpoint())
                 .penaltyScore(languageModelProperties.getPenaltyScore())
-                .topK(languageModelProperties.getTopK())
-                .topP(languageModelProperties.getTopP())
+                .topK(languageModelProperties.getTopK()).topP(languageModelProperties.getTopP())
                 .baseUrl(languageModelProperties.getBaseUrl())
                 .apiKey(languageModelProperties.getApiKey())
                 .secretKey(languageModelProperties.getSecretKey())
@@ -71,8 +64,7 @@ public class QianfanAutoConfig {
                 .temperature(languageModelProperties.getTemperature())
                 .maxRetries(languageModelProperties.getMaxRetries())
                 .logRequests(languageModelProperties.getLogRequests())
-                .logResponses(languageModelProperties.getLogResponses())
-                .build();
+                .logResponses(languageModelProperties.getLogResponses()).build();
     }
 
     @Bean
@@ -82,8 +74,7 @@ public class QianfanAutoConfig {
         return QianfanStreamingLanguageModel.builder()
                 .endpoint(languageModelProperties.getEndpoint())
                 .penaltyScore(languageModelProperties.getPenaltyScore())
-                .topK(languageModelProperties.getTopK())
-                .topP(languageModelProperties.getTopP())
+                .topK(languageModelProperties.getTopK()).topP(languageModelProperties.getTopP())
                 .baseUrl(languageModelProperties.getBaseUrl())
                 .apiKey(languageModelProperties.getApiKey())
                 .secretKey(languageModelProperties.getSecretKey())
@@ -91,16 +82,14 @@ public class QianfanAutoConfig {
                 .temperature(languageModelProperties.getTemperature())
                 .maxRetries(languageModelProperties.getMaxRetries())
                 .logRequests(languageModelProperties.getLogRequests())
-                .logResponses(languageModelProperties.getLogResponses())
-                .build();
+                .logResponses(languageModelProperties.getLogResponses()).build();
     }
 
     @Bean
     @ConditionalOnProperty(PREFIX + ".embedding-model.api-key")
     QianfanEmbeddingModel qianfanEmbeddingModel(Properties properties) {
         EmbeddingModelProperties embeddingModelProperties = properties.getEmbeddingModel();
-        return QianfanEmbeddingModel.builder()
-                .baseUrl(embeddingModelProperties.getBaseUrl())
+        return QianfanEmbeddingModel.builder().baseUrl(embeddingModelProperties.getBaseUrl())
                 .endpoint(embeddingModelProperties.getEndpoint())
                 .apiKey(embeddingModelProperties.getApiKey())
                 .secretKey(embeddingModelProperties.getSecretKey())
@@ -108,7 +97,6 @@ public class QianfanAutoConfig {
                 .user(embeddingModelProperties.getUser())
                 .maxRetries(embeddingModelProperties.getMaxRetries())
                 .logRequests(embeddingModelProperties.getLogRequests())
-                .logResponses(embeddingModelProperties.getLogResponses())
-                .build();
+                .logResponses(embeddingModelProperties.getLogResponses()).build();
     }
 }

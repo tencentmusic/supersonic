@@ -35,9 +35,8 @@ public class Text2SQLEval extends BaseTest {
         for (Long duration : durations) {
             total_duration += duration;
         }
-        System.out.println(
-                String.format(
-                        "Avg Duration: %d seconds", total_duration / 1000 / durations.size()));
+        System.out.println(String.format("Avg Duration: %d seconds",
+                total_duration / 1000 / durations.size()));
     }
 
     @Test
@@ -119,11 +118,8 @@ public class Text2SQLEval extends BaseTest {
         QueryResult result = submitNewChat("过去半个月核心用户的总停留时长", agentId);
         durations.add(System.currentTimeMillis() - start);
         assert result.getQueryColumns().size() >= 1;
-        assert result.getQueryColumns().stream()
-                        .filter(c -> c.getName().contains("停留时长"))
-                        .collect(Collectors.toList())
-                        .size()
-                == 1;
+        assert result.getQueryColumns().stream().filter(c -> c.getName().contains("停留时长"))
+                .collect(Collectors.toList()).size() == 1;
         assert result.getQueryResults().size() >= 1;
     }
 
