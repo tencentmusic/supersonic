@@ -42,7 +42,7 @@ public class BaseTest extends BaseApplication {
         ChatExecuteReq request = ChatExecuteReq.builder().queryText(parseResp.getQueryText())
                 .user(DataUtils.getUser()).parseId(semanticParseInfo.getId())
                 .queryId(parseResp.getQueryId()).chatId(chatId).saveAnswer(true).build();
-        QueryResult queryResult = chatQueryService.performExecution(request);
+        QueryResult queryResult = chatQueryService.execute(request);
         queryResult.setChatContext(semanticParseInfo);
         return queryResult;
     }
@@ -56,7 +56,7 @@ public class BaseTest extends BaseApplication {
                 .user(DataUtils.getUser()).parseId(parseInfo.getId()).agentId(agentId)
                 .chatId(chatId).queryId(parseResp.getQueryId()).saveAnswer(false).build();
 
-        QueryResult result = chatQueryService.performExecution(request);
+        QueryResult result = chatQueryService.execute(request);
         result.setChatContext(parseInfo);
         return result;
     }
@@ -64,7 +64,7 @@ public class BaseTest extends BaseApplication {
     protected ParseResp submitParse(String queryText, Integer agentId, Integer chatId) {
         ChatParseReq chatParseReq = DataUtils.getChatParseReq(chatId, queryText);
         chatParseReq.setAgentId(agentId);
-        return chatQueryService.performParsing(chatParseReq);
+        return chatQueryService.parse(chatParseReq);
     }
 
     protected void assertSchemaElements(Set<SchemaElement> expected, Set<SchemaElement> actual) {

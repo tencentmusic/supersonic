@@ -106,7 +106,7 @@ public class ChatQueryServiceImpl implements ChatQueryService {
     }
 
     @Override
-    public ParseResp performParsing(ChatParseReq chatParseReq) {
+    public ParseResp parse(ChatParseReq chatParseReq) {
         ParseResp parseResp = new ParseResp(chatParseReq.getQueryText());
         chatManageService.createChatQuery(chatParseReq, parseResp);
         ParseContext parseContext = buildParseContext(chatParseReq);
@@ -124,7 +124,7 @@ public class ChatQueryServiceImpl implements ChatQueryService {
     }
 
     @Override
-    public QueryResult performExecution(ChatExecuteReq chatExecuteReq) {
+    public QueryResult execute(ChatExecuteReq chatExecuteReq) {
         QueryResult queryResult = new QueryResult();
         ExecuteContext executeContext = buildExecuteContext(chatExecuteReq);
         for (ChatQueryExecutor chatQueryExecutor : chatQueryExecutors) {
@@ -146,7 +146,7 @@ public class ChatQueryServiceImpl implements ChatQueryService {
 
     @Override
     public QueryResult parseAndExecute(ChatParseReq chatParseReq) {
-        ParseResp parseResp = performParsing(chatParseReq);
+        ParseResp parseResp = parse(chatParseReq);
         if (CollectionUtils.isEmpty(parseResp.getSelectedParses())) {
             log.debug("chatId:{}, agentId:{}, queryText:{}, parseResp.getSelectedParses() is empty",
                     chatParseReq.getChatId(), chatParseReq.getAgentId(),
@@ -161,7 +161,7 @@ public class ChatQueryServiceImpl implements ChatQueryService {
         executeReq.setUser(User.getFakeUser());
         executeReq.setAgentId(chatParseReq.getAgentId());
         executeReq.setSaveAnswer(true);
-        return performExecution(executeReq);
+        return execute(executeReq);
     }
 
     private ParseContext buildParseContext(ChatParseReq chatParseReq) {
@@ -174,7 +174,7 @@ public class ChatQueryServiceImpl implements ChatQueryService {
 
     private void supplyMapInfo(ParseContext parseContext) {
         QueryNLReq queryNLReq = QueryReqConverter.buildText2SqlQueryReq(parseContext);
-        MapResp mapResp = chatLayerService.performMapping(queryNLReq);
+        MapResp mapResp = chatLayerService.map(queryNLReq);
         parseContext.setMapInfo(mapResp.getMapInfo());
     }
 

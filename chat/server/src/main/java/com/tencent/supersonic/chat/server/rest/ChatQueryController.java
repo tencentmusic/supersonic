@@ -41,14 +41,14 @@ public class ChatQueryController {
     public Object parse(@RequestBody ChatParseReq chatParseReq, HttpServletRequest request,
             HttpServletResponse response) throws Exception {
         chatParseReq.setUser(UserHolder.findUser(request, response));
-        return chatQueryService.performParsing(chatParseReq);
+        return chatQueryService.parse(chatParseReq);
     }
 
     @PostMapping("execute")
     public Object execute(@RequestBody ChatExecuteReq chatExecuteReq, HttpServletRequest request,
             HttpServletResponse response) throws Exception {
         chatExecuteReq.setUser(UserHolder.findUser(request, response));
-        return chatQueryService.performExecution(chatExecuteReq);
+        return chatQueryService.execute(chatExecuteReq);
     }
 
     @PostMapping("/")
@@ -56,7 +56,7 @@ public class ChatQueryController {
             HttpServletResponse response) throws Exception {
         User user = UserHolder.findUser(request, response);
         chatParseReq.setUser(user);
-        ParseResp parseResp = chatQueryService.performParsing(chatParseReq);
+        ParseResp parseResp = chatQueryService.parse(chatParseReq);
 
         if (CollectionUtils.isEmpty(parseResp.getSelectedParses())) {
             throw new InvalidArgumentException("parser error,no selectedParses");
@@ -66,7 +66,7 @@ public class ChatQueryController {
         BeanUtils.copyProperties(chatParseReq, chatExecuteReq);
         chatExecuteReq.setQueryId(parseResp.getQueryId());
         chatExecuteReq.setParseId(semanticParseInfo.getId());
-        return chatQueryService.performExecution(chatExecuteReq);
+        return chatQueryService.execute(chatExecuteReq);
     }
 
     @PostMapping("queryData")

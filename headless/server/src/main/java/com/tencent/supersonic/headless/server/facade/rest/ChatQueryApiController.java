@@ -40,21 +40,21 @@ public class ChatQueryApiController {
     public Object map(@RequestBody QueryNLReq queryNLReq, HttpServletRequest request,
             HttpServletResponse response) {
         queryNLReq.setUser(UserHolder.findUser(request, response));
-        return chatLayerService.performMapping(queryNLReq);
+        return chatLayerService.map(queryNLReq);
     }
 
     @PostMapping("/chat/parse")
     public Object parse(@RequestBody QueryNLReq queryNLReq, HttpServletRequest request,
             HttpServletResponse response) throws Exception {
         queryNLReq.setUser(UserHolder.findUser(request, response));
-        return chatLayerService.performParsing(queryNLReq);
+        return chatLayerService.parse(queryNLReq);
     }
 
     @PostMapping("/chat")
     public Object queryByNL(@RequestBody QueryNLReq queryNLReq, HttpServletRequest request,
             HttpServletResponse response) throws Exception {
         User user = UserHolder.findUser(request, response);
-        ParseResp parseResp = chatLayerService.performParsing(queryNLReq);
+        ParseResp parseResp = chatLayerService.parse(queryNLReq);
         if (parseResp.getState().equals(ParseResp.ParseState.COMPLETED)) {
             SemanticParseInfo parseInfo = parseResp.getSelectedParses().get(0);
             QuerySqlReq sqlReq = new QuerySqlReq();

@@ -63,7 +63,7 @@ public class S2ChatLayerService implements ChatLayerService {
     private ChatWorkflowEngine chatWorkflowEngine;
 
     @Override
-    public MapResp performMapping(QueryNLReq queryNLReq) {
+    public MapResp map(QueryNLReq queryNLReq) {
         MapResp mapResp = new MapResp(queryNLReq.getQueryText());
         ChatQueryContext queryCtx = buildChatQueryContext(queryNLReq);
         ComponentFactory.getSchemaMappers().forEach(mapper -> {
@@ -82,13 +82,13 @@ public class S2ChatLayerService implements ChatLayerService {
 
         Set<Long> dataSetIds = dataSets.stream().map(SchemaItem::getId).collect(Collectors.toSet());
         queryNLReq.setDataSetIds(dataSetIds);
-        MapResp mapResp = performMapping(queryNLReq);
+        MapResp mapResp = map(queryNLReq);
         dataSetIds.retainAll(mapResp.getMapInfo().getDataSetElementMatches().keySet());
         return convert(mapResp, queryMapReq.getTopN(), dataSetIds);
     }
 
     @Override
-    public ParseResp performParsing(QueryNLReq queryNLReq) {
+    public ParseResp parse(QueryNLReq queryNLReq) {
         ParseResp parseResult = new ParseResp(queryNLReq.getQueryText());
         ChatQueryContext queryCtx = buildChatQueryContext(queryNLReq);
         chatWorkflowEngine.execute(queryCtx, parseResult);
