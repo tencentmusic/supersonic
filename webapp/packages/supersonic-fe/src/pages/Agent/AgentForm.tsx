@@ -38,7 +38,7 @@ const AgentForm: React.FC<Props> = ({ editAgent, onSaveAgent, onCreateToolBtnCli
       provider: 'OPEN_AI',
       temperature: 0,
     },
-    agentConfig: {
+    toolConfig: {
       ...defaultAgentConfig,
     },
   });
@@ -55,7 +55,7 @@ const AgentForm: React.FC<Props> = ({ editAgent, onSaveAgent, onCreateToolBtnCli
       const initData = {
         ...sourceData,
         enableSearch: editAgent.enableSearch !== 0,
-        agentConfig: { ...defaultAgentConfig, ...config },
+        toolConfig: { ...defaultAgentConfig, ...config },
       };
       form.setFieldsValue(initData);
       setFormData(initData);
@@ -112,7 +112,7 @@ const AgentForm: React.FC<Props> = ({ editAgent, onSaveAgent, onCreateToolBtnCli
       id: editAgent?.id,
       ...(editAgent || {}),
       ...values,
-      agentConfig: JSON.stringify({
+      toolConfig: JSON.stringify({
         ...config,
         ...values.toolConfig,
         debugMode: values.toolConfig?.simpleMode === true ? false : values.toolConfig?.debugMode,
@@ -158,7 +158,7 @@ const AgentForm: React.FC<Props> = ({ editAgent, onSaveAgent, onCreateToolBtnCli
             <Switch />
           </FormItem>
           <FormItem
-            name={['agentConfig', 'simpleMode']}
+            name={['toolConfig', 'simpleMode']}
             label="开启精简模式"
             tooltip="精简模式下不可调整查询条件、不显示调试信息、不显示可视化组件"
             valuePropName="checked"
@@ -167,7 +167,7 @@ const AgentForm: React.FC<Props> = ({ editAgent, onSaveAgent, onCreateToolBtnCli
           </FormItem>
 
           <FormItem
-            name={['agentConfig', 'debugMode']}
+            name={['toolConfig', 'debugMode']}
             label="开启调试信息"
             hidden={formData?.toolConfig?.simpleMode === true}
             tooltip="包含Schema映射、SQL生成每阶段的关键信息"
