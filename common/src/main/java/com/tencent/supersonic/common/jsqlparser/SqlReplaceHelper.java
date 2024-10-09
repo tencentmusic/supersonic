@@ -36,7 +36,9 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -181,7 +183,6 @@ public class SqlReplaceHelper {
         }
         return selectStatement.toString();
     }
-
 
 
     private static void replaceFieldsInPlainOneSelect(Map<String, String> fieldNameMap,
@@ -385,95 +386,89 @@ public class SqlReplaceHelper {
         if (StringUtils.isEmpty(tableName)) {
             return sql;
         }
+        List<String> withNameList = SqlSelectHelper.getWithName(sql);
         Select selectStatement = SqlSelectHelper.getSelect(sql);
         List<PlainSelect> plainSelectList = SqlSelectHelper.getWithItem(selectStatement);
+
         if (!CollectionUtils.isEmpty(plainSelectList)) {
-            List<String> withNameList = SqlSelectHelper.getWithName(sql);
-            plainSelectList.stream().forEach(plainSelect -> {
-                if (plainSelect.getFromItem() instanceof Table) {
-                    Table table = (Table) plainSelect.getFromItem();
-                    if (!withNameList.contains(table.getName())) {
-                        replaceSingleTable(plainSelect, tableName);
-                    }
-                }
-                if (plainSelect.getFromItem() instanceof ParenthesedSelect) {
-                    ParenthesedSelect parenthesedSelect =
-                            (ParenthesedSelect) plainSelect.getFromItem();
-                    PlainSelect subPlainSelect = parenthesedSelect.getPlainSelect();
-                    Table table = (Table) subPlainSelect.getFromItem();
-                    if (!withNameList.contains(table.getName())) {
-                        replaceSingleTable(subPlainSelect, tableName);
-                    }
-                }
-            });
-            return selectStatement.toString();
+            plainSelectList.forEach(
+                    plainSelect -> processPlainSelect(plainSelect, tableName, withNameList));
         }
         if (selectStatement instanceof PlainSelect) {
-            PlainSelect plainSelect = (PlainSelect) selectStatement;
-            replaceSingleTable(plainSelect, tableName);
-            replaceSubTable(plainSelect, tableName);
+            processPlainSelect((PlainSelect) selectStatement, tableName, withNameList);
         } else if (selectStatement instanceof SetOperationList) {
             SetOperationList setOperationList = (SetOperationList) selectStatement;
             if (!CollectionUtils.isEmpty(setOperationList.getSelects())) {
-                setOperationList.getSelects().forEach(subSelectBody -> {
-                    PlainSelect subPlainSelect = (PlainSelect) subSelectBody;
-                    replaceSingleTable(subPlainSelect, tableName);
-                    replaceSubTable(subPlainSelect, tableName);
-                });
+                setOperationList.getSelects()
+                        .forEach(subSelectBody -> processPlainSelect((PlainSelect) subSelectBody,
+                                tableName, withNameList));
             }
         }
 
         return selectStatement.toString();
     }
 
-    public static void replaceSubTable(PlainSelect plainSelect, String tableName) {
-        if (plainSelect.getFromItem() instanceof ParenthesedSelect) {
+    private static void processPlainSelect(PlainSelect plainSelect, String tableName,
+            List<String> withNameList) {
+        if (plainSelect.getFromItem() instanceof Table) {
+            replaceSingleTable(plainSelect, tableName, withNameList);
+        } else if (plainSelect.getFromItem() instanceof ParenthesedSelect) {
             ParenthesedSelect parenthesedSelect = (ParenthesedSelect) plainSelect.getFromItem();
             PlainSelect subPlainSelect = parenthesedSelect.getPlainSelect();
-            replaceSingleTable(subPlainSelect, tableName);
+            replaceSingleTable(subPlainSelect, tableName, withNameList);
         }
-        List<Join> joinList = plainSelect.getJoins();
-        if (CollectionUtils.isEmpty(joinList)) {
-            return;
-        }
-        for (Join join : joinList) {
-            if (join.getFromItem() instanceof ParenthesedSelect) {
-                ParenthesedSelect parenthesedSelect = (ParenthesedSelect) join.getFromItem();
-                replaceSingleTable(parenthesedSelect.getPlainSelect(), tableName);
+        replaceSubTable(plainSelect, tableName, withNameList);
+    }
+
+    public static void replaceSingleTable(PlainSelect plainSelect, String tableName,
+            List<String> withNameList) {
+        List<PlainSelect> plainSelects =
+                SqlSelectHelper.getPlainSelects(Collections.singletonList(plainSelect));
+        plainSelects.forEach(painSelect -> {
+            painSelect.accept(new SelectVisitorAdapter() {
+                @Override
+                public void visit(PlainSelect plainSelect) {
+                    plainSelect.getFromItem().accept(
+                            new TableNameReplaceVisitor(tableName, new HashSet<>(withNameList)));
+                }
+            });
+            replaceJoins(painSelect, tableName, withNameList);
+        });
+    }
+
+    private static void replaceJoins(PlainSelect plainSelect, String tableName,
+            List<String> withNameList) {
+        List<Join> joins = plainSelect.getJoins();
+        if (!CollectionUtils.isEmpty(joins)) {
+            for (Join join : joins) {
+                if (join.getRightItem() instanceof ParenthesedFromItem) {
+                    List<PlainSelect> subPlainSelects = SqlSelectHelper.getPlainSelects(
+                            Collections.singletonList((PlainSelect) join.getRightItem()));
+                    subPlainSelects.forEach(subPlainSelect -> subPlainSelect.getFromItem().accept(
+                            new TableNameReplaceVisitor(tableName, new HashSet<>(withNameList))));
+                } else if (join.getRightItem() instanceof Table) {
+                    Table table = (Table) join.getRightItem();
+                    table.setName(tableName);
+                }
             }
         }
     }
 
-    public static void replaceSingleTable(PlainSelect plainSelect, String tableName) {
-        // replace table name
-        List<PlainSelect> plainSelects = new ArrayList<>();
-        plainSelects.add(plainSelect);
-        List<PlainSelect> painSelects = SqlSelectHelper.getPlainSelects(plainSelects);
-        for (PlainSelect painSelect : painSelects) {
-            painSelect.accept(new SelectVisitorAdapter() {
-                @Override
-                public void visit(PlainSelect plainSelect) {
-                    plainSelect.getFromItem().accept(new TableNameReplaceVisitor(tableName));
+    public static void replaceSubTable(PlainSelect plainSelect, String tableName,
+            List<String> withNameList) {
+        if (plainSelect.getFromItem() instanceof ParenthesedSelect) {
+            ParenthesedSelect parenthesedSelect = (ParenthesedSelect) plainSelect.getFromItem();
+            replaceSingleTable(parenthesedSelect.getPlainSelect(), tableName, withNameList);
+        }
+
+        List<Join> joinList = plainSelect.getJoins();
+        if (!CollectionUtils.isEmpty(joinList)) {
+            joinList.forEach(join -> {
+                if (join.getFromItem() instanceof ParenthesedSelect) {
+                    ParenthesedSelect parenthesedSelect = (ParenthesedSelect) join.getFromItem();
+                    replaceSingleTable(parenthesedSelect.getPlainSelect(), tableName, withNameList);
                 }
             });
-            List<Join> joins = painSelect.getJoins();
-            if (!CollectionUtils.isEmpty(joins)) {
-                for (Join join : joins) {
-                    if (join.getRightItem() instanceof ParenthesedFromItem) {
-                        List<PlainSelect> plainSelectList = new ArrayList<>();
-                        plainSelectList.add((PlainSelect) join.getRightItem());
-                        List<PlainSelect> subPlainSelects =
-                                SqlSelectHelper.getPlainSelects(plainSelectList);
-                        for (PlainSelect subPlainSelect : subPlainSelects) {
-                            subPlainSelect.getFromItem()
-                                    .accept(new TableNameReplaceVisitor(tableName));
-                        }
-                    } else if (join.getRightItem() instanceof Table) {
-                        Table table = (Table) join.getRightItem();
-                        table.setName(tableName);
-                    }
-                }
-            }
         }
     }
 

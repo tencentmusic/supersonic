@@ -402,6 +402,18 @@ class SqlReplaceHelperTest {
         Assert.assertEquals("SELECT 歌曲名称, sum(评分) FROM cspider WHERE (1 < 2) AND 数据日期 = "
                 + "'2023-10-15' GROUP BY 歌曲名称 HAVING sum(评分) < (SELECT min(评分) "
                 + "FROM cspider WHERE 语种 = '英文')", replaceSql);
+
+        sql = "WITH _部门访问次数_ AS ( SELECT 部门, SUM(访问次数) AS _总访问次数_ FROM 超音数数据集 WHERE 数据日期 >= '2024-07-11'"
+                + " AND 数据日期 <= '2024-10-09' GROUP BY 部门 HAVING SUM(访问次数) > 100 ) SELECT 用户, SUM(访问次数) "
+                + "AS _访问次数汇总_ FROM 超音数数据集 WHERE 部门 IN ( SELECT 部门 FROM _部门访问次数_ ) AND 数据日期 >= '2024-07-11' "
+                + "AND 数据日期 <= '2024-10-09' GROUP BY 用户";
+
+        replaceSql = SqlReplaceHelper.replaceTable(sql, "t_1");
+
+        Assert.assertEquals("WITH _部门访问次数_ AS (SELECT 部门, SUM(访问次数) AS _总访问次数_ FROM t_1 "
+                + "WHERE 数据日期 >= '2024-07-11' AND 数据日期 <= '2024-10-09' GROUP BY 部门 HAVING SUM(访问次数) > 100) "
+                + "SELECT 用户, SUM(访问次数) AS _访问次数汇总_ FROM t_1 WHERE 部门 IN (SELECT 部门 FROM _部门访问次数_) "
+                + "AND 数据日期 >= '2024-07-11' AND 数据日期 <= '2024-10-09' GROUP BY 用户", replaceSql);
     }
 
     @Test
