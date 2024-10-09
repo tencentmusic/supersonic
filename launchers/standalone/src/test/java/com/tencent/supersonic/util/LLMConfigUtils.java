@@ -65,11 +65,11 @@ public class LLMConfigUtils {
 
         ChatModelConfig chatModelConfig;
         if (type.isOllam) {
-            chatModelConfig = ChatModelConfig.builder().provider("ollama").baseUrl(baseUrl)
+            chatModelConfig = ChatModelConfig.builder().provider("OLLAMA").baseUrl(baseUrl)
                     .modelName(modelName).temperature(temperature).timeOut(60000L).build();
         } else {
             chatModelConfig =
-                    ChatModelConfig.builder().provider("open_ai").baseUrl(baseUrl).apiKey(apiKey)
+                    ChatModelConfig.builder().provider("OPEN_AI").baseUrl(baseUrl).apiKey(apiKey)
                             .modelName(modelName).temperature(temperature).timeOut(60000L).build();
         }
 
