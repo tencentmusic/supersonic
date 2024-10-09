@@ -2,7 +2,6 @@ package com.tencent.supersonic.demo;
 
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
-import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.chat.server.agent.Agent;
 import com.tencent.supersonic.chat.server.agent.AgentToolType;
 import com.tencent.supersonic.chat.server.agent.LLMParserTool;
@@ -43,7 +42,7 @@ public class S2ArtistDemo extends S2BaseDemo {
         try {
             DomainResp singerDomain = addDomain();
             TagObjectResp singerTagObject = addTagObjectSinger(singerDomain);
-            ModelResp singerModel = addModel(singerDomain, demoDatabaseResp, singerTagObject);
+            ModelResp singerModel = addModel(singerDomain, demoDatabase, singerTagObject);
             addTags(singerModel);
             long dataSetId = addDataSet(singerDomain, singerModel);
             addAgent(dataSetId);
@@ -69,8 +68,7 @@ public class S2ArtistDemo extends S2BaseDemo {
         tagObjectReq.setDomainId(singerDomain.getId());
         tagObjectReq.setName("歌手");
         tagObjectReq.setBizName("singer");
-        User user = User.getDefaultUser();
-        return tagObjectService.create(tagObjectReq, user);
+        return tagObjectService.create(tagObjectReq, defaultUser);
     }
 
     public DomainResp addDomain() {
@@ -84,7 +82,7 @@ public class S2ArtistDemo extends S2BaseDemo {
         domainReq.setAdmins(Arrays.asList("admin", "alice"));
         domainReq.setAdminOrgs(Collections.emptyList());
         domainReq.setIsOpen(1);
-        return domainService.createDomain(domainReq, user);
+        return domainService.createDomain(domainReq, defaultUser);
     }
 
     public ModelResp addModel(DomainResp singerDomain, DatabaseResp s2Database,
@@ -121,7 +119,7 @@ public class S2ArtistDemo extends S2BaseDemo {
         modelDetail.setSqlQuery("select singer_name, act_area, song_name, genre, "
                 + "js_play_cnt, down_cnt, favor_cnt from singer");
         modelReq.setModelDetail(modelDetail);
-        return modelService.createModel(modelReq, user);
+        return modelService.createModel(modelReq, defaultUser);
     }
 
     private void addTags(ModelResp model) {
@@ -159,7 +157,7 @@ public class S2ArtistDemo extends S2BaseDemo {
         queryConfig.setDetailTypeDefaultConfig(detailTypeDefaultConfig);
         queryConfig.setAggregateTypeDefaultConfig(aggregateTypeDefaultConfig);
         dataSetReq.setQueryConfig(queryConfig);
-        DataSetResp dataSetResp = dataSetService.save(dataSetReq, User.getDefaultUser());
+        DataSetResp dataSetResp = dataSetService.save(dataSetReq, defaultUser);
         return dataSetResp.getId();
     }
 
@@ -185,6 +183,6 @@ public class S2ArtistDemo extends S2BaseDemo {
             toolConfig.getTools().add(llmParserTool);
         }
         agent.setToolConfig(JSONObject.toJSONString(toolConfig));
-        agentService.createAgent(agent, User.getDefaultUser());
+        agentService.createAgent(agent, defaultUser);
     }
 }

@@ -38,8 +38,7 @@ public class MemoryServiceImpl implements MemoryService {
     public void createMemory(ChatMemoryDO memory) {
         // do not save duplicate memory for exactly the same question
         List<ChatMemoryDO> memories = getMemories(ChatMemoryFilter.builder()
-                .agentId(memory.getAgentId())
-                .question(memory.getQuestion()).build());
+                .agentId(memory.getAgentId()).question(memory.getQuestion()).build());
         if (memories.size() == 0) {
             chatMemoryRepository.createMemory(memory);
         }

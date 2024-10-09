@@ -2,7 +2,6 @@ package com.tencent.supersonic.demo;
 
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
-import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.chat.server.agent.Agent;
 import com.tencent.supersonic.chat.server.agent.MultiTurnConfig;
 import com.tencent.supersonic.chat.server.agent.ToolConfig;
@@ -31,7 +30,7 @@ public class SmallTalkDemo extends S2BaseDemo {
         multiTurnConfig.setEnableMultiTurn(true);
         agent.setMultiTurnConfig(multiTurnConfig);
 
-        agentService.createAgent(agent, User.getDefaultUser());
+        agentService.createAgent(agent, defaultUser);
     }
 
     @Override

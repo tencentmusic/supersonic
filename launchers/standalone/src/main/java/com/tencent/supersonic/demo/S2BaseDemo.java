@@ -5,7 +5,6 @@ import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.auth.api.authorization.service.AuthService;
 import com.tencent.supersonic.chat.server.pojo.ChatModel;
 import com.tencent.supersonic.chat.server.service.*;
-import com.tencent.supersonic.common.service.SystemConfigService;
 import com.tencent.supersonic.common.util.AESEncryptionUtil;
 import com.tencent.supersonic.headless.api.pojo.DataSetModelConfig;
 import com.tencent.supersonic.headless.api.pojo.DrillDownDimension;
@@ -19,7 +18,6 @@ import com.tencent.supersonic.headless.api.pojo.response.DatabaseResp;
 import com.tencent.supersonic.headless.api.pojo.response.DimensionResp;
 import com.tencent.supersonic.headless.api.pojo.response.MetricResp;
 import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
-import com.tencent.supersonic.headless.server.service.CanvasService;
 import com.tencent.supersonic.headless.server.service.DataSetService;
 import com.tencent.supersonic.headless.server.service.DatabaseService;
 import com.tencent.supersonic.headless.server.service.DimensionService;
@@ -45,10 +43,11 @@ import java.util.stream.Collectors;
 
 @Slf4j
 public abstract class S2BaseDemo implements CommandLineRunner {
-    protected DatabaseResp demoDatabaseResp;
-    protected ChatModel chatModel;
 
-    protected User user = User.getDefaultUser();
+    protected DatabaseResp demoDatabase;
+    protected ChatModel demoChatModel;
+    protected User defaultUser = User.getDefaultUser();
+
     @Autowired
     protected DatabaseService databaseService;
     @Autowired
@@ -82,10 +81,6 @@ public abstract class S2BaseDemo implements CommandLineRunner {
     @Autowired
     protected AgentService agentService;
     @Autowired
-    protected SystemConfigService sysParameterService;
-    @Autowired
-    protected CanvasService canvasService;
-    @Autowired
     protected DictWordService dictWordService;
     @Autowired
     protected ChatModelService chatModelService;
@@ -97,8 +92,8 @@ public abstract class S2BaseDemo implements CommandLineRunner {
     protected boolean demoEnableLlm;
 
     public void run(String... args) {
-        demoDatabaseResp = addDatabaseIfNotExist();
-        addChatModelIfNotExist();
+        demoDatabase = addDatabaseIfNotExist();
+        demoChatModel = addChatModelIfNotExist();
         if (demoList != null && demoList.contains(getClass().getSimpleName())) {
             if (checkNeedToRun()) {
                 doRun();
@@ -111,14 +106,14 @@ public abstract class S2BaseDemo implements CommandLineRunner {
     abstract boolean checkNeedToRun();
 
     protected DatabaseResp addDatabaseIfNotExist() {
-        List<DatabaseResp> databaseList = databaseService.getDatabaseList(User.getDefaultUser());
+        List<DatabaseResp> databaseList = databaseService.getDatabaseList(defaultUser);
         if (!CollectionUtils.isEmpty(databaseList)) {
             return databaseList.get(0);
         }
         String url = dataSourceProperties.getUrl();
         DatabaseReq databaseReq = new DatabaseReq();
-        databaseReq.setName("数据实例");
-        databaseReq.setDescription("样例数据库实例");
+        databaseReq.setName("H2数据库DEMO");
+        databaseReq.setDescription("样例数据库实例仅用于体验，正式使用请切换持久化数据库");
         if (StringUtils.isNotBlank(url)
                 && url.toLowerCase().contains(DataType.MYSQL.getFeature().toLowerCase())) {
             databaseReq.setType(DataType.MYSQL.getFeature());
@@ -130,18 +125,21 @@ public abstract class S2BaseDemo implements CommandLineRunner {
         databaseReq.setUsername(dataSourceProperties.getUsername());
         databaseReq
                 .setPassword(AESEncryptionUtil.aesEncryptECB(dataSourceProperties.getPassword()));
-        return databaseService.createOrUpdateDatabase(databaseReq, user);
+        return databaseService.createOrUpdateDatabase(databaseReq, defaultUser);
     }
 
-    protected void addChatModelIfNotExist() {
-        if (chatModelService.getChatModels().size() > 0) {
-            return;
+    protected ChatModel addChatModelIfNotExist() {
+        List<ChatModel> chatModels = chatModelService.getChatModels();
+        if (chatModels.size() > 0) {
+            return chatModels.get(0);
+        } else {
+            ChatModel chatModel = new ChatModel();
+            chatModel.setName("OpenAI模型DEMO");
+            chatModel.setDescription("由langchain4j社区提供仅用于体验(单次请求最大token数1000), 正式使用请切换大模型");
+            chatModel.setConfig(ModelProvider.DEMO_CHAT_MODEL);
+            chatModel = chatModelService.createChatModel(chatModel, defaultUser);
+            return chatModel;
         }
-        chatModel = new ChatModel();
-        chatModel.setName("OpenAI模型DEMO");
-        chatModel.setDescription("由langchain4j社区提供仅用于体验，单次请求最大token数1000");
-        chatModel.setConfig(ModelProvider.DEMO_CHAT_MODEL);
-        chatModel = chatModelService.createChatModel(chatModel, User.getDefaultUser());
     }
 
     protected MetricResp getMetric(String bizName, ModelResp model) {
