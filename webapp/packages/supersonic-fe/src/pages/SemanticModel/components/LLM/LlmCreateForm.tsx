@@ -48,8 +48,6 @@ const LlmCreateForm: ForwardRefRenderFunction<any, Props> = ({ llmItem, onSubmit
 
   const save = async () => {
     const values = await form.validateFields();
-    console.log(values, 22222);
-
     const { code, msg } = await saveLlmConfig({
       ...(llmItem || {}),
       ...values,
@@ -103,7 +101,7 @@ const LlmCreateForm: ForwardRefRenderFunction<any, Props> = ({ llmItem, onSubmit
     const values = await form.validateFields();
     setTestLoading(true);
     const { code, data } = await testLLMConn({
-      ...values.config,
+      ...values,
     });
     setTestLoading(false);
     if (code === 200 && data) {
