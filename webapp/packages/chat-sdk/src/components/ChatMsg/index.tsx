@@ -111,6 +111,7 @@ const ChatMsg: React.FC<Props> = ({
       (categoryField.length > 1 ||
         queryMode === 'TAG_DETAIL' ||
         queryMode === 'ENTITY_DIMENSION' ||
+        dataSource?.length === 1 ||
         (categoryField.length === 1 && metricFields.length === 0));
 
     if (isTable) {
