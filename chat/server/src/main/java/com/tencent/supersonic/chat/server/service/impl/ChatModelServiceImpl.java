@@ -47,6 +47,7 @@ public class ChatModelServiceImpl extends ServiceImpl<ChatModelMapper, ChatModel
             chatModelDO.setAdmin(user.getName());
         }
         save(chatModelDO);
+        chatModel.setId(chatModelDO.getId());
         return chatModel;
     }
 

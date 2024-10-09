@@ -6,6 +6,8 @@ import com.tencent.supersonic.chat.api.pojo.request.ChatMemoryFilter;
 import com.tencent.supersonic.chat.api.pojo.request.ChatParseReq;
 import com.tencent.supersonic.chat.server.agent.Agent;
 import com.tencent.supersonic.chat.server.agent.MultiTurnConfig;
+import com.tencent.supersonic.chat.server.agent.PromptConfig;
+import com.tencent.supersonic.chat.server.agent.VisualConfig;
 import com.tencent.supersonic.chat.server.persistence.dataobject.AgentDO;
 import com.tencent.supersonic.chat.server.persistence.dataobject.ChatMemoryDO;
 import com.tencent.supersonic.chat.server.persistence.mapper.AgentDOMapper;
@@ -14,8 +16,6 @@ import com.tencent.supersonic.chat.server.service.ChatModelService;
 import com.tencent.supersonic.chat.server.service.ChatQueryService;
 import com.tencent.supersonic.chat.server.service.MemoryService;
 import com.tencent.supersonic.chat.server.util.ModelConfigHelper;
-import com.tencent.supersonic.common.config.PromptConfig;
-import com.tencent.supersonic.common.config.VisualConfig;
 import com.tencent.supersonic.common.pojo.enums.ChatModelType;
 import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.headless.chat.parser.llm.OnePassSCSqlGenStrategy;
@@ -140,10 +140,10 @@ public class AgentServiceImpl extends ServiceImpl<AgentDOMapper, AgentDO> implem
         }
         Agent agent = new Agent();
         BeanUtils.copyProperties(agentDO, agent);
-        agent.setAgentConfig(agentDO.getConfig());
+        agent.setToolConfig(agentDO.getToolConfig());
         agent.setExamples(JsonUtil.toList(agentDO.getExamples(), String.class));
-        agent.setModelConfig(
-                JsonUtil.toMap(agentDO.getModelConfig(), ChatModelType.class, Integer.class));
+        agent.setChatModelConfig(
+                JsonUtil.toMap(agentDO.getChatModelConfig(), ChatModelType.class, Integer.class));
         agent.setPromptConfig(JsonUtil.toObject(agentDO.getPromptConfig(), PromptConfig.class));
         agent.setMultiTurnConfig(
                 JsonUtil.toObject(agentDO.getMultiTurnConfig(), MultiTurnConfig.class));
@@ -154,9 +154,9 @@ public class AgentServiceImpl extends ServiceImpl<AgentDOMapper, AgentDO> implem
     private AgentDO convert(Agent agent) {
         AgentDO agentDO = new AgentDO();
         BeanUtils.copyProperties(agent, agentDO);
-        agentDO.setConfig(agent.getAgentConfig());
+        agentDO.setToolConfig(agent.getToolConfig());
         agentDO.setExamples(JsonUtil.toString(agent.getExamples()));
-        agentDO.setModelConfig(JsonUtil.toString(agent.getModelConfig()));
+        agentDO.setChatModelConfig(JsonUtil.toString(agent.getChatModelConfig()));
         agentDO.setMultiTurnConfig(JsonUtil.toString(agent.getMultiTurnConfig()));
         agentDO.setVisualConfig(JsonUtil.toString(agent.getVisualConfig()));
         agentDO.setPromptConfig(JsonUtil.toString(agent.getPromptConfig()));

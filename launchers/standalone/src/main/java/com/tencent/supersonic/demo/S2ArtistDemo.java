@@ -4,10 +4,10 @@ import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.chat.server.agent.Agent;
-import com.tencent.supersonic.chat.server.agent.AgentConfig;
 import com.tencent.supersonic.chat.server.agent.AgentToolType;
 import com.tencent.supersonic.chat.server.agent.LLMParserTool;
 import com.tencent.supersonic.chat.server.agent.RuleParserTool;
+import com.tencent.supersonic.chat.server.agent.ToolConfig;
 import com.tencent.supersonic.common.pojo.enums.StatusEnum;
 import com.tencent.supersonic.common.pojo.enums.TypeEnums;
 import com.tencent.supersonic.headless.api.pojo.*;
@@ -69,7 +69,7 @@ public class S2ArtistDemo extends S2BaseDemo {
         tagObjectReq.setDomainId(singerDomain.getId());
         tagObjectReq.setName("歌手");
         tagObjectReq.setBizName("singer");
-        User user = User.getFakeUser();
+        User user = User.getDefaultUser();
         return tagObjectService.create(tagObjectReq, user);
     }
 
@@ -159,7 +159,7 @@ public class S2ArtistDemo extends S2BaseDemo {
         queryConfig.setDetailTypeDefaultConfig(detailTypeDefaultConfig);
         queryConfig.setAggregateTypeDefaultConfig(aggregateTypeDefaultConfig);
         dataSetReq.setQueryConfig(queryConfig);
-        DataSetResp dataSetResp = dataSetService.save(dataSetReq, User.getFakeUser());
+        DataSetResp dataSetResp = dataSetService.save(dataSetReq, User.getDefaultUser());
         return dataSetResp.getId();
     }
 
@@ -170,21 +170,21 @@ public class S2ArtistDemo extends S2BaseDemo {
         agent.setStatus(1);
         agent.setEnableSearch(1);
         agent.setExamples(Lists.newArrayList("国风流派歌手", "港台歌手", "周杰伦流派"));
-        AgentConfig agentConfig = new AgentConfig();
+        ToolConfig toolConfig = new ToolConfig();
         RuleParserTool ruleQueryTool = new RuleParserTool();
         ruleQueryTool.setId("0");
         ruleQueryTool.setType(AgentToolType.NL2SQL_RULE);
         ruleQueryTool.setDataSetIds(Lists.newArrayList(dataSetId));
-        agentConfig.getTools().add(ruleQueryTool);
+        toolConfig.getTools().add(ruleQueryTool);
 
         if (demoEnableLlm) {
             LLMParserTool llmParserTool = new LLMParserTool();
             llmParserTool.setId("1");
             llmParserTool.setType(AgentToolType.NL2SQL_LLM);
             llmParserTool.setDataSetIds(Lists.newArrayList(dataSetId));
-            agentConfig.getTools().add(llmParserTool);
+            toolConfig.getTools().add(llmParserTool);
         }
-        agent.setAgentConfig(JSONObject.toJSONString(agentConfig));
-        agentService.createAgent(agent, User.getFakeUser());
+        agent.setToolConfig(JSONObject.toJSONString(toolConfig));
+        agentService.createAgent(agent, User.getDefaultUser());
     }
 }

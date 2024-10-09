@@ -15,7 +15,7 @@ public class QueryDimensionTest extends BaseTest {
         queryDimValueReq.setBizName("department");
 
         SemanticQueryResp queryResp =
-                semanticLayerService.queryDimensionValue(queryDimValueReq, User.getFakeUser());
+                semanticLayerService.queryDimensionValue(queryDimValueReq, User.getDefaultUser());
         Assert.assertNotNull(queryResp.getResultList());
         Assert.assertEquals(4, queryResp.getResultList().size());
     }

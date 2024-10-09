@@ -162,7 +162,7 @@ public class DictUtils {
             dictItemResp.setBizName(dimension.getBizName());
         }
         if (TypeEnums.TAG.equals(TypeEnums.valueOf(dictConfDO.getType()))) {
-            TagResp tagResp = tagMetaService.getTag(dictConfDO.getItemId(), User.getFakeUser());
+            TagResp tagResp = tagMetaService.getTag(dictConfDO.getItemId(), User.getDefaultUser());
             dictItemResp.setModelId(tagResp.getModelId());
             dictItemResp.setBizName(tagResp.getBizName());
         }

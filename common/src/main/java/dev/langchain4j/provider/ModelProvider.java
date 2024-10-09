@@ -1,6 +1,5 @@
 package dev.langchain4j.provider;
 
-import com.tencent.supersonic.common.config.ChatModelParameterConfig;
 import com.tencent.supersonic.common.config.EmbeddingModelParameterConfig;
 import com.tencent.supersonic.common.pojo.ChatModelConfig;
 import com.tencent.supersonic.common.pojo.EmbeddingModelConfig;
@@ -13,6 +12,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ModelProvider {
+
+    public static final ChatModelConfig DEMO_CHAT_MODEL =
+            ChatModelConfig.builder().provider("open_ai").baseUrl("https://api.openai.com/v1")
+                    .apiKey("demo").modelName("gpt-4o-mini").temperature(0.0).timeOut(60L).build();
 
     private static final Map<String, ModelFactory> factories = new HashMap<>();
 
@@ -27,9 +30,7 @@ public class ModelProvider {
     public static ChatLanguageModel getChatModel(ChatModelConfig modelConfig) {
         if (modelConfig == null || StringUtils.isBlank(modelConfig.getProvider())
                 || StringUtils.isBlank(modelConfig.getBaseUrl())) {
-            ChatModelParameterConfig parameterConfig =
-                    ContextUtils.getBean(ChatModelParameterConfig.class);
-            modelConfig = parameterConfig.convert();
+            modelConfig = DEMO_CHAT_MODEL;
         }
         ModelFactory modelFactory = factories.get(modelConfig.getProvider().toUpperCase());
         if (modelFactory != null) {

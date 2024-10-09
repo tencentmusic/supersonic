@@ -6,10 +6,12 @@ import javax.servlet.http.HttpServletResponse;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
 import com.tencent.supersonic.chat.api.pojo.response.ChatModelTypeResp;
+import com.tencent.supersonic.chat.server.config.ChatModelParameters;
 import com.tencent.supersonic.chat.server.pojo.ChatModel;
 import com.tencent.supersonic.chat.server.service.ChatModelService;
 import com.tencent.supersonic.chat.server.util.ModelConfigHelper;
 import com.tencent.supersonic.common.pojo.ChatModelConfig;
+import com.tencent.supersonic.common.pojo.Parameter;
 import com.tencent.supersonic.common.pojo.enums.ChatModelType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -54,6 +56,11 @@ public class ChatModelController {
         return Arrays.stream(ChatModelType.values()).map(t -> ChatModelTypeResp.builder()
                 .type(t.toString()).name(t.getName()).description(t.getDescription()).build())
                 .collect(Collectors.toList());
+    }
+
+    @RequestMapping("/getModelParameters")
+    public List<Parameter> getModelParameters() {
+        return ChatModelParameters.getParameters();
     }
 
     @PostMapping("/testConnection")

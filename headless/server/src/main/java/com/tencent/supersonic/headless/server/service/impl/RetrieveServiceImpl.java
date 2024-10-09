@@ -70,7 +70,7 @@ public class RetrieveServiceImpl implements RetrieveService {
         List<SchemaElement> metricsDb = semanticSchemaDb.getMetrics();
         final Map<Long, String> dataSetIdToName = semanticSchemaDb.getDataSetIdToName();
         Map<Long, List<Long>> modelIdToDataSetIds = dataSetService.getModelIdToDataSetIds(
-                new ArrayList<>(dataSetIdToName.keySet()), User.getFakeUser());
+                new ArrayList<>(dataSetIdToName.keySet()), User.getDefaultUser());
         // 2.detect by segment
         List<S2Term> originals = knowledgeBaseService.getTerms(queryText, modelIdToDataSetIds);
         log.debug("hanlp parse result: {}", originals);

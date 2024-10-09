@@ -1,7 +1,6 @@
 package com.tencent.supersonic.headless.chat.parser.llm;
 
 import com.google.common.collect.Lists;
-import com.tencent.supersonic.common.config.PromptConfig;
 import com.tencent.supersonic.common.pojo.Text2SQLExemplar;
 import com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMReq;
 import com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMResp;
@@ -112,10 +111,9 @@ public class OnePassSCSqlGenStrategy extends SqlGenStrategy {
         variable.put("information", sideInformation);
 
         // use custom prompt template if provided.
-        PromptConfig promptConfig = llmReq.getPromptConfig();
         String promptTemplate = INSTRUCTION;
-        if (promptConfig != null && StringUtils.isNotBlank(promptConfig.getPromptTemplate())) {
-            promptTemplate = promptConfig.getPromptTemplate();
+        if (StringUtils.isNotBlank(llmReq.getCustomPrompt())) {
+            promptTemplate = llmReq.getCustomPrompt();
         }
         return PromptTemplate.from(promptTemplate).apply(variable);
     }

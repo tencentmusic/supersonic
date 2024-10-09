@@ -29,7 +29,7 @@ public class User {
         return new User(id, name, name, name, 0);
     }
 
-    public static User getFakeUser() {
+    public static User getDefaultUser() {
         return new User(1L, "admin", "admin", "admin@email", 1);
     }
 

@@ -4,9 +4,9 @@ import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.chat.server.agent.Agent;
-import com.tencent.supersonic.chat.server.agent.AgentConfig;
 import com.tencent.supersonic.chat.server.agent.AgentToolType;
 import com.tencent.supersonic.chat.server.agent.LLMParserTool;
+import com.tencent.supersonic.chat.server.agent.ToolConfig;
 import com.tencent.supersonic.common.pojo.JoinCondition;
 import com.tencent.supersonic.common.pojo.ModelRela;
 import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
@@ -274,7 +274,7 @@ public class DuSQLDemo extends S2BaseDemo {
         aggregateTypeDefaultConfig.setTimeDefaultConfig(timeDefaultConfig);
         queryConfig.setAggregateTypeDefaultConfig(aggregateTypeDefaultConfig);
         dataSetReq.setQueryConfig(queryConfig);
-        dataSetService.save(dataSetReq, User.getFakeUser());
+        dataSetService.save(dataSetReq, User.getDefaultUser());
     }
 
     public void addModelRela_1() {
@@ -334,16 +334,16 @@ public class DuSQLDemo extends S2BaseDemo {
         agent.setStatus(1);
         agent.setEnableSearch(1);
         agent.setExamples(Lists.newArrayList());
-        AgentConfig agentConfig = new AgentConfig();
+        ToolConfig toolConfig = new ToolConfig();
 
         LLMParserTool llmParserTool = new LLMParserTool();
         llmParserTool.setId("1");
         llmParserTool.setType(AgentToolType.NL2SQL_LLM);
         llmParserTool.setDataSetIds(Lists.newArrayList(4L));
-        agentConfig.getTools().add(llmParserTool);
+        toolConfig.getTools().add(llmParserTool);
 
-        agent.setAgentConfig(JSONObject.toJSONString(agentConfig));
+        agent.setToolConfig(JSONObject.toJSONString(toolConfig));
         log.info("agent:{}", JsonUtil.toString(agent));
-        agentService.createAgent(agent, User.getFakeUser());
+        agentService.createAgent(agent, User.getDefaultUser());
     }
 }

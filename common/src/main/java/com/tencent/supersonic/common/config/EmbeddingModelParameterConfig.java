@@ -21,30 +21,32 @@ import java.util.List;
 @Service("EmbeddingModelParameterConfig")
 @Slf4j
 public class EmbeddingModelParameterConfig extends ParameterConfig {
+    private static final String MODULE_NAME = "嵌入模型配置";
+
     public static final Parameter EMBEDDING_MODEL_PROVIDER =
             new Parameter("s2.embedding.model.provider", InMemoryModelFactory.PROVIDER, "接口协议", "",
-                    "list", "向量模型配置", getCandidateValues());
+                    "list", MODULE_NAME, getCandidateValues());
     public static final Parameter EMBEDDING_MODEL_BASE_URL =
-            new Parameter("s2.embedding.model.base.url", "", "BaseUrl", "", "string", "向量模型配置",
+            new Parameter("s2.embedding.model.base.url", "", "BaseUrl", "", "string", MODULE_NAME,
                     null, getBaseUrlDependency());
 
     public static final Parameter EMBEDDING_MODEL_API_KEY =
-            new Parameter("s2.embedding.model.api.key", "", "ApiKey", "", "password", "向量模型配置",
+            new Parameter("s2.embedding.model.api.key", "", "ApiKey", "", "password", MODULE_NAME,
                     null, getApiKeyDependency());
 
     public static final Parameter EMBEDDING_MODEL_SECRET_KEY =
             new Parameter("s2.embedding.model.secretKey", "demo", "SecretKey", "", "password",
-                    "向量模型配置", null, getSecretKeyDependency());
+                    MODULE_NAME, null, getSecretKeyDependency());
 
     public static final Parameter EMBEDDING_MODEL_NAME =
             new Parameter("s2.embedding.model.name", EmbeddingModelConstant.BGE_SMALL_ZH,
-                    "ModelName", "", "string", "向量模型配置", null, getModelNameDependency());
+                    "ModelName", "", "string", MODULE_NAME, null, getModelNameDependency());
 
     public static final Parameter EMBEDDING_MODEL_PATH = new Parameter("s2.embedding.model.path",
-            "", "模型路径", "", "string", "向量模型配置", null, getModelPathDependency());
+            "", "模型路径", "", "string", MODULE_NAME, null, getModelPathDependency());
     public static final Parameter EMBEDDING_MODEL_VOCABULARY_PATH =
-            new Parameter("s2.embedding.model.vocabulary.path", "", "词汇表路径", "", "string", "向量模型配置",
-                    null, getModelPathDependency());
+            new Parameter("s2.embedding.model.vocabulary.path", "", "词汇表路径", "", "string",
+                    MODULE_NAME, null, getModelPathDependency());
 
     @Override
     public List<Parameter> getSysParameters() {
