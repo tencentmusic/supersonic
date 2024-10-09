@@ -7,10 +7,10 @@ import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.chat.BaseTest;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.chat.server.agent.Agent;
-import com.tencent.supersonic.chat.server.agent.AgentConfig;
 import com.tencent.supersonic.chat.server.agent.AgentToolType;
 import com.tencent.supersonic.chat.server.agent.MultiTurnConfig;
 import com.tencent.supersonic.chat.server.agent.RuleParserTool;
+import com.tencent.supersonic.chat.server.agent.ToolConfig;
 import com.tencent.supersonic.chat.server.pojo.ChatModel;
 import com.tencent.supersonic.common.pojo.enums.ChatModelType;
 import com.tencent.supersonic.util.DataUtils;
@@ -49,7 +49,7 @@ public class Text2SQLEval extends BaseTest {
         QueryResult result = submitNewChat("近30天总访问次数", agentId);
         durations.add(System.currentTimeMillis() - start);
         assert result.getQueryColumns().size() == 1;
-        assert result.getQueryColumns().get(0).getName().contains("访问次数");
+        assert result.getTextResult().contains("511");
     }
 
     @Test
@@ -58,8 +58,8 @@ public class Text2SQLEval extends BaseTest {
         QueryResult result = submitNewChat("近30日每天的访问次数", agentId);
         durations.add(System.currentTimeMillis() - start);
         assert result.getQueryColumns().size() == 2;
-        assert result.getQueryColumns().get(0).getName().equalsIgnoreCase("date");
-        assert result.getQueryColumns().get(1).getName().contains("访问次数");
+        assert result.getQueryResults().size() == 30;
+        assert result.getTextResult().contains("date");
     }
 
     @Test
@@ -68,9 +68,11 @@ public class Text2SQLEval extends BaseTest {
         QueryResult result = submitNewChat("过去30天每个部门的汇总访问次数", agentId);
         durations.add(System.currentTimeMillis() - start);
         assert result.getQueryColumns().size() == 2;
-        assert result.getQueryColumns().get(0).getName().equalsIgnoreCase("部门");
-        assert result.getQueryColumns().get(1).getName().contains("访问次数");
         assert result.getQueryResults().size() == 4;
+        assert result.getTextResult().contains("marketing");
+        assert result.getTextResult().contains("sales");
+        assert result.getTextResult().contains("strategy");
+        assert result.getTextResult().contains("HR");
     }
 
     @Test
@@ -134,16 +136,16 @@ public class Text2SQLEval extends BaseTest {
     public Agent getLLMAgent(boolean enableMultiturn) {
         Agent agent = new Agent();
         agent.setName("Agent for Test");
-        AgentConfig agentConfig = new AgentConfig();
-        agentConfig.getTools().add(getLLMQueryTool());
-        agent.setAgentConfig(JSONObject.toJSONString(agentConfig));
+        ToolConfig toolConfig = new ToolConfig();
+        toolConfig.getTools().add(getLLMQueryTool());
+        agent.setToolConfig(JSONObject.toJSONString(toolConfig));
         ChatModel chatModel = new ChatModel();
         chatModel.setName("Text2SQL LLM");
         chatModel.setConfig(LLMConfigUtils.getLLMConfig(LLMConfigUtils.LLMType.OLLAMA_LLAMA3));
-        chatModel = chatModelService.createChatModel(chatModel, User.getFakeUser());
+        chatModel = chatModelService.createChatModel(chatModel, User.getDefaultUser());
         Map<ChatModelType, Integer> chatModelConfig = Maps.newHashMap();
         chatModelConfig.put(ChatModelType.TEXT_TO_SQL, chatModel.getId());
-        agent.setModelConfig(chatModelConfig);
+        agent.setChatModelConfig(chatModelConfig);
         MultiTurnConfig multiTurnConfig = new MultiTurnConfig();
         multiTurnConfig.setEnableMultiTurn(enableMultiturn);
         agent.setMultiTurnConfig(multiTurnConfig);

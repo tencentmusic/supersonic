@@ -224,7 +224,7 @@ public class CspiderDemo extends S2BaseDemo {
         queryConfig.setDetailTypeDefaultConfig(detailTypeDefaultConfig);
         queryConfig.setAggregateTypeDefaultConfig(aggregateTypeDefaultConfig);
         dataSetReq.setQueryConfig(queryConfig);
-        dataSetService.save(dataSetReq, User.getFakeUser());
+        dataSetService.save(dataSetReq, User.getDefaultUser());
     }
 
     public void addModelRela_1(DomainResp s2Domain, ModelResp genreModelResp,
@@ -296,6 +296,6 @@ public class CspiderDemo extends S2BaseDemo {
 
     private void batchPushlishMetric() {
         List<Long> ids = Lists.newArrayList(1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L);
-        metricService.batchPublish(ids, User.getFakeUser());
+        metricService.batchPublish(ids, User.getDefaultUser());
     }
 }

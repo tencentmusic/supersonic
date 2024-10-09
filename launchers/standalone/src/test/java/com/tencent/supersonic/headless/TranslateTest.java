@@ -19,7 +19,7 @@ public class TranslateTest extends BaseTest {
         String sql = "SELECT 部门, SUM(访问次数) AS 访问次数 FROM 超音数PVUV统计  GROUP BY 部门 ";
         SemanticTranslateResp explain = semanticLayerService.translate(
                 QueryReqBuilder.buildS2SQLReq(sql, DataUtils.getMetricAgentView()),
-                User.getFakeUser());
+                User.getDefaultUser());
         assertNotNull(explain);
         assertNotNull(explain.getQuerySQL());
         assertTrue(explain.getQuerySQL().contains("department"));
@@ -30,7 +30,7 @@ public class TranslateTest extends BaseTest {
     public void testStructExplain() throws Exception {
         QueryStructReq queryStructReq = buildQueryStructReq(Arrays.asList("department"));
         SemanticTranslateResp explain =
-                semanticLayerService.translate(queryStructReq, User.getFakeUser());
+                semanticLayerService.translate(queryStructReq, User.getDefaultUser());
         assertNotNull(explain);
         assertNotNull(explain.getQuerySQL());
         assertTrue(explain.getQuerySQL().contains("department"));

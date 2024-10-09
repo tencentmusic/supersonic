@@ -3,10 +3,8 @@ package com.tencent.supersonic.demo;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.auth.api.authorization.service.AuthService;
-import com.tencent.supersonic.chat.server.service.AgentService;
-import com.tencent.supersonic.chat.server.service.ChatManageService;
-import com.tencent.supersonic.chat.server.service.ChatQueryService;
-import com.tencent.supersonic.chat.server.service.PluginService;
+import com.tencent.supersonic.chat.server.pojo.ChatModel;
+import com.tencent.supersonic.chat.server.service.*;
 import com.tencent.supersonic.common.service.SystemConfigService;
 import com.tencent.supersonic.common.util.AESEncryptionUtil;
 import com.tencent.supersonic.headless.api.pojo.DataSetModelConfig;
@@ -33,6 +31,7 @@ import com.tencent.supersonic.headless.server.service.TagMetaService;
 import com.tencent.supersonic.headless.server.service.TagObjectService;
 import com.tencent.supersonic.headless.server.service.TermService;
 import com.tencent.supersonic.headless.server.service.impl.DictWordService;
+import dev.langchain4j.provider.ModelProvider;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,8 +46,9 @@ import java.util.stream.Collectors;
 @Slf4j
 public abstract class S2BaseDemo implements CommandLineRunner {
     protected DatabaseResp demoDatabaseResp;
+    protected ChatModel chatModel;
 
-    protected User user = User.getFakeUser();
+    protected User user = User.getDefaultUser();
     @Autowired
     protected DatabaseService databaseService;
     @Autowired
@@ -87,6 +87,8 @@ public abstract class S2BaseDemo implements CommandLineRunner {
     protected CanvasService canvasService;
     @Autowired
     protected DictWordService dictWordService;
+    @Autowired
+    protected ChatModelService chatModelService;
 
     @Value("${s2.demo.names:S2VisitsDemo}")
     protected List<String> demoList;
@@ -96,6 +98,7 @@ public abstract class S2BaseDemo implements CommandLineRunner {
 
     public void run(String... args) {
         demoDatabaseResp = addDatabaseIfNotExist();
+        addChatModelIfNotExist();
         if (demoList != null && demoList.contains(getClass().getSimpleName())) {
             if (checkNeedToRun()) {
                 doRun();
@@ -108,7 +111,7 @@ public abstract class S2BaseDemo implements CommandLineRunner {
     abstract boolean checkNeedToRun();
 
     protected DatabaseResp addDatabaseIfNotExist() {
-        List<DatabaseResp> databaseList = databaseService.getDatabaseList(User.getFakeUser());
+        List<DatabaseResp> databaseList = databaseService.getDatabaseList(User.getDefaultUser());
         if (!CollectionUtils.isEmpty(databaseList)) {
             return databaseList.get(0);
         }
@@ -128,6 +131,17 @@ public abstract class S2BaseDemo implements CommandLineRunner {
         databaseReq
                 .setPassword(AESEncryptionUtil.aesEncryptECB(dataSourceProperties.getPassword()));
         return databaseService.createOrUpdateDatabase(databaseReq, user);
+    }
+
+    protected void addChatModelIfNotExist() {
+        if (chatModelService.getChatModels().size() > 0) {
+            return;
+        }
+        chatModel = new ChatModel();
+        chatModel.setName("OpenAI模型DEMO");
+        chatModel.setDescription("由langchain4j社区提供仅用于体验，单次请求最大token数1000");
+        chatModel.setConfig(ModelProvider.DEMO_CHAT_MODEL);
+        chatModel = chatModelService.createChatModel(chatModel, User.getDefaultUser());
     }
 
     protected MetricResp getMetric(String bizName, ModelResp model) {
@@ -160,7 +174,7 @@ public abstract class S2BaseDemo implements CommandLineRunner {
         TagReq tagReq = new TagReq();
         tagReq.setTagDefineType(tagDefineType);
         tagReq.setItemId(itemId);
-        tagMetaService.create(tagReq, User.getFakeUser());
+        tagMetaService.create(tagReq, User.getDefaultUser());
     }
 
     protected DimensionResp getDimension(String bizName, ModelResp model) {

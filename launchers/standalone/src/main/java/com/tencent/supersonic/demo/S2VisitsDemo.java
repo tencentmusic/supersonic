@@ -2,16 +2,17 @@ package com.tencent.supersonic.demo;
 
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.auth.api.authorization.pojo.AuthGroup;
 import com.tencent.supersonic.auth.api.authorization.pojo.AuthRule;
 import com.tencent.supersonic.chat.api.pojo.request.ChatParseReq;
 import com.tencent.supersonic.chat.server.agent.Agent;
-import com.tencent.supersonic.chat.server.agent.AgentConfig;
 import com.tencent.supersonic.chat.server.agent.AgentToolType;
 import com.tencent.supersonic.chat.server.agent.LLMParserTool;
 import com.tencent.supersonic.chat.server.agent.MultiTurnConfig;
 import com.tencent.supersonic.chat.server.agent.RuleParserTool;
+import com.tencent.supersonic.chat.server.agent.ToolConfig;
 import com.tencent.supersonic.chat.server.plugin.ChatPlugin;
 import com.tencent.supersonic.chat.server.plugin.PluginParseConfig;
 import com.tencent.supersonic.chat.server.plugin.build.WebBase;
@@ -19,12 +20,7 @@ import com.tencent.supersonic.chat.server.plugin.build.webpage.WebPageQuery;
 import com.tencent.supersonic.chat.server.plugin.build.webservice.WebServiceQuery;
 import com.tencent.supersonic.common.pojo.JoinCondition;
 import com.tencent.supersonic.common.pojo.ModelRela;
-import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
-import com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum;
-import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
-import com.tencent.supersonic.common.pojo.enums.SensitiveLevelEnum;
-import com.tencent.supersonic.common.pojo.enums.StatusEnum;
-import com.tencent.supersonic.common.pojo.enums.TypeEnums;
+import com.tencent.supersonic.common.pojo.enums.*;
 import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.headless.api.pojo.DataSetDetail;
 import com.tencent.supersonic.headless.api.pojo.DataSetModelConfig;
@@ -63,10 +59,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 @Component
 @Slf4j
@@ -146,7 +139,7 @@ public class S2VisitsDemo extends S2BaseDemo {
 
     private void submitText(int chatId, int agentId, String queryText) {
         chatQueryService.parseAndExecute(ChatParseReq.builder().chatId(chatId).agentId(agentId)
-                .queryText(queryText).user(User.getFakeUser()).disableLLM(true).build());
+                .queryText(queryText).user(User.getDefaultUser()).disableLLM(true).build());
     }
 
     private Integer addAgent(long dataSetId) {
@@ -157,23 +150,32 @@ public class S2VisitsDemo extends S2BaseDemo {
         agent.setEnableSearch(1);
         agent.setExamples(Lists.newArrayList("近15天超音数访问次数汇总", "按部门统计超音数的访问人数", "对比alice和lucy的停留时长",
                 "过去30天访问次数最高的部门top3", "近1个月总访问次数超过100次的部门有几个", "过去半个月每个核心用户的总停留时长"));
-        AgentConfig agentConfig = new AgentConfig();
+        // configure tools
+        ToolConfig toolConfig = new ToolConfig();
         RuleParserTool ruleQueryTool = new RuleParserTool();
         ruleQueryTool.setType(AgentToolType.NL2SQL_RULE);
         ruleQueryTool.setId("0");
         ruleQueryTool.setDataSetIds(Lists.newArrayList(dataSetId));
-        agentConfig.getTools().add(ruleQueryTool);
+        toolConfig.getTools().add(ruleQueryTool);
         if (demoEnableLlm) {
             LLMParserTool llmParserTool = new LLMParserTool();
             llmParserTool.setId("1");
             llmParserTool.setType(AgentToolType.NL2SQL_LLM);
             llmParserTool.setDataSetIds(Lists.newArrayList(dataSetId));
-            agentConfig.getTools().add(llmParserTool);
+            toolConfig.getTools().add(llmParserTool);
         }
-        agent.setAgentConfig(JSONObject.toJSONString(agentConfig));
+        agent.setToolConfig(JSONObject.toJSONString(toolConfig));
+        // configure chat models
+        Map<ChatModelType, Integer> chatModelConfig = Maps.newHashMap();
+        chatModelConfig.put(ChatModelType.TEXT_TO_SQL, chatModel.getId());
+        chatModelConfig.put(ChatModelType.MEMORY_REVIEW, chatModel.getId());
+        chatModelConfig.put(ChatModelType.RESPONSE_GENERATE, chatModel.getId());
+        chatModelConfig.put(ChatModelType.MULTI_TURN_REWRITE, chatModel.getId());
+        agent.setChatModelConfig(chatModelConfig);
+
         MultiTurnConfig multiTurnConfig = new MultiTurnConfig(true);
         agent.setMultiTurnConfig(multiTurnConfig);
-        Agent agentCreated = agentService.createAgent(agent, User.getFakeUser());
+        Agent agentCreated = agentService.createAgent(agent, User.getDefaultUser());
         return agentCreated.getId();
     }
 
@@ -460,7 +462,7 @@ public class S2VisitsDemo extends S2BaseDemo {
         dataSetDetail.setDataSetModelConfigs(dataSetModelConfigs);
         dataSetReq.setDataSetDetail(dataSetDetail);
         dataSetReq.setTypeEnum(TypeEnums.DATASET);
-        return dataSetService.save(dataSetReq, User.getFakeUser());
+        return dataSetService.save(dataSetReq, User.getDefaultUser());
     }
 
     public void addTerm(DomainResp s2Domain) {
@@ -469,7 +471,7 @@ public class S2VisitsDemo extends S2BaseDemo {
         termReq.setDescription("指近10天");
         termReq.setAlias(Lists.newArrayList("近一段时间"));
         termReq.setDomainId(s2Domain.getId());
-        termService.saveOrUpdate(termReq, User.getFakeUser());
+        termService.saveOrUpdate(termReq, User.getDefaultUser());
     }
 
     public void addTerm_1(DomainResp s2Domain) {
@@ -478,7 +480,7 @@ public class S2VisitsDemo extends S2BaseDemo {
         termReq.setDescription("用户为tom和lucy");
         termReq.setAlias(Lists.newArrayList("VIP用户"));
         termReq.setDomainId(s2Domain.getId());
-        termService.saveOrUpdate(termReq, User.getFakeUser());
+        termService.saveOrUpdate(termReq, User.getDefaultUser());
     }
 
     public void addAuthGroup_1(ModelResp stayTimeModel) {
@@ -553,7 +555,7 @@ public class S2VisitsDemo extends S2BaseDemo {
         tagObjectReq.setDomainId(s2Domain.getId());
         tagObjectReq.setName("用户");
         tagObjectReq.setBizName("user");
-        User user = User.getFakeUser();
+        User user = User.getDefaultUser();
         return tagObjectService.create(tagObjectReq, user);
     }
 

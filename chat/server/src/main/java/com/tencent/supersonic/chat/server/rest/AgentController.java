@@ -59,8 +59,4 @@ public class AgentController {
         return AgentToolType.getToolTypes();
     }
 
-    @PostMapping("/testLLMConn")
-    public boolean testLLMConn(@RequestBody ChatModelConfig modelConfig) {
-        return ModelConfigHelper.testConnection(modelConfig);
-    }
 }

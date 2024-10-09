@@ -50,7 +50,7 @@ public class QueryReqConverter {
             queryNLReq.setMapInfo(queryNLReq.getMapInfo());
         }
         queryNLReq.setModelConfig(chatModelConfig);
-        queryNLReq.setPromptConfig(agent.getPromptConfig());
+        queryNLReq.setCustomPrompt(agent.getPromptConfig().getPromptTemplate());
         if (chatCtx != null) {
             queryNLReq.setContextParseInfo(chatCtx.getParseInfo());
         }

@@ -158,7 +158,7 @@ public class ChatQueryServiceImpl implements ChatQueryService {
         executeReq.setParseId(parseResp.getSelectedParses().get(0).getId());
         executeReq.setQueryText(chatParseReq.getQueryText());
         executeReq.setChatId(chatParseReq.getChatId());
-        executeReq.setUser(User.getFakeUser());
+        executeReq.setUser(User.getDefaultUser());
         executeReq.setAgentId(chatParseReq.getAgentId());
         executeReq.setSaveAnswer(true);
         return execute(executeReq);

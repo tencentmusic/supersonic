@@ -29,8 +29,8 @@ public class ModelConfigHelper {
 
     public static ChatModelConfig getChatModelConfig(Agent agent, ChatModelType modelType) {
         ChatModelConfig chatModelConfig = null;
-        if (agent.getModelConfig().containsKey(modelType)) {
-            Integer chatModelId = agent.getModelConfig().get(modelType);
+        if (agent.getChatModelConfig().containsKey(modelType)) {
+            Integer chatModelId = agent.getChatModelConfig().get(modelType);
             ChatModelService chatModelService = ContextUtils.getBean(ChatModelService.class);
             chatModelConfig = chatModelService.getChatModel(chatModelId).getConfig();
         }
