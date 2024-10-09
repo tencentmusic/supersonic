@@ -15,11 +15,8 @@ import java.util.stream.Collectors;
 /** transform query results to return the users */
 public class DataTransformUtils {
 
-    public static List<Map<String, Object>> transform(
-            List<Map<String, Object>> originalData,
-            String metric,
-            List<String> groups,
-            DateConf dateConf) {
+    public static List<Map<String, Object>> transform(List<Map<String, Object>> originalData,
+            String metric, List<String> groups, DateConf dateConf) {
         List<String> dateList = dateConf.getDateList();
         List<Map<String, Object>> transposedData = new ArrayList<>();
         for (Map<String, Object> originalRow : originalData) {
@@ -29,14 +26,12 @@ public class DataTransformUtils {
                     transposedRow.put(key, originalRow.get(key));
                 }
             }
-            transposedRow.put(
-                    String.valueOf(originalRow.get(getTimeDimension(dateConf))),
+            transposedRow.put(String.valueOf(originalRow.get(getTimeDimension(dateConf))),
                     originalRow.get(metric));
             transposedData.add(transposedRow);
         }
-        Map<String, List<Map<String, Object>>> dataMerge =
-                transposedData.stream()
-                        .collect(Collectors.groupingBy(row -> getRowKey(row, groups)));
+        Map<String, List<Map<String, Object>>> dataMerge = transposedData.stream()
+                .collect(Collectors.groupingBy(row -> getRowKey(row, groups)));
         List<Map<String, Object>> resultData = Lists.newArrayList();
         for (List<Map<String, Object>> data : dataMerge.values()) {
             Map<String, Object> rowData = new HashMap<>();

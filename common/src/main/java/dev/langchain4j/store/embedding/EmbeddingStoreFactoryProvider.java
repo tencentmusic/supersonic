@@ -27,24 +27,19 @@ public class EmbeddingStoreFactoryProvider {
             return ContextUtils.getBean(EmbeddingStoreFactory.class);
         }
         if (EmbeddingStoreType.CHROMA.name().equalsIgnoreCase(embeddingStoreConfig.getProvider())) {
-            return factoryMap.computeIfAbsent(
-                    embeddingStoreConfig,
+            return factoryMap.computeIfAbsent(embeddingStoreConfig,
                     storeConfig -> new ChromaEmbeddingStoreFactory(storeConfig));
         }
         if (EmbeddingStoreType.MILVUS.name().equalsIgnoreCase(embeddingStoreConfig.getProvider())) {
-            return factoryMap.computeIfAbsent(
-                    embeddingStoreConfig,
+            return factoryMap.computeIfAbsent(embeddingStoreConfig,
                     storeConfig -> new MilvusEmbeddingStoreFactory(storeConfig));
         }
-        if (EmbeddingStoreType.IN_MEMORY
-                .name()
+        if (EmbeddingStoreType.IN_MEMORY.name()
                 .equalsIgnoreCase(embeddingStoreConfig.getProvider())) {
-            return factoryMap.computeIfAbsent(
-                    embeddingStoreConfig,
+            return factoryMap.computeIfAbsent(embeddingStoreConfig,
                     storeConfig -> new InMemoryEmbeddingStoreFactory(storeConfig));
         }
-        throw new RuntimeException(
-                "Unsupported EmbeddingStoreFactory provider: "
-                        + embeddingStoreConfig.getProvider());
+        throw new RuntimeException("Unsupported EmbeddingStoreFactory provider: "
+                + embeddingStoreConfig.getProvider());
     }
 }

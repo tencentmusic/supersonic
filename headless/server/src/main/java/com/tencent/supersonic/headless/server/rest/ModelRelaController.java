@@ -19,7 +19,8 @@ import java.util.List;
 @RequestMapping("/api/semantic/modelRela")
 public class ModelRelaController {
 
-    @Autowired private ModelRelaService modelRelaService;
+    @Autowired
+    private ModelRelaService modelRelaService;
 
     @PostMapping
     public boolean save(@RequestBody ModelRela modelRela, User user) {

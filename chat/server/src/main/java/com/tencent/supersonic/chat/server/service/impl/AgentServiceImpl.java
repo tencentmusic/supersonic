@@ -3,6 +3,7 @@ package com.tencent.supersonic.chat.server.service.impl;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.chat.api.pojo.request.ChatMemoryFilter;
+import com.tencent.supersonic.chat.api.pojo.request.ChatParseReq;
 import com.tencent.supersonic.chat.server.agent.Agent;
 import com.tencent.supersonic.chat.server.agent.MultiTurnConfig;
 import com.tencent.supersonic.chat.server.persistence.dataobject.AgentDO;
@@ -33,9 +34,11 @@ import java.util.stream.Collectors;
 @Service
 public class AgentServiceImpl extends ServiceImpl<AgentDOMapper, AgentDO> implements AgentService {
 
-    @Autowired private MemoryService memoryService;
+    @Autowired
+    private MemoryService memoryService;
 
-    @Autowired private ChatQueryService chatQueryService;
+    @Autowired
+    private ChatQueryService chatQueryService;
 
     private ExecutorService executorService = Executors.newFixedThreadPool(1);
 
@@ -98,8 +101,7 @@ public class AgentServiceImpl extends ServiceImpl<AgentDOMapper, AgentDO> implem
     }
 
     private synchronized void doExecuteAgentExamples(Agent agent) {
-        if (!agent.containsLLMTool()
-                || !LLMConnHelper.testConnection(agent.getModelConfig())
+        if (!agent.containsLLMTool() || !LLMConnHelper.testConnection(agent.getModelConfig())
                 || CollectionUtils.isEmpty(agent.getExamples())) {
             return;
         }
@@ -107,16 +109,15 @@ public class AgentServiceImpl extends ServiceImpl<AgentDOMapper, AgentDO> implem
         List<String> examples = agent.getExamples();
         ChatMemoryFilter chatMemoryFilter =
                 ChatMemoryFilter.builder().agentId(agent.getId()).questions(examples).build();
-        List<String> memoriesExisted =
-                memoryService.getMemories(chatMemoryFilter).stream()
-                        .map(ChatMemoryDO::getQuestion)
-                        .collect(Collectors.toList());
+        List<String> memoriesExisted = memoryService.getMemories(chatMemoryFilter).stream()
+                .map(ChatMemoryDO::getQuestion).collect(Collectors.toList());
         for (String example : examples) {
             if (memoriesExisted.contains(example)) {
                 continue;
             }
             try {
-                chatQueryService.parseAndExecute(-1, agent.getId(), example);
+                chatQueryService.parseAndExecute(ChatParseReq.builder().chatId(-1)
+                        .agentId(agent.getId()).queryText(example).build());
             } catch (Exception e) {
                 log.warn("agent:{} example execute failed:{}", agent.getName(), example);
             }

@@ -26,13 +26,8 @@ class LLMSqlParserTest {
         value1.setAlias(Arrays.asList("周杰倫", "Jay Chou", "周董", "周先生"));
         schemaValueMaps.add(value1);
 
-        SchemaElement schemaElement =
-                SchemaElement.builder()
-                        .bizName("singer_name")
-                        .name("歌手名")
-                        .dataSetId(2L)
-                        .schemaValueMaps(schemaValueMaps)
-                        .build();
+        SchemaElement schemaElement = SchemaElement.builder().bizName("singer_name").name("歌手名")
+                .dataSetId(2L).schemaValueMaps(schemaValueMaps).build();
         dimensions.add(schemaElement);
 
         SchemaElement schemaElement2 =

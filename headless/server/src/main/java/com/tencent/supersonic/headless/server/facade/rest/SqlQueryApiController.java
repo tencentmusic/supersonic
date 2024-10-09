@@ -30,16 +30,15 @@ import java.util.stream.Collectors;
 @Slf4j
 public class SqlQueryApiController {
 
-    @Autowired private SemanticLayerService semanticLayerService;
+    @Autowired
+    private SemanticLayerService semanticLayerService;
 
-    @Autowired private ChatLayerService chatLayerService;
+    @Autowired
+    private ChatLayerService chatLayerService;
 
     @PostMapping("/sql")
-    public Object queryBySql(
-            @RequestBody QuerySqlReq querySqlReq,
-            HttpServletRequest request,
-            HttpServletResponse response)
-            throws Exception {
+    public Object queryBySql(@RequestBody QuerySqlReq querySqlReq, HttpServletRequest request,
+            HttpServletResponse response) throws Exception {
         User user = UserHolder.findUser(request, response);
         String sql = querySqlReq.getSql();
         querySqlReq.setSql(StringUtil.replaceBackticks(sql));
@@ -48,63 +47,40 @@ public class SqlQueryApiController {
     }
 
     @PostMapping("/sqls")
-    public Object queryBySqls(
-            @RequestBody QuerySqlsReq querySqlsReq,
-            HttpServletRequest request,
-            HttpServletResponse response)
-            throws Exception {
+    public Object queryBySqls(@RequestBody QuerySqlsReq querySqlsReq, HttpServletRequest request,
+            HttpServletResponse response) throws Exception {
         User user = UserHolder.findUser(request, response);
-        List<SemanticQueryReq> semanticQueryReqs =
-                querySqlsReq.getSqls().stream()
-                        .map(
-                                sql -> {
-                                    QuerySqlReq querySqlReq = new QuerySqlReq();
-                                    BeanUtils.copyProperties(querySqlsReq, querySqlReq);
-                                    querySqlReq.setSql(StringUtil.replaceBackticks(sql));
-                                    chatLayerService.correct(querySqlReq, user);
-                                    return querySqlReq;
-                                })
-                        .collect(Collectors.toList());
+        List<SemanticQueryReq> semanticQueryReqs = querySqlsReq.getSqls().stream().map(sql -> {
+            QuerySqlReq querySqlReq = new QuerySqlReq();
+            BeanUtils.copyProperties(querySqlsReq, querySqlReq);
+            querySqlReq.setSql(StringUtil.replaceBackticks(sql));
+            chatLayerService.correct(querySqlReq, user);
+            return querySqlReq;
+        }).collect(Collectors.toList());
 
         List<CompletableFuture<SemanticQueryResp>> futures =
-                semanticQueryReqs.stream()
-                        .map(
-                                querySqlReq ->
-                                        CompletableFuture.supplyAsync(
-                                                () -> {
-                                                    try {
-                                                        return semanticLayerService.queryByReq(
-                                                                querySqlReq, user);
-                                                    } catch (Exception e) {
-                                                        log.error(
-                                                                "querySqlReq:{},queryByReq error:",
-                                                                querySqlReq,
-                                                                e);
-                                                        return new SemanticQueryResp();
-                                                    }
-                                                }))
-                        .collect(Collectors.toList());
+                semanticQueryReqs.stream().map(querySqlReq -> CompletableFuture.supplyAsync(() -> {
+                    try {
+                        return semanticLayerService.queryByReq(querySqlReq, user);
+                    } catch (Exception e) {
+                        log.error("querySqlReq:{},queryByReq error:", querySqlReq, e);
+                        return new SemanticQueryResp();
+                    }
+                })).collect(Collectors.toList());
         return futures.stream().map(CompletableFuture::join).collect(Collectors.toList());
     }
 
     @PostMapping("/sqlsWithException")
-    public Object queryBySqlsWithException(
-            @RequestBody QuerySqlsReq querySqlsReq,
-            HttpServletRequest request,
-            HttpServletResponse response)
-            throws Exception {
+    public Object queryBySqlsWithException(@RequestBody QuerySqlsReq querySqlsReq,
+            HttpServletRequest request, HttpServletResponse response) throws Exception {
         User user = UserHolder.findUser(request, response);
-        List<SemanticQueryReq> semanticQueryReqs =
-                querySqlsReq.getSqls().stream()
-                        .map(
-                                sql -> {
-                                    QuerySqlReq querySqlReq = new QuerySqlReq();
-                                    BeanUtils.copyProperties(querySqlsReq, querySqlReq);
-                                    querySqlReq.setSql(StringUtil.replaceBackticks(sql));
-                                    chatLayerService.correct(querySqlReq, user);
-                                    return querySqlReq;
-                                })
-                        .collect(Collectors.toList());
+        List<SemanticQueryReq> semanticQueryReqs = querySqlsReq.getSqls().stream().map(sql -> {
+            QuerySqlReq querySqlReq = new QuerySqlReq();
+            BeanUtils.copyProperties(querySqlsReq, querySqlReq);
+            querySqlReq.setSql(StringUtil.replaceBackticks(sql));
+            chatLayerService.correct(querySqlReq, user);
+            return querySqlReq;
+        }).collect(Collectors.toList());
         List<SemanticQueryResp> semanticQueryRespList = new ArrayList<>();
         try {
             for (SemanticQueryReq semanticQueryReq : semanticQueryReqs) {
@@ -119,11 +95,8 @@ public class SqlQueryApiController {
     }
 
     @PostMapping("/validate")
-    public Object validate(
-            @RequestBody QuerySqlReq querySqlReq,
-            HttpServletRequest request,
-            HttpServletResponse response)
-            throws Exception {
+    public Object validate(@RequestBody QuerySqlReq querySqlReq, HttpServletRequest request,
+            HttpServletResponse response) throws Exception {
         User user = UserHolder.findUser(request, response);
         String sql = querySqlReq.getSql();
         querySqlReq.setSql(StringUtil.replaceBackticks(sql));

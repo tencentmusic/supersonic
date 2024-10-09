@@ -31,19 +31,16 @@ public class EntityMapper extends BaseMapper {
             if (entity == null || entity.getId() == null) {
                 continue;
             }
-            List<SchemaElementMatch> valueSchemaElements =
-                    schemaElementMatchList.stream()
-                            .filter(
-                                    schemaElementMatch ->
-                                            SchemaElementType.VALUE.equals(
-                                                    schemaElementMatch.getElement().getType()))
-                            .collect(Collectors.toList());
+            List<SchemaElementMatch> valueSchemaElements = schemaElementMatchList.stream()
+                    .filter(schemaElementMatch -> SchemaElementType.VALUE
+                            .equals(schemaElementMatch.getElement().getType()))
+                    .collect(Collectors.toList());
             for (SchemaElementMatch schemaElementMatch : valueSchemaElements) {
                 if (!entity.getId().equals(schemaElementMatch.getElement().getId())) {
                     continue;
                 }
-                if (!checkExistSameEntitySchemaElements(
-                        schemaElementMatch, schemaElementMatchList)) {
+                if (!checkExistSameEntitySchemaElements(schemaElementMatch,
+                        schemaElementMatchList)) {
                     SchemaElementMatch entitySchemaElementMath = new SchemaElementMatch();
                     BeanUtils.copyProperties(schemaElementMatch, entitySchemaElementMath);
                     entitySchemaElementMath.setElement(entity);
@@ -54,20 +51,14 @@ public class EntityMapper extends BaseMapper {
         }
     }
 
-    private boolean checkExistSameEntitySchemaElements(
-            SchemaElementMatch valueSchemaElementMatch,
+    private boolean checkExistSameEntitySchemaElements(SchemaElementMatch valueSchemaElementMatch,
             List<SchemaElementMatch> schemaElementMatchList) {
-        List<SchemaElementMatch> entitySchemaElements =
-                schemaElementMatchList.stream()
-                        .filter(
-                                schemaElementMatch ->
-                                        SchemaElementType.ENTITY.equals(
-                                                schemaElementMatch.getElement().getType()))
-                        .collect(Collectors.toList());
+        List<SchemaElementMatch> entitySchemaElements = schemaElementMatchList.stream()
+                .filter(schemaElementMatch -> SchemaElementType.ENTITY
+                        .equals(schemaElementMatch.getElement().getType()))
+                .collect(Collectors.toList());
         for (SchemaElementMatch schemaElementMatch : entitySchemaElements) {
-            if (schemaElementMatch
-                    .getElement()
-                    .getId()
+            if (schemaElementMatch.getElement().getId()
                     .equals(valueSchemaElementMatch.getElement().getId())) {
                 return true;
             }

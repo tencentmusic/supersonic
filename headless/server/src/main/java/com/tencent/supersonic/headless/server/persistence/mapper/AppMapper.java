@@ -5,4 +5,5 @@ import com.tencent.supersonic.headless.server.persistence.dataobject.AppDO;
 import org.apache.ibatis.annotations.Mapper;
 
 @Mapper
-public interface AppMapper extends BaseMapper<AppDO> {}
+public interface AppMapper extends BaseMapper<AppDO> {
+}

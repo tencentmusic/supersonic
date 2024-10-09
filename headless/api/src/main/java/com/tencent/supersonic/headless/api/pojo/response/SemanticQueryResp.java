@@ -28,10 +28,8 @@ public class SemanticQueryResp extends QueryResult<Map<String, Object>> {
     }
 
     public List<QueryColumn> getDimensionColumns() {
-        return columns.stream()
-                .filter(
-                        queryColumn ->
-                                !SemanticType.NUMBER.name().equals(queryColumn.getShowType()))
+        return columns.stream().filter(
+                queryColumn -> !SemanticType.NUMBER.name().equals(queryColumn.getShowType()))
                 .collect(Collectors.toList());
     }
 }

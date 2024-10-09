@@ -25,6 +25,8 @@ public class DatabaseReq extends RecordInfo {
 
     private String database;
 
+    private String databaseType;
+
     private String version;
 
     private String description;

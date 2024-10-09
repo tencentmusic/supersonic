@@ -23,38 +23,32 @@ public class AliasGenerateHelper {
 
     private static final Logger keyPipelineLog = LoggerFactory.getLogger("keyPipeline");
 
-    private static final String NAME_ALIAS_INSTRUCTION =
-            ""
-                    + "\n#Role: You are a professional data analyst specializing in metrics and dimensions."
-                    + "\n#Task: You will be provided with metadata about a metric or dimension, please help "
-                    + "generate a few aliases in the same language as its `fieldName`."
-                    + "\n#Rules:"
-                    + "1. Please do not generate aliases like xxx1, xxx2, xxx3."
-                    + "2. Please do not generate aliases that are the same as the original names of metrics/dimensions."
-                    + "3. Please pay attention to the quality of the generated aliases and "
-                    + "avoid creating aliases that look like test data."
-                    + "4. Please output as a json string array."
-                    + "\n#Metadata: {'table':'{{table}}', 'name':'{{name}}', 'type':'{{type}}', "
-                    + "'field':'field', 'description':'{{desc}}'}"
-                    + "\n#Output:";
+    private static final String NAME_ALIAS_INSTRUCTION = ""
+            + "\n#Role: You are a professional data analyst specializing in metrics and dimensions."
+            + "\n#Task: You will be provided with metadata about a metric or dimension, please help "
+            + "generate a few aliases in the same language as its `fieldName`." + "\n#Rules:"
+            + "1. Please do not generate aliases like xxx1, xxx2, xxx3."
+            + "2. Please do not generate aliases that are the same as the original names of metrics/dimensions."
+            + "3. Please pay attention to the quality of the generated aliases and "
+            + "avoid creating aliases that look like test data."
+            + "4. Please output as a json string array."
+            + "\n#Metadata: {'table':'{{table}}', 'name':'{{name}}', 'type':'{{type}}', "
+            + "'field':'field', 'description':'{{desc}}'}" + "\n#Output:";
 
     private static final String VALUE_ALIAS_INSTRUCTION =
-            ""
-                    + "\n#Role: You are a professional data analyst."
+            "" + "\n#Role: You are a professional data analyst."
                     + "\n#Task: You will be provided with a json array of dimension values,"
-                    + "please help generate a few aliases for each value."
-                    + "\n#Rule:"
+                    + "please help generate a few aliases for each value." + "\n#Rule:"
                     + "1. ALWAYS output json array for each value."
                     + "2. The aliases should be in the same language as its original value."
-                    + "\n#Exemplar:"
-                    + "Values: [\\\"qq_music\\\",\\\"kugou_music\\\"], "
+                    + "\n#Exemplar:" + "Values: [\\\"qq_music\\\",\\\"kugou_music\\\"], "
                     + "Output: {\\\"tran\\\":[\\\"qq音乐\\\",\\\"酷狗音乐\\\"],"
                     + "         \\\"alias\\\":{\\\"qq_music\\\":[\\\"q音\\\",\\\"qq音乐\\\"],"
                     + "         \\\"kugou_music\\\":[\\\"kugou\\\",\\\"酷狗\\\"]}}"
                     + "\nValues: {{values}}, Output:";
 
-    public String generateAlias(
-            String mockType, String name, String bizName, String table, String desc) {
+    public String generateAlias(String mockType, String name, String bizName, String table,
+            String desc) {
         Map<String, Object> variable = new HashMap<>();
         variable.put("table", table);
         variable.put("name", name);
@@ -88,8 +82,8 @@ public class AliasGenerateHelper {
         return response.content().text();
     }
 
-    private static String extractString(
-            String targetString, String left, String right, Boolean exclusionFlag) {
+    private static String extractString(String targetString, String left, String right,
+            Boolean exclusionFlag) {
         if (targetString == null || left == null || right == null || exclusionFlag == null) {
             return targetString;
         }
@@ -139,19 +133,18 @@ public class AliasGenerateHelper {
             }
         }
         BoundaryPattern[] patterns = {
-            // 不做任何匹配
-            new BoundaryPattern(null, null, null),
-            // ```{"name":"Alice","age":25,"city":"NewYork"}```
-            new BoundaryPattern("```", "```", true),
-            // ```json {"name":"Alice","age":25,"city":"NewYork"}```
-            new BoundaryPattern("```json", "```", true),
-            // ```JSON {"name":"Alice","age":25,"city":"NewYork"}```
-            new BoundaryPattern("```JSON", "```", true),
-            // {"name":"Alice","age":25,"city":"NewYork"}
-            new BoundaryPattern("{", "}", false),
-            // ["Alice", "Bob"]
-            new BoundaryPattern("[", "]", false)
-        };
+                        // 不做任何匹配
+                        new BoundaryPattern(null, null, null),
+                        // ```{"name":"Alice","age":25,"city":"NewYork"}```
+                        new BoundaryPattern("```", "```", true),
+                        // ```json {"name":"Alice","age":25,"city":"NewYork"}```
+                        new BoundaryPattern("```json", "```", true),
+                        // ```JSON {"name":"Alice","age":25,"city":"NewYork"}```
+                        new BoundaryPattern("```JSON", "```", true),
+                        // {"name":"Alice","age":25,"city":"NewYork"}
+                        new BoundaryPattern("{", "}", false),
+                        // ["Alice", "Bob"]
+                        new BoundaryPattern("[", "]", false)};
         for (BoundaryPattern pattern : patterns) {
             String extracted =
                     extractString(aiMessage, pattern.left, pattern.right, pattern.exclusionFlag);

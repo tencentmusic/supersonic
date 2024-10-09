@@ -26,13 +26,10 @@ public class ParamOption {
      * forward
      */
     public enum ParamType {
-        CUSTOM,
-        SEMANTIC,
-        FORWARD
+        CUSTOM, SEMANTIC, FORWARD
     }
 
     public enum OptionType {
-        REQUIRED,
-        OPTIONAL
+        REQUIRED, OPTIONAL
     }
 }

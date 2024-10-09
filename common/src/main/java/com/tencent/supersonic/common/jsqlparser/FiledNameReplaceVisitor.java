@@ -34,11 +34,9 @@ public class FiledNameReplaceVisitor extends ExpressionVisitorAdapter {
         Expression leftExpression = expr.getLeftExpression();
         Expression rightExpression = expr.getRightExpression();
 
-        if (!(rightExpression instanceof StringValue)
-                || !(leftExpression instanceof Column)
+        if (!(rightExpression instanceof StringValue) || !(leftExpression instanceof Column)
                 || CollectionUtils.isEmpty(fieldValueToFieldNames)
-                || Objects.isNull(rightExpression)
-                || Objects.isNull(leftExpression)) {
+                || Objects.isNull(rightExpression) || Objects.isNull(leftExpression)) {
             return;
         }
 

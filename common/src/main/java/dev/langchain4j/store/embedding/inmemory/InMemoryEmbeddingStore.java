@@ -40,16 +40,19 @@ import static java.util.stream.Collectors.toList;
 /**
  * An {@link EmbeddingStore} that stores embeddings in memory.
  *
- * <p>Uses a brute force approach by iterating over all embeddings to find the best matches.
+ * <p>
+ * Uses a brute force approach by iterating over all embeddings to find the best matches.
  *
- * <p>This store can be persisted using the {@link #serializeToJson()} and {@link
- * #serializeToFile(Path)} methods.
+ * <p>
+ * This store can be persisted using the {@link #serializeToJson()} and
+ * {@link #serializeToFile(Path)} methods.
  *
- * <p>It can also be recreated from JSON or a file using the {@link #fromJson(String)} and {@link
- * #fromFile(Path)} methods.
+ * <p>
+ * It can also be recreated from JSON or a file using the {@link #fromJson(String)} and
+ * {@link #fromFile(Path)} methods.
  *
- * @param <Embedded> The class of the object that has been embedded. Typically, it is {@link
- *     dev.langchain4j.data.segment.TextSegment}.
+ * @param <Embedded> The class of the object that has been embedded. Typically, it is
+ *        {@link dev.langchain4j.data.segment.TextSegment}.
  */
 public class InMemoryEmbeddingStore<Embedded> implements EmbeddingStore<Embedded> {
 
@@ -88,10 +91,8 @@ public class InMemoryEmbeddingStore<Embedded> implements EmbeddingStore<Embedded
     @Override
     public List<String> addAll(List<Embedding> embeddings) {
 
-        List<Entry<Embedded>> newEntries =
-                embeddings.stream()
-                        .map(embedding -> new Entry<Embedded>(randomUUID(), embedding))
-                        .collect(toList());
+        List<Entry<Embedded>> newEntries = embeddings.stream()
+                .map(embedding -> new Entry<Embedded>(randomUUID(), embedding)).collect(toList());
 
         return add(newEntries);
     }
@@ -103,11 +104,9 @@ public class InMemoryEmbeddingStore<Embedded> implements EmbeddingStore<Embedded
                     "The list of embeddings and embedded must have the same size");
         }
 
-        List<Entry<Embedded>> newEntries =
-                IntStream.range(0, embeddings.size())
-                        .mapToObj(
-                                i -> new Entry<>(randomUUID(), embeddings.get(i), embedded.get(i)))
-                        .collect(toList());
+        List<Entry<Embedded>> newEntries = IntStream.range(0, embeddings.size())
+                .mapToObj(i -> new Entry<>(randomUUID(), embeddings.get(i), embedded.get(i)))
+                .collect(toList());
 
         return add(newEntries);
     }
@@ -123,16 +122,15 @@ public class InMemoryEmbeddingStore<Embedded> implements EmbeddingStore<Embedded
     public void removeAll(Filter filter) {
         ensureNotNull(filter, "filter");
 
-        entries.removeIf(
-                entry -> {
-                    if (entry.embedded instanceof TextSegment) {
-                        return filter.test(((TextSegment) entry.embedded).metadata());
-                    } else if (entry.embedded == null) {
-                        return false;
-                    } else {
-                        throw new UnsupportedOperationException("Not supported yet.");
-                    }
-                });
+        entries.removeIf(entry -> {
+            if (entry.embedded instanceof TextSegment) {
+                return filter.test(((TextSegment) entry.embedded).metadata());
+            } else if (entry.embedded == null) {
+                return false;
+            } else {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+        });
     }
 
     @Override
@@ -157,9 +155,8 @@ public class InMemoryEmbeddingStore<Embedded> implements EmbeddingStore<Embedded
                 }
             }
 
-            double cosineSimilarity =
-                    CosineSimilarity.between(
-                            entry.embedding, embeddingSearchRequest.queryEmbedding());
+            double cosineSimilarity = CosineSimilarity.between(entry.embedding,
+                    embeddingSearchRequest.queryEmbedding());
             double score = RelevanceScore.fromCosineSimilarity(cosineSimilarity);
             if (score >= embeddingSearchRequest.minScore()) {
                 matches.add(new EmbeddingMatch<>(score, entry.id, entry.embedding, entry.embedded));
@@ -247,8 +244,8 @@ public class InMemoryEmbeddingStore<Embedded> implements EmbeddingStore<Embedded
     }
 
     private static InMemoryEmbeddingStoreJsonCodec loadCodec() {
-        for (InMemoryEmbeddingStoreJsonCodecFactory factory :
-                loadFactories(InMemoryEmbeddingStoreJsonCodecFactory.class)) {
+        for (InMemoryEmbeddingStoreJsonCodecFactory factory : loadFactories(
+                InMemoryEmbeddingStoreJsonCodecFactory.class)) {
             return factory.create();
         }
         return new GsonInMemoryEmbeddingStoreJsonCodec();

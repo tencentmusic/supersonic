@@ -48,13 +48,17 @@ public class RetrieveServiceImpl implements RetrieveService {
 
     private static final int RESULT_SIZE = 10;
 
-    @Autowired private DataSetService dataSetService;
+    @Autowired
+    private DataSetService dataSetService;
 
-    @Autowired private SchemaService schemaService;
+    @Autowired
+    private SchemaService schemaService;
 
-    @Autowired private KnowledgeBaseService knowledgeBaseService;
+    @Autowired
+    private KnowledgeBaseService knowledgeBaseService;
 
-    @Autowired private SearchMatchStrategy searchMatchStrategy;
+    @Autowired
+    private SearchMatchStrategy searchMatchStrategy;
 
     @Override
     public List<SearchResult> retrieve(QueryNLReq queryNLReq) {
@@ -65,9 +69,8 @@ public class RetrieveServiceImpl implements RetrieveService {
                 schemaService.getSemanticSchema(queryNLReq.getDataSetIds());
         List<SchemaElement> metricsDb = semanticSchemaDb.getMetrics();
         final Map<Long, String> dataSetIdToName = semanticSchemaDb.getDataSetIdToName();
-        Map<Long, List<Long>> modelIdToDataSetIds =
-                dataSetService.getModelIdToDataSetIds(
-                        new ArrayList<>(dataSetIdToName.keySet()), User.getFakeUser());
+        Map<Long, List<Long>> modelIdToDataSetIds = dataSetService.getModelIdToDataSetIds(
+                new ArrayList<>(dataSetIdToName.keySet()), User.getFakeUser());
         // 2.detect by segment
         List<S2Term> originals = knowledgeBaseService.getTerms(queryText, modelIdToDataSetIds);
         log.debug("hanlp parse result: {}", originals);
@@ -86,14 +89,9 @@ public class RetrieveServiceImpl implements RetrieveService {
         Optional<Map.Entry<MatchText, List<HanlpMapResult>>> mostSimilarSearchResult =
                 regTextMap.entrySet().stream()
                         .filter(entry -> CollectionUtils.isNotEmpty(entry.getValue()))
-                        .reduce(
-                                (entry1, entry2) ->
-                                        entry1.getKey().getDetectSegment().length()
-                                                        >= entry2.getKey()
-                                                                .getDetectSegment()
-                                                                .length()
-                                                ? entry1
-                                                : entry2);
+                        .reduce((entry1, entry2) -> entry1.getKey().getDetectSegment()
+                                .length() >= entry2.getKey().getDetectSegment().length() ? entry1
+                                        : entry2);
 
         // 4.optimize the results after the query
         if (!mostSimilarSearchResult.isPresent()) {
@@ -108,12 +106,8 @@ public class RetrieveServiceImpl implements RetrieveService {
         List<Long> possibleDataSets = getPossibleDataSets(queryNLReq, originals, dataSetIds);
 
         // 5.1 priority dimension metric
-        boolean existMetricAndDimension =
-                searchMetricAndDimension(
-                        new HashSet<>(possibleDataSets),
-                        dataSetIdToName,
-                        searchTextEntry,
-                        searchResults);
+        boolean existMetricAndDimension = searchMetricAndDimension(new HashSet<>(possibleDataSets),
+                dataSetIdToName, searchTextEntry, searchResults);
 
         // 5.2 process based on dimension values
         MatchText matchText = searchTextEntry.getKey();
@@ -123,24 +117,17 @@ public class RetrieveServiceImpl implements RetrieveService {
 
         for (Map.Entry<String, String> natureToNameEntry : natureToNameMap.entrySet()) {
 
-            Set<SearchResult> searchResultSet =
-                    searchDimensionValue(
-                            metricsDb,
-                            dataSetIdToName,
-                            dataSetInfoStat.getMetricDataSetCount(),
-                            existMetricAndDimension,
-                            matchText,
-                            natureToNameMap,
-                            natureToNameEntry,
-                            queryNLReq.getQueryFilters());
+            Set<SearchResult> searchResultSet = searchDimensionValue(metricsDb, dataSetIdToName,
+                    dataSetInfoStat.getMetricDataSetCount(), existMetricAndDimension, matchText,
+                    natureToNameMap, natureToNameEntry, queryNLReq.getQueryFilters());
 
             searchResults.addAll(searchResultSet);
         }
         return searchResults.stream().limit(RESULT_SIZE).collect(Collectors.toList());
     }
 
-    private List<Long> getPossibleDataSets(
-            QueryNLReq queryCtx, List<S2Term> originals, Set<Long> dataSetIds) {
+    private List<Long> getPossibleDataSets(QueryNLReq queryCtx, List<S2Term> originals,
+            Set<Long> dataSetIds) {
         if (CollectionUtils.isNotEmpty(dataSetIds)) {
             return new ArrayList<>(dataSetIds);
         }
@@ -155,15 +142,10 @@ public class RetrieveServiceImpl implements RetrieveService {
         return possibleDataSets;
     }
 
-    private Set<SearchResult> searchDimensionValue(
-            List<SchemaElement> metricsDb,
-            Map<Long, String> modelToName,
-            long metricModelCount,
-            boolean existMetricAndDimension,
-            MatchText matchText,
-            Map<String, String> natureToNameMap,
-            Map.Entry<String, String> natureToNameEntry,
-            QueryFilters queryFilters) {
+    private Set<SearchResult> searchDimensionValue(List<SchemaElement> metricsDb,
+            Map<Long, String> modelToName, long metricModelCount, boolean existMetricAndDimension,
+            MatchText matchText, Map<String, String> natureToNameMap,
+            Map.Entry<String, String> natureToNameEntry, QueryFilters queryFilters) {
 
         Set<SearchResult> searchResults = new LinkedHashSet();
         String nature = natureToNameEntry.getKey();
@@ -175,15 +157,10 @@ public class RetrieveServiceImpl implements RetrieveService {
         if (SchemaElementType.ENTITY.equals(schemaElementType)) {
             return searchResults;
         }
-        // If there are no metric/dimension, complete the  metric information
-        SearchResult searchResult =
-                SearchResult.builder()
-                        .modelId(modelId)
-                        .modelName(modelToName.get(modelId))
-                        .recommend(matchText.getRegText() + wordName)
-                        .schemaElementType(schemaElementType)
-                        .subRecommend(wordName)
-                        .build();
+        // If there are no metric/dimension, complete the metric information
+        SearchResult searchResult = SearchResult.builder().modelId(modelId)
+                .modelName(modelToName.get(modelId)).recommend(matchText.getRegText() + wordName)
+                .schemaElementType(schemaElementType).subRecommend(wordName).build();
 
         if (metricModelCount <= 0 && !existMetricAndDimension) {
             if (filterByQueryFilter(wordName, queryFilters)) {
@@ -191,24 +168,15 @@ public class RetrieveServiceImpl implements RetrieveService {
             }
             searchResults.add(searchResult);
             int metricSize = getMetricSize(natureToNameMap);
-            List<String> metrics =
-                    filerMetricsByModel(metricsDb, modelId, metricSize * 3).stream()
-                            .limit(metricSize)
-                            .collect(Collectors.toList());
+            List<String> metrics = filerMetricsByModel(metricsDb, modelId, metricSize * 3).stream()
+                    .limit(metricSize).collect(Collectors.toList());
 
             for (String metric : metrics) {
-                SearchResult result =
-                        SearchResult.builder()
-                                .modelId(modelId)
-                                .modelName(modelToName.get(modelId))
-                                .recommend(
-                                        matchText.getRegText()
-                                                + wordName
-                                                + DictWordType.SPACE
-                                                + metric)
-                                .subRecommend(wordName + DictWordType.SPACE + metric)
-                                .isComplete(false)
-                                .build();
+                SearchResult result = SearchResult.builder().modelId(modelId)
+                        .modelName(modelToName.get(modelId))
+                        .recommend(matchText.getRegText() + wordName + DictWordType.SPACE + metric)
+                        .subRecommend(wordName + DictWordType.SPACE + metric).isComplete(false)
+                        .build();
                 searchResults.add(result);
             }
         } else {
@@ -238,22 +206,19 @@ public class RetrieveServiceImpl implements RetrieveService {
         return true;
     }
 
-    protected List<String> filerMetricsByModel(
-            List<SchemaElement> metricsDb, Long model, int metricSize) {
+    protected List<String> filerMetricsByModel(List<SchemaElement> metricsDb, Long model,
+            int metricSize) {
         if (CollectionUtils.isEmpty(metricsDb)) {
             return Lists.newArrayList();
         }
         return metricsDb.stream()
                 .filter(mapDO -> Objects.nonNull(mapDO) && model.equals(mapDO.getDataSetId()))
                 .sorted(Comparator.comparing(SchemaElement::getUseCnt).reversed())
-                .flatMap(
-                        entry -> {
-                            List<String> result = new ArrayList<>();
-                            result.add(entry.getName());
-                            return result.stream();
-                        })
-                .limit(metricSize)
-                .collect(Collectors.toList());
+                .flatMap(entry -> {
+                    List<String> result = new ArrayList<>();
+                    result.add(entry.getName());
+                    return result.stream();
+                }).limit(metricSize).collect(Collectors.toList());
     }
 
     /**
@@ -267,35 +232,23 @@ public class RetrieveServiceImpl implements RetrieveService {
             Set<Long> possibleModels) {
         List<HanlpMapResult> recommendValues = recommendTextListEntry.getValue();
         return recommendValues.stream()
-                .flatMap(
-                        entry ->
-                                entry.getNatures().stream()
-                                        .filter(
-                                                nature -> {
-                                                    if (CollectionUtils.isEmpty(possibleModels)) {
-                                                        return true;
-                                                    }
-                                                    Long model = NatureHelper.getDataSetId(nature);
-                                                    return possibleModels.contains(model);
-                                                })
-                                        .map(
-                                                nature -> {
-                                                    DictWord posDO = new DictWord();
-                                                    posDO.setWord(entry.getName());
-                                                    posDO.setNature(nature);
-                                                    return posDO;
-                                                }))
-                .sorted(Comparator.comparingInt(a -> a.getWord().length()))
-                .collect(
-                        Collectors.toMap(
-                                DictWord::getNature,
-                                DictWord::getWord,
-                                (value1, value2) -> value1,
-                                LinkedHashMap::new));
+                .flatMap(entry -> entry.getNatures().stream().filter(nature -> {
+                    if (CollectionUtils.isEmpty(possibleModels)) {
+                        return true;
+                    }
+                    Long model = NatureHelper.getDataSetId(nature);
+                    return possibleModels.contains(model);
+                }).map(nature -> {
+                    DictWord posDO = new DictWord();
+                    posDO.setWord(entry.getName());
+                    posDO.setNature(nature);
+                    return posDO;
+                })).sorted(Comparator.comparingInt(a -> a.getWord().length()))
+                .collect(Collectors.toMap(DictWord::getNature, DictWord::getWord,
+                        (value1, value2) -> value1, LinkedHashMap::new));
     }
 
-    private boolean searchMetricAndDimension(
-            Set<Long> possibleDataSets,
+    private boolean searchMetricAndDimension(Set<Long> possibleDataSets,
             Map<Long, String> modelToName,
             Map.Entry<MatchText, List<HanlpMapResult>> searchTextEntry,
             Set<SearchResult> searchResults) {
@@ -306,15 +259,12 @@ public class RetrieveServiceImpl implements RetrieveService {
 
         for (HanlpMapResult hanlpMapResult : hanlpMapResults) {
 
-            List<ModelWithSemanticType> dimensionMetricClassIds =
-                    hanlpMapResult.getNatures().stream()
-                            .map(
-                                    nature ->
-                                            new ModelWithSemanticType(
-                                                    NatureHelper.getDataSetId(nature),
-                                                    NatureHelper.convertToElementType(nature)))
-                            .filter(entry -> matchCondition(entry, possibleDataSets))
-                            .collect(Collectors.toList());
+            List<ModelWithSemanticType> dimensionMetricClassIds = hanlpMapResult.getNatures()
+                    .stream()
+                    .map(nature -> new ModelWithSemanticType(NatureHelper.getDataSetId(nature),
+                            NatureHelper.convertToElementType(nature)))
+                    .filter(entry -> matchCondition(entry, possibleDataSets))
+                    .collect(Collectors.toList());
 
             if (CollectionUtils.isEmpty(dimensionMetricClassIds)) {
                 continue;
@@ -324,21 +274,15 @@ public class RetrieveServiceImpl implements RetrieveService {
                 Long modelId = modelWithSemanticType.getModel();
                 SchemaElementType schemaElementType = modelWithSemanticType.getSchemaElementType();
                 SearchResult searchResult =
-                        SearchResult.builder()
-                                .modelId(modelId)
-                                .modelName(modelToName.get(modelId))
+                        SearchResult.builder().modelId(modelId).modelName(modelToName.get(modelId))
                                 .recommend(matchText.getRegText() + hanlpMapResult.getName())
                                 .subRecommend(hanlpMapResult.getName())
-                                .schemaElementType(schemaElementType)
-                                .build();
-                // visibility to filter  metrics
+                                .schemaElementType(schemaElementType).build();
+                // visibility to filter metrics
                 searchResults.add(searchResult);
             }
-            log.debug(
-                    "parseResult:{},dimensionMetricClassIds:{},possibleDataSets:{}",
-                    hanlpMapResult,
-                    dimensionMetricClassIds,
-                    possibleDataSets);
+            log.debug("parseResult:{},dimensionMetricClassIds:{},possibleDataSets:{}",
+                    hanlpMapResult, dimensionMetricClassIds, possibleDataSets);
         }
         log.info("searchMetricAndDimension searchResults:{}", searchResults);
         return existMetric;

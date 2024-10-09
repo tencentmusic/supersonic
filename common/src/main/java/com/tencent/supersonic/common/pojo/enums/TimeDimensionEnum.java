@@ -31,33 +31,23 @@ public enum TimeDimensionEnum {
     }
 
     public static List<String> getNameList() {
-        return Arrays.stream(TimeDimensionEnum.values())
-                .map(TimeDimensionEnum::getName)
+        return Arrays.stream(TimeDimensionEnum.values()).map(TimeDimensionEnum::getName)
                 .collect(Collectors.toList());
     }
 
     public static List<String> getChNameList() {
-        return Arrays.stream(TimeDimensionEnum.values())
-                .map(TimeDimensionEnum::getChName)
+        return Arrays.stream(TimeDimensionEnum.values()).map(TimeDimensionEnum::getChName)
                 .collect(Collectors.toList());
     }
 
     public static Map<String, String> getChNameToNameMap() {
-        return Arrays.stream(TimeDimensionEnum.values())
-                .collect(
-                        Collectors.toMap(
-                                TimeDimensionEnum::getChName,
-                                TimeDimensionEnum::getName,
-                                (k1, k2) -> k1));
+        return Arrays.stream(TimeDimensionEnum.values()).collect(Collectors
+                .toMap(TimeDimensionEnum::getChName, TimeDimensionEnum::getName, (k1, k2) -> k1));
     }
 
     public static Map<String, String> getNameToNameMap() {
-        return Arrays.stream(TimeDimensionEnum.values())
-                .collect(
-                        Collectors.toMap(
-                                TimeDimensionEnum::getName,
-                                TimeDimensionEnum::getName,
-                                (k1, k2) -> k1));
+        return Arrays.stream(TimeDimensionEnum.values()).collect(Collectors
+                .toMap(TimeDimensionEnum::getName, TimeDimensionEnum::getName, (k1, k2) -> k1));
     }
 
     public String getName() {

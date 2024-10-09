@@ -109,9 +109,8 @@ public class DuSQLDemo extends S2BaseDemo {
         modelDetail.setMeasures(measures);
 
         modelDetail.setQueryType("sql_query");
-        modelDetail.setSqlQuery(
-                "SELECT imp_date,company_id,company_name,headquarter_address,"
-                        + "company_established_time,founder,ceo,annual_turnover,employee_count FROM company");
+        modelDetail.setSqlQuery("SELECT imp_date,company_id,company_name,headquarter_address,"
+                + "company_established_time,founder,ceo,annual_turnover,employee_count FROM company");
         modelReq.setModelDetail(modelDetail);
         modelService.createModel(modelReq, user);
     }
@@ -138,8 +137,8 @@ public class DuSQLDemo extends S2BaseDemo {
         dimensions.add(new Dim("品牌名称", "brand_name", DimensionType.categorical.name(), 1));
         dimensions.add(
                 new Dim("品牌成立时间", "brand_established_time", DimensionType.categorical.name(), 1));
-        dimensions.add(
-                new Dim("法定代表人", "legal_representative", DimensionType.categorical.name(), 1));
+        dimensions
+                .add(new Dim("法定代表人", "legal_representative", DimensionType.categorical.name(), 1));
         modelDetail.setDimensions(dimensions);
 
         List<Identify> identifiers = new ArrayList<>();
@@ -152,9 +151,8 @@ public class DuSQLDemo extends S2BaseDemo {
         modelDetail.setMeasures(measures);
 
         modelDetail.setQueryType("sql_query");
-        modelDetail.setSqlQuery(
-                "SELECT  imp_date,brand_id,brand_name,brand_established_time,"
-                        + "company_id,legal_representative,registered_capital FROM brand");
+        modelDetail.setSqlQuery("SELECT  imp_date,brand_id,brand_name,brand_established_time,"
+                + "company_id,legal_representative,registered_capital FROM brand");
         modelReq.setModelDetail(modelDetail);
         modelService.createModel(modelReq, user);
     }
@@ -193,9 +191,8 @@ public class DuSQLDemo extends S2BaseDemo {
         modelDetail.setMeasures(measures);
 
         modelDetail.setQueryType("sql_query");
-        modelDetail.setSqlQuery(
-                "SELECT imp_date,company_id,brand_id,revenue_proportion,"
-                        + "profit_proportion,expenditure_proportion FROM company_revenue");
+        modelDetail.setSqlQuery("SELECT imp_date,company_id,brand_id,revenue_proportion,"
+                + "profit_proportion,expenditure_proportion FROM company_revenue");
         modelReq.setModelDetail(modelDetail);
         modelService.createModel(modelReq, user);
         MetricResp metricResp = metricService.getMetric(13L, user);
@@ -235,17 +232,15 @@ public class DuSQLDemo extends S2BaseDemo {
         List<Measure> measures = new ArrayList<>();
         measures.add(new Measure("营收", "revenue", AggOperatorEnum.SUM.name(), 1));
         measures.add(new Measure("利润", "profit", AggOperatorEnum.SUM.name(), 1));
-        measures.add(
-                new Measure(
-                        "营收同比增长", "revenue_growth_year_on_year", AggOperatorEnum.SUM.name(), 1));
+        measures.add(new Measure("营收同比增长", "revenue_growth_year_on_year",
+                AggOperatorEnum.SUM.name(), 1));
         measures.add(
                 new Measure("利润同比增长", "profit_growth_year_on_year", AggOperatorEnum.SUM.name(), 1));
         modelDetail.setMeasures(measures);
 
         modelDetail.setQueryType("sql_query");
-        modelDetail.setSqlQuery(
-                "SELECT imp_date,year_time,brand_id,revenue,profit,"
-                        + "revenue_growth_year_on_year,profit_growth_year_on_year FROM company_brand_revenue");
+        modelDetail.setSqlQuery("SELECT imp_date,year_time,brand_id,revenue,profit,"
+                + "revenue_growth_year_on_year,profit_growth_year_on_year FROM company_brand_revenue");
         modelReq.setModelDetail(modelDetail);
         modelService.createModel(modelReq, user);
     }
@@ -257,20 +252,15 @@ public class DuSQLDemo extends S2BaseDemo {
         dataSetReq.setDomainId(4L);
         dataSetReq.setDescription("DuSQL互联网企业数据源相关的指标和维度等");
         dataSetReq.setAdmins(Lists.newArrayList("admin"));
-        List<DataSetModelConfig> viewModelConfigs =
-                Lists.newArrayList(
-                        new DataSetModelConfig(
-                                9L,
-                                Lists.newArrayList(16L, 17L, 18L, 19L, 20L),
-                                Lists.newArrayList(10L, 11L)),
-                        new DataSetModelConfig(
-                                10L, Lists.newArrayList(21L, 22L, 23L), Lists.newArrayList(12L)),
-                        new DataSetModelConfig(
-                                11L, Lists.newArrayList(), Lists.newArrayList(13L, 14L, 15L)),
-                        new DataSetModelConfig(
-                                12L,
-                                Lists.newArrayList(24L),
-                                Lists.newArrayList(16L, 17L, 18L, 19L)));
+        List<DataSetModelConfig> viewModelConfigs = Lists.newArrayList(
+                new DataSetModelConfig(9L, Lists.newArrayList(16L, 17L, 18L, 19L, 20L),
+                        Lists.newArrayList(10L, 11L)),
+                new DataSetModelConfig(10L, Lists.newArrayList(21L, 22L, 23L),
+                        Lists.newArrayList(12L)),
+                new DataSetModelConfig(11L, Lists.newArrayList(),
+                        Lists.newArrayList(13L, 14L, 15L)),
+                new DataSetModelConfig(12L, Lists.newArrayList(24L),
+                        Lists.newArrayList(16L, 17L, 18L, 19L)));
 
         DataSetDetail dsDetail = new DataSetDetail();
         dsDetail.setDataSetModelConfigs(viewModelConfigs);
@@ -289,8 +279,8 @@ public class DuSQLDemo extends S2BaseDemo {
 
     public void addModelRela_1() {
         List<JoinCondition> joinConditions = Lists.newArrayList();
-        joinConditions.add(
-                new JoinCondition("company_id", "company_id", FilterOperatorEnum.EQUALS));
+        joinConditions
+                .add(new JoinCondition("company_id", "company_id", FilterOperatorEnum.EQUALS));
         ModelRela modelRelaReq = new ModelRela();
         modelRelaReq.setDomainId(4L);
         modelRelaReq.setFromModelId(9L);
@@ -302,8 +292,8 @@ public class DuSQLDemo extends S2BaseDemo {
 
     public void addModelRela_2() {
         List<JoinCondition> joinConditions = Lists.newArrayList();
-        joinConditions.add(
-                new JoinCondition("company_id", "company_id", FilterOperatorEnum.EQUALS));
+        joinConditions
+                .add(new JoinCondition("company_id", "company_id", FilterOperatorEnum.EQUALS));
         ModelRela modelRelaReq = new ModelRela();
         modelRelaReq.setDomainId(4L);
         modelRelaReq.setFromModelId(9L);

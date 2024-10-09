@@ -26,23 +26,20 @@ import java.util.stream.Stream;
 @Slf4j
 public class MetaEmbeddingService {
 
-    @Autowired private EmbeddingService embeddingService;
-    @Autowired private EmbeddingConfig embeddingConfig;
+    @Autowired
+    private EmbeddingService embeddingService;
+    @Autowired
+    private EmbeddingConfig embeddingConfig;
 
-    public List<RetrieveQueryResult> retrieveQuery(
-            RetrieveQuery retrieveQuery,
-            int num,
-            Map<Long, List<Long>> modelIdToDataSetIds,
-            Set<Long> detectDataSetIds) {
+    public List<RetrieveQueryResult> retrieveQuery(RetrieveQuery retrieveQuery, int num,
+            Map<Long, List<Long>> modelIdToDataSetIds, Set<Long> detectDataSetIds) {
         // dataSetIds->modelIds
         Set<Long> allModels = NatureHelper.getModelIds(modelIdToDataSetIds, detectDataSetIds);
 
         if (CollectionUtils.isNotEmpty(allModels)) {
             Map<String, Object> filterCondition = new HashMap<>();
-            filterCondition.put(
-                    "modelId",
-                    allModels.stream()
-                            .map(modelId -> modelId + DictWordType.NATURE_SPILT)
+            filterCondition.put("modelId",
+                    allModels.stream().map(modelId -> modelId + DictWordType.NATURE_SPILT)
                             .collect(Collectors.toList()));
             retrieveQuery.setFilterCondition(filterCondition);
         }
@@ -67,36 +64,22 @@ public class MetaEmbeddingService {
             return result;
         }
         // Process each Retrieval object.
-        List<Retrieval> updatedRetrievals =
-                retrievals.stream()
-                        .flatMap(
-                                retrieval -> {
-                                    Long modelId =
-                                            Retrieval.getLongId(
-                                                    retrieval.getMetadata().get("modelId"));
-                                    List<Long> dataSetIds = modelIdToDataSetIds.get(modelId);
+        List<Retrieval> updatedRetrievals = retrievals.stream().flatMap(retrieval -> {
+            Long modelId = Retrieval.getLongId(retrieval.getMetadata().get("modelId"));
+            List<Long> dataSetIds = modelIdToDataSetIds.get(modelId);
 
-                                    if (CollectionUtils.isEmpty(dataSetIds)) {
-                                        return Stream.of(retrieval);
-                                    }
+            if (CollectionUtils.isEmpty(dataSetIds)) {
+                return Stream.of(retrieval);
+            }
 
-                                    return dataSetIds.stream()
-                                            .map(
-                                                    dataSetId -> {
-                                                        Retrieval newRetrieval = new Retrieval();
-                                                        BeanUtils.copyProperties(
-                                                                retrieval, newRetrieval);
-                                                        newRetrieval
-                                                                .getMetadata()
-                                                                .putIfAbsent(
-                                                                        "dataSetId",
-                                                                        dataSetId
-                                                                                + Constants
-                                                                                        .UNDERLINE);
-                                                        return newRetrieval;
-                                                    });
-                                })
-                        .collect(Collectors.toList());
+            return dataSetIds.stream().map(dataSetId -> {
+                Retrieval newRetrieval = new Retrieval();
+                BeanUtils.copyProperties(retrieval, newRetrieval);
+                newRetrieval.getMetadata().putIfAbsent("dataSetId",
+                        dataSetId + Constants.UNDERLINE);
+                return newRetrieval;
+            });
+        }).collect(Collectors.toList());
         result.setRetrieval(updatedRetrievals);
         return result;
     }

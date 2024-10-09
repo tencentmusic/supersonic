@@ -20,8 +20,7 @@ public class EditDistanceUtils {
     public static double getSimilarity(String detectSegment, String matchName) {
         String detectSegmentLower = detectSegment == null ? null : detectSegment.toLowerCase();
         String matchNameLower = matchName == null ? null : matchName.toLowerCase();
-        return 1
-                - (double) EditDistance.compute(detectSegmentLower, matchNameLower)
-                        / Math.max(matchName.length(), detectSegment.length());
+        return 1 - (double) EditDistance.compute(detectSegmentLower, matchNameLower)
+                / Math.max(matchName.length(), detectSegment.length());
     }
 }

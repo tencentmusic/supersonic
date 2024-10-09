@@ -35,30 +35,23 @@ public class DataSetResp extends SchemaItem {
     private List<TagItem> allDimensions = new ArrayList<>();
 
     public List<Long> metricIds() {
-        return getDataSetModelConfigs().stream()
-                .map(DataSetModelConfig::getMetrics)
-                .flatMap(Collection::stream)
-                .collect(Collectors.toList());
+        return getDataSetModelConfigs().stream().map(DataSetModelConfig::getMetrics)
+                .flatMap(Collection::stream).collect(Collectors.toList());
     }
 
     public List<Long> dimensionIds() {
-        return getDataSetModelConfigs().stream()
-                .map(DataSetModelConfig::getDimensions)
-                .flatMap(Collection::stream)
-                .collect(Collectors.toList());
+        return getDataSetModelConfigs().stream().map(DataSetModelConfig::getDimensions)
+                .flatMap(Collection::stream).collect(Collectors.toList());
     }
 
     public List<Long> getAllModels() {
-        return getDataSetModelConfigs().stream()
-                .map(DataSetModelConfig::getId)
+        return getDataSetModelConfigs().stream().map(DataSetModelConfig::getId)
                 .collect(Collectors.toList());
     }
 
     public List<Long> getAllIncludeAllModels() {
-        return getDataSetModelConfigs().stream()
-                .filter(DataSetModelConfig::getIncludesAll)
-                .map(DataSetModelConfig::getId)
-                .collect(Collectors.toList());
+        return getDataSetModelConfigs().stream().filter(DataSetModelConfig::getIncludesAll)
+                .map(DataSetModelConfig::getId).collect(Collectors.toList());
     }
 
     private List<DataSetModelConfig> getDataSetModelConfigs() {

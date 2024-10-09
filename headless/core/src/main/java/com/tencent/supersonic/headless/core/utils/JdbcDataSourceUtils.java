@@ -31,7 +31,8 @@ import static com.tencent.supersonic.common.pojo.Constants.SPACE;
 @Slf4j
 public class JdbcDataSourceUtils {
 
-    @Getter private static Set releaseSourceSet = new HashSet();
+    @Getter
+    private static Set releaseSourceSet = new HashSet();
     private JdbcDataSource jdbcDataSource;
 
     public JdbcDataSourceUtils(JdbcDataSource jdbcDataSource) {
@@ -46,9 +47,8 @@ public class JdbcDataSourceUtils {
             log.error(e.toString(), e);
             return false;
         }
-        try (Connection con =
-                DriverManager.getConnection(
-                        database.getUrl(), database.getUsername(), database.passwordDecrypt())) {
+        try (Connection con = DriverManager.getConnection(database.getUrl(), database.getUsername(),
+                database.passwordDecrypt())) {
             return con != null;
         } catch (SQLException e) {
             log.error(e.toString(), e);
@@ -116,8 +116,7 @@ public class JdbcDataSourceUtils {
             log.error("e", e);
         }
 
-        if (!StringUtils.isEmpty(className)
-                && !className.contains("com.sun.proxy")
+        if (!StringUtils.isEmpty(className) && !className.contains("com.sun.proxy")
                 && !className.contains("net.sf.cglib.proxy")) {
             return className;
         }
@@ -129,13 +128,8 @@ public class JdbcDataSourceUtils {
         throw new RuntimeException("Not supported data type: jdbcUrl=" + jdbcUrl);
     }
 
-    public static String getKey(
-            String name,
-            String jdbcUrl,
-            String username,
-            String password,
-            String version,
-            boolean isExt) {
+    public static String getKey(String name, String jdbcUrl, String username, String password,
+            String version, boolean isExt) {
 
         StringBuilder sb = new StringBuilder();
 
@@ -165,10 +159,8 @@ public class JdbcDataSourceUtils {
                 return dataSource.getConnection();
             } catch (Exception e) {
                 log.error("Get connection error, jdbcUrl:{}, e:{}", database.getUrl(), e);
-                throw new RuntimeException(
-                        "Get connection error, jdbcUrl:"
-                                + database.getUrl()
-                                + " you can try again later or reset datasource");
+                throw new RuntimeException("Get connection error, jdbcUrl:" + database.getUrl()
+                        + " you can try again later or reset datasource");
             }
         }
         return conn;
@@ -176,7 +168,7 @@ public class JdbcDataSourceUtils {
 
     private Connection getConnectionWithRetry(Database database) {
         int rc = 1;
-        for (; ; ) {
+        for (;;) {
 
             if (rc > 3) {
                 return null;

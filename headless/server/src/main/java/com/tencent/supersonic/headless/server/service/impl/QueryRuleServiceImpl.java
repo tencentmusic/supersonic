@@ -26,8 +26,8 @@ public class QueryRuleServiceImpl implements QueryRuleService {
     private final QueryRuleRepository queryRuleRepository;
     private final DataSetService dataSetService;
 
-    public QueryRuleServiceImpl(
-            QueryRuleRepository queryRuleRepository, DataSetService dataSetService) {
+    public QueryRuleServiceImpl(QueryRuleRepository queryRuleRepository,
+            DataSetService dataSetService) {
         this.queryRuleRepository = queryRuleRepository;
         this.dataSetService = dataSetService;
     }

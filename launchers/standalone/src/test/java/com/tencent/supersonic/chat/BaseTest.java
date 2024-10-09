@@ -29,24 +29,20 @@ public class BaseTest extends BaseApplication {
     protected final String endDay = LocalDate.now().toString();
     protected final DatePeriodEnum period = DatePeriodEnum.DAY;
 
-    @Autowired protected ChatQueryService chatQueryService;
-    @Autowired protected AgentService agentService;
+    @Autowired
+    protected ChatQueryService chatQueryService;
+    @Autowired
+    protected AgentService agentService;
 
     protected QueryResult submitMultiTurnChat(String queryText, Integer agentId, Integer chatId)
             throws Exception {
         ParseResp parseResp = submitParse(queryText, agentId, chatId);
 
         SemanticParseInfo semanticParseInfo = parseResp.getSelectedParses().get(0);
-        ChatExecuteReq request =
-                ChatExecuteReq.builder()
-                        .queryText(parseResp.getQueryText())
-                        .user(DataUtils.getUser())
-                        .parseId(semanticParseInfo.getId())
-                        .queryId(parseResp.getQueryId())
-                        .chatId(chatId)
-                        .saveAnswer(true)
-                        .build();
-        QueryResult queryResult = chatQueryService.performExecution(request);
+        ChatExecuteReq request = ChatExecuteReq.builder().queryText(parseResp.getQueryText())
+                .user(DataUtils.getUser()).parseId(semanticParseInfo.getId())
+                .queryId(parseResp.getQueryId()).chatId(chatId).saveAnswer(true).build();
+        QueryResult queryResult = chatQueryService.execute(request);
         queryResult.setChatContext(semanticParseInfo);
         return queryResult;
     }
@@ -56,18 +52,11 @@ public class BaseTest extends BaseApplication {
         ParseResp parseResp = submitParse(queryText, agentId, chatId);
 
         SemanticParseInfo parseInfo = parseResp.getSelectedParses().get(0);
-        ChatExecuteReq request =
-                ChatExecuteReq.builder()
-                        .queryText(parseResp.getQueryText())
-                        .user(DataUtils.getUser())
-                        .parseId(parseInfo.getId())
-                        .agentId(agentId)
-                        .chatId(chatId)
-                        .queryId(parseResp.getQueryId())
-                        .saveAnswer(false)
-                        .build();
+        ChatExecuteReq request = ChatExecuteReq.builder().queryText(parseResp.getQueryText())
+                .user(DataUtils.getUser()).parseId(parseInfo.getId()).agentId(agentId)
+                .chatId(chatId).queryId(parseResp.getQueryId()).saveAnswer(false).build();
 
-        QueryResult result = chatQueryService.performExecution(request);
+        QueryResult result = chatQueryService.execute(request);
         result.setChatContext(parseInfo);
         return result;
     }
@@ -75,20 +64,14 @@ public class BaseTest extends BaseApplication {
     protected ParseResp submitParse(String queryText, Integer agentId, Integer chatId) {
         ChatParseReq chatParseReq = DataUtils.getChatParseReq(chatId, queryText);
         chatParseReq.setAgentId(agentId);
-        return chatQueryService.performParsing(chatParseReq);
+        return chatQueryService.parse(chatParseReq);
     }
 
     protected void assertSchemaElements(Set<SchemaElement> expected, Set<SchemaElement> actual) {
-        Set<String> expectedNames =
-                expected.stream()
-                        .map(s -> s.getName())
-                        .filter(s -> s != null)
-                        .collect(Collectors.toSet());
-        Set<String> actualNames =
-                actual.stream()
-                        .map(s -> s.getName())
-                        .filter(s -> s != null)
-                        .collect(Collectors.toSet());
+        Set<String> expectedNames = expected.stream().map(s -> s.getName()).filter(s -> s != null)
+                .collect(Collectors.toSet());
+        Set<String> actualNames = actual.stream().map(s -> s.getName()).filter(s -> s != null)
+                .collect(Collectors.toSet());
 
         assertEquals(expectedNames, actualNames);
     }
@@ -104,8 +87,8 @@ public class BaseTest extends BaseApplication {
         assertSchemaElements(expectedParseInfo.getMetrics(), actualParseInfo.getMetrics());
         assertSchemaElements(expectedParseInfo.getDimensions(), actualParseInfo.getDimensions());
 
-        assertEquals(
-                expectedParseInfo.getDimensionFilters(), actualParseInfo.getDimensionFilters());
+        assertEquals(expectedParseInfo.getDimensionFilters(),
+                actualParseInfo.getDimensionFilters());
         assertEquals(expectedParseInfo.getMetricFilters(), actualParseInfo.getMetricFilters());
 
         assertEquals(expectedParseInfo.getDateInfo(), actualParseInfo.getDateInfo());

@@ -15,13 +15,13 @@ import java.util.List;
 /** This interface adds natural language support to the semantic layer. */
 public interface ChatLayerService {
 
-    MapResp performMapping(QueryNLReq queryNLReq);
-
-    ParseResp performParsing(QueryNLReq queryNLReq);
+    MapResp map(QueryNLReq queryNLReq);
 
     MapInfoResp map(QueryMapReq queryMapReq);
 
     List<SearchResult> retrieve(QueryNLReq queryNLReq);
+
+    ParseResp parse(QueryNLReq queryNLReq);
 
     void correct(QuerySqlReq querySqlReq, User user);
 

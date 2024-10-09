@@ -26,4 +26,11 @@ public class ChatMemoryFilter {
     private MemoryReviewResult llmReviewRet;
 
     private MemoryReviewResult humanReviewRet;
+
+    private String sort = "desc";
+    private String orderCondition;
+
+    public boolean isAsc() {
+        return "asc".equalsIgnoreCase(sort);
+    }
 }

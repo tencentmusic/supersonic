@@ -25,14 +25,13 @@ import java.util.List;
 @RequestMapping({"/api/chat/manage", "/openapi/chat/manage"})
 public class ChatController {
 
-    @Autowired private ChatManageService chatService;
+    @Autowired
+    private ChatManageService chatService;
 
     @PostMapping("/save")
-    public Boolean save(
-            @RequestParam(value = "chatName") String chatName,
+    public Boolean save(@RequestParam(value = "chatName") String chatName,
             @RequestParam(value = "agentId", required = false) Integer agentId,
-            HttpServletRequest request,
-            HttpServletResponse response) {
+            HttpServletRequest request, HttpServletResponse response) {
         chatService.addChat(UserHolder.findUser(request, response), chatName, agentId);
         return true;
     }
@@ -40,50 +39,42 @@ public class ChatController {
     @GetMapping("/getAll")
     public List<ChatDO> getAllConversions(
             @RequestParam(value = "agentId", required = false) Integer agentId,
-            HttpServletRequest request,
-            HttpServletResponse response) {
+            HttpServletRequest request, HttpServletResponse response) {
         String userName = UserHolder.findUser(request, response).getName();
         return chatService.getAll(userName, agentId);
     }
 
     @PostMapping("/delete")
-    public Boolean deleteConversion(
-            @RequestParam(value = "chatId") long chatId,
-            HttpServletRequest request,
-            HttpServletResponse response) {
+    public Boolean deleteConversion(@RequestParam(value = "chatId") long chatId,
+            HttpServletRequest request, HttpServletResponse response) {
         String userName = UserHolder.findUser(request, response).getName();
         return chatService.deleteChat(chatId, userName);
     }
 
     @PostMapping("/updateChatName")
-    public Boolean updateConversionName(
-            @RequestParam(value = "chatId") Long chatId,
-            @RequestParam(value = "chatName") String chatName,
-            HttpServletRequest request,
+    public Boolean updateConversionName(@RequestParam(value = "chatId") Long chatId,
+            @RequestParam(value = "chatName") String chatName, HttpServletRequest request,
             HttpServletResponse response) {
         String userName = UserHolder.findUser(request, response).getName();
         return chatService.updateChatName(chatId, chatName, userName);
     }
 
     @PostMapping("/updateQAFeedback")
-    public Boolean updateQAFeedback(
-            @RequestParam(value = "id") Integer id,
+    public Boolean updateQAFeedback(@RequestParam(value = "id") Integer id,
             @RequestParam(value = "score") Integer score,
             @RequestParam(value = "feedback", required = false) String feedback) {
         return chatService.updateFeedback(id, score, feedback);
     }
 
     @PostMapping("/updateChatIsTop")
-    public Boolean updateConversionIsTop(
-            @RequestParam(value = "chatId") Long chatId, @RequestParam(value = "isTop") int isTop) {
+    public Boolean updateConversionIsTop(@RequestParam(value = "chatId") Long chatId,
+            @RequestParam(value = "isTop") int isTop) {
         return chatService.updateChatIsTop(chatId, isTop);
     }
 
     @PostMapping("/pageQueryInfo")
-    public PageInfo<QueryResp> pageQueryInfo(
-            @RequestBody PageQueryInfoReq pageQueryInfoCommand,
-            @RequestParam(value = "chatId") long chatId,
-            HttpServletRequest request,
+    public PageInfo<QueryResp> pageQueryInfo(@RequestBody PageQueryInfoReq pageQueryInfoCommand,
+            @RequestParam(value = "chatId") long chatId, HttpServletRequest request,
             HttpServletResponse response) {
         pageQueryInfoCommand.setUserName(UserHolder.findUser(request, response).getName());
         return chatService.queryInfo(pageQueryInfoCommand, chatId);
@@ -95,8 +86,7 @@ public class ChatController {
     }
 
     @PostMapping("/queryShowCase")
-    public ShowCaseResp queryShowCase(
-            @RequestBody PageQueryInfoReq pageQueryInfoCommand,
+    public ShowCaseResp queryShowCase(@RequestBody PageQueryInfoReq pageQueryInfoCommand,
             @RequestParam(value = "agentId") int agentId) {
         return chatService.queryShowCase(pageQueryInfoCommand, agentId);
     }

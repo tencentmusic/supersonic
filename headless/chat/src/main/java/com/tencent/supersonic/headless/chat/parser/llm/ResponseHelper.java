@@ -54,19 +54,13 @@ public class ResponseHelper {
         return Pair.of(inputMax, votePercentage);
     }
 
-    public static Map<String, LLMSqlResp> buildSqlRespMap(
-            List<Text2SQLExemplar> sqlExamples, Map<String, Double> sqlMap) {
+    public static Map<String, LLMSqlResp> buildSqlRespMap(List<Text2SQLExemplar> sqlExamples,
+            Map<String, Double> sqlMap) {
         if (sqlMap == null) {
             return new HashMap<>();
         }
         return sqlMap.entrySet().stream()
-                .collect(
-                        Collectors.toMap(
-                                Map.Entry::getKey,
-                                entry ->
-                                        LLMSqlResp.builder()
-                                                .sqlWeight(entry.getValue())
-                                                .fewShots(sqlExamples)
-                                                .build()));
+                .collect(Collectors.toMap(Map.Entry::getKey, entry -> LLMSqlResp.builder()
+                        .sqlWeight(entry.getValue()).fewShots(sqlExamples).build()));
     }
 }

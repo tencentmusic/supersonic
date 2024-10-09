@@ -12,5 +12,6 @@ public class Properties {
 
     static final String PREFIX = "langchain4j.milvus";
 
-    @NestedConfigurationProperty EmbeddingStoreProperties embeddingStore;
+    @NestedConfigurationProperty
+    EmbeddingStoreProperties embeddingStore;
 }

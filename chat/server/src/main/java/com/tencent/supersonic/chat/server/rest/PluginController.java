@@ -25,23 +25,20 @@ import java.util.List;
 @RequestMapping("/api/chat/plugin")
 public class PluginController {
 
-    @Autowired protected PluginService pluginService;
+    @Autowired
+    protected PluginService pluginService;
 
     @PostMapping
-    public boolean createPlugin(
-            @RequestBody ChatPlugin plugin,
-            HttpServletRequest httpServletRequest,
-            HttpServletResponse httpServletResponse) {
+    public boolean createPlugin(@RequestBody ChatPlugin plugin,
+            HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {
         User user = UserHolder.findUser(httpServletRequest, httpServletResponse);
         pluginService.createPlugin(plugin, user);
         return true;
     }
 
     @PutMapping
-    public boolean updatePlugin(
-            @RequestBody ChatPlugin plugin,
-            HttpServletRequest httpServletRequest,
-            HttpServletResponse httpServletResponse) {
+    public boolean updatePlugin(@RequestBody ChatPlugin plugin,
+            HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {
         User user = UserHolder.findUser(httpServletRequest, httpServletResponse);
         pluginService.updatePlugin(plugin, user);
         return true;
@@ -59,18 +56,16 @@ public class PluginController {
     }
 
     @PostMapping("/query")
-    List<ChatPlugin> query(
-            @RequestBody PluginQueryReq pluginQueryReq,
-            HttpServletRequest httpServletRequest,
-            HttpServletResponse httpServletResponse) {
+    List<ChatPlugin> query(@RequestBody PluginQueryReq pluginQueryReq,
+            HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {
         User user = UserHolder.findUser(httpServletRequest, httpServletResponse);
         return pluginService.queryWithAuthCheck(pluginQueryReq, user);
     }
 
     @AuthenticationIgnore
     @PostMapping("/pluginDemo")
-    public String pluginDemo(
-            @RequestParam("queryText") String queryText, @RequestBody Object object) {
+    public String pluginDemo(@RequestParam("queryText") String queryText,
+            @RequestBody Object object) {
         return String.format("已收到您的问题:%s, 但这只是一个demo~", queryText);
     }
 }

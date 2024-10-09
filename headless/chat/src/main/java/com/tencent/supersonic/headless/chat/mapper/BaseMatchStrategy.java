@@ -19,8 +19,8 @@ import java.util.Set;
 @Slf4j
 public abstract class BaseMatchStrategy<T extends MapResult> implements MatchStrategy<T> {
     @Override
-    public Map<MatchText, List<T>> match(
-            ChatQueryContext chatQueryContext, List<S2Term> terms, Set<Long> detectDataSetIds) {
+    public Map<MatchText, List<T>> match(ChatQueryContext chatQueryContext, List<S2Term> terms,
+            Set<Long> detectDataSetIds) {
         String text = chatQueryContext.getQueryText();
         if (Objects.isNull(terms) || StringUtils.isEmpty(text)) {
             return null;
@@ -35,8 +35,8 @@ public abstract class BaseMatchStrategy<T extends MapResult> implements MatchStr
         return result;
     }
 
-    public List<T> detect(
-            ChatQueryContext chatQueryContext, List<S2Term> terms, Set<Long> detectDataSetIds) {
+    public List<T> detect(ChatQueryContext chatQueryContext, List<S2Term> terms,
+            Set<Long> detectDataSetIds) {
         throw new RuntimeException("Not implemented");
     }
 
@@ -46,15 +46,13 @@ public abstract class BaseMatchStrategy<T extends MapResult> implements MatchStr
         }
         for (T oneRoundResult : oneRoundResults) {
             if (existResults.contains(oneRoundResult)) {
-                boolean isDeleted =
-                        existResults.removeIf(
-                                existResult -> {
-                                    boolean delete = existResult.lessSimilar(oneRoundResult);
-                                    if (delete) {
-                                        log.info("deleted existResult:{}", existResult);
-                                    }
-                                    return delete;
-                                });
+                boolean isDeleted = existResults.removeIf(existResult -> {
+                    boolean delete = existResult.lessSimilar(oneRoundResult);
+                    if (delete) {
+                        log.info("deleted existResult:{}", existResult);
+                    }
+                    return delete;
+                });
                 if (isDeleted) {
                     log.info("deleted, add oneRoundResult:{}", oneRoundResult);
                     existResults.add(oneRoundResult);

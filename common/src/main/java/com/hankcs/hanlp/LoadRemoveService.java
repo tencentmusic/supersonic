@@ -24,13 +24,12 @@ public class LoadRemoveService {
         }
         List<String> resultList = new ArrayList<>(value);
         if (StringUtils.isNotBlank(mapperRemoveNaturePrefix)) {
-            resultList.removeIf(
-                    nature -> {
-                        if (Objects.isNull(nature)) {
-                            return false;
-                        }
-                        return nature.startsWith(mapperRemoveNaturePrefix);
-                    });
+            resultList.removeIf(nature -> {
+                if (Objects.isNull(nature)) {
+                    return false;
+                }
+                return nature.startsWith(mapperRemoveNaturePrefix);
+            });
         }
         return resultList;
     }

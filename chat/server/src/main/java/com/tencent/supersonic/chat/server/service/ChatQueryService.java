@@ -15,11 +15,11 @@ public interface ChatQueryService {
 
     List<SearchResult> search(ChatParseReq chatParseReq);
 
-    ParseResp performParsing(ChatParseReq chatParseReq);
+    ParseResp parse(ChatParseReq chatParseReq);
 
-    QueryResult performExecution(ChatExecuteReq chatExecuteReq) throws Exception;
+    QueryResult execute(ChatExecuteReq chatExecuteReq) throws Exception;
 
-    QueryResult parseAndExecute(int chatId, int agentId, String queryText);
+    QueryResult parseAndExecute(ChatParseReq chatParseReq);
 
     Object queryData(ChatQueryDataReq chatQueryDataReq, User user) throws Exception;
 

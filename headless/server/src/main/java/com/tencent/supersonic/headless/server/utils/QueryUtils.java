@@ -37,8 +37,8 @@ public class QueryUtils {
     @Value("${s2.query-optimizer.enable:true}")
     private Boolean optimizeEnable;
 
-    public void populateQueryColumns(
-            SemanticQueryResp semanticQueryResp, SemanticSchemaResp semanticSchemaResp) {
+    public void populateQueryColumns(SemanticQueryResp semanticQueryResp,
+            SemanticSchemaResp semanticSchemaResp) {
         Map<String, MetricResp> metricRespMap = createMetricRespMap(semanticSchemaResp);
         Map<String, String> namePair = new HashMap<>();
         Map<String, String> nameTypePair = new HashMap<>();
@@ -53,36 +53,24 @@ public class QueryUtils {
                 .collect(Collectors.toMap(MetricResp::getBizName, a -> a, (k1, k2) -> k1));
     }
 
-    private void populateNamePairs(
-            SemanticSchemaResp semanticSchemaResp,
-            Map<String, String> namePair,
-            Map<String, String> nameTypePair) {
+    private void populateNamePairs(SemanticSchemaResp semanticSchemaResp,
+            Map<String, String> namePair, Map<String, String> nameTypePair) {
         for (TimeDimensionEnum timeDimensionEnum : TimeDimensionEnum.values()) {
             namePair.put(timeDimensionEnum.getName(), "date");
             nameTypePair.put(timeDimensionEnum.getName(), "DATE");
         }
-        semanticSchemaResp
-                .getMetrics()
-                .forEach(
-                        metricDesc -> {
-                            namePair.put(metricDesc.getBizName(), metricDesc.getName());
-                            nameTypePair.put(metricDesc.getBizName(), SemanticType.NUMBER.name());
-                        });
-        semanticSchemaResp
-                .getDimensions()
-                .forEach(
-                        dimensionDesc -> {
-                            namePair.put(dimensionDesc.getBizName(), dimensionDesc.getName());
-                            nameTypePair.put(
-                                    dimensionDesc.getBizName(), dimensionDesc.getSemanticType());
-                        });
+        semanticSchemaResp.getMetrics().forEach(metricDesc -> {
+            namePair.put(metricDesc.getBizName(), metricDesc.getName());
+            nameTypePair.put(metricDesc.getBizName(), SemanticType.NUMBER.name());
+        });
+        semanticSchemaResp.getDimensions().forEach(dimensionDesc -> {
+            namePair.put(dimensionDesc.getBizName(), dimensionDesc.getName());
+            nameTypePair.put(dimensionDesc.getBizName(), dimensionDesc.getSemanticType());
+        });
     }
 
-    private void processColumn(
-            QueryColumn column,
-            Map<String, String> namePair,
-            Map<String, String> nameTypePair,
-            Map<String, MetricResp> metricRespMap) {
+    private void processColumn(QueryColumn column, Map<String, String> namePair,
+            Map<String, String> nameTypePair, Map<String, MetricResp> metricRespMap) {
         String nameEn = getName(column.getNameEn().toLowerCase());
         if (nameEn.contains(JOIN_UNDERLINE)) {
             nameEn = nameEn.split(JOIN_UNDERLINE)[1];
@@ -126,14 +114,10 @@ public class QueryUtils {
         if (StringUtils.isBlank(type)) {
             return false;
         }
-        return type.equalsIgnoreCase("int")
-                || type.equalsIgnoreCase("bigint")
-                || type.equalsIgnoreCase("float")
-                || type.equalsIgnoreCase("double")
-                || type.equalsIgnoreCase("numeric")
-                || type.toLowerCase().startsWith("decimal")
-                || type.toLowerCase().startsWith("uint")
-                || type.toLowerCase().startsWith("int");
+        return type.equalsIgnoreCase("int") || type.equalsIgnoreCase("bigint")
+                || type.equalsIgnoreCase("float") || type.equalsIgnoreCase("double")
+                || type.equalsIgnoreCase("numeric") || type.toLowerCase().startsWith("decimal")
+                || type.toLowerCase().startsWith("uint") || type.toLowerCase().startsWith("int");
     }
 
     private String getName(String nameEn) {
@@ -156,23 +140,19 @@ public class QueryUtils {
         return null;
     }
 
-    public QueryStatement sqlParserUnion(
-            QueryMultiStructReq queryMultiStructCmd, List<QueryStatement> sqlParsers) {
+    public QueryStatement sqlParserUnion(QueryMultiStructReq queryMultiStructCmd,
+            List<QueryStatement> sqlParsers) {
         QueryStatement sqlParser = new QueryStatement();
         StringBuilder unionSqlBuilder = new StringBuilder();
         for (int i = 0; i < sqlParsers.size(); i++) {
-            String selectStr =
-                    SqlGenerateUtils.getUnionSelect(
-                            queryMultiStructCmd.getQueryStructReqs().get(i));
-            unionSqlBuilder.append(
-                    String.format(
-                            "select %s from ( %s ) sub_sql_%s",
-                            selectStr, sqlParsers.get(i).getSql(), i));
+            String selectStr = SqlGenerateUtils
+                    .getUnionSelect(queryMultiStructCmd.getQueryStructReqs().get(i));
+            unionSqlBuilder.append(String.format("select %s from ( %s ) sub_sql_%s", selectStr,
+                    sqlParsers.get(i).getSql(), i));
             unionSqlBuilder.append(UNIONALL);
         }
-        String unionSql =
-                unionSqlBuilder.substring(
-                        0, unionSqlBuilder.length() - Constants.UNIONALL.length());
+        String unionSql = unionSqlBuilder.substring(0,
+                unionSqlBuilder.length() - Constants.UNIONALL.length());
         sqlParser.setSql(unionSql);
         log.info("union sql parser:{}", sqlParser);
         return sqlParser;

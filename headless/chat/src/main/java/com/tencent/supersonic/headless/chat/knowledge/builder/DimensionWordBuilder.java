@@ -29,20 +29,12 @@ public class DimensionWordBuilder extends BaseWordWithAliasBuilder {
         DictWord dictWord = new DictWord();
         dictWord.setWord(word);
         Long modelId = schemaElement.getModel();
-        String nature =
-                DictWordType.NATURE_SPILT
-                        + modelId
-                        + DictWordType.NATURE_SPILT
-                        + schemaElement.getId()
-                        + DictWordType.DIMENSION.getType();
+        String nature = DictWordType.NATURE_SPILT + modelId + DictWordType.NATURE_SPILT
+                + schemaElement.getId() + DictWordType.DIMENSION.getType();
         if (isSuffix) {
-            nature =
-                    DictWordType.NATURE_SPILT
-                            + modelId
-                            + DictWordType.NATURE_SPILT
-                            + schemaElement.getId()
-                            + DictWordType.SUFFIX.getType()
-                            + DictWordType.DIMENSION.getType();
+            nature = DictWordType.NATURE_SPILT + modelId + DictWordType.NATURE_SPILT
+                    + schemaElement.getId() + DictWordType.SUFFIX.getType()
+                    + DictWordType.DIMENSION.getType();
         }
         dictWord.setNatureWithFrequency(String.format("%s " + DEFAULT_FREQUENCY, nature));
         return dictWord;

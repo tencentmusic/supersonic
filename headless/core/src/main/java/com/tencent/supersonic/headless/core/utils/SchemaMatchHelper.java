@@ -19,24 +19,21 @@ public class SchemaMatchHelper {
         }
 
         Set<String> metricDimensionDetectWordSet =
-                matches.stream()
-                        .filter(SchemaMatchHelper::isMetricOrDimension)
-                        .map(SchemaElementMatch::getDetectWord)
-                        .collect(Collectors.toSet());
+                matches.stream().filter(SchemaMatchHelper::isMetricOrDimension)
+                        .map(SchemaElementMatch::getDetectWord).collect(Collectors.toSet());
 
-        matches.removeIf(
-                elementMatch -> {
-                    if (!isMetricOrDimension(elementMatch)) {
-                        return false;
-                    }
-                    for (String detectWord : metricDimensionDetectWordSet) {
-                        if (detectWord.startsWith(elementMatch.getDetectWord())
-                                && detectWord.length() > elementMatch.getDetectWord().length()) {
-                            return true;
-                        }
-                    }
-                    return false;
-                });
+        matches.removeIf(elementMatch -> {
+            if (!isMetricOrDimension(elementMatch)) {
+                return false;
+            }
+            for (String detectWord : metricDimensionDetectWordSet) {
+                if (detectWord.startsWith(elementMatch.getDetectWord())
+                        && detectWord.length() > elementMatch.getDetectWord().length()) {
+                    return true;
+                }
+            }
+            return false;
+        });
     }
 
     private static boolean isMetricOrDimension(SchemaElementMatch elementMatch) {

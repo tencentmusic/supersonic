@@ -37,8 +37,10 @@ import java.util.stream.Collectors;
 @Service
 public class ChatManageServiceImpl implements ChatManageService {
 
-    @Autowired private ChatRepository chatRepository;
-    @Autowired private ChatQueryRepository chatQueryRepository;
+    @Autowired
+    private ChatRepository chatRepository;
+    @Autowired
+    private ChatQueryRepository chatQueryRepository;
 
     @Override
     public Long addChat(User user, String chatName, Integer agentId) {
@@ -121,30 +123,23 @@ public class ChatManageServiceImpl implements ChatManageService {
         if (CollectionUtils.isEmpty(queryResps)) {
             return showCaseResp;
         }
-        queryResps.removeIf(
-                queryResp -> {
-                    if (queryResp.getQueryResult() == null) {
-                        return true;
-                    }
-                    if (queryResp.getQueryResult().getResponse() != null) {
-                        return false;
-                    }
-                    if (CollectionUtils.isEmpty(queryResp.getQueryResult().getQueryResults())) {
-                        return true;
-                    }
-                    Map<String, Object> data = queryResp.getQueryResult().getQueryResults().get(0);
-                    return CollectionUtils.isEmpty(data);
-                });
-        queryResps =
-                new ArrayList<>(
-                        queryResps.stream()
-                                .collect(
-                                        Collectors.toMap(
-                                                QueryResp::getQueryText,
-                                                Function.identity(),
-                                                (existing, replacement) -> existing,
-                                                LinkedHashMap::new))
-                                .values());
+        queryResps.removeIf(queryResp -> {
+            if (queryResp.getQueryResult() == null) {
+                return true;
+            }
+            if (queryResp.getQueryResult().getResponse() != null) {
+                return false;
+            }
+            if (CollectionUtils.isEmpty(queryResp.getQueryResult().getQueryResults())) {
+                return true;
+            }
+            Map<String, Object> data = queryResp.getQueryResult().getQueryResults().get(0);
+            return CollectionUtils.isEmpty(data);
+        });
+        queryResps = new ArrayList<>(queryResps.stream()
+                .collect(Collectors.toMap(QueryResp::getQueryText, Function.identity(),
+                        (existing, replacement) -> existing, LinkedHashMap::new))
+                .values());
         fillParseInfo(queryResps);
         Map<Long, List<QueryResp>> showCaseMap =
                 queryResps.stream().collect(Collectors.groupingBy(QueryResp::getChatId));
@@ -166,17 +161,11 @@ public class ChatManageServiceImpl implements ChatManageService {
             if (CollectionUtils.isEmpty(chatParseDOList)) {
                 continue;
             }
-            List<SemanticParseInfo> parseInfos =
-                    chatParseDOList.stream()
-                            .map(
-                                    chatParseDO ->
-                                            JsonUtil.toObject(
-                                                    chatParseDO.getParseInfo(),
-                                                    SemanticParseInfo.class))
-                            .sorted(
-                                    Comparator.comparingDouble(SemanticParseInfo::getScore)
-                                            .reversed())
-                            .collect(Collectors.toList());
+            List<SemanticParseInfo> parseInfos = chatParseDOList.stream()
+                    .map(chatParseDO -> JsonUtil.toObject(chatParseDO.getParseInfo(),
+                            SemanticParseInfo.class))
+                    .sorted(Comparator.comparingDouble(SemanticParseInfo::getScore).reversed())
+                    .collect(Collectors.toList());
             queryResp.setParseInfos(parseInfos);
         }
     }
@@ -188,10 +177,8 @@ public class ChatManageServiceImpl implements ChatManageService {
         chatQueryDO.setQueryResult(JsonUtil.toString(queryResult));
         chatQueryDO.setQueryState(1);
         updateQuery(chatQueryDO);
-        chatRepository.updateLastQuestion(
-                chatExecuteReq.getChatId().longValue(),
-                chatExecuteReq.getQueryText(),
-                getCurrentTime());
+        chatRepository.updateLastQuestion(chatExecuteReq.getChatId().longValue(),
+                chatExecuteReq.getQueryText(), getCurrentTime());
         return chatQueryDO;
     }
 

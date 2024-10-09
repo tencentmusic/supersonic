@@ -27,27 +27,20 @@ import static com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum.DISTINC
 @Slf4j
 public class AggregateTypeParser implements SemanticParser {
 
-    private static final Map<AggregateTypeEnum, Pattern> REGX_MAP =
-            Stream.of(
-                            new AbstractMap.SimpleEntry<>(
-                                    AggregateTypeEnum.MAX,
-                                    Pattern.compile("(?i)(最大值|最大|max|峰值|最高|最多)")),
-                            new AbstractMap.SimpleEntry<>(
-                                    AggregateTypeEnum.MIN,
-                                    Pattern.compile("(?i)(最小值|最小|min|最低|最少)")),
-                            new AbstractMap.SimpleEntry<>(
-                                    AggregateTypeEnum.SUM, Pattern.compile("(?i)(汇总|总和|sum)")),
-                            new AbstractMap.SimpleEntry<>(
-                                    AggregateTypeEnum.AVG, Pattern.compile("(?i)(平均值|日均|平均|avg)")),
-                            new AbstractMap.SimpleEntry<>(
-                                    AggregateTypeEnum.TOPN, Pattern.compile("(?i)(top)")),
-                            new AbstractMap.SimpleEntry<>(DISTINCT, Pattern.compile("(?i)(uv)")),
-                            new AbstractMap.SimpleEntry<>(COUNT, Pattern.compile("(?i)(总数|pv)")),
-                            new AbstractMap.SimpleEntry<>(
-                                    AggregateTypeEnum.NONE, Pattern.compile("(?i)(明细)")))
-                    .collect(
-                            Collectors.toMap(
-                                    Map.Entry::getKey, Map.Entry::getValue, (k1, k2) -> k2));
+    private static final Map<AggregateTypeEnum, Pattern> REGX_MAP = Stream.of(
+            new AbstractMap.SimpleEntry<>(AggregateTypeEnum.MAX,
+                    Pattern.compile("(?i)(最大值|最大|max|峰值|最高|最多)")),
+            new AbstractMap.SimpleEntry<>(AggregateTypeEnum.MIN,
+                    Pattern.compile("(?i)(最小值|最小|min|最低|最少)")),
+            new AbstractMap.SimpleEntry<>(AggregateTypeEnum.SUM,
+                    Pattern.compile("(?i)(汇总|总和|sum)")),
+            new AbstractMap.SimpleEntry<>(AggregateTypeEnum.AVG,
+                    Pattern.compile("(?i)(平均值|日均|平均|avg)")),
+            new AbstractMap.SimpleEntry<>(AggregateTypeEnum.TOPN, Pattern.compile("(?i)(top)")),
+            new AbstractMap.SimpleEntry<>(DISTINCT, Pattern.compile("(?i)(uv)")),
+            new AbstractMap.SimpleEntry<>(COUNT, Pattern.compile("(?i)(总数|pv)")),
+            new AbstractMap.SimpleEntry<>(AggregateTypeEnum.NONE, Pattern.compile("(?i)(明细)")))
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (k1, k2) -> k2));
 
     @Override
     public void parse(ChatQueryContext chatQueryContext) {
@@ -63,8 +56,7 @@ public class AggregateTypeParser implements SemanticParser {
             if (StringUtils.isNotEmpty(aggregateConf.detectWord)) {
                 detectWordLength = aggregateConf.detectWord.length();
             }
-            semanticQuery
-                    .getParseInfo()
+            semanticQuery.getParseInfo()
                     .setScore(semanticQuery.getParseInfo().getScore() + detectWordLength);
         }
     }
@@ -93,10 +85,8 @@ public class AggregateTypeParser implements SemanticParser {
         }
 
         AggregateTypeEnum type =
-                aggregateCount.entrySet().stream()
-                        .max(Map.Entry.comparingByValue())
-                        .map(entry -> entry.getKey())
-                        .orElse(AggregateTypeEnum.NONE);
+                aggregateCount.entrySet().stream().max(Map.Entry.comparingByValue())
+                        .map(entry -> entry.getKey()).orElse(AggregateTypeEnum.NONE);
         String detectWord = aggregateWord.get(type);
         return new AggregateConf(type, detectWord);
     }

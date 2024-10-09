@@ -16,8 +16,8 @@ public class FunctionNameReplaceVisitor extends ExpressionVisitorAdapter {
     private Map<String, String> functionMap;
     private Map<String, UnaryOperator> functionCallMap;
 
-    public FunctionNameReplaceVisitor(
-            Map<String, String> functionMap, Map<String, UnaryOperator> functionCallMap) {
+    public FunctionNameReplaceVisitor(Map<String, String> functionMap,
+            Map<String, UnaryOperator> functionCallMap) {
         this.functionMap = functionMap;
         this.functionCallMap = functionCallMap;
     }

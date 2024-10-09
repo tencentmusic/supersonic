@@ -1,6 +1,6 @@
 package com.tencent.supersonic.headless.core.translator.calcite.sql.node;
 
-import com.tencent.supersonic.headless.api.pojo.enums.EngineType;
+import com.tencent.supersonic.common.pojo.enums.EngineType;
 import com.tencent.supersonic.headless.core.translator.calcite.s2sql.Identify;
 import org.apache.calcite.sql.SqlNode;
 import org.apache.calcite.sql.validate.SqlValidatorScope;
@@ -18,10 +18,8 @@ public class IdentifyNode extends SemanticNode {
     }
 
     public static Set<String> getIdentifyNames(List<Identify> identifies, Identify.Type type) {
-        return identifies.stream()
-                .filter(i -> type.name().equalsIgnoreCase(i.getType()))
-                .map(i -> i.getName())
-                .collect(Collectors.toSet());
+        return identifies.stream().filter(i -> type.name().equalsIgnoreCase(i.getType()))
+                .map(i -> i.getName()).collect(Collectors.toSet());
     }
 
     public static boolean isForeign(String name, List<Identify> identifies) {

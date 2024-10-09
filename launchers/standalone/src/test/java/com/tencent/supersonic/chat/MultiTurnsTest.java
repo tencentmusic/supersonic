@@ -17,9 +17,8 @@ public class MultiTurnsTest extends BaseTest {
     @Test
     @Order(1)
     public void queryTest_01() throws Exception {
-        QueryResult actualResult =
-                submitMultiTurnChat(
-                        "alice的访问次数", DataUtils.metricAgentId, DataUtils.MULTI_TURNS_CHAT_ID);
+        QueryResult actualResult = submitMultiTurnChat("alice的访问次数", DataUtils.metricAgentId,
+                DataUtils.MULTI_TURNS_CHAT_ID);
 
         QueryResult expectedResult = new QueryResult();
         SemanticParseInfo expectedParseInfo = new SemanticParseInfo();
@@ -30,11 +29,8 @@ public class MultiTurnsTest extends BaseTest {
 
         expectedParseInfo.getMetrics().add(DataUtils.getSchemaElement("访问次数"));
 
-        expectedParseInfo
-                .getDimensionFilters()
-                .add(
-                        DataUtils.getFilter(
-                                "user_name", FilterOperatorEnum.EQUALS, "alice", "用户", 2L));
+        expectedParseInfo.getDimensionFilters().add(
+                DataUtils.getFilter("user_name", FilterOperatorEnum.EQUALS, "alice", "用户", 2L));
 
         expectedParseInfo.setDateInfo(
                 DataUtils.getDateConf(DateConf.DateMode.BETWEEN, unit, period, startDay, endDay));
@@ -46,9 +42,8 @@ public class MultiTurnsTest extends BaseTest {
     @Test
     @Order(2)
     public void queryTest_02() throws Exception {
-        QueryResult actualResult =
-                submitMultiTurnChat(
-                        "停留时长呢", DataUtils.metricAgentId, DataUtils.MULTI_TURNS_CHAT_ID);
+        QueryResult actualResult = submitMultiTurnChat("停留时长呢", DataUtils.metricAgentId,
+                DataUtils.MULTI_TURNS_CHAT_ID);
 
         QueryResult expectedResult = new QueryResult();
         SemanticParseInfo expectedParseInfo = new SemanticParseInfo();
@@ -59,11 +54,8 @@ public class MultiTurnsTest extends BaseTest {
 
         expectedParseInfo.getMetrics().add(DataUtils.getSchemaElement("停留时长"));
 
-        expectedParseInfo
-                .getDimensionFilters()
-                .add(
-                        DataUtils.getFilter(
-                                "user_name", FilterOperatorEnum.EQUALS, "alice", "用户", 2L));
+        expectedParseInfo.getDimensionFilters().add(
+                DataUtils.getFilter("user_name", FilterOperatorEnum.EQUALS, "alice", "用户", 2L));
 
         expectedParseInfo.setDateInfo(
                 DataUtils.getDateConf(DateConf.DateMode.BETWEEN, unit, period, startDay, endDay));
@@ -75,9 +67,8 @@ public class MultiTurnsTest extends BaseTest {
     @Test
     @Order(3)
     public void queryTest_03() throws Exception {
-        QueryResult actualResult =
-                submitMultiTurnChat(
-                        "lucy的如何", DataUtils.metricAgentId, DataUtils.MULTI_TURNS_CHAT_ID);
+        QueryResult actualResult = submitMultiTurnChat("lucy的如何", DataUtils.metricAgentId,
+                DataUtils.MULTI_TURNS_CHAT_ID);
 
         QueryResult expectedResult = new QueryResult();
         SemanticParseInfo expectedParseInfo = new SemanticParseInfo();
@@ -88,8 +79,7 @@ public class MultiTurnsTest extends BaseTest {
 
         expectedParseInfo.getMetrics().add(DataUtils.getSchemaElement("停留时长"));
 
-        expectedParseInfo
-                .getDimensionFilters()
+        expectedParseInfo.getDimensionFilters()
                 .add(DataUtils.getFilter("user_name", FilterOperatorEnum.EQUALS, "lucy", "用户", 2L));
 
         expectedParseInfo.setDateInfo(

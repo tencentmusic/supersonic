@@ -27,8 +27,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User getCurrentUser(
-            HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {
+    public User getCurrentUser(HttpServletRequest httpServletRequest,
+            HttpServletResponse httpServletResponse) {
         User user = UserHolder.findUser(httpServletRequest, httpServletResponse);
         if (user != null) {
             SystemConfig systemConfig = sysParameterService.getSystemConfig();

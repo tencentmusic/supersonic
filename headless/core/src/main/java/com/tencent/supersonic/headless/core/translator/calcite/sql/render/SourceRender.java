@@ -1,6 +1,6 @@
 package com.tencent.supersonic.headless.core.translator.calcite.sql.render;
 
-import com.tencent.supersonic.headless.api.pojo.enums.EngineType;
+import com.tencent.supersonic.common.pojo.enums.EngineType;
 import com.tencent.supersonic.headless.core.pojo.MetricQueryParam;
 import com.tencent.supersonic.headless.core.translator.calcite.s2sql.Constants;
 import com.tencent.supersonic.headless.core.translator.calcite.s2sql.DataSource;
@@ -42,16 +42,9 @@ import static com.tencent.supersonic.headless.core.translator.calcite.s2sql.Cons
 @Slf4j
 public class SourceRender extends Renderer {
 
-    public static TableView renderOne(
-            String alias,
-            List<String> fieldWheres,
-            List<String> reqMetrics,
-            List<String> reqDimensions,
-            String queryWhere,
-            DataSource datasource,
-            SqlValidatorScope scope,
-            SemanticSchema schema,
-            boolean nonAgg)
+    public static TableView renderOne(String alias, List<String> fieldWheres,
+            List<String> reqMetrics, List<String> reqDimensions, String queryWhere,
+            DataSource datasource, SqlValidatorScope scope, SemanticSchema schema, boolean nonAgg)
             throws Exception {
 
         TableView dataSet = new TableView();
@@ -63,29 +56,14 @@ public class SourceRender extends Renderer {
         if (!fieldWhere.isEmpty()) {
             Set<String> dimensions = new HashSet<>();
             Set<String> metrics = new HashSet<>();
-            whereDimMetric(
-                    fieldWhere,
-                    queryMetrics,
-                    queryDimensions,
-                    datasource,
-                    schema,
-                    dimensions,
-                    metrics);
+            whereDimMetric(fieldWhere, queryMetrics, queryDimensions, datasource, schema,
+                    dimensions, metrics);
             queryMetrics.addAll(metrics);
             queryMetrics = uniqList(queryMetrics);
             queryDimensions.addAll(dimensions);
             queryDimensions = uniqList(queryDimensions);
-            mergeWhere(
-                    fieldWhere,
-                    dataSet,
-                    output,
-                    queryMetrics,
-                    queryDimensions,
-                    extendFields,
-                    datasource,
-                    scope,
-                    schema,
-                    nonAgg);
+            mergeWhere(fieldWhere, dataSet, output, queryMetrics, queryDimensions, extendFields,
+                    datasource, scope, schema, nonAgg);
         }
         addTimeDimension(datasource, queryDimensions);
         for (String metric : queryMetrics) {
@@ -109,18 +87,11 @@ public class SourceRender extends Renderer {
                     && queryDimensions.contains(dimension.split(Constants.DIMENSION_IDENTIFY)[1])) {
                 continue;
             }
-            buildDimension(
-                    dimension.contains(Constants.DIMENSION_IDENTIFY) ? dimension : "",
+            buildDimension(dimension.contains(Constants.DIMENSION_IDENTIFY) ? dimension : "",
                     dimension.contains(Constants.DIMENSION_IDENTIFY)
                             ? dimension.split(Constants.DIMENSION_IDENTIFY)[1]
                             : dimension,
-                    datasource,
-                    schema,
-                    nonAgg,
-                    extendFields,
-                    dataSet,
-                    output,
-                    scope);
+                    datasource, schema, nonAgg, extendFields, dataSet, output, scope);
         }
 
         output.setMeasure(deduplicateNode(output.getMeasure()));
@@ -129,12 +100,8 @@ public class SourceRender extends Renderer {
         SqlNode tableNode = DataSourceNode.buildExtend(datasource, extendFields, scope);
         dataSet.setTable(tableNode);
         output.setTable(
-                SemanticNode.buildAs(
-                        Constants.DATASOURCE_TABLE_OUT_PREFIX
-                                + datasource.getName()
-                                + "_"
-                                + UUID.randomUUID().toString().substring(32),
-                        dataSet.build()));
+                SemanticNode.buildAs(Constants.DATASOURCE_TABLE_OUT_PREFIX + datasource.getName()
+                        + "_" + UUID.randomUUID().toString().substring(32), dataSet.build()));
         return output;
     }
 
@@ -148,8 +115,7 @@ public class SourceRender extends Renderer {
         return uniqueElements;
     }
 
-    private static boolean containsElement(
-            List<SqlNode> list, SqlNode element) { // 检查List<SqlNode>中是否含有某element
+    private static boolean containsElement(List<SqlNode> list, SqlNode element) { // 检查List<SqlNode>中是否含有某element
         for (SqlNode i : list) {
             if (i.equalsDeep(element, Litmus.IGNORE)) {
                 return true;
@@ -158,17 +124,9 @@ public class SourceRender extends Renderer {
         return false;
     }
 
-    private static void buildDimension(
-            String alias,
-            String dimension,
-            DataSource datasource,
-            SemanticSchema schema,
-            boolean nonAgg,
-            Map<String, String> extendFields,
-            TableView dataSet,
-            TableView output,
-            SqlValidatorScope scope)
-            throws Exception {
+    private static void buildDimension(String alias, String dimension, DataSource datasource,
+            SemanticSchema schema, boolean nonAgg, Map<String, String> extendFields,
+            TableView dataSet, TableView output, SqlValidatorScope scope) throws Exception {
         List<Dimension> dimensionList = schema.getDimension().get(datasource.getName());
         EngineType engineType =
                 EngineType.fromString(schema.getSemanticModel().getDatabase().getType());
@@ -197,10 +155,8 @@ public class SourceRender extends Renderer {
             }
         }
         if (!isAdd) {
-            Optional<Identify> identify =
-                    datasource.getIdentifiers().stream()
-                            .filter(i -> i.getName().equalsIgnoreCase(dimension))
-                            .findFirst();
+            Optional<Identify> identify = datasource.getIdentifiers().stream()
+                    .filter(i -> i.getName().equalsIgnoreCase(dimension)).findFirst();
             if (identify.isPresent()) {
                 if (nonAgg) {
                     dataSet.getMeasure()
@@ -238,24 +194,17 @@ public class SourceRender extends Renderer {
         if (dimension.getDataType().isArray()) {
             if (Objects.nonNull(dimension.getExt())
                     && dimension.getExt().containsKey(DIMENSION_DELIMITER)) {
-                extendFields.put(
-                        dimension.getExpr(), (String) dimension.getExt().get(DIMENSION_DELIMITER));
+                extendFields.put(dimension.getExpr(),
+                        (String) dimension.getExt().get(DIMENSION_DELIMITER));
             } else {
                 extendFields.put(dimension.getExpr(), "");
             }
         }
     }
 
-    private static List<SqlNode> getWhereMeasure(
-            List<String> fields,
-            List<String> queryMetrics,
-            List<String> queryDimensions,
-            Map<String, String> extendFields,
-            DataSource datasource,
-            SqlValidatorScope scope,
-            SemanticSchema schema,
-            boolean nonAgg)
-            throws Exception {
+    private static List<SqlNode> getWhereMeasure(List<String> fields, List<String> queryMetrics,
+            List<String> queryDimensions, Map<String, String> extendFields, DataSource datasource,
+            SqlValidatorScope scope, SemanticSchema schema, boolean nonAgg) throws Exception {
         Iterator<String> iterator = fields.iterator();
         List<SqlNode> whereNode = new ArrayList<>();
         EngineType engineType =
@@ -295,40 +244,19 @@ public class SourceRender extends Renderer {
         return whereNode;
     }
 
-    private static void mergeWhere(
-            List<String> fields,
-            TableView dataSet,
-            TableView outputSet,
-            List<String> queryMetrics,
-            List<String> queryDimensions,
-            Map<String, String> extendFields,
-            DataSource datasource,
-            SqlValidatorScope scope,
-            SemanticSchema schema,
-            boolean nonAgg)
-            throws Exception {
-        List<SqlNode> whereNode =
-                getWhereMeasure(
-                        fields,
-                        queryMetrics,
-                        queryDimensions,
-                        extendFields,
-                        datasource,
-                        scope,
-                        schema,
-                        nonAgg);
+    private static void mergeWhere(List<String> fields, TableView dataSet, TableView outputSet,
+            List<String> queryMetrics, List<String> queryDimensions,
+            Map<String, String> extendFields, DataSource datasource, SqlValidatorScope scope,
+            SemanticSchema schema, boolean nonAgg) throws Exception {
+        List<SqlNode> whereNode = getWhereMeasure(fields, queryMetrics, queryDimensions,
+                extendFields, datasource, scope, schema, nonAgg);
         dataSet.getMeasure().addAll(whereNode);
         // getWhere(outputSet,fields,queryMetrics,queryDimensions,datasource,scope,schema);
     }
 
-    public static void whereDimMetric(
-            List<String> fields,
-            List<String> queryMetrics,
-            List<String> queryDimensions,
-            DataSource datasource,
-            SemanticSchema schema,
-            Set<String> dimensions,
-            Set<String> metrics) {
+    public static void whereDimMetric(List<String> fields, List<String> queryMetrics,
+            List<String> queryDimensions, DataSource datasource, SemanticSchema schema,
+            Set<String> dimensions, Set<String> metrics) {
         for (String field : fields) {
             if (queryDimensions.contains(field) || queryMetrics.contains(field)) {
                 continue;
@@ -341,59 +269,40 @@ public class SourceRender extends Renderer {
         }
     }
 
-    private static void addField(
-            String field,
-            String oriField,
-            DataSource datasource,
-            SemanticSchema schema,
-            Set<String> dimensions,
-            Set<String> metrics) {
-        Optional<Dimension> dimension =
-                datasource.getDimensions().stream()
-                        .filter(d -> d.getName().equalsIgnoreCase(field))
-                        .findFirst();
+    private static void addField(String field, String oriField, DataSource datasource,
+            SemanticSchema schema, Set<String> dimensions, Set<String> metrics) {
+        Optional<Dimension> dimension = datasource.getDimensions().stream()
+                .filter(d -> d.getName().equalsIgnoreCase(field)).findFirst();
         if (dimension.isPresent()) {
             dimensions.add(oriField);
             return;
         }
-        Optional<Identify> identify =
-                datasource.getIdentifiers().stream()
-                        .filter(i -> i.getName().equalsIgnoreCase(field))
-                        .findFirst();
+        Optional<Identify> identify = datasource.getIdentifiers().stream()
+                .filter(i -> i.getName().equalsIgnoreCase(field)).findFirst();
         if (identify.isPresent()) {
             dimensions.add(oriField);
             return;
         }
         if (schema.getDimension().containsKey(datasource.getName())) {
-            Optional<Dimension> dataSourceDim =
-                    schema.getDimension().get(datasource.getName()).stream()
-                            .filter(d -> d.getName().equalsIgnoreCase(field))
-                            .findFirst();
+            Optional<Dimension> dataSourceDim = schema.getDimension().get(datasource.getName())
+                    .stream().filter(d -> d.getName().equalsIgnoreCase(field)).findFirst();
             if (dataSourceDim.isPresent()) {
                 dimensions.add(oriField);
                 return;
             }
         }
-        Optional<Measure> metric =
-                datasource.getMeasures().stream()
-                        .filter(m -> m.getName().equalsIgnoreCase(field))
-                        .findFirst();
+        Optional<Measure> metric = datasource.getMeasures().stream()
+                .filter(m -> m.getName().equalsIgnoreCase(field)).findFirst();
         if (metric.isPresent()) {
             metrics.add(oriField);
             return;
         }
-        Optional<Metric> datasourceMetric =
-                schema.getMetrics().stream()
-                        .filter(m -> m.getName().equalsIgnoreCase(field))
-                        .findFirst();
+        Optional<Metric> datasourceMetric = schema.getMetrics().stream()
+                .filter(m -> m.getName().equalsIgnoreCase(field)).findFirst();
         if (datasourceMetric.isPresent()) {
-            Set<String> measures =
-                    datasourceMetric.get().getMetricTypeParams().getMeasures().stream()
-                            .map(m -> m.getName())
-                            .collect(Collectors.toSet());
-            if (datasource.getMeasures().stream()
-                    .map(m -> m.getName())
-                    .collect(Collectors.toSet())
+            Set<String> measures = datasourceMetric.get().getMetricTypeParams().getMeasures()
+                    .stream().map(m -> m.getName()).collect(Collectors.toSet());
+            if (datasource.getMeasures().stream().map(m -> m.getName()).collect(Collectors.toSet())
                     .containsAll(measures)) {
                 metrics.add(oriField);
                 return;
@@ -402,25 +311,19 @@ public class SourceRender extends Renderer {
     }
 
     public static boolean isDimension(String name, DataSource datasource, SemanticSchema schema) {
-        Optional<Dimension> dimension =
-                datasource.getDimensions().stream()
-                        .filter(d -> d.getName().equalsIgnoreCase(name))
-                        .findFirst();
+        Optional<Dimension> dimension = datasource.getDimensions().stream()
+                .filter(d -> d.getName().equalsIgnoreCase(name)).findFirst();
         if (dimension.isPresent()) {
             return true;
         }
-        Optional<Identify> identify =
-                datasource.getIdentifiers().stream()
-                        .filter(i -> i.getName().equalsIgnoreCase(name))
-                        .findFirst();
+        Optional<Identify> identify = datasource.getIdentifiers().stream()
+                .filter(i -> i.getName().equalsIgnoreCase(name)).findFirst();
         if (identify.isPresent()) {
             return true;
         }
         if (schema.getDimension().containsKey(datasource.getName())) {
-            Optional<Dimension> dataSourceDim =
-                    schema.getDimension().get(datasource.getName()).stream()
-                            .filter(d -> d.getName().equalsIgnoreCase(name))
-                            .findFirst();
+            Optional<Dimension> dataSourceDim = schema.getDimension().get(datasource.getName())
+                    .stream().filter(d -> d.getName().equalsIgnoreCase(name)).findFirst();
             if (dataSourceDim.isPresent()) {
                 return true;
             }
@@ -430,30 +333,14 @@ public class SourceRender extends Renderer {
 
     private static void addTimeDimension(DataSource dataSource, List<String> queryDimension) {
         if (Materialization.TimePartType.ZIPPER.equals(dataSource.getTimePartType())) {
-            Optional<Dimension> startTimeOp =
-                    dataSource.getDimensions().stream()
-                            .filter(
-                                    d ->
-                                            Constants.DIMENSION_TYPE_TIME.equalsIgnoreCase(
-                                                    d.getType()))
-                            .filter(
-                                    d ->
-                                            d.getName()
-                                                    .startsWith(
-                                                            Constants.MATERIALIZATION_ZIPPER_START))
-                            .findFirst();
-            Optional<Dimension> endTimeOp =
-                    dataSource.getDimensions().stream()
-                            .filter(
-                                    d ->
-                                            Constants.DIMENSION_TYPE_TIME.equalsIgnoreCase(
-                                                    d.getType()))
-                            .filter(
-                                    d ->
-                                            d.getName()
-                                                    .startsWith(
-                                                            Constants.MATERIALIZATION_ZIPPER_END))
-                            .findFirst();
+            Optional<Dimension> startTimeOp = dataSource.getDimensions().stream()
+                    .filter(d -> Constants.DIMENSION_TYPE_TIME.equalsIgnoreCase(d.getType()))
+                    .filter(d -> d.getName().startsWith(Constants.MATERIALIZATION_ZIPPER_START))
+                    .findFirst();
+            Optional<Dimension> endTimeOp = dataSource.getDimensions().stream()
+                    .filter(d -> Constants.DIMENSION_TYPE_TIME.equalsIgnoreCase(d.getType()))
+                    .filter(d -> d.getName().startsWith(Constants.MATERIALIZATION_ZIPPER_END))
+                    .findFirst();
             if (startTimeOp.isPresent() && !queryDimension.contains(startTimeOp.get().getName())) {
                 queryDimension.add(startTimeOp.get().getName());
             }
@@ -461,26 +348,17 @@ public class SourceRender extends Renderer {
                 queryDimension.add(endTimeOp.get().getName());
             }
         } else {
-            Optional<Dimension> timeOp =
-                    dataSource.getDimensions().stream()
-                            .filter(
-                                    d ->
-                                            Constants.DIMENSION_TYPE_TIME.equalsIgnoreCase(
-                                                    d.getType()))
-                            .findFirst();
+            Optional<Dimension> timeOp = dataSource.getDimensions().stream()
+                    .filter(d -> Constants.DIMENSION_TYPE_TIME.equalsIgnoreCase(d.getType()))
+                    .findFirst();
             if (timeOp.isPresent() && !queryDimension.contains(timeOp.get().getName())) {
                 queryDimension.add(timeOp.get().getName());
             }
         }
     }
 
-    public void render(
-            MetricQueryParam metricQueryParam,
-            List<DataSource> dataSources,
-            SqlValidatorScope scope,
-            SemanticSchema schema,
-            boolean nonAgg)
-            throws Exception {
+    public void render(MetricQueryParam metricQueryParam, List<DataSource> dataSources,
+            SqlValidatorScope scope, SemanticSchema schema, boolean nonAgg) throws Exception {
         String queryWhere = metricQueryParam.getWhere();
         Set<String> whereFields = new HashSet<>();
         List<String> fieldWhere = new ArrayList<>();
@@ -493,17 +371,9 @@ public class SourceRender extends Renderer {
         }
         if (dataSources.size() == 1) {
             DataSource dataSource = dataSources.get(0);
-            super.tableView =
-                    renderOne(
-                            "",
-                            fieldWhere,
-                            metricQueryParam.getMetrics(),
-                            metricQueryParam.getDimensions(),
-                            metricQueryParam.getWhere(),
-                            dataSource,
-                            scope,
-                            schema,
-                            nonAgg);
+            super.tableView = renderOne("", fieldWhere, metricQueryParam.getMetrics(),
+                    metricQueryParam.getDimensions(), metricQueryParam.getWhere(), dataSource,
+                    scope, schema, nonAgg);
             return;
         }
         JoinRender joinRender = new JoinRender();

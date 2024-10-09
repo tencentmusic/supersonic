@@ -1,6 +1,6 @@
 package com.tencent.supersonic.headless.core.translator.calcite.sql.render;
 
-import com.tencent.supersonic.headless.api.pojo.enums.EngineType;
+import com.tencent.supersonic.common.pojo.enums.EngineType;
 import com.tencent.supersonic.headless.core.pojo.MetricQueryParam;
 import com.tencent.supersonic.headless.core.translator.calcite.s2sql.Constants;
 import com.tencent.supersonic.headless.core.translator.calcite.s2sql.DataSource;
@@ -48,13 +48,8 @@ import java.util.stream.Collectors;
 public class JoinRender extends Renderer {
 
     @Override
-    public void render(
-            MetricQueryParam metricCommand,
-            List<DataSource> dataSources,
-            SqlValidatorScope scope,
-            SemanticSchema schema,
-            boolean nonAgg)
-            throws Exception {
+    public void render(MetricQueryParam metricCommand, List<DataSource> dataSources,
+            SqlValidatorScope scope, SemanticSchema schema, boolean nonAgg) throws Exception {
         String queryWhere = metricCommand.getWhere();
         EngineType engineType =
                 EngineType.fromString(schema.getSemanticModel().getDatabase().getType());
@@ -82,14 +77,8 @@ public class JoinRender extends Renderer {
             final Set<String> filterMetrics = new HashSet<>();
             final List<String> queryDimension = new ArrayList<>();
             final List<String> queryMetrics = new ArrayList<>();
-            SourceRender.whereDimMetric(
-                    fieldWhere,
-                    queryMetrics,
-                    queryDimension,
-                    dataSource,
-                    schema,
-                    filterDimensions,
-                    filterMetrics);
+            SourceRender.whereDimMetric(fieldWhere, queryMetrics, queryDimension, dataSource,
+                    schema, filterDimensions, filterMetrics);
             List<String> reqMetric = new ArrayList<>(metricCommand.getMetrics());
             reqMetric.addAll(filterMetrics);
             reqMetric = uniqList(reqMetric);
@@ -98,33 +87,14 @@ public class JoinRender extends Renderer {
             reqDimension.addAll(filterDimensions);
             reqDimension = uniqList(reqDimension);
 
-            Set<String> sourceMeasure =
-                    dataSource.getMeasures().stream()
-                            .map(mm -> mm.getName())
-                            .collect(Collectors.toSet());
-            doMetric(
-                    innerSelect,
-                    filterView,
-                    queryMetrics,
-                    reqMetric,
-                    dataSource,
-                    sourceMeasure,
-                    scope,
-                    schema,
-                    nonAgg);
-            Set<String> dimension =
-                    dataSource.getDimensions().stream()
-                            .map(dd -> dd.getName())
-                            .collect(Collectors.toSet());
-            doDimension(
-                    innerSelect,
-                    filterDimension,
-                    queryDimension,
-                    reqDimension,
-                    dataSource,
-                    dimension,
-                    scope,
-                    schema);
+            Set<String> sourceMeasure = dataSource.getMeasures().stream().map(mm -> mm.getName())
+                    .collect(Collectors.toSet());
+            doMetric(innerSelect, filterView, queryMetrics, reqMetric, dataSource, sourceMeasure,
+                    scope, schema, nonAgg);
+            Set<String> dimension = dataSource.getDimensions().stream().map(dd -> dd.getName())
+                    .collect(Collectors.toSet());
+            doDimension(innerSelect, filterDimension, queryDimension, reqDimension, dataSource,
+                    dimension, scope, schema);
             List<String> primary = new ArrayList<>();
             for (Identify identify : dataSource.getIdentifiers()) {
                 primary.add(identify.getName());
@@ -135,16 +105,8 @@ public class JoinRender extends Renderer {
             List<String> dataSourceWhere = new ArrayList<>(fieldWhere);
             addZipperField(dataSource, dataSourceWhere);
             TableView tableView =
-                    SourceRender.renderOne(
-                            "",
-                            dataSourceWhere,
-                            queryMetrics,
-                            queryDimension,
-                            metricCommand.getWhere(),
-                            dataSources.get(i),
-                            scope,
-                            schema,
-                            true);
+                    SourceRender.renderOne("", dataSourceWhere, queryMetrics, queryDimension,
+                            metricCommand.getWhere(), dataSources.get(i), scope, schema, true);
             log.info("tableView {}", StringUtils.normalizeSpace(tableView.getTable().toString()));
             String alias = Constants.JOIN_TABLE_PREFIX + dataSource.getName();
             tableView.setAlias(alias);
@@ -165,8 +127,8 @@ public class JoinRender extends Renderer {
             innerView.getMeasure().add(entry.getValue());
         }
         innerView.setTable(left);
-        filterView.setTable(
-                SemanticNode.buildAs(Constants.JOIN_TABLE_OUT_PREFIX, innerView.build()));
+        filterView
+                .setTable(SemanticNode.buildAs(Constants.JOIN_TABLE_OUT_PREFIX, innerView.build()));
         if (!filterDimension.isEmpty()) {
             for (String d : getQueryDimension(filterDimension, queryAllDimension, whereFields)) {
                 if (nonAgg) {
@@ -179,17 +141,10 @@ public class JoinRender extends Renderer {
         super.tableView = filterView;
     }
 
-    private void doMetric(
-            Map<String, SqlNode> innerSelect,
-            TableView filterView,
-            List<String> queryMetrics,
-            List<String> reqMetrics,
-            DataSource dataSource,
-            Set<String> sourceMeasure,
-            SqlValidatorScope scope,
-            SemanticSchema schema,
-            boolean nonAgg)
-            throws Exception {
+    private void doMetric(Map<String, SqlNode> innerSelect, TableView filterView,
+            List<String> queryMetrics, List<String> reqMetrics, DataSource dataSource,
+            Set<String> sourceMeasure, SqlValidatorScope scope, SemanticSchema schema,
+            boolean nonAgg) throws Exception {
         String alias = Constants.JOIN_TABLE_PREFIX + dataSource.getName();
         EngineType engineType =
                 EngineType.fromString(schema.getSemanticModel().getDatabase().getType());
@@ -200,38 +155,21 @@ public class JoinRender extends Renderer {
 
                 if (!metricNode.getNonAggNode().isEmpty()) {
                     for (String measure : metricNode.getNonAggNode().keySet()) {
-                        innerSelect.put(
-                                measure,
-                                SemanticNode.buildAs(
-                                        measure,
-                                        SemanticNode.parse(
-                                                alias + "." + measure, scope, engineType)));
+                        innerSelect.put(measure, SemanticNode.buildAs(measure,
+                                SemanticNode.parse(alias + "." + measure, scope, engineType)));
                     }
                 }
                 if (metricNode.getAggFunction() != null && !metricNode.getAggFunction().isEmpty()) {
                     for (Map.Entry<String, String> entry : metricNode.getAggFunction().entrySet()) {
                         if (metricNode.getNonAggNode().containsKey(entry.getKey())) {
                             if (nonAgg) {
-                                filterView
-                                        .getMeasure()
-                                        .add(
-                                                SemanticNode.buildAs(
-                                                        entry.getKey(),
-                                                        SemanticNode.parse(
-                                                                entry.getKey(),
-                                                                scope,
-                                                                engineType)));
+                                filterView.getMeasure().add(SemanticNode.buildAs(entry.getKey(),
+                                        SemanticNode.parse(entry.getKey(), scope, engineType)));
                             } else {
-                                filterView
-                                        .getMeasure()
-                                        .add(
-                                                SemanticNode.buildAs(
-                                                        entry.getKey(),
-                                                        AggFunctionNode.build(
-                                                                entry.getValue(),
-                                                                entry.getKey(),
-                                                                scope,
-                                                                engineType)));
+                                filterView.getMeasure()
+                                        .add(SemanticNode.buildAs(entry.getKey(),
+                                                AggFunctionNode.build(entry.getValue(),
+                                                        entry.getKey(), scope, engineType)));
                             }
                         }
                     }
@@ -240,15 +178,9 @@ public class JoinRender extends Renderer {
         }
     }
 
-    private void doDimension(
-            Map<String, SqlNode> innerSelect,
-            Set<String> filterDimension,
-            List<String> queryDimension,
-            List<String> reqDimensions,
-            DataSource dataSource,
-            Set<String> dimension,
-            SqlValidatorScope scope,
-            SemanticSchema schema)
+    private void doDimension(Map<String, SqlNode> innerSelect, Set<String> filterDimension,
+            List<String> queryDimension, List<String> reqDimensions, DataSource dataSource,
+            Set<String> dimension, SqlValidatorScope scope, SemanticSchema schema)
             throws Exception {
         String alias = Constants.JOIN_TABLE_PREFIX + dataSource.getName();
         EngineType engineType =
@@ -257,44 +189,32 @@ public class JoinRender extends Renderer {
             if (getMatchDimension(schema, dimension, dataSource, d, queryDimension)) {
                 if (d.contains(Constants.DIMENSION_IDENTIFY)) {
                     String[] identifyDimension = d.split(Constants.DIMENSION_IDENTIFY);
-                    innerSelect.put(
-                            d,
-                            SemanticNode.buildAs(
-                                    d,
-                                    SemanticNode.parse(
-                                            alias + "." + identifyDimension[1],
-                                            scope,
-                                            engineType)));
+                    innerSelect.put(d, SemanticNode.buildAs(d, SemanticNode
+                            .parse(alias + "." + identifyDimension[1], scope, engineType)));
                 } else {
-                    innerSelect.put(
-                            d,
-                            SemanticNode.buildAs(
-                                    d, SemanticNode.parse(alias + "." + d, scope, engineType)));
+                    innerSelect.put(d, SemanticNode.buildAs(d,
+                            SemanticNode.parse(alias + "." + d, scope, engineType)));
                 }
                 filterDimension.add(d);
             }
         }
     }
 
-    private Set<String> getQueryDimension(
-            Set<String> filterDimension, Set<String> queryAllDimension, Set<String> whereFields) {
+    private Set<String> getQueryDimension(Set<String> filterDimension,
+            Set<String> queryAllDimension, Set<String> whereFields) {
         return filterDimension.stream()
                 .filter(d -> queryAllDimension.contains(d) || whereFields.contains(d))
                 .collect(Collectors.toSet());
     }
 
-    private boolean getMatchMetric(
-            SemanticSchema schema, Set<String> sourceMeasure, String m, List<String> queryMetrics) {
-        Optional<Metric> metric =
-                schema.getMetrics().stream()
-                        .filter(mm -> mm.getName().equalsIgnoreCase(m))
-                        .findFirst();
+    private boolean getMatchMetric(SemanticSchema schema, Set<String> sourceMeasure, String m,
+            List<String> queryMetrics) {
+        Optional<Metric> metric = schema.getMetrics().stream()
+                .filter(mm -> mm.getName().equalsIgnoreCase(m)).findFirst();
         boolean isAdd = false;
         if (metric.isPresent()) {
-            Set<String> metricMeasures =
-                    metric.get().getMetricTypeParams().getMeasures().stream()
-                            .map(me -> me.getName())
-                            .collect(Collectors.toSet());
+            Set<String> metricMeasures = metric.get().getMetricTypeParams().getMeasures().stream()
+                    .map(me -> me.getName()).collect(Collectors.toSet());
             if (sourceMeasure.containsAll(metricMeasures)) {
                 isAdd = true;
             }
@@ -308,12 +228,8 @@ public class JoinRender extends Renderer {
         return isAdd;
     }
 
-    private boolean getMatchDimension(
-            SemanticSchema schema,
-            Set<String> sourceDimension,
-            DataSource dataSource,
-            String d,
-            List<String> queryDimension) {
+    private boolean getMatchDimension(SemanticSchema schema, Set<String> sourceDimension,
+            DataSource dataSource, String d, List<String> queryDimension) {
         String oriDimension = d;
         boolean isAdd = false;
         if (d.contains(Constants.DIMENSION_IDENTIFY)) {
@@ -345,15 +261,9 @@ public class JoinRender extends Renderer {
         return SemanticNode.getTable(tableView.getTable());
     }
 
-    private SqlNode buildJoin(
-            SqlNode left,
-            TableView leftTable,
-            TableView tableView,
-            Map<String, String> before,
-            DataSource dataSource,
-            SemanticSchema schema,
-            SqlValidatorScope scope)
-            throws Exception {
+    private SqlNode buildJoin(SqlNode left, TableView leftTable, TableView tableView,
+            Map<String, String> before, DataSource dataSource, SemanticSchema schema,
+            SqlValidatorScope scope) throws Exception {
         EngineType engineType =
                 EngineType.fromString(schema.getSemanticModel().getDatabase().getType());
         SqlNode condition =
@@ -367,53 +277,37 @@ public class JoinRender extends Renderer {
             condition = joinRelationCondition;
         }
         if (Materialization.TimePartType.ZIPPER.equals(leftTable.getDataSource().getTimePartType())
-                || Materialization.TimePartType.ZIPPER.equals(
-                        tableView.getDataSource().getTimePartType())) {
+                || Materialization.TimePartType.ZIPPER
+                        .equals(tableView.getDataSource().getTimePartType())) {
             SqlNode zipperCondition =
                     getZipperCondition(leftTable, tableView, dataSource, schema, scope);
             if (Objects.nonNull(joinRelationCondition)) {
-                condition =
-                        new SqlBasicCall(
-                                SqlStdOperatorTable.AND,
-                                new ArrayList<>(
-                                        Arrays.asList(zipperCondition, joinRelationCondition)),
-                                SqlParserPos.ZERO,
-                                null);
+                condition = new SqlBasicCall(SqlStdOperatorTable.AND,
+                        new ArrayList<>(Arrays.asList(zipperCondition, joinRelationCondition)),
+                        SqlParserPos.ZERO, null);
             } else {
                 condition = zipperCondition;
             }
         }
 
-        return new SqlJoin(
-                SqlParserPos.ZERO,
-                left,
-                SqlLiteral.createBoolean(false, SqlParserPos.ZERO),
-                sqlLiteral,
+        return new SqlJoin(SqlParserPos.ZERO, left,
+                SqlLiteral.createBoolean(false, SqlParserPos.ZERO), sqlLiteral,
                 SemanticNode.buildAs(tableView.getAlias(), getTable(tableView, scope)),
-                SqlLiteral.createSymbol(JoinConditionType.ON, SqlParserPos.ZERO),
-                condition);
+                SqlLiteral.createSymbol(JoinConditionType.ON, SqlParserPos.ZERO), condition);
     }
 
-    private JoinRelation getMatchJoinRelation(
-            Map<String, String> before, TableView tableView, SemanticSchema schema) {
+    private JoinRelation getMatchJoinRelation(Map<String, String> before, TableView tableView,
+            SemanticSchema schema) {
         JoinRelation matchJoinRelation = JoinRelation.builder().build();
         if (!CollectionUtils.isEmpty(schema.getJoinRelations())) {
             for (JoinRelation joinRelation : schema.getJoinRelations()) {
                 if (joinRelation.getRight().equalsIgnoreCase(tableView.getDataSource().getName())
                         && before.containsKey(joinRelation.getLeft())) {
-                    matchJoinRelation.setJoinCondition(
-                            joinRelation.getJoinCondition().stream()
-                                    .map(
-                                            r ->
-                                                    Triple.of(
-                                                            before.get(joinRelation.getLeft())
-                                                                    + "."
-                                                                    + r.getLeft(),
-                                                            r.getMiddle(),
-                                                            tableView.getAlias()
-                                                                    + "."
-                                                                    + r.getRight()))
-                                    .collect(Collectors.toList()));
+                    matchJoinRelation.setJoinCondition(joinRelation.getJoinCondition().stream()
+                            .map(r -> Triple.of(
+                                    before.get(joinRelation.getLeft()) + "." + r.getLeft(),
+                                    r.getMiddle(), tableView.getAlias() + "." + r.getRight()))
+                            .collect(Collectors.toList()));
                     matchJoinRelation.setJoinType(joinRelation.getJoinType());
                 }
             }
@@ -421,46 +315,29 @@ public class JoinRender extends Renderer {
         return matchJoinRelation;
     }
 
-    private SqlNode getCondition(
-            JoinRelation joinRelation, SqlValidatorScope scope, EngineType engineType)
-            throws Exception {
+    private SqlNode getCondition(JoinRelation joinRelation, SqlValidatorScope scope,
+            EngineType engineType) throws Exception {
         SqlNode condition = null;
         for (Triple<String, String, String> con : joinRelation.getJoinCondition()) {
             List<SqlNode> ons = new ArrayList<>();
             ons.add(SemanticNode.parse(con.getLeft(), scope, engineType));
             ons.add(SemanticNode.parse(con.getRight(), scope, engineType));
             if (Objects.isNull(condition)) {
-                condition =
-                        new SqlBasicCall(
-                                SemanticNode.getBinaryOperator(con.getMiddle()),
-                                ons,
-                                SqlParserPos.ZERO,
-                                null);
+                condition = new SqlBasicCall(SemanticNode.getBinaryOperator(con.getMiddle()), ons,
+                        SqlParserPos.ZERO, null);
                 continue;
             }
-            SqlNode addCondition =
-                    new SqlBasicCall(
-                            SemanticNode.getBinaryOperator(con.getMiddle()),
-                            ons,
-                            SqlParserPos.ZERO,
-                            null);
-            condition =
-                    new SqlBasicCall(
-                            SqlStdOperatorTable.AND,
-                            new ArrayList<>(Arrays.asList(condition, addCondition)),
-                            SqlParserPos.ZERO,
-                            null);
+            SqlNode addCondition = new SqlBasicCall(SemanticNode.getBinaryOperator(con.getMiddle()),
+                    ons, SqlParserPos.ZERO, null);
+            condition = new SqlBasicCall(SqlStdOperatorTable.AND,
+                    new ArrayList<>(Arrays.asList(condition, addCondition)), SqlParserPos.ZERO,
+                    null);
         }
         return condition;
     }
 
-    private SqlNode getCondition(
-            TableView left,
-            TableView right,
-            DataSource dataSource,
-            SemanticSchema schema,
-            SqlValidatorScope scope,
-            EngineType engineType)
+    private SqlNode getCondition(TableView left, TableView right, DataSource dataSource,
+            SemanticSchema schema, SqlValidatorScope scope, EngineType engineType)
             throws Exception {
 
         Set<String> selectLeft = SemanticNode.getSelect(left.getTable());
@@ -491,22 +368,15 @@ public class JoinRender extends Renderer {
             }
             SqlNode addCondition =
                     new SqlBasicCall(SqlStdOperatorTable.EQUALS, ons, SqlParserPos.ZERO, null);
-            condition =
-                    new SqlBasicCall(
-                            SqlStdOperatorTable.AND,
-                            new ArrayList<>(Arrays.asList(condition, addCondition)),
-                            SqlParserPos.ZERO,
-                            null);
+            condition = new SqlBasicCall(SqlStdOperatorTable.AND,
+                    new ArrayList<>(Arrays.asList(condition, addCondition)), SqlParserPos.ZERO,
+                    null);
         }
         return condition;
     }
 
-    private static void joinOrder(
-            int cnt,
-            String id,
-            Map<String, Set<String>> next,
-            Queue<String> orders,
-            Map<String, Boolean> visited) {
+    private static void joinOrder(int cnt, String id, Map<String, Set<String>> next,
+            Queue<String> orders, Map<String, Boolean> visited) {
         visited.put(id, true);
         orders.add(id);
         if (orders.size() >= cnt) {
@@ -528,97 +398,62 @@ public class JoinRender extends Renderer {
         if (Materialization.TimePartType.ZIPPER.equals(dataSource.getTimePartType())) {
             dataSource.getDimensions().stream()
                     .filter(d -> Constants.DIMENSION_TYPE_TIME.equalsIgnoreCase(d.getType()))
-                    .forEach(
-                            t -> {
-                                if (t.getName().startsWith(Constants.MATERIALIZATION_ZIPPER_END)
-                                        && !fields.contains(t.getName())) {
-                                    fields.add(t.getName());
-                                }
-                                if (t.getName().startsWith(Constants.MATERIALIZATION_ZIPPER_START)
-                                        && !fields.contains(t.getName())) {
-                                    fields.add(t.getName());
-                                }
-                            });
+                    .forEach(t -> {
+                        if (t.getName().startsWith(Constants.MATERIALIZATION_ZIPPER_END)
+                                && !fields.contains(t.getName())) {
+                            fields.add(t.getName());
+                        }
+                        if (t.getName().startsWith(Constants.MATERIALIZATION_ZIPPER_START)
+                                && !fields.contains(t.getName())) {
+                            fields.add(t.getName());
+                        }
+                    });
         }
     }
 
-    private SqlNode getZipperCondition(
-            TableView left,
-            TableView right,
-            DataSource dataSource,
-            SemanticSchema schema,
-            SqlValidatorScope scope)
-            throws Exception {
+    private SqlNode getZipperCondition(TableView left, TableView right, DataSource dataSource,
+            SemanticSchema schema, SqlValidatorScope scope) throws Exception {
         if (Materialization.TimePartType.ZIPPER.equals(left.getDataSource().getTimePartType())
-                && Materialization.TimePartType.ZIPPER.equals(
-                        right.getDataSource().getTimePartType())) {
+                && Materialization.TimePartType.ZIPPER
+                        .equals(right.getDataSource().getTimePartType())) {
             throw new Exception("not support two zipper table");
         }
         SqlNode condition = null;
-        Optional<Dimension> leftTime =
-                left.getDataSource().getDimensions().stream()
-                        .filter(d -> Constants.DIMENSION_TYPE_TIME.equalsIgnoreCase(d.getType()))
-                        .findFirst();
-        Optional<Dimension> rightTime =
-                right.getDataSource().getDimensions().stream()
-                        .filter(d -> Constants.DIMENSION_TYPE_TIME.equalsIgnoreCase(d.getType()))
-                        .findFirst();
+        Optional<Dimension> leftTime = left.getDataSource().getDimensions().stream()
+                .filter(d -> Constants.DIMENSION_TYPE_TIME.equalsIgnoreCase(d.getType()))
+                .findFirst();
+        Optional<Dimension> rightTime = right.getDataSource().getDimensions().stream()
+                .filter(d -> Constants.DIMENSION_TYPE_TIME.equalsIgnoreCase(d.getType()))
+                .findFirst();
         if (leftTime.isPresent() && rightTime.isPresent()) {
 
             String startTime = "";
             String endTime = "";
             String dateTime = "";
 
-            Optional<Dimension> startTimeOp =
-                    (Materialization.TimePartType.ZIPPER.equals(
-                                            left.getDataSource().getTimePartType())
-                                    ? left
-                                    : right)
-                            .getDataSource().getDimensions().stream()
-                                    .filter(
-                                            d ->
-                                                    Constants.DIMENSION_TYPE_TIME.equalsIgnoreCase(
-                                                            d.getType()))
-                                    .filter(
-                                            d ->
-                                                    d.getName()
-                                                            .startsWith(
-                                                                    Constants
-                                                                            .MATERIALIZATION_ZIPPER_START))
-                                    .findFirst();
-            Optional<Dimension> endTimeOp =
-                    (Materialization.TimePartType.ZIPPER.equals(
-                                            left.getDataSource().getTimePartType())
-                                    ? left
-                                    : right)
-                            .getDataSource().getDimensions().stream()
-                                    .filter(
-                                            d ->
-                                                    Constants.DIMENSION_TYPE_TIME.equalsIgnoreCase(
-                                                            d.getType()))
-                                    .filter(
-                                            d ->
-                                                    d.getName()
-                                                            .startsWith(
-                                                                    Constants
-                                                                            .MATERIALIZATION_ZIPPER_END))
-                                    .findFirst();
+            Optional<Dimension> startTimeOp = (Materialization.TimePartType.ZIPPER
+                    .equals(left.getDataSource().getTimePartType()) ? left : right).getDataSource()
+                            .getDimensions().stream()
+                            .filter(d -> Constants.DIMENSION_TYPE_TIME
+                                    .equalsIgnoreCase(d.getType()))
+                            .filter(d -> d.getName()
+                                    .startsWith(Constants.MATERIALIZATION_ZIPPER_START))
+                            .findFirst();
+            Optional<Dimension> endTimeOp = (Materialization.TimePartType.ZIPPER
+                    .equals(left.getDataSource().getTimePartType()) ? left : right).getDataSource()
+                            .getDimensions().stream()
+                            .filter(d -> Constants.DIMENSION_TYPE_TIME
+                                    .equalsIgnoreCase(d.getType()))
+                            .filter(d -> d.getName()
+                                    .startsWith(Constants.MATERIALIZATION_ZIPPER_END))
+                            .findFirst();
             if (startTimeOp.isPresent() && endTimeOp.isPresent()) {
-                TableView zipper =
-                        Materialization.TimePartType.ZIPPER.equals(
-                                        left.getDataSource().getTimePartType())
-                                ? left
-                                : right;
-                TableView partMetric =
-                        Materialization.TimePartType.ZIPPER.equals(
-                                        left.getDataSource().getTimePartType())
-                                ? right
-                                : left;
-                Optional<Dimension> partTime =
-                        Materialization.TimePartType.ZIPPER.equals(
-                                        left.getDataSource().getTimePartType())
-                                ? rightTime
-                                : leftTime;
+                TableView zipper = Materialization.TimePartType.ZIPPER
+                        .equals(left.getDataSource().getTimePartType()) ? left : right;
+                TableView partMetric = Materialization.TimePartType.ZIPPER
+                        .equals(left.getDataSource().getTimePartType()) ? right : left;
+                Optional<Dimension> partTime = Materialization.TimePartType.ZIPPER
+                        .equals(left.getDataSource().getTimePartType()) ? rightTime : leftTime;
                 startTime = zipper.getAlias() + "." + startTimeOp.get().getName();
                 endTime = zipper.getAlias() + "." + endTimeOp.get().getName();
                 dateTime = partMetric.getAlias() + "." + partTime.get().getName();
@@ -626,36 +461,18 @@ public class JoinRender extends Renderer {
             EngineType engineType =
                     EngineType.fromString(schema.getSemanticModel().getDatabase().getType());
             ArrayList<SqlNode> operandList =
-                    new ArrayList<>(
-                            Arrays.asList(
-                                    SemanticNode.parse(endTime, scope, engineType),
-                                    SemanticNode.parse(dateTime, scope, engineType)));
-            condition =
-                    new SqlBasicCall(
-                            SqlStdOperatorTable.AND,
-                            new ArrayList<SqlNode>(
-                                    Arrays.asList(
-                                            new SqlBasicCall(
-                                                    SqlStdOperatorTable.LESS_THAN_OR_EQUAL,
-                                                    new ArrayList<SqlNode>(
-                                                            Arrays.asList(
-                                                                    SemanticNode.parse(
-                                                                            startTime,
-                                                                            scope,
-                                                                            engineType),
-                                                                    SemanticNode.parse(
-                                                                            dateTime,
-                                                                            scope,
-                                                                            engineType))),
-                                                    SqlParserPos.ZERO,
-                                                    null),
-                                            new SqlBasicCall(
-                                                    SqlStdOperatorTable.GREATER_THAN,
-                                                    operandList,
-                                                    SqlParserPos.ZERO,
-                                                    null))),
-                            SqlParserPos.ZERO,
-                            null);
+                    new ArrayList<>(Arrays.asList(SemanticNode.parse(endTime, scope, engineType),
+                            SemanticNode.parse(dateTime, scope, engineType)));
+            condition = new SqlBasicCall(SqlStdOperatorTable.AND,
+                    new ArrayList<SqlNode>(Arrays.asList(
+                            new SqlBasicCall(SqlStdOperatorTable.LESS_THAN_OR_EQUAL,
+                                    new ArrayList<SqlNode>(Arrays.asList(
+                                            SemanticNode.parse(startTime, scope, engineType),
+                                            SemanticNode.parse(dateTime, scope, engineType))),
+                                    SqlParserPos.ZERO, null),
+                            new SqlBasicCall(SqlStdOperatorTable.GREATER_THAN, operandList,
+                                    SqlParserPos.ZERO, null))),
+                    SqlParserPos.ZERO, null);
         }
         return condition;
     }

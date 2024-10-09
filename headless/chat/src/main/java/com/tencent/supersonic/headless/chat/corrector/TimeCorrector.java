@@ -36,15 +36,14 @@ public class TimeCorrector extends BaseSemanticCorrector {
         }
     }
 
-    private void addDateIfNotExist(
-            ChatQueryContext chatQueryContext, SemanticParseInfo semanticParseInfo) {
+    private void addDateIfNotExist(ChatQueryContext chatQueryContext,
+            SemanticParseInfo semanticParseInfo) {
         String correctS2SQL = semanticParseInfo.getSqlInfo().getCorrectedS2SQL();
         List<String> whereFields = SqlSelectHelper.getWhereFields(correctS2SQL);
         Long dataSetId = semanticParseInfo.getDataSetId();
         DataSetSchema dataSetSchema =
                 chatQueryContext.getSemanticSchema().getDataSetSchemaMap().get(dataSetId);
-        if (Objects.isNull(dataSetSchema)
-                || Objects.isNull(dataSetSchema.getPartitionDimension())
+        if (Objects.isNull(dataSetSchema) || Objects.isNull(dataSetSchema.getPartitionDimension())
                 || Objects.isNull(dataSetSchema.getPartitionDimension().getName())
                 || TimeDimensionEnum.containsZhTimeDimension(whereFields)) {
             return;
@@ -66,13 +65,8 @@ public class TimeCorrector extends BaseSemanticCorrector {
                 correctS2SQL = SqlAddHelper.addParenthesisToWhere(correctS2SQL);
                 String startDateLeft = dateRange.getLeft();
                 String endDateRight = dateRange.getRight();
-                String condExpr =
-                        String.format(
-                                " ( %s >= '%s'  and %s <= '%s' )",
-                                partitionDimension,
-                                startDateLeft,
-                                partitionDimension,
-                                endDateRight);
+                String condExpr = String.format(" ( %s >= '%s'  and %s <= '%s' )",
+                        partitionDimension, startDateLeft, partitionDimension, endDateRight);
                 correctS2SQL = addConditionToSQL(correctS2SQL, condExpr);
             }
         }
@@ -83,8 +77,7 @@ public class TimeCorrector extends BaseSemanticCorrector {
         String correctS2SQL = semanticParseInfo.getSqlInfo().getCorrectedS2SQL();
         DateBoundInfo dateBoundInfo = SqlDateSelectHelper.getDateBoundInfo(correctS2SQL);
 
-        if (dateBoundInfo != null
-                && StringUtils.isBlank(dateBoundInfo.getLowerBound())
+        if (dateBoundInfo != null && StringUtils.isBlank(dateBoundInfo.getLowerBound())
                 && StringUtils.isNotBlank(dateBoundInfo.getUpperBound())
                 && StringUtils.isNotBlank(dateBoundInfo.getUpperDate())) {
             String upperDate = dateBoundInfo.getUpperDate();

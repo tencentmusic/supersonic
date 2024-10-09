@@ -45,34 +45,24 @@ public class StatRepositoryImpl implements StatRepository {
         List<ItemUseResp> result = new ArrayList<>();
         List<QueryStat> statInfos = statMapper.getStatInfo(itemUseReq);
         Map<String, Long> map = new ConcurrentHashMap<>();
-        statInfos.stream()
-                .forEach(
-                        stat -> {
-                            String dimensions = stat.getDimensions();
-                            String metrics = stat.getMetrics();
-                            if (Objects.nonNull(stat.getDataSetId())) {
-                                updateStatMapInfo(
-                                        map,
-                                        dimensions,
-                                        TypeEnums.DIMENSION.name().toLowerCase(),
-                                        stat.getDataSetId());
-                                updateStatMapInfo(
-                                        map,
-                                        metrics,
-                                        TypeEnums.METRIC.name().toLowerCase(),
-                                        stat.getDataSetId());
-                            }
-                        });
-        map.forEach(
-                (k, v) -> {
-                    Long classId = Long.parseLong(k.split(AT_SYMBOL + AT_SYMBOL)[0]);
-                    String type = k.split(AT_SYMBOL + AT_SYMBOL)[1];
-                    String nameEn = k.split(AT_SYMBOL + AT_SYMBOL)[2];
-                    result.add(new ItemUseResp(classId, type, nameEn, v));
-                });
+        statInfos.stream().forEach(stat -> {
+            String dimensions = stat.getDimensions();
+            String metrics = stat.getMetrics();
+            if (Objects.nonNull(stat.getDataSetId())) {
+                updateStatMapInfo(map, dimensions, TypeEnums.DIMENSION.name().toLowerCase(),
+                        stat.getDataSetId());
+                updateStatMapInfo(map, metrics, TypeEnums.METRIC.name().toLowerCase(),
+                        stat.getDataSetId());
+            }
+        });
+        map.forEach((k, v) -> {
+            Long classId = Long.parseLong(k.split(AT_SYMBOL + AT_SYMBOL)[0]);
+            String type = k.split(AT_SYMBOL + AT_SYMBOL)[1];
+            String nameEn = k.split(AT_SYMBOL + AT_SYMBOL)[2];
+            result.add(new ItemUseResp(classId, type, nameEn, v));
+        });
 
-        return result.stream()
-                .sorted(Comparator.comparing(ItemUseResp::getUseCnt).reversed())
+        return result.stream().sorted(Comparator.comparing(ItemUseResp::getUseCnt).reversed())
                 .collect(Collectors.toList());
     }
 
@@ -81,24 +71,21 @@ public class StatRepositoryImpl implements StatRepository {
         return statMapper.getStatInfo(itemUseCommend);
     }
 
-    private void updateStatMapInfo(
-            Map<String, Long> map, String dimensions, String type, Long dataSetId) {
+    private void updateStatMapInfo(Map<String, Long> map, String dimensions, String type,
+            Long dataSetId) {
         if (StringUtils.isNotEmpty(dimensions)) {
             try {
                 List<String> dimensionList =
                         mapper.readValue(dimensions, new TypeReference<List<String>>() {});
-                dimensionList.stream()
-                        .forEach(
-                                dimension -> {
-                                    String key =
-                                            dataSetId + AT_SYMBOL + AT_SYMBOL + type + AT_SYMBOL
-                                                    + AT_SYMBOL + dimension;
-                                    if (map.containsKey(key)) {
-                                        map.put(key, map.get(key) + 1);
-                                    } else {
-                                        map.put(key, 1L);
-                                    }
-                                });
+                dimensionList.stream().forEach(dimension -> {
+                    String key = dataSetId + AT_SYMBOL + AT_SYMBOL + type + AT_SYMBOL + AT_SYMBOL
+                            + dimension;
+                    if (map.containsKey(key)) {
+                        map.put(key, map.get(key) + 1);
+                    } else {
+                        map.put(key, 1L);
+                    }
+                });
             } catch (Exception e) {
                 log.warn("e:{}", e);
             }

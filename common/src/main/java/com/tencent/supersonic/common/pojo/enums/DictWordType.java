@@ -51,8 +51,7 @@ public enum DictWordType {
             return DATASET;
         }
         // dimension value
-        if (natures.length == 3
-                && StringUtils.isNumeric(natures[1])
+        if (natures.length == 3 && StringUtils.isNumeric(natures[1])
                 && StringUtils.isNumeric(natures[2])) {
             return VALUE;
         }

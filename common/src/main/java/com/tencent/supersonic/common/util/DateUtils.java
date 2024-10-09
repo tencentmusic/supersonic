@@ -90,8 +90,8 @@ public class DateUtils {
         return startDate.format(DEFAULT_DATE_FORMATTER2);
     }
 
-    public static String getBeforeDate(
-            String currentDate, int intervalDay, DatePeriodEnum datePeriodEnum) {
+    public static String getBeforeDate(String currentDate, int intervalDay,
+            DatePeriodEnum datePeriodEnum) {
         LocalDate specifiedDate = LocalDate.parse(currentDate, DEFAULT_DATE_FORMATTER2);
         LocalDate result = null;
         switch (datePeriodEnum) {
@@ -101,9 +101,8 @@ public class DateUtils {
             case WEEK:
                 result = specifiedDate.minusWeeks(intervalDay);
                 if (intervalDay == 0) {
-                    result =
-                            result.with(
-                                    TemporalAdjusters.previousOrSame(java.time.DayOfWeek.MONDAY));
+                    result = result
+                            .with(TemporalAdjusters.previousOrSame(java.time.DayOfWeek.MONDAY));
                 }
                 break;
             case MONTH:
@@ -115,14 +114,13 @@ public class DateUtils {
             case QUARTER:
                 result = specifiedDate.minusMonths(intervalDay * 3L);
                 if (intervalDay == 0) {
-                    TemporalAdjuster firstDayOfQuarter =
-                            temporal -> {
-                                LocalDate tempDate = LocalDate.from(temporal);
-                                int month = tempDate.get(ChronoField.MONTH_OF_YEAR);
-                                int firstMonthOfQuarter = ((month - 1) / 3) * 3 + 1;
-                                return tempDate.with(ChronoField.MONTH_OF_YEAR, firstMonthOfQuarter)
-                                        .with(TemporalAdjusters.firstDayOfMonth());
-                            };
+                    TemporalAdjuster firstDayOfQuarter = temporal -> {
+                        LocalDate tempDate = LocalDate.from(temporal);
+                        int month = tempDate.get(ChronoField.MONTH_OF_YEAR);
+                        int firstMonthOfQuarter = ((month - 1) / 3) * 3 + 1;
+                        return tempDate.with(ChronoField.MONTH_OF_YEAR, firstMonthOfQuarter)
+                                .with(TemporalAdjusters.firstDayOfMonth());
+                    };
                     result = result.with(firstDayOfQuarter);
                 }
                 break;
@@ -162,8 +160,8 @@ public class DateUtils {
         return !timeString.equals("00:00:00");
     }
 
-    public static List<String> getDateList(
-            String startDateStr, String endDateStr, DatePeriodEnum period) {
+    public static List<String> getDateList(String startDateStr, String endDateStr,
+            DatePeriodEnum period) {
         try {
             LocalDate startDate = LocalDate.parse(startDateStr);
             LocalDate endDate = LocalDate.parse(endDateStr);

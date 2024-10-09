@@ -7,8 +7,7 @@ import org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 /** Chat Launcher */
-@SpringBootApplication(
-        scanBasePackages = {"com.tencent.supersonic"},
+@SpringBootApplication(scanBasePackages = {"com.tencent.supersonic"},
         exclude = {MongoAutoConfiguration.class, MongoDataAutoConfiguration.class})
 @EnableScheduling
 public class ChatLauncher {

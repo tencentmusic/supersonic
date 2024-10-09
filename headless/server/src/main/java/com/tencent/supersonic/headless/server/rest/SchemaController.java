@@ -21,20 +21,19 @@ import java.util.List;
 @RequestMapping("/api/semantic/schema")
 public class SchemaController {
 
-    @Autowired private SchemaService schemaService;
+    @Autowired
+    private SchemaService schemaService;
 
     @GetMapping("/domain/list")
-    public List<DomainResp> getDomainList(
-            HttpServletRequest request, HttpServletResponse response) {
+    public List<DomainResp> getDomainList(HttpServletRequest request,
+            HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
         return schemaService.getDomainList(user);
     }
 
     @GetMapping("/model/list")
-    public List<ModelResp> getModelList(
-            @RequestParam("domainId") Long domainId,
-            @RequestParam("authType") String authType,
-            HttpServletRequest request,
+    public List<ModelResp> getModelList(@RequestParam("domainId") Long domainId,
+            @RequestParam("authType") String authType, HttpServletRequest request,
             HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
         return schemaService.getModelList(user, AuthType.valueOf(authType), domainId);

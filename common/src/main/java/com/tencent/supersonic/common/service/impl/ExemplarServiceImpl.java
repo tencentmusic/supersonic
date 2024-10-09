@@ -35,14 +35,15 @@ public class ExemplarServiceImpl implements ExemplarService, CommandLineRunner {
 
     private final ObjectMapper objectMapper = JsonUtil.INSTANCE.getObjectMapper();
 
-    @Autowired private EmbeddingConfig embeddingConfig;
+    @Autowired
+    private EmbeddingConfig embeddingConfig;
 
-    @Autowired private EmbeddingService embeddingService;
+    @Autowired
+    private EmbeddingService embeddingService;
 
     public void storeExemplar(String collection, Text2SQLExemplar exemplar) {
-        Metadata metadata =
-                Metadata.from(
-                        JsonUtil.toMap(JsonUtil.toString(exemplar), String.class, Object.class));
+        Metadata metadata = Metadata
+                .from(JsonUtil.toMap(JsonUtil.toString(exemplar), String.class, Object.class));
         TextSegment segment = TextSegment.from(exemplar.getQuestion(), metadata);
         TextSegmentConvert.addQueryId(segment, exemplar.getQuestion());
 
@@ -50,9 +51,8 @@ public class ExemplarServiceImpl implements ExemplarService, CommandLineRunner {
     }
 
     public void removeExemplar(String collection, Text2SQLExemplar exemplar) {
-        Metadata metadata =
-                Metadata.from(
-                        JsonUtil.toMap(JsonUtil.toString(exemplar), String.class, Object.class));
+        Metadata metadata = Metadata
+                .from(JsonUtil.toMap(JsonUtil.toString(exemplar), String.class, Object.class));
         TextSegment segment = TextSegment.from(exemplar.getQuestion(), metadata);
         TextSegmentConvert.addQueryId(segment, exemplar.getQuestion());
 
@@ -70,18 +70,11 @@ public class ExemplarServiceImpl implements ExemplarService, CommandLineRunner {
                 RetrieveQuery.builder().queryTextsList(Lists.newArrayList(query)).build();
         List<RetrieveQueryResult> results =
                 embeddingService.retrieveQuery(collection, retrieveQuery, num);
-        results.stream()
-                .forEach(
-                        ret -> {
-                            ret.getRetrieval().stream()
-                                    .forEach(
-                                            r -> {
-                                                exemplars.add(
-                                                        JsonUtil.mapToObject(
-                                                                r.getMetadata(),
-                                                                Text2SQLExemplar.class));
-                                            });
-                        });
+        results.stream().forEach(ret -> {
+            ret.getRetrieval().stream().forEach(r -> {
+                exemplars.add(JsonUtil.mapToObject(r.getMetadata(), Text2SQLExemplar.class));
+            });
+        });
 
         return exemplars;
     }

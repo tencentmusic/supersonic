@@ -18,9 +18,7 @@ public class ParseResp {
     private ParseTimeCostResp parseTimeCost = new ParseTimeCostResp();
 
     public enum ParseState {
-        COMPLETED,
-        PENDING,
-        FAILED
+        COMPLETED, PENDING, FAILED
     }
 
     public ParseResp(String queryText) {
@@ -29,10 +27,9 @@ public class ParseResp {
     }
 
     public List<SemanticParseInfo> getSelectedParses() {
-        selectedParses =
-                selectedParses.stream()
-                        .sorted(Comparator.comparingDouble(SemanticParseInfo::getScore).reversed())
-                        .collect(Collectors.toList());
+        selectedParses = selectedParses.stream()
+                .sorted(Comparator.comparingDouble(SemanticParseInfo::getScore).reversed())
+                .collect(Collectors.toList());
         generateParseInfoId(selectedParses);
         return selectedParses;
     }

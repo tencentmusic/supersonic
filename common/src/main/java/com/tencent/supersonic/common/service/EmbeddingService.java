@@ -16,8 +16,8 @@ public interface EmbeddingService {
 
     void deleteQuery(String collectionName, List<TextSegment> queries);
 
-    List<RetrieveQueryResult> retrieveQuery(
-            String collectionName, RetrieveQuery retrieveQuery, int num);
+    List<RetrieveQueryResult> retrieveQuery(String collectionName, RetrieveQuery retrieveQuery,
+            int num);
 
     void removeAll();
 }
