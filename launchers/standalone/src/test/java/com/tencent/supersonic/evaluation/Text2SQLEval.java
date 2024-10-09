@@ -2,6 +2,8 @@ package com.tencent.supersonic.evaluation;
 
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.chat.BaseTest;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.chat.server.agent.Agent;
@@ -9,12 +11,14 @@ import com.tencent.supersonic.chat.server.agent.AgentConfig;
 import com.tencent.supersonic.chat.server.agent.AgentToolType;
 import com.tencent.supersonic.chat.server.agent.MultiTurnConfig;
 import com.tencent.supersonic.chat.server.agent.RuleParserTool;
+import com.tencent.supersonic.chat.server.pojo.ChatModel;
+import com.tencent.supersonic.common.pojo.enums.ChatModelType;
 import com.tencent.supersonic.util.DataUtils;
 import com.tencent.supersonic.util.LLMConfigUtils;
 import org.junit.jupiter.api.*;
 
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Map;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Disabled
@@ -133,7 +137,13 @@ public class Text2SQLEval extends BaseTest {
         AgentConfig agentConfig = new AgentConfig();
         agentConfig.getTools().add(getLLMQueryTool());
         agent.setAgentConfig(JSONObject.toJSONString(agentConfig));
-        agent.setModelConfig(LLMConfigUtils.getLLMConfig(LLMConfigUtils.LLMType.OLLAMA_LLAMA3));
+        ChatModel chatModel = new ChatModel();
+        chatModel.setName("Text2SQL LLM");
+        chatModel.setConfig(LLMConfigUtils.getLLMConfig(LLMConfigUtils.LLMType.OLLAMA_LLAMA3));
+        chatModel = chatModelService.createChatModel(chatModel, User.getFakeUser());
+        Map<ChatModelType, Integer> chatModelConfig = Maps.newHashMap();
+        chatModelConfig.put(ChatModelType.TEXT_TO_SQL, chatModel.getId());
+        agent.setModelConfig(chatModelConfig);
         MultiTurnConfig multiTurnConfig = new MultiTurnConfig();
         multiTurnConfig.setEnableMultiTurn(enableMultiturn);
         agent.setMultiTurnConfig(multiTurnConfig);

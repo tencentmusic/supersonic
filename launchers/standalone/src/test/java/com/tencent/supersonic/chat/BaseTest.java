@@ -5,6 +5,7 @@ import com.tencent.supersonic.chat.api.pojo.request.ChatExecuteReq;
 import com.tencent.supersonic.chat.api.pojo.request.ChatParseReq;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.chat.server.service.AgentService;
+import com.tencent.supersonic.chat.server.service.ChatModelService;
 import com.tencent.supersonic.chat.server.service.ChatQueryService;
 import com.tencent.supersonic.common.pojo.enums.DatePeriodEnum;
 import com.tencent.supersonic.headless.api.pojo.SchemaElement;
@@ -33,6 +34,8 @@ public class BaseTest extends BaseApplication {
     protected ChatQueryService chatQueryService;
     @Autowired
     protected AgentService agentService;
+    @Autowired
+    protected ChatModelService chatModelService;
 
     protected QueryResult submitMultiTurnChat(String queryText, Integer agentId, Integer chatId)
             throws Exception {

@@ -103,6 +103,21 @@ CREATE TABLE IF NOT EXISTS `s2_chat_memory` (
     ) ;
 COMMENT ON TABLE s2_chat_memory IS 'chat memory table ';
 
+CREATE TABLE IF NOT EXISTS `s2_chat_model`
+(
+    id          int AUTO_INCREMENT,
+    name        varchar(100)  null,
+    description varchar(500) null,
+   `config` varchar(500) NOT  NULL ,
+   `created_at` TIMESTAMP NOT  NULL ,
+   `created_by` varchar(100) NOT  NULL ,
+   `updated_at` TIMESTAMP NOT  NULL ,
+   `updated_by` varchar(100) NOT  NULL,
+   `admin` varchar(500) NOT  NULL,
+   `viewer` varchar(500) DEFAULT  NULL,
+    PRIMARY KEY (`id`)
+); COMMENT ON TABLE s2_chat_model IS 'chat model table';
+
 create table IF NOT EXISTS s2_user
 (
     id       INT AUTO_INCREMENT,
@@ -387,7 +402,6 @@ CREATE TABLE IF NOT EXISTS s2_agent
     enable_memory_review int null,
     PRIMARY KEY (`id`)
 ); COMMENT ON TABLE s2_agent IS 'agent information table';
-
 
 -------demo for semantic and chat
 CREATE TABLE IF NOT EXISTS `s2_user_department` (

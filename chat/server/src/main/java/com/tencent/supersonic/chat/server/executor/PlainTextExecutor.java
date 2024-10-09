@@ -8,6 +8,8 @@ import com.tencent.supersonic.chat.server.parser.ParserConfig;
 import com.tencent.supersonic.chat.server.pojo.ExecuteContext;
 import com.tencent.supersonic.chat.server.service.AgentService;
 import com.tencent.supersonic.chat.server.service.ChatManageService;
+import com.tencent.supersonic.chat.server.util.ModelConfigHelper;
+import com.tencent.supersonic.common.pojo.enums.ChatModelType;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.headless.api.pojo.response.QueryState;
 import dev.langchain4j.data.message.AiMessage;
@@ -44,8 +46,8 @@ public class PlainTextExecutor implements ChatQueryExecutor {
         AgentService agentService = ContextUtils.getBean(AgentService.class);
         Agent chatAgent = agentService.getAgent(executeContext.getAgent().getId());
 
-        ChatLanguageModel chatLanguageModel =
-                ModelProvider.getChatModel(chatAgent.getModelConfig());
+        ChatLanguageModel chatLanguageModel = ModelProvider.getChatModel(
+                ModelConfigHelper.getChatModelConfig(chatAgent, ChatModelType.RESPONSE_GENERATE));
         Response<AiMessage> response = chatLanguageModel.generate(prompt.toUserMessage());
 
         QueryResult result = new QueryResult();
