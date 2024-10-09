@@ -89,7 +89,7 @@ export type AgentType = {
   createdAt: string;
   updatedAt: string;
   enableSearch: number;
-  agentConfig: string;
+  toolConfig: string;
   modelConfig: {
     provider: string;
     baseUrl: string;

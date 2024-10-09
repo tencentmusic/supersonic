@@ -96,7 +96,7 @@ export type AgentType = {
   examples?: string[];
   status?: 0 | 1;
   enableSearch?: 0 | 1;
-  agentConfig?: AgentConfigType;
+  toolConfig?: string;
   modelConfig: LlmConfigType;
   multiTurnConfig?: MultiTurnConfig;
   visualConfig?: VisualConfig;

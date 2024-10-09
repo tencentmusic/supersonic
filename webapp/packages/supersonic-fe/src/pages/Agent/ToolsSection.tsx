@@ -15,7 +15,7 @@ const ToolsSection: React.FC<Props> = ({ currentAgent, onSaveAgent }) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [editTool, setEditTool] = useState<AgentToolType>();
 
-  const agentConfig = currentAgent?.toolConfig ? JSON.parse(currentAgent.toolConfig as any) : {};
+  const toolConfig = currentAgent?.toolConfig ? JSON.parse(currentAgent.toolConfig as any) : {};
 
   const saveAgent = async (agent: AgentType) => {
     await onSaveAgent(agent);
@@ -23,7 +23,7 @@ const ToolsSection: React.FC<Props> = ({ currentAgent, onSaveAgent }) => {
   };
 
   const onSaveTool = async (tool: AgentToolType) => {
-    const newAgentConfig = agentConfig || ({} as any);
+    const newAgentConfig = toolConfig || ({} as any);
     if (!newAgentConfig.tools) {
       newAgentConfig.tools = [];
     }
@@ -35,13 +35,13 @@ const ToolsSection: React.FC<Props> = ({ currentAgent, onSaveAgent }) => {
     }
     await saveAgent({
       ...currentAgent,
-      agentConfig: JSON.stringify(newAgentConfig) as any,
+      toolConfig: JSON.stringify(newAgentConfig) as any,
     });
     setModalVisible(false);
   };
 
   const onDeleteTool = async (tool: AgentToolType) => {
-    const newAgentConfig = agentConfig || ({} as any);
+    const newAgentConfig = toolConfig || ({} as any);
     if (!newAgentConfig.tools) {
       newAgentConfig.tools = [];
     }
@@ -50,16 +50,16 @@ const ToolsSection: React.FC<Props> = ({ currentAgent, onSaveAgent }) => {
     );
     await saveAgent({
       ...currentAgent,
-      agentConfig: JSON.stringify(newAgentConfig) as any,
+      toolConfig: JSON.stringify(newAgentConfig) as any,
     });
   };
 
   return (
     <>
       <div className={styles.toolSection}>
-        {agentConfig?.tools && agentConfig?.tools?.length > 0 ? (
+        {toolConfig?.tools && toolConfig?.tools?.length > 0 ? (
           <div className={styles.toolsContent}>
-            {agentConfig.tools.map((tool: AgentToolType) => {
+            {toolConfig.tools.map((tool: AgentToolType) => {
               const toolType = AGENT_TOOL_TYPE_LIST.find((item) => item.value === tool.type)?.label;
               return (
                 <div
