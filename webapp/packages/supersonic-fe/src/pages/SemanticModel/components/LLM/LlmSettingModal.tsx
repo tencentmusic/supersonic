@@ -17,7 +17,7 @@ const DatabaseSettingModal: React.FC<CreateFormProps> = ({ onCancel, llmItem, op
 
   const handleTestConnection = async () => {
     setTestLoading(true);
-    await createFormRef.current.testDatabaseConnection();
+    await createFormRef.current.testLlmConnection();
     setTestLoading(false);
   };
 
@@ -38,7 +38,7 @@ const DatabaseSettingModal: React.FC<CreateFormProps> = ({ onCancel, llmItem, op
           <Button
             type="primary"
             onClick={() => {
-              createFormRef.current.saveDatabaseConfig();
+              createFormRef.current.saveLlmConfig();
             }}
           >
             保 存

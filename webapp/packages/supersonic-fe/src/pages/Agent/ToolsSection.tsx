@@ -15,7 +15,7 @@ const ToolsSection: React.FC<Props> = ({ currentAgent, onSaveAgent }) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [editTool, setEditTool] = useState<AgentToolType>();
 
-  const agentConfig = currentAgent?.agentConfig ? JSON.parse(currentAgent.agentConfig as any) : {};
+  const agentConfig = currentAgent?.toolConfig ? JSON.parse(currentAgent.toolConfig as any) : {};
 
   const saveAgent = async (agent: AgentType) => {
     await onSaveAgent(agent);

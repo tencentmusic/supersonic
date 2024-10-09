@@ -95,7 +95,7 @@ const Chat: ForwardRefRenderFunction<any, Props> = (
   };
 
   const updateAgentConfigMode = (agent: AgentType) => {
-    const agentConfig = jsonParse(agent?.agentConfig, {});
+    const agentConfig = jsonParse(agent?.toolConfig, {});
     const { simpleMode, debugMode } = agentConfig;
     if (isBoolean(simpleMode)) {
       setIsSimpleMode(simpleMode);

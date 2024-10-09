@@ -781,12 +781,6 @@ export function deleteTerm(data: any): Promise<any> {
   });
 }
 
-export function getLlmList(): Promise<any> {
-  return request(`${process.env.CHAT_API_BASE_URL}model/getModelList`, {
-    method: 'GET',
-  });
-}
-
 export function createLlmConfig(data: any): Promise<any> {
   return request(`${process.env.CHAT_API_BASE_URL}chat/model`, {
     method: 'POST',

@@ -4,8 +4,8 @@ import { message, Button, Space, Popconfirm } from 'antd';
 import React, { useRef, useState, useEffect } from 'react';
 import LlmSettingModal from './LlmSettingModal';
 import { ISemantic } from '../../data';
-import { getLlmList, deleteLlmConfig } from '../../service';
-
+import { deleteLlmConfig } from '../../service';
+import { getLlmList } from '@/services/system';
 import dayjs from 'dayjs';
 
 type Props = {};

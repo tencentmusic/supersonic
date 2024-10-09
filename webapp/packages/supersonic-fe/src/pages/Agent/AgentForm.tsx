@@ -1,28 +1,14 @@
-import {
-  Form,
-  Modal,
-  Input,
-  Button,
-  Switch,
-  Tabs,
-  Slider,
-  InputNumber,
-  Select,
-  Row,
-  message,
-  Space,
-  Tooltip,
-} from 'antd';
+import { Form, Input, Button, Switch, Tabs, Select, message, Space, Tooltip } from 'antd';
 import MainTitleMark from '@/components/MainTitleMark';
 import { AgentType } from './type';
 import { useEffect, useState } from 'react';
 import styles from './style.less';
 import { DeleteOutlined, PlusOutlined } from '@ant-design/icons';
-import { uuid, jsonParse, encryptPassword, decryptPassword } from '@/utils/utils';
+import { uuid, jsonParse } from '@/utils/utils';
 import ToolsSection from './ToolsSection';
 import globalStyles from '@/global.less';
 import { QuestionCircleOutlined } from '@ant-design/icons';
-import { testLLMConn } from '../../services/system';
+import { getLlmModelTypeList, getLlmList } from '../../services/system';
 import MemorySection from './MemorySection';
 
 const FormItem = Form.Item;
@@ -43,7 +29,8 @@ const AgentForm: React.FC<Props> = ({ editAgent, onSaveAgent, onCreateToolBtnCli
   const [saveLoading, setSaveLoading] = useState(false);
   const [examples, setExamples] = useState<{ id: string; question?: string }[]>([]);
   const [activeKey, setActiveKey] = useState('basic');
-  const [llmTestLoading, setLlmTestLoading] = useState<boolean>(false);
+  const [modelTypeOptions, setModelTypeOptions] = useState<any[]>([]);
+  const [llmConfigListOptions, setLlmConfigListOptions] = useState<any[]>([]);
   const [formData, setFormData] = useState<any>({
     enableSearch: true,
     modelConfig: {
@@ -51,10 +38,6 @@ const AgentForm: React.FC<Props> = ({ editAgent, onSaveAgent, onCreateToolBtnCli
       provider: 'OPEN_AI',
       temperature: 0,
     },
-    // embeddingStore: {
-    //   provider: 'MILVUS',
-    //   timeOut: 60,
-    // },
     agentConfig: {
       ...defaultAgentConfig,
     },
@@ -68,7 +51,7 @@ const AgentForm: React.FC<Props> = ({ editAgent, onSaveAgent, onCreateToolBtnCli
         delete sourceData.modelConfig;
       }
 
-      const config = jsonParse(editAgent.agentConfig, {});
+      const config = jsonParse(editAgent.toolConfig, {});
       const initData = {
         ...sourceData,
         enableSearch: editAgent.enableSearch !== 0,
@@ -82,26 +65,57 @@ const AgentForm: React.FC<Props> = ({ editAgent, onSaveAgent, onCreateToolBtnCli
     } else {
       form.resetFields();
     }
+    queryModelTypeList();
+    queryLlmList();
   }, [editAgent]);
+
+  const queryLlmList = async () => {
+    const { code, data } = await getLlmList();
+    if (code === 200 && data) {
+      const options = data.map((item) => {
+        return {
+          label: item.name,
+          value: item.id,
+        };
+      });
+      setLlmConfigListOptions(options);
+    } else {
+      message.error('获取模型场景类型失败');
+    }
+  };
+  const queryModelTypeList = async () => {
+    const { code, data } = await getLlmModelTypeList();
+    if (code === 200 && data) {
+      const options = data.map((item) => {
+        return {
+          label: item.name,
+          value: item.type,
+          description: item.description,
+        };
+      });
+      setModelTypeOptions(options);
+    } else {
+      message.error('获取模型场景类型失败');
+    }
+  };
 
   const layout = {
     labelCol: { span: 4 },
     wrapperCol: { span: 16 },
-    // layout: 'vertical',
   };
 
   const onOk = async () => {
     const values = await form.validateFields();
     setSaveLoading(true);
-    const config = jsonParse(editAgent?.agentConfig, {});
+    const config = jsonParse(editAgent?.toolConfig, {});
     await onSaveAgent?.({
       id: editAgent?.id,
       ...(editAgent || {}),
       ...values,
       agentConfig: JSON.stringify({
         ...config,
-        ...values.agentConfig,
-        debugMode: values.agentConfig?.simpleMode === true ? false : values.agentConfig?.debugMode,
+        ...values.toolConfig,
+        debugMode: values.toolConfig?.simpleMode === true ? false : values.toolConfig?.debugMode,
       }) as any,
       examples: examples.map((example) => example.question),
       enableSearch: values.enableSearch ? 1 : 0,
@@ -110,16 +124,6 @@ const AgentForm: React.FC<Props> = ({ editAgent, onSaveAgent, onCreateToolBtnCli
     setSaveLoading(false);
   };
 
-  const testLLMConnect = async (params: any) => {
-    setLlmTestLoading(true);
-    const { code, data } = await testLLMConn(params);
-    setLlmTestLoading(false);
-    if (code === 200 && data) {
-      message.success('连接成功');
-    } else {
-      message.error('模型连接失败');
-    }
-  };
   const tips = [
     '自定义提示词模板可嵌入以下变量，将由系统自动进行替换：',
     '-{{exemplar}} :替换成few-shot示例，示例个数由系统配置',
@@ -140,25 +144,6 @@ const AgentForm: React.FC<Props> = ({ editAgent, onSaveAgent, onCreateToolBtnCli
           >
             <Input placeholder="请输入助理名称" />
           </FormItem>
-          {/* <FormItem name={['visualConfig', 'defaultShowType']} label="问答默认格式">
-            <Select
-              placeholder=""
-              options={[
-                {
-                  label: '文本',
-                  value: 'TEXT',
-                },
-                {
-                  label: '表格',
-                  value: 'TABLE',
-                },
-                {
-                  label: '图表',
-                  value: 'WIDGET',
-                },
-              ]}
-            />
-          </FormItem> */}
           <FormItem name="enableSearch" label="开启输入联想" valuePropName="checked">
             <Switch />
           </FormItem>
@@ -184,7 +169,7 @@ const AgentForm: React.FC<Props> = ({ editAgent, onSaveAgent, onCreateToolBtnCli
           <FormItem
             name={['agentConfig', 'debugMode']}
             label="开启调试信息"
-            hidden={formData?.agentConfig?.simpleMode === true}
+            hidden={formData?.toolConfig?.simpleMode === true}
             tooltip="包含Schema映射、SQL生成每阶段的关键信息"
             valuePropName="checked"
           >
@@ -238,168 +223,19 @@ const AgentForm: React.FC<Props> = ({ editAgent, onSaveAgent, onCreateToolBtnCli
         <div className={styles.agentFormContainer}>
           <div className={styles.agentFormTitle}>
             <Space>
-              对话模型 <MainTitleMark />
+              应用场景 <MainTitleMark />
             </Space>
           </div>
-          <FormItem name={['modelConfig', 'provider']} label="接口协议">
-            <Select placeholder="">
-              {['OPEN_AI', 'OLLAMA'].map((item) => (
-                <Select.Option key={item} value={item}>
-                  {item}
-                </Select.Option>
-              ))}
-            </Select>
-          </FormItem>
-          <FormItem name={['modelConfig', 'modelName']} label="Model Name">
-            <Input placeholder="请输入语言模型名称" />
-          </FormItem>
-          <FormItem name={['modelConfig', 'baseUrl']} label="Base URL">
-            <Input placeholder="请输入Base URL" />
-          </FormItem>
-          <FormItem
-            name={['modelConfig', 'apiKey']}
-            label="API Key"
-            hidden={formData?.modelConfig?.provider === 'OLLAMA'}
-            getValueFromEvent={(event) => {
-              const value = event.target.value;
-              return encryptPassword(value);
-            }}
-            getValueProps={(value) => {
-              return {
-                value: value ? decryptPassword(value) : '',
-              };
-            }}
-          >
-            <Input.Password placeholder="请输入API Key" visibilityToggle />
-          </FormItem>
-
-          <FormItem name={['modelConfig', 'temperature']} label="Temperature">
-            <Slider
-              min={0}
-              max={1}
-              step={0.1}
-              marks={{
-                0: '精准',
-                1: '随机',
-              }}
-            />
-          </FormItem>
-          <FormItem name={['modelConfig', 'timeOut']} label="超时时间(秒)">
-            <InputNumber />
-          </FormItem>
-
-          {/* <div className={styles.agentFormTitle}>
-            <Space>
-              向量模型 <MainTitleMark />
-            </Space>
-          </div>
-
-          <FormItem name={['modelConfig', 'embeddingModel', 'provider']} label="接口协议">
-            <Select placeholder="">
-              {[
-                'OPEN_AI',
-                'OLLAMA',
-                'LOCAL_AI',
-                'IN_MEMORY',
-                'ZHIPU',
-                'AZURE',
-                'QIANFAN',
-                'DASHSCOPE',
-              ].map((item) => (
-                <Select.Option key={item} value={item}>
-                  {item}
-                </Select.Option>
-              ))}
-            </Select>
-          </FormItem>
-          <FormItem name={['modelConfig', 'embeddingModel', 'modelName']} label="Model Name">
-            <Input placeholder="请输入向量模型名称" />
-          </FormItem>
-          {formData?.modelConfig?.embeddingModel?.provider === 'IN_MEMORY' ? (
-            <>
-              <FormItem name={['modelConfig', 'embeddingModel', 'modelPath']} label="模型路径">
-                <Input placeholder="请输入模型路径" />
+          {modelTypeOptions.map((item) => {
+            return (
+              <FormItem name={['chatModelConfig', item.value]} label={item.label}>
+                <Select placeholder="" options={llmConfigListOptions} />
               </FormItem>
-              <FormItem
-                name={['modelConfig', 'embeddingModel', 'vocabularyPath']}
-                label="词汇表路径"
-              >
-                <Input placeholder="请输入模型路径" />
-              </FormItem>
-            </>
-          ) : (
-            <>
-              <FormItem name={['modelConfig', 'embeddingModel', 'baseUrl']} label="Base URL">
-                <Input placeholder="请输入Base URL" />
-              </FormItem>
-              <FormItem
-                name={['modelConfig', 'embeddingModel', 'apiKey']}
-                label="API Key"
-                getValueFromEvent={(event) => {
-                  const value = event.target.value;
-                  return encryptPassword(value);
-                }}
-                getValueProps={(value) => {
-                  return {
-                    value: value ? decryptPassword(value) : '',
-                  };
-                }}
-              >
-                <Input.Password placeholder="请输入API Key" visibilityToggle />
-              </FormItem>
-            </>
-          )} */}
+            );
+          })}
         </div>
       ),
     },
-    // {
-    //   label: '向量库配置',
-    //   key: 'embeddingStore',
-    //   children: (
-    //     <div className={styles.agentFormContainer}>
-    //       <FormItem name={['embeddingStore', 'provider']} label="接口协议">
-    //         <Select placeholder="">
-    //           {['MILVUS', 'CHROMA', 'IN_MEMORY'].map((item) => (
-    //             <Select.Option key={item} value={item}>
-    //               {item}
-    //             </Select.Option>
-    //           ))}
-    //         </Select>
-    //       </FormItem>
-    //       {formData?.embeddingStore?.provider === 'IN_MEMORY' ? (
-    //         <>
-    //           <FormItem name={['embeddingStore', 'persistPath']} label="持久化路径">
-    //             <Input placeholder="请输入持久化路径" />
-    //           </FormItem>
-    //         </>
-    //       ) : (
-    //         <>
-    //           <FormItem name={['embeddingStore', 'baseUrl']} label="Base URL">
-    //             <Input placeholder="请输入Base URL" />
-    //           </FormItem>
-    //           <FormItem
-    //             name={['embeddingStore', 'apiKey']}
-    //             label="API Key"
-    //             getValueFromEvent={(event) => {
-    //               const value = event.target.value;
-    //               return encryptPassword(value);
-    //             }}
-    //             getValueProps={(value) => {
-    //               return {
-    //                 value: value ? decryptPassword(value) : '',
-    //               };
-    //             }}
-    //           >
-    //             <Input.Password placeholder="请输入API Key" visibilityToggle />
-    //           </FormItem>
-    //           <FormItem name={['embeddingStore', 'timeOut']} label="超时时间(秒)">
-    //             <InputNumber />
-    //           </FormItem>
-    //         </>
-    //       )}
-    //     </div>
-    //   ),
-    // },
     {
       label: '提示词配置',
       key: 'promptConfig',
@@ -433,7 +269,7 @@ const AgentForm: React.FC<Props> = ({ editAgent, onSaveAgent, onCreateToolBtnCli
       ),
     },
     {
-      label: '工具管理',
+      label: '工具配置',
       key: 'tools',
       children: <ToolsSection currentAgent={editAgent} onSaveAgent={onSaveAgent} />,
     },
@@ -476,17 +312,6 @@ const AgentForm: React.FC<Props> = ({ editAgent, onSaveAgent, onCreateToolBtnCli
                 }}
               >
                 <PlusOutlined /> 新增工具
-              </Button>
-            )}
-            {activeKey === 'modelConfig' && (
-              <Button
-                type="primary"
-                loading={llmTestLoading}
-                onClick={() => {
-                  testLLMConnect(formData.modelConfig);
-                }}
-              >
-                大模型连接测试
               </Button>
             )}
           </Space>
