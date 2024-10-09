@@ -2,11 +2,14 @@ package com.tencent.supersonic.common.jsqlparser;
 
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
+import net.sf.jsqlparser.statement.select.PlainSelect;
 import org.apache.commons.collections.CollectionUtils;
 
 import java.util.List;
 
-/** Sql Parser valid Helper */
+/**
+ * Sql Parser valid Helper
+ */
 @Slf4j
 public class SqlValidHelper {
 
@@ -74,5 +77,10 @@ public class SqlValidHelper {
             log.error("isValidSQL parse:{}", e);
             return false;
         }
+    }
+
+    public static boolean isComplexSQL(String sql) {
+        List<PlainSelect> plainSelect = SqlSelectHelper.getPlainSelect(sql);
+        return !CollectionUtils.isEmpty(plainSelect) && plainSelect.size() >= 2;
     }
 }

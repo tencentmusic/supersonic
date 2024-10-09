@@ -5,17 +5,12 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.tencent.supersonic.common.config.PromptConfig;
 import com.tencent.supersonic.common.config.VisualConfig;
-import com.tencent.supersonic.common.pojo.ChatModelConfig;
 import com.tencent.supersonic.common.pojo.RecordInfo;
+import com.tencent.supersonic.common.pojo.enums.ChatModelType;
 import lombok.Data;
 import org.springframework.util.CollectionUtils;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Data
@@ -29,10 +24,9 @@ public class Agent extends RecordInfo {
 
     /** 0 offline, 1 online */
     private Integer status;
-
     private List<String> examples;
     private String agentConfig;
-    private ChatModelConfig modelConfig;
+    private Map<ChatModelType, Integer> modelConfig = Collections.EMPTY_MAP;
     private PromptConfig promptConfig;
     private MultiTurnConfig multiTurnConfig;
     private VisualConfig visualConfig;

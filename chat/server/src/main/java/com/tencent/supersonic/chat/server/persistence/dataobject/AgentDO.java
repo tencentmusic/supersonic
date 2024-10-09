@@ -45,7 +45,9 @@ public class AgentDO {
     private Integer enableSearch;
 
     private Integer enableMemoryReview;
+
     private String modelConfig;
+
     private String multiTurnConfig;
 
     private String visualConfig;

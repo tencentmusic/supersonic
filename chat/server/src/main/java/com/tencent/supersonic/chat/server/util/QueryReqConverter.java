@@ -3,6 +3,8 @@ package com.tencent.supersonic.chat.server.util;
 import com.tencent.supersonic.chat.server.agent.Agent;
 import com.tencent.supersonic.chat.server.pojo.ChatContext;
 import com.tencent.supersonic.chat.server.pojo.ParseContext;
+import com.tencent.supersonic.common.pojo.ChatModelConfig;
+import com.tencent.supersonic.common.pojo.enums.ChatModelType;
 import com.tencent.supersonic.common.pojo.enums.Text2SQLType;
 import com.tencent.supersonic.common.util.BeanMapper;
 import com.tencent.supersonic.headless.api.pojo.request.QueryNLReq;
@@ -24,9 +26,11 @@ public class QueryReqConverter {
             return queryNLReq;
         }
 
+        ChatModelConfig chatModelConfig =
+                ModelConfigHelper.getChatModelConfig(agent, ChatModelType.TEXT_TO_SQL);
         boolean hasLLMTool = agent.containsLLMTool();
         boolean hasRuleTool = agent.containsRuleTool();
-        boolean hasLLMConfig = Objects.nonNull(agent.getModelConfig());
+        boolean hasLLMConfig = chatModelConfig != null;
 
         if (parseContext.isDisableLLM()) {
             queryNLReq.setText2SQLType(Text2SQLType.ONLY_RULE);
@@ -45,7 +49,7 @@ public class QueryReqConverter {
                 && MapUtils.isNotEmpty(queryNLReq.getMapInfo().getDataSetElementMatches())) {
             queryNLReq.setMapInfo(queryNLReq.getMapInfo());
         }
-        queryNLReq.setModelConfig(agent.getModelConfig());
+        queryNLReq.setModelConfig(chatModelConfig);
         queryNLReq.setPromptConfig(agent.getPromptConfig());
         if (chatCtx != null) {
             queryNLReq.setContextParseInfo(chatCtx.getParseInfo());

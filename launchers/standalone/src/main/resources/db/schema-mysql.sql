@@ -210,6 +210,20 @@ CREATE TABLE IF NOT EXISTS `s2_chat_statistics` (
   KEY `commonIndex` (`question_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+CREATE TABLE IF NOT EXISTS `s2_chat_model` (
+   `id` bigint(20) NOT NULL AUTO_INCREMENT,
+   `name` varchar(255) NOT NULL COMMENT '名称',
+   `description` varchar(500) DEFAULT NULL COMMENT '描述',
+   `config` text NOT NULL COMMENT '配置信息',
+   `created_at` datetime NOT NULL COMMENT '创建时间',
+   `created_by` varchar(100) NOT NULL COMMENT '创建人',
+   `updated_at` datetime NOT NULL COMMENT '更新时间',
+   `updated_by` varchar(100) NOT NULL COMMENT '更新人',
+   `admin` varchar(500) DEFAULT NULL,
+   `viewer` varchar(500) DEFAULT NULL,
+   PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='对话大模型实例表';
+
 CREATE TABLE IF NOT EXISTS `s2_database` (
    `id` bigint(20) NOT NULL AUTO_INCREMENT,
    `name` varchar(255) NOT NULL COMMENT '名称',
