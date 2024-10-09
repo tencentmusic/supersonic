@@ -14,6 +14,7 @@ import com.tencent.supersonic.headless.api.pojo.enums.DimensionType;
 import com.tencent.supersonic.headless.api.pojo.enums.IdentifyType;
 import com.tencent.supersonic.headless.api.pojo.request.ModelReq;
 import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
+import com.tencent.supersonic.headless.server.builder.ModelIntelligentBuilder;
 import com.tencent.supersonic.headless.server.persistence.dataobject.ModelDO;
 import com.tencent.supersonic.headless.server.persistence.repository.DateInfoRepository;
 import com.tencent.supersonic.headless.server.persistence.repository.ModelRepository;
@@ -75,8 +76,11 @@ class ModelServiceImplTest {
         UserService userService = Mockito.mock(UserService.class);
         DateInfoRepository dateInfoRepository = Mockito.mock(DateInfoRepository.class);
         DataSetService viewService = Mockito.mock(DataSetService.class);
+        ModelIntelligentBuilder modelIntelligentBuilder =
+                Mockito.mock(ModelIntelligentBuilder.class);
         return new ModelServiceImpl(modelRepository, databaseService, dimensionService,
-                metricService, domainService, userService, viewService, dateInfoRepository);
+                metricService, domainService, userService, viewService, dateInfoRepository,
+                modelIntelligentBuilder);
     }
 
     private ModelReq mockModelReq() {

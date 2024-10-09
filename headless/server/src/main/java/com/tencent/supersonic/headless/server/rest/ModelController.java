@@ -7,9 +7,11 @@ import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
 import com.tencent.supersonic.common.pojo.enums.AuthType;
+import com.tencent.supersonic.headless.api.pojo.ModelSchema;
 import com.tencent.supersonic.headless.api.pojo.request.FieldRemovedReq;
 import com.tencent.supersonic.headless.api.pojo.request.MetaBatchReq;
 import com.tencent.supersonic.headless.api.pojo.request.ModelReq;
+import com.tencent.supersonic.headless.api.pojo.request.ModelSchemaReq;
 import com.tencent.supersonic.headless.api.pojo.response.DatabaseResp;
 import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
 import com.tencent.supersonic.headless.api.pojo.response.UnAvailableItemResp;
@@ -24,6 +26,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -104,5 +107,11 @@ public class ModelController {
     @PostMapping("/getUnAvailableItem")
     public UnAvailableItemResp getUnAvailableItem(@RequestBody FieldRemovedReq fieldRemovedReq) {
         return modelService.getUnAvailableItem(fieldRemovedReq);
+    }
+
+    @PostMapping("/buildModelSchema")
+    public ModelSchema buildModelSchema(@RequestBody ModelSchemaReq modelSchemaReq)
+            throws SQLException {
+        return modelService.buildModelSchema(modelSchemaReq);
     }
 }
