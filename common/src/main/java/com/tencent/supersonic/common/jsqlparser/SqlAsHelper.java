@@ -12,10 +12,27 @@ import org.springframework.util.CollectionUtils;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Slf4j
 public class SqlAsHelper {
+
+    private static void extractAliasesFromSelect(PlainSelect plainSelect, Set<String> aliases) {
+        // Extract aliases from SELECT items
+        for (SelectItem selectItem : plainSelect.getSelectItems()) {
+            Alias alias = selectItem.getAlias();
+            if (alias != null) {
+                aliases.add(alias.getName());
+            }
+        }
+        FunctionAliasVisitor visitor = new FunctionAliasVisitor(aliases);
+        for (SelectItem selectItem : plainSelect.getSelectItems()) {
+            selectItem.accept(visitor);
+        }
+    }
+
 
     public static List<String> getAsFields(String sql) {
         List<PlainSelect> plainSelectList = SqlSelectHelper.getPlainSelect(sql);
@@ -43,17 +60,14 @@ public class SqlAsHelper {
         return new ArrayList<>(aliases);
     }
 
-    private static void extractAliasesFromSelect(PlainSelect plainSelect, Set<String> aliases) {
-        // Extract aliases from SELECT items
-        for (SelectItem selectItem : plainSelect.getSelectItems()) {
-            Alias alias = selectItem.getAlias();
-            if (alias != null) {
-                aliases.add(alias.getName());
-            }
-        }
-        FunctionAliasVisitor visitor = new FunctionAliasVisitor(aliases);
-        for (SelectItem selectItem : plainSelect.getSelectItems()) {
-            selectItem.accept(visitor);
-        }
+    public static Map<String, String> getFieldMapFilterByAsFields(String sql,
+            Map<String, String> fieldNameMap) {
+        // Delete aliases if they exist
+        List<String> asFields = SqlAsHelper.getAsFields(sql);
+        Set<String> asFieldsSet = new HashSet<>(asFields);
+        fieldNameMap = fieldNameMap.entrySet().stream()
+                .filter(entry -> !asFieldsSet.contains(entry.getKey()))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        return fieldNameMap;
     }
 }

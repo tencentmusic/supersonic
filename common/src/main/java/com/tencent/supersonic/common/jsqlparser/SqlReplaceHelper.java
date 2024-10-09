@@ -43,7 +43,9 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.function.UnaryOperator;
 
-/** Sql Parser replace Helper */
+/**
+ * Sql Parser replace Helper
+ */
 @Slf4j
 public class SqlReplaceHelper {
     public static String replaceAggFields(String sql,
@@ -179,6 +181,8 @@ public class SqlReplaceHelper {
         }
         return selectStatement.toString();
     }
+
+
 
     private static void replaceFieldsInPlainOneSelect(Map<String, String> fieldNameMap,
             boolean exactReplace, PlainSelect plainSelect) {

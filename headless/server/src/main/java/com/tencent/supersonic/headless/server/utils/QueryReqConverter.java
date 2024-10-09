@@ -274,9 +274,9 @@ public class QueryReqConverter {
         String sql = viewQueryParam.getSql();
         for (MetricTable metricTable : viewQueryParam.getTables()) {
             Set<String> measures = new HashSet<>();
-            Map<String, String> replaces = new HashMap<>();
-            generateDerivedMetric(semanticSchemaResp, aggOption, metricTable.getMetrics(),
-                    metricTable.getDimensions(), measures, replaces);
+            Map<String, String> replaces = generateDerivedMetric(semanticSchemaResp, aggOption,
+                    metricTable.getMetrics(), metricTable.getDimensions(), measures);
+
             if (!CollectionUtils.isEmpty(replaces)) {
                 // metricTable sql use measures replace metric
                 sql = SqlReplaceHelper.replaceSqlByExpression(sql, replaces);
@@ -295,49 +295,59 @@ public class QueryReqConverter {
         viewQueryParam.setSql(sql);
     }
 
-    private void generateDerivedMetric(SemanticSchemaResp semanticSchemaResp, AggOption aggOption,
-            List<String> metrics, List<String> dimensions, Set<String> measures,
-            Map<String, String> replaces) {
+    private Map<String, String> generateDerivedMetric(SemanticSchemaResp semanticSchemaResp,
+            AggOption aggOption, List<String> metrics, List<String> dimensions,
+            Set<String> measures) {
+        Map<String, String> result = new HashMap<>();
         List<MetricSchemaResp> metricResps = semanticSchemaResp.getMetrics();
         List<DimSchemaResp> dimensionResps = semanticSchemaResp.getDimensions();
-        // check metrics has derived
-        if (!metricResps.stream().anyMatch(m -> metrics.contains(m.getBizName()) && MetricType
-                .isDerived(m.getMetricDefineType(), m.getMetricDefineByMeasureParams()))) {
-            return;
+
+        // Check if any metric is derived
+        boolean hasDerivedMetrics =
+                metricResps.stream().anyMatch(m -> metrics.contains(m.getBizName()) && MetricType
+                        .isDerived(m.getMetricDefineType(), m.getMetricDefineByMeasureParams()));
+        if (!hasDerivedMetrics) {
+            return result;
         }
+
         log.debug("begin to generateDerivedMetric {} [{}]", aggOption, metrics);
+
         Set<String> allFields = new HashSet<>();
         Map<String, Measure> allMeasures = new HashMap<>();
         semanticSchemaResp.getModelResps().forEach(modelResp -> {
             allFields.addAll(modelResp.getFieldList());
-            if (Objects.nonNull(modelResp.getModelDetail().getMeasures())) {
-                modelResp.getModelDetail().getMeasures().stream()
-                        .forEach(mm -> allMeasures.put(mm.getBizName(), mm));
+            if (modelResp.getModelDetail().getMeasures() != null) {
+                modelResp.getModelDetail().getMeasures()
+                        .forEach(measure -> allMeasures.put(measure.getBizName(), measure));
             }
         });
-        Set<String> deriveDimension = new HashSet<>();
-        Set<String> deriveMetric = new HashSet<>();
-        Map<String, String> visitedMetric = new HashMap<>();
-        if (!CollectionUtils.isEmpty(metricResps)) {
-            for (MetricResp metricResp : metricResps) {
-                if (metrics.contains(metricResp.getBizName())) {
-                    if (MetricType.isDerived(metricResp.getMetricDefineType(),
-                            metricResp.getMetricDefineByMeasureParams())) {
-                        String expr = sqlGenerateUtils.generateDerivedMetric(metricResps, allFields,
-                                allMeasures, dimensionResps, sqlGenerateUtils.getExpr(metricResp),
-                                metricResp.getMetricDefineType(), aggOption, visitedMetric,
-                                deriveMetric, deriveDimension);
-                        replaces.put(metricResp.getBizName(), expr);
-                        log.debug("derived metric {}->{}", metricResp.getBizName(), expr);
-                    } else {
-                        measures.add(metricResp.getBizName());
-                    }
+
+        Set<String> derivedDimensions = new HashSet<>();
+        Set<String> derivedMetrics = new HashSet<>();
+        Map<String, String> visitedMetrics = new HashMap<>();
+
+        for (MetricResp metricResp : metricResps) {
+            if (metrics.contains(metricResp.getBizName())) {
+                boolean isDerived = MetricType.isDerived(metricResp.getMetricDefineType(),
+                        metricResp.getMetricDefineByMeasureParams());
+                if (isDerived) {
+                    String expr = sqlGenerateUtils.generateDerivedMetric(metricResps, allFields,
+                            allMeasures, dimensionResps, sqlGenerateUtils.getExpr(metricResp),
+                            metricResp.getMetricDefineType(), aggOption, visitedMetrics,
+                            derivedMetrics, derivedDimensions);
+                    result.put(metricResp.getBizName(), expr);
+                    log.debug("derived metric {}->{}", metricResp.getBizName(), expr);
+                } else {
+                    measures.add(metricResp.getBizName());
                 }
             }
         }
-        measures.addAll(deriveMetric);
-        deriveDimension.stream().filter(d -> !dimensions.contains(d))
-                .forEach(d -> dimensions.add(d));
+
+        measures.addAll(derivedMetrics);
+        derivedDimensions.stream().filter(dimension -> !dimensions.contains(dimension))
+                .forEach(dimensions::add);
+
+        return result;
     }
 
     private String getDefaultModel(SemanticSchemaResp semanticSchemaResp, List<String> dimensions) {

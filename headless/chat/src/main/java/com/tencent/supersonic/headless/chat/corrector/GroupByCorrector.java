@@ -2,6 +2,7 @@ package com.tencent.supersonic.headless.chat.corrector;
 
 import com.tencent.supersonic.common.jsqlparser.SqlAddHelper;
 import com.tencent.supersonic.common.jsqlparser.SqlSelectHelper;
+import com.tencent.supersonic.common.jsqlparser.SqlValidHelper;
 import com.tencent.supersonic.common.pojo.enums.QueryType;
 import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import com.tencent.supersonic.common.util.ContextUtils;
@@ -24,6 +25,10 @@ public class GroupByCorrector extends BaseSemanticCorrector {
 
     @Override
     public void doCorrect(ChatQueryContext chatQueryContext, SemanticParseInfo semanticParseInfo) {
+        String correctS2SQL = semanticParseInfo.getSqlInfo().getCorrectedS2SQL();
+        if (SqlValidHelper.isComplexSQL(correctS2SQL)) {
+            return;
+        }
         Boolean needAddGroupBy = needAddGroupBy(chatQueryContext, semanticParseInfo);
         if (!needAddGroupBy) {
             return;
