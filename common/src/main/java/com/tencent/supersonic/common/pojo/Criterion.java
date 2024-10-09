@@ -40,9 +40,16 @@ public class Criterion {
     }
 
     public enum NumericDataType {
-        TINYINT("TINYINT"), SMALLINT("SMALLINT"), MEDIUMINT("MEDIUMINT"), INT("INT"), INTEGER(
-                "INTEGER"), BIGINT("BIGINT"), FLOAT(
-                        "FLOAT"), DOUBLE("DOUBLE"), DECIMAL("DECIMAL"), NUMERIC("NUMERIC"),;
+        TINYINT("TINYINT"),
+        SMALLINT("SMALLINT"),
+        MEDIUMINT("MEDIUMINT"),
+        INT("INT"),
+        INTEGER("INTEGER"),
+        BIGINT("BIGINT"),
+        FLOAT("FLOAT"),
+        DOUBLE("DOUBLE"),
+        DECIMAL("DECIMAL"),
+        NUMERIC("NUMERIC"),;
 
         private String type;
 
