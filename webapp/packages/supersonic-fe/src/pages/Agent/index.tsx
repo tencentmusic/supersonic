@@ -17,7 +17,7 @@ const Agent = () => {
   const [agentConfig, setAgentConfig] = useState<any>({});
 
   useEffect(() => {
-    const config = jsonParse(currentAgent?.agentConfig, {});
+    const config = jsonParse(currentAgent?.toolConfig, {});
     setAgentConfig(config);
   }, [currentAgent]);
 
