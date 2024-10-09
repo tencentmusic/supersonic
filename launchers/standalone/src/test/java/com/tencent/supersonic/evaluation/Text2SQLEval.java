@@ -83,10 +83,10 @@ public class Text2SQLEval extends BaseTest {
     @Test
     public void test_filter_and_top() throws Exception {
         long start = System.currentTimeMillis();
-        QueryResult result = submitNewChat("近半个月来sales部门访问量最高的用户是谁", agentId);
+        QueryResult result = submitNewChat("近半个月来marketing部门访问量最高的用户是谁", agentId);
         durations.add(System.currentTimeMillis() - start);
         assert result.getQueryResults().size() == 1;
-        assert result.getTextResult().contains("tom");
+        assert result.getTextResult().contains("dean");
     }
 
     @Test
