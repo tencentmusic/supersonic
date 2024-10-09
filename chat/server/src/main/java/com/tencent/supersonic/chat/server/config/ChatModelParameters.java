@@ -25,7 +25,7 @@ public class ChatModelParameters {
                     "", "string", MODULE_NAME, null, getModelNameDependency());
 
     public static final Parameter CHAT_MODEL_API_KEY =
-            new Parameter("apiKey", ModelProvider.DEMO_CHAT_MODEL.getApiKey(), "ApiKey", "",
+            new Parameter("apiKey", "", "ApiKey", "",
                     "password", MODULE_NAME, null, getApiKeyDependency());
 
     public static final Parameter CHAT_MODEL_ENDPOINT = new Parameter("endpoint", "llama_2_70b",
