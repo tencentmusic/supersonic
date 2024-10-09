@@ -450,7 +450,8 @@ public class DictUtils {
 
         String dateFilter = generateDictDateFilter(dictItemResp);
         if (StringUtils.isNotEmpty(dateFilter)) {
-            joiner.add(dateFilter);
+            // Fixed: issue #1753
+            // joiner.add(dateFilter);
         }
         return joiner.toString();
     }
