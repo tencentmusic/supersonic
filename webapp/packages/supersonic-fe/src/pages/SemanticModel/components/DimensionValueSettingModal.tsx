@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Modal, message, Space, Tooltip, Tabs } from 'antd';
+import { Button, Modal, message, Space, Tooltip, Tabs, Drawer } from 'antd';
 import { InfoCircleOutlined } from '@ant-design/icons';
 import { ISemantic } from '../data';
 import CommonEditTable from './CommonEditTable';
