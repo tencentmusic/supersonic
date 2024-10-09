@@ -36,7 +36,13 @@ public class MemoryServiceImpl implements MemoryService {
 
     @Override
     public void createMemory(ChatMemoryDO memory) {
-        chatMemoryRepository.createMemory(memory);
+        // do not save duplicate memory for exactly the same question
+        List<ChatMemoryDO> memories = getMemories(ChatMemoryFilter.builder()
+                .agentId(memory.getAgentId())
+                .question(memory.getQuestion()).build());
+        if (memories.size() == 0) {
+            chatMemoryRepository.createMemory(memory);
+        }
     }
 
     @Override
