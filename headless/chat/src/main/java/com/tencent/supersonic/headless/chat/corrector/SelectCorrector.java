@@ -4,6 +4,7 @@ import com.tencent.supersonic.common.jsqlparser.SqlAddHelper;
 import com.tencent.supersonic.common.jsqlparser.SqlRemoveHelper;
 import com.tencent.supersonic.common.jsqlparser.SqlSelectFunctionHelper;
 import com.tencent.supersonic.common.jsqlparser.SqlSelectHelper;
+import com.tencent.supersonic.common.jsqlparser.SqlValidHelper;
 import com.tencent.supersonic.common.pojo.enums.QueryType;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.headless.api.pojo.DataSetSchema;
@@ -30,6 +31,9 @@ public class SelectCorrector extends BaseSemanticCorrector {
     @Override
     public void doCorrect(ChatQueryContext chatQueryContext, SemanticParseInfo semanticParseInfo) {
         String correctS2SQL = semanticParseInfo.getSqlInfo().getCorrectedS2SQL();
+        if (SqlValidHelper.isComplexSQL(correctS2SQL)) {
+            return;
+        }
         List<String> aggregateFields = SqlSelectHelper.getAggregateFields(correctS2SQL);
         List<String> selectFields = SqlSelectHelper.getSelectFields(correctS2SQL);
         // If the number of aggregated fields is equal to the number of queried fields, do not add
