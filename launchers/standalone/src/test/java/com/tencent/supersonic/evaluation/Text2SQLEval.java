@@ -6,11 +6,7 @@ import com.google.common.collect.Maps;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.chat.BaseTest;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
-import com.tencent.supersonic.chat.server.agent.Agent;
-import com.tencent.supersonic.chat.server.agent.AgentToolType;
-import com.tencent.supersonic.chat.server.agent.MultiTurnConfig;
-import com.tencent.supersonic.chat.server.agent.RuleParserTool;
-import com.tencent.supersonic.chat.server.agent.ToolConfig;
+import com.tencent.supersonic.chat.server.agent.*;
 import com.tencent.supersonic.chat.server.pojo.ChatModel;
 import com.tencent.supersonic.common.pojo.enums.ChatModelType;
 import com.tencent.supersonic.util.DataUtils;
@@ -152,11 +148,11 @@ public class Text2SQLEval extends BaseTest {
         return agent;
     }
 
-    private RuleParserTool getLLMQueryTool() {
-        RuleParserTool ruleQueryTool = new RuleParserTool();
-        ruleQueryTool.setType(AgentToolType.NL2SQL_LLM);
-        ruleQueryTool.setDataSetIds(Lists.newArrayList(-1L));
+    private static LLMParserTool getLLMQueryTool() {
+        LLMParserTool llmParserTool = new LLMParserTool();
+        llmParserTool.setType(AgentToolType.NL2SQL_LLM);
+        llmParserTool.setDataSetIds(Lists.newArrayList(-1L));
 
-        return ruleQueryTool;
+        return llmParserTool;
     }
 }

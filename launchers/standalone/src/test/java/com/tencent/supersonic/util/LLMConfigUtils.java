@@ -8,7 +8,7 @@ public class LLMConfigUtils {
                 false), OPENAI_GLM(
                         false), OLLAMA_LLAMA3(true), OLLAMA_QWEN2(true), OLLAMA_QWEN25(true);
 
-        private boolean isOllam;
+        public boolean isOllam;
 
         LLMType(boolean isOllam) {
             this.isOllam = isOllam;
