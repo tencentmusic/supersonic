@@ -1,8 +1,11 @@
 package com.tencent.supersonic.headless.chat.knowledge;
 
 public enum DictUpdateMode {
-    OFFLINE_FULL("OFFLINE_FULL"), OFFLINE_MODEL("OFFLINE_MODEL"), REALTIME_ADD(
-            "REALTIME_ADD"), REALTIME_DELETE("REALTIME_DELETE"), NOT_SUPPORT("NOT_SUPPORT");
+    OFFLINE_FULL("OFFLINE_FULL"),
+    OFFLINE_MODEL("OFFLINE_MODEL"),
+    REALTIME_ADD("REALTIME_ADD"),
+    REALTIME_DELETE("REALTIME_DELETE"),
+    NOT_SUPPORT("NOT_SUPPORT");
 
     private String value;
 

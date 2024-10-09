@@ -4,9 +4,14 @@ import com.tencent.supersonic.common.pojo.ChatModelConfig;
 
 public class LLMConfigUtils {
     public enum LLMType {
-        OPENAI_GPT(false), OPENAI_MOONSHOT(false), OPENAI_DEEPSEEK(false), OPENAI_QWEN(
-                false), OPENAI_GLM(
-                        false), OLLAMA_LLAMA3(true), OLLAMA_QWEN2(true), OLLAMA_QWEN25(true);
+        OPENAI_GPT(false),
+        OPENAI_MOONSHOT(false),
+        OPENAI_DEEPSEEK(false),
+        OPENAI_QWEN(false),
+        OPENAI_GLM(false),
+        OLLAMA_LLAMA3(true),
+        OLLAMA_QWEN2(true),
+        OLLAMA_QWEN25(true);
 
         public boolean isOllam;
 
