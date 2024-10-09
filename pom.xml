@@ -76,6 +76,7 @@
         <flight-sql-jdbc-driver.version>15.0.2</flight-sql-jdbc-driver.version>
         <gson.version>2.10.1</gson.version>
         <spotless.version>2.27.1</spotless.version>
+        <spotless.skip>false</spotless.skip>
         <stax2.version>4.2.1</stax2.version>
     </properties>
 
@@ -244,6 +245,7 @@
                 <artifactId>spotless-maven-plugin</artifactId>
                 <version>${spotless.version}</version>
                 <configuration>
+                    <skip>${spotless.skip}</skip>
                     <java>
                         <eclipse>
                             <file>java-formatter.xml</file>
@@ -260,6 +262,9 @@
                         <goals>
                             <goal>apply</goal>
                         </goals>
+                        <configuration>
+                            <skip>${spotless.skip}</skip>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
