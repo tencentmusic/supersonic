@@ -112,18 +112,22 @@ const ToolModal: React.FC<Props> = ({ editTool, onSaveTool, onCancel }) => {
         <FormItem name="name" label="名称">
           <Input placeholder="请输入工具名称" />
         </FormItem>
-        {(toolType === AgentToolTypeEnum.NL2SQL_RULE ||
-          toolType === AgentToolTypeEnum.NL2SQL_LLM) && (
-          <FormItem name="dataSetIds" label="数据集">
-            <TreeSelect
-              treeData={modelList}
-              placeholder="请选择数据集"
-              multiple
-              treeCheckable
-              allowClear
-            />
-          </FormItem>
-        )}
+        {toolType &&
+          [
+            AgentToolTypeEnum.NL2SQL_RULE,
+            AgentToolTypeEnum.NL2SQL_LLM,
+            AgentToolTypeEnum.DATASET,
+          ].includes(toolType) && (
+            <FormItem name="dataSetIds" label="数据集">
+              <TreeSelect
+                treeData={modelList}
+                placeholder="请选择数据集"
+                multiple
+                treeCheckable
+                allowClear
+              />
+            </FormItem>
+          )}
         {toolType === AgentToolTypeEnum.NL2SQL_LLM && (
           <FormItem name="exampleQuestions" label="示例问题">
             <div className={styles.paramsSection}>
