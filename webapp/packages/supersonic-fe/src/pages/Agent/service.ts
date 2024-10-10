@@ -63,3 +63,9 @@ export function batchDeleteMemory(ids: number[]) {
     data: { ids },
   });
 }
+
+export function getToolTypes(): Promise<any> {
+  return request(`${process.env.CHAT_API_BASE_URL}agent/getToolTypes`, {
+    method: 'GET',
+  });
+}

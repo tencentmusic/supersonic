@@ -8,22 +8,8 @@ export enum AgentToolTypeEnum {
   NL2SQL_RULE = 'NL2SQL_RULE',
   NL2SQL_LLM = 'NL2SQL_LLM',
   PLUGIN = 'PLUGIN',
+  DATASET = 'DATASET',
 }
-
-export const AGENT_TOOL_TYPE_LIST = [
-  {
-    label: '规则语义解析',
-    value: AgentToolTypeEnum.NL2SQL_RULE,
-  },
-  {
-    label: '大模型语义解析',
-    value: AgentToolTypeEnum.NL2SQL_LLM,
-  },
-  {
-    label: '第三方插件',
-    value: AgentToolTypeEnum.PLUGIN,
-  },
-];
 
 export enum QueryModeEnum {
   METRIC = 'METRIC',
@@ -97,7 +83,7 @@ export type AgentType = {
   status?: 0 | 1;
   enableSearch?: 0 | 1;
   toolConfig?: string;
-  modelConfig: LlmConfigType;
+  modelConfig?: LlmConfigType;
   multiTurnConfig?: MultiTurnConfig;
   visualConfig?: VisualConfig;
 };
