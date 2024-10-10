@@ -37,12 +37,12 @@ public class DataUtils {
         return User.get(3L, "tom");
     }
 
-    public static ChatParseReq getChatParseReq(Integer id, String query) {
+    public static ChatParseReq getChatParseReq(Integer id, String query, boolean enableLLM) {
         ChatParseReq chatParseReq = new ChatParseReq();
         chatParseReq.setQueryText(query);
         chatParseReq.setChatId(id);
         chatParseReq.setUser(user_test);
-        chatParseReq.setDisableLLM(true);
+        chatParseReq.setDisableLLM(!enableLLM);
         return chatParseReq;
     }
 

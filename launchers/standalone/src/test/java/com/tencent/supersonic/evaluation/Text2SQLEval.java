@@ -12,11 +12,13 @@ import com.tencent.supersonic.common.pojo.enums.ChatModelType;
 import com.tencent.supersonic.util.DataUtils;
 import com.tencent.supersonic.util.LLMConfigUtils;
 import org.junit.jupiter.api.*;
+import org.springframework.test.context.TestPropertySource;
 
 import java.util.List;
 import java.util.Map;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@TestPropertySource(properties = {"s2.demo.enableLLM = true"})
 @Disabled
 public class Text2SQLEval extends BaseTest {
 
