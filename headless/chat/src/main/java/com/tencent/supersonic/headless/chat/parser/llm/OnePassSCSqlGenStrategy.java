@@ -35,7 +35,8 @@ public class OnePassSCSqlGenStrategy extends SqlGenStrategy {
             + "\n4.DO NOT calculate date range using functions."
             + "\n5.DO NOT miss the AGGREGATE operator of metrics, always add it as needed."
             + "\n6.ALWAYS use `with` statement if nested aggregation is needed."
-            + "\n7.ALWAYS enclose alias created by `AS` command in underscores and translate to the same language as the `Question`."
+            + "\n7.ALWAYS enclose alias created by `AS` command in underscores."
+            + "\n8.ALWAYS translate alias created by `AS` command to the same language as the `#Question`."
             + "\n#Exemplars: {{exemplar}}"
             + "\n#Question: Question:{{question}},Schema:{{schema}},SideInfo:{{information}}";
 
