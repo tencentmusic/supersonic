@@ -42,6 +42,7 @@ public class DataUtils {
         chatParseReq.setQueryText(query);
         chatParseReq.setChatId(id);
         chatParseReq.setUser(user_test);
+        chatParseReq.setDisableLLM(true);
         return chatParseReq;
     }
 

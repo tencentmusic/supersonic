@@ -54,12 +54,12 @@ public class Agent extends RecordInfo {
         return !CollectionUtils.isEmpty(detectViewIds) && detectViewIds.contains(-1L);
     }
 
-    public List<NL2SQLTool> getParserTools(AgentToolType agentToolType) {
+    public List<DatasetTool> getParserTools(AgentToolType agentToolType) {
         List<String> tools = this.getTools(agentToolType);
         if (CollectionUtils.isEmpty(tools)) {
             return Lists.newArrayList();
         }
-        return tools.stream().map(tool -> JSONObject.parseObject(tool, NL2SQLTool.class))
+        return tools.stream().map(tool -> JSONObject.parseObject(tool, DatasetTool.class))
                 .collect(Collectors.toList());
     }
 
@@ -67,17 +67,8 @@ public class Agent extends RecordInfo {
         return !CollectionUtils.isEmpty(getParserTools(AgentToolType.PLUGIN));
     }
 
-    public boolean containsLLMTool() {
-        return !CollectionUtils.isEmpty(getParserTools(AgentToolType.NL2SQL_LLM));
-    }
-
-    public boolean containsRuleTool() {
-        return !CollectionUtils.isEmpty(getParserTools(AgentToolType.NL2SQL_RULE));
-    }
-
-    public boolean containsNL2SQLTool() {
-        return !CollectionUtils.isEmpty(getParserTools(AgentToolType.NL2SQL_LLM))
-                || !CollectionUtils.isEmpty(getParserTools(AgentToolType.NL2SQL_RULE));
+    public boolean containsDatasetTool() {
+        return !CollectionUtils.isEmpty(getParserTools(AgentToolType.DATASET));
     }
 
     public boolean containsAnyTool() {
@@ -102,11 +93,11 @@ public class Agent extends RecordInfo {
     }
 
     public Set<Long> getDataSetIds(AgentToolType agentToolType) {
-        List<NL2SQLTool> commonAgentTools = getParserTools(agentToolType);
+        List<DatasetTool> commonAgentTools = getParserTools(agentToolType);
         if (CollectionUtils.isEmpty(commonAgentTools)) {
             return new HashSet<>();
         }
-        return commonAgentTools.stream().map(NL2SQLTool::getDataSetIds)
+        return commonAgentTools.stream().map(DatasetTool::getDataSetIds)
                 .filter(modelIds -> !CollectionUtils.isEmpty(modelIds)).flatMap(Collection::stream)
                 .collect(Collectors.toSet());
     }
