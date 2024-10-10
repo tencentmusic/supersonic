@@ -289,7 +289,7 @@ def build_agent(dataSetId):
     #     "description":"DuSQL",
     #     "status":1,
     #     "examples":[],
-    #     "agentConfig":json.dumps({
+    #     "toolConfig":json.dumps({
     #         "tools":[{
     #             "id":1,
     #             "type":"NL2SQL_LLM",
@@ -303,7 +303,7 @@ def build_agent(dataSetId):
                "description":"DuSQL",
                "status":1,
                "examples":[],
-               "agentConfig":json.dumps({
+               "toolConfig":json.dumps({
                    "tools":[{
                        "id":1,
                        "type":"NL2SQL_LLM",

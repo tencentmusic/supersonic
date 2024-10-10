@@ -37,10 +37,34 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-/** Sql Parser remove Helper */
+/**
+ * Sql Parser remove Helper
+ */
 @Slf4j
 public class SqlRemoveHelper {
+    private static Pattern pattern =
+            Pattern.compile("([\\s,\\t\\n]|\\b)_([^\\s,\\t\\n]+)_([\\s,\\t\\n]|\\b)");
+
+    public static String removeUnderscores(String sql) {
+        try {
+            Matcher matcher = pattern.matcher(sql);
+
+            StringBuffer result = new StringBuffer();
+            while (matcher.find()) {
+                matcher.appendReplacement(result,
+                        matcher.group(1) + matcher.group(2) + matcher.group(3));
+            }
+            matcher.appendTail(result);
+
+            return result.toString();
+        } catch (Exception e) {
+            log.error("removeUnderscores error", e);
+        }
+        return sql;
+    }
 
     public static String removeAsteriskAndAddFields(String sql, Set<String> needAddDefaultFields) {
         Select selectStatement = SqlSelectHelper.getSelect(sql);

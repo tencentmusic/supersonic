@@ -5,6 +5,8 @@ import com.tencent.supersonic.chat.server.agent.Agent;
 import com.tencent.supersonic.chat.server.persistence.dataobject.ChatMemoryDO;
 import com.tencent.supersonic.chat.server.service.AgentService;
 import com.tencent.supersonic.chat.server.service.MemoryService;
+import com.tencent.supersonic.chat.server.util.ModelConfigHelper;
+import com.tencent.supersonic.common.pojo.enums.ChatModelType;
 import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.input.Prompt;
 import dev.langchain4j.model.input.PromptTemplate;
@@ -63,8 +65,8 @@ public class MemoryReviewTask {
         Prompt prompt = PromptTemplate.from(promptStr).apply(Collections.EMPTY_MAP);
 
         keyPipelineLog.info("MemoryReviewTask reqPrompt:\n{}", promptStr);
-        ChatLanguageModel chatLanguageModel =
-                ModelProvider.getChatModel(chatAgent.getModelConfig());
+        ChatLanguageModel chatLanguageModel = ModelProvider.getChatModel(
+                ModelConfigHelper.getChatModelConfig(chatAgent, ChatModelType.MEMORY_REVIEW));
         if (Objects.nonNull(chatLanguageModel)) {
             String response = chatLanguageModel.generate(prompt.toUserMessage()).content().text();
             keyPipelineLog.info("MemoryReviewTask modelResp:\n{}", response);

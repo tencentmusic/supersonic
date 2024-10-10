@@ -2,15 +2,16 @@ package com.tencent.supersonic.demo;
 
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
-import com.tencent.supersonic.auth.api.authentication.pojo.User;
+import com.google.common.collect.Maps;
 import com.tencent.supersonic.auth.api.authorization.pojo.AuthGroup;
 import com.tencent.supersonic.auth.api.authorization.pojo.AuthRule;
+import com.tencent.supersonic.chat.api.pojo.request.ChatParseReq;
 import com.tencent.supersonic.chat.server.agent.Agent;
-import com.tencent.supersonic.chat.server.agent.AgentConfig;
 import com.tencent.supersonic.chat.server.agent.AgentToolType;
 import com.tencent.supersonic.chat.server.agent.LLMParserTool;
 import com.tencent.supersonic.chat.server.agent.MultiTurnConfig;
 import com.tencent.supersonic.chat.server.agent.RuleParserTool;
+import com.tencent.supersonic.chat.server.agent.ToolConfig;
 import com.tencent.supersonic.chat.server.plugin.ChatPlugin;
 import com.tencent.supersonic.chat.server.plugin.PluginParseConfig;
 import com.tencent.supersonic.chat.server.plugin.build.WebBase;
@@ -18,12 +19,7 @@ import com.tencent.supersonic.chat.server.plugin.build.webpage.WebPageQuery;
 import com.tencent.supersonic.chat.server.plugin.build.webservice.WebServiceQuery;
 import com.tencent.supersonic.common.pojo.JoinCondition;
 import com.tencent.supersonic.common.pojo.ModelRela;
-import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
-import com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum;
-import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
-import com.tencent.supersonic.common.pojo.enums.SensitiveLevelEnum;
-import com.tencent.supersonic.common.pojo.enums.StatusEnum;
-import com.tencent.supersonic.common.pojo.enums.TypeEnums;
+import com.tencent.supersonic.common.pojo.enums.*;
 import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.headless.api.pojo.DataSetDetail;
 import com.tencent.supersonic.headless.api.pojo.DataSetModelConfig;
@@ -62,10 +58,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 @Component
 @Slf4j
@@ -79,9 +72,9 @@ public class S2VisitsDemo extends S2BaseDemo {
             TagObjectResp s2TagObject = addTagObjectUser(s2Domain);
 
             // create models
-            ModelResp userModel = addModel_1(s2Domain, demoDatabaseResp, s2TagObject);
-            ModelResp pvUvModel = addModel_2(s2Domain, demoDatabaseResp);
-            ModelResp stayTimeModel = addModel_3(s2Domain, demoDatabaseResp);
+            ModelResp userModel = addModel_1(s2Domain, demoDatabase, s2TagObject);
+            ModelResp pvUvModel = addModel_2(s2Domain, demoDatabase);
+            ModelResp stayTimeModel = addModel_3(s2Domain, demoDatabase);
             addModelRela_1(s2Domain, userModel, pvUvModel);
             addModelRela_2(s2Domain, userModel, stayTimeModel);
             addTags(userModel);
@@ -135,13 +128,17 @@ public class S2VisitsDemo extends S2BaseDemo {
     }
 
     public void addSampleChats(Integer agentId) {
-        Long chatId = chatManageService.addChat(user, "样例对话1", agentId);
+        Long chatId = chatManageService.addChat(defaultUser, "样例对话1", agentId);
+        submitText(chatId.intValue(), agentId, "超音数 访问次数");
+        submitText(chatId.intValue(), agentId, "按部门统计");
+        submitText(chatId.intValue(), agentId, "查询近30天");
+        submitText(chatId.intValue(), agentId, "alice 停留时长");
+        submitText(chatId.intValue(), agentId, "访问次数最高的部门");
+    }
 
-        chatQueryService.parseAndExecute(chatId.intValue(), agentId, "超音数 访问次数");
-        chatQueryService.parseAndExecute(chatId.intValue(), agentId, "按部门统计");
-        chatQueryService.parseAndExecute(chatId.intValue(), agentId, "查询近30天");
-        chatQueryService.parseAndExecute(chatId.intValue(), agentId, "alice 停留时长");
-        chatQueryService.parseAndExecute(chatId.intValue(), agentId, "访问次数最高的部门");
+    private void submitText(int chatId, int agentId, String queryText) {
+        chatQueryService.parseAndExecute(ChatParseReq.builder().chatId(chatId).agentId(agentId)
+                .queryText(queryText).user(defaultUser).disableLLM(true).build());
     }
 
     private Integer addAgent(long dataSetId) {
@@ -150,25 +147,34 @@ public class S2VisitsDemo extends S2BaseDemo {
         agent.setDescription("帮助您用自然语言查询指标，支持时间限定、条件筛选、下钻维度以及聚合统计");
         agent.setStatus(1);
         agent.setEnableSearch(1);
-        agent.setExamples(Lists.newArrayList("超音数访问次数", "近15天超音数访问次数汇总", "按部门统计超音数的访问人数",
-                "对比alice和lucy的停留时长", "超音数访问次数最高的部门"));
-        AgentConfig agentConfig = new AgentConfig();
+        agent.setExamples(Lists.newArrayList("近15天超音数访问次数汇总", "按部门统计超音数的访问人数", "对比alice和lucy的停留时长",
+                "过去30天访问次数最高的部门top3", "近1个月总访问次数超过100次的部门有几个", "过去半个月每个核心用户的总停留时长"));
+        // configure tools
+        ToolConfig toolConfig = new ToolConfig();
         RuleParserTool ruleQueryTool = new RuleParserTool();
         ruleQueryTool.setType(AgentToolType.NL2SQL_RULE);
         ruleQueryTool.setId("0");
         ruleQueryTool.setDataSetIds(Lists.newArrayList(dataSetId));
-        agentConfig.getTools().add(ruleQueryTool);
+        toolConfig.getTools().add(ruleQueryTool);
         if (demoEnableLlm) {
             LLMParserTool llmParserTool = new LLMParserTool();
             llmParserTool.setId("1");
             llmParserTool.setType(AgentToolType.NL2SQL_LLM);
             llmParserTool.setDataSetIds(Lists.newArrayList(dataSetId));
-            agentConfig.getTools().add(llmParserTool);
+            toolConfig.getTools().add(llmParserTool);
         }
-        agent.setAgentConfig(JSONObject.toJSONString(agentConfig));
+        agent.setToolConfig(JSONObject.toJSONString(toolConfig));
+        // configure chat models
+        Map<ChatModelType, Integer> chatModelConfig = Maps.newHashMap();
+        chatModelConfig.put(ChatModelType.TEXT_TO_SQL, demoChatModel.getId());
+        chatModelConfig.put(ChatModelType.MEMORY_REVIEW, demoChatModel.getId());
+        chatModelConfig.put(ChatModelType.RESPONSE_GENERATE, demoChatModel.getId());
+        chatModelConfig.put(ChatModelType.MULTI_TURN_REWRITE, demoChatModel.getId());
+        agent.setChatModelConfig(chatModelConfig);
+
         MultiTurnConfig multiTurnConfig = new MultiTurnConfig(true);
         agent.setMultiTurnConfig(multiTurnConfig);
-        Agent agentCreated = agentService.createAgent(agent, User.getFakeUser());
+        Agent agentCreated = agentService.createAgent(agent, defaultUser);
         return agentCreated.getId();
     }
 
@@ -181,7 +187,7 @@ public class S2VisitsDemo extends S2BaseDemo {
         domainReq.setViewers(Arrays.asList("admin", "tom"));
         domainReq.setAdmins(Arrays.asList("admin", "jack"));
         domainReq.setIsOpen(1);
-        return domainService.createDomain(domainReq, user);
+        return domainService.createDomain(domainReq, defaultUser);
     }
 
     public ModelResp addModel_1(DomainResp s2Domain, DatabaseResp s2Database,
@@ -213,7 +219,7 @@ public class S2VisitsDemo extends S2BaseDemo {
         modelDetail.setQueryType("sql_query");
         modelDetail.setSqlQuery("select user_name,department from s2_user_department");
         modelReq.setModelDetail(modelDetail);
-        return modelService.createModel(modelReq, user);
+        return modelService.createModel(modelReq, defaultUser);
     }
 
     public ModelResp addModel_2(DomainResp s2Domain, DatabaseResp s2Database) throws Exception {
@@ -257,7 +263,7 @@ public class S2VisitsDemo extends S2BaseDemo {
                 + "user_name as user_id FROM s2_pv_uv_statis");
         modelDetail.setQueryType("sql_query");
         modelReq.setModelDetail(modelDetail);
-        return modelService.createModel(modelReq, user);
+        return modelService.createModel(modelReq, defaultUser);
     }
 
     public ModelResp addModel_3(DomainResp s2Domain, DatabaseResp s2Database) throws Exception {
@@ -299,7 +305,7 @@ public class S2VisitsDemo extends S2BaseDemo {
                 .setSqlQuery("select imp_date,user_name,stay_hours,page from s2_stay_time_statis");
         modelDetail.setQueryType("sql_query");
         modelReq.setModelDetail(modelDetail);
-        return modelService.createModel(modelReq, user);
+        return modelService.createModel(modelReq, defaultUser);
     }
 
     public void addModelRela_1(DomainResp s2Domain, ModelResp userDepartmentModel,
@@ -312,7 +318,7 @@ public class S2VisitsDemo extends S2BaseDemo {
         modelRelaReq.setToModelId(pvUvModel.getId());
         modelRelaReq.setJoinType("left join");
         modelRelaReq.setJoinConditions(joinConditions);
-        modelRelaService.save(modelRelaReq, user);
+        modelRelaService.save(modelRelaReq, defaultUser);
     }
 
     public void addModelRela_2(DomainResp s2Domain, ModelResp userDepartmentModel,
@@ -325,7 +331,7 @@ public class S2VisitsDemo extends S2BaseDemo {
         modelRelaReq.setToModelId(stayTimeModel.getId());
         modelRelaReq.setJoinType("left join");
         modelRelaReq.setJoinConditions(joinConditions);
-        modelRelaService.save(modelRelaReq, user);
+        modelRelaService.save(modelRelaReq, defaultUser);
     }
 
     private void addTags(ModelResp model) {
@@ -347,7 +353,7 @@ public class S2VisitsDemo extends S2BaseDemo {
         dimensionReq.setDescription("页面");
         dimensionReq.setExpr("page");
         dimensionReq.setDimValueMaps(Collections.emptyList());
-        dimensionService.updateDimension(dimensionReq, user);
+        dimensionService.updateDimension(dimensionReq, defaultUser);
     }
 
     public void updateMetric(ModelResp stayTimeModel, DimensionResp departmentDimension,
@@ -372,7 +378,7 @@ public class S2VisitsDemo extends S2BaseDemo {
         metricReq.setMetricDefineType(MetricDefineType.MEASURE);
         metricReq.setRelateDimension(getRelateDimension(
                 Lists.newArrayList(departmentDimension.getId(), userDimension.getId())));
-        metricService.updateMetric(metricReq, user);
+        metricService.updateMetric(metricReq, defaultUser);
     }
 
     public void updateMetric_pv(ModelResp pvUvModel, DimensionResp departmentDimension,
@@ -394,7 +400,7 @@ public class S2VisitsDemo extends S2BaseDemo {
         metricReq.setMetricDefineType(MetricDefineType.MEASURE);
         metricReq.setRelateDimension(getRelateDimension(
                 Lists.newArrayList(departmentDimension.getId(), userDimension.getId())));
-        metricService.updateMetric(metricReq, user);
+        metricService.updateMetric(metricReq, defaultUser);
     }
 
     public MetricResp addMetric_uv(ModelResp uvModel, DimensionResp departmentDimension)
@@ -415,7 +421,7 @@ public class S2VisitsDemo extends S2BaseDemo {
         metricReq.setMetricDefineType(MetricDefineType.FIELD);
         metricReq.setRelateDimension(
                 getRelateDimension(Lists.newArrayList(departmentDimension.getId())));
-        return metricService.createMetric(metricReq, user);
+        return metricService.createMetric(metricReq, defaultUser);
     }
 
     public MetricResp addMetric_pv_avg(MetricResp metricPv, MetricResp metricUv,
@@ -440,7 +446,7 @@ public class S2VisitsDemo extends S2BaseDemo {
         metricReq.setMetricDefineType(MetricDefineType.METRIC);
         metricReq.setRelateDimension(
                 getRelateDimension(Lists.newArrayList(departmentDimension.getId())));
-        return metricService.createMetric(metricReq, user);
+        return metricService.createMetric(metricReq, defaultUser);
     }
 
     public DataSetResp addDataSet(DomainResp s2Domain) {
@@ -455,7 +461,7 @@ public class S2VisitsDemo extends S2BaseDemo {
         dataSetDetail.setDataSetModelConfigs(dataSetModelConfigs);
         dataSetReq.setDataSetDetail(dataSetDetail);
         dataSetReq.setTypeEnum(TypeEnums.DATASET);
-        return dataSetService.save(dataSetReq, User.getFakeUser());
+        return dataSetService.save(dataSetReq, defaultUser);
     }
 
     public void addTerm(DomainResp s2Domain) {
@@ -464,7 +470,7 @@ public class S2VisitsDemo extends S2BaseDemo {
         termReq.setDescription("指近10天");
         termReq.setAlias(Lists.newArrayList("近一段时间"));
         termReq.setDomainId(s2Domain.getId());
-        termService.saveOrUpdate(termReq, User.getFakeUser());
+        termService.saveOrUpdate(termReq, defaultUser);
     }
 
     public void addTerm_1(DomainResp s2Domain) {
@@ -473,7 +479,7 @@ public class S2VisitsDemo extends S2BaseDemo {
         termReq.setDescription("用户为tom和lucy");
         termReq.setAlias(Lists.newArrayList("VIP用户"));
         termReq.setDomainId(s2Domain.getId());
-        termService.saveOrUpdate(termReq, User.getFakeUser());
+        termService.saveOrUpdate(termReq, defaultUser);
     }
 
     public void addAuthGroup_1(ModelResp stayTimeModel) {
@@ -522,7 +528,7 @@ public class S2VisitsDemo extends S2BaseDemo {
         webBase.setUrl("www.yourbi.com");
         webBase.setParamOptions(Lists.newArrayList());
         plugin1.setConfig(JsonUtil.toString(webBase));
-        pluginService.createPlugin(plugin1, user);
+        pluginService.createPlugin(plugin1, defaultUser);
     }
 
     private void addPlugin_1() {
@@ -540,7 +546,7 @@ public class S2VisitsDemo extends S2BaseDemo {
         webBase.setUrl("http://localhost:9080/api/chat/plugin/pluginDemo");
         webBase.setParamOptions(Lists.newArrayList());
         plugin1.setConfig(JsonUtil.toString(webBase));
-        pluginService.createPlugin(plugin1, user);
+        pluginService.createPlugin(plugin1, defaultUser);
     }
 
     private TagObjectResp addTagObjectUser(DomainResp s2Domain) throws Exception {
@@ -548,8 +554,7 @@ public class S2VisitsDemo extends S2BaseDemo {
         tagObjectReq.setDomainId(s2Domain.getId());
         tagObjectReq.setName("用户");
         tagObjectReq.setBizName("user");
-        User user = User.getFakeUser();
-        return tagObjectService.create(tagObjectReq, user);
+        return tagObjectService.create(tagObjectReq, defaultUser);
     }
 
     private void loadDictWord() {

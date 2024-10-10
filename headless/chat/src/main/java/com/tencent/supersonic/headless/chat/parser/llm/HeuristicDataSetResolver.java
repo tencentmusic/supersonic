@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -47,6 +48,10 @@ public class HeuristicDataSetResolver implements DataSetResolver {
                             difference = o1.getValue().getTotalSimilarity()
                                     - o2.getValue().getTotalSimilarity();
                         }
+                        if (difference == 0) {
+                            difference = o1.getValue().getMaxMetricUseCnt()
+                                    - o2.getValue().getMaxMetricUseCnt();
+                        }
                     }
                     return difference >= 0 ? -1 : 1;
                 }).findFirst().orElse(null);
@@ -65,12 +70,16 @@ public class HeuristicDataSetResolver implements DataSetResolver {
             double maxMetricSimilarity = 0;
             double maxDatasetSimilarity = 0;
             double totalSimilarity = 0;
+            long maxMetricUseCnt = 0L;
             for (SchemaElementMatch match : entry.getValue()) {
                 if (SchemaElementType.DATASET.equals(match.getElement().getType())) {
                     maxDatasetSimilarity = Math.max(maxDatasetSimilarity, match.getSimilarity());
                 }
                 if (SchemaElementType.METRIC.equals(match.getElement().getType())) {
                     maxMetricSimilarity = Math.max(maxMetricSimilarity, match.getSimilarity());
+                    if (Objects.nonNull(match.getElement().getUseCnt())) {
+                        maxMetricUseCnt = Math.max(maxMetricUseCnt, match.getElement().getUseCnt());
+                    }
                 }
                 totalSimilarity += match.getSimilarity();
             }

@@ -277,8 +277,8 @@ public class SqlGenerateUtils {
     public String generateDerivedMetric(final List<MetricSchemaResp> metricResps,
             final Set<String> allFields, final Map<String, Measure> allMeasures,
             final List<DimSchemaResp> dimensionResps, final String expression,
-            final MetricDefineType metricDefineType, AggOption aggOption, Set<String> visitedMetric,
-            Set<String> measures, Set<String> dimensions) {
+            final MetricDefineType metricDefineType, AggOption aggOption,
+            Map<String, String> visitedMetric, Set<String> measures, Set<String> dimensions) {
         Set<String> fields = SqlSelectHelper.getColumnFromExpr(expression);
         if (!CollectionUtils.isEmpty(fields)) {
             Map<String, String> replace = new HashMap<>();
@@ -288,7 +288,8 @@ public class SqlGenerateUtils {
                         Optional<MetricSchemaResp> metricItem = metricResps.stream()
                                 .filter(m -> m.getBizName().equalsIgnoreCase(field)).findFirst();
                         if (metricItem.isPresent()) {
-                            if (visitedMetric.contains(field)) {
+                            if (visitedMetric.keySet().contains(field)) {
+                                replace.put(field, visitedMetric.get(field));
                                 break;
                             }
                             replace.put(field,
@@ -296,7 +297,7 @@ public class SqlGenerateUtils {
                                             dimensionResps, getExpr(metricItem.get()),
                                             metricItem.get().getMetricDefineType(), aggOption,
                                             visitedMetric, measures, dimensions));
-                            visitedMetric.add(field);
+                            visitedMetric.put(field, replace.get(field));
                         }
                         break;
                     case MEASURE:

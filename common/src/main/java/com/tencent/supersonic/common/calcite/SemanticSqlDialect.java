@@ -81,4 +81,8 @@ public class SemanticSqlDialect extends SqlDialect {
             @Nullable SqlNode fetch) {
         unparseFetchUsingAnsi(writer, offset, fetch);
     }
+
+    public boolean supportsNestedAggregations() {
+        return false;
+    }
 }

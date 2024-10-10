@@ -75,7 +75,7 @@ public class LLMRequestService {
         llmReq.setSqlGenType(
                 LLMReq.SqlGenType.valueOf(parserConfig.getParameterValue(PARSER_STRATEGY_TYPE)));
         llmReq.setModelConfig(queryCtx.getModelConfig());
-        llmReq.setPromptConfig(queryCtx.getPromptConfig());
+        llmReq.setCustomPrompt(queryCtx.getCustomPrompt());
         llmReq.setDynamicExemplars(queryCtx.getDynamicExemplars());
 
         return llmReq;

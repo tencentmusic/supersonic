@@ -3,42 +3,33 @@ package com.tencent.supersonic.chat.server.agent;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.tencent.supersonic.common.config.PromptConfig;
-import com.tencent.supersonic.common.config.VisualConfig;
-import com.tencent.supersonic.common.pojo.ChatModelConfig;
 import com.tencent.supersonic.common.pojo.RecordInfo;
+import com.tencent.supersonic.common.pojo.enums.ChatModelType;
 import lombok.Data;
 import org.springframework.util.CollectionUtils;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Data
 public class Agent extends RecordInfo {
 
     private Integer id;
-    private Integer enableSearch;
-    private Integer enableMemoryReview;
     private String name;
     private String description;
-
     /** 0 offline, 1 online */
     private Integer status;
-
     private List<String> examples;
-    private String agentConfig;
-    private ChatModelConfig modelConfig;
+    private Integer enableSearch;
+    private Integer enableMemoryReview;
+    private String toolConfig;
+    private Map<ChatModelType, Integer> chatModelConfig = Collections.EMPTY_MAP;
     private PromptConfig promptConfig;
     private MultiTurnConfig multiTurnConfig;
     private VisualConfig visualConfig;
 
     public List<String> getTools(AgentToolType type) {
-        Map map = JSONObject.parseObject(agentConfig, Map.class);
+        Map map = JSONObject.parseObject(toolConfig, Map.class);
         if (CollectionUtils.isEmpty(map) || map.get("tools") == null) {
             return Lists.newArrayList();
         }
@@ -90,7 +81,7 @@ public class Agent extends RecordInfo {
     }
 
     public boolean containsAnyTool() {
-        Map map = JSONObject.parseObject(agentConfig, Map.class);
+        Map map = JSONObject.parseObject(toolConfig, Map.class);
         if (CollectionUtils.isEmpty(map)) {
             return false;
         }

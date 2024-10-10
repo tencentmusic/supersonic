@@ -2,7 +2,6 @@ package com.tencent.supersonic.headless.chat.query.llm.s2sql;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.google.common.collect.Lists;
-import com.tencent.supersonic.common.config.PromptConfig;
 import com.tencent.supersonic.common.pojo.ChatModelConfig;
 import com.tencent.supersonic.common.pojo.Text2SQLExemplar;
 import com.tencent.supersonic.headless.api.pojo.SchemaElement;
@@ -23,7 +22,7 @@ public class LLMReq {
     private String priorExts;
     private SqlGenType sqlGenType;
     private ChatModelConfig modelConfig;
-    private PromptConfig promptConfig;
+    private String customPrompt;
     private List<Text2SQLExemplar> dynamicExemplars;
 
     @Data

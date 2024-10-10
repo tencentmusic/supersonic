@@ -15,7 +15,7 @@ fi
 function buildJavaService {
   model_name=$1
   echo "starting building supersonic-${model_name} service"
-  mvn -f $projectDir clean package -DskipTests
+  mvn -f $projectDir clean package -DskipTests -Dspotless.skip=true
   if [ $? -ne 0 ]; then
       echo "Failed to build backend Java modules."
       exit 1

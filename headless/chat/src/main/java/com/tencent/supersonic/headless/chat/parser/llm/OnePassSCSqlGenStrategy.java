@@ -1,7 +1,6 @@
 package com.tencent.supersonic.headless.chat.parser.llm;
 
 import com.google.common.collect.Lists;
-import com.tencent.supersonic.common.config.PromptConfig;
 import com.tencent.supersonic.common.pojo.Text2SQLExemplar;
 import com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMReq;
 import com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMResp;
@@ -34,10 +33,11 @@ public class OnePassSCSqlGenStrategy extends SqlGenStrategy {
             + "\n2.ALWAYS specify date filter using `>`,`<`,`>=`,`<=` operator."
             + "\n3.DO NOT include date filter in the where clause if not explicitly expressed in the `Question`."
             + "\n4.DO NOT calculate date range using functions."
-            + "\n5.DO NOT calculate date range using DATE_SUB."
-            + "\n6.DO NOT miss the AGGREGATE operator of metrics, always add it as needed."
-            + "\n#Exemplars:\n{{exemplar}}"
-            + "\n#Question:\nQuestion:{{question}},Schema:{{schema}},SideInfo:{{information}}";
+            + "\n5.DO NOT miss the AGGREGATE operator of metrics, always add it as needed."
+            + "\n6.ALWAYS use `with` statement if nested aggregation is needed."
+            + "\n7.ALWAYS enclose alias created by `AS` command in underscores and translate to the same language as the `Question`."
+            + "\n#Exemplars: {{exemplar}}"
+            + "\n#Question: Question:{{question}},Schema:{{schema}},SideInfo:{{information}}";
 
     @Data
     static class SemanticSql {
@@ -94,7 +94,7 @@ public class OnePassSCSqlGenStrategy extends SqlGenStrategy {
     private Prompt generatePrompt(LLMReq llmReq, LLMResp llmResp) {
         StringBuilder exemplars = new StringBuilder();
         for (Text2SQLExemplar exemplar : llmReq.getDynamicExemplars()) {
-            String exemplarStr = String.format("Question:%s,Schema:%s,SideInfo:%s,SQL:%s\n",
+            String exemplarStr = String.format("\nQuestion:%s,Schema:%s,SideInfo:%s,SQL:%s",
                     exemplar.getQuestion(), exemplar.getDbSchema(), exemplar.getSideInfo(),
                     exemplar.getSql());
             exemplars.append(exemplarStr);
@@ -111,10 +111,9 @@ public class OnePassSCSqlGenStrategy extends SqlGenStrategy {
         variable.put("information", sideInformation);
 
         // use custom prompt template if provided.
-        PromptConfig promptConfig = llmReq.getPromptConfig();
         String promptTemplate = INSTRUCTION;
-        if (promptConfig != null && StringUtils.isNotBlank(promptConfig.getPromptTemplate())) {
-            promptTemplate = promptConfig.getPromptTemplate();
+        if (StringUtils.isNotBlank(llmReq.getCustomPrompt())) {
+            promptTemplate = llmReq.getCustomPrompt();
         }
         return PromptTemplate.from(promptTemplate).apply(variable);
     }
