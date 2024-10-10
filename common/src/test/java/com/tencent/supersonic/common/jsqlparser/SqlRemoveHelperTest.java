@@ -7,8 +7,56 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-/** SqlParser Remove Helper Test */
+/**
+ * SqlParser Remove Helper Test
+ */
 class SqlRemoveHelperTest {
+
+    @Test
+    void testRemoveUnderscores() {
+        String sql =
+                "WITH 部门访问统计 AS (SELECT department, user_name, SUM(pv) AS _访问次数_ FROM 超音数数据集 WHERE sys_imp_date >= '2024-07-12' "
+                        + "AND sys_imp_date <= '2024-10-10' GROUP BY department, user_name HAVING SUM(pv) > 100) SELECT user_name, _访问次数_ FROM 部门访问统计";
+        sql = SqlRemoveHelper.removeUnderscores(sql);
+        Assert.assertEquals(sql,
+                "WITH 部门访问统计 AS (SELECT department, user_name, SUM(pv) AS 访问次数 FROM 超音数数据集 WHERE sys_imp_date >= '2024-07-12' "
+                        + "AND sys_imp_date <= '2024-10-10' GROUP BY department, user_name HAVING SUM(pv) > 100) SELECT user_name, 访问次数 FROM 部门访问统计");
+
+        sql = "WITH 部门访问统计 AS (SELECT department, user_name, SUM(pv) AS _访问次数_ FROM 超音数数据集 WHERE sys_imp_date >= '2024-07-12' "
+                + "AND sys_imp_date <= '2024-10-10' GROUP BY department, user_name HAVING SUM(pv) > 100) SELECT user_name,_访问次数_ FROM 部门访问统计";
+        sql = SqlRemoveHelper.removeUnderscores(sql);
+        Assert.assertEquals(sql,
+                "WITH 部门访问统计 AS (SELECT department, user_name, SUM(pv) AS 访问次数 FROM 超音数数据集 WHERE sys_imp_date >= '2024-07-12' "
+                        + "AND sys_imp_date <= '2024-10-10' GROUP BY department, user_name HAVING SUM(pv) > 100) SELECT user_name,访问次数 FROM 部门访问统计");
+
+        sql = "WITH 部门访问统计 AS (SELECT department, SUM(pv) AS _访问次数_,user_name FROM 超音数数据集 WHERE sys_imp_date >= '2024-07-12' "
+                + "AND sys_imp_date <= '2024-10-10' GROUP BY department, user_name HAVING SUM(pv) > 100) SELECT _访问次数_,user_name FROM 部门访问统计";
+        sql = SqlRemoveHelper.removeUnderscores(sql);
+        Assert.assertEquals(sql,
+                "WITH 部门访问统计 AS (SELECT department, SUM(pv) AS 访问次数,user_name FROM 超音数数据集 WHERE sys_imp_date >= "
+                        + "'2024-07-12' AND sys_imp_date <= '2024-10-10' GROUP BY department, user_name HAVING SUM(pv) > 100) SELECT 访问次数,user_name FROM 部门访问统计");
+
+        sql = "WITH _部门访问统计 AS (SELECT department, SUM(pv) AS _访问次数_,user_name FROM 超音数数据集 WHERE sys_imp_date >= '2024-07-12' "
+                + "AND sys_imp_date <= '2024-10-10' GROUP BY department, user_name HAVING SUM(pv) > 100) SELECT _访问次数_,user_name FROM _部门访问统计";
+        sql = SqlRemoveHelper.removeUnderscores(sql);
+        Assert.assertEquals(sql,
+                "WITH _部门访问统计 AS (SELECT department, SUM(pv) AS 访问次数,user_name FROM 超音数数据集 WHERE sys_imp_date >= "
+                        + "'2024-07-12' AND sys_imp_date <= '2024-10-10' GROUP BY department, user_name HAVING SUM(pv) > 100) SELECT 访问次数,user_name FROM _部门访问统计");
+
+        sql = "WITH _部门访问统计_ AS (SELECT department, SUM(pv) AS _访问次数_,user_name FROM 超音数数据集 WHERE sys_imp_date >= '2024-07-12' "
+                + "AND sys_imp_date <= '2024-10-10' GROUP BY department, user_name HAVING SUM(pv) > 100) SELECT _访问次数_,user_name FROM _部门访问统计_";
+        sql = SqlRemoveHelper.removeUnderscores(sql);
+        Assert.assertEquals(sql,
+                "WITH 部门访问统计 AS (SELECT department, SUM(pv) AS 访问次数,user_name FROM 超音数数据集 WHERE sys_imp_date >= "
+                        + "'2024-07-12' AND sys_imp_date <= '2024-10-10' GROUP BY department, user_name HAVING SUM(pv) > 100) SELECT 访问次数,user_name FROM 部门访问统计");
+
+        sql = "_部门访问统计_ AS (SELECT department, SUM(pv) AS _访问次数_,user_name FROM 超音数数据集 WHERE sys_imp_date >= '2024-07-12' "
+                + "AND sys_imp_date <= '2024-10-10' GROUP BY department, user_name HAVING SUM(pv) > 100) SELECT _访问次数_,user_name FROM _部门访问统计_";
+        sql = SqlRemoveHelper.removeUnderscores(sql);
+        Assert.assertEquals(sql,
+                "部门访问统计 AS (SELECT department, SUM(pv) AS 访问次数,user_name FROM 超音数数据集 WHERE sys_imp_date >= "
+                        + "'2024-07-12' AND sys_imp_date <= '2024-10-10' GROUP BY department, user_name HAVING SUM(pv) > 100) SELECT 访问次数,user_name FROM 部门访问统计");
+    }
 
     @Test
     void testRemoveAsterisk() {

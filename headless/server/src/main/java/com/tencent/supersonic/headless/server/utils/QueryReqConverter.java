@@ -1,5 +1,6 @@
 package com.tencent.supersonic.headless.server.utils;
 
+import com.tencent.supersonic.common.jsqlparser.SqlRemoveHelper;
 import com.tencent.supersonic.common.jsqlparser.SqlReplaceHelper;
 import com.tencent.supersonic.common.jsqlparser.SqlSelectFunctionHelper;
 import com.tencent.supersonic.common.jsqlparser.SqlSelectHelper;
@@ -69,6 +70,8 @@ public class QueryReqConverter {
         functionNameCorrector(querySQLReq, semanticSchemaResp);
         // 3.correct tableName
         correctTableName(querySQLReq);
+        // 4.remove Underscores
+        querySQLReq.setSql(SqlRemoveHelper.removeUnderscores(querySQLReq.getSql()));
 
         String tableName = SqlSelectHelper.getTableName(querySQLReq.getSql());
         if (StringUtils.isEmpty(tableName)) {
@@ -78,7 +81,7 @@ public class QueryReqConverter {
         String reqSql = querySQLReq.getSql();
         querySQLReq.setSql(SqlReplaceHelper.replaceAggAliasOrderItem(querySQLReq.getSql()));
         log.debug("replaceOrderAggSameAlias {} -> {}", reqSql, querySQLReq.getSql());
-        // 4.build MetricTables
+        // 5.build MetricTables
         List<String> allFields = SqlSelectHelper.getAllSelectFields(querySQLReq.getSql());
         List<MetricSchemaResp> metricSchemas = getMetrics(semanticSchemaResp, allFields);
         List<String> metrics =
@@ -106,7 +109,7 @@ public class QueryReqConverter {
         metricTable.setAggOption(aggOption);
         List<MetricTable> tables = new ArrayList<>();
         tables.add(metricTable);
-        // 4.build ParseSqlReq
+        // 6.build ParseSqlReq
         DataSetQueryParam result = new DataSetQueryParam();
         BeanUtils.copyProperties(querySQLReq, result);
 
@@ -117,9 +120,9 @@ public class QueryReqConverter {
             result.setSupportWith(false);
             result.setWithAlias(false);
         }
-        // 5. do deriveMetric
+        // 7. do deriveMetric
         generateDerivedMetric(semanticSchemaResp, aggOption, result);
-        // 6.physicalSql by ParseSqlReq
+        // 8.physicalSql by ParseSqlReq
 
         queryStructReq.setDateInfo(queryStructUtils.getDateConfBySql(querySQLReq.getSql()));
         queryStructReq.setDataSetId(querySQLReq.getDataSetId());
