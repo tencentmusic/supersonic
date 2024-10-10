@@ -439,16 +439,18 @@ public class SqlReplaceHelper {
     private static void replaceJoins(PlainSelect plainSelect, String tableName,
             List<String> withNameList) {
         List<Join> joins = plainSelect.getJoins();
+        TableNameReplaceVisitor fromItemVisitor =
+                new TableNameReplaceVisitor(tableName, new HashSet<>(withNameList));
         if (!CollectionUtils.isEmpty(joins)) {
             for (Join join : joins) {
                 if (join.getRightItem() instanceof ParenthesedFromItem) {
                     List<PlainSelect> subPlainSelects = SqlSelectHelper.getPlainSelects(
                             Collections.singletonList((PlainSelect) join.getRightItem()));
-                    subPlainSelects.forEach(subPlainSelect -> subPlainSelect.getFromItem().accept(
-                            new TableNameReplaceVisitor(tableName, new HashSet<>(withNameList))));
+                    subPlainSelects.forEach(subPlainSelect -> {
+                        subPlainSelect.getFromItem().accept(fromItemVisitor);
+                    });
                 } else if (join.getRightItem() instanceof Table) {
-                    Table table = (Table) join.getRightItem();
-                    table.setName(tableName);
+                    join.getRightItem().accept(fromItemVisitor);
                 }
             }
         }
