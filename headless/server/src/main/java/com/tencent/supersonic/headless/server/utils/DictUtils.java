@@ -91,8 +91,8 @@ public class DictUtils {
     private final TagMetaService tagMetaService;
 
     public DictUtils(DimensionService dimensionService, MetricService metricService,
-            SemanticLayerService queryService, ModelService modelService,
-            @Lazy TagMetaService tagMetaService) {
+                     SemanticLayerService queryService, ModelService modelService,
+                     @Lazy TagMetaService tagMetaService) {
         this.dimensionService = dimensionService;
         this.metricService = metricService;
         this.queryService = queryService;
@@ -106,7 +106,7 @@ public class DictUtils {
     }
 
     public DictTaskDO generateDictTaskDO(DictItemResp dictItemResp, User user,
-            TaskStatusEnum status) {
+                                         TaskStatusEnum status) {
         DictTaskDO taskDO = new DictTaskDO();
         Date createAt = new Date();
         String name = dictItemResp.fetchDictFileName();
@@ -224,7 +224,7 @@ public class DictUtils {
     }
 
     private void constructDictLines(Map<String, Long> valueAndFrequencyPair, List<String> lines,
-            String nature) {
+                                    String nature) {
         if (CollectionUtils.isEmpty(valueAndFrequencyPair)) {
             return;
         }
@@ -238,7 +238,7 @@ public class DictUtils {
     }
 
     private void mergeMultivaluedValue(Map<String, Long> valueAndFrequencyPair, String dimValue,
-            Long metric) {
+                                       Long metric) {
         if (StringUtils.isEmpty(dimValue)) {
             return;
         }
@@ -398,7 +398,7 @@ public class DictUtils {
     }
 
     private void fillStructDateBetween(QueryStructReq queryStructReq, ModelResp model,
-            Integer itemValueDateStart, Integer itemValueDateEnd) {
+                                       Integer itemValueDateStart, Integer itemValueDateEnd) {
         if (Objects.nonNull(model)) {
             List<Dim> timeDims = model.getTimeDimension();
             if (!CollectionUtils.isEmpty(timeDims)) {
@@ -467,6 +467,9 @@ public class DictUtils {
 
     private String generateDictDateFilter(DictItemResp dictItemResp) {
         ItemValueConfig config = dictItemResp.getConfig();
+        if (!partitionedModel(dictItemResp.getModelId())) {
+            return "";
+        }
         // 未进行设置
         if (Objects.isNull(config) || Objects.isNull(config.getDateConf())) {
             return defaultDateFilter();
@@ -487,6 +490,17 @@ public class DictUtils {
         }
 
         return "";
+    }
+
+    private boolean partitionedModel(Long modelId) {
+        ModelResp model = modelService.getModel(modelId);
+        if (Objects.nonNull(model)) {
+            List<Dim> timeDims = model.getTimeDimension();
+            if (!CollectionUtils.isEmpty(timeDims)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private String generateDictDateFilterRecent(DictItemResp dictItemResp) {
