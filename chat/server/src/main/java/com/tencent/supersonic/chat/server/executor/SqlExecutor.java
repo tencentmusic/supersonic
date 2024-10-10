@@ -75,22 +75,26 @@ public class SqlExecutor implements ChatQueryExecutor {
         sqlReq.setDataSetId(parseInfo.getDataSetId());
 
         long startTime = System.currentTimeMillis();
-        SemanticQueryResp queryResp = semanticLayer.queryByReq(sqlReq, executeContext.getUser());
         QueryResult queryResult = new QueryResult();
         queryResult.setChatContext(parseInfo);
         queryResult.setQueryMode(parseInfo.getQueryMode());
         queryResult.setQueryTimeCost(System.currentTimeMillis() - startTime);
-        if (queryResp != null) {
-            queryResult.setQueryAuthorization(queryResp.getQueryAuthorization());
-            queryResult.setQuerySql(queryResp.getSql());
-            queryResult.setQueryResults(queryResp.getResultList());
-            queryResult.setQueryColumns(queryResp.getColumns());
-            queryResult.setQueryState(QueryState.SUCCESS);
-
-            chatCtx.setParseInfo(parseInfo);
-            chatContextService.updateContext(chatCtx);
-        } else {
-            queryResult.setQueryState(QueryState.INVALID);
+        try {
+            SemanticQueryResp queryResp =
+                    semanticLayer.queryByReq(sqlReq, executeContext.getUser());
+            if (queryResp != null) {
+                queryResult.setQueryAuthorization(queryResp.getQueryAuthorization());
+                queryResult.setQuerySql(queryResp.getSql());
+                queryResult.setQueryResults(queryResp.getResultList());
+                queryResult.setQueryColumns(queryResp.getColumns());
+                queryResult.setQueryState(QueryState.SUCCESS);
+                chatCtx.setParseInfo(parseInfo);
+                chatContextService.updateContext(chatCtx);
+            } else {
+                queryResult.setQueryState(QueryState.INVALID);
+            }
+        } catch (Exception e) {
+            queryResult.setErrorMsg(e.getMessage());
         }
         return queryResult;
     }

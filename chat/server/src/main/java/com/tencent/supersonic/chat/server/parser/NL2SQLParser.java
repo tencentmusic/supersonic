@@ -105,6 +105,7 @@ public class NL2SQLParser implements ChatQueryParser {
         }
         parseResp.setState(text2SqlParseResp.getState());
         parseResp.getParseTimeCost().setSqlTime(text2SqlParseResp.getParseTimeCost().getSqlTime());
+        parseResp.setErrorMsg(text2SqlParseResp.getErrorMsg());
         formatParseResult(parseResp);
     }
 

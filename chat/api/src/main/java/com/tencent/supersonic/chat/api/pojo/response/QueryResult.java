@@ -28,4 +28,5 @@ public class QueryResult {
     private EntityInfo entityInfo;
     private List<SchemaElement> recommendedDimensions;
     private AggregateInfo aggregateInfo;
+    private String errorMsg;
 }

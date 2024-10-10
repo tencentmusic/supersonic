@@ -23,6 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -74,7 +75,7 @@ public class ChatWorkflowEngine {
                     break;
                 case TRANSLATING:
                     long start = System.currentTimeMillis();
-                    performTranslating(queryCtx);
+                    performTranslating(queryCtx, parseResult);
                     parseResult.getParseTimeCost().setSqlTime(System.currentTimeMillis() - start);
                     queryCtx.setChatWorkflowState(ChatWorkflowState.PROCESSING);
                     break;
@@ -126,10 +127,13 @@ public class ChatWorkflowEngine {
         });
     }
 
-    private void performTranslating(ChatQueryContext chatQueryContext) {
+    private void performTranslating(ChatQueryContext chatQueryContext, ParseResp parseResult) {
         List<SemanticParseInfo> semanticParseInfos = chatQueryContext.getCandidateQueries().stream()
                 .map(SemanticQuery::getParseInfo).collect(Collectors.toList());
-
+        List<String> errorMsg = new ArrayList<>();
+        if (StringUtils.isNotBlank(parseResult.getErrorMsg())) {
+            errorMsg.add(parseResult.getErrorMsg());
+        }
         semanticParseInfos.forEach(parseInfo -> {
             try {
                 SemanticQuery semanticQuery = QueryManager.createQuery(parseInfo.getQueryMode());
@@ -143,7 +147,9 @@ public class ChatWorkflowEngine {
                 SemanticTranslateResp explain =
                         queryService.translate(semanticQueryReq, chatQueryContext.getUser());
                 parseInfo.getSqlInfo().setQuerySQL(explain.getQuerySQL());
-
+                if (StringUtils.isNotBlank(explain.getErrMsg())) {
+                    errorMsg.add(explain.getErrMsg());
+                }
                 keyPipelineLog.info(
                         "SqlInfoProcessor results:\n"
                                 + "Parsed S2SQL: {}\nCorrected S2SQL: {}\nQuery SQL: {}",
@@ -152,7 +158,12 @@ public class ChatWorkflowEngine {
                         StringUtils.normalizeSpace(parseInfo.getSqlInfo().getQuerySQL()));
             } catch (Exception e) {
                 log.warn("get sql info failed:{}", parseInfo, e);
+                errorMsg.add(String.format("S2SQL:%s %s", parseInfo.getSqlInfo().getParsedS2SQL(),
+                        e.getMessage()));
             }
         });
+        if (!errorMsg.isEmpty()) {
+            parseResult.setErrorMsg(errorMsg.stream().collect(Collectors.joining("\n")));
+        }
     }
 }
