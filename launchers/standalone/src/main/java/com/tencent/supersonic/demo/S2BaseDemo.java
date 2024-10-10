@@ -36,6 +36,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
+import org.springframework.core.env.Environment;
 import org.springframework.util.CollectionUtils;
 
 import java.util.List;
@@ -84,6 +85,8 @@ public abstract class S2BaseDemo implements CommandLineRunner {
     protected DictWordService dictWordService;
     @Autowired
     protected ChatModelService chatModelService;
+    @Autowired
+    protected Environment environment;
 
     @Value("${s2.demo.names:S2VisitsDemo}")
     protected List<String> demoList;
@@ -137,6 +140,15 @@ public abstract class S2BaseDemo implements CommandLineRunner {
             chatModel.setName("OpenAI模型DEMO");
             chatModel.setDescription("由langchain4j社区提供仅用于体验(单次请求最大token数1000), 正式使用请切换大模型");
             chatModel.setConfig(ModelProvider.DEMO_CHAT_MODEL);
+            if (StringUtils.isNotBlank(environment.getProperty("OPENAI_BASE_URL"))) {
+                chatModel.getConfig().setBaseUrl(environment.getProperty("OPENAI_BASE_URL"));
+            }
+            if (StringUtils.isNotBlank(environment.getProperty("OPENAI_API_KEY"))) {
+                chatModel.getConfig().setApiKey(environment.getProperty("OPENAI_API_KEY"));
+            }
+            if (StringUtils.isNotBlank(environment.getProperty("OPENAI_MODEL_NAME"))) {
+                chatModel.getConfig().setModelName(environment.getProperty("OPENAI_MODEL_NAME"));
+            }
             chatModel = chatModelService.createChatModel(chatModel, defaultUser);
             return chatModel;
         }
