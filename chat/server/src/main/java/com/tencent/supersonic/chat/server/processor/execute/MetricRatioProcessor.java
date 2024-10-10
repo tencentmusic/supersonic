@@ -43,6 +43,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 import static com.tencent.supersonic.common.pojo.Constants.DAY_FORMAT;
 import static com.tencent.supersonic.common.pojo.Constants.DAY_FORMAT_INT;
@@ -51,7 +52,9 @@ import static com.tencent.supersonic.common.pojo.Constants.MONTH_FORMAT_INT;
 import static com.tencent.supersonic.common.pojo.Constants.TIMES_FORMAT;
 import static com.tencent.supersonic.common.pojo.Constants.TIME_FORMAT;
 
-/** Add ratio queries for metric queries. */
+/**
+ * Add ratio queries for metric queries.
+ */
 @Slf4j
 public class MetricRatioProcessor implements ExecuteResultProcessor {
 
@@ -71,10 +74,8 @@ public class MetricRatioProcessor implements ExecuteResultProcessor {
 
     public AggregateInfo getAggregateInfo(User user, SemanticParseInfo semanticParseInfo,
             QueryResult queryResult) {
+        Set<String> resultMetricNames = getResultMetricNames(queryResult);
 
-        Set<String> resultMetricNames = new HashSet<>();
-        queryResult.getQueryColumns().stream().forEach(
-                c -> resultMetricNames.addAll(SqlSelectHelper.getColumnFromExpr(c.getNameEn())));
         Optional<SchemaElement> ratioMetric = semanticParseInfo.getMetrics().stream()
                 .filter(m -> resultMetricNames.contains(m.getBizName())).findFirst();
 
@@ -92,17 +93,20 @@ public class MetricRatioProcessor implements ExecuteResultProcessor {
             if (!lastDayOp.isPresent()) {
                 return new AggregateInfo();
             }
+
             Optional<Map<String, Object>> lastValue = queryResult.getQueryResults().stream()
                     .filter(r -> r.get(dateField).toString().equals(lastDayOp.get())).findFirst();
 
             MetricInfo metricInfo = new MetricInfo();
             metricInfo.setStatistics(new HashMap<>());
-            if (lastValue.isPresent()
-                    && lastValue.get().containsKey(ratioMetric.get().getBizName())) {
-                DecimalFormat df = new DecimalFormat("#.####");
-                metricInfo.setValue(df.format(lastValue.get().get(ratioMetric.get().getBizName())));
-            }
-            metricInfo.setDate(lastValue.get().get(dateField).toString());
+
+            lastValue.ifPresent(value -> {
+                if (value.containsKey(ratioMetric.get().getBizName())) {
+                    DecimalFormat df = new DecimalFormat("#.####");
+                    metricInfo.setValue(df.format(value.get(ratioMetric.get().getBizName())));
+                }
+                metricInfo.setDate(value.get(dateField).toString());
+            });
 
             CompletableFuture<MetricInfo> metricInfoRoll =
                     CompletableFuture.supplyAsync(() -> queryRatio(user, semanticParseInfo,
@@ -110,16 +114,28 @@ public class MetricRatioProcessor implements ExecuteResultProcessor {
             CompletableFuture<MetricInfo> metricInfoOver =
                     CompletableFuture.supplyAsync(() -> queryRatio(user, semanticParseInfo,
                             ratioMetric.get(), AggOperatorEnum.RATIO_OVER, queryResult));
-            CompletableFuture.allOf(metricInfoRoll, metricInfoOver);
+
+            CompletableFuture.allOf(metricInfoRoll, metricInfoOver).join();
+
             metricInfo.setName(metricInfoRoll.get().getName());
             metricInfo.setValue(metricInfoRoll.get().getValue());
             metricInfo.getStatistics().putAll(metricInfoRoll.get().getStatistics());
             metricInfo.getStatistics().putAll(metricInfoOver.get().getStatistics());
+
             aggregateInfo.getMetricInfos().add(metricInfo);
         } catch (Exception e) {
             log.error("queryRatio error {}", e);
         }
         return aggregateInfo;
+    }
+
+    private static Set<String> getResultMetricNames(QueryResult queryResult) {
+        if (queryResult.getQueryColumns() == null) {
+            return new HashSet<>();
+        }
+        return queryResult.getQueryColumns().stream()
+                .flatMap(c -> SqlSelectHelper.getColumnFromExpr(c.getNameEn()).stream())
+                .collect(Collectors.toSet());
     }
 
     @SneakyThrows

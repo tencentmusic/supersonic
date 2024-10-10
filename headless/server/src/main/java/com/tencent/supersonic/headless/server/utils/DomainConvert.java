@@ -11,6 +11,7 @@ import org.springframework.beans.BeanUtils;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public class DomainConvert {
 
@@ -26,6 +27,9 @@ public class DomainConvert {
     }
 
     public static DomainResp convert(DomainDO domainDO, Map<Long, String> domainFullPathMap) {
+        if (Objects.isNull(domainDO)) {
+            return null;
+        }
         DomainResp domainResp = new DomainResp();
         BeanUtils.copyProperties(domainDO, domainResp);
         domainResp.setFullPath(domainFullPathMap.get(domainDO.getId()));
