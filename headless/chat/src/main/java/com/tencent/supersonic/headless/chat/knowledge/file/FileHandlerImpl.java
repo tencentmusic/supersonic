@@ -89,15 +89,16 @@ public class FileHandlerImpl implements FileHandler {
     }
 
     private PageInfo<DictValueResp> getDictValueRespPagWithKey(String fileName,
-                                                               DictValueReq dictValueReq) {
+            DictValueReq dictValueReq) {
         PageInfo<DictValueResp> dictValueRespPageInfo = new PageInfo<>();
         dictValueRespPageInfo.setPageSize(dictValueReq.getPageSize());
         dictValueRespPageInfo.setPageNum(dictValueReq.getCurrent());
         String filePath = localFileConfig.getDictDirectoryLatest() + FILE_SPILT + fileName;
         Long fileLineNum = getFileLineNum(filePath);
         Integer startLine = 1;
-        List<DictValueResp> dictValueRespList = getFileData(filePath, startLine, fileLineNum.intValue())
-                        .stream().filter(dictValue -> dictValue.getValue().contains(dictValueReq.getKeyValue()))
+        List<DictValueResp> dictValueRespList =
+                getFileData(filePath, startLine, fileLineNum.intValue()).stream().filter(
+                        dictValue -> dictValue.getValue().contains(dictValueReq.getKeyValue()))
                         .collect(Collectors.toList());
         if (CollectionUtils.isEmpty(dictValueRespList)) {
             dictValueRespPageInfo.setList(new ArrayList<>());
@@ -120,7 +121,7 @@ public class FileHandlerImpl implements FileHandler {
     }
 
     private PageInfo<DictValueResp> getDictValueRespPagWithoutKey(String fileName,
-                                                                  DictValueReq dictValueReq) {
+            DictValueReq dictValueReq) {
         PageInfo<DictValueResp> dictValueRespPageInfo = new PageInfo<>();
         String filePath = localFileConfig.getDictDirectoryLatest() + FILE_SPILT + fileName;
         Long fileLineNum = Math.min(dictValueMaxCountPage, getFileLineNum(filePath));

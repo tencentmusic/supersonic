@@ -59,7 +59,7 @@ public class KnowledgeController {
      */
     @PostMapping("/conf")
     public DictItemResp addDictConf(@RequestBody @Valid DictItemReq dictItemReq,
-                                    HttpServletRequest request, HttpServletResponse response) {
+            HttpServletRequest request, HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
         return confService.addDictConf(dictItemReq, user);
     }
@@ -71,7 +71,7 @@ public class KnowledgeController {
      */
     @PutMapping("/conf")
     public DictItemResp editDictConf(@RequestBody @Valid DictItemReq dictItemReq,
-                                     HttpServletRequest request, HttpServletResponse response) {
+            HttpServletRequest request, HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
         return confService.editDictConf(dictItemReq, user);
     }
@@ -83,7 +83,7 @@ public class KnowledgeController {
      */
     @PostMapping("/conf/query")
     public List<DictItemResp> queryDictConf(@RequestBody @Valid DictItemFilter filter,
-                                            HttpServletRequest request, HttpServletResponse response) {
+            HttpServletRequest request, HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
         return confService.queryDictConf(filter, user);
     }
@@ -95,7 +95,7 @@ public class KnowledgeController {
      */
     @PostMapping("/task")
     public Long addDictTask(@RequestBody DictSingleTaskReq taskReq, HttpServletRequest request,
-                            HttpServletResponse response) {
+            HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
         return taskService.addDictTask(taskReq, user);
     }
@@ -107,7 +107,7 @@ public class KnowledgeController {
      */
     @PutMapping("/task/delete")
     public Long deleteDictTask(@RequestBody DictSingleTaskReq taskReq, HttpServletRequest request,
-                               HttpServletResponse response) {
+            HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
         return taskService.deleteDictTask(taskReq, user);
     }
@@ -127,7 +127,7 @@ public class KnowledgeController {
      */
     @PostMapping("/task/search")
     public DictTaskResp queryLatestDictTask(@RequestBody DictSingleTaskReq taskReq,
-                                            HttpServletRequest request, HttpServletResponse response) {
+            HttpServletRequest request, HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
         return taskService.queryLatestDictTask(taskReq, user);
     }
@@ -158,7 +158,7 @@ public class KnowledgeController {
      */
     @PostMapping("/dict/data")
     public PageInfo<DictValueDimResp> queryDictValue(@RequestBody @Valid DictValueReq dictValueReq,
-                                                     HttpServletRequest request, HttpServletResponse response) {
+            HttpServletRequest request, HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
         return taskService.queryDictValue(dictValueReq, user);
     }
@@ -170,7 +170,7 @@ public class KnowledgeController {
      */
     @PostMapping("/dict/file")
     public String queryDictFilePath(@RequestBody @Valid DictValueReq dictValueReq,
-                                    HttpServletRequest request, HttpServletResponse response) {
+            HttpServletRequest request, HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
         return taskService.queryDictFilePath(dictValueReq, user);
     }
