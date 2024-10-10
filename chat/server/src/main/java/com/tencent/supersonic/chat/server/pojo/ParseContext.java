@@ -21,13 +21,6 @@ public class ParseContext {
         if (agent == null) {
             return false;
         }
-        return agent.containsNL2SQLTool();
-    }
-
-    public boolean enbaleLLM() {
-        if (agent == null || disableLLM) {
-            return false;
-        }
-        return agent.containsLLMTool();
+        return agent.containsDatasetTool();
     }
 }

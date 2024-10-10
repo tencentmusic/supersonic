@@ -64,6 +64,9 @@ public class FieldValueReplaceVisitor extends ExpressionVisitorAdapter {
         }
         Column column = (Column) inExpression.getLeftExpression();
         Map<String, String> valueMap = filedNameToValueMap.get(column.getColumnName());
+        if (!(inExpression.getRightExpression() instanceof ExpressionList)) {
+            return;
+        }
         ExpressionList rightItemsList = (ExpressionList) inExpression.getRightExpression();
         List<Expression> expressions = rightItemsList.getExpressions();
         List<String> values = new ArrayList<>();

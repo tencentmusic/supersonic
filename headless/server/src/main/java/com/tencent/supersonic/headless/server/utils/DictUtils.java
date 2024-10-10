@@ -467,6 +467,9 @@ public class DictUtils {
 
     private String generateDictDateFilter(DictItemResp dictItemResp) {
         ItemValueConfig config = dictItemResp.getConfig();
+        if (!partitionedModel(dictItemResp.getModelId())) {
+            return "";
+        }
         // 未进行设置
         if (Objects.isNull(config) || Objects.isNull(config.getDateConf())) {
             return defaultDateFilter();
@@ -487,6 +490,17 @@ public class DictUtils {
         }
 
         return "";
+    }
+
+    private boolean partitionedModel(Long modelId) {
+        ModelResp model = modelService.getModel(modelId);
+        if (Objects.nonNull(model)) {
+            List<Dim> timeDims = model.getTimeDimension();
+            if (!CollectionUtils.isEmpty(timeDims)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private String generateDictDateFilterRecent(DictItemResp dictItemResp) {

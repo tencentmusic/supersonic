@@ -1,7 +1,6 @@
 package com.tencent.supersonic.demo;
 
 import com.google.common.collect.Lists;
-import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.common.pojo.JoinCondition;
 import com.tencent.supersonic.common.pojo.ModelRela;
 import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
@@ -33,10 +32,10 @@ public class CspiderDemo extends S2BaseDemo {
     public void doRun() {
         try {
             DomainResp s2Domain = addDomain();
-            ModelResp genreModelResp = addModel_1(s2Domain, demoDatabaseResp);
-            ModelResp artistModelResp = addModel_2(s2Domain, demoDatabaseResp);
-            ModelResp filesModelResp = addModel_3(s2Domain, demoDatabaseResp);
-            ModelResp songModelResp = addModel_4(s2Domain, demoDatabaseResp);
+            ModelResp genreModelResp = addModel_1(s2Domain, demoDatabase);
+            ModelResp artistModelResp = addModel_2(s2Domain, demoDatabase);
+            ModelResp filesModelResp = addModel_3(s2Domain, demoDatabase);
+            ModelResp songModelResp = addModel_4(s2Domain, demoDatabase);
             addDataSet_1(s2Domain);
             addModelRela_1(s2Domain, genreModelResp, artistModelResp);
             addModelRela_2(s2Domain, filesModelResp, artistModelResp);
@@ -63,7 +62,7 @@ public class CspiderDemo extends S2BaseDemo {
         domainReq.setViewOrgs(Collections.singletonList("1"));
         domainReq.setAdmins(Collections.singletonList("admin"));
         domainReq.setAdminOrgs(Collections.emptyList());
-        return domainService.createDomain(domainReq, user);
+        return domainService.createDomain(domainReq, defaultUser);
     }
 
     public ModelResp addModel_1(DomainResp s2Domain, DatabaseResp s2Database) throws Exception {
@@ -98,7 +97,7 @@ public class CspiderDemo extends S2BaseDemo {
         modelDetail.setQueryType("sql_query");
         modelDetail.setSqlQuery("SELECT g_name, rating, most_popular_in FROM genre");
         modelReq.setModelDetail(modelDetail);
-        return modelService.createModel(modelReq, user);
+        return modelService.createModel(modelReq, defaultUser);
     }
 
     public ModelResp addModel_2(DomainResp s2Domain, DatabaseResp s2Database) throws Exception {
@@ -125,7 +124,7 @@ public class CspiderDemo extends S2BaseDemo {
         modelDetail.setQueryType("sql_query");
         modelDetail.setSqlQuery("SELECT artist_name, citizenship, gender, g_name FROM artist");
         modelReq.setModelDetail(modelDetail);
-        return modelService.createModel(modelReq, user);
+        return modelService.createModel(modelReq, defaultUser);
     }
 
     public ModelResp addModel_3(DomainResp s2Domain, DatabaseResp s2Database) throws Exception {
@@ -153,7 +152,7 @@ public class CspiderDemo extends S2BaseDemo {
         modelDetail
                 .setSqlQuery("SELECT f_id, artist_name, file_size, duration, formats FROM files");
         modelReq.setModelDetail(modelDetail);
-        return modelService.createModel(modelReq, user);
+        return modelService.createModel(modelReq, defaultUser);
     }
 
     public ModelResp addModel_4(DomainResp s2Domain, DatabaseResp s2Database) throws Exception {
@@ -191,7 +190,7 @@ public class CspiderDemo extends S2BaseDemo {
         modelDetail.setSqlQuery("SELECT imp_date, song_name, artist_name, country, f_id, g_name, "
                 + " rating, languages, releasedate, resolution FROM song");
         modelReq.setModelDetail(modelDetail);
-        return modelService.createModel(modelReq, user);
+        return modelService.createModel(modelReq, defaultUser);
     }
 
     public void addDataSet_1(DomainResp s2Domain) {
@@ -224,7 +223,7 @@ public class CspiderDemo extends S2BaseDemo {
         queryConfig.setDetailTypeDefaultConfig(detailTypeDefaultConfig);
         queryConfig.setAggregateTypeDefaultConfig(aggregateTypeDefaultConfig);
         dataSetReq.setQueryConfig(queryConfig);
-        dataSetService.save(dataSetReq, User.getDefaultUser());
+        dataSetService.save(dataSetReq, defaultUser);
     }
 
     public void addModelRela_1(DomainResp s2Domain, ModelResp genreModelResp,
@@ -237,7 +236,7 @@ public class CspiderDemo extends S2BaseDemo {
         modelRelaReq.setToModelId(genreModelResp.getId());
         modelRelaReq.setJoinType("left join");
         modelRelaReq.setJoinConditions(joinConditions);
-        modelRelaService.save(modelRelaReq, user);
+        modelRelaService.save(modelRelaReq, defaultUser);
     }
 
     public void addModelRela_2(DomainResp s2Domain, ModelResp filesModelResp,
@@ -251,7 +250,7 @@ public class CspiderDemo extends S2BaseDemo {
         modelRelaReq.setToModelId(artistModelResp.getId());
         modelRelaReq.setJoinType("left join");
         modelRelaReq.setJoinConditions(joinConditions);
-        modelRelaService.save(modelRelaReq, user);
+        modelRelaService.save(modelRelaReq, defaultUser);
     }
 
     public void addModelRela_3(DomainResp s2Domain, ModelResp songModelResp,
@@ -265,7 +264,7 @@ public class CspiderDemo extends S2BaseDemo {
         modelRelaReq.setToModelId(artistModelResp.getId());
         modelRelaReq.setJoinType("left join");
         modelRelaReq.setJoinConditions(joinConditions);
-        modelRelaService.save(modelRelaReq, user);
+        modelRelaService.save(modelRelaReq, defaultUser);
     }
 
     public void addModelRela_4(DomainResp s2Domain, ModelResp songModelResp,
@@ -278,7 +277,7 @@ public class CspiderDemo extends S2BaseDemo {
         modelRelaReq.setToModelId(genreModelResp.getId());
         modelRelaReq.setJoinType("left join");
         modelRelaReq.setJoinConditions(joinConditions);
-        modelRelaService.save(modelRelaReq, user);
+        modelRelaService.save(modelRelaReq, defaultUser);
     }
 
     public void addModelRela_5(DomainResp s2Domain, ModelResp songModelResp,
@@ -291,11 +290,11 @@ public class CspiderDemo extends S2BaseDemo {
         modelRelaReq.setToModelId(filesModelResp.getId());
         modelRelaReq.setJoinType("left join");
         modelRelaReq.setJoinConditions(joinConditions);
-        modelRelaService.save(modelRelaReq, user);
+        modelRelaService.save(modelRelaReq, defaultUser);
     }
 
     private void batchPushlishMetric() {
         List<Long> ids = Lists.newArrayList(1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L);
-        metricService.batchPublish(ids, User.getDefaultUser());
+        metricService.batchPublish(ids, defaultUser);
     }
 }

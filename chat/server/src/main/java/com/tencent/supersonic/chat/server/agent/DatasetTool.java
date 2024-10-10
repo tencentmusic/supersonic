@@ -9,7 +9,8 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class NL2SQLTool extends AgentTool {
+public class DatasetTool extends AgentTool {
 
-    protected List<Long> dataSetIds;
+    private List<Long> dataSetIds;
+    private List<String> exampleQuestions;
 }

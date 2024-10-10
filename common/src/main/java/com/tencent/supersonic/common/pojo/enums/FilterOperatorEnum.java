@@ -10,10 +10,20 @@ import net.sf.jsqlparser.expression.operators.relational.MinorThan;
 import net.sf.jsqlparser.expression.operators.relational.MinorThanEquals;
 
 public enum FilterOperatorEnum {
-    IN("IN"), NOT_IN("NOT_IN"), EQUALS("="), BETWEEN("BETWEEN"), GREATER_THAN(
-            ">"), GREATER_THAN_EQUALS(">="), IS_NULL("IS_NULL"), IS_NOT_NULL("IS_NOT_NULL"), LIKE(
-                    "LIKE"), MINOR_THAN("<"), MINOR_THAN_EQUALS(
-                            "<="), NOT_EQUALS("!="), SQL_PART("SQL_PART"), EXISTS("EXISTS");
+    IN("IN"),
+    NOT_IN("NOT_IN"),
+    EQUALS("="),
+    BETWEEN("BETWEEN"),
+    GREATER_THAN(">"),
+    GREATER_THAN_EQUALS(">="),
+    IS_NULL("IS_NULL"),
+    IS_NOT_NULL("IS_NOT_NULL"),
+    LIKE("LIKE"),
+    MINOR_THAN("<"),
+    MINOR_THAN_EQUALS("<="),
+    NOT_EQUALS("!="),
+    SQL_PART("SQL_PART"),
+    EXISTS("EXISTS");
 
     private String value;
 

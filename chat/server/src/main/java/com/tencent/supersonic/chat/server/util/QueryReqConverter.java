@@ -26,22 +26,10 @@ public class QueryReqConverter {
             return queryNLReq;
         }
 
-        ChatModelConfig chatModelConfig =
-                ModelConfigHelper.getChatModelConfig(agent, ChatModelType.TEXT_TO_SQL);
-        boolean hasLLMTool = agent.containsLLMTool();
-        boolean hasRuleTool = agent.containsRuleTool();
-        boolean hasLLMConfig = chatModelConfig != null;
-
         if (parseContext.isDisableLLM()) {
             queryNLReq.setText2SQLType(Text2SQLType.ONLY_RULE);
-        } else if (hasLLMTool && hasLLMConfig) {
-            queryNLReq.setText2SQLType(Text2SQLType.ONLY_LLM);
-        } else if (hasLLMTool && hasRuleTool) {
+        } else {
             queryNLReq.setText2SQLType(Text2SQLType.RULE_AND_LLM);
-        } else if (hasLLMTool) {
-            queryNLReq.setText2SQLType(Text2SQLType.ONLY_LLM);
-        } else if (hasRuleTool) {
-            queryNLReq.setText2SQLType(Text2SQLType.ONLY_RULE);
         }
 
         queryNLReq.setDataSetIds(agent.getDataSetIds());
@@ -49,6 +37,8 @@ public class QueryReqConverter {
                 && MapUtils.isNotEmpty(queryNLReq.getMapInfo().getDataSetElementMatches())) {
             queryNLReq.setMapInfo(queryNLReq.getMapInfo());
         }
+        ChatModelConfig chatModelConfig =
+                ModelConfigHelper.getChatModelConfig(agent, ChatModelType.TEXT_TO_SQL);
         queryNLReq.setModelConfig(chatModelConfig);
         queryNLReq.setCustomPrompt(agent.getPromptConfig().getPromptTemplate());
         if (chatCtx != null) {

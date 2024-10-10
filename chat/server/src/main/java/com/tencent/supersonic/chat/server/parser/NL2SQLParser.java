@@ -85,7 +85,7 @@ public class NL2SQLParser implements ChatQueryParser {
         ChatContextService chatContextService = ContextUtils.getBean(ChatContextService.class);
         ChatContext chatCtx = chatContextService.getOrCreateContext(parseContext.getChatId());
 
-        if (parseContext.enbaleLLM()) {
+        if (!parseContext.isDisableLLM()) {
             processMultiTurn(parseContext);
         }
         QueryNLReq queryNLReq = QueryReqConverter.buildText2SqlQueryReq(parseContext, chatCtx);
@@ -96,7 +96,7 @@ public class NL2SQLParser implements ChatQueryParser {
         if (ParseResp.ParseState.COMPLETED.equals(text2SqlParseResp.getState())) {
             parseResp.getSelectedParses().addAll(text2SqlParseResp.getSelectedParses());
         } else {
-            if (parseContext.enbaleLLM()) {
+            if (!parseContext.isDisableLLM()) {
                 parseResp.setErrorMsg(rewriteErrorMessage(parseContext.getQueryText(),
                         text2SqlParseResp.getErrorMsg(), queryNLReq.getDynamicExemplars(),
                         parseContext.getAgent().getExamples(), ModelConfigHelper.getChatModelConfig(

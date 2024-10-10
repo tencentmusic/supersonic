@@ -105,7 +105,7 @@ public class AgentServiceImpl extends ServiceImpl<AgentDOMapper, AgentDO> implem
     }
 
     private synchronized void doExecuteAgentExamples(Agent agent) {
-        if (!agent.containsLLMTool()
+        if (!agent.containsDatasetTool()
                 || !ModelConfigHelper.testConnection(
                         ModelConfigHelper.getChatModelConfig(agent, ChatModelType.TEXT_TO_SQL))
                 || CollectionUtils.isEmpty(agent.getExamples())) {
@@ -122,8 +122,9 @@ public class AgentServiceImpl extends ServiceImpl<AgentDOMapper, AgentDO> implem
                 continue;
             }
             try {
-                chatQueryService.parseAndExecute(ChatParseReq.builder().chatId(-1)
-                        .agentId(agent.getId()).queryText(example).user(User.getDefaultUser()).build());
+                chatQueryService
+                        .parseAndExecute(ChatParseReq.builder().chatId(-1).agentId(agent.getId())
+                                .queryText(example).user(User.getDefaultUser()).build());
             } catch (Exception e) {
                 log.warn("agent:{} example execute failed:{}", agent.getName(), example);
             }

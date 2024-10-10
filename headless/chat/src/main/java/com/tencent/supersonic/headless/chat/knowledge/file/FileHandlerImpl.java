@@ -5,6 +5,7 @@ import com.tencent.supersonic.headless.api.pojo.request.DictValueReq;
 import com.tencent.supersonic.headless.api.pojo.response.DictValueResp;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
@@ -26,6 +27,10 @@ import java.util.stream.Stream;
 @Slf4j
 @Component
 public class FileHandlerImpl implements FileHandler {
+
+    @Value("${dict.value.max.count.page:1000}")
+    private int dictValueMaxCountPage;
+
     public static final String FILE_SPILT = File.separator;
 
     private final LocalFileConfig localFileConfig;
@@ -92,10 +97,9 @@ public class FileHandlerImpl implements FileHandler {
         Long fileLineNum = getFileLineNum(filePath);
         Integer startLine = 1;
         List<DictValueResp> dictValueRespList =
-                getFileData(filePath, startLine, fileLineNum.intValue());
-        dictValueRespList = dictValueRespList.stream()
-                .filter(dictValue -> dictValue.getValue().contains(dictValueReq.getKeyValue()))
-                .collect(Collectors.toList());
+                getFileData(filePath, startLine, fileLineNum.intValue()).stream().filter(
+                        dictValue -> dictValue.getValue().contains(dictValueReq.getKeyValue()))
+                        .collect(Collectors.toList());
         if (CollectionUtils.isEmpty(dictValueRespList)) {
             dictValueRespPageInfo.setList(new ArrayList<>());
             return dictValueRespPageInfo;
@@ -120,7 +124,7 @@ public class FileHandlerImpl implements FileHandler {
             DictValueReq dictValueReq) {
         PageInfo<DictValueResp> dictValueRespPageInfo = new PageInfo<>();
         String filePath = localFileConfig.getDictDirectoryLatest() + FILE_SPILT + fileName;
-        Long fileLineNum = getFileLineNum(filePath);
+        Long fileLineNum = Math.min(dictValueMaxCountPage, getFileLineNum(filePath));
         Integer startLine = 1;
         Integer endLine = Integer.valueOf(
                 Math.min(dictValueReq.getCurrent() * dictValueReq.getPageSize(), fileLineNum) + "");

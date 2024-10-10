@@ -2,11 +2,9 @@ package com.tencent.supersonic.demo;
 
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
-import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.chat.server.agent.Agent;
 import com.tencent.supersonic.chat.server.agent.AgentToolType;
-import com.tencent.supersonic.chat.server.agent.LLMParserTool;
-import com.tencent.supersonic.chat.server.agent.RuleParserTool;
+import com.tencent.supersonic.chat.server.agent.DatasetTool;
 import com.tencent.supersonic.chat.server.agent.ToolConfig;
 import com.tencent.supersonic.common.pojo.enums.StatusEnum;
 import com.tencent.supersonic.common.pojo.enums.TypeEnums;
@@ -43,7 +41,7 @@ public class S2ArtistDemo extends S2BaseDemo {
         try {
             DomainResp singerDomain = addDomain();
             TagObjectResp singerTagObject = addTagObjectSinger(singerDomain);
-            ModelResp singerModel = addModel(singerDomain, demoDatabaseResp, singerTagObject);
+            ModelResp singerModel = addModel(singerDomain, demoDatabase, singerTagObject);
             addTags(singerModel);
             long dataSetId = addDataSet(singerDomain, singerModel);
             addAgent(dataSetId);
@@ -69,8 +67,7 @@ public class S2ArtistDemo extends S2BaseDemo {
         tagObjectReq.setDomainId(singerDomain.getId());
         tagObjectReq.setName("歌手");
         tagObjectReq.setBizName("singer");
-        User user = User.getDefaultUser();
-        return tagObjectService.create(tagObjectReq, user);
+        return tagObjectService.create(tagObjectReq, defaultUser);
     }
 
     public DomainResp addDomain() {
@@ -84,7 +81,7 @@ public class S2ArtistDemo extends S2BaseDemo {
         domainReq.setAdmins(Arrays.asList("admin", "alice"));
         domainReq.setAdminOrgs(Collections.emptyList());
         domainReq.setIsOpen(1);
-        return domainService.createDomain(domainReq, user);
+        return domainService.createDomain(domainReq, defaultUser);
     }
 
     public ModelResp addModel(DomainResp singerDomain, DatabaseResp s2Database,
@@ -121,7 +118,7 @@ public class S2ArtistDemo extends S2BaseDemo {
         modelDetail.setSqlQuery("select singer_name, act_area, song_name, genre, "
                 + "js_play_cnt, down_cnt, favor_cnt from singer");
         modelReq.setModelDetail(modelDetail);
-        return modelService.createModel(modelReq, user);
+        return modelService.createModel(modelReq, defaultUser);
     }
 
     private void addTags(ModelResp model) {
@@ -159,7 +156,7 @@ public class S2ArtistDemo extends S2BaseDemo {
         queryConfig.setDetailTypeDefaultConfig(detailTypeDefaultConfig);
         queryConfig.setAggregateTypeDefaultConfig(aggregateTypeDefaultConfig);
         dataSetReq.setQueryConfig(queryConfig);
-        DataSetResp dataSetResp = dataSetService.save(dataSetReq, User.getDefaultUser());
+        DataSetResp dataSetResp = dataSetService.save(dataSetReq, defaultUser);
         return dataSetResp.getId();
     }
 
@@ -171,20 +168,12 @@ public class S2ArtistDemo extends S2BaseDemo {
         agent.setEnableSearch(1);
         agent.setExamples(Lists.newArrayList("国风流派歌手", "港台歌手", "周杰伦流派"));
         ToolConfig toolConfig = new ToolConfig();
-        RuleParserTool ruleQueryTool = new RuleParserTool();
-        ruleQueryTool.setId("0");
-        ruleQueryTool.setType(AgentToolType.NL2SQL_RULE);
-        ruleQueryTool.setDataSetIds(Lists.newArrayList(dataSetId));
-        toolConfig.getTools().add(ruleQueryTool);
-
-        if (demoEnableLlm) {
-            LLMParserTool llmParserTool = new LLMParserTool();
-            llmParserTool.setId("1");
-            llmParserTool.setType(AgentToolType.NL2SQL_LLM);
-            llmParserTool.setDataSetIds(Lists.newArrayList(dataSetId));
-            toolConfig.getTools().add(llmParserTool);
-        }
+        DatasetTool datasetTool = new DatasetTool();
+        datasetTool.setId("1");
+        datasetTool.setType(AgentToolType.DATASET);
+        datasetTool.setDataSetIds(Lists.newArrayList(dataSetId));
+        toolConfig.getTools().add(datasetTool);
         agent.setToolConfig(JSONObject.toJSONString(toolConfig));
-        agentService.createAgent(agent, User.getDefaultUser());
+        agentService.createAgent(agent, defaultUser);
     }
 }
