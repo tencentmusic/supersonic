@@ -5,7 +5,7 @@ import { getSystemConfig, saveSystemConfig } from '@/services/user';
 import { ProCard } from '@ant-design/pro-components';
 import SelectTMEPerson from '@/components/SelectTMEPerson';
 import { ConfigParametersItem, SystemConfig, dependenciesItem } from './types';
-import { testLLMConn } from '../../services/system';
+// import { testLLMConn } from '../../services/system';
 import { groupBy } from 'lodash';
 import { genneratorFormItemList } from '../SemanticModel/utils';
 
@@ -23,7 +23,7 @@ const System: React.FC = () => {
   const configMap = useRef<Record<string, ConfigParametersItem>>();
 
   const configIocDepMap = useRef<Record<string, any>>();
-  const [llmTestLoading, setLlmTestLoading] = useState<boolean>(false);
+  // const [llmTestLoading, setLlmTestLoading] = useState<boolean>(false);
 
   useEffect(() => {
     querySystemConfig();
@@ -48,7 +48,6 @@ const System: React.FC = () => {
       configMap.current = parametersMap;
 
       groupConfigAndSet(parameters);
-      console.log(parameters, admins, 232323);
       initDepConfig(parameters, admins);
 
       setConfigSource(data);
@@ -197,16 +196,16 @@ const System: React.FC = () => {
     groupConfigAndSet(Object.values(tempConfigMap));
   };
 
-  const testLLMConnect = async (params: any) => {
-    setLlmTestLoading(true);
-    const { code, data } = await testLLMConn(params);
-    setLlmTestLoading(false);
-    if (code === 200 && data) {
-      message.success('连接成功');
-    } else {
-      message.error('模型连接失败');
-    }
-  };
+  // const testLLMConnect = async (params: any) => {
+  //   setLlmTestLoading(true);
+  //   const { code, data } = await testLLMConn(params);
+  //   setLlmTestLoading(false);
+  //   if (code === 200 && data) {
+  //     message.success('连接成功');
+  //   } else {
+  //     message.error('模型连接失败');
+  //   }
+  // };
 
   return (
     <>

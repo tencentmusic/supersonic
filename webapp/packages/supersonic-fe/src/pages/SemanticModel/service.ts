@@ -102,6 +102,12 @@ export function mockDimensionValuesAlias(data: any): Promise<any> {
   });
 }
 
+export function getDictData(data: any): Promise<any> {
+  return request.post(`${process.env.API_BASE_URL}knowledge/dict/data`, {
+    data,
+  });
+}
+
 export function queryMetric(data: any): Promise<any> {
   const { domainId, modelId } = data;
   const queryParams = {

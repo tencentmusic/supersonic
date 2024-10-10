@@ -10,6 +10,7 @@ type Props = {
   tableDataSource: any[];
   columnList: any[];
   rowKey?: string;
+  hideCtrlBtn?: string[];
   editableProTableProps?: any;
   onDataSourceChange?: (dataSource: any) => void;
   extenderCtrlColumn?: (text, record, _, action) => ReactNode[];
@@ -29,6 +30,7 @@ const CommonEditTable: React.FC<Props> = forwardRef(
       rowKey,
       tableDataSource,
       editableProTableProps = {},
+      hideCtrlBtn,
       onDataSourceChange,
       extenderCtrlColumn,
       editableActionRender,
@@ -72,26 +74,31 @@ const CommonEditTable: React.FC<Props> = forwardRef(
         render: (text, record, _, action) => {
           return (
             <Space>
-              <a
-                key="editable"
-                onClick={() => {
-                  action?.startEditable?.(record.editRowId);
-                }}
-              >
-                编辑
-              </a>
-              <a
-                key="deleteBtn"
-                onClick={() => {
-                  const data = [...dataSource].filter(
-                    (item) => item[defaultRowKey] !== record[defaultRowKey],
-                  );
-                  setDataSource(data);
-                  handleDataSourceChange(data);
-                }}
-              >
-                删除
-              </a>
+              {!hideCtrlBtn?.includes('editable') && (
+                <a
+                  key="editable"
+                  onClick={() => {
+                    action?.startEditable?.(record.editRowId);
+                  }}
+                >
+                  编辑
+                </a>
+              )}
+              {!hideCtrlBtn?.includes('deleteBtn') && (
+                <a
+                  key="deleteBtn"
+                  onClick={() => {
+                    const data = [...dataSource].filter(
+                      (item) => item[defaultRowKey] !== record[defaultRowKey],
+                    );
+                    setDataSource(data);
+                    handleDataSourceChange(data);
+                  }}
+                >
+                  删除
+                </a>
+              )}
+
               {extenderCtrlColumn?.(text, record, _, action)}
             </Space>
           );

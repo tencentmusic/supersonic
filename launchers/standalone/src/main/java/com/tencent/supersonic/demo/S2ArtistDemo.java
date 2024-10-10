@@ -4,8 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.chat.server.agent.Agent;
 import com.tencent.supersonic.chat.server.agent.AgentToolType;
-import com.tencent.supersonic.chat.server.agent.LLMParserTool;
-import com.tencent.supersonic.chat.server.agent.RuleParserTool;
+import com.tencent.supersonic.chat.server.agent.DatasetTool;
 import com.tencent.supersonic.chat.server.agent.ToolConfig;
 import com.tencent.supersonic.common.pojo.enums.StatusEnum;
 import com.tencent.supersonic.common.pojo.enums.TypeEnums;
@@ -169,19 +168,11 @@ public class S2ArtistDemo extends S2BaseDemo {
         agent.setEnableSearch(1);
         agent.setExamples(Lists.newArrayList("国风流派歌手", "港台歌手", "周杰伦流派"));
         ToolConfig toolConfig = new ToolConfig();
-        RuleParserTool ruleQueryTool = new RuleParserTool();
-        ruleQueryTool.setId("0");
-        ruleQueryTool.setType(AgentToolType.NL2SQL_RULE);
-        ruleQueryTool.setDataSetIds(Lists.newArrayList(dataSetId));
-        toolConfig.getTools().add(ruleQueryTool);
-
-        if (demoEnableLlm) {
-            LLMParserTool llmParserTool = new LLMParserTool();
-            llmParserTool.setId("1");
-            llmParserTool.setType(AgentToolType.NL2SQL_LLM);
-            llmParserTool.setDataSetIds(Lists.newArrayList(dataSetId));
-            toolConfig.getTools().add(llmParserTool);
-        }
+        DatasetTool datasetTool = new DatasetTool();
+        datasetTool.setId("1");
+        datasetTool.setType(AgentToolType.DATASET);
+        datasetTool.setDataSetIds(Lists.newArrayList(dataSetId));
+        toolConfig.getTools().add(datasetTool);
         agent.setToolConfig(JSONObject.toJSONString(toolConfig));
         agentService.createAgent(agent, defaultUser);
     }

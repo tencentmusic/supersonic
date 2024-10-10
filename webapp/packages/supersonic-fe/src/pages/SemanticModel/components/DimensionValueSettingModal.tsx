@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Modal, message, Space, Tooltip, Tabs, Drawer } from 'antd';
-import { InfoCircleOutlined } from '@ant-design/icons';
+import { Button, Modal, message, Space, Tooltip, Tabs, Input } from 'antd';
+import TableHeaderFilter from '@/components/TableHeaderFilter';
 import { ISemantic } from '../data';
 import CommonEditTable from './CommonEditTable';
-import { updateDimension, mockDimensionValuesAlias } from '../service';
+import { updateDimension, getDictData } from '../service';
 import DimensionValueSettingForm from './Entity/DimensionValueSettingForm';
 
 export type CreateFormProps = {
@@ -26,10 +26,16 @@ const DimensionValueSettingModal: React.FC<CreateFormProps> = ({
   const [tableDataSource, setTableDataSource] = useState<TableDataSource[]>([]);
   const [dimValueMaps, setDimValueMaps] = useState<ISemantic.IDimensionValueSettingItem[]>([]);
   const [llmLoading, setLlmLoading] = useState<boolean>(false);
+  const [filterParams, setFilterParams] = useState<Record<string, any>>({});
   const [menuKey, setMenuKey] = useState<string>('default');
-
+  const defaultPagination = {
+    current: 1,
+    pageSize: 2,
+    total: 0,
+  };
+  const [pagination, setPagination] = useState(defaultPagination);
   useEffect(() => {
-    setTableDataSource(dimensionValueSettingList);
+    queryDictData();
     setDimValueMaps(dimensionValueSettingList);
   }, [dimensionValueSettingList]);
 
@@ -53,14 +59,26 @@ const DimensionValueSettingModal: React.FC<CreateFormProps> = ({
     message.error(msg);
   };
 
-  const generatorDimensionValue = async () => {
+  const queryDictData = async (params = {}) => {
     setLlmLoading(true);
-    const { code, data } = await mockDimensionValuesAlias({ ...dimensionItem });
+    const { code, data } = await getDictData({
+      modelId: dimensionItem.modelId,
+      itemId: dimensionItem.id,
+      ...filterParams,
+      ...defaultPagination,
+      ...params,
+    });
+
     setLlmLoading(false);
     if (code === 200) {
-      if (Array.isArray(data)) {
-        setDimValueMaps([...dimValueMaps, ...data]);
-        setTableDataSource([...tableDataSource, ...data]);
+      const { list, total, pageSize, current } = data;
+      setPagination({
+        current,
+        pageSize,
+        total,
+      });
+      if (Array.isArray(list)) {
+        setTableDataSource(list);
       }
     } else {
       message.error('大语言模型解析异常');
@@ -73,7 +91,7 @@ const DimensionValueSettingModal: React.FC<CreateFormProps> = ({
         <Button onClick={onCancel}>取消</Button>
         {menuKey === 'default' && (
           <>
-            <Button
+            {/* <Button
               type="primary"
               loading={llmLoading}
               onClick={() => {
@@ -86,7 +104,7 @@ const DimensionValueSettingModal: React.FC<CreateFormProps> = ({
                   <InfoCircleOutlined />
                 </Tooltip>
               </Space>
-            </Button>
+            </Button> */}
             <Button
               type="primary"
               onClick={() => {
@@ -103,13 +121,13 @@ const DimensionValueSettingModal: React.FC<CreateFormProps> = ({
 
   const columns = [
     {
-      title: '技术名称',
-      dataIndex: 'techName',
+      title: '维度值',
+      dataIndex: 'value',
       width: 200,
       tooltip: '数据库中存储的维度值数据。 比如数据库中维度平台的维度值有kw、qy等',
       formItemProps: {
         fieldProps: {
-          placeholder: '请填写技术名称',
+          placeholder: '请填写维度值',
         },
         rules: [
           {
@@ -120,25 +138,25 @@ const DimensionValueSettingModal: React.FC<CreateFormProps> = ({
         ],
       },
     },
-    {
-      title: '业务名称',
-      dataIndex: 'bizName',
-      width: 200,
-      tooltip:
-        '查询完成后,最终返回给用户的维度值信息。比如将技术名称kw转换成酷我平台,最终返回给用户是酷我平台',
-      fieldProps: {
-        placeholder: '请填写业务名称',
-      },
-      formItemProps: {
-        rules: [
-          {
-            required: true,
-            whitespace: true,
-            message: '此项是必填项',
-          },
-        ],
-      },
-    },
+    // {
+    //   title: '业务名称',
+    //   dataIndex: 'bizName',
+    //   width: 200,
+    //   tooltip:
+    //     '查询完成后,最终返回给用户的维度值信息。比如将技术名称kw转换成酷我平台,最终返回给用户是酷我平台',
+    //   fieldProps: {
+    //     placeholder: '请填写业务名称',
+    //   },
+    //   formItemProps: {
+    //     rules: [
+    //       {
+    //         required: true,
+    //         whitespace: true,
+    //         message: '此项是必填项',
+    //       },
+    //     ],
+    //   },
+    // },
     {
       title: '别名',
       dataIndex: 'alias',
@@ -157,7 +175,7 @@ const DimensionValueSettingModal: React.FC<CreateFormProps> = ({
 
   const tabItem = [
     {
-      label: '维度值填充',
+      label: '维度值管理',
       key: 'default',
       children: (
         <CommonEditTable
@@ -169,8 +187,45 @@ const DimensionValueSettingModal: React.FC<CreateFormProps> = ({
                 ...item,
               };
             });
-
             setDimValueMaps(dimValueMaps);
+          }}
+          hideCtrlBtn={['deleteBtn']}
+          editableProTableProps={{
+            recordCreatorProps: false,
+            pagination: pagination,
+            headerTitle: (
+              <TableHeaderFilter
+                components={[
+                  {
+                    label: '维度值搜索',
+                    component: (
+                      <Input.Search
+                        style={{ width: 280 }}
+                        placeholder="请输入维度值名称"
+                        onSearch={(value) => {
+                          setFilterParams((preState) => {
+                            return {
+                              ...preState,
+                              keyValue: value,
+                            };
+                          });
+                          queryDictData({ keyValue: value });
+                        }}
+                      />
+                    ),
+                  },
+                ]}
+              />
+            ),
+            onTableChange: (data: any) => {
+              const { current, pageSize, total } = data;
+              setPagination({
+                current,
+                pageSize,
+                total,
+              });
+              queryDictData({ current, pageSize });
+            },
           }}
         />
       ),

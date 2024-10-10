@@ -12,11 +12,13 @@ import com.tencent.supersonic.common.pojo.enums.ChatModelType;
 import com.tencent.supersonic.util.DataUtils;
 import com.tencent.supersonic.util.LLMConfigUtils;
 import org.junit.jupiter.api.*;
+import org.springframework.test.context.TestPropertySource;
 
 import java.util.List;
 import java.util.Map;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@TestPropertySource(properties = {"s2.demo.enableLLM = true"})
 @Disabled
 public class Text2SQLEval extends BaseTest {
 
@@ -148,11 +150,11 @@ public class Text2SQLEval extends BaseTest {
         return agent;
     }
 
-    private static LLMParserTool getLLMQueryTool() {
-        LLMParserTool llmParserTool = new LLMParserTool();
-        llmParserTool.setType(AgentToolType.NL2SQL_LLM);
-        llmParserTool.setDataSetIds(Lists.newArrayList(-1L));
+    private static DatasetTool getLLMQueryTool() {
+        DatasetTool datasetTool = new DatasetTool();
+        datasetTool.setType(AgentToolType.DATASET);
+        datasetTool.setDataSetIds(Lists.newArrayList(-1L));
 
-        return llmParserTool;
+        return datasetTool;
     }
 }
