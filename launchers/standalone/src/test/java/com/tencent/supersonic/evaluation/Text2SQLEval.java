@@ -148,11 +148,11 @@ public class Text2SQLEval extends BaseTest {
         return agent;
     }
 
-    private static LLMParserTool getLLMQueryTool() {
-        LLMParserTool llmParserTool = new LLMParserTool();
-        llmParserTool.setType(AgentToolType.NL2SQL_LLM);
-        llmParserTool.setDataSetIds(Lists.newArrayList(-1L));
+    private static DatasetTool getLLMQueryTool() {
+        DatasetTool datasetTool = new DatasetTool();
+        datasetTool.setType(AgentToolType.DATASET);
+        datasetTool.setDataSetIds(Lists.newArrayList(-1L));
 
-        return llmParserTool;
+        return datasetTool;
     }
 }

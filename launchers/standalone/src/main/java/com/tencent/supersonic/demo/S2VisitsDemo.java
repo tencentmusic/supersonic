@@ -8,9 +8,8 @@ import com.tencent.supersonic.auth.api.authorization.pojo.AuthRule;
 import com.tencent.supersonic.chat.api.pojo.request.ChatParseReq;
 import com.tencent.supersonic.chat.server.agent.Agent;
 import com.tencent.supersonic.chat.server.agent.AgentToolType;
-import com.tencent.supersonic.chat.server.agent.LLMParserTool;
+import com.tencent.supersonic.chat.server.agent.DatasetTool;
 import com.tencent.supersonic.chat.server.agent.MultiTurnConfig;
-import com.tencent.supersonic.chat.server.agent.RuleParserTool;
 import com.tencent.supersonic.chat.server.agent.ToolConfig;
 import com.tencent.supersonic.chat.server.plugin.ChatPlugin;
 import com.tencent.supersonic.chat.server.plugin.PluginParseConfig;
@@ -151,18 +150,12 @@ public class S2VisitsDemo extends S2BaseDemo {
                 "过去30天访问次数最高的部门top3", "近1个月总访问次数超过100次的部门有几个", "过去半个月每个核心用户的总停留时长"));
         // configure tools
         ToolConfig toolConfig = new ToolConfig();
-        RuleParserTool ruleQueryTool = new RuleParserTool();
-        ruleQueryTool.setType(AgentToolType.NL2SQL_RULE);
-        ruleQueryTool.setId("0");
-        ruleQueryTool.setDataSetIds(Lists.newArrayList(dataSetId));
-        toolConfig.getTools().add(ruleQueryTool);
-        if (demoEnableLlm) {
-            LLMParserTool llmParserTool = new LLMParserTool();
-            llmParserTool.setId("1");
-            llmParserTool.setType(AgentToolType.NL2SQL_LLM);
-            llmParserTool.setDataSetIds(Lists.newArrayList(dataSetId));
-            toolConfig.getTools().add(llmParserTool);
-        }
+        DatasetTool datasetTool = new DatasetTool();
+        datasetTool.setId("1");
+        datasetTool.setType(AgentToolType.DATASET);
+        datasetTool.setDataSetIds(Lists.newArrayList(dataSetId));
+        toolConfig.getTools().add(datasetTool);
+
         agent.setToolConfig(JSONObject.toJSONString(toolConfig));
         // configure chat models
         Map<ChatModelType, Integer> chatModelConfig = Maps.newHashMap();

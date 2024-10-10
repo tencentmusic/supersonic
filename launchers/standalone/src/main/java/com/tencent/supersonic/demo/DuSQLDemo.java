@@ -4,7 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.chat.server.agent.Agent;
 import com.tencent.supersonic.chat.server.agent.AgentToolType;
-import com.tencent.supersonic.chat.server.agent.LLMParserTool;
+import com.tencent.supersonic.chat.server.agent.DatasetTool;
 import com.tencent.supersonic.chat.server.agent.ToolConfig;
 import com.tencent.supersonic.common.pojo.JoinCondition;
 import com.tencent.supersonic.common.pojo.ModelRela;
@@ -335,11 +335,11 @@ public class DuSQLDemo extends S2BaseDemo {
         agent.setExamples(Lists.newArrayList());
         ToolConfig toolConfig = new ToolConfig();
 
-        LLMParserTool llmParserTool = new LLMParserTool();
-        llmParserTool.setId("1");
-        llmParserTool.setType(AgentToolType.NL2SQL_LLM);
-        llmParserTool.setDataSetIds(Lists.newArrayList(4L));
-        toolConfig.getTools().add(llmParserTool);
+        DatasetTool datasetTool = new DatasetTool();
+        datasetTool.setId("1");
+        datasetTool.setType(AgentToolType.DATASET);
+        datasetTool.setDataSetIds(Lists.newArrayList(4L));
+        toolConfig.getTools().add(datasetTool);
 
         agent.setToolConfig(JSONObject.toJSONString(toolConfig));
         log.info("agent:{}", JsonUtil.toString(agent));
