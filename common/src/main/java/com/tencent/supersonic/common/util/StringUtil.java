@@ -51,4 +51,21 @@ public class StringUtil {
         }
         return sql.replaceAll("`", "");
     }
+
+    public static String append(String old, String add) {
+        return append(old, add, "\n");
+    }
+
+    public static String append(String old, String add, String split) {
+        if (StringUtils.isNotBlank(old)) {
+            if (StringUtils.isNotBlank(add)) {
+                return String.format("%s%s%s", old, split, add);
+            }
+            return old;
+        }
+        if (StringUtils.isNotBlank(add)) {
+            return add;
+        }
+        return null;
+    }
 }

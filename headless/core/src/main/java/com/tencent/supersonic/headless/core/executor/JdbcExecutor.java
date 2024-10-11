@@ -40,9 +40,14 @@ public class JdbcExecutor implements QueryExecutor {
         log.info("executing SQL: {}", sql);
         Database database = queryStatement.getSemanticModel().getDatabase();
         SemanticQueryResp queryResultWithColumns = new SemanticQueryResp();
-        SqlUtils sqlUtil = sqlUtils.init(database);
-        sqlUtil.queryInternal(queryStatement.getSql(), queryResultWithColumns);
-        queryResultWithColumns.setSql(sql);
+        try {
+            SqlUtils sqlUtil = sqlUtils.init(database);
+            sqlUtil.queryInternal(queryStatement.getSql(), queryResultWithColumns);
+            queryResultWithColumns.setSql(sql);
+        } catch (Exception e) {
+            log.error("queryInternal error [{}]", e);
+            queryResultWithColumns.setErrorMsg(e.getMessage());
+        }
         return queryResultWithColumns;
     }
 }
