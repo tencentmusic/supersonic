@@ -64,7 +64,7 @@ public class MetricCheckUtils {
     }
 
     private static boolean hasAggregateFunction(String expr) {
-        String sql = String.format("select %s from table", expr);
-        return SqlSelectFunctionHelper.hasAggregateFunction(sql);
+        return !CollectionUtils.isEmpty(SqlSelectFunctionHelper.getAggregateFunctions(expr));
     }
+
 }
