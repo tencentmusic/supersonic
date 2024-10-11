@@ -30,7 +30,7 @@ const DimensionValueSettingModal: React.FC<CreateFormProps> = ({
   const [menuKey, setMenuKey] = useState<string>('default');
   const defaultPagination = {
     current: 1,
-    pageSize: 2,
+    pageSize: 20,
     total: 0,
   };
   const [pagination, setPagination] = useState(defaultPagination);
@@ -124,6 +124,7 @@ const DimensionValueSettingModal: React.FC<CreateFormProps> = ({
       title: '维度值',
       dataIndex: 'value',
       width: 200,
+      editable: false,
       tooltip: '数据库中存储的维度值数据。 比如数据库中维度平台的维度值有kw、qy等',
       formItemProps: {
         fieldProps: {
