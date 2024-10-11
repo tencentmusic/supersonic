@@ -86,16 +86,8 @@ const ChatMsg: React.FC<Props> = ({
     }
     const isDslMetricCard =
       queryMode === 'LLM_S2SQL' && singleData && metricFields.length === 1 && columns.length === 1;
-
     const isMetricCard = (queryMode.includes('METRIC') || isDslMetricCard) && singleData;
-
-    const isText =
-      queryMode === 'PLAIN_TEXT' ||
-      (columns.length === 1 &&
-        columns[0].showType === 'CATEGORY' &&
-        ((!queryMode.includes('METRIC') && !queryMode.includes('ENTITY')) ||
-          queryMode === 'METRIC_INTERPRET') &&
-        singleData);
+    const isText = !queryColumns?.length;
 
     if (isText) {
       return MsgContentTypeEnum.TEXT;
@@ -120,6 +112,8 @@ const ChatMsg: React.FC<Props> = ({
     const isMetricTrend =
       dateField &&
       metricFields.length > 0 &&
+      categoryField.length <= 1 &&
+      !(metricFields.length > 1 && categoryField.length > 0) &&
       !dataSource.every(item => item[dateField.nameEn] === dataSource[0][dateField.nameEn]);
 
     if (isMetricTrend) {

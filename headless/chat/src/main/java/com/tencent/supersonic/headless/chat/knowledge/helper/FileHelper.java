@@ -6,6 +6,8 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -45,7 +47,8 @@ public class FileHelper {
     }
 
     private static String getCustomPath(String[] path) {
-        return path[0].substring(0, path[0].lastIndexOf(FILE_SPILT)) + FILE_SPILT;
+        Path firstPath = Paths.get(path[0]).normalize();
+        return firstPath.getParent().toString() + File.separator;
     }
 
     /**

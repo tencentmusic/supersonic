@@ -91,9 +91,6 @@ public abstract class S2BaseDemo implements CommandLineRunner {
     @Value("${s2.demo.names:S2VisitsDemo}")
     protected List<String> demoList;
 
-    @Value("${s2.demo.enableLLM:true}")
-    protected boolean demoEnableLlm;
-
     public void run(String... args) {
         demoDatabase = addDatabaseIfNotExist();
         demoChatModel = addChatModelIfNotExist();
