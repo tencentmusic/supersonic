@@ -7,6 +7,7 @@ import com.tencent.supersonic.common.pojo.QueryColumn;
 import com.tencent.supersonic.common.pojo.enums.EngineType;
 import com.tencent.supersonic.headless.api.pojo.DBColumn;
 import com.tencent.supersonic.headless.api.pojo.request.DatabaseReq;
+import com.tencent.supersonic.headless.api.pojo.request.ModelSchemaReq;
 import com.tencent.supersonic.headless.api.pojo.request.SqlExecuteReq;
 import com.tencent.supersonic.headless.api.pojo.response.DatabaseResp;
 import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
@@ -203,6 +204,16 @@ public class DatabaseServiceImpl extends ServiceImpl<DatabaseDOMapper, DatabaseD
         DatabaseResp databaseResp = getDatabase(id);
         DbAdaptor dbAdaptor = DbAdaptorFactory.getEngineAdaptor(databaseResp.getType());
         return dbAdaptor.getTables(DatabaseConverter.getConnectInfo(databaseResp), db);
+    }
+
+    @Override
+    public List<DBColumn> getDbColumns(ModelSchemaReq modelSchemaReq) throws SQLException {
+        if (StringUtils.isNotBlank(modelSchemaReq.getSql())) {
+            return getColumns(modelSchemaReq.getDatabaseId(), modelSchemaReq.getSql());
+        } else {
+            return getColumns(modelSchemaReq.getDatabaseId(), modelSchemaReq.getDb(),
+                    modelSchemaReq.getTable());
+        }
     }
 
     @Override
