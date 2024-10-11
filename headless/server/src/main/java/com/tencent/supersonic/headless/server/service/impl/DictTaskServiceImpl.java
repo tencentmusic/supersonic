@@ -59,8 +59,8 @@ public class DictTaskServiceImpl implements DictTaskService {
     private final DimensionService dimensionService;
 
     public DictTaskServiceImpl(DictRepository dictRepository, DictUtils dictConverter,
-            DictUtils dictUtils, FileHandler fileHandler, DictWordService dictWordService,
-            DimensionService dimensionService) {
+                               DictUtils dictUtils, FileHandler fileHandler, DictWordService dictWordService,
+                               DimensionService dimensionService) {
         this.dictRepository = dictRepository;
         this.dictConverter = dictConverter;
         this.dictUtils = dictUtils;
@@ -178,7 +178,26 @@ public class DictTaskServiceImpl implements DictTaskService {
         PageInfo<DictValueResp> dictValueRespList =
                 fileHandler.queryDictValue(fileName, dictValueReq);
         PageInfo<DictValueDimResp> result = convert2DictValueDimRespPage(dictValueRespList);
+        fillDimMapInfo(result.getList(), dictValueReq.getItemId());
         return result;
+    }
+
+    private void fillDimMapInfo(List<DictValueDimResp> list, Long dimId) {
+        DimensionResp dimResp = dimensionService.getDimension(dimId);
+        if (CollectionUtils.isEmpty(dimResp.getDimValueMaps())) {
+            return;
+        }
+        Map<String, DimValueMap> valueAndMap = dimResp.getDimValueMaps().stream()
+                .collect(Collectors.toMap(dim -> dim.getValue(), v -> v, (v1, v2) -> v2));
+        if (CollectionUtils.isEmpty(valueAndMap)) {
+            return;
+        }
+        list.stream().forEach(dictValueDimResp -> {
+            String dimValue = dictValueDimResp.getValue();
+            if (valueAndMap.containsKey(dimValue) && Objects.nonNull(valueAndMap.get(dimValue))) {
+                dictValueDimResp.setAlias(valueAndMap.get(dimValue).getAlias());
+            }
+        });
     }
 
     private PageInfo<DictValueDimResp> convert2DictValueDimRespPage(
