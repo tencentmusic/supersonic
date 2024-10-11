@@ -106,6 +106,7 @@ public class AgentServiceImpl extends ServiceImpl<AgentDOMapper, AgentDO> implem
 
     private synchronized void doExecuteAgentExamples(Agent agent) {
         if (!agent.containsDatasetTool()
+                || !agent.enableMemoryReview()
                 || !ModelConfigHelper.testConnection(
                         ModelConfigHelper.getChatModelConfig(agent, ChatModelType.TEXT_TO_SQL))
                 || CollectionUtils.isEmpty(agent.getExamples())) {

@@ -31,10 +31,11 @@ public class MemoryReviewTask {
 
     private static final String INSTRUCTION = ""
             + "\n#Role: You are a senior data engineer experienced in writing SQL."
-            + "\n#Task: Your will be provided with a user question and the SQL written by junior engineer,"
-            + "please take a review and give your opinion." + "\n#Rules: "
-            + "1.ALWAYS follow the output format: `opinion=(POSITIVE|NEGATIVE),comment=(your comment)`."
-            + "2.NO NEED to include date filter in the where clause if not explicitly expressed in the `Question`."
+            + "\n#Task: Your will be provided with a user question and the SQL written by a junior engineer,"
+            + "please take a review and give your opinion."
+            + "\n#Rules: "
+            + "\n1.ALWAYS follow the output format: `opinion=(POSITIVE|NEGATIVE),comment=(your comment)`."
+            + "\n2.NO NEED to check date filters as the junior engineer seldom makes mistakes in this regard."
             + "\n#Question: %s" + "\n#Schema: %s" + "\n#SideInfo: %s" + "\n#SQL: %s"
             + "\n#Response: ";
 
