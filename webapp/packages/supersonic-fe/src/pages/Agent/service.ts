@@ -69,3 +69,10 @@ export function getToolTypes(): Promise<any> {
     method: 'GET',
   });
 }
+
+export function createMemory(data: any) {
+  return request<Result<string>>('/api/chat/memory/createMemory', {
+    method: 'POST',
+    data,
+  });
+}
