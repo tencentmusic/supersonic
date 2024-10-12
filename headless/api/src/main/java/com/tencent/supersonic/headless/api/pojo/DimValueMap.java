@@ -16,4 +16,6 @@ public class DimValueMap {
 
     /** dimension value for user query */
     private List<String> alias = new ArrayList<>();
+
+    private String value;
 }

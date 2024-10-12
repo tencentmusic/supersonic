@@ -1,7 +1,8 @@
 package com.tencent.supersonic.headless.api.pojo;
 
-import java.util.List;
 import lombok.Data;
+
+import java.util.List;
 
 @Data
 public class ModelSchema {

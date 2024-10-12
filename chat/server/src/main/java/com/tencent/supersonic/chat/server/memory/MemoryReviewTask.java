@@ -55,11 +55,14 @@ public class MemoryReviewTask {
 
     @Scheduled(fixedDelay = 60 * 1000)
     public void review() {
-        try {
-            memoryService.getMemoriesForLlmReview().stream().forEach(this::processMemory);
-        } catch (Exception e) {
-            log.error("Exception occurred during memory review task", e);
-        }
+        memoryService.getMemoriesForLlmReview().stream().forEach(memory -> {
+            try {
+                processMemory(memory);
+            } catch (Exception e) {
+                log.error("Exception occurred while processing memory with id {}: {}",
+                        memory.getId(), e.getMessage(), e);
+            }
+        });
     }
 
     private void processMemory(ChatMemoryDO m) {

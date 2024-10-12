@@ -34,6 +34,11 @@ public class DimensionConverter {
             dimensionDO.setDefaultValues(JSONObject.toJSONString(dimensionReq.getDefaultValues()));
         }
         if (!CollectionUtils.isEmpty(dimensionReq.getDimValueMaps())) {
+            List<DimValueMap> dimValueMaps = dimensionReq.getDimValueMaps();
+            dimValueMaps.stream().forEach(dimValueMap -> {
+                dimValueMap.setTechName(dimValueMap.getValue());
+            });
+
             dimensionDO.setDimValueMaps(JSONObject.toJSONString(dimensionReq.getDimValueMaps()));
         } else {
             dimensionDO.setDimValueMaps(JSONObject.toJSONString(new ArrayList<>()));
@@ -70,7 +75,7 @@ public class DimensionConverter {
     }
 
     public static DimensionResp convert2DimensionResp(DimensionDO dimensionDO,
-            Map<Long, ModelResp> modelRespMap) {
+                                                      Map<Long, ModelResp> modelRespMap) {
         DimensionResp dimensionResp = new DimensionResp();
         BeanUtils.copyProperties(dimensionDO, dimensionResp);
         dimensionResp.setModelName(
@@ -118,11 +123,11 @@ public class DimensionConverter {
     }
 
     public static List<DimensionResp> filterByDataSet(List<DimensionResp> dimensionResps,
-            DataSetResp dataSetResp) {
+                                                      DataSetResp dataSetResp) {
         return dimensionResps.stream()
                 .filter(dimensionResp -> dataSetResp.dimensionIds().contains(dimensionResp.getId())
                         || dataSetResp.getAllIncludeAllModels()
-                                .contains(dimensionResp.getModelId()))
+                        .contains(dimensionResp.getModelId()))
                 .collect(Collectors.toList());
     }
 }
