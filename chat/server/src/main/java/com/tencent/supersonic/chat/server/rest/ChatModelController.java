@@ -16,8 +16,8 @@ import com.tencent.supersonic.common.util.ChatAppManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping({"/api/chat/model", "/openapi/chat/model"})
@@ -51,8 +51,8 @@ public class ChatModelController {
     }
 
     @RequestMapping("/getModelAppList")
-    public List<ChatApp> getModelAppList() {
-        return new ArrayList(ChatAppManager.getAllApps().values());
+    public Map<String, ChatApp> getChatAppList() {
+        return ChatAppManager.getAllApps();
     }
 
     @RequestMapping("/getModelParameters")

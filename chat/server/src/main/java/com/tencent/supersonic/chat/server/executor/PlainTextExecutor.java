@@ -29,14 +29,14 @@ import static com.tencent.supersonic.chat.server.parser.ParserConfig.PARSER_MULT
 public class PlainTextExecutor implements ChatQueryExecutor {
 
     private static final String APP_KEY = "SMALL_TALK";
-    private static final String INSTRUCTION = "" + "#Role: You are a nice person to talk to.\n"
-            + "#Task: Respond quickly and nicely to the user."
-            + "#Rules: 1.ALWAYS use the same language as the input.\n" + "#History Inputs: %s\n"
-            + "#Current Input: %s\n" + "#Your response: ";
+    private static final String INSTRUCTION = "" + "#Role: You are a nice person to talk to."
+            + "\n#Task: Respond quickly and nicely to the user."
+            + "\n#Rules: 1.ALWAYS use the same language as the `#Current Input`."
+            + "\n#History Inputs: %s" + "\n#Current Input: %s" + "\n#Response: ";
 
     public PlainTextExecutor() {
-        ChatAppManager.register(ChatApp.builder().key(APP_KEY).prompt(INSTRUCTION).name("闲聊对话")
-                .description("直接将原始输入透传大模型").enable(true).build());
+        ChatAppManager.register(APP_KEY, ChatApp.builder().prompt(INSTRUCTION).name("闲聊对话")
+                .description("直接将原始输入透传大模型").enable(false).build());
     }
 
     @Override

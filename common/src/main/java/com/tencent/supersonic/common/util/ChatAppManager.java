@@ -8,8 +8,8 @@ import java.util.Map;
 public class ChatAppManager {
     private static final Map<String, ChatApp> chatApps = Maps.newConcurrentMap();
 
-    public static void register(ChatApp chatApp) {
-        chatApps.put(chatApp.getKey(), chatApp);
+    public static void register(String key, ChatApp app) {
+        chatApps.put(key, app);
     }
 
     public static Map<String, ChatApp> getAllApps() {

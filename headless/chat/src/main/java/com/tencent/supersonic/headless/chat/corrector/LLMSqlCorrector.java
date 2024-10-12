@@ -39,8 +39,8 @@ public class LLMSqlCorrector extends BaseSemanticCorrector {
             + "\n#Question:{{question}} #InputSQL:{{sql}} #Response:";
 
     public LLMSqlCorrector() {
-        ChatAppManager.register(ChatApp.builder().key(APP_KEY).prompt(INSTRUCTION).name("语义SQL修正")
-                .description("").enable(false).build());
+        ChatAppManager.register(APP_KEY, ChatApp.builder().prompt(INSTRUCTION).name("语义SQL修正")
+                .description("通过大模型对解析S2SQL做二次修正").enable(false).build());
     }
 
     @Data

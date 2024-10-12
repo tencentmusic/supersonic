@@ -43,7 +43,7 @@ public class OnePassSCSqlGenStrategy extends SqlGenStrategy {
             + "\n#Question: Question:{{question}},Schema:{{schema}},SideInfo:{{information}}";
 
     public OnePassSCSqlGenStrategy() {
-        ChatAppManager.register(ChatApp.builder().key(APP_KEY).prompt(INSTRUCTION).name("语义SQL解析")
+        ChatAppManager.register(APP_KEY, ChatApp.builder().prompt(INSTRUCTION).name("语义SQL解析")
                 .description("通过大模型做语义解析生成S2SQL").enable(true).build());
     }
 

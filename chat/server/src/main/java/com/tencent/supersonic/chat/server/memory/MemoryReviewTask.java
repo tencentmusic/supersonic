@@ -49,7 +49,7 @@ public class MemoryReviewTask {
     private AgentService agentService;
 
     public MemoryReviewTask() {
-        ChatAppManager.register(ChatApp.builder().key(APP_KEY).prompt(INSTRUCTION).name("记忆启用评估")
+        ChatAppManager.register(APP_KEY, ChatApp.builder().prompt(INSTRUCTION).name("记忆启用评估")
                 .description("通过大模型对记忆做正确性评估以决定是否启用").enable(false).build());
     }
 

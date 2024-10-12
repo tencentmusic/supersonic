@@ -11,7 +11,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ChatApp {
-    private String key;
     private String name;
     private String description;
     private String prompt;

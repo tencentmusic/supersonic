@@ -77,13 +77,13 @@ public class NL2SQLParser implements ChatQueryParser {
             + "#Examples: {{examples}}\n" + "#Response: ";
 
     public NL2SQLParser() {
-        ChatAppManager.register(
-                ChatApp.builder().key(APP_KEY_MULTI_TURN).prompt(REWRITE_MULTI_TURN_INSTRUCTION)
+        ChatAppManager.register(APP_KEY_MULTI_TURN,
+                ChatApp.builder().prompt(REWRITE_MULTI_TURN_INSTRUCTION)
                         .name("多轮对话改写").description("通过大模型根据历史对话来改写本轮对话").enable(false).build());
 
-        ChatAppManager.register(ChatApp.builder().key(APP_KEY_ERROR_MESSAGE)
-                .prompt(REWRITE_ERROR_MESSAGE_INSTRUCTION).name("异常提示改写")
-                .description("通过大模型将异常信息改写为更友好和引导性的提示用语").enable(false).build());
+        ChatAppManager.register(APP_KEY_ERROR_MESSAGE,
+                ChatApp.builder().prompt(REWRITE_ERROR_MESSAGE_INSTRUCTION)
+                .name("异常提示改写").description("通过大模型将异常信息改写为更友好和引导性的提示用语").enable(false).build());
     }
 
     @Override
