@@ -3,6 +3,7 @@ package com.tencent.supersonic.chat.server.agent;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.tencent.supersonic.chat.server.memory.MemoryReviewTask;
 import com.tencent.supersonic.common.pojo.ChatApp;
 import com.tencent.supersonic.common.pojo.RecordInfo;
 import lombok.Data;
@@ -21,6 +22,7 @@ public class Agent extends RecordInfo {
     private Integer status;
     private List<String> examples;
     private Integer enableSearch;
+    private Integer enableFeedback;
     private String toolConfig;
     private Map<String, ChatApp> chatAppConfig = Collections.EMPTY_MAP;
     private VisualConfig visualConfig;
@@ -44,7 +46,7 @@ public class Agent extends RecordInfo {
     }
 
     public boolean enableMemoryReview() {
-        return false;
+        return chatAppConfig.get(MemoryReviewTask.APP_KEY).isEnable();
     }
 
     public static boolean containsAllModel(Set<Long> detectViewIds) {

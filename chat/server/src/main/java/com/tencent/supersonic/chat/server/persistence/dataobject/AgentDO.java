@@ -33,6 +33,8 @@ public class AgentDO {
 
     private Integer enableSearch;
 
+    private Integer enableFeedback;
+
     private String toolConfig;
 
     private String chatModelConfig;

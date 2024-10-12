@@ -397,6 +397,7 @@ CREATE TABLE IF NOT EXISTS s2_agent
     updated_by  varchar(100) null,
     updated_at  TIMESTAMP null,
     enable_search int null,
+    enable_feedback int null,
     PRIMARY KEY (`id`)
 ); COMMENT ON TABLE s2_agent IS 'agent information table';
 
