@@ -75,6 +75,7 @@ CREATE TABLE IF NOT EXISTS `s2_agent` (
     `chat_model_config` text COLLATE utf8_unicode_ci DEFAULT NULL,
     `visual_config` varchar(2000)  COLLATE utf8_unicode_ci DEFAULT NULL,
     `enable_search` tinyint DEFAULT 1,
+    `enable_feedback` tinyint DEFAULT 1,
     `created_by` varchar(100) COLLATE utf8_unicode_ci DEFAULT NULL,
     `created_at` datetime DEFAULT NULL,
     `updated_by` varchar(100) COLLATE utf8_unicode_ci DEFAULT NULL,

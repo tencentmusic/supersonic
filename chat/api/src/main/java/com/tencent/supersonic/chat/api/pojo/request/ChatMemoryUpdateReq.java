@@ -4,11 +4,10 @@ import javax.validation.constraints.NotNull;
 
 import com.tencent.supersonic.chat.api.pojo.enums.MemoryReviewResult;
 import com.tencent.supersonic.chat.api.pojo.enums.MemoryStatus;
-import com.tencent.supersonic.common.pojo.RecordInfo;
 import lombok.Data;
 
 @Data
-public class ChatMemoryUpdateReq extends RecordInfo {
+public class ChatMemoryUpdateReq {
 
     @NotNull(message = "id不可为空")
     private Long id;

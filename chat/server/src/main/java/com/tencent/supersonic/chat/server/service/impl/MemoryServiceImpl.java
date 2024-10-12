@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -46,10 +47,11 @@ public class MemoryServiceImpl implements MemoryService {
 
     @Override
     public void updateMemory(ChatMemoryUpdateReq chatMemoryUpdateReq, User user) {
-        chatMemoryUpdateReq.updatedBy(user.getName());
         ChatMemoryDO chatMemoryDO = chatMemoryRepository.getMemory(chatMemoryUpdateReq.getId());
-        boolean hadEnabled = MemoryStatus.ENABLED.equals(chatMemoryDO.getStatus());
+        chatMemoryDO.setUpdatedBy(user.getName());
+        chatMemoryDO.setUpdatedAt(new Date());
         BeanMapper.mapper(chatMemoryUpdateReq, chatMemoryDO);
+        boolean hadEnabled = MemoryStatus.ENABLED.equals(chatMemoryDO.getStatus());
         if (MemoryStatus.ENABLED.equals(chatMemoryUpdateReq.getStatus()) && !hadEnabled) {
             enableMemory(chatMemoryDO);
         } else if (MemoryStatus.DISABLED.equals(chatMemoryUpdateReq.getStatus()) && hadEnabled) {
