@@ -19,10 +19,10 @@ public class Agent extends RecordInfo {
     private String name;
     private String description;
     /** 0 offline, 1 online */
-    private Integer status;
+    private Integer status = 1;
     private List<String> examples;
-    private Integer enableSearch;
-    private Integer enableFeedback;
+    private Integer enableSearch = 1;
+    private Integer enableFeedback = 0;
     private String toolConfig;
     private Map<String, ChatApp> chatAppConfig = Collections.EMPTY_MAP;
     private VisualConfig visualConfig;
