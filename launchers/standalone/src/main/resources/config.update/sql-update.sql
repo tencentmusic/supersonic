@@ -387,3 +387,8 @@ CREATE TABLE IF NOT EXISTS `s2_chat_model` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='对话大模型实例表';
 ALTER TABLE s2_agent RENAME COLUMN config TO tool_config;
 ALTER TABLE s2_agent RENAME COLUMN model_config TO chat_model_config;
+
+--20241011
+ALTER TABLE s2_agent DROP COLUMN prompt_config;
+ALTER TABLE s2_agent DROP COLUMN multi_turn_config;
+ALTER TABLE s2_agent DROP COLUMN enable_memory_review;

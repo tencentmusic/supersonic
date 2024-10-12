@@ -1,14 +1,16 @@
 package com.tencent.supersonic.common.calcite;
 
 import com.google.common.base.Preconditions;
-import org.apache.calcite.sql.SqlDialect;
-import org.apache.calcite.sql.SqlIntervalLiteral;
-import org.apache.calcite.sql.SqlNode;
-import org.apache.calcite.sql.SqlWriter;
+import org.apache.calcite.rel.type.RelDataTypeSystem;
+import org.apache.calcite.sql.*;
+import org.apache.calcite.sql.fun.SqlMonotonicBinaryOperator;
+import org.apache.calcite.sql.parser.SqlParserPos;
 import org.apache.calcite.sql.validate.SqlConformance;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-/** customize the SqlDialect */
+/**
+ * customize the SqlDialect
+ */
 public class SemanticSqlDialect extends SqlDialect {
 
     private static final SqlConformance tagTdwSqlConformance = new SemanticSqlConformance();
@@ -83,6 +85,38 @@ public class SemanticSqlDialect extends SqlDialect {
     }
 
     public boolean supportsNestedAggregations() {
+        return false;
+    }
+
+
+    public void unparseCall(SqlWriter writer, SqlCall call, int leftPrec, int rightPrec) {
+        if (modifyIntervalTime(call, writer, leftPrec, rightPrec)) {
+            return;
+        }
+        super.unparseCall(writer, call, leftPrec, rightPrec);
+
+    }
+
+    private Boolean modifyIntervalTime(SqlCall call, SqlWriter writer, int leftPrec,
+            int rightPrec) {
+        SqlOperator operator = call.getOperator();
+        if (operator instanceof SqlMonotonicBinaryOperator
+                && call.getKind().equals(SqlKind.TIMES)) {
+            if (call.getOperandList() != null && call.getOperandList().size() == 2
+                    && call.getOperandList().get(1) instanceof SqlIntervalLiteral) {
+                SqlIntervalLiteral intervalOperand =
+                        (SqlIntervalLiteral) call.getOperandList().get(1);
+                SqlIntervalLiteral.IntervalValue interval =
+                        (SqlIntervalLiteral.IntervalValue) intervalOperand.getValue();
+                call.setOperand(1, SqlNumericLiteral.createExactNumeric(interval.toString(),
+                        SqlParserPos.ZERO));
+                writer.keyword(SqlKind.INTERVAL.name());
+                call.unparse(writer, leftPrec, rightPrec);
+                unparseSqlIntervalQualifier(writer, interval.getIntervalQualifier(),
+                        RelDataTypeSystem.DEFAULT);
+                return true;
+            }
+        }
         return false;
     }
 }

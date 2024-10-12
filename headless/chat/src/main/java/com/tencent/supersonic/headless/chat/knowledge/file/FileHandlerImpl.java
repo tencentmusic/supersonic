@@ -28,9 +28,6 @@ import java.util.stream.Stream;
 @Component
 public class FileHandlerImpl implements FileHandler {
 
-    @Value("${dict.value.max.count.page:1000}")
-    private int dictValueMaxCountPage;
-
     public static final String FILE_SPILT = File.separator;
 
     private final LocalFileConfig localFileConfig;
@@ -124,8 +121,9 @@ public class FileHandlerImpl implements FileHandler {
             DictValueReq dictValueReq) {
         PageInfo<DictValueResp> dictValueRespPageInfo = new PageInfo<>();
         String filePath = localFileConfig.getDictDirectoryLatest() + FILE_SPILT + fileName;
-        Long fileLineNum = Math.min(dictValueMaxCountPage, getFileLineNum(filePath));
-        Integer startLine = 1;
+        Long fileLineNum = getFileLineNum(filePath);
+        Integer startLine =
+                Math.max(1, (dictValueReq.getCurrent() - 1) * dictValueReq.getPageSize() + 1);
         Integer endLine = Integer.valueOf(
                 Math.min(dictValueReq.getCurrent() * dictValueReq.getPageSize(), fileLineNum) + "");
         List<DictValueResp> dictValueRespList = getFileData(filePath, startLine, endLine);
@@ -135,7 +133,7 @@ public class FileHandlerImpl implements FileHandler {
         dictValueRespPageInfo.setTotal(fileLineNum);
         dictValueRespPageInfo.setList(dictValueRespList);
         dictValueRespPageInfo.setHasNextPage(endLine >= fileLineNum ? false : true);
-        dictValueRespPageInfo.setHasPreviousPage(startLine <= 0 ? false : true);
+        dictValueRespPageInfo.setHasPreviousPage(startLine <= 1 ? false : true);
         return dictValueRespPageInfo;
     }
 
@@ -149,6 +147,13 @@ public class FileHandlerImpl implements FileHandler {
         return null;
     }
 
+    /**
+     *
+     * @param filePath
+     * @param startLine 1开始
+     * @param endLine
+     * @return
+     */
     private List<DictValueResp> getFileData(String filePath, Integer startLine, Integer endLine) {
         List<DictValueResp> fileData = new ArrayList<>();
 

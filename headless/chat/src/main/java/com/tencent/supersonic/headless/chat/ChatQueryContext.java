@@ -2,6 +2,7 @@ package com.tencent.supersonic.headless.chat;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
+import com.tencent.supersonic.common.pojo.ChatApp;
 import com.tencent.supersonic.common.pojo.ChatModelConfig;
 import com.tencent.supersonic.common.pojo.Text2SQLExemplar;
 import com.tencent.supersonic.common.pojo.enums.Text2SQLType;
@@ -47,13 +48,14 @@ public class ChatQueryContext {
     private SchemaMapInfo mapInfo = new SchemaMapInfo();
     private SemanticParseInfo contextParseInfo;
     private MapModeEnum mapModeEnum = MapModeEnum.STRICT;
+    private QueryDataType queryDataType = QueryDataType.ALL;
     @JsonIgnore
     private SemanticSchema semanticSchema;
     @JsonIgnore
     private ChatWorkflowState chatWorkflowState;
-    private QueryDataType queryDataType = QueryDataType.ALL;
-    private ChatModelConfig modelConfig;
-    private String customPrompt;
+    @JsonIgnore
+    private Map<String, ChatApp> chatAppConfig;
+    @JsonIgnore
     private List<Text2SQLExemplar> dynamicExemplars;
 
     public List<SemanticQuery> getCandidateQueries() {

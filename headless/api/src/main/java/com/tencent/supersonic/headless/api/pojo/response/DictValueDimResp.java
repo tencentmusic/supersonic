@@ -13,7 +13,7 @@ import java.util.List;
 @Data
 @ToString
 public class DictValueDimResp extends DictValueResp {
-    /** dimension value for result show */
+    /** dimension value */
     private String bizName;
 
     /** dimension value for user query */

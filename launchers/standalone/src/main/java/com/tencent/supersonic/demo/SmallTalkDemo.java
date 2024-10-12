@@ -26,10 +26,6 @@ public class SmallTalkDemo extends S2BaseDemo {
         ToolConfig toolConfig = new ToolConfig();
         agent.setToolConfig(JSONObject.toJSONString(toolConfig));
         agent.setExamples(Lists.newArrayList("如何才能变帅", "如何才能赚更多钱", "如何才能世界和平"));
-        MultiTurnConfig multiTurnConfig = new MultiTurnConfig();
-        multiTurnConfig.setEnableMultiTurn(true);
-        agent.setMultiTurnConfig(multiTurnConfig);
-
         agentService.createAgent(agent, defaultUser);
     }
 
