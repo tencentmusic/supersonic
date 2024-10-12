@@ -29,7 +29,7 @@ public class Text2SQLEval extends BaseTest {
 
     @BeforeAll
     public void init() {
-        Agent agent = agentService.createAgent(getLLMAgent(false), DataUtils.getUser());
+        Agent agent = agentService.createAgent(getLLMAgent(), DataUtils.getUser());
         agentId = agent.getId();
     }
 
@@ -133,7 +133,7 @@ public class Text2SQLEval extends BaseTest {
         assert result.getTextResult().contains("3");
     }
 
-    public Agent getLLMAgent(boolean enableMultiturn) {
+    public Agent getLLMAgent() {
         Agent agent = new Agent();
         agent.setName("Agent for Test");
         ToolConfig toolConfig = new ToolConfig();

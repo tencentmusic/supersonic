@@ -64,7 +64,8 @@ public class LLMSqlCorrector extends BaseSemanticCorrector {
             return;
         }
 
-        ChatLanguageModel chatLanguageModel = ModelProvider.getChatModel(chatApp.getChatModelConfig());
+        ChatLanguageModel chatLanguageModel =
+                ModelProvider.getChatModel(chatApp.getChatModelConfig());
         SemanticSqlExtractor extractor =
                 AiServices.create(SemanticSqlExtractor.class, chatLanguageModel);
         Prompt prompt = generatePrompt(chatQueryContext.getQueryText(), semanticParseInfo,

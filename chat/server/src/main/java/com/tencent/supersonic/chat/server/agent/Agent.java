@@ -5,7 +5,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.tencent.supersonic.common.pojo.ChatApp;
 import com.tencent.supersonic.common.pojo.RecordInfo;
-import com.tencent.supersonic.common.pojo.enums.ChatModelType;
 import lombok.Data;
 import org.springframework.util.CollectionUtils;
 
@@ -22,12 +21,8 @@ public class Agent extends RecordInfo {
     private Integer status;
     private List<String> examples;
     private Integer enableSearch;
-    private Integer enableMemoryReview;
     private String toolConfig;
-    private Map<ChatModelType, Integer> chatModelConfig = Collections.EMPTY_MAP;
     private Map<String, ChatApp> chatAppConfig = Collections.EMPTY_MAP;
-    private PromptConfig promptConfig;
-    private MultiTurnConfig multiTurnConfig;
     private VisualConfig visualConfig;
 
     public List<String> getTools(AgentToolType type) {
@@ -49,7 +44,7 @@ public class Agent extends RecordInfo {
     }
 
     public boolean enableMemoryReview() {
-        return enableMemoryReview != null && enableMemoryReview == 1;
+        return false;
     }
 
     public static boolean containsAllModel(Set<Long> detectViewIds) {

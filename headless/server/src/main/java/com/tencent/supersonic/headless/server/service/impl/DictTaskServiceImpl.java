@@ -59,8 +59,8 @@ public class DictTaskServiceImpl implements DictTaskService {
     private final DimensionService dimensionService;
 
     public DictTaskServiceImpl(DictRepository dictRepository, DictUtils dictConverter,
-                               DictUtils dictUtils, FileHandler fileHandler, DictWordService dictWordService,
-                               DimensionService dimensionService) {
+            DictUtils dictUtils, FileHandler fileHandler, DictWordService dictWordService,
+            DimensionService dimensionService) {
         this.dictRepository = dictRepository;
         this.dictConverter = dictConverter;
         this.dictUtils = dictUtils;

@@ -86,7 +86,7 @@ public class FileHandlerImpl implements FileHandler {
     }
 
     private PageInfo<DictValueResp> getDictValueRespPagWithKey(String fileName,
-                                                               DictValueReq dictValueReq) {
+            DictValueReq dictValueReq) {
         PageInfo<DictValueResp> dictValueRespPageInfo = new PageInfo<>();
         dictValueRespPageInfo.setPageSize(dictValueReq.getPageSize());
         dictValueRespPageInfo.setPageNum(dictValueReq.getCurrent());
@@ -118,11 +118,12 @@ public class FileHandlerImpl implements FileHandler {
     }
 
     private PageInfo<DictValueResp> getDictValueRespPagWithoutKey(String fileName,
-                                                                  DictValueReq dictValueReq) {
+            DictValueReq dictValueReq) {
         PageInfo<DictValueResp> dictValueRespPageInfo = new PageInfo<>();
         String filePath = localFileConfig.getDictDirectoryLatest() + FILE_SPILT + fileName;
         Long fileLineNum = getFileLineNum(filePath);
-        Integer startLine = Math.max(1, (dictValueReq.getCurrent() - 1) * dictValueReq.getPageSize() + 1);
+        Integer startLine =
+                Math.max(1, (dictValueReq.getCurrent() - 1) * dictValueReq.getPageSize() + 1);
         Integer endLine = Integer.valueOf(
                 Math.min(dictValueReq.getCurrent() * dictValueReq.getPageSize(), fileLineNum) + "");
         List<DictValueResp> dictValueRespList = getFileData(filePath, startLine, endLine);
