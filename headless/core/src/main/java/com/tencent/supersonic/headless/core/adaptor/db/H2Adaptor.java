@@ -2,7 +2,13 @@ package com.tencent.supersonic.headless.core.adaptor.db;
 
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
+import lombok.extern.slf4j.Slf4j;
 
+import java.sql.DatabaseMetaData;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+@Slf4j
 public class H2Adaptor extends BaseDbAdaptor {
 
     @Override
@@ -28,6 +34,11 @@ public class H2Adaptor extends BaseDbAdaptor {
             }
         }
         return column;
+    }
+
+    protected ResultSet getResultSet(String schemaName, DatabaseMetaData metaData)
+            throws SQLException {
+        return metaData.getTables(schemaName, null, null, new String[] {"TABLE", "VIEW"});
     }
 
     @Override
