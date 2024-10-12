@@ -71,6 +71,17 @@ export type VisualConfig = {
   defaultShowType: string;
 };
 
+export type ChatAppConfigItem = {
+  key: string;
+  name: string;
+  description: string;
+  prompt: string;
+  enable: boolean;
+  chatModelId: number;
+};
+
+export type ChatAppConfig = Record<string, ChatAppConfigItem>;
+
 export type AgentType = {
   id?: number;
   name?: string;
@@ -83,7 +94,8 @@ export type AgentType = {
   status?: 0 | 1;
   enableSearch?: 0 | 1;
   toolConfig?: string;
-  modelConfig?: LlmConfigType;
+  // modelConfig?: LlmConfigType;
+  chatAppConfig: ChatAppConfig;
   multiTurnConfig?: MultiTurnConfig;
   visualConfig?: VisualConfig;
 };
