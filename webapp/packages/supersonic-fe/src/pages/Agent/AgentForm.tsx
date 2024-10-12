@@ -1,6 +1,6 @@
-import { Form, Input, Button, Switch, Tabs, Select, message, Space, Tooltip } from 'antd';
+import { Form, Input, Button, Switch, Tabs, Select, message, Space, Tooltip, Row, Col } from 'antd';
 import MainTitleMark from '@/components/MainTitleMark';
-import { AgentType } from './type';
+import { AgentType, ChatAppConfig, ChatAppConfigItem } from './type';
 import { useEffect, useState } from 'react';
 import styles from './style.less';
 import { DeleteOutlined, PlusOutlined } from '@ant-design/icons';
@@ -8,7 +8,7 @@ import { uuid, jsonParse } from '@/utils/utils';
 import ToolsSection from './ToolsSection';
 import globalStyles from '@/global.less';
 import { QuestionCircleOutlined } from '@ant-design/icons';
-import { getLlmModelTypeList, getLlmList } from '../../services/system';
+import { getLlmModelTypeList, getLlmModelAppList, getLlmList } from '../../services/system';
 import MemorySection from './MemorySection';
 
 const FormItem = Form.Item;
@@ -29,8 +29,12 @@ const AgentForm: React.FC<Props> = ({ editAgent, onSaveAgent, onCreateToolBtnCli
   const [saveLoading, setSaveLoading] = useState(false);
   const [examples, setExamples] = useState<{ id: string; question?: string }[]>([]);
   const [activeKey, setActiveKey] = useState('basic');
-  const [modelTypeOptions, setModelTypeOptions] = useState<any[]>([]);
-  const [llmConfigListOptions, setLlmConfigListOptions] = useState<any[]>([]);
+  const [modelTypeOptions, setModelTypeOptions] = useState<
+    (OptionsItem & { enable: boolean; prompt: string; description: string })[]
+  >([]);
+  const [llmConfigListOptions, setLlmConfigListOptions] = useState<OptionsItem[]>([]);
+  const [currentChatModel, setCurrentChatModel] = useState<string>('');
+  const [defaultChatAppConfig, setDefaultChatAppConfig] = useState<ChatAppConfig>({});
   const [formData, setFormData] = useState<any>({
     enableSearch: true,
     modelConfig: {
@@ -46,17 +50,13 @@ const AgentForm: React.FC<Props> = ({ editAgent, onSaveAgent, onCreateToolBtnCli
 
   useEffect(() => {
     if (editAgent) {
-      const sourceData = { ...editAgent };
-      if (!sourceData.modelConfig) {
-        delete sourceData.modelConfig;
-      }
-
       const config = jsonParse(editAgent.toolConfig, {});
       const initData = {
-        ...sourceData,
+        ...editAgent,
         enableSearch: editAgent.enableSearch !== 0,
         toolConfig: { ...defaultAgentConfig, ...config },
       };
+
       form.setFieldsValue(initData);
       setFormData(initData);
       if (editAgent.examples) {
@@ -65,7 +65,7 @@ const AgentForm: React.FC<Props> = ({ editAgent, onSaveAgent, onCreateToolBtnCli
     } else {
       form.resetFields();
     }
-    queryModelTypeList();
+    queryModelTypeList(editAgent?.chatAppConfig);
     queryLlmList();
   }, [editAgent]);
 
@@ -83,15 +83,48 @@ const AgentForm: React.FC<Props> = ({ editAgent, onSaveAgent, onCreateToolBtnCli
       message.error('获取模型场景类型失败');
     }
   };
-  const queryModelTypeList = async () => {
-    const { code, data } = await getLlmModelTypeList();
+  const queryModelTypeList = async (currentAgentChatConfig: any = {}) => {
+    const { code, data } = await getLlmModelAppList();
     if (code === 200 && data) {
-      const options = data.map((item) => {
+      let options = Object.keys(data).map((key: string) => {
+        let config = data[key];
+        if (currentAgentChatConfig[key]) {
+          config = currentAgentChatConfig[key];
+        }
         return {
-          label: item.name,
-          value: item.type,
-          description: item.description,
+          label: config.name,
+          value: key,
+          enable: config.enable,
+          description: config.description,
+          prompt: config.prompt,
         };
+      });
+      const sqlParserIndex = options.findIndex((item) => item.value === 'S2SQL_PARSER');
+      if (sqlParserIndex >= 0) {
+        options.splice(0, 0, options.splice(sqlParserIndex, 1)[0]);
+      }
+      const firstOption = options[0];
+      if (firstOption) {
+        setCurrentChatModel(firstOption.value);
+      }
+      const initChatModelConfig = Object.keys(data).reduce(
+        (modelConfig: ChatAppConfig, key: string) => {
+          let config = data[key];
+          if (currentAgentChatConfig[key]) {
+            config = currentAgentChatConfig[key];
+          }
+          return {
+            ...modelConfig,
+            [key]: config,
+          };
+        },
+        {},
+      );
+      setDefaultChatAppConfig(initChatModelConfig);
+      const formData = form.getFieldsValue();
+      form.setFieldsValue({
+        ...formData,
+        chatAppConfig: initChatModelConfig,
       });
       setModelTypeOptions(options);
     } else {
@@ -100,8 +133,8 @@ const AgentForm: React.FC<Props> = ({ editAgent, onSaveAgent, onCreateToolBtnCli
   };
 
   const layout = {
-    labelCol: { span: 4 },
-    wrapperCol: { span: 16 },
+    labelCol: { span: 8 },
+    wrapperCol: { span: 12 },
   };
 
   const onOk = async () => {
@@ -119,7 +152,15 @@ const AgentForm: React.FC<Props> = ({ editAgent, onSaveAgent, onCreateToolBtnCli
       }) as any,
       examples: examples.map((example) => example.question),
       enableSearch: values.enableSearch ? 1 : 0,
-      enableMemoryReview: values.enableMemoryReview ? 1 : 0,
+      chatAppConfig: Object.keys(defaultChatAppConfig).reduce((mergeConfig, key) => {
+        return {
+          ...mergeConfig,
+          [key]: {
+            ...defaultChatAppConfig[key],
+            ...(values.chatAppConfig[key] ? values.chatAppConfig[key] : {}),
+          },
+        };
+      }, {}),
     });
     setSaveLoading(false);
   };
@@ -147,7 +188,7 @@ const AgentForm: React.FC<Props> = ({ editAgent, onSaveAgent, onCreateToolBtnCli
           <FormItem name="enableSearch" label="开启输入联想" valuePropName="checked">
             <Switch />
           </FormItem>
-          <FormItem
+          {/* <FormItem
             name={['multiTurnConfig', 'enableMultiTurn']}
             label="开启多轮对话"
             valuePropName="checked"
@@ -156,7 +197,7 @@ const AgentForm: React.FC<Props> = ({ editAgent, onSaveAgent, onCreateToolBtnCli
           </FormItem>
           <FormItem name="enableMemoryReview" label="开启记忆评估" valuePropName="checked">
             <Switch />
-          </FormItem>
+          </FormItem> */}
           <FormItem
             name={['toolConfig', 'simpleMode']}
             label="开启精简模式"
@@ -220,54 +261,118 @@ const AgentForm: React.FC<Props> = ({ editAgent, onSaveAgent, onCreateToolBtnCli
       label: '大模型配置',
       key: 'modelConfig',
       children: (
-        <div className={styles.agentFormContainer}>
+        <div className={styles.agentFormContainer} style={{ width: '100%' }}>
           <div className={styles.agentFormTitle}>
             <Space>
               应用场景 <MainTitleMark />
             </Space>
           </div>
-          {modelTypeOptions.map((item) => {
-            return (
-              <FormItem name={['chatModelConfig', item.value]} label={item.label}>
-                <Select placeholder="" options={llmConfigListOptions} />
-              </FormItem>
-            );
-          })}
-        </div>
-      ),
-    },
-    {
-      label: '提示词配置',
-      key: 'promptConfig',
-      children: (
-        <div className={styles.agentFormContainer}>
-          <FormItem
-            name={['promptConfig', 'promptTemplate']}
-            label={
-              <>
-                <Space>
-                  提示词模板
-                  <Tooltip
-                    overlayInnerStyle={{ width: 400 }}
-                    title={
-                      <>
-                        {tips.map((tip) => (
-                          <div>{tip}</div>
-                        ))}
-                      </>
-                    }
+          <Row>
+            <Col flex="400px">
+              {modelTypeOptions.map((item) => {
+                return (
+                  <div
+                    className={`${styles.agentChatModelCell} ${
+                      currentChatModel === item.value ? styles.agentChatModelCellActive : ''
+                    }`}
+                    onClick={() => {
+                      setCurrentChatModel(item.value);
+                    }}
                   >
-                    <QuestionCircleOutlined />
-                  </Tooltip>
-                </Space>
-              </>
-            }
-          >
-            <Input.TextArea style={{ minHeight: 600 }} />
-          </FormItem>
+                    <FormItem
+                      name={['chatAppConfig', item.value, 'enable']}
+                      label={item.label}
+                      valuePropName="checked"
+                      tooltip={item.description}
+                    >
+                      <Switch />
+                    </FormItem>
+                  </div>
+                );
+              })}
+            </Col>
+            <Col flex="auto">
+              <div style={{ width: 800 }}>
+                {modelTypeOptions.map((item) => {
+                  return (
+                    <div
+                      key={`setting-${item.value}`}
+                      style={{
+                        display: currentChatModel === item.value ? 'block' : 'none',
+                      }}
+                    >
+                      <FormItem
+                        name={['chatAppConfig', item.value, 'chatModelId']}
+                        label="应用模型"
+                        tooltip={item.description}
+                      >
+                        <Select placeholder="" options={llmConfigListOptions} />
+                      </FormItem>
+                      <FormItem
+                        name={['chatAppConfig', item.value, 'prompt']}
+                        label={
+                          <>
+                            <Space>
+                              提示词模板
+                              <Tooltip
+                                overlayInnerStyle={{ width: 400 }}
+                                title={
+                                  <>
+                                    {tips.map((tip) => (
+                                      <div>{tip}</div>
+                                    ))}
+                                  </>
+                                }
+                              >
+                                <QuestionCircleOutlined />
+                              </Tooltip>
+                            </Space>
+                          </>
+                        }
+                      >
+                        <Input.TextArea style={{ minHeight: 600 }} />
+                      </FormItem>
+                    </div>
+                  );
+                })}
+              </div>
+            </Col>
+          </Row>
         </div>
       ),
     },
+    // {
+    //   label: '提示词配置',
+    //   key: 'promptConfig',
+    //   children: (
+    //     <div className={styles.agentFormContainer}>
+    //       <FormItem
+    //         name={['promptConfig', 'promptTemplate']}
+    //         label={
+    //           <>
+    //             <Space>
+    //               提示词模板
+    //               <Tooltip
+    //                 overlayInnerStyle={{ width: 400 }}
+    //                 title={
+    //                   <>
+    //                     {tips.map((tip) => (
+    //                       <div>{tip}</div>
+    //                     ))}
+    //                   </>
+    //                 }
+    //               >
+    //                 <QuestionCircleOutlined />
+    //               </Tooltip>
+    //             </Space>
+    //           </>
+    //         }
+    //       >
+    //         <Input.TextArea style={{ minHeight: 600 }} />
+    //       </FormItem>
+    //     </div>
+    //   ),
+    // },
     {
       label: '工具配置',
       key: 'tools',

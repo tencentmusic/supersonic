@@ -13,6 +13,12 @@ export function getLlmModelTypeList(): Promise<any> {
   });
 }
 
+export function getLlmModelAppList(): Promise<any> {
+  return request(`${process.env.CHAT_API_BASE_URL}model/getModelAppList`, {
+    method: 'GET',
+  });
+}
+
 export function getLlmList(): Promise<any> {
   return request(`${process.env.CHAT_API_BASE_URL}model/getModelList`, {
     method: 'GET',
