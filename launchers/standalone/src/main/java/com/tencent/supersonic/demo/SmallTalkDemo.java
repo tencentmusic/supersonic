@@ -3,7 +3,6 @@ package com.tencent.supersonic.demo;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.chat.server.agent.Agent;
-import com.tencent.supersonic.chat.server.agent.MultiTurnConfig;
 import com.tencent.supersonic.chat.server.agent.ToolConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.annotation.Order;
