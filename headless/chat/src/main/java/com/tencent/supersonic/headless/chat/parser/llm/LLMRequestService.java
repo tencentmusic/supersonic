@@ -74,8 +74,7 @@ public class LLMRequestService {
         llmReq.setTerms(getMappedTerms(queryCtx, dataSetId));
         llmReq.setSqlGenType(
                 LLMReq.SqlGenType.valueOf(parserConfig.getParameterValue(PARSER_STRATEGY_TYPE)));
-        llmReq.setModelConfig(queryCtx.getModelConfig());
-        llmReq.setCustomPrompt(queryCtx.getCustomPrompt());
+        llmReq.setChatAppConfig(queryCtx.getChatAppConfig());
         llmReq.setDynamicExemplars(queryCtx.getDynamicExemplars());
 
         return llmReq;

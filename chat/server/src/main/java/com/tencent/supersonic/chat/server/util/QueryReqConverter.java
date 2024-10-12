@@ -3,10 +3,12 @@ package com.tencent.supersonic.chat.server.util;
 import com.tencent.supersonic.chat.server.agent.Agent;
 import com.tencent.supersonic.chat.server.pojo.ChatContext;
 import com.tencent.supersonic.chat.server.pojo.ParseContext;
+import com.tencent.supersonic.chat.server.service.ChatModelService;
 import com.tencent.supersonic.common.pojo.ChatModelConfig;
 import com.tencent.supersonic.common.pojo.enums.ChatModelType;
 import com.tencent.supersonic.common.pojo.enums.Text2SQLType;
 import com.tencent.supersonic.common.util.BeanMapper;
+import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.headless.api.pojo.request.QueryNLReq;
 import org.apache.commons.collections.MapUtils;
 
@@ -37,10 +39,7 @@ public class QueryReqConverter {
                 && MapUtils.isNotEmpty(queryNLReq.getMapInfo().getDataSetElementMatches())) {
             queryNLReq.setMapInfo(queryNLReq.getMapInfo());
         }
-        ChatModelConfig chatModelConfig =
-                ModelConfigHelper.getChatModelConfig(agent, ChatModelType.TEXT_TO_SQL);
-        queryNLReq.setModelConfig(chatModelConfig);
-        queryNLReq.setCustomPrompt(agent.getPromptConfig().getPromptTemplate());
+        queryNLReq.setChatAppConfig(parseContext.getAgent().getChatAppConfig());
         if (chatCtx != null) {
             queryNLReq.setContextParseInfo(chatCtx.getParseInfo());
         }

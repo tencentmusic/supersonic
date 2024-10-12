@@ -3,6 +3,7 @@ package com.tencent.supersonic.chat.server.agent;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.tencent.supersonic.common.pojo.ChatApp;
 import com.tencent.supersonic.common.pojo.RecordInfo;
 import com.tencent.supersonic.common.pojo.enums.ChatModelType;
 import lombok.Data;
@@ -24,6 +25,7 @@ public class Agent extends RecordInfo {
     private Integer enableMemoryReview;
     private String toolConfig;
     private Map<ChatModelType, Integer> chatModelConfig = Collections.EMPTY_MAP;
+    private Map<String, ChatApp> chatAppConfig = Collections.EMPTY_MAP;
     private PromptConfig promptConfig;
     private MultiTurnConfig multiTurnConfig;
     private VisualConfig visualConfig;

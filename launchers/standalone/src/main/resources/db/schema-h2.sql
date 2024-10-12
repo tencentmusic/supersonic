@@ -391,15 +391,12 @@ CREATE TABLE IF NOT EXISTS s2_agent
     tool_config varchar(2000)  null,
     llm_config varchar(2000)  null,
     chat_model_config varchar(6000) null,
-    prompt_config varchar(5000)  null,
-    multi_turn_config varchar(2000)  null,
     visual_config varchar(2000)  null,
     created_by  varchar(100) null,
     created_at  TIMESTAMP  null,
     updated_by  varchar(100) null,
     updated_at  TIMESTAMP null,
     enable_search int null,
-    enable_memory_review int null,
     PRIMARY KEY (`id`)
 ); COMMENT ON TABLE s2_agent IS 'agent information table';
 

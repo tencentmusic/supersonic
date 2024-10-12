@@ -16,9 +16,11 @@ import com.tencent.supersonic.chat.server.plugin.PluginParseConfig;
 import com.tencent.supersonic.chat.server.plugin.build.WebBase;
 import com.tencent.supersonic.chat.server.plugin.build.webpage.WebPageQuery;
 import com.tencent.supersonic.chat.server.plugin.build.webservice.WebServiceQuery;
+import com.tencent.supersonic.common.pojo.ChatApp;
 import com.tencent.supersonic.common.pojo.JoinCondition;
 import com.tencent.supersonic.common.pojo.ModelRela;
 import com.tencent.supersonic.common.pojo.enums.*;
+import com.tencent.supersonic.common.util.ChatAppManager;
 import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.headless.api.pojo.DataSetDetail;
 import com.tencent.supersonic.headless.api.pojo.DataSetModelConfig;
@@ -148,6 +150,7 @@ public class S2VisitsDemo extends S2BaseDemo {
         agent.setEnableSearch(1);
         agent.setExamples(Lists.newArrayList("近15天超音数访问次数汇总", "按部门统计超音数的访问人数", "对比alice和lucy的停留时长",
                 "过去30天访问次数最高的部门top3", "近1个月总访问次数超过100次的部门有几个", "过去半个月每个核心用户的总停留时长"));
+
         // configure tools
         ToolConfig toolConfig = new ToolConfig();
         DatasetTool datasetTool = new DatasetTool();
@@ -157,16 +160,10 @@ public class S2VisitsDemo extends S2BaseDemo {
         toolConfig.getTools().add(datasetTool);
 
         agent.setToolConfig(JSONObject.toJSONString(toolConfig));
-        // configure chat models
-        Map<ChatModelType, Integer> chatModelConfig = Maps.newHashMap();
-        chatModelConfig.put(ChatModelType.TEXT_TO_SQL, demoChatModel.getId());
-        chatModelConfig.put(ChatModelType.MEMORY_REVIEW, demoChatModel.getId());
-        chatModelConfig.put(ChatModelType.RESPONSE_GENERATE, demoChatModel.getId());
-        chatModelConfig.put(ChatModelType.MULTI_TURN_REWRITE, demoChatModel.getId());
-        agent.setChatModelConfig(chatModelConfig);
-
-        MultiTurnConfig multiTurnConfig = new MultiTurnConfig(true);
-        agent.setMultiTurnConfig(multiTurnConfig);
+        // configure chat apps
+        Map<String, ChatApp> chatAppConfig = Maps.newHashMap(ChatAppManager.getAllApps());
+        chatAppConfig.values().forEach(app -> app.setChatModelId(demoChatModel.getId()));
+        agent.setChatAppConfig(chatAppConfig);
         Agent agentCreated = agentService.createAgent(agent, defaultUser);
         return agentCreated.getId();
     }

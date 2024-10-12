@@ -8,7 +8,9 @@ import com.tencent.supersonic.chat.BaseTest;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.chat.server.agent.*;
 import com.tencent.supersonic.chat.server.pojo.ChatModel;
-import com.tencent.supersonic.common.pojo.enums.ChatModelType;
+import com.tencent.supersonic.common.pojo.ChatApp;
+import com.tencent.supersonic.common.util.ChatAppManager;
+import com.tencent.supersonic.headless.chat.corrector.LLMSqlCorrector;
 import com.tencent.supersonic.util.DataUtils;
 import com.tencent.supersonic.util.LLMConfigUtils;
 import org.junit.jupiter.api.*;
@@ -135,22 +137,22 @@ public class Text2SQLEval extends BaseTest {
         Agent agent = new Agent();
         agent.setName("Agent for Test");
         ToolConfig toolConfig = new ToolConfig();
-        toolConfig.getTools().add(getLLMQueryTool());
+        toolConfig.getTools().add(getDatasetTool());
         agent.setToolConfig(JSONObject.toJSONString(toolConfig));
         ChatModel chatModel = new ChatModel();
         chatModel.setName("Text2SQL LLM");
         chatModel.setConfig(LLMConfigUtils.getLLMConfig(LLMConfigUtils.LLMType.OLLAMA_LLAMA3));
         chatModel = chatModelService.createChatModel(chatModel, User.getDefaultUser());
-        Map<ChatModelType, Integer> chatModelConfig = Maps.newHashMap();
-        chatModelConfig.put(ChatModelType.TEXT_TO_SQL, chatModel.getId());
-        agent.setChatModelConfig(chatModelConfig);
-        MultiTurnConfig multiTurnConfig = new MultiTurnConfig();
-        multiTurnConfig.setEnableMultiTurn(enableMultiturn);
-        agent.setMultiTurnConfig(multiTurnConfig);
+        Integer chatModelId = chatModel.getId();
+        // configure chat apps
+        Map<String, ChatApp> chatAppConfig = Maps.newHashMap(ChatAppManager.getAllApps());
+        chatAppConfig.values().forEach(app -> app.setChatModelId(chatModelId));
+        chatAppConfig.get(LLMSqlCorrector.APP_KEY).setEnable(true);
+        agent.setChatAppConfig(chatAppConfig);
         return agent;
     }
 
-    private static DatasetTool getLLMQueryTool() {
+    private static DatasetTool getDatasetTool() {
         DatasetTool datasetTool = new DatasetTool();
         datasetTool.setType(AgentToolType.DATASET);
         datasetTool.setDataSetIds(Lists.newArrayList(-1L));

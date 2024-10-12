@@ -15,8 +15,8 @@ import com.tencent.supersonic.chat.server.service.AgentService;
 import com.tencent.supersonic.chat.server.service.ChatModelService;
 import com.tencent.supersonic.chat.server.service.ChatQueryService;
 import com.tencent.supersonic.chat.server.service.MemoryService;
-import com.tencent.supersonic.chat.server.util.ModelConfigHelper;
-import com.tencent.supersonic.common.pojo.enums.ChatModelType;
+import com.tencent.supersonic.common.pojo.ChatApp;
+import com.tencent.supersonic.common.pojo.ChatModelConfig;
 import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.headless.chat.parser.llm.OnePassSCSqlGenStrategy;
 import lombok.extern.slf4j.Slf4j;
@@ -26,6 +26,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -53,12 +54,6 @@ public class AgentServiceImpl extends ServiceImpl<AgentDOMapper, AgentDO> implem
 
     @Override
     public Agent createAgent(Agent agent, User user) {
-        if (Objects.isNull(agent.getPromptConfig())
-                || Objects.isNull(agent.getPromptConfig().getPromptTemplate())) {
-            PromptConfig promptConfig = new PromptConfig();
-            promptConfig.setPromptTemplate(OnePassSCSqlGenStrategy.INSTRUCTION.trim());
-            agent.setPromptConfig(promptConfig);
-        }
         agent.createdBy(user.getName());
         AgentDO agentDO = convert(agent);
         save(agentDO);
@@ -69,12 +64,6 @@ public class AgentServiceImpl extends ServiceImpl<AgentDOMapper, AgentDO> implem
 
     @Override
     public Agent updateAgent(Agent agent, User user) {
-        if (Objects.isNull(agent.getPromptConfig())
-                || Objects.isNull(agent.getPromptConfig().getPromptTemplate())) {
-            PromptConfig promptConfig = new PromptConfig();
-            promptConfig.setPromptTemplate(OnePassSCSqlGenStrategy.INSTRUCTION.trim());
-            agent.setPromptConfig(promptConfig);
-        }
         agent.updatedBy(user.getName());
         updateById(convert(agent));
         executeAgentExamplesAsync(agent);
@@ -105,10 +94,7 @@ public class AgentServiceImpl extends ServiceImpl<AgentDOMapper, AgentDO> implem
     }
 
     private synchronized void doExecuteAgentExamples(Agent agent) {
-        if (!agent.containsDatasetTool()
-                || !agent.enableMemoryReview()
-                || !ModelConfigHelper.testConnection(
-                        ModelConfigHelper.getChatModelConfig(agent, ChatModelType.TEXT_TO_SQL))
+        if (!agent.containsDatasetTool() || !agent.enableMemoryReview()
                 || CollectionUtils.isEmpty(agent.getExamples())) {
             return;
         }
@@ -144,11 +130,8 @@ public class AgentServiceImpl extends ServiceImpl<AgentDOMapper, AgentDO> implem
         BeanUtils.copyProperties(agentDO, agent);
         agent.setToolConfig(agentDO.getToolConfig());
         agent.setExamples(JsonUtil.toList(agentDO.getExamples(), String.class));
-        agent.setChatModelConfig(
-                JsonUtil.toMap(agentDO.getChatModelConfig(), ChatModelType.class, Integer.class));
-        agent.setPromptConfig(JsonUtil.toObject(agentDO.getPromptConfig(), PromptConfig.class));
-        agent.setMultiTurnConfig(
-                JsonUtil.toObject(agentDO.getMultiTurnConfig(), MultiTurnConfig.class));
+        agent.setChatAppConfig(
+                JsonUtil.toMap(agentDO.getChatModelConfig(), String.class, ChatApp.class));
         agent.setVisualConfig(JsonUtil.toObject(agentDO.getVisualConfig(), VisualConfig.class));
         return agent;
     }
@@ -158,10 +141,8 @@ public class AgentServiceImpl extends ServiceImpl<AgentDOMapper, AgentDO> implem
         BeanUtils.copyProperties(agent, agentDO);
         agentDO.setToolConfig(agent.getToolConfig());
         agentDO.setExamples(JsonUtil.toString(agent.getExamples()));
-        agentDO.setChatModelConfig(JsonUtil.toString(agent.getChatModelConfig()));
-        agentDO.setMultiTurnConfig(JsonUtil.toString(agent.getMultiTurnConfig()));
+        agentDO.setChatModelConfig(JsonUtil.toString(agent.getChatAppConfig()));
         agentDO.setVisualConfig(JsonUtil.toString(agent.getVisualConfig()));
-        agentDO.setPromptConfig(JsonUtil.toString(agent.getPromptConfig()));
         if (agentDO.getStatus() == null) {
             agentDO.setStatus(1);
         }

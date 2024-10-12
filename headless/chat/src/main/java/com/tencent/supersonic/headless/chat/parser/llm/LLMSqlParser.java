@@ -1,5 +1,6 @@
 package com.tencent.supersonic.headless.chat.parser.llm;
 
+import com.tencent.supersonic.common.pojo.ChatModelConfig;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.headless.chat.ChatQueryContext;
 import com.tencent.supersonic.headless.chat.parser.SemanticParser;
@@ -69,10 +70,12 @@ public class LLMSqlParser implements SemanticParser {
             } catch (Exception e) {
                 log.error("currentRetryRound:{}, runText2SQL failed", currentRetry, e);
             }
-            Double temperature = llmReq.getModelConfig().getTemperature();
+            ChatModelConfig chatModelConfig = llmReq.getChatAppConfig()
+                    .get(OnePassSCSqlGenStrategy.APP_KEY).getChatModelConfig();
+            Double temperature = chatModelConfig.getTemperature();
             if (temperature == 0) {
                 // 报错时增加随机性，减少无效重试
-                llmReq.getModelConfig().setTemperature(0.5);
+                chatModelConfig.setTemperature(0.5);
             }
             currentRetry++;
         }

@@ -33,15 +33,9 @@ public class AgentDO {
 
     private Integer enableSearch;
 
-    private Integer enableMemoryReview;
-
     private String toolConfig;
 
     private String chatModelConfig;
 
-    private String multiTurnConfig;
-
     private String visualConfig;
-
-    private String promptConfig;
 }

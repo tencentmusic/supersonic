@@ -2,6 +2,7 @@ package com.tencent.supersonic.chat.server.util;
 
 import com.tencent.supersonic.chat.server.agent.Agent;
 import com.tencent.supersonic.chat.server.service.ChatModelService;
+import com.tencent.supersonic.common.pojo.ChatApp;
 import com.tencent.supersonic.common.pojo.ChatModelConfig;
 import com.tencent.supersonic.common.pojo.enums.ChatModelType;
 import com.tencent.supersonic.common.pojo.exception.InvalidArgumentException;
@@ -27,13 +28,10 @@ public class ModelConfigHelper {
         }
     }
 
-    public static ChatModelConfig getChatModelConfig(Agent agent, ChatModelType modelType) {
-        ChatModelConfig chatModelConfig = null;
-        if (agent.getChatModelConfig().containsKey(modelType)) {
-            Integer chatModelId = agent.getChatModelConfig().get(modelType);
-            ChatModelService chatModelService = ContextUtils.getBean(ChatModelService.class);
-            chatModelConfig = chatModelService.getChatModel(chatModelId).getConfig();
-        }
+    public static ChatModelConfig getChatModelConfig(ChatApp chatApp) {
+        ChatModelService chatModelService = ContextUtils.getBean(ChatModelService.class);
+        ChatModelConfig chatModelConfig =
+                chatModelService.getChatModel(chatApp.getChatModelId()).getConfig();
         return chatModelConfig;
     }
 }

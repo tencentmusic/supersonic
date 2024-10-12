@@ -6,7 +6,8 @@ import com.tencent.supersonic.chat.server.persistence.dataobject.ChatMemoryDO;
 import com.tencent.supersonic.chat.server.service.AgentService;
 import com.tencent.supersonic.chat.server.service.MemoryService;
 import com.tencent.supersonic.chat.server.util.ModelConfigHelper;
-import com.tencent.supersonic.common.pojo.enums.ChatModelType;
+import com.tencent.supersonic.common.pojo.ChatApp;
+import com.tencent.supersonic.common.util.ChatAppManager;
 import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.input.Prompt;
 import dev.langchain4j.model.input.PromptTemplate;
@@ -29,11 +30,11 @@ public class MemoryReviewTask {
 
     private static final Logger keyPipelineLog = LoggerFactory.getLogger("keyPipeline");
 
+    public static final String APP_KEY = "MEMORY_REVIEW";
     private static final String INSTRUCTION = ""
             + "\n#Role: You are a senior data engineer experienced in writing SQL."
             + "\n#Task: Your will be provided with a user question and the SQL written by a junior engineer,"
-            + "please take a review and give your opinion."
-            + "\n#Rules: "
+            + "please take a review and give your opinion." + "\n#Rules: "
             + "\n1.ALWAYS follow the output format: `opinion=(POSITIVE|NEGATIVE),comment=(your comment)`."
             + "\n2.NO NEED to check date filters as the junior engineer seldom makes mistakes in this regard."
             + "\n#Question: %s" + "\n#Schema: %s" + "\n#SideInfo: %s" + "\n#SQL: %s"
@@ -47,6 +48,11 @@ public class MemoryReviewTask {
     @Autowired
     private AgentService agentService;
 
+    public MemoryReviewTask() {
+        ChatAppManager.register(ChatApp.builder().key(APP_KEY).prompt(INSTRUCTION).name("记忆启用评估")
+                .description("通过大模型对记忆做正确性评估以决定是否启用").enable(false).build());
+    }
+
     @Scheduled(fixedDelay = 60 * 1000)
     public void review() {
         try {
@@ -58,16 +64,22 @@ public class MemoryReviewTask {
 
     private void processMemory(ChatMemoryDO m) {
         Agent chatAgent = agentService.getAgent(m.getAgentId());
-        if (Objects.isNull(chatAgent) || !chatAgent.enableMemoryReview()) {
-            log.debug("Agent id {} not found or memory review disabled", m.getAgentId());
+        if (Objects.isNull(chatAgent)) {
+            log.warn("Agent id {} not found or memory review disabled", m.getAgentId());
             return;
         }
-        String promptStr = createPromptString(m);
+
+        ChatApp chatApp = chatAgent.getChatAppConfig().get(APP_KEY);
+        if (!chatApp.isEnable()) {
+            return;
+        }
+
+        String promptStr = createPromptString(m, chatApp.getPrompt());
         Prompt prompt = PromptTemplate.from(promptStr).apply(Collections.EMPTY_MAP);
 
         keyPipelineLog.info("MemoryReviewTask reqPrompt:\n{}", promptStr);
-        ChatLanguageModel chatLanguageModel = ModelProvider.getChatModel(
-                ModelConfigHelper.getChatModelConfig(chatAgent, ChatModelType.MEMORY_REVIEW));
+        ChatLanguageModel chatLanguageModel =
+                ModelProvider.getChatModel(ModelConfigHelper.getChatModelConfig(chatApp));
         if (Objects.nonNull(chatLanguageModel)) {
             String response = chatLanguageModel.generate(prompt.toUserMessage()).content().text();
             keyPipelineLog.info("MemoryReviewTask modelResp:\n{}", response);
@@ -77,8 +89,8 @@ public class MemoryReviewTask {
         }
     }
 
-    private String createPromptString(ChatMemoryDO m) {
-        return String.format(INSTRUCTION, m.getQuestion(), m.getDbSchema(), m.getSideInfo(),
+    private String createPromptString(ChatMemoryDO m, String promptTemplate) {
+        return String.format(promptTemplate, m.getQuestion(), m.getDbSchema(), m.getSideInfo(),
                 m.getS2sql());
     }
 
