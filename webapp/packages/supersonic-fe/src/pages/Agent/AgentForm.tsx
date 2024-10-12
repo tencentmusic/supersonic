@@ -54,6 +54,7 @@ const AgentForm: React.FC<Props> = ({ editAgent, onSaveAgent, onCreateToolBtnCli
       const initData = {
         ...editAgent,
         enableSearch: editAgent.enableSearch !== 0,
+        enableFeedback: editAgent.enableFeedback !== 0,
         toolConfig: { ...defaultAgentConfig, ...config },
       };
 
@@ -152,12 +153,13 @@ const AgentForm: React.FC<Props> = ({ editAgent, onSaveAgent, onCreateToolBtnCli
       }) as any,
       examples: examples.map((example) => example.question),
       enableSearch: values.enableSearch ? 1 : 0,
+      enableFeedback: values.enableFeedback ? 1 : 0,
       chatAppConfig: Object.keys(defaultChatAppConfig).reduce((mergeConfig, key) => {
         return {
           ...mergeConfig,
           [key]: {
             ...defaultChatAppConfig[key],
-            ...(values.chatAppConfig[key] ? values.chatAppConfig[key] : {}),
+            ...(values.chatAppConfig?.[key] ? values.chatAppConfig[key] : {}),
           },
         };
       }, {}),
@@ -186,6 +188,9 @@ const AgentForm: React.FC<Props> = ({ editAgent, onSaveAgent, onCreateToolBtnCli
             <Input placeholder="请输入助理名称" />
           </FormItem>
           <FormItem name="enableSearch" label="开启输入联想" valuePropName="checked">
+            <Switch />
+          </FormItem>
+          <FormItem name="enableFeedback" label="开启用户确认" valuePropName="checked">
             <Switch />
           </FormItem>
           {/* <FormItem

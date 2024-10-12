@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { MemoryType, ReviewEnum, StatusEnum } from './type';
 import { getMemeoryList, saveMemory, batchDeleteMemory } from './service';
 import { Popover, Input, Badge, Radio, Select, Button, message } from 'antd';
+import MemorySettingModal from './MemorySettingModal';
 import styles from './style.less';
 import { isArrayOfValues } from '@/utils/utils';
 import dayjs from 'dayjs';
@@ -19,6 +20,7 @@ const MemorySection = ({ agentId }: Props) => {
   const [dataSource, setDataSource] = useState<readonly MemoryType[]>([]);
   const [loading, setLoading] = useState(false);
   const [filters, setFilters] = useState<any>({});
+  const [createModalVisible, setCreateModalVisible] = useState<boolean>(false);
   const { question, status, llmReviewRet, humanReviewRet } = filters;
   const [selectedRowKeys, setSelectedRowKeys] = useState<number[]>([]);
 
@@ -55,7 +57,7 @@ const MemorySection = ({ agentId }: Props) => {
       ),
     },
     {
-      title: '大模型解析SQL',
+      title: '语义S2SQL',
       dataIndex: 's2sql',
       width: 220,
       valueType: 'textarea',
@@ -342,6 +344,17 @@ const MemorySection = ({ agentId }: Props) => {
         <Button type="primary" onClick={() => loadMemoryList()}>
           查询
         </Button>
+        {agentId && (
+          <Button
+            type="primary"
+            onClick={() => {
+              setCreateModalVisible(true);
+            }}
+          >
+            新增
+          </Button>
+        )}
+
         <Button
           key="batchDelete"
           type="primary"
@@ -376,6 +389,19 @@ const MemorySection = ({ agentId }: Props) => {
           onChange: setEditableRowKeys,
         }}
       />
+      {createModalVisible && agentId && (
+        <MemorySettingModal
+          open={true}
+          agentId={agentId}
+          onCancel={() => {
+            setCreateModalVisible(false);
+          }}
+          onSubmit={() => {
+            setCreateModalVisible(false);
+            loadMemoryList();
+          }}
+        />
+      )}
     </div>
   );
 };
