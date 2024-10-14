@@ -2,12 +2,15 @@ package com.tencent.supersonic.demo;
 
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.tencent.supersonic.chat.server.agent.Agent;
 import com.tencent.supersonic.chat.server.agent.AgentToolType;
 import com.tencent.supersonic.chat.server.agent.DatasetTool;
 import com.tencent.supersonic.chat.server.agent.ToolConfig;
+import com.tencent.supersonic.common.pojo.ChatApp;
 import com.tencent.supersonic.common.pojo.enums.StatusEnum;
 import com.tencent.supersonic.common.pojo.enums.TypeEnums;
+import com.tencent.supersonic.common.util.ChatAppManager;
 import com.tencent.supersonic.headless.api.pojo.*;
 import com.tencent.supersonic.headless.api.pojo.DetailTypeDefaultConfig;
 import com.tencent.supersonic.headless.api.pojo.enums.DimensionType;
@@ -31,6 +34,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 @Component
 @Slf4j
@@ -167,6 +171,8 @@ public class S2ArtistDemo extends S2BaseDemo {
         agent.setStatus(1);
         agent.setEnableSearch(1);
         agent.setExamples(Lists.newArrayList("国风流派歌手", "港台歌手", "周杰伦流派"));
+
+        // configure tools
         ToolConfig toolConfig = new ToolConfig();
         DatasetTool datasetTool = new DatasetTool();
         datasetTool.setId("1");
@@ -174,6 +180,11 @@ public class S2ArtistDemo extends S2BaseDemo {
         datasetTool.setDataSetIds(Lists.newArrayList(dataSetId));
         toolConfig.getTools().add(datasetTool);
         agent.setToolConfig(JSONObject.toJSONString(toolConfig));
+
+        // configure chat apps
+        Map<String, ChatApp> chatAppConfig = Maps.newHashMap(ChatAppManager.getAllApps());
+        chatAppConfig.values().forEach(app -> app.setChatModelId(demoChatModel.getId()));
+        agent.setChatAppConfig(chatAppConfig);
         agentService.createAgent(agent, defaultUser);
     }
 }

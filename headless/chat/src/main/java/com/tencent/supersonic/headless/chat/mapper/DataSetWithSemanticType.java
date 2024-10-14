@@ -8,13 +8,13 @@ import java.io.Serializable;
 
 @Data
 @ToString
-public class ModelWithSemanticType implements Serializable {
+public class DataSetWithSemanticType implements Serializable {
 
-    private Long model;
+    private Long dataSetId;
     private SchemaElementType schemaElementType;
 
-    public ModelWithSemanticType(Long model, SchemaElementType schemaElementType) {
-        this.model = model;
+    public DataSetWithSemanticType(Long dataSetId, SchemaElementType schemaElementType) {
+        this.dataSetId = dataSetId;
         this.schemaElementType = schemaElementType;
     }
 }
