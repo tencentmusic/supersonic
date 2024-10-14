@@ -1,5 +1,6 @@
 package com.tencent.supersonic.chat;
 
+import com.google.common.collect.Lists;
 import com.tencent.supersonic.BaseApplication;
 import com.tencent.supersonic.chat.api.pojo.request.ChatExecuteReq;
 import com.tencent.supersonic.chat.api.pojo.request.ChatParseReq;
@@ -17,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -38,6 +40,10 @@ public class BaseTest extends BaseApplication {
 
     @Value("${s2.demo.enableLLM:false}")
     protected boolean enableLLM;
+    protected int agentId;
+
+
+    protected List<Long> durations = Lists.newArrayList();
 
     protected QueryResult submitMultiTurnChat(String queryText, Integer agentId, Integer chatId)
             throws Exception {

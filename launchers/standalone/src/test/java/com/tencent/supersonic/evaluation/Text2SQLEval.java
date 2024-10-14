@@ -9,6 +9,7 @@ import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.chat.server.agent.*;
 import com.tencent.supersonic.chat.server.pojo.ChatModel;
 import com.tencent.supersonic.common.pojo.ChatApp;
+import com.tencent.supersonic.common.pojo.enums.AppModule;
 import com.tencent.supersonic.common.util.ChatAppManager;
 import com.tencent.supersonic.headless.chat.corrector.LLMSqlCorrector;
 import com.tencent.supersonic.util.DataUtils;
@@ -16,7 +17,6 @@ import com.tencent.supersonic.util.LLMConfigUtils;
 import org.junit.jupiter.api.*;
 import org.springframework.test.context.TestPropertySource;
 
-import java.util.List;
 import java.util.Map;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -24,8 +24,8 @@ import java.util.Map;
 @Disabled
 public class Text2SQLEval extends BaseTest {
 
-    private int agentId;
-    private List<Long> durations = Lists.newArrayList();
+    private LLMConfigUtils.LLMType llmType = LLMConfigUtils.LLMType.OLLAMA_LLAMA3;
+    private boolean enableLLMCorrection = true;
 
     @BeforeAll
     public void init() {
@@ -139,15 +139,17 @@ public class Text2SQLEval extends BaseTest {
         ToolConfig toolConfig = new ToolConfig();
         toolConfig.getTools().add(getDatasetTool());
         agent.setToolConfig(JSONObject.toJSONString(toolConfig));
+        // create chat model for this evaluation
         ChatModel chatModel = new ChatModel();
         chatModel.setName("Text2SQL LLM");
-        chatModel.setConfig(LLMConfigUtils.getLLMConfig(LLMConfigUtils.LLMType.OLLAMA_LLAMA3));
+        chatModel.setConfig(LLMConfigUtils.getLLMConfig(llmType));
         chatModel = chatModelService.createChatModel(chatModel, User.getDefaultUser());
         Integer chatModelId = chatModel.getId();
         // configure chat apps
-        Map<String, ChatApp> chatAppConfig = Maps.newHashMap(ChatAppManager.getAllApps());
+        Map<String, ChatApp> chatAppConfig =
+                Maps.newHashMap(ChatAppManager.getAllApps(AppModule.CHAT));
         chatAppConfig.values().forEach(app -> app.setChatModelId(chatModelId));
-        chatAppConfig.get(LLMSqlCorrector.APP_KEY).setEnable(true);
+        chatAppConfig.get(LLMSqlCorrector.APP_KEY).setEnable(enableLLMCorrection);
         agent.setChatAppConfig(chatAppConfig);
         return agent;
     }

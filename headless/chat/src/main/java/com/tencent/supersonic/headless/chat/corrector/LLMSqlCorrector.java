@@ -1,6 +1,7 @@
 package com.tencent.supersonic.headless.chat.corrector;
 
 import com.tencent.supersonic.common.pojo.ChatApp;
+import com.tencent.supersonic.common.pojo.enums.AppModule;
 import com.tencent.supersonic.common.util.ChatAppManager;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.chat.ChatQueryContext;
@@ -40,7 +41,7 @@ public class LLMSqlCorrector extends BaseSemanticCorrector {
 
     public LLMSqlCorrector() {
         ChatAppManager.register(APP_KEY, ChatApp.builder().prompt(INSTRUCTION).name("语义SQL修正")
-                .description("通过大模型对解析S2SQL做二次修正").enable(false).build());
+                .appModule(AppModule.CHAT).description("通过大模型对解析S2SQL做二次修正").enable(false).build());
     }
 
     @Data

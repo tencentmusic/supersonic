@@ -3,6 +3,7 @@ package com.tencent.supersonic.headless.chat.parser.llm;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.common.pojo.ChatApp;
 import com.tencent.supersonic.common.pojo.Text2SQLExemplar;
+import com.tencent.supersonic.common.pojo.enums.AppModule;
 import com.tencent.supersonic.common.util.ChatAppManager;
 import com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMReq;
 import com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMResp;
@@ -44,7 +45,7 @@ public class OnePassSCSqlGenStrategy extends SqlGenStrategy {
 
     public OnePassSCSqlGenStrategy() {
         ChatAppManager.register(APP_KEY, ChatApp.builder().prompt(INSTRUCTION).name("语义SQL解析")
-                .description("通过大模型做语义解析生成S2SQL").enable(true).build());
+                .appModule(AppModule.CHAT).description("通过大模型做语义解析生成S2SQL").enable(true).build());
     }
 
     @Data

@@ -8,6 +8,7 @@ import com.tencent.supersonic.chat.server.agent.AgentToolType;
 import com.tencent.supersonic.chat.server.agent.DatasetTool;
 import com.tencent.supersonic.chat.server.agent.ToolConfig;
 import com.tencent.supersonic.common.pojo.ChatApp;
+import com.tencent.supersonic.common.pojo.enums.AppModule;
 import com.tencent.supersonic.common.pojo.enums.StatusEnum;
 import com.tencent.supersonic.common.pojo.enums.TypeEnums;
 import com.tencent.supersonic.common.util.ChatAppManager;
@@ -182,7 +183,8 @@ public class S2ArtistDemo extends S2BaseDemo {
         agent.setToolConfig(JSONObject.toJSONString(toolConfig));
 
         // configure chat apps
-        Map<String, ChatApp> chatAppConfig = Maps.newHashMap(ChatAppManager.getAllApps());
+        Map<String, ChatApp> chatAppConfig =
+                Maps.newHashMap(ChatAppManager.getAllApps(AppModule.CHAT));
         chatAppConfig.values().forEach(app -> app.setChatModelId(demoChatModel.getId()));
         agent.setChatAppConfig(chatAppConfig);
         agentService.createAgent(agent, defaultUser);

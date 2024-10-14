@@ -7,6 +7,7 @@ import com.tencent.supersonic.chat.server.service.AgentService;
 import com.tencent.supersonic.chat.server.service.MemoryService;
 import com.tencent.supersonic.chat.server.util.ModelConfigHelper;
 import com.tencent.supersonic.common.pojo.ChatApp;
+import com.tencent.supersonic.common.pojo.enums.AppModule;
 import com.tencent.supersonic.common.util.ChatAppManager;
 import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.input.Prompt;
@@ -49,8 +50,9 @@ public class MemoryReviewTask {
     private AgentService agentService;
 
     public MemoryReviewTask() {
-        ChatAppManager.register(APP_KEY, ChatApp.builder().prompt(INSTRUCTION).name("记忆启用评估")
-                .description("通过大模型对记忆做正确性评估以决定是否启用").enable(false).build());
+        ChatAppManager.register(APP_KEY,
+                ChatApp.builder().prompt(INSTRUCTION).name("记忆启用评估").appModule(AppModule.CHAT)
+                        .description("通过大模型对记忆做正确性评估以决定是否启用").enable(false).build());
     }
 
     @Scheduled(fixedDelay = 60 * 1000)

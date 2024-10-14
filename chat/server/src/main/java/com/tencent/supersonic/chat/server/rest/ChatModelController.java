@@ -12,6 +12,7 @@ import com.tencent.supersonic.chat.server.util.ModelConfigHelper;
 import com.tencent.supersonic.common.pojo.ChatApp;
 import com.tencent.supersonic.common.pojo.ChatModelConfig;
 import com.tencent.supersonic.common.pojo.Parameter;
+import com.tencent.supersonic.common.pojo.enums.AppModule;
 import com.tencent.supersonic.common.util.ChatAppManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -52,7 +53,7 @@ public class ChatModelController {
 
     @RequestMapping("/getModelAppList")
     public Map<String, ChatApp> getChatAppList() {
-        return ChatAppManager.getAllApps();
+        return ChatAppManager.getAllApps(AppModule.CHAT);
     }
 
     @RequestMapping("/getModelParameters")

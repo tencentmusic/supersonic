@@ -7,6 +7,7 @@ import com.tencent.supersonic.chat.server.pojo.ExecuteContext;
 import com.tencent.supersonic.chat.server.service.AgentService;
 import com.tencent.supersonic.chat.server.service.ChatManageService;
 import com.tencent.supersonic.common.pojo.ChatApp;
+import com.tencent.supersonic.common.pojo.enums.AppModule;
 import com.tencent.supersonic.common.util.ChatAppManager;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.headless.api.pojo.response.QueryState;
@@ -32,7 +33,7 @@ public class PlainTextExecutor implements ChatQueryExecutor {
 
     public PlainTextExecutor() {
         ChatAppManager.register(APP_KEY, ChatApp.builder().prompt(INSTRUCTION).name("闲聊对话")
-                .description("直接将原始输入透传大模型").enable(false).build());
+                .appModule(AppModule.CHAT).description("直接将原始输入透传大模型").enable(false).build());
     }
 
     @Override
