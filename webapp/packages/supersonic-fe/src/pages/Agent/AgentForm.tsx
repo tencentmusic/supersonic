@@ -266,14 +266,16 @@ const AgentForm: React.FC<Props> = ({ editAgent, onSaveAgent, onCreateToolBtnCli
       label: '大模型配置',
       key: 'modelConfig',
       children: (
-        <div className={styles.agentFormContainer} style={{ width: '100%' }}>
+        <div className={styles.agentFormContainer} style={{ width: '1200px', marginTop: 20 }}>
           <div className={styles.agentFormTitle}>
             <Space>
               应用场景 <MainTitleMark />
             </Space>
           </div>
-          <Row>
-            <Col flex="400px">
+          <Space style={{ alignItems: 'start' }}>
+            {/* <Row> */}
+            {/* <Col flex="400px"> */}
+            <div style={{ width: 400 }}>
               {modelTypeOptions.map((item) => {
                 return (
                   <div
@@ -295,54 +297,56 @@ const AgentForm: React.FC<Props> = ({ editAgent, onSaveAgent, onCreateToolBtnCli
                   </div>
                 );
               })}
-            </Col>
-            <Col flex="auto">
-              <div style={{ width: 800 }}>
-                {modelTypeOptions.map((item) => {
-                  return (
-                    <div
-                      key={`setting-${item.value}`}
-                      style={{
-                        display: currentChatModel === item.value ? 'block' : 'none',
-                      }}
+            </div>
+            {/* </Col>
+            <Col flex="auto"> */}
+            <div style={{ width: 800 }}>
+              {modelTypeOptions.map((item) => {
+                return (
+                  <div
+                    key={`setting-${item.value}`}
+                    style={{
+                      display: currentChatModel === item.value ? 'block' : 'none',
+                    }}
+                  >
+                    <FormItem
+                      name={['chatAppConfig', item.value, 'chatModelId']}
+                      label="应用模型"
+                      tooltip={item.description}
                     >
-                      <FormItem
-                        name={['chatAppConfig', item.value, 'chatModelId']}
-                        label="应用模型"
-                        tooltip={item.description}
-                      >
-                        <Select placeholder="" options={llmConfigListOptions} />
-                      </FormItem>
-                      <FormItem
-                        name={['chatAppConfig', item.value, 'prompt']}
-                        label={
-                          <>
-                            <Space>
-                              提示词模板
-                              <Tooltip
-                                overlayInnerStyle={{ width: 400 }}
-                                title={
-                                  <>
-                                    {tips.map((tip) => (
-                                      <div>{tip}</div>
-                                    ))}
-                                  </>
-                                }
-                              >
-                                <QuestionCircleOutlined />
-                              </Tooltip>
-                            </Space>
-                          </>
-                        }
-                      >
-                        <Input.TextArea style={{ minHeight: 600 }} />
-                      </FormItem>
-                    </div>
-                  );
-                })}
-              </div>
-            </Col>
-          </Row>
+                      <Select placeholder="" options={llmConfigListOptions} />
+                    </FormItem>
+                    <FormItem
+                      name={['chatAppConfig', item.value, 'prompt']}
+                      label={
+                        <>
+                          <Space>
+                            提示词模板
+                            <Tooltip
+                              overlayInnerStyle={{ width: 400 }}
+                              title={
+                                <>
+                                  {tips.map((tip) => (
+                                    <div>{tip}</div>
+                                  ))}
+                                </>
+                              }
+                            >
+                              <QuestionCircleOutlined />
+                            </Tooltip>
+                          </Space>
+                        </>
+                      }
+                    >
+                      <Input.TextArea style={{ minHeight: 600 }} />
+                    </FormItem>
+                  </div>
+                );
+              })}
+            </div>
+            {/* </Col> */}
+            {/* </Row> */}
+          </Space>
         </div>
       ),
     },
