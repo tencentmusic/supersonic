@@ -6,6 +6,7 @@ import com.tencent.supersonic.common.util.ContextUtils;
 import dev.langchain4j.chroma.spring.ChromaEmbeddingStoreFactory;
 import dev.langchain4j.inmemory.spring.InMemoryEmbeddingStoreFactory;
 import dev.langchain4j.milvus.spring.MilvusEmbeddingStoreFactory;
+import dev.langchain4j.pgvector.spring.PgvectorEmbeddingStoreFactory;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Map;
@@ -33,6 +34,11 @@ public class EmbeddingStoreFactoryProvider {
         if (EmbeddingStoreType.MILVUS.name().equalsIgnoreCase(embeddingStoreConfig.getProvider())) {
             return factoryMap.computeIfAbsent(embeddingStoreConfig,
                     storeConfig -> new MilvusEmbeddingStoreFactory(storeConfig));
+        }
+        if (EmbeddingStoreType.PGVECTOR.name().equalsIgnoreCase(embeddingStoreConfig.getProvider())) {
+            return factoryMap.computeIfAbsent(
+                    embeddingStoreConfig,
+                    storeConfig -> new PgvectorEmbeddingStoreFactory(storeConfig));
         }
         if (EmbeddingStoreType.IN_MEMORY.name()
                 .equalsIgnoreCase(embeddingStoreConfig.getProvider())) {
