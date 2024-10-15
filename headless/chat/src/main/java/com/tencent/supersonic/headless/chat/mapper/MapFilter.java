@@ -21,6 +21,7 @@ public class MapFilter {
     public static void filter(ChatQueryContext chatQueryContext) {
         filterByDataSetId(chatQueryContext);
         filterByDetectWordLenLessThanOne(chatQueryContext);
+        twoCharactersMustEqual(chatQueryContext);
         switch (chatQueryContext.getQueryDataType()) {
             case TAG:
                 filterByQueryDataType(chatQueryContext, element -> !(element.getIsTag() > 0));
@@ -66,6 +67,19 @@ public class MapFilter {
             if (!CollectionUtils.isEmpty(value)) {
                 value.removeIf(schemaElementMatch -> StringUtils
                         .length(schemaElementMatch.getDetectWord()) <= 1);
+            }
+        }
+    }
+
+    private static void twoCharactersMustEqual(ChatQueryContext chatQueryContext) {
+        Map<Long, List<SchemaElementMatch>> dataSetElementMatches =
+                chatQueryContext.getMapInfo().getDataSetElementMatches();
+        for (Map.Entry<Long, List<SchemaElementMatch>> entry : dataSetElementMatches.entrySet()) {
+            List<SchemaElementMatch> value = entry.getValue();
+            if (!CollectionUtils.isEmpty(value)) {
+                value.removeIf(schemaElementMatch -> StringUtils
+                        .length(schemaElementMatch.getDetectWord()) <= 2
+                        && schemaElementMatch.getSimilarity() < 1);
             }
         }
     }
