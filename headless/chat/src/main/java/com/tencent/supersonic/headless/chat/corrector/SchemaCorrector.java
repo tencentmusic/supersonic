@@ -39,6 +39,8 @@ public class SchemaCorrector extends BaseSemanticCorrector {
 
         correctAggFunction(semanticParseInfo);
 
+        replaceAlias(semanticParseInfo);
+
         updateFieldNameByLinkingValue(semanticParseInfo);
 
         updateFieldValueByLinkingValue(semanticParseInfo);
@@ -157,5 +159,11 @@ public class SchemaCorrector extends BaseSemanticCorrector {
 
         String sql = SqlRemoveHelper.removeWhereCondition(correctS2SQL, removeFieldNames);
         sqlInfo.setCorrectedS2SQL(sql);
+    }
+
+    private void replaceAlias(SemanticParseInfo semanticParseInfo) {
+        SqlInfo sqlInfo = semanticParseInfo.getSqlInfo();
+        String replaceAlias = SqlReplaceHelper.replaceAlias(sqlInfo.getCorrectedS2SQL());
+        sqlInfo.setCorrectedS2SQL(replaceAlias);
     }
 }

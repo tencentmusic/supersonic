@@ -23,7 +23,8 @@ public class FunctionAliasReplaceVisitor extends SelectItemVisitorAdapter {
                     && !selectExpressionItem.getAlias().getName().equalsIgnoreCase(columnName)) {
                 aliasToActualExpression.put(selectExpressionItem.getAlias().getName(),
                         function.toString());
-                selectExpressionItem.setAlias(null);
+                selectExpressionItem.getAlias()
+                        .setName("`" + selectExpressionItem.getAlias().getName() + "`");
             }
         }
     }
