@@ -136,6 +136,32 @@ class SqlWithMergerTest {
                         + "WHERE 总访问次数 > 100");
     }
 
+
+    @Test
+    void test6() throws SqlParseException {
+
+        String sql1 =
+                "SELECT COUNT(*) FROM Department join Visits WHERE 总访问次数 > 100 ORDER BY 总访问次数 LIMIT 10";
+
+        String sql2 =
+                "SELECT `t3`.`sys_imp_date`, `t2`.`department`, `t3`.`s2_pv_uv_statis_pv` AS `pv`\n"
+                        + "FROM\n" + "(SELECT `user_name`, `department`\n" + "FROM\n"
+                        + "`s2_user_department`) AS `t2`\n"
+                        + "LEFT JOIN (SELECT 1 AS `s2_pv_uv_statis_pv`, `imp_date` AS `sys_imp_date`, `user_name`\n"
+                        + "FROM\n"
+                        + "`s2_pv_uv_statis`) AS `t3` ON `t2`.`user_name` = `t3`.`user_name`";
+
+        String mergeSql = SqlMergeWithUtils.mergeWith(EngineType.MYSQL, sql1,
+                Collections.singletonList(sql2), Collections.singletonList("t_1"));
+
+
+        Assert.assertEquals(format(mergeSql),
+                "WITH t_1 AS (SELECT `t3`.`sys_imp_date`, `t2`.`department`, `t3`.`s2_pv_uv_statis_pv` AS `pv` FROM "
+                        + "(SELECT `user_name`, `department` FROM `s2_user_department`) AS `t2` LEFT JOIN (SELECT 1 AS `s2_pv_uv_statis_pv`,"
+                        + " `imp_date` AS `sys_imp_date`, `user_name` FROM `s2_pv_uv_statis`) AS `t3` ON `t2`.`user_name` = `t3`.`user_name`) "
+                        + "SELECT COUNT(*) FROM Department INNER JOIN Visits WHERE 总访问次数 > 100 ORDER BY 总访问次数 LIMIT 10");
+    }
+
     private static String format(String mergeSql) {
         mergeSql = mergeSql.replace("\r\n", "\n");
         // Remove extra spaces and newlines
