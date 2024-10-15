@@ -43,6 +43,8 @@ public interface ChatManageService {
 
     int updateQuery(ChatQueryDO chatQueryDO);
 
+    void deleteQuery(Long queryId);
+
     void updateParseCostTime(ParseResp parseResp);
 
     List<ChatParseDO> batchAddParse(ChatParseReq chatParseReq, ParseResp parseResult);

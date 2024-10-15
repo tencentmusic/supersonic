@@ -389,9 +389,9 @@ ALTER TABLE s2_agent RENAME COLUMN config TO tool_config;
 ALTER TABLE s2_agent RENAME COLUMN model_config TO chat_model_config;
 
 --20241011
-ALTER TABLE s2_agent DROP COLUMN prompt_config;
-ALTER TABLE s2_agent DROP COLUMN multi_turn_config;
-ALTER TABLE s2_agent DROP COLUMN enable_memory_review;
+ALTER TABLE s2_agent DROP COLUMN IF EXISTS `prompt_config`;
+ALTER TABLE s2_agent DROP COLUMN IF EXISTS `multi_turn_config`;
+ALTER TABLE s2_agent DROP COLUMN IF EXISTS `enable_memory_review`;
 
 --20241012
 alter table s2_agent add column `enable_feedback` tinyint DEFAULT 1;
