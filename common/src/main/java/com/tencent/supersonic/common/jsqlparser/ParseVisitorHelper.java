@@ -2,6 +2,9 @@ package com.tencent.supersonic.common.jsqlparser;
 
 import com.tencent.supersonic.common.util.StringUtil;
 import lombok.extern.slf4j.Slf4j;
+import net.sf.jsqlparser.expression.Expression;
+import net.sf.jsqlparser.expression.Function;
+import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
 import net.sf.jsqlparser.schema.Column;
 import org.apache.commons.lang3.StringUtils;
 
@@ -12,6 +15,17 @@ import java.util.stream.Collectors;
 
 @Slf4j
 public class ParseVisitorHelper {
+
+    public void replaceFunction(Function expression, Map<String, String> fieldNameMap,
+            boolean exactReplace) {
+        Function function = expression;
+        ExpressionList<?> expressions = function.getParameters();
+        for (Expression column : expressions) {
+            if (column instanceof Column) {
+                replaceColumn((Column) column, fieldNameMap, exactReplace);
+            }
+        }
+    }
 
     public void replaceColumn(Column column, Map<String, String> fieldNameMap,
             boolean exactReplace) {
