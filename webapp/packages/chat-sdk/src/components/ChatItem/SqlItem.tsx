@@ -19,6 +19,7 @@ type Props = {
   queryMode?: string;
   sqlInfo: SqlInfoType;
   sqlTimeCost?: number;
+  executeErrorMsg: string;
 };
 
 const SqlItem: React.FC<Props> = ({
@@ -31,6 +32,7 @@ const SqlItem: React.FC<Props> = ({
   queryMode,
   sqlInfo,
   sqlTimeCost,
+  executeErrorMsg,
 }) => {
   const [sqlType, setSqlType] = useState('');
 
@@ -126,6 +128,14 @@ ${format(sqlInfo.querySQL)}
 `;
   };
 
+  const getErrorMsgText = () => {
+    return `
+异常日志
+
+${executeErrorMsg}
+`;
+  };
+
   const onExportLog = () => {
     let text = '';
     if (question) {
@@ -148,6 +158,9 @@ ${format(sqlInfo.querySQL)}
     if (sqlInfo.querySQL) {
       text += getQuerySQLText();
     }
+    if (!!executeErrorMsg) {
+      text += getErrorMsgText();
+    }
     exportTextFile(text, `supersonic-debug-${agentId}-${queryId}.log`);
   };
 
@@ -157,7 +170,7 @@ ${format(sqlInfo.querySQL)}
         <CheckCircleFilled className={`${tipPrefixCls}-step-icon`} />
         <div className={`${tipPrefixCls}-step-title`}>
           SQL生成
-          {sqlTimeCost && (
+          {!!sqlTimeCost && (
             <span className={`${tipPrefixCls}-title-tip`}>(耗时: {sqlTimeCost}ms)</span>
           )}
           ：

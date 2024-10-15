@@ -118,7 +118,7 @@ const ParseTip: React.FC<Props> = ({
     return getNode(
       <>
         意图解析失败
-        {parseTimeCost && isDeveloper && (
+        {!!parseTimeCost && isDeveloper && (
           <span className={`${prefixCls}-title-tip`}>(耗时: {parseTimeCost}ms)</span>
         )}
       </>,
@@ -338,7 +338,7 @@ const ParseTip: React.FC<Props> = ({
     <div className={`${prefixCls}-title-bar`}>
       <div>
         意图解析
-        {parseTimeCost && isDeveloper && (
+        {!!parseTimeCost && isDeveloper && (
           <span className={`${prefixCls}-title-tip`}>(耗时: {parseTimeCost}ms)</span>
         )}
         {parseInfoOptions?.length > 1 ? '：' : ''}

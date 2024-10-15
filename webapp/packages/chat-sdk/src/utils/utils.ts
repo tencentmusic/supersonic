@@ -303,3 +303,30 @@ export function exportTextFile(content: string, fileName: string, mimeType: stri
   // 释放 URL 对象
   URL.revokeObjectURL(url);
 }
+
+function replacer(key: string, value: any) {
+  return value === null ? '' : value; // 将null值转换为空字符串
+}
+
+export function exportCsvFile(data: any[]) {
+  // 生成CSV内容
+  const csvRows: any[] = [];
+  const headers = Object.keys(data[0]);
+  csvRows.push(headers.join(',')); // 添加表头
+
+  for (const row of data) {
+    csvRows.push(headers.map(header => JSON.stringify(row[header], replacer)).join(','));
+  }
+
+  // 创建Blob并下载文件
+  const csvString = '\ufeff' + csvRows.join('\n');
+  const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'data.csv'; // 指定下载文件名
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  window.URL.revokeObjectURL(url); // 释放Blob URL
+}
