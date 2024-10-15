@@ -18,6 +18,7 @@ export enum SemanticTypeEnum {
   DIMENSION = 'DIMENSION',
   METRIC = 'METRIC',
   VALUE = 'VALUE',
+  TERM = 'TERM',
 }
 
 export const SEMANTIC_TYPE_MAP = {
@@ -25,6 +26,7 @@ export const SEMANTIC_TYPE_MAP = {
   [SemanticTypeEnum.DIMENSION]: '维度',
   [SemanticTypeEnum.METRIC]: '指标',
   [SemanticTypeEnum.VALUE]: '维度值',
+  [SemanticTypeEnum.TERM]: '术语',
 };
 
 export const AGENT_ICONS = [
