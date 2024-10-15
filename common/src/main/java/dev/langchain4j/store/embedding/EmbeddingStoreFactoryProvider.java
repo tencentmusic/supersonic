@@ -35,9 +35,9 @@ public class EmbeddingStoreFactoryProvider {
             return factoryMap.computeIfAbsent(embeddingStoreConfig,
                     storeConfig -> new MilvusEmbeddingStoreFactory(storeConfig));
         }
-        if (EmbeddingStoreType.PGVECTOR.name().equalsIgnoreCase(embeddingStoreConfig.getProvider())) {
-            return factoryMap.computeIfAbsent(
-                    embeddingStoreConfig,
+        if (EmbeddingStoreType.PGVECTOR.name()
+                .equalsIgnoreCase(embeddingStoreConfig.getProvider())) {
+            return factoryMap.computeIfAbsent(embeddingStoreConfig,
                     storeConfig -> new PgvectorEmbeddingStoreFactory(storeConfig));
         }
         if (EmbeddingStoreType.IN_MEMORY.name()
