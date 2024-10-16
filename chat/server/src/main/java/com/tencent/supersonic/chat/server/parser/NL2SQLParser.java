@@ -173,7 +173,7 @@ public class NL2SQLParser implements ChatQueryParser {
 
     private void processMultiTurn(ParseContext parseContext) {
         ChatApp chatApp = parseContext.getAgent().getChatAppConfig().get(APP_KEY_MULTI_TURN);
-        if (!chatApp.isEnable()) {
+        if (Objects.isNull(chatApp) || !chatApp.isEnable()) {
             return;
         }
 
@@ -222,7 +222,7 @@ public class NL2SQLParser implements ChatQueryParser {
             List<Text2SQLExemplar> similarExemplars) {
 
         ChatApp chatApp = parseContext.getAgent().getChatAppConfig().get(APP_KEY_ERROR_MESSAGE);
-        if (!chatApp.isEnable()) {
+        if (Objects.isNull(chatApp) || !chatApp.isEnable()) {
             return errMsg;
         }
 

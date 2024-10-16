@@ -1,6 +1,7 @@
 package com.tencent.supersonic.chat.server.util;
 
 import com.tencent.supersonic.chat.server.agent.Agent;
+import com.tencent.supersonic.chat.server.pojo.ChatModel;
 import com.tencent.supersonic.chat.server.service.ChatModelService;
 import com.tencent.supersonic.common.pojo.ChatApp;
 import com.tencent.supersonic.common.pojo.ChatModelConfig;
@@ -11,6 +12,8 @@ import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.provider.ModelProvider;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+
+import java.util.Objects;
 
 @Slf4j
 public class ModelConfigHelper {
@@ -30,8 +33,11 @@ public class ModelConfigHelper {
 
     public static ChatModelConfig getChatModelConfig(ChatApp chatApp) {
         ChatModelService chatModelService = ContextUtils.getBean(ChatModelService.class);
-        ChatModelConfig chatModelConfig =
-                chatModelService.getChatModel(chatApp.getChatModelId()).getConfig();
-        return chatModelConfig;
+        ChatModel chatModel = chatModelService.getChatModel(chatApp.getChatModelId());
+        if (Objects.isNull(chatModel)) {
+            return null;
+        }
+
+        return chatModel.getConfig();
     }
 }

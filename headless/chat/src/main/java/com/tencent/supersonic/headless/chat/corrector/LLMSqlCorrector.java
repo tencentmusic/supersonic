@@ -20,6 +20,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 @Slf4j
 public class LLMSqlCorrector extends BaseSemanticCorrector {
@@ -61,7 +62,8 @@ public class LLMSqlCorrector extends BaseSemanticCorrector {
     @Override
     public void doCorrect(ChatQueryContext chatQueryContext, SemanticParseInfo semanticParseInfo) {
         ChatApp chatApp = chatQueryContext.getChatAppConfig().get(APP_KEY);
-        if (!chatQueryContext.getText2SQLType().enableLLM() || !chatApp.isEnable()) {
+        if (!chatQueryContext.getText2SQLType().enableLLM() || Objects.isNull(chatApp)
+                || !chatApp.isEnable()) {
             return;
         }
 

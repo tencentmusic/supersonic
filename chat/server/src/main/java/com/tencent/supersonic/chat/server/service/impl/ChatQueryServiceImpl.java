@@ -9,6 +9,7 @@ import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.chat.server.agent.Agent;
 import com.tencent.supersonic.chat.server.executor.ChatQueryExecutor;
 import com.tencent.supersonic.chat.server.parser.ChatQueryParser;
+import com.tencent.supersonic.chat.server.pojo.ChatModel;
 import com.tencent.supersonic.chat.server.pojo.ExecuteContext;
 import com.tencent.supersonic.chat.server.pojo.ParseContext;
 import com.tencent.supersonic.chat.server.processor.execute.ExecuteResultProcessor;
@@ -171,8 +172,12 @@ public class ChatQueryServiceImpl implements ChatQueryService {
         ParseContext parseContext = new ParseContext();
         BeanMapper.mapper(chatParseReq, parseContext);
         Agent agent = agentService.getAgent(chatParseReq.getAgentId());
-        agent.getChatAppConfig().values().forEach(c -> c
-                .setChatModelConfig(chatModelService.getChatModel(c.getChatModelId()).getConfig()));
+        agent.getChatAppConfig().values().forEach(c -> {
+            ChatModel chatModel = chatModelService.getChatModel(c.getChatModelId());
+            if (Objects.nonNull(chatModel)) {
+                c.setChatModelConfig(chatModelService.getChatModel(c.getChatModelId()).getConfig());
+            }
+        });
         parseContext.setAgent(agent);
         return parseContext;
     }

@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 
 public class PlainTextExecutor implements ChatQueryExecutor {
 
-    private static final String APP_KEY = "SMALL_TALK";
+    public static final String APP_KEY = "SMALL_TALK";
     private static final String INSTRUCTION = "" + "#Role: You are a nice person to talk to."
             + "\n#Task: Respond quickly and nicely to the user."
             + "\n#Rules: 1.ALWAYS use the same language as the `#Current Input`."
@@ -45,7 +45,7 @@ public class PlainTextExecutor implements ChatQueryExecutor {
         AgentService agentService = ContextUtils.getBean(AgentService.class);
         Agent chatAgent = agentService.getAgent(executeContext.getAgent().getId());
         ChatApp chatApp = chatAgent.getChatAppConfig().get(APP_KEY);
-        if (!chatApp.isEnable()) {
+        if (Objects.isNull(chatApp) || !chatApp.isEnable()) {
             return null;
         }
 

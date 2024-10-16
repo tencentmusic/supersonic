@@ -75,7 +75,7 @@ public class MemoryReviewTask {
         }
 
         ChatApp chatApp = chatAgent.getChatAppConfig().get(APP_KEY);
-        if (!chatApp.isEnable()) {
+        if (Objects.isNull(chatApp) || !chatApp.isEnable()) {
             return;
         }
 
