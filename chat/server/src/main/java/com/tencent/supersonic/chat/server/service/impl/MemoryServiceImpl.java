@@ -38,8 +38,9 @@ public class MemoryServiceImpl implements MemoryService {
     @Override
     public void createMemory(ChatMemoryDO memory) {
         // if an existing enabled memory has the same question, just skip
-        List<ChatMemoryDO> memories = getMemories(ChatMemoryFilter.builder()
-                .agentId(memory.getAgentId()).question(memory.getQuestion()).status(MemoryStatus.ENABLED).build());
+        List<ChatMemoryDO> memories =
+                getMemories(ChatMemoryFilter.builder().agentId(memory.getAgentId())
+                        .question(memory.getQuestion()).status(MemoryStatus.ENABLED).build());
         if (memories.size() == 0) {
             chatMemoryRepository.createMemory(memory);
         }

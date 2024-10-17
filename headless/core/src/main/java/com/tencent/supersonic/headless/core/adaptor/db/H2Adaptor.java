@@ -5,11 +5,12 @@ import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import com.tencent.supersonic.headless.api.pojo.DBColumn;
 import com.tencent.supersonic.headless.core.pojo.ConnectInfo;
+import lombok.extern.slf4j.Slf4j;
+
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
-import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class H2Adaptor extends BaseDbAdaptor {
