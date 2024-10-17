@@ -11,5 +11,5 @@ public class ParserConfig extends ParameterConfig {
 
     public static final Parameter PARSER_MULTI_TURN_ENABLE =
             new Parameter("s2.parser.multi-turn.enable", "false", "是否开启多轮对话", "开启多轮对话将消耗更多token",
-                    "bool", "Parser相关配置");
+                    "bool", "语义解析配置");
 }

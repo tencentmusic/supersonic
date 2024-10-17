@@ -254,7 +254,7 @@ public class DataSetServiceImpl extends ServiceImpl<DataSetDOMapper, DataSetDO>
 
     @Override
     public Map<Long, List<Long>> getModelIdToDataSetIds() {
-        return getModelIdToDataSetIds(Lists.newArrayList(), User.getFakeUser());
+        return getModelIdToDataSetIds(Lists.newArrayList(), User.getDefaultUser());
     }
 
     private void conflictCheck(DataSetResp dataSetResp) {

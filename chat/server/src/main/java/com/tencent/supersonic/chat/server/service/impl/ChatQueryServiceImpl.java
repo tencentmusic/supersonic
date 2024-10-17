@@ -9,12 +9,14 @@ import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.chat.server.agent.Agent;
 import com.tencent.supersonic.chat.server.executor.ChatQueryExecutor;
 import com.tencent.supersonic.chat.server.parser.ChatQueryParser;
+import com.tencent.supersonic.chat.server.pojo.ChatModel;
 import com.tencent.supersonic.chat.server.pojo.ExecuteContext;
 import com.tencent.supersonic.chat.server.pojo.ParseContext;
 import com.tencent.supersonic.chat.server.processor.execute.ExecuteResultProcessor;
 import com.tencent.supersonic.chat.server.processor.parse.ParseResultProcessor;
 import com.tencent.supersonic.chat.server.service.AgentService;
 import com.tencent.supersonic.chat.server.service.ChatManageService;
+import com.tencent.supersonic.chat.server.service.ChatModelService;
 import com.tencent.supersonic.chat.server.service.ChatQueryService;
 import com.tencent.supersonic.chat.server.util.ComponentFactory;
 import com.tencent.supersonic.chat.server.util.QueryReqConverter;
@@ -86,6 +88,8 @@ public class ChatQueryServiceImpl implements ChatQueryService {
     private SemanticLayerService semanticLayerService;
     @Autowired
     private AgentService agentService;
+    @Autowired
+    private ChatModelService chatModelService;
 
     private List<ChatQueryParser> chatQueryParsers = ComponentFactory.getChatParsers();
     private List<ChatQueryExecutor> chatQueryExecutors = ComponentFactory.getChatExecutors();
@@ -106,7 +110,7 @@ public class ChatQueryServiceImpl implements ChatQueryService {
     }
 
     @Override
-    public ParseResp performParsing(ChatParseReq chatParseReq) {
+    public ParseResp parse(ChatParseReq chatParseReq) {
         ParseResp parseResp = new ParseResp(chatParseReq.getQueryText());
         chatManageService.createChatQuery(chatParseReq, parseResp);
         ParseContext parseContext = buildParseContext(chatParseReq);
@@ -124,7 +128,7 @@ public class ChatQueryServiceImpl implements ChatQueryService {
     }
 
     @Override
-    public QueryResult performExecution(ChatExecuteReq chatExecuteReq) {
+    public QueryResult execute(ChatExecuteReq chatExecuteReq) {
         QueryResult queryResult = new QueryResult();
         ExecuteContext executeContext = buildExecuteContext(chatExecuteReq);
         for (ChatQueryExecutor chatQueryExecutor : chatQueryExecutors) {
@@ -145,40 +149,42 @@ public class ChatQueryServiceImpl implements ChatQueryService {
     }
 
     @Override
-    public QueryResult parseAndExecute(int chatId, int agentId, String queryText) {
-        ChatParseReq chatParseReq = new ChatParseReq();
-        chatParseReq.setQueryText(queryText);
-        chatParseReq.setChatId(chatId);
-        chatParseReq.setAgentId(agentId);
-        chatParseReq.setUser(User.getFakeUser());
-        ParseResp parseResp = performParsing(chatParseReq);
+    public QueryResult parseAndExecute(ChatParseReq chatParseReq) {
+        ParseResp parseResp = parse(chatParseReq);
         if (CollectionUtils.isEmpty(parseResp.getSelectedParses())) {
             log.debug("chatId:{}, agentId:{}, queryText:{}, parseResp.getSelectedParses() is empty",
-                    chatId, agentId, queryText);
+                    chatParseReq.getChatId(), chatParseReq.getAgentId(),
+                    chatParseReq.getQueryText());
             return null;
         }
         ChatExecuteReq executeReq = new ChatExecuteReq();
         executeReq.setQueryId(parseResp.getQueryId());
         executeReq.setParseId(parseResp.getSelectedParses().get(0).getId());
-        executeReq.setQueryText(queryText);
-        executeReq.setChatId(chatId);
-        executeReq.setUser(User.getFakeUser());
-        executeReq.setAgentId(agentId);
+        executeReq.setQueryText(chatParseReq.getQueryText());
+        executeReq.setChatId(chatParseReq.getChatId());
+        executeReq.setUser(User.getDefaultUser());
+        executeReq.setAgentId(chatParseReq.getAgentId());
         executeReq.setSaveAnswer(true);
-        return performExecution(executeReq);
+        return execute(executeReq);
     }
 
     private ParseContext buildParseContext(ChatParseReq chatParseReq) {
         ParseContext parseContext = new ParseContext();
         BeanMapper.mapper(chatParseReq, parseContext);
         Agent agent = agentService.getAgent(chatParseReq.getAgentId());
+        agent.getChatAppConfig().values().forEach(c -> {
+            ChatModel chatModel = chatModelService.getChatModel(c.getChatModelId());
+            if (Objects.nonNull(chatModel)) {
+                c.setChatModelConfig(chatModelService.getChatModel(c.getChatModelId()).getConfig());
+            }
+        });
         parseContext.setAgent(agent);
         return parseContext;
     }
 
     private void supplyMapInfo(ParseContext parseContext) {
         QueryNLReq queryNLReq = QueryReqConverter.buildText2SqlQueryReq(parseContext);
-        MapResp mapResp = chatLayerService.performMapping(queryNLReq);
+        MapResp mapResp = chatLayerService.map(queryNLReq);
         parseContext.setMapInfo(mapResp.getMapInfo());
     }
 

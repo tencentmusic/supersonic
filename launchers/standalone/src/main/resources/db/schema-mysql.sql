@@ -70,14 +70,12 @@ CREATE TABLE IF NOT EXISTS `s2_agent` (
     `examples` TEXT COLLATE utf8_unicode_ci DEFAULT NULL,
     `status` tinyint DEFAULT NULL,
     `model` varchar(100) COLLATE utf8_unicode_ci DEFAULT NULL,
-    `config` varchar(6000) COLLATE utf8_unicode_ci DEFAULT NULL,
+    `tool_config` varchar(6000) COLLATE utf8_unicode_ci DEFAULT NULL,
     `llm_config` varchar(2000) COLLATE utf8_unicode_ci DEFAULT NULL,
-    `model_config` text COLLATE utf8_unicode_ci DEFAULT NULL,
-    `prompt_config` text  COLLATE utf8_unicode_ci DEFAULT NULL,
-    `multi_turn_config` varchar(2000) COLLATE utf8_unicode_ci DEFAULT NULL,
+    `chat_model_config` text COLLATE utf8_unicode_ci DEFAULT NULL,
     `visual_config` varchar(2000)  COLLATE utf8_unicode_ci DEFAULT NULL,
     `enable_search` tinyint DEFAULT 1,
-    `enable_memory_review` tinyint DEFAULT 0,
+    `enable_feedback` tinyint DEFAULT 1,
     `created_by` varchar(100) COLLATE utf8_unicode_ci DEFAULT NULL,
     `created_at` datetime DEFAULT NULL,
     `updated_by` varchar(100) COLLATE utf8_unicode_ci DEFAULT NULL,
@@ -209,6 +207,20 @@ CREATE TABLE IF NOT EXISTS `s2_chat_statistics` (
   `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   KEY `commonIndex` (`question_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS `s2_chat_model` (
+   `id` bigint(20) NOT NULL AUTO_INCREMENT,
+   `name` varchar(255) NOT NULL COMMENT '名称',
+   `description` varchar(500) DEFAULT NULL COMMENT '描述',
+   `config` text NOT NULL COMMENT '配置信息',
+   `created_at` datetime NOT NULL COMMENT '创建时间',
+   `created_by` varchar(100) NOT NULL COMMENT '创建人',
+   `updated_at` datetime NOT NULL COMMENT '更新时间',
+   `updated_by` varchar(100) NOT NULL COMMENT '更新人',
+   `admin` varchar(500) DEFAULT NULL,
+   `viewer` varchar(500) DEFAULT NULL,
+   PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='对话大模型实例表';
 
 CREATE TABLE IF NOT EXISTS `s2_database` (
    `id` bigint(20) NOT NULL AUTO_INCREMENT,

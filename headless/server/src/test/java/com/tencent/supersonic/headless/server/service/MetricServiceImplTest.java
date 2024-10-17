@@ -43,7 +43,7 @@ public class MetricServiceImplTest {
         MetricReq metricReq = buildMetricReq();
         when(modelService.getModel(metricReq.getModelId())).thenReturn(mockModelResp());
         when(modelService.getModelByDomainIds(any())).thenReturn(Lists.newArrayList());
-        MetricResp actualMetricResp = metricService.createMetric(metricReq, User.getFakeUser());
+        MetricResp actualMetricResp = metricService.createMetric(metricReq, User.getDefaultUser());
         MetricResp expectedMetricResp = buildExpectedMetricResp();
         Assertions.assertEquals(expectedMetricResp, actualMetricResp);
     }
@@ -58,7 +58,7 @@ public class MetricServiceImplTest {
         when(modelService.getModelByDomainIds(any())).thenReturn(Lists.newArrayList());
         MetricDO metricDO = MetricConverter.convert2MetricDO(buildMetricReq());
         when(metricRepository.getMetricById(metricDO.getId())).thenReturn(metricDO);
-        MetricResp actualMetricResp = metricService.updateMetric(metricReq, User.getFakeUser());
+        MetricResp actualMetricResp = metricService.updateMetric(metricReq, User.getDefaultUser());
         MetricResp expectedMetricResp = buildExpectedMetricResp();
         Assertions.assertEquals(expectedMetricResp, actualMetricResp);
     }

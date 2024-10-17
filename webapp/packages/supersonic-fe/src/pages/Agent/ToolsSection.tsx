@@ -1,10 +1,11 @@
 import { uuid } from '@/utils/utils';
 import { DeleteOutlined, EditOutlined, ToolOutlined } from '@ant-design/icons';
-import { Empty, Popconfirm } from 'antd';
-import { useState } from 'react';
+import { Empty, Popconfirm, message } from 'antd';
+import { useState, useEffect } from 'react';
 import styles from './style.less';
 import ToolModal from './ToolModal';
-import { AgentToolType, AgentType, AGENT_TOOL_TYPE_LIST } from './type';
+import { getToolTypes } from './service';
+import { AgentToolType, AgentType } from './type';
 
 type Props = {
   currentAgent?: AgentType;
@@ -15,15 +16,36 @@ const ToolsSection: React.FC<Props> = ({ currentAgent, onSaveAgent }) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [editTool, setEditTool] = useState<AgentToolType>();
 
-  const agentConfig = currentAgent?.agentConfig ? JSON.parse(currentAgent.agentConfig as any) : {};
+  const [toolTypesOptions, setToolTypesOptions] = useState<OptionsItem[]>([]);
+
+  useEffect(() => {
+    queryToolTypes();
+  }, []);
+
+  const toolConfig = currentAgent?.toolConfig ? JSON.parse(currentAgent.toolConfig as any) : {};
 
   const saveAgent = async (agent: AgentType) => {
     await onSaveAgent(agent);
     setModalVisible(false);
   };
 
+  const queryToolTypes = async () => {
+    const { code, data } = await getToolTypes();
+    if (code === 200 && data) {
+      const options = Object.keys(data).map((key: string) => {
+        return {
+          label: data[key],
+          value: key,
+        };
+      });
+      setToolTypesOptions(options);
+    } else {
+      message.error('获取工具类型失败');
+    }
+  };
+
   const onSaveTool = async (tool: AgentToolType) => {
-    const newAgentConfig = agentConfig || ({} as any);
+    const newAgentConfig = toolConfig || ({} as any);
     if (!newAgentConfig.tools) {
       newAgentConfig.tools = [];
     }
@@ -35,13 +57,13 @@ const ToolsSection: React.FC<Props> = ({ currentAgent, onSaveAgent }) => {
     }
     await saveAgent({
       ...currentAgent,
-      agentConfig: JSON.stringify(newAgentConfig) as any,
+      toolConfig: JSON.stringify(newAgentConfig) as any,
     });
     setModalVisible(false);
   };
 
   const onDeleteTool = async (tool: AgentToolType) => {
-    const newAgentConfig = agentConfig || ({} as any);
+    const newAgentConfig = toolConfig || ({} as any);
     if (!newAgentConfig.tools) {
       newAgentConfig.tools = [];
     }
@@ -50,17 +72,17 @@ const ToolsSection: React.FC<Props> = ({ currentAgent, onSaveAgent }) => {
     );
     await saveAgent({
       ...currentAgent,
-      agentConfig: JSON.stringify(newAgentConfig) as any,
+      toolConfig: JSON.stringify(newAgentConfig) as any,
     });
   };
 
   return (
     <>
       <div className={styles.toolSection}>
-        {agentConfig?.tools && agentConfig?.tools?.length > 0 ? (
+        {toolConfig?.tools && toolConfig?.tools?.length > 0 ? (
           <div className={styles.toolsContent}>
-            {agentConfig.tools.map((tool: AgentToolType) => {
-              const toolType = AGENT_TOOL_TYPE_LIST.find((item) => item.value === tool.type)?.label;
+            {toolConfig.tools.map((tool: AgentToolType) => {
+              const toolType = toolTypesOptions.find((item) => item.value === tool.type)?.label;
               return (
                 <div
                   className={styles.toolItem}

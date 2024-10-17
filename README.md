@@ -4,7 +4,7 @@
 
 # SuperSonic
 
-SuperSonic is the next-generation BI platform that integrates **Chat BI** (powered by LLM) and **Headless BI** (powered by semantic layer) paradigms. This integration ensures that Chat BI has access to the same curated and governed semantic data models as traditional BI. Furthermore, the implementation of both paradigms benefits from the integration: 
+SuperSonic is the next-generation BI platform that unifies **Chat BI** (powered by LLM) and **Headless BI** (powered by semantic layer) paradigms. This unification ensures that Chat BI has access to the same curated and governed semantic data models as traditional BI. Furthermore, the implementation of both paradigms benefit from each other:
 
 - Chat BI's Text2SQL gets augmented with context-retrieval from semantic models.
 - Headless BI's query interface gets extended with natural language API.
@@ -46,9 +46,9 @@ The high-level architecture and main process flow is as follows:
 
 - **Schema Mapper:** identifies references to schema elements(metrics/dimensions/entities/values) in user queries. It matches the query text against the knowledge base.
 
-- **Semantic Parser:** understands user queries and generates semantic query statement. It consists of a combination of rule-based and model-based parsers, each of which deals with specific scenarios.
+- **Semantic Parser:** understands user queries and generates semantic query statement. It consists of a combination of rule-based and LLM-based parsers, each of which deals with specific scenarios.
 
-- **Semantic Corrector:** checks validity of semantic query statement and performs correction and optimization if needed.
+- **Semantic Corrector:** checks validity of semantic query statement and performs correction if necessary. It consists of a combination of rule-based and LLM-based correctors, each of which deals with specific scenarios.
 
 - **Semantic Translator:** converts semantic query statement into SQL statement that can be executed against physical data models.
 

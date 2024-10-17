@@ -15,6 +15,7 @@ import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -60,6 +61,15 @@ public class DictWordService {
         addWordsByType(DictWordType.ENTITY, semanticSchema.getEntities(), words);
         addWordsByType(DictWordType.VALUE, semanticSchema.getDimensionValues(), words);
         addWordsByType(DictWordType.TERM, semanticSchema.getTerms(), words);
+        return words;
+    }
+
+    public List<DictWord> getDimDictWords(Set<Long> dimIds) {
+        SemanticSchema semanticSchema = schemaService.getSemanticSchema();
+        List<SchemaElement> requiredDims = semanticSchema.getDimensionValues().stream()
+                .filter(dim -> dimIds.contains(dim.getId())).collect(Collectors.toList());
+        List<DictWord> words = new ArrayList<>();
+        addWordsByType(DictWordType.VALUE, requiredDims, words);
         return words;
     }
 

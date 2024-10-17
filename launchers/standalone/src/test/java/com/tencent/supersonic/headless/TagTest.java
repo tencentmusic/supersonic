@@ -21,7 +21,7 @@ public class TagTest extends BaseTest {
         ItemValueReq itemValueReq = new ItemValueReq();
         itemValueReq.setId(1L);
         ItemValueResp itemValueResp =
-                tagQueryService.queryTagValue(itemValueReq, User.getFakeUser());
+                tagQueryService.queryTagValue(itemValueReq, User.getDefaultUser());
         Assertions.assertNotNull(itemValueResp);
     }
 }

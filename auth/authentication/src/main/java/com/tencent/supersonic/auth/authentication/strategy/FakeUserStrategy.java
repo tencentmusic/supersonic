@@ -17,11 +17,11 @@ public class FakeUserStrategy implements UserStrategy {
 
     @Override
     public User findUser(HttpServletRequest request, HttpServletResponse response) {
-        return User.getFakeUser();
+        return User.getDefaultUser();
     }
 
     @Override
     public User findUser(String token, String appKey) {
-        return User.getFakeUser();
+        return User.getDefaultUser();
     }
 }

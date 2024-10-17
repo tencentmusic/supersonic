@@ -102,6 +102,12 @@ export function mockDimensionValuesAlias(data: any): Promise<any> {
   });
 }
 
+export function getDictData(data: any): Promise<any> {
+  return request.post(`${process.env.API_BASE_URL}knowledge/dict/data`, {
+    data,
+  });
+}
+
 export function queryMetric(data: any): Promise<any> {
   const { domainId, modelId } = data;
   const queryParams = {
@@ -778,5 +784,31 @@ export function deleteTerm(data: any): Promise<any> {
   return request(`${process.env.API_BASE_URL}term/deleteBatch`, {
     method: 'POST',
     data: { ...data },
+  });
+}
+
+export function createLlmConfig(data: any): Promise<any> {
+  return request(`${process.env.CHAT_API_BASE_URL}chat/model`, {
+    method: 'POST',
+    data: { ...data },
+  });
+}
+
+export function saveLlmConfig(data: any): Promise<any> {
+  if (data.id) {
+    return request(`${process.env.CHAT_API_BASE_URL}model`, {
+      method: 'PUT',
+      data,
+    });
+  }
+  return request(`${process.env.CHAT_API_BASE_URL}model`, {
+    method: 'POST',
+    data,
+  });
+}
+
+export function deleteLlmConfig(id: number): Promise<any> {
+  return request(`${process.env.CHAT_API_BASE_URL}model/${id}`, {
+    method: 'DELETE',
   });
 }

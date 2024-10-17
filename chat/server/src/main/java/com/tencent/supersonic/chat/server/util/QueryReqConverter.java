@@ -3,8 +3,12 @@ package com.tencent.supersonic.chat.server.util;
 import com.tencent.supersonic.chat.server.agent.Agent;
 import com.tencent.supersonic.chat.server.pojo.ChatContext;
 import com.tencent.supersonic.chat.server.pojo.ParseContext;
+import com.tencent.supersonic.chat.server.service.ChatModelService;
+import com.tencent.supersonic.common.pojo.ChatModelConfig;
+import com.tencent.supersonic.common.pojo.enums.ChatModelType;
 import com.tencent.supersonic.common.pojo.enums.Text2SQLType;
 import com.tencent.supersonic.common.util.BeanMapper;
+import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.headless.api.pojo.request.QueryNLReq;
 import org.apache.commons.collections.MapUtils;
 
@@ -24,26 +28,18 @@ public class QueryReqConverter {
             return queryNLReq;
         }
 
-        boolean hasLLMTool = agent.containsLLMTool();
-        boolean hasRuleTool = agent.containsRuleTool();
-        boolean hasLLMConfig = Objects.nonNull(agent.getModelConfig());
-
-        if (hasLLMTool && hasLLMConfig) {
-            queryNLReq.setText2SQLType(Text2SQLType.ONLY_LLM);
-        } else if (hasLLMTool && hasRuleTool) {
-            queryNLReq.setText2SQLType(Text2SQLType.RULE_AND_LLM);
-        } else if (hasLLMTool) {
-            queryNLReq.setText2SQLType(Text2SQLType.ONLY_LLM);
-        } else if (hasRuleTool) {
+        if (parseContext.isDisableLLM()) {
             queryNLReq.setText2SQLType(Text2SQLType.ONLY_RULE);
+        } else {
+            queryNLReq.setText2SQLType(Text2SQLType.RULE_AND_LLM);
         }
+
         queryNLReq.setDataSetIds(agent.getDataSetIds());
         if (Objects.nonNull(queryNLReq.getMapInfo())
                 && MapUtils.isNotEmpty(queryNLReq.getMapInfo().getDataSetElementMatches())) {
             queryNLReq.setMapInfo(queryNLReq.getMapInfo());
         }
-        queryNLReq.setModelConfig(agent.getModelConfig());
-        queryNLReq.setPromptConfig(agent.getPromptConfig());
+        queryNLReq.setChatAppConfig(parseContext.getAgent().getChatAppConfig());
         if (chatCtx != null) {
             queryNLReq.setContextParseInfo(chatCtx.getParseInfo());
         }

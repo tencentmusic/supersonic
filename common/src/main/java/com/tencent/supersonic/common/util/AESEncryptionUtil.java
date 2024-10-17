@@ -1,12 +1,13 @@
 package com.tencent.supersonic.common.util;
 
-import lombok.extern.slf4j.Slf4j;
-
 import javax.crypto.Cipher;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
+
+import lombok.extern.slf4j.Slf4j;
+
 import java.security.MessageDigest;
 import java.security.spec.KeySpec;
 import java.util.Arrays;

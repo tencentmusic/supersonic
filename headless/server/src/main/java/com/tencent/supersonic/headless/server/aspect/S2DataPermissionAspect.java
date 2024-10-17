@@ -43,6 +43,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.StringJoiner;
 import java.util.stream.Collectors;
@@ -180,64 +181,66 @@ public class S2DataPermissionAspect {
 
     private void doRowPermission(QuerySqlReq querySqlReq,
             AuthorizedResourceResp authorizedResource) {
-        log.debug("start doRowPermission logic");
-        StringJoiner joiner = new StringJoiner(" OR ");
-        List<String> dimensionFilters = new ArrayList<>();
-        if (!CollectionUtils.isEmpty(authorizedResource.getFilters())) {
-            authorizedResource.getFilters().stream()
-                    .forEach(filter -> dimensionFilters.addAll(filter.getExpressions()));
-        }
+        log.debug("Start doRowPermission logic");
 
-        if (CollectionUtils.isEmpty(dimensionFilters)) {
-            log.debug("dimensionFilters is empty");
+        if (CollectionUtils.isEmpty(authorizedResource.getFilters())) {
+            log.debug("authorizedResource.getFilters() is empty");
+            return;
+        }
+        List<String> dimensionFilters = authorizedResource.getFilters().stream()
+                .flatMap(filter -> filter.getExpressions().stream()).filter(StringUtils::isNotBlank)
+                .collect(Collectors.toList());
+
+        if (dimensionFilters.isEmpty()) {
+            log.debug("Dimension filters are empty");
             return;
         }
 
-        dimensionFilters.stream().forEach(filter -> {
-            if (StringUtils.isNotEmpty(filter) && StringUtils.isNotEmpty(filter.trim())) {
-                joiner.add(" ( " + filter + " ) ");
-            }
-        });
+        StringJoiner joiner = new StringJoiner(" OR ");
+        dimensionFilters.stream().filter(
+                filter -> StringUtils.isNotEmpty(filter) && StringUtils.isNotEmpty(filter.trim()))
+                .forEach(filter -> joiner.add(" ( " + filter + " ) "));
+
         try {
             Expression expression = CCJSqlParserUtil.parseCondExpression(" ( " + joiner + " ) ");
             if (StringUtils.isNotEmpty(joiner.toString())) {
-                String sql = SqlAddHelper.addWhere(querySqlReq.getSql(), expression);
-                log.info("before doRowPermission, queryS2SQLReq:{}", querySqlReq.getSql());
-                querySqlReq.setSql(sql);
-                log.info("after doRowPermission, queryS2SQLReq:{}", querySqlReq.getSql());
+                String originalSql = querySqlReq.getSql();
+                String modifiedSql = SqlAddHelper.addWhere(originalSql, expression);
+                log.info("Before doRowPermission, querySqlReq: {}", originalSql);
+                querySqlReq.setSql(modifiedSql);
+                log.info("After doRowPermission, querySqlReq: {}", modifiedSql);
             }
-        } catch (JSQLParserException jsqlParserException) {
-            log.info("jsqlParser has an exception:{}", jsqlParserException.toString());
+        } catch (JSQLParserException e) {
+            log.error("JSQLParser encountered an exception: {}", e.toString());
         }
     }
 
     private void doRowPermission(QueryStructReq queryStructReq,
             AuthorizedResourceResp authorizedResource) {
         log.debug("start doRowPermission logic");
-        StringJoiner joiner = new StringJoiner(" OR ");
-        List<String> dimensionFilters = new ArrayList<>();
-        if (!CollectionUtils.isEmpty(authorizedResource.getFilters())) {
-            authorizedResource.getFilters().stream()
-                    .forEach(filter -> dimensionFilters.addAll(filter.getExpressions()));
-        }
 
-        if (CollectionUtils.isEmpty(dimensionFilters)) {
+        if (CollectionUtils.isEmpty(authorizedResource.getFilters())) {
+            log.debug("authorizedResource.getFilters() is empty");
+            return;
+        }
+        List<String> dimensionFilters = authorizedResource.getFilters().stream()
+                .flatMap(filter -> filter.getExpressions().stream()).filter(StringUtils::isNotBlank)
+                .collect(Collectors.toList());
+
+        if (dimensionFilters.isEmpty()) {
             log.debug("dimensionFilters is empty");
             return;
         }
 
-        dimensionFilters.stream().forEach(filter -> {
-            if (StringUtils.isNotEmpty(filter) && StringUtils.isNotEmpty(filter.trim())) {
-                joiner.add(" ( " + filter + " ) ");
-            }
-        });
+        StringJoiner joiner = new StringJoiner(" OR ");
+        dimensionFilters.forEach(filter -> joiner.add(" ( " + filter + " ) "));
 
-        if (StringUtils.isNotEmpty(joiner.toString())) {
+        String joinedFilters = joiner.toString();
+        if (StringUtils.isNotEmpty(joinedFilters)) {
             log.info("before doRowPermission, queryStructReq:{}", queryStructReq);
-            Filter filter = new Filter("", FilterOperatorEnum.SQL_PART, joiner.toString());
-            List<Filter> filters =
-                    Objects.isNull(queryStructReq.getOriginalFilter()) ? new ArrayList<>()
-                            : queryStructReq.getOriginalFilter();
+            Filter filter = new Filter("", FilterOperatorEnum.SQL_PART, joinedFilters);
+            List<Filter> filters = Optional.ofNullable(queryStructReq.getOriginalFilter())
+                    .orElseGet(ArrayList::new);
             filters.add(filter);
             queryStructReq.setDimensionFilters(filters);
             log.info("after doRowPermission, queryStructReq:{}", queryStructReq);

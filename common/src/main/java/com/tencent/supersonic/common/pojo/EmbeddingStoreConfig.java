@@ -22,4 +22,6 @@ public class EmbeddingStoreConfig implements Serializable {
     private Long timeOut = 60L;
     private Integer dimension;
     private String databaseName;
+    private Integer post;
+    private String user;
 }

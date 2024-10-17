@@ -5,14 +5,17 @@ import com.tencent.supersonic.common.pojo.ItemDateResp;
 import com.tencent.supersonic.common.pojo.enums.AuthType;
 import com.tencent.supersonic.headless.api.pojo.ItemDateFilter;
 import com.tencent.supersonic.headless.api.pojo.MetaFilter;
+import com.tencent.supersonic.headless.api.pojo.ModelSchema;
 import com.tencent.supersonic.headless.api.pojo.request.FieldRemovedReq;
 import com.tencent.supersonic.headless.api.pojo.request.MetaBatchReq;
 import com.tencent.supersonic.headless.api.pojo.request.ModelReq;
+import com.tencent.supersonic.headless.api.pojo.request.ModelSchemaReq;
 import com.tencent.supersonic.headless.api.pojo.response.DatabaseResp;
 import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
 import com.tencent.supersonic.headless.api.pojo.response.UnAvailableItemResp;
 import com.tencent.supersonic.headless.server.pojo.ModelFilter;
 
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
@@ -31,6 +34,8 @@ public interface ModelService {
     ItemDateResp getItemDate(ItemDateFilter dimension, ItemDateFilter metric);
 
     UnAvailableItemResp getUnAvailableItem(FieldRemovedReq fieldRemovedReq);
+
+    ModelSchema buildModelSchema(ModelSchemaReq modelSchemaReq) throws SQLException;
 
     List<ModelResp> getModelListWithAuth(User user, Long domainId, AuthType authType);
 

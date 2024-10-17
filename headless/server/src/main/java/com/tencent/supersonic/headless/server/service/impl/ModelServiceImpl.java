@@ -9,17 +9,22 @@ import com.tencent.supersonic.common.pojo.enums.EventType;
 import com.tencent.supersonic.common.pojo.enums.StatusEnum;
 import com.tencent.supersonic.common.pojo.exception.InvalidArgumentException;
 import com.tencent.supersonic.common.util.JsonUtil;
+import com.tencent.supersonic.headless.api.pojo.DBColumn;
+import com.tencent.supersonic.headless.api.pojo.DbSchema;
 import com.tencent.supersonic.headless.api.pojo.Dim;
+import com.tencent.supersonic.headless.api.pojo.FieldSchema;
 import com.tencent.supersonic.headless.api.pojo.Identify;
 import com.tencent.supersonic.headless.api.pojo.ItemDateFilter;
 import com.tencent.supersonic.headless.api.pojo.Measure;
 import com.tencent.supersonic.headless.api.pojo.MetaFilter;
+import com.tencent.supersonic.headless.api.pojo.ModelSchema;
 import com.tencent.supersonic.headless.api.pojo.request.DateInfoReq;
 import com.tencent.supersonic.headless.api.pojo.request.DimensionReq;
 import com.tencent.supersonic.headless.api.pojo.request.FieldRemovedReq;
 import com.tencent.supersonic.headless.api.pojo.request.MetaBatchReq;
 import com.tencent.supersonic.headless.api.pojo.request.MetricReq;
 import com.tencent.supersonic.headless.api.pojo.request.ModelReq;
+import com.tencent.supersonic.headless.api.pojo.request.ModelSchemaReq;
 import com.tencent.supersonic.headless.api.pojo.response.DataSetResp;
 import com.tencent.supersonic.headless.api.pojo.response.DatabaseResp;
 import com.tencent.supersonic.headless.api.pojo.response.DimensionResp;
@@ -27,6 +32,7 @@ import com.tencent.supersonic.headless.api.pojo.response.DomainResp;
 import com.tencent.supersonic.headless.api.pojo.response.MetricResp;
 import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
 import com.tencent.supersonic.headless.api.pojo.response.UnAvailableItemResp;
+import com.tencent.supersonic.headless.server.builder.ModelIntelligentBuilder;
 import com.tencent.supersonic.headless.server.persistence.dataobject.DateInfoDO;
 import com.tencent.supersonic.headless.server.persistence.dataobject.ModelDO;
 import com.tencent.supersonic.headless.server.persistence.repository.DateInfoRepository;
@@ -48,6 +54,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
@@ -78,10 +85,13 @@ public class ModelServiceImpl implements ModelService {
 
     private DateInfoRepository dateInfoRepository;
 
+    private ModelIntelligentBuilder modelIntelligentBuilder;
+
     public ModelServiceImpl(ModelRepository modelRepository, DatabaseService databaseService,
             @Lazy DimensionService dimensionService, @Lazy MetricService metricService,
             DomainService domainService, UserService userService, DataSetService dataSetService,
-            DateInfoRepository dateInfoRepository) {
+            DateInfoRepository dateInfoRepository,
+            ModelIntelligentBuilder modelIntelligentBuilder) {
         this.modelRepository = modelRepository;
         this.databaseService = databaseService;
         this.dimensionService = dimensionService;
@@ -90,6 +100,7 @@ public class ModelServiceImpl implements ModelService {
         this.userService = userService;
         this.dataSetService = dataSetService;
         this.dateInfoRepository = dateInfoRepository;
+        this.modelIntelligentBuilder = modelIntelligentBuilder;
     }
 
     @Override
@@ -182,6 +193,42 @@ public class ModelServiceImpl implements ModelService {
         List<DimensionResp> dimensionResps = dimensionService.getDimensions(metaFilter);
         return UnAvailableItemResp.builder().dimensionResps(dimensionResps).metricResps(metricResps)
                 .build();
+    }
+
+    @Override
+    public ModelSchema buildModelSchema(ModelSchemaReq modelSchemaReq) throws SQLException {
+        List<DBColumn> dbColumns = databaseService.getDbColumns(modelSchemaReq);
+        if (modelSchemaReq.isBuildByLLM()) {
+            DbSchema dbSchema = convert(modelSchemaReq, dbColumns);
+            return modelIntelligentBuilder.build(dbSchema);
+        }
+        return build(dbColumns);
+    }
+
+    private DbSchema convert(ModelSchemaReq modelSchemaReq, List<DBColumn> dbColumns) {
+        DbSchema dbSchema = new DbSchema();
+        dbSchema.setDb(modelSchemaReq.getDb());
+        dbSchema.setTable(modelSchemaReq.getTable());
+        dbSchema.setSql(modelSchemaReq.getSql());
+        dbSchema.setDbColumns(dbColumns);
+        return dbSchema;
+    }
+
+    private FieldSchema convert(DBColumn dbColumn) {
+        FieldSchema fieldSchema = new FieldSchema();
+        fieldSchema.setName(dbColumn.getComment());
+        fieldSchema.setColumnName(dbColumn.getColumnName());
+        fieldSchema.setComment(dbColumn.getComment());
+        fieldSchema.setDataType(dbColumn.getDataType());
+        return fieldSchema;
+    }
+
+    private ModelSchema build(List<DBColumn> dbColumns) {
+        ModelSchema modelSchema = new ModelSchema();
+        List<FieldSchema> fieldSchemas =
+                dbColumns.stream().map(this::convert).collect(Collectors.toList());
+        modelSchema.setFiledSchemas(fieldSchemas);
+        return modelSchema;
     }
 
     private void batchCreateDimension(ModelDO modelDO, User user) throws Exception {

@@ -34,7 +34,7 @@ public class BaseTest extends BaseApplication {
     private DomainRepository domainRepository;
 
     protected SemanticQueryResp queryBySql(String sql) throws Exception {
-        return queryBySql(sql, User.getFakeUser());
+        return queryBySql(sql, User.getDefaultUser());
     }
 
     protected SemanticQueryResp queryBySql(String sql, User user) throws Exception {

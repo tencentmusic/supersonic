@@ -69,7 +69,7 @@ public class DefaultAuthenticationInterceptor extends AuthenticationInterceptor 
     private void setFakerUser(HttpServletRequest request) {
         String token = userTokenUtils.generateAdminToken(request);
         reflectSetParam(request, authenticationConfig.getTokenHttpHeaderKey(), token);
-        setContext(User.getFakeUser().getName(), request);
+        setContext(User.getDefaultUser().getName(), request);
     }
 
     private void setContext(String userName, HttpServletRequest request) {

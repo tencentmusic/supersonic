@@ -19,7 +19,7 @@ public class DataUtils {
     public static final Integer tagAgentId = 2;
     public static final Integer ONE_TURNS_CHAT_ID = 10;
     public static final Integer MULTI_TURNS_CHAT_ID = 11;
-    private static final User user_test = User.getFakeUser();
+    private static final User user_test = User.getDefaultUser();
 
     public static User getUser() {
         return user_test;
@@ -37,11 +37,12 @@ public class DataUtils {
         return User.get(3L, "tom");
     }
 
-    public static ChatParseReq getChatParseReq(Integer id, String query) {
+    public static ChatParseReq getChatParseReq(Integer id, String query, boolean enableLLM) {
         ChatParseReq chatParseReq = new ChatParseReq();
         chatParseReq.setQueryText(query);
         chatParseReq.setChatId(id);
         chatParseReq.setUser(user_test);
+        chatParseReq.setDisableLLM(!enableLLM);
         return chatParseReq;
     }
 

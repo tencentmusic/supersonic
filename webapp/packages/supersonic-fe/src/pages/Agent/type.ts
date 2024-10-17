@@ -8,22 +8,8 @@ export enum AgentToolTypeEnum {
   NL2SQL_RULE = 'NL2SQL_RULE',
   NL2SQL_LLM = 'NL2SQL_LLM',
   PLUGIN = 'PLUGIN',
+  DATASET = 'DATASET',
 }
-
-export const AGENT_TOOL_TYPE_LIST = [
-  {
-    label: '规则语义解析',
-    value: AgentToolTypeEnum.NL2SQL_RULE,
-  },
-  {
-    label: '大模型语义解析',
-    value: AgentToolTypeEnum.NL2SQL_LLM,
-  },
-  {
-    label: '第三方插件',
-    value: AgentToolTypeEnum.PLUGIN,
-  },
-];
 
 export enum QueryModeEnum {
   METRIC = 'METRIC',
@@ -85,6 +71,17 @@ export type VisualConfig = {
   defaultShowType: string;
 };
 
+export type ChatAppConfigItem = {
+  key: string;
+  name: string;
+  description: string;
+  prompt: string;
+  enable: boolean;
+  chatModelId: number;
+};
+
+export type ChatAppConfig = Record<string, ChatAppConfigItem>;
+
 export type AgentType = {
   id?: number;
   name?: string;
@@ -96,8 +93,10 @@ export type AgentType = {
   examples?: string[];
   status?: 0 | 1;
   enableSearch?: 0 | 1;
-  agentConfig?: AgentConfigType;
-  modelConfig: LlmConfigType;
+  enableFeedback?: 0 | 1;
+  toolConfig?: string;
+  // modelConfig?: LlmConfigType;
+  chatAppConfig: ChatAppConfig;
   multiTurnConfig?: MultiTurnConfig;
   visualConfig?: VisualConfig;
 };

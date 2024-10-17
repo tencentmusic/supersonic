@@ -3,20 +3,18 @@ package com.tencent.supersonic.chat.server.service.impl;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.chat.api.pojo.request.ChatMemoryFilter;
+import com.tencent.supersonic.chat.api.pojo.request.ChatParseReq;
 import com.tencent.supersonic.chat.server.agent.Agent;
-import com.tencent.supersonic.chat.server.agent.MultiTurnConfig;
+import com.tencent.supersonic.chat.server.agent.VisualConfig;
 import com.tencent.supersonic.chat.server.persistence.dataobject.AgentDO;
 import com.tencent.supersonic.chat.server.persistence.dataobject.ChatMemoryDO;
 import com.tencent.supersonic.chat.server.persistence.mapper.AgentDOMapper;
 import com.tencent.supersonic.chat.server.service.AgentService;
+import com.tencent.supersonic.chat.server.service.ChatModelService;
 import com.tencent.supersonic.chat.server.service.ChatQueryService;
 import com.tencent.supersonic.chat.server.service.MemoryService;
-import com.tencent.supersonic.chat.server.util.LLMConnHelper;
-import com.tencent.supersonic.common.config.PromptConfig;
-import com.tencent.supersonic.common.config.VisualConfig;
-import com.tencent.supersonic.common.pojo.ChatModelConfig;
+import com.tencent.supersonic.common.pojo.ChatApp;
 import com.tencent.supersonic.common.util.JsonUtil;
-import com.tencent.supersonic.headless.chat.parser.llm.OnePassSCSqlGenStrategy;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +22,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
@@ -39,6 +36,9 @@ public class AgentServiceImpl extends ServiceImpl<AgentDOMapper, AgentDO> implem
     @Autowired
     private ChatQueryService chatQueryService;
 
+    @Autowired
+    private ChatModelService chatModelService;
+
     private ExecutorService executorService = Executors.newFixedThreadPool(1);
 
     @Override
@@ -48,12 +48,6 @@ public class AgentServiceImpl extends ServiceImpl<AgentDOMapper, AgentDO> implem
 
     @Override
     public Agent createAgent(Agent agent, User user) {
-        if (Objects.isNull(agent.getPromptConfig())
-                || Objects.isNull(agent.getPromptConfig().getPromptTemplate())) {
-            PromptConfig promptConfig = new PromptConfig();
-            promptConfig.setPromptTemplate(OnePassSCSqlGenStrategy.INSTRUCTION.trim());
-            agent.setPromptConfig(promptConfig);
-        }
         agent.createdBy(user.getName());
         AgentDO agentDO = convert(agent);
         save(agentDO);
@@ -64,12 +58,6 @@ public class AgentServiceImpl extends ServiceImpl<AgentDOMapper, AgentDO> implem
 
     @Override
     public Agent updateAgent(Agent agent, User user) {
-        if (Objects.isNull(agent.getPromptConfig())
-                || Objects.isNull(agent.getPromptConfig().getPromptTemplate())) {
-            PromptConfig promptConfig = new PromptConfig();
-            promptConfig.setPromptTemplate(OnePassSCSqlGenStrategy.INSTRUCTION.trim());
-            agent.setPromptConfig(promptConfig);
-        }
         agent.updatedBy(user.getName());
         updateById(convert(agent));
         executeAgentExamplesAsync(agent);
@@ -100,7 +88,7 @@ public class AgentServiceImpl extends ServiceImpl<AgentDOMapper, AgentDO> implem
     }
 
     private synchronized void doExecuteAgentExamples(Agent agent) {
-        if (!agent.containsLLMTool() || !LLMConnHelper.testConnection(agent.getModelConfig())
+        if (!agent.containsDatasetTool() || !agent.enableMemoryReview()
                 || CollectionUtils.isEmpty(agent.getExamples())) {
             return;
         }
@@ -115,7 +103,9 @@ public class AgentServiceImpl extends ServiceImpl<AgentDOMapper, AgentDO> implem
                 continue;
             }
             try {
-                chatQueryService.parseAndExecute(-1, agent.getId(), example);
+                chatQueryService
+                        .parseAndExecute(ChatParseReq.builder().chatId(-1).agentId(agent.getId())
+                                .queryText(example).user(User.getDefaultUser()).build());
             } catch (Exception e) {
                 log.warn("agent:{} example execute failed:{}", agent.getName(), example);
             }
@@ -132,12 +122,10 @@ public class AgentServiceImpl extends ServiceImpl<AgentDOMapper, AgentDO> implem
         }
         Agent agent = new Agent();
         BeanUtils.copyProperties(agentDO, agent);
-        agent.setAgentConfig(agentDO.getConfig());
+        agent.setToolConfig(agentDO.getToolConfig());
         agent.setExamples(JsonUtil.toList(agentDO.getExamples(), String.class));
-        agent.setModelConfig(JsonUtil.toObject(agentDO.getModelConfig(), ChatModelConfig.class));
-        agent.setPromptConfig(JsonUtil.toObject(agentDO.getPromptConfig(), PromptConfig.class));
-        agent.setMultiTurnConfig(
-                JsonUtil.toObject(agentDO.getMultiTurnConfig(), MultiTurnConfig.class));
+        agent.setChatAppConfig(
+                JsonUtil.toMap(agentDO.getChatModelConfig(), String.class, ChatApp.class));
         agent.setVisualConfig(JsonUtil.toObject(agentDO.getVisualConfig(), VisualConfig.class));
         return agent;
     }
@@ -145,12 +133,10 @@ public class AgentServiceImpl extends ServiceImpl<AgentDOMapper, AgentDO> implem
     private AgentDO convert(Agent agent) {
         AgentDO agentDO = new AgentDO();
         BeanUtils.copyProperties(agent, agentDO);
-        agentDO.setConfig(agent.getAgentConfig());
+        agentDO.setToolConfig(agent.getToolConfig());
         agentDO.setExamples(JsonUtil.toString(agent.getExamples()));
-        agentDO.setModelConfig(JsonUtil.toString(agent.getModelConfig()));
-        agentDO.setMultiTurnConfig(JsonUtil.toString(agent.getMultiTurnConfig()));
+        agentDO.setChatModelConfig(JsonUtil.toString(agent.getChatAppConfig()));
         agentDO.setVisualConfig(JsonUtil.toString(agent.getVisualConfig()));
-        agentDO.setPromptConfig(JsonUtil.toString(agent.getPromptConfig()));
         if (agentDO.getStatus() == null) {
             agentDO.setStatus(1);
         }

@@ -9,4 +9,5 @@ public class DataSetMatchResult {
     private double maxMetricSimilarity;
     private double maxDatesetSimilarity;
     private double totalSimilarity;
+    private Long maxMetricUseCnt;
 }

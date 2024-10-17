@@ -6,6 +6,8 @@ import org.apache.calcite.sql.SqlIdentifier;
 import org.apache.calcite.sql.SqlLiteral;
 import org.apache.calcite.sql.SqlNode;
 import org.apache.calcite.sql.SqlNodeList;
+import org.apache.calcite.sql.SqlOrderBy;
+import org.apache.calcite.sql.SqlSelect;
 import org.apache.calcite.sql.SqlWith;
 import org.apache.calcite.sql.SqlWithItem;
 import org.apache.calcite.sql.SqlWriterConfig;
@@ -19,7 +21,6 @@ import java.util.List;
 
 @Slf4j
 public class SqlMergeWithUtils {
-
     public static String mergeWith(EngineType engineType, String sql, List<String> parentSqlList,
             List<String> parentWithNameList) throws SqlParseException {
         SqlParser.Config parserConfig = Configuration.getParserConfig(engineType);
@@ -42,14 +43,26 @@ public class SqlMergeWithUtils {
 
             // Create a new WITH item for parentWithName without quotes
             SqlWithItem withItem = new SqlWithItem(SqlParserPos.ZERO,
-                    new SqlIdentifier(parentWithName, SqlParserPos.ZERO), // false
-                                                                          // to
-                                                                          // avoid
-                                                                          // quotes
-                    null, sqlNode2, SqlLiteral.createBoolean(false, SqlParserPos.ZERO));
+                    new SqlIdentifier(parentWithName, SqlParserPos.ZERO), null, sqlNode2,
+                    SqlLiteral.createBoolean(false, SqlParserPos.ZERO));
 
             // Add the new WITH item to the list
             withItemList.add(withItem);
+        }
+
+        // Check if the main SQL node contains an ORDER BY or LIMIT clause
+        SqlNode limitNode = null;
+        SqlNodeList orderByList = null;
+        if (sqlNode1 instanceof SqlOrderBy) {
+            SqlOrderBy sqlOrderBy = (SqlOrderBy) sqlNode1;
+            limitNode = sqlOrderBy.fetch;
+            orderByList = sqlOrderBy.orderList;
+            sqlNode1 = sqlOrderBy.query;
+        } else if (sqlNode1 instanceof SqlSelect) {
+            SqlSelect sqlSelect = (SqlSelect) sqlNode1;
+            limitNode = sqlSelect.getFetch();
+            sqlSelect.setFetch(null);
+            sqlNode1 = sqlSelect;
         }
 
         // Extract existing WITH items from sqlNode1 if it is a SqlWith
@@ -62,10 +75,18 @@ public class SqlMergeWithUtils {
         // Create a new SqlWith node
         SqlWith finalSqlNode = new SqlWith(SqlParserPos.ZERO,
                 new SqlNodeList(withItemList, SqlParserPos.ZERO), sqlNode1);
+
+        // If there was an ORDER BY or LIMIT clause, wrap the finalSqlNode in a SqlOrderBy
+        SqlNode resultNode = finalSqlNode;
+        if (orderByList != null || limitNode != null) {
+            resultNode = new SqlOrderBy(SqlParserPos.ZERO, finalSqlNode,
+                    orderByList != null ? orderByList : SqlNodeList.EMPTY, null, limitNode);
+        }
+
         // Custom SqlPrettyWriter configuration to avoid quoting identifiers
         SqlWriterConfig config = Configuration.getSqlWriterConfig(engineType);
         // Pretty print the final SQL
         SqlPrettyWriter writer = new SqlPrettyWriter(config);
-        return writer.format(finalSqlNode);
+        return writer.format(resultNode);
     }
 }

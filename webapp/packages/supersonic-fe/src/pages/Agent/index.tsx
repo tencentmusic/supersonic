@@ -14,10 +14,10 @@ const Agent = () => {
   const [currentAgent, setCurrentAgent] = useState<AgentType>();
   const [modalVisible, setModalVisible] = useState(false);
   const [showDetail, setShowDetail] = useState<boolean>(false);
-  const [agentConfig, setAgentConfig] = useState<any>({});
+  const [toolConfig, setAgentConfig] = useState<any>({});
 
   useEffect(() => {
-    const config = jsonParse(currentAgent?.agentConfig, {});
+    const config = jsonParse(currentAgent?.toolConfig, {});
     setAgentConfig(config);
   }, [currentAgent]);
 
@@ -33,7 +33,7 @@ const Agent = () => {
   }, []);
 
   const onSaveTool = async (tool: AgentToolType) => {
-    const newAgentConfig = agentConfig || ({} as any);
+    const newAgentConfig = toolConfig || ({} as any);
     if (!newAgentConfig.tools) {
       newAgentConfig.tools = [];
     }
@@ -47,14 +47,14 @@ const Agent = () => {
     if (!currentAgent?.id) {
       setCurrentAgent({
         ...currentAgent,
-        agentConfig: JSON.stringify(newAgentConfig) as any,
+        toolConfig: JSON.stringify(newAgentConfig) as any,
       });
       setModalVisible(false);
       return;
     }
     await onSaveAgent({
       ...currentAgent,
-      agentConfig: JSON.stringify(newAgentConfig) as any,
+      toolConfig: JSON.stringify(newAgentConfig) as any,
     });
     setModalVisible(false);
   };

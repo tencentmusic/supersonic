@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -36,15 +37,21 @@ public class MemoryServiceImpl implements MemoryService {
 
     @Override
     public void createMemory(ChatMemoryDO memory) {
-        chatMemoryRepository.createMemory(memory);
+        // if an existing enabled memory has the same question, just skip
+        List<ChatMemoryDO> memories = getMemories(ChatMemoryFilter.builder()
+                .agentId(memory.getAgentId()).question(memory.getQuestion()).status(MemoryStatus.ENABLED).build());
+        if (memories.size() == 0) {
+            chatMemoryRepository.createMemory(memory);
+        }
     }
 
     @Override
     public void updateMemory(ChatMemoryUpdateReq chatMemoryUpdateReq, User user) {
-        chatMemoryUpdateReq.updatedBy(user.getName());
         ChatMemoryDO chatMemoryDO = chatMemoryRepository.getMemory(chatMemoryUpdateReq.getId());
-        boolean hadEnabled = MemoryStatus.ENABLED.equals(chatMemoryDO.getStatus());
+        chatMemoryDO.setUpdatedBy(user.getName());
+        chatMemoryDO.setUpdatedAt(new Date());
         BeanMapper.mapper(chatMemoryUpdateReq, chatMemoryDO);
+        boolean hadEnabled = MemoryStatus.ENABLED.equals(chatMemoryDO.getStatus());
         if (MemoryStatus.ENABLED.equals(chatMemoryUpdateReq.getStatus()) && !hadEnabled) {
             enableMemory(chatMemoryDO);
         } else if (MemoryStatus.DISABLED.equals(chatMemoryUpdateReq.getStatus()) && hadEnabled) {

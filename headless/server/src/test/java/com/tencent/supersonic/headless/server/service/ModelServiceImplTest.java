@@ -14,6 +14,7 @@ import com.tencent.supersonic.headless.api.pojo.enums.DimensionType;
 import com.tencent.supersonic.headless.api.pojo.enums.IdentifyType;
 import com.tencent.supersonic.headless.api.pojo.request.ModelReq;
 import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
+import com.tencent.supersonic.headless.server.builder.ModelIntelligentBuilder;
 import com.tencent.supersonic.headless.server.persistence.dataobject.ModelDO;
 import com.tencent.supersonic.headless.server.persistence.repository.DateInfoRepository;
 import com.tencent.supersonic.headless.server.persistence.repository.ModelRepository;
@@ -34,7 +35,7 @@ class ModelServiceImplTest {
     void createModel() throws Exception {
         ModelRepository modelRepository = Mockito.mock(ModelRepository.class);
         ModelService modelService = mockModelService(modelRepository);
-        ModelResp actualModelResp = modelService.createModel(mockModelReq(), User.getFakeUser());
+        ModelResp actualModelResp = modelService.createModel(mockModelReq(), User.getDefaultUser());
         ModelResp expectedModelResp = buildExpectedModelResp();
         Assertions.assertEquals(expectedModelResp, actualModelResp);
     }
@@ -44,9 +45,9 @@ class ModelServiceImplTest {
         ModelRepository modelRepository = Mockito.mock(ModelRepository.class);
         ModelService modelService = mockModelService(modelRepository);
         ModelReq modelReq = mockModelReq_update();
-        ModelDO modelDO = ModelConverter.convert(mockModelReq(), User.getFakeUser());
+        ModelDO modelDO = ModelConverter.convert(mockModelReq(), User.getDefaultUser());
         when(modelRepository.getModelById(modelReq.getId())).thenReturn(modelDO);
-        User user = User.getFakeUser();
+        User user = User.getDefaultUser();
         user.setName("alice");
         ModelResp actualModelResp = modelService.updateModel(modelReq, user);
         ModelResp expectedModelResp = buildExpectedModelResp_update();
@@ -60,9 +61,9 @@ class ModelServiceImplTest {
         ModelRepository modelRepository = Mockito.mock(ModelRepository.class);
         ModelService modelService = mockModelService(modelRepository);
         ModelReq modelReq = mockModelReq_updateAdmin();
-        ModelDO modelDO = ModelConverter.convert(mockModelReq(), User.getFakeUser());
+        ModelDO modelDO = ModelConverter.convert(mockModelReq(), User.getDefaultUser());
         when(modelRepository.getModelById(modelReq.getId())).thenReturn(modelDO);
-        ModelResp actualModelResp = modelService.updateModel(modelReq, User.getFakeUser());
+        ModelResp actualModelResp = modelService.updateModel(modelReq, User.getDefaultUser());
         ModelResp expectedModelResp = buildExpectedModelResp();
         Assertions.assertEquals(expectedModelResp, actualModelResp);
     }
@@ -75,8 +76,11 @@ class ModelServiceImplTest {
         UserService userService = Mockito.mock(UserService.class);
         DateInfoRepository dateInfoRepository = Mockito.mock(DateInfoRepository.class);
         DataSetService viewService = Mockito.mock(DataSetService.class);
+        ModelIntelligentBuilder modelIntelligentBuilder =
+                Mockito.mock(ModelIntelligentBuilder.class);
         return new ModelServiceImpl(modelRepository, databaseService, dimensionService,
-                metricService, domainService, userService, viewService, dateInfoRepository);
+                metricService, domainService, userService, viewService, dateInfoRepository,
+                modelIntelligentBuilder);
     }
 
     private ModelReq mockModelReq() {

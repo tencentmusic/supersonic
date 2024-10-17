@@ -1,17 +1,12 @@
-import { Form, Modal, Input, Select, Button, TreeSelect } from 'antd';
-import {
-  AgentToolType,
-  AgentToolTypeEnum,
-  AGENT_TOOL_TYPE_LIST,
-  MetricOptionType,
-  QUERY_MODE_LIST,
-} from './type';
+import { Form, Modal, Input, Select, Button, TreeSelect, message } from 'antd';
+import { AgentToolType, AgentToolTypeEnum, MetricOptionType, QUERY_MODE_LIST } from './type';
 import { useEffect, useState } from 'react';
 import { DeleteOutlined, PlusOutlined } from '@ant-design/icons';
 import styles from './style.less';
 import { traverseTree, uuid } from '@/utils/utils';
 import { getModelList } from './service';
 import { PluginType } from '../ChatPlugin/type';
+import { getToolTypes } from './service';
 import { getPluginList } from '../ChatPlugin/service';
 
 const FormItem = Form.Item;
@@ -29,6 +24,7 @@ const ToolModal: React.FC<Props> = ({ editTool, onSaveTool, onCancel }) => {
   const [examples, setExamples] = useState<{ id: string; question?: string }[]>([]);
   const [metricOptions, setMetricOptions] = useState<MetricOptionType[]>([]);
   const [plugins, setPlugins] = useState<PluginType[]>([]);
+  const [toolTypesOptions, setToolTypesOptions] = useState<OptionsItem[]>([]);
   const [form] = Form.useForm();
 
   const initModelList = async () => {
@@ -50,6 +46,7 @@ const ToolModal: React.FC<Props> = ({ editTool, onSaveTool, onCancel }) => {
   useEffect(() => {
     initModelList();
     initPluginList();
+    queryToolTypes();
   }, []);
 
   useEffect(() => {
@@ -64,6 +61,21 @@ const ToolModal: React.FC<Props> = ({ editTool, onSaveTool, onCancel }) => {
       form.resetFields();
     }
   }, [editTool]);
+
+  const queryToolTypes = async () => {
+    const { code, data } = await getToolTypes();
+    if (code === 200 && data) {
+      const options = Object.keys(data).map((key: string) => {
+        return {
+          label: data[key],
+          value: key,
+        };
+      });
+      setToolTypesOptions(options);
+    } else {
+      message.error('获取工具类型失败');
+    }
+  };
 
   const layout = {
     labelCol: { span: 6 },
@@ -95,27 +107,27 @@ const ToolModal: React.FC<Props> = ({ editTool, onSaveTool, onCancel }) => {
     >
       <Form {...layout} form={form}>
         <FormItem name="type" label="类型" rules={[{ required: true, message: '请选择工具类型' }]}>
-          <Select
-            options={AGENT_TOOL_TYPE_LIST}
-            placeholder="请选择工具类型"
-            onChange={setToolType}
-          />
+          <Select options={toolTypesOptions} placeholder="请选择工具类型" onChange={setToolType} />
         </FormItem>
         <FormItem name="name" label="名称">
           <Input placeholder="请输入工具名称" />
         </FormItem>
-        {(toolType === AgentToolTypeEnum.NL2SQL_RULE ||
-          toolType === AgentToolTypeEnum.NL2SQL_LLM) && (
-          <FormItem name="dataSetIds" label="数据集">
-            <TreeSelect
-              treeData={modelList}
-              placeholder="请选择数据集"
-              multiple
-              treeCheckable
-              allowClear
-            />
-          </FormItem>
-        )}
+        {toolType &&
+          [
+            AgentToolTypeEnum.NL2SQL_RULE,
+            AgentToolTypeEnum.NL2SQL_LLM,
+            AgentToolTypeEnum.DATASET,
+          ].includes(toolType) && (
+            <FormItem name="dataSetIds" label="数据集">
+              <TreeSelect
+                treeData={modelList}
+                placeholder="请选择数据集"
+                multiple
+                treeCheckable
+                allowClear
+              />
+            </FormItem>
+          )}
         {toolType === AgentToolTypeEnum.NL2SQL_LLM && (
           <FormItem name="exampleQuestions" label="示例问题">
             <div className={styles.paramsSection}>

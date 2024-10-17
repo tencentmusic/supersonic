@@ -15,7 +15,7 @@ import com.tencent.supersonic.headless.api.pojo.request.DictSingleTaskReq;
 import com.tencent.supersonic.headless.api.pojo.request.DictValueReq;
 import com.tencent.supersonic.headless.api.pojo.response.DictItemResp;
 import com.tencent.supersonic.headless.api.pojo.response.DictTaskResp;
-import com.tencent.supersonic.headless.api.pojo.response.DictValueResp;
+import com.tencent.supersonic.headless.api.pojo.response.DictValueDimResp;
 import com.tencent.supersonic.headless.server.service.DictConfService;
 import com.tencent.supersonic.headless.server.service.DictTaskService;
 import com.tencent.supersonic.headless.server.task.DictionaryReloadTask;
@@ -112,7 +112,9 @@ public class KnowledgeController {
         return taskService.deleteDictTask(taskReq, user);
     }
 
-    /** dailyDictTask-手动离线更新所有字典 */
+    /**
+     * dailyDictTask-手动离线更新所有字典
+     */
     @PutMapping("/task/all")
     public Boolean dailyDictTask() {
         return taskService.dailyDictTask();
@@ -155,7 +157,7 @@ public class KnowledgeController {
      * @param dictValueReq
      */
     @PostMapping("/dict/data")
-    public PageInfo<DictValueResp> queryDictValue(@RequestBody @Valid DictValueReq dictValueReq,
+    public PageInfo<DictValueDimResp> queryDictValue(@RequestBody @Valid DictValueReq dictValueReq,
             HttpServletRequest request, HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
         return taskService.queryDictValue(dictValueReq, user);

@@ -162,7 +162,7 @@ public class DictUtils {
             dictItemResp.setBizName(dimension.getBizName());
         }
         if (TypeEnums.TAG.equals(TypeEnums.valueOf(dictConfDO.getType()))) {
-            TagResp tagResp = tagMetaService.getTag(dictConfDO.getItemId(), User.getFakeUser());
+            TagResp tagResp = tagMetaService.getTag(dictConfDO.getItemId(), User.getDefaultUser());
             dictItemResp.setModelId(tagResp.getModelId());
             dictItemResp.setBizName(tagResp.getBizName());
         }
@@ -320,6 +320,10 @@ public class DictUtils {
         long limit =
                 (Objects.isNull(config) || Objects.isNull(config.getLimit())) ? itemValueMaxCount
                         : dictItemResp.getConfig().getLimit();
+        if (limit <= 0) {
+            limit = Integer.MAX_VALUE;
+        }
+
         String sql = String.format(sqlPattern, bizName, where, bizName, limit);
         Set<Long> modelIds = new HashSet<>();
         modelIds.add(dictItemResp.getModelId());
@@ -463,6 +467,9 @@ public class DictUtils {
 
     private String generateDictDateFilter(DictItemResp dictItemResp) {
         ItemValueConfig config = dictItemResp.getConfig();
+        if (!partitionedModel(dictItemResp.getModelId())) {
+            return "";
+        }
         // 未进行设置
         if (Objects.isNull(config) || Objects.isNull(config.getDateConf())) {
             return defaultDateFilter();
@@ -483,6 +490,17 @@ public class DictUtils {
         }
 
         return "";
+    }
+
+    private boolean partitionedModel(Long modelId) {
+        ModelResp model = modelService.getModel(modelId);
+        if (Objects.nonNull(model)) {
+            List<Dim> timeDims = model.getTimeDimension();
+            if (!CollectionUtils.isEmpty(timeDims)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private String generateDictDateFilterRecent(DictItemResp dictItemResp) {

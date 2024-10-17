@@ -34,6 +34,11 @@ public class DimensionConverter {
             dimensionDO.setDefaultValues(JSONObject.toJSONString(dimensionReq.getDefaultValues()));
         }
         if (!CollectionUtils.isEmpty(dimensionReq.getDimValueMaps())) {
+            List<DimValueMap> dimValueMaps = dimensionReq.getDimValueMaps();
+            dimValueMaps.stream().forEach(dimValueMap -> {
+                dimValueMap.setTechName(dimValueMap.getValue());
+            });
+
             dimensionDO.setDimValueMaps(JSONObject.toJSONString(dimensionReq.getDimValueMaps()));
         } else {
             dimensionDO.setDimValueMaps(JSONObject.toJSONString(new ArrayList<>()));

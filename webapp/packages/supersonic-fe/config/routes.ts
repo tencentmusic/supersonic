@@ -152,8 +152,13 @@ const ROUTES = [
   {
     path: '/database',
     name: 'database',
-    // hideInMenu: true,
     component: './SemanticModel/components/Database/DatabaseTable',
+    envEnableList: [ENV_KEY.SEMANTIC],
+  },
+  {
+    path: '/llm',
+    name: 'llm',
+    component: './SemanticModel/components/LLM/LlmTable',
     envEnableList: [ENV_KEY.SEMANTIC],
   },
   {

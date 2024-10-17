@@ -2,11 +2,10 @@ package com.tencent.supersonic.demo;
 
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
-import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.chat.server.agent.Agent;
-import com.tencent.supersonic.chat.server.agent.AgentConfig;
 import com.tencent.supersonic.chat.server.agent.AgentToolType;
-import com.tencent.supersonic.chat.server.agent.LLMParserTool;
+import com.tencent.supersonic.chat.server.agent.DatasetTool;
+import com.tencent.supersonic.chat.server.agent.ToolConfig;
 import com.tencent.supersonic.common.pojo.JoinCondition;
 import com.tencent.supersonic.common.pojo.ModelRela;
 import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
@@ -68,7 +67,7 @@ public class DuSQLDemo extends S2BaseDemo {
         domainReq.setViewOrgs(Collections.singletonList("1"));
         domainReq.setAdmins(Collections.singletonList("admin"));
         domainReq.setAdminOrgs(Collections.emptyList());
-        domainService.createDomain(domainReq, user);
+        domainService.createDomain(domainReq, defaultUser);
     }
 
     // 9
@@ -112,7 +111,7 @@ public class DuSQLDemo extends S2BaseDemo {
         modelDetail.setSqlQuery("SELECT imp_date,company_id,company_name,headquarter_address,"
                 + "company_established_time,founder,ceo,annual_turnover,employee_count FROM company");
         modelReq.setModelDetail(modelDetail);
-        modelService.createModel(modelReq, user);
+        modelService.createModel(modelReq, defaultUser);
     }
 
     // 10
@@ -154,7 +153,7 @@ public class DuSQLDemo extends S2BaseDemo {
         modelDetail.setSqlQuery("SELECT  imp_date,brand_id,brand_name,brand_established_time,"
                 + "company_id,legal_representative,registered_capital FROM brand");
         modelReq.setModelDetail(modelDetail);
-        modelService.createModel(modelReq, user);
+        modelService.createModel(modelReq, defaultUser);
     }
 
     // 11
@@ -194,13 +193,13 @@ public class DuSQLDemo extends S2BaseDemo {
         modelDetail.setSqlQuery("SELECT imp_date,company_id,brand_id,revenue_proportion,"
                 + "profit_proportion,expenditure_proportion FROM company_revenue");
         modelReq.setModelDetail(modelDetail);
-        modelService.createModel(modelReq, user);
-        MetricResp metricResp = metricService.getMetric(13L, user);
+        modelService.createModel(modelReq, defaultUser);
+        MetricResp metricResp = metricService.getMetric(13L, defaultUser);
 
         MetricReq metricReq = new MetricReq();
         BeanUtils.copyProperties(metricResp, metricReq);
         metricReq.setAlias("收入比例");
-        metricService.updateMetric(metricReq, user);
+        metricService.updateMetric(metricReq, defaultUser);
     }
 
     // 12
@@ -242,7 +241,7 @@ public class DuSQLDemo extends S2BaseDemo {
         modelDetail.setSqlQuery("SELECT imp_date,year_time,brand_id,revenue,profit,"
                 + "revenue_growth_year_on_year,profit_growth_year_on_year FROM company_brand_revenue");
         modelReq.setModelDetail(modelDetail);
-        modelService.createModel(modelReq, user);
+        modelService.createModel(modelReq, defaultUser);
     }
 
     public void addDataSet_1() {
@@ -274,7 +273,7 @@ public class DuSQLDemo extends S2BaseDemo {
         aggregateTypeDefaultConfig.setTimeDefaultConfig(timeDefaultConfig);
         queryConfig.setAggregateTypeDefaultConfig(aggregateTypeDefaultConfig);
         dataSetReq.setQueryConfig(queryConfig);
-        dataSetService.save(dataSetReq, User.getFakeUser());
+        dataSetService.save(dataSetReq, defaultUser);
     }
 
     public void addModelRela_1() {
@@ -287,7 +286,7 @@ public class DuSQLDemo extends S2BaseDemo {
         modelRelaReq.setToModelId(10L);
         modelRelaReq.setJoinType("inner join");
         modelRelaReq.setJoinConditions(joinConditions);
-        modelRelaService.save(modelRelaReq, user);
+        modelRelaService.save(modelRelaReq, defaultUser);
     }
 
     public void addModelRela_2() {
@@ -300,7 +299,7 @@ public class DuSQLDemo extends S2BaseDemo {
         modelRelaReq.setToModelId(11L);
         modelRelaReq.setJoinType("inner join");
         modelRelaReq.setJoinConditions(joinConditions);
-        modelRelaService.save(modelRelaReq, user);
+        modelRelaService.save(modelRelaReq, defaultUser);
     }
 
     public void addModelRela_3() {
@@ -312,7 +311,7 @@ public class DuSQLDemo extends S2BaseDemo {
         modelRelaReq.setToModelId(11L);
         modelRelaReq.setJoinType("inner join");
         modelRelaReq.setJoinConditions(joinConditions);
-        modelRelaService.save(modelRelaReq, user);
+        modelRelaService.save(modelRelaReq, defaultUser);
     }
 
     public void addModelRela_4() {
@@ -324,7 +323,7 @@ public class DuSQLDemo extends S2BaseDemo {
         modelRelaReq.setToModelId(12L);
         modelRelaReq.setJoinType("inner join");
         modelRelaReq.setJoinConditions(joinConditions);
-        modelRelaService.save(modelRelaReq, user);
+        modelRelaService.save(modelRelaReq, defaultUser);
     }
 
     private void addAgent() {
@@ -334,16 +333,16 @@ public class DuSQLDemo extends S2BaseDemo {
         agent.setStatus(1);
         agent.setEnableSearch(1);
         agent.setExamples(Lists.newArrayList());
-        AgentConfig agentConfig = new AgentConfig();
+        ToolConfig toolConfig = new ToolConfig();
 
-        LLMParserTool llmParserTool = new LLMParserTool();
-        llmParserTool.setId("1");
-        llmParserTool.setType(AgentToolType.NL2SQL_LLM);
-        llmParserTool.setDataSetIds(Lists.newArrayList(4L));
-        agentConfig.getTools().add(llmParserTool);
+        DatasetTool datasetTool = new DatasetTool();
+        datasetTool.setId("1");
+        datasetTool.setType(AgentToolType.DATASET);
+        datasetTool.setDataSetIds(Lists.newArrayList(4L));
+        toolConfig.getTools().add(datasetTool);
 
-        agent.setAgentConfig(JSONObject.toJSONString(agentConfig));
+        agent.setToolConfig(JSONObject.toJSONString(toolConfig));
         log.info("agent:{}", JsonUtil.toString(agent));
-        agentService.createAgent(agent, User.getFakeUser());
+        agentService.createAgent(agent, defaultUser);
     }
 }

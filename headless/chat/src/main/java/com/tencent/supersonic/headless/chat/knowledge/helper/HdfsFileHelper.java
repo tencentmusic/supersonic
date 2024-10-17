@@ -11,6 +11,7 @@ import org.apache.hadoop.fs.Path;
 
 import java.io.IOException;
 import java.net.URI;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -59,11 +60,14 @@ public class HdfsFileHelper {
         String[] path = Config.CustomDictionaryPath;
         FileSystem fs = FileSystem.get(URI.create(path[0]), new Configuration());
         String cacheFilePath = path[0] + Predefine.BIN_EXT;
-        int customBase = cacheFilePath.lastIndexOf(FileHelper.FILE_SPILT);
-        String customPath =
-                cacheFilePath.substring(0, customBase) + FileHelper.FILE_SPILT + "*.txt";
-        log.info("customPath:{}", customPath);
-        List<String> fileList = getFileList(fs, new Path(customPath));
+
+        java.nio.file.Path normalizedPath = Paths.get(cacheFilePath).normalize();
+        int customBase = normalizedPath.toString().lastIndexOf(FileHelper.FILE_SPILT);
+        String customPathStr = normalizedPath.toString().substring(0, customBase)
+                + FileHelper.FILE_SPILT + "*.txt";
+
+        log.info("customPath:{}", customPathStr);
+        List<String> fileList = getFileList(fs, new Path(customPathStr));
         log.info("CustomDictionaryPath:{}", fileList);
         Config.CustomDictionaryPath = fileList.toArray(new String[0]);
         customDictionary.path =
