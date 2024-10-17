@@ -172,12 +172,6 @@ public class ChatQueryServiceImpl implements ChatQueryService {
         ParseContext parseContext = new ParseContext();
         BeanMapper.mapper(chatParseReq, parseContext);
         Agent agent = agentService.getAgent(chatParseReq.getAgentId());
-        agent.getChatAppConfig().values().forEach(c -> {
-            ChatModel chatModel = chatModelService.getChatModel(c.getChatModelId());
-            if (Objects.nonNull(chatModel)) {
-                c.setChatModelConfig(chatModelService.getChatModel(c.getChatModelId()).getConfig());
-            }
-        });
         parseContext.setAgent(agent);
         return parseContext;
     }

@@ -127,6 +127,12 @@ public class AgentServiceImpl extends ServiceImpl<AgentDOMapper, AgentDO> implem
         agent.setChatAppConfig(
                 JsonUtil.toMap(agentDO.getChatModelConfig(), String.class, ChatApp.class));
         agent.setVisualConfig(JsonUtil.toObject(agentDO.getVisualConfig(), VisualConfig.class));
+        agent.getChatAppConfig().values().forEach(c -> {
+            ChatModel chatModel = chatModelService.getChatModel(c.getChatModelId());
+            if (Objects.nonNull(chatModel)) {
+                c.setChatModelConfig(chatModelService.getChatModel(c.getChatModelId()).getConfig());
+            }
+        });
         return agent;
     }
 
