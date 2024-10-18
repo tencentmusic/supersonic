@@ -37,15 +37,16 @@ public class OnePassSCSqlGenStrategy extends SqlGenStrategy {
             + "please convert it to a SQL query so that relevant data could be returned "
             + "by executing the SQL query against underlying database." + "\n#Rules:"
             + "\n1.ALWAYS generate columns and values specified in the `Schema`, DO NOT hallucinate."
-            + "\n2.ALWAYS specify date filter using `>`,`<`,`>=`,`<=` operator."
-            + "\n3.DO NOT include date filter in the where clause if not explicitly expressed in the `Question`."
-            + "\n4.DO NOT calculate date range using functions."
-            + "\n5.DO NOT miss the AGGREGATE operator of metrics, always add it as needed."
-            + "\n6.ALWAYS use `with` statement if nested aggregation is needed."
-            + "\n7.ALWAYS enclose alias created by `AS` command in underscores."
-            + "\n8.ALWAYS translate alias created by `AS` command to the same language as the `#Question`."
+            + "\n2.ALWAYS be cautious, word in the `Schema` does not mean it must appear in the SQL."
+            + "\n3.ALWAYS specify date filter using `>`,`<`,`>=`,`<=` operator."
+            + "\n4.DO NOT include date filter in the where clause if not explicitly expressed in the `Question`."
+            + "\n5.DO NOT calculate date range using functions."
+            + "\n6.DO NOT miss the AGGREGATE operator of metrics, always add it as needed."
+            + "\n7.ALWAYS use `with` statement if nested aggregation is needed."
+            + "\n8.ALWAYS enclose alias created by `AS` command in underscores."
+            + "\n9.ALWAYS translate alias created by `AS` command to the same language as the `#Question`."
             + "\n#Exemplars: {{exemplar}}"
-            + "\n#Question: Question:{{question}},Schema:{{schema}},SideInfo:{{information}}";
+            + "\n#Query: Question:{{question}},Schema:{{schema}},SideInfo:{{information}}";
 
     public OnePassSCSqlGenStrategy() {
         ChatAppManager.register(APP_KEY, ChatApp.builder().prompt(INSTRUCTION).name("语义SQL解析")
@@ -70,7 +71,7 @@ public class OnePassSCSqlGenStrategy extends SqlGenStrategy {
         LLMResp llmResp = new LLMResp();
         llmResp.setQuery(llmReq.getQueryText());
         // 1.recall exemplars
-        log.info("OnePassSCSqlGenStrategy llmReq:\n{}", llmReq);
+        log.debug("OnePassSCSqlGenStrategy llmReq:\n{}", llmReq);
         List<List<Text2SQLExemplar>> exemplarsList = promptHelper.getFewShotExemplars(llmReq);
 
         // 2.generate sql generation prompt for each self-consistency inference
@@ -91,7 +92,8 @@ public class OnePassSCSqlGenStrategy extends SqlGenStrategy {
         prompt2Exemplar.keySet().parallelStream().forEach(prompt -> {
             SemanticSql s2Sql = extractor.generateSemanticSql(prompt.toUserMessage().singleText());
             output2Prompt.put(s2Sql.getSql(), prompt);
-            keyPipelineLog.info("OnePassSCSqlGenStrategy modelReq:\n{} \nmodelResp:\n{}", prompt.text(), s2Sql);
+            keyPipelineLog.info("OnePassSCSqlGenStrategy modelReq:\n{} \nmodelResp:\n{}",
+                    prompt.text(), s2Sql);
         });
 
         // 4.format response.

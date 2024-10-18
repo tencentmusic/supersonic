@@ -86,7 +86,8 @@ public class MemoryReviewTask {
                 ModelProvider.getChatModel(ModelConfigHelper.getChatModelConfig(chatApp));
         if (Objects.nonNull(chatLanguageModel)) {
             String response = chatLanguageModel.generate(prompt.toUserMessage()).content().text();
-            keyPipelineLog.info("MemoryReviewTask modelReq:\n{} \nmodelResp:\n{}", promptStr, response);
+            keyPipelineLog.info("MemoryReviewTask modelReq:\n{} \nmodelResp:\n{}", promptStr,
+                    response);
             processResponse(response, m);
         } else {
             log.debug("ChatLanguageModel not found for agent:{}", chatAgent.getId());

@@ -58,7 +58,8 @@ public class AliasGenerateHelper {
 
         Prompt prompt = PromptTemplate.from(NAME_ALIAS_INSTRUCTION).apply(variable);
         String response = getChatCompletion(prompt);
-        keyPipelineLog.info("AliasGenerateHelper.generateAlias modelReq:\n{} \nmodelResp:\n{}", prompt.text(), response);
+        keyPipelineLog.info("AliasGenerateHelper.generateAlias modelReq:\n{} \nmodelResp:\n{}",
+                prompt.text(), response);
         return response;
     }
 
@@ -68,8 +69,9 @@ public class AliasGenerateHelper {
 
         Prompt prompt = PromptTemplate.from(VALUE_ALIAS_INSTRUCTION).apply(variable);
         String response = getChatCompletion(prompt);
-        keyPipelineLog.info("AliasGenerateHelper.generateValueAlias modelReq:\n{} " +
-                "\nmodelResp:\n{}", prompt.text(), response);
+        keyPipelineLog.info(
+                "AliasGenerateHelper.generateValueAlias modelReq:\n{} " + "\nmodelResp:\n{}",
+                prompt.text(), response);
 
 
         return response;
