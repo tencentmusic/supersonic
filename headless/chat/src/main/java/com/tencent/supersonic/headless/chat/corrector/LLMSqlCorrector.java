@@ -29,7 +29,7 @@ public class LLMSqlCorrector extends BaseSemanticCorrector {
 
     public static final String APP_KEY = "S2SQL_CORRECTOR";
     private static final String INSTRUCTION = ""
-            + "\n#Role: You are a senior data engineer experienced in writing SQL."
+            + "#Role: You are a senior data engineer experienced in writing SQL."
             + "\n#Task: Your will be provided with a user question and the SQL written by a junior engineer,"
             + "please take a review and help correct it if necessary." + "\n#Rules: "
             + "\n1.ALWAYS follow the output format: `opinion=(POSITIVE|NEGATIVE),sql=(corrected sql if NEGATIVE; empty string if POSITIVE)`."
@@ -73,9 +73,8 @@ public class LLMSqlCorrector extends BaseSemanticCorrector {
                 AiServices.create(SemanticSqlExtractor.class, chatLanguageModel);
         Prompt prompt = generatePrompt(chatQueryContext.getQueryText(), semanticParseInfo,
                 chatApp.getPrompt());
-        keyPipelineLog.info("LLMSqlCorrector reqPrompt:\n{}", prompt.text());
         SemanticSql s2Sql = extractor.generateSemanticSql(prompt.toUserMessage().singleText());
-        keyPipelineLog.info("LLMSqlCorrector modelResp:\n{}", s2Sql);
+        keyPipelineLog.info("LLMSqlCorrector modelReq:\n{} \nmodelResp:\n{}", prompt.text(), s2Sql);
         if ("NEGATIVE".equals(s2Sql.getOpinion()) && StringUtils.isNotBlank(s2Sql.getSql())) {
             semanticParseInfo.getSqlInfo().setCorrectedS2SQL(s2Sql.getSql());
         }

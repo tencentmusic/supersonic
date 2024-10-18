@@ -15,6 +15,8 @@ import dev.langchain4j.service.AiServices;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -26,9 +28,11 @@ import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 public class OnePassSCSqlGenStrategy extends SqlGenStrategy {
 
+    private static final Logger keyPipelineLog = LoggerFactory.getLogger("keyPipeline");
+
     public static final String APP_KEY = "S2SQL_PARSER";
     public static final String INSTRUCTION = ""
-            + "\n#Role: You are a data analyst experienced in SQL languages."
+            + "#Role: You are a data analyst experienced in SQL languages."
             + "\n#Task: You will be provided with a natural language question asked by users,"
             + "please convert it to a SQL query so that relevant data could be returned "
             + "by executing the SQL query against underlying database." + "\n#Rules:"
@@ -66,7 +70,7 @@ public class OnePassSCSqlGenStrategy extends SqlGenStrategy {
         LLMResp llmResp = new LLMResp();
         llmResp.setQuery(llmReq.getQueryText());
         // 1.recall exemplars
-        keyPipelineLog.info("OnePassSCSqlGenStrategy llmReq:\n{}", llmReq);
+        log.info("OnePassSCSqlGenStrategy llmReq:\n{}", llmReq);
         List<List<Text2SQLExemplar>> exemplarsList = promptHelper.getFewShotExemplars(llmReq);
 
         // 2.generate sql generation prompt for each self-consistency inference
@@ -85,10 +89,9 @@ public class OnePassSCSqlGenStrategy extends SqlGenStrategy {
         // 3.perform multiple self-consistency inferences parallelly
         Map<String, Prompt> output2Prompt = new ConcurrentHashMap<>();
         prompt2Exemplar.keySet().parallelStream().forEach(prompt -> {
-            keyPipelineLog.info("OnePassSCSqlGenStrategy reqPrompt:\n{}", prompt.toUserMessage());
             SemanticSql s2Sql = extractor.generateSemanticSql(prompt.toUserMessage().singleText());
             output2Prompt.put(s2Sql.getSql(), prompt);
-            keyPipelineLog.info("OnePassSCSqlGenStrategy modelResp:\n{}", s2Sql.getSql());
+            keyPipelineLog.info("OnePassSCSqlGenStrategy modelReq:\n{} \nmodelResp:\n{}", prompt.text(), s2Sql);
         });
 
         // 4.format response.

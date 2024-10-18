@@ -203,13 +203,11 @@ public class NL2SQLParser implements ChatQueryParser {
         variables.put("history_sql", histSQL);
 
         Prompt prompt = PromptTemplate.from(chatApp.getPrompt()).apply(variables);
-        keyPipelineLog.info("QueryRewrite reqPrompt:{}", prompt.text());
-
         ChatLanguageModel chatLanguageModel =
                 ModelProvider.getChatModel(ModelConfigHelper.getChatModelConfig(chatApp));
         Response<AiMessage> response = chatLanguageModel.generate(prompt.toUserMessage());
         String rewrittenQuery = response.content().text();
-        keyPipelineLog.info("QueryRewrite modelResp:{}", rewrittenQuery);
+        keyPipelineLog.info("QueryRewrite modelReq:\n{} \nmodelResp:\n{}", prompt.text(), response);
         parseContext.setQueryText(rewrittenQuery);
         QueryNLReq rewrittenQueryNLReq = QueryReqConverter.buildText2SqlQueryReq(parseContext);
         MapResp rewrittenQueryMapResult = chatLayerService.map(rewrittenQueryNLReq);
@@ -238,12 +236,11 @@ public class NL2SQLParser implements ChatQueryParser {
         variables.put("examples", exampleStr);
 
         Prompt prompt = PromptTemplate.from(chatApp.getPrompt()).apply(variables);
-        keyPipelineLog.info("ErrorRewrite reqPrompt:{}", prompt.text());
         ChatLanguageModel chatLanguageModel =
                 ModelProvider.getChatModel(ModelConfigHelper.getChatModelConfig(chatApp));
         Response<AiMessage> response = chatLanguageModel.generate(prompt.toUserMessage());
         String rewrittenMsg = response.content().text();
-        keyPipelineLog.info("ErrorRewrite modelResp:{}", rewrittenMsg);
+        keyPipelineLog.info("ErrorRewrite modelReq:\n{} \nmodelResp:\n{}", prompt.text(), response);
 
         return rewrittenMsg;
     }

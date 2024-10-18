@@ -19,8 +19,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -32,7 +30,6 @@ import java.util.stream.Collectors;
 @Slf4j
 public class ChatWorkflowEngine {
 
-    private static final Logger keyPipelineLog = LoggerFactory.getLogger("keyPipeline");
     private final List<SchemaMapper> schemaMappers = ComponentFactory.getSchemaMappers();
     private final List<SemanticParser> semanticParsers = ComponentFactory.getSemanticParsers();
     private final List<SemanticCorrector> semanticCorrectors =
@@ -150,7 +147,7 @@ public class ChatWorkflowEngine {
                 if (StringUtils.isNotBlank(explain.getErrMsg())) {
                     errorMsg.add(explain.getErrMsg());
                 }
-                keyPipelineLog.info(
+                log.info(
                         "SqlInfoProcessor results:\n"
                                 + "Parsed S2SQL: {}\nCorrected S2SQL: {}\nQuery SQL: {}",
                         StringUtils.normalizeSpace(parseInfo.getSqlInfo().getParsedS2SQL()),

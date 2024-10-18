@@ -24,7 +24,7 @@ public class AliasGenerateHelper {
     private static final Logger keyPipelineLog = LoggerFactory.getLogger("keyPipeline");
 
     private static final String NAME_ALIAS_INSTRUCTION = ""
-            + "\n#Role: You are a professional data analyst specializing in metrics and dimensions."
+            + "#Role: You are a professional data analyst specializing in metrics and dimensions."
             + "\n#Task: You will be provided with metadata about a metric or dimension, please help "
             + "generate a few aliases in the same language as its `fieldName`." + "\n#Rules:"
             + "1. Please do not generate aliases like xxx1, xxx2, xxx3."
@@ -57,9 +57,8 @@ public class AliasGenerateHelper {
         variable.put("desc", desc);
 
         Prompt prompt = PromptTemplate.from(NAME_ALIAS_INSTRUCTION).apply(variable);
-        keyPipelineLog.info("AliasGenerateHelper.generateNameAlias reqPrompt:{}", prompt.text());
         String response = getChatCompletion(prompt);
-        keyPipelineLog.info("AliasGenerateHelper.generateNameAlias modelResp:{}", response);
+        keyPipelineLog.info("AliasGenerateHelper.generateAlias modelReq:\n{} \nmodelResp:\n{}", prompt.text(), response);
         return response;
     }
 
@@ -68,9 +67,10 @@ public class AliasGenerateHelper {
         variable.put("values", json);
 
         Prompt prompt = PromptTemplate.from(VALUE_ALIAS_INSTRUCTION).apply(variable);
-        keyPipelineLog.info("AliasGenerateHelper.generateValueAlias reqPrompt:{}", prompt.text());
         String response = getChatCompletion(prompt);
-        keyPipelineLog.info("AliasGenerateHelper.generateValueAlias modelResp:{}", response);
+        keyPipelineLog.info("AliasGenerateHelper.generateValueAlias modelReq:\n{} " +
+                "\nmodelResp:\n{}", prompt.text(), response);
+
 
         return response;
     }
