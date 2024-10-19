@@ -8,16 +8,15 @@ import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.headless.api.pojo.DataSetSchema;
 import com.tencent.supersonic.headless.api.pojo.RelatedSchemaElement;
 import com.tencent.supersonic.headless.api.pojo.SchemaElement;
+import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.server.facade.service.SemanticLayerService;
-import org.springframework.util.CollectionUtils;
-
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
+import org.springframework.util.CollectionUtils;
 
 /**
  * DimensionRecommendProcessor recommend some dimensions related to metrics based on configuration
@@ -38,8 +37,7 @@ public class DimensionRecommendProcessor implements ExecuteResultProcessor {
         if (!firstMetric.isPresent()) {
             return;
         }
-        SchemaElement element = firstMetric.get();
-        List<SchemaElement> dimensionRecommended = getDimensions(element.getId(), dataSetId);
+        List<SchemaElement> dimensionRecommended = getDimensions(firstMetric.get().getId(), dataSetId);
         queryResult.setRecommendedDimensions(dimensionRecommended);
     }
 
@@ -49,23 +47,16 @@ public class DimensionRecommendProcessor implements ExecuteResultProcessor {
         if (dataSetSchema == null) {
             return Lists.newArrayList();
         }
-        List<Long> drillDownDimensions = Lists.newArrayList();
-        Set<SchemaElement> metricElements = dataSetSchema.getMetrics();
-        if (!CollectionUtils.isEmpty(metricElements)) {
-            Optional<SchemaElement> metric = metricElements.stream()
-                    .filter(schemaElement -> metricId.equals(schemaElement.getId())
-                            && !CollectionUtils.isEmpty(schemaElement.getRelatedSchemaElements()))
-                    .findFirst();
-            if (metric.isPresent()) {
-                drillDownDimensions = metric.get().getRelatedSchemaElements().stream()
-                        .map(RelatedSchemaElement::getDimensionId).collect(Collectors.toList());
-            }
+        SchemaElement metric = dataSetSchema.getElement(SchemaElementType.METRIC, metricId);
+        if (!CollectionUtils.isEmpty(metric.getRelatedSchemaElements())) {
+            List<Long> drillDownDimensions = metric.getRelatedSchemaElements().stream()
+                    .map(RelatedSchemaElement::getDimensionId).collect(Collectors.toList());
+            return dataSetSchema.getDimensions().stream()
+                    .filter(dim -> filterDimension(drillDownDimensions, dim))
+                    .sorted(Comparator.comparing(SchemaElement::getUseCnt).reversed())
+                    .limit(recommend_dimension_size).collect(Collectors.toList());
         }
-        final List<Long> drillDownDimensionsFinal = drillDownDimensions;
-        return dataSetSchema.getDimensions().stream()
-                .filter(dim -> filterDimension(drillDownDimensionsFinal, dim))
-                .sorted(Comparator.comparing(SchemaElement::getUseCnt).reversed())
-                .limit(recommend_dimension_size).collect(Collectors.toList());
+        return Lists.newArrayList();
     }
 
     private boolean filterDimension(List<Long> drillDownDimensions, SchemaElement dimension) {
