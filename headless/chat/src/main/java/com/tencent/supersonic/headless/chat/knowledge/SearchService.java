@@ -58,9 +58,8 @@ public class SearchService {
             return new HanlpMapResult(name, entry.getValue(), key, similarity);
         }).sorted((a, b) -> -(b.getName().length() - a.getName().length()))
                 .collect(Collectors.toList());
-        hanlpMapResults = transformAndFilterByDataSet(hanlpMapResults, modelIdToDataSetIds,
-                detectDataSetIds, limit);
-        return hanlpMapResults;
+        return transformAndFilterByDataSet(hanlpMapResults, modelIdToDataSetIds, detectDataSetIds,
+                limit);
     }
 
     /**
@@ -71,15 +70,14 @@ public class SearchService {
      */
     public static List<HanlpMapResult> suffixSearch(String key, int limit,
             Map<Long, List<Long>> modelIdToDataSetIds, Set<Long> detectDataSetIds) {
-        String reverseDetectSegment = StringUtils.reverse(key);
-        return suffixSearch(reverseDetectSegment, limit, suffixTrie, modelIdToDataSetIds,
-                detectDataSetIds);
+        return suffixSearch(key, limit, suffixTrie, modelIdToDataSetIds, detectDataSetIds);
     }
 
     public static List<HanlpMapResult> suffixSearch(String key, int limit,
             BinTrie<List<String>> binTrie, Map<Long, List<Long>> modelIdToDataSetIds,
             Set<Long> detectDataSetIds) {
-        Set<Map.Entry<String, List<String>>> result = search(key, binTrie);
+        String reverseDetectSegment = StringUtils.reverse(key);
+        Set<Map.Entry<String, List<String>>> result = search(reverseDetectSegment, binTrie);
         List<HanlpMapResult> hanlpMapResults = result.stream().map(entry -> {
             String name = entry.getKey().replace("#", " ");
             List<String> natures = entry.getValue().stream()
