@@ -48,6 +48,14 @@ import com.tencent.supersonic.headless.server.service.MetricService;
 import com.tencent.supersonic.headless.server.service.ModelService;
 import com.tencent.supersonic.headless.server.utils.ModelConverter;
 import com.tencent.supersonic.headless.server.utils.NameCheckUtils;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
+
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -58,13 +66,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.BeanUtils;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
 
 @Service
 @Slf4j
@@ -93,8 +94,8 @@ public class ModelServiceImpl implements ModelService {
     public ModelServiceImpl(ModelRepository modelRepository, DatabaseService databaseService,
             @Lazy DimensionService dimensionService, @Lazy MetricService metricService,
             DomainService domainService, UserService userService, DataSetService dataSetService,
-            DateInfoRepository dateInfoRepository,
-            ModelIntelligentBuilder modelIntelligentBuilder, ChatModelService chatModelService) {
+            DateInfoRepository dateInfoRepository, ModelIntelligentBuilder modelIntelligentBuilder,
+            ChatModelService chatModelService) {
         this.modelRepository = modelRepository;
         this.databaseService = databaseService;
         this.dimensionService = dimensionService;
@@ -200,7 +201,8 @@ public class ModelServiceImpl implements ModelService {
     }
 
     @Override
-    public Map<String, ModelSchema> buildModelSchema(ModelSchemaReq modelSchemaReq) throws SQLException {
+    public Map<String, ModelSchema> buildModelSchema(ModelSchemaReq modelSchemaReq)
+            throws SQLException {
         Map<String, List<DBColumn>> dbColumnMap = databaseService.getDbColumns(modelSchemaReq);
         Map<String, ModelSchema> modelSchemaMap = new HashMap<>();
         if (modelSchemaReq.isBuildByLLM()) {
@@ -218,10 +220,10 @@ public class ModelServiceImpl implements ModelService {
                 modelSchemaMap.put(entry.getKey(), build(entry.getValue()));
             }
         }
-       return modelSchemaMap;
+        return modelSchemaMap;
     }
 
-    private DbSchema convert(ModelSchemaReq modelSchemaReq, String key,  List<DBColumn> dbColumns) {
+    private DbSchema convert(ModelSchemaReq modelSchemaReq, String key, List<DBColumn> dbColumns) {
         DbSchema dbSchema = new DbSchema();
         dbSchema.setDb(modelSchemaReq.getDb());
         dbSchema.setTable(key);

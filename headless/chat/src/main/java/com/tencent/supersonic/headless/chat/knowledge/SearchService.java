@@ -16,6 +16,7 @@ import org.springframework.util.CollectionUtils;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -51,7 +52,9 @@ public class SearchService {
     public static List<HanlpMapResult> prefixSearch(String key, int limit,
             BinTrie<List<String>> binTrie, Map<Long, List<Long>> modelIdToDataSetIds,
             Set<Long> detectDataSetIds) {
-        Set<Map.Entry<String, List<String>>> result = search(key, binTrie);
+        Set<Long> modelIdOrDataSetIds =
+                findModelIdOrDataSetIds(modelIdToDataSetIds, detectDataSetIds);
+        Set<Map.Entry<String, List<String>>> result = search(key, binTrie, modelIdOrDataSetIds);
         List<HanlpMapResult> hanlpMapResults = result.stream().map(entry -> {
             String name = entry.getKey().replace("#", " ");
             double similarity = EditDistanceUtils.getSimilarity(name, key);
@@ -77,7 +80,11 @@ public class SearchService {
             BinTrie<List<String>> binTrie, Map<Long, List<Long>> modelIdToDataSetIds,
             Set<Long> detectDataSetIds) {
         String reverseDetectSegment = StringUtils.reverse(key);
-        Set<Map.Entry<String, List<String>>> result = search(reverseDetectSegment, binTrie);
+        Set<Long> modelIdOrDataSetIds =
+                findModelIdOrDataSetIds(modelIdToDataSetIds, detectDataSetIds);
+
+        Set<Map.Entry<String, List<String>>> result =
+                search(reverseDetectSegment, binTrie, modelIdOrDataSetIds);
         List<HanlpMapResult> hanlpMapResults = result.stream().map(entry -> {
             String name = entry.getKey().replace("#", " ");
             List<String> natures = entry.getValue().stream()
@@ -115,7 +122,7 @@ public class SearchService {
     }
 
     private static Set<Map.Entry<String, List<String>>> search(String key,
-            BinTrie<List<String>> binTrie) {
+            BinTrie<List<String>> binTrie, Set<Long> modelIdOrDataSetIds) {
         key = key.toLowerCase();
         Set<Map.Entry<String, List<String>>> entrySet =
                 new TreeSet<Map.Entry<String, List<String>>>();
@@ -136,7 +143,7 @@ public class SearchService {
         if (branch == null) {
             return entrySet;
         }
-        branch.walkLimit(sb, entrySet);
+        branch.walkLimit(sb, entrySet, modelIdOrDataSetIds);
         return entrySet;
     }
 
@@ -198,5 +205,24 @@ public class SearchService {
             return new ArrayList<>();
         }
         return terms.stream().map(term -> term.getWord()).collect(Collectors.toList());
+    }
+
+    /**
+     * Find all modelIds and dataSetIds based on the dataSetId
+     */
+    public static Set<Long> findModelIdOrDataSetIds(Map<Long, List<Long>> modelIdToDataSetIds,
+            Set<Long> detectDataSetIds) {
+        if (CollectionUtils.isEmpty(detectDataSetIds)) {
+            return new HashSet<>();
+        }
+        if (CollectionUtils.isEmpty(modelIdToDataSetIds)) {
+            return new HashSet<>(detectDataSetIds);
+        }
+        Set<Long> result = modelIdToDataSetIds.entrySet().stream()
+                .filter(entry -> entry.getValue().stream().anyMatch(detectDataSetIds::contains))
+                .map(Map.Entry::getKey).collect(Collectors.toSet());
+
+        result.addAll(detectDataSetIds);
+        return result;
     }
 }

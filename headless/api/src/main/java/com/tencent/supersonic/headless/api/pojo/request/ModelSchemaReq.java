@@ -1,8 +1,9 @@
 package com.tencent.supersonic.headless.api.pojo.request;
 
 import com.tencent.supersonic.common.pojo.ChatModelConfig;
-import java.util.List;
 import lombok.Data;
+
+import java.util.List;
 
 @Data
 public class ModelSchemaReq {

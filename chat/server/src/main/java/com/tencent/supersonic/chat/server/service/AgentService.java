@@ -1,7 +1,7 @@
 package com.tencent.supersonic.chat.server.service;
 
-import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.chat.server.agent.Agent;
+import com.tencent.supersonic.common.pojo.User;
 
 import java.util.List;
 

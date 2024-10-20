@@ -1,7 +1,7 @@
 package com.tencent.supersonic.headless.server.service.impl;
 
-import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.common.pojo.DateConf;
+import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import com.tencent.supersonic.headless.api.pojo.Dim;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementType;

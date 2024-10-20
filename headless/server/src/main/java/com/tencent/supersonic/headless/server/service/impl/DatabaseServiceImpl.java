@@ -2,8 +2,8 @@ package com.tencent.supersonic.headless.server.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.common.collect.Lists;
-import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.common.pojo.QueryColumn;
+import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.common.pojo.enums.EngineType;
 import com.tencent.supersonic.headless.api.pojo.DBColumn;
 import com.tencent.supersonic.headless.api.pojo.request.DatabaseReq;
@@ -28,7 +28,6 @@ import com.tencent.supersonic.headless.server.pojo.ModelFilter;
 import com.tencent.supersonic.headless.server.service.DatabaseService;
 import com.tencent.supersonic.headless.server.service.ModelService;
 import com.tencent.supersonic.headless.server.utils.DatabaseConverter;
-import java.util.HashMap;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +36,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -208,14 +208,17 @@ public class DatabaseServiceImpl extends ServiceImpl<DatabaseDOMapper, DatabaseD
     }
 
     @Override
-    public Map<String, List<DBColumn>> getDbColumns(ModelSchemaReq modelSchemaReq) throws SQLException {
+    public Map<String, List<DBColumn>> getDbColumns(ModelSchemaReq modelSchemaReq)
+            throws SQLException {
         Map<String, List<DBColumn>> dbColumnMap = new HashMap<>();
         if (StringUtils.isNotBlank(modelSchemaReq.getSql())) {
-            List<DBColumn> columns = getColumns(modelSchemaReq.getDatabaseId(), modelSchemaReq.getSql());
+            List<DBColumn> columns =
+                    getColumns(modelSchemaReq.getDatabaseId(), modelSchemaReq.getSql());
             dbColumnMap.put(modelSchemaReq.getSql(), columns);
         } else {
             for (String table : modelSchemaReq.getTables()) {
-                List<DBColumn> columns = getColumns(modelSchemaReq.getDatabaseId(), modelSchemaReq.getDb(), table);
+                List<DBColumn> columns =
+                        getColumns(modelSchemaReq.getDatabaseId(), modelSchemaReq.getDb(), table);
                 dbColumnMap.put(table, columns);
             }
         }

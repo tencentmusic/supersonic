@@ -1,7 +1,6 @@
 package com.tencent.supersonic.chat.server.service.impl;
 
 import com.google.common.collect.Lists;
-import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.chat.api.pojo.request.ChatAggConfigReq;
 import com.tencent.supersonic.chat.api.pojo.request.ChatConfigBaseReq;
 import com.tencent.supersonic.chat.api.pojo.request.ChatConfigEditReqReq;
@@ -23,6 +22,7 @@ import com.tencent.supersonic.chat.server.config.ChatConfig;
 import com.tencent.supersonic.chat.server.persistence.repository.ChatConfigRepository;
 import com.tencent.supersonic.chat.server.service.ConfigService;
 import com.tencent.supersonic.chat.server.util.ChatConfigHelper;
+import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.headless.api.pojo.DataSetSchema;
 import com.tencent.supersonic.headless.api.pojo.MetaFilter;

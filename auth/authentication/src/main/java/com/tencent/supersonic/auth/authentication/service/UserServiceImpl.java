@@ -4,12 +4,12 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.tencent.supersonic.auth.api.authentication.pojo.Organization;
-import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.auth.api.authentication.request.UserReq;
 import com.tencent.supersonic.auth.api.authentication.service.UserService;
 import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
 import com.tencent.supersonic.auth.authentication.utils.ComponentFactory;
 import com.tencent.supersonic.common.config.SystemConfig;
+import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.common.service.SystemConfigService;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;

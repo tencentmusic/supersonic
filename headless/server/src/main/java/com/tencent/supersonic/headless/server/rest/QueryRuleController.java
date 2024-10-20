@@ -3,8 +3,8 @@ package com.tencent.supersonic.headless.server.rest;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
+import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.headless.api.pojo.request.QueryRuleFilter;
 import com.tencent.supersonic.headless.api.pojo.request.QueryRuleReq;
 import com.tencent.supersonic.headless.api.pojo.response.QueryRuleResp;
