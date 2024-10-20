@@ -37,7 +37,7 @@ public interface DatabaseService {
 
     List<String> getTables(Long id, String db) throws SQLException;
 
-    List<DBColumn> getDbColumns(ModelSchemaReq modelSchemaReq) throws SQLException;
+    Map<String, List<DBColumn>> getDbColumns(ModelSchemaReq modelSchemaReq) throws SQLException;
 
     List<DBColumn> getColumns(Long id, String db, String table) throws SQLException;
 
