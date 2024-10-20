@@ -14,4 +14,6 @@ public interface UserDOMapper {
 
     /** @mbg.generated */
     List<UserDO> selectByExample(UserDOExample example);
+
+    void updateByPrimaryKey(UserDO userDO);
 }

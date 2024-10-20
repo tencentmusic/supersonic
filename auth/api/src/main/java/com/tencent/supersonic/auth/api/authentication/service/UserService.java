@@ -5,6 +5,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.tencent.supersonic.auth.api.authentication.pojo.Organization;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
+import com.tencent.supersonic.auth.api.authentication.pojo.UserToken;
 import com.tencent.supersonic.auth.api.authentication.request.UserReq;
 
 import java.util.List;
@@ -30,4 +31,16 @@ public interface UserService {
     List<User> getUserByOrg(String key);
 
     List<Organization> getOrganizationTree();
+
+    String getPassword(String userName);
+
+    void resetPassword(String userName, String password, String newPassword);
+
+    UserToken generateToken(String name, String userName, long expireTime);
+
+    List<UserToken> getUserTokens(String userName);
+
+    UserToken getUserToken(Long id);
+
+    void deleteUserToken(Long id);
 }

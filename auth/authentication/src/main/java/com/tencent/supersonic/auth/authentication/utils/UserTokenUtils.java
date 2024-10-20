@@ -41,10 +41,11 @@ public class UserTokenUtils {
 
     public String generateToken(UserWithPassword user, HttpServletRequest request) {
         String appKey = getAppKey(request);
-        return generateToken(user, appKey);
+        long expiration = System.currentTimeMillis() + authenticationConfig.getTokenTimeout();
+        return generateToken(user, appKey, expiration);
     }
 
-    public String generateToken(UserWithPassword user, String appKey) {
+    public String generateToken(UserWithPassword user, String appKey, long expiration) {
         Map<String, Object> claims = new HashMap<>(5);
         claims.put(TOKEN_USER_ID, user.getId());
         claims.put(TOKEN_USER_NAME, StringUtils.isEmpty(user.getName()) ? "" : user.getName());
@@ -53,7 +54,7 @@ public class UserTokenUtils {
         claims.put(TOKEN_USER_DISPLAY_NAME, user.getDisplayName());
         claims.put(TOKEN_CREATE_TIME, System.currentTimeMillis());
         claims.put(TOKEN_IS_ADMIN, user.getIsAdmin());
-        return generate(claims, appKey);
+        return generate(claims, appKey, expiration);
     }
 
     public String generateAdminToken(HttpServletRequest request) {
@@ -131,13 +132,22 @@ public class UserTokenUtils {
                 : token.trim();
     }
 
-    private String generate(Map<String, Object> claims, String appKey) {
-        return toTokenString(claims, appKey);
+    private String generate(Map<String, Object> claims, String appKey, long expiration) {
+        return toTokenString(claims, appKey, expiration);
     }
 
-    private String toTokenString(Map<String, Object> claims, String appKey) {
-        Long tokenTimeout = authenticationConfig.getTokenTimeout();
-        long expiration = Long.parseLong(claims.get(TOKEN_CREATE_TIME) + "") + tokenTimeout;
+    public String generateToken(UserWithPassword user, long expiration) {
+        String appKey = authenticationConfig.getTokenDefaultAppKey();
+        long exp = System.currentTimeMillis() + expiration;
+        return generateToken(user, appKey, exp);
+    }
+
+    public String generateToken(UserWithPassword user, String appKey) {
+        long expiration = System.currentTimeMillis() + authenticationConfig.getTokenTimeout();
+        return generateToken(user, appKey, expiration);
+    }
+
+    private String toTokenString(Map<String, Object> claims, String appKey, long expiration) {
         Date expirationDate = new Date(expiration);
         String tokenSecret = getTokenSecret(appKey);
 
