@@ -1,11 +1,11 @@
 package com.tencent.supersonic.chat.server.service;
 
 import com.github.pagehelper.PageInfo;
-import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.chat.api.pojo.request.ChatMemoryFilter;
 import com.tencent.supersonic.chat.api.pojo.request.ChatMemoryUpdateReq;
 import com.tencent.supersonic.chat.api.pojo.request.PageMemoryReq;
 import com.tencent.supersonic.chat.server.persistence.dataobject.ChatMemoryDO;
+import com.tencent.supersonic.common.pojo.User;
 
 import java.util.List;
 

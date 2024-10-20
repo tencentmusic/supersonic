@@ -1,12 +1,14 @@
 package com.tencent.supersonic.demo;
 
 import com.google.common.collect.Lists;
-import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.auth.api.authorization.service.AuthService;
 import com.tencent.supersonic.chat.server.service.AgentService;
 import com.tencent.supersonic.chat.server.service.ChatManageService;
 import com.tencent.supersonic.chat.server.service.ChatQueryService;
 import com.tencent.supersonic.chat.server.service.PluginService;
+import com.tencent.supersonic.common.config.ChatModel;
+import com.tencent.supersonic.common.pojo.User;
+import com.tencent.supersonic.common.service.ChatModelService;
 import com.tencent.supersonic.common.util.AESEncryptionUtil;
 import com.tencent.supersonic.headless.api.pojo.DataSetModelConfig;
 import com.tencent.supersonic.headless.api.pojo.DrillDownDimension;
@@ -20,8 +22,6 @@ import com.tencent.supersonic.headless.api.pojo.response.DatabaseResp;
 import com.tencent.supersonic.headless.api.pojo.response.DimensionResp;
 import com.tencent.supersonic.headless.api.pojo.response.MetricResp;
 import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
-import com.tencent.supersonic.common.config.ChatModel;
-import com.tencent.supersonic.common.service.ChatModelService;
 import com.tencent.supersonic.headless.server.service.DataSetService;
 import com.tencent.supersonic.headless.server.service.DatabaseService;
 import com.tencent.supersonic.headless.server.service.DimensionService;
@@ -34,8 +34,6 @@ import com.tencent.supersonic.headless.server.service.TagObjectService;
 import com.tencent.supersonic.headless.server.service.TermService;
 import com.tencent.supersonic.headless.server.service.impl.DictWordService;
 import dev.langchain4j.provider.ModelProvider;
-import java.util.List;
-import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,6 +42,9 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.core.env.Environment;
 import org.springframework.util.CollectionUtils;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 public abstract class S2BaseDemo implements CommandLineRunner {

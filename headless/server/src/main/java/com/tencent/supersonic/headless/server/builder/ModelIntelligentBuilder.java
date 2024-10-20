@@ -11,10 +11,11 @@ import com.tencent.supersonic.headless.api.pojo.request.ModelSchemaReq;
 import dev.langchain4j.model.input.Prompt;
 import dev.langchain4j.model.input.PromptTemplate;
 import dev.langchain4j.service.AiServices;
+import org.springframework.stereotype.Component;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import org.springframework.stereotype.Component;
 
 @Component
 public class ModelIntelligentBuilder extends IntelligentBuilder {
@@ -54,7 +55,8 @@ public class ModelIntelligentBuilder extends IntelligentBuilder {
             return null;
         }
         ChatModelConfig chatModelConfig = modelSchemaReq.getChatModelConfig();
-        ModelSchemaExtractor extractor = AiServices.create(ModelSchemaExtractor.class, getChatModel(chatModelConfig));
+        ModelSchemaExtractor extractor =
+                AiServices.create(ModelSchemaExtractor.class, getChatModel(chatModelConfig));
         Prompt prompt = generatePrompt(dbSchema, chatApp.get());
         return extractor.generateModelSchema(prompt.toUserMessage().singleText());
     }

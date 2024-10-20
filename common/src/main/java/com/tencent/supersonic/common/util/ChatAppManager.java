@@ -22,7 +22,6 @@ public class ChatAppManager {
 
     public static Optional<ChatApp> getApp(String appKey) {
         return chatApps.entrySet().stream().filter(e -> e.getKey().equals(appKey))
-                .map(Map.Entry::getValue)
-                .findFirst();
+                .map(Map.Entry::getValue).findFirst();
     }
 }

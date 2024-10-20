@@ -3,7 +3,6 @@ package com.tencent.supersonic.chat.server.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.chat.api.pojo.enums.MemoryStatus;
 import com.tencent.supersonic.chat.api.pojo.request.ChatMemoryFilter;
 import com.tencent.supersonic.chat.api.pojo.request.ChatMemoryUpdateReq;
@@ -13,6 +12,7 @@ import com.tencent.supersonic.chat.server.persistence.repository.ChatMemoryRepos
 import com.tencent.supersonic.chat.server.service.MemoryService;
 import com.tencent.supersonic.common.config.EmbeddingConfig;
 import com.tencent.supersonic.common.pojo.Text2SQLExemplar;
+import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.common.service.ExemplarService;
 import com.tencent.supersonic.common.util.BeanMapper;
 import org.apache.commons.lang3.StringUtils;

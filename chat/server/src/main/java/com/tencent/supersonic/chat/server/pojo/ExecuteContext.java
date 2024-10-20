@@ -1,7 +1,7 @@
 package com.tencent.supersonic.chat.server.pojo;
 
-import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.chat.server.agent.Agent;
+import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import lombok.Data;
 

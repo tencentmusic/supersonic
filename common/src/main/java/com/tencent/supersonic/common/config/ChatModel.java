@@ -1,8 +1,9 @@
 package com.tencent.supersonic.common.config;
 
 import com.tencent.supersonic.common.pojo.ChatModelConfig;
-import java.util.Date;
 import lombok.Data;
+
+import java.util.Date;
 
 @Data
 public class ChatModel {

@@ -1,7 +1,7 @@
 package com.tencent.supersonic.headless.server.service;
 
-import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.common.pojo.ModelRela;
+import com.tencent.supersonic.common.pojo.User;
 
 import java.util.List;
 
