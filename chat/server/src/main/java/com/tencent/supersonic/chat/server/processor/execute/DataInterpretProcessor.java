@@ -30,6 +30,7 @@ public class DataInterpretProcessor implements ExecuteResultProcessor {
             + "\n#Task: Your will be provided with a question asked by a user and the relevant "
             + "result data queried from the databases, please interpret the data and organize a brief answer."
             + "\n#Rules: " + "\n1.The `#Answer` must use the same language as the `#Question`."
+            + "\n2.ALWAYS reference some key data in the `#Answer`."
             + "\n#Question:{{question}} #Data:{{data}} #Answer:";
 
     public DataInterpretProcessor() {
