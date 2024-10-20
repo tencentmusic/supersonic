@@ -6,7 +6,7 @@ import com.tencent.supersonic.chat.server.pojo.ChatContext;
 import com.tencent.supersonic.chat.server.pojo.ParseContext;
 import com.tencent.supersonic.chat.server.service.ChatContextService;
 import com.tencent.supersonic.chat.server.service.ChatManageService;
-import com.tencent.supersonic.chat.server.util.ModelConfigHelper;
+import com.tencent.supersonic.headless.server.utils.ModelConfigHelper;
 import com.tencent.supersonic.chat.server.util.QueryReqConverter;
 import com.tencent.supersonic.common.config.EmbeddingConfig;
 import com.tencent.supersonic.common.pojo.ChatApp;

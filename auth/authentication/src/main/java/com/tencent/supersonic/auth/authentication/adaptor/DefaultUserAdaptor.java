@@ -6,7 +6,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.tencent.supersonic.auth.api.authentication.adaptor.UserAdaptor;
 import com.tencent.supersonic.auth.api.authentication.pojo.Organization;
-import com.tencent.supersonic.auth.api.authentication.pojo.User;
+import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.auth.api.authentication.pojo.UserWithPassword;
 import com.tencent.supersonic.auth.api.authentication.request.UserReq;
 import com.tencent.supersonic.auth.authentication.persistence.dataobject.UserDO;

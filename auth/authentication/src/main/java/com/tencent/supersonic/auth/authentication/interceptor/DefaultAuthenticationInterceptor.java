@@ -5,7 +5,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.tencent.supersonic.auth.api.authentication.annotation.AuthenticationIgnore;
 import com.tencent.supersonic.auth.api.authentication.config.AuthenticationConfig;
-import com.tencent.supersonic.auth.api.authentication.pojo.User;
+import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.auth.api.authentication.pojo.UserWithPassword;
 import com.tencent.supersonic.auth.authentication.service.UserServiceImpl;
 import com.tencent.supersonic.auth.authentication.utils.UserTokenUtils;

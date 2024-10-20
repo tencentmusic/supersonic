@@ -1,7 +1,7 @@
 package com.tencent.supersonic.chat.server.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.tencent.supersonic.auth.api.authentication.pojo.User;
+import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.chat.api.pojo.request.ChatMemoryFilter;
 import com.tencent.supersonic.chat.api.pojo.request.ChatParseReq;
 import com.tencent.supersonic.chat.server.agent.Agent;
@@ -9,13 +9,13 @@ import com.tencent.supersonic.chat.server.agent.VisualConfig;
 import com.tencent.supersonic.chat.server.persistence.dataobject.AgentDO;
 import com.tencent.supersonic.chat.server.persistence.dataobject.ChatMemoryDO;
 import com.tencent.supersonic.chat.server.persistence.mapper.AgentDOMapper;
-import com.tencent.supersonic.chat.server.pojo.ChatModel;
 import com.tencent.supersonic.chat.server.service.AgentService;
-import com.tencent.supersonic.chat.server.service.ChatModelService;
 import com.tencent.supersonic.chat.server.service.ChatQueryService;
 import com.tencent.supersonic.chat.server.service.MemoryService;
 import com.tencent.supersonic.common.pojo.ChatApp;
 import com.tencent.supersonic.common.util.JsonUtil;
+import com.tencent.supersonic.common.config.ChatModel;
+import com.tencent.supersonic.common.service.ChatModelService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,6 +1,6 @@
 package com.tencent.supersonic.chat.server.processor.execute;
 
-import com.tencent.supersonic.auth.api.authentication.pojo.User;
+import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.chat.server.pojo.ExecuteContext;
 import com.tencent.supersonic.common.jsqlparser.SqlSelectHelper;
