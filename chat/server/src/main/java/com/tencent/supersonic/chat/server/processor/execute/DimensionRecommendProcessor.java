@@ -11,12 +11,13 @@ import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.server.facade.service.SemanticLayerService;
+import org.springframework.util.CollectionUtils;
+
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import org.springframework.util.CollectionUtils;
 
 /**
  * DimensionRecommendProcessor recommend some dimensions related to metrics based on configuration
@@ -37,7 +38,8 @@ public class DimensionRecommendProcessor implements ExecuteResultProcessor {
         if (!firstMetric.isPresent()) {
             return;
         }
-        List<SchemaElement> dimensionRecommended = getDimensions(firstMetric.get().getId(), dataSetId);
+        List<SchemaElement> dimensionRecommended =
+                getDimensions(firstMetric.get().getId(), dataSetId);
         queryResult.setRecommendedDimensions(dimensionRecommended);
     }
 

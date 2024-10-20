@@ -52,7 +52,8 @@ public class BaseTest extends BaseApplication {
         SemanticParseInfo semanticParseInfo = parseResp.getSelectedParses().get(0);
         ChatExecuteReq request = ChatExecuteReq.builder().queryText(parseResp.getQueryText())
                 .user(DataUtils.getUser()).parseId(semanticParseInfo.getId())
-                .queryId(parseResp.getQueryId()).chatId(chatId).saveAnswer(true).build();
+                .queryId(parseResp.getQueryId()).chatId(chatId).agentId(agentId).saveAnswer(true)
+                .build();
         QueryResult queryResult = chatQueryService.execute(request);
         queryResult.setChatContext(semanticParseInfo);
         return queryResult;
