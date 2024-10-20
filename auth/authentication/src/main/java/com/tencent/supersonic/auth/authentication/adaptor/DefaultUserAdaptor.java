@@ -1,7 +1,5 @@
 package com.tencent.supersonic.auth.authentication.adaptor;
 
-import javax.servlet.http.HttpServletRequest;
-
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.tencent.supersonic.auth.api.authentication.adaptor.UserAdaptor;
@@ -10,18 +8,21 @@ import com.tencent.supersonic.auth.api.authentication.pojo.UserWithPassword;
 import com.tencent.supersonic.auth.api.authentication.request.UserReq;
 import com.tencent.supersonic.auth.authentication.persistence.dataobject.UserDO;
 import com.tencent.supersonic.auth.authentication.persistence.repository.UserRepository;
-import com.tencent.supersonic.auth.authentication.utils.UserTokenUtils;
+import com.tencent.supersonic.auth.authentication.utils.TokenService;
 import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.common.util.AESEncryptionUtil;
 import com.tencent.supersonic.common.util.ContextUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-/** DefaultUserAdaptor provides a default method to obtain user and organization information */
+/**
+ * DefaultUserAdaptor provides a default method to obtain user and organization information
+ */
 @Slf4j
 public class DefaultUserAdaptor implements UserAdaptor {
 
@@ -88,17 +89,17 @@ public class DefaultUserAdaptor implements UserAdaptor {
 
     @Override
     public String login(UserReq userReq, HttpServletRequest request) {
-        UserTokenUtils userTokenUtils = ContextUtils.getBean(UserTokenUtils.class);
-        String appKey = userTokenUtils.getAppKey(request);
+        TokenService tokenService = ContextUtils.getBean(TokenService.class);
+        String appKey = tokenService.getAppKey(request);
         return login(userReq, appKey);
     }
 
     @Override
     public String login(UserReq userReq, String appKey) {
-        UserTokenUtils userTokenUtils = ContextUtils.getBean(UserTokenUtils.class);
+        TokenService tokenService = ContextUtils.getBean(TokenService.class);
         try {
             UserWithPassword user = getUserWithPassword(userReq);
-            return userTokenUtils.generateToken(user, appKey);
+            return tokenService.generateToken(UserWithPassword.convert(user), appKey);
         } catch (Exception e) {
             log.error("", e);
             throw new RuntimeException("password encrypt error, please try again");
