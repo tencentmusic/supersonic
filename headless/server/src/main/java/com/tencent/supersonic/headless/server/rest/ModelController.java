@@ -1,5 +1,6 @@
 package com.tencent.supersonic.headless.server.rest;
 
+import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -110,7 +111,7 @@ public class ModelController {
     }
 
     @PostMapping("/buildModelSchema")
-    public ModelSchema buildModelSchema(@RequestBody ModelSchemaReq modelSchemaReq)
+    public Map<String, ModelSchema> buildModelSchema(@RequestBody ModelSchemaReq modelSchemaReq)
             throws SQLException {
         return modelService.buildModelSchema(modelSchemaReq);
     }

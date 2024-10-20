@@ -5,6 +5,7 @@ import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.auth.api.authentication.service.UserService;
 import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
 import com.tencent.supersonic.common.pojo.enums.StatusEnum;
+import com.tencent.supersonic.common.service.ChatModelService;
 import com.tencent.supersonic.headless.api.pojo.Dim;
 import com.tencent.supersonic.headless.api.pojo.DimensionTimeTypeParams;
 import com.tencent.supersonic.headless.api.pojo.Identify;
@@ -78,9 +79,10 @@ class ModelServiceImplTest {
         DataSetService viewService = Mockito.mock(DataSetService.class);
         ModelIntelligentBuilder modelIntelligentBuilder =
                 Mockito.mock(ModelIntelligentBuilder.class);
+        ChatModelService chatModelService = Mockito.mock(ChatModelService.class);
         return new ModelServiceImpl(modelRepository, databaseService, dimensionService,
                 metricService, domainService, userService, viewService, dateInfoRepository,
-                modelIntelligentBuilder);
+                modelIntelligentBuilder, chatModelService);
     }
 
     private ModelReq mockModelReq() {

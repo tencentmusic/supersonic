@@ -35,7 +35,7 @@ public interface ModelService {
 
     UnAvailableItemResp getUnAvailableItem(FieldRemovedReq fieldRemovedReq);
 
-    ModelSchema buildModelSchema(ModelSchemaReq modelSchemaReq) throws SQLException;
+    Map<String, ModelSchema> buildModelSchema(ModelSchemaReq modelSchemaReq) throws SQLException;
 
     List<ModelResp> getModelListWithAuth(User user, Long domainId, AuthType authType);
 
