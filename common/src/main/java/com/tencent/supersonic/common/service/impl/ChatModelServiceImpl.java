@@ -1,23 +1,21 @@
-package com.tencent.supersonic.chat.server.service.impl;
+package com.tencent.supersonic.common.service.impl;
+
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.tencent.supersonic.auth.api.authentication.pojo.User;
-import com.tencent.supersonic.chat.server.persistence.dataobject.ChatModelDO;
-import com.tencent.supersonic.chat.server.persistence.mapper.ChatModelMapper;
-import com.tencent.supersonic.chat.server.pojo.ChatModel;
-import com.tencent.supersonic.chat.server.service.ChatModelService;
+import com.tencent.supersonic.common.config.ChatModel;
+import com.tencent.supersonic.common.persistence.dataobject.ChatModelDO;
+import com.tencent.supersonic.common.persistence.mapper.ChatModelMapper;
 import com.tencent.supersonic.common.pojo.ChatModelConfig;
+import com.tencent.supersonic.common.pojo.User;
+import com.tencent.supersonic.common.service.ChatModelService;
 import com.tencent.supersonic.common.util.JsonUtil;
-import com.tencent.supersonic.common.util.StringUtil;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang.StringUtils;
-import org.springframework.beans.BeanUtils;
-import org.springframework.stereotype.Service;
-
 import java.util.Date;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
+import org.springframework.stereotype.Service;
 
 @Slf4j
 @Service

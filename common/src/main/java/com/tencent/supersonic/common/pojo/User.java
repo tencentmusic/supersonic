@@ -1,4 +1,4 @@
-package com.tencent.supersonic.auth.api.authentication.pojo;
+package com.tencent.supersonic.common.pojo;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

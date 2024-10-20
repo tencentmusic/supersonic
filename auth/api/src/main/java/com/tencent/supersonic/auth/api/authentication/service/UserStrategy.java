@@ -3,7 +3,7 @@ package com.tencent.supersonic.auth.api.authentication.service;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.tencent.supersonic.auth.api.authentication.pojo.User;
+import com.tencent.supersonic.common.pojo.User;
 
 public interface UserStrategy {
 

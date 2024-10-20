@@ -1,6 +1,6 @@
 package com.tencent.supersonic.headless.api.pojo.request;
 
-import com.tencent.supersonic.auth.api.authentication.pojo.User;
+import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.headless.api.pojo.QueryDataType;
 import com.tencent.supersonic.headless.api.pojo.enums.MapModeEnum;
 import lombok.Data;

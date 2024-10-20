@@ -1,7 +1,7 @@
 package com.tencent.supersonic.headless.server.service.impl;
 
 import com.google.common.collect.Lists;
-import com.tencent.supersonic.auth.api.authentication.pojo.User;
+import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.auth.api.authentication.service.UserService;
 import com.tencent.supersonic.common.pojo.ItemDateResp;
 import com.tencent.supersonic.common.pojo.enums.AuthType;
@@ -200,7 +200,10 @@ public class ModelServiceImpl implements ModelService {
         List<DBColumn> dbColumns = databaseService.getDbColumns(modelSchemaReq);
         if (modelSchemaReq.isBuildByLLM()) {
             DbSchema dbSchema = convert(modelSchemaReq, dbColumns);
-            return modelIntelligentBuilder.build(dbSchema);
+            ModelSchema modelSchema = modelIntelligentBuilder.build(dbSchema, modelSchemaReq);
+            if (modelSchema != null) {
+                return modelSchema;
+            }
         }
         return build(dbColumns);
     }

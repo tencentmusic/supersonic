@@ -1,6 +1,6 @@
 package com.tencent.supersonic.headless.server.rest;
 
-import com.tencent.supersonic.auth.api.authentication.pojo.User;
+import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.common.pojo.ModelRela;
 import com.tencent.supersonic.headless.server.service.ModelRelaService;
 import org.springframework.beans.factory.annotation.Autowired;

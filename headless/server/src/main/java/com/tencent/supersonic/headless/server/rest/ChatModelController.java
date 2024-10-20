@@ -1,14 +1,14 @@
-package com.tencent.supersonic.chat.server.rest;
+package com.tencent.supersonic.headless.server.rest;
 
+import com.tencent.supersonic.common.config.ChatModel;
+import com.tencent.supersonic.common.pojo.ChatModelParameters;
+import com.tencent.supersonic.common.service.ChatModelService;
+import com.tencent.supersonic.headless.server.utils.ModelConfigHelper;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.tencent.supersonic.auth.api.authentication.pojo.User;
+import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
-import com.tencent.supersonic.chat.server.config.ChatModelParameters;
-import com.tencent.supersonic.chat.server.pojo.ChatModel;
-import com.tencent.supersonic.chat.server.service.ChatModelService;
-import com.tencent.supersonic.chat.server.util.ModelConfigHelper;
 import com.tencent.supersonic.common.pojo.ChatApp;
 import com.tencent.supersonic.common.pojo.ChatModelConfig;
 import com.tencent.supersonic.common.pojo.Parameter;
@@ -28,7 +28,7 @@ public class ChatModelController {
 
     @PostMapping
     public ChatModel createModel(@RequestBody ChatModel model,
-            HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {
+                                 HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {
         User user = UserHolder.findUser(httpServletRequest, httpServletResponse);
         return chatModelService.createChatModel(model, user);
     }

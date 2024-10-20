@@ -1,4 +1,4 @@
-package com.tencent.supersonic.chat.server.config;
+package com.tencent.supersonic.common.pojo;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;

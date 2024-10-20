@@ -1,19 +1,25 @@
 package com.tencent.supersonic.headless.server.builder;
 
+import com.tencent.supersonic.common.pojo.ChatApp;
+import com.tencent.supersonic.common.pojo.ChatModelConfig;
+import com.tencent.supersonic.common.pojo.enums.AppModule;
+import com.tencent.supersonic.common.util.ChatAppManager;
 import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.headless.api.pojo.DbSchema;
 import com.tencent.supersonic.headless.api.pojo.ModelSchema;
-import dev.langchain4j.model.chat.ChatLanguageModel;
+import com.tencent.supersonic.headless.api.pojo.request.ModelSchemaReq;
 import dev.langchain4j.model.input.Prompt;
 import dev.langchain4j.model.input.PromptTemplate;
 import dev.langchain4j.service.AiServices;
-import org.springframework.stereotype.Component;
-
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
+import org.springframework.stereotype.Component;
 
 @Component
 public class ModelIntelligentBuilder extends IntelligentBuilder {
+
+    public static final String APP_KEY = "BUILD_DATA_MODEL";
 
     public static final String INSTRUCTION = ""
             + "Role: As an experienced data analyst with extensive modeling experience, "
@@ -31,23 +37,33 @@ public class ModelIntelligentBuilder extends IntelligentBuilder {
 
             + "\nDBSchema: {{DBSchema}}" + "\nExemplar: {{exemplar}}";
 
+    public ModelIntelligentBuilder() {
+        ChatAppManager.register(APP_KEY, ChatApp.builder().prompt(INSTRUCTION).name("构造数据语义模型")
+                .appModule(AppModule.HEADLESS).description("通过大模型来构造数据语义模型").enable(true).build());
+    }
+
+
     interface ModelSchemaExtractor {
         ModelSchema generateModelSchema(String text);
     }
 
 
-    public ModelSchema build(DbSchema dbSchema) {
-        ChatLanguageModel chatModel = getChatModel();
-        ModelSchemaExtractor extractor = AiServices.create(ModelSchemaExtractor.class, chatModel);
-        Prompt prompt = generatePrompt(dbSchema);
+    public ModelSchema build(DbSchema dbSchema, ModelSchemaReq modelSchemaReq) {
+        Optional<ChatApp> chatApp = ChatAppManager.getApp(APP_KEY);
+        if (!chatApp.isPresent() || !chatApp.get().isEnable()) {
+            return null;
+        }
+        ChatModelConfig chatModelConfig = modelSchemaReq.getChatModelConfig();
+        ModelSchemaExtractor extractor = AiServices.create(ModelSchemaExtractor.class, getChatModel(chatModelConfig));
+        Prompt prompt = generatePrompt(dbSchema, chatApp.get());
         return extractor.generateModelSchema(prompt.toUserMessage().singleText());
     }
 
-    private Prompt generatePrompt(DbSchema dbSchema) {
+    private Prompt generatePrompt(DbSchema dbSchema, ChatApp chatApp) {
         Map<String, Object> variable = new HashMap<>();
         variable.put("exemplar", loadExemplars());
         variable.put("DBSchema", JsonUtil.toString(dbSchema));
-        return PromptTemplate.from(INSTRUCTION).apply(variable);
+        return PromptTemplate.from(chatApp.getPrompt()).apply(variable);
     }
 
     private String loadExemplars() {

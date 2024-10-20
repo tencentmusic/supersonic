@@ -1,8 +1,8 @@
-package com.tencent.supersonic.chat.server.service;
+package com.tencent.supersonic.common.service;
 
-import com.tencent.supersonic.auth.api.authentication.pojo.User;
-import com.tencent.supersonic.chat.server.pojo.ChatModel;
 
+import com.tencent.supersonic.common.config.ChatModel;
+import com.tencent.supersonic.common.pojo.User;
 import java.util.List;
 
 public interface ChatModelService {

@@ -1,6 +1,6 @@
 package com.tencent.supersonic.headless.chat.query.llm.s2sql;
 
-import com.tencent.supersonic.auth.api.authentication.pojo.User;
+import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.headless.api.pojo.DataSetSchema;
 import com.tencent.supersonic.headless.api.pojo.SqlInfo;
 import com.tencent.supersonic.headless.chat.query.QueryManager;
