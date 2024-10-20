@@ -1,11 +1,9 @@
 package com.tencent.supersonic.auth.authentication.interceptor;
 
-import javax.servlet.http.HttpServletRequest;
-
 import com.tencent.supersonic.auth.api.authentication.config.AuthenticationConfig;
 import com.tencent.supersonic.auth.api.authentication.constant.UserConstants;
 import com.tencent.supersonic.auth.authentication.service.UserServiceImpl;
-import com.tencent.supersonic.auth.authentication.utils.UserTokenUtils;
+import com.tencent.supersonic.auth.authentication.utils.TokenService;
 import com.tencent.supersonic.common.util.S2ThreadContext;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.catalina.connector.RequestFacade;
@@ -15,6 +13,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.support.StandardMultipartHttpServletRequest;
 import org.springframework.web.servlet.HandlerInterceptor;
 
+import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.List;
@@ -26,7 +25,7 @@ public abstract class AuthenticationInterceptor implements HandlerInterceptor {
 
     protected UserServiceImpl userServiceImpl;
 
-    protected UserTokenUtils userTokenUtils;
+    protected TokenService tokenService;
 
     protected S2ThreadContext s2ThreadContext;
 
