@@ -1,5 +1,7 @@
 package com.tencent.supersonic.auth.authentication.interceptor;
 
+import javax.servlet.http.HttpServletRequest;
+
 import com.tencent.supersonic.auth.api.authentication.config.AuthenticationConfig;
 import com.tencent.supersonic.auth.api.authentication.constant.UserConstants;
 import com.tencent.supersonic.auth.authentication.service.UserServiceImpl;
@@ -13,7 +15,6 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.support.StandardMultipartHttpServletRequest;
 import org.springframework.web.servlet.HandlerInterceptor;
 
-import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.List;

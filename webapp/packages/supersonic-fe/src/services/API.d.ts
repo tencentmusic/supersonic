@@ -23,6 +23,23 @@ declare namespace API {
     access?: 'user' | 'guest' | 'admin';
   };
 
+  export interface UserItem {
+    id: number;
+    name: string;
+    displayName: string;
+    email: string;
+  }
+
+  export interface UserAccessToken {
+    createDate: string;
+    expireDate: string;
+    expireTime: number;
+    id: number;
+    name: string;
+    token: string;
+    userName: string;
+  }
+
   export type LoginStateType = {
     status?: 'ok' | 'error';
     type?: string;

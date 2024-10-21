@@ -2,8 +2,15 @@ package com.tencent.supersonic.common.pojo;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
-import com.tencent.supersonic.common.pojo.Parameter;
-import dev.langchain4j.provider.*;
+import dev.langchain4j.provider.AzureModelFactory;
+import dev.langchain4j.provider.DashscopeModelFactory;
+import dev.langchain4j.provider.DifyModelFactory;
+import dev.langchain4j.provider.LocalAiModelFactory;
+import dev.langchain4j.provider.ModelProvider;
+import dev.langchain4j.provider.OllamaModelFactory;
+import dev.langchain4j.provider.OpenAiModelFactory;
+import dev.langchain4j.provider.QianfanModelFactory;
+import dev.langchain4j.provider.ZhipuModelFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -52,7 +59,7 @@ public class ChatModelParameters {
         return Lists.newArrayList(OpenAiModelFactory.PROVIDER, OllamaModelFactory.PROVIDER,
                 QianfanModelFactory.PROVIDER, ZhipuModelFactory.PROVIDER,
                 LocalAiModelFactory.PROVIDER, DashscopeModelFactory.PROVIDER,
-                AzureModelFactory.PROVIDER);
+                AzureModelFactory.PROVIDER, DifyModelFactory.PROVIDER);
     }
 
     private static List<Parameter.Dependency> getBaseUrlDependency() {
@@ -63,20 +70,23 @@ public class ChatModelParameters {
                         QianfanModelFactory.PROVIDER, QianfanModelFactory.DEFAULT_BASE_URL,
                         ZhipuModelFactory.PROVIDER, ZhipuModelFactory.DEFAULT_BASE_URL,
                         LocalAiModelFactory.PROVIDER, LocalAiModelFactory.DEFAULT_BASE_URL,
-                        DashscopeModelFactory.PROVIDER, DashscopeModelFactory.DEFAULT_BASE_URL));
+                        DashscopeModelFactory.PROVIDER, DashscopeModelFactory.DEFAULT_BASE_URL,
+                        DifyModelFactory.PROVIDER, DifyModelFactory.DEFAULT_BASE_URL));
     }
 
     private static List<Parameter.Dependency> getApiKeyDependency() {
         return getDependency(CHAT_MODEL_PROVIDER.getName(),
                 Lists.newArrayList(OpenAiModelFactory.PROVIDER, QianfanModelFactory.PROVIDER,
                         ZhipuModelFactory.PROVIDER, LocalAiModelFactory.PROVIDER,
-                        AzureModelFactory.PROVIDER, DashscopeModelFactory.PROVIDER),
+                        AzureModelFactory.PROVIDER, DashscopeModelFactory.PROVIDER,
+                        DifyModelFactory.PROVIDER),
                 ImmutableMap.of(OpenAiModelFactory.PROVIDER,
                         ModelProvider.DEMO_CHAT_MODEL.getApiKey(), QianfanModelFactory.PROVIDER,
                         ModelProvider.DEMO_CHAT_MODEL.getApiKey(), ZhipuModelFactory.PROVIDER,
                         ModelProvider.DEMO_CHAT_MODEL.getApiKey(), LocalAiModelFactory.PROVIDER,
                         ModelProvider.DEMO_CHAT_MODEL.getApiKey(), AzureModelFactory.PROVIDER,
                         ModelProvider.DEMO_CHAT_MODEL.getApiKey(), DashscopeModelFactory.PROVIDER,
+                        ModelProvider.DEMO_CHAT_MODEL.getApiKey(), DifyModelFactory.PROVIDER,
                         ModelProvider.DEMO_CHAT_MODEL.getApiKey()));
     }
 
@@ -88,7 +98,8 @@ public class ChatModelParameters {
                         ZhipuModelFactory.PROVIDER, ZhipuModelFactory.DEFAULT_MODEL_NAME,
                         LocalAiModelFactory.PROVIDER, LocalAiModelFactory.DEFAULT_MODEL_NAME,
                         AzureModelFactory.PROVIDER, AzureModelFactory.DEFAULT_MODEL_NAME,
-                        DashscopeModelFactory.PROVIDER, DashscopeModelFactory.DEFAULT_MODEL_NAME));
+                        DashscopeModelFactory.PROVIDER, DashscopeModelFactory.DEFAULT_MODEL_NAME,
+                        DifyModelFactory.PROVIDER, DifyModelFactory.DEFAULT_MODEL_NAME));
     }
 
     private static List<Parameter.Dependency> getEndpointDependency() {

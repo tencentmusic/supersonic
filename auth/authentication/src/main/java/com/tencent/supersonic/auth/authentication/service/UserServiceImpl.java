@@ -4,6 +4,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.tencent.supersonic.auth.api.authentication.pojo.Organization;
+import com.tencent.supersonic.auth.api.authentication.pojo.UserToken;
 import com.tencent.supersonic.auth.api.authentication.request.UserReq;
 import com.tencent.supersonic.auth.api.authentication.service.UserService;
 import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
@@ -78,5 +79,35 @@ public class UserServiceImpl implements UserService {
     @Override
     public String login(UserReq userReq, String appKey) {
         return ComponentFactory.getUserAdaptor().login(userReq, appKey);
+    }
+
+    @Override
+    public String getPassword(String userName) {
+        return ComponentFactory.getUserAdaptor().getPassword(userName);
+    }
+
+    @Override
+    public void resetPassword(String userName, String password, String newPassword) {
+        ComponentFactory.getUserAdaptor().resetPassword(userName, password, newPassword);
+    }
+
+    @Override
+    public UserToken generateToken(String name, String userName, long expireTime) {
+        return ComponentFactory.getUserAdaptor().generateToken(name, userName, expireTime);
+    }
+
+    @Override
+    public List<UserToken> getUserTokens(String userName) {
+        return ComponentFactory.getUserAdaptor().getUserTokens(userName);
+    }
+
+    @Override
+    public UserToken getUserToken(Long id) {
+        return ComponentFactory.getUserAdaptor().getUserToken(id);
+    }
+
+    @Override
+    public void deleteUserToken(Long id) {
+        ComponentFactory.getUserAdaptor().deleteUserToken(id);
     }
 }
