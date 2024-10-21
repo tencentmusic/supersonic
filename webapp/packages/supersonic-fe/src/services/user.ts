@@ -20,3 +20,31 @@ export function saveSystemConfig(data: any): Promise<any> {
     data,
   });
 }
+
+export function changePassword(data: { newPassword: string; oldPassword: string }): Promise<any> {
+  return request(`${process.env.AUTH_API_BASE_URL}user/resetPassword`, {
+    method: 'post',
+    data: {
+      newPassword: data.newPassword,
+      password: data.oldPassword,
+    },
+  });
+}
+
+// 获取用户accessTokens
+export async function getUserAccessTokens(): Promise<Result<API.UserItem[]>> {
+  return request.get(`${process.env.AUTH_API_BASE_URL}user/getUserTokens`);
+}
+
+export function generateAccessToken(data: { expireTime: number; name: string }): Promise<any> {
+  return request(`${process.env.AUTH_API_BASE_URL}user/generateToken`, {
+    method: 'post',
+    data,
+  });
+}
+
+export function removeAccessToken(id: number): Promise<any> {
+  return request(`${process.env.AUTH_API_BASE_URL}user/deleteUserToken?tokenId=${id}`, {
+    method: 'post',
+  });
+}

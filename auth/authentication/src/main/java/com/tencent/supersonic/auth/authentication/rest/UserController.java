@@ -4,7 +4,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.tencent.supersonic.auth.api.authentication.pojo.Organization;
+import com.tencent.supersonic.auth.api.authentication.pojo.UserToken;
 import com.tencent.supersonic.auth.api.authentication.request.UserReq;
+import com.tencent.supersonic.auth.api.authentication.request.UserTokenReq;
 import com.tencent.supersonic.auth.api.authentication.service.UserService;
 import com.tencent.supersonic.common.pojo.User;
 import lombok.extern.slf4j.Slf4j;
@@ -13,6 +15,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -68,5 +71,29 @@ public class UserController {
     @PostMapping("/login")
     public String login(@RequestBody UserReq userCmd, HttpServletRequest request) {
         return userService.login(userCmd, request);
+    }
+
+    @PostMapping("/generateToken")
+    public UserToken generateToken(@RequestBody UserTokenReq userTokenReq,
+            HttpServletRequest request, HttpServletResponse response) {
+        User user = userService.getCurrentUser(request, response);
+        return userService.generateToken(userTokenReq.getName(), user.getName(),
+                userTokenReq.getExpireTime());
+    }
+
+    @GetMapping("/getUserTokens")
+    public List<UserToken> getUserTokens(HttpServletRequest request, HttpServletResponse response) {
+        User user = userService.getCurrentUser(request, response);
+        return userService.getUserTokens(user.getName());
+    }
+
+    @GetMapping("/getUserToken")
+    public UserToken getUserToken(@RequestParam(name = "tokenId") Long tokenId) {
+        return userService.getUserToken(tokenId);
+    }
+
+    @PostMapping("/deleteUserToken")
+    public void deleteUserToken(@RequestParam(name = "tokenId") Long tokenId) {
+        userService.deleteUserToken(tokenId);
     }
 }
