@@ -80,9 +80,10 @@ class ModelServiceImplTest {
         ModelIntelligentBuilder modelIntelligentBuilder =
                 Mockito.mock(ModelIntelligentBuilder.class);
         ChatModelService chatModelService = Mockito.mock(ChatModelService.class);
+        ModelRelaService modelRelaService = Mockito.mock(ModelRelaService.class);
         return new ModelServiceImpl(modelRepository, databaseService, dimensionService,
                 metricService, domainService, userService, viewService, dateInfoRepository,
-                modelIntelligentBuilder, chatModelService);
+                modelIntelligentBuilder, chatModelService, modelRelaService);
     }
 
     private ModelReq mockModelReq() {
