@@ -93,3 +93,9 @@ export enum DatePeriod {
   MONTH = 'MONTH',
   YEAR = 'YEAR',
 }
+
+export enum DimensionValueListType {
+  BLACK_LIST = 'blackList',
+  WHITE_LIST = 'whiteList',
+  RULE_LIST = 'ruleList',
+}

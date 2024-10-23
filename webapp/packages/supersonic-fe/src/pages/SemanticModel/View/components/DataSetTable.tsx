@@ -28,6 +28,7 @@ const DataSetTable: React.FC<Props> = ({ dataSetList, disabledEdit = false }) =>
   const [searchModalOpen, setSearchModalOpen] = useState(false);
   const [modelList, setModelList] = useState<ISemantic.IModelItem[]>([]);
   const actionRef = useRef<ActionType>();
+  const [editFormStep, setEditFormStep] = useState<number>(0);
 
   const updateViewStatus = async (modelData: ISemantic.IDatasetItem) => {
     setSaveLoading(true);
@@ -86,6 +87,19 @@ const DataSetTable: React.FC<Props> = ({ dataSetList, disabledEdit = false }) =>
       dataIndex: 'name',
       title: '数据集名称',
       search: false,
+      render: (name, record) => {
+        return (
+          <a
+            onClick={() => {
+              setEditFormStep(1);
+              setViewItem(record);
+              setCreateDataSourceModalOpen(true);
+            }}
+          >
+            {name}
+          </a>
+        );
+      },
     },
     {
       dataIndex: 'bizName',
@@ -130,6 +144,7 @@ const DataSetTable: React.FC<Props> = ({ dataSetList, disabledEdit = false }) =>
             <a
               key="metricEditBtn"
               onClick={() => {
+                setEditFormStep(0);
                 setViewItem(record);
                 setCreateDataSourceModalOpen(true);
               }}
@@ -227,6 +242,7 @@ const DataSetTable: React.FC<Props> = ({ dataSetList, disabledEdit = false }) =>
       />
       {createDataSourceModalOpen && (
         <ViewCreateFormModal
+          step={editFormStep}
           domainId={selectDomainId}
           viewItem={viewItem}
           modelList={modelList}

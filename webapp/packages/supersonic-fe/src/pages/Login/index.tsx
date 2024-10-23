@@ -12,7 +12,7 @@ import type { RegisterFormDetail } from './components/types';
 import { postUserLogin, userRegister } from './services';
 import { AUTH_TOKEN_KEY } from '@/common/constants';
 import { queryCurrentUser } from '@/services/user';
-import { history, useModel } from 'umi';
+import { history, useModel } from '@umijs/max';
 import CryptoJS from 'crypto-js';
 import { encryptPassword } from '@/utils/utils';
 
