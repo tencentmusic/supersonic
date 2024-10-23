@@ -603,3 +603,19 @@ CREATE TABLE IF NOT EXISTS `s2_term` (
     `updated_by` varchar(100) DEFAULT NULL ,
     PRIMARY KEY (`id`)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8 COMMENT ='术语表';
+
+CREATE TABLE `s2_user_token` (
+     `id` bigint NOT NULL AUTO_INCREMENT,
+     `name` VARCHAR(255) NOT NULL,
+     `user_name` VARCHAR(255)  NOT NULL,
+     `expire_time` BIGINT(20) NOT NULL,
+     `token` text NOT NULL,
+     `salt` VARCHAR(255)  default NULL,
+     `create_time` DATETIME NOT NULL,
+     `create_by` VARCHAR(255) NOT NULL,
+     `update_time` DATETIME default NULL,
+     `update_by` VARCHAR(255) NOT NULL,
+     `expire_date_time` DATETIME NOT NULL,
+     unique key name_username (`name`, `user_name`),
+     PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin comment='用户令牌信息表';

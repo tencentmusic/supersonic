@@ -148,6 +148,7 @@ export type MsgDataType = {
   similarQueries: SimilarQuestionType[];
   recommendedDimensions: DrillDownDimensionType[];
   textResult: string;
+  errorMsg: string;
 };
 
 export enum ParseStateEnum {

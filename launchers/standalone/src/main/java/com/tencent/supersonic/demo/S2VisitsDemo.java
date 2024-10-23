@@ -157,10 +157,11 @@ public class S2VisitsDemo extends S2BaseDemo {
         datasetTool.setType(AgentToolType.DATASET);
         datasetTool.setDataSetIds(Lists.newArrayList(dataSetId));
         toolConfig.getTools().add(datasetTool);
-
         agent.setToolConfig(JSONObject.toJSONString(toolConfig));
+
         // configure chat apps
-        Map<String, ChatApp> chatAppConfig = Maps.newHashMap(ChatAppManager.getAllApps());
+        Map<String, ChatApp> chatAppConfig =
+                Maps.newHashMap(ChatAppManager.getAllApps(AppModule.CHAT));
         chatAppConfig.values().forEach(app -> app.setChatModelId(demoChatModel.getId()));
         agent.setChatAppConfig(chatAppConfig);
         Agent agentCreated = agentService.createAgent(agent, defaultUser);

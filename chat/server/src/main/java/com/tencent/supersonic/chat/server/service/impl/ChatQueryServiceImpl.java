@@ -1,7 +1,6 @@
 package com.tencent.supersonic.chat.server.service.impl;
 
 import com.google.common.collect.Lists;
-import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.chat.api.pojo.request.ChatExecuteReq;
 import com.tencent.supersonic.chat.api.pojo.request.ChatParseReq;
 import com.tencent.supersonic.chat.api.pojo.request.ChatQueryDataReq;
@@ -15,7 +14,6 @@ import com.tencent.supersonic.chat.server.processor.execute.ExecuteResultProcess
 import com.tencent.supersonic.chat.server.processor.parse.ParseResultProcessor;
 import com.tencent.supersonic.chat.server.service.AgentService;
 import com.tencent.supersonic.chat.server.service.ChatManageService;
-import com.tencent.supersonic.chat.server.service.ChatModelService;
 import com.tencent.supersonic.chat.server.service.ChatQueryService;
 import com.tencent.supersonic.chat.server.util.ComponentFactory;
 import com.tencent.supersonic.chat.server.util.QueryReqConverter;
@@ -24,7 +22,9 @@ import com.tencent.supersonic.common.jsqlparser.SqlAddHelper;
 import com.tencent.supersonic.common.jsqlparser.SqlRemoveHelper;
 import com.tencent.supersonic.common.jsqlparser.SqlReplaceHelper;
 import com.tencent.supersonic.common.jsqlparser.SqlSelectHelper;
+import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
+import com.tencent.supersonic.common.service.ChatModelService;
 import com.tencent.supersonic.common.util.BeanMapper;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.DateUtils;
@@ -171,8 +171,6 @@ public class ChatQueryServiceImpl implements ChatQueryService {
         ParseContext parseContext = new ParseContext();
         BeanMapper.mapper(chatParseReq, parseContext);
         Agent agent = agentService.getAgent(chatParseReq.getAgentId());
-        agent.getChatAppConfig().values().forEach(c -> c
-                .setChatModelConfig(chatModelService.getChatModel(c.getChatModelId()).getConfig()));
         parseContext.setAgent(agent);
         return parseContext;
     }

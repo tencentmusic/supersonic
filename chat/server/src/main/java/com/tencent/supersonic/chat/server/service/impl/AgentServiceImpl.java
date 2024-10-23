@@ -1,7 +1,6 @@
 package com.tencent.supersonic.chat.server.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.chat.api.pojo.request.ChatMemoryFilter;
 import com.tencent.supersonic.chat.api.pojo.request.ChatParseReq;
 import com.tencent.supersonic.chat.server.agent.Agent;
@@ -10,10 +9,12 @@ import com.tencent.supersonic.chat.server.persistence.dataobject.AgentDO;
 import com.tencent.supersonic.chat.server.persistence.dataobject.ChatMemoryDO;
 import com.tencent.supersonic.chat.server.persistence.mapper.AgentDOMapper;
 import com.tencent.supersonic.chat.server.service.AgentService;
-import com.tencent.supersonic.chat.server.service.ChatModelService;
 import com.tencent.supersonic.chat.server.service.ChatQueryService;
 import com.tencent.supersonic.chat.server.service.MemoryService;
+import com.tencent.supersonic.common.config.ChatModel;
 import com.tencent.supersonic.common.pojo.ChatApp;
+import com.tencent.supersonic.common.pojo.User;
+import com.tencent.supersonic.common.service.ChatModelService;
 import com.tencent.supersonic.common.util.JsonUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
@@ -22,6 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
@@ -127,6 +129,12 @@ public class AgentServiceImpl extends ServiceImpl<AgentDOMapper, AgentDO> implem
         agent.setChatAppConfig(
                 JsonUtil.toMap(agentDO.getChatModelConfig(), String.class, ChatApp.class));
         agent.setVisualConfig(JsonUtil.toObject(agentDO.getVisualConfig(), VisualConfig.class));
+        agent.getChatAppConfig().values().forEach(c -> {
+            ChatModel chatModel = chatModelService.getChatModel(c.getChatModelId());
+            if (Objects.nonNull(chatModel)) {
+                c.setChatModelConfig(chatModelService.getChatModel(c.getChatModelId()).getConfig());
+            }
+        });
         return agent;
     }
 

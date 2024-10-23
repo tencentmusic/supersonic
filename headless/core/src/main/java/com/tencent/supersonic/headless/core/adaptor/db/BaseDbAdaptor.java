@@ -81,4 +81,5 @@ public abstract class BaseDbAdaptor implements DbAdaptor {
                 connectionInfo.getUserName(), connectionInfo.getPassword());
         return connection.getMetaData();
     }
+
 }

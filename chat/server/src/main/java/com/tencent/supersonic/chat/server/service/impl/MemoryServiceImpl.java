@@ -3,7 +3,6 @@ package com.tencent.supersonic.chat.server.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.chat.api.pojo.enums.MemoryStatus;
 import com.tencent.supersonic.chat.api.pojo.request.ChatMemoryFilter;
 import com.tencent.supersonic.chat.api.pojo.request.ChatMemoryUpdateReq;
@@ -13,6 +12,7 @@ import com.tencent.supersonic.chat.server.persistence.repository.ChatMemoryRepos
 import com.tencent.supersonic.chat.server.service.MemoryService;
 import com.tencent.supersonic.common.config.EmbeddingConfig;
 import com.tencent.supersonic.common.pojo.Text2SQLExemplar;
+import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.common.service.ExemplarService;
 import com.tencent.supersonic.common.util.BeanMapper;
 import org.apache.commons.lang3.StringUtils;
@@ -37,9 +37,10 @@ public class MemoryServiceImpl implements MemoryService {
 
     @Override
     public void createMemory(ChatMemoryDO memory) {
-        // do not save duplicate memory for exactly the same question
-        List<ChatMemoryDO> memories = getMemories(ChatMemoryFilter.builder()
-                .agentId(memory.getAgentId()).question(memory.getQuestion()).build());
+        // if an existing enabled memory has the same question, just skip
+        List<ChatMemoryDO> memories =
+                getMemories(ChatMemoryFilter.builder().agentId(memory.getAgentId())
+                        .question(memory.getQuestion()).status(MemoryStatus.ENABLED).build());
         if (memories.size() == 0) {
             chatMemoryRepository.createMemory(memory);
         }

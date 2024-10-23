@@ -21,7 +21,6 @@ import java.util.List;
 
 @Slf4j
 public class SqlMergeWithUtils {
-
     public static String mergeWith(EngineType engineType, String sql, List<String> parentSqlList,
             List<String> parentWithNameList) throws SqlParseException {
         SqlParser.Config parserConfig = Configuration.getParserConfig(engineType);
@@ -51,11 +50,13 @@ public class SqlMergeWithUtils {
             withItemList.add(withItem);
         }
 
-        // Check if the main SQL node contains a LIMIT clause
+        // Check if the main SQL node contains an ORDER BY or LIMIT clause
         SqlNode limitNode = null;
+        SqlNodeList orderByList = null;
         if (sqlNode1 instanceof SqlOrderBy) {
             SqlOrderBy sqlOrderBy = (SqlOrderBy) sqlNode1;
             limitNode = sqlOrderBy.fetch;
+            orderByList = sqlOrderBy.orderList;
             sqlNode1 = sqlOrderBy.query;
         } else if (sqlNode1 instanceof SqlSelect) {
             SqlSelect sqlSelect = (SqlSelect) sqlNode1;
@@ -63,21 +64,23 @@ public class SqlMergeWithUtils {
             sqlSelect.setFetch(null);
             sqlNode1 = sqlSelect;
         }
+
         // Extract existing WITH items from sqlNode1 if it is a SqlWith
         if (sqlNode1 instanceof SqlWith) {
             SqlWith sqlWith = (SqlWith) sqlNode1;
             withItemList.addAll(sqlWith.withList.getList());
             sqlNode1 = sqlWith.body;
         }
+
         // Create a new SqlWith node
         SqlWith finalSqlNode = new SqlWith(SqlParserPos.ZERO,
                 new SqlNodeList(withItemList, SqlParserPos.ZERO), sqlNode1);
 
-        // If there was a LIMIT clause, wrap the finalSqlNode in a SqlOrderBy with the LIMIT
+        // If there was an ORDER BY or LIMIT clause, wrap the finalSqlNode in a SqlOrderBy
         SqlNode resultNode = finalSqlNode;
-        if (limitNode != null) {
-            resultNode = new SqlOrderBy(SqlParserPos.ZERO, finalSqlNode, SqlNodeList.EMPTY, null,
-                    limitNode);
+        if (orderByList != null || limitNode != null) {
+            resultNode = new SqlOrderBy(SqlParserPos.ZERO, finalSqlNode,
+                    orderByList != null ? orderByList : SqlNodeList.EMPTY, null, limitNode);
         }
 
         // Custom SqlPrettyWriter configuration to avoid quoting identifiers

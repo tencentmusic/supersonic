@@ -7,6 +7,7 @@ import com.tencent.supersonic.chat.server.pojo.ExecuteContext;
 import com.tencent.supersonic.chat.server.service.AgentService;
 import com.tencent.supersonic.chat.server.service.ChatManageService;
 import com.tencent.supersonic.common.pojo.ChatApp;
+import com.tencent.supersonic.common.pojo.enums.AppModule;
 import com.tencent.supersonic.common.util.ChatAppManager;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.headless.api.pojo.response.QueryState;
@@ -24,7 +25,7 @@ import java.util.stream.Collectors;
 
 public class PlainTextExecutor implements ChatQueryExecutor {
 
-    private static final String APP_KEY = "SMALL_TALK";
+    public static final String APP_KEY = "SMALL_TALK";
     private static final String INSTRUCTION = "" + "#Role: You are a nice person to talk to."
             + "\n#Task: Respond quickly and nicely to the user."
             + "\n#Rules: 1.ALWAYS use the same language as the `#Current Input`."
@@ -32,7 +33,7 @@ public class PlainTextExecutor implements ChatQueryExecutor {
 
     public PlainTextExecutor() {
         ChatAppManager.register(APP_KEY, ChatApp.builder().prompt(INSTRUCTION).name("闲聊对话")
-                .description("直接将原始输入透传大模型").enable(false).build());
+                .appModule(AppModule.CHAT).description("直接将原始输入透传大模型").enable(false).build());
     }
 
     @Override
@@ -44,7 +45,7 @@ public class PlainTextExecutor implements ChatQueryExecutor {
         AgentService agentService = ContextUtils.getBean(AgentService.class);
         Agent chatAgent = agentService.getAgent(executeContext.getAgent().getId());
         ChatApp chatApp = chatAgent.getChatAppConfig().get(APP_KEY);
-        if (!chatApp.isEnable()) {
+        if (Objects.isNull(chatApp) || !chatApp.isEnable()) {
             return null;
         }
 

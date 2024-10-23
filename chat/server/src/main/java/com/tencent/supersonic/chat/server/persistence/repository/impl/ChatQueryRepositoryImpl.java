@@ -64,6 +64,7 @@ public class ChatQueryRepositoryImpl implements ChatQueryRepository {
         queryWrapper.lambda().isNotNull(ChatQueryDO::getQueryResult);
         queryWrapper.lambda().ne(ChatQueryDO::getQueryResult, "");
         queryWrapper.lambda().orderByDesc(ChatQueryDO::getQuestionId);
+        queryWrapper.lambda().eq(ChatQueryDO::getQueryState, 1);
 
         PageInfo<ChatQueryDO> pageInfo =
                 PageHelper.startPage(pageQueryInfoReq.getCurrent(), pageQueryInfoReq.getPageSize())
@@ -95,6 +96,7 @@ public class ChatQueryRepositoryImpl implements ChatQueryRepository {
         QueryWrapper<ChatQueryDO> queryWrapper = new QueryWrapper<>();
         queryWrapper.lambda().eq(ChatQueryDO::getChatId, chatId);
         queryWrapper.lambda().orderByDesc(ChatQueryDO::getQuestionId);
+        queryWrapper.lambda().eq(ChatQueryDO::getQueryState, 1);
         return chatQueryDOMapper.selectList(queryWrapper).stream().map(q -> convertTo(q))
                 .collect(Collectors.toList());
     }
@@ -132,6 +134,7 @@ public class ChatQueryRepositoryImpl implements ChatQueryRepository {
         chatQueryDO.setQueryText(chatParseReq.getQueryText());
         chatQueryDO.setAgentId(chatParseReq.getAgentId());
         chatQueryDO.setQueryResult("");
+        chatQueryDO.setQueryState(1);
         try {
             chatQueryDOMapper.insert(chatQueryDO);
         } catch (Exception e) {

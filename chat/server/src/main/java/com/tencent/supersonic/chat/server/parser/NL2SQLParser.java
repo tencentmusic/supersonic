@@ -6,11 +6,11 @@ import com.tencent.supersonic.chat.server.pojo.ChatContext;
 import com.tencent.supersonic.chat.server.pojo.ParseContext;
 import com.tencent.supersonic.chat.server.service.ChatContextService;
 import com.tencent.supersonic.chat.server.service.ChatManageService;
-import com.tencent.supersonic.chat.server.util.ModelConfigHelper;
 import com.tencent.supersonic.chat.server.util.QueryReqConverter;
 import com.tencent.supersonic.common.config.EmbeddingConfig;
 import com.tencent.supersonic.common.pojo.ChatApp;
 import com.tencent.supersonic.common.pojo.Text2SQLExemplar;
+import com.tencent.supersonic.common.pojo.enums.AppModule;
 import com.tencent.supersonic.common.service.impl.ExemplarServiceImpl;
 import com.tencent.supersonic.common.util.ChatAppManager;
 import com.tencent.supersonic.common.util.ContextUtils;
@@ -24,6 +24,7 @@ import com.tencent.supersonic.headless.api.pojo.response.MapResp;
 import com.tencent.supersonic.headless.api.pojo.response.ParseResp;
 import com.tencent.supersonic.headless.api.pojo.response.QueryState;
 import com.tencent.supersonic.headless.server.facade.service.ChatLayerService;
+import com.tencent.supersonic.headless.server.utils.ModelConfigHelper;
 import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.input.Prompt;
@@ -79,11 +80,13 @@ public class NL2SQLParser implements ChatQueryParser {
     public NL2SQLParser() {
         ChatAppManager.register(APP_KEY_MULTI_TURN,
                 ChatApp.builder().prompt(REWRITE_MULTI_TURN_INSTRUCTION).name("多轮对话改写")
-                        .description("通过大模型根据历史对话来改写本轮对话").enable(false).build());
+                        .appModule(AppModule.CHAT).description("通过大模型根据历史对话来改写本轮对话").enable(false)
+                        .build());
 
         ChatAppManager.register(APP_KEY_ERROR_MESSAGE,
                 ChatApp.builder().prompt(REWRITE_ERROR_MESSAGE_INSTRUCTION).name("异常提示改写")
-                        .description("通过大模型将异常信息改写为更友好和引导性的提示用语").enable(false).build());
+                        .appModule(AppModule.CHAT).description("通过大模型将异常信息改写为更友好和引导性的提示用语")
+                        .enable(false).build());
     }
 
     @Override
@@ -170,7 +173,7 @@ public class NL2SQLParser implements ChatQueryParser {
 
     private void processMultiTurn(ParseContext parseContext) {
         ChatApp chatApp = parseContext.getAgent().getChatAppConfig().get(APP_KEY_MULTI_TURN);
-        if (!chatApp.isEnable()) {
+        if (Objects.isNull(chatApp) || !chatApp.isEnable()) {
             return;
         }
 
@@ -200,13 +203,11 @@ public class NL2SQLParser implements ChatQueryParser {
         variables.put("history_sql", histSQL);
 
         Prompt prompt = PromptTemplate.from(chatApp.getPrompt()).apply(variables);
-        keyPipelineLog.info("QueryRewrite reqPrompt:{}", prompt.text());
-
         ChatLanguageModel chatLanguageModel =
                 ModelProvider.getChatModel(ModelConfigHelper.getChatModelConfig(chatApp));
         Response<AiMessage> response = chatLanguageModel.generate(prompt.toUserMessage());
         String rewrittenQuery = response.content().text();
-        keyPipelineLog.info("QueryRewrite modelResp:{}", rewrittenQuery);
+        keyPipelineLog.info("QueryRewrite modelReq:\n{} \nmodelResp:\n{}", prompt.text(), response);
         parseContext.setQueryText(rewrittenQuery);
         QueryNLReq rewrittenQueryNLReq = QueryReqConverter.buildText2SqlQueryReq(parseContext);
         MapResp rewrittenQueryMapResult = chatLayerService.map(rewrittenQueryNLReq);
@@ -219,7 +220,7 @@ public class NL2SQLParser implements ChatQueryParser {
             List<Text2SQLExemplar> similarExemplars) {
 
         ChatApp chatApp = parseContext.getAgent().getChatAppConfig().get(APP_KEY_ERROR_MESSAGE);
-        if (!chatApp.isEnable()) {
+        if (Objects.isNull(chatApp) || !chatApp.isEnable()) {
             return errMsg;
         }
 
@@ -235,12 +236,11 @@ public class NL2SQLParser implements ChatQueryParser {
         variables.put("examples", exampleStr);
 
         Prompt prompt = PromptTemplate.from(chatApp.getPrompt()).apply(variables);
-        keyPipelineLog.info("ErrorRewrite reqPrompt:{}", prompt.text());
         ChatLanguageModel chatLanguageModel =
                 ModelProvider.getChatModel(ModelConfigHelper.getChatModelConfig(chatApp));
         Response<AiMessage> response = chatLanguageModel.generate(prompt.toUserMessage());
         String rewrittenMsg = response.content().text();
-        keyPipelineLog.info("ErrorRewrite modelResp:{}", rewrittenMsg);
+        keyPipelineLog.info("ErrorRewrite modelReq:\n{} \nmodelResp:\n{}", prompt.text(), response);
 
         return rewrittenMsg;
     }

@@ -682,3 +682,19 @@ CREATE TABLE IF NOT EXISTS `s2_term` (
     PRIMARY KEY (`id`)
     );
 COMMENT ON TABLE s2_term IS 'term info';
+
+CREATE TABLE IF NOT EXISTS `s2_user_token` (
+   `id` INT NOT NULL AUTO_INCREMENT,
+   `name` VARCHAR(255) NOT NULL,
+    `user_name` VARCHAR(255)  NOT NULL,
+    `expire_time` INT NOT NULL,
+    `token` text NOT NULL,
+    `salt` VARCHAR(255)  default NULL,
+    `create_time` DATETIME NOT NULL,
+    `create_by` VARCHAR(255) NOT NULL,
+    `update_time` DATETIME default NULL,
+    `update_by` VARCHAR(255) NOT NULL,
+    `expire_date_time` DATETIME NOT NULL,
+    PRIMARY KEY (`id`)
+    );
+COMMENT ON TABLE s2_user_token IS 'user token info';

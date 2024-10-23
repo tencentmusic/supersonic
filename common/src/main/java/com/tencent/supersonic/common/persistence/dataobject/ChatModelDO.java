@@ -1,4 +1,4 @@
-package com.tencent.supersonic.chat.server.persistence.dataobject;
+package com.tencent.supersonic.common.persistence.dataobject;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;

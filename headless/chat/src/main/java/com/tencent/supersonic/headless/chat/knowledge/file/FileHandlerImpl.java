@@ -156,8 +156,13 @@ public class FileHandlerImpl implements FileHandler {
      */
     private List<DictValueResp> getFileData(String filePath, Integer startLine, Integer endLine) {
         List<DictValueResp> fileData = new ArrayList<>();
+        Path path = Paths.get(filePath);
+        if (!Files.exists(path)) {
+            log.warn("[getFileData] File does not exist: {}", getAbsolutePath(filePath));
+            return fileData;
+        }
 
-        try (Stream<String> lines = Files.lines(Paths.get(filePath))) {
+        try (Stream<String> lines = Files.lines(path)) {
             fileData = lines.skip(startLine - 1).limit(endLine - startLine + 1)
                     .map(lineStr -> convert2Resp(lineStr)).filter(line -> Objects.nonNull(line))
                     .collect(Collectors.toList());
@@ -181,7 +186,13 @@ public class FileHandlerImpl implements FileHandler {
     }
 
     private Long getFileLineNum(String filePath) {
-        try (Stream<String> lines = Files.lines(Paths.get(filePath))) {
+        Path path = Paths.get(filePath);
+        if (!Files.exists(path)) {
+            log.warn("[getFileData] File does not exist: {}", getAbsolutePath(filePath));
+            return 0L;
+        }
+
+        try (Stream<String> lines = Files.lines(path)) {
             Long lineCount = lines.count();
             return lineCount;
         } catch (IOException e) {
