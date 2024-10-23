@@ -21,6 +21,6 @@ const Settings: ProLayoutProps & {
   // },
 };
 export const publicPath = '/webapp/';
-export const basePath = '/';
+export const basePath = '/webapp/';
 
 export default Settings;
