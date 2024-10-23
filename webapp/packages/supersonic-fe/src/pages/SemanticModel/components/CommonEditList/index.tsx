@@ -1,16 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, ReactNode } from 'react';
 import { List, Collapse, Button } from 'antd';
 import { uuid } from '@/utils/utils';
 import SqlEditor from '@/components/SqlEditor';
-
 import styles from './style.less';
 
 const { Panel } = Collapse;
 
 type Props = {
-  title?: string;
+  title?: string | ReactNode;
   defaultCollapse?: boolean;
   value?: string[];
+  createBtnType?: 'link' | 'primary';
   onChange?: (list: string[]) => void;
 };
 
@@ -21,7 +21,13 @@ type ListItem = {
 
 type List = ListItem[];
 
-const CommonEditList: React.FC<Props> = ({ title, defaultCollapse = false, value, onChange }) => {
+const CommonEditList: React.FC<Props> = ({
+  title,
+  defaultCollapse = false,
+  value,
+  createBtnType = 'link',
+  onChange,
+}) => {
   const [listDataSource, setListDataSource] = useState<List>([]);
   const [currentSql, setCurrentSql] = useState<string>('');
   const [activeKey, setActiveKey] = useState<string>();
@@ -61,7 +67,7 @@ const CommonEditList: React.FC<Props> = ({ title, defaultCollapse = false, value
             activeKey ? (
               <Button
                 key="saveBtn"
-                type="link"
+                type={createBtnType}
                 onClick={() => {
                   if (!currentRecord && !currentSql) {
                     setActiveKey(undefined);
@@ -98,7 +104,7 @@ const CommonEditList: React.FC<Props> = ({ title, defaultCollapse = false, value
               </Button>
             ) : (
               <Button
-                type="link"
+                type={createBtnType}
                 key="createBtn"
                 onClick={() => {
                   setCurrentRecord(undefined);

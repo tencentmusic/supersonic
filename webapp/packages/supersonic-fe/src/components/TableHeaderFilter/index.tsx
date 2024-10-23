@@ -5,7 +5,7 @@ import styles from './index.less';
 
 type Props = {
   components: {
-    label: string;
+    label?: string;
     component: ReactNode;
   }[];
 };
@@ -16,7 +16,8 @@ const TableHeaderFilter: React.FC<Props> = ({ components }) => {
       <Space className={styles.tableHeaderTitle} size={20}>
         {components.map(({ label, component }) => (
           <Space size={8} key={`TableHeaderFilter-${label}`}>
-            <span className={styles.headerTitleLabel}>{label}:</span>
+            {label && <span className={styles.headerTitleLabel}>{label}:</span>}
+
             {component}
           </Space>
         ))}

@@ -498,3 +498,7 @@ export function decryptPassword(encryptPassword: string) {
   });
   return CryptoJS.enc.Utf8.stringify(decrypt).toString();
 }
+
+export function uniqueArray(arr: any[]) {
+  return Array.from(new Set(arr));
+}

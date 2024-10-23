@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Form, Button, Modal, Input, Select, Steps, Radio, Space } from 'antd';
+import { Form, Button, Modal, Input, Select, Steps, Spin, Space } from 'antd';
 import styles from '../../components/style.less';
 import { message } from 'antd';
 import { formLayout } from '@/components/FormHelper/utils';
-import { createView, updateView, getDimensionList, queryMetric, getTagList } from '../../service';
+import { createView, updateView, getDimensionList, queryMetric } from '../../service';
 import { ISemantic } from '../../data';
 import FormItemTitle from '@/components/FormHelper/FormItemTitle';
 import SelectTMEPerson from '@/components/SelectTMEPerson';
@@ -12,6 +12,7 @@ import ViewModelConfigTransfer from './ViewModelConfigTransfer';
 const FormItem = Form.Item;
 
 export type ModelCreateFormModalProps = {
+  step: number;
   domainId: number;
   viewItem: any;
   modelList: ISemantic.IModelItem[];
@@ -20,13 +21,19 @@ export type ModelCreateFormModalProps = {
 };
 const { Step } = Steps;
 const ViewCreateFormModal: React.FC<ModelCreateFormModalProps> = ({
+  step = 0,
   viewItem,
   domainId,
   onCancel,
   onSubmit,
   modelList,
 }) => {
-  const [currentStep, setCurrentStep] = useState(0);
+  const stepWidth: Record<string, number> = {
+    '0': 800,
+    '1': 1200,
+    '2': 800,
+  };
+  const [currentStep, setCurrentStep] = useState(step);
 
   const [formVals, setFormVals] = useState<ISemantic.IModelItem>({
     ...viewItem,
@@ -36,7 +43,8 @@ const ViewCreateFormModal: React.FC<ModelCreateFormModalProps> = ({
   const [queryType, setQueryType] = useState<string>('METRIC');
 
   const [saveLoading, setSaveLoading] = useState<boolean>(false);
-  const [modalWidth, setModalWidth] = useState<number>(800);
+  const [dimensionLoading, setDimensionLoading] = useState<boolean>(false);
+  const [modalWidth, setModalWidth] = useState<number>(stepWidth[`${currentStep}`]);
   const [selectedModelItem, setSelectedModelItem] = useState<ISemantic.IModelItem | undefined>(
     modelList[0],
   );
@@ -63,7 +71,9 @@ const ViewCreateFormModal: React.FC<ModelCreateFormModalProps> = ({
   }, [selectedModelItem]);
 
   const queryDimensionList = async (modelId: number) => {
+    setDimensionLoading(true);
     const { code, data, msg } = await getDimensionList({ modelId });
+    setDimensionLoading(false);
     if (code === 200 && Array.isArray(data?.list)) {
       setDimensionList(data.list);
     } else {
@@ -104,12 +114,6 @@ const ViewCreateFormModal: React.FC<ModelCreateFormModalProps> = ({
     }
   };
 
-  const stepWidth: any = {
-    '0': 800,
-    '1': 1200,
-    '2': 800,
-  };
-
   const forward = () => {
     setModalWidth(stepWidth[`${currentStep + 1}`]);
     setCurrentStep(currentStep + 1);
@@ -131,11 +135,9 @@ const ViewCreateFormModal: React.FC<ModelCreateFormModalProps> = ({
           <Button style={{ float: 'left' }} onClick={backward}>
             上一步
           </Button>
-          {/* <Button type="primary" onClick={handleNext}>
-            下一步
-          </Button> */}
           <Button
             type="primary"
+            loading={saveLoading}
             onClick={() => {
               handleConfirm();
             }}
@@ -153,6 +155,7 @@ const ViewCreateFormModal: React.FC<ModelCreateFormModalProps> = ({
         </Button>
         <Button
           type="primary"
+          loading={saveLoading}
           onClick={() => {
             handleConfirm();
           }}
@@ -167,40 +170,40 @@ const ViewCreateFormModal: React.FC<ModelCreateFormModalProps> = ({
     return (
       <>
         <div style={{ display: currentStep === 1 ? 'block' : 'none' }}>
-          <ViewModelConfigTransfer
-            key={queryType}
-            queryType={queryType}
-            toolbarSolt={
-              <Space>
-                <span>切换模型: </span>
-                <Select
-                  style={{
-                    minWidth: 150,
-                    textAlign: 'left',
-                  }}
-                  value={selectedModelItem?.id}
-                  placeholder="请选择模型，获取当前模型下指标维度信息"
-                  onChange={(val) => {
-                    setDimensionList(undefined);
-                    setMetricList(undefined);
-                    const modelItem = modelList.find((item) => item.id === val);
-                    setSelectedModelItem(modelItem);
-                  }}
-                  options={modelList.map((item) => {
-                    return { label: item.name, value: item.id };
-                  })}
-                />
-              </Space>
-            }
-            dimensionList={dimensionList}
-            metricList={metricList}
-            // tagList={tagList}
-            modelItem={selectedModelItem}
-            viewItem={viewItem}
-            ref={configTableRef}
-          />
+          <Spin spinning={dimensionLoading}>
+            <ViewModelConfigTransfer
+              key={queryType}
+              queryType={queryType}
+              toolbarSolt={
+                <Space>
+                  <span>切换模型: </span>
+                  <Select
+                    style={{
+                      minWidth: 150,
+                      textAlign: 'left',
+                    }}
+                    value={selectedModelItem?.id}
+                    placeholder="请选择模型，获取当前模型下指标维度信息"
+                    onChange={(val) => {
+                      setDimensionList(undefined);
+                      setMetricList(undefined);
+                      const modelItem = modelList.find((item) => item.id === val);
+                      setSelectedModelItem(modelItem);
+                    }}
+                    options={modelList.map((item) => {
+                      return { label: item.name, value: item.id };
+                    })}
+                  />
+                </Space>
+              }
+              dimensionList={dimensionList}
+              metricList={metricList}
+              modelItem={selectedModelItem}
+              viewItem={viewItem}
+              ref={configTableRef}
+            />
+          </Spin>
         </div>
-
         <div style={{ display: currentStep === 0 ? 'block' : 'none' }}>
           <FormItem
             name="name"

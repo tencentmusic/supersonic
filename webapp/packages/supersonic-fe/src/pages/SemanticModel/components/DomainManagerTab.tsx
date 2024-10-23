@@ -192,7 +192,7 @@ const DomainManagerTab: React.FC<Props> = ({
         activeKey={getActiveKey()}
         tabBarExtraContent={{
           right:
-            getActiveKey() === 'overview' ? (
+            getActiveKey() === 'modelManage' ? (
               <Radio.Group
                 buttonStyle="solid"
                 value={showModelType}
