@@ -16,11 +16,11 @@
             如果同时有<File>和<FileNamePattern>，那么当天日志是<File>，明天会自动把今天
             的日志改名为今天的日期。即，<File> 的日志都是当天的。
         -->
-        <File>${LOG_PATH}/info.${LOG_APPNAME}.log</File>
+        <File>${LOG_PATH}/s2-info.log</File>
         <!--滚动策略，按照时间滚动 TimeBasedRollingPolicy-->
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <!--文件路径,定义了日志的切分方式——把每一天的日志归档到一个文件中,以防止日志填满整个磁盘空间-->
-            <FileNamePattern>${LOG_PATH}/info.${LOG_APPNAME}.%d{yyyy-MM-dd}.log.gz</FileNamePattern>
+            <FileNamePattern>${LOG_PATH}/s2-info.%d{yyyy-MM-dd}.log.gz</FileNamePattern>
             <!--只保留最近30天的日志-->
             <maxHistory>30</maxHistory>
             <!--用来指定日志文件的上限大小，那么到了这个值，就会删除旧的日志-->
@@ -42,11 +42,11 @@
             如果同时有<File>和<FileNamePattern>，那么当天日志是<File>，明天会自动把今天
             的日志改名为今天的日期。即，<File> 的日志都是当天的。
         -->
-        <File>${LOG_PATH}/error.${LOG_APPNAME}.log</File>
+        <File>${LOG_PATH}/s2-error.log</File>
         <!--滚动策略，按照时间滚动 TimeBasedRollingPolicy-->
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <!--文件路径,定义了日志的切分方式——把每一天的日志归档到一个文件中,以防止日志填满整个磁盘空间-->
-            <FileNamePattern>${LOG_PATH}/error.${LOG_APPNAME}.%d{yyyy-MM-dd}.log.gz
+            <FileNamePattern>${LOG_PATH}/s2-error.%d{yyyy-MM-dd}.log.gz
             </FileNamePattern>
             <!--只保留最近90天的日志-->
             <maxHistory>90</maxHistory>
@@ -89,11 +89,11 @@
 
     <!-- 业务日志输出 -->
     <appender name="keyPipelineAppender" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <File>${LOG_PATH}/keyPipeline.log</File>
+        <File>${LOG_PATH}/s2-llm.log</File>
         <!-- 循环政策：基于时间创建日志文件 -->
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <!-- 日志文件名格式 -->
-            <fileNamePattern>${LOG_PATH}/keyPipeline.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <fileNamePattern>${LOG_PATH}/s2-llm.%d{yyyy-MM-dd}.log</fileNamePattern>
             <!--只保留最近30天的日志-->
             <maxHistory>30</maxHistory>
             <cleanHistoryOnStart>true</cleanHistoryOnStart>

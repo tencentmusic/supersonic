@@ -11,13 +11,7 @@ import com.tencent.supersonic.chat.api.pojo.response.ShowCaseResp;
 import com.tencent.supersonic.chat.server.persistence.dataobject.ChatDO;
 import com.tencent.supersonic.chat.server.service.ChatManageService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -37,7 +31,7 @@ public class ChatController {
     }
 
     @GetMapping("/getAll")
-    public List<ChatDO> getAllConversions(
+    public List<ChatDO> getAllChats(
             @RequestParam(value = "agentId", required = false) Integer agentId,
             HttpServletRequest request, HttpServletResponse response) {
         String userName = UserHolder.findUser(request, response).getName();
@@ -45,14 +39,14 @@ public class ChatController {
     }
 
     @PostMapping("/delete")
-    public Boolean deleteConversion(@RequestParam(value = "chatId") long chatId,
+    public Boolean deleteChat(@RequestParam(value = "chatId") long chatId,
             HttpServletRequest request, HttpServletResponse response) {
         String userName = UserHolder.findUser(request, response).getName();
         return chatService.deleteChat(chatId, userName);
     }
 
     @PostMapping("/updateChatName")
-    public Boolean updateConversionName(@RequestParam(value = "chatId") Long chatId,
+    public Boolean updateChatName(@RequestParam(value = "chatId") Long chatId,
             @RequestParam(value = "chatName") String chatName, HttpServletRequest request,
             HttpServletResponse response) {
         String userName = UserHolder.findUser(request, response).getName();
@@ -67,7 +61,7 @@ public class ChatController {
     }
 
     @PostMapping("/updateChatIsTop")
-    public Boolean updateConversionIsTop(@RequestParam(value = "chatId") Long chatId,
+    public Boolean updateChatIsTop(@RequestParam(value = "chatId") Long chatId,
             @RequestParam(value = "isTop") int isTop) {
         return chatService.updateChatIsTop(chatId, isTop);
     }
@@ -83,6 +77,12 @@ public class ChatController {
     @GetMapping("/getChatQuery/{queryId}")
     public QueryResp getChatQuery(@PathVariable("queryId") Long queryId) {
         return chatService.getChatQuery(queryId);
+    }
+
+    @DeleteMapping("/{queryId}")
+    public boolean deleteChatQuery(@PathVariable(value = "queryId") Long queryId) {
+        chatService.deleteQuery(queryId);
+        return true;
     }
 
     @PostMapping("/queryShowCase")

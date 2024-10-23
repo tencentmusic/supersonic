@@ -1,7 +1,7 @@
 package com.tencent.supersonic.chat.api.pojo.request;
 
-import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.common.pojo.DateConf;
+import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.headless.api.pojo.request.QueryFilter;
 import lombok.Data;

@@ -15,7 +15,7 @@ public class MapperConfig extends ParameterConfig {
                     "number", "Mapper相关配置");
 
     public static final Parameter MAPPER_NAME_THRESHOLD =
-            new Parameter("s2.mapper.name.threshold", "0.5", "指标名、维度名文本相似度阈值",
+            new Parameter("s2.mapper.name.threshold", "0.3", "指标名、维度名文本相似度阈值",
                     "文本片段和匹配到的指标、维度名计算出来的编辑距离阈值, 若超出该阈值, 则舍弃", "number", "Mapper相关配置");
 
     public static final Parameter MAPPER_NAME_THRESHOLD_MIN =

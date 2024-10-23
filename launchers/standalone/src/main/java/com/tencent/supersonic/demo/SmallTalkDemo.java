@@ -2,13 +2,21 @@ package com.tencent.supersonic.demo;
 
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.tencent.supersonic.chat.server.agent.Agent;
 import com.tencent.supersonic.chat.server.agent.ToolConfig;
+import com.tencent.supersonic.chat.server.executor.PlainTextExecutor;
+import com.tencent.supersonic.chat.server.parser.PlainTextParser;
+import com.tencent.supersonic.common.pojo.ChatApp;
+import com.tencent.supersonic.common.pojo.enums.AppModule;
+import com.tencent.supersonic.common.util.ChatAppManager;
+import com.tencent.supersonic.headless.chat.parser.llm.OnePassSCSqlGenStrategy;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Component
@@ -25,6 +33,14 @@ public class SmallTalkDemo extends S2BaseDemo {
         ToolConfig toolConfig = new ToolConfig();
         agent.setToolConfig(JSONObject.toJSONString(toolConfig));
         agent.setExamples(Lists.newArrayList("如何才能变帅", "如何才能赚更多钱", "如何才能世界和平"));
+
+        // configure chat apps
+        Map<String, ChatApp> chatAppConfig =
+                Maps.newHashMap(ChatAppManager.getAllApps(AppModule.CHAT));
+        chatAppConfig.values().forEach(app -> app.setChatModelId(demoChatModel.getId()));
+        chatAppConfig.get(PlainTextExecutor.APP_KEY).setEnable(true);
+        chatAppConfig.get(OnePassSCSqlGenStrategy.APP_KEY).setEnable(false);
+        agent.setChatAppConfig(chatAppConfig);
         agentService.createAgent(agent, defaultUser);
     }
 

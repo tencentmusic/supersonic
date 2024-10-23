@@ -2,7 +2,6 @@ package com.tencent.supersonic.chat.server.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
 import com.github.pagehelper.PageInfo;
-import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.chat.api.pojo.request.ChatExecuteReq;
 import com.tencent.supersonic.chat.api.pojo.request.ChatParseReq;
 import com.tencent.supersonic.chat.api.pojo.request.PageQueryInfoReq;
@@ -16,6 +15,7 @@ import com.tencent.supersonic.chat.server.persistence.dataobject.QueryDO;
 import com.tencent.supersonic.chat.server.persistence.repository.ChatQueryRepository;
 import com.tencent.supersonic.chat.server.persistence.repository.ChatRepository;
 import com.tencent.supersonic.chat.server.service.ChatManageService;
+import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.api.pojo.response.ParseResp;
@@ -25,11 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -185,6 +181,15 @@ public class ChatManageServiceImpl implements ChatManageService {
     @Override
     public int updateQuery(ChatQueryDO chatQueryDO) {
         return chatQueryRepository.updateChatQuery(chatQueryDO);
+    }
+
+    @Override
+    public void deleteQuery(Long queryId) {
+        ChatQueryDO chatQuery = chatQueryRepository.getChatQueryDO(queryId);
+        if (Objects.nonNull(chatQuery)) {
+            chatQuery.setQueryState(0);
+            chatQueryRepository.updateChatQuery(chatQuery);
+        }
     }
 
     @Override

@@ -1,6 +1,7 @@
 package com.tencent.supersonic.common.pojo;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.tencent.supersonic.common.pojo.enums.AppModule;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -18,4 +19,6 @@ public class ChatApp {
     private Integer chatModelId;
     @JsonIgnore
     private ChatModelConfig chatModelConfig;
+    @JsonIgnore
+    private AppModule appModule;
 }

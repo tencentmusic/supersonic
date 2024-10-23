@@ -1,7 +1,7 @@
-package com.tencent.supersonic.chat.server.persistence.mapper;
+package com.tencent.supersonic.common.persistence.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.tencent.supersonic.chat.server.persistence.dataobject.ChatModelDO;
+import com.tencent.supersonic.common.persistence.dataobject.ChatModelDO;
 import org.apache.ibatis.annotations.Mapper;
 
 @Mapper

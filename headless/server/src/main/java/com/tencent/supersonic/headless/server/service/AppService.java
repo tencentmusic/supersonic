@@ -1,7 +1,7 @@
 package com.tencent.supersonic.headless.server.service;
 
 import com.github.pagehelper.PageInfo;
-import com.tencent.supersonic.auth.api.authentication.pojo.User;
+import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.headless.api.pojo.request.AppQueryReq;
 import com.tencent.supersonic.headless.api.pojo.request.AppReq;
 import com.tencent.supersonic.headless.api.pojo.response.AppDetailResp;

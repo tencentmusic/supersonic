@@ -73,6 +73,7 @@ const ChatItem: React.FC<Props> = ({
   const [executeMode, setExecuteMode] = useState(false);
   const [executeLoading, setExecuteLoading] = useState(false);
   const [executeTip, setExecuteTip] = useState('');
+  const [executeErrorMsg, setExecuteErrorMsg] = useState('');
   const [data, setData] = useState<MsgDataType>();
   const [entitySwitchLoading, setEntitySwitchLoading] = useState(false);
   const [dimensionFilters, setDimensionFilters] = useState<FilterItemType[]>([]);
@@ -87,8 +88,9 @@ const ChatItem: React.FC<Props> = ({
   const updateData = (res: Result<MsgDataType>) => {
     let tip: string = '';
     let data: MsgDataType | undefined = undefined;
-    const { queryColumns, queryResults, queryState, queryMode, response, chatContext } =
+    const { queryColumns, queryResults, queryState, queryMode, response, chatContext, errorMsg } =
       res.data || {};
+    setExecuteErrorMsg(errorMsg);
     if (res.code === 400 || res.code === 401 || res.code === 412) {
       tip = res.msg;
     } else if (res.code !== 200) {
@@ -366,6 +368,7 @@ const ChatItem: React.FC<Props> = ({
                   queryMode={parseInfo.queryMode}
                   sqlInfo={parseInfo.sqlInfo}
                   sqlTimeCost={parseTimeCost?.sqlTime}
+                  executeErrorMsg={executeErrorMsg}
                 />
               )}
               <ExecuteItem

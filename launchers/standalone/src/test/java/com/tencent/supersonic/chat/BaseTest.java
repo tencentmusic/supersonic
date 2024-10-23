@@ -1,13 +1,14 @@
 package com.tencent.supersonic.chat;
 
+import com.google.common.collect.Lists;
 import com.tencent.supersonic.BaseApplication;
 import com.tencent.supersonic.chat.api.pojo.request.ChatExecuteReq;
 import com.tencent.supersonic.chat.api.pojo.request.ChatParseReq;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.chat.server.service.AgentService;
-import com.tencent.supersonic.chat.server.service.ChatModelService;
 import com.tencent.supersonic.chat.server.service.ChatQueryService;
 import com.tencent.supersonic.common.pojo.enums.DatePeriodEnum;
+import com.tencent.supersonic.common.service.ChatModelService;
 import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.api.pojo.response.ParseResp;
@@ -17,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -38,6 +40,10 @@ public class BaseTest extends BaseApplication {
 
     @Value("${s2.demo.enableLLM:false}")
     protected boolean enableLLM;
+    protected int agentId;
+
+
+    protected List<Long> durations = Lists.newArrayList();
 
     protected QueryResult submitMultiTurnChat(String queryText, Integer agentId, Integer chatId)
             throws Exception {
@@ -46,7 +52,8 @@ public class BaseTest extends BaseApplication {
         SemanticParseInfo semanticParseInfo = parseResp.getSelectedParses().get(0);
         ChatExecuteReq request = ChatExecuteReq.builder().queryText(parseResp.getQueryText())
                 .user(DataUtils.getUser()).parseId(semanticParseInfo.getId())
-                .queryId(parseResp.getQueryId()).chatId(chatId).saveAnswer(true).build();
+                .queryId(parseResp.getQueryId()).chatId(chatId).agentId(agentId).saveAnswer(true)
+                .build();
         QueryResult queryResult = chatQueryService.execute(request);
         queryResult.setChatContext(semanticParseInfo);
         return queryResult;

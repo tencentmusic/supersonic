@@ -91,7 +91,7 @@ public class NatureHelper {
 
     public static List<String> changeModel2DataSet(String nature,
             Map<Long, List<Long>> modelIdToDataSetIds) {
-        if (SchemaElementType.TERM.equals(NatureHelper.convertToElementType(nature))) {
+        if (isTerm(nature)) {
             return Collections.singletonList(nature);
         }
         Long modelId = getModelId(nature);
@@ -101,6 +101,10 @@ public class NatureHelper {
         }
         return dataSetIds.stream().map(dataSetId -> changeModel2DataSet(nature, dataSetId))
                 .filter(Objects::nonNull).map(String::valueOf).collect(Collectors.toList());
+    }
+
+    public static boolean isTerm(String nature) {
+        return SchemaElementType.TERM.equals(NatureHelper.convertToElementType(nature));
     }
 
     public static boolean isDimensionValueDataSetId(String nature) {
