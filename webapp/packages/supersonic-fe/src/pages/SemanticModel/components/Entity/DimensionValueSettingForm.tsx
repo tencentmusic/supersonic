@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Form, Switch, Space, Button, Tooltip, message, Select } from 'antd';
 import FormItemTitle from '@/components/FormHelper/FormItemTitle';
-import { useModel } from '@umijs/max';
 import { RedoOutlined, InfoCircleOutlined } from '@ant-design/icons';
 import { formLayout } from '@/components/FormHelper/utils';
 import {
@@ -15,9 +14,9 @@ import {
   createDictTask,
   editDictConfig,
   deleteDictTask,
+  createDictConfig,
 } from '../../service';
 import type { ISemantic } from '../../data';
-import type { StateType } from '../../model';
 import styles from '../style.less';
 
 type Props = {
@@ -25,6 +24,7 @@ type Props = {
   type?: KnowledgeConfigTypeEnum;
   knowledgeConfig?: ISemantic.IDictKnowledgeConfigItem;
   onSubmit?: () => void;
+  onDictChange?: () => void;
   onVisibleChange?: (visible: KnowledgeConfigStatusEnum) => void;
 };
 
@@ -34,11 +34,12 @@ const DimensionValueSettingForm: React.FC<Props> = ({
   dataItem,
   knowledgeConfig,
   type = KnowledgeConfigTypeEnum.DIMENSION,
+  onSubmit,
+  onDictChange,
   onVisibleChange,
 }) => {
   const [form] = Form.useForm();
-  const domainModel = useModel('SemanticModel.domainData');
-  const { selectDomainId } = domainModel;
+
   const [dimensionVisible, setDimensionVisible] = useState<boolean>(false);
   const [taskItemState, setTaskItemState] = useState<ISemantic.IDictKnowledgeTaskItem>();
   const [saveLoading, setSaveLoading] = useState<boolean>(false);
@@ -48,7 +49,6 @@ const DimensionValueSettingForm: React.FC<Props> = ({
   const [importDictState, setImportDictState] = useState<boolean>(false);
 
   useEffect(() => {
-    // searchKnowledgeConfig();
     queryDictLatestTaskList();
   }, []);
 
@@ -56,9 +56,7 @@ const DimensionValueSettingForm: React.FC<Props> = ({
     if (!knowledgeConfig) {
       return;
     }
-
     const configItem = knowledgeConfig;
-    // if (configItem) {
     const { status, config } = configItem;
     if (status === KnowledgeConfigStatusEnum.ONLINE) {
       setDimensionVisible(true);
@@ -107,7 +105,7 @@ const DimensionValueSettingForm: React.FC<Props> = ({
       type,
       itemId: dimension.id,
     });
-
+    onDictChange?.();
     if (code !== 200) {
       message.error('字典导入任务创建失败!');
       return;
@@ -117,10 +115,27 @@ const DimensionValueSettingForm: React.FC<Props> = ({
     }, 2000);
   };
 
+  const createDictConfigQuery = async () => {
+    setSaveLoading(true);
+    const { code } = await createDictConfig({
+      type: KnowledgeConfigTypeEnum.DIMENSION,
+      itemId: dataItem.id,
+      status: KnowledgeConfigStatusEnum.ONLINE,
+    });
+    setSaveLoading(false);
+    if (code === 200) {
+      message.success('维度值设置保存成功!');
+      onSubmit?.();
+      return;
+    }
+    message.error('维度值设置保存失败!');
+  };
+
   const editDictTaskQuery = async (
     status: KnowledgeConfigStatusEnum = KnowledgeConfigStatusEnum.ONLINE,
   ) => {
     if (!knowledgeConfig?.id) {
+      createDictConfigQuery();
       return;
     }
     const config = await form.validateFields();
@@ -136,6 +151,7 @@ const DimensionValueSettingForm: React.FC<Props> = ({
     setSaveLoading(false);
     if (code === 200) {
       message.success('维度值设置保存成功!');
+      onSubmit?.();
       return;
     }
     message.error('维度值设置保存失败!');
@@ -147,6 +163,7 @@ const DimensionValueSettingForm: React.FC<Props> = ({
       type,
       itemId: dimension.id,
     });
+    onDictChange?.();
     setDeleteLoading(false);
     if (code !== 200) {
       message.error('字典清除失败!');
