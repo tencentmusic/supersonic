@@ -31,6 +31,8 @@ const DimensionValueFilterModal: React.FC<Props> = ({
         style={{ top: 48 }}
         maskClosable={false}
         open={true}
+        cancelText="关闭"
+        okButtonProps={{ hidden: true }}
         onCancel={onCancel}
       >
         <div>

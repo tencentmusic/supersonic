@@ -94,6 +94,7 @@ const DimensionValueSettingModal: React.FC<CreateFormProps> = ({
         ...knowledgeConfig.config,
         ...config,
       },
+      status: dimensionVisibleState,
     };
     const { code } = await editDictConfig(queryConfig);
     setSaveLoading(false);
@@ -313,12 +314,12 @@ const DimensionValueSettingModal: React.FC<CreateFormProps> = ({
     }
   };
 
-  // const refreshTableData = () => {
-  //   queryDictData({
-  //     ...pagination,
-  //     ...filterParams,
-  //   });
-  // };
+  const refreshTableData = () => {
+    queryDictData({
+      ...pagination,
+      ...filterParams,
+    });
+  };
 
   // const tabItem = [
   //   {
@@ -356,6 +357,12 @@ const DimensionValueSettingModal: React.FC<CreateFormProps> = ({
           knowledgeConfig={knowledgeConfig}
           onVisibleChange={(state) => {
             setDimensionVisibleState(state);
+          }}
+          onSubmit={() => {
+            searchKnowledgeConfig();
+          }}
+          onDictChange={() => {
+            refreshTableData();
           }}
         />
         {dimensionVisibleState === KnowledgeConfigStatusEnum.ONLINE && (
