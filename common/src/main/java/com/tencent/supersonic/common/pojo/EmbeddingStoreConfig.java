@@ -24,4 +24,5 @@ public class EmbeddingStoreConfig implements Serializable {
     private String databaseName;
     private Integer post;
     private String user;
+    private String password;
 }

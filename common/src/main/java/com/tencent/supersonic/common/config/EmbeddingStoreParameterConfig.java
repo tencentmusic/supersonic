@@ -50,12 +50,16 @@ public class EmbeddingStoreParameterConfig extends ParameterConfig {
     public static final Parameter EMBEDDING_STORE_USER = new Parameter("s2.embedding.store.user",
             "", "用户名", "", "string", MODULE_NAME, null, getUserDependency());
 
+    public static final Parameter EMBEDDING_STORE_PASSWORD =
+            new Parameter("s2.embedding.store.password", "", "密码", "", "password", MODULE_NAME,
+                    null, getPasswordDependency());
+
     @Override
     public List<Parameter> getSysParameters() {
         return Lists.newArrayList(EMBEDDING_STORE_PROVIDER, EMBEDDING_STORE_BASE_URL,
-                EMBEDDING_STORE_POST, EMBEDDING_STORE_USER, EMBEDDING_STORE_API_KEY,
-                EMBEDDING_STORE_DATABASE_NAME, EMBEDDING_STORE_PERSIST_PATH,
-                EMBEDDING_STORE_TIMEOUT, EMBEDDING_STORE_DIMENSION);
+                EMBEDDING_STORE_POST, EMBEDDING_STORE_USER, EMBEDDING_STORE_PASSWORD,
+                EMBEDDING_STORE_API_KEY, EMBEDDING_STORE_DATABASE_NAME,
+                EMBEDDING_STORE_PERSIST_PATH, EMBEDDING_STORE_TIMEOUT, EMBEDDING_STORE_DIMENSION);
     }
 
     public EmbeddingStoreConfig convert() {
@@ -74,9 +78,10 @@ public class EmbeddingStoreParameterConfig extends ParameterConfig {
             port = Integer.valueOf(getParameterValue(EMBEDDING_STORE_POST));
         }
         String user = getParameterValue(EMBEDDING_STORE_USER);
+        String password = getParameterValue(EMBEDDING_STORE_PASSWORD);
         return EmbeddingStoreConfig.builder().provider(provider).baseUrl(baseUrl).apiKey(apiKey)
                 .persistPath(persistPath).databaseName(databaseName).timeOut(Long.valueOf(timeOut))
-                .dimension(dimension).post(port).user(user).build();
+                .dimension(dimension).post(port).user(user).password(password).build();
     }
 
     private static ArrayList<String> getCandidateValues() {
@@ -132,7 +137,15 @@ public class EmbeddingStoreParameterConfig extends ParameterConfig {
 
     private static List<Parameter.Dependency> getUserDependency() {
         return getDependency(EMBEDDING_STORE_PROVIDER.getName(),
-                Lists.newArrayList(EmbeddingStoreType.PGVECTOR.name()),
-                ImmutableMap.of(EmbeddingStoreType.PGVECTOR.name(), "pgvector"));
+                Lists.newArrayList(EmbeddingStoreType.MILVUS.name(),
+                        EmbeddingStoreType.PGVECTOR.name()),
+                ImmutableMap.of(EmbeddingStoreType.MILVUS.name(), "milvus",
+                        EmbeddingStoreType.PGVECTOR.name(), "pgvector"));
+    }
+
+    private static List<Parameter.Dependency> getPasswordDependency() {
+        return getDependency(EMBEDDING_STORE_PROVIDER.getName(),
+                Lists.newArrayList(EmbeddingStoreType.MILVUS.name()),
+                ImmutableMap.of(EmbeddingStoreType.MILVUS.name(), "milvus"));
     }
 }
