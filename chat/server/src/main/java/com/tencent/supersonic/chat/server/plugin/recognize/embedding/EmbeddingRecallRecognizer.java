@@ -30,7 +30,7 @@ public class EmbeddingRecallRecognizer extends PluginRecognizer {
     }
 
     public PluginRecallResult recallPlugin(ParseContext parseContext) {
-        String text = parseContext.getQueryText();
+        String text = parseContext.getRequest().getQueryText();
         List<Retrieval> embeddingRetrievals = embeddingRecall(text);
         if (CollectionUtils.isEmpty(embeddingRetrievals)) {
             return null;
@@ -52,7 +52,7 @@ public class EmbeddingRecallRecognizer extends PluginRecognizer {
                 }
                 plugin.setParseMode(ParseMode.EMBEDDING_RECALL);
                 double similarity = embeddingRetrieval.getSimilarity();
-                double score = parseContext.getQueryText().length() * similarity;
+                double score = parseContext.getRequest().getQueryText().length() * similarity;
                 return PluginRecallResult.builder().plugin(plugin).dataSetIds(dataSetList)
                         .score(score).distance(similarity).build();
             }

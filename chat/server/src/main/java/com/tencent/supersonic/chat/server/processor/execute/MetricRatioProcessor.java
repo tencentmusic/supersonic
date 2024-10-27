@@ -67,8 +67,8 @@ public class MetricRatioProcessor implements ExecuteResultProcessor {
                 || !QueryType.AGGREGATE.equals(semanticParseInfo.getQueryType())) {
             return;
         }
-        AggregateInfo aggregateInfo =
-                getAggregateInfo(executeContext.getUser(), semanticParseInfo, queryResult);
+        AggregateInfo aggregateInfo = getAggregateInfo(executeContext.getRequest().getUser(),
+                semanticParseInfo, queryResult);
         queryResult.setAggregateInfo(aggregateInfo);
     }
 

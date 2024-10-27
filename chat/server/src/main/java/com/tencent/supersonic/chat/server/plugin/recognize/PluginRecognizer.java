@@ -72,7 +72,7 @@ public abstract class PluginRecognizer {
     protected SemanticParseInfo buildSemanticParseInfo(Long dataSetId, ChatPlugin plugin,
             ParseContext parseContext, SchemaMapInfo mapInfo, double distance) {
         List<SchemaElementMatch> schemaElementMatches = mapInfo.getMatchedElements(dataSetId);
-        QueryFilters queryFilters = parseContext.getQueryFilters();
+        QueryFilters queryFilters = parseContext.getRequest().getQueryFilters();
         if (schemaElementMatches == null) {
             schemaElementMatches = Lists.newArrayList();
         }
@@ -86,7 +86,7 @@ public abstract class PluginRecognizer {
         pluginParseResult.setPlugin(plugin);
         pluginParseResult.setQueryFilters(queryFilters);
         pluginParseResult.setDistance(distance);
-        pluginParseResult.setQueryText(parseContext.getQueryText());
+        pluginParseResult.setQueryText(parseContext.getRequest().getQueryText());
         properties.put(Constants.CONTEXT, pluginParseResult);
         properties.put("type", "plugin");
         properties.put("name", plugin.getName());

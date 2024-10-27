@@ -48,7 +48,7 @@ public class DataInterpretProcessor implements ExecuteResultProcessor {
         }
 
         Map<String, Object> variable = new HashMap<>();
-        variable.put("question", executeContext.getQueryText());
+        variable.put("question", executeContext.getRequest().getQueryText());
         variable.put("data", queryResult.getTextResult());
 
         Prompt prompt = PromptTemplate.from(chatApp.getPrompt()).apply(variable);

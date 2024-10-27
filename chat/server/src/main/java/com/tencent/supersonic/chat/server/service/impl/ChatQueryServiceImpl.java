@@ -24,8 +24,6 @@ import com.tencent.supersonic.common.jsqlparser.SqlReplaceHelper;
 import com.tencent.supersonic.common.jsqlparser.SqlSelectHelper;
 import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
-import com.tencent.supersonic.common.service.ChatModelService;
-import com.tencent.supersonic.common.util.BeanMapper;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.DateUtils;
 import com.tencent.supersonic.common.util.JsonUtil;
@@ -86,8 +84,6 @@ public class ChatQueryServiceImpl implements ChatQueryService {
     private SemanticLayerService semanticLayerService;
     @Autowired
     private AgentService agentService;
-    @Autowired
-    private ChatModelService chatModelService;
 
     private final List<ChatQueryParser> chatQueryParsers = ComponentFactory.getChatParsers();
     private final List<ChatQueryExecutor> chatQueryExecutors = ComponentFactory.getChatExecutors();
@@ -120,7 +116,7 @@ public class ChatQueryServiceImpl implements ChatQueryService {
             processor.process(parseContext, parseResp);
         }
 
-        chatParseReq.setQueryText(parseContext.getQueryText());
+        chatParseReq.setQueryText(parseContext.getRequest().getQueryText());
         chatManageService.batchAddParse(chatParseReq, parseResp);
         chatManageService.updateParseCostTime(parseResp);
         return parseResp;
@@ -168,16 +164,14 @@ public class ChatQueryServiceImpl implements ChatQueryService {
     }
 
     private ParseContext buildParseContext(ChatParseReq chatParseReq) {
-        ParseContext parseContext = new ParseContext();
-        BeanMapper.mapper(chatParseReq, parseContext);
+        ParseContext parseContext = new ParseContext(chatParseReq);
         Agent agent = agentService.getAgent(chatParseReq.getAgentId());
         parseContext.setAgent(agent);
         return parseContext;
     }
 
     private ExecuteContext buildExecuteContext(ChatExecuteReq chatExecuteReq) {
-        ExecuteContext executeContext = new ExecuteContext();
-        BeanMapper.mapper(chatExecuteReq, executeContext);
+        ExecuteContext executeContext = new ExecuteContext(chatExecuteReq);
         SemanticParseInfo parseInfo = chatManageService.getParseInfo(chatExecuteReq.getQueryId(),
                 chatExecuteReq.getParseId());
         Agent agent = agentService.getAgent(chatExecuteReq.getAgentId());
@@ -443,14 +437,14 @@ public class ChatQueryServiceImpl implements ChatQueryService {
         if (CollectionUtils.isEmpty(valueList)) {
             return;
         }
-        valueList.stream().forEach(o -> {
+        valueList.forEach(o -> {
             StringValue stringValue = new StringValue(o);
             parenthesedExpressionList.add(stringValue);
         });
         inExpression.setLeftExpression(column);
         inExpression.setRightExpression(parenthesedExpressionList);
         addConditions.add(inExpression);
-        contextMetricFilters.stream().forEach(o -> {
+        contextMetricFilters.forEach(o -> {
             if (o.getName().equals(dslQueryFilter.getName())) {
                 o.setValue(dslQueryFilter.getValue());
                 o.setOperator(dslQueryFilter.getOperator());
@@ -480,7 +474,7 @@ public class ChatQueryServiceImpl implements ChatQueryService {
             comparisonExpression.setRightExpression(stringValue);
         }
         addConditions.add(comparisonExpression);
-        contextMetricFilters.stream().forEach(o -> {
+        contextMetricFilters.forEach(o -> {
             if (o.getName().equals(dslQueryFilter.getName())) {
                 o.setValue(dslQueryFilter.getValue());
                 o.setOperator(dslQueryFilter.getOperator());

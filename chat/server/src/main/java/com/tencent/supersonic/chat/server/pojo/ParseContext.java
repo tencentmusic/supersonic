@@ -1,19 +1,17 @@
 package com.tencent.supersonic.chat.server.pojo;
 
+import com.tencent.supersonic.chat.api.pojo.request.ChatParseReq;
 import com.tencent.supersonic.chat.server.agent.Agent;
-import com.tencent.supersonic.common.pojo.User;
-import com.tencent.supersonic.headless.api.pojo.request.QueryFilters;
 import lombok.Data;
 
 @Data
 public class ParseContext {
-    private User user;
-    private String queryText;
+    private ChatParseReq request;
     private Agent agent;
-    private Integer chatId;
-    private QueryFilters queryFilters;
-    private boolean saveAnswer = true;
-    private boolean disableLLM = false;
+
+    public ParseContext(ChatParseReq request) {
+        this.request = request;
+    }
 
     public boolean enableNL2SQL() {
         if (agent == null) {

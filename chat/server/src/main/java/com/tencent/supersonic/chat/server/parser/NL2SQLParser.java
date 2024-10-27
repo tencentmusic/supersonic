@@ -91,16 +91,24 @@ public class NL2SQLParser implements ChatQueryParser {
 
     @Override
     public void parse(ParseContext parseContext, ParseResp parseResp) {
-        if (!parseContext.enableNL2SQL() || checkSkip(parseResp)) {
+        if (!parseContext.enableNL2SQL() || Objects.isNull(parseContext.getAgent())) {
             return;
         }
-        ChatContextService chatContextService = ContextUtils.getBean(ChatContextService.class);
-        ChatContext chatCtx = chatContextService.getOrCreateContext(parseContext.getChatId());
+        QueryNLReq queryNLReq = QueryReqConverter.buildQueryNLReq(parseContext);
+        if (Objects.isNull(queryNLReq)) {
+            return;
+        }
 
-        if (!parseContext.isDisableLLM()) {
+        if (!parseContext.getRequest().isDisableLLM()) {
             processMultiTurn(parseContext);
         }
-        QueryNLReq queryNLReq = QueryReqConverter.buildQueryNLReq(parseContext, chatCtx);
+
+        ChatContextService chatContextService = ContextUtils.getBean(ChatContextService.class);
+        ChatContext chatCtx =
+                chatContextService.getOrCreateContext(parseContext.getRequest().getChatId());
+        if (chatCtx != null) {
+            queryNLReq.setContextParseInfo(chatCtx.getParseInfo());
+        }
         addDynamicExemplars(parseContext.getAgent().getId(), queryNLReq);
 
         ChatLayerService chatLayerService = ContextUtils.getBean(ChatLayerService.class);
@@ -108,7 +116,7 @@ public class NL2SQLParser implements ChatQueryParser {
         if (ParseResp.ParseState.COMPLETED.equals(text2SqlParseResp.getState())) {
             parseResp.getSelectedParses().addAll(text2SqlParseResp.getSelectedParses());
         } else {
-            if (!parseContext.isDisableLLM()) {
+            if (!parseContext.getRequest().isDisableLLM()) {
                 parseResp.setErrorMsg(rewriteErrorMessage(parseContext,
                         text2SqlParseResp.getErrorMsg(), queryNLReq.getDynamicExemplars()));
             }
@@ -117,16 +125,6 @@ public class NL2SQLParser implements ChatQueryParser {
         parseResp.getParseTimeCost().setSqlTime(text2SqlParseResp.getParseTimeCost().getSqlTime());
         parseResp.setErrorMsg(text2SqlParseResp.getErrorMsg());
         formatParseResult(parseResp);
-    }
-
-    private boolean checkSkip(ParseResp parseResp) {
-        List<SemanticParseInfo> selectedParses = parseResp.getSelectedParses();
-        for (SemanticParseInfo semanticParseInfo : selectedParses) {
-            if (semanticParseInfo.getScore() >= parseResp.getQueryText().length()) {
-                return true;
-            }
-        }
-        return false;
     }
 
     private void formatParseResult(ParseResp parseResp) {
@@ -182,7 +180,8 @@ public class NL2SQLParser implements ChatQueryParser {
         QueryNLReq queryNLReq = QueryReqConverter.buildQueryNLReq(parseContext);
         MapResp currentMapResult = chatLayerService.map(queryNLReq);
 
-        List<QueryResp> historyQueries = getHistoryQueries(parseContext.getChatId(), 1);
+        List<QueryResp> historyQueries =
+                getHistoryQueries(parseContext.getRequest().getChatId(), 1);
         if (historyQueries.isEmpty()) {
             return;
         }
@@ -208,7 +207,7 @@ public class NL2SQLParser implements ChatQueryParser {
         Response<AiMessage> response = chatLanguageModel.generate(prompt.toUserMessage());
         String rewrittenQuery = response.content().text();
         keyPipelineLog.info("QueryRewrite modelReq:\n{} \nmodelResp:\n{}", prompt.text(), response);
-        parseContext.setQueryText(rewrittenQuery);
+        parseContext.getRequest().setQueryText(rewrittenQuery);
         log.info("Last Query: {} Current Query: {}, Rewritten Query: {}", lastQuery.getQueryText(),
                 currentMapResult.getQueryText(), rewrittenQuery);
     }
@@ -222,7 +221,7 @@ public class NL2SQLParser implements ChatQueryParser {
         }
 
         Map<String, Object> variables = new HashMap<>();
-        variables.put("user_question", parseContext.getQueryText());
+        variables.put("user_question", parseContext.getRequest().getQueryText());
         variables.put("system_message", errMsg);
 
         StringBuilder exampleStr = new StringBuilder();
@@ -286,7 +285,7 @@ public class NL2SQLParser implements ChatQueryParser {
         String memoryCollectionName = embeddingConfig.getMemoryCollectionName(agentId);
         ParserConfig parserConfig = ContextUtils.getBean(ParserConfig.class);
         int exemplarRecallNumber =
-                Integer.valueOf(parserConfig.getParameterValue(PARSER_EXEMPLAR_RECALL_NUMBER));
+                Integer.parseInt(parserConfig.getParameterValue(PARSER_EXEMPLAR_RECALL_NUMBER));
         List<Text2SQLExemplar> exemplars = exemplarManager.recallExemplars(memoryCollectionName,
                 queryNLReq.getQueryText(), exemplarRecallNumber);
         queryNLReq.getDynamicExemplars().addAll(exemplars);
