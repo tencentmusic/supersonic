@@ -13,11 +13,13 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.TestPropertySource;
 
 import java.sql.SQLException;
 import java.util.Map;
 
 @Disabled
+@TestPropertySource(properties = {"s2.model.building.exemplars.enabled = false"})
 public class ModelIntelligentBuildTest extends BaseTest {
 
     private LLMConfigUtils.LLMType llmType = LLMConfigUtils.LLMType.OLLAMA_LLAMA3;
@@ -56,7 +58,6 @@ public class ModelIntelligentBuildTest extends BaseTest {
         Assertions.assertEquals(AggOperatorEnum.SUM,
                 stayTimeModelSchema.getFieldByName("stay_hours").getAgg());
     }
-
 
     @Test
     public void testBuildModelBySql() throws SQLException {
