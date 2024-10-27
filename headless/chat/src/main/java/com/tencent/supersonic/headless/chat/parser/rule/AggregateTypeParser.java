@@ -86,13 +86,13 @@ public class AggregateTypeParser implements SemanticParser {
 
         AggregateTypeEnum type =
                 aggregateCount.entrySet().stream().max(Map.Entry.comparingByValue())
-                        .map(entry -> entry.getKey()).orElse(AggregateTypeEnum.NONE);
+                        .map(Map.Entry::getKey).orElse(AggregateTypeEnum.NONE);
         String detectWord = aggregateWord.get(type);
         return new AggregateConf(type, detectWord);
     }
 
     @AllArgsConstructor
-    class AggregateConf {
+    static class AggregateConf {
         public AggregateTypeEnum type;
         public String detectWord;
     }

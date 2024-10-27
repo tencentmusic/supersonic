@@ -119,9 +119,7 @@ public class ChatWorkflowEngine {
     }
 
     private void performProcessing(ChatQueryContext queryCtx, ParseResp parseResult) {
-        resultProcessors.forEach(processor -> {
-            processor.process(parseResult, queryCtx);
-        });
+        resultProcessors.forEach(processor -> processor.process(parseResult, queryCtx));
     }
 
     private void performTranslating(ChatQueryContext chatQueryContext, ParseResp parseResult) {
@@ -160,7 +158,7 @@ public class ChatWorkflowEngine {
             }
         });
         if (!errorMsg.isEmpty()) {
-            parseResult.setErrorMsg(errorMsg.stream().collect(Collectors.joining("\n")));
+            parseResult.setErrorMsg(String.join("\n", errorMsg));
         }
     }
 }

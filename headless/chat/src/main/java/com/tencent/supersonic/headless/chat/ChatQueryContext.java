@@ -40,13 +40,15 @@ public class ChatQueryContext {
     private Map<Long, List<Long>> modelIdToDataSetIds;
     private User user;
     private boolean saveAnswer;
-    @Builder.Default
-    private Text2SQLType text2SQLType = Text2SQLType.RULE_AND_LLM;
     private QueryFilters queryFilters;
     private List<SemanticQuery> candidateQueries = new ArrayList<>();
     private SchemaMapInfo mapInfo = new SchemaMapInfo();
     private SemanticParseInfo contextParseInfo;
+    @Builder.Default
+    private Text2SQLType text2SQLType = Text2SQLType.RULE_AND_LLM;
+    @Builder.Default
     private MapModeEnum mapModeEnum = MapModeEnum.STRICT;
+    @Builder.Default
     private QueryDataType queryDataType = QueryDataType.ALL;
     @JsonIgnore
     private SemanticSchema semanticSchema;

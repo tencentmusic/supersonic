@@ -78,10 +78,9 @@ public class QueryTypeParser implements SemanticParser {
     }
 
     private static List<String> filterByTimeFields(List<String> whereFields) {
-        List<String> selectAndWhereFilterByTimeFields = whereFields.stream()
+        return whereFields.stream()
                 .filter(field -> !TimeDimensionEnum.containsTimeDimension(field))
                 .collect(Collectors.toList());
-        return selectAndWhereFilterByTimeFields;
     }
 
     private static boolean selectContainsMetric(SqlInfo sqlInfo, Long dataSetId,

@@ -17,8 +17,8 @@ import java.util.List;
 @Slf4j
 public class RuleSqlParser implements SemanticParser {
 
-    private static List<SemanticParser> auxiliaryParsers = Arrays.asList(new ContextInheritParser(),
-            new TimeRangeParser(), new AggregateTypeParser());
+    private static final List<SemanticParser> auxiliaryParsers = Arrays
+            .asList(new ContextInheritParser(), new TimeRangeParser(), new AggregateTypeParser());
 
     @Override
     public void parse(ChatQueryContext chatQueryContext) {
@@ -38,6 +38,6 @@ public class RuleSqlParser implements SemanticParser {
             }
         }
 
-        auxiliaryParsers.stream().forEach(p -> p.parse(chatQueryContext));
+        auxiliaryParsers.forEach(p -> p.parse(chatQueryContext));
     }
 }

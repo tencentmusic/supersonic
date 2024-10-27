@@ -66,9 +66,7 @@ public class S2ChatLayerService implements ChatLayerService {
     public MapResp map(QueryNLReq queryNLReq) {
         MapResp mapResp = new MapResp(queryNLReq.getQueryText());
         ChatQueryContext queryCtx = buildChatQueryContext(queryNLReq);
-        ComponentFactory.getSchemaMappers().forEach(mapper -> {
-            mapper.map(queryCtx);
-        });
+        ComponentFactory.getSchemaMappers().forEach(mapper -> mapper.map(queryCtx));
         mapResp.setMapInfo(queryCtx.getMapInfo());
         return mapResp;
     }
@@ -264,22 +262,16 @@ public class S2ChatLayerService implements ChatLayerService {
 
     /**
      * * get time dimension SchemaElementMatch
-     *
-     * @param dataSetId
-     * @param dataSetName
-     * @return
      */
     private SchemaElementMatch getTimeDimension(Long dataSetId, String dataSetName) {
         SchemaElement element = SchemaElement.builder().dataSetId(dataSetId)
                 .dataSetName(dataSetName).type(SchemaElementType.DIMENSION)
                 .bizName(TimeDimensionEnum.DAY.getName()).build();
 
-        SchemaElementMatch timeDimensionMatch = SchemaElementMatch.builder().element(element)
+        return SchemaElementMatch.builder().element(element)
                 .detectWord(TimeDimensionEnum.DAY.getChName())
                 .word(TimeDimensionEnum.DAY.getChName()).similarity(1L)
                 .frequency(BaseWordBuilder.DEFAULT_FREQUENCY).build();
-
-        return timeDimensionMatch;
     }
 
     private Function<SchemaElement, SchemaElementMatch> mergeFunction() {

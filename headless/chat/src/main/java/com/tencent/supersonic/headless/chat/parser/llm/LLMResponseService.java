@@ -23,8 +23,8 @@ import java.util.Objects;
 @Service
 public class LLMResponseService {
 
-    public SemanticParseInfo addParseInfo(ChatQueryContext queryCtx, ParseResult parseResult,
-            String s2SQL, Double weight) {
+    public void addParseInfo(ChatQueryContext queryCtx, ParseResult parseResult, String s2SQL,
+            Double weight) {
         if (Objects.isNull(weight)) {
             weight = 0D;
         }
@@ -49,7 +49,6 @@ public class LLMResponseService {
         parseInfo.setQueryMode(semanticQuery.getQueryMode());
         parseInfo.getSqlInfo().setParsedS2SQL(s2SQL);
         queryCtx.getCandidateQueries().add(semanticQuery);
-        return parseInfo;
     }
 
     public Map<String, LLMSqlResp> getDeduplicationSqlResp(int currentRetry, LLMResp llmResp) {

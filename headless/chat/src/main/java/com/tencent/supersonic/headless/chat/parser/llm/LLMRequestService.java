@@ -65,7 +65,7 @@ public class LLMRequestService {
         llmSchema.setPrimaryKey(getPrimaryKey(queryCtx, dataSetId));
 
         boolean linkingValueEnabled =
-                Boolean.valueOf(parserConfig.getParameterValue(PARSER_LINKING_VALUE_ENABLE));
+                Boolean.parseBoolean(parserConfig.getParameterValue(PARSER_LINKING_VALUE_ENABLE));
         if (linkingValueEnabled) {
             llmSchema.setValues(getMappedValues(queryCtx, dataSetId));
         }
@@ -135,13 +135,10 @@ public class LLMRequestService {
         if (CollectionUtils.isEmpty(matchedElements)) {
             return Collections.emptyList();
         }
-        List<SchemaElement> schemaElements = matchedElements.stream().filter(schemaElementMatch -> {
+        return matchedElements.stream().filter(schemaElementMatch -> {
             SchemaElementType elementType = schemaElementMatch.getElement().getType();
             return SchemaElementType.METRIC.equals(elementType);
-        }).map(schemaElementMatch -> {
-            return schemaElementMatch.getElement();
-        }).collect(Collectors.toList());
-        return schemaElements;
+        }).map(SchemaElementMatch::getElement).collect(Collectors.toList());
     }
 
     protected List<SchemaElement> getMappedDimensions(@NotNull ChatQueryContext queryCtx,
