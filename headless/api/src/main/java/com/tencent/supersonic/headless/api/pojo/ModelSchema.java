@@ -1,5 +1,6 @@
 package com.tencent.supersonic.headless.api.pojo;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
 import java.util.List;
@@ -14,5 +15,15 @@ public class ModelSchema {
     private String description;
 
     private List<FieldSchema> filedSchemas;
+
+    @JsonIgnore
+    public FieldSchema getFieldByName(String columnName) {
+        for (FieldSchema fieldSchema : filedSchemas) {
+            if (fieldSchema.getColumnName().equalsIgnoreCase(columnName)) {
+                return fieldSchema;
+            }
+        }
+        return null;
+    }
 
 }

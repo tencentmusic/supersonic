@@ -1,5 +1,6 @@
 package com.tencent.supersonic.headless.api.pojo;
 
+import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
 import com.tencent.supersonic.headless.api.pojo.enums.FieldType;
 import lombok.Data;
 
@@ -14,5 +15,8 @@ public class FieldSchema {
 
     private FieldType filedType;
 
+    private AggOperatorEnum agg;
+
     private String name;
+
 }
