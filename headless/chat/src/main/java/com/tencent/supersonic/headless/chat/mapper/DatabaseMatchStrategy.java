@@ -93,7 +93,8 @@ public class DatabaseMatchStrategy extends SingleMatchStrategy<DatabaseMapResult
             log.debug("ModelElementMatches:{},not exist Element threshold reduce by half:{}",
                     modelElementMatches, threshold);
         }
-        return getThreshold(threshold, minThreshold, chatQueryContext.getMapModeEnum());
+        return getThreshold(threshold, minThreshold,
+                chatQueryContext.getRequest().getMapModeEnum());
     }
 
     private Map<String, Set<SchemaElement>> getNameToItems(List<SchemaElement> models) {

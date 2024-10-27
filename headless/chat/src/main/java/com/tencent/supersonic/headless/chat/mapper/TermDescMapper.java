@@ -20,21 +20,22 @@ public class TermDescMapper extends BaseMapper {
             return;
         }
         if (StringUtils.isBlank(chatQueryContext.getOriQueryText())) {
-            chatQueryContext.setOriQueryText(chatQueryContext.getQueryText());
+            chatQueryContext.setOriQueryText(chatQueryContext.getRequest().getQueryText());
         }
         for (SchemaElement schemaElement : termDescriptionToMap) {
             if (schemaElement.isDescriptionMapped()) {
                 continue;
             }
-            if (chatQueryContext.getQueryText().equals(schemaElement.getDescription())) {
+            if (chatQueryContext.getRequest().getQueryText()
+                    .equals(schemaElement.getDescription())) {
                 schemaElement.setDescriptionMapped(true);
                 continue;
             }
-            chatQueryContext.setQueryText(schemaElement.getDescription());
+            chatQueryContext.getRequest().setQueryText(schemaElement.getDescription());
             break;
         }
         if (CollectionUtils.isEmpty(chatQueryContext.getMapInfo().getTermDescriptionToMap())) {
-            chatQueryContext.setQueryText(chatQueryContext.getOriQueryText());
+            chatQueryContext.getRequest().setQueryText(chatQueryContext.getOriQueryText());
         }
     }
 }

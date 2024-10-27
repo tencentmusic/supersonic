@@ -105,6 +105,7 @@ public class HanlpDictMatchStrategy extends SingleMatchStrategy<HanlpMapResult> 
                     mapperConfig.getParameterValue(MapperConfig.MAPPER_VALUE_THRESHOLD_MIN));
         }
 
-        return getThreshold(threshold, minThreshold, chatQueryContext.getMapModeEnum());
+        return getThreshold(threshold, minThreshold,
+                chatQueryContext.getRequest().getMapModeEnum());
     }
 }

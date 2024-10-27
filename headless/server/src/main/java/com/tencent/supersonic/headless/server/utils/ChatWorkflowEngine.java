@@ -140,7 +140,7 @@ public class ChatWorkflowEngine {
                 SemanticLayerService queryService =
                         ContextUtils.getBean(SemanticLayerService.class);
                 SemanticTranslateResp explain =
-                        queryService.translate(semanticQueryReq, queryCtx.getUser());
+                        queryService.translate(semanticQueryReq, queryCtx.getRequest().getUser());
                 parseInfo.getSqlInfo().setQuerySQL(explain.getQuerySQL());
                 if (StringUtils.isNotBlank(explain.getErrMsg())) {
                     errorMsg.add(explain.getErrMsg());

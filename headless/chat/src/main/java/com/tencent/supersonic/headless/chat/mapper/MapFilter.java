@@ -22,7 +22,7 @@ public class MapFilter {
         filterByDataSetId(chatQueryContext);
         filterByDetectWordLenLessThanOne(chatQueryContext);
         twoCharactersMustEqual(chatQueryContext);
-        switch (chatQueryContext.getQueryDataType()) {
+        switch (chatQueryContext.getRequest().getQueryDataType()) {
             case TAG:
                 filterByQueryDataType(chatQueryContext, element -> !(element.getIsTag() > 0));
                 break;
@@ -46,7 +46,7 @@ public class MapFilter {
     }
 
     public static void filterByDataSetId(ChatQueryContext chatQueryContext) {
-        Set<Long> dataSetIds = chatQueryContext.getDataSetIds();
+        Set<Long> dataSetIds = chatQueryContext.getRequest().getDataSetIds();
         if (CollectionUtils.isEmpty(dataSetIds)) {
             return;
         }

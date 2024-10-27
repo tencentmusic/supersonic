@@ -44,7 +44,7 @@ public class AggregateTypeParser implements SemanticParser {
 
     @Override
     public void parse(ChatQueryContext chatQueryContext) {
-        String queryText = chatQueryContext.getQueryText();
+        String queryText = chatQueryContext.getRequest().getQueryText();
         AggregateConf aggregateConf = resolveAggregateConf(queryText);
 
         for (SemanticQuery semanticQuery : chatQueryContext.getCandidateQueries()) {

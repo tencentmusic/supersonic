@@ -39,13 +39,14 @@ public class LLMResponseService {
         Map<String, Object> properties = new HashMap<>();
         properties.put(Constants.CONTEXT, parseResult);
         properties.put("type", "internal");
-        Text2SQLExemplar exemplar = Text2SQLExemplar.builder().question(queryCtx.getQueryText())
-                .sideInfo(parseResult.getLlmResp().getSideInfo())
-                .dbSchema(parseResult.getLlmResp().getSchema())
-                .sql(parseResult.getLlmResp().getSqlOutput()).build();
+        Text2SQLExemplar exemplar =
+                Text2SQLExemplar.builder().question(queryCtx.getRequest().getQueryText())
+                        .sideInfo(parseResult.getLlmResp().getSideInfo())
+                        .dbSchema(parseResult.getLlmResp().getSchema())
+                        .sql(parseResult.getLlmResp().getSqlOutput()).build();
         properties.put(Text2SQLExemplar.PROPERTY_KEY, exemplar);
         parseInfo.setProperties(properties);
-        parseInfo.setScore(queryCtx.getQueryText().length() * (1 + weight));
+        parseInfo.setScore(queryCtx.getRequest().getQueryText().length() * (1 + weight));
         parseInfo.setQueryMode(semanticQuery.getQueryMode());
         parseInfo.getSqlInfo().setParsedS2SQL(s2SQL);
         queryCtx.getCandidateQueries().add(semanticQuery);

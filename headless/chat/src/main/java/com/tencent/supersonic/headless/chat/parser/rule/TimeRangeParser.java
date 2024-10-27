@@ -38,7 +38,7 @@ public class TimeRangeParser implements SemanticParser {
 
     @Override
     public void parse(ChatQueryContext queryContext) {
-        String queryText = queryContext.getQueryText();
+        String queryText = queryContext.getRequest().getQueryText();
         DateConf dateConf = parseRecent(queryText);
         if (dateConf == null) {
             dateConf = parseDateNumber(queryText);
@@ -62,7 +62,7 @@ public class TimeRangeParser implements SemanticParser {
                 parseInfo.setScore(parseInfo.getScore() + dateConf.getDetectWord().length());
             }
         } else {
-            SemanticParseInfo contextParseInfo = queryContext.getContextParseInfo();
+            SemanticParseInfo contextParseInfo = queryContext.getRequest().getContextParseInfo();
             if (QueryManager.containsRuleQuery(contextParseInfo.getQueryMode())) {
                 RuleSemanticQuery semanticQuery =
                         QueryManager.createRuleQuery(contextParseInfo.getQueryMode());

@@ -21,7 +21,7 @@ public abstract class BaseMatchStrategy<T extends MapResult> implements MatchStr
     @Override
     public Map<MatchText, List<T>> match(ChatQueryContext chatQueryContext, List<S2Term> terms,
             Set<Long> detectDataSetIds) {
-        String text = chatQueryContext.getQueryText();
+        String text = chatQueryContext.getRequest().getQueryText();
         if (Objects.isNull(terms) || StringUtils.isEmpty(text)) {
             return null;
         }

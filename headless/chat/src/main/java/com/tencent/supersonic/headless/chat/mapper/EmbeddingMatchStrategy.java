@@ -69,7 +69,7 @@ public class EmbeddingMatchStrategy extends BatchMatchStrategy<EmbeddingResult> 
         double embeddingThresholdMin =
                 Double.valueOf(mapperConfig.getParameterValue(EMBEDDING_MAPPER_THRESHOLD_MIN));
         double threshold = getThreshold(embeddingThreshold, embeddingThresholdMin,
-                chatQueryContext.getMapModeEnum());
+                chatQueryContext.getRequest().getMapModeEnum());
 
         // step1. build query params
         RetrieveQuery retrieveQuery = RetrieveQuery.builder().queryTextsList(queryTextsSub).build();

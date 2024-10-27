@@ -25,7 +25,8 @@ public class SatisfactionChecker {
             if (query.getQueryMode().equals(LLMSqlQuery.QUERY_MODE)) {
                 continue;
             }
-            if (checkThreshold(chatQueryContext.getQueryText(), query.getParseInfo())) {
+            if (checkThreshold(chatQueryContext.getRequest().getQueryText(),
+                    query.getParseInfo())) {
                 return true;
             }
         }

@@ -93,19 +93,6 @@ public class S2ChatLayerService implements ChatLayerService {
         return parseResult;
     }
 
-    private ChatQueryContext buildChatQueryContext(QueryNLReq queryNLReq) {
-        SemanticSchema semanticSchema = schemaService.getSemanticSchema(queryNLReq.getDataSetIds());
-        Map<Long, List<Long>> modelIdToDataSetIds = dataSetService.getModelIdToDataSetIds();
-        ChatQueryContext queryCtx = ChatQueryContext.builder()
-                .queryFilters(queryNLReq.getQueryFilters()).semanticSchema(semanticSchema)
-                .candidateQueries(new ArrayList<>()).mapInfo(new SchemaMapInfo())
-                .modelIdToDataSetIds(modelIdToDataSetIds).text2SQLType(queryNLReq.getText2SQLType())
-                .mapModeEnum(queryNLReq.getMapModeEnum()).dataSetIds(queryNLReq.getDataSetIds())
-                .build();
-        BeanUtils.copyProperties(queryNLReq, queryCtx);
-        return queryCtx;
-    }
-
     public void correct(QuerySqlReq querySqlReq, User user) {
         SemanticParseInfo semanticParseInfo = correctSqlReq(querySqlReq, user);
         querySqlReq.setSql(semanticParseInfo.getSqlInfo().getCorrectedS2SQL());
@@ -120,6 +107,15 @@ public class S2ChatLayerService implements ChatLayerService {
     @Override
     public List<SearchResult> retrieve(QueryNLReq queryNLReq) {
         return retrieveService.retrieve(queryNLReq);
+    }
+
+    private ChatQueryContext buildChatQueryContext(QueryNLReq queryNLReq) {
+        ChatQueryContext queryCtx = new ChatQueryContext(queryNLReq);
+        SemanticSchema semanticSchema = schemaService.getSemanticSchema(queryNLReq.getDataSetIds());
+        Map<Long, List<Long>> modelIdToDataSetIds = dataSetService.getModelIdToDataSetIds();
+        queryCtx.setSemanticSchema(semanticSchema);
+        queryCtx.setModelIdToDataSetIds(modelIdToDataSetIds);
+        return queryCtx;
     }
 
     private SemanticParseInfo correctSqlReq(QuerySqlReq querySqlReq, User user) {

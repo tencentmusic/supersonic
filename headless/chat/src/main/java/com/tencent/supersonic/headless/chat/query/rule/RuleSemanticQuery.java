@@ -69,8 +69,9 @@ public abstract class RuleSemanticQuery extends BaseSemanticQuery {
 
     private void fillDateConfByInherited(SemanticParseInfo queryParseInfo,
             ChatQueryContext chatQueryContext) {
-        SemanticParseInfo contextParseInfo = chatQueryContext.getContextParseInfo();
-        if (queryParseInfo.getDateInfo() != null || contextParseInfo.getDateInfo() == null
+        SemanticParseInfo contextParseInfo = chatQueryContext.getRequest().getContextParseInfo();
+        if (queryParseInfo.getDateInfo() != null || Objects.isNull(contextParseInfo)
+                || Objects.isNull(contextParseInfo.getDateInfo())
                 || needFillDateConf(chatQueryContext)) {
             return;
         }
