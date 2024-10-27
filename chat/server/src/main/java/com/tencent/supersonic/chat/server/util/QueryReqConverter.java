@@ -12,11 +12,11 @@ import java.util.Objects;
 
 public class QueryReqConverter {
 
-    public static QueryNLReq buildText2SqlQueryReq(ParseContext parseContext) {
-        return buildText2SqlQueryReq(parseContext, null);
+    public static QueryNLReq buildQueryNLReq(ParseContext parseContext) {
+        return buildQueryNLReq(parseContext, null);
     }
 
-    public static QueryNLReq buildText2SqlQueryReq(ParseContext parseContext, ChatContext chatCtx) {
+    public static QueryNLReq buildQueryNLReq(ParseContext parseContext, ChatContext chatCtx) {
         QueryNLReq queryNLReq = new QueryNLReq();
         BeanMapper.mapper(parseContext, queryNLReq);
         Agent agent = parseContext.getAgent();

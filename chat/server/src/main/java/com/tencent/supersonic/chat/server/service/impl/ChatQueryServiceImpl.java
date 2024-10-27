@@ -38,7 +38,6 @@ import com.tencent.supersonic.headless.api.pojo.request.DimensionValueReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryFilter;
 import com.tencent.supersonic.headless.api.pojo.request.QueryNLReq;
 import com.tencent.supersonic.headless.api.pojo.request.SemanticQueryReq;
-import com.tencent.supersonic.headless.api.pojo.response.MapResp;
 import com.tencent.supersonic.headless.api.pojo.response.ParseResp;
 import com.tencent.supersonic.headless.api.pojo.response.QueryState;
 import com.tencent.supersonic.headless.api.pojo.response.SearchResult;
@@ -90,11 +89,11 @@ public class ChatQueryServiceImpl implements ChatQueryService {
     @Autowired
     private ChatModelService chatModelService;
 
-    private List<ChatQueryParser> chatQueryParsers = ComponentFactory.getChatParsers();
-    private List<ChatQueryExecutor> chatQueryExecutors = ComponentFactory.getChatExecutors();
-    private List<ParseResultProcessor> parseResultProcessors =
+    private final List<ChatQueryParser> chatQueryParsers = ComponentFactory.getChatParsers();
+    private final List<ChatQueryExecutor> chatQueryExecutors = ComponentFactory.getChatExecutors();
+    private final List<ParseResultProcessor> parseResultProcessors =
             ComponentFactory.getParseProcessors();
-    private List<ExecuteResultProcessor> executeResultProcessors =
+    private final List<ExecuteResultProcessor> executeResultProcessors =
             ComponentFactory.getExecuteProcessors();
 
     @Override
@@ -104,7 +103,7 @@ public class ChatQueryServiceImpl implements ChatQueryService {
         if (!agent.enableSearch()) {
             return Lists.newArrayList();
         }
-        QueryNLReq queryNLReq = QueryReqConverter.buildText2SqlQueryReq(parseContext);
+        QueryNLReq queryNLReq = QueryReqConverter.buildQueryNLReq(parseContext);
         return chatLayerService.retrieve(queryNLReq);
     }
 
@@ -113,13 +112,14 @@ public class ChatQueryServiceImpl implements ChatQueryService {
         ParseResp parseResp = new ParseResp(chatParseReq.getQueryText());
         chatManageService.createChatQuery(chatParseReq, parseResp);
         ParseContext parseContext = buildParseContext(chatParseReq);
-        supplyMapInfo(parseContext);
-        for (ChatQueryParser chatQueryParser : chatQueryParsers) {
-            chatQueryParser.parse(parseContext, parseResp);
+
+        for (ChatQueryParser parser : chatQueryParsers) {
+            parser.parse(parseContext, parseResp);
         }
         for (ParseResultProcessor processor : parseResultProcessors) {
             processor.process(parseContext, parseResp);
         }
+
         chatParseReq.setQueryText(parseContext.getQueryText());
         chatManageService.batchAddParse(chatParseReq, parseResp);
         chatManageService.updateParseCostTime(parseResp);
@@ -175,12 +175,6 @@ public class ChatQueryServiceImpl implements ChatQueryService {
         return parseContext;
     }
 
-    private void supplyMapInfo(ParseContext parseContext) {
-        QueryNLReq queryNLReq = QueryReqConverter.buildText2SqlQueryReq(parseContext);
-        MapResp mapResp = chatLayerService.map(queryNLReq);
-        parseContext.setMapInfo(mapResp.getMapInfo());
-    }
-
     private ExecuteContext buildExecuteContext(ChatExecuteReq chatExecuteReq) {
         ExecuteContext executeContext = new ExecuteContext();
         BeanMapper.mapper(chatExecuteReq, executeContext);
@@ -197,7 +191,7 @@ public class ChatQueryServiceImpl implements ChatQueryService {
         Integer parseId = chatQueryDataReq.getParseId();
         SemanticParseInfo parseInfo =
                 chatManageService.getParseInfo(chatQueryDataReq.getQueryId(), parseId);
-        parseInfo = mergeParseInfo(parseInfo, chatQueryDataReq);
+        mergeParseInfo(parseInfo, chatQueryDataReq);
         DataSetSchema dataSetSchema =
                 semanticLayerService.getDataSetSchema(parseInfo.getDataSetId());
 
@@ -494,10 +488,9 @@ public class ChatQueryServiceImpl implements ChatQueryService {
         });
     }
 
-    private SemanticParseInfo mergeParseInfo(SemanticParseInfo parseInfo,
-            ChatQueryDataReq queryData) {
+    private void mergeParseInfo(SemanticParseInfo parseInfo, ChatQueryDataReq queryData) {
         if (LLMSqlQuery.QUERY_MODE.equals(parseInfo.getQueryMode())) {
-            return parseInfo;
+            return;
         }
         if (!CollectionUtils.isEmpty(queryData.getDimensions())) {
             parseInfo.setDimensions(queryData.getDimensions());
@@ -515,7 +508,6 @@ public class ChatQueryServiceImpl implements ChatQueryService {
             parseInfo.setDateInfo(queryData.getDateInfo());
         }
         parseInfo.setSqlInfo(new SqlInfo());
-        return parseInfo;
     }
 
     private void validFilter(Set<QueryFilter> filters) {

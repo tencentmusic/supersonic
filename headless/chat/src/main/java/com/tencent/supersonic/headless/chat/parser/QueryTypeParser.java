@@ -78,8 +78,7 @@ public class QueryTypeParser implements SemanticParser {
     }
 
     private static List<String> filterByTimeFields(List<String> whereFields) {
-        return whereFields.stream()
-                .filter(field -> !TimeDimensionEnum.containsTimeDimension(field))
+        return whereFields.stream().filter(field -> !TimeDimensionEnum.containsTimeDimension(field))
                 .collect(Collectors.toList());
     }
 

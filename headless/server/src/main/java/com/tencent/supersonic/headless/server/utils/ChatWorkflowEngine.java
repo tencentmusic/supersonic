@@ -36,7 +36,7 @@ public class ChatWorkflowEngine {
             ComponentFactory.getSemanticCorrectors();
     private final List<ResultProcessor> resultProcessors = ComponentFactory.getResultProcessors();
 
-    public void execute(ChatQueryContext queryCtx, ParseResp parseResult) {
+    public void start(ChatQueryContext queryCtx, ParseResp parseResult) {
         queryCtx.setChatWorkflowState(ChatWorkflowState.MAPPING);
         while (queryCtx.getChatWorkflowState() != ChatWorkflowState.FINISHED) {
             switch (queryCtx.getChatWorkflowState()) {
@@ -122,8 +122,8 @@ public class ChatWorkflowEngine {
         resultProcessors.forEach(processor -> processor.process(parseResult, queryCtx));
     }
 
-    private void performTranslating(ChatQueryContext chatQueryContext, ParseResp parseResult) {
-        List<SemanticParseInfo> semanticParseInfos = chatQueryContext.getCandidateQueries().stream()
+    private void performTranslating(ChatQueryContext queryCtx, ParseResp parseResult) {
+        List<SemanticParseInfo> semanticParseInfos = queryCtx.getCandidateQueries().stream()
                 .map(SemanticQuery::getParseInfo).collect(Collectors.toList());
         List<String> errorMsg = new ArrayList<>();
         if (StringUtils.isNotBlank(parseResult.getErrorMsg())) {
@@ -140,7 +140,7 @@ public class ChatWorkflowEngine {
                 SemanticLayerService queryService =
                         ContextUtils.getBean(SemanticLayerService.class);
                 SemanticTranslateResp explain =
-                        queryService.translate(semanticQueryReq, chatQueryContext.getUser());
+                        queryService.translate(semanticQueryReq, queryCtx.getUser());
                 parseInfo.getSqlInfo().setQuerySQL(explain.getQuerySQL());
                 if (StringUtils.isNotBlank(explain.getErrMsg())) {
                     errorMsg.add(explain.getErrMsg());

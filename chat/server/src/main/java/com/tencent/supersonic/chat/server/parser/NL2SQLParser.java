@@ -100,7 +100,7 @@ public class NL2SQLParser implements ChatQueryParser {
         if (!parseContext.isDisableLLM()) {
             processMultiTurn(parseContext);
         }
-        QueryNLReq queryNLReq = QueryReqConverter.buildText2SqlQueryReq(parseContext, chatCtx);
+        QueryNLReq queryNLReq = QueryReqConverter.buildQueryNLReq(parseContext, chatCtx);
         addDynamicExemplars(parseContext.getAgent().getId(), queryNLReq);
 
         ChatLayerService chatLayerService = ContextUtils.getBean(ChatLayerService.class);
@@ -179,11 +179,11 @@ public class NL2SQLParser implements ChatQueryParser {
 
         // derive mapping result of current question and parsing result of last question.
         ChatLayerService chatLayerService = ContextUtils.getBean(ChatLayerService.class);
-        QueryNLReq queryNLReq = QueryReqConverter.buildText2SqlQueryReq(parseContext);
+        QueryNLReq queryNLReq = QueryReqConverter.buildQueryNLReq(parseContext);
         MapResp currentMapResult = chatLayerService.map(queryNLReq);
 
         List<QueryResp> historyQueries = getHistoryQueries(parseContext.getChatId(), 1);
-        if (historyQueries.size() == 0) {
+        if (historyQueries.isEmpty()) {
             return;
         }
         QueryResp lastQuery = historyQueries.get(0);
@@ -209,9 +209,6 @@ public class NL2SQLParser implements ChatQueryParser {
         String rewrittenQuery = response.content().text();
         keyPipelineLog.info("QueryRewrite modelReq:\n{} \nmodelResp:\n{}", prompt.text(), response);
         parseContext.setQueryText(rewrittenQuery);
-        QueryNLReq rewrittenQueryNLReq = QueryReqConverter.buildText2SqlQueryReq(parseContext);
-        MapResp rewrittenQueryMapResult = chatLayerService.map(rewrittenQueryNLReq);
-        parseContext.setMapInfo(rewrittenQueryMapResult.getMapInfo());
         log.info("Last Query: {} Current Query: {}, Rewritten Query: {}", lastQuery.getQueryText(),
                 currentMapResult.getQueryText(), rewrittenQuery);
     }

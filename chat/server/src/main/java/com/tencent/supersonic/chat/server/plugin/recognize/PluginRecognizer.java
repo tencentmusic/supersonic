@@ -7,15 +7,20 @@ import com.tencent.supersonic.chat.server.plugin.PluginManager;
 import com.tencent.supersonic.chat.server.plugin.PluginParseResult;
 import com.tencent.supersonic.chat.server.plugin.PluginRecallResult;
 import com.tencent.supersonic.chat.server.pojo.ParseContext;
+import com.tencent.supersonic.chat.server.util.QueryReqConverter;
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
+import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementMatch;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
+import com.tencent.supersonic.headless.api.pojo.SchemaMapInfo;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.api.pojo.request.QueryFilter;
 import com.tencent.supersonic.headless.api.pojo.request.QueryFilters;
+import com.tencent.supersonic.headless.api.pojo.request.QueryNLReq;
 import com.tencent.supersonic.headless.api.pojo.response.ParseResp;
+import com.tencent.supersonic.headless.server.facade.service.ChatLayerService;
 import org.springframework.util.CollectionUtils;
 
 import java.util.HashMap;
@@ -48,9 +53,12 @@ public abstract class PluginRecognizer {
         if (plugin.isContainsAllDataSet()) {
             dataSetIds = Sets.newHashSet(-1L);
         }
+        ChatLayerService chatLayerService = ContextUtils.getBean(ChatLayerService.class);
+        QueryNLReq queryNLReq = QueryReqConverter.buildQueryNLReq(parseContext);
+        SchemaMapInfo schemaMapInfo = chatLayerService.map(queryNLReq).getMapInfo();
         for (Long dataSetId : dataSetIds) {
             SemanticParseInfo semanticParseInfo = buildSemanticParseInfo(dataSetId, plugin,
-                    parseContext, pluginRecallResult.getDistance());
+                    parseContext, schemaMapInfo, pluginRecallResult.getDistance());
             semanticParseInfo.setQueryMode(plugin.getType());
             semanticParseInfo.setScore(pluginRecallResult.getScore());
             parseResp.getSelectedParses().add(semanticParseInfo);
@@ -62,9 +70,8 @@ public abstract class PluginRecognizer {
     }
 
     protected SemanticParseInfo buildSemanticParseInfo(Long dataSetId, ChatPlugin plugin,
-            ParseContext parseContext, double distance) {
-        List<SchemaElementMatch> schemaElementMatches =
-                parseContext.getMapInfo().getMatchedElements(dataSetId);
+            ParseContext parseContext, SchemaMapInfo mapInfo, double distance) {
+        List<SchemaElementMatch> schemaElementMatches = mapInfo.getMatchedElements(dataSetId);
         QueryFilters queryFilters = parseContext.getQueryFilters();
         if (schemaElementMatches == null) {
             schemaElementMatches = Lists.newArrayList();

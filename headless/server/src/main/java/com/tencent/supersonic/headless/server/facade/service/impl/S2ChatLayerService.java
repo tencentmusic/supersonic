@@ -89,7 +89,7 @@ public class S2ChatLayerService implements ChatLayerService {
     public ParseResp parse(QueryNLReq queryNLReq) {
         ParseResp parseResult = new ParseResp(queryNLReq.getQueryText());
         ChatQueryContext queryCtx = buildChatQueryContext(queryNLReq);
-        chatWorkflowEngine.execute(queryCtx, parseResult);
+        chatWorkflowEngine.start(queryCtx, parseResult);
         return parseResult;
     }
 
