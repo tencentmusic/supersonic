@@ -15,6 +15,7 @@ import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.api.pojo.SemanticSchema;
 import com.tencent.supersonic.headless.api.pojo.SqlEvaluation;
 import com.tencent.supersonic.headless.api.pojo.SqlInfo;
+import com.tencent.supersonic.headless.api.pojo.enums.ChatWorkflowState;
 import com.tencent.supersonic.headless.api.pojo.request.QueryMapReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryNLReq;
 import com.tencent.supersonic.headless.api.pojo.request.QuerySqlReq;
@@ -87,7 +88,11 @@ public class S2ChatLayerService implements ChatLayerService {
     public ParseResp parse(QueryNLReq queryNLReq) {
         ParseResp parseResult = new ParseResp(queryNLReq.getQueryText());
         ChatQueryContext queryCtx = buildChatQueryContext(queryNLReq);
-        chatWorkflowEngine.start(queryCtx, parseResult);
+        if (queryCtx.getMapInfo().isEmpty()) {
+            chatWorkflowEngine.start(ChatWorkflowState.MAPPING, queryCtx, parseResult);
+        } else {
+            chatWorkflowEngine.start(ChatWorkflowState.PARSING, queryCtx, parseResult);
+        }
         return parseResult;
     }
 
@@ -113,6 +118,7 @@ public class S2ChatLayerService implements ChatLayerService {
         Map<Long, List<Long>> modelIdToDataSetIds = dataSetService.getModelIdToDataSetIds();
         queryCtx.setSemanticSchema(semanticSchema);
         queryCtx.setModelIdToDataSetIds(modelIdToDataSetIds);
+
         return queryCtx;
     }
 

@@ -15,6 +15,10 @@ public class SchemaMapInfo {
 
     private final Map<Long, List<SchemaElementMatch>> dataSetElementMatches = new HashMap<>();
 
+    public boolean isEmpty() {
+        return dataSetElementMatches.keySet().isEmpty();
+    }
+
     public Set<Long> getMatchedDataSetInfos() {
         return dataSetElementMatches.keySet();
     }

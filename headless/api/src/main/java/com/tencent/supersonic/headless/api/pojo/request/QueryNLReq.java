@@ -28,6 +28,7 @@ public class QueryNLReq extends SemanticQueryReq {
     private Map<String, ChatApp> chatAppConfig;
     private List<Text2SQLExemplar> dynamicExemplars = Lists.newArrayList();
     private SemanticParseInfo contextParseInfo;
+    private SemanticParseInfo selectedParseInfo;
 
     @Override
     public String toCustomizedString() {

@@ -19,4 +19,6 @@ public class ChatParseReq {
     private QueryFilters queryFilters;
     private boolean saveAnswer = true;
     private boolean disableLLM = false;
+    private Long queryId;
+    private Integer parseId;
 }

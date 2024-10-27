@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.headless.api.pojo.DataSetSchema;
 import com.tencent.supersonic.headless.api.pojo.SchemaMapInfo;
+import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.api.pojo.SemanticSchema;
 import com.tencent.supersonic.headless.api.pojo.enums.ChatWorkflowState;
 import com.tencent.supersonic.headless.api.pojo.request.QueryNLReq;
@@ -15,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Data
@@ -35,6 +37,10 @@ public class ChatQueryContext {
 
     public ChatQueryContext(QueryNLReq request) {
         this.request = request;
+        SemanticParseInfo parseInfo = request.getSelectedParseInfo();
+        if (Objects.nonNull(parseInfo) && Objects.nonNull(parseInfo.getDataSetId())) {
+            mapInfo.setMatchedElements(parseInfo.getDataSetId(), parseInfo.getElementMatches());
+        }
     }
 
     public List<SemanticQuery> getCandidateQueries() {

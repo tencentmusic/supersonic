@@ -36,13 +36,14 @@ public class ChatWorkflowEngine {
             ComponentFactory.getSemanticCorrectors();
     private final List<ResultProcessor> resultProcessors = ComponentFactory.getResultProcessors();
 
-    public void start(ChatQueryContext queryCtx, ParseResp parseResult) {
-        queryCtx.setChatWorkflowState(ChatWorkflowState.MAPPING);
+    public void start(ChatWorkflowState initialState, ChatQueryContext queryCtx,
+            ParseResp parseResult) {
+        queryCtx.setChatWorkflowState(initialState);
         while (queryCtx.getChatWorkflowState() != ChatWorkflowState.FINISHED) {
             switch (queryCtx.getChatWorkflowState()) {
                 case MAPPING:
                     performMapping(queryCtx);
-                    if (queryCtx.getMapInfo().getMatchedDataSetInfos().isEmpty()) {
+                    if (queryCtx.getMapInfo().isEmpty()) {
                         parseResult.setState(ParseResp.ParseState.FAILED);
                         parseResult.setErrorMsg(
                                 "No semantic entities can be mapped against user question.");

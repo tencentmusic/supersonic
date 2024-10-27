@@ -168,6 +168,12 @@ public class ChatQueryServiceImpl implements ChatQueryService {
         ParseContext parseContext = new ParseContext(chatParseReq);
         Agent agent = agentService.getAgent(chatParseReq.getAgentId());
         parseContext.setAgent(agent);
+        if (Objects.nonNull(chatParseReq.getQueryId())
+                && Objects.nonNull(chatParseReq.getParseId())) {
+            SemanticParseInfo parseInfo = chatManageService.getParseInfo(chatParseReq.getQueryId(),
+                    chatParseReq.getParseId());
+            parseContext.setSelectedParseInfo(parseInfo);
+        }
         return parseContext;
     }
 
