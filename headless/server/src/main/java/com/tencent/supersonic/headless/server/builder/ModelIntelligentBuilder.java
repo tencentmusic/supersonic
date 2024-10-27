@@ -1,5 +1,6 @@
 package com.tencent.supersonic.headless.server.builder;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tencent.supersonic.common.pojo.ChatApp;
 import com.tencent.supersonic.common.pojo.ChatModelConfig;
 import com.tencent.supersonic.common.pojo.enums.AppModule;
@@ -12,8 +13,11 @@ import dev.langchain4j.model.input.Prompt;
 import dev.langchain4j.model.input.PromptTemplate;
 import dev.langchain4j.service.AiServices;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
 
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,6 +28,8 @@ import java.util.Optional;
 public class ModelIntelligentBuilder extends IntelligentBuilder {
 
     public static final String APP_KEY = "BUILD_DATA_MODEL";
+
+    private static final String SYS_EXEMPLAR_FILE = "s2-buildModel-exemplar.json";
 
     public static final String INSTRUCTION = ""
             + "Role: As an experienced data analyst with extensive modeling experience, "
@@ -44,11 +50,15 @@ public class ModelIntelligentBuilder extends IntelligentBuilder {
             + "\nDBSchema: {{DBSchema}}" + "\nOtherRelatedDBSchema: {{otherRelatedDBSchema}}"
             + "\nExemplar: {{exemplar}}";
 
+    private final ObjectMapper objectMapper = JsonUtil.INSTANCE.getObjectMapper();
+
+    @Value("${s2.model.building.exemplars.enabled:true}")
+    private Boolean enableExemplarLoading;
+
     public ModelIntelligentBuilder() {
         ChatAppManager.register(APP_KEY, ChatApp.builder().prompt(INSTRUCTION).name("构造数据语义模型")
                 .appModule(AppModule.HEADLESS).description("通过大模型来构造数据语义模型").enable(true).build());
     }
-
 
     interface ModelSchemaExtractor {
         ModelSchema generateModelSchema(String text);
@@ -67,7 +77,8 @@ public class ModelIntelligentBuilder extends IntelligentBuilder {
         Prompt prompt = generatePrompt(dbSchema, otherDbSchema, chatApp.get());
         ModelSchema modelSchema =
                 extractor.generateModelSchema(prompt.toUserMessage().singleText());
-        log.info("dbSchema:  {} modelSchema: {}", JsonUtil.toString(dbSchema),
+        log.info("dbSchema:  {}\n otherRelatedDBSchema:{}\n modelSchema: {}",
+                JsonUtil.toString(dbSchema), JsonUtil.toString(otherDbSchema),
                 JsonUtil.toString(modelSchema));
         return modelSchema;
     }
@@ -82,7 +93,20 @@ public class ModelIntelligentBuilder extends IntelligentBuilder {
     }
 
     private String loadExemplars() {
-        // to add
+        if (!enableExemplarLoading) {
+            log.info("Not enable load model-building exemplars");
+            return "";
+        }
+        try {
+            ClassPathResource resource = new ClassPathResource(SYS_EXEMPLAR_FILE);
+            if (resource.exists()) {
+                InputStream inputStream = resource.getInputStream();
+                return objectMapper
+                        .writeValueAsString(objectMapper.readValue(inputStream, Object.class));
+            }
+        } catch (Exception e) {
+            log.error("Failed to load model-building system exemplars", e);
+        }
         return "";
     }
 

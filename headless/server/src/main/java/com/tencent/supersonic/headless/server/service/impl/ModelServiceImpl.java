@@ -103,7 +103,7 @@ public class ModelServiceImpl implements ModelService {
     private ModelRelaService modelRelaService;
 
     ExecutorService executor =
-            new ThreadPoolExecutor(0, 5, 100L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
+            new ThreadPoolExecutor(0, 5, 5L, TimeUnit.SECONDS, new LinkedBlockingQueue<>());
 
     public ModelServiceImpl(ModelRepository modelRepository, DatabaseService databaseService,
             @Lazy DimensionService dimensionService, @Lazy MetricService metricService,
@@ -219,12 +219,11 @@ public class ModelServiceImpl implements ModelService {
     @Override
     public Map<String, ModelSchema> buildModelSchema(ModelBuildReq modelBuildReq)
             throws SQLException {
-        Map<String, List<DBColumn>> dbColumnMap = databaseService.getDbColumns(modelBuildReq);
         if (modelBuildReq.isBuildByLLM() && modelBuildReq.getChatModelConfig() == null) {
             ChatModel chatModel = chatModelService.getChatModel(modelBuildReq.getChatModelId());
             modelBuildReq.setChatModelConfig(chatModel.getConfig());
         }
-        List<DbSchema> dbSchemas = convert(dbColumnMap, modelBuildReq);
+        List<DbSchema> dbSchemas = getDbSchemes(modelBuildReq);
         Map<String, ModelSchema> modelSchemaMap = new ConcurrentHashMap<>();
         CompletableFuture.allOf(dbSchemas.stream()
                 .map(dbSchema -> CompletableFuture.runAsync(
@@ -244,6 +243,11 @@ public class ModelServiceImpl implements ModelService {
         } else {
             modelSchemaMap.put(curSchema.getTable(), build(curSchema.getDbColumns()));
         }
+    }
+
+    private List<DbSchema> getDbSchemes(ModelBuildReq modelBuildReq) throws SQLException {
+        Map<String, List<DBColumn>> dbColumnMap = databaseService.getDbColumns(modelBuildReq);
+        return convert(dbColumnMap, modelBuildReq);
     }
 
     private List<DbSchema> getOtherDbSchema(DbSchema curSchema, List<DbSchema> dbSchemas) {
