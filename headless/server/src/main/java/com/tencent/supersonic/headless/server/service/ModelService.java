@@ -8,8 +8,8 @@ import com.tencent.supersonic.headless.api.pojo.MetaFilter;
 import com.tencent.supersonic.headless.api.pojo.ModelSchema;
 import com.tencent.supersonic.headless.api.pojo.request.FieldRemovedReq;
 import com.tencent.supersonic.headless.api.pojo.request.MetaBatchReq;
+import com.tencent.supersonic.headless.api.pojo.request.ModelBuildReq;
 import com.tencent.supersonic.headless.api.pojo.request.ModelReq;
-import com.tencent.supersonic.headless.api.pojo.request.ModelSchemaReq;
 import com.tencent.supersonic.headless.api.pojo.response.DatabaseResp;
 import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
 import com.tencent.supersonic.headless.api.pojo.response.UnAvailableItemResp;
@@ -35,7 +35,7 @@ public interface ModelService {
 
     UnAvailableItemResp getUnAvailableItem(FieldRemovedReq fieldRemovedReq);
 
-    Map<String, ModelSchema> buildModelSchema(ModelSchemaReq modelSchemaReq) throws SQLException;
+    Map<String, ModelSchema> buildModelSchema(ModelBuildReq modelBuildReq) throws SQLException;
 
     List<ModelResp> getModelListWithAuth(User user, Long domainId, AuthType authType);
 

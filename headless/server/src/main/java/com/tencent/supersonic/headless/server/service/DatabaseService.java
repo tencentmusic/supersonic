@@ -3,7 +3,7 @@ package com.tencent.supersonic.headless.server.service;
 import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.headless.api.pojo.DBColumn;
 import com.tencent.supersonic.headless.api.pojo.request.DatabaseReq;
-import com.tencent.supersonic.headless.api.pojo.request.ModelSchemaReq;
+import com.tencent.supersonic.headless.api.pojo.request.ModelBuildReq;
 import com.tencent.supersonic.headless.api.pojo.request.SqlExecuteReq;
 import com.tencent.supersonic.headless.api.pojo.response.DatabaseResp;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
@@ -37,7 +37,7 @@ public interface DatabaseService {
 
     List<String> getTables(Long id, String db) throws SQLException;
 
-    Map<String, List<DBColumn>> getDbColumns(ModelSchemaReq modelSchemaReq) throws SQLException;
+    Map<String, List<DBColumn>> getDbColumns(ModelBuildReq modelBuildReq) throws SQLException;
 
     List<DBColumn> getColumns(Long id, String db, String table) throws SQLException;
 
