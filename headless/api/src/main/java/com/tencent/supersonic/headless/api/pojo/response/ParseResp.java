@@ -1,6 +1,7 @@
 package com.tencent.supersonic.headless.api.pojo.response;
 
 import com.google.common.collect.Lists;
+import com.tencent.supersonic.common.pojo.Text2SQLExemplar;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import lombok.Data;
 
@@ -16,6 +17,7 @@ public class ParseResp {
     private String errorMsg;
     private List<SemanticParseInfo> selectedParses = Lists.newArrayList();
     private ParseTimeCostResp parseTimeCost = new ParseTimeCostResp();
+    private List<Text2SQLExemplar> usedExemplars;
 
     public enum ParseState {
         COMPLETED, PENDING, FAILED

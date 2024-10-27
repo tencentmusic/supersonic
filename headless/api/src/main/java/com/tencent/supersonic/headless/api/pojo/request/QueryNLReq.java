@@ -31,6 +31,15 @@ public class QueryNLReq extends SemanticQueryReq {
 
     @Override
     public String toCustomizedString() {
-        return "";
+        StringBuilder stringBuilder = new StringBuilder("{");
+        stringBuilder.append("\"queryText\":").append(dataSetId);
+        stringBuilder.append("\"dataSetId\":").append(dataSetId);
+        stringBuilder.append("\"modelIds\":").append(modelIds);
+        stringBuilder.append(",\"params\":").append(params);
+        stringBuilder.append(",\"cacheInfo\":").append(cacheInfo);
+        stringBuilder.append(",\"mapMode\":").append(mapModeEnum);
+        stringBuilder.append(",\"dataType\":").append(queryDataType);
+        stringBuilder.append('}');
+        return stringBuilder.toString();
     }
 }

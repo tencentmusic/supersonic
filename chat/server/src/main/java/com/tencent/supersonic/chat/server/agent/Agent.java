@@ -42,7 +42,11 @@ public class Agent extends RecordInfo {
     }
 
     public boolean enableSearch() {
-        return enableSearch != null && enableSearch == 1;
+        return enableSearch == 1;
+    }
+
+    public boolean enableFeedback() {
+        return enableFeedback == 1;
     }
 
     public boolean enableMemoryReview() {

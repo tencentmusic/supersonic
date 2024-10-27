@@ -12,13 +12,13 @@ import lombok.ToString;
 @AllArgsConstructor
 @NoArgsConstructor
 public class SchemaElementMatch {
-    SchemaElement element;
-    double offset;
-    double similarity;
-    String detectWord;
-    String word;
-    Long frequency;
-    boolean isInherited;
+    private SchemaElement element;
+    private double offset;
+    private double similarity;
+    private String detectWord;
+    private String word;
+    private Long frequency;
+    private boolean isInherited;
 
     public boolean isFullMatched() {
         return 1.0 == similarity;

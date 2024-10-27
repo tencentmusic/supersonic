@@ -64,11 +64,9 @@ public class S2ChatLayerService implements ChatLayerService {
 
     @Override
     public MapResp map(QueryNLReq queryNLReq) {
-        MapResp mapResp = new MapResp(queryNLReq.getQueryText());
         ChatQueryContext queryCtx = buildChatQueryContext(queryNLReq);
         ComponentFactory.getSchemaMappers().forEach(mapper -> mapper.map(queryCtx));
-        mapResp.setMapInfo(queryCtx.getMapInfo());
-        return mapResp;
+        return new MapResp(queryNLReq.getQueryText(), queryCtx.getMapInfo());
     }
 
     @Override
