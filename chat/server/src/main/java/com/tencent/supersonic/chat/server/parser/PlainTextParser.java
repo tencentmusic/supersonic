@@ -7,14 +7,14 @@ import com.tencent.supersonic.headless.api.pojo.response.ParseResp;
 public class PlainTextParser implements ChatQueryParser {
 
     @Override
-    public void parse(ParseContext parseContext, ParseResp parseResp) {
+    public void parse(ParseContext parseContext) {
         if (parseContext.getAgent().containsAnyTool()) {
             return;
         }
 
         SemanticParseInfo parseInfo = new SemanticParseInfo();
         parseInfo.setQueryMode("PLAIN_TEXT");
-        parseResp.getSelectedParses().add(parseInfo);
-        parseResp.setState(ParseResp.ParseState.COMPLETED);
+        parseContext.getResponse().getSelectedParses().add(parseInfo);
+        parseContext.getResponse().setState(ParseResp.ParseState.COMPLETED);
     }
 }

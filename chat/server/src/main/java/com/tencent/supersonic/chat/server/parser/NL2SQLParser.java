@@ -1,5 +1,6 @@
 package com.tencent.supersonic.chat.server.parser;
 
+import com.tencent.supersonic.chat.api.pojo.request.ChatParseReq;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResp;
 import com.tencent.supersonic.chat.server.plugin.PluginQueryManager;
 import com.tencent.supersonic.chat.server.pojo.ChatContext;
@@ -90,7 +91,7 @@ public class NL2SQLParser implements ChatQueryParser {
     }
 
     @Override
-    public void parse(ParseContext parseContext, ParseResp parseResp) {
+    public void parse(ParseContext parseContext) {
         if (!parseContext.enableNL2SQL() || Objects.isNull(parseContext.getAgent())) {
             return;
         }
@@ -98,14 +99,15 @@ public class NL2SQLParser implements ChatQueryParser {
         if (Objects.isNull(queryNLReq)) {
             return;
         }
+        ParseResp parseResp = parseContext.getResponse();
+        ChatParseReq parseReq = parseContext.getRequest();
 
         if (!parseContext.getRequest().isDisableLLM()) {
             processMultiTurn(parseContext);
         }
 
         ChatContextService chatContextService = ContextUtils.getBean(ChatContextService.class);
-        ChatContext chatCtx =
-                chatContextService.getOrCreateContext(parseContext.getRequest().getChatId());
+        ChatContext chatCtx = chatContextService.getOrCreateContext(parseReq.getChatId());
         if (chatCtx != null) {
             queryNLReq.setContextParseInfo(chatCtx.getParseInfo());
         }
@@ -116,7 +118,7 @@ public class NL2SQLParser implements ChatQueryParser {
         if (ParseResp.ParseState.COMPLETED.equals(text2SqlParseResp.getState())) {
             parseResp.getSelectedParses().addAll(text2SqlParseResp.getSelectedParses());
         } else {
-            if (!parseContext.getRequest().isDisableLLM()) {
+            if (!parseReq.isDisableLLM()) {
                 parseResp.setErrorMsg(rewriteErrorMessage(parseContext,
                         text2SqlParseResp.getErrorMsg(), queryNLReq.getDynamicExemplars()));
             }

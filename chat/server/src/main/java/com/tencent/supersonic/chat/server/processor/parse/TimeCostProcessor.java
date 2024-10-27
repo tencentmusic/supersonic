@@ -9,7 +9,8 @@ import lombok.extern.slf4j.Slf4j;
 public class TimeCostProcessor implements ParseResultProcessor {
 
     @Override
-    public void process(ParseContext parseContext, ParseResp parseResp) {
+    public void process(ParseContext parseContext) {
+        ParseResp parseResp = parseContext.getResponse();
         long parseStartTime = parseResp.getParseTimeCost().getParseStartTime();
         parseResp.getParseTimeCost().setParseTime(System.currentTimeMillis() - parseStartTime
                 - parseResp.getParseTimeCost().getSqlTime());

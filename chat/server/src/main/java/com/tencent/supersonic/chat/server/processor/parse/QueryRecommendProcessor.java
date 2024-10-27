@@ -10,7 +10,6 @@ import com.tencent.supersonic.common.config.EmbeddingConfig;
 import com.tencent.supersonic.common.pojo.Text2SQLExemplar;
 import com.tencent.supersonic.common.service.ExemplarService;
 import com.tencent.supersonic.common.util.ContextUtils;
-import com.tencent.supersonic.headless.api.pojo.response.ParseResp;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
@@ -23,13 +22,13 @@ import java.util.stream.Collectors;
 public class QueryRecommendProcessor implements ParseResultProcessor {
 
     @Override
-    public void process(ParseContext parseContext, ParseResp parseResp) {
-        CompletableFuture.runAsync(() -> doProcess(parseResp, parseContext));
+    public void process(ParseContext parseContext) {
+        CompletableFuture.runAsync(() -> doProcess(parseContext));
     }
 
     @SneakyThrows
-    private void doProcess(ParseResp parseResp, ParseContext parseContext) {
-        Long queryId = parseResp.getQueryId();
+    private void doProcess(ParseContext parseContext) {
+        Long queryId = parseContext.getResponse().getQueryId();
         List<SimilarQueryRecallResp> solvedQueries = getSimilarQueries(
                 parseContext.getRequest().getQueryText(), parseContext.getAgent().getId());
         ChatQueryDO chatQueryDO = getChatQuery(queryId);

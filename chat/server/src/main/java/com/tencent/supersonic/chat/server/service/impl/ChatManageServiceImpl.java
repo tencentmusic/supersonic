@@ -93,9 +93,8 @@ public class ChatManageServiceImpl implements ChatManageService {
     }
 
     @Override
-    public void createChatQuery(ChatParseReq chatParseReq, ParseResp parseResp) {
-        Long queryId = chatQueryRepository.createChatQuery(chatParseReq);
-        parseResp.setQueryId(queryId);
+    public Long createChatQuery(ChatParseReq chatParseReq) {
+        return chatQueryRepository.createChatQuery(chatParseReq);
     }
 
     @Override

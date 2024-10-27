@@ -120,7 +120,7 @@ public class RetrieveServiceImpl implements RetrieveService {
         return searchResults.stream().limit(RESULT_SIZE).collect(Collectors.toList());
     }
 
-    private List<Long> getPossibleDataSets(QueryNLReq queryCtx, List<S2Term> originals,
+    private List<Long> getPossibleDataSets(QueryNLReq queryReq, List<S2Term> originals,
             Set<Long> dataSetIds) {
         if (CollectionUtils.isNotEmpty(dataSetIds)) {
             return new ArrayList<>(dataSetIds);
@@ -128,8 +128,8 @@ public class RetrieveServiceImpl implements RetrieveService {
 
         List<Long> possibleDataSets = NatureHelper.selectPossibleDataSets(originals);
         if (possibleDataSets.isEmpty()) {
-            if (Objects.nonNull(queryCtx.getContextParseInfo())) {
-                possibleDataSets.add(queryCtx.getContextParseInfo().getDataSetId());
+            if (Objects.nonNull(queryReq.getContextParseInfo())) {
+                possibleDataSets.add(queryReq.getContextParseInfo().getDataSetId());
             }
         }
 

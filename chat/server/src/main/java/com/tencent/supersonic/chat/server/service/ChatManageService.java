@@ -31,7 +31,7 @@ public interface ChatManageService {
 
     PageInfo<QueryResp> queryInfo(PageQueryInfoReq pageQueryInfoReq, long chatId);
 
-    void createChatQuery(ChatParseReq chatParseReq, ParseResp parseResp);
+    Long createChatQuery(ChatParseReq chatParseReq);
 
     QueryResp getChatQuery(Long queryId);
 

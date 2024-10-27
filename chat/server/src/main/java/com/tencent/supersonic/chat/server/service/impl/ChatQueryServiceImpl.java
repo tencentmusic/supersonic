@@ -105,15 +105,16 @@ public class ChatQueryServiceImpl implements ChatQueryService {
 
     @Override
     public ParseResp parse(ChatParseReq chatParseReq) {
-        ParseResp parseResp = new ParseResp(chatParseReq.getQueryText());
-        chatManageService.createChatQuery(chatParseReq, parseResp);
         ParseContext parseContext = buildParseContext(chatParseReq);
+        ParseResp parseResp = parseContext.getResponse();
+        Long queryId = chatManageService.createChatQuery(chatParseReq);
+        parseResp.setQueryId(queryId);
 
         for (ChatQueryParser parser : chatQueryParsers) {
-            parser.parse(parseContext, parseResp);
+            parser.parse(parseContext);
         }
         for (ParseResultProcessor processor : parseResultProcessors) {
-            processor.process(parseContext, parseResp);
+            processor.process(parseContext);
         }
 
         chatParseReq.setQueryText(parseContext.getRequest().getQueryText());

@@ -31,7 +31,7 @@ import java.util.Set;
 /** PluginParser defines the basic process and common methods for recalling plugins. */
 public abstract class PluginRecognizer {
 
-    public void recognize(ParseContext parseContext, ParseResp parseResp) {
+    public void recognize(ParseContext parseContext) {
         if (!checkPreCondition(parseContext)) {
             return;
         }
@@ -39,7 +39,7 @@ public abstract class PluginRecognizer {
         if (pluginRecallResult == null) {
             return;
         }
-        buildQuery(parseContext, parseResp, pluginRecallResult);
+        buildQuery(parseContext, parseContext.getResponse(), pluginRecallResult);
     }
 
     public abstract boolean checkPreCondition(ParseContext parseContext);
