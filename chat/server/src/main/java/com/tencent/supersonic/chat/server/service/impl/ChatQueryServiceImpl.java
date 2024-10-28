@@ -119,6 +119,13 @@ public class ChatQueryServiceImpl implements ChatQueryService {
             chatManageService.updateParseCostTime(parseContext.getResponse());
         }
 
+        // no need for explicit user feedback if there is only one candidate parses
+        if (parseContext.needFeedback() && parseContext.getResponse().getSelectedParses().size() == 1) {
+            chatParseReq.setQueryId(parseContext.getResponse().getQueryId());
+            chatParseReq.setSelectedParse(parseContext.getResponse().getSelectedParses().get(0));
+            return parse(chatParseReq);
+        }
+
         return parseContext.getResponse();
     }
 
