@@ -1,5 +1,6 @@
 package com.tencent.supersonic.chat.server.parser;
 
+import com.tencent.supersonic.chat.api.pojo.response.ChatParseResp;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResp;
 import com.tencent.supersonic.chat.server.pojo.ChatContext;
 import com.tencent.supersonic.chat.server.pojo.ParseContext;
@@ -92,28 +93,27 @@ public class NL2SQLParser implements ChatQueryParser {
             addDynamicExemplars(parseContext, queryNLReq);
         }
 
-        ParseResp parseResp = parseContext.getResponse();
-        doParse(queryNLReq, parseResp);
+        doParse(queryNLReq, parseContext.getResponse());
     }
 
     private void processFeedback(ParseContext parseContext) {
         QueryNLReq queryNLReq = QueryReqConverter.buildQueryNLReq(parseContext);
-        ParseResp parseResp = parseContext.getResponse();
+        ChatParseResp parseResp = parseContext.getResponse();
         for (MapModeEnum mode : MapModeEnum.values()) {
             queryNLReq.setMapModeEnum(mode);
             doParse(queryNLReq, parseResp);
         }
     }
 
-    private void doParse(QueryNLReq req, ParseResp resp) {
+    private void doParse(QueryNLReq req, ChatParseResp resp) {
         ChatLayerService chatLayerService = ContextUtils.getBean(ChatLayerService.class);
-        ParseResp text2SqlParseResp = chatLayerService.parse(req);
-        if (text2SqlParseResp.getState().equals(ParseResp.ParseState.COMPLETED)) {
-            resp.getSelectedParses().addAll(text2SqlParseResp.getSelectedParses());
+        ParseResp parseResp = chatLayerService.parse(req);
+        if (parseResp.getState().equals(ParseResp.ParseState.COMPLETED)) {
+            resp.getSelectedParses().addAll(parseResp.getSelectedParses());
         }
-        resp.setState(text2SqlParseResp.getState());
-        resp.setParseTimeCost(text2SqlParseResp.getParseTimeCost());
-        resp.setErrorMsg(text2SqlParseResp.getErrorMsg());
+        resp.setState(parseResp.getState());
+        resp.setParseTimeCost(parseResp.getParseTimeCost());
+        resp.setErrorMsg(parseResp.getErrorMsg());
     }
 
     private void rewriteMultiTurn(ParseContext parseContext, QueryNLReq queryNLReq) {

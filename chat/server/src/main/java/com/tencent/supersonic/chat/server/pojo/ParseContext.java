@@ -1,6 +1,7 @@
 package com.tencent.supersonic.chat.server.pojo;
 
 import com.tencent.supersonic.chat.api.pojo.request.ChatParseReq;
+import com.tencent.supersonic.chat.api.pojo.response.ChatParseResp;
 import com.tencent.supersonic.chat.server.agent.Agent;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.api.pojo.response.ParseResp;
@@ -11,13 +12,12 @@ import java.util.Objects;
 @Data
 public class ParseContext {
     private ChatParseReq request;
-    private ParseResp response;
+    private ChatParseResp response;
     private Agent agent;
     private SemanticParseInfo selectedParseInfo;
 
     public ParseContext(ChatParseReq request) {
         this.request = request;
-        response = new ParseResp(request.getQueryText());
     }
 
     public boolean enableNL2SQL() {

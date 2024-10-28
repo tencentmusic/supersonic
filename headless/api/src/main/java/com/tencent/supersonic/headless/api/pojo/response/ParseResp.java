@@ -12,12 +12,10 @@ import java.util.stream.Collectors;
 @Data
 public class ParseResp {
     private final String queryText;
-    private Long queryId;
     private ParseState state = ParseState.PENDING;
     private String errorMsg;
     private List<SemanticParseInfo> selectedParses = Lists.newArrayList();
     private ParseTimeCostResp parseTimeCost = new ParseTimeCostResp();
-    private List<Text2SQLExemplar> usedExemplars;
 
     public enum ParseState {
         COMPLETED, PENDING, FAILED

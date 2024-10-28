@@ -7,6 +7,7 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.tencent.supersonic.chat.api.pojo.request.ChatParseReq;
 import com.tencent.supersonic.chat.api.pojo.request.PageQueryInfoReq;
+import com.tencent.supersonic.chat.api.pojo.response.ChatParseResp;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResp;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.chat.api.pojo.response.SimilarQueryRecallResp;
@@ -144,10 +145,10 @@ public class ChatQueryRepositoryImpl implements ChatQueryRepository {
     }
 
     @Override
-    public List<ChatParseDO> batchSaveParseInfo(ChatParseReq chatParseReq, ParseResp parseResult,
-            List<SemanticParseInfo> candidateParses) {
+    public List<ChatParseDO> batchSaveParseInfo(ChatParseReq chatParseReq,
+            ChatParseResp chatParseResp, List<SemanticParseInfo> candidateParses) {
         List<ChatParseDO> chatParseDOList = new ArrayList<>();
-        getChatParseDO(chatParseReq, parseResult.getQueryId(), candidateParses, chatParseDOList);
+        getChatParseDO(chatParseReq, chatParseResp.getQueryId(), candidateParses, chatParseDOList);
         if (!CollectionUtils.isEmpty(candidateParses)) {
             chatParseMapper.batchSaveParseInfo(chatParseDOList);
         }

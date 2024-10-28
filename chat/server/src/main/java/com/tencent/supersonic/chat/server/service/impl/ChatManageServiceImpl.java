@@ -5,6 +5,7 @@ import com.github.pagehelper.PageInfo;
 import com.tencent.supersonic.chat.api.pojo.request.ChatExecuteReq;
 import com.tencent.supersonic.chat.api.pojo.request.ChatParseReq;
 import com.tencent.supersonic.chat.api.pojo.request.PageQueryInfoReq;
+import com.tencent.supersonic.chat.api.pojo.response.ChatParseResp;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResp;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.chat.api.pojo.response.ShowCaseResp;
@@ -192,16 +193,16 @@ public class ChatManageServiceImpl implements ChatManageService {
     }
 
     @Override
-    public void updateParseCostTime(ParseResp parseResp) {
-        ChatQueryDO chatQueryDO = chatQueryRepository.getChatQueryDO(parseResp.getQueryId());
-        chatQueryDO.setParseTimeCost(JsonUtil.toString(parseResp.getParseTimeCost()));
+    public void updateParseCostTime(ChatParseResp chatParseResp) {
+        ChatQueryDO chatQueryDO = chatQueryRepository.getChatQueryDO(chatParseResp.getQueryId());
+        chatQueryDO.setParseTimeCost(JsonUtil.toString(chatParseResp.getParseTimeCost()));
         updateQuery(chatQueryDO);
     }
 
     @Override
-    public List<ChatParseDO> batchAddParse(ChatParseReq chatParseReq, ParseResp parseResult) {
-        List<SemanticParseInfo> candidateParses = parseResult.getSelectedParses();
-        return chatQueryRepository.batchSaveParseInfo(chatParseReq, parseResult, candidateParses);
+    public List<ChatParseDO> batchAddParse(ChatParseReq chatParseReq, ChatParseResp chatParseResp) {
+        List<SemanticParseInfo> candidateParses = chatParseResp.getSelectedParses();
+        return chatQueryRepository.batchSaveParseInfo(chatParseReq, chatParseResp, candidateParses);
     }
 
     private String getCurrentTime() {

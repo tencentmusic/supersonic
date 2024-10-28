@@ -2,6 +2,7 @@ package com.tencent.supersonic.chat.server.plugin.recognize;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.tencent.supersonic.chat.api.pojo.response.ChatParseResp;
 import com.tencent.supersonic.chat.server.plugin.ChatPlugin;
 import com.tencent.supersonic.chat.server.plugin.PluginManager;
 import com.tencent.supersonic.chat.server.plugin.PluginParseResult;
@@ -46,7 +47,7 @@ public abstract class PluginRecognizer {
 
     public abstract PluginRecallResult recallPlugin(ParseContext parseContext);
 
-    public void buildQuery(ParseContext parseContext, ParseResp parseResp,
+    public void buildQuery(ParseContext parseContext, ChatParseResp parseResp,
             PluginRecallResult pluginRecallResult) {
         ChatPlugin plugin = pluginRecallResult.getPlugin();
         Set<Long> dataSetIds = pluginRecallResult.getDataSetIds();

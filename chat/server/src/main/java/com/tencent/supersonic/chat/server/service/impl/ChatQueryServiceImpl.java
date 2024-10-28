@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import com.tencent.supersonic.chat.api.pojo.request.ChatExecuteReq;
 import com.tencent.supersonic.chat.api.pojo.request.ChatParseReq;
 import com.tencent.supersonic.chat.api.pojo.request.ChatQueryDataReq;
+import com.tencent.supersonic.chat.api.pojo.response.ChatParseResp;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.chat.server.agent.Agent;
 import com.tencent.supersonic.chat.server.executor.ChatQueryExecutor;
@@ -104,11 +105,10 @@ public class ChatQueryServiceImpl implements ChatQueryService {
     }
 
     @Override
-    public ParseResp parse(ChatParseReq chatParseReq) {
+    public ChatParseResp parse(ChatParseReq chatParseReq) {
         ParseContext parseContext = buildParseContext(chatParseReq);
-        ParseResp parseResp = parseContext.getResponse();
         Long queryId = chatManageService.createChatQuery(chatParseReq);
-        parseResp.setQueryId(queryId);
+        parseContext.setResponse(new ChatParseResp(queryId));
 
         for (ChatQueryParser parser : chatQueryParsers) {
             parser.parse(parseContext);
@@ -118,9 +118,9 @@ public class ChatQueryServiceImpl implements ChatQueryService {
         }
 
         chatParseReq.setQueryText(parseContext.getRequest().getQueryText());
-        chatManageService.batchAddParse(chatParseReq, parseResp);
-        chatManageService.updateParseCostTime(parseResp);
-        return parseResp;
+        chatManageService.batchAddParse(chatParseReq, parseContext.getResponse());
+        chatManageService.updateParseCostTime(parseContext.getResponse());
+        return parseContext.getResponse();
     }
 
     @Override
@@ -146,7 +146,7 @@ public class ChatQueryServiceImpl implements ChatQueryService {
 
     @Override
     public QueryResult parseAndExecute(ChatParseReq chatParseReq) {
-        ParseResp parseResp = parse(chatParseReq);
+        ChatParseResp parseResp = parse(chatParseReq);
         if (CollectionUtils.isEmpty(parseResp.getSelectedParses())) {
             log.debug("chatId:{}, agentId:{}, queryText:{}, parseResp.getSelectedParses() is empty",
                     chatParseReq.getChatId(), chatParseReq.getAgentId(),
