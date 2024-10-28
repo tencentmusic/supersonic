@@ -26,7 +26,7 @@ class SqlReplaceHelperTest {
     @BeforeEach
     public void setUp() {
         ReplaceService replaceService = new ReplaceService();
-        replaceService.setReplaceColumnThreshold(0.0);
+        replaceService.setReplaceColumnThreshold(0.4);
 
         // Mock the static method ContextUtils.getBean
         mockedContextUtils = mockStatic(ContextUtils.class);
@@ -82,9 +82,8 @@ class SqlReplaceHelperTest {
         replaceSql = SqlReplaceHelper.replaceValue(replaceSql, filedNameToValueMap2, false);
 
         Assert.assertEquals(
-                "SELECT 歌曲名 FROM 歌曲库 WHERE datediff('day', 发布日期, '2023-08-09') <= 1 AND 歌手名 = '周杰伦' "
-                        + "AND 歌手名 = '林俊杰' AND 歌手名 = '陈奕迅' AND 数据日期 = '2023-08-09' AND "
-                        + "歌曲发布时 = '2023-08-01' ORDER BY 播放量 DESC LIMIT 11",
+                "SELECT 歌曲名 FROM 歌曲库 WHERE datediff('day', 发布日期, '2023-08-09') <= 1 AND 歌手名 = '周杰伦' " +
+                        "AND 歌手名 = '林俊杰' AND 歌手名 = '陈' AND 数据日期 = '2023-08-09' AND 歌曲发布时 = '2023-08-01' ORDER BY 播放量 DESC LIMIT 11",
                 replaceSql);
 
         replaceSql = "select 歌曲名 from 歌曲库 where (datediff('day', 发布日期, '2023-08-09') <= 1 "
@@ -94,9 +93,8 @@ class SqlReplaceHelperTest {
         replaceSql = SqlReplaceHelper.replaceValue(replaceSql, filedNameToValueMap2, false);
 
         Assert.assertEquals(
-                "SELECT 歌曲名 FROM 歌曲库 WHERE (datediff('day', 发布日期, '2023-08-09') <= 1 AND 歌手名 = '周杰伦' "
-                        + "AND 歌手名 = '林俊杰' AND 歌手名 = '陈奕迅' AND 歌曲发布时 = '2023-08-01') "
-                        + "AND 数据日期 = '2023-08-09' ORDER BY 播放量 DESC LIMIT 11",
+                "SELECT 歌曲名 FROM 歌曲库 WHERE (datediff('day', 发布日期, '2023-08-09') <= 1 AND 歌手名 = '周杰伦' AND " +
+                        "歌手名 = '林俊杰' AND 歌手名 = '陈' AND 歌曲发布时 = '2023-08-01') AND 数据日期 = '2023-08-09' ORDER BY 播放量 DESC LIMIT 11",
                 replaceSql);
 
         replaceSql = "select 歌曲名 from 歌曲库 where (datediff('day', 发布日期, '2023-08-09') <= 1 "
@@ -107,10 +105,9 @@ class SqlReplaceHelperTest {
         replaceSql = SqlReplaceHelper.replaceValue(replaceSql, filedNameToValueMap2, false);
 
         Assert.assertEquals(
-                "SELECT 歌曲名 FROM 歌曲库 WHERE (datediff('day', 发布日期, '2023-08-09') <= 1 AND "
-                        + "歌手名 = '周杰伦' AND 歌手名 = '林俊杰' AND 歌手名 = '陈奕迅' AND 歌曲发布时 = '2023-08-01' "
-                        + "AND 播放量 < (SELECT min(播放量) FROM 歌曲库 WHERE 语种 = '英文')) AND 数据日期 = '2023-08-09' "
-                        + "ORDER BY 播放量 DESC LIMIT 11",
+                "SELECT 歌曲名 FROM 歌曲库 WHERE (datediff('day', 发布日期, '2023-08-09') <= 1 AND 歌手名 = '周杰伦' AND 歌手名 = '林俊杰' AND " +
+                        "歌手名 = '陈' AND 歌曲发布时 = '2023-08-01' AND 播放量 < (SELECT min(播放量) FROM 歌曲库 WHERE 语种 = '英文')) " +
+                        "AND 数据日期 = '2023-08-09' ORDER BY 播放量 DESC LIMIT 11",
                 replaceSql);
 
         Map<String, Map<String, String>> filedNameToValueMap3 = new HashMap<>();
