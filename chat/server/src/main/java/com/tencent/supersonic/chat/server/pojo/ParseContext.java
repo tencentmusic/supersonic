@@ -3,7 +3,6 @@ package com.tencent.supersonic.chat.server.pojo;
 import com.tencent.supersonic.chat.api.pojo.request.ChatParseReq;
 import com.tencent.supersonic.chat.api.pojo.response.ChatParseResp;
 import com.tencent.supersonic.chat.server.agent.Agent;
-import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import lombok.Data;
 
 import java.util.Objects;
@@ -20,14 +19,24 @@ public class ParseContext {
     }
 
     public boolean enableNL2SQL() {
-        return agent.containsDatasetTool();
-    }
-
-    public boolean needFeedback() {
-        return agent.enableFeedback() && Objects.isNull(request.getSelectedParse());
+        return Objects.nonNull(agent) && agent.containsDatasetTool();
     }
 
     public boolean enableLLM() {
-        return !(needFeedback() || request.isDisableLLM());
+        return !request.isDisableLLM();
+    }
+
+    public boolean needFeedback() {
+        return agent.enableFeedback() && (Objects.isNull(request.getSelectedParse())
+                && response.getSelectedParses().size() > 1);
+    }
+
+    public boolean needRuleParse() {
+        return Objects.isNull(request.getSelectedParse());
+    }
+
+    public boolean needLLMParse() {
+        return enableLLM() && (Objects.nonNull(request.getSelectedParse())
+                || !response.getSelectedParses().isEmpty());
     }
 }

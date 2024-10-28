@@ -11,6 +11,7 @@ import com.tencent.supersonic.common.config.EmbeddingConfig;
 import com.tencent.supersonic.common.pojo.ChatApp;
 import com.tencent.supersonic.common.pojo.Text2SQLExemplar;
 import com.tencent.supersonic.common.pojo.enums.AppModule;
+import com.tencent.supersonic.common.pojo.enums.Text2SQLType;
 import com.tencent.supersonic.common.service.impl.ExemplarServiceImpl;
 import com.tencent.supersonic.common.util.ChatAppManager;
 import com.tencent.supersonic.common.util.ContextUtils;
@@ -73,11 +74,7 @@ public class NL2SQLParser implements ChatQueryParser {
 
     @Override
     public void parse(ParseContext parseContext) {
-        if (!parseContext.enableNL2SQL() || Objects.isNull(parseContext.getAgent())) {
-            return;
-        }
-        if (parseContext.needFeedback()) {
-            processFeedback(parseContext);
+        if (!parseContext.enableNL2SQL()) {
             return;
         }
 
@@ -88,20 +85,25 @@ public class NL2SQLParser implements ChatQueryParser {
         if (chatCtx != null && Objects.isNull(queryNLReq.getContextParseInfo())) {
             queryNLReq.setContextParseInfo(chatCtx.getParseInfo());
         }
-        if (parseContext.enableLLM()) {
-            rewriteMultiTurn(parseContext, queryNLReq);
-            addDynamicExemplars(parseContext, queryNLReq);
+
+        if (parseContext.needRuleParse()) {
+            queryNLReq.setText2SQLType(Text2SQLType.ONLY_RULE);
+            ChatParseResp parseResp = parseContext.getResponse();
+            for (MapModeEnum mode : MapModeEnum.values()) {
+                queryNLReq.setMapModeEnum(mode);
+                doParse(queryNLReq, parseResp);
+            }
         }
 
-        doParse(queryNLReq, parseContext.getResponse());
-    }
-
-    private void processFeedback(ParseContext parseContext) {
-        QueryNLReq queryNLReq = QueryReqConverter.buildQueryNLReq(parseContext);
-        ChatParseResp parseResp = parseContext.getResponse();
-        for (MapModeEnum mode : MapModeEnum.values()) {
-            queryNLReq.setMapModeEnum(mode);
-            doParse(queryNLReq, parseResp);
+        if (parseContext.needLLMParse() && !parseContext.needFeedback()) {
+            SemanticParseInfo selectedParse = parseContext.getRequest().getSelectedParse();
+            queryNLReq.setSelectedParseInfo(Objects.nonNull(selectedParse) ? selectedParse
+                    : parseContext.getResponse().getSelectedParses().get(0));
+            queryNLReq.setText2SQLType(Text2SQLType.RULE_AND_LLM);
+            parseContext.getResponse().getSelectedParses().clear();
+            rewriteMultiTurn(parseContext, queryNLReq);
+            addDynamicExemplars(parseContext, queryNLReq);
+            doParse(queryNLReq, parseContext.getResponse());
         }
     }
 

@@ -24,7 +24,7 @@ public class ParseInfoSortProcessor implements ParseResultProcessor {
             }
         });
 
-        Collections.sort(sortedParseInfo, (o1, o2) -> o1.getScore() - o2.getScore() >= 0 ? 1 : 0);
+        sortedParseInfo.sort((o1, o2) -> o1.getScore() - o2.getScore() > 0 ? 1 : 0);
         parseContext.getResponse().setSelectedParses(sortedParseInfo);
     }
 }
