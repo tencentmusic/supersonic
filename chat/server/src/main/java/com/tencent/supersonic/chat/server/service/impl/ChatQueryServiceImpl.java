@@ -37,7 +37,6 @@ import com.tencent.supersonic.headless.api.pojo.request.DimensionValueReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryFilter;
 import com.tencent.supersonic.headless.api.pojo.request.QueryNLReq;
 import com.tencent.supersonic.headless.api.pojo.request.SemanticQueryReq;
-import com.tencent.supersonic.headless.api.pojo.response.ParseResp;
 import com.tencent.supersonic.headless.api.pojo.response.QueryState;
 import com.tencent.supersonic.headless.api.pojo.response.SearchResult;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
@@ -95,7 +94,7 @@ public class ChatQueryServiceImpl implements ChatQueryService {
 
     @Override
     public List<SearchResult> search(ChatParseReq chatParseReq) {
-        ParseContext parseContext = buildParseContext(chatParseReq);
+        ParseContext parseContext = buildParseContext(chatParseReq, null);
         Agent agent = parseContext.getAgent();
         if (!agent.enableSearch()) {
             return Lists.newArrayList();
@@ -106,20 +105,20 @@ public class ChatQueryServiceImpl implements ChatQueryService {
 
     @Override
     public ChatParseResp parse(ChatParseReq chatParseReq) {
-        ParseContext parseContext = buildParseContext(chatParseReq);
-        Long queryId = chatManageService.createChatQuery(chatParseReq);
-        parseContext.setResponse(new ChatParseResp(queryId));
-
-        for (ChatQueryParser parser : chatQueryParsers) {
-            parser.parse(parseContext);
-        }
-        for (ParseResultProcessor processor : parseResultProcessors) {
-            processor.process(parseContext);
+        Long queryId = chatParseReq.getQueryId();
+        if (Objects.isNull(queryId)) {
+            queryId = chatManageService.createChatQuery(chatParseReq);
         }
 
-        chatParseReq.setQueryText(parseContext.getRequest().getQueryText());
-        chatManageService.batchAddParse(chatParseReq, parseContext.getResponse());
-        chatManageService.updateParseCostTime(parseContext.getResponse());
+        ParseContext parseContext = buildParseContext(chatParseReq, new ChatParseResp(queryId));
+        chatQueryParsers.forEach(p -> p.parse(parseContext));
+        parseResultProcessors.forEach(p -> p.process(parseContext));
+
+        if (!parseContext.needFeedback()) {
+            chatManageService.batchAddParse(chatParseReq, parseContext.getResponse());
+            chatManageService.updateParseCostTime(parseContext.getResponse());
+        }
+
         return parseContext.getResponse();
     }
 
@@ -164,16 +163,10 @@ public class ChatQueryServiceImpl implements ChatQueryService {
         return execute(executeReq);
     }
 
-    private ParseContext buildParseContext(ChatParseReq chatParseReq) {
-        ParseContext parseContext = new ParseContext(chatParseReq);
+    private ParseContext buildParseContext(ChatParseReq chatParseReq, ChatParseResp chatParseResp) {
+        ParseContext parseContext = new ParseContext(chatParseReq, chatParseResp);
         Agent agent = agentService.getAgent(chatParseReq.getAgentId());
         parseContext.setAgent(agent);
-        if (Objects.nonNull(chatParseReq.getQueryId())
-                && Objects.nonNull(chatParseReq.getParseId())) {
-            SemanticParseInfo parseInfo = chatManageService.getParseInfo(chatParseReq.getQueryId(),
-                    chatParseReq.getParseId());
-            parseContext.setSelectedParseInfo(parseInfo);
-        }
         return parseContext;
     }
 

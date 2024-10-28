@@ -3,6 +3,7 @@ package com.tencent.supersonic.headless.core.cache;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.headless.api.pojo.request.SemanticQueryReq;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -18,7 +19,10 @@ public class DefaultQueryCache implements QueryCache {
         CacheManager cacheManager = ContextUtils.getBean(CacheManager.class);
         if (isCache(semanticQueryReq)) {
             Object result = cacheManager.get(cacheKey);
-            log.info("query from cache, key:{},result:{}", cacheKey, result);
+            if (Objects.nonNull(result)) {
+                log.info("query from cache, key:{},result:{}", cacheKey,
+                        StringUtils.normalizeSpace(result.toString()));
+            }
             return result;
         }
         return null;

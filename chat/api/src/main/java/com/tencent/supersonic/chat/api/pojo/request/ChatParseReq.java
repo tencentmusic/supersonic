@@ -1,6 +1,7 @@
 package com.tencent.supersonic.chat.api.pojo.request;
 
 import com.tencent.supersonic.common.pojo.User;
+import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.api.pojo.request.QueryFilters;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -20,5 +21,5 @@ public class ChatParseReq {
     private boolean saveAnswer = true;
     private boolean disableLLM = false;
     private Long queryId;
-    private Integer parseId;
+    private SemanticParseInfo selectedParse;
 }

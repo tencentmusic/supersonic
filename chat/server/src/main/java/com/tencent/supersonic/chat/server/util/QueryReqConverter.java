@@ -14,7 +14,7 @@ public class QueryReqConverter {
                 parseContext.enableLLM() ? Text2SQLType.RULE_AND_LLM : Text2SQLType.ONLY_RULE);
         queryNLReq.setDataSetIds(parseContext.getAgent().getDataSetIds());
         queryNLReq.setChatAppConfig(parseContext.getAgent().getChatAppConfig());
-        queryNLReq.setSelectedParseInfo(parseContext.getSelectedParseInfo());
+        queryNLReq.setSelectedParseInfo(parseContext.getRequest().getSelectedParse());
 
         return queryNLReq;
     }

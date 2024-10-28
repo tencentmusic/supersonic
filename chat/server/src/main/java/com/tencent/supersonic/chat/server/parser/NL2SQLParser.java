@@ -76,7 +76,7 @@ public class NL2SQLParser implements ChatQueryParser {
         if (!parseContext.enableNL2SQL() || Objects.isNull(parseContext.getAgent())) {
             return;
         }
-        if (parseContext.enableFeedback()) {
+        if (parseContext.needFeedback()) {
             processFeedback(parseContext);
             return;
         }
