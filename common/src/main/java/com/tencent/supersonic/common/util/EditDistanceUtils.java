@@ -1,4 +1,4 @@
-package com.tencent.supersonic.common.jsqlparser;
+package com.tencent.supersonic.common.util;
 
 public class EditDistanceUtils {
 

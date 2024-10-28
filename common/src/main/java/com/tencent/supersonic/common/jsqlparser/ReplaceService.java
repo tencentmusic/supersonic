@@ -1,5 +1,6 @@
 package com.tencent.supersonic.common.jsqlparser;
 
+import com.tencent.supersonic.common.util.EditDistanceUtils;
 import com.tencent.supersonic.common.util.StringUtil;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -21,7 +22,7 @@ import java.util.stream.Collectors;
 @Data
 public class ReplaceService {
 
-    @Value("${s2.replace.column.threshold:0.4}")
+    @Value("${s2.replace.threshold:0.4}")
     private double replaceColumnThreshold;
 
     public void replaceFunction(Function expression, Map<String, String> fieldNameMap,
