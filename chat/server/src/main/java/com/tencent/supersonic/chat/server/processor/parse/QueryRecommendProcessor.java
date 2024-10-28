@@ -17,7 +17,9 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
-/** MetricRecommendProcessor fills recommended query based on embedding similarity. */
+/**
+ * MetricRecommendProcessor fills recommended query based on embedding similarity.
+ **/
 @Slf4j
 public class QueryRecommendProcessor implements ParseResultProcessor {
 

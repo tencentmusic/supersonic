@@ -67,14 +67,14 @@ com.tencent.supersonic.chat.server.plugin.recognize.PluginRecognizer=\
 
 com.tencent.supersonic.chat.server.processor.parse.ParseResultProcessor=\
     com.tencent.supersonic.chat.server.processor.parse.QueryRecommendProcessor,\
-    com.tencent.supersonic.chat.server.processor.parse.TimeCostProcessor,\
-    com.tencent.supersonic.chat.server.processor.parse.ErrorMessageProcessor,\
-    com.tencent.supersonic.chat.server.processor.parse.TextInfoProcessor
+    com.tencent.supersonic.chat.server.processor.parse.TimeCostCalcProcessor,\
+    com.tencent.supersonic.chat.server.processor.parse.ErrorMsgRewriteProcessor,\
+    com.tencent.supersonic.chat.server.processor.parse.ParseInfoFormatProcessor
 
 com.tencent.supersonic.chat.server.processor.execute.ExecuteResultProcessor=\
     com.tencent.supersonic.chat.server.processor.execute.MetricRecommendProcessor,\
     com.tencent.supersonic.chat.server.processor.execute.DimensionRecommendProcessor,\
-    com.tencent.supersonic.chat.server.processor.execute.MetricRatioProcessor,\
+    com.tencent.supersonic.chat.server.processor.execute.MetricRatioCalcProcessor,\
     com.tencent.supersonic.chat.server.processor.execute.DataInterpretProcessor
 
 ### auth-authentication SPIs

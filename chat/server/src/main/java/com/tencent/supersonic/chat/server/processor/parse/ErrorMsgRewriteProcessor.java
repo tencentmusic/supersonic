@@ -19,7 +19,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-public class ErrorMessageProcessor implements ParseResultProcessor {
+/**
+ * ErrorMsgRewriteProcessor rewrites error message to make it more readable to the users.
+ **/
+public class ErrorMsgRewriteProcessor implements ParseResultProcessor {
 
     private static final Logger keyPipelineLog = LoggerFactory.getLogger("keyPipeline");
 
@@ -33,7 +36,7 @@ public class ErrorMessageProcessor implements ParseResultProcessor {
             + "#Input: {{user_question}}\n" + "#Output: {{system_message}}\n"
             + "#Examples: {{examples}}\n" + "#Response: ";
 
-    public ErrorMessageProcessor() {
+    public ErrorMsgRewriteProcessor() {
         ChatAppManager.register(APP_KEY_ERROR_MESSAGE,
                 ChatApp.builder().prompt(REWRITE_ERROR_MESSAGE_INSTRUCTION).name("异常提示改写")
                         .appModule(AppModule.CHAT).description("通过大模型将异常信息改写为更友好和引导性的提示用语")

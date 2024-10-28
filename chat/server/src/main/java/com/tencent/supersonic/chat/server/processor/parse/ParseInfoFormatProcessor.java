@@ -13,7 +13,10 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class TextInfoProcessor implements ParseResultProcessor {
+/**
+ * ParseInfoFormatProcessor formats parse info to make it more readable to the users.
+ **/
+public class ParseInfoFormatProcessor implements ParseResultProcessor {
     @Override
     public void process(ParseContext parseContext) {
         parseContext.getResponse().getSelectedParses().forEach(p -> {

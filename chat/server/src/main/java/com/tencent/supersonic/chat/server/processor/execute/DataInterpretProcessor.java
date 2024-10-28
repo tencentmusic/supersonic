@@ -20,6 +20,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
+/**
+ * DataInterpretProcessor interprets query result to make it more readable to the users.
+ */
 public class DataInterpretProcessor implements ExecuteResultProcessor {
 
     private static final Logger keyPipelineLog = LoggerFactory.getLogger("keyPipeline");
