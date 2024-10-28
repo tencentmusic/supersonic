@@ -1,56 +1,61 @@
 package com.tencent.supersonic.chat.server.agent;
 
 import com.alibaba.fastjson.JSONObject;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import com.tencent.supersonic.chat.server.memory.MemoryReviewTask;
 import com.tencent.supersonic.common.pojo.ChatApp;
 import com.tencent.supersonic.common.pojo.RecordInfo;
 import lombok.Data;
 import org.springframework.util.CollectionUtils;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Data
 public class Agent extends RecordInfo {
 
+    private static final int ONLINE_STATUS = 1;
+    private static final int OFFLINE_STATUS = 0;
+    private static final int ENABLED = 1;
+    private static final int DISABLED = 0;
+
     private Integer id;
     private String name;
     private String description;
     /** 0 offline, 1 online */
-    private Integer status = 1;
+    private Integer status = ONLINE_STATUS;
     private List<String> examples;
-    private Integer enableSearch = 1;
-    private Integer enableFeedback = 0;
+    private Integer enableSearch = ENABLED;
+    private Integer enableFeedback = DISABLED;
     private String toolConfig;
-    private Map<String, ChatApp> chatAppConfig = Collections.EMPTY_MAP;
+    private Map<String, ChatApp> chatAppConfig = Collections.emptyMap();
     private VisualConfig visualConfig;
 
     public List<String> getTools(AgentToolType type) {
-        Map map = JSONObject.parseObject(toolConfig, Map.class);
+        Map<String, Object> map = JSONObject.parseObject(toolConfig, Map.class);
         if (CollectionUtils.isEmpty(map) || map.get("tools") == null) {
-            return Lists.newArrayList();
+            return Collections.emptyList();
         }
-        List<Map> toolList = (List) map.get("tools");
-        return toolList.stream().filter(tool -> {
-            if (Objects.isNull(type)) {
-                return true;
-            }
-            return type.name().equals(tool.get("type"));
-        }).map(JSONObject::toJSONString).collect(Collectors.toList());
+        List<Map<String, Object>> toolList = (List<Map<String, Object>>) map.get("tools");
+        return toolList.stream()
+                .filter(tool -> type == null || type.name().equals(tool.get("type")))
+                .map(JSONObject::toJSONString).collect(Collectors.toList());
     }
 
     public boolean enableSearch() {
-        return enableSearch == 1;
+        return enableSearch == ENABLED;
     }
 
     public boolean enableFeedback() {
-        return enableFeedback == 1;
+        return enableFeedback == ENABLED;
     }
 
     public boolean enableMemoryReview() {
-        return chatAppConfig.get(MemoryReviewTask.APP_KEY).isEnable();
+        ChatApp memoryReviewApp = chatAppConfig.get(MemoryReviewTask.APP_KEY);
+        return memoryReviewApp != null && memoryReviewApp.isEnable();
     }
 
     public static boolean containsAllModel(Set<Long> detectViewIds) {
@@ -60,7 +65,7 @@ public class Agent extends RecordInfo {
     public List<DatasetTool> getParserTools(AgentToolType agentToolType) {
         List<String> tools = this.getTools(agentToolType);
         if (CollectionUtils.isEmpty(tools)) {
-            return Lists.newArrayList();
+            return Collections.emptyList();
         }
         return tools.stream().map(tool -> JSONObject.parseObject(tool, DatasetTool.class))
                 .collect(Collectors.toList());
@@ -75,22 +80,18 @@ public class Agent extends RecordInfo {
     }
 
     public boolean containsAnyTool() {
-        Map map = JSONObject.parseObject(toolConfig, Map.class);
+        Map<String, Object> map = JSONObject.parseObject(toolConfig, Map.class);
         if (CollectionUtils.isEmpty(map)) {
             return false;
         }
-        List<Map> toolList = (List) map.get("tools");
-        if (CollectionUtils.isEmpty(toolList)) {
-            return false;
-        }
-
-        return true;
+        List<Map<String, Object>> toolList = (List<Map<String, Object>>) map.get("tools");
+        return !CollectionUtils.isEmpty(toolList);
     }
 
     public Set<Long> getDataSetIds() {
         Set<Long> dataSetIds = getDataSetIds(null);
         if (containsAllModel(dataSetIds)) {
-            return Sets.newHashSet();
+            return Collections.emptySet();
         }
         return dataSetIds;
     }
@@ -98,10 +99,10 @@ public class Agent extends RecordInfo {
     public Set<Long> getDataSetIds(AgentToolType agentToolType) {
         List<DatasetTool> commonAgentTools = getParserTools(agentToolType);
         if (CollectionUtils.isEmpty(commonAgentTools)) {
-            return new HashSet<>();
+            return Collections.emptySet();
         }
         return commonAgentTools.stream().map(DatasetTool::getDataSetIds)
-                .filter(modelIds -> !CollectionUtils.isEmpty(modelIds)).flatMap(Collection::stream)
-                .collect(Collectors.toSet());
+                .filter(dataSetIds -> !CollectionUtils.isEmpty(dataSetIds))
+                .flatMap(Collection::stream).collect(Collectors.toSet());
     }
 }
