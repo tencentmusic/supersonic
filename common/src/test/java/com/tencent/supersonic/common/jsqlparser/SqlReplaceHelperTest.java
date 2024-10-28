@@ -1,9 +1,13 @@
 package com.tencent.supersonic.common.jsqlparser;
 
 import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
+import com.tencent.supersonic.common.util.ContextUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Assert;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.MockedStatic;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -11,10 +15,25 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import static org.mockito.Mockito.mockStatic;
+
 /**
  * SqlParserReplaceHelperTest
  */
 class SqlReplaceHelperTest {
+    private MockedStatic<ContextUtils> mockedContextUtils;
+
+    @BeforeEach
+    public void setUp() {
+        ReplaceService replaceService = new ReplaceService();
+        replaceService.setReplaceColumnThreshold(0.0);
+
+        // Mock the static method ContextUtils.getBean
+        mockedContextUtils = mockStatic(ContextUtils.class);
+        mockedContextUtils.when(() -> ContextUtils.getBean(ReplaceService.class))
+                .thenReturn(replaceService);
+    }
+
     @Test
     void testReplaceAggField() {
         String sql = "SELECT 维度1,sum(播放量) FROM 数据库 "
@@ -333,5 +352,13 @@ class SqlReplaceHelperTest {
         fieldToBizName.put("歌曲发布年份", "song_publis_year");
         fieldToBizName.put("访问次数", "pv");
         return fieldToBizName;
+    }
+
+    @AfterEach
+    public void tearDown() {
+        // Close the mocked static context
+        if (mockedContextUtils != null) {
+            mockedContextUtils.close();
+        }
     }
 }
