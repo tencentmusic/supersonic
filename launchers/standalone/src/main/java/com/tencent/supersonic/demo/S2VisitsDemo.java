@@ -224,7 +224,7 @@ public class S2VisitsDemo extends S2BaseDemo {
         modelReq.setAdminOrgs(Collections.emptyList());
         List<Identify> identifiers = new ArrayList<>();
         ModelDetail modelDetail = new ModelDetail();
-        identifiers.add(new Identify("用户名", IdentifyType.primary.name(), "user_name", 0));
+        identifiers.add(new Identify("用户名", IdentifyType.foreign.name(), "user_name", 0));
         modelDetail.setIdentifiers(identifiers);
 
         List<Dim> dimensions = new ArrayList<>();
@@ -268,7 +268,7 @@ public class S2VisitsDemo extends S2BaseDemo {
         modelReq.setAdminOrgs(Collections.emptyList());
         List<Identify> identifiers = new ArrayList<>();
         ModelDetail modelDetail = new ModelDetail();
-        identifiers.add(new Identify("用户", IdentifyType.primary.name(), "user_name", 0));
+        identifiers.add(new Identify("用户", IdentifyType.foreign.name(), "user_name", 0));
         modelDetail.setIdentifiers(identifiers);
 
         List<Dim> dimensions = new ArrayList<>();

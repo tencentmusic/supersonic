@@ -116,7 +116,7 @@ public class DimensionConverter {
         try {
             // Support compatibility with legacy data.
             IdentifyType.valueOf(type.toLowerCase());
-            return DimensionType.identify;
+            return DimensionType.primary_key;
         } catch (IllegalArgumentException e) {
             return DimensionType.valueOf(type);
         }
