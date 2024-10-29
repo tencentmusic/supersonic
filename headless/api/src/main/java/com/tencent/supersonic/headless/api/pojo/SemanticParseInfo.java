@@ -98,6 +98,15 @@ public class SemanticParseInfo {
         }
     }
 
+    public static void sort(List<SemanticParseInfo> parses) {
+        parses.sort(new SemanticParseComparator());
+        // re-assign parseId
+        for (int i = 0; i < parses.size(); i++) {
+            SemanticParseInfo parseInfo = parses.get(i);
+            parseInfo.setId(i + 1);
+        }
+    }
+
     private static class SchemaNameLengthComparator implements Comparator<SchemaElement> {
         @Override
         public int compare(SchemaElement o1, SchemaElement o2) {

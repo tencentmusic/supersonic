@@ -104,6 +104,7 @@ public class NL2SQLParser implements ChatQueryParser {
                         .collect(Collectors.toList());
                 parseContext.getResponse().getSelectedParses().addAll(sortedParses);
             }
+            SemanticParseInfo.sort(parseContext.getResponse().getSelectedParses());
         }
 
         // next go with llm-based parsers unless LLM is disabled or use feedback is needed.

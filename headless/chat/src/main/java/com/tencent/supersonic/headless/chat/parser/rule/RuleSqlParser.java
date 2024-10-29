@@ -24,8 +24,7 @@ public class RuleSqlParser implements SemanticParser {
 
     @Override
     public void parse(ChatQueryContext chatQueryContext) {
-        if (!chatQueryContext.getRequest().getText2SQLType().enableRule()
-                || !chatQueryContext.getCandidateQueries().isEmpty()) {
+        if (!chatQueryContext.getCandidateQueries().isEmpty()) {
             return;
         }
         SchemaMapInfo mapInfo = chatQueryContext.getMapInfo();

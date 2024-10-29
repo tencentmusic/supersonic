@@ -25,12 +25,12 @@ public class LLMSqlParser implements SemanticParser {
     @Override
     public void parse(ChatQueryContext queryCtx) {
         try {
-            LLMRequestService requestService = ContextUtils.getBean(LLMRequestService.class);
             // 1.determine whether to skip this parser.
-            if (requestService.isSkip(queryCtx)) {
+            if (!queryCtx.getRequest().getText2SQLType().enableLLM()) {
                 return;
             }
             // 2.get dataSetId from queryCtx and chatCtx.
+            LLMRequestService requestService = ContextUtils.getBean(LLMRequestService.class);
             Long dataSetId = requestService.getDataSetId(queryCtx);
             if (dataSetId == null) {
                 return;

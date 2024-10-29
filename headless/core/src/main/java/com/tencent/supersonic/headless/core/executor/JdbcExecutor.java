@@ -45,7 +45,7 @@ public class JdbcExecutor implements QueryExecutor {
             sqlUtil.queryInternal(queryStatement.getSql(), queryResultWithColumns);
             queryResultWithColumns.setSql(sql);
         } catch (Exception e) {
-            log.error("queryInternal error [{}]", e);
+            log.error("queryInternal error [{}]", StringUtils.normalizeSpace(e.toString()));
             queryResultWithColumns.setErrorMsg(e.getMessage());
         }
         return queryResultWithColumns;
