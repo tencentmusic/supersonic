@@ -1,5 +1,6 @@
 import { isMobile } from '../../utils/utils';
-import { DislikeOutlined, LikeOutlined } from '@ant-design/icons';
+import { DislikeOutlined, LikeOutlined, DownloadOutlined, RedoOutlined } from '@ant-design/icons';
+import { Button } from 'antd';
 import { CLS_PREFIX } from '../../common/constants';
 import { useState } from 'react';
 import classNames from 'classnames';
@@ -9,11 +10,21 @@ type Props = {
   queryId: number;
   scoreValue?: number;
   isLastMessage?: boolean;
+  isParserError?: boolean;
+  onExportData?: () => void;
+  onReExecute?: (queryId: number) => void;
 };
 
-const Tools: React.FC<Props> = ({ queryId, scoreValue, isLastMessage }) => {
+const Tools: React.FC<Props> = ({
+  queryId,
+  scoreValue,
+  isLastMessage,
+  isParserError = false,
+  onExportData,
+  onReExecute,
+}) => {
   const [score, setScore] = useState(scoreValue || 0);
-
+  const [exportLoading, setExportLoading] = useState<boolean>(false);
   const prefixCls = `${CLS_PREFIX}-tools`;
 
   const like = () => {
@@ -37,15 +48,51 @@ const Tools: React.FC<Props> = ({ queryId, scoreValue, isLastMessage }) => {
     <div className={prefixCls}>
       {!isMobile && (
         <div className={`${prefixCls}-feedback`}>
-          <div>这个回答正确吗？</div>
-          <LikeOutlined className={likeClass} onClick={like} />
-          <DislikeOutlined
-            className={dislikeClass}
-            onClick={e => {
-              e.stopPropagation();
-              dislike();
-            }}
-          />
+          {/* <div>这个回答正确吗？</div> */}
+
+          <div className={`${prefixCls}-feedback-left`}>
+            {!isParserError && (
+              <>
+                <Button
+                  size="small"
+                  onClick={() => {
+                    setExportLoading(true);
+                    onExportData?.();
+                    setTimeout(() => {
+                      setExportLoading(false);
+                    }, 1000);
+                  }}
+                  type="text"
+                  loading={exportLoading}
+                >
+                  <DownloadOutlined />
+                  <span className={`${prefixCls}-font-style`}>导出数据</span>
+                </Button>
+                {isLastMessage && (
+                  <Button
+                    size="small"
+                    onClick={() => {
+                      onReExecute?.(queryId);
+                    }}
+                    type="text"
+                  >
+                    <RedoOutlined />
+                    <span className={`${prefixCls}-font-style`}>再试一次</span>
+                  </Button>
+                )}
+              </>
+            )}
+          </div>
+          <div className={`${prefixCls}-feedback-left`}>
+            <LikeOutlined className={likeClass} onClick={like} style={{ marginRight: 10 }} />
+            <DislikeOutlined
+              className={dislikeClass}
+              onClick={e => {
+                e.stopPropagation();
+                dislike();
+              }}
+            />
+          </div>
         </div>
       )}
     </div>

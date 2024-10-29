@@ -69,7 +69,7 @@ const MessageContainer: React.FC<Props> = ({
   return (
     <div id={id} className={messageContainerClass}>
       <div className={styles.messageList}>
-        {messageList.map((msgItem: MessageItem) => {
+        {messageList.map((msgItem: MessageItem, index: number) => {
           const {
             id: msgId,
             modelId,
@@ -96,6 +96,7 @@ const MessageContainer: React.FC<Props> = ({
                   <Text position="right" data={msg} />
                   {identityMsg && <Text position="left" data={identityMsg} />}
                   <ChatItem
+                    currentAgent={currentAgent}
                     isSimpleMode={isSimpleMode}
                     isDebugMode={isDebugMode}
                     msg={msgValue || msg || ''}
@@ -115,6 +116,7 @@ const MessageContainer: React.FC<Props> = ({
                     }}
                     onUpdateMessageScroll={updateMessageContainerScroll}
                     onSendMsg={onSendMsg}
+                    isLastMessage={index === messageList.length - 1}
                   />
                 </>
               )}

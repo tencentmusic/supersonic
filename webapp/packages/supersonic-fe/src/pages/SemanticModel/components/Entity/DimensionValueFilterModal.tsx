@@ -52,11 +52,13 @@ const DimensionValueFilterModal: React.FC<Props> = ({
             {[DimensionValueListType.BLACK_LIST, DimensionValueListType.WHITE_LIST].includes(
               listType,
             ) && (
-              <DimensionValueFilterTable
-                dataSource={knowledgeConfig?.config?.[listType]}
-                listType={listType}
-                onMenuClick={onMenuClick}
-              />
+              <div key={listType}>
+                <DimensionValueFilterTable
+                  dataSource={knowledgeConfig?.config?.[listType]}
+                  listType={listType}
+                  onMenuClick={onMenuClick}
+                />
+              </div>
             )}
             {DimensionValueListType.RULE_LIST === listType && (
               <div style={{ marginTop: 20 }}>
