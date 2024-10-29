@@ -88,7 +88,8 @@ public class NL2SQLParser implements ChatQueryParser {
             for (Long datasetId : requestedDatasets) {
                 queryNLReq.setDataSetIds(Collections.singleton(datasetId));
                 ChatParseResp parseResp = new ChatParseResp(parseContext.getRequest().getQueryId());
-                for (MapModeEnum mode : Lists.newArrayList(MapModeEnum.STRICT, MapModeEnum.MODERATE)) {
+                for (MapModeEnum mode : Lists.newArrayList(MapModeEnum.STRICT,
+                        MapModeEnum.MODERATE)) {
                     queryNLReq.setMapModeEnum(mode);
                     doParse(queryNLReq, parseResp);
                 }

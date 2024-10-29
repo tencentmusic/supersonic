@@ -25,7 +25,6 @@ import java.util.stream.Collectors;
 import static com.tencent.supersonic.headless.chat.mapper.MapperConfig.EMBEDDING_MAPPER_NUMBER;
 import static com.tencent.supersonic.headless.chat.mapper.MapperConfig.EMBEDDING_MAPPER_ROUND_NUMBER;
 import static com.tencent.supersonic.headless.chat.mapper.MapperConfig.EMBEDDING_MAPPER_THRESHOLD;
-import static com.tencent.supersonic.headless.chat.mapper.MapperConfig.EMBEDDING_MAPPER_THRESHOLD_MIN;
 
 /**
  * EmbeddingMatchStrategy uses vector database to perform similarity search against the embeddings
@@ -64,12 +63,8 @@ public class EmbeddingMatchStrategy extends BatchMatchStrategy<EmbeddingResult> 
     private List<EmbeddingResult> detectByQueryTextsSub(Set<Long> detectDataSetIds,
             List<String> queryTextsSub, ChatQueryContext chatQueryContext) {
         Map<Long, List<Long>> modelIdToDataSetIds = chatQueryContext.getModelIdToDataSetIds();
-        double embeddingThreshold =
+        double threshold =
                 Double.valueOf(mapperConfig.getParameterValue(EMBEDDING_MAPPER_THRESHOLD));
-        double embeddingThresholdMin =
-                Double.valueOf(mapperConfig.getParameterValue(EMBEDDING_MAPPER_THRESHOLD_MIN));
-        double threshold = getThreshold(embeddingThreshold, embeddingThresholdMin,
-                chatQueryContext.getRequest().getMapModeEnum());
 
         // step1. build query params
         RetrieveQuery retrieveQuery = RetrieveQuery.builder().queryTextsList(queryTextsSub).build();
