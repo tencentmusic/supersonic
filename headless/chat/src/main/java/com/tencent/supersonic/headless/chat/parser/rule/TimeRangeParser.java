@@ -5,9 +5,7 @@ import com.tencent.supersonic.common.pojo.enums.DatePeriodEnum;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.chat.ChatQueryContext;
 import com.tencent.supersonic.headless.chat.parser.SemanticParser;
-import com.tencent.supersonic.headless.chat.query.QueryManager;
 import com.tencent.supersonic.headless.chat.query.SemanticQuery;
-import com.tencent.supersonic.headless.chat.query.rule.RuleSemanticQuery;
 import com.xkzhangsan.time.nlp.TimeNLP;
 import com.xkzhangsan.time.nlp.TimeNLPUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -38,6 +36,10 @@ public class TimeRangeParser implements SemanticParser {
 
     @Override
     public void parse(ChatQueryContext queryContext) {
+        if (queryContext.getCandidateQueries().isEmpty()) {
+            return;
+        }
+
         String queryText = queryContext.getRequest().getQueryText();
         DateConf dateConf = parseRecent(queryText);
         if (dateConf == null) {
@@ -46,34 +48,18 @@ public class TimeRangeParser implements SemanticParser {
         if (dateConf == null) {
             dateConf = parseDateCN(queryText);
         }
-
         if (dateConf != null) {
             updateQueryContext(queryContext, dateConf);
         }
     }
 
     private void updateQueryContext(ChatQueryContext queryContext, DateConf dateConf) {
-        if (!queryContext.getCandidateQueries().isEmpty()) {
-            for (SemanticQuery query : queryContext.getCandidateQueries()) {
-                SemanticParseInfo parseInfo = query.getParseInfo();
-                if (queryContext.containsPartitionDimensions(parseInfo.getDataSetId())) {
-                    parseInfo.setDateInfo(dateConf);
-                }
-                parseInfo.setScore(parseInfo.getScore() + dateConf.getDetectWord().length());
+        for (SemanticQuery query : queryContext.getCandidateQueries()) {
+            SemanticParseInfo parseInfo = query.getParseInfo();
+            if (queryContext.containsPartitionDimensions(parseInfo.getDataSetId())) {
+                parseInfo.setDateInfo(dateConf);
             }
-        } else {
-            SemanticParseInfo contextParseInfo = queryContext.getRequest().getContextParseInfo();
-            if (QueryManager.containsRuleQuery(contextParseInfo.getQueryMode())) {
-                RuleSemanticQuery semanticQuery =
-                        QueryManager.createRuleQuery(contextParseInfo.getQueryMode());
-                if (queryContext.containsPartitionDimensions(contextParseInfo.getDataSetId())) {
-                    contextParseInfo.setDateInfo(dateConf);
-                }
-                contextParseInfo
-                        .setScore(contextParseInfo.getScore() + dateConf.getDetectWord().length());
-                semanticQuery.setParseInfo(contextParseInfo);
-                queryContext.getCandidateQueries().add(semanticQuery);
-            }
+            parseInfo.setScore(parseInfo.getScore() + dateConf.getDetectWord().length());
         }
     }
 
