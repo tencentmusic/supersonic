@@ -65,7 +65,6 @@ const MessageContainer: React.FC<Props> = ({
   }, [historyVisible, chatVisible]);
 
   const messageContainerClass = classNames(styles.messageContainer, { [styles.mobile]: isMobile });
-
   return (
     <div id={id} className={messageContainerClass}>
       <div className={styles.messageList}>

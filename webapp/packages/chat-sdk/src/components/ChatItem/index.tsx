@@ -334,7 +334,7 @@ const ChatItem: React.FC<Props> = ({
   };
 
   const deleteQueryInfo = async (queryId: number) => {
-    const { code, data } = await deleteQuery(queryId);
+    const { code }: any = await deleteQuery(queryId);
     if (code === 200) {
       resetState();
       initChatItem(msg, undefined);
