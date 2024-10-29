@@ -11,7 +11,7 @@ import { exportTextFile } from '../../utils/utils';
 
 type Props = {
   agentId?: number;
-  queryId: number;
+  queryId?: number;
   question: string;
   llmReq?: any;
   llmResp?: any;
