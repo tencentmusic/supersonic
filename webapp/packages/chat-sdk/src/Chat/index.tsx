@@ -405,6 +405,7 @@ const Chat: ForwardRefRenderFunction<any, Props> = (
                             <div className={styles.chatHeaderTip}>{currentAgent.description}</div>
                             <Tooltip title="精简模式下，问答结果将以文本形式输出">
                               <Switch
+                                key={currentAgent.id}
                                 style={{ position: 'relative', top: -1 }}
                                 size="small"
                                 value={isSimpleMode}

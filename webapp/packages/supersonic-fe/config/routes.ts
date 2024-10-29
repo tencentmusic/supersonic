@@ -42,12 +42,12 @@ const ROUTES = [
     component: './Agent',
     envEnableList: [ENV_KEY.CHAT],
   },
-  // {
-  //   path: '/plugin',
-  //   name: 'plugin',
-  //   component: './ChatPlugin',
-  //   envEnableList: [ENV_KEY.CHAT],
-  // },
+  {
+    path: '/plugin',
+    name: 'plugin',
+    component: './ChatPlugin',
+    envEnableList: [ENV_KEY.CHAT],
+  },
   {
     path: '/model/metric/edit/:metricId',
     name: 'metricEdit',

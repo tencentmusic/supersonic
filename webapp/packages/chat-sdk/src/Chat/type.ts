@@ -89,6 +89,7 @@ export type AgentType = {
   createdAt: string;
   updatedAt: string;
   enableSearch: number;
+  enableFeedback: number;
   toolConfig: string;
   modelConfig: {
     provider: string;

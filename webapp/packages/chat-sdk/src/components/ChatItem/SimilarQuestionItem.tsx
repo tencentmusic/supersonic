@@ -57,19 +57,23 @@ const SimilarQuestions: React.FC<Props> = ({
       <div className={prefixCls}>
         {expanded && (
           <div className={`${prefixCls}-content`}>
-            {similarQuestions?.slice(0, 5).map((question, index) => {
-              return (
-                <div
-                  className={`${prefixCls}-question`}
-                  key={question.queryText}
-                  onClick={() => {
-                    onSelectQuestion(question);
-                  }}
-                >
-                  {index + 1}. {question.queryText}
-                </div>
-              );
-            })}
+            {Array.isArray(similarQuestions) && similarQuestions.length > 0 ? (
+              similarQuestions?.slice(0, 5).map((question, index) => {
+                return (
+                  <div
+                    className={`${prefixCls}-question`}
+                    key={question.queryText}
+                    onClick={() => {
+                      onSelectQuestion(question);
+                    }}
+                  >
+                    {index + 1}. {question.queryText}
+                  </div>
+                );
+              })
+            ) : (
+              <>暂无推荐</>
+            )}
           </div>
         )}
       </div>
