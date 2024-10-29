@@ -36,12 +36,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.tencent.supersonic.headless.chat.parser.ParserConfig.PARSER_EXEMPLAR_RECALL_NUMBER;
@@ -78,29 +73,46 @@ public class NL2SQLParser implements ChatQueryParser {
             return;
         }
 
-        QueryNLReq queryNLReq = QueryReqConverter.buildQueryNLReq(parseContext);
-        ChatContextService chatContextService = ContextUtils.getBean(ChatContextService.class);
-        ChatContext chatCtx =
-                chatContextService.getOrCreateContext(parseContext.getRequest().getChatId());
-        if (chatCtx != null && Objects.isNull(queryNLReq.getContextParseInfo())) {
-            queryNLReq.setContextParseInfo(chatCtx.getParseInfo());
-        }
-
-        if (parseContext.needRuleParse()) {
+        // first go with rule-based parsers unless the user has already selected one parse.
+        if (Objects.isNull(parseContext.getRequest().getSelectedParse())) {
+            QueryNLReq queryNLReq = QueryReqConverter.buildQueryNLReq(parseContext);
             queryNLReq.setText2SQLType(Text2SQLType.ONLY_RULE);
-            ChatParseResp parseResp = parseContext.getResponse();
-            for (MapModeEnum mode : MapModeEnum.values()) {
-                queryNLReq.setMapModeEnum(mode);
-                doParse(queryNLReq, parseResp);
+
+            // inject semantic parse saved by in the chat context
+            ChatContextService chatContextService = ContextUtils.getBean(ChatContextService.class);
+            ChatContext chatCtx =
+                    chatContextService.getOrCreateContext(parseContext.getRequest().getChatId());
+            if (chatCtx != null && Objects.isNull(queryNLReq.getContextParseInfo())) {
+                queryNLReq.setContextParseInfo(chatCtx.getParseInfo());
+            }
+
+            // for every requested dataSet, recursively invoke rule-based parser
+            // with different mapModes, unless any valid semantic parse is derived.
+            Set<Long> requestedDatasets = queryNLReq.getDataSetIds();
+            for (Long datasetId : requestedDatasets) {
+                queryNLReq.setDataSetIds(Collections.singleton(datasetId));
+                ChatParseResp parseResp = parseContext.getResponse();
+                for (MapModeEnum mode : MapModeEnum.values()) {
+                    queryNLReq.setMapModeEnum(mode);
+                    doParse(queryNLReq, parseResp);
+                    if (!parseResp.getSelectedParses().isEmpty()) {
+                        break;
+                    }
+                }
             }
         }
 
+        // next go with llm-based parsers unless LLM is disabled or use feedback is needed.
         if (parseContext.needLLMParse() && !parseContext.needFeedback()) {
-            SemanticParseInfo selectedParse = parseContext.getRequest().getSelectedParse();
-            queryNLReq.setSelectedParseInfo(Objects.nonNull(selectedParse) ? selectedParse
+            QueryNLReq queryNLReq = QueryReqConverter.buildQueryNLReq(parseContext);
+            queryNLReq.setText2SQLType(Text2SQLType.LLM_OR_RULE);
+
+            // either the user or the system selects one parse from the candidate parses.
+            SemanticParseInfo userSelectParse = parseContext.getRequest().getSelectedParse();
+            queryNLReq.setSelectedParseInfo(Objects.nonNull(userSelectParse) ? userSelectParse
                     : parseContext.getResponse().getSelectedParses().get(0));
-            queryNLReq.setText2SQLType(Text2SQLType.RULE_AND_LLM);
-            parseContext.getResponse().getSelectedParses().clear();
+
+            parseContext.setResponse(new ChatParseResp(parseContext.getResponse().getQueryId()));
             rewriteMultiTurn(parseContext, queryNLReq);
             addDynamicExemplars(parseContext, queryNLReq);
             doParse(queryNLReq, parseContext.getResponse());

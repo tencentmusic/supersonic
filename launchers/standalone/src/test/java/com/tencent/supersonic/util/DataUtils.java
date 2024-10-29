@@ -40,6 +40,7 @@ public class DataUtils {
     public static ChatParseReq getChatParseReq(Integer id, String query, boolean enableLLM) {
         ChatParseReq chatParseReq = new ChatParseReq();
         chatParseReq.setQueryText(query);
+        chatParseReq.setAgentId(metricAgentId);
         chatParseReq.setChatId(id);
         chatParseReq.setUser(user_test);
         chatParseReq.setDisableLLM(!enableLLM);

@@ -22,4 +22,5 @@ public class ChatParseResp {
     public ChatParseResp(Long queryId) {
         this.queryId = queryId;
     }
+
 }
