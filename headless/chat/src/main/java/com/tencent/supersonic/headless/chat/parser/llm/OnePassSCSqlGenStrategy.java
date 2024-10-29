@@ -31,22 +31,22 @@ public class OnePassSCSqlGenStrategy extends SqlGenStrategy {
     private static final Logger keyPipelineLog = LoggerFactory.getLogger("keyPipeline");
 
     public static final String APP_KEY = "S2SQL_PARSER";
-    public static final String INSTRUCTION = ""
-            + "#Role: You are a data analyst experienced in SQL languages."
-            + "\n#Task: You will be provided with a natural language question asked by users,"
-            + "please convert it to a SQL query so that relevant data could be returned "
-            + "by executing the SQL query against underlying database." + "\n#Rules:"
-            + "\n1.ALWAYS generate columns and values specified in the `Schema`, DO NOT hallucinate."
-            + "\n2.ALWAYS be cautious, word in the `Schema` does not mean it must appear in the SQL."
-            + "\n3.ALWAYS specify date filter using `>`,`<`,`>=`,`<=` operator."
-            + "\n4.DO NOT include date filter in the where clause if not explicitly expressed in the `Question`."
-            + "\n5.DO NOT calculate date range using functions."
-            + "\n6.DO NOT miss the AGGREGATE operator of metrics, always add it as needed."
-            + "\n7.ALWAYS use `with` statement if nested aggregation is needed."
-            + "\n8.ALWAYS enclose alias created by `AS` command in underscores."
-            + "\n9.ALWAYS translate alias created by `AS` command to the same language as the `#Question`."
-            + "\n#Exemplars: {{exemplar}}"
-            + "\n#Query: Question:{{question}},Schema:{{schema}},SideInfo:{{information}}";
+    public static final String INSTRUCTION =
+            "#Role: You are a data analyst experienced in SQL languages."
+                    + "\n#Task: You will be provided with a natural language question asked by users,"
+                    + "please convert it to a SQL query so that relevant data could be returned "
+                    + "by executing the SQL query against underlying database." + "\n#Rules:"
+                    + "\n1.ALWAYS generate columns and values specified in the `Schema`, DO NOT hallucinate."
+                    + "\n2.ALWAYS be cautious, word in the `Schema` does not mean it must appear in the SQL."
+                    + "\n3.ALWAYS specify date filter using `>`,`<`,`>=`,`<=` operator."
+                    + "\n4.DO NOT include date filter in the where clause if not explicitly expressed in the `Question`."
+                    + "\n5.DO NOT calculate date range using functions."
+                    + "\n6.DO NOT miss the AGGREGATE operator of metrics, always add it as needed."
+                    + "\n7.ALWAYS use `with` statement if nested aggregation is needed."
+                    + "\n8.ALWAYS enclose alias created by `AS` command in underscores."
+                    + "\n9.ALWAYS translate alias created by `AS` command to the same language as the `#Question`."
+                    + "\n#Exemplars: {{exemplar}}"
+                    + "\n#Query: Question:{{question}},Schema:{{schema}},SideInfo:{{information}}";
 
     public OnePassSCSqlGenStrategy() {
         ChatAppManager.register(APP_KEY, ChatApp.builder().prompt(INSTRUCTION).name("语义SQL解析")

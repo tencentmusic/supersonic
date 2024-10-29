@@ -7,7 +7,6 @@ import com.tencent.supersonic.common.pojo.Text2SQLExemplar;
 import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.common.pojo.enums.Text2SQLType;
 import com.tencent.supersonic.headless.api.pojo.QueryDataType;
-import com.tencent.supersonic.headless.api.pojo.SchemaMapInfo;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.api.pojo.enums.MapModeEnum;
 import lombok.Data;
@@ -17,7 +16,7 @@ import java.util.Map;
 import java.util.Set;
 
 @Data
-public class QueryNLReq {
+public class QueryNLReq extends SemanticQueryReq {
     private String queryText;
     private Set<Long> dataSetIds = Sets.newHashSet();
     private User user;
@@ -25,9 +24,23 @@ public class QueryNLReq {
     private boolean saveAnswer = true;
     private Text2SQLType text2SQLType = Text2SQLType.RULE_AND_LLM;
     private MapModeEnum mapModeEnum = MapModeEnum.STRICT;
-    private SchemaMapInfo mapInfo = new SchemaMapInfo();
     private QueryDataType queryDataType = QueryDataType.ALL;
     private Map<String, ChatApp> chatAppConfig;
     private List<Text2SQLExemplar> dynamicExemplars = Lists.newArrayList();
     private SemanticParseInfo contextParseInfo;
+    private SemanticParseInfo selectedParseInfo;
+
+    @Override
+    public String toCustomizedString() {
+        StringBuilder stringBuilder = new StringBuilder("{");
+        stringBuilder.append("\"queryText\":").append(dataSetId);
+        stringBuilder.append("\"dataSetId\":").append(dataSetId);
+        stringBuilder.append("\"modelIds\":").append(modelIds);
+        stringBuilder.append(",\"params\":").append(params);
+        stringBuilder.append(",\"cacheInfo\":").append(cacheInfo);
+        stringBuilder.append(",\"mapMode\":").append(mapModeEnum);
+        stringBuilder.append(",\"dataType\":").append(queryDataType);
+        stringBuilder.append('}');
+        return stringBuilder.toString();
+    }
 }

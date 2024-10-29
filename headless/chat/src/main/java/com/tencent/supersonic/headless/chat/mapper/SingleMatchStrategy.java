@@ -24,7 +24,7 @@ public abstract class SingleMatchStrategy<T extends MapResult> extends BaseMatch
     public List<T> detect(ChatQueryContext chatQueryContext, List<S2Term> terms,
             Set<Long> detectDataSetIds) {
         Map<Integer, Integer> regOffsetToLength = mapperHelper.getRegOffsetToLength(terms);
-        String text = chatQueryContext.getQueryText();
+        String text = chatQueryContext.getRequest().getQueryText();
         Set<T> results = new HashSet<>();
 
         Set<String> detectSegments = new HashSet<>();

@@ -48,7 +48,7 @@ class WhereCorrectorTest {
         queryFilters.getFilters().add(filter2);
         queryFilters.getFilters().add(filter3);
         queryFilters.getFilters().add(filter4);
-        chatQueryContext.setQueryFilters(queryFilters);
+        chatQueryContext.getRequest().setQueryFilters(queryFilters);
 
         WhereCorrector whereCorrector = new WhereCorrector();
         whereCorrector.addQueryFilter(chatQueryContext, semanticParseInfo);

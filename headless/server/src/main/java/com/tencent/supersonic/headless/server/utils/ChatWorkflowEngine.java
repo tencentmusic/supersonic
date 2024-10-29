@@ -36,13 +36,14 @@ public class ChatWorkflowEngine {
             ComponentFactory.getSemanticCorrectors();
     private final List<ResultProcessor> resultProcessors = ComponentFactory.getResultProcessors();
 
-    public void execute(ChatQueryContext queryCtx, ParseResp parseResult) {
-        queryCtx.setChatWorkflowState(ChatWorkflowState.MAPPING);
+    public void start(ChatWorkflowState initialState, ChatQueryContext queryCtx,
+            ParseResp parseResult) {
+        queryCtx.setChatWorkflowState(initialState);
         while (queryCtx.getChatWorkflowState() != ChatWorkflowState.FINISHED) {
             switch (queryCtx.getChatWorkflowState()) {
                 case MAPPING:
                     performMapping(queryCtx);
-                    if (queryCtx.getMapInfo().getMatchedDataSetInfos().isEmpty()) {
+                    if (queryCtx.getMapInfo().isEmpty()) {
                         parseResult.setState(ParseResp.ParseState.FAILED);
                         parseResult.setErrorMsg(
                                 "No semantic entities can be mapped against user question.");
@@ -119,13 +120,11 @@ public class ChatWorkflowEngine {
     }
 
     private void performProcessing(ChatQueryContext queryCtx, ParseResp parseResult) {
-        resultProcessors.forEach(processor -> {
-            processor.process(parseResult, queryCtx);
-        });
+        resultProcessors.forEach(processor -> processor.process(parseResult, queryCtx));
     }
 
-    private void performTranslating(ChatQueryContext chatQueryContext, ParseResp parseResult) {
-        List<SemanticParseInfo> semanticParseInfos = chatQueryContext.getCandidateQueries().stream()
+    private void performTranslating(ChatQueryContext queryCtx, ParseResp parseResult) {
+        List<SemanticParseInfo> semanticParseInfos = queryCtx.getCandidateQueries().stream()
                 .map(SemanticQuery::getParseInfo).collect(Collectors.toList());
         List<String> errorMsg = new ArrayList<>();
         if (StringUtils.isNotBlank(parseResult.getErrorMsg())) {
@@ -142,7 +141,7 @@ public class ChatWorkflowEngine {
                 SemanticLayerService queryService =
                         ContextUtils.getBean(SemanticLayerService.class);
                 SemanticTranslateResp explain =
-                        queryService.translate(semanticQueryReq, chatQueryContext.getUser());
+                        queryService.translate(semanticQueryReq, queryCtx.getRequest().getUser());
                 parseInfo.getSqlInfo().setQuerySQL(explain.getQuerySQL());
                 if (StringUtils.isNotBlank(explain.getErrMsg())) {
                     errorMsg.add(explain.getErrMsg());
@@ -160,7 +159,7 @@ public class ChatWorkflowEngine {
             }
         });
         if (!errorMsg.isEmpty()) {
-            parseResult.setErrorMsg(errorMsg.stream().collect(Collectors.joining("\n")));
+            parseResult.setErrorMsg(String.join("\n", errorMsg));
         }
     }
 }

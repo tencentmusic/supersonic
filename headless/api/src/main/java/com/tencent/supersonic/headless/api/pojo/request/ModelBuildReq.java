@@ -6,7 +6,7 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-public class ModelSchemaReq {
+public class ModelBuildReq {
 
     private Long databaseId;
 

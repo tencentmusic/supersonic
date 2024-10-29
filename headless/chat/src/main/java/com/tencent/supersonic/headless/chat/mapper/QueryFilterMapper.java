@@ -25,7 +25,7 @@ public class QueryFilterMapper extends BaseMapper {
 
     @Override
     public void doMap(ChatQueryContext chatQueryContext) {
-        Set<Long> dataSetIds = chatQueryContext.getDataSetIds();
+        Set<Long> dataSetIds = chatQueryContext.getRequest().getDataSetIds();
         if (CollectionUtils.isEmpty(dataSetIds)) {
             return;
         }
@@ -53,7 +53,7 @@ public class QueryFilterMapper extends BaseMapper {
 
     private void addValueSchemaElementMatch(Long dataSetId, ChatQueryContext chatQueryContext,
             List<SchemaElementMatch> candidateElementMatches) {
-        QueryFilters queryFilters = chatQueryContext.getQueryFilters();
+        QueryFilters queryFilters = chatQueryContext.getRequest().getQueryFilters();
         if (queryFilters == null || CollectionUtils.isEmpty(queryFilters.getFilters())) {
             return;
         }

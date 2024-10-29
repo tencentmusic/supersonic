@@ -60,12 +60,12 @@ public class ContextInheritParser implements SemanticParser {
                 chatQueryContext.getMapInfo().getMatchedElements(dataSetId);
 
         List<SchemaElementMatch> matchesToInherit = new ArrayList<>();
-        for (SchemaElementMatch match : chatQueryContext.getContextParseInfo()
+        for (SchemaElementMatch match : chatQueryContext.getRequest().getContextParseInfo()
                 .getElementMatches()) {
             SchemaElementType matchType = match.getElement().getType();
             // mutual exclusive element types should not be inherited
-            RuleSemanticQuery ruleQuery = QueryManager
-                    .getRuleQuery(chatQueryContext.getContextParseInfo().getQueryMode());
+            RuleSemanticQuery ruleQuery = QueryManager.getRuleQuery(
+                    chatQueryContext.getRequest().getContextParseInfo().getQueryMode());
             if (!containsTypes(elementMatches, matchType, ruleQuery)) {
                 match.setInherited(true);
                 matchesToInherit.add(match);
@@ -121,10 +121,13 @@ public class ContextInheritParser implements SemanticParser {
     }
 
     protected Long getMatchedDataSet(ChatQueryContext chatQueryContext) {
-        Long dataSetId = chatQueryContext.getContextParseInfo().getDataSetId();
-        if (dataSetId == null) {
+        if (Objects.isNull(chatQueryContext)
+                || Objects.isNull(chatQueryContext.getRequest().getContextParseInfo())
+                || Objects.isNull(
+                        chatQueryContext.getRequest().getContextParseInfo().getDataSetId())) {
             return null;
         }
+        Long dataSetId = chatQueryContext.getRequest().getContextParseInfo().getDataSetId();
         Set<Long> queryDataSets = chatQueryContext.getMapInfo().getMatchedDataSetInfos();
         if (queryDataSets.contains(dataSetId)) {
             return dataSetId;

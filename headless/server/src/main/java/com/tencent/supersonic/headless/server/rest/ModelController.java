@@ -10,8 +10,8 @@ import com.tencent.supersonic.common.pojo.enums.AuthType;
 import com.tencent.supersonic.headless.api.pojo.ModelSchema;
 import com.tencent.supersonic.headless.api.pojo.request.FieldRemovedReq;
 import com.tencent.supersonic.headless.api.pojo.request.MetaBatchReq;
+import com.tencent.supersonic.headless.api.pojo.request.ModelBuildReq;
 import com.tencent.supersonic.headless.api.pojo.request.ModelReq;
-import com.tencent.supersonic.headless.api.pojo.request.ModelSchemaReq;
 import com.tencent.supersonic.headless.api.pojo.response.DatabaseResp;
 import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
 import com.tencent.supersonic.headless.api.pojo.response.UnAvailableItemResp;
@@ -111,8 +111,8 @@ public class ModelController {
     }
 
     @PostMapping("/buildModelSchema")
-    public Map<String, ModelSchema> buildModelSchema(@RequestBody ModelSchemaReq modelSchemaReq)
+    public Map<String, ModelSchema> buildModelSchema(@RequestBody ModelBuildReq modelBuildReq)
             throws SQLException {
-        return modelService.buildModelSchema(modelSchemaReq);
+        return modelService.buildModelSchema(modelBuildReq);
     }
 }

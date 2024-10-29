@@ -86,6 +86,8 @@ public class MultiCustomDictionary extends DynamicCustomDictionary {
                         line = IOUtil.removeUTF8BOM(line);
                         firstLine = false;
                     }
+                    // remove tab character
+                    line = line.replaceAll("\t", "");
 
                     param = line.split(splitter);
                 } while (param[0].length() == 0);

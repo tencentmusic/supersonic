@@ -50,7 +50,7 @@ public class PlainTextExecutor implements ChatQueryExecutor {
         }
 
         String promptStr = String.format(chatApp.getPrompt(), getHistoryInputs(executeContext),
-                executeContext.getQueryText());
+                executeContext.getRequest().getQueryText());
         Prompt prompt = PromptTemplate.from(promptStr).apply(Collections.EMPTY_MAP);
         ChatLanguageModel chatLanguageModel =
                 ModelProvider.getChatModel(chatApp.getChatModelConfig());
@@ -66,8 +66,8 @@ public class PlainTextExecutor implements ChatQueryExecutor {
 
     private String getHistoryInputs(ExecuteContext executeContext) {
         StringBuilder historyInput = new StringBuilder();
-        List<QueryResp> queryResps = getHistoryQueries(executeContext.getChatId(), 5);
-        queryResps.stream().forEach(p -> {
+        List<QueryResp> queryResps = getHistoryQueries(executeContext.getRequest().getChatId(), 5);
+        queryResps.forEach(p -> {
             historyInput.append(p.getQueryText());
             historyInput.append(";");
 

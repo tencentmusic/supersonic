@@ -33,7 +33,7 @@ public class MilvusEmbeddingStoreFactory extends BaseEmbeddingStoreFactory {
                 .port(storeProperties.getPort()).collectionName(collectionName)
                 .dimension(storeProperties.getDimension()).indexType(storeProperties.getIndexType())
                 .metricType(storeProperties.getMetricType()).uri(storeProperties.getUri())
-                .token(storeProperties.getToken()).username(storeProperties.getUsername())
+                .token(storeProperties.getToken()).username(storeProperties.getUser())
                 .password(storeProperties.getPassword())
                 .consistencyLevel(storeProperties.getConsistencyLevel())
                 .retrieveEmbeddingsOnSearch(storeProperties.getRetrieveEmbeddingsOnSearch())

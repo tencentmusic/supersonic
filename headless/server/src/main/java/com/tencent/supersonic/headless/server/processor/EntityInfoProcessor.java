@@ -26,7 +26,7 @@ public class EntityInfoProcessor implements ResultProcessor {
             DataSetSchema dataSetSchema =
                     semanticService.getDataSetSchema(parseInfo.getDataSetId());
             EntityInfo entityInfo = semanticService.getEntityInfo(parseInfo, dataSetSchema,
-                    chatQueryContext.getUser());
+                    chatQueryContext.getRequest().getUser());
             parseInfo.setEntityInfo(entityInfo);
         });
     }

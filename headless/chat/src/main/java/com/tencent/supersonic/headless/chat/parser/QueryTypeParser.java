@@ -31,7 +31,7 @@ public class QueryTypeParser implements SemanticParser {
     public void parse(ChatQueryContext chatQueryContext) {
 
         List<SemanticQuery> candidateQueries = chatQueryContext.getCandidateQueries();
-        User user = chatQueryContext.getUser();
+        User user = chatQueryContext.getRequest().getUser();
 
         for (SemanticQuery semanticQuery : candidateQueries) {
             // 1.init S2SQL
@@ -78,10 +78,8 @@ public class QueryTypeParser implements SemanticParser {
     }
 
     private static List<String> filterByTimeFields(List<String> whereFields) {
-        List<String> selectAndWhereFilterByTimeFields = whereFields.stream()
-                .filter(field -> !TimeDimensionEnum.containsTimeDimension(field))
+        return whereFields.stream().filter(field -> !TimeDimensionEnum.containsTimeDimension(field))
                 .collect(Collectors.toList());
-        return selectAndWhereFilterByTimeFields;
     }
 
     private static boolean selectContainsMetric(SqlInfo sqlInfo, Long dataSetId,

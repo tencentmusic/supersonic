@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import com.tencent.supersonic.BaseApplication;
 import com.tencent.supersonic.chat.api.pojo.request.ChatExecuteReq;
 import com.tencent.supersonic.chat.api.pojo.request.ChatParseReq;
+import com.tencent.supersonic.chat.api.pojo.response.ChatParseResp;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.chat.server.service.AgentService;
 import com.tencent.supersonic.chat.server.service.ChatQueryService;
@@ -47,13 +48,13 @@ public class BaseTest extends BaseApplication {
 
     protected QueryResult submitMultiTurnChat(String queryText, Integer agentId, Integer chatId)
             throws Exception {
-        ParseResp parseResp = submitParse(queryText, agentId, chatId);
+        ChatParseResp parseResp = submitParse(queryText, agentId, chatId);
 
         SemanticParseInfo semanticParseInfo = parseResp.getSelectedParses().get(0);
-        ChatExecuteReq request = ChatExecuteReq.builder().queryText(parseResp.getQueryText())
-                .user(DataUtils.getUser()).parseId(semanticParseInfo.getId())
-                .queryId(parseResp.getQueryId()).chatId(chatId).agentId(agentId).saveAnswer(true)
-                .build();
+        ChatExecuteReq request =
+                ChatExecuteReq.builder().queryText(queryText).user(DataUtils.getUser())
+                        .parseId(semanticParseInfo.getId()).queryId(parseResp.getQueryId())
+                        .chatId(chatId).agentId(agentId).saveAnswer(true).build();
         QueryResult queryResult = chatQueryService.execute(request);
         queryResult.setChatContext(semanticParseInfo);
         return queryResult;
@@ -61,10 +62,10 @@ public class BaseTest extends BaseApplication {
 
     protected QueryResult submitNewChat(String queryText, Integer agentId) throws Exception {
         int chatId = DataUtils.ONE_TURNS_CHAT_ID;
-        ParseResp parseResp = submitParse(queryText, agentId, chatId);
+        ChatParseResp parseResp = submitParse(queryText, agentId, chatId);
 
         SemanticParseInfo parseInfo = parseResp.getSelectedParses().get(0);
-        ChatExecuteReq request = ChatExecuteReq.builder().queryText(parseResp.getQueryText())
+        ChatExecuteReq request = ChatExecuteReq.builder().queryText(queryText)
                 .user(DataUtils.getUser()).parseId(parseInfo.getId()).agentId(agentId)
                 .chatId(chatId).queryId(parseResp.getQueryId()).saveAnswer(false).build();
 
@@ -73,7 +74,7 @@ public class BaseTest extends BaseApplication {
         return result;
     }
 
-    protected ParseResp submitParse(String queryText, Integer agentId, Integer chatId) {
+    protected ChatParseResp submitParse(String queryText, Integer agentId, Integer chatId) {
 
         ChatParseReq chatParseReq = DataUtils.getChatParseReq(chatId, queryText, enableLLM);
         chatParseReq.setAgentId(agentId);

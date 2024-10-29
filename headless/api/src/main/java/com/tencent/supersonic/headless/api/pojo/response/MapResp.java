@@ -7,10 +7,10 @@ import lombok.Data;
 public class MapResp {
 
     private final String queryText;
+    private final SchemaMapInfo mapInfo;
 
-    private SchemaMapInfo mapInfo = new SchemaMapInfo();
-
-    public MapResp(String queryText) {
+    public MapResp(String queryText, SchemaMapInfo schemaMapInfo) {
         this.queryText = queryText;
+        this.mapInfo = schemaMapInfo;
     }
 }

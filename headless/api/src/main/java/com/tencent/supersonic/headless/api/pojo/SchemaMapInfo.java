@@ -2,6 +2,7 @@ package com.tencent.supersonic.headless.api.pojo;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.collect.Lists;
+import lombok.Getter;
 import org.apache.commons.collections4.CollectionUtils;
 
 import java.util.HashMap;
@@ -9,9 +10,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+@Getter
 public class SchemaMapInfo {
 
-    private Map<Long, List<SchemaElementMatch>> dataSetElementMatches = new HashMap<>();
+    private final Map<Long, List<SchemaElementMatch>> dataSetElementMatches = new HashMap<>();
+
+    public boolean isEmpty() {
+        return dataSetElementMatches.keySet().isEmpty();
+    }
 
     public Set<Long> getMatchedDataSetInfos() {
         return dataSetElementMatches.keySet();
@@ -19,10 +25,6 @@ public class SchemaMapInfo {
 
     public List<SchemaElementMatch> getMatchedElements(Long dataSet) {
         return dataSetElementMatches.getOrDefault(dataSet, Lists.newArrayList());
-    }
-
-    public Map<Long, List<SchemaElementMatch>> getDataSetElementMatches() {
-        return dataSetElementMatches;
     }
 
     public void setMatchedElements(Long dataSet, List<SchemaElementMatch> elementMatches) {

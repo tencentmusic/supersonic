@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.github.pagehelper.PageInfo;
 import com.tencent.supersonic.chat.api.pojo.request.ChatParseReq;
 import com.tencent.supersonic.chat.api.pojo.request.PageQueryInfoReq;
+import com.tencent.supersonic.chat.api.pojo.response.ChatParseResp;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResp;
 import com.tencent.supersonic.chat.server.persistence.dataobject.ChatParseDO;
 import com.tencent.supersonic.chat.server.persistence.dataobject.ChatQueryDO;
@@ -30,7 +31,7 @@ public interface ChatQueryRepository {
 
     Long createChatQuery(ChatParseReq chatParseReq);
 
-    List<ChatParseDO> batchSaveParseInfo(ChatParseReq chatParseReq, ParseResp parseResult,
+    List<ChatParseDO> batchSaveParseInfo(ChatParseReq chatParseReq, ChatParseResp chatParseResp,
             List<SemanticParseInfo> candidateParses);
 
     ChatParseDO getParseInfo(Long questionId, int parseId);

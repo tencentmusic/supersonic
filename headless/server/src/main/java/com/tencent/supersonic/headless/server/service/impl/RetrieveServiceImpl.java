@@ -24,7 +24,6 @@ import com.tencent.supersonic.headless.server.service.RetrieveService;
 import com.tencent.supersonic.headless.server.service.SchemaService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -75,8 +74,7 @@ public class RetrieveServiceImpl implements RetrieveService {
         log.debug("originals terms: {}", originals);
         Set<Long> dataSetIds = queryNLReq.getDataSetIds();
 
-        ChatQueryContext chatQueryContext = new ChatQueryContext();
-        BeanUtils.copyProperties(queryNLReq, chatQueryContext);
+        ChatQueryContext chatQueryContext = new ChatQueryContext(queryNLReq);
         chatQueryContext.setModelIdToDataSetIds(dataSetService.getModelIdToDataSetIds());
 
         Map<MatchText, List<HanlpMapResult>> regTextMap =
@@ -120,7 +118,7 @@ public class RetrieveServiceImpl implements RetrieveService {
         return searchResults.stream().limit(RESULT_SIZE).collect(Collectors.toList());
     }
 
-    private List<Long> getPossibleDataSets(QueryNLReq queryCtx, List<S2Term> originals,
+    private List<Long> getPossibleDataSets(QueryNLReq queryReq, List<S2Term> originals,
             Set<Long> dataSetIds) {
         if (CollectionUtils.isNotEmpty(dataSetIds)) {
             return new ArrayList<>(dataSetIds);
@@ -128,8 +126,8 @@ public class RetrieveServiceImpl implements RetrieveService {
 
         List<Long> possibleDataSets = NatureHelper.selectPossibleDataSets(originals);
         if (possibleDataSets.isEmpty()) {
-            if (Objects.nonNull(queryCtx.getContextParseInfo())) {
-                possibleDataSets.add(queryCtx.getContextParseInfo().getDataSetId());
+            if (Objects.nonNull(queryReq.getContextParseInfo())) {
+                possibleDataSets.add(queryReq.getContextParseInfo().getDataSetId());
             }
         }
 

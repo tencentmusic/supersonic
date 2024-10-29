@@ -18,9 +18,9 @@ class SqlReplaceFieldsTest extends SqlReplaceHelperTest {
         replaceSql = SqlReplaceHelper.replaceFields(replaceSql, fieldToBizName);
         replaceSql = SqlReplaceHelper.replaceFunction(replaceSql);
         Assert.assertEquals(
-                "SELECT song_name FROM 歌曲库 WHERE (publish_date >= '2023-08-08' AND publish_date <= '2023-08-09')"
-                        + " AND singer_name = '邓紫棋' AND sys_imp_date = '2023-08-09' AND song_publis_date = '2023-08-01'"
-                        + " ORDER BY play_count DESC LIMIT 11",
+                "SELECT song_name FROM 歌曲库 WHERE (publish_date >= '2023-08-08' AND publish_date "
+                        + "<= '2023-08-09') AND singer_name = '邓紫棋' AND sys_imp_date = '2023-08-09' AND "
+                        + "歌曲发布时 = '2023-08-01' ORDER BY 播放量 DESC LIMIT 11",
                 replaceSql);
     }
 
@@ -77,9 +77,9 @@ class SqlReplaceFieldsTest extends SqlReplaceHelperTest {
         replaceSql = SqlReplaceHelper.replaceFields(replaceSql, fieldToBizName);
         replaceSql = SqlReplaceHelper.replaceFunction(replaceSql);
 
-        Assert.assertEquals("SELECT YEAR(发行日期), count(song_name) FROM 歌曲库 "
-                + "WHERE YEAR(发行日期) IN (2022, 2023) AND sys_imp_date = '2023-08-14' "
-                + "GROUP BY YEAR(publish_date)", replaceSql);
+        Assert.assertEquals("SELECT YEAR(发行日期), count(song_name) FROM 歌曲库 WHERE "
+                + "YEAR(发行日期) IN (2022, 2023) AND sys_imp_date = '2023-08-14' GROUP BY YEAR(发行日期)",
+                replaceSql);
     }
 
     @Test
@@ -91,9 +91,10 @@ class SqlReplaceFieldsTest extends SqlReplaceHelperTest {
         replaceSql = SqlReplaceHelper.replaceFields(replaceSql, fieldToBizName);
         replaceSql = SqlReplaceHelper.replaceFunction(replaceSql);
 
-        Assert.assertEquals("SELECT YEAR(发行日期), count(song_name) FROM 歌曲库 "
-                + "WHERE YEAR(发行日期) IN (2022, 2023) AND sys_imp_date = '2023-08-14'"
-                + " GROUP BY publish_date", replaceSql);
+        Assert.assertEquals(
+                "SELECT YEAR(发行日期), count(song_name) FROM 歌曲库 WHERE YEAR(发行日期) "
+                        + "IN (2022, 2023) AND sys_imp_date = '2023-08-14' GROUP BY 发行日期",
+                replaceSql);
 
     }
 
@@ -107,9 +108,8 @@ class SqlReplaceFieldsTest extends SqlReplaceHelperTest {
         replaceSql = SqlReplaceHelper.replaceFunction(replaceSql);
 
         Assert.assertEquals(
-                "SELECT song_name FROM 歌曲库 WHERE (publish_date >= '2022-08-11' "
-                        + "AND publish_date <= '2023-08-11') AND play_count > 1000000 AND "
-                        + "(sys_imp_date >= '2023-07-12' AND sys_imp_date <= '2023-08-11')",
+                "SELECT song_name FROM 歌曲库 WHERE (publish_date >= '2022-08-11' AND publish_date <= '2023-08-11')"
+                        + " AND 结算播放量 > 1000000 AND (sys_imp_date >= '2023-07-12' AND sys_imp_date <= '2023-08-11')",
                 replaceSql);
     }
 
@@ -123,8 +123,9 @@ class SqlReplaceFieldsTest extends SqlReplaceHelperTest {
         replaceSql = SqlReplaceHelper.replaceFunction(replaceSql);
 
         Assert.assertEquals(
-                "SELECT song_name FROM 歌曲库 WHERE (publish_date >= '2023-08-08' AND publish_date <= '2023-08-09')"
-                        + " AND singer_name = '邓紫棋' AND sys_imp_date = '2023-08-09' ORDER BY play_count DESC LIMIT 11",
+                "SELECT song_name FROM 歌曲库 WHERE (publish_date >= '2023-08-08' AND publish_date "
+                        + "<= '2023-08-09') AND singer_name = '邓紫棋' AND sys_imp_date = '2023-08-09' ORDER BY "
+                        + "播放量 DESC LIMIT 11",
                 replaceSql);
     }
 
@@ -138,8 +139,9 @@ class SqlReplaceFieldsTest extends SqlReplaceHelperTest {
         replaceSql = SqlReplaceHelper.replaceFunction(replaceSql);
 
         Assert.assertEquals(
-                "SELECT song_name FROM 歌曲库 WHERE (publish_date >= '2023-01-01' AND publish_date <= '2023-08-09')"
-                        + " AND singer_name = '邓紫棋' AND sys_imp_date = '2023-08-09' ORDER BY play_count DESC LIMIT 11",
+                "SELECT song_name FROM 歌曲库 WHERE (publish_date >= '2023-01-01' AND publish_date "
+                        + "<= '2023-08-09') AND singer_name = '邓紫棋' AND sys_imp_date = '2023-08-09' "
+                        + "ORDER BY 播放量 DESC LIMIT 11",
                 replaceSql);
     }
 
@@ -153,8 +155,9 @@ class SqlReplaceFieldsTest extends SqlReplaceHelperTest {
         replaceSql = SqlReplaceHelper.replaceFunction(replaceSql);
 
         Assert.assertEquals(
-                "SELECT song_name FROM 歌曲库 WHERE (publish_date >= '2023-02-09' AND publish_date <= '2023-08-09')"
-                        + " AND singer_name = '邓紫棋' AND sys_imp_date = '2023-08-09' ORDER BY play_count DESC LIMIT 11",
+                "SELECT song_name FROM 歌曲库 WHERE (publish_date >= '2023-02-09' AND publish_date <="
+                        + " '2023-08-09') AND singer_name = '邓紫棋' AND sys_imp_date = '2023-08-09' "
+                        + "ORDER BY 播放量 DESC LIMIT 11",
                 replaceSql);
     }
 
@@ -167,9 +170,9 @@ class SqlReplaceFieldsTest extends SqlReplaceHelperTest {
                 fieldToBizName);
         replaceSql = SqlReplaceHelper.replaceFunction(replaceSql);
         replaceSql = SqlRemoveHelper.removeNumberFilter(replaceSql);
-        Assert.assertEquals("SELECT song_name FROM 歌曲库 WHERE publish_date <= '2023-02-09' AND"
-                + " singer_name = '邓紫棋' AND sys_imp_date = '2023-08-09'"
-                + " ORDER BY play_count DESC LIMIT 11", replaceSql);
+        Assert.assertEquals("SELECT song_name FROM 歌曲库 WHERE publish_date <= '2023-02-09' "
+                + "AND singer_name = '邓紫棋' AND sys_imp_date = '2023-08-09' ORDER BY 播放量 DESC LIMIT 11",
+                replaceSql);
     }
 
     @Test
@@ -222,9 +225,8 @@ class SqlReplaceFieldsTest extends SqlReplaceHelperTest {
         replaceSql = SqlReplaceHelper.replaceFunction(replaceSql);
 
         Assert.assertEquals(
-                "SELECT song_name, sum(评分) FROM CSpider WHERE (1 < 2) AND "
-                        + "sys_imp_date = '2023-10-15' GROUP BY song_name HAVING "
-                        + "sum(评分) < (SELECT min(评分) FROM CSpider WHERE user_id = '英文')",
+                "SELECT 歌曲名称, sum(评分) FROM CSpider WHERE (1 < 2) AND sys_imp_date = '2023-10-15' "
+                        + "GROUP BY 歌曲名称 HAVING sum(评分) < (SELECT min(评分) FROM CSpider WHERE 语种 = '英文')",
                 replaceSql);
     }
 
@@ -239,9 +241,9 @@ class SqlReplaceFieldsTest extends SqlReplaceHelperTest {
         replaceSql = SqlReplaceHelper.replaceFunction(replaceSql);
 
         Assert.assertEquals(
-                "SELECT sum(评分) / (SELECT sum(评分) FROM CSpider WHERE sys_imp_date = '2023-10-15') "
-                        + "FROM CSpider WHERE sys_imp_date = '2023-10-15' GROUP BY song_name HAVING "
-                        + "sum(评分) < (SELECT min(评分) FROM CSpider WHERE user_id = '英文')",
+                "SELECT sum(评分) / (SELECT sum(评分) FROM CSpider WHERE sys_imp_date = '2023-10-15') FROM "
+                        + "CSpider WHERE sys_imp_date = '2023-10-15' GROUP BY 歌曲名称 HAVING sum(评分) < (SELECT min(评分) "
+                        + "FROM CSpider WHERE 语种 = '英文')",
                 replaceSql);
     }
 

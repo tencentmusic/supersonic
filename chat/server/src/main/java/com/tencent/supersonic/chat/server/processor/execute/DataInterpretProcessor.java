@@ -20,6 +20,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
+/**
+ * DataInterpretProcessor interprets query result to make it more readable to the users.
+ */
 public class DataInterpretProcessor implements ExecuteResultProcessor {
 
     private static final Logger keyPipelineLog = LoggerFactory.getLogger("keyPipeline");
@@ -48,7 +51,7 @@ public class DataInterpretProcessor implements ExecuteResultProcessor {
         }
 
         Map<String, Object> variable = new HashMap<>();
-        variable.put("question", executeContext.getQueryText());
+        variable.put("question", executeContext.getRequest().getQueryText());
         variable.put("data", queryResult.getTextResult());
 
         Prompt prompt = PromptTemplate.from(chatApp.getPrompt()).apply(variable);

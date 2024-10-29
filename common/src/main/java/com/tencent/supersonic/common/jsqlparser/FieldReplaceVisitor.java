@@ -1,5 +1,6 @@
 package com.tencent.supersonic.common.jsqlparser;
 
+import com.tencent.supersonic.common.util.ContextUtils;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.expression.ExpressionVisitorAdapter;
 import net.sf.jsqlparser.expression.Function;
@@ -9,7 +10,6 @@ import java.util.Map;
 
 @Slf4j
 public class FieldReplaceVisitor extends ExpressionVisitorAdapter {
-    ParseVisitorHelper parseVisitorHelper = new ParseVisitorHelper();
     private Map<String, String> fieldNameMap;
     private ThreadLocal<Boolean> exactReplace = ThreadLocal.withInitial(() -> false);
 
@@ -20,7 +20,8 @@ public class FieldReplaceVisitor extends ExpressionVisitorAdapter {
 
     @Override
     public void visit(Column column) {
-        parseVisitorHelper.replaceColumn(column, fieldNameMap, exactReplace.get());
+        ReplaceService replaceService = ContextUtils.getBean(ReplaceService.class);
+        replaceService.replaceColumn(column, fieldNameMap, exactReplace.get());
     }
 
     @Override

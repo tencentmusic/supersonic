@@ -61,8 +61,8 @@ public class LLMSqlCorrector extends BaseSemanticCorrector {
 
     @Override
     public void doCorrect(ChatQueryContext chatQueryContext, SemanticParseInfo semanticParseInfo) {
-        ChatApp chatApp = chatQueryContext.getChatAppConfig().get(APP_KEY);
-        if (!chatQueryContext.getText2SQLType().enableLLM() || Objects.isNull(chatApp)
+        ChatApp chatApp = chatQueryContext.getRequest().getChatAppConfig().get(APP_KEY);
+        if (!chatQueryContext.getRequest().getText2SQLType().enableLLM() || Objects.isNull(chatApp)
                 || !chatApp.isEnable()) {
             return;
         }
@@ -71,8 +71,8 @@ public class LLMSqlCorrector extends BaseSemanticCorrector {
                 ModelProvider.getChatModel(chatApp.getChatModelConfig());
         SemanticSqlExtractor extractor =
                 AiServices.create(SemanticSqlExtractor.class, chatLanguageModel);
-        Prompt prompt = generatePrompt(chatQueryContext.getQueryText(), semanticParseInfo,
-                chatApp.getPrompt());
+        Prompt prompt = generatePrompt(chatQueryContext.getRequest().getQueryText(),
+                semanticParseInfo, chatApp.getPrompt());
         SemanticSql s2Sql = extractor.generateSemanticSql(prompt.toUserMessage().singleText());
         keyPipelineLog.info("LLMSqlCorrector modelReq:\n{} \nmodelResp:\n{}", prompt.text(), s2Sql);
         if ("NEGATIVE".equals(s2Sql.getOpinion()) && StringUtils.isNotBlank(s2Sql.getSql())) {

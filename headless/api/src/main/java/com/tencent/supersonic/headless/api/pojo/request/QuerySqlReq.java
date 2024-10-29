@@ -17,7 +17,6 @@ import java.util.Objects;
 public class QuerySqlReq extends SemanticQueryReq {
 
     private String sql;
-
     private Integer limit = 1000;
 
     @Override

@@ -7,7 +7,7 @@ import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.common.pojo.enums.EngineType;
 import com.tencent.supersonic.headless.api.pojo.DBColumn;
 import com.tencent.supersonic.headless.api.pojo.request.DatabaseReq;
-import com.tencent.supersonic.headless.api.pojo.request.ModelSchemaReq;
+import com.tencent.supersonic.headless.api.pojo.request.ModelBuildReq;
 import com.tencent.supersonic.headless.api.pojo.request.SqlExecuteReq;
 import com.tencent.supersonic.headless.api.pojo.response.DatabaseResp;
 import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
@@ -208,17 +208,17 @@ public class DatabaseServiceImpl extends ServiceImpl<DatabaseDOMapper, DatabaseD
     }
 
     @Override
-    public Map<String, List<DBColumn>> getDbColumns(ModelSchemaReq modelSchemaReq)
+    public Map<String, List<DBColumn>> getDbColumns(ModelBuildReq modelBuildReq)
             throws SQLException {
         Map<String, List<DBColumn>> dbColumnMap = new HashMap<>();
-        if (StringUtils.isNotBlank(modelSchemaReq.getSql())) {
+        if (StringUtils.isNotBlank(modelBuildReq.getSql())) {
             List<DBColumn> columns =
-                    getColumns(modelSchemaReq.getDatabaseId(), modelSchemaReq.getSql());
-            dbColumnMap.put(modelSchemaReq.getSql(), columns);
+                    getColumns(modelBuildReq.getDatabaseId(), modelBuildReq.getSql());
+            dbColumnMap.put(modelBuildReq.getSql(), columns);
         } else {
-            for (String table : modelSchemaReq.getTables()) {
+            for (String table : modelBuildReq.getTables()) {
                 List<DBColumn> columns =
-                        getColumns(modelSchemaReq.getDatabaseId(), modelSchemaReq.getDb(), table);
+                        getColumns(modelBuildReq.getDatabaseId(), modelBuildReq.getDb(), table);
                 dbColumnMap.put(table, columns);
             }
         }

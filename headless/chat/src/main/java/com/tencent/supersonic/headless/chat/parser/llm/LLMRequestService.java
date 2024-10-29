@@ -35,7 +35,7 @@ public class LLMRequestService {
     private ParserConfig parserConfig;
 
     public boolean isSkip(ChatQueryContext queryCtx) {
-        if (!queryCtx.getText2SQLType().enableLLM()) {
+        if (!queryCtx.getRequest().getText2SQLType().enableLLM()) {
             log.info("LLM disabled, skip");
             return true;
         }
@@ -45,12 +45,12 @@ public class LLMRequestService {
 
     public Long getDataSetId(ChatQueryContext queryCtx) {
         DataSetResolver dataSetResolver = ComponentFactory.getModelResolver();
-        return dataSetResolver.resolve(queryCtx, queryCtx.getDataSetIds());
+        return dataSetResolver.resolve(queryCtx, queryCtx.getRequest().getDataSetIds());
     }
 
     public LLMReq getLlmReq(ChatQueryContext queryCtx, Long dataSetId) {
         Map<Long, String> dataSetIdToName = queryCtx.getSemanticSchema().getDataSetIdToName();
-        String queryText = queryCtx.getQueryText();
+        String queryText = queryCtx.getRequest().getQueryText();
 
         LLMReq llmReq = new LLMReq();
         llmReq.setQueryText(queryText);
@@ -65,7 +65,7 @@ public class LLMRequestService {
         llmSchema.setPrimaryKey(getPrimaryKey(queryCtx, dataSetId));
 
         boolean linkingValueEnabled =
-                Boolean.valueOf(parserConfig.getParameterValue(PARSER_LINKING_VALUE_ENABLE));
+                Boolean.parseBoolean(parserConfig.getParameterValue(PARSER_LINKING_VALUE_ENABLE));
         if (linkingValueEnabled) {
             llmSchema.setValues(getMappedValues(queryCtx, dataSetId));
         }
@@ -74,8 +74,8 @@ public class LLMRequestService {
         llmReq.setTerms(getMappedTerms(queryCtx, dataSetId));
         llmReq.setSqlGenType(
                 LLMReq.SqlGenType.valueOf(parserConfig.getParameterValue(PARSER_STRATEGY_TYPE)));
-        llmReq.setChatAppConfig(queryCtx.getChatAppConfig());
-        llmReq.setDynamicExemplars(queryCtx.getDynamicExemplars());
+        llmReq.setChatAppConfig(queryCtx.getRequest().getChatAppConfig());
+        llmReq.setDynamicExemplars(queryCtx.getRequest().getDynamicExemplars());
 
         return llmReq;
     }
@@ -135,13 +135,10 @@ public class LLMRequestService {
         if (CollectionUtils.isEmpty(matchedElements)) {
             return Collections.emptyList();
         }
-        List<SchemaElement> schemaElements = matchedElements.stream().filter(schemaElementMatch -> {
+        return matchedElements.stream().filter(schemaElementMatch -> {
             SchemaElementType elementType = schemaElementMatch.getElement().getType();
             return SchemaElementType.METRIC.equals(elementType);
-        }).map(schemaElementMatch -> {
-            return schemaElementMatch.getElement();
-        }).collect(Collectors.toList());
-        return schemaElements;
+        }).map(SchemaElementMatch::getElement).collect(Collectors.toList());
     }
 
     protected List<SchemaElement> getMappedDimensions(@NotNull ChatQueryContext queryCtx,

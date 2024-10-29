@@ -56,7 +56,7 @@ import static com.tencent.supersonic.common.pojo.Constants.TIME_FORMAT;
  * Add ratio queries for metric queries.
  */
 @Slf4j
-public class MetricRatioProcessor implements ExecuteResultProcessor {
+public class MetricRatioCalcProcessor implements ExecuteResultProcessor {
 
     @Override
     public void process(ExecuteContext executeContext, QueryResult queryResult) {
@@ -67,8 +67,8 @@ public class MetricRatioProcessor implements ExecuteResultProcessor {
                 || !QueryType.AGGREGATE.equals(semanticParseInfo.getQueryType())) {
             return;
         }
-        AggregateInfo aggregateInfo =
-                getAggregateInfo(executeContext.getUser(), semanticParseInfo, queryResult);
+        AggregateInfo aggregateInfo = getAggregateInfo(executeContext.getRequest().getUser(),
+                semanticParseInfo, queryResult);
         queryResult.setAggregateInfo(aggregateInfo);
     }
 

@@ -10,7 +10,6 @@ import com.tencent.supersonic.common.config.EmbeddingConfig;
 import com.tencent.supersonic.common.pojo.Text2SQLExemplar;
 import com.tencent.supersonic.common.service.ExemplarService;
 import com.tencent.supersonic.common.util.ContextUtils;
-import com.tencent.supersonic.headless.api.pojo.response.ParseResp;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
@@ -18,20 +17,22 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
-/** MetricRecommendProcessor fills recommended query based on embedding similarity. */
+/**
+ * MetricRecommendProcessor fills recommended query based on embedding similarity.
+ **/
 @Slf4j
 public class QueryRecommendProcessor implements ParseResultProcessor {
 
     @Override
-    public void process(ParseContext parseContext, ParseResp parseResp) {
-        CompletableFuture.runAsync(() -> doProcess(parseResp, parseContext));
+    public void process(ParseContext parseContext) {
+        CompletableFuture.runAsync(() -> doProcess(parseContext));
     }
 
     @SneakyThrows
-    private void doProcess(ParseResp parseResp, ParseContext parseContext) {
-        Long queryId = parseResp.getQueryId();
-        List<SimilarQueryRecallResp> solvedQueries =
-                getSimilarQueries(parseContext.getQueryText(), parseContext.getAgent().getId());
+    private void doProcess(ParseContext parseContext) {
+        Long queryId = parseContext.getResponse().getQueryId();
+        List<SimilarQueryRecallResp> solvedQueries = getSimilarQueries(
+                parseContext.getRequest().getQueryText(), parseContext.getAgent().getId());
         ChatQueryDO chatQueryDO = getChatQuery(queryId);
         chatQueryDO.setSimilarQueries(JSONObject.toJSONString(solvedQueries));
         updateChatQuery(chatQueryDO);

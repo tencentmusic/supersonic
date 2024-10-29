@@ -36,7 +36,7 @@ public class SearchMatchStrategy extends BaseMatchStrategy<HanlpMapResult> {
     @Override
     public Map<MatchText, List<HanlpMapResult>> match(ChatQueryContext chatQueryContext,
             List<S2Term> originals, Set<Long> detectDataSetIds) {
-        String text = chatQueryContext.getQueryText();
+        String text = chatQueryContext.getRequest().getQueryText();
         Map<Integer, Integer> regOffsetToLength = mapperHelper.getRegOffsetToLength(originals);
 
         List<Integer> detectIndexList = Lists.newArrayList();

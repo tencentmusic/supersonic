@@ -4,6 +4,7 @@ import com.github.pagehelper.PageInfo;
 import com.tencent.supersonic.chat.api.pojo.request.ChatExecuteReq;
 import com.tencent.supersonic.chat.api.pojo.request.ChatParseReq;
 import com.tencent.supersonic.chat.api.pojo.request.PageQueryInfoReq;
+import com.tencent.supersonic.chat.api.pojo.response.ChatParseResp;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResp;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.chat.api.pojo.response.ShowCaseResp;
@@ -31,7 +32,7 @@ public interface ChatManageService {
 
     PageInfo<QueryResp> queryInfo(PageQueryInfoReq pageQueryInfoReq, long chatId);
 
-    void createChatQuery(ChatParseReq chatParseReq, ParseResp parseResp);
+    Long createChatQuery(ChatParseReq chatParseReq);
 
     QueryResp getChatQuery(Long queryId);
 
@@ -45,9 +46,9 @@ public interface ChatManageService {
 
     void deleteQuery(Long queryId);
 
-    void updateParseCostTime(ParseResp parseResp);
+    void updateParseCostTime(ChatParseResp chatParseResp);
 
-    List<ChatParseDO> batchAddParse(ChatParseReq chatParseReq, ParseResp parseResult);
+    List<ChatParseDO> batchAddParse(ChatParseReq chatParseReq, ChatParseResp chatParseResp);
 
     SemanticParseInfo getParseInfo(Long questionId, int parseId);
 }

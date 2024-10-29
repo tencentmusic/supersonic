@@ -1,44 +1,40 @@
 package com.tencent.supersonic.chat.server.util;
 
-import com.tencent.supersonic.chat.server.agent.Agent;
-import com.tencent.supersonic.chat.server.pojo.ChatContext;
+import com.tencent.supersonic.chat.api.pojo.request.ChatParseReq;
 import com.tencent.supersonic.chat.server.pojo.ParseContext;
 import com.tencent.supersonic.common.pojo.enums.Text2SQLType;
 import com.tencent.supersonic.common.util.BeanMapper;
 import com.tencent.supersonic.headless.api.pojo.request.QueryNLReq;
-import org.apache.commons.collections.MapUtils;
+import org.springframework.util.CollectionUtils;
 
+import java.util.Collections;
 import java.util.Objects;
+import java.util.Set;
 
 public class QueryReqConverter {
 
-    public static QueryNLReq buildText2SqlQueryReq(ParseContext parseContext) {
-        return buildText2SqlQueryReq(parseContext, null);
+    public static QueryNLReq buildQueryNLReq(ParseContext parseContext) {
+        QueryNLReq queryNLReq = new QueryNLReq();
+        BeanMapper.mapper(parseContext.getRequest(), queryNLReq);
+        queryNLReq.setText2SQLType(
+                parseContext.enableLLM() ? Text2SQLType.RULE_AND_LLM : Text2SQLType.ONLY_RULE);
+        queryNLReq.setDataSetIds(getDataSetIds(parseContext));
+        queryNLReq.setChatAppConfig(parseContext.getAgent().getChatAppConfig());
+        queryNLReq.setSelectedParseInfo(parseContext.getRequest().getSelectedParse());
+        return queryNLReq;
     }
 
-    public static QueryNLReq buildText2SqlQueryReq(ParseContext parseContext, ChatContext chatCtx) {
-        QueryNLReq queryNLReq = new QueryNLReq();
-        BeanMapper.mapper(parseContext, queryNLReq);
-        Agent agent = parseContext.getAgent();
-        if (agent == null) {
-            return queryNLReq;
-        }
+    private static Set<Long> getDataSetIds(ParseContext parseContext) {
+        ChatParseReq chatParseReq = parseContext.getRequest();
+        Set<Long> dataSetIds = parseContext.getAgent().getDataSetIds();
+        Long requestDataSetId = chatParseReq.getDataSetId();
 
-        if (parseContext.isDisableLLM()) {
-            queryNLReq.setText2SQLType(Text2SQLType.ONLY_RULE);
-        } else {
-            queryNLReq.setText2SQLType(Text2SQLType.RULE_AND_LLM);
+        if (Objects.nonNull(requestDataSetId)) {
+            if (CollectionUtils.isEmpty(dataSetIds)) {
+                return Collections.singleton(requestDataSetId);
+            }
+            dataSetIds.removeIf(dataSetId -> !dataSetId.equals(requestDataSetId));
         }
-
-        queryNLReq.setDataSetIds(agent.getDataSetIds());
-        if (Objects.nonNull(queryNLReq.getMapInfo())
-                && MapUtils.isNotEmpty(queryNLReq.getMapInfo().getDataSetElementMatches())) {
-            queryNLReq.setMapInfo(queryNLReq.getMapInfo());
-        }
-        queryNLReq.setChatAppConfig(parseContext.getAgent().getChatAppConfig());
-        if (chatCtx != null) {
-            queryNLReq.setContextParseInfo(chatCtx.getParseInfo());
-        }
-        return queryNLReq;
+        return dataSetIds;
     }
 }
