@@ -9,6 +9,7 @@ import com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum;
 import com.tencent.supersonic.common.pojo.enums.FilterType;
 import com.tencent.supersonic.common.pojo.enums.QueryType;
 import com.tencent.supersonic.headless.api.pojo.request.QueryFilter;
+import lombok.Builder;
 import lombok.Data;
 
 import java.util.Comparator;
@@ -46,8 +47,58 @@ public class SemanticParseInfo {
     private String textInfo;
     private Map<String, Object> properties = Maps.newHashMap();
 
-    private static class SchemaNameLengthComparator implements Comparator<SchemaElement> {
+    @Data
+    @Builder
+    public static class DataSetMatchResult {
+        private double maxMetricSimilarity;
+        private double maxDatesetSimilarity;
+        private double totalSimilarity;
+        private long maxMetricUseCnt;
+    }
 
+    public static class SemanticParseComparator implements Comparator<SemanticParseInfo> {
+        @Override
+        public int compare(SemanticParseInfo o1, SemanticParseInfo o2) {
+            DataSetMatchResult mr1 = getDataSetMatchResult(o1.getElementMatches());
+            DataSetMatchResult mr2 = getDataSetMatchResult(o2.getElementMatches());
+
+            double difference = mr1.getMaxDatesetSimilarity() - mr2.getMaxDatesetSimilarity();
+            if (difference == 0) {
+                difference = mr1.getMaxMetricSimilarity() - mr2.getMaxMetricSimilarity();
+                if (difference == 0) {
+                    difference = mr1.getTotalSimilarity() - mr2.getTotalSimilarity();
+                }
+                if (difference == 0) {
+                    difference = mr1.getMaxMetricUseCnt() - mr2.getMaxMetricUseCnt();
+                }
+            }
+            return difference >= 0 ? -1 : 1;
+        }
+
+        private DataSetMatchResult getDataSetMatchResult(List<SchemaElementMatch> elementMatches) {
+            double maxMetricSimilarity = 0;
+            double maxDatasetSimilarity = 0;
+            double totalSimilarity = 0;
+            long maxMetricUseCnt = 0L;
+            for (SchemaElementMatch match : elementMatches) {
+                if (SchemaElementType.DATASET.equals(match.getElement().getType())) {
+                    maxDatasetSimilarity = Math.max(maxDatasetSimilarity, match.getSimilarity());
+                }
+                if (SchemaElementType.METRIC.equals(match.getElement().getType())) {
+                    maxMetricSimilarity = Math.max(maxMetricSimilarity, match.getSimilarity());
+                    if (Objects.nonNull(match.getElement().getUseCnt())) {
+                        maxMetricUseCnt = Math.max(maxMetricUseCnt, match.getElement().getUseCnt());
+                    }
+                }
+                totalSimilarity += match.getSimilarity();
+            }
+            return DataSetMatchResult.builder().maxMetricSimilarity(maxMetricSimilarity)
+                    .maxDatesetSimilarity(maxDatasetSimilarity).totalSimilarity(totalSimilarity)
+                    .build();
+        }
+    }
+
+    private static class SchemaNameLengthComparator implements Comparator<SchemaElement> {
         @Override
         public int compare(SchemaElement o1, SchemaElement o2) {
             if (o1.getOrder() != o2.getOrder()) {
@@ -92,5 +143,20 @@ public class SemanticParseInfo {
             limit = queryConfig.getAggregateTypeDefaultConfig().getLimit();
         }
         return limit;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        SemanticParseInfo that = (SemanticParseInfo) o;
+        return Objects.equals(textInfo, that.textInfo);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(textInfo);
     }
 }

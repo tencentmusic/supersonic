@@ -1,5 +1,6 @@
 package com.tencent.supersonic.chat.server.parser;
 
+import com.google.common.collect.Lists;
 import com.tencent.supersonic.chat.api.pojo.response.ChatParseResp;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResp;
 import com.tencent.supersonic.chat.server.pojo.ChatContext;
@@ -15,10 +16,12 @@ import com.tencent.supersonic.common.pojo.enums.Text2SQLType;
 import com.tencent.supersonic.common.service.impl.ExemplarServiceImpl;
 import com.tencent.supersonic.common.util.ChatAppManager;
 import com.tencent.supersonic.common.util.ContextUtils;
+import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementMatch;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.api.pojo.enums.MapModeEnum;
+import com.tencent.supersonic.headless.api.pojo.request.QueryFilter;
 import com.tencent.supersonic.headless.api.pojo.request.QueryNLReq;
 import com.tencent.supersonic.headless.api.pojo.response.MapResp;
 import com.tencent.supersonic.headless.api.pojo.response.ParseResp;
@@ -35,6 +38,7 @@ import dev.langchain4j.provider.ModelProvider;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.CollectionUtils;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -78,27 +82,24 @@ public class NL2SQLParser implements ChatQueryParser {
             QueryNLReq queryNLReq = QueryReqConverter.buildQueryNLReq(parseContext);
             queryNLReq.setText2SQLType(Text2SQLType.ONLY_RULE);
 
-            // inject semantic parse saved by in the chat context
-            ChatContextService chatContextService = ContextUtils.getBean(ChatContextService.class);
-            ChatContext chatCtx =
-                    chatContextService.getOrCreateContext(parseContext.getRequest().getChatId());
-            if (chatCtx != null && Objects.isNull(queryNLReq.getContextParseInfo())) {
-                queryNLReq.setContextParseInfo(chatCtx.getParseInfo());
-            }
-
-            // for every requested dataSet, recursively invoke rule-based parser
-            // with different mapModes, unless any valid semantic parse is derived.
+            // for every requested dataSet, recursively invoke rule-based parser with different
+            // mapModes
             Set<Long> requestedDatasets = queryNLReq.getDataSetIds();
             for (Long datasetId : requestedDatasets) {
                 queryNLReq.setDataSetIds(Collections.singleton(datasetId));
-                ChatParseResp parseResp = parseContext.getResponse();
-                for (MapModeEnum mode : MapModeEnum.values()) {
+                ChatParseResp parseResp = new ChatParseResp(parseContext.getRequest().getQueryId());
+                for (MapModeEnum mode : Lists.newArrayList(MapModeEnum.STRICT, MapModeEnum.MODERATE)) {
                     queryNLReq.setMapModeEnum(mode);
                     doParse(queryNLReq, parseResp);
-                    if (!parseResp.getSelectedParses().isEmpty()) {
-                        break;
-                    }
                 }
+                if (parseResp.getSelectedParses().isEmpty()) {
+                    queryNLReq.setMapModeEnum(MapModeEnum.LOOSE);
+                    doParse(queryNLReq, parseResp);
+                }
+                List<SemanticParseInfo> sortedParses = parseResp.getSelectedParses().stream()
+                        .sorted(new SemanticParseInfo.SemanticParseComparator()).limit(1)
+                        .collect(Collectors.toList());
+                parseContext.getResponse().getSelectedParses().addAll(sortedParses);
             }
         }
 

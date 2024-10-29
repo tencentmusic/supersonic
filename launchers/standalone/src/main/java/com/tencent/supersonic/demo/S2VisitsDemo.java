@@ -129,8 +129,7 @@ public class S2VisitsDemo extends S2BaseDemo {
     public void addSampleChats(Integer agentId) {
         Long chatId = chatManageService.addChat(defaultUser, "样例对话1", agentId);
         submitText(chatId.intValue(), agentId, "超音数 访问次数");
-        submitText(chatId.intValue(), agentId, "按部门统计");
-        submitText(chatId.intValue(), agentId, "查询近30天");
+        submitText(chatId.intValue(), agentId, "按部门统计近7天访问次数");
         submitText(chatId.intValue(), agentId, "alice 停留时长");
         submitText(chatId.intValue(), agentId, "访问次数最高的部门");
     }
