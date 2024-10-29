@@ -22,16 +22,7 @@ import com.tencent.supersonic.headless.api.pojo.response.DatabaseResp;
 import com.tencent.supersonic.headless.api.pojo.response.DimensionResp;
 import com.tencent.supersonic.headless.api.pojo.response.MetricResp;
 import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
-import com.tencent.supersonic.headless.server.service.DataSetService;
-import com.tencent.supersonic.headless.server.service.DatabaseService;
-import com.tencent.supersonic.headless.server.service.DimensionService;
-import com.tencent.supersonic.headless.server.service.DomainService;
-import com.tencent.supersonic.headless.server.service.MetricService;
-import com.tencent.supersonic.headless.server.service.ModelRelaService;
-import com.tencent.supersonic.headless.server.service.ModelService;
-import com.tencent.supersonic.headless.server.service.TagMetaService;
-import com.tencent.supersonic.headless.server.service.TagObjectService;
-import com.tencent.supersonic.headless.server.service.TermService;
+import com.tencent.supersonic.headless.server.service.*;
 import com.tencent.supersonic.headless.server.service.impl.DictWordService;
 import dev.langchain4j.provider.ModelProvider;
 import lombok.extern.slf4j.Slf4j;
@@ -89,6 +80,10 @@ public abstract class S2BaseDemo implements CommandLineRunner {
     protected DictWordService dictWordService;
     @Autowired
     protected ChatModelService chatModelService;
+    @Autowired
+    protected DictConfService dictConfService;
+    @Autowired
+    protected DictTaskService dictTaskService;
     @Autowired
     protected Environment environment;
 

@@ -17,7 +17,7 @@ public class QueryReqConverter {
         QueryNLReq queryNLReq = new QueryNLReq();
         BeanMapper.mapper(parseContext.getRequest(), queryNLReq);
         queryNLReq.setText2SQLType(
-                parseContext.enableLLM() ? Text2SQLType.RULE_AND_LLM : Text2SQLType.ONLY_RULE);
+                parseContext.enableLLM() ? Text2SQLType.LLM_OR_RULE : Text2SQLType.ONLY_RULE);
         queryNLReq.setDataSetIds(getDataSetIds(parseContext));
         queryNLReq.setChatAppConfig(parseContext.getAgent().getChatAppConfig());
         queryNLReq.setSelectedParseInfo(parseContext.getRequest().getSelectedParse());

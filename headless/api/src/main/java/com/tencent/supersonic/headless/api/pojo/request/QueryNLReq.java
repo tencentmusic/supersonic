@@ -22,7 +22,7 @@ public class QueryNLReq extends SemanticQueryReq {
     private User user;
     private QueryFilters queryFilters;
     private boolean saveAnswer = true;
-    private Text2SQLType text2SQLType = Text2SQLType.RULE_AND_LLM;
+    private Text2SQLType text2SQLType = Text2SQLType.LLM_OR_RULE;
     private MapModeEnum mapModeEnum = MapModeEnum.STRICT;
     private QueryDataType queryDataType = QueryDataType.ALL;
     private Map<String, ChatApp> chatAppConfig;

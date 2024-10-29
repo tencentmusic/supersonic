@@ -31,10 +31,6 @@ public class ParseContext {
                 && response.getSelectedParses().size() > 1);
     }
 
-    public boolean needRuleParse() {
-        return Objects.isNull(request.getSelectedParse());
-    }
-
     public boolean needLLMParse() {
         return enableLLM() && (Objects.nonNull(request.getSelectedParse())
                 || !response.getSelectedParses().isEmpty());
