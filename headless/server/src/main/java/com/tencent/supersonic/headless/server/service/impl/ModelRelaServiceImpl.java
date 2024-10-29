@@ -8,9 +8,14 @@ import com.tencent.supersonic.common.pojo.JoinCondition;
 import com.tencent.supersonic.common.pojo.ModelRela;
 import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.common.util.BeanMapper;
+import com.tencent.supersonic.headless.api.pojo.enums.IdentifyType;
+import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
 import com.tencent.supersonic.headless.server.persistence.dataobject.ModelRelaDO;
 import com.tencent.supersonic.headless.server.persistence.mapper.ModelRelaDOMapper;
 import com.tencent.supersonic.headless.server.service.ModelRelaService;
+import com.tencent.supersonic.headless.server.service.ModelService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -21,8 +26,13 @@ import java.util.stream.Collectors;
 public class ModelRelaServiceImpl extends ServiceImpl<ModelRelaDOMapper, ModelRelaDO>
         implements ModelRelaService {
 
+    @Lazy
+    @Autowired
+    private ModelService modelService;
+
     @Override
     public void save(ModelRela modelRela, User user) {
+        check(modelRela);
         modelRela.createdBy(user.getName());
         ModelRelaDO modelRelaDO = convert(modelRela);
         save(modelRelaDO);
@@ -30,9 +40,29 @@ public class ModelRelaServiceImpl extends ServiceImpl<ModelRelaDOMapper, ModelRe
 
     @Override
     public void update(ModelRela modelRela, User user) {
+        check(modelRela);
         modelRela.updatedBy(user.getName());
         ModelRelaDO modelRelaDO = convert(modelRela);
         updateById(modelRelaDO);
+    }
+
+    private void check(ModelRela modelRela) {
+        ModelResp fromModel = modelService.getModel(modelRela.getFromModelId());
+        ModelResp toModel = modelService.getModel(modelRela.getToModelId());
+        if (CollectionUtils.isEmpty(modelRela.getJoinConditions())) {
+            throw new RuntimeException("关联关系不可为空");
+        }
+        for (JoinCondition joinCondition : modelRela.getJoinConditions()) {
+            IdentifyType identifyTypeLeft = fromModel.getIdentifyType(joinCondition.getLeftField());
+            IdentifyType identifyTypeRight = toModel.getIdentifyType(joinCondition.getRightField());
+            if (IdentifyType.foreign.equals(identifyTypeLeft)
+                    || IdentifyType.foreign.equals(identifyTypeRight)) {
+                if (!IdentifyType.primary.equals(identifyTypeLeft)
+                        && !IdentifyType.primary.equals(identifyTypeRight)) {
+                    throw new RuntimeException("外键必须跟主键关联");
+                }
+            }
+        }
     }
 
     @Override
