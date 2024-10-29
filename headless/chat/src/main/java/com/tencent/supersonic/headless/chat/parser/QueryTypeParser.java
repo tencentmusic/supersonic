@@ -68,9 +68,8 @@ public class QueryTypeParser implements SemanticParser {
             }
         }
 
-        // 2. metric queryType
-        if (selectContainsMetric(sqlInfo, dataSetId, semanticSchema)
-                || SqlSelectFunctionHelper.hasAggregateFunction(sqlInfo.getParsedS2SQL())) {
+        // 2. AGG queryType
+        if (SqlSelectFunctionHelper.hasAggregateFunction(sqlInfo.getParsedS2SQL())) {
             return QueryType.AGGREGATE;
         }
 

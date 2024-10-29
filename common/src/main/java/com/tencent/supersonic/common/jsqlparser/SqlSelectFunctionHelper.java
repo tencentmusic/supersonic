@@ -30,10 +30,7 @@ public class SqlSelectFunctionHelper {
             Arrays.asList("SUM", "COUNT", "MAX", "MIN", "AVG");
 
     public static boolean hasAggregateFunction(String sql) {
-        if (!CollectionUtils.isEmpty(getFunctions(sql))) {
-            return true;
-        }
-        return SqlSelectHelper.hasGroupBy(sql);
+        return !CollectionUtils.isEmpty(getFunctions(sql));
     }
 
     public static boolean hasFunction(String sql, String functionName) {
