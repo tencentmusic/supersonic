@@ -4,6 +4,7 @@ import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.headless.chat.corrector.SemanticCorrector;
 import com.tencent.supersonic.headless.chat.mapper.SchemaMapper;
 import com.tencent.supersonic.headless.chat.parser.SemanticParser;
+import com.tencent.supersonic.headless.server.modeller.SemanticModeller;
 import com.tencent.supersonic.headless.server.processor.ResultProcessor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
@@ -19,6 +20,7 @@ public class ComponentFactory {
     private static List<SchemaMapper> schemaMappers = new ArrayList<>();
     private static List<SemanticParser> semanticParsers = new ArrayList<>();
     private static List<SemanticCorrector> semanticCorrectors = new ArrayList<>();
+    private static SemanticModeller semanticModeller;
 
     public static List<ResultProcessor> getResultProcessors() {
         return CollectionUtils.isEmpty(resultProcessors)
@@ -41,6 +43,10 @@ public class ComponentFactory {
         return CollectionUtils.isEmpty(semanticCorrectors)
                 ? init(SemanticCorrector.class, semanticCorrectors)
                 : semanticCorrectors;
+    }
+
+    public static SemanticModeller getSemanticModeller() {
+        return semanticModeller == null ? init(SemanticModeller.class) : semanticModeller;
     }
 
     public static <T> T getBean(String name, Class<T> tClass) {

@@ -9,12 +9,10 @@ import com.tencent.supersonic.common.pojo.enums.AuthType;
 import com.tencent.supersonic.common.pojo.enums.EventType;
 import com.tencent.supersonic.common.pojo.enums.StatusEnum;
 import com.tencent.supersonic.common.pojo.exception.InvalidArgumentException;
-import com.tencent.supersonic.common.service.ChatModelService;
 import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.headless.api.pojo.DBColumn;
 import com.tencent.supersonic.headless.api.pojo.DbSchema;
 import com.tencent.supersonic.headless.api.pojo.Dim;
-import com.tencent.supersonic.headless.api.pojo.FieldSchema;
 import com.tencent.supersonic.headless.api.pojo.Identify;
 import com.tencent.supersonic.headless.api.pojo.ItemDateFilter;
 import com.tencent.supersonic.headless.api.pojo.Measure;
@@ -34,6 +32,7 @@ import com.tencent.supersonic.headless.api.pojo.response.DomainResp;
 import com.tencent.supersonic.headless.api.pojo.response.MetricResp;
 import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
 import com.tencent.supersonic.headless.api.pojo.response.UnAvailableItemResp;
+import com.tencent.supersonic.headless.server.modeller.SemanticModeller;
 import com.tencent.supersonic.headless.server.persistence.dataobject.DateInfoDO;
 import com.tencent.supersonic.headless.server.persistence.dataobject.ModelDO;
 import com.tencent.supersonic.headless.server.persistence.repository.DateInfoRepository;
@@ -46,6 +45,7 @@ import com.tencent.supersonic.headless.server.service.DomainService;
 import com.tencent.supersonic.headless.server.service.MetricService;
 import com.tencent.supersonic.headless.server.service.ModelRelaService;
 import com.tencent.supersonic.headless.server.service.ModelService;
+import com.tencent.supersonic.headless.server.utils.ComponentFactory;
 import com.tencent.supersonic.headless.server.utils.ModelConverter;
 import com.tencent.supersonic.headless.server.utils.NameCheckUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -94,8 +94,6 @@ public class ModelServiceImpl implements ModelService {
 
     private DateInfoRepository dateInfoRepository;
 
-    private ChatModelService chatModelService;
-
     private ModelRelaService modelRelaService;
 
     ExecutorService executor =
@@ -104,8 +102,7 @@ public class ModelServiceImpl implements ModelService {
     public ModelServiceImpl(ModelRepository modelRepository, DatabaseService databaseService,
             @Lazy DimensionService dimensionService, @Lazy MetricService metricService,
             DomainService domainService, UserService userService, DataSetService dataSetService,
-            DateInfoRepository dateInfoRepository, ChatModelService chatModelService,
-            ModelRelaService modelRelaService) {
+            DateInfoRepository dateInfoRepository, ModelRelaService modelRelaService) {
         this.modelRepository = modelRepository;
         this.databaseService = databaseService;
         this.dimensionService = dimensionService;
@@ -114,7 +111,6 @@ public class ModelServiceImpl implements ModelService {
         this.userService = userService;
         this.dataSetService = dataSetService;
         this.dateInfoRepository = dateInfoRepository;
-        this.chatModelService = chatModelService;
         this.modelRelaService = modelRelaService;
     }
 
@@ -216,19 +212,19 @@ public class ModelServiceImpl implements ModelService {
             throws SQLException {
         List<DbSchema> dbSchemas = getDbSchemes(modelBuildReq);
         Map<String, ModelSchema> modelSchemaMap = new ConcurrentHashMap<>();
-        CompletableFuture.allOf(dbSchemas
-                .stream().map(dbSchema -> CompletableFuture
-                        .runAsync(() -> doBuild(dbSchema, modelSchemaMap), executor))
+        CompletableFuture.allOf(dbSchemas.stream()
+                .map(dbSchema -> CompletableFuture.runAsync(
+                        () -> doBuild(modelBuildReq, dbSchema, dbSchemas, modelSchemaMap),
+                        executor))
                 .toArray(CompletableFuture[]::new)).join();
         return modelSchemaMap;
     }
 
-    private void doBuild(DbSchema dbSchema, Map<String, ModelSchema> modelSchemaMap) {
-        ModelSchema modelSchema = new ModelSchema();
-        List<FieldSchema> fieldSchemas =
-                dbSchema.getDbColumns().stream().map(this::convert).collect(Collectors.toList());
-        modelSchema.setFiledSchemas(fieldSchemas);
-        modelSchemaMap.put(dbSchema.getTable(), modelSchema);
+    private void doBuild(ModelBuildReq modelBuildReq, DbSchema curSchema, List<DbSchema> dbSchemas,
+            Map<String, ModelSchema> modelSchemaMap) {
+        SemanticModeller semanticModeller = ComponentFactory.getSemanticModeller();
+        ModelSchema modelSchema = semanticModeller.build(curSchema, dbSchemas, modelBuildReq);
+        modelSchemaMap.put(curSchema.getTable(), modelSchema);
     }
 
     private List<DbSchema> getDbSchemes(ModelBuildReq modelBuildReq) throws SQLException {
@@ -237,9 +233,9 @@ public class ModelServiceImpl implements ModelService {
     }
 
     private List<DbSchema> convert(Map<String, List<DBColumn>> dbColumnMap,
-            ModelBuildReq modelSchemaReq) {
+            ModelBuildReq modelBuildReq) {
         return dbColumnMap.keySet().stream()
-                .map(key -> convert(modelSchemaReq, key, dbColumnMap.get(key)))
+                .map(key -> convert(modelBuildReq, key, dbColumnMap.get(key)))
                 .collect(Collectors.toList());
     }
 
@@ -250,15 +246,6 @@ public class ModelServiceImpl implements ModelService {
         dbSchema.setSql(modelSchemaReq.getSql());
         dbSchema.setDbColumns(dbColumns);
         return dbSchema;
-    }
-
-    private FieldSchema convert(DBColumn dbColumn) {
-        FieldSchema fieldSchema = new FieldSchema();
-        fieldSchema.setName(dbColumn.getComment());
-        fieldSchema.setColumnName(dbColumn.getColumnName());
-        fieldSchema.setComment(dbColumn.getComment());
-        fieldSchema.setDataType(dbColumn.getDataType());
-        return fieldSchema;
     }
 
     private void batchCreateDimension(ModelDO modelDO, User user) throws Exception {

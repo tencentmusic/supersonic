@@ -5,7 +5,7 @@ import com.tencent.supersonic.headless.api.pojo.enums.FieldType;
 import lombok.Data;
 
 @Data
-public class FieldSchema {
+public class ColumnSchema {
 
     private String columnName;
 
