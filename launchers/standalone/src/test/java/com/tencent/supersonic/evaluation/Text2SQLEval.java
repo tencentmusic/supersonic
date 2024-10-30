@@ -59,7 +59,8 @@ public class Text2SQLEval extends BaseTest {
         durations.add(System.currentTimeMillis() - start);
         assert result.getQueryColumns().size() == 2;
         assert result.getQueryResults().size() == 30;
-        assert result.getTextResult().contains("date");
+        assert result.getTextResult().contains("date")
+                || result.getTextResult().contains("日期");
     }
 
     @Test
