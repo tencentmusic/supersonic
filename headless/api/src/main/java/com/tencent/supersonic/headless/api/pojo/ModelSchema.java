@@ -14,11 +14,11 @@ public class ModelSchema {
 
     private String description;
 
-    private List<FieldSchema> filedSchemas;
+    private List<ColumnSchema> columnSchemas;
 
     @JsonIgnore
-    public FieldSchema getFieldByName(String columnName) {
-        for (FieldSchema fieldSchema : filedSchemas) {
+    public ColumnSchema getColumnByName(String columnName) {
+        for (ColumnSchema fieldSchema : columnSchemas) {
             if (fieldSchema.getColumnName().equalsIgnoreCase(columnName)) {
                 return fieldSchema;
             }

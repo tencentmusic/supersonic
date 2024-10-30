@@ -50,6 +50,9 @@ com.tencent.supersonic.headless.server.processor.ResultProcessor=\
     com.tencent.supersonic.headless.server.processor.ParseInfoProcessor,\
     com.tencent.supersonic.headless.server.processor.EntityInfoProcessor
 
+com.tencent.supersonic.headless.server.modeller.SemanticModeller=\
+    com.tencent.supersonic.headless.server.modeller.RuleSemanticModeller
+
 ### chat-server SPIs
 
 com.tencent.supersonic.chat.server.parser.ChatQueryParser=\
