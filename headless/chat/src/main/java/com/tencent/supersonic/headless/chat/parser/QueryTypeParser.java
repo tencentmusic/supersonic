@@ -23,7 +23,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-/** QueryTypeParser resolves query type as either METRIC or TAG, or ID. */
+/** QueryTypeParser resolves query type as either AGGREGATE or DETAIL or ID. */
 @Slf4j
 public class QueryTypeParser implements SemanticParser {
 
