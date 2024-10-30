@@ -15,19 +15,16 @@ import com.tencent.supersonic.headless.api.pojo.enums.DimensionType;
 import com.tencent.supersonic.headless.api.pojo.enums.IdentifyType;
 import com.tencent.supersonic.headless.api.pojo.request.ModelReq;
 import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
-import com.tencent.supersonic.headless.server.builder.ModelIntelligentBuilder;
 import com.tencent.supersonic.headless.server.persistence.dataobject.ModelDO;
 import com.tencent.supersonic.headless.server.persistence.repository.DateInfoRepository;
 import com.tencent.supersonic.headless.server.persistence.repository.ModelRepository;
 import com.tencent.supersonic.headless.server.service.impl.ModelServiceImpl;
 import com.tencent.supersonic.headless.server.utils.ModelConverter;
+import java.util.ArrayList;
+import java.util.List;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-
-import java.util.ArrayList;
-import java.util.List;
-
 import static org.mockito.Mockito.when;
 
 class ModelServiceImplTest {
@@ -77,13 +74,11 @@ class ModelServiceImplTest {
         UserService userService = Mockito.mock(UserService.class);
         DateInfoRepository dateInfoRepository = Mockito.mock(DateInfoRepository.class);
         DataSetService viewService = Mockito.mock(DataSetService.class);
-        ModelIntelligentBuilder modelIntelligentBuilder =
-                Mockito.mock(ModelIntelligentBuilder.class);
         ChatModelService chatModelService = Mockito.mock(ChatModelService.class);
         ModelRelaService modelRelaService = Mockito.mock(ModelRelaService.class);
         return new ModelServiceImpl(modelRepository, databaseService, dimensionService,
                 metricService, domainService, userService, viewService, dateInfoRepository,
-                modelIntelligentBuilder, chatModelService, modelRelaService);
+                chatModelService, modelRelaService);
     }
 
     private ModelReq mockModelReq() {
