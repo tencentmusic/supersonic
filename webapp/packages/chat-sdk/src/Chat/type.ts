@@ -17,6 +17,7 @@ export type MessageItem = {
   id: string | number;
   type?: MessageTypeEnum;
   msg?: string;
+  questionId?: number;
   msgValue?: string;
   identityMsg?: string;
   modelId?: number;

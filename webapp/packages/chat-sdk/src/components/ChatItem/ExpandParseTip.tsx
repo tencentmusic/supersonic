@@ -1,7 +1,7 @@
 import React, { ReactNode } from 'react';
 import { ChatContextType, DateInfoType, EntityInfoType, FilterItemType } from '../../common/type';
-import { Button, DatePicker, Row, Col, Tag } from 'antd';
-import { CheckCircleFilled, CloseCircleFilled, ReloadOutlined } from '@ant-design/icons';
+import { Button, DatePicker, Row, Col } from 'antd';
+import { CheckCircleFilled, CloseCircleFilled } from '@ant-design/icons';
 import Loading from './Loading';
 import FilterItem from './FilterItem';
 import classNames from 'classnames';
@@ -9,6 +9,7 @@ import { isMobile } from '../../utils/utils';
 import dayjs, { Dayjs } from 'dayjs';
 import quarterOfYear from 'dayjs/plugin/quarterOfYear';
 import { prefixCls, getTipNode } from './ParseTipUtils';
+import MarkDown from '../ChatMsg/MarkDown';
 
 import 'dayjs/locale/zh-cn';
 
@@ -18,14 +19,10 @@ dayjs.locale('zh-cn');
 const { RangePicker } = DatePicker;
 
 type Props = {
-  parseLoading: boolean;
+  isSimpleMode?: boolean;
   parseInfoOptions: ChatContextType[];
-  parseTip: string;
   currentParseInfo?: ChatContextType;
   agentId?: number;
-  dimensionFilters: FilterItemType[];
-  dateInfo: DateInfoType;
-  entityInfo: EntityInfoType;
   integrateSystem?: string;
   parseTimeCost?: number;
   isDeveloper?: boolean;
@@ -41,14 +38,10 @@ type RangeValue = [Dayjs, Dayjs];
 type RangeKeys = '近7日' | '近14日' | '近30日' | '本周' | '本月' | '上月' | '本季度' | '本年';
 
 const ExpandParseTip: React.FC<Props> = ({
-  parseLoading,
+  isSimpleMode = false,
   parseInfoOptions,
-  parseTip,
   currentParseInfo,
   agentId,
-  dimensionFilters,
-  dateInfo,
-  entityInfo,
   integrateSystem,
   parseTimeCost,
   isDeveloper,
@@ -76,21 +69,26 @@ const ExpandParseTip: React.FC<Props> = ({
   const getNode = (tipTitle: ReactNode, tipNode?: ReactNode, failed?: boolean) => {
     return (
       <div className={`${prefixCls}-parse-tip`}>
-        <div className={`${prefixCls}-title-bar`}>
-          {!failed ? (
-            <CheckCircleFilled className={`${prefixCls}-step-icon`} />
-          ) : (
-            <CloseCircleFilled className={`${prefixCls}-step-error-icon`} />
-          )}
-          <div className={`${prefixCls}-step-title`}>
-            {tipTitle}
-            {tipNode === undefined && <Loading />}
+        {isSimpleMode ? (
+          <></>
+        ) : (
+          <div className={`${prefixCls}-title-bar`}>
+            {!failed ? (
+              <CheckCircleFilled className={`${prefixCls}-step-icon`} />
+            ) : (
+              <CloseCircleFilled className={`${prefixCls}-step-error-icon`} />
+            )}
+            <div className={`${prefixCls}-step-title`}>
+              {tipTitle}
+              {tipNode === undefined && <Loading />}
+            </div>
           </div>
-        </div>
+        )}
+
         {(tipNode || tipNode === null) && (
           <div
             className={classNames(
-              `${prefixCls}-content-container`,
+              !isSimpleMode && `${prefixCls}-content-container`,
               tipNode === null && `${prefixCls}-empty-content-container`,
               failed && `${prefixCls}-content-container-failed`
             )}
@@ -102,37 +100,17 @@ const ExpandParseTip: React.FC<Props> = ({
     );
   };
 
-  if (parseLoading) {
-    return getNode('意图解析中');
-  }
-
-  if (parseTip) {
-    return getNode(
-      <>
-        意图解析失败
-        {!!parseTimeCost && isDeveloper && (
-          <span className={`${prefixCls}-title-tip`}>(耗时: {parseTimeCost}ms)</span>
-        )}
-      </>,
-      parseTip,
-      true
-    );
-  }
-
-  if (parseInfoOptions.length === 0) {
-    return null;
-  }
-
   const { modelId, queryMode, entity, nativeQuery } = currentParseInfo || {};
 
   const entityAlias = entity?.alias?.[0]?.split('.')?.[0];
 
-  const getFilterContent = (filters: any) => {
+  const getFilterContent = (filters: any, dateInfo: DateInfoType) => {
     const itemValueClass = `${prefixCls}-tip-item-value`;
     const { startDate, endDate } = dateInfo || {};
     const tipItemOptionClass = classNames(`${prefixCls}-tip-item-option`, {
       [`${prefixCls}-mobile-tip-item-option`]: isMobile,
     });
+    const disabled = true;
     return (
       <div className={`${prefixCls}-tip-item-filter-content`}>
         {!!dateInfo && (
@@ -147,6 +125,7 @@ const ExpandParseTip: React.FC<Props> = ({
                 value={[dayjs(startDate), dayjs(endDate)]}
                 onChange={onDateInfoChange}
                 format="YYYY-MM-DD"
+                disabled={disabled}
                 renderExtraFooter={() => (
                   <Row gutter={[28, 28]}>
                     {Object.keys(ranges).map(key => (
@@ -167,6 +146,7 @@ const ExpandParseTip: React.FC<Props> = ({
         )}
         {filters?.map((filter: any, index: number) => (
           <FilterItem
+            disabled={disabled}
             modelId={modelId!}
             filters={filters}
             filter={filter}
@@ -185,13 +165,14 @@ const ExpandParseTip: React.FC<Props> = ({
   };
 
   const getFiltersNode = parseInfo => {
+    const { dateInfo, dimensionFilters } = parseInfo;
     return (
       <>
         {(!!dateInfo || !!dimensionFilters?.length) && (
           <div className={`${prefixCls}-tip-item`}>
             <div className={`${prefixCls}-tip-item-name`}>筛选条件：</div>
             <div className={`${prefixCls}-tip-item-content`}>
-              {getFilterContent(dimensionFilters)}
+              {getFilterContent(dimensionFilters, dateInfo)}
             </div>
           </div>
         )}
@@ -202,59 +183,109 @@ const ExpandParseTip: React.FC<Props> = ({
   return getNode(
     <div className={`${prefixCls}-title-bar`}>
       <div>
-        意图解析
+        意图确认
         {!!parseTimeCost && isDeveloper && (
           <span className={`${prefixCls}-title-tip`}>(耗时: {parseTimeCost}ms)</span>
         )}
       </div>
     </div>,
-    queryMode === 'PLAIN_TEXT' ? null : (
-      <>
-        <div>
-          {parseInfoOptions.map((parseInfo, index) => {
-            const { queryMode, properties } = parseInfo || {};
-            const { type: agentType } = properties || {};
-            return (
-              <div style={{ marginBottom: 10, paddingBottom: 10, borderBottom: '1px solid #eee' }}>
-                <div style={{ marginBottom: 10, height: '30px', lineHeight: '30px' }}>
-                  <span className={`${prefixCls}-content-parser-options-title`}>
-                    解析{index + 1}:
-                  </span>
-                </div>
-                <div className={`${prefixCls}-tip`}>
+
+    <>
+      <div>
+        {parseInfoOptions.map((parseInfo, index) => {
+          const { queryMode, properties, textInfo, id, dimensionFilters, entityInfo } =
+            parseInfo || {};
+          const { type: agentType } = properties || {};
+          return isSimpleMode ? (
+            <>
+              <div style={{ marginBottom: 10 }}>
+                <span
+                  className={`${prefixCls}-content-parser-options-title`}
+                  style={{ display: 'flex' }}
+                >
+                  <span style={{ paddingTop: 3, marginRight: 10 }}>解析{index + 1}: </span>{' '}
+                  <MarkDown markdown={textInfo} />
+                </span>
+              </div>
+            </>
+          ) : (
+            <div
+              style={{ marginBottom: 10, paddingBottom: 10, borderBottom: '1px solid #eee' }}
+              key={`${id}-${textInfo}`}
+            >
+              <div style={{ marginBottom: 10, height: '30px', lineHeight: '30px' }}>
+                <span className={`${prefixCls}-content-parser-options-title`}>
+                  解析{index + 1}:
+                </span>
+              </div>
+              <div className={`${prefixCls}-tip`}>
+                <>
                   {getTipNode({ parseInfo, dimensionFilters, entityInfo })}
                   {!(!!agentType && queryMode !== 'LLM_S2SQL') && getFiltersNode(parseInfo)}
-                </div>
+                </>
               </div>
-            );
-          })}
-          {parseInfoOptions?.length > 1 && (
-            <div className={`${prefixCls}-content-parser-container`}>
-              <div className={`${prefixCls}-content-options`}>
+            </div>
+          );
+        })}
+        {/* {parseInfoOptions.map((parseInfo, index) => {
+          const { queryMode, properties, textInfo, id, dimensionFilters, entityInfo } =
+            parseInfo || {};
+          const { type: agentType } = properties || {};
+          return (
+            <div
+              style={{ marginBottom: 10, paddingBottom: 10, borderBottom: '1px solid #eee' }}
+              key={`${id}-${textInfo}`}
+            >
+              <div style={{ marginBottom: 10, height: '30px', lineHeight: '30px' }}>
+                <span className={`${prefixCls}-content-parser-options-title`}>
+                  解析{index + 1}:
+                </span>
+              </div>
+              <div className={`${prefixCls}-tip`}>
+                {isSimpleMode ? (
+                  <MarkDown markdown={textInfo} />
+                ) : (
+                  <>
+                    {getTipNode({ parseInfo, dimensionFilters, entityInfo })}
+                    {!(!!agentType && queryMode !== 'LLM_S2SQL') && getFiltersNode(parseInfo)}
+                  </>
+                )}
+              </div>
+            </div>
+          );
+        })} */}
+        {parseInfoOptions?.length > 1 && (
+          <div className={`${prefixCls}-content-parser-container`}>
+            <div className={`${prefixCls}-content-options`}>
+              {!currentParseInfo && (
                 <span className={`${prefixCls}-breathing-text`}>
                   请选择适合的解析意图，并进行下一步:
                 </span>
-                {parseInfoOptions.map((parseInfo, index) => (
-                  <div
-                    className={`${prefixCls}-content-option ${
-                      parseInfo.id === currentParseInfo?.id
-                        ? `${prefixCls}-content-option-active`
-                        : ''
-                    }`}
-                    onClick={() => {
-                      onSelectParseInfo(parseInfo);
-                    }}
-                    key={parseInfo.id}
-                  >
-                    解析{index + 1}
-                  </div>
-                ))}
-              </div>
+              )}
+
+              {parseInfoOptions.map((parseInfo, index) => (
+                <div
+                  className={`${prefixCls}-content-option ${
+                    parseInfo.id === currentParseInfo?.id
+                      ? `${prefixCls}-content-option-active`
+                      : ''
+                  } ${currentParseInfo ? `${prefixCls}-content-option-disabled` : ''}`}
+                  onClick={() => {
+                    if (currentParseInfo) {
+                      return;
+                    }
+                    onSelectParseInfo(parseInfo);
+                  }}
+                  key={parseInfo.id}
+                >
+                  解析{index + 1}
+                </div>
+              ))}
             </div>
-          )}
-        </div>
-      </>
-    )
+          </div>
+        )}
+      </div>
+    </>
   );
 };
 

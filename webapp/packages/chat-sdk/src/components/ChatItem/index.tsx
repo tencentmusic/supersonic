@@ -29,6 +29,7 @@ import { exportCsvFile } from '../../utils/utils';
 type Props = {
   msg: string;
   conversationId?: number;
+  questionId?: number;
   modelId?: number;
   agentId?: number;
   score?: number;
@@ -53,6 +54,7 @@ type Props = {
 const ChatItem: React.FC<Props> = ({
   msg,
   conversationId,
+  questionId,
   modelId,
   agentId,
   score,
@@ -77,8 +79,11 @@ const ChatItem: React.FC<Props> = ({
   const [parseTimeCost, setParseTimeCost] = useState<ParseTimeCostType>();
   const [parseInfo, setParseInfo] = useState<ChatContextType>();
   const [parseInfoOptions, setParseInfoOptions] = useState<ChatContextType[]>([]);
+  const [preParseInfoOptions, setPreParseInfoOptions] = useState<ChatContextType[]>([]);
   const [parseTip, setParseTip] = useState('');
   const [executeMode, setExecuteMode] = useState(false);
+  const [preParseMode, setPreParseMode] = useState(false);
+  const [showExpandParseTip, setShowExpandParseTip] = useState(false);
   const [executeLoading, setExecuteLoading] = useState(false);
   const [executeTip, setExecuteTip] = useState('');
   const [executeErrorMsg, setExecuteErrorMsg] = useState('');
@@ -97,6 +102,9 @@ const ChatItem: React.FC<Props> = ({
     setParseTimeCost(undefined);
     setParseInfo(undefined);
     setParseInfoOptions([]);
+    setPreParseMode(false);
+    setShowExpandParseTip(false);
+    setPreParseInfoOptions([]);
     setParseTip('');
     setExecuteMode(false);
     setDimensionFilters([]);
@@ -222,7 +230,11 @@ const ChatItem: React.FC<Props> = ({
       ...item,
       queryId,
     }));
-
+    if (parseInfos.length > 1) {
+      setPreParseInfoOptions(parseInfos);
+      setShowExpandParseTip(true);
+      setPreParseMode(true);
+    }
     setParseInfoOptions(parseInfos || []);
     const parseInfoValue = parseInfos[0];
     if (!(currentAgent?.enableFeedback === 1 && parseInfos.length > 1)) {
@@ -368,48 +380,32 @@ const ChatItem: React.FC<Props> = ({
 
   const onExpandSelectParseInfo = async (parseInfoValue: ChatContextType) => {
     setParseInfo(parseInfoValue);
-    if (dataCache[parseInfoValue.id!]) {
-      const { tip, data } = dataCache[parseInfoValue.id!];
-      setExecuteTip(tip);
-      setData(data);
-      onMsgDataLoaded?.(
-        {
-          ...(data as any),
-          parseInfos,
-          queryId: parseInfoValue.queryId,
-        },
-        true,
-        true
-      );
-    } else {
-      const { id: parseId, queryId } = parseInfoValue;
-      setExecuteMode(true);
-      setEntitySwitchLoading(true);
-      const { code, data }: any = await chatParse({
-        queryText: msg,
-        chatId: conversationId,
-        modelId,
-        agentId,
-        filters: filter,
-        parseId,
-        queryId,
-        parseInfo: parseInfoValue,
-      });
-
-      setEntitySwitchLoading(false);
-      if (code === 200) {
-        setParseTimeCost(data.parseTimeCost);
-        const parseInfo = data.selectedParses[0];
-        parseInfo.queryId = data.queryId;
-        setParseInfoOptions([parseInfo]);
-        setParseInfo(parseInfo);
-        updateDimensionFitlers(parseInfo.dimensionFilters || []);
-        setDateInfo(parseInfo.dateInfo);
-        if (parseInfo.entityInfo) {
-          setEntityInfo(parseInfo.entityInfo);
-        }
-        onExecute(parseInfo, [parseInfo], true, true);
+    setPreParseMode(false);
+    const { id: parseId, queryId } = parseInfoValue;
+    setParseLoading(true);
+    const { code, data }: any = await chatParse({
+      queryText: msg,
+      chatId: conversationId,
+      modelId,
+      agentId,
+      filters: filter,
+      parseId,
+      queryId,
+      parseInfo: parseInfoValue,
+    });
+    setParseLoading(false);
+    if (code === 200) {
+      setParseTimeCost(data.parseTimeCost);
+      const parseInfo = data.selectedParses[0];
+      parseInfo.queryId = data.queryId;
+      setParseInfoOptions([parseInfo]);
+      setParseInfo(parseInfo);
+      updateDimensionFitlers(parseInfo.dimensionFilters || []);
+      setDateInfo(parseInfo.dateInfo);
+      if (parseInfo.entityInfo) {
+        setEntityInfo(parseInfo.entityInfo);
       }
+      onExecute(parseInfo, [parseInfo], true, true);
     }
   };
 
@@ -447,18 +443,15 @@ const ChatItem: React.FC<Props> = ({
             : ''}
         </div>
         <div className={contentClass}>
-          {!isSimpleMode && (
-            <>
-              {currentAgent?.enableFeedback === 1 && parseInfoOptions.length > 1 ? (
+          {/* {!isSimpleMode && ( */}
+          <>
+            {currentAgent?.enableFeedback === 1 && !questionId && showExpandParseTip && (
+              <div style={{ marginBottom: 10 }}>
                 <ExpandParseTip
-                  parseLoading={parseLoading}
-                  parseInfoOptions={parseInfoOptions}
-                  parseTip={parseTip}
+                  isSimpleMode={isSimpleMode}
+                  parseInfoOptions={preParseInfoOptions}
                   currentParseInfo={parseInfo}
                   agentId={agentId}
-                  dimensionFilters={dimensionFilters}
-                  dateInfo={dateInfo}
-                  entityInfo={entityInfo}
                   integrateSystem={integrateSystem}
                   parseTimeCost={parseTimeCost?.parseTime}
                   isDeveloper={isDeveloper}
@@ -469,63 +462,68 @@ const ChatItem: React.FC<Props> = ({
                   onRefresh={onRefresh}
                   handlePresetClick={handlePresetClick}
                 />
-              ) : (
-                <ParseTip
-                  parseLoading={parseLoading}
-                  parseInfoOptions={parseInfoOptions}
-                  parseTip={parseTip}
-                  currentParseInfo={parseInfo}
-                  agentId={agentId}
-                  dimensionFilters={dimensionFilters}
-                  dateInfo={dateInfo}
-                  entityInfo={entityInfo}
-                  integrateSystem={integrateSystem}
-                  parseTimeCost={parseTimeCost?.parseTime}
-                  isDeveloper={isDeveloper}
-                  onSelectParseInfo={onSelectParseInfo}
-                  onSwitchEntity={onSwitchEntity}
-                  onFiltersChange={onFiltersChange}
-                  onDateInfoChange={onDateInfoChange}
-                  onRefresh={() => {
-                    onRefresh();
-                  }}
-                  handlePresetClick={handlePresetClick}
-                />
-              )}
-            </>
-          )}
+              </div>
+            )}
+
+            {!preParseMode && (
+              <ParseTip
+                isSimpleMode={isSimpleMode}
+                parseLoading={parseLoading}
+                parseInfoOptions={parseInfoOptions}
+                parseTip={parseTip}
+                currentParseInfo={parseInfo}
+                agentId={agentId}
+                dimensionFilters={dimensionFilters}
+                dateInfo={dateInfo}
+                entityInfo={entityInfo}
+                integrateSystem={integrateSystem}
+                parseTimeCost={parseTimeCost?.parseTime}
+                isDeveloper={isDeveloper}
+                onSelectParseInfo={onSelectParseInfo}
+                onSwitchEntity={onSwitchEntity}
+                onFiltersChange={onFiltersChange}
+                onDateInfoChange={onDateInfoChange}
+                onRefresh={() => {
+                  onRefresh();
+                }}
+                handlePresetClick={handlePresetClick}
+              />
+            )}
+          </>
+          {/* )} */}
 
           {executeMode && (
             <Spin spinning={entitySwitchLoading}>
-              {!isMobile && parseInfo?.sqlInfo && isDeveloper && isDebugMode && !isSimpleMode && (
-                <SqlItem
-                  agentId={agentId}
-                  queryId={parseInfo.queryId}
+              <div style={{ minHeight: 50 }}>
+                {!isMobile && parseInfo?.sqlInfo && isDeveloper && isDebugMode && !isSimpleMode && (
+                  <SqlItem
+                    agentId={agentId}
+                    queryId={parseInfo.queryId}
+                    question={msg}
+                    llmReq={llmReq}
+                    llmResp={llmResp}
+                    integrateSystem={integrateSystem}
+                    queryMode={parseInfo.queryMode}
+                    sqlInfo={parseInfo.sqlInfo}
+                    sqlTimeCost={parseTimeCost?.sqlTime}
+                    executeErrorMsg={executeErrorMsg}
+                  />
+                )}
+                <ExecuteItem
+                  isSimpleMode={isSimpleMode}
+                  queryId={parseInfo?.queryId}
                   question={msg}
-                  llmReq={llmReq}
-                  llmResp={llmResp}
-                  integrateSystem={integrateSystem}
-                  queryMode={parseInfo.queryMode}
-                  sqlInfo={parseInfo.sqlInfo}
-                  sqlTimeCost={parseTimeCost?.sqlTime}
-                  executeErrorMsg={executeErrorMsg}
+                  queryMode={parseInfo?.queryMode}
+                  executeLoading={executeLoading}
+                  executeTip={executeTip}
+                  chartIndex={0}
+                  data={data}
+                  triggerResize={triggerResize}
+                  executeItemNode={executeItemNode}
+                  isDeveloper={isDeveloper}
+                  renderCustomExecuteNode={renderCustomExecuteNode}
                 />
-              )}
-              <ExecuteItem
-                isSimpleMode={isSimpleMode}
-                queryId={parseInfo?.queryId}
-                question={msg}
-                queryMode={parseInfo?.queryMode}
-                executeLoading={executeLoading}
-                // entitySwitchLoading={entitySwitchLoading}
-                executeTip={executeTip}
-                chartIndex={0}
-                data={data}
-                triggerResize={triggerResize}
-                executeItemNode={executeItemNode}
-                isDeveloper={isDeveloper}
-                renderCustomExecuteNode={renderCustomExecuteNode}
-              />
+              </div>
             </Spin>
           )}
           {executeMode &&

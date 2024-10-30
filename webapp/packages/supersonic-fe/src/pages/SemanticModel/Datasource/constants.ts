@@ -11,6 +11,9 @@ export enum EnumDataSourceType {
   MEASURES = 'measures',
   PRIMARY = 'primary',
   FOREIGN = 'foreign',
+  PRIMARY_KEY = 'primary_key',
+  FOREIGN_KEY = 'foreign_key',
+  IDENTIFY = 'identify',
 }
 
 export enum EnumModelDataType {
@@ -31,6 +34,14 @@ export const modelDataClass = {
 
 export const DIM_OPTIONS = [
   {
+    label: '主键',
+    value: EnumDataSourceType.PRIMARY_KEY,
+  },
+  {
+    label: '外键',
+    value: EnumDataSourceType.FOREIGN_KEY,
+  },
+  {
     label: '枚举',
     value: EnumDataSourceType.CATEGORICAL,
   },
@@ -43,6 +54,13 @@ export const DIM_OPTIONS = [
     value: EnumDataSourceType.PARTITION_TIME,
   },
 ];
+
+export const TYPE_OPTIONS_LABEL: Record<string, string> = {
+  [EnumModelDataType.DIMENSION]: '枚举',
+  [EnumModelDataType.MEASURES]: '度量',
+  [EnumDataSourceType.PRIMARY]: '主键',
+  [EnumDataSourceType.FOREIGN]: '外键',
+};
 
 export const TYPE_OPTIONS = [
   {

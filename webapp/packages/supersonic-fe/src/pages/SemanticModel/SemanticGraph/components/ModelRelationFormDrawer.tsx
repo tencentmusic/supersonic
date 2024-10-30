@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Form, Button, Drawer, Space, Input, Select, message, Popconfirm } from 'antd';
 import { formLayout } from '@/components/FormHelper/utils';
+import { TYPE_OPTIONS_LABEL } from '@/pages/SemanticModel/Datasource/constants';
 import { createOrUpdateModelRela, deleteModelRela, getModelDetail } from '../../service';
 
 export type ModelRelationFormDrawerProps = {
@@ -52,8 +53,11 @@ const ModelRelationFormDrawer: React.FC<ModelRelationFormDrawerProps> = ({
       if (Array.isArray(data?.modelDetail?.identifiers)) {
         const dataSourceIdentifiers = data.modelDetail.identifiers;
         const options = dataSourceIdentifiers.map((item: any) => {
+          const typeLabel = TYPE_OPTIONS_LABEL[item.type];
           return {
-            label: `${item.bizName}${item.name ? `(${item.name})` : ''}`,
+            label: `${item.bizName}${item.name ? `(${item.name})` : ''}${
+              typeLabel ? `-${typeLabel}` : ''
+            }`,
             value: item.bizName,
           };
         });
