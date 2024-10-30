@@ -154,36 +154,19 @@ public class SqlReplaceHelper {
     public static String replaceFields(String sql, Map<String, String> fieldNameMap,
             boolean exactReplace) {
         Select selectStatement = SqlSelectHelper.getSelect(sql);
-        List<PlainSelect> plainSelectList = SqlSelectHelper.getWithItem(selectStatement);
-        if (selectStatement instanceof PlainSelect) {
-            PlainSelect plainSelect = (PlainSelect) selectStatement;
-            plainSelectList.add(plainSelect);
-            getFromSelect(plainSelect.getFromItem(), plainSelectList);
-        } else if (selectStatement instanceof SetOperationList) {
-            SetOperationList setOperationList = (SetOperationList) selectStatement;
-            if (!CollectionUtils.isEmpty(setOperationList.getSelects())) {
-                setOperationList.getSelects().forEach(subSelectBody -> {
-                    PlainSelect subPlainSelect = (PlainSelect) subSelectBody;
-                    plainSelectList.add(subPlainSelect);
-                    getFromSelect(subPlainSelect.getFromItem(), plainSelectList);
-                });
+        Set<Select> plainSelectList = SqlSelectHelper.getAllSelect(selectStatement);
+        for (Select plainSelect : plainSelectList) {
+            if (plainSelect instanceof PlainSelect) {
+                replaceFieldsInPlainOneSelect(fieldNameMap, exactReplace,
+                        (PlainSelect) plainSelect);
             }
-            List<OrderByElement> orderByElements = setOperationList.getOrderByElements();
-            if (!CollectionUtils.isEmpty(orderByElements)) {
-                for (OrderByElement orderByElement : orderByElements) {
-                    orderByElement.accept(new OrderByReplaceVisitor(fieldNameMap, exactReplace));
-                }
+            if (plainSelect instanceof SetOperationList) {
+                replaceFieldsInSetOperationList(fieldNameMap, exactReplace,
+                        (SetOperationList) plainSelect);
             }
-        } else {
-            return sql;
-        }
-        List<PlainSelect> plainSelects = SqlSelectHelper.getPlainSelects(plainSelectList);
-        for (PlainSelect plainSelect : plainSelects) {
-            replaceFieldsInPlainOneSelect(fieldNameMap, exactReplace, plainSelect);
         }
         return selectStatement.toString();
     }
-
 
     private static void replaceFieldsInPlainOneSelect(Map<String, String> fieldNameMap,
             boolean exactReplace, PlainSelect plainSelect) {
@@ -236,22 +219,24 @@ public class SqlReplaceHelper {
         List<Join> joins = plainSelect.getJoins();
         if (!CollectionUtils.isEmpty(joins)) {
             for (Join join : joins) {
-                if (!CollectionUtils.isEmpty(join.getOnExpressions())) {
-                    join.getOnExpressions().stream().forEach(onExpression -> {
-                        onExpression.accept(visitor);
-                    });
-                }
-                if (!(join.getRightItem() instanceof ParenthesedSelect)) {
+                if (CollectionUtils.isEmpty(join.getOnExpressions())) {
                     continue;
+
                 }
-                ParenthesedSelect parenthesedSelect = (ParenthesedSelect) join.getRightItem();
-                List<PlainSelect> plainSelectList = new ArrayList<>();
-                plainSelectList.add(parenthesedSelect.getPlainSelect());
-                List<PlainSelect> subPlainSelects =
-                        SqlSelectHelper.getPlainSelects(plainSelectList);
-                for (PlainSelect subPlainSelect : subPlainSelects) {
-                    replaceFieldsInPlainOneSelect(fieldNameMap, exactReplace, subPlainSelect);
-                }
+                join.getOnExpressions().stream().forEach(onExpression -> {
+                    onExpression.accept(visitor);
+                });
+            }
+        }
+    }
+
+
+    private static void replaceFieldsInSetOperationList(Map<String, String> fieldNameMap,
+            boolean exactReplace, SetOperationList operationList) {
+        List<OrderByElement> orderByElements = operationList.getOrderByElements();
+        if (!CollectionUtils.isEmpty(orderByElements)) {
+            for (OrderByElement orderByElement : orderByElements) {
+                orderByElement.accept(new OrderByReplaceVisitor(fieldNameMap, exactReplace));
             }
         }
     }

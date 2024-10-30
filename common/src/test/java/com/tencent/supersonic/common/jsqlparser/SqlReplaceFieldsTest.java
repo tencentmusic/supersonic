@@ -263,4 +263,21 @@ class SqlReplaceFieldsTest extends SqlReplaceHelperTest {
                 + "SELECT * FROM daily_visits", replaceSql);
     }
 
+    @Test
+    void testReplaceFields18() {
+
+        String replaceSql = "WITH\n" + "  latest_data AS (\n" + "    SELECT\n" + "      粉丝数,\n"
+                + "      ROW_NUMBER() OVER (\n" + "        ORDER BY\n" + "          数据日期 DESC\n"
+                + "      ) AS __row_num__\n" + "    FROM\n" + "      问答艺人数据集\n" + "    WHERE\n"
+                + "      (TME歌手ID = '1')\n" + "      AND (\n" + "        数据日期 >= '2024-10-22'\n"
+                + "        AND 数据日期 <= '2024-10-29'\n" + "      )\n" + "  )\n" + "SELECT\n"
+                + "  AVG(__粉丝数__)\n" + "FROM\n" + "  latest_data\n" + "WHERE\n"
+                + "  __row_num__ = 1";
+        replaceSql = SqlReplaceHelper.replaceFields(replaceSql, fieldToBizName);
+
+        Assert.assertEquals("WITH latest_data AS (SELECT fans_cnt, ROW_NUMBER() OVER "
+                + "(ORDER BY sys_imp_date DESC) AS __row_num__ FROM 问答艺人数据集 WHERE (TME歌手ID = '1') "
+                + "AND (sys_imp_date >= '2024-10-22' AND sys_imp_date <= '2024-10-29')) SELECT AVG(__粉丝数__) "
+                + "FROM latest_data WHERE __row_num__ = 1", replaceSql);
+    }
 }
