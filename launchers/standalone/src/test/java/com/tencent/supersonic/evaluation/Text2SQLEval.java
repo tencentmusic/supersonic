@@ -157,7 +157,7 @@ public class Text2SQLEval extends BaseTest {
     private static DatasetTool getDatasetTool() {
         DatasetTool datasetTool = new DatasetTool();
         datasetTool.setType(AgentToolType.DATASET);
-        datasetTool.setDataSetIds(Lists.newArrayList(-1L));
+        datasetTool.setDataSetIds(Lists.newArrayList(1L));
 
         return datasetTool;
     }

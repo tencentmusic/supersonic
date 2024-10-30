@@ -34,15 +34,6 @@ public class LLMRequestService {
     @Autowired
     private ParserConfig parserConfig;
 
-    public boolean isSkip(ChatQueryContext queryCtx) {
-        if (!queryCtx.getRequest().getText2SQLType().enableLLM()) {
-            log.info("LLM disabled, skip");
-            return true;
-        }
-
-        return false;
-    }
-
     public Long getDataSetId(ChatQueryContext queryCtx) {
         DataSetResolver dataSetResolver = ComponentFactory.getModelResolver();
         return dataSetResolver.resolve(queryCtx, queryCtx.getRequest().getDataSetIds());

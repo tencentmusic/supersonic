@@ -54,10 +54,6 @@ public class MapperConfig extends ParameterConfig {
             new Parameter("s2.mapper.embedding.threshold", "0.98", "向量召回相似度阈值", "相似度小于该阈值的则舍弃",
                     "number", "Mapper相关配置");
 
-    public static final Parameter EMBEDDING_MAPPER_THRESHOLD_MIN =
-            new Parameter("s2.mapper.embedding.min.threshold", "0.9", "向量召回最小相似度阈值",
-                    "向量召回相似度阈值在动态调整中的最低值", "number", "Mapper相关配置");
-
     public static final Parameter EMBEDDING_MAPPER_ROUND_NUMBER =
             new Parameter("s2.mapper.embedding.round.number", "10", "向量召回最小相似度阈值",
                     "向量召回相似度阈值在动态调整中的最低值", "number", "Mapper相关配置");

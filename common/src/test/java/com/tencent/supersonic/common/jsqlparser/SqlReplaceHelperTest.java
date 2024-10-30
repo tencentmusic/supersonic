@@ -348,6 +348,7 @@ class SqlReplaceHelperTest {
         fieldToBizName.put("歌曲发布时间", "song_publis_date");
         fieldToBizName.put("歌曲发布年份", "song_publis_year");
         fieldToBizName.put("访问次数", "pv");
+        fieldToBizName.put("粉丝数", "fans_cnt");
         return fieldToBizName;
     }
 

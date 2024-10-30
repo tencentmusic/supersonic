@@ -19,13 +19,12 @@ import java.util.List;
 @Slf4j
 public class RuleSqlParser implements SemanticParser {
 
-    private static final List<SemanticParser> auxiliaryParsers = Arrays
-            .asList(new ContextInheritParser(), new TimeRangeParser(), new AggregateTypeParser());
+    private static final List<SemanticParser> auxiliaryParsers =
+            Arrays.asList(new TimeRangeParser(), new AggregateTypeParser());
 
     @Override
     public void parse(ChatQueryContext chatQueryContext) {
-        if (!chatQueryContext.getRequest().getText2SQLType().enableRule()
-                || !chatQueryContext.getCandidateQueries().isEmpty()) {
+        if (!chatQueryContext.getCandidateQueries().isEmpty()) {
             return;
         }
         SchemaMapInfo mapInfo = chatQueryContext.getMapInfo();

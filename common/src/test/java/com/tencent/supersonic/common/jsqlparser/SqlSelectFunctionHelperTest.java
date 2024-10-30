@@ -35,7 +35,7 @@ class SqlSelectFunctionHelperTest {
         hasAggregateFunction = SqlSelectFunctionHelper.hasAggregateFunction(sql);
         Assert.assertEquals(hasAggregateFunction, false);
 
-        sql = "SELECT user_name, pv FROM t_34 WHERE sys_imp_date <= '2023-09-03' "
+        sql = "SELECT user_name, sum(pv) FROM t_34 WHERE sys_imp_date <= '2023-09-03' "
                 + "AND sys_imp_date >= '2023-08-04' GROUP BY user_name ORDER BY sum(pv) DESC LIMIT 10";
         hasAggregateFunction = SqlSelectFunctionHelper.hasAggregateFunction(sql);
         Assert.assertEquals(hasAggregateFunction, true);

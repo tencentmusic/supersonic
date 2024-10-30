@@ -26,6 +26,7 @@ import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.Statement;
+import net.sf.jsqlparser.statement.select.FromItem;
 import net.sf.jsqlparser.statement.select.GroupByElement;
 import net.sf.jsqlparser.statement.select.Join;
 import net.sf.jsqlparser.statement.select.LateralView;
@@ -50,7 +51,9 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-/** Sql Parser Select Helper */
+/**
+ * Sql Parser Select Helper
+ */
 @Slf4j
 public class SqlSelectHelper {
 
@@ -807,5 +810,104 @@ public class SqlSelectHelper {
                 }
             }
         }
+    }
+
+    public static Set<Select> getAllSelect(Select selectStatement) {
+        Set<Select> selects = new HashSet<>();
+        collectSelects(selectStatement, selects);
+        return selects;
+    }
+
+    private static void collectSelects(Select select, Set<Select> selects) {
+        if (select == null) {
+            return;
+        }
+        if (select instanceof PlainSelect) {
+            PlainSelect plainSelect = (PlainSelect) select;
+            selects.add(plainSelect);
+            collectFromItemPlainSelects(plainSelect.getFromItem(), selects);
+            collectWithItemPlainSelects(plainSelect.getWithItemsList(), selects);
+            collectJoinsPlainSelects(plainSelect.getJoins(), selects);
+            collectNestedPlainSelects(plainSelect, selects);
+        } else if (select instanceof SetOperationList) {
+            SetOperationList setOperationList = (SetOperationList) select;
+            selects.add(setOperationList);
+            if (!CollectionUtils.isEmpty(setOperationList.getSelects())) {
+                for (Select subSelectBody : setOperationList.getSelects()) {
+                    collectSelects(subSelectBody, selects);
+                }
+            }
+        } else if (select instanceof WithItem) {
+            WithItem withItem = (WithItem) select;
+            collectSelects(withItem.getSelect(), selects);
+        } else if (select instanceof ParenthesedSelect) {
+            ParenthesedSelect parenthesedSelect = (ParenthesedSelect) select;
+            collectSelects(parenthesedSelect.getPlainSelect(), selects);
+        }
+    }
+
+    private static void collectJoinsPlainSelects(List<Join> joins, Set<Select> selects) {
+        if (CollectionUtils.isEmpty(joins)) {
+            return;
+        }
+        for (Join join : joins) {
+            FromItem rightItem = join.getRightItem();
+            if (!(rightItem instanceof ParenthesedSelect)) {
+                continue;
+            }
+            ParenthesedSelect parenthesedSelect = (ParenthesedSelect) rightItem;
+            selects.add(parenthesedSelect.getPlainSelect());
+        }
+    }
+
+    private static void collectFromItemPlainSelects(FromItem fromItem, Set<Select> selects) {
+        if (fromItem instanceof ParenthesedSelect) {
+            ParenthesedSelect parenthesedSelect = (ParenthesedSelect) fromItem;
+            collectSelects(parenthesedSelect.getSelect(), selects);
+        }
+    }
+
+    public static void collectWithItemPlainSelects(List<WithItem> withItemList,
+            Set<Select> selects) {
+        if (CollectionUtils.isEmpty(withItemList)) {
+            return;
+        }
+        for (WithItem withItem : withItemList) {
+            collectSelects(withItem.getSelect(), selects);
+        }
+    }
+
+    private static void collectNestedPlainSelects(PlainSelect plainSelect, Set<Select> selects) {
+        ExpressionVisitorAdapter expressionVisitor = new ExpressionVisitorAdapter() {
+            @Override
+            public void visit(Select subSelect) {
+                if (subSelect instanceof ParenthesedSelect) {
+                    ParenthesedSelect parenthesedSelect = (ParenthesedSelect) subSelect;
+                    if (parenthesedSelect.getSelect() instanceof PlainSelect) {
+                        selects.add(parenthesedSelect.getPlainSelect());
+                    }
+                }
+            }
+        };
+
+        plainSelect.accept(new SelectVisitorAdapter() {
+            @Override
+            public void visit(PlainSelect plainSelect) {
+                Expression whereExpression = plainSelect.getWhere();
+                if (whereExpression != null) {
+                    whereExpression.accept(expressionVisitor);
+                }
+                Expression having = plainSelect.getHaving();
+                if (Objects.nonNull(having)) {
+                    having.accept(expressionVisitor);
+                }
+                List<SelectItem<?>> selectItems = plainSelect.getSelectItems();
+                if (!CollectionUtils.isEmpty(selectItems)) {
+                    for (SelectItem selectItem : selectItems) {
+                        selectItem.accept(expressionVisitor);
+                    }
+                }
+            }
+        });
     }
 }

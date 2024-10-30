@@ -152,7 +152,7 @@ public class ModelConverter {
         dimensionReq.setSemanticType(SemanticType.CATEGORY.name());
         dimensionReq.setModelId(modelDO.getId());
         dimensionReq.setExpr(identify.getBizName());
-        dimensionReq.setType(DimensionType.identify.name());
+        dimensionReq.setType(DimensionType.fromIdentify(identify.getType()).name());
         return dimensionReq;
     }
 

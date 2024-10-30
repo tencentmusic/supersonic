@@ -27,7 +27,6 @@ public abstract class BaseMapper implements SchemaMapper {
 
     @Override
     public void map(ChatQueryContext chatQueryContext) {
-
         String simpleName = this.getClass().getSimpleName();
         long startTime = System.currentTimeMillis();
         log.debug("before {},mapInfo:{}", simpleName,

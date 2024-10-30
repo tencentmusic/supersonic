@@ -129,8 +129,7 @@ public class S2VisitsDemo extends S2BaseDemo {
     public void addSampleChats(Integer agentId) {
         Long chatId = chatManageService.addChat(defaultUser, "样例对话1", agentId);
         submitText(chatId.intValue(), agentId, "超音数 访问次数");
-        submitText(chatId.intValue(), agentId, "按部门统计");
-        submitText(chatId.intValue(), agentId, "查询近30天");
+        submitText(chatId.intValue(), agentId, "按部门统计近7天访问次数");
         submitText(chatId.intValue(), agentId, "alice 停留时长");
         submitText(chatId.intValue(), agentId, "访问次数最高的部门");
     }
@@ -224,7 +223,7 @@ public class S2VisitsDemo extends S2BaseDemo {
         modelReq.setAdminOrgs(Collections.emptyList());
         List<Identify> identifiers = new ArrayList<>();
         ModelDetail modelDetail = new ModelDetail();
-        identifiers.add(new Identify("用户名", IdentifyType.primary.name(), "user_name", 0));
+        identifiers.add(new Identify("用户名", IdentifyType.foreign.name(), "user_name", 0));
         modelDetail.setIdentifiers(identifiers);
 
         List<Dim> dimensions = new ArrayList<>();
@@ -268,7 +267,7 @@ public class S2VisitsDemo extends S2BaseDemo {
         modelReq.setAdminOrgs(Collections.emptyList());
         List<Identify> identifiers = new ArrayList<>();
         ModelDetail modelDetail = new ModelDetail();
-        identifiers.add(new Identify("用户", IdentifyType.primary.name(), "user_name", 0));
+        identifiers.add(new Identify("用户", IdentifyType.foreign.name(), "user_name", 0));
         modelDetail.setIdentifiers(identifiers);
 
         List<Dim> dimensions = new ArrayList<>();

@@ -1,14 +1,12 @@
 package com.tencent.supersonic.headless.chat;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.headless.api.pojo.DataSetSchema;
 import com.tencent.supersonic.headless.api.pojo.SchemaMapInfo;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.api.pojo.SemanticSchema;
 import com.tencent.supersonic.headless.api.pojo.enums.ChatWorkflowState;
 import com.tencent.supersonic.headless.api.pojo.request.QueryNLReq;
-import com.tencent.supersonic.headless.chat.parser.ParserConfig;
 import com.tencent.supersonic.headless.chat.query.SemanticQuery;
 import lombok.Data;
 

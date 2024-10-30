@@ -4,6 +4,7 @@ import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementMatch;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
+import com.tencent.supersonic.headless.api.pojo.enums.MapModeEnum;
 import com.tencent.supersonic.headless.chat.ChatQueryContext;
 import com.tencent.supersonic.headless.chat.knowledge.EmbeddingResult;
 import com.tencent.supersonic.headless.chat.knowledge.builder.BaseWordBuilder;
@@ -14,13 +15,18 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.List;
 import java.util.Objects;
 
-/** A mapper that recognizes schema elements with vector embedding. */
+/**
+ * A mapper that recognizes schema elements with vector embedding.
+ */
 @Slf4j
 public class EmbeddingMapper extends BaseMapper {
 
     @Override
     public void doMap(ChatQueryContext chatQueryContext) {
         // 1. query from embedding by queryText
+        if (MapModeEnum.STRICT.equals(chatQueryContext.getRequest().getMapModeEnum())) {
+            return;
+        }
         EmbeddingMatchStrategy matchStrategy = ContextUtils.getBean(EmbeddingMatchStrategy.class);
         List<EmbeddingResult> matchResults = getMatches(chatQueryContext, matchStrategy);
 
