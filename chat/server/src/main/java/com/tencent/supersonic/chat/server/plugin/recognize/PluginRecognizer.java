@@ -57,9 +57,11 @@ public abstract class PluginRecognizer {
         ChatLayerService chatLayerService = ContextUtils.getBean(ChatLayerService.class);
         QueryNLReq queryNLReq = QueryReqConverter.buildQueryNLReq(parseContext);
         SchemaMapInfo schemaMapInfo = chatLayerService.map(queryNLReq).getMapInfo();
+        int parseId = 1;
         for (Long dataSetId : dataSetIds) {
             SemanticParseInfo semanticParseInfo = buildSemanticParseInfo(dataSetId, plugin,
                     parseContext, schemaMapInfo, pluginRecallResult.getDistance());
+            semanticParseInfo.setId(parseId++);
             semanticParseInfo.setQueryMode(plugin.getType());
             semanticParseInfo.setScore(pluginRecallResult.getScore());
             parseResp.getSelectedParses().add(semanticParseInfo);
