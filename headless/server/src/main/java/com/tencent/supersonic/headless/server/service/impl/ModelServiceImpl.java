@@ -48,6 +48,14 @@ import com.tencent.supersonic.headless.server.service.ModelRelaService;
 import com.tencent.supersonic.headless.server.service.ModelService;
 import com.tencent.supersonic.headless.server.utils.ModelConverter;
 import com.tencent.supersonic.headless.server.utils.NameCheckUtils;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
+
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -65,13 +73,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.BeanUtils;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
 
 @Service
 @Slf4j
@@ -103,8 +104,8 @@ public class ModelServiceImpl implements ModelService {
     public ModelServiceImpl(ModelRepository modelRepository, DatabaseService databaseService,
             @Lazy DimensionService dimensionService, @Lazy MetricService metricService,
             DomainService domainService, UserService userService, DataSetService dataSetService,
-            DateInfoRepository dateInfoRepository,
-            ChatModelService chatModelService, ModelRelaService modelRelaService) {
+            DateInfoRepository dateInfoRepository, ChatModelService chatModelService,
+            ModelRelaService modelRelaService) {
         this.modelRepository = modelRepository;
         this.databaseService = databaseService;
         this.dimensionService = dimensionService;
@@ -215,9 +216,9 @@ public class ModelServiceImpl implements ModelService {
             throws SQLException {
         List<DbSchema> dbSchemas = getDbSchemes(modelBuildReq);
         Map<String, ModelSchema> modelSchemaMap = new ConcurrentHashMap<>();
-        CompletableFuture.allOf(dbSchemas.stream()
-                .map(dbSchema -> CompletableFuture.runAsync(() ->
-                        doBuild(dbSchema, modelSchemaMap), executor))
+        CompletableFuture.allOf(dbSchemas
+                .stream().map(dbSchema -> CompletableFuture
+                        .runAsync(() -> doBuild(dbSchema, modelSchemaMap), executor))
                 .toArray(CompletableFuture[]::new)).join();
         return modelSchemaMap;
     }

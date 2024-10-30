@@ -30,6 +30,10 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static com.tencent.supersonic.headless.api.pojo.SchemaElementType.TERM;
+import static com.tencent.supersonic.headless.chat.query.rule.QueryMatchOption.OptionType.OPTIONAL;
+import static com.tencent.supersonic.headless.chat.query.rule.QueryMatchOption.RequireNumberType.AT_LEAST;
+
 @Slf4j
 @ToString
 public abstract class RuleSemanticQuery extends BaseSemanticQuery {
@@ -38,6 +42,7 @@ public abstract class RuleSemanticQuery extends BaseSemanticQuery {
 
     public RuleSemanticQuery() {
         QueryManager.register(this);
+        queryMatcher.addOption(TERM, OPTIONAL, AT_LEAST, 0);
     }
 
     public List<SchemaElementMatch> match(List<SchemaElementMatch> candidateElementMatches,
