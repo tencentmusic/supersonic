@@ -171,6 +171,11 @@ public class QueryReqConverter {
             log.debug("getAggOption find null defaultAgg metric set to NATIVE");
             return AggOption.OUTER;
         }
+        if (!SqlSelectFunctionHelper.hasAggregateFunction(sql) && !SqlSelectHelper.hasGroupBy(sql)
+                && !SqlSelectHelper.hasWith(sql) && !SqlSelectHelper.hasSubSelect(sql)) {
+            log.debug("getAggOption simple sql set to NATIVE");
+            return AggOption.NATIVE;
+        }
         return AggOption.DEFAULT;
     }
 

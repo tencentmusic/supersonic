@@ -99,12 +99,20 @@ public class DefaultSemanticTranslator implements SemanticTranslator {
                 if (!tables.isEmpty()) {
                     String sql;
                     if (dataSetQueryParam.isSupportWith()) {
-                        List<String> parentWithNameList =
-                                tables.stream().map(table -> table[0]).collect(Collectors.toList());
-                        List<String> parentSqlList =
-                                tables.stream().map(table -> table[1]).collect(Collectors.toList());
-                        sql = SqlMergeWithUtils.mergeWith(engineType, dataSetQueryParam.getSql(),
-                                parentSqlList, parentWithNameList);
+                        if (!SqlMergeWithUtils.hasWith(engineType, dataSetQueryParam.getSql())) {
+                            sql = "with "
+                                    + tables.stream()
+                                            .map(t -> String.format("%s as (%s)", t[0], t[1]))
+                                            .collect(Collectors.joining(","))
+                                    + "\n" + dataSetQueryParam.getSql();
+                        } else {
+                            List<String> parentWithNameList = tables.stream().map(table -> table[0])
+                                    .collect(Collectors.toList());
+                            List<String> parentSqlList = tables.stream().map(table -> table[1])
+                                    .collect(Collectors.toList());
+                            sql = SqlMergeWithUtils.mergeWith(engineType,
+                                    dataSetQueryParam.getSql(), parentSqlList, parentWithNameList);
+                        }
                     } else {
                         sql = dataSetQueryParam.getSql();
                         for (String[] tb : tables) {
