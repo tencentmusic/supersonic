@@ -37,7 +37,7 @@ const DomainManagerTab: React.FC<Props> = ({
   const domainModel = useModel('SemanticModel.domainData');
   const modelModel = useModel('SemanticModel.modelData');
 
-  const { selectDomainId, selectDomainName, selectDomain: domainData, domainList } = domainModel;
+  const { selectDomainId, selectDomainName, selectDomain: domainData } = domainModel;
   const { selectModelId, selectModelName } = modelModel;
 
   useEffect(() => {
@@ -82,17 +82,6 @@ const DomainManagerTab: React.FC<Props> = ({
       hidden: !!domainData?.parentId,
       children: <TermTable />,
     },
-    // {
-    //   label: '画布',
-    //   key: 'xflow',
-    //   hidden: domainData && domainListParentIdList.includes(domainData.id),
-    //   children: (
-    //     <div style={{ width: '100%' }}>
-    //       <SemanticGraphCanvas />
-    //       {/* <HeadlessFlows /> */}
-    //     </div>
-    //   ),
-    // },
     {
       label: '权限管理',
       key: 'permissonSetting',

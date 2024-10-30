@@ -163,20 +163,6 @@ const DimensionValueSettingModal: React.FC<CreateFormProps> = ({
         <Button onClick={onCancel}>取消</Button>
         {menuKey === 'default' && (
           <>
-            {/* <Button
-              type="primary"
-              loading={llmLoading}
-              onClick={() => {
-                generatorDimensionValue();
-              }}
-            >
-              <Space>
-                智能填充
-                <Tooltip title="智能填充将根据维度相关信息，使用大语言模型获取可能被使用的维度值">
-                  <InfoCircleOutlined />
-                </Tooltip>
-              </Space>
-            </Button> */}
             <Button
               type="primary"
               onClick={() => {

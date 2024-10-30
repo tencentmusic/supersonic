@@ -351,68 +351,70 @@ const ClassMetricTable: React.FC<Props> = ({ onEmptyMetricData }) => {
         className={`${styles.classTable} ${styles.classTableSelectColumnAlignLeft} ${styles.disabledSearchTable} `}
         actionRef={actionRef}
         headerTitle={
-          <TableHeaderFilter
-            components={[
-              {
-                label: '指标搜索',
-                component: (
-                  <Input.Search
-                    style={{ width: 280 }}
-                    placeholder="请输入ID/指标名称/英文名称/标签"
-                    onSearch={(value) => {
-                      setFilterParams((preState) => {
-                        return {
-                          ...preState,
-                          key: value,
-                        };
-                      });
-                    }}
-                  />
-                ),
-              },
-              {
-                label: '敏感度',
-                component: (
-                  <Select
-                    style={{ width: 140 }}
-                    options={SENSITIVE_LEVEL_OPTIONS}
-                    placeholder="请选择敏感度"
-                    allowClear
-                    onChange={(value) => {
-                      setFilterParams((preState) => {
-                        return {
-                          ...preState,
-                          sensitiveLevel: value,
-                        };
-                      });
-                    }}
-                  />
-                ),
-              },
-              {
-                label: '是否为标签',
-                component: (
-                  <Select
-                    style={{ width: 145 }}
-                    placeholder="请选择标签状态"
-                    allowClear
-                    onChange={(value) => {
-                      setFilterParams((preState) => {
-                        return {
-                          ...preState,
-                          isTag: value,
-                        };
-                      });
-                    }}
-                    options={[
-                      { value: 1, label: '是' },
-                      { value: 0, label: '否' },
-                    ]}
-                  />
-                ),
-              },
-            ]}
-          />
+          <div style={{ marginLeft: 15 }}>
+            <TableHeaderFilter
+              components={[
+                {
+                  label: '指标搜索',
+                  component: (
+                    <Input.Search
+                      style={{ width: 280 }}
+                      placeholder="请输入ID/指标名称/英文名称/标签"
+                      onSearch={(value) => {
+                        setFilterParams((preState) => {
+                          return {
+                            ...preState,
+                            key: value,
+                          };
+                        });
+                      }}
+                    />
+                  ),
+                },
+                {
+                  label: '敏感度',
+                  component: (
+                    <Select
+                      style={{ width: 140 }}
+                      options={SENSITIVE_LEVEL_OPTIONS}
+                      placeholder="请选择敏感度"
+                      allowClear
+                      onChange={(value) => {
+                        setFilterParams((preState) => {
+                          return {
+                            ...preState,
+                            sensitiveLevel: value,
+                          };
+                        });
+                      }}
+                    />
+                  ),
+                },
+                {
+                  label: '是否为标签',
+                  component: (
+                    <Select
+                      style={{ width: 145 }}
+                      placeholder="请选择标签状态"
+                      allowClear
+                      onChange={(value) => {
+                        setFilterParams((preState) => {
+                          return {
+                            ...preState,
+                            isTag: value,
+                          };
+                        });
+                      }}
+                      options={[
+                        { value: 1, label: '是' },
+                        { value: 0, label: '否' },
+                      ]}
+                    />
+                  ),
+                },
+              ]}
+            />
+          </div>
         }
         rowKey="id"
         loading={loading}

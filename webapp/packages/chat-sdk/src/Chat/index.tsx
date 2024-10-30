@@ -200,6 +200,7 @@ const Chat: ForwardRefRenderFunction<any, Props> = (
   const convertHistoryMsg = (list: HistoryMsgItemType[]) => {
     return list.map((item: HistoryMsgItemType) => ({
       id: item.questionId,
+      questionId: item.questionId,
       type: MessageTypeEnum.QUESTION,
       msg: item.queryText,
       parseInfos: item.parseInfos,

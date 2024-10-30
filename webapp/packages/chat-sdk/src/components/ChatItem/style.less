@@ -125,7 +125,16 @@
 
   &-content-option-active {
     color: #fff !important;
-    background-color: var(--chat-blue);
+    background-color: var(--chat-blue)!important;
+  }
+
+
+  &-content-option-disabled {
+    cursor: unset;
+    background-color: #eee;
+    &:hover {
+      color: #626a6a;
+    }
   }
 
   &-avatar {
