@@ -11,12 +11,13 @@ import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.api.pojo.enums.MapModeEnum;
 import lombok.Data;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 @Data
-public class QueryNLReq extends SemanticQueryReq {
+public class QueryNLReq extends SemanticQueryReq implements Serializable {
     private String queryText;
     private Set<Long> dataSetIds = Sets.newHashSet();
     private User user;
