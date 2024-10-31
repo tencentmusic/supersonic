@@ -35,6 +35,7 @@ import org.apache.calcite.sql.validate.SqlValidator;
 import org.apache.calcite.sql.validate.SqlValidatorScope;
 import org.apache.calcite.sql.validate.SqlValidatorWithHints;
 import org.apache.calcite.sql2rel.SqlToRelConverter;
+import org.apache.calcite.util.Litmus;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -461,4 +462,27 @@ public abstract class SemanticNode {
         }
         return SqlLiteral.createSymbol(JoinType.INNER, SqlParserPos.ZERO);
     }
+
+    public static List<SqlNode> deduplicateNode(List<SqlNode> listNode) { // List<SqlNode>去重
+        if (listNode == null) {
+            return null;
+        }
+        List<SqlNode> uniqueElements = new ArrayList<>();
+        for (SqlNode element : listNode) {
+            if (!containsElement(uniqueElements, element)) {
+                uniqueElements.add(element);
+            }
+        }
+        return uniqueElements;
+    }
+
+    private static boolean containsElement(List<SqlNode> list, SqlNode element) { // 检查List<SqlNode>中是否含有某element
+        for (SqlNode i : list) {
+            if (i.equalsDeep(element, Litmus.IGNORE)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
 }

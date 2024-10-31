@@ -149,9 +149,14 @@ public class QueryReqConverter {
     }
 
     private AggOption getAggOption(QuerySqlReq databaseReq, List<MetricSchemaResp> metricSchemas) {
+        String sql = databaseReq.getSql();
+        if (!SqlSelectFunctionHelper.hasAggregateFunction(sql) && !SqlSelectHelper.hasGroupBy(sql)
+                && !SqlSelectHelper.hasWith(sql) && !SqlSelectHelper.hasSubSelect(sql)) {
+            log.debug("getAggOption simple sql set to DEFAULT");
+            return AggOption.DEFAULT;
+        }
         // if there is no group by in S2SQL,set MetricTable's aggOption to "NATIVE"
         // if there is count() in S2SQL,set MetricTable's aggOption to "NATIVE"
-        String sql = databaseReq.getSql();
         if (!SqlSelectFunctionHelper.hasAggregateFunction(sql)
                 || SqlSelectFunctionHelper.hasFunction(sql, "count")
                 || SqlSelectFunctionHelper.hasFunction(sql, "count_distinct")) {
@@ -171,11 +176,6 @@ public class QueryReqConverter {
             log.debug("getAggOption find null defaultAgg metric set to NATIVE");
             return AggOption.OUTER;
         }
-        if (!SqlSelectFunctionHelper.hasAggregateFunction(sql) && !SqlSelectHelper.hasGroupBy(sql)
-                && !SqlSelectHelper.hasWith(sql) && !SqlSelectHelper.hasSubSelect(sql)) {
-            log.debug("getAggOption simple sql set to NATIVE");
-            return AggOption.NATIVE;
-        }
         return AggOption.DEFAULT;
     }
 
@@ -185,6 +185,8 @@ public class QueryReqConverter {
         String sql = querySqlReq.getSql();
         log.debug("dataSetId:{},convert name to bizName before:{}", querySqlReq.getDataSetId(),
                 sql);
+        sql = SqlReplaceHelper.replaceSqlByPositions(sql);
+        log.debug("replaceSqlByPositions:{}", sql);
         String replaceFields = SqlReplaceHelper.replaceFields(sql, fieldNameToBizNameMap, true);
         log.debug("dataSetId:{},convert name to bizName after:{}", querySqlReq.getDataSetId(),
                 replaceFields);
