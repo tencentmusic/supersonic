@@ -16,10 +16,12 @@ import com.tencent.supersonic.common.pojo.enums.EventType;
 import com.tencent.supersonic.common.pojo.enums.StatusEnum;
 import com.tencent.supersonic.common.pojo.enums.TypeEnums;
 import com.tencent.supersonic.common.pojo.exception.InvalidArgumentException;
+import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.headless.api.pojo.DimValueMap;
 import com.tencent.supersonic.headless.api.pojo.MetaFilter;
 import com.tencent.supersonic.headless.api.pojo.ModelDetail;
 import com.tencent.supersonic.headless.api.pojo.enums.ModelDefineType;
+import com.tencent.supersonic.headless.api.pojo.request.DimValueAliasReq;
 import com.tencent.supersonic.headless.api.pojo.request.DimensionReq;
 import com.tencent.supersonic.headless.api.pojo.request.MetaBatchReq;
 import com.tencent.supersonic.headless.api.pojo.request.PageDimensionReq;
@@ -426,6 +428,40 @@ public class DimensionServiceImpl extends ServiceImpl<DimensionDOMapper, Dimensi
         DimensionFilter dimensionFilter = new DimensionFilter();
         List<DimensionDO> dimensionDOS = queryDimension(dimensionFilter);
         return getDataEvent(dimensionDOS, EventType.ADD);
+    }
+
+    @Override
+    public Boolean updateDimValueAlias(DimValueAliasReq req, User user) {
+        DimensionDO dimensionDO = getById(req.getId());
+        List<DimValueMap> dimValueMapList = new ArrayList<>();
+        if (StringUtils.isNotEmpty(dimensionDO.getDimValueMaps())) {
+            dimValueMapList = JsonUtil.toList(dimensionDO.getDimValueMaps(), DimValueMap.class);
+        }
+        DimValueMap dimValueMaps = req.getDimValueMaps();
+        Map<String, DimValueMap> valeAndMapInfo = dimValueMapList.stream()
+                .collect(Collectors.toMap(DimValueMap::getValue, v -> v, (v1, v2) -> v2));
+        String value = dimValueMaps.getValue();
+        if (CollectionUtils.isEmpty(dimValueMaps.getAlias())) {
+            // 删除
+            dimValueMapList =
+                    dimValueMapList.stream().filter(map -> !map.getValue().equalsIgnoreCase(value))
+                            .collect(Collectors.toList());
+        } else {
+            // 新增
+            if (!valeAndMapInfo.keySet().contains(value)) {
+                dimValueMapList.add(dimValueMaps);
+            } else {
+                // 更新
+                dimValueMapList.stream().forEach(map -> {
+                    if (map.getValue().equalsIgnoreCase(value)) {
+                        map.setAlias(dimValueMaps.getAlias());
+                    }
+                });
+            }
+        }
+        dimensionDO.setDimValueMaps(JsonUtil.toString(dimValueMapList));
+        updateById(dimensionDO);
+        return true;
     }
 
     private DataEvent getDataEvent(List<DimensionDO> dimensionDOS, EventType eventType) {
