@@ -10,6 +10,7 @@ import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.common.pojo.enums.SensitiveLevelEnum;
 import com.tencent.supersonic.headless.api.pojo.DimValueMap;
 import com.tencent.supersonic.headless.api.pojo.MetaFilter;
+import com.tencent.supersonic.headless.api.pojo.request.DimValueAliasReq;
 import com.tencent.supersonic.headless.api.pojo.request.DimensionReq;
 import com.tencent.supersonic.headless.api.pojo.request.DimensionValueReq;
 import com.tencent.supersonic.headless.api.pojo.request.MetaBatchReq;
@@ -57,6 +58,14 @@ public class DimensionController {
             HttpServletRequest request, HttpServletResponse response) throws Exception {
         User user = UserHolder.findUser(request, response);
         dimensionService.updateDimension(dimensionReq, user);
+        return true;
+    }
+
+    @PostMapping("/updateDimension/alias/value")
+    public Boolean updateDimValueAlias(@RequestBody DimValueAliasReq req,
+            HttpServletRequest request, HttpServletResponse response) {
+        User user = UserHolder.findUser(request, response);
+        dimensionService.updateDimValueAlias(req, user);
         return true;
     }
 
