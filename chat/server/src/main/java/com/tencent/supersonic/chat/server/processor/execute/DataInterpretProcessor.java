@@ -62,7 +62,7 @@ public class DataInterpretProcessor implements ExecuteResultProcessor {
         keyPipelineLog.info("DataInterpretProcessor modelReq:\n{} \nmodelResp:\n{}", prompt.text(),
                 anwser);
         if (StringUtils.isNotBlank(anwser)) {
-            queryResult.setTextResult(anwser);
+            queryResult.setTextSummary(anwser);
         }
     }
 }

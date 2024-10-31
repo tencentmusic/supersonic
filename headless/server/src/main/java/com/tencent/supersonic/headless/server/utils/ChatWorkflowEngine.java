@@ -30,11 +30,12 @@ import java.util.stream.Collectors;
 @Slf4j
 public class ChatWorkflowEngine {
 
-    private final List<SchemaMapper> schemaMappers = ComponentFactory.getSchemaMappers();
-    private final List<SemanticParser> semanticParsers = ComponentFactory.getSemanticParsers();
+    private final List<SchemaMapper> schemaMappers = CoreComponentFactory.getSchemaMappers();
+    private final List<SemanticParser> semanticParsers = CoreComponentFactory.getSemanticParsers();
     private final List<SemanticCorrector> semanticCorrectors =
-            ComponentFactory.getSemanticCorrectors();
-    private final List<ResultProcessor> resultProcessors = ComponentFactory.getResultProcessors();
+            CoreComponentFactory.getSemanticCorrectors();
+    private final List<ResultProcessor> resultProcessors =
+            CoreComponentFactory.getResultProcessors();
 
     public void start(ChatWorkflowState initialState, ChatQueryContext queryCtx,
             ParseResp parseResult) {
@@ -48,8 +49,6 @@ public class ChatWorkflowEngine {
                         parseResult.setErrorMsg(
                                 "No semantic entities can be mapped against user question.");
                         queryCtx.setChatWorkflowState(ChatWorkflowState.FINISHED);
-                    } else if (queryCtx.getMapInfo().needContinueMap()) {
-                        queryCtx.setChatWorkflowState(ChatWorkflowState.MAPPING);
                     } else {
                         queryCtx.setChatWorkflowState(ChatWorkflowState.PARSING);
                     }
@@ -91,8 +90,7 @@ public class ChatWorkflowEngine {
 
     private void performMapping(ChatQueryContext queryCtx) {
         if (Objects.isNull(queryCtx.getMapInfo())
-                || MapUtils.isEmpty(queryCtx.getMapInfo().getDataSetElementMatches())
-                || queryCtx.getMapInfo().needContinueMap()) {
+                || MapUtils.isEmpty(queryCtx.getMapInfo().getDataSetElementMatches())) {
             schemaMappers.forEach(mapper -> mapper.map(queryCtx));
         }
     }

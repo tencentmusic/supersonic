@@ -69,6 +69,9 @@ public class CalciteQueryParser implements QueryParser {
 
     private String getSqlByDataSet(EngineType engineType, String parentSql, String dataSetSql,
             String parentAlias) throws SqlParseException {
+        if (!SqlMergeWithUtils.hasWith(engineType, dataSetSql)) {
+            return String.format("with %s as (%s) %s", parentAlias, parentSql, dataSetSql);
+        }
         return SqlMergeWithUtils.mergeWith(engineType, dataSetSql,
                 Collections.singletonList(parentSql), Collections.singletonList(parentAlias));
     }
