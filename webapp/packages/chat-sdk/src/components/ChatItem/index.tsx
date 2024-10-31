@@ -434,7 +434,7 @@ const ChatItem: React.FC<Props> = ({
   const { llmReq, llmResp } = parseInfo?.properties?.CONTEXT || {};
 
   return (
-    <div className={prefixCls} key={parseInfo?.queryId}>
+    <div className={prefixCls}>
       {!isMobile && <IconFont type="icon-zhinengsuanfa" className={`${prefixCls}-avatar`} />}
       <div className={isMobile ? `${prefixCls}-mobile-msg-card` : ''}>
         <div className={`${prefixCls}-time`}>
@@ -450,7 +450,6 @@ const ChatItem: React.FC<Props> = ({
                 <ExpandParseTip
                   isSimpleMode={isSimpleMode}
                   parseInfoOptions={preParseInfoOptions}
-                  currentParseInfo={parseInfo}
                   agentId={agentId}
                   integrateSystem={integrateSystem}
                   parseTimeCost={parseTimeCost?.parseTime}
@@ -516,6 +515,7 @@ const ChatItem: React.FC<Props> = ({
                   queryMode={parseInfo?.queryMode}
                   executeLoading={executeLoading}
                   executeTip={executeTip}
+                  executeErrorMsg={executeErrorMsg}
                   chartIndex={0}
                   data={data}
                   triggerResize={triggerResize}

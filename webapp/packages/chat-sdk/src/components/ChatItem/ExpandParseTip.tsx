@@ -1,4 +1,4 @@
-import React, { ReactNode } from 'react';
+import React, { ReactNode, useState } from 'react';
 import { ChatContextType, DateInfoType, EntityInfoType, FilterItemType } from '../../common/type';
 import { Button, DatePicker, Row, Col } from 'antd';
 import { CheckCircleFilled, CloseCircleFilled } from '@ant-design/icons';
@@ -21,7 +21,6 @@ const { RangePicker } = DatePicker;
 type Props = {
   isSimpleMode?: boolean;
   parseInfoOptions: ChatContextType[];
-  currentParseInfo?: ChatContextType;
   agentId?: number;
   integrateSystem?: string;
   parseTimeCost?: number;
@@ -40,7 +39,6 @@ type RangeKeys = '近7日' | '近14日' | '近30日' | '本周' | '本月' | '�
 const ExpandParseTip: React.FC<Props> = ({
   isSimpleMode = false,
   parseInfoOptions,
-  currentParseInfo,
   agentId,
   integrateSystem,
   parseTimeCost,
@@ -52,6 +50,8 @@ const ExpandParseTip: React.FC<Props> = ({
   onRefresh,
   handlePresetClick,
 }) => {
+  const [currentParseInfo, setCurrentParseInfo] = useState<ChatContextType>();
+
   const ranges: Record<RangeKeys, RangeValue> = {
     近7日: [dayjs().subtract(7, 'day'), dayjs()],
     近14日: [dayjs().subtract(14, 'day'), dayjs()],
@@ -227,33 +227,7 @@ const ExpandParseTip: React.FC<Props> = ({
             </div>
           );
         })}
-        {/* {parseInfoOptions.map((parseInfo, index) => {
-          const { queryMode, properties, textInfo, id, dimensionFilters, entityInfo } =
-            parseInfo || {};
-          const { type: agentType } = properties || {};
-          return (
-            <div
-              style={{ marginBottom: 10, paddingBottom: 10, borderBottom: '1px solid #eee' }}
-              key={`${id}-${textInfo}`}
-            >
-              <div style={{ marginBottom: 10, height: '30px', lineHeight: '30px' }}>
-                <span className={`${prefixCls}-content-parser-options-title`}>
-                  解析{index + 1}:
-                </span>
-              </div>
-              <div className={`${prefixCls}-tip`}>
-                {isSimpleMode ? (
-                  <MarkDown markdown={textInfo} />
-                ) : (
-                  <>
-                    {getTipNode({ parseInfo, dimensionFilters, entityInfo })}
-                    {!(!!agentType && queryMode !== 'LLM_S2SQL') && getFiltersNode(parseInfo)}
-                  </>
-                )}
-              </div>
-            </div>
-          );
-        })} */}
+
         {parseInfoOptions?.length > 1 && (
           <div className={`${prefixCls}-content-parser-container`}>
             <div className={`${prefixCls}-content-options`}>
@@ -274,6 +248,7 @@ const ExpandParseTip: React.FC<Props> = ({
                     if (currentParseInfo) {
                       return;
                     }
+                    setCurrentParseInfo(parseInfo);
                     onSelectParseInfo(parseInfo);
                   }}
                   key={parseInfo.id}

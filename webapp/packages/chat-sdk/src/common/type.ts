@@ -149,6 +149,7 @@ export type MsgDataType = {
   recommendedDimensions: DrillDownDimensionType[];
   textResult: string;
   errorMsg: string;
+  textSummary: string;
 };
 
 export enum ParseStateEnum {

@@ -1,5 +1,5 @@
-import { Spin, Switch } from 'antd';
-import { CheckCircleFilled } from '@ant-design/icons';
+import { Spin, Switch, Tooltip } from 'antd';
+import { CheckCircleFilled, InfoCircleOutlined } from '@ant-design/icons';
 import { PREFIX_CLS, MsgContentTypeEnum } from '../../common/constants';
 import { MsgDataType } from '../../common/type';
 import ChatMsg from '../ChatMsg';
@@ -15,6 +15,7 @@ type Props = {
   entitySwitchLoading?: boolean;
   chartIndex: number;
   executeTip?: string;
+  executeErrorMsg?: string;
   executeItemNode?: ReactNode;
   renderCustomExecuteNode?: boolean;
   data?: MsgDataType;
@@ -31,6 +32,7 @@ const ExecuteItem: React.FC<Props> = ({
   entitySwitchLoading = false,
   chartIndex,
   executeTip,
+  executeErrorMsg,
   executeItemNode,
   renderCustomExecuteNode,
   data,
@@ -66,7 +68,13 @@ const ExecuteItem: React.FC<Props> = ({
   if (executeTip) {
     return getNodeTip(
       <>
-        {titlePrefix}查询失败
+        <span>{titlePrefix}查询失败</span>
+        {executeErrorMsg && (
+          <Tooltip title={executeErrorMsg}>
+            <InfoCircleOutlined style={{ marginLeft: 5, color: 'red' }} />
+          </Tooltip>
+        )}
+
         {!!data?.queryTimeCost && isDeveloper && (
           <span className={`${prefixCls}-title-tip`}>(耗时: {data.queryTimeCost}ms)</span>
         )}
@@ -121,6 +129,15 @@ const ExecuteItem: React.FC<Props> = ({
           {data.queryAuthorization?.message && (
             <div className={`${prefixCls}-auth-tip`}>提示：{data.queryAuthorization.message}</div>
           )}
+          {data.textSummary && (
+            <p>
+              <span className={`${prefixCls}-step-title`} style={{ marginRight: 5 }}>
+                总结:
+              </span>
+              {data.textSummary}
+            </p>
+          )}
+
           {renderCustomExecuteNode && executeItemNode ? (
             executeItemNode
           ) : data?.queryMode === 'PLAIN_TEXT' || data?.queryMode === 'WEB_SERVICE' ? (
