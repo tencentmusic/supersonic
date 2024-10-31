@@ -12,6 +12,7 @@ import com.tencent.supersonic.headless.api.pojo.request.QueryFilter;
 import lombok.Builder;
 import lombok.Data;
 
+import java.io.Serializable;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -22,7 +23,7 @@ import static com.tencent.supersonic.common.pojo.Constants.DEFAULT_DETAIL_LIMIT;
 import static com.tencent.supersonic.common.pojo.Constants.DEFAULT_METRIC_LIMIT;
 
 @Data
-public class SemanticParseInfo {
+public class SemanticParseInfo implements Serializable {
 
     private Integer id;
     private String queryMode = "PLAIN_TEXT";

@@ -3,8 +3,10 @@ package com.tencent.supersonic.headless.api.pojo;
 import com.tencent.supersonic.common.pojo.Constants;
 import lombok.Data;
 
+import java.io.Serializable;
+
 @Data
-public class DetailTypeDefaultConfig {
+public class DetailTypeDefaultConfig implements Serializable {
 
     private DefaultDisplayInfo defaultDisplayInfo;
 

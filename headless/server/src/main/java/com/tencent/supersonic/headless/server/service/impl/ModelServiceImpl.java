@@ -45,7 +45,7 @@ import com.tencent.supersonic.headless.server.service.DomainService;
 import com.tencent.supersonic.headless.server.service.MetricService;
 import com.tencent.supersonic.headless.server.service.ModelRelaService;
 import com.tencent.supersonic.headless.server.service.ModelService;
-import com.tencent.supersonic.headless.server.utils.ComponentFactory;
+import com.tencent.supersonic.headless.server.utils.CoreComponentFactory;
 import com.tencent.supersonic.headless.server.utils.ModelConverter;
 import com.tencent.supersonic.headless.server.utils.NameCheckUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -222,7 +222,7 @@ public class ModelServiceImpl implements ModelService {
 
     private void doBuild(ModelBuildReq modelBuildReq, DbSchema curSchema, List<DbSchema> dbSchemas,
             Map<String, ModelSchema> modelSchemaMap) {
-        SemanticModeller semanticModeller = ComponentFactory.getSemanticModeller();
+        SemanticModeller semanticModeller = CoreComponentFactory.getSemanticModeller();
         ModelSchema modelSchema = semanticModeller.build(curSchema, dbSchemas, modelBuildReq);
         modelSchemaMap.put(curSchema.getTable(), modelSchema);
     }

@@ -10,6 +10,7 @@ import com.tencent.supersonic.headless.api.pojo.request.QueryNLReq;
 import com.tencent.supersonic.headless.chat.query.SemanticQuery;
 import lombok.Data;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -18,10 +19,9 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Data
-public class ChatQueryContext {
+public class ChatQueryContext implements Serializable {
 
     private QueryNLReq request;
-    private String oriQueryText;
     private Map<Long, List<Long>> modelIdToDataSetIds;
     private List<SemanticQuery> candidateQueries = new ArrayList<>();
     private SchemaMapInfo mapInfo = new SchemaMapInfo();

@@ -6,12 +6,14 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
+import java.io.Serializable;
+
 @Data
 @ToString
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class SchemaElementMatch {
+public class SchemaElementMatch implements Serializable {
     private SchemaElement element;
     private double offset;
     private double similarity;
