@@ -214,8 +214,7 @@ const ChatMsg: React.FC<Props> = ({
         );
       case MsgContentTypeEnum.MARKDOWN:
         return (
-          <div style={{ maxHeight: 800, overflow: 'scroll' }}>
-            {/* {data.textResult} */}
+          <div style={{ maxHeight: 800 }}>
             <MarkDown markdown={data.textResult} loading={loading} />
           </div>
         );
