@@ -22,7 +22,9 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-/** Sql Parser Select function Helper */
+/**
+ * Sql Parser Select function Helper
+ */
 @Slf4j
 public class SqlSelectFunctionHelper {
 
@@ -42,17 +44,21 @@ public class SqlSelectFunctionHelper {
     }
 
     public static Set<String> getFunctions(String sql) {
-        Select selectStatement = SqlSelectHelper.getSelect(sql);
-        if (!(selectStatement instanceof PlainSelect)) {
-            return new HashSet<>();
+        Set<Select> allSelect = SqlSelectHelper.getAllSelect(sql);
+        Set<String> result = new HashSet<>();
+        for (Select select : allSelect) {
+            if (!(select instanceof PlainSelect)) {
+                continue;
+            }
+            PlainSelect plainSelect = (PlainSelect) select;
+            List<SelectItem<?>> selectItems = plainSelect.getSelectItems();
+            FunctionVisitor visitor = new FunctionVisitor();
+            for (SelectItem selectItem : selectItems) {
+                selectItem.accept(visitor);
+            }
+            result.addAll(visitor.getFunctionNames());
         }
-        PlainSelect plainSelect = (PlainSelect) selectStatement;
-        List<SelectItem<?>> selectItems = plainSelect.getSelectItems();
-        FunctionVisitor visitor = new FunctionVisitor();
-        for (SelectItem selectItem : selectItems) {
-            selectItem.accept(visitor);
-        }
-        return visitor.getFunctionNames();
+        return result;
     }
 
     public static Function getFunction(Expression expression,

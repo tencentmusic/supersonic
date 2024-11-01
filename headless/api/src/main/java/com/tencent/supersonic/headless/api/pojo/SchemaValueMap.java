@@ -2,11 +2,12 @@ package com.tencent.supersonic.headless.api.pojo;
 
 import lombok.Data;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 @Data
-public class SchemaValueMap {
+public class SchemaValueMap implements Serializable {
 
     /** dimension value in db */
     private String techName;
