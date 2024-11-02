@@ -1,20 +1,22 @@
-#!/bin/bash
-# 确保脚本在出错时退出
+#!/usr/bin/env bash
+# Exit immediately if a command exits with a non-zero status
 set -e
-# 镜像名称
+VERSION=$1
+
+# Image name
 IMAGE_NAME="supersonicbi/supersonic"
 
-# 默认标签为 latest
-TAGS=("latest")
+# Default tag is latest
+TAGS="latest"
 
-# 如果有 Git 标签，则使用 Git 标签作为额外的镜像标签
-if [ -n "$GITHUB_REF" ]; then
-  GIT_TAG=$(echo $GITHUB_REF | sed 's/refs\/tags\///')
-  TAGS+=("$GIT_TAG")
+# If VERSION is provided, add it to TAGS and tag the image as latest
+if [ -n "$VERSION" ]; then
+  TAGS="$TAGS $VERSION"
+  docker tag $IMAGE_NAME:$VERSION $IMAGE_NAME:latest
 fi
 
-# 推送 Docker 镜像
-for TAG in "${TAGS[@]}"; do
+# Push Docker images
+for TAG in $TAGS; do
   echo "Pushing Docker image $IMAGE_NAME:$TAG"
   docker push $IMAGE_NAME:$TAG
 done

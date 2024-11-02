@@ -4,7 +4,13 @@ sbinDir=$(cd "$(dirname "$0")"; pwd)
 chmod +x $sbinDir/supersonic-common.sh
 source $sbinDir/supersonic-common.sh
 cd $projectDir
-MVN_VERSION=$(mvn help:evaluate -Dexpression=project.version | grep -e '^[^\[]')
+
+MVN_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout | grep -v '^\[' | sed -n '/^[0-9]/p')
+if [ -z "$MVN_VERSION" ]; then
+  echo "Failed to retrieve Maven project version."
+  exit 1
+fi
+echo "Maven project version: $MVN_VERSION"
 
 cd $baseDir
 service=$1
