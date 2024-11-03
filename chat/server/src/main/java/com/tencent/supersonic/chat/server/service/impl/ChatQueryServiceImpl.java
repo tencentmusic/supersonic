@@ -25,11 +25,9 @@ import com.tencent.supersonic.common.jsqlparser.SqlReplaceHelper;
 import com.tencent.supersonic.common.jsqlparser.SqlSelectHelper;
 import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
-import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.DateUtils;
 import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.headless.api.pojo.DataSetSchema;
-import com.tencent.supersonic.headless.api.pojo.EntityInfo;
 import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.api.pojo.SqlInfo;
@@ -198,7 +196,7 @@ public class ChatQueryServiceImpl implements ChatQueryService {
             handleRuleQueryMode(semanticQuery, dataSetSchema, user);
         }
 
-        return executeQuery(semanticQuery, user, dataSetSchema);
+        return executeQuery(semanticQuery, user);
     }
 
     private List<String> getFieldsFromSql(SemanticParseInfo parseInfo) {
@@ -236,15 +234,11 @@ public class ChatQueryServiceImpl implements ChatQueryService {
         semanticQuery.initS2Sql(dataSetSchema, user);
     }
 
-    private QueryResult executeQuery(SemanticQuery semanticQuery, User user,
-            DataSetSchema dataSetSchema) throws Exception {
+    private QueryResult executeQuery(SemanticQuery semanticQuery, User user) throws Exception {
         SemanticQueryReq semanticQueryReq = semanticQuery.buildSemanticQueryReq();
         SemanticParseInfo parseInfo = semanticQuery.getParseInfo();
         QueryResult queryResult = doExecution(semanticQueryReq, parseInfo.getQueryMode(), user);
         queryResult.setChatContext(semanticQuery.getParseInfo());
-        SemanticLayerService semanticService = ContextUtils.getBean(SemanticLayerService.class);
-        EntityInfo entityInfo = semanticService.getEntityInfo(parseInfo, dataSetSchema, user);
-        queryResult.setEntityInfo(entityInfo);
         parseInfo.getSqlInfo().setQuerySQL(queryResult.getQuerySql());
         return queryResult;
     }

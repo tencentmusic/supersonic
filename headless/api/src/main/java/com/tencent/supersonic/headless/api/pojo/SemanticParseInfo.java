@@ -27,15 +27,17 @@ public class SemanticParseInfo implements Serializable {
 
     private Integer id;
     private String queryMode = "PLAIN_TEXT";
-    private SchemaElement dataSet;
     private QueryConfig queryConfig;
+    private QueryType queryType = QueryType.DETAIL;
+
+    private SchemaElement dataSet;
     private Set<SchemaElement> metrics = Sets.newTreeSet(new SchemaNameLengthComparator());
     private Set<SchemaElement> dimensions = Sets.newTreeSet(new SchemaNameLengthComparator());
-    private SchemaElement entity;
-    private AggregateTypeEnum aggType = AggregateTypeEnum.NONE;
-    private FilterType filterType = FilterType.AND;
     private Set<QueryFilter> dimensionFilters = Sets.newHashSet();
     private Set<QueryFilter> metricFilters = Sets.newHashSet();
+
+    private AggregateTypeEnum aggType = AggregateTypeEnum.NONE;
+    private FilterType filterType = FilterType.AND;
     private Set<Order> orders = Sets.newHashSet();
     private DateConf dateInfo;
     private long limit = DEFAULT_DETAIL_LIMIT;
@@ -43,8 +45,6 @@ public class SemanticParseInfo implements Serializable {
     private List<SchemaElementMatch> elementMatches = Lists.newArrayList();
     private SqlInfo sqlInfo = new SqlInfo();
     private SqlEvaluation sqlEvaluation = new SqlEvaluation();
-    private QueryType queryType = QueryType.ID;
-    private EntityInfo entityInfo;
     private String textInfo;
     private Map<String, Object> properties = Maps.newHashMap();
 

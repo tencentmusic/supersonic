@@ -1,7 +1,6 @@
 package com.tencent.supersonic.headless.api.pojo;
 
 import lombok.Data;
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.Serializable;
@@ -9,7 +8,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -31,9 +29,6 @@ public class DataSetSchema implements Serializable {
         Optional<SchemaElement> element = Optional.empty();
 
         switch (elementType) {
-            case ENTITY:
-                element = Optional.ofNullable(entity);
-                break;
             case DATASET:
                 element = Optional.of(dataSet);
                 break;
@@ -55,11 +50,7 @@ public class DataSetSchema implements Serializable {
             default:
         }
 
-        if (element.isPresent()) {
-            return element.get();
-        } else {
-            return null;
-        }
+        return element.orElse(null);
     }
 
     public Map<String, String> getBizNameToName() {
@@ -70,7 +61,7 @@ public class DataSetSchema implements Serializable {
                 SchemaElement::getName, (k1, k2) -> k1));
     }
 
-    public TimeDefaultConfig getTagTypeTimeDefaultConfig() {
+    public TimeDefaultConfig getDetailTypeTimeDefaultConfig() {
         if (queryConfig == null) {
             return null;
         }
@@ -95,38 +86,6 @@ public class DataSetSchema implements Serializable {
             return null;
         }
         return queryConfig.getDetailTypeDefaultConfig();
-    }
-
-    public List<SchemaElement> getTagDefaultDimensions() {
-        DetailTypeDefaultConfig detailTypeDefaultConfig = getTagTypeDefaultConfig();
-        if (Objects.isNull(detailTypeDefaultConfig)
-                || Objects.isNull(detailTypeDefaultConfig.getDefaultDisplayInfo())) {
-            return new ArrayList<>();
-        }
-        if (CollectionUtils
-                .isNotEmpty(detailTypeDefaultConfig.getDefaultDisplayInfo().getMetricIds())) {
-            return detailTypeDefaultConfig.getDefaultDisplayInfo().getMetricIds().stream()
-                    .map(id -> {
-                        SchemaElement metric = getElement(SchemaElementType.METRIC, id);
-                        return metric;
-                    }).filter(Objects::nonNull).collect(Collectors.toList());
-        }
-        return new ArrayList<>();
-    }
-
-    public List<SchemaElement> getTagDefaultMetrics() {
-        DetailTypeDefaultConfig detailTypeDefaultConfig = getTagTypeDefaultConfig();
-        if (Objects.isNull(detailTypeDefaultConfig)
-                || Objects.isNull(detailTypeDefaultConfig.getDefaultDisplayInfo())) {
-            return new ArrayList<>();
-        }
-        if (CollectionUtils
-                .isNotEmpty(detailTypeDefaultConfig.getDefaultDisplayInfo().getDimensionIds())) {
-            return detailTypeDefaultConfig.getDefaultDisplayInfo().getDimensionIds().stream()
-                    .map(id -> getElement(SchemaElementType.DIMENSION, id)).filter(Objects::nonNull)
-                    .collect(Collectors.toList());
-        }
-        return new ArrayList<>();
     }
 
     public boolean containsPartitionDimensions() {

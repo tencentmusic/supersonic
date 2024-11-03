@@ -100,6 +100,9 @@ public class NL2SQLParser implements ChatQueryParser {
                     queryNLReq.setMapModeEnum(MapModeEnum.LOOSE);
                     doParse(queryNLReq, parseResp);
                 }
+                if (parseResp.getSelectedParses().isEmpty()) {
+                    return;
+                }
                 // for one dataset select the top 1 parse after sorting
                 SemanticParseInfo.sort(parseResp.getSelectedParses());
                 candidateParses.add(parseResp.getSelectedParses().get(0));

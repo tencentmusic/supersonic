@@ -35,9 +35,6 @@ public class NatureHelper {
             case DIMENSION:
                 result = SchemaElementType.DIMENSION;
                 break;
-            case ENTITY:
-                result = SchemaElementType.ENTITY;
-                break;
             case DATASET:
                 result = SchemaElementType.DATASET;
                 break;

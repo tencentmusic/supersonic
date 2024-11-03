@@ -94,9 +94,8 @@ public class MapFilter {
                 SchemaElement element = schemaElementMatch.getElement();
                 SchemaElementType type = element.getType();
 
-                boolean isEntityOrDatasetOrId = SchemaElementType.ENTITY.equals(type)
-                        || SchemaElementType.DATASET.equals(type)
-                        || SchemaElementType.ID.equals(type);
+                boolean isEntityOrDatasetOrId =
+                        SchemaElementType.DATASET.equals(type) || SchemaElementType.ID.equals(type);
 
                 return !isEntityOrDatasetOrId && needRemovePredicate.test(element);
             });

@@ -41,7 +41,7 @@ public abstract class DetailSemanticQuery extends RuleSemanticQuery {
         Map<Long, DataSetSchema> dataSetSchemaMap =
                 chatQueryContext.getSemanticSchema().getDataSetSchemaMap();
         DataSetSchema dataSetSchema = dataSetSchemaMap.get(parseInfo.getDataSetId());
-        TimeDefaultConfig timeDefaultConfig = dataSetSchema.getTagTypeTimeDefaultConfig();
+        TimeDefaultConfig timeDefaultConfig = dataSetSchema.getDetailTypeTimeDefaultConfig();
 
         if (Objects.nonNull(timeDefaultConfig) && Objects.nonNull(timeDefaultConfig.getUnit())
                 && timeDefaultConfig.getUnit() != -1) {

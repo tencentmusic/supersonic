@@ -211,10 +211,6 @@ public class CspiderDemo extends S2BaseDemo {
         tagTimeDefaultConfig.setTimeMode(TimeMode.LAST);
         tagTimeDefaultConfig.setUnit(7);
         detailTypeDefaultConfig.setTimeDefaultConfig(tagTimeDefaultConfig);
-        DefaultDisplayInfo defaultDisplayInfo = new DefaultDisplayInfo();
-        defaultDisplayInfo.setDimensionIds(Lists.newArrayList());
-        defaultDisplayInfo.setMetricIds(Lists.newArrayList());
-        detailTypeDefaultConfig.setDefaultDisplayInfo(defaultDisplayInfo);
         AggregateTypeDefaultConfig aggregateTypeDefaultConfig = new AggregateTypeDefaultConfig();
         TimeDefaultConfig timeDefaultConfig = new TimeDefaultConfig();
         timeDefaultConfig.setTimeMode(TimeMode.RECENT);

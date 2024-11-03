@@ -4,7 +4,15 @@ import com.google.common.collect.Lists;
 import com.tencent.supersonic.common.pojo.DimensionConstants;
 import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import com.tencent.supersonic.common.util.DateUtils;
-import com.tencent.supersonic.headless.api.pojo.*;
+import com.tencent.supersonic.headless.api.pojo.DataSetSchema;
+import com.tencent.supersonic.headless.api.pojo.DimValueMap;
+import com.tencent.supersonic.headless.api.pojo.DimensionTimeTypeParams;
+import com.tencent.supersonic.headless.api.pojo.RelateDimension;
+import com.tencent.supersonic.headless.api.pojo.RelatedSchemaElement;
+import com.tencent.supersonic.headless.api.pojo.SchemaElement;
+import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
+import com.tencent.supersonic.headless.api.pojo.SchemaItem;
+import com.tencent.supersonic.headless.api.pojo.SchemaValueMap;
 import com.tencent.supersonic.headless.api.pojo.response.DataSetSchemaResp;
 import com.tencent.supersonic.headless.api.pojo.response.DimSchemaResp;
 import com.tencent.supersonic.headless.api.pojo.response.MetricSchemaResp;
@@ -17,7 +25,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -50,10 +57,6 @@ public class DataSetSchemaBuilder {
         Set<SchemaElement> terms = getTerms(resp);
         dataSetSchema.getTerms().addAll(terms);
 
-        SchemaElement entity = getEntity(resp);
-        if (Objects.nonNull(entity)) {
-            dataSetSchema.setEntity(entity);
-        }
         return dataSetSchema;
     }
 
@@ -97,17 +100,6 @@ public class DataSetSchemaBuilder {
             }
         }
         return tags;
-    }
-
-    private static SchemaElement getEntity(DataSetSchemaResp resp) {
-        DimSchemaResp dim = resp.getPrimaryKey();
-        if (Objects.isNull(dim)) {
-            return null;
-        }
-        return SchemaElement.builder().dataSetId(resp.getId()).model(dim.getModelId())
-                .id(dim.getId()).name(dim.getName()).bizName(dim.getBizName())
-                .type(SchemaElementType.ENTITY).useCnt(dim.getUseCnt()).alias(dim.getEntityAlias())
-                .build();
     }
 
     private static Set<SchemaElement> getDimensions(DataSetSchemaResp resp) {

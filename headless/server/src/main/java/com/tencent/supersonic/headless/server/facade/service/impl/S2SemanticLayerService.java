@@ -2,18 +2,16 @@ package com.tencent.supersonic.headless.server.facade.service.impl;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.common.pojo.QueryColumn;
 import com.tencent.supersonic.common.pojo.User;
-import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
-import com.tencent.supersonic.common.pojo.enums.QueryType;
 import com.tencent.supersonic.common.pojo.enums.TaskStatusEnum;
 import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
-import com.tencent.supersonic.headless.api.pojo.*;
-import com.tencent.supersonic.headless.api.pojo.DetailTypeDefaultConfig;
+import com.tencent.supersonic.headless.api.pojo.DataSetSchema;
+import com.tencent.supersonic.headless.api.pojo.Dim;
+import com.tencent.supersonic.headless.api.pojo.MetaFilter;
+import com.tencent.supersonic.headless.api.pojo.QueryParam;
 import com.tencent.supersonic.headless.api.pojo.enums.SemanticType;
 import com.tencent.supersonic.headless.api.pojo.request.DimensionValueReq;
-import com.tencent.supersonic.headless.api.pojo.request.QueryFilter;
 import com.tencent.supersonic.headless.api.pojo.request.QueryMultiStructReq;
 import com.tencent.supersonic.headless.api.pojo.request.QuerySqlReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
@@ -32,7 +30,6 @@ import com.tencent.supersonic.headless.chat.knowledge.MapResult;
 import com.tencent.supersonic.headless.chat.knowledge.SearchService;
 import com.tencent.supersonic.headless.chat.knowledge.helper.HanlpHelper;
 import com.tencent.supersonic.headless.chat.knowledge.helper.NatureHelper;
-import com.tencent.supersonic.headless.chat.utils.QueryReqBuilder;
 import com.tencent.supersonic.headless.core.cache.QueryCache;
 import com.tencent.supersonic.headless.core.executor.QueryExecutor;
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;
@@ -54,13 +51,10 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -262,39 +256,6 @@ public class S2SemanticLayerService implements SemanticLayerService {
         return dimensionResp;
     }
 
-    public EntityInfo getEntityInfo(SemanticParseInfo parseInfo, DataSetSchema dataSetSchema,
-            User user) {
-        if (parseInfo != null && parseInfo.getDataSetId() != null && parseInfo.getDataSetId() > 0) {
-            EntityInfo entityInfo = getEntityBasicInfo(dataSetSchema);
-            if (parseInfo.getDimensionFilters().size() <= 0
-                    || entityInfo.getDataSetInfo() == null) {
-                entityInfo.setMetrics(null);
-                entityInfo.setDimensions(null);
-                return entityInfo;
-            }
-            String primaryKey = entityInfo.getDataSetInfo().getPrimaryKey();
-            if (StringUtils.isNotBlank(primaryKey)) {
-                String entityId = "";
-                for (QueryFilter chatFilter : parseInfo.getDimensionFilters()) {
-                    if (chatFilter != null && chatFilter.getBizName() != null
-                            && chatFilter.getBizName().equals(primaryKey)) {
-                        if (chatFilter.getOperator().equals(FilterOperatorEnum.EQUALS)) {
-                            entityId = chatFilter.getValue().toString();
-                        }
-                    }
-                }
-                entityInfo.setEntityId(entityId);
-                try {
-                    fillEntityInfoValue(entityInfo, dataSetSchema, user);
-                    return entityInfo;
-                } catch (Exception e) {
-                    log.error("setMainModel error", e);
-                }
-            }
-        }
-        return null;
-    }
-
     @Override
     public List<ItemResp> getDomainDataSetTree() {
         return schemaService.getDomainDataSetTree();
@@ -305,29 +266,9 @@ public class S2SemanticLayerService implements SemanticLayerService {
         return dimensionService.getDimensions(metaFilter);
     }
 
-    private Set<SchemaElement> getDimensions(EntityInfo modelInfo) {
-        Set<SchemaElement> dimensions = new LinkedHashSet();
-        for (DataInfo mainEntityDimension : modelInfo.getDimensions()) {
-            SchemaElement dimension = new SchemaElement();
-            dimension.setBizName(mainEntityDimension.getBizName());
-            dimensions.add(dimension);
-        }
-        return dimensions;
-    }
-
     @Override
     public List<MetricResp> getMetrics(MetaFilter metaFilter) {
         return metricService.getMetrics(metaFilter);
-    }
-
-    private Set<SchemaElement> getMetrics(EntityInfo modelInfo) {
-        Set<SchemaElement> metrics = Sets.newHashSet();
-        for (DataInfo metricValue : modelInfo.getMetrics()) {
-            SchemaElement metric = new SchemaElement();
-            BeanUtils.copyProperties(metricValue, metric);
-            metrics.add(metric);
-        }
-        return metrics;
     }
 
     private QueryStatement buildSqlQueryStatement(QuerySqlReq querySqlReq, User user)
@@ -437,131 +378,4 @@ public class S2SemanticLayerService implements SemanticLayerService {
         metricDrillDownChecker.checkQuery(queryStatement);
     }
 
-    private EntityInfo getEntityBasicInfo(DataSetSchema dataSetSchema) {
-
-        EntityInfo entityInfo = new EntityInfo();
-        if (dataSetSchema == null) {
-            return entityInfo;
-        }
-        Long dataSetId = dataSetSchema.getDataSet().getDataSetId();
-        DataSetInfo dataSetInfo = new DataSetInfo();
-        dataSetInfo.setItemId(dataSetId.intValue());
-        dataSetInfo.setName(dataSetSchema.getDataSet().getName());
-        dataSetInfo.setWords(dataSetSchema.getDataSet().getAlias());
-        dataSetInfo.setBizName(dataSetSchema.getDataSet().getBizName());
-        if (Objects.nonNull(dataSetSchema.getEntity())) {
-            dataSetInfo.setPrimaryKey(dataSetSchema.getEntity().getBizName());
-        }
-        entityInfo.setDataSetInfo(dataSetInfo);
-        DetailTypeDefaultConfig detailTypeDefaultConfig = dataSetSchema.getTagTypeDefaultConfig();
-        if (detailTypeDefaultConfig == null
-                || detailTypeDefaultConfig.getDefaultDisplayInfo() == null) {
-            return entityInfo;
-        }
-        List<DataInfo> dimensions = detailTypeDefaultConfig.getDefaultDisplayInfo()
-                .getDimensionIds().stream().map(id -> {
-                    SchemaElement element =
-                            dataSetSchema.getElement(SchemaElementType.DIMENSION, id);
-                    if (element == null) {
-                        return null;
-                    }
-                    return new DataInfo(element.getId().intValue(), element.getName(),
-                            element.getBizName(), null);
-                }).filter(Objects::nonNull).collect(Collectors.toList());
-        List<DataInfo> metrics = detailTypeDefaultConfig.getDefaultDisplayInfo().getDimensionIds()
-                .stream().map(id -> {
-                    SchemaElement element = dataSetSchema.getElement(SchemaElementType.METRIC, id);
-                    if (element == null) {
-                        return null;
-                    }
-                    return new DataInfo(element.getId().intValue(), element.getName(),
-                            element.getBizName(), null);
-                }).filter(Objects::nonNull).collect(Collectors.toList());
-        entityInfo.setDimensions(dimensions);
-        entityInfo.setMetrics(metrics);
-        return entityInfo;
-    }
-
-    private void fillEntityInfoValue(EntityInfo entityInfo, DataSetSchema dataSetSchema,
-            User user) {
-        SemanticQueryResp queryResultWithColumns =
-                getQueryResultWithSchemaResp(entityInfo, dataSetSchema, user);
-        if (queryResultWithColumns != null) {
-            if (!CollectionUtils.isEmpty(queryResultWithColumns.getResultList())) {
-                Map<String, Object> result = queryResultWithColumns.getResultList().get(0);
-                for (Map.Entry<String, Object> entry : result.entrySet()) {
-                    String entryKey = getEntryKey(entry);
-                    if (entry.getValue() == null || entryKey == null) {
-                        continue;
-                    }
-                    entityInfo.getDimensions().stream().filter(i -> entryKey.equals(i.getBizName()))
-                            .forEach(i -> i.setValue(entry.getValue().toString()));
-                    entityInfo.getMetrics().stream().filter(i -> entryKey.equals(i.getBizName()))
-                            .forEach(i -> i.setValue(entry.getValue().toString()));
-                }
-            }
-        }
-    }
-
-    private SemanticQueryResp getQueryResultWithSchemaResp(EntityInfo entityInfo,
-            DataSetSchema dataSetSchema, User user) {
-        SemanticParseInfo semanticParseInfo = new SemanticParseInfo();
-        semanticParseInfo.setDataSet(dataSetSchema.getDataSet());
-        semanticParseInfo.setQueryType(QueryType.DETAIL);
-        semanticParseInfo.setMetrics(getMetrics(entityInfo));
-        semanticParseInfo.setDimensions(getDimensions(entityInfo));
-
-        if (dataSetSchema.containsPartitionDimensions()) {
-            DateConf dateInfo = new DateConf();
-            int unit = 1;
-            TimeDefaultConfig timeDefaultConfig = dataSetSchema.getTagTypeTimeDefaultConfig();
-            if (Objects.nonNull(timeDefaultConfig)) {
-                unit = timeDefaultConfig.getUnit();
-                String date = LocalDate.now().minusDays(unit).toString();
-                dateInfo.setDateMode(DateConf.DateMode.BETWEEN);
-                dateInfo.setStartDate(date);
-                dateInfo.setEndDate(date);
-            } else {
-                dateInfo.setUnit(unit);
-                dateInfo.setDateMode(DateConf.DateMode.RECENT);
-            }
-            semanticParseInfo.setDateInfo(dateInfo);
-        }
-
-        // add filter
-        QueryFilter chatFilter = getQueryFilter(entityInfo);
-        Set<QueryFilter> chatFilters = Sets.newHashSet();
-        chatFilters.add(chatFilter);
-        semanticParseInfo.setDimensionFilters(chatFilters);
-
-        SemanticQueryResp queryResultWithColumns = null;
-        try {
-            QuerySqlReq querySqlReq = QueryReqBuilder.buildStructReq(semanticParseInfo).convert();
-            queryResultWithColumns = queryByReq(querySqlReq, user);
-        } catch (Exception e) {
-            log.warn("setMainModel queryByStruct error, e:", e);
-        }
-        return queryResultWithColumns;
-    }
-
-    private QueryFilter getQueryFilter(EntityInfo entityInfo) {
-        QueryFilter chatFilter = new QueryFilter();
-        chatFilter.setValue(entityInfo.getEntityId());
-        chatFilter.setOperator(FilterOperatorEnum.EQUALS);
-        chatFilter.setBizName(getEntityPrimaryName(entityInfo));
-        return chatFilter;
-    }
-
-    private String getEntryKey(Map.Entry<String, Object> entry) {
-        // metric parser special handle, TODO delete
-        String entryKey = entry.getKey();
-        if (entryKey.contains("__")) {
-            entryKey = entryKey.split("__")[1];
-        }
-        return entryKey;
-    }
-
-    private String getEntityPrimaryName(EntityInfo entityInfo) {
-        return entityInfo.getDataSetInfo().getPrimaryKey();
-    }
 }
