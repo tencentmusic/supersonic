@@ -14,8 +14,6 @@ public enum DictWordType {
 
     DATASET("dataSet"),
 
-    ENTITY("entity"),
-
     NUMBER("m"),
 
     TAG("tag"),

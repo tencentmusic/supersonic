@@ -10,10 +10,9 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Objects;
 
-/** model word nature */
 @Service
 @Slf4j
-public class ModelWordBuilder extends BaseWordWithAliasBuilder {
+public class DataSetWordBuilder extends BaseWordWithAliasBuilder {
 
     @Override
     public List<DictWord> doGet(String word, SchemaElement schemaElement) {
