@@ -31,19 +31,18 @@ public class QueryTypeParser implements SemanticParser {
                     chatQueryContext.getSemanticSchema().getDataSetSchemaMap().get(dataSetId);
             semanticQuery.initS2Sql(dataSetSchema, user);
             // 2.set queryType
-            QueryType queryType = getQueryType(chatQueryContext, semanticQuery);
+            QueryType queryType = getQueryType(semanticQuery);
             semanticQuery.getParseInfo().setQueryType(queryType);
         }
     }
 
-    private QueryType getQueryType(ChatQueryContext chatQueryContext, SemanticQuery semanticQuery) {
+    private QueryType getQueryType(SemanticQuery semanticQuery) {
         SemanticParseInfo parseInfo = semanticQuery.getParseInfo();
         SqlInfo sqlInfo = parseInfo.getSqlInfo();
         if (Objects.isNull(sqlInfo) || StringUtils.isBlank(sqlInfo.getParsedS2SQL())) {
             return QueryType.DETAIL;
         }
 
-        // 2. AGG queryType
         if (SqlSelectFunctionHelper.hasAggregateFunction(sqlInfo.getParsedS2SQL())) {
             return QueryType.AGGREGATE;
         }
