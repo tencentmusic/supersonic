@@ -14,7 +14,6 @@ import com.tencent.supersonic.headless.chat.parser.SemanticParser;
 import com.tencent.supersonic.headless.chat.query.QueryManager;
 import com.tencent.supersonic.headless.chat.query.SemanticQuery;
 import com.tencent.supersonic.headless.server.facade.service.SemanticLayerService;
-import com.tencent.supersonic.headless.server.processor.ResultProcessor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
@@ -34,8 +33,6 @@ public class ChatWorkflowEngine {
     private final List<SemanticParser> semanticParsers = CoreComponentFactory.getSemanticParsers();
     private final List<SemanticCorrector> semanticCorrectors =
             CoreComponentFactory.getSemanticCorrectors();
-    private final List<ResultProcessor> resultProcessors =
-            CoreComponentFactory.getResultProcessors();
 
     public void start(ChatWorkflowState initialState, ChatQueryContext queryCtx,
             ParseResp parseResult) {
@@ -74,11 +71,10 @@ public class ChatWorkflowEngine {
                     long start = System.currentTimeMillis();
                     performTranslating(queryCtx, parseResult);
                     parseResult.getParseTimeCost().setSqlTime(System.currentTimeMillis() - start);
-                    queryCtx.setChatWorkflowState(ChatWorkflowState.PROCESSING);
+                    parseResult.setState(ParseResp.ParseState.COMPLETED);
+                    queryCtx.setChatWorkflowState(ChatWorkflowState.FINISHED);
                     break;
-                case PROCESSING:
                 default:
-                    performProcessing(queryCtx, parseResult);
                     if (parseResult.getState().equals(ParseResp.ParseState.PENDING)) {
                         parseResult.setState(ParseResp.ParseState.COMPLETED);
                     }
@@ -115,10 +111,6 @@ public class ChatWorkflowEngine {
                 }
             }
         }
-    }
-
-    private void performProcessing(ChatQueryContext queryCtx, ParseResp parseResult) {
-        resultProcessors.forEach(processor -> processor.process(parseResult, queryCtx));
     }
 
     private void performTranslating(ChatQueryContext queryCtx, ParseResp parseResult) {
