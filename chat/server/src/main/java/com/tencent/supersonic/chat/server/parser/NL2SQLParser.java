@@ -101,7 +101,7 @@ public class NL2SQLParser implements ChatQueryParser {
                     doParse(queryNLReq, parseResp);
                 }
                 if (parseResp.getSelectedParses().isEmpty()) {
-                    return;
+                    continue;
                 }
                 // for one dataset select the top 1 parse after sorting
                 SemanticParseInfo.sort(parseResp.getSelectedParses());
