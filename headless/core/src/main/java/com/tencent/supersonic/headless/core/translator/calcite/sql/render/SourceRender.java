@@ -94,8 +94,8 @@ public class SourceRender extends Renderer {
                     datasource, schema, nonAgg, extendFields, dataSet, output, scope);
         }
 
-        output.setMeasure(deduplicateNode(output.getMeasure()));
-        dataSet.setMeasure(deduplicateNode(dataSet.getMeasure()));
+        output.setMeasure(SemanticNode.deduplicateNode(output.getMeasure()));
+        dataSet.setMeasure(SemanticNode.deduplicateNode(dataSet.getMeasure()));
 
         SqlNode tableNode = DataSourceNode.buildExtend(datasource, extendFields, scope);
         dataSet.setTable(tableNode);
@@ -105,24 +105,7 @@ public class SourceRender extends Renderer {
         return output;
     }
 
-    private static List<SqlNode> deduplicateNode(List<SqlNode> listNode) { // List<SqlNode>去重
-        List<SqlNode> uniqueElements = new ArrayList<>();
-        for (SqlNode element : listNode) {
-            if (!containsElement(uniqueElements, element)) {
-                uniqueElements.add(element);
-            }
-        }
-        return uniqueElements;
-    }
 
-    private static boolean containsElement(List<SqlNode> list, SqlNode element) { // 检查List<SqlNode>中是否含有某element
-        for (SqlNode i : list) {
-            if (i.equalsDeep(element, Litmus.IGNORE)) {
-                return true;
-            }
-        }
-        return false;
-    }
 
     private static void buildDimension(String alias, String dimension, DataSource datasource,
             SemanticSchema schema, boolean nonAgg, Map<String, String> extendFields,

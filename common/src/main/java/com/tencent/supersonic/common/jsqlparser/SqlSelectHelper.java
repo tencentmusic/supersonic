@@ -812,6 +812,10 @@ public class SqlSelectHelper {
         }
     }
 
+    public static Set<Select> getAllSelect(String sql) {
+        return getAllSelect(getSelect(sql));
+    }
+
     public static Set<Select> getAllSelect(Select selectStatement) {
         Set<Select> selects = new HashSet<>();
         collectSelects(selectStatement, selects);

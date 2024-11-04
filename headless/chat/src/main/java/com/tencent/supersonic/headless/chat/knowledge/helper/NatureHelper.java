@@ -18,7 +18,9 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-/** nature parse helper */
+/**
+ * nature parse helper
+ */
 @Slf4j
 public class NatureHelper {
 
@@ -35,9 +37,6 @@ public class NatureHelper {
             case DIMENSION:
                 result = SchemaElementType.DIMENSION;
                 break;
-            case ENTITY:
-                result = SchemaElementType.ENTITY;
-                break;
             case DATASET:
                 result = SchemaElementType.DATASET;
                 break;
@@ -53,10 +52,9 @@ public class NatureHelper {
         return result;
     }
 
-    private static boolean isDataSetOrEntity(S2Term term, Integer model) {
+    private static boolean isDataSet(S2Term term, Integer model) {
         String natureStr = term.nature.toString();
-        return (DictWordType.NATURE_SPILT + model).equals(natureStr)
-                || natureStr.endsWith(DictWordType.ENTITY.getType());
+        return (DictWordType.NATURE_SPILT + model).equals(natureStr);
     }
 
     public static Integer getDataSetByNature(Nature nature) {
@@ -122,8 +120,8 @@ public class NatureHelper {
     }
 
     private static long getDataSetCount(List<S2Term> terms) {
-        return terms.stream()
-                .filter(term -> isDataSetOrEntity(term, getDataSetByNature(term.nature))).count();
+        return terms.stream().filter(term -> isDataSet(term, getDataSetByNature(term.nature)))
+                .count();
     }
 
     private static long getDimensionValueCount(List<S2Term> terms) {

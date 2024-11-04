@@ -148,11 +148,6 @@ public class RetrieveServiceImpl implements RetrieveService {
         Long dataSetId = NatureHelper.getDataSetId(nature);
         SchemaElementType schemaElementType = NatureHelper.convertToElementType(nature);
 
-        // Skip if the schema element type is ENTITY
-        if (SchemaElementType.ENTITY.equals(schemaElementType)) {
-            return searchResults;
-        }
-
         // Create a base search result
         SearchResult baseSearchResult = createBaseSearchResult(dataSetId, dataSetIdToName,
                 matchText, wordName, schemaElementType);

@@ -1,13 +1,9 @@
 package com.tencent.supersonic.headless.chat.corrector;
 
 import com.tencent.supersonic.common.jsqlparser.SqlAddHelper;
-import com.tencent.supersonic.common.jsqlparser.SqlRemoveHelper;
-import com.tencent.supersonic.common.jsqlparser.SqlSelectFunctionHelper;
 import com.tencent.supersonic.common.jsqlparser.SqlSelectHelper;
 import com.tencent.supersonic.common.jsqlparser.SqlValidHelper;
-import com.tencent.supersonic.common.pojo.enums.QueryType;
 import com.tencent.supersonic.common.util.ContextUtils;
-import com.tencent.supersonic.headless.api.pojo.DataSetSchema;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.chat.ChatQueryContext;
 import lombok.extern.slf4j.Slf4j;
@@ -18,9 +14,7 @@ import org.springframework.util.CollectionUtils;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 /** Perform SQL corrections on the "Select" section in S2SQL. */
 @Slf4j
@@ -42,13 +36,11 @@ public class SelectCorrector extends BaseSemanticCorrector {
                 && aggregateFields.size() == selectFields.size()) {
             return;
         }
-        correctS2SQL = addFieldsToSelect(chatQueryContext, semanticParseInfo, correctS2SQL);
+        correctS2SQL = addFieldsToSelect(semanticParseInfo, correctS2SQL);
         semanticParseInfo.getSqlInfo().setCorrectedS2SQL(correctS2SQL);
     }
 
-    protected String addFieldsToSelect(ChatQueryContext chatQueryContext,
-            SemanticParseInfo semanticParseInfo, String correctS2SQL) {
-        correctS2SQL = addTagDefaultFields(chatQueryContext, semanticParseInfo, correctS2SQL);
+    protected String addFieldsToSelect(SemanticParseInfo semanticParseInfo, String correctS2SQL) {
 
         Set<String> selectFields = new HashSet<>(SqlSelectHelper.getSelectFields(correctS2SQL));
         Set<String> needAddFields = new HashSet<>(SqlSelectHelper.getGroupByFields(correctS2SQL));
@@ -70,34 +62,4 @@ public class SelectCorrector extends BaseSemanticCorrector {
         return addFieldsToSelectSql;
     }
 
-    private String addTagDefaultFields(ChatQueryContext chatQueryContext,
-            SemanticParseInfo semanticParseInfo, String correctS2SQL) {
-        // If it is in DETAIL mode and select *, add default metrics and dimensions.
-        boolean hasAsterisk = SqlSelectFunctionHelper.hasAsterisk(correctS2SQL);
-        if (!(hasAsterisk && QueryType.DETAIL.equals(semanticParseInfo.getQueryType()))) {
-            return correctS2SQL;
-        }
-        Long dataSetId = semanticParseInfo.getDataSetId();
-        DataSetSchema dataSetSchema =
-                chatQueryContext.getSemanticSchema().getDataSetSchemaMap().get(dataSetId);
-        Set<String> needAddDefaultFields = new HashSet<>();
-        if (Objects.nonNull(dataSetSchema)) {
-            if (!CollectionUtils.isEmpty(dataSetSchema.getTagDefaultMetrics())) {
-                Set<String> metrics = dataSetSchema.getTagDefaultMetrics().stream()
-                        .map(schemaElement -> schemaElement.getName()).collect(Collectors.toSet());
-                needAddDefaultFields.addAll(metrics);
-            }
-            if (!CollectionUtils.isEmpty(dataSetSchema.getTagDefaultDimensions())) {
-                Set<String> dimensions = dataSetSchema.getTagDefaultDimensions().stream()
-                        .map(schemaElement -> schemaElement.getName()).collect(Collectors.toSet());
-                needAddDefaultFields.addAll(dimensions);
-            }
-        }
-        // remove * in sql and add default fields.
-        if (!CollectionUtils.isEmpty(needAddDefaultFields)) {
-            correctS2SQL =
-                    SqlRemoveHelper.removeAsteriskAndAddFields(correctS2SQL, needAddDefaultFields);
-        }
-        return correctS2SQL;
-    }
 }

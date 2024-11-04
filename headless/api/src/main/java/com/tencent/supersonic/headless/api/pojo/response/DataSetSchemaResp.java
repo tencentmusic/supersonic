@@ -19,19 +19,4 @@ public class DataSetSchemaResp extends DataSetResp {
     private List<ModelResp> modelResps = Lists.newArrayList();
     private List<TermResp> termResps = Lists.newArrayList();
 
-    public DimSchemaResp getPrimaryKey() {
-        for (ModelResp modelResp : modelResps) {
-            Identify identify = modelResp.getPrimaryIdentify();
-            if (identify == null) {
-                continue;
-            }
-            for (DimSchemaResp dimension : dimensions) {
-                if (identify.getBizName().equals(dimension.getBizName())) {
-                    dimension.setEntityAlias(identify.getEntityNames());
-                    return dimension;
-                }
-            }
-        }
-        return null;
-    }
 }

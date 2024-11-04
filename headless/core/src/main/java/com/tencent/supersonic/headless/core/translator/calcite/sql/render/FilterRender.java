@@ -66,6 +66,8 @@ public class FilterRender extends Renderer {
                 tableView.getMeasure().add(SemanticNode.parse(metric, scope, engineType));
             }
         }
+        tableView.setMeasure(SemanticNode.deduplicateNode(tableView.getMeasure()));
+        tableView.setDimension(SemanticNode.deduplicateNode(tableView.getDimension()));
         if (filterNode != null) {
             TableView filterView = new TableView();
             filterView.setTable(SemanticNode.buildAs(Constants.DATASOURCE_TABLE_FILTER_PREFIX,

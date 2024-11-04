@@ -8,8 +8,6 @@ import java.io.Serializable;
 @Data
 public class DetailTypeDefaultConfig implements Serializable {
 
-    private DefaultDisplayInfo defaultDisplayInfo;
-
     // default time to filter tag selection results
     private TimeDefaultConfig timeDefaultConfig = new TimeDefaultConfig();
 

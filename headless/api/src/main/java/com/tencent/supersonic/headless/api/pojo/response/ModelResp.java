@@ -62,21 +62,6 @@ public class ModelResp extends SchemaItem {
         return isOpen != null && isOpen == 1;
     }
 
-    public Identify getPrimaryIdentify() {
-        if (modelDetail == null) {
-            return null;
-        }
-        if (CollectionUtils.isEmpty(modelDetail.getIdentifiers())) {
-            return null;
-        }
-        for (Identify identify : modelDetail.getIdentifiers()) {
-            if (!CollectionUtils.isEmpty(identify.getEntityNames())) {
-                return identify;
-            }
-        }
-        return null;
-    }
-
     public List<Dim> getTimeDimension() {
         if (modelDetail == null) {
             return Lists.newArrayList();

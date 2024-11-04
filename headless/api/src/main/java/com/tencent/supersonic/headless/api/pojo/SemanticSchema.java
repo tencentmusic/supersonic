@@ -27,9 +27,6 @@ public class SemanticSchema implements Serializable {
         Optional<SchemaElement> element = Optional.empty();
 
         switch (elementType) {
-            case ENTITY:
-                element = getElementsById(elementID, getEntities());
-                break;
             case DATASET:
                 element = getElementsById(elementID, getDataSets());
                 break;
@@ -95,17 +92,6 @@ public class SemanticSchema implements Serializable {
     public List<SchemaElement> getMetrics(Long dataSetId) {
         List<SchemaElement> metrics = getMetrics();
         return getElementsByDataSetId(dataSetId, metrics);
-    }
-
-    public List<SchemaElement> getEntities() {
-        List<SchemaElement> entities = new ArrayList<>();
-        dataSetSchemaList.stream().forEach(d -> entities.add(d.getEntity()));
-        return entities;
-    }
-
-    public List<SchemaElement> getEntities(Long dataSetId) {
-        List<SchemaElement> entities = getEntities();
-        return getElementsByDataSetId(dataSetId, entities);
     }
 
     public List<SchemaElement> getTags() {

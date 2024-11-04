@@ -12,6 +12,7 @@ import com.tencent.supersonic.common.pojo.enums.QueryType;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.DateModeUtils;
 import com.tencent.supersonic.common.util.SqlFilterUtils;
+import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.JSQLParserException;
@@ -42,6 +43,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class QueryStructReq extends SemanticQueryReq {
 
+    private List<SchemaElement> dimensions = new ArrayList<>();
     private List<String> groups = new ArrayList<>();
     private List<Aggregator> aggregators = new ArrayList<>();
     private List<Order> orders = new ArrayList<>();
@@ -49,7 +51,7 @@ public class QueryStructReq extends SemanticQueryReq {
     private List<Filter> metricFilters = new ArrayList<>();
     private DateConf dateInfo;
     private long limit = Constants.DEFAULT_DETAIL_LIMIT;
-    private QueryType queryType = QueryType.ID;
+    private QueryType queryType = QueryType.DETAIL;
     private boolean convertToSql = true;
 
     public List<String> getGroups() {
