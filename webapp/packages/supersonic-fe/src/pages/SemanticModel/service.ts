@@ -90,6 +90,12 @@ export function updateDimension(data: any): Promise<any> {
   });
 }
 
+export function updateDimensionAliasValue(data: any): Promise<any> {
+  return request.post(`${process.env.API_BASE_URL}dimension/updateDimension/alias/value`, {
+    data,
+  });
+}
+
 export function mockDimensionAlias(data: any): Promise<any> {
   return request.post(`${process.env.API_BASE_URL}dimension/mockDimensionAlias`, {
     data,
