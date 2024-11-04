@@ -148,12 +148,13 @@ public abstract class RuleSemanticQuery extends BaseSemanticQuery {
     }
 
     private void addToFilters(Map<Long, List<SchemaElementMatch>> id2Values,
-            SemanticParseInfo parseInfo, SemanticSchema semanticSchema, SchemaElementType entity) {
+            SemanticParseInfo parseInfo, SemanticSchema semanticSchema,
+            SchemaElementType elementType) {
         if (id2Values == null || id2Values.isEmpty()) {
             return;
         }
         for (Entry<Long, List<SchemaElementMatch>> entry : id2Values.entrySet()) {
-            SchemaElement dimension = semanticSchema.getElement(entity, entry.getKey());
+            SchemaElement dimension = semanticSchema.getElement(elementType, entry.getKey());
             if (dimension.isPartitionTime()) {
                 continue;
             }

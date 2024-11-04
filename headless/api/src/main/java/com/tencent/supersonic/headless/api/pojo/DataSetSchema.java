@@ -22,7 +22,6 @@ public class DataSetSchema implements Serializable {
     private Set<SchemaElement> tags = new HashSet<>();
     private Set<SchemaElement> dimensionValues = new HashSet<>();
     private Set<SchemaElement> terms = new HashSet<>();
-    private SchemaElement entity = new SchemaElement();
     private QueryConfig queryConfig;
 
     public SchemaElement getElement(SchemaElementType elementType, long elementID) {
@@ -79,13 +78,6 @@ public class DataSetSchema implements Serializable {
             return null;
         }
         return queryConfig.getAggregateTypeDefaultConfig().getTimeDefaultConfig();
-    }
-
-    public DetailTypeDefaultConfig getTagTypeDefaultConfig() {
-        if (queryConfig == null) {
-            return null;
-        }
-        return queryConfig.getDetailTypeDefaultConfig();
     }
 
     public boolean containsPartitionDimensions() {
