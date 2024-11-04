@@ -29,7 +29,6 @@ const ChangePasswordModal = forwardRef<IRef>((_, ref) => {
   const handleOk = async () => {
     try {
       const values = await form.validateFields();
-      console.log(values);
       setConfirmLoading(true);
       // Call API to change password
       const res = await changePassword({

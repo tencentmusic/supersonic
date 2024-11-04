@@ -130,10 +130,8 @@ const ExecuteItem: React.FC<Props> = ({
             <div className={`${prefixCls}-auth-tip`}>提示：{data.queryAuthorization.message}</div>
           )}
           {data.textSummary && (
-            <p>
-              <span className={`${prefixCls}-step-title`} style={{ marginRight: 5 }}>
-                总结:
-              </span>
+            <p className={`${prefixCls}-step-title`}>
+              <span style={{ marginRight: 5 }}>总结:</span>
               {data.textSummary}
             </p>
           )}

@@ -17,9 +17,8 @@ type Props = {
   onMenuClick?: (key: string, selectedKes: React.Key[]) => void;
 };
 
-const DimensionValueFilterModal: React.FC<Props> = ({
+const DimensionValueFilterTable: React.FC<Props> = ({
   listType,
-
   dataSource,
   onCancel,
   onMenuClick,
@@ -196,4 +195,4 @@ const DimensionValueFilterModal: React.FC<Props> = ({
   );
 };
 
-export default DimensionValueFilterModal;
+export default DimensionValueFilterTable;

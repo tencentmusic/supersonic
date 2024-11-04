@@ -175,7 +175,6 @@ const ChangePasswordModal = forwardRef<IRef>((_, ref) => {
         editable={{
           type: 'single',
           onSave: async (rowKey, data, row) => {
-            console.log(rowKey, data, row);
             await generateAccessToken({
               name: data.name!,
               expireTime: new Date(data.expireDate!).getTime() - new Date().getTime(),
