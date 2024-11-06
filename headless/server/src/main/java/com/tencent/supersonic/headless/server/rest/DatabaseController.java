@@ -3,11 +3,11 @@ package com.tencent.supersonic.headless.server.rest;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
+import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.headless.api.pojo.DBColumn;
 import com.tencent.supersonic.headless.api.pojo.request.DatabaseReq;
-import com.tencent.supersonic.headless.api.pojo.request.ModelSchemaReq;
+import com.tencent.supersonic.headless.api.pojo.request.ModelBuildReq;
 import com.tencent.supersonic.headless.api.pojo.request.SqlExecuteReq;
 import com.tencent.supersonic.headless.api.pojo.response.DatabaseResp;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
@@ -96,9 +96,9 @@ public class DatabaseController {
     }
 
     @PostMapping("/listColumnsBySql")
-    public List<DBColumn> listColumnsBySql(@RequestBody ModelSchemaReq modelSchemaReq)
+    public List<DBColumn> listColumnsBySql(@RequestBody ModelBuildReq modelBuildReq)
             throws SQLException {
-        return databaseService.getColumns(modelSchemaReq.getDatabaseId(), modelSchemaReq.getSql());
+        return databaseService.getColumns(modelBuildReq.getDatabaseId(), modelBuildReq.getSql());
     }
 
     @GetMapping("/getDatabaseParameters")

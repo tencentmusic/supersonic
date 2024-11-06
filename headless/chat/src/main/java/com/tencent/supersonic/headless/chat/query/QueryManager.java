@@ -13,8 +13,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class QueryManager {
 
-    private static Map<String, RuleSemanticQuery> ruleQueryMap = new ConcurrentHashMap<>();
-    private static Map<String, LLMSemanticQuery> llmQueryMap = new ConcurrentHashMap<>();
+    private final static Map<String, RuleSemanticQuery> ruleQueryMap = new ConcurrentHashMap<>();
+    private final static Map<String, LLMSemanticQuery> llmQueryMap = new ConcurrentHashMap<>();
 
     public static void register(SemanticQuery query) {
         if (query instanceof RuleSemanticQuery) {
@@ -71,13 +71,6 @@ public class QueryManager {
             return false;
         }
         return ruleQueryMap.get(queryMode) instanceof DetailSemanticQuery;
-    }
-
-    public static RuleSemanticQuery getRuleQuery(String queryMode) {
-        if (queryMode == null) {
-            return null;
-        }
-        return ruleQueryMap.get(queryMode);
     }
 
     public static List<RuleSemanticQuery> getRuleQueries() {

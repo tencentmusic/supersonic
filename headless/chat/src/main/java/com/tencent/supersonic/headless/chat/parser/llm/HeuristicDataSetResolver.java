@@ -3,6 +3,7 @@ package com.tencent.supersonic.headless.chat.parser.llm;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementMatch;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
 import com.tencent.supersonic.headless.api.pojo.SchemaMapInfo;
+import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.chat.ChatQueryContext;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
@@ -36,8 +37,9 @@ public class HeuristicDataSetResolver implements DataSetResolver {
     }
 
     protected Long selectDataSetByMatchSimilarity(SchemaMapInfo schemaMap) {
-        Map<Long, DataSetMatchResult> dataSetMatchRet = getDataSetMatchResult(schemaMap);
-        Entry<Long, DataSetMatchResult> selectedDataset =
+        Map<Long, SemanticParseInfo.DataSetMatchResult> dataSetMatchRet =
+                getDataSetMatchResult(schemaMap);
+        Entry<Long, SemanticParseInfo.DataSetMatchResult> selectedDataset =
                 dataSetMatchRet.entrySet().stream().sorted((o1, o2) -> {
                     double difference = o1.getValue().getMaxDatesetSimilarity()
                             - o2.getValue().getMaxDatesetSimilarity();
@@ -63,8 +65,9 @@ public class HeuristicDataSetResolver implements DataSetResolver {
         return null;
     }
 
-    protected Map<Long, DataSetMatchResult> getDataSetMatchResult(SchemaMapInfo schemaMap) {
-        Map<Long, DataSetMatchResult> dateSetMatchRet = new HashMap<>();
+    protected Map<Long, SemanticParseInfo.DataSetMatchResult> getDataSetMatchResult(
+            SchemaMapInfo schemaMap) {
+        Map<Long, SemanticParseInfo.DataSetMatchResult> dateSetMatchRet = new HashMap<>();
         for (Entry<Long, List<SchemaElementMatch>> entry : schemaMap.getDataSetElementMatches()
                 .entrySet()) {
             double maxMetricSimilarity = 0;
@@ -84,7 +87,8 @@ public class HeuristicDataSetResolver implements DataSetResolver {
                 totalSimilarity += match.getSimilarity();
             }
             dateSetMatchRet.put(entry.getKey(),
-                    DataSetMatchResult.builder().maxMetricSimilarity(maxMetricSimilarity)
+                    SemanticParseInfo.DataSetMatchResult.builder()
+                            .maxMetricSimilarity(maxMetricSimilarity)
                             .maxDatesetSimilarity(maxDatasetSimilarity)
                             .totalSimilarity(totalSimilarity).build());
         }

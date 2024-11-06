@@ -14,13 +14,10 @@ import com.tencent.supersonic.headless.chat.parser.SemanticParser;
 import com.tencent.supersonic.headless.chat.query.QueryManager;
 import com.tencent.supersonic.headless.chat.query.SemanticQuery;
 import com.tencent.supersonic.headless.server.facade.service.SemanticLayerService;
-import com.tencent.supersonic.headless.server.processor.ResultProcessor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -32,26 +29,23 @@ import java.util.stream.Collectors;
 @Slf4j
 public class ChatWorkflowEngine {
 
-    private static final Logger keyPipelineLog = LoggerFactory.getLogger("keyPipeline");
-    private final List<SchemaMapper> schemaMappers = ComponentFactory.getSchemaMappers();
-    private final List<SemanticParser> semanticParsers = ComponentFactory.getSemanticParsers();
+    private final List<SchemaMapper> schemaMappers = CoreComponentFactory.getSchemaMappers();
+    private final List<SemanticParser> semanticParsers = CoreComponentFactory.getSemanticParsers();
     private final List<SemanticCorrector> semanticCorrectors =
-            ComponentFactory.getSemanticCorrectors();
-    private final List<ResultProcessor> resultProcessors = ComponentFactory.getResultProcessors();
+            CoreComponentFactory.getSemanticCorrectors();
 
-    public void execute(ChatQueryContext queryCtx, ParseResp parseResult) {
-        queryCtx.setChatWorkflowState(ChatWorkflowState.MAPPING);
+    public void start(ChatWorkflowState initialState, ChatQueryContext queryCtx,
+            ParseResp parseResult) {
+        queryCtx.setChatWorkflowState(initialState);
         while (queryCtx.getChatWorkflowState() != ChatWorkflowState.FINISHED) {
             switch (queryCtx.getChatWorkflowState()) {
                 case MAPPING:
                     performMapping(queryCtx);
-                    if (queryCtx.getMapInfo().getMatchedDataSetInfos().isEmpty()) {
+                    if (queryCtx.getMapInfo().isEmpty()) {
                         parseResult.setState(ParseResp.ParseState.FAILED);
                         parseResult.setErrorMsg(
                                 "No semantic entities can be mapped against user question.");
                         queryCtx.setChatWorkflowState(ChatWorkflowState.FINISHED);
-                    } else if (queryCtx.getMapInfo().needContinueMap()) {
-                        queryCtx.setChatWorkflowState(ChatWorkflowState.MAPPING);
                     } else {
                         queryCtx.setChatWorkflowState(ChatWorkflowState.PARSING);
                     }
@@ -77,11 +71,10 @@ public class ChatWorkflowEngine {
                     long start = System.currentTimeMillis();
                     performTranslating(queryCtx, parseResult);
                     parseResult.getParseTimeCost().setSqlTime(System.currentTimeMillis() - start);
-                    queryCtx.setChatWorkflowState(ChatWorkflowState.PROCESSING);
+                    parseResult.setState(ParseResp.ParseState.COMPLETED);
+                    queryCtx.setChatWorkflowState(ChatWorkflowState.FINISHED);
                     break;
-                case PROCESSING:
                 default:
-                    performProcessing(queryCtx, parseResult);
                     if (parseResult.getState().equals(ParseResp.ParseState.PENDING)) {
                         parseResult.setState(ParseResp.ParseState.COMPLETED);
                     }
@@ -93,8 +86,7 @@ public class ChatWorkflowEngine {
 
     private void performMapping(ChatQueryContext queryCtx) {
         if (Objects.isNull(queryCtx.getMapInfo())
-                || MapUtils.isEmpty(queryCtx.getMapInfo().getDataSetElementMatches())
-                || queryCtx.getMapInfo().needContinueMap()) {
+                || MapUtils.isEmpty(queryCtx.getMapInfo().getDataSetElementMatches())) {
             schemaMappers.forEach(mapper -> mapper.map(queryCtx));
         }
     }
@@ -121,14 +113,8 @@ public class ChatWorkflowEngine {
         }
     }
 
-    private void performProcessing(ChatQueryContext queryCtx, ParseResp parseResult) {
-        resultProcessors.forEach(processor -> {
-            processor.process(parseResult, queryCtx);
-        });
-    }
-
-    private void performTranslating(ChatQueryContext chatQueryContext, ParseResp parseResult) {
-        List<SemanticParseInfo> semanticParseInfos = chatQueryContext.getCandidateQueries().stream()
+    private void performTranslating(ChatQueryContext queryCtx, ParseResp parseResult) {
+        List<SemanticParseInfo> semanticParseInfos = queryCtx.getCandidateQueries().stream()
                 .map(SemanticQuery::getParseInfo).collect(Collectors.toList());
         List<String> errorMsg = new ArrayList<>();
         if (StringUtils.isNotBlank(parseResult.getErrorMsg())) {
@@ -145,12 +131,12 @@ public class ChatWorkflowEngine {
                 SemanticLayerService queryService =
                         ContextUtils.getBean(SemanticLayerService.class);
                 SemanticTranslateResp explain =
-                        queryService.translate(semanticQueryReq, chatQueryContext.getUser());
+                        queryService.translate(semanticQueryReq, queryCtx.getRequest().getUser());
                 parseInfo.getSqlInfo().setQuerySQL(explain.getQuerySQL());
                 if (StringUtils.isNotBlank(explain.getErrMsg())) {
                     errorMsg.add(explain.getErrMsg());
                 }
-                keyPipelineLog.info(
+                log.info(
                         "SqlInfoProcessor results:\n"
                                 + "Parsed S2SQL: {}\nCorrected S2SQL: {}\nQuery SQL: {}",
                         StringUtils.normalizeSpace(parseInfo.getSqlInfo().getParsedS2SQL()),
@@ -163,7 +149,7 @@ public class ChatWorkflowEngine {
             }
         });
         if (!errorMsg.isEmpty()) {
-            parseResult.setErrorMsg(errorMsg.stream().collect(Collectors.joining("\n")));
+            parseResult.setErrorMsg(String.join("\n", errorMsg));
         }
     }
 }

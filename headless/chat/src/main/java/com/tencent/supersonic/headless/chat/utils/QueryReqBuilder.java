@@ -60,15 +60,12 @@ public class QueryReqBuilder {
         queryStructReq.setGroups(parseInfo.getDimensions().stream().map(SchemaElement::getBizName)
                 .collect(Collectors.toList()));
         queryStructReq.setLimit(parseInfo.getLimit());
-        // only one metric is queried at once
-        Set<SchemaElement> metrics = parseInfo.getMetrics();
-        if (!CollectionUtils.isEmpty(metrics)) {
-            SchemaElement metricElement = parseInfo.getMetrics().iterator().next();
-            Set<Order> order =
-                    getOrder(parseInfo.getOrders(), parseInfo.getAggType(), metricElement);
-            queryStructReq
-                    .setAggregators(getAggregatorByMetric(parseInfo.getAggType(), metricElement));
-            queryStructReq.setOrders(new ArrayList<>(order));
+
+        for (SchemaElement metricElement : parseInfo.getMetrics()) {
+            queryStructReq.getAggregators()
+                    .addAll(getAggregatorByMetric(parseInfo.getAggType(), metricElement));
+            queryStructReq.setOrders(new ArrayList<>(
+                    getOrder(parseInfo.getOrders(), parseInfo.getAggType(), metricElement)));
         }
 
         deletionDuplicated(queryStructReq);

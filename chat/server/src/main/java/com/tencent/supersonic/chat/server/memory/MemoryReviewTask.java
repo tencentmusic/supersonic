@@ -5,10 +5,10 @@ import com.tencent.supersonic.chat.server.agent.Agent;
 import com.tencent.supersonic.chat.server.persistence.dataobject.ChatMemoryDO;
 import com.tencent.supersonic.chat.server.service.AgentService;
 import com.tencent.supersonic.chat.server.service.MemoryService;
-import com.tencent.supersonic.chat.server.util.ModelConfigHelper;
 import com.tencent.supersonic.common.pojo.ChatApp;
 import com.tencent.supersonic.common.pojo.enums.AppModule;
 import com.tencent.supersonic.common.util.ChatAppManager;
+import com.tencent.supersonic.headless.server.utils.ModelConfigHelper;
 import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.input.Prompt;
 import dev.langchain4j.model.input.PromptTemplate;
@@ -33,7 +33,7 @@ public class MemoryReviewTask {
 
     public static final String APP_KEY = "MEMORY_REVIEW";
     private static final String INSTRUCTION = ""
-            + "\n#Role: You are a senior data engineer experienced in writing SQL."
+            + "#Role: You are a senior data engineer experienced in writing SQL."
             + "\n#Task: Your will be provided with a user question and the SQL written by a junior engineer,"
             + "please take a review and give your opinion." + "\n#Rules: "
             + "\n1.ALWAYS follow the output format: `opinion=(POSITIVE|NEGATIVE),comment=(your comment)`."
@@ -82,12 +82,12 @@ public class MemoryReviewTask {
         String promptStr = createPromptString(m, chatApp.getPrompt());
         Prompt prompt = PromptTemplate.from(promptStr).apply(Collections.EMPTY_MAP);
 
-        keyPipelineLog.info("MemoryReviewTask reqPrompt:\n{}", promptStr);
         ChatLanguageModel chatLanguageModel =
                 ModelProvider.getChatModel(ModelConfigHelper.getChatModelConfig(chatApp));
         if (Objects.nonNull(chatLanguageModel)) {
             String response = chatLanguageModel.generate(prompt.toUserMessage()).content().text();
-            keyPipelineLog.info("MemoryReviewTask modelResp:\n{}", response);
+            keyPipelineLog.info("MemoryReviewTask modelReq:\n{} \nmodelResp:\n{}", promptStr,
+                    response);
             processResponse(response, m);
         } else {
             log.debug("ChatLanguageModel not found for agent:{}", chatAgent.getId());

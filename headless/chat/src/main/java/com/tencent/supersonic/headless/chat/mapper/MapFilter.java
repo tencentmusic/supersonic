@@ -22,7 +22,7 @@ public class MapFilter {
         filterByDataSetId(chatQueryContext);
         filterByDetectWordLenLessThanOne(chatQueryContext);
         twoCharactersMustEqual(chatQueryContext);
-        switch (chatQueryContext.getQueryDataType()) {
+        switch (chatQueryContext.getRequest().getQueryDataType()) {
             case TAG:
                 filterByQueryDataType(chatQueryContext, element -> !(element.getIsTag() > 0));
                 break;
@@ -46,7 +46,7 @@ public class MapFilter {
     }
 
     public static void filterByDataSetId(ChatQueryContext chatQueryContext) {
-        Set<Long> dataSetIds = chatQueryContext.getDataSetIds();
+        Set<Long> dataSetIds = chatQueryContext.getRequest().getDataSetIds();
         if (CollectionUtils.isEmpty(dataSetIds)) {
             return;
         }
@@ -77,9 +77,9 @@ public class MapFilter {
         for (Map.Entry<Long, List<SchemaElementMatch>> entry : dataSetElementMatches.entrySet()) {
             List<SchemaElementMatch> value = entry.getValue();
             if (!CollectionUtils.isEmpty(value)) {
-                value.removeIf(schemaElementMatch -> StringUtils
-                        .length(schemaElementMatch.getDetectWord()) <= 2
-                        && schemaElementMatch.getSimilarity() < 1);
+                value.removeIf(
+                        schemaElementMatch -> StringUtils.length(schemaElementMatch.getWord()) <= 2
+                                && schemaElementMatch.getSimilarity() < 1);
             }
         }
     }
@@ -94,9 +94,8 @@ public class MapFilter {
                 SchemaElement element = schemaElementMatch.getElement();
                 SchemaElementType type = element.getType();
 
-                boolean isEntityOrDatasetOrId = SchemaElementType.ENTITY.equals(type)
-                        || SchemaElementType.DATASET.equals(type)
-                        || SchemaElementType.ID.equals(type);
+                boolean isEntityOrDatasetOrId =
+                        SchemaElementType.DATASET.equals(type) || SchemaElementType.ID.equals(type);
 
                 return !isEntityOrDatasetOrId && needRemovePredicate.test(element);
             });

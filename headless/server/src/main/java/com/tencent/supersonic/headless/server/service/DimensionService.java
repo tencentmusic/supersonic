@@ -1,11 +1,12 @@
 package com.tencent.supersonic.headless.server.service;
 
 import com.github.pagehelper.PageInfo;
-import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.common.pojo.DataEvent;
+import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.common.pojo.enums.EventType;
 import com.tencent.supersonic.headless.api.pojo.DimValueMap;
 import com.tencent.supersonic.headless.api.pojo.MetaFilter;
+import com.tencent.supersonic.headless.api.pojo.request.DimValueAliasReq;
 import com.tencent.supersonic.headless.api.pojo.request.DimensionReq;
 import com.tencent.supersonic.headless.api.pojo.request.MetaBatchReq;
 import com.tencent.supersonic.headless.api.pojo.request.PageDimensionReq;
@@ -47,4 +48,6 @@ public interface DimensionService {
     void sendDimensionEventBatch(List<Long> modelIds, EventType eventType);
 
     DataEvent getDataEvent();
+
+    Boolean updateDimValueAlias(DimValueAliasReq req, User user);
 }

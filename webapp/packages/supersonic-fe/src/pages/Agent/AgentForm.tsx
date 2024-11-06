@@ -135,7 +135,7 @@ const AgentForm: React.FC<Props> = ({ editAgent, onSaveAgent, onCreateToolBtnCli
 
   const layout = {
     labelCol: { span: 8 },
-    wrapperCol: { span: 12 },
+    wrapperCol: { span: 16 },
   };
 
   const onOk = async () => {
@@ -187,10 +187,10 @@ const AgentForm: React.FC<Props> = ({ editAgent, onSaveAgent, onCreateToolBtnCli
           >
             <Input placeholder="请输入助理名称" />
           </FormItem>
-          <FormItem name="enableSearch" label="开启输入联想" valuePropName="checked">
+          <FormItem name="enableSearch" label="开启输入联想" valuePropName="checked" htmlFor="">
             <Switch />
           </FormItem>
-          <FormItem name="enableFeedback" label="开启用户确认" valuePropName="checked">
+          <FormItem name="enableFeedback" label="开启用户确认" valuePropName="checked" htmlFor="">
             <Switch />
           </FormItem>
           {/* <FormItem
@@ -208,6 +208,7 @@ const AgentForm: React.FC<Props> = ({ editAgent, onSaveAgent, onCreateToolBtnCli
             label="开启精简模式"
             tooltip="精简模式下不可调整查询条件、不显示调试信息、不显示可视化组件"
             valuePropName="checked"
+            htmlFor=""
           >
             <Switch />
           </FormItem>
@@ -218,6 +219,7 @@ const AgentForm: React.FC<Props> = ({ editAgent, onSaveAgent, onCreateToolBtnCli
             hidden={formData?.toolConfig?.simpleMode === true}
             tooltip="包含Schema映射、SQL生成每阶段的关键信息"
             valuePropName="checked"
+            htmlFor=""
           >
             <Switch />
           </FormItem>
@@ -275,7 +277,7 @@ const AgentForm: React.FC<Props> = ({ editAgent, onSaveAgent, onCreateToolBtnCli
           <Space style={{ alignItems: 'start' }}>
             {/* <Row> */}
             {/* <Col flex="400px"> */}
-            <div style={{ width: 400 }}>
+            <div style={{ width: 350 }}>
               {modelTypeOptions.map((item) => {
                 return (
                   <div
@@ -291,6 +293,7 @@ const AgentForm: React.FC<Props> = ({ editAgent, onSaveAgent, onCreateToolBtnCli
                       label={item.label}
                       valuePropName="checked"
                       tooltip={item.description}
+                      htmlFor=""
                     >
                       <Switch />
                     </FormItem>
@@ -300,7 +303,7 @@ const AgentForm: React.FC<Props> = ({ editAgent, onSaveAgent, onCreateToolBtnCli
             </div>
             {/* </Col>
             <Col flex="auto"> */}
-            <div style={{ width: 800 }}>
+            <div style={{ width: 900 }}>
               {modelTypeOptions.map((item) => {
                 return (
                   <div

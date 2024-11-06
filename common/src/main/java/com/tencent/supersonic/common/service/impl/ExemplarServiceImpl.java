@@ -70,8 +70,8 @@ public class ExemplarServiceImpl implements ExemplarService, CommandLineRunner {
                 RetrieveQuery.builder().queryTextsList(Lists.newArrayList(query)).build();
         List<RetrieveQueryResult> results =
                 embeddingService.retrieveQuery(collection, retrieveQuery, num);
-        results.stream().forEach(ret -> {
-            ret.getRetrieval().stream().forEach(r -> {
+        results.forEach(ret -> {
+            ret.getRetrieval().forEach(r -> {
                 exemplars.add(JsonUtil.mapToObject(r.getMetadata(), Text2SQLExemplar.class));
             });
         });

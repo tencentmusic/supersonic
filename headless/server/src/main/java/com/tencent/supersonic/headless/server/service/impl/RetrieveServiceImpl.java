@@ -1,6 +1,6 @@
 package com.tencent.supersonic.headless.server.service.impl;
 
-import com.tencent.supersonic.auth.api.authentication.pojo.User;
+import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.common.pojo.enums.DictWordType;
 import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
@@ -24,7 +24,6 @@ import com.tencent.supersonic.headless.server.service.RetrieveService;
 import com.tencent.supersonic.headless.server.service.SchemaService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -75,8 +74,7 @@ public class RetrieveServiceImpl implements RetrieveService {
         log.debug("originals terms: {}", originals);
         Set<Long> dataSetIds = queryNLReq.getDataSetIds();
 
-        ChatQueryContext chatQueryContext = new ChatQueryContext();
-        BeanUtils.copyProperties(queryNLReq, chatQueryContext);
+        ChatQueryContext chatQueryContext = new ChatQueryContext(queryNLReq);
         chatQueryContext.setModelIdToDataSetIds(dataSetService.getModelIdToDataSetIds());
 
         Map<MatchText, List<HanlpMapResult>> regTextMap =
@@ -120,7 +118,7 @@ public class RetrieveServiceImpl implements RetrieveService {
         return searchResults.stream().limit(RESULT_SIZE).collect(Collectors.toList());
     }
 
-    private List<Long> getPossibleDataSets(QueryNLReq queryCtx, List<S2Term> originals,
+    private List<Long> getPossibleDataSets(QueryNLReq queryReq, List<S2Term> originals,
             Set<Long> dataSetIds) {
         if (CollectionUtils.isNotEmpty(dataSetIds)) {
             return new ArrayList<>(dataSetIds);
@@ -128,8 +126,8 @@ public class RetrieveServiceImpl implements RetrieveService {
 
         List<Long> possibleDataSets = NatureHelper.selectPossibleDataSets(originals);
         if (possibleDataSets.isEmpty()) {
-            if (Objects.nonNull(queryCtx.getContextParseInfo())) {
-                possibleDataSets.add(queryCtx.getContextParseInfo().getDataSetId());
+            if (Objects.nonNull(queryReq.getContextParseInfo())) {
+                possibleDataSets.add(queryReq.getContextParseInfo().getDataSetId());
             }
         }
 
@@ -149,11 +147,6 @@ public class RetrieveServiceImpl implements RetrieveService {
 
         Long dataSetId = NatureHelper.getDataSetId(nature);
         SchemaElementType schemaElementType = NatureHelper.convertToElementType(nature);
-
-        // Skip if the schema element type is ENTITY
-        if (SchemaElementType.ENTITY.equals(schemaElementType)) {
-            return searchResults;
-        }
 
         // Create a base search result
         SearchResult baseSearchResult = createBaseSearchResult(dataSetId, dataSetIdToName,
@@ -183,7 +176,8 @@ public class RetrieveServiceImpl implements RetrieveService {
 
     private SearchResult createBaseSearchResult(Long dataSetId, Map<Long, String> dataSetIdToName,
             MatchText matchText, String wordName, SchemaElementType schemaElementType) {
-        return SearchResult.builder().modelId(dataSetId).modelName(dataSetIdToName.get(dataSetId))
+        return SearchResult.builder().dataSetId(dataSetId)
+                .dataSetName(dataSetIdToName.get(dataSetId))
                 .recommend(matchText.getRegText() + wordName).schemaElementType(schemaElementType)
                 .subRecommend(wordName).build();
     }
@@ -208,7 +202,7 @@ public class RetrieveServiceImpl implements RetrieveService {
 
     private SearchResult createMetricSearchResult(Long modelId, Map<Long, String> modelToName,
             MatchText matchText, String wordName, String metric) {
-        return SearchResult.builder().modelId(modelId).modelName(modelToName.get(modelId))
+        return SearchResult.builder().dataSetId(modelId).dataSetName(modelToName.get(modelId))
                 .recommend(matchText.getRegText() + wordName + DictWordType.SPACE + metric)
                 .subRecommend(wordName + DictWordType.SPACE + metric).isComplete(false).build();
     }
@@ -283,7 +277,7 @@ public class RetrieveServiceImpl implements RetrieveService {
                 String subRecommendText = hanlpMapResult.getName();
 
                 SearchResult searchResult =
-                        SearchResult.builder().modelId(dataSetId).modelName(modelName)
+                        SearchResult.builder().dataSetId(dataSetId).dataSetName(modelName)
                                 .recommend(recommendText).subRecommend(subRecommendText)
                                 .schemaElementType(schemaElementType).build();
 

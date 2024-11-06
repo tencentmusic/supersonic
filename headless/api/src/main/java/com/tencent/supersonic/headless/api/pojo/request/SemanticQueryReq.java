@@ -50,12 +50,4 @@ public abstract class SemanticQueryReq {
     public Set<Long> getModelIdSet() {
         return modelIds;
     }
-
-    public boolean isNeedAuth() {
-        return needAuth;
-    }
-
-    public void setNeedAuth(boolean needAuth) {
-        this.needAuth = needAuth;
-    }
 }

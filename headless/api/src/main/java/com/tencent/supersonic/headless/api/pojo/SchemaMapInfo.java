@@ -2,16 +2,24 @@ package com.tencent.supersonic.headless.api.pojo;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.collect.Lists;
-import org.apache.commons.collections4.CollectionUtils;
+import lombok.Getter;
 
+import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class SchemaMapInfo {
+@Getter
+public class SchemaMapInfo implements Serializable {
 
-    private Map<Long, List<SchemaElementMatch>> dataSetElementMatches = new HashMap<>();
+    private final Map<Long, List<SchemaElementMatch>> dataSetElementMatches = new HashMap<>();
+
+    public boolean isEmpty() {
+        return dataSetElementMatches.keySet().isEmpty();
+    }
 
     public Set<Long> getMatchedDataSetInfos() {
         return dataSetElementMatches.keySet();
@@ -21,12 +29,25 @@ public class SchemaMapInfo {
         return dataSetElementMatches.getOrDefault(dataSet, Lists.newArrayList());
     }
 
-    public Map<Long, List<SchemaElementMatch>> getDataSetElementMatches() {
-        return dataSetElementMatches;
-    }
-
     public void setMatchedElements(Long dataSet, List<SchemaElementMatch> elementMatches) {
         dataSetElementMatches.put(dataSet, elementMatches);
+    }
+
+    public void addMatchedElements(SchemaMapInfo schemaMapInfo) {
+        for (Map.Entry<Long, List<SchemaElementMatch>> entry : schemaMapInfo.dataSetElementMatches
+                .entrySet()) {
+            Long dataSet = entry.getKey();
+            List<SchemaElementMatch> newMatches = entry.getValue();
+
+            if (dataSetElementMatches.containsKey(dataSet)) {
+                List<SchemaElementMatch> existingMatches = dataSetElementMatches.get(dataSet);
+                Set<SchemaElementMatch> mergedMatches = new HashSet<>(existingMatches);
+                mergedMatches.addAll(newMatches);
+                dataSetElementMatches.put(dataSet, new ArrayList<>(mergedMatches));
+            } else {
+                dataSetElementMatches.put(dataSet, new ArrayList<>(new HashSet<>(newMatches)));
+            }
+        }
     }
 
     @JsonIgnore
@@ -36,16 +57,11 @@ public class SchemaMapInfo {
             List<SchemaElementMatch> matchedElements = getMatchedElements(dataSetId);
             for (SchemaElementMatch schemaElementMatch : matchedElements) {
                 if (SchemaElementType.TERM.equals(schemaElementMatch.getElement().getType())
-                        && schemaElementMatch.isFullMatched()
-                        && !schemaElementMatch.getElement().isDescriptionMapped()) {
+                        && schemaElementMatch.isFullMatched()) {
                     termElements.add(schemaElementMatch.getElement());
                 }
             }
         }
         return termElements;
-    }
-
-    public boolean needContinueMap() {
-        return CollectionUtils.isNotEmpty(getTermDescriptionToMap());
     }
 }

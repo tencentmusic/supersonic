@@ -1,8 +1,8 @@
 package com.tencent.supersonic.util;
 
-import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.chat.api.pojo.request.ChatParseReq;
 import com.tencent.supersonic.common.pojo.DateConf;
+import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.common.pojo.enums.DatePeriodEnum;
 import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
 import com.tencent.supersonic.headless.api.pojo.SchemaElement;
@@ -40,6 +40,7 @@ public class DataUtils {
     public static ChatParseReq getChatParseReq(Integer id, String query, boolean enableLLM) {
         ChatParseReq chatParseReq = new ChatParseReq();
         chatParseReq.setQueryText(query);
+        chatParseReq.setAgentId(metricAgentId);
         chatParseReq.setChatId(id);
         chatParseReq.setUser(user_test);
         chatParseReq.setDisableLLM(!enableLLM);

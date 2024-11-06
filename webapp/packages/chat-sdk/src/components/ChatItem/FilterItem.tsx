@@ -14,6 +14,7 @@ type Props = {
   index: number;
   chatContext: ChatContextType;
   agentId?: number;
+  disabled?: boolean;
   entityAlias?: string;
   integrateSystem?: string;
   onFiltersChange: (filters: FilterItemType[]) => void;
@@ -21,6 +22,7 @@ type Props = {
 };
 
 const FilterItem: React.FC<Props> = ({
+  disabled = false,
   modelId,
   filters,
   filter,
@@ -151,6 +153,7 @@ const FilterItem: React.FC<Props> = ({
               { label: '小于等于', value: '<=' },
               { label: '小于', value: '<' },
             ]}
+            disabled={disabled}
             className={`${prefixCls}-operator-control`}
             value={filter.operator}
             onChange={onOperatorChange}
@@ -159,6 +162,7 @@ const FilterItem: React.FC<Props> = ({
       {(typeof filter.value === 'number' || filter.value === null) &&
       !filter.bizName?.includes('_id') ? (
         <InputNumber
+          disabled={disabled}
           className={`${prefixCls}-input-number-control`}
           value={filter.value}
           onChange={onChange}
@@ -168,6 +172,7 @@ const FilterItem: React.FC<Props> = ({
       ) : (typeof filter.value === 'string' || isArray(filter.value)) &&
         !filter.bizName?.includes('_id') ? (
         <Select
+          disabled={disabled}
           value={filter.value}
           options={options.filter(option => option.value !== '' && option.value !== null)}
           className={`${prefixCls}-select-control`}

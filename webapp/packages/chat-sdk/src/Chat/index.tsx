@@ -200,6 +200,7 @@ const Chat: ForwardRefRenderFunction<any, Props> = (
   const convertHistoryMsg = (list: HistoryMsgItemType[]) => {
     return list.map((item: HistoryMsgItemType) => ({
       id: item.questionId,
+      questionId: item.questionId,
       type: MessageTypeEnum.QUESTION,
       msg: item.queryText,
       parseInfos: item.parseInfos,
@@ -405,6 +406,7 @@ const Chat: ForwardRefRenderFunction<any, Props> = (
                             <div className={styles.chatHeaderTip}>{currentAgent.description}</div>
                             <Tooltip title="精简模式下，问答结果将以文本形式输出">
                               <Switch
+                                key={currentAgent.id}
                                 style={{ position: 'relative', top: -1 }}
                                 size="small"
                                 value={isSimpleMode}

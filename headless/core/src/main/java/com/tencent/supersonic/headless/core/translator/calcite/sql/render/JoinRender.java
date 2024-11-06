@@ -138,6 +138,8 @@ public class JoinRender extends Renderer {
                 }
             }
         }
+        filterView.setMeasure(SemanticNode.deduplicateNode(filterView.getMeasure()));
+        filterView.setDimension(SemanticNode.deduplicateNode(filterView.getDimension()));
         super.tableView = filterView;
     }
 

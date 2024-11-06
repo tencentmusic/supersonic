@@ -26,7 +26,9 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-/** MetricRecommendProcessor fills recommended metrics based on embedding similarity. */
+/**
+ * MetricRecommendProcessor fills recommended metrics based on embedding similarity.
+ **/
 public class MetricRecommendProcessor implements ExecuteResultProcessor {
 
     private static final int METRIC_RECOMMEND_SIZE = 5;

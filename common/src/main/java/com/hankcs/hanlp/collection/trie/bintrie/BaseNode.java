@@ -20,16 +20,26 @@ import java.util.Set;
 @Slf4j
 public abstract class BaseNode<V> implements Comparable<BaseNode> {
 
-    /** 状态数组，方便读取的时候用 */
+    /**
+     * 状态数组，方便读取的时候用
+     */
     static final Status[] ARRAY_STATUS = Status.values();
 
-    /** 子节点 */
+    /**
+     * 子节点
+     */
     protected BaseNode[] child;
-    /** 节点状态 */
+    /**
+     * 节点状态
+     */
     protected Status status;
-    /** 节点代表的字符 */
+    /**
+     * 节点代表的字符
+     */
     protected char c;
-    /** 节点代表的值 */
+    /**
+     * 节点代表的值
+     */
     protected V value;
 
     protected String prefix = null;
@@ -228,13 +238,21 @@ public abstract class BaseNode<V> implements Comparable<BaseNode> {
     }
 
     public enum Status {
-        /** 未指定，用于删除词条 */
+        /**
+         * 未指定，用于删除词条
+         */
         UNDEFINED_0,
-        /** 不是词语的结尾 */
+        /**
+         * 不是词语的结尾
+         */
         NOT_WORD_1,
-        /** 是个词语的结尾，并且还可以继续 */
+        /**
+         * 是个词语的结尾，并且还可以继续
+         */
         WORD_MIDDLE_2,
-        /** 是个词语的结尾，并且没有继续 */
+        /**
+         * 是个词语的结尾，并且没有继续
+         */
         WORD_END_3,
     }
 
@@ -257,10 +275,10 @@ public abstract class BaseNode<V> implements Comparable<BaseNode> {
                 + ", value=" + value + ", prefix='" + prefix + '\'' + '}';
     }
 
-    public void walkNode(Set<Map.Entry<String, V>> entrySet) {
+    public void walkNode(Set<Map.Entry<String, V>> entrySet, Set<Long> modelIdOrDataSetIds) {
         if (status == Status.WORD_MIDDLE_2 || status == Status.WORD_END_3) {
             log.debug("walkNode before:{}", value.toString());
-            List natures = new LoadRemoveService().removeNatures((List) value);
+            List natures = new LoadRemoveService().removeNatures((List) value, modelIdOrDataSetIds);
             String name = this.prefix != null ? this.prefix + c : "" + c;
             log.debug("walkNode name:{},after:{},natures:{}", name, (List) value, natures);
             entrySet.add(new TrieEntry(name, (V) natures));
@@ -273,7 +291,8 @@ public abstract class BaseNode<V> implements Comparable<BaseNode> {
      * @param sb
      * @param entrySet
      */
-    public void walkLimit(StringBuilder sb, Set<Map.Entry<String, V>> entrySet) {
+    public void walkLimit(StringBuilder sb, Set<Map.Entry<String, V>> entrySet,
+            Set<Long> modelIdOrDataSetIds) {
         Queue<BaseNode> queue = new ArrayDeque<>();
         this.prefix = sb.toString();
         queue.add(this);
@@ -282,7 +301,7 @@ public abstract class BaseNode<V> implements Comparable<BaseNode> {
             if (root == null) {
                 continue;
             }
-            root.walkNode(entrySet);
+            root.walkNode(entrySet, modelIdOrDataSetIds);
             if (root.child == null) {
                 continue;
             }

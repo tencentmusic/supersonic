@@ -27,7 +27,6 @@ public abstract class BaseMapper implements SchemaMapper {
 
     @Override
     public void map(ChatQueryContext chatQueryContext) {
-
         String simpleName = this.getClass().getSimpleName();
         long startTime = System.currentTimeMillis();
         log.debug("before {},mapInfo:{}", simpleName,
@@ -114,14 +113,13 @@ public abstract class BaseMapper implements SchemaMapper {
         return element.getAlias();
     }
 
-    public <T> List<T> getMatches(ChatQueryContext chatQueryContext,
-            BaseMatchStrategy matchStrategy) {
-        String queryText = chatQueryContext.getQueryText();
+    public <T> List<T> getMatches(ChatQueryContext chatQueryContext, MatchStrategy matchStrategy) {
+        String queryText = chatQueryContext.getRequest().getQueryText();
         List<S2Term> terms =
                 HanlpHelper.getTerms(queryText, chatQueryContext.getModelIdToDataSetIds());
-        terms = HanlpHelper.getTerms(terms, chatQueryContext.getDataSetIds());
-        Map<MatchText, List<T>> matchResult =
-                matchStrategy.match(chatQueryContext, terms, chatQueryContext.getDataSetIds());
+        terms = HanlpHelper.getTerms(terms, chatQueryContext.getRequest().getDataSetIds());
+        Map<MatchText, List<T>> matchResult = matchStrategy.match(chatQueryContext, terms,
+                chatQueryContext.getRequest().getDataSetIds());
         List<T> matches = new ArrayList<>();
         if (Objects.isNull(matchResult)) {
             return matches;

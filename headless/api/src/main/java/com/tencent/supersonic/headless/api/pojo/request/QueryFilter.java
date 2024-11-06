@@ -5,9 +5,11 @@ import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
 import lombok.Data;
 import lombok.ToString;
 
+import java.io.Serializable;
+
 @Data
 @ToString(callSuper = true)
-public class QueryFilter {
+public class QueryFilter implements Serializable {
 
     private String bizName;
 

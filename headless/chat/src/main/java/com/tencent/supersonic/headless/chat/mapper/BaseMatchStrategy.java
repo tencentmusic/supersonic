@@ -21,7 +21,7 @@ public abstract class BaseMatchStrategy<T extends MapResult> implements MatchStr
     @Override
     public Map<MatchText, List<T>> match(ChatQueryContext chatQueryContext, List<S2Term> terms,
             Set<Long> detectDataSetIds) {
-        String text = chatQueryContext.getQueryText();
+        String text = chatQueryContext.getRequest().getQueryText();
         if (Objects.isNull(terms) || StringUtils.isEmpty(text)) {
             return null;
         }
@@ -64,6 +64,9 @@ public abstract class BaseMatchStrategy<T extends MapResult> implements MatchStr
     }
 
     public double getThreshold(Double threshold, Double minThreshold, MapModeEnum mapModeEnum) {
+        if (MapModeEnum.STRICT.equals(mapModeEnum)) {
+            return 1.0d;
+        }
         double decreaseAmount = (threshold - minThreshold) / 4;
         double divideThreshold = threshold - mapModeEnum.threshold * decreaseAmount;
         return divideThreshold >= minThreshold ? divideThreshold : minThreshold;

@@ -12,6 +12,7 @@ import com.tencent.supersonic.common.pojo.enums.DatePeriodEnum;
 import com.tencent.supersonic.common.pojo.enums.TypeEnums;
 import com.tencent.supersonic.common.util.DateModeUtils;
 import com.tencent.supersonic.common.util.SqlFilterUtils;
+import com.tencent.supersonic.headless.api.pojo.Identify;
 import com.tencent.supersonic.headless.api.pojo.ItemDateFilter;
 import com.tencent.supersonic.headless.api.pojo.MetaFilter;
 import com.tencent.supersonic.headless.api.pojo.SchemaItem;
@@ -19,6 +20,7 @@ import com.tencent.supersonic.headless.api.pojo.request.QuerySqlReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
 import com.tencent.supersonic.headless.api.pojo.response.DimensionResp;
 import com.tencent.supersonic.headless.api.pojo.response.MetricResp;
+import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticSchemaResp;
 import com.tencent.supersonic.headless.server.service.SchemaService;
 import lombok.extern.slf4j.Slf4j;
@@ -143,6 +145,37 @@ public class QueryStructUtils {
         return Lists.newArrayList();
     }
 
+    private Set<Long> getModelIdsByIdentifiesFromSql(QuerySqlReq querySqlReq,
+            SemanticSchemaResp semanticSchemaResp) {
+        Set<String> resNameSet = getResName(querySqlReq);
+        Set<Long> modelIds = new HashSet<>();
+
+        if (semanticSchemaResp == null) {
+            return modelIds;
+        }
+        if (CollectionUtils.isEmpty(semanticSchemaResp.getModelResps())) {
+            return modelIds;
+        }
+        for (ModelResp modelResp : semanticSchemaResp.getModelResps()) {
+            if (modelHasMatchingIdentifier(modelResp, resNameSet)) {
+                modelIds.add(modelResp.getId());
+            }
+        }
+        return modelIds;
+    }
+
+    private boolean modelHasMatchingIdentifier(ModelResp modelResp, Set<String> resNameSet) {
+        if (modelResp.getModelDetail() == null) {
+            return false;
+        }
+        List<Identify> identifiers = modelResp.getModelDetail().getIdentifiers();
+        if (CollectionUtils.isEmpty(identifiers)) {
+            return false;
+        }
+        return identifiers.stream().anyMatch(identifier -> resNameSet.contains(identifier.getName())
+                || resNameSet.contains(identifier.getBizName()));
+    }
+
     private List<DimensionResp> getDimensionsFromSql(QuerySqlReq querySqlReq,
             SemanticSchemaResp semanticSchemaResp) {
         Set<String> resNameSet = getResName(querySqlReq);
@@ -162,6 +195,7 @@ public class QueryStructUtils {
         modelIds.addAll(
                 dimensions.stream().map(DimensionResp::getModelId).collect(Collectors.toList()));
         modelIds.addAll(metrics.stream().map(MetricResp::getModelId).collect(Collectors.toList()));
+        modelIds.addAll(getModelIdsByIdentifiesFromSql(querySqlReq, semanticSchemaResp));
         return modelIds;
     }
 

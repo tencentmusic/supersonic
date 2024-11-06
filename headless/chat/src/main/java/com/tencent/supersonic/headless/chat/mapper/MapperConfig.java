@@ -15,7 +15,7 @@ public class MapperConfig extends ParameterConfig {
                     "number", "Mapper相关配置");
 
     public static final Parameter MAPPER_NAME_THRESHOLD =
-            new Parameter("s2.mapper.name.threshold", "0.5", "指标名、维度名文本相似度阈值",
+            new Parameter("s2.mapper.name.threshold", "0.3", "指标名、维度名文本相似度阈值",
                     "文本片段和匹配到的指标、维度名计算出来的编辑距离阈值, 若超出该阈值, 则舍弃", "number", "Mapper相关配置");
 
     public static final Parameter MAPPER_NAME_THRESHOLD_MIN =
@@ -53,10 +53,6 @@ public class MapperConfig extends ParameterConfig {
     public static final Parameter EMBEDDING_MAPPER_THRESHOLD =
             new Parameter("s2.mapper.embedding.threshold", "0.98", "向量召回相似度阈值", "相似度小于该阈值的则舍弃",
                     "number", "Mapper相关配置");
-
-    public static final Parameter EMBEDDING_MAPPER_THRESHOLD_MIN =
-            new Parameter("s2.mapper.embedding.min.threshold", "0.9", "向量召回最小相似度阈值",
-                    "向量召回相似度阈值在动态调整中的最低值", "number", "Mapper相关配置");
 
     public static final Parameter EMBEDDING_MAPPER_ROUND_NUMBER =
             new Parameter("s2.mapper.embedding.round.number", "10", "向量召回最小相似度阈值",

@@ -65,6 +65,30 @@ const BatchCtrlDropDownButton: FC<BatchCtrlDropDownButtonProps> = ({
       icon: <FormOutlined />,
       disabled: disabledList?.includes('batchSensitiveLevel'),
     },
+    batchDimensionValueBlackList: {
+      key: 'batchDimensionValueBlackList',
+      label: '批量导入黑名单',
+      icon: <FormOutlined />,
+      disabled: disabledList?.includes('batchDimensionValueBlackList'),
+    },
+    batchDimensionValueWhiteList: {
+      key: 'batchDimensionValueWhiteList',
+      label: '批量导入白名单',
+      icon: <FormOutlined />,
+      disabled: disabledList?.includes('batchDimensionValueWhiteList'),
+    },
+    batchRemoveDimensionValueBlackList: {
+      key: 'batchRemoveDimensionValueBlackList',
+      label: '批量移除黑名单',
+      icon: <DeleteOutlined />,
+      disabled: disabledList?.includes('batchRemoveDimensionValueBlackList'),
+    },
+    batchRemoveDimensionValueWhiteList: {
+      key: 'batchRemoveDimensionValueWhiteList',
+      label: '批量移除白名单',
+      icon: <DeleteOutlined />,
+      disabled: disabledList?.includes('batchRemoveDimensionValueWhiteList'),
+    },
   };
 
   const extenderButtonList: any[] = extenderList.reduce((list: any[], key) => {

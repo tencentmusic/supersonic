@@ -32,7 +32,7 @@ public class KeywordMapper extends BaseMapper {
 
     @Override
     public void doMap(ChatQueryContext chatQueryContext) {
-        String queryText = chatQueryContext.getQueryText();
+        String queryText = chatQueryContext.getRequest().getQueryText();
         // 1.hanlpDict Match
         List<S2Term> terms =
                 HanlpHelper.getTerms(queryText, chatQueryContext.getModelIdToDataSetIds());

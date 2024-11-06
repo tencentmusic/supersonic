@@ -48,9 +48,9 @@ public class SqlExecutor implements ChatQueryExecutor {
                         .agentId(executeContext.getAgent().getId()).status(MemoryStatus.PENDING)
                         .question(exemplar.getQuestion()).sideInfo(exemplar.getSideInfo())
                         .dbSchema(exemplar.getDbSchema()).s2sql(exemplar.getSql())
-                        .createdBy(executeContext.getUser().getName())
-                        .updatedBy(executeContext.getUser().getName()).createdAt(new Date())
-                        .build());
+                        .createdBy(executeContext.getRequest().getUser().getName())
+                        .updatedBy(executeContext.getRequest().getUser().getName())
+                        .createdAt(new Date()).build());
             }
         }
 
@@ -62,7 +62,8 @@ public class SqlExecutor implements ChatQueryExecutor {
         SemanticLayerService semanticLayer = ContextUtils.getBean(SemanticLayerService.class);
         ChatContextService chatContextService = ContextUtils.getBean(ChatContextService.class);
 
-        ChatContext chatCtx = chatContextService.getOrCreateContext(executeContext.getChatId());
+        ChatContext chatCtx =
+                chatContextService.getOrCreateContext(executeContext.getRequest().getChatId());
         SemanticParseInfo parseInfo = executeContext.getParseInfo();
         if (Objects.isNull(parseInfo.getSqlInfo())
                 || StringUtils.isBlank(parseInfo.getSqlInfo().getCorrectedS2SQL())) {
@@ -79,7 +80,8 @@ public class SqlExecutor implements ChatQueryExecutor {
         queryResult.setChatContext(parseInfo);
         queryResult.setQueryMode(parseInfo.getQueryMode());
         queryResult.setQueryTimeCost(System.currentTimeMillis() - startTime);
-        SemanticQueryResp queryResp = semanticLayer.queryByReq(sqlReq, executeContext.getUser());
+        SemanticQueryResp queryResp =
+                semanticLayer.queryByReq(sqlReq, executeContext.getRequest().getUser());
         if (queryResp != null) {
             queryResult.setQueryAuthorization(queryResp.getQueryAuthorization());
             queryResult.setQuerySql(queryResp.getSql());

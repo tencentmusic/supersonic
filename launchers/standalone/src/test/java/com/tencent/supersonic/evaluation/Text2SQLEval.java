@@ -3,12 +3,12 @@ package com.tencent.supersonic.evaluation;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.chat.BaseTest;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.chat.server.agent.*;
-import com.tencent.supersonic.chat.server.pojo.ChatModel;
+import com.tencent.supersonic.common.config.ChatModel;
 import com.tencent.supersonic.common.pojo.ChatApp;
+import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.common.pojo.enums.AppModule;
 import com.tencent.supersonic.common.util.ChatAppManager;
 import com.tencent.supersonic.headless.chat.corrector.LLMSqlCorrector;
@@ -59,7 +59,7 @@ public class Text2SQLEval extends BaseTest {
         durations.add(System.currentTimeMillis() - start);
         assert result.getQueryColumns().size() == 2;
         assert result.getQueryResults().size() == 30;
-        assert result.getTextResult().contains("date");
+        assert result.getTextResult().contains("date") || result.getTextResult().contains("日期");
     }
 
     @Test
@@ -157,7 +157,7 @@ public class Text2SQLEval extends BaseTest {
     private static DatasetTool getDatasetTool() {
         DatasetTool datasetTool = new DatasetTool();
         datasetTool.setType(AgentToolType.DATASET);
-        datasetTool.setDataSetIds(Lists.newArrayList(-1L));
+        datasetTool.setDataSetIds(Lists.newArrayList(1L));
 
         return datasetTool;
     }

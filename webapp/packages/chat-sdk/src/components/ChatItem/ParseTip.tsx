@@ -1,5 +1,4 @@
 import React, { ReactNode } from 'react';
-import { AGG_TYPE_MAP, PREFIX_CLS } from '../../common/constants';
 import { ChatContextType, DateInfoType, EntityInfoType, FilterItemType } from '../../common/type';
 import { Button, DatePicker, Row, Col } from 'antd';
 import { CheckCircleFilled, CloseCircleFilled, ReloadOutlined } from '@ant-design/icons';
@@ -9,8 +8,8 @@ import MarkDown from '../ChatMsg/MarkDown';
 import classNames from 'classnames';
 import { isMobile } from '../../utils/utils';
 import dayjs, { Dayjs } from 'dayjs';
-import { ChatContextTypeQueryTypeEnum } from '../../common/constants';
 import quarterOfYear from 'dayjs/plugin/quarterOfYear';
+import { prefixCls, getTipNode } from './ParseTipUtils';
 
 import 'dayjs/locale/zh-cn';
 
@@ -40,12 +39,11 @@ type Props = {
   handlePresetClick: any;
 };
 
-const MAX_OPTION_VALUES_COUNT = 2;
-
 type RangeValue = [Dayjs, Dayjs];
 type RangeKeys = '近7日' | '近14日' | '近30日' | '本周' | '本月' | '上月' | '本季度' | '本年';
 
 const ParseTip: React.FC<Props> = ({
+  isSimpleMode = false,
   parseLoading,
   parseInfoOptions,
   parseTip,
@@ -57,7 +55,6 @@ const ParseTip: React.FC<Props> = ({
   integrateSystem,
   parseTimeCost,
   isDeveloper,
-  isSimpleMode,
   onSelectParseInfo,
   onSwitchEntity,
   onFiltersChange,
@@ -78,8 +75,6 @@ const ParseTip: React.FC<Props> = ({
     本季度: [dayjs().startOf('quarter'), dayjs().endOf('quarter')], // 使用 quarterOfYear 插件
     本年: [dayjs().startOf('year'), dayjs().endOf('year')],
   };
-
-  const prefixCls = `${PREFIX_CLS}-item`;
 
   const getNode = (tipTitle: ReactNode, tipNode?: ReactNode, failed?: boolean) => {
     return (
@@ -127,127 +122,20 @@ const ParseTip: React.FC<Props> = ({
     );
   }
 
-  if (parseInfoOptions.length === 0) {
+  if (isSimpleMode || parseInfoOptions.length === 0) {
     return null;
   }
 
   const {
     modelId,
-    dataSet,
-    dimensions,
-    metrics,
-    aggType,
     queryMode,
-    queryType,
     properties,
     entity,
-    elementMatches,
     nativeQuery,
     textInfo = '',
   } = currentParseInfo || {};
 
   const entityAlias = entity?.alias?.[0]?.split('.')?.[0];
-
-  const getTipNode = () => {
-    const dimensionItems = dimensions?.filter(item => item.type === 'DIMENSION');
-    const itemValueClass = `${prefixCls}-tip-item-value`;
-    const entityId = dimensionFilters?.length > 0 ? dimensionFilters[0].value : undefined;
-    const entityAlias = entity?.alias?.[0]?.split('.')?.[0];
-    const entityName = elementMatches?.find(item => item.element?.type === 'ID')?.element.name;
-
-    const { type: agentType, name: agentName } = properties || {};
-
-    const fields =
-      queryMode === 'TAG_DETAIL' ? dimensionItems?.concat(metrics || []) : dimensionItems;
-
-    return (
-      <div className={`${prefixCls}-tip-content`}>
-        {!!agentType && queryMode !== 'LLM_S2SQL' ? (
-          <div className={`${prefixCls}-tip-item`}>
-            将由{agentType === 'plugin' ? '插件' : '内置'}工具
-            <span className={itemValueClass}>{agentName}</span>来解答
-          </div>
-        ) : (
-          <>
-            {(queryMode?.includes('ENTITY') || queryMode === 'LLM_S2SQL') &&
-            typeof entityId === 'string' &&
-            !!entityAlias &&
-            !!entityName ? (
-              <div className={`${prefixCls}-tip-item`}>
-                <div className={`${prefixCls}-tip-item-name`}>{entityAlias}：</div>
-                <div className={itemValueClass}>{entityName}</div>
-              </div>
-            ) : (
-              <div className={`${prefixCls}-tip-item`}>
-                <div className={`${prefixCls}-tip-item-name`}>数据集：</div>
-                <div className={itemValueClass}>{dataSet?.name}</div>
-              </div>
-            )}
-            {(queryType === ChatContextTypeQueryTypeEnum.AGGREGATE ||
-              queryType === 'METRIC_TAG' ||
-              queryType === 'DETAIL') && (
-              <div className={`${prefixCls}-tip-item`}>
-                <div className={`${prefixCls}-tip-item-name`}>查询模式：</div>
-                <div className={itemValueClass}>
-                  {queryType === ChatContextTypeQueryTypeEnum.AGGREGATE ||
-                  queryType === 'METRIC_TAG'
-                    ? '聚合模式'
-                    : '明细模式'}
-                </div>
-              </div>
-            )}
-            {queryType !== 'DETAIL' &&
-              metrics &&
-              metrics.length > 0 &&
-              !dimensions?.some(item => item.bizName?.includes('_id')) && (
-                <div className={`${prefixCls}-tip-item`}>
-                  <div className={`${prefixCls}-tip-item-name`}>指标：</div>
-                  <div className={itemValueClass}>
-                    {queryType === ChatContextTypeQueryTypeEnum.AGGREGATE || queryType === 'ID'
-                      ? metrics[0].name
-                      : metrics.map(metric => metric.name).join('、')}
-                  </div>
-                </div>
-              )}
-            {['METRIC_GROUPBY', 'METRIC_ORDERBY', 'TAG_DETAIL', 'LLM_S2SQL'].includes(queryMode!) &&
-              fields &&
-              fields.length > 0 && (
-                <div className={`${prefixCls}-tip-item`}>
-                  <div className={`${prefixCls}-tip-item-name`}>
-                    {queryType === 'DETAIL' ? '查询字段' : '下钻维度'}：
-                  </div>
-                  <div className={itemValueClass}>
-                    {fields
-                      .slice(0, MAX_OPTION_VALUES_COUNT)
-                      .map(field => field.name)
-                      .join('、')}
-                    {fields.length > MAX_OPTION_VALUES_COUNT && '...'}
-                  </div>
-                </div>
-              )}
-            {queryMode !== 'TAG_ID' &&
-              !dimensions?.some(item => item.bizName?.includes('_id')) &&
-              entityInfo?.dimensions
-                ?.filter(dimension => dimension.value != null)
-                .map(dimension => (
-                  <div className={`${prefixCls}-tip-item`} key={dimension.itemId}>
-                    <div className={`${prefixCls}-tip-item-name`}>{dimension.name}：</div>
-                    <div className={itemValueClass}>{dimension.value}</div>
-                  </div>
-                ))}
-            {(queryMode === 'METRIC_ORDERBY' || queryMode === 'METRIC_MODEL') &&
-              aggType &&
-              aggType !== 'NONE' && (
-                <div className={`${prefixCls}-tip-item`}>
-                  <div className={`${prefixCls}-tip-item-name`}>聚合方式：</div>
-                  <div className={itemValueClass}>{AGG_TYPE_MAP[aggType]}</div>
-                </div>
-              )}
-          </>
-        )}
-      </div>
-    );
-  };
 
   const getFilterContent = (filters: any) => {
     const itemValueClass = `${prefixCls}-tip-item-value`;
@@ -329,7 +217,7 @@ const ParseTip: React.FC<Props> = ({
 
   const tipNode = (
     <div className={`${prefixCls}-tip`}>
-      {getTipNode()}
+      {getTipNode({ parseInfo: currentParseInfo, dimensionFilters, entityInfo })}
       {!(!!agentType && queryMode !== 'LLM_S2SQL') && getFiltersNode()}
     </div>
   );
@@ -341,27 +229,10 @@ const ParseTip: React.FC<Props> = ({
         {!!parseTimeCost && isDeveloper && (
           <span className={`${prefixCls}-title-tip`}>(耗时: {parseTimeCost}ms)</span>
         )}
-        {parseInfoOptions?.length > 1 ? '：' : ''}
       </div>
-      {!isSimpleMode && parseInfoOptions?.length > 1 && (
-        <div className={`${prefixCls}-content-options`}>
-          {parseInfoOptions.map((parseInfo, index) => (
-            <div
-              className={`${prefixCls}-content-option ${
-                parseInfo.id === currentParseInfo?.id ? `${prefixCls}-content-option-active` : ''
-              }`}
-              onClick={() => {
-                onSelectParseInfo(parseInfo);
-              }}
-              key={parseInfo.id}
-            >
-              解析{index + 1}
-            </div>
-          ))}
-        </div>
-      )}
     </div>,
-    isSimpleMode ? <MarkDown markdown={textInfo} /> : queryMode === 'PLAIN_TEXT' ? null : tipNode
+    // isSimpleMode ? <MarkDown markdown={textInfo} /> : queryMode === 'PLAIN_TEXT' ? null : tipNode
+    queryMode === 'PLAIN_TEXT' ? null : tipNode
   );
 };
 

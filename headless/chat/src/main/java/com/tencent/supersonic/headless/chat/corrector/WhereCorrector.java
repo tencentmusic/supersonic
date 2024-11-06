@@ -33,7 +33,7 @@ public class WhereCorrector extends BaseSemanticCorrector {
 
     protected void addQueryFilter(ChatQueryContext chatQueryContext,
             SemanticParseInfo semanticParseInfo) {
-        String queryFilter = getQueryFilter(chatQueryContext.getQueryFilters());
+        String queryFilter = getQueryFilter(chatQueryContext.getRequest().getQueryFilters());
         String correctS2SQL = semanticParseInfo.getSqlInfo().getCorrectedS2SQL();
 
         if (StringUtils.isNotEmpty(queryFilter)) {

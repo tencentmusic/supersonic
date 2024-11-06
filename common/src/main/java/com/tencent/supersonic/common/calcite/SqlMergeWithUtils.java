@@ -89,4 +89,18 @@ public class SqlMergeWithUtils {
         SqlPrettyWriter writer = new SqlPrettyWriter(config);
         return writer.format(resultNode);
     }
+
+    public static boolean hasWith(EngineType engineType, String sql) throws SqlParseException {
+        SqlParser.Config parserConfig = Configuration.getParserConfig(engineType);
+        SqlParser parser = SqlParser.create(sql, parserConfig);
+        SqlNode sqlNode = parser.parseQuery();
+        SqlNode sqlSelect = sqlNode;
+        if (sqlNode instanceof SqlOrderBy) {
+            SqlOrderBy sqlOrderBy = (SqlOrderBy) sqlNode;
+            sqlSelect = sqlOrderBy.query;
+        } else if (sqlNode instanceof SqlSelect) {
+            sqlSelect = (SqlSelect) sqlNode;
+        }
+        return sqlSelect instanceof SqlWith;
+    }
 }

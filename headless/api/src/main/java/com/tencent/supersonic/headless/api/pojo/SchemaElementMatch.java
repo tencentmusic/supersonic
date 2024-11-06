@@ -6,19 +6,21 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
+import java.io.Serializable;
+
 @Data
 @ToString
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class SchemaElementMatch {
-    SchemaElement element;
-    double offset;
-    double similarity;
-    String detectWord;
-    String word;
-    Long frequency;
-    boolean isInherited;
+public class SchemaElementMatch implements Serializable {
+    private SchemaElement element;
+    private double offset;
+    private double similarity;
+    private String detectWord;
+    private String word;
+    private Long frequency;
+    private boolean isInherited;
 
     public boolean isFullMatched() {
         return 1.0 == similarity;

@@ -1,4 +1,8 @@
-import { formatByDecimalPlaces, getFormattedValue } from '../../../utils/utils';
+import {
+  formatByDecimalPlaces,
+  getFormattedValue,
+  formatByThousandSeperator,
+} from '../../../utils/utils';
 import { Table as AntTable } from 'antd';
 import { MsgDataType } from '../../../common/type';
 import { CLS_PREFIX } from '../../../common/constants';
@@ -17,7 +21,6 @@ const Table: React.FC<Props> = ({ data, size, loading, onApplyAuth }) => {
   const { entityInfo, queryColumns, queryResults } = data;
 
   const prefixCls = `${CLS_PREFIX}-table`;
-
   const tableColumns: any[] = queryColumns.map(
     ({ name, nameEn, showType, dataFormatType, dataFormat, authorized }) => {
       return {
@@ -47,7 +50,8 @@ const Table: React.FC<Props> = ({ data, size, loading, onApplyAuth }) => {
           if (showType === 'NUMBER') {
             return (
               <div className={`${prefixCls}-formatted-value`}>
-                {getFormattedValue(value as number)}
+                {/* {getFormattedValue(value as number)} */}
+                {formatByThousandSeperator(value)}
               </div>
             );
           }

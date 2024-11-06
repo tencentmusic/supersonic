@@ -2,8 +2,8 @@ package com.tencent.supersonic.headless.server.utils;
 
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
-import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.common.pojo.DimensionConstants;
+import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.common.pojo.enums.StatusEnum;
 import com.tencent.supersonic.common.util.BeanMapper;
 import com.tencent.supersonic.common.util.JsonUtil;
@@ -152,7 +152,7 @@ public class ModelConverter {
         dimensionReq.setSemanticType(SemanticType.CATEGORY.name());
         dimensionReq.setModelId(modelDO.getId());
         dimensionReq.setExpr(identify.getBizName());
-        dimensionReq.setType(DimensionType.identify.name());
+        dimensionReq.setType(DimensionType.fromIdentify(identify.getType()).name());
         return dimensionReq;
     }
 

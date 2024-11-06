@@ -32,3 +32,13 @@ s2:
       http:
         header:
           key: Authorization
+
+  mapper:
+    name:
+      threshold: 0.30
+      min:
+        threshold:value: 0.25
+    value:
+      threshold: 0.5
+      min:
+        threshold: 0.3

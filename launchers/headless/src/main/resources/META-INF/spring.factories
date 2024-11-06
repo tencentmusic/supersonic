@@ -4,7 +4,6 @@ com.tencent.supersonic.headless.chat.mapper.SchemaMapper=\
     com.tencent.supersonic.headless.chat.mapper.EmbeddingMapper, \
     com.tencent.supersonic.headless.chat.mapper.KeywordMapper, \
     com.tencent.supersonic.headless.chat.mapper.QueryFilterMapper, \
-    com.tencent.supersonic.headless.chat.mapper.EntityMapper, \
     com.tencent.supersonic.headless.chat.mapper.TermDescMapper
 
 com.tencent.supersonic.headless.chat.parser.SemanticParser=\
@@ -13,7 +12,8 @@ com.tencent.supersonic.headless.chat.parser.SemanticParser=\
     com.tencent.supersonic.headless.chat.parser.QueryTypeParser
 
 com.tencent.supersonic.headless.chat.corrector.SemanticCorrector=\
-    com.tencent.supersonic.headless.chat.corrector.RuleSqlCorrector
+    com.tencent.supersonic.headless.chat.corrector.RuleSqlCorrector,\
+    com.tencent.supersonic.headless.chat.corrector.LLMSqlCorrector
 
 com.tencent.supersonic.headless.chat.knowledge.file.FileHandler=\
     com.tencent.supersonic.headless.chat.knowledge.file.FileHandlerImpl
@@ -45,14 +45,5 @@ com.tencent.supersonic.headless.core.cache.QueryCache=\
 
 ### headless-server SPIs
 
-com.tencent.supersonic.headless.server.processor.ResultProcessor=\
-    com.tencent.supersonic.headless.server.processor.ParseInfoProcessor,\
-    com.tencent.supersonic.headless.server.processor.EntityInfoProcessor
-
-### auth-authentication SPIs
-
-com.tencent.supersonic.auth.authentication.interceptor.AuthenticationInterceptor=\
-    com.tencent.supersonic.auth.authentication.interceptor.DefaultAuthenticationInterceptor
-
-com.tencent.supersonic.auth.api.authentication.adaptor.UserAdaptor=\
-    com.tencent.supersonic.auth.authentication.adaptor.DefaultUserAdaptor
+com.tencent.supersonic.headless.server.modeller.SemanticModeller=\
+    com.tencent.supersonic.headless.server.modeller.RuleSemanticModeller

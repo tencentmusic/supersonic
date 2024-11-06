@@ -20,17 +20,7 @@ import net.sf.jsqlparser.expression.operators.relational.NotEqualsTo;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
-import net.sf.jsqlparser.statement.select.FromItem;
-import net.sf.jsqlparser.statement.select.GroupByElement;
-import net.sf.jsqlparser.statement.select.Join;
-import net.sf.jsqlparser.statement.select.OrderByElement;
-import net.sf.jsqlparser.statement.select.ParenthesedFromItem;
-import net.sf.jsqlparser.statement.select.ParenthesedSelect;
-import net.sf.jsqlparser.statement.select.PlainSelect;
-import net.sf.jsqlparser.statement.select.Select;
-import net.sf.jsqlparser.statement.select.SelectItem;
-import net.sf.jsqlparser.statement.select.SelectVisitorAdapter;
-import net.sf.jsqlparser.statement.select.SetOperationList;
+import net.sf.jsqlparser.statement.select.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.util.CollectionUtils;
@@ -154,36 +144,19 @@ public class SqlReplaceHelper {
     public static String replaceFields(String sql, Map<String, String> fieldNameMap,
             boolean exactReplace) {
         Select selectStatement = SqlSelectHelper.getSelect(sql);
-        List<PlainSelect> plainSelectList = SqlSelectHelper.getWithItem(selectStatement);
-        if (selectStatement instanceof PlainSelect) {
-            PlainSelect plainSelect = (PlainSelect) selectStatement;
-            plainSelectList.add(plainSelect);
-            getFromSelect(plainSelect.getFromItem(), plainSelectList);
-        } else if (selectStatement instanceof SetOperationList) {
-            SetOperationList setOperationList = (SetOperationList) selectStatement;
-            if (!CollectionUtils.isEmpty(setOperationList.getSelects())) {
-                setOperationList.getSelects().forEach(subSelectBody -> {
-                    PlainSelect subPlainSelect = (PlainSelect) subSelectBody;
-                    plainSelectList.add(subPlainSelect);
-                    getFromSelect(subPlainSelect.getFromItem(), plainSelectList);
-                });
+        Set<Select> plainSelectList = SqlSelectHelper.getAllSelect(selectStatement);
+        for (Select plainSelect : plainSelectList) {
+            if (plainSelect instanceof PlainSelect) {
+                replaceFieldsInPlainOneSelect(fieldNameMap, exactReplace,
+                        (PlainSelect) plainSelect);
             }
-            List<OrderByElement> orderByElements = setOperationList.getOrderByElements();
-            if (!CollectionUtils.isEmpty(orderByElements)) {
-                for (OrderByElement orderByElement : orderByElements) {
-                    orderByElement.accept(new OrderByReplaceVisitor(fieldNameMap, exactReplace));
-                }
+            if (plainSelect instanceof SetOperationList) {
+                replaceFieldsInSetOperationList(fieldNameMap, exactReplace,
+                        (SetOperationList) plainSelect);
             }
-        } else {
-            return sql;
-        }
-        List<PlainSelect> plainSelects = SqlSelectHelper.getPlainSelects(plainSelectList);
-        for (PlainSelect plainSelect : plainSelects) {
-            replaceFieldsInPlainOneSelect(fieldNameMap, exactReplace, plainSelect);
         }
         return selectStatement.toString();
     }
-
 
     private static void replaceFieldsInPlainOneSelect(Map<String, String> fieldNameMap,
             boolean exactReplace, PlainSelect plainSelect) {
@@ -236,22 +209,24 @@ public class SqlReplaceHelper {
         List<Join> joins = plainSelect.getJoins();
         if (!CollectionUtils.isEmpty(joins)) {
             for (Join join : joins) {
-                if (!CollectionUtils.isEmpty(join.getOnExpressions())) {
-                    join.getOnExpressions().stream().forEach(onExpression -> {
-                        onExpression.accept(visitor);
-                    });
-                }
-                if (!(join.getRightItem() instanceof ParenthesedSelect)) {
+                if (CollectionUtils.isEmpty(join.getOnExpressions())) {
                     continue;
+
                 }
-                ParenthesedSelect parenthesedSelect = (ParenthesedSelect) join.getRightItem();
-                List<PlainSelect> plainSelectList = new ArrayList<>();
-                plainSelectList.add(parenthesedSelect.getPlainSelect());
-                List<PlainSelect> subPlainSelects =
-                        SqlSelectHelper.getPlainSelects(plainSelectList);
-                for (PlainSelect subPlainSelect : subPlainSelects) {
-                    replaceFieldsInPlainOneSelect(fieldNameMap, exactReplace, subPlainSelect);
-                }
+                join.getOnExpressions().stream().forEach(onExpression -> {
+                    onExpression.accept(visitor);
+                });
+            }
+        }
+    }
+
+
+    private static void replaceFieldsInSetOperationList(Map<String, String> fieldNameMap,
+            boolean exactReplace, SetOperationList operationList) {
+        List<OrderByElement> orderByElements = operationList.getOrderByElements();
+        if (!CollectionUtils.isEmpty(orderByElements)) {
+            for (OrderByElement orderByElement : orderByElements) {
+                orderByElement.accept(new OrderByReplaceVisitor(fieldNameMap, exactReplace));
             }
         }
     }
@@ -635,6 +610,63 @@ public class SqlReplaceHelper {
         for (PlainSelect plainSelect : plainSelects) {
             replacePlainSelectByExpr(plainSelect, replace);
         }
+        return selectStatement.toString();
+    }
+
+    public static void replaceSqlByPositions(Select select) {
+        if (select instanceof PlainSelect) {
+            PlainSelect plainSelect = (PlainSelect) select;
+            if (plainSelect.getSelectItems() != null) {
+                Map<String, Integer> columnMap = new HashMap<>();
+                for (int i = 0; i < plainSelect.getSelectItems().size(); i++) {
+                    SelectItem selectItem = plainSelect.getSelectItems().get(i);
+                    if (selectItem.getAlias() != null) {
+                        columnMap.put(selectItem.getAlias().getName(), i + 1);
+                    } else if (selectItem.getExpression() instanceof Column) {
+                        Column column = (Column) selectItem.getExpression();
+                        columnMap.put(column.getColumnName(), i + 1);
+                    }
+                }
+                if (plainSelect.getGroupBy() != null) {
+                    ExpressionList groupByExpressionList =
+                            plainSelect.getGroupBy().getGroupByExpressionList();
+                    List<Expression> groupByExpressions = groupByExpressionList.getExpressions();
+                    for (Expression expression : groupByExpressions) {
+                        if (expression instanceof Column) {
+                            Column column = (Column) expression;
+                            if (columnMap.containsKey(column.getColumnName())) {
+                                column.setColumnName(
+                                        String.valueOf(columnMap.get(column.getColumnName())));
+                            }
+                        }
+                    }
+                }
+                if (plainSelect.getOrderByElements() != null) {
+                    for (OrderByElement orderByElement : plainSelect.getOrderByElements()) {
+                        if (orderByElement.getExpression() instanceof Column) {
+                            Column column = (Column) orderByElement.getExpression();
+                            if (columnMap.containsKey(column.getColumnName())) {
+                                orderByElement.setExpression(
+                                        new LongValue(columnMap.get(column.getColumnName())));
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        if (select instanceof ParenthesedSelect) {
+            ParenthesedSelect parenthesedSelect = (ParenthesedSelect) select;
+            replaceSqlByPositions(parenthesedSelect.getSelect());
+        }
+        if (select instanceof SetOperationList) {
+            SetOperationList setOperationList = (SetOperationList) select;
+            setOperationList.getSelects().forEach(s -> replaceSqlByPositions(s));
+        }
+    }
+
+    public static String replaceSqlByPositions(String sql) {
+        Select selectStatement = SqlSelectHelper.getSelect(sql);
+        replaceSqlByPositions(selectStatement);
         return selectStatement.toString();
     }
 

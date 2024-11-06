@@ -13,6 +13,7 @@ import com.tencent.supersonic.chat.server.plugin.event.PluginDelEvent;
 import com.tencent.supersonic.chat.server.plugin.event.PluginUpdateEvent;
 import com.tencent.supersonic.chat.server.pojo.ParseContext;
 import com.tencent.supersonic.chat.server.service.PluginService;
+import com.tencent.supersonic.chat.server.util.QueryReqConverter;
 import com.tencent.supersonic.common.config.EmbeddingConfig;
 import com.tencent.supersonic.common.service.EmbeddingService;
 import com.tencent.supersonic.common.util.ContextUtils;
@@ -20,6 +21,8 @@ import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementMatch;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
 import com.tencent.supersonic.headless.api.pojo.SchemaMapInfo;
+import com.tencent.supersonic.headless.api.pojo.request.QueryNLReq;
+import com.tencent.supersonic.headless.server.facade.service.ChatLayerService;
 import dev.langchain4j.data.segment.TextSegment;
 import dev.langchain4j.store.embedding.Retrieval;
 import dev.langchain4j.store.embedding.RetrieveQuery;
@@ -193,8 +196,10 @@ public class PluginManager {
     }
 
     public static Pair<Boolean, Set<Long>> resolve(ChatPlugin plugin, ParseContext parseContext) {
-        SchemaMapInfo schemaMapInfo = parseContext.getMapInfo();
-        Set<Long> pluginMatchedDataSet = getPluginMatchedDataSet(plugin, parseContext);
+        ChatLayerService chatLayerService = ContextUtils.getBean(ChatLayerService.class);
+        QueryNLReq queryNLReq = QueryReqConverter.buildQueryNLReq(parseContext);
+        SchemaMapInfo schemaMapInfo = chatLayerService.map(queryNLReq).getMapInfo();
+        Set<Long> pluginMatchedDataSet = getPluginMatchedDataSet(plugin, schemaMapInfo);
         if (CollectionUtils.isEmpty(pluginMatchedDataSet) && !plugin.isContainsAllDataSet()) {
             return Pair.of(false, Sets.newHashSet());
         }
@@ -260,8 +265,8 @@ public class PluginManager {
                 .collect(Collectors.toList());
     }
 
-    private static Set<Long> getPluginMatchedDataSet(ChatPlugin plugin, ParseContext parseContext) {
-        Set<Long> matchedDataSets = parseContext.getMapInfo().getMatchedDataSetInfos();
+    private static Set<Long> getPluginMatchedDataSet(ChatPlugin plugin, SchemaMapInfo mapInfo) {
+        Set<Long> matchedDataSets = mapInfo.getMatchedDataSetInfos();
         if (plugin.isContainsAllDataSet()) {
             return Sets.newHashSet(plugin.getDefaultMode());
         }

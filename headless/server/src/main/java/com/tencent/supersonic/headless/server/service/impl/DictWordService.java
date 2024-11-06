@@ -58,7 +58,6 @@ public class DictWordService {
 
         addWordsByType(DictWordType.DIMENSION, semanticSchema.getDimensions(), words);
         addWordsByType(DictWordType.METRIC, semanticSchema.getMetrics(), words);
-        addWordsByType(DictWordType.ENTITY, semanticSchema.getEntities(), words);
         addWordsByType(DictWordType.VALUE, semanticSchema.getDimensionValues(), words);
         addWordsByType(DictWordType.TERM, semanticSchema.getTerms(), words);
         return words;

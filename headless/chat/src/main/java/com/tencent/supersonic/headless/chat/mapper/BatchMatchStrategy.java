@@ -22,7 +22,7 @@ public abstract class BatchMatchStrategy<T extends MapResult> extends BaseMatchS
     public List<T> detect(ChatQueryContext chatQueryContext, List<S2Term> terms,
             Set<Long> detectDataSetIds) {
 
-        String text = chatQueryContext.getQueryText();
+        String text = chatQueryContext.getRequest().getQueryText();
         Set<String> detectSegments = new HashSet<>();
 
         int embeddingTextSize = Integer

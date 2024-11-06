@@ -40,13 +40,7 @@ import com.tencent.supersonic.headless.api.pojo.enums.IdentifyType;
 import com.tencent.supersonic.headless.api.pojo.enums.MetricDefineType;
 import com.tencent.supersonic.headless.api.pojo.enums.SemanticType;
 import com.tencent.supersonic.headless.api.pojo.enums.TagDefineType;
-import com.tencent.supersonic.headless.api.pojo.request.DataSetReq;
-import com.tencent.supersonic.headless.api.pojo.request.DimensionReq;
-import com.tencent.supersonic.headless.api.pojo.request.DomainReq;
-import com.tencent.supersonic.headless.api.pojo.request.MetricReq;
-import com.tencent.supersonic.headless.api.pojo.request.ModelReq;
-import com.tencent.supersonic.headless.api.pojo.request.TagObjectReq;
-import com.tencent.supersonic.headless.api.pojo.request.TermReq;
+import com.tencent.supersonic.headless.api.pojo.request.*;
 import com.tencent.supersonic.headless.api.pojo.response.DataSetResp;
 import com.tencent.supersonic.headless.api.pojo.response.DatabaseResp;
 import com.tencent.supersonic.headless.api.pojo.response.DimensionResp;
@@ -54,6 +48,7 @@ import com.tencent.supersonic.headless.api.pojo.response.DomainResp;
 import com.tencent.supersonic.headless.api.pojo.response.MetricResp;
 import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
 import com.tencent.supersonic.headless.api.pojo.response.TagObjectResp;
+import io.swagger.models.auth.In;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
@@ -90,6 +85,10 @@ public class S2VisitsDemo extends S2BaseDemo {
             DimensionResp userDimension = getDimension("user_name", userModel);
             updateMetric(stayTimeModel, departmentDimension, userDimension);
             updateMetric_pv(pvUvModel, departmentDimension, userDimension, metricPv);
+
+            // create dict conf for dimensions
+            createDictConf(departmentDimension);
+            createDictConf(userDimension);
 
             // create data set
             DataSetResp s2DataSet = addDataSet(s2Domain);
@@ -130,8 +129,7 @@ public class S2VisitsDemo extends S2BaseDemo {
     public void addSampleChats(Integer agentId) {
         Long chatId = chatManageService.addChat(defaultUser, "样例对话1", agentId);
         submitText(chatId.intValue(), agentId, "超音数 访问次数");
-        submitText(chatId.intValue(), agentId, "按部门统计");
-        submitText(chatId.intValue(), agentId, "查询近30天");
+        submitText(chatId.intValue(), agentId, "按部门统计近7天访问次数");
         submitText(chatId.intValue(), agentId, "alice 停留时长");
         submitText(chatId.intValue(), agentId, "访问次数最高的部门");
     }
@@ -225,7 +223,7 @@ public class S2VisitsDemo extends S2BaseDemo {
         modelReq.setAdminOrgs(Collections.emptyList());
         List<Identify> identifiers = new ArrayList<>();
         ModelDetail modelDetail = new ModelDetail();
-        identifiers.add(new Identify("用户名", IdentifyType.primary.name(), "user_name", 0));
+        identifiers.add(new Identify("用户名", IdentifyType.foreign.name(), "user_name", 0));
         modelDetail.setIdentifiers(identifiers);
 
         List<Dim> dimensions = new ArrayList<>();
@@ -269,7 +267,7 @@ public class S2VisitsDemo extends S2BaseDemo {
         modelReq.setAdminOrgs(Collections.emptyList());
         List<Identify> identifiers = new ArrayList<>();
         ModelDetail modelDetail = new ModelDetail();
-        identifiers.add(new Identify("用户", IdentifyType.primary.name(), "user_name", 0));
+        identifiers.add(new Identify("用户", IdentifyType.foreign.name(), "user_name", 0));
         modelDetail.setIdentifiers(identifiers);
 
         List<Dim> dimensions = new ArrayList<>();
@@ -344,6 +342,13 @@ public class S2VisitsDemo extends S2BaseDemo {
         dimensionReq.setExpr("page");
         dimensionReq.setDimValueMaps(Collections.emptyList());
         dimensionService.updateDimension(dimensionReq, defaultUser);
+    }
+
+    private void createDictConf(DimensionResp dimension) {
+        dictConfService.addDictConf(DictItemReq.builder().type(TypeEnums.DIMENSION)
+                .itemId(dimension.getId()).status(StatusEnum.ONLINE).build(), defaultUser);
+        dictTaskService.addDictTask(DictSingleTaskReq.builder().itemId(dimension.getId())
+                .type(TypeEnums.DIMENSION).build(), defaultUser);
     }
 
     public void updateMetric(ModelResp stayTimeModel, DimensionResp departmentDimension,

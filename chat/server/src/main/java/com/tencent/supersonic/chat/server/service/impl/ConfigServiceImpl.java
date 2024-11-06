@@ -1,14 +1,12 @@
 package com.tencent.supersonic.chat.server.service.impl;
 
 import com.google.common.collect.Lists;
-import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.chat.api.pojo.request.ChatAggConfigReq;
 import com.tencent.supersonic.chat.api.pojo.request.ChatConfigBaseReq;
 import com.tencent.supersonic.chat.api.pojo.request.ChatConfigEditReqReq;
 import com.tencent.supersonic.chat.api.pojo.request.ChatConfigFilter;
 import com.tencent.supersonic.chat.api.pojo.request.ChatDefaultConfigReq;
 import com.tencent.supersonic.chat.api.pojo.request.ChatDetailConfigReq;
-import com.tencent.supersonic.chat.api.pojo.request.Entity;
 import com.tencent.supersonic.chat.api.pojo.request.ItemNameVisibilityInfo;
 import com.tencent.supersonic.chat.api.pojo.request.ItemVisibility;
 import com.tencent.supersonic.chat.api.pojo.request.KnowledgeInfoReq;
@@ -17,12 +15,12 @@ import com.tencent.supersonic.chat.api.pojo.response.ChatConfigResp;
 import com.tencent.supersonic.chat.api.pojo.response.ChatConfigRichResp;
 import com.tencent.supersonic.chat.api.pojo.response.ChatDefaultRichConfigResp;
 import com.tencent.supersonic.chat.api.pojo.response.ChatDetailRichConfigResp;
-import com.tencent.supersonic.chat.api.pojo.response.EntityRichInfoResp;
 import com.tencent.supersonic.chat.api.pojo.response.ItemVisibilityInfo;
 import com.tencent.supersonic.chat.server.config.ChatConfig;
 import com.tencent.supersonic.chat.server.persistence.repository.ChatConfigRepository;
 import com.tencent.supersonic.chat.server.service.ConfigService;
 import com.tencent.supersonic.chat.server.util.ChatConfigHelper;
+import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.headless.api.pojo.DataSetSchema;
 import com.tencent.supersonic.headless.api.pojo.MetaFilter;
@@ -238,19 +236,6 @@ public class ConfigServiceImpl implements ConfigService {
                 chatDetailConfig.getChatDefaultConfig(), modelSchema, itemVisibilityInfo));
 
         return detailRichConfig;
-    }
-
-    private EntityRichInfoResp generateRichEntity(Entity entity, DataSetSchema modelSchema) {
-        EntityRichInfoResp entityRichInfo = new EntityRichInfoResp();
-        if (Objects.isNull(entity) || Objects.isNull(entity.getEntityId())) {
-            return entityRichInfo;
-        }
-        BeanUtils.copyProperties(entity, entityRichInfo);
-        Map<Long, SchemaElement> dimIdAndRespPair = modelSchema.getDimensions().stream().collect(
-                Collectors.toMap(SchemaElement::getId, Function.identity(), (k1, k2) -> k1));
-
-        entityRichInfo.setDimItem(dimIdAndRespPair.get(entity.getEntityId()));
-        return entityRichInfo;
     }
 
     private ChatAggRichConfigResp fillChatAggRichConfig(DataSetSchema modelSchema,

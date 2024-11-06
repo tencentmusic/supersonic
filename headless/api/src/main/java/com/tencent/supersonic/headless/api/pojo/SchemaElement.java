@@ -39,7 +39,6 @@ public class SchemaElement implements Serializable {
     private double order;
     private int isTag;
     private String description;
-    private boolean descriptionMapped;
     @Builder.Default
     private Map<String, Object> extInfo = new HashMap<>();
     private DimensionTimeTypeParams typeParams;
@@ -84,14 +83,14 @@ public class SchemaElement implements Serializable {
             return false;
         }
         Object o = extInfo.get(DimensionConstants.DIMENSION_TYPE);
-        DimensionType dimensionTYpe = null;
+        DimensionType dimensionType = null;
         if (o instanceof DimensionType) {
-            dimensionTYpe = (DimensionType) o;
+            dimensionType = (DimensionType) o;
         }
         if (o instanceof String) {
-            dimensionTYpe = DimensionType.valueOf((String) o);
+            dimensionType = DimensionType.valueOf((String) o);
         }
-        return DimensionType.isIdentity(dimensionTYpe);
+        return DimensionType.isPrimaryKey(dimensionType);
     }
 
     public String getTimeFormat() {

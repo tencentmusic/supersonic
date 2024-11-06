@@ -10,7 +10,6 @@ import TagObjectCreateForm from './TagObjectCreateForm';
 import styles from '../style.less';
 import { ISemantic } from '../../data';
 import { ColumnsConfig } from '../../components/TableColumnRender';
-import TagValueSettingModal from './TagValueSettingModal';
 
 type Props = {};
 
@@ -24,8 +23,6 @@ const TagObjectTable: React.FC<Props> = ({}) => {
 
   const [tableData, setTableData] = useState<ISemantic.ITagItem[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
-
-  const [tagValueSettingModalVisible, setTagValueSettingModalVisible] = useState<boolean>(false);
 
   const actionRef = useRef<ActionType>();
 
@@ -179,18 +176,6 @@ const TagObjectTable: React.FC<Props> = ({}) => {
           }}
           onCancel={() => {
             setCreateModalVisible(false);
-          }}
-        />
-      )}
-      {tagValueSettingModalVisible && (
-        <TagValueSettingModal
-          open={tagValueSettingModalVisible}
-          tagItem={tagItem}
-          onCancel={() => {
-            setTagValueSettingModalVisible(false);
-          }}
-          onSubmit={() => {
-            setTagValueSettingModalVisible(false);
           }}
         />
       )}

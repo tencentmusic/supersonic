@@ -45,7 +45,6 @@ const MessageContainer: React.FC<Props> = ({
   onSendMsg,
 }) => {
   const [triggerResize, setTriggerResize] = useState(false);
-
   const onResize = useCallback(() => {
     setTriggerResize(true);
     setTimeout(() => {
@@ -65,13 +64,13 @@ const MessageContainer: React.FC<Props> = ({
   }, [historyVisible, chatVisible]);
 
   const messageContainerClass = classNames(styles.messageContainer, { [styles.mobile]: isMobile });
-
   return (
     <div id={id} className={messageContainerClass}>
       <div className={styles.messageList}>
-        {messageList.map((msgItem: MessageItem) => {
+        {messageList.map((msgItem: MessageItem, index: number) => {
           const {
             id: msgId,
+            questionId,
             modelId,
             agentId,
             type,
@@ -96,6 +95,8 @@ const MessageContainer: React.FC<Props> = ({
                   <Text position="right" data={msg} />
                   {identityMsg && <Text position="left" data={identityMsg} />}
                   <ChatItem
+                    questionId={questionId}
+                    currentAgent={currentAgent}
                     isSimpleMode={isSimpleMode}
                     isDebugMode={isDebugMode}
                     msg={msgValue || msg || ''}
@@ -115,6 +116,7 @@ const MessageContainer: React.FC<Props> = ({
                     }}
                     onUpdateMessageScroll={updateMessageContainerScroll}
                     onSendMsg={onSendMsg}
+                    isLastMessage={index === messageList.length - 1}
                   />
                 </>
               )}

@@ -18,7 +18,7 @@ type Props = {
   onToggleHistoryVisible: () => void;
   onOpenAgents: () => void;
   onInputMsgChange: (value: string) => void;
-  onSendMsg: (msg: string, modelId?: number) => void;
+  onSendMsg: (msg: string, dataSetId?: number) => void;
   onAddConversation: (agent?: AgentType) => void;
   onSelectAgent: (agent: AgentType) => void;
   onOpenShowcase: () => void;
@@ -94,7 +94,7 @@ const ChatFooter: ForwardRefRenderFunction<any, Props> = (
   }, []);
 
   const getStepOptions = (recommends: any[]) => {
-    const data = groupByColumn(recommends, 'modelName');
+    const data = groupByColumn(recommends, 'dataSetName');
     return isMobile && recommends.length > 6
       ? Object.keys(data)
           .slice(0, 4)
@@ -110,12 +110,12 @@ const ChatFooter: ForwardRefRenderFunction<any, Props> = (
 
   const processMsg = (msg: string) => {
     let msgValue = msg;
-    let modelId: number | undefined;
+    let dataSetId: number | undefined;
     if (msg?.[0] === '/') {
       const agent = agentList.find(item => msg.includes(`/${item.name}`));
       msgValue = agent ? msg.replace(`/${agent.name}`, '') : msg;
     }
-    return { msgValue, modelId };
+    return { msgValue, dataSetId };
   };
 
   const debounceGetWordsFunc = useCallback(() => {
@@ -128,14 +128,13 @@ const ChatFooter: ForwardRefRenderFunction<any, Props> = (
       }
       fetchRef.current += 1;
       const fetchId = fetchRef.current;
-      const { msgValue, modelId } = processMsg(msg);
-      const res = await searchRecommend(msgValue.trim(), chatId, modelId, currentAgent?.id);
+      const { msgValue, dataSetId } = processMsg(msg);
+      const res = await searchRecommend(msgValue.trim(), chatId, dataSetId, currentAgent?.id);
       if (fetchId !== fetchRef.current) {
         return;
       }
       const recommends = msgValue ? res.data || [] : [];
       const stepOptionList = recommends.map((item: any) => item.subRecommend);
-
       if (stepOptionList.length > 0 && stepOptionList.every((item: any) => item !== null)) {
         setStepOptions(getStepOptions(recommends));
       } else {
@@ -203,12 +202,13 @@ const ChatFooter: ForwardRefRenderFunction<any, Props> = (
       .find(item =>
         Object.keys(stepOptions).length === 1
           ? item.recommend === value
-          : `${item.modelName || ''}${item.recommend}` === value
+          : `${item.dataSetName || ''}${item.recommend}` === value
       );
+
     if (option && isSelect) {
-      onSendMsg(option.recommend, Object.keys(stepOptions).length > 1 ? option.modelId : undefined);
+      onSendMsg(option.recommend, option.dataSetIds);
     } else {
-      onSendMsg(value.trim());
+      onSendMsg(value.trim(), option?.dataSetId);
     }
   };
 
@@ -255,14 +255,14 @@ const ChatFooter: ForwardRefRenderFunction<any, Props> = (
           let optionValue =
             Object.keys(stepOptions).length === 1
               ? option.recommend
-              : `${option.modelName || ''}${option.recommend}`;
+              : `${option.dataSetName || ''}${option.recommend}`;
           if (inputMsg[0] === '/') {
             const agent = agentList.find(item => inputMsg.includes(item.name));
             optionValue = agent ? `/${agent.name} ${option.recommend}` : optionValue;
           }
           return (
             <Option
-              key={`${option.recommend}${option.modelName ? `_${option.modelName}` : ''}`}
+              key={`${option.recommend}${option.dataSetName ? `_${option.dataSetName}` : ''}`}
               value={`${optionValue}${HOLDER_TAG}`}
               className={styles.searchOption}
             >
@@ -295,26 +295,28 @@ const ChatFooter: ForwardRefRenderFunction<any, Props> = (
 
   const fixWidthBug = () => {
     setTimeout(() => {
-      const dropdownDom = document.querySelector( '.' + styles.autoCompleteDropdown + ' .rc-virtual-list-holder-inner')
+      const dropdownDom = document.querySelector(
+        '.' + styles.autoCompleteDropdown + ' .rc-virtual-list-holder-inner'
+      );
 
       if (!dropdownDom) {
-        fixWidthBug()
-      }else{
+        fixWidthBug();
+      } else {
         // 获取popoverDom样式
-        const popoverDomStyle = window.getComputedStyle(dropdownDom)
+        const popoverDomStyle = window.getComputedStyle(dropdownDom);
         // 在获取popoverDom中增加样式 width: fit-content
-        dropdownDom.setAttribute('style', `${popoverDomStyle.cssText};width: fit-content`)
+        dropdownDom.setAttribute('style', `${popoverDomStyle.cssText};width: fit-content`);
         // 获取popoverDom的宽度
-        const popoverDomWidth = dropdownDom.clientWidth
+        const popoverDomWidth = dropdownDom.clientWidth;
         // 将popoverDom的宽度赋值给他的父元素
-        const offset = 20 // 预增加20px的宽度，预留空间给虚拟渲染出来的元素
-        dropdownDom.parentElement!.style.width = popoverDomWidth + offset + 'px'
+        const offset = 20; // 预增加20px的宽度，预留空间给虚拟渲染出来的元素
+        dropdownDom.parentElement!.style.width = popoverDomWidth + offset + 'px';
       }
-    })
-  }
+    });
+  };
 
   useEffect(() => {
-    if (modelOptionNodes.length || associateOptionNodes.length) fixWidthBug()
+    if (modelOptionNodes.length || associateOptionNodes.length) fixWidthBug();
   }, [modelOptionNodes.length, associateOptionNodes.length]);
 
   return (

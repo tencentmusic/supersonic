@@ -4,6 +4,15 @@
 - "Breaking Changes" describes any changes that may break existing functionality or cause
   compatibility issues with previous versions.
 
+## SuperSonic [0.9.8] - 2024-11-01
+- Add LLM management module to reuse connection across agents.
+- Add ChatAPP configuration sub-module in Agent Management.
+- Enhance dimension value management sub-module.
+- Enhance memory management and term management sub-module.
+- Enhance semantic translation of complex S2SQL.
+- Enhance user experience in Chat UI.
+- Introduce LLM-based semantic corrector and data interpreter.
+
 ## SuperSonic [0.9.2] - 2024-06-01
 
 ### Added

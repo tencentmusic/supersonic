@@ -16,7 +16,7 @@ export default {
   'menu.database': '数据库管理',
   'menu.llm': '大模型管理',
   'menu.chatSetting': '问答设置',
-  'menu.plugin': '工具管理',
+  'menu.plugin': '插件管理',
   'menu.login': '登录',
   'menu.system': '系统设置',
   'menu.chat': '问答对话',

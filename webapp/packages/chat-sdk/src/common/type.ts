@@ -83,7 +83,7 @@ export type SqlInfoType = {
 
 export type ChatContextType = {
   id: number;
-  queryId: number;
+  queryId?: number;
   aggType: string;
   modelId: number;
   modelName: string;
@@ -149,6 +149,7 @@ export type MsgDataType = {
   recommendedDimensions: DrillDownDimensionType[];
   textResult: string;
   errorMsg: string;
+  textSummary: string;
 };
 
 export enum ParseStateEnum {

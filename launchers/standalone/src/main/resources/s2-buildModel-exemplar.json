@@ -1,0 +1,234 @@
+[
+  {
+    "dbSchema": {
+      "db": "semantic",
+      "table": "s2_stay_time_statis",
+      "dbColumns": [
+        {
+          "columnName": "imp_date",
+          "dataType": "VARCHAR",
+          "comment": ""
+        },
+        {
+          "columnName": "user_name",
+          "dataType": "VARCHAR",
+          "comment": ""
+        },
+        {
+          "columnName": "stay_hours",
+          "dataType": "DOUBLE",
+          "comment": ""
+        },
+        {
+          "columnName": "page",
+          "dataType": "VARCHAR",
+          "comment": ""
+        }
+      ]
+    },
+
+    "otherRelatedDBSchema":[
+      {
+        "db": "semantic",
+        "table": "s2_user_department",
+        "dbColumns": [
+          {
+            "columnName": "user_name",
+            "dataType": "VARCHAR",
+            "comment": ""
+          },
+          {
+            "columnName": "department",
+            "dataType": "VARCHAR",
+            "comment": ""
+          }
+        ]
+      }
+    ],
+
+    "modelSchema":{
+      "name": "停留时间统计",
+      "bizName": "StayTimeStatistics",
+      "description": "记录用户在页面上的停留时间统计信息",
+      "filedSchemas": [
+        {
+          "columnName": "imp_date",
+          "dataType": "VARCHAR",
+          "comment": "",
+          "filedType": "data_time",
+          "name": "导入日期"
+        },
+        {
+          "columnName": "user_name",
+          "dataType": "VARCHAR",
+          "comment": "",
+          "filedType": "foreign_key",
+          "name": "用户名"
+        },
+        {
+          "columnName": "stay_hours",
+          "dataType": "DOUBLE",
+          "comment": "",
+          "filedType": "measure",
+          "agg": "SUM",
+          "name": "停留小时数"
+        },
+        {
+          "columnName": "page",
+          "dataType": "VARCHAR",
+          "comment": "",
+          "filedType": "dimension",
+          "name": "页面"
+        }
+      ]
+    }
+  },
+
+  {
+    "dbSchema":{
+      "db": "semantic",
+      "table": "s2_user_department",
+      "dbColumns": [
+        {
+          "columnName": "user_name",
+          "dataType": "VARCHAR",
+          "comment": ""
+        },
+        {
+          "columnName": "department",
+          "dataType": "VARCHAR",
+          "comment": ""
+        }
+      ]
+    },
+    "otherRelatedDBSchema":[
+      {
+        "db": "semantic",
+        "table": "s2_stay_time_statis",
+        "dbColumns": [
+          {
+            "columnName": "imp_date",
+            "dataType": "VARCHAR",
+            "comment": ""
+          },
+          {
+            "columnName": "user_name",
+            "dataType": "VARCHAR",
+            "comment": ""
+          },
+          {
+            "columnName": "stay_hours",
+            "dataType": "DOUBLE",
+            "comment": ""
+          },
+          {
+            "columnName": "page",
+            "dataType": "VARCHAR",
+            "comment": ""
+          }
+        ]
+      }
+    ],
+
+    "modelSchema":{
+      "name": "用户部门信息",
+      "bizName": "UserDepartmentInfo",
+      "description": "记录用户所属的部门信息",
+      "filedSchemas": [
+        {
+          "columnName": "user_name",
+          "dataType": "VARCHAR",
+          "comment": "",
+          "filedType": "primary_key",
+          "name": "用户名"
+        },
+        {
+          "columnName": "department",
+          "dataType": "VARCHAR",
+          "comment": "",
+          "filedType": "dimension",
+          "name": "部门"
+        }
+      ]
+    }
+  },
+
+  {
+    "dbSchema": {
+      "db": "semantic",
+      "table": "SELECT imp_date, user_name, page, 1 as pv, user_name as uv FROM s2_pv_uv_statis",
+      "sql": "SELECT imp_date, user_name, page, 1 as pv, user_name as uv FROM s2_pv_uv_statis",
+      "dbColumns": [
+        {
+          "columnName": "imp_date",
+          "dataType": "VARCHAR"
+        },
+        {
+          "columnName": "user_name",
+          "dataType": "VARCHAR"
+        },
+        {
+          "columnName": "page",
+          "dataType": "VARCHAR"
+        },
+        {
+          "columnName": "pv",
+          "dataType": "INTEGER"
+        },
+        {
+          "columnName": "uv",
+          "dataType": "VARCHAR"
+        }
+      ]
+    },
+
+    "otherRelatedDBSchema": [
+
+    ],
+
+    "modelSchema":{
+      "name": "页面访问统计",
+      "bizName": "PageVisitStatistics",
+      "description": "该模型用于统计用户在不同页面的访问情况，包括页面访问次数和独立用户数。",
+      "filedSchemas": [
+        {
+          "columnName": "imp_date",
+          "dataType": "VARCHAR",
+          "comment": "数据生成时间",
+          "filedType": "data_time",
+          "name": "数据生成时间"
+        },
+        {
+          "columnName": "user_name",
+          "dataType": "VARCHAR",
+          "comment": "用户名",
+          "filedType": "dimension",
+          "name": "用户名"
+        },
+        {
+          "columnName": "page",
+          "dataType": "VARCHAR",
+          "comment": "页面名称",
+          "filedType": "dimension",
+          "name": "页面名称"
+        },
+        {
+          "columnName": "pv",
+          "dataType": "INTEGER",
+          "comment": "页面访问次数",
+          "filedType": "measure",
+          "agg": "SUM",
+          "name": "页面访问次数"
+        },
+        {
+          "columnName": "uv",
+          "dataType": "VARCHAR",
+          "comment": "独立用户数",
+          "filedType": "measure",
+          "agg": "COUNT_DISTINCT",
+          "name": "独立用户数"
+        }
+      ]
+    }
+  }
+]

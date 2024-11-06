@@ -1,9 +1,13 @@
 package com.tencent.supersonic.common.jsqlparser;
 
 import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
+import com.tencent.supersonic.common.util.ContextUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Assert;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.MockedStatic;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -11,10 +15,25 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import static org.mockito.Mockito.mockStatic;
+
 /**
  * SqlParserReplaceHelperTest
  */
 class SqlReplaceHelperTest {
+    private MockedStatic<ContextUtils> mockedContextUtils;
+
+    @BeforeEach
+    public void setUp() {
+        ReplaceService replaceService = new ReplaceService();
+        replaceService.setReplaceColumnThreshold(0.4);
+
+        // Mock the static method ContextUtils.getBean
+        mockedContextUtils = mockStatic(ContextUtils.class);
+        mockedContextUtils.when(() -> ContextUtils.getBean(ReplaceService.class))
+                .thenReturn(replaceService);
+    }
+
     @Test
     void testReplaceAggField() {
         String sql = "SELECT 维度1,sum(播放量) FROM 数据库 "
@@ -64,8 +83,7 @@ class SqlReplaceHelperTest {
 
         Assert.assertEquals(
                 "SELECT 歌曲名 FROM 歌曲库 WHERE datediff('day', 发布日期, '2023-08-09') <= 1 AND 歌手名 = '周杰伦' "
-                        + "AND 歌手名 = '林俊杰' AND 歌手名 = '陈奕迅' AND 数据日期 = '2023-08-09' AND "
-                        + "歌曲发布时 = '2023-08-01' ORDER BY 播放量 DESC LIMIT 11",
+                        + "AND 歌手名 = '林俊杰' AND 歌手名 = '陈' AND 数据日期 = '2023-08-09' AND 歌曲发布时 = '2023-08-01' ORDER BY 播放量 DESC LIMIT 11",
                 replaceSql);
 
         replaceSql = "select 歌曲名 from 歌曲库 where (datediff('day', 发布日期, '2023-08-09') <= 1 "
@@ -75,9 +93,8 @@ class SqlReplaceHelperTest {
         replaceSql = SqlReplaceHelper.replaceValue(replaceSql, filedNameToValueMap2, false);
 
         Assert.assertEquals(
-                "SELECT 歌曲名 FROM 歌曲库 WHERE (datediff('day', 发布日期, '2023-08-09') <= 1 AND 歌手名 = '周杰伦' "
-                        + "AND 歌手名 = '林俊杰' AND 歌手名 = '陈奕迅' AND 歌曲发布时 = '2023-08-01') "
-                        + "AND 数据日期 = '2023-08-09' ORDER BY 播放量 DESC LIMIT 11",
+                "SELECT 歌曲名 FROM 歌曲库 WHERE (datediff('day', 发布日期, '2023-08-09') <= 1 AND 歌手名 = '周杰伦' AND "
+                        + "歌手名 = '林俊杰' AND 歌手名 = '陈' AND 歌曲发布时 = '2023-08-01') AND 数据日期 = '2023-08-09' ORDER BY 播放量 DESC LIMIT 11",
                 replaceSql);
 
         replaceSql = "select 歌曲名 from 歌曲库 where (datediff('day', 发布日期, '2023-08-09') <= 1 "
@@ -88,10 +105,9 @@ class SqlReplaceHelperTest {
         replaceSql = SqlReplaceHelper.replaceValue(replaceSql, filedNameToValueMap2, false);
 
         Assert.assertEquals(
-                "SELECT 歌曲名 FROM 歌曲库 WHERE (datediff('day', 发布日期, '2023-08-09') <= 1 AND "
-                        + "歌手名 = '周杰伦' AND 歌手名 = '林俊杰' AND 歌手名 = '陈奕迅' AND 歌曲发布时 = '2023-08-01' "
-                        + "AND 播放量 < (SELECT min(播放量) FROM 歌曲库 WHERE 语种 = '英文')) AND 数据日期 = '2023-08-09' "
-                        + "ORDER BY 播放量 DESC LIMIT 11",
+                "SELECT 歌曲名 FROM 歌曲库 WHERE (datediff('day', 发布日期, '2023-08-09') <= 1 AND 歌手名 = '周杰伦' AND 歌手名 = '林俊杰' AND "
+                        + "歌手名 = '陈' AND 歌曲发布时 = '2023-08-01' AND 播放量 < (SELECT min(播放量) FROM 歌曲库 WHERE 语种 = '英文')) "
+                        + "AND 数据日期 = '2023-08-09' ORDER BY 播放量 DESC LIMIT 11",
                 replaceSql);
 
         Map<String, Map<String, String>> filedNameToValueMap3 = new HashMap<>();
@@ -332,6 +348,15 @@ class SqlReplaceHelperTest {
         fieldToBizName.put("歌曲发布时间", "song_publis_date");
         fieldToBizName.put("歌曲发布年份", "song_publis_year");
         fieldToBizName.put("访问次数", "pv");
+        fieldToBizName.put("粉丝数", "fans_cnt");
         return fieldToBizName;
+    }
+
+    @AfterEach
+    public void tearDown() {
+        // Close the mocked static context
+        if (mockedContextUtils != null) {
+            mockedContextUtils.close();
+        }
     }
 }

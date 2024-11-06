@@ -1,6 +1,7 @@
 package com.tencent.supersonic.headless.api.pojo.response;
 
 import com.google.common.collect.Lists;
+import com.tencent.supersonic.common.pojo.Text2SQLExemplar;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import lombok.Data;
 
@@ -11,7 +12,6 @@ import java.util.stream.Collectors;
 @Data
 public class ParseResp {
     private final String queryText;
-    private Long queryId;
     private ParseState state = ParseState.PENDING;
     private String errorMsg;
     private List<SemanticParseInfo> selectedParses = Lists.newArrayList();

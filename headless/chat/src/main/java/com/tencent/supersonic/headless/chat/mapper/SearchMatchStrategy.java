@@ -1,13 +1,11 @@
 package com.tencent.supersonic.headless.chat.mapper;
 
 import com.google.common.collect.Lists;
-import com.tencent.supersonic.common.pojo.enums.DictWordType;
 import com.tencent.supersonic.headless.api.pojo.response.S2Term;
 import com.tencent.supersonic.headless.chat.ChatQueryContext;
 import com.tencent.supersonic.headless.chat.knowledge.HanlpMapResult;
 import com.tencent.supersonic.headless.chat.knowledge.KnowledgeBaseService;
 import com.tencent.supersonic.headless.chat.knowledge.SearchService;
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,7 +15,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 /**
  * SearchMatchStrategy encapsulates a concrete matching algorithm executed during search process.
@@ -36,7 +33,7 @@ public class SearchMatchStrategy extends BaseMatchStrategy<HanlpMapResult> {
     @Override
     public Map<MatchText, List<HanlpMapResult>> match(ChatQueryContext chatQueryContext,
             List<S2Term> originals, Set<Long> detectDataSetIds) {
-        String text = chatQueryContext.getQueryText();
+        String text = chatQueryContext.getRequest().getQueryText();
         Map<Integer, Integer> regOffsetToLength = mapperHelper.getRegOffsetToLength(originals);
 
         List<Integer> detectIndexList = Lists.newArrayList();
@@ -66,16 +63,6 @@ public class SearchMatchStrategy extends BaseMatchStrategy<HanlpMapResult> {
                         knowledgeBaseService.suffixSearch(detectSegment, SEARCH_SIZE,
                                 chatQueryContext.getModelIdToDataSetIds(), detectDataSetIds);
                 hanlpMapResults.addAll(suffixHanlpMapResults);
-                // remove entity name where search
-                hanlpMapResults = hanlpMapResults.stream().filter(entry -> {
-                    List<String> natures = entry.getNatures().stream()
-                            .filter(nature -> !nature.endsWith(DictWordType.ENTITY.getType()))
-                            .collect(Collectors.toList());
-                    if (CollectionUtils.isEmpty(natures)) {
-                        return false;
-                    }
-                    return true;
-                }).collect(Collectors.toList());
                 MatchText matchText =
                         MatchText.builder().regText(regText).detectSegment(detectSegment).build();
                 regTextMap.put(matchText, hanlpMapResults);

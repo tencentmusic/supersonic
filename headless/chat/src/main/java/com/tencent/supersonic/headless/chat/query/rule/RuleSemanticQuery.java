@@ -1,6 +1,6 @@
 package com.tencent.supersonic.headless.chat.query.rule;
 
-import com.tencent.supersonic.auth.api.authentication.pojo.User;
+import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
 import com.tencent.supersonic.headless.api.pojo.DataSetSchema;
 import com.tencent.supersonic.headless.api.pojo.SchemaElement;
@@ -10,7 +10,6 @@ import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.api.pojo.SemanticSchema;
 import com.tencent.supersonic.headless.api.pojo.request.QueryFilter;
 import com.tencent.supersonic.headless.api.pojo.request.QueryMultiStructReq;
-import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
 import com.tencent.supersonic.headless.api.pojo.request.SemanticQueryReq;
 import com.tencent.supersonic.headless.chat.ChatQueryContext;
 import com.tencent.supersonic.headless.chat.query.BaseSemanticQuery;
@@ -30,6 +29,10 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static com.tencent.supersonic.headless.api.pojo.SchemaElementType.TERM;
+import static com.tencent.supersonic.headless.chat.query.rule.QueryMatchOption.OptionType.OPTIONAL;
+import static com.tencent.supersonic.headless.chat.query.rule.QueryMatchOption.RequireNumberType.AT_LEAST;
+
 @Slf4j
 @ToString
 public abstract class RuleSemanticQuery extends BaseSemanticQuery {
@@ -38,6 +41,7 @@ public abstract class RuleSemanticQuery extends BaseSemanticQuery {
 
     public RuleSemanticQuery() {
         QueryManager.register(this);
+        queryMatcher.addOption(TERM, OPTIONAL, AT_LEAST, 0);
     }
 
     public List<SchemaElementMatch> match(List<SchemaElementMatch> candidateElementMatches,
@@ -69,8 +73,9 @@ public abstract class RuleSemanticQuery extends BaseSemanticQuery {
 
     private void fillDateConfByInherited(SemanticParseInfo queryParseInfo,
             ChatQueryContext chatQueryContext) {
-        SemanticParseInfo contextParseInfo = chatQueryContext.getContextParseInfo();
-        if (queryParseInfo.getDateInfo() != null || contextParseInfo.getDateInfo() == null
+        SemanticParseInfo contextParseInfo = chatQueryContext.getRequest().getContextParseInfo();
+        if (queryParseInfo.getDateInfo() != null || Objects.isNull(contextParseInfo)
+                || Objects.isNull(contextParseInfo.getDateInfo())
                 || needFillDateConf(chatQueryContext)) {
             return;
         }
@@ -118,18 +123,6 @@ public abstract class RuleSemanticQuery extends BaseSemanticQuery {
             SchemaElement element = schemaMatch.getElement();
             element.setOrder(1 - schemaMatch.getSimilarity());
             switch (element.getType()) {
-                case ID:
-                    SchemaElement entityElement =
-                            semanticSchema.getElement(SchemaElementType.ENTITY, element.getId());
-                    if (entityElement != null) {
-                        if (id2Values.containsKey(element.getId())) {
-                            id2Values.get(element.getId()).add(schemaMatch);
-                        } else {
-                            id2Values.put(element.getId(),
-                                    new ArrayList<>(Arrays.asList(schemaMatch)));
-                        }
-                    }
-                    break;
                 case VALUE:
                     SchemaElement dimElement =
                             semanticSchema.getElement(SchemaElementType.DIMENSION, element.getId());
@@ -148,23 +141,20 @@ public abstract class RuleSemanticQuery extends BaseSemanticQuery {
                 case METRIC:
                     parseInfo.getMetrics().add(element);
                     break;
-                case ENTITY:
-                    parseInfo.setEntity(element);
-                    break;
                 default:
             }
         }
-        addToFilters(id2Values, parseInfo, semanticSchema, SchemaElementType.ENTITY);
         addToFilters(dim2Values, parseInfo, semanticSchema, SchemaElementType.DIMENSION);
     }
 
     private void addToFilters(Map<Long, List<SchemaElementMatch>> id2Values,
-            SemanticParseInfo parseInfo, SemanticSchema semanticSchema, SchemaElementType entity) {
+            SemanticParseInfo parseInfo, SemanticSchema semanticSchema,
+            SchemaElementType elementType) {
         if (id2Values == null || id2Values.isEmpty()) {
             return;
         }
         for (Entry<Long, List<SchemaElementMatch>> entry : id2Values.entrySet()) {
-            SchemaElement dimension = semanticSchema.getElement(entity, entry.getKey());
+            SchemaElement dimension = semanticSchema.getElement(elementType, entry.getKey());
             if (dimension.isPartitionTime()) {
                 continue;
             }
@@ -176,8 +166,6 @@ public abstract class RuleSemanticQuery extends BaseSemanticQuery {
                 dimensionFilter.setName(dimension.getName());
                 dimensionFilter.setOperator(FilterOperatorEnum.EQUALS);
                 dimensionFilter.setElementID(schemaMatch.getElement().getId());
-                parseInfo.setEntity(
-                        semanticSchema.getElement(SchemaElementType.ENTITY, entry.getKey()));
                 parseInfo.getDimensionFilters().add(dimensionFilter);
             } else {
                 QueryFilter dimensionFilter = new QueryFilter();
@@ -210,11 +198,6 @@ public abstract class RuleSemanticQuery extends BaseSemanticQuery {
         return convertQueryMultiStruct();
     }
 
-    @Override
-    public void setParseInfo(SemanticParseInfo parseInfo) {
-        this.parseInfo = parseInfo;
-    }
-
     public static List<RuleSemanticQuery> resolve(Long dataSetId,
             List<SchemaElementMatch> candidateElementMatches, ChatQueryContext chatQueryContext) {
         List<RuleSemanticQuery> matchedQueries = new ArrayList<>();
@@ -222,7 +205,7 @@ public abstract class RuleSemanticQuery extends BaseSemanticQuery {
             List<SchemaElementMatch> matches =
                     semanticQuery.match(candidateElementMatches, chatQueryContext);
 
-            if (matches.size() > 0) {
+            if (!matches.isEmpty()) {
                 RuleSemanticQuery query =
                         QueryManager.createRuleQuery(semanticQuery.getQueryMode());
                 query.getParseInfo().getElementMatches().addAll(matches);
@@ -230,10 +213,6 @@ public abstract class RuleSemanticQuery extends BaseSemanticQuery {
             }
         }
         return matchedQueries;
-    }
-
-    protected QueryStructReq convertQueryStruct() {
-        return QueryReqBuilder.buildStructReq(parseInfo);
     }
 
     protected QueryMultiStructReq convertQueryMultiStruct() {
