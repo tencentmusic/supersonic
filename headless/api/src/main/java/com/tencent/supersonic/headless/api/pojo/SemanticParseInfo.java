@@ -138,8 +138,7 @@ public class SemanticParseInfo implements Serializable {
     public long getDetailLimit() {
         long limit = DEFAULT_DETAIL_LIMIT;
         if (Objects.nonNull(queryConfig)
-                && Objects.nonNull(queryConfig.getDetailTypeDefaultConfig())
-                && Objects.nonNull(queryConfig.getDetailTypeDefaultConfig().getLimit())) {
+                && Objects.nonNull(queryConfig.getDetailTypeDefaultConfig())) {
             limit = queryConfig.getDetailTypeDefaultConfig().getLimit();
         }
         return limit;
@@ -148,8 +147,7 @@ public class SemanticParseInfo implements Serializable {
     public long getMetricLimit() {
         long limit = DEFAULT_METRIC_LIMIT;
         if (Objects.nonNull(queryConfig)
-                && Objects.nonNull(queryConfig.getAggregateTypeDefaultConfig())
-                && Objects.nonNull(queryConfig.getAggregateTypeDefaultConfig().getLimit())) {
+                && Objects.nonNull(queryConfig.getAggregateTypeDefaultConfig())) {
             limit = queryConfig.getAggregateTypeDefaultConfig().getLimit();
         }
         return limit;

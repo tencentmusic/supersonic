@@ -8,6 +8,7 @@ import com.tencent.supersonic.headless.chat.knowledge.DictWord;
 import com.tencent.supersonic.headless.chat.knowledge.KnowledgeBaseService;
 import com.tencent.supersonic.headless.chat.knowledge.builder.WordBuilderFactory;
 import com.tencent.supersonic.headless.server.service.SchemaService;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,6 +22,7 @@ import java.util.stream.Collectors;
 
 @Service
 @Slf4j
+@Data
 public class DictWordService {
 
     @Autowired
@@ -78,14 +80,6 @@ public class DictWordService {
         List<DictWord> natureList = WordBuilderFactory.get(value).getDictWords(metas);
         log.debug("nature type:{} , nature size:{}", value.name(), natureList.size());
         natures.addAll(natureList);
-    }
-
-    public List<DictWord> getPreDictWords() {
-        return preDictWords;
-    }
-
-    public void setPreDictWords(List<DictWord> preDictWords) {
-        this.preDictWords = preDictWords;
     }
 
     private List<SchemaElement> distinct(List<SchemaElement> metas) {

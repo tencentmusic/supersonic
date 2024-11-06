@@ -9,13 +9,14 @@ import com.tencent.supersonic.headless.api.pojo.enums.FieldType;
 import com.tencent.supersonic.headless.api.pojo.request.ModelBuildReq;
 import com.tencent.supersonic.headless.server.service.ModelService;
 import com.tencent.supersonic.util.LLMConfigUtils;
-import java.sql.SQLException;
-import java.util.Map;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.TestPropertySource;
+
+import java.sql.SQLException;
+import java.util.Map;
 
 @Disabled
 @TestPropertySource(properties = {"s2.model.building.exemplars.enabled = false"})

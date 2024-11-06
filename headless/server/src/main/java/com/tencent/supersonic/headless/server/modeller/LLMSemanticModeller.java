@@ -17,15 +17,16 @@ import dev.langchain4j.model.input.Prompt;
 import dev.langchain4j.model.input.PromptTemplate;
 import dev.langchain4j.provider.ModelProvider;
 import dev.langchain4j.service.AiServices;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.env.Environment;
+import org.springframework.core.io.ClassPathResource;
+
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.core.env.Environment;
-import org.springframework.core.io.ClassPathResource;
 
 @Slf4j
 public class LLMSemanticModeller implements SemanticModeller {
