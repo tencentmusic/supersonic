@@ -130,7 +130,7 @@ export const layout: RunTimeLayoutConfig = (params) => {
           style={{ display: 'inline-block', marginTop: 8 }}
         />
         <div className="logo" style={{ position: 'relative', top: '-2px' }}>
-          SuperSonic
+          分析云智能助手
         </div>
       </Space>
     ),

@@ -32,7 +32,7 @@ public class User implements Serializable {
     }
 
     public static User getDefaultUser() {
-        return new User(1L, "admin", "admin", "admin@email", 1);
+        return new User(1L, "分析云智能助手体验用户", "分析云智能助手体验用户", "admin@email", 1);
     }
 
     public static User getVisitUser() {

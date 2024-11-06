@@ -40,4 +40,5 @@ public class Constants {
     public static final long DEFAULT_DETAIL_LIMIT = 500;
     public static final long DEFAULT_METRIC_LIMIT = 200;
     public static final long DEFAULT_DOWNLOAD_LIMIT = 10000;
+    public static final String META_DICT_QUERY_KEYWORD = "元数据,数据字典,数据范围";
 }

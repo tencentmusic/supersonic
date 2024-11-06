@@ -8,3 +8,8 @@ spring:
   mvc:
     pathmatch:
       matching-strategy: ANT_PATH_MATCHER
+s2:
+  item:
+    value:
+      date:
+        start: 200
