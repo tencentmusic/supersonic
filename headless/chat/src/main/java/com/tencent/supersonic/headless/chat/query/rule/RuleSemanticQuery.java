@@ -20,7 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -117,7 +117,6 @@ public abstract class RuleSemanticQuery extends BaseSemanticQuery {
         parseInfo.setDataSet(semanticSchema.getDataSet(dataSetId));
         parseInfo.setQueryConfig(semanticSchema.getQueryConfig(dataSetId));
         Map<Long, List<SchemaElementMatch>> dim2Values = new HashMap<>();
-        Map<Long, List<SchemaElementMatch>> id2Values = new HashMap<>();
 
         for (SchemaElementMatch schemaMatch : parseInfo.getElementMatches()) {
             SchemaElement element = schemaMatch.getElement();
@@ -131,7 +130,7 @@ public abstract class RuleSemanticQuery extends BaseSemanticQuery {
                             dim2Values.get(element.getId()).add(schemaMatch);
                         } else {
                             dim2Values.put(element.getId(),
-                                    new ArrayList<>(Arrays.asList(schemaMatch)));
+                                    new ArrayList<>(Collections.singletonList(schemaMatch)));
                         }
                     }
                     break;
@@ -170,7 +169,7 @@ public abstract class RuleSemanticQuery extends BaseSemanticQuery {
             } else {
                 QueryFilter dimensionFilter = new QueryFilter();
                 List<String> values = new ArrayList<>();
-                entry.getValue().stream().forEach(i -> values.add(i.getWord()));
+                entry.getValue().forEach(i -> values.add(i.getWord()));
                 dimensionFilter.setValue(values);
                 dimensionFilter.setBizName(dimension.getBizName());
                 dimensionFilter.setName(dimension.getName());
