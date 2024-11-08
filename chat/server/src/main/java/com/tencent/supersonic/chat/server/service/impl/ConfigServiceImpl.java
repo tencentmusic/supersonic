@@ -86,16 +86,6 @@ public class ConfigServiceImpl implements ConfigService {
         return configEditCmd.getId();
     }
 
-    public ItemNameVisibilityInfo getVisibilityByModelId(Long modelId) {
-        ChatConfigResp chatConfigResp = fetchConfigByModelId(modelId);
-        ChatConfig chatConfig = new ChatConfig();
-        chatConfig.setModelId(modelId);
-        chatConfig.setChatAggConfig(chatConfigResp.getChatAggConfig());
-        chatConfig.setChatDetailConfig(chatConfigResp.getChatDetailConfig());
-        ItemNameVisibilityInfo itemNameVisibility = getItemNameVisibility(chatConfig);
-        return itemNameVisibility;
-    }
-
     public ItemNameVisibilityInfo getItemNameVisibility(ChatConfig chatConfig) {
         Long modelId = chatConfig.getModelId();
 
@@ -312,7 +302,7 @@ public class ConfigServiceImpl implements ConfigService {
         }
         Map<Long, SchemaElement> dimIdAndRespPair = modelSchema.getDimensions().stream().collect(
                 Collectors.toMap(SchemaElement::getId, Function.identity(), (k1, k2) -> k1));
-        knowledgeInfos.stream().forEach(knowledgeInfo -> {
+        knowledgeInfos.forEach(knowledgeInfo -> {
             if (Objects.nonNull(knowledgeInfo)) {
                 SchemaElement dimSchemaResp = dimIdAndRespPair.get(knowledgeInfo.getItemId());
                 if (Objects.nonNull(dimSchemaResp)) {
