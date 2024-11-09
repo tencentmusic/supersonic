@@ -20,7 +20,8 @@ public class TermDescMapper extends BaseMapper {
     public void doMap(ChatQueryContext chatQueryContext) {
         SchemaMapInfo mapInfo = chatQueryContext.getMapInfo();
         List<SchemaElement> termElements = mapInfo.getTermDescriptionToMap();
-        if (CollectionUtils.isEmpty(termElements)) {
+        if (CollectionUtils.isEmpty(termElements)
+                || chatQueryContext.getRequest().isDescriptionMapped()) {
             return;
         }
         for (SchemaElement schemaElement : termElements) {
@@ -39,6 +40,7 @@ public class TermDescMapper extends BaseMapper {
         queryContext.setSemanticSchema(chatQueryContext.getSemanticSchema());
         queryContext.setModelIdToDataSetIds(chatQueryContext.getModelIdToDataSetIds());
         queryContext.setChatWorkflowState(chatQueryContext.getChatWorkflowState());
+        queryContext.getRequest().setDescriptionMapped(true);
         return queryContext;
     }
 }
