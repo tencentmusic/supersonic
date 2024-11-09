@@ -34,15 +34,13 @@ public class RuleSqlParser implements SemanticParser {
             List<SchemaElementMatch> elementMatches = mapInfo.getMatchedElements(dataSetId);
             List<RuleSemanticQuery> queries =
                     RuleSemanticQuery.resolve(dataSetId, elementMatches, chatQueryContext);
-            for (RuleSemanticQuery query : queries) {
-                query.fillParseInfo(chatQueryContext);
-                chatQueryContext.getCandidateQueries().add(query);
-            }
-            candidateQueries.addAll(chatQueryContext.getCandidateQueries());
-            chatQueryContext.getCandidateQueries().clear();
+            candidateQueries.addAll(queries);
         }
         chatQueryContext.setCandidateQueries(candidateQueries);
 
         auxiliaryParsers.forEach(p -> p.parse(chatQueryContext));
+
+        candidateQueries.forEach(query -> query.buildS2Sql(
+                chatQueryContext.getDataSetSchema(query.getParseInfo().getDataSetId())));
     }
 }

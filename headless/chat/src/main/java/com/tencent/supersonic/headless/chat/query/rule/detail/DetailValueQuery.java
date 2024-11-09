@@ -1,7 +1,7 @@
 package com.tencent.supersonic.headless.chat.query.rule.detail;
 
+import com.tencent.supersonic.headless.api.pojo.DataSetSchema;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementMatch;
-import com.tencent.supersonic.headless.api.pojo.SemanticSchema;
 import com.tencent.supersonic.headless.chat.ChatQueryContext;
 import org.springframework.stereotype.Component;
 
@@ -31,16 +31,14 @@ public class DetailValueQuery extends DetailSemanticQuery {
     }
 
     @Override
-    public void fillParseInfo(ChatQueryContext chatQueryContext) {
-        super.fillParseInfo(chatQueryContext);
+    public void fillParseInfo(ChatQueryContext chatQueryContext, Long dataSetId) {
+        super.fillParseInfo(chatQueryContext, dataSetId);
 
-        SemanticSchema semanticSchema = chatQueryContext.getSemanticSchema();
-        parseInfo.getDimensions().addAll(semanticSchema.getDimensions());
-        parseInfo.getDimensions().forEach(d -> {
-            parseInfo.getElementMatches()
-                    .add(SchemaElementMatch.builder().element(d).word(d.getName()).similarity(0)
-                            .isInherited(false).detectWord(d.getName()).build());
-        });
+        DataSetSchema dataSetSchema = chatQueryContext.getDataSetSchema(dataSetId);
+        parseInfo.getDimensions().addAll(dataSetSchema.getDimensions());
+        parseInfo.getDimensions().forEach(
+                d -> parseInfo.getElementMatches().add(SchemaElementMatch.builder().element(d)
+                        .word(d.getName()).similarity(0).detectWord(d.getName()).build()));
 
     }
 
