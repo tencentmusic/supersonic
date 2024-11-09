@@ -24,6 +24,10 @@ public class DataSetSchema implements Serializable {
     private Set<SchemaElement> terms = new HashSet<>();
     private QueryConfig queryConfig;
 
+    public Long getDataSetId() {
+        return dataSet.getDataSetId();
+    }
+
     public SchemaElement getElement(SchemaElementType elementType, long elementID) {
         Optional<SchemaElement> element = Optional.empty();
 

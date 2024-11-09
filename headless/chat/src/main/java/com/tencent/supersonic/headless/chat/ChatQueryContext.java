@@ -41,6 +41,10 @@ public class ChatQueryContext implements Serializable {
         }
     }
 
+    public DataSetSchema getDataSetSchema(Long dataSetId) {
+        return semanticSchema.getDataSetSchema(dataSetId);
+    }
+
     public List<SemanticQuery> getCandidateQueries() {
         candidateQueries = candidateQueries.stream()
                 .sorted(Comparator.comparing(

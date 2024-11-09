@@ -1,7 +1,6 @@
 package com.tencent.supersonic.headless.chat.query.rule.detail;
 
 import com.tencent.supersonic.common.pojo.DateConf;
-import com.tencent.supersonic.common.pojo.enums.QueryType;
 import com.tencent.supersonic.common.pojo.enums.TimeMode;
 import com.tencent.supersonic.headless.api.pojo.DataSetSchema;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementMatch;
@@ -29,12 +28,10 @@ public abstract class DetailSemanticQuery extends RuleSemanticQuery {
     }
 
     @Override
-    public void fillParseInfo(ChatQueryContext chatQueryContext) {
-        super.fillParseInfo(chatQueryContext);
+    public void fillParseInfo(ChatQueryContext chatQueryContext, Long dataSetId) {
+        super.fillParseInfo(chatQueryContext, dataSetId);
 
-        parseInfo.setQueryType(QueryType.DETAIL);
         parseInfo.setLimit(parseInfo.getDetailLimit());
-
         if (!needFillDateConf(chatQueryContext)) {
             return;
         }

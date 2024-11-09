@@ -1,7 +1,10 @@
 package com.tencent.supersonic.headless.chat.query.rule;
 
-import com.tencent.supersonic.common.pojo.User;
+import com.tencent.supersonic.common.pojo.Aggregator;
+import com.tencent.supersonic.common.pojo.Filter;
+import com.tencent.supersonic.common.pojo.Order;
 import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
+import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import com.tencent.supersonic.headless.api.pojo.DataSetSchema;
 import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementMatch;
@@ -10,6 +13,8 @@ import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.api.pojo.SemanticSchema;
 import com.tencent.supersonic.headless.api.pojo.request.QueryFilter;
 import com.tencent.supersonic.headless.api.pojo.request.QueryMultiStructReq;
+import com.tencent.supersonic.headless.api.pojo.request.QuerySqlReq;
+import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
 import com.tencent.supersonic.headless.api.pojo.request.SemanticQueryReq;
 import com.tencent.supersonic.headless.chat.ChatQueryContext;
 import com.tencent.supersonic.headless.chat.query.BaseSemanticQuery;
@@ -17,6 +22,7 @@ import com.tencent.supersonic.headless.chat.query.QueryManager;
 import com.tencent.supersonic.headless.chat.utils.QueryReqBuilder;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
@@ -26,7 +32,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.tencent.supersonic.headless.api.pojo.SchemaElementType.TERM;
@@ -50,14 +55,24 @@ public abstract class RuleSemanticQuery extends BaseSemanticQuery {
     }
 
     @Override
-    public void initS2Sql(DataSetSchema dataSetSchema, User user) {
-        initS2SqlByStruct(dataSetSchema);
+    public void buildS2Sql(DataSetSchema dataSetSchema) {
+        QueryStructReq queryStructReq = convertQueryStruct();
+        convertBizNameToName(dataSetSchema, queryStructReq);
+        QuerySqlReq querySQLReq = queryStructReq.convert();
+        parseInfo.getSqlInfo().setParsedS2SQL(querySQLReq.getSql());
+        parseInfo.getSqlInfo().setCorrectedS2SQL(querySQLReq.getSql());
     }
 
-    public void fillParseInfo(ChatQueryContext chatQueryContext) {
-        parseInfo.setQueryMode(getQueryMode());
+    protected QueryStructReq convertQueryStruct() {
+        return QueryReqBuilder.buildStructReq(parseInfo);
+    }
+
+    protected void fillParseInfo(ChatQueryContext chatQueryContext, Long dataSetId) {
         SemanticSchema semanticSchema = chatQueryContext.getSemanticSchema();
 
+        parseInfo.setQueryMode(getQueryMode());
+        parseInfo.setDataSet(semanticSchema.getDataSet(dataSetId));
+        parseInfo.setQueryConfig(semanticSchema.getQueryConfig(dataSetId));
         fillSchemaElement(parseInfo, semanticSchema);
         fillScore(parseInfo);
         fillDateConfByInherited(parseInfo, chatQueryContext);
@@ -110,12 +125,7 @@ public abstract class RuleSemanticQuery extends BaseSemanticQuery {
     }
 
     private void fillSchemaElement(SemanticParseInfo parseInfo, SemanticSchema semanticSchema) {
-        Set<Long> dataSetIds =
-                parseInfo.getElementMatches().stream().map(SchemaElementMatch::getElement)
-                        .map(SchemaElement::getDataSetId).collect(Collectors.toSet());
-        Long dataSetId = dataSetIds.iterator().next();
-        parseInfo.setDataSet(semanticSchema.getDataSet(dataSetId));
-        parseInfo.setQueryConfig(semanticSchema.getQueryConfig(dataSetId));
+
         Map<Long, List<SchemaElementMatch>> dim2Values = new HashMap<>();
 
         for (SchemaElementMatch schemaMatch : parseInfo.getElementMatches()) {
@@ -200,14 +210,15 @@ public abstract class RuleSemanticQuery extends BaseSemanticQuery {
     public static List<RuleSemanticQuery> resolve(Long dataSetId,
             List<SchemaElementMatch> candidateElementMatches, ChatQueryContext chatQueryContext) {
         List<RuleSemanticQuery> matchedQueries = new ArrayList<>();
+
         for (RuleSemanticQuery semanticQuery : QueryManager.getRuleQueries()) {
             List<SchemaElementMatch> matches =
                     semanticQuery.match(candidateElementMatches, chatQueryContext);
-
             if (!matches.isEmpty()) {
                 RuleSemanticQuery query =
                         QueryManager.createRuleQuery(semanticQuery.getQueryMode());
                 query.getParseInfo().getElementMatches().addAll(matches);
+                query.fillParseInfo(chatQueryContext, dataSetId);
                 matchedQueries.add(query);
             }
         }
@@ -217,4 +228,39 @@ public abstract class RuleSemanticQuery extends BaseSemanticQuery {
     protected QueryMultiStructReq convertQueryMultiStruct() {
         return QueryReqBuilder.buildMultiStructReq(parseInfo);
     }
+
+
+    protected void convertBizNameToName(DataSetSchema dataSetSchema,
+            QueryStructReq queryStructReq) {
+        Map<String, String> bizNameToName = dataSetSchema.getBizNameToName();
+        bizNameToName.putAll(TimeDimensionEnum.getNameToNameMap());
+
+        List<Order> orders = queryStructReq.getOrders();
+        if (CollectionUtils.isNotEmpty(orders)) {
+            for (Order order : orders) {
+                order.setColumn(bizNameToName.get(order.getColumn()));
+            }
+        }
+        List<Aggregator> aggregators = queryStructReq.getAggregators();
+        if (CollectionUtils.isNotEmpty(aggregators)) {
+            for (Aggregator aggregator : aggregators) {
+                aggregator.setColumn(bizNameToName.get(aggregator.getColumn()));
+            }
+        }
+        List<String> groups = queryStructReq.getGroups();
+        if (CollectionUtils.isNotEmpty(groups)) {
+            groups = groups.stream().map(bizNameToName::get).collect(Collectors.toList());
+            queryStructReq.setGroups(groups);
+        }
+        List<Filter> dimensionFilters = queryStructReq.getDimensionFilters();
+        if (CollectionUtils.isNotEmpty(dimensionFilters)) {
+            dimensionFilters
+                    .forEach(filter -> filter.setName(bizNameToName.get(filter.getBizName())));
+        }
+        List<Filter> metricFilters = queryStructReq.getMetricFilters();
+        if (CollectionUtils.isNotEmpty(dimensionFilters)) {
+            metricFilters.forEach(filter -> filter.setName(bizNameToName.get(filter.getBizName())));
+        }
+    }
+
 }

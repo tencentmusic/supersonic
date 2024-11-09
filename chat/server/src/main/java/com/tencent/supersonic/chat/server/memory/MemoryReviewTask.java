@@ -22,10 +22,10 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.List;
 
 @Component
 @Slf4j
@@ -61,10 +61,11 @@ public class MemoryReviewTask {
     public void review() {
         List<Agent> agentList = agentService.getAgents();
         for (Agent agent : agentList) {
-            if(!agent.enableMemoryReview()){
+            if (!agent.enableMemoryReview()) {
                 continue;
             }
-            ChatMemoryFilter chatMemoryFilter = ChatMemoryFilter.builder().agentId(agent.getId()).build();
+            ChatMemoryFilter chatMemoryFilter =
+                    ChatMemoryFilter.builder().agentId(agent.getId()).build();
             memoryService.getMemories(chatMemoryFilter).stream().forEach(memory -> {
                 try {
                     processMemory(memory, agent);

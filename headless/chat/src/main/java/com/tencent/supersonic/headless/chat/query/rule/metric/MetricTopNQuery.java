@@ -48,8 +48,8 @@ public class MetricTopNQuery extends MetricSemanticQuery {
     }
 
     @Override
-    public void fillParseInfo(ChatQueryContext chatQueryContext) {
-        super.fillParseInfo(chatQueryContext);
+    public void fillParseInfo(ChatQueryContext chatQueryContext, Long dataSetId) {
+        super.fillParseInfo(chatQueryContext, dataSetId);
 
         parseInfo.setScore(parseInfo.getScore() + 2.0);
         parseInfo.setAggType(AggregateTypeEnum.SUM);
