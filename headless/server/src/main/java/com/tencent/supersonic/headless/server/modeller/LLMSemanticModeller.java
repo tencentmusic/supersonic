@@ -45,7 +45,7 @@ public class LLMSemanticModeller implements SemanticModeller {
             + "\n2. Create a Chinese name for the field and categorize the field into one of the following five types:"
             + "\n   primary_key: This is a unique identifier for a record row in a database."
             + "\n   foreign_key: This is a key in a database whose value is derived from the primary key of another table."
-            + "\n   data_time: This represents the time when data is generated in the data warehouse."
+            + "\n   partition_time: This represents the time when data is generated in the data warehouse."
             + "\n   dimension: Usually a string type, used for grouping and filtering data. No need to generate aggregate functions"
             + "\n   measure: Usually a numeric type, used to quantify data from a certain evaluative perspective. "
             + "              Also, you need to generate aggregate functions(Eg: MAX, MIN, AVG, SUM, COUNT) for the measure type. "
@@ -66,22 +66,23 @@ public class LLMSemanticModeller implements SemanticModeller {
     }
 
     @Override
-    public ModelSchema build(DbSchema dbSchema, List<DbSchema> dbSchemas,
+    public void build(DbSchema dbSchema, List<DbSchema> dbSchemas, ModelSchema modelSchema,
             ModelBuildReq modelBuildReq) {
+        if (!modelBuildReq.isBuildByLLM()) {
+            return;
+        }
         Optional<ChatApp> chatApp = ChatAppManager.getApp(APP_KEY);
         if (!chatApp.isPresent() || !chatApp.get().isEnable()) {
-            return null;
+            return;
         }
         List<DbSchema> otherDbSchema = getOtherDbSchema(dbSchema, dbSchemas);
         ModelSchemaExtractor extractor =
                 AiServices.create(ModelSchemaExtractor.class, getChatModel(modelBuildReq));
         Prompt prompt = generatePrompt(dbSchema, otherDbSchema, chatApp.get());
-        ModelSchema modelSchema =
-                extractor.generateModelSchema(prompt.toUserMessage().singleText());
+        modelSchema = extractor.generateModelSchema(prompt.toUserMessage().singleText());
         log.info("dbSchema:  {}\n otherRelatedDBSchema:{}\n modelSchema: {}",
                 JsonUtil.toString(dbSchema), JsonUtil.toString(otherDbSchema),
                 JsonUtil.toString(modelSchema));
-        return modelSchema;
     }
 
     private List<DbSchema> getOtherDbSchema(DbSchema curSchema, List<DbSchema> dbSchemas) {
@@ -113,7 +114,7 @@ public class LLMSemanticModeller implements SemanticModeller {
         Environment environment = ContextUtils.getBean(Environment.class);
         String enableExemplarLoading =
                 environment.getProperty("s2.model.building.exemplars.enabled");
-        if (Boolean.TRUE.equals(Boolean.parseBoolean(enableExemplarLoading))) {
+        if (Boolean.FALSE.equals(Boolean.parseBoolean(enableExemplarLoading))) {
             log.info("Not enable load model-building exemplars");
             return "";
         }

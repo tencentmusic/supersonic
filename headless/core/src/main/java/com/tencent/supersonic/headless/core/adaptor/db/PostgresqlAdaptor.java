@@ -5,6 +5,7 @@ import com.tencent.supersonic.common.jsqlparser.SqlReplaceHelper;
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import com.tencent.supersonic.headless.api.pojo.DBColumn;
+import com.tencent.supersonic.headless.api.pojo.enums.FieldType;
 import com.tencent.supersonic.headless.core.pojo.ConnectInfo;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.expression.StringValue;
@@ -105,8 +106,41 @@ public class PostgresqlAdaptor extends BaseDbAdaptor {
             String columnName = columns.getString("COLUMN_NAME");
             String dataType = columns.getString("TYPE_NAME");
             String remarks = columns.getString("REMARKS");
-            dbColumns.add(new DBColumn(columnName, dataType, remarks));
+            FieldType fieldType = classifyColumnType(dataType);
+            dbColumns.add(new DBColumn(columnName, dataType, remarks, fieldType));
         }
         return dbColumns;
     }
+
+    protected static FieldType classifyColumnType(String typeName) {
+        switch (typeName.toUpperCase()) {
+            case "INT":
+            case "INTEGER":
+            case "BIGINT":
+            case "SMALLINT":
+            case "SERIAL":
+            case "BIGSERIAL":
+            case "SMALLSERIAL":
+            case "REAL":
+            case "DOUBLE PRECISION":
+            case "NUMERIC":
+            case "DECIMAL":
+                return FieldType.measure;
+            case "DATE":
+            case "TIME":
+            case "TIMESTAMP":
+            case "TIMESTAMPTZ":
+            case "INTERVAL":
+                return FieldType.time;
+            case "VARCHAR":
+            case "CHAR":
+            case "TEXT":
+            case "CHARACTER VARYING":
+            case "CHARACTER":
+            case "UUID":
+            default:
+                return FieldType.dimension;
+        }
+    }
+
 }

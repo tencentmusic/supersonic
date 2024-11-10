@@ -20,7 +20,7 @@ import java.util.Map;
 
 @Disabled
 @TestPropertySource(properties = {"s2.model.building.exemplars.enabled = false"})
-public class LLMSemanticModellerTest extends BaseTest {
+public class SemanticModellerTest extends BaseTest {
 
     private LLMConfigUtils.LLMType llmType = LLMConfigUtils.LLMType.OLLAMA_LLAMA3;
 
@@ -49,7 +49,7 @@ public class LLMSemanticModellerTest extends BaseTest {
         Assertions.assertEquals(4, stayTimeModelSchema.getColumnSchemas().size());
         Assertions.assertEquals(FieldType.foreign_key,
                 stayTimeModelSchema.getColumnByName("user_name").getFiledType());
-        Assertions.assertEquals(FieldType.data_time,
+        Assertions.assertEquals(FieldType.partition_time,
                 stayTimeModelSchema.getColumnByName("imp_date").getFiledType());
         Assertions.assertEquals(FieldType.dimension,
                 stayTimeModelSchema.getColumnByName("page").getFiledType());
@@ -73,7 +73,7 @@ public class LLMSemanticModellerTest extends BaseTest {
 
         ModelSchema pvModelSchema = modelSchemaMap.values().iterator().next();
         Assertions.assertEquals(5, pvModelSchema.getColumnSchemas().size());
-        Assertions.assertEquals(FieldType.data_time,
+        Assertions.assertEquals(FieldType.partition_time,
                 pvModelSchema.getColumnByName("imp_date").getFiledType());
         Assertions.assertEquals(FieldType.dimension,
                 pvModelSchema.getColumnByName("user_name").getFiledType());
