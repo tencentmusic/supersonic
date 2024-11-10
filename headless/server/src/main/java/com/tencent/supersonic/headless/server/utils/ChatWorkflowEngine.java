@@ -60,7 +60,12 @@ public class ChatWorkflowEngine {
                         List<SemanticParseInfo> parseInfos = queryCtx.getCandidateQueries().stream()
                                 .map(SemanticQuery::getParseInfo).collect(Collectors.toList());
                         parseResult.setSelectedParses(parseInfos);
-                        queryCtx.setChatWorkflowState(ChatWorkflowState.CORRECTING);
+                        if (queryCtx.needSQL()) {
+                            queryCtx.setChatWorkflowState(ChatWorkflowState.CORRECTING);
+                        } else {
+                            parseResult.setState(ParseResp.ParseState.COMPLETED);
+                            queryCtx.setChatWorkflowState(ChatWorkflowState.FINISHED);
+                        }
                     }
                     break;
                 case CORRECTING:

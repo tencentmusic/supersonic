@@ -1,6 +1,7 @@
 package com.tencent.supersonic.headless.chat;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.tencent.supersonic.common.pojo.enums.Text2SQLType;
 import com.tencent.supersonic.headless.api.pojo.DataSetSchema;
 import com.tencent.supersonic.headless.api.pojo.SchemaMapInfo;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
@@ -39,6 +40,10 @@ public class ChatQueryContext implements Serializable {
         if (Objects.nonNull(parseInfo) && Objects.nonNull(parseInfo.getDataSetId())) {
             mapInfo.setMatchedElements(parseInfo.getDataSetId(), parseInfo.getElementMatches());
         }
+    }
+
+    public boolean needSQL() {
+        return !request.getText2SQLType().equals(Text2SQLType.NONE);
     }
 
     public DataSetSchema getDataSetSchema(Long dataSetId) {

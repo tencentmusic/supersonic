@@ -3,16 +3,17 @@ package com.tencent.supersonic.headless.chat.query.llm.s2sql;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.common.pojo.ChatApp;
-import com.tencent.supersonic.common.pojo.ChatModelConfig;
 import com.tencent.supersonic.common.pojo.Text2SQLExemplar;
 import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import lombok.Data;
 import org.apache.commons.collections4.CollectionUtils;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Data
@@ -45,22 +46,23 @@ public class LLMReq {
         private SchemaElement primaryKey;
 
         public List<String> getFieldNameList() {
-            List<String> fieldNameList = new ArrayList<>();
+            Set<String> fieldNameList = new HashSet<>();
             if (CollectionUtils.isNotEmpty(metrics)) {
-                fieldNameList.addAll(metrics.stream().map(metric -> metric.getName())
-                        .collect(Collectors.toList()));
+                fieldNameList.addAll(
+                        metrics.stream().map(SchemaElement::getName).collect(Collectors.toList()));
             }
             if (CollectionUtils.isNotEmpty(dimensions)) {
-                fieldNameList.addAll(dimensions.stream().map(dimension -> dimension.getName())
+                fieldNameList.addAll(dimensions.stream().map(SchemaElement::getName)
+                        .collect(Collectors.toList()));
+            }
+            if (CollectionUtils.isNotEmpty(values)) {
+                fieldNameList.addAll(values.stream().map(ElementValue::getFieldName)
                         .collect(Collectors.toList()));
             }
             if (Objects.nonNull(partitionTime)) {
                 fieldNameList.add(partitionTime.getName());
             }
-            if (Objects.nonNull(primaryKey)) {
-                fieldNameList.add(primaryKey.getName());
-            }
-            return fieldNameList;
+            return new ArrayList<>(fieldNameList);
         }
     }
 
@@ -74,7 +76,7 @@ public class LLMReq {
     public enum SqlGenType {
         ONE_PASS_SELF_CONSISTENCY("1_pass_self_consistency");
 
-        private String name;
+        private final String name;
 
         SqlGenType(String name) {
             this.name = name;

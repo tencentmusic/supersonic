@@ -26,26 +26,27 @@ import static com.tencent.supersonic.common.pojo.Constants.DEFAULT_METRIC_LIMIT;
 public class SemanticParseInfo implements Serializable {
 
     private Integer id;
-    private String queryMode = "PLAIN_TEXT";
+    private String queryMode = "";
     private QueryConfig queryConfig;
-    private QueryType queryType = QueryType.DETAIL;
+    private QueryType queryType;
 
     private SchemaElement dataSet;
     private Set<SchemaElement> metrics = Sets.newTreeSet(new SchemaNameLengthComparator());
     private Set<SchemaElement> dimensions = Sets.newTreeSet(new SchemaNameLengthComparator());
+
     private Set<QueryFilter> dimensionFilters = Sets.newHashSet();
     private Set<QueryFilter> metricFilters = Sets.newHashSet();
+    private FilterType filterType = FilterType.AND;
 
     private AggregateTypeEnum aggType = AggregateTypeEnum.NONE;
-    private FilterType filterType = FilterType.AND;
     private Set<Order> orders = Sets.newHashSet();
-    private DateConf dateInfo;
     private long limit = DEFAULT_DETAIL_LIMIT;
     private double score;
     private List<SchemaElementMatch> elementMatches = Lists.newArrayList();
+    private DateConf dateInfo;
     private SqlInfo sqlInfo = new SqlInfo();
-    private SqlEvaluation sqlEvaluation = new SqlEvaluation();
     private String textInfo;
+    private SqlEvaluation sqlEvaluation = new SqlEvaluation();
     private Map<String, Object> properties = Maps.newHashMap();
 
     @Data
