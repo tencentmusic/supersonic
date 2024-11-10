@@ -47,8 +47,6 @@ import com.tencent.supersonic.headless.api.pojo.enums.MetricDefineType;
 import com.tencent.supersonic.headless.api.pojo.enums.SemanticType;
 import com.tencent.supersonic.headless.api.pojo.enums.TagDefineType;
 import com.tencent.supersonic.headless.api.pojo.request.DataSetReq;
-import com.tencent.supersonic.headless.api.pojo.request.DictItemReq;
-import com.tencent.supersonic.headless.api.pojo.request.DictSingleTaskReq;
 import com.tencent.supersonic.headless.api.pojo.request.DimensionReq;
 import com.tencent.supersonic.headless.api.pojo.request.DomainReq;
 import com.tencent.supersonic.headless.api.pojo.request.MetricReq;
@@ -104,8 +102,8 @@ public class S2VisitsDemo extends S2BaseDemo {
             updateMetric_pv(pvUvModel, departmentDimension, userDimension, metricPv);
 
             // create dict conf for dimensions
-            createDictConf(departmentDimension);
-            createDictConf(userDimension);
+            enableDimensionValue(departmentDimension);
+            enableDimensionValue(userDimension);
 
             // create data set
             DataSetResp s2DataSet = addDataSet(s2Domain);
@@ -157,8 +155,8 @@ public class S2VisitsDemo extends S2BaseDemo {
 
     private Integer addAgent(long dataSetId) {
         Agent agent = new Agent();
-        agent.setName("算指标");
-        agent.setDescription("帮助您用自然语言查询指标，支持时间限定、条件筛选、下钻维度以及聚合统计");
+        agent.setName("超音数分析助手");
+        agent.setDescription("帮忙您对超音数产品的用户访问情况做分析");
         agent.setStatus(1);
         agent.setEnableSearch(1);
         agent.setExamples(Lists.newArrayList("近15天超音数访问次数汇总", "按部门统计超音数的访问人数", "对比alice和lucy的停留时长",
@@ -184,7 +182,7 @@ public class S2VisitsDemo extends S2BaseDemo {
 
     public DomainResp addDomain() {
         DomainReq domainReq = new DomainReq();
-        domainReq.setName("超音数");
+        domainReq.setName("产品数据");
         domainReq.setBizName("supersonic");
         domainReq.setParentId(0L);
         domainReq.setStatus(StatusEnum.ONLINE.getCode());
@@ -358,13 +356,6 @@ public class S2VisitsDemo extends S2BaseDemo {
         dimensionReq.setExpr("page");
         dimensionReq.setDimValueMaps(Collections.emptyList());
         dimensionService.updateDimension(dimensionReq, defaultUser);
-    }
-
-    private void createDictConf(DimensionResp dimension) {
-        dictConfService.addDictConf(DictItemReq.builder().type(TypeEnums.DIMENSION)
-                .itemId(dimension.getId()).status(StatusEnum.ONLINE).build(), defaultUser);
-        dictTaskService.addDictTask(DictSingleTaskReq.builder().itemId(dimension.getId())
-                .type(TypeEnums.DIMENSION).build(), defaultUser);
     }
 
     public void updateMetric(ModelResp stayTimeModel, DimensionResp departmentDimension,
