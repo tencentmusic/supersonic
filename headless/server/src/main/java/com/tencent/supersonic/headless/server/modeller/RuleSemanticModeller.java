@@ -14,13 +14,11 @@ import java.util.stream.Collectors;
 public class RuleSemanticModeller implements SemanticModeller {
 
     @Override
-    public ModelSchema build(DbSchema dbSchema, List<DbSchema> dbSchemas,
+    public void build(DbSchema dbSchema, List<DbSchema> dbSchemas, ModelSchema modelSchema,
             ModelBuildReq modelBuildReq) {
-        ModelSchema modelSchema = new ModelSchema();
         List<ColumnSchema> columnSchemas =
                 dbSchema.getDbColumns().stream().map(this::convert).collect(Collectors.toList());
         modelSchema.setColumnSchemas(columnSchemas);
-        return modelSchema;
     }
 
     private ColumnSchema convert(DBColumn dbColumn) {
@@ -29,6 +27,7 @@ public class RuleSemanticModeller implements SemanticModeller {
         columnSchema.setColumnName(dbColumn.getColumnName());
         columnSchema.setComment(dbColumn.getComment());
         columnSchema.setDataType(dbColumn.getDataType());
+        columnSchema.setFiledType(dbColumn.getFieldType());
         return columnSchema;
     }
 
