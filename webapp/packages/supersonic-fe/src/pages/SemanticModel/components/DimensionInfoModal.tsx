@@ -305,6 +305,7 @@ const DimensionInfoModal: React.FC<CreateFormProps> = ({
           <InfoTagList />
         </FormItem> */}
         <Form.Item
+          hidden={!!!process.env.SHOW_TAG}
           label={
             <FormItemTitle
               title={`设为标签`}

@@ -38,6 +38,7 @@ const BatchCtrlDropDownButton: FC<BatchCtrlDropDownButtonProps> = ({
     exportTagButton: {
       key: 'exportTagButton',
       label: '导出为标签',
+      hidden: !!!process.env.SHOW_TAG,
       icon: <ExportOutlined />,
       disabled: disabledList?.includes('exportTagButton'),
     },
@@ -142,9 +143,11 @@ const BatchCtrlDropDownButton: FC<BatchCtrlDropDownButtonProps> = ({
       icon: <DeleteOutlined />,
       disabled: disabledList?.includes('batchDelete'),
     },
-  ].filter((item) => {
-    return !hiddenList.includes(item.key);
-  });
+  ]
+    .filter((item) => {
+      return !hiddenList.includes(item.key);
+    })
+    .filter((item) => !!!item.hidden);
 
   const popoverConfig = {
     title: '选择下载区间',

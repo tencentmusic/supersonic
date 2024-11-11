@@ -249,6 +249,31 @@ const ModelFieldForm: React.FC<Props> = ({
             </Select>
           );
         }
+
+        if (process.env.SHOW_TAG) {
+          if (type === EnumDataSourceType.CATEGORICAL) {
+            const isTag = fields.find((field) => field.bizName === record.bizName)?.isTag;
+            return (
+              <Space>
+                <Space>
+                  <span>设为标签:</span>
+                  <Switch
+                    defaultChecked
+                    size="small"
+                    checked={!!isTag}
+                    onChange={(value) => {
+                      handleFieldChange(record, 'isTag', value);
+                    }}
+                  />
+                  <Tooltip title="如果勾选，代表维度的取值都是一种“标签”，可用作对实体的圈选">
+                    <ExclamationCircleOutlined />
+                  </Tooltip>
+                </Space>
+              </Space>
+            );
+          }
+        }
+
         if (type === EnumDataSourceType.CATEGORICAL) {
           const isTag = fields.find((field) => field.bizName === record.bizName)?.isTag;
           return (
