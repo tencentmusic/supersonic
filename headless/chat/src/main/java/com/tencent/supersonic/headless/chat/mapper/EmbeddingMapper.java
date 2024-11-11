@@ -20,22 +20,25 @@ import java.util.Objects;
  */
 @Slf4j
 public class EmbeddingMapper extends BaseMapper {
-
-    @Override
     public void doMap(ChatQueryContext chatQueryContext) {
-        // 1. query from embedding by queryText
-        if (MapModeEnum.STRICT.equals(chatQueryContext.getRequest().getMapModeEnum())) {
+        // Check if the map mode is LOOSE
+        if (!MapModeEnum.LOOSE.equals(chatQueryContext.getRequest().getMapModeEnum())) {
             return;
         }
+
+        // 1. Query from embedding by queryText
         EmbeddingMatchStrategy matchStrategy = ContextUtils.getBean(EmbeddingMatchStrategy.class);
         List<EmbeddingResult> matchResults = getMatches(chatQueryContext, matchStrategy);
 
+        // Process match results
         HanlpHelper.transLetterOriginal(matchResults);
 
-        // 2. build SchemaElementMatch by info
+        // 2. Build SchemaElementMatch based on match results
         for (EmbeddingResult matchResult : matchResults) {
             Long elementId = Retrieval.getLongId(matchResult.getId());
             Long dataSetId = Retrieval.getLongId(matchResult.getMetadata().get("dataSetId"));
+
+            // Skip if dataSetId is null
             if (Objects.isNull(dataSetId)) {
                 continue;
             }
@@ -43,14 +46,19 @@ public class EmbeddingMapper extends BaseMapper {
                     SchemaElementType.valueOf(matchResult.getMetadata().get("type"));
             SchemaElement schemaElement = getSchemaElement(dataSetId, elementType, elementId,
                     chatQueryContext.getSemanticSchema());
+
+            // Skip if schemaElement is null
             if (schemaElement == null) {
                 continue;
             }
+
+            // Build SchemaElementMatch object
             SchemaElementMatch schemaElementMatch = SchemaElementMatch.builder()
                     .element(schemaElement).frequency(BaseWordBuilder.DEFAULT_FREQUENCY)
                     .word(matchResult.getName()).similarity(matchResult.getSimilarity())
                     .detectWord(matchResult.getDetectWord()).build();
-            // 3. add to mapInfo
+
+            // 3. Add SchemaElementMatch to mapInfo
             addToSchemaMap(chatQueryContext.getMapInfo(), dataSetId, schemaElementMatch);
         }
     }

@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
 public class PlainTextExecutor implements ChatQueryExecutor {
 
     public static final String APP_KEY = "SMALL_TALK";
-    private static final String INSTRUCTION = "" + "#Role: You are a nice person to talk to."
+    private static final String INSTRUCTION = "#Role: You are a nice person to talk to."
             + "\n#Task: Respond quickly and nicely to the user."
             + "\n#Rules: 1.ALWAYS use the same language as the `#Current Input`."
             + "\n#History Inputs: %s" + "\n#Current Input: %s" + "\n#Response: ";

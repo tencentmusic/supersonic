@@ -30,6 +30,7 @@ public class QueryNLReq extends SemanticQueryReq implements Serializable {
     private List<Text2SQLExemplar> dynamicExemplars = Lists.newArrayList();
     private SemanticParseInfo contextParseInfo;
     private SemanticParseInfo selectedParseInfo;
+    private boolean descriptionMapped;
 
     @Override
     public String toCustomizedString() {

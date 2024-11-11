@@ -45,11 +45,9 @@ com.tencent.supersonic.headless.core.cache.QueryCache=\
 
 ### headless-server SPIs
 
-com.tencent.supersonic.headless.server.processor.ResultProcessor=\
-    com.tencent.supersonic.headless.server.processor.ParseInfoProcessor
-
 com.tencent.supersonic.headless.server.modeller.SemanticModeller=\
-    com.tencent.supersonic.headless.server.modeller.RuleSemanticModeller
+    com.tencent.supersonic.headless.server.modeller.RuleSemanticModeller, \
+    com.tencent.supersonic.headless.server.modeller.LLMSemanticModeller
 
 ### chat-server SPIs
 

@@ -231,7 +231,7 @@ public class ChatQueryServiceImpl implements ChatQueryService {
         log.info("rule begin replace metrics and revise filters!");
         validFilter(semanticQuery.getParseInfo().getDimensionFilters());
         validFilter(semanticQuery.getParseInfo().getMetricFilters());
-        semanticQuery.initS2Sql(dataSetSchema, user);
+        semanticQuery.buildS2Sql(dataSetSchema);
     }
 
     private QueryResult executeQuery(SemanticQuery semanticQuery, User user) throws Exception {

@@ -45,8 +45,8 @@ import java.util.Map;
 
 @Component
 @Slf4j
-@Order(2)
-public class S2ArtistDemo extends S2BaseDemo {
+@Order(3)
+public class S2SingerDemo extends S2BaseDemo {
 
     public void doRun() {
         try {
@@ -83,7 +83,7 @@ public class S2ArtistDemo extends S2BaseDemo {
 
     public DomainResp addDomain() {
         DomainReq domainReq = new DomainReq();
-        domainReq.setName("歌手库");
+        domainReq.setName("歌手数据");
         domainReq.setBizName("singer");
         domainReq.setParentId(0L);
         domainReq.setStatus(StatusEnum.ONLINE.getCode());
@@ -145,7 +145,7 @@ public class S2ArtistDemo extends S2BaseDemo {
 
     public long addDataSet(DomainResp singerDomain, ModelResp singerModel) {
         DataSetReq dataSetReq = new DataSetReq();
-        dataSetReq.setName("歌手库数据集");
+        dataSetReq.setName("歌手数据集");
         dataSetReq.setBizName("singer");
         dataSetReq.setDomainId(singerDomain.getId());
         dataSetReq.setDescription("包含歌手相关标签和指标信息");
@@ -167,8 +167,8 @@ public class S2ArtistDemo extends S2BaseDemo {
 
     private void addAgent(long dataSetId) {
         Agent agent = new Agent();
-        agent.setName("做圈选");
-        agent.setDescription("帮助您用自然语言进行圈选，支持多条件组合筛选");
+        agent.setName("艺人分析助手");
+        agent.setDescription("帮忙您对不同流派、区域的艺人做分析查询");
         agent.setStatus(1);
         agent.setEnableSearch(1);
         agent.setExamples(Lists.newArrayList("国风流派歌手", "港台歌手", "周杰伦流派"));
