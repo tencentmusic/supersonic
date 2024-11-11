@@ -73,7 +73,7 @@ const DomainManagerTab: React.FC<Props> = ({
     {
       label: '标签对象管理',
       key: 'tagObjectManage',
-      hidden: !!domainData?.parentId,
+      hidden: !!!process.env.SHOW_TAG ? true : !!domainData?.parentId,
       children: <TagObjectTable />,
     },
     {

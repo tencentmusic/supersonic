@@ -728,6 +728,7 @@ const MetricInfoCreateForm: React.FC<CreateFormProps> = ({
         <FormItem
           name="isTag"
           valuePropName="checked"
+          hidden={!!!process.env.SHOW_TAG}
           getValueFromEvent={(value) => {
             return value === true ? 1 : 0;
           }}
@@ -749,8 +750,9 @@ const MetricInfoCreateForm: React.FC<CreateFormProps> = ({
               <Switch />
             </Col>
           </Row>
+          <Divider />
         </FormItem>
-        <Divider />
+
         <FormItem>
           <Row gutter={20}>
             <Col flex="1 1 200px">
