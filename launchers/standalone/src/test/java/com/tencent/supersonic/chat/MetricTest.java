@@ -28,6 +28,11 @@ import static com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum.SUM;
 public class MetricTest extends BaseTest {
 
     @Test
+    public void testMetric() throws Exception {
+        QueryResult actualResult = submitNewChat("超音数 访问次数", DataUtils.metricAgentId);
+    }
+
+    @Test
     public void testMetricFilter() throws Exception {
         QueryResult actualResult = submitNewChat("alice的访问次数", DataUtils.metricAgentId);
 

@@ -147,6 +147,12 @@ public class QueryReqBuilder {
         return aggregateType.name();
     }
 
+    private static boolean isDateFieldAlreadyPresent(SemanticParseInfo parseInfo,
+            String dateField) {
+        return parseInfo.getDimensions().stream()
+                .anyMatch(dimension -> dimension.getBizName().equalsIgnoreCase(dateField));
+    }
+
     public static Set<Order> getOrder(Set<Order> existingOrders, AggregateTypeEnum aggregator,
             SchemaElement metric) {
         if (existingOrders != null && !existingOrders.isEmpty()) {
