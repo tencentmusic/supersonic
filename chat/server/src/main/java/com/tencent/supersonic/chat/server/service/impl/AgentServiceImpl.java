@@ -1,5 +1,7 @@
 package com.tencent.supersonic.chat.server.service.impl;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.chat.api.pojo.request.ChatMemoryFilter;
@@ -17,12 +19,15 @@ import com.tencent.supersonic.common.pojo.ChatApp;
 import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.common.service.ChatModelService;
 import com.tencent.supersonic.common.util.JsonUtil;
+import com.tencent.supersonic.headless.server.service.DataSetService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
@@ -43,7 +48,54 @@ public class AgentServiceImpl extends ServiceImpl<AgentDOMapper, AgentDO> implem
     @Autowired
     private ChatModelService chatModelService;
 
+    @Autowired
+    private DataSetService dataSetService;
+
     private ExecutorService executorService = Executors.newFixedThreadPool(1);
+
+    @Override
+    public List<Agent> getAgents(User user) {
+        // 获取所有 Agent 并转换
+        List<Agent> agentList = getAgentDOList().stream()
+                .map(this::convert)
+                .collect(Collectors.toList());
+
+        // 获取用户具有权限的 dataSetIds
+        List<Long> authorizedDataSetIds = dataSetService.getDataSetsInheritAuth(user);
+
+        // 过滤 agentList，保留包含在 authorizedDataSetIds 中的 Agent
+        return agentList.stream()
+                .filter(agent -> hasAuthorizedDataSet(agent, authorizedDataSetIds))
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * 检查给定的 Agent 是否具有至少一个在 authorizedDataSetIds 中的数据集 ID。
+     *
+     * @param agent                 要检查的 Agent 对象
+     * @param authorizedDataSetIds   用户具有权限的数据集 ID 列表
+     * @return 如果 Agent 包含至少一个在 authorizedDataSetIds 中的数据集 ID，则返回 true；否则返回 false
+     */
+    private boolean hasAuthorizedDataSet(Agent agent, List<Long> authorizedDataSetIds) {
+        String toolConfig = agent.getToolConfig();
+        if (StringUtils.isBlank(toolConfig)) {
+            return false;
+        }
+
+        // 解析 toolConfig 字段并获取 tools 数组
+        JSONArray tools = JSONObject.parseObject(toolConfig).getJSONArray("tools");
+        if (tools == null) {
+            return false;
+        }
+
+        // 检查 tools 中的 dataSetIds 是否与 authorizedDataSetIds 有交集
+        return tools.stream()
+                .map(tool -> ((JSONObject) tool).getJSONArray("dataSetIds"))
+                .filter(Objects::nonNull)
+                .flatMap(Collection::stream)
+                .mapToLong(id -> ((Number) id).longValue())
+                .anyMatch(authorizedDataSetIds::contains);
+    }
 
     @Override
     public List<Agent> getAgents() {

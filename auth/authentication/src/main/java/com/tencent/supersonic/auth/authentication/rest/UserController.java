@@ -73,6 +73,13 @@ public class UserController {
         return userService.login(userCmd, request);
     }
 
+    @PostMapping("/loginByUrl")
+    public String loginByUrl(@RequestParam("username") String username,
+                             @RequestParam("projectId") String projectId,
+                             HttpServletRequest request) {
+        return userService.loginByUrl(username,projectId, request);
+    }
+
     @PostMapping("/generateToken")
     public UserToken generateToken(@RequestBody UserTokenReq userTokenReq,
             HttpServletRequest request, HttpServletResponse response) {

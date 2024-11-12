@@ -118,7 +118,11 @@ public class DimensionConverter {
             IdentifyType.valueOf(type.toLowerCase());
             return DimensionType.primary_key;
         } catch (IllegalArgumentException e) {
-            return DimensionType.valueOf(type);
+            try {
+                return DimensionType.valueOf(type);
+            } catch (IllegalArgumentException ex) {
+                return DimensionType.categorical;  // 或者根据业务需求选择其他默认值
+            }
         }
     }
 

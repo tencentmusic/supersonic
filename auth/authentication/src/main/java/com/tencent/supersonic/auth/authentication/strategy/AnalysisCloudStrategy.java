@@ -8,7 +8,7 @@ import com.tencent.supersonic.common.pojo.User;
 import org.springframework.stereotype.Service;
 
 @Service
-public class FakeUserStrategy implements UserStrategy {
+public class AnalysisCloudStrategy implements UserStrategy {
 
     @Override
     public boolean accept(boolean isEnableAuthentication) {

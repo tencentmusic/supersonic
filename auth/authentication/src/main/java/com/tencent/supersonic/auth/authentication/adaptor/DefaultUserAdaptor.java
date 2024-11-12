@@ -2,6 +2,7 @@ package com.tencent.supersonic.auth.authentication.adaptor;
 
 import javax.servlet.http.HttpServletRequest;
 
+import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.tencent.supersonic.auth.api.authentication.adaptor.UserAdaptor;
@@ -9,6 +10,8 @@ import com.tencent.supersonic.auth.api.authentication.pojo.Organization;
 import com.tencent.supersonic.auth.api.authentication.pojo.UserToken;
 import com.tencent.supersonic.auth.api.authentication.pojo.UserWithPassword;
 import com.tencent.supersonic.auth.api.authentication.request.UserReq;
+import com.tencent.supersonic.auth.api.authentication.response.AnalysisCloudTokenProjectLoginResponse;
+import com.tencent.supersonic.auth.authentication.exception.AuthErrorEnum;
 import com.tencent.supersonic.auth.authentication.persistence.dataobject.UserDO;
 import com.tencent.supersonic.auth.authentication.persistence.dataobject.UserTokenDO;
 import com.tencent.supersonic.auth.authentication.persistence.repository.UserRepository;
@@ -16,9 +19,13 @@ import com.tencent.supersonic.auth.authentication.utils.TokenService;
 import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.common.util.AESEncryptionUtil;
 import com.tencent.supersonic.common.util.ContextUtils;
+import com.tencent.supersonic.common.util.HttpClientUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.http.Header;
+import org.apache.http.message.BasicHeader;
 import org.springframework.beans.BeanUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -30,6 +37,8 @@ import java.util.stream.Collectors;
 @Slf4j
 public class DefaultUserAdaptor implements UserAdaptor {
 
+    private static final String ANALYSIS_CLOUD_URL = "https://10.148.155.29/migunet_iam";
+    private static final String TOKEN_PATH = "/project/getProjectInfoById";
     private List<UserDO> getUserDOList() {
         UserRepository userRepository = ContextUtils.getBean(UserRepository.class);
         return userRepository.getUserList();
@@ -107,6 +116,48 @@ public class DefaultUserAdaptor implements UserAdaptor {
         } catch (Exception e) {
             log.error("", e);
             throw new RuntimeException("password encrypt error, please try again");
+        }
+    }
+
+    @Override
+    public String loginByUrl(String username,String projectId, HttpServletRequest request) {
+        TokenService tokenService = ContextUtils.getBean(TokenService.class);
+        String appKey = tokenService.getAppKey(request);
+        //校验用户名，用户是否存在
+        UserDO userDO = getUser(username);
+        if (userDO == null) {
+            throw new RuntimeException("user not exist,please register");
+        }
+        //校验分析云token
+        String analysisToken = request.getHeader("token");
+        analysisCloudTokenLogin(analysisToken, projectId);
+
+        //账号及分析云token校验通过，创建用户信息对象
+        UserWithPassword user = UserWithPassword.get(userDO.getId(), userDO.getName(),
+                userDO.getDisplayName(), userDO.getEmail(), userDO.getPassword(),
+                userDO.getIsAdmin());
+        //用户信息对象以及appKey生成token
+        return tokenService.generateToken(UserWithPassword.convert(user), appKey);
+    }
+
+    public void analysisCloudTokenLogin(String token, String projectId) {
+        List<Header> headers = new ArrayList<Header>();
+        headers.add(new BasicHeader("token", token));
+        String result = HttpClientUtils.doPost(ANALYSIS_CLOUD_URL + TOKEN_PATH + "?id=" + projectId, headers, "", "UTF-8");
+        log.info("结果：" + result);
+        if (result == null) {
+            log.error("Token认证响应为null");
+            throw new RuntimeException("分析云Token认证失败");
+        }
+        try {
+            AnalysisCloudTokenProjectLoginResponse response = JSONObject.parseObject(result, AnalysisCloudTokenProjectLoginResponse.class);
+            if (!response.getRspcode().equals("0")) {
+                log.error("[分析云token认证失败,{}]", response.getRspdesc());
+                throw new RuntimeException(response.getRspdesc());
+            }
+        } catch (Throwable t) {
+            log.error("", t);
+            throw new RuntimeException(String.valueOf(AuthErrorEnum.ANALYSIS_CLOUD_TOKEN_LOGIN_FAILED));
         }
     }
 

@@ -43,4 +43,6 @@ public interface UserService {
     UserToken getUserToken(Long id);
 
     void deleteUserToken(Long id);
+
+    String loginByUrl(String username, String projectId, HttpServletRequest request);
 }

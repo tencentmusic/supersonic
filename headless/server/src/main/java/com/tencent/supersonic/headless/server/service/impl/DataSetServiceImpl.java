@@ -15,6 +15,7 @@ import com.tencent.supersonic.common.util.BeanMapper;
 import com.tencent.supersonic.headless.api.pojo.DataSetDetail;
 import com.tencent.supersonic.headless.api.pojo.MetaFilter;
 import com.tencent.supersonic.headless.api.pojo.QueryConfig;
+import com.tencent.supersonic.headless.api.pojo.SchemaItem;
 import com.tencent.supersonic.headless.api.pojo.enums.TagDefineType;
 import com.tencent.supersonic.headless.api.pojo.request.DataSetReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryDataSetReq;
@@ -149,6 +150,14 @@ public class DataSetServiceImpl extends ServiceImpl<DataSetDOMapper, DataSetDO>
     private List<DataSetResp> getDataSetsByAuth(User user, MetaFilter metaFilter) {
         List<DataSetResp> dataSetResps = getDataSetList(metaFilter);
         return getDataSetFilterByAuth(dataSetResps, user);
+    }
+
+    @Override
+    public List<Long> getDataSetsInheritAuth(User user) {
+        List<DataSetResp> dataSetResps = getDataSetList(new MetaFilter());
+        List<DataSetResp> dataSetFilterByDomainAuth = getDataSetFilterByDomainAuth(dataSetResps, user);
+        Set<DataSetResp> dataSetRespSet = new HashSet<>(dataSetFilterByDomainAuth);
+        return dataSetRespSet.stream().map(SchemaItem::getId).collect(Collectors.toList());
     }
 
     @Override

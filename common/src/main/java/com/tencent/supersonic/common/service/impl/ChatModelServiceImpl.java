@@ -14,6 +14,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -22,6 +23,34 @@ import java.util.stream.Collectors;
 @Service
 public class ChatModelServiceImpl extends ServiceImpl<ChatModelMapper, ChatModelDO>
         implements ChatModelService {
+
+    @Override
+    public List<ChatModel> getChatModels(User user) {
+        // 获取所有 ChatModel，并过滤仅返回用户有权限的 ChatModel
+        return list().stream()
+                .map(this::convert)
+                .filter(chatModelResp -> hasPermission(chatModelResp, user))
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * 检查给定的 ChatModel 是否有权限返回给用户
+     *
+     * @param chatModelResp 要检查的 ChatModel 对象
+     * @param user          当前用户
+     * @return 如果用户具有访问权限（在 viewers 或 admins 列表中），则返回 true；否则返回 false
+     */
+    private boolean hasPermission(ChatModel chatModelResp, User user) {
+        // 检查用户是否为当前 ChatModel 的管理员或创建者，或者是否为超级管理员
+        if (chatModelResp.getAdmins().contains(user.getName())
+                || user.getName().equalsIgnoreCase(chatModelResp.getCreatedBy())
+                || user.isSuperAdmin()) {
+            return true;
+        }
+        // 检查用户是否为当前 ChatModel 的查看者
+        return chatModelResp.getViewers().contains(user.getName());
+    }
+
     @Override
     public List<ChatModel> getChatModels() {
         return list().stream().map(this::convert).collect(Collectors.toList());
@@ -73,6 +102,12 @@ public class ChatModelServiceImpl extends ServiceImpl<ChatModelMapper, ChatModel
         }
         ChatModel chatModel = new ChatModel();
         BeanUtils.copyProperties(chatModelDO, chatModel);
+        if (StringUtils.isNotBlank(chatModelDO.getAdmin())) {
+            chatModel.setAdmins(Arrays.asList(chatModelDO.getAdmin().split(",")));
+        }
+        if (StringUtils.isNotBlank(chatModelDO.getViewer())) {
+            chatModel.setViewers(Arrays.asList(chatModelDO.getViewer().split(",")));
+        }
         chatModel.setConfig(JsonUtil.toObject(chatModelDO.getConfig(), ChatModelConfig.class));
         return chatModel;
     }

@@ -7,6 +7,8 @@ import com.tencent.supersonic.common.pojo.User;
 import java.util.List;
 
 public interface ChatModelService {
+    List<ChatModel> getChatModels(User user);
+
     List<ChatModel> getChatModels();
 
     ChatModel getChatModel(Integer id);

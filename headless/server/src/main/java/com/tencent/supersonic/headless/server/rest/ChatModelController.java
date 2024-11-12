@@ -53,8 +53,10 @@ public class ChatModelController {
     }
 
     @RequestMapping("/getModelList")
-    public List<ChatModel> getModelList() {
-        return chatModelService.getChatModels();
+    public List<ChatModel> getModelList(HttpServletRequest request,
+                                        HttpServletResponse response) {
+        User user = UserHolder.findUser(request, response);
+        return chatModelService.getChatModels(user);
     }
 
     @RequestMapping("/getModelAppList")

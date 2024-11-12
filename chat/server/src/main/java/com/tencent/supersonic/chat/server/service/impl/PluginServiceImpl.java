@@ -13,9 +13,11 @@ import com.tencent.supersonic.chat.server.plugin.event.PluginUpdateEvent;
 import com.tencent.supersonic.chat.server.service.PluginService;
 import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.common.util.JsonUtil;
+import com.tencent.supersonic.headless.server.service.DataSetService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -35,6 +37,9 @@ public class PluginServiceImpl implements PluginService {
     private PluginRepository pluginRepository;
 
     private ApplicationEventPublisher publisher;
+
+    @Autowired
+    private DataSetService dataSetService;
 
     public PluginServiceImpl(PluginRepository pluginRepository,
             ApplicationEventPublisher publisher) {
@@ -149,7 +154,26 @@ public class PluginServiceImpl implements PluginService {
 
     @Override
     public List<ChatPlugin> queryWithAuthCheck(PluginQueryReq pluginQueryReq, User user) {
-        return authCheck(query(pluginQueryReq), user);
+        List<ChatPlugin> chatPluginList = query(pluginQueryReq);
+        // 获取用户具有权限的 dataSetIds
+        List<Long> authorizedDataSetIds = dataSetService.getDataSetsInheritAuth(user);
+
+        // 过滤 chatPluginList，保留包含在 authorizedDataSetIds 中的 ChatPlugin
+        return chatPluginList.stream()
+                .filter(chatPlugin -> hasAuthorizedPlugin(chatPlugin, authorizedDataSetIds))
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * 检查给定的 ChatPlugin 是否具有至少一个在 authorizedDataSetIds 中的数据集 ID。
+     * @param chatPlugin             检查的 ChatPlugin 对象
+     * @param authorizedDataSetIds   用户具有权限的数据集 ID 列表
+     * @return 如果 ChatPlugin 包含至少一个在 authorizedDataSetIds 中的数据集 ID，则返回 true；否则返回 false
+     */
+    private boolean hasAuthorizedPlugin(ChatPlugin chatPlugin, List<Long> authorizedDataSetIds) {
+        List<Long> pluginDataSetList = chatPlugin.getDataSetList();
+        // 判断 pluginDataSetList 是否包含任意一个在 authorizedDataSetIds 中的 ID
+        return pluginDataSetList.stream().anyMatch(authorizedDataSetIds::contains);
     }
 
     @Override
