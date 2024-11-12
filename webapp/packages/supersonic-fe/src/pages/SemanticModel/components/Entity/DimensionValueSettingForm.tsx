@@ -213,7 +213,7 @@ const DimensionValueSettingForm: React.FC<Props> = ({
         >
           {dimensionVisible && (
             <Space size={20} style={{ marginBottom: 20 }}>
-              <Tooltip title={`立即将${KnowledgeConfigTypeWordingMap[type]}值导入字典`}>
+              <Tooltip title={`维度值可见后将定期启动导入任务，如果想立即启动可手动触发`}>
                 <Button
                   type="link"
                   size="small"

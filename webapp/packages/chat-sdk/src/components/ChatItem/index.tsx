@@ -443,7 +443,6 @@ const ChatItem: React.FC<Props> = ({
             : ''}
         </div>
         <div className={contentClass}>
-          {/* {!isSimpleMode && ( */}
           <>
             {currentAgent?.enableFeedback === 1 && !questionId && showExpandParseTip && (
               <div style={{ marginBottom: 10 }}>
@@ -489,7 +488,6 @@ const ChatItem: React.FC<Props> = ({
               />
             )}
           </>
-          {/* )} */}
 
           {executeMode && (
             <Spin spinning={entitySwitchLoading}>
