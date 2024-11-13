@@ -12,10 +12,13 @@ public class WebConfig implements WebMvcConfigurer {
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         registry.addResourceHandler("/webapp/**")
                 .addResourceLocations("classpath:/webapp/");
+
+        registry.addResourceHandler("/favicon.ico")
+                .addResourceLocations("classpath:/webapp/");
     }
 
     @Override
     public void addViewControllers(ViewControllerRegistry registry) {
-        registry.addViewController("/").setViewName("forward:webapp/index.html");
+        registry.addViewController("/").setViewName("forward:/webapp/index.html");
     }
 }
