@@ -545,6 +545,78 @@ public class UserDOExample {
             addCriterion("is_admin not between", value1, value2, "isAdmin");
             return (Criteria) this;
         }
+
+        // Add criteria methods for analysiscloudName field
+
+        public Criteria andAnalysiscloudNameIsNull() {
+            addCriterion("analysis_cloud_user_name is null");
+            return (Criteria) this;
+        }
+
+        public Criteria andAnalysiscloudNameIsNotNull() {
+            addCriterion("analysiscloud_name is not null");
+            return (Criteria) this;
+        }
+
+        public Criteria andAnalysiscloudNameEqualTo(String value) {
+            addCriterion("analysiscloud_name =", value, "analysiscloudName");
+            return (Criteria) this;
+        }
+
+        public Criteria andAnalysiscloudNameNotEqualTo(String value) {
+            addCriterion("analysiscloud_name <>", value, "analysiscloudName");
+            return (Criteria) this;
+        }
+
+        public Criteria andAnalysiscloudNameGreaterThan(String value) {
+            addCriterion("analysiscloud_name >", value, "analysiscloudName");
+            return (Criteria) this;
+        }
+
+        public Criteria andAnalysiscloudNameGreaterThanOrEqualTo(String value) {
+            addCriterion("analysiscloud_name >=", value, "analysiscloudName");
+            return (Criteria) this;
+        }
+
+        public Criteria andAnalysiscloudNameLessThan(String value) {
+            addCriterion("analysiscloud_name <", value, "analysiscloudName");
+            return (Criteria) this;
+        }
+
+        public Criteria andAnalysiscloudNameLessThanOrEqualTo(String value) {
+            addCriterion("analysiscloud_name <=", value, "analysiscloudName");
+            return (Criteria) this;
+        }
+
+        public Criteria andAnalysiscloudNameLike(String value) {
+            addCriterion("analysiscloud_name like", value, "analysiscloudName");
+            return (Criteria) this;
+        }
+
+        public Criteria andAnalysiscloudNameNotLike(String value) {
+            addCriterion("analysiscloud_name not like", value, "analysiscloudName");
+            return (Criteria) this;
+        }
+
+        public Criteria andAnalysiscloudNameIn(List<String> values) {
+            addCriterion("analysiscloud_name in", values, "analysiscloudName");
+            return (Criteria) this;
+        }
+
+        public Criteria andAnalysiscloudNameNotIn(List<String> values) {
+            addCriterion("analysiscloud_name not in", values, "analysiscloudName");
+            return (Criteria) this;
+        }
+
+        public Criteria andAnalysiscloudNameBetween(String value1, String value2) {
+            addCriterion("analysiscloud_name between", value1, value2, "analysiscloudName");
+            return (Criteria) this;
+        }
+
+        public Criteria andAnalysiscloudNameNotBetween(String value1, String value2) {
+            addCriterion("analysiscloud_name not between", value1, value2, "analysiscloudName");
+            return (Criteria) this;
+        }
     }
 
     /** s2_user */

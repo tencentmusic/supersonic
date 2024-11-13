@@ -2,6 +2,7 @@ package com.tencent.supersonic.headless.server.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.common.collect.Lists;
+import com.tencent.supersonic.common.config.GeneralManageConfig;
 import com.tencent.supersonic.common.pojo.QueryColumn;
 import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.common.pojo.enums.EngineType;
@@ -50,6 +51,9 @@ public class DatabaseServiceImpl extends ServiceImpl<DatabaseDOMapper, DatabaseD
     @Autowired
     private SqlUtils sqlUtils;
 
+    @Autowired
+    private GeneralManageConfig generalManageConfig;
+
     @Lazy
     @Autowired
     private ModelService datasourceService;
@@ -85,20 +89,27 @@ public class DatabaseServiceImpl extends ServiceImpl<DatabaseDOMapper, DatabaseD
         List<DatabaseResp> databaseResps =
                 list().stream().map(DatabaseConverter::convert).collect(Collectors.toList());
         fillPermission(databaseResps, user);
-        return databaseResps;
+        return databaseResps.stream().filter(DatabaseResp::isHasPermission).collect(Collectors.toList());
     }
 
     private void fillPermission(List<DatabaseResp> databaseResps, User user) {
+        List<Long> chatDatabaseIds = generalManageConfig.getChatDatabaseIds();
+        boolean hasCommonDatabases = chatDatabaseIds != null && !chatDatabaseIds.isEmpty();
         databaseResps.forEach(databaseResp -> {
-            if (databaseResp.getAdmins().contains(user.getName())
-                    || user.getName().equalsIgnoreCase(databaseResp.getCreatedBy())
-                    || user.isSuperAdmin()) {
+            if (hasCommonDatabases && chatDatabaseIds.contains(databaseResp.getId())) {
                 databaseResp.setHasPermission(true);
-                databaseResp.setHasEditPermission(true);
                 databaseResp.setHasUsePermission(true);
-            }
-            if (databaseResp.getViewers().contains(user.getName())) {
-                databaseResp.setHasUsePermission(true);
+            } else {
+                if (databaseResp.getAdmins().contains(user.getName())
+                        || user.getName().equalsIgnoreCase(databaseResp.getCreatedBy())
+                        || user.isSuperAdmin()) {
+                    databaseResp.setHasPermission(true);
+                    databaseResp.setHasEditPermission(true);
+                    databaseResp.setHasUsePermission(true);
+                } else if (databaseResp.getViewers().contains(user.getName())) {
+                    databaseResp.setHasPermission(true);
+                    databaseResp.setHasUsePermission(true);
+                }
             }
         });
     }

@@ -32,4 +32,10 @@ public class ChatModel {
     private List<String> admins = Lists.newArrayList();
 
     private List<String> viewers = Lists.newArrayList();
+
+    private boolean hasPermission = false;
+
+    private boolean hasUsePermission = false;
+
+    private boolean hasEditPermission = false;
 }

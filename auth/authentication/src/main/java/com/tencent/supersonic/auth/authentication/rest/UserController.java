@@ -74,10 +74,8 @@ public class UserController {
     }
 
     @PostMapping("/loginByUrl")
-    public String loginByUrl(@RequestParam("username") String username,
-                             @RequestParam("projectId") String projectId,
-                             HttpServletRequest request) {
-        return userService.loginByUrl(username,projectId, request);
+    public String loginByUrl(HttpServletRequest request) {
+        return userService.loginByUrl(request);
     }
 
     @PostMapping("/generateToken")

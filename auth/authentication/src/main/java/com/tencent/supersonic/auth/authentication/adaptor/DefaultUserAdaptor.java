@@ -49,6 +49,11 @@ public class DefaultUserAdaptor implements UserAdaptor {
         return userRepository.getUser(name);
     }
 
+    private UserDO getUserByAnalysisCloudName(String name) {
+        UserRepository userRepository = ContextUtils.getBean(UserRepository.class);
+        return userRepository.getUserByAnalysisCloudName(name);
+    }
+
     @Override
     public List<String> getUserNames() {
         return getUserDOList().stream().map(UserDO::getName).collect(Collectors.toList());
@@ -120,17 +125,24 @@ public class DefaultUserAdaptor implements UserAdaptor {
     }
 
     @Override
-    public String loginByUrl(String username,String projectId, HttpServletRequest request) {
+    public String loginByUrl(HttpServletRequest request) {
+        // 从请求头中获取 username ,projectId和 token
+        String username = request.getHeader("username");
+        String analysisToken = request.getHeader("token");
+        String projectId = request.getHeader("projectId");
+        // 校验请求头中的参数
+        if (username == null || analysisToken == null || projectId == null) {
+            throw new IllegalArgumentException("Missing required header parameters: username, token, projectId");
+        }
         TokenService tokenService = ContextUtils.getBean(TokenService.class);
         String appKey = tokenService.getAppKey(request);
         //校验用户名，用户是否存在
-        UserDO userDO = getUser(username);
+        UserDO userDO = getUserByAnalysisCloudName(username);
         if (userDO == null) {
             throw new RuntimeException("user not exist,please register");
         }
         //校验分析云token
-        String analysisToken = request.getHeader("token");
-        analysisCloudTokenLogin(analysisToken, projectId);
+//        analysisCloudTokenLogin(analysisToken, projectId);
 
         //账号及分析云token校验通过，创建用户信息对象
         UserWithPassword user = UserWithPassword.get(userDO.getId(), userDO.getName(),

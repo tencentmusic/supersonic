@@ -3,6 +3,7 @@ package com.tencent.supersonic.common.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.tencent.supersonic.common.config.ChatModel;
+import com.tencent.supersonic.common.config.GeneralManageConfig;
 import com.tencent.supersonic.common.persistence.dataobject.ChatModelDO;
 import com.tencent.supersonic.common.persistence.mapper.ChatModelMapper;
 import com.tencent.supersonic.common.pojo.ChatModelConfig;
@@ -12,6 +13,7 @@ import com.tencent.supersonic.common.util.JsonUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
@@ -24,36 +26,61 @@ import java.util.stream.Collectors;
 public class ChatModelServiceImpl extends ServiceImpl<ChatModelMapper, ChatModelDO>
         implements ChatModelService {
 
-    @Override
-    public List<ChatModel> getChatModels(User user) {
-        // 获取所有 ChatModel，并过滤仅返回用户有权限的 ChatModel
-        return list().stream()
-                .map(this::convert)
-                .filter(chatModelResp -> hasPermission(chatModelResp, user))
-                .collect(Collectors.toList());
-    }
-
-    /**
-     * 检查给定的 ChatModel 是否有权限返回给用户
-     *
-     * @param chatModelResp 要检查的 ChatModel 对象
-     * @param user          当前用户
-     * @return 如果用户具有访问权限（在 viewers 或 admins 列表中），则返回 true；否则返回 false
-     */
-    private boolean hasPermission(ChatModel chatModelResp, User user) {
-        // 检查用户是否为当前 ChatModel 的管理员或创建者，或者是否为超级管理员
-        if (chatModelResp.getAdmins().contains(user.getName())
-                || user.getName().equalsIgnoreCase(chatModelResp.getCreatedBy())
-                || user.isSuperAdmin()) {
-            return true;
-        }
-        // 检查用户是否为当前 ChatModel 的查看者
-        return chatModelResp.getViewers().contains(user.getName());
-    }
+    @Autowired
+    private GeneralManageConfig generalManageConfig;
 
     @Override
     public List<ChatModel> getChatModels() {
         return list().stream().map(this::convert).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<ChatModel> getChatModels(User user) {
+        // 获取所有 ChatModel，并过滤仅返回用户有权限的 ChatModel
+        List<ChatModel> chatModelList = list().stream().map(this::convert).collect(Collectors.toList());
+        setPermission(chatModelList, user);
+        return chatModelList.stream().filter(ChatModel::isHasPermission).collect(Collectors.toList());
+    }
+
+    private void setPermission(List<ChatModel> chatModelList, User user) {
+        List<Integer> chatModelIds = generalManageConfig.getChatModelIds();
+        // 先检查 chatModelIds 是否有效
+        boolean hasCommonModels = chatModelIds != null && !chatModelIds.isEmpty();
+        chatModelList.forEach(chatModel -> {
+            if (hasCommonModels && chatModelIds.contains(chatModel.getId())) {
+                // 设置通用模型的权限
+                setCommonModelPermissions(chatModel);
+            } else {
+                // 根据用户权限设置 ChatModel 的权限
+                setPermissionsForUser(chatModel, user);
+            }
+        });
+    }
+    private void setCommonModelPermissions(ChatModel chatModel) {
+        chatModel.setHasPermission(true);
+        chatModel.setHasUsePermission(true);
+        chatModel.setHasEditPermission(false); // 通用大模型不可编辑
+    }
+
+    private void setPermissionsForUser(ChatModel chatModel, User user) {
+        if (isAdminOrCreatorOrSuperAdmin(chatModel, user)) {
+            chatModel.setHasPermission(true);
+            chatModel.setHasEditPermission(true);
+            chatModel.setHasUsePermission(true);
+        } else if (isViewer(chatModel, user)) {
+            chatModel.setHasPermission(true);
+            chatModel.setHasUsePermission(true);
+        }
+    }
+
+    private boolean isAdminOrCreatorOrSuperAdmin(ChatModel chatModel, User user) {
+        return chatModel.getAdmins().contains(user.getName())
+                || user.getName().equalsIgnoreCase(chatModel.getCreatedBy())
+                || user.isSuperAdmin();
+    }
+
+    private boolean isViewer(ChatModel chatModel, User user) {
+        return chatModel.getViewers().contains(user.getName());
     }
 
     @Override

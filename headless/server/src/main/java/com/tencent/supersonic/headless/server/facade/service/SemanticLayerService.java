@@ -24,7 +24,7 @@ public interface SemanticLayerService {
 
     DataSetSchema getDataSetSchema(Long id);
 
-    List<ItemResp> getDomainDataSetTree();
+    List<ItemResp> getDomainDataSetTree(User user);
 
     List<DimensionResp> getDimensions(MetaFilter metaFilter);
 

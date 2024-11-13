@@ -25,7 +25,7 @@ public interface UserAdaptor {
 
     String login(UserReq userReq, String appKey);
 
-    String loginByUrl(String username,String projectId, HttpServletRequest request);
+    String loginByUrl(HttpServletRequest request);
 
     List<User> getUserByOrg(String key);
 

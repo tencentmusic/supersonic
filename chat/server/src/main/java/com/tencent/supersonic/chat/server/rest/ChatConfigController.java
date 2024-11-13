@@ -67,8 +67,9 @@ public class ChatConfigController {
     }
 
     @GetMapping("/getDomainDataSetTree")
-    public List<ItemResp> getDomainDataSetTree() {
-        return semanticLayerService.getDomainDataSetTree();
+    public List<ItemResp> getDomainDataSetTree(HttpServletRequest request, HttpServletResponse response) {
+        User user = UserHolder.findUser(request, response);
+        return semanticLayerService.getDomainDataSetTree(user);
     }
 
     @GetMapping("/getDataSetSchema/{id}")

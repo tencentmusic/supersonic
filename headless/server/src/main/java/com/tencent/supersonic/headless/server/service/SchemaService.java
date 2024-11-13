@@ -55,7 +55,7 @@ public interface SchemaService {
 
     List<ItemUseResp> getStatInfo(ItemUseReq itemUseReq) throws ExecutionException;
 
-    List<ItemResp> getDomainDataSetTree();
+    List<ItemResp> getDomainDataSetTree(User user);
 
     void getSchemaYamlTpl(SemanticSchemaResp semanticSchemaResp,
             Map<String, List<DimensionYamlTpl>> dimensionYamlMap,

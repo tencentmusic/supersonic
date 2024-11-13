@@ -82,8 +82,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public String loginByUrl(String username,String projectId, HttpServletRequest request) {
-        return ComponentFactory.getUserAdaptor().loginByUrl(username,projectId, request);
+    public String loginByUrl(HttpServletRequest request) {
+        return ComponentFactory.getUserAdaptor().loginByUrl(request);
     }
 
     @Override

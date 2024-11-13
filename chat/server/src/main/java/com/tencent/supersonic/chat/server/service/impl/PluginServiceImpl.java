@@ -152,25 +152,34 @@ public class PluginServiceImpl implements PluginService {
         return functionCallConfig;
     }
 
+    //    @Override
+//    public List<ChatPlugin> queryWithAuthCheck(PluginQueryReq pluginQueryReq, User user) {
+//        return authCheck(query(pluginQueryReq), user);
+//    }
     @Override
     public List<ChatPlugin> queryWithAuthCheck(PluginQueryReq pluginQueryReq, User user) {
         List<ChatPlugin> chatPluginList = query(pluginQueryReq);
+
+        if (user.isSuperAdmin()){
+            return chatPluginList;
+        }
         // 获取用户具有权限的 dataSetIds
         List<Long> authorizedDataSetIds = dataSetService.getDataSetsInheritAuth(user);
 
         // 过滤 chatPluginList，保留包含在 authorizedDataSetIds 中的 ChatPlugin
         return chatPluginList.stream()
-                .filter(chatPlugin -> hasAuthorizedPlugin(chatPlugin, authorizedDataSetIds))
+                .filter(chatPlugin -> hasAuthorizedPlugin(chatPlugin, authorizedDataSetIds,user))
                 .collect(Collectors.toList());
     }
 
     /**
-     * 检查给定的 ChatPlugin 是否具有至少一个在 authorizedDataSetIds 中的数据集 ID。
-     * @param chatPlugin             检查的 ChatPlugin 对象
-     * @param authorizedDataSetIds   用户具有权限的数据集 ID 列表
      * @return 如果 ChatPlugin 包含至少一个在 authorizedDataSetIds 中的数据集 ID，则返回 true；否则返回 false
      */
-    private boolean hasAuthorizedPlugin(ChatPlugin chatPlugin, List<Long> authorizedDataSetIds) {
+    private boolean hasAuthorizedPlugin(ChatPlugin chatPlugin, List<Long> authorizedDataSetIds,User user) {
+        // 判断是否是创建者
+        if (chatPlugin.getCreatedBy().contains(user.getName())) {
+            return true;
+        }
         List<Long> pluginDataSetList = chatPlugin.getDataSetList();
         // 判断 pluginDataSetList 是否包含任意一个在 authorizedDataSetIds 中的 ID
         return pluginDataSetList.stream().anyMatch(authorizedDataSetIds::contains);

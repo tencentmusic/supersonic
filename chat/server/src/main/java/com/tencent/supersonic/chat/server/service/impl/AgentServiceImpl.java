@@ -56,27 +56,29 @@ public class AgentServiceImpl extends ServiceImpl<AgentDOMapper, AgentDO> implem
     @Override
     public List<Agent> getAgents(User user) {
         // 获取所有 Agent 并转换
-        List<Agent> agentList = getAgentDOList().stream()
-                .map(this::convert)
-                .collect(Collectors.toList());
+        List<Agent> agentList = getAgentDOList().stream().map(this::convert).collect(Collectors.toList());
 
+        if (user.isSuperAdmin()) {
+            return agentList;
+        }
         // 获取用户具有权限的 dataSetIds
         List<Long> authorizedDataSetIds = dataSetService.getDataSetsInheritAuth(user);
 
         // 过滤 agentList，保留包含在 authorizedDataSetIds 中的 Agent
         return agentList.stream()
-                .filter(agent -> hasAuthorizedDataSet(agent, authorizedDataSetIds))
+                .filter(agent -> hasAuthorizedDataSet(agent, authorizedDataSetIds, user))
                 .collect(Collectors.toList());
     }
 
     /**
-     * 检查给定的 Agent 是否具有至少一个在 authorizedDataSetIds 中的数据集 ID。
-     *
-     * @param agent                 要检查的 Agent 对象
-     * @param authorizedDataSetIds   用户具有权限的数据集 ID 列表
      * @return 如果 Agent 包含至少一个在 authorizedDataSetIds 中的数据集 ID，则返回 true；否则返回 false
      */
-    private boolean hasAuthorizedDataSet(Agent agent, List<Long> authorizedDataSetIds) {
+    private boolean hasAuthorizedDataSet(Agent agent, List<Long> authorizedDataSetIds,User user) {
+        // 判断是否是创建者
+        if (agent.getCreatedBy().contains(user.getName())) {
+            return true;
+        }
+
         String toolConfig = agent.getToolConfig();
         if (StringUtils.isBlank(toolConfig)) {
             return false;
