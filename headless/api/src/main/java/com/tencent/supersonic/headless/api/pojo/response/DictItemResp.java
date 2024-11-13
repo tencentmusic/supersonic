@@ -1,10 +1,9 @@
 package com.tencent.supersonic.headless.api.pojo.response;
 
-import javax.validation.constraints.NotNull;
-
 import com.tencent.supersonic.common.pojo.enums.StatusEnum;
 import com.tencent.supersonic.common.pojo.enums.TypeEnums;
 import com.tencent.supersonic.headless.api.pojo.ItemValueConfig;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 import static com.tencent.supersonic.common.pojo.Constants.UNDERLINE;

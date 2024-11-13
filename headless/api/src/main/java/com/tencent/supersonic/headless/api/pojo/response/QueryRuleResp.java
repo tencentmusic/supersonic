@@ -1,11 +1,10 @@
 package com.tencent.supersonic.headless.api.pojo.response;
 
-import javax.validation.constraints.NotNull;
-
 import com.tencent.supersonic.headless.api.pojo.ActionInfo;
 import com.tencent.supersonic.headless.api.pojo.RuleInfo;
 import com.tencent.supersonic.headless.api.pojo.SchemaItem;
 import com.tencent.supersonic.headless.api.pojo.enums.QueryRuleType;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 import java.util.Map;
