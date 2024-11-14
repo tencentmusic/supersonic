@@ -90,11 +90,21 @@ const ModelFieldForm: React.FC<Props> = ({
       dataIndex: 'type',
       width: 250,
       render: (_: any, record: FieldItem) => {
-        const type = fields.find((field) => field.bizName === record.bizName)?.type;
-        const classType = fields.find((field) => field.bizName === record.bizName)?.classType;
-        const selectTypeValue = [EnumModelDataType.DIMENSION].includes(classType)
-          ? classType
-          : type;
+        let type = fields.find((field) => field.bizName === record.bizName)?.type;
+        let classType = fields.find((field) => field.bizName === record.bizName)?.classType;
+
+        // if (type === EnumDataSourceType.PRIMARY) {
+        //   classType = EnumModelDataType.DIMENSION;
+        //   type = EnumDataSourceType.PRIMARY_KEY;
+        // }
+        // if (type === EnumDataSourceType.FOREIGN) {
+        //   classType = EnumModelDataType.DIMENSION;
+        //   type = EnumDataSourceType.FOREIGN_KEY;
+        // }
+
+        let selectTypeValue = [EnumModelDataType.DIMENSION].includes(classType) ? classType : type;
+
+        console.log(type, classType, selectTypeValue, record, 222, fields);
         return (
           <Space>
             <Select
@@ -120,11 +130,6 @@ const ModelFieldForm: React.FC<Props> = ({
                   defaultParams = {
                     type: DIM_OPTIONS[0].value,
                     classType: EnumModelDataType.DIMENSION,
-                  };
-                } else if (value === EnumDataSourceType.PRIMARY) {
-                  defaultParams = {
-                    type: EnumDataSourceType.PRIMARY,
-                    classType: EnumModelDataType.IDENTIFIERS,
                   };
                 } else {
                   defaultParams = {
@@ -167,6 +172,11 @@ const ModelFieldForm: React.FC<Props> = ({
                     defaultParams = {
                       dateFormat: DATE_FORMATTER[0],
                       timeGranularity: 'day',
+                    };
+                  } else if (value === EnumDataSourceType.PRIMARY) {
+                    defaultParams = {
+                      type: EnumDataSourceType.PRIMARY,
+                      classType: EnumModelDataType.IDENTIFIERS,
                     };
                   } else {
                     defaultParams = {
@@ -273,27 +283,28 @@ const ModelFieldForm: React.FC<Props> = ({
             );
           }
         }
-
-        if (type === EnumDataSourceType.CATEGORICAL) {
-          const isTag = fields.find((field) => field.bizName === record.bizName)?.isTag;
-          return (
-            <Space>
+        if (process.env.SHOW_TAG) {
+          if (type === EnumDataSourceType.CATEGORICAL) {
+            const isTag = fields.find((field) => field.bizName === record.bizName)?.isTag;
+            return (
               <Space>
-                <span>设为标签:</span>
-                <Switch
-                  defaultChecked
-                  size="small"
-                  checked={!!isTag}
-                  onChange={(value) => {
-                    handleFieldChange(record, 'isTag', value);
-                  }}
-                />
-                <Tooltip title="如果勾选，代表维度的取值都是一种“标签”，可用作对实体的圈选">
-                  <ExclamationCircleOutlined />
-                </Tooltip>
+                <Space>
+                  <span>设为标签:</span>
+                  <Switch
+                    defaultChecked
+                    size="small"
+                    checked={!!isTag}
+                    onChange={(value) => {
+                      handleFieldChange(record, 'isTag', value);
+                    }}
+                  />
+                  <Tooltip title="如果勾选，代表维度的取值都是一种“标签”，可用作对实体的圈选">
+                    <ExclamationCircleOutlined />
+                  </Tooltip>
+                </Space>
               </Space>
-            </Space>
-          );
+            );
+          }
         }
         if ([EnumDataSourceType.TIME, EnumDataSourceType.PARTITION_TIME].includes(type)) {
           const dateFormat = fields.find((field) => field.bizName === record.bizName)?.dateFormat;

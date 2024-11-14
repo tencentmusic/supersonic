@@ -75,14 +75,14 @@ export const TYPE_OPTIONS = [
     label: '度量',
     value: EnumDataSourceType.MEASURES,
   },
-  {
-    label: '主键',
-    value: EnumDataSourceType.PRIMARY,
-  },
-  {
-    label: '外键',
-    value: EnumDataSourceType.FOREIGN,
-  },
+  // {
+  //   label: '主键',
+  //   value: EnumDataSourceType.PRIMARY,
+  // },
+  // {
+  //   label: '外键',
+  //   value: EnumDataSourceType.FOREIGN,
+  // },
 ];
 
 export const AGG_OPTIONS = [

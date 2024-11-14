@@ -60,6 +60,7 @@ public abstract class RuleSemanticQuery extends BaseSemanticQuery {
         convertBizNameToName(dataSetSchema, queryStructReq);
         QuerySqlReq querySQLReq = queryStructReq.convert();
         parseInfo.getSqlInfo().setParsedS2SQL(querySQLReq.getSql());
+        parseInfo.getSqlInfo().setCorrectedS2SQL(querySQLReq.getSql());
     }
 
     protected QueryStructReq convertQueryStruct() {
