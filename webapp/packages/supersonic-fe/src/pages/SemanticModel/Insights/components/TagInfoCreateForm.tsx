@@ -78,6 +78,9 @@ const TagInfoCreateForm: React.FC<CreateFormProps> = ({
   const backward = () => setCurrentStep(currentStep - 1);
 
   const queryModelDetail = async (modelId) => {
+    if (!modelId) {
+      return;
+    }
     const { code, data } = await getModelDetail({ modelId });
     if (code === 200) {
       if (Array.isArray(data?.modelDetail?.fields)) {
