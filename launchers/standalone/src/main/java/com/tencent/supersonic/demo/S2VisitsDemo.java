@@ -18,7 +18,13 @@ import com.tencent.supersonic.chat.server.plugin.build.webservice.WebServiceQuer
 import com.tencent.supersonic.common.pojo.ChatApp;
 import com.tencent.supersonic.common.pojo.JoinCondition;
 import com.tencent.supersonic.common.pojo.ModelRela;
-import com.tencent.supersonic.common.pojo.enums.*;
+import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
+import com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum;
+import com.tencent.supersonic.common.pojo.enums.AppModule;
+import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
+import com.tencent.supersonic.common.pojo.enums.SensitiveLevelEnum;
+import com.tencent.supersonic.common.pojo.enums.StatusEnum;
+import com.tencent.supersonic.common.pojo.enums.TypeEnums;
 import com.tencent.supersonic.common.util.ChatAppManager;
 import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.headless.api.pojo.DataSetDetail;
@@ -40,7 +46,13 @@ import com.tencent.supersonic.headless.api.pojo.enums.IdentifyType;
 import com.tencent.supersonic.headless.api.pojo.enums.MetricDefineType;
 import com.tencent.supersonic.headless.api.pojo.enums.SemanticType;
 import com.tencent.supersonic.headless.api.pojo.enums.TagDefineType;
-import com.tencent.supersonic.headless.api.pojo.request.*;
+import com.tencent.supersonic.headless.api.pojo.request.DataSetReq;
+import com.tencent.supersonic.headless.api.pojo.request.DimensionReq;
+import com.tencent.supersonic.headless.api.pojo.request.DomainReq;
+import com.tencent.supersonic.headless.api.pojo.request.MetricReq;
+import com.tencent.supersonic.headless.api.pojo.request.ModelReq;
+import com.tencent.supersonic.headless.api.pojo.request.TagObjectReq;
+import com.tencent.supersonic.headless.api.pojo.request.TermReq;
 import com.tencent.supersonic.headless.api.pojo.response.DataSetResp;
 import com.tencent.supersonic.headless.api.pojo.response.DatabaseResp;
 import com.tencent.supersonic.headless.api.pojo.response.DimensionResp;
@@ -48,12 +60,15 @@ import com.tencent.supersonic.headless.api.pojo.response.DomainResp;
 import com.tencent.supersonic.headless.api.pojo.response.MetricResp;
 import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
 import com.tencent.supersonic.headless.api.pojo.response.TagObjectResp;
-import io.swagger.models.auth.In;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 @Component
 @Slf4j
@@ -87,8 +102,8 @@ public class S2VisitsDemo extends S2BaseDemo {
             updateMetric_pv(pvUvModel, departmentDimension, userDimension, metricPv);
 
             // create dict conf for dimensions
-            createDictConf(departmentDimension);
-            createDictConf(userDimension);
+            enableDimensionValue(departmentDimension);
+            enableDimensionValue(userDimension);
 
             // create data set
             DataSetResp s2DataSet = addDataSet(s2Domain);
@@ -131,7 +146,6 @@ public class S2VisitsDemo extends S2BaseDemo {
         submitText(chatId.intValue(), agentId, "超音数 访问次数");
         submitText(chatId.intValue(), agentId, "按部门统计近7天访问次数");
         submitText(chatId.intValue(), agentId, "alice 停留时长");
-        submitText(chatId.intValue(), agentId, "访问次数最高的部门");
     }
 
     private void submitText(int chatId, int agentId, String queryText) {
@@ -141,8 +155,8 @@ public class S2VisitsDemo extends S2BaseDemo {
 
     private Integer addAgent(long dataSetId) {
         Agent agent = new Agent();
-        agent.setName("算指标");
-        agent.setDescription("帮助您用自然语言查询指标，支持时间限定、条件筛选、下钻维度以及聚合统计");
+        agent.setName("超音数分析助手");
+        agent.setDescription("帮忙您对超音数产品的用户访问情况做分析");
         agent.setStatus(1);
         agent.setEnableSearch(1);
         agent.setExamples(Lists.newArrayList("近15天超音数访问次数汇总", "按部门统计超音数的访问人数", "对比alice和lucy的停留时长",
@@ -168,7 +182,7 @@ public class S2VisitsDemo extends S2BaseDemo {
 
     public DomainResp addDomain() {
         DomainReq domainReq = new DomainReq();
-        domainReq.setName("超音数");
+        domainReq.setName("产品数据");
         domainReq.setBizName("supersonic");
         domainReq.setParentId(0L);
         domainReq.setStatus(StatusEnum.ONLINE.getCode());
@@ -342,13 +356,6 @@ public class S2VisitsDemo extends S2BaseDemo {
         dimensionReq.setExpr("page");
         dimensionReq.setDimValueMaps(Collections.emptyList());
         dimensionService.updateDimension(dimensionReq, defaultUser);
-    }
-
-    private void createDictConf(DimensionResp dimension) {
-        dictConfService.addDictConf(DictItemReq.builder().type(TypeEnums.DIMENSION)
-                .itemId(dimension.getId()).status(StatusEnum.ONLINE).build(), defaultUser);
-        dictTaskService.addDictTask(DictSingleTaskReq.builder().itemId(dimension.getId())
-                .type(TypeEnums.DIMENSION).build(), defaultUser);
     }
 
     public void updateMetric(ModelResp stayTimeModel, DimensionResp departmentDimension,

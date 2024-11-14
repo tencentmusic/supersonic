@@ -20,6 +20,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum.MAX;
 import static com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum.NONE;
 import static com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum.SUM;
 
@@ -46,6 +47,7 @@ public class MetricTest extends BaseTest {
         expectedParseInfo.setQueryType(QueryType.AGGREGATE);
 
         assertQueryResult(expectedResult, actualResult);
+        assert actualResult.getQueryResults().size() == 1;
     }
 
     @Test
@@ -67,6 +69,7 @@ public class MetricTest extends BaseTest {
         expectedParseInfo.setQueryType(QueryType.AGGREGATE);
 
         assertQueryResult(expectedResult, actualResult);
+        assert actualResult.getQueryResults().size() == 4;
     }
 
     @Test
@@ -93,6 +96,7 @@ public class MetricTest extends BaseTest {
         expectedParseInfo.setQueryType(QueryType.AGGREGATE);
 
         assertQueryResult(expectedResult, actualResult);
+        assert actualResult.getQueryResults().size() == 2;
     }
 
     @Test
@@ -105,7 +109,7 @@ public class MetricTest extends BaseTest {
         expectedResult.setChatContext(expectedParseInfo);
 
         expectedResult.setQueryMode(MetricTopNQuery.QUERY_MODE);
-        expectedParseInfo.setAggType(SUM);
+        expectedParseInfo.setAggType(MAX);
 
         expectedParseInfo.getMetrics().add(DataUtils.getSchemaElement("访问次数"));
         expectedParseInfo.getDimensions().add(DataUtils.getSchemaElement("用户"));
@@ -135,6 +139,7 @@ public class MetricTest extends BaseTest {
         expectedParseInfo.setQueryType(QueryType.AGGREGATE);
 
         assertQueryResult(expectedResult, actualResult);
+        assert actualResult.getQueryResults().size() == 4;
     }
 
     @Test
@@ -144,7 +149,7 @@ public class MetricTest extends BaseTest {
         String dateStr = textFormat.format(format.parse(startDay));
 
         QueryResult actualResult =
-                submitNewChat(String.format("想知道%salice的访问次数", dateStr), DataUtils.metricAgentId);
+                submitNewChat(String.format("alice在%s的访问次数", dateStr), DataUtils.metricAgentId);
 
         QueryResult expectedResult = new QueryResult();
         SemanticParseInfo expectedParseInfo = new SemanticParseInfo();

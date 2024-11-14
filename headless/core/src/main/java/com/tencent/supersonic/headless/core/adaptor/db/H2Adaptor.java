@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import com.tencent.supersonic.headless.api.pojo.DBColumn;
+import com.tencent.supersonic.headless.api.pojo.enums.FieldType;
 import com.tencent.supersonic.headless.core.pojo.ConnectInfo;
 import lombok.extern.slf4j.Slf4j;
 
@@ -54,7 +55,8 @@ public class H2Adaptor extends BaseDbAdaptor {
             String columnName = columns.getString("COLUMN_NAME");
             String dataType = columns.getString("TYPE_NAME");
             String remarks = columns.getString("REMARKS");
-            dbColumns.add(new DBColumn(columnName, dataType, remarks));
+            FieldType fieldType = classifyColumnType(dataType);
+            dbColumns.add(new DBColumn(columnName, dataType, remarks, fieldType));
         }
         return dbColumns;
     }

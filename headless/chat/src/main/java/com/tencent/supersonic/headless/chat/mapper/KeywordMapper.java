@@ -33,32 +33,32 @@ public class KeywordMapper extends BaseMapper {
     @Override
     public void doMap(ChatQueryContext chatQueryContext) {
         String queryText = chatQueryContext.getRequest().getQueryText();
-        // 1.hanlpDict Match
+
+        // 1. hanlpDict Match
         List<S2Term> terms =
                 HanlpHelper.getTerms(queryText, chatQueryContext.getModelIdToDataSetIds());
         HanlpDictMatchStrategy hanlpMatchStrategy =
                 ContextUtils.getBean(HanlpDictMatchStrategy.class);
+        List<HanlpMapResult> hanlpMatchResults = getMatches(chatQueryContext, hanlpMatchStrategy);
+        convertMapResultToMapInfo(hanlpMatchResults, chatQueryContext, terms);
 
-        List<HanlpMapResult> matchResults = getMatches(chatQueryContext, hanlpMatchStrategy);
-
-        convertHanlpMapResultToMapInfo(matchResults, chatQueryContext, terms);
-
-        // 2.database Match
+        // 2. database Match
         DatabaseMatchStrategy databaseMatchStrategy =
                 ContextUtils.getBean(DatabaseMatchStrategy.class);
-        List<DatabaseMapResult> databaseResults =
+        List<DatabaseMapResult> databaseMatchResults =
                 getMatches(chatQueryContext, databaseMatchStrategy);
-        convertDatabaseMapResultToMapInfo(chatQueryContext, databaseResults);
+        convertMapResultToMapInfo(chatQueryContext, databaseMatchResults);
     }
 
-    private void convertHanlpMapResultToMapInfo(List<HanlpMapResult> mapResults,
+    private void convertMapResultToMapInfo(List<HanlpMapResult> mapResults,
             ChatQueryContext chatQueryContext, List<S2Term> terms) {
         if (CollectionUtils.isEmpty(mapResults)) {
             return;
         }
+
         HanlpHelper.transLetterOriginal(mapResults);
-        Map<String, Long> wordNatureToFrequency = terms.stream()
-                .collect(Collectors.toMap(entry -> entry.getWord() + entry.getNature(),
+        Map<String, Long> wordNatureToFrequency =
+                terms.stream().collect(Collectors.toMap(term -> term.getWord() + term.getNature(),
                         term -> Long.valueOf(term.getFrequency()), (value1, value2) -> value2));
 
         for (HanlpMapResult hanlpMapResult : mapResults) {
@@ -74,9 +74,10 @@ public class KeywordMapper extends BaseMapper {
                 Long elementID = NatureHelper.getElementID(nature);
                 SchemaElement element = getSchemaElement(dataSetId, elementType, elementID,
                         chatQueryContext.getSemanticSchema());
-                if (element == null) {
+                if (Objects.isNull(element)) {
                     continue;
                 }
+
                 Long frequency = wordNatureToFrequency.get(hanlpMapResult.getName() + nature);
                 SchemaElementMatch schemaElementMatch = SchemaElementMatch.builder()
                         .element(element).frequency(frequency).word(hanlpMapResult.getName())
@@ -88,7 +89,7 @@ public class KeywordMapper extends BaseMapper {
         }
     }
 
-    private void convertDatabaseMapResultToMapInfo(ChatQueryContext chatQueryContext,
+    private void convertMapResultToMapInfo(ChatQueryContext chatQueryContext,
             List<DatabaseMapResult> mapResults) {
         for (DatabaseMapResult match : mapResults) {
             SchemaElement schemaElement = match.getSchemaElement();

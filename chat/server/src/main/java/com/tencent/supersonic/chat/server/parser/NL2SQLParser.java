@@ -83,6 +83,9 @@ public class NL2SQLParser implements ChatQueryParser {
         if (Objects.isNull(parseContext.getRequest().getSelectedParse())) {
             QueryNLReq queryNLReq = QueryReqConverter.buildQueryNLReq(parseContext);
             queryNLReq.setText2SQLType(Text2SQLType.ONLY_RULE);
+            if (parseContext.enableLLM()) {
+                queryNLReq.setText2SQLType(Text2SQLType.NONE);
+            }
 
             // for every requested dataSet, recursively invoke rule-based parser with different
             // mapModes

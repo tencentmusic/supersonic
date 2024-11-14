@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 
 public class SemanticSchema implements Serializable {
 
-    private List<DataSetSchema> dataSetSchemaList;
+    private final List<DataSetSchema> dataSetSchemaList;
 
     public SemanticSchema(List<DataSetSchema> dataSetSchemaList) {
         this.dataSetSchemaList = dataSetSchemaList;
@@ -48,11 +48,7 @@ public class SemanticSchema implements Serializable {
             default:
         }
 
-        if (element.isPresent()) {
-            return element.get();
-        } else {
-            return null;
-        }
+        return element.orElse(null);
     }
 
     public Map<Long, String> getDataSetIdToName() {
@@ -62,13 +58,13 @@ public class SemanticSchema implements Serializable {
 
     public List<SchemaElement> getDimensionValues() {
         List<SchemaElement> dimensionValues = new ArrayList<>();
-        dataSetSchemaList.stream().forEach(d -> dimensionValues.addAll(d.getDimensionValues()));
+        dataSetSchemaList.forEach(d -> dimensionValues.addAll(d.getDimensionValues()));
         return dimensionValues;
     }
 
     public List<SchemaElement> getDimensions() {
         List<SchemaElement> dimensions = new ArrayList<>();
-        dataSetSchemaList.stream().forEach(d -> dimensions.addAll(d.getDimensions()));
+        dataSetSchemaList.forEach(d -> dimensions.addAll(d.getDimensions()));
         return dimensions;
     }
 
@@ -96,13 +92,13 @@ public class SemanticSchema implements Serializable {
 
     public List<SchemaElement> getTags() {
         List<SchemaElement> tags = new ArrayList<>();
-        dataSetSchemaList.stream().forEach(d -> tags.addAll(d.getTags()));
+        dataSetSchemaList.forEach(d -> tags.addAll(d.getTags()));
         return tags;
     }
 
     public List<SchemaElement> getTerms() {
         List<SchemaElement> terms = new ArrayList<>();
-        dataSetSchemaList.stream().forEach(d -> terms.addAll(d.getTerms()));
+        dataSetSchemaList.forEach(d -> terms.addAll(d.getTerms()));
         return terms;
     }
 
@@ -123,20 +119,24 @@ public class SemanticSchema implements Serializable {
         return getElementsById(dataSetId, dataSets).orElse(null);
     }
 
-    public QueryConfig getQueryConfig(Long dataSetId) {
-        DataSetSchema first = dataSetSchemaList.stream().filter(
-                dataSetSchema -> dataSetId.equals(dataSetSchema.getDataSet().getDataSetId()))
-                .findFirst().orElse(null);
-        if (Objects.nonNull(first)) {
-            return first.getQueryConfig();
-        }
-        return null;
-    }
-
     public List<SchemaElement> getDataSets() {
         List<SchemaElement> dataSets = new ArrayList<>();
-        dataSetSchemaList.stream().forEach(d -> dataSets.add(d.getDataSet()));
+        dataSetSchemaList.forEach(d -> dataSets.add(d.getDataSet()));
         return dataSets;
+    }
+
+    public DataSetSchema getDataSetSchema(Long dataSetId) {
+        return dataSetSchemaList.stream()
+                .filter(dataSetSchema -> dataSetId.equals(dataSetSchema.getDataSetId())).findFirst()
+                .orElse(null);
+    }
+
+    public QueryConfig getQueryConfig(Long dataSetId) {
+        DataSetSchema dataSetSchema = getDataSetSchema(dataSetId);
+        if (Objects.nonNull(dataSetSchema)) {
+            return dataSetSchema.getQueryConfig();
+        }
+        return null;
     }
 
     public Map<Long, DataSetSchema> getDataSetSchemaMap() {
