@@ -288,10 +288,10 @@ public class S2CompanyDemo extends S2BaseDemo {
         return dataSetService.save(dataSetReq, defaultUser);
     }
 
-    public void addModelRela(DomainResp domain, ModelResp fromModel, ModelResp toModel, String joinField) {
+    public void addModelRela(DomainResp domain, ModelResp fromModel, ModelResp toModel,
+            String joinField) {
         List<JoinCondition> joinConditions = Lists.newArrayList();
-        joinConditions
-                .add(new JoinCondition(joinField, joinField, FilterOperatorEnum.EQUALS));
+        joinConditions.add(new JoinCondition(joinField, joinField, FilterOperatorEnum.EQUALS));
         ModelRela modelRelaReq = new ModelRela();
         modelRelaReq.setDomainId(domain.getId());
         modelRelaReq.setFromModelId(fromModel.getId());
