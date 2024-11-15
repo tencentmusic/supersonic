@@ -1,19 +1,19 @@
 import React, { useState } from 'react';
-import { Table, Select, Checkbox, Input, Space, Tooltip, Form, Switch, Row, Col } from 'antd';
+import { Checkbox, Form, Input, Select, Space, Switch, Table, Tooltip } from 'antd';
 import TableTitleTooltips from '../../components/TableTitleTooltips';
 import { isUndefined } from 'lodash';
 import { ExclamationCircleOutlined } from '@ant-design/icons';
 import SqlEditor from '@/components/SqlEditor';
 import { ISemantic } from '../../data';
 import {
-  TYPE_OPTIONS,
-  DATE_FORMATTER,
   AGG_OPTIONS,
-  EnumDataSourceType,
+  DATE_FORMATTER,
   DATE_OPTIONS,
   DIM_OPTIONS,
+  EnumDataSourceType,
   EnumModelDataType,
   PARTITION_TIME_FORMATTER,
+  TYPE_OPTIONS,
 } from '../constants';
 import styles from '../style.less';
 
@@ -229,11 +229,10 @@ const ModelFieldForm: React.FC<Props> = ({
           );
         }
         if (type === EnumDataSourceType.MEASURES) {
-          const agg = fields.find((field) => field.expr === record.expr)?.agg;
           return (
             <Select
               placeholder="度量算子"
-              value={agg}
+              value={record.agg}
               onChange={(value) => {
                 handleFieldChange(record, 'agg', value);
               }}
