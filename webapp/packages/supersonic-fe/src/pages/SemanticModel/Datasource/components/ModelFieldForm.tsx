@@ -90,8 +90,7 @@ const ModelFieldForm: React.FC<Props> = ({
       dataIndex: 'type',
       width: 250,
       render: (_: any, record: FieldItem) => {
-        const type = fields.find((field) => field.bizName === record.bizName)?.type;
-        const classType = fields.find((field) => field.bizName === record.bizName)?.classType;
+        const { type, classType } = record;
         const selectTypeValue = [EnumModelDataType.DIMENSION].includes(classType)
           ? classType
           : type;
@@ -249,7 +248,7 @@ const ModelFieldForm: React.FC<Props> = ({
           );
         }
         if (type === EnumDataSourceType.CATEGORICAL) {
-          const isTag = fields.find((field) => field.bizName === record.bizName)?.isTag;
+          const { isTag } = record;
           return (
             <Space>
               <Space>
@@ -270,10 +269,7 @@ const ModelFieldForm: React.FC<Props> = ({
           );
         }
         if ([EnumDataSourceType.TIME, EnumDataSourceType.PARTITION_TIME].includes(type)) {
-          const dateFormat = fields.find((field) => field.bizName === record.bizName)?.dateFormat;
-          const timeGranularity = fields.find(
-            (field) => field.bizName === record.bizName,
-          )?.timeGranularity;
+          const { dateFormat, timeGranularity } = record;
           const dateFormatterOptions =
             type === EnumDataSourceType.PARTITION_TIME ? PARTITION_TIME_FORMATTER : DATE_FORMATTER;
 
