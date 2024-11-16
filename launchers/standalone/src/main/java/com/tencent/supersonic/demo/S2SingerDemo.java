@@ -81,7 +81,7 @@ public class S2SingerDemo extends S2BaseDemo {
 
     public DomainResp addDomain() {
         DomainReq domainReq = new DomainReq();
-        domainReq.setName("歌手数据");
+        domainReq.setName("歌手数据域");
         domainReq.setBizName("singer");
         domainReq.setParentId(0L);
         domainReq.setStatus(StatusEnum.ONLINE.getCode());

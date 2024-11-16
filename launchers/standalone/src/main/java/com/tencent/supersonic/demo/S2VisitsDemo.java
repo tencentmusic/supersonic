@@ -182,7 +182,7 @@ public class S2VisitsDemo extends S2BaseDemo {
 
     public DomainResp addDomain() {
         DomainReq domainReq = new DomainReq();
-        domainReq.setName("产品数据");
+        domainReq.setName("产品数据域");
         domainReq.setBizName("supersonic");
         domainReq.setParentId(0L);
         domainReq.setStatus(StatusEnum.ONLINE.getCode());

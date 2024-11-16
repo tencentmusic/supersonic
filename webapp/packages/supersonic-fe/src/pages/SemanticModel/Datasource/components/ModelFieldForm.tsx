@@ -90,21 +90,11 @@ const ModelFieldForm: React.FC<Props> = ({
       dataIndex: 'type',
       width: 250,
       render: (_: any, record: FieldItem) => {
-        let type = fields.find((field) => field.bizName === record.bizName)?.type;
-        let classType = fields.find((field) => field.bizName === record.bizName)?.classType;
-
-        // if (type === EnumDataSourceType.PRIMARY) {
-        //   classType = EnumModelDataType.DIMENSION;
-        //   type = EnumDataSourceType.PRIMARY_KEY;
-        // }
-        // if (type === EnumDataSourceType.FOREIGN) {
-        //   classType = EnumModelDataType.DIMENSION;
-        //   type = EnumDataSourceType.FOREIGN_KEY;
-        // }
-
-        let selectTypeValue = [EnumModelDataType.DIMENSION].includes(classType) ? classType : type;
-
-        console.log(type, classType, selectTypeValue, record, 222, fields);
+        const type = fields.find((field) => field.bizName === record.bizName)?.type;
+        const classType = fields.find((field) => field.bizName === record.bizName)?.classType;
+        const selectTypeValue = [EnumModelDataType.DIMENSION].includes(classType)
+          ? classType
+          : type;
         return (
           <Space>
             <Select
@@ -130,6 +120,11 @@ const ModelFieldForm: React.FC<Props> = ({
                   defaultParams = {
                     type: DIM_OPTIONS[0].value,
                     classType: EnumModelDataType.DIMENSION,
+                  };
+                } else if (value === EnumDataSourceType.PRIMARY) {
+                  defaultParams = {
+                    type: EnumDataSourceType.PRIMARY,
+                    classType: EnumModelDataType.IDENTIFIERS,
                   };
                 } else {
                   defaultParams = {
@@ -172,11 +167,6 @@ const ModelFieldForm: React.FC<Props> = ({
                     defaultParams = {
                       dateFormat: DATE_FORMATTER[0],
                       timeGranularity: 'day',
-                    };
-                  } else if (value === EnumDataSourceType.PRIMARY) {
-                    defaultParams = {
-                      type: EnumDataSourceType.PRIMARY,
-                      classType: EnumModelDataType.IDENTIFIERS,
                     };
                   } else {
                     defaultParams = {
@@ -239,7 +229,9 @@ const ModelFieldForm: React.FC<Props> = ({
           );
         }
         if (type === EnumDataSourceType.MEASURES) {
-          const agg = fields.find((field) => field.expr === record.expr)?.agg;
+          const agg = record.expr
+            ? fields.find((field) => field.expr === record.expr)?.agg
+            : undefined;
           return (
             <Select
               placeholder="度量算子"

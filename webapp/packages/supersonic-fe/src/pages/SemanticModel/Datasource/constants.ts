@@ -33,14 +33,14 @@ export const modelDataClass = {
 };
 
 export const DIM_OPTIONS = [
-  {
-    label: '主键',
-    value: EnumDataSourceType.PRIMARY_KEY,
-  },
-  {
-    label: '外键',
-    value: EnumDataSourceType.FOREIGN_KEY,
-  },
+  // {
+  //   label: '主键',
+  //   value: EnumDataSourceType.PRIMARY_KEY,
+  // },
+  // {
+  //   label: '外键',
+  //   value: EnumDataSourceType.FOREIGN_KEY,
+  // },
   {
     label: '枚举',
     value: EnumDataSourceType.CATEGORICAL,
@@ -75,14 +75,14 @@ export const TYPE_OPTIONS = [
     label: '度量',
     value: EnumDataSourceType.MEASURES,
   },
-  // {
-  //   label: '主键',
-  //   value: EnumDataSourceType.PRIMARY,
-  // },
-  // {
-  //   label: '外键',
-  //   value: EnumDataSourceType.FOREIGN,
-  // },
+  {
+    label: '主键',
+    value: EnumDataSourceType.PRIMARY,
+  },
+  {
+    label: '外键',
+    value: EnumDataSourceType.FOREIGN,
+  },
 ];
 
 export const AGG_OPTIONS = [

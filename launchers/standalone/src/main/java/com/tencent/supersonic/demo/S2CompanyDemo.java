@@ -85,7 +85,7 @@ public class S2CompanyDemo extends S2BaseDemo {
 
     public DomainResp addDomain() {
         DomainReq domainReq = new DomainReq();
-        domainReq.setName("企业数据");
+        domainReq.setName("企业数据域");
         domainReq.setBizName("corporate");
         domainReq.setParentId(0L);
         domainReq.setViewers(Arrays.asList("admin", "tom", "jack"));
