@@ -301,43 +301,6 @@ public class S2CompanyDemo extends S2BaseDemo {
         modelRelaService.save(modelRelaReq, defaultUser);
     }
 
-    public void addModelRela_2(DomainResp domain, ModelResp fromModel, ModelResp toModel) {
-        List<JoinCondition> joinConditions = Lists.newArrayList();
-        joinConditions
-                .add(new JoinCondition("company_id", "company_id", FilterOperatorEnum.EQUALS));
-        ModelRela modelRelaReq = new ModelRela();
-        modelRelaReq.setDomainId(domain.getId());
-        modelRelaReq.setFromModelId(fromModel.getId());
-        modelRelaReq.setToModelId(toModel.getId());
-        modelRelaReq.setJoinType("left join");
-        modelRelaReq.setJoinConditions(joinConditions);
-        modelRelaService.save(modelRelaReq, defaultUser);
-    }
-
-    public void addModelRela_3(DomainResp domain, ModelResp fromModel, ModelResp toModel) {
-        List<JoinCondition> joinConditions = Lists.newArrayList();
-        joinConditions.add(new JoinCondition("brand_id", "brand_id", FilterOperatorEnum.EQUALS));
-        ModelRela modelRelaReq = new ModelRela();
-        modelRelaReq.setDomainId(domain.getId());
-        modelRelaReq.setFromModelId(fromModel.getId());
-        modelRelaReq.setToModelId(toModel.getId());
-        modelRelaReq.setJoinType("left join");
-        modelRelaReq.setJoinConditions(joinConditions);
-        modelRelaService.save(modelRelaReq, defaultUser);
-    }
-
-    public void addModelRela_4(DomainResp domain, ModelResp fromModel, ModelResp toModel) {
-        List<JoinCondition> joinConditions = Lists.newArrayList();
-        joinConditions.add(new JoinCondition("brand_id", "brand_id", FilterOperatorEnum.EQUALS));
-        ModelRela modelRelaReq = new ModelRela();
-        modelRelaReq.setDomainId(domain.getId());
-        modelRelaReq.setFromModelId(fromModel.getId());
-        modelRelaReq.setToModelId(toModel.getId());
-        modelRelaReq.setJoinType("left join");
-        modelRelaReq.setJoinConditions(joinConditions);
-        modelRelaService.save(modelRelaReq, defaultUser);
-    }
-
     private void addAgent(Long dataSetId) {
         Agent agent = new Agent();
         agent.setName("企业分析助手");

@@ -23,16 +23,13 @@ import com.tencent.supersonic.headless.api.pojo.ModelDetail;
 import com.tencent.supersonic.headless.api.pojo.QueryConfig;
 import com.tencent.supersonic.headless.api.pojo.enums.DimensionType;
 import com.tencent.supersonic.headless.api.pojo.enums.IdentifyType;
-import com.tencent.supersonic.headless.api.pojo.enums.TagDefineType;
 import com.tencent.supersonic.headless.api.pojo.request.DataSetReq;
 import com.tencent.supersonic.headless.api.pojo.request.DomainReq;
 import com.tencent.supersonic.headless.api.pojo.request.ModelReq;
-import com.tencent.supersonic.headless.api.pojo.request.TagObjectReq;
 import com.tencent.supersonic.headless.api.pojo.response.DataSetResp;
 import com.tencent.supersonic.headless.api.pojo.response.DatabaseResp;
 import com.tencent.supersonic.headless.api.pojo.response.DomainResp;
 import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
-import com.tencent.supersonic.headless.api.pojo.response.TagObjectResp;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
@@ -69,14 +66,6 @@ public class S2SingerDemo extends S2BaseDemo {
             }
         }
         return true;
-    }
-
-    private TagObjectResp addTagObjectSinger(DomainResp singerDomain) throws Exception {
-        TagObjectReq tagObjectReq = new TagObjectReq();
-        tagObjectReq.setDomainId(singerDomain.getId());
-        tagObjectReq.setName("歌手");
-        tagObjectReq.setBizName("singer");
-        return tagObjectService.create(tagObjectReq, defaultUser);
     }
 
     public DomainResp addDomain() {
@@ -132,18 +121,6 @@ public class S2SingerDemo extends S2BaseDemo {
         enableDimensionValue(getDimension("singer_name", modelResp));
 
         return modelResp;
-    }
-
-    private void addTags(ModelResp model) {
-        addTag(dimensionService.getDimension("act_area", model.getId()).getId(),
-                TagDefineType.DIMENSION);
-        addTag(dimensionService.getDimension("song_name", model.getId()).getId(),
-                TagDefineType.DIMENSION);
-        addTag(dimensionService.getDimension("genre", model.getId()).getId(),
-                TagDefineType.DIMENSION);
-        addTag(dimensionService.getDimension("singer_name", model.getId()).getId(),
-                TagDefineType.DIMENSION);
-        addTag(metricService.getMetric(model.getId(), "js_play_cnt").getId(), TagDefineType.METRIC);
     }
 
     public long addDataSet(DomainResp singerDomain, ModelResp singerModel) {

@@ -5,7 +5,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.tencent.supersonic.auth.api.authorization.pojo.AuthGroup;
 import com.tencent.supersonic.auth.api.authorization.pojo.AuthRule;
-import com.tencent.supersonic.chat.api.pojo.request.ChatParseReq;
 import com.tencent.supersonic.chat.server.agent.Agent;
 import com.tencent.supersonic.chat.server.agent.AgentToolType;
 import com.tencent.supersonic.chat.server.agent.DatasetTool;
@@ -13,7 +12,6 @@ import com.tencent.supersonic.chat.server.agent.ToolConfig;
 import com.tencent.supersonic.chat.server.plugin.ChatPlugin;
 import com.tencent.supersonic.chat.server.plugin.PluginParseConfig;
 import com.tencent.supersonic.chat.server.plugin.build.WebBase;
-import com.tencent.supersonic.chat.server.plugin.build.webpage.WebPageQuery;
 import com.tencent.supersonic.chat.server.plugin.build.webservice.WebServiceQuery;
 import com.tencent.supersonic.common.pojo.ChatApp;
 import com.tencent.supersonic.common.pojo.JoinCondition;
@@ -45,13 +43,11 @@ import com.tencent.supersonic.headless.api.pojo.enums.DimensionType;
 import com.tencent.supersonic.headless.api.pojo.enums.IdentifyType;
 import com.tencent.supersonic.headless.api.pojo.enums.MetricDefineType;
 import com.tencent.supersonic.headless.api.pojo.enums.SemanticType;
-import com.tencent.supersonic.headless.api.pojo.enums.TagDefineType;
 import com.tencent.supersonic.headless.api.pojo.request.DataSetReq;
 import com.tencent.supersonic.headless.api.pojo.request.DimensionReq;
 import com.tencent.supersonic.headless.api.pojo.request.DomainReq;
 import com.tencent.supersonic.headless.api.pojo.request.MetricReq;
 import com.tencent.supersonic.headless.api.pojo.request.ModelReq;
-import com.tencent.supersonic.headless.api.pojo.request.TagObjectReq;
 import com.tencent.supersonic.headless.api.pojo.request.TermReq;
 import com.tencent.supersonic.headless.api.pojo.response.DataSetResp;
 import com.tencent.supersonic.headless.api.pojo.response.DatabaseResp;
@@ -59,7 +55,6 @@ import com.tencent.supersonic.headless.api.pojo.response.DimensionResp;
 import com.tencent.supersonic.headless.api.pojo.response.DomainResp;
 import com.tencent.supersonic.headless.api.pojo.response.MetricResp;
 import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
-import com.tencent.supersonic.headless.api.pojo.response.TagObjectResp;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
@@ -79,15 +74,13 @@ public class S2VisitsDemo extends S2BaseDemo {
         try {
             // create domain
             DomainResp s2Domain = addDomain();
-            TagObjectResp s2TagObject = addTagObjectUser(s2Domain);
 
             // create models
-            ModelResp userModel = addModel_1(s2Domain, demoDatabase, s2TagObject);
+            ModelResp userModel = addModel_1(s2Domain, demoDatabase);
             ModelResp pvUvModel = addModel_2(s2Domain, demoDatabase);
             ModelResp stayTimeModel = addModel_3(s2Domain, demoDatabase);
-            addModelRela_1(s2Domain, userModel, pvUvModel);
-            addModelRela_2(s2Domain, userModel, stayTimeModel);
-            addTags(userModel);
+            addModelRela(s2Domain, userModel, pvUvModel, "user_name");
+            addModelRela(s2Domain, userModel, stayTimeModel, "user_name");
 
             // create metrics and dimensions
             DimensionResp departmentDimension = getDimension("department", userModel);
@@ -112,9 +105,7 @@ public class S2VisitsDemo extends S2BaseDemo {
 
             // create terms and plugin
             addTerm(s2Domain);
-            addTerm_1(s2Domain);
-            addPlugin(s2DataSet);
-            addPlugin_1();
+            addPlugin();
 
             // load dict word
             loadDictWord();
@@ -130,7 +121,7 @@ public class S2VisitsDemo extends S2BaseDemo {
     }
 
     @Override
-    boolean checkNeedToRun() {
+    public boolean checkNeedToRun() {
         List<DomainResp> domainList = domainService.getDomainList();
         for (DomainResp domainResp : domainList) {
             if (domainResp.getBizName().equalsIgnoreCase("supersonic")) {
@@ -141,16 +132,11 @@ public class S2VisitsDemo extends S2BaseDemo {
         return true;
     }
 
-    public void addSampleChats(Integer agentId) {
+    private void addSampleChats(Integer agentId) {
         Long chatId = chatManageService.addChat(defaultUser, "样例对话1", agentId);
         submitText(chatId.intValue(), agentId, "超音数 访问次数");
         submitText(chatId.intValue(), agentId, "按部门统计近7天访问次数");
         submitText(chatId.intValue(), agentId, "alice 停留时长");
-    }
-
-    private void submitText(int chatId, int agentId, String queryText) {
-        chatQueryService.parseAndExecute(ChatParseReq.builder().chatId(chatId).agentId(agentId)
-                .queryText(queryText).user(defaultUser).disableLLM(true).build());
     }
 
     private Integer addAgent(long dataSetId) {
@@ -180,7 +166,7 @@ public class S2VisitsDemo extends S2BaseDemo {
         return agentCreated.getId();
     }
 
-    public DomainResp addDomain() {
+    private DomainResp addDomain() {
         DomainReq domainReq = new DomainReq();
         domainReq.setName("产品数据域");
         domainReq.setBizName("supersonic");
@@ -192,15 +178,13 @@ public class S2VisitsDemo extends S2BaseDemo {
         return domainService.createDomain(domainReq, defaultUser);
     }
 
-    public ModelResp addModel_1(DomainResp s2Domain, DatabaseResp s2Database,
-            TagObjectResp s2TagObject) throws Exception {
+    private ModelResp addModel_1(DomainResp s2Domain, DatabaseResp s2Database) throws Exception {
         ModelReq modelReq = new ModelReq();
         modelReq.setName("用户部门");
         modelReq.setBizName("user_department");
         modelReq.setDescription("用户部门信息");
         modelReq.setDatabaseId(s2Database.getId());
         modelReq.setDomainId(s2Domain.getId());
-        modelReq.setTagObjectId(s2TagObject.getId());
         modelReq.setViewers(Arrays.asList("admin", "tom", "jack"));
         modelReq.setViewOrgs(Collections.singletonList("1"));
         modelReq.setAdmins(Arrays.asList("admin", "alice"));
@@ -224,7 +208,7 @@ public class S2VisitsDemo extends S2BaseDemo {
         return modelService.createModel(modelReq, defaultUser);
     }
 
-    public ModelResp addModel_2(DomainResp s2Domain, DatabaseResp s2Database) throws Exception {
+    private ModelResp addModel_2(DomainResp s2Domain, DatabaseResp s2Database) throws Exception {
         ModelReq modelReq = new ModelReq();
         modelReq.setName("PVUV统计");
         modelReq.setBizName("s2_pv_uv_statis");
@@ -268,7 +252,7 @@ public class S2VisitsDemo extends S2BaseDemo {
         return modelService.createModel(modelReq, defaultUser);
     }
 
-    public ModelResp addModel_3(DomainResp s2Domain, DatabaseResp s2Database) throws Exception {
+    private ModelResp addModel_3(DomainResp s2Domain, DatabaseResp s2Database) throws Exception {
         ModelReq modelReq = new ModelReq();
         modelReq.setName("停留时长统计");
         modelReq.setBizName("s2_stay_time_statis");
@@ -310,38 +294,20 @@ public class S2VisitsDemo extends S2BaseDemo {
         return modelService.createModel(modelReq, defaultUser);
     }
 
-    public void addModelRela_1(DomainResp s2Domain, ModelResp userDepartmentModel,
-            ModelResp pvUvModel) {
+    private void addModelRela(DomainResp s2Domain, ModelResp fromModel, ModelResp toModel,
+            String joinField) {
         List<JoinCondition> joinConditions = Lists.newArrayList();
-        joinConditions.add(new JoinCondition("user_name", "user_name", FilterOperatorEnum.EQUALS));
+        joinConditions.add(new JoinCondition(joinField, joinField, FilterOperatorEnum.EQUALS));
         ModelRela modelRelaReq = new ModelRela();
         modelRelaReq.setDomainId(s2Domain.getId());
-        modelRelaReq.setFromModelId(userDepartmentModel.getId());
-        modelRelaReq.setToModelId(pvUvModel.getId());
+        modelRelaReq.setFromModelId(fromModel.getId());
+        modelRelaReq.setToModelId(toModel.getId());
         modelRelaReq.setJoinType("left join");
         modelRelaReq.setJoinConditions(joinConditions);
         modelRelaService.save(modelRelaReq, defaultUser);
     }
 
-    public void addModelRela_2(DomainResp s2Domain, ModelResp userDepartmentModel,
-            ModelResp stayTimeModel) {
-        List<JoinCondition> joinConditions = Lists.newArrayList();
-        joinConditions.add(new JoinCondition("user_name", "user_name", FilterOperatorEnum.EQUALS));
-        ModelRela modelRelaReq = new ModelRela();
-        modelRelaReq.setDomainId(s2Domain.getId());
-        modelRelaReq.setFromModelId(userDepartmentModel.getId());
-        modelRelaReq.setToModelId(stayTimeModel.getId());
-        modelRelaReq.setJoinType("left join");
-        modelRelaReq.setJoinConditions(joinConditions);
-        modelRelaService.save(modelRelaReq, defaultUser);
-    }
-
-    private void addTags(ModelResp model) {
-        addTag(dimensionService.getDimension("department", model.getId()).getId(),
-                TagDefineType.DIMENSION);
-    }
-
-    public void updateDimension(ModelResp stayTimeModel, DimensionResp pageDimension)
+    private void updateDimension(ModelResp stayTimeModel, DimensionResp pageDimension)
             throws Exception {
         DimensionReq dimensionReq = new DimensionReq();
         dimensionReq.setType(DimensionType.categorical.name());
@@ -349,16 +315,15 @@ public class S2VisitsDemo extends S2BaseDemo {
         dimensionReq.setName("页面");
         dimensionReq.setBizName("page");
         dimensionReq.setModelId(stayTimeModel.getId());
-        dimensionReq.setAlias("page");
         dimensionReq.setSemanticType(SemanticType.CATEGORY.name());
-        dimensionReq.setSensitiveLevel(SensitiveLevelEnum.HIGH.getCode());
+        dimensionReq.setSensitiveLevel(SensitiveLevelEnum.MID.getCode());
         dimensionReq.setDescription("页面");
         dimensionReq.setExpr("page");
         dimensionReq.setDimValueMaps(Collections.emptyList());
         dimensionService.updateDimension(dimensionReq, defaultUser);
     }
 
-    public void updateMetric(ModelResp stayTimeModel, DimensionResp departmentDimension,
+    private void updateMetric(ModelResp stayTimeModel, DimensionResp departmentDimension,
             DimensionResp userDimension) throws Exception {
         MetricResp stayHoursMetric = metricService.getMetric(stayTimeModel.getId(), "stay_hours");
         MetricReq metricReq = new MetricReq();
@@ -383,7 +348,7 @@ public class S2VisitsDemo extends S2BaseDemo {
         metricService.updateMetric(metricReq, defaultUser);
     }
 
-    public void updateMetric_pv(ModelResp pvUvModel, DimensionResp departmentDimension,
+    private void updateMetric_pv(ModelResp pvUvModel, DimensionResp departmentDimension,
             DimensionResp userDimension, MetricResp metricPv) throws Exception {
         MetricReq metricReq = new MetricReq();
         metricReq.setModelId(pvUvModel.getId());
@@ -405,7 +370,7 @@ public class S2VisitsDemo extends S2BaseDemo {
         metricService.updateMetric(metricReq, defaultUser);
     }
 
-    public MetricResp addMetric_uv(ModelResp uvModel, DimensionResp departmentDimension)
+    private MetricResp addMetric_uv(ModelResp uvModel, DimensionResp departmentDimension)
             throws Exception {
         MetricReq metricReq = new MetricReq();
         metricReq.setModelId(uvModel.getId());
@@ -426,7 +391,7 @@ public class S2VisitsDemo extends S2BaseDemo {
         return metricService.createMetric(metricReq, defaultUser);
     }
 
-    public MetricResp addMetric_pv_avg(MetricResp metricPv, MetricResp metricUv,
+    private MetricResp addMetric_pv_avg(MetricResp metricPv, MetricResp metricUv,
             DimensionResp departmentDimension, ModelResp pvModel) throws Exception {
         MetricReq metricReq = new MetricReq();
         metricReq.setModelId(pvModel.getId());
@@ -451,7 +416,7 @@ public class S2VisitsDemo extends S2BaseDemo {
         return metricService.createMetric(metricReq, defaultUser);
     }
 
-    public DataSetResp addDataSet(DomainResp s2Domain) {
+    private DataSetResp addDataSet(DomainResp s2Domain) {
         DataSetReq dataSetReq = new DataSetReq();
         dataSetReq.setName("超音数数据集");
         dataSetReq.setBizName("s2");
@@ -466,25 +431,23 @@ public class S2VisitsDemo extends S2BaseDemo {
         return dataSetService.save(dataSetReq, defaultUser);
     }
 
-    public void addTerm(DomainResp s2Domain) {
+    private void addTerm(DomainResp s2Domain) {
         TermReq termReq = new TermReq();
         termReq.setName("近期");
         termReq.setDescription("指近10天");
         termReq.setAlias(Lists.newArrayList("近一段时间"));
         termReq.setDomainId(s2Domain.getId());
         termService.saveOrUpdate(termReq, defaultUser);
-    }
 
-    public void addTerm_1(DomainResp s2Domain) {
-        TermReq termReq = new TermReq();
-        termReq.setName("核心用户");
-        termReq.setDescription("用户为tom和lucy");
-        termReq.setAlias(Lists.newArrayList("VIP用户"));
-        termReq.setDomainId(s2Domain.getId());
+        TermReq termReq1 = new TermReq();
+        termReq1.setName("核心用户");
+        termReq1.setDescription("用户为tom和lucy");
+        termReq1.setAlias(Lists.newArrayList("VIP用户"));
+        termReq1.setDomainId(s2Domain.getId());
         termService.saveOrUpdate(termReq, defaultUser);
     }
 
-    public void addAuthGroup_1(ModelResp stayTimeModel) {
+    private void addAuthGroup_1(ModelResp stayTimeModel) {
         AuthGroup authGroupReq = new AuthGroup();
         authGroupReq.setModelId(stayTimeModel.getId());
         authGroupReq.setName("jack_column_permission");
@@ -501,7 +464,7 @@ public class S2VisitsDemo extends S2BaseDemo {
         authService.addOrUpdateAuthGroup(authGroupReq);
     }
 
-    public void addAuthGroup_2(ModelResp pvuvModel) {
+    private void addAuthGroup_2(ModelResp pvuvModel) {
         AuthGroup authGroupReq = new AuthGroup();
         authGroupReq.setModelId(pvuvModel.getId());
         authGroupReq.setName("tom_row_permission");
@@ -515,25 +478,7 @@ public class S2VisitsDemo extends S2BaseDemo {
         authService.addOrUpdateAuthGroup(authGroupReq);
     }
 
-    private void addPlugin(DataSetResp s2DataSet) {
-        ChatPlugin plugin1 = new ChatPlugin();
-        plugin1.setType(WebPageQuery.QUERY_MODE);
-        plugin1.setDataSetList(Collections.singletonList(s2DataSet.getId()));
-        plugin1.setPattern("用于分析超音数的流量概况，包含UV、PV等核心指标的追踪。P.S. 仅作为示例展示，无实际看板");
-        plugin1.setName("超音数流量分析看板");
-        PluginParseConfig pluginParseConfig = new PluginParseConfig();
-        pluginParseConfig.setDescription(plugin1.getPattern());
-        pluginParseConfig.setName(plugin1.getName());
-        pluginParseConfig.setExamples(Lists.newArrayList("tom最近访问超音数情况怎么样"));
-        plugin1.setParseModeConfig(JSONObject.toJSONString(pluginParseConfig));
-        WebBase webBase = new WebBase();
-        webBase.setUrl("www.yourbi.com");
-        webBase.setParamOptions(Lists.newArrayList());
-        plugin1.setConfig(JsonUtil.toString(webBase));
-        pluginService.createPlugin(plugin1, defaultUser);
-    }
-
-    private void addPlugin_1() {
+    private void addPlugin() {
         ChatPlugin plugin1 = new ChatPlugin();
         plugin1.setType(WebServiceQuery.QUERY_MODE);
         plugin1.setDataSetList(Collections.singletonList(-1L));
@@ -551,15 +496,4 @@ public class S2VisitsDemo extends S2BaseDemo {
         pluginService.createPlugin(plugin1, defaultUser);
     }
 
-    private TagObjectResp addTagObjectUser(DomainResp s2Domain) throws Exception {
-        TagObjectReq tagObjectReq = new TagObjectReq();
-        tagObjectReq.setDomainId(s2Domain.getId());
-        tagObjectReq.setName("用户");
-        tagObjectReq.setBizName("user");
-        return tagObjectService.create(tagObjectReq, defaultUser);
-    }
-
-    private void loadDictWord() {
-        dictWordService.loadDictWord();
-    }
 }
