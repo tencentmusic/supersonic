@@ -51,9 +51,7 @@ public class S2SingerDemo extends S2BaseDemo {
     public void doRun() {
         try {
             DomainResp singerDomain = addDomain();
-            TagObjectResp singerTagObject = addTagObjectSinger(singerDomain);
-            ModelResp singerModel = addModel(singerDomain, demoDatabase, singerTagObject);
-            addTags(singerModel);
+            ModelResp singerModel = addModel(singerDomain, demoDatabase);
             long dataSetId = addDataSet(singerDomain, singerModel);
             addAgent(dataSetId);
         } catch (Exception e) {
@@ -83,7 +81,7 @@ public class S2SingerDemo extends S2BaseDemo {
 
     public DomainResp addDomain() {
         DomainReq domainReq = new DomainReq();
-        domainReq.setName("歌手数据");
+        domainReq.setName("歌手数据域");
         domainReq.setBizName("singer");
         domainReq.setParentId(0L);
         domainReq.setStatus(StatusEnum.ONLINE.getCode());
@@ -95,15 +93,13 @@ public class S2SingerDemo extends S2BaseDemo {
         return domainService.createDomain(domainReq, defaultUser);
     }
 
-    public ModelResp addModel(DomainResp singerDomain, DatabaseResp s2Database,
-            TagObjectResp singerTagObject) throws Exception {
+    public ModelResp addModel(DomainResp singerDomain, DatabaseResp s2Database) throws Exception {
         ModelReq modelReq = new ModelReq();
         modelReq.setName("歌手库");
         modelReq.setBizName("singer");
         modelReq.setDescription("歌手库");
         modelReq.setDatabaseId(s2Database.getId());
         modelReq.setDomainId(singerDomain.getId());
-        modelReq.setTagObjectId(singerTagObject.getId());
         modelReq.setViewers(Arrays.asList("admin", "tom", "jack"));
         modelReq.setViewOrgs(Collections.singletonList("1"));
         modelReq.setAdmins(Collections.singletonList("admin"));
@@ -128,7 +124,14 @@ public class S2SingerDemo extends S2BaseDemo {
         modelDetail.setSqlQuery("select singer_name, act_area, song_name, genre, "
                 + "js_play_cnt, down_cnt, favor_cnt from singer");
         modelReq.setModelDetail(modelDetail);
-        return modelService.createModel(modelReq, defaultUser);
+        ModelResp modelResp = modelService.createModel(modelReq, defaultUser);
+
+        // create dict conf for dimensions
+        enableDimensionValue(getDimension("act_area", modelResp));
+        enableDimensionValue(getDimension("genre", modelResp));
+        enableDimensionValue(getDimension("singer_name", modelResp));
+
+        return modelResp;
     }
 
     private void addTags(ModelResp model) {

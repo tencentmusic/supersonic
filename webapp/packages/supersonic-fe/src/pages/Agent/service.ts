@@ -35,15 +35,20 @@ export function getMetricList(modelId: number) {
   });
 }
 
-export function getMemeoryList(data: { agentId: number; chatMemoryFilter: any; current: number }) {
-  const { agentId, chatMemoryFilter, current } = data;
+export function getMemeoryList(data: {
+  agentId: number;
+  chatMemoryFilter: any;
+  current: number;
+  pageSize: number;
+}) {
+  const { agentId, chatMemoryFilter, current, pageSize } = data;
   return request<Result<{ list: MetricType[] }>>('/api/chat/memory/pageMemories', {
     method: 'POST',
     data: {
       ...data,
       chatMemoryFilter: { agentId, ...chatMemoryFilter },
       current,
-      pageSize: 10,
+      pageSize: pageSize || 10,
       sort: 'desc',
       // orderCondition: 'updatedAt',
     },

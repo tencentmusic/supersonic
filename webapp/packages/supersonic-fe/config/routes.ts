@@ -115,12 +115,12 @@ const ROUTES = [
       },
     ],
   },
-
   {
     path: '/tag',
     name: 'tag',
     component: './SemanticModel/Insights',
     envEnableList: [ENV_KEY.SEMANTIC],
+    hideInMenu: process.env.SHOW_TAG ? false : true,
     routes: [
       {
         path: '/tag',

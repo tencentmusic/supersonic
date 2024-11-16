@@ -48,6 +48,9 @@ const ModelRelationFormDrawer: React.FC<ModelRelationFormDrawerProps> = ({
   }, [relationData]);
 
   const queryModelDetail = async (modelId: number, isSource: boolean) => {
+    if (!modelId) {
+      return;
+    }
     const { code, data } = await getModelDetail({ modelId });
     if (code === 200) {
       if (Array.isArray(data?.modelDetail?.identifiers)) {

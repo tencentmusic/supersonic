@@ -229,7 +229,9 @@ const ModelFieldForm: React.FC<Props> = ({
           );
         }
         if (type === EnumDataSourceType.MEASURES) {
-          const agg = fields.find((field) => field.expr === record.expr)?.agg;
+          const agg = record.expr
+            ? fields.find((field) => field.expr === record.expr)?.agg
+            : undefined;
           return (
             <Select
               placeholder="度量算子"
@@ -249,26 +251,52 @@ const ModelFieldForm: React.FC<Props> = ({
             </Select>
           );
         }
-        if (type === EnumDataSourceType.CATEGORICAL) {
-          const isTag = fields.find((field) => field.bizName === record.bizName)?.isTag;
-          return (
-            <Space>
+
+        if (process.env.SHOW_TAG) {
+          if (type === EnumDataSourceType.CATEGORICAL) {
+            const isTag = fields.find((field) => field.bizName === record.bizName)?.isTag;
+            return (
               <Space>
-                <span>设为标签:</span>
-                <Switch
-                  defaultChecked
-                  size="small"
-                  checked={!!isTag}
-                  onChange={(value) => {
-                    handleFieldChange(record, 'isTag', value);
-                  }}
-                />
-                <Tooltip title="如果勾选，代表维度的取值都是一种“标签”，可用作对实体的圈选">
-                  <ExclamationCircleOutlined />
-                </Tooltip>
+                <Space>
+                  <span>设为标签:</span>
+                  <Switch
+                    defaultChecked
+                    size="small"
+                    checked={!!isTag}
+                    onChange={(value) => {
+                      handleFieldChange(record, 'isTag', value);
+                    }}
+                  />
+                  <Tooltip title="如果勾选，代表维度的取值都是一种“标签”，可用作对实体的圈选">
+                    <ExclamationCircleOutlined />
+                  </Tooltip>
+                </Space>
               </Space>
-            </Space>
-          );
+            );
+          }
+        }
+        if (process.env.SHOW_TAG) {
+          if (type === EnumDataSourceType.CATEGORICAL) {
+            const isTag = fields.find((field) => field.bizName === record.bizName)?.isTag;
+            return (
+              <Space>
+                <Space>
+                  <span>设为标签:</span>
+                  <Switch
+                    defaultChecked
+                    size="small"
+                    checked={!!isTag}
+                    onChange={(value) => {
+                      handleFieldChange(record, 'isTag', value);
+                    }}
+                  />
+                  <Tooltip title="如果勾选，代表维度的取值都是一种“标签”，可用作对实体的圈选">
+                    <ExclamationCircleOutlined />
+                  </Tooltip>
+                </Space>
+              </Space>
+            );
+          }
         }
         if ([EnumDataSourceType.TIME, EnumDataSourceType.PARTITION_TIME].includes(type)) {
           const dateFormat = fields.find((field) => field.bizName === record.bizName)?.dateFormat;

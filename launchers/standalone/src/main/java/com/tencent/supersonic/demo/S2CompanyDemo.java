@@ -56,13 +56,13 @@ public class S2CompanyDemo extends S2BaseDemo {
 
             ModelResp model_company = addModel_1(domain, demoDatabase);
             ModelResp model_brand = addModel_2(domain, demoDatabase);
-            ModelResp model_company_revenue = addModel_3(domain, demoDatabase);
+            ModelResp company_brand_revenue_proportion = addModel_3(domain, demoDatabase);
             ModelResp model_brand_revenue = addModel_4(domain, demoDatabase);
 
-            addModelRela_1(domain, model_company_revenue, model_company);
-            addModelRela_2(domain, model_brand, model_company);
-            addModelRela_3(domain, model_brand_revenue, model_brand);
-            addModelRela_4(domain, model_company_revenue, model_brand);
+            addModelRela(domain, company_brand_revenue_proportion, model_company, "company_id");
+            addModelRela(domain, company_brand_revenue_proportion, model_brand, "brand_id");
+            addModelRela(domain, model_brand, model_company, "company_id");
+            addModelRela(domain, model_brand_revenue, model_brand, "brand_id");
 
             DataSetResp dataset = addDataSet(domain);
             addAgent(dataset.getId());
@@ -85,7 +85,7 @@ public class S2CompanyDemo extends S2BaseDemo {
 
     public DomainResp addDomain() {
         DomainReq domainReq = new DomainReq();
-        domainReq.setName("企业数据");
+        domainReq.setName("企业数据域");
         domainReq.setBizName("corporate");
         domainReq.setParentId(0L);
         domainReq.setViewers(Arrays.asList("admin", "tom", "jack"));
@@ -188,7 +188,7 @@ public class S2CompanyDemo extends S2BaseDemo {
     public ModelResp addModel_3(DomainResp domain, DatabaseResp database) throws Exception {
         ModelReq modelReq = new ModelReq();
         modelReq.setName("公司品牌收入占比");
-        modelReq.setBizName("company_revenue");
+        modelReq.setBizName("company_brand_revenue_proportion");
         modelReq.setDatabaseId(database.getId());
         modelReq.setDomainId(domain.getId());
         modelReq.setViewers(Arrays.asList("admin", "tom", "jack"));
@@ -210,8 +210,7 @@ public class S2CompanyDemo extends S2BaseDemo {
         modelDetail.setIdentifiers(identifiers);
 
         List<Measure> measures = new ArrayList<>();
-        Measure measure = new Measure("营收占比", "revenue_proportion", AggOperatorEnum.MAX.name(), 1);
-        measures.add(measure);
+        measures.add(new Measure("营收占比", "revenue_proportion", AggOperatorEnum.MAX.name(), 1));
         measures.add(new Measure("利润占比", "profit_proportion", AggOperatorEnum.MAX.name(), 1));
         measures.add(new Measure("支出占比", "expenditure_proportion", AggOperatorEnum.MAX.name(), 1));
         modelDetail.setMeasures(measures);
@@ -268,7 +267,7 @@ public class S2CompanyDemo extends S2BaseDemo {
         dataSetReq.setName("企业数据集");
         dataSetReq.setBizName("CorporateData");
         dataSetReq.setDomainId(domain.getId());
-        dataSetReq.setDescription("互联网企业核心经营数据");
+        dataSetReq.setDescription("巨头公司核心经营数据");
         dataSetReq.setAdmins(Lists.newArrayList("admin"));
 
         List<DataSetModelConfig> dataSetModelConfigs = getDataSetModelConfigs(domain.getId());
@@ -289,10 +288,10 @@ public class S2CompanyDemo extends S2BaseDemo {
         return dataSetService.save(dataSetReq, defaultUser);
     }
 
-    public void addModelRela_1(DomainResp domain, ModelResp fromModel, ModelResp toModel) {
+    public void addModelRela(DomainResp domain, ModelResp fromModel, ModelResp toModel,
+            String joinField) {
         List<JoinCondition> joinConditions = Lists.newArrayList();
-        joinConditions
-                .add(new JoinCondition("company_id", "company_id", FilterOperatorEnum.EQUALS));
+        joinConditions.add(new JoinCondition(joinField, joinField, FilterOperatorEnum.EQUALS));
         ModelRela modelRelaReq = new ModelRela();
         modelRelaReq.setDomainId(domain.getId());
         modelRelaReq.setFromModelId(fromModel.getId());
