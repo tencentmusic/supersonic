@@ -100,9 +100,9 @@ public class S2SingerDemo extends S2BaseDemo {
         modelDetail.setIdentifiers(identifiers);
 
         List<Dim> dimensions = new ArrayList<>();
-        dimensions.add(new Dim("活跃区域", "act_area", DimensionType.categorical.name(), 1, 1));
-        dimensions.add(new Dim("代表作", "song_name", DimensionType.categorical.name(), 1));
-        dimensions.add(new Dim("流派", "genre", DimensionType.categorical.name(), 1, 1));
+        dimensions.add(new Dim("活跃区域", "act_area", DimensionType.categorical, 1));
+        dimensions.add(new Dim("代表作", "song_name", DimensionType.categorical, 1));
+        dimensions.add(new Dim("流派", "genre", DimensionType.categorical, 1));
         modelDetail.setDimensions(dimensions);
 
         Measure measure1 = new Measure("播放量", "js_play_cnt", "sum", 1);

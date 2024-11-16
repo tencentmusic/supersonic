@@ -195,7 +195,7 @@ public class S2VisitsDemo extends S2BaseDemo {
         modelDetail.setIdentifiers(identifiers);
 
         List<Dim> dimensions = new ArrayList<>();
-        dimensions.add(new Dim("部门", "department", DimensionType.categorical.name(), 1));
+        dimensions.add(new Dim("部门", "department", DimensionType.categorical, 1));
         modelDetail.setDimensions(dimensions);
         List<Field> fields = Lists.newArrayList();
         fields.add(Field.builder().fieldName("user_name").dataType("Varchar").build());
@@ -225,10 +225,10 @@ public class S2VisitsDemo extends S2BaseDemo {
         modelDetail.setIdentifiers(identifiers);
 
         List<Dim> dimensions = new ArrayList<>();
-        Dim dimension1 = new Dim("", "imp_date", DimensionType.partition_time.name(), 0);
+        Dim dimension1 = new Dim("", "imp_date", DimensionType.partition_time, 0);
         dimension1.setTypeParams(new DimensionTimeTypeParams());
         dimensions.add(dimension1);
-        Dim dimension2 = new Dim("", "page", DimensionType.categorical.name(), 0);
+        Dim dimension2 = new Dim("", "page", DimensionType.categorical, 0);
         dimension2.setExpr("page");
         dimensions.add(dimension2);
         modelDetail.setDimensions(dimensions);
@@ -269,10 +269,10 @@ public class S2VisitsDemo extends S2BaseDemo {
         modelDetail.setIdentifiers(identifiers);
 
         List<Dim> dimensions = new ArrayList<>();
-        Dim dimension1 = new Dim("数据日期", "imp_date", DimensionType.partition_time.name(), 1);
+        Dim dimension1 = new Dim("数据日期", "imp_date", DimensionType.partition_time, 1);
         dimension1.setTypeParams(new DimensionTimeTypeParams());
         dimensions.add(dimension1);
-        Dim dimension2 = new Dim("页面", "page", DimensionType.categorical.name(), 1);
+        Dim dimension2 = new Dim("页面", "page", DimensionType.categorical, 1);
         dimension2.setExpr("page");
         dimensions.add(dimension2);
         modelDetail.setDimensions(dimensions);
