@@ -7,6 +7,7 @@ import com.tencent.supersonic.chat.server.agent.Agent;
 import com.tencent.supersonic.chat.server.agent.AgentToolType;
 import com.tencent.supersonic.chat.server.agent.DatasetTool;
 import com.tencent.supersonic.chat.server.agent.ToolConfig;
+import com.tencent.supersonic.chat.server.processor.execute.DataInterpretProcessor;
 import com.tencent.supersonic.common.pojo.ChatApp;
 import com.tencent.supersonic.common.pojo.JoinCondition;
 import com.tencent.supersonic.common.pojo.ModelRela;
@@ -56,13 +57,10 @@ public class S2CompanyDemo extends S2BaseDemo {
 
             ModelResp model_company = addModel_1(domain, demoDatabase);
             ModelResp model_brand = addModel_2(domain, demoDatabase);
-            ModelResp company_brand_revenue_proportion = addModel_3(domain, demoDatabase);
-            ModelResp model_brand_revenue = addModel_4(domain, demoDatabase);
+            ModelResp model_brand_revenue = addModel_3(domain, demoDatabase);
 
-            addModelRela(domain, company_brand_revenue_proportion, model_company, "company_id");
-            addModelRela(domain, company_brand_revenue_proportion, model_brand, "brand_id");
-            addModelRela(domain, model_brand, model_company, "company_id");
-            addModelRela(domain, model_brand_revenue, model_brand, "brand_id");
+            addModelRela(domain, model_company, model_brand, "company_id");
+            addModelRela(domain, model_brand, model_brand_revenue, "brand_id");
 
             DataSetResp dataset = addDataSet(domain);
             addAgent(dataset.getId());
@@ -107,17 +105,13 @@ public class S2CompanyDemo extends S2BaseDemo {
         modelReq.setAdminOrgs(Collections.emptyList());
         ModelDetail modelDetail = new ModelDetail();
         List<Dim> dimensions = new ArrayList<>();
-        Dim dimension1 = new Dim("", "imp_date", DimensionType.partition_time.name(), 0);
-        DimensionTimeTypeParams dimensionTimeTypeParams =
-                new DimensionTimeTypeParams("false", "none");
-        dimension1.setTypeParams(dimensionTimeTypeParams);
-        dimensions.add(dimension1);
-        dimensions.add(new Dim("公司名称", "company_name", DimensionType.categorical.name(), 1));
-        dimensions.add(new Dim("总部地点", "headquarter_address", DimensionType.categorical.name(), 1));
-        dimensions.add(new Dim("成立时间", "company_established_time", DimensionType.time.name(), 1));
-        dimensions.add(new Dim("创始人", "founder", DimensionType.categorical.name(), 1));
-        dimensions.add(new Dim("首席执行官", "ceo", DimensionType.categorical.name(), 1));
         modelDetail.setDimensions(dimensions);
+
+        dimensions.add(new Dim("公司名称", "company_name", DimensionType.categorical, 1));
+        dimensions.add(new Dim("总部地点", "headquarter_address", DimensionType.categorical, 1));
+        dimensions.add(new Dim("成立时间", "company_established_time", DimensionType.time, 1));
+        dimensions.add(new Dim("创始人", "founder", DimensionType.categorical, 1));
+        dimensions.add(new Dim("首席执行官", "ceo", DimensionType.categorical, 1));
 
         List<Identify> identifiers = new ArrayList<>();
         identifiers.add(new Identify("公司id", IdentifyType.primary.name(), "company_id"));
@@ -130,7 +124,7 @@ public class S2CompanyDemo extends S2BaseDemo {
         modelDetail.setMeasures(measures);
 
         modelDetail.setQueryType("sql_query");
-        modelDetail.setSqlQuery("SELECT imp_date,company_id,company_name,headquarter_address,"
+        modelDetail.setSqlQuery("SELECT company_id,company_name,headquarter_address,"
                 + "company_established_time,founder,ceo,annual_turnover,employee_count FROM company");
         modelReq.setModelDetail(modelDetail);
         ModelResp companyModel = modelService.createModel(modelReq, defaultUser);
@@ -154,16 +148,11 @@ public class S2CompanyDemo extends S2BaseDemo {
         modelReq.setAdminOrgs(Collections.emptyList());
         ModelDetail modelDetail = new ModelDetail();
         List<Dim> dimensions = new ArrayList<>();
-        Dim dimension1 = new Dim("", "imp_date", DimensionType.partition_time.name(), 0);
-        DimensionTimeTypeParams dimensionTimeTypeParams =
-                new DimensionTimeTypeParams("false", "none");
-        dimension1.setTypeParams(dimensionTimeTypeParams);
-        dimensions.add(dimension1);
-        dimensions.add(new Dim("品牌名称", "brand_name", DimensionType.categorical.name(), 1));
-        dimensions.add(new Dim("品牌成立时间", "brand_established_time", DimensionType.time.name(), 1));
-        dimensions
-                .add(new Dim("法定代表人", "legal_representative", DimensionType.categorical.name(), 1));
         modelDetail.setDimensions(dimensions);
+
+        dimensions.add(new Dim("品牌名称", "brand_name", DimensionType.categorical, 1));
+        dimensions.add(new Dim("品牌成立时间", "brand_established_time", DimensionType.time, 1));
+        dimensions.add(new Dim("法定代表人", "legal_representative", DimensionType.categorical, 1));
 
         List<Identify> identifiers = new ArrayList<>();
         identifiers.add(new Identify("品牌id", IdentifyType.primary.name(), "brand_id"));
@@ -175,7 +164,7 @@ public class S2CompanyDemo extends S2BaseDemo {
         modelDetail.setMeasures(measures);
 
         modelDetail.setQueryType("sql_query");
-        modelDetail.setSqlQuery("SELECT  imp_date,brand_id,brand_name,brand_established_time,"
+        modelDetail.setSqlQuery("SELECT brand_id,brand_name,brand_established_time,"
                 + "company_id,legal_representative,registered_capital FROM brand");
         modelReq.setModelDetail(modelDetail);
         ModelResp brandModel = modelService.createModel(modelReq, defaultUser);
@@ -187,8 +176,8 @@ public class S2CompanyDemo extends S2BaseDemo {
 
     public ModelResp addModel_3(DomainResp domain, DatabaseResp database) throws Exception {
         ModelReq modelReq = new ModelReq();
-        modelReq.setName("公司品牌收入占比");
-        modelReq.setBizName("company_brand_revenue_proportion");
+        modelReq.setName("品牌历年收入");
+        modelReq.setBizName("brand_revenue");
         modelReq.setDatabaseId(database.getId());
         modelReq.setDomainId(domain.getId());
         modelReq.setViewers(Arrays.asList("admin", "tom", "jack"));
@@ -197,50 +186,10 @@ public class S2CompanyDemo extends S2BaseDemo {
         modelReq.setAdminOrgs(Collections.emptyList());
         ModelDetail modelDetail = new ModelDetail();
         List<Dim> dimensions = new ArrayList<>();
-        Dim dimension1 = new Dim("", "imp_date", DimensionType.partition_time.name(), 0);
-        DimensionTimeTypeParams dimensionTimeTypeParams =
-                new DimensionTimeTypeParams("false", "none");
-        dimension1.setTypeParams(dimensionTimeTypeParams);
-        dimensions.add(dimension1);
         modelDetail.setDimensions(dimensions);
 
-        List<Identify> identifiers = new ArrayList<>();
-        identifiers.add(new Identify("公司id", IdentifyType.foreign.name(), "company_id"));
-        identifiers.add(new Identify("品牌id", IdentifyType.foreign.name(), "brand_id"));
-        modelDetail.setIdentifiers(identifiers);
-
-        List<Measure> measures = new ArrayList<>();
-        measures.add(new Measure("营收占比", "revenue_proportion", AggOperatorEnum.MAX.name(), 1));
-        measures.add(new Measure("利润占比", "profit_proportion", AggOperatorEnum.MAX.name(), 1));
-        measures.add(new Measure("支出占比", "expenditure_proportion", AggOperatorEnum.MAX.name(), 1));
-        modelDetail.setMeasures(measures);
-
-        modelDetail.setQueryType("sql_query");
-        modelDetail.setSqlQuery("SELECT imp_date,company_id,brand_id,revenue_proportion,"
-                + "profit_proportion,expenditure_proportion FROM company_revenue");
-        modelReq.setModelDetail(modelDetail);
-        return modelService.createModel(modelReq, defaultUser);
-    }
-
-    public ModelResp addModel_4(DomainResp domain, DatabaseResp database) throws Exception {
-        ModelReq modelReq = new ModelReq();
-        modelReq.setName("公司品牌历年收入");
-        modelReq.setBizName("company_brand_revenue");
-        modelReq.setDatabaseId(database.getId());
-        modelReq.setDomainId(domain.getId());
-        modelReq.setViewers(Arrays.asList("admin", "tom", "jack"));
-        modelReq.setViewOrgs(Collections.singletonList("1"));
-        modelReq.setAdmins(Collections.singletonList("admin"));
-        modelReq.setAdminOrgs(Collections.emptyList());
-        ModelDetail modelDetail = new ModelDetail();
-        List<Dim> dimensions = new ArrayList<>();
-        Dim dimension1 = new Dim("", "imp_date", DimensionType.partition_time.name(), 0);
-        DimensionTimeTypeParams dimensionTimeTypeParams =
-                new DimensionTimeTypeParams("false", "none");
-        dimension1.setTypeParams(dimensionTimeTypeParams);
-        dimensions.add(dimension1);
-        dimensions.add(new Dim("年份", "year_time", DimensionType.categorical.name(), 1));
-        modelDetail.setDimensions(dimensions);
+        dimensions.add(new Dim("财年", "year_time", DimensionType.time, 1, "year_time", "yyyy",
+                new DimensionTimeTypeParams("false", "year")));
 
         List<Identify> identifiers = new ArrayList<>();
         identifiers.add(new Identify("品牌id", IdentifyType.foreign.name(), "brand_id"));
@@ -250,14 +199,14 @@ public class S2CompanyDemo extends S2BaseDemo {
         measures.add(new Measure("营收", "revenue", AggOperatorEnum.SUM.name(), 1));
         measures.add(new Measure("利润", "profit", AggOperatorEnum.SUM.name(), 1));
         measures.add(new Measure("营收同比增长", "revenue_growth_year_on_year",
-                AggOperatorEnum.SUM.name(), 1));
+                AggOperatorEnum.AVG.name(), 1));
         measures.add(
-                new Measure("利润同比增长", "profit_growth_year_on_year", AggOperatorEnum.SUM.name(), 1));
+                new Measure("利润同比增长", "profit_growth_year_on_year", AggOperatorEnum.AVG.name(), 1));
         modelDetail.setMeasures(measures);
 
         modelDetail.setQueryType("sql_query");
-        modelDetail.setSqlQuery("SELECT imp_date,year_time,brand_id,revenue,profit,"
-                + "revenue_growth_year_on_year,profit_growth_year_on_year FROM company_brand_revenue");
+        modelDetail.setSqlQuery("SELECT year_time,brand_id,revenue,profit,"
+                + "revenue_growth_year_on_year,profit_growth_year_on_year FROM brand_revenue");
         modelReq.setModelDetail(modelDetail);
         return modelService.createModel(modelReq, defaultUser);
     }
@@ -279,7 +228,7 @@ public class S2CompanyDemo extends S2BaseDemo {
         QueryConfig queryConfig = new QueryConfig();
         AggregateTypeDefaultConfig aggregateTypeDefaultConfig = new AggregateTypeDefaultConfig();
         TimeDefaultConfig timeDefaultConfig = new TimeDefaultConfig();
-        timeDefaultConfig.setTimeMode(TimeMode.RECENT);
+        timeDefaultConfig.setTimeMode(TimeMode.LAST);
         timeDefaultConfig.setUnit(1);
         aggregateTypeDefaultConfig.setTimeDefaultConfig(timeDefaultConfig);
         queryConfig.setAggregateTypeDefaultConfig(aggregateTypeDefaultConfig);
@@ -301,43 +250,6 @@ public class S2CompanyDemo extends S2BaseDemo {
         modelRelaService.save(modelRelaReq, defaultUser);
     }
 
-    public void addModelRela_2(DomainResp domain, ModelResp fromModel, ModelResp toModel) {
-        List<JoinCondition> joinConditions = Lists.newArrayList();
-        joinConditions
-                .add(new JoinCondition("company_id", "company_id", FilterOperatorEnum.EQUALS));
-        ModelRela modelRelaReq = new ModelRela();
-        modelRelaReq.setDomainId(domain.getId());
-        modelRelaReq.setFromModelId(fromModel.getId());
-        modelRelaReq.setToModelId(toModel.getId());
-        modelRelaReq.setJoinType("left join");
-        modelRelaReq.setJoinConditions(joinConditions);
-        modelRelaService.save(modelRelaReq, defaultUser);
-    }
-
-    public void addModelRela_3(DomainResp domain, ModelResp fromModel, ModelResp toModel) {
-        List<JoinCondition> joinConditions = Lists.newArrayList();
-        joinConditions.add(new JoinCondition("brand_id", "brand_id", FilterOperatorEnum.EQUALS));
-        ModelRela modelRelaReq = new ModelRela();
-        modelRelaReq.setDomainId(domain.getId());
-        modelRelaReq.setFromModelId(fromModel.getId());
-        modelRelaReq.setToModelId(toModel.getId());
-        modelRelaReq.setJoinType("left join");
-        modelRelaReq.setJoinConditions(joinConditions);
-        modelRelaService.save(modelRelaReq, defaultUser);
-    }
-
-    public void addModelRela_4(DomainResp domain, ModelResp fromModel, ModelResp toModel) {
-        List<JoinCondition> joinConditions = Lists.newArrayList();
-        joinConditions.add(new JoinCondition("brand_id", "brand_id", FilterOperatorEnum.EQUALS));
-        ModelRela modelRelaReq = new ModelRela();
-        modelRelaReq.setDomainId(domain.getId());
-        modelRelaReq.setFromModelId(fromModel.getId());
-        modelRelaReq.setToModelId(toModel.getId());
-        modelRelaReq.setJoinType("left join");
-        modelRelaReq.setJoinConditions(joinConditions);
-        modelRelaService.save(modelRelaReq, defaultUser);
-    }
-
     private void addAgent(Long dataSetId) {
         Agent agent = new Agent();
         agent.setName("企业分析助手");
@@ -345,7 +257,7 @@ public class S2CompanyDemo extends S2BaseDemo {
         agent.setStatus(1);
         agent.setEnableSearch(1);
         agent.setExamples(
-                Lists.newArrayList("各公司员工都有多少人", "利润最高的公司top 3", "英伟达2024年利润", "特斯拉下有哪些品牌"));
+                Lists.newArrayList("各公司员工都有多少人", "利润最高的品牌top 3", "2024财年aws的营收和利润", "特斯拉下有哪些品牌"));
         ToolConfig toolConfig = new ToolConfig();
 
         // configure tools
@@ -360,6 +272,7 @@ public class S2CompanyDemo extends S2BaseDemo {
         Map<String, ChatApp> chatAppConfig =
                 Maps.newHashMap(ChatAppManager.getAllApps(AppModule.CHAT));
         chatAppConfig.values().forEach(app -> app.setChatModelId(demoChatModel.getId()));
+        chatAppConfig.get(DataInterpretProcessor.APP_KEY).setEnable(true);
         agent.setChatAppConfig(chatAppConfig);
 
         agentService.createAgent(agent, defaultUser);

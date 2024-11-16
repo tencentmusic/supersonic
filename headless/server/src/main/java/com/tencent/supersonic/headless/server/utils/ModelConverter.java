@@ -120,7 +120,7 @@ public class ModelConverter {
         }
         dimensionReq.setModelId(modelDO.getId());
         dimensionReq.setExpr(dim.getBizName());
-        dimensionReq.setType(dim.getType());
+        dimensionReq.setType(dim.getType().name());
         dimensionReq
                 .setDescription(Objects.isNull(dim.getDescription()) ? "" : dim.getDescription());
         dimensionReq.setIsTag(dim.getIsTag());

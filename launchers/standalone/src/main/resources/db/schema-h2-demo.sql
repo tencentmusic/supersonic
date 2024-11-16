@@ -53,7 +53,6 @@ COMMENT ON TABLE artist IS 'artist';
 
 -------S2CompanyDemo
 CREATE TABLE IF NOT EXISTS `company` (
-    `imp_date` varchar(50) ,
     `company_id` varchar(50) NOT NULL ,
     `company_name` varchar(50) NOT NULL ,
     `headquarter_address` varchar(50) NOT NULL ,
@@ -66,7 +65,6 @@ CREATE TABLE IF NOT EXISTS `company` (
     );
 
 CREATE TABLE IF NOT EXISTS `brand` (
-    `imp_date` varchar(50) ,
     `brand_id` varchar(50) NOT NULL ,
     `brand_name` varchar(50) NOT NULL ,
     `brand_established_time` varchar(20) NOT NULL ,
@@ -76,17 +74,7 @@ CREATE TABLE IF NOT EXISTS `brand` (
     PRIMARY KEY (`brand_id`)
     );
 
-CREATE TABLE IF NOT EXISTS `company_revenue` (
-    `imp_date` varchar(50) ,
-    `company_id` varchar(50) NOT NULL ,
-    `brand_id` varchar(50) NOT NULL ,
-    `revenue_proportion` double NOT NULL,
-    `profit_proportion` double NOT NULL ,
-    `expenditure_proportion` double NOT NULL
-    );
-
-CREATE TABLE IF NOT EXISTS `company_brand_revenue` (
-    `imp_date` varchar(50) ,
+CREATE TABLE IF NOT EXISTS `brand_revenue` (
     `year_time` varchar(10) NOT NULL ,
     `brand_id` varchar(50) NOT NULL ,
     `revenue` bigint(15) NOT NULL,
