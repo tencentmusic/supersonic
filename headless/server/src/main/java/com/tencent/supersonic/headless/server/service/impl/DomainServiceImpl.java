@@ -126,7 +126,7 @@ public class DomainServiceImpl implements DomainService {
             return domainWithAuth.stream().peek(domainResp -> domainResp.setHasEditPermission(true))
                     .collect(Collectors.toSet());
         }
-        if (authTypeEnum.equals(AuthType.VISIBLE)) {
+        if (authTypeEnum.equals(AuthType.VIEWER)) {
             domainWithAuth = domainResps.stream()
                     .filter(domainResp -> checkViewPermission(orgIds, user, domainResp))
                     .collect(Collectors.toSet());

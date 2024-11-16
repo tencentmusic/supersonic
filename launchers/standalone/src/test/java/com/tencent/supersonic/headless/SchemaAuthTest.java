@@ -51,7 +51,7 @@ public class SchemaAuthTest extends BaseTest {
     public void test_getVisibleModelList_alice() {
         User user = DataUtils.getUserAlice();
         List<ModelResp> modelResps =
-                modelService.getModelListWithAuth(user, null, AuthType.VISIBLE);
+                modelService.getModelListWithAuth(user, null, AuthType.VIEWER);
         List<String> expectedModelBizNames = Lists.newArrayList("user_department", "singer");
         Assertions.assertEquals(expectedModelBizNames,
                 modelResps.stream().map(ModelResp::getBizName).collect(Collectors.toList()));

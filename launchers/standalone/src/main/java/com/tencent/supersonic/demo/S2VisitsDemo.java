@@ -162,6 +162,8 @@ public class S2VisitsDemo extends S2BaseDemo {
                 Maps.newHashMap(ChatAppManager.getAllApps(AppModule.CHAT));
         chatAppConfig.values().forEach(app -> app.setChatModelId(demoChatModel.getId()));
         agent.setChatAppConfig(chatAppConfig);
+        agent.setAdmins(Lists.newArrayList("tom"));
+        agent.setViewers(Lists.newArrayList("alice", "jack"));
         Agent agentCreated = agentService.createAgent(agent, defaultUser);
         return agentCreated.getId();
     }

@@ -40,4 +40,8 @@ public class AgentDO {
     private String chatModelConfig;
 
     private String visualConfig;
+
+    private String admin;
+
+    private String viewer;
 }
