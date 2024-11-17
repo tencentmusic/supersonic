@@ -8,7 +8,7 @@ import com.tencent.supersonic.headless.api.pojo.response.DatabaseResp;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticSchemaResp;
 import com.tencent.supersonic.headless.api.pojo.response.TagResp;
 import com.tencent.supersonic.headless.core.translator.calcite.s2sql.Constants;
-import com.tencent.supersonic.headless.core.translator.calcite.s2sql.DataSource;
+import com.tencent.supersonic.headless.core.translator.calcite.s2sql.DataModel;
 import com.tencent.supersonic.headless.core.translator.calcite.s2sql.DataType;
 import com.tencent.supersonic.headless.core.translator.calcite.s2sql.Dimension;
 import com.tencent.supersonic.headless.core.translator.calcite.s2sql.DimensionTimeTypeParams;
@@ -19,7 +19,7 @@ import com.tencent.supersonic.headless.core.translator.calcite.s2sql.Measure;
 import com.tencent.supersonic.headless.core.translator.calcite.s2sql.Metric;
 import com.tencent.supersonic.headless.core.translator.calcite.s2sql.MetricTypeParams;
 import com.tencent.supersonic.headless.core.translator.calcite.s2sql.SemanticModel;
-import com.tencent.supersonic.headless.core.translator.calcite.schema.SemanticSchema;
+import com.tencent.supersonic.headless.core.translator.calcite.schema.S2SemanticSchema;
 import com.tencent.supersonic.headless.server.pojo.yaml.DataModelYamlTpl;
 import com.tencent.supersonic.headless.server.pojo.yaml.DimensionTimeTypeParamsTpl;
 import com.tencent.supersonic.headless.server.pojo.yaml.DimensionYamlTpl;
@@ -73,9 +73,9 @@ public class SemanticSchemaManager {
                     getJoinRelation(semanticSchemaResp.getModelRelas(), modelIdName));
         }
         if (!dataModelYamlTpls.isEmpty()) {
-            Map<String, DataSource> dataSourceMap =
+            Map<String, DataModel> dataSourceMap =
                     dataModelYamlTpls.stream().map(SemanticSchemaManager::getDatasource).collect(
-                            Collectors.toMap(DataSource::getName, item -> item, (k1, k2) -> k1));
+                            Collectors.toMap(DataModel::getName, item -> item, (k1, k2) -> k1));
             semanticModel.setDatasourceMap(dataSourceMap);
         }
         if (!dimensionYamlTpls.isEmpty()) {
@@ -107,8 +107,7 @@ public class SemanticSchemaManager {
         }
         if (Objects.nonNull(semanticModel.getDatasourceMap())
                 && !semanticModel.getDatasourceMap().isEmpty()) {
-            for (Map.Entry<String, DataSource> entry : semanticModel.getDatasourceMap()
-                    .entrySet()) {
+            for (Map.Entry<String, DataModel> entry : semanticModel.getDatasourceMap().entrySet()) {
                 List<Dimension> modelDimensions = new ArrayList<>();
                 if (!semanticModel.getDimensionMap().containsKey(entry.getKey())) {
                     semanticModel.getDimensionMap().put(entry.getKey(), modelDimensions);
@@ -178,8 +177,8 @@ public class SemanticSchemaManager {
         return getDimension(t);
     }
 
-    public static DataSource getDatasource(final DataModelYamlTpl d) {
-        DataSource datasource = DataSource.builder().id(d.getId()).sourceId(d.getSourceId())
+    public static DataModel getDatasource(final DataModelYamlTpl d) {
+        DataModel datasource = DataModel.builder().id(d.getId()).sourceId(d.getSourceId())
                 .type(d.getType()).sqlQuery(d.getSqlQuery()).name(d.getName())
                 .tableQuery(d.getTableQuery()).identifiers(getIdentify(d.getIdentifiers()))
                 .measures(getMeasureParams(d.getMeasures()))
@@ -356,17 +355,17 @@ public class SemanticSchemaManager {
         return joinRelations;
     }
 
-    public static void update(SemanticSchema schema, List<Metric> metric) throws Exception {
+    public static void update(S2SemanticSchema schema, List<Metric> metric) throws Exception {
         if (schema != null) {
             updateMetric(metric, schema.getMetrics());
         }
     }
 
-    public static void update(SemanticSchema schema, DataSource datasourceYamlTpl)
+    public static void update(S2SemanticSchema schema, DataModel datasourceYamlTpl)
             throws Exception {
         if (schema != null) {
             String dataSourceName = datasourceYamlTpl.getName();
-            Optional<Entry<String, DataSource>> datasourceYamlTplMap =
+            Optional<Entry<String, DataModel>> datasourceYamlTplMap =
                     schema.getDatasource().entrySet().stream()
                             .filter(t -> t.getKey().equalsIgnoreCase(dataSourceName)).findFirst();
             if (datasourceYamlTplMap.isPresent()) {
@@ -377,7 +376,7 @@ public class SemanticSchemaManager {
         }
     }
 
-    public static void update(SemanticSchema schema, String datasourceBizName,
+    public static void update(S2SemanticSchema schema, String datasourceBizName,
             List<Dimension> dimensionYamlTpls) throws Exception {
         if (schema != null) {
             Optional<Map.Entry<String, List<Dimension>>> datasourceYamlTplMap = schema

@@ -15,7 +15,7 @@ public class SemanticModel {
 
     private String schemaKey;
     private List<Metric> metrics = new ArrayList<>();
-    private Map<String, DataSource> datasourceMap = new HashMap<>();
+    private Map<String, DataModel> datasourceMap = new HashMap<>();
     private Map<String, List<Dimension>> dimensionMap = new HashMap<>();
     private List<Materialization> materializationList = new ArrayList<>();
     private List<JoinRelation> joinRelations;
@@ -26,8 +26,8 @@ public class SemanticModel {
                 .collect(Collectors.toList());
     }
 
-    public Map<Long, DataSource> getModelMap() {
+    public Map<Long, DataModel> getModelMap() {
         return datasourceMap.values().stream()
-                .collect(Collectors.toMap(DataSource::getId, dataSource -> dataSource));
+                .collect(Collectors.toMap(DataModel::getId, dataSource -> dataSource));
     }
 }

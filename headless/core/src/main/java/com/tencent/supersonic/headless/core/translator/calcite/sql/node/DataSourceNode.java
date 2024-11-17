@@ -6,13 +6,13 @@ import com.tencent.supersonic.common.jsqlparser.SqlSelectHelper;
 import com.tencent.supersonic.common.pojo.enums.EngineType;
 import com.tencent.supersonic.headless.core.pojo.MetricQueryParam;
 import com.tencent.supersonic.headless.core.translator.calcite.s2sql.Constants;
-import com.tencent.supersonic.headless.core.translator.calcite.s2sql.DataSource;
+import com.tencent.supersonic.headless.core.translator.calcite.s2sql.DataModel;
 import com.tencent.supersonic.headless.core.translator.calcite.s2sql.Dimension;
 import com.tencent.supersonic.headless.core.translator.calcite.s2sql.Identify;
 import com.tencent.supersonic.headless.core.translator.calcite.s2sql.JoinRelation;
 import com.tencent.supersonic.headless.core.translator.calcite.s2sql.Measure;
+import com.tencent.supersonic.headless.core.translator.calcite.schema.S2SemanticSchema;
 import com.tencent.supersonic.headless.core.translator.calcite.schema.SchemaBuilder;
-import com.tencent.supersonic.headless.core.translator.calcite.schema.SemanticSchema;
 import com.tencent.supersonic.headless.core.translator.calcite.sql.node.extend.LateralViewExplodeNode;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.calcite.sql.SqlBasicCall;
@@ -40,7 +40,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class DataSourceNode extends SemanticNode {
 
-    public static SqlNode build(DataSource datasource, SqlValidatorScope scope) throws Exception {
+    public static SqlNode build(DataModel datasource, SqlValidatorScope scope) throws Exception {
         String sqlTable = "";
         if (datasource.getSqlQuery() != null && !datasource.getSqlQuery().isEmpty()) {
             sqlTable = datasource.getSqlQuery();
@@ -61,7 +61,7 @@ public class DataSourceNode extends SemanticNode {
         return buildAs(datasource.getName(), source);
     }
 
-    private static void addSchema(SqlValidatorScope scope, DataSource datasource, String table)
+    private static void addSchema(SqlValidatorScope scope, DataModel datasource, String table)
             throws Exception {
         Map<String, Set<String>> sqlTable = SqlSelectHelper.getFieldsWithSubQuery(table);
         for (Map.Entry<String, Set<String>> entry : sqlTable.entrySet()) {
@@ -75,7 +75,7 @@ public class DataSourceNode extends SemanticNode {
         }
     }
 
-    private static void addSchemaTable(SqlValidatorScope scope, DataSource datasource, String db,
+    private static void addSchemaTable(SqlValidatorScope scope, DataModel datasource, String db,
             String tb, Set<String> fields) throws Exception {
         Set<String> dateInfo = new HashSet<>();
         Set<String> dimensions = new HashSet<>();
@@ -112,7 +112,7 @@ public class DataSourceNode extends SemanticNode {
                 dateInfo, dimensions, metrics);
     }
 
-    public static SqlNode buildExtend(DataSource datasource, Map<String, String> exprList,
+    public static SqlNode buildExtend(DataModel datasource, Map<String, String> exprList,
             SqlValidatorScope scope) throws Exception {
         if (CollectionUtils.isEmpty(exprList)) {
             return build(datasource, scope);
@@ -146,11 +146,11 @@ public class DataSourceNode extends SemanticNode {
         return sqlNode;
     }
 
-    public static String getNames(List<DataSource> dataSourceList) {
-        return dataSourceList.stream().map(d -> d.getName()).collect(Collectors.joining("_"));
+    public static String getNames(List<DataModel> dataModelList) {
+        return dataModelList.stream().map(d -> d.getName()).collect(Collectors.joining("_"));
     }
 
-    public static void getQueryDimensionMeasure(SemanticSchema schema,
+    public static void getQueryDimensionMeasure(S2SemanticSchema schema,
             MetricQueryParam metricCommand, Set<String> queryDimension, List<String> measures) {
         queryDimension.addAll(metricCommand.getDimensions().stream()
                 .map(d -> d.contains(Constants.DIMENSION_IDENTIFY)
@@ -166,7 +166,7 @@ public class DataSourceNode extends SemanticNode {
                 .forEach(m -> measures.add(m));
     }
 
-    public static void mergeQueryFilterDimensionMeasure(SemanticSchema schema,
+    public static void mergeQueryFilterDimensionMeasure(S2SemanticSchema schema,
             MetricQueryParam metricCommand, Set<String> queryDimension, List<String> measures,
             SqlValidatorScope scope) throws Exception {
         EngineType engineType =
@@ -193,18 +193,18 @@ public class DataSourceNode extends SemanticNode {
         }
     }
 
-    public static List<DataSource> getMatchDataSources(SqlValidatorScope scope,
-            SemanticSchema schema, MetricQueryParam metricCommand) throws Exception {
-        List<DataSource> dataSources = new ArrayList<>();
+    public static List<DataModel> getMatchDataSources(SqlValidatorScope scope,
+            S2SemanticSchema schema, MetricQueryParam metricCommand) throws Exception {
+        List<DataModel> dataModels = new ArrayList<>();
 
         // check by metric
         List<String> measures = new ArrayList<>();
         Set<String> queryDimension = new HashSet<>();
         getQueryDimensionMeasure(schema, metricCommand, queryDimension, measures);
-        DataSource baseDataSource = null;
+        DataModel baseDataModel = null;
         // one , match measure count
         Map<String, Integer> dataSourceMeasures = new HashMap<>();
-        for (Map.Entry<String, DataSource> entry : schema.getDatasource().entrySet()) {
+        for (Map.Entry<String, DataModel> entry : schema.getDatasource().entrySet()) {
             Set<String> sourceMeasure = entry.getValue().getMeasures().stream()
                     .map(mm -> mm.getName()).collect(Collectors.toSet());
             sourceMeasure.retainAll(measures);
@@ -214,19 +214,19 @@ public class DataSourceNode extends SemanticNode {
         Optional<Map.Entry<String, Integer>> base = dataSourceMeasures.entrySet().stream()
                 .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder())).findFirst();
         if (base.isPresent()) {
-            baseDataSource = schema.getDatasource().get(base.get().getKey());
-            dataSources.add(baseDataSource);
+            baseDataModel = schema.getDatasource().get(base.get().getKey());
+            dataModels.add(baseDataModel);
         }
         // second , check match all dimension and metric
-        if (baseDataSource != null) {
+        if (baseDataModel != null) {
             Set<String> filterMeasure = new HashSet<>();
-            Set<String> sourceMeasure = baseDataSource.getMeasures().stream()
-                    .map(mm -> mm.getName()).collect(Collectors.toSet());
-            Set<String> dimension = baseDataSource.getDimensions().stream().map(dd -> dd.getName())
+            Set<String> sourceMeasure = baseDataModel.getMeasures().stream().map(mm -> mm.getName())
                     .collect(Collectors.toSet());
-            baseDataSource.getIdentifiers().stream().forEach(i -> dimension.add(i.getName()));
-            if (schema.getDimension().containsKey(baseDataSource.getName())) {
-                schema.getDimension().get(baseDataSource.getName()).stream()
+            Set<String> dimension = baseDataModel.getDimensions().stream().map(dd -> dd.getName())
+                    .collect(Collectors.toSet());
+            baseDataModel.getIdentifiers().stream().forEach(i -> dimension.add(i.getName()));
+            if (schema.getDimension().containsKey(baseDataModel.getName())) {
+                schema.getDimension().get(baseDataModel.getName()).stream()
                         .forEach(d -> dimension.add(d.getName()));
             }
             filterMeasure.addAll(sourceMeasure);
@@ -238,34 +238,34 @@ public class DataSourceNode extends SemanticNode {
             boolean isAllMatch = checkMatch(sourceMeasure, queryDimension, measures, dimension,
                     metricCommand, scope, engineType);
             if (isAllMatch) {
-                log.debug("baseDataSource  match all ");
-                return dataSources;
+                log.debug("baseDataModel  match all ");
+                return dataModels;
             }
             // find all dataSource has the same identifiers
-            List<DataSource> linkDataSources = getLinkDataSourcesByJoinRelation(queryDimension,
-                    measures, baseDataSource, schema);
-            if (CollectionUtils.isEmpty(linkDataSources)) {
-                log.debug("baseDataSource get by identifiers ");
-                Set<String> baseIdentifiers = baseDataSource.getIdentifiers().stream()
+            List<DataModel> linkDataModels = getLinkDataSourcesByJoinRelation(queryDimension,
+                    measures, baseDataModel, schema);
+            if (CollectionUtils.isEmpty(linkDataModels)) {
+                log.debug("baseDataModel get by identifiers ");
+                Set<String> baseIdentifiers = baseDataModel.getIdentifiers().stream()
                         .map(i -> i.getName()).collect(Collectors.toSet());
                 if (baseIdentifiers.isEmpty()) {
                     throw new Exception(
-                            "datasource error : " + baseDataSource.getName() + " miss identifier");
+                            "datasource error : " + baseDataModel.getName() + " miss identifier");
                 }
-                linkDataSources = getLinkDataSources(baseIdentifiers, queryDimension, measures,
-                        baseDataSource, schema);
-                if (linkDataSources.isEmpty()) {
+                linkDataModels = getLinkDataSources(baseIdentifiers, queryDimension, measures,
+                        baseDataModel, schema);
+                if (linkDataModels.isEmpty()) {
                     throw new Exception(String.format(
                             "not find the match datasource : dimension[%s],measure[%s]",
                             queryDimension, measures));
                 }
             }
-            log.debug("linkDataSources {}", linkDataSources);
-            return linkDataSources;
-            // dataSources.addAll(linkDataSources);
+            log.debug("linkDataModels {}", linkDataModels);
+            return linkDataModels;
+            // dataModels.addAll(linkDataModels);
         }
 
-        return dataSources;
+        return dataModels;
     }
 
     private static boolean checkMatch(Set<String> sourceMeasure, Set<String> queryDimension,
@@ -301,17 +301,17 @@ public class DataSourceNode extends SemanticNode {
         return isAllMatch;
     }
 
-    private static List<DataSource> getLinkDataSourcesByJoinRelation(Set<String> queryDimension,
-            List<String> measures, DataSource baseDataSource, SemanticSchema schema) {
+    private static List<DataModel> getLinkDataSourcesByJoinRelation(Set<String> queryDimension,
+            List<String> measures, DataModel baseDataModel, S2SemanticSchema schema) {
         Set<String> linkDataSourceName = new HashSet<>();
-        List<DataSource> linkDataSources = new ArrayList<>();
+        List<DataModel> linkDataModels = new ArrayList<>();
         Set<String> before = new HashSet<>();
-        before.add(baseDataSource.getName());
+        before.add(baseDataModel.getName());
         if (!CollectionUtils.isEmpty(schema.getJoinRelations())) {
             Set<Long> visitJoinRelations = new HashSet<>();
             List<JoinRelation> sortedJoinRelation = new ArrayList<>();
-            sortJoinRelation(schema.getJoinRelations(), baseDataSource.getName(),
-                    visitJoinRelations, sortedJoinRelation);
+            sortJoinRelation(schema.getJoinRelations(), baseDataModel.getName(), visitJoinRelations,
+                    sortedJoinRelation);
             schema.getJoinRelations().stream().filter(j -> !visitJoinRelations.contains(j.getId()))
                     .forEach(j -> sortedJoinRelation.add(j));
             for (JoinRelation joinRelation : sortedJoinRelation) {
@@ -321,7 +321,7 @@ public class DataSourceNode extends SemanticNode {
                 }
                 boolean isMatch = false;
                 boolean isRight = before.contains(joinRelation.getLeft());
-                DataSource other = isRight ? schema.getDatasource().get(joinRelation.getRight())
+                DataModel other = isRight ? schema.getDatasource().get(joinRelation.getRight())
                         : schema.getDatasource().get(joinRelation.getLeft());
                 if (!queryDimension.isEmpty()) {
                     Set<String> linkDimension = other.getDimensions().stream()
@@ -354,8 +354,8 @@ public class DataSourceNode extends SemanticNode {
         }
         if (!CollectionUtils.isEmpty(linkDataSourceName)) {
             Map<String, Long> orders = new HashMap<>();
-            linkDataSourceName.add(baseDataSource.getName());
-            orders.put(baseDataSource.getName(), 0L);
+            linkDataSourceName.add(baseDataModel.getName());
+            orders.put(baseDataModel.getName(), 0L);
             for (JoinRelation joinRelation : schema.getJoinRelations()) {
                 if (linkDataSourceName.contains(joinRelation.getLeft())
                         && linkDataSourceName.contains(joinRelation.getRight())) {
@@ -364,10 +364,10 @@ public class DataSourceNode extends SemanticNode {
                 }
             }
             orders.entrySet().stream().sorted(Map.Entry.comparingByValue()).forEach(d -> {
-                linkDataSources.add(schema.getDatasource().get(d.getKey()));
+                linkDataModels.add(schema.getDatasource().get(d.getKey()));
             });
         }
-        return linkDataSources;
+        return linkDataModels;
     }
 
     private static void sortJoinRelation(List<JoinRelation> joinRelations, String next,
@@ -385,13 +385,13 @@ public class DataSourceNode extends SemanticNode {
         }
     }
 
-    private static List<DataSource> getLinkDataSources(Set<String> baseIdentifiers,
-            Set<String> queryDimension, List<String> measures, DataSource baseDataSource,
-            SemanticSchema schema) {
+    private static List<DataModel> getLinkDataSources(Set<String> baseIdentifiers,
+            Set<String> queryDimension, List<String> measures, DataModel baseDataModel,
+            S2SemanticSchema schema) {
         Set<String> linkDataSourceName = new HashSet<>();
-        List<DataSource> linkDataSources = new ArrayList<>();
-        for (Map.Entry<String, DataSource> entry : schema.getDatasource().entrySet()) {
-            if (entry.getKey().equalsIgnoreCase(baseDataSource.getName())) {
+        List<DataModel> linkDataModels = new ArrayList<>();
+        for (Map.Entry<String, DataModel> entry : schema.getDatasource().entrySet()) {
+            if (entry.getKey().equalsIgnoreCase(baseDataModel.getName())) {
                 continue;
             }
             Long identifierNum = entry.getValue().getIdentifiers().stream().map(i -> i.getName())
@@ -432,12 +432,12 @@ public class DataSourceNode extends SemanticNode {
             }
         }
         for (String linkName : linkDataSourceName) {
-            linkDataSources.add(schema.getDatasource().get(linkName));
+            linkDataModels.add(schema.getDatasource().get(linkName));
         }
-        if (!CollectionUtils.isEmpty(linkDataSources)) {
-            List<DataSource> all = new ArrayList<>();
-            all.add(baseDataSource);
-            all.addAll(linkDataSources);
+        if (!CollectionUtils.isEmpty(linkDataModels)) {
+            List<DataModel> all = new ArrayList<>();
+            all.add(baseDataModel);
+            all.addAll(linkDataModels);
             return all;
         }
         return Lists.newArrayList();

@@ -2,7 +2,7 @@ package com.tencent.supersonic.headless.core.translator.calcite.sql.node;
 
 import com.tencent.supersonic.common.pojo.enums.EngineType;
 import com.tencent.supersonic.headless.core.translator.calcite.s2sql.Metric;
-import com.tencent.supersonic.headless.core.translator.calcite.schema.SemanticSchema;
+import com.tencent.supersonic.headless.core.translator.calcite.schema.S2SemanticSchema;
 import lombok.Data;
 import org.apache.calcite.sql.SqlNode;
 import org.apache.calcite.sql.validate.SqlValidatorScope;
@@ -30,7 +30,7 @@ public class MetricNode extends SemanticNode {
         return buildAs(metric.getName(), sqlNode);
     }
 
-    public static Boolean isMetricField(String name, SemanticSchema schema) {
+    public static Boolean isMetricField(String name, S2SemanticSchema schema) {
         Optional<Metric> metric = schema.getMetrics().stream()
                 .filter(m -> m.getName().equalsIgnoreCase(name)).findFirst();
         return metric.isPresent() && metric.get().getMetricTypeParams().isFieldMetric();

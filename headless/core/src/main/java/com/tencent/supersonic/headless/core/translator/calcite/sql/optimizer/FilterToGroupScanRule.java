@@ -1,6 +1,6 @@
 package com.tencent.supersonic.headless.core.translator.calcite.sql.optimizer;
 
-import com.tencent.supersonic.headless.core.translator.calcite.schema.SemanticSchema;
+import com.tencent.supersonic.headless.core.translator.calcite.schema.S2SemanticSchema;
 import org.apache.calcite.plan.RelOptRuleCall;
 import org.apache.calcite.plan.RelRule;
 import org.apache.calcite.rel.core.Aggregate;
@@ -40,9 +40,10 @@ public class FilterToGroupScanRule extends RelRule<Config> implements Transforma
                 });
             }).as(FilterTableScanRule.Config.class);
 
-    private SemanticSchema semanticSchema;
+    private S2SemanticSchema semanticSchema;
 
-    public FilterToGroupScanRule(FilterTableScanRule.Config config, SemanticSchema semanticSchema) {
+    public FilterToGroupScanRule(FilterTableScanRule.Config config,
+            S2SemanticSchema semanticSchema) {
         super(config);
         this.semanticSchema = semanticSchema;
     }

@@ -7,11 +7,10 @@ import com.tencent.supersonic.headless.core.pojo.Database;
 import com.tencent.supersonic.headless.core.pojo.MetricQueryParam;
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;
 import com.tencent.supersonic.headless.core.translator.calcite.s2sql.Constants;
-import com.tencent.supersonic.headless.core.translator.calcite.s2sql.DataSource;
+import com.tencent.supersonic.headless.core.translator.calcite.s2sql.DataModel;
+import com.tencent.supersonic.headless.core.translator.calcite.schema.S2SemanticSchema;
 import com.tencent.supersonic.headless.core.translator.calcite.schema.SchemaBuilder;
-import com.tencent.supersonic.headless.core.translator.calcite.schema.SemanticSchema;
 import com.tencent.supersonic.headless.core.translator.calcite.sql.Renderer;
-import com.tencent.supersonic.headless.core.translator.calcite.sql.TableView;
 import com.tencent.supersonic.headless.core.translator.calcite.sql.node.DataSourceNode;
 import com.tencent.supersonic.headless.core.translator.calcite.sql.node.SemanticNode;
 import com.tencent.supersonic.headless.core.translator.calcite.sql.render.FilterRender;
@@ -27,29 +26,27 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Objects;
-import java.util.Stack;
 
 /** parsing from query dimensions and metrics */
 @Slf4j
 public class AggPlanner implements Planner {
 
     private MetricQueryParam metricReq;
-    private SemanticSchema schema;
+    private final S2SemanticSchema schema;
     private SqlValidatorScope scope;
-    private Stack<TableView> dataSets = new Stack<>();
     private SqlNode parserNode;
     private String sourceId;
     private boolean isAgg = false;
     private AggOption aggOption = AggOption.DEFAULT;
 
-    public AggPlanner(SemanticSchema schema) {
+    public AggPlanner(S2SemanticSchema schema) {
         this.schema = schema;
     }
 
-    public void parse() throws Exception {
+    private void parse() throws Exception {
         // find the match Datasource
         scope = SchemaBuilder.getScope(schema);
-        List<DataSource> datasource = getMatchDataSource(scope);
+        List<DataModel> datasource = getMatchDataSource(scope);
         if (datasource == null || datasource.isEmpty()) {
             throw new Exception("datasource not found");
         }
@@ -78,16 +75,16 @@ public class AggPlanner implements Planner {
         parserNode = builders.getLast().builder();
     }
 
-    private List<DataSource> getMatchDataSource(SqlValidatorScope scope) throws Exception {
+    private List<DataModel> getMatchDataSource(SqlValidatorScope scope) throws Exception {
         return DataSourceNode.getMatchDataSources(scope, schema, metricReq);
     }
 
-    private boolean getAgg(DataSource dataSource) {
+    private boolean getAgg(DataModel dataModel) {
         if (!AggOption.DEFAULT.equals(aggOption)) {
             return AggOption.isAgg(aggOption);
         }
-        // default by dataSource time aggregation
-        if (Objects.nonNull(dataSource.getAggTime()) && !dataSource.getAggTime()
+        // default by dataModel time aggregation
+        if (Objects.nonNull(dataModel.getAggTime()) && !dataModel.getAggTime()
                 .equalsIgnoreCase(Constants.DIMENSION_TYPE_TIME_GRANULARITY_NONE)) {
             if (!metricReq.isNativeQuery()) {
                 return true;
@@ -97,7 +94,7 @@ public class AggPlanner implements Planner {
     }
 
     @Override
-    public void explain(QueryStatement queryStatement, AggOption aggOption) throws Exception {
+    public void plan(QueryStatement queryStatement, AggOption aggOption) throws Exception {
         this.metricReq = queryStatement.getMetricQueryParam();
         if (metricReq.getMetrics() == null) {
             metricReq.setMetrics(new ArrayList<>());
@@ -129,22 +126,6 @@ public class AggPlanner implements Planner {
 
     @Override
     public String simplify(String sql, EngineType engineType) {
-        return optimize(sql, engineType);
-    }
-
-    public void optimize(EngineType engineType) {
-        if (Objects.isNull(schema.getRuntimeOptions())
-                || Objects.isNull(schema.getRuntimeOptions().getEnableOptimize())
-                || !schema.getRuntimeOptions().getEnableOptimize()) {
-            return;
-        }
-        SqlNode optimizeNode = optimizeSql(SemanticNode.getSql(parserNode, engineType), engineType);
-        if (Objects.nonNull(optimizeNode)) {
-            parserNode = optimizeNode;
-        }
-    }
-
-    public String optimize(String sql, EngineType engineType) {
         try {
             SqlNode sqlNode =
                     SqlParser.create(sql, Configuration.getParserConfig(engineType)).parseStmt();
@@ -153,21 +134,32 @@ public class AggPlanner implements Planner {
                         SemanticNode.optimize(scope, schema, sqlNode, engineType), engineType);
             }
         } catch (Exception e) {
-            log.error("optimize error {}", e);
+            log.error("optimize error {}", e.toString());
         }
         return "";
     }
 
-    private SqlNode optimizeSql(String sql, EngineType engineType) {
+    private void optimize(EngineType engineType) {
+        if (Objects.isNull(schema.getRuntimeOptions())
+                || Objects.isNull(schema.getRuntimeOptions().getEnableOptimize())
+                || !schema.getRuntimeOptions().getEnableOptimize()) {
+            return;
+        }
+
+        SqlNode optimizeNode = null;
         try {
-            SqlNode sqlNode =
-                    SqlParser.create(sql, Configuration.getParserConfig(engineType)).parseStmt();
+            SqlNode sqlNode = SqlParser.create(SemanticNode.getSql(parserNode, engineType),
+                    Configuration.getParserConfig(engineType)).parseStmt();
             if (Objects.nonNull(sqlNode)) {
-                return SemanticNode.optimize(scope, schema, sqlNode, engineType);
+                optimizeNode = SemanticNode.optimize(scope, schema, sqlNode, engineType);
             }
         } catch (Exception e) {
             log.error("optimize error {}", e);
         }
-        return null;
+
+        if (Objects.nonNull(optimizeNode)) {
+            parserNode = optimizeNode;
+        }
     }
+
 }

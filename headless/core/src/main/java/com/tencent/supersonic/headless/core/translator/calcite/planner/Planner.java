@@ -7,11 +7,11 @@ import com.tencent.supersonic.headless.core.pojo.QueryStatement;
 /** parse and generate SQL and other execute information */
 public interface Planner {
 
-    public void explain(QueryStatement queryStatement, AggOption aggOption) throws Exception;
+    void plan(QueryStatement queryStatement, AggOption aggOption) throws Exception;
 
-    public String getSql(EngineType enginType);
+    String getSql(EngineType enginType);
 
-    public String getSourceId();
+    String getSourceId();
 
-    public String simplify(String sql, EngineType engineType);
+    String simplify(String sql, EngineType engineType);
 }

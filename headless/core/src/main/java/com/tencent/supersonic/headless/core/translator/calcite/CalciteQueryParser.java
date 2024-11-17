@@ -9,7 +9,7 @@ import com.tencent.supersonic.headless.core.translator.QueryParser;
 import com.tencent.supersonic.headless.core.translator.calcite.planner.AggPlanner;
 import com.tencent.supersonic.headless.core.translator.calcite.s2sql.SemanticModel;
 import com.tencent.supersonic.headless.core.translator.calcite.schema.RuntimeOptions;
-import com.tencent.supersonic.headless.core.translator.calcite.schema.SemanticSchema;
+import com.tencent.supersonic.headless.core.translator.calcite.schema.S2SemanticSchema;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.calcite.sql.parser.SqlParseException;
 import org.springframework.stereotype.Component;
@@ -31,18 +31,18 @@ public class CalciteQueryParser implements QueryParser {
             return;
         }
         queryStatement.setMetricQueryParam(metricReq);
-        SemanticSchema semanticSchema = getSemanticSchema(semanticModel, queryStatement);
-        AggPlanner aggBuilder = new AggPlanner(semanticSchema);
-        aggBuilder.explain(queryStatement, isAgg);
+        S2SemanticSchema semanticSchema = getSemanticSchema(semanticModel, queryStatement);
+        AggPlanner aggPlanner = new AggPlanner(semanticSchema);
+        aggPlanner.plan(queryStatement, isAgg);
         EngineType engineType = EngineType.fromString(semanticModel.getDatabase().getType());
-        queryStatement.setSql(aggBuilder.getSql(engineType));
+        queryStatement.setSql(aggPlanner.getSql(engineType));
         if (Objects.nonNull(queryStatement.getEnableOptimize())
                 && queryStatement.getEnableOptimize()
                 && Objects.nonNull(queryStatement.getDataSetAlias())
                 && !queryStatement.getDataSetAlias().isEmpty()) {
             // simplify model sql with query sql
-            String simplifySql = aggBuilder.simplify(
-                    getSqlByDataSet(engineType, aggBuilder.getSql(engineType),
+            String simplifySql = aggPlanner.simplify(
+                    getSqlByDataSet(engineType, aggPlanner.getSql(engineType),
                             queryStatement.getDataSetSql(), queryStatement.getDataSetAlias()),
                     engineType);
             if (Objects.nonNull(simplifySql) && !simplifySql.isEmpty()) {
@@ -52,10 +52,10 @@ public class CalciteQueryParser implements QueryParser {
         }
     }
 
-    private SemanticSchema getSemanticSchema(SemanticModel semanticModel,
+    private S2SemanticSchema getSemanticSchema(SemanticModel semanticModel,
             QueryStatement queryStatement) {
-        SemanticSchema semanticSchema =
-                SemanticSchema.newBuilder(semanticModel.getSchemaKey()).build();
+        S2SemanticSchema semanticSchema =
+                S2SemanticSchema.newBuilder(semanticModel.getSchemaKey()).build();
         semanticSchema.setSemanticModel(semanticModel);
         semanticSchema.setDatasource(semanticModel.getDatasourceMap());
         semanticSchema.setDimension(semanticModel.getDimensionMap());

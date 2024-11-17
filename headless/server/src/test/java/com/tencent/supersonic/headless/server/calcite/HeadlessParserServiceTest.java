@@ -7,7 +7,7 @@ import com.tencent.supersonic.headless.api.pojo.response.SqlParserResp;
 import com.tencent.supersonic.headless.core.pojo.MetricQueryParam;
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;
 import com.tencent.supersonic.headless.core.translator.calcite.planner.AggPlanner;
-import com.tencent.supersonic.headless.core.translator.calcite.schema.SemanticSchema;
+import com.tencent.supersonic.headless.core.translator.calcite.schema.S2SemanticSchema;
 import com.tencent.supersonic.headless.server.manager.SemanticSchemaManager;
 import com.tencent.supersonic.headless.server.pojo.yaml.DataModelYamlTpl;
 import com.tencent.supersonic.headless.server.pojo.yaml.DimensionTimeTypeParamsTpl;
@@ -27,9 +27,9 @@ import java.util.Map;
 @Slf4j
 class HeadlessParserServiceTest {
 
-    private static Map<String, SemanticSchema> headlessSchemaMap = new HashMap<>();
+    private static Map<String, S2SemanticSchema> headlessSchemaMap = new HashMap<>();
 
-    public static SqlParserResp parser(SemanticSchema semanticSchema,
+    public static SqlParserResp parser(S2SemanticSchema semanticSchema,
             MetricQueryParam metricQueryParam, boolean isAgg) {
         SqlParserResp sqlParser = new SqlParserResp();
         try {
@@ -40,7 +40,7 @@ class HeadlessParserServiceTest {
             AggPlanner aggBuilder = new AggPlanner(semanticSchema);
             QueryStatement queryStatement = new QueryStatement();
             queryStatement.setMetricQueryParam(metricQueryParam);
-            aggBuilder.explain(queryStatement, AggOption.getAggregation(!isAgg));
+            aggBuilder.plan(queryStatement, AggOption.getAggregation(!isAgg));
             EngineType engineType = EngineType
                     .fromString(semanticSchema.getSemanticModel().getDatabase().getType());
             sqlParser.setSql(aggBuilder.getSql(engineType));
@@ -122,7 +122,7 @@ class HeadlessParserServiceTest {
         identify.setType("primary");
         identifies.add(identify);
         datasource.setIdentifiers(identifies);
-        SemanticSchema semanticSchema = SemanticSchema.newBuilder("1").build();
+        S2SemanticSchema semanticSchema = S2SemanticSchema.newBuilder("1").build();
 
         SemanticSchemaManager.update(semanticSchema,
                 SemanticSchemaManager.getDatasource(datasource));
@@ -192,7 +192,7 @@ class HeadlessParserServiceTest {
         System.out.println(parser(semanticSchema, metricCommand2, true));
     }
 
-    private static void addDepartment(SemanticSchema semanticSchema) {
+    private static void addDepartment(S2SemanticSchema semanticSchema) {
         DataModelYamlTpl datasource = new DataModelYamlTpl();
         datasource.setName("user_department");
         datasource.setSourceId(1L);

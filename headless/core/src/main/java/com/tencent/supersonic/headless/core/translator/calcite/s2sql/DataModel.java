@@ -7,7 +7,7 @@ import java.util.List;
 
 @Data
 @Builder
-public class DataSource {
+public class DataModel {
 
     private Long id;
 

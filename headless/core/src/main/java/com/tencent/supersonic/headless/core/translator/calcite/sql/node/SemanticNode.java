@@ -5,7 +5,7 @@ import com.tencent.supersonic.common.calcite.SemanticSqlDialect;
 import com.tencent.supersonic.common.calcite.SqlDialectFactory;
 import com.tencent.supersonic.common.pojo.enums.EngineType;
 import com.tencent.supersonic.headless.core.translator.calcite.s2sql.Constants;
-import com.tencent.supersonic.headless.core.translator.calcite.schema.SemanticSchema;
+import com.tencent.supersonic.headless.core.translator.calcite.schema.S2SemanticSchema;
 import com.tencent.supersonic.headless.core.translator.calcite.sql.optimizer.FilterToGroupScanRule;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.calcite.plan.RelOptPlanner;
@@ -397,8 +397,8 @@ public abstract class SemanticNode {
         return parseInfo;
     }
 
-    public static SqlNode optimize(SqlValidatorScope scope, SemanticSchema schema, SqlNode sqlNode,
-            EngineType engineType) {
+    public static SqlNode optimize(SqlValidatorScope scope, S2SemanticSchema schema,
+            SqlNode sqlNode, EngineType engineType) {
         try {
             HepProgramBuilder hepProgramBuilder = new HepProgramBuilder();
             SemanticSqlDialect sqlDialect = SqlDialectFactory.getSqlDialect(engineType);

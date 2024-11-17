@@ -42,7 +42,7 @@ public class DefaultSemanticTranslator implements SemanticTranslator {
         }
     }
 
-    public void parse(QueryStatement queryStatement) throws Exception {
+    private void parse(QueryStatement queryStatement) throws Exception {
         QueryParam queryParam = queryStatement.getQueryParam();
         if (Objects.isNull(queryStatement.getDataSetQueryParam())) {
             queryStatement.setDataSetQueryParam(new DataSetQueryParam());
@@ -64,7 +64,8 @@ public class DefaultSemanticTranslator implements SemanticTranslator {
         } else {
             queryStatement.getMetricQueryParam()
                     .setNativeQuery(queryParam.getQueryType().isNativeAggQuery());
-            doParse(queryStatement);
+            doParse(queryStatement,
+                    AggOption.getAggregation(queryStatement.getMetricQueryParam().isNativeQuery()));
         }
         if (StringUtils.isEmpty(queryStatement.getSql())) {
             throw new RuntimeException("parse Exception: " + queryStatement.getErrMsg());
@@ -77,7 +78,7 @@ public class DefaultSemanticTranslator implements SemanticTranslator {
         }
     }
 
-    public QueryStatement doParse(DataSetQueryParam dataSetQueryParam,
+    private QueryStatement doParse(DataSetQueryParam dataSetQueryParam,
             QueryStatement queryStatement) {
         log.info("parse dataSetQuery [{}] ", dataSetQueryParam);
         SemanticModel semanticModel = queryStatement.getSemanticModel();
@@ -132,12 +133,7 @@ public class DefaultSemanticTranslator implements SemanticTranslator {
         return queryStatement;
     }
 
-    public QueryStatement doParse(QueryStatement queryStatement) {
-        return doParse(queryStatement,
-                AggOption.getAggregation(queryStatement.getMetricQueryParam().isNativeQuery()));
-    }
-
-    public QueryStatement doParse(QueryStatement queryStatement, AggOption isAgg) {
+    private QueryStatement doParse(QueryStatement queryStatement, AggOption isAgg) {
         MetricQueryParam metricQueryParam = queryStatement.getMetricQueryParam();
         log.info("parse metricQuery [{}] isAgg [{}]", metricQueryParam, isAgg);
         try {

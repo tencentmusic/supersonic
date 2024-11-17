@@ -1,6 +1,6 @@
 package com.tencent.supersonic.headless.core.translator.calcite.schema;
 
-import com.tencent.supersonic.headless.core.translator.calcite.s2sql.DataSource;
+import com.tencent.supersonic.headless.core.translator.calcite.s2sql.DataModel;
 import com.tencent.supersonic.headless.core.translator.calcite.s2sql.Dimension;
 import com.tencent.supersonic.headless.core.translator.calcite.s2sql.JoinRelation;
 import com.tencent.supersonic.headless.core.translator.calcite.s2sql.Materialization;
@@ -15,9 +15,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class SemanticSchema extends AbstractSchema {
+public class S2SemanticSchema extends AbstractSchema {
 
     private final String schemaKey;
+
     private final Map<String, Table> tableMap;
 
     private SemanticModel semanticModel = new SemanticModel();
@@ -26,7 +27,7 @@ public class SemanticSchema extends AbstractSchema {
 
     private RuntimeOptions runtimeOptions;
 
-    private SemanticSchema(String schemaKey, Map<String, Table> tableMap) {
+    private S2SemanticSchema(String schemaKey, Map<String, Table> tableMap) {
         this.schemaKey = schemaKey;
         this.tableMap = tableMap;
     }
@@ -57,11 +58,11 @@ public class SemanticSchema extends AbstractSchema {
         return this;
     }
 
-    public Map<String, DataSource> getDatasource() {
+    public Map<String, DataModel> getDatasource() {
         return semanticModel.getDatasourceMap();
     }
 
-    public void setDatasource(Map<String, DataSource> datasource) {
+    public void setDatasource(Map<String, DataModel> datasource) {
         semanticModel.setDatasourceMap(datasource);
     }
 
@@ -129,8 +130,8 @@ public class SemanticSchema extends AbstractSchema {
             return this;
         }
 
-        public SemanticSchema build() {
-            return new SemanticSchema(schemaKey, tableMap);
+        public S2SemanticSchema build() {
+            return new S2SemanticSchema(schemaKey, tableMap);
         }
     }
 }

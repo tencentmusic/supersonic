@@ -5,7 +5,7 @@ import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.headless.api.pojo.QueryParam;
 import com.tencent.supersonic.headless.core.pojo.MetricQueryParam;
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;
-import com.tencent.supersonic.headless.core.translator.calcite.s2sql.DataSource;
+import com.tencent.supersonic.headless.core.translator.calcite.s2sql.DataModel;
 import com.tencent.supersonic.headless.core.utils.SqlGenerateUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
@@ -60,7 +60,7 @@ public class ParserDefaultConverter implements QueryConverter {
         // support detail query
         if (queryParam.getQueryType().isNativeAggQuery()
                 && CollectionUtils.isEmpty(metricQueryParam.getMetrics())) {
-            Map<Long, DataSource> modelMap = queryStatement.getSemanticModel().getModelMap();
+            Map<Long, DataModel> modelMap = queryStatement.getSemanticModel().getModelMap();
             for (Long modelId : modelMap.keySet()) {
                 String modelBizName = modelMap.get(modelId).getName();
                 String internalMetricName =

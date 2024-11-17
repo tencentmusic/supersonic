@@ -1,6 +1,6 @@
 package com.tencent.supersonic.headless.core.translator.calcite.sql;
 
-import com.tencent.supersonic.headless.core.translator.calcite.s2sql.DataSource;
+import com.tencent.supersonic.headless.core.translator.calcite.s2sql.DataModel;
 import lombok.Data;
 import org.apache.calcite.sql.SqlBasicCall;
 import org.apache.calcite.sql.SqlKind;
@@ -27,7 +27,7 @@ public class TableView {
 
     private String alias;
     private List<String> primary;
-    private DataSource dataSource;
+    private DataModel dataModel;
 
     public SqlNode build() {
         measure.addAll(dimension);
