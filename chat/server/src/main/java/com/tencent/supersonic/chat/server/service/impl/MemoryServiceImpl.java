@@ -49,10 +49,10 @@ public class MemoryServiceImpl implements MemoryService {
     @Override
     public void updateMemory(ChatMemoryUpdateReq chatMemoryUpdateReq, User user) {
         ChatMemoryDO chatMemoryDO = chatMemoryRepository.getMemory(chatMemoryUpdateReq.getId());
+        boolean hadEnabled = MemoryStatus.ENABLED.equals(chatMemoryDO.getStatus());
         chatMemoryDO.setUpdatedBy(user.getName());
         chatMemoryDO.setUpdatedAt(new Date());
         BeanMapper.mapper(chatMemoryUpdateReq, chatMemoryDO);
-        boolean hadEnabled = MemoryStatus.ENABLED.equals(chatMemoryDO.getStatus());
         if (MemoryStatus.ENABLED.equals(chatMemoryUpdateReq.getStatus()) && !hadEnabled) {
             enableMemory(chatMemoryDO);
         } else if (MemoryStatus.DISABLED.equals(chatMemoryUpdateReq.getStatus()) && hadEnabled) {

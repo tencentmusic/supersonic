@@ -88,6 +88,15 @@ public class MemoryReviewTask {
             return;
         }
 
+        // 如果大模型已经评估过，则不再评估
+        if (Objects.nonNull(m.getLlmReviewRet())) {
+            // directly enable memory if the LLM determines it positive
+            if (MemoryReviewResult.POSITIVE.equals(m.getLlmReviewRet())) {
+                memoryService.enableMemory(m);
+            }
+            return;
+        }
+
         String promptStr = createPromptString(m, chatApp.getPrompt());
         Prompt prompt = PromptTemplate.from(promptStr).apply(Collections.EMPTY_MAP);
 
