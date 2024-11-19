@@ -2,7 +2,6 @@ package com.tencent.supersonic.headless.chat.query.rule.metric;
 
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.Order;
-import com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum;
 import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementMatch;
 import com.tencent.supersonic.headless.chat.ChatQueryContext;
@@ -48,12 +47,10 @@ public class MetricTopNQuery extends MetricSemanticQuery {
     }
 
     @Override
-    public void fillParseInfo(ChatQueryContext chatQueryContext) {
-        super.fillParseInfo(chatQueryContext);
+    public void fillParseInfo(ChatQueryContext chatQueryContext, Long dataSetId) {
+        super.fillParseInfo(chatQueryContext, dataSetId);
 
         parseInfo.setScore(parseInfo.getScore() + 2.0);
-        parseInfo.setAggType(AggregateTypeEnum.SUM);
-
         SchemaElement metric = parseInfo.getMetrics().iterator().next();
         parseInfo.getOrders().add(new Order(metric.getBizName(), Constants.DESC_UPPER));
     }

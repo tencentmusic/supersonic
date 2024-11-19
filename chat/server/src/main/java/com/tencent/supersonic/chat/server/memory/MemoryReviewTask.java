@@ -1,6 +1,7 @@
 package com.tencent.supersonic.chat.server.memory;
 
 import com.tencent.supersonic.chat.api.pojo.enums.MemoryReviewResult;
+import com.tencent.supersonic.chat.api.pojo.request.ChatMemoryFilter;
 import com.tencent.supersonic.chat.server.agent.Agent;
 import com.tencent.supersonic.chat.server.persistence.dataobject.ChatMemoryDO;
 import com.tencent.supersonic.chat.server.service.AgentService;
@@ -21,6 +22,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -57,24 +59,31 @@ public class MemoryReviewTask {
 
     @Scheduled(fixedDelay = 60 * 1000)
     public void review() {
-        memoryService.getMemoriesForLlmReview().stream().forEach(memory -> {
-            try {
-                processMemory(memory);
-            } catch (Exception e) {
-                log.error("Exception occurred while processing memory with id {}: {}",
-                        memory.getId(), e.getMessage(), e);
+        List<Agent> agentList = agentService.getAgents();
+        for (Agent agent : agentList) {
+            if (!agent.enableMemoryReview()) {
+                continue;
             }
-        });
+            ChatMemoryFilter chatMemoryFilter =
+                    ChatMemoryFilter.builder().agentId(agent.getId()).build();
+            memoryService.getMemories(chatMemoryFilter).stream().forEach(memory -> {
+                try {
+                    processMemory(memory, agent);
+                } catch (Exception e) {
+                    log.error("Exception occurred while processing memory with id {}: {}",
+                            memory.getId(), e.getMessage(), e);
+                }
+            });
+        }
     }
 
-    private void processMemory(ChatMemoryDO m) {
-        Agent chatAgent = agentService.getAgent(m.getAgentId());
-        if (Objects.isNull(chatAgent)) {
+    private void processMemory(ChatMemoryDO m, Agent agent) {
+        if (Objects.isNull(agent)) {
             log.warn("Agent id {} not found or memory review disabled", m.getAgentId());
             return;
         }
 
-        ChatApp chatApp = chatAgent.getChatAppConfig().get(APP_KEY);
+        ChatApp chatApp = agent.getChatAppConfig().get(APP_KEY);
         if (Objects.isNull(chatApp) || !chatApp.isEnable()) {
             return;
         }
@@ -90,7 +99,7 @@ public class MemoryReviewTask {
                     response);
             processResponse(response, m);
         } else {
-            log.debug("ChatLanguageModel not found for agent:{}", chatAgent.getId());
+            log.debug("ChatLanguageModel not found for agent:{}", agent.getId());
         }
     }
 

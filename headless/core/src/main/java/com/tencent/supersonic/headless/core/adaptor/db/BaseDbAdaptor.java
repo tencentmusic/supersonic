@@ -2,6 +2,7 @@ package com.tencent.supersonic.headless.core.adaptor.db;
 
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.headless.api.pojo.DBColumn;
+import com.tencent.supersonic.headless.api.pojo.enums.FieldType;
 import com.tencent.supersonic.headless.core.pojo.ConnectInfo;
 import lombok.extern.slf4j.Slf4j;
 
@@ -71,7 +72,8 @@ public abstract class BaseDbAdaptor implements DbAdaptor {
             String columnName = columns.getString("COLUMN_NAME");
             String dataType = columns.getString("TYPE_NAME");
             String remarks = columns.getString("REMARKS");
-            dbColumns.add(new DBColumn(columnName, dataType, remarks));
+            FieldType fieldType = classifyColumnType(dataType);
+            dbColumns.add(new DBColumn(columnName, dataType, remarks, fieldType));
         }
         return dbColumns;
     }
@@ -80,6 +82,27 @@ public abstract class BaseDbAdaptor implements DbAdaptor {
         Connection connection = DriverManager.getConnection(connectionInfo.getUrl(),
                 connectionInfo.getUserName(), connectionInfo.getPassword());
         return connection.getMetaData();
+    }
+
+    protected static FieldType classifyColumnType(String typeName) {
+        switch (typeName.toUpperCase()) {
+            case "INT":
+            case "INTEGER":
+            case "BIGINT":
+            case "SMALLINT":
+            case "TINYINT":
+            case "FLOAT":
+            case "DOUBLE":
+            case "DECIMAL":
+            case "NUMERIC":
+                return FieldType.measure;
+            case "DATE":
+            case "TIME":
+            case "TIMESTAMP":
+                return FieldType.time;
+            default:
+                return FieldType.dimension;
+        }
     }
 
 }

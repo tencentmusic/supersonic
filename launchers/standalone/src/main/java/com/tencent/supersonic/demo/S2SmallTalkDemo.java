@@ -6,7 +6,6 @@ import com.google.common.collect.Maps;
 import com.tencent.supersonic.chat.server.agent.Agent;
 import com.tencent.supersonic.chat.server.agent.ToolConfig;
 import com.tencent.supersonic.chat.server.executor.PlainTextExecutor;
-import com.tencent.supersonic.chat.server.parser.PlainTextParser;
 import com.tencent.supersonic.common.pojo.ChatApp;
 import com.tencent.supersonic.common.pojo.enums.AppModule;
 import com.tencent.supersonic.common.util.ChatAppManager;
@@ -21,12 +20,12 @@ import java.util.stream.Collectors;
 
 @Component
 @Slf4j
-@Order(2)
-public class SmallTalkDemo extends S2BaseDemo {
+@Order(10)
+public class S2SmallTalkDemo extends S2BaseDemo {
 
     public void doRun() {
         Agent agent = new Agent();
-        agent.setName("来闲聊");
+        agent.setName("闲聊助手");
         agent.setDescription("直接与大模型对话，验证连通性");
         agent.setStatus(1);
         agent.setEnableSearch(0);

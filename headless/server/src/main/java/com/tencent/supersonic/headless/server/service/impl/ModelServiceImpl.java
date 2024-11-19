@@ -222,8 +222,11 @@ public class ModelServiceImpl implements ModelService {
 
     private void doBuild(ModelBuildReq modelBuildReq, DbSchema curSchema, List<DbSchema> dbSchemas,
             Map<String, ModelSchema> modelSchemaMap) {
-        SemanticModeller semanticModeller = CoreComponentFactory.getSemanticModeller();
-        ModelSchema modelSchema = semanticModeller.build(curSchema, dbSchemas, modelBuildReq);
+        ModelSchema modelSchema = new ModelSchema();
+        List<SemanticModeller> semanticModellers = CoreComponentFactory.getSemanticModellers();
+        for (SemanticModeller semanticModeller : semanticModellers) {
+            semanticModeller.build(curSchema, dbSchemas, modelSchema, modelBuildReq);
+        }
         modelSchemaMap.put(curSchema.getTable(), modelSchema);
     }
 

@@ -1,6 +1,5 @@
 package com.tencent.supersonic.headless.chat.query;
 
-import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.headless.api.pojo.DataSetSchema;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.api.pojo.request.SemanticQueryReq;
@@ -13,7 +12,7 @@ public interface SemanticQuery {
 
     SemanticQueryReq buildSemanticQueryReq() throws SqlParseException;
 
-    void initS2Sql(DataSetSchema dataSetSchema, User user);
+    void buildS2Sql(DataSetSchema dataSetSchema);
 
     SemanticParseInfo getParseInfo();
 
