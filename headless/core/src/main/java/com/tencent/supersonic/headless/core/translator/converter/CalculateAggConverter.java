@@ -97,7 +97,7 @@ public class CalculateAggConverter implements QueryConverter {
 
     @Override
     public void convert(QueryStatement queryStatement) throws Exception {
-        Database database = queryStatement.getSemanticModel().getDatabase();
+        Database database = queryStatement.getOntology().getDatabase();
         DataSetQueryParam dataSetQueryParam = generateSqlCommend(queryStatement,
                 EngineType.fromString(database.getType().toUpperCase()), database.getVersion());
         queryStatement.setDataSetQueryParam(dataSetQueryParam);

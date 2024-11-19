@@ -60,7 +60,7 @@ public class ParserDefaultConverter implements QueryConverter {
         // support detail query
         if (queryParam.getQueryType().isNativeAggQuery()
                 && CollectionUtils.isEmpty(metricQueryParam.getMetrics())) {
-            Map<Long, DataModel> modelMap = queryStatement.getSemanticModel().getModelMap();
+            Map<Long, DataModel> modelMap = queryStatement.getOntology().getModelMap();
             for (Long modelId : modelMap.keySet()) {
                 String modelBizName = modelMap.get(modelId).getName();
                 String internalMetricName =

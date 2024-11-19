@@ -18,7 +18,7 @@ import com.tencent.supersonic.headless.core.translator.calcite.s2sql.Materializa
 import com.tencent.supersonic.headless.core.translator.calcite.s2sql.Measure;
 import com.tencent.supersonic.headless.core.translator.calcite.s2sql.Metric;
 import com.tencent.supersonic.headless.core.translator.calcite.s2sql.MetricTypeParams;
-import com.tencent.supersonic.headless.core.translator.calcite.s2sql.SemanticModel;
+import com.tencent.supersonic.headless.core.translator.calcite.s2sql.Ontology;
 import com.tencent.supersonic.headless.core.translator.calcite.schema.S2SemanticSchema;
 import com.tencent.supersonic.headless.server.pojo.yaml.DataModelYamlTpl;
 import com.tencent.supersonic.headless.server.pojo.yaml.DimensionTimeTypeParamsTpl;
@@ -57,9 +57,9 @@ public class SemanticSchemaManager {
         this.schemaService = schemaService;
     }
 
-    public SemanticModel getSemanticModel(SemanticSchemaResp semanticSchemaResp) {
-        SemanticModel semanticModel = new SemanticModel();
-        semanticModel.setSchemaKey(semanticSchemaResp.getSchemaKey());
+    public Ontology buildOntology(SemanticSchemaResp semanticSchemaResp) {
+        Ontology ontology = new Ontology();
+        ontology.setSchemaKey(semanticSchemaResp.getSchemaKey());
         Map<String, List<DimensionYamlTpl>> dimensionYamlTpls = new HashMap<>();
         List<DataModelYamlTpl> dataModelYamlTpls = new ArrayList<>();
         List<MetricYamlTpl> metricYamlTpls = new ArrayList<>();
@@ -67,36 +67,35 @@ public class SemanticSchemaManager {
         schemaService.getSchemaYamlTpl(semanticSchemaResp, dimensionYamlTpls, dataModelYamlTpls,
                 metricYamlTpls, modelIdName);
         DatabaseResp databaseResp = semanticSchemaResp.getDatabaseResp();
-        semanticModel.setDatabase(DatabaseConverter.convert(databaseResp));
+        ontology.setDatabase(DatabaseConverter.convert(databaseResp));
         if (!CollectionUtils.isEmpty(semanticSchemaResp.getModelRelas())) {
-            semanticModel.setJoinRelations(
+            ontology.setJoinRelations(
                     getJoinRelation(semanticSchemaResp.getModelRelas(), modelIdName));
         }
         if (!dataModelYamlTpls.isEmpty()) {
             Map<String, DataModel> dataSourceMap =
                     dataModelYamlTpls.stream().map(SemanticSchemaManager::getDatasource).collect(
                             Collectors.toMap(DataModel::getName, item -> item, (k1, k2) -> k1));
-            semanticModel.setDatasourceMap(dataSourceMap);
+            ontology.setDatasourceMap(dataSourceMap);
         }
         if (!dimensionYamlTpls.isEmpty()) {
             Map<String, List<Dimension>> dimensionMap = new HashMap<>();
             for (Map.Entry<String, List<DimensionYamlTpl>> entry : dimensionYamlTpls.entrySet()) {
                 dimensionMap.put(entry.getKey(), getDimensions(entry.getValue()));
             }
-            semanticModel.setDimensionMap(dimensionMap);
+            ontology.setDimensionMap(dimensionMap);
         }
         if (!metricYamlTpls.isEmpty()) {
-            semanticModel.setMetrics(getMetrics(metricYamlTpls));
+            ontology.setMetrics(getMetrics(metricYamlTpls));
         }
-        return semanticModel;
+        return ontology;
     }
 
-    public SemanticModel getTagSemanticModel(SemanticSchemaResp semanticSchemaResp)
-            throws Exception {
+    public Ontology getTagSemanticModel(SemanticSchemaResp semanticSchemaResp) throws Exception {
         if (CollectionUtils.isEmpty(semanticSchemaResp.getTags())) {
             throw new Exception("semanticSchemaResp tag is empty");
         }
-        SemanticModel semanticModel = getSemanticModel(semanticSchemaResp);
+        Ontology ontology = buildOntology(semanticSchemaResp);
         // Map<String, List<Dimension>> dimensions = new HashMap<>();
         Map<Long, List<TagResp>> tagMap = new HashMap<>();
         for (TagResp tagResp : semanticSchemaResp.getTags()) {
@@ -105,24 +104,24 @@ public class SemanticSchemaManager {
             }
             tagMap.get(tagResp.getModelId()).add(tagResp);
         }
-        if (Objects.nonNull(semanticModel.getDatasourceMap())
-                && !semanticModel.getDatasourceMap().isEmpty()) {
-            for (Map.Entry<String, DataModel> entry : semanticModel.getDatasourceMap().entrySet()) {
+        if (Objects.nonNull(ontology.getDatasourceMap())
+                && !ontology.getDatasourceMap().isEmpty()) {
+            for (Map.Entry<String, DataModel> entry : ontology.getDatasourceMap().entrySet()) {
                 List<Dimension> modelDimensions = new ArrayList<>();
-                if (!semanticModel.getDimensionMap().containsKey(entry.getKey())) {
-                    semanticModel.getDimensionMap().put(entry.getKey(), modelDimensions);
+                if (!ontology.getDimensionMap().containsKey(entry.getKey())) {
+                    ontology.getDimensionMap().put(entry.getKey(), modelDimensions);
                 } else {
-                    modelDimensions = semanticModel.getDimensionMap().get(entry.getKey());
+                    modelDimensions = ontology.getDimensionMap().get(entry.getKey());
                 }
                 if (tagMap.containsKey(entry.getValue().getId())) {
                     for (TagResp tagResp : tagMap.get(entry.getValue().getId())) {
-                        addTagModel(tagResp, modelDimensions, semanticModel.getMetrics());
+                        addTagModel(tagResp, modelDimensions, ontology.getMetrics());
                     }
                 }
             }
         }
 
-        return semanticModel;
+        return ontology;
     }
 
     private void addTagModel(TagResp tagResp, List<Dimension> modelDimensions,

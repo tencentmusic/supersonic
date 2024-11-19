@@ -5,7 +5,7 @@ import com.tencent.supersonic.headless.core.translator.calcite.s2sql.Dimension;
 import com.tencent.supersonic.headless.core.translator.calcite.s2sql.JoinRelation;
 import com.tencent.supersonic.headless.core.translator.calcite.s2sql.Materialization;
 import com.tencent.supersonic.headless.core.translator.calcite.s2sql.Metric;
-import com.tencent.supersonic.headless.core.translator.calcite.s2sql.SemanticModel;
+import com.tencent.supersonic.headless.core.translator.calcite.s2sql.Ontology;
 import org.apache.calcite.schema.Schema;
 import org.apache.calcite.schema.SchemaVersion;
 import org.apache.calcite.schema.Table;
@@ -21,7 +21,7 @@ public class S2SemanticSchema extends AbstractSchema {
 
     private final Map<String, Table> tableMap;
 
-    private SemanticModel semanticModel = new SemanticModel();
+    private Ontology ontology = new Ontology();
 
     private List<JoinRelation> joinRelations;
 
@@ -40,12 +40,12 @@ public class S2SemanticSchema extends AbstractSchema {
         return schemaKey;
     }
 
-    public void setSemanticModel(SemanticModel semanticModel) {
-        this.semanticModel = semanticModel;
+    public void setSemanticModel(Ontology ontology) {
+        this.ontology = ontology;
     }
 
-    public SemanticModel getSemanticModel() {
-        return semanticModel;
+    public Ontology getSemanticModel() {
+        return ontology;
     }
 
     @Override
@@ -59,35 +59,35 @@ public class S2SemanticSchema extends AbstractSchema {
     }
 
     public Map<String, DataModel> getDatasource() {
-        return semanticModel.getDatasourceMap();
+        return ontology.getDatasourceMap();
     }
 
     public void setDatasource(Map<String, DataModel> datasource) {
-        semanticModel.setDatasourceMap(datasource);
+        ontology.setDatasourceMap(datasource);
     }
 
     public Map<String, List<Dimension>> getDimension() {
-        return semanticModel.getDimensionMap();
+        return ontology.getDimensionMap();
     }
 
     public void setDimension(Map<String, List<Dimension>> dimensions) {
-        semanticModel.setDimensionMap(dimensions);
+        ontology.setDimensionMap(dimensions);
     }
 
     public List<Metric> getMetrics() {
-        return semanticModel.getMetrics();
+        return ontology.getMetrics();
     }
 
     public void setMetric(List<Metric> metric) {
-        semanticModel.setMetrics(metric);
+        ontology.setMetrics(metric);
     }
 
     public void setMaterializationList(List<Materialization> materializationList) {
-        semanticModel.setMaterializationList(materializationList);
+        ontology.setMaterializationList(materializationList);
     }
 
     public List<Materialization> getMaterializationList() {
-        return semanticModel.getMaterializationList();
+        return ontology.getMaterializationList();
     }
 
     public void setJoinRelations(List<JoinRelation> joinRelations) {

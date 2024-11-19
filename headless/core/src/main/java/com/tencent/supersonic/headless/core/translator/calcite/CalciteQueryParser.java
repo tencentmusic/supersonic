@@ -7,7 +7,7 @@ import com.tencent.supersonic.headless.core.pojo.MetricQueryParam;
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;
 import com.tencent.supersonic.headless.core.translator.QueryParser;
 import com.tencent.supersonic.headless.core.translator.calcite.planner.AggPlanner;
-import com.tencent.supersonic.headless.core.translator.calcite.s2sql.SemanticModel;
+import com.tencent.supersonic.headless.core.translator.calcite.s2sql.Ontology;
 import com.tencent.supersonic.headless.core.translator.calcite.schema.RuntimeOptions;
 import com.tencent.supersonic.headless.core.translator.calcite.schema.S2SemanticSchema;
 import lombok.extern.slf4j.Slf4j;
@@ -25,16 +25,16 @@ public class CalciteQueryParser implements QueryParser {
     @Override
     public void parse(QueryStatement queryStatement, AggOption isAgg) throws Exception {
         MetricQueryParam metricReq = queryStatement.getMetricQueryParam();
-        SemanticModel semanticModel = queryStatement.getSemanticModel();
-        if (semanticModel == null) {
+        Ontology ontology = queryStatement.getOntology();
+        if (ontology == null) {
             queryStatement.setErrMsg("semanticSchema not found");
             return;
         }
         queryStatement.setMetricQueryParam(metricReq);
-        S2SemanticSchema semanticSchema = getSemanticSchema(semanticModel, queryStatement);
+        S2SemanticSchema semanticSchema = getSemanticSchema(ontology, queryStatement);
         AggPlanner aggPlanner = new AggPlanner(semanticSchema);
         aggPlanner.plan(queryStatement, isAgg);
-        EngineType engineType = EngineType.fromString(semanticModel.getDatabase().getType());
+        EngineType engineType = EngineType.fromString(ontology.getDatabase().getType());
         queryStatement.setSql(aggPlanner.getSql(engineType));
         if (Objects.nonNull(queryStatement.getEnableOptimize())
                 && queryStatement.getEnableOptimize()
@@ -52,15 +52,14 @@ public class CalciteQueryParser implements QueryParser {
         }
     }
 
-    private S2SemanticSchema getSemanticSchema(SemanticModel semanticModel,
-            QueryStatement queryStatement) {
+    private S2SemanticSchema getSemanticSchema(Ontology ontology, QueryStatement queryStatement) {
         S2SemanticSchema semanticSchema =
-                S2SemanticSchema.newBuilder(semanticModel.getSchemaKey()).build();
-        semanticSchema.setSemanticModel(semanticModel);
-        semanticSchema.setDatasource(semanticModel.getDatasourceMap());
-        semanticSchema.setDimension(semanticModel.getDimensionMap());
-        semanticSchema.setMetric(semanticModel.getMetrics());
-        semanticSchema.setJoinRelations(semanticModel.getJoinRelations());
+                S2SemanticSchema.newBuilder(ontology.getSchemaKey()).build();
+        semanticSchema.setSemanticModel(ontology);
+        semanticSchema.setDatasource(ontology.getDatasourceMap());
+        semanticSchema.setDimension(ontology.getDimensionMap());
+        semanticSchema.setMetric(ontology.getMetrics());
+        semanticSchema.setJoinRelations(ontology.getJoinRelations());
         semanticSchema.setRuntimeOptions(
                 RuntimeOptions.builder().minMaxTime(queryStatement.getMinMaxTime())
                         .enableOptimize(queryStatement.getEnableOptimize()).build());

@@ -29,6 +29,7 @@ import com.tencent.supersonic.headless.core.adaptor.db.DbAdaptorFactory;
 import com.tencent.supersonic.headless.core.pojo.DataSetQueryParam;
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;
 import com.tencent.supersonic.headless.core.utils.SqlGenerateUtils;
+import com.tencent.supersonic.headless.server.manager.SemanticSchemaManager;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -58,8 +59,14 @@ public class QueryReqConverter {
     @Autowired
     private SqlGenerateUtils sqlGenerateUtils;
 
-    public QueryStatement convert(QuerySqlReq querySQLReq, SemanticSchemaResp semanticSchemaResp)
-            throws Exception {
+    @Autowired
+    private QueryUtils queryUtils;
+
+    @Autowired
+    private SemanticSchemaManager semanticSchemaManager;
+
+    public QueryStatement buildQueryStatement(QuerySqlReq querySQLReq,
+            SemanticSchemaResp semanticSchemaResp) {
 
         if (semanticSchemaResp == null) {
             return new QueryStatement();
@@ -87,17 +94,14 @@ public class QueryReqConverter {
         List<String> metrics =
                 metricSchemas.stream().map(m -> m.getBizName()).collect(Collectors.toList());
         QueryStructReq queryStructReq = new QueryStructReq();
+
         MetricTable metricTable = new MetricTable();
-        metricTable.setMetrics(metrics);
-
+        metricTable.getMetrics().addAll(metrics);
         Set<String> dimensions = getDimensions(semanticSchemaResp, allFields);
-
-        metricTable.setDimensions(new ArrayList<>(dimensions));
-
+        metricTable.getDimensions().addAll(dimensions);
         metricTable.setAlias(tableName.toLowerCase());
         // if metric empty , fill model default
         if (CollectionUtils.isEmpty(metricTable.getMetrics())) {
-            metricTable.setMetrics(new ArrayList<>());
             metricTable.getMetrics().add(sqlGenerateUtils.generateInternalMetricName(
                     getDefaultModel(semanticSchemaResp, metricTable.getDimensions())));
         } else {
@@ -122,14 +126,15 @@ public class QueryReqConverter {
         }
         // 7. do deriveMetric
         generateDerivedMetric(semanticSchemaResp, aggOption, result);
-        // 8.physicalSql by ParseSqlReq
 
+        // 8.physicalSql by ParseSqlReq
         queryStructReq.setDateInfo(queryStructUtils.getDateConfBySql(querySQLReq.getSql()));
         queryStructReq.setDataSetId(querySQLReq.getDataSetId());
         queryStructReq.setQueryType(getQueryType(aggOption));
         log.debug("QueryReqConverter queryStructReq[{}]", queryStructReq);
         QueryParam queryParam = new QueryParam();
-        convert(queryStructReq, queryParam);
+        BeanUtils.copyProperties(queryStructReq, queryParam);
+
         QueryStatement queryStatement = new QueryStatement();
         queryStatement.setQueryParam(queryParam);
         queryStatement.setDataSetQueryParam(result);
@@ -137,15 +142,12 @@ public class QueryReqConverter {
         queryStatement.setMinMaxTime(queryStructUtils.getBeginEndTime(queryStructReq));
         queryStatement.setDataSetId(querySQLReq.getDataSetId());
         queryStatement.setLimit(querySQLReq.getLimit());
+        queryStatement.setModelIds(querySQLReq.getModelIds());
+        queryStatement.setEnableOptimize(queryUtils.enableOptimize());
+        queryStatement.setSemanticSchemaResp(semanticSchemaResp);
+        queryStatement.setOntology(semanticSchemaManager.buildOntology(semanticSchemaResp));
 
         return queryStatement;
-    }
-
-    public void convert(QueryStructReq queryStructReq, QueryParam queryParam) {
-        BeanUtils.copyProperties(queryStructReq, queryParam);
-        queryParam.setOrders(queryStructReq.getOrders());
-        queryParam.setMetrics(queryStructReq.getMetrics());
-        queryParam.setGroups(queryStructReq.getGroups());
     }
 
     private AggOption getAggOption(QuerySqlReq databaseReq, List<MetricSchemaResp> metricSchemas) {

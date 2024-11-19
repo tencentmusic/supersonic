@@ -109,7 +109,7 @@ public class AggPlanner implements Planner {
         // build a parse Node
         parse();
         // optimizer
-        Database database = queryStatement.getSemanticModel().getDatabase();
+        Database database = queryStatement.getOntology().getDatabase();
         EngineType engineType = EngineType.fromString(database.getType());
         optimize(engineType);
     }

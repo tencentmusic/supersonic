@@ -34,7 +34,7 @@ public class DefaultDimValueConverter implements QueryConverter {
 
     @Override
     public void convert(QueryStatement queryStatement) {
-        List<Dimension> dimensions = queryStatement.getSemanticModel().getDimensions().stream()
+        List<Dimension> dimensions = queryStatement.getOntology().getDimensions().stream()
                 .filter(dimension -> !CollectionUtils.isEmpty(dimension.getDefaultValues()))
                 .collect(Collectors.toList());
         if (CollectionUtils.isEmpty(dimensions)) {

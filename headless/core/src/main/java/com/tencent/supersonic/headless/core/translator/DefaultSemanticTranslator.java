@@ -10,7 +10,7 @@ import com.tencent.supersonic.headless.api.pojo.enums.AggOption;
 import com.tencent.supersonic.headless.core.pojo.DataSetQueryParam;
 import com.tencent.supersonic.headless.core.pojo.MetricQueryParam;
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;
-import com.tencent.supersonic.headless.core.translator.calcite.s2sql.SemanticModel;
+import com.tencent.supersonic.headless.core.translator.calcite.s2sql.Ontology;
 import com.tencent.supersonic.headless.core.translator.converter.QueryConverter;
 import com.tencent.supersonic.headless.core.utils.ComponentFactory;
 import lombok.extern.slf4j.Slf4j;
@@ -81,8 +81,8 @@ public class DefaultSemanticTranslator implements SemanticTranslator {
     private QueryStatement doParse(DataSetQueryParam dataSetQueryParam,
             QueryStatement queryStatement) {
         log.info("parse dataSetQuery [{}] ", dataSetQueryParam);
-        SemanticModel semanticModel = queryStatement.getSemanticModel();
-        EngineType engineType = EngineType.fromString(semanticModel.getDatabase().getType());
+        Ontology ontology = queryStatement.getOntology();
+        EngineType engineType = EngineType.fromString(ontology.getDatabase().getType());
         try {
             if (!CollectionUtils.isEmpty(dataSetQueryParam.getTables())) {
                 List<String[]> tables = new ArrayList<>();
@@ -158,7 +158,7 @@ public class DefaultSemanticTranslator implements SemanticTranslator {
         tableSql.setMinMaxTime(queryStatement.getMinMaxTime());
         tableSql.setEnableOptimize(queryStatement.getEnableOptimize());
         tableSql.setDataSetId(queryStatement.getDataSetId());
-        tableSql.setSemanticModel(queryStatement.getSemanticModel());
+        tableSql.setOntology(queryStatement.getOntology());
         if (isSingleMetricTable) {
             tableSql.setDataSetSql(dataSetQueryParam.getSql());
             tableSql.setDataSetAlias(metricTable.getAlias());

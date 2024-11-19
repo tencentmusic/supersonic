@@ -11,7 +11,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Data
-public class SemanticModel {
+public class Ontology {
 
     private String schemaKey;
     private List<Metric> metrics = new ArrayList<>();
