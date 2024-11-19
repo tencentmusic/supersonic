@@ -9,10 +9,9 @@ import com.tencent.supersonic.headless.core.translator.calcite.s2sql.Identify;
 import com.tencent.supersonic.headless.core.translator.calcite.s2sql.Materialization;
 import com.tencent.supersonic.headless.core.translator.calcite.s2sql.Measure;
 import com.tencent.supersonic.headless.core.translator.calcite.s2sql.Metric;
-import com.tencent.supersonic.headless.core.translator.calcite.schema.S2SemanticSchema;
-import com.tencent.supersonic.headless.core.translator.calcite.sql.Renderer;
+import com.tencent.supersonic.headless.core.translator.calcite.sql.S2CalciteSchema;
 import com.tencent.supersonic.headless.core.translator.calcite.sql.TableView;
-import com.tencent.supersonic.headless.core.translator.calcite.sql.node.DataSourceNode;
+import com.tencent.supersonic.headless.core.translator.calcite.sql.node.DataModelNode;
 import com.tencent.supersonic.headless.core.translator.calcite.sql.node.DimensionNode;
 import com.tencent.supersonic.headless.core.translator.calcite.sql.node.FilterNode;
 import com.tencent.supersonic.headless.core.translator.calcite.sql.node.IdentifyNode;
@@ -43,7 +42,7 @@ public class SourceRender extends Renderer {
 
     public static TableView renderOne(String alias, List<String> fieldWheres,
             List<String> reqMetrics, List<String> reqDimensions, String queryWhere,
-            DataModel datasource, SqlValidatorScope scope, S2SemanticSchema schema, boolean nonAgg)
+            DataModel datasource, SqlValidatorScope scope, S2CalciteSchema schema, boolean nonAgg)
             throws Exception {
 
         TableView dataSet = new TableView();
@@ -96,7 +95,7 @@ public class SourceRender extends Renderer {
         output.setMeasure(SemanticNode.deduplicateNode(output.getMeasure()));
         dataSet.setMeasure(SemanticNode.deduplicateNode(dataSet.getMeasure()));
 
-        SqlNode tableNode = DataSourceNode.buildExtend(datasource, extendFields, scope);
+        SqlNode tableNode = DataModelNode.buildExtend(datasource, extendFields, scope);
         dataSet.setTable(tableNode);
         output.setTable(
                 SemanticNode.buildAs(Constants.DATASOURCE_TABLE_OUT_PREFIX + datasource.getName()
@@ -107,11 +106,10 @@ public class SourceRender extends Renderer {
 
 
     private static void buildDimension(String alias, String dimension, DataModel datasource,
-            S2SemanticSchema schema, boolean nonAgg, Map<String, String> extendFields,
+            S2CalciteSchema schema, boolean nonAgg, Map<String, String> extendFields,
             TableView dataSet, TableView output, SqlValidatorScope scope) throws Exception {
         List<Dimension> dimensionList = schema.getDimension().get(datasource.getName());
-        EngineType engineType =
-                EngineType.fromString(schema.getSemanticModel().getDatabase().getType());
+        EngineType engineType = EngineType.fromString(schema.getOntology().getDatabase().getType());
         boolean isAdd = false;
         if (!CollectionUtils.isEmpty(dimensionList)) {
             for (Dimension dim : dimensionList) {
@@ -186,11 +184,10 @@ public class SourceRender extends Renderer {
 
     private static List<SqlNode> getWhereMeasure(List<String> fields, List<String> queryMetrics,
             List<String> queryDimensions, Map<String, String> extendFields, DataModel datasource,
-            SqlValidatorScope scope, S2SemanticSchema schema, boolean nonAgg) throws Exception {
+            SqlValidatorScope scope, S2CalciteSchema schema, boolean nonAgg) throws Exception {
         Iterator<String> iterator = fields.iterator();
         List<SqlNode> whereNode = new ArrayList<>();
-        EngineType engineType =
-                EngineType.fromString(schema.getSemanticModel().getDatabase().getType());
+        EngineType engineType = EngineType.fromString(schema.getOntology().getDatabase().getType());
         while (iterator.hasNext()) {
             String cur = iterator.next();
             if (queryDimensions.contains(cur) || queryMetrics.contains(cur)) {
@@ -229,7 +226,7 @@ public class SourceRender extends Renderer {
     private static void mergeWhere(List<String> fields, TableView dataSet, TableView outputSet,
             List<String> queryMetrics, List<String> queryDimensions,
             Map<String, String> extendFields, DataModel datasource, SqlValidatorScope scope,
-            S2SemanticSchema schema, boolean nonAgg) throws Exception {
+            S2CalciteSchema schema, boolean nonAgg) throws Exception {
         List<SqlNode> whereNode = getWhereMeasure(fields, queryMetrics, queryDimensions,
                 extendFields, datasource, scope, schema, nonAgg);
         dataSet.getMeasure().addAll(whereNode);
@@ -237,7 +234,7 @@ public class SourceRender extends Renderer {
     }
 
     public static void whereDimMetric(List<String> fields, List<String> queryMetrics,
-            List<String> queryDimensions, DataModel datasource, S2SemanticSchema schema,
+            List<String> queryDimensions, DataModel datasource, S2CalciteSchema schema,
             Set<String> dimensions, Set<String> metrics) {
         for (String field : fields) {
             if (queryDimensions.contains(field) || queryMetrics.contains(field)) {
@@ -252,7 +249,7 @@ public class SourceRender extends Renderer {
     }
 
     private static void addField(String field, String oriField, DataModel datasource,
-            S2SemanticSchema schema, Set<String> dimensions, Set<String> metrics) {
+            S2CalciteSchema schema, Set<String> dimensions, Set<String> metrics) {
         Optional<Dimension> dimension = datasource.getDimensions().stream()
                 .filter(d -> d.getName().equalsIgnoreCase(field)).findFirst();
         if (dimension.isPresent()) {
@@ -292,7 +289,7 @@ public class SourceRender extends Renderer {
         }
     }
 
-    public static boolean isDimension(String name, DataModel datasource, S2SemanticSchema schema) {
+    public static boolean isDimension(String name, DataModel datasource, S2CalciteSchema schema) {
         Optional<Dimension> dimension = datasource.getDimensions().stream()
                 .filter(d -> d.getName().equalsIgnoreCase(name)).findFirst();
         if (dimension.isPresent()) {
@@ -340,12 +337,11 @@ public class SourceRender extends Renderer {
     }
 
     public void render(MetricQueryParam metricQueryParam, List<DataModel> dataModels,
-            SqlValidatorScope scope, S2SemanticSchema schema, boolean nonAgg) throws Exception {
+            SqlValidatorScope scope, S2CalciteSchema schema, boolean nonAgg) throws Exception {
         String queryWhere = metricQueryParam.getWhere();
         Set<String> whereFields = new HashSet<>();
         List<String> fieldWhere = new ArrayList<>();
-        EngineType engineType =
-                EngineType.fromString(schema.getSemanticModel().getDatabase().getType());
+        EngineType engineType = EngineType.fromString(schema.getOntology().getDatabase().getType());
         if (queryWhere != null && !queryWhere.isEmpty()) {
             SqlNode sqlNode = SemanticNode.parse(queryWhere, scope, engineType);
             FilterNode.getFilterField(sqlNode, whereFields);

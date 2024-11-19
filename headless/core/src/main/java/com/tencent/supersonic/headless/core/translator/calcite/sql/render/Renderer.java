@@ -1,4 +1,4 @@
-package com.tencent.supersonic.headless.core.translator.calcite.sql;
+package com.tencent.supersonic.headless.core.translator.calcite.sql.render;
 
 import com.tencent.supersonic.common.pojo.enums.EngineType;
 import com.tencent.supersonic.headless.core.pojo.MetricQueryParam;
@@ -7,7 +7,8 @@ import com.tencent.supersonic.headless.core.translator.calcite.s2sql.Dimension;
 import com.tencent.supersonic.headless.core.translator.calcite.s2sql.Identify;
 import com.tencent.supersonic.headless.core.translator.calcite.s2sql.Measure;
 import com.tencent.supersonic.headless.core.translator.calcite.s2sql.Metric;
-import com.tencent.supersonic.headless.core.translator.calcite.schema.S2SemanticSchema;
+import com.tencent.supersonic.headless.core.translator.calcite.sql.S2CalciteSchema;
+import com.tencent.supersonic.headless.core.translator.calcite.sql.TableView;
 import com.tencent.supersonic.headless.core.translator.calcite.sql.node.MeasureNode;
 import com.tencent.supersonic.headless.core.translator.calcite.sql.node.MetricNode;
 import com.tencent.supersonic.headless.core.translator.calcite.sql.node.SemanticNode;
@@ -37,7 +38,7 @@ public abstract class Renderer {
                 .findFirst();
     }
 
-    public static Optional<Metric> getMetricByName(String name, S2SemanticSchema schema) {
+    public static Optional<Metric> getMetricByName(String name, S2CalciteSchema schema) {
         Optional<Metric> metric = schema.getMetrics().stream()
                 .filter(m -> m.getName().equalsIgnoreCase(name)).findFirst();
         return metric;
@@ -49,7 +50,7 @@ public abstract class Renderer {
     }
 
     public static MetricNode buildMetricNode(String metric, DataModel datasource,
-            SqlValidatorScope scope, S2SemanticSchema schema, boolean nonAgg, String alias)
+            SqlValidatorScope scope, S2CalciteSchema schema, boolean nonAgg, String alias)
             throws Exception {
         Optional<Metric> metricOpt = getMetricByName(metric, schema);
         MetricNode metricNode = new MetricNode();
@@ -114,5 +115,5 @@ public abstract class Renderer {
     }
 
     public abstract void render(MetricQueryParam metricCommand, List<DataModel> dataModels,
-            SqlValidatorScope scope, S2SemanticSchema schema, boolean nonAgg) throws Exception;
+            SqlValidatorScope scope, S2CalciteSchema schema, boolean nonAgg) throws Exception;
 }

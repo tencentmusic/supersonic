@@ -134,7 +134,7 @@ public class S2VisitsDemo extends S2BaseDemo {
 
     private void addSampleChats(Integer agentId) {
         Long chatId = chatManageService.addChat(defaultUser, "样例对话1", agentId);
-        submitText(chatId.intValue(), agentId, "超音数 访问次数");
+        submitText(chatId.intValue(), agentId, "访问过超音数的部门有哪些");
         submitText(chatId.intValue(), agentId, "按部门统计近7天访问次数");
         submitText(chatId.intValue(), agentId, "alice 停留时长");
     }
@@ -446,7 +446,7 @@ public class S2VisitsDemo extends S2BaseDemo {
         termReq1.setDescription("用户为tom和lucy");
         termReq1.setAlias(Lists.newArrayList("VIP用户"));
         termReq1.setDomainId(s2Domain.getId());
-        termService.saveOrUpdate(termReq, defaultUser);
+        termService.saveOrUpdate(termReq1, defaultUser);
     }
 
     private void addAuthGroup_1(ModelResp stayTimeModel) {

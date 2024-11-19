@@ -140,15 +140,15 @@ public class QueryUtils {
         return null;
     }
 
-    public QueryStatement sqlParserUnion(QueryMultiStructReq queryMultiStructCmd,
-            List<QueryStatement> sqlParsers) {
+    public QueryStatement unionAll(QueryMultiStructReq queryMultiStructCmd,
+            List<QueryStatement> queryStatements) {
         QueryStatement sqlParser = new QueryStatement();
         StringBuilder unionSqlBuilder = new StringBuilder();
-        for (int i = 0; i < sqlParsers.size(); i++) {
+        for (int i = 0; i < queryStatements.size(); i++) {
             String selectStr = SqlGenerateUtils
                     .getUnionSelect(queryMultiStructCmd.getQueryStructReqs().get(i));
             unionSqlBuilder.append(String.format("select %s from ( %s ) sub_sql_%s", selectStr,
-                    sqlParsers.get(i).getSql(), i));
+                    queryStatements.get(i).getSql(), i));
             unionSqlBuilder.append(UNIONALL);
         }
         String unionSql = unionSqlBuilder.substring(0,

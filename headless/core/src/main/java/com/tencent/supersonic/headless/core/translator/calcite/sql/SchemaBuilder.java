@@ -1,8 +1,7 @@
-package com.tencent.supersonic.headless.core.translator.calcite.schema;
+package com.tencent.supersonic.headless.core.translator.calcite.sql;
 
 import com.tencent.supersonic.common.calcite.Configuration;
 import com.tencent.supersonic.common.pojo.enums.EngineType;
-import com.tencent.supersonic.headless.core.translator.calcite.sql.S2SQLSqlValidatorImpl;
 import org.apache.calcite.jdbc.CalciteSchema;
 import org.apache.calcite.prepare.CalciteCatalogReader;
 import org.apache.calcite.prepare.Prepare;
@@ -27,15 +26,14 @@ public class SchemaBuilder {
     public static final String MATERIALIZATION_SYS_FIELD_DATE = "C1";
     public static final String MATERIALIZATION_SYS_FIELD_DATA = "C2";
 
-    public static SqlValidatorScope getScope(S2SemanticSchema schema) throws Exception {
+    public static SqlValidatorScope getScope(S2CalciteSchema schema) throws Exception {
         Map<String, RelDataType> nameToTypeMap = new HashMap<>();
         CalciteSchema rootSchema = CalciteSchema.createRootSchema(true, false);
         rootSchema.add(schema.getSchemaKey(), schema);
         Prepare.CatalogReader catalogReader = new CalciteCatalogReader(rootSchema,
                 Collections.singletonList(schema.getSchemaKey()), Configuration.typeFactory,
                 Configuration.config);
-        EngineType engineType =
-                EngineType.fromString(schema.getSemanticModel().getDatabase().getType());
+        EngineType engineType = EngineType.fromString(schema.getOntology().getDatabase().getType());
         S2SQLSqlValidatorImpl s2SQLSqlValidator =
                 new S2SQLSqlValidatorImpl(Configuration.operatorTable, catalogReader,
                         Configuration.typeFactory, Configuration.getValidatorConfig(engineType));
@@ -45,12 +43,12 @@ public class SchemaBuilder {
     public static CalciteSchema getMaterializationSchema() {
         CalciteSchema rootSchema = CalciteSchema.createRootSchema(true, false);
         SchemaPlus schema = rootSchema.plus().add(MATERIALIZATION_SYS_DB, new AbstractSchema());
-        DataSourceTable srcTable = DataSourceTable.newBuilder(MATERIALIZATION_SYS_SOURCE)
+        S2CalciteTable srcTable = S2CalciteTable.newBuilder(MATERIALIZATION_SYS_SOURCE)
                 .addField(MATERIALIZATION_SYS_FIELD_DATE, SqlTypeName.DATE)
                 .addField(MATERIALIZATION_SYS_FIELD_DATA, SqlTypeName.BIGINT).withRowCount(1)
                 .build();
         schema.add(MATERIALIZATION_SYS_SOURCE, srcTable);
-        DataSourceTable dataSetTable = DataSourceTable.newBuilder(MATERIALIZATION_SYS_VIEW)
+        S2CalciteTable dataSetTable = S2CalciteTable.newBuilder(MATERIALIZATION_SYS_VIEW)
                 .addField(MATERIALIZATION_SYS_FIELD_DATE, SqlTypeName.DATE)
                 .addField(MATERIALIZATION_SYS_FIELD_DATA, SqlTypeName.BIGINT).withRowCount(1)
                 .build();
@@ -62,7 +60,7 @@ public class SchemaBuilder {
             Set<String> dates, Set<String> dimensions, Set<String> metrics) {
         String tb = tbSrc;
         String db = dbSrc;
-        DataSourceTable.Builder builder = DataSourceTable.newBuilder(tb);
+        S2CalciteTable.Builder builder = S2CalciteTable.newBuilder(tb);
         for (String date : dates) {
             builder.addField(date, SqlTypeName.VARCHAR);
         }
@@ -72,7 +70,7 @@ public class SchemaBuilder {
         for (String metric : metrics) {
             builder.addField(metric, SqlTypeName.ANY);
         }
-        DataSourceTable srcTable = builder.withRowCount(1).build();
+        S2CalciteTable srcTable = builder.withRowCount(1).build();
         if (Objects.nonNull(db) && !db.isEmpty()) {
             SchemaPlus dbPs = dataSetSchema.plus();
             for (String d : db.split("\\.")) {

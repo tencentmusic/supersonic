@@ -1,6 +1,5 @@
-package com.tencent.supersonic.headless.core.translator.calcite.sql.optimizer;
+package com.tencent.supersonic.headless.core.translator.calcite.sql;
 
-import com.tencent.supersonic.headless.core.translator.calcite.schema.S2SemanticSchema;
 import org.apache.calcite.plan.RelOptRuleCall;
 import org.apache.calcite.plan.RelRule;
 import org.apache.calcite.rel.core.Aggregate;
@@ -40,24 +39,23 @@ public class FilterToGroupScanRule extends RelRule<Config> implements Transforma
                 });
             }).as(FilterTableScanRule.Config.class);
 
-    private S2SemanticSchema semanticSchema;
+    private S2CalciteSchema schema;
 
-    public FilterToGroupScanRule(FilterTableScanRule.Config config,
-            S2SemanticSchema semanticSchema) {
+    public FilterToGroupScanRule(FilterTableScanRule.Config config, S2CalciteSchema schema) {
         super(config);
-        this.semanticSchema = semanticSchema;
+        this.schema = schema;
     }
 
     public void onMatch(RelOptRuleCall call) {
         if (call.rels.length != 4) {
             return;
         }
-        if (Objects.isNull(semanticSchema.getRuntimeOptions())
-                || Objects.isNull(semanticSchema.getRuntimeOptions().getMinMaxTime())
-                || semanticSchema.getRuntimeOptions().getMinMaxTime().getLeft().isEmpty()) {
+        if (Objects.isNull(schema.getRuntimeOptions())
+                || Objects.isNull(schema.getRuntimeOptions().getMinMaxTime())
+                || schema.getRuntimeOptions().getMinMaxTime().getLeft().isEmpty()) {
             return;
         }
-        Triple<String, String, String> minMax = semanticSchema.getRuntimeOptions().getMinMaxTime();
+        Triple<String, String, String> minMax = schema.getRuntimeOptions().getMinMaxTime();
         Filter filter = (Filter) call.rel(0);
         Project project0 = (Project) call.rel(1);
         Project project1 = (Project) call.rel(3);

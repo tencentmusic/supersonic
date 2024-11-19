@@ -13,7 +13,7 @@ public class DataModel {
 
     private String name;
 
-    private Long sourceId;
+    private Long modelId;
 
     private String type;
 

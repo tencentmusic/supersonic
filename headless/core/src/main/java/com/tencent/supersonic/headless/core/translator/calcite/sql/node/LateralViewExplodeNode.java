@@ -1,6 +1,5 @@
-package com.tencent.supersonic.headless.core.translator.calcite.sql.node.extend;
+package com.tencent.supersonic.headless.core.translator.calcite.sql.node;
 
-import com.tencent.supersonic.headless.core.translator.calcite.sql.node.ExtendNode;
 import org.apache.calcite.linq4j.Ord;
 import org.apache.calcite.sql.SqlCall;
 import org.apache.calcite.sql.SqlIdentifier;

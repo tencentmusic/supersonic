@@ -11,9 +11,8 @@ import com.tencent.supersonic.headless.core.translator.calcite.s2sql.Dimension;
 import com.tencent.supersonic.headless.core.translator.calcite.s2sql.Identify;
 import com.tencent.supersonic.headless.core.translator.calcite.s2sql.JoinRelation;
 import com.tencent.supersonic.headless.core.translator.calcite.s2sql.Measure;
-import com.tencent.supersonic.headless.core.translator.calcite.schema.S2SemanticSchema;
-import com.tencent.supersonic.headless.core.translator.calcite.schema.SchemaBuilder;
-import com.tencent.supersonic.headless.core.translator.calcite.sql.node.extend.LateralViewExplodeNode;
+import com.tencent.supersonic.headless.core.translator.calcite.sql.S2CalciteSchema;
+import com.tencent.supersonic.headless.core.translator.calcite.sql.SchemaBuilder;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.calcite.sql.SqlBasicCall;
 import org.apache.calcite.sql.SqlDataTypeSpec;
@@ -38,27 +37,27 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Slf4j
-public class DataSourceNode extends SemanticNode {
+public class DataModelNode extends SemanticNode {
 
-    public static SqlNode build(DataModel datasource, SqlValidatorScope scope) throws Exception {
+    public static SqlNode build(DataModel dataModel, SqlValidatorScope scope) throws Exception {
         String sqlTable = "";
-        if (datasource.getSqlQuery() != null && !datasource.getSqlQuery().isEmpty()) {
-            sqlTable = datasource.getSqlQuery();
-        } else if (datasource.getTableQuery() != null && !datasource.getTableQuery().isEmpty()) {
-            if (datasource.getType().equalsIgnoreCase(EngineType.POSTGRESQL.getName())) {
-                String fullTableName = Arrays.stream(datasource.getTableQuery().split("\\."))
+        if (dataModel.getSqlQuery() != null && !dataModel.getSqlQuery().isEmpty()) {
+            sqlTable = dataModel.getSqlQuery();
+        } else if (dataModel.getTableQuery() != null && !dataModel.getTableQuery().isEmpty()) {
+            if (dataModel.getType().equalsIgnoreCase(EngineType.POSTGRESQL.getName())) {
+                String fullTableName = Arrays.stream(dataModel.getTableQuery().split("\\."))
                         .collect(Collectors.joining(".public."));
                 sqlTable = "select * from " + fullTableName;
             } else {
-                sqlTable = "select * from " + datasource.getTableQuery();
+                sqlTable = "select * from " + dataModel.getTableQuery();
             }
         }
         if (sqlTable.isEmpty()) {
             throw new Exception("DatasourceNode build error [tableSqlNode not found]");
         }
-        SqlNode source = getTable(sqlTable, scope, EngineType.fromString(datasource.getType()));
-        addSchema(scope, datasource, sqlTable);
-        return buildAs(datasource.getName(), source);
+        SqlNode source = getTable(sqlTable, scope, EngineType.fromString(dataModel.getType()));
+        addSchema(scope, dataModel, sqlTable);
+        return buildAs(dataModel.getName(), source);
     }
 
     private static void addSchema(SqlValidatorScope scope, DataModel datasource, String table)
@@ -150,7 +149,7 @@ public class DataSourceNode extends SemanticNode {
         return dataModelList.stream().map(d -> d.getName()).collect(Collectors.joining("_"));
     }
 
-    public static void getQueryDimensionMeasure(S2SemanticSchema schema,
+    public static void getQueryDimensionMeasure(S2CalciteSchema schema,
             MetricQueryParam metricCommand, Set<String> queryDimension, List<String> measures) {
         queryDimension.addAll(metricCommand.getDimensions().stream()
                 .map(d -> d.contains(Constants.DIMENSION_IDENTIFY)
@@ -166,11 +165,10 @@ public class DataSourceNode extends SemanticNode {
                 .forEach(m -> measures.add(m));
     }
 
-    public static void mergeQueryFilterDimensionMeasure(S2SemanticSchema schema,
+    public static void mergeQueryFilterDimensionMeasure(S2CalciteSchema schema,
             MetricQueryParam metricCommand, Set<String> queryDimension, List<String> measures,
             SqlValidatorScope scope) throws Exception {
-        EngineType engineType =
-                EngineType.fromString(schema.getSemanticModel().getDatabase().getType());
+        EngineType engineType = EngineType.fromString(schema.getOntology().getDatabase().getType());
         if (Objects.nonNull(metricCommand.getWhere()) && !metricCommand.getWhere().isEmpty()) {
             Set<String> filterConditions = new HashSet<>();
             FilterNode.getFilterField(parse(metricCommand.getWhere(), scope, engineType),
@@ -193,8 +191,8 @@ public class DataSourceNode extends SemanticNode {
         }
     }
 
-    public static List<DataModel> getMatchDataSources(SqlValidatorScope scope,
-            S2SemanticSchema schema, MetricQueryParam metricCommand) throws Exception {
+    public static List<DataModel> getRelatedDataModels(SqlValidatorScope scope,
+            S2CalciteSchema schema, MetricQueryParam metricCommand) throws Exception {
         List<DataModel> dataModels = new ArrayList<>();
 
         // check by metric
@@ -232,7 +230,7 @@ public class DataSourceNode extends SemanticNode {
             filterMeasure.addAll(sourceMeasure);
             filterMeasure.addAll(dimension);
             EngineType engineType =
-                    EngineType.fromString(schema.getSemanticModel().getDatabase().getType());
+                    EngineType.fromString(schema.getOntology().getDatabase().getType());
             mergeQueryFilterDimensionMeasure(schema, metricCommand, queryDimension, measures,
                     scope);
             boolean isAllMatch = checkMatch(sourceMeasure, queryDimension, measures, dimension,
@@ -302,7 +300,7 @@ public class DataSourceNode extends SemanticNode {
     }
 
     private static List<DataModel> getLinkDataSourcesByJoinRelation(Set<String> queryDimension,
-            List<String> measures, DataModel baseDataModel, S2SemanticSchema schema) {
+            List<String> measures, DataModel baseDataModel, S2CalciteSchema schema) {
         Set<String> linkDataSourceName = new HashSet<>();
         List<DataModel> linkDataModels = new ArrayList<>();
         Set<String> before = new HashSet<>();
@@ -387,7 +385,7 @@ public class DataSourceNode extends SemanticNode {
 
     private static List<DataModel> getLinkDataSources(Set<String> baseIdentifiers,
             Set<String> queryDimension, List<String> measures, DataModel baseDataModel,
-            S2SemanticSchema schema) {
+            S2CalciteSchema schema) {
         Set<String> linkDataSourceName = new HashSet<>();
         List<DataModel> linkDataModels = new ArrayList<>();
         for (Map.Entry<String, DataModel> entry : schema.getDatasource().entrySet()) {

@@ -19,7 +19,7 @@ import com.tencent.supersonic.headless.core.translator.calcite.s2sql.Measure;
 import com.tencent.supersonic.headless.core.translator.calcite.s2sql.Metric;
 import com.tencent.supersonic.headless.core.translator.calcite.s2sql.MetricTypeParams;
 import com.tencent.supersonic.headless.core.translator.calcite.s2sql.Ontology;
-import com.tencent.supersonic.headless.core.translator.calcite.schema.S2SemanticSchema;
+import com.tencent.supersonic.headless.core.translator.calcite.sql.S2CalciteSchema;
 import com.tencent.supersonic.headless.server.pojo.yaml.DataModelYamlTpl;
 import com.tencent.supersonic.headless.server.pojo.yaml.DimensionTimeTypeParamsTpl;
 import com.tencent.supersonic.headless.server.pojo.yaml.DimensionYamlTpl;
@@ -59,7 +59,6 @@ public class SemanticSchemaManager {
 
     public Ontology buildOntology(SemanticSchemaResp semanticSchemaResp) {
         Ontology ontology = new Ontology();
-        ontology.setSchemaKey(semanticSchemaResp.getSchemaKey());
         Map<String, List<DimensionYamlTpl>> dimensionYamlTpls = new HashMap<>();
         List<DataModelYamlTpl> dataModelYamlTpls = new ArrayList<>();
         List<MetricYamlTpl> metricYamlTpls = new ArrayList<>();
@@ -177,7 +176,7 @@ public class SemanticSchemaManager {
     }
 
     public static DataModel getDatasource(final DataModelYamlTpl d) {
-        DataModel datasource = DataModel.builder().id(d.getId()).sourceId(d.getSourceId())
+        DataModel datasource = DataModel.builder().id(d.getId()).modelId(d.getSourceId())
                 .type(d.getType()).sqlQuery(d.getSqlQuery()).name(d.getName())
                 .tableQuery(d.getTableQuery()).identifiers(getIdentify(d.getIdentifiers()))
                 .measures(getMeasureParams(d.getMeasures()))
@@ -354,13 +353,13 @@ public class SemanticSchemaManager {
         return joinRelations;
     }
 
-    public static void update(S2SemanticSchema schema, List<Metric> metric) throws Exception {
+    public static void update(S2CalciteSchema schema, List<Metric> metric) throws Exception {
         if (schema != null) {
             updateMetric(metric, schema.getMetrics());
         }
     }
 
-    public static void update(S2SemanticSchema schema, DataModel datasourceYamlTpl)
+    public static void update(S2CalciteSchema schema, DataModel datasourceYamlTpl)
             throws Exception {
         if (schema != null) {
             String dataSourceName = datasourceYamlTpl.getName();
@@ -375,7 +374,7 @@ public class SemanticSchemaManager {
         }
     }
 
-    public static void update(S2SemanticSchema schema, String datasourceBizName,
+    public static void update(S2CalciteSchema schema, String datasourceBizName,
             List<Dimension> dimensionYamlTpls) throws Exception {
         if (schema != null) {
             Optional<Map.Entry<String, List<Dimension>>> datasourceYamlTplMap = schema

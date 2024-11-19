@@ -13,7 +13,6 @@ import java.util.stream.Collectors;
 @Data
 public class Ontology {
 
-    private String schemaKey;
     private List<Metric> metrics = new ArrayList<>();
     private Map<String, DataModel> datasourceMap = new HashMap<>();
     private Map<String, List<Dimension>> dimensionMap = new HashMap<>();

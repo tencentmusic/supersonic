@@ -5,8 +5,7 @@ import com.tencent.supersonic.headless.core.pojo.MetricQueryParam;
 import com.tencent.supersonic.headless.core.translator.calcite.s2sql.Constants;
 import com.tencent.supersonic.headless.core.translator.calcite.s2sql.DataModel;
 import com.tencent.supersonic.headless.core.translator.calcite.s2sql.Metric;
-import com.tencent.supersonic.headless.core.translator.calcite.schema.S2SemanticSchema;
-import com.tencent.supersonic.headless.core.translator.calcite.sql.Renderer;
+import com.tencent.supersonic.headless.core.translator.calcite.sql.S2CalciteSchema;
 import com.tencent.supersonic.headless.core.translator.calcite.sql.TableView;
 import com.tencent.supersonic.headless.core.translator.calcite.sql.node.FilterNode;
 import com.tencent.supersonic.headless.core.translator.calcite.sql.node.MetricNode;
@@ -28,13 +27,12 @@ public class FilterRender extends Renderer {
 
     @Override
     public void render(MetricQueryParam metricCommand, List<DataModel> dataModels,
-            SqlValidatorScope scope, S2SemanticSchema schema, boolean nonAgg) throws Exception {
+            SqlValidatorScope scope, S2CalciteSchema schema, boolean nonAgg) throws Exception {
         TableView tableView = super.tableView;
         SqlNode filterNode = null;
         List<String> queryMetrics = new ArrayList<>(metricCommand.getMetrics());
         List<String> queryDimensions = new ArrayList<>(metricCommand.getDimensions());
-        EngineType engineType =
-                EngineType.fromString(schema.getSemanticModel().getDatabase().getType());
+        EngineType engineType = EngineType.fromString(schema.getOntology().getDatabase().getType());
 
         if (metricCommand.getWhere() != null && !metricCommand.getWhere().isEmpty()) {
             filterNode = SemanticNode.parse(metricCommand.getWhere(), scope, engineType);

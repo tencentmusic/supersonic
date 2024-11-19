@@ -1,6 +1,7 @@
-package com.tencent.supersonic.headless.core.translator.calcite.planner;
+package com.tencent.supersonic.headless.core.translator.calcite.sql;
 
 import com.tencent.supersonic.common.calcite.Configuration;
+import com.tencent.supersonic.common.calcite.SqlMergeWithUtils;
 import com.tencent.supersonic.common.pojo.enums.EngineType;
 import com.tencent.supersonic.headless.api.pojo.enums.AggOption;
 import com.tencent.supersonic.headless.core.pojo.Database;
@@ -8,20 +9,20 @@ import com.tencent.supersonic.headless.core.pojo.MetricQueryParam;
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;
 import com.tencent.supersonic.headless.core.translator.calcite.s2sql.Constants;
 import com.tencent.supersonic.headless.core.translator.calcite.s2sql.DataModel;
-import com.tencent.supersonic.headless.core.translator.calcite.schema.S2SemanticSchema;
-import com.tencent.supersonic.headless.core.translator.calcite.schema.SchemaBuilder;
-import com.tencent.supersonic.headless.core.translator.calcite.sql.Renderer;
-import com.tencent.supersonic.headless.core.translator.calcite.sql.node.DataSourceNode;
+import com.tencent.supersonic.headless.core.translator.calcite.sql.node.DataModelNode;
 import com.tencent.supersonic.headless.core.translator.calcite.sql.node.SemanticNode;
 import com.tencent.supersonic.headless.core.translator.calcite.sql.render.FilterRender;
 import com.tencent.supersonic.headless.core.translator.calcite.sql.render.OutputRender;
+import com.tencent.supersonic.headless.core.translator.calcite.sql.render.Renderer;
 import com.tencent.supersonic.headless.core.translator.calcite.sql.render.SourceRender;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.calcite.sql.SqlNode;
+import org.apache.calcite.sql.parser.SqlParseException;
 import org.apache.calcite.sql.parser.SqlParser;
 import org.apache.calcite.sql.validate.SqlValidatorScope;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
@@ -29,29 +30,62 @@ import java.util.Objects;
 
 /** parsing from query dimensions and metrics */
 @Slf4j
-public class AggPlanner implements Planner {
+public class SqlBuilder {
 
-    private MetricQueryParam metricReq;
-    private final S2SemanticSchema schema;
+    private MetricQueryParam metricQueryParam;
+    private final S2CalciteSchema schema;
     private SqlValidatorScope scope;
     private SqlNode parserNode;
-    private String sourceId;
     private boolean isAgg = false;
     private AggOption aggOption = AggOption.DEFAULT;
 
-    public AggPlanner(S2SemanticSchema schema) {
+    public SqlBuilder(S2CalciteSchema schema) {
         this.schema = schema;
     }
 
-    private void parse() throws Exception {
+    public void build(QueryStatement queryStatement, AggOption aggOption) throws Exception {
+        this.metricQueryParam = queryStatement.getMetricQueryParam();
+        if (metricQueryParam.getMetrics() == null) {
+            metricQueryParam.setMetrics(new ArrayList<>());
+        }
+        if (metricQueryParam.getDimensions() == null) {
+            metricQueryParam.setDimensions(new ArrayList<>());
+        }
+        if (metricQueryParam.getLimit() == null) {
+            metricQueryParam.setLimit(0L);
+        }
+        this.aggOption = aggOption;
+
+        buildParseNode();
+        Database database = queryStatement.getOntology().getDatabase();
+        EngineType engineType = EngineType.fromString(database.getType());
+        optimizeParseNode(engineType);
+        String sql = getSql(engineType);
+
+        queryStatement.setSql(sql);
+        if (Objects.nonNull(queryStatement.getEnableOptimize())
+                && queryStatement.getEnableOptimize()
+                && Objects.nonNull(queryStatement.getDataSetAlias())
+                && !queryStatement.getDataSetAlias().isEmpty()) {
+            // simplify model sql with query sql
+            String simplifySql = rewrite(getSqlByDataSet(engineType, sql,
+                    queryStatement.getDataSetSql(), queryStatement.getDataSetAlias()), engineType);
+            if (Objects.nonNull(simplifySql) && !simplifySql.isEmpty()) {
+                log.debug("simplifySql [{}]", simplifySql);
+                queryStatement.setDataSetSimplifySql(simplifySql);
+            }
+        }
+    }
+
+    private void buildParseNode() throws Exception {
         // find the match Datasource
         scope = SchemaBuilder.getScope(schema);
-        List<DataModel> datasource = getMatchDataSource(scope);
-        if (datasource == null || datasource.isEmpty()) {
-            throw new Exception("datasource not found");
+        List<DataModel> dataModels =
+                DataModelNode.getRelatedDataModels(scope, schema, metricQueryParam);
+        if (dataModels == null || dataModels.isEmpty()) {
+            throw new Exception("data model not found");
         }
-        isAgg = getAgg(datasource.get(0));
-        sourceId = String.valueOf(datasource.get(0).getSourceId());
+        isAgg = getAgg(dataModels.get(0));
 
         // build level by level
         LinkedList<Renderer> builders = new LinkedList<>();
@@ -64,19 +98,15 @@ public class AggPlanner implements Planner {
         while (it.hasNext()) {
             Renderer renderer = it.next();
             if (previous != null) {
-                previous.render(metricReq, datasource, scope, schema, !isAgg);
+                previous.render(metricQueryParam, dataModels, scope, schema, !isAgg);
                 renderer.setTable(previous
-                        .builderAs(DataSourceNode.getNames(datasource) + "_" + String.valueOf(i)));
+                        .builderAs(DataModelNode.getNames(dataModels) + "_" + String.valueOf(i)));
                 i++;
             }
             previous = renderer;
         }
-        builders.getLast().render(metricReq, datasource, scope, schema, !isAgg);
+        builders.getLast().render(metricQueryParam, dataModels, scope, schema, !isAgg);
         parserNode = builders.getLast().builder();
-    }
-
-    private List<DataModel> getMatchDataSource(SqlValidatorScope scope) throws Exception {
-        return DataSourceNode.getMatchDataSources(scope, schema, metricReq);
     }
 
     private boolean getAgg(DataModel dataModel) {
@@ -86,46 +116,18 @@ public class AggPlanner implements Planner {
         // default by dataModel time aggregation
         if (Objects.nonNull(dataModel.getAggTime()) && !dataModel.getAggTime()
                 .equalsIgnoreCase(Constants.DIMENSION_TYPE_TIME_GRANULARITY_NONE)) {
-            if (!metricReq.isNativeQuery()) {
+            if (!metricQueryParam.isNativeQuery()) {
                 return true;
             }
         }
         return isAgg;
     }
 
-    @Override
-    public void plan(QueryStatement queryStatement, AggOption aggOption) throws Exception {
-        this.metricReq = queryStatement.getMetricQueryParam();
-        if (metricReq.getMetrics() == null) {
-            metricReq.setMetrics(new ArrayList<>());
-        }
-        if (metricReq.getDimensions() == null) {
-            metricReq.setDimensions(new ArrayList<>());
-        }
-        if (metricReq.getLimit() == null) {
-            metricReq.setLimit(0L);
-        }
-        this.aggOption = aggOption;
-        // build a parse Node
-        parse();
-        // optimizer
-        Database database = queryStatement.getOntology().getDatabase();
-        EngineType engineType = EngineType.fromString(database.getType());
-        optimize(engineType);
-    }
-
-    @Override
     public String getSql(EngineType engineType) {
         return SemanticNode.getSql(parserNode, engineType);
     }
 
-    @Override
-    public String getSourceId() {
-        return sourceId;
-    }
-
-    @Override
-    public String simplify(String sql, EngineType engineType) {
+    private String rewrite(String sql, EngineType engineType) {
         try {
             SqlNode sqlNode =
                     SqlParser.create(sql, Configuration.getParserConfig(engineType)).parseStmt();
@@ -139,7 +141,7 @@ public class AggPlanner implements Planner {
         return "";
     }
 
-    private void optimize(EngineType engineType) {
+    private void optimizeParseNode(EngineType engineType) {
         if (Objects.isNull(schema.getRuntimeOptions())
                 || Objects.isNull(schema.getRuntimeOptions().getEnableOptimize())
                 || !schema.getRuntimeOptions().getEnableOptimize()) {
@@ -160,6 +162,15 @@ public class AggPlanner implements Planner {
         if (Objects.nonNull(optimizeNode)) {
             parserNode = optimizeNode;
         }
+    }
+
+    private String getSqlByDataSet(EngineType engineType, String parentSql, String dataSetSql,
+            String parentAlias) throws SqlParseException {
+        if (!SqlMergeWithUtils.hasWith(engineType, dataSetSql)) {
+            return String.format("with %s as (%s) %s", parentAlias, parentSql, dataSetSql);
+        }
+        return SqlMergeWithUtils.mergeWith(engineType, dataSetSql,
+                Collections.singletonList(parentSql), Collections.singletonList(parentAlias));
     }
 
 }

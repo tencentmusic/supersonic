@@ -1,6 +1,5 @@
 package com.tencent.supersonic.headless.core.translator.calcite.s2sql;
 
-import com.tencent.supersonic.headless.core.translator.calcite.schema.SemanticItem;
 import lombok.Builder;
 import lombok.Data;
 
