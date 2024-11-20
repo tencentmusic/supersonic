@@ -40,9 +40,7 @@ public class RuleSqlParser implements SemanticParser {
 
         auxiliaryParsers.forEach(p -> p.parse(chatQueryContext));
 
-        if (chatQueryContext.needSQL()) {
-            candidateQueries.forEach(query -> query.buildS2Sql(
-                    chatQueryContext.getDataSetSchema(query.getParseInfo().getDataSetId())));
-        }
+        candidateQueries.forEach(query -> query.buildS2Sql(
+                chatQueryContext.getDataSetSchema(query.getParseInfo().getDataSetId())));
     }
 }

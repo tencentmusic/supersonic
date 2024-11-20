@@ -177,7 +177,7 @@ const ClassMetricTable: React.FC<Props> = ({ onEmptyMetricData }) => {
     {
       dataIndex: 'isTag',
       title: '是否标签',
-      // width: 90,
+      hideInTable: !!!process.env.SHOW_TAG,
       render: (isTag) => {
         switch (isTag) {
           case 0:
@@ -353,66 +353,69 @@ const ClassMetricTable: React.FC<Props> = ({ onEmptyMetricData }) => {
         headerTitle={
           <div style={{ marginLeft: 15 }}>
             <TableHeaderFilter
-              components={[
-                {
-                  label: '指标搜索',
-                  component: (
-                    <Input.Search
-                      style={{ width: 280 }}
-                      placeholder="请输入ID/指标名称/英文名称/标签"
-                      onSearch={(value) => {
-                        setFilterParams((preState) => {
-                          return {
-                            ...preState,
-                            key: value,
-                          };
-                        });
-                      }}
-                    />
-                  ),
-                },
-                {
-                  label: '敏感度',
-                  component: (
-                    <Select
-                      style={{ width: 140 }}
-                      options={SENSITIVE_LEVEL_OPTIONS}
-                      placeholder="请选择敏感度"
-                      allowClear
-                      onChange={(value) => {
-                        setFilterParams((preState) => {
-                          return {
-                            ...preState,
-                            sensitiveLevel: value,
-                          };
-                        });
-                      }}
-                    />
-                  ),
-                },
-                {
-                  label: '是否为标签',
-                  component: (
-                    <Select
-                      style={{ width: 145 }}
-                      placeholder="请选择标签状态"
-                      allowClear
-                      onChange={(value) => {
-                        setFilterParams((preState) => {
-                          return {
-                            ...preState,
-                            isTag: value,
-                          };
-                        });
-                      }}
-                      options={[
-                        { value: 1, label: '是' },
-                        { value: 0, label: '否' },
-                      ]}
-                    />
-                  ),
-                },
-              ]}
+              components={
+                [
+                  {
+                    label: '指标搜索',
+                    component: (
+                      <Input.Search
+                        style={{ width: 280 }}
+                        placeholder="请输入ID/指标名称/英文名称"
+                        onSearch={(value) => {
+                          setFilterParams((preState) => {
+                            return {
+                              ...preState,
+                              key: value,
+                            };
+                          });
+                        }}
+                      />
+                    ),
+                  },
+                  {
+                    label: '敏感度',
+                    component: (
+                      <Select
+                        style={{ width: 140 }}
+                        options={SENSITIVE_LEVEL_OPTIONS}
+                        placeholder="请选择敏感度"
+                        allowClear
+                        onChange={(value) => {
+                          setFilterParams((preState) => {
+                            return {
+                              ...preState,
+                              sensitiveLevel: value,
+                            };
+                          });
+                        }}
+                      />
+                    ),
+                  },
+                  {
+                    label: '是否为标签',
+                    hidden: !!!process.env.SHOW_TAG,
+                    component: (
+                      <Select
+                        style={{ width: 145 }}
+                        placeholder="请选择标签状态"
+                        allowClear
+                        onChange={(value) => {
+                          setFilterParams((preState) => {
+                            return {
+                              ...preState,
+                              isTag: value,
+                            };
+                          });
+                        }}
+                        options={[
+                          { value: 1, label: '是' },
+                          { value: 0, label: '否' },
+                        ]}
+                      />
+                    ),
+                  },
+                ].filter((item) => !!!item.hidden) as any
+              }
             />
           </div>
         }

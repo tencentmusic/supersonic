@@ -180,6 +180,7 @@ const ChatMsg: React.FC<Props> = ({
       case MsgContentTypeEnum.TABLE:
         return (
           <Table
+            question={question}
             data={{ ...data, queryColumns: columns, queryResults: dataSource }}
             loading={loading}
           />
@@ -221,6 +222,7 @@ const ChatMsg: React.FC<Props> = ({
       default:
         return (
           <Table
+            question={question}
             data={{ ...data, queryColumns: columns, queryResults: dataSource }}
             loading={loading}
           />

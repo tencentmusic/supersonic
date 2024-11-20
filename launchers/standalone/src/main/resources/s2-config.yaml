@@ -21,7 +21,7 @@ s2:
     date: true
 
   demo:
-    names: S2VisitsDemo,S2SingerDemo,S2CompanyDemo,S2SmallTalkDemo,
+    names: S2VisitsDemo,S2SingerDemo,S2CompanyDemo,S2SmallTalkDemo
     enableLLM: true
 
   authentication:

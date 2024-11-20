@@ -452,6 +452,9 @@ export function getUnAvailableItem(data: any): Promise<any> {
 }
 
 export function getModelDetail(data: any): Promise<any> {
+  if (!data.modelId) {
+    return;
+  }
   return request.get(`${process.env.API_BASE_URL}model/getModel/${data.modelId}`);
 }
 

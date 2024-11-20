@@ -1,10 +1,12 @@
-import { Spin, Switch, Tooltip } from 'antd';
+import { Space, Spin, Switch, Tooltip, message } from 'antd';
 import { CheckCircleFilled, InfoCircleOutlined } from '@ant-design/icons';
 import { PREFIX_CLS, MsgContentTypeEnum } from '../../common/constants';
 import { MsgDataType } from '../../common/type';
 import ChatMsg from '../ChatMsg';
 import WebPage from '../ChatMsg/WebPage';
 import Loading from './Loading';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { solarizedlight } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import React, { ReactNode, useState } from 'react';
 
 type Props = {
@@ -43,10 +45,10 @@ const ExecuteItem: React.FC<Props> = ({
   const prefixCls = `${PREFIX_CLS}-item`;
   const [showMsgContentTable, setShowMsgContentTable] = useState<boolean>(false);
   const [msgContentType, setMsgContentType] = useState<MsgContentTypeEnum>();
-
+  const [showErrMsg, setShowErrMsg] = useState<boolean>(false);
   const titlePrefix = queryMode === 'PLAIN_TEXT' || queryMode === 'WEB_SERVICE' ? '问答' : '数据';
 
-  const getNodeTip = (title: ReactNode, tip?: string) => {
+  const getNodeTip = (title: ReactNode, tip?: string | ReactNode) => {
     return (
       <>
         <div className={`${prefixCls}-title-bar`}>
@@ -65,21 +67,38 @@ const ExecuteItem: React.FC<Props> = ({
     return getNodeTip(`${titlePrefix}查询中`);
   }
 
+  const handleCopy = (_: string, result: any) => {
+    result ? message.success('复制SQL成功', 1) : message.error('复制SQL失败', 1);
+  };
+
   if (executeTip) {
     return getNodeTip(
       <>
         <span>{titlePrefix}查询失败</span>
         {executeErrorMsg && (
-          <Tooltip title={executeErrorMsg}>
+          <Space>
             <InfoCircleOutlined style={{ marginLeft: 5, color: 'red' }} />
-          </Tooltip>
+            <a
+              onClick={() => {
+                setShowErrMsg(!showErrMsg);
+              }}
+            >
+              {!showErrMsg ? '查看' : '收起'}
+            </a>
+          </Space>
         )}
-
         {!!data?.queryTimeCost && isDeveloper && (
           <span className={`${prefixCls}-title-tip`}>(耗时: {data.queryTimeCost}ms)</span>
         )}
       </>,
-      executeTip
+
+      <>
+        {showErrMsg && (
+          <SyntaxHighlighter className={`${prefixCls}-code`} language="sql" style={solarizedlight}>
+            {executeErrorMsg}
+          </SyntaxHighlighter>
+        )}
+      </>
     );
   }
 
