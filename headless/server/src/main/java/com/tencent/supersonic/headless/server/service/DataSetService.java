@@ -30,6 +30,8 @@ public interface DataSetService {
 
     List<DataSetResp> getDataSets(List<String> dataSetNames, User user);
 
+    List<Long> getDataSetsInheritAuth(User user);
+
     List<DataSetResp> getDataSetsInheritAuth(User user, Long domainId);
 
     SemanticQueryReq convert(QueryDataSetReq queryDataSetReq);

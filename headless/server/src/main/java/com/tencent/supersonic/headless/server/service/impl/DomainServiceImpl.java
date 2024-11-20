@@ -3,6 +3,7 @@ package com.tencent.supersonic.headless.server.service.impl;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.tencent.supersonic.auth.api.authentication.service.UserService;
+import com.tencent.supersonic.common.config.GeneralManageConfig;
 import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.common.pojo.enums.AuthType;
 import com.tencent.supersonic.common.pojo.enums.StatusEnum;
@@ -17,6 +18,7 @@ import com.tencent.supersonic.headless.server.service.DomainService;
 import com.tencent.supersonic.headless.server.service.ModelService;
 import com.tencent.supersonic.headless.server.utils.DomainConvert;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -40,6 +42,9 @@ public class DomainServiceImpl implements DomainService {
     private final DomainRepository domainRepository;
     private final ModelService modelService;
     private final UserService userService;
+
+    @Autowired
+    private GeneralManageConfig generalManageConfig;
 
     public DomainServiceImpl(DomainRepository domainRepository, @Lazy ModelService modelService,
             UserService userService) {
@@ -234,6 +239,11 @@ public class DomainServiceImpl implements DomainService {
     }
 
     private boolean checkAdminPermission(Set<String> orgIds, User user, DomainResp domainResp) {
+        List<Long> chatDomainIds = generalManageConfig.getChatDomainIds();
+        boolean hasCommonDomains = chatDomainIds != null && !chatDomainIds.isEmpty();
+        if (hasCommonDomains && chatDomainIds.contains(domainResp.getId())) {
+            return true;
+        }
         List<String> admins = domainResp.getAdmins();
         List<String> adminOrgs = domainResp.getAdminOrgs();
         if (user.isSuperAdmin()) {

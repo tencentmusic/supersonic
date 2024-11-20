@@ -13,9 +13,11 @@ import com.tencent.supersonic.chat.server.plugin.event.PluginUpdateEvent;
 import com.tencent.supersonic.chat.server.service.PluginService;
 import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.common.util.JsonUtil;
+import com.tencent.supersonic.headless.server.service.DataSetService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -35,6 +37,9 @@ public class PluginServiceImpl implements PluginService {
     private PluginRepository pluginRepository;
 
     private ApplicationEventPublisher publisher;
+
+    @Autowired
+    private DataSetService dataSetService;
 
     public PluginServiceImpl(PluginRepository pluginRepository,
             ApplicationEventPublisher publisher) {
@@ -147,9 +152,27 @@ public class PluginServiceImpl implements PluginService {
         return functionCallConfig;
     }
 
+    //    @Override
+//    public List<ChatPlugin> queryWithAuthCheck(PluginQueryReq pluginQueryReq, User user) {
+//        return authCheck(query(pluginQueryReq), user);
+//    }
+
     @Override
     public List<ChatPlugin> queryWithAuthCheck(PluginQueryReq pluginQueryReq, User user) {
-        return authCheck(query(pluginQueryReq), user);
+        List<ChatPlugin> chatPluginList = query(pluginQueryReq);
+        if (user.isSuperAdmin()){
+            return chatPluginList;
+        }
+        List<Long> authorizedDataSetIds = dataSetService.getDataSetsInheritAuth(user);
+        return chatPluginList.stream().filter(chatPlugin -> hasAuthorizedPlugin(chatPlugin, authorizedDataSetIds,user)).collect(Collectors.toList());
+    }
+
+    private boolean hasAuthorizedPlugin(ChatPlugin chatPlugin, List<Long> authorizedDataSetIds,User user) {
+        if (chatPlugin.getCreatedBy().contains(user.getName())) {
+            return true;
+        }
+        List<Long> pluginDataSetList = chatPlugin.getDataSetList();
+        return pluginDataSetList.stream().anyMatch(authorizedDataSetIds::contains);
     }
 
     @Override

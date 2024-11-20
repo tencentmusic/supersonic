@@ -82,6 +82,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public String loginByAnalysisCloud(HttpServletRequest request) {
+        return ComponentFactory.getUserAdaptor().loginByAnalysisCloud(request);
+    }
+
+    @Override
     public String getPassword(String userName) {
         return ComponentFactory.getUserAdaptor().getPassword(userName);
     }
@@ -110,4 +115,6 @@ public class UserServiceImpl implements UserService {
     public void deleteUserToken(Long id) {
         ComponentFactory.getUserAdaptor().deleteUserToken(id);
     }
+
+
 }

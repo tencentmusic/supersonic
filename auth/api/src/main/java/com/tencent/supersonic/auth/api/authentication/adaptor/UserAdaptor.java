@@ -25,6 +25,8 @@ public interface UserAdaptor {
 
     String login(UserReq userReq, String appKey);
 
+    String loginByAnalysisCloud(HttpServletRequest request);
+
     List<User> getUserByOrg(String key);
 
     Set<String> getUserAllOrgId(String userName);
@@ -40,4 +42,6 @@ public interface UserAdaptor {
     UserToken getUserToken(Long id);
 
     List<UserToken> getUserTokens(String userName);
+
+
 }

@@ -1,5 +1,6 @@
 package com.tencent.supersonic.common.util;
 
+import com.tencent.supersonic.common.exception.EasyBiException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Header;
@@ -9,6 +10,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.NameValuePair;
 import org.apache.http.NoHttpResponseException;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.HttpRequestRetryHandler;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -660,5 +662,41 @@ public class HttpClientUtils {
                 close(httpPut, response);
             }
         });
+    }
+    public static String doPost(String url, List<Header> headers, String jsonStr, String charset) {
+        return doPost(url, headers, jsonStr, charset, false);
+    }
+    private static String doPost(String url, List<Header> headers, String jsonStr, String charset, boolean throwException) {
+        HttpClient httpClient = null;
+        HttpPost httpPost = null;
+        String contentType = "application/json";
+        String result = null;
+        try {
+            httpClient = new SSLClient();
+            httpPost = new HttpPost(url);
+            httpPost.addHeader("Content-Type", contentType);
+            if (headers != null) {
+                for (Header header : headers) {
+                    httpPost.addHeader(header.getName(), header.getValue());
+                }
+            }
+            StringEntity se = new StringEntity(jsonStr, charset);
+            se.setContentType(contentType);
+            se.setContentEncoding(charset);
+            httpPost.setEntity(se);
+            HttpResponse response = httpClient.execute(httpPost);
+            if (response != null) {
+                HttpEntity resEntity = response.getEntity();
+                if (resEntity != null) {
+                    result = EntityUtils.toString(resEntity, charset);
+                }
+            }
+        } catch (Exception ex) {
+            log.error("post请求失败", ex);
+            if (throwException) {
+                throw new EasyBiException("post失败" + ex.getMessage());
+            }
+        }
+        return result;
     }
 }

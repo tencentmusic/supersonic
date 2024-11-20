@@ -257,8 +257,8 @@ public class S2SemanticLayerService implements SemanticLayerService {
     }
 
     @Override
-    public List<ItemResp> getDomainDataSetTree() {
-        return schemaService.getDomainDataSetTree();
+    public List<ItemResp> getDomainDataSetTree(User user) {
+        return schemaService.getDomainDataSetTree(user);
     }
 
     @Override

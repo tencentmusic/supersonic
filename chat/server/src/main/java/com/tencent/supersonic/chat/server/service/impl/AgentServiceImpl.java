@@ -1,5 +1,7 @@
 package com.tencent.supersonic.chat.server.service.impl;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.chat.api.pojo.request.ChatMemoryFilter;
@@ -18,12 +20,15 @@ import com.tencent.supersonic.common.pojo.ChatApp;
 import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.common.service.ChatModelService;
 import com.tencent.supersonic.common.util.JsonUtil;
+import com.tencent.supersonic.headless.server.service.DataSetService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
@@ -44,7 +49,40 @@ public class AgentServiceImpl extends ServiceImpl<AgentDOMapper, AgentDO> implem
     @Autowired
     private ChatModelService chatModelService;
 
+    @Autowired
+    private DataSetService dataSetService;
+
     private ExecutorService executorService = Executors.newFixedThreadPool(1);
+
+    @Override
+    public List<Agent> getAgents(User user) {
+        List<Agent> agentList = getAgentDOList().stream().map(this::convert).collect(Collectors.toList());
+        if (user.isSuperAdmin()) {
+            return agentList;
+        }
+        List<Long> authorizedDataSetIds = dataSetService.getDataSetsInheritAuth(user);
+        return agentList.stream().filter(agent -> hasAuthorizedDataSet(agent, authorizedDataSetIds, user)).collect(Collectors.toList());
+    }
+
+    private boolean hasAuthorizedDataSet(Agent agent, List<Long> authorizedDataSetIds,User user) {
+        if (agent.getCreatedBy().contains(user.getName())) {
+            return true;
+        }
+        String toolConfig = agent.getToolConfig();
+        if (StringUtils.isBlank(toolConfig)) {
+            return false;
+        }
+        JSONArray tools = JSONObject.parseObject(toolConfig).getJSONArray("tools");
+        if (tools == null) {
+            return false;
+        }
+        return tools.stream()
+                .map(tool -> ((JSONObject) tool).getJSONArray("dataSetIds"))
+                .filter(Objects::nonNull)
+                .flatMap(Collection::stream)
+                .mapToLong(id -> ((Number) id).longValue())
+                .anyMatch(authorizedDataSetIds::contains);
+    }
 
     @Override
     public List<Agent> getAgents() {

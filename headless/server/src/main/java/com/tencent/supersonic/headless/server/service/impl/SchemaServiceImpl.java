@@ -446,8 +446,8 @@ public class SchemaServiceImpl implements SchemaService {
     }
 
     @Override
-    public List<ItemResp> getDomainDataSetTree() {
-        List<DomainResp> domainResps = domainService.getDomainList();
+    public List<ItemResp> getDomainDataSetTree(User user) {
+        Set<DomainResp> domainResps = domainService.getDomainAuthSet(user, AuthType.ADMIN);
         List<ItemResp> itemResps = domainResps.stream().map(domain -> new ItemResp(domain.getId(),
                 domain.getParentId(), domain.getName(), TypeEnums.DOMAIN))
                 .collect(Collectors.toList());
