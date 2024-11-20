@@ -8,6 +8,8 @@ import com.tencent.supersonic.chat.server.service.ChatQueryService;
 import com.tencent.supersonic.chat.server.service.PluginService;
 import com.tencent.supersonic.common.config.ChatModel;
 import com.tencent.supersonic.common.pojo.User;
+import com.tencent.supersonic.common.pojo.enums.StatusEnum;
+import com.tencent.supersonic.common.pojo.enums.TypeEnums;
 import com.tencent.supersonic.common.service.ChatModelService;
 import com.tencent.supersonic.common.util.AESEncryptionUtil;
 import com.tencent.supersonic.headless.api.pojo.DataSetModelConfig;
@@ -17,6 +19,8 @@ import com.tencent.supersonic.headless.api.pojo.RelateDimension;
 import com.tencent.supersonic.headless.api.pojo.enums.DataType;
 import com.tencent.supersonic.headless.api.pojo.enums.TagDefineType;
 import com.tencent.supersonic.headless.api.pojo.request.DatabaseReq;
+import com.tencent.supersonic.headless.api.pojo.request.DictItemReq;
+import com.tencent.supersonic.headless.api.pojo.request.DictSingleTaskReq;
 import com.tencent.supersonic.headless.api.pojo.request.TagReq;
 import com.tencent.supersonic.headless.api.pojo.response.DatabaseResp;
 import com.tencent.supersonic.headless.api.pojo.response.DimensionResp;
@@ -197,5 +201,12 @@ public abstract class S2BaseDemo implements CommandLineRunner {
 
     protected void updateQueryScore(Integer queryId) {
         chatManageService.updateFeedback(queryId, 5, "");
+    }
+
+    protected void enableDimensionValue(DimensionResp dimension) {
+        dictConfService.addDictConf(DictItemReq.builder().type(TypeEnums.DIMENSION)
+                .itemId(dimension.getId()).status(StatusEnum.ONLINE).build(), defaultUser);
+        dictTaskService.addDictTask(DictSingleTaskReq.builder().itemId(dimension.getId())
+                .type(TypeEnums.DIMENSION).build(), defaultUser);
     }
 }
