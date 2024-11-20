@@ -25,7 +25,7 @@ public interface UserAdaptor {
 
     String login(UserReq userReq, String appKey);
 
-    String loginByUrl(HttpServletRequest request);
+    String loginByAnalysisCloud(HttpServletRequest request);
 
     List<User> getUserByOrg(String key);
 

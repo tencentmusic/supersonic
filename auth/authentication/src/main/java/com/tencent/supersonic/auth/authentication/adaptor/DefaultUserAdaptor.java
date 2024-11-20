@@ -125,7 +125,7 @@ public class DefaultUserAdaptor implements UserAdaptor {
     }
 
     @Override
-    public String loginByUrl(HttpServletRequest request) {
+    public String loginByAnalysisCloud(HttpServletRequest request) {
         // 从请求头中获取 username ,projectId和 token
         String username = request.getHeader("username");
         String analysisToken = request.getHeader("token");

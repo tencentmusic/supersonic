@@ -73,9 +73,9 @@ public class UserController {
         return userService.login(userCmd, request);
     }
 
-    @PostMapping("/loginByUrl")
+    @PostMapping("/loginByAnalysisCloud")
     public String loginByUrl(HttpServletRequest request) {
-        return userService.loginByUrl(request);
+        return userService.loginByAnalysisCloud(request);
     }
 
     @PostMapping("/generateToken")

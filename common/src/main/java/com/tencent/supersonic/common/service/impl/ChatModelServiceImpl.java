@@ -36,7 +36,6 @@ public class ChatModelServiceImpl extends ServiceImpl<ChatModelMapper, ChatModel
 
     @Override
     public List<ChatModel> getChatModels(User user) {
-        // 获取所有 ChatModel，并过滤仅返回用户有权限的 ChatModel
         List<ChatModel> chatModelList = list().stream().map(this::convert).collect(Collectors.toList());
         setPermission(chatModelList, user);
         return chatModelList.stream().filter(ChatModel::isHasPermission).collect(Collectors.toList());
@@ -44,14 +43,11 @@ public class ChatModelServiceImpl extends ServiceImpl<ChatModelMapper, ChatModel
 
     private void setPermission(List<ChatModel> chatModelList, User user) {
         List<Integer> chatModelIds = generalManageConfig.getChatModelIds();
-        // 先检查 chatModelIds 是否有效
         boolean hasCommonModels = chatModelIds != null && !chatModelIds.isEmpty();
         chatModelList.forEach(chatModel -> {
             if (hasCommonModels && chatModelIds.contains(chatModel.getId())) {
-                // 设置通用模型的权限
                 setCommonModelPermissions(chatModel);
             } else {
-                // 根据用户权限设置 ChatModel 的权限
                 setPermissionsForUser(chatModel, user);
             }
         });
@@ -59,7 +55,7 @@ public class ChatModelServiceImpl extends ServiceImpl<ChatModelMapper, ChatModel
     private void setCommonModelPermissions(ChatModel chatModel) {
         chatModel.setHasPermission(true);
         chatModel.setHasUsePermission(true);
-        chatModel.setHasEditPermission(false); // 通用大模型不可编辑
+        chatModel.setHasEditPermission(false);
     }
 
     private void setPermissionsForUser(ChatModel chatModel, User user) {
