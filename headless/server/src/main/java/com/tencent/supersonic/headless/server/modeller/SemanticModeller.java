@@ -9,6 +9,7 @@ import java.util.List;
 
 public interface SemanticModeller {
 
-    ModelSchema build(DbSchema dbSchema, List<DbSchema> otherDbSchema, ModelBuildReq modelBuildReq);
+    void build(DbSchema dbSchema, List<DbSchema> otherDbSchema, ModelSchema modelSchema,
+            ModelBuildReq modelBuildReq);
 
 }

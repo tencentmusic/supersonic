@@ -1,7 +1,6 @@
 package com.tencent.supersonic.chat.server.processor.parse;
 
 import com.google.common.collect.Lists;
-import com.tencent.supersonic.chat.server.plugin.PluginQueryManager;
 import com.tencent.supersonic.chat.server.pojo.ParseContext;
 import com.tencent.supersonic.common.jsqlparser.FieldExpression;
 import com.tencent.supersonic.common.jsqlparser.SqlSelectFunctionHelper;
@@ -22,7 +21,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.util.CollectionUtils;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -33,8 +37,7 @@ public class ParseInfoFormatProcessor implements ParseResultProcessor {
     @Override
     public void process(ParseContext parseContext) {
         parseContext.getResponse().getSelectedParses().forEach(p -> {
-            if (PluginQueryManager.isPluginQuery(p.getQueryMode())
-                    || "PLAIN_TEXT".equals(p.getQueryMode())) {
+            if (Objects.isNull(p.getDataSet()) || Objects.isNull(p.getSqlInfo().getParsedS2SQL())) {
                 return;
             }
 

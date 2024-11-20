@@ -188,36 +188,31 @@ public class QueryStructReq extends SemanticQueryReq {
         List<Aggregator> aggregators = queryStructReq.getAggregators();
         if (!CollectionUtils.isEmpty(aggregators)) {
             for (Aggregator aggregator : aggregators) {
-                selectItems.add(buildAggregatorSelectItem(aggregator, queryStructReq));
+                selectItems.add(buildAggregatorSelectItem(aggregator));
             }
         }
 
         return selectItems;
     }
 
-    private SelectItem buildAggregatorSelectItem(Aggregator aggregator,
-            QueryStructReq queryStructReq) {
+    private SelectItem buildAggregatorSelectItem(Aggregator aggregator) {
         String columnName = aggregator.getColumn();
-        if (queryStructReq.getQueryType().isNativeAggQuery()) {
-            return new SelectItem(new Column(columnName));
-        } else {
-            Function function = new Function();
-            AggOperatorEnum func = aggregator.getFunc();
-            if (AggOperatorEnum.UNKNOWN.equals(func)) {
-                func = AggOperatorEnum.SUM;
-            }
-            function.setName(func.getOperator());
-            if (AggOperatorEnum.COUNT_DISTINCT.equals(func)) {
-                function.setName("count");
-                function.setDistinct(true);
-            }
-            function.setParameters(new ExpressionList(new Column(columnName)));
-            SelectItem selectExpressionItem = new SelectItem(function);
-            String alias = StringUtils.isNotBlank(aggregator.getAlias()) ? aggregator.getAlias()
-                    : columnName;
-            selectExpressionItem.setAlias(new Alias(alias));
-            return selectExpressionItem;
+        Function function = new Function();
+        AggOperatorEnum func = aggregator.getFunc();
+        if (AggOperatorEnum.UNKNOWN.equals(func)) {
+            func = AggOperatorEnum.SUM;
         }
+        function.setName(func.getOperator());
+        if (AggOperatorEnum.COUNT_DISTINCT.equals(func)) {
+            function.setName("count");
+            function.setDistinct(true);
+        }
+        function.setParameters(new ExpressionList(new Column(columnName)));
+        SelectItem selectExpressionItem = new SelectItem(function);
+        String alias =
+                StringUtils.isNotBlank(aggregator.getAlias()) ? aggregator.getAlias() : columnName;
+        selectExpressionItem.setAlias(new Alias(alias));
+        return selectExpressionItem;
     }
 
     private List<OrderByElement> buildOrderByElements(QueryStructReq queryStructReq) {
@@ -241,7 +236,7 @@ public class QueryStructReq extends SemanticQueryReq {
 
     private GroupByElement buildGroupByElement(QueryStructReq queryStructReq) {
         List<String> groups = queryStructReq.getGroups();
-        if (!CollectionUtils.isEmpty(groups) && !queryStructReq.getQueryType().isNativeAggQuery()) {
+        if (!CollectionUtils.isEmpty(groups) && !queryStructReq.getAggregators().isEmpty()) {
             GroupByElement groupByElement = new GroupByElement();
             for (String group : groups) {
                 groupByElement.addGroupByExpression(new Column(group));

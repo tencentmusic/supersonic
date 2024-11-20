@@ -14,7 +14,6 @@ import com.tencent.supersonic.headless.api.pojo.SchemaMapInfo;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.api.pojo.SemanticSchema;
 import com.tencent.supersonic.headless.api.pojo.SqlEvaluation;
-import com.tencent.supersonic.headless.api.pojo.SqlInfo;
 import com.tencent.supersonic.headless.api.pojo.enums.ChatWorkflowState;
 import com.tencent.supersonic.headless.api.pojo.request.QueryMapReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryNLReq;
@@ -128,10 +127,7 @@ public class S2ChatLayerService implements ChatLayerService {
                 schemaService.getSemanticSchema(Sets.newHashSet(querySqlReq.getDataSetId()));
         queryCtx.setSemanticSchema(semanticSchema);
         SemanticParseInfo semanticParseInfo = new SemanticParseInfo();
-        SqlInfo sqlInfo = new SqlInfo();
-        sqlInfo.setCorrectedS2SQL(querySqlReq.getSql());
-        sqlInfo.setParsedS2SQL(querySqlReq.getSql());
-        semanticParseInfo.setSqlInfo(sqlInfo);
+        semanticParseInfo.getSqlInfo().setParsedS2SQL(querySqlReq.getSql());
         semanticParseInfo.setQueryType(QueryType.DETAIL);
 
         Long dataSetId = querySqlReq.getDataSetId();
@@ -147,7 +143,7 @@ public class S2ChatLayerService implements ChatLayerService {
                 corrector.correct(queryCtx, semanticParseInfo);
             }
         });
-        log.info("chatQueryServiceImpl correct:{}", sqlInfo.getCorrectedS2SQL());
+        log.info("Corrected SQL:{}", semanticParseInfo.getSqlInfo().getCorrectedS2SQL());
         return semanticParseInfo;
     }
 
