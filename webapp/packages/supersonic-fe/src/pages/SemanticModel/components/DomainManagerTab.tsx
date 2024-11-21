@@ -50,7 +50,7 @@ const DomainManagerTab: React.FC<Props> = ({
       label: '数据集管理',
       key: 'overview',
       hidden: !!domainData?.parentId,
-      children: <View dataSetList={dataSetList} />,
+      children: <View isCurrent={activeKey === 'overview'} dataSetList={dataSetList} />,
     },
     {
       label: '模型管理',
