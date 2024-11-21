@@ -108,7 +108,7 @@ public class SourceRender extends Renderer {
     private static void buildDimension(String alias, String dimension, DataModel datasource,
             S2CalciteSchema schema, boolean nonAgg, Map<String, String> extendFields,
             TableView dataSet, TableView output, SqlValidatorScope scope) throws Exception {
-        List<Dimension> dimensionList = schema.getDimension().get(datasource.getName());
+        List<Dimension> dimensionList = schema.getDimensions().get(datasource.getName());
         EngineType engineType = EngineType.fromString(schema.getOntology().getDatabase().getType());
         boolean isAdd = false;
         if (!CollectionUtils.isEmpty(dimensionList)) {
@@ -195,7 +195,7 @@ public class SourceRender extends Renderer {
             }
         }
         for (String where : fields) {
-            List<Dimension> dimensionList = schema.getDimension().get(datasource.getName());
+            List<Dimension> dimensionList = schema.getDimensions().get(datasource.getName());
             boolean isAdd = false;
             if (!CollectionUtils.isEmpty(dimensionList)) {
                 for (Dimension dim : dimensionList) {
@@ -262,8 +262,8 @@ public class SourceRender extends Renderer {
             dimensions.add(oriField);
             return;
         }
-        if (schema.getDimension().containsKey(datasource.getName())) {
-            Optional<Dimension> dataSourceDim = schema.getDimension().get(datasource.getName())
+        if (schema.getDimensions().containsKey(datasource.getName())) {
+            Optional<Dimension> dataSourceDim = schema.getDimensions().get(datasource.getName())
                     .stream().filter(d -> d.getName().equalsIgnoreCase(field)).findFirst();
             if (dataSourceDim.isPresent()) {
                 dimensions.add(oriField);
@@ -300,8 +300,8 @@ public class SourceRender extends Renderer {
         if (identify.isPresent()) {
             return true;
         }
-        if (schema.getDimension().containsKey(datasource.getName())) {
-            Optional<Dimension> dataSourceDim = schema.getDimension().get(datasource.getName())
+        if (schema.getDimensions().containsKey(datasource.getName())) {
+            Optional<Dimension> dataSourceDim = schema.getDimensions().get(datasource.getName())
                     .stream().filter(d -> d.getName().equalsIgnoreCase(name)).findFirst();
             if (dataSourceDim.isPresent()) {
                 return true;

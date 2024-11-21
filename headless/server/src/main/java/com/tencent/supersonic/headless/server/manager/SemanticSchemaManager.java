@@ -72,10 +72,10 @@ public class SemanticSchemaManager {
                     getJoinRelation(semanticSchemaResp.getModelRelas(), modelIdName));
         }
         if (!dataModelYamlTpls.isEmpty()) {
-            Map<String, DataModel> dataSourceMap =
-                    dataModelYamlTpls.stream().map(SemanticSchemaManager::getDatasource).collect(
+            Map<String, DataModel> dataModelMap =
+                    dataModelYamlTpls.stream().map(SemanticSchemaManager::getDataModel).collect(
                             Collectors.toMap(DataModel::getName, item -> item, (k1, k2) -> k1));
-            ontology.setDatasourceMap(dataSourceMap);
+            ontology.setDataModelMap(dataModelMap);
         }
         if (!dimensionYamlTpls.isEmpty()) {
             Map<String, List<Dimension>> dimensionMap = new HashMap<>();
@@ -103,9 +103,8 @@ public class SemanticSchemaManager {
             }
             tagMap.get(tagResp.getModelId()).add(tagResp);
         }
-        if (Objects.nonNull(ontology.getDatasourceMap())
-                && !ontology.getDatasourceMap().isEmpty()) {
-            for (Map.Entry<String, DataModel> entry : ontology.getDatasourceMap().entrySet()) {
+        if (Objects.nonNull(ontology.getDataModelMap()) && !ontology.getDataModelMap().isEmpty()) {
+            for (Map.Entry<String, DataModel> entry : ontology.getDataModelMap().entrySet()) {
                 List<Dimension> modelDimensions = new ArrayList<>();
                 if (!ontology.getDimensionMap().containsKey(entry.getKey())) {
                     ontology.getDimensionMap().put(entry.getKey(), modelDimensions);
@@ -175,30 +174,30 @@ public class SemanticSchemaManager {
         return getDimension(t);
     }
 
-    public static DataModel getDatasource(final DataModelYamlTpl d) {
-        DataModel datasource = DataModel.builder().id(d.getId()).modelId(d.getSourceId())
+    public static DataModel getDataModel(final DataModelYamlTpl d) {
+        DataModel dataModel = DataModel.builder().id(d.getId()).modelId(d.getSourceId())
                 .type(d.getType()).sqlQuery(d.getSqlQuery()).name(d.getName())
                 .tableQuery(d.getTableQuery()).identifiers(getIdentify(d.getIdentifiers()))
                 .measures(getMeasureParams(d.getMeasures()))
                 .dimensions(getDimensions(d.getDimensions())).build();
-        datasource.setAggTime(getDataSourceAggTime(datasource.getDimensions()));
+        dataModel.setAggTime(getDataModelAggTime(dataModel.getDimensions()));
         if (Objects.nonNull(d.getModelSourceTypeEnum())) {
-            datasource.setTimePartType(TimePartType.of(d.getModelSourceTypeEnum().name()));
+            dataModel.setTimePartType(TimePartType.of(d.getModelSourceTypeEnum().name()));
         }
         if (Objects.nonNull(d.getFields()) && !CollectionUtils.isEmpty(d.getFields())) {
-            Set<String> measures = datasource.getMeasures().stream().map(mm -> mm.getName())
+            Set<String> measures = dataModel.getMeasures().stream().map(mm -> mm.getName())
                     .collect(Collectors.toSet());
             for (Field f : d.getFields()) {
                 if (!measures.contains(f.getFieldName())) {
-                    datasource.getMeasures().add(Measure.builder().expr(f.getFieldName())
+                    dataModel.getMeasures().add(Measure.builder().expr(f.getFieldName())
                             .name(f.getFieldName()).agg("").build());
                 }
             }
         }
-        return datasource;
+        return dataModel;
     }
 
-    private static String getDataSourceAggTime(List<Dimension> dimensions) {
+    private static String getDataModelAggTime(List<Dimension> dimensions) {
         Optional<Dimension> timeDimension = dimensions.stream()
                 .filter(d -> Constants.DIMENSION_TYPE_TIME.equalsIgnoreCase(d.getType()))
                 .findFirst();
@@ -364,12 +363,12 @@ public class SemanticSchemaManager {
         if (schema != null) {
             String dataSourceName = datasourceYamlTpl.getName();
             Optional<Entry<String, DataModel>> datasourceYamlTplMap =
-                    schema.getDatasource().entrySet().stream()
+                    schema.getDataModels().entrySet().stream()
                             .filter(t -> t.getKey().equalsIgnoreCase(dataSourceName)).findFirst();
             if (datasourceYamlTplMap.isPresent()) {
                 datasourceYamlTplMap.get().setValue(datasourceYamlTpl);
             } else {
-                schema.getDatasource().put(dataSourceName, datasourceYamlTpl);
+                schema.getDataModels().put(dataSourceName, datasourceYamlTpl);
             }
         }
     }
@@ -378,14 +377,14 @@ public class SemanticSchemaManager {
             List<Dimension> dimensionYamlTpls) throws Exception {
         if (schema != null) {
             Optional<Map.Entry<String, List<Dimension>>> datasourceYamlTplMap = schema
-                    .getDimension().entrySet().stream()
+                    .getDimensions().entrySet().stream()
                     .filter(t -> t.getKey().equalsIgnoreCase(datasourceBizName)).findFirst();
             if (datasourceYamlTplMap.isPresent()) {
                 updateDimension(dimensionYamlTpls, datasourceYamlTplMap.get().getValue());
             } else {
                 List<Dimension> dimensions = new ArrayList<>();
                 updateDimension(dimensionYamlTpls, dimensions);
-                schema.getDimension().put(datasourceBizName, dimensions);
+                schema.getDimensions().put(datasourceBizName, dimensions);
             }
         }
     }

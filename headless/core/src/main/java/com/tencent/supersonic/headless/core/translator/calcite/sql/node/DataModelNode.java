@@ -202,7 +202,7 @@ public class DataModelNode extends SemanticNode {
         DataModel baseDataModel = null;
         // one , match measure count
         Map<String, Integer> dataSourceMeasures = new HashMap<>();
-        for (Map.Entry<String, DataModel> entry : schema.getDatasource().entrySet()) {
+        for (Map.Entry<String, DataModel> entry : schema.getDataModels().entrySet()) {
             Set<String> sourceMeasure = entry.getValue().getMeasures().stream()
                     .map(mm -> mm.getName()).collect(Collectors.toSet());
             sourceMeasure.retainAll(measures);
@@ -212,7 +212,7 @@ public class DataModelNode extends SemanticNode {
         Optional<Map.Entry<String, Integer>> base = dataSourceMeasures.entrySet().stream()
                 .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder())).findFirst();
         if (base.isPresent()) {
-            baseDataModel = schema.getDatasource().get(base.get().getKey());
+            baseDataModel = schema.getDataModels().get(base.get().getKey());
             dataModels.add(baseDataModel);
         }
         // second , check match all dimension and metric
@@ -223,8 +223,8 @@ public class DataModelNode extends SemanticNode {
             Set<String> dimension = baseDataModel.getDimensions().stream().map(dd -> dd.getName())
                     .collect(Collectors.toSet());
             baseDataModel.getIdentifiers().stream().forEach(i -> dimension.add(i.getName()));
-            if (schema.getDimension().containsKey(baseDataModel.getName())) {
-                schema.getDimension().get(baseDataModel.getName()).stream()
+            if (schema.getDimensions().containsKey(baseDataModel.getName())) {
+                schema.getDimensions().get(baseDataModel.getName()).stream()
                         .forEach(d -> dimension.add(d.getName()));
             }
             filterMeasure.addAll(sourceMeasure);
@@ -319,8 +319,8 @@ public class DataModelNode extends SemanticNode {
                 }
                 boolean isMatch = false;
                 boolean isRight = before.contains(joinRelation.getLeft());
-                DataModel other = isRight ? schema.getDatasource().get(joinRelation.getRight())
-                        : schema.getDatasource().get(joinRelation.getLeft());
+                DataModel other = isRight ? schema.getDataModels().get(joinRelation.getRight())
+                        : schema.getDataModels().get(joinRelation.getLeft());
                 if (!queryDimension.isEmpty()) {
                     Set<String> linkDimension = other.getDimensions().stream()
                             .map(dd -> dd.getName()).collect(Collectors.toSet());
@@ -336,8 +336,8 @@ public class DataModelNode extends SemanticNode {
                 if (!linkMeasure.isEmpty()) {
                     isMatch = true;
                 }
-                if (!isMatch && schema.getDimension().containsKey(other.getName())) {
-                    Set<String> linkDimension = schema.getDimension().get(other.getName()).stream()
+                if (!isMatch && schema.getDimensions().containsKey(other.getName())) {
+                    Set<String> linkDimension = schema.getDimensions().get(other.getName()).stream()
                             .map(dd -> dd.getName()).collect(Collectors.toSet());
                     linkDimension.retainAll(queryDimension);
                     if (!linkDimension.isEmpty()) {
@@ -362,7 +362,7 @@ public class DataModelNode extends SemanticNode {
                 }
             }
             orders.entrySet().stream().sorted(Map.Entry.comparingByValue()).forEach(d -> {
-                linkDataModels.add(schema.getDatasource().get(d.getKey()));
+                linkDataModels.add(schema.getDataModels().get(d.getKey()));
             });
         }
         return linkDataModels;
@@ -388,7 +388,7 @@ public class DataModelNode extends SemanticNode {
             S2CalciteSchema schema) {
         Set<String> linkDataSourceName = new HashSet<>();
         List<DataModel> linkDataModels = new ArrayList<>();
-        for (Map.Entry<String, DataModel> entry : schema.getDatasource().entrySet()) {
+        for (Map.Entry<String, DataModel> entry : schema.getDataModels().entrySet()) {
             if (entry.getKey().equalsIgnoreCase(baseDataModel.getName())) {
                 continue;
             }
@@ -419,7 +419,7 @@ public class DataModelNode extends SemanticNode {
                 }
             }
         }
-        for (Map.Entry<String, List<Dimension>> entry : schema.getDimension().entrySet()) {
+        for (Map.Entry<String, List<Dimension>> entry : schema.getDimensions().entrySet()) {
             if (!queryDimension.isEmpty()) {
                 Set<String> linkDimension = entry.getValue().stream().map(dd -> dd.getName())
                         .collect(Collectors.toSet());
@@ -430,7 +430,7 @@ public class DataModelNode extends SemanticNode {
             }
         }
         for (String linkName : linkDataSourceName) {
-            linkDataModels.add(schema.getDatasource().get(linkName));
+            linkDataModels.add(schema.getDataModels().get(linkName));
         }
         if (!CollectionUtils.isEmpty(linkDataModels)) {
             List<DataModel> all = new ArrayList<>();

@@ -40,7 +40,7 @@ public class SqlVariableParseConverter implements QueryConverter {
                                 modelResp.getModelDetail().getSqlVariables(),
                                 queryStatement.getQueryParam().getParams());
                 DataModel dataModel =
-                        queryStatement.getOntology().getDatasourceMap().get(modelResp.getBizName());
+                        queryStatement.getOntology().getDataModelMap().get(modelResp.getBizName());
                 dataModel.setSqlQuery(sqlParsed);
             }
         }

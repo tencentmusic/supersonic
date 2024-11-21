@@ -241,8 +241,8 @@ public class JoinRender extends Renderer {
                 break;
             }
         }
-        if (schema.getDimension().containsKey(dataModel.getName())) {
-            for (Dimension dim : schema.getDimension().get(dataModel.getName())) {
+        if (schema.getDimensions().containsKey(dataModel.getName())) {
+            for (Dimension dim : schema.getDimensions().get(dataModel.getName())) {
                 if (dim.getName().equalsIgnoreCase(oriDimension)) {
                     isAdd = true;
                 }

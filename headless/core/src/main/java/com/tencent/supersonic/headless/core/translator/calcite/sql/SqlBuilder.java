@@ -32,8 +32,8 @@ import java.util.Objects;
 @Slf4j
 public class SqlBuilder {
 
-    private MetricQueryParam metricQueryParam;
     private final S2CalciteSchema schema;
+    private MetricQueryParam metricQueryParam;
     private SqlValidatorScope scope;
     private SqlNode parserNode;
     private boolean isAgg = false;

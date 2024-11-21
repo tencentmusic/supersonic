@@ -120,7 +120,7 @@ class HeadlessParserServiceTest {
         S2CalciteSchema semanticSchema = S2CalciteSchema.builder().build();
 
         SemanticSchemaManager.update(semanticSchema,
-                SemanticSchemaManager.getDatasource(datasource));
+                SemanticSchemaManager.getDataModel(datasource));
 
         DimensionYamlTpl dimension1 = new DimensionYamlTpl();
         dimension1.setExpr("page");
@@ -233,8 +233,8 @@ class HeadlessParserServiceTest {
         identifies.add(identify);
         datasource.setIdentifiers(identifies);
 
-        semanticSchema.getDatasource().put("user_department",
-                SemanticSchemaManager.getDatasource(datasource));
+        semanticSchema.getDataModels().put("user_department",
+                SemanticSchemaManager.getDataModel(datasource));
 
         DimensionYamlTpl dimension1 = new DimensionYamlTpl();
         dimension1.setExpr("department");
@@ -243,7 +243,7 @@ class HeadlessParserServiceTest {
         List<DimensionYamlTpl> dimensionYamlTpls = new ArrayList<>();
         dimensionYamlTpls.add(dimension1);
 
-        semanticSchema.getDimension().put("user_department",
+        semanticSchema.getDimensions().put("user_department",
                 SemanticSchemaManager.getDimensions(dimensionYamlTpls));
     }
 }

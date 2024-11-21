@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 public class Ontology {
 
     private List<Metric> metrics = new ArrayList<>();
-    private Map<String, DataModel> datasourceMap = new HashMap<>();
+    private Map<String, DataModel> dataModelMap = new HashMap<>();
     private Map<String, List<Dimension>> dimensionMap = new HashMap<>();
     private List<Materialization> materializationList = new ArrayList<>();
     private List<JoinRelation> joinRelations;
@@ -26,7 +26,7 @@ public class Ontology {
     }
 
     public Map<Long, DataModel> getModelMap() {
-        return datasourceMap.values().stream()
+        return dataModelMap.values().stream()
                 .collect(Collectors.toMap(DataModel::getId, dataSource -> dataSource));
     }
 }

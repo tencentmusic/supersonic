@@ -29,20 +29,20 @@ public class S2CalciteSchema extends AbstractSchema {
         return this;
     }
 
-    public Map<String, DataModel> getDatasource() {
-        return ontology.getDatasourceMap();
+    public Map<String, DataModel> getDataModels() {
+        return ontology.getDataModelMap();
     }
 
-    public Map<String, List<Dimension>> getDimension() {
+    public List<Metric> getMetrics() {
+        return ontology.getMetrics();
+    }
+
+    public Map<String, List<Dimension>> getDimensions() {
         return ontology.getDimensionMap();
     }
 
     public List<JoinRelation> getJoinRelations() {
         return ontology.getJoinRelations();
-    }
-
-    public List<Metric> getMetrics() {
-        return ontology.getMetrics();
     }
 
 }
