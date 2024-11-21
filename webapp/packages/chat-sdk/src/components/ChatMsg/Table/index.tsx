@@ -13,7 +13,7 @@ import moment from 'moment';
 type Props = {
   data: MsgDataType;
   size?: SizeType;
-  question: string;
+  question?: string;
   loading?: boolean;
   onApplyAuth?: (model: string) => void;
 };
