@@ -15,9 +15,10 @@ import ViewSearchFormModal from './ViewSearchFormModal';
 type Props = {
   dataSetList: ISemantic.IDatasetItem[];
   disabledEdit?: boolean;
+  isCurrent: boolean;
 };
 
-const DataSetTable: React.FC<Props> = ({ dataSetList, disabledEdit = false }) => {
+const DataSetTable: React.FC<Props> = ({ dataSetList, disabledEdit = false, isCurrent }) => {
   const domainModel = useModel('SemanticModel.domainData');
   const { selectDomainId } = domainModel;
 
@@ -51,8 +52,8 @@ const DataSetTable: React.FC<Props> = ({ dataSetList, disabledEdit = false }) =>
 
   useEffect(() => {
     // queryDataSetList();
-    queryDomainAllModel();
-  }, [selectDomainId]);
+    if (isCurrent) queryDomainAllModel();
+  }, [selectDomainId, isCurrent]);
 
   const queryDataSetList = async () => {
     setLoading(true);
