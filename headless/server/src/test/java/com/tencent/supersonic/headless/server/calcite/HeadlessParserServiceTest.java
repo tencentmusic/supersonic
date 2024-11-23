@@ -6,8 +6,8 @@ import com.tencent.supersonic.headless.api.pojo.enums.AggOption;
 import com.tencent.supersonic.headless.api.pojo.response.SqlParserResp;
 import com.tencent.supersonic.headless.core.pojo.MetricQueryParam;
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;
-import com.tencent.supersonic.headless.core.translator.calcite.planner.AggPlanner;
-import com.tencent.supersonic.headless.core.translator.calcite.schema.SemanticSchema;
+import com.tencent.supersonic.headless.core.translator.calcite.sql.S2CalciteSchema;
+import com.tencent.supersonic.headless.core.translator.calcite.sql.SqlBuilder;
 import com.tencent.supersonic.headless.server.manager.SemanticSchemaManager;
 import com.tencent.supersonic.headless.server.pojo.yaml.DataModelYamlTpl;
 import com.tencent.supersonic.headless.server.pojo.yaml.DimensionTimeTypeParamsTpl;
@@ -20,16 +20,12 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Slf4j
 class HeadlessParserServiceTest {
 
-    private static Map<String, SemanticSchema> headlessSchemaMap = new HashMap<>();
-
-    public static SqlParserResp parser(SemanticSchema semanticSchema,
+    public static SqlParserResp parser(S2CalciteSchema semanticSchema,
             MetricQueryParam metricQueryParam, boolean isAgg) {
         SqlParserResp sqlParser = new SqlParserResp();
         try {
@@ -37,14 +33,13 @@ class HeadlessParserServiceTest {
                 sqlParser.setErrMsg("headlessSchema not found");
                 return sqlParser;
             }
-            AggPlanner aggBuilder = new AggPlanner(semanticSchema);
+            SqlBuilder aggBuilder = new SqlBuilder(semanticSchema);
             QueryStatement queryStatement = new QueryStatement();
             queryStatement.setMetricQueryParam(metricQueryParam);
-            aggBuilder.explain(queryStatement, AggOption.getAggregation(!isAgg));
-            EngineType engineType = EngineType
-                    .fromString(semanticSchema.getSemanticModel().getDatabase().getType());
+            aggBuilder.build(queryStatement, AggOption.getAggregation(!isAgg));
+            EngineType engineType =
+                    EngineType.fromString(semanticSchema.getOntology().getDatabase().getType());
             sqlParser.setSql(aggBuilder.getSql(engineType));
-            sqlParser.setSourceId(aggBuilder.getSourceId());
         } catch (Exception e) {
             sqlParser.setErrMsg(e.getMessage());
             log.error("parser error metricQueryReq[{}] error [{}]", metricQueryParam, e);
@@ -122,10 +117,10 @@ class HeadlessParserServiceTest {
         identify.setType("primary");
         identifies.add(identify);
         datasource.setIdentifiers(identifies);
-        SemanticSchema semanticSchema = SemanticSchema.newBuilder("1").build();
+        S2CalciteSchema semanticSchema = S2CalciteSchema.builder().build();
 
         SemanticSchemaManager.update(semanticSchema,
-                SemanticSchemaManager.getDatasource(datasource));
+                SemanticSchemaManager.getDataModel(datasource));
 
         DimensionYamlTpl dimension1 = new DimensionYamlTpl();
         dimension1.setExpr("page");
@@ -192,7 +187,7 @@ class HeadlessParserServiceTest {
         System.out.println(parser(semanticSchema, metricCommand2, true));
     }
 
-    private static void addDepartment(SemanticSchema semanticSchema) {
+    private static void addDepartment(S2CalciteSchema semanticSchema) {
         DataModelYamlTpl datasource = new DataModelYamlTpl();
         datasource.setName("user_department");
         datasource.setSourceId(1L);
@@ -238,8 +233,8 @@ class HeadlessParserServiceTest {
         identifies.add(identify);
         datasource.setIdentifiers(identifies);
 
-        semanticSchema.getDatasource().put("user_department",
-                SemanticSchemaManager.getDatasource(datasource));
+        semanticSchema.getDataModels().put("user_department",
+                SemanticSchemaManager.getDataModel(datasource));
 
         DimensionYamlTpl dimension1 = new DimensionYamlTpl();
         dimension1.setExpr("department");
@@ -248,7 +243,7 @@ class HeadlessParserServiceTest {
         List<DimensionYamlTpl> dimensionYamlTpls = new ArrayList<>();
         dimensionYamlTpls.add(dimension1);
 
-        semanticSchema.getDimension().put("user_department",
+        semanticSchema.getDimensions().put("user_department",
                 SemanticSchemaManager.getDimensions(dimensionYamlTpls));
     }
 }

@@ -398,6 +398,8 @@ CREATE TABLE IF NOT EXISTS s2_agent
     updated_at  TIMESTAMP null,
     enable_search int null,
     enable_feedback int null,
+    admin varchar(1000),
+    viewer varchar(1000),
     PRIMARY KEY (`id`)
 ); COMMENT ON TABLE s2_agent IS 'agent information table';
 

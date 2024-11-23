@@ -11,11 +11,10 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Data
-public class SemanticModel {
+public class Ontology {
 
-    private String schemaKey;
     private List<Metric> metrics = new ArrayList<>();
-    private Map<String, DataSource> datasourceMap = new HashMap<>();
+    private Map<String, DataModel> dataModelMap = new HashMap<>();
     private Map<String, List<Dimension>> dimensionMap = new HashMap<>();
     private List<Materialization> materializationList = new ArrayList<>();
     private List<JoinRelation> joinRelations;
@@ -26,8 +25,8 @@ public class SemanticModel {
                 .collect(Collectors.toList());
     }
 
-    public Map<Long, DataSource> getModelMap() {
-        return datasourceMap.values().stream()
-                .collect(Collectors.toMap(DataSource::getId, dataSource -> dataSource));
+    public Map<Long, DataModel> getModelMap() {
+        return dataModelMap.values().stream()
+                .collect(Collectors.toMap(DataModel::getId, dataSource -> dataSource));
     }
 }

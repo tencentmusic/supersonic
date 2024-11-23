@@ -34,7 +34,6 @@ import com.tencent.supersonic.headless.core.cache.QueryCache;
 import com.tencent.supersonic.headless.core.executor.QueryExecutor;
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;
 import com.tencent.supersonic.headless.core.translator.SemanticTranslator;
-import com.tencent.supersonic.headless.core.translator.calcite.s2sql.SemanticModel;
 import com.tencent.supersonic.headless.core.utils.ComponentFactory;
 import com.tencent.supersonic.headless.server.annotation.S2DataPermission;
 import com.tencent.supersonic.headless.server.facade.service.SemanticLayerService;
@@ -44,13 +43,13 @@ import com.tencent.supersonic.headless.server.service.DimensionService;
 import com.tencent.supersonic.headless.server.service.MetricService;
 import com.tencent.supersonic.headless.server.service.SchemaService;
 import com.tencent.supersonic.headless.server.utils.MetricDrillDownChecker;
-import com.tencent.supersonic.headless.server.utils.QueryReqConverter;
 import com.tencent.supersonic.headless.server.utils.QueryUtils;
 import com.tencent.supersonic.headless.server.utils.StatUtils;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -67,7 +66,6 @@ public class S2SemanticLayerService implements SemanticLayerService {
 
     private final StatUtils statUtils;
     private final QueryUtils queryUtils;
-    private final QueryReqConverter queryReqConverter;
     private final SemanticSchemaManager semanticSchemaManager;
     private final DataSetService dataSetService;
     private final SchemaService schemaService;
@@ -80,14 +78,13 @@ public class S2SemanticLayerService implements SemanticLayerService {
     private final List<QueryExecutor> queryExecutors = ComponentFactory.getQueryExecutors();
 
     public S2SemanticLayerService(StatUtils statUtils, QueryUtils queryUtils,
-            QueryReqConverter queryReqConverter, SemanticSchemaManager semanticSchemaManager,
-            DataSetService dataSetService, SchemaService schemaService,
-            SemanticTranslator semanticTranslator, MetricDrillDownChecker metricDrillDownChecker,
+            SemanticSchemaManager semanticSchemaManager, DataSetService dataSetService,
+            SchemaService schemaService, SemanticTranslator semanticTranslator,
+            MetricDrillDownChecker metricDrillDownChecker,
             KnowledgeBaseService knowledgeBaseService, MetricService metricService,
             DimensionService dimensionService) {
         this.statUtils = statUtils;
         this.queryUtils = queryUtils;
-        this.queryReqConverter = queryReqConverter;
         this.semanticSchemaManager = semanticSchemaManager;
         this.dataSetService = dataSetService;
         this.schemaService = schemaService;
@@ -122,7 +119,6 @@ public class S2SemanticLayerService implements SemanticLayerService {
             statUtils.initStatInfo(queryReq, user);
 
             // 2.query from cache
-
             String cacheKey = queryCache.getCacheKey(queryReq);
             Object query = queryCache.query(queryReq, cacheKey);
             if (Objects.nonNull(query)) {
@@ -136,16 +132,16 @@ public class S2SemanticLayerService implements SemanticLayerService {
             }
             StatUtils.get().setUseResultCache(false);
 
-            // 3 query
+            // 3 translate query
             QueryStatement queryStatement = buildQueryStatement(queryReq, user);
+            semanticTranslator.translate(queryStatement);
+
+            // Check whether the dimensions of the metric drill-down are correct temporarily,
+            // add the abstraction of a validator later.
+            metricDrillDownChecker.checkQuery(queryStatement);
+
+            // 4.execute query
             SemanticQueryResp queryResp = null;
-
-            // skip translation if already done.
-            if (!queryStatement.isTranslated()) {
-                semanticTranslator.translate(queryStatement);
-            }
-            queryPreCheck(queryStatement);
-
             for (QueryExecutor queryExecutor : queryExecutors) {
                 if (queryExecutor.accept(queryStatement)) {
                     queryResp = queryExecutor.execute(queryStatement);
@@ -154,7 +150,7 @@ public class S2SemanticLayerService implements SemanticLayerService {
                 }
             }
 
-            // 4 reset cache and set stateInfo
+            // 5.reset cache and set stateInfo
             Boolean setCacheSuccess = queryCache.put(cacheKey, queryResp);
             if (setCacheSuccess) {
                 // if result is not null, update cache data
@@ -185,7 +181,7 @@ public class S2SemanticLayerService implements SemanticLayerService {
 
         List<String> dimensionValues = getDimensionValuesFromDict(dimensionValueReq, dataSetIds);
 
-        // If the search results are null, search dimensionValue from the database
+        // try to query dimensionValue from the database.
         if (CollectionUtils.isEmpty(dimensionValues)) {
             return getDimensionValuesFromDb(dimensionValueReq, user);
         }
@@ -218,9 +214,29 @@ public class S2SemanticLayerService implements SemanticLayerService {
                 .map(MapResult::getName).collect(Collectors.toList());
     }
 
-    private SemanticQueryResp getDimensionValuesFromDb(DimensionValueReq dimensionValueReq,
+    private SemanticQueryResp getDimensionValuesFromDb(DimensionValueReq queryDimValueReq,
             User user) {
-        QuerySqlReq querySqlReq = buildQuerySqlReq(dimensionValueReq);
+        QuerySqlReq querySqlReq = new QuerySqlReq();
+        List<ModelResp> modelResps =
+                schemaService.getModelList(Lists.newArrayList(queryDimValueReq.getModelId()));
+        DimensionResp dimensionResp = schemaService.getDimension(queryDimValueReq.getBizName(),
+                queryDimValueReq.getModelId());
+        ModelResp modelResp = modelResps.get(0);
+        String sql = String.format("select distinct %s from %s where 1=1", dimensionResp.getName(),
+                modelResp.getName());
+        List<Dim> timeDims = modelResp.getTimeDimension();
+        if (CollectionUtils.isNotEmpty(timeDims)) {
+            sql = String.format("%s and %s >= '%s' and %s <= '%s'", sql,
+                    TimeDimensionEnum.DAY.getName(), queryDimValueReq.getDateInfo().getStartDate(),
+                    TimeDimensionEnum.DAY.getName(), queryDimValueReq.getDateInfo().getEndDate());
+        }
+        if (StringUtils.isNotBlank(queryDimValueReq.getValue())) {
+            sql += " AND " + queryDimValueReq.getBizName() + " LIKE '%"
+                    + queryDimValueReq.getValue() + "%'";
+        }
+        querySqlReq.setModelIds(Sets.newHashSet(queryDimValueReq.getModelId()));
+        querySqlReq.setSql(sql);
+
         return queryByReq(querySqlReq, user);
     }
 
@@ -271,35 +287,16 @@ public class S2SemanticLayerService implements SemanticLayerService {
         return metricService.getMetrics(metaFilter);
     }
 
-    private QueryStatement buildSqlQueryStatement(QuerySqlReq querySqlReq, User user)
-            throws Exception {
-        // If dataSetId or DataSetName is empty, parse dataSetId from the SQL
-        if (querySqlReq.needGetDataSetId()) {
-            Long dataSetId = dataSetService.getDataSetIdFromSql(querySqlReq.getSql(), user);
-            querySqlReq.setDataSetId(dataSetId);
-        }
-        SchemaFilterReq filter = buildSchemaFilterReq(querySqlReq);
-        SemanticSchemaResp semanticSchemaResp = schemaService.fetchSemanticSchema(filter);
-        QueryStatement queryStatement = queryReqConverter.convert(querySqlReq, semanticSchemaResp);
-        queryStatement.setModelIds(querySqlReq.getModelIds());
-        queryStatement.setEnableOptimize(queryUtils.enableOptimize());
-        queryStatement.setSemanticSchemaResp(semanticSchemaResp);
-        queryStatement.setSemanticModel(semanticSchemaManager.getSemanticModel(semanticSchemaResp));
-        return queryStatement;
-    }
-
-    private QueryStatement buildQueryStatement(SemanticQueryReq semanticQueryReq, User user)
-            throws Exception {
+    private QueryStatement buildQueryStatement(SemanticQueryReq semanticQueryReq, User user) {
         QueryStatement queryStatement = null;
         if (semanticQueryReq instanceof QuerySqlReq) {
             queryStatement = buildSqlQueryStatement((QuerySqlReq) semanticQueryReq, user);
         }
         if (semanticQueryReq instanceof QueryStructReq) {
-            queryStatement = buildStructQueryStatement((QueryStructReq) semanticQueryReq);
+            queryStatement = buildStructQueryStatement(semanticQueryReq);
         }
         if (semanticQueryReq instanceof QueryMultiStructReq) {
-            queryStatement =
-                    buildMultiStructQueryStatement((QueryMultiStructReq) semanticQueryReq, user);
+            queryStatement = buildMultiStructQueryStatement((QueryMultiStructReq) semanticQueryReq);
         }
         if (Objects.nonNull(queryStatement) && Objects.nonNull(semanticQueryReq.getSqlInfo())
                 && StringUtils.isNotBlank(semanticQueryReq.getSqlInfo().getQuerySQL())) {
@@ -310,72 +307,46 @@ public class S2SemanticLayerService implements SemanticLayerService {
         return queryStatement;
     }
 
-    private QueryStatement buildStructQueryStatement(QueryStructReq queryStructReq) {
-        SchemaFilterReq filter = buildSchemaFilterReq(queryStructReq);
-        SemanticSchemaResp semanticSchemaResp = schemaService.fetchSemanticSchema(filter);
-        QueryStatement queryStatement = new QueryStatement();
-        QueryParam queryParam = new QueryParam();
-        queryReqConverter.convert(queryStructReq, queryParam);
-        queryStatement.setQueryParam(queryParam);
-        queryStatement.setIsS2SQL(false);
-        queryStatement.setEnableOptimize(queryUtils.enableOptimize());
-        queryStatement.setDataSetId(queryStructReq.getDataSetId());
-        queryStatement.setSemanticSchemaResp(semanticSchemaResp);
-        queryStatement.setSemanticModel(semanticSchemaManager.getSemanticModel(semanticSchemaResp));
+    private QueryStatement buildSqlQueryStatement(QuerySqlReq querySqlReq, User user) {
+        // If dataSetId or DataSetName is empty, parse dataSetId from the SQL
+        if (querySqlReq.needGetDataSetId()) {
+            Long dataSetId = dataSetService.getDataSetIdFromSql(querySqlReq.getSql(), user);
+            querySqlReq.setDataSetId(dataSetId);
+        }
+
+        QueryStatement queryStatement = buildStructQueryStatement(querySqlReq);
+        queryStatement.setIsS2SQL(true);
+        queryStatement.setSql(querySqlReq.getSql());
         return queryStatement;
     }
 
-    private QueryStatement buildMultiStructQueryStatement(QueryMultiStructReq queryMultiStructReq,
-            User user) throws Exception {
-        List<QueryStatement> sqlParsers = new ArrayList<>();
-        for (QueryStructReq queryStructReq : queryMultiStructReq.getQueryStructReqs()) {
-            QueryStatement queryStatement = buildQueryStatement(queryStructReq, user);
-            SemanticModel semanticModel = queryStatement.getSemanticModel();
-            queryStatement.setModelIds(queryStructReq.getModelIds());
-            queryStatement.setSemanticModel(semanticModel);
-            queryStatement.setEnableOptimize(queryUtils.enableOptimize());
-            semanticTranslator.translate(queryStatement);
-            sqlParsers.add(queryStatement);
-        }
-        log.info("multi sqlParser:{}", sqlParsers);
-        return queryUtils.sqlParserUnion(queryMultiStructReq, sqlParsers);
-    }
-
-    private SchemaFilterReq buildSchemaFilterReq(SemanticQueryReq semanticQueryReq) {
+    private QueryStatement buildStructQueryStatement(SemanticQueryReq queryReq) {
         SchemaFilterReq schemaFilterReq = new SchemaFilterReq();
-        schemaFilterReq.setDataSetId(semanticQueryReq.getDataSetId());
-        schemaFilterReq.setModelIds(semanticQueryReq.getModelIds());
-        return schemaFilterReq;
+        schemaFilterReq.setDataSetId(queryReq.getDataSetId());
+        schemaFilterReq.setModelIds(queryReq.getModelIds());
+        SemanticSchemaResp semanticSchemaResp = schemaService.fetchSemanticSchema(schemaFilterReq);
+
+        QueryStatement queryStatement = new QueryStatement();
+        QueryParam queryParam = new QueryParam();
+        BeanUtils.copyProperties(queryReq, queryParam);
+        queryStatement.setQueryParam(queryParam);
+        queryStatement.setModelIds(queryReq.getModelIds());
+        queryStatement.setEnableOptimize(queryUtils.enableOptimize());
+        queryStatement.setDataSetId(queryReq.getDataSetId());
+        queryStatement.setSemanticSchemaResp(semanticSchemaResp);
+        queryStatement.setOntology(semanticSchemaManager.buildOntology(semanticSchemaResp));
+        return queryStatement;
     }
 
-    private QuerySqlReq buildQuerySqlReq(DimensionValueReq queryDimValueReq) {
-        QuerySqlReq querySqlReq = new QuerySqlReq();
-        List<ModelResp> modelResps =
-                schemaService.getModelList(Lists.newArrayList(queryDimValueReq.getModelId()));
-        DimensionResp dimensionResp = schemaService.getDimension(queryDimValueReq.getBizName(),
-                queryDimValueReq.getModelId());
-        ModelResp modelResp = modelResps.get(0);
-        String sql = String.format("select distinct %s from %s where 1=1", dimensionResp.getName(),
-                modelResp.getName());
-        List<Dim> timeDims = modelResp.getTimeDimension();
-        if (CollectionUtils.isNotEmpty(timeDims)) {
-            sql = String.format("%s and %s >= '%s' and %s <= '%s'", sql,
-                    TimeDimensionEnum.DAY.getName(), queryDimValueReq.getDateInfo().getStartDate(),
-                    TimeDimensionEnum.DAY.getName(), queryDimValueReq.getDateInfo().getEndDate());
+    private QueryStatement buildMultiStructQueryStatement(QueryMultiStructReq queryMultiStructReq) {
+        List<QueryStatement> queryStatements = new ArrayList<>();
+        for (QueryStructReq queryStructReq : queryMultiStructReq.getQueryStructReqs()) {
+            QueryStatement queryStatement = buildStructQueryStatement(queryStructReq);
+            semanticTranslator.translate(queryStatement);
+            queryStatements.add(queryStatement);
         }
-        if (StringUtils.isNotBlank(queryDimValueReq.getValue())) {
-            sql += " AND " + queryDimValueReq.getBizName() + " LIKE '%"
-                    + queryDimValueReq.getValue() + "%'";
-        }
-        querySqlReq.setModelIds(Sets.newHashSet(queryDimValueReq.getModelId()));
-        querySqlReq.setSql(sql);
-        return querySqlReq;
-    }
-
-    private void queryPreCheck(QueryStatement queryStatement) {
-        // Check whether the dimensions of the metric drill-down are correct temporarily,
-        // add the abstraction of a validator later.
-        metricDrillDownChecker.checkQuery(queryStatement);
+        log.info("Union multiple query statements:{}", queryStatements);
+        return queryUtils.unionAll(queryMultiStructReq, queryStatements);
     }
 
 }

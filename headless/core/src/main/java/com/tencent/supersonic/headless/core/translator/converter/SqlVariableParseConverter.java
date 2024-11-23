@@ -4,7 +4,7 @@ import com.tencent.supersonic.headless.api.pojo.enums.ModelDefineType;
 import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticSchemaResp;
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;
-import com.tencent.supersonic.headless.core.translator.calcite.s2sql.DataSource;
+import com.tencent.supersonic.headless.core.translator.calcite.s2sql.DataModel;
 import com.tencent.supersonic.headless.core.utils.SqlVariableParseUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -39,9 +39,9 @@ public class SqlVariableParseConverter implements QueryConverter {
                         SqlVariableParseUtils.parse(modelResp.getModelDetail().getSqlQuery(),
                                 modelResp.getModelDetail().getSqlVariables(),
                                 queryStatement.getQueryParam().getParams());
-                DataSource dataSource = queryStatement.getSemanticModel().getDatasourceMap()
-                        .get(modelResp.getBizName());
-                dataSource.setSqlQuery(sqlParsed);
+                DataModel dataModel =
+                        queryStatement.getOntology().getDataModelMap().get(modelResp.getBizName());
+                dataModel.setSqlQuery(sqlParsed);
             }
         }
     }

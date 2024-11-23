@@ -40,6 +40,8 @@ public class S2SmallTalkDemo extends S2BaseDemo {
         chatAppConfig.get(PlainTextExecutor.APP_KEY).setEnable(true);
         chatAppConfig.get(OnePassSCSqlGenStrategy.APP_KEY).setEnable(false);
         agent.setChatAppConfig(chatAppConfig);
+        agent.setAdmins(Lists.newArrayList("jack"));
+        agent.setViewers(Lists.newArrayList("alice", "tom"));
         agentService.createAgent(agent, defaultUser);
     }
 

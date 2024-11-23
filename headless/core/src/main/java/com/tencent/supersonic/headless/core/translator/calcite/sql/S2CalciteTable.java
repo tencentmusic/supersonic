@@ -1,4 +1,4 @@
-package com.tencent.supersonic.headless.core.translator.calcite.schema;
+package com.tencent.supersonic.headless.core.translator.calcite.sql;
 
 import org.apache.calcite.DataContext;
 import org.apache.calcite.linq4j.Enumerable;
@@ -23,7 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /** customize the AbstractTable */
-public class DataSourceTable extends AbstractTable implements ScannableTable, TranslatableTable {
+public class S2CalciteTable extends AbstractTable implements ScannableTable, TranslatableTable {
 
     private final String tableName;
     private final List<String> fieldNames;
@@ -32,7 +32,7 @@ public class DataSourceTable extends AbstractTable implements ScannableTable, Tr
 
     private RelDataType rowType;
 
-    private DataSourceTable(String tableName, List<String> fieldNames, List<SqlTypeName> fieldTypes,
+    private S2CalciteTable(String tableName, List<String> fieldNames, List<SqlTypeName> fieldTypes,
             Statistic statistic) {
         this.tableName = tableName;
         this.fieldNames = fieldNames;
@@ -116,7 +116,7 @@ public class DataSourceTable extends AbstractTable implements ScannableTable, Tr
             return this;
         }
 
-        public DataSourceTable build() {
+        public S2CalciteTable build() {
             if (fieldNames.isEmpty()) {
                 throw new IllegalStateException("Table must have at least one field");
             }
@@ -125,7 +125,7 @@ public class DataSourceTable extends AbstractTable implements ScannableTable, Tr
                 throw new IllegalStateException("Table must have positive row count");
             }
 
-            return new DataSourceTable(tableName, fieldNames, fieldTypes,
+            return new S2CalciteTable(tableName, fieldNames, fieldTypes,
                     Statistics.of(rowCount, null));
         }
     }

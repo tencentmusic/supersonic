@@ -14,6 +14,7 @@ import com.tencent.supersonic.chat.server.service.MemoryService;
 import com.tencent.supersonic.common.config.ChatModel;
 import com.tencent.supersonic.common.pojo.ChatApp;
 import com.tencent.supersonic.common.pojo.User;
+import com.tencent.supersonic.common.pojo.enums.AuthType;
 import com.tencent.supersonic.common.service.ChatModelService;
 import com.tencent.supersonic.common.util.JsonUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -42,6 +43,27 @@ public class AgentServiceImpl extends ServiceImpl<AgentDOMapper, AgentDO> implem
     private ChatModelService chatModelService;
 
     private ExecutorService executorService = Executors.newFixedThreadPool(1);
+
+    @Override
+    public List<Agent> getAgents(User user, AuthType authType) {
+        return getAgentDOList().stream().map(this::convert)
+                .filter(agent -> filterByAuth(agent, user, authType)).collect(Collectors.toList());
+    }
+
+    private boolean filterByAuth(Agent agent, User user, AuthType authType) {
+        if (user.isSuperAdmin() || user.getName().equals(agent.getCreatedBy())) {
+            return true;
+        }
+        authType = authType == null ? AuthType.VIEWER : authType;
+        switch (authType) {
+            case ADMIN:
+                return agent.contains(user, Agent::getAdmins);
+            case VIEWER:
+            default:
+                return agent.contains(user, Agent::getAdmins)
+                        || agent.contains(user, Agent::getViewers);
+        }
+    }
 
     @Override
     public List<Agent> getAgents() {
@@ -135,6 +157,8 @@ public class AgentServiceImpl extends ServiceImpl<AgentDOMapper, AgentDO> implem
                 c.setChatModelConfig(chatModelService.getChatModel(c.getChatModelId()).getConfig());
             }
         });
+        agent.setAdmins(JsonUtil.toList(agentDO.getAdmin(), String.class));
+        agent.setViewers(JsonUtil.toList(agentDO.getViewer(), String.class));
         return agent;
     }
 
@@ -145,6 +169,8 @@ public class AgentServiceImpl extends ServiceImpl<AgentDOMapper, AgentDO> implem
         agentDO.setExamples(JsonUtil.toString(agent.getExamples()));
         agentDO.setChatModelConfig(JsonUtil.toString(agent.getChatAppConfig()));
         agentDO.setVisualConfig(JsonUtil.toString(agent.getVisualConfig()));
+        agentDO.setAdmin(JsonUtil.toString(agent.getAdmins()));
+        agentDO.setViewer(JsonUtil.toString(agent.getViewers()));
         if (agentDO.getStatus() == null) {
             agentDO.setStatus(1);
         }

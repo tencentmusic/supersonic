@@ -3,10 +3,9 @@ package com.tencent.supersonic.headless.core.translator.calcite.sql.render;
 import com.tencent.supersonic.common.pojo.enums.EngineType;
 import com.tencent.supersonic.headless.core.pojo.MetricQueryParam;
 import com.tencent.supersonic.headless.core.translator.calcite.s2sql.Constants;
-import com.tencent.supersonic.headless.core.translator.calcite.s2sql.DataSource;
+import com.tencent.supersonic.headless.core.translator.calcite.s2sql.DataModel;
 import com.tencent.supersonic.headless.core.translator.calcite.s2sql.Metric;
-import com.tencent.supersonic.headless.core.translator.calcite.schema.SemanticSchema;
-import com.tencent.supersonic.headless.core.translator.calcite.sql.Renderer;
+import com.tencent.supersonic.headless.core.translator.calcite.sql.S2CalciteSchema;
 import com.tencent.supersonic.headless.core.translator.calcite.sql.TableView;
 import com.tencent.supersonic.headless.core.translator.calcite.sql.node.FilterNode;
 import com.tencent.supersonic.headless.core.translator.calcite.sql.node.MetricNode;
@@ -27,14 +26,13 @@ import java.util.stream.Collectors;
 public class FilterRender extends Renderer {
 
     @Override
-    public void render(MetricQueryParam metricCommand, List<DataSource> dataSources,
-            SqlValidatorScope scope, SemanticSchema schema, boolean nonAgg) throws Exception {
+    public void render(MetricQueryParam metricCommand, List<DataModel> dataModels,
+            SqlValidatorScope scope, S2CalciteSchema schema, boolean nonAgg) throws Exception {
         TableView tableView = super.tableView;
         SqlNode filterNode = null;
         List<String> queryMetrics = new ArrayList<>(metricCommand.getMetrics());
         List<String> queryDimensions = new ArrayList<>(metricCommand.getDimensions());
-        EngineType engineType =
-                EngineType.fromString(schema.getSemanticModel().getDatabase().getType());
+        EngineType engineType = EngineType.fromString(schema.getOntology().getDatabase().getType());
 
         if (metricCommand.getWhere() != null && !metricCommand.getWhere().isEmpty()) {
             filterNode = SemanticNode.parse(metricCommand.getWhere(), scope, engineType);
@@ -43,9 +41,9 @@ public class FilterRender extends Renderer {
             List<String> fieldWhere = whereFields.stream().collect(Collectors.toList());
             Set<String> dimensions = new HashSet<>();
             Set<String> metrics = new HashSet<>();
-            for (DataSource dataSource : dataSources) {
+            for (DataModel dataModel : dataModels) {
                 SourceRender.whereDimMetric(fieldWhere, metricCommand.getMetrics(),
-                        metricCommand.getDimensions(), dataSource, schema, dimensions, metrics);
+                        metricCommand.getDimensions(), dataModel, schema, dimensions, metrics);
             }
             queryMetrics.addAll(metrics);
             queryDimensions.addAll(dimensions);

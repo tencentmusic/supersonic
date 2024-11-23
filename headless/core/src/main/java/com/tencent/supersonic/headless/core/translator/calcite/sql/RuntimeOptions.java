@@ -1,4 +1,4 @@
-package com.tencent.supersonic.headless.core.translator.calcite.schema;
+package com.tencent.supersonic.headless.core.translator.calcite.sql;
 
 import lombok.Builder;
 import lombok.Data;

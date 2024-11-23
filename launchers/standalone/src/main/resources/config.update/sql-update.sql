@@ -394,3 +394,7 @@ ALTER TABLE s2_agent DROP COLUMN  `enable_memory_review`;
 
 --20241012
 alter table s2_agent add column `enable_feedback` tinyint DEFAULT 1;
+
+--20241116
+alter table s2_agent add column `admin` varchar(1000);
+alter table s2_agent add column `viewer` varchar(1000);

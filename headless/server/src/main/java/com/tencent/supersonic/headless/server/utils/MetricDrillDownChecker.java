@@ -32,7 +32,7 @@ public class MetricDrillDownChecker {
 
     public void checkQuery(QueryStatement queryStatement) {
         SemanticSchemaResp semanticSchemaResp = queryStatement.getSemanticSchemaResp();
-        String sql = queryStatement.getDataSetQueryParam().getSql();
+        String sql = queryStatement.getSql();
         if (StringUtils.isBlank(sql)) {
             return;
         }

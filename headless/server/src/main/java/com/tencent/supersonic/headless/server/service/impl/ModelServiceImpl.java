@@ -428,7 +428,7 @@ public class ModelServiceImpl implements ModelService {
                     .filter(modelResp -> checkAdminPermission(orgIds, user, modelResp))
                     .collect(Collectors.toList());
         }
-        if (authTypeEnum.equals(AuthType.VISIBLE)) {
+        if (authTypeEnum.equals(AuthType.VIEWER)) {
             modelWithAuth = modelResps.stream()
                     .filter(domainResp -> checkDataSetPermission(orgIds, user, domainResp))
                     .collect(Collectors.toList());

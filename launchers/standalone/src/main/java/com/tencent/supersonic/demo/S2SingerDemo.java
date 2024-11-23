@@ -167,6 +167,8 @@ public class S2SingerDemo extends S2BaseDemo {
                 Maps.newHashMap(ChatAppManager.getAllApps(AppModule.CHAT));
         chatAppConfig.values().forEach(app -> app.setChatModelId(demoChatModel.getId()));
         agent.setChatAppConfig(chatAppConfig);
+        agent.setAdmins(Lists.newArrayList("alice"));
+        agent.setViewers(Lists.newArrayList("tom", "jack"));
         agentService.createAgent(agent, defaultUser);
     }
 }

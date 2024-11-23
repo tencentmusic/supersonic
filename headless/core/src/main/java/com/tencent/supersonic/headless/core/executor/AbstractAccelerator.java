@@ -4,9 +4,9 @@ import com.tencent.supersonic.common.calcite.Configuration;
 import com.tencent.supersonic.common.jsqlparser.SqlSelectHelper;
 import com.tencent.supersonic.headless.core.pojo.Materialization;
 import com.tencent.supersonic.headless.core.translator.calcite.s2sql.TimeRange;
-import com.tencent.supersonic.headless.core.translator.calcite.schema.DataSourceTable;
-import com.tencent.supersonic.headless.core.translator.calcite.schema.DataSourceTable.Builder;
-import com.tencent.supersonic.headless.core.translator.calcite.schema.SchemaBuilder;
+import com.tencent.supersonic.headless.core.translator.calcite.sql.S2CalciteTable;
+import com.tencent.supersonic.headless.core.translator.calcite.sql.S2CalciteTable.Builder;
+import com.tencent.supersonic.headless.core.translator.calcite.sql.SchemaBuilder;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.calcite.adapter.enumerable.EnumerableRules;
 import org.apache.calcite.config.CalciteConnectionConfigImpl;
@@ -156,14 +156,14 @@ public abstract class AbstractAccelerator implements QueryAccelerator {
         String[] dbTable = materialization.getName().split("\\.");
         String tb = dbTable[1].toLowerCase();
         String db = dbTable[0].toLowerCase();
-        Builder builder = DataSourceTable.newBuilder(tb);
+        Builder builder = S2CalciteTable.newBuilder(tb);
         for (String f : materialization.getColumns()) {
             builder.addField(f, SqlTypeName.VARCHAR);
         }
         if (StringUtils.isNotBlank(materialization.getPartitionName())) {
             builder.addField(materialization.getPartitionName(), SqlTypeName.VARCHAR);
         }
-        DataSourceTable srcTable = builder.withRowCount(1L).build();
+        S2CalciteTable srcTable = builder.withRowCount(1L).build();
         if (Objects.nonNull(db) && !db.isEmpty()) {
             SchemaPlus schemaPlus = dataSetSchema.plus().getSubSchema(db);
             if (Objects.isNull(schemaPlus)) {

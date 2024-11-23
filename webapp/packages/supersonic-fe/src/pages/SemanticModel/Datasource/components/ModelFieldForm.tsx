@@ -207,26 +207,26 @@ const ModelFieldForm: React.FC<Props> = ({
       // width: 200,
       render: (_: any, record: FieldItem) => {
         const { type } = record;
-        if (type === EnumDataSourceType.PRIMARY) {
-          return (
-            <Space>
-              <Select
-                style={{ minWidth: 150 }}
-                value={tagObjectId ? tagObjectId : undefined}
-                placeholder="请选择所属对象"
-                onChange={(value) => {
-                  onTagObjectChange?.(value);
-                }}
-                options={tagObjectList.map((item: ISemantic.ITagObjectItem) => {
-                  return {
-                    label: item.name,
-                    value: item.id,
-                  };
-                })}
-              />
-            </Space>
-          );
-        }
+        // if (type === EnumDataSourceType.PRIMARY) {
+        //   return (
+        //     <Space>
+        //       <Select
+        //         style={{ minWidth: 150 }}
+        //         value={tagObjectId ? tagObjectId : undefined}
+        //         placeholder="请选择所属对象"
+        //         onChange={(value) => {
+        //           onTagObjectChange?.(value);
+        //         }}
+        //         options={tagObjectList.map((item: ISemantic.ITagObjectItem) => {
+        //           return {
+        //             label: item.name,
+        //             value: item.id,
+        //           };
+        //         })}
+        //       />
+        //     </Space>
+        //   );
+        // }
         if (type === EnumDataSourceType.MEASURES) {
           return (
             <Select

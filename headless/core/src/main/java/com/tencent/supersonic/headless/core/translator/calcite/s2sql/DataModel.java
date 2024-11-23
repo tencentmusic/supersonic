@@ -7,13 +7,13 @@ import java.util.List;
 
 @Data
 @Builder
-public class DataSource {
+public class DataModel {
 
     private Long id;
 
     private String name;
 
-    private Long sourceId;
+    private Long modelId;
 
     private String type;
 
