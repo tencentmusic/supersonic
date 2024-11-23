@@ -16,6 +16,7 @@ export const ColumnsConfig: any = (params?: {
   indicatorInfo?: {
     url?: string;
     starType?: StarType;
+    onNameClick?: (record: ISemantic.IMetricItem) => void;
   };
 }) => {
   return {
@@ -117,11 +118,15 @@ export const ColumnsConfig: any = (params?: {
                   className={styles.textLink}
                   style={{ fontWeight: 500 }}
                   onClick={(event: any) => {
-                    history.push(`${url}${id}`);
+                    if (params?.indicatorInfo?.onNameClick) {
+                      params?.indicatorInfo?.onNameClick(record);
+                    } else {
+                      history.push(`${url}${id}`);
+                    }
                     event.preventDefault();
                     event.stopPropagation();
                   }}
-                  href={`/webapp${url}${id}`}
+                  // href={`/webapp${url}${id}`}
                 >
                   {name}
                 </a>

@@ -13,11 +13,11 @@ import { ColumnsConfig } from '../../components/TableColumnRender';
 import ViewSearchFormModal from './ViewSearchFormModal';
 
 type Props = {
-  dataSetList: ISemantic.IDatasetItem[];
+  // dataSetList: ISemantic.IDatasetItem[];
   disabledEdit?: boolean;
 };
 
-const DataSetTable: React.FC<Props> = ({ dataSetList, disabledEdit = false }) => {
+const DataSetTable: React.FC<Props> = ({ disabledEdit = false }) => {
   const domainModel = useModel('SemanticModel.domainData');
   const { selectDomainId } = domainModel;
 
@@ -43,14 +43,14 @@ const DataSetTable: React.FC<Props> = ({ dataSetList, disabledEdit = false }) =>
     }
   };
 
-  const [viewList, setViewList] = useState<ISemantic.IDatasetItem[]>(dataSetList);
+  const [viewList, setViewList] = useState<ISemantic.IDatasetItem[]>();
+
+  // useEffect(() => {
+  //   setViewList(dataSetList);
+  // }, [dataSetList]);
 
   useEffect(() => {
-    setViewList(dataSetList);
-  }, [dataSetList]);
-
-  useEffect(() => {
-    // queryDataSetList();
+    queryDataSetList();
     queryDomainAllModel();
   }, [selectDomainId]);
 

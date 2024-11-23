@@ -8,14 +8,14 @@ import { ISemantic } from './data';
 import { getDomainList, getDataSetList } from './service';
 import DomainManagerTab from './components/DomainManagerTab';
 import { isArrayOfValues } from '@/utils/utils';
+import OverviewContainerRight from './components/OverviewContainerRight';
 
 type Props = {
   mode: 'domain';
 };
 
-const OverviewContainer: React.FC<Props> = ({ mode }) => {
+const OverviewContainer: React.FC<Props> = ({ mode = 'domain' }) => {
   const defaultTabKey = 'overview';
-  // 'overview'  dataSetManage
   const params: any = useParams();
   const domainId = params.domainId;
   const modelId = params.modelId;
@@ -184,6 +184,7 @@ const OverviewContainer: React.FC<Props> = ({ mode }) => {
         <div className={styles.content}>
           {selectDomainId ? (
             <>
+              <OverviewContainerRight />
               <DomainManagerTab
                 isModel={isModel}
                 activeKey={activeKey}

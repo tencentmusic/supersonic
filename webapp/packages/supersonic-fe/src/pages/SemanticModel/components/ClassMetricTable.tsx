@@ -142,7 +142,11 @@ const ClassMetricTable: React.FC<Props> = ({ onEmptyMetricData }) => {
     }
   };
 
-  const columnsConfig = ColumnsConfig({ indicatorInfo: { url: '/model/metric/edit/' } });
+  const columnsConfig = ColumnsConfig({
+    indicatorInfo: {
+      url: '/model/metric/edit/',
+    },
+  });
 
   const columns: ProColumns[] = [
     {
