@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.tencent.supersonic.common.pojo.enums.TypeEnums;
 import com.tencent.supersonic.headless.api.pojo.request.DictItemFilter;
 import com.tencent.supersonic.headless.api.pojo.request.DictSingleTaskReq;
+import com.tencent.supersonic.headless.api.pojo.request.ValueTaskQueryReq;
 import com.tencent.supersonic.headless.api.pojo.response.DictItemResp;
 import com.tencent.supersonic.headless.api.pojo.response.DictTaskResp;
 import com.tencent.supersonic.headless.api.pojo.response.DimensionResp;
@@ -14,11 +15,14 @@ import com.tencent.supersonic.headless.server.persistence.mapper.DictTaskMapper;
 import com.tencent.supersonic.headless.server.persistence.repository.DictRepository;
 import com.tencent.supersonic.headless.server.service.DimensionService;
 import com.tencent.supersonic.headless.server.utils.DictUtils;
+import com.xkzhangsan.time.utils.CollectionUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.codehaus.plexus.util.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.CollectionUtils;
 
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
@@ -98,6 +102,23 @@ public class DictRepositoryImpl implements DictRepository {
         taskResp.setBizName(dimension.getBizName());
         taskResp.setModelId(dimension.getModelId());
         return taskResp;
+    }
+
+    @Override
+    public List<DictTaskDO> queryAllDictTask(ValueTaskQueryReq taskQueryReq) {
+        QueryWrapper<DictTaskDO> wrapper = new QueryWrapper<>();
+        if (Objects.nonNull(taskQueryReq.getItemId())) {
+            wrapper.lambda().eq(DictTaskDO::getItemId, taskQueryReq.getItemId());
+        }
+        if (CollectionUtil.isNotEmpty(taskQueryReq.getTaskStatusList())) {
+            wrapper.lambda().in(DictTaskDO::getStatus, taskQueryReq.getTaskStatusList());
+        }
+        if (StringUtils.isNotEmpty(taskQueryReq.getKey())) {
+            String key = taskQueryReq.getKey();
+            wrapper.lambda().and(qw -> qw.like(DictTaskDO::getName, key).or()
+                    .like(DictTaskDO::getDescription, key).or().like(DictTaskDO::getConfig, key));
+        }
+        return dictTaskMapper.selectList(wrapper);
     }
 
     @Override
