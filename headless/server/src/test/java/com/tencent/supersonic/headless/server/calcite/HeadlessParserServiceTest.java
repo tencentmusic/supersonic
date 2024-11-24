@@ -2,20 +2,13 @@ package com.tencent.supersonic.headless.server.calcite;
 
 import com.tencent.supersonic.common.pojo.ColumnOrder;
 import com.tencent.supersonic.common.pojo.enums.EngineType;
-import com.tencent.supersonic.headless.api.pojo.enums.AggOption;
 import com.tencent.supersonic.headless.api.pojo.response.SqlParserResp;
-import com.tencent.supersonic.headless.core.pojo.MetricQueryParam;
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;
+import com.tencent.supersonic.headless.core.translator.calcite.s2sql.OntologyQueryParam;
 import com.tencent.supersonic.headless.core.translator.calcite.sql.S2CalciteSchema;
 import com.tencent.supersonic.headless.core.translator.calcite.sql.SqlBuilder;
 import com.tencent.supersonic.headless.server.manager.SemanticSchemaManager;
-import com.tencent.supersonic.headless.server.pojo.yaml.DataModelYamlTpl;
-import com.tencent.supersonic.headless.server.pojo.yaml.DimensionTimeTypeParamsTpl;
-import com.tencent.supersonic.headless.server.pojo.yaml.DimensionYamlTpl;
-import com.tencent.supersonic.headless.server.pojo.yaml.IdentifyYamlTpl;
-import com.tencent.supersonic.headless.server.pojo.yaml.MeasureYamlTpl;
-import com.tencent.supersonic.headless.server.pojo.yaml.MetricTypeParamsYamlTpl;
-import com.tencent.supersonic.headless.server.pojo.yaml.MetricYamlTpl;
+import com.tencent.supersonic.headless.server.pojo.yaml.*;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
@@ -26,7 +19,7 @@ import java.util.List;
 class HeadlessParserServiceTest {
 
     public static SqlParserResp parser(S2CalciteSchema semanticSchema,
-            MetricQueryParam metricQueryParam, boolean isAgg) {
+            OntologyQueryParam ontologyQueryParam, boolean isAgg) {
         SqlParserResp sqlParser = new SqlParserResp();
         try {
             if (semanticSchema == null) {
@@ -35,14 +28,14 @@ class HeadlessParserServiceTest {
             }
             SqlBuilder aggBuilder = new SqlBuilder(semanticSchema);
             QueryStatement queryStatement = new QueryStatement();
-            queryStatement.setMetricQueryParam(metricQueryParam);
-            aggBuilder.build(queryStatement, AggOption.getAggregation(!isAgg));
+            queryStatement.setOntologyQueryParam(ontologyQueryParam);
+            aggBuilder.build(queryStatement);
             EngineType engineType =
                     EngineType.fromString(semanticSchema.getOntology().getDatabase().getType());
             sqlParser.setSql(aggBuilder.getSql(engineType));
         } catch (Exception e) {
             sqlParser.setErrMsg(e.getMessage());
-            log.error("parser error metricQueryReq[{}] error [{}]", metricQueryParam, e);
+            log.error("parser error metricQueryReq[{}] error [{}]", ontologyQueryParam, e);
         }
         return sqlParser;
     }
@@ -161,7 +154,7 @@ class HeadlessParserServiceTest {
 
         // HeadlessSchemaManager.update(headlessSchema, HeadlessSchemaManager.getMetrics(metric));
 
-        MetricQueryParam metricCommand = new MetricQueryParam();
+        OntologyQueryParam metricCommand = new OntologyQueryParam();
         metricCommand.setDimensions(new ArrayList<>(Arrays.asList("sys_imp_date")));
         metricCommand.setMetrics(new ArrayList<>(Arrays.asList("pv")));
         metricCommand.setWhere(
@@ -174,7 +167,7 @@ class HeadlessParserServiceTest {
 
         addDepartment(semanticSchema);
 
-        MetricQueryParam metricCommand2 = new MetricQueryParam();
+        OntologyQueryParam metricCommand2 = new OntologyQueryParam();
         metricCommand2.setDimensions(new ArrayList<>(Arrays.asList("sys_imp_date",
                 "user_name__department", "user_name", "user_name__page")));
         metricCommand2.setMetrics(new ArrayList<>(Arrays.asList("pv")));

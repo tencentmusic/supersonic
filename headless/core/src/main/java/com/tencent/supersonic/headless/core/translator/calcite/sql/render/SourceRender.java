@@ -1,7 +1,6 @@
 package com.tencent.supersonic.headless.core.translator.calcite.sql.render;
 
 import com.tencent.supersonic.common.pojo.enums.EngineType;
-import com.tencent.supersonic.headless.core.pojo.MetricQueryParam;
 import com.tencent.supersonic.headless.core.translator.calcite.s2sql.Constants;
 import com.tencent.supersonic.headless.core.translator.calcite.s2sql.DataModel;
 import com.tencent.supersonic.headless.core.translator.calcite.s2sql.Dimension;
@@ -9,6 +8,7 @@ import com.tencent.supersonic.headless.core.translator.calcite.s2sql.Identify;
 import com.tencent.supersonic.headless.core.translator.calcite.s2sql.Materialization;
 import com.tencent.supersonic.headless.core.translator.calcite.s2sql.Measure;
 import com.tencent.supersonic.headless.core.translator.calcite.s2sql.Metric;
+import com.tencent.supersonic.headless.core.translator.calcite.s2sql.OntologyQueryParam;
 import com.tencent.supersonic.headless.core.translator.calcite.sql.S2CalciteSchema;
 import com.tencent.supersonic.headless.core.translator.calcite.sql.TableView;
 import com.tencent.supersonic.headless.core.translator.calcite.sql.node.DataModelNode;
@@ -336,9 +336,9 @@ public class SourceRender extends Renderer {
         }
     }
 
-    public void render(MetricQueryParam metricQueryParam, List<DataModel> dataModels,
+    public void render(OntologyQueryParam ontologyQueryParam, List<DataModel> dataModels,
             SqlValidatorScope scope, S2CalciteSchema schema, boolean nonAgg) throws Exception {
-        String queryWhere = metricQueryParam.getWhere();
+        String queryWhere = ontologyQueryParam.getWhere();
         Set<String> whereFields = new HashSet<>();
         List<String> fieldWhere = new ArrayList<>();
         EngineType engineType = EngineType.fromString(schema.getOntology().getDatabase().getType());
@@ -349,13 +349,13 @@ public class SourceRender extends Renderer {
         }
         if (dataModels.size() == 1) {
             DataModel dataModel = dataModels.get(0);
-            super.tableView = renderOne("", fieldWhere, metricQueryParam.getMetrics(),
-                    metricQueryParam.getDimensions(), metricQueryParam.getWhere(), dataModel, scope,
-                    schema, nonAgg);
+            super.tableView = renderOne("", fieldWhere, ontologyQueryParam.getMetrics(),
+                    ontologyQueryParam.getDimensions(), ontologyQueryParam.getWhere(), dataModel,
+                    scope, schema, nonAgg);
             return;
         }
         JoinRender joinRender = new JoinRender();
-        joinRender.render(metricQueryParam, dataModels, scope, schema, nonAgg);
+        joinRender.render(ontologyQueryParam, dataModels, scope, schema, nonAgg);
         super.tableView = joinRender.getTableView();
     }
 }

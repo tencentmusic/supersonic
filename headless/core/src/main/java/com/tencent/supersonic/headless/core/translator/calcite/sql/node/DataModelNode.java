@@ -4,13 +4,13 @@ import com.google.common.collect.Lists;
 import com.tencent.supersonic.common.calcite.Configuration;
 import com.tencent.supersonic.common.jsqlparser.SqlSelectHelper;
 import com.tencent.supersonic.common.pojo.enums.EngineType;
-import com.tencent.supersonic.headless.core.pojo.MetricQueryParam;
 import com.tencent.supersonic.headless.core.translator.calcite.s2sql.Constants;
 import com.tencent.supersonic.headless.core.translator.calcite.s2sql.DataModel;
 import com.tencent.supersonic.headless.core.translator.calcite.s2sql.Dimension;
 import com.tencent.supersonic.headless.core.translator.calcite.s2sql.Identify;
 import com.tencent.supersonic.headless.core.translator.calcite.s2sql.JoinRelation;
 import com.tencent.supersonic.headless.core.translator.calcite.s2sql.Measure;
+import com.tencent.supersonic.headless.core.translator.calcite.s2sql.OntologyQueryParam;
 import com.tencent.supersonic.headless.core.translator.calcite.sql.S2CalciteSchema;
 import com.tencent.supersonic.headless.core.translator.calcite.sql.SchemaBuilder;
 import lombok.extern.slf4j.Slf4j;
@@ -150,7 +150,7 @@ public class DataModelNode extends SemanticNode {
     }
 
     public static void getQueryDimensionMeasure(S2CalciteSchema schema,
-            MetricQueryParam metricCommand, Set<String> queryDimension, List<String> measures) {
+            OntologyQueryParam metricCommand, Set<String> queryDimension, List<String> measures) {
         queryDimension.addAll(metricCommand.getDimensions().stream()
                 .map(d -> d.contains(Constants.DIMENSION_IDENTIFY)
                         ? d.split(Constants.DIMENSION_IDENTIFY)[1]
@@ -166,7 +166,7 @@ public class DataModelNode extends SemanticNode {
     }
 
     public static void mergeQueryFilterDimensionMeasure(S2CalciteSchema schema,
-            MetricQueryParam metricCommand, Set<String> queryDimension, List<String> measures,
+            OntologyQueryParam metricCommand, Set<String> queryDimension, List<String> measures,
             SqlValidatorScope scope) throws Exception {
         EngineType engineType = EngineType.fromString(schema.getOntology().getDatabase().getType());
         if (Objects.nonNull(metricCommand.getWhere()) && !metricCommand.getWhere().isEmpty()) {
@@ -192,7 +192,7 @@ public class DataModelNode extends SemanticNode {
     }
 
     public static List<DataModel> getRelatedDataModels(SqlValidatorScope scope,
-            S2CalciteSchema schema, MetricQueryParam metricCommand) throws Exception {
+            S2CalciteSchema schema, OntologyQueryParam metricCommand) throws Exception {
         List<DataModel> dataModels = new ArrayList<>();
 
         // check by metric
@@ -208,7 +208,7 @@ public class DataModelNode extends SemanticNode {
             sourceMeasure.retainAll(measures);
             dataSourceMeasures.put(entry.getKey(), sourceMeasure.size());
         }
-        log.info("dataSourceMeasures [{}]", dataSourceMeasures);
+        log.info("metrics: [{}]", dataSourceMeasures);
         Optional<Map.Entry<String, Integer>> base = dataSourceMeasures.entrySet().stream()
                 .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder())).findFirst();
         if (base.isPresent()) {
@@ -267,7 +267,7 @@ public class DataModelNode extends SemanticNode {
     }
 
     private static boolean checkMatch(Set<String> sourceMeasure, Set<String> queryDimension,
-            List<String> measures, Set<String> dimension, MetricQueryParam metricCommand,
+            List<String> measures, Set<String> dimension, OntologyQueryParam metricCommand,
             SqlValidatorScope scope, EngineType engineType) throws Exception {
         boolean isAllMatch = true;
         sourceMeasure.retainAll(measures);

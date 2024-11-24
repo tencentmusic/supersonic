@@ -1,6 +1,5 @@
 package com.tencent.supersonic.headless.core.translator.calcite;
 
-import com.tencent.supersonic.headless.api.pojo.enums.AggOption;
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;
 import com.tencent.supersonic.headless.core.translator.QueryParser;
 import com.tencent.supersonic.headless.core.translator.calcite.s2sql.Ontology;
@@ -16,7 +15,7 @@ import org.springframework.stereotype.Component;
 public class CalciteQueryParser implements QueryParser {
 
     @Override
-    public void parse(QueryStatement queryStatement, AggOption isAgg) throws Exception {
+    public void parse(QueryStatement queryStatement) throws Exception {
         Ontology ontology = queryStatement.getOntology();
         if (ontology == null) {
             queryStatement.setErrMsg("No ontology could be found");
@@ -29,7 +28,7 @@ public class CalciteQueryParser implements QueryParser {
                         .enableOptimize(queryStatement.getEnableOptimize()).build())
                 .build();
         SqlBuilder sqlBuilder = new SqlBuilder(semanticSchema);
-        sqlBuilder.build(queryStatement, isAgg);
+        sqlBuilder.build(queryStatement);
     }
 
 }

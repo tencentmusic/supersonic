@@ -20,6 +20,7 @@ public class QueryByMetricTest extends BaseTest {
 
     @Test
     public void testWithMetricAndDimensionBizNames() throws Exception {
+        System.setProperty("s2.test", "true");
         QueryMetricReq queryMetricReq = new QueryMetricReq();
         queryMetricReq.setMetricNames(Arrays.asList("stay_hours", "pv"));
         queryMetricReq.setDimensionNames(Arrays.asList("user_name", "department"));

@@ -6,82 +6,46 @@ import com.tencent.supersonic.common.pojo.enums.DatePeriodEnum;
 import com.tencent.supersonic.common.pojo.enums.EngineType;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.DateModeUtils;
-import com.tencent.supersonic.headless.api.pojo.MetricTable;
-import com.tencent.supersonic.headless.api.pojo.QueryParam;
 import com.tencent.supersonic.headless.api.pojo.enums.AggOption;
-import com.tencent.supersonic.headless.core.pojo.DataSetQueryParam;
 import com.tencent.supersonic.headless.core.pojo.Database;
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;
+import com.tencent.supersonic.headless.core.pojo.SqlQueryParam;
+import com.tencent.supersonic.headless.core.pojo.StructQueryParam;
+import com.tencent.supersonic.headless.core.translator.calcite.s2sql.OntologyQueryParam;
 import com.tencent.supersonic.headless.core.utils.SqlGenerateUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-/** supplement the QueryStatement when query with custom aggregation method */
 @Component("CalculateAggConverter")
 @Slf4j
-public class CalculateAggConverter implements QueryConverter {
+public class MetricRatioConverter implements QueryConverter {
 
     public interface EngineSql {
 
-        String sql(QueryParam queryParam, boolean isOver, boolean asWith, String metricSql);
-    }
-
-    public DataSetQueryParam generateSqlCommend(QueryStatement queryStatement,
-            EngineType engineTypeEnum, String version) throws Exception {
-        SqlGenerateUtils sqlGenerateUtils = ContextUtils.getBean(SqlGenerateUtils.class);
-        QueryParam queryParam = queryStatement.getQueryParam();
-        // 同环比
-        if (isRatioAccept(queryParam)) {
-            return generateRatioSqlCommand(queryStatement, engineTypeEnum, version);
-        }
-        DataSetQueryParam sqlCommand = new DataSetQueryParam();
-        String metricTableName = "v_metric_tb_tmp";
-        MetricTable metricTable = new MetricTable();
-        metricTable.setAlias(metricTableName);
-        metricTable.setMetrics(queryParam.getMetrics());
-        metricTable.setDimensions(queryParam.getGroups());
-        String where = sqlGenerateUtils.generateWhere(queryParam, null);
-        log.info("in generateSqlCommand, complete where:{}", where);
-        metricTable.setWhere(where);
-        metricTable.setAggOption(AggOption.AGGREGATION);
-        sqlCommand.setTables(new ArrayList<>(Collections.singletonList(metricTable)));
-        String sql = String.format("select %s from %s  %s %s %s",
-                sqlGenerateUtils.getSelect(queryParam), metricTableName,
-                sqlGenerateUtils.getGroupBy(queryParam), sqlGenerateUtils.getOrderBy(queryParam),
-                sqlGenerateUtils.getLimit(queryParam));
-        if (!sqlGenerateUtils.isSupportWith(engineTypeEnum, version)) {
-            sqlCommand.setSupportWith(false);
-            sql = String.format("select %s from %s t0 %s %s %s",
-                    sqlGenerateUtils.getSelect(queryParam), metricTableName,
-                    sqlGenerateUtils.getGroupBy(queryParam),
-                    sqlGenerateUtils.getOrderBy(queryParam), sqlGenerateUtils.getLimit(queryParam));
-        }
-        sqlCommand.setSql(sql);
-        return sqlCommand;
+        String sql(StructQueryParam structQueryParam, boolean isOver, boolean asWith,
+                String metricSql);
     }
 
     @Override
     public boolean accept(QueryStatement queryStatement) {
-        if (Objects.isNull(queryStatement.getQueryParam()) || queryStatement.getIsS2SQL()) {
+        if (Objects.isNull(queryStatement.getStructQueryParam()) || queryStatement.getIsS2SQL()
+                || !isRatioAccept(queryStatement.getStructQueryParam())) {
             return false;
         }
-        QueryParam queryParam = queryStatement.getQueryParam();
-        if (queryParam.getQueryType().isNativeAggQuery()) {
-            return false;
-        }
-        if (CollectionUtils.isEmpty(queryParam.getAggregators())) {
+        StructQueryParam structQueryParam = queryStatement.getStructQueryParam();
+        if (structQueryParam.getQueryType().isNativeAggQuery()
+                || CollectionUtils.isEmpty(structQueryParam.getAggregators())) {
             return false;
         }
 
         int nonSumFunction = 0;
-        for (Aggregator agg : queryParam.getAggregators()) {
+        for (Aggregator agg : structQueryParam.getAggregators()) {
             if (agg.getFunc() == null || "".equals(agg.getFunc())) {
                 return false;
             }
@@ -98,14 +62,13 @@ public class CalculateAggConverter implements QueryConverter {
     @Override
     public void convert(QueryStatement queryStatement) throws Exception {
         Database database = queryStatement.getOntology().getDatabase();
-        DataSetQueryParam dataSetQueryParam = generateSqlCommend(queryStatement,
-                EngineType.fromString(database.getType().toUpperCase()), database.getVersion());
-        queryStatement.setDataSetQueryParam(dataSetQueryParam);
+        generateRatioSql(queryStatement, EngineType.fromString(database.getType().toUpperCase()),
+                database.getVersion());
     }
 
     /** Ratio */
-    public boolean isRatioAccept(QueryParam queryParam) {
-        Long ratioFuncNum = queryParam.getAggregators().stream()
+    public boolean isRatioAccept(StructQueryParam structQueryParam) {
+        Long ratioFuncNum = structQueryParam.getAggregators().stream()
                 .filter(f -> (f.getFunc().equals(AggOperatorEnum.RATIO_ROLL)
                         || f.getFunc().equals(AggOperatorEnum.RATIO_OVER)))
                 .count();
@@ -115,53 +78,47 @@ public class CalculateAggConverter implements QueryConverter {
         return false;
     }
 
-    public DataSetQueryParam generateRatioSqlCommand(QueryStatement queryStatement,
-            EngineType engineTypeEnum, String version) throws Exception {
+    public void generateRatioSql(QueryStatement queryStatement, EngineType engineTypeEnum,
+            String version) throws Exception {
         SqlGenerateUtils sqlGenerateUtils = ContextUtils.getBean(SqlGenerateUtils.class);
-        QueryParam queryParam = queryStatement.getQueryParam();
-        check(queryParam);
+        StructQueryParam structQueryParam = queryStatement.getStructQueryParam();
+        check(structQueryParam);
         queryStatement.setEnableOptimize(false);
-        DataSetQueryParam sqlCommand = new DataSetQueryParam();
+        OntologyQueryParam ontologyQueryParam = queryStatement.getOntologyQueryParam();
+        ontologyQueryParam.setAggOption(AggOption.AGGREGATION);
         String metricTableName = "v_metric_tb_tmp";
-        MetricTable metricTable = new MetricTable();
-        metricTable.setAlias(metricTableName);
-        metricTable.setMetrics(queryParam.getMetrics());
-        metricTable.setDimensions(queryParam.getGroups());
-        String where = sqlGenerateUtils.generateWhere(queryParam, null);
-        log.info("in generateSqlCommend, complete where:{}", where);
-        metricTable.setWhere(where);
-        metricTable.setAggOption(AggOption.AGGREGATION);
-        sqlCommand.setTables(new ArrayList<>(Collections.singletonList(metricTable)));
-        boolean isOver = isOverRatio(queryParam);
+        boolean isOver = isOverRatio(structQueryParam);
         String sql = "";
+
+        SqlQueryParam dsParam = queryStatement.getSqlQueryParam();
+        dsParam.setTable(metricTableName);
         switch (engineTypeEnum) {
             case H2:
-                sql = new H2EngineSql().sql(queryParam, isOver, true, metricTableName);
+                sql = new H2EngineSql().sql(structQueryParam, isOver, true, metricTableName);
                 break;
             case MYSQL:
             case DORIS:
             case CLICKHOUSE:
                 if (!sqlGenerateUtils.isSupportWith(engineTypeEnum, version)) {
-                    sqlCommand.setSupportWith(false);
+                    dsParam.setSupportWith(false);
                 }
                 if (!engineTypeEnum.equals(engineTypeEnum.CLICKHOUSE)) {
-                    sql = new MysqlEngineSql().sql(queryParam, isOver, sqlCommand.isSupportWith(),
-                            metricTableName);
+                    sql = new MysqlEngineSql().sql(structQueryParam, isOver,
+                            dsParam.isSupportWith(), metricTableName);
                 } else {
-                    sql = new CkEngineSql().sql(queryParam, isOver, sqlCommand.isSupportWith(),
+                    sql = new CkEngineSql().sql(structQueryParam, isOver, dsParam.isSupportWith(),
                             metricTableName);
                 }
                 break;
             default:
         }
-        sqlCommand.setSql(sql);
-        return sqlCommand;
+        dsParam.setSql(sql);
     }
 
     public class H2EngineSql implements EngineSql {
 
-        public String getOverSelect(QueryParam queryParam, boolean isOver) {
-            String aggStr = queryParam.getAggregators().stream().map(f -> {
+        public String getOverSelect(StructQueryParam structQueryParam, boolean isOver) {
+            String aggStr = structQueryParam.getAggregators().stream().map(f -> {
                 if (f.getFunc().equals(AggOperatorEnum.RATIO_OVER)
                         || f.getFunc().equals(AggOperatorEnum.RATIO_ROLL)) {
                     return String.format("( (%s-%s_roll)/cast(%s_roll as DOUBLE) ) as %s_%s,%s",
@@ -171,43 +128,44 @@ public class CalculateAggConverter implements QueryConverter {
                     return f.getColumn();
                 }
             }).collect(Collectors.joining(","));
-            return CollectionUtils.isEmpty(queryParam.getGroups()) ? aggStr
-                    : String.join(",", queryParam.getGroups()) + "," + aggStr;
+            return CollectionUtils.isEmpty(structQueryParam.getGroups()) ? aggStr
+                    : String.join(",", structQueryParam.getGroups()) + "," + aggStr;
         }
 
-        public String getTimeSpan(QueryParam queryParam, boolean isOver, boolean isAdd) {
-            if (Objects.nonNull(queryParam.getDateInfo())) {
+        public String getTimeSpan(StructQueryParam structQueryParam, boolean isOver,
+                boolean isAdd) {
+            if (Objects.nonNull(structQueryParam.getDateInfo())) {
                 String addStr = isAdd ? "" : "-";
-                if (queryParam.getDateInfo().getPeriod().equals(DatePeriodEnum.DAY)) {
+                if (structQueryParam.getDateInfo().getPeriod().equals(DatePeriodEnum.DAY)) {
                     return "day," + (isOver ? addStr + "7" : addStr + "1");
                 }
-                if (queryParam.getDateInfo().getPeriod().equals(DatePeriodEnum.MONTH)) {
+                if (structQueryParam.getDateInfo().getPeriod().equals(DatePeriodEnum.MONTH)) {
                     return isOver ? "month," + addStr + "1" : "day," + addStr + "7";
                 }
-                if (queryParam.getDateInfo().getPeriod().equals(DatePeriodEnum.MONTH.MONTH)) {
+                if (structQueryParam.getDateInfo().getPeriod().equals(DatePeriodEnum.MONTH.MONTH)) {
                     return isOver ? "year," + addStr + "1" : "month," + addStr + "1";
                 }
             }
             return "";
         }
 
-        public String getJoinOn(QueryParam queryParam, boolean isOver, String aliasLeft,
+        public String getJoinOn(StructQueryParam structQueryParam, boolean isOver, String aliasLeft,
                 String aliasRight) {
-            String timeDim = getTimeDim(queryParam);
-            String timeSpan = getTimeSpan(queryParam, isOver, true);
-            String aggStr = queryParam.getAggregators().stream().map(f -> {
+            String timeDim = getTimeDim(structQueryParam);
+            String timeSpan = getTimeSpan(structQueryParam, isOver, true);
+            String aggStr = structQueryParam.getAggregators().stream().map(f -> {
                 if (f.getFunc().equals(AggOperatorEnum.RATIO_OVER)
                         || f.getFunc().equals(AggOperatorEnum.RATIO_ROLL)) {
-                    if (queryParam.getDateInfo().getPeriod().equals(DatePeriodEnum.MONTH)) {
+                    if (structQueryParam.getDateInfo().getPeriod().equals(DatePeriodEnum.MONTH)) {
                         return String.format(
                                 "%s is not null and %s = FORMATDATETIME(DATEADD(%s,CONCAT(%s,'-01')),'yyyy-MM') ",
                                 aliasRight + timeDim, aliasLeft + timeDim, timeSpan,
                                 aliasRight + timeDim);
                     }
-                    if (queryParam.getDateInfo().getPeriod().equals(DatePeriodEnum.WEEK)
+                    if (structQueryParam.getDateInfo().getPeriod().equals(DatePeriodEnum.WEEK)
                             && isOver) {
                         return String.format(" DATE_TRUNC('week',DATEADD(%s,%s) ) = %s ",
-                                getTimeSpan(queryParam, isOver, false), aliasLeft + timeDim,
+                                getTimeSpan(structQueryParam, isOver, false), aliasLeft + timeDim,
                                 aliasRight + timeDim);
                     }
                     return String.format("%s = TIMESTAMPADD(%s,%s) ", aliasLeft + timeDim, timeSpan,
@@ -217,7 +175,7 @@ public class CalculateAggConverter implements QueryConverter {
                 }
             }).collect(Collectors.joining(" and "));
             List<String> groups = new ArrayList<>();
-            for (String group : queryParam.getGroups()) {
+            for (String group : structQueryParam.getGroups()) {
                 if (group.equalsIgnoreCase(timeDim)) {
                     continue;
                 }
@@ -228,35 +186,36 @@ public class CalculateAggConverter implements QueryConverter {
         }
 
         @Override
-        public String sql(QueryParam queryParam, boolean isOver, boolean asWith, String metricSql) {
+        public String sql(StructQueryParam structQueryParam, boolean isOver, boolean asWith,
+                String metricSql) {
             String sql = String.format(
                     "select %s from ( select %s , %s from %s t0 left join %s t1 on %s ) metric_tb_src %s %s ",
-                    getOverSelect(queryParam, isOver), getAllSelect(queryParam, "t0."),
-                    getAllJoinSelect(queryParam, "t1."), metricSql, metricSql,
-                    getJoinOn(queryParam, isOver, "t0.", "t1."), getOrderBy(queryParam),
-                    getLimit(queryParam));
+                    getOverSelect(structQueryParam, isOver), getAllSelect(structQueryParam, "t0."),
+                    getAllJoinSelect(structQueryParam, "t1."), metricSql, metricSql,
+                    getJoinOn(structQueryParam, isOver, "t0.", "t1."), getOrderBy(structQueryParam),
+                    getLimit(structQueryParam));
             return sql;
         }
     }
 
     public class CkEngineSql extends MysqlEngineSql {
 
-        public String getJoinOn(QueryParam queryParam, boolean isOver, String aliasLeft,
+        public String getJoinOn(StructQueryParam structQueryParam, boolean isOver, String aliasLeft,
                 String aliasRight) {
-            String timeDim = getTimeDim(queryParam);
-            String timeSpan = "INTERVAL  " + getTimeSpan(queryParam, isOver, true);
-            String aggStr = queryParam.getAggregators().stream().map(f -> {
+            String timeDim = getTimeDim(structQueryParam);
+            String timeSpan = "INTERVAL  " + getTimeSpan(structQueryParam, isOver, true);
+            String aggStr = structQueryParam.getAggregators().stream().map(f -> {
                 if (f.getFunc().equals(AggOperatorEnum.RATIO_OVER)
                         || f.getFunc().equals(AggOperatorEnum.RATIO_ROLL)) {
-                    if (queryParam.getDateInfo().getPeriod().equals(DatePeriodEnum.MONTH)) {
+                    if (structQueryParam.getDateInfo().getPeriod().equals(DatePeriodEnum.MONTH)) {
                         return String.format(
                                 "toDate(CONCAT(%s,'-01')) = date_add(toDate(CONCAT(%s,'-01')),%s)  ",
                                 aliasLeft + timeDim, aliasRight + timeDim, timeSpan);
                     }
-                    if (queryParam.getDateInfo().getPeriod().equals(DatePeriodEnum.WEEK)
+                    if (structQueryParam.getDateInfo().getPeriod().equals(DatePeriodEnum.WEEK)
                             && isOver) {
                         return String.format("toMonday(date_add(%s ,INTERVAL %s) ) = %s",
-                                aliasLeft + timeDim, getTimeSpan(queryParam, isOver, false),
+                                aliasLeft + timeDim, getTimeSpan(structQueryParam, isOver, false),
                                 aliasRight + timeDim);
                     }
                     return String.format("%s = date_add(%s,%s) ", aliasLeft + timeDim,
@@ -266,7 +225,7 @@ public class CalculateAggConverter implements QueryConverter {
                 }
             }).collect(Collectors.joining(" and "));
             List<String> groups = new ArrayList<>();
-            for (String group : queryParam.getGroups()) {
+            for (String group : structQueryParam.getGroups()) {
                 if (group.equalsIgnoreCase(timeDim)) {
                     continue;
                 }
@@ -277,45 +236,49 @@ public class CalculateAggConverter implements QueryConverter {
         }
 
         @Override
-        public String sql(QueryParam queryParam, boolean isOver, boolean asWith, String metricSql) {
+        public String sql(StructQueryParam structQueryParam, boolean isOver, boolean asWith,
+                String metricSql) {
             if (!asWith) {
                 return String.format(
                         "select %s from ( select %s , %s from %s t0 left join %s t1 on %s ) metric_tb_src %s %s ",
-                        getOverSelect(queryParam, isOver), getAllSelect(queryParam, "t0."),
-                        getAllJoinSelect(queryParam, "t1."), metricSql, metricSql,
-                        getJoinOn(queryParam, isOver, "t0.", "t1."), getOrderBy(queryParam),
-                        getLimit(queryParam));
+                        getOverSelect(structQueryParam, isOver),
+                        getAllSelect(structQueryParam, "t0."),
+                        getAllJoinSelect(structQueryParam, "t1."), metricSql, metricSql,
+                        getJoinOn(structQueryParam, isOver, "t0.", "t1."),
+                        getOrderBy(structQueryParam), getLimit(structQueryParam));
             }
             return String.format(
                     ",t0 as (select * from %s),t1 as (select * from %s) select %s from ( select %s , %s "
                             + "from  t0 left join t1 on %s ) metric_tb_src %s %s ",
-                    metricSql, metricSql, getOverSelect(queryParam, isOver),
-                    getAllSelect(queryParam, "t0."), getAllJoinSelect(queryParam, "t1."),
-                    getJoinOn(queryParam, isOver, "t0.", "t1."), getOrderBy(queryParam),
-                    getLimit(queryParam));
+                    metricSql, metricSql, getOverSelect(structQueryParam, isOver),
+                    getAllSelect(structQueryParam, "t0."),
+                    getAllJoinSelect(structQueryParam, "t1."),
+                    getJoinOn(structQueryParam, isOver, "t0.", "t1."), getOrderBy(structQueryParam),
+                    getLimit(structQueryParam));
         }
     }
 
     public class MysqlEngineSql implements EngineSql {
 
-        public String getTimeSpan(QueryParam queryParam, boolean isOver, boolean isAdd) {
-            if (Objects.nonNull(queryParam.getDateInfo())) {
+        public String getTimeSpan(StructQueryParam structQueryParam, boolean isOver,
+                boolean isAdd) {
+            if (Objects.nonNull(structQueryParam.getDateInfo())) {
                 String addStr = isAdd ? "" : "-";
-                if (queryParam.getDateInfo().getPeriod().equals(DatePeriodEnum.DAY)) {
+                if (structQueryParam.getDateInfo().getPeriod().equals(DatePeriodEnum.DAY)) {
                     return isOver ? addStr + "7 day" : addStr + "1 day";
                 }
-                if (queryParam.getDateInfo().getPeriod().equals(DatePeriodEnum.WEEK)) {
+                if (structQueryParam.getDateInfo().getPeriod().equals(DatePeriodEnum.WEEK)) {
                     return isOver ? addStr + "1 month" : addStr + "7 day";
                 }
-                if (queryParam.getDateInfo().getPeriod().equals(DatePeriodEnum.MONTH)) {
+                if (structQueryParam.getDateInfo().getPeriod().equals(DatePeriodEnum.MONTH)) {
                     return isOver ? addStr + "1 year" : addStr + "1 month";
                 }
             }
             return "";
         }
 
-        public String getOverSelect(QueryParam queryParam, boolean isOver) {
-            String aggStr = queryParam.getAggregators().stream().map(f -> {
+        public String getOverSelect(StructQueryParam structQueryParam, boolean isOver) {
+            String aggStr = structQueryParam.getAggregators().stream().map(f -> {
                 if (f.getFunc().equals(AggOperatorEnum.RATIO_OVER)
                         || f.getFunc().equals(AggOperatorEnum.RATIO_ROLL)) {
                     return String.format("if(%s_roll!=0,  (%s-%s_roll)/%s_roll , 0) as %s_%s,%s",
@@ -325,26 +288,26 @@ public class CalculateAggConverter implements QueryConverter {
                     return f.getColumn();
                 }
             }).collect(Collectors.joining(","));
-            return CollectionUtils.isEmpty(queryParam.getGroups()) ? aggStr
-                    : String.join(",", queryParam.getGroups()) + "," + aggStr;
+            return CollectionUtils.isEmpty(structQueryParam.getGroups()) ? aggStr
+                    : String.join(",", structQueryParam.getGroups()) + "," + aggStr;
         }
 
-        public String getJoinOn(QueryParam queryParam, boolean isOver, String aliasLeft,
+        public String getJoinOn(StructQueryParam structQueryParam, boolean isOver, String aliasLeft,
                 String aliasRight) {
-            String timeDim = getTimeDim(queryParam);
-            String timeSpan = "INTERVAL  " + getTimeSpan(queryParam, isOver, true);
-            String aggStr = queryParam.getAggregators().stream().map(f -> {
+            String timeDim = getTimeDim(structQueryParam);
+            String timeSpan = "INTERVAL  " + getTimeSpan(structQueryParam, isOver, true);
+            String aggStr = structQueryParam.getAggregators().stream().map(f -> {
                 if (f.getFunc().equals(AggOperatorEnum.RATIO_OVER)
                         || f.getFunc().equals(AggOperatorEnum.RATIO_ROLL)) {
-                    if (queryParam.getDateInfo().getPeriod().equals(DatePeriodEnum.MONTH)) {
+                    if (structQueryParam.getDateInfo().getPeriod().equals(DatePeriodEnum.MONTH)) {
                         return String.format(
                                 "%s = DATE_FORMAT(date_add(CONCAT(%s,'-01'), %s),'%%Y-%%m') ",
                                 aliasLeft + timeDim, aliasRight + timeDim, timeSpan);
                     }
-                    if (queryParam.getDateInfo().getPeriod().equals(DatePeriodEnum.WEEK)
+                    if (structQueryParam.getDateInfo().getPeriod().equals(DatePeriodEnum.WEEK)
                             && isOver) {
                         return String.format("to_monday(date_add(%s ,INTERVAL %s) ) = %s",
-                                aliasLeft + timeDim, getTimeSpan(queryParam, isOver, false),
+                                aliasLeft + timeDim, getTimeSpan(structQueryParam, isOver, false),
                                 aliasRight + timeDim);
                     }
                     return String.format("%s = date_add(%s,%s) ", aliasLeft + timeDim,
@@ -354,7 +317,7 @@ public class CalculateAggConverter implements QueryConverter {
                 }
             }).collect(Collectors.joining(" and "));
             List<String> groups = new ArrayList<>();
-            for (String group : queryParam.getGroups()) {
+            for (String group : structQueryParam.getGroups()) {
                 if (group.equalsIgnoreCase(timeDim)) {
                     continue;
                 }
@@ -365,51 +328,53 @@ public class CalculateAggConverter implements QueryConverter {
         }
 
         @Override
-        public String sql(QueryParam queryParam, boolean isOver, boolean asWith, String metricSql) {
+        public String sql(StructQueryParam structQueryParam, boolean isOver, boolean asWith,
+                String metricSql) {
             String sql = String.format(
                     "select %s from ( select %s , %s from %s t0 left join %s t1 on %s ) metric_tb_src %s %s ",
-                    getOverSelect(queryParam, isOver), getAllSelect(queryParam, "t0."),
-                    getAllJoinSelect(queryParam, "t1."), metricSql, metricSql,
-                    getJoinOn(queryParam, isOver, "t0.", "t1."), getOrderBy(queryParam),
-                    getLimit(queryParam));
+                    getOverSelect(structQueryParam, isOver), getAllSelect(structQueryParam, "t0."),
+                    getAllJoinSelect(structQueryParam, "t1."), metricSql, metricSql,
+                    getJoinOn(structQueryParam, isOver, "t0.", "t1."), getOrderBy(structQueryParam),
+                    getLimit(structQueryParam));
             return sql;
         }
     }
 
-    private String getAllJoinSelect(QueryParam queryParam, String alias) {
-        String aggStr = queryParam.getAggregators().stream()
+    private String getAllJoinSelect(StructQueryParam structQueryParam, String alias) {
+        String aggStr = structQueryParam.getAggregators().stream()
                 .map(f -> getSelectField(f, alias) + " as " + getSelectField(f, "") + "_roll")
                 .collect(Collectors.joining(","));
         List<String> groups = new ArrayList<>();
-        for (String group : queryParam.getGroups()) {
+        for (String group : structQueryParam.getGroups()) {
             groups.add(alias + group + " as " + group + "_roll");
         }
         return CollectionUtils.isEmpty(groups) ? aggStr : String.join(",", groups) + "," + aggStr;
     }
 
-    private String getGroupDimWithOutTime(QueryParam queryParam) {
-        String timeDim = getTimeDim(queryParam);
-        return queryParam.getGroups().stream().filter(f -> !f.equalsIgnoreCase(timeDim))
+    private String getGroupDimWithOutTime(StructQueryParam structQueryParam) {
+        String timeDim = getTimeDim(structQueryParam);
+        return structQueryParam.getGroups().stream().filter(f -> !f.equalsIgnoreCase(timeDim))
                 .collect(Collectors.joining(","));
     }
 
-    private static String getTimeDim(QueryParam queryParam) {
+    private static String getTimeDim(StructQueryParam structQueryParam) {
         DateModeUtils dateModeUtils = ContextUtils.getContext().getBean(DateModeUtils.class);
-        return dateModeUtils.getSysDateCol(queryParam.getDateInfo());
+        return dateModeUtils.getSysDateCol(structQueryParam.getDateInfo());
     }
 
-    private static String getLimit(QueryParam queryParam) {
-        if (queryParam != null && queryParam.getLimit() != null && queryParam.getLimit() > 0) {
-            return " limit " + String.valueOf(queryParam.getLimit());
+    private static String getLimit(StructQueryParam structQueryParam) {
+        if (structQueryParam != null && structQueryParam.getLimit() != null
+                && structQueryParam.getLimit() > 0) {
+            return " limit " + String.valueOf(structQueryParam.getLimit());
         }
         return "";
     }
 
-    private String getAllSelect(QueryParam queryParam, String alias) {
-        String aggStr = queryParam.getAggregators().stream().map(f -> getSelectField(f, alias))
-                .collect(Collectors.joining(","));
-        return CollectionUtils.isEmpty(queryParam.getGroups()) ? aggStr
-                : alias + String.join("," + alias, queryParam.getGroups()) + "," + aggStr;
+    private String getAllSelect(StructQueryParam structQueryParam, String alias) {
+        String aggStr = structQueryParam.getAggregators().stream()
+                .map(f -> getSelectField(f, alias)).collect(Collectors.joining(","));
+        return CollectionUtils.isEmpty(structQueryParam.getGroups()) ? aggStr
+                : alias + String.join("," + alias, structQueryParam.getGroups()) + "," + aggStr;
     }
 
     private String getSelectField(final Aggregator agg, String alias) {
@@ -421,32 +386,32 @@ public class CalculateAggConverter implements QueryConverter {
         return sqlGenerateUtils.getSelectField(agg);
     }
 
-    private String getGroupBy(QueryParam queryParam) {
-        if (CollectionUtils.isEmpty(queryParam.getGroups())) {
+    private String getGroupBy(StructQueryParam structQueryParam) {
+        if (CollectionUtils.isEmpty(structQueryParam.getGroups())) {
             return "";
         }
-        return "group by " + String.join(",", queryParam.getGroups());
+        return "group by " + String.join(",", structQueryParam.getGroups());
     }
 
-    private static String getOrderBy(QueryParam queryParam) {
-        return "order by " + getTimeDim(queryParam) + " desc";
+    private static String getOrderBy(StructQueryParam structQueryParam) {
+        return "order by " + getTimeDim(structQueryParam) + " desc";
     }
 
-    private boolean isOverRatio(QueryParam queryParam) {
-        Long overCt = queryParam.getAggregators().stream()
+    private boolean isOverRatio(StructQueryParam structQueryParam) {
+        Long overCt = structQueryParam.getAggregators().stream()
                 .filter(f -> f.getFunc().equals(AggOperatorEnum.RATIO_OVER)).count();
         return overCt > 0;
     }
 
-    private void check(QueryParam queryParam) throws Exception {
-        Long ratioOverNum = queryParam.getAggregators().stream()
+    private void check(StructQueryParam structQueryParam) throws Exception {
+        Long ratioOverNum = structQueryParam.getAggregators().stream()
                 .filter(f -> f.getFunc().equals(AggOperatorEnum.RATIO_OVER)).count();
-        Long ratioRollNum = queryParam.getAggregators().stream()
+        Long ratioRollNum = structQueryParam.getAggregators().stream()
                 .filter(f -> f.getFunc().equals(AggOperatorEnum.RATIO_ROLL)).count();
         if (ratioOverNum > 0 && ratioRollNum > 0) {
             throw new Exception("not support over ratio and roll ratio together ");
         }
-        if (getTimeDim(queryParam).isEmpty()) {
+        if (getTimeDim(structQueryParam).isEmpty()) {
             throw new Exception("miss time filter");
         }
     }

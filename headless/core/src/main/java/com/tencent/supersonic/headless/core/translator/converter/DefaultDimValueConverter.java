@@ -4,7 +4,6 @@ import com.google.common.collect.Lists;
 import com.tencent.supersonic.common.jsqlparser.SqlAddHelper;
 import com.tencent.supersonic.common.jsqlparser.SqlSelectHelper;
 import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
-import com.tencent.supersonic.headless.api.pojo.MetricTable;
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;
 import com.tencent.supersonic.headless.core.translator.calcite.s2sql.Dimension;
 import lombok.extern.slf4j.Slf4j;
@@ -28,8 +27,8 @@ public class DefaultDimValueConverter implements QueryConverter {
 
     @Override
     public boolean accept(QueryStatement queryStatement) {
-        return !Objects.isNull(queryStatement.getDataSetQueryParam())
-                && !StringUtils.isBlank(queryStatement.getDataSetQueryParam().getSql());
+        return Objects.nonNull(queryStatement.getSqlQueryParam())
+                && StringUtils.isNotBlank(queryStatement.getSqlQueryParam().getSql());
     }
 
     @Override
@@ -40,15 +39,13 @@ public class DefaultDimValueConverter implements QueryConverter {
         if (CollectionUtils.isEmpty(dimensions)) {
             return;
         }
-        String sql = queryStatement.getDataSetQueryParam().getSql();
+        String sql = queryStatement.getSqlQueryParam().getSql();
         List<String> whereFields = SqlSelectHelper.getWhereFields(sql).stream()
                 .filter(field -> !TimeDimensionEnum.containsTimeDimension(field))
                 .collect(Collectors.toList());
         if (!CollectionUtils.isEmpty(whereFields)) {
             return;
         }
-        MetricTable metricTable =
-                queryStatement.getDataSetQueryParam().getTables().stream().findFirst().orElse(null);
         List<Expression> expressions = Lists.newArrayList();
         for (Dimension dimension : dimensions) {
             ExpressionList expressionList = new ExpressionList();
@@ -59,11 +56,11 @@ public class DefaultDimValueConverter implements QueryConverter {
             inExpression.setLeftExpression(new Column(dimension.getBizName()));
             inExpression.setRightExpression(expressionList);
             expressions.add(inExpression);
-            if (metricTable != null) {
-                metricTable.getDimensions().add(dimension.getBizName());
+            if (Objects.nonNull(queryStatement.getSqlQueryParam().getTable())) {
+                queryStatement.getOntologyQueryParam().getDimensions().add(dimension.getBizName());
             }
         }
         sql = SqlAddHelper.addWhere(sql, expressions);
-        queryStatement.getDataSetQueryParam().setSql(sql);
+        queryStatement.getSqlQueryParam().setSql(sql);
     }
 }
