@@ -59,38 +59,42 @@ public class DefaultSemanticTranslator implements SemanticTranslator {
         SqlQueryParam sqlQueryParam = queryStatement.getSqlQueryParam();
         log.info("parse with ontology: [{}]", ontologyQueryParam);
         ComponentFactory.getQueryParser().parse(queryStatement);
+        String ontologyQueryTable = sqlQueryParam.getTable();
+        String ontologyQuerySql = sqlQueryParam.getSql();
+        String ontologySql = queryStatement.getSql();
 
         if (!queryStatement.isOk()) {
-            throw new Exception(String.format("parse table [%s] error [%s]",
-                    sqlQueryParam.getTable(), queryStatement.getErrMsg()));
+            throw new Exception(String.format("parse ontology table [%s] error [%s]",
+                    ontologyQueryTable, queryStatement.getErrMsg()));
         }
 
         List<Pair<String, String>> tables = new ArrayList<>();
-        tables.add(Pair.of(sqlQueryParam.getTable(), queryStatement.getSql()));
+
+        tables.add(Pair.of(ontologyQueryTable, ontologySql));
         if (sqlQueryParam.isSupportWith()) {
             EngineType engineType =
                     EngineType.fromString(queryStatement.getOntology().getDatabase().getType());
-            if (!SqlMergeWithUtils.hasWith(engineType, sqlQueryParam.getSql())) {
+            if (!SqlMergeWithUtils.hasWith(engineType, ontologyQuerySql)) {
                 String withSql = "with " + tables.stream()
                         .map(t -> String.format("%s as (%s)", t.getLeft(), t.getRight()))
-                        .collect(Collectors.joining(",")) + "\n" + sqlQueryParam.getSql();
+                        .collect(Collectors.joining(",")) + "\n" + ontologyQuerySql;
                 queryStatement.setSql(withSql);
             } else {
                 List<String> parentTableList =
                         tables.stream().map(Pair::getLeft).collect(Collectors.toList());
                 List<String> parentSqlList =
                         tables.stream().map(Pair::getRight).collect(Collectors.toList());
-                String mergeSql = SqlMergeWithUtils.mergeWith(engineType, sqlQueryParam.getSql(),
+                String mergeSql = SqlMergeWithUtils.mergeWith(engineType, ontologyQuerySql,
                         parentSqlList, parentTableList);
                 queryStatement.setSql(mergeSql);
             }
         } else {
-            String dsSql = sqlQueryParam.getSql();
             for (Pair<String, String> tb : tables) {
-                dsSql = StringUtils.replace(dsSql, tb.getLeft(), "(" + tb.getRight() + ") "
-                        + (sqlQueryParam.isWithAlias() ? "" : tb.getLeft()), -1);
+                ontologyQuerySql =
+                        StringUtils.replace(ontologyQuerySql, tb.getLeft(), "(" + tb.getRight()
+                                + ") " + (sqlQueryParam.isWithAlias() ? "" : tb.getLeft()), -1);
             }
-            queryStatement.setSql(dsSql);
+            queryStatement.setSql(ontologyQuerySql);
         }
     }
 

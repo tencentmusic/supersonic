@@ -35,7 +35,7 @@ public class SqlBuilder {
         this.schema = schema;
     }
 
-    public void build(QueryStatement queryStatement) throws Exception {
+    public void buildOntologySql(QueryStatement queryStatement) throws Exception {
         this.ontologyQueryParam = queryStatement.getOntologyQueryParam();
         if (ontologyQueryParam.getMetrics() == null) {
             ontologyQueryParam.setMetrics(new ArrayList<>());
