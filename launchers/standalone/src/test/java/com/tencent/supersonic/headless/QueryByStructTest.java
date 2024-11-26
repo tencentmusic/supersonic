@@ -46,7 +46,6 @@ public class QueryByStructTest extends BaseTest {
 
     @Test
     public void testDetailQuery() throws Exception {
-        System.setProperty("s2.test", "true");
         QueryStructReq queryStructReq =
                 buildQueryStructReq(Arrays.asList("user_name", "department"), QueryType.DETAIL);
         SemanticQueryResp semanticQueryResp =
@@ -87,7 +86,6 @@ public class QueryByStructTest extends BaseTest {
 
     @Test
     public void testFilterQuery() throws Exception {
-        System.setProperty("s2.test", "true");
         QueryStructReq queryStructReq = buildQueryStructReq(Arrays.asList("department"));
         List<Filter> dimensionFilters = new ArrayList<>();
         Filter filter = new Filter();

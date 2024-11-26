@@ -14,6 +14,7 @@ import com.tencent.supersonic.headless.chat.query.rule.metric.MetricTopNQuery;
 import com.tencent.supersonic.util.DataUtils;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junitpioneer.jupiter.SetSystemProperty;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.text.DateFormat;
@@ -72,8 +73,8 @@ public class MetricTest extends BaseTest {
     }
 
     @Test
+    @SetSystemProperty(key = "s2.test", value = "true")
     public void testMetricGroupBy() throws Exception {
-        System.setProperty("s2.test", "true");
         QueryResult actualResult = submitNewChat("近7天超音数各部门的访问次数", DataUtils.productAgentId);
 
         QueryResult expectedResult = new QueryResult();
