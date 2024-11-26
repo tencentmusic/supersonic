@@ -502,3 +502,10 @@ export function decryptPassword(encryptPassword: string) {
 export function uniqueArray(arr: any[]) {
   return Array.from(new Set(arr));
 }
+
+// 替换以:开头标记的变量
+export const replaceRouteParams = (template: string, values: Record<string, string>): string => {
+  return template.replace(/:([a-zA-Z0-9_]+)/g, (match, key) => {
+    return values[key] !== undefined ? values[key] : match;
+  });
+};

@@ -106,7 +106,7 @@ const ModelTable: React.FC<Props> = ({ modelList, disabledEdit = false, onModelC
             onClick={() => {
               setSelectModel(record);
 
-              history.push(`/model/manager/${domainId}/${id}`);
+              history.push(`/model/domain/manager/${domainId}/${id}`);
               // onModelChange?.(record);
             }}
           >

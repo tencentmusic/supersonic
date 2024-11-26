@@ -4,27 +4,18 @@ import ModelManagerTab from './components/ModelManagerTab';
 
 type Props = {};
 
-const OverviewContainer: React.FC<Props> = ({}) => {
+const ModelManager: React.FC<Props> = ({}) => {
   const defaultTabKey = 'overview';
   const params: any = useParams();
-  const domainId = params.domainId;
   const modelId = params.modelId;
   const domainModel = useModel('SemanticModel.domainData');
   const modelModel = useModel('SemanticModel.modelData');
   const dimensionModel = useModel('SemanticModel.dimensionData');
   const metricModel = useModel('SemanticModel.metricData');
-  const databaseModel = useModel('SemanticModel.databaseData');
-  const { selectDomainId, domainList, setSelectDomain, setDomainList } = domainModel;
-  const {
-    selectModelId,
-    modelList,
-    MrefreshModelList,
-    setSelectModel,
-    setModelTableHistoryParams,
-  } = modelModel;
+  const { selectDomainId } = domainModel;
+  const { selectModelId, modelList } = modelModel;
   const { MrefreshDimensionList } = dimensionModel;
   const { MrefreshMetricList } = metricModel;
-  const { MrefreshDatabaseList } = databaseModel;
   const menuKey = params.menuKey ? params.menuKey : !Number(modelId) ? defaultTabKey : '';
   const [activeKey, setActiveKey] = useState<string>(menuKey);
 
@@ -35,7 +26,7 @@ const OverviewContainer: React.FC<Props> = ({}) => {
   };
 
   useEffect(() => {
-    if (!selectModelId) {
+    if (!selectModelId || `${selectModelId}` === `${modelId}`) {
       return;
     }
     initModelConfig();
@@ -44,22 +35,13 @@ const OverviewContainer: React.FC<Props> = ({}) => {
   }, [selectModelId]);
 
   const pushUrlMenu = (domainId: number, modelId: number, menuKey: string) => {
-    history.push(`/model/manager/${domainId}/${modelId}/${menuKey}`);
-  };
-
-  const cleanModelInfo = (domainId) => {
-    setActiveKey(defaultTabKey);
-    pushUrlMenu(domainId, 0, defaultTabKey);
-    setSelectModel(undefined);
+    history.push(`/model/domain/manager/${domainId}/${modelId}/${menuKey}`);
   };
 
   return (
     <ModelManagerTab
       activeKey={activeKey}
       modelList={modelList}
-      onBackDomainBtnClick={() => {
-        cleanModelInfo(selectDomainId);
-      }}
       onMenuChange={(menuKey) => {
         setActiveKey(menuKey);
         pushUrlMenu(selectDomainId, selectModelId, menuKey);
@@ -68,4 +50,4 @@ const OverviewContainer: React.FC<Props> = ({}) => {
   );
 };
 
-export default OverviewContainer;
+export default ModelManager;

@@ -18,28 +18,14 @@ import View from '../View';
 type Props = {
   activeKey: string;
   modelList: ISemantic.IModelItem[];
-  handleModelChange: (model?: ISemantic.IModelItem) => void;
-  onBackDomainBtnClick?: () => void;
   onMenuChange?: (menuKey: string) => void;
 };
-const ModelManagerTab: React.FC<Props> = ({
-  activeKey,
-  modelList,
-  handleModelChange,
-  onBackDomainBtnClick,
-  onMenuChange,
-}) => {
+const ModelManagerTab: React.FC<Props> = ({ activeKey, onMenuChange }) => {
   const initState = useRef<boolean>(false);
   const defaultTabKey = 'metric';
-  const domainModel = useModel('SemanticModel.domainData');
   const modelModel = useModel('SemanticModel.modelData');
 
-  const { selectDomainId, selectDomainName, selectDomain: domainData } = domainModel;
-  const { selectModelId, selectModelName } = modelModel;
-
-  useEffect(() => {
-    console.log(modelList, 'modelList');
-  }, [modelList]);
+  const { selectModelId } = modelModel;
 
   useEffect(() => {
     initState.current = false;

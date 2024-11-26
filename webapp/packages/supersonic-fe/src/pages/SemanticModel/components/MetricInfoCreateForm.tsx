@@ -901,7 +901,7 @@ const MetricInfoCreateForm: React.FC<CreateFormProps> = ({
               key="console"
               onClick={() => {
                 history.replace(
-                  `/model/manager/${domainId}/${modelId || metricItem?.modelId}/dataSource`,
+                  `/model/domain/manager/${domainId}/${modelId || metricItem?.modelId}/dataSource`,
                 );
                 onCancel?.();
               }}

@@ -62,27 +62,85 @@ const ROUTES = [
     envEnableList: [ENV_KEY.SEMANTIC],
     routes: [
       {
-        path: '/model/:domainId',
-        component: './SemanticModel/DomainManager',
-        envEnableList: [ENV_KEY.SEMANTIC],
+        path: '/model/',
+        redirect: '/model/domain',
+      },
+      {
+        path: '/model/domain/',
+        component: './SemanticModel/OverviewContainer',
         routes: [
           {
-            path: '/model/:domainId/:menuKey',
+            path: '/model/domain/:domainId',
             component: './SemanticModel/DomainManager',
+            routes: [
+              {
+                path: '/model/domain/:domainId/:menuKey',
+                component: './SemanticModel/DomainManager',
+              },
+            ],
+          },
+          {
+            path: '/model/domain/manager/:domainId/:modelId',
+            component: './SemanticModel/ModelManager',
+            routes: [
+              {
+                path: '/model/domain/manager/:domainId/:modelId/:menuKey',
+                component: './SemanticModel/ModelManager',
+              },
+            ],
           },
         ],
       },
       {
-        path: '/model/manager/:domainId/:modelId',
-        component: './SemanticModel/ModelManager',
+        path: '/model/metric/:domainId/:modelId/:metricId',
+        component: './SemanticModel/Metric/Edit',
         envEnableList: [ENV_KEY.SEMANTIC],
-        routes: [
-          {
-            path: '/model/manager/:domainId/:modelId/:menuKey',
-            component: './SemanticModel/ModelManager',
-          },
-        ],
+        // routes: [
+        //   {
+        //     path: '/model/manager/:domainId/:modelId/:menuKey',
+        //     component: './SemanticModel/ModelManager',
+        //   },
+        // ],
       },
+      // {
+      //   path: '/model/manager/',
+      //   component: './SemanticModel/OverviewContainer',
+      //   routes: [
+      //     {
+      //       path: '/model/manager/:domainId/:modelId',
+      //       component: './SemanticModel/ModelManager',
+      //       routes: [
+      //         {
+      //           path: '/model/manager/:domainId/:modelId/:menuKey',
+      //           component: './SemanticModel/ModelManager',
+      //         },
+      //       ],
+      //     },
+      //   ],
+      // },
+      // {
+      //   path: '/model/:domainId',
+      //   component: './SemanticModel/DomainManager',
+      //   envEnableList: [ENV_KEY.SEMANTIC],
+      //   routes: [
+      //     {
+      //       path: '/model/:domainId/:menuKey',
+      //       component: './SemanticModel/DomainManager',
+      //     },
+      //   ],
+      // },
+      // {
+      //   path: '/model/manager/:domainId/:modelId',
+      //   component: './SemanticModel/ModelManager',
+      //   envEnableList: [ENV_KEY.SEMANTIC],
+      //   routes: [
+      //     {
+      //       path: '/model/manager/:domainId/:modelId/:menuKey',
+      //       component: './SemanticModel/ModelManager',
+      //     },
+      //   ],
+      // },
+
       // {
       //   path: '/model/:domainId/:modelId/:menuKey',
       //   component: './SemanticModel/DomainManager',

@@ -1,45 +1,27 @@
-import { Tabs, Breadcrumb, Space, Radio } from 'antd';
+import { Tabs, Radio } from 'antd';
 import React, { useRef, useEffect, useState } from 'react';
-import { history, useModel } from '@umijs/max';
-import ClassDimensionTable from './ClassDimensionTable';
-import ClassMetricTable from './ClassMetricTable';
+import { useModel } from '@umijs/max';
 import PermissionSection from './Permission/PermissionSection';
 import TagObjectTable from '../Insights/components/TagObjectTable';
 import TermTable from '../components/Term/TermTable';
 import OverView from './OverView';
 import styles from './style.less';
-import { HomeOutlined, FundViewOutlined } from '@ant-design/icons';
-import { ISemantic } from '../data';
 import SemanticGraphCanvas from '../SemanticGraphCanvas';
-import Dimension from '../Dimension';
-import ModelMetric from '../components/ModelMetric';
 import View from '../View';
 
 type Props = {
-  // isModel: boolean;
   activeKey: string;
-  // modelList: ISemantic.IModelItem[];
-  dataSetList: ISemantic.IDatasetItem[];
-  // handleModelChange: (model?: ISemantic.IModelItem) => void;
-  onBackDomainBtnClick?: () => void;
   onMenuChange?: (menuKey: string) => void;
 };
-const DomainManagerTab: React.FC<Props> = ({
-  activeKey,
-  // modelList,
-  dataSetList,
-  // handleModelChange,
-  onBackDomainBtnClick,
-  onMenuChange,
-}) => {
+const DomainManagerTab: React.FC<Props> = ({ activeKey, onMenuChange }) => {
   const initState = useRef<boolean>(false);
   const defaultTabKey = 'metric';
 
   const domainModel = useModel('SemanticModel.domainData');
   const modelModel = useModel('SemanticModel.modelData');
 
-  const { selectDomainId, selectDomainName, selectDomain: domainData } = domainModel;
-  const { selectModelId, modelList, selectModelName } = modelModel;
+  const { selectDomainId, selectDomain: domainData } = domainModel;
+  const { selectModelId, modelList } = modelModel;
 
   useEffect(() => {
     initState.current = false;

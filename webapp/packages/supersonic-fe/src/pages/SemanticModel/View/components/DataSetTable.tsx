@@ -45,11 +45,10 @@ const DataSetTable: React.FC<Props> = ({ disabledEdit = false }) => {
 
   const [viewList, setViewList] = useState<ISemantic.IDatasetItem[]>();
 
-  // useEffect(() => {
-  //   setViewList(dataSetList);
-  // }, [dataSetList]);
-
   useEffect(() => {
+    if (!selectDomainId) {
+      return;
+    }
     queryDataSetList();
     queryDomainAllModel();
   }, [selectDomainId]);

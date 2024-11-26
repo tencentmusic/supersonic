@@ -3,7 +3,7 @@ import { ProTable } from '@ant-design/pro-components';
 import { message, Button, Space, Popconfirm, Input, Select, Tag } from 'antd';
 import React, { useRef, useState, useEffect } from 'react';
 import { StatusEnum, SemanticNodeType } from '../enum';
-import { useModel } from '@umijs/max';
+import { useModel, history } from '@umijs/max';
 import { SENSITIVE_LEVEL_ENUM, SENSITIVE_LEVEL_OPTIONS, TAG_DEFINE_TYPE } from '../constant';
 import {
   queryMetric,
@@ -32,7 +32,7 @@ const ClassMetricTable: React.FC<Props> = ({ onEmptyMetricData }) => {
   const metricModel = useModel('SemanticModel.metricData');
   const { selectDomainId } = domainModel;
   const { selectModelId: modelId } = modelModel;
-  const { MrefreshMetricList } = metricModel;
+  const { MrefreshMetricList, selectMetric, setSelectMetric } = metricModel;
   const [batchSensitiveLevelOpenState, setBatchSensitiveLevelOpenState] = useState<boolean>(false);
   const [createModalVisible, setCreateModalVisible] = useState<boolean>(false);
   const [metricItem, setMetricItem] = useState<ISemantic.IMetricItem>();
@@ -144,7 +144,10 @@ const ClassMetricTable: React.FC<Props> = ({ onEmptyMetricData }) => {
 
   const columnsConfig = ColumnsConfig({
     indicatorInfo: {
-      url: '/model/metric/edit/',
+      url: '/model/metric/:domainId/:modelId/:indicatorId',
+      onNameClick: (record: ISemantic.IMetricItem) => {
+        setSelectMetric(record);
+      },
     },
   });
 
@@ -240,8 +243,9 @@ const ClassMetricTable: React.FC<Props> = ({ onEmptyMetricData }) => {
               type="link"
               key="metricEditBtn"
               onClick={() => {
-                setMetricItem(record);
-                setCreateModalVisible(true);
+                history.push(`/model/metric/${record.domainId}/${record.modelId}/${record.id}`);
+                // setMetricItem(record);
+                // setCreateModalVisible(true);
               }}
             >
               编辑

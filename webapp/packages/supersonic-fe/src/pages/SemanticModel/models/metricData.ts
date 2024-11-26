@@ -5,6 +5,7 @@ import { queryMetric } from '../service';
 
 export default function Metric() {
   const [metricList, setMetricList] = useState<ISemantic.IMetricItem[]>([]);
+  const [selectMetric, setSelectMetric] = useState<ISemantic.IMetricItem>();
 
   const queryMetricList = async (params: any) => {
     const { code, data, msg } = await queryMetric({
@@ -25,6 +26,8 @@ export default function Metric() {
 
   return {
     MmetricList: metricList,
+    setSelectMetric: setSelectMetric,
+    selectMetric: selectMetric,
     MrefreshMetricList: refreshMetricList,
     MqueryMetricList: queryMetricList,
   };
