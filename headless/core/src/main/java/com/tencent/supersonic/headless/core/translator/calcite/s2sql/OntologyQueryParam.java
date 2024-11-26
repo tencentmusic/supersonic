@@ -1,16 +1,17 @@
 package com.tencent.supersonic.headless.core.translator.calcite.s2sql;
 
-import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.tencent.supersonic.common.pojo.ColumnOrder;
 import com.tencent.supersonic.headless.api.pojo.enums.AggOption;
 import lombok.Data;
 
 import java.util.List;
+import java.util.Set;
 
 @Data
 public class OntologyQueryParam {
-    private List<String> metrics = Lists.newArrayList();
-    private List<String> dimensions = Lists.newArrayList();
+    private Set<String> metrics = Sets.newHashSet();
+    private Set<String> dimensions = Sets.newHashSet();
     private String where;
     private Long limit;
     private List<ColumnOrder> order;

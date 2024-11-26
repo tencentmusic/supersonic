@@ -158,7 +158,6 @@ public class SqlQueryConverter implements QueryConverter {
                 ontologyParam.getMetrics().addAll(measures);
             } else {
                 // empty measure , fill default
-                ontologyParam.setMetrics(new ArrayList<>());
                 ontologyParam.getMetrics().add(sqlGenerateUtils.generateInternalMetricName(
                         getDefaultModel(semanticSchemaResp, ontologyParam.getDimensions())));
             }
@@ -168,8 +167,8 @@ public class SqlQueryConverter implements QueryConverter {
     }
 
     private Map<String, String> generateDerivedMetric(SqlGenerateUtils sqlGenerateUtils,
-            SemanticSchemaResp semanticSchemaResp, AggOption aggOption, List<String> metrics,
-            List<String> dimensions, Set<String> measures) {
+            SemanticSchemaResp semanticSchemaResp, AggOption aggOption, Set<String> metrics,
+            Set<String> dimensions, Set<String> measures) {
         Map<String, String> result = new HashMap<>();
         List<MetricSchemaResp> metricResps = semanticSchemaResp.getMetrics();
         List<DimSchemaResp> dimensionResps = semanticSchemaResp.getDimensions();
@@ -291,7 +290,7 @@ public class SqlQueryConverter implements QueryConverter {
         return elements.stream();
     }
 
-    private String getDefaultModel(SemanticSchemaResp semanticSchemaResp, List<String> dimensions) {
+    private String getDefaultModel(SemanticSchemaResp semanticSchemaResp, Set<String> dimensions) {
         if (!CollectionUtils.isEmpty(dimensions)) {
             Map<String, Long> modelMatchCnt = new HashMap<>();
             for (ModelResp modelResp : semanticSchemaResp.getModelResps()) {

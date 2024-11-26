@@ -58,6 +58,7 @@ public class QueryByMetricTest extends BaseTest {
 
     @Test
     public void testWithMetricAndDimensionIds() throws Exception {
+        System.setProperty("s2.test", "true");
         QueryMetricReq queryMetricReq = new QueryMetricReq();
         queryMetricReq.setDomainId(1L);
         queryMetricReq.setMetricIds(Arrays.asList(1L, 3L));

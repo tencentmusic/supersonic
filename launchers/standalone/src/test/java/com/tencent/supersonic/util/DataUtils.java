@@ -18,6 +18,11 @@ public class DataUtils {
     public static final Integer productAgentId = 1;
     public static final Integer companyAgentId = 2;
     public static final Integer singerAgentId = 3;
+
+    public static final Long productDatasetId = 1L;
+    public static final Long companyDatasetId = 2L;
+    public static final Long singerDatasettId = 3L;
+
     public static final Integer ONE_TURNS_CHAT_ID = 10;
     private static final User user_test = User.getDefaultUser();
 
@@ -92,7 +97,4 @@ public class DataUtils {
         return result;
     }
 
-    public static Long getMetricAgentView() {
-        return 1L;
-    }
 }

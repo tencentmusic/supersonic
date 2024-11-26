@@ -59,7 +59,7 @@ public class JoinRender extends Renderer {
             fieldWhere = whereFields.stream().collect(Collectors.toList());
         }
         Set<String> queryAllDimension = new HashSet<>();
-        List<String> measures = new ArrayList<>();
+        Set<String> measures = new HashSet<>();
         DataModelNode.getQueryDimensionMeasure(schema, metricCommand, queryAllDimension, measures);
         SqlNode left = null;
         TableView leftTable = null;
@@ -73,8 +73,8 @@ public class JoinRender extends Renderer {
             final DataModel dataModel = dataModels.get(i);
             final Set<String> filterDimensions = new HashSet<>();
             final Set<String> filterMetrics = new HashSet<>();
-            final List<String> queryDimension = new ArrayList<>();
-            final List<String> queryMetrics = new ArrayList<>();
+            final Set<String> queryDimension = new HashSet<>();
+            final Set<String> queryMetrics = new HashSet<>();
             SourceRender.whereDimMetric(fieldWhere, queryMetrics, queryDimension, dataModel, schema,
                     filterDimensions, filterMetrics);
             List<String> reqMetric = new ArrayList<>(metricCommand.getMetrics());
@@ -142,7 +142,7 @@ public class JoinRender extends Renderer {
     }
 
     private void doMetric(Map<String, SqlNode> innerSelect, TableView filterView,
-            List<String> queryMetrics, List<String> reqMetrics, DataModel dataModel,
+            Set<String> queryMetrics, List<String> reqMetrics, DataModel dataModel,
             Set<String> sourceMeasure, SqlValidatorScope scope, S2CalciteSchema schema,
             boolean nonAgg) throws Exception {
         String alias = Constants.JOIN_TABLE_PREFIX + dataModel.getName();
@@ -177,7 +177,7 @@ public class JoinRender extends Renderer {
     }
 
     private void doDimension(Map<String, SqlNode> innerSelect, Set<String> filterDimension,
-            List<String> queryDimension, List<String> reqDimensions, DataModel dataModel,
+            Set<String> queryDimension, List<String> reqDimensions, DataModel dataModel,
             Set<String> dimension, SqlValidatorScope scope, S2CalciteSchema schema)
             throws Exception {
         String alias = Constants.JOIN_TABLE_PREFIX + dataModel.getName();
@@ -205,7 +205,7 @@ public class JoinRender extends Renderer {
     }
 
     private boolean getMatchMetric(S2CalciteSchema schema, Set<String> sourceMeasure, String m,
-            List<String> queryMetrics) {
+            Set<String> queryMetrics) {
         Optional<Metric> metric = schema.getMetrics().stream()
                 .filter(mm -> mm.getName().equalsIgnoreCase(m)).findFirst();
         boolean isAdd = false;
@@ -226,7 +226,7 @@ public class JoinRender extends Renderer {
     }
 
     private boolean getMatchDimension(S2CalciteSchema schema, Set<String> sourceDimension,
-            DataModel dataModel, String d, List<String> queryDimension) {
+            DataModel dataModel, String d, Set<String> queryDimension) {
         String oriDimension = d;
         boolean isAdd = false;
         if (d.contains(Constants.DIMENSION_IDENTIFY)) {

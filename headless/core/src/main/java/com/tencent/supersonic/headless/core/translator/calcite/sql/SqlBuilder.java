@@ -37,12 +37,6 @@ public class SqlBuilder {
 
     public String buildOntologySql(QueryStatement queryStatement) throws Exception {
         this.ontologyQueryParam = queryStatement.getOntologyQueryParam();
-        if (ontologyQueryParam.getMetrics() == null) {
-            ontologyQueryParam.setMetrics(new ArrayList<>());
-        }
-        if (ontologyQueryParam.getDimensions() == null) {
-            ontologyQueryParam.setDimensions(new ArrayList<>());
-        }
         if (ontologyQueryParam.getLimit() == null) {
             ontologyQueryParam.setLimit(0L);
         }

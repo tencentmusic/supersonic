@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 
 @Slf4j
@@ -155,8 +156,8 @@ class HeadlessParserServiceTest {
         // HeadlessSchemaManager.update(headlessSchema, HeadlessSchemaManager.getMetrics(metric));
 
         OntologyQueryParam metricCommand = new OntologyQueryParam();
-        metricCommand.setDimensions(new ArrayList<>(Arrays.asList("sys_imp_date")));
-        metricCommand.setMetrics(new ArrayList<>(Arrays.asList("pv")));
+        metricCommand.setDimensions(new HashSet<>(Arrays.asList("sys_imp_date")));
+        metricCommand.setMetrics(new HashSet<>(Arrays.asList("pv")));
         metricCommand.setWhere(
                 "user_name = 'ab' and (sys_imp_date >= '2023-02-28' and sys_imp_date <= '2023-05-28') ");
         metricCommand.setLimit(1000L);
@@ -168,9 +169,9 @@ class HeadlessParserServiceTest {
         addDepartment(semanticSchema);
 
         OntologyQueryParam metricCommand2 = new OntologyQueryParam();
-        metricCommand2.setDimensions(new ArrayList<>(Arrays.asList("sys_imp_date",
+        metricCommand2.setDimensions(new HashSet<>(Arrays.asList("sys_imp_date",
                 "user_name__department", "user_name", "user_name__page")));
-        metricCommand2.setMetrics(new ArrayList<>(Arrays.asList("pv")));
+        metricCommand2.setMetrics(new HashSet<>(Arrays.asList("pv")));
         metricCommand2.setWhere(
                 "user_name = 'ab' and (sys_imp_date >= '2023-02-28' and sys_imp_date <= '2023-05-28') ");
         metricCommand2.setLimit(1000L);

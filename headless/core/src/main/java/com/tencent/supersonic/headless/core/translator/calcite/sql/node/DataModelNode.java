@@ -150,23 +150,23 @@ public class DataModelNode extends SemanticNode {
     }
 
     public static void getQueryDimensionMeasure(S2CalciteSchema schema,
-            OntologyQueryParam metricCommand, Set<String> queryDimension, List<String> measures) {
-        queryDimension.addAll(metricCommand.getDimensions().stream()
+            OntologyQueryParam queryParam, Set<String> queryDimensions, Set<String> queryMeasures) {
+        queryDimensions.addAll(queryParam.getDimensions().stream()
                 .map(d -> d.contains(Constants.DIMENSION_IDENTIFY)
                         ? d.split(Constants.DIMENSION_IDENTIFY)[1]
                         : d)
                 .collect(Collectors.toSet()));
         Set<String> schemaMetricName =
                 schema.getMetrics().stream().map(m -> m.getName()).collect(Collectors.toSet());
-        schema.getMetrics().stream().filter(m -> metricCommand.getMetrics().contains(m.getName()))
+        schema.getMetrics().stream().filter(m -> queryParam.getMetrics().contains(m.getName()))
                 .forEach(m -> m.getMetricTypeParams().getMeasures().stream()
-                        .forEach(mm -> measures.add(mm.getName())));
-        metricCommand.getMetrics().stream().filter(m -> !schemaMetricName.contains(m))
-                .forEach(m -> measures.add(m));
+                        .forEach(mm -> queryMeasures.add(mm.getName())));
+        queryParam.getMetrics().stream().filter(m -> !schemaMetricName.contains(m))
+                .forEach(m -> queryMeasures.add(m));
     }
 
     public static void mergeQueryFilterDimensionMeasure(S2CalciteSchema schema,
-            OntologyQueryParam metricCommand, Set<String> queryDimension, List<String> measures,
+            OntologyQueryParam metricCommand, Set<String> queryDimension, Set<String> measures,
             SqlValidatorScope scope) throws Exception {
         EngineType engineType = schema.getOntology().getDatabase().getType();
         if (Objects.nonNull(metricCommand.getWhere()) && !metricCommand.getWhere().isEmpty()) {
@@ -192,20 +192,20 @@ public class DataModelNode extends SemanticNode {
     }
 
     public static List<DataModel> getRelatedDataModels(SqlValidatorScope scope,
-            S2CalciteSchema schema, OntologyQueryParam metricCommand) throws Exception {
+            S2CalciteSchema schema, OntologyQueryParam queryParam) throws Exception {
         List<DataModel> dataModels = new ArrayList<>();
 
         // check by metric
-        List<String> measures = new ArrayList<>();
-        Set<String> queryDimension = new HashSet<>();
-        getQueryDimensionMeasure(schema, metricCommand, queryDimension, measures);
+        Set<String> queryMeasures = new HashSet<>();
+        Set<String> queryDimensions = new HashSet<>();
+        getQueryDimensionMeasure(schema, queryParam, queryDimensions, queryMeasures);
         DataModel baseDataModel = null;
         // one , match measure count
         Map<String, Integer> dataSourceMeasures = new HashMap<>();
         for (Map.Entry<String, DataModel> entry : schema.getDataModels().entrySet()) {
             Set<String> sourceMeasure = entry.getValue().getMeasures().stream()
                     .map(mm -> mm.getName()).collect(Collectors.toSet());
-            sourceMeasure.retainAll(measures);
+            sourceMeasure.retainAll(queryMeasures);
             dataSourceMeasures.put(entry.getKey(), sourceMeasure.size());
         }
         log.info("metrics: [{}]", dataSourceMeasures);
@@ -230,17 +230,17 @@ public class DataModelNode extends SemanticNode {
             filterMeasure.addAll(sourceMeasure);
             filterMeasure.addAll(dimension);
             EngineType engineType = schema.getOntology().getDatabase().getType();
-            mergeQueryFilterDimensionMeasure(schema, metricCommand, queryDimension, measures,
+            mergeQueryFilterDimensionMeasure(schema, queryParam, queryDimensions, queryMeasures,
                     scope);
-            boolean isAllMatch = checkMatch(sourceMeasure, queryDimension, measures, dimension,
-                    metricCommand, scope, engineType);
+            boolean isAllMatch = checkMatch(sourceMeasure, queryDimensions, queryMeasures,
+                    dimension, queryParam, scope, engineType);
             if (isAllMatch) {
                 log.debug("baseDataModel  match all ");
                 return dataModels;
             }
             // find all dataSource has the same identifiers
-            List<DataModel> linkDataModels = getLinkDataSourcesByJoinRelation(queryDimension,
-                    measures, baseDataModel, schema);
+            List<DataModel> linkDataModels = getLinkDataSourcesByJoinRelation(queryDimensions,
+                    queryMeasures, baseDataModel, schema);
             if (CollectionUtils.isEmpty(linkDataModels)) {
                 log.debug("baseDataModel get by identifiers ");
                 Set<String> baseIdentifiers = baseDataModel.getIdentifiers().stream()
@@ -249,24 +249,23 @@ public class DataModelNode extends SemanticNode {
                     throw new Exception(
                             "datasource error : " + baseDataModel.getName() + " miss identifier");
                 }
-                linkDataModels = getLinkDataSources(baseIdentifiers, queryDimension, measures,
+                linkDataModels = getLinkDataSources(baseIdentifiers, queryDimensions, queryMeasures,
                         baseDataModel, schema);
                 if (linkDataModels.isEmpty()) {
                     throw new Exception(String.format(
                             "not find the match datasource : dimension[%s],measure[%s]",
-                            queryDimension, measures));
+                            queryDimensions, queryMeasures));
                 }
             }
             log.debug("linkDataModels {}", linkDataModels);
             return linkDataModels;
-            // dataModels.addAll(linkDataModels);
         }
 
         return dataModels;
     }
 
     private static boolean checkMatch(Set<String> sourceMeasure, Set<String> queryDimension,
-            List<String> measures, Set<String> dimension, OntologyQueryParam metricCommand,
+            Set<String> measures, Set<String> dimension, OntologyQueryParam metricCommand,
             SqlValidatorScope scope, EngineType engineType) throws Exception {
         boolean isAllMatch = true;
         sourceMeasure.retainAll(measures);
@@ -299,7 +298,7 @@ public class DataModelNode extends SemanticNode {
     }
 
     private static List<DataModel> getLinkDataSourcesByJoinRelation(Set<String> queryDimension,
-            List<String> measures, DataModel baseDataModel, S2CalciteSchema schema) {
+            Set<String> measures, DataModel baseDataModel, S2CalciteSchema schema) {
         Set<String> linkDataSourceName = new HashSet<>();
         List<DataModel> linkDataModels = new ArrayList<>();
         Set<String> before = new HashSet<>();
@@ -383,7 +382,7 @@ public class DataModelNode extends SemanticNode {
     }
 
     private static List<DataModel> getLinkDataSources(Set<String> baseIdentifiers,
-            Set<String> queryDimension, List<String> measures, DataModel baseDataModel,
+            Set<String> queryDimension, Set<String> measures, DataModel baseDataModel,
             S2CalciteSchema schema) {
         Set<String> linkDataSourceName = new HashSet<>();
         List<DataModel> linkDataModels = new ArrayList<>();

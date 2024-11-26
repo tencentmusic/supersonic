@@ -41,14 +41,14 @@ import static com.tencent.supersonic.headless.core.translator.calcite.s2sql.Cons
 public class SourceRender extends Renderer {
 
     public static TableView renderOne(String alias, List<String> fieldWheres,
-            List<String> reqMetrics, List<String> reqDimensions, String queryWhere,
+            Set<String> reqMetrics, Set<String> reqDimensions, String queryWhere,
             DataModel datasource, SqlValidatorScope scope, S2CalciteSchema schema, boolean nonAgg)
             throws Exception {
 
         TableView dataSet = new TableView();
         TableView output = new TableView();
-        List<String> queryMetrics = new ArrayList<>(reqMetrics);
-        List<String> queryDimensions = new ArrayList<>(reqDimensions);
+        Set<String> queryMetrics = new HashSet<>(reqMetrics);
+        Set<String> queryDimensions = new HashSet<>(reqDimensions);
         List<String> fieldWhere = new ArrayList<>(fieldWheres);
         Map<String, String> extendFields = new HashMap<>();
         if (!fieldWhere.isEmpty()) {
@@ -57,9 +57,7 @@ public class SourceRender extends Renderer {
             whereDimMetric(fieldWhere, queryMetrics, queryDimensions, datasource, schema,
                     dimensions, metrics);
             queryMetrics.addAll(metrics);
-            queryMetrics = uniqList(queryMetrics);
             queryDimensions.addAll(dimensions);
-            queryDimensions = uniqList(queryDimensions);
             mergeWhere(fieldWhere, dataSet, output, queryMetrics, queryDimensions, extendFields,
                     datasource, scope, schema, nonAgg);
         }
@@ -182,8 +180,8 @@ public class SourceRender extends Renderer {
         }
     }
 
-    private static List<SqlNode> getWhereMeasure(List<String> fields, List<String> queryMetrics,
-            List<String> queryDimensions, Map<String, String> extendFields, DataModel datasource,
+    private static List<SqlNode> getWhereMeasure(List<String> fields, Set<String> queryMetrics,
+            Set<String> queryDimensions, Map<String, String> extendFields, DataModel datasource,
             SqlValidatorScope scope, S2CalciteSchema schema, boolean nonAgg) throws Exception {
         Iterator<String> iterator = fields.iterator();
         List<SqlNode> whereNode = new ArrayList<>();
@@ -224,17 +222,17 @@ public class SourceRender extends Renderer {
     }
 
     private static void mergeWhere(List<String> fields, TableView dataSet, TableView outputSet,
-            List<String> queryMetrics, List<String> queryDimensions,
-            Map<String, String> extendFields, DataModel datasource, SqlValidatorScope scope,
-            S2CalciteSchema schema, boolean nonAgg) throws Exception {
+            Set<String> queryMetrics, Set<String> queryDimensions, Map<String, String> extendFields,
+            DataModel datasource, SqlValidatorScope scope, S2CalciteSchema schema, boolean nonAgg)
+            throws Exception {
         List<SqlNode> whereNode = getWhereMeasure(fields, queryMetrics, queryDimensions,
                 extendFields, datasource, scope, schema, nonAgg);
         dataSet.getMeasure().addAll(whereNode);
         // getWhere(outputSet,fields,queryMetrics,queryDimensions,datasource,scope,schema);
     }
 
-    public static void whereDimMetric(List<String> fields, List<String> queryMetrics,
-            List<String> queryDimensions, DataModel datasource, S2CalciteSchema schema,
+    public static void whereDimMetric(List<String> fields, Set<String> queryMetrics,
+            Set<String> queryDimensions, DataModel datasource, S2CalciteSchema schema,
             Set<String> dimensions, Set<String> metrics) {
         for (String field : fields) {
             if (queryDimensions.contains(field) || queryMetrics.contains(field)) {
@@ -310,7 +308,7 @@ public class SourceRender extends Renderer {
         return false;
     }
 
-    private static void addTimeDimension(DataModel dataModel, List<String> queryDimension) {
+    private static void addTimeDimension(DataModel dataModel, Set<String> queryDimension) {
         if (Materialization.TimePartType.ZIPPER.equals(dataModel.getTimePartType())) {
             Optional<Dimension> startTimeOp = dataModel.getDimensions().stream()
                     .filter(d -> Constants.DIMENSION_TYPE_TIME.equalsIgnoreCase(d.getType()))

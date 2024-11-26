@@ -383,9 +383,9 @@ public class S2VisitsDemo extends S2BaseDemo {
         metricReq.setDescription("访问的用户个数");
         metricReq.setAlias("UV,访问人数");
         MetricDefineByFieldParams metricTypeParams = new MetricDefineByFieldParams();
-        metricTypeParams.setExpr("count(distinct user_id)");
+        metricTypeParams.setExpr("count(distinct user_name)");
         List<FieldParam> fieldParams = new ArrayList<>();
-        fieldParams.add(new FieldParam("user_id"));
+        fieldParams.add(new FieldParam("user_name"));
         metricTypeParams.setFields(fieldParams);
         metricReq.setMetricDefineByFieldParams(metricTypeParams);
         metricReq.setMetricDefineType(MetricDefineType.FIELD);

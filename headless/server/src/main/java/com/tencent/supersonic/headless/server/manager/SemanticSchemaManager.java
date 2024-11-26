@@ -2,33 +2,14 @@ package com.tencent.supersonic.headless.server.manager;
 
 import com.tencent.supersonic.common.pojo.ModelRela;
 import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
-import com.tencent.supersonic.headless.api.pojo.Field;
 import com.tencent.supersonic.headless.api.pojo.enums.TagDefineType;
 import com.tencent.supersonic.headless.api.pojo.response.DatabaseResp;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticSchemaResp;
 import com.tencent.supersonic.headless.api.pojo.response.TagResp;
-import com.tencent.supersonic.headless.core.translator.calcite.s2sql.Constants;
-import com.tencent.supersonic.headless.core.translator.calcite.s2sql.DataModel;
-import com.tencent.supersonic.headless.core.translator.calcite.s2sql.DataType;
-import com.tencent.supersonic.headless.core.translator.calcite.s2sql.Dimension;
-import com.tencent.supersonic.headless.core.translator.calcite.s2sql.DimensionTimeTypeParams;
-import com.tencent.supersonic.headless.core.translator.calcite.s2sql.Identify;
-import com.tencent.supersonic.headless.core.translator.calcite.s2sql.JoinRelation;
+import com.tencent.supersonic.headless.core.translator.calcite.s2sql.*;
 import com.tencent.supersonic.headless.core.translator.calcite.s2sql.Materialization.TimePartType;
-import com.tencent.supersonic.headless.core.translator.calcite.s2sql.Measure;
-import com.tencent.supersonic.headless.core.translator.calcite.s2sql.Metric;
-import com.tencent.supersonic.headless.core.translator.calcite.s2sql.MetricTypeParams;
-import com.tencent.supersonic.headless.core.translator.calcite.s2sql.Ontology;
 import com.tencent.supersonic.headless.core.translator.calcite.sql.S2CalciteSchema;
-import com.tencent.supersonic.headless.server.pojo.yaml.DataModelYamlTpl;
-import com.tencent.supersonic.headless.server.pojo.yaml.DimensionTimeTypeParamsTpl;
-import com.tencent.supersonic.headless.server.pojo.yaml.DimensionYamlTpl;
-import com.tencent.supersonic.headless.server.pojo.yaml.FieldParamYamlTpl;
-import com.tencent.supersonic.headless.server.pojo.yaml.IdentifyYamlTpl;
-import com.tencent.supersonic.headless.server.pojo.yaml.MeasureYamlTpl;
-import com.tencent.supersonic.headless.server.pojo.yaml.MetricParamYamlTpl;
-import com.tencent.supersonic.headless.server.pojo.yaml.MetricTypeParamsYamlTpl;
-import com.tencent.supersonic.headless.server.pojo.yaml.MetricYamlTpl;
+import com.tencent.supersonic.headless.server.pojo.yaml.*;
 import com.tencent.supersonic.headless.server.service.SchemaService;
 import com.tencent.supersonic.headless.server.utils.DatabaseConverter;
 import lombok.extern.slf4j.Slf4j;
@@ -36,15 +17,8 @@ import org.apache.commons.lang3.tuple.Triple;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -183,16 +157,6 @@ public class SemanticSchemaManager {
         dataModel.setAggTime(getDataModelAggTime(dataModel.getDimensions()));
         if (Objects.nonNull(d.getModelSourceTypeEnum())) {
             dataModel.setTimePartType(TimePartType.of(d.getModelSourceTypeEnum().name()));
-        }
-        if (Objects.nonNull(d.getFields()) && !CollectionUtils.isEmpty(d.getFields())) {
-            Set<String> measures = dataModel.getMeasures().stream().map(mm -> mm.getName())
-                    .collect(Collectors.toSet());
-            for (Field f : d.getFields()) {
-                if (!measures.contains(f.getFieldName())) {
-                    dataModel.getMeasures().add(Measure.builder().expr(f.getFieldName())
-                            .name(f.getFieldName()).agg("").build());
-                }
-            }
         }
         return dataModel;
     }
