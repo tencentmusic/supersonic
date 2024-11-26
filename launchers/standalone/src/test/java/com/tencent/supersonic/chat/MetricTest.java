@@ -75,7 +75,7 @@ public class MetricTest extends BaseTest {
     @Test
     @SetSystemProperty(key = "s2.test", value = "true")
     public void testMetricGroupBy() throws Exception {
-        QueryResult actualResult = submitNewChat("近7天超音数各部门的访问次数", DataUtils.productAgentId);
+        QueryResult actualResult = submitNewChat("近7天超音数各部门的访问次数和停留时长", DataUtils.productAgentId);
 
         QueryResult expectedResult = new QueryResult();
         SemanticParseInfo expectedParseInfo = new SemanticParseInfo();
@@ -85,6 +85,7 @@ public class MetricTest extends BaseTest {
         expectedParseInfo.setAggType(NONE);
 
         expectedParseInfo.getMetrics().add(DataUtils.getSchemaElement("访问次数"));
+        expectedParseInfo.getMetrics().add(DataUtils.getSchemaElement("停留时长"));
         expectedParseInfo.getDimensions().add(DataUtils.getSchemaElement("部门"));
 
         expectedParseInfo.setDateInfo(DataUtils.getDateConf(DateConf.DateMode.BETWEEN, 7,

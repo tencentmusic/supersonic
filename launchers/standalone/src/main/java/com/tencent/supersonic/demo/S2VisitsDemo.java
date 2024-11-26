@@ -79,8 +79,8 @@ public class S2VisitsDemo extends S2BaseDemo {
             ModelResp userModel = addModel_1(s2Domain, demoDatabase);
             ModelResp pvUvModel = addModel_2(s2Domain, demoDatabase);
             ModelResp stayTimeModel = addModel_3(s2Domain, demoDatabase);
-            addModelRela(s2Domain, userModel, pvUvModel, "user_name");
-            addModelRela(s2Domain, userModel, stayTimeModel, "user_name");
+            addModelRela(s2Domain, pvUvModel, userModel, "user_name");
+            addModelRela(s2Domain, stayTimeModel, userModel, "user_name");
 
             // create metrics and dimensions
             DimensionResp departmentDimension = getDimension("department", userModel);
