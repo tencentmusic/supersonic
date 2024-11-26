@@ -14,15 +14,13 @@ import java.util.List;
 import java.util.Objects;
 
 @Slf4j
-@Component("SqlVariableParseConverter")
-public class SqlVariableParseConverter implements QueryConverter {
+@Component("SqlVariableConverter")
+public class SqlVariableConverter implements QueryConverter {
 
     @Override
     public boolean accept(QueryStatement queryStatement) {
-        if (Objects.isNull(queryStatement.getQueryParam())) {
-            return false;
-        }
-        return true;
+        return Objects.nonNull(queryStatement.getStructQueryParam())
+                && !queryStatement.getIsS2SQL();
     }
 
     @Override
@@ -38,7 +36,7 @@ public class SqlVariableParseConverter implements QueryConverter {
                 String sqlParsed =
                         SqlVariableParseUtils.parse(modelResp.getModelDetail().getSqlQuery(),
                                 modelResp.getModelDetail().getSqlVariables(),
-                                queryStatement.getQueryParam().getParams());
+                                queryStatement.getStructQueryParam().getParams());
                 DataModel dataModel =
                         queryStatement.getOntology().getDataModelMap().get(modelResp.getBizName());
                 dataModel.setSqlQuery(sqlParsed);

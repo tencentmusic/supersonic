@@ -1,7 +1,6 @@
 package com.tencent.supersonic.headless.core.translator.calcite.sql.render;
 
 import com.tencent.supersonic.common.pojo.enums.EngineType;
-import com.tencent.supersonic.headless.core.pojo.MetricQueryParam;
 import com.tencent.supersonic.headless.core.translator.calcite.s2sql.Constants;
 import com.tencent.supersonic.headless.core.translator.calcite.s2sql.DataModel;
 import com.tencent.supersonic.headless.core.translator.calcite.s2sql.Dimension;
@@ -9,6 +8,7 @@ import com.tencent.supersonic.headless.core.translator.calcite.s2sql.Identify;
 import com.tencent.supersonic.headless.core.translator.calcite.s2sql.JoinRelation;
 import com.tencent.supersonic.headless.core.translator.calcite.s2sql.Materialization;
 import com.tencent.supersonic.headless.core.translator.calcite.s2sql.Metric;
+import com.tencent.supersonic.headless.core.translator.calcite.s2sql.OntologyQueryParam;
 import com.tencent.supersonic.headless.core.translator.calcite.sql.S2CalciteSchema;
 import com.tencent.supersonic.headless.core.translator.calcite.sql.TableView;
 import com.tencent.supersonic.headless.core.translator.calcite.sql.node.AggFunctionNode;
@@ -47,10 +47,10 @@ import java.util.stream.Collectors;
 public class JoinRender extends Renderer {
 
     @Override
-    public void render(MetricQueryParam metricCommand, List<DataModel> dataModels,
+    public void render(OntologyQueryParam metricCommand, List<DataModel> dataModels,
             SqlValidatorScope scope, S2CalciteSchema schema, boolean nonAgg) throws Exception {
         String queryWhere = metricCommand.getWhere();
-        EngineType engineType = EngineType.fromString(schema.getOntology().getDatabase().getType());
+        EngineType engineType = schema.getOntology().getDatabase().getType();
         Set<String> whereFields = new HashSet<>();
         List<String> fieldWhere = new ArrayList<>();
         if (queryWhere != null && !queryWhere.isEmpty()) {
@@ -59,7 +59,7 @@ public class JoinRender extends Renderer {
             fieldWhere = whereFields.stream().collect(Collectors.toList());
         }
         Set<String> queryAllDimension = new HashSet<>();
-        List<String> measures = new ArrayList<>();
+        Set<String> measures = new HashSet<>();
         DataModelNode.getQueryDimensionMeasure(schema, metricCommand, queryAllDimension, measures);
         SqlNode left = null;
         TableView leftTable = null;
@@ -73,8 +73,8 @@ public class JoinRender extends Renderer {
             final DataModel dataModel = dataModels.get(i);
             final Set<String> filterDimensions = new HashSet<>();
             final Set<String> filterMetrics = new HashSet<>();
-            final List<String> queryDimension = new ArrayList<>();
-            final List<String> queryMetrics = new ArrayList<>();
+            final Set<String> queryDimension = new HashSet<>();
+            final Set<String> queryMetrics = new HashSet<>();
             SourceRender.whereDimMetric(fieldWhere, queryMetrics, queryDimension, dataModel, schema,
                     filterDimensions, filterMetrics);
             List<String> reqMetric = new ArrayList<>(metricCommand.getMetrics());
@@ -142,11 +142,11 @@ public class JoinRender extends Renderer {
     }
 
     private void doMetric(Map<String, SqlNode> innerSelect, TableView filterView,
-            List<String> queryMetrics, List<String> reqMetrics, DataModel dataModel,
+            Set<String> queryMetrics, List<String> reqMetrics, DataModel dataModel,
             Set<String> sourceMeasure, SqlValidatorScope scope, S2CalciteSchema schema,
             boolean nonAgg) throws Exception {
         String alias = Constants.JOIN_TABLE_PREFIX + dataModel.getName();
-        EngineType engineType = EngineType.fromString(schema.getOntology().getDatabase().getType());
+        EngineType engineType = schema.getOntology().getDatabase().getType();
         for (String m : reqMetrics) {
             if (getMatchMetric(schema, sourceMeasure, m, queryMetrics)) {
                 MetricNode metricNode = buildMetricNode(m, dataModel, scope, schema, nonAgg, alias);
@@ -177,11 +177,11 @@ public class JoinRender extends Renderer {
     }
 
     private void doDimension(Map<String, SqlNode> innerSelect, Set<String> filterDimension,
-            List<String> queryDimension, List<String> reqDimensions, DataModel dataModel,
+            Set<String> queryDimension, List<String> reqDimensions, DataModel dataModel,
             Set<String> dimension, SqlValidatorScope scope, S2CalciteSchema schema)
             throws Exception {
         String alias = Constants.JOIN_TABLE_PREFIX + dataModel.getName();
-        EngineType engineType = EngineType.fromString(schema.getOntology().getDatabase().getType());
+        EngineType engineType = schema.getOntology().getDatabase().getType();
         for (String d : reqDimensions) {
             if (getMatchDimension(schema, dimension, dataModel, d, queryDimension)) {
                 if (d.contains(Constants.DIMENSION_IDENTIFY)) {
@@ -205,7 +205,7 @@ public class JoinRender extends Renderer {
     }
 
     private boolean getMatchMetric(S2CalciteSchema schema, Set<String> sourceMeasure, String m,
-            List<String> queryMetrics) {
+            Set<String> queryMetrics) {
         Optional<Metric> metric = schema.getMetrics().stream()
                 .filter(mm -> mm.getName().equalsIgnoreCase(m)).findFirst();
         boolean isAdd = false;
@@ -226,7 +226,7 @@ public class JoinRender extends Renderer {
     }
 
     private boolean getMatchDimension(S2CalciteSchema schema, Set<String> sourceDimension,
-            DataModel dataModel, String d, List<String> queryDimension) {
+            DataModel dataModel, String d, Set<String> queryDimension) {
         String oriDimension = d;
         boolean isAdd = false;
         if (d.contains(Constants.DIMENSION_IDENTIFY)) {
@@ -261,7 +261,7 @@ public class JoinRender extends Renderer {
     private SqlNode buildJoin(SqlNode left, TableView leftTable, TableView tableView,
             Map<String, String> before, DataModel dataModel, S2CalciteSchema schema,
             SqlValidatorScope scope) throws Exception {
-        EngineType engineType = EngineType.fromString(schema.getOntology().getDatabase().getType());
+        EngineType engineType = schema.getOntology().getDatabase().getType();
         SqlNode condition =
                 getCondition(leftTable, tableView, dataModel, schema, scope, engineType);
         SqlLiteral sqlLiteral = SemanticNode.getJoinSqlLiteral("");
@@ -454,8 +454,7 @@ public class JoinRender extends Renderer {
                 endTime = zipper.getAlias() + "." + endTimeOp.get().getName();
                 dateTime = partMetric.getAlias() + "." + partTime.get().getName();
             }
-            EngineType engineType =
-                    EngineType.fromString(schema.getOntology().getDatabase().getType());
+            EngineType engineType = schema.getOntology().getDatabase().getType();
             ArrayList<SqlNode> operandList =
                     new ArrayList<>(Arrays.asList(SemanticNode.parse(endTime, scope, engineType),
                             SemanticNode.parse(dateTime, scope, engineType)));

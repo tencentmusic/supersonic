@@ -2,6 +2,7 @@ package com.tencent.supersonic.headless.core.pojo;
 
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.common.pojo.RecordInfo;
+import com.tencent.supersonic.common.pojo.enums.EngineType;
 import com.tencent.supersonic.common.util.AESEncryptionUtil;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -36,7 +37,7 @@ public class Database extends RecordInfo {
 
     private String schema;
     /** mysql,clickhouse */
-    private String type;
+    private EngineType type;
 
     private List<String> admins = Lists.newArrayList();
 

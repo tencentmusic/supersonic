@@ -9,6 +9,7 @@ import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.api.pojo.request.QueryFilter;
 import com.tencent.supersonic.headless.chat.query.rule.metric.MetricFilterQuery;
 import com.tencent.supersonic.headless.chat.query.rule.metric.MetricGroupByQuery;
+import com.tencent.supersonic.headless.chat.query.rule.metric.MetricModelQuery;
 import com.tencent.supersonic.headless.chat.query.rule.metric.MetricTopNQuery;
 import com.tencent.supersonic.util.DataUtils;
 import org.junit.jupiter.api.Order;
@@ -28,13 +29,28 @@ import static com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum.SUM;
 public class MetricTest extends BaseTest {
 
     @Test
-    public void testMetric() throws Exception {
-        QueryResult actualResult = submitNewChat("超音数 访问次数", DataUtils.metricAgentId);
+    public void testMetricModel() throws Exception {
+        QueryResult actualResult = submitNewChat("超音数 访问次数", DataUtils.productAgentId);
+
+        QueryResult expectedResult = new QueryResult();
+        SemanticParseInfo expectedParseInfo = new SemanticParseInfo();
+        expectedResult.setChatContext(expectedParseInfo);
+
+        expectedResult.setQueryMode(MetricModelQuery.QUERY_MODE);
+        expectedParseInfo.setAggType(NONE);
+        expectedParseInfo.getMetrics().add(DataUtils.getSchemaElement("访问次数"));
+
+        expectedParseInfo.setDateInfo(
+                DataUtils.getDateConf(DateConf.DateMode.BETWEEN, unit, period, startDay, endDay));
+        expectedParseInfo.setQueryType(QueryType.AGGREGATE);
+
+        assertQueryResult(expectedResult, actualResult);
+        assert actualResult.getQueryResults().size() == 1;
     }
 
     @Test
     public void testMetricFilter() throws Exception {
-        QueryResult actualResult = submitNewChat("alice的访问次数", DataUtils.metricAgentId);
+        QueryResult actualResult = submitNewChat("alice的访问次数", DataUtils.productAgentId);
 
         QueryResult expectedResult = new QueryResult();
         SemanticParseInfo expectedParseInfo = new SemanticParseInfo();
@@ -57,7 +73,8 @@ public class MetricTest extends BaseTest {
 
     @Test
     public void testMetricGroupBy() throws Exception {
-        QueryResult actualResult = submitNewChat("近7天超音数各部门的访问次数", DataUtils.metricAgentId);
+        System.setProperty("s2.test", "true");
+        QueryResult actualResult = submitNewChat("近7天超音数各部门的访问次数", DataUtils.productAgentId);
 
         QueryResult expectedResult = new QueryResult();
         SemanticParseInfo expectedParseInfo = new SemanticParseInfo();
@@ -79,7 +96,7 @@ public class MetricTest extends BaseTest {
 
     @Test
     public void testMetricFilterCompare() throws Exception {
-        QueryResult actualResult = submitNewChat("对比alice和lucy的访问次数", DataUtils.metricAgentId);
+        QueryResult actualResult = submitNewChat("对比alice和lucy的访问次数", DataUtils.productAgentId);
 
         QueryResult expectedResult = new QueryResult();
         SemanticParseInfo expectedParseInfo = new SemanticParseInfo();
@@ -107,7 +124,7 @@ public class MetricTest extends BaseTest {
     @Test
     @Order(3)
     public void testMetricTopN() throws Exception {
-        QueryResult actualResult = submitNewChat("近3天访问次数最多的用户", DataUtils.metricAgentId);
+        QueryResult actualResult = submitNewChat("近3天访问次数最多的用户", DataUtils.productAgentId);
 
         QueryResult expectedResult = new QueryResult();
         SemanticParseInfo expectedParseInfo = new SemanticParseInfo();
@@ -128,7 +145,7 @@ public class MetricTest extends BaseTest {
 
     @Test
     public void testMetricGroupBySum() throws Exception {
-        QueryResult actualResult = submitNewChat("近7天超音数各部门的访问次数总和", DataUtils.metricAgentId);
+        QueryResult actualResult = submitNewChat("近7天超音数各部门的访问次数总和", DataUtils.productAgentId);
         QueryResult expectedResult = new QueryResult();
         SemanticParseInfo expectedParseInfo = new SemanticParseInfo();
         expectedResult.setChatContext(expectedParseInfo);
@@ -154,7 +171,7 @@ public class MetricTest extends BaseTest {
         String dateStr = textFormat.format(format.parse(startDay));
 
         QueryResult actualResult =
-                submitNewChat(String.format("alice在%s的访问次数", dateStr), DataUtils.metricAgentId);
+                submitNewChat(String.format("alice在%s的访问次数", dateStr), DataUtils.productAgentId);
 
         QueryResult expectedResult = new QueryResult();
         SemanticParseInfo expectedParseInfo = new SemanticParseInfo();

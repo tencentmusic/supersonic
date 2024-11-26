@@ -1,12 +1,12 @@
 package com.tencent.supersonic.headless.core.translator.calcite.sql.render;
 
 import com.tencent.supersonic.common.pojo.enums.EngineType;
-import com.tencent.supersonic.headless.core.pojo.MetricQueryParam;
 import com.tencent.supersonic.headless.core.translator.calcite.s2sql.DataModel;
 import com.tencent.supersonic.headless.core.translator.calcite.s2sql.Dimension;
 import com.tencent.supersonic.headless.core.translator.calcite.s2sql.Identify;
 import com.tencent.supersonic.headless.core.translator.calcite.s2sql.Measure;
 import com.tencent.supersonic.headless.core.translator.calcite.s2sql.Metric;
+import com.tencent.supersonic.headless.core.translator.calcite.s2sql.OntologyQueryParam;
 import com.tencent.supersonic.headless.core.translator.calcite.sql.S2CalciteSchema;
 import com.tencent.supersonic.headless.core.translator.calcite.sql.TableView;
 import com.tencent.supersonic.headless.core.translator.calcite.sql.node.MeasureNode;
@@ -114,6 +114,6 @@ public abstract class Renderer {
         return SemanticNode.buildAs(alias, tableView.build());
     }
 
-    public abstract void render(MetricQueryParam metricCommand, List<DataModel> dataModels,
+    public abstract void render(OntologyQueryParam metricCommand, List<DataModel> dataModels,
             SqlValidatorScope scope, S2CalciteSchema schema, boolean nonAgg) throws Exception;
 }

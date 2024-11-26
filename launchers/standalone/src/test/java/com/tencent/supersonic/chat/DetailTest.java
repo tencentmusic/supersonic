@@ -20,7 +20,7 @@ public class DetailTest extends BaseTest {
 
     @Test
     public void test_detail_dimension() throws Exception {
-        QueryResult actualResult = submitNewChat("周杰伦流派和代表作", DataUtils.tagAgentId);
+        QueryResult actualResult = submitNewChat("周杰伦流派和代表作", DataUtils.singerAgentId);
 
         QueryResult expectedResult = new QueryResult();
         SemanticParseInfo expectedParseInfo = new SemanticParseInfo();
@@ -31,7 +31,7 @@ public class DetailTest extends BaseTest {
         expectedParseInfo.setAggType(AggregateTypeEnum.NONE);
 
         QueryFilter dimensionFilter =
-                DataUtils.getFilter("singer_name", FilterOperatorEnum.EQUALS, "周杰伦", "歌手名", 8L);
+                DataUtils.getFilter("singer_name", FilterOperatorEnum.EQUALS, "周杰伦", "歌手名", 17L);
         expectedParseInfo.getDimensionFilters().add(dimensionFilter);
 
         expectedParseInfo.getDimensions()
@@ -43,7 +43,7 @@ public class DetailTest extends BaseTest {
 
     @Test
     public void test_detail_filter() throws Exception {
-        QueryResult actualResult = submitNewChat("国风歌手", DataUtils.tagAgentId);
+        QueryResult actualResult = submitNewChat("国风歌手", DataUtils.singerAgentId);
 
         QueryResult expectedResult = new QueryResult();
         SemanticParseInfo expectedParseInfo = new SemanticParseInfo();
