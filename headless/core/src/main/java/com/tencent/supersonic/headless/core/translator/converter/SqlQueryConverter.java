@@ -34,31 +34,24 @@ public class SqlQueryConverter implements QueryConverter {
 
     @Override
     public boolean accept(QueryStatement queryStatement) {
-        if (Objects.nonNull(queryStatement.getSqlQueryParam()) && queryStatement.getIsS2SQL()) {
-            return true;
-        }
-        return false;
+        return Objects.nonNull(queryStatement.getSqlQueryParam()) && queryStatement.getIsS2SQL();
     }
 
     @Override
     public void convert(QueryStatement queryStatement) throws Exception {
-        SqlGenerateUtils sqlGenerateUtils = ContextUtils.getBean(SqlGenerateUtils.class);
         convertNameToBizName(queryStatement);
         rewriteFunction(queryStatement);
-        String reqSql = queryStatement.getSqlQueryParam().getSql();
-        String tableName = SqlSelectHelper.getTableName(reqSql);
+        rewriteOrderBy(queryStatement);
+
+        // fill sqlQuery
+        SemanticSchemaResp semanticSchemaResp = queryStatement.getSemanticSchemaResp();
+        SqlQueryParam sqlQueryParam = queryStatement.getSqlQueryParam();
+        String tableName = SqlSelectHelper.getTableName(sqlQueryParam.getSql());
         if (StringUtils.isEmpty(tableName)) {
             return;
         }
-
-        // replace order by field with the select sequence number
-        queryStatement.setSql(SqlReplaceHelper.replaceAggAliasOrderbyField(reqSql));
-        log.debug("replaceOrderAggSameAlias {} -> {}", reqSql, queryStatement.getSql());
-
-        SemanticSchemaResp semanticSchemaResp = queryStatement.getSemanticSchemaResp();
-        // fill dataSetQuery
-        SqlQueryParam sqlQueryParam = queryStatement.getSqlQueryParam();
         sqlQueryParam.setTable(tableName.toLowerCase());
+        SqlGenerateUtils sqlGenerateUtils = ContextUtils.getBean(SqlGenerateUtils.class);
         if (!sqlGenerateUtils.isSupportWith(
                 EngineType.fromString(semanticSchemaResp.getDatabaseResp().getType().toUpperCase()),
                 semanticSchemaResp.getDatabaseResp().getVersion())) {
@@ -67,27 +60,26 @@ public class SqlQueryConverter implements QueryConverter {
         }
 
         // build ontologyQuery
-        List<String> allFields = SqlSelectHelper.getAllSelectFields(queryStatement.getSql());
+        List<String> allFields = SqlSelectHelper.getAllSelectFields(sqlQueryParam.getSql());
         List<MetricSchemaResp> metricSchemas = getMetrics(semanticSchemaResp, allFields);
         List<String> metrics =
                 metricSchemas.stream().map(SchemaItem::getBizName).collect(Collectors.toList());
-        AggOption aggOption = getAggOption(queryStatement, metricSchemas);
+        AggOption aggOption = getAggOption(sqlQueryParam.getSql(), metricSchemas);
         Set<String> dimensions = getDimensions(semanticSchemaResp, allFields);
         OntologyQueryParam ontologyQueryParam = new OntologyQueryParam();
         ontologyQueryParam.getMetrics().addAll(metrics);
         ontologyQueryParam.getDimensions().addAll(dimensions);
         ontologyQueryParam.setAggOption(aggOption);
         ontologyQueryParam.setNativeQuery(!AggOption.isAgg(aggOption));
-
-        log.info("parse sqlQuery [{}] ", sqlQueryParam);
         queryStatement.setOntologyQueryParam(ontologyQueryParam);
-        queryStatement.setSql(sqlQueryParam.getSql());
+
         generateDerivedMetric(sqlGenerateUtils, queryStatement);
+
+        queryStatement.setSql(sqlQueryParam.getSql());
+        log.info("parse sqlQuery [{}] ", sqlQueryParam);
     }
 
-    private AggOption getAggOption(QueryStatement queryStatement,
-            List<MetricSchemaResp> metricSchemas) {
-        String sql = queryStatement.getSql();
+    private AggOption getAggOption(String sql, List<MetricSchemaResp> metricSchemas) {
         if (SqlSelectFunctionHelper.hasAggregateFunction(sql)) {
             return AggOption.AGGREGATION;
         }
@@ -148,30 +140,31 @@ public class SqlQueryConverter implements QueryConverter {
     private void generateDerivedMetric(SqlGenerateUtils sqlGenerateUtils,
             QueryStatement queryStatement) {
         SemanticSchemaResp semanticSchemaResp = queryStatement.getSemanticSchemaResp();
-        SqlQueryParam dsParam = queryStatement.getSqlQueryParam();
-        OntologyQueryParam ontology = queryStatement.getOntologyQueryParam();
-        String sql = dsParam.getSql();
+        SqlQueryParam sqlParam = queryStatement.getSqlQueryParam();
+        OntologyQueryParam ontologyParam = queryStatement.getOntologyQueryParam();
+        String sql = sqlParam.getSql();
 
         Set<String> measures = new HashSet<>();
         Map<String, String> replaces = generateDerivedMetric(sqlGenerateUtils, semanticSchemaResp,
-                ontology.getAggOption(), ontology.getMetrics(), ontology.getDimensions(), measures);
+                ontologyParam.getAggOption(), ontologyParam.getMetrics(),
+                ontologyParam.getDimensions(), measures);
 
         if (!CollectionUtils.isEmpty(replaces)) {
             // metricTable sql use measures replace metric
             sql = SqlReplaceHelper.replaceSqlByExpression(sql, replaces);
-            ontology.setAggOption(AggOption.NATIVE);
+            ontologyParam.setAggOption(AggOption.NATIVE);
             // metricTable use measures replace metric
             if (!CollectionUtils.isEmpty(measures)) {
-                ontology.getMetrics().addAll(measures);
+                ontologyParam.getMetrics().addAll(measures);
             } else {
                 // empty measure , fill default
-                ontology.setMetrics(new ArrayList<>());
-                ontology.getMetrics().add(sqlGenerateUtils.generateInternalMetricName(
-                        getDefaultModel(semanticSchemaResp, ontology.getDimensions())));
+                ontologyParam.setMetrics(new ArrayList<>());
+                ontologyParam.getMetrics().add(sqlGenerateUtils.generateInternalMetricName(
+                        getDefaultModel(semanticSchemaResp, ontologyParam.getDimensions())));
             }
         }
 
-        dsParam.setSql(sql);
+        sqlParam.setSql(sql);
     }
 
     private Map<String, String> generateDerivedMetric(SqlGenerateUtils sqlGenerateUtils,
@@ -245,6 +238,13 @@ public class SqlQueryConverter implements QueryConverter {
         queryStatement.getSqlQueryParam().setSql(sql);
     }
 
+    private void rewriteOrderBy(QueryStatement queryStatement) {
+        // replace order by field with the select sequence number
+        String sql = queryStatement.getSqlQueryParam().getSql();
+        String newSql = SqlReplaceHelper.replaceAggAliasOrderbyField(sql);
+        log.debug("replaceOrderAggSameAlias {} -> {}", sql, newSql);
+        queryStatement.getSqlQueryParam().setSql(newSql);
+    }
 
     private void rewriteFunction(QueryStatement queryStatement) {
         SemanticSchemaResp semanticSchemaResp = queryStatement.getSemanticSchemaResp();
@@ -300,7 +300,7 @@ public class SqlQueryConverter implements QueryConverter {
             }
             return modelMatchCnt.entrySet().stream()
                     .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
-                    .map(m -> m.getKey()).findFirst().orElse("");
+                    .map(Map.Entry::getKey).findFirst().orElse("");
         }
         return semanticSchemaResp.getModelResps().get(0).getBizName();
     }

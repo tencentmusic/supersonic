@@ -109,7 +109,7 @@ public class SourceRender extends Renderer {
             S2CalciteSchema schema, boolean nonAgg, Map<String, String> extendFields,
             TableView dataSet, TableView output, SqlValidatorScope scope) throws Exception {
         List<Dimension> dimensionList = schema.getDimensions().get(datasource.getName());
-        EngineType engineType = EngineType.fromString(schema.getOntology().getDatabase().getType());
+        EngineType engineType = schema.getOntology().getDatabase().getType();
         boolean isAdd = false;
         if (!CollectionUtils.isEmpty(dimensionList)) {
             for (Dimension dim : dimensionList) {
@@ -187,7 +187,7 @@ public class SourceRender extends Renderer {
             SqlValidatorScope scope, S2CalciteSchema schema, boolean nonAgg) throws Exception {
         Iterator<String> iterator = fields.iterator();
         List<SqlNode> whereNode = new ArrayList<>();
-        EngineType engineType = EngineType.fromString(schema.getOntology().getDatabase().getType());
+        EngineType engineType = schema.getOntology().getDatabase().getType();
         while (iterator.hasNext()) {
             String cur = iterator.next();
             if (queryDimensions.contains(cur) || queryMetrics.contains(cur)) {
@@ -341,7 +341,7 @@ public class SourceRender extends Renderer {
         String queryWhere = ontologyQueryParam.getWhere();
         Set<String> whereFields = new HashSet<>();
         List<String> fieldWhere = new ArrayList<>();
-        EngineType engineType = EngineType.fromString(schema.getOntology().getDatabase().getType());
+        EngineType engineType = schema.getOntology().getDatabase().getType();
         if (queryWhere != null && !queryWhere.isEmpty()) {
             SqlNode sqlNode = SemanticNode.parse(queryWhere, scope, engineType);
             FilterNode.getFilterField(sqlNode, whereFields);

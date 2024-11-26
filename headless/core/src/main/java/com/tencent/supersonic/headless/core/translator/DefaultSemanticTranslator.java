@@ -50,42 +50,40 @@ public class DefaultSemanticTranslator implements SemanticTranslator {
             }
         } catch (Exception e) {
             queryStatement.setErrMsg(e.getMessage());
-            log.error("Failed to translate semantic query [{}]", e);
+            log.error("Failed to translate semantic query [{}]", e.getMessage(), e);
         }
     }
 
     private void doOntologyParse(QueryStatement queryStatement) throws Exception {
         OntologyQueryParam ontologyQueryParam = queryStatement.getOntologyQueryParam();
-        SqlQueryParam sqlQueryParam = queryStatement.getSqlQueryParam();
         log.info("parse with ontology: [{}]", ontologyQueryParam);
         ComponentFactory.getQueryParser().parse(queryStatement);
-        String ontologyQueryTable = sqlQueryParam.getTable();
-        String ontologyQuerySql = sqlQueryParam.getSql();
-        String ontologySql = queryStatement.getSql();
-
         if (!queryStatement.isOk()) {
             throw new Exception(String.format("parse ontology table [%s] error [%s]",
-                    ontologyQueryTable, queryStatement.getErrMsg()));
+                    queryStatement.getSqlQueryParam().getTable(), queryStatement.getErrMsg()));
         }
 
-        List<Pair<String, String>> tables = new ArrayList<>();
+        SqlQueryParam sqlQueryParam = queryStatement.getSqlQueryParam();
+        String ontologyQuerySql = sqlQueryParam.getSql();
+        String ontologyInnerTable = sqlQueryParam.getTable();
+        String ontologyInnerSql = queryStatement.getSql();
 
-        tables.add(Pair.of(ontologyQueryTable, ontologySql));
+        List<Pair<String, String>> tables = new ArrayList<>();
+        tables.add(Pair.of(ontologyInnerTable, ontologyInnerSql));
         if (sqlQueryParam.isSupportWith()) {
-            EngineType engineType =
-                    EngineType.fromString(queryStatement.getOntology().getDatabase().getType());
+            EngineType engineType = queryStatement.getOntology().getDatabase().getType();
             if (!SqlMergeWithUtils.hasWith(engineType, ontologyQuerySql)) {
                 String withSql = "with " + tables.stream()
                         .map(t -> String.format("%s as (%s)", t.getLeft(), t.getRight()))
                         .collect(Collectors.joining(",")) + "\n" + ontologyQuerySql;
                 queryStatement.setSql(withSql);
             } else {
-                List<String> parentTableList =
+                List<String> withTableList =
                         tables.stream().map(Pair::getLeft).collect(Collectors.toList());
-                List<String> parentSqlList =
+                List<String> withSqlList =
                         tables.stream().map(Pair::getRight).collect(Collectors.toList());
                 String mergeSql = SqlMergeWithUtils.mergeWith(engineType, ontologyQuerySql,
-                        parentSqlList, parentTableList);
+                        withSqlList, withTableList);
                 queryStatement.setSql(mergeSql);
             }
         } else {

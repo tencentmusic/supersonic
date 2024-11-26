@@ -62,8 +62,7 @@ public class MetricRatioConverter implements QueryConverter {
     @Override
     public void convert(QueryStatement queryStatement) throws Exception {
         Database database = queryStatement.getOntology().getDatabase();
-        generateRatioSql(queryStatement, EngineType.fromString(database.getType().toUpperCase()),
-                database.getVersion());
+        generateRatioSql(queryStatement, database.getType(), database.getVersion());
     }
 
     /** Ratio */

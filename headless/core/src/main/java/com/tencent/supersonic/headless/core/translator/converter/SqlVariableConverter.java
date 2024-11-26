@@ -19,10 +19,8 @@ public class SqlVariableConverter implements QueryConverter {
 
     @Override
     public boolean accept(QueryStatement queryStatement) {
-        if (Objects.isNull(queryStatement.getStructQueryParam()) && queryStatement.getIsS2SQL()) {
-            return false;
-        }
-        return true;
+        return Objects.nonNull(queryStatement.getStructQueryParam())
+                && !queryStatement.getIsS2SQL();
     }
 
     @Override

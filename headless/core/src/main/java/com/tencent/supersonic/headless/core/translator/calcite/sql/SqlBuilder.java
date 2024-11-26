@@ -35,7 +35,7 @@ public class SqlBuilder {
         this.schema = schema;
     }
 
-    public void buildOntologySql(QueryStatement queryStatement) throws Exception {
+    public String buildOntologySql(QueryStatement queryStatement) throws Exception {
         this.ontologyQueryParam = queryStatement.getOntologyQueryParam();
         if (ontologyQueryParam.getMetrics() == null) {
             ontologyQueryParam.setMetrics(new ArrayList<>());
@@ -50,14 +50,12 @@ public class SqlBuilder {
 
         buildParseNode();
         Database database = queryStatement.getOntology().getDatabase();
-        EngineType engineType = EngineType.fromString(database.getType());
-        optimizeParseNode(engineType);
-        String sql = getSql(engineType);
-        queryStatement.setSql(sql);
+        optimizeParseNode(database.getType());
+        return getSql(database.getType());
     }
 
     private void buildParseNode() throws Exception {
-        // find the match Datasource
+        // find relevant data models
         scope = SchemaBuilder.getScope(schema);
         List<DataModel> dataModels =
                 DataModelNode.getRelatedDataModels(scope, schema, ontologyQueryParam);

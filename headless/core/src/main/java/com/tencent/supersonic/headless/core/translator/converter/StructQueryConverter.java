@@ -1,7 +1,7 @@
 package com.tencent.supersonic.headless.core.translator.converter;
 
+import com.tencent.supersonic.common.pojo.Aggregator;
 import com.tencent.supersonic.common.pojo.ColumnOrder;
-import com.tencent.supersonic.common.pojo.enums.EngineType;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.headless.api.pojo.enums.AggOption;
 import com.tencent.supersonic.headless.core.pojo.Database;
@@ -22,11 +22,8 @@ public class StructQueryConverter implements QueryConverter {
 
     @Override
     public boolean accept(QueryStatement queryStatement) {
-        if (Objects.nonNull(queryStatement.getStructQueryParam()) && !queryStatement.getIsS2SQL()) {
-            return true;
-        }
-
-        return false;
+        return Objects.nonNull(queryStatement.getStructQueryParam())
+                && !queryStatement.getIsS2SQL();
     }
 
     @Override
@@ -43,8 +40,7 @@ public class StructQueryConverter implements QueryConverter {
                 sqlGenerateUtils.getOrderBy(structQueryParam),
                 sqlGenerateUtils.getLimit(structQueryParam));
         Database database = queryStatement.getOntology().getDatabase();
-        EngineType engineType = EngineType.fromString(database.getType().toUpperCase());
-        if (!sqlGenerateUtils.isSupportWith(engineType, database.getVersion())) {
+        if (!sqlGenerateUtils.isSupportWith(database.getType(), database.getVersion())) {
             sqlParam.setSupportWith(false);
             sql = String.format("select %s from %s t0 %s %s %s",
                     sqlGenerateUtils.getSelect(structQueryParam), dsTable,
@@ -58,7 +54,7 @@ public class StructQueryConverter implements QueryConverter {
         OntologyQueryParam ontologyQueryParam = new OntologyQueryParam();
         ontologyQueryParam.getDimensions().addAll(structQueryParam.getGroups());
         ontologyQueryParam.getMetrics().addAll(structQueryParam.getAggregators().stream()
-                .map(a -> a.getColumn()).collect(Collectors.toList()));
+                .map(Aggregator::getColumn).collect(Collectors.toList()));
         String where = sqlGenerateUtils.generateWhere(structQueryParam, null);
         ontologyQueryParam.setWhere(where);
         ontologyQueryParam.setAggOption(AggOption.AGGREGATION);

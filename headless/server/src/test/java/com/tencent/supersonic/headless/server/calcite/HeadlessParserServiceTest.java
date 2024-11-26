@@ -29,9 +29,9 @@ class HeadlessParserServiceTest {
             SqlBuilder aggBuilder = new SqlBuilder(semanticSchema);
             QueryStatement queryStatement = new QueryStatement();
             queryStatement.setOntologyQueryParam(ontologyQueryParam);
-            aggBuilder.buildOntologySql(queryStatement);
-            EngineType engineType =
-                    EngineType.fromString(semanticSchema.getOntology().getDatabase().getType());
+            String sql = aggBuilder.buildOntologySql(queryStatement);
+            queryStatement.setSql(sql);
+            EngineType engineType = semanticSchema.getOntology().getDatabase().getType();
             sqlParser.setSql(aggBuilder.getSql(engineType));
         } catch (Exception e) {
             sqlParser.setErrMsg(e.getMessage());

@@ -168,7 +168,7 @@ public class DataModelNode extends SemanticNode {
     public static void mergeQueryFilterDimensionMeasure(S2CalciteSchema schema,
             OntologyQueryParam metricCommand, Set<String> queryDimension, List<String> measures,
             SqlValidatorScope scope) throws Exception {
-        EngineType engineType = EngineType.fromString(schema.getOntology().getDatabase().getType());
+        EngineType engineType = schema.getOntology().getDatabase().getType();
         if (Objects.nonNull(metricCommand.getWhere()) && !metricCommand.getWhere().isEmpty()) {
             Set<String> filterConditions = new HashSet<>();
             FilterNode.getFilterField(parse(metricCommand.getWhere(), scope, engineType),
@@ -229,8 +229,7 @@ public class DataModelNode extends SemanticNode {
             }
             filterMeasure.addAll(sourceMeasure);
             filterMeasure.addAll(dimension);
-            EngineType engineType =
-                    EngineType.fromString(schema.getOntology().getDatabase().getType());
+            EngineType engineType = schema.getOntology().getDatabase().getType();
             mergeQueryFilterDimensionMeasure(schema, metricCommand, queryDimension, measures,
                     scope);
             boolean isAllMatch = checkMatch(sourceMeasure, queryDimension, measures, dimension,

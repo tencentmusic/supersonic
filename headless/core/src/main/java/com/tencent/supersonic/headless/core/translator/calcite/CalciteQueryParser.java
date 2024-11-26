@@ -28,7 +28,8 @@ public class CalciteQueryParser implements QueryParser {
                         .enableOptimize(queryStatement.getEnableOptimize()).build())
                 .build();
         SqlBuilder sqlBuilder = new SqlBuilder(semanticSchema);
-        sqlBuilder.buildOntologySql(queryStatement);
+        String sql = sqlBuilder.buildOntologySql(queryStatement);
+        queryStatement.setSql(sql);
     }
 
 }

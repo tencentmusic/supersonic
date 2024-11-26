@@ -33,7 +33,7 @@ public class SchemaBuilder {
         Prepare.CatalogReader catalogReader = new CalciteCatalogReader(rootSchema,
                 Collections.singletonList(schema.getSchemaKey()), Configuration.typeFactory,
                 Configuration.config);
-        EngineType engineType = EngineType.fromString(schema.getOntology().getDatabase().getType());
+        EngineType engineType = schema.getOntology().getDatabase().getType();
         S2SQLSqlValidatorImpl s2SQLSqlValidator =
                 new S2SQLSqlValidatorImpl(Configuration.operatorTable, catalogReader,
                         Configuration.typeFactory, Configuration.getValidatorConfig(engineType));
