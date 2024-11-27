@@ -13,12 +13,14 @@ import com.tencent.supersonic.common.service.ChatModelService;
 import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.api.pojo.response.QueryState;
+import com.tencent.supersonic.headless.server.service.SchemaService;
 import com.tencent.supersonic.util.DataUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -37,6 +39,8 @@ public class BaseTest extends BaseApplication {
     protected AgentService agentService;
     @Autowired
     protected ChatModelService chatModelService;
+    @Autowired
+    protected SchemaService schemaService;
 
     @Value("${s2.demo.enableLLM:false}")
     protected boolean enableLLM;
@@ -105,5 +109,11 @@ public class BaseTest extends BaseApplication {
         assertEquals(expectedParseInfo.getMetricFilters(), actualParseInfo.getMetricFilters());
 
         assertEquals(expectedParseInfo.getDateInfo(), actualParseInfo.getDateInfo());
+    }
+
+    protected SchemaElement getSchemaElementByName(Set<SchemaElement> elementSet, String name) {
+        Optional<SchemaElement> matchElement =
+                elementSet.stream().filter(e -> e.getName().equals(name)).findFirst();
+        return matchElement.orElse(null);
     }
 }

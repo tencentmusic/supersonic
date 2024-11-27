@@ -87,7 +87,7 @@ public class SqlQueryConverter implements QueryConverter {
         if (!SqlSelectFunctionHelper.hasAggregateFunction(sql) && !SqlSelectHelper.hasGroupBy(sql)
                 && !SqlSelectHelper.hasWith(sql) && !SqlSelectHelper.hasSubSelect(sql)) {
             log.debug("getAggOption simple sql set to DEFAULT");
-            return AggOption.DEFAULT;
+            return AggOption.NATIVE;
         }
 
         // if there is no group by in S2SQL,set MetricTable's aggOption to "NATIVE"
@@ -107,7 +107,7 @@ public class SqlQueryConverter implements QueryConverter {
                 .count();
         if (defaultAggNullCnt > 0) {
             log.debug("getAggOption find null defaultAgg metric set to NATIVE");
-            return AggOption.OUTER;
+            return AggOption.DEFAULT;
         }
         return AggOption.DEFAULT;
     }

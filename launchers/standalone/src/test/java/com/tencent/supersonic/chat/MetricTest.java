@@ -5,6 +5,8 @@ import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.common.pojo.enums.DatePeriodEnum;
 import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
 import com.tencent.supersonic.common.pojo.enums.QueryType;
+import com.tencent.supersonic.headless.api.pojo.DataSetSchema;
+import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.api.pojo.request.QueryFilter;
 import com.tencent.supersonic.headless.chat.query.rule.metric.MetricFilterQuery;
@@ -61,8 +63,11 @@ public class MetricTest extends BaseTest {
         expectedParseInfo.setAggType(NONE);
 
         expectedParseInfo.getMetrics().add(DataUtils.getSchemaElement("访问次数"));
-        expectedParseInfo.getDimensionFilters().add(
-                DataUtils.getFilter("user_name", FilterOperatorEnum.EQUALS, "alice", "用户", 2L));
+
+        DataSetSchema schema = schemaService.getDataSetSchema(DataUtils.productDatasetId);
+        SchemaElement userElement = getSchemaElementByName(schema.getDimensions(), "用户");
+        expectedParseInfo.getDimensionFilters().add(DataUtils.getFilter("user_name",
+                FilterOperatorEnum.EQUALS, "alice", "用户", userElement.getId()));
 
         expectedParseInfo.setDateInfo(
                 DataUtils.getDateConf(DateConf.DateMode.BETWEEN, unit, period, startDay, endDay));
@@ -111,8 +116,11 @@ public class MetricTest extends BaseTest {
         List<String> list = new ArrayList<>();
         list.add("alice");
         list.add("lucy");
-        QueryFilter dimensionFilter =
-                DataUtils.getFilter("user_name", FilterOperatorEnum.IN, list, "用户", 2L);
+
+        DataSetSchema schema = schemaService.getDataSetSchema(DataUtils.productDatasetId);
+        SchemaElement userElement = getSchemaElementByName(schema.getDimensions(), "用户");
+        QueryFilter dimensionFilter = DataUtils.getFilter("user_name", FilterOperatorEnum.IN, list,
+                "用户", userElement.getId());
         expectedParseInfo.getDimensionFilters().add(dimensionFilter);
 
         expectedParseInfo.setDateInfo(
@@ -182,9 +190,11 @@ public class MetricTest extends BaseTest {
         expectedResult.setQueryMode(MetricFilterQuery.QUERY_MODE);
         expectedParseInfo.setAggType(NONE);
 
+        DataSetSchema schema = schemaService.getDataSetSchema(DataUtils.productDatasetId);
+        SchemaElement userElement = getSchemaElementByName(schema.getDimensions(), "用户");
         expectedParseInfo.getMetrics().add(DataUtils.getSchemaElement("访问次数"));
-        expectedParseInfo.getDimensionFilters().add(
-                DataUtils.getFilter("user_name", FilterOperatorEnum.EQUALS, "alice", "用户", 2L));
+        expectedParseInfo.getDimensionFilters().add(DataUtils.getFilter("user_name",
+                FilterOperatorEnum.EQUALS, "alice", "用户", userElement.getId()));
 
         expectedParseInfo.setDateInfo(
                 DataUtils.getDateConf(DateConf.DateMode.BETWEEN, 1, period, startDay, startDay));

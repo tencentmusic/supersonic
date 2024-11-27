@@ -39,7 +39,7 @@ public class SqlQueryApiController {
 
     @PostMapping("/sql")
     public Object queryBySql(@RequestBody QuerySqlReq querySqlReq, HttpServletRequest request,
-                             HttpServletResponse response) throws Exception {
+            HttpServletResponse response) throws Exception {
         User user = UserHolder.findUser(request, response);
         String sql = querySqlReq.getSql();
         querySqlReq.setSql(StringUtil.replaceBackticks(sql));
@@ -49,7 +49,7 @@ public class SqlQueryApiController {
 
     @PostMapping("/sqls")
     public Object queryBySqls(@RequestBody QuerySqlsReq querySqlsReq, HttpServletRequest request,
-                              HttpServletResponse response) throws Exception {
+            HttpServletResponse response) throws Exception {
         User user = UserHolder.findUser(request, response);
         List<SemanticQueryReq> semanticQueryReqs = querySqlsReq.getSqls().stream().map(sql -> {
             QuerySqlReq querySqlReq = new QuerySqlReq();
@@ -73,7 +73,7 @@ public class SqlQueryApiController {
 
     @PostMapping("/sqlsWithException")
     public Object queryBySqlsWithException(@RequestBody QuerySqlsReq querySqlsReq,
-                                           HttpServletRequest request, HttpServletResponse response) throws Exception {
+            HttpServletRequest request, HttpServletResponse response) throws Exception {
         User user = UserHolder.findUser(request, response);
         List<SemanticQueryReq> semanticQueryReqs = querySqlsReq.getSqls().stream().map(sql -> {
             QuerySqlReq querySqlReq = new QuerySqlReq();
@@ -97,7 +97,7 @@ public class SqlQueryApiController {
 
     @PostMapping("/validate")
     public Object validate(@RequestBody QuerySqlReq querySqlReq, HttpServletRequest request,
-                           HttpServletResponse response) throws Exception {
+            HttpServletResponse response) throws Exception {
         User user = UserHolder.findUser(request, response);
         String sql = querySqlReq.getSql();
         querySqlReq.setSql(StringUtil.replaceBackticks(sql));
@@ -106,7 +106,7 @@ public class SqlQueryApiController {
 
     @PostMapping("/validateAndQuery")
     public Object validateAndQuery(@RequestBody QuerySqlsReq querySqlsReq,
-                                   HttpServletRequest request, HttpServletResponse response) throws Exception {
+            HttpServletRequest request, HttpServletResponse response) throws Exception {
         User user = UserHolder.findUser(request, response);
         List<QuerySqlReq> convert = convert(querySqlsReq);
         for (QuerySqlReq querySqlReq : convert) {
