@@ -52,7 +52,7 @@ public class SqlBuilder {
         // find relevant data models
         scope = SchemaBuilder.getScope(schema);
         List<DataModel> dataModels =
-                DataModelNode.getRelatedDataModels(scope, schema, ontologyQueryParam);
+                DataModelNode.getQueryDataModels(scope, schema, ontologyQueryParam);
         if (dataModels == null || dataModels.isEmpty()) {
             throw new Exception("data model not found");
         }
@@ -96,20 +96,6 @@ public class SqlBuilder {
 
     public String getSql(EngineType engineType) {
         return SemanticNode.getSql(parserNode, engineType);
-    }
-
-    private String rewrite(String sql, EngineType engineType) {
-        try {
-            SqlNode sqlNode =
-                    SqlParser.create(sql, Configuration.getParserConfig(engineType)).parseStmt();
-            if (Objects.nonNull(sqlNode)) {
-                return SemanticNode.getSql(
-                        SemanticNode.optimize(scope, schema, sqlNode, engineType), engineType);
-            }
-        } catch (Exception e) {
-            log.error("optimize error {}", e.toString());
-        }
-        return "";
     }
 
     private void optimizeParseNode(EngineType engineType) {

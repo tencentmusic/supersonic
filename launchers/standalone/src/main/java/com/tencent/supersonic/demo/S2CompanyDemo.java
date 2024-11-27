@@ -41,8 +41,8 @@ public class S2CompanyDemo extends S2BaseDemo {
             ModelResp model_brand = addModel_2(domain, demoDatabase);
             ModelResp model_brand_revenue = addModel_3(domain, demoDatabase);
 
-            addModelRela(domain, model_company, model_brand, "company_id");
-            addModelRela(domain, model_brand, model_brand_revenue, "brand_id");
+            addModelRela(domain, model_brand, model_company, "company_id");
+            addModelRela(domain, model_brand_revenue, model_brand, "brand_id");
 
             DataSetResp dataset = addDataSet(domain);
             addAgent(dataset.getId());
@@ -106,8 +106,7 @@ public class S2CompanyDemo extends S2BaseDemo {
         modelDetail.setMeasures(measures);
 
         modelDetail.setQueryType("sql_query");
-        modelDetail.setSqlQuery("SELECT company_id,company_name,headquarter_address,"
-                + "company_established_time,founder,ceo,annual_turnover,employee_count FROM company");
+        modelDetail.setSqlQuery("SELECT * FROM company");
         modelReq.setModelDetail(modelDetail);
         ModelResp companyModel = modelService.createModel(modelReq, defaultUser);
 
@@ -146,8 +145,7 @@ public class S2CompanyDemo extends S2BaseDemo {
         modelDetail.setMeasures(measures);
 
         modelDetail.setQueryType("sql_query");
-        modelDetail.setSqlQuery("SELECT brand_id,brand_name,brand_established_time,"
-                + "company_id,legal_representative,registered_capital FROM brand");
+        modelDetail.setSqlQuery("SELECT * FROM brand");
         modelReq.setModelDetail(modelDetail);
         ModelResp brandModel = modelService.createModel(modelReq, defaultUser);
 
@@ -187,8 +185,7 @@ public class S2CompanyDemo extends S2BaseDemo {
         modelDetail.setMeasures(measures);
 
         modelDetail.setQueryType("sql_query");
-        modelDetail.setSqlQuery("SELECT year_time,brand_id,revenue,profit,"
-                + "revenue_growth_year_on_year,profit_growth_year_on_year FROM brand_revenue");
+        modelDetail.setSqlQuery("SELECT * FROM brand_revenue");
         modelReq.setModelDetail(modelDetail);
         return modelService.createModel(modelReq, defaultUser);
     }
@@ -227,7 +224,7 @@ public class S2CompanyDemo extends S2BaseDemo {
         modelRelaReq.setDomainId(domain.getId());
         modelRelaReq.setFromModelId(fromModel.getId());
         modelRelaReq.setToModelId(toModel.getId());
-        modelRelaReq.setJoinType("left join");
+        modelRelaReq.setJoinType("inner join");
         modelRelaReq.setJoinConditions(joinConditions);
         modelRelaService.save(modelRelaReq, defaultUser);
     }

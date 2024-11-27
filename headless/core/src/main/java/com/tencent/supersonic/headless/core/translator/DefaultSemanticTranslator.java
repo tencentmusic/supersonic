@@ -50,7 +50,7 @@ public class DefaultSemanticTranslator implements SemanticTranslator {
             }
         } catch (Exception e) {
             queryStatement.setErrMsg(e.getMessage());
-            log.error("Failed to translate semantic query [{}]", e.getMessage(), e);
+            log.error("Failed to translate query [{}]", e.getMessage(), e);
         }
     }
 

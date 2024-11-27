@@ -2,10 +2,8 @@ package com.tencent.supersonic.headless.server.manager;
 
 import com.tencent.supersonic.common.pojo.ModelRela;
 import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
-import com.tencent.supersonic.headless.api.pojo.enums.TagDefineType;
 import com.tencent.supersonic.headless.api.pojo.response.DatabaseResp;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticSchemaResp;
-import com.tencent.supersonic.headless.api.pojo.response.TagResp;
 import com.tencent.supersonic.headless.core.translator.calcite.s2sql.*;
 import com.tencent.supersonic.headless.core.translator.calcite.s2sql.Materialization.TimePartType;
 import com.tencent.supersonic.headless.core.translator.calcite.sql.S2CalciteSchema;
@@ -62,82 +60,6 @@ public class SemanticSchemaManager {
             ontology.setMetrics(getMetrics(metricYamlTpls));
         }
         return ontology;
-    }
-
-    public Ontology getTagSemanticModel(SemanticSchemaResp semanticSchemaResp) throws Exception {
-        if (CollectionUtils.isEmpty(semanticSchemaResp.getTags())) {
-            throw new Exception("semanticSchemaResp tag is empty");
-        }
-        Ontology ontology = buildOntology(semanticSchemaResp);
-        // Map<String, List<Dimension>> dimensions = new HashMap<>();
-        Map<Long, List<TagResp>> tagMap = new HashMap<>();
-        for (TagResp tagResp : semanticSchemaResp.getTags()) {
-            if (!tagMap.containsKey(tagResp.getModelId())) {
-                tagMap.put(tagResp.getModelId(), new ArrayList<>());
-            }
-            tagMap.get(tagResp.getModelId()).add(tagResp);
-        }
-        if (Objects.nonNull(ontology.getDataModelMap()) && !ontology.getDataModelMap().isEmpty()) {
-            for (Map.Entry<String, DataModel> entry : ontology.getDataModelMap().entrySet()) {
-                List<Dimension> modelDimensions = new ArrayList<>();
-                if (!ontology.getDimensionMap().containsKey(entry.getKey())) {
-                    ontology.getDimensionMap().put(entry.getKey(), modelDimensions);
-                } else {
-                    modelDimensions = ontology.getDimensionMap().get(entry.getKey());
-                }
-                if (tagMap.containsKey(entry.getValue().getId())) {
-                    for (TagResp tagResp : tagMap.get(entry.getValue().getId())) {
-                        addTagModel(tagResp, modelDimensions, ontology.getMetrics());
-                    }
-                }
-            }
-        }
-
-        return ontology;
-    }
-
-    private void addTagModel(TagResp tagResp, List<Dimension> modelDimensions,
-            List<Metric> modelMetrics) throws Exception {
-        TagDefineType tagDefineType = TagDefineType.valueOf(tagResp.getTagDefineType());
-        switch (tagDefineType) {
-            case FIELD:
-            case DIMENSION:
-                if (TagDefineType.DIMENSION.equals(tagResp.getTagDefineType())) {
-                    Optional<Dimension> modelDimension = modelDimensions.stream()
-                            // .filter(d -> d.getBizName().equals(tagResp.getExpr()))
-                            .findFirst();
-                    if (modelDimension.isPresent()) {
-                        modelDimension.get().setName(tagResp.getBizName());
-                        return;
-                    }
-                }
-                Dimension dimension = Dimension.builder().build();
-                dimension.setType("");
-                // dimension.setExpr(tagResp.getExpr());
-                dimension.setName(tagResp.getBizName());
-                dimension.setOwners("");
-                dimension.setBizName(tagResp.getBizName());
-                if (Objects.isNull(dimension.getDataType())) {
-                    dimension.setDataType(DataType.UNKNOWN);
-                }
-
-                DimensionTimeTypeParams dimensionTimeTypeParams = new DimensionTimeTypeParams();
-                dimension.setDimensionTimeTypeParams(dimensionTimeTypeParams);
-                modelDimensions.add(dimension);
-                return;
-            case METRIC:
-                Optional<Metric> modelMetric = modelMetrics.stream()
-                        // .filter(m -> m.getName().equalsIgnoreCase(tagResp.getExpr()))
-                        .findFirst();
-                if (modelMetric.isPresent()) {
-                    modelMetric.get().setName(tagResp.getBizName());
-                } else {
-                    throw new Exception(
-                            String.format("tag [{}] cant find the metric", tagResp.getBizName()));
-                }
-                return;
-            default:
-        }
     }
 
     public static List<Metric> getMetrics(final List<MetricYamlTpl> t) {

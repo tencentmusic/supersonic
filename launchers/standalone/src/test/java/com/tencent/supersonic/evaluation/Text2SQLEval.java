@@ -5,7 +5,10 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.tencent.supersonic.chat.BaseTest;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
-import com.tencent.supersonic.chat.server.agent.*;
+import com.tencent.supersonic.chat.server.agent.Agent;
+import com.tencent.supersonic.chat.server.agent.AgentToolType;
+import com.tencent.supersonic.chat.server.agent.DatasetTool;
+import com.tencent.supersonic.chat.server.agent.ToolConfig;
 import com.tencent.supersonic.common.config.ChatModel;
 import com.tencent.supersonic.common.pojo.ChatApp;
 import com.tencent.supersonic.common.pojo.User;
@@ -133,11 +136,28 @@ public class Text2SQLEval extends BaseTest {
         assert result.getTextResult().contains("3");
     }
 
+    @Test
+    public void test_detail_query() throws Exception {
+        long start = System.currentTimeMillis();
+        QueryResult result = submitNewChat("特斯拉旗下有哪些品牌", agentId);
+        durations.add(System.currentTimeMillis() - start);
+        assert result.getQueryColumns().size() >= 1;
+        assert result.getTextResult().contains("Model Y");
+        assert result.getTextResult().contains("Model 3");
+    }
+
     public Agent getLLMAgent() {
         Agent agent = new Agent();
         agent.setName("Agent for Test");
         ToolConfig toolConfig = new ToolConfig();
-        toolConfig.getTools().add(getDatasetTool());
+        DatasetTool datasetTool = new DatasetTool();
+        datasetTool.setType(AgentToolType.DATASET);
+        datasetTool.setDataSetIds(Lists.newArrayList(DataUtils.productDatasetId));
+        toolConfig.getTools().add(datasetTool);
+        DatasetTool datasetTool2 = new DatasetTool();
+        datasetTool2.setType(AgentToolType.DATASET);
+        datasetTool2.setDataSetIds(Lists.newArrayList(DataUtils.companyDatasetId));
+        toolConfig.getTools().add(datasetTool2);
         agent.setToolConfig(JSONObject.toJSONString(toolConfig));
         // create chat model for this evaluation
         ChatModel chatModel = new ChatModel();
@@ -154,11 +174,4 @@ public class Text2SQLEval extends BaseTest {
         return agent;
     }
 
-    private static DatasetTool getDatasetTool() {
-        DatasetTool datasetTool = new DatasetTool();
-        datasetTool.setType(AgentToolType.DATASET);
-        datasetTool.setDataSetIds(Lists.newArrayList(1L));
-
-        return datasetTool;
-    }
 }

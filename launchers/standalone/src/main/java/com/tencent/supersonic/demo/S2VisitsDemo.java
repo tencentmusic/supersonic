@@ -199,6 +199,7 @@ public class S2VisitsDemo extends S2BaseDemo {
 
         List<Dim> dimensions = new ArrayList<>();
         dimensions.add(new Dim("部门", "department", DimensionType.categorical, 1));
+        // dimensions.add(new Dim("用户", "user_name", DimensionType.categorical, 1));
         modelDetail.setDimensions(dimensions);
         List<Field> fields = Lists.newArrayList();
         fields.add(Field.builder().fieldName("user_name").dataType("Varchar").build());

@@ -25,8 +25,4 @@ public class Ontology {
                 .collect(Collectors.toList());
     }
 
-    public Map<Long, DataModel> getModelMap() {
-        return dataModelMap.values().stream()
-                .collect(Collectors.toMap(DataModel::getId, dataSource -> dataSource));
-    }
 }

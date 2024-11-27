@@ -60,7 +60,8 @@ public class JoinRender extends Renderer {
         }
         Set<String> queryAllDimension = new HashSet<>();
         Set<String> measures = new HashSet<>();
-        DataModelNode.getQueryDimensionMeasure(schema, metricCommand, queryAllDimension, measures);
+        DataModelNode.getQueryDimensionMeasure(schema.getOntology(), metricCommand,
+                queryAllDimension, measures);
         SqlNode left = null;
         TableView leftTable = null;
         TableView innerView = new TableView();
