@@ -18,7 +18,7 @@ public class AuthenticationConfig {
     @Value("${s2.authentication.include.path:/api}")
     private String includePath;
 
-    @Value("${s2.authentication.enable:false}")
+    @Value("${s2.authentication.enable:true}")
     private boolean enabled;
 
     @Value("${s2.authentication.token.default.appKey:supersonic}")

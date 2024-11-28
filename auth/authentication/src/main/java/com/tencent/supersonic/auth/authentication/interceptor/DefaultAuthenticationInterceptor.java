@@ -3,29 +3,34 @@ package com.tencent.supersonic.auth.authentication.interceptor;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.alibaba.fastjson.JSONObject;
 import com.tencent.supersonic.auth.api.authentication.annotation.AuthenticationIgnore;
 import com.tencent.supersonic.auth.api.authentication.config.AuthenticationConfig;
 import com.tencent.supersonic.auth.api.authentication.pojo.UserWithPassword;
+import com.tencent.supersonic.auth.api.authentication.request.UserReq;
+import com.tencent.supersonic.auth.api.authentication.response.AnalysisCloudTokenProjectLoginResponse;
+import com.tencent.supersonic.auth.authentication.exception.AuthErrorEnum;
+import com.tencent.supersonic.auth.authentication.persistence.dataobject.UserDO;
+import com.tencent.supersonic.auth.authentication.persistence.repository.UserRepository;
 import com.tencent.supersonic.auth.authentication.service.UserServiceImpl;
+import com.tencent.supersonic.auth.authentication.utils.ComponentFactory;
 import com.tencent.supersonic.auth.authentication.utils.TokenService;
 import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.common.pojo.exception.AccessException;
-import com.tencent.supersonic.common.util.ContextUtils;
-import com.tencent.supersonic.common.util.S2ThreadContext;
-import com.tencent.supersonic.common.util.ThreadContext;
+import com.tencent.supersonic.common.util.*;
 import io.jsonwebtoken.Claims;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.http.Header;
+import org.apache.http.message.BasicHeader;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.method.HandlerMethod;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
-import static com.tencent.supersonic.auth.api.authentication.constant.UserConstants.TOKEN_IS_ADMIN;
-import static com.tencent.supersonic.auth.api.authentication.constant.UserConstants.TOKEN_USER_DISPLAY_NAME;
-import static com.tencent.supersonic.auth.api.authentication.constant.UserConstants.TOKEN_USER_EMAIL;
-import static com.tencent.supersonic.auth.api.authentication.constant.UserConstants.TOKEN_USER_ID;
-import static com.tencent.supersonic.auth.api.authentication.constant.UserConstants.TOKEN_USER_NAME;
-import static com.tencent.supersonic.auth.api.authentication.constant.UserConstants.TOKEN_USER_PASSWORD;
+import static com.tencent.supersonic.auth.api.authentication.constant.UserConstants.*;
 
 @Slf4j
 public class DefaultAuthenticationInterceptor extends AuthenticationInterceptor {
@@ -37,18 +42,10 @@ public class DefaultAuthenticationInterceptor extends AuthenticationInterceptor 
         userServiceImpl = ContextUtils.getBean(UserServiceImpl.class);
         tokenService = ContextUtils.getBean(TokenService.class);
         s2ThreadContext = ContextUtils.getBean(S2ThreadContext.class);
-        if (!authenticationConfig.isEnabled()) {
-            setFakerUser(request);
-            return true;
+        if (!authenticationConfig.isEnabled() || isInternalRequest(request) || isAppRequest(request)) {
+            return handleFakerUserRequest(request);
         }
-        if (isInternalRequest(request)) {
-            setFakerUser(request);
-            return true;
-        }
-        if (isAppRequest(request)) {
-            setFakerUser(request);
-            return true;
-        }
+
         if (handler instanceof HandlerMethod) {
             HandlerMethod handlerMethod = (HandlerMethod) handler;
             Method method = handlerMethod.getMethod();
@@ -57,8 +54,15 @@ public class DefaultAuthenticationInterceptor extends AuthenticationInterceptor 
                 return true;
             }
         }
-
         String uri = request.getServletPath();
+        if (GET_CURRENT_USER.equals(uri)
+                && ComponentFactory.getUserAdaptor().verifyParameters(request)) {
+            if (verifyAnalysisCloud(request)) {
+                return true;
+            }
+            throw new AccessException("分析云Token认证失败,请联系管理员！");
+        }
+
         if (!isIncludedUri(uri)) {
             return true;
         }
@@ -73,6 +77,48 @@ public class DefaultAuthenticationInterceptor extends AuthenticationInterceptor 
             return true;
         }
         throw new AccessException("authentication failed, please login");
+    }
+
+    private boolean handleFakerUserRequest(HttpServletRequest request) {
+        setFakerUser(request);
+        return true;
+    }
+    private boolean verifyAnalysisCloud(HttpServletRequest request) {
+
+        String userName = request.getParameter("userName");
+        String token = request.getParameter("token");
+        String projectId = request.getParameter("projectId");
+        //校验用户名，用户是否存在
+        UserRepository userRepository = ContextUtils.getBean(UserRepository.class);
+        UserDO userDO = userRepository.getUser(userName);
+        if (userDO == null) {
+            throw new AccessException("user not exist,please register");
+        }
+        //校验分析云token
+//        analysisCloudTokenLogin(analysisToken, projectId);
+
+        return true;
+    }
+
+    public void analysisCloudTokenLogin(String token, String projectId) {
+        List<Header> headers = new ArrayList<Header>();
+        headers.add(new BasicHeader("token", token));
+        String result = HttpClientUtils.doPost(ANALYSIS_CLOUD_URL + TOKEN_PATH + "?id=" + projectId, headers, "", "UTF-8");
+        log.info("结果：" + result);
+        if (result == null) {
+            log.error("Token认证响应为null");
+            throw new AccessException("分析云Token认证失败");
+        }
+        try {
+            AnalysisCloudTokenProjectLoginResponse response = JSONObject.parseObject(result, AnalysisCloudTokenProjectLoginResponse.class);
+            if (!response.getRspcode().equals("0")) {
+                log.error("[分析云token认证失败,{}]", response.getRspdesc());
+                throw new AccessException(response.getRspdesc());
+            }
+        } catch (Throwable t) {
+            log.error("", t);
+            throw new AccessException(String.valueOf(AuthErrorEnum.ANALYSIS_CLOUD_TOKEN_LOGIN_FAILED));
+        }
     }
 
     private void setFakerUser(HttpServletRequest request) {

@@ -25,11 +25,13 @@ public interface UserAdaptor {
 
     String login(UserReq userReq, String appKey);
 
-    String loginByAnalysisCloud(HttpServletRequest request);
+    User loginByAnalysisCloud(HttpServletRequest request);
 
     List<User> getUserByOrg(String key);
 
     Set<String> getUserAllOrgId(String userName);
+
+    Boolean verifyParameters(HttpServletRequest request);
 
     String getPassword(String userName);
 

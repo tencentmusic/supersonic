@@ -21,14 +21,6 @@ public class UserDO {
     /** */
     private Integer isAdmin;
 
-    private String analysiscloudName;
-    public String getAnalysiscloudName() {
-        return analysiscloudName;
-    }
-    public void setAnalysiscloudName(String analysiscloudName) {
-        this.analysiscloudName = analysiscloudName;
-    }
-
     /** @return id */
     public Long getId() {
         return id;

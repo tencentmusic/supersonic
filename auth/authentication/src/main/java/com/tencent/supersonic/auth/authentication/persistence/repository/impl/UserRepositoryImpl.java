@@ -49,15 +49,6 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
-    public UserDO getUserByAnalysisCloudName(String analysisCloudName) {
-        UserDOExample userDOExample = new UserDOExample();
-        userDOExample.createCriteria().andAnalysiscloudNameEqualTo(analysisCloudName);
-        List<UserDO> userDOS = userDOMapper.selectByExample(userDOExample);
-        Optional<UserDO> userDOOptional = userDOS.stream().findFirst();
-        return userDOOptional.orElse(null);
-    }
-
-    @Override
     public List<UserTokenDO> getUserTokenListByName(String userName) {
         QueryWrapper<UserTokenDO> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("user_name", userName);

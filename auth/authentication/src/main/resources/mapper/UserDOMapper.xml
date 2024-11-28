@@ -4,7 +4,6 @@
   <resultMap id="BaseResultMap" type="com.tencent.supersonic.auth.authentication.persistence.dataobject.UserDO">
     <result column="id" jdbcType="BIGINT" property="id" />
     <result column="name" jdbcType="VARCHAR" property="name" />
-    <result column="analysiscloud_name" jdbcType="VARCHAR" property="analysiscloudName" />
     <result column="password" jdbcType="VARCHAR" property="password" />
     <result column="salt" jdbcType="VARCHAR" property="salt" />
     <result column="display_name" jdbcType="VARCHAR" property="displayName" />
@@ -41,7 +40,7 @@
     </where>
   </sql>
   <sql id="Base_Column_List">
-    id, name, analysiscloud_name,password, salt, display_name, email, is_admin
+    id, name, password, salt, display_name, email, is_admin
   </sql>
   <select id="selectByExample" parameterType="com.tencent.supersonic.auth.authentication.persistence.dataobject.UserDOExample" resultMap="BaseResultMap">
     select
@@ -61,10 +60,10 @@
     </if>
   </select>
   <insert id="insert" parameterType="com.tencent.supersonic.auth.authentication.persistence.dataobject.UserDO">
-    insert into s2_user (id, name, analysiscloud_name, password, salt,
+    insert into s2_user (id, name, password, salt,
                          display_name, email, is_admin
     )
-    values (#{id,jdbcType=BIGINT}, #{name,jdbcType=VARCHAR}, #{analysiscloudName,jdbcType=VARCHAR}, #{password,jdbcType=VARCHAR}, #{salt,jdbcType=VARCHAR},
+    values (#{id,jdbcType=BIGINT}, #{name,jdbcType=VARCHAR}, #{password,jdbcType=VARCHAR}, #{salt,jdbcType=VARCHAR},
             #{displayName,jdbcType=VARCHAR}, #{email,jdbcType=VARCHAR}, #{isAdmin,jdbcType=INTEGER}
            )
   </insert>
@@ -76,9 +75,6 @@
       </if>
       <if test="name != null">
         name,
-      </if>
-      <if test="analysiscloudName != null">
-        analysiscloud_name,
       </if>
       <if test="password != null">
         password,
@@ -102,9 +98,6 @@
       </if>
       <if test="name != null">
         #{name,jdbcType=VARCHAR},
-      </if>
-      <if test="analysiscloudName != null">
-        #{analysiscloudName,jdbcType=VARCHAR},
       </if>
       <if test="password != null">
         #{password,jdbcType=VARCHAR},
@@ -135,9 +128,6 @@
     <set>
       <if test="name != null">
         name = #{name,jdbcType=VARCHAR},
-      </if>
-      <if test="analysiscloudName != null">
-        analysiscloud_name = #{analysiscloudName,jdbcType=VARCHAR},
       </if>
       <if test="password != null">
         password = #{password,jdbcType=VARCHAR},

@@ -3,19 +3,28 @@ package com.tencent.supersonic.auth.authentication.service;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.tencent.supersonic.auth.api.authentication.config.AuthenticationConfig;
+import com.tencent.supersonic.auth.api.authentication.constant.UserConstants;
 import com.tencent.supersonic.auth.api.authentication.pojo.Organization;
 import com.tencent.supersonic.auth.api.authentication.pojo.UserToken;
 import com.tencent.supersonic.auth.api.authentication.request.UserReq;
 import com.tencent.supersonic.auth.api.authentication.service.UserService;
+import com.tencent.supersonic.auth.api.authentication.service.UserStrategy;
 import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
+import com.tencent.supersonic.auth.authentication.persistence.dataobject.UserDO;
+import com.tencent.supersonic.auth.authentication.strategy.HttpHeaderUserStrategy;
 import com.tencent.supersonic.auth.authentication.utils.ComponentFactory;
+import com.tencent.supersonic.auth.authentication.utils.TokenService;
 import com.tencent.supersonic.common.config.SystemConfig;
 import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.common.service.SystemConfigService;
+import io.jsonwebtoken.Claims;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 @Service
@@ -23,6 +32,8 @@ public class UserServiceImpl implements UserService {
 
     private SystemConfigService sysParameterService;
 
+    @Autowired
+    private AuthenticationConfig authenticationConfig;
     public UserServiceImpl(SystemConfigService sysParameterService) {
         this.sysParameterService = sysParameterService;
     }
@@ -30,6 +41,10 @@ public class UserServiceImpl implements UserService {
     @Override
     public User getCurrentUser(HttpServletRequest httpServletRequest,
             HttpServletResponse httpServletResponse) {
+        // 分析云登录校验参数是否存在
+        if (ComponentFactory.getUserAdaptor().verifyParameters(httpServletRequest)) {
+            return loginByAnalysisCloud(httpServletRequest);
+        }
         User user = UserHolder.findUser(httpServletRequest, httpServletResponse);
         if (user != null) {
             SystemConfig systemConfig = sysParameterService.getSystemConfig();
@@ -82,7 +97,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public String loginByAnalysisCloud(HttpServletRequest request) {
+    public User loginByAnalysisCloud(HttpServletRequest request) {
         return ComponentFactory.getUserAdaptor().loginByAnalysisCloud(request);
     }
 

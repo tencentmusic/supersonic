@@ -31,14 +31,15 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static com.tencent.supersonic.auth.api.authentication.constant.UserConstants.ANALYSIS_CLOUD_URL;
+import static com.tencent.supersonic.auth.api.authentication.constant.UserConstants.TOKEN_PATH;
+
 /**
  * DefaultUserAdaptor provides a default method to obtain user and organization information
  */
 @Slf4j
 public class DefaultUserAdaptor implements UserAdaptor {
 
-    private static final String ANALYSIS_CLOUD_URL = "https://10.148.155.29/migunet_iam";
-    private static final String TOKEN_PATH = "/project/getProjectInfoById";
     private List<UserDO> getUserDOList() {
         UserRepository userRepository = ContextUtils.getBean(UserRepository.class);
         return userRepository.getUserList();
@@ -47,11 +48,6 @@ public class DefaultUserAdaptor implements UserAdaptor {
     private UserDO getUser(String name) {
         UserRepository userRepository = ContextUtils.getBean(UserRepository.class);
         return userRepository.getUser(name);
-    }
-
-    private UserDO getUserByAnalysisCloudName(String name) {
-        UserRepository userRepository = ContextUtils.getBean(UserRepository.class);
-        return userRepository.getUserByAnalysisCloudName(name);
     }
 
     @Override
@@ -125,52 +121,32 @@ public class DefaultUserAdaptor implements UserAdaptor {
     }
 
     @Override
-    public String loginByAnalysisCloud(HttpServletRequest request) {
-        // 从请求头中获取 username ,projectId和 token
-        String username = request.getHeader("username");
-        String analysisToken = request.getHeader("token");
-        String projectId = request.getHeader("projectId");
-        // 校验请求头中的参数
-        if (username == null || analysisToken == null || projectId == null) {
-            throw new IllegalArgumentException("Missing required header parameters: username, token, projectId");
+    public User loginByAnalysisCloud(HttpServletRequest request) {
+        if (!verifyParameters(request)){
+            throw new RuntimeException(AuthErrorEnum.ANALYSIS_CLOUD_TOKEN_LOGIN_FAILED.getMessage());
         }
         TokenService tokenService = ContextUtils.getBean(TokenService.class);
         String appKey = tokenService.getAppKey(request);
-        //校验用户名，用户是否存在
-        UserDO userDO = getUserByAnalysisCloudName(username);
-        if (userDO == null) {
-            throw new RuntimeException("user not exist,please register");
-        }
-        //校验分析云token
-//        analysisCloudTokenLogin(analysisToken, projectId);
-
+        UserDO userDO = getUser(request.getParameter("userName"));
         //账号及分析云token校验通过，创建用户信息对象
-        UserWithPassword user = UserWithPassword.get(userDO.getId(), userDO.getName(),
+        UserWithPassword userWithPassword = UserWithPassword.get(userDO.getId(), userDO.getName(),
                 userDO.getDisplayName(), userDO.getEmail(), userDO.getPassword(),
                 userDO.getIsAdmin());
         //用户信息对象以及appKey生成token
-        return tokenService.generateToken(UserWithPassword.convert(user), appKey);
+        String generateToken = tokenService.generateToken(UserWithPassword.convert(userWithPassword), appKey);
+        User user = User.get(userDO.getId(), userDO.getName(), userDO.getDisplayName(), userDO.getEmail(), userDO.getIsAdmin());
+        user.setToken(generateToken);
+        return user;
     }
 
-    public void analysisCloudTokenLogin(String token, String projectId) {
-        List<Header> headers = new ArrayList<Header>();
-        headers.add(new BasicHeader("token", token));
-        String result = HttpClientUtils.doPost(ANALYSIS_CLOUD_URL + TOKEN_PATH + "?id=" + projectId, headers, "", "UTF-8");
-        log.info("结果：" + result);
-        if (result == null) {
-            log.error("Token认证响应为null");
-            throw new RuntimeException("分析云Token认证失败");
-        }
-        try {
-            AnalysisCloudTokenProjectLoginResponse response = JSONObject.parseObject(result, AnalysisCloudTokenProjectLoginResponse.class);
-            if (!response.getRspcode().equals("0")) {
-                log.error("[分析云token认证失败,{}]", response.getRspdesc());
-                throw new RuntimeException(response.getRspdesc());
-            }
-        } catch (Throwable t) {
-            log.error("", t);
-            throw new RuntimeException(String.valueOf(AuthErrorEnum.ANALYSIS_CLOUD_TOKEN_LOGIN_FAILED));
-        }
+    @Override
+    public Boolean verifyParameters(HttpServletRequest request) {
+        // 从请求头中获取 username ,projectId和 token
+        String userName = request.getParameter("userName");
+        String analysisToken = request.getParameter("token");
+        String projectId = request.getParameter("projectId");
+        // 校验请求头中的参数是否存在
+        return userName != null && analysisToken != null && projectId != null;
     }
 
     @Override
