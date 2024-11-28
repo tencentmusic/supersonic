@@ -29,7 +29,6 @@ import {
   batchCreateTag,
   batchDeleteTag,
 } from '../../service';
-import { ArrowLeftOutlined } from '@ant-design/icons';
 import MetricMetricFormTable from '../../components/MetricMetricFormTable';
 import MetricFieldFormTable from '../../components/MetricFieldFormTable';
 import DimensionAndMetricRelationModal from '../../components/DimensionAndMetricRelationModal';
@@ -68,7 +67,6 @@ const MetricInfoCreateForm: React.FC<CreateFormProps> = ({
   const isEdit = !!metricItem?.id;
   const domainId = metricItem?.domainId;
   const modelId = metricItem?.modelId;
-  const [currentStep, setCurrentStep] = useState(0);
   const formValRef = useRef({} as any);
   const [form] = Form.useForm();
   const updateFormVal = (val: any) => {
@@ -827,7 +825,10 @@ const MetricInfoCreateForm: React.FC<CreateFormProps> = ({
               <span style={{ flex: 'auto' }}>{MetricSettingWording[settingKey]}</span>
 
               <span style={{ flex: 'none' }}>
-                <Button
+                <Button type="primary" onClick={handleSave}>
+                  保 存
+                </Button>
+                {/* <Button
                   size="middle"
                   type="link"
                   key="backListBtn"
@@ -839,7 +840,7 @@ const MetricInfoCreateForm: React.FC<CreateFormProps> = ({
                     <ArrowLeftOutlined />
                     返回列表页
                   </Space>
-                </Button>
+                </Button> */}
               </span>
             </div>
             <div className={styles.infoCardContainer}>
@@ -869,13 +870,6 @@ const MetricInfoCreateForm: React.FC<CreateFormProps> = ({
               >
                 {renderContent()}
               </Form>
-            </div>
-            <div className={styles.infoCardFooter}>
-              <div className={styles.infoCardFooterContainer}>
-                <Button type="primary" onClick={handleSave}>
-                  保 存
-                </Button>
-              </div>
             </div>
           </div>
           <DimensionAndMetricRelationModal

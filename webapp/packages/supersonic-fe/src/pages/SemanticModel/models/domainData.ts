@@ -2,7 +2,9 @@ import { ISemantic } from '../data';
 import { useState } from 'react';
 
 export default function Domain() {
-  const [selectDomain, setSelectDomain] = useState<ISemantic.IDomainItem>();
+  const [selectDomain, setSelectDomain] = useState<ISemantic.IDomainItem>(
+    {} as ISemantic.IDomainItem,
+  );
   const [domainList, setDomainList] = useState<ISemantic.IDomainItem[]>([]);
 
   return {

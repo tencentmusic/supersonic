@@ -11,6 +11,7 @@ import styles from '../../components/style.less';
 import { ISemantic } from '../../data';
 import { ColumnsConfig } from '../../components/TableColumnRender';
 import ViewSearchFormModal from './ViewSearchFormModal';
+import { toDatasetEditPage } from '@/pages/SemanticModel/utils';
 
 type Props = {
   // dataSetList: ISemantic.IDatasetItem[];
@@ -90,9 +91,10 @@ const DataSetTable: React.FC<Props> = ({ disabledEdit = false }) => {
         return (
           <a
             onClick={() => {
-              setEditFormStep(1);
-              setViewItem(record);
-              setCreateDataSourceModalOpen(true);
+              toDatasetEditPage(record.domainId, record.id);
+              // setEditFormStep(1);
+              // setViewItem(record);
+              // setCreateDataSourceModalOpen(true);
             }}
           >
             {name}

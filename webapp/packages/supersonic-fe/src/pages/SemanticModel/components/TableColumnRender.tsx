@@ -136,7 +136,7 @@ export const ColumnsConfig = (params?: ColumnsConfigParams) => {
       render: (_, record: ISemantic.IMetricItem) => {
         const { name, alias, bizName, classifications, id, isCollect, domainId, modelId } = record;
 
-        let url = `/metric/detail/`;
+        let url = `/metric/detail/${id}`;
         let starType: StarType = 'metric';
         if (params?.indicatorInfo) {
           url = replaceRouteParams(params.indicatorInfo.url || '', {

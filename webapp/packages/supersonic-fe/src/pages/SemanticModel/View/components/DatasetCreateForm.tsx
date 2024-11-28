@@ -8,20 +8,24 @@ import { ISemantic } from '../../data';
 import FormItemTitle from '@/components/FormHelper/FormItemTitle';
 import SelectTMEPerson from '@/components/SelectTMEPerson';
 import ViewModelConfigTransfer from './ViewModelConfigTransfer';
+import type { FormInstance } from 'antd';
 
 const FormItem = Form.Item;
 
 export type ModelCreateFormModalProps = {
-  step: number;
+  // step: number;
+  form: FormInstance;
+  activeKey: string;
   domainId: number;
   viewItem: any;
   modelList: ISemantic.IModelItem[];
   onCancel: () => void;
   onSubmit: (values: any) => void;
 };
-const { Step } = Steps;
-const ViewCreateFormModal: React.FC<ModelCreateFormModalProps> = ({
-  step = 0,
+
+const DatasetCreateForm: React.FC<ModelCreateFormModalProps> = ({
+  form,
+  activeKey,
   viewItem,
   domainId,
   onCancel,
@@ -33,7 +37,7 @@ const ViewCreateFormModal: React.FC<ModelCreateFormModalProps> = ({
     '1': 1200,
     '2': 800,
   };
-  const [currentStep, setCurrentStep] = useState(step);
+  // const [currentStep, setCurrentStep] = useState();
 
   const [formVals, setFormVals] = useState<ISemantic.IModelItem>({
     ...viewItem,
@@ -44,11 +48,11 @@ const ViewCreateFormModal: React.FC<ModelCreateFormModalProps> = ({
 
   const [saveLoading, setSaveLoading] = useState<boolean>(false);
   const [dimensionLoading, setDimensionLoading] = useState<boolean>(false);
-  const [modalWidth, setModalWidth] = useState<number>(stepWidth[`${currentStep}`]);
+  // const [modalWidth, setModalWidth] = useState<number>(stepWidth[`${currentStep}`]);
   const [selectedModelItem, setSelectedModelItem] = useState<ISemantic.IModelItem | undefined>(
     modelList[0],
   );
-  const [form] = Form.useForm();
+  // const [form] = Form.useForm();
   const configTableRef = useRef<any>();
 
   useEffect(() => {
@@ -63,6 +67,7 @@ const ViewCreateFormModal: React.FC<ModelCreateFormModalProps> = ({
   // const [tagList, setTagList] = useState<ISemantic.ITagItem[]>();
 
   useEffect(() => {
+    console.log(selectedModelItem, 'selectedModelItemselectedModelItem');
     if (selectedModelItem?.id) {
       queryDimensionList(selectedModelItem.id);
       queryMetricList(selectedModelItem.id);
@@ -114,62 +119,62 @@ const ViewCreateFormModal: React.FC<ModelCreateFormModalProps> = ({
     }
   };
 
-  const forward = () => {
-    setModalWidth(stepWidth[`${currentStep + 1}`]);
-    setCurrentStep(currentStep + 1);
-  };
-  const backward = () => {
-    setModalWidth(stepWidth[`${currentStep - 1}`]);
-    setCurrentStep(currentStep - 1);
-  };
+  // const forward = () => {
+  //   setModalWidth(stepWidth[`${currentStep + 1}`]);
+  //   setCurrentStep(currentStep + 1);
+  // };
+  // const backward = () => {
+  //   setModalWidth(stepWidth[`${currentStep - 1}`]);
+  //   setCurrentStep(currentStep - 1);
+  // };
 
-  const handleNext = async () => {
-    await form.validateFields();
-    forward();
-  };
+  // const handleNext = async () => {
+  //   await form.validateFields();
+  //   forward();
+  // };
 
-  const renderFooter = () => {
-    if (currentStep === 1) {
-      return (
-        <>
-          <Button style={{ float: 'left' }} onClick={backward}>
-            上一步
-          </Button>
-          <Button
-            type="primary"
-            loading={saveLoading}
-            onClick={() => {
-              handleConfirm();
-            }}
-          >
-            保 存
-          </Button>
-        </>
-      );
-    }
-    return (
-      <>
-        <Button onClick={onCancel}>取消</Button>
-        <Button type="primary" onClick={handleNext}>
-          下一步
-        </Button>
-        <Button
-          type="primary"
-          loading={saveLoading}
-          onClick={() => {
-            handleConfirm();
-          }}
-        >
-          保 存
-        </Button>
-      </>
-    );
-  };
+  // const renderFooter = () => {
+  //   if (currentStep === 1) {
+  //     return (
+  //       <>
+  //         <Button style={{ float: 'left' }} onClick={backward}>
+  //           上一步
+  //         </Button>
+  //         <Button
+  //           type="primary"
+  //           loading={saveLoading}
+  //           onClick={() => {
+  //             handleConfirm();
+  //           }}
+  //         >
+  //           保 存
+  //         </Button>
+  //       </>
+  //     );
+  //   }
+  //   return (
+  //     <>
+  //       <Button onClick={onCancel}>取消</Button>
+  //       <Button type="primary" onClick={handleNext}>
+  //         下一步
+  //       </Button>
+  //       <Button
+  //         type="primary"
+  //         loading={saveLoading}
+  //         onClick={() => {
+  //           handleConfirm();
+  //         }}
+  //       >
+  //         保 存
+  //       </Button>
+  //     </>
+  //   );
+  // };
 
   const renderContent = () => {
     return (
       <>
-        <div style={{ display: currentStep === 1 ? 'block' : 'none' }}>
+        <div style={{ display: activeKey === 'relation' ? 'block' : 'none' }}>
           <Spin spinning={dimensionLoading}>
             <ViewModelConfigTransfer
               key={queryType}
@@ -185,6 +190,7 @@ const ViewCreateFormModal: React.FC<ModelCreateFormModalProps> = ({
                     value={selectedModelItem?.id}
                     placeholder="请选择模型，获取当前模型下指标维度信息"
                     onChange={(val) => {
+                      console.log(val, 211111111);
                       setDimensionList(undefined);
                       setMetricList(undefined);
                       const modelItem = modelList.find((item) => item.id === val);
@@ -204,7 +210,7 @@ const ViewCreateFormModal: React.FC<ModelCreateFormModalProps> = ({
             />
           </Spin>
         </div>
-        <div style={{ display: currentStep === 0 ? 'block' : 'none' }}>
+        <div style={{ display: activeKey === 'basic' ? 'block' : 'none' }}>
           <FormItem
             name="name"
             label="数据集名称"
@@ -250,19 +256,20 @@ const ViewCreateFormModal: React.FC<ModelCreateFormModalProps> = ({
   };
 
   return (
-    <Modal
-      width={modalWidth}
-      destroyOnClose
-      title={'数据集信息'}
-      open={true}
-      maskClosable={false}
-      footer={renderFooter()}
-      onCancel={onCancel}
-    >
-      <Steps style={{ marginBottom: 28 }} size="small" current={currentStep}>
+    // <Modal
+    //   width={modalWidth}
+    //   destroyOnClose
+    //   title={'数据集信息'}
+    //   open={true}
+    //   maskClosable={false}
+    //   footer={renderFooter()}
+    //   onCancel={onCancel}
+    // >
+    <>
+      {/* <Steps style={{ marginBottom: 28 }} size="small" current={currentStep}>
         <Step title="基本信息" />
         <Step title="关联信息" />
-      </Steps>
+      </Steps> */}
       <Form
         {...formLayout}
         form={form}
@@ -274,8 +281,9 @@ const ViewCreateFormModal: React.FC<ModelCreateFormModalProps> = ({
       >
         {renderContent()}
       </Form>
-    </Modal>
+    </>
+    // </Modal>
   );
 };
 
-export default ViewCreateFormModal;
+export default DatasetCreateForm;

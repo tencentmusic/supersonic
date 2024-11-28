@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { history, useParams, useModel } from '@umijs/max';
 import ModelManagerTab from './components/ModelManagerTab';
+import { toModelList } from '@/pages/SemanticModel/utils';
 
 type Props = {};
 
@@ -21,7 +22,7 @@ const ModelManager: React.FC<Props> = ({}) => {
 
   const initModelConfig = () => {
     const currentMenuKey = menuKey === defaultTabKey ? '' : menuKey;
-    pushUrlMenu(selectDomainId, selectModelId, currentMenuKey);
+    toModelList(selectDomainId, selectModelId, currentMenuKey);
     setActiveKey(currentMenuKey);
   };
 
@@ -34,17 +35,13 @@ const ModelManager: React.FC<Props> = ({}) => {
     MrefreshMetricList({ modelId: selectModelId });
   }, [selectModelId]);
 
-  const pushUrlMenu = (domainId: number, modelId: number, menuKey: string) => {
-    history.push(`/model/domain/manager/${domainId}/${modelId}/${menuKey}`);
-  };
-
   return (
     <ModelManagerTab
       activeKey={activeKey}
       modelList={modelList}
       onMenuChange={(menuKey) => {
         setActiveKey(menuKey);
-        pushUrlMenu(selectDomainId, selectModelId, menuKey);
+        toModelList(selectDomainId, selectModelId, menuKey);
       }}
     />
   );

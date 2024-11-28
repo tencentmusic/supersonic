@@ -1,12 +1,14 @@
 import { message } from 'antd';
 import React, { useState, useEffect } from 'react';
 import { getMetricData } from '../service';
-import { useParams, useModel } from '@umijs/max';
-import styles from './style.less';
+import { useParams, useModel, Helmet } from '@umijs/max';
+import { BASE_TITLE } from '@/common/constants';
 import { ISemantic } from '../data';
-import MetricInfoEditSider from './MetricInfoEditSider';
 import MetricInfoCreateForm from './components/MetricInfoCreateForm';
-import { MetricSettingKey } from './constants';
+import DetailContainer from '../components/DetailContainer';
+import DetailSider from '../components/DetailContainer/DetailSider';
+import { ProjectOutlined, ConsoleSqlOutlined } from '@ant-design/icons';
+import { MetricSettingKey, MetricSettingWording } from './constants';
 
 type Props = Record<string, any>;
 
@@ -15,7 +17,7 @@ const MetricDetail: React.FC<Props> = () => {
   const metricId = params.metricId;
   const [metircData, setMetircData] = useState<ISemantic.IMetricItem>();
   const metricModel = useModel('SemanticModel.metricData');
-  const { selectMetric, setSelectMetric } = metricModel;
+  const { setSelectMetric } = metricModel;
   const [settingKey, setSettingKey] = useState<MetricSettingKey>(MetricSettingKey.BASIC);
 
   useEffect(() => {
@@ -41,23 +43,35 @@ const MetricDetail: React.FC<Props> = () => {
     message.error(msg);
   };
 
+  const settingList = [
+    {
+      icon: <ProjectOutlined />,
+      key: MetricSettingKey.BASIC,
+      text: MetricSettingWording[MetricSettingKey.BASIC],
+    },
+    {
+      icon: <ConsoleSqlOutlined />,
+      key: MetricSettingKey.SQL_CONFIG,
+      text: MetricSettingWording[MetricSettingKey.SQL_CONFIG],
+    },
+  ];
+
   return (
     <>
-      <div className={styles.metricEditWrapper}>
-        <div className={styles.metricDetail}>
-          <div className={styles.siderContainer}>
-            <MetricInfoEditSider
-              onSettingKeyChange={(key: string) => {
-                setSettingKey(key);
-              }}
-              metircData={metircData}
-            />
-          </div>
-          <div className={styles.tabContainer}>
-            <MetricInfoCreateForm settingKey={settingKey} metricItem={metircData} />
-          </div>
-        </div>
-      </div>
+      <Helmet title={`[指标]${metircData?.name}-${BASE_TITLE}`} />
+      <DetailContainer
+        siderNode={
+          <DetailSider
+            menuKey={MetricSettingKey.BASIC}
+            menuList={settingList}
+            detailData={metircData}
+            onMenuKeyChange={(key: string) => {
+              setSettingKey(key);
+            }}
+          />
+        }
+        containerNode={<MetricInfoCreateForm settingKey={settingKey} metricItem={metircData} />}
+      />
     </>
   );
 };

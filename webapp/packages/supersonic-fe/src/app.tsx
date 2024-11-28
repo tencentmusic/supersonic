@@ -12,6 +12,7 @@ import { publicPath } from '../config/defaultSettings';
 import { Copilot } from 'supersonic-chat-sdk';
 import { configProviderTheme } from '../config/themeSettings';
 export { request } from './services/request';
+import { BASE_TITLE } from '@/common/constants';
 import { ROUTE_AUTH_CODES } from '../config/routes';
 import AppPage from './pages/index';
 
@@ -106,12 +107,12 @@ export async function getInitialState(): Promise<{
 // }
 
 export function onRouteChange() {
-  const title = window.document.title.split('-SuperSonic')[0];
-  if (!title.includes('SuperSonic')) {
-    window.document.title = `${title}-SuperSonic`;
-  } else {
-    window.document.title = 'SuperSonic';
-  }
+  setTimeout(() => {
+    let title = window.document.title;
+    if (!title.toLowerCase().endsWith(BASE_TITLE.toLowerCase())) {
+      window.document.title = `${title}-${BASE_TITLE}`;
+    }
+  }, 100);
 }
 
 export const layout: RunTimeLayoutConfig = (params) => {

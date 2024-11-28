@@ -628,6 +628,12 @@ export function getDataSetList(domainId: number): Promise<any> {
   });
 }
 
+export function getDataSetDetail(id: number): Promise<any> {
+  return request(`${process.env.API_BASE_URL}dataSet/${id}`, {
+    method: 'GET',
+  });
+}
+
 export function createView(data: any): Promise<any> {
   return request(`${process.env.API_BASE_URL}dataSet`, {
     method: 'POST',

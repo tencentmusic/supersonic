@@ -1,60 +1,47 @@
 import { Tag, Space, Tooltip } from 'antd';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import dayjs from 'dayjs';
-import { MetricSettingKey, MetricSettingWording } from './constants';
-import { basePath } from '../../../../config/defaultSettings';
 import {
   ExportOutlined,
   SolutionOutlined,
   PartitionOutlined,
-  ProjectOutlined,
-  ConsoleSqlOutlined,
   SettingOutlined,
 } from '@ant-design/icons';
 import styles from './style.less';
-import { ISemantic } from '../data';
-import IndicatorStar from '../components/IndicatorStar';
+import IndicatorStar from '../IndicatorStar';
+import { toDomainList, toModelList } from '@/pages/SemanticModel/utils';
+import { MenuItem } from './type';
 
 type Props = {
-  metircData: ISemantic.IMetricItem;
-  onSettingKeyChange?: (key: MetricSettingKey) => void;
+  detailData: any;
+  menuKey: string;
+  menuList: MenuItem[];
+  onMenuKeyChange?: (key: string, item: MenuItem) => void;
 };
 
-const MetricInfoEditSider: React.FC<Props> = ({ metircData, onSettingKeyChange }) => {
-  const [settingKey, setSettingKey] = useState<MetricSettingKey>(MetricSettingKey.BASIC);
+const DetailSider: React.FC<Props> = ({ detailData, menuList, menuKey, onMenuKeyChange }) => {
+  const [settingKey, setSettingKey] = useState<string>(menuKey);
 
-  const settingList = [
-    {
-      icon: <ProjectOutlined />,
-      key: MetricSettingKey.BASIC,
-      text: MetricSettingWording[MetricSettingKey.BASIC],
-    },
-    {
-      icon: <ConsoleSqlOutlined />,
-      key: MetricSettingKey.SQL_CONFIG,
-      text: MetricSettingWording[MetricSettingKey.SQL_CONFIG],
-    },
-    // {
-    //   icon: <DashboardOutlined />,
-    //   key: MetricSettingKey.DIMENSION_CONFIG,
-    //   text: MetricSettingWording[MetricSettingKey.DIMENSION_CONFIG],
-    // },
-  ];
+  useEffect(() => {
+    if (menuKey) {
+      setSettingKey(menuKey);
+    }
+  }, [menuKey]);
 
   return (
-    <div className={styles.metricInfoSider}>
+    <div className={styles.DetailInfoSider}>
       <div className={styles.sectionContainer}>
-        {metircData?.id ? (
+        {detailData?.id ? (
           <div className={styles.title}>
             <div className={styles.name}>
               <Space>
-                <IndicatorStar indicatorId={metircData?.id} initState={metircData?.isCollect} />
-                {metircData?.name}
-                {metircData?.hasAdminRes && (
+                <IndicatorStar indicatorId={detailData?.id} initState={detailData?.isCollect} />
+                {detailData?.name}
+                {detailData?.hasAdminRes && (
                   <span
                     className={styles.gotoMetricListIcon}
                     onClick={() => {
-                      window.open(`${basePath}model/${metircData.domainId}/${metircData.modelId}/`);
+                      toModelList(detailData.domainId, detailData.modelId);
                     }}
                   >
                     <Tooltip title="前往所属模型指标列表">
@@ -64,7 +51,7 @@ const MetricInfoEditSider: React.FC<Props> = ({ metircData, onSettingKeyChange }
                 )}
               </Space>
             </div>
-            {metircData?.bizName && <div className={styles.bizName}>{metircData.bizName}</div>}
+            {detailData?.bizName && <div className={styles.bizName}>{detailData.bizName}</div>}
           </div>
         ) : (
           <div className={styles.createTitle}>
@@ -78,13 +65,13 @@ const MetricInfoEditSider: React.FC<Props> = ({ metircData, onSettingKeyChange }
         <hr className={styles.hr} />
         <div className={styles.section} style={{ padding: '16px 0' }}>
           <ul className={styles.settingList}>
-            {settingList.map((item) => {
+            {menuList.map((item) => {
               return (
                 <li
                   className={item.key === settingKey ? styles.active : ''}
                   key={item.key}
                   onClick={() => {
-                    onSettingKeyChange?.(item.key);
+                    onMenuKeyChange?.(item.key, item);
                     setSettingKey(item.key);
                   }}
                 >
@@ -97,8 +84,7 @@ const MetricInfoEditSider: React.FC<Props> = ({ metircData, onSettingKeyChange }
             })}
           </ul>
         </div>
-        {/* <hr className={styles.hr} /> */}
-        {metircData?.id && (
+        {detailData?.id && (
           <div className={styles.section} style={{ marginTop: 'auto' }}>
             <div className={styles.sectionTitleBox}>
               <span className={styles.sectionTitle}>
@@ -113,13 +99,13 @@ const MetricInfoEditSider: React.FC<Props> = ({ metircData, onSettingKeyChange }
               <span className={styles.itemValue}>
                 <Space>
                   <Tag icon={<PartitionOutlined />} color="#3b5999">
-                    {metircData?.modelName || '模型名为空'}
+                    {detailData?.modelName || '模型名为空'}
                   </Tag>
-                  {metircData?.hasAdminRes && (
+                  {detailData?.hasAdminRes && (
                     <span
                       className={styles.gotoMetricListIcon}
                       onClick={() => {
-                        window.open(`${basePath}model/${metircData.domainId}/0/overview`);
+                        toDomainList(detailData.domainId, 'overview');
                       }}
                     >
                       <Tooltip title="前往模型设置页">
@@ -132,31 +118,29 @@ const MetricInfoEditSider: React.FC<Props> = ({ metircData, onSettingKeyChange }
             </div>
             <div className={styles.item}>
               <span className={styles.itemLable}>创建人: </span>
-              <span className={styles.itemValue}>{metircData?.createdBy}</span>
+              <span className={styles.itemValue}>{detailData?.createdBy}</span>
             </div>
             <div className={styles.item}>
               <span className={styles.itemLable}>创建时间: </span>
               <span className={styles.itemValue}>
-                {metircData?.createdAt
-                  ? dayjs(metircData?.createdAt).format('YYYY-MM-DD HH:mm:ss')
+                {detailData?.createdAt
+                  ? dayjs(detailData?.createdAt).format('YYYY-MM-DD HH:mm:ss')
                   : ''}
               </span>
             </div>
             <div className={styles.item}>
               <span className={styles.itemLable}>更新时间: </span>
               <span className={styles.itemValue}>
-                {metircData?.createdAt
-                  ? dayjs(metircData?.updatedAt).format('YYYY-MM-DD HH:mm:ss')
+                {detailData?.createdAt
+                  ? dayjs(detailData?.updatedAt).format('YYYY-MM-DD HH:mm:ss')
                   : ''}
               </span>
             </div>
           </div>
         )}
-
-        {/* <hr className={styles.hr} /> */}
       </div>
     </div>
   );
 };
 
-export default MetricInfoEditSider;
+export default DetailSider;
