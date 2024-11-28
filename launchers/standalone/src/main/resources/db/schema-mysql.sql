@@ -15,6 +15,8 @@ CREATE TABLE IF NOT EXISTS `s2_agent` (
     `created_at` datetime DEFAULT NULL,
     `updated_by` varchar(100) COLLATE utf8_unicode_ci DEFAULT NULL,
     `updated_at` datetime DEFAULT NULL,
+    `admin` varchar(1000) COLLATE utf8_unicode_ci DEFAULT NULL,
+    `viewer` varchar(1000) COLLATE utf8_unicode_ci DEFAULT NULL,
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
