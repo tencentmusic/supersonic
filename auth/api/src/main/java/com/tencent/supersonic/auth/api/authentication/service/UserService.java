@@ -44,5 +44,5 @@ public interface UserService {
 
     void deleteUserToken(Long id);
 
-    String loginByAnalysisCloud(HttpServletRequest request);
+    User loginByAnalysisCloud(HttpServletRequest request);
 }

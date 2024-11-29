@@ -41,8 +41,3 @@ s2:
       threshold: 0.5
       min:
         threshold: 0.3
-chat:
-  model:
-    ids:
-      - 1
-      - 2

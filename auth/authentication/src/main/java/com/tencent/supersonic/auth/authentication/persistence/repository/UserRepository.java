@@ -24,6 +24,4 @@ public interface UserRepository {
     void deleteUserTokenByName(String userName);
 
     void deleteUserToken(Long tokenId);
-
-    UserDO getUserByAnalysisCloudName(String analysisCloudUserName);
 }

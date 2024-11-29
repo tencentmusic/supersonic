@@ -17,4 +17,8 @@ public class UserConstants {
 
     public static final String TOKEN_PREFIX = "Bearer";
     public static final String INTERNAL = "internal";
+
+    public static final String ANALYSIS_CLOUD_URL = "https://10.148.155.29/migunet_iam";
+    public static final String TOKEN_PATH = "/project/getProjectInfoById";
+    public static final String GET_CURRENT_USER = "/api/auth/user/getCurrentUser";
 }
