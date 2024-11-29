@@ -108,9 +108,9 @@ public abstract class S2BaseDemo implements CommandLineRunner {
         }
     }
 
-    abstract void doRun();
+    protected abstract void doRun();
 
-    abstract boolean checkNeedToRun();
+    protected abstract boolean checkNeedToRun();
 
     protected DatabaseResp addDatabaseIfNotExist() {
         List<DatabaseResp> databaseList = databaseService.getDatabaseList(defaultUser);

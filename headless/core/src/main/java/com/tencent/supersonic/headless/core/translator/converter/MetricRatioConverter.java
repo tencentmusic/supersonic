@@ -11,7 +11,7 @@ import com.tencent.supersonic.headless.core.pojo.Database;
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;
 import com.tencent.supersonic.headless.core.pojo.SqlQueryParam;
 import com.tencent.supersonic.headless.core.pojo.StructQueryParam;
-import com.tencent.supersonic.headless.core.translator.calcite.s2sql.OntologyQueryParam;
+import com.tencent.supersonic.headless.core.translator.parser.s2sql.OntologyQueryParam;
 import com.tencent.supersonic.headless.core.utils.SqlGenerateUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
