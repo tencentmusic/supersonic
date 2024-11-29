@@ -541,7 +541,7 @@ CREATE TABLE IF NOT EXISTS `s2_term` (
     PRIMARY KEY (`id`)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8 COMMENT ='术语表';
 
-CREATE TABLE `s2_user_token` (
+CREATE TABLE IF NOT EXISTS `s2_user_token` (
      `id` bigint NOT NULL AUTO_INCREMENT,
      `name` VARCHAR(255) NOT NULL,
      `user_name` VARCHAR(255)  NOT NULL,
