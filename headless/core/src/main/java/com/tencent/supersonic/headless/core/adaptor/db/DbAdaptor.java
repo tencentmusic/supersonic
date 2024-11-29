@@ -11,7 +11,7 @@ public interface DbAdaptor {
 
     String getDateFormat(String dateType, String dateFormat, String column);
 
-    String functionNameCorrector(String sql);
+    String rewriteSql(String sql);
 
     List<String> getDBs(ConnectInfo connectInfo) throws SQLException;
 

@@ -67,7 +67,8 @@ public class MetricDrillDownChecker {
             List<MetricResp> metricResps = getMetrics(metricFields, semanticSchemaResp);
             if (!checkDrillDownDimension(dimensionBizName, metricResps, semanticSchemaResp)) {
                 DimSchemaResp dimSchemaResp = semanticSchemaResp.getDimension(dimensionBizName);
-                if (Objects.nonNull(dimSchemaResp) && dimSchemaResp.isPartitionTime()) {
+                if (Objects.isNull(dimSchemaResp)
+                        || (Objects.nonNull(dimSchemaResp) && dimSchemaResp.isPartitionTime())) {
                     continue;
                 }
                 String errMsg =

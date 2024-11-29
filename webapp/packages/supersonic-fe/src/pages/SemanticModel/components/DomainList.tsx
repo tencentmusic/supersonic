@@ -1,14 +1,11 @@
-import { DownOutlined, PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
-import { Input, message, Tree, Popconfirm, Tooltip, Row, Col, Button, Menu } from 'antd';
+import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
+import { Input, message, Popconfirm, Tooltip, Row, Col, Button, Menu } from 'antd';
 import type { DataNode } from 'antd/lib/tree';
 import { useEffect, useState } from 'react';
-import type { FC, Key } from 'react';
+import type { FC } from 'react';
 import { useModel } from '@umijs/max';
 import { createDomain, updateDomain, deleteDomain } from '../service';
-import { treeParentKeyLists } from '../utils';
 import DomainInfoForm from './DomainInfoForm';
-import { constructorClassTreeFromList, addPathInTreeData } from '../utils';
-import { AppstoreOutlined } from '@ant-design/icons';
 import styles from './style.less';
 import { ISemantic } from '../data';
 
@@ -42,20 +39,15 @@ const DomainListTree: FC<DomainListProps> = ({
   onTreeSelected,
   onTreeDataUpdate,
 }) => {
-  const [projectTree, setProjectTree] = useState<DataNode[]>([]);
   const [projectInfoModalVisible, setProjectInfoModalVisible] = useState<boolean>(false);
   const [domainInfoParams, setDomainInfoParams] = useState<any>({});
   const [filterValue, setFliterValue] = useState<string>('');
-  const [expandedKeys, setExpandedKeys] = useState<string[]>([]);
   const [classList, setClassList] = useState<ISemantic.IDomainItem[]>([]);
   const domainModel = useModel('SemanticModel.domainData');
   const { selectDomainId, domainList } = domainModel;
 
   useEffect(() => {
-    const treeData = addPathInTreeData(constructorClassTreeFromList(domainList));
-    setProjectTree(treeData);
     setClassList(domainList);
-    setExpandedKeys(treeParentKeyLists(treeData));
   }, [domainList]);
 
   const onSearch = (value: any) => {
@@ -67,7 +59,7 @@ const DomainListTree: FC<DomainListProps> = ({
       return;
     }
     const targetNodeData = classList.filter((item: any) => {
-      return item.id === selectedKeys;
+      return `${item.id}` === `${selectedKeys}`;
     })[0];
     onTreeSelected?.(targetNodeData);
   };
@@ -83,20 +75,6 @@ const DomainListTree: FC<DomainListProps> = ({
       message.error(res.msg);
     }
   };
-
-  // const createDefaultModelSet = async (domainId: number) => {
-  //   const { code, msg } = await createDomain({
-  //     modelType: 'add',
-  //     type: 'normal',
-  //     parentId: domainId,
-  //     name: '默认模型集',
-  //     bizName: `defaultModelSet_${(Math.random() * 1000000).toFixed(0)}`,
-  //     isUnique: 1,
-  //   });
-  //   if (code !== 200) {
-  //     message.error(msg);
-  //   }
-  // };
 
   const domainSubmit = async (values: any) => {
     if (values.modelType === 'add') {
@@ -126,21 +104,19 @@ const DomainListTree: FC<DomainListProps> = ({
     const { id, name, path, hasEditPermission, parentId, hasModel } = node as any;
     const type = parentId === 0 ? 'top' : 'normal';
     return (
-      <div className={styles.projectItem}>
-        <span
-          className={styles.projectItemTitle}
-          onClick={() => {
-            handleSelect(id);
-          }}
-        >
-          {name}
-        </span>
+      <div
+        className={styles.projectItem}
+        // onClick={() => {
+        //   handleSelect(id);
+        // }}
+      >
+        <span className={styles.projectItemTitle}>{name}</span>
         {createDomainBtnVisible && hasEditPermission && (
           <span className={`${styles.operation}  ${styles.rowHover} `}>
             {Array.isArray(path) && path.length < 2 && !hasModel && (
               <PlusOutlined
                 className={styles.icon}
-                onClick={() => {
+                onClick={(e) => {
                   setDomainInfoParams({
                     modelType: 'add',
                     type: 'normal',
@@ -148,19 +124,21 @@ const DomainListTree: FC<DomainListProps> = ({
                     parentName: name,
                   });
                   setProjectInfoModalVisible(true);
+                  e.stopPropagation();
                 }}
               />
             )}
 
             <EditOutlined
               className={styles.icon}
-              onClick={() => {
+              onClick={(e) => {
                 setDomainInfoParams({
                   modelType: 'edit',
                   type,
                   ...node,
                 });
                 setProjectInfoModalVisible(true);
+                e.stopPropagation();
               }}
             />
             <Popconfirm
@@ -172,7 +150,12 @@ const DomainListTree: FC<DomainListProps> = ({
               okText="是"
               cancelText="否"
             >
-              <DeleteOutlined className={styles.icon} />
+              <DeleteOutlined
+                className={styles.icon}
+                onClick={(e) => {
+                  e.stopPropagation();
+                }}
+              />
             </Popconfirm>
           </span>
         )}
@@ -180,14 +163,14 @@ const DomainListTree: FC<DomainListProps> = ({
     );
   };
 
-  const projectRenderTree = filterValue ? projectTreeFlat(projectTree, filterValue) : projectTree;
-
-  const handleExpand = (_expandedKeys: Key[]) => {
-    setExpandedKeys(_expandedKeys as string[]);
-  };
-
   const items = domainList
-    .filter((domain) => domain.parentId === 0)
+    .filter((domain) => {
+      if (filterValue) {
+        return domain.parentId === 0 && domain.name.includes(filterValue);
+      } else {
+        return domain.parentId === 0;
+      }
+    })
     .map((domain: ISemantic.IDomainItem) => {
       return {
         key: domain.id,
@@ -245,6 +228,12 @@ const DomainListTree: FC<DomainListProps> = ({
               className={styles.search}
               placeholder="请输入名称搜索"
               onSearch={onSearch}
+              onChange={(e) => {
+                const value = e.target.value;
+                if (!value) {
+                  setFliterValue(value);
+                }
+              }}
             />
           </Col>
           {createDomainBtnVisible && (
@@ -265,25 +254,19 @@ const DomainListTree: FC<DomainListProps> = ({
           )}
         </Row>
       </div>
-      <Menu
-        mode="inline"
-        defaultSelectedKeys={['231']}
-        openKeys={stateOpenKeys}
-        onOpenChange={onOpenChange}
-        style={{ width: 256 }}
-        items={items}
-      />
-      {/* <Tree
-        expandedKeys={expandedKeys}
-        onExpand={handleExpand}
-        className={styles.tree}
-        selectedKeys={[selectDomainId]}
-        blockNode={true}
-        switcherIcon={<DownOutlined />}
-        defaultExpandAll={true}
-        treeData={projectRenderTree}
-        titleRender={titleRender}
-      /> */}
+      {selectDomainId && (
+        <Menu
+          mode="inline"
+          defaultSelectedKeys={[`${selectDomainId}`]}
+          openKeys={stateOpenKeys}
+          onOpenChange={onOpenChange}
+          style={{ width: 256 }}
+          items={items}
+          onClick={(info) => {
+            handleSelect(info.key);
+          }}
+        />
+      )}
       {projectInfoModalVisible && (
         <DomainInfoForm
           basicInfo={domainInfoParams}

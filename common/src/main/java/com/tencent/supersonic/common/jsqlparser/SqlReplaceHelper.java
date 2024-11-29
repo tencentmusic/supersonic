@@ -528,7 +528,7 @@ public class SqlReplaceHelper {
         }
     }
 
-    private static Select replaceAggAliasOrderItem(Select selectStatement) {
+    private static Select replaceAggAliasOrderbyField(Select selectStatement) {
         if (selectStatement instanceof PlainSelect) {
             PlainSelect plainSelect = (PlainSelect) selectStatement;
             if (Objects.nonNull(plainSelect.getOrderByElements())) {
@@ -564,15 +564,15 @@ public class SqlReplaceHelper {
             if (plainSelect.getFromItem() instanceof ParenthesedSelect) {
                 ParenthesedSelect parenthesedSelect = (ParenthesedSelect) plainSelect.getFromItem();
                 parenthesedSelect
-                        .setSelect(replaceAggAliasOrderItem(parenthesedSelect.getSelect()));
+                        .setSelect(replaceAggAliasOrderbyField(parenthesedSelect.getSelect()));
             }
             return selectStatement;
         }
         return selectStatement;
     }
 
-    public static String replaceAggAliasOrderItem(String sql) {
-        Select selectStatement = replaceAggAliasOrderItem(SqlSelectHelper.getSelect(sql));
+    public static String replaceAggAliasOrderbyField(String sql) {
+        Select selectStatement = replaceAggAliasOrderbyField(SqlSelectHelper.getSelect(sql));
         return selectStatement.toString();
     }
 

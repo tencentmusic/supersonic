@@ -1,4 +1,4 @@
--------S2VisitsDemo
+-- S2VisitsDemo
 insert into s2_user_department (user_name, department) values ('jack','HR');
 insert into s2_user_department (user_name, department) values ('tom','sales');
 insert into s2_user_department (user_name, department) values ('lucy','marketing');
@@ -1019,7 +1019,7 @@ INSERT INTO s2_stay_time_statis (imp_date, user_name, stay_hours, page) VALUES (
 INSERT INTO s2_stay_time_statis (imp_date, user_name, stay_hours, page) VALUES (DATE_SUB(CURRENT_DATE(), INTERVAL 15 DAY), 'lucy', '0.8124302447925607', 'p4');
 INSERT INTO s2_stay_time_statis (imp_date, user_name, stay_hours, page) VALUES (DATE_SUB(CURRENT_DATE(), INTERVAL 8 DAY), 'lucy', '0.039935860913407284', 'p2');
 
--------S2ArtistDemo
+-- S2ArtistDemo
 INSERT INTO singer (singer_name, act_area, song_name, genre, js_play_cnt, down_cnt, favor_cnt)
 VALUES ('周杰伦', '港台', '青花瓷', '国风', 1000000, 1000000, 1000000);
 

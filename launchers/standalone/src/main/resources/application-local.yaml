@@ -12,3 +12,23 @@ spring:
     console:
       path: /h2-console/semantic
       enabled: true
+
+### Comment out following lines if using MySQL
+#spring:
+#  datasource:
+#    driver-class-name: com.mysql.cj.jdbc.Driver
+#    url: jdbc:mysql://localhost:3306/s2_database?user=root
+#    username: root
+#    password:
+#  sql:
+#    enabled: true
+#    mode: always
+#    username: root
+#    password:
+#    init:
+#      schema-locations: classpath:db/schema-mysql.sql,classpath:db/schema-mysql-demo.sql
+#      data-locations: classpath:db/data-mysql.sql,classpath:db/data-mysql-demo.sql
+#  h2:
+#    console:
+#      path: /h2-console/semantic
+#      enabled: true

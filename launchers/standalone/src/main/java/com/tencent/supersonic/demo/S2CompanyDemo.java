@@ -7,26 +7,12 @@ import com.tencent.supersonic.chat.server.agent.Agent;
 import com.tencent.supersonic.chat.server.agent.AgentToolType;
 import com.tencent.supersonic.chat.server.agent.DatasetTool;
 import com.tencent.supersonic.chat.server.agent.ToolConfig;
-import com.tencent.supersonic.chat.server.processor.execute.DataInterpretProcessor;
 import com.tencent.supersonic.common.pojo.ChatApp;
 import com.tencent.supersonic.common.pojo.JoinCondition;
 import com.tencent.supersonic.common.pojo.ModelRela;
-import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
-import com.tencent.supersonic.common.pojo.enums.AppModule;
-import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
-import com.tencent.supersonic.common.pojo.enums.TimeMode;
-import com.tencent.supersonic.common.pojo.enums.TypeEnums;
+import com.tencent.supersonic.common.pojo.enums.*;
 import com.tencent.supersonic.common.util.ChatAppManager;
-import com.tencent.supersonic.headless.api.pojo.AggregateTypeDefaultConfig;
-import com.tencent.supersonic.headless.api.pojo.DataSetDetail;
-import com.tencent.supersonic.headless.api.pojo.DataSetModelConfig;
-import com.tencent.supersonic.headless.api.pojo.Dim;
-import com.tencent.supersonic.headless.api.pojo.DimensionTimeTypeParams;
-import com.tencent.supersonic.headless.api.pojo.Identify;
-import com.tencent.supersonic.headless.api.pojo.Measure;
-import com.tencent.supersonic.headless.api.pojo.ModelDetail;
-import com.tencent.supersonic.headless.api.pojo.QueryConfig;
-import com.tencent.supersonic.headless.api.pojo.TimeDefaultConfig;
+import com.tencent.supersonic.headless.api.pojo.*;
 import com.tencent.supersonic.headless.api.pojo.enums.DimensionType;
 import com.tencent.supersonic.headless.api.pojo.enums.IdentifyType;
 import com.tencent.supersonic.headless.api.pojo.request.DataSetReq;
@@ -40,11 +26,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Component
 @Slf4j
@@ -59,8 +41,8 @@ public class S2CompanyDemo extends S2BaseDemo {
             ModelResp model_brand = addModel_2(domain, demoDatabase);
             ModelResp model_brand_revenue = addModel_3(domain, demoDatabase);
 
-            addModelRela(domain, model_company, model_brand, "company_id");
-            addModelRela(domain, model_brand, model_brand_revenue, "brand_id");
+            addModelRela(domain, model_brand, model_company, "company_id");
+            addModelRela(domain, model_brand_revenue, model_brand, "brand_id");
 
             DataSetResp dataset = addDataSet(domain);
             addAgent(dataset.getId());
@@ -70,7 +52,7 @@ public class S2CompanyDemo extends S2BaseDemo {
     }
 
     @Override
-    boolean checkNeedToRun() {
+    protected boolean checkNeedToRun() {
         List<DomainResp> domainList = domainService.getDomainList();
         for (DomainResp domainResp : domainList) {
             if (domainResp.getBizName().equalsIgnoreCase("corporate")) {
@@ -124,8 +106,7 @@ public class S2CompanyDemo extends S2BaseDemo {
         modelDetail.setMeasures(measures);
 
         modelDetail.setQueryType("sql_query");
-        modelDetail.setSqlQuery("SELECT company_id,company_name,headquarter_address,"
-                + "company_established_time,founder,ceo,annual_turnover,employee_count FROM company");
+        modelDetail.setSqlQuery("SELECT * FROM company");
         modelReq.setModelDetail(modelDetail);
         ModelResp companyModel = modelService.createModel(modelReq, defaultUser);
 
@@ -164,8 +145,7 @@ public class S2CompanyDemo extends S2BaseDemo {
         modelDetail.setMeasures(measures);
 
         modelDetail.setQueryType("sql_query");
-        modelDetail.setSqlQuery("SELECT brand_id,brand_name,brand_established_time,"
-                + "company_id,legal_representative,registered_capital FROM brand");
+        modelDetail.setSqlQuery("SELECT * FROM brand");
         modelReq.setModelDetail(modelDetail);
         ModelResp brandModel = modelService.createModel(modelReq, defaultUser);
 
@@ -205,8 +185,7 @@ public class S2CompanyDemo extends S2BaseDemo {
         modelDetail.setMeasures(measures);
 
         modelDetail.setQueryType("sql_query");
-        modelDetail.setSqlQuery("SELECT year_time,brand_id,revenue,profit,"
-                + "revenue_growth_year_on_year,profit_growth_year_on_year FROM brand_revenue");
+        modelDetail.setSqlQuery("SELECT * FROM brand_revenue");
         modelReq.setModelDetail(modelDetail);
         return modelService.createModel(modelReq, defaultUser);
     }
@@ -245,7 +224,7 @@ public class S2CompanyDemo extends S2BaseDemo {
         modelRelaReq.setDomainId(domain.getId());
         modelRelaReq.setFromModelId(fromModel.getId());
         modelRelaReq.setToModelId(toModel.getId());
-        modelRelaReq.setJoinType("left join");
+        modelRelaReq.setJoinType("inner join");
         modelRelaReq.setJoinConditions(joinConditions);
         modelRelaService.save(modelRelaReq, defaultUser);
     }
@@ -272,7 +251,6 @@ public class S2CompanyDemo extends S2BaseDemo {
         Map<String, ChatApp> chatAppConfig =
                 Maps.newHashMap(ChatAppManager.getAllApps(AppModule.CHAT));
         chatAppConfig.values().forEach(app -> app.setChatModelId(demoChatModel.getId()));
-        chatAppConfig.get(DataInterpretProcessor.APP_KEY).setEnable(true);
         agent.setChatAppConfig(chatAppConfig);
 
         agentService.createAgent(agent, defaultUser);

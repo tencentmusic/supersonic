@@ -155,7 +155,7 @@ const ClassMetricTable: React.FC<Props> = ({}) => {
 
   const columnsConfig = ColumnsConfig({
     indicatorInfo: {
-      url: '/tag/detail/',
+      url: '/tag/detail/:indicatorId',
       starType: 'tag',
     },
   });
