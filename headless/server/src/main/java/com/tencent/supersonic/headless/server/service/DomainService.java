@@ -5,6 +5,7 @@ import com.tencent.supersonic.common.pojo.enums.AuthType;
 import com.tencent.supersonic.headless.api.pojo.request.DomainReq;
 import com.tencent.supersonic.headless.api.pojo.request.DomainUpdateReq;
 import com.tencent.supersonic.headless.api.pojo.response.DomainResp;
+import com.tencent.supersonic.headless.server.persistence.dataobject.DomainDO;
 
 import java.util.List;
 import java.util.Map;
@@ -31,6 +32,8 @@ public interface DomainService {
     List<DomainResp> getDomainListWithAdminAuth(User user);
 
     Set<DomainResp> getDomainAuthSet(User user, AuthType authTypeEnum);
+
+    List<DomainDO> getDomainByBizName(String bizName);
 
     Set<DomainResp> getDomainChildren(List<Long> domainId);
 }

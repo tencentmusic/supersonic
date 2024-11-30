@@ -51,8 +51,8 @@ public class ModelController {
     }
 
     @PostMapping("/createModelBatch")
-    public Boolean createModelBatch(@RequestBody ModelBuildReq modelBuildReq, HttpServletRequest request,
-                               HttpServletResponse response) throws Exception {
+    public Boolean createModelBatch(@RequestBody ModelBuildReq modelBuildReq,
+            HttpServletRequest request, HttpServletResponse response) throws Exception {
         User user = UserHolder.findUser(request, response);
         modelService.createModel(modelBuildReq, user);
         return true;
