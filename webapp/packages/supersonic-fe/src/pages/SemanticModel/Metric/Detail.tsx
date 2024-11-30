@@ -33,6 +33,9 @@ const MetricDetail: React.FC<Props> = () => {
   }, [metricId]);
 
   const queryMetricData = async (metricId: string) => {
+    if (!metricId) {
+      return;
+    }
     const { code, data, msg } = await getMetricData(metricId);
     if (code === 200) {
       setMetircData({ ...data });
@@ -104,7 +107,9 @@ const MetricDetail: React.FC<Props> = () => {
 
   return (
     <>
-      <Helmet title={`[指标]${metircData?.name}-${BASE_TITLE}`} />
+      <Helmet
+        title={`${metircData?.id ? `[指标]${metircData?.name}-${BASE_TITLE}` : '新建指标'}`}
+      />
       <div className={styles.metricDetailWrapper}>
         <div className={styles.metricDetail}>
           <div className={styles.siderContainer}>

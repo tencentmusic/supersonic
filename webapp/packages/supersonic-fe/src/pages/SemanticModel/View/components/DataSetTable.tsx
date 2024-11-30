@@ -91,7 +91,7 @@ const DataSetTable: React.FC<Props> = ({ disabledEdit = false }) => {
         return (
           <a
             onClick={() => {
-              toDatasetEditPage(record.domainId, record.id);
+              toDatasetEditPage(record.domainId, record.id, 'relation');
               // setEditFormStep(1);
               // setViewItem(record);
               // setCreateDataSourceModalOpen(true);
@@ -145,9 +145,10 @@ const DataSetTable: React.FC<Props> = ({ disabledEdit = false }) => {
             <a
               key="metricEditBtn"
               onClick={() => {
-                setEditFormStep(0);
-                setViewItem(record);
-                setCreateDataSourceModalOpen(true);
+                toDatasetEditPage(record.domainId, record.id);
+                // setEditFormStep(0);
+                // setViewItem(record);
+                // setCreateDataSourceModalOpen(true);
               }}
             >
               编辑

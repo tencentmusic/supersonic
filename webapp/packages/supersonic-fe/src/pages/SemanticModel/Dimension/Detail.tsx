@@ -1,13 +1,13 @@
-import { message, Form } from 'antd';
+import { message } from 'antd';
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useModel, Helmet } from '@umijs/max';
 import { BASE_TITLE } from '@/common/constants';
-import { ISemantic } from '../../data';
-import { getAllModelByDomainId, getDataSetDetail } from '../../service';
+import { ISemantic } from '../data';
+import { getDimensionList } from '../service';
 import DetailContainer from '@/pages/SemanticModel/components/DetailContainer';
 import DetailSider from '@/pages/SemanticModel/components/DetailContainer/DetailSider';
 import { ProjectOutlined, ConsoleSqlOutlined } from '@ant-design/icons';
-import DatasetCreateForm from './DatasetCreateForm';
+import DimensionInfoForm from '../components/DimensionInfoForm';
 import DetailFormWrapper from '@/pages/SemanticModel/components/DetailContainer/DetailFormWrapper';
 
 type Props = Record<string, any>;
@@ -19,19 +19,15 @@ const DataSetDetail: React.FC<Props> = () => {
       key: 'basic',
       text: '基本信息',
     },
-    {
-      icon: <ConsoleSqlOutlined />,
-      key: 'relation',
-      text: '关联信息',
-    },
   ];
   const params: any = useParams();
-  const detailId = params.datasetId;
+  const detailId = params.dimensionId;
+  const modelId = params.modelId;
+  const domainId = params.domainId;
   const menuKey = params.menuKey;
-  const [detailData, setDetailData] = useState<ISemantic.IDatasetItem>();
-  const domainModel = useModel('SemanticModel.domainData');
-  const { selectDomainId, setSelectDataSet } = domainModel;
-  const [modelList, setModelList] = useState<ISemantic.IModelItem[]>([]);
+  const [detailData, setDetailData] = useState<ISemantic.IDimensionItem>();
+  const dimensionModel = useModel('SemanticModel.dimensionData');
+  const { setSelectDimension } = dimensionModel;
   const [activeMenu, setActiveMenu] = useState<any>(() => {
     if (menuKey) {
       const target = settingList.find((item) => item.key === menuKey);
@@ -46,7 +42,7 @@ const DataSetDetail: React.FC<Props> = () => {
 
   useEffect(() => {
     return () => {
-      setSelectDataSet(undefined);
+      setSelectDimension(undefined);
     };
   }, []);
 
@@ -57,27 +53,12 @@ const DataSetDetail: React.FC<Props> = () => {
     queryDetailData(detailId);
   }, [detailId]);
 
-  useEffect(() => {
-    if (!selectDomainId) {
-      return;
-    }
-    queryDomainAllModel();
-  }, [selectDomainId]);
-
-  const queryDomainAllModel = async () => {
-    const { code, data, msg } = await getAllModelByDomainId(selectDomainId);
-    if (code === 200) {
-      setModelList(data);
-    } else {
-      message.error(msg);
-    }
-  };
-
   const queryDetailData = async (id: number) => {
-    const { code, data, msg } = await getDataSetDetail(id);
+    const { code, data, msg } = await getDimensionList({ ids: [id] });
     if (code === 200) {
-      setDetailData(data);
-      setSelectDataSet(data);
+      const target = data?.list?.[0];
+      setDetailData(target);
+      setSelectDimension(target);
       return;
     }
     message.error(msg);
@@ -93,7 +74,6 @@ const DataSetDetail: React.FC<Props> = () => {
             menuList={settingList}
             detailData={detailData}
             onMenuKeyChange={(key: string, menu) => {
-              // setSettingKey(key);
               setActiveMenu(menu);
             }}
           />
@@ -105,12 +85,11 @@ const DataSetDetail: React.FC<Props> = () => {
               detailFormRef.current.onSave();
             }}
           >
-            <DatasetCreateForm
+            <DimensionInfoForm
               ref={detailFormRef}
-              activeKey={activeMenu.key}
-              domainId={selectDomainId}
-              datasetItem={detailData}
-              modelList={modelList}
+              modelId={modelId}
+              domainId={domainId}
+              dimensionItem={detailData}
             />
           </DetailFormWrapper>
         }

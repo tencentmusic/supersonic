@@ -146,8 +146,8 @@ const ClassMetricTable: React.FC<Props> = ({ onEmptyMetricData }) => {
   const columnsConfig = ColumnsConfig({
     indicatorInfo: {
       url: '/model/metric/:domainId/:modelId/:indicatorId',
-      onNameClick: (record: ISemantic.IMetricItem) => {
-        setSelectMetric(record);
+      onNameClick: (record) => {
+        setSelectMetric(record as ISemantic.IMetricItem);
       },
     },
   });
@@ -460,8 +460,9 @@ const ClassMetricTable: React.FC<Props> = ({ onEmptyMetricData }) => {
             key="create"
             type="primary"
             onClick={() => {
-              setMetricItem(undefined);
-              setCreateModalVisible(true);
+              toMetricEditPage(selectDomainId, modelId!, 0);
+              // setMetricItem(undefined);
+              // setCreateModalVisible(true);
             }}
           >
             创建指标

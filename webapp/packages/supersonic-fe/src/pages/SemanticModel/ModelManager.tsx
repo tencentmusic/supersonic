@@ -22,7 +22,7 @@ const ModelManager: React.FC<Props> = ({}) => {
 
   const initModelConfig = () => {
     const currentMenuKey = menuKey === defaultTabKey ? '' : menuKey;
-    toModelList(selectDomainId, selectModelId, currentMenuKey);
+    toModelList(selectDomainId, selectModelId!, currentMenuKey);
     setActiveKey(currentMenuKey);
   };
 
@@ -41,7 +41,7 @@ const ModelManager: React.FC<Props> = ({}) => {
       modelList={modelList}
       onMenuChange={(menuKey) => {
         setActiveKey(menuKey);
-        toModelList(selectDomainId, selectModelId, menuKey);
+        toModelList(selectDomainId, selectModelId!, menuKey);
       }}
     />
   );

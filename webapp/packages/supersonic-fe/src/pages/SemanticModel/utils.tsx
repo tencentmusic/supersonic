@@ -253,10 +253,26 @@ export const toModelList = (domainId: number, modelId: number, menuKey?: string)
   history.push(`/model/domain/manager/${domainId}/${modelId}${menuKey ? `/${menuKey}` : ''}`);
 };
 
-export const toMetricEditPage = (domainId: number, modelId: number, metircId: number) => {
-  history.push(`/model/metric/${domainId}/${modelId}/${metircId}`);
+export const toMetricEditPage = (
+  domainId: number,
+  modelId: number,
+  metircId: number,
+  menuKey?: string,
+) => {
+  history.push(`/model/metric/${domainId}/${modelId}/${metircId}${menuKey ? `/${menuKey}` : ''}`);
 };
 
-export const toDatasetEditPage = (domainId: number, datasetId: number) => {
-  history.push(`/model/dataset/${domainId}/${datasetId}`);
+export const toDatasetEditPage = (domainId: number, datasetId: number, menuKey?: string) => {
+  history.push(`/model/dataset/${domainId}/${datasetId}${menuKey ? `/${menuKey}` : ''}`);
+};
+
+export const toDimensionEditPage = (
+  domainId: number,
+  modelId: number,
+  dimensionId: number,
+  menuKey?: string,
+) => {
+  history.push(
+    `/model/dimension/${domainId}/${modelId}/${dimensionId}${menuKey ? `/${menuKey}` : ''}`,
+  );
 };

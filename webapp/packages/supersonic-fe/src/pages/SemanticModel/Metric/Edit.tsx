@@ -14,7 +14,9 @@ type Props = Record<string, any>;
 
 const MetricDetail: React.FC<Props> = () => {
   const params: any = useParams();
-  const metricId = params.metricId;
+  const metricId = +params.metricId;
+  const modelId = +params.modelId;
+  const domainId = +params.domainId;
   const [metircData, setMetircData] = useState<ISemantic.IMetricItem>();
   const metricModel = useModel('SemanticModel.metricData');
   const { setSelectMetric } = metricModel;
@@ -33,7 +35,10 @@ const MetricDetail: React.FC<Props> = () => {
     };
   }, []);
 
-  const queryMetricData = async (metricId: string) => {
+  const queryMetricData = async (metricId: number) => {
+    if (!metricId) {
+      return;
+    }
     const { code, data, msg } = await getMetricData(metricId);
     if (code === 200) {
       setMetircData({ ...data });
@@ -58,7 +63,11 @@ const MetricDetail: React.FC<Props> = () => {
 
   return (
     <>
-      <Helmet title={`[指标]${metircData?.name}-${BASE_TITLE}`} />
+      <Helmet
+        title={`${
+          metircData?.id ? `[指标]${metircData?.name}-${BASE_TITLE}` : `新建指标-${BASE_TITLE}`
+        }`}
+      />
       <DetailContainer
         siderNode={
           <DetailSider
@@ -70,7 +79,14 @@ const MetricDetail: React.FC<Props> = () => {
             }}
           />
         }
-        containerNode={<MetricInfoCreateForm settingKey={settingKey} metricItem={metircData} />}
+        containerNode={
+          <MetricInfoCreateForm
+            settingKey={settingKey}
+            metricItem={metircData}
+            modelId={metircData?.modelId || modelId}
+            domainId={metircData?.domainId || domainId}
+          />
+        }
       />
     </>
   );

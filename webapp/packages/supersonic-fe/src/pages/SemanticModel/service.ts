@@ -50,9 +50,6 @@ export function getDimensionList(data: any): Promise<any> {
       ...(modelId ? { modelIds: [modelId] } : {}),
     },
   };
-  if (getRunningEnv() === 'chat') {
-    return request.post(`${process.env.CHAT_API_BASE_URL}conf/dimension/page`, queryParams);
-  }
   return request.post(`${process.env.API_BASE_URL}dimension/queryDimension`, queryParams);
 }
 

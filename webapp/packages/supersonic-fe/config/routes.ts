@@ -95,10 +95,27 @@ const ROUTES = [
         path: '/model/dataset/:domainId/:datasetId',
         component: './SemanticModel/View/components/Detail',
         envEnableList: [ENV_KEY.SEMANTIC],
+        routes: [
+          {
+            path: '/model/dataset/:domainId/:datasetId/:menuKey',
+            component: './SemanticModel/View/components/Detail',
+          },
+        ],
       },
       {
         path: '/model/metric/:domainId/:modelId/:metricId',
         component: './SemanticModel/Metric/Edit',
+        envEnableList: [ENV_KEY.SEMANTIC],
+        // routes: [
+        //   {
+        //     path: '/model/manager/:domainId/:modelId/:menuKey',
+        //     component: './SemanticModel/ModelManager',
+        //   },
+        // ],
+      },
+      {
+        path: '/model/dimension/:domainId/:modelId/:dimensionId',
+        component: './SemanticModel/Dimension/Detail',
         envEnableList: [ENV_KEY.SEMANTIC],
         // routes: [
         //   {

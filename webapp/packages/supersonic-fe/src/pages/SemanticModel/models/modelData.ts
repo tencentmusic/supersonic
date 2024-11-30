@@ -1,12 +1,24 @@
 import { ISemantic } from '../data';
 import { message } from 'antd';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useModel } from '@umijs/max';
 import { getModelList } from '../service';
 
 export default function Model() {
   const [selectModel, setSelectModel] = useState<ISemantic.IModelItem>();
   const [modelList, setModelList] = useState<ISemantic.IModelItem[]>([]);
   const [modelTableHistoryParams, setModelTableHistoryParams] = useState<Record<string, any>>({});
+
+  const metricModel = useModel('SemanticModel.metricData');
+  const dimensionModel = useModel('SemanticModel.dimensionData');
+
+  const { setSelectDimension } = dimensionModel;
+  const { setSelectMetric } = metricModel;
+
+  useEffect(() => {
+    setSelectDimension(undefined);
+    setSelectMetric(undefined);
+  }, [selectModel]);
 
   const mergeParams = (params: Record<string, any>) => {
     setModelTableHistoryParams({

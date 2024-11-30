@@ -35,7 +35,12 @@ const DetailSider: React.FC<Props> = ({ detailData, menuList, menuKey, onMenuKey
           <div className={styles.title}>
             <div className={styles.name}>
               <Space>
-                <IndicatorStar indicatorId={detailData?.id} initState={detailData?.isCollect} />
+                {detailData?.isCollect !== undefined ? (
+                  <IndicatorStar indicatorId={detailData?.id} initState={detailData?.isCollect} />
+                ) : (
+                  <div style={{ width: 15 }}></div>
+                )}
+
                 {detailData?.name}
                 {detailData?.hasAdminRes && (
                   <span
@@ -94,28 +99,31 @@ const DetailSider: React.FC<Props> = ({ detailData, menuList, menuKey, onMenuKey
                 </Space>
               </span>
             </div>
-            <div className={styles.item}>
-              <span className={styles.itemLable}>所属模型: </span>
-              <span className={styles.itemValue}>
-                <Space>
-                  <Tag icon={<PartitionOutlined />} color="#3b5999">
-                    {detailData?.modelName || '模型名为空'}
-                  </Tag>
-                  {detailData?.hasAdminRes && (
-                    <span
-                      className={styles.gotoMetricListIcon}
-                      onClick={() => {
-                        toDomainList(detailData.domainId, 'overview');
-                      }}
-                    >
-                      <Tooltip title="前往模型设置页">
-                        <ExportOutlined />
-                      </Tooltip>
-                    </span>
-                  )}
-                </Space>
-              </span>
-            </div>
+            {detailData?.modelName && (
+              <div className={styles.item}>
+                <span className={styles.itemLable}>所属模型: </span>
+                <span className={styles.itemValue}>
+                  <Space>
+                    <Tag icon={<PartitionOutlined />} color="#3b5999">
+                      {detailData?.modelName || '模型名为空'}
+                    </Tag>
+                    {detailData?.hasAdminRes && (
+                      <span
+                        className={styles.gotoMetricListIcon}
+                        onClick={() => {
+                          toDomainList(detailData.domainId, 'overview');
+                        }}
+                      >
+                        <Tooltip title="前往模型设置页">
+                          <ExportOutlined />
+                        </Tooltip>
+                      </span>
+                    )}
+                  </Space>
+                </span>
+              </div>
+            )}
+
             <div className={styles.item}>
               <span className={styles.itemLable}>创建人: </span>
               <span className={styles.itemValue}>{detailData?.createdBy}</span>

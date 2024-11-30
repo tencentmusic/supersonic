@@ -161,7 +161,7 @@ const ViewModelConfigTransfer: React.FC<Props> = forwardRef(
         setSelectedTransferKeys(transferKeys);
         setViewModelConfigsMap(viewConfigMap);
       }
-    }, [queryType]);
+    }, [queryType, viewItem]);
 
     useEffect(() => {
       if (queryType !== TransType.METRIC) {

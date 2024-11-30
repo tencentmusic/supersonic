@@ -165,7 +165,6 @@ const ViewCreateFormModal: React.FC<ModelCreateFormModalProps> = ({
       </>
     );
   };
-
   const renderContent = () => {
     return (
       <>
