@@ -79,8 +79,8 @@ public class S2VisitsDemo extends S2BaseDemo {
             ModelResp userModel = addModel_1(s2Domain, demoDatabase);
             ModelResp pvUvModel = addModel_2(s2Domain, demoDatabase);
             ModelResp stayTimeModel = addModel_3(s2Domain, demoDatabase);
-            addModelRela(s2Domain, userModel, pvUvModel, "user_name");
-            addModelRela(s2Domain, userModel, stayTimeModel, "user_name");
+            addModelRela(s2Domain, pvUvModel, userModel, "user_name");
+            addModelRela(s2Domain, stayTimeModel, userModel, "user_name");
 
             // create metrics and dimensions
             DimensionResp departmentDimension = getDimension("department", userModel);
@@ -146,7 +146,8 @@ public class S2VisitsDemo extends S2BaseDemo {
         agent.setStatus(1);
         agent.setEnableSearch(1);
         agent.setExamples(Lists.newArrayList("近15天超音数访问次数汇总", "按部门统计超音数的访问人数", "对比alice和lucy的停留时长",
-                "过去30天访问次数最高的部门top3", "近1个月总访问次数超过100次的部门有几个", "过去半个月每个核心用户的总停留时长"));
+                "过去30天访问次数最高的部门top3", "近1个月总访问次数超过100次的部门有几个", "过去半个月每个核心用户的总停留时长",
+                "今年以来访问次数最高的一天是哪一天"));
 
         // configure tools
         ToolConfig toolConfig = new ToolConfig();
@@ -198,6 +199,7 @@ public class S2VisitsDemo extends S2BaseDemo {
 
         List<Dim> dimensions = new ArrayList<>();
         dimensions.add(new Dim("部门", "department", DimensionType.categorical, 1));
+        // dimensions.add(new Dim("用户", "user_name", DimensionType.categorical, 1));
         modelDetail.setDimensions(dimensions);
         List<Field> fields = Lists.newArrayList();
         fields.add(Field.builder().fieldName("user_name").dataType("Varchar").build());
@@ -382,9 +384,9 @@ public class S2VisitsDemo extends S2BaseDemo {
         metricReq.setDescription("访问的用户个数");
         metricReq.setAlias("UV,访问人数");
         MetricDefineByFieldParams metricTypeParams = new MetricDefineByFieldParams();
-        metricTypeParams.setExpr("count(distinct user_id)");
+        metricTypeParams.setExpr("count(distinct user_name)");
         List<FieldParam> fieldParams = new ArrayList<>();
-        fieldParams.add(new FieldParam("user_id"));
+        fieldParams.add(new FieldParam("user_name"));
         metricTypeParams.setFields(fieldParams);
         metricReq.setMetricDefineByFieldParams(metricTypeParams);
         metricReq.setMetricDefineType(MetricDefineType.FIELD);

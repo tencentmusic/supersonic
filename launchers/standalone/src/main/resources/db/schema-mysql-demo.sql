@@ -1,4 +1,4 @@
--------S2VisitsDemo
+-- S2VisitsDemo
 CREATE TABLE IF NOT EXISTS `s2_user_department` (
       `user_name` varchar(200) NOT NULL,
        `department` varchar(200) NOT NULL
@@ -27,7 +27,7 @@ CREATE TABLE IF NOT EXISTS `singer` (
     `favor_cnt` bigint DEFAULT NULL
 )ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--------S2ArtistDemo
+-- S2ArtistDemo
 CREATE TABLE IF NOT EXISTS `genre` (
     `g_name` varchar(20) NOT NULL , -- genre name
     `rating` INT ,

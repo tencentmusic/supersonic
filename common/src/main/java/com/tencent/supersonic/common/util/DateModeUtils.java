@@ -4,6 +4,7 @@ import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.common.pojo.ItemDateResp;
 import com.tencent.supersonic.common.pojo.enums.DatePeriodEnum;
+import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -32,14 +33,9 @@ import static com.tencent.supersonic.common.pojo.Constants.MONTH_FORMAT;
 @Data
 public class DateModeUtils {
 
-    @Value("${s2.query.parameter.sys.date:sys_imp_date}")
-    private String sysDateCol;
-
-    @Value("${s2.query.parameter.sys.month:sys_imp_month}")
-    private String sysDateMonthCol;
-
-    @Value("${s2.query.parameter.sys.month:sys_imp_week}")
-    private String sysDateWeekCol;
+    private final String sysDateCol = TimeDimensionEnum.DAY.getName();
+    private final String sysDateMonthCol = TimeDimensionEnum.MONTH.getName();
+    private final String sysDateWeekCol = TimeDimensionEnum.WEEK.getName();
 
     @Value("${s2.query.parameter.sys.zipper.begin:start_}")
     private String sysZipperDateColBegin;

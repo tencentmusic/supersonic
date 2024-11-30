@@ -4,9 +4,9 @@ import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.headless.core.cache.QueryCache;
 import com.tencent.supersonic.headless.core.executor.QueryAccelerator;
 import com.tencent.supersonic.headless.core.executor.QueryExecutor;
-import com.tencent.supersonic.headless.core.translator.QueryOptimizer;
-import com.tencent.supersonic.headless.core.translator.QueryParser;
 import com.tencent.supersonic.headless.core.translator.converter.QueryConverter;
+import com.tencent.supersonic.headless.core.translator.optimizer.QueryOptimizer;
+import com.tencent.supersonic.headless.core.translator.parser.QueryParser;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.support.SpringFactoriesLoader;
 

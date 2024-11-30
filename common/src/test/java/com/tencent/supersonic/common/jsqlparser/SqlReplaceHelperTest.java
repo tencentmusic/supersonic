@@ -325,10 +325,10 @@ class SqlReplaceHelperTest {
     }
 
     @Test
-    void testReplaceAggAliasOrderItem() {
+    void testReplaceAggAliasOrderbyField() {
         String sql = "SELECT SUM(访问次数) AS top10总播放量 FROM (SELECT 部门, SUM(访问次数) AS 访问次数 FROM 超音数  "
                 + "GROUP BY 部门 ORDER BY SUM(访问次数) DESC LIMIT 10) AS top10";
-        String replaceSql = SqlReplaceHelper.replaceAggAliasOrderItem(sql);
+        String replaceSql = SqlReplaceHelper.replaceAggAliasOrderbyField(sql);
         Assert.assertEquals(
                 "SELECT SUM(访问次数) AS top10总播放量 FROM (SELECT 部门, SUM(访问次数) AS 访问次数 FROM 超音数 "
                         + "GROUP BY 部门 ORDER BY 2 DESC LIMIT 10) AS top10",

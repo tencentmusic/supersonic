@@ -12,7 +12,6 @@ import com.tencent.supersonic.common.util.DateModeUtils;
 import com.tencent.supersonic.common.util.SqlFilterUtils;
 import com.tencent.supersonic.common.util.StringUtil;
 import com.tencent.supersonic.headless.api.pojo.Measure;
-import com.tencent.supersonic.headless.api.pojo.QueryParam;
 import com.tencent.supersonic.headless.api.pojo.enums.AggOption;
 import com.tencent.supersonic.headless.api.pojo.enums.MetricDefineType;
 import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
@@ -20,6 +19,7 @@ import com.tencent.supersonic.headless.api.pojo.response.DimSchemaResp;
 import com.tencent.supersonic.headless.api.pojo.response.MetricResp;
 import com.tencent.supersonic.headless.api.pojo.response.MetricSchemaResp;
 import com.tencent.supersonic.headless.core.config.ExecutorConfig;
+import com.tencent.supersonic.headless.core.pojo.StructQueryParam;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -85,25 +85,26 @@ public class SqlGenerateUtils {
         return selectSql;
     }
 
-    public String getLimit(QueryParam queryParam) {
-        if (queryParam != null && queryParam.getLimit() != null && queryParam.getLimit() > 0) {
-            return " limit " + queryParam.getLimit();
+    public String getLimit(StructQueryParam structQueryParam) {
+        if (structQueryParam != null && structQueryParam.getLimit() != null
+                && structQueryParam.getLimit() > 0) {
+            return " limit " + structQueryParam.getLimit();
         }
         return "";
     }
 
-    public String getSelect(QueryParam queryParam) {
-        String aggStr = queryParam.getAggregators().stream().map(this::getSelectField)
+    public String getSelect(StructQueryParam structQueryParam) {
+        String aggStr = structQueryParam.getAggregators().stream().map(this::getSelectField)
                 .collect(Collectors.joining(","));
-        return CollectionUtils.isEmpty(queryParam.getGroups()) ? aggStr
-                : String.join(",", queryParam.getGroups()) + "," + aggStr;
+        return CollectionUtils.isEmpty(structQueryParam.getGroups()) ? aggStr
+                : String.join(",", structQueryParam.getGroups()) + "," + aggStr;
     }
 
-    public String getSelect(QueryParam queryParam, Map<String, String> deriveMetrics) {
-        String aggStr = queryParam.getAggregators().stream()
+    public String getSelect(StructQueryParam structQueryParam, Map<String, String> deriveMetrics) {
+        String aggStr = structQueryParam.getAggregators().stream()
                 .map(a -> getSelectField(a, deriveMetrics)).collect(Collectors.joining(","));
-        return CollectionUtils.isEmpty(queryParam.getGroups()) ? aggStr
-                : String.join(",", queryParam.getGroups()) + "," + aggStr;
+        return CollectionUtils.isEmpty(structQueryParam.getGroups()) ? aggStr
+                : String.join(",", structQueryParam.getGroups()) + "," + aggStr;
     }
 
     public String getSelectField(final Aggregator agg) {
@@ -128,46 +129,46 @@ public class SqlGenerateUtils {
         return deriveMetrics.get(agg.getColumn());
     }
 
-    public String getGroupBy(QueryParam queryParam) {
-        if (CollectionUtils.isEmpty(queryParam.getGroups())) {
+    public String getGroupBy(StructQueryParam structQueryParam) {
+        if (CollectionUtils.isEmpty(structQueryParam.getGroups())) {
             return "";
         }
-        return "group by " + String.join(",", queryParam.getGroups());
+        return "group by " + String.join(",", structQueryParam.getGroups());
     }
 
-    public String getOrderBy(QueryParam queryParam) {
-        if (CollectionUtils.isEmpty(queryParam.getOrders())) {
+    public String getOrderBy(StructQueryParam structQueryParam) {
+        if (CollectionUtils.isEmpty(structQueryParam.getOrders())) {
             return "";
         }
-        return "order by " + queryParam.getOrders().stream()
+        return "order by " + structQueryParam.getOrders().stream()
                 .map(order -> " " + order.getColumn() + " " + order.getDirection() + " ")
                 .collect(Collectors.joining(","));
     }
 
-    public String getOrderBy(QueryParam queryParam, Map<String, String> deriveMetrics) {
-        if (CollectionUtils.isEmpty(queryParam.getOrders())) {
+    public String getOrderBy(StructQueryParam structQueryParam, Map<String, String> deriveMetrics) {
+        if (CollectionUtils.isEmpty(structQueryParam.getOrders())) {
             return "";
         }
-        if (!queryParam.getOrders().stream()
+        if (!structQueryParam.getOrders().stream()
                 .anyMatch(o -> deriveMetrics.containsKey(o.getColumn()))) {
-            return getOrderBy(queryParam);
+            return getOrderBy(structQueryParam);
         }
-        return "order by " + queryParam.getOrders().stream()
+        return "order by " + structQueryParam.getOrders().stream()
                 .map(order -> " " + (deriveMetrics.containsKey(order.getColumn())
                         ? deriveMetrics.get(order.getColumn())
                         : order.getColumn()) + " " + order.getDirection() + " ")
                 .collect(Collectors.joining(","));
     }
 
-    public String generateWhere(QueryParam queryParam, ItemDateResp itemDateResp) {
+    public String generateWhere(StructQueryParam structQueryParam, ItemDateResp itemDateResp) {
         String whereClauseFromFilter =
-                sqlFilterUtils.getWhereClause(queryParam.getDimensionFilters());
-        String whereFromDate = getDateWhereClause(queryParam.getDateInfo(), itemDateResp);
-        return mergeDateWhereClause(queryParam, whereClauseFromFilter, whereFromDate);
+                sqlFilterUtils.getWhereClause(structQueryParam.getDimensionFilters());
+        String whereFromDate = getDateWhereClause(structQueryParam.getDateInfo(), itemDateResp);
+        return mergeDateWhereClause(structQueryParam, whereClauseFromFilter, whereFromDate);
     }
 
-    private String mergeDateWhereClause(QueryParam queryParam, String whereClauseFromFilter,
-            String whereFromDate) {
+    private String mergeDateWhereClause(StructQueryParam structQueryParam,
+            String whereClauseFromFilter, String whereFromDate) {
         if (StringUtils.isNotEmpty(whereFromDate)
                 && StringUtils.isNotEmpty(whereClauseFromFilter)) {
             return String.format("%s AND (%s)", whereFromDate, whereClauseFromFilter);
@@ -179,7 +180,7 @@ public class SqlGenerateUtils {
             return whereFromDate;
         } else if (Objects.isNull(whereFromDate) && StringUtils.isEmpty(whereClauseFromFilter)) {
             log.debug("the current date information is empty, enter the date initialization logic");
-            return dateModeUtils.defaultRecentDateInfo(queryParam.getDateInfo());
+            return dateModeUtils.defaultRecentDateInfo(structQueryParam.getDateInfo());
         }
         return whereClauseFromFilter;
     }
@@ -203,12 +204,12 @@ public class SqlGenerateUtils {
         return dateModeUtils.getDateWhereStr(dateInfo, dateDate);
     }
 
-    public Triple<String, String, String> getBeginEndTime(QueryParam queryParam,
+    public Triple<String, String, String> getBeginEndTime(StructQueryParam structQueryParam,
             ItemDateResp dataDate) {
-        if (Objects.isNull(queryParam.getDateInfo())) {
+        if (Objects.isNull(structQueryParam.getDateInfo())) {
             return Triple.of("", "", "");
         }
-        DateConf dateConf = queryParam.getDateInfo();
+        DateConf dateConf = structQueryParam.getDateInfo();
         String dateInfo = dateModeUtils.getSysDateCol(dateConf);
         if (dateInfo.isEmpty()) {
             return Triple.of("", "", "");

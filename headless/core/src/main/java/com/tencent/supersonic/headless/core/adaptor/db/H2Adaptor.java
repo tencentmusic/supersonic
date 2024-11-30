@@ -62,7 +62,7 @@ public class H2Adaptor extends BaseDbAdaptor {
     }
 
     @Override
-    public String functionNameCorrector(String sql) {
+    public String rewriteSql(String sql) {
         return sql;
     }
 }

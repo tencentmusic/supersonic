@@ -108,9 +108,9 @@ public abstract class S2BaseDemo implements CommandLineRunner {
         }
     }
 
-    abstract void doRun();
+    protected abstract void doRun();
 
-    abstract boolean checkNeedToRun();
+    protected abstract boolean checkNeedToRun();
 
     protected DatabaseResp addDatabaseIfNotExist() {
         List<DatabaseResp> databaseList = databaseService.getDatabaseList(defaultUser);
@@ -119,8 +119,8 @@ public abstract class S2BaseDemo implements CommandLineRunner {
         }
         String url = dataSourceProperties.getUrl();
         DatabaseReq databaseReq = new DatabaseReq();
-        databaseReq.setName("H2数据库DEMO");
-        databaseReq.setDescription("样例数据库实例仅用于体验，正式使用请切换持久化数据库");
+        databaseReq.setName("S2数据库DEMO");
+        databaseReq.setDescription("样例数据库实例仅用于体验");
         if (StringUtils.isNotBlank(url)
                 && url.toLowerCase().contains(DataType.MYSQL.getFeature().toLowerCase())) {
             databaseReq.setType(DataType.MYSQL.getFeature());
