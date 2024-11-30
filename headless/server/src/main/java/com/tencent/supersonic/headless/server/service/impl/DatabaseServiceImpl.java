@@ -138,7 +138,8 @@ public class DatabaseServiceImpl extends ServiceImpl<DatabaseDOMapper, DatabaseD
         QueryWrapper<DatabaseDO> queryWrapper = new QueryWrapper<>();
         queryWrapper.lambda().eq(DatabaseDO::getType, dataType.getFeature());
         List<DatabaseDO> list = list(queryWrapper);
-        return list.stream().map(DatabaseConverter::convertWithPassword).collect(Collectors.toList());
+        return list.stream().map(DatabaseConverter::convertWithPassword)
+                .collect(Collectors.toList());
     }
 
     @Override
