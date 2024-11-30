@@ -165,7 +165,6 @@ const ViewCreateFormModal: React.FC<ModelCreateFormModalProps> = ({
       </>
     );
   };
-
   const renderContent = () => {
     return (
       <>
@@ -262,7 +261,6 @@ const ViewCreateFormModal: React.FC<ModelCreateFormModalProps> = ({
       <Steps style={{ marginBottom: 28 }} size="small" current={currentStep}>
         <Step title="基本信息" />
         <Step title="关联信息" />
-        {/* <Step title="进阶设置" /> */}
       </Steps>
       <Form
         {...formLayout}

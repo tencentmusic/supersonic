@@ -92,6 +92,17 @@ const ROUTES = [
         ],
       },
       {
+        path: '/model/dataset/:domainId/:datasetId',
+        component: './SemanticModel/View/components/Detail',
+        envEnableList: [ENV_KEY.SEMANTIC],
+        routes: [
+          {
+            path: '/model/dataset/:domainId/:datasetId/:menuKey',
+            component: './SemanticModel/View/components/Detail',
+          },
+        ],
+      },
+      {
         path: '/model/metric/:domainId/:modelId/:metricId',
         component: './SemanticModel/Metric/Edit',
         envEnableList: [ENV_KEY.SEMANTIC],
@@ -102,101 +113,19 @@ const ROUTES = [
         //   },
         // ],
       },
-      // {
-      //   path: '/model/manager/',
-      //   component: './SemanticModel/OverviewContainer',
-      //   routes: [
-      //     {
-      //       path: '/model/manager/:domainId/:modelId',
-      //       component: './SemanticModel/ModelManager',
-      //       routes: [
-      //         {
-      //           path: '/model/manager/:domainId/:modelId/:menuKey',
-      //           component: './SemanticModel/ModelManager',
-      //         },
-      //       ],
-      //     },
-      //   ],
-      // },
-      // {
-      //   path: '/model/:domainId',
-      //   component: './SemanticModel/DomainManager',
-      //   envEnableList: [ENV_KEY.SEMANTIC],
-      //   routes: [
-      //     {
-      //       path: '/model/:domainId/:menuKey',
-      //       component: './SemanticModel/DomainManager',
-      //     },
-      //   ],
-      // },
-      // {
-      //   path: '/model/manager/:domainId/:modelId',
-      //   component: './SemanticModel/ModelManager',
-      //   envEnableList: [ENV_KEY.SEMANTIC],
-      //   routes: [
-      //     {
-      //       path: '/model/manager/:domainId/:modelId/:menuKey',
-      //       component: './SemanticModel/ModelManager',
-      //     },
-      //   ],
-      // },
-
-      // {
-      //   path: '/model/:domainId/:modelId/:menuKey',
-      //   component: './SemanticModel/DomainManager',
-      //   envEnableList: [ENV_KEY.SEMANTIC],
-      // },
-      // {
-      //   path: '/model/:domainId/:modelId/metric',
-      //   component: './SemanticModel/components/ModelMetric',
-      //   envEnableList: [ENV_KEY.SEMANTIC],
-      //   routes: [
-      //     {
-      //       path: '/model/:domainId/:modelId/metric/list',
-      //       component: './SemanticModel/components/ClassMetricTable',
-      //       envEnableList: [ENV_KEY.SEMANTIC],
-      //     },
-      //   ],
-      // },
+      {
+        path: '/model/dimension/:domainId/:modelId/:dimensionId',
+        component: './SemanticModel/Dimension/Detail',
+        envEnableList: [ENV_KEY.SEMANTIC],
+        // routes: [
+        //   {
+        //     path: '/model/manager/:domainId/:modelId/:menuKey',
+        //     component: './SemanticModel/ModelManager',
+        //   },
+        // ],
+      },
     ],
   },
-  // {
-  //   path: '/model/',
-  //   component: './SemanticModel/DomainManager',
-  //   name: 'semanticModel',
-  //   envEnableList: [ENV_KEY.SEMANTIC],
-  //   routes: [
-  //     {
-  //       path: '/model/:domainId/:modelId',
-  //       component: './SemanticModel/DomainManager',
-  //       envEnableList: [ENV_KEY.SEMANTIC],
-  //     },
-  //     {
-  //       path: '/model/:domainId/:modelId/:menuKey',
-  //       component: './SemanticModel/DomainManager',
-  //       envEnableList: [ENV_KEY.SEMANTIC],
-  //     },
-  //     {
-  //       path: '/model/:domainId/:modelId/metric',
-  //       component: './SemanticModel/components/ModelMetric',
-  //       envEnableList: [ENV_KEY.SEMANTIC],
-  //       routes: [
-  //         {
-  //           path: '/model/:domainId/:modelId/metric/list',
-  //           component: './SemanticModel/components/ClassMetricTable',
-  //           envEnableList: [ENV_KEY.SEMANTIC],
-  //         },
-  //       ],
-  //     },
-  //   ],
-  // },
-
-  // {
-  //   path: '/model/:domainId/:modelId/:menuKey',
-  //   component: './SemanticModel/DomainManager',
-  //   name: 'semanticModel',
-  //   envEnableList: [ENV_KEY.SEMANTIC],
-  // },
 
   {
     path: '/metric',

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { history, useParams, useModel } from '@umijs/max';
+import { useParams, useModel } from '@umijs/max';
 import DomainManagerTab from './components/DomainManagerTab';
+import { toDomainList } from '@/pages/SemanticModel/utils';
 
 type Props = {};
 
@@ -14,16 +15,12 @@ const DomainManager: React.FC<Props> = ({}) => {
 
   const [activeKey, setActiveKey] = useState<string>(menuKey);
 
-  const pushUrlMenu = (domainId: number, menuKey: string) => {
-    history.push(`/model/domain/${domainId}/${menuKey}`);
-  };
-
   return (
     <DomainManagerTab
       activeKey={activeKey}
       onMenuChange={(menuKey) => {
         setActiveKey(menuKey);
-        pushUrlMenu(selectDomainId, menuKey);
+        toDomainList(selectDomainId, menuKey);
       }}
     />
   );
