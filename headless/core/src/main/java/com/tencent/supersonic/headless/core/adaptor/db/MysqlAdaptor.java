@@ -31,7 +31,7 @@ public class MysqlAdaptor extends BaseDbAdaptor {
     }
 
     @Override
-    public String functionNameCorrector(String sql) {
+    public String rewriteSql(String sql) {
         return sql;
     }
 }

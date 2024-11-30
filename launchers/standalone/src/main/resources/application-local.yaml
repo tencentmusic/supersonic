@@ -21,6 +21,10 @@ spring:
 #    username: root
 #    password:
 #  sql:
+#    enabled: true
+#    mode: always
+#    username: root
+#    password:
 #    init:
 #      schema-locations: classpath:db/schema-mysql.sql,classpath:db/schema-mysql-demo.sql
 #      data-locations: classpath:db/data-mysql.sql,classpath:db/data-mysql-demo.sql

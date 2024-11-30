@@ -2,7 +2,7 @@ package com.tencent.supersonic.chat.core.parser.aggregate;
 
 import com.alibaba.fastjson.JSON;
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;
-import com.tencent.supersonic.headless.core.translator.calcite.CalciteQueryParser;
+import com.tencent.supersonic.headless.core.translator.parser.calcite.CalciteQueryParser;
 import org.junit.jupiter.api.Test;
 import org.testng.Assert;
 

@@ -12,11 +12,9 @@ import com.tencent.supersonic.headless.api.pojo.SchemaItem;
 import com.tencent.supersonic.headless.api.pojo.enums.AggOption;
 import com.tencent.supersonic.headless.api.pojo.enums.MetricType;
 import com.tencent.supersonic.headless.api.pojo.response.*;
-import com.tencent.supersonic.headless.core.adaptor.db.DbAdaptor;
-import com.tencent.supersonic.headless.core.adaptor.db.DbAdaptorFactory;
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;
 import com.tencent.supersonic.headless.core.pojo.SqlQueryParam;
-import com.tencent.supersonic.headless.core.translator.calcite.s2sql.OntologyQueryParam;
+import com.tencent.supersonic.headless.core.translator.parser.s2sql.OntologyQueryParam;
 import com.tencent.supersonic.headless.core.utils.SqlGenerateUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -40,7 +38,6 @@ public class SqlQueryConverter implements QueryConverter {
     @Override
     public void convert(QueryStatement queryStatement) throws Exception {
         convertNameToBizName(queryStatement);
-        rewriteFunction(queryStatement);
         rewriteOrderBy(queryStatement);
 
         // fill sqlQuery
@@ -244,22 +241,6 @@ public class SqlQueryConverter implements QueryConverter {
         log.debug("replaceOrderAggSameAlias {} -> {}", sql, newSql);
         queryStatement.getSqlQueryParam().setSql(newSql);
     }
-
-    private void rewriteFunction(QueryStatement queryStatement) {
-        SemanticSchemaResp semanticSchemaResp = queryStatement.getSemanticSchemaResp();
-        DatabaseResp database = semanticSchemaResp.getDatabaseResp();
-        String sql = queryStatement.getSqlQueryParam().getSql();
-        if (Objects.isNull(database) || Objects.isNull(database.getType())) {
-            return;
-        }
-        String type = database.getType();
-        DbAdaptor engineAdaptor = DbAdaptorFactory.getEngineAdaptor(type.toLowerCase());
-        if (Objects.nonNull(engineAdaptor)) {
-            String functionNameCorrector = engineAdaptor.functionNameCorrector(sql);
-            queryStatement.getSqlQueryParam().setSql(functionNameCorrector);
-        }
-    }
-
 
     protected Map<String, String> getFieldNameToBizNameMap(SemanticSchemaResp semanticSchemaResp) {
         // support fieldName and field alias to bizName

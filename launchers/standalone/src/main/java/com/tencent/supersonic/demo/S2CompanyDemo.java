@@ -52,7 +52,7 @@ public class S2CompanyDemo extends S2BaseDemo {
     }
 
     @Override
-    boolean checkNeedToRun() {
+    protected boolean checkNeedToRun() {
         List<DomainResp> domainList = domainService.getDomainList();
         for (DomainResp domainResp : domainList) {
             if (domainResp.getBizName().equalsIgnoreCase("corporate")) {
