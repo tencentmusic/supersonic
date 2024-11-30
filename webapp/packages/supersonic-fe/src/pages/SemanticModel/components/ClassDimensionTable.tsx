@@ -2,7 +2,7 @@ import type { ActionType, ProColumns } from '@ant-design/pro-components';
 import { ProTable } from '@ant-design/pro-components';
 import { message, Button, Space, Popconfirm, Input, Tag, Select } from 'antd';
 import React, { useRef, useState, useEffect } from 'react';
-import { useModel } from '@umijs/max';
+import { useModel, history } from '@umijs/max';
 import { StatusEnum, SemanticNodeType } from '../enum';
 import { SENSITIVE_LEVEL_ENUM, SENSITIVE_LEVEL_OPTIONS, TAG_DEFINE_TYPE } from '../constant';
 import {
@@ -19,6 +19,7 @@ import TableHeaderFilter from '@/components/TableHeaderFilter';
 import BatchCtrlDropDownButton from '@/components/BatchCtrlDropDownButton';
 import { ColumnsConfig } from './TableColumnRender';
 import BatchSensitiveLevelModal from '@/components/BatchCtrlDropDownButton/BatchSensitiveLevelModal';
+import { toDimensionEditPage } from '@/pages/SemanticModel/utils';
 import styles from './style.less';
 
 type Props = {};
@@ -80,6 +81,9 @@ const ClassDimensionTable: React.FC<Props> = ({}) => {
   };
 
   const queryDataSourceList = async () => {
+    if (!domainId) {
+      return;
+    }
     const { code, data, msg } = await getModelList(domainId);
     if (code === 200) {
       setDataSourceList(data);
@@ -94,7 +98,7 @@ const ClassDimensionTable: React.FC<Props> = ({}) => {
 
   useEffect(() => {
     queryDataSourceList();
-  }, [modelId]);
+  }, [domainId]);
 
   const queryBatchUpdateStatus = async (ids: React.Key[], status: StatusEnum) => {
     if (Array.isArray(ids) && ids.length === 0) {
@@ -137,7 +141,17 @@ const ClassDimensionTable: React.FC<Props> = ({}) => {
     message.error(msg);
   };
 
-  const columnsConfig = ColumnsConfig();
+  // const columnsConfig = ColumnsConfig();
+  const columnsConfig = ColumnsConfig({
+    indicatorInfo: {
+      url: '/model/dimension/:domainId/:modelId/:indicatorId',
+      onNameClick: (record) => {
+        const { id } = record;
+        toDimensionEditPage(domainId, modelId!, id);
+        return false;
+      },
+    },
+  });
 
   const columns: ProColumns[] = [
     {
@@ -216,8 +230,10 @@ const ClassDimensionTable: React.FC<Props> = ({}) => {
               key="dimensionEditBtn"
               type="link"
               onClick={() => {
-                setDimensionItem(record);
-                setCreateModalVisible(true);
+                // setDimensionItem(record);
+                // setCreateModalVisible(true);
+                const { id } = record;
+                toDimensionEditPage(domainId, modelId!, id);
               }}
             >
               编辑
@@ -423,8 +439,9 @@ const ClassDimensionTable: React.FC<Props> = ({}) => {
             key="create"
             type="primary"
             onClick={() => {
-              setDimensionItem(undefined);
-              setCreateModalVisible(true);
+              toDimensionEditPage(domainId, modelId!, 0);
+              // setDimensionItem(undefined);
+              // setCreateModalVisible(true);
             }}
           >
             创建维度

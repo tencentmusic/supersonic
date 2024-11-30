@@ -13,7 +13,7 @@ import IndicatorStar, { StarType } from '../components/IndicatorStar';
 interface IndicatorInfo {
   url?: string;
   starType?: StarType;
-  onNameClick?: (record: ISemantic.IMetricItem) => void | boolean;
+  onNameClick?: (record: ISemantic.IMetricItem | ISemantic.IDimensionItem) => void | boolean;
 }
 
 interface ColumnsConfigParams {
@@ -116,18 +116,43 @@ export const ColumnsConfig = (params?: ColumnsConfigParams) => {
     },
     dimensionInfo: {
       render: (_, record: ISemantic.IDimensionItem) => {
-        const { name, alias, bizName } = record;
+        const { name, alias, bizName, id, domainId, modelId } = record;
+        let url = `/demension/detail/${id}`;
+        if (params?.indicatorInfo) {
+          url = replaceRouteParams(params.indicatorInfo.url || '', {
+            domainId: `${domainId}`,
+            modelId: `${modelId}`,
+            indicatorId: `${id}`,
+          });
+        }
         return (
           <>
             <div>
               <Space>
-                <span style={{ fontWeight: 500 }}>{name}</span>
+                <a
+                  className={styles.textLink}
+                  style={{ fontWeight: 500 }}
+                  onClick={(event: any) => {
+                    if (params?.indicatorInfo?.onNameClick) {
+                      const state = params.indicatorInfo.onNameClick(record);
+                      if (state === false) {
+                        return;
+                      }
+                    }
+                    history.push(url);
+                    event.preventDefault();
+                    event.stopPropagation();
+                  }}
+                >
+                  {name}
+                </a>
+                {/* <span style={{ fontWeight: 500 }}>{name}</span> */}
               </Space>
             </div>
             <div style={{ color: '#5f748d', fontSize: 14, marginTop: 5, marginLeft: 0 }}>
               {bizName}
             </div>
-            {renderAliasAndClassifications(alias, undefined)}
+            {alias && renderAliasAndClassifications(alias, undefined)}
           </>
         );
       },
@@ -136,7 +161,7 @@ export const ColumnsConfig = (params?: ColumnsConfigParams) => {
       render: (_, record: ISemantic.IMetricItem) => {
         const { name, alias, bizName, classifications, id, isCollect, domainId, modelId } = record;
 
-        let url = `/metric/detail/`;
+        let url = `/metric/detail/${id}`;
         let starType: StarType = 'metric';
         if (params?.indicatorInfo) {
           url = replaceRouteParams(params.indicatorInfo.url || '', {
@@ -174,7 +199,7 @@ export const ColumnsConfig = (params?: ColumnsConfigParams) => {
             <div style={{ color: '#5f748d', fontSize: 14, marginTop: 5, marginLeft: 0 }}>
               {bizName}
             </div>
-            {renderAliasAndClassifications(alias, classifications)}
+            {alias && renderAliasAndClassifications(alias, classifications)}
           </>
         );
       },

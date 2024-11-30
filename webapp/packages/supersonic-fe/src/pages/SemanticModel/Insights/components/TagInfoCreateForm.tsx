@@ -540,7 +540,6 @@ const TagInfoCreateForm: React.FC<CreateFormProps> = ({
       forceRender
       width={800}
       style={{ top: 48 }}
-      // styles={{ padding: '32px 40px 48px' }}
       destroyOnClose
       title={`${isEdit ? '编辑' : '新建'}标签`}
       maskClosable={false}

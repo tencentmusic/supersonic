@@ -8,6 +8,8 @@ import { ConfigParametersItem } from '../System/types';
 import { TransType } from './enum';
 import { isString, isBoolean } from 'lodash';
 import { ReactNode } from 'react';
+import { history } from '@umijs/max';
+import { openNewPage } from '@/utils/utils';
 
 const FormItem = Form.Item;
 const { TextArea } = Input;
@@ -241,4 +243,36 @@ export const genneratorFormItemList = (itemList: ConfigParametersItem[]) => {
 
 export const wrapperTransTypeAndId = (exTransType: TransType, id: number) => {
   return `${exTransType}-${id}`;
+};
+
+export const toDomainList = (domainId: number, menuKey: string) => {
+  history.push(`/model/domain/${domainId}/${menuKey}`);
+};
+
+export const toModelList = (domainId: number, modelId: number, menuKey?: string) => {
+  history.push(`/model/domain/manager/${domainId}/${modelId}${menuKey ? `/${menuKey}` : ''}`);
+};
+
+export const toMetricEditPage = (
+  domainId: number,
+  modelId: number,
+  metircId: number,
+  menuKey?: string,
+) => {
+  history.push(`/model/metric/${domainId}/${modelId}/${metircId}${menuKey ? `/${menuKey}` : ''}`);
+};
+
+export const toDatasetEditPage = (domainId: number, datasetId: number, menuKey?: string) => {
+  history.push(`/model/dataset/${domainId}/${datasetId}${menuKey ? `/${menuKey}` : ''}`);
+};
+
+export const toDimensionEditPage = (
+  domainId: number,
+  modelId: number,
+  dimensionId: number,
+  menuKey?: string,
+) => {
+  history.push(
+    `/model/dimension/${domainId}/${modelId}/${dimensionId}${menuKey ? `/${menuKey}` : ''}`,
+  );
 };
