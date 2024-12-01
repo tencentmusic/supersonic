@@ -8,12 +8,15 @@ import com.tencent.supersonic.headless.api.pojo.SchemaMapInfo;
 import com.tencent.supersonic.headless.api.pojo.response.S2Term;
 import com.tencent.supersonic.headless.chat.ChatQueryContext;
 import com.tencent.supersonic.headless.chat.knowledge.DatabaseMapResult;
+import com.tencent.supersonic.headless.chat.knowledge.DictWord;
 import com.tencent.supersonic.headless.chat.knowledge.HanlpMapResult;
+import com.tencent.supersonic.headless.chat.knowledge.KnowledgeBaseService;
 import com.tencent.supersonic.headless.chat.knowledge.builder.BaseWordBuilder;
 import com.tencent.supersonic.headless.chat.knowledge.helper.HanlpHelper;
 import com.tencent.supersonic.headless.chat.knowledge.helper.NatureHelper;
 import com.tencent.supersonic.headless.chat.utils.EditDistanceUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.CollectionUtils;
 
 import java.util.HashSet;
@@ -83,8 +86,28 @@ public class KeywordMapper extends BaseMapper {
                         .element(element).frequency(frequency).word(hanlpMapResult.getName())
                         .similarity(hanlpMapResult.getSimilarity())
                         .detectWord(hanlpMapResult.getDetectWord()).build();
-
+                // doDimValueAliasLogic 将维度值别名进行替换成真实维度值
+                doDimValueAliasLogic(schemaElementMatch);
                 addToSchemaMap(chatQueryContext.getMapInfo(), dataSetId, schemaElementMatch);
+            }
+        }
+    }
+
+    private void doDimValueAliasLogic(SchemaElementMatch schemaElementMatch) {
+        SchemaElement element = schemaElementMatch.getElement();
+        if (SchemaElementType.VALUE.equals(element.getType())) {
+            Long dimId = element.getId();
+            String word = schemaElementMatch.getWord();
+            Map<Long, List<DictWord>> dimValueAlias = KnowledgeBaseService.getDimValueAlias();
+            if (Objects.nonNull(dimId) && StringUtils.isNotEmpty(word)
+                    && dimValueAlias.containsKey(dimId)) {
+                Map<String, DictWord> aliasAndDictMap = dimValueAlias.get(dimId).stream()
+                        .collect(Collectors.toMap(dictWord -> dictWord.getAlias(),
+                                dictWord -> dictWord, (v1, v2) -> v2));
+                if (aliasAndDictMap.containsKey(word)) {
+                    String wordTech = aliasAndDictMap.get(word).getWord();
+                    schemaElementMatch.setWord(wordTech);
+                }
             }
         }
     }
