@@ -38,8 +38,8 @@ public class EmbeddingStoreParameterConfig extends ParameterConfig {
             new Parameter("s2.embedding.store.timeout", "60", "超时时间(秒)", "", "number", MODULE_NAME);
 
     public static final Parameter EMBEDDING_STORE_DIMENSION =
-            new Parameter("s2.embedding.store.dimension", "", "向量维度", "", "number", MODULE_NAME, null,
-                    getDimensionDependency());
+            new Parameter("s2.embedding.store.dimension", "", "向量维度", "", "number", MODULE_NAME,
+                    null, getDimensionDependency());
     public static final Parameter EMBEDDING_STORE_DATABASE_NAME =
             new Parameter("s2.embedding.store.databaseName", "", "DatabaseName", "", "string",
                     MODULE_NAME, null, getDatabaseNameDependency());
@@ -144,6 +144,6 @@ public class EmbeddingStoreParameterConfig extends ParameterConfig {
                 Lists.newArrayList(EmbeddingStoreType.MILVUS.name(),
                         EmbeddingStoreType.PGVECTOR.name()),
                 ImmutableMap.of(EmbeddingStoreType.MILVUS.name(), "milvus",
-                EmbeddingStoreType.PGVECTOR.name(), "postgres"));
+                        EmbeddingStoreType.PGVECTOR.name(), "postgres"));
     }
 }

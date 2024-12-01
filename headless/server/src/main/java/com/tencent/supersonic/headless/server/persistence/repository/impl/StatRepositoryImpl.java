@@ -1,5 +1,6 @@
 package com.tencent.supersonic.headless.server.persistence.repository.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tencent.supersonic.common.pojo.enums.TypeEnums;
@@ -47,7 +48,7 @@ public class StatRepositoryImpl implements StatRepository {
     @SneakyThrows
     public List<ItemUseResp> getStatInfo(ItemUseReq itemUseReq) {
         List<ItemUseResp> result = new ArrayList<>();
-        List<QueryStat> statInfos = statMapper.getStatInfo(itemUseReq);
+        List<QueryStatDO> statInfos = getQueryStats(itemUseReq);
         Map<String, Long> map = new ConcurrentHashMap<>();
         statInfos.stream().forEach(stat -> {
             String dimensions = stat.getDimensions();
@@ -68,6 +69,21 @@ public class StatRepositoryImpl implements StatRepository {
 
         return result.stream().sorted(Comparator.comparing(ItemUseResp::getUseCnt).reversed())
                 .collect(Collectors.toList());
+    }
+
+    private List<QueryStatDO> getQueryStats(ItemUseReq itemUseReq) {
+        QueryWrapper<QueryStatDO> queryWrapper = new QueryWrapper<>();
+        if (Objects.nonNull(itemUseReq.getModelId())) {
+            queryWrapper.eq("model_id", itemUseReq.getModelId());
+        }
+        if (Objects.nonNull(itemUseReq.getModelIds()) && !itemUseReq.getModelIds().isEmpty()) {
+            queryWrapper.in("model_id", itemUseReq.getModelIds());
+        }
+        if (Objects.nonNull(itemUseReq.getMetric())) {
+            queryWrapper.like("metrics", itemUseReq.getMetric());
+        }
+
+        return statMapper.selectList(queryWrapper);
     }
 
     private void updateStatMapInfo(Map<String, Long> map, String dimensions, String type,

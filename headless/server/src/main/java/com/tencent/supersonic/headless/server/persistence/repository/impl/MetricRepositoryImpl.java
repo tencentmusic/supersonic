@@ -9,9 +9,11 @@ import com.tencent.supersonic.headless.server.persistence.mapper.MetricQueryDefa
 import com.tencent.supersonic.headless.server.persistence.repository.MetricRepository;
 import com.tencent.supersonic.headless.server.pojo.MetricFilter;
 import com.tencent.supersonic.headless.server.pojo.MetricsFilter;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Objects;
 
 @Component
 public class MetricRepositoryImpl implements MetricRepository {
@@ -73,7 +75,46 @@ public class MetricRepositoryImpl implements MetricRepository {
 
     @Override
     public List<MetricDO> getMetric(MetricFilter metricFilter) {
-        return metricDOCustomMapper.query(metricFilter);
+        QueryWrapper<MetricDO> queryWrapper = new QueryWrapper<>();
+        queryWrapper.ne("status", 3);
+        if (Objects.nonNull(metricFilter.getIds()) && !metricFilter.getIds().isEmpty()) {
+            queryWrapper.in("id", metricFilter.getIds());
+        }
+        if (StringUtils.isNotBlank(metricFilter.getId())) {
+            queryWrapper.eq("id", metricFilter.getId());
+        }
+        if (Objects.nonNull(metricFilter.getModelIds()) && !metricFilter.getModelIds().isEmpty()) {
+            queryWrapper.in("model_id", metricFilter.getModelIds());
+        }
+        if (StringUtils.isNotBlank(metricFilter.getType())) {
+            queryWrapper.eq("type", metricFilter.getType());
+        }
+        if (StringUtils.isNotBlank(metricFilter.getName())) {
+            queryWrapper.like("name", metricFilter.getName());
+        }
+        if (StringUtils.isNotBlank(metricFilter.getId())) {
+            queryWrapper.like("biz_name", metricFilter.getBizName());
+        }
+        if (Objects.nonNull(metricFilter.getStatus())) {
+            queryWrapper.eq("status", metricFilter.getStatus());
+        }
+        if (Objects.nonNull(metricFilter.getSensitiveLevel())) {
+            queryWrapper.eq("sensitive_level", metricFilter.getSensitiveLevel());
+        }
+        if (StringUtils.isNotBlank(metricFilter.getCreatedBy())) {
+            queryWrapper.eq("created_by", metricFilter.getCreatedBy());
+        }
+        if (Objects.nonNull(metricFilter.getIsPublish()) && metricFilter.getIsPublish() == 1) {
+            queryWrapper.eq("is_publish", metricFilter.getIsPublish());
+        }
+        if (StringUtils.isNotBlank(metricFilter.getKey())) {
+            String key = metricFilter.getKey();
+            queryWrapper.like("name", key).or().like("biz_name", key).or().like("description", key)
+                    .or().like("alias", key).or().like("classifications", key).or()
+                    .like("created_by", key);
+        }
+
+        return metricDOMapper.selectList(queryWrapper);
     }
 
     @Override
