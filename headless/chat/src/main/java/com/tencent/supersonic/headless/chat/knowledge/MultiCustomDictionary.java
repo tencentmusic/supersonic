@@ -12,6 +12,8 @@ import com.hankcs.hanlp.dictionary.other.CharTable;
 import com.hankcs.hanlp.seg.common.Term;
 import com.hankcs.hanlp.utility.LexiconUtility;
 import com.hankcs.hanlp.utility.TextUtility;
+import com.tencent.supersonic.common.pojo.Constants;
+import com.tencent.supersonic.common.pojo.enums.DictWordType;
 import com.tencent.supersonic.headless.chat.knowledge.helper.HanlpHelper;
 
 import java.io.BufferedOutputStream;
@@ -103,7 +105,22 @@ public class MultiCustomDictionary extends DynamicCustomDictionary {
                 String word = getWordBySpace(param[0]);
                 if (isLetters) {
                     original = word;
-                    word = word.toLowerCase();
+                    // word = word.toLowerCase();
+                    // 加入小写别名
+                    if (!original.equals(word.toLowerCase())) {
+                        DictWord dictWord = new DictWord();
+                        String nature = param[1];
+                        dictWord.setNatureWithFrequency(
+                                String.format("%s " + Constants.DEFAULT_FREQUENCY, nature));
+                        dictWord.setWord(word);
+                        dictWord.setAlias(word.toLowerCase());
+                        String[] split = nature.split(DictWordType.NATURE_SPILT);
+                        if (split.length >= 2) {
+                            Long dimId = Long.parseLong(
+                                    nature.split(DictWordType.NATURE_SPILT)[split.length - 1]);
+                            KnowledgeBaseService.addDimValueAlias(dimId, Arrays.asList(dictWord));
+                        }
+                    }
                 }
                 if (natureCount == 0) {
                     attribute = new CoreDictionary.Attribute(defaultNature);
