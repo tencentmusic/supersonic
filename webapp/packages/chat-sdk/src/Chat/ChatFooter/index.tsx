@@ -9,6 +9,7 @@ import { SemanticTypeEnum, SEMANTIC_TYPE_MAP, HOLDER_TAG } from '../constants';
 import { AgentType, ModelType } from '../type';
 import { searchRecommend } from '../../service';
 import styles from './style.module.less';
+import { useComposing } from '../../hooks/useComposing';
 
 type Props = {
   inputMsg: string;
@@ -319,6 +320,8 @@ const ChatFooter: ForwardRefRenderFunction<any, Props> = (
     if (modelOptionNodes.length || associateOptionNodes.length) fixWidthBug();
   }, [modelOptionNodes.length, associateOptionNodes.length]);
 
+  const { isComposing } = useComposing(document.getElementById('chatInput'));
+
   return (
     <div className={chatFooterClass}>
       <div className={styles.tools}>
@@ -380,7 +383,7 @@ const ChatFooter: ForwardRefRenderFunction<any, Props> = (
                   onInputMsgChange('');
                   return;
                 }
-                if (!isSelect) {
+                if (!isSelect && !isComposing) {
                   sendMsg(chatInputEl.value);
                   setOpen(false);
                 }
