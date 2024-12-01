@@ -45,7 +45,7 @@ public class EmbeddingStoreParameterConfig extends ParameterConfig {
                     MODULE_NAME, null, getDatabaseNameDependency());
 
     public static final Parameter EMBEDDING_STORE_POST = new Parameter("s2.embedding.store.port",
-            "", "端口", "", "number", MODULE_NAME, null, getPostDependency());
+            "", "端口", "", "number", MODULE_NAME, null, getPortDependency());
 
     public static final Parameter EMBEDDING_STORE_USER = new Parameter("s2.embedding.store.user",
             "", "用户名", "", "string", MODULE_NAME, null, getUserDependency());
@@ -100,11 +100,7 @@ public class EmbeddingStoreParameterConfig extends ParameterConfig {
     }
 
     private static List<Parameter.Dependency> getApiKeyDependency() {
-        return getDependency(EMBEDDING_STORE_PROVIDER.getName(),
-                Lists.newArrayList(EmbeddingStoreType.MILVUS.name(),
-                        EmbeddingStoreType.PGVECTOR.name()),
-                ImmutableMap.of(EmbeddingStoreType.MILVUS.name(), DEMO,
-                        EmbeddingStoreType.PGVECTOR.name(), DEMO));
+        return Lists.newArrayList();
     }
 
     private static List<Parameter.Dependency> getPathDependency() {
@@ -129,7 +125,7 @@ public class EmbeddingStoreParameterConfig extends ParameterConfig {
                         EmbeddingStoreType.PGVECTOR.name(), "postgres"));
     }
 
-    private static List<Parameter.Dependency> getPostDependency() {
+    private static List<Parameter.Dependency> getPortDependency() {
         return getDependency(EMBEDDING_STORE_PROVIDER.getName(),
                 Lists.newArrayList(EmbeddingStoreType.PGVECTOR.name()),
                 ImmutableMap.of(EmbeddingStoreType.PGVECTOR.name(), "54333"));
@@ -140,12 +136,14 @@ public class EmbeddingStoreParameterConfig extends ParameterConfig {
                 Lists.newArrayList(EmbeddingStoreType.MILVUS.name(),
                         EmbeddingStoreType.PGVECTOR.name()),
                 ImmutableMap.of(EmbeddingStoreType.MILVUS.name(), "milvus",
-                        EmbeddingStoreType.PGVECTOR.name(), "pgvector"));
+                        EmbeddingStoreType.PGVECTOR.name(), "postgres"));
     }
 
     private static List<Parameter.Dependency> getPasswordDependency() {
         return getDependency(EMBEDDING_STORE_PROVIDER.getName(),
-                Lists.newArrayList(EmbeddingStoreType.MILVUS.name()),
-                ImmutableMap.of(EmbeddingStoreType.MILVUS.name(), "milvus"));
+                Lists.newArrayList(EmbeddingStoreType.MILVUS.name(),
+                        EmbeddingStoreType.PGVECTOR.name()),
+                ImmutableMap.of(EmbeddingStoreType.MILVUS.name(), "milvus",
+                EmbeddingStoreType.PGVECTOR.name(), "postgres"));
     }
 }
