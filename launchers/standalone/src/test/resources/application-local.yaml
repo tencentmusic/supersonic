@@ -13,22 +13,34 @@ spring:
       path: /h2-console/semantic
       enabled: true
 
-### Comment out following lines if using MySQL
+## Comment out following lines if using MySQL
 #spring:
 #  datasource:
 #    driver-class-name: com.mysql.cj.jdbc.Driver
-#    url: jdbc:mysql://localhost:3306/s2_database?user=root
+#    url: jdbc:mysql://localhost:3306/mysql
 #    username: root
 #    password:
 #  sql:
-#    enabled: true
-#    mode: always
-#    username: root
-#    password:
 #    init:
+#      enabled: false
+#      mode: always
+#      username: root
+#      password:
 #      schema-locations: classpath:db/schema-mysql.sql,classpath:db/schema-mysql-demo.sql
 #      data-locations: classpath:db/data-mysql.sql,classpath:db/data-mysql-demo.sql
-#  h2:
-#    console:
-#      path: /h2-console/semantic
-#      enabled: true
+
+## Comment out following lines if using Postgres
+#spring:
+#  datasource:
+#    driver-class-name: org.postgresql.Driver
+#    url: jdbc:postgresql://localhost:5432/postgres?stringtype=unspecified
+#    username: postgres
+#    password: postgres
+#  sql:
+#    init:
+#      enabled: false
+#      mode: always
+#      username: postgres
+#      password: postgres
+#      schema-locations: classpath:db/schema-postgres.sql,classpath:db/schema-postgres-demo.sql
+#      data-locations: classpath:db/data-postgres.sql,classpath:db/data-postgres-demo.sql

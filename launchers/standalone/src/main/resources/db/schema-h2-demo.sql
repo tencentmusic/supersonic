@@ -42,15 +42,6 @@ CREATE TABLE IF NOT EXISTS `genre` (
     );
 COMMENT ON TABLE genre IS 'genre';
 
-CREATE TABLE IF NOT EXISTS `artist` (
-    `artist_name` varchar(50) NOT NULL , -- genre name
-    `citizenship` varchar(20) ,
-    `gender` varchar(20) ,
-    `g_name` varchar(50),
-    PRIMARY KEY (`artist_name`,`citizenship`)
-    );
-COMMENT ON TABLE artist IS 'artist';
-
 -------S2CompanyDemo
 CREATE TABLE IF NOT EXISTS `company` (
     `company_id` varchar(50) NOT NULL ,

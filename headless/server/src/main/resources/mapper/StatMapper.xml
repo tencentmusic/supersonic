@@ -40,21 +40,6 @@
         <result column="query_opt_mode" property="queryOptMode"/>
     </resultMap>
 
-    <insert id="createRecord">
-        insert into s2_query_stat_info
-        (
-            trace_id, model_id, data_set_id, `user`, query_type, query_type_back, query_sql_cmd, sql_cmd_md5, query_struct_cmd, struct_cmd_md5, `sql`, sql_md5, query_engine,
-            elapsed_ms, query_state, native_query, start_date, end_date, dimensions, metrics, select_cols, agg_cols, filter_cols, group_by_cols,
-            order_by_cols, use_result_cache, use_sql_cache, sql_cache_key, result_cache_key, query_opt_mode
-        )
-        values
-        (
-            #{traceId}, #{modelId}, #{dataSetId}, #{user}, #{queryType}, #{queryTypeBack}, #{querySqlCmd}, #{querySqlCmdMd5}, #{queryStructCmd}, #{queryStructCmdMd5}, #{sql}, #{sqlMd5}, #{queryEngine},
-            #{elapsedMs}, #{queryState}, #{nativeQuery}, #{startDate}, #{endDate}, #{dimensions}, #{metrics}, #{selectCols}, #{aggCols}, #{filterCols}, #{groupByCols},
-            #{orderByCols}, #{useResultCache}, #{useSqlCache}, #{sqlCacheKey}, #{resultCacheKey}, #{queryOptMode}
-        )
-    </insert>
-
     <select id="getStatInfo"
             resultType="com.tencent.supersonic.headless.api.pojo.QueryStat">
         select *

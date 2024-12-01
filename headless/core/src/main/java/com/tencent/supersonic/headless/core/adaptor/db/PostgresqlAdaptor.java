@@ -78,7 +78,9 @@ public class PostgresqlAdaptor extends BaseDbAdaptor {
             }
             return o;
         });
-        return SqlReplaceHelper.replaceFunction(sql, functionMap, functionCall);
+        sql = SqlReplaceHelper.replaceFunction(sql, functionMap, functionCall);
+        sql = sql.replaceAll("`", "\"");
+        return sql;
     }
 
     public List<String> getTables(ConnectInfo connectionInfo, String schemaName)

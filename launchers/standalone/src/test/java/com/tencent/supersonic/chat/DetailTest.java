@@ -5,13 +5,14 @@ import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum;
 import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
 import com.tencent.supersonic.common.pojo.enums.QueryType;
-import com.tencent.supersonic.headless.api.pojo.DataSetSchema;
+import com.tencent.supersonic.demo.S2SingerDemo;
 import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.api.pojo.request.QueryFilter;
 import com.tencent.supersonic.headless.chat.query.rule.detail.DetailDimensionQuery;
 import com.tencent.supersonic.util.DataUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junitpioneer.jupiter.SetSystemProperty;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -20,10 +21,16 @@ import org.springframework.boot.test.context.SpringBootTest;
 @Slf4j
 public class DetailTest extends BaseTest {
 
+    @BeforeEach
+    public void init() {
+        agent = getAgentByName(S2SingerDemo.AGENT_NAME);
+        schema = schemaService.getSemanticSchema(agent.getDataSetIds());
+    }
+
     @Test
     @SetSystemProperty(key = "s2.test", value = "true")
     public void test_detail_dimension() throws Exception {
-        QueryResult actualResult = submitNewChat("周杰伦流派和代表作", DataUtils.singerAgentId);
+        QueryResult actualResult = submitNewChat("周杰伦流派和代表作", agent.getId());
 
         QueryResult expectedResult = new QueryResult();
         SemanticParseInfo expectedParseInfo = new SemanticParseInfo();
@@ -33,7 +40,6 @@ public class DetailTest extends BaseTest {
         expectedParseInfo.setQueryType(QueryType.DETAIL);
         expectedParseInfo.setAggType(AggregateTypeEnum.NONE);
 
-        DataSetSchema schema = schemaService.getDataSetSchema(DataUtils.singerDatasettId);
         SchemaElement singerElement = getSchemaElementByName(schema.getDimensions(), "歌手名");
 
         QueryFilter dimensionFilter = DataUtils.getFilter("singer_name", FilterOperatorEnum.EQUALS,
@@ -49,7 +55,7 @@ public class DetailTest extends BaseTest {
 
     @Test
     public void test_detail_filter() throws Exception {
-        QueryResult actualResult = submitNewChat("国风歌手", DataUtils.singerAgentId);
+        QueryResult actualResult = submitNewChat("国风歌手", agent.getId());
 
         QueryResult expectedResult = new QueryResult();
         SemanticParseInfo expectedParseInfo = new SemanticParseInfo();
@@ -59,7 +65,6 @@ public class DetailTest extends BaseTest {
         expectedParseInfo.setQueryType(QueryType.DETAIL);
         expectedParseInfo.setAggType(AggregateTypeEnum.NONE);
 
-        DataSetSchema schema = schemaService.getDataSetSchema(DataUtils.singerDatasettId);
         SchemaElement genreElement = getSchemaElementByName(schema.getDimensions(), "流派");
         QueryFilter dimensionFilter = DataUtils.getFilter("genre", FilterOperatorEnum.EQUALS, "国风",
                 "流派", genreElement.getId());
