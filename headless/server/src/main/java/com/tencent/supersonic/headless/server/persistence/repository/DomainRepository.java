@@ -15,4 +15,6 @@ public interface DomainRepository {
     List<DomainDO> getDomainList();
 
     DomainDO getDomainById(Long id);
+
+    List<DomainDO> getDomainByBizName(String bizName);
 }

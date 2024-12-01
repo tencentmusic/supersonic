@@ -1,10 +1,10 @@
 -------S2VisitsDemo
-insert INTO s2_user_department (user_name, department) values ('jack','HR');
-insert INTO s2_user_department (user_name, department) values ('tom','sales');
-insert INTO s2_user_department (user_name, department) values ('lucy','marketing');
-insert INTO s2_user_department (user_name, department) values ('john','strategy');
-insert INTO s2_user_department (user_name, department) values ('alice','sales');
-insert INTO s2_user_department (user_name, department) values ('dean','marketing');
+MERGE INTO s2_user_department (user_name, department) values ('jack','HR');
+MERGE INTO s2_user_department (user_name, department) values ('tom','sales');
+MERGE INTO s2_user_department (user_name, department) values ('lucy','marketing');
+MERGE INTO s2_user_department (user_name, department) values ('john','strategy');
+MERGE INTO s2_user_department (user_name, department) values ('alice','sales');
+MERGE INTO s2_user_department (user_name, department) values ('dean','marketing');
 
 INSERT INTO s2_pv_uv_statis (imp_date, user_name, page) VALUES (CURRENT_DATE(), 'lucy', 'p1');
 INSERT INTO s2_pv_uv_statis (imp_date, user_name, page) VALUES (CURRENT_DATE(), 'jack', 'p1');
@@ -1021,45 +1021,37 @@ INSERT INTO s2_stay_time_statis (imp_date, user_name, stay_hours, page) VALUES (
 
 
 -------S2ArtistDemo
-insert INTO singer (singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES ('周杰伦', '港台','青花瓷','国风',1000000,1000000,1000000);
-insert INTO singer (singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES ('陈奕迅', '港台','爱情转移','流行',1000000,1000000,1000000);
-insert INTO singer (singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES ('林俊杰', '港台','美人鱼','流行',1000000,1000000,1000000);
-insert INTO singer (singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES ('张碧晨', '内地','光的方向','流行',1000000,1000000,1000000);
-insert INTO singer (singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES ('程响', '内地','人间烟火','国风',1000000,1000000,1000000);
-insert INTO singer (singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES ('Taylor Swift', '欧美','Love Story','流行',1000000,1000000,1000000);
+MERGE INTO singer (singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES ('周杰伦', '港台','青花瓷','国风',1000000,1000000,1000000);
+MERGE INTO singer (singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES ('陈奕迅', '港台','爱情转移','流行',1000000,1000000,1000000);
+MERGE INTO singer (singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES ('林俊杰', '港台','美人鱼','流行',1000000,1000000,1000000);
+MERGE INTO singer (singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES ('张碧晨', '内地','光的方向','流行',1000000,1000000,1000000);
+MERGE INTO singer (singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES ('程响', '内地','人间烟火','国风',1000000,1000000,1000000);
+MERGE INTO singer (singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES ('Taylor Swift', '欧美','Love Story','流行',1000000,1000000,1000000);
 
-insert INTO genre(g_name,rating,most_popular_in) VALUES ('tagore',8,'孟加拉国');
-insert INTO genre(g_name,rating,most_popular_in) VALUES ('nazrul',7,'孟加拉国');
-insert INTO genre(g_name,rating,most_popular_in) VALUES ('民间',9,'锡尔赫特、吉大港、库斯蒂亚');
-insert INTO genre(g_name,rating,most_popular_in) VALUES ('现代',8,'孟加拉国');
-insert INTO genre(g_name,rating,most_popular_in) VALUES ('蓝调',7,'加拿大');
-insert INTO genre(g_name,rating,most_popular_in) VALUES ('流行',9,'美国');
-
-insert INTO artist(artist_name,citizenship,gender,g_name) VALUES ('Shrikanta','印度','男性','tagore');
-insert INTO artist(artist_name,citizenship,gender,g_name) VALUES ('Prity','孟加拉国','女性','nazrul');
-insert INTO artist(artist_name,citizenship,gender,g_name) VALUES ('Farida','孟加拉国','女性','民间');
-insert INTO artist(artist_name,citizenship,gender,g_name) VALUES ('Topu','印度','女性','现代');
-insert INTO artist(artist_name,citizenship,gender,g_name) VALUES ('Enrique','美国','男性','蓝调');
-insert INTO artist(artist_name,citizenship,gender,g_name) VALUES ('Michel','英国','男性','流行');
-
+MERGE INTO genre(g_name,rating,most_popular_in) VALUES ('tagore',8,'孟加拉国');
+MERGE INTO genre(g_name,rating,most_popular_in) VALUES ('nazrul',7,'孟加拉国');
+MERGE INTO genre(g_name,rating,most_popular_in) VALUES ('民间',9,'锡尔赫特、吉大港、库斯蒂亚');
+MERGE INTO genre(g_name,rating,most_popular_in) VALUES ('现代',8,'孟加拉国');
+MERGE INTO genre(g_name,rating,most_popular_in) VALUES ('蓝调',7,'加拿大');
+MERGE INTO genre(g_name,rating,most_popular_in) VALUES ('流行',9,'美国');
 
 -------S2CompanyDemo
-insert into company(company_id,company_name,headquarter_address,company_established_time,founder,ceo,annual_turnover,employee_count) VALUES ('item_enterprise_13_131','微软','西雅图','1975','盖茨','纳德拉',102300000000,210000);
-insert into company(company_id,company_name,headquarter_address,company_established_time,founder,ceo,annual_turnover,employee_count) VALUES ('item_enterprise_13_132','特斯拉','加州','2003','艾伯哈德','马斯克',376800000000,140473);
-insert into company(company_id,company_name,headquarter_address,company_established_time,founder,ceo,annual_turnover,employee_count) VALUES ('item_enterprise_13_133','谷歌','加州','1998','拉里佩奇','劈柴',321600000000,182503);
-insert into company(company_id,company_name,headquarter_address,company_established_time,founder,ceo,annual_turnover,employee_count) VALUES ('item_enterprise_13_134','亚马逊','加州','1994','贝索斯','贝索斯',28800000000,950000);
-insert into company(company_id,company_name,headquarter_address,company_established_time,founder,ceo,annual_turnover,employee_count) VALUES ('item_enterprise_13_135','英伟达','杭州','1993','黄仁勋','黄仁勋',67500000000,29000);
+MERGE into company(company_id,company_name,headquarter_address,company_established_time,founder,ceo,annual_turnover,employee_count) VALUES ('item_enterprise_13_131','微软','西雅图','1975','盖茨','纳德拉',102300000000,210000);
+MERGE into company(company_id,company_name,headquarter_address,company_established_time,founder,ceo,annual_turnover,employee_count) VALUES ('item_enterprise_13_132','特斯拉','加州','2003','艾伯哈德','马斯克',376800000000,140473);
+MERGE into company(company_id,company_name,headquarter_address,company_established_time,founder,ceo,annual_turnover,employee_count) VALUES ('item_enterprise_13_133','谷歌','加州','1998','拉里佩奇','劈柴',321600000000,182503);
+MERGE into company(company_id,company_name,headquarter_address,company_established_time,founder,ceo,annual_turnover,employee_count) VALUES ('item_enterprise_13_134','亚马逊','加州','1994','贝索斯','贝索斯',28800000000,950000);
+MERGE into company(company_id,company_name,headquarter_address,company_established_time,founder,ceo,annual_turnover,employee_count) VALUES ('item_enterprise_13_135','英伟达','杭州','1993','黄仁勋','黄仁勋',67500000000,29000);
 
-insert into brand(brand_id,brand_name,brand_established_time,company_id,legal_representative,registered_capital) VALUES ('item_brand_13_131','Office','1990','item_enterprise_13_131','盖茨',50000000);
-insert into brand(brand_id,brand_name,brand_established_time,company_id,legal_representative,registered_capital) VALUES ('item_brand_13_132','Windows','1991','item_enterprise_13_131','盖茨',50000000);
-insert into brand(brand_id,brand_name,brand_established_time,company_id,legal_representative,registered_capital) VALUES ('item_brand_13_133','Model 3','2017','item_enterprise_13_132','马斯克',100000000);
-insert into brand(brand_id,brand_name,brand_established_time,company_id,legal_representative,registered_capital) VALUES ('item_brand_13_134','Model Y','2020','item_enterprise_13_132','马斯克',100000000);
-insert into brand(brand_id,brand_name,brand_established_time,company_id,legal_representative,registered_capital) VALUES ('item_brand_13_135','Google','2003','item_enterprise_13_133','拉里佩奇',50000000);
-insert into brand(brand_id,brand_name,brand_established_time,company_id,legal_representative,registered_capital) VALUES ('item_brand_13_136','Android','2007','item_enterprise_13_133','拉里佩奇',50000000);
-insert into brand(brand_id,brand_name,brand_established_time,company_id,legal_representative,registered_capital) VALUES ('item_brand_13_137','aws','2004','item_enterprise_13_134','贝索斯',100000000);
-insert into brand(brand_id,brand_name,brand_established_time,company_id,legal_representative,registered_capital) VALUES ('item_brand_13_138','kindle','2007','item_enterprise_13_134','贝索斯',100000000);
-insert into brand(brand_id,brand_name,brand_established_time,company_id,legal_representative,registered_capital) VALUES ('item_brand_13_139','H100','2022','item_enterprise_13_135','黄仁勋',100000000);
-insert into brand(brand_id,brand_name,brand_established_time,company_id,legal_representative,registered_capital) VALUES ('item_brand_13_140','A100','2021','item_enterprise_13_135','黄仁勋',100000000);
+MERGE into brand(brand_id,brand_name,brand_established_time,company_id,legal_representative,registered_capital) VALUES ('item_brand_13_131','Office','1990','item_enterprise_13_131','盖茨',50000000);
+MERGE into brand(brand_id,brand_name,brand_established_time,company_id,legal_representative,registered_capital) VALUES ('item_brand_13_132','Windows','1991','item_enterprise_13_131','盖茨',50000000);
+MERGE into brand(brand_id,brand_name,brand_established_time,company_id,legal_representative,registered_capital) VALUES ('item_brand_13_133','Model 3','2017','item_enterprise_13_132','马斯克',100000000);
+MERGE into brand(brand_id,brand_name,brand_established_time,company_id,legal_representative,registered_capital) VALUES ('item_brand_13_134','Model Y','2020','item_enterprise_13_132','马斯克',100000000);
+MERGE into brand(brand_id,brand_name,brand_established_time,company_id,legal_representative,registered_capital) VALUES ('item_brand_13_135','Google','2003','item_enterprise_13_133','拉里佩奇',50000000);
+MERGE into brand(brand_id,brand_name,brand_established_time,company_id,legal_representative,registered_capital) VALUES ('item_brand_13_136','Android','2007','item_enterprise_13_133','拉里佩奇',50000000);
+MERGE into brand(brand_id,brand_name,brand_established_time,company_id,legal_representative,registered_capital) VALUES ('item_brand_13_137','aws','2004','item_enterprise_13_134','贝索斯',100000000);
+MERGE into brand(brand_id,brand_name,brand_established_time,company_id,legal_representative,registered_capital) VALUES ('item_brand_13_138','kindle','2007','item_enterprise_13_134','贝索斯',100000000);
+MERGE into brand(brand_id,brand_name,brand_established_time,company_id,legal_representative,registered_capital) VALUES ('item_brand_13_139','H100','2022','item_enterprise_13_135','黄仁勋',100000000);
+MERGE into brand(brand_id,brand_name,brand_established_time,company_id,legal_representative,registered_capital) VALUES ('item_brand_13_140','A100','2021','item_enterprise_13_135','黄仁勋',100000000);
 
 insert into brand_revenue(year_time,brand_id,revenue,profit,revenue_growth_year_on_year,profit_growth_year_on_year) VALUES ('2023','item_brand_13_131',12100000000, 2100000000,10,10);
 insert into brand_revenue(year_time,brand_id,revenue,profit,revenue_growth_year_on_year,profit_growth_year_on_year) VALUES ('2023','item_brand_13_132',12200000000, 2200000000,20,20);

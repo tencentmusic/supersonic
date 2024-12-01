@@ -12,5 +12,4 @@ public interface StatRepository {
 
     List<ItemUseResp> getStatInfo(ItemUseReq itemUseCommend);
 
-    List<QueryStat> getQueryStatInfoWithoutCache(ItemUseReq itemUseCommend);
 }

@@ -70,6 +70,8 @@ import java.util.Map;
 @Order(1)
 public class S2VisitsDemo extends S2BaseDemo {
 
+    public static final String AGENT_NAME = "超音数分析助手";
+
     public void doRun() {
         try {
             // create domain
@@ -141,7 +143,7 @@ public class S2VisitsDemo extends S2BaseDemo {
 
     private Integer addAgent(long dataSetId) {
         Agent agent = new Agent();
-        agent.setName("超音数分析助手");
+        agent.setName(AGENT_NAME);
         agent.setDescription("帮忙您对超音数产品的用户访问情况做分析");
         agent.setStatus(1);
         agent.setEnableSearch(1);

@@ -121,13 +121,7 @@ public abstract class S2BaseDemo implements CommandLineRunner {
         DatabaseReq databaseReq = new DatabaseReq();
         databaseReq.setName("S2数据库DEMO");
         databaseReq.setDescription("样例数据库实例仅用于体验");
-        if (StringUtils.isNotBlank(url)
-                && url.toLowerCase().contains(DataType.MYSQL.getFeature().toLowerCase())) {
-            databaseReq.setType(DataType.MYSQL.getFeature());
-            databaseReq.setVersion("5.7");
-        } else {
-            databaseReq.setType(DataType.H2.getFeature());
-        }
+        databaseReq.setType(DataType.POSTGRESQL.getFeature());
         databaseReq.setUrl(url);
         databaseReq.setUsername(dataSourceProperties.getUsername());
         databaseReq

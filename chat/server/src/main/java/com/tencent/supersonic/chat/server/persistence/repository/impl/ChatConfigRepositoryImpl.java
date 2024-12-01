@@ -32,15 +32,15 @@ public class ChatConfigRepositoryImpl implements ChatConfigRepository {
     @Override
     public Long createConfig(ChatConfig chaConfig) {
         ChatConfigDO chaConfigDO = chatConfigHelper.chatConfig2DO(chaConfig);
-        chatConfigMapper.addConfig(chaConfigDO);
+        chatConfigMapper.insert(chaConfigDO);
         return chaConfigDO.getId();
     }
 
     @Override
     public Long updateConfig(ChatConfig chaConfig) {
         ChatConfigDO chaConfigDO = chatConfigHelper.chatConfig2DO(chaConfig);
-
-        return chatConfigMapper.editConfig(chaConfigDO);
+        chatConfigMapper.updateById(chaConfigDO);
+        return chaConfigDO.getId();
     }
 
     @Override

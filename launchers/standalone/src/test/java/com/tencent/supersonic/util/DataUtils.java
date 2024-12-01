@@ -15,14 +15,6 @@ import static java.time.LocalDate.now;
 
 public class DataUtils {
 
-    public static final Integer productAgentId = 1;
-    public static final Integer companyAgentId = 2;
-    public static final Integer singerAgentId = 3;
-
-    public static final Long productDatasetId = 1L;
-    public static final Long companyDatasetId = 2L;
-    public static final Long singerDatasettId = 3L;
-
     public static final Integer ONE_TURNS_CHAT_ID = 10;
     private static final User user_test = User.getDefaultUser();
 
@@ -42,11 +34,12 @@ public class DataUtils {
         return User.get(3L, "tom");
     }
 
-    public static ChatParseReq getChatParseReq(Integer id, String query, boolean enableLLM) {
+    public static ChatParseReq getChatParseReq(Integer id, Integer agentId, String query,
+            boolean enableLLM) {
         ChatParseReq chatParseReq = new ChatParseReq();
         chatParseReq.setQueryText(query);
-        chatParseReq.setAgentId(productAgentId);
         chatParseReq.setChatId(id);
+        chatParseReq.setAgentId(agentId);
         chatParseReq.setUser(user_test);
         chatParseReq.setDisableLLM(!enableLLM);
         return chatParseReq;
