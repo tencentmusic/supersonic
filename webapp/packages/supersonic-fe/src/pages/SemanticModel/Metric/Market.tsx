@@ -152,8 +152,6 @@ const ClassMetricTable: React.FC<Props> = ({}) => {
   };
 
   const handleMetricEdit = (metricItem: ISemantic.IMetricItem) => {
-    // setMetricItem(metricItem);
-    // setCreateModalVisible(true);
     history.push(`/model/metric/edit/${metricItem.id}`);
   };
 

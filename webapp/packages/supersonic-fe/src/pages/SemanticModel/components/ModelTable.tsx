@@ -11,6 +11,7 @@ import TableHeaderFilter from '@/components/TableHeaderFilter';
 import moment from 'moment';
 import styles from './style.less';
 import { ISemantic } from '../data';
+import { toModelList } from '@/pages/SemanticModel/utils';
 
 type Props = {
   disabledEdit?: boolean;
@@ -105,9 +106,7 @@ const ModelTable: React.FC<Props> = ({ modelList, disabledEdit = false, onModelC
           <a
             onClick={() => {
               setSelectModel(record);
-
-              history.push(`/model/domain/manager/${domainId}/${id}`);
-              // onModelChange?.(record);
+              toModelList(domainId, id);
             }}
           >
             {_}

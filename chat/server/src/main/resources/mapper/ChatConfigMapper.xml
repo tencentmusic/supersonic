@@ -20,54 +20,6 @@
         <result column="updated_at" property="updatedAt"/>
     </resultMap>
 
-    <insert id="addConfig"
-            parameterType="com.tencent.supersonic.chat.server.persistence.dataobject.ChatConfigDO"
-            useGeneratedKeys="true" keyProperty="id">
-    insert into s2_chat_config
-    (
-        model_id, `chat_detail_config`, chat_agg_config,  recommended_questions, status, llm_examples, created_by, updated_by, created_at, updated_at
-    )
-    values
-    (
-        #{modelId}, #{chatDetailConfig}, #{chatAggConfig}, #{recommendedQuestions}, #{status}, #{llmExamples}, #{createdBy}, #{updatedBy}, #{createdAt}, #{updatedAt}
-    )
-    </insert>
-
-
-    <update id="editConfig">
-        update s2_chat_config
-        <set>
-            `updated_at` = #{updatedAt} ,
-            <if test="chatDetailConfig != null and chatDetailConfig != ''">
-                `chat_detail_config` = #{chatDetailConfig} ,
-            </if>
-            <if test="chatAggConfig != null and chatAggConfig != ''">
-                chat_agg_config = #{chatAggConfig} ,
-            </if>
-            <if test="recommendedQuestions != null and recommendedQuestions != ''">
-                recommended_questions = #{recommendedQuestions} ,
-            </if>
-            <if test="status != null and status != ''">
-                status = #{status} ,
-            </if>
-            <if test="updatedBy != null and updatedBy != ''">
-                updated_by = #{updatedBy} ,
-            </if>
-            <if test="llmExamples != null and llmExamples != ''">
-                llm_examples = #{llmExamples} ,
-            </if>
-        </set>
-
-        <where>
-            <if test="id != null and id != ''">
-                id = #{id}
-            </if>
-            <if test="modelId != null and modelId != ''">
-                and model_id = #{modelId}
-            </if>
-        </where>
-    </update>
-
     <select id="search" resultMap="chaConfigDO">
         select *
         from s2_chat_config

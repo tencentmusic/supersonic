@@ -22,6 +22,7 @@ import org.junit.jupiter.api.TestMethodOrder;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -135,9 +136,9 @@ public class QueryByStructTest extends BaseTest {
         aggregator.setFunc(AggOperatorEnum.SUM);
         aggregator.setColumn("pv");
         QueryStructReq queryStructReq1 =
-                buildQueryStructReq(Arrays.asList("department"), aggregator);
+                buildQueryStructReq(Collections.singletonList("department"), aggregator);
         SemanticQueryResp semanticQueryResp = semanticLayerService.queryByReq(queryStructReq1, tom);
         Assertions.assertNotNull(semanticQueryResp.getQueryAuthorization().getMessage());
-        Assertions.assertTrue(semanticQueryResp.getSql().contains("`user_name` = 'tom'"));
+        Assertions.assertTrue(semanticQueryResp.getSql().contains("user_name = 'tom'"));
     }
 }

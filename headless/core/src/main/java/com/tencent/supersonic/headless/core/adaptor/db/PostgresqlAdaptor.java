@@ -48,7 +48,7 @@ public class PostgresqlAdaptor extends BaseDbAdaptor {
     }
 
     @Override
-    public String functionNameCorrector(String sql) {
+    public String rewriteSql(String sql) {
         Map<String, String> functionMap = new HashMap<>();
         functionMap.put("MONTH".toLowerCase(), "TO_CHAR");
         functionMap.put("DAY".toLowerCase(), "TO_CHAR");
@@ -78,7 +78,9 @@ public class PostgresqlAdaptor extends BaseDbAdaptor {
             }
             return o;
         });
-        return SqlReplaceHelper.replaceFunction(sql, functionMap, functionCall);
+        sql = SqlReplaceHelper.replaceFunction(sql, functionMap, functionCall);
+        sql = sql.replaceAll("`", "\"");
+        return sql;
     }
 
     public List<String> getTables(ConnectInfo connectionInfo, String schemaName)

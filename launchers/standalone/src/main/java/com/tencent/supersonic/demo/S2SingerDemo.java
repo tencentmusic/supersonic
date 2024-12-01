@@ -45,6 +45,8 @@ import java.util.Map;
 @Order(3)
 public class S2SingerDemo extends S2BaseDemo {
 
+    public static final String AGENT_NAME = "艺人分析助手";
+
     public void doRun() {
         try {
             DomainResp singerDomain = addDomain();
@@ -57,7 +59,7 @@ public class S2SingerDemo extends S2BaseDemo {
     }
 
     @Override
-    boolean checkNeedToRun() {
+    protected boolean checkNeedToRun() {
         List<DomainResp> domainList = domainService.getDomainList();
         for (DomainResp domainResp : domainList) {
             if (domainResp.getBizName().equalsIgnoreCase("singer")) {
@@ -147,7 +149,7 @@ public class S2SingerDemo extends S2BaseDemo {
 
     private void addAgent(long dataSetId) {
         Agent agent = new Agent();
-        agent.setName("艺人分析助手");
+        agent.setName(AGENT_NAME);
         agent.setDescription("帮忙您对不同流派、区域的艺人做分析查询");
         agent.setStatus(1);
         agent.setEnableSearch(1);

@@ -509,3 +509,9 @@ export const replaceRouteParams = (template: string, values: Record<string, stri
     return values[key] !== undefined ? values[key] : match;
   });
 };
+
+export function openNewPage(url: string) {
+  const newWindow: any = window.open();
+  newWindow.opener = null;
+  newWindow.location.href = url;
+}

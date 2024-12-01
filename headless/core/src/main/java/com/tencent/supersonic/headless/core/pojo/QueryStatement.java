@@ -1,8 +1,8 @@
 package com.tencent.supersonic.headless.core.pojo;
 
 import com.tencent.supersonic.headless.api.pojo.response.SemanticSchemaResp;
-import com.tencent.supersonic.headless.core.translator.calcite.s2sql.Ontology;
-import com.tencent.supersonic.headless.core.translator.calcite.s2sql.OntologyQueryParam;
+import com.tencent.supersonic.headless.core.translator.parser.s2sql.Ontology;
+import com.tencent.supersonic.headless.core.translator.parser.s2sql.OntologyQueryParam;
 import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Triple;

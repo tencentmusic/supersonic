@@ -34,7 +34,7 @@ public class ClickHouseAdaptor extends BaseDbAdaptor {
     }
 
     @Override
-    public String functionNameCorrector(String sql) {
+    public String rewriteSql(String sql) {
         Map<String, String> functionMap = new HashMap<>();
         functionMap.put("MONTH".toLowerCase(), "toMonth");
         functionMap.put("DAY".toLowerCase(), "toDayOfMonth");

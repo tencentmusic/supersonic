@@ -33,6 +33,8 @@ import java.util.*;
 @Order(2)
 public class S2CompanyDemo extends S2BaseDemo {
 
+    public static final String AGENT_NAME = "企业分析助手";
+
     public void doRun() {
         try {
             DomainResp domain = addDomain();
@@ -45,14 +47,15 @@ public class S2CompanyDemo extends S2BaseDemo {
             addModelRela(domain, model_brand_revenue, model_brand, "brand_id");
 
             DataSetResp dataset = addDataSet(domain);
-            addAgent(dataset.getId());
+            Long dataSetId = dataset.getId();
+            addAgent(dataSetId);
         } catch (Exception e) {
             log.error("Failed to add bench mark demo data", e);
         }
     }
 
     @Override
-    boolean checkNeedToRun() {
+    protected boolean checkNeedToRun() {
         List<DomainResp> domainList = domainService.getDomainList();
         for (DomainResp domainResp : domainList) {
             if (domainResp.getBizName().equalsIgnoreCase("corporate")) {
@@ -229,9 +232,9 @@ public class S2CompanyDemo extends S2BaseDemo {
         modelRelaService.save(modelRelaReq, defaultUser);
     }
 
-    private void addAgent(Long dataSetId) {
+    private Agent addAgent(Long dataSetId) {
         Agent agent = new Agent();
-        agent.setName("企业分析助手");
+        agent.setName(AGENT_NAME);
         agent.setDescription("帮忙您对企业的员工数、收入、利润经营指标分析");
         agent.setStatus(1);
         agent.setEnableSearch(1);
@@ -253,6 +256,6 @@ public class S2CompanyDemo extends S2BaseDemo {
         chatAppConfig.values().forEach(app -> app.setChatModelId(demoChatModel.getId()));
         agent.setChatAppConfig(chatAppConfig);
 
-        agentService.createAgent(agent, defaultUser);
+        return agentService.createAgent(agent, defaultUser);
     }
 }

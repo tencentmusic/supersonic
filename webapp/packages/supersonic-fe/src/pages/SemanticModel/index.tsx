@@ -24,6 +24,13 @@ const SemanticModel: React.FC<Props> = ({}) => {
 
   const { selectMetric, setSelectMetric } = metricModel;
 
+  // useEffect(() => {
+
+  //   return () => {
+  //     setSelectMetric(undefined);
+  //   }
+  // }, [])
+
   const initSelectedDomain = (domainList: ISemantic.IDomainItem[]) => {
     const targetNode = domainList.filter((item: any) => {
       return `${item.id}` === domainId;
