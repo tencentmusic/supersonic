@@ -55,7 +55,8 @@ public class MemoryServiceImpl implements MemoryService {
     @Override
     public void updateMemory(ChatMemoryUpdateReq chatMemoryUpdateReq, User user) {
         ChatMemoryDO chatMemoryDO = chatMemoryRepository.getMemory(chatMemoryUpdateReq.getId());
-        boolean hadEnabled = MemoryStatus.ENABLED.toString().equals(chatMemoryDO.getStatus().trim());
+        boolean hadEnabled =
+                MemoryStatus.ENABLED.toString().equals(chatMemoryDO.getStatus().trim());
         chatMemoryDO.setUpdatedBy(user.getName());
         chatMemoryDO.setUpdatedAt(new Date());
         BeanMapper.mapper(chatMemoryUpdateReq, chatMemoryDO);
@@ -154,7 +155,8 @@ public class MemoryServiceImpl implements MemoryService {
         BeanUtils.copyProperties(memoryDO, memory);
         memory.setStatus(MemoryStatus.valueOf(memoryDO.getStatus().trim()));
         if (Objects.nonNull(memoryDO.getHumanReviewRet())) {
-            memory.setHumanReviewRet(MemoryReviewResult.valueOf(memoryDO.getHumanReviewRet().trim()));
+            memory.setHumanReviewRet(
+                    MemoryReviewResult.valueOf(memoryDO.getHumanReviewRet().trim()));
         }
         if (Objects.nonNull(memoryDO.getLlmReviewRet())) {
             memory.setLlmReviewRet(MemoryReviewResult.valueOf(memoryDO.getLlmReviewRet().trim()));
