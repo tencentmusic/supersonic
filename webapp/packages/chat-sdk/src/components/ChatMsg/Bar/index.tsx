@@ -7,10 +7,19 @@ import {
 } from '../../../utils/utils';
 import type { ECharts } from 'echarts';
 import * as echarts from 'echarts';
-import React, { useEffect, useRef, useState } from 'react';
+import {
+  forwardRef,
+  ForwardRefRenderFunction,
+  useContext,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+} from 'react';
 import NoPermissionChart from '../NoPermissionChart';
 import { ColumnType } from '../../../common/type';
 import { Spin } from 'antd';
+import { ChartItemContext } from '../../ChatItem';
+import { useExportByEcharts } from '../../../hooks';
 
 type Props = {
   data: MsgDataType;
@@ -30,7 +39,7 @@ const BarChart: React.FC<Props> = ({
   onApplyAuth,
 }) => {
   const chartRef = useRef<any>();
-  const [instance, setInstance] = useState<ECharts>();
+  const instanceRef = useRef<ECharts>();
 
   const { queryColumns, queryResults, entityInfo } = data;
 
@@ -41,11 +50,11 @@ const BarChart: React.FC<Props> = ({
 
   const renderChart = () => {
     let instanceObj: any;
-    if (!instance) {
+    if (!instanceRef.current) {
       instanceObj = echarts.init(chartRef.current);
-      setInstance(instanceObj);
+      instanceRef.current = instanceObj;
     } else {
-      instanceObj = instance;
+      instanceObj = instanceRef.current;
     }
     const data = (queryResults || []).sort(
       (a: any, b: any) => b[metricColumnName] - a[metricColumnName]
@@ -163,8 +172,8 @@ const BarChart: React.FC<Props> = ({
   }, [queryResults]);
 
   useEffect(() => {
-    if (triggerResize && instance) {
-      instance.resize();
+    if (triggerResize && instanceRef.current) {
+      instanceRef.current.resize();
     }
   }, [triggerResize]);
 
@@ -179,6 +188,15 @@ const BarChart: React.FC<Props> = ({
   }
 
   const prefixCls = `${PREFIX_CLS}-bar`;
+
+  const { downloadChartAsImage } = useExportByEcharts({
+    instanceRef,
+    question,
+  });
+
+  const { register } = useContext(ChartItemContext);
+
+  register('downloadChartAsImage', downloadChartAsImage);
 
   return (
     <div>
