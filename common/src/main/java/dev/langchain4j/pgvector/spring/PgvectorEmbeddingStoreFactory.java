@@ -26,7 +26,7 @@ public class PgvectorEmbeddingStoreFactory extends BaseEmbeddingStoreFactory {
         embeddingStore.setPort(storeConfig.getPost());
         embeddingStore.setDatabase(storeConfig.getDatabaseName());
         embeddingStore.setUser(storeConfig.getUser());
-        embeddingStore.setPassword(storeConfig.getApiKey());
+        embeddingStore.setPassword(storeConfig.getPassword());
         return embeddingStore;
     }
 

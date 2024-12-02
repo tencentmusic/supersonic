@@ -100,7 +100,9 @@ public class EmbeddingStoreParameterConfig extends ParameterConfig {
     }
 
     private static List<Parameter.Dependency> getApiKeyDependency() {
-        return Lists.newArrayList();
+        return getDependency(EMBEDDING_STORE_PROVIDER.getName(),
+                Lists.newArrayList(EmbeddingStoreType.MILVUS.name()),
+                ImmutableMap.of(EmbeddingStoreType.MILVUS.name(), DEMO));
     }
 
     private static List<Parameter.Dependency> getPathDependency() {
