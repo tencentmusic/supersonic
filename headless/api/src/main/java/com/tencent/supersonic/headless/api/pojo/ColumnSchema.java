@@ -15,7 +15,7 @@ public class ColumnSchema {
 
     private FieldType filedType;
 
-    private AggOperatorEnum agg;
+    private AggOperatorEnum agg = AggOperatorEnum.UNKNOWN;
 
     private String name;
 

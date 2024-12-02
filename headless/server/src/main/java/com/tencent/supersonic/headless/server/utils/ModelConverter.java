@@ -165,8 +165,8 @@ public class ModelConverter {
     public static ModelReq convert(ModelSchema modelSchema, ModelBuildReq modelBuildReq,
             String tableName) {
         ModelReq modelReq = new ModelReq();
-        modelReq.setName(modelSchema.getName());
-        modelReq.setBizName(modelSchema.getBizName());
+        modelReq.setName(modelBuildReq.getName());
+        modelReq.setBizName(modelBuildReq.getBizName());
         modelReq.setDatabaseId(modelBuildReq.getDatabaseId());
         modelReq.setDomainId(modelBuildReq.getDomainId());
         ModelDetail modelDetail = new ModelDetail();
@@ -198,10 +198,12 @@ public class ModelConverter {
     }
 
     private static IdentifyType getIdentifyType(FieldType fieldType) {
-        if (FieldType.foreign_key.equals(fieldType) || FieldType.primary_key.equals(fieldType)) {
+        if (FieldType.primary_key.equals(fieldType)) {
             return IdentifyType.primary;
-        } else {
+        } else if (FieldType.foreign_key.equals(fieldType)) {
             return IdentifyType.foreign;
+        } else {
+            return null;
         }
     }
 

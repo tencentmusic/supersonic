@@ -79,7 +79,7 @@ public class DataSetServiceImpl extends ServiceImpl<DataSetDOMapper, DataSetDO>
         DataSetDO dataSetDO = convert(dataSetReq);
         dataSetDO.setStatus(StatusEnum.ONLINE.getCode());
         DataSetResp dataSetResp = convert(dataSetDO);
-        conflictCheck(dataSetResp);
+        // conflictCheck(dataSetResp);
         save(dataSetDO);
         dataSetResp.setId(dataSetDO.getId());
         return dataSetResp;
@@ -90,7 +90,7 @@ public class DataSetServiceImpl extends ServiceImpl<DataSetDOMapper, DataSetDO>
         dataSetReq.updatedBy(user.getName());
         DataSetDO dataSetDO = convert(dataSetReq);
         DataSetResp dataSetResp = convert(dataSetDO);
-        conflictCheck(dataSetResp);
+        // conflictCheck(dataSetResp);
         updateById(dataSetDO);
         return dataSetResp;
     }

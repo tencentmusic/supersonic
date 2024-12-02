@@ -91,6 +91,7 @@ public class NL2SQLParser implements ChatQueryParser {
             // mapModes
             Set<Long> requestedDatasets = queryNLReq.getDataSetIds();
             List<SemanticParseInfo> candidateParses = Lists.newArrayList();
+            StringBuilder errMsg = new StringBuilder();
             for (Long datasetId : requestedDatasets) {
                 queryNLReq.setDataSetIds(Collections.singleton(datasetId));
                 ChatParseResp parseResp = new ChatParseResp(parseContext.getRequest().getQueryId());
@@ -104,6 +105,7 @@ public class NL2SQLParser implements ChatQueryParser {
                     doParse(queryNLReq, parseResp);
                 }
                 if (parseResp.getSelectedParses().isEmpty()) {
+                    errMsg.append(parseResp.getErrorMsg());
                     continue;
                 }
                 // for one dataset select the top 1 parse after sorting
@@ -116,6 +118,10 @@ public class NL2SQLParser implements ChatQueryParser {
             SemanticParseInfo.sort(candidateParses);
             parseContext.getResponse().setSelectedParses(
                     candidateParses.subList(0, Math.min(parserShowCount, candidateParses.size())));
+            if (parseContext.getResponse().getSelectedParses().isEmpty()) {
+                parseContext.getResponse().setState(ParseResp.ParseState.FAILED);
+                parseContext.getResponse().setErrorMsg(errMsg.toString());
+            }
         }
 
         // next go with llm-based parsers unless LLM is disabled or use feedback is needed.
