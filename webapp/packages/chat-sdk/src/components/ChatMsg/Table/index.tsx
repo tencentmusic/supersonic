@@ -1,8 +1,4 @@
-import {
-  formatByDecimalPlaces,
-  getFormattedValue,
-  formatByThousandSeperator,
-} from '../../../utils/utils';
+import { formatByDecimalPlaces, formatByThousandSeperator } from '../../../utils/utils';
 import { Table as AntTable } from 'antd';
 import { MsgDataType } from '../../../common/type';
 import { CLS_PREFIX } from '../../../common/constants';
@@ -13,7 +9,7 @@ import moment from 'moment';
 type Props = {
   data: MsgDataType;
   size?: SizeType;
-  question: string;
+  question?: string;
   loading?: boolean;
   onApplyAuth?: (model: string) => void;
 };
@@ -86,9 +82,12 @@ const Table: React.FC<Props> = ({ data, size, loading, question, onApplyAuth }) 
     : queryResults;
   return (
     <div className={prefixCls}>
-      <div className={`${prefixCls}-top-bar`}>
-        <div className={`${prefixCls}-indicator-name`}>{question}</div>
-      </div>
+      {question && (
+        <div className={`${prefixCls}-top-bar`}>
+          <div className={`${prefixCls}-indicator-name`}>{question}</div>
+        </div>
+      )}
+
       <AntTable
         pagination={
           queryResults.length <= 10 ? false : { defaultPageSize: 10, position: ['bottomCenter'] }
