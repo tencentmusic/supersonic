@@ -57,7 +57,6 @@ public class QueryRecommendProcessor implements ParseResultProcessor {
         ChatQueryRepository chatQueryRepository = ContextUtils.getBean(ChatQueryRepository.class);
         UpdateWrapper<ChatQueryDO> updateWrapper = new UpdateWrapper<>();
         updateWrapper.eq("question_id", chatQueryDO.getQuestionId());
-        updateWrapper.set("similar_queries", chatQueryDO.getSimilarQueries());
         chatQueryRepository.updateChatQuery(chatQueryDO, updateWrapper);
     }
 }
