@@ -74,13 +74,13 @@ public class StatRepositoryImpl implements StatRepository {
     private List<QueryStatDO> getQueryStats(ItemUseReq itemUseReq) {
         QueryWrapper<QueryStatDO> queryWrapper = new QueryWrapper<>();
         if (Objects.nonNull(itemUseReq.getModelId())) {
-            queryWrapper.eq("model_id", itemUseReq.getModelId());
+            queryWrapper.lambda().eq(QueryStatDO::getModelId, itemUseReq.getModelId());
         }
         if (Objects.nonNull(itemUseReq.getModelIds()) && !itemUseReq.getModelIds().isEmpty()) {
-            queryWrapper.in("model_id", itemUseReq.getModelIds());
+            queryWrapper.lambda().in(QueryStatDO::getModelId, itemUseReq.getModelIds());
         }
         if (Objects.nonNull(itemUseReq.getMetric())) {
-            queryWrapper.like("metrics", itemUseReq.getMetric());
+            queryWrapper.lambda().like(QueryStatDO::getMetrics, itemUseReq.getMetric());
         }
 
         return statMapper.selectList(queryWrapper);

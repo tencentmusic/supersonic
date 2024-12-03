@@ -76,42 +76,42 @@ public class MetricRepositoryImpl implements MetricRepository {
     @Override
     public List<MetricDO> getMetric(MetricFilter metricFilter) {
         QueryWrapper<MetricDO> queryWrapper = new QueryWrapper<>();
-        queryWrapper.ne("status", 3);
+        queryWrapper.lambda().ne(MetricDO::getStatus, 3);
         if (Objects.nonNull(metricFilter.getIds()) && !metricFilter.getIds().isEmpty()) {
-            queryWrapper.in("id", metricFilter.getIds());
+            queryWrapper.lambda().in(MetricDO::getId, metricFilter.getIds());
         }
         if (StringUtils.isNotBlank(metricFilter.getId())) {
-            queryWrapper.eq("id", metricFilter.getId());
+            queryWrapper.lambda().eq(MetricDO::getId, metricFilter.getId());
         }
         if (Objects.nonNull(metricFilter.getModelIds()) && !metricFilter.getModelIds().isEmpty()) {
-            queryWrapper.in("model_id", metricFilter.getModelIds());
+            queryWrapper.lambda().in(MetricDO::getModelId, metricFilter.getModelIds());
         }
         if (StringUtils.isNotBlank(metricFilter.getType())) {
-            queryWrapper.eq("type", metricFilter.getType());
+            queryWrapper.lambda().eq(MetricDO::getType, metricFilter.getType());
         }
         if (StringUtils.isNotBlank(metricFilter.getName())) {
-            queryWrapper.like("name", metricFilter.getName());
+            queryWrapper.lambda().like(MetricDO::getName, metricFilter.getName());
         }
         if (StringUtils.isNotBlank(metricFilter.getId())) {
-            queryWrapper.like("biz_name", metricFilter.getBizName());
+            queryWrapper.lambda().like(MetricDO::getBizName, metricFilter.getBizName());
         }
         if (Objects.nonNull(metricFilter.getStatus())) {
-            queryWrapper.eq("status", metricFilter.getStatus());
+            queryWrapper.lambda().eq(MetricDO::getStatus, metricFilter.getStatus());
         }
         if (Objects.nonNull(metricFilter.getSensitiveLevel())) {
-            queryWrapper.eq("sensitive_level", metricFilter.getSensitiveLevel());
+            queryWrapper.lambda().eq(MetricDO::getSensitiveLevel, metricFilter.getSensitiveLevel());
         }
         if (StringUtils.isNotBlank(metricFilter.getCreatedBy())) {
-            queryWrapper.eq("created_by", metricFilter.getCreatedBy());
+            queryWrapper.lambda().eq(MetricDO::getCreatedBy, metricFilter.getCreatedBy());
         }
         if (Objects.nonNull(metricFilter.getIsPublish()) && metricFilter.getIsPublish() == 1) {
-            queryWrapper.eq("is_publish", metricFilter.getIsPublish());
+            queryWrapper.lambda().eq(MetricDO::getIsPublish, metricFilter.getIsPublish());
         }
         if (StringUtils.isNotBlank(metricFilter.getKey())) {
             String key = metricFilter.getKey();
-            queryWrapper.like("name", key).or().like("biz_name", key).or().like("description", key)
-                    .or().like("alias", key).or().like("classifications", key).or()
-                    .like("created_by", key);
+            queryWrapper.lambda().like(MetricDO::getName, key).or().like(MetricDO::getBizName, key)
+                    .or().like(MetricDO::getDescription, key).or().like(MetricDO::getAlias, key)
+                    .or().like(MetricDO::getCreatedBy, key);
         }
 
         return metricDOMapper.selectList(queryWrapper);

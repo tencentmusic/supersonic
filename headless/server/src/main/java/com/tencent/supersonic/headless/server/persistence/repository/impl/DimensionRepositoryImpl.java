@@ -54,36 +54,39 @@ public class DimensionRepositoryImpl implements DimensionRepository {
     @Override
     public List<DimensionDO> getDimension(DimensionFilter dimensionFilter) {
         QueryWrapper<DimensionDO> queryWrapper = new QueryWrapper<>();
-        queryWrapper.ne("status", 3);
+        queryWrapper.lambda().ne(DimensionDO::getStatus, 3);
         if (Objects.nonNull(dimensionFilter.getIds()) && !dimensionFilter.getIds().isEmpty()) {
-            queryWrapper.in("id", dimensionFilter.getIds());
+            queryWrapper.lambda().in(DimensionDO::getId, dimensionFilter.getIds());
         }
         if (StringUtils.isNotBlank(dimensionFilter.getId())) {
-            queryWrapper.eq("id", dimensionFilter.getId());
+            queryWrapper.lambda().eq(DimensionDO::getId, dimensionFilter.getId());
         }
         if (Objects.nonNull(dimensionFilter.getModelIds())
                 && !dimensionFilter.getModelIds().isEmpty()) {
-            queryWrapper.in("model_id", dimensionFilter.getModelIds());
+            queryWrapper.lambda().in(DimensionDO::getModelId, dimensionFilter.getModelIds());
         }
         if (StringUtils.isNotBlank(dimensionFilter.getName())) {
-            queryWrapper.like("name", dimensionFilter.getName());
+            queryWrapper.lambda().like(DimensionDO::getName, dimensionFilter.getName());
         }
         if (StringUtils.isNotBlank(dimensionFilter.getId())) {
-            queryWrapper.like("biz_name", dimensionFilter.getBizName());
+            queryWrapper.lambda().like(DimensionDO::getBizName, dimensionFilter.getBizName());
         }
         if (Objects.nonNull(dimensionFilter.getStatus())) {
-            queryWrapper.eq("status", dimensionFilter.getStatus());
+            queryWrapper.lambda().eq(DimensionDO::getStatus, dimensionFilter.getStatus());
         }
         if (Objects.nonNull(dimensionFilter.getSensitiveLevel())) {
-            queryWrapper.eq("sensitive_level", dimensionFilter.getSensitiveLevel());
+            queryWrapper.lambda().eq(DimensionDO::getSensitiveLevel,
+                    dimensionFilter.getSensitiveLevel());
         }
         if (StringUtils.isNotBlank(dimensionFilter.getCreatedBy())) {
-            queryWrapper.eq("created_by", dimensionFilter.getCreatedBy());
+            queryWrapper.lambda().eq(DimensionDO::getCreatedBy, dimensionFilter.getCreatedBy());
         }
         if (StringUtils.isNotBlank(dimensionFilter.getKey())) {
             String key = dimensionFilter.getKey();
-            queryWrapper.like("name", key).or().like("biz_name", key).or().like("description", key)
-                    .or().like("alias", key).or().like("created_by", key);
+            queryWrapper.lambda().like(DimensionDO::getName, key).or()
+                    .like(DimensionDO::getBizName, key).or().like(DimensionDO::getDescription, key)
+                    .or().like(DimensionDO::getAlias, key).or()
+                    .like(DimensionDO::getCreatedBy, key);
         }
 
         return dimensionDOMapper.selectList(queryWrapper);
