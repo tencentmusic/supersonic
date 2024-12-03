@@ -13,6 +13,7 @@ import com.tencent.supersonic.headless.api.pojo.request.DictItemFilter;
 import com.tencent.supersonic.headless.api.pojo.request.DictItemReq;
 import com.tencent.supersonic.headless.api.pojo.request.DictSingleTaskReq;
 import com.tencent.supersonic.headless.api.pojo.request.DictValueReq;
+import com.tencent.supersonic.headless.api.pojo.request.ValueTaskQueryReq;
 import com.tencent.supersonic.headless.api.pojo.response.DictItemResp;
 import com.tencent.supersonic.headless.api.pojo.response.DictTaskResp;
 import com.tencent.supersonic.headless.api.pojo.response.DictValueDimResp;
@@ -130,6 +131,18 @@ public class KnowledgeController {
             HttpServletRequest request, HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
         return taskService.queryLatestDictTask(taskReq, user);
+    }
+
+    /**
+     * queryDictTask-分页返回维度的字典任务列表
+     *
+     * @param taskQueryReq
+     */
+    @PostMapping("/task/search/page")
+    public PageInfo<DictTaskResp> queryDictTask(@RequestBody ValueTaskQueryReq taskQueryReq,
+            HttpServletRequest request, HttpServletResponse response) {
+        User user = UserHolder.findUser(request, response);
+        return taskService.queryDictTask(taskQueryReq, user);
     }
 
     @GetMapping("/embedding/reload")

@@ -1,14 +1,46 @@
 spring:
   datasource:
     driver-class-name: org.h2.Driver
-    url: jdbc:h2:mem:semantic;DATABASE_TO_UPPER=false;QUERY_TIMEOUT=100
+    url: jdbc:h2:mem:semantic;DATABASE_TO_UPPER=false;QUERY_TIMEOUT=30
     username: root
     password: semantic
   sql:
     init:
-      schema-locations: classpath:db/schema-h2.sql
-      data-locations: classpath:db/data-h2.sql
+      schema-locations: classpath:db/schema-h2.sql,classpath:db/schema-h2-demo.sql
+      data-locations: classpath:db/data-h2.sql,classpath:db/data-h2-demo.sql
   h2:
     console:
       path: /h2-console/semantic
       enabled: true
+
+## Comment out following lines if using MySQL
+#spring:
+#  datasource:
+#    driver-class-name: com.mysql.cj.jdbc.Driver
+#    url: jdbc:mysql://localhost:3306/mysql
+#    username: root
+#    password:
+#  sql:
+#    init:
+#      enabled: false
+#      mode: always
+#      username: root
+#      password:
+#      schema-locations: classpath:db/schema-mysql.sql,classpath:db/schema-mysql-demo.sql
+#      data-locations: classpath:db/data-mysql.sql,classpath:db/data-mysql-demo.sql
+
+## Comment out following lines if using Postgres
+#spring:
+#  datasource:
+#    driver-class-name: org.postgresql.Driver
+#    url: jdbc:postgresql://localhost:5432/postgres?stringtype=unspecified
+#    username: postgres
+#    password: postgres
+#  sql:
+#    init:
+#      enabled: false
+#      mode: always
+#      username: postgres
+#      password: postgres
+#      schema-locations: classpath:db/schema-postgres.sql,classpath:db/schema-postgres-demo.sql
+#      data-locations: classpath:db/data-postgres.sql,classpath:db/data-postgres-demo.sql

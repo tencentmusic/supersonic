@@ -2,6 +2,7 @@ package com.tencent.supersonic.common.pojo;
 
 import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -10,6 +11,7 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class Filter {
 
     private Relation relation = Relation.FILTER;

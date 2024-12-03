@@ -1,9 +1,11 @@
 package com.tencent.supersonic.chat.server.agent;
 
 import com.alibaba.fastjson.JSONObject;
+import com.google.common.collect.Lists;
 import com.tencent.supersonic.chat.server.memory.MemoryReviewTask;
 import com.tencent.supersonic.common.pojo.ChatApp;
 import com.tencent.supersonic.common.pojo.RecordInfo;
+import com.tencent.supersonic.common.pojo.User;
 import lombok.Data;
 import org.springframework.util.CollectionUtils;
 
@@ -12,6 +14,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Data
@@ -33,6 +36,8 @@ public class Agent extends RecordInfo {
     private String toolConfig;
     private Map<String, ChatApp> chatAppConfig = Collections.emptyMap();
     private VisualConfig visualConfig;
+    private List<String> admins = Lists.newArrayList();
+    private List<String> viewers = Lists.newArrayList();
 
     public List<String> getTools(AgentToolType type) {
         Map<String, Object> map = JSONObject.parseObject(toolConfig, Map.class);
@@ -105,4 +110,9 @@ public class Agent extends RecordInfo {
                 .filter(dataSetIds -> !CollectionUtils.isEmpty(dataSetIds))
                 .flatMap(Collection::stream).collect(Collectors.toSet());
     }
+
+    public boolean contains(User user, Function<Agent, List<String>> list) {
+        return list.apply(this).contains(user.getName());
+    }
+
 }

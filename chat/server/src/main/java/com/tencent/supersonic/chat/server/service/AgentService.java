@@ -2,10 +2,12 @@ package com.tencent.supersonic.chat.server.service;
 
 import com.tencent.supersonic.chat.server.agent.Agent;
 import com.tencent.supersonic.common.pojo.User;
+import com.tencent.supersonic.common.pojo.enums.AuthType;
 
 import java.util.List;
 
 public interface AgentService {
+    List<Agent> getAgents(User user, AuthType authType);
 
     List<Agent> getAgents();
 

@@ -2,6 +2,7 @@ package com.tencent.supersonic.demo;
 
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authorization.service.AuthService;
+import com.tencent.supersonic.chat.api.pojo.request.ChatParseReq;
 import com.tencent.supersonic.chat.server.service.AgentService;
 import com.tencent.supersonic.chat.server.service.ChatManageService;
 import com.tencent.supersonic.chat.server.service.ChatQueryService;
@@ -17,16 +18,23 @@ import com.tencent.supersonic.headless.api.pojo.DrillDownDimension;
 import com.tencent.supersonic.headless.api.pojo.MetaFilter;
 import com.tencent.supersonic.headless.api.pojo.RelateDimension;
 import com.tencent.supersonic.headless.api.pojo.enums.DataType;
-import com.tencent.supersonic.headless.api.pojo.enums.TagDefineType;
 import com.tencent.supersonic.headless.api.pojo.request.DatabaseReq;
 import com.tencent.supersonic.headless.api.pojo.request.DictItemReq;
 import com.tencent.supersonic.headless.api.pojo.request.DictSingleTaskReq;
-import com.tencent.supersonic.headless.api.pojo.request.TagReq;
 import com.tencent.supersonic.headless.api.pojo.response.DatabaseResp;
 import com.tencent.supersonic.headless.api.pojo.response.DimensionResp;
 import com.tencent.supersonic.headless.api.pojo.response.MetricResp;
 import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
-import com.tencent.supersonic.headless.server.service.*;
+import com.tencent.supersonic.headless.server.service.DataSetService;
+import com.tencent.supersonic.headless.server.service.DatabaseService;
+import com.tencent.supersonic.headless.server.service.DictConfService;
+import com.tencent.supersonic.headless.server.service.DictTaskService;
+import com.tencent.supersonic.headless.server.service.DimensionService;
+import com.tencent.supersonic.headless.server.service.DomainService;
+import com.tencent.supersonic.headless.server.service.MetricService;
+import com.tencent.supersonic.headless.server.service.ModelRelaService;
+import com.tencent.supersonic.headless.server.service.ModelService;
+import com.tencent.supersonic.headless.server.service.TermService;
 import com.tencent.supersonic.headless.server.service.impl.DictWordService;
 import dev.langchain4j.provider.ModelProvider;
 import lombok.extern.slf4j.Slf4j;
@@ -61,8 +69,6 @@ public abstract class S2BaseDemo implements CommandLineRunner {
     @Autowired
     protected MetricService metricService;
     @Autowired
-    protected TagMetaService tagMetaService;
-    @Autowired
     protected AuthService authService;
     @Autowired
     protected DataSetService dataSetService;
@@ -72,8 +78,6 @@ public abstract class S2BaseDemo implements CommandLineRunner {
     protected PluginService pluginService;
     @Autowired
     protected DataSourceProperties dataSourceProperties;
-    @Autowired
-    protected TagObjectService tagObjectService;
     @Autowired
     protected ChatQueryService chatQueryService;
     @Autowired
@@ -104,9 +108,9 @@ public abstract class S2BaseDemo implements CommandLineRunner {
         }
     }
 
-    abstract void doRun();
+    protected abstract void doRun();
 
-    abstract boolean checkNeedToRun();
+    protected abstract boolean checkNeedToRun();
 
     protected DatabaseResp addDatabaseIfNotExist() {
         List<DatabaseResp> databaseList = databaseService.getDatabaseList(defaultUser);
@@ -115,15 +119,9 @@ public abstract class S2BaseDemo implements CommandLineRunner {
         }
         String url = dataSourceProperties.getUrl();
         DatabaseReq databaseReq = new DatabaseReq();
-        databaseReq.setName("H2数据库DEMO");
-        databaseReq.setDescription("样例数据库实例仅用于体验，正式使用请切换持久化数据库");
-        if (StringUtils.isNotBlank(url)
-                && url.toLowerCase().contains(DataType.MYSQL.getFeature().toLowerCase())) {
-            databaseReq.setType(DataType.MYSQL.getFeature());
-            databaseReq.setVersion("5.7");
-        } else {
-            databaseReq.setType(DataType.H2.getFeature());
-        }
+        databaseReq.setName("S2数据库DEMO");
+        databaseReq.setDescription("样例数据库实例仅用于体验");
+        databaseReq.setType(DataType.POSTGRESQL.getFeature());
         databaseReq.setUrl(url);
         databaseReq.setUsername(dataSourceProperties.getUsername());
         databaseReq
@@ -133,7 +131,7 @@ public abstract class S2BaseDemo implements CommandLineRunner {
 
     protected ChatModel addChatModelIfNotExist() {
         List<ChatModel> chatModels = chatModelService.getChatModels();
-        if (chatModels.size() > 0) {
+        if (!chatModels.isEmpty()) {
             return chatModels.get(0);
         } else {
             ChatModel chatModel = new ChatModel();
@@ -180,13 +178,6 @@ public abstract class S2BaseDemo implements CommandLineRunner {
         return dataSetModelConfigs;
     }
 
-    protected void addTag(Long itemId, TagDefineType tagDefineType) {
-        TagReq tagReq = new TagReq();
-        tagReq.setTagDefineType(tagDefineType);
-        tagReq.setItemId(itemId);
-        tagMetaService.create(tagReq, User.getDefaultUser());
-    }
-
     protected DimensionResp getDimension(String bizName, ModelResp model) {
         return dimensionService.getDimension(bizName, model.getId());
     }
@@ -208,5 +199,14 @@ public abstract class S2BaseDemo implements CommandLineRunner {
                 .itemId(dimension.getId()).status(StatusEnum.ONLINE).build(), defaultUser);
         dictTaskService.addDictTask(DictSingleTaskReq.builder().itemId(dimension.getId())
                 .type(TypeEnums.DIMENSION).build(), defaultUser);
+    }
+
+    protected void submitText(int chatId, int agentId, String queryText) {
+        chatQueryService.parseAndExecute(ChatParseReq.builder().chatId(chatId).agentId(agentId)
+                .queryText(queryText).user(defaultUser).disableLLM(true).build());
+    }
+
+    protected void loadDictWord() {
+        dictWordService.loadDictWord();
     }
 }

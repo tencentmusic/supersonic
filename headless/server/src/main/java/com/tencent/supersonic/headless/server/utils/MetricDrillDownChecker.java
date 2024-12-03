@@ -32,7 +32,7 @@ public class MetricDrillDownChecker {
 
     public void checkQuery(QueryStatement queryStatement) {
         SemanticSchemaResp semanticSchemaResp = queryStatement.getSemanticSchemaResp();
-        String sql = queryStatement.getDataSetQueryParam().getSql();
+        String sql = queryStatement.getSql();
         if (StringUtils.isBlank(sql)) {
             return;
         }
@@ -67,7 +67,8 @@ public class MetricDrillDownChecker {
             List<MetricResp> metricResps = getMetrics(metricFields, semanticSchemaResp);
             if (!checkDrillDownDimension(dimensionBizName, metricResps, semanticSchemaResp)) {
                 DimSchemaResp dimSchemaResp = semanticSchemaResp.getDimension(dimensionBizName);
-                if (Objects.nonNull(dimSchemaResp) && dimSchemaResp.isPartitionTime()) {
+                if (Objects.isNull(dimSchemaResp)
+                        || (Objects.nonNull(dimSchemaResp) && dimSchemaResp.isPartitionTime())) {
                     continue;
                 }
                 String errMsg =

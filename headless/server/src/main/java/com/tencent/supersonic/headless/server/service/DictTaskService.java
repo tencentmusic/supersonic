@@ -4,6 +4,7 @@ import com.github.pagehelper.PageInfo;
 import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.headless.api.pojo.request.DictSingleTaskReq;
 import com.tencent.supersonic.headless.api.pojo.request.DictValueReq;
+import com.tencent.supersonic.headless.api.pojo.request.ValueTaskQueryReq;
 import com.tencent.supersonic.headless.api.pojo.response.DictTaskResp;
 import com.tencent.supersonic.headless.api.pojo.response.DictValueDimResp;
 
@@ -16,6 +17,8 @@ public interface DictTaskService {
     Boolean dailyDictTask();
 
     DictTaskResp queryLatestDictTask(DictSingleTaskReq taskReq, User user);
+
+    PageInfo<DictTaskResp> queryDictTask(ValueTaskQueryReq taskQueryReq, User user);
 
     PageInfo<DictValueDimResp> queryDictValue(DictValueReq dictValueReq, User user);
 

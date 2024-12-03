@@ -2,33 +2,12 @@ package com.tencent.supersonic.headless.server.manager;
 
 import com.tencent.supersonic.common.pojo.ModelRela;
 import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
-import com.tencent.supersonic.headless.api.pojo.Field;
-import com.tencent.supersonic.headless.api.pojo.enums.TagDefineType;
 import com.tencent.supersonic.headless.api.pojo.response.DatabaseResp;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticSchemaResp;
-import com.tencent.supersonic.headless.api.pojo.response.TagResp;
-import com.tencent.supersonic.headless.core.translator.calcite.s2sql.Constants;
-import com.tencent.supersonic.headless.core.translator.calcite.s2sql.DataSource;
-import com.tencent.supersonic.headless.core.translator.calcite.s2sql.DataType;
-import com.tencent.supersonic.headless.core.translator.calcite.s2sql.Dimension;
-import com.tencent.supersonic.headless.core.translator.calcite.s2sql.DimensionTimeTypeParams;
-import com.tencent.supersonic.headless.core.translator.calcite.s2sql.Identify;
-import com.tencent.supersonic.headless.core.translator.calcite.s2sql.JoinRelation;
-import com.tencent.supersonic.headless.core.translator.calcite.s2sql.Materialization.TimePartType;
-import com.tencent.supersonic.headless.core.translator.calcite.s2sql.Measure;
-import com.tencent.supersonic.headless.core.translator.calcite.s2sql.Metric;
-import com.tencent.supersonic.headless.core.translator.calcite.s2sql.MetricTypeParams;
-import com.tencent.supersonic.headless.core.translator.calcite.s2sql.SemanticModel;
-import com.tencent.supersonic.headless.core.translator.calcite.schema.SemanticSchema;
-import com.tencent.supersonic.headless.server.pojo.yaml.DataModelYamlTpl;
-import com.tencent.supersonic.headless.server.pojo.yaml.DimensionTimeTypeParamsTpl;
-import com.tencent.supersonic.headless.server.pojo.yaml.DimensionYamlTpl;
-import com.tencent.supersonic.headless.server.pojo.yaml.FieldParamYamlTpl;
-import com.tencent.supersonic.headless.server.pojo.yaml.IdentifyYamlTpl;
-import com.tencent.supersonic.headless.server.pojo.yaml.MeasureYamlTpl;
-import com.tencent.supersonic.headless.server.pojo.yaml.MetricParamYamlTpl;
-import com.tencent.supersonic.headless.server.pojo.yaml.MetricTypeParamsYamlTpl;
-import com.tencent.supersonic.headless.server.pojo.yaml.MetricYamlTpl;
+import com.tencent.supersonic.headless.core.translator.parser.calcite.S2CalciteSchema;
+import com.tencent.supersonic.headless.core.translator.parser.s2sql.*;
+import com.tencent.supersonic.headless.core.translator.parser.s2sql.Materialization.TimePartType;
+import com.tencent.supersonic.headless.server.pojo.yaml.*;
 import com.tencent.supersonic.headless.server.service.SchemaService;
 import com.tencent.supersonic.headless.server.utils.DatabaseConverter;
 import lombok.extern.slf4j.Slf4j;
@@ -36,15 +15,8 @@ import org.apache.commons.lang3.tuple.Triple;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -57,9 +29,8 @@ public class SemanticSchemaManager {
         this.schemaService = schemaService;
     }
 
-    public SemanticModel getSemanticModel(SemanticSchemaResp semanticSchemaResp) {
-        SemanticModel semanticModel = new SemanticModel();
-        semanticModel.setSchemaKey(semanticSchemaResp.getSchemaKey());
+    public Ontology buildOntology(SemanticSchemaResp semanticSchemaResp) {
+        Ontology ontology = new Ontology();
         Map<String, List<DimensionYamlTpl>> dimensionYamlTpls = new HashMap<>();
         List<DataModelYamlTpl> dataModelYamlTpls = new ArrayList<>();
         List<MetricYamlTpl> metricYamlTpls = new ArrayList<>();
@@ -67,107 +38,28 @@ public class SemanticSchemaManager {
         schemaService.getSchemaYamlTpl(semanticSchemaResp, dimensionYamlTpls, dataModelYamlTpls,
                 metricYamlTpls, modelIdName);
         DatabaseResp databaseResp = semanticSchemaResp.getDatabaseResp();
-        semanticModel.setDatabase(DatabaseConverter.convert(databaseResp));
+        ontology.setDatabase(DatabaseConverter.convert(databaseResp));
         if (!CollectionUtils.isEmpty(semanticSchemaResp.getModelRelas())) {
-            semanticModel.setJoinRelations(
+            ontology.setJoinRelations(
                     getJoinRelation(semanticSchemaResp.getModelRelas(), modelIdName));
         }
         if (!dataModelYamlTpls.isEmpty()) {
-            Map<String, DataSource> dataSourceMap =
-                    dataModelYamlTpls.stream().map(SemanticSchemaManager::getDatasource).collect(
-                            Collectors.toMap(DataSource::getName, item -> item, (k1, k2) -> k1));
-            semanticModel.setDatasourceMap(dataSourceMap);
+            Map<String, DataModel> dataModelMap =
+                    dataModelYamlTpls.stream().map(SemanticSchemaManager::getDataModel).collect(
+                            Collectors.toMap(DataModel::getName, item -> item, (k1, k2) -> k1));
+            ontology.setDataModelMap(dataModelMap);
         }
         if (!dimensionYamlTpls.isEmpty()) {
             Map<String, List<Dimension>> dimensionMap = new HashMap<>();
             for (Map.Entry<String, List<DimensionYamlTpl>> entry : dimensionYamlTpls.entrySet()) {
                 dimensionMap.put(entry.getKey(), getDimensions(entry.getValue()));
             }
-            semanticModel.setDimensionMap(dimensionMap);
+            ontology.setDimensionMap(dimensionMap);
         }
         if (!metricYamlTpls.isEmpty()) {
-            semanticModel.setMetrics(getMetrics(metricYamlTpls));
+            ontology.setMetrics(getMetrics(metricYamlTpls));
         }
-        return semanticModel;
-    }
-
-    public SemanticModel getTagSemanticModel(SemanticSchemaResp semanticSchemaResp)
-            throws Exception {
-        if (CollectionUtils.isEmpty(semanticSchemaResp.getTags())) {
-            throw new Exception("semanticSchemaResp tag is empty");
-        }
-        SemanticModel semanticModel = getSemanticModel(semanticSchemaResp);
-        // Map<String, List<Dimension>> dimensions = new HashMap<>();
-        Map<Long, List<TagResp>> tagMap = new HashMap<>();
-        for (TagResp tagResp : semanticSchemaResp.getTags()) {
-            if (!tagMap.containsKey(tagResp.getModelId())) {
-                tagMap.put(tagResp.getModelId(), new ArrayList<>());
-            }
-            tagMap.get(tagResp.getModelId()).add(tagResp);
-        }
-        if (Objects.nonNull(semanticModel.getDatasourceMap())
-                && !semanticModel.getDatasourceMap().isEmpty()) {
-            for (Map.Entry<String, DataSource> entry : semanticModel.getDatasourceMap()
-                    .entrySet()) {
-                List<Dimension> modelDimensions = new ArrayList<>();
-                if (!semanticModel.getDimensionMap().containsKey(entry.getKey())) {
-                    semanticModel.getDimensionMap().put(entry.getKey(), modelDimensions);
-                } else {
-                    modelDimensions = semanticModel.getDimensionMap().get(entry.getKey());
-                }
-                if (tagMap.containsKey(entry.getValue().getId())) {
-                    for (TagResp tagResp : tagMap.get(entry.getValue().getId())) {
-                        addTagModel(tagResp, modelDimensions, semanticModel.getMetrics());
-                    }
-                }
-            }
-        }
-
-        return semanticModel;
-    }
-
-    private void addTagModel(TagResp tagResp, List<Dimension> modelDimensions,
-            List<Metric> modelMetrics) throws Exception {
-        TagDefineType tagDefineType = TagDefineType.valueOf(tagResp.getTagDefineType());
-        switch (tagDefineType) {
-            case FIELD:
-            case DIMENSION:
-                if (TagDefineType.DIMENSION.equals(tagResp.getTagDefineType())) {
-                    Optional<Dimension> modelDimension = modelDimensions.stream()
-                            // .filter(d -> d.getBizName().equals(tagResp.getExpr()))
-                            .findFirst();
-                    if (modelDimension.isPresent()) {
-                        modelDimension.get().setName(tagResp.getBizName());
-                        return;
-                    }
-                }
-                Dimension dimension = Dimension.builder().build();
-                dimension.setType("");
-                // dimension.setExpr(tagResp.getExpr());
-                dimension.setName(tagResp.getBizName());
-                dimension.setOwners("");
-                dimension.setBizName(tagResp.getBizName());
-                if (Objects.isNull(dimension.getDataType())) {
-                    dimension.setDataType(DataType.UNKNOWN);
-                }
-
-                DimensionTimeTypeParams dimensionTimeTypeParams = new DimensionTimeTypeParams();
-                dimension.setDimensionTimeTypeParams(dimensionTimeTypeParams);
-                modelDimensions.add(dimension);
-                return;
-            case METRIC:
-                Optional<Metric> modelMetric = modelMetrics.stream()
-                        // .filter(m -> m.getName().equalsIgnoreCase(tagResp.getExpr()))
-                        .findFirst();
-                if (modelMetric.isPresent()) {
-                    modelMetric.get().setName(tagResp.getBizName());
-                } else {
-                    throw new Exception(
-                            String.format("tag [{}] cant find the metric", tagResp.getBizName()));
-                }
-                return;
-            default:
-        }
+        return ontology;
     }
 
     public static List<Metric> getMetrics(final List<MetricYamlTpl> t) {
@@ -178,30 +70,20 @@ public class SemanticSchemaManager {
         return getDimension(t);
     }
 
-    public static DataSource getDatasource(final DataModelYamlTpl d) {
-        DataSource datasource = DataSource.builder().id(d.getId()).sourceId(d.getSourceId())
+    public static DataModel getDataModel(final DataModelYamlTpl d) {
+        DataModel dataModel = DataModel.builder().id(d.getId()).modelId(d.getSourceId())
                 .type(d.getType()).sqlQuery(d.getSqlQuery()).name(d.getName())
                 .tableQuery(d.getTableQuery()).identifiers(getIdentify(d.getIdentifiers()))
                 .measures(getMeasureParams(d.getMeasures()))
                 .dimensions(getDimensions(d.getDimensions())).build();
-        datasource.setAggTime(getDataSourceAggTime(datasource.getDimensions()));
+        dataModel.setAggTime(getDataModelAggTime(dataModel.getDimensions()));
         if (Objects.nonNull(d.getModelSourceTypeEnum())) {
-            datasource.setTimePartType(TimePartType.of(d.getModelSourceTypeEnum().name()));
+            dataModel.setTimePartType(TimePartType.of(d.getModelSourceTypeEnum().name()));
         }
-        if (Objects.nonNull(d.getFields()) && !CollectionUtils.isEmpty(d.getFields())) {
-            Set<String> measures = datasource.getMeasures().stream().map(mm -> mm.getName())
-                    .collect(Collectors.toSet());
-            for (Field f : d.getFields()) {
-                if (!measures.contains(f.getFieldName())) {
-                    datasource.getMeasures().add(Measure.builder().expr(f.getFieldName())
-                            .name(f.getFieldName()).agg("").build());
-                }
-            }
-        }
-        return datasource;
+        return dataModel;
     }
 
-    private static String getDataSourceAggTime(List<Dimension> dimensions) {
+    private static String getDataModelAggTime(List<Dimension> dimensions) {
         Optional<Dimension> timeDimension = dimensions.stream()
                 .filter(d -> Constants.DIMENSION_TYPE_TIME.equalsIgnoreCase(d.getType()))
                 .findFirst();
@@ -356,39 +238,39 @@ public class SemanticSchemaManager {
         return joinRelations;
     }
 
-    public static void update(SemanticSchema schema, List<Metric> metric) throws Exception {
+    public static void update(S2CalciteSchema schema, List<Metric> metric) throws Exception {
         if (schema != null) {
             updateMetric(metric, schema.getMetrics());
         }
     }
 
-    public static void update(SemanticSchema schema, DataSource datasourceYamlTpl)
+    public static void update(S2CalciteSchema schema, DataModel datasourceYamlTpl)
             throws Exception {
         if (schema != null) {
             String dataSourceName = datasourceYamlTpl.getName();
-            Optional<Entry<String, DataSource>> datasourceYamlTplMap =
-                    schema.getDatasource().entrySet().stream()
+            Optional<Entry<String, DataModel>> datasourceYamlTplMap =
+                    schema.getDataModels().entrySet().stream()
                             .filter(t -> t.getKey().equalsIgnoreCase(dataSourceName)).findFirst();
             if (datasourceYamlTplMap.isPresent()) {
                 datasourceYamlTplMap.get().setValue(datasourceYamlTpl);
             } else {
-                schema.getDatasource().put(dataSourceName, datasourceYamlTpl);
+                schema.getDataModels().put(dataSourceName, datasourceYamlTpl);
             }
         }
     }
 
-    public static void update(SemanticSchema schema, String datasourceBizName,
+    public static void update(S2CalciteSchema schema, String datasourceBizName,
             List<Dimension> dimensionYamlTpls) throws Exception {
         if (schema != null) {
             Optional<Map.Entry<String, List<Dimension>>> datasourceYamlTplMap = schema
-                    .getDimension().entrySet().stream()
+                    .getDimensions().entrySet().stream()
                     .filter(t -> t.getKey().equalsIgnoreCase(datasourceBizName)).findFirst();
             if (datasourceYamlTplMap.isPresent()) {
                 updateDimension(dimensionYamlTpls, datasourceYamlTplMap.get().getValue());
             } else {
                 List<Dimension> dimensions = new ArrayList<>();
                 updateDimension(dimensionYamlTpls, dimensions);
-                schema.getDimension().put(datasourceBizName, dimensions);
+                schema.getDimensions().put(datasourceBizName, dimensions);
             }
         }
     }

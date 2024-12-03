@@ -68,8 +68,5 @@ class QueryNLReqBuilderTest {
         DateModeUtils dateModeUtils = new DateModeUtils();
         mockContextUtils.when(() -> ContextUtils.getBean(DateModeUtils.class))
                 .thenReturn(dateModeUtils);
-        dateModeUtils.setSysDateCol("sys_imp_date");
-        dateModeUtils.setSysDateWeekCol("sys_imp_week");
-        dateModeUtils.setSysDateMonthCol("sys_imp_month");
     }
 }

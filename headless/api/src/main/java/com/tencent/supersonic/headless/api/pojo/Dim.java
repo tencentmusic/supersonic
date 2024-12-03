@@ -1,6 +1,7 @@
 package com.tencent.supersonic.headless.api.pojo;
 
 import com.tencent.supersonic.common.pojo.Constants;
+import com.tencent.supersonic.headless.api.pojo.enums.DimensionType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -12,7 +13,7 @@ public class Dim {
 
     private String name;
 
-    private String type;
+    private DimensionType type;
 
     private String expr;
 
@@ -28,23 +29,15 @@ public class Dim {
 
     private int isTag;
 
-    public Dim(String name, String bizName, String type, Integer isCreateDimension) {
+    public Dim(String name, String bizName, DimensionType type, Integer isCreateDimension) {
         this.name = name;
         this.type = type;
         this.isCreateDimension = isCreateDimension;
         this.bizName = bizName;
     }
 
-    public Dim(String name, String bizName, String type, Integer isCreateDimension, int isTag) {
-        this.name = name;
-        this.type = type;
-        this.isCreateDimension = isCreateDimension;
-        this.bizName = bizName;
-        this.isTag = isTag;
-    }
-
-    public Dim(String name, String type, String expr, String dateFormat,
-            DimensionTimeTypeParams typeParams, Integer isCreateDimension, String bizName) {
+    public Dim(String name, String bizName, DimensionType type, Integer isCreateDimension,
+            String expr, String dateFormat, DimensionTimeTypeParams typeParams) {
         this.name = name;
         this.type = type;
         this.expr = expr;
@@ -55,8 +48,8 @@ public class Dim {
     }
 
     public static Dim getDefault() {
-        return new Dim("日期", "time", "2023-05-28", Constants.DAY_FORMAT,
-                new DimensionTimeTypeParams("true", "day"), 0, "imp_date");
+        return new Dim("数据日期", "imp_date", DimensionType.partition_time, 0, "imp_date",
+                Constants.DAY_FORMAT, new DimensionTimeTypeParams("false", "day"));
     }
 
     public String getFieldName() {

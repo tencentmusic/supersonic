@@ -126,7 +126,7 @@ public class DomainServiceImpl implements DomainService {
             return domainWithAuth.stream().peek(domainResp -> domainResp.setHasEditPermission(true))
                     .collect(Collectors.toSet());
         }
-        if (authTypeEnum.equals(AuthType.VISIBLE)) {
+        if (authTypeEnum.equals(AuthType.VIEWER)) {
             domainWithAuth = domainResps.stream()
                     .filter(domainResp -> checkViewPermission(orgIds, user, domainResp))
                     .collect(Collectors.toSet());
@@ -177,6 +177,11 @@ public class DomainServiceImpl implements DomainService {
     public Map<Long, DomainResp> getDomainMap() {
         return getDomainList().stream()
                 .collect(Collectors.toMap(DomainResp::getId, a -> a, (k1, k2) -> k1));
+    }
+
+    @Override
+    public List<DomainDO> getDomainByBizName(String bizName) {
+        return domainRepository.getDomainByBizName(bizName);
     }
 
     @Override

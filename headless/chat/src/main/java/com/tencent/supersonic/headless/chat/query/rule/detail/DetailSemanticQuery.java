@@ -22,12 +22,6 @@ public abstract class DetailSemanticQuery extends RuleSemanticQuery {
     }
 
     @Override
-    public List<SchemaElementMatch> match(List<SchemaElementMatch> candidateElementMatches,
-            ChatQueryContext queryCtx) {
-        return super.match(candidateElementMatches, queryCtx);
-    }
-
-    @Override
     public void fillParseInfo(ChatQueryContext chatQueryContext, Long dataSetId) {
         super.fillParseInfo(chatQueryContext, dataSetId);
 

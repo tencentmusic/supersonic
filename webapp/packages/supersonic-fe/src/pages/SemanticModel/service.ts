@@ -50,9 +50,6 @@ export function getDimensionList(data: any): Promise<any> {
       ...(modelId ? { modelIds: [modelId] } : {}),
     },
   };
-  if (getRunningEnv() === 'chat') {
-    return request.post(`${process.env.CHAT_API_BASE_URL}conf/dimension/page`, queryParams);
-  }
   return request.post(`${process.env.API_BASE_URL}dimension/queryDimension`, queryParams);
 }
 
@@ -452,6 +449,9 @@ export function getUnAvailableItem(data: any): Promise<any> {
 }
 
 export function getModelDetail(data: any): Promise<any> {
+  if (!data.modelId) {
+    return {};
+  }
   return request.get(`${process.env.API_BASE_URL}model/getModel/${data.modelId}`);
 }
 
@@ -622,6 +622,12 @@ export function getDataSetList(domainId: number): Promise<any> {
   return request(`${process.env.API_BASE_URL}dataSet/getDataSetList`, {
     method: 'GET',
     params: { domainId },
+  });
+}
+
+export function getDataSetDetail(id: number): Promise<any> {
+  return request(`${process.env.API_BASE_URL}dataSet/${id}`, {
+    method: 'GET',
   });
 }
 

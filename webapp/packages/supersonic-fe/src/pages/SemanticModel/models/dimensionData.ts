@@ -5,6 +5,7 @@ import { getDimensionList } from '../service';
 
 export default function Dimension() {
   const [dimensionList, setDimensionList] = useState<ISemantic.IDimensionItem[]>([]);
+  const [selectDimension, setSelectDimension] = useState<ISemantic.IDimensionItem>();
 
   const queryDimensionList = async (params: any) => {
     const { code, data, msg } = await getDimensionList({
@@ -23,5 +24,10 @@ export default function Dimension() {
     return await queryDimensionList(params);
   };
 
-  return { MdimensionList: dimensionList, MrefreshDimensionList: refreshDimensionList };
+  return {
+    MdimensionList: dimensionList,
+    MrefreshDimensionList: refreshDimensionList,
+    selectDimension,
+    setSelectDimension,
+  };
 }

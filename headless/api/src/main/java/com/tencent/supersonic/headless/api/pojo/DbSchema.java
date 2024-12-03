@@ -17,5 +17,7 @@ public class DbSchema {
 
     private String sql;
 
+    private String ddl;
+
     private List<DBColumn> dbColumns;
 }

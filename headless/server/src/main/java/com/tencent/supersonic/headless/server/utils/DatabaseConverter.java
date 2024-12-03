@@ -1,6 +1,7 @@
 package com.tencent.supersonic.headless.server.utils;
 
 import com.alibaba.fastjson.JSONObject;
+import com.tencent.supersonic.common.pojo.enums.EngineType;
 import com.tencent.supersonic.headless.api.pojo.request.DatabaseReq;
 import com.tencent.supersonic.headless.api.pojo.response.DatabaseResp;
 import com.tencent.supersonic.headless.core.pojo.ConnectInfo;
@@ -16,6 +17,7 @@ public class DatabaseConverter {
     public static Database convert(DatabaseResp databaseResp) {
         Database database = new Database();
         BeanUtils.copyProperties(databaseResp, database);
+        database.setType(EngineType.fromString(databaseResp.getType().toUpperCase()));
         return database;
     }
 

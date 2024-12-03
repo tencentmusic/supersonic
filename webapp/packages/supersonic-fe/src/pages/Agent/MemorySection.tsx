@@ -217,7 +217,11 @@ const MemorySection = ({ agentId }: Props) => {
   };
 
   const loadMemoryList = async (
-    { filtersValue, current }: { filtersValue?: any; current?: number } = {},
+    {
+      filtersValue,
+      current,
+      pageSize,
+    }: { filtersValue?: any; current?: number; pageSize?: number } = {},
     sort?: any,
   ) => {
     if (!agentId) {
@@ -249,10 +253,11 @@ const MemorySection = ({ agentId }: Props) => {
       agentId,
       chatMemoryFilter: filtersValue || filters,
       current: current || 1,
+      pageSize,
       ...sortParams,
     });
     setLoading(false);
-    const { list, total, pageSize, pageNum } = res.data;
+    const { list, total, pageNum } = res.data;
     setDataSource(list);
     setPagination({
       pageSize,

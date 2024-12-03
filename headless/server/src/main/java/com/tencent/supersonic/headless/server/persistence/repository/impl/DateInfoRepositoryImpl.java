@@ -66,7 +66,7 @@ public class DateInfoRepositoryImpl implements DateInfoRepository {
     private Integer batchUpsert(List<DateInfoDO> dateInfoDOList) {
         Stopwatch stopwatch = Stopwatch.createStarted();
         for (DateInfoDO dateInfoDO : dateInfoDOList) {
-            dateInfoMapper.upsertDateInfo(dateInfoDO);
+            dateInfoMapper.insertOrUpdate(dateInfoDO);
         }
         log.info("before final, elapsed time:{}", stopwatch.elapsed(TimeUnit.MILLISECONDS));
         return 0;

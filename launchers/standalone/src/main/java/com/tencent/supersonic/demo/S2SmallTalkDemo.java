@@ -40,13 +40,16 @@ public class S2SmallTalkDemo extends S2BaseDemo {
         chatAppConfig.get(PlainTextExecutor.APP_KEY).setEnable(true);
         chatAppConfig.get(OnePassSCSqlGenStrategy.APP_KEY).setEnable(false);
         agent.setChatAppConfig(chatAppConfig);
+        agent.setAdmins(Lists.newArrayList("jack"));
+        agent.setViewers(Lists.newArrayList("alice", "tom"));
         agentService.createAgent(agent, defaultUser);
     }
 
     @Override
-    boolean checkNeedToRun() {
+    protected boolean checkNeedToRun() {
         List<String> agentNames =
                 agentService.getAgents().stream().map(Agent::getName).collect(Collectors.toList());
-        return !agentNames.contains("来闲聊");
+        return !agentNames.contains("闲聊助手");
     }
+
 }
