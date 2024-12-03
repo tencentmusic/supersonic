@@ -9,13 +9,13 @@ import java.util.List;
 public class GeneralManageConfig {
 
     // 使用 @Value 注解注入配置文件中的 chat.model.ids 配置
-    @Value("${chat.model.ids:1,2}")
+    @Value("${chat.model.ids:9}")
     private List<Integer> chatModelIds;
 
-    @Value("${chat.database.ids:1,2}")
+    @Value("${chat.database.ids:1}")
     private List<Long> chatDatabaseIds;
 
-    @Value("${chat.domain.ids:1,2}")
+    @Value("${chat.domain.ids:1,3}")
     private List<Long> chatDomainIds;
 
     // 获取通用模型的 IDs
