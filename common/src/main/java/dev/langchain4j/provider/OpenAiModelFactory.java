@@ -17,7 +17,7 @@ public class OpenAiModelFactory implements ModelFactory, InitializingBean {
     public static final String PROVIDER = "OPEN_AI";
     public static final String DEFAULT_BASE_URL = "https://api.openai.com/v1";
     public static final String DEFAULT_MODEL_NAME = "gpt-4o-mini";
-    public static final String DEFAULT_EMBEDDING_MODEL_NAME = "text-embedding-ada-002";
+    public static final String DEFAULT_EMBEDDING_MODEL_NAME = "text-embedding-3-small";
 
     @Override
     public ChatLanguageModel createChatModel(ChatModelConfig modelConfig) {
