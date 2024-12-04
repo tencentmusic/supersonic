@@ -153,10 +153,13 @@ export const genneratorFormItemList = (itemList: ConfigParametersItem[]) => {
         }
 
         break;
-      case 'password': {
-        defaultItem = <Input.Password placeholder={placeholder} />;
+      case 'password': 
+        if( name === 'apiKey' ){
+          defaultItem = <Input.Password placeholder={placeholder} iconRender={()=>{return <></>}}/>;
+        } else {
+          defaultItem = <Input.Password placeholder={placeholder} />;
+        }
         break;
-      }
       case 'longText':
         defaultItem = <TextArea placeholder={placeholder} style={{ height: 100 }} />;
         break;
