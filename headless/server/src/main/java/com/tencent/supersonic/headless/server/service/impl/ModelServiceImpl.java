@@ -459,7 +459,7 @@ public class ModelServiceImpl implements ModelService {
         }
         ModelFilter modelFilter = new ModelFilter();
         modelFilter.setDomainIds(domainIds);
-        modelFilter.setIncludesDetail(false);
+        modelFilter.setIncludesDetail(true);
         List<ModelResp> modelResps = getModelList(modelFilter);
         if (CollectionUtils.isEmpty(modelResps)) {
             return modelResps;

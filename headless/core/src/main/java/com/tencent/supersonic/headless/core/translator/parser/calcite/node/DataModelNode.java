@@ -196,8 +196,8 @@ public class DataModelNode extends SemanticNode {
         }
 
         // second, traverse the ontology to find other related dataModels
-        List<DataModel> relatedDataModels = findRelatedModelsByRelation(ontology, baseDataModel,
-                queryDimensions, queryMeasures);
+        List<DataModel> relatedDataModels = findRelatedModelsByRelation(ontology, queryParam,
+                baseDataModel, queryDimensions, queryMeasures);
         if (CollectionUtils.isEmpty(relatedDataModels)) {
             relatedDataModels = findRelatedModelsByIdentifier(ontology, baseDataModel,
                     queryDimensions, queryMeasures);
@@ -282,7 +282,8 @@ public class DataModelNode extends SemanticNode {
     }
 
     private static List<DataModel> findRelatedModelsByRelation(Ontology ontology,
-            DataModel baseDataModel, Set<String> queryDimensions, Set<String> queryMeasures) {
+            OntologyQueryParam queryParam, DataModel baseDataModel, Set<String> queryDimensions,
+            Set<String> queryMeasures) {
         Set<String> joinDataModelNames = new HashSet<>();
         List<DataModel> joinDataModels = new ArrayList<>();
         Set<String> before = new HashSet<>();
@@ -305,6 +306,8 @@ public class DataModelNode extends SemanticNode {
                 boolean isRight = before.contains(joinRelation.getLeft());
                 DataModel other = isRight ? ontology.getDataModelMap().get(joinRelation.getRight())
                         : ontology.getDataModelMap().get(joinRelation.getLeft());
+                String joinDimName = isRight ? joinRelation.getJoinCondition().get(0).getRight()
+                        : joinRelation.getJoinCondition().get(0).getLeft();
                 if (!queryDimensions.isEmpty()) {
                     Set<String> linkDimension = other.getDimensions().stream()
                             .map(dd -> dd.getName()).collect(Collectors.toSet());
@@ -312,6 +315,8 @@ public class DataModelNode extends SemanticNode {
                     linkDimension.retainAll(queryDimensions);
                     if (!linkDimension.isEmpty()) {
                         isMatch = true;
+                        // joinDim should be added to the query dimension
+                        queryParam.getDimensions().add(joinDimName);
                     }
                 }
                 Set<String> linkMeasure = other.getMeasures().stream().map(Measure::getName)

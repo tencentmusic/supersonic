@@ -27,7 +27,7 @@ public class SchemaDictUpdateListener implements ApplicationListener<DataEvent> 
             dictWord.setWord(dataItem.getName());
             String sign = DictWordType.NATURE_SPILT;
             String suffixNature = DictWordType.getSuffixNature(dataItem.getType());
-            String nature = sign + dataItem.getModelId() + dataItem.getId() + suffixNature;
+            String nature = sign + dataItem.getModelId() + sign + dataItem.getId() + suffixNature;
             String natureWithFrequency = nature + " " + Constants.DEFAULT_FREQUENCY;
             dictWord.setNature(nature);
             dictWord.setNatureWithFrequency(natureWithFrequency);

@@ -19,19 +19,6 @@ public class Term {
         this.nature = nature;
     }
 
-    public Term(String word, Nature nature, int offset) {
-        this.word = word;
-        this.nature = nature;
-        this.offset = offset;
-    }
-
-    public Term(String word, Nature nature, int offset, int frequency) {
-        this.word = word;
-        this.nature = nature;
-        this.offset = offset;
-        this.frequency = frequency;
-    }
-
     public int length() {
         return this.word.length();
     }
