@@ -8,7 +8,7 @@ import com.tencent.supersonic.common.pojo.enums.StatusEnum;
 import com.tencent.supersonic.common.util.BeanMapper;
 import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.headless.api.pojo.ColumnSchema;
-import com.tencent.supersonic.headless.api.pojo.Dim;
+import com.tencent.supersonic.headless.api.pojo.Dimension;
 import com.tencent.supersonic.headless.api.pojo.DrillDownDimension;
 import com.tencent.supersonic.headless.api.pojo.Identify;
 import com.tencent.supersonic.headless.api.pojo.Measure;
@@ -111,7 +111,7 @@ public class ModelConverter {
         return measureResp;
     }
 
-    public static DimensionReq convert(Dim dim, ModelDO modelDO) {
+    public static DimensionReq convert(Dimension dim, ModelDO modelDO) {
         DimensionReq dimensionReq = new DimensionReq();
         dimensionReq.setName(dim.getName());
         dimensionReq.setBizName(dim.getBizName());
@@ -129,7 +129,6 @@ public class ModelConverter {
         dimensionReq.setType(dim.getType().name());
         dimensionReq
                 .setDescription(Objects.isNull(dim.getDescription()) ? "" : dim.getDescription());
-        dimensionReq.setIsTag(dim.getIsTag());
         dimensionReq.setTypeParams(dim.getTypeParams());
         return dimensionReq;
     }
@@ -188,7 +187,7 @@ public class ModelConverter {
                         columnSchema.getAgg().getOperator(), 1);
                 modelDetail.getMeasures().add(measure);
             } else {
-                Dim dim = new Dim(columnSchema.getName(), columnSchema.getColumnName(),
+                Dimension dim = new Dimension(columnSchema.getName(), columnSchema.getColumnName(),
                         DimensionType.valueOf(columnSchema.getFiledType().name()), 1);
                 modelDetail.getDimensions().add(dim);
             }
@@ -216,7 +215,7 @@ public class ModelConverter {
         return modelDescs;
     }
 
-    private static boolean isCreateDimension(Dim dim) {
+    private static boolean isCreateDimension(Dimension dim) {
         return dim.getIsCreateDimension() == 1 && StringUtils.isNotBlank(dim.getName());
     }
 
@@ -228,7 +227,7 @@ public class ModelConverter {
         return measure.getIsCreateMetric() == 1 && StringUtils.isNotBlank(measure.getName());
     }
 
-    public static List<Dim> getDimToCreateDimension(ModelDetail modelDetail) {
+    public static List<Dimension> getDimToCreateDimension(ModelDetail modelDetail) {
         if (CollectionUtils.isEmpty(modelDetail.getDimensions())) {
             return Lists.newArrayList();
         }
@@ -256,7 +255,7 @@ public class ModelConverter {
         List<DimensionReq> dimensionReqs = Lists.newArrayList();
         ModelDetail modelDetail =
                 JSONObject.parseObject(modelDO.getModelDetail(), ModelDetail.class);
-        List<Dim> dims = getDimToCreateDimension(modelDetail);
+        List<Dimension> dims = getDimToCreateDimension(modelDetail);
         if (!CollectionUtils.isEmpty(dims)) {
             dimensionReqs = dims.stream().filter(dim -> StringUtils.isNotBlank(dim.getName()))
                     .map(dim -> convert(dim, modelDO)).collect(Collectors.toList());

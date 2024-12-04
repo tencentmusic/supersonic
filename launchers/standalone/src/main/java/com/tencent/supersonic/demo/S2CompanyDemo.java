@@ -89,14 +89,14 @@ public class S2CompanyDemo extends S2BaseDemo {
         modelReq.setAdmins(Collections.singletonList("admin"));
         modelReq.setAdminOrgs(Collections.emptyList());
         ModelDetail modelDetail = new ModelDetail();
-        List<Dim> dimensions = new ArrayList<>();
+        List<Dimension> dimensions = new ArrayList<>();
         modelDetail.setDimensions(dimensions);
 
-        dimensions.add(new Dim("公司名称", "company_name", DimensionType.categorical, 1));
-        dimensions.add(new Dim("总部地点", "headquarter_address", DimensionType.categorical, 1));
-        dimensions.add(new Dim("成立时间", "company_established_time", DimensionType.time, 1));
-        dimensions.add(new Dim("创始人", "founder", DimensionType.categorical, 1));
-        dimensions.add(new Dim("首席执行官", "ceo", DimensionType.categorical, 1));
+        dimensions.add(new Dimension("公司名称", "company_name", DimensionType.categorical, 1));
+        dimensions.add(new Dimension("总部地点", "headquarter_address", DimensionType.categorical, 1));
+        dimensions.add(new Dimension("成立时间", "company_established_time", DimensionType.time, 1));
+        dimensions.add(new Dimension("创始人", "founder", DimensionType.categorical, 1));
+        dimensions.add(new Dimension("首席执行官", "ceo", DimensionType.categorical, 1));
 
         List<Identify> identifiers = new ArrayList<>();
         identifiers.add(new Identify("公司id", IdentifyType.primary.name(), "company_id"));
@@ -131,12 +131,13 @@ public class S2CompanyDemo extends S2BaseDemo {
         modelReq.setAdmins(Collections.singletonList("admin"));
         modelReq.setAdminOrgs(Collections.emptyList());
         ModelDetail modelDetail = new ModelDetail();
-        List<Dim> dimensions = new ArrayList<>();
+        List<Dimension> dimensions = new ArrayList<>();
         modelDetail.setDimensions(dimensions);
 
-        dimensions.add(new Dim("品牌名称", "brand_name", DimensionType.categorical, 1));
-        dimensions.add(new Dim("品牌成立时间", "brand_established_time", DimensionType.time, 1));
-        dimensions.add(new Dim("法定代表人", "legal_representative", DimensionType.categorical, 1));
+        dimensions.add(new Dimension("品牌名称", "brand_name", DimensionType.categorical, 1));
+        dimensions.add(new Dimension("品牌成立时间", "brand_established_time", DimensionType.time, 1));
+        dimensions
+                .add(new Dimension("法定代表人", "legal_representative", DimensionType.categorical, 1));
 
         List<Identify> identifiers = new ArrayList<>();
         identifiers.add(new Identify("品牌id", IdentifyType.primary.name(), "brand_id"));
@@ -168,10 +169,10 @@ public class S2CompanyDemo extends S2BaseDemo {
         modelReq.setAdmins(Collections.singletonList("admin"));
         modelReq.setAdminOrgs(Collections.emptyList());
         ModelDetail modelDetail = new ModelDetail();
-        List<Dim> dimensions = new ArrayList<>();
+        List<Dimension> dimensions = new ArrayList<>();
         modelDetail.setDimensions(dimensions);
 
-        dimensions.add(new Dim("财年", "year_time", DimensionType.time, 1, "year_time", "yyyy",
+        dimensions.add(new Dimension("财年", "year_time", DimensionType.time, 1, "year_time", "yyyy",
                 new DimensionTimeTypeParams("false", "year")));
 
         List<Identify> identifiers = new ArrayList<>();

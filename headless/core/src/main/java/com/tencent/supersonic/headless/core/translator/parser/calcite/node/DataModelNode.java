@@ -26,8 +26,8 @@ public class DataModelNode extends SemanticNode {
             sqlTable = dataModel.getSqlQuery();
         } else if (dataModel.getTableQuery() != null && !dataModel.getTableQuery().isEmpty()) {
             if (dataModel.getType().equalsIgnoreCase(EngineType.POSTGRESQL.getName())) {
-                String fullTableName = Arrays.stream(dataModel.getTableQuery().split("\\."))
-                        .collect(Collectors.joining(".public."));
+                String fullTableName =
+                        String.join(".public.", dataModel.getTableQuery().split("\\."));
                 sqlTable = "select * from " + fullTableName;
             } else {
                 sqlTable = "select * from " + dataModel.getTableQuery();
@@ -64,7 +64,7 @@ public class DataModelNode extends SemanticNode {
         for (Dimension d : datasource.getDimensions()) {
             List<SqlNode> identifiers =
                     expand(SemanticNode.parse(d.getExpr(), scope, engineType), scope);
-            identifiers.stream().forEach(i -> dimensions.add(i.toString()));
+            identifiers.forEach(i -> dimensions.add(i.toString()));
             dimensions.add(d.getName());
         }
         for (Identify i : datasource.getIdentifiers()) {
@@ -73,7 +73,7 @@ public class DataModelNode extends SemanticNode {
         for (Measure m : datasource.getMeasures()) {
             List<SqlNode> identifiers =
                     expand(SemanticNode.parse(m.getExpr(), scope, engineType), scope);
-            identifiers.stream().forEach(i -> {
+            identifiers.forEach(i -> {
                 if (!dimensions.contains(i.toString())) {
                     metrics.add(i.toString());
                 }
@@ -127,7 +127,7 @@ public class DataModelNode extends SemanticNode {
     }
 
     public static String getNames(List<DataModel> dataModelList) {
-        return dataModelList.stream().map(d -> d.getName()).collect(Collectors.joining("_"));
+        return dataModelList.stream().map(DataModel::getName).collect(Collectors.joining("_"));
     }
 
     public static void getQueryDimensionMeasure(Ontology ontology, OntologyQueryParam queryParam,
@@ -138,12 +138,12 @@ public class DataModelNode extends SemanticNode {
                         : d)
                 .collect(Collectors.toSet()));
         Set<String> schemaMetricName =
-                ontology.getMetrics().stream().map(m -> m.getName()).collect(Collectors.toSet());
+                ontology.getMetrics().stream().map(Metric::getName).collect(Collectors.toSet());
         ontology.getMetrics().stream().filter(m -> queryParam.getMetrics().contains(m.getName()))
-                .forEach(m -> m.getMetricTypeParams().getMeasures().stream()
+                .forEach(m -> m.getMetricTypeParams().getMeasures()
                         .forEach(mm -> queryMeasures.add(mm.getName())));
         queryParam.getMetrics().stream().filter(m -> !schemaMetricName.contains(m))
-                .forEach(m -> queryMeasures.add(m));
+                .forEach(queryMeasures::add);
     }
 
     public static void mergeQueryFilterDimensionMeasure(Ontology ontology,
@@ -155,13 +155,13 @@ public class DataModelNode extends SemanticNode {
             FilterNode.getFilterField(parse(queryParam.getWhere(), scope, engineType),
                     filterConditions);
             Set<String> queryMeasures = new HashSet<>(measures);
-            Set<String> schemaMetricName = ontology.getMetrics().stream().map(m -> m.getName())
-                    .collect(Collectors.toSet());
+            Set<String> schemaMetricName =
+                    ontology.getMetrics().stream().map(Metric::getName).collect(Collectors.toSet());
             for (String filterCondition : filterConditions) {
                 if (schemaMetricName.contains(filterCondition)) {
                     ontology.getMetrics().stream()
                             .filter(m -> m.getName().equalsIgnoreCase(filterCondition))
-                            .forEach(m -> m.getMetricTypeParams().getMeasures().stream()
+                            .forEach(m -> m.getMetricTypeParams().getMeasures()
                                     .forEach(mm -> queryMeasures.add(mm.getName())));
                     continue;
                 }
@@ -255,7 +255,7 @@ public class DataModelNode extends SemanticNode {
                 .collect(Collectors.toSet());
         Set<String> baseDimensions = baseDataModel.getDimensions().stream().map(Dimension::getName)
                 .collect(Collectors.toSet());
-        baseDataModel.getIdentifiers().stream().forEach(i -> baseDimensions.add(i.getName()));
+        baseDataModel.getIdentifiers().forEach(i -> baseDimensions.add(i.getName()));
 
         baseMeasures.retainAll(queryMeasures);
         if (baseMeasures.size() < queryMeasures.size()) {
@@ -296,7 +296,7 @@ public class DataModelNode extends SemanticNode {
                     visitJoinRelations, sortedJoinRelation);
             ontology.getJoinRelations().stream()
                     .filter(j -> !visitJoinRelations.contains(j.getId()))
-                    .forEach(j -> sortedJoinRelation.add(j));
+                    .forEach(sortedJoinRelation::add);
             for (JoinRelation joinRelation : sortedJoinRelation) {
                 if (!before.contains(joinRelation.getLeft())
                         && !before.contains(joinRelation.getRight())) {
@@ -310,8 +310,8 @@ public class DataModelNode extends SemanticNode {
                         : joinRelation.getJoinCondition().get(0).getLeft();
                 if (!queryDimensions.isEmpty()) {
                     Set<String> linkDimension = other.getDimensions().stream()
-                            .map(dd -> dd.getName()).collect(Collectors.toSet());
-                    other.getIdentifiers().stream().forEach(i -> linkDimension.add(i.getName()));
+                            .map(Dimension::getName).collect(Collectors.toSet());
+                    other.getIdentifiers().forEach(i -> linkDimension.add(i.getName()));
                     linkDimension.retainAll(queryDimensions);
                     if (!linkDimension.isEmpty()) {
                         isMatch = true;
@@ -327,7 +327,7 @@ public class DataModelNode extends SemanticNode {
                 }
                 if (!isMatch && ontology.getDimensionMap().containsKey(other.getName())) {
                     Set<String> linkDimension = ontology.getDimensionMap().get(other.getName())
-                            .stream().map(dd -> dd.getName()).collect(Collectors.toSet());
+                            .stream().map(Dimension::getName).collect(Collectors.toSet());
                     linkDimension.retainAll(queryDimensions);
                     if (!linkDimension.isEmpty()) {
                         isMatch = true;
@@ -387,15 +387,14 @@ public class DataModelNode extends SemanticNode {
             if (entry.getKey().equalsIgnoreCase(baseDataModel.getName())) {
                 continue;
             }
-            Long identifierNum = entry.getValue().getIdentifiers().stream().map(i -> i.getName())
-                    .filter(i -> baseIdentifiers.contains(i)).count();
+            long identifierNum = entry.getValue().getIdentifiers().stream().map(Identify::getName)
+                    .filter(baseIdentifiers::contains).count();
             if (identifierNum > 0) {
                 boolean isMatch = false;
                 if (!queryDimension.isEmpty()) {
                     Set<String> linkDimension = entry.getValue().getDimensions().stream()
-                            .map(dd -> dd.getName()).collect(Collectors.toSet());
-                    entry.getValue().getIdentifiers().stream()
-                            .forEach(i -> linkDimension.add(i.getName()));
+                            .map(Dimension::getName).collect(Collectors.toSet());
+                    entry.getValue().getIdentifiers().forEach(i -> linkDimension.add(i.getName()));
                     linkDimension.retainAll(queryDimension);
                     if (!linkDimension.isEmpty()) {
                         isMatch = true;
@@ -403,7 +402,7 @@ public class DataModelNode extends SemanticNode {
                 }
                 if (!measures.isEmpty()) {
                     Set<String> linkMeasure = entry.getValue().getMeasures().stream()
-                            .map(mm -> mm.getName()).collect(Collectors.toSet());
+                            .map(Measure::getName).collect(Collectors.toSet());
                     linkMeasure.retainAll(measures);
                     if (!linkMeasure.isEmpty()) {
                         isMatch = true;

@@ -1,6 +1,6 @@
 package com.tencent.supersonic.headless.server.manager;
 
-import com.tencent.supersonic.headless.api.pojo.Dim;
+import com.tencent.supersonic.headless.api.pojo.Dimension;
 import com.tencent.supersonic.headless.api.pojo.Identify;
 import com.tencent.supersonic.headless.api.pojo.Measure;
 import com.tencent.supersonic.headless.api.pojo.ModelDetail;
@@ -53,7 +53,7 @@ public class ModelYamlManager {
         return dataModelYamlTpl;
     }
 
-    public static DimensionYamlTpl convert(Dim dim) {
+    public static DimensionYamlTpl convert(Dimension dim) {
         DimensionYamlTpl dimensionYamlTpl = new DimensionYamlTpl();
         BeanUtils.copyProperties(dim, dimensionYamlTpl);
         dimensionYamlTpl.setName(dim.getBizName());

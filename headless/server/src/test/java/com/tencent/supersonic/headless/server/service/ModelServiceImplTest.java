@@ -5,7 +5,7 @@ import com.tencent.supersonic.auth.api.authentication.service.UserService;
 import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
 import com.tencent.supersonic.common.pojo.enums.StatusEnum;
-import com.tencent.supersonic.headless.api.pojo.Dim;
+import com.tencent.supersonic.headless.api.pojo.Dimension;
 import com.tencent.supersonic.headless.api.pojo.DimensionTimeTypeParams;
 import com.tencent.supersonic.headless.api.pojo.Identify;
 import com.tencent.supersonic.headless.api.pojo.Measure;
@@ -95,11 +95,11 @@ class ModelServiceImplTest {
         List<Identify> identifiers = new ArrayList<>();
         identifiers.add(new Identify("用户名", IdentifyType.primary.name(), "user_name"));
         modelDetail.setIdentifiers(identifiers);
-        List<Dim> dimensions = new ArrayList<>();
-        Dim dimension1 = new Dim("", "imp_date", DimensionType.partition_time, 0);
+        List<Dimension> dimensions = new ArrayList<>();
+        Dimension dimension1 = new Dimension("", "imp_date", DimensionType.partition_time, 0);
         dimension1.setTypeParams(new DimensionTimeTypeParams());
         dimensions.add(dimension1);
-        Dim dimension2 = new Dim("", "page", DimensionType.categorical, 0);
+        Dimension dimension2 = new Dimension("", "page", DimensionType.categorical, 0);
         dimension2.setExpr("page");
         dimensions.add(dimension2);
         modelDetail.setDimensions(dimensions);
@@ -134,11 +134,11 @@ class ModelServiceImplTest {
         identifiers.add(new Identify("用户名_a", IdentifyType.primary.name(), "user_name_a"));
         modelDetail.setIdentifiers(identifiers);
 
-        List<Dim> dimensions = new ArrayList<>();
-        Dim dimension1 = new Dim("", "imp_date_a", DimensionType.partition_time, 0);
+        List<Dimension> dimensions = new ArrayList<>();
+        Dimension dimension1 = new Dimension("", "imp_date_a", DimensionType.partition_time, 0);
         dimension1.setTypeParams(new DimensionTimeTypeParams());
         dimensions.add(dimension1);
-        Dim dimension2 = new Dim("", "page_a", DimensionType.categorical, 0);
+        Dimension dimension2 = new Dimension("", "page_a", DimensionType.categorical, 0);
         dimension2.setExpr("page_a");
         dimensions.add(dimension2);
         modelDetail.setDimensions(dimensions);
@@ -169,11 +169,11 @@ class ModelServiceImplTest {
         List<Identify> identifiers = new ArrayList<>();
         identifiers.add(new Identify("用户名", IdentifyType.primary.name(), "user_name"));
         modelDetail.setIdentifiers(identifiers);
-        List<Dim> dimensions = new ArrayList<>();
-        Dim dimension1 = new Dim("", "imp_date", DimensionType.partition_time, 0);
+        List<Dimension> dimensions = new ArrayList<>();
+        Dimension dimension1 = new Dimension("", "imp_date", DimensionType.partition_time, 0);
         dimension1.setTypeParams(new DimensionTimeTypeParams());
         dimensions.add(dimension1);
-        Dim dimension2 = new Dim("", "page", DimensionType.categorical, 0);
+        Dimension dimension2 = new Dimension("", "page", DimensionType.categorical, 0);
         dimension2.setExpr("page");
         dimensions.add(dimension2);
         modelDetail.setDimensions(dimensions);
@@ -207,11 +207,11 @@ class ModelServiceImplTest {
         identifiers.add(new Identify("用户名", IdentifyType.primary.name(), "user_name"));
         modelDetail.setIdentifiers(identifiers);
 
-        List<Dim> dimensions = new ArrayList<>();
-        Dim dimension1 = new Dim("", "imp_date", DimensionType.partition_time, 0);
+        List<Dimension> dimensions = new ArrayList<>();
+        Dimension dimension1 = new Dimension("", "imp_date", DimensionType.partition_time, 0);
         dimension1.setTypeParams(new DimensionTimeTypeParams());
         dimensions.add(dimension1);
-        Dim dimension2 = new Dim("", "page", DimensionType.categorical, 0);
+        Dimension dimension2 = new Dimension("", "page", DimensionType.categorical, 0);
         dimension2.setExpr("page");
         dimensions.add(dimension2);
         modelDetail.setDimensions(dimensions);
@@ -252,11 +252,11 @@ class ModelServiceImplTest {
         identifiers.add(new Identify("用户名_a", IdentifyType.primary.name(), "user_name_a"));
         modelDetail.setIdentifiers(identifiers);
 
-        List<Dim> dimensions = new ArrayList<>();
-        Dim dimension1 = new Dim("", "imp_date_a", DimensionType.partition_time, 0);
+        List<Dimension> dimensions = new ArrayList<>();
+        Dimension dimension1 = new Dimension("", "imp_date_a", DimensionType.partition_time, 0);
         dimension1.setTypeParams(new DimensionTimeTypeParams());
         dimensions.add(dimension1);
-        Dim dimension2 = new Dim("", "page_a", DimensionType.categorical, 0);
+        Dimension dimension2 = new Dimension("", "page_a", DimensionType.categorical, 0);
         dimension2.setExpr("page_a");
         dimensions.add(dimension2);
         modelDetail.setDimensions(dimensions);

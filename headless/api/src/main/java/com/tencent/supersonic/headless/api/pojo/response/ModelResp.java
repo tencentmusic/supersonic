@@ -1,7 +1,7 @@
 package com.tencent.supersonic.headless.api.pojo.response;
 
 import com.google.common.collect.Lists;
-import com.tencent.supersonic.headless.api.pojo.Dim;
+import com.tencent.supersonic.headless.api.pojo.Dimension;
 import com.tencent.supersonic.headless.api.pojo.DrillDownDimension;
 import com.tencent.supersonic.headless.api.pojo.Field;
 import com.tencent.supersonic.headless.api.pojo.Identify;
@@ -62,7 +62,7 @@ public class ModelResp extends SchemaItem {
         return isOpen != null && isOpen == 1;
     }
 
-    public List<Dim> getTimeDimension() {
+    public List<Dimension> getTimeDimension() {
         if (modelDetail == null) {
             return Lists.newArrayList();
         }
