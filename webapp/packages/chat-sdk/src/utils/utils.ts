@@ -7,7 +7,7 @@ export function formatByDecimalPlaces(value: number | string, decimalPlaces: num
     return value;
   }
   let strValue = (+value).toFixed(decimalPlaces);
-  if (!/^[0-9.]+$/g.test(strValue)) {
+  if (!/^[-]?[0-9.]+$/g.test(strValue)) {
     return '0';
   }
   while (strValue.includes('.') && (strValue.endsWith('.') || strValue.endsWith('0'))) {

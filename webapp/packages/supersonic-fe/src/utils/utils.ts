@@ -268,7 +268,7 @@ export function formatByDecimalPlaces(value: number | string, decimalPlaces: num
     return value;
   }
   let str = (+value).toFixed(decimalPlaces);
-  if (!/^[0-9.]+$/g.test(str)) {
+  if (!/^[-]?[0-9.]+$/g.test(str)) {
     return '0';
   }
   while (str.includes('.') && (str.endsWith('.') || str.endsWith('0'))) {
