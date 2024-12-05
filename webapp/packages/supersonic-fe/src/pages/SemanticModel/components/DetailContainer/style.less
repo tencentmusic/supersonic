@@ -1,0 +1,338 @@
+.DetailWrapper {
+    .Detail {
+        position: relative;
+        display: flex;
+        flex-direction: row;
+        width: 100%;
+        padding: 0px;
+        background-color: transparent;
+        height: 100%;
+        .tabContainer {
+          padding: 12px;
+          min-height: calc(100vh - 105px);
+          width: calc(100vw - 350px);
+          background-color: #fafafb;
+        }
+        .siderContainer {
+          width: 320px;
+          min-height: calc(100vh - 105px);
+          border-radius: 6px;
+          padding: 12px 0 12px 12px;
+        }
+      }
+
+  }
+
+
+
+
+  .DetailInfoSider {
+    padding: 10px;
+    color: #344767;
+    background-color: #fff;
+    height: 100%;
+    border: 1px solid #e6ebf1;
+    border-radius: 6px;
+    .createTitle {
+      display: flex;
+      margin-left: 10px;
+      min-height: 47px;
+      margin-bottom: 10px;
+      color:#344767;
+      font-weight: 500;
+      font-size: 16px;
+      font-family: var(--tencent-font-family);
+    }
+    .gotoMetricListIcon {
+      color: #3182ce;
+      cursor: pointer;
+      &:hover {
+        color: #5493ff;
+      }
+    }
+    .title {
+      margin: 10px 0;
+      min-height: 47px;
+      .name {
+        font-weight: 600;
+        font-size: 18px;
+      }
+      .bizName {
+        margin: 5px 0 0 25px;
+        color: #7b809a;
+        font-weight: 400;
+      }
+    }
+    .desc {
+      display: block;
+      margin-top: 8px;
+      color: #7b809a;
+      font-weight: 500;
+      font-size: 14px;
+      line-height: 1.9;
+    }
+    .subTitle {
+      margin: 0px;
+      color: rgb(123, 128, 154);
+      font-weight: 700;
+      font-size: 14px;
+      line-height: 1.25;
+      letter-spacing: 0.03333em;
+      text-transform: uppercase;
+      text-decoration: none;
+      vertical-align: unset;
+      opacity: 1;
+    }
+    .sectionContainer {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      overflow: scroll;
+  
+  
+      overflow: hidden;
+      background-image: none;
+      border-radius: 6px;
+      .section {
+        padding: 16px;
+        color: rgb(52, 71, 103);
+        line-height: 1.25;
+        background: transparent;
+        box-shadow: none;
+        opacity: 1;
+        .sectionTitleBox {
+          padding: 8px 0;
+          color: rgb(52, 71, 103);
+          background: transparent;
+          box-shadow: none;
+          opacity: 1;
+          .sectionTitle {
+            margin: 0px;
+            color: rgb(52, 71, 103);
+            font-weight: 600;
+            font-size: 16px;
+            line-height: 1.625;
+            letter-spacing: 0.0075em;
+            text-transform: capitalize;
+            text-decoration: none;
+            vertical-align: unset;
+            opacity: 1;
+          }
+        }
+  
+        .item {
+          display: flex;
+          padding-top: 8px;
+          padding-right: 16px;
+          padding-bottom: 8px;
+          color: rgb(52, 71, 103);
+          background: transparent;
+          box-shadow: none;
+          opacity: 1;
+          .itemLable {
+            min-width: fit-content;
+            margin: 0px;
+            margin-right: 10px;
+            color: #344767;
+            font-weight: 700;
+            font-size: 14px;
+            line-height: 1.5;
+            letter-spacing: 0.02857em;
+            text-transform: capitalize;
+            text-decoration: none;
+            vertical-align: unset;
+            opacity: 1;
+          }
+          .itemValue {
+            margin: 0px;
+            color: #7b809a;
+            font-weight: 400;
+            font-size: 14px;
+            line-height: 1.5;
+            letter-spacing: 0.02857em;
+            text-transform: none;
+            text-decoration: none;
+            vertical-align: unset;
+            opacity: 1;
+          }
+        }
+      }
+      .hr {
+        flex-shrink: 0;
+        margin: 0px;
+        border-color: rgb(242, 244, 247);
+        // border-width: 0px 0px thin;
+        border-style: solid;
+      }
+      .ctrlBox {
+        .ctrlList {
+          position: relative;
+          margin: 0px;
+          padding: 8px 0px;
+          list-style: none;
+          background-color: rgb(249, 250, 251);
+          li {
+            position: relative;
+            display: flex;
+            flex-grow: 1;
+            align-items: center;
+            justify-content: flex-start;
+            box-sizing: border-box;
+            min-width: 0px;
+            margin: 4px;
+            padding: 4px 16px;
+            color: inherit;
+            text-align: left;
+            text-decoration: none;
+            vertical-align: middle;
+            background-color: transparent;
+            border: 0px;
+            border-radius: 0px;
+            outline: 0px;
+            cursor: pointer;
+            transition: background-color 150ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+            appearance: none;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-box-flex: 1;
+            -webkit-box-pack: start;
+            -webkit-box-align: center;
+            &:hover {
+              color: #3182ce;
+              text-decoration: none;
+              background-color: rgba(16, 24, 40, 0.04);
+            }
+          }
+          .ctrlItemIcon {
+            flex-shrink: 0;
+            min-width: unset;
+            margin-right: 5px;
+            font-size: 14px;
+          }
+          .styles.ctrlItemLable {
+            display: block;
+            margin: 0px;
+            font-weight: 400;
+            font-size: 14px;
+            line-height: 1.6;
+          }
+        }
+      }
+    }
+  }
+
+
+
+  .settingList {
+    list-style: none;
+    margin: 0px;
+    position: relative;
+    padding: 0px;
+    li {
+      -webkit-tap-highlight-color: transparent;
+      background-color: transparent;
+      outline: 0px;
+      border: 0px;
+      margin: 0px;
+      border-radius: 0px;
+      cursor: pointer;
+      user-select: none;
+      vertical-align: middle;
+      appearance: none;
+      display: flex;
+      flex-grow: 1;
+      justify-content: flex-start;
+      align-items: center;
+      position: relative;
+      text-decoration: none;
+      min-width: 0px;
+      box-sizing: border-box;
+      text-align: left;
+      padding: 8px 16px;
+      transition: background-color 150ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+      &.active {
+        background-color: rgba(22, 119, 255, 0.08);
+        .icon {
+          color: rgb(22, 119, 255);
+        }
+        .content {
+          .text {
+            color: rgb(22, 119, 255);
+          }
+        }
+      }
+      .icon {
+        min-width: 32px;
+        color: #344767;
+        flex-shrink: 0;
+        display: inline-flex;
+      }
+      .content {
+        flex: 1 1 auto;
+        min-width: 0px;
+        margin-top: 4px;
+        margin-bottom: 4px;
+        .text {
+          margin: 0px;
+          color: #344767;
+          font-size: 16px;
+          // line-height: 1.57;
+          // font-family: var(--tencent-font-family);
+          font-weight: 600;
+          display: block;
+        }
+      }
+      &:hover {
+        text-decoration: none;
+        background-color: rgba(0, 0, 0, 0.04);
+      }
+    }
+  }
+
+
+
+.infoCard {
+  min-height: 100%;
+  background-color: rgb(255, 255, 255);
+  color: rgb(38, 38, 38);
+  transition: box-shadow 300ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+  position: relative;
+  border: 1px solid rgb(230, 235, 241);
+  border-radius: 4px;
+  box-shadow: inherit;
+  .infoCardTitle {
+    display: flex;
+    border-bottom: 1px solid #e6ebf1;
+    padding: 15px 20px;
+    align-items: center;
+    color: rgb(38, 38, 38);
+    margin: 0px;
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 1.57;
+    font-family: "tencentFont", sans-serif;
+  }
+  .infoCardContainer {
+    padding: 20px;
+    height: calc(100vh - 260px);
+    overflow: scroll;
+  }
+  .infoCardFooter {
+    border-top: 1px solid #e6ebf1;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex: 0 0 auto;
+    padding: 20px;
+    .infoCardFooterContainer {
+      box-sizing: border-box;
+      display: flex;
+      flex-flow: wrap;
+      // width: 100%;
+      justify-content: space-between;
+      align-items: center;
+    }
+  }
+}

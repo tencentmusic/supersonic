@@ -260,9 +260,8 @@ public class S2DataPermissionAspect {
     }
 
     public void checkModelVisible(User user, Set<Long> modelIds) {
-        List<Long> modelListVisible =
-                modelService.getModelListWithAuth(user, null, AuthType.VISIBLE).stream()
-                        .map(ModelResp::getId).collect(Collectors.toList());
+        List<Long> modelListVisible = modelService.getModelListWithAuth(user, null, AuthType.VIEWER)
+                .stream().map(ModelResp::getId).collect(Collectors.toList());
         List<Long> modelIdCopied = new ArrayList<>(modelIds);
         modelIdCopied.removeAll(modelListVisible);
         if (!CollectionUtils.isEmpty(modelIdCopied)) {

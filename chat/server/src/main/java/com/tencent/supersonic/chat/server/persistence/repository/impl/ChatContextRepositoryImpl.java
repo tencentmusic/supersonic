@@ -35,12 +35,7 @@ public class ChatContextRepositoryImpl implements ChatContextRepository {
 
     @Override
     public void updateContext(ChatContext chatCtx) {
-        ChatContextDO context = cast(chatCtx);
-        if (chatContextMapper.getContextByChatId(chatCtx.getChatId()) == null) {
-            chatContextMapper.addContext(context);
-        } else {
-            chatContextMapper.updateContext(context);
-        }
+        chatContextMapper.insertOrUpdate(cast(chatCtx));
     }
 
     private ChatContext cast(ChatContextDO contextDO) {

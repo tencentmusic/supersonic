@@ -36,8 +36,8 @@ public class LLMSqlCorrector extends BaseSemanticCorrector {
             + "\n2.NO NEED to check date filters as the junior engineer seldom makes mistakes in this regard."
             + "\n3.DO NOT miss the AGGREGATE operator of metrics, always add it as needed."
             + "\n4.ALWAYS use `with` statement if nested aggregation is needed."
-            + "\n5.ALWAYS enclose alias created by `AS` command in underscores."
-            + "\n6.ALWAYS translate alias created by `AS` command to the same language as the `#Question`."
+            + "\n5.ALWAYS enclose alias declared by `AS` command in underscores."
+            + "\n6.Alias created by `AS` command must be in the same language ast the `Question`."
             + "\n#Question:{{question}} #InputSQL:{{sql}} #Response:";
 
     public LLMSqlCorrector() {

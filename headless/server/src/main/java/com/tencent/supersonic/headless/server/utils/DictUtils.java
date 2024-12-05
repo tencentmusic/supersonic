@@ -34,6 +34,7 @@ import com.tencent.supersonic.headless.server.service.DimensionService;
 import com.tencent.supersonic.headless.server.service.MetricService;
 import com.tencent.supersonic.headless.server.service.ModelService;
 import com.tencent.supersonic.headless.server.service.TagMetaService;
+import com.xkzhangsan.time.utils.CollectionUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -532,5 +533,13 @@ public class DictUtils {
         resp.setType(TypeEnums.valueOf(dictTaskDO.getType()));
         resp.setConfig(JsonUtil.toObject(dictTaskDO.getConfig(), ItemValueConfig.class));
         return resp;
+    }
+
+    public List<DictTaskResp> taskDO2Resp(List<DictTaskDO> dictTaskDOList) {
+        List<DictTaskResp> dictTaskRespList = new ArrayList<>();
+        if (CollectionUtil.isNotEmpty(dictTaskDOList)) {
+            dictTaskDOList.stream().forEach(taskDO -> dictTaskRespList.add(taskDO2Resp(taskDO)));
+        }
+        return dictTaskRespList;
     }
 }

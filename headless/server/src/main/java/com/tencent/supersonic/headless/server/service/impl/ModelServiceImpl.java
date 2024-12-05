@@ -126,6 +126,19 @@ public class ModelServiceImpl implements ModelService {
     }
 
     @Override
+    public List<ModelResp> createModel(ModelBuildReq modelBuildReq, User user) throws Exception {
+        List<ModelResp> modelResps = Lists.newArrayList();
+        Map<String, ModelSchema> modelSchemaMap = buildModelSchema(modelBuildReq);
+        for (Map.Entry<String, ModelSchema> entry : modelSchemaMap.entrySet()) {
+            ModelReq modelReq =
+                    ModelConverter.convert(entry.getValue(), modelBuildReq, entry.getKey());
+            ModelResp modelResp = createModel(modelReq, user);
+            modelResps.add(modelResp);
+        }
+        return modelResps;
+    }
+
+    @Override
     @Transactional
     public ModelResp updateModel(ModelReq modelReq, User user) throws Exception {
         checkParams(modelReq);
@@ -231,6 +244,9 @@ public class ModelServiceImpl implements ModelService {
     }
 
     private List<DbSchema> getDbSchemes(ModelBuildReq modelBuildReq) throws SQLException {
+        if (!CollectionUtils.isEmpty(modelBuildReq.getDbSchemas())) {
+            return modelBuildReq.getDbSchemas();
+        }
         Map<String, List<DBColumn>> dbColumnMap = databaseService.getDbColumns(modelBuildReq);
         return convert(dbColumnMap, modelBuildReq);
     }
@@ -428,7 +444,7 @@ public class ModelServiceImpl implements ModelService {
                     .filter(modelResp -> checkAdminPermission(orgIds, user, modelResp))
                     .collect(Collectors.toList());
         }
-        if (authTypeEnum.equals(AuthType.VISIBLE)) {
+        if (authTypeEnum.equals(AuthType.VIEWER)) {
             modelWithAuth = modelResps.stream()
                     .filter(domainResp -> checkDataSetPermission(orgIds, user, domainResp))
                     .collect(Collectors.toList());

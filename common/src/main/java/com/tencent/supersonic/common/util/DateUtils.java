@@ -16,6 +16,7 @@ import java.time.temporal.TemporalAdjuster;
 import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -199,6 +200,13 @@ public class DateUtils {
             }
         }
         return false;
+    }
+
+    public static Long calculateDiffMs(Date createAt) {
+        Calendar calendar = Calendar.getInstance();
+        Date now = calendar.getTime();
+        long milliseconds = now.getTime() - createAt.getTime();
+        return milliseconds;
     }
 
     public static boolean isDateString(String value, String format) {

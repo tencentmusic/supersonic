@@ -713,6 +713,7 @@ const MetricInfoCreateForm: React.FC<CreateFormProps> = ({
         </FormItem>
 
         <Form.Item
+          hidden={!!!process.env.SHOW_TAG}
           label={
             <FormItemTitle
               title={`设为标签`}
@@ -899,7 +900,9 @@ const MetricInfoCreateForm: React.FC<CreateFormProps> = ({
               type="primary"
               key="console"
               onClick={() => {
-                history.replace(`/model/${domainId}/${modelId || metricItem?.modelId}/dataSource`);
+                history.replace(
+                  `/model/domain/manager/${domainId}/${modelId || metricItem?.modelId}/dataSource`,
+                );
                 onCancel?.();
               }}
             >

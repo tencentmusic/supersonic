@@ -2,6 +2,7 @@ package com.tencent.supersonic.headless.server.service;
 
 import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.headless.api.pojo.DBColumn;
+import com.tencent.supersonic.headless.api.pojo.enums.DataType;
 import com.tencent.supersonic.headless.api.pojo.request.DatabaseReq;
 import com.tencent.supersonic.headless.api.pojo.request.ModelBuildReq;
 import com.tencent.supersonic.headless.api.pojo.request.SqlExecuteReq;
@@ -16,6 +17,8 @@ import java.util.Map;
 public interface DatabaseService {
 
     SemanticQueryResp executeSql(String sql, DatabaseResp databaseResp);
+
+    List<DatabaseResp> getDatabaseByType(DataType dataType);
 
     SemanticQueryResp executeSql(SqlExecuteReq sqlExecuteReq, Long id, User user);
 

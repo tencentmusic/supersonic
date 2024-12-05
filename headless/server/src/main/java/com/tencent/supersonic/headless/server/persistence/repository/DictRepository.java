@@ -2,6 +2,7 @@ package com.tencent.supersonic.headless.server.persistence.repository;
 
 import com.tencent.supersonic.headless.api.pojo.request.DictItemFilter;
 import com.tencent.supersonic.headless.api.pojo.request.DictSingleTaskReq;
+import com.tencent.supersonic.headless.api.pojo.request.ValueTaskQueryReq;
 import com.tencent.supersonic.headless.api.pojo.response.DictItemResp;
 import com.tencent.supersonic.headless.api.pojo.response.DictTaskResp;
 import com.tencent.supersonic.headless.server.persistence.dataobject.DictConfDO;
@@ -26,4 +27,6 @@ public interface DictRepository {
     DictTaskDO queryDictTaskById(Long id);
 
     DictTaskResp queryLatestDictTask(DictSingleTaskReq taskReq);
+
+    List<DictTaskDO> queryAllDictTask(ValueTaskQueryReq taskQueryReq);
 }

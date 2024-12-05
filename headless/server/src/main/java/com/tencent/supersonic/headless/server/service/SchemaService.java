@@ -9,15 +9,7 @@ import com.tencent.supersonic.headless.api.pojo.MetaFilter;
 import com.tencent.supersonic.headless.api.pojo.SemanticSchema;
 import com.tencent.supersonic.headless.api.pojo.request.ItemUseReq;
 import com.tencent.supersonic.headless.api.pojo.request.SchemaFilterReq;
-import com.tencent.supersonic.headless.api.pojo.response.DatabaseResp;
-import com.tencent.supersonic.headless.api.pojo.response.DimensionResp;
-import com.tencent.supersonic.headless.api.pojo.response.DomainResp;
-import com.tencent.supersonic.headless.api.pojo.response.ItemResp;
-import com.tencent.supersonic.headless.api.pojo.response.ItemUseResp;
-import com.tencent.supersonic.headless.api.pojo.response.MetricResp;
-import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
-import com.tencent.supersonic.headless.api.pojo.response.ModelSchemaResp;
-import com.tencent.supersonic.headless.api.pojo.response.SemanticSchemaResp;
+import com.tencent.supersonic.headless.api.pojo.response.*;
 import com.tencent.supersonic.headless.server.pojo.yaml.DataModelYamlTpl;
 import com.tencent.supersonic.headless.server.pojo.yaml.DimensionYamlTpl;
 import com.tencent.supersonic.headless.server.pojo.yaml.MetricYamlTpl;
@@ -64,5 +56,4 @@ public interface SchemaService {
 
     ItemDateResp getItemDate(ItemDateFilter dimension, ItemDateFilter metric);
 
-    DatabaseResp getDatabase(Long id);
 }

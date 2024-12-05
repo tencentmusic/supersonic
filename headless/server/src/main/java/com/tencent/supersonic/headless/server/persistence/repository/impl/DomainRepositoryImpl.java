@@ -1,5 +1,6 @@
 package com.tencent.supersonic.headless.server.persistence.repository.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.tencent.supersonic.headless.server.persistence.dataobject.DomainDO;
 import com.tencent.supersonic.headless.server.persistence.mapper.DomainDOMapper;
@@ -43,4 +44,12 @@ public class DomainRepositoryImpl implements DomainRepository {
     public DomainDO getDomainById(Long id) {
         return domainDOMapper.selectById(id);
     }
+
+    @Override
+    public List<DomainDO> getDomainByBizName(String bizName) {
+        QueryWrapper<DomainDO> queryWrapper = new QueryWrapper<>();
+        queryWrapper.lambda().eq(DomainDO::getBizName, bizName);
+        return domainDOMapper.selectList(queryWrapper);
+    }
+
 }

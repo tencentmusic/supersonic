@@ -8,6 +8,7 @@ import com.tencent.supersonic.chat.server.agent.Agent;
 import com.tencent.supersonic.chat.server.agent.AgentToolType;
 import com.tencent.supersonic.chat.server.service.AgentService;
 import com.tencent.supersonic.common.pojo.User;
+import com.tencent.supersonic.common.pojo.enums.AuthType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -48,9 +50,11 @@ public class AgentController {
     }
 
     @RequestMapping("/getAgentList")
-    public List<Agent> getAgentList(HttpServletRequest request,HttpServletResponse response) {
-        User user = UserHolder.findUser(request, response);
-        return agentService.getAgents(user);
+    public List<Agent> getAgentList(
+            @RequestParam(value = "authType", required = false) AuthType authType,
+            HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {
+        User user = UserHolder.findUser(httpServletRequest, httpServletResponse);
+        return agentService.getAgents(user, authType);
     }
 
     @RequestMapping("/getToolTypes")

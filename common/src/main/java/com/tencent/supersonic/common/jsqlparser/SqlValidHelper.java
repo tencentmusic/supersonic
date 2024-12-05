@@ -74,7 +74,6 @@ public class SqlValidHelper {
             CCJSqlParserUtil.parse(sql);
             return true;
         } catch (Exception e) {
-            log.error("isValidSQL parse:{}", e);
             return false;
         }
     }

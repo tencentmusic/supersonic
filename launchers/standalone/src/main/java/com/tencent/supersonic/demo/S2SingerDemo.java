@@ -23,16 +23,13 @@ import com.tencent.supersonic.headless.api.pojo.ModelDetail;
 import com.tencent.supersonic.headless.api.pojo.QueryConfig;
 import com.tencent.supersonic.headless.api.pojo.enums.DimensionType;
 import com.tencent.supersonic.headless.api.pojo.enums.IdentifyType;
-import com.tencent.supersonic.headless.api.pojo.enums.TagDefineType;
 import com.tencent.supersonic.headless.api.pojo.request.DataSetReq;
 import com.tencent.supersonic.headless.api.pojo.request.DomainReq;
 import com.tencent.supersonic.headless.api.pojo.request.ModelReq;
-import com.tencent.supersonic.headless.api.pojo.request.TagObjectReq;
 import com.tencent.supersonic.headless.api.pojo.response.DataSetResp;
 import com.tencent.supersonic.headless.api.pojo.response.DatabaseResp;
 import com.tencent.supersonic.headless.api.pojo.response.DomainResp;
 import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
-import com.tencent.supersonic.headless.api.pojo.response.TagObjectResp;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
@@ -48,12 +45,12 @@ import java.util.Map;
 @Order(3)
 public class S2SingerDemo extends S2BaseDemo {
 
+    public static final String AGENT_NAME = "艺人分析助手";
+
     public void doRun() {
         try {
             DomainResp singerDomain = addDomain();
-            TagObjectResp singerTagObject = addTagObjectSinger(singerDomain);
-            ModelResp singerModel = addModel(singerDomain, demoDatabase, singerTagObject);
-            addTags(singerModel);
+            ModelResp singerModel = addModel(singerDomain, demoDatabase);
             long dataSetId = addDataSet(singerDomain, singerModel);
             addAgent(dataSetId);
         } catch (Exception e) {
@@ -62,7 +59,7 @@ public class S2SingerDemo extends S2BaseDemo {
     }
 
     @Override
-    boolean checkNeedToRun() {
+    protected boolean checkNeedToRun() {
         List<DomainResp> domainList = domainService.getDomainList();
         for (DomainResp domainResp : domainList) {
             if (domainResp.getBizName().equalsIgnoreCase("singer")) {
@@ -73,17 +70,9 @@ public class S2SingerDemo extends S2BaseDemo {
         return true;
     }
 
-    private TagObjectResp addTagObjectSinger(DomainResp singerDomain) throws Exception {
-        TagObjectReq tagObjectReq = new TagObjectReq();
-        tagObjectReq.setDomainId(singerDomain.getId());
-        tagObjectReq.setName("歌手");
-        tagObjectReq.setBizName("singer");
-        return tagObjectService.create(tagObjectReq, defaultUser);
-    }
-
     public DomainResp addDomain() {
         DomainReq domainReq = new DomainReq();
-        domainReq.setName("歌手数据");
+        domainReq.setName("歌手数据域");
         domainReq.setBizName("singer");
         domainReq.setParentId(0L);
         domainReq.setStatus(StatusEnum.ONLINE.getCode());
@@ -95,15 +84,13 @@ public class S2SingerDemo extends S2BaseDemo {
         return domainService.createDomain(domainReq, defaultUser);
     }
 
-    public ModelResp addModel(DomainResp singerDomain, DatabaseResp s2Database,
-            TagObjectResp singerTagObject) throws Exception {
+    public ModelResp addModel(DomainResp singerDomain, DatabaseResp s2Database) throws Exception {
         ModelReq modelReq = new ModelReq();
         modelReq.setName("歌手库");
         modelReq.setBizName("singer");
         modelReq.setDescription("歌手库");
         modelReq.setDatabaseId(s2Database.getId());
         modelReq.setDomainId(singerDomain.getId());
-        modelReq.setTagObjectId(singerTagObject.getId());
         modelReq.setViewers(Arrays.asList("admin", "tom", "jack"));
         modelReq.setViewOrgs(Collections.singletonList("1"));
         modelReq.setAdmins(Collections.singletonList("admin"));
@@ -115,9 +102,9 @@ public class S2SingerDemo extends S2BaseDemo {
         modelDetail.setIdentifiers(identifiers);
 
         List<Dim> dimensions = new ArrayList<>();
-        dimensions.add(new Dim("活跃区域", "act_area", DimensionType.categorical.name(), 1, 1));
-        dimensions.add(new Dim("代表作", "song_name", DimensionType.categorical.name(), 1));
-        dimensions.add(new Dim("流派", "genre", DimensionType.categorical.name(), 1, 1));
+        dimensions.add(new Dim("活跃区域", "act_area", DimensionType.categorical, 1));
+        dimensions.add(new Dim("代表作", "song_name", DimensionType.categorical, 1));
+        dimensions.add(new Dim("流派", "genre", DimensionType.categorical, 1));
         modelDetail.setDimensions(dimensions);
 
         Measure measure1 = new Measure("播放量", "js_play_cnt", "sum", 1);
@@ -128,19 +115,14 @@ public class S2SingerDemo extends S2BaseDemo {
         modelDetail.setSqlQuery("select singer_name, act_area, song_name, genre, "
                 + "js_play_cnt, down_cnt, favor_cnt from singer");
         modelReq.setModelDetail(modelDetail);
-        return modelService.createModel(modelReq, defaultUser);
-    }
+        ModelResp modelResp = modelService.createModel(modelReq, defaultUser);
 
-    private void addTags(ModelResp model) {
-        addTag(dimensionService.getDimension("act_area", model.getId()).getId(),
-                TagDefineType.DIMENSION);
-        addTag(dimensionService.getDimension("song_name", model.getId()).getId(),
-                TagDefineType.DIMENSION);
-        addTag(dimensionService.getDimension("genre", model.getId()).getId(),
-                TagDefineType.DIMENSION);
-        addTag(dimensionService.getDimension("singer_name", model.getId()).getId(),
-                TagDefineType.DIMENSION);
-        addTag(metricService.getMetric(model.getId(), "js_play_cnt").getId(), TagDefineType.METRIC);
+        // create dict conf for dimensions
+        enableDimensionValue(getDimension("act_area", modelResp));
+        enableDimensionValue(getDimension("genre", modelResp));
+        enableDimensionValue(getDimension("singer_name", modelResp));
+
+        return modelResp;
     }
 
     public long addDataSet(DomainResp singerDomain, ModelResp singerModel) {
@@ -167,7 +149,7 @@ public class S2SingerDemo extends S2BaseDemo {
 
     private void addAgent(long dataSetId) {
         Agent agent = new Agent();
-        agent.setName("艺人分析助手");
+        agent.setName(AGENT_NAME);
         agent.setDescription("帮忙您对不同流派、区域的艺人做分析查询");
         agent.setStatus(1);
         agent.setEnableSearch(1);
@@ -187,6 +169,8 @@ public class S2SingerDemo extends S2BaseDemo {
                 Maps.newHashMap(ChatAppManager.getAllApps(AppModule.CHAT));
         chatAppConfig.values().forEach(app -> app.setChatModelId(demoChatModel.getId()));
         agent.setChatAppConfig(chatAppConfig);
+        agent.setAdmins(Lists.newArrayList("alice"));
+        agent.setViewers(Lists.newArrayList("tom", "jack"));
         agentService.createAgent(agent, defaultUser);
     }
 }

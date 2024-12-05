@@ -23,6 +23,8 @@ public interface ModelService {
 
     ModelResp createModel(ModelReq datasourceReq, User user) throws Exception;
 
+    List<ModelResp> createModel(ModelBuildReq modelBuildReq, User user) throws Exception;
+
     ModelResp updateModel(ModelReq datasourceReq, User user) throws Exception;
 
     List<ModelResp> getModelList(MetaFilter metaFilter);
