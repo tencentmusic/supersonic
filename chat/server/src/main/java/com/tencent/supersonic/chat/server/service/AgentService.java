@@ -9,8 +9,6 @@ import java.util.List;
 public interface AgentService {
     List<Agent> getAgents(User user, AuthType authType);
 
-    List<Agent> getAgents(User user);
-
     List<Agent> getAgents();
 
     Agent createAgent(Agent agent, User user);
