@@ -3,7 +3,7 @@ import { ProTable } from '@ant-design/pro-components';
 import { message, Button, Space, Popconfirm, Input } from 'antd';
 import React, { useRef, useState, useEffect } from 'react';
 import { StatusEnum } from '../enum';
-import { useModel } from '@umijs/max';
+import { useModel, history } from '@umijs/max';
 import { deleteModel, batchUpdateModelStatus } from '../service';
 import ClassModelTypeModal from './ClassModelTypeModal';
 import { ColumnsConfig } from './TableColumnRender';
@@ -11,6 +11,7 @@ import TableHeaderFilter from '@/components/TableHeaderFilter';
 import moment from 'moment';
 import styles from './style.less';
 import { ISemantic } from '../data';
+import { toModelList } from '@/pages/SemanticModel/utils';
 
 type Props = {
   disabledEdit?: boolean;
@@ -22,14 +23,14 @@ const ModelTable: React.FC<Props> = ({ modelList, disabledEdit = false, onModelC
   const domainModel = useModel('SemanticModel.domainData');
   const modelModel = useModel('SemanticModel.modelData');
   const { selectDomainId } = domainModel;
-  const { modelTableHistoryParams, setModelTableHistoryParams } = modelModel;
+  const { modelTableHistoryParams, setModelTableHistoryParams, setSelectModel } = modelModel;
 
   const [modelItem, setModelItem] = useState<ISemantic.IModelItem>();
   const [filterParams, setFilterParams] = useState<Record<string, any>>({});
   const [createDataSourceModalOpen, setCreateDataSourceModalOpen] = useState(false);
   const [currentPageNumber, setCurrentPageNumber] = useState<number>(1);
   const actionRef = useRef<ActionType>();
-
+  const [isEditing, setIsEditing] = useState<boolean>(false);
   const [tableData, setTableData] = useState<ISemantic.IModelItem[]>([]);
   const params = modelTableHistoryParams?.[selectDomainId];
 
@@ -100,10 +101,12 @@ const ModelTable: React.FC<Props> = ({ modelList, disabledEdit = false, onModelC
       title: '模型名称',
       search: false,
       render: (_, record) => {
+        const { domainId, id } = record;
         return (
           <a
             onClick={() => {
-              onModelChange?.(record);
+              setSelectModel(record);
+              toModelList(domainId, id);
             }}
           >
             {_}
@@ -161,6 +164,7 @@ const ModelTable: React.FC<Props> = ({ modelList, disabledEdit = false, onModelC
               onClick={() => {
                 setModelItem(record);
                 setCreateDataSourceModalOpen(true);
+                setIsEditing(true);
               }}
             >
               编辑
@@ -209,84 +213,88 @@ const ModelTable: React.FC<Props> = ({ modelList, disabledEdit = false, onModelC
 
   return (
     <>
-      <ProTable
-        className={`${styles.classTable} ${styles.classTableSelectColumnAlignLeft}`}
-        actionRef={actionRef}
-        rowKey="id"
-        search={false}
-        columns={columns}
-        dataSource={tableData}
-        tableAlertRender={() => {
-          return false;
-        }}
-        pagination={{
-          current: currentPageNumber,
-          onChange: (pageNumber) => {
-            setCurrentPageNumber(pageNumber);
-            dipatchParams({
-              ...filterParams,
-              pageNumber: `${pageNumber}`,
-            });
-          },
-        }}
-        headerTitle={
-          <TableHeaderFilter
-            components={[
-              {
-                label: '模型搜索',
-                component: (
-                  <Input.Search
-                    style={{ width: 280 }}
-                    placeholder="请输入模型名称"
-                    defaultValue={params?.key}
-                    onSearch={(value) => {
-                      setCurrentPageNumber(1);
-                      dipatchParams({
-                        ...filterParams,
-                        key: value,
-                        pageNumber: `1`,
-                      });
-                      setFilterParams((preState) => {
-                        return {
-                          ...preState,
+      <div style={{ display: isEditing ? 'none' : 'block' }}>
+        <ProTable
+          className={`${styles.classTable} ${styles.classTableSelectColumnAlignLeft}`}
+          actionRef={actionRef}
+          rowKey="id"
+          search={false}
+          columns={columns}
+          dataSource={tableData}
+          tableAlertRender={() => {
+            return false;
+          }}
+          pagination={{
+            current: currentPageNumber,
+            onChange: (pageNumber) => {
+              setCurrentPageNumber(pageNumber);
+              dipatchParams({
+                ...filterParams,
+                pageNumber: `${pageNumber}`,
+              });
+            },
+          }}
+          headerTitle={
+            <TableHeaderFilter
+              components={[
+                {
+                  label: '模型搜索',
+                  component: (
+                    <Input.Search
+                      style={{ width: 280 }}
+                      placeholder="请输入模型名称"
+                      defaultValue={params?.key}
+                      onSearch={(value) => {
+                        setCurrentPageNumber(1);
+                        dipatchParams({
+                          ...filterParams,
                           key: value,
-                        };
-                      });
+                          pageNumber: `1`,
+                        });
+                        setFilterParams((preState) => {
+                          return {
+                            ...preState,
+                            key: value,
+                          };
+                        });
+                      }}
+                    />
+                  ),
+                },
+              ]}
+            />
+          }
+          size="small"
+          options={{ reload: false, density: false, fullScreen: false }}
+          toolBarRender={() =>
+            disabledEdit
+              ? [<></>]
+              : [
+                  <Button
+                    key="create"
+                    type="primary"
+                    onClick={() => {
+                      setModelItem(undefined);
+                      setCreateDataSourceModalOpen(true);
                     }}
-                  />
-                ),
-              },
-            ]}
-          />
-        }
-        size="small"
-        options={{ reload: false, density: false, fullScreen: false }}
-        toolBarRender={() =>
-          disabledEdit
-            ? [<></>]
-            : [
-                <Button
-                  key="create"
-                  type="primary"
-                  onClick={() => {
-                    setModelItem(undefined);
-                    setCreateDataSourceModalOpen(true);
-                  }}
-                >
-                  创建模型
-                </Button>,
-              ]
-        }
-      />
+                  >
+                    创建模型
+                  </Button>,
+                ]
+          }
+        />
+      </div>
       {createDataSourceModalOpen && (
         <ClassModelTypeModal
           open={createDataSourceModalOpen}
           modelItem={modelItem}
           onSubmit={() => {
             onModelChange?.();
+            setIsEditing(false);
             setCreateDataSourceModalOpen(false);
           }}
           onCancel={() => {
+            setIsEditing(false);
             setCreateDataSourceModalOpen(false);
           }}
         />

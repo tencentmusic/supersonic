@@ -1,0 +1,14 @@
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/mysql?useUnicode=true&characterEncoding=UTF-8&useSSL=false&allowMultiQueries=true&allowPublicKeyRetrieval=true
+    username: root
+    password:
+  sql:
+    init:
+      enabled: false
+      mode: always
+      username: root
+      password:
+      schema-locations: classpath:db/schema-mysql.sql,classpath:db/schema-mysql-demo.sql
+      data-locations: classpath:db/data-mysql.sql,classpath:db/data-mysql-demo.sql

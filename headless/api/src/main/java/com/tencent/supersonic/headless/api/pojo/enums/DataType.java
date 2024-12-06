@@ -45,7 +45,8 @@ public enum DataType {
 
     TDENGINE("TAOS", "TAOS", "com.taosdata.jdbc.TSDBDriver", "'", "'", "\"", "\""),
 
-    POSTGRESQL("postgresql", "postgresql", "org.postgresql.Driver", "'", "'", "\"", "\"");
+    POSTGRESQL("postgresql", "postgresql", "org.postgresql.Driver", "'", "'", "\"", "\""),
+    DUCKDB("duckdb", "duckdb", "org.duckdb.DuckDBDriver", "'", "'", "\"", "\"");
 
     private String feature;
     private String desc;

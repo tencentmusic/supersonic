@@ -123,7 +123,7 @@ public class HanlpHelper {
                 HanLP.Config.CustomDictionaryPath);
 
         HanLP.Config.CoreDictionaryPath =
-                hanlpPropertiesPath + FILE_SPILT + HanLP.Config.BiGramDictionaryPath;
+                hanlpPropertiesPath + FILE_SPILT + HanLP.Config.CoreDictionaryPath;
         HanLP.Config.CoreDictionaryTransformMatrixDictionaryPath = hanlpPropertiesPath + FILE_SPILT
                 + HanLP.Config.CoreDictionaryTransformMatrixDictionaryPath;
         HanLP.Config.BiGramDictionaryPath =

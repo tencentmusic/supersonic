@@ -7,6 +7,7 @@ import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.common.pojo.enums.StatusEnum;
 import com.tencent.supersonic.common.util.BeanMapper;
 import com.tencent.supersonic.common.util.JsonUtil;
+import com.tencent.supersonic.headless.api.pojo.ColumnSchema;
 import com.tencent.supersonic.headless.api.pojo.Dim;
 import com.tencent.supersonic.headless.api.pojo.DrillDownDimension;
 import com.tencent.supersonic.headless.api.pojo.Identify;
@@ -14,11 +15,16 @@ import com.tencent.supersonic.headless.api.pojo.Measure;
 import com.tencent.supersonic.headless.api.pojo.MeasureParam;
 import com.tencent.supersonic.headless.api.pojo.MetricDefineByMeasureParams;
 import com.tencent.supersonic.headless.api.pojo.ModelDetail;
+import com.tencent.supersonic.headless.api.pojo.ModelSchema;
 import com.tencent.supersonic.headless.api.pojo.enums.DimensionType;
+import com.tencent.supersonic.headless.api.pojo.enums.FieldType;
+import com.tencent.supersonic.headless.api.pojo.enums.IdentifyType;
 import com.tencent.supersonic.headless.api.pojo.enums.MetricDefineType;
+import com.tencent.supersonic.headless.api.pojo.enums.ModelDefineType;
 import com.tencent.supersonic.headless.api.pojo.enums.SemanticType;
 import com.tencent.supersonic.headless.api.pojo.request.DimensionReq;
 import com.tencent.supersonic.headless.api.pojo.request.MetricReq;
+import com.tencent.supersonic.headless.api.pojo.request.ModelBuildReq;
 import com.tencent.supersonic.headless.api.pojo.request.ModelReq;
 import com.tencent.supersonic.headless.api.pojo.response.DomainResp;
 import com.tencent.supersonic.headless.api.pojo.response.MeasureResp;
@@ -120,7 +126,7 @@ public class ModelConverter {
         }
         dimensionReq.setModelId(modelDO.getId());
         dimensionReq.setExpr(dim.getBizName());
-        dimensionReq.setType(dim.getType());
+        dimensionReq.setType(dim.getType().name());
         dimensionReq
                 .setDescription(Objects.isNull(dim.getDescription()) ? "" : dim.getDescription());
         dimensionReq.setIsTag(dim.getIsTag());
@@ -154,6 +160,49 @@ public class ModelConverter {
         dimensionReq.setExpr(identify.getBizName());
         dimensionReq.setType(DimensionType.fromIdentify(identify.getType()).name());
         return dimensionReq;
+    }
+
+    public static ModelReq convert(ModelSchema modelSchema, ModelBuildReq modelBuildReq,
+            String tableName) {
+        ModelReq modelReq = new ModelReq();
+        modelReq.setName(modelSchema.getName());
+        modelReq.setBizName(modelSchema.getBizName());
+        modelReq.setDatabaseId(modelBuildReq.getDatabaseId());
+        modelReq.setDomainId(modelBuildReq.getDomainId());
+        ModelDetail modelDetail = new ModelDetail();
+        if (StringUtils.isNotBlank(modelBuildReq.getSql())) {
+            modelDetail.setQueryType(ModelDefineType.SQL_QUERY.getName());
+            modelDetail.setSqlQuery(modelBuildReq.getSql());
+        } else {
+            modelDetail.setQueryType(ModelDefineType.TABLE_QUERY.getName());
+            modelDetail.setTableQuery(String.format("%s.%s", modelBuildReq.getDb(), tableName));
+        }
+        for (ColumnSchema columnSchema : modelSchema.getColumnSchemas()) {
+            FieldType fieldType = columnSchema.getFiledType();
+            if (getIdentifyType(fieldType) != null) {
+                Identify identify = new Identify(columnSchema.getName(),
+                        getIdentifyType(fieldType).name(), columnSchema.getColumnName(), 1);
+                modelDetail.getIdentifiers().add(identify);
+            } else if (FieldType.measure.equals(fieldType)) {
+                Measure measure = new Measure(columnSchema.getName(), columnSchema.getColumnName(),
+                        columnSchema.getAgg().getOperator(), 1);
+                modelDetail.getMeasures().add(measure);
+            } else {
+                Dim dim = new Dim(columnSchema.getName(), columnSchema.getColumnName(),
+                        DimensionType.valueOf(columnSchema.getFiledType().name()), 1);
+                modelDetail.getDimensions().add(dim);
+            }
+        }
+        modelReq.setModelDetail(modelDetail);
+        return modelReq;
+    }
+
+    private static IdentifyType getIdentifyType(FieldType fieldType) {
+        if (FieldType.foreign_key.equals(fieldType) || FieldType.primary_key.equals(fieldType)) {
+            return IdentifyType.primary;
+        } else {
+            return IdentifyType.foreign;
+        }
     }
 
     public static List<ModelResp> convertList(List<ModelDO> modelDOS) {

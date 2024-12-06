@@ -1,5 +1,5 @@
 import React from 'react';
-import { Outlet } from 'umi';
+import { Outlet } from '@umijs/max';
 
 const market: React.FC = () => {
   return (

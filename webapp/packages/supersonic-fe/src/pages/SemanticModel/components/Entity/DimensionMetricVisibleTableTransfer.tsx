@@ -53,7 +53,7 @@ const DimensionMetricVisibleTableTransfer: React.FC<Props> = ({
     {
       dataIndex: 'isTag',
       title: '是否标签',
-      // hidden: true,
+      hidden: true,
       render: (isTag) => {
         if (isTag) {
           return <span style={{ color: '#0958d9' }}>是</span>;

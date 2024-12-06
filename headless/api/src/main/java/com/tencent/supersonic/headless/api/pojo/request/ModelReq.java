@@ -35,8 +35,6 @@ public class ModelReq extends SchemaItem {
 
     private List<String> adminOrgs;
 
-    private Long tagObjectId;
-
     private Map<String, Object> ext;
 
     public String getViewer() {

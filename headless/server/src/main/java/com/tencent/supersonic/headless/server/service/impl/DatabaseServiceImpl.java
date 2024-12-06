@@ -1,5 +1,6 @@
 package com.tencent.supersonic.headless.server.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.common.config.GeneralManageConfig;
@@ -7,6 +8,7 @@ import com.tencent.supersonic.common.pojo.QueryColumn;
 import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.common.pojo.enums.EngineType;
 import com.tencent.supersonic.headless.api.pojo.DBColumn;
+import com.tencent.supersonic.headless.api.pojo.enums.DataType;
 import com.tencent.supersonic.headless.api.pojo.request.DatabaseReq;
 import com.tencent.supersonic.headless.api.pojo.request.ModelBuildReq;
 import com.tencent.supersonic.headless.api.pojo.request.SqlExecuteReq;
@@ -140,6 +142,15 @@ public class DatabaseServiceImpl extends ServiceImpl<DatabaseDOMapper, DatabaseD
         DatabaseResp databaseResp = getDatabase(id);
         checkPermission(databaseResp, user);
         return databaseResp;
+    }
+
+    @Override
+    public List<DatabaseResp> getDatabaseByType(DataType dataType) {
+        QueryWrapper<DatabaseDO> queryWrapper = new QueryWrapper<>();
+        queryWrapper.lambda().eq(DatabaseDO::getType, dataType.getFeature());
+        List<DatabaseDO> list = list(queryWrapper);
+        return list.stream().map(DatabaseConverter::convertWithPassword)
+                .collect(Collectors.toList());
     }
 
     @Override

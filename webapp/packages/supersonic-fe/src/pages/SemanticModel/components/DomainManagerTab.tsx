@@ -1,44 +1,27 @@
-import { Tabs, Breadcrumb, Space, Radio } from 'antd';
+import { Tabs, Radio } from 'antd';
 import React, { useRef, useEffect, useState } from 'react';
-import { history, useModel } from '@umijs/max';
-import ClassDimensionTable from './ClassDimensionTable';
-import ClassMetricTable from './ClassMetricTable';
+import { useModel } from '@umijs/max';
 import PermissionSection from './Permission/PermissionSection';
 import TagObjectTable from '../Insights/components/TagObjectTable';
 import TermTable from '../components/Term/TermTable';
 import OverView from './OverView';
 import styles from './style.less';
-import { HomeOutlined, FundViewOutlined } from '@ant-design/icons';
-import { ISemantic } from '../data';
 import SemanticGraphCanvas from '../SemanticGraphCanvas';
 import View from '../View';
 
 type Props = {
-  isModel: boolean;
   activeKey: string;
-  modelList: ISemantic.IModelItem[];
-  dataSetList: ISemantic.IDatasetItem[];
-  handleModelChange: (model?: ISemantic.IModelItem) => void;
-  onBackDomainBtnClick?: () => void;
   onMenuChange?: (menuKey: string) => void;
 };
-const DomainManagerTab: React.FC<Props> = ({
-  isModel,
-  activeKey,
-  modelList,
-  dataSetList,
-  handleModelChange,
-  onBackDomainBtnClick,
-  onMenuChange,
-}) => {
+const DomainManagerTab: React.FC<Props> = ({ activeKey, onMenuChange }) => {
   const initState = useRef<boolean>(false);
   const defaultTabKey = 'metric';
 
   const domainModel = useModel('SemanticModel.domainData');
   const modelModel = useModel('SemanticModel.modelData');
 
-  const { selectDomainId, selectDomainName, selectDomain: domainData } = domainModel;
-  const { selectModelId, selectModelName } = modelModel;
+  const { selectDomainId, selectDomain: domainData } = domainModel;
+  const { selectModelId, modelList } = modelModel;
 
   useEffect(() => {
     initState.current = false;
@@ -50,7 +33,7 @@ const DomainManagerTab: React.FC<Props> = ({
       label: '数据集管理',
       key: 'overview',
       hidden: !!domainData?.parentId,
-      children: <View dataSetList={dataSetList} />,
+      children: <View />,
     },
     {
       label: '模型管理',
@@ -59,9 +42,9 @@ const DomainManagerTab: React.FC<Props> = ({
         showModelType === 'list' ? (
           <OverView
             modelList={modelList}
-            onModelChange={(model) => {
-              handleModelChange(model);
-            }}
+            // onModelChange={(model) => {
+            //   handleModelChange(model);
+            // }}
           />
         ) : (
           <div style={{ width: '100%' }} key={selectDomainId}>
@@ -73,7 +56,7 @@ const DomainManagerTab: React.FC<Props> = ({
     {
       label: '标签对象管理',
       key: 'tagObjectManage',
-      hidden: !!domainData?.parentId,
+      hidden: !!!process.env.SHOW_TAG ? true : !!domainData?.parentId,
       children: <TagObjectTable />,
     },
     {
@@ -98,36 +81,9 @@ const DomainManagerTab: React.FC<Props> = ({
     return item.key !== 'permissonSetting';
   });
 
-  const isModelItem = [
-    {
-      label: '指标管理',
-      key: 'metric',
-      children: (
-        <ClassMetricTable
-          onEmptyMetricData={() => {
-            if (!initState.current) {
-              initState.current = true;
-              onMenuChange?.('dimenstion');
-            }
-          }}
-        />
-      ),
-    },
-    {
-      label: '维度管理',
-      key: 'dimenstion',
-      children: <ClassDimensionTable />,
-    },
-    {
-      label: '权限管理',
-      key: 'permissonSetting',
-      children: <PermissionSection permissionTarget={'model'} />,
-    },
-  ];
-
   const getActiveKey = () => {
     const key = activeKey || defaultTabKey;
-    const tabItems = !isModel ? tabItem : isModelItem;
+    const tabItems = tabItem;
     const tabItemsKeys = tabItems.map((item) => item.key);
     if (!tabItemsKeys.includes(key)) {
       return tabItemsKeys[0];
@@ -137,47 +93,9 @@ const DomainManagerTab: React.FC<Props> = ({
 
   return (
     <div>
-      <Breadcrumb
-        className={styles.breadcrumb}
-        separator=""
-        items={[
-          {
-            title: (
-              <Space
-                onClick={() => {
-                  onBackDomainBtnClick?.();
-                }}
-                style={
-                  selectModelName ? { cursor: 'pointer' } : { color: '#296df3', fontWeight: 'bold' }
-                }
-              >
-                <HomeOutlined />
-                <span>{selectDomainName}</span>
-              </Space>
-            ),
-          },
-          {
-            type: 'separator',
-            separator: selectModelName ? '/' : '',
-          },
-          {
-            title: selectModelName ? (
-              <Space
-                onClick={() => {
-                  history.push(`/model/${selectDomainId}/${selectModelId}/`);
-                }}
-                style={{ color: '#296df3' }}
-              >
-                <FundViewOutlined style={{ position: 'relative', top: '2px' }} />
-                <span>{selectModelName}</span>
-              </Space>
-            ) : undefined,
-          },
-        ]}
-      />
       <Tabs
         className={styles.tab}
-        items={!isModel ? tabItem : selectModelId ? isModelItem : []}
+        items={tabItem}
         activeKey={getActiveKey()}
         tabBarExtraContent={{
           right:

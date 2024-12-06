@@ -11,7 +11,12 @@ public class LLMConfigUtils {
         OPENAI_GLM(false),
         OLLAMA_LLAMA3(true),
         OLLAMA_QWEN2(true),
-        OLLAMA_QWEN25(true);
+        OLLAMA_QWEN25_7B(true),
+        OLLAMA_QWEN25_14B(true),
+        OLLAMA_QWEN25_CODE_7B(true),
+        OLLAMA_QWEN25_CODE_3B(true),
+        OLLAMA_GLM4(true);
+
 
         public boolean isOllam;
 
@@ -35,9 +40,25 @@ public class LLMConfigUtils {
                 baseUrl = "http://localhost:11434";
                 modelName = "qwen2:7b";
                 break;
-            case OLLAMA_QWEN25:
+            case OLLAMA_QWEN25_7B:
                 baseUrl = "http://localhost:11434";
                 modelName = "qwen2.5:7b";
+                break;
+            case OLLAMA_QWEN25_14B:
+                baseUrl = "http://localhost:11434";
+                modelName = "qwen2.5:14b";
+                break;
+            case OLLAMA_QWEN25_CODE_7B:
+                baseUrl = "http://localhost:11434";
+                modelName = "qwen2.5-coder:7b";
+                break;
+            case OLLAMA_QWEN25_CODE_3B:
+                baseUrl = "http://localhost:11434";
+                modelName = "qwen2.5-coder:3b";
+                break;
+            case OLLAMA_GLM4:
+                baseUrl = "http://localhost:11434";
+                modelName = "glm4:latest";
                 break;
             case OPENAI_GLM:
                 baseUrl = "https://open.bigmodel.cn/api/pas/v4/";
