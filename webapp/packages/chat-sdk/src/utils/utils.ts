@@ -3,6 +3,9 @@ import { NumericUnit } from '../common/constants';
 import { isString } from 'lodash';
 
 export function formatByDecimalPlaces(value: number | string, decimalPlaces: number) {
+  if (value === null || value === undefined || value === '') {
+    return 0;
+  }
   if (isNaN(+value) || decimalPlaces < 0 || decimalPlaces > 100) {
     return value;
   }
@@ -17,6 +20,9 @@ export function formatByDecimalPlaces(value: number | string, decimalPlaces: num
 }
 
 export function formatByThousandSeperator(value: number | string) {
+  if (value === null || value === undefined || value === '') {
+    return 0;
+  }
   if (isNaN(+value)) {
     return value;
   }

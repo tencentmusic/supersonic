@@ -29,7 +29,6 @@ import {
   batchCreateTag,
   batchDeleteTag,
 } from '../../service';
-import { ArrowLeftOutlined } from '@ant-design/icons';
 import MetricMetricFormTable from '../../components/MetricMetricFormTable';
 import MetricFieldFormTable from '../../components/MetricFieldFormTable';
 import DimensionAndMetricRelationModal from '../../components/DimensionAndMetricRelationModal';
@@ -38,9 +37,12 @@ import { createMetric, updateMetric, mockMetricAlias, getMetricTags } from '../.
 import { MetricSettingKey, MetricSettingWording } from '../constants';
 import { ISemantic } from '../../data';
 import { history } from '@umijs/max';
+import { toDomainList, toModelList } from '@/pages/SemanticModel/utils';
 import globalStyles from '@/global.less';
 
 export type CreateFormProps = {
+  modelId: number;
+  domainId: number;
   datasourceId?: number;
   metricItem: any;
   settingKey: MetricSettingKey;
@@ -59,6 +61,8 @@ const queryParamsTypeParamsKey = {
 };
 
 const MetricInfoCreateForm: React.FC<CreateFormProps> = ({
+  modelId,
+  domainId,
   datasourceId,
   onCancel,
   settingKey,
@@ -66,9 +70,6 @@ const MetricInfoCreateForm: React.FC<CreateFormProps> = ({
   onSubmit,
 }) => {
   const isEdit = !!metricItem?.id;
-  const domainId = metricItem?.domainId;
-  const modelId = metricItem?.modelId;
-  const [currentStep, setCurrentStep] = useState(0);
   const formValRef = useRef({} as any);
   const [form] = Form.useForm();
   const updateFormVal = (val: any) => {
@@ -383,6 +384,9 @@ const MetricInfoCreateForm: React.FC<CreateFormProps> = ({
       }
       message.success('编辑指标成功');
       onSubmit?.(queryParams);
+      if (!isEdit) {
+        toModelList(domainId, modelId!, 'metric');
+      }
       return;
     }
     message.error(msg);
@@ -482,10 +486,11 @@ const MetricInfoCreateForm: React.FC<CreateFormProps> = ({
   };
 
   const renderContent = () => {
-    if (settingKey === MetricSettingKey.SQL_CONFIG) {
-      return (
+    return (
+      <>
         <div
           style={{
+            display: settingKey === MetricSettingKey.SQL_CONFIG ? 'block' : 'none',
             marginLeft: '-24px',
           }}
         >
@@ -609,209 +614,211 @@ const MetricInfoCreateForm: React.FC<CreateFormProps> = ({
             </>
           )}
         </div>
-      );
-    }
 
-    return (
-      <>
-        <FormItem hidden={true} name="id" label="ID">
-          <Input placeholder="id" />
-        </FormItem>
-        <Row gutter={20}>
-          <Col span={12}>
-            <FormItem
-              name="name"
-              label="指标名称"
-              rules={[{ required: true, message: '请输入指标名称' }]}
-            >
-              <Input placeholder="名称不可重复" />
-            </FormItem>
-          </Col>
-          <Col span={12}>
-            <FormItem
-              name="bizName"
-              label="英文名称"
-              rules={[{ required: true, message: '请输入英文名称' }]}
-            >
-              <Input placeholder="名称不可重复" disabled={isEdit} />
-            </FormItem>
-          </Col>
-        </Row>
-        <Row gutter={20}>
-          <Col span={12}>
-            <FormItem
-              name="sensitiveLevel"
-              label="敏感度"
-              rules={[{ required: true, message: '请选择敏感度' }]}
-            >
-              <Select placeholder="请选择敏感度">
-                {SENSITIVE_LEVEL_OPTIONS.map((item) => (
-                  <Option key={item.value} value={item.value}>
-                    {item.label}
-                  </Option>
-                ))}
-              </Select>
-            </FormItem>
-          </Col>
-          <Col span={12}>
-            <FormItem name="classifications" label="分类">
-              <Select
-                mode="tags"
-                placeholder="支持手动输入及选择"
-                tokenSeparators={[',']}
-                maxTagCount={9}
-                options={tagOptions}
-              />
-            </FormItem>
-          </Col>
-        </Row>
-
-        <FormItem
-          name="description"
-          label={
-            <TableTitleTooltips
-              title="业务口径"
-              overlayInnerStyle={{ width: 600 }}
-              tooltips={
-                <>
-                  <p>
-                    在录入指标时，请务必详细填写指标口径。口径描述对于理解指标的含义、计算方法和使用场景至关重要。一个清晰、准确的口径描述可以帮助其他用户更好地理解和使用该指标，避免因为误解而导致错误的数据分析和决策。在填写口径时，建议包括以下信息：
-                  </p>
-                  <p>1. 指标的计算方法：详细说明指标是如何计算的，包括涉及的公式、计算步骤等。</p>
-                  <p>2. 数据来源：描述指标所依赖的数据来源，包括数据表、字段等信息。</p>
-                  <p>3. 使用场景：说明该指标适用于哪些业务场景，以及如何在这些场景中使用该指标。</p>
-                  <p>4. 任何其他相关信息：例如数据更新频率、数据质量要求等。</p>
-                  <p>
-                    请确保口径描述清晰、简洁且易于理解，以便其他用户能够快速掌握指标的核心要点。
-                  </p>
-                </>
-              }
-            />
-          }
-          rules={[{ required: true, message: '请输入业务口径' }]}
-        >
-          <TextArea placeholder="请输入业务口径" style={{ minHeight: 173 }} />
-        </FormItem>
-
-        <FormItem label="别名">
+        <div style={{ display: settingKey === MetricSettingKey.BASIC ? 'block' : 'none' }}>
+          <FormItem hidden={true} name="id" label="ID">
+            <Input placeholder="id" />
+          </FormItem>
           <Row gutter={20}>
-            <Col flex="1 1 200px">
-              <FormItem name="alias" noStyle>
+            <Col span={12}>
+              <FormItem
+                name="name"
+                label="指标名称"
+                rules={[{ required: true, message: '请输入指标名称' }]}
+              >
+                <Input placeholder="名称不可重复" />
+              </FormItem>
+            </Col>
+            <Col span={12}>
+              <FormItem
+                name="bizName"
+                label="英文名称"
+                rules={[{ required: true, message: '请输入英文名称' }]}
+              >
+                <Input placeholder="名称不可重复" disabled={isEdit} />
+              </FormItem>
+            </Col>
+          </Row>
+          <Row gutter={20}>
+            <Col span={12}>
+              <FormItem
+                name="sensitiveLevel"
+                label="敏感度"
+                rules={[{ required: true, message: '请选择敏感度' }]}
+              >
+                <Select placeholder="请选择敏感度">
+                  {SENSITIVE_LEVEL_OPTIONS.map((item) => (
+                    <Option key={item.value} value={item.value}>
+                      {item.label}
+                    </Option>
+                  ))}
+                </Select>
+              </FormItem>
+            </Col>
+            <Col span={12}>
+              <FormItem name="classifications" label="分类">
                 <Select
-                  style={{ maxWidth: 500 }}
                   mode="tags"
-                  placeholder="输入别名后回车确认，多别名输入、复制粘贴支持英文逗号自动分隔"
+                  placeholder="支持手动输入及选择"
                   tokenSeparators={[',']}
                   maxTagCount={9}
+                  options={tagOptions}
                 />
               </FormItem>
             </Col>
-            {isEdit && (
-              <Col flex="0 1 75px">
-                <Tooltip title="智能填充将根据指标相关信息，使用大语言模型获取指标别名">
-                  <Button
-                    type="primary"
-                    loading={llmLoading}
-                    style={{ top: '5px' }}
-                    onClick={() => {
-                      generatorMetricAlias();
-                    }}
-                  >
-                    智能填充
-                  </Button>
-                </Tooltip>
-              </Col>
-            )}
           </Row>
-        </FormItem>
-        <Divider />
-        <FormItem
-          name="isTag"
-          valuePropName="checked"
-          getValueFromEvent={(value) => {
-            return value === true ? 1 : 0;
-          }}
-          getValueProps={(value) => {
-            return {
-              checked: value === 1,
-            };
-          }}
-        >
-          <Row gutter={20}>
-            <Col flex="1 1 200px">
-              <FormItemTitle
-                title={`设为标签`}
-                subTitle={`如果勾选，代表取值都是一种'标签'，可用作对实体的圈选`}
-              />
-            </Col>
 
-            <Col flex="0 1 75px">
-              <Switch />
-            </Col>
-          </Row>
-        </FormItem>
-        <Divider />
-        <FormItem>
-          <Row gutter={20}>
-            <Col flex="1 1 200px">
-              <FormItemTitle
-                title={'下钻维度配置'}
-                subTitle={'配置下钻维度后，将可以在指标卡中进行下钻'}
-              />
-            </Col>
-
-            <Col flex="0 1 75px">
-              <Button
-                type="primary"
-                onClick={() => {
-                  setMetricRelationModalOpenState(true);
-                }}
-              >
-                设 置
-              </Button>
-            </Col>
-          </Row>
-        </FormItem>
-        <Divider />
-        <FormItem label={<FormItemTitle title={'数据格式化'} />} name="dataFormatType">
-          <Radio.Group buttonStyle="solid" size="middle">
-            <Radio.Button value="">默认</Radio.Button>
-            <Radio.Button value="decimal">小数</Radio.Button>
-            <Radio.Button value="percent">百分比</Radio.Button>
-          </Radio.Group>
-        </FormItem>
-
-        {(isPercentState || isDecimalState) && (
           <FormItem
+            name="description"
             label={
-              <FormItemTitle
-                title={'小数位数'}
-                subTitle={`对小数位数进行设置，如保留两位，0.021252 -> 0.02${
-                  isPercentState ? '%' : ''
-                }`}
+              <TableTitleTooltips
+                title="业务口径"
+                overlayInnerStyle={{ width: 600 }}
+                tooltips={
+                  <>
+                    <p>
+                      在录入指标时，请务必详细填写指标口径。口径描述对于理解指标的含义、计算方法和使用场景至关重要。一个清晰、准确的口径描述可以帮助其他用户更好地理解和使用该指标，避免因为误解而导致错误的数据分析和决策。在填写口径时，建议包括以下信息：
+                    </p>
+                    <p>1. 指标的计算方法：详细说明指标是如何计算的，包括涉及的公式、计算步骤等。</p>
+                    <p>2. 数据来源：描述指标所依赖的数据来源，包括数据表、字段等信息。</p>
+                    <p>
+                      3. 使用场景：说明该指标适用于哪些业务场景，以及如何在这些场景中使用该指标。
+                    </p>
+                    <p>4. 任何其他相关信息：例如数据更新频率、数据质量要求等。</p>
+                    <p>
+                      请确保口径描述清晰、简洁且易于理解，以便其他用户能够快速掌握指标的核心要点。
+                    </p>
+                  </>
+                }
               />
             }
-            name={['dataFormat', 'decimalPlaces']}
+            rules={[{ required: true, message: '请输入业务口径' }]}
           >
-            <InputNumber placeholder="请输入需要保留小数位数" style={{ width: '300px' }} />
+            <TextArea placeholder="请输入业务口径" style={{ minHeight: 173 }} />
           </FormItem>
-        )}
-        {isPercentState && (
-          <>
+
+          <FormItem label="别名">
+            <Row gutter={20}>
+              <Col flex="1 1 200px">
+                <FormItem name="alias" noStyle>
+                  <Select
+                    style={{ maxWidth: 500 }}
+                    mode="tags"
+                    placeholder="输入别名后回车确认，多别名输入、复制粘贴支持英文逗号自动分隔"
+                    tokenSeparators={[',']}
+                    maxTagCount={9}
+                  />
+                </FormItem>
+              </Col>
+              {isEdit && (
+                <Col flex="0 1 75px">
+                  <Tooltip title="智能填充将根据指标相关信息，使用大语言模型获取指标别名">
+                    <Button
+                      type="primary"
+                      loading={llmLoading}
+                      style={{ top: '5px' }}
+                      onClick={() => {
+                        generatorMetricAlias();
+                      }}
+                    >
+                      智能填充
+                    </Button>
+                  </Tooltip>
+                </Col>
+              )}
+            </Row>
+          </FormItem>
+          <Divider />
+          <FormItem
+            name="isTag"
+            valuePropName="checked"
+            hidden={!!!process.env.SHOW_TAG}
+            getValueFromEvent={(value) => {
+              return value === true ? 1 : 0;
+            }}
+            getValueProps={(value) => {
+              return {
+                checked: value === 1,
+              };
+            }}
+          >
+            <Row gutter={20}>
+              <Col flex="1 1 200px">
+                <FormItemTitle
+                  title={`设为标签`}
+                  subTitle={`如果勾选，代表取值都是一种'标签'，可用作对实体的圈选`}
+                />
+              </Col>
+
+              <Col flex="0 1 75px">
+                <Switch />
+              </Col>
+            </Row>
+            <Divider />
+          </FormItem>
+
+          <FormItem>
+            <Row gutter={20}>
+              <Col flex="1 1 200px">
+                <FormItemTitle
+                  title={'下钻维度配置'}
+                  subTitle={'配置下钻维度后，将可以在指标卡中进行下钻'}
+                />
+              </Col>
+
+              <Col flex="0 1 75px">
+                <Button
+                  type="primary"
+                  onClick={() => {
+                    setMetricRelationModalOpenState(true);
+                  }}
+                >
+                  设 置
+                </Button>
+              </Col>
+            </Row>
+          </FormItem>
+          <Divider />
+          <FormItem label={<FormItemTitle title={'数据格式化'} />} name="dataFormatType">
+            <Radio.Group buttonStyle="solid" size="middle">
+              <Radio.Button value="">默认</Radio.Button>
+              <Radio.Button value="decimal">小数</Radio.Button>
+              <Radio.Button value="percent">百分比</Radio.Button>
+            </Radio.Group>
+          </FormItem>
+
+          {(isPercentState || isDecimalState) && (
             <FormItem
               label={
                 <FormItemTitle
-                  title={'原始值是否乘以100'}
-                  subTitle={'如 原始值0.001 ->展示值0.1% '}
+                  title={'小数位数'}
+                  subTitle={`对小数位数进行设置，如保留两位，0.021252 -> 0.02${
+                    isPercentState ? '%' : ''
+                  }`}
                 />
               }
-              name={['dataFormat', 'needMultiply100']}
-              valuePropName="checked"
+              name={['dataFormat', 'decimalPlaces']}
             >
-              <Switch />
+              <InputNumber placeholder="请输入需要保留小数位数" style={{ width: '300px' }} />
             </FormItem>
-          </>
-        )}
+          )}
+          {isPercentState && (
+            <>
+              <FormItem
+                label={
+                  <FormItemTitle
+                    title={'原始值是否乘以100'}
+                    subTitle={'如 原始值0.001 ->展示值0.1% '}
+                  />
+                }
+                name={['dataFormat', 'needMultiply100']}
+                valuePropName="checked"
+              >
+                <Switch />
+              </FormItem>
+            </>
+          )}
+        </div>
       </>
     );
   };
@@ -825,7 +832,10 @@ const MetricInfoCreateForm: React.FC<CreateFormProps> = ({
               <span style={{ flex: 'auto' }}>{MetricSettingWording[settingKey]}</span>
 
               <span style={{ flex: 'none' }}>
-                <Button
+                <Button type="primary" onClick={handleSave}>
+                  保 存
+                </Button>
+                {/* <Button
                   size="middle"
                   type="link"
                   key="backListBtn"
@@ -837,7 +847,7 @@ const MetricInfoCreateForm: React.FC<CreateFormProps> = ({
                     <ArrowLeftOutlined />
                     返回列表页
                   </Space>
-                </Button>
+                </Button> */}
               </span>
             </div>
             <div className={styles.infoCardContainer}>
@@ -868,13 +878,6 @@ const MetricInfoCreateForm: React.FC<CreateFormProps> = ({
                 {renderContent()}
               </Form>
             </div>
-            <div className={styles.infoCardFooter}>
-              <div className={styles.infoCardFooterContainer}>
-                <Button type="primary" onClick={handleSave}>
-                  保 存
-                </Button>
-              </div>
-            </div>
           </div>
           <DimensionAndMetricRelationModal
             metricItem={metricItem}
@@ -896,13 +899,13 @@ const MetricInfoCreateForm: React.FC<CreateFormProps> = ({
         <Result
           style={{ background: '#fff' }}
           status="warning"
-          subTitle="当前数据源缺少度量，无法创建指标。请前往数据源配置中，将字段设置为度量"
+          subTitle="当前数据模型缺少度量，无法创建指标。请前往模型配置中，将字段设置为度量"
           extra={
             <Button
               type="primary"
               key="console"
               onClick={() => {
-                history.replace(`/model/${domainId}/${modelId || metricItem?.modelId}/dataSource`);
+                toDomainList(domainId, 'menuKey');
                 onCancel?.();
               }}
             >

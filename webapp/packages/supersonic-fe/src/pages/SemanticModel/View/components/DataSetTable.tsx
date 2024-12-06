@@ -11,13 +11,14 @@ import styles from '../../components/style.less';
 import { ISemantic } from '../../data';
 import { ColumnsConfig } from '../../components/TableColumnRender';
 import ViewSearchFormModal from './ViewSearchFormModal';
+import { toDatasetEditPage } from '@/pages/SemanticModel/utils';
 
 type Props = {
-  dataSetList: ISemantic.IDatasetItem[];
+  // dataSetList: ISemantic.IDatasetItem[];
   disabledEdit?: boolean;
 };
 
-const DataSetTable: React.FC<Props> = ({ dataSetList, disabledEdit = false }) => {
+const DataSetTable: React.FC<Props> = ({ disabledEdit = false }) => {
   const domainModel = useModel('SemanticModel.domainData');
   const { selectDomainId } = domainModel;
 
@@ -43,14 +44,13 @@ const DataSetTable: React.FC<Props> = ({ dataSetList, disabledEdit = false }) =>
     }
   };
 
-  const [viewList, setViewList] = useState<ISemantic.IDatasetItem[]>(dataSetList);
+  const [viewList, setViewList] = useState<ISemantic.IDatasetItem[]>();
 
   useEffect(() => {
-    setViewList(dataSetList);
-  }, [dataSetList]);
-
-  useEffect(() => {
-    // queryDataSetList();
+    if (!selectDomainId) {
+      return;
+    }
+    queryDataSetList();
     queryDomainAllModel();
   }, [selectDomainId]);
 
@@ -91,9 +91,10 @@ const DataSetTable: React.FC<Props> = ({ dataSetList, disabledEdit = false }) =>
         return (
           <a
             onClick={() => {
-              setEditFormStep(1);
-              setViewItem(record);
-              setCreateDataSourceModalOpen(true);
+              toDatasetEditPage(record.domainId, record.id, 'relation');
+              // setEditFormStep(1);
+              // setViewItem(record);
+              // setCreateDataSourceModalOpen(true);
             }}
           >
             {name}
@@ -144,9 +145,10 @@ const DataSetTable: React.FC<Props> = ({ dataSetList, disabledEdit = false }) =>
             <a
               key="metricEditBtn"
               onClick={() => {
-                setEditFormStep(0);
-                setViewItem(record);
-                setCreateDataSourceModalOpen(true);
+                toDatasetEditPage(record.domainId, record.id);
+                // setEditFormStep(0);
+                // setViewItem(record);
+                // setCreateDataSourceModalOpen(true);
               }}
             >
               编辑

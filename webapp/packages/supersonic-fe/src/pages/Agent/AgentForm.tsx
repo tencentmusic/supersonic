@@ -8,6 +8,8 @@ import { uuid, jsonParse } from '@/utils/utils';
 import ToolsSection from './ToolsSection';
 import globalStyles from '@/global.less';
 import { QuestionCircleOutlined } from '@ant-design/icons';
+import SelectTMEPerson from '@/components/SelectTMEPerson';
+import FormItemTitle from '@/components/FormHelper/FormItemTitle';
 import { getLlmModelTypeList, getLlmModelAppList, getLlmList } from '../../services/system';
 import MemorySection from './MemorySection';
 
@@ -223,7 +225,16 @@ const AgentForm: React.FC<Props> = ({ editAgent, onSaveAgent, onCreateToolBtnCli
           >
             <Switch />
           </FormItem>
-
+          <FormItem
+            name="admins"
+            label="管理员"
+            // rules={[{ required: true, message: '请设定数据库连接管理者' }]}
+          >
+            <SelectTMEPerson placeholder="请邀请团队成员" />
+          </FormItem>
+          <FormItem tooltip="选择用户后，该助理只对所选用户可见" name="viewers" label="使用者">
+            <SelectTMEPerson placeholder="请邀请团队成员" />
+          </FormItem>
           <FormItem name="examples" label="示例问题">
             <div className={styles.paramsSection}>
               {examples.map((example) => {

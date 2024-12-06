@@ -37,6 +37,7 @@ const SelectTMEPerson: FC<Props> = ({ placeholder, value, isMultiple = true, onC
       mode={isMultiple ? 'multiple' : undefined}
       allowClear
       showSearch
+      className={styles.selectPerson}
       onChange={onChange}
     >
       {userList.map((item) => {

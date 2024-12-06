@@ -6,6 +6,7 @@
 
 
   .projectManger {
+    border-top: 1px solid #eee;
     width: 100%;
     min-height: calc(100vh - 56px);
     background-color: #fff;
@@ -163,8 +164,8 @@
     //   }
     // }
     .tab {
-      border-top: 1px solid #eee;
-      margin-top: 10px;
+
+      // margin-top: 10px;
       :global {
         .ant-tabs-tab-btn {
           font-size: 16px;
@@ -338,18 +339,28 @@
 
 .breadcrumb{
   font-size: 18px;
-  margin: 17px 0 0 20px;
-  padding-bottom: 3px;
+  height: 48px;
+  line-height: 48px;
+  padding: 0 20px;
   :global {
     .ant-breadcrumb-link {
       height: 28px;
       color: #709bf1;
+      cursor: pointer;
       &:hover{
         color: #296df3;
       }
     }
     .anticon {
       font-size: 18px;
+    }
+    li {
+      &:last-child {
+        .ant-breadcrumb-link {
+          color: #296df3;
+        }
+
+      }
     }
   }
 }
@@ -408,7 +419,7 @@
     .infoCardTitle {
       display: flex;
       border-bottom: 1px solid #e6ebf1;
-      padding: 20px 20px 20px 40px;
+      padding: 15px 20px;
       align-items: center;
       color: rgb(38, 38, 38);
       margin: 0px;

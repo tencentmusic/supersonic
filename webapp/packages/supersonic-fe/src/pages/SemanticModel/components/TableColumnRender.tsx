@@ -6,108 +6,124 @@ import { history } from '@umijs/max';
 import { ISemantic } from '../data';
 import { isString } from 'lodash';
 import dayjs from 'dayjs';
-import { isArrayOfValues } from '@/utils/utils';
+import { isArrayOfValues, replaceRouteParams } from '@/utils/utils';
 import styles from './style.less';
 import IndicatorStar, { StarType } from '../components/IndicatorStar';
 
+interface IndicatorInfo {
+  url?: string;
+  starType?: StarType;
+  onNameClick?: (record: ISemantic.IMetricItem | ISemantic.IDimensionItem) => void | boolean;
+}
+
+interface ColumnsConfigParams {
+  indicatorInfo?: IndicatorInfo;
+}
+
 const { Text, Paragraph } = Typography;
 
-export const ColumnsConfig: any = (params?: {
-  indicatorInfo?: {
-    url?: string;
-    starType?: StarType;
-  };
-}) => {
+export const ColumnsConfig = (params?: ColumnsConfigParams) => {
+  const renderAliasAndClassifications = (
+    alias: string | undefined,
+    classifications: string[] | undefined,
+  ) => (
+    <div style={{ marginTop: 8 }}>
+      <Space direction="vertical" size={4}>
+        {alias && (
+          <Space size={4} style={{ color: '#5f748d', fontSize: 12, margin: '5px 0 5px 0' }}>
+            <ReadOutlined />
+            <div style={{ width: 'max-content' }}>别名:</div>
+            <span style={{ marginLeft: 2 }}>
+              <Space size={[0, 8]} wrap>
+                {isString(alias) &&
+                  alias.split(',').map((aliasName: string) => (
+                    <Tag
+                      color="#eee"
+                      key={aliasName}
+                      style={{
+                        borderRadius: 44,
+                        maxWidth: 90,
+                        minWidth: 40,
+                        backgroundColor: 'rgba(18, 31, 67, 0.04)',
+                      }}
+                    >
+                      <Text
+                        style={{
+                          maxWidth: 80,
+                          color: 'rgb(95, 116, 141)',
+                          textAlign: 'center',
+                          fontSize: 12,
+                        }}
+                        ellipsis={{ tooltip: aliasName }}
+                      >
+                        {aliasName}
+                      </Text>
+                    </Tag>
+                  ))}
+              </Space>
+            </span>
+          </Space>
+        )}
+
+        {isArrayOfValues(classifications) && (
+          <Space size={4} style={{ color: '#5f748d', fontSize: 12, margin: '5px 0 5px 0' }}>
+            <TagsOutlined />
+            <div style={{ width: 'max-content' }}>分类:</div>
+            <span style={{ marginLeft: 2 }}>
+              <Space size={[0, 8]} wrap>
+                {classifications.map((tag: string) => (
+                  <Tag
+                    color="#eee"
+                    key={tag}
+                    style={{
+                      borderRadius: 44,
+                      maxWidth: 90,
+                      minWidth: 40,
+                      backgroundColor: 'rgba(18, 31, 67, 0.04)',
+                    }}
+                  >
+                    <Text
+                      style={{
+                        maxWidth: 80,
+                        color: 'rgb(95, 116, 141)',
+                        textAlign: 'center',
+                        fontSize: 12,
+                      }}
+                      ellipsis={{ tooltip: tag }}
+                    >
+                      {tag}
+                    </Text>
+                  </Tag>
+                ))}
+              </Space>
+            </span>
+          </Space>
+        )}
+      </Space>
+    </div>
+  );
+
   return {
     description: {
-      render: (_, record: ISemantic.IMetricItem) => {
-        const { description } = record;
-        return (
-          <Paragraph
-            ellipsis={{ tooltip: description, rows: 3 }}
-            style={{ width: 250, marginBottom: 0 }}
-          >
-            {description}
-          </Paragraph>
-        );
-      },
+      render: (_, record: ISemantic.IMetricItem) => (
+        <Paragraph
+          ellipsis={{ tooltip: record.description, rows: 3 }}
+          style={{ width: 250, marginBottom: 0 }}
+        >
+          {record.description}
+        </Paragraph>
+      ),
     },
     dimensionInfo: {
       render: (_, record: ISemantic.IDimensionItem) => {
-        const { name, alias, bizName } = record;
-        return (
-          <>
-            <div>
-              <Space>
-                <span style={{ fontWeight: 500 }}>{name}</span>
-              </Space>
-            </div>
-            <div style={{ color: '#5f748d', fontSize: 14, marginTop: 5, marginLeft: 0 }}>
-              {bizName}
-            </div>
-
-            {alias && (
-              <div style={{ marginTop: 8 }}>
-                <Space direction="vertical" size={4}>
-                  {alias && (
-                    <Space
-                      size={4}
-                      style={{ color: '#5f748d', fontSize: 12, margin: '5px 0 5px 0' }}
-                    >
-                      <ReadOutlined />
-                      <div style={{ width: 'max-content' }}>别名:</div>
-                      <span style={{ marginLeft: 2 }}>
-                        <Space size={[0, 8]} wrap>
-                          {isString(alias) &&
-                            alias.split(',').map((aliasName: string) => {
-                              return (
-                                <Tag
-                                  color="#eee"
-                                  key={aliasName}
-                                  style={{
-                                    borderRadius: 44,
-                                    maxWidth: 90,
-                                    minWidth: 40,
-                                    backgroundColor: 'rgba(18, 31, 67, 0.04)',
-                                  }}
-                                >
-                                  <Text
-                                    style={{
-                                      maxWidth: 80,
-                                      color: 'rgb(95, 116, 141)',
-                                      textAlign: 'center',
-                                      fontSize: 12,
-                                    }}
-                                    ellipsis={{ tooltip: aliasName }}
-                                  >
-                                    {aliasName}
-                                  </Text>
-                                </Tag>
-                              );
-                            })}
-                        </Space>
-                      </span>
-                    </Space>
-                  )}
-                </Space>
-              </div>
-            )}
-          </>
-        );
-      },
-    },
-    indicatorInfo: {
-      render: (_, record: ISemantic.IMetricItem) => {
-        const { name, alias, bizName, classifications, id, isCollect } = record;
-        let url = `/metric/detail/`;
-        let starType: StarType = 'metric';
-        if (params) {
-          if (params?.indicatorInfo?.url) {
-            url = params.indicatorInfo.url;
-          }
-          if (params?.indicatorInfo?.starType) {
-            starType = params.indicatorInfo.starType;
-          }
+        const { name, alias, bizName, id, domainId, modelId } = record;
+        let url = `/demension/detail/${id}`;
+        if (params?.indicatorInfo) {
+          url = replaceRouteParams(params.indicatorInfo.url || '', {
+            domainId: `${domainId}`,
+            modelId: `${modelId}`,
+            indicatorId: `${id}`,
+          });
         }
         return (
           <>
@@ -117,202 +133,119 @@ export const ColumnsConfig: any = (params?: {
                   className={styles.textLink}
                   style={{ fontWeight: 500 }}
                   onClick={(event: any) => {
-                    history.push(`${url}${id}`);
+                    if (params?.indicatorInfo?.onNameClick) {
+                      const state = params.indicatorInfo.onNameClick(record);
+                      if (state === false) {
+                        return;
+                      }
+                    }
+                    history.push(url);
                     event.preventDefault();
                     event.stopPropagation();
                   }}
-                  href={`/webapp${url}${id}`}
                 >
                   {name}
                 </a>
-                <IndicatorStar indicatorId={id} type={starType} initState={isCollect} />
-                {/* <Tag
-                color={SENSITIVE_LEVEL_COLOR[sensitiveLevel]}
-                style={{ lineHeight: '16px', position: 'relative', top: '-1px' }}
-              >
-                {SENSITIVE_LEVEL_ENUM[sensitiveLevel]}
-              </Tag> */}
+                {/* <span style={{ fontWeight: 500 }}>{name}</span> */}
               </Space>
             </div>
             <div style={{ color: '#5f748d', fontSize: 14, marginTop: 5, marginLeft: 0 }}>
               {bizName}
             </div>
+            {alias && renderAliasAndClassifications(alias, undefined)}
+          </>
+        );
+      },
+    },
+    indicatorInfo: {
+      render: (_, record: ISemantic.IMetricItem) => {
+        const { name, alias, bizName, classifications, id, isCollect, domainId, modelId } = record;
 
-            {(alias || isArrayOfValues(classifications)) && (
-              <div style={{ marginTop: 8 }}>
-                <Space direction="vertical" size={4}>
-                  {alias && (
-                    <Space
-                      size={4}
-                      style={{ color: '#5f748d', fontSize: 12, margin: '5px 0 5px 0' }}
-                    >
-                      <ReadOutlined />
-                      <div style={{ width: 'max-content' }}>别名:</div>
-                      <span style={{ marginLeft: 2 }}>
-                        <Space size={[0, 8]} wrap>
-                          {isString(alias) &&
-                            alias.split(',').map((aliasName: string) => {
-                              return (
-                                <Tag
-                                  color="#eee"
-                                  key={aliasName}
-                                  style={{
-                                    borderRadius: 44,
-                                    maxWidth: 90,
-                                    minWidth: 40,
-                                    backgroundColor: 'rgba(18, 31, 67, 0.04)',
-                                  }}
-                                >
-                                  <Text
-                                    style={{
-                                      maxWidth: 80,
-                                      color: 'rgb(95, 116, 141)',
-                                      textAlign: 'center',
-                                      fontSize: 12,
-                                    }}
-                                    ellipsis={{ tooltip: aliasName }}
-                                  >
-                                    {aliasName}
-                                  </Text>
-                                </Tag>
-                              );
-                            })}
-                        </Space>
-                      </span>
-                    </Space>
-                  )}
+        let url = `/metric/detail/${id}`;
+        let starType: StarType = 'metric';
+        if (params?.indicatorInfo) {
+          url = replaceRouteParams(params.indicatorInfo.url || '', {
+            domainId: `${domainId}`,
+            modelId: `${modelId}`,
+            indicatorId: `${id}`,
+          });
+          starType = params.indicatorInfo.starType || 'metric';
+        }
 
-                  {isArrayOfValues(classifications) && (
-                    <Space
-                      size={4}
-                      style={{ color: '#5f748d', fontSize: 12, margin: '5px 0 5px 0' }}
-                    >
-                      <TagsOutlined />
-                      <div style={{ width: 'max-content' }}>分类:</div>
-                      <span style={{ marginLeft: 2 }}>
-                        <Space size={[0, 8]} wrap>
-                          {classifications.map((tag: string) => {
-                            return (
-                              <Tag
-                                color="#eee"
-                                key={tag}
-                                style={{
-                                  borderRadius: 44,
-                                  maxWidth: 90,
-                                  minWidth: 40,
-                                  backgroundColor: 'rgba(18, 31, 67, 0.04)',
-                                }}
-                              >
-                                <Text
-                                  style={{
-                                    maxWidth: 80,
-                                    color: 'rgb(95, 116, 141)',
-                                    textAlign: 'center',
-                                    fontSize: 12,
-                                  }}
-                                  ellipsis={{ tooltip: tag }}
-                                >
-                                  {tag}
-                                </Text>
-                              </Tag>
-                            );
-                          })}
-                        </Space>
-                      </span>
-                    </Space>
-                  )}
-                  {/* <Space size={10}>
-        <Space
-          size={2}
-          style={{ color: '#5f748d', fontSize: 12, position: 'relative', top: '1px' }}
-        >
-          <FieldNumberOutlined style={{ fontSize: 16, position: 'relative', top: '1px' }} />
-          <span>:</span>
-          <span style={{ marginLeft: 0 }}>{id}</span>
-        </Space>
-        <Space size={2} style={{ color: '#5f748d', fontSize: 12 }}>
-          <UserOutlined />
-          <span>:</span>
-          <span style={{ marginLeft: 0 }}>{createdBy}</span>
-        </Space>
-      </Space> */}
-                </Space>
-              </div>
-            )}
+        return (
+          <>
+            <div>
+              <Space>
+                <a
+                  className={styles.textLink}
+                  style={{ fontWeight: 500 }}
+                  onClick={(event: any) => {
+                    if (params?.indicatorInfo?.onNameClick) {
+                      const state = params.indicatorInfo.onNameClick(record);
+                      if (state === false) {
+                        return;
+                      }
+                    }
+                    history.push(url);
+                    event.preventDefault();
+                    event.stopPropagation();
+                  }}
+                >
+                  {name}
+                </a>
+                <IndicatorStar indicatorId={id} type={starType} initState={isCollect} />
+              </Space>
+            </div>
+            <div style={{ color: '#5f748d', fontSize: 14, marginTop: 5, marginLeft: 0 }}>
+              {bizName}
+            </div>
+            {alias && renderAliasAndClassifications(alias, classifications)}
           </>
         );
       },
     },
     sensitiveLevel: {
-      render: (_, record: ISemantic.IMetricItem) => {
-        const { sensitiveLevel } = record;
-        return SENSITIVE_LEVEL_COLOR[sensitiveLevel] ? (
-          <Tag
-            color={SENSITIVE_LEVEL_COLOR[sensitiveLevel]}
-            style={{
-              borderRadius: '40px',
-              padding: '2px 16px',
-              fontSize: '13px',
-              // color: '#8ca3ba',
-            }}
-          >
-            {SENSITIVE_LEVEL_ENUM[sensitiveLevel]}
-          </Tag>
-        ) : (
-          <Tag
-            style={{
-              borderRadius: '40px',
-              padding: '2px 16px',
-              fontSize: '13px',
-            }}
-          >
-            未知
-          </Tag>
-        );
-      },
+      render: (_, record: ISemantic.IMetricItem) => (
+        <Tag
+          color={SENSITIVE_LEVEL_COLOR[record.sensitiveLevel] || 'default'}
+          style={{
+            borderRadius: '40px',
+            padding: '2px 16px',
+            fontSize: '13px',
+          }}
+        >
+          {SENSITIVE_LEVEL_ENUM[record.sensitiveLevel] || '未知'}
+        </Tag>
+      ),
     },
     state: {
       render: (status) => {
-        let tagProps: { color: string; label: string; style?: any } = {
+        const tagProps = {
           color: 'default',
           label: '未知',
           style: {},
         };
         switch (status) {
           case StatusEnum.ONLINE:
-            tagProps = {
-              // color: 'processing',
-              color: 'geekblue',
-              label: '已启用',
-            };
+            tagProps.color = 'geekblue';
+            tagProps.label = '已启用';
             break;
           case StatusEnum.OFFLINE:
-            tagProps = {
-              color: 'default',
-              label: '未启用',
-              style: {
-                color: 'rgb(95, 116, 141)',
-                fontWeight: 400,
-              },
-            };
+            tagProps.color = 'default';
+            tagProps.label = '未启用';
+            tagProps.style = { color: 'rgb(95, 116, 141)', fontWeight: 400 };
             break;
           case StatusEnum.INITIALIZED:
-            tagProps = {
-              color: 'processing',
-              label: '初始化',
-            };
+            tagProps.color = 'processing';
+            tagProps.label = '初始化';
             break;
           case StatusEnum.DELETED:
-            tagProps = {
-              color: 'default',
-              label: '已删除',
-            };
+            tagProps.color = 'default';
+            tagProps.label = '已删除';
             break;
           case StatusEnum.UNAVAILABLE:
-            tagProps = {
-              color: 'default',
-              label: '不可用',
-            };
+            tagProps.color = 'default';
+            tagProps.label = '不可用';
             break;
           default:
             break;
@@ -339,14 +272,12 @@ export const ColumnsConfig: any = (params?: {
       tooltip: '创建人/更新时间',
       width: 180,
       search: false,
-      render: (value: any, record: ISemantic.IMetricItem) => {
-        return (
-          <Space direction="vertical">
-            <span> {record.createdBy}</span>
-            <span>{value && value !== '-' ? dayjs(value).format('YYYY-MM-DD HH:mm:ss') : '-'}</span>
-          </Space>
-        );
-      },
+      render: (value: any, record: ISemantic.IMetricItem) => (
+        <Space direction="vertical">
+          <span> {record.createdBy}</span>
+          <span>{value && value !== '-' ? dayjs(value).format('YYYY-MM-DD HH:mm:ss') : '-'}</span>
+        </Space>
+      ),
     },
   };
 };

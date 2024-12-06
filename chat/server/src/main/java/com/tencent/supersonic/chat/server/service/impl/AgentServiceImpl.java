@@ -1,7 +1,5 @@
 package com.tencent.supersonic.chat.server.service.impl;
 
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.chat.api.pojo.request.ChatMemoryFilter;
@@ -17,11 +15,10 @@ import com.tencent.supersonic.chat.server.service.MemoryService;
 import com.tencent.supersonic.common.config.ChatModel;
 import com.tencent.supersonic.common.pojo.ChatApp;
 import com.tencent.supersonic.common.pojo.User;
+import com.tencent.supersonic.common.pojo.enums.AuthType;
 import com.tencent.supersonic.common.service.ChatModelService;
 import com.tencent.supersonic.common.util.JsonUtil;
-import com.tencent.supersonic.headless.server.service.DataSetService;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -48,39 +45,27 @@ public class AgentServiceImpl extends ServiceImpl<AgentDOMapper, AgentDO> implem
     @Autowired
     private ChatModelService chatModelService;
 
-    @Autowired
-    private DataSetService dataSetService;
-
     private ExecutorService executorService = Executors.newFixedThreadPool(1);
 
     @Override
-    public List<Agent> getAgents(User user) {
-        List<Agent> agentList = getAgentDOList().stream().map(this::convert).collect(Collectors.toList());
-        if (user.isSuperAdmin()) {
-            return agentList;
-        }
-        List<Long> authorizedDataSetIds = dataSetService.getDataSetsInheritAuth(user);
-        return agentList.stream().filter(agent -> hasAuthorizedDataSet(agent, authorizedDataSetIds, user)).collect(Collectors.toList());
+    public List<Agent> getAgents(User user, AuthType authType) {
+        return getAgentDOList().stream().map(this::convert)
+                .filter(agent -> filterByAuth(agent, user, authType)).collect(Collectors.toList());
     }
 
-    private boolean hasAuthorizedDataSet(Agent agent, List<Long> authorizedDataSetIds,User user) {
-        if (agent.getCreatedBy().contains(user.getName())) {
+    private boolean filterByAuth(Agent agent, User user, AuthType authType) {
+        if (user.isSuperAdmin() || user.getName().equals(agent.getCreatedBy())) {
             return true;
         }
-        String toolConfig = agent.getToolConfig();
-        if (StringUtils.isBlank(toolConfig)) {
-            return false;
+        authType = authType == null ? AuthType.VIEWER : authType;
+        switch (authType) {
+            case ADMIN:
+                return agent.contains(user, Agent::getAdmins);
+            case VIEWER:
+            default:
+                return agent.contains(user, Agent::getAdmins)
+                        || agent.contains(user, Agent::getViewers);
         }
-        JSONArray tools = JSONObject.parseObject(toolConfig).getJSONArray("tools");
-        if (tools == null) {
-            return false;
-        }
-        return tools.stream()
-                .map(tool -> ((JSONObject) tool).getJSONArray("dataSetIds"))
-                .filter(Objects::nonNull)
-                .flatMap(Collection::stream)
-                .mapToLong(id -> ((Number) id).longValue())
-                .anyMatch(authorizedDataSetIds::contains);
     }
 
     @Override
@@ -180,6 +165,8 @@ public class AgentServiceImpl extends ServiceImpl<AgentDOMapper, AgentDO> implem
                 c.setChatModelConfig(chatModelService.getChatModel(c.getChatModelId()).getConfig());
             }
         });
+        agent.setAdmins(JsonUtil.toList(agentDO.getAdmin(), String.class));
+        agent.setViewers(JsonUtil.toList(agentDO.getViewer(), String.class));
         return agent;
     }
 
@@ -190,6 +177,8 @@ public class AgentServiceImpl extends ServiceImpl<AgentDOMapper, AgentDO> implem
         agentDO.setExamples(JsonUtil.toString(agent.getExamples()));
         agentDO.setChatModelConfig(JsonUtil.toString(agent.getChatAppConfig()));
         agentDO.setVisualConfig(JsonUtil.toString(agent.getVisualConfig()));
+        agentDO.setAdmin(JsonUtil.toString(agent.getAdmins()));
+        agentDO.setViewer(JsonUtil.toString(agent.getViewers()));
         if (agentDO.getStatus() == null) {
             agentDO.setStatus(1);
         }

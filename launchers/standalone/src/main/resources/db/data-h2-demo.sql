@@ -1,10 +1,10 @@
 -------S2VisitsDemo
-insert INTO s2_user_department (user_name, department) values ('jack','HR');
-insert INTO s2_user_department (user_name, department) values ('tom','sales');
-insert INTO s2_user_department (user_name, department) values ('lucy','marketing');
-insert INTO s2_user_department (user_name, department) values ('john','strategy');
-insert INTO s2_user_department (user_name, department) values ('alice','sales');
-insert INTO s2_user_department (user_name, department) values ('dean','marketing');
+MERGE INTO s2_user_department (user_name, department) values ('jack','HR');
+MERGE INTO s2_user_department (user_name, department) values ('tom','sales');
+MERGE INTO s2_user_department (user_name, department) values ('lucy','marketing');
+MERGE INTO s2_user_department (user_name, department) values ('john','strategy');
+MERGE INTO s2_user_department (user_name, department) values ('alice','sales');
+MERGE INTO s2_user_department (user_name, department) values ('dean','marketing');
 
 INSERT INTO s2_pv_uv_statis (imp_date, user_name, page) VALUES (CURRENT_DATE(), 'lucy', 'p1');
 INSERT INTO s2_pv_uv_statis (imp_date, user_name, page) VALUES (CURRENT_DATE(), 'jack', 'p1');
@@ -1021,66 +1021,55 @@ INSERT INTO s2_stay_time_statis (imp_date, user_name, stay_hours, page) VALUES (
 
 
 -------S2ArtistDemo
-insert INTO singer (singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES ('周杰伦', '港台','青花瓷','国风',1000000,1000000,1000000);
-insert INTO singer (singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES ('陈奕迅', '港台','爱情转移','流行',1000000,1000000,1000000);
-insert INTO singer (singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES ('林俊杰', '港台','美人鱼','流行',1000000,1000000,1000000);
-insert INTO singer (singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES ('张碧晨', '内地','光的方向','流行',1000000,1000000,1000000);
-insert INTO singer (singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES ('程响', '内地','人间烟火','国风',1000000,1000000,1000000);
-insert INTO singer (singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES ('Taylor Swift', '欧美','Love Story','流行',1000000,1000000,1000000);
+MERGE INTO singer (singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES ('周杰伦', '港台','青花瓷','国风',1000000,1000000,1000000);
+MERGE INTO singer (singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES ('陈奕迅', '港台','爱情转移','流行',1000000,1000000,1000000);
+MERGE INTO singer (singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES ('林俊杰', '港台','美人鱼','流行',1000000,1000000,1000000);
+MERGE INTO singer (singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES ('张碧晨', '内地','光的方向','流行',1000000,1000000,1000000);
+MERGE INTO singer (singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES ('程响', '内地','人间烟火','国风',1000000,1000000,1000000);
+MERGE INTO singer (singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES ('Taylor Swift', '欧美','Love Story','流行',1000000,1000000,1000000);
 
-insert INTO genre(g_name,rating,most_popular_in) VALUES ('tagore',8,'孟加拉国');
-insert INTO genre(g_name,rating,most_popular_in) VALUES ('nazrul',7,'孟加拉国');
-insert INTO genre(g_name,rating,most_popular_in) VALUES ('民间',9,'锡尔赫特、吉大港、库斯蒂亚');
-insert INTO genre(g_name,rating,most_popular_in) VALUES ('现代',8,'孟加拉国');
-insert INTO genre(g_name,rating,most_popular_in) VALUES ('蓝调',7,'加拿大');
-insert INTO genre(g_name,rating,most_popular_in) VALUES ('流行',9,'美国');
-
-insert INTO artist(artist_name,citizenship,gender,g_name) VALUES ('Shrikanta','印度','男性','tagore');
-insert INTO artist(artist_name,citizenship,gender,g_name) VALUES ('Prity','孟加拉国','女性','nazrul');
-insert INTO artist(artist_name,citizenship,gender,g_name) VALUES ('Farida','孟加拉国','女性','民间');
-insert INTO artist(artist_name,citizenship,gender,g_name) VALUES ('Topu','印度','女性','现代');
-insert INTO artist(artist_name,citizenship,gender,g_name) VALUES ('Enrique','美国','男性','蓝调');
-insert INTO artist(artist_name,citizenship,gender,g_name) VALUES ('Michel','英国','男性','流行');
-
+MERGE INTO genre(g_name,rating,most_popular_in) VALUES ('tagore',8,'孟加拉国');
+MERGE INTO genre(g_name,rating,most_popular_in) VALUES ('nazrul',7,'孟加拉国');
+MERGE INTO genre(g_name,rating,most_popular_in) VALUES ('民间',9,'锡尔赫特、吉大港、库斯蒂亚');
+MERGE INTO genre(g_name,rating,most_popular_in) VALUES ('现代',8,'孟加拉国');
+MERGE INTO genre(g_name,rating,most_popular_in) VALUES ('蓝调',7,'加拿大');
+MERGE INTO genre(g_name,rating,most_popular_in) VALUES ('流行',9,'美国');
 
 -------S2CompanyDemo
-insert into company(imp_date,company_id,company_name,headquarter_address,company_established_time,founder,ceo,annual_turnover,employee_count) VALUES (DATEADD('DAY', -1, CURRENT_DATE()),'item_enterprise_13_131','微软','西雅图','1975','盖茨','纳德拉',102300000000,40000);
-insert into company(imp_date,company_id,company_name,headquarter_address,company_established_time,founder,ceo,annual_turnover,employee_count) VALUES (DATEADD('DAY', -1, CURRENT_DATE()),'item_enterprise_13_132','特斯拉','加州','2003','艾伯哈德','马斯克',376800000000,103699);
-insert into company(imp_date,company_id,company_name,headquarter_address,company_established_time,founder,ceo,annual_turnover,employee_count) VALUES (DATEADD('DAY', -1, CURRENT_DATE()),'item_enterprise_13_133','谷歌','加州','1998','拉里佩奇','劈柴',321600000000,56310);
-insert into company(imp_date,company_id,company_name,headquarter_address,company_established_time,founder,ceo,annual_turnover,employee_count) VALUES (DATEADD('DAY', -1, CURRENT_DATE()),'item_enterprise_13_134','亚马逊','加州','1994','贝索斯','贝索斯',28800000000,179000);
-insert into company(imp_date,company_id,company_name,headquarter_address,company_established_time,founder,ceo,annual_turnover,employee_count) VALUES (DATEADD('DAY', -1, CURRENT_DATE()),'item_enterprise_13_135','英伟达','杭州','1993','黄仁勋','黄仁勋',67500000000,20000);
+MERGE into company(company_id,company_name,headquarter_address,company_established_time,founder,ceo,annual_turnover,employee_count) VALUES ('item_enterprise_13_131','微软','西雅图','1975','盖茨','纳德拉',102300000000,210000);
+MERGE into company(company_id,company_name,headquarter_address,company_established_time,founder,ceo,annual_turnover,employee_count) VALUES ('item_enterprise_13_132','特斯拉','加州','2003','艾伯哈德','马斯克',376800000000,140473);
+MERGE into company(company_id,company_name,headquarter_address,company_established_time,founder,ceo,annual_turnover,employee_count) VALUES ('item_enterprise_13_133','谷歌','加州','1998','拉里佩奇','劈柴',321600000000,182503);
+MERGE into company(company_id,company_name,headquarter_address,company_established_time,founder,ceo,annual_turnover,employee_count) VALUES ('item_enterprise_13_134','亚马逊','加州','1994','贝索斯','贝索斯',28800000000,950000);
+MERGE into company(company_id,company_name,headquarter_address,company_established_time,founder,ceo,annual_turnover,employee_count) VALUES ('item_enterprise_13_135','英伟达','杭州','1993','黄仁勋','黄仁勋',67500000000,29000);
 
-insert into brand(imp_date,brand_id,brand_name,brand_established_time,company_id,legal_representative,registered_capital) VALUES (DATEADD('DAY', -1, CURRENT_DATE()),'item_brand_13_131','Office','1990','item_enterprise_13_131','盖茨',50000000);
-insert into brand(imp_date,brand_id,brand_name,brand_established_time,company_id,legal_representative,registered_capital) VALUES (DATEADD('DAY', -1, CURRENT_DATE()),'item_brand_13_132','Windows','1991','item_enterprise_13_131','盖茨',50000000);
-insert into brand(imp_date,brand_id,brand_name,brand_established_time,company_id,legal_representative,registered_capital) VALUES (DATEADD('DAY', -1, CURRENT_DATE()),'item_brand_13_133','Model 3','2017','item_enterprise_13_132','马斯克',100000000);
-insert into brand(imp_date,brand_id,brand_name,brand_established_time,company_id,legal_representative,registered_capital) VALUES (DATEADD('DAY', -1, CURRENT_DATE()),'item_brand_13_134','Model Y','2020','item_enterprise_13_132','马斯克',100000000);
-insert into brand(imp_date,brand_id,brand_name,brand_established_time,company_id,legal_representative,registered_capital) VALUES (DATEADD('DAY', -1, CURRENT_DATE()),'item_brand_13_135','Google','2003','item_enterprise_13_133','拉里佩奇',50000000);
-insert into brand(imp_date,brand_id,brand_name,brand_established_time,company_id,legal_representative,registered_capital) VALUES (DATEADD('DAY', -1, CURRENT_DATE()),'item_brand_13_136','Android','2007','item_enterprise_13_133','拉里佩奇',50000000);
-insert into brand(imp_date,brand_id,brand_name,brand_established_time,company_id,legal_representative,registered_capital) VALUES (DATEADD('DAY', -1, CURRENT_DATE()),'item_brand_13_137','AWS','2004','item_enterprise_13_134','贝索斯',100000000);
-insert into brand(imp_date,brand_id,brand_name,brand_established_time,company_id,legal_representative,registered_capital) VALUES (DATEADD('DAY', -1, CURRENT_DATE()),'item_brand_13_138','Kindle','2007','item_enterprise_13_134','贝索斯',100000000);
-insert into brand(imp_date,brand_id,brand_name,brand_established_time,company_id,legal_representative,registered_capital) VALUES (DATEADD('DAY', -1, CURRENT_DATE()),'item_brand_13_139','H100','2022','item_enterprise_13_135','黄仁勋',100000000);
-insert into brand(imp_date,brand_id,brand_name,brand_established_time,company_id,legal_representative,registered_capital) VALUES (DATEADD('DAY', -1, CURRENT_DATE()),'item_brand_13_140','A100','2021','item_enterprise_13_135','黄仁勋',100000000);
+MERGE into brand(brand_id,brand_name,brand_established_time,company_id,legal_representative,registered_capital) VALUES ('item_brand_13_131','Office','1990','item_enterprise_13_131','盖茨',50000000);
+MERGE into brand(brand_id,brand_name,brand_established_time,company_id,legal_representative,registered_capital) VALUES ('item_brand_13_132','Windows','1991','item_enterprise_13_131','盖茨',50000000);
+MERGE into brand(brand_id,brand_name,brand_established_time,company_id,legal_representative,registered_capital) VALUES ('item_brand_13_133','Model 3','2017','item_enterprise_13_132','马斯克',100000000);
+MERGE into brand(brand_id,brand_name,brand_established_time,company_id,legal_representative,registered_capital) VALUES ('item_brand_13_134','Model Y','2020','item_enterprise_13_132','马斯克',100000000);
+MERGE into brand(brand_id,brand_name,brand_established_time,company_id,legal_representative,registered_capital) VALUES ('item_brand_13_135','Google','2003','item_enterprise_13_133','拉里佩奇',50000000);
+MERGE into brand(brand_id,brand_name,brand_established_time,company_id,legal_representative,registered_capital) VALUES ('item_brand_13_136','Android','2007','item_enterprise_13_133','拉里佩奇',50000000);
+MERGE into brand(brand_id,brand_name,brand_established_time,company_id,legal_representative,registered_capital) VALUES ('item_brand_13_137','aws','2004','item_enterprise_13_134','贝索斯',100000000);
+MERGE into brand(brand_id,brand_name,brand_established_time,company_id,legal_representative,registered_capital) VALUES ('item_brand_13_138','kindle','2007','item_enterprise_13_134','贝索斯',100000000);
+MERGE into brand(brand_id,brand_name,brand_established_time,company_id,legal_representative,registered_capital) VALUES ('item_brand_13_139','H100','2022','item_enterprise_13_135','黄仁勋',100000000);
+MERGE into brand(brand_id,brand_name,brand_established_time,company_id,legal_representative,registered_capital) VALUES ('item_brand_13_140','A100','2021','item_enterprise_13_135','黄仁勋',100000000);
 
-insert into company_revenue(imp_date,company_id,brand_id,revenue_proportion,profit_proportion,expenditure_proportion) VALUES ( DATEADD('DAY', -1, CURRENT_DATE()),'item_enterprise_13_131','item_brand_13_131',10,10,30);
-insert into company_revenue(imp_date,company_id,brand_id,revenue_proportion,profit_proportion,expenditure_proportion) VALUES ( DATEADD('DAY', -1, CURRENT_DATE()),'item_enterprise_13_131','item_brand_13_132',10,10,30);
-insert into company_revenue(imp_date,company_id,brand_id,revenue_proportion,profit_proportion,expenditure_proportion) VALUES ( DATEADD('DAY', -1, CURRENT_DATE()),'item_enterprise_13_132','item_brand_13_133',80,80,60);
-insert into company_revenue(imp_date,company_id,brand_id,revenue_proportion,profit_proportion,expenditure_proportion) VALUES ( DATEADD('DAY', -1, CURRENT_DATE()),'item_enterprise_13_132','item_brand_13_134',80,80,60);
-insert into company_revenue(imp_date,company_id,brand_id,revenue_proportion,profit_proportion,expenditure_proportion) VALUES ( DATEADD('DAY', -1, CURRENT_DATE()),'item_enterprise_13_133','item_brand_13_135',80,80,60);
-insert into company_revenue(imp_date,company_id,brand_id,revenue_proportion,profit_proportion,expenditure_proportion) VALUES ( DATEADD('DAY', -1, CURRENT_DATE()),'item_enterprise_13_133','item_brand_13_136',80,80,60);
-insert into company_revenue(imp_date,company_id,brand_id,revenue_proportion,profit_proportion,expenditure_proportion) VALUES ( DATEADD('DAY', -1, CURRENT_DATE()),'item_enterprise_13_134','item_brand_13_137',80,80,60);
-insert into company_revenue(imp_date,company_id,brand_id,revenue_proportion,profit_proportion,expenditure_proportion) VALUES ( DATEADD('DAY', -1, CURRENT_DATE()),'item_enterprise_13_134','item_brand_13_138',80,80,60);
-insert into company_revenue(imp_date,company_id,brand_id,revenue_proportion,profit_proportion,expenditure_proportion) VALUES ( DATEADD('DAY', -1, CURRENT_DATE()),'item_enterprise_13_135','item_brand_13_139',10,10,30);
-insert into company_revenue(imp_date,company_id,brand_id,revenue_proportion,profit_proportion,expenditure_proportion) VALUES ( DATEADD('DAY', -1, CURRENT_DATE()),'item_enterprise_13_135','item_brand_13_140',10,10,30);
-
-insert into company_brand_revenue(imp_date,year_time,brand_id,revenue,profit,revenue_growth_year_on_year,profit_growth_year_on_year) VALUES (DATEADD('DAY', -1, CURRENT_DATE()), '2024','item_brand_13_131',500000000, 300000000,10,10);
-insert into company_brand_revenue(imp_date,year_time,brand_id,revenue,profit,revenue_growth_year_on_year,profit_growth_year_on_year) VALUES (DATEADD('DAY', -1, CURRENT_DATE()), '2024','item_brand_13_132',600000000, 300000000,20,20);
-insert into company_brand_revenue(imp_date,year_time,brand_id,revenue,profit,revenue_growth_year_on_year,profit_growth_year_on_year) VALUES (DATEADD('DAY', -1, CURRENT_DATE()), '2024','item_brand_13_133',700000000, 300000000,30,30);
-insert into company_brand_revenue(imp_date,year_time,brand_id,revenue,profit,revenue_growth_year_on_year,profit_growth_year_on_year) VALUES (DATEADD('DAY', -1, CURRENT_DATE()), '2024','item_brand_13_134',500000000, 300000000,10,10);
-insert into company_brand_revenue(imp_date,year_time,brand_id,revenue,profit,revenue_growth_year_on_year,profit_growth_year_on_year) VALUES (DATEADD('DAY', -1, CURRENT_DATE()), '2024','item_brand_13_135',600000000, 300000000,30,30);
-insert into company_brand_revenue(imp_date,year_time,brand_id,revenue,profit,revenue_growth_year_on_year,profit_growth_year_on_year) VALUES (DATEADD('DAY', -1, CURRENT_DATE()), '2024','item_brand_13_136',700000000, 300000000,40,40);
-insert into company_brand_revenue(imp_date,year_time,brand_id,revenue,profit,revenue_growth_year_on_year,profit_growth_year_on_year) VALUES (DATEADD('DAY', -1, CURRENT_DATE()), '2024','item_brand_13_137',800000000, 300000000,50,50);
-insert into company_brand_revenue(imp_date,year_time,brand_id,revenue,profit,revenue_growth_year_on_year,profit_growth_year_on_year) VALUES (DATEADD('DAY', -1, CURRENT_DATE()), '2024','item_brand_13_138',400000000, 300000000,20,10);
-insert into company_brand_revenue(imp_date,year_time,brand_id,revenue,profit,revenue_growth_year_on_year,profit_growth_year_on_year) VALUES (DATEADD('DAY', -1, CURRENT_DATE()), '2024','item_brand_13_139',300000000, 300000000,60,70);
-insert into company_brand_revenue(imp_date,year_time,brand_id,revenue,profit,revenue_growth_year_on_year,profit_growth_year_on_year) VALUES (DATEADD('DAY', -1, CURRENT_DATE()), '2024','item_brand_13_140',900000000, 300000000,80,100);
-
-
+insert into brand_revenue(year_time,brand_id,revenue,profit,revenue_growth_year_on_year,profit_growth_year_on_year) VALUES ('2023','item_brand_13_131',12100000000, 2100000000,10,10);
+insert into brand_revenue(year_time,brand_id,revenue,profit,revenue_growth_year_on_year,profit_growth_year_on_year) VALUES ('2023','item_brand_13_132',12200000000, 2200000000,20,20);
+insert into brand_revenue(year_time,brand_id,revenue,profit,revenue_growth_year_on_year,profit_growth_year_on_year) VALUES ('2023','item_brand_13_133',12300000000, 2300000000,30,30);
+insert into brand_revenue(year_time,brand_id,revenue,profit,revenue_growth_year_on_year,profit_growth_year_on_year) VALUES ('2023','item_brand_13_134',12400000000, 2400000000,10,10);
+insert into brand_revenue(year_time,brand_id,revenue,profit,revenue_growth_year_on_year,profit_growth_year_on_year) VALUES ('2023','item_brand_13_135',12500000000, 2500000000,30,30);
+insert into brand_revenue(year_time,brand_id,revenue,profit,revenue_growth_year_on_year,profit_growth_year_on_year) VALUES ('2023','item_brand_13_136',12600000000, 2600000000,40,40);
+insert into brand_revenue(year_time,brand_id,revenue,profit,revenue_growth_year_on_year,profit_growth_year_on_year) VALUES ('2023','item_brand_13_137',12700000000, 2700000000,50,50);
+insert into brand_revenue(year_time,brand_id,revenue,profit,revenue_growth_year_on_year,profit_growth_year_on_year) VALUES ('2023','item_brand_13_138',12800000000, 2800000000,20,10);
+insert into brand_revenue(year_time,brand_id,revenue,profit,revenue_growth_year_on_year,profit_growth_year_on_year) VALUES ('2023','item_brand_13_139',12900000000, 2900000000,60,70);
+insert into brand_revenue(year_time,brand_id,revenue,profit,revenue_growth_year_on_year,profit_growth_year_on_year) VALUES ('2023','item_brand_13_140',13000000000, 3000000000,80,100);
+insert into brand_revenue(year_time,brand_id,revenue,profit,revenue_growth_year_on_year,profit_growth_year_on_year) VALUES ('2024','item_brand_13_131',13100000000,3100000000, 10,10);
+insert into brand_revenue(year_time,brand_id,revenue,profit,revenue_growth_year_on_year,profit_growth_year_on_year) VALUES ('2024','item_brand_13_132',13200000000, 3200000000,20,20);
+insert into brand_revenue(year_time,brand_id,revenue,profit,revenue_growth_year_on_year,profit_growth_year_on_year) VALUES ('2024','item_brand_13_133',13300000000, 3300000000,30,30);
+insert into brand_revenue(year_time,brand_id,revenue,profit,revenue_growth_year_on_year,profit_growth_year_on_year) VALUES ('2024','item_brand_13_134',13400000000, 3400000000,10,10);
+insert into brand_revenue(year_time,brand_id,revenue,profit,revenue_growth_year_on_year,profit_growth_year_on_year) VALUES ('2024','item_brand_13_135',13500000000, 3500000000,30,30);
+insert into brand_revenue(year_time,brand_id,revenue,profit,revenue_growth_year_on_year,profit_growth_year_on_year) VALUES ('2024','item_brand_13_136',13600000000, 3600000000,40,40);
+insert into brand_revenue(year_time,brand_id,revenue,profit,revenue_growth_year_on_year,profit_growth_year_on_year) VALUES ('2024','item_brand_13_137',13700000000, 3700000000,50,50);
+insert into brand_revenue(year_time,brand_id,revenue,profit,revenue_growth_year_on_year,profit_growth_year_on_year) VALUES ('2024','item_brand_13_138',13800000000, 3800000000,20,10);
+insert into brand_revenue(year_time,brand_id,revenue,profit,revenue_growth_year_on_year,profit_growth_year_on_year) VALUES ('2024','item_brand_13_139',13900000000, 3900000000,60,70);
+insert into brand_revenue(year_time,brand_id,revenue,profit,revenue_growth_year_on_year,profit_growth_year_on_year) VALUES ('2024','item_brand_13_140',14000000000, 4000000000,80,100);

@@ -38,7 +38,7 @@ public class JdbcExecutor implements QueryExecutor {
         SqlUtils sqlUtils = ContextUtils.getBean(SqlUtils.class);
         String sql = StringUtils.normalizeSpace(queryStatement.getSql());
         log.info("executing SQL: {}", sql);
-        Database database = queryStatement.getSemanticModel().getDatabase();
+        Database database = queryStatement.getOntology().getDatabase();
         SemanticQueryResp queryResultWithColumns = new SemanticQueryResp();
         try {
             SqlUtils sqlUtil = sqlUtils.init(database);

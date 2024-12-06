@@ -117,8 +117,12 @@ public class MetricRatioCalcProcessor implements ExecuteResultProcessor {
 
             CompletableFuture.allOf(metricInfoRoll, metricInfoOver).join();
 
-            metricInfo.setName(metricInfoRoll.get().getName());
-            metricInfo.setValue(metricInfoRoll.get().getValue());
+            if (metricInfoRoll.get().getName() != null) {
+                metricInfo.setName(metricInfoRoll.get().getName());
+            }
+            if (metricInfoOver.get().getValue() != null) {
+                metricInfo.setValue(metricInfoRoll.get().getValue());
+            }
             metricInfo.getStatistics().putAll(metricInfoRoll.get().getStatistics());
             metricInfo.getStatistics().putAll(metricInfoOver.get().getStatistics());
 

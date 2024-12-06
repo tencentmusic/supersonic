@@ -394,3 +394,11 @@ ALTER TABLE s2_agent DROP COLUMN  `enable_memory_review`;
 
 --20241012
 alter table s2_agent add column `enable_feedback` tinyint DEFAULT 1;
+
+--20241116
+alter table s2_agent add column `admin` varchar(1000) COLLATE utf8_unicode_ci DEFAULT NULL;
+alter table s2_agent add column `viewer` varchar(1000) COLLATE utf8_unicode_ci DEFAULT NULL;
+
+--20241201
+ALTER TABLE s2_query_stat_info RENAME COLUMN `user` TO `query_user`;
+ALTER TABLE s2_chat_context RENAME COLUMN `user` TO `query_user`;

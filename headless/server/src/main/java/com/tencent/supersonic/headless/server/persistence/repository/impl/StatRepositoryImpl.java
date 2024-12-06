@@ -6,11 +6,13 @@ import com.tencent.supersonic.common.pojo.enums.TypeEnums;
 import com.tencent.supersonic.headless.api.pojo.QueryStat;
 import com.tencent.supersonic.headless.api.pojo.request.ItemUseReq;
 import com.tencent.supersonic.headless.api.pojo.response.ItemUseResp;
+import com.tencent.supersonic.headless.server.persistence.dataobject.QueryStatDO;
 import com.tencent.supersonic.headless.server.persistence.mapper.StatMapper;
 import com.tencent.supersonic.headless.server.persistence.repository.StatRepository;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
@@ -36,7 +38,9 @@ public class StatRepositoryImpl implements StatRepository {
 
     @Override
     public Boolean createRecord(QueryStat queryStatInfo) {
-        return statMapper.createRecord(queryStatInfo);
+        QueryStatDO queryStatDO = new QueryStatDO();
+        BeanUtils.copyProperties(queryStatInfo, queryStatDO);
+        return statMapper.insertOrUpdate(queryStatDO);
     }
 
     @Override
@@ -66,11 +70,6 @@ public class StatRepositoryImpl implements StatRepository {
                 .collect(Collectors.toList());
     }
 
-    @Override
-    public List<QueryStat> getQueryStatInfoWithoutCache(ItemUseReq itemUseCommend) {
-        return statMapper.getStatInfo(itemUseCommend);
-    }
-
     private void updateStatMapInfo(Map<String, Long> map, String dimensions, String type,
             Long dataSetId) {
         if (StringUtils.isNotEmpty(dimensions)) {
@@ -92,14 +91,4 @@ public class StatRepositoryImpl implements StatRepository {
         }
     }
 
-    private void updateStatMapInfo(Map<String, Long> map, Long modelId, String type) {
-        if (Objects.nonNull(modelId)) {
-            String key = type + AT_SYMBOL + AT_SYMBOL + modelId;
-            if (map.containsKey(key)) {
-                map.put(key, map.get(key) + 1);
-            } else {
-                map.put(key, 1L);
-            }
-        }
-    }
 }

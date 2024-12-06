@@ -30,11 +30,10 @@ public abstract class BaseSemanticCorrector implements SemanticCorrector {
 
     public void correct(ChatQueryContext chatQueryContext, SemanticParseInfo semanticParseInfo) {
         try {
-            String s2SQL = semanticParseInfo.getSqlInfo().getParsedS2SQL();
+            String s2SQL = semanticParseInfo.getSqlInfo().getCorrectedS2SQL();
             if (Objects.isNull(s2SQL)) {
                 return;
             }
-            semanticParseInfo.getSqlInfo().setCorrectedS2SQL(s2SQL);
             doCorrect(chatQueryContext, semanticParseInfo);
             log.debug("sqlCorrection:{} sql:{}", this.getClass().getSimpleName(),
                     semanticParseInfo.getSqlInfo());

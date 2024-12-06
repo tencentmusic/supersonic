@@ -21,6 +21,7 @@ import TableHeaderFilter from '@/components/TableHeaderFilter';
 import styles from './style.less';
 import { ISemantic } from '../data';
 import { ColumnsConfig } from './TableColumnRender';
+import { toMetricEditPage } from '@/pages/SemanticModel/utils';
 
 type Props = {
   onEmptyMetricData?: () => void;
@@ -32,7 +33,7 @@ const ClassMetricTable: React.FC<Props> = ({ onEmptyMetricData }) => {
   const metricModel = useModel('SemanticModel.metricData');
   const { selectDomainId } = domainModel;
   const { selectModelId: modelId } = modelModel;
-  const { MrefreshMetricList } = metricModel;
+  const { MrefreshMetricList, setSelectMetric } = metricModel;
   const [batchSensitiveLevelOpenState, setBatchSensitiveLevelOpenState] = useState<boolean>(false);
   const [createModalVisible, setCreateModalVisible] = useState<boolean>(false);
   const [metricItem, setMetricItem] = useState<ISemantic.IMetricItem>();
@@ -142,7 +143,14 @@ const ClassMetricTable: React.FC<Props> = ({ onEmptyMetricData }) => {
     }
   };
 
-  const columnsConfig = ColumnsConfig({ indicatorInfo: { url: '/model/metric/edit/' } });
+  const columnsConfig = ColumnsConfig({
+    indicatorInfo: {
+      url: '/model/metric/:domainId/:modelId/:indicatorId',
+      onNameClick: (record) => {
+        setSelectMetric(record as ISemantic.IMetricItem);
+      },
+    },
+  });
 
   const columns: ProColumns[] = [
     {
@@ -177,7 +185,7 @@ const ClassMetricTable: React.FC<Props> = ({ onEmptyMetricData }) => {
     {
       dataIndex: 'isTag',
       title: '是否标签',
-      // width: 90,
+      hideInTable: !!!process.env.SHOW_TAG,
       render: (isTag) => {
         switch (isTag) {
           case 0:
@@ -236,8 +244,8 @@ const ClassMetricTable: React.FC<Props> = ({ onEmptyMetricData }) => {
               type="link"
               key="metricEditBtn"
               onClick={() => {
-                setMetricItem(record);
-                setCreateModalVisible(true);
+                const { domainId, modelId, id } = record;
+                toMetricEditPage(domainId, modelId, id);
               }}
             >
               编辑
@@ -353,66 +361,69 @@ const ClassMetricTable: React.FC<Props> = ({ onEmptyMetricData }) => {
         headerTitle={
           <div style={{ marginLeft: 15 }}>
             <TableHeaderFilter
-              components={[
-                {
-                  label: '指标搜索',
-                  component: (
-                    <Input.Search
-                      style={{ width: 280 }}
-                      placeholder="请输入ID/指标名称/英文名称/标签"
-                      onSearch={(value) => {
-                        setFilterParams((preState) => {
-                          return {
-                            ...preState,
-                            key: value,
-                          };
-                        });
-                      }}
-                    />
-                  ),
-                },
-                {
-                  label: '敏感度',
-                  component: (
-                    <Select
-                      style={{ width: 140 }}
-                      options={SENSITIVE_LEVEL_OPTIONS}
-                      placeholder="请选择敏感度"
-                      allowClear
-                      onChange={(value) => {
-                        setFilterParams((preState) => {
-                          return {
-                            ...preState,
-                            sensitiveLevel: value,
-                          };
-                        });
-                      }}
-                    />
-                  ),
-                },
-                {
-                  label: '是否为标签',
-                  component: (
-                    <Select
-                      style={{ width: 145 }}
-                      placeholder="请选择标签状态"
-                      allowClear
-                      onChange={(value) => {
-                        setFilterParams((preState) => {
-                          return {
-                            ...preState,
-                            isTag: value,
-                          };
-                        });
-                      }}
-                      options={[
-                        { value: 1, label: '是' },
-                        { value: 0, label: '否' },
-                      ]}
-                    />
-                  ),
-                },
-              ]}
+              components={
+                [
+                  {
+                    label: '指标搜索',
+                    component: (
+                      <Input.Search
+                        style={{ width: 280 }}
+                        placeholder="请输入ID/指标名称/英文名称"
+                        onSearch={(value) => {
+                          setFilterParams((preState) => {
+                            return {
+                              ...preState,
+                              key: value,
+                            };
+                          });
+                        }}
+                      />
+                    ),
+                  },
+                  {
+                    label: '敏感度',
+                    component: (
+                      <Select
+                        style={{ width: 140 }}
+                        options={SENSITIVE_LEVEL_OPTIONS}
+                        placeholder="请选择敏感度"
+                        allowClear
+                        onChange={(value) => {
+                          setFilterParams((preState) => {
+                            return {
+                              ...preState,
+                              sensitiveLevel: value,
+                            };
+                          });
+                        }}
+                      />
+                    ),
+                  },
+                  {
+                    label: '是否为标签',
+                    hidden: !!!process.env.SHOW_TAG,
+                    component: (
+                      <Select
+                        style={{ width: 145 }}
+                        placeholder="请选择标签状态"
+                        allowClear
+                        onChange={(value) => {
+                          setFilterParams((preState) => {
+                            return {
+                              ...preState,
+                              isTag: value,
+                            };
+                          });
+                        }}
+                        options={[
+                          { value: 1, label: '是' },
+                          { value: 0, label: '否' },
+                        ]}
+                      />
+                    ),
+                  },
+                ].filter((item) => !!!item.hidden) as any
+              }
             />
           </div>
         }
@@ -449,8 +460,9 @@ const ClassMetricTable: React.FC<Props> = ({ onEmptyMetricData }) => {
             key="create"
             type="primary"
             onClick={() => {
-              setMetricItem(undefined);
-              setCreateModalVisible(true);
+              toMetricEditPage(selectDomainId, modelId!, 0);
+              // setMetricItem(undefined);
+              // setCreateModalVisible(true);
             }}
           >
             创建指标

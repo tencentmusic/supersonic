@@ -3,6 +3,7 @@ package com.tencent.supersonic.headless.core.utils;
 import javax.sql.DataSource;
 
 import com.tencent.supersonic.common.pojo.QueryColumn;
+import com.tencent.supersonic.common.pojo.enums.EngineType;
 import com.tencent.supersonic.common.util.DateUtils;
 import com.tencent.supersonic.headless.api.pojo.enums.DataType;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
@@ -64,7 +65,7 @@ public class SqlUtils {
     public SqlUtils init(Database database) {
         return SqlUtilsBuilder.getBuilder()
                 .withName(database.getId() + AT_SYMBOL + database.getName())
-                .withType(database.getType()).withJdbcUrl(database.getUrl())
+                .withType(database.getType().getName()).withJdbcUrl(database.getUrl())
                 .withUsername(database.getUsername()).withPassword(database.getPassword())
                 .withJdbcDataSource(this.jdbcDataSource).withResultLimit(this.resultLimit)
                 .withIsQueryLogEnable(this.isQueryLogEnable).build();
@@ -224,7 +225,8 @@ public class SqlUtils {
         }
 
         public SqlUtils build() {
-            Database database = Database.builder().name(this.name).type(this.type).url(this.jdbcUrl)
+            Database database = Database.builder().name(this.name)
+                    .type(EngineType.fromString(this.type.toUpperCase())).url(this.jdbcUrl)
                     .username(this.username).password(this.password).build();
 
             SqlUtils sqlUtils = new SqlUtils(database);

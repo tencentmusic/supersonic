@@ -1,19 +1,19 @@
 import React, { useState } from 'react';
-import { Table, Select, Checkbox, Input, Space, Tooltip, Form, Switch, Row, Col } from 'antd';
+import { Checkbox, Form, Input, Select, Space, Switch, Table, Tooltip } from 'antd';
 import TableTitleTooltips from '../../components/TableTitleTooltips';
 import { isUndefined } from 'lodash';
 import { ExclamationCircleOutlined } from '@ant-design/icons';
 import SqlEditor from '@/components/SqlEditor';
 import { ISemantic } from '../../data';
 import {
-  TYPE_OPTIONS,
-  DATE_FORMATTER,
   AGG_OPTIONS,
-  EnumDataSourceType,
+  DATE_FORMATTER,
   DATE_OPTIONS,
   DIM_OPTIONS,
+  EnumDataSourceType,
   EnumModelDataType,
   PARTITION_TIME_FORMATTER,
+  TYPE_OPTIONS,
 } from '../constants';
 import styles from '../style.less';
 
@@ -90,8 +90,7 @@ const ModelFieldForm: React.FC<Props> = ({
       dataIndex: 'type',
       width: 250,
       render: (_: any, record: FieldItem) => {
-        const type = fields.find((field) => field.bizName === record.bizName)?.type;
-        const classType = fields.find((field) => field.bizName === record.bizName)?.classType;
+        const { type, classType } = record;
         const selectTypeValue = [EnumModelDataType.DIMENSION].includes(classType)
           ? classType
           : type;
@@ -208,32 +207,31 @@ const ModelFieldForm: React.FC<Props> = ({
       // width: 200,
       render: (_: any, record: FieldItem) => {
         const { type } = record;
-        if (type === EnumDataSourceType.PRIMARY) {
-          return (
-            <Space>
-              <Select
-                style={{ minWidth: 150 }}
-                value={tagObjectId ? tagObjectId : undefined}
-                placeholder="请选择所属对象"
-                onChange={(value) => {
-                  onTagObjectChange?.(value);
-                }}
-                options={tagObjectList.map((item: ISemantic.ITagObjectItem) => {
-                  return {
-                    label: item.name,
-                    value: item.id,
-                  };
-                })}
-              />
-            </Space>
-          );
-        }
+        // if (type === EnumDataSourceType.PRIMARY) {
+        //   return (
+        //     <Space>
+        //       <Select
+        //         style={{ minWidth: 150 }}
+        //         value={tagObjectId ? tagObjectId : undefined}
+        //         placeholder="请选择所属对象"
+        //         onChange={(value) => {
+        //           onTagObjectChange?.(value);
+        //         }}
+        //         options={tagObjectList.map((item: ISemantic.ITagObjectItem) => {
+        //           return {
+        //             label: item.name,
+        //             value: item.id,
+        //           };
+        //         })}
+        //       />
+        //     </Space>
+        //   );
+        // }
         if (type === EnumDataSourceType.MEASURES) {
-          const agg = fields.find((field) => field.expr === record.expr)?.agg;
           return (
             <Select
               placeholder="度量算子"
-              value={agg}
+              value={record.agg}
               onChange={(value) => {
                 handleFieldChange(record, 'agg', value);
               }}
@@ -249,32 +247,54 @@ const ModelFieldForm: React.FC<Props> = ({
             </Select>
           );
         }
-        if (type === EnumDataSourceType.CATEGORICAL) {
-          const isTag = fields.find((field) => field.bizName === record.bizName)?.isTag;
-          return (
-            <Space>
+        if (process.env.SHOW_TAG) {
+          if (type === EnumDataSourceType.CATEGORICAL) {
+            const isTag = fields.find((field) => field.bizName === record.bizName)?.isTag;
+            return (
               <Space>
-                <span>设为标签:</span>
-                <Switch
-                  defaultChecked
-                  size="small"
-                  checked={!!isTag}
-                  onChange={(value) => {
-                    handleFieldChange(record, 'isTag', value);
-                  }}
-                />
-                <Tooltip title="如果勾选，代表维度的取值都是一种“标签”，可用作对实体的圈选">
-                  <ExclamationCircleOutlined />
-                </Tooltip>
+                <Space>
+                  <span>设为标签:</span>
+                  <Switch
+                    defaultChecked
+                    size="small"
+                    checked={!!isTag}
+                    onChange={(value) => {
+                      handleFieldChange(record, 'isTag', value);
+                    }}
+                  />
+                  <Tooltip title="如果勾选，代表维度的取值都是一种“标签”，可用作对实体的圈选">
+                    <ExclamationCircleOutlined />
+                  </Tooltip>
+                </Space>
               </Space>
-            </Space>
-          );
+            );
+          }
+        }
+        if (process.env.SHOW_TAG) {
+          if (type === EnumDataSourceType.CATEGORICAL) {
+            const isTag = fields.find((field) => field.bizName === record.bizName)?.isTag;
+            return (
+              <Space>
+                <Space>
+                  <span>设为标签:</span>
+                  <Switch
+                    defaultChecked
+                    size="small"
+                    checked={!!isTag}
+                    onChange={(value) => {
+                      handleFieldChange(record, 'isTag', value);
+                    }}
+                  />
+                  <Tooltip title="如果勾选，代表维度的取值都是一种“标签”，可用作对实体的圈选">
+                    <ExclamationCircleOutlined />
+                  </Tooltip>
+                </Space>
+              </Space>
+            );
+          }
         }
         if ([EnumDataSourceType.TIME, EnumDataSourceType.PARTITION_TIME].includes(type)) {
-          const dateFormat = fields.find((field) => field.bizName === record.bizName)?.dateFormat;
-          const timeGranularity = fields.find(
-            (field) => field.bizName === record.bizName,
-          )?.timeGranularity;
+          const { dateFormat, timeGranularity } = record;
           const dateFormatterOptions =
             type === EnumDataSourceType.PARTITION_TIME ? PARTITION_TIME_FORMATTER : DATE_FORMATTER;
 

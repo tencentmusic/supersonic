@@ -1,15 +1,18 @@
 package com.tencent.supersonic.headless.server.service.impl;
 
+import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.common.pojo.enums.StatusEnum;
 import com.tencent.supersonic.common.pojo.enums.TaskStatusEnum;
 import com.tencent.supersonic.common.util.BeanMapper;
+import com.tencent.supersonic.common.util.DateUtils;
 import com.tencent.supersonic.headless.api.pojo.DimValueMap;
 import com.tencent.supersonic.headless.api.pojo.request.DictItemFilter;
 import com.tencent.supersonic.headless.api.pojo.request.DictSingleTaskReq;
 import com.tencent.supersonic.headless.api.pojo.request.DictValueReq;
+import com.tencent.supersonic.headless.api.pojo.request.ValueTaskQueryReq;
 import com.tencent.supersonic.headless.api.pojo.response.DictItemResp;
 import com.tencent.supersonic.headless.api.pojo.response.DictTaskResp;
 import com.tencent.supersonic.headless.api.pojo.response.DictValueDimResp;
@@ -116,14 +119,17 @@ public class DictTaskServiceImpl implements DictTaskService {
         fileHandler.writeFile(data, fileName, false);
 
         // 3.Change in-memory dictionary data in real time
+        String status = TaskStatusEnum.SUCCESS.getStatus();
         try {
             dictWordService.loadDictWord();
-
-            dictTaskDO.setStatus(TaskStatusEnum.SUCCESS.getStatus());
-            dictRepository.editDictTask(dictTaskDO);
         } catch (Exception e) {
             log.error("reloadCustomDictionary error", e);
+            status = TaskStatusEnum.ERROR.getStatus();
+            dictTaskDO.setDescription(e.toString());
         }
+        dictTaskDO.setStatus(status);
+        dictTaskDO.setElapsedMs(DateUtils.calculateDiffMs(dictTaskDO.getCreatedAt()));
+        dictRepository.editDictTask(dictTaskDO);
     }
 
     @Override
@@ -162,6 +168,17 @@ public class DictTaskServiceImpl implements DictTaskService {
     @Override
     public DictTaskResp queryLatestDictTask(DictSingleTaskReq taskReq, User user) {
         return dictRepository.queryLatestDictTask(taskReq);
+    }
+
+    @Override
+    public PageInfo<DictTaskResp> queryDictTask(ValueTaskQueryReq taskQueryReq, User user) {
+        PageInfo<DictTaskDO> dictTaskDOPageInfo =
+                PageHelper.startPage(taskQueryReq.getCurrent(), taskQueryReq.getPageSize())
+                        .doSelectPageInfo(() -> dictRepository.queryAllDictTask(taskQueryReq));
+        PageInfo<DictTaskResp> dictTaskRespPageInfo = new PageInfo<>();
+        BeanMapper.mapper(dictTaskDOPageInfo, dictTaskRespPageInfo);
+        dictTaskRespPageInfo.setList(dictConverter.taskDO2Resp(dictTaskDOPageInfo.getList()));
+        return dictTaskRespPageInfo;
     }
 
     @Override
