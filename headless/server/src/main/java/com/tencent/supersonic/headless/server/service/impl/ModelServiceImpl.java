@@ -295,9 +295,6 @@ public class ModelServiceImpl implements ModelService {
         List<Dimension> dims = modelReq.getModelDetail().getDimensions();
         List<Measure> measures = modelReq.getModelDetail().getMeasures();
         List<Identify> identifies = modelReq.getModelDetail().getIdentifiers();
-        if (CollectionUtils.isEmpty(dims)) {
-            throw new InvalidArgumentException("缺少维度信息");
-        }
         for (Measure measure : measures) {
             String measureForbiddenCharacters =
                     NameCheckUtils.findForbiddenCharacters(measure.getName());
