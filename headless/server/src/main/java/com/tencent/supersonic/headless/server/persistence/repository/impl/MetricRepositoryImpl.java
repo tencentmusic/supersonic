@@ -9,9 +9,11 @@ import com.tencent.supersonic.headless.server.persistence.mapper.MetricQueryDefa
 import com.tencent.supersonic.headless.server.persistence.repository.MetricRepository;
 import com.tencent.supersonic.headless.server.pojo.MetricFilter;
 import com.tencent.supersonic.headless.server.pojo.MetricsFilter;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Objects;
 
 @Component
 public class MetricRepositoryImpl implements MetricRepository {
@@ -73,7 +75,46 @@ public class MetricRepositoryImpl implements MetricRepository {
 
     @Override
     public List<MetricDO> getMetric(MetricFilter metricFilter) {
-        return metricDOCustomMapper.query(metricFilter);
+        QueryWrapper<MetricDO> queryWrapper = new QueryWrapper<>();
+        queryWrapper.lambda().ne(MetricDO::getStatus, 3);
+        if (Objects.nonNull(metricFilter.getIds()) && !metricFilter.getIds().isEmpty()) {
+            queryWrapper.lambda().in(MetricDO::getId, metricFilter.getIds());
+        }
+        if (StringUtils.isNotBlank(metricFilter.getId())) {
+            queryWrapper.lambda().eq(MetricDO::getId, metricFilter.getId());
+        }
+        if (Objects.nonNull(metricFilter.getModelIds()) && !metricFilter.getModelIds().isEmpty()) {
+            queryWrapper.lambda().in(MetricDO::getModelId, metricFilter.getModelIds());
+        }
+        if (StringUtils.isNotBlank(metricFilter.getType())) {
+            queryWrapper.lambda().eq(MetricDO::getType, metricFilter.getType());
+        }
+        if (StringUtils.isNotBlank(metricFilter.getName())) {
+            queryWrapper.lambda().like(MetricDO::getName, metricFilter.getName());
+        }
+        if (StringUtils.isNotBlank(metricFilter.getId())) {
+            queryWrapper.lambda().like(MetricDO::getBizName, metricFilter.getBizName());
+        }
+        if (Objects.nonNull(metricFilter.getStatus())) {
+            queryWrapper.lambda().eq(MetricDO::getStatus, metricFilter.getStatus());
+        }
+        if (Objects.nonNull(metricFilter.getSensitiveLevel())) {
+            queryWrapper.lambda().eq(MetricDO::getSensitiveLevel, metricFilter.getSensitiveLevel());
+        }
+        if (StringUtils.isNotBlank(metricFilter.getCreatedBy())) {
+            queryWrapper.lambda().eq(MetricDO::getCreatedBy, metricFilter.getCreatedBy());
+        }
+        if (Objects.nonNull(metricFilter.getIsPublish()) && metricFilter.getIsPublish() == 1) {
+            queryWrapper.lambda().eq(MetricDO::getIsPublish, metricFilter.getIsPublish());
+        }
+        if (StringUtils.isNotBlank(metricFilter.getKey())) {
+            String key = metricFilter.getKey();
+            queryWrapper.lambda().like(MetricDO::getName, key).or().like(MetricDO::getBizName, key)
+                    .or().like(MetricDO::getDescription, key).or().like(MetricDO::getAlias, key)
+                    .or().like(MetricDO::getCreatedBy, key);
+        }
+
+        return metricDOMapper.selectList(queryWrapper);
     }
 
     @Override

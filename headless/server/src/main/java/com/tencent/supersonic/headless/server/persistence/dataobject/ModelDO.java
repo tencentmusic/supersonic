@@ -16,6 +16,7 @@ public class ModelDO {
 
     private Long domainId;
 
+    @Deprecated
     private Long tagObjectId;
 
     private String name;

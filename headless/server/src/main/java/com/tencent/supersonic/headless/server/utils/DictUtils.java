@@ -14,7 +14,7 @@ import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import com.tencent.supersonic.common.pojo.enums.TypeEnums;
 import com.tencent.supersonic.common.util.BeanMapper;
 import com.tencent.supersonic.common.util.JsonUtil;
-import com.tencent.supersonic.headless.api.pojo.Dim;
+import com.tencent.supersonic.headless.api.pojo.Dimension;
 import com.tencent.supersonic.headless.api.pojo.ItemValueConfig;
 import com.tencent.supersonic.headless.api.pojo.request.DictItemReq;
 import com.tencent.supersonic.headless.api.pojo.request.QuerySqlReq;
@@ -401,7 +401,7 @@ public class DictUtils {
     private void fillStructDateBetween(QueryStructReq queryStructReq, ModelResp model,
             Integer itemValueDateStart, Integer itemValueDateEnd) {
         if (Objects.nonNull(model)) {
-            List<Dim> timeDims = model.getTimeDimension();
+            List<Dimension> timeDims = model.getTimeDimension();
             if (!CollectionUtils.isEmpty(timeDims)) {
                 DateConf dateConf = new DateConf();
                 dateConf.setDateMode(DateConf.DateMode.BETWEEN);
@@ -496,7 +496,7 @@ public class DictUtils {
     private boolean partitionedModel(Long modelId) {
         ModelResp model = modelService.getModel(modelId);
         if (Objects.nonNull(model)) {
-            List<Dim> timeDims = model.getTimeDimension();
+            List<Dimension> timeDims = model.getTimeDimension();
             if (!CollectionUtils.isEmpty(timeDims)) {
                 return true;
             }
@@ -507,7 +507,7 @@ public class DictUtils {
     private String generateDictDateFilterRecent(DictItemResp dictItemResp) {
         ModelResp model = modelService.getModel(dictItemResp.getModelId());
         if (Objects.nonNull(model)) {
-            List<Dim> timeDims = model.getTimeDimension();
+            List<Dimension> timeDims = model.getTimeDimension();
             if (!CollectionUtils.isEmpty(timeDims)) {
                 String dateFormat = timeDims.get(0).getDateFormat();
                 if (StringUtils.isEmpty(dateFormat)) {

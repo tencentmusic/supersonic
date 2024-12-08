@@ -9,6 +9,10 @@ import java.util.List;
 @Data
 public class ModelBuildReq {
 
+    private String name;
+
+    private String bizName;
+
     private Long databaseId;
 
     private Long domainId;

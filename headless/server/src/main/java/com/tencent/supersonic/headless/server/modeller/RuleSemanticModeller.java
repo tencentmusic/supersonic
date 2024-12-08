@@ -23,7 +23,7 @@ public class RuleSemanticModeller implements SemanticModeller {
 
     private ColumnSchema convert(DBColumn dbColumn) {
         ColumnSchema columnSchema = new ColumnSchema();
-        columnSchema.setName(dbColumn.getComment());
+        columnSchema.setName(dbColumn.getColumnName());
         columnSchema.setColumnName(dbColumn.getColumnName());
         columnSchema.setComment(dbColumn.getComment());
         columnSchema.setDataType(dbColumn.getDataType());

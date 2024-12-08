@@ -57,7 +57,11 @@ public class StructQueryConverter implements QueryConverter {
                 .map(Aggregator::getColumn).collect(Collectors.toList()));
         String where = sqlGenerateUtils.generateWhere(structQueryParam, null);
         ontologyQueryParam.setWhere(where);
-        ontologyQueryParam.setAggOption(AggOption.AGGREGATION);
+        if (ontologyQueryParam.getMetrics().isEmpty()) {
+            ontologyQueryParam.setAggOption(AggOption.NATIVE);
+        } else {
+            ontologyQueryParam.setAggOption(AggOption.DEFAULT);
+        }
         ontologyQueryParam.setNativeQuery(structQueryParam.getQueryType().isNativeAggQuery());
         ontologyQueryParam.setOrder(structQueryParam.getOrders().stream()
                 .map(order -> new ColumnOrder(order.getColumn(), order.getDirection()))

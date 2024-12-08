@@ -4,27 +4,22 @@ import com.github.pagehelper.PageInfo;
 import com.tencent.supersonic.chat.api.pojo.request.ChatMemoryFilter;
 import com.tencent.supersonic.chat.api.pojo.request.ChatMemoryUpdateReq;
 import com.tencent.supersonic.chat.api.pojo.request.PageMemoryReq;
-import com.tencent.supersonic.chat.server.persistence.dataobject.ChatMemoryDO;
+import com.tencent.supersonic.chat.server.pojo.ChatMemory;
 import com.tencent.supersonic.common.pojo.User;
 
 import java.util.List;
 
 public interface MemoryService {
-    void createMemory(ChatMemoryDO memory);
+    void createMemory(ChatMemory memory);
 
     void updateMemory(ChatMemoryUpdateReq chatMemoryUpdateReq, User user);
 
-    void updateMemory(ChatMemoryDO memory);
-
-    void enableMemory(ChatMemoryDO memory);
-
-    void disableMemory(ChatMemoryDO memory);
+    void updateMemory(ChatMemory memory);
 
     void batchDelete(List<Long> ids);
 
-    PageInfo<ChatMemoryDO> pageMemories(PageMemoryReq pageMemoryReq);
+    PageInfo<ChatMemory> pageMemories(PageMemoryReq pageMemoryReq);
 
-    List<ChatMemoryDO> getMemories(ChatMemoryFilter chatMemoryFilter);
+    List<ChatMemory> getMemories(ChatMemoryFilter chatMemoryFilter);
 
-    List<ChatMemoryDO> getMemoriesForLlmReview();
 }

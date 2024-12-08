@@ -19,6 +19,7 @@ public class DictWord {
     private String word;
     private String nature;
     private String natureWithFrequency;
+    private String alias;
 
     @Override
     public boolean equals(Object o) {

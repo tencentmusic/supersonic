@@ -47,7 +47,7 @@ public interface DimensionService {
 
     void sendDimensionEventBatch(List<Long> modelIds, EventType eventType);
 
-    DataEvent getDataEvent();
+    DataEvent getAllDataEvents();
 
     Boolean updateDimValueAlias(DimValueAliasReq req, User user);
 }

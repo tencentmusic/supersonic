@@ -4,6 +4,7 @@ com.tencent.supersonic.headless.chat.mapper.SchemaMapper=\
     com.tencent.supersonic.headless.chat.mapper.EmbeddingMapper, \
     com.tencent.supersonic.headless.chat.mapper.KeywordMapper, \
     com.tencent.supersonic.headless.chat.mapper.QueryFilterMapper, \
+    com.tencent.supersonic.headless.chat.mapper.TimeFieldMapper,\
     com.tencent.supersonic.headless.chat.mapper.TermDescMapper
 
 com.tencent.supersonic.headless.chat.parser.SemanticParser=\
@@ -27,9 +28,9 @@ com.tencent.supersonic.headless.chat.parser.llm.DataSetResolver=\
 com.tencent.supersonic.headless.core.translator.converter.QueryConverter=\
     com.tencent.supersonic.headless.core.translator.converter.DefaultDimValueConverter,\
     com.tencent.supersonic.headless.core.translator.converter.SqlVariableConverter,\
-    com.tencent.supersonic.headless.core.translator.converter.MetricRatioConverter,\
     com.tencent.supersonic.headless.core.translator.converter.SqlQueryConverter,\
-    com.tencent.supersonic.headless.core.translator.converter.StructQueryConverter
+    com.tencent.supersonic.headless.core.translator.converter.StructQueryConverter,\
+    com.tencent.supersonic.headless.core.translator.converter.MetricRatioConverter
 
 com.tencent.supersonic.headless.core.translator.optimizer.QueryOptimizer=\
     com.tencent.supersonic.headless.core.translator.optimizer.DetailQueryOptimizer,\
