@@ -41,3 +41,14 @@ s2:
       threshold: 0.5
       min:
         threshold: 0.3
+
+  manage:
+    chat:
+      agent:
+        ids: 1,3,5  # chatAgentIds
+      model:
+        ids: 1,2,9  # chatModelIds
+      dataBase:
+        ids: 1,2,3    # chatDatabaseIds
+      domain:
+        ids: 1,2,3    # chatDomainIds

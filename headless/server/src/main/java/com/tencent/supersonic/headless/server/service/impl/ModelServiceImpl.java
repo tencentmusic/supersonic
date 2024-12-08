@@ -12,7 +12,7 @@ import com.tencent.supersonic.common.pojo.exception.InvalidArgumentException;
 import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.headless.api.pojo.DBColumn;
 import com.tencent.supersonic.headless.api.pojo.DbSchema;
-import com.tencent.supersonic.headless.api.pojo.Dim;
+import com.tencent.supersonic.headless.api.pojo.Dimension;
 import com.tencent.supersonic.headless.api.pojo.Identify;
 import com.tencent.supersonic.headless.api.pojo.ItemDateFilter;
 import com.tencent.supersonic.headless.api.pojo.Measure;
@@ -78,23 +78,23 @@ import java.util.stream.Collectors;
 @Slf4j
 public class ModelServiceImpl implements ModelService {
 
-    private ModelRepository modelRepository;
+    private final ModelRepository modelRepository;
 
-    private DatabaseService databaseService;
+    private final DatabaseService databaseService;
 
-    private DimensionService dimensionService;
+    private final DimensionService dimensionService;
 
-    private MetricService metricService;
+    private final MetricService metricService;
 
-    private DomainService domainService;
+    private final DomainService domainService;
 
-    private UserService userService;
+    private final UserService userService;
 
-    private DataSetService dataSetService;
+    private final DataSetService dataSetService;
 
-    private DateInfoRepository dateInfoRepository;
+    private final DateInfoRepository dateInfoRepository;
 
-    private ModelRelaService modelRelaService;
+    private final ModelRelaService modelRelaService;
 
     ExecutorService executor =
             new ThreadPoolExecutor(0, 5, 5L, TimeUnit.SECONDS, new LinkedBlockingQueue<>());
@@ -292,12 +292,9 @@ public class ModelServiceImpl implements ModelService {
         if (modelReq.getModelDetail() == null) {
             return;
         }
-        List<Dim> dims = modelReq.getModelDetail().getDimensions();
+        List<Dimension> dims = modelReq.getModelDetail().getDimensions();
         List<Measure> measures = modelReq.getModelDetail().getMeasures();
         List<Identify> identifies = modelReq.getModelDetail().getIdentifiers();
-        if (CollectionUtils.isEmpty(dims)) {
-            throw new InvalidArgumentException("缺少维度信息");
-        }
         for (Measure measure : measures) {
             String measureForbiddenCharacters =
                     NameCheckUtils.findForbiddenCharacters(measure.getName());
@@ -308,7 +305,7 @@ public class ModelServiceImpl implements ModelService {
                 throw new InvalidArgumentException(message);
             }
         }
-        for (Dim dim : dims) {
+        for (Dimension dim : dims) {
             String dimForbiddenCharacters = NameCheckUtils.findForbiddenCharacters(dim.getName());
             if (StringUtils.isNotBlank(dim.getName())
                     && StringUtils.isNotBlank(dimForbiddenCharacters)) {
@@ -337,12 +334,10 @@ public class ModelServiceImpl implements ModelService {
         Set<String> relations = new HashSet<>();
         for (ModelRela modelRela : modelRelas) {
             if (modelRela.getFromModelId().equals(modelReq.getId())) {
-                modelRela.getJoinConditions().stream()
-                        .forEach(r -> relations.add(r.getLeftField()));
+                modelRela.getJoinConditions().forEach(r -> relations.add(r.getLeftField()));
             }
             if (modelRela.getToModelId().equals(modelReq.getId())) {
-                modelRela.getJoinConditions().stream()
-                        .forEach(r -> relations.add(r.getRightField()));
+                modelRela.getJoinConditions().forEach(r -> relations.add(r.getRightField()));
             }
         }
         if (relations.isEmpty()) {
@@ -351,10 +346,10 @@ public class ModelServiceImpl implements ModelService {
         // any identify in model relation should not be deleted
         if (modelReq.getModelDetail() == null
                 || CollectionUtils.isEmpty(modelReq.getModelDetail().getIdentifiers())) {
-            throw new InvalidArgumentException(String.format("模型关联中主键/外键不存在, 请检查"));
+            throw new InvalidArgumentException("模型关联中主键/外键不存在, 请检查");
         }
         List<String> modelIdentifiers = modelReq.getModelDetail().getIdentifiers().stream()
-                .map(i -> i.getBizName()).collect(Collectors.toList());
+                .map(Identify::getBizName).collect(Collectors.toList());
         for (String rela : relations) {
             if (!modelIdentifiers.contains(rela)) {
                 throw new InvalidArgumentException(String.format("模型关联中主键/外键(%s)不存在, 请检查", rela));
@@ -459,7 +454,7 @@ public class ModelServiceImpl implements ModelService {
         }
         ModelFilter modelFilter = new ModelFilter();
         modelFilter.setDomainIds(domainIds);
-        modelFilter.setIncludesDetail(false);
+        modelFilter.setIncludesDetail(true);
         List<ModelResp> modelResps = getModelList(modelFilter);
         if (CollectionUtils.isEmpty(modelResps)) {
             return modelResps;

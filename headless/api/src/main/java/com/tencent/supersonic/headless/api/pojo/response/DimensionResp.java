@@ -18,6 +18,8 @@ public class DimensionResp extends SchemaItem {
 
     private Long modelId;
 
+    private Long domainId;
+
     private DimensionType type;
 
     private String expr;

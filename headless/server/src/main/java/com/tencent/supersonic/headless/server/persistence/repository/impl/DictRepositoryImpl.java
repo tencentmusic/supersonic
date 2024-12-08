@@ -118,6 +118,7 @@ public class DictRepositoryImpl implements DictRepository {
             wrapper.lambda().and(qw -> qw.like(DictTaskDO::getName, key).or()
                     .like(DictTaskDO::getDescription, key).or().like(DictTaskDO::getConfig, key));
         }
+        wrapper.lambda().orderByDesc(DictTaskDO::getCreatedAt);
         return dictTaskMapper.selectList(wrapper);
     }
 

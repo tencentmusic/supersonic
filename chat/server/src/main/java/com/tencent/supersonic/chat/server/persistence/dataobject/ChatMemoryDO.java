@@ -4,17 +4,17 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import com.tencent.supersonic.chat.api.pojo.enums.MemoryReviewResult;
-import com.tencent.supersonic.chat.api.pojo.enums.MemoryStatus;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.ToString;
+import lombok.NoArgsConstructor;
 
 import java.util.Date;
 
 @Data
 @Builder
-@ToString
+@NoArgsConstructor
+@AllArgsConstructor
 @TableName("s2_chat_memory")
 public class ChatMemoryDO {
     @TableId(type = IdType.AUTO)
@@ -36,16 +36,16 @@ public class ChatMemoryDO {
     private String s2sql;
 
     @TableField("status")
-    private MemoryStatus status;
+    private String status;
 
     @TableField("llm_review")
-    private MemoryReviewResult llmReviewRet;
+    private String llmReviewRet;
 
     @TableField("llm_comment")
     private String llmReviewCmt;
 
     @TableField("human_review")
-    private MemoryReviewResult humanReviewRet;
+    private String humanReviewRet;
 
     @TableField("human_comment")
     private String humanReviewCmt;

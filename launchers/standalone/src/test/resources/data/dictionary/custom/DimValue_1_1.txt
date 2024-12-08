@@ -1,5 +1,0 @@
-hr _1_1 876
-sales _1_1 872
-marketing _1_1 310
-strategy _1_1 360
-sales _1_1 500

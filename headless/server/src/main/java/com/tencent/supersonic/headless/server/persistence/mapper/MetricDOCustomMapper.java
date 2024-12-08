@@ -1,7 +1,6 @@
 package com.tencent.supersonic.headless.server.persistence.mapper;
 
 import com.tencent.supersonic.headless.server.persistence.dataobject.MetricDO;
-import com.tencent.supersonic.headless.server.pojo.MetricFilter;
 import com.tencent.supersonic.headless.server.pojo.MetricsFilter;
 import org.apache.ibatis.annotations.Mapper;
 
@@ -19,8 +18,6 @@ public interface MetricDOCustomMapper {
     void batchUnPublish(List<MetricDO> metricDOS);
 
     void updateClassificationsBatch(List<MetricDO> metricDOS);
-
-    List<MetricDO> query(MetricFilter metricFilter);
 
     List<MetricDO> queryMetrics(MetricsFilter metricsFilter);
 }

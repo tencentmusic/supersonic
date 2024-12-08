@@ -1,5 +1,6 @@
 package com.tencent.supersonic.common.pojo;
 
+import com.google.common.collect.Lists;
 import lombok.Data;
 
 import java.util.List;
@@ -18,5 +19,5 @@ public class ModelRela extends RecordInfo {
     // left join, inner join, right join, outer join
     private String joinType;
 
-    private List<JoinCondition> joinConditions;
+    private List<JoinCondition> joinConditions = Lists.newArrayList();
 }

@@ -61,13 +61,18 @@ public class SqlQueryConverter implements QueryConverter {
         List<MetricSchemaResp> metricSchemas = getMetrics(semanticSchemaResp, allFields);
         List<String> metrics =
                 metricSchemas.stream().map(SchemaItem::getBizName).collect(Collectors.toList());
-        AggOption aggOption = getAggOption(sqlQueryParam.getSql(), metricSchemas);
         Set<String> dimensions = getDimensions(semanticSchemaResp, allFields);
         OntologyQueryParam ontologyQueryParam = new OntologyQueryParam();
         ontologyQueryParam.getMetrics().addAll(metrics);
         ontologyQueryParam.getDimensions().addAll(dimensions);
-        ontologyQueryParam.setAggOption(aggOption);
-        ontologyQueryParam.setNativeQuery(!AggOption.isAgg(aggOption));
+        AggOption sqlQueryAggOption = getAggOption(sqlQueryParam.getSql(), metricSchemas);
+        // if sql query itself has aggregation, ontology query just returns detail
+        if (sqlQueryAggOption.equals(AggOption.AGGREGATION)) {
+            ontologyQueryParam.setAggOption(AggOption.NATIVE);
+        } else if (sqlQueryAggOption.equals(AggOption.NATIVE) && !metrics.isEmpty()) {
+            ontologyQueryParam.setAggOption(AggOption.DEFAULT);
+        }
+        ontologyQueryParam.setNativeQuery(!AggOption.isAgg(ontologyQueryParam.getAggOption()));
         queryStatement.setOntologyQueryParam(ontologyQueryParam);
 
         generateDerivedMetric(sqlGenerateUtils, queryStatement);

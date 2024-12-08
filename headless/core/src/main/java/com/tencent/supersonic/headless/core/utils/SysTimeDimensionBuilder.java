@@ -1,7 +1,7 @@
 package com.tencent.supersonic.headless.core.utils;
 
 import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
-import com.tencent.supersonic.headless.api.pojo.Dim;
+import com.tencent.supersonic.headless.api.pojo.Dimension;
 import com.tencent.supersonic.headless.api.pojo.DimensionTimeTypeParams;
 import com.tencent.supersonic.headless.api.pojo.enums.DimensionType;
 import com.tencent.supersonic.headless.core.adaptor.db.DbAdaptor;
@@ -20,11 +20,11 @@ public class SysTimeDimensionBuilder {
             Pattern.compile("\\b(DATE|TIME|TIMESTAMP|YEAR|MONTH|DAY|HOUR|MINUTE|SECOND)\\b",
                     Pattern.CASE_INSENSITIVE);
 
-    public static void addSysTimeDimension(List<Dim> dims, DbAdaptor engineAdaptor) {
+    public static void addSysTimeDimension(List<Dimension> dims, DbAdaptor engineAdaptor) {
         log.debug("addSysTimeDimension before:{}, engineAdaptor:{}", dims, engineAdaptor);
-        Dim timeDim = getTimeDim(dims);
+        Dimension timeDim = getTimeDim(dims);
         if (timeDim == null) {
-            timeDim = Dim.getDefault();
+            timeDim = Dimension.getDefault();
             // todo not find the time dimension
             return;
         }
@@ -34,8 +34,8 @@ public class SysTimeDimensionBuilder {
         log.debug("addSysTimeDimension after:{}, engineAdaptor:{}", dims, engineAdaptor);
     }
 
-    private static Dim generateSysDayDimension(Dim timeDim, DbAdaptor engineAdaptor) {
-        Dim dim = new Dim();
+    private static Dimension generateSysDayDimension(Dimension timeDim, DbAdaptor engineAdaptor) {
+        Dimension dim = new Dimension();
         dim.setBizName(TimeDimensionEnum.DAY.getName());
         dim.setType(DimensionType.partition_time);
         dim.setExpr(generateTimeExpr(timeDim, TimeDimensionEnum.DAY.name().toLowerCase(),
@@ -47,8 +47,8 @@ public class SysTimeDimensionBuilder {
         return dim;
     }
 
-    private static Dim generateSysWeekDimension(Dim timeDim, DbAdaptor engineAdaptor) {
-        Dim dim = new Dim();
+    private static Dimension generateSysWeekDimension(Dimension timeDim, DbAdaptor engineAdaptor) {
+        Dimension dim = new Dimension();
         dim.setBizName(TimeDimensionEnum.WEEK.getName());
         dim.setType(DimensionType.partition_time);
         dim.setExpr(generateTimeExpr(timeDim, TimeDimensionEnum.WEEK.name().toLowerCase(),
@@ -60,8 +60,8 @@ public class SysTimeDimensionBuilder {
         return dim;
     }
 
-    private static Dim generateSysMonthDimension(Dim timeDim, DbAdaptor engineAdaptor) {
-        Dim dim = new Dim();
+    private static Dimension generateSysMonthDimension(Dimension timeDim, DbAdaptor engineAdaptor) {
+        Dimension dim = new Dimension();
         dim.setBizName(TimeDimensionEnum.MONTH.getName());
         dim.setType(DimensionType.partition_time);
         dim.setExpr(generateTimeExpr(timeDim, TimeDimensionEnum.MONTH.name().toLowerCase(),
@@ -79,7 +79,8 @@ public class SysTimeDimensionBuilder {
     }
 
     // Check whether the time field contains keywords,Generation time expression
-    private static String generateTimeExpr(Dim timeDim, String dateType, DbAdaptor engineAdaptor) {
+    private static String generateTimeExpr(Dimension timeDim, String dateType,
+            DbAdaptor engineAdaptor) {
         String bizName = timeDim.getBizName();
         String dateFormat = timeDim.getDateFormat();
         if (containsTimeKeyword(bizName)) {
@@ -90,8 +91,8 @@ public class SysTimeDimensionBuilder {
         }
     }
 
-    private static Dim getTimeDim(List<Dim> timeDims) {
-        for (Dim dim : timeDims) {
+    private static Dimension getTimeDim(List<Dimension> timeDims) {
+        for (Dimension dim : timeDims) {
             if (dim.getType().equals(DimensionType.partition_time)) {
                 return dim;
             }

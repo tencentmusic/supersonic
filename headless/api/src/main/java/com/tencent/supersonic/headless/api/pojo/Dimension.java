@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Dim {
+public class Dimension {
 
     private String name;
 
@@ -27,16 +27,14 @@ public class Dim {
 
     private String description;
 
-    private int isTag;
-
-    public Dim(String name, String bizName, DimensionType type, Integer isCreateDimension) {
+    public Dimension(String name, String bizName, DimensionType type, Integer isCreateDimension) {
         this.name = name;
         this.type = type;
         this.isCreateDimension = isCreateDimension;
         this.bizName = bizName;
     }
 
-    public Dim(String name, String bizName, DimensionType type, Integer isCreateDimension,
+    public Dimension(String name, String bizName, DimensionType type, Integer isCreateDimension,
             String expr, String dateFormat, DimensionTimeTypeParams typeParams) {
         this.name = name;
         this.type = type;
@@ -47,8 +45,8 @@ public class Dim {
         this.bizName = bizName;
     }
 
-    public static Dim getDefault() {
-        return new Dim("数据日期", "imp_date", DimensionType.partition_time, 0, "imp_date",
+    public static Dimension getDefault() {
+        return new Dimension("数据日期", "imp_date", DimensionType.partition_time, 0, "imp_date",
                 Constants.DAY_FORMAT, new DimensionTimeTypeParams("false", "day"));
     }
 

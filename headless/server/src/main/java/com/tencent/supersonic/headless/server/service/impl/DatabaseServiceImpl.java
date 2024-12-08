@@ -236,6 +236,9 @@ public class DatabaseServiceImpl extends ServiceImpl<DatabaseDOMapper, DatabaseD
         if (StringUtils.isNotBlank(modelBuildReq.getSql())) {
             List<DBColumn> columns =
                     getColumns(modelBuildReq.getDatabaseId(), modelBuildReq.getSql());
+            DatabaseResp databaseResp = getDatabase(modelBuildReq.getDatabaseId());
+            DbAdaptor engineAdaptor = DbAdaptorFactory.getEngineAdaptor(databaseResp.getType());
+            columns.forEach(c -> c.setFieldType(engineAdaptor.classifyColumnType(c.getDataType())));
             dbColumnMap.put(modelBuildReq.getSql(), columns);
         } else {
             for (String table : modelBuildReq.getTables()) {

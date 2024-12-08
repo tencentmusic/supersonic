@@ -1,6 +1,7 @@
 package com.tencent.supersonic.headless.core.adaptor.db;
 
 import com.tencent.supersonic.headless.api.pojo.DBColumn;
+import com.tencent.supersonic.headless.api.pojo.enums.FieldType;
 import com.tencent.supersonic.headless.core.pojo.ConnectInfo;
 
 import java.sql.SQLException;
@@ -19,4 +20,6 @@ public interface DbAdaptor {
 
     List<DBColumn> getColumns(ConnectInfo connectInfo, String schemaName, String tableName)
             throws SQLException;
+
+    FieldType classifyColumnType(String typeName);
 }

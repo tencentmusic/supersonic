@@ -1,9 +1,10 @@
 package com.tencent.supersonic.chat.server.memory;
 
 import com.tencent.supersonic.chat.api.pojo.enums.MemoryReviewResult;
+import com.tencent.supersonic.chat.api.pojo.enums.MemoryStatus;
 import com.tencent.supersonic.chat.api.pojo.request.ChatMemoryFilter;
 import com.tencent.supersonic.chat.server.agent.Agent;
-import com.tencent.supersonic.chat.server.persistence.dataobject.ChatMemoryDO;
+import com.tencent.supersonic.chat.server.pojo.ChatMemory;
 import com.tencent.supersonic.chat.server.service.AgentService;
 import com.tencent.supersonic.chat.server.service.MemoryService;
 import com.tencent.supersonic.common.pojo.ChatApp;
@@ -66,7 +67,7 @@ public class MemoryReviewTask {
             }
             ChatMemoryFilter chatMemoryFilter =
                     ChatMemoryFilter.builder().agentId(agent.getId()).build();
-            memoryService.getMemories(chatMemoryFilter).stream().forEach(memory -> {
+            memoryService.getMemories(chatMemoryFilter).forEach(memory -> {
                 try {
                     processMemory(memory, agent);
                 } catch (Exception e) {
@@ -77,23 +78,19 @@ public class MemoryReviewTask {
         }
     }
 
-    private void processMemory(ChatMemoryDO m, Agent agent) {
+    private void processMemory(ChatMemory m, Agent agent) {
         if (Objects.isNull(agent)) {
             log.warn("Agent id {} not found or memory review disabled", m.getAgentId());
             return;
         }
 
-        ChatApp chatApp = agent.getChatAppConfig().get(APP_KEY);
-        if (Objects.isNull(chatApp) || !chatApp.isEnable()) {
+        // if either LLM or human has reviewed, just return
+        if (Objects.nonNull(m.getLlmReviewRet()) || Objects.nonNull(m.getHumanReviewRet())) {
             return;
         }
 
-        // 如果大模型已经评估过，则不再评估
-        if (Objects.nonNull(m.getLlmReviewRet())) {
-            // directly enable memory if the LLM determines it positive
-            if (MemoryReviewResult.POSITIVE.equals(m.getLlmReviewRet())) {
-                memoryService.enableMemory(m);
-            }
+        ChatApp chatApp = agent.getChatAppConfig().get(APP_KEY);
+        if (Objects.isNull(chatApp) || !chatApp.isEnable()) {
             return;
         }
 
@@ -112,19 +109,19 @@ public class MemoryReviewTask {
         }
     }
 
-    private String createPromptString(ChatMemoryDO m, String promptTemplate) {
+    private String createPromptString(ChatMemory m, String promptTemplate) {
         return String.format(promptTemplate, m.getQuestion(), m.getDbSchema(), m.getSideInfo(),
                 m.getS2sql());
     }
 
-    private void processResponse(String response, ChatMemoryDO m) {
+    private void processResponse(String response, ChatMemory m) {
         Matcher matcher = OUTPUT_PATTERN.matcher(response);
         if (matcher.find()) {
             m.setLlmReviewRet(MemoryReviewResult.getMemoryReviewResult(matcher.group(1)));
             m.setLlmReviewCmt(matcher.group(2));
             // directly enable memory if the LLM determines it positive
             if (MemoryReviewResult.POSITIVE.equals(m.getLlmReviewRet())) {
-                memoryService.enableMemory(m);
+                m.setStatus(MemoryStatus.ENABLED);
             }
             memoryService.updateMemory(m);
         }

@@ -24,7 +24,7 @@ public class ModelDetail {
 
     private List<Identify> identifiers = Lists.newArrayList();
 
-    private List<Dim> dimensions = Lists.newArrayList();
+    private List<Dimension> dimensions = Lists.newArrayList();
 
     private List<Measure> measures = Lists.newArrayList();
 
@@ -39,7 +39,7 @@ public class ModelDetail {
         return sqlQuery;
     }
 
-    public List<Dim> filterTimeDims() {
+    public List<Dimension> filterTimeDims() {
         if (CollectionUtils.isEmpty(dimensions)) {
             return Lists.newArrayList();
         }
