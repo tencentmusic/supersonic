@@ -20,7 +20,6 @@ import com.tencent.supersonic.chat.server.persistence.repository.ChatQueryReposi
 import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.common.util.PageUtils;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
-import com.tencent.supersonic.headless.api.pojo.response.ParseResp;
 import com.tencent.supersonic.headless.api.pojo.response.ParseTimeCostResp;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;

@@ -207,7 +207,7 @@ public class S2SemanticLayerService implements SemanticLayerService {
         ModelResp modelResp = modelResps.get(0);
         String sql = String.format("select distinct %s from %s where 1=1", dimensionResp.getName(),
                 modelResp.getName());
-        List<Dim> timeDims = modelResp.getTimeDimension();
+        List<Dimension> timeDims = modelResp.getTimeDimension();
         if (CollectionUtils.isNotEmpty(timeDims)) {
             sql = String.format("%s and %s >= '%s' and %s <= '%s'", sql,
                     TimeDimensionEnum.DAY.getName(), queryDimValueReq.getDateInfo().getStartDate(),

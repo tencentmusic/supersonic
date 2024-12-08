@@ -15,6 +15,6 @@ public class OntologyQueryParam {
     private String where;
     private Long limit;
     private List<ColumnOrder> order;
-    private boolean nativeQuery = false;
-    private AggOption aggOption = AggOption.DEFAULT;
+    private boolean nativeQuery = true;
+    private AggOption aggOption = AggOption.NATIVE;
 }

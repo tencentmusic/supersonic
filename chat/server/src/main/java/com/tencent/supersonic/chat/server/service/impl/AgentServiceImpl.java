@@ -7,8 +7,8 @@ import com.tencent.supersonic.chat.api.pojo.request.ChatParseReq;
 import com.tencent.supersonic.chat.server.agent.Agent;
 import com.tencent.supersonic.chat.server.agent.VisualConfig;
 import com.tencent.supersonic.chat.server.persistence.dataobject.AgentDO;
-import com.tencent.supersonic.chat.server.persistence.dataobject.ChatMemoryDO;
 import com.tencent.supersonic.chat.server.persistence.mapper.AgentDOMapper;
+import com.tencent.supersonic.chat.server.pojo.ChatMemory;
 import com.tencent.supersonic.chat.server.service.AgentService;
 import com.tencent.supersonic.chat.server.service.ChatQueryService;
 import com.tencent.supersonic.chat.server.service.MemoryService;
@@ -124,7 +124,7 @@ public class AgentServiceImpl extends ServiceImpl<AgentDOMapper, AgentDO> implem
         ChatMemoryFilter chatMemoryFilter =
                 ChatMemoryFilter.builder().agentId(agent.getId()).questions(examples).build();
         List<String> memoriesExisted = memoryService.getMemories(chatMemoryFilter).stream()
-                .map(ChatMemoryDO::getQuestion).collect(Collectors.toList());
+                .map(ChatMemory::getQuestion).collect(Collectors.toList());
         for (String example : examples) {
             if (memoriesExisted.contains(example)) {
                 continue;

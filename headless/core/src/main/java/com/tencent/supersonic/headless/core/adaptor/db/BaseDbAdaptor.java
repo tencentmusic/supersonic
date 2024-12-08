@@ -84,7 +84,7 @@ public abstract class BaseDbAdaptor implements DbAdaptor {
         return connection.getMetaData();
     }
 
-    protected static FieldType classifyColumnType(String typeName) {
+    public FieldType classifyColumnType(String typeName) {
         switch (typeName.toUpperCase()) {
             case "INT":
             case "INTEGER":
@@ -101,7 +101,7 @@ public abstract class BaseDbAdaptor implements DbAdaptor {
             case "TIMESTAMP":
                 return FieldType.time;
             default:
-                return FieldType.dimension;
+                return FieldType.categorical;
         }
     }
 

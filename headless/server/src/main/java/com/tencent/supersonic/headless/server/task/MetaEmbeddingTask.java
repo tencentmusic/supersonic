@@ -69,7 +69,7 @@ public class MetaEmbeddingTask implements CommandLineRunner {
             embeddingService.addQuery(embeddingConfig.getMetaCollectionName(),
                     TextSegmentConvert.convertToEmbedding(metricDataItems));
 
-            List<DataItem> dimensionDataItems = dimensionService.getDataEvent().getDataItems();
+            List<DataItem> dimensionDataItems = dimensionService.getAllDataEvents().getDataItems();
             embeddingService.addQuery(embeddingConfig.getMetaCollectionName(),
                     TextSegmentConvert.convertToEmbedding(dimensionDataItems));
         } catch (Exception e) {

@@ -211,7 +211,9 @@ public class QueryStructReq extends SemanticQueryReq {
         SelectItem selectExpressionItem = new SelectItem(function);
         String alias =
                 StringUtils.isNotBlank(aggregator.getAlias()) ? aggregator.getAlias() : columnName;
-        selectExpressionItem.setAlias(new Alias(alias));
+        if (!alias.equals(columnName)) {
+            selectExpressionItem.setAlias(new Alias(alias));
+        }
         return selectExpressionItem;
     }
 
