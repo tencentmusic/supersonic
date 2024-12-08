@@ -32,8 +32,6 @@ public class DimensionReq extends SchemaItem {
 
     private DataTypeEnums dataType;
 
-    private int isTag;
-
     private Map<String, Object> ext;
 
     private DimensionTimeTypeParams typeParams;

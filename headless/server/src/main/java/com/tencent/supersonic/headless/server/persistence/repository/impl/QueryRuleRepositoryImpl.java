@@ -51,7 +51,7 @@ public class QueryRuleRepositoryImpl implements QueryRuleRepository {
 
         QueryWrapper<QueryRuleDO> wrapperSys = new QueryWrapper<>();
         // 返回系统设置的规则
-        wrapperSys.or().eq("priority", 0L);
+        wrapperSys.lambda().or().eq(QueryRuleDO::getPriority, 0L);
         List<QueryRuleDO> queryRuleDOListSys = mapper.selectList(wrapperSys);
 
         queryRuleDOList.addAll(queryRuleDOListSys);

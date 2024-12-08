@@ -7,7 +7,7 @@ import com.tencent.supersonic.common.pojo.enums.PublishEnum;
 import com.tencent.supersonic.common.pojo.enums.StatusEnum;
 import com.tencent.supersonic.common.pojo.enums.TypeEnums;
 import com.tencent.supersonic.common.util.BeanMapper;
-import com.tencent.supersonic.headless.api.pojo.Dim;
+import com.tencent.supersonic.headless.api.pojo.Dimension;
 import com.tencent.supersonic.headless.api.pojo.MetricDefineByFieldParams;
 import com.tencent.supersonic.headless.api.pojo.MetricDefineByMeasureParams;
 import com.tencent.supersonic.headless.api.pojo.MetricDefineByMetricParams;
@@ -82,7 +82,7 @@ public class MetricConverter {
             metricResp.setModelName(modelResp.getName());
             metricResp.setModelBizName(modelResp.getBizName());
             metricResp.setDomainId(modelResp.getDomainId());
-            List<Dim> timeDims = modelResp.getTimeDimension();
+            List<Dimension> timeDims = modelResp.getTimeDimension();
             if (CollectionUtils.isNotEmpty(timeDims)) {
                 metricResp.setContainsPartitionDimensions(true);
             }

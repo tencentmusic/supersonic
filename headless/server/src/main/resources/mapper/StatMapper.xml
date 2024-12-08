@@ -40,28 +40,4 @@
         <result column="query_opt_mode" property="queryOptMode"/>
     </resultMap>
 
-    <select id="getStatInfo"
-            resultType="com.tencent.supersonic.headless.api.pojo.QueryStat">
-        select *
-        from s2_query_stat_info
-        <where>
-            <if test="startTime != null">
-                and start_time >= #{startTime}String.valueOf(queryFilter.getValue())
-            </if>
-            <if test="modelId != null">
-                and model_id = #{modelId}
-            </if>
-            <if test="modelIds != null and modelIds.size() > 0">
-                and model_id in
-                <foreach item="id" collection="modelIds" open="(" separator="," close=")">
-                    #{id}
-                </foreach>
-            </if>
-            <if test="metric != null">
-                and metrics like concat('%',#{metric},'%')
-            </if>
-        </where>
-
-    </select>
-
 </mapper>

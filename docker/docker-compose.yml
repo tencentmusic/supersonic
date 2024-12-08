@@ -1,51 +1,28 @@
 services:
-  chroma:
-    image: chromadb/chroma:0.5.3
+  postgres:
+    image: pgvector/pgvector:pg17
     privileged: true
-    container_name: supersonic_chroma
-    ports:
-      - "8000:8000"
-    volumes:
-      - chroma_data:/chroma
-    networks:
-      - supersonic_network
-    dns:
-      - 114.114.114.114
-      - 8.8.8.8
-      - 8.8.4.4
-    healthcheck:
-      test: ["CMD", "curl", "http://0.0.0.0:8000"]
-      interval: 10s
-      timeout: 5s
-      retries: 10
-
-  mysql:
-    image: mysql:8.0
-    privileged: true
-    container_name: supersonic_mysql
+    container_name: supersonic_postgres
     environment:
       LANG: 'C.UTF-8'  # 设置环境变量
-      MYSQL_ROOT_PASSWORD: root_password
-      MYSQL_DATABASE: supersonic_db
-      MYSQL_USER: supersonic_user
-      MYSQL_PASSWORD: supersonic_password
+      POSTGRES_ROOT_PASSWORD: root_password
+      POSTGRES_DATABASE: postgres
+      POSTGRES_USER: supersonic_user
+      POSTGRES_PASSWORD: supersonic_password
     ports:
-      - "13306:3306"
+      - "15432:5432"
     volumes:
-      - mysql_data:/var/lib/mysql
+      - postgres_data:/var/lib/postgresql
     networks:
       - supersonic_network
     dns:
       - 114.114.114.114
       - 8.8.8.8
       - 8.8.4.4
-    depends_on:
-      chroma:
-        condition: service_healthy
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      interval: 10s
-      timeout: 5s
+      test: ["CMD-SHELL", "sh -c 'pg_isready -U supersonic_user -d postgres'"]
+      interval: 30s
+      timeout: 10s
       retries: 5
 
   db_init:
@@ -53,22 +30,21 @@ services:
     privileged: true
     container_name: supersonic_db_init
     depends_on:
-      mysql:
+      postgres:
         condition: service_healthy
     networks:
       - supersonic_network
     command: >
       sh -c "
-      sleep 15 &&
-      if ! mysql -h supersonic_mysql -usupersonic_user -psupersonic_password -e 'use supersonic_db; show tables;' | grep -q 's2_database'; then
-        mysql -h supersonic_mysql -usupersonic_user -psupersonic_password supersonic_db < /usr/src/app/supersonic-standalone-${SUPERSONIC_VERSION:-latest}/conf/db/schema-mysql.sql &&
-        mysql -h supersonic_mysql -usupersonic_user -psupersonic_password supersonic_db < /usr/src/app/supersonic-standalone-${SUPERSONIC_VERSION:-latest}/conf/db/schema-mysql-demo.sql &&
-        mysql -h supersonic_mysql -usupersonic_user -psupersonic_password supersonic_db < /usr/src/app/supersonic-standalone-${SUPERSONIC_VERSION:-latest}/conf/db/data-mysql.sql &&
-        mysql -h supersonic_mysql -usupersonic_user -psupersonic_password supersonic_db < /usr/src/app/supersonic-standalone-${SUPERSONIC_VERSION:-latest}/conf/db/data-mysql-demo.sql
-      else
-        echo 'Database already initialized.'
-      fi
-      "
+        if ! PGPASSWORD=supersonic_password psql -h supersonic_postgres -U supersonic_user -d postgres -c 'select * from s2_database limit 1' > /dev/null;
+        then
+          PGPASSWORD=supersonic_password psql -hsupersonic_postgres -U supersonic_user -d postgres < /usr/src/app/supersonic-standalone-${SUPERSONIC_VERSION:-latest}/conf/db/schema-postgres.sql
+          PGPASSWORD=supersonic_password psql -hsupersonic_postgres -U supersonic_user -d postgres < /usr/src/app/supersonic-standalone-${SUPERSONIC_VERSION:-latest}/conf/db/schema-postgres-demo.sql
+          PGPASSWORD=supersonic_password psql -hsupersonic_postgres -U supersonic_user -d postgres < /usr/src/app/supersonic-standalone-${SUPERSONIC_VERSION:-latest}/conf/db/data-postgres.sql
+          PGPASSWORD=supersonic_password psql -hsupersonic_postgres -U supersonic_user -d postgres < /usr/src/app/supersonic-standalone-${SUPERSONIC_VERSION:-latest}/conf/db/data-postgres-demo.sql 
+        else
+          echo 'Database already initialized.'
+        fi"
     dns:
       - 114.114.114.114
       - 8.8.8.8
@@ -79,17 +55,14 @@ services:
     privileged: true
     container_name: supersonic_standalone
     environment:
-      DB_HOST: supersonic_mysql
-      DB_NAME: supersonic_db
+      DB_HOST: supersonic_postgres
+      DB_NAME: postgres
       DB_USERNAME: supersonic_user
       DB_PASSWORD: supersonic_password
-      CHROMA_HOST: supersonic_chroma
     ports:
       - "9080:9080"
     depends_on:
-      chroma:
-        condition: service_healthy
-      mysql:
+      postgres:
         condition: service_healthy
       db_init:
         condition: service_completed_successfully
@@ -112,8 +85,7 @@ services:
       #          propagation: rprivate
       #          create_host_path: true
 volumes:
-  mysql_data:
-  chroma_data:
+  postgres_data:
   supersonic_data:
 
 networks:

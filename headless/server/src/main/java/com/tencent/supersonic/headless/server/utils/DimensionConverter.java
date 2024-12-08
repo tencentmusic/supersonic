@@ -105,6 +105,8 @@ public class DimensionConverter {
         dimensionResp.setType(getType(dimensionDO.getType()));
         dimensionResp.setTypeEnum(TypeEnums.DIMENSION);
         dimensionResp.setIsTag(dimensionDO.getIsTag());
+        dimensionResp.setDomainId(modelRespMap
+                .getOrDefault(dimensionResp.getModelId(), new ModelResp()).getDomainId());
         return dimensionResp;
     }
 

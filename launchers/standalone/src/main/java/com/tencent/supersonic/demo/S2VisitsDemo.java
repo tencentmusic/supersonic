@@ -27,7 +27,7 @@ import com.tencent.supersonic.common.util.ChatAppManager;
 import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.headless.api.pojo.DataSetDetail;
 import com.tencent.supersonic.headless.api.pojo.DataSetModelConfig;
-import com.tencent.supersonic.headless.api.pojo.Dim;
+import com.tencent.supersonic.headless.api.pojo.Dimension;
 import com.tencent.supersonic.headless.api.pojo.DimensionTimeTypeParams;
 import com.tencent.supersonic.headless.api.pojo.Field;
 import com.tencent.supersonic.headless.api.pojo.FieldParam;
@@ -199,9 +199,9 @@ public class S2VisitsDemo extends S2BaseDemo {
         identifiers.add(new Identify("用户", IdentifyType.primary.name(), "user_name", 1));
         modelDetail.setIdentifiers(identifiers);
 
-        List<Dim> dimensions = new ArrayList<>();
-        dimensions.add(new Dim("部门", "department", DimensionType.categorical, 1));
-        // dimensions.add(new Dim("用户", "user_name", DimensionType.categorical, 1));
+        List<Dimension> dimensions = new ArrayList<>();
+        dimensions.add(new Dimension("部门", "department", DimensionType.categorical, 1));
+        // dimensions.add(new Dimension("用户", "user_name", DimensionType.categorical, 1));
         modelDetail.setDimensions(dimensions);
         List<Field> fields = Lists.newArrayList();
         fields.add(Field.builder().fieldName("user_name").dataType("Varchar").build());
@@ -230,11 +230,11 @@ public class S2VisitsDemo extends S2BaseDemo {
         identifiers.add(new Identify("用户名", IdentifyType.foreign.name(), "user_name", 0));
         modelDetail.setIdentifiers(identifiers);
 
-        List<Dim> dimensions = new ArrayList<>();
-        Dim dimension1 = new Dim("", "imp_date", DimensionType.partition_time, 0);
+        List<Dimension> dimensions = new ArrayList<>();
+        Dimension dimension1 = new Dimension("", "imp_date", DimensionType.partition_time, 0);
         dimension1.setTypeParams(new DimensionTimeTypeParams());
         dimensions.add(dimension1);
-        Dim dimension2 = new Dim("", "page", DimensionType.categorical, 0);
+        Dimension dimension2 = new Dimension("", "page", DimensionType.categorical, 0);
         dimension2.setExpr("page");
         dimensions.add(dimension2);
         modelDetail.setDimensions(dimensions);
@@ -274,11 +274,11 @@ public class S2VisitsDemo extends S2BaseDemo {
         identifiers.add(new Identify("用户", IdentifyType.foreign.name(), "user_name", 0));
         modelDetail.setIdentifiers(identifiers);
 
-        List<Dim> dimensions = new ArrayList<>();
-        Dim dimension1 = new Dim("数据日期", "imp_date", DimensionType.partition_time, 1);
+        List<Dimension> dimensions = new ArrayList<>();
+        Dimension dimension1 = new Dimension("数据日期", "imp_date", DimensionType.partition_time, 1);
         dimension1.setTypeParams(new DimensionTimeTypeParams());
         dimensions.add(dimension1);
-        Dim dimension2 = new Dim("页面", "page", DimensionType.categorical, 1);
+        Dimension dimension2 = new Dimension("页面", "page", DimensionType.categorical, 1);
         dimension2.setExpr("page");
         dimensions.add(dimension2);
         modelDetail.setDimensions(dimensions);
