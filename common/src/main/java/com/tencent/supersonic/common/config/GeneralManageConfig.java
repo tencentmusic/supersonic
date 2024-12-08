@@ -8,17 +8,21 @@ import java.util.List;
 @Component
 public class GeneralManageConfig {
 
-    // 使用 @Value 注解注入配置文件中的 chat.model.ids 配置
-    @Value("${chat.model.ids:9}")
+    @Value("${s2.manage.chat.agent.ids:1,3,5}")
+    private List<Long> chatAgentIds;
+
+    @Value("${s2.manage.chat.model.ids:9}")
     private List<Integer> chatModelIds;
 
-    @Value("${chat.database.ids:1}")
+    @Value("${s2.manage.chat.dataBase.ids:1}")
     private List<Long> chatDatabaseIds;
 
-    @Value("${chat.domain.ids:1,3}")
+    @Value("${s2.manage.chat.domain.ids:1,3}")
     private List<Long> chatDomainIds;
 
-    // 获取通用模型的 IDs
+    public List<Long> getChatAgentIds() {
+        return chatAgentIds;
+    }
     public List<Integer> getChatModelIds() {
         return chatModelIds;
     }
