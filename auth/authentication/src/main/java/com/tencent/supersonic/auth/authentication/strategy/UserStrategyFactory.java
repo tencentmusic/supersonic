@@ -1,10 +1,10 @@
 package com.tencent.supersonic.auth.authentication.strategy;
 
-import javax.annotation.PostConstruct;
 
 import com.tencent.supersonic.auth.api.authentication.config.AuthenticationConfig;
 import com.tencent.supersonic.auth.api.authentication.service.UserStrategy;
 import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
+import jakarta.annotation.PostConstruct;
 import lombok.Data;
 import org.springframework.context.annotation.Configuration;
 
