@@ -306,6 +306,16 @@ public class JoinRender extends Renderer {
                                     r.getMiddle(), tableView.getAlias() + "." + r.getRight()))
                             .collect(Collectors.toList()));
                     matchJoinRelation.setJoinType(joinRelation.getJoinType());
+                    // Added join condition judgment to solve the problem of join condition order
+                } else if (joinRelation.getLeft()
+                        .equalsIgnoreCase(tableView.getDataModel().getName())
+                        && before.containsKey(joinRelation.getRight())) {
+                    matchJoinRelation.setJoinCondition(joinRelation.getJoinCondition().stream()
+                            .map(r -> Triple.of(
+                                    before.get(joinRelation.getRight()) + "." + r.getRight(),
+                                    r.getMiddle(), tableView.getAlias() + "." + r.getLeft()))
+                            .collect(Collectors.toList()));
+                    matchJoinRelation.setJoinType(joinRelation.getJoinType());
                 }
             }
         }
