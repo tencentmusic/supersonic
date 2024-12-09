@@ -343,18 +343,25 @@ public class DataModelNode extends SemanticNode {
             Map<String, Long> orders = new HashMap<>();
             joinDataModelNames.add(baseDataModel.getName());
             orders.put(baseDataModel.getName(), 0L);
+
+            // Adjust the order of tables in the data source to facilitate subsequent joins
+            ArrayList<String> joinTables = new ArrayList<>();
             for (JoinRelation joinRelation : ontology.getJoinRelations()) {
                 if (joinDataModelNames.contains(joinRelation.getLeft())
                         && joinDataModelNames.contains(joinRelation.getRight())) {
-                    orders.put(joinRelation.getLeft(), 0L);
-                    orders.put(joinRelation.getRight(), 1L);
+                    joinTables.add(joinRelation.getLeft());
+                    joinTables.add(joinRelation.getRight());
                 }
             }
-            orders.entrySet().stream().sorted(Map.Entry.comparingByValue()).forEach(d -> {
-                joinDataModels.add(ontology.getDataModelMap().get(d.getKey()));
-            });
+            for (String joinTable : joinTables) {
+                orders.put(joinTable, orders.getOrDefault(joinTable, 0L) + 1L);
+            }
+            orders.entrySet().stream()
+                    .sorted((entry1, entry2) -> entry2.getValue().compareTo(entry1.getValue())) // 倒序排序
+                    .forEach(d -> {
+                        joinDataModels.add(ontology.getDataModelMap().get(d.getKey()));
+                    });
         }
-
         return joinDataModels;
     }
 
