@@ -32,7 +32,7 @@ CREATE TABLE IF NOT EXISTS `s2_chat_query`
     `create_time`       TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     `query_text`          mediumtext,
     `user_name`         varchar(150)  DEFAULT NULL COMMENT '',
-    `query_state`             int(1) DEFAULT NULL,
+    `query_state`             int DEFAULT NULL,
     `chat_id`           BIGINT NOT NULL , -- context chat id
     `query_result` mediumtext NOT NULL ,
     `score`             int DEFAULT '0',
@@ -61,7 +61,7 @@ CREATE TABLE IF NOT EXISTS `s2_chat_statistics`
     `user_name`         varchar(150)  DEFAULT NULL COMMENT '',
     `query_text`          varchar(200),
     `interface_name`         varchar(100)  DEFAULT NULL COMMENT '',
-    `cost` INT(6) NOT NULL ,
+    `cost` INT NOT NULL ,
     `type` INT NOT NULL ,
     `create_time`       TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );

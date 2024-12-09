@@ -1,9 +1,8 @@
 package com.tencent.supersonic.headless.api.pojo.request;
 
-import javax.validation.constraints.NotNull;
-
 import com.tencent.supersonic.common.pojo.RecordInfo;
 import com.tencent.supersonic.headless.api.pojo.enums.TagDefineType;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 @Data

@@ -1,8 +1,7 @@
 package com.tencent.supersonic.common.pojo;
 
-import javax.validation.constraints.NotBlank;
-
 import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
 import java.util.List;

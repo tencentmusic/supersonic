@@ -1,13 +1,12 @@
 package com.tencent.supersonic.headless.server.aspect;
 
-import javax.servlet.http.HttpServletRequest;
-
 import com.tencent.supersonic.common.pojo.Pair;
 import com.tencent.supersonic.common.pojo.exception.InvalidArgumentException;
 import com.tencent.supersonic.common.util.SignatureUtils;
 import com.tencent.supersonic.headless.api.pojo.enums.AppStatus;
 import com.tencent.supersonic.headless.api.pojo.response.AppDetailResp;
 import com.tencent.supersonic.headless.server.service.AppService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.aspectj.lang.ProceedingJoinPoint;

@@ -10,7 +10,7 @@
         <result column="trace_id" property="traceId"/>
         <result column="model_id" property="modelId"/>
         <result column="data_set_id" property="dataSetId"/>
-        <result column="user" property="user"/>
+        <result column="user" property="queryUser"/>
         <result column="created_at" property="createdAt"/>
         <result column="query_type" property="queryType"/>
         <result column="query_type_back" property="queryTypeBack"/>

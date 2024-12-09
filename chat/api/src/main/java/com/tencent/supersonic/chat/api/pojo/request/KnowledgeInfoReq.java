@@ -1,8 +1,7 @@
 package com.tencent.supersonic.chat.api.pojo.request;
 
-import javax.validation.constraints.NotNull;
-
 import com.tencent.supersonic.common.pojo.enums.TypeEnums;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 /** information about dictionary about the model */
