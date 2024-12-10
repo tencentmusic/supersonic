@@ -20,11 +20,16 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Set up JDK ${{ matrix.java-version }}  
-        uses: actions/setup-java@v2  
-        with:  
-          java-version: ${{ matrix.java-version }}  
+      - name: Set up JDK ${{ matrix.java-version }}
+        uses: actions/setup-java@v2
+        with:
+          java-version: ${{ matrix.java-version }}
           distribution: 'adopt'
+
+      - name: Set up Maven
+        uses: actions/setup-maven@v1
+        with:
+          maven-version: '3.8.6'
 
       - name: Verify Java and Maven installation
         run: |
@@ -43,3 +48,4 @@ jobs:
 
       - name: Test with Maven
         run: mvn test
+
