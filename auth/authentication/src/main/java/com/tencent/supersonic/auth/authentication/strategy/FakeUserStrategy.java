@@ -10,6 +10,13 @@ import org.springframework.stereotype.Service;
 @Service
 public class FakeUserStrategy implements UserStrategy {
 
+    public static final String STRATEGY_NAME = "fake";
+
+    @Override
+    public String getStrategyName() {
+        return STRATEGY_NAME;
+    }
+
     @Override
     public boolean accept(boolean isEnableAuthentication) {
         return !isEnableAuthentication;
