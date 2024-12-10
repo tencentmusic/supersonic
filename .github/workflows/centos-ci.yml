@@ -26,10 +26,20 @@ jobs:
           java-version: ${{ matrix.java-version }}
           distribution: 'adopt'
 
-      - name: Set up Maven
-        uses: actions/setup-maven@v1
-        with:
-          maven-version: '3.8.6'
+      - name: Reset DNF repositories
+        run: |
+          cd /etc/yum.repos.d/
+          sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-*
+          sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-*
+
+      - name: Update DNF package index
+        run: dnf makecache
+
+      - name: Install Maven with retry
+        run: |
+          for i in {1..5}; do
+              dnf install -y maven && break || sleep 15
+          done
 
       - name: Verify Java and Maven installation
         run: |
