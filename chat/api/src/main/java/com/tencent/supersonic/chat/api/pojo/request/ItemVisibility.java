@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Data
-@ToString
 public class ItemVisibility {
 
     /** invisible dimensions */

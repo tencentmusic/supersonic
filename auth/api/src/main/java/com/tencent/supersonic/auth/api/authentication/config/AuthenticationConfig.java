@@ -18,6 +18,9 @@ public class AuthenticationConfig {
     @Value("${s2.authentication.include.path:/api}")
     private String includePath;
 
+    @Value("${s2.authentication.strategy:http}")
+    private String strategy;
+
     @Value("${s2.authentication.enable:false}")
     private boolean enabled;
 

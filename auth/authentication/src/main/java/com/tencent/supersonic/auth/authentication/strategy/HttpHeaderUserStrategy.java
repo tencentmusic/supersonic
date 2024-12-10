@@ -15,10 +15,16 @@ import java.util.Optional;
 @Service
 public class HttpHeaderUserStrategy implements UserStrategy {
 
+    public static final String STRATEGY_NAME = "http";
     private final TokenService tokenService;
 
     public HttpHeaderUserStrategy(TokenService tokenService) {
         this.tokenService = tokenService;
+    }
+
+    @Override
+    public String getStrategyName() {
+        return STRATEGY_NAME;
     }
 
     @Override
