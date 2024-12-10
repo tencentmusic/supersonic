@@ -100,6 +100,7 @@ const MetricTrend: React.FC<Props> = ({
               <MultiMetricsTrendChart
                 dateColumnName={dateColumnName}
                 metricFields={metricFields}
+                question={question}
                 resultList={queryResults}
                 triggerResize={triggerResize}
                 chartType={chartType}
