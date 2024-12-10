@@ -64,6 +64,7 @@ const AgentsSection: React.FC<Props> = ({
               }}
             >
               <Switch
+                key={agent.id}
                 size="small"
                 defaultChecked={status === 1}
                 onChange={(value) => {
