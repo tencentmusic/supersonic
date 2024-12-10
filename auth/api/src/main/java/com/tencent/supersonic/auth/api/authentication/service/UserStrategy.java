@@ -6,6 +6,8 @@ import jakarta.servlet.http.HttpServletResponse;
 
 public interface UserStrategy {
 
+    String getStrategyName();
+
     boolean accept(boolean isEnableAuthentication);
 
     User findUser(HttpServletRequest request, HttpServletResponse response);
