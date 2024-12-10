@@ -7,6 +7,8 @@ import com.tencent.supersonic.common.pojo.User;
 
 public interface UserStrategy {
 
+    String getStrategyName();
+
     boolean accept(boolean isEnableAuthentication);
 
     User findUser(HttpServletRequest request, HttpServletResponse response);
