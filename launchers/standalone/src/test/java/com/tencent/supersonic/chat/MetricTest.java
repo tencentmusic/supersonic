@@ -39,6 +39,7 @@ public class MetricTest extends BaseTest {
     }
 
     @Test
+    @SetSystemProperty(key = "s2.test", value = "true")
     public void testMetricModel() throws Exception {
         QueryResult actualResult = submitNewChat("超音数 访问次数", agent.getId());
 
@@ -56,6 +57,7 @@ public class MetricTest extends BaseTest {
 
         assertQueryResult(expectedResult, actualResult);
         assert actualResult.getQueryResults().size() == 1;
+        assert actualResult.getQuerySql().contains("s2_pv_uv_statis");
     }
 
     @Test

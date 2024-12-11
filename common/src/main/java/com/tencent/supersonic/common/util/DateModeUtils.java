@@ -126,19 +126,20 @@ public class DateModeUtils {
         return ImmutablePair.of(start, dateDate.getEndDate());
     }
 
-    public String recentMonthStr(LocalDate endData, Long unit, String dateFormatStr, DateConf dateInfo) {
+    public String recentMonthStr(LocalDate endData, Long unit, String dateFormatStr,
+            DateConf dateInfo) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern(dateFormatStr);
         String endStr = endData.format(formatter);
         String start = endData.minusMonths(unit).format(formatter);
-        return String.format("(%s >= '%s' and %s <= '%s')", dateInfo.getDateField(), start, dateInfo.getDateField(),
-                endStr);
+        return String.format("(%s >= '%s' and %s <= '%s')", dateInfo.getDateField(), start,
+                dateInfo.getDateField(), endStr);
     }
 
     public String recentMonthStr(ItemDateResp dateDate, DateConf dateInfo) {
         List<ImmutablePair<String, String>> range = recentMonth(dateDate, dateInfo);
         if (range.size() == 1) {
-            return String.format("(%s >= '%s' and %s <= '%s')", dateInfo.getDateField(), range.get(0).left,
-                    dateInfo.getDateField(), range.get(0).right);
+            return String.format("(%s >= '%s' and %s <= '%s')", dateInfo.getDateField(),
+                    range.get(0).left, dateInfo.getDateField(), range.get(0).right);
         }
         if (range.size() > 0) {
             StringJoiner joiner = new StringJoiner(",");
@@ -176,8 +177,8 @@ public class DateModeUtils {
     public String recentWeekStr(LocalDate endData, Long unit, DateConf dataInfo) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DAY_FORMAT);
         String start = endData.minusDays(unit * 7).format(formatter);
-        return String.format("(%s >= '%s' and %s <= '%s')", dataInfo.getDateField(), start, dataInfo.getDateField(),
-                endData.format(formatter));
+        return String.format("(%s >= '%s' and %s <= '%s')", dataInfo.getDateField(), start,
+                dataInfo.getDateField(), endData.format(formatter));
     }
 
     public String recentWeekStr(ItemDateResp dateDate, DateConf dateInfo) {

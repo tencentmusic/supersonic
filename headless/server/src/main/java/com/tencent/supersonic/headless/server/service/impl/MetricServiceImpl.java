@@ -8,23 +8,58 @@ import com.github.pagehelper.PageInfo;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.tencent.supersonic.common.jsqlparser.SqlSelectFunctionHelper;
-import com.tencent.supersonic.common.pojo.*;
-import com.tencent.supersonic.common.pojo.enums.*;
+import com.tencent.supersonic.common.pojo.Aggregator;
+import com.tencent.supersonic.common.pojo.DataEvent;
+import com.tencent.supersonic.common.pojo.DataItem;
+import com.tencent.supersonic.common.pojo.DateConf;
+import com.tencent.supersonic.common.pojo.Filter;
+import com.tencent.supersonic.common.pojo.User;
+import com.tencent.supersonic.common.pojo.enums.AuthType;
+import com.tencent.supersonic.common.pojo.enums.EventType;
+import com.tencent.supersonic.common.pojo.enums.QueryType;
+import com.tencent.supersonic.common.pojo.enums.StatusEnum;
+import com.tencent.supersonic.common.pojo.enums.TypeEnums;
 import com.tencent.supersonic.common.util.BeanMapper;
-import com.tencent.supersonic.headless.api.pojo.*;
+import com.tencent.supersonic.headless.api.pojo.DrillDownDimension;
+import com.tencent.supersonic.headless.api.pojo.Measure;
+import com.tencent.supersonic.headless.api.pojo.MeasureParam;
+import com.tencent.supersonic.headless.api.pojo.MetaFilter;
+import com.tencent.supersonic.headless.api.pojo.MetricParam;
+import com.tencent.supersonic.headless.api.pojo.MetricQueryDefaultConfig;
+import com.tencent.supersonic.headless.api.pojo.SchemaElementMatch;
+import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
+import com.tencent.supersonic.headless.api.pojo.SchemaItem;
 import com.tencent.supersonic.headless.api.pojo.enums.MapModeEnum;
 import com.tencent.supersonic.headless.api.pojo.enums.MetricDefineType;
-import com.tencent.supersonic.headless.api.pojo.request.*;
-import com.tencent.supersonic.headless.api.pojo.response.*;
+import com.tencent.supersonic.headless.api.pojo.request.MetaBatchReq;
+import com.tencent.supersonic.headless.api.pojo.request.MetricBaseReq;
+import com.tencent.supersonic.headless.api.pojo.request.MetricReq;
+import com.tencent.supersonic.headless.api.pojo.request.PageMetricReq;
+import com.tencent.supersonic.headless.api.pojo.request.QueryMapReq;
+import com.tencent.supersonic.headless.api.pojo.request.QueryMetricReq;
+import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
+import com.tencent.supersonic.headless.api.pojo.response.DataSetMapInfo;
+import com.tencent.supersonic.headless.api.pojo.response.DataSetResp;
+import com.tencent.supersonic.headless.api.pojo.response.DimensionResp;
+import com.tencent.supersonic.headless.api.pojo.response.MapInfoResp;
+import com.tencent.supersonic.headless.api.pojo.response.MetricResp;
+import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
 import com.tencent.supersonic.headless.server.facade.service.ChatLayerService;
 import com.tencent.supersonic.headless.server.persistence.dataobject.CollectDO;
 import com.tencent.supersonic.headless.server.persistence.dataobject.MetricDO;
 import com.tencent.supersonic.headless.server.persistence.dataobject.MetricQueryDefaultConfigDO;
 import com.tencent.supersonic.headless.server.persistence.mapper.MetricDOMapper;
 import com.tencent.supersonic.headless.server.persistence.repository.MetricRepository;
-import com.tencent.supersonic.headless.server.pojo.*;
-import com.tencent.supersonic.headless.server.service.*;
+import com.tencent.supersonic.headless.server.pojo.DimensionsFilter;
+import com.tencent.supersonic.headless.server.pojo.MetricFilter;
+import com.tencent.supersonic.headless.server.pojo.MetricsFilter;
+import com.tencent.supersonic.headless.server.pojo.ModelCluster;
+import com.tencent.supersonic.headless.server.pojo.ModelFilter;
+import com.tencent.supersonic.headless.server.service.CollectService;
+import com.tencent.supersonic.headless.server.service.DataSetService;
+import com.tencent.supersonic.headless.server.service.DimensionService;
+import com.tencent.supersonic.headless.server.service.MetricService;
+import com.tencent.supersonic.headless.server.service.ModelService;
 import com.tencent.supersonic.headless.server.utils.AliasGenerateHelper;
 import com.tencent.supersonic.headless.server.utils.MetricCheckUtils;
 import com.tencent.supersonic.headless.server.utils.MetricConverter;
@@ -37,7 +72,18 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -656,38 +702,24 @@ public class MetricServiceImpl extends ServiceImpl<MetricDOMapper, MetricDO>
                 && !metricResp.getDefaultAgg().isEmpty())) {
             return metricResp.getDefaultAgg();
         }
-        // FIELD define will get from expr
-        if (MetricDefineType.FIELD.equals(metricResp.getMetricDefineType())) {
-            return SqlSelectFunctionHelper.getFirstAggregateFunctions(metricResp.getExpr());
-        }
-        // METRIC define will get from first metric
-        if (MetricDefineType.METRIC.equals(metricResp.getMetricDefineType())) {
-            if (!CollectionUtils.isEmpty(metricResp.getMetricDefineByMetricParams().getMetrics())) {
-                MetricParam metricParam =
-                        metricResp.getMetricDefineByMetricParams().getMetrics().get(0);
-                MetricResp firstMetricResp =
-                        getMetric(modelResp.getDomainId(), metricParam.getBizName());
-                if (Objects.nonNull(firstMetricResp)) {
-                    return getDefaultAgg(firstMetricResp, modelResp);
-                }
-                return "";
-            }
-        }
         // Measure define will get from first measure
-        List<Measure> measures = modelResp.getModelDetail().getMeasures();
-        List<MeasureParam> measureParams =
-                metricResp.getMetricDefineByMeasureParams().getMeasures();
-        if (CollectionUtils.isEmpty(measureParams)) {
-            return "";
-        }
-        MeasureParam firstMeasure = measureParams.get(0);
+        if (MetricDefineType.MEASURE.equals(metricResp.getMetricDefineType())) {
+            List<Measure> measures = modelResp.getModelDetail().getMeasures();
+            List<MeasureParam> measureParams =
+                    metricResp.getMetricDefineByMeasureParams().getMeasures();
+            if (CollectionUtils.isEmpty(measureParams)) {
+                return null;
+            }
+            MeasureParam firstMeasure = measureParams.get(0);
 
-        for (Measure measure : measures) {
-            if (measure.getBizName().equalsIgnoreCase(firstMeasure.getBizName())) {
-                return measure.getAgg();
+            for (Measure measure : measures) {
+                if (measure.getBizName().equalsIgnoreCase(firstMeasure.getBizName())) {
+                    return measure.getAgg();
+                }
             }
         }
-        return "";
+
+        return null;
     }
 
     @Override
