@@ -37,9 +37,9 @@ jobs:
 
       - name: Install Maven with retry
         run: |
-            for i in {1..5}; do
+          for i in {1..5}; do
               dnf install -y maven && break || sleep 15
-            done
+          done
 
       - name: Verify Java and Maven installation
         run: |
@@ -58,3 +58,4 @@ jobs:
 
       - name: Test with Maven
         run: mvn test
+

@@ -1,8 +1,7 @@
 package com.tencent.supersonic.common.pojo;
 
-import javax.validation.constraints.NotBlank;
-
 import com.google.common.base.Objects;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
 import static com.tencent.supersonic.common.pojo.Constants.ASC_UPPER;

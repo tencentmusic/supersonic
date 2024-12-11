@@ -50,8 +50,8 @@ CREATE TABLE IF NOT EXISTS `company` (
     `company_established_time` varchar(20) NOT NULL ,
     `founder` varchar(20) NOT NULL ,
     `ceo` varchar(20) NOT NULL ,
-    `annual_turnover` bigint(15)  ,
-    `employee_count` int(7) ,
+    `annual_turnover` bigint  ,
+    `employee_count` int ,
     PRIMARY KEY (`company_id`)
     );
 
@@ -61,15 +61,15 @@ CREATE TABLE IF NOT EXISTS `brand` (
     `brand_established_time` varchar(20) NOT NULL ,
     `company_id` varchar(50) NOT NULL ,
     `legal_representative` varchar(20) NOT NULL ,
-    `registered_capital` bigint(15)  ,
+    `registered_capital` bigint  ,
     PRIMARY KEY (`brand_id`)
     );
 
 CREATE TABLE IF NOT EXISTS `brand_revenue` (
     `year_time` varchar(10) NOT NULL ,
     `brand_id` varchar(50) NOT NULL ,
-    `revenue` bigint(15) NOT NULL,
-    `profit` bigint(15) NOT NULL ,
+    `revenue` bigint NOT NULL,
+    `profit` bigint NOT NULL ,
     `revenue_growth_year_on_year` double NOT NULL ,
     `profit_growth_year_on_year` double NOT NULL
     );

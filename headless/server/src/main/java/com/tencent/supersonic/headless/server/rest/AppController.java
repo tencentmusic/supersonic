@@ -1,8 +1,5 @@
 package com.tencent.supersonic.headless.server.rest;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import com.github.pagehelper.PageInfo;
 import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
 import com.tencent.supersonic.common.pojo.User;
@@ -11,6 +8,8 @@ import com.tencent.supersonic.headless.api.pojo.request.AppReq;
 import com.tencent.supersonic.headless.api.pojo.response.AppDetailResp;
 import com.tencent.supersonic.headless.api.pojo.response.AppResp;
 import com.tencent.supersonic.headless.server.service.AppService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;

@@ -1,9 +1,8 @@
 package com.tencent.supersonic.headless.api.pojo.request;
 
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
-
 import com.tencent.supersonic.common.pojo.enums.TypeEnums;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 import java.util.List;
