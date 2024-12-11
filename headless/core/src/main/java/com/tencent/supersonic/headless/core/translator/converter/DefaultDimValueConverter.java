@@ -41,7 +41,6 @@ public class DefaultDimValueConverter implements QueryConverter {
         }
         String sql = queryStatement.getSqlQueryParam().getSql();
         List<String> whereFields = SqlSelectHelper.getWhereFields(sql).stream()
-                .filter(field -> !TimeDimensionEnum.containsTimeDimension(field))
                 .collect(Collectors.toList());
         if (!CollectionUtils.isEmpty(whereFields)) {
             return;

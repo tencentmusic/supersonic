@@ -1,17 +1,7 @@
 package com.tencent.supersonic.headless.server.utils;
 
-import com.tencent.supersonic.common.pojo.Aggregator;
-import com.tencent.supersonic.common.pojo.Constants;
-import com.tencent.supersonic.common.pojo.DateConf;
-import com.tencent.supersonic.common.pojo.Filter;
-import com.tencent.supersonic.common.pojo.Order;
-import com.tencent.supersonic.common.pojo.User;
-import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
-import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
-import com.tencent.supersonic.common.pojo.enums.StatusEnum;
-import com.tencent.supersonic.common.pojo.enums.TaskStatusEnum;
-import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
-import com.tencent.supersonic.common.pojo.enums.TypeEnums;
+import com.tencent.supersonic.common.pojo.*;
+import com.tencent.supersonic.common.pojo.enums.*;
 import com.tencent.supersonic.common.util.BeanMapper;
 import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.headless.api.pojo.Dimension;
@@ -20,13 +10,7 @@ import com.tencent.supersonic.headless.api.pojo.request.DictItemReq;
 import com.tencent.supersonic.headless.api.pojo.request.QuerySqlReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
 import com.tencent.supersonic.headless.api.pojo.request.SemanticQueryReq;
-import com.tencent.supersonic.headless.api.pojo.response.DictItemResp;
-import com.tencent.supersonic.headless.api.pojo.response.DictTaskResp;
-import com.tencent.supersonic.headless.api.pojo.response.DimensionResp;
-import com.tencent.supersonic.headless.api.pojo.response.MetricResp;
-import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
-import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
-import com.tencent.supersonic.headless.api.pojo.response.TagResp;
+import com.tencent.supersonic.headless.api.pojo.response.*;
 import com.tencent.supersonic.headless.server.facade.service.SemanticLayerService;
 import com.tencent.supersonic.headless.server.persistence.dataobject.DictConfDO;
 import com.tencent.supersonic.headless.server.persistence.dataobject.DictTaskDO;
@@ -45,22 +29,9 @@ import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.StringJoiner;
+import java.util.*;
 
-import static com.tencent.supersonic.common.pojo.Constants.AND_UPPER;
-import static com.tencent.supersonic.common.pojo.Constants.APOSTROPHE;
-import static com.tencent.supersonic.common.pojo.Constants.COMMA;
-import static com.tencent.supersonic.common.pojo.Constants.POUND;
-import static com.tencent.supersonic.common.pojo.Constants.SPACE;
+import static com.tencent.supersonic.common.pojo.Constants.*;
 
 @Slf4j
 @Component
@@ -456,14 +427,14 @@ public class DictUtils {
         return joiner.toString();
     }
 
-    public String defaultDateFilter() {
+    public String defaultDateFilter(DateConf dateConf) {
         String format = itemValueDateFormat;
         String start = LocalDate.now().minusDays(itemValueDateStart)
                 .format(DateTimeFormatter.ofPattern(format));
         String end = LocalDate.now().minusDays(itemValueDateEnd)
                 .format(DateTimeFormatter.ofPattern(format));
-        return String.format("( %s >= '%s' and %s <= '%s' )", TimeDimensionEnum.DAY.getName(),
-                start, TimeDimensionEnum.DAY.getName(), end);
+        return String.format("( %s >= '%s' and %s <= '%s' )", dateConf.getDateField(), start,
+                dateConf.getDateField(), end);
     }
 
     private String generateDictDateFilter(DictItemResp dictItemResp) {
@@ -473,7 +444,7 @@ public class DictUtils {
         }
         // 未进行设置
         if (Objects.isNull(config) || Objects.isNull(config.getDateConf())) {
-            return defaultDateFilter();
+            return defaultDateFilter(config.getDateConf());
         }
         // 全表扫描
         if (DateConf.DateMode.ALL.equals(config.getDateConf().getDateMode())) {
@@ -481,9 +452,9 @@ public class DictUtils {
         }
         // 静态日期
         if (DateConf.DateMode.BETWEEN.equals(config.getDateConf().getDateMode())) {
-            return String.format("( %s >= '%s' and %s <= '%s' )", TimeDimensionEnum.DAY.getName(),
-                    config.getDateConf().getStartDate(), TimeDimensionEnum.DAY.getName(),
-                    config.getDateConf().getEndDate());
+            return String.format("( %s >= '%s' and %s <= '%s' )",
+                    config.getDateConf().getDateField(), config.getDateConf().getStartDate(),
+                    config.getDateConf().getDateField(), config.getDateConf().getEndDate());
         }
         // 动态日期
         if (DateConf.DateMode.RECENT.equals(config.getDateConf().getDateMode())) {
@@ -519,8 +490,8 @@ public class DictUtils {
                 String end = LocalDate.now().minusDays(0)
                         .format(DateTimeFormatter.ofPattern(dateFormat));
                 return String.format("( %s > '%s' and %s <= '%s' )",
-                        TimeDimensionEnum.DAY.getName(), start, TimeDimensionEnum.DAY.getName(),
-                        end);
+                        dictItemResp.getConfig().getDateConf().getDateField(), start,
+                        dictItemResp.getConfig().getDateConf().getDateField(), end);
             }
         }
         return "";

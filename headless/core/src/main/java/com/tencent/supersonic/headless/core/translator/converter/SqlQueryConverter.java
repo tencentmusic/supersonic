@@ -5,7 +5,6 @@ import com.tencent.supersonic.common.jsqlparser.SqlSelectFunctionHelper;
 import com.tencent.supersonic.common.jsqlparser.SqlSelectHelper;
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.enums.EngineType;
-import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.headless.api.pojo.SchemaItem;
 import com.tencent.supersonic.headless.api.pojo.enums.AggOption;
@@ -115,8 +114,8 @@ public class SqlQueryConverter implements QueryConverter {
         Map<String, String> dimensionLowerToNameMap = semanticSchemaResp.getDimensions().stream()
                 .collect(Collectors.toMap(entry -> entry.getBizName().toLowerCase(),
                         SchemaItem::getBizName, (k1, k2) -> k1));
-        dimensionLowerToNameMap.put(TimeDimensionEnum.DAY.getName(),
-                TimeDimensionEnum.DAY.getName());
+        // dimensionLowerToNameMap.put(TimeDimensionEnum.DAY.getName(),
+        // TimeDimensionEnum.DAY.getName());
         return allFields.stream()
                 .filter(entry -> dimensionLowerToNameMap.containsKey(entry.toLowerCase()))
                 .map(entry -> dimensionLowerToNameMap.get(entry.toLowerCase()))
@@ -167,8 +166,6 @@ public class SqlQueryConverter implements QueryConverter {
                 entry -> getPairStream(entry.getAlias(), entry.getName(), entry.getBizName()))
                 .collect(Collectors.toMap(Pair::getLeft, Pair::getRight, (k1, k2) -> k1));
 
-        dimensionResults.putAll(TimeDimensionEnum.getChNameToNameMap());
-        dimensionResults.putAll(TimeDimensionEnum.getNameToNameMap());
         dimensionResults.putAll(metricResults);
         return dimensionResults;
     }

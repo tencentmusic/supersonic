@@ -5,8 +5,9 @@ import com.google.common.collect.Sets;
 import com.tencent.supersonic.common.pojo.QueryColumn;
 import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.common.pojo.enums.TaskStatusEnum;
-import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
-import com.tencent.supersonic.headless.api.pojo.*;
+import com.tencent.supersonic.headless.api.pojo.DataSetSchema;
+import com.tencent.supersonic.headless.api.pojo.Dimension;
+import com.tencent.supersonic.headless.api.pojo.MetaFilter;
 import com.tencent.supersonic.headless.api.pojo.enums.SemanticType;
 import com.tencent.supersonic.headless.api.pojo.request.*;
 import com.tencent.supersonic.headless.api.pojo.response.*;
@@ -210,8 +211,10 @@ public class S2SemanticLayerService implements SemanticLayerService {
         List<Dimension> timeDims = modelResp.getTimeDimension();
         if (CollectionUtils.isNotEmpty(timeDims)) {
             sql = String.format("%s and %s >= '%s' and %s <= '%s'", sql,
-                    TimeDimensionEnum.DAY.getName(), queryDimValueReq.getDateInfo().getStartDate(),
-                    TimeDimensionEnum.DAY.getName(), queryDimValueReq.getDateInfo().getEndDate());
+                    queryDimValueReq.getDateInfo().getDateField(),
+                    queryDimValueReq.getDateInfo().getStartDate(),
+                    queryDimValueReq.getDateInfo().getDateField(),
+                    queryDimValueReq.getDateInfo().getEndDate());
         }
         if (StringUtils.isNotBlank(queryDimValueReq.getValue())) {
             sql += " AND " + queryDimValueReq.getBizName() + " LIKE '%"

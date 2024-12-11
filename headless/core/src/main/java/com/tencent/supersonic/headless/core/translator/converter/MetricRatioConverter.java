@@ -5,7 +5,6 @@ import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
 import com.tencent.supersonic.common.pojo.enums.DatePeriodEnum;
 import com.tencent.supersonic.common.pojo.enums.EngineType;
 import com.tencent.supersonic.common.util.ContextUtils;
-import com.tencent.supersonic.common.util.DateModeUtils;
 import com.tencent.supersonic.headless.api.pojo.enums.AggOption;
 import com.tencent.supersonic.headless.core.pojo.Database;
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;
@@ -350,15 +349,8 @@ public class MetricRatioConverter implements QueryConverter {
         return CollectionUtils.isEmpty(groups) ? aggStr : String.join(",", groups) + "," + aggStr;
     }
 
-    private String getGroupDimWithOutTime(StructQueryParam structQueryParam) {
-        String timeDim = getTimeDim(structQueryParam);
-        return structQueryParam.getGroups().stream().filter(f -> !f.equalsIgnoreCase(timeDim))
-                .collect(Collectors.joining(","));
-    }
-
     private static String getTimeDim(StructQueryParam structQueryParam) {
-        DateModeUtils dateModeUtils = ContextUtils.getContext().getBean(DateModeUtils.class);
-        return dateModeUtils.getSysDateCol(structQueryParam.getDateInfo());
+        return structQueryParam.getDateInfo().getDateField();
     }
 
     private static String getLimit(StructQueryParam structQueryParam) {
@@ -383,13 +375,6 @@ public class MetricRatioConverter implements QueryConverter {
             return alias + agg.getColumn();
         }
         return sqlGenerateUtils.getSelectField(agg);
-    }
-
-    private String getGroupBy(StructQueryParam structQueryParam) {
-        if (CollectionUtils.isEmpty(structQueryParam.getGroups())) {
-            return "";
-        }
-        return "group by " + String.join(",", structQueryParam.getGroups());
     }
 
     private static String getOrderBy(StructQueryParam structQueryParam) {

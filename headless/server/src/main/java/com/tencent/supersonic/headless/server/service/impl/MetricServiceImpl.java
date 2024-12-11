@@ -723,7 +723,7 @@ public class MetricServiceImpl extends ServiceImpl<MetricDOMapper, MetricDO>
         QueryStructReq queryStructReq = new QueryStructReq();
         DateConf dateInfo = queryMetricReq.getDateInfo();
         if (Objects.nonNull(dateInfo) && dateInfo.isGroupByDate()) {
-            queryStructReq.getGroups().add(dateInfo.getGroupByTimeDimension());
+            queryStructReq.getGroups().add(dateInfo.getDateField());
         }
         if (!CollectionUtils.isEmpty(dimensionBizNames)) {
             queryStructReq.getGroups().addAll(dimensionBizNames);

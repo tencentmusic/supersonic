@@ -7,14 +7,7 @@ import com.tencent.supersonic.headless.api.pojo.ModelDetail;
 import com.tencent.supersonic.headless.api.pojo.enums.ModelDefineType;
 import com.tencent.supersonic.headless.api.pojo.response.DatabaseResp;
 import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
-import com.tencent.supersonic.headless.core.adaptor.db.DbAdaptor;
-import com.tencent.supersonic.headless.core.adaptor.db.DbAdaptorFactory;
-import com.tencent.supersonic.headless.core.utils.SysTimeDimensionBuilder;
-import com.tencent.supersonic.headless.server.pojo.yaml.DataModelYamlTpl;
-import com.tencent.supersonic.headless.server.pojo.yaml.DimensionTimeTypeParamsTpl;
-import com.tencent.supersonic.headless.server.pojo.yaml.DimensionYamlTpl;
-import com.tencent.supersonic.headless.server.pojo.yaml.IdentifyYamlTpl;
-import com.tencent.supersonic.headless.server.pojo.yaml.MeasureYamlTpl;
+import com.tencent.supersonic.headless.server.pojo.yaml.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
@@ -30,8 +23,6 @@ public class ModelYamlManager {
     public static synchronized DataModelYamlTpl convert2YamlObj(ModelResp modelResp,
             DatabaseResp databaseResp) {
         ModelDetail modelDetail = modelResp.getModelDetail();
-        DbAdaptor engineAdaptor = DbAdaptorFactory.getEngineAdaptor(databaseResp.getType());
-        SysTimeDimensionBuilder.addSysTimeDimension(modelDetail.getDimensions(), engineAdaptor);
         DataModelYamlTpl dataModelYamlTpl = new DataModelYamlTpl();
         dataModelYamlTpl.setType(databaseResp.getType());
         BeanUtils.copyProperties(modelDetail, dataModelYamlTpl);

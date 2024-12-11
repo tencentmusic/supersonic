@@ -1,7 +1,6 @@
 package com.tencent.supersonic.common.pojo;
 
 import com.tencent.supersonic.common.pojo.enums.DatePeriodEnum;
-import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import com.tencent.supersonic.common.util.DateUtils;
 import lombok.Data;
 import org.springframework.util.CollectionUtils;
@@ -40,6 +39,8 @@ public class DateConf {
 
     private boolean groupByDate;
 
+    private String dateField;
+
     public List<String> getDateList() {
         if (!CollectionUtils.isEmpty(dateList)) {
             return dateList;
@@ -47,18 +48,6 @@ public class DateConf {
         String startDateStr = getStartDate();
         String endDateStr = getEndDate();
         return DateUtils.getDateList(startDateStr, endDateStr, getPeriod());
-    }
-
-    public String getGroupByTimeDimension() {
-        if (DatePeriodEnum.DAY.equals(period)) {
-            return TimeDimensionEnum.DAY.getName();
-        } else if (DatePeriodEnum.WEEK.equals(period)) {
-            return TimeDimensionEnum.WEEK.getName();
-        } else if (DatePeriodEnum.MONTH.equals(period)) {
-            return TimeDimensionEnum.MONTH.getName();
-        } else {
-            return TimeDimensionEnum.DAY.getName();
-        }
     }
 
     @Override

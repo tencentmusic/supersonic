@@ -74,6 +74,7 @@ public class DataUtils {
     public static DateConf getDateConf(DateConf.DateMode dateMode, Integer unit,
             DatePeriodEnum period, String startDate, String endDate) {
         DateConf dateInfo = new DateConf();
+        dateInfo.setDateField("imp_date");
         dateInfo.setUnit(unit);
         dateInfo.setDateMode(dateMode);
         dateInfo.setPeriod(period);
