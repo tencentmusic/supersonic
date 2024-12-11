@@ -46,6 +46,6 @@ public class TranslateTest extends BaseTest {
         assertNotNull(explain);
         assertNotNull(explain.getQuerySQL());
         assertTrue(explain.getQuerySQL().contains("department"));
-        assertTrue(explain.getQuerySQL().contains("pv"));
+        assertTrue(explain.getQuerySQL().contains("stay_hours"));
     }
 }

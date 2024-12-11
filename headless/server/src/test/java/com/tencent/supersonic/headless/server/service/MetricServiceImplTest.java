@@ -70,11 +70,9 @@ public class MetricServiceImplTest {
         ApplicationEventPublisher eventPublisher = Mockito.mock(ApplicationEventPublisher.class);
         DataSetService dataSetService = Mockito.mock(DataSetServiceImpl.class);
         DimensionService dimensionService = Mockito.mock(DimensionService.class);
-        TagMetaService tagMetaService = Mockito.mock(TagMetaService.class);
         ChatLayerService chatLayerService = Mockito.mock(ChatLayerService.class);
         return new MetricServiceImpl(metricRepository, modelService, aliasGenerateHelper,
-                collectService, dataSetService, eventPublisher, dimensionService, tagMetaService,
-                chatLayerService);
+                collectService, dataSetService, eventPublisher, dimensionService, chatLayerService);
     }
 
     private MetricReq buildMetricReq() {

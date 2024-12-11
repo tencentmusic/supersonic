@@ -59,15 +59,12 @@ public class MetricServiceImpl extends ServiceImpl<MetricDOMapper, MetricDO>
 
     private ApplicationEventPublisher eventPublisher;
 
-    private TagMetaService tagMetaService;
-
     private ChatLayerService chatLayerService;
 
     public MetricServiceImpl(MetricRepository metricRepository, ModelService modelService,
             AliasGenerateHelper aliasGenerateHelper, CollectService collectService,
             DataSetService dataSetService, ApplicationEventPublisher eventPublisher,
-            DimensionService dimensionService, TagMetaService tagMetaService,
-            @Lazy ChatLayerService chatLayerService) {
+            DimensionService dimensionService, @Lazy ChatLayerService chatLayerService) {
         this.metricRepository = metricRepository;
         this.modelService = modelService;
         this.aliasGenerateHelper = aliasGenerateHelper;
@@ -75,7 +72,6 @@ public class MetricServiceImpl extends ServiceImpl<MetricDOMapper, MetricDO>
         this.collectService = collectService;
         this.dataSetService = dataSetService;
         this.dimensionService = dimensionService;
-        this.tagMetaService = tagMetaService;
         this.chatLayerService = chatLayerService;
     }
 

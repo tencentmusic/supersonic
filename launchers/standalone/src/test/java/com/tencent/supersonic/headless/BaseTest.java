@@ -78,7 +78,7 @@ public class BaseTest extends BaseApplication {
         queryStructReq.setQueryType(queryType);
         Aggregator aggregator = new Aggregator();
         aggregator.setFunc(AggOperatorEnum.SUM);
-        aggregator.setColumn("pv");
+        aggregator.setColumn("stay_hours");
         queryStructReq.setAggregators(Arrays.asList(aggregator));
 
         if (CollectionUtils.isNotEmpty(groups)) {
@@ -93,7 +93,7 @@ public class BaseTest extends BaseApplication {
 
         List<Order> orders = new ArrayList<>();
         Order order = new Order();
-        order.setColumn("pv");
+        order.setColumn("stay_hours");
         orders.add(order);
         queryStructReq.setOrders(orders);
         return queryStructReq;

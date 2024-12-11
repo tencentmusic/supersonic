@@ -40,7 +40,7 @@ public class QueryByMetricTest extends BaseTest {
     public void testWithMetricAndDimensionNames() throws Exception {
         QueryMetricReq queryMetricReq = new QueryMetricReq();
         queryMetricReq.setMetricNames(Arrays.asList("停留时长", "访问次数"));
-        queryMetricReq.setDimensionNames(Arrays.asList("用户", "部门"));
+        queryMetricReq.setDimensionNames(Arrays.asList("用户名", "部门"));
         queryMetricReq.getFilters()
                 .add(Filter.builder().name("数据日期").operator(FilterOperatorEnum.MINOR_THAN_EQUALS)
                         .relation(Filter.Relation.FILTER).value(LocalDate.now().toString())

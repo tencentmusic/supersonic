@@ -140,8 +140,16 @@ public class DataModelNode extends SemanticNode {
         Set<String> schemaMetricName =
                 ontology.getMetrics().stream().map(Metric::getName).collect(Collectors.toSet());
         ontology.getMetrics().stream().filter(m -> queryParam.getMetrics().contains(m.getName()))
-                .forEach(m -> m.getMetricTypeParams().getMeasures()
-                        .forEach(mm -> queryMeasures.add(mm.getName())));
+                .forEach(m -> {
+                    if (!CollectionUtils.isEmpty(m.getMetricTypeParams().getMeasures())) {
+                        m.getMetricTypeParams().getMeasures()
+                                .forEach(mm -> queryMeasures.add(mm.getName()));
+                    }
+                    if (!CollectionUtils.isEmpty(m.getMetricTypeParams().getFields())) {
+                        m.getMetricTypeParams().getFields()
+                                .forEach(mm -> queryMeasures.add(mm.getName()));
+                    }
+                });
         queryParam.getMetrics().stream().filter(m -> !schemaMetricName.contains(m))
                 .forEach(queryMeasures::add);
     }
