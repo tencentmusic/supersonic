@@ -8,12 +8,14 @@ import {
 } from '../../../utils/utils';
 import type { ECharts } from 'echarts';
 import * as echarts from 'echarts';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import moment from 'moment';
 import { ColumnType } from '../../../common/type';
 import NoPermissionChart from '../NoPermissionChart';
 import classNames from 'classnames';
 import { isArray } from 'lodash';
+import { useExportByEcharts } from '../../../hooks';
+import { ChartItemContext } from '../../ChatItem';
 
 type Props = {
   model?: string;
@@ -37,15 +39,15 @@ const MetricTrendChart: React.FC<Props> = ({
   chartType,
 }) => {
   const chartRef = useRef<any>();
-  const [instance, setInstance] = useState<ECharts>();
+  const instanceRef = useRef<ECharts>();
 
   const renderChart = () => {
     let instanceObj: any;
-    if (!instance) {
+    if (!instanceRef.current) {
       instanceObj = echarts.init(chartRef.current);
-      setInstance(instanceObj);
+      instanceRef.current = instanceObj;
     } else {
-      instanceObj = instance;
+      instanceObj = instanceRef.current;
       instanceObj.clear();
     }
 
@@ -195,6 +197,15 @@ const MetricTrendChart: React.FC<Props> = ({
     instanceObj.resize();
   };
 
+  const { downloadChartAsImage } = useExportByEcharts({
+    instanceRef,
+    question: metricField.name,
+  });
+
+  const { register } = useContext(ChartItemContext);
+
+  register('downloadChartAsImage', downloadChartAsImage);
+
   useEffect(() => {
     if (metricField.authorized) {
       renderChart();
@@ -202,8 +213,8 @@ const MetricTrendChart: React.FC<Props> = ({
   }, [resultList, metricField, chartType]);
 
   useEffect(() => {
-    if (triggerResize && instance) {
-      instance.resize();
+    if (triggerResize && instanceRef.current) {
+      instanceRef.current.resize();
     }
   }, [triggerResize]);
 
