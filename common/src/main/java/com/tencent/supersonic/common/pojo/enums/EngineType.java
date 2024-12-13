@@ -9,7 +9,8 @@ public enum EngineType {
     H2(5, "h2"),
     POSTGRESQL(6, "postgresql"),
     OTHER(7, "other"),
-    DUCKDB(8, "duckdb");
+    DUCKDB(8, "duckdb"),
+    HANADB(9, "hanadb");
 
     private Integer code;
 
