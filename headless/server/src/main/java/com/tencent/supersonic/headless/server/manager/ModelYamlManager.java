@@ -1,9 +1,6 @@
 package com.tencent.supersonic.headless.server.manager;
 
-import com.tencent.supersonic.headless.api.pojo.Dimension;
-import com.tencent.supersonic.headless.api.pojo.Identify;
-import com.tencent.supersonic.headless.api.pojo.Measure;
-import com.tencent.supersonic.headless.api.pojo.ModelDetail;
+import com.tencent.supersonic.headless.api.pojo.*;
 import com.tencent.supersonic.headless.api.pojo.enums.ModelDefineType;
 import com.tencent.supersonic.headless.api.pojo.response.DatabaseResp;
 import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
@@ -52,8 +49,7 @@ public class ModelYamlManager {
             dimensionYamlTpl.setExpr(dim.getBizName());
         }
         if (dim.getTypeParams() != null) {
-            DimensionTimeTypeParamsTpl dimensionTimeTypeParamsTpl =
-                    new DimensionTimeTypeParamsTpl();
+            DimensionTimeTypeParams dimensionTimeTypeParamsTpl = new DimensionTimeTypeParams();
             dimensionTimeTypeParamsTpl.setIsPrimary(dim.getTypeParams().getIsPrimary());
             dimensionTimeTypeParamsTpl.setTimeGranularity(dim.getTypeParams().getTimeGranularity());
             dimensionYamlTpl.setTypeParams(dimensionTimeTypeParamsTpl);

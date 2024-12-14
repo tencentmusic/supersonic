@@ -138,7 +138,7 @@ public class MetricRatioCalcProcessor implements ExecuteResultProcessor {
             return new HashSet<>();
         }
         return queryResult.getQueryColumns().stream()
-                .flatMap(c -> SqlSelectHelper.getColumnFromExpr(c.getNameEn()).stream())
+                .flatMap(c -> SqlSelectHelper.getFieldsFromExpr(c.getNameEn()).stream())
                 .collect(Collectors.toSet());
     }
 

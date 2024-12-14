@@ -1,9 +1,19 @@
 package com.tencent.supersonic.headless.server.manager;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.tencent.supersonic.common.pojo.ModelRela;
+import com.tencent.supersonic.common.pojo.enums.DataTypeEnums;
 import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
+import com.tencent.supersonic.headless.api.pojo.*;
+import com.tencent.supersonic.headless.api.pojo.enums.MetricDefineType;
 import com.tencent.supersonic.headless.api.pojo.response.DatabaseResp;
+import com.tencent.supersonic.headless.api.pojo.response.DimSchemaResp;
+import com.tencent.supersonic.headless.api.pojo.response.MetricSchemaResp;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticSchemaResp;
+import com.tencent.supersonic.headless.core.pojo.DataModel;
+import com.tencent.supersonic.headless.core.pojo.JoinRelation;
+import com.tencent.supersonic.headless.core.pojo.Ontology;
 import com.tencent.supersonic.headless.core.translator.parser.calcite.S2CalciteSchema;
 import com.tencent.supersonic.headless.core.translator.parser.s2sql.*;
 import com.tencent.supersonic.headless.core.translator.parser.s2sql.Materialization.TimePartType;
@@ -31,6 +41,16 @@ public class SemanticSchemaManager {
 
     public Ontology buildOntology(SemanticSchemaResp semanticSchemaResp) {
         Ontology ontology = new Ontology();
+        ontology.setMetrics(semanticSchemaResp.getMetrics());
+        Map<String, List<DimSchemaResp>> model2Dimensions = Maps.newHashMap();
+        semanticSchemaResp.getDimensions().forEach(dim -> {
+            if (!model2Dimensions.containsKey(dim.getModelBizName())) {
+                model2Dimensions.put(dim.getModelBizName(), Lists.newArrayList());
+            }
+            model2Dimensions.get(dim.getModelBizName()).add(dim);
+        });
+        ontology.setDimensionMap(model2Dimensions);
+
         Map<String, List<DimensionYamlTpl>> dimensionYamlTpls = new HashMap<>();
         List<DataModelYamlTpl> dataModelYamlTpls = new ArrayList<>();
         List<MetricYamlTpl> metricYamlTpls = new ArrayList<>();
@@ -49,24 +69,15 @@ public class SemanticSchemaManager {
                             Collectors.toMap(DataModel::getName, item -> item, (k1, k2) -> k1));
             ontology.setDataModelMap(dataModelMap);
         }
-        if (!dimensionYamlTpls.isEmpty()) {
-            Map<String, List<Dimension>> dimensionMap = new HashMap<>();
-            for (Map.Entry<String, List<DimensionYamlTpl>> entry : dimensionYamlTpls.entrySet()) {
-                dimensionMap.put(entry.getKey(), getDimensions(entry.getValue()));
-            }
-            ontology.setDimensionMap(dimensionMap);
-        }
-        if (!metricYamlTpls.isEmpty()) {
-            ontology.setMetrics(getMetrics(metricYamlTpls));
-        }
+
         return ontology;
     }
 
-    public static List<Metric> getMetrics(final List<MetricYamlTpl> t) {
+    public static List<MetricSchemaResp> getMetrics(final List<MetricYamlTpl> t) {
         return getMetricsByMetricYamlTpl(t);
     }
 
-    public static List<Dimension> getDimensions(final List<DimensionYamlTpl> t) {
+    public static List<DimSchemaResp> getDimensions(final List<DimensionYamlTpl> t) {
         return getDimension(t);
     }
 
@@ -83,23 +94,21 @@ public class SemanticSchemaManager {
         return dataModel;
     }
 
-    private static String getDataModelAggTime(List<Dimension> dimensions) {
-        Optional<Dimension> timeDimension = dimensions.stream()
-                .filter(d -> Constants.DIMENSION_TYPE_TIME.equalsIgnoreCase(d.getType()))
-                .findFirst();
-        if (timeDimension.isPresent()
-                && Objects.nonNull(timeDimension.get().getDimensionTimeTypeParams())) {
-            return timeDimension.get().getDimensionTimeTypeParams().getTimeGranularity();
+    private static String getDataModelAggTime(List<DimSchemaResp> dimensions) {
+        Optional<DimSchemaResp> timeDimension =
+                dimensions.stream().filter(DimSchemaResp::isTimeDimension).findFirst();
+        if (timeDimension.isPresent() && Objects.nonNull(timeDimension.get().getTypeParams())) {
+            return timeDimension.get().getTypeParams().getTimeGranularity();
         }
         return Constants.DIMENSION_TYPE_TIME_GRANULARITY_NONE;
     }
 
-    private static List<Metric> getMetricsByMetricYamlTpl(List<MetricYamlTpl> metricYamlTpls) {
-        List<Metric> metrics = new ArrayList<>();
+    private static List<MetricSchemaResp> getMetricsByMetricYamlTpl(
+            List<MetricYamlTpl> metricYamlTpls) {
+        List<MetricSchemaResp> metrics = new ArrayList<>();
         for (MetricYamlTpl metricYamlTpl : metricYamlTpls) {
-            Metric metric = new Metric();
-            metric.setMetricTypeParams(getMetricTypeParams(metricYamlTpl.getTypeParams()));
-            metric.setOwners(metricYamlTpl.getOwners());
+            MetricSchemaResp metric = new MetricSchemaResp();
+            fillMetricTypeParams(metric, metricYamlTpl.getTypeParams());
             metric.setType(metricYamlTpl.getType());
             metric.setName(metricYamlTpl.getName());
             metrics.add(metric);
@@ -107,55 +116,50 @@ public class SemanticSchemaManager {
         return metrics;
     }
 
-    private static MetricTypeParams getMetricTypeParams(
+    private static void fillMetricTypeParams(MetricSchemaResp metric,
             MetricTypeParamsYamlTpl metricTypeParamsYamlTpl) {
-        MetricTypeParams metricTypeParams = new MetricTypeParams();
-        metricTypeParams.setExpr(metricTypeParamsYamlTpl.getExpr());
-        metricTypeParams.setFieldMetric(false);
         if (!CollectionUtils.isEmpty(metricTypeParamsYamlTpl.getMeasures())) {
-            metricTypeParams.setMeasures(getMeasureParams(metricTypeParamsYamlTpl.getMeasures()));
+            MetricDefineByMeasureParams params = new MetricDefineByMeasureParams();
+            params.setMeasures(getMeasureParams(metricTypeParamsYamlTpl.getMeasures()));
+            metric.setMetricDefinition(MetricDefineType.MEASURE, params);
+        } else if (!CollectionUtils.isEmpty(metricTypeParamsYamlTpl.getMetrics())) {
+            MetricDefineByMetricParams params = new MetricDefineByMetricParams();
+            params.setMetrics(getMetricParams(metricTypeParamsYamlTpl.getMetrics()));
+            params.setExpr(metricTypeParamsYamlTpl.getExpr());
+            metric.setMetricDefinition(MetricDefineType.METRIC, params);
+        } else if (!CollectionUtils.isEmpty(metricTypeParamsYamlTpl.getFields())) {
+            MetricDefineByFieldParams params = new MetricDefineByFieldParams();
+            params.setExpr(metricTypeParamsYamlTpl.getExpr());
+            params.setFields(getFieldParams(metricTypeParamsYamlTpl.getFields()));
+            metric.setMetricDefinition(MetricDefineType.FIELD, params);
         }
-        if (!CollectionUtils.isEmpty(metricTypeParamsYamlTpl.getMetrics())) {
-            metricTypeParams.setMeasures(getMetricParams(metricTypeParamsYamlTpl.getMetrics()));
-            metricTypeParams.setExpr(metricTypeParams.getMeasures().get(0).getExpr());
-            metricTypeParams.setFieldMetric(true);
-        }
-        if (!CollectionUtils.isEmpty(metricTypeParamsYamlTpl.getFields())) {
-            metricTypeParams.setMeasures(getFieldParams(metricTypeParamsYamlTpl.getFields()));
-            metricTypeParams.setExpr(metricTypeParams.getMeasures().get(0).getExpr());
-            metricTypeParams.setFieldMetric(true);
-        }
-
-        return metricTypeParams;
     }
 
-    private static List<Measure> getFieldParams(List<FieldParamYamlTpl> fieldParamYamlTpls) {
-        List<Measure> measures = new ArrayList<>();
+    private static List<FieldParam> getFieldParams(List<FieldParamYamlTpl> fieldParamYamlTpls) {
+        List<FieldParam> fields = new ArrayList<>();
         for (FieldParamYamlTpl fieldParamYamlTpl : fieldParamYamlTpls) {
-            Measure measure = new Measure();
-            measure.setName(fieldParamYamlTpl.getFieldName());
-            measure.setExpr(fieldParamYamlTpl.getFieldName());
-            measures.add(measure);
+            FieldParam field = new FieldParam();
+            field.setFieldName(fieldParamYamlTpl.getFieldName());
+            fields.add(field);
         }
-        return measures;
+        return fields;
     }
 
-    private static List<Measure> getMetricParams(List<MetricParamYamlTpl> metricParamYamlTpls) {
-        List<Measure> measures = new ArrayList<>();
+    private static List<MetricParam> getMetricParams(List<MetricParamYamlTpl> metricParamYamlTpls) {
+        List<MetricParam> metrics = new ArrayList<>();
         for (MetricParamYamlTpl metricParamYamlTpl : metricParamYamlTpls) {
-            Measure measure = new Measure();
-            measure.setName(metricParamYamlTpl.getBizName());
-            measure.setExpr(metricParamYamlTpl.getBizName());
-            measures.add(measure);
+            MetricParam metric = new MetricParam();
+            metric.setBizName(metricParamYamlTpl.getBizName());
+            metric.setId(metricParamYamlTpl.getId());
+            metrics.add(metric);
         }
-        return measures;
+        return metrics;
     }
 
     private static List<Measure> getMeasureParams(List<MeasureYamlTpl> measureYamlTpls) {
         List<Measure> measures = new ArrayList<>();
         for (MeasureYamlTpl measureYamlTpl : measureYamlTpls) {
             Measure measure = new Measure();
-            measure.setCreateMetric(measureYamlTpl.getCreateMetric());
             measure.setExpr(measureYamlTpl.getExpr());
             measure.setAgg(measureYamlTpl.getAgg());
             measure.setName(measureYamlTpl.getName());
@@ -166,34 +170,32 @@ public class SemanticSchemaManager {
         return measures;
     }
 
-    private static List<Dimension> getDimension(List<DimensionYamlTpl> dimensionYamlTpls) {
-        List<Dimension> dimensions = new ArrayList<>();
+    private static List<DimSchemaResp> getDimension(List<DimensionYamlTpl> dimensionYamlTpls) {
+        List<DimSchemaResp> dimensions = new ArrayList<>();
         for (DimensionYamlTpl dimensionYamlTpl : dimensionYamlTpls) {
-            Dimension dimension = Dimension.builder().build();
-            dimension.setType(dimensionYamlTpl.getType());
+            DimSchemaResp dimension = new DimSchemaResp();
+            // dimension.setType(dimensionYamlTpl.getType());
             dimension.setExpr(dimensionYamlTpl.getExpr());
             dimension.setName(dimensionYamlTpl.getName());
-            dimension.setOwners(dimensionYamlTpl.getOwners());
             dimension.setBizName(dimensionYamlTpl.getBizName());
             dimension.setDefaultValues(dimensionYamlTpl.getDefaultValues());
             if (Objects.nonNull(dimensionYamlTpl.getDataType())) {
-                dimension.setDataType(DataType.of(dimensionYamlTpl.getDataType().getType()));
+                dimension.setDataType(dimensionYamlTpl.getDataType());
             }
             if (Objects.isNull(dimension.getDataType())) {
-                dimension.setDataType(DataType.UNKNOWN);
+                dimension.setDataType(DataTypeEnums.UNKNOWN);
             }
             if (Objects.nonNull(dimensionYamlTpl.getExt())) {
                 dimension.setExt(dimensionYamlTpl.getExt());
             }
-            dimension.setDimensionTimeTypeParams(
-                    getDimensionTimeTypeParams(dimensionYamlTpl.getTypeParams()));
+            dimension.setTypeParams(dimensionYamlTpl.getTypeParams());
             dimensions.add(dimension);
         }
         return dimensions;
     }
 
     private static DimensionTimeTypeParams getDimensionTimeTypeParams(
-            DimensionTimeTypeParamsTpl dimensionTimeTypeParamsTpl) {
+            DimensionTimeTypeParams dimensionTimeTypeParamsTpl) {
         DimensionTimeTypeParams dimensionTimeTypeParams = new DimensionTimeTypeParams();
         if (dimensionTimeTypeParamsTpl != null) {
             dimensionTimeTypeParams
@@ -238,7 +240,8 @@ public class SemanticSchemaManager {
         return joinRelations;
     }
 
-    public static void update(S2CalciteSchema schema, List<Metric> metric) throws Exception {
+    public static void update(S2CalciteSchema schema, List<MetricSchemaResp> metric)
+            throws Exception {
         if (schema != null) {
             updateMetric(metric, schema.getMetrics());
         }
@@ -260,31 +263,31 @@ public class SemanticSchemaManager {
     }
 
     public static void update(S2CalciteSchema schema, String datasourceBizName,
-            List<Dimension> dimensionYamlTpls) throws Exception {
+            List<DimSchemaResp> dimensionYamlTpls) throws Exception {
         if (schema != null) {
-            Optional<Map.Entry<String, List<Dimension>>> datasourceYamlTplMap = schema
+            Optional<Map.Entry<String, List<DimSchemaResp>>> datasourceYamlTplMap = schema
                     .getDimensions().entrySet().stream()
                     .filter(t -> t.getKey().equalsIgnoreCase(datasourceBizName)).findFirst();
             if (datasourceYamlTplMap.isPresent()) {
                 updateDimension(dimensionYamlTpls, datasourceYamlTplMap.get().getValue());
             } else {
-                List<Dimension> dimensions = new ArrayList<>();
+                List<DimSchemaResp> dimensions = new ArrayList<>();
                 updateDimension(dimensionYamlTpls, dimensions);
                 schema.getDimensions().put(datasourceBizName, dimensions);
             }
         }
     }
 
-    private static void updateDimension(List<Dimension> dimensionYamlTpls,
-            List<Dimension> dimensions) {
+    private static void updateDimension(List<DimSchemaResp> dimensionYamlTpls,
+            List<DimSchemaResp> dimensions) {
         if (CollectionUtils.isEmpty(dimensionYamlTpls)) {
             return;
         }
         Set<String> toAdd =
                 dimensionYamlTpls.stream().map(m -> m.getName()).collect(Collectors.toSet());
-        Iterator<Dimension> iterator = dimensions.iterator();
+        Iterator<DimSchemaResp> iterator = dimensions.iterator();
         while (iterator.hasNext()) {
-            Dimension cur = iterator.next();
+            DimSchemaResp cur = iterator.next();
             if (toAdd.contains(cur.getName())) {
                 iterator.remove();
             }
@@ -292,15 +295,16 @@ public class SemanticSchemaManager {
         dimensions.addAll(dimensionYamlTpls);
     }
 
-    private static void updateMetric(List<Metric> metricYamlTpls, List<Metric> metrics) {
+    private static void updateMetric(List<MetricSchemaResp> metricYamlTpls,
+            List<MetricSchemaResp> metrics) {
         if (CollectionUtils.isEmpty(metricYamlTpls)) {
             return;
         }
         Set<String> toAdd =
                 metricYamlTpls.stream().map(m -> m.getName()).collect(Collectors.toSet());
-        Iterator<Metric> iterator = metrics.iterator();
+        Iterator<MetricSchemaResp> iterator = metrics.iterator();
         while (iterator.hasNext()) {
-            Metric cur = iterator.next();
+            MetricSchemaResp cur = iterator.next();
             if (toAdd.contains(cur.getName())) {
                 iterator.remove();
             }

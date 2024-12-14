@@ -7,6 +7,7 @@ import com.tencent.supersonic.headless.api.pojo.response.SemanticTranslateResp;
 import com.tencent.supersonic.headless.chat.utils.QueryReqBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junitpioneer.jupiter.SetSystemProperty;
 
 import java.util.Collections;
 import java.util.Optional;
@@ -38,6 +39,7 @@ public class TranslateTest extends BaseTest {
     }
 
     @Test
+    @SetSystemProperty(key = "s2.test", value = "true")
     public void testStructExplain() throws Exception {
         QueryStructReq queryStructReq =
                 buildQueryStructReq(Collections.singletonList("department"));

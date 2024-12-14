@@ -41,7 +41,7 @@ public class MetricTest extends BaseTest {
     @Test
     @SetSystemProperty(key = "s2.test", value = "true")
     public void testMetricModel() throws Exception {
-        QueryResult actualResult = submitNewChat("超音数 访问次数", agent.getId());
+        QueryResult actualResult = submitNewChat("超音数访问次数", agent.getId());
 
         QueryResult expectedResult = new QueryResult();
         SemanticParseInfo expectedParseInfo = new SemanticParseInfo();
@@ -79,6 +79,7 @@ public class MetricTest extends BaseTest {
 
         assertQueryResult(expectedResult, actualResult);
         assert actualResult.getQueryResults().size() == 1;
+        assert actualResult.getQuerySql().contains("s2_pv_uv_statis");
     }
 
     @Test
@@ -104,11 +105,61 @@ public class MetricTest extends BaseTest {
 
         assertQueryResult(expectedResult, actualResult);
         assert actualResult.getQueryResults().size() == 1;
+        assert actualResult.getQuerySql().contains("s2_pv_uv_statis");
     }
 
     @Test
     @SetSystemProperty(key = "s2.test", value = "true")
     public void testMetricGroupBy() throws Exception {
+        QueryResult actualResult = submitNewChat("近7天超音数各用户的访问次数", agent.getId());
+
+        QueryResult expectedResult = new QueryResult();
+        SemanticParseInfo expectedParseInfo = new SemanticParseInfo();
+        expectedResult.setChatContext(expectedParseInfo);
+
+        expectedResult.setQueryMode(MetricGroupByQuery.QUERY_MODE);
+        expectedParseInfo.setAggType(NONE);
+
+        expectedParseInfo.getMetrics().add(DataUtils.getSchemaElement("访问次数"));
+        expectedParseInfo.getDimensions().add(DataUtils.getSchemaElement("用户名"));
+
+        expectedParseInfo.setDateInfo(DataUtils.getDateConf(DateConf.DateMode.BETWEEN, 7,
+                DatePeriodEnum.DAY, startDay, endDay));
+        expectedParseInfo.setQueryType(QueryType.AGGREGATE);
+
+        assertQueryResult(expectedResult, actualResult);
+        assert actualResult.getQueryResults().size() == 6;
+        assert actualResult.getQuerySql().contains("s2_pv_uv_statis");
+        assert actualResult.getQuerySql().contains("s2_user_department");
+    }
+
+    @Test
+    @SetSystemProperty(key = "s2.test", value = "true")
+    public void testMetricGroupByAndJoin() throws Exception {
+        QueryResult actualResult = submitNewChat("近7天超音数各部门的访问次数", agent.getId());
+
+        QueryResult expectedResult = new QueryResult();
+        SemanticParseInfo expectedParseInfo = new SemanticParseInfo();
+        expectedResult.setChatContext(expectedParseInfo);
+
+        expectedResult.setQueryMode(MetricGroupByQuery.QUERY_MODE);
+        expectedParseInfo.setAggType(NONE);
+
+        expectedParseInfo.getMetrics().add(DataUtils.getSchemaElement("访问次数"));
+        expectedParseInfo.getDimensions().add(DataUtils.getSchemaElement("部门"));
+
+        expectedParseInfo.setDateInfo(DataUtils.getDateConf(DateConf.DateMode.BETWEEN, 7,
+                DatePeriodEnum.DAY, startDay, endDay));
+        expectedParseInfo.setQueryType(QueryType.AGGREGATE);
+
+        assertQueryResult(expectedResult, actualResult);
+        assert actualResult.getQueryResults().size() == 4;
+        assert actualResult.getQuerySql().contains("s2_pv_uv_statis");
+    }
+
+    @Test
+    @SetSystemProperty(key = "s2.test", value = "true")
+    public void testMetricGroupByAndMultiJoin() throws Exception {
         QueryResult actualResult = submitNewChat("近7天超音数各部门的访问次数和停留时长", agent.getId());
 
         QueryResult expectedResult = new QueryResult();
@@ -128,6 +179,9 @@ public class MetricTest extends BaseTest {
 
         assertQueryResult(expectedResult, actualResult);
         assert actualResult.getQueryResults().size() == 4;
+        assert actualResult.getQuerySql().contains("s2_pv_uv_statis");
+        assert actualResult.getQuerySql().contains("s2_user_department");
+        assert actualResult.getQuerySql().contains("s2_stay_time_statis");
     }
 
     @Test

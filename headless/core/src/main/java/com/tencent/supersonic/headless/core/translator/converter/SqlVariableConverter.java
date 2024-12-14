@@ -3,8 +3,8 @@ package com.tencent.supersonic.headless.core.translator.converter;
 import com.tencent.supersonic.headless.api.pojo.enums.ModelDefineType;
 import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticSchemaResp;
+import com.tencent.supersonic.headless.core.pojo.DataModel;
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;
-import com.tencent.supersonic.headless.core.translator.parser.s2sql.DataModel;
 import com.tencent.supersonic.headless.core.utils.SqlVariableParseUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -19,13 +19,12 @@ public class SqlVariableConverter implements QueryConverter {
 
     @Override
     public boolean accept(QueryStatement queryStatement) {
-        return Objects.nonNull(queryStatement.getStructQueryParam())
-                && !queryStatement.getIsS2SQL();
+        return Objects.nonNull(queryStatement.getStructQuery()) && !queryStatement.getIsS2SQL();
     }
 
     @Override
     public void convert(QueryStatement queryStatement) {
-        SemanticSchemaResp semanticSchemaResp = queryStatement.getSemanticSchemaResp();
+        SemanticSchemaResp semanticSchemaResp = queryStatement.getSemanticSchema();
         List<ModelResp> modelResps = semanticSchemaResp.getModelResps();
         if (CollectionUtils.isEmpty(modelResps)) {
             return;
@@ -36,7 +35,7 @@ public class SqlVariableConverter implements QueryConverter {
                 String sqlParsed =
                         SqlVariableParseUtils.parse(modelResp.getModelDetail().getSqlQuery(),
                                 modelResp.getModelDetail().getSqlVariables(),
-                                queryStatement.getStructQueryParam().getParams());
+                                queryStatement.getStructQuery().getParams());
                 DataModel dataModel =
                         queryStatement.getOntology().getDataModelMap().get(modelResp.getBizName());
                 dataModel.setSqlQuery(sqlParsed);

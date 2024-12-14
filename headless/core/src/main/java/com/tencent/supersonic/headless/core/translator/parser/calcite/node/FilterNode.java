@@ -22,7 +22,4 @@ public class FilterNode extends SemanticNode {
         }
     }
 
-    public static boolean isMatchDataSource(Set<String> measures) {
-        return false;
-    }
 }

@@ -1,8 +1,8 @@
 package com.tencent.supersonic.headless.core.translator.parser.calcite;
 
+import com.tencent.supersonic.headless.core.pojo.Ontology;
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;
 import com.tencent.supersonic.headless.core.translator.parser.QueryParser;
-import com.tencent.supersonic.headless.core.translator.parser.s2sql.Ontology;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 

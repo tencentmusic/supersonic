@@ -1,54 +1,42 @@
 package com.tencent.supersonic.headless.core.translator.parser.calcite;
 
-import com.tencent.supersonic.headless.core.translator.parser.s2sql.DataModel;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
+import com.tencent.supersonic.headless.core.pojo.DataModel;
 import lombok.Data;
-import org.apache.calcite.sql.SqlBasicCall;
-import org.apache.calcite.sql.SqlKind;
-import org.apache.calcite.sql.SqlNode;
-import org.apache.calcite.sql.SqlNodeList;
-import org.apache.calcite.sql.SqlSelect;
+import org.apache.calcite.sql.*;
 import org.apache.calcite.sql.parser.SqlParserPos;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /** basic query project */
 @Data
 public class TableView {
 
-    private List<SqlNode> filter = new ArrayList<>();
+    private Set<String> fields = Sets.newHashSet();
     private List<SqlNode> dimension = new ArrayList<>();
-    private List<SqlNode> measure = new ArrayList<>();
+    private List<SqlNode> metric = new ArrayList<>();
     private SqlNodeList order;
     private SqlNode fetch;
     private SqlNode offset;
     private SqlNode table;
+    private List<SqlNode> select = Lists.newArrayList();
 
     private String alias;
     private List<String> primary;
     private DataModel dataModel;
 
     public SqlNode build() {
-        measure.addAll(dimension);
-        SqlNodeList dimensionNodeList = null;
-        if (dimension.size() > 0) {
-            dimensionNodeList = new SqlNodeList(getGroup(dimension), SqlParserPos.ZERO);
-        }
-        SqlNodeList filterNodeList = null;
-        if (filter.size() > 0) {
-            filterNodeList = new SqlNodeList(filter, SqlParserPos.ZERO);
-        }
-        return new SqlSelect(SqlParserPos.ZERO, null, new SqlNodeList(measure, SqlParserPos.ZERO),
-                table, filterNodeList, dimensionNodeList, null, null, null, order, offset, fetch,
-                null);
+        List<SqlNode> selectNodeList = new ArrayList<>();
+        selectNodeList.addAll(metric);
+        selectNodeList.addAll(dimension);
+        selectNodeList.addAll(select);
+        return new SqlSelect(SqlParserPos.ZERO, null,
+                new SqlNodeList(selectNodeList, SqlParserPos.ZERO), table, null, null, null, null,
+                null, order, offset, fetch, null);
     }
 
-    private List<SqlNode> getGroup(List<SqlNode> sqlNodeList) {
-        return sqlNodeList.stream()
-                .map(s -> (s.getKind().equals(SqlKind.AS)
-                        ? ((SqlBasicCall) s).getOperandList().get(0)
-                        : s))
-                .collect(Collectors.toList());
-    }
 }

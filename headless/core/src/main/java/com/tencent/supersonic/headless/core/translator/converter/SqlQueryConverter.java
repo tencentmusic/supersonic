@@ -6,30 +6,33 @@ import com.tencent.supersonic.common.jsqlparser.SqlSelectHelper;
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.enums.EngineType;
 import com.tencent.supersonic.common.util.ContextUtils;
-import com.tencent.supersonic.headless.api.pojo.SchemaItem;
 import com.tencent.supersonic.headless.api.pojo.enums.AggOption;
+import com.tencent.supersonic.headless.api.pojo.response.DimSchemaResp;
 import com.tencent.supersonic.headless.api.pojo.response.MetricSchemaResp;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticSchemaResp;
+import com.tencent.supersonic.headless.core.pojo.OntologyQuery;
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;
-import com.tencent.supersonic.headless.core.pojo.SqlQueryParam;
-import com.tencent.supersonic.headless.core.translator.parser.s2sql.OntologyQueryParam;
+import com.tencent.supersonic.headless.core.pojo.SqlQuery;
 import com.tencent.supersonic.headless.core.utils.SqlGenerateUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
+/**
+ * This converter rewrites S2SQL including conversion from metric/dimension name to bizName and
+ * build ontology query in preparation for generation of physical SQL.
+ */
 @Component("SqlQueryConverter")
 @Slf4j
 public class SqlQueryConverter implements QueryConverter {
 
     @Override
     public boolean accept(QueryStatement queryStatement) {
-        return Objects.nonNull(queryStatement.getSqlQueryParam()) && queryStatement.getIsS2SQL();
+        return Objects.nonNull(queryStatement.getSqlQuery()) && queryStatement.getIsS2SQL();
     }
 
     @Override
@@ -38,42 +41,40 @@ public class SqlQueryConverter implements QueryConverter {
         rewriteOrderBy(queryStatement);
 
         // fill sqlQuery
-        SemanticSchemaResp semanticSchemaResp = queryStatement.getSemanticSchemaResp();
-        SqlQueryParam sqlQueryParam = queryStatement.getSqlQueryParam();
-        String tableName = SqlSelectHelper.getTableName(sqlQueryParam.getSql());
+        SqlQuery sqlQuery = queryStatement.getSqlQuery();
+        String tableName = SqlSelectHelper.getTableName(sqlQuery.getSql());
         if (StringUtils.isEmpty(tableName)) {
             return;
         }
-        sqlQueryParam.setTable(tableName.toLowerCase());
+        sqlQuery.setTable(tableName.toLowerCase());
         SqlGenerateUtils sqlGenerateUtils = ContextUtils.getBean(SqlGenerateUtils.class);
+        SemanticSchemaResp semanticSchema = queryStatement.getSemanticSchema();
         if (!sqlGenerateUtils.isSupportWith(
-                EngineType.fromString(semanticSchemaResp.getDatabaseResp().getType().toUpperCase()),
-                semanticSchemaResp.getDatabaseResp().getVersion())) {
-            sqlQueryParam.setSupportWith(false);
-            sqlQueryParam.setWithAlias(false);
+                EngineType.fromString(semanticSchema.getDatabaseResp().getType().toUpperCase()),
+                semanticSchema.getDatabaseResp().getVersion())) {
+            sqlQuery.setSupportWith(false);
+            sqlQuery.setWithAlias(false);
         }
 
         // build ontologyQuery
-        List<String> allFields = SqlSelectHelper.getAllSelectFields(sqlQueryParam.getSql());
-        List<MetricSchemaResp> metricSchemas = getMetrics(semanticSchemaResp, allFields);
-        List<String> metrics =
-                metricSchemas.stream().map(SchemaItem::getBizName).collect(Collectors.toList());
-        Set<String> dimensions = getDimensions(semanticSchemaResp, allFields);
-        OntologyQueryParam ontologyQueryParam = new OntologyQueryParam();
-        ontologyQueryParam.getMetrics().addAll(metrics);
-        ontologyQueryParam.getDimensions().addAll(dimensions);
-        AggOption sqlQueryAggOption = getAggOption(sqlQueryParam.getSql(), metricSchemas);
+        List<String> allQueryFields = SqlSelectHelper.getAllSelectFields(sqlQuery.getSql());
+        List<MetricSchemaResp> queryMetrics = semanticSchema.getMetrics(allQueryFields);
+        List<DimSchemaResp> queryDimensions = semanticSchema.getDimensions(allQueryFields);
+        OntologyQuery ontologyQuery = new OntologyQuery();
+        ontologyQuery.getMetrics().addAll(queryMetrics);
+        ontologyQuery.getDimensions().addAll(queryDimensions);
 
+        AggOption sqlQueryAggOption = getAggOption(sqlQuery.getSql(), queryMetrics);
         // if sql query itself has aggregation, ontology query just returns detail
         if (sqlQueryAggOption.equals(AggOption.AGGREGATION)) {
-            ontologyQueryParam.setAggOption(AggOption.NATIVE);
-        } else if (sqlQueryAggOption.equals(AggOption.NATIVE) && !metrics.isEmpty()) {
-            ontologyQueryParam.setAggOption(AggOption.DEFAULT);
+            ontologyQuery.setAggOption(AggOption.NATIVE);
+        } else if (sqlQueryAggOption.equals(AggOption.NATIVE) && !queryMetrics.isEmpty()) {
+            ontologyQuery.setAggOption(AggOption.DEFAULT);
         }
-        ontologyQueryParam.setNativeQuery(!AggOption.isAgg(ontologyQueryParam.getAggOption()));
-        queryStatement.setOntologyQueryParam(ontologyQueryParam);
-        queryStatement.setSql(sqlQueryParam.getSql());
-        log.info("parse sqlQuery [{}] ", sqlQueryParam);
+        ontologyQuery.setNativeQuery(!AggOption.isAgg(ontologyQuery.getAggOption()));
+
+        queryStatement.setOntologyQuery(ontologyQuery);
+        log.info("parse sqlQuery [{}] ", sqlQuery);
     }
 
     private AggOption getAggOption(String sql, List<MetricSchemaResp> metricSchemas) {
@@ -109,34 +110,10 @@ public class SqlQueryConverter implements QueryConverter {
         return AggOption.DEFAULT;
     }
 
-    private Set<String> getDimensions(SemanticSchemaResp semanticSchemaResp,
-            List<String> allFields) {
-        Map<String, String> dimensionLowerToNameMap = semanticSchemaResp.getDimensions().stream()
-                .collect(Collectors.toMap(entry -> entry.getBizName().toLowerCase(),
-                        SchemaItem::getBizName, (k1, k2) -> k1));
-        // dimensionLowerToNameMap.put(TimeDimensionEnum.DAY.getName(),
-        // TimeDimensionEnum.DAY.getName());
-        return allFields.stream()
-                .filter(entry -> dimensionLowerToNameMap.containsKey(entry.toLowerCase()))
-                .map(entry -> dimensionLowerToNameMap.get(entry.toLowerCase()))
-                .collect(Collectors.toSet());
-    }
-
-    private List<MetricSchemaResp> getMetrics(SemanticSchemaResp semanticSchemaResp,
-            List<String> allFields) {
-        Map<String, MetricSchemaResp> metricLowerToNameMap =
-                semanticSchemaResp.getMetrics().stream().collect(Collectors
-                        .toMap(entry -> entry.getBizName().toLowerCase(), entry -> entry));
-        return allFields.stream()
-                .filter(entry -> metricLowerToNameMap.containsKey(entry.toLowerCase()))
-                .map(entry -> metricLowerToNameMap.get(entry.toLowerCase()))
-                .collect(Collectors.toList());
-    }
-
     private void convertNameToBizName(QueryStatement queryStatement) {
-        SemanticSchemaResp semanticSchemaResp = queryStatement.getSemanticSchemaResp();
-        Map<String, String> fieldNameToBizNameMap = getFieldNameToBizNameMap(semanticSchemaResp);
-        String sql = queryStatement.getSqlQueryParam().getSql();
+        SemanticSchemaResp semanticSchema = queryStatement.getSemanticSchema();
+        Map<String, String> fieldNameToBizNameMap = semanticSchema.getNameToBizNameMap();
+        String sql = queryStatement.getSqlQuery().getSql();
         log.debug("dataSetId:{},convert name to bizName before:{}", queryStatement.getDataSetId(),
                 sql);
         sql = SqlReplaceHelper.replaceFields(sql, fieldNameToBizNameMap, true);
@@ -145,42 +122,15 @@ public class SqlQueryConverter implements QueryConverter {
         sql = SqlReplaceHelper.replaceTable(sql,
                 Constants.TABLE_PREFIX + queryStatement.getDataSetId());
         log.debug("replaceTableName after:{}", sql);
-        queryStatement.getSqlQueryParam().setSql(sql);
+        queryStatement.getSqlQuery().setSql(sql);
     }
 
     private void rewriteOrderBy(QueryStatement queryStatement) {
         // replace order by field with the select sequence number
-        String sql = queryStatement.getSqlQueryParam().getSql();
+        String sql = queryStatement.getSqlQuery().getSql();
         String newSql = SqlReplaceHelper.replaceAggAliasOrderbyField(sql);
         log.debug("replaceOrderAggSameAlias {} -> {}", sql, newSql);
-        queryStatement.getSqlQueryParam().setSql(newSql);
-    }
-
-    protected Map<String, String> getFieldNameToBizNameMap(SemanticSchemaResp semanticSchemaResp) {
-        // support fieldName and field alias to bizName
-        Map<String, String> dimensionResults = semanticSchemaResp.getDimensions().stream().flatMap(
-                entry -> getPairStream(entry.getAlias(), entry.getName(), entry.getBizName()))
-                .collect(Collectors.toMap(Pair::getLeft, Pair::getRight, (k1, k2) -> k1));
-
-        Map<String, String> metricResults = semanticSchemaResp.getMetrics().stream().flatMap(
-                entry -> getPairStream(entry.getAlias(), entry.getName(), entry.getBizName()))
-                .collect(Collectors.toMap(Pair::getLeft, Pair::getRight, (k1, k2) -> k1));
-
-        dimensionResults.putAll(metricResults);
-        return dimensionResults;
-    }
-
-    private Stream<Pair<String, String>> getPairStream(String aliasStr, String name,
-            String bizName) {
-        Set<Pair<String, String>> elements = new HashSet<>();
-        elements.add(Pair.of(name, bizName));
-        if (StringUtils.isNotBlank(aliasStr)) {
-            List<String> aliasList = SchemaItem.getAliasList(aliasStr);
-            for (String alias : aliasList) {
-                elements.add(Pair.of(alias, bizName));
-            }
-        }
-        return elements.stream();
+        queryStatement.getSqlQuery().setSql(newSql);
     }
 
 }

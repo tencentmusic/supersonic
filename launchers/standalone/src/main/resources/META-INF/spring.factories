@@ -26,11 +26,11 @@ com.tencent.supersonic.headless.chat.parser.llm.DataSetResolver=\
 ### headless-core SPIs
 
 com.tencent.supersonic.headless.core.translator.converter.QueryConverter=\
-    com.tencent.supersonic.headless.core.translator.converter.DefaultDimValueConverter,\
     com.tencent.supersonic.headless.core.translator.converter.SqlVariableConverter,\
-    com.tencent.supersonic.headless.core.translator.converter.SqlQueryConverter,\
     com.tencent.supersonic.headless.core.translator.converter.StructQueryConverter,\
-    com.tencent.supersonic.headless.core.translator.converter.DerivedMetricConverter,\
+    com.tencent.supersonic.headless.core.translator.converter.SqlQueryConverter,\
+    com.tencent.supersonic.headless.core.translator.converter.DefaultDimValueConverter,\
+    com.tencent.supersonic.headless.core.translator.converter.MetricExpressionConverter,\
     com.tencent.supersonic.headless.core.translator.converter.MetricRatioConverter
 
 com.tencent.supersonic.headless.core.translator.optimizer.QueryOptimizer=\

@@ -55,7 +55,7 @@ public class S2VisitsDemo extends S2BaseDemo {
             DimensionResp departmentDimension = getDimension("department", userModel);
             MetricResp metricUv = addMetric_uv(pvUvModel, departmentDimension);
 
-            DimensionResp pageDimension = getDimension("page", stayTimeModel);
+            DimensionResp pageDimension = getDimension("visits_page", stayTimeModel);
             updateDimension(stayTimeModel, pageDimension);
             DimensionResp userDimension = getDimension("user_name", userModel);
             MetricResp metricPv = addMetric_pv(pvUvModel, departmentDimension, userDimension);
@@ -196,7 +196,7 @@ public class S2VisitsDemo extends S2BaseDemo {
         modelDetail.setIdentifiers(identifiers);
 
         List<Dimension> dimensions = new ArrayList<>();
-        Dimension dimension1 = new Dimension("", "imp_date", DimensionType.partition_time, 0);
+        Dimension dimension1 = new Dimension("数据日期", "imp_date", DimensionType.partition_time, 1);
         dimension1.setTypeParams(new DimensionTimeTypeParams());
         dimensions.add(dimension1);
         Dimension dimension2 = new Dimension("", "page", DimensionType.categorical, 0);
@@ -231,10 +231,10 @@ public class S2VisitsDemo extends S2BaseDemo {
         modelDetail.setIdentifiers(identifiers);
 
         List<Dimension> dimensions = new ArrayList<>();
-        Dimension dimension1 = new Dimension("数据日期", "imp_date", DimensionType.partition_time, 1);
+        Dimension dimension1 = new Dimension("数据日期", "imp_date", DimensionType.partition_time, 0);
         dimension1.setTypeParams(new DimensionTimeTypeParams());
         dimensions.add(dimension1);
-        Dimension dimension2 = new Dimension("页面", "page", DimensionType.categorical, 1);
+        Dimension dimension2 = new Dimension("页面", "visits_page", DimensionType.categorical, 1);
         dimension2.setExpr("page");
         dimensions.add(dimension2);
         modelDetail.setDimensions(dimensions);

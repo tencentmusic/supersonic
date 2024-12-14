@@ -1,8 +1,9 @@
 package com.tencent.supersonic.headless.core.translator.parser.calcite.node;
 
+import com.tencent.supersonic.common.pojo.enums.DataTypeEnums;
 import com.tencent.supersonic.common.pojo.enums.EngineType;
+import com.tencent.supersonic.headless.api.pojo.response.DimSchemaResp;
 import com.tencent.supersonic.headless.core.translator.parser.s2sql.Constants;
-import com.tencent.supersonic.headless.core.translator.parser.s2sql.Dimension;
 import org.apache.calcite.sql.SqlNode;
 import org.apache.calcite.sql.validate.SqlValidatorScope;
 
@@ -11,40 +12,35 @@ import java.util.Objects;
 
 public class DimensionNode extends SemanticNode {
 
-    public static SqlNode build(Dimension dimension, SqlValidatorScope scope, EngineType engineType)
-            throws Exception {
-        SqlNode sqlNode = parse(dimension.getExpr(), scope, engineType);
-        return buildAs(dimension.getName(), sqlNode);
+    public static SqlNode build(DimSchemaResp dimension, SqlValidatorScope scope,
+            EngineType engineType) throws Exception {
+        return parse(dimension.getExpr(), scope, engineType);
     }
 
-    public static List<SqlNode> expand(Dimension dimension, SqlValidatorScope scope,
+    public static List<SqlNode> expand(DimSchemaResp dimension, SqlValidatorScope scope,
             EngineType engineType) throws Exception {
         SqlNode sqlNode = parse(dimension.getExpr(), scope, engineType);
         return expand(sqlNode, scope);
     }
 
-    public static SqlNode buildName(Dimension dimension, SqlValidatorScope scope,
-            EngineType engineType) throws Exception {
-        return parse(dimension.getName(), scope, engineType);
-    }
-
-    public static SqlNode buildExp(Dimension dimension, SqlValidatorScope scope,
+    public static SqlNode buildName(DimSchemaResp dimension, SqlValidatorScope scope,
             EngineType engineType) throws Exception {
         return parse(dimension.getExpr(), scope, engineType);
     }
 
-    public static SqlNode buildNameAs(String alias, Dimension dimension, SqlValidatorScope scope,
-            EngineType engineType) throws Exception {
+    public static SqlNode buildNameAs(String alias, DimSchemaResp dimension,
+            SqlValidatorScope scope, EngineType engineType) throws Exception {
         if ("".equals(alias)) {
             return buildName(dimension, scope, engineType);
         }
-        SqlNode sqlNode = parse(dimension.getName(), scope, engineType);
+        SqlNode sqlNode = parse(dimension.getExpr(), scope, engineType);
         return buildAs(alias, sqlNode);
     }
 
-    public static SqlNode buildArray(Dimension dimension, SqlValidatorScope scope,
+    public static SqlNode buildArray(DimSchemaResp dimension, SqlValidatorScope scope,
             EngineType engineType) throws Exception {
-        if (Objects.nonNull(dimension.getDataType()) && dimension.getDataType().isArray()) {
+        if (Objects.nonNull(dimension.getDataType())
+                && dimension.getDataType().equals(DataTypeEnums.ARRAY)) {
             SqlNode sqlNode = parse(dimension.getExpr(), scope, engineType);
             if (isIdentifier(sqlNode)) {
                 return buildAs(dimension.getName(),

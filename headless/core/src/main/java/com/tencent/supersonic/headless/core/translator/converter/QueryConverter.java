@@ -2,7 +2,9 @@ package com.tencent.supersonic.headless.core.translator.converter;
 
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;
 
-/** to supplement,translate the request Body */
+/**
+ * A query converter performs preprocessing work to the QueryStatement before parsing.
+ */
 public interface QueryConverter {
 
     boolean accept(QueryStatement queryStatement);

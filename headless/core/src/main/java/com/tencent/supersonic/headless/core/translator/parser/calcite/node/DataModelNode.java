@@ -1,12 +1,21 @@
 package com.tencent.supersonic.headless.core.translator.parser.calcite.node;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.tencent.supersonic.common.calcite.Configuration;
 import com.tencent.supersonic.common.jsqlparser.SqlSelectHelper;
 import com.tencent.supersonic.common.pojo.enums.EngineType;
-import com.tencent.supersonic.headless.core.translator.parser.calcite.S2CalciteSchema;
+import com.tencent.supersonic.headless.api.pojo.Identify;
+import com.tencent.supersonic.headless.api.pojo.Measure;
+import com.tencent.supersonic.headless.api.pojo.response.DimSchemaResp;
+import com.tencent.supersonic.headless.api.pojo.response.MetricSchemaResp;
+import com.tencent.supersonic.headless.core.pojo.DataModel;
+import com.tencent.supersonic.headless.core.pojo.JoinRelation;
+import com.tencent.supersonic.headless.core.pojo.Ontology;
+import com.tencent.supersonic.headless.core.pojo.OntologyQuery;
 import com.tencent.supersonic.headless.core.translator.parser.calcite.SchemaBuilder;
-import com.tencent.supersonic.headless.core.translator.parser.s2sql.*;
+import com.tencent.supersonic.headless.core.translator.parser.s2sql.Constants;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.calcite.sql.*;
 import org.apache.calcite.sql.parser.SqlParser;
@@ -61,7 +70,7 @@ public class DataModelNode extends SemanticNode {
         Set<String> dimensions = new HashSet<>();
         Set<String> metrics = new HashSet<>();
         EngineType engineType = EngineType.fromString(datasource.getType());
-        for (Dimension d : datasource.getDimensions()) {
+        for (DimSchemaResp d : datasource.getDimensions()) {
             List<SqlNode> identifiers =
                     expand(SemanticNode.parse(d.getExpr(), scope, engineType), scope);
             identifiers.forEach(i -> dimensions.add(i.toString()));
@@ -130,46 +139,36 @@ public class DataModelNode extends SemanticNode {
         return dataModelList.stream().map(DataModel::getName).collect(Collectors.joining("_"));
     }
 
-    public static void getQueryDimensionMeasure(Ontology ontology, OntologyQueryParam queryParam,
+    public static void getQueryDimensionMeasure(Ontology ontology, OntologyQuery ontologyQuery,
             Set<String> queryDimensions, Set<String> queryMeasures) {
-        queryDimensions.addAll(queryParam.getDimensions().stream()
-                .map(d -> d.contains(Constants.DIMENSION_IDENTIFY)
-                        ? d.split(Constants.DIMENSION_IDENTIFY)[1]
-                        : d)
-                .collect(Collectors.toSet()));
-        Set<String> schemaMetricName =
-                ontology.getMetrics().stream().map(Metric::getName).collect(Collectors.toSet());
-        ontology.getMetrics().stream().filter(m -> queryParam.getMetrics().contains(m.getName()))
-                .forEach(m -> {
-                    if (!CollectionUtils.isEmpty(m.getMetricTypeParams().getMeasures())) {
-                        m.getMetricTypeParams().getMeasures()
-                                .forEach(mm -> queryMeasures.add(mm.getName()));
-                    }
-                    if (!CollectionUtils.isEmpty(m.getMetricTypeParams().getFields())) {
-                        m.getMetricTypeParams().getFields()
-                                .forEach(mm -> queryMeasures.add(mm.getName()));
-                    }
-                });
-        queryParam.getMetrics().stream().filter(m -> !schemaMetricName.contains(m))
-                .forEach(queryMeasures::add);
+        ontologyQuery.getMetrics().forEach(m -> {
+            if (Objects.nonNull(m.getMetricDefineByMeasureParams())) {
+                m.getMetricDefineByMeasureParams().getMeasures()
+                        .forEach(mm -> queryMeasures.add(mm.getName()));
+            }
+            if (Objects.nonNull(m.getMetricDefineByFieldParams())) {
+                m.getMetricDefineByFieldParams().getFields()
+                        .forEach(mm -> queryMeasures.add(mm.getFieldName()));
+            }
+        });
     }
 
     public static void mergeQueryFilterDimensionMeasure(Ontology ontology,
-            OntologyQueryParam queryParam, Set<String> dimensions, Set<String> measures,
+            OntologyQuery ontologyQuery, Set<String> dimensions, Set<String> measures,
             SqlValidatorScope scope) throws Exception {
         EngineType engineType = ontology.getDatabase().getType();
-        if (Objects.nonNull(queryParam.getWhere()) && !queryParam.getWhere().isEmpty()) {
+        if (Objects.nonNull(ontologyQuery.getWhere()) && !ontologyQuery.getWhere().isEmpty()) {
             Set<String> filterConditions = new HashSet<>();
-            FilterNode.getFilterField(parse(queryParam.getWhere(), scope, engineType),
+            FilterNode.getFilterField(parse(ontologyQuery.getWhere(), scope, engineType),
                     filterConditions);
             Set<String> queryMeasures = new HashSet<>(measures);
-            Set<String> schemaMetricName =
-                    ontology.getMetrics().stream().map(Metric::getName).collect(Collectors.toSet());
+            Set<String> schemaMetricName = ontology.getMetrics().stream()
+                    .map(MetricSchemaResp::getName).collect(Collectors.toSet());
             for (String filterCondition : filterConditions) {
                 if (schemaMetricName.contains(filterCondition)) {
                     ontology.getMetrics().stream()
                             .filter(m -> m.getName().equalsIgnoreCase(filterCondition))
-                            .forEach(m -> m.getMetricTypeParams().getMeasures()
+                            .forEach(m -> m.getMetricDefineByMeasureParams().getMeasures()
                                     .forEach(mm -> queryMeasures.add(mm.getName())));
                     continue;
                 }
@@ -180,18 +179,51 @@ public class DataModelNode extends SemanticNode {
         }
     }
 
-    public static List<DataModel> getQueryDataModels(SqlValidatorScope scope,
-            S2CalciteSchema schema, OntologyQueryParam queryParam) throws Exception {
-        Ontology ontology = schema.getOntology();
+    public static List<DataModel> getQueryDataModelsV2(Ontology ontology, OntologyQuery query) {
+        // first, sort models based on the number of query metrics
+        Map<String, Integer> modelMetricCount = Maps.newHashMap();
+        query.getMetrics().forEach(m -> {
+            if (!modelMetricCount.containsKey(m.getModelBizName())) {
+                modelMetricCount.put(m.getModelBizName(), 1);
+            } else {
+                int count = modelMetricCount.get(m.getModelBizName());
+                modelMetricCount.put(m.getModelBizName(), count + 1);
+            }
+        });
+        List<String> metricsDataModels = modelMetricCount.entrySet().stream()
+                .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder())).map(e -> e.getKey())
+                .collect(Collectors.toList());
+
+        // first, sort models based on the number of query dimensions
+        Map<String, Integer> modelDimCount = Maps.newHashMap();
+        query.getDimensions().forEach(m -> {
+            if (!modelDimCount.containsKey(m.getModelBizName())) {
+                modelDimCount.put(m.getModelBizName(), 1);
+            } else {
+                int count = modelDimCount.get(m.getModelBizName());
+                modelDimCount.put(m.getModelBizName(), count + 1);
+            }
+        });
+        List<String> dimDataModels = modelDimCount.entrySet().stream()
+                .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder())).map(e -> e.getKey())
+                .collect(Collectors.toList());
+
+        Set<String> dataModelNames = Sets.newLinkedHashSet();
+        dataModelNames.addAll(metricsDataModels);
+        dataModelNames.addAll(dimDataModels);
+        return dataModelNames.stream().map(bizName -> ontology.getDataModelMap().get(bizName))
+                .collect(Collectors.toList());
+    }
+
+    public static List<DataModel> getQueryDataModels(Ontology ontology,
+            OntologyQuery ontologyQuery) {
         // get query measures and dimensions
         Set<String> queryMeasures = new HashSet<>();
         Set<String> queryDimensions = new HashSet<>();
-        getQueryDimensionMeasure(ontology, queryParam, queryDimensions, queryMeasures);
-        mergeQueryFilterDimensionMeasure(ontology, queryParam, queryDimensions, queryMeasures,
-                scope);
+        getQueryDimensionMeasure(ontology, ontologyQuery, queryDimensions, queryMeasures);
 
         // first, find the base model
-        DataModel baseDataModel = findBaseModel(ontology, queryMeasures, queryDimensions);
+        DataModel baseDataModel = findBaseModel(ontology, ontologyQuery);
         if (Objects.isNull(baseDataModel)) {
             throw new RuntimeException(
                     String.format("could not find matching dataModel, dimensions:%s, measures:%s",
@@ -204,7 +236,7 @@ public class DataModelNode extends SemanticNode {
         }
 
         // second, traverse the ontology to find other related dataModels
-        List<DataModel> relatedDataModels = findRelatedModelsByRelation(ontology, queryParam,
+        List<DataModel> relatedDataModels = findRelatedModelsByRelation(ontology, ontologyQuery,
                 baseDataModel, queryDimensions, queryMeasures);
         if (CollectionUtils.isEmpty(relatedDataModels)) {
             relatedDataModels = findRelatedModelsByIdentifier(ontology, baseDataModel,
@@ -216,6 +248,45 @@ public class DataModelNode extends SemanticNode {
 
         log.debug("relatedDataModels {}", relatedDataModels);
         return relatedDataModels;
+    }
+
+    private static DataModel findBaseModel(Ontology ontology, OntologyQuery query) {
+        DataModel dataModel = null;
+        // first, try to find the model with the most query metrics
+        Map<String, Integer> modelMetricCount = Maps.newHashMap();
+        query.getMetrics().forEach(m -> {
+            if (!modelMetricCount.containsKey(m.getModelBizName())) {
+                modelMetricCount.put(m.getModelBizName(), 1);
+            } else {
+                int count = modelMetricCount.get(m.getModelBizName());
+                modelMetricCount.put(m.getModelBizName(), count + 1);
+            }
+        });
+        Optional<String> baseModelName = modelMetricCount.entrySet().stream()
+                .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder())).map(e -> e.getKey())
+                .findFirst();
+        if (baseModelName.isPresent()) {
+            dataModel = ontology.getDataModelMap().get(baseModelName.get());
+        } else {
+            // second, try to find the model with the most query dimensions
+            Map<String, Integer> modelDimCount = Maps.newHashMap();
+            query.getDimensions().forEach(m -> {
+                if (!modelDimCount.containsKey(m.getModelBizName())) {
+                    modelDimCount.put(m.getModelBizName(), 1);
+                } else {
+                    int count = modelDimCount.get(m.getModelBizName());
+                    modelDimCount.put(m.getModelBizName(), count + 1);
+                }
+            });
+            baseModelName = modelMetricCount.entrySet().stream()
+                    .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
+                    .map(e -> e.getKey()).findFirst();
+            if (baseModelName.isPresent()) {
+                dataModel = ontology.getDataModelMap().get(baseModelName.get());
+            }
+        }
+
+        return dataModel;
     }
 
     private static DataModel findBaseModel(Ontology ontology, Set<String> queryMeasures,
@@ -239,8 +310,9 @@ public class DataModelNode extends SemanticNode {
         } else {
             // second, try to find the model with the most matching dimensions
             Map<String, Integer> dataModelDimCount = new HashMap<>();
-            for (Map.Entry<String, List<Dimension>> entry : ontology.getDimensionMap().entrySet()) {
-                Set<String> modelDimensions = entry.getValue().stream().map(Dimension::getName)
+            for (Map.Entry<String, List<DimSchemaResp>> entry : ontology.getDimensionMap()
+                    .entrySet()) {
+                Set<String> modelDimensions = entry.getValue().stream().map(DimSchemaResp::getName)
                         .collect(Collectors.toSet());
                 modelDimensions.retainAll(queryDimensions);
                 dataModelDimCount.put(entry.getKey(), modelDimensions.size());
@@ -261,8 +333,8 @@ public class DataModelNode extends SemanticNode {
         boolean isAllMatch = true;
         Set<String> baseMeasures = baseDataModel.getMeasures().stream().map(Measure::getName)
                 .collect(Collectors.toSet());
-        Set<String> baseDimensions = baseDataModel.getDimensions().stream().map(Dimension::getName)
-                .collect(Collectors.toSet());
+        Set<String> baseDimensions = baseDataModel.getDimensions().stream()
+                .map(DimSchemaResp::getName).collect(Collectors.toSet());
         baseDataModel.getIdentifiers().forEach(i -> baseDimensions.add(i.getName()));
 
         baseMeasures.retainAll(queryMeasures);
@@ -290,7 +362,7 @@ public class DataModelNode extends SemanticNode {
     }
 
     private static List<DataModel> findRelatedModelsByRelation(Ontology ontology,
-            OntologyQueryParam queryParam, DataModel baseDataModel, Set<String> queryDimensions,
+            OntologyQuery ontologyQuery, DataModel baseDataModel, Set<String> queryDimensions,
             Set<String> queryMeasures) {
         Set<String> joinDataModelNames = new HashSet<>();
         List<DataModel> joinDataModels = new ArrayList<>();
@@ -318,13 +390,13 @@ public class DataModelNode extends SemanticNode {
                         : joinRelation.getJoinCondition().get(0).getLeft();
                 if (!queryDimensions.isEmpty()) {
                     Set<String> linkDimension = other.getDimensions().stream()
-                            .map(Dimension::getName).collect(Collectors.toSet());
+                            .map(DimSchemaResp::getName).collect(Collectors.toSet());
                     other.getIdentifiers().forEach(i -> linkDimension.add(i.getName()));
                     linkDimension.retainAll(queryDimensions);
                     if (!linkDimension.isEmpty()) {
                         isMatch = true;
                         // joinDim should be added to the query dimension
-                        queryParam.getDimensions().add(joinDimName);
+                        // ontologyQuery.getDimensions().add(joinDimName);
                     }
                 }
                 Set<String> linkMeasure = other.getMeasures().stream().map(Measure::getName)
@@ -335,7 +407,7 @@ public class DataModelNode extends SemanticNode {
                 }
                 if (!isMatch && ontology.getDimensionMap().containsKey(other.getName())) {
                     Set<String> linkDimension = ontology.getDimensionMap().get(other.getName())
-                            .stream().map(Dimension::getName).collect(Collectors.toSet());
+                            .stream().map(DimSchemaResp::getName).collect(Collectors.toSet());
                     linkDimension.retainAll(queryDimensions);
                     if (!linkDimension.isEmpty()) {
                         isMatch = true;
@@ -408,7 +480,7 @@ public class DataModelNode extends SemanticNode {
                 boolean isMatch = false;
                 if (!queryDimension.isEmpty()) {
                     Set<String> linkDimension = entry.getValue().getDimensions().stream()
-                            .map(Dimension::getName).collect(Collectors.toSet());
+                            .map(DimSchemaResp::getName).collect(Collectors.toSet());
                     entry.getValue().getIdentifiers().forEach(i -> linkDimension.add(i.getName()));
                     linkDimension.retainAll(queryDimension);
                     if (!linkDimension.isEmpty()) {
@@ -428,9 +500,9 @@ public class DataModelNode extends SemanticNode {
                 }
             }
         }
-        for (Map.Entry<String, List<Dimension>> entry : ontology.getDimensionMap().entrySet()) {
+        for (Map.Entry<String, List<DimSchemaResp>> entry : ontology.getDimensionMap().entrySet()) {
             if (!queryDimension.isEmpty()) {
-                Set<String> linkDimension = entry.getValue().stream().map(Dimension::getName)
+                Set<String> linkDimension = entry.getValue().stream().map(DimSchemaResp::getName)
                         .collect(Collectors.toSet());
                 linkDimension.retainAll(queryDimension);
                 if (!linkDimension.isEmpty()) {

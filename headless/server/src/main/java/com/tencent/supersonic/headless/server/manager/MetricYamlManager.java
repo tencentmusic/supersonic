@@ -1,19 +1,10 @@
 package com.tencent.supersonic.headless.server.manager;
 
 import com.google.common.collect.Lists;
-import com.tencent.supersonic.headless.api.pojo.FieldParam;
-import com.tencent.supersonic.headless.api.pojo.MeasureParam;
-import com.tencent.supersonic.headless.api.pojo.MetricDefineByFieldParams;
-import com.tencent.supersonic.headless.api.pojo.MetricDefineByMeasureParams;
-import com.tencent.supersonic.headless.api.pojo.MetricDefineByMetricParams;
-import com.tencent.supersonic.headless.api.pojo.MetricParam;
+import com.tencent.supersonic.headless.api.pojo.*;
 import com.tencent.supersonic.headless.api.pojo.enums.MetricDefineType;
 import com.tencent.supersonic.headless.api.pojo.response.MetricResp;
-import com.tencent.supersonic.headless.server.pojo.yaml.FieldParamYamlTpl;
-import com.tencent.supersonic.headless.server.pojo.yaml.MeasureYamlTpl;
-import com.tencent.supersonic.headless.server.pojo.yaml.MetricParamYamlTpl;
-import com.tencent.supersonic.headless.server.pojo.yaml.MetricTypeParamsYamlTpl;
-import com.tencent.supersonic.headless.server.pojo.yaml.MetricYamlTpl;
+import com.tencent.supersonic.headless.server.pojo.yaml.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
@@ -47,7 +38,7 @@ public class MetricYamlManager {
             MetricDefineByMeasureParams metricDefineParams =
                     metric.getMetricDefineByMeasureParams();
             metricTypeParamsYamlTpl.setExpr(metricDefineParams.getExpr());
-            List<MeasureParam> measures = metricDefineParams.getMeasures();
+            List<Measure> measures = metricDefineParams.getMeasures();
             metricTypeParamsYamlTpl.setMeasures(
                     measures.stream().map(MetricYamlManager::convert).collect(Collectors.toList()));
         } else if (MetricDefineType.FIELD.equals(metric.getMetricDefineType())) {
@@ -68,7 +59,7 @@ public class MetricYamlManager {
         return metricYamlTpl;
     }
 
-    public static MeasureYamlTpl convert(MeasureParam measure) {
+    public static MeasureYamlTpl convert(Measure measure) {
         MeasureYamlTpl measureYamlTpl = new MeasureYamlTpl();
         measureYamlTpl.setName(measure.getBizName());
         measureYamlTpl.setConstraint(measure.getConstraint());

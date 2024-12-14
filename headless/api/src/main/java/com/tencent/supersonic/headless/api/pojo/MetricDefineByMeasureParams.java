@@ -8,5 +8,5 @@ import java.util.List;
 @Data
 public class MetricDefineByMeasureParams extends MetricDefineParams {
 
-    private List<MeasureParam> measures = Lists.newArrayList();
+    private List<Measure> measures = Lists.newArrayList();
 }

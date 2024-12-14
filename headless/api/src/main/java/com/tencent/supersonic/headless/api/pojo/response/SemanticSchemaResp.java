@@ -3,14 +3,20 @@ package com.tencent.supersonic.headless.api.pojo.response;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.common.pojo.ModelRela;
 import com.tencent.supersonic.common.pojo.enums.QueryType;
+import com.tencent.supersonic.headless.api.pojo.SchemaItem;
 import com.tencent.supersonic.headless.api.pojo.enums.SchemaType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Data
 @AllArgsConstructor
@@ -39,6 +45,14 @@ public class SemanticSchemaResp {
                 .orElse(null);
     }
 
+    public List<MetricSchemaResp> getMetrics(List<String> bizNames) {
+        Map<String, MetricSchemaResp> metricLowerToNameMap = metrics.stream().collect(
+                Collectors.toMap(entry -> entry.getBizName().toLowerCase(), entry -> entry));
+        return bizNames.stream().map(String::toLowerCase)
+                .filter(entry -> metricLowerToNameMap.containsKey(entry))
+                .map(entry -> metricLowerToNameMap.get(entry)).collect(Collectors.toList());
+    }
+
     public DimSchemaResp getDimension(String bizName) {
         return dimensions.stream()
                 .filter(dimension -> bizName.equalsIgnoreCase(dimension.getBizName())).findFirst()
@@ -48,6 +62,14 @@ public class SemanticSchemaResp {
     public DimSchemaResp getDimension(Long id) {
         return dimensions.stream().filter(dimension -> id.equals(dimension.getId())).findFirst()
                 .orElse(null);
+    }
+
+    public List<DimSchemaResp> getDimensions(List<String> bizNames) {
+        Map<String, DimSchemaResp> dimLowerToNameMap = dimensions.stream().collect(
+                Collectors.toMap(entry -> entry.getBizName().toLowerCase(), entry -> entry));
+        return bizNames.stream().map(String::toLowerCase)
+                .filter(entry -> dimLowerToNameMap.containsKey(entry))
+                .map(entry -> dimLowerToNameMap.get(entry)).collect(Collectors.toList());
     }
 
     public Set<String> getNameFromBizNames(Set<String> bizNames) {
@@ -65,4 +87,32 @@ public class SemanticSchemaResp {
         }
         return names;
     }
+
+    public Map<String, String> getNameToBizNameMap() {
+        // support fieldName and field alias to bizName
+        Map<String, String> dimensionResults = dimensions.stream().flatMap(
+                entry -> getPairStream(entry.getAlias(), entry.getName(), entry.getBizName()))
+                .collect(Collectors.toMap(Pair::getLeft, Pair::getRight, (k1, k2) -> k1));
+
+        Map<String, String> metricResults = metrics.stream().flatMap(
+                entry -> getPairStream(entry.getAlias(), entry.getName(), entry.getBizName()))
+                .collect(Collectors.toMap(Pair::getLeft, Pair::getRight, (k1, k2) -> k1));
+
+        dimensionResults.putAll(metricResults);
+        return dimensionResults;
+    }
+
+    private Stream<Pair<String, String>> getPairStream(String aliasStr, String name,
+            String bizName) {
+        Set<Pair<String, String>> elements = new HashSet<>();
+        elements.add(Pair.of(name, bizName));
+        if (StringUtils.isNotBlank(aliasStr)) {
+            List<String> aliasList = SchemaItem.getAliasList(aliasStr);
+            for (String alias : aliasList) {
+                elements.add(Pair.of(alias, bizName));
+            }
+        }
+        return elements.stream();
+    }
+
 }

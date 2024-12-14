@@ -1,7 +1,7 @@
 package com.tencent.supersonic.headless.core.translator.optimizer;
 
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;
-import com.tencent.supersonic.headless.core.pojo.StructQueryParam;
+import com.tencent.supersonic.headless.core.pojo.StructQuery;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
@@ -15,7 +15,7 @@ public class DetailQueryOptimizer implements QueryOptimizer {
 
     @Override
     public void rewrite(QueryStatement queryStatement) {
-        StructQueryParam structQueryParam = queryStatement.getStructQueryParam();
+        StructQuery structQuery = queryStatement.getStructQuery();
         String sqlRaw = queryStatement.getSql().trim();
         if (StringUtils.isEmpty(sqlRaw)) {
             throw new RuntimeException("sql is empty or null");
@@ -33,8 +33,7 @@ public class DetailQueryOptimizer implements QueryOptimizer {
         log.debug("after handleNoMetric, sql:{}", queryStatement.getSql());
     }
 
-    public boolean isDetailQuery(StructQueryParam structQueryParam) {
-        return Objects.nonNull(structQueryParam)
-                && structQueryParam.getQueryType().isNativeAggQuery();
+    public boolean isDetailQuery(StructQuery structQuery) {
+        return Objects.nonNull(structQuery) && structQuery.getQueryType().isNativeAggQuery();
     }
 }
