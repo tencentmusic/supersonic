@@ -1,9 +1,8 @@
 package com.tencent.supersonic.headless.api.pojo.request;
 
-import javax.validation.constraints.NotNull;
-
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.common.pojo.RecordInfo;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 import java.util.List;

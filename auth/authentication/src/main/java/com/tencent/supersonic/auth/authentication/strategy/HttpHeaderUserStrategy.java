@@ -1,13 +1,12 @@
 package com.tencent.supersonic.auth.authentication.strategy;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import com.tencent.supersonic.auth.api.authentication.constant.UserConstants;
 import com.tencent.supersonic.auth.api.authentication.service.UserStrategy;
 import com.tencent.supersonic.auth.authentication.utils.TokenService;
 import com.tencent.supersonic.common.pojo.User;
 import io.jsonwebtoken.Claims;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -15,10 +14,16 @@ import java.util.Optional;
 @Service
 public class HttpHeaderUserStrategy implements UserStrategy {
 
+    public static final String STRATEGY_NAME = "http";
     private final TokenService tokenService;
 
     public HttpHeaderUserStrategy(TokenService tokenService) {
         this.tokenService = tokenService;
+    }
+
+    @Override
+    public String getStrategyName() {
+        return STRATEGY_NAME;
     }
 
     @Override

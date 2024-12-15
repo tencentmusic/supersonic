@@ -8,7 +8,6 @@ import java.util.List;
 
 /** extended information command about model */
 @Data
-@ToString
 public class ChatConfigBaseReq {
 
     private Long modelId;
