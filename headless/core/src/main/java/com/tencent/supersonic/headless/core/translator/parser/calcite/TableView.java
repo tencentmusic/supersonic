@@ -2,7 +2,7 @@ package com.tencent.supersonic.headless.core.translator.parser.calcite;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.tencent.supersonic.headless.core.pojo.DataModel;
+import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
 import lombok.Data;
 import org.apache.calcite.sql.SqlNode;
 import org.apache.calcite.sql.SqlNodeList;
@@ -13,7 +13,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-/** basic query project */
 @Data
 public class TableView {
 
@@ -28,7 +27,7 @@ public class TableView {
 
     private String alias;
     private List<String> primary;
-    private DataModel dataModel;
+    private ModelResp dataModel;
 
     public SqlNode build() {
         List<SqlNode> selectNodeList = new ArrayList<>();

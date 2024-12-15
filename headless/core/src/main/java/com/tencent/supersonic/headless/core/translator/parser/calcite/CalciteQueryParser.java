@@ -6,7 +6,6 @@ import com.tencent.supersonic.headless.core.translator.parser.QueryParser;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-/** the calcite parse implements */
 @Component("CalciteQueryParser")
 @Slf4j
 public class CalciteQueryParser implements QueryParser {

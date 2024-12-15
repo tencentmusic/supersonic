@@ -1,7 +1,8 @@
 package com.tencent.supersonic.headless.core.translator.converter;
 
+import com.tencent.supersonic.common.pojo.enums.EngineType;
 import com.tencent.supersonic.common.util.ContextUtils;
-import com.tencent.supersonic.headless.core.pojo.Database;
+import com.tencent.supersonic.headless.api.pojo.response.DatabaseResp;
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;
 import com.tencent.supersonic.headless.core.pojo.SqlQuery;
 import com.tencent.supersonic.headless.core.pojo.StructQuery;
@@ -40,8 +41,9 @@ public class StructQueryConverter implements QueryConverter {
                 sqlGenerateUtils.generateWhere(structQuery, null),
                 sqlGenerateUtils.getGroupBy(structQuery), sqlGenerateUtils.getOrderBy(structQuery),
                 sqlGenerateUtils.getLimit(structQuery));
-        Database database = queryStatement.getOntology().getDatabase();
-        if (!sqlGenerateUtils.isSupportWith(database.getType(), database.getVersion())) {
+        DatabaseResp database = queryStatement.getOntology().getDatabase();
+        if (!sqlGenerateUtils.isSupportWith(EngineType.fromString(database.getType()),
+                database.getVersion())) {
             sqlQuery.setSupportWith(false);
             sql = String.format("select %s from %s t0 %s %s %s",
                     sqlGenerateUtils.getSelect(structQuery), dsTable,

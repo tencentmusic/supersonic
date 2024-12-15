@@ -1,4 +1,4 @@
-package com.tencent.supersonic.headless.core.translator.parser.s2sql;
+package com.tencent.supersonic.headless.core.translator.parser;
 
 import lombok.Builder;
 import lombok.Data;

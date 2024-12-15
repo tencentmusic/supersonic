@@ -6,7 +6,7 @@ import com.tencent.supersonic.common.pojo.enums.DatePeriodEnum;
 import com.tencent.supersonic.common.pojo.enums.EngineType;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.headless.api.pojo.enums.AggOption;
-import com.tencent.supersonic.headless.core.pojo.Database;
+import com.tencent.supersonic.headless.api.pojo.response.DatabaseResp;
 import com.tencent.supersonic.headless.core.pojo.OntologyQuery;
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;
 import com.tencent.supersonic.headless.core.pojo.SqlQuery;
@@ -59,8 +59,9 @@ public class MetricRatioConverter implements QueryConverter {
 
     @Override
     public void convert(QueryStatement queryStatement) throws Exception {
-        Database database = queryStatement.getOntology().getDatabase();
-        generateRatioSql(queryStatement, database.getType(), database.getVersion());
+        DatabaseResp database = queryStatement.getOntology().getDatabase();
+        generateRatioSql(queryStatement, EngineType.fromString(database.getType()),
+                database.getVersion());
     }
 
     /** Ratio */
