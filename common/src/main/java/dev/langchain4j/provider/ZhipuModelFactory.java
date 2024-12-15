@@ -9,6 +9,7 @@ import dev.langchain4j.model.zhipu.ZhipuAiChatModel;
 import dev.langchain4j.model.zhipu.ZhipuAiEmbeddingModel;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Service;
+import static java.time.Duration.ofSeconds;
 
 @Service
 public class ZhipuModelFactory implements ModelFactory, InitializingBean {
@@ -30,7 +31,8 @@ public class ZhipuModelFactory implements ModelFactory, InitializingBean {
     public EmbeddingModel createEmbeddingModel(EmbeddingModelConfig embeddingModelConfig) {
         return ZhipuAiEmbeddingModel.builder().baseUrl(embeddingModelConfig.getBaseUrl())
                 .apiKey(embeddingModelConfig.getApiKey()).model(embeddingModelConfig.getModelName())
-                .maxRetries(embeddingModelConfig.getMaxRetries())
+                .maxRetries(embeddingModelConfig.getMaxRetries()).callTimeout(ofSeconds(60))
+                .connectTimeout(ofSeconds(60)).writeTimeout(ofSeconds(60)).readTimeout(ofSeconds(60))
                 .logRequests(embeddingModelConfig.getLogRequests())
                 .logResponses(embeddingModelConfig.getLogResponses()).build();
     }
