@@ -22,10 +22,10 @@ import com.tencent.supersonic.headless.server.utils.ModelConverter;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.springframework.context.ApplicationEventPublisher;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.springframework.context.ApplicationEventPublisher;
 
 import static org.mockito.Mockito.when;
 

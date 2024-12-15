@@ -71,7 +71,6 @@ public class SqlQueryConverter implements QueryConverter {
         } else if (sqlQueryAggOption.equals(AggOption.NATIVE) && !queryMetrics.isEmpty()) {
             ontologyQuery.setAggOption(AggOption.DEFAULT);
         }
-        ontologyQuery.setNativeQuery(!AggOption.isAgg(ontologyQuery.getAggOption()));
 
         queryStatement.setOntologyQuery(ontologyQuery);
         log.info("parse sqlQuery [{}] ", sqlQuery);

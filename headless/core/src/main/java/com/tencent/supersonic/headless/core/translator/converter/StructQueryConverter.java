@@ -35,8 +35,9 @@ public class StructQueryConverter implements QueryConverter {
         }
         SqlQuery sqlQuery = new SqlQuery();
         sqlQuery.setTable(dsTable);
-        String sql = String.format("select %s from %s  %s %s %s",
+        String sql = String.format("select %s from %s %s %s %s %s",
                 sqlGenerateUtils.getSelect(structQuery), dsTable,
+                sqlGenerateUtils.generateWhere(structQuery, null),
                 sqlGenerateUtils.getGroupBy(structQuery), sqlGenerateUtils.getOrderBy(structQuery),
                 sqlGenerateUtils.getLimit(structQuery));
         Database database = queryStatement.getOntology().getDatabase();

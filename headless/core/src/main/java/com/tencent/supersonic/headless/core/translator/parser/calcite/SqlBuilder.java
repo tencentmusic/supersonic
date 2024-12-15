@@ -2,16 +2,14 @@ package com.tencent.supersonic.headless.core.translator.parser.calcite;
 
 import com.tencent.supersonic.common.calcite.Configuration;
 import com.tencent.supersonic.common.pojo.enums.EngineType;
-import com.tencent.supersonic.headless.api.pojo.enums.AggOption;
 import com.tencent.supersonic.headless.core.pojo.DataModel;
 import com.tencent.supersonic.headless.core.pojo.Database;
 import com.tencent.supersonic.headless.core.pojo.OntologyQuery;
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;
 import com.tencent.supersonic.headless.core.translator.parser.calcite.node.DataModelNode;
 import com.tencent.supersonic.headless.core.translator.parser.calcite.node.SemanticNode;
+import com.tencent.supersonic.headless.core.translator.parser.calcite.render.JoinRender;
 import com.tencent.supersonic.headless.core.translator.parser.calcite.render.Renderer;
-import com.tencent.supersonic.headless.core.translator.parser.calcite.render.SourceRender;
-import com.tencent.supersonic.headless.core.translator.parser.s2sql.Constants;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.calcite.sql.SqlNode;
 import org.apache.calcite.sql.parser.SqlParser;
@@ -29,8 +27,6 @@ public class SqlBuilder {
     private OntologyQuery ontologyQuery;
     private SqlValidatorScope scope;
     private SqlNode parserNode;
-    private boolean isAgg = false;
-    private AggOption aggOption = AggOption.DEFAULT;
 
     public SqlBuilder(S2CalciteSchema schema) {
         this.schema = schema;
@@ -41,7 +37,6 @@ public class SqlBuilder {
         if (ontologyQuery.getLimit() == null) {
             ontologyQuery.setLimit(0L);
         }
-        this.aggOption = ontologyQuery.getAggOption();
 
         buildParseNode();
         Database database = queryStatement.getOntology().getDatabase();
@@ -57,39 +52,23 @@ public class SqlBuilder {
         if (dataModels == null || dataModels.isEmpty()) {
             throw new Exception("data model not found");
         }
-        isAgg = getAgg(dataModels.get(0));
 
-        // build level by level
         LinkedList<Renderer> builders = new LinkedList<>();
-        builders.add(new SourceRender());
+        builders.add(new JoinRender());
         ListIterator<Renderer> it = builders.listIterator();
         int i = 0;
         Renderer previous = null;
         while (it.hasNext()) {
             Renderer renderer = it.next();
             if (previous != null) {
-                previous.render(ontologyQuery, dataModels, scope, schema, !isAgg);
+                previous.render(ontologyQuery, dataModels, scope, schema);
                 renderer.setTable(previous.builderAs(DataModelNode.getNames(dataModels) + "_" + i));
                 i++;
             }
             previous = renderer;
         }
-        builders.getLast().render(ontologyQuery, dataModels, scope, schema, !isAgg);
+        builders.getLast().render(ontologyQuery, dataModels, scope, schema);
         parserNode = builders.getLast().build();
-    }
-
-    private boolean getAgg(DataModel dataModel) {
-        if (!AggOption.DEFAULT.equals(aggOption)) {
-            return AggOption.isAgg(aggOption);
-        }
-        // default by dataModel time aggregation
-        if (Objects.nonNull(dataModel.getAggTime()) && !dataModel.getAggTime()
-                .equalsIgnoreCase(Constants.DIMENSION_TYPE_TIME_GRANULARITY_NONE)) {
-            if (!ontologyQuery.isNativeQuery()) {
-                return true;
-            }
-        }
-        return isAgg;
     }
 
     public String getSql(EngineType engineType) {

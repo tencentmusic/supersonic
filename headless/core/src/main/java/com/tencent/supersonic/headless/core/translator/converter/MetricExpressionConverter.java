@@ -48,9 +48,6 @@ public class MetricExpressionConverter implements QueryConverter {
 
     private Map<String, String> getMetricExpressions(SemanticSchemaResp semanticSchema,
             OntologyQuery ontologyQuery) {
-        if (!ontologyQuery.hasDerivedMetric()) {
-            return Collections.emptyMap();
-        }
 
         List<MetricSchemaResp> allMetrics = semanticSchema.getMetrics();
         List<DimSchemaResp> allDimensions = semanticSchema.getDimensions();
@@ -73,14 +70,14 @@ public class MetricExpressionConverter implements QueryConverter {
         Map<String, String> visitedMetrics = new HashMap<>();
         Map<String, String> metric2Expr = new HashMap<>();
         for (MetricSchemaResp queryMetric : queryMetrics) {
+            String fieldExpr = buildFieldExpr(allMetrics, allFields, allMeasures, allDimensions,
+                    queryMetric.getExpr(), queryMetric.getMetricDefineType(), aggOption,
+                    visitedMetrics, queryDimensions, queryFields);
+            // add all fields referenced in the expression
+            queryMetric.getFields().addAll(SqlSelectHelper.getFieldsFromExpr(fieldExpr));
+            log.debug("derived metric {}->{}", queryMetric.getBizName(), fieldExpr);
             if (queryMetric.isDerived()) {
-                String fieldExpr = buildFieldExpr(allMetrics, allFields, allMeasures, allDimensions,
-                        queryMetric.getExpr(), queryMetric.getMetricDefineType(), aggOption,
-                        visitedMetrics, queryDimensions, queryFields);
                 metric2Expr.put(queryMetric.getBizName(), fieldExpr);
-                // add all fields referenced in the expression
-                queryMetric.getFields().addAll(SqlSelectHelper.getFieldsFromExpr(fieldExpr));
-                log.debug("derived metric {}->{}", queryMetric.getBizName(), fieldExpr);
             }
         }
 
@@ -120,13 +117,13 @@ public class MetricExpressionConverter implements QueryConverter {
                             Measure measure = allMeasures.get(field);
                             if (AggOperatorEnum.COUNT_DISTINCT.getOperator()
                                     .equalsIgnoreCase(measure.getAgg())) {
-                                return AggOption.NATIVE.equals(aggOption) ? measure.getBizName()
+                                return AggOption.NATIVE.equals(aggOption) ? measure.getExpr()
                                         : AggOperatorEnum.COUNT.getOperator() + " ( "
-                                                + AggOperatorEnum.DISTINCT + " "
-                                                + measure.getBizName() + " ) ";
+                                                + AggOperatorEnum.DISTINCT + " " + measure.getExpr()
+                                                + " ) ";
                             }
-                            String expr = AggOption.NATIVE.equals(aggOption) ? measure.getBizName()
-                                    : measure.getAgg() + " ( " + measure.getBizName() + " ) ";
+                            String expr = AggOption.NATIVE.equals(aggOption) ? measure.getExpr()
+                                    : measure.getAgg() + " ( " + measure.getExpr() + " ) ";
 
                             replace.put(field, expr);
                         }

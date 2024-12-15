@@ -30,5 +30,5 @@ public abstract class Renderer {
     }
 
     public abstract void render(OntologyQuery ontologyQuery, List<DataModel> dataModels,
-            SqlValidatorScope scope, S2CalciteSchema schema, boolean nonAgg) throws Exception;
+            SqlValidatorScope scope, S2CalciteSchema schema) throws Exception;
 }

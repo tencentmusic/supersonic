@@ -141,7 +141,12 @@ public class SqlGenerateUtils {
         String whereClauseFromFilter =
                 sqlFilterUtils.getWhereClause(structQuery.getDimensionFilters());
         String whereFromDate = getDateWhereClause(structQuery.getDateInfo(), itemDateResp);
-        return mergeDateWhereClause(structQuery, whereClauseFromFilter, whereFromDate);
+        String mergedWhere =
+                mergeDateWhereClause(structQuery, whereClauseFromFilter, whereFromDate);
+        if (StringUtils.isNotBlank(mergedWhere)) {
+            mergedWhere = "where " + mergedWhere;
+        }
+        return mergedWhere;
     }
 
     private String mergeDateWhereClause(StructQuery structQuery, String whereClauseFromFilter,

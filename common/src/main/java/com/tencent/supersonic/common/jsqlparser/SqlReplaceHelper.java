@@ -594,7 +594,14 @@ public class SqlReplaceHelper {
         Select selectStatement = SqlSelectHelper.getSelect(sql);
         List<PlainSelect> plainSelectList = new ArrayList<>();
         if (selectStatement instanceof PlainSelect) {
-            plainSelectList.add((PlainSelect) selectStatement);
+            // if with statement exists, replace expression in the with statement.
+            if (!CollectionUtils.isEmpty(selectStatement.getWithItemsList())) {
+                selectStatement.getWithItemsList().forEach(withItem -> {
+                    plainSelectList.add(withItem.getSelect().getPlainSelect());
+                });
+            } else {
+                plainSelectList.add((PlainSelect) selectStatement);
+            }
         } else if (selectStatement instanceof SetOperationList) {
             SetOperationList setOperationList = (SetOperationList) selectStatement;
             if (!CollectionUtils.isEmpty(setOperationList.getSelects())) {
@@ -606,9 +613,13 @@ public class SqlReplaceHelper {
         } else {
             return sql;
         }
+
         List<PlainSelect> plainSelects = SqlSelectHelper.getPlainSelects(plainSelectList);
         for (PlainSelect plainSelect : plainSelects) {
             replacePlainSelectByExpr(plainSelect, replace);
+            if (SqlSelectHelper.hasAggregateFunction(plainSelect)) {
+                SqlSelectHelper.addMissingGroupby(plainSelect);
+            }
         }
         return selectStatement.toString();
     }

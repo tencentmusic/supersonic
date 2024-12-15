@@ -914,4 +914,31 @@ public class SqlSelectHelper {
             }
         });
     }
+
+    public static void addMissingGroupby(PlainSelect plainSelect) {
+        if (Objects.nonNull(plainSelect.getGroupBy())
+                && !plainSelect.getGroupBy().getGroupByExpressionList().isEmpty()) {
+            return;
+        }
+        GroupByElement groupBy = new GroupByElement();
+        for (SelectItem selectItem : plainSelect.getSelectItems()) {
+            Expression expression = selectItem.getExpression();
+            if (expression instanceof Column) {
+                groupBy.addGroupByExpression(expression);
+            }
+        }
+        if (!groupBy.getGroupByExpressionList().isEmpty()) {
+            plainSelect.setGroupByElement(groupBy);
+        }
+    }
+
+    public static boolean hasAggregateFunction(PlainSelect plainSelect) {
+        List<SelectItem<?>> selectItems = plainSelect.getSelectItems();
+        FunctionVisitor visitor = new FunctionVisitor();
+        for (SelectItem selectItem : selectItems) {
+            selectItem.accept(visitor);
+        }
+        return !visitor.getFunctionNames().isEmpty();
+    }
+
 }

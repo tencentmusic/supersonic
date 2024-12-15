@@ -44,6 +44,7 @@ public class DefaultSemanticTranslator implements SemanticTranslator {
             for (QueryOptimizer queryOptimizer : ComponentFactory.getQueryOptimizers()) {
                 queryOptimizer.rewrite(queryStatement);
             }
+            log.info("translated query SQL: [{}]", queryStatement.getSql());
         } catch (Exception e) {
             queryStatement.setErrMsg(e.getMessage());
             log.error("Failed to translate query [{}]", e.getMessage(), e);

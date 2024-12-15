@@ -9,10 +9,10 @@ import com.tencent.supersonic.headless.core.pojo.JoinRelation;
 import com.tencent.supersonic.headless.core.pojo.OntologyQuery;
 import com.tencent.supersonic.headless.core.translator.parser.calcite.S2CalciteSchema;
 import com.tencent.supersonic.headless.core.translator.parser.calcite.TableView;
+import com.tencent.supersonic.headless.core.translator.parser.calcite.node.DataModelNode;
 import com.tencent.supersonic.headless.core.translator.parser.calcite.node.IdentifyNode;
 import com.tencent.supersonic.headless.core.translator.parser.calcite.node.SemanticNode;
 import com.tencent.supersonic.headless.core.translator.parser.s2sql.Constants;
-import com.tencent.supersonic.headless.core.translator.parser.s2sql.Materialization;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.calcite.sql.*;
 import org.apache.calcite.sql.fun.SqlStdOperatorTable;
@@ -31,7 +31,7 @@ public class JoinRender extends Renderer {
 
     @Override
     public void render(OntologyQuery ontologyQuery, List<DataModel> dataModels,
-            SqlValidatorScope scope, S2CalciteSchema schema, boolean nonAgg) throws Exception {
+            SqlValidatorScope scope, S2CalciteSchema schema) throws Exception {
         SqlNode left = null;
         TableView leftTable = null;
         Map<String, SqlNode> outerSelect = new HashMap<>();
@@ -50,7 +50,8 @@ public class JoinRender extends Renderer {
                 primary.add(identify.getName());
             }
 
-            TableView tableView = SourceRender.renderOne(queryMetrics, queryDimensions, dataModel, scope, schema);
+            TableView tableView =
+                    renderOne(queryMetrics, queryDimensions, dataModel, scope, schema);
             log.info("tableView {}", StringUtils.normalizeSpace(tableView.getTable().toString()));
             String alias = Constants.JOIN_TABLE_PREFIX + dataModel.getName();
             tableView.setAlias(alias);
@@ -60,14 +61,13 @@ public class JoinRender extends Renderer {
                 outerSelect.put(field, SemanticNode.parse(alias + "." + field, scope, engineType));
             }
             if (left == null) {
-                leftTable = tableView;
                 left = SemanticNode.buildAs(tableView.getAlias(), getTable(tableView));
-                beforeModels.put(dataModel.getName(), leftTable.getAlias());
-                continue;
+            } else {
+                left = buildJoin(left, leftTable, tableView, beforeModels, dataModel, schema,
+                        scope);
             }
-            left = buildJoin(left, leftTable, tableView, beforeModels, dataModel, schema, scope);
             leftTable = tableView;
-            beforeModels.put(dataModel.getName(), tableView.getAlias());
+            beforeModels.put(dataModel.getName(), leftTable.getAlias());
         }
 
         for (Map.Entry<String, SqlNode> entry : outerSelect.entrySet()) {
@@ -84,27 +84,15 @@ public class JoinRender extends Renderer {
             Map<String, String> before, DataModel dataModel, S2CalciteSchema schema,
             SqlValidatorScope scope) throws Exception {
         EngineType engineType = schema.getOntology().getDatabase().getType();
-        SqlNode condition = getCondition(leftTable, rightTable, dataModel, schema, scope, engineType);
+        SqlNode condition =
+                getCondition(leftTable, rightTable, dataModel, schema, scope, engineType);
         SqlLiteral sqlLiteral = SemanticNode.getJoinSqlLiteral("");
         JoinRelation matchJoinRelation = getMatchJoinRelation(before, rightTable, schema);
-        SqlNode joinRelationCondition = null;
+        SqlNode joinRelationCondition;
         if (!CollectionUtils.isEmpty(matchJoinRelation.getJoinCondition())) {
             sqlLiteral = SemanticNode.getJoinSqlLiteral(matchJoinRelation.getJoinType());
             joinRelationCondition = getCondition(matchJoinRelation, scope, engineType);
             condition = joinRelationCondition;
-        }
-        if (Materialization.TimePartType.ZIPPER.equals(leftTable.getDataModel().getTimePartType())
-                || Materialization.TimePartType.ZIPPER
-                        .equals(rightTable.getDataModel().getTimePartType())) {
-            SqlNode zipperCondition =
-                    getZipperCondition(leftTable, rightTable, dataModel, schema, scope);
-            if (Objects.nonNull(joinRelationCondition)) {
-                condition = new SqlBasicCall(SqlStdOperatorTable.AND,
-                        new ArrayList<>(Arrays.asList(zipperCondition, joinRelationCondition)),
-                        SqlParserPos.ZERO, null);
-            } else {
-                condition = zipperCondition;
-            }
         }
 
         return new SqlJoin(SqlParserPos.ZERO, leftNode,
@@ -172,7 +160,7 @@ public class JoinRender extends Renderer {
         selectLeft.retainAll(selectRight);
         SqlNode condition = null;
         for (String on : selectLeft) {
-            if (!SourceRender.isDimension(on, dataModel, schema)) {
+            if (!isDimension(on, dataModel, schema)) {
                 continue;
             }
             if (IdentifyNode.isForeign(on, left.getDataModel().getIdentifiers())) {
@@ -202,104 +190,47 @@ public class JoinRender extends Renderer {
         return condition;
     }
 
-    private static void joinOrder(int cnt, String id, Map<String, Set<String>> next,
-            Queue<String> orders, Map<String, Boolean> visited) {
-        visited.put(id, true);
-        orders.add(id);
-        if (orders.size() >= cnt) {
-            return;
+
+    public static TableView renderOne(Set<MetricSchemaResp> queryMetrics,
+            Set<DimSchemaResp> queryDimensions, DataModel dataModel, SqlValidatorScope scope,
+            S2CalciteSchema schema) {
+        TableView tableView = new TableView();
+        EngineType engineType = schema.getOntology().getDatabase().getType();
+        Set<String> queryFields = tableView.getFields();
+        queryMetrics.stream().forEach(m -> queryFields.addAll(m.getFields()));
+        queryDimensions.stream().forEach(m -> queryFields.add(m.getBizName()));
+
+        try {
+            for (String field : queryFields) {
+                tableView.getSelect().add(SemanticNode.parse(field, scope, engineType));
+            }
+            tableView.setTable(DataModelNode.build(dataModel, scope));
+        } catch (Exception e) {
+            log.error("Failed to create sqlNode for data model {}", dataModel);
         }
-        for (String nextId : next.get(id)) {
-            if (!visited.get(nextId)) {
-                joinOrder(cnt, nextId, next, orders, visited);
-                if (orders.size() >= cnt) {
-                    return;
-                }
+
+        return tableView;
+    }
+
+    public static boolean isDimension(String name, DataModel dataModel, S2CalciteSchema schema) {
+        Optional<DimSchemaResp> dimension = dataModel.getDimensions().stream()
+                .filter(d -> d.getName().equalsIgnoreCase(name)).findFirst();
+        if (dimension.isPresent()) {
+            return true;
+        }
+        Optional<Identify> identify = dataModel.getIdentifiers().stream()
+                .filter(i -> i.getName().equalsIgnoreCase(name)).findFirst();
+        if (identify.isPresent()) {
+            return true;
+        }
+        if (schema.getDimensions().containsKey(dataModel.getName())) {
+            Optional<DimSchemaResp> dataSourceDim = schema.getDimensions().get(dataModel.getName())
+                    .stream().filter(d -> d.getName().equalsIgnoreCase(name)).findFirst();
+            if (dataSourceDim.isPresent()) {
+                return true;
             }
         }
-        orders.poll();
-        visited.put(id, false);
+        return false;
     }
 
-    private void addZipperField(DataModel dataModel, List<String> fields) {
-        // if (Materialization.TimePartType.ZIPPER.equals(dataModel.getTimePartType())) {
-        // dataModel.getDimensions().stream()
-        // .filter(d -> Constants.DIMENSION_TYPE_TIME.equalsIgnoreCase(d.getType()))
-        // .forEach(t -> {
-        // if (t.getName().startsWith(Constants.MATERIALIZATION_ZIPPER_END)
-        // && !fields.contains(t.getName())) {
-        // fields.add(t.getName());
-        // }
-        // if (t.getName().startsWith(Constants.MATERIALIZATION_ZIPPER_START)
-        // && !fields.contains(t.getName())) {
-        // fields.add(t.getName());
-        // }
-        // });
-        // }
-    }
-
-    private SqlNode getZipperCondition(TableView left, TableView right, DataModel dataModel,
-            S2CalciteSchema schema, SqlValidatorScope scope) throws Exception {
-        // if (Materialization.TimePartType.ZIPPER.equals(left.getDataModel().getTimePartType())
-        // && Materialization.TimePartType.ZIPPER
-        // .equals(right.getDataModel().getTimePartType())) {
-        // throw new Exception("not support two zipper table");
-        // }
-        SqlNode condition = null;
-        // Optional<Dimension> leftTime = left.getDataModel().getDimensions().stream()
-        // .filter(d -> Constants.DIMENSION_TYPE_TIME.equalsIgnoreCase(d.getType()))
-        // .findFirst();
-        // Optional<Dimension> rightTime = right.getDataModel().getDimensions().stream()
-        // .filter(d -> Constants.DIMENSION_TYPE_TIME.equalsIgnoreCase(d.getType()))
-        // .findFirst();
-        // if (leftTime.isPresent() && rightTime.isPresent()) {
-        //
-        // String startTime = "";
-        // String endTime = "";
-        // String dateTime = "";
-        //
-        // Optional<Dimension> startTimeOp = (Materialization.TimePartType.ZIPPER
-        // .equals(left.getDataModel().getTimePartType()) ? left : right).getDataModel()
-        // .getDimensions().stream()
-        // .filter(d -> Constants.DIMENSION_TYPE_TIME
-        // .equalsIgnoreCase(d.getType()))
-        // .filter(d -> d.getName()
-        // .startsWith(Constants.MATERIALIZATION_ZIPPER_START))
-        // .findFirst();
-        // Optional<Dimension> endTimeOp = (Materialization.TimePartType.ZIPPER
-        // .equals(left.getDataModel().getTimePartType()) ? left : right).getDataModel()
-        // .getDimensions().stream()
-        // .filter(d -> Constants.DIMENSION_TYPE_TIME
-        // .equalsIgnoreCase(d.getType()))
-        // .filter(d -> d.getName()
-        // .startsWith(Constants.MATERIALIZATION_ZIPPER_END))
-        // .findFirst();
-        // if (startTimeOp.isPresent() && endTimeOp.isPresent()) {
-        // TableView zipper = Materialization.TimePartType.ZIPPER
-        // .equals(left.getDataModel().getTimePartType()) ? left : right;
-        // TableView partMetric = Materialization.TimePartType.ZIPPER
-        // .equals(left.getDataModel().getTimePartType()) ? right : left;
-        // Optional<Dimension> partTime = Materialization.TimePartType.ZIPPER
-        // .equals(left.getDataModel().getTimePartType()) ? rightTime : leftTime;
-        // startTime = zipper.getAlias() + "." + startTimeOp.get().getName();
-        // endTime = zipper.getAlias() + "." + endTimeOp.get().getName();
-        // dateTime = partMetric.getAlias() + "." + partTime.get().getName();
-        // }
-        // EngineType engineType = schema.getOntology().getDatabase().getType();
-        // ArrayList<SqlNode> operandList =
-        // new ArrayList<>(Arrays.asList(SemanticNode.parse(endTime, scope, engineType),
-        // SemanticNode.parse(dateTime, scope, engineType)));
-        // condition = new SqlBasicCall(SqlStdOperatorTable.AND,
-        // new ArrayList<SqlNode>(Arrays.asList(
-        // new SqlBasicCall(SqlStdOperatorTable.LESS_THAN_OR_EQUAL,
-        // new ArrayList<SqlNode>(Arrays.asList(
-        // SemanticNode.parse(startTime, scope, engineType),
-        // SemanticNode.parse(dateTime, scope, engineType))),
-        // SqlParserPos.ZERO, null),
-        // new SqlBasicCall(SqlStdOperatorTable.GREATER_THAN, operandList,
-        // SqlParserPos.ZERO, null))),
-        // SqlParserPos.ZERO, null);
-        // }
-        return condition;
-    }
 }
