@@ -1,8 +1,7 @@
-package com.tencent.supersonic.headless.core.translator.converter;
+package com.tencent.supersonic.headless.core.translator.parser;
 
 import com.tencent.supersonic.common.jsqlparser.SqlReplaceHelper;
 import com.tencent.supersonic.common.jsqlparser.SqlSelectHelper;
-import com.tencent.supersonic.headless.api.pojo.Dimension;
 import com.tencent.supersonic.headless.api.pojo.response.DimSchemaResp;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticSchemaResp;
 import com.tencent.supersonic.headless.core.pojo.OntologyQuery;
@@ -13,15 +12,17 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 
 /**
- * This converter replaces dimension bizName in the S2SQL with calculation expression (if
- * configured).
+ * This parser replaces dimension bizName in the S2SQL with calculation expression (if configured).
  */
-@Component("DimExpressionConverter")
+@Component("DimExpressionParser")
 @Slf4j
-public class DimExpressionConverter implements QueryConverter {
+public class DimExpressionParser implements QueryParser {
     @Override
     public boolean accept(QueryStatement queryStatement) {
         return Objects.nonNull(queryStatement.getSqlQuery())
@@ -29,7 +30,7 @@ public class DimExpressionConverter implements QueryConverter {
     }
 
     @Override
-    public void convert(QueryStatement queryStatement) throws Exception {
+    public void parse(QueryStatement queryStatement) throws Exception {
 
         SemanticSchemaResp semanticSchema = queryStatement.getSemanticSchema();
         SqlQuery sqlQuery = queryStatement.getSqlQuery();
@@ -49,22 +50,11 @@ public class DimExpressionConverter implements QueryConverter {
         Set<String> queryFields = ontologyQuery.getFields();
         log.debug("begin to generateDerivedMetric {} [{}]", queryDimensions);
 
-        Set<String> allFields = new HashSet<>();
-        Map<String, Dimension> dimensionMap = new HashMap<>();
-        semanticSchema.getModelResps().forEach(modelResp -> {
-            allFields.addAll(modelResp.getFieldList());
-            if (modelResp.getModelDetail().getDimensions() != null) {
-                modelResp.getModelDetail().getDimensions()
-                        .forEach(dimension -> dimensionMap.put(dimension.getBizName(), dimension));
-            }
-        });
-
-
         Map<String, String> dim2Expr = new HashMap<>();
         for (DimSchemaResp queryDim : queryDimensions) {
             queryDim.getFields().addAll(SqlSelectHelper.getFieldsFromExpr(queryDim.getExpr()));
-            dim2Expr.put(queryDim.getBizName(), queryDim.getExpr());
             queryFields.addAll(queryDim.getFields());
+            dim2Expr.put(queryDim.getBizName(), queryDim.getExpr());
         }
 
         return dim2Expr;

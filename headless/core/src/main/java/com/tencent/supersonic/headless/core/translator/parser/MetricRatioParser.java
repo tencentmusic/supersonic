@@ -1,4 +1,4 @@
-package com.tencent.supersonic.headless.core.translator.converter;
+package com.tencent.supersonic.headless.core.translator.parser;
 
 import com.tencent.supersonic.common.pojo.Aggregator;
 import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
@@ -21,9 +21,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-@Component("MetricRatioConverter")
+@Component("MetricRatioParser")
 @Slf4j
-public class MetricRatioConverter implements QueryConverter {
+public class MetricRatioParser implements QueryParser {
 
     public interface EngineSql {
 
@@ -58,7 +58,7 @@ public class MetricRatioConverter implements QueryConverter {
     }
 
     @Override
-    public void convert(QueryStatement queryStatement) throws Exception {
+    public void parse(QueryStatement queryStatement) throws Exception {
         DatabaseResp database = queryStatement.getOntology().getDatabase();
         generateRatioSql(queryStatement, EngineType.fromString(database.getType()),
                 database.getVersion());

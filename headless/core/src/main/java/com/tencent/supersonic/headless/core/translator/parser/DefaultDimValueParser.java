@@ -1,4 +1,4 @@
-package com.tencent.supersonic.headless.core.translator.converter;
+package com.tencent.supersonic.headless.core.translator.parser;
 
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.common.jsqlparser.SqlAddHelper;
@@ -22,11 +22,11 @@ import java.util.stream.Collectors;
 
 
 /**
- * This converter appends default dimension values (if configured) to the where statement.
+ * This parser appends default dimension values (if configured) to the where statement.
  */
 @Slf4j
-@Component("DefaultDimValueConverter")
-public class DefaultDimValueConverter implements QueryConverter {
+@Component("DefaultDimValueParser")
+public class DefaultDimValueParser implements QueryParser {
 
     @Override
     public boolean accept(QueryStatement queryStatement) {
@@ -35,7 +35,7 @@ public class DefaultDimValueConverter implements QueryConverter {
     }
 
     @Override
-    public void convert(QueryStatement queryStatement) {
+    public void parse(QueryStatement queryStatement) {
         List<DimSchemaResp> dimensions = queryStatement.getOntology().getDimensions().stream()
                 .filter(dimension -> !CollectionUtils.isEmpty(dimension.getDefaultValues()))
                 .collect(Collectors.toList());

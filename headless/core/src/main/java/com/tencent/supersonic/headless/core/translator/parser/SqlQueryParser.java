@@ -1,4 +1,4 @@
-package com.tencent.supersonic.headless.core.translator.converter;
+package com.tencent.supersonic.headless.core.translator.parser;
 
 import com.tencent.supersonic.common.jsqlparser.SqlReplaceHelper;
 import com.tencent.supersonic.common.jsqlparser.SqlSelectFunctionHelper;
@@ -23,12 +23,12 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
- * This converter rewrites S2SQL including conversion from metric/dimension name to bizName and
- * build ontology query in preparation for generation of physical SQL.
+ * This parser rewrites S2SQL including conversion from metric/dimension name to bizName and build
+ * ontology query in preparation for generation of physical SQL.
  */
-@Component("SqlQueryConverter")
+@Component("SqlQueryParser")
 @Slf4j
-public class SqlQueryConverter implements QueryConverter {
+public class SqlQueryParser implements QueryParser {
 
     @Override
     public boolean accept(QueryStatement queryStatement) {
@@ -36,7 +36,7 @@ public class SqlQueryConverter implements QueryConverter {
     }
 
     @Override
-    public void convert(QueryStatement queryStatement) throws Exception {
+    public void parse(QueryStatement queryStatement) throws Exception {
         convertNameToBizName(queryStatement);
         rewriteOrderBy(queryStatement);
 

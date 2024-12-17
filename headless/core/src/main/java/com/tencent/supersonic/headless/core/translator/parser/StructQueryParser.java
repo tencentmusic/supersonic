@@ -1,4 +1,4 @@
-package com.tencent.supersonic.headless.core.translator.converter;
+package com.tencent.supersonic.headless.core.translator.parser;
 
 import com.tencent.supersonic.common.pojo.enums.EngineType;
 import com.tencent.supersonic.common.util.ContextUtils;
@@ -13,12 +13,12 @@ import org.springframework.stereotype.Component;
 import java.util.Objects;
 
 /**
- * This converter converts struct semantic query into sql query by generating S2SQL based on
- * structured semantic information.
+ * This parser converts struct semantic query into sql query by generating S2SQL based on structured
+ * semantic information.
  */
-@Component("StructQueryConverter")
+@Component("StructQueryParser")
 @Slf4j
-public class StructQueryConverter implements QueryConverter {
+public class StructQueryParser implements QueryParser {
 
     @Override
     public boolean accept(QueryStatement queryStatement) {
@@ -26,7 +26,7 @@ public class StructQueryConverter implements QueryConverter {
     }
 
     @Override
-    public void convert(QueryStatement queryStatement) throws Exception {
+    public void parse(QueryStatement queryStatement) throws Exception {
         SqlGenerateUtils sqlGenerateUtils = ContextUtils.getBean(SqlGenerateUtils.class);
         StructQuery structQuery = queryStatement.getStructQuery();
 

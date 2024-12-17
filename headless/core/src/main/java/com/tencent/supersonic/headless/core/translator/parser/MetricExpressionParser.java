@@ -1,4 +1,4 @@
-package com.tencent.supersonic.headless.core.translator.converter;
+package com.tencent.supersonic.headless.core.translator.parser;
 
 import com.tencent.supersonic.common.jsqlparser.SqlReplaceHelper;
 import com.tencent.supersonic.common.jsqlparser.SqlSelectHelper;
@@ -17,11 +17,11 @@ import org.springframework.util.CollectionUtils;
 import java.util.*;
 
 /**
- * This converter replaces metric bizName in the S2SQL with calculation expression (if configured).
+ * This parser replaces metric bizName in the S2SQL with calculation expression (if configured).
  */
-@Component("MetricExpressionConverter")
+@Component("MetricExpressionParser")
 @Slf4j
-public class MetricExpressionConverter implements QueryConverter {
+public class MetricExpressionParser implements QueryParser {
     @Override
     public boolean accept(QueryStatement queryStatement) {
         return Objects.nonNull(queryStatement.getSqlQuery())
@@ -29,7 +29,7 @@ public class MetricExpressionConverter implements QueryConverter {
     }
 
     @Override
-    public void convert(QueryStatement queryStatement) throws Exception {
+    public void parse(QueryStatement queryStatement) throws Exception {
 
         SemanticSchemaResp semanticSchema = queryStatement.getSemanticSchema();
         SqlQuery sqlQuery = queryStatement.getSqlQuery();
@@ -64,10 +64,10 @@ public class MetricExpressionConverter implements QueryConverter {
         Map<String, String> metric2Expr = new HashMap<>();
         for (MetricSchemaResp queryMetric : queryMetrics) {
             String fieldExpr = buildFieldExpr(allMetrics, allMeasures, queryMetric.getExpr(),
-                    queryMetric.getMetricDefineType(), visitedMetrics, queryFields);
+                    queryMetric.getMetricDefineType(), visitedMetrics);
             // add all fields referenced in the expression
             queryMetric.getFields().addAll(SqlSelectHelper.getFieldsFromExpr(fieldExpr));
-            log.debug("derived metric {}->{}", queryMetric.getBizName(), fieldExpr);
+            queryFields.addAll(queryMetric.getFields());
             if (!queryMetric.getBizName().equals(fieldExpr)) {
                 metric2Expr.put(queryMetric.getBizName(), fieldExpr);
             }
@@ -78,8 +78,7 @@ public class MetricExpressionConverter implements QueryConverter {
 
     private String buildFieldExpr(final List<MetricSchemaResp> metricResps,
             final Map<String, Measure> allMeasures, final String metricExpr,
-            final MetricDefineType metricDefineType, Map<String, String> visitedMetric,
-            Set<String> queryFields) {
+            final MetricDefineType metricDefineType, Map<String, String> visitedMetric) {
         Set<String> fields = SqlSelectHelper.getFieldsFromExpr(metricExpr);
         if (!CollectionUtils.isEmpty(fields)) {
             Map<String, String> replace = new HashMap<>();
@@ -97,8 +96,7 @@ public class MetricExpressionConverter implements QueryConverter {
                             replace.put(field,
                                     buildFieldExpr(metricResps, allMeasures,
                                             metricItem.get().getExpr(),
-                                            metricItem.get().getMetricDefineType(), visitedMetric,
-                                            queryFields));
+                                            metricItem.get().getMetricDefineType(), visitedMetric));
                             visitedMetric.put(field, replace.get(field));
                         }
                         break;
@@ -111,19 +109,16 @@ public class MetricExpressionConverter implements QueryConverter {
                                 expr = String.format("%s (%s)", measure.getAgg(), metricExpr);
                             }
                             replace.put(field, expr);
-                            queryFields.add(field);
                         }
                         break;
                     case FIELD:
-                        queryFields.add(field);
-                        break;
                     default:
                         break;
                 }
             }
             if (!CollectionUtils.isEmpty(replace)) {
                 String expr = SqlReplaceHelper.replaceExpression(metricExpr, replace);
-                log.debug("derived measure {}->{}", metricExpr, expr);
+                log.debug("derived metric {}->{}", metricExpr, expr);
                 return expr;
             }
         }

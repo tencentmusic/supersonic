@@ -1,4 +1,4 @@
-package com.tencent.supersonic.headless.core.translator.converter;
+package com.tencent.supersonic.headless.core.translator.parser;
 
 import com.tencent.supersonic.headless.api.pojo.enums.ModelDefineType;
 import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
@@ -13,8 +13,8 @@ import java.util.List;
 import java.util.Objects;
 
 @Slf4j
-@Component("SqlVariableConverter")
-public class SqlVariableConverter implements QueryConverter {
+@Component("SqlVariableParser")
+public class SqlVariableParser implements QueryParser {
 
     @Override
     public boolean accept(QueryStatement queryStatement) {
@@ -22,7 +22,7 @@ public class SqlVariableConverter implements QueryConverter {
     }
 
     @Override
-    public void convert(QueryStatement queryStatement) {
+    public void parse(QueryStatement queryStatement) {
         SemanticSchemaResp semanticSchemaResp = queryStatement.getSemanticSchema();
         List<ModelResp> modelResps = semanticSchemaResp.getModelResps();
         if (CollectionUtils.isEmpty(modelResps)) {
