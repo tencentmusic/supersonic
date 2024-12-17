@@ -30,6 +30,7 @@ com.tencent.supersonic.headless.core.translator.converter.QueryConverter=\
     com.tencent.supersonic.headless.core.translator.converter.StructQueryConverter,\
     com.tencent.supersonic.headless.core.translator.converter.SqlQueryConverter,\
     com.tencent.supersonic.headless.core.translator.converter.DefaultDimValueConverter,\
+    com.tencent.supersonic.headless.core.translator.converter.DimExpressionConverter,\
     com.tencent.supersonic.headless.core.translator.converter.MetricExpressionConverter,\
     com.tencent.supersonic.headless.core.translator.converter.MetricRatioConverter
 

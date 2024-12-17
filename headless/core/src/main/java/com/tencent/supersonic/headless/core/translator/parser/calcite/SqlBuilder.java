@@ -251,7 +251,7 @@ public class SqlBuilder {
         EngineType engineType = EngineType.fromString(schema.getOntology().getDatabase().getType());
         Set<String> queryFields = tableView.getFields();
         queryMetrics.stream().forEach(m -> queryFields.addAll(m.getFields()));
-        queryDimensions.stream().forEach(m -> queryFields.add(m.getBizName()));
+        queryDimensions.stream().forEach(d -> queryFields.addAll(d.getFields()));
 
         try {
             for (String field : queryFields) {

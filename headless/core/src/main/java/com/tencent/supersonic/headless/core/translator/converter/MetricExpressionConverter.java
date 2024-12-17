@@ -2,11 +2,8 @@ package com.tencent.supersonic.headless.core.translator.converter;
 
 import com.tencent.supersonic.common.jsqlparser.SqlReplaceHelper;
 import com.tencent.supersonic.common.jsqlparser.SqlSelectHelper;
-import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
 import com.tencent.supersonic.headless.api.pojo.Measure;
-import com.tencent.supersonic.headless.api.pojo.enums.AggOption;
 import com.tencent.supersonic.headless.api.pojo.enums.MetricDefineType;
-import com.tencent.supersonic.headless.api.pojo.response.DimSchemaResp;
 import com.tencent.supersonic.headless.api.pojo.response.MetricSchemaResp;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticSchemaResp;
 import com.tencent.supersonic.headless.core.pojo.OntologyQuery;
@@ -20,7 +17,7 @@ import org.springframework.util.CollectionUtils;
 import java.util.*;
 
 /**
- * This converter replaces metric fields in the S2SQL with calculation expressions (if configured).
+ * This converter replaces metric bizName in the S2SQL with calculation expression (if configured).
  */
 @Component("MetricExpressionConverter")
 @Slf4j
@@ -38,11 +35,10 @@ public class MetricExpressionConverter implements QueryConverter {
         SqlQuery sqlQuery = queryStatement.getSqlQuery();
         OntologyQuery ontologyQuery = queryStatement.getOntologyQuery();
 
-        Map<String, String> metric2Expr = getMetricExpressions(semanticSchema, ontologyQuery);
-        if (!CollectionUtils.isEmpty(metric2Expr)) {
-            String sql = SqlReplaceHelper.replaceSqlByExpression(sqlQuery.getSql(), metric2Expr);
+        Map<String, String> bizName2Expr = getMetricExpressions(semanticSchema, ontologyQuery);
+        if (!CollectionUtils.isEmpty(bizName2Expr)) {
+            String sql = SqlReplaceHelper.replaceSqlByExpression(sqlQuery.getSql(), bizName2Expr);
             sqlQuery.setSql(sql);
-            ontologyQuery.setAggOption(AggOption.NATIVE);
         }
     }
 
@@ -50,12 +46,9 @@ public class MetricExpressionConverter implements QueryConverter {
             OntologyQuery ontologyQuery) {
 
         List<MetricSchemaResp> allMetrics = semanticSchema.getMetrics();
-        List<DimSchemaResp> allDimensions = semanticSchema.getDimensions();
-        AggOption aggOption = ontologyQuery.getAggOption();
         Set<MetricSchemaResp> queryMetrics = ontologyQuery.getMetrics();
-        Set<DimSchemaResp> queryDimensions = ontologyQuery.getDimensions();
         Set<String> queryFields = ontologyQuery.getFields();
-        log.debug("begin to generateDerivedMetric {} [{}]", aggOption, queryMetrics);
+        log.debug("begin to generateDerivedMetric {} [{}]", queryMetrics);
 
         Set<String> allFields = new HashSet<>();
         Map<String, Measure> allMeasures = new HashMap<>();
@@ -70,13 +63,12 @@ public class MetricExpressionConverter implements QueryConverter {
         Map<String, String> visitedMetrics = new HashMap<>();
         Map<String, String> metric2Expr = new HashMap<>();
         for (MetricSchemaResp queryMetric : queryMetrics) {
-            String fieldExpr = buildFieldExpr(allMetrics, allFields, allMeasures, allDimensions,
-                    queryMetric.getExpr(), queryMetric.getMetricDefineType(), aggOption,
-                    visitedMetrics, queryDimensions, queryFields);
+            String fieldExpr = buildFieldExpr(allMetrics, allMeasures, queryMetric.getExpr(),
+                    queryMetric.getMetricDefineType(), visitedMetrics, queryFields);
             // add all fields referenced in the expression
             queryMetric.getFields().addAll(SqlSelectHelper.getFieldsFromExpr(fieldExpr));
             log.debug("derived metric {}->{}", queryMetric.getBizName(), fieldExpr);
-            if (queryMetric.isDerived()) {
+            if (!queryMetric.getBizName().equals(fieldExpr)) {
                 metric2Expr.put(queryMetric.getBizName(), fieldExpr);
             }
         }
@@ -85,18 +77,16 @@ public class MetricExpressionConverter implements QueryConverter {
     }
 
     private String buildFieldExpr(final List<MetricSchemaResp> metricResps,
-            final Set<String> allFields, final Map<String, Measure> allMeasures,
-            final List<DimSchemaResp> dimensionResps, final String expression,
-            final MetricDefineType metricDefineType, AggOption aggOption,
-            Map<String, String> visitedMetric, Set<DimSchemaResp> queryDimensions,
+            final Map<String, Measure> allMeasures, final String metricExpr,
+            final MetricDefineType metricDefineType, Map<String, String> visitedMetric,
             Set<String> queryFields) {
-        Set<String> fields = SqlSelectHelper.getFieldsFromExpr(expression);
+        Set<String> fields = SqlSelectHelper.getFieldsFromExpr(metricExpr);
         if (!CollectionUtils.isEmpty(fields)) {
             Map<String, String> replace = new HashMap<>();
             for (String field : fields) {
-                queryFields.add(field);
                 switch (metricDefineType) {
                     case METRIC:
+                        // if defineType=METRIC, field should be the bizName of its parent metric
                         Optional<MetricSchemaResp> metricItem = metricResps.stream()
                                 .filter(m -> m.getBizName().equalsIgnoreCase(field)).findFirst();
                         if (metricItem.isPresent()) {
@@ -105,49 +95,39 @@ public class MetricExpressionConverter implements QueryConverter {
                                 break;
                             }
                             replace.put(field,
-                                    buildFieldExpr(metricResps, allFields, allMeasures,
-                                            dimensionResps, metricItem.get().getExpr(),
-                                            metricItem.get().getMetricDefineType(), aggOption,
-                                            visitedMetric, queryDimensions, queryFields));
+                                    buildFieldExpr(metricResps, allMeasures,
+                                            metricItem.get().getExpr(),
+                                            metricItem.get().getMetricDefineType(), visitedMetric,
+                                            queryFields));
                             visitedMetric.put(field, replace.get(field));
                         }
                         break;
                     case MEASURE:
+                        // if defineType=MEASURE, field should be the bizName of its measure
                         if (allMeasures.containsKey(field)) {
                             Measure measure = allMeasures.get(field);
-                            if (AggOperatorEnum.COUNT_DISTINCT.getOperator()
-                                    .equalsIgnoreCase(measure.getAgg())) {
-                                return AggOption.NATIVE.equals(aggOption) ? measure.getExpr()
-                                        : AggOperatorEnum.COUNT.getOperator() + " ( "
-                                                + AggOperatorEnum.DISTINCT + " " + measure.getExpr()
-                                                + " ) ";
+                            String expr = metricExpr;
+                            if (Objects.nonNull(measure.getAgg())) {
+                                expr = String.format("%s (%s)", measure.getAgg(), metricExpr);
                             }
-                            String expr = AggOption.NATIVE.equals(aggOption) ? measure.getExpr()
-                                    : measure.getAgg() + " ( " + measure.getExpr() + " ) ";
-
                             replace.put(field, expr);
+                            queryFields.add(field);
                         }
                         break;
                     case FIELD:
-                        if (allFields.contains(field)) {
-                            Optional<DimSchemaResp> dimensionItem = dimensionResps.stream()
-                                    .filter(d -> d.getBizName().equals(field)).findFirst();
-                            if (dimensionItem.isPresent()) {
-                                queryDimensions.add(dimensionItem.get());
-                            }
-                        }
+                        queryFields.add(field);
                         break;
                     default:
                         break;
                 }
             }
             if (!CollectionUtils.isEmpty(replace)) {
-                String expr = SqlReplaceHelper.replaceExpression(expression, replace);
-                log.debug("derived measure {}->{}", expression, expr);
+                String expr = SqlReplaceHelper.replaceExpression(metricExpr, replace);
+                log.debug("derived measure {}->{}", metricExpr, expr);
                 return expr;
             }
         }
-        return expression;
+        return metricExpr;
     }
 
 }

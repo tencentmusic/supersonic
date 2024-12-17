@@ -32,6 +32,16 @@ public class Dimension {
         this.type = type;
         this.isCreateDimension = isCreateDimension;
         this.bizName = bizName;
+        this.expr = bizName;
+    }
+
+    public Dimension(String name, String bizName, String expr, DimensionType type,
+            Integer isCreateDimension) {
+        this.name = name;
+        this.type = type;
+        this.isCreateDimension = isCreateDimension;
+        this.bizName = bizName;
+        this.expr = expr;
     }
 
     public Dimension(String name, String bizName, DimensionType type, Integer isCreateDimension,

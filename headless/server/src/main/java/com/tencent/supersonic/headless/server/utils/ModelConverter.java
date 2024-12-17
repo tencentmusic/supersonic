@@ -28,7 +28,8 @@ public class ModelConverter {
 
     public static ModelDO convert(ModelReq modelReq, User user) {
         ModelDO modelDO = new ModelDO();
-        ModelDetail modelDetail = createModelDetail(modelReq);
+        // ModelDetail modelDetail = createModelDetail(modelReq);
+        ModelDetail modelDetail = modelReq.getModelDetail();
         modelReq.createdBy(user.getName());
         BeanMapper.mapper(modelReq, modelDO);
         modelDO.setStatus(StatusEnum.ONLINE.getCode());
@@ -107,7 +108,7 @@ public class ModelConverter {
             dimensionReq.setSemanticType(SemanticType.CATEGORY.name());
         }
         dimensionReq.setModelId(modelDO.getId());
-        dimensionReq.setExpr(dim.getBizName());
+        dimensionReq.setExpr(dim.getExpr());
         dimensionReq.setType(dim.getType().name());
         dimensionReq
                 .setDescription(Objects.isNull(dim.getDescription()) ? "" : dim.getDescription());
@@ -118,11 +119,11 @@ public class ModelConverter {
     public static MetricReq convert(Measure measure, ModelDO modelDO) {
         MetricReq metricReq = new MetricReq();
         metricReq.setName(measure.getName());
-        metricReq.setBizName(measure.getExpr());
+        metricReq.setBizName(measure.getBizName());
         metricReq.setDescription(measure.getName());
         metricReq.setModelId(modelDO.getId());
         MetricDefineByMeasureParams exprTypeParams = new MetricDefineByMeasureParams();
-        exprTypeParams.setExpr(measure.getBizName());
+        exprTypeParams.setExpr(measure.getExpr());
         exprTypeParams.setMeasures(Lists.newArrayList(measure));
         metricReq.setMetricDefineByMeasureParams(exprTypeParams);
         metricReq.setMetricDefineType(MetricDefineType.MEASURE);
@@ -163,11 +164,14 @@ public class ModelConverter {
                         getIdentifyType(fieldType).name(), columnSchema.getColumnName(), 1);
                 modelDetail.getIdentifiers().add(identify);
             } else if (FieldType.measure.equals(fieldType)) {
-                Measure measure = new Measure(columnSchema.getName(), columnSchema.getColumnName(),
-                        columnSchema.getAgg().getOperator(), 1);
+                Measure measure = new Measure(columnSchema.getName(),
+                        modelReq.getBizName() + "_" + columnSchema.getColumnName(),
+                        columnSchema.getColumnName(), columnSchema.getAgg().getOperator(), 1);
                 modelDetail.getMeasures().add(measure);
             } else {
-                Dimension dim = new Dimension(columnSchema.getName(), columnSchema.getColumnName(),
+                Dimension dim = new Dimension(columnSchema.getName(),
+                        modelReq.getBizName() + "_" + columnSchema.getColumnName(),
+                        columnSchema.getColumnName(),
                         DimensionType.valueOf(columnSchema.getFiledType().name()), 1);
                 modelDetail.getDimensions().add(dim);
             }

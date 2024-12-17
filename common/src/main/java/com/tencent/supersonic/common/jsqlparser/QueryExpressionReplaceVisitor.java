@@ -1,13 +1,10 @@
 package com.tencent.supersonic.common.jsqlparser;
 
-import net.sf.jsqlparser.expression.Alias;
-import net.sf.jsqlparser.expression.BinaryExpression;
-import net.sf.jsqlparser.expression.Expression;
-import net.sf.jsqlparser.expression.ExpressionVisitorAdapter;
-import net.sf.jsqlparser.expression.Function;
+import net.sf.jsqlparser.expression.*;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.statement.select.SelectItem;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.Map;
 import java.util.Objects;
@@ -50,7 +47,8 @@ public class QueryExpressionReplaceVisitor extends ExpressionVisitorAdapter {
         String columnName = "";
         if (expression instanceof Function) {
             Function leftFunc = (Function) expression;
-            if (leftFunc.getParameters().getExpressions().get(0) instanceof Column) {
+            if (Objects.nonNull(leftFunc.getParameters())
+                    && leftFunc.getParameters().getExpressions().get(0) instanceof Column) {
                 Column column = (Column) leftFunc.getParameters().getExpressions().get(0);
                 columnName = column.getColumnName();
                 toReplace = getReplaceExpr(leftFunc, fieldExprMap);
@@ -75,7 +73,10 @@ public class QueryExpressionReplaceVisitor extends ExpressionVisitorAdapter {
     public static Expression replace(Expression expression, Map<String, String> fieldExprMap) {
         String toReplace = "";
         if (expression instanceof Function) {
-            toReplace = getReplaceExpr((Function) expression, fieldExprMap);
+            Function function = (Function) expression;
+            if (function.getParameters().getExpressions().get(0) instanceof Column) {
+                toReplace = getReplaceExpr((Function) expression, fieldExprMap);
+            }
         }
         if (expression instanceof Column) {
             toReplace = getReplaceExpr((Column) expression, fieldExprMap);
@@ -109,6 +110,16 @@ public class QueryExpressionReplaceVisitor extends ExpressionVisitorAdapter {
 
     public static String getReplaceExpr(Function function, Map<String, String> fieldExprMap) {
         Column column = (Column) function.getParameters().getExpressions().get(0);
-        return getReplaceExpr(column, fieldExprMap);
+        String expr = getReplaceExpr(column, fieldExprMap);
+        // if metric expr itself has agg function then replace original function in the SQL
+        if (StringUtils.isBlank(expr)) {
+            return expr;
+        } else if (!SqlSelectFunctionHelper.getAggregateFunctions(expr).isEmpty()) {
+            return expr;
+        } else {
+            String col = getReplaceExpr(column, fieldExprMap);
+            column.setColumnName(col);
+            return function.toString();
+        }
     }
 }

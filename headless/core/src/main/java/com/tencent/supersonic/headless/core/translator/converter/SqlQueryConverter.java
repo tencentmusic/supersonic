@@ -65,13 +65,7 @@ public class SqlQueryConverter implements QueryConverter {
         ontologyQuery.getDimensions().addAll(queryDimensions);
 
         AggOption sqlQueryAggOption = getAggOption(sqlQuery.getSql(), queryMetrics);
-        // if sql query itself has aggregation, ontology query just returns detail
-        if (sqlQueryAggOption.equals(AggOption.AGGREGATION)) {
-            ontologyQuery.setAggOption(AggOption.NATIVE);
-        } else if (sqlQueryAggOption.equals(AggOption.NATIVE) && !queryMetrics.isEmpty()) {
-            ontologyQuery.setAggOption(AggOption.DEFAULT);
-        }
-
+        ontologyQuery.setAggOption(sqlQueryAggOption);
         queryStatement.setOntologyQuery(ontologyQuery);
         log.info("parse sqlQuery [{}] ", sqlQuery);
     }
