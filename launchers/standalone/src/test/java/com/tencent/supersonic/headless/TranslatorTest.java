@@ -47,7 +47,7 @@ public class TranslatorTest extends BaseTest {
                 .translate(QueryReqBuilder.buildS2SQLReq(sql, dataSetId), User.getDefaultUser());
         assertNotNull(explain);
         assertNotNull(explain.getQuerySQL());
-        assertTrue(explain.getQuerySQL().contains("count(imp_date)"));
+        assertTrue(explain.getQuerySQL().contains("count(1)"));
         executeSql(explain.getQuerySQL());
     }
 
@@ -59,7 +59,7 @@ public class TranslatorTest extends BaseTest {
         assertNotNull(explain);
         assertNotNull(explain.getQuerySQL());
         assertTrue(explain.getQuerySQL().contains("department"));
-        assertTrue(explain.getQuerySQL().contains("count(imp_date)"));
+        assertTrue(explain.getQuerySQL().contains("count(1)"));
         executeSql(explain.getQuerySQL());
     }
 
@@ -73,7 +73,7 @@ public class TranslatorTest extends BaseTest {
         assertNotNull(explain);
         assertNotNull(explain.getQuerySQL());
         assertTrue(explain.getQuerySQL().toLowerCase().contains("department"));
-        assertTrue(explain.getQuerySQL().toLowerCase().contains("count(imp_date)"));
+        assertTrue(explain.getQuerySQL().toLowerCase().contains("count(1)"));
         executeSql(explain.getQuerySQL());
     }
 
@@ -87,7 +87,7 @@ public class TranslatorTest extends BaseTest {
         assertNotNull(explain);
         assertNotNull(explain.getQuerySQL());
         assertTrue(explain.getQuerySQL().toLowerCase().contains("department"));
-        assertTrue(explain.getQuerySQL().toLowerCase().contains("count(imp_date)"));
+        assertTrue(explain.getQuerySQL().toLowerCase().contains("count(1)"));
         executeSql(explain.getQuerySQL());
     }
 

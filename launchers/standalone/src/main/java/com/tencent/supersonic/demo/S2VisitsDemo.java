@@ -292,10 +292,10 @@ public class S2VisitsDemo extends S2BaseDemo {
         metricReq.setBizName("pv");
         metricReq.setDescription("一段时间内用户的访问次数");
         MetricDefineByFieldParams metricTypeParams = new MetricDefineByFieldParams();
-        metricTypeParams.setExpr("count(imp_date)");
-        List<FieldParam> fieldParams = new ArrayList<>();
-        fieldParams.add(new FieldParam("imp_date"));
-        metricTypeParams.setFields(fieldParams);
+        metricTypeParams.setExpr("count(1)");
+        // List<FieldParam> fieldParams = new ArrayList<>();
+        // fieldParams.add(new FieldParam("imp_date"));
+        // metricTypeParams.setFields(fieldParams);
         metricReq.setMetricDefineByFieldParams(metricTypeParams);
         metricReq.setMetricDefineType(MetricDefineType.FIELD);
         metricReq.setRelateDimension(getRelateDimension(

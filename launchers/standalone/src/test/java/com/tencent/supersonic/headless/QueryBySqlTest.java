@@ -7,6 +7,7 @@ import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
 import com.tencent.supersonic.util.DataUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junitpioneer.jupiter.SetSystemProperty;
 
 import static java.time.LocalDate.now;
 import static org.junit.Assert.assertEquals;
@@ -29,6 +30,7 @@ public class QueryBySqlTest extends BaseTest {
     }
 
     @Test
+    @SetSystemProperty(key = "s2.test", value = "true")
     public void testSumQuery() throws Exception {
         SemanticQueryResp semanticQueryResp =
                 queryBySql("SELECT SUM(访问次数) AS 总访问次数 FROM 超音数PVUV统计 ");

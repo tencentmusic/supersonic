@@ -17,26 +17,27 @@ import java.util.Set;
 public class TableView {
 
     private Set<String> fields = Sets.newHashSet();
-    private List<SqlNode> dimension = new ArrayList<>();
-    private List<SqlNode> metric = new ArrayList<>();
+    private List<SqlNode> select = Lists.newArrayList();
     private SqlNodeList order;
     private SqlNode fetch;
     private SqlNode offset;
     private SqlNode table;
-    private List<SqlNode> select = Lists.newArrayList();
-
     private String alias;
     private List<String> primary;
     private ModelResp dataModel;
 
     public SqlNode build() {
         List<SqlNode> selectNodeList = new ArrayList<>();
-        selectNodeList.addAll(metric);
-        selectNodeList.addAll(dimension);
-        selectNodeList.addAll(select);
-        return new SqlSelect(SqlParserPos.ZERO, null,
-                new SqlNodeList(selectNodeList, SqlParserPos.ZERO), table, null, null, null, null,
-                null, order, offset, fetch, null);
+        if (select.isEmpty()) {
+            return new SqlSelect(SqlParserPos.ZERO, null,
+                    new SqlNodeList(SqlNodeList.SINGLETON_STAR, SqlParserPos.ZERO), table, null,
+                    null, null, null, null, order, offset, fetch, null);
+        } else {
+            selectNodeList.addAll(select);
+            return new SqlSelect(SqlParserPos.ZERO, null,
+                    new SqlNodeList(selectNodeList, SqlParserPos.ZERO), table, null, null, null,
+                    null, null, order, offset, fetch, null);
+        }
     }
 
 }
