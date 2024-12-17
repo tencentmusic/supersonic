@@ -1,5 +1,6 @@
 package com.tencent.supersonic.headless.core.translator.converter;
 
+import com.tencent.supersonic.common.jsqlparser.SqlAsHelper;
 import com.tencent.supersonic.common.jsqlparser.SqlReplaceHelper;
 import com.tencent.supersonic.common.jsqlparser.SqlSelectFunctionHelper;
 import com.tencent.supersonic.common.jsqlparser.SqlSelectHelper;
@@ -78,6 +79,9 @@ public class SqlQueryConverter implements QueryConverter {
         generateDerivedMetric(sqlGenerateUtils, queryStatement);
 
         queryStatement.setSql(sqlQueryParam.getSql());
+        // replace sql fields for db, must called after convertNameToBizName
+        String sqlRewrite = replaceSqlFieldsForHanaDB(queryStatement, sqlQueryParam.getSql());
+        sqlQueryParam.setSql(sqlRewrite);
         log.info("parse sqlQuery [{}] ", sqlQueryParam);
     }
 
@@ -223,6 +227,54 @@ public class SqlQueryConverter implements QueryConverter {
         return result;
     }
 
+
+    /**
+     * special process for hanaDB,the sap hana DB don't support the chinese name as
+     * the column name,
+     * so we need to quote the column name after converting the convertNameToBizName
+     * called
+     * 
+     * sap hana DB will auto translate the colume to upper case letter if not
+     * quoted.
+     * also we need to quote the field name if it is a lower case letter.
+     * 
+     * @param queryStatement
+     * @param sql
+     * @return
+     */
+    private String replaceSqlFieldsForHanaDB(QueryStatement queryStatement, String sql) {
+        SemanticSchemaResp semanticSchemaResp = queryStatement.getSemanticSchemaResp();
+        if (!semanticSchemaResp.getDatabaseResp().getType().equalsIgnoreCase(EngineType.HANADB.getName())) {
+            return sql;
+        }
+        Map<String, String> fieldNameToBizNameMap = getFieldNameToBizNameMap(semanticSchemaResp);
+
+        Map<String, String> fieldNameToBizNameMapQuote = new HashMap<>();
+        fieldNameToBizNameMap.forEach((key, value) -> {
+            if (!fieldNameToBizNameMapQuote.containsKey(value) && !value.matches("\".*\"")
+                    && !value.matches("[A-Z0-9_].*?")) {
+                fieldNameToBizNameMapQuote.put(value, "\"" + value + "\"");
+            }
+        });
+        String sqlNew = sql;
+        if (fieldNameToBizNameMapQuote.size() > 0) {
+            sqlNew = SqlReplaceHelper.replaceFields(sql, fieldNameToBizNameMapQuote, true);
+        }
+        // replace alias field name
+        List<String> asFields = SqlAsHelper.getAsFields(sqlNew);
+        Map<String, String> fieldMapput = new HashMap<>();
+        for (String asField : asFields) {
+            String value = asField;
+            if (!value.matches("\".*?\"") && !value.matches("[A-Z0-9_].*?")) {
+                value = "\"" + asField + "\"";
+                fieldMapput.put(asField, value);
+            }
+        }
+        if (fieldMapput.size() > 0) {
+            sqlNew = SqlReplaceHelper.replaceAliasFieldName(sqlNew, fieldMapput);
+        }
+        return sqlNew;
+    }
 
     private void convertNameToBizName(QueryStatement queryStatement) {
         SemanticSchemaResp semanticSchemaResp = queryStatement.getSemanticSchemaResp();
