@@ -27,12 +27,9 @@ import java.util.stream.Collectors;
 @Slf4j
 public class DatabaseMatchStrategy extends SingleMatchStrategy<DatabaseMapResult> {
 
-    private List<SchemaElement> allElements;
-
     @Override
     public Map<MatchText, List<DatabaseMapResult>> match(ChatQueryContext chatQueryContext,
             List<S2Term> terms, Set<Long> detectDataSetIds) {
-        this.allElements = getSchemaElements(chatQueryContext);
         return super.match(chatQueryContext, terms, detectDataSetIds);
     }
 
@@ -41,7 +38,7 @@ public class DatabaseMatchStrategy extends SingleMatchStrategy<DatabaseMapResult
         if (StringUtils.isBlank(detectSegment)) {
             return new ArrayList<>();
         }
-
+        List<SchemaElement> allElements = getSchemaElements(chatQueryContext);
         Double metricDimensionThresholdConfig = getThreshold(chatQueryContext);
         Map<String, Set<SchemaElement>> nameToItems = getNameToItems(allElements);
         List<DatabaseMapResult> results = new ArrayList<>();
