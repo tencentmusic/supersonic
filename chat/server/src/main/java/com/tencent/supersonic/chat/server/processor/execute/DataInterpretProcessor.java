@@ -122,7 +122,7 @@ public class DataInterpretProcessor implements ExecuteResultProcessor {
         }
 
         return String.format("\n提示：涉及分级的问题\n" +
-                "%s 对应多种分类数据，如下所示，请选择如下细致分类，添加到问题中：\n" +
+                "%s 对应多种分类数据，如下所示，请补充分类信息，添加到问题中，如以下表格中的第一条数据：\n" +
                 "%s", matchedText, detailedText.toString());
     }
     private Map<String, String> parseWhereConditions(String sql) {
