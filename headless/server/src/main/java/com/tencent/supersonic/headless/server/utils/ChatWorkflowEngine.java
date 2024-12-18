@@ -41,6 +41,9 @@ public class ChatWorkflowEngine {
             switch (queryCtx.getChatWorkflowState()) {
                 case MAPPING:
                     performMapping(queryCtx);
+                    if (queryCtx.getIsTip()){
+                        DimensionValuesMatchHelper.dimensionValuesStoreToCache(queryCtx);
+                    }
                     if (queryCtx.getMapInfo().isEmpty()) {
                         parseResult.setState(ParseResp.ParseState.FAILED);
                         parseResult.setErrorMsg(

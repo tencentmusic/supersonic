@@ -14,16 +14,13 @@ import com.tencent.supersonic.headless.chat.knowledge.KnowledgeBaseService;
 import com.tencent.supersonic.headless.chat.knowledge.builder.BaseWordBuilder;
 import com.tencent.supersonic.headless.chat.knowledge.helper.HanlpHelper;
 import com.tencent.supersonic.headless.chat.knowledge.helper.NatureHelper;
+import com.tencent.supersonic.headless.chat.utils.DimensionValuesMatchUtils;
 import com.tencent.supersonic.headless.chat.utils.EditDistanceUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.CollectionUtils;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -64,6 +61,8 @@ public class KeywordMapper extends BaseMapper {
                 terms.stream().collect(Collectors.toMap(term -> term.getWord() + term.getNature(),
                         term -> Long.valueOf(term.getFrequency()), (value1, value2) -> value2));
 
+        // 新增一个 Map 用于存储 SchemaElementType 和 nature 的映射关系
+        Map<SchemaElementType, List<String>> elementTypeToNatureMap = new HashMap<>();
         for (HanlpMapResult hanlpMapResult : mapResults) {
             for (String nature : hanlpMapResult.getNatures()) {
                 Long dataSetId = NatureHelper.getDataSetId(nature);
@@ -73,6 +72,10 @@ public class KeywordMapper extends BaseMapper {
                 SchemaElementType elementType = NatureHelper.convertToElementType(nature);
                 if (Objects.isNull(elementType)) {
                     continue;
+                }
+                // 存储 elementType 和 nature 到 map 中
+                if (SchemaElementType.VALUE.equals(elementType)){
+                    elementTypeToNatureMap.computeIfAbsent(elementType, k -> new ArrayList<>()).add(hanlpMapResult.getName() + nature);
                 }
                 Long elementID = NatureHelper.getElementID(nature);
                 SchemaElement element = getSchemaElement(dataSetId, elementType, elementID,
@@ -91,6 +94,7 @@ public class KeywordMapper extends BaseMapper {
                 addToSchemaMap(chatQueryContext.getMapInfo(), dataSetId, schemaElementMatch);
             }
         }
+        DimensionValuesMatchUtils.processDimensions(elementTypeToNatureMap, chatQueryContext);
     }
 
     private void doDimValueAliasLogic(SchemaElementMatch schemaElementMatch) {
