@@ -56,11 +56,11 @@ public class ModelResp extends SchemaItem {
     }
 
     public List<Measure> getMeasures() {
-        return modelDetail.getMeasures();
+        return modelDetail != null ? modelDetail.getMeasures() : Lists.newArrayList();
     }
 
     public List<Identify> getIdentifiers() {
-        return modelDetail.getIdentifiers();
+        return modelDetail != null ? modelDetail.getIdentifiers() : Lists.newArrayList();
     }
 
     public List<Dimension> getTimeDimension() {

@@ -1,4 +1,4 @@
-package com.tencent.supersonic.headless.core.translator.parser;
+package com.tencent.supersonic.headless.core.executor;
 
 import lombok.Builder;
 import lombok.Data;
