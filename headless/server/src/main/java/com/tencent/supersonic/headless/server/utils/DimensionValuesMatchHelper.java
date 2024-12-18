@@ -13,30 +13,33 @@ import com.tencent.supersonic.headless.core.utils.SqlUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @Slf4j
+@Component
 public class DimensionValuesMatchHelper {
 
-    private static final QueryCache queryCache = ComponentFactory.getQueryCache();
+    private final QueryCache queryCache = ComponentFactory.getQueryCache();
+
     @Autowired
-    private static DimensionMappingConfig dimensionMappingConfig;
-    static void dimensionValuesStoreToCache(ChatQueryContext chatQueryContext) {
+    private DimensionMappingConfig dimensionMappingConfig;
+     void dimensionValuesStoreToCache(ChatQueryContext chatQueryContext) {
         String queryId = String.valueOf(chatQueryContext.getRequest().getQueryId());
         queryCache.put(queryId + DimValuesConstants.CONDITION, true);
         queryCache.put(queryId + DimValuesConstants.DIMENSION_VALUS_AND_ID, chatQueryContext.getSchemaValusByTerm());
         log.info("这里记录了缓存： key : {}, value : {}", queryId + DimValuesConstants.DIMENSION_VALUS_AND_ID, true);
     }
 
-    private static String buildQuery(List<Map.Entry<String, String>> dimensionValuesAndId) {
+    private String buildQuery(List<Map.Entry<String, String>> dimensionValuesAndId) {
         // 初始化 SQL 查询
         StringBuilder sql = new StringBuilder(
                 "SELECT DISTINCT pid1_2022, pid2_2022, pid3_2022, pid4_2022 FROM supersonic.hhweb_user_active_scene_index_2022_d WHERE 1=1");
 
-        Map<String, String> mapping = DimensionMappingConfig.getMapping();
+        Map<String, String> mapping = dimensionMappingConfig.getMapping();
 
         for (Map.Entry<String, String> entry : dimensionValuesAndId) {
             if (mapping.containsValue(entry.getKey())) {
@@ -50,20 +53,22 @@ public class DimensionValuesMatchHelper {
             }
         }
 
-        // 获取最近5天的日期范围
+        // 获取最近3天的日期范围
         String today = LocalDate.now().format(DateTimeFormatter.BASIC_ISO_DATE);
-        String threeDaysAgo = LocalDate.now().minusDays(5).format(DateTimeFormatter.BASIC_ISO_DATE);
+        String threeDaysAgo = LocalDate.now().minusDays(3).format(DateTimeFormatter.BASIC_ISO_DATE);
 
-        // 添加 period_id 条件，最近5天
+        // 添加 period_id 条件，最近3天
         sql.append(" AND period_id BETWEEN '").append(threeDaysAgo).append("' AND '").append(today).append("'");
 
+        // 添加 LIMIT 子句，限制结果为前 1000 条
+        sql.append(" LIMIT 1000");
         return sql.toString();
     }
 
     /**
      * 对 SQL 值进行简单的安全处理，防止注入。
      */
-    private static String sanitizeSqlValue(String value) {
+    private String sanitizeSqlValue(String value) {
         if (value == null || value.trim().isEmpty()) {
             return "";
         }
@@ -73,7 +78,7 @@ public class DimensionValuesMatchHelper {
 
 
 
-    public static SemanticQueryResp executeQuery(List<Map.Entry<String, String>> dimensionValuesAndId, QueryStatement queryStatement) {
+    public SemanticQueryResp executeQuery(List<Map.Entry<String, String>> dimensionValuesAndId, QueryStatement queryStatement) {
 
         SqlUtils sqlUtils = ContextUtils.getBean(SqlUtils.class);
         String sql = buildQuery(dimensionValuesAndId);

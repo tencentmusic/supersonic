@@ -37,6 +37,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -81,6 +82,8 @@ public class S2SemanticLayerService implements SemanticLayerService {
         return schemaService.getDataSetSchema(id);
     }
 
+    @Autowired
+    private DimensionValuesMatchHelper dimensionValuesMatchHelper;
     @S2DataPermission
     @Override
     public SemanticTranslateResp translate(SemanticQueryReq queryReq, User user) throws Exception {
@@ -145,7 +148,7 @@ public class S2SemanticLayerService implements SemanticLayerService {
             metricDrillDownChecker.checkQuery(queryStatement);
             // 4.execute query
             SemanticQueryResp queryResp = null;
-            queryResp = DimensionValuesMatchHelper.executeQuery(dimensionValuesAndId, queryStatement);
+            queryResp = dimensionValuesMatchHelper.executeQuery(dimensionValuesAndId, queryStatement);
             queryUtils.populateQueryColumns(queryResp,
                     queryStatement.getSemanticSchemaResp());
 

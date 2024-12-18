@@ -5,18 +5,20 @@ import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
 import com.tencent.supersonic.headless.chat.ChatQueryContext;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.*;
 import java.util.stream.Collectors;
 @Slf4j
+@Component
 public class DimensionValuesMatchUtils {
 
     @Autowired
-    private static DimensionMappingConfig dimensionMappingConfig;
-    public static void processDimensions(Map<SchemaElementType, List<String>> elementTypeToNatureMap,
+    private DimensionMappingConfig dimensionMappingConfig;
+    public void processDimensions(Map<SchemaElementType, List<String>> elementTypeToNatureMap,
                                          ChatQueryContext chatQueryContext) {
         Set<Long> dataSetIds = chatQueryContext.getRequest().getDataSetIds();
-        if (!dataSetIds.contains(5L)) {
+        if (!dataSetIds.contains(dimensionMappingConfig.getDataSet())) {
             return;
         }
 
@@ -32,7 +34,7 @@ public class DimensionValuesMatchUtils {
         storeToChatQueryContext(chatQueryContext, dimensionValusAndIdMap);
     }
 
-    private static Set<String> extractDimensionIds(Map<SchemaElementType, List<String>> elementTypeToNatureMap) {
+    private Set<String> extractDimensionIds(Map<SchemaElementType, List<String>> elementTypeToNatureMap) {
         return elementTypeToNatureMap.values().stream()
                 .flatMap(List::stream)
                 .map(value -> {
@@ -43,17 +45,17 @@ public class DimensionValuesMatchUtils {
                 .collect(Collectors.toSet());
     }
 
-    private static void storeToChatQueryContext(ChatQueryContext chatQueryContext, List<Map.Entry<String, String>> dimensionValusAndIdMap) {
+    private void storeToChatQueryContext(ChatQueryContext chatQueryContext, List<Map.Entry<String, String>> dimensionValusAndIdMap) {
         chatQueryContext.setIsTip(true);
         chatQueryContext.setSchemaValusByTerm(dimensionValusAndIdMap);
     }
 
-    private static Boolean getJudgeByType(Set<String> dimensionIds) {
+    private Boolean getJudgeByType(Set<String> dimensionIds) {
         // 获取维度ID配置
-        String dimPid1 = DimensionMappingConfig.getMapping().get("pid1_2022");
-        String dimPid2 = DimensionMappingConfig.getMapping().get("pid2_2022");
-        String dimPid3 = DimensionMappingConfig.getMapping().get("pid3_2022");
-        String dimPid4 = DimensionMappingConfig.getMapping().get("pid4_2022");
+        String dimPid1 = dimensionMappingConfig.getMapping().get("pid1_2022");
+        String dimPid2 = dimensionMappingConfig.getMapping().get("pid2_2022");
+        String dimPid3 = dimensionMappingConfig.getMapping().get("pid3_2022");
+        String dimPid4 = dimensionMappingConfig.getMapping().get("pid4_2022");
         boolean hasPid1 = dimensionIds.contains(dimPid1);
         boolean hasPid2 = dimensionIds.contains(dimPid2);
         boolean hasPid3 = dimensionIds.contains(dimPid3);
@@ -75,7 +77,7 @@ public class DimensionValuesMatchUtils {
         }
         return false;
     }
-    private static List<Map.Entry<String, String>> generateDimensionValusAndIdMap(Map<SchemaElementType, List<String>> elementTypeToNatureMap) {
+    private List<Map.Entry<String, String>> generateDimensionValusAndIdMap(Map<SchemaElementType, List<String>> elementTypeToNatureMap) {
         return elementTypeToNatureMap.values().stream()
                 .flatMap(List::stream)
                 .map(value -> value.split("_"))
