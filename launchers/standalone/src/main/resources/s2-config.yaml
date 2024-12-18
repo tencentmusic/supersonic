@@ -52,3 +52,11 @@ s2:
         ids: 1,2,3    # chatDatabaseIds
       domain:
         ids: 1,2,3    # chatDomainIds
+
+  dimension:
+    mapping:
+      pid1_2022: "313"
+      pid2_2022: "315"
+      pid3_2022: "317"
+      pid4_2022: "319"
+
