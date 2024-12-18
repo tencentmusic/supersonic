@@ -18,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -34,6 +35,8 @@ public class ChatWorkflowEngine {
     private final List<SemanticCorrector> semanticCorrectors =
             CoreComponentFactory.getSemanticCorrectors();
 
+    @Autowired
+    private DimensionValuesMatchHelper dimensionValuesMatchHelper;
     public void start(ChatWorkflowState initialState, ChatQueryContext queryCtx,
             ParseResp parseResult) {
         queryCtx.setChatWorkflowState(initialState);
@@ -42,7 +45,7 @@ public class ChatWorkflowEngine {
                 case MAPPING:
                     performMapping(queryCtx);
                     if (queryCtx.getIsTip()){
-                        DimensionValuesMatchHelper.dimensionValuesStoreToCache(queryCtx);
+                        dimensionValuesMatchHelper.dimensionValuesStoreToCache(queryCtx);
                     }
                     if (queryCtx.getMapInfo().isEmpty()) {
                         parseResult.setState(ParseResp.ParseState.FAILED);

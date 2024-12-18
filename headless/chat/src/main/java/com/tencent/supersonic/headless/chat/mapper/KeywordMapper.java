@@ -1,10 +1,7 @@
 package com.tencent.supersonic.headless.chat.mapper;
 
 import com.tencent.supersonic.common.util.ContextUtils;
-import com.tencent.supersonic.headless.api.pojo.SchemaElement;
-import com.tencent.supersonic.headless.api.pojo.SchemaElementMatch;
-import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
-import com.tencent.supersonic.headless.api.pojo.SchemaMapInfo;
+import com.tencent.supersonic.headless.api.pojo.*;
 import com.tencent.supersonic.headless.api.pojo.response.S2Term;
 import com.tencent.supersonic.headless.chat.ChatQueryContext;
 import com.tencent.supersonic.headless.chat.knowledge.DatabaseMapResult;
@@ -94,7 +91,8 @@ public class KeywordMapper extends BaseMapper {
                 addToSchemaMap(chatQueryContext.getMapInfo(), dataSetId, schemaElementMatch);
             }
         }
-        DimensionValuesMatchUtils.processDimensions(elementTypeToNatureMap, chatQueryContext);
+        DimensionValuesMatchUtils dimensionValuesMatchUtils = ContextUtils.getBean(DimensionValuesMatchUtils.class);
+        dimensionValuesMatchUtils.processDimensions(elementTypeToNatureMap, chatQueryContext);
     }
 
     private void doDimValueAliasLogic(SchemaElementMatch schemaElementMatch) {

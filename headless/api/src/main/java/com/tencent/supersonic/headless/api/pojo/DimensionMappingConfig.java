@@ -22,18 +22,27 @@ public class DimensionMappingConfig {
     @Value("${s2.dimension.mapping.pid4_2022}")
     private String pid4;
 
-    private static final Map<String, String> mapping = new HashMap<>();
+    @Value("${s2.dimension.mapping.dataSet}")
+    private Long dataSet;
 
+    private final Map<String, String> mapping = new HashMap<>();
     @PostConstruct
     public void init() {
         mapping.put("pid1_2022", pid1);
         mapping.put("pid2_2022", pid2);
         mapping.put("pid3_2022", pid3);
         mapping.put("pid4_2022", pid4);
+
+        System.out.println("Loaded mapping: " + mapping);
+        System.out.println("Loaded dataSet: " + dataSet);
     }
 
-    public static Map<String, String> getMapping() {
+    public Map<String, String> getMapping() {
         return mapping;
+    }
+
+    public Long getDataSet() {
+        return dataSet;
     }
 }
 
