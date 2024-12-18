@@ -29,6 +29,8 @@ public class ChatQueryContext implements Serializable {
     @JsonIgnore
     private SemanticSchema semanticSchema;
     private ChatWorkflowState chatWorkflowState;
+    private List<Map.Entry<String, String>> schemaValusByTerm;
+    private Boolean isTip = false;
 
     public ChatQueryContext() {
         this(new QueryNLReq());

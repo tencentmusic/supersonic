@@ -6,4 +6,4 @@ spring:
     username: root
     password: 1234
     #    password: SePo6*8iNsC
-    driver-class-name: com.mysql.jdbc.Driver
+    driver-class-name: com.mysql.cj.jdbc.Driver

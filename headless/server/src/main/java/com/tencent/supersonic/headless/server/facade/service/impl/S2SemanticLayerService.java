@@ -2,6 +2,7 @@ package com.tencent.supersonic.headless.server.facade.service.impl;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.tencent.supersonic.common.pojo.DimValuesConstants;
 import com.tencent.supersonic.common.pojo.QueryColumn;
 import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.common.pojo.enums.TaskStatusEnum;
@@ -30,9 +31,7 @@ import com.tencent.supersonic.headless.server.service.DataSetService;
 import com.tencent.supersonic.headless.server.service.DimensionService;
 import com.tencent.supersonic.headless.server.service.MetricService;
 import com.tencent.supersonic.headless.server.service.SchemaService;
-import com.tencent.supersonic.headless.server.utils.MetricDrillDownChecker;
-import com.tencent.supersonic.headless.server.utils.QueryUtils;
-import com.tencent.supersonic.headless.server.utils.StatUtils;
+import com.tencent.supersonic.headless.server.utils.*;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
@@ -89,6 +88,87 @@ public class S2SemanticLayerService implements SemanticLayerService {
         semanticTranslator.translate(queryStatement);
         return SemanticTranslateResp.builder().querySQL(queryStatement.getSql())
                 .isOk(queryStatement.isOk()).errMsg(queryStatement.getErrMsg()).build();
+    }
+
+    @Override
+    public SemanticQueryResp queryBySchemaStrValues(SemanticQueryReq queryReq, User user) {
+        String queryId = String.valueOf(queryReq.getQueryId());
+        // 构建缓存的key
+        String conditionKey = queryId + DimValuesConstants.CONDITION;
+        String dimensionKey = queryId + DimValuesConstants.DIMENSION_VALUS_AND_ID;
+        String fullQueryKey = queryId + DimValuesConstants.FULL_QUERY;
+
+        // 取出缓存中的判断条件和维度数据
+        Boolean condition = (Boolean) queryCache.get(conditionKey);
+
+        SemanticQueryResp queryResp;
+        if (queryId != null && condition != null && condition) {
+            List<Map.Entry<String, String>> dimensionValuesAndId = (List<Map.Entry<String, String>>) queryCache.get(dimensionKey);
+            queryResp = getSemanticQueryResp(queryReq, user,dimensionValuesAndId);
+            queryCache.put(fullQueryKey, true);
+        } else {
+            queryResp = queryByReq(queryReq, user);
+        }
+        return queryResp;
+    }
+
+
+    @S2DataPermission
+    @SneakyThrows
+    private SemanticQueryResp getSemanticQueryResp(SemanticQueryReq queryReq, User user,List<Map.Entry<String, String>> dimensionValuesAndId) {
+        TaskStatusEnum state = TaskStatusEnum.SUCCESS;
+        log.info("[queryReq:{}]", queryReq);
+        try {
+            // 1.initStatInfo
+            statUtils.initStatInfo(queryReq, user);
+
+            // 2.query from cache
+            String cacheKey = queryCache.getCacheKey(queryReq);
+            Object query = queryCache.query(queryReq, cacheKey);
+            if (Objects.nonNull(query)) {
+                log.info("cacheKey:{},query:{}", cacheKey,
+                        StringUtils.normalizeSpace(query.toString()));
+            }
+            if (Objects.nonNull(query)) {
+                SemanticQueryResp queryResp = (SemanticQueryResp) query;
+                queryResp.setUseCache(true);
+                return queryResp;
+            }
+            StatUtils.get().setUseResultCache(false);
+
+            // 3 translate query
+            QueryStatement queryStatement = buildQueryStatement(queryReq, user);
+            semanticTranslator.translate(queryStatement);
+
+            // Check whether the dimensions of the metric drill-down are correct temporarily,
+            // add the abstraction of a validator later.
+            metricDrillDownChecker.checkQuery(queryStatement);
+            // 4.execute query
+            SemanticQueryResp queryResp = null;
+            queryResp = DimensionValuesMatchHelper.executeQuery(dimensionValuesAndId, queryStatement);
+            queryUtils.populateQueryColumns(queryResp,
+                    queryStatement.getSemanticSchemaResp());
+
+            // 5.reset cache and set stateInfo
+            Boolean setCacheSuccess = queryCache.put(cacheKey, queryResp);
+            if (setCacheSuccess) {
+                // if result is not null, update cache data
+                statUtils.updateResultCacheKey(cacheKey);
+            }
+            if (Objects.isNull(queryResp)) {
+                state = TaskStatusEnum.ERROR;
+            } else {
+                queryResp.appendErrorMsg(queryStatement.getErrMsg());
+            }
+
+            return queryResp;
+        } catch (Exception e) {
+            log.error("exception in queryByReq:{}, e: ", queryReq, e);
+            state = TaskStatusEnum.ERROR;
+            throw e;
+        } finally {
+            statUtils.statInfo2DbAsync(state);
+        }
     }
 
     @Override

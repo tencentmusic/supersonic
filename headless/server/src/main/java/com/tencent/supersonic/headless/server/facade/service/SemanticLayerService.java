@@ -20,6 +20,8 @@ public interface SemanticLayerService {
 
     SemanticQueryResp queryByReq(SemanticQueryReq queryReq, User user) throws Exception;
 
+    SemanticQueryResp queryBySchemaStrValues(SemanticQueryReq queryReq, User user) throws Exception;
+
     SemanticQueryResp queryDimensionValue(DimensionValueReq dimensionValueReq, User user);
 
     DataSetSchema getDataSetSchema(Long id);

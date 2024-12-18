@@ -9,4 +9,7 @@ public interface QueryCache {
     Boolean put(String cacheKey, Object value);
 
     String getCacheKey(SemanticQueryReq semanticQueryReq);
+
+    Object get(String key);
+
 }

@@ -1,6 +1,7 @@
 package com.tencent.supersonic.headless.api.pojo.request;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.tencent.supersonic.headless.api.pojo.Cache;
 import com.tencent.supersonic.headless.api.pojo.Param;
 import com.tencent.supersonic.headless.api.pojo.SqlInfo;
@@ -8,10 +9,7 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Data
 @Slf4j
@@ -33,6 +31,7 @@ public abstract class SemanticQueryReq {
 
     protected SqlInfo sqlInfo = new SqlInfo();
 
+    private Long queryId;
     public void addModelId(Long modelId) {
         modelIds.add(modelId);
     }
