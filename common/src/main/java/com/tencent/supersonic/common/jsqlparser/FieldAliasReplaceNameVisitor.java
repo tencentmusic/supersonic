@@ -1,14 +1,12 @@
 package com.tencent.supersonic.common.jsqlparser;
 
+import net.sf.jsqlparser.expression.Alias;
 import net.sf.jsqlparser.statement.select.SelectItem;
 import net.sf.jsqlparser.statement.select.SelectItemVisitorAdapter;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.HashMap;
 import java.util.Map;
-
-import org.apache.commons.lang3.StringUtils;
-
-import net.sf.jsqlparser.expression.Alias;
 
 public class FieldAliasReplaceNameVisitor extends SelectItemVisitorAdapter {
     private Map<String, String> fieldNameMap;
