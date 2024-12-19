@@ -43,12 +43,17 @@ public class DataInterpretProcessor implements ExecuteResultProcessor {
 
 
     @Override
-    public void process(ExecuteContext executeContext, QueryResult queryResult) {
+    public boolean accept(ExecuteContext executeContext) {
         Agent agent = executeContext.getAgent();
         ChatApp chatApp = agent.getChatAppConfig().get(APP_KEY);
-        if (Objects.isNull(chatApp) || !chatApp.isEnable()) {
-            return;
-        }
+        return Objects.nonNull(chatApp) && chatApp.isEnable();
+    }
+
+    @Override
+    public void process(ExecuteContext executeContext) {
+        QueryResult queryResult = executeContext.getResponse();
+        Agent agent = executeContext.getAgent();
+        ChatApp chatApp = agent.getChatAppConfig().get(APP_KEY);
 
         Map<String, Object> variable = new HashMap<>();
         variable.put("question", executeContext.getRequest().getQueryText());
