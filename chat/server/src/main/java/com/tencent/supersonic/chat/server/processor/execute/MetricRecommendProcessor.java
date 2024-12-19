@@ -1,7 +1,6 @@
 package com.tencent.supersonic.chat.server.processor.execute;
 
 import com.alibaba.fastjson.JSONObject;
-import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.chat.server.pojo.ExecuteContext;
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.enums.DictWordType;
@@ -16,14 +15,7 @@ import dev.langchain4j.store.embedding.RetrieveQuery;
 import dev.langchain4j.store.embedding.RetrieveQueryResult;
 import org.springframework.util.CollectionUtils;
 
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -34,17 +26,20 @@ public class MetricRecommendProcessor implements ExecuteResultProcessor {
     private static final int METRIC_RECOMMEND_SIZE = 5;
 
     @Override
-    public void process(ExecuteContext executeContext, QueryResult queryResult) {
+    public boolean accept(ExecuteContext executeContext) {
+        SemanticParseInfo parseInfo = executeContext.getParseInfo();
+        return Objects.nonNull(parseInfo.getQueryType())
+                && parseInfo.getQueryType().equals(QueryType.AGGREGATE)
+                && !CollectionUtils.isEmpty(parseInfo.getMetrics())
+                && parseInfo.getMetrics().size() <= METRIC_RECOMMEND_SIZE;
+    }
+
+    @Override
+    public void process(ExecuteContext executeContext) {
         fillSimilarMetric(executeContext.getParseInfo());
     }
 
     private void fillSimilarMetric(SemanticParseInfo parseInfo) {
-        if (Objects.isNull(parseInfo.getQueryType())
-                || !parseInfo.getQueryType().equals(QueryType.AGGREGATE)
-                || parseInfo.getMetrics().size() > METRIC_RECOMMEND_SIZE
-                || CollectionUtils.isEmpty(parseInfo.getMetrics())) {
-            return;
-        }
         List<String> metricNames =
                 Collections.singletonList(parseInfo.getMetrics().iterator().next().getName());
         Map<String, Object> filterCondition = new HashMap<>();

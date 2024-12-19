@@ -59,14 +59,18 @@ import static com.tencent.supersonic.common.pojo.Constants.TIME_FORMAT;
 public class MetricRatioCalcProcessor implements ExecuteResultProcessor {
 
     @Override
-    public void process(ExecuteContext executeContext, QueryResult queryResult) {
+    public boolean accept(ExecuteContext executeContext) {
         SemanticParseInfo semanticParseInfo = executeContext.getParseInfo();
         AggregatorConfig aggregatorConfig = ContextUtils.getBean(AggregatorConfig.class);
-        if (CollectionUtils.isEmpty(semanticParseInfo.getMetrics())
-                || !aggregatorConfig.getEnableRatio()
-                || !QueryType.AGGREGATE.equals(semanticParseInfo.getQueryType())) {
-            return;
-        }
+        return !CollectionUtils.isEmpty(semanticParseInfo.getMetrics())
+                && aggregatorConfig.getEnableRatio()
+                && QueryType.AGGREGATE.equals(semanticParseInfo.getQueryType());
+    }
+
+    @Override
+    public void process(ExecuteContext executeContext) {
+        QueryResult queryResult = executeContext.getResponse();
+        SemanticParseInfo semanticParseInfo = executeContext.getParseInfo();
         AggregateInfo aggregateInfo = getAggregateInfo(executeContext.getRequest().getUser(),
                 semanticParseInfo, queryResult);
         queryResult.setAggregateInfo(aggregateInfo);

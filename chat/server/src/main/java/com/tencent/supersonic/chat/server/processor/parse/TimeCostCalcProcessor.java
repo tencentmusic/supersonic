@@ -11,6 +11,11 @@ import lombok.extern.slf4j.Slf4j;
 public class TimeCostCalcProcessor implements ParseResultProcessor {
 
     @Override
+    public boolean accept(ParseContext parseContext) {
+        return true;
+    }
+
+    @Override
     public void process(ParseContext parseContext) {
         ChatParseResp parseResp = parseContext.getResponse();
         long parseStartTime = parseResp.getParseTimeCost().getParseStartTime();
