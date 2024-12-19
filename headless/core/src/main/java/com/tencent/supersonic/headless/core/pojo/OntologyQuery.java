@@ -1,4 +1,4 @@
-package com.tencent.supersonic.headless.core.translator.parser.s2sql;
+package com.tencent.supersonic.headless.core.pojo;
 
 import com.google.common.collect.Sets;
 import com.tencent.supersonic.common.pojo.ColumnOrder;
@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Set;
 
 @Data
-public class OntologyQueryParam {
+public class OntologyQuery {
     private Set<String> metrics = Sets.newHashSet();
     private Set<String> dimensions = Sets.newHashSet();
     private String where;

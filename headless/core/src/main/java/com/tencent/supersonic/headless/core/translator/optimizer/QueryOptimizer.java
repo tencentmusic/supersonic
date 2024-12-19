@@ -7,5 +7,9 @@ import com.tencent.supersonic.headless.core.pojo.QueryStatement;
  * derive the most efficient query.
  */
 public interface QueryOptimizer {
+
+    boolean accept(QueryStatement queryStatement);
+
     void rewrite(QueryStatement queryStatement);
+
 }

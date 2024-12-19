@@ -4,6 +4,9 @@ import com.google.common.collect.Lists;
 import com.tencent.supersonic.common.calcite.Configuration;
 import com.tencent.supersonic.common.jsqlparser.SqlSelectHelper;
 import com.tencent.supersonic.common.pojo.enums.EngineType;
+import com.tencent.supersonic.headless.core.pojo.JoinRelation;
+import com.tencent.supersonic.headless.core.pojo.Ontology;
+import com.tencent.supersonic.headless.core.pojo.OntologyQuery;
 import com.tencent.supersonic.headless.core.translator.parser.calcite.S2CalciteSchema;
 import com.tencent.supersonic.headless.core.translator.parser.calcite.SchemaBuilder;
 import com.tencent.supersonic.headless.core.translator.parser.s2sql.*;
@@ -130,8 +133,8 @@ public class DataModelNode extends SemanticNode {
         return dataModelList.stream().map(DataModel::getName).collect(Collectors.joining("_"));
     }
 
-    public static void getQueryDimensionMeasure(Ontology ontology, OntologyQueryParam queryParam,
-            Set<String> queryDimensions, Set<String> queryMeasures) {
+    public static void getQueryDimensionMeasure(Ontology ontology, OntologyQuery queryParam,
+                                                Set<String> queryDimensions, Set<String> queryMeasures) {
         queryDimensions.addAll(queryParam.getDimensions().stream()
                 .map(d -> d.contains(Constants.DIMENSION_IDENTIFY)
                         ? d.split(Constants.DIMENSION_IDENTIFY)[1]
@@ -146,9 +149,9 @@ public class DataModelNode extends SemanticNode {
                 .forEach(queryMeasures::add);
     }
 
-    public static void mergeQueryFilterDimensionMeasure(Ontology ontology,
-            OntologyQueryParam queryParam, Set<String> dimensions, Set<String> measures,
-            SqlValidatorScope scope) throws Exception {
+    public static void mergeQueryFilterDimensionMeasure(Ontology ontology, OntologyQuery queryParam,
+            Set<String> dimensions, Set<String> measures, SqlValidatorScope scope)
+            throws Exception {
         EngineType engineType = ontology.getDatabase().getType();
         if (Objects.nonNull(queryParam.getWhere()) && !queryParam.getWhere().isEmpty()) {
             Set<String> filterConditions = new HashSet<>();
@@ -173,7 +176,7 @@ public class DataModelNode extends SemanticNode {
     }
 
     public static List<DataModel> getQueryDataModels(SqlValidatorScope scope,
-            S2CalciteSchema schema, OntologyQueryParam queryParam) throws Exception {
+            S2CalciteSchema schema, OntologyQuery queryParam) throws Exception {
         Ontology ontology = schema.getOntology();
         // get query measures and dimensions
         Set<String> queryMeasures = new HashSet<>();
@@ -282,7 +285,7 @@ public class DataModelNode extends SemanticNode {
     }
 
     private static List<DataModel> findRelatedModelsByRelation(Ontology ontology,
-            OntologyQueryParam queryParam, DataModel baseDataModel, Set<String> queryDimensions,
+            OntologyQuery queryParam, DataModel baseDataModel, Set<String> queryDimensions,
             Set<String> queryMeasures) {
         Set<String> joinDataModelNames = new HashSet<>();
         List<DataModel> joinDataModels = new ArrayList<>();

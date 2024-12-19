@@ -1,6 +1,9 @@
-package com.tencent.supersonic.headless.core.translator.parser.s2sql;
+package com.tencent.supersonic.headless.core.pojo;
 
-import com.tencent.supersonic.headless.core.pojo.Database;
+import com.tencent.supersonic.headless.core.translator.parser.s2sql.DataModel;
+import com.tencent.supersonic.headless.core.translator.parser.s2sql.Dimension;
+import com.tencent.supersonic.headless.core.translator.parser.s2sql.Materialization;
+import com.tencent.supersonic.headless.core.translator.parser.s2sql.Metric;
 import lombok.Data;
 
 import java.util.ArrayList;

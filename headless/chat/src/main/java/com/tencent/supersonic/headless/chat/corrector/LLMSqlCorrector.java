@@ -65,7 +65,7 @@ public class LLMSqlCorrector extends BaseSemanticCorrector {
             return;
         }
 
-        Text2SQLExemplar exemplar = (Text2SQLExemplar)semanticParseInfo.getProperties()
+        Text2SQLExemplar exemplar = (Text2SQLExemplar) semanticParseInfo.getProperties()
                 .get(Text2SQLExemplar.PROPERTY_KEY);
 
         ChatLanguageModel chatLanguageModel =

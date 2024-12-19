@@ -11,7 +11,7 @@ import com.tencent.supersonic.headless.core.translator.parser.s2sql.Dimension;
 import com.tencent.supersonic.headless.core.translator.parser.s2sql.Identify;
 import com.tencent.supersonic.headless.core.translator.parser.s2sql.Measure;
 import com.tencent.supersonic.headless.core.translator.parser.s2sql.Metric;
-import com.tencent.supersonic.headless.core.translator.parser.s2sql.OntologyQueryParam;
+import com.tencent.supersonic.headless.core.pojo.OntologyQuery;
 import lombok.Data;
 import org.apache.calcite.sql.SqlNode;
 import org.apache.calcite.sql.validate.SqlValidatorScope;
@@ -114,6 +114,6 @@ public abstract class Renderer {
         return SemanticNode.buildAs(alias, tableView.build());
     }
 
-    public abstract void render(OntologyQueryParam metricCommand, List<DataModel> dataModels,
+    public abstract void render(OntologyQuery metricCommand, List<DataModel> dataModels,
             SqlValidatorScope scope, S2CalciteSchema schema, boolean nonAgg) throws Exception;
 }
