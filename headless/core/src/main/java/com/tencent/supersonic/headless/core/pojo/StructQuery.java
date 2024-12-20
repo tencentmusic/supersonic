@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Data
-public class StructQueryParam {
+public class StructQuery {
     private List<String> groups = new ArrayList();
     private List<Aggregator> aggregators = new ArrayList();
     private List<Order> orders = new ArrayList();

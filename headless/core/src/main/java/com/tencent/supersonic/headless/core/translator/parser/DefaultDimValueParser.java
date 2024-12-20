@@ -1,4 +1,4 @@
-package com.tencent.supersonic.headless.core.translator.converter;
+package com.tencent.supersonic.headless.core.translator.parser;
 
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.common.jsqlparser.SqlAddHelper;
@@ -22,24 +22,24 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Slf4j
-@Component("DefaultDimValueConverter")
-public class DefaultDimValueConverter implements QueryConverter {
+@Component("DefaultDimValueParser")
+public class DefaultDimValueParser implements QueryParser {
 
     @Override
     public boolean accept(QueryStatement queryStatement) {
-        return Objects.nonNull(queryStatement.getSqlQueryParam())
-                && StringUtils.isNotBlank(queryStatement.getSqlQueryParam().getSql());
+        return Objects.nonNull(queryStatement.getSqlQuery())
+                && StringUtils.isNotBlank(queryStatement.getSqlQuery().getSql());
     }
 
     @Override
-    public void convert(QueryStatement queryStatement) {
+    public void parse(QueryStatement queryStatement) {
         List<Dimension> dimensions = queryStatement.getOntology().getDimensions().stream()
                 .filter(dimension -> !CollectionUtils.isEmpty(dimension.getDefaultValues()))
                 .collect(Collectors.toList());
         if (CollectionUtils.isEmpty(dimensions)) {
             return;
         }
-        String sql = queryStatement.getSqlQueryParam().getSql();
+        String sql = queryStatement.getSqlQuery().getSql();
         List<String> whereFields = SqlSelectHelper.getWhereFields(sql).stream()
                 .filter(field -> !TimeDimensionEnum.containsTimeDimension(field))
                 .collect(Collectors.toList());
@@ -56,11 +56,11 @@ public class DefaultDimValueConverter implements QueryConverter {
             inExpression.setLeftExpression(new Column(dimension.getBizName()));
             inExpression.setRightExpression(expressionList);
             expressions.add(inExpression);
-            if (Objects.nonNull(queryStatement.getSqlQueryParam().getTable())) {
-                queryStatement.getOntologyQueryParam().getDimensions().add(dimension.getBizName());
+            if (Objects.nonNull(queryStatement.getSqlQuery().getTable())) {
+                queryStatement.getOntologyQuery().getDimensions().add(dimension.getBizName());
             }
         }
         sql = SqlAddHelper.addWhere(sql, expressions);
-        queryStatement.getSqlQueryParam().setSql(sql);
+        queryStatement.getSqlQuery().setSql(sql);
     }
 }

@@ -465,6 +465,7 @@ public class SqlReplaceHelper {
         }
         return selectStatement.toString();
     }
+
     public static String replaceAlias(String sql) {
         Select selectStatement = SqlSelectHelper.getSelect(sql);
         if (!(selectStatement instanceof PlainSelect)) {

@@ -4,7 +4,6 @@ import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.headless.core.cache.QueryCache;
 import com.tencent.supersonic.headless.core.executor.QueryAccelerator;
 import com.tencent.supersonic.headless.core.executor.QueryExecutor;
-import com.tencent.supersonic.headless.core.translator.converter.QueryConverter;
 import com.tencent.supersonic.headless.core.translator.optimizer.QueryOptimizer;
 import com.tencent.supersonic.headless.core.translator.parser.QueryParser;
 import lombok.extern.slf4j.Slf4j;
@@ -20,27 +19,18 @@ import java.util.stream.Collectors;
 @Slf4j
 public class ComponentFactory {
 
-    private static List<QueryConverter> queryConverters = new ArrayList<>();
     private static Map<String, QueryOptimizer> queryOptimizers = new HashMap<>();
     private static List<QueryExecutor> queryExecutors = new ArrayList<>();
     private static List<QueryAccelerator> queryAccelerators = new ArrayList<>();
-    private static QueryParser queryParser;
+    private static List<QueryParser> queryParsers = new ArrayList<>();
     private static QueryCache queryCache;
 
     static {
-        initQueryConverter();
         initQueryOptimizer();
         initQueryExecutors();
         initQueryAccelerators();
-        initQueryParser();
+        initQueryParsers();
         initQueryCache();
-    }
-
-    public static List<QueryConverter> getQueryConverters() {
-        if (queryConverters.isEmpty()) {
-            initQueryConverter();
-        }
-        return queryConverters;
     }
 
     public static List<QueryOptimizer> getQueryOptimizers() {
@@ -64,11 +54,11 @@ public class ComponentFactory {
         return queryAccelerators;
     }
 
-    public static QueryParser getQueryParser() {
-        if (queryParser == null) {
-            initQueryParser();
+    public static List<QueryParser> getQueryParser() {
+        if (queryParsers.isEmpty()) {
+            initQueryParsers();
         }
-        return queryParser;
+        return queryParsers;
     }
 
     public static QueryCache getQueryCache() {
@@ -92,23 +82,15 @@ public class ComponentFactory {
     }
 
     private static void initQueryExecutors() {
-        // queryExecutors.add(ContextUtils.getContext().getBean("JdbcExecutor",
-        // JdbcExecutor.class));
         init(QueryExecutor.class, queryExecutors);
     }
 
     private static void initQueryAccelerators() {
-        // queryExecutors.add(ContextUtils.getContext().getBean("JdbcExecutor",
-        // JdbcExecutor.class));
         init(QueryAccelerator.class, queryAccelerators);
     }
 
-    private static void initQueryConverter() {
-        init(QueryConverter.class, queryConverters);
-    }
-
-    private static void initQueryParser() {
-        queryParser = init(QueryParser.class);
+    private static void initQueryParsers() {
+        init(QueryParser.class, queryParsers);
     }
 
     private static void initQueryCache() {

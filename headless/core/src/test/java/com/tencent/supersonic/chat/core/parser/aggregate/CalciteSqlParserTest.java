@@ -2,7 +2,7 @@ package com.tencent.supersonic.chat.core.parser.aggregate;
 
 import com.alibaba.fastjson.JSON;
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;
-import com.tencent.supersonic.headless.core.translator.parser.calcite.CalciteQueryParser;
+import com.tencent.supersonic.headless.core.translator.parser.OntologyQueryParser;
 import org.junit.jupiter.api.Test;
 import org.testng.Assert;
 
@@ -316,7 +316,7 @@ public class CalciteSqlParserTest {
                 + "            \"createdAt\": 1711367511146,\n"
                 + "            \"updatedAt\": 1711367511146\n" + "        }\n" + "    }\n" + "}";
         QueryStatement queryStatement = JSON.parseObject(json, QueryStatement.class);
-        CalciteQueryParser calciteSqlParser = new CalciteQueryParser();
+        OntologyQueryParser calciteSqlParser = new OntologyQueryParser();
         calciteSqlParser.parse(queryStatement);
         Assert.assertEquals(queryStatement.getSql().trim().replaceAll("\\s+", ""),
                 "SELECT`imp_date`AS`sys_imp_date`,SUM(1)AS`pv`" + "FROM" + "`s2_pv_uv_statis`"

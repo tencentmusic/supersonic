@@ -86,7 +86,7 @@ public abstract class SemanticNode {
                 expression = String.format("`%s`", expression);
             }
         }
-        SqlParser sqlParser = 
+        SqlParser sqlParser =
                 SqlParser.create(expression, Configuration.getParserConfig(engineType));
         SqlNode sqlNode = sqlParser.parseExpression();
         scope.validateExpr(sqlNode);

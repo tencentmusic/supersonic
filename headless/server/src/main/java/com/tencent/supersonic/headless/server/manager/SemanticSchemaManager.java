@@ -4,6 +4,8 @@ import com.tencent.supersonic.common.pojo.ModelRela;
 import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
 import com.tencent.supersonic.headless.api.pojo.response.DatabaseResp;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticSchemaResp;
+import com.tencent.supersonic.headless.core.pojo.JoinRelation;
+import com.tencent.supersonic.headless.core.pojo.Ontology;
 import com.tencent.supersonic.headless.core.translator.parser.calcite.S2CalciteSchema;
 import com.tencent.supersonic.headless.core.translator.parser.s2sql.*;
 import com.tencent.supersonic.headless.core.translator.parser.s2sql.Materialization.TimePartType;
@@ -215,7 +217,7 @@ public class SemanticSchemaManager {
     }
 
     private static List<JoinRelation> getJoinRelation(List<ModelRela> modelRelas,
-            Map<Long, String> modelIdName) {
+                                                      Map<Long, String> modelIdName) {
         List<JoinRelation> joinRelations = new ArrayList<>();
         modelRelas.stream().forEach(r -> {
             if (modelIdName.containsKey(r.getFromModelId())
