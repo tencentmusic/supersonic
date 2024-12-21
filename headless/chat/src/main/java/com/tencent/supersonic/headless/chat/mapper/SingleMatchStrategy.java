@@ -1,6 +1,5 @@
 package com.tencent.supersonic.headless.chat.mapper;
 
-import com.tencent.supersonic.common.config.ThreadPoolConfig;
 import com.tencent.supersonic.headless.api.pojo.response.S2Term;
 import com.tencent.supersonic.headless.chat.ChatQueryContext;
 import com.tencent.supersonic.headless.chat.knowledge.MapResult;
@@ -22,26 +21,22 @@ public abstract class SingleMatchStrategy<T extends MapResult> extends BaseMatch
     protected MapperConfig mapperConfig;
     @Autowired
     protected MapperHelper mapperHelper;
-    @Autowired
-    protected ThreadPoolConfig threadPoolConfig;
 
     public List<T> detect(ChatQueryContext chatQueryContext, List<S2Term> terms,
-            Set<Long> detectDataSetIds) {
+                          Set<Long> detectDataSetIds) {
         Map<Integer, Integer> regOffsetToLength = mapperHelper.getRegOffsetToLength(terms);
         String text = chatQueryContext.getRequest().getQueryText();
         Set<T> results = ConcurrentHashMap.newKeySet();
-        Set<String> detectSegments = ConcurrentHashMap.newKeySet();
         List<Callable<Void>> tasks = new ArrayList<>();
 
-        for (int startIndex = 0; startIndex <= text.length() - 1;) {
-            for (int index = startIndex; index <= text.length();) {
+        for (int startIndex = 0; startIndex <= text.length() - 1; ) {
+            for (int index = startIndex; index <= text.length(); ) {
                 int offset = mapperHelper.getStepOffset(terms, startIndex);
                 index = mapperHelper.getStepIndex(regOffsetToLength, index);
                 if (index <= text.length()) {
                     String detectSegment = text.substring(startIndex, index).trim();
-                    detectSegments.add(detectSegment);
-                    tasks.add(createTask(chatQueryContext, detectDataSetIds, detectSegment, offset,
-                            results));
+                    Callable<Void> task = createTask(chatQueryContext, detectDataSetIds, detectSegment, offset, results);
+                    tasks.add(task);
                 }
             }
             startIndex = mapperHelper.getStepIndex(regOffsetToLength, startIndex);
@@ -51,7 +46,7 @@ public abstract class SingleMatchStrategy<T extends MapResult> extends BaseMatch
     }
 
     private Callable<Void> createTask(ChatQueryContext chatQueryContext, Set<Long> detectDataSetIds,
-            String detectSegment, int offset, Set<T> results) {
+                                      String detectSegment, int offset, Set<T> results) {
         return () -> {
             List<T> oneRoundResults =
                     detectByStep(chatQueryContext, detectDataSetIds, detectSegment, offset);
@@ -62,15 +57,6 @@ public abstract class SingleMatchStrategy<T extends MapResult> extends BaseMatch
         };
     }
 
-    private void executeTasks(List<Callable<Void>> tasks) {
-        try {
-            threadPoolConfig.getMapExecutor().invokeAll(tasks);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new RuntimeException("Task execution interrupted", e);
-        }
-    }
-
     public abstract List<T> detectByStep(ChatQueryContext chatQueryContext,
-            Set<Long> detectDataSetIds, String detectSegment, int offset);
+                                         Set<Long> detectDataSetIds, String detectSegment, int offset);
 }
