@@ -26,4 +26,12 @@ public class ThreadPoolConfig {
                 new ThreadFactoryBuilder().setNameFormat("supersonic-map-pool-").build(),
                 new ThreadPoolExecutor.CallerRunsPolicy());
     }
+
+    @Bean("chatExecutor")
+    public ThreadPoolExecutor getChatExecutor() {
+        return new ThreadPoolExecutor(8, 16, 60 * 3, TimeUnit.SECONDS,
+                new LinkedBlockingQueue<Runnable>(1024),
+                new ThreadFactoryBuilder().setNameFormat("supersonic-chat-pool-").build(),
+                new ThreadPoolExecutor.CallerRunsPolicy());
+    }
 }
