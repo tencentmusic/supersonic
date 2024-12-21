@@ -260,7 +260,7 @@ public class SqlGenerateUtils {
 
     public boolean isSupportWith(EngineType engineTypeEnum, String version) {
         if (engineTypeEnum.equals(EngineType.MYSQL) && Objects.nonNull(version)
-                && version.startsWith(executorConfig.getMysqlLowVersion())) {
+                && StringUtil.compareVersion(version, executorConfig.getMysqlLowVersion()) < 0) {
             return false;
         }
         if (engineTypeEnum.equals(EngineType.CLICKHOUSE) && Objects.nonNull(version)
