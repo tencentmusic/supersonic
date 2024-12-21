@@ -47,7 +47,7 @@ public class ErrorMsgRewriteProcessor implements ParseResultProcessor {
     public boolean accept(ParseContext parseContext) {
         ChatApp chatApp = parseContext.getAgent().getChatAppConfig().get(APP_KEY_ERROR_MESSAGE);
         return StringUtils.isNotBlank(parseContext.getResponse().getErrorMsg())
-                && Objects.nonNull(chatApp) || chatApp.isEnable();
+                && Objects.nonNull(chatApp) && chatApp.isEnable();
     }
 
     @Override
