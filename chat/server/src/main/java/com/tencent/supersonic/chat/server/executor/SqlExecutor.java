@@ -77,6 +77,7 @@ public class SqlExecutor implements ChatQueryExecutor {
 
         long startTime = System.currentTimeMillis();
         QueryResult queryResult = new QueryResult();
+        queryResult.setQueryId(executeContext.getRequest().getQueryId());
         queryResult.setChatContext(parseInfo);
         queryResult.setQueryMode(parseInfo.getQueryMode());
         queryResult.setQueryTimeCost(System.currentTimeMillis() - startTime);
