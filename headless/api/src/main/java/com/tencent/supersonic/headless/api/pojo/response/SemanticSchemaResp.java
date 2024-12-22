@@ -45,14 +45,6 @@ public class SemanticSchemaResp {
                 .orElse(null);
     }
 
-    public List<MetricSchemaResp> getMetrics(List<String> bizNames) {
-        Map<String, MetricSchemaResp> metricLowerToNameMap = metrics.stream().collect(
-                Collectors.toMap(entry -> entry.getBizName().toLowerCase(), entry -> entry));
-        return bizNames.stream().map(String::toLowerCase)
-                .filter(entry -> metricLowerToNameMap.containsKey(entry))
-                .map(entry -> metricLowerToNameMap.get(entry)).collect(Collectors.toList());
-    }
-
     public DimSchemaResp getDimension(String bizName) {
         return dimensions.stream()
                 .filter(dimension -> bizName.equalsIgnoreCase(dimension.getBizName())).findFirst()
@@ -62,14 +54,6 @@ public class SemanticSchemaResp {
     public DimSchemaResp getDimension(Long id) {
         return dimensions.stream().filter(dimension -> id.equals(dimension.getId())).findFirst()
                 .orElse(null);
-    }
-
-    public List<DimSchemaResp> getDimensions(List<String> bizNames) {
-        Map<String, DimSchemaResp> dimLowerToNameMap = dimensions.stream().collect(
-                Collectors.toMap(entry -> entry.getBizName().toLowerCase(), entry -> entry));
-        return bizNames.stream().map(String::toLowerCase)
-                .filter(entry -> dimLowerToNameMap.containsKey(entry))
-                .map(entry -> dimLowerToNameMap.get(entry)).collect(Collectors.toList());
     }
 
     public Set<String> getNameFromBizNames(Set<String> bizNames) {

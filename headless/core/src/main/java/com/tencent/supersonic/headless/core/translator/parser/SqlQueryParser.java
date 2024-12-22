@@ -1,5 +1,7 @@
 package com.tencent.supersonic.headless.core.translator.parser;
 
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.tencent.supersonic.common.jsqlparser.SqlReplaceHelper;
 import com.tencent.supersonic.common.jsqlparser.SqlSelectFunctionHelper;
 import com.tencent.supersonic.common.jsqlparser.SqlSelectHelper;
@@ -9,7 +11,9 @@ import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.headless.api.pojo.enums.AggOption;
 import com.tencent.supersonic.headless.api.pojo.response.DimSchemaResp;
 import com.tencent.supersonic.headless.api.pojo.response.MetricSchemaResp;
+import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticSchemaResp;
+import com.tencent.supersonic.headless.core.pojo.Ontology;
 import com.tencent.supersonic.headless.core.pojo.OntologyQuery;
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;
 import com.tencent.supersonic.headless.core.pojo.SqlQuery;
@@ -18,9 +22,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * This parser rewrites S2SQL including conversion from metric/dimension name to bizName and build
@@ -57,16 +60,23 @@ public class SqlQueryParser implements QueryParser {
         }
 
         // build ontologyQuery
+        Ontology ontology = queryStatement.getOntology();
         List<String> allQueryFields = SqlSelectHelper.getAllSelectFields(sqlQuery.getSql());
-        List<MetricSchemaResp> queryMetrics = semanticSchema.getMetrics(allQueryFields);
-        List<DimSchemaResp> queryDimensions = semanticSchema.getDimensions(allQueryFields);
         OntologyQuery ontologyQuery = new OntologyQuery();
+        queryStatement.setOntologyQuery(ontologyQuery);
+
+        List<MetricSchemaResp> queryMetrics = findQueryMetrics(ontology, allQueryFields);
         ontologyQuery.getMetrics().addAll(queryMetrics);
+
+        List<DimSchemaResp> queryDimensions = findQueryDimensions(ontology, allQueryFields);
         ontologyQuery.getDimensions().addAll(queryDimensions);
+
+        List<ModelResp> queryModels = findQueryModels(ontology, queryMetrics, queryDimensions);
+        ontologyQuery.getModels().addAll(queryModels);
 
         AggOption sqlQueryAggOption = getAggOption(sqlQuery.getSql(), queryMetrics);
         ontologyQuery.setAggOption(sqlQueryAggOption);
-        queryStatement.setOntologyQuery(ontologyQuery);
+
         log.info("parse sqlQuery [{}] ", sqlQuery);
     }
 
@@ -124,6 +134,59 @@ public class SqlQueryParser implements QueryParser {
         String newSql = SqlReplaceHelper.replaceAggAliasOrderbyField(sql);
         log.debug("replaceOrderAggSameAlias {} -> {}", sql, newSql);
         queryStatement.getSqlQuery().setSql(newSql);
+    }
+
+    public List<MetricSchemaResp> findQueryMetrics(Ontology ontology, List<String> bizNames) {
+        Map<String, MetricSchemaResp> metricLowerToNameMap = ontology.getMetrics().stream().collect(
+                Collectors.toMap(entry -> entry.getBizName().toLowerCase(), entry -> entry));
+        return bizNames.stream().map(String::toLowerCase)
+                .filter(entry -> metricLowerToNameMap.containsKey(entry))
+                .map(entry -> metricLowerToNameMap.get(entry)).collect(Collectors.toList());
+    }
+
+    public List<DimSchemaResp> findQueryDimensions(Ontology ontology, List<String> bizNames) {
+        Map<String, DimSchemaResp> dimLowerToNameMap = ontology.getDimensions().stream().collect(
+                Collectors.toMap(entry -> entry.getBizName().toLowerCase(), entry -> entry));
+        return bizNames.stream().map(String::toLowerCase)
+                .filter(entry -> dimLowerToNameMap.containsKey(entry))
+                .map(entry -> dimLowerToNameMap.get(entry)).collect(Collectors.toList());
+    }
+
+    public List<ModelResp> findQueryModels(Ontology ontology, List<MetricSchemaResp> queryMetrics,
+            List<DimSchemaResp> queryDimensions) {
+        // first, sort models based on the number of query metrics
+        Map<String, Integer> modelMetricCount = Maps.newHashMap();
+        queryMetrics.forEach(m -> {
+            if (!modelMetricCount.containsKey(m.getModelBizName())) {
+                modelMetricCount.put(m.getModelBizName(), 1);
+            } else {
+                int count = modelMetricCount.get(m.getModelBizName());
+                modelMetricCount.put(m.getModelBizName(), count + 1);
+            }
+        });
+        List<String> metricsDataModels = modelMetricCount.entrySet().stream()
+                .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder())).map(e -> e.getKey())
+                .collect(Collectors.toList());
+
+        // second, sort models based on the number of query dimensions
+        Map<String, Integer> modelDimCount = Maps.newHashMap();
+        queryDimensions.forEach(m -> {
+            if (!modelDimCount.containsKey(m.getModelBizName())) {
+                modelDimCount.put(m.getModelBizName(), 1);
+            } else {
+                int count = modelDimCount.get(m.getModelBizName());
+                modelDimCount.put(m.getModelBizName(), count + 1);
+            }
+        });
+        List<String> dimDataModels = modelDimCount.entrySet().stream()
+                .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder())).map(e -> e.getKey())
+                .collect(Collectors.toList());
+
+        Set<String> dataModelNames = Sets.newLinkedHashSet();
+        dataModelNames.addAll(dimDataModels);
+        dataModelNames.addAll(metricsDataModels);
+        return dataModelNames.stream().map(bizName -> ontology.getModelMap().get(bizName))
+                .collect(Collectors.toList());
     }
 
 }

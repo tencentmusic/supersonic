@@ -41,14 +41,12 @@ public class SqlBuilder {
             ontologyQuery.setLimit(0L);
         }
 
-        // find relevant data models
-        List<ModelResp> dataModels =
-                DataModelNode.getQueryDataModelsV2(schema.getOntology(), ontologyQuery);
+        Set<ModelResp> dataModels = ontologyQuery.getModels();
         if (dataModels == null || dataModels.isEmpty()) {
             throw new Exception("data model not found");
         }
 
-        TableView tableView = render(ontologyQuery, dataModels, scope, schema);
+        TableView tableView = render(ontologyQuery, new ArrayList<>(dataModels), scope, schema);
         SqlNode parserNode = tableView.build();
         DatabaseResp database = queryStatement.getOntology().getDatabase();
         EngineType engineType = EngineType.fromString(database.getType());

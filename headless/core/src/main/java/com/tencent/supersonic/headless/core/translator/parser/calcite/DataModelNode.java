@@ -2,7 +2,6 @@ package com.tencent.supersonic.headless.core.translator.parser.calcite;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import com.tencent.supersonic.common.calcite.Configuration;
 import com.tencent.supersonic.common.jsqlparser.SqlSelectHelper;
 import com.tencent.supersonic.common.pojo.enums.EngineType;
@@ -127,56 +126,6 @@ public class DataModelNode extends SemanticNode {
         return sqlNode;
     }
 
-    public static void getQueryDimensionMeasure(Ontology ontology, OntologyQuery ontologyQuery,
-            Set<String> queryDimensions, Set<String> queryMeasures) {
-        ontologyQuery.getMetrics().forEach(m -> {
-            if (Objects.nonNull(m.getMetricDefineByMeasureParams())) {
-                m.getMetricDefineByMeasureParams().getMeasures()
-                        .forEach(mm -> queryMeasures.add(mm.getName()));
-            }
-            if (Objects.nonNull(m.getMetricDefineByFieldParams())) {
-                m.getMetricDefineByFieldParams().getFields()
-                        .forEach(mm -> queryMeasures.add(mm.getFieldName()));
-            }
-        });
-    }
-
-    public static List<ModelResp> getQueryDataModelsV2(Ontology ontology, OntologyQuery query) {
-        // first, sort models based on the number of query metrics
-        Map<String, Integer> modelMetricCount = Maps.newHashMap();
-        query.getMetrics().forEach(m -> {
-            if (!modelMetricCount.containsKey(m.getModelBizName())) {
-                modelMetricCount.put(m.getModelBizName(), 1);
-            } else {
-                int count = modelMetricCount.get(m.getModelBizName());
-                modelMetricCount.put(m.getModelBizName(), count + 1);
-            }
-        });
-        List<String> metricsDataModels = modelMetricCount.entrySet().stream()
-                .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder())).map(e -> e.getKey())
-                .collect(Collectors.toList());
-
-        // first, sort models based on the number of query dimensions
-        Map<String, Integer> modelDimCount = Maps.newHashMap();
-        query.getDimensions().forEach(m -> {
-            if (!modelDimCount.containsKey(m.getModelBizName())) {
-                modelDimCount.put(m.getModelBizName(), 1);
-            } else {
-                int count = modelDimCount.get(m.getModelBizName());
-                modelDimCount.put(m.getModelBizName(), count + 1);
-            }
-        });
-        List<String> dimDataModels = modelDimCount.entrySet().stream()
-                .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder())).map(e -> e.getKey())
-                .collect(Collectors.toList());
-
-        Set<String> dataModelNames = Sets.newLinkedHashSet();
-        dataModelNames.addAll(dimDataModels);
-        dataModelNames.addAll(metricsDataModels);
-        return dataModelNames.stream().map(bizName -> ontology.getModelMap().get(bizName))
-                .collect(Collectors.toList());
-    }
-
     public static List<ModelResp> getQueryDataModels(Ontology ontology,
             OntologyQuery ontologyQuery) {
         // get query measures and dimensions
@@ -210,6 +159,20 @@ public class DataModelNode extends SemanticNode {
 
         log.debug("relatedDataModels {}", relatedDataModels);
         return relatedDataModels;
+    }
+
+    public static void getQueryDimensionMeasure(Ontology ontology, OntologyQuery ontologyQuery,
+            Set<String> queryDimensions, Set<String> queryMeasures) {
+        ontologyQuery.getMetrics().forEach(m -> {
+            if (Objects.nonNull(m.getMetricDefineByMeasureParams())) {
+                m.getMetricDefineByMeasureParams().getMeasures()
+                        .forEach(mm -> queryMeasures.add(mm.getName()));
+            }
+            if (Objects.nonNull(m.getMetricDefineByFieldParams())) {
+                m.getMetricDefineByFieldParams().getFields()
+                        .forEach(mm -> queryMeasures.add(mm.getFieldName()));
+            }
+        });
     }
 
     private static ModelResp findBaseModel(Ontology ontology, OntologyQuery query) {
