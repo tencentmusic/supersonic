@@ -1,6 +1,5 @@
 package com.tencent.supersonic.headless.core.translator.parser;
 
-import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.tencent.supersonic.common.jsqlparser.SqlReplaceHelper;
 import com.tencent.supersonic.common.jsqlparser.SqlSelectFunctionHelper;
@@ -8,10 +7,9 @@ import com.tencent.supersonic.common.jsqlparser.SqlSelectHelper;
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.enums.EngineType;
 import com.tencent.supersonic.common.util.ContextUtils;
+import com.tencent.supersonic.headless.api.pojo.SchemaItem;
 import com.tencent.supersonic.headless.api.pojo.enums.AggOption;
-import com.tencent.supersonic.headless.api.pojo.response.DimSchemaResp;
 import com.tencent.supersonic.headless.api.pojo.response.MetricSchemaResp;
-import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticSchemaResp;
 import com.tencent.supersonic.headless.core.pojo.Ontology;
 import com.tencent.supersonic.headless.core.pojo.OntologyQuery;
@@ -20,10 +18,12 @@ import com.tencent.supersonic.headless.core.pojo.SqlQuery;
 import com.tencent.supersonic.headless.core.utils.SqlGenerateUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * This parser rewrites S2SQL including conversion from metric/dimension name to bizName and build
@@ -40,11 +40,20 @@ public class SqlQueryParser implements QueryParser {
 
     @Override
     public void parse(QueryStatement queryStatement) throws Exception {
+        // build ontologyQuery
+        SqlQuery sqlQuery = queryStatement.getSqlQuery();
+        List<String> queryFields = SqlSelectHelper.getAllSelectFields(sqlQuery.getSql());
+        Ontology ontology = queryStatement.getOntology();
+        OntologyQuery ontologyQuery = buildOntologyQuery(ontology, queryFields);
+        queryStatement.setOntologyQuery(ontologyQuery);
+
+        AggOption sqlQueryAggOption = getAggOption(sqlQuery.getSql(), ontologyQuery.getMetrics());
+        ontologyQuery.setAggOption(sqlQueryAggOption);
+
         convertNameToBizName(queryStatement);
         rewriteOrderBy(queryStatement);
 
         // fill sqlQuery
-        SqlQuery sqlQuery = queryStatement.getSqlQuery();
         String tableName = SqlSelectHelper.getTableName(sqlQuery.getSql());
         if (StringUtils.isEmpty(tableName)) {
             return;
@@ -59,28 +68,10 @@ public class SqlQueryParser implements QueryParser {
             sqlQuery.setWithAlias(false);
         }
 
-        // build ontologyQuery
-        Ontology ontology = queryStatement.getOntology();
-        List<String> allQueryFields = SqlSelectHelper.getAllSelectFields(sqlQuery.getSql());
-        OntologyQuery ontologyQuery = new OntologyQuery();
-        queryStatement.setOntologyQuery(ontologyQuery);
-
-        List<MetricSchemaResp> queryMetrics = findQueryMetrics(ontology, allQueryFields);
-        ontologyQuery.getMetrics().addAll(queryMetrics);
-
-        List<DimSchemaResp> queryDimensions = findQueryDimensions(ontology, allQueryFields);
-        ontologyQuery.getDimensions().addAll(queryDimensions);
-
-        List<ModelResp> queryModels = findQueryModels(ontology, queryMetrics, queryDimensions);
-        ontologyQuery.getModels().addAll(queryModels);
-
-        AggOption sqlQueryAggOption = getAggOption(sqlQuery.getSql(), queryMetrics);
-        ontologyQuery.setAggOption(sqlQueryAggOption);
-
         log.info("parse sqlQuery [{}] ", sqlQuery);
     }
 
-    private AggOption getAggOption(String sql, List<MetricSchemaResp> metricSchemas) {
+    private AggOption getAggOption(String sql, Set<MetricSchemaResp> metricSchemas) {
         if (SqlSelectFunctionHelper.hasAggregateFunction(sql)) {
             return AggOption.AGGREGATION;
         }
@@ -113,9 +104,36 @@ public class SqlQueryParser implements QueryParser {
         return AggOption.DEFAULT;
     }
 
+    private Map<String, String> getNameToBizNameMap(OntologyQuery query) {
+        // support fieldName and field alias to bizName
+        Map<String, String> dimensionResults = query.getDimensions().stream().flatMap(
+                entry -> getPairStream(entry.getAlias(), entry.getName(), entry.getBizName()))
+                .collect(Collectors.toMap(Pair::getLeft, Pair::getRight, (k1, k2) -> k1));
+
+        Map<String, String> metricResults = query.getMetrics().stream().flatMap(
+                entry -> getPairStream(entry.getAlias(), entry.getName(), entry.getBizName()))
+                .collect(Collectors.toMap(Pair::getLeft, Pair::getRight, (k1, k2) -> k1));
+
+        dimensionResults.putAll(metricResults);
+        return dimensionResults;
+    }
+
+    private Stream<Pair<String, String>> getPairStream(String aliasStr, String name,
+            String bizName) {
+        Set<Pair<String, String>> elements = new HashSet<>();
+        elements.add(Pair.of(name, bizName));
+        if (StringUtils.isNotBlank(aliasStr)) {
+            List<String> aliasList = SchemaItem.getAliasList(aliasStr);
+            for (String alias : aliasList) {
+                elements.add(Pair.of(alias, bizName));
+            }
+        }
+        return elements.stream();
+    }
+
     private void convertNameToBizName(QueryStatement queryStatement) {
-        SemanticSchemaResp semanticSchema = queryStatement.getSemanticSchema();
-        Map<String, String> fieldNameToBizNameMap = semanticSchema.getNameToBizNameMap();
+        Map<String, String> fieldNameToBizNameMap =
+                getNameToBizNameMap(queryStatement.getOntologyQuery());
         String sql = queryStatement.getSqlQuery().getSql();
         log.debug("dataSetId:{},convert name to bizName before:{}", queryStatement.getDataSetId(),
                 sql);
@@ -136,57 +154,70 @@ public class SqlQueryParser implements QueryParser {
         queryStatement.getSqlQuery().setSql(newSql);
     }
 
-    public List<MetricSchemaResp> findQueryMetrics(Ontology ontology, List<String> bizNames) {
-        Map<String, MetricSchemaResp> metricLowerToNameMap = ontology.getMetrics().stream().collect(
-                Collectors.toMap(entry -> entry.getBizName().toLowerCase(), entry -> entry));
-        return bizNames.stream().map(String::toLowerCase)
-                .filter(entry -> metricLowerToNameMap.containsKey(entry))
-                .map(entry -> metricLowerToNameMap.get(entry)).collect(Collectors.toList());
-    }
+    private OntologyQuery buildOntologyQuery(Ontology ontology, List<String> queryFields) {
+        OntologyQuery ontologyQuery = new OntologyQuery();
+        Set<String> fields = Sets.newHashSet(queryFields);
 
-    public List<DimSchemaResp> findQueryDimensions(Ontology ontology, List<String> bizNames) {
-        Map<String, DimSchemaResp> dimLowerToNameMap = ontology.getDimensions().stream().collect(
-                Collectors.toMap(entry -> entry.getBizName().toLowerCase(), entry -> entry));
-        return bizNames.stream().map(String::toLowerCase)
-                .filter(entry -> dimLowerToNameMap.containsKey(entry))
-                .map(entry -> dimLowerToNameMap.get(entry)).collect(Collectors.toList());
-    }
-
-    public List<ModelResp> findQueryModels(Ontology ontology, List<MetricSchemaResp> queryMetrics,
-            List<DimSchemaResp> queryDimensions) {
-        // first, sort models based on the number of query metrics
-        Map<String, Integer> modelMetricCount = Maps.newHashMap();
-        queryMetrics.forEach(m -> {
-            if (!modelMetricCount.containsKey(m.getModelBizName())) {
-                modelMetricCount.put(m.getModelBizName(), 1);
-            } else {
-                int count = modelMetricCount.get(m.getModelBizName());
-                modelMetricCount.put(m.getModelBizName(), count + 1);
-            }
+        // find belonging model for every querying metrics
+        ontology.getMetricMap().entrySet().forEach(entry -> {
+            String modelName = entry.getKey();
+            entry.getValue().forEach(m -> {
+                if (fields.contains(m.getName()) || fields.contains(m.getBizName())) {
+                    if (!ontologyQuery.getMetricMap().containsKey(modelName)) {
+                        ontologyQuery.getMetricMap().put(modelName, Sets.newHashSet());
+                    }
+                    ontologyQuery.getModelMap().put(modelName,
+                            ontology.getModelMap().get(modelName));
+                    ontologyQuery.getMetricMap().get(modelName).add(m);
+                    fields.remove(m.getName());
+                    fields.remove(m.getBizName());
+                }
+            });
         });
-        List<String> metricsDataModels = modelMetricCount.entrySet().stream()
-                .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder())).map(e -> e.getKey())
-                .collect(Collectors.toList());
 
-        // second, sort models based on the number of query dimensions
-        Map<String, Integer> modelDimCount = Maps.newHashMap();
-        queryDimensions.forEach(m -> {
-            if (!modelDimCount.containsKey(m.getModelBizName())) {
-                modelDimCount.put(m.getModelBizName(), 1);
-            } else {
-                int count = modelDimCount.get(m.getModelBizName());
-                modelDimCount.put(m.getModelBizName(), count + 1);
-            }
-        });
-        List<String> dimDataModels = modelDimCount.entrySet().stream()
-                .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder())).map(e -> e.getKey())
-                .collect(Collectors.toList());
+        // first try to find all querying dimensions in the models with querying metrics.
+        ontology.getDimensionMap().entrySet().stream()
+                .filter(entry -> ontologyQuery.getMetricMap().containsKey(entry.getKey()))
+                .forEach(entry -> {
+                    String modelName = entry.getKey();
+                    entry.getValue().forEach(d -> {
+                        if (fields.contains(d.getName()) || fields.contains(d.getBizName())) {
+                            if (!ontologyQuery.getDimensionMap().containsKey(entry.getKey())) {
+                                ontologyQuery.getDimensionMap().put(entry.getKey(),
+                                        Sets.newHashSet());
+                            }
+                            ontologyQuery.getModelMap().put(modelName,
+                                    ontology.getModelMap().get(modelName));
+                            ontologyQuery.getDimensionMap().get(entry.getKey()).add(d);
+                            fields.remove(d.getName());
+                            fields.remove(d.getBizName());
+                        }
+                    });
+                });
 
-        Set<String> dataModelNames = Sets.newLinkedHashSet();
-        dataModelNames.addAll(dimDataModels);
-        dataModelNames.addAll(metricsDataModels);
-        return dataModelNames.stream().map(bizName -> ontology.getModelMap().get(bizName))
-                .collect(Collectors.toList());
+        // if there are still fields not found belonging models, try to find in the models without
+        // querying metrics.
+        if (!fields.isEmpty()) {
+            ontology.getDimensionMap().entrySet().forEach(entry -> {
+                String modelName = entry.getKey();
+                if (!ontologyQuery.getDimensionMap().containsKey(modelName)) {
+                    entry.getValue().forEach(d -> {
+                        if (fields.contains(d.getName()) || fields.contains(d.getBizName())) {
+                            if (!ontologyQuery.getDimensionMap().containsKey(modelName)) {
+                                ontologyQuery.getDimensionMap().put(modelName, Sets.newHashSet());
+                            }
+                            ontologyQuery.getModelMap().put(modelName,
+                                    ontology.getModelMap().get(modelName));
+                            ontologyQuery.getDimensionMap().get(modelName).add(d);
+                            fields.remove(d.getName());
+                            fields.remove(d.getBizName());
+                        }
+                    });
+                }
+            });
+        }
+
+        return ontologyQuery;
     }
 
 }

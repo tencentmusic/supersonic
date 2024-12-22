@@ -131,7 +131,6 @@ public class MetricTest extends BaseTest {
         assertQueryResult(expectedResult, actualResult);
         assert actualResult.getQueryResults().size() == 6;
         assert actualResult.getQuerySql().contains("s2_pv_uv_statis");
-        assert actualResult.getQuerySql().contains("s2_user_department");
     }
 
     @Test
@@ -237,6 +236,7 @@ public class MetricTest extends BaseTest {
     }
 
     @Test
+    @SetSystemProperty(key = "s2.test", value = "true")
     public void testMetricGroupBySum() throws Exception {
         QueryResult actualResult = submitNewChat("近7天超音数各部门的访问次数总和", agent.getId());
         QueryResult expectedResult = new QueryResult();

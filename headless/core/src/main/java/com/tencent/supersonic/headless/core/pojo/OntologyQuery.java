@@ -1,5 +1,6 @@
 package com.tencent.supersonic.headless.core.pojo;
 
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.tencent.supersonic.common.pojo.ColumnOrder;
 import com.tencent.supersonic.headless.api.pojo.enums.AggOption;
@@ -9,6 +10,7 @@ import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
 import lombok.Data;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -19,22 +21,40 @@ import java.util.stream.Collectors;
 @Data
 public class OntologyQuery {
 
-    private Set<ModelResp> models = Sets.newHashSet();
-    private Set<MetricSchemaResp> metrics = Sets.newHashSet();
-    private Set<DimSchemaResp> dimensions = Sets.newHashSet();
+    private Map<String, ModelResp> modelMap = Maps.newHashMap();
+    private Map<String, Set<MetricSchemaResp>> metricMap = Maps.newHashMap();
+    private Map<String, Set<DimSchemaResp>> dimensionMap = Maps.newHashMap();
     private Set<String> fields = Sets.newHashSet();
     private Long limit;
     private List<ColumnOrder> order;
     private boolean nativeQuery = true;
     private AggOption aggOption = AggOption.NATIVE;
 
-    public Set<MetricSchemaResp> getMetricsByModel(Long modelId) {
-        return metrics.stream().filter(m -> m.getModelId().equals(modelId))
-                .collect(Collectors.toSet());
+    public Set<ModelResp> getModels() {
+        return modelMap.values().stream().collect(Collectors.toSet());
     }
 
-    public Set<DimSchemaResp> getDimensionsByModel(Long modelId) {
-        return dimensions.stream().filter(m -> m.getModelId().equals(modelId))
-                .collect(Collectors.toSet());
+    public Set<DimSchemaResp> getDimensions() {
+        Set<DimSchemaResp> dimensions = Sets.newHashSet();
+        dimensionMap.entrySet().forEach(entry -> {
+            dimensions.addAll(entry.getValue());
+        });
+        return dimensions;
+    }
+
+    public Set<MetricSchemaResp> getMetrics() {
+        Set<MetricSchemaResp> metrics = Sets.newHashSet();
+        metricMap.entrySet().forEach(entry -> {
+            metrics.addAll(entry.getValue());
+        });
+        return metrics;
+    }
+
+    public Set<MetricSchemaResp> getMetricsByModel(String modelName) {
+        return metricMap.get(modelName);
+    }
+
+    public Set<DimSchemaResp> getDimensionsByModel(String modelName) {
+        return dimensionMap.get(modelName);
     }
 }

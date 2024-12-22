@@ -697,31 +697,31 @@ public class MetricServiceImpl extends ServiceImpl<MetricDOMapper, MetricDO>
             queryMetricReq.setDateInfo(null);
         }
         // 4. set groups
-        List<String> dimensionBizNames = dimensionResps.stream()
+        List<String> dimensionNames = dimensionResps.stream()
                 .filter(entry -> modelCluster.getModelIds().contains(entry.getModelId()))
                 .filter(entry -> queryMetricReq.getDimensionNames().contains(entry.getName())
                         || queryMetricReq.getDimensionNames().contains(entry.getBizName())
                         || queryMetricReq.getDimensionIds().contains(entry.getId()))
-                .map(SchemaItem::getBizName).collect(Collectors.toList());
+                .map(SchemaItem::getName).collect(Collectors.toList());
 
         QueryStructReq queryStructReq = new QueryStructReq();
         DateConf dateInfo = queryMetricReq.getDateInfo();
         if (Objects.nonNull(dateInfo) && dateInfo.isGroupByDate()) {
             queryStructReq.getGroups().add(dateInfo.getDateField());
         }
-        if (!CollectionUtils.isEmpty(dimensionBizNames)) {
-            queryStructReq.getGroups().addAll(dimensionBizNames);
+        if (!CollectionUtils.isEmpty(dimensionNames)) {
+            queryStructReq.getGroups().addAll(dimensionNames);
         }
         // 5. set aggregators
-        List<String> metricBizNames = metricResps.stream()
+        List<String> metricNames = metricResps.stream()
                 .filter(entry -> modelCluster.getModelIds().contains(entry.getModelId()))
-                .map(SchemaItem::getBizName).collect(Collectors.toList());
-        if (CollectionUtils.isEmpty(metricBizNames)) {
+                .map(SchemaItem::getName).collect(Collectors.toList());
+        if (CollectionUtils.isEmpty(metricNames)) {
             throw new IllegalArgumentException(
                     "Invalid input parameters, unable to obtain valid metrics");
         }
         List<Aggregator> aggregators = new ArrayList<>();
-        for (String metricBizName : metricBizNames) {
+        for (String metricBizName : metricNames) {
             Aggregator aggregator = new Aggregator();
             aggregator.setColumn(metricBizName);
             aggregators.add(aggregator);

@@ -91,9 +91,9 @@ public class SqlBuilder {
         for (int i = 0; i < dataModels.size(); i++) {
             final ModelResp dataModel = dataModels.get(i);
             final Set<DimSchemaResp> queryDimensions =
-                    ontologyQuery.getDimensionsByModel(dataModel.getId());
+                    ontologyQuery.getDimensionsByModel(dataModel.getName());
             final Set<MetricSchemaResp> queryMetrics =
-                    ontologyQuery.getMetricsByModel(dataModel.getId());
+                    ontologyQuery.getMetricsByModel(dataModel.getName());
 
             List<String> primary = new ArrayList<>();
             for (Identify identify : dataModel.getIdentifiers()) {
@@ -248,8 +248,12 @@ public class SqlBuilder {
         TableView tableView = new TableView();
         EngineType engineType = EngineType.fromString(schema.getOntology().getDatabase().getType());
         Set<String> queryFields = tableView.getFields();
-        queryMetrics.stream().forEach(m -> queryFields.addAll(m.getFields()));
-        queryDimensions.stream().forEach(d -> queryFields.addAll(d.getFields()));
+        if (Objects.nonNull(queryMetrics)) {
+            queryMetrics.stream().forEach(m -> queryFields.addAll(m.getFields()));
+        }
+        if (Objects.nonNull(queryDimensions)) {
+            queryDimensions.stream().forEach(d -> queryFields.addAll(d.getFields()));
+        }
 
         try {
             for (String field : queryFields) {
