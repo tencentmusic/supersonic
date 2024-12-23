@@ -1,4 +1,4 @@
-package com.tencent.supersonic.headless.core.translator.converter;
+package com.tencent.supersonic.headless.core.translator.parser;
 
 import com.tencent.supersonic.headless.api.pojo.enums.ModelDefineType;
 import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
@@ -14,18 +14,17 @@ import java.util.List;
 import java.util.Objects;
 
 @Slf4j
-@Component("SqlVariableConverter")
-public class SqlVariableConverter implements QueryConverter {
+@Component("SqlVariableParser")
+public class SqlVariableParser implements QueryParser {
 
     @Override
     public boolean accept(QueryStatement queryStatement) {
-        return Objects.nonNull(queryStatement.getStructQueryParam())
-                && !queryStatement.getIsS2SQL();
+        return Objects.nonNull(queryStatement.getStructQuery()) && !queryStatement.getIsS2SQL();
     }
 
     @Override
-    public void convert(QueryStatement queryStatement) {
-        SemanticSchemaResp semanticSchemaResp = queryStatement.getSemanticSchemaResp();
+    public void parse(QueryStatement queryStatement) {
+        SemanticSchemaResp semanticSchemaResp = queryStatement.getSemanticSchema();
         List<ModelResp> modelResps = semanticSchemaResp.getModelResps();
         if (CollectionUtils.isEmpty(modelResps)) {
             return;
@@ -36,7 +35,7 @@ public class SqlVariableConverter implements QueryConverter {
                 String sqlParsed =
                         SqlVariableParseUtils.parse(modelResp.getModelDetail().getSqlQuery(),
                                 modelResp.getModelDetail().getSqlVariables(),
-                                queryStatement.getStructQueryParam().getParams());
+                                queryStatement.getStructQuery().getParams());
                 DataModel dataModel =
                         queryStatement.getOntology().getDataModelMap().get(modelResp.getBizName());
                 dataModel.setSqlQuery(sqlParsed);

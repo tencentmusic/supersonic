@@ -15,8 +15,15 @@ import java.util.Objects;
 public class DbDialectOptimizer implements QueryOptimizer {
 
     @Override
+    public boolean accept(QueryStatement queryStatement) {
+        SemanticSchemaResp semanticSchemaResp = queryStatement.getSemanticSchema();
+        DatabaseResp database = semanticSchemaResp.getDatabaseResp();
+        return Objects.nonNull(database) && Objects.nonNull(database.getType());
+    }
+
+    @Override
     public void rewrite(QueryStatement queryStatement) {
-        SemanticSchemaResp semanticSchemaResp = queryStatement.getSemanticSchemaResp();
+        SemanticSchemaResp semanticSchemaResp = queryStatement.getSemanticSchema();
         DatabaseResp database = semanticSchemaResp.getDatabaseResp();
         String sql = queryStatement.getSql();
         if (Objects.isNull(database) || Objects.isNull(database.getType())) {

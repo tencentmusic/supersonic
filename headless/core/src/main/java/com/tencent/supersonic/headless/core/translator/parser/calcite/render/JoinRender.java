@@ -13,10 +13,10 @@ import com.tencent.supersonic.headless.core.translator.parser.s2sql.Constants;
 import com.tencent.supersonic.headless.core.translator.parser.s2sql.DataModel;
 import com.tencent.supersonic.headless.core.translator.parser.s2sql.Dimension;
 import com.tencent.supersonic.headless.core.translator.parser.s2sql.Identify;
-import com.tencent.supersonic.headless.core.translator.parser.s2sql.JoinRelation;
+import com.tencent.supersonic.headless.core.pojo.JoinRelation;
 import com.tencent.supersonic.headless.core.translator.parser.s2sql.Materialization;
 import com.tencent.supersonic.headless.core.translator.parser.s2sql.Metric;
-import com.tencent.supersonic.headless.core.translator.parser.s2sql.OntologyQueryParam;
+import com.tencent.supersonic.headless.core.pojo.OntologyQuery;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.calcite.sql.JoinConditionType;
 import org.apache.calcite.sql.SqlBasicCall;
@@ -47,7 +47,7 @@ import java.util.stream.Collectors;
 public class JoinRender extends Renderer {
 
     @Override
-    public void render(OntologyQueryParam metricCommand, List<DataModel> dataModels,
+    public void render(OntologyQuery metricCommand, List<DataModel> dataModels,
             SqlValidatorScope scope, S2CalciteSchema schema, boolean nonAgg) throws Exception {
         String queryWhere = metricCommand.getWhere();
         EngineType engineType = schema.getOntology().getDatabase().getType();

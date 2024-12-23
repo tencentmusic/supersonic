@@ -3,7 +3,7 @@ package com.tencent.supersonic.headless.core.pojo;
 import lombok.Data;
 
 @Data
-public class SqlQueryParam {
+public class SqlQuery {
     private String sql;
     private String table;
     private boolean supportWith = true;

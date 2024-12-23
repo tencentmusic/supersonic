@@ -3,10 +3,10 @@ package com.tencent.supersonic.headless.core.translator;
 import com.tencent.supersonic.common.calcite.SqlMergeWithUtils;
 import com.tencent.supersonic.common.pojo.enums.EngineType;
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;
-import com.tencent.supersonic.headless.core.pojo.SqlQueryParam;
-import com.tencent.supersonic.headless.core.translator.converter.QueryConverter;
+import com.tencent.supersonic.headless.core.pojo.SqlQuery;
 import com.tencent.supersonic.headless.core.translator.optimizer.QueryOptimizer;
-import com.tencent.supersonic.headless.core.translator.parser.s2sql.OntologyQueryParam;
+import com.tencent.supersonic.headless.core.translator.parser.QueryParser;
+import com.tencent.supersonic.headless.core.pojo.OntologyQuery;
 import com.tencent.supersonic.headless.core.utils.ComponentFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -26,47 +26,51 @@ public class DefaultSemanticTranslator implements SemanticTranslator {
             return;
         }
         try {
-            for (QueryConverter converter : ComponentFactory.getQueryConverters()) {
-                if (converter.accept(queryStatement)) {
-                    log.debug("QueryConverter accept [{}]", converter.getClass().getName());
-                    converter.convert(queryStatement);
+            for (QueryParser parser : ComponentFactory.getQueryParser()) {
+                if (parser.accept(queryStatement)) {
+                    log.debug("QueryConverter accept [{}]", parser.getClass().getName());
+                    parser.parse(queryStatement);
                 }
             }
-            doOntologyParse(queryStatement);
+            if (!queryStatement.isOk()) {
+                throw new Exception(String.format("parse ontology table [%s] error [%s]",
+                        queryStatement.getSqlQuery().getTable(), queryStatement.getErrMsg()));
+            }
 
-            if (StringUtils.isNotBlank(queryStatement.getSqlQueryParam().getSimplifiedSql())) {
-                queryStatement.setSql(queryStatement.getSqlQueryParam().getSimplifiedSql());
+            mergeOntologyQuery(queryStatement);
+
+            if (StringUtils.isNotBlank(queryStatement.getSqlQuery().getSimplifiedSql())) {
+                queryStatement.setSql(queryStatement.getSqlQuery().getSimplifiedSql());
             }
             if (StringUtils.isBlank(queryStatement.getSql())) {
                 throw new RuntimeException("parse exception: " + queryStatement.getErrMsg());
             }
 
-            for (QueryOptimizer queryOptimizer : ComponentFactory.getQueryOptimizers()) {
-                queryOptimizer.rewrite(queryStatement);
+            for (QueryOptimizer optimizer : ComponentFactory.getQueryOptimizers()) {
+                if (optimizer.accept(queryStatement)) {
+                    optimizer.rewrite(queryStatement);
+                }
             }
+            log.info("translated query SQL: [{}]",
+                    StringUtils.normalizeSpace(queryStatement.getSql()));
         } catch (Exception e) {
             queryStatement.setErrMsg(e.getMessage());
             log.error("Failed to translate query [{}]", e.getMessage(), e);
         }
     }
 
-    private void doOntologyParse(QueryStatement queryStatement) throws Exception {
-        OntologyQueryParam ontologyQueryParam = queryStatement.getOntologyQueryParam();
-        log.info("parse with ontology: [{}]", ontologyQueryParam);
-        ComponentFactory.getQueryParser().parse(queryStatement);
-        if (!queryStatement.isOk()) {
-            throw new Exception(String.format("parse ontology table [%s] error [%s]",
-                    queryStatement.getSqlQueryParam().getTable(), queryStatement.getErrMsg()));
-        }
+    private void mergeOntologyQuery(QueryStatement queryStatement) throws Exception {
+        OntologyQuery ontologyQuery = queryStatement.getOntologyQuery();
+        log.info("parse with ontology: [{}]", ontologyQuery);
 
-        SqlQueryParam sqlQueryParam = queryStatement.getSqlQueryParam();
-        String ontologyQuerySql = sqlQueryParam.getSql();
-        String ontologyInnerTable = sqlQueryParam.getTable();
+        SqlQuery sqlQuery = queryStatement.getSqlQuery();
+        String ontologyQuerySql = sqlQuery.getSql();
+        String ontologyInnerTable = sqlQuery.getTable();
         String ontologyInnerSql = queryStatement.getSql();
 
         List<Pair<String, String>> tables = new ArrayList<>();
         tables.add(Pair.of(ontologyInnerTable, ontologyInnerSql));
-        if (sqlQueryParam.isSupportWith()) {
+        if (sqlQuery.isSupportWith()) {
             EngineType engineType = queryStatement.getOntology().getDatabase().getType();
             if (!SqlMergeWithUtils.hasWith(engineType, ontologyQuerySql)) {
                 String withSql = "with " + tables.stream()
@@ -84,9 +88,9 @@ public class DefaultSemanticTranslator implements SemanticTranslator {
             }
         } else {
             for (Pair<String, String> tb : tables) {
-                ontologyQuerySql =
-                        StringUtils.replace(ontologyQuerySql, tb.getLeft(), "(" + tb.getRight()
-                                + ") " + (sqlQueryParam.isWithAlias() ? "" : tb.getLeft()), -1);
+                ontologyQuerySql = StringUtils.replace(ontologyQuerySql, tb.getLeft(),
+                        "(" + tb.getRight() + ") " + (sqlQuery.isWithAlias() ? "" : tb.getLeft()),
+                        -1);
             }
             queryStatement.setSql(ontologyQuerySql);
         }

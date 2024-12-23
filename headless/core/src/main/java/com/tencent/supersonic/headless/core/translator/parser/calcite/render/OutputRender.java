@@ -7,7 +7,7 @@ import com.tencent.supersonic.headless.core.translator.parser.calcite.TableView;
 import com.tencent.supersonic.headless.core.translator.parser.calcite.node.MetricNode;
 import com.tencent.supersonic.headless.core.translator.parser.calcite.node.SemanticNode;
 import com.tencent.supersonic.headless.core.translator.parser.s2sql.DataModel;
-import com.tencent.supersonic.headless.core.translator.parser.s2sql.OntologyQueryParam;
+import com.tencent.supersonic.headless.core.pojo.OntologyQuery;
 import org.apache.calcite.sql.SqlNode;
 import org.apache.calcite.sql.SqlNodeList;
 import org.apache.calcite.sql.fun.SqlStdOperatorTable;
@@ -22,7 +22,7 @@ import java.util.List;
 public class OutputRender extends Renderer {
 
     @Override
-    public void render(OntologyQueryParam metricCommand, List<DataModel> dataModels,
+    public void render(OntologyQuery metricCommand, List<DataModel> dataModels,
             SqlValidatorScope scope, S2CalciteSchema schema, boolean nonAgg) throws Exception {
         TableView selectDataSet = super.tableView;
         EngineType engineType = schema.getOntology().getDatabase().getType();

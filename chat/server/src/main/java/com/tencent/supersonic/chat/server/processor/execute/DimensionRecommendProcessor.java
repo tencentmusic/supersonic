@@ -27,17 +27,18 @@ public class DimensionRecommendProcessor implements ExecuteResultProcessor {
     private static final int recommend_dimension_size = 5;
 
     @Override
-    public void process(ExecuteContext executeContext, QueryResult queryResult) {
+    public boolean accept(ExecuteContext executeContext) {
         SemanticParseInfo semanticParseInfo = executeContext.getParseInfo();
-        if (!QueryType.AGGREGATE.equals(semanticParseInfo.getQueryType())
-                || CollectionUtils.isEmpty(semanticParseInfo.getMetrics())) {
-            return;
-        }
+        return QueryType.AGGREGATE.equals(semanticParseInfo.getQueryType())
+                && !CollectionUtils.isEmpty(semanticParseInfo.getMetrics());
+    }
+
+    @Override
+    public void process(ExecuteContext executeContext) {
+        QueryResult queryResult = executeContext.getResponse();
+        SemanticParseInfo semanticParseInfo = executeContext.getParseInfo();
         Long dataSetId = semanticParseInfo.getDataSetId();
         Optional<SchemaElement> firstMetric = semanticParseInfo.getMetrics().stream().findFirst();
-        if (!firstMetric.isPresent()) {
-            return;
-        }
         List<SchemaElement> dimensionRecommended =
                 getDimensions(firstMetric.get().getId(), dataSetId);
         queryResult.setRecommendedDimensions(dimensionRecommended);

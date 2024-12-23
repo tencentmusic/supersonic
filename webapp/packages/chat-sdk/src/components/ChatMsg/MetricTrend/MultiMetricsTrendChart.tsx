@@ -2,10 +2,12 @@ import { CHART_SECONDARY_COLOR, CLS_PREFIX, THEME_COLOR_LIST } from '../../../co
 import { getFormattedValue } from '../../../utils/utils';
 import type { ECharts } from 'echarts';
 import * as echarts from 'echarts';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import moment from 'moment';
 import { ColumnType } from '../../../common/type';
 import { isArray } from 'lodash';
+import { ChartItemContext } from '../../ChatItem';
+import { useExportByEcharts } from '../../../hooks';
 
 type Props = {
   dateColumnName: string;
@@ -13,6 +15,7 @@ type Props = {
   resultList: any[];
   triggerResize?: boolean;
   chartType?: string;
+  question: string;
 };
 
 const MultiMetricsTrendChart: React.FC<Props> = ({
@@ -21,17 +24,17 @@ const MultiMetricsTrendChart: React.FC<Props> = ({
   resultList,
   triggerResize,
   chartType,
+  question,
 }) => {
   const chartRef = useRef<any>();
-  const [instance, setInstance] = useState<ECharts>();
-
+  const instanceRef = useRef<ECharts>();
   const renderChart = () => {
     let instanceObj: any;
-    if (!instance) {
+    if (!instanceRef.current) {
       instanceObj = echarts.init(chartRef.current);
-      setInstance(instanceObj);
+      instanceRef.current = instanceObj;
     } else {
-      instanceObj = instance;
+      instanceObj = instanceRef.current;
       instanceObj.clear();
     }
 
@@ -132,13 +135,22 @@ const MultiMetricsTrendChart: React.FC<Props> = ({
     instanceObj.resize();
   };
 
+  const { downloadChartAsImage } = useExportByEcharts({
+    instanceRef,
+    question,
+  });
+
+  const { register } = useContext(ChartItemContext);
+
+  register('downloadChartAsImage', downloadChartAsImage);
+
   useEffect(() => {
     renderChart();
   }, [resultList, chartType]);
 
   useEffect(() => {
-    if (triggerResize && instance) {
-      instance.resize();
+    if (triggerResize && instanceRef.current) {
+      instanceRef.current.resize();
     }
   }, [triggerResize]);
 

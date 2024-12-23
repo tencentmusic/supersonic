@@ -449,6 +449,23 @@ public class SqlReplaceHelper {
         }
     }
 
+    public static String replaceAliasFieldName(String sql, Map<String, String> fieldNameMap) {
+        Select selectStatement = SqlSelectHelper.getSelect(sql);
+        if (!(selectStatement instanceof PlainSelect)) {
+            return sql;
+        }
+        PlainSelect plainSelect = (PlainSelect) selectStatement;
+        FieldAliasReplaceNameVisitor visitor = new FieldAliasReplaceNameVisitor(fieldNameMap);
+        for (SelectItem selectItem : plainSelect.getSelectItems()) {
+            selectItem.accept(visitor);
+        }
+        Map<String, String> aliasToActualExpression = visitor.getAliasToActualExpression();
+        if (Objects.nonNull(aliasToActualExpression) && !aliasToActualExpression.isEmpty()) {
+            return replaceFields(selectStatement.toString(), aliasToActualExpression, true);
+        }
+        return selectStatement.toString();
+    }
+
     public static String replaceAlias(String sql) {
         Select selectStatement = SqlSelectHelper.getSelect(sql);
         if (!(selectStatement instanceof PlainSelect)) {

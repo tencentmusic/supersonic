@@ -19,8 +19,8 @@ import com.tencent.supersonic.headless.chat.knowledge.helper.NatureHelper;
 import com.tencent.supersonic.headless.core.cache.QueryCache;
 import com.tencent.supersonic.headless.core.executor.QueryExecutor;
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;
-import com.tencent.supersonic.headless.core.pojo.SqlQueryParam;
-import com.tencent.supersonic.headless.core.pojo.StructQueryParam;
+import com.tencent.supersonic.headless.core.pojo.SqlQuery;
+import com.tencent.supersonic.headless.core.pojo.StructQuery;
 import com.tencent.supersonic.headless.core.translator.SemanticTranslator;
 import com.tencent.supersonic.headless.core.utils.ComponentFactory;
 import com.tencent.supersonic.headless.server.annotation.S2DataPermission;
@@ -128,8 +128,7 @@ public class S2SemanticLayerService implements SemanticLayerService {
             for (QueryExecutor queryExecutor : queryExecutors) {
                 if (queryExecutor.accept(queryStatement)) {
                     queryResp = queryExecutor.execute(queryStatement);
-                    queryUtils.populateQueryColumns(queryResp,
-                            queryStatement.getSemanticSchemaResp());
+                    queryUtils.populateQueryColumns(queryResp, queryStatement.getSemanticSchema());
                 }
             }
 
@@ -299,7 +298,7 @@ public class S2SemanticLayerService implements SemanticLayerService {
         QueryStatement queryStatement = new QueryStatement();
         queryStatement.setEnableOptimize(queryUtils.enableOptimize());
         queryStatement.setDataSetId(queryReq.getDataSetId());
-        queryStatement.setSemanticSchemaResp(semanticSchemaResp);
+        queryStatement.setSemanticSchema(semanticSchemaResp);
         queryStatement.setOntology(semanticSchemaManager.buildOntology(semanticSchemaResp));
         return queryStatement;
     }
@@ -308,9 +307,9 @@ public class S2SemanticLayerService implements SemanticLayerService {
         QueryStatement queryStatement = buildQueryStatement(querySqlReq);
         queryStatement.setIsS2SQL(true);
 
-        SqlQueryParam sqlQueryParam = new SqlQueryParam();
-        sqlQueryParam.setSql(querySqlReq.getSql());
-        queryStatement.setSqlQueryParam(sqlQueryParam);
+        SqlQuery sqlQuery = new SqlQuery();
+        sqlQuery.setSql(querySqlReq.getSql());
+        queryStatement.setSqlQuery(sqlQuery);
 
         // If dataSetId or DataSetName is empty, parse dataSetId from the SQL
         if (querySqlReq.needGetDataSetId()) {
@@ -322,9 +321,9 @@ public class S2SemanticLayerService implements SemanticLayerService {
 
     private QueryStatement buildStructQueryStatement(SemanticQueryReq queryReq) {
         QueryStatement queryStatement = buildQueryStatement(queryReq);
-        StructQueryParam structQueryParam = new StructQueryParam();
-        BeanUtils.copyProperties(queryReq, structQueryParam);
-        queryStatement.setStructQueryParam(structQueryParam);
+        StructQuery structQuery = new StructQuery();
+        BeanUtils.copyProperties(queryReq, structQuery);
+        queryStatement.setStructQuery(structQuery);
         queryStatement.setIsS2SQL(false);
         return queryStatement;
     }

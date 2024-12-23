@@ -24,6 +24,11 @@ import java.util.stream.Collectors;
 public class QueryRecommendProcessor implements ParseResultProcessor {
 
     @Override
+    public boolean accept(ParseContext parseContext) {
+        return true;
+    }
+
+    @Override
     public void process(ParseContext parseContext) {
         CompletableFuture.runAsync(() -> doProcess(parseContext));
     }

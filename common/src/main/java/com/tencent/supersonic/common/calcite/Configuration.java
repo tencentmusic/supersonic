@@ -81,7 +81,7 @@ public class Configuration {
                 .setUnquotedCasing(Casing.TO_UPPER).setConformance(sqlDialect.getConformance())
                 .setLex(Lex.BIG_QUERY);
         if (EngineType.HANADB.equals(engineType)) {
-                parserConfig = parserConfig.setQuoting(Quoting.DOUBLE_QUOTE);
+            parserConfig = parserConfig.setQuoting(Quoting.DOUBLE_QUOTE);
         }
         parserConfig = parserConfig.setQuotedCasing(Casing.UNCHANGED);
         parserConfig = parserConfig.setUnquotedCasing(Casing.UNCHANGED);
