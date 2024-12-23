@@ -1,16 +1,25 @@
 import { isMobile } from '../../utils/utils';
-import { DislikeOutlined, LikeOutlined, DownloadOutlined, RedoOutlined } from '@ant-design/icons';
+import {
+  DislikeOutlined,
+  LikeOutlined,
+  DownloadOutlined,
+  RedoOutlined,
+  FileJpgOutlined,
+} from '@ant-design/icons';
 import { Button } from 'antd';
 import { CLS_PREFIX } from '../../common/constants';
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 import classNames from 'classnames';
 import { updateQAFeedback } from '../../service';
+import { useMethodRegister } from '../../hooks';
+import { ChartItemContext } from '../ChatItem';
 
 type Props = {
   queryId: number;
   scoreValue?: number;
   isLastMessage?: boolean;
   isParserError?: boolean;
+  isSimpleMode?: boolean;
   onExportData?: () => void;
   onReExecute?: (queryId: number) => void;
 };
@@ -20,6 +29,7 @@ const Tools: React.FC<Props> = ({
   scoreValue,
   isLastMessage,
   isParserError = false,
+  isSimpleMode = false,
   onExportData,
   onReExecute,
 }) => {
@@ -43,6 +53,8 @@ const Tools: React.FC<Props> = ({
   const dislikeClass = classNames(`${prefixCls}-dislike`, {
     [`${prefixCls}-feedback-active`]: score === 1,
   });
+
+  const { call } = useContext(ChartItemContext);
 
   return (
     <div className={prefixCls}>
@@ -68,6 +80,18 @@ const Tools: React.FC<Props> = ({
                   <DownloadOutlined />
                   <span className={`${prefixCls}-font-style`}>导出数据</span>
                 </Button>
+                {!isSimpleMode && (
+                  <Button
+                    size="small"
+                    onClick={() => {
+                      call('downloadChartAsImage');
+                    }}
+                    type="text"
+                  >
+                    <FileJpgOutlined />
+                    <span className={`${prefixCls}-font-style`}>导出图片</span>
+                  </Button>
+                )}
                 {isLastMessage && (
                   <Button
                     size="small"
