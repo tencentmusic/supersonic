@@ -21,6 +21,11 @@ public class SqlDialectFactory {
             .withDatabaseProduct(DatabaseProduct.BIG_QUERY).withLiteralQuoteString("'")
             .withLiteralEscapedQuoteString("''").withUnquotedCasing(Casing.UNCHANGED)
             .withQuotedCasing(Casing.UNCHANGED).withCaseSensitive(false);
+    public static final Context HANADB_CONTEXT =
+            SqlDialect.EMPTY_CONTEXT.withDatabaseProduct(DatabaseProduct.BIG_QUERY)
+                    .withLiteralQuoteString("'").withIdentifierQuoteString("\"")
+                    .withLiteralEscapedQuoteString("''").withUnquotedCasing(Casing.UNCHANGED)
+                    .withQuotedCasing(Casing.UNCHANGED).withCaseSensitive(true);
     private static Map<EngineType, SemanticSqlDialect> sqlDialectMap;
 
     static {
@@ -29,6 +34,7 @@ public class SqlDialectFactory {
         sqlDialectMap.put(EngineType.MYSQL, new SemanticSqlDialect(DEFAULT_CONTEXT));
         sqlDialectMap.put(EngineType.H2, new SemanticSqlDialect(DEFAULT_CONTEXT));
         sqlDialectMap.put(EngineType.POSTGRESQL, new SemanticSqlDialect(POSTGRESQL_CONTEXT));
+        sqlDialectMap.put(EngineType.HANADB, new SemanticSqlDialect(HANADB_CONTEXT));
     }
 
     public static SemanticSqlDialect getSqlDialect(EngineType engineType) {

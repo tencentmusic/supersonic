@@ -27,14 +27,12 @@ logging:
     dev.langchain4j: DEBUG
     dev.ai4j.openai4j: DEBUG
 
-swagger:
-  title: 'SuperSonic API Documentation'
-  base:
-    package: com.tencent.supersonic
-  description: 'SuperSonic API Documentation'
-  url: ''
-  contact:
-    name:
-    email:
-    url: ''
-  version: 3.0
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    enabled: true
+  api-docs:
+    path: /v3/api-docs
+    enabled: true
+  packages-to-scan: com.tencent.supersonic
+  paths-to-match: /api/chat/**,/api/semantic/**

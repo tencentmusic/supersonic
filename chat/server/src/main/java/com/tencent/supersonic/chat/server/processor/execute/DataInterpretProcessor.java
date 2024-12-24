@@ -51,6 +51,15 @@ public class DataInterpretProcessor implements ExecuteResultProcessor {
 
 
     @Override
+    public boolean accept(ExecuteContext executeContext) {
+        Agent agent = executeContext.getAgent();
+        ChatApp chatApp = agent.getChatAppConfig().get(APP_KEY);
+        return Objects.nonNull(chatApp) && chatApp.isEnable();
+    }
+
+    @Override
+    public void process(ExecuteContext executeContext) {
+        QueryResult queryResult = executeContext.getResponse();
     public void process(ExecuteContext executeContext, QueryResult queryResult) {
         String queryId = String.valueOf(executeContext.getRequest().getQueryId());
         String fullQueryKey = queryId + DimValuesConstants.FULL_QUERY;
@@ -61,9 +70,6 @@ public class DataInterpretProcessor implements ExecuteResultProcessor {
         }
         Agent agent = executeContext.getAgent();
         ChatApp chatApp = agent.getChatAppConfig().get(APP_KEY);
-        if (Objects.isNull(chatApp) || !chatApp.isEnable()) {
-            return;
-        }
 
         Map<String, Object> variable = new HashMap<>();
         variable.put("question", executeContext.getRequest().getQueryText());

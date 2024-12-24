@@ -31,7 +31,7 @@ public class MetricDrillDownChecker {
     private MetricService metricService;
 
     public void checkQuery(QueryStatement queryStatement) {
-        SemanticSchemaResp semanticSchemaResp = queryStatement.getSemanticSchemaResp();
+        SemanticSchemaResp semanticSchemaResp = queryStatement.getSemanticSchema();
         String sql = queryStatement.getSql();
         if (StringUtils.isBlank(sql)) {
             return;

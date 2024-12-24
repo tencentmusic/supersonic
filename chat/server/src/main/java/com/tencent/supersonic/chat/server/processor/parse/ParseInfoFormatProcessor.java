@@ -34,6 +34,12 @@ import java.util.stream.Collectors;
  **/
 @Slf4j
 public class ParseInfoFormatProcessor implements ParseResultProcessor {
+
+    @Override
+    public boolean accept(ParseContext parseContext) {
+        return !parseContext.getResponse().getSelectedParses().isEmpty();
+    }
+
     @Override
     public void process(ParseContext parseContext) {
         parseContext.getResponse().getSelectedParses().forEach(p -> {

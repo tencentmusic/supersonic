@@ -2,6 +2,7 @@ package com.tencent.supersonic.headless.server.service;
 
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.service.UserService;
+import com.tencent.supersonic.common.config.ThreadPoolConfig;
 import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
 import com.tencent.supersonic.common.pojo.enums.StatusEnum;
@@ -76,9 +77,10 @@ class ModelServiceImplTest {
         DateInfoRepository dateInfoRepository = Mockito.mock(DateInfoRepository.class);
         DataSetService viewService = Mockito.mock(DataSetService.class);
         ModelRelaService modelRelaService = Mockito.mock(ModelRelaService.class);
+        ThreadPoolConfig threadPoolConfig = Mockito.mock(ThreadPoolConfig.class);
         return new ModelServiceImpl(modelRepository, databaseService, dimensionService,
                 metricService, domainService, userService, viewService, dateInfoRepository,
-                modelRelaService);
+                modelRelaService, threadPoolConfig);
     }
 
     private ModelReq mockModelReq() {

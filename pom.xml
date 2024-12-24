@@ -22,25 +22,23 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.7.2</version>
+        <version>3.2.4</version>
     </parent>
 
     <properties>
         <revision>0.9.10-SNAPSHOT</revision>
-        <java.source.version>1.8</java.source.version>
-        <java.target.version>1.8</java.target.version>
-        <maven.compiler.source>8</maven.compiler.source>
-        <maven.compiler.target>8</maven.compiler.target>
+        <java.source.version>21</java.source.version>
+        <java.target.version>21</java.target.version>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
         <file.encoding>UTF-8</file.encoding>
         <jsqlparser.version>4.7</jsqlparser.version>
         <pagehelper.version>6.1.0</pagehelper.version>
         <pagehelper.spring.version>2.1.0</pagehelper.spring.version>
         <mybatis.version>3.5.3</mybatis.version>
-        <lombok.version>1.18.30</lombok.version>
         <guava.version>32.0.0-jre</guava.version>
         <hanlp.version>portable-1.8.3</hanlp.version>
         <hadoop.version>2.7.2</hadoop.version>
-        <jackson.version>2.11.2</jackson.version>
         <commons.lang.version>2.6</commons.lang.version>
         <commons.lang3.version>3.7</commons.lang3.version>
         <org.testng.version>6.13.1</org.testng.version>
@@ -50,11 +48,13 @@
         <alibaba.druid.version>1.2.24</alibaba.druid.version>
         <mysql.connector.java.version>5.1.46</mysql.connector.java.version>
         <mybatis.plus.version>3.5.7</mybatis.plus.version>
+        <httpclient5.version>5.4.1</httpclient5.version>
+<!--        <httpcore.version>4.4.16</httpcore.version>-->
+        <httpcore5.version>5.3.1</httpcore5.version>
         <clickhouse.jdbc.version>0.4.6</clickhouse.jdbc.version>
-        <h2.version>1.4.200</h2.version>
         <fastjson.version>2.0.40</fastjson.version>
         <dozer.verson>7.0.0</dozer.verson>
-        <httpmime.version>4.5.6</httpmime.version>
+<!--        <httpmime.version>4.5.6</httpmime.version>-->
         <transmittable.version>2.12.1</transmittable.version>
         <commons.compress.version>1.26.0</commons.compress.version>
         <jetty.util.version>6.1.26</jetty.util.version>
@@ -68,7 +68,7 @@
         <poi.version>3.17</poi.version>
         <langchain4j.version>0.34.0</langchain4j.version>
         <langchain4j.embedding.version>0.27.1</langchain4j.embedding.version>
-        <postgresql.version>42.7.1</postgresql.version>
+<!--        <postgresql.version>42.7.1</postgresql.version>-->
         <st.version>4.0.8</st.version>
         <duckdb_jdbc.version>0.10.0</duckdb_jdbc.version>
         <flight-sql.version>15.0.2</flight-sql.version>
@@ -78,6 +78,7 @@
         <spotless.version>2.27.1</spotless.version>
         <spotless.skip>false</spotless.skip>
         <stax2.version>4.2.1</stax2.version>
+        <io.springfox.version>3.0.0</io.springfox.version>
     </properties>
 
     <dependencyManagement>
@@ -196,6 +197,21 @@
                 <groupId>org.codehaus.woodstox</groupId>
                 <artifactId>stax2-api</artifactId>
                 <version>${stax2.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>mysql</groupId>
+                <artifactId>mysql-connector-java</artifactId>
+                <version>${mysql.connector.java.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.mockito</groupId>
+                <artifactId>mockito-inline</artifactId>
+                <version>${mockito-inline.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springdoc</groupId>
+                <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+                <version>2.1.0</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

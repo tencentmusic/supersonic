@@ -44,13 +44,16 @@ public class ErrorMsgRewriteProcessor implements ParseResultProcessor {
     }
 
     @Override
+    public boolean accept(ParseContext parseContext) {
+        ChatApp chatApp = parseContext.getAgent().getChatAppConfig().get(APP_KEY_ERROR_MESSAGE);
+        return StringUtils.isNotBlank(parseContext.getResponse().getErrorMsg())
+                && Objects.nonNull(chatApp) && chatApp.isEnable();
+    }
+
+    @Override
     public void process(ParseContext parseContext) {
         String errMsg = parseContext.getResponse().getErrorMsg();
         ChatApp chatApp = parseContext.getAgent().getChatAppConfig().get(APP_KEY_ERROR_MESSAGE);
-        if (StringUtils.isBlank(errMsg) || Objects.isNull(chatApp) || !chatApp.isEnable()) {
-            return;
-        }
-
         Map<String, Object> variables = new HashMap<>();
         variables.put("user_question", parseContext.getRequest().getQueryText());
         variables.put("system_message", errMsg);

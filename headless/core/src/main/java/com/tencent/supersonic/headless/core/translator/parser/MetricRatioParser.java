@@ -1,4 +1,4 @@
-package com.tencent.supersonic.headless.core.translator.converter;
+package com.tencent.supersonic.headless.core.translator.parser;
 
 import com.tencent.supersonic.common.pojo.Aggregator;
 import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
@@ -9,9 +9,9 @@ import com.tencent.supersonic.common.util.DateModeUtils;
 import com.tencent.supersonic.headless.api.pojo.enums.AggOption;
 import com.tencent.supersonic.headless.core.pojo.Database;
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;
-import com.tencent.supersonic.headless.core.pojo.SqlQueryParam;
-import com.tencent.supersonic.headless.core.pojo.StructQueryParam;
-import com.tencent.supersonic.headless.core.translator.parser.s2sql.OntologyQueryParam;
+import com.tencent.supersonic.headless.core.pojo.SqlQuery;
+import com.tencent.supersonic.headless.core.pojo.StructQuery;
+import com.tencent.supersonic.headless.core.pojo.OntologyQuery;
 import com.tencent.supersonic.headless.core.utils.SqlGenerateUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -22,30 +22,29 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-@Component("CalculateAggConverter")
+@Component("MetricRatioParser")
 @Slf4j
-public class MetricRatioConverter implements QueryConverter {
+public class MetricRatioParser implements QueryParser {
 
     public interface EngineSql {
 
-        String sql(StructQueryParam structQueryParam, boolean isOver, boolean asWith,
-                String metricSql);
+        String sql(StructQuery structQuery, boolean isOver, boolean asWith, String metricSql);
     }
 
     @Override
     public boolean accept(QueryStatement queryStatement) {
-        if (Objects.isNull(queryStatement.getStructQueryParam()) || queryStatement.getIsS2SQL()
-                || !isRatioAccept(queryStatement.getStructQueryParam())) {
+        if (Objects.isNull(queryStatement.getStructQuery()) || queryStatement.getIsS2SQL()
+                || !isRatioAccept(queryStatement.getStructQuery())) {
             return false;
         }
-        StructQueryParam structQueryParam = queryStatement.getStructQueryParam();
-        if (structQueryParam.getQueryType().isNativeAggQuery()
-                || CollectionUtils.isEmpty(structQueryParam.getAggregators())) {
+        StructQuery structQuery = queryStatement.getStructQuery();
+        if (structQuery.getQueryType().isNativeAggQuery()
+                || CollectionUtils.isEmpty(structQuery.getAggregators())) {
             return false;
         }
 
         int nonSumFunction = 0;
-        for (Aggregator agg : structQueryParam.getAggregators()) {
+        for (Aggregator agg : structQuery.getAggregators()) {
             if (agg.getFunc() == null || "".equals(agg.getFunc())) {
                 return false;
             }
@@ -60,14 +59,14 @@ public class MetricRatioConverter implements QueryConverter {
     }
 
     @Override
-    public void convert(QueryStatement queryStatement) throws Exception {
+    public void parse(QueryStatement queryStatement) throws Exception {
         Database database = queryStatement.getOntology().getDatabase();
         generateRatioSql(queryStatement, database.getType(), database.getVersion());
     }
 
     /** Ratio */
-    public boolean isRatioAccept(StructQueryParam structQueryParam) {
-        Long ratioFuncNum = structQueryParam.getAggregators().stream()
+    public boolean isRatioAccept(StructQuery structQuery) {
+        Long ratioFuncNum = structQuery.getAggregators().stream()
                 .filter(f -> (f.getFunc().equals(AggOperatorEnum.RATIO_ROLL)
                         || f.getFunc().equals(AggOperatorEnum.RATIO_OVER)))
                 .count();
@@ -80,20 +79,20 @@ public class MetricRatioConverter implements QueryConverter {
     public void generateRatioSql(QueryStatement queryStatement, EngineType engineTypeEnum,
             String version) throws Exception {
         SqlGenerateUtils sqlGenerateUtils = ContextUtils.getBean(SqlGenerateUtils.class);
-        StructQueryParam structQueryParam = queryStatement.getStructQueryParam();
-        check(structQueryParam);
+        StructQuery structQuery = queryStatement.getStructQuery();
+        check(structQuery);
         queryStatement.setEnableOptimize(false);
-        OntologyQueryParam ontologyQueryParam = queryStatement.getOntologyQueryParam();
-        ontologyQueryParam.setAggOption(AggOption.AGGREGATION);
+        OntologyQuery ontologyQuery = queryStatement.getOntologyQuery();
+        ontologyQuery.setAggOption(AggOption.AGGREGATION);
         String metricTableName = "v_metric_tb_tmp";
-        boolean isOver = isOverRatio(structQueryParam);
+        boolean isOver = isOverRatio(structQuery);
         String sql = "";
 
-        SqlQueryParam dsParam = queryStatement.getSqlQueryParam();
+        SqlQuery dsParam = queryStatement.getSqlQuery();
         dsParam.setTable(metricTableName);
         switch (engineTypeEnum) {
             case H2:
-                sql = new H2EngineSql().sql(structQueryParam, isOver, true, metricTableName);
+                sql = new H2EngineSql().sql(structQuery, isOver, true, metricTableName);
                 break;
             case MYSQL:
             case DORIS:
@@ -102,10 +101,10 @@ public class MetricRatioConverter implements QueryConverter {
                     dsParam.setSupportWith(false);
                 }
                 if (!engineTypeEnum.equals(engineTypeEnum.CLICKHOUSE)) {
-                    sql = new MysqlEngineSql().sql(structQueryParam, isOver,
-                            dsParam.isSupportWith(), metricTableName);
+                    sql = new MysqlEngineSql().sql(structQuery, isOver, dsParam.isSupportWith(),
+                            metricTableName);
                 } else {
-                    sql = new CkEngineSql().sql(structQueryParam, isOver, dsParam.isSupportWith(),
+                    sql = new CkEngineSql().sql(structQuery, isOver, dsParam.isSupportWith(),
                             metricTableName);
                 }
                 break;
@@ -116,8 +115,8 @@ public class MetricRatioConverter implements QueryConverter {
 
     public class H2EngineSql implements EngineSql {
 
-        public String getOverSelect(StructQueryParam structQueryParam, boolean isOver) {
-            String aggStr = structQueryParam.getAggregators().stream().map(f -> {
+        public String getOverSelect(StructQuery structQuery, boolean isOver) {
+            String aggStr = structQuery.getAggregators().stream().map(f -> {
                 if (f.getFunc().equals(AggOperatorEnum.RATIO_OVER)
                         || f.getFunc().equals(AggOperatorEnum.RATIO_ROLL)) {
                     return String.format("( (%s-%s_roll)/cast(%s_roll as DOUBLE) ) as %s_%s,%s",
@@ -127,44 +126,43 @@ public class MetricRatioConverter implements QueryConverter {
                     return f.getColumn();
                 }
             }).collect(Collectors.joining(","));
-            return CollectionUtils.isEmpty(structQueryParam.getGroups()) ? aggStr
-                    : String.join(",", structQueryParam.getGroups()) + "," + aggStr;
+            return CollectionUtils.isEmpty(structQuery.getGroups()) ? aggStr
+                    : String.join(",", structQuery.getGroups()) + "," + aggStr;
         }
 
-        public String getTimeSpan(StructQueryParam structQueryParam, boolean isOver,
-                boolean isAdd) {
-            if (Objects.nonNull(structQueryParam.getDateInfo())) {
+        public String getTimeSpan(StructQuery structQuery, boolean isOver, boolean isAdd) {
+            if (Objects.nonNull(structQuery.getDateInfo())) {
                 String addStr = isAdd ? "" : "-";
-                if (structQueryParam.getDateInfo().getPeriod().equals(DatePeriodEnum.DAY)) {
+                if (structQuery.getDateInfo().getPeriod().equals(DatePeriodEnum.DAY)) {
                     return "day," + (isOver ? addStr + "7" : addStr + "1");
                 }
-                if (structQueryParam.getDateInfo().getPeriod().equals(DatePeriodEnum.MONTH)) {
+                if (structQuery.getDateInfo().getPeriod().equals(DatePeriodEnum.MONTH)) {
                     return isOver ? "month," + addStr + "1" : "day," + addStr + "7";
                 }
-                if (structQueryParam.getDateInfo().getPeriod().equals(DatePeriodEnum.MONTH.MONTH)) {
+                if (structQuery.getDateInfo().getPeriod().equals(DatePeriodEnum.MONTH.MONTH)) {
                     return isOver ? "year," + addStr + "1" : "month," + addStr + "1";
                 }
             }
             return "";
         }
 
-        public String getJoinOn(StructQueryParam structQueryParam, boolean isOver, String aliasLeft,
+        public String getJoinOn(StructQuery structQuery, boolean isOver, String aliasLeft,
                 String aliasRight) {
-            String timeDim = getTimeDim(structQueryParam);
-            String timeSpan = getTimeSpan(structQueryParam, isOver, true);
-            String aggStr = structQueryParam.getAggregators().stream().map(f -> {
+            String timeDim = getTimeDim(structQuery);
+            String timeSpan = getTimeSpan(structQuery, isOver, true);
+            String aggStr = structQuery.getAggregators().stream().map(f -> {
                 if (f.getFunc().equals(AggOperatorEnum.RATIO_OVER)
                         || f.getFunc().equals(AggOperatorEnum.RATIO_ROLL)) {
-                    if (structQueryParam.getDateInfo().getPeriod().equals(DatePeriodEnum.MONTH)) {
+                    if (structQuery.getDateInfo().getPeriod().equals(DatePeriodEnum.MONTH)) {
                         return String.format(
                                 "%s is not null and %s = FORMATDATETIME(DATEADD(%s,CONCAT(%s,'-01')),'yyyy-MM') ",
                                 aliasRight + timeDim, aliasLeft + timeDim, timeSpan,
                                 aliasRight + timeDim);
                     }
-                    if (structQueryParam.getDateInfo().getPeriod().equals(DatePeriodEnum.WEEK)
+                    if (structQuery.getDateInfo().getPeriod().equals(DatePeriodEnum.WEEK)
                             && isOver) {
                         return String.format(" DATE_TRUNC('week',DATEADD(%s,%s) ) = %s ",
-                                getTimeSpan(structQueryParam, isOver, false), aliasLeft + timeDim,
+                                getTimeSpan(structQuery, isOver, false), aliasLeft + timeDim,
                                 aliasRight + timeDim);
                     }
                     return String.format("%s = TIMESTAMPADD(%s,%s) ", aliasLeft + timeDim, timeSpan,
@@ -174,7 +172,7 @@ public class MetricRatioConverter implements QueryConverter {
                 }
             }).collect(Collectors.joining(" and "));
             List<String> groups = new ArrayList<>();
-            for (String group : structQueryParam.getGroups()) {
+            for (String group : structQuery.getGroups()) {
                 if (group.equalsIgnoreCase(timeDim)) {
                     continue;
                 }
@@ -185,36 +183,36 @@ public class MetricRatioConverter implements QueryConverter {
         }
 
         @Override
-        public String sql(StructQueryParam structQueryParam, boolean isOver, boolean asWith,
+        public String sql(StructQuery structQuery, boolean isOver, boolean asWith,
                 String metricSql) {
             String sql = String.format(
                     "select %s from ( select %s , %s from %s t0 left join %s t1 on %s ) metric_tb_src %s %s ",
-                    getOverSelect(structQueryParam, isOver), getAllSelect(structQueryParam, "t0."),
-                    getAllJoinSelect(structQueryParam, "t1."), metricSql, metricSql,
-                    getJoinOn(structQueryParam, isOver, "t0.", "t1."), getOrderBy(structQueryParam),
-                    getLimit(structQueryParam));
+                    getOverSelect(structQuery, isOver), getAllSelect(structQuery, "t0."),
+                    getAllJoinSelect(structQuery, "t1."), metricSql, metricSql,
+                    getJoinOn(structQuery, isOver, "t0.", "t1."), getOrderBy(structQuery),
+                    getLimit(structQuery));
             return sql;
         }
     }
 
     public class CkEngineSql extends MysqlEngineSql {
 
-        public String getJoinOn(StructQueryParam structQueryParam, boolean isOver, String aliasLeft,
+        public String getJoinOn(StructQuery structQuery, boolean isOver, String aliasLeft,
                 String aliasRight) {
-            String timeDim = getTimeDim(structQueryParam);
-            String timeSpan = "INTERVAL  " + getTimeSpan(structQueryParam, isOver, true);
-            String aggStr = structQueryParam.getAggregators().stream().map(f -> {
+            String timeDim = getTimeDim(structQuery);
+            String timeSpan = "INTERVAL  " + getTimeSpan(structQuery, isOver, true);
+            String aggStr = structQuery.getAggregators().stream().map(f -> {
                 if (f.getFunc().equals(AggOperatorEnum.RATIO_OVER)
                         || f.getFunc().equals(AggOperatorEnum.RATIO_ROLL)) {
-                    if (structQueryParam.getDateInfo().getPeriod().equals(DatePeriodEnum.MONTH)) {
+                    if (structQuery.getDateInfo().getPeriod().equals(DatePeriodEnum.MONTH)) {
                         return String.format(
                                 "toDate(CONCAT(%s,'-01')) = date_add(toDate(CONCAT(%s,'-01')),%s)  ",
                                 aliasLeft + timeDim, aliasRight + timeDim, timeSpan);
                     }
-                    if (structQueryParam.getDateInfo().getPeriod().equals(DatePeriodEnum.WEEK)
+                    if (structQuery.getDateInfo().getPeriod().equals(DatePeriodEnum.WEEK)
                             && isOver) {
                         return String.format("toMonday(date_add(%s ,INTERVAL %s) ) = %s",
-                                aliasLeft + timeDim, getTimeSpan(structQueryParam, isOver, false),
+                                aliasLeft + timeDim, getTimeSpan(structQuery, isOver, false),
                                 aliasRight + timeDim);
                     }
                     return String.format("%s = date_add(%s,%s) ", aliasLeft + timeDim,
@@ -224,7 +222,7 @@ public class MetricRatioConverter implements QueryConverter {
                 }
             }).collect(Collectors.joining(" and "));
             List<String> groups = new ArrayList<>();
-            for (String group : structQueryParam.getGroups()) {
+            for (String group : structQuery.getGroups()) {
                 if (group.equalsIgnoreCase(timeDim)) {
                     continue;
                 }
@@ -235,49 +233,46 @@ public class MetricRatioConverter implements QueryConverter {
         }
 
         @Override
-        public String sql(StructQueryParam structQueryParam, boolean isOver, boolean asWith,
+        public String sql(StructQuery structQuery, boolean isOver, boolean asWith,
                 String metricSql) {
             if (!asWith) {
                 return String.format(
                         "select %s from ( select %s , %s from %s t0 left join %s t1 on %s ) metric_tb_src %s %s ",
-                        getOverSelect(structQueryParam, isOver),
-                        getAllSelect(structQueryParam, "t0."),
-                        getAllJoinSelect(structQueryParam, "t1."), metricSql, metricSql,
-                        getJoinOn(structQueryParam, isOver, "t0.", "t1."),
-                        getOrderBy(structQueryParam), getLimit(structQueryParam));
+                        getOverSelect(structQuery, isOver), getAllSelect(structQuery, "t0."),
+                        getAllJoinSelect(structQuery, "t1."), metricSql, metricSql,
+                        getJoinOn(structQuery, isOver, "t0.", "t1."), getOrderBy(structQuery),
+                        getLimit(structQuery));
             }
             return String.format(
                     ",t0 as (select * from %s),t1 as (select * from %s) select %s from ( select %s , %s "
                             + "from  t0 left join t1 on %s ) metric_tb_src %s %s ",
-                    metricSql, metricSql, getOverSelect(structQueryParam, isOver),
-                    getAllSelect(structQueryParam, "t0."),
-                    getAllJoinSelect(structQueryParam, "t1."),
-                    getJoinOn(structQueryParam, isOver, "t0.", "t1."), getOrderBy(structQueryParam),
-                    getLimit(structQueryParam));
+                    metricSql, metricSql, getOverSelect(structQuery, isOver),
+                    getAllSelect(structQuery, "t0."), getAllJoinSelect(structQuery, "t1."),
+                    getJoinOn(structQuery, isOver, "t0.", "t1."), getOrderBy(structQuery),
+                    getLimit(structQuery));
         }
     }
 
     public class MysqlEngineSql implements EngineSql {
 
-        public String getTimeSpan(StructQueryParam structQueryParam, boolean isOver,
-                boolean isAdd) {
-            if (Objects.nonNull(structQueryParam.getDateInfo())) {
+        public String getTimeSpan(StructQuery structQuery, boolean isOver, boolean isAdd) {
+            if (Objects.nonNull(structQuery.getDateInfo())) {
                 String addStr = isAdd ? "" : "-";
-                if (structQueryParam.getDateInfo().getPeriod().equals(DatePeriodEnum.DAY)) {
+                if (structQuery.getDateInfo().getPeriod().equals(DatePeriodEnum.DAY)) {
                     return isOver ? addStr + "7 day" : addStr + "1 day";
                 }
-                if (structQueryParam.getDateInfo().getPeriod().equals(DatePeriodEnum.WEEK)) {
+                if (structQuery.getDateInfo().getPeriod().equals(DatePeriodEnum.WEEK)) {
                     return isOver ? addStr + "1 month" : addStr + "7 day";
                 }
-                if (structQueryParam.getDateInfo().getPeriod().equals(DatePeriodEnum.MONTH)) {
+                if (structQuery.getDateInfo().getPeriod().equals(DatePeriodEnum.MONTH)) {
                     return isOver ? addStr + "1 year" : addStr + "1 month";
                 }
             }
             return "";
         }
 
-        public String getOverSelect(StructQueryParam structQueryParam, boolean isOver) {
-            String aggStr = structQueryParam.getAggregators().stream().map(f -> {
+        public String getOverSelect(StructQuery structQuery, boolean isOver) {
+            String aggStr = structQuery.getAggregators().stream().map(f -> {
                 if (f.getFunc().equals(AggOperatorEnum.RATIO_OVER)
                         || f.getFunc().equals(AggOperatorEnum.RATIO_ROLL)) {
                     return String.format("if(%s_roll!=0,  (%s-%s_roll)/%s_roll , 0) as %s_%s,%s",
@@ -287,26 +282,26 @@ public class MetricRatioConverter implements QueryConverter {
                     return f.getColumn();
                 }
             }).collect(Collectors.joining(","));
-            return CollectionUtils.isEmpty(structQueryParam.getGroups()) ? aggStr
-                    : String.join(",", structQueryParam.getGroups()) + "," + aggStr;
+            return CollectionUtils.isEmpty(structQuery.getGroups()) ? aggStr
+                    : String.join(",", structQuery.getGroups()) + "," + aggStr;
         }
 
-        public String getJoinOn(StructQueryParam structQueryParam, boolean isOver, String aliasLeft,
+        public String getJoinOn(StructQuery structQuery, boolean isOver, String aliasLeft,
                 String aliasRight) {
-            String timeDim = getTimeDim(structQueryParam);
-            String timeSpan = "INTERVAL  " + getTimeSpan(structQueryParam, isOver, true);
-            String aggStr = structQueryParam.getAggregators().stream().map(f -> {
+            String timeDim = getTimeDim(structQuery);
+            String timeSpan = "INTERVAL  " + getTimeSpan(structQuery, isOver, true);
+            String aggStr = structQuery.getAggregators().stream().map(f -> {
                 if (f.getFunc().equals(AggOperatorEnum.RATIO_OVER)
                         || f.getFunc().equals(AggOperatorEnum.RATIO_ROLL)) {
-                    if (structQueryParam.getDateInfo().getPeriod().equals(DatePeriodEnum.MONTH)) {
+                    if (structQuery.getDateInfo().getPeriod().equals(DatePeriodEnum.MONTH)) {
                         return String.format(
                                 "%s = DATE_FORMAT(date_add(CONCAT(%s,'-01'), %s),'%%Y-%%m') ",
                                 aliasLeft + timeDim, aliasRight + timeDim, timeSpan);
                     }
-                    if (structQueryParam.getDateInfo().getPeriod().equals(DatePeriodEnum.WEEK)
+                    if (structQuery.getDateInfo().getPeriod().equals(DatePeriodEnum.WEEK)
                             && isOver) {
                         return String.format("to_monday(date_add(%s ,INTERVAL %s) ) = %s",
-                                aliasLeft + timeDim, getTimeSpan(structQueryParam, isOver, false),
+                                aliasLeft + timeDim, getTimeSpan(structQuery, isOver, false),
                                 aliasRight + timeDim);
                     }
                     return String.format("%s = date_add(%s,%s) ", aliasLeft + timeDim,
@@ -316,7 +311,7 @@ public class MetricRatioConverter implements QueryConverter {
                 }
             }).collect(Collectors.joining(" and "));
             List<String> groups = new ArrayList<>();
-            for (String group : structQueryParam.getGroups()) {
+            for (String group : structQuery.getGroups()) {
                 if (group.equalsIgnoreCase(timeDim)) {
                     continue;
                 }
@@ -327,53 +322,52 @@ public class MetricRatioConverter implements QueryConverter {
         }
 
         @Override
-        public String sql(StructQueryParam structQueryParam, boolean isOver, boolean asWith,
+        public String sql(StructQuery structQuery, boolean isOver, boolean asWith,
                 String metricSql) {
             String sql = String.format(
                     "select %s from ( select %s , %s from %s t0 left join %s t1 on %s ) metric_tb_src %s %s ",
-                    getOverSelect(structQueryParam, isOver), getAllSelect(structQueryParam, "t0."),
-                    getAllJoinSelect(structQueryParam, "t1."), metricSql, metricSql,
-                    getJoinOn(structQueryParam, isOver, "t0.", "t1."), getOrderBy(structQueryParam),
-                    getLimit(structQueryParam));
+                    getOverSelect(structQuery, isOver), getAllSelect(structQuery, "t0."),
+                    getAllJoinSelect(structQuery, "t1."), metricSql, metricSql,
+                    getJoinOn(structQuery, isOver, "t0.", "t1."), getOrderBy(structQuery),
+                    getLimit(structQuery));
             return sql;
         }
     }
 
-    private String getAllJoinSelect(StructQueryParam structQueryParam, String alias) {
-        String aggStr = structQueryParam.getAggregators().stream()
+    private String getAllJoinSelect(StructQuery structQuery, String alias) {
+        String aggStr = structQuery.getAggregators().stream()
                 .map(f -> getSelectField(f, alias) + " as " + getSelectField(f, "") + "_roll")
                 .collect(Collectors.joining(","));
         List<String> groups = new ArrayList<>();
-        for (String group : structQueryParam.getGroups()) {
+        for (String group : structQuery.getGroups()) {
             groups.add(alias + group + " as " + group + "_roll");
         }
         return CollectionUtils.isEmpty(groups) ? aggStr : String.join(",", groups) + "," + aggStr;
     }
 
-    private String getGroupDimWithOutTime(StructQueryParam structQueryParam) {
-        String timeDim = getTimeDim(structQueryParam);
-        return structQueryParam.getGroups().stream().filter(f -> !f.equalsIgnoreCase(timeDim))
+    private String getGroupDimWithOutTime(StructQuery structQuery) {
+        String timeDim = getTimeDim(structQuery);
+        return structQuery.getGroups().stream().filter(f -> !f.equalsIgnoreCase(timeDim))
                 .collect(Collectors.joining(","));
     }
 
-    private static String getTimeDim(StructQueryParam structQueryParam) {
+    private static String getTimeDim(StructQuery structQuery) {
         DateModeUtils dateModeUtils = ContextUtils.getContext().getBean(DateModeUtils.class);
-        return dateModeUtils.getSysDateCol(structQueryParam.getDateInfo());
+        return dateModeUtils.getSysDateCol(structQuery.getDateInfo());
     }
 
-    private static String getLimit(StructQueryParam structQueryParam) {
-        if (structQueryParam != null && structQueryParam.getLimit() != null
-                && structQueryParam.getLimit() > 0) {
-            return " limit " + String.valueOf(structQueryParam.getLimit());
+    private static String getLimit(StructQuery structQuery) {
+        if (structQuery != null && structQuery.getLimit() != null && structQuery.getLimit() > 0) {
+            return " limit " + String.valueOf(structQuery.getLimit());
         }
         return "";
     }
 
-    private String getAllSelect(StructQueryParam structQueryParam, String alias) {
-        String aggStr = structQueryParam.getAggregators().stream()
-                .map(f -> getSelectField(f, alias)).collect(Collectors.joining(","));
-        return CollectionUtils.isEmpty(structQueryParam.getGroups()) ? aggStr
-                : alias + String.join("," + alias, structQueryParam.getGroups()) + "," + aggStr;
+    private String getAllSelect(StructQuery structQuery, String alias) {
+        String aggStr = structQuery.getAggregators().stream().map(f -> getSelectField(f, alias))
+                .collect(Collectors.joining(","));
+        return CollectionUtils.isEmpty(structQuery.getGroups()) ? aggStr
+                : alias + String.join("," + alias, structQuery.getGroups()) + "," + aggStr;
     }
 
     private String getSelectField(final Aggregator agg, String alias) {
@@ -385,32 +379,32 @@ public class MetricRatioConverter implements QueryConverter {
         return sqlGenerateUtils.getSelectField(agg);
     }
 
-    private String getGroupBy(StructQueryParam structQueryParam) {
-        if (CollectionUtils.isEmpty(structQueryParam.getGroups())) {
+    private String getGroupBy(StructQuery structQuery) {
+        if (CollectionUtils.isEmpty(structQuery.getGroups())) {
             return "";
         }
-        return "group by " + String.join(",", structQueryParam.getGroups());
+        return "group by " + String.join(",", structQuery.getGroups());
     }
 
-    private static String getOrderBy(StructQueryParam structQueryParam) {
-        return "order by " + getTimeDim(structQueryParam) + " desc";
+    private static String getOrderBy(StructQuery structQuery) {
+        return "order by " + getTimeDim(structQuery) + " desc";
     }
 
-    private boolean isOverRatio(StructQueryParam structQueryParam) {
-        Long overCt = structQueryParam.getAggregators().stream()
+    private boolean isOverRatio(StructQuery structQuery) {
+        Long overCt = structQuery.getAggregators().stream()
                 .filter(f -> f.getFunc().equals(AggOperatorEnum.RATIO_OVER)).count();
         return overCt > 0;
     }
 
-    private void check(StructQueryParam structQueryParam) throws Exception {
-        Long ratioOverNum = structQueryParam.getAggregators().stream()
+    private void check(StructQuery structQuery) throws Exception {
+        Long ratioOverNum = structQuery.getAggregators().stream()
                 .filter(f -> f.getFunc().equals(AggOperatorEnum.RATIO_OVER)).count();
-        Long ratioRollNum = structQueryParam.getAggregators().stream()
+        Long ratioRollNum = structQuery.getAggregators().stream()
                 .filter(f -> f.getFunc().equals(AggOperatorEnum.RATIO_ROLL)).count();
         if (ratioOverNum > 0 && ratioRollNum > 0) {
             throw new Exception("not support over ratio and roll ratio together ");
         }
-        if (getTimeDim(structQueryParam).isEmpty()) {
+        if (getTimeDim(structQuery).isEmpty()) {
             throw new Exception("miss time filter");
         }
     }

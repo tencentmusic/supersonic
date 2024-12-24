@@ -80,7 +80,11 @@ public abstract class SemanticNode {
                 scope.getValidator().getCatalogReader().getRootSchema(), engineType);
         if (Configuration.getSqlAdvisor(sqlValidatorWithHints, engineType).getReservedAndKeyWords()
                 .contains(expression.toUpperCase())) {
-            expression = String.format("`%s`", expression);
+            if (engineType == EngineType.HANADB) {
+                expression = String.format("\"%s\"", expression);
+            } else {
+                expression = String.format("`%s`", expression);
+            }
         }
         SqlParser sqlParser =
                 SqlParser.create(expression, Configuration.getParserConfig(engineType));

@@ -6,7 +6,7 @@ import com.tencent.supersonic.headless.api.pojo.response.SqlParserResp;
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;
 import com.tencent.supersonic.headless.core.translator.parser.calcite.S2CalciteSchema;
 import com.tencent.supersonic.headless.core.translator.parser.calcite.SqlBuilder;
-import com.tencent.supersonic.headless.core.translator.parser.s2sql.OntologyQueryParam;
+import com.tencent.supersonic.headless.core.pojo.OntologyQuery;
 import com.tencent.supersonic.headless.server.manager.SemanticSchemaManager;
 import com.tencent.supersonic.headless.server.pojo.yaml.*;
 import lombok.extern.slf4j.Slf4j;
@@ -19,8 +19,8 @@ import java.util.List;
 @Slf4j
 class HeadlessParserServiceTest {
 
-    public static SqlParserResp parser(S2CalciteSchema semanticSchema,
-            OntologyQueryParam ontologyQueryParam, boolean isAgg) {
+    public static SqlParserResp parser(S2CalciteSchema semanticSchema, OntologyQuery ontologyQuery,
+            boolean isAgg) {
         SqlParserResp sqlParser = new SqlParserResp();
         try {
             if (semanticSchema == null) {
@@ -29,14 +29,14 @@ class HeadlessParserServiceTest {
             }
             SqlBuilder aggBuilder = new SqlBuilder(semanticSchema);
             QueryStatement queryStatement = new QueryStatement();
-            queryStatement.setOntologyQueryParam(ontologyQueryParam);
+            queryStatement.setOntologyQuery(ontologyQuery);
             String sql = aggBuilder.buildOntologySql(queryStatement);
             queryStatement.setSql(sql);
             EngineType engineType = semanticSchema.getOntology().getDatabase().getType();
             sqlParser.setSql(aggBuilder.getSql(engineType));
         } catch (Exception e) {
             sqlParser.setErrMsg(e.getMessage());
-            log.error("parser error metricQueryReq[{}] error [{}]", ontologyQueryParam, e);
+            log.error("parser error metricQueryReq[{}] error [{}]", ontologyQuery, e);
         }
         return sqlParser;
     }
@@ -155,7 +155,7 @@ class HeadlessParserServiceTest {
 
         // HeadlessSchemaManager.update(headlessSchema, HeadlessSchemaManager.getMetrics(metric));
 
-        OntologyQueryParam metricCommand = new OntologyQueryParam();
+        OntologyQuery metricCommand = new OntologyQuery();
         metricCommand.setDimensions(new HashSet<>(Arrays.asList("sys_imp_date")));
         metricCommand.setMetrics(new HashSet<>(Arrays.asList("pv")));
         metricCommand.setWhere(
@@ -168,7 +168,7 @@ class HeadlessParserServiceTest {
 
         addDepartment(semanticSchema);
 
-        OntologyQueryParam metricCommand2 = new OntologyQueryParam();
+        OntologyQuery metricCommand2 = new OntologyQuery();
         metricCommand2.setDimensions(new HashSet<>(Arrays.asList("sys_imp_date",
                 "user_name__department", "user_name", "user_name__page")));
         metricCommand2.setMetrics(new HashSet<>(Arrays.asList("pv")));
