@@ -7,6 +7,7 @@ import com.tencent.supersonic.headless.api.pojo.SchemaItem;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -31,7 +32,7 @@ public class DimensionReq extends SchemaItem {
 
     private DataTypeEnums dataType;
 
-    private Map<String, Object> ext;
+    private Map<String, Object> ext = new HashMap();
 
     private DimensionTimeTypeParams typeParams;
 }
