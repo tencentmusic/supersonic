@@ -14,8 +14,6 @@ public interface MemoryService {
 
     void updateMemory(ChatMemoryUpdateReq chatMemoryUpdateReq, User user);
 
-    void updateMemory(ChatMemory memory);
-
     void batchDelete(List<Long> ids);
 
     PageInfo<ChatMemory> pageMemories(PageMemoryReq pageMemoryReq);

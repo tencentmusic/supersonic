@@ -26,4 +26,8 @@ public class ChatMemoryUpdateReq {
     private MemoryReviewResult humanReviewRet;
 
     private String humanReviewCmt;
+
+    private MemoryReviewResult llmReviewRet;
+
+    private String llmReviewCmt;
 }

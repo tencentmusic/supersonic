@@ -1,6 +1,7 @@
 package com.tencent.supersonic.chat.server.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.tencent.supersonic.chat.api.pojo.enums.MemoryReviewResult;
@@ -9,6 +10,7 @@ import com.tencent.supersonic.chat.api.pojo.request.ChatMemoryFilter;
 import com.tencent.supersonic.chat.api.pojo.request.ChatMemoryUpdateReq;
 import com.tencent.supersonic.chat.api.pojo.request.PageMemoryReq;
 import com.tencent.supersonic.chat.server.persistence.dataobject.ChatMemoryDO;
+import com.tencent.supersonic.chat.server.persistence.mapper.ChatMemoryMapper;
 import com.tencent.supersonic.chat.server.persistence.repository.ChatMemoryRepository;
 import com.tencent.supersonic.chat.server.pojo.ChatMemory;
 import com.tencent.supersonic.chat.server.service.MemoryService;
@@ -16,7 +18,6 @@ import com.tencent.supersonic.common.config.EmbeddingConfig;
 import com.tencent.supersonic.common.pojo.Text2SQLExemplar;
 import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.common.service.ExemplarService;
-import com.tencent.supersonic.common.util.BeanMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +34,9 @@ public class MemoryServiceImpl implements MemoryService {
 
     @Autowired
     private ChatMemoryRepository chatMemoryRepository;
+
+    @Autowired
+    private ChatMemoryMapper chatMemoryMapper;
 
     @Autowired
     private ExemplarService exemplarService;
@@ -57,20 +61,33 @@ public class MemoryServiceImpl implements MemoryService {
         ChatMemoryDO chatMemoryDO = chatMemoryRepository.getMemory(chatMemoryUpdateReq.getId());
         boolean hadEnabled =
                 MemoryStatus.ENABLED.toString().equals(chatMemoryDO.getStatus().trim());
-        chatMemoryDO.setUpdatedBy(user.getName());
-        chatMemoryDO.setUpdatedAt(new Date());
-        BeanMapper.mapper(chatMemoryUpdateReq, chatMemoryDO);
         if (MemoryStatus.ENABLED.equals(chatMemoryUpdateReq.getStatus()) && !hadEnabled) {
             enableMemory(chatMemoryDO);
         } else if (MemoryStatus.DISABLED.equals(chatMemoryUpdateReq.getStatus()) && hadEnabled) {
             disableMemory(chatMemoryDO);
         }
-        chatMemoryRepository.updateMemory(chatMemoryDO);
-    }
 
-    @Override
-    public void updateMemory(ChatMemory memory) {
-        chatMemoryRepository.updateMemory(getMemoryDO(memory));
+        LambdaUpdateWrapper<ChatMemoryDO> updateWrapper = new LambdaUpdateWrapper<>();
+        updateWrapper.eq(ChatMemoryDO::getId, chatMemoryDO.getId());
+        if (Objects.nonNull(chatMemoryUpdateReq.getStatus())) {
+            updateWrapper.set(ChatMemoryDO::getStatus, chatMemoryUpdateReq.getStatus());
+        }
+        if (Objects.nonNull(chatMemoryUpdateReq.getLlmReviewRet())) {
+            updateWrapper.set(ChatMemoryDO::getLlmReviewRet, chatMemoryUpdateReq.getLlmReviewRet().toString());
+        }
+        if (Objects.nonNull(chatMemoryUpdateReq.getLlmReviewCmt())) {
+            updateWrapper.set(ChatMemoryDO::getLlmReviewCmt, chatMemoryUpdateReq.getLlmReviewCmt());
+        }
+        if (Objects.nonNull(chatMemoryUpdateReq.getHumanReviewRet())) {
+            updateWrapper.set(ChatMemoryDO::getHumanReviewRet, chatMemoryUpdateReq.getHumanReviewRet().toString());
+        }
+        if (Objects.nonNull(chatMemoryUpdateReq.getHumanReviewCmt())) {
+            updateWrapper.set(ChatMemoryDO::getHumanReviewCmt, chatMemoryUpdateReq.getHumanReviewCmt());
+        }
+        updateWrapper.set(ChatMemoryDO::getUpdatedAt, new Date());
+        updateWrapper.set(ChatMemoryDO::getUpdatedBy, user.getName());
+
+        chatMemoryMapper.update(updateWrapper);
     }
 
     @Override
