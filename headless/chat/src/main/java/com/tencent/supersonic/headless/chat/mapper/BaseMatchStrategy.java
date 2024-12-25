@@ -27,7 +27,7 @@ public abstract class BaseMatchStrategy<T extends MapResult> implements MatchStr
 
     @Override
     public Map<MatchText, List<T>> match(ChatQueryContext chatQueryContext, List<S2Term> terms,
-            Set<Long> detectDataSetIds) {
+                                         Set<Long> detectDataSetIds) {
         String text = chatQueryContext.getRequest().getQueryText();
         if (Objects.isNull(terms) || StringUtils.isEmpty(text)) {
             return null;
@@ -43,7 +43,7 @@ public abstract class BaseMatchStrategy<T extends MapResult> implements MatchStr
     }
 
     public List<T> detect(ChatQueryContext chatQueryContext, List<S2Term> terms,
-            Set<Long> detectDataSetIds) {
+                          Set<Long> detectDataSetIds) {
         throw new RuntimeException("Not implemented");
     }
 
@@ -73,11 +73,15 @@ public abstract class BaseMatchStrategy<T extends MapResult> implements MatchStr
     protected void executeTasks(List<Callable<Void>> tasks) {
         try {
             threadPoolConfig.getMapExecutor().invokeAll(tasks);
-        } catch (InterruptedException e) {
+            for (Callable<Void> future : tasks) {
+                future.call();
+            }
+        } catch (Exception e) {
             Thread.currentThread().interrupt();
             throw new RuntimeException("Task execution interrupted", e);
         }
     }
+
     public double getThreshold(Double threshold, Double minThreshold, MapModeEnum mapModeEnum) {
         if (MapModeEnum.STRICT.equals(mapModeEnum)) {
             return 1.0d;
