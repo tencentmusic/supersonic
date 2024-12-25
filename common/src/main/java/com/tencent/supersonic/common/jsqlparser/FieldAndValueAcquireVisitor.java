@@ -7,15 +7,7 @@ import net.sf.jsqlparser.expression.ExpressionVisitorAdapter;
 import net.sf.jsqlparser.expression.Function;
 import net.sf.jsqlparser.expression.LongValue;
 import net.sf.jsqlparser.expression.StringValue;
-import net.sf.jsqlparser.expression.operators.relational.ComparisonOperator;
-import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
-import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
-import net.sf.jsqlparser.expression.operators.relational.GreaterThan;
-import net.sf.jsqlparser.expression.operators.relational.GreaterThanEquals;
-import net.sf.jsqlparser.expression.operators.relational.InExpression;
-import net.sf.jsqlparser.expression.operators.relational.LikeExpression;
-import net.sf.jsqlparser.expression.operators.relational.MinorThan;
-import net.sf.jsqlparser.expression.operators.relational.MinorThanEquals;
+import net.sf.jsqlparser.expression.operators.relational.*;
 import net.sf.jsqlparser.schema.Column;
 import org.apache.commons.collections.CollectionUtils;
 
@@ -32,6 +24,29 @@ public class FieldAndValueAcquireVisitor extends ExpressionVisitorAdapter {
 
     public FieldAndValueAcquireVisitor(Set<FieldExpression> fieldExpressions) {
         this.fieldExpressions = fieldExpressions;
+    }
+
+    public void visit(Between between) {
+        Expression leftExpression = between.getLeftExpression();
+        String columnName = null;
+        if (leftExpression instanceof Column) {
+            Column column = (Column) leftExpression;
+            columnName = column.getColumnName();
+        }
+        Expression betweenExpressionStart = between.getBetweenExpressionStart();
+        Expression betweenExpressionEnd = between.getBetweenExpressionEnd();
+
+        FieldExpression fieldExpressionStart = new FieldExpression();
+        fieldExpressionStart.setFieldName(columnName);
+        fieldExpressionStart.setFieldValue(getFieldValue(betweenExpressionStart));
+        fieldExpressionStart.setOperator(JsqlConstants.GREATER_THAN_EQUALS);
+        fieldExpressions.add(fieldExpressionStart);
+
+        FieldExpression fieldExpressionEnd = new FieldExpression();
+        fieldExpressionEnd.setFieldName(columnName);
+        fieldExpressionEnd.setFieldValue(getFieldValue(betweenExpressionEnd));
+        fieldExpressionEnd.setOperator(JsqlConstants.MINOR_THAN_EQUALS);
+        fieldExpressions.add(fieldExpressionEnd);
     }
 
     public void visit(LikeExpression expr) {
