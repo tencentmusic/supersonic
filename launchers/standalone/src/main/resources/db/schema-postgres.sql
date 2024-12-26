@@ -416,7 +416,7 @@ CREATE TABLE IF NOT EXISTS s2_query_stat_info (
     sql_cmd_md5 varchar(200) DEFAULT NULL,
     query_struct_cmd text,
     struct_cmd_md5 varchar(200) DEFAULT NULL,
-    sql text,
+    query_sql text,
     sql_md5 varchar(200) DEFAULT NULL,
     query_engine varchar(20) DEFAULT NULL,
     elapsed_ms bigint DEFAULT NULL,

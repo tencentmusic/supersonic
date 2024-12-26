@@ -28,7 +28,7 @@ public class QueryStatDO {
     private String queryStructCmd;
     @TableField("struct_cmd_md5")
     private String queryStructCmdMd5;
-    @TableField("`sql`")
+    @TableField("query_sql")
     private String sql;
     private String sqlMd5;
     private String queryEngine;

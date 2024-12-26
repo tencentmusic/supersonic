@@ -11,8 +11,8 @@ services:
       POSTGRES_PASSWORD: supersonic_password
     ports:
       - "15432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql
+#    volumes:
+#      - postgres_data:/var/lib/postgresql
     networks:
       - supersonic_network
     dns:
@@ -72,9 +72,9 @@ services:
       - 114.114.114.114
       - 8.8.8.8
       - 8.8.4.4
-    volumes:
+    #volumes:
       #1.Named Volumes are best for persistent data managed by Docker.
-      - supersonic_data:/usr/src/app/supersonic-standalone-${SUPERSONIC_VERSION:-latest}
+      #- supersonic_data:/usr/src/app/supersonic-standalone-${SUPERSONIC_VERSION:-latest}
       #2.Bind Mounts are suitable for frequent modifications and debugging.
       #      - ./conf/application-prd.yaml:/usr/src/app/supersonic-standalone-${SUPERSONIC_VERSION:-latest}/conf/application-prd.yaml
       #3.Detailed Bind Mounts offer more control over the mount behavior.
@@ -84,9 +84,9 @@ services:
       #        bind:
       #          propagation: rprivate
       #          create_host_path: true
-volumes:
-  postgres_data:
-  supersonic_data:
+#volumes:
+#  postgres_data:
+#  supersonic_data:
 
 networks:
   supersonic_network:
