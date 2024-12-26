@@ -17,13 +17,14 @@ import java.util.List;
 public class TermDescMapper extends BaseMapper {
 
     @Override
+    public boolean accept(ChatQueryContext chatQueryContext) {
+        return !(CollectionUtils.isEmpty(chatQueryContext.getMapInfo().getTermDescriptionToMap())
+                || chatQueryContext.getRequest().isDescriptionMapped());
+    }
+
+    @Override
     public void doMap(ChatQueryContext chatQueryContext) {
-        SchemaMapInfo mapInfo = chatQueryContext.getMapInfo();
-        List<SchemaElement> termElements = mapInfo.getTermDescriptionToMap();
-        if (CollectionUtils.isEmpty(termElements)
-                || chatQueryContext.getRequest().isDescriptionMapped()) {
-            return;
-        }
+        List<SchemaElement> termElements = chatQueryContext.getMapInfo().getTermDescriptionToMap();
         for (SchemaElement schemaElement : termElements) {
             ChatQueryContext queryCtx =
                     buildQueryContext(chatQueryContext, schemaElement.getDescription());

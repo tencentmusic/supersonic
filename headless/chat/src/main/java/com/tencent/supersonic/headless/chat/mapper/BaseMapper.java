@@ -27,6 +27,10 @@ public abstract class BaseMapper implements SchemaMapper {
 
     @Override
     public void map(ChatQueryContext chatQueryContext) {
+        if (!accept(chatQueryContext)) {
+            return;
+        }
+
         String simpleName = this.getClass().getSimpleName();
         long startTime = System.currentTimeMillis();
         log.debug("before {},mapInfo:{}", simpleName,
@@ -45,6 +49,10 @@ public abstract class BaseMapper implements SchemaMapper {
     }
 
     public abstract void doMap(ChatQueryContext chatQueryContext);
+
+    protected boolean accept(ChatQueryContext chatQueryContext) {
+        return true;
+    }
 
     public void addToSchemaMap(SchemaMapInfo schemaMap, Long dataSetId,
             SchemaElementMatch newElementMatch) {

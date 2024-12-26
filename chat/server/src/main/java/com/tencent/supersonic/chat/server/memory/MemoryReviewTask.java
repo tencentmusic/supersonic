@@ -125,12 +125,9 @@ public class MemoryReviewTask {
             if (MemoryReviewResult.POSITIVE.equals(m.getLlmReviewRet())) {
                 m.setStatus(MemoryStatus.ENABLED);
             }
-            ChatMemoryUpdateReq memoryUpdateReq = ChatMemoryUpdateReq.builder()
-                    .id(m.getId())
-                    .status(m.getStatus())
-                    .llmReviewRet(m.getLlmReviewRet())
-                    .llmReviewCmt(m.getLlmReviewCmt())
-                    .build();
+            ChatMemoryUpdateReq memoryUpdateReq = ChatMemoryUpdateReq.builder().id(m.getId())
+                    .status(m.getStatus()).llmReviewRet(m.getLlmReviewRet())
+                    .llmReviewCmt(m.getLlmReviewCmt()).build();
             memoryService.updateMemory(memoryUpdateReq, User.getDefaultUser());
         }
     }

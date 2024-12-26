@@ -45,6 +45,14 @@ public class SqlQueryParser implements QueryParser {
         List<String> queryFields = SqlSelectHelper.getAllSelectFields(sqlQuery.getSql());
         Ontology ontology = queryStatement.getOntology();
         OntologyQuery ontologyQuery = buildOntologyQuery(ontology, queryFields);
+        // check if there are fields not matched with any metric or dimension
+        if (queryFields.size() > ontologyQuery.getMetrics().size()
+                + ontologyQuery.getDimensions().size()) {
+            queryStatement
+                    .setErrMsg("There are fields in the SQL not matched with any semantic column.");
+            queryStatement.setStatus(1);
+            return;
+        }
         queryStatement.setOntologyQuery(ontologyQuery);
 
         AggOption sqlQueryAggOption = getAggOption(sqlQuery.getSql(), ontologyQuery.getMetrics());

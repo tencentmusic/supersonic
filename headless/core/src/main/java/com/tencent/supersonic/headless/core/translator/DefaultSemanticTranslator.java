@@ -30,6 +30,9 @@ public class DefaultSemanticTranslator implements SemanticTranslator {
                 if (parser.accept(queryStatement)) {
                     log.debug("QueryConverter accept [{}]", parser.getClass().getName());
                     parser.parse(queryStatement);
+                    if (queryStatement.getStatus() != 0) {
+                        break;
+                    }
                 }
             }
             mergeOntologyQuery(queryStatement);

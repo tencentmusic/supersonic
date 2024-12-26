@@ -73,16 +73,19 @@ public class MemoryServiceImpl implements MemoryService {
             updateWrapper.set(ChatMemoryDO::getStatus, chatMemoryUpdateReq.getStatus());
         }
         if (Objects.nonNull(chatMemoryUpdateReq.getLlmReviewRet())) {
-            updateWrapper.set(ChatMemoryDO::getLlmReviewRet, chatMemoryUpdateReq.getLlmReviewRet().toString());
+            updateWrapper.set(ChatMemoryDO::getLlmReviewRet,
+                    chatMemoryUpdateReq.getLlmReviewRet().toString());
         }
         if (Objects.nonNull(chatMemoryUpdateReq.getLlmReviewCmt())) {
             updateWrapper.set(ChatMemoryDO::getLlmReviewCmt, chatMemoryUpdateReq.getLlmReviewCmt());
         }
         if (Objects.nonNull(chatMemoryUpdateReq.getHumanReviewRet())) {
-            updateWrapper.set(ChatMemoryDO::getHumanReviewRet, chatMemoryUpdateReq.getHumanReviewRet().toString());
+            updateWrapper.set(ChatMemoryDO::getHumanReviewRet,
+                    chatMemoryUpdateReq.getHumanReviewRet().toString());
         }
         if (Objects.nonNull(chatMemoryUpdateReq.getHumanReviewCmt())) {
-            updateWrapper.set(ChatMemoryDO::getHumanReviewCmt, chatMemoryUpdateReq.getHumanReviewCmt());
+            updateWrapper.set(ChatMemoryDO::getHumanReviewCmt,
+                    chatMemoryUpdateReq.getHumanReviewCmt());
         }
         updateWrapper.set(ChatMemoryDO::getUpdatedAt, new Date());
         updateWrapper.set(ChatMemoryDO::getUpdatedBy, user.getName());
