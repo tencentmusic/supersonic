@@ -133,6 +133,15 @@ public class SqlSelectHelper {
         return result;
     }
 
+    public static Set<String> getAliasFields(PlainSelect plainSelect) {
+        Set<String> result = new HashSet<>();
+        List<SelectItem<?>> selectItems = plainSelect.getSelectItems();
+        for (SelectItem selectItem : selectItems) {
+            selectItem.accept(new AliasAcquireVisitor(result));
+        }
+        return result;
+    }
+
     public static List<PlainSelect> getPlainSelect(Select selectStatement) {
         if (selectStatement == null) {
             return null;
@@ -264,10 +273,14 @@ public class SqlSelectHelper {
     public static List<String> getAllSelectFields(String sql) {
         List<PlainSelect> plainSelects = getPlainSelects(getPlainSelect(sql));
         Set<String> results = new HashSet<>();
+        Set<String> aliases = new HashSet<>();
         for (PlainSelect plainSelect : plainSelects) {
             List<String> fields = getFieldsByPlainSelect(plainSelect);
             results.addAll(fields);
+            aliases.addAll(getAliasFields(plainSelect));
         }
+        // do not account in aliases
+        results.removeAll(aliases);
         return new ArrayList<>(results);
     }
 

@@ -24,6 +24,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
+import org.junitpioneer.jupiter.SetSystemProperty;
 import org.springframework.test.context.TestPropertySource;
 
 import java.util.List;
@@ -95,6 +96,7 @@ public class Text2SQLEval extends BaseTest {
     }
 
     @Test
+    @SetSystemProperty(key = "s2.test", value = "true")
     public void test_drilldown_and_topN() throws Exception {
         long start = System.currentTimeMillis();
         QueryResult result = submitNewChat("过去30天访问次数最高的部门top3", agent.getId());
