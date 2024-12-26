@@ -53,7 +53,7 @@ public class ChatController {
     }
 
     @PostMapping("/updateQAFeedback")
-    public Boolean updateQAFeedback(@RequestParam(value = "id") Integer id,
+    public Boolean updateQAFeedback(@RequestParam(value = "id") Long id,
             @RequestParam(value = "score") Integer score,
             @RequestParam(value = "feedback", required = false) String feedback) {
         return chatService.updateFeedback(id, score, feedback);

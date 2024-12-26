@@ -86,6 +86,7 @@ COMMENT ON TABLE s2_chat_config IS 'chat config information table ';
 CREATE TABLE IF NOT EXISTS `s2_chat_memory` (
     `id` INT NOT NULL AUTO_INCREMENT,
     `question` varchar(655)    ,
+    `query_id`  BIGINT    ,
     `agent_id`  INT    ,
     `db_schema`  TEXT    ,
     `s2_sql` TEXT   ,

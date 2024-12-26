@@ -140,7 +140,7 @@ public class MemoryServiceImpl implements MemoryService {
         return chatMemoryDOS.stream().map(this::getMemory).collect(Collectors.toList());
     }
 
-    private void enableMemory(ChatMemoryDO memory) {
+    public void enableMemory(ChatMemoryDO memory) {
         memory.setStatus(MemoryStatus.ENABLED.toString());
         exemplarService.storeExemplar(embeddingConfig.getMemoryCollectionName(memory.getAgentId()),
                 Text2SQLExemplar.builder().question(memory.getQuestion())
@@ -148,7 +148,7 @@ public class MemoryServiceImpl implements MemoryService {
                         .sql(memory.getS2sql()).build());
     }
 
-    private void disableMemory(ChatMemoryDO memory) {
+    public void disableMemory(ChatMemoryDO memory) {
         memory.setStatus(MemoryStatus.DISABLED.toString());
         exemplarService.removeExemplar(embeddingConfig.getMemoryCollectionName(memory.getAgentId()),
                 Text2SQLExemplar.builder().question(memory.getQuestion())

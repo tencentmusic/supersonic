@@ -70,6 +70,7 @@ CREATE TABLE IF NOT EXISTS s2_chat_memory (
     id SERIAL PRIMARY KEY,
     question varchar(655),
     side_info TEXT,
+    query_id bigint,
     agent_id INTEGER,
     db_schema TEXT,
     s2_sql TEXT,

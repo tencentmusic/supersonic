@@ -23,6 +23,9 @@ public class ChatMemoryDO {
     @TableField("agent_id")
     private Integer agentId;
 
+    @TableField("query_id")
+    private Long queryId;
+
     @TableField("question")
     private String question;
 

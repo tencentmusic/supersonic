@@ -115,8 +115,8 @@ public class S2VisitsDemo extends S2BaseDemo {
             // create agent
             Integer agentId = addAgent(s2DataSet.getId());
             addSampleChats(agentId);
-            updateQueryScore(1);
-            updateQueryScore(4);
+            updateQueryScore(1L);
+            updateQueryScore(4L);
         } catch (Exception e) {
             log.error("Failed to add S2Visits demo data", e);
         }
