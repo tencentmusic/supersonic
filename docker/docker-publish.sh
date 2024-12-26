@@ -12,6 +12,7 @@ TAGS="latest"
 # If VERSION is provided, add it to TAGS and tag the image as latest
 if [ -n "$VERSION" ]; then
   TAGS="$TAGS $VERSION"
+  echo "Tagging Docker images $IMAGE_NAME:$VERSION to $IMAGE_NAME:latest"
   docker tag $IMAGE_NAME:$VERSION $IMAGE_NAME:latest
 fi
 
