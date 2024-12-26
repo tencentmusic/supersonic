@@ -219,8 +219,8 @@ public class SqlRemoveHelper {
         updateLikeExpression(likeExpression, constantExpression);
     }
 
-    private static void handleBetweenExpression(Between between,
-                                                Set<String> removeFieldNames) throws JSQLParserException {
+    private static void handleBetweenExpression(Between between, Set<String> removeFieldNames)
+            throws JSQLParserException {
         String columnName = SqlSelectHelper.getColumnName(between.getLeftExpression());
         if (!removeFieldNames.contains(columnName)) {
             return;
