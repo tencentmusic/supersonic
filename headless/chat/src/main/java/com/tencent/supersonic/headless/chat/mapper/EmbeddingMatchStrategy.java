@@ -1,7 +1,6 @@
 package com.tencent.supersonic.headless.chat.mapper;
 
 import com.google.common.collect.Lists;
-import com.tencent.supersonic.common.config.ThreadPoolConfig;
 import com.tencent.supersonic.headless.chat.ChatQueryContext;
 import com.tencent.supersonic.headless.chat.knowledge.EmbeddingResult;
 import com.tencent.supersonic.headless.chat.knowledge.MetaEmbeddingService;
@@ -38,8 +37,6 @@ public class EmbeddingMatchStrategy extends BatchMatchStrategy<EmbeddingResult> 
 
     @Autowired
     private MetaEmbeddingService metaEmbeddingService;
-    @Autowired
-    protected ThreadPoolConfig threadPoolConfig;
 
     @Override
     public List<EmbeddingResult> detectByBatch(ChatQueryContext chatQueryContext,

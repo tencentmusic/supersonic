@@ -102,8 +102,13 @@ public class NL2SQLParser implements ChatQueryParser {
                 }
 
                 if (parseResp.getSelectedParses().isEmpty()) {
-                    queryNLReq.setMapModeEnum(MapModeEnum.LOOSE);
-                    doParse(queryNLReq, parseResp);
+                    for (MapModeEnum mode : Lists.newArrayList(MapModeEnum.LOOSE)) {
+                        queryNLReq.setMapModeEnum(mode);
+                        doParse(queryNLReq, parseResp);
+                        if (!parseResp.getSelectedParses().isEmpty()) {
+                            break;
+                        }
+                    }
                 }
 
                 if (parseResp.getSelectedParses().isEmpty()) {
