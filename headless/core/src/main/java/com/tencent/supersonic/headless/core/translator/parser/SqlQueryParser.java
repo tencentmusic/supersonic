@@ -63,6 +63,14 @@ public class SqlQueryParser implements QueryParser {
         List<String> metrics =
                 metricSchemas.stream().map(SchemaItem::getBizName).collect(Collectors.toList());
         Set<String> dimensions = getDimensions(semanticSchemaResp, allFields);
+        // check if there are fields not matched with any metric or dimension
+        if (allFields.size() > metricSchemas.size() + dimensions.size()) {
+            queryStatement
+                    .setErrMsg("There are fields in the SQL not matched with any semantic column.");
+            queryStatement.setStatus(1);
+            return;
+        }
+
         OntologyQuery ontologyQuery = new OntologyQuery();
         ontologyQuery.getMetrics().addAll(metrics);
         ontologyQuery.getDimensions().addAll(dimensions);
