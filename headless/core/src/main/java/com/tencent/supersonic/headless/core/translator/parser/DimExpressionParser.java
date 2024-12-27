@@ -26,7 +26,9 @@ public class DimExpressionParser implements QueryParser {
     @Override
     public boolean accept(QueryStatement queryStatement) {
         return Objects.nonNull(queryStatement.getSqlQuery())
-                && StringUtils.isNotBlank(queryStatement.getSqlQuery().getSql());
+                && Objects.nonNull(queryStatement.getOntologyQuery())
+                && StringUtils.isNotBlank(queryStatement.getSqlQuery().getSql())
+                && !CollectionUtils.isEmpty(queryStatement.getOntologyQuery().getDimensions());
     }
 
     @Override
