@@ -276,8 +276,10 @@ public class SqlSelectHelper {
         Set<String> aliases = new HashSet<>();
         for (PlainSelect plainSelect : plainSelects) {
             List<String> fields = getFieldsByPlainSelect(plainSelect);
+            Set<String> subaliases = getAliasFields(plainSelect);
+            subaliases.removeAll(fields);
             results.addAll(fields);
-            aliases.addAll(getAliasFields(plainSelect));
+            aliases.addAll(subaliases);
         }
         // do not account in aliases
         results.removeAll(aliases);
