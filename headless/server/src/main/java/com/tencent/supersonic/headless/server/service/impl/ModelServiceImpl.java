@@ -97,10 +97,10 @@ public class ModelServiceImpl implements ModelService {
     private final ThreadPoolExecutor executor;
 
     public ModelServiceImpl(ModelRepository modelRepository, DatabaseService databaseService,
-                            @Lazy DimensionService dimensionService, @Lazy MetricService metricService,
-                            DomainService domainService, UserService userService, DataSetService dataSetService,
-                            DateInfoRepository dateInfoRepository, ModelRelaService modelRelaService,
-                            @Qualifier("commonExecutor") ThreadPoolExecutor executor) {
+            @Lazy DimensionService dimensionService, @Lazy MetricService metricService,
+            DomainService domainService, UserService userService, DataSetService dataSetService,
+            DateInfoRepository dateInfoRepository, ModelRelaService modelRelaService,
+            @Qualifier("commonExecutor") ThreadPoolExecutor executor) {
         this.modelRepository = modelRepository;
         this.databaseService = databaseService;
         this.dimensionService = dimensionService;
@@ -233,7 +233,7 @@ public class ModelServiceImpl implements ModelService {
     }
 
     private void doBuild(ModelBuildReq modelBuildReq, DbSchema curSchema, List<DbSchema> dbSchemas,
-                         Map<String, ModelSchema> modelSchemaMap) {
+            Map<String, ModelSchema> modelSchemaMap) {
         ModelSchema modelSchema = new ModelSchema();
         List<SemanticModeller> semanticModellers = CoreComponentFactory.getSemanticModellers();
         for (SemanticModeller semanticModeller : semanticModellers) {
@@ -251,7 +251,7 @@ public class ModelServiceImpl implements ModelService {
     }
 
     private List<DbSchema> convert(Map<String, List<DBColumn>> dbColumnMap,
-                                   ModelBuildReq modelBuildReq) {
+            ModelBuildReq modelBuildReq) {
         return dbColumnMap.keySet().stream()
                 .map(key -> convert(modelBuildReq, key, dbColumnMap.get(key)))
                 .collect(Collectors.toList());
@@ -406,7 +406,7 @@ public class ModelServiceImpl implements ModelService {
     }
 
     public List<ModelResp> getModelRespAuthInheritDomain(User user, Long domainId,
-                                                         AuthType authType) {
+            AuthType authType) {
         List<Long> domainIds =
                 domainService.getDomainAuthSet(user, authType).stream().filter(domainResp -> {
                     if (domainId == null) {
@@ -581,7 +581,7 @@ public class ModelServiceImpl implements ModelService {
     }
 
     public static boolean checkDataSetPermission(Set<String> orgIds, User user,
-                                                 ModelResp modelResp) {
+            ModelResp modelResp) {
         if (checkAdminPermission(orgIds, user, modelResp)) {
             return true;
         }

@@ -108,6 +108,7 @@ public class Text2SQLEval extends BaseTest {
     }
 
     @Test
+    @SetSystemProperty(key = "s2.test", value = "true")
     public void test_filter_and_top() throws Exception {
         long start = System.currentTimeMillis();
         QueryResult result = submitNewChat("近半个月来marketing部门访问量最高的用户是谁", agent.getId());
