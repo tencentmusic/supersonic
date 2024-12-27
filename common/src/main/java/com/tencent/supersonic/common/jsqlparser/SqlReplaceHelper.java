@@ -229,6 +229,26 @@ public class SqlReplaceHelper {
                 orderByElement.accept(new OrderByReplaceVisitor(fieldNameMap, exactReplace));
             }
         }
+        List<Select> selects = operationList.getSelects();
+        if (!CollectionUtils.isEmpty(selects)) {
+            for (Select select : selects) {
+                if (select instanceof PlainSelect) {
+                    replaceFieldsInPlainOneSelect(fieldNameMap, exactReplace, (PlainSelect) select);
+                }
+            }
+        }
+        List<WithItem> withItems = operationList.getWithItemsList();
+        if (!CollectionUtils.isEmpty(withItems)) {
+            for (WithItem withItem : withItems) {
+                Select select = withItem.getSelect();
+                if (select instanceof PlainSelect) {
+                    replaceFieldsInPlainOneSelect(fieldNameMap, exactReplace, (PlainSelect) select);
+                } else if (select instanceof ParenthesedSelect) {
+                    replaceFieldsInPlainOneSelect(fieldNameMap, exactReplace,
+                            select.getPlainSelect());
+                }
+            }
+        }
     }
 
     public static String replaceFunction(String sql, Map<String, String> functionMap) {
@@ -609,6 +629,25 @@ public class SqlReplaceHelper {
                     PlainSelect subPlainSelect = (PlainSelect) subSelectBody;
                     plainSelectList.add(subPlainSelect);
                 });
+            }
+            List<Select> selects = setOperationList.getSelects();
+            if (!CollectionUtils.isEmpty(selects)) {
+                for (Select select : selects) {
+                    if (select instanceof PlainSelect) {
+                        plainSelectList.add((PlainSelect) select);
+                    }
+                }
+            }
+            List<WithItem> withItems = setOperationList.getWithItemsList();
+            if (!CollectionUtils.isEmpty(withItems)) {
+                for (WithItem withItem : withItems) {
+                    Select select = withItem.getSelect();
+                    if (select instanceof PlainSelect) {
+                        plainSelectList.add((PlainSelect) select);
+                    } else if (select instanceof ParenthesedSelect) {
+                        plainSelectList.add(select.getPlainSelect());
+                    }
+                }
             }
         } else {
             return sql;

@@ -1,18 +1,17 @@
 package com.tencent.supersonic.headless;
 
 import com.tencent.supersonic.common.pojo.User;
-import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.demo.S2VisitsDemo;
-import com.tencent.supersonic.headless.api.pojo.response.DatabaseResp;
-import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticTranslateResp;
 import com.tencent.supersonic.headless.chat.utils.QueryReqBuilder;
-import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junitpioneer.jupiter.SetSystemProperty;
 
-import java.util.Optional;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Objects;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -21,22 +20,13 @@ public class TranslatorTest extends BaseTest {
 
     private Long dataSetId;
 
-    private DatabaseResp databaseResp;
-
     @BeforeEach
     public void init() {
         agent = getAgentByName(S2VisitsDemo.AGENT_NAME);
         schema = schemaService.getSemanticSchema(agent.getDataSetIds());
-        Optional<Long> id = agent.getDataSetIds().stream().findFirst();
-        dataSetId = id.orElse(1L);
-        databaseResp = databaseService.getDatabase(1L);
-    }
-
-    private void executeSql(String sql) {
-        SemanticQueryResp queryResp = databaseService.executeSql(sql, databaseResp);
-        assert StringUtils.isBlank(queryResp.getErrorMsg());
-        System.out.println(
-                String.format("Execute result: %s", JsonUtil.toString(queryResp.getResultList())));
+        if (Objects.nonNull(agent)) {
+            dataSetId = agent.getDataSetIds().stream().findFirst().get();
+        }
     }
 
     @Test
@@ -88,6 +78,36 @@ public class TranslatorTest extends BaseTest {
         assertNotNull(explain.getQuerySQL());
         assertTrue(explain.getQuerySQL().toLowerCase().contains("department"));
         assertTrue(explain.getQuerySQL().toLowerCase().contains("count(1)"));
+        executeSql(explain.getQuerySQL());
+    }
+
+    @Test
+    @SetSystemProperty(key = "s2.test", value = "true")
+    public void testSql_unionALL() throws Exception {
+        String sql = new String(
+                Files.readAllBytes(
+                        Paths.get(ClassLoader.getSystemResource("sql/testUnion.sql").toURI())),
+                StandardCharsets.UTF_8);
+        SemanticTranslateResp explain = semanticLayerService
+                .translate(QueryReqBuilder.buildS2SQLReq(sql, dataSetId), User.getDefaultUser());
+        assertNotNull(explain);
+        assertNotNull(explain.getQuerySQL());
+        assertTrue(explain.getQuerySQL().contains("department"));
+        assertTrue(explain.getQuerySQL().contains("pv"));
+        executeSql(explain.getQuerySQL());
+    }
+
+    @Test
+    @SetSystemProperty(key = "s2.test", value = "true")
+    public void testSql_with() throws Exception {
+        String sql = new String(
+                Files.readAllBytes(
+                        Paths.get(ClassLoader.getSystemResource("sql/testWith.sql").toURI())),
+                StandardCharsets.UTF_8);
+        SemanticTranslateResp explain = semanticLayerService
+                .translate(QueryReqBuilder.buildS2SQLReq(sql, dataSetId), User.getDefaultUser());
+        assertNotNull(explain);
+        assertNotNull(explain.getQuerySQL());
         executeSql(explain.getQuerySQL());
     }
 
