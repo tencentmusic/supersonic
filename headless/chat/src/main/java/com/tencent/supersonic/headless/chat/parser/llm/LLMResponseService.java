@@ -2,7 +2,10 @@ package com.tencent.supersonic.headless.chat.parser.llm;
 
 import com.tencent.supersonic.common.jsqlparser.SqlValidHelper;
 import com.tencent.supersonic.common.pojo.Constants;
+import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.common.pojo.Text2SQLExemplar;
+import com.tencent.supersonic.headless.api.pojo.DataSetSchema;
+import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.chat.ChatQueryContext;
 import com.tencent.supersonic.headless.chat.query.QueryManager;
@@ -50,6 +53,15 @@ public class LLMResponseService {
         parseInfo.setQueryMode(semanticQuery.getQueryMode());
         parseInfo.getSqlInfo().setParsedS2SQL(s2SQL);
         parseInfo.getSqlInfo().setCorrectedS2SQL(s2SQL);
+
+        DataSetSchema dataSetSchema =
+                queryCtx.getSemanticSchema().getDataSetSchemaMap().get(parseInfo.getDataSetId());
+        SchemaElement partitionDimension = dataSetSchema.getPartitionDimension();
+        if (Objects.nonNull(partitionDimension)) {
+            DateConf dateConf = new DateConf();
+            dateConf.setDateField(partitionDimension.getName());
+            parseInfo.setDateInfo(dateConf);
+        }
         queryCtx.getCandidateQueries().add(semanticQuery);
     }
 

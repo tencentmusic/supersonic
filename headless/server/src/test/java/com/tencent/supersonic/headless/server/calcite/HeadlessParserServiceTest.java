@@ -2,6 +2,7 @@ package com.tencent.supersonic.headless.server.calcite;
 
 import com.tencent.supersonic.common.pojo.ColumnOrder;
 import com.tencent.supersonic.common.pojo.enums.EngineType;
+import com.tencent.supersonic.headless.api.pojo.DimensionTimeTypeParams;
 import com.tencent.supersonic.headless.api.pojo.response.SqlParserResp;
 import com.tencent.supersonic.headless.core.pojo.OntologyQuery;
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;
@@ -76,7 +77,7 @@ class HeadlessParserServiceTest {
         dimension.setName("imp_date");
         dimension.setExpr("imp_date");
         dimension.setType("time");
-        DimensionTimeTypeParamsTpl dimensionTimeTypeParams = new DimensionTimeTypeParamsTpl();
+        DimensionTimeTypeParams dimensionTimeTypeParams = new DimensionTimeTypeParams();
         dimensionTimeTypeParams.setIsPrimary("true");
         dimensionTimeTypeParams.setTimeGranularity("day");
         dimension.setTypeParams(dimensionTimeTypeParams);
@@ -87,7 +88,7 @@ class HeadlessParserServiceTest {
         dimension2.setName("sys_imp_date");
         dimension2.setExpr("imp_date");
         dimension2.setType("time");
-        DimensionTimeTypeParamsTpl dimensionTimeTypeParams2 = new DimensionTimeTypeParamsTpl();
+        DimensionTimeTypeParams dimensionTimeTypeParams2 = new DimensionTimeTypeParams();
         dimensionTimeTypeParams2.setIsPrimary("true");
         dimensionTimeTypeParams2.setTimeGranularity("day");
         dimension2.setTypeParams(dimensionTimeTypeParams2);
@@ -97,7 +98,7 @@ class HeadlessParserServiceTest {
         dimension3.setName("sys_imp_week");
         dimension3.setExpr("to_monday(from_unixtime(unix_timestamp(imp_date), 'yyyy-MM-dd'))");
         dimension3.setType("time");
-        DimensionTimeTypeParamsTpl dimensionTimeTypeParams3 = new DimensionTimeTypeParamsTpl();
+        DimensionTimeTypeParams dimensionTimeTypeParams3 = new DimensionTimeTypeParams();
         dimensionTimeTypeParams3.setIsPrimary("true");
         dimensionTimeTypeParams3.setTimeGranularity("day");
         dimension3.setTypeParams(dimensionTimeTypeParams3);
@@ -201,7 +202,7 @@ class HeadlessParserServiceTest {
         dimension.setName("sys_imp_date");
         dimension.setExpr("imp_date");
         dimension.setType("time");
-        DimensionTimeTypeParamsTpl dimensionTimeTypeParams = new DimensionTimeTypeParamsTpl();
+        DimensionTimeTypeParams dimensionTimeTypeParams = new DimensionTimeTypeParams();
         dimensionTimeTypeParams.setIsPrimary("true");
         dimensionTimeTypeParams.setTimeGranularity("day");
         dimension.setTypeParams(dimensionTimeTypeParams);
@@ -212,7 +213,7 @@ class HeadlessParserServiceTest {
         dimension3.setName("sys_imp_week");
         dimension3.setExpr("to_monday(from_unixtime(unix_timestamp(imp_date), 'yyyy-MM-dd'))");
         dimension3.setType("time");
-        DimensionTimeTypeParamsTpl dimensionTimeTypeParams3 = new DimensionTimeTypeParamsTpl();
+        DimensionTimeTypeParams dimensionTimeTypeParams3 = new DimensionTimeTypeParams();
         dimensionTimeTypeParams3.setIsPrimary("true");
         dimensionTimeTypeParams3.setTimeGranularity("week");
         dimension3.setTypeParams(dimensionTimeTypeParams3);

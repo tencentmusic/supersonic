@@ -3,7 +3,6 @@ package com.tencent.supersonic.headless.core.translator.parser;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.common.jsqlparser.SqlAddHelper;
 import com.tencent.supersonic.common.jsqlparser.SqlSelectHelper;
-import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;
 import com.tencent.supersonic.headless.core.translator.parser.s2sql.Dimension;
 import lombok.extern.slf4j.Slf4j;
@@ -40,9 +39,8 @@ public class DefaultDimValueParser implements QueryParser {
             return;
         }
         String sql = queryStatement.getSqlQuery().getSql();
-        List<String> whereFields = SqlSelectHelper.getWhereFields(sql).stream()
-                .filter(field -> !TimeDimensionEnum.containsTimeDimension(field))
-                .collect(Collectors.toList());
+        List<String> whereFields =
+                SqlSelectHelper.getWhereFields(sql).stream().collect(Collectors.toList());
         if (!CollectionUtils.isEmpty(whereFields)) {
             return;
         }

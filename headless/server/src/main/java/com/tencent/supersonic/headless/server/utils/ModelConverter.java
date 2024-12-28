@@ -7,21 +7,8 @@ import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.common.pojo.enums.StatusEnum;
 import com.tencent.supersonic.common.util.BeanMapper;
 import com.tencent.supersonic.common.util.JsonUtil;
-import com.tencent.supersonic.headless.api.pojo.ColumnSchema;
-import com.tencent.supersonic.headless.api.pojo.Dimension;
-import com.tencent.supersonic.headless.api.pojo.DrillDownDimension;
-import com.tencent.supersonic.headless.api.pojo.Identify;
-import com.tencent.supersonic.headless.api.pojo.Measure;
-import com.tencent.supersonic.headless.api.pojo.MeasureParam;
-import com.tencent.supersonic.headless.api.pojo.MetricDefineByMeasureParams;
-import com.tencent.supersonic.headless.api.pojo.ModelDetail;
-import com.tencent.supersonic.headless.api.pojo.ModelSchema;
-import com.tencent.supersonic.headless.api.pojo.enums.DimensionType;
-import com.tencent.supersonic.headless.api.pojo.enums.FieldType;
-import com.tencent.supersonic.headless.api.pojo.enums.IdentifyType;
-import com.tencent.supersonic.headless.api.pojo.enums.MetricDefineType;
-import com.tencent.supersonic.headless.api.pojo.enums.ModelDefineType;
-import com.tencent.supersonic.headless.api.pojo.enums.SemanticType;
+import com.tencent.supersonic.headless.api.pojo.*;
+import com.tencent.supersonic.headless.api.pojo.enums.*;
 import com.tencent.supersonic.headless.api.pojo.request.DimensionReq;
 import com.tencent.supersonic.headless.api.pojo.request.MetricReq;
 import com.tencent.supersonic.headless.api.pojo.request.ModelBuildReq;
@@ -34,12 +21,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.util.CollectionUtils;
 
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class ModelConverter {
@@ -141,7 +123,7 @@ public class ModelConverter {
         metricReq.setModelId(modelDO.getId());
         MetricDefineByMeasureParams exprTypeParams = new MetricDefineByMeasureParams();
         exprTypeParams.setExpr(measure.getBizName());
-        MeasureParam measureParam = new MeasureParam();
+        Measure measureParam = new Measure();
         BeanMapper.mapper(measure, measureParam);
         exprTypeParams.setMeasures(Lists.newArrayList(measureParam));
         metricReq.setMetricDefineByMeasureParams(exprTypeParams);

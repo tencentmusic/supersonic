@@ -1,5 +1,6 @@
 package com.tencent.supersonic.headless.core.translator.parser.s2sql;
 
+import com.tencent.supersonic.headless.api.pojo.DimensionTimeTypeParams;
 import lombok.Builder;
 import lombok.Data;
 

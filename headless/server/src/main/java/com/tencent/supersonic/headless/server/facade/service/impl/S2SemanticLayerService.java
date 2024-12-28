@@ -5,8 +5,8 @@ import com.google.common.collect.Sets;
 import com.tencent.supersonic.common.pojo.QueryColumn;
 import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.common.pojo.enums.TaskStatusEnum;
-import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
-import com.tencent.supersonic.headless.api.pojo.*;
+import com.tencent.supersonic.headless.api.pojo.DataSetSchema;
+import com.tencent.supersonic.headless.api.pojo.MetaFilter;
 import com.tencent.supersonic.headless.api.pojo.enums.SemanticType;
 import com.tencent.supersonic.headless.api.pojo.request.*;
 import com.tencent.supersonic.headless.api.pojo.response.*;
@@ -206,12 +206,6 @@ public class S2SemanticLayerService implements SemanticLayerService {
         ModelResp modelResp = modelResps.get(0);
         String sql = String.format("select distinct %s from %s where 1=1", dimensionResp.getName(),
                 modelResp.getName());
-        List<Dimension> timeDims = modelResp.getTimeDimension();
-        if (CollectionUtils.isNotEmpty(timeDims)) {
-            sql = String.format("%s and %s >= '%s' and %s <= '%s'", sql,
-                    TimeDimensionEnum.DAY.getName(), queryDimValueReq.getDateInfo().getStartDate(),
-                    TimeDimensionEnum.DAY.getName(), queryDimValueReq.getDateInfo().getEndDate());
-        }
         if (StringUtils.isNotBlank(queryDimValueReq.getValue())) {
             sql += " AND " + queryDimValueReq.getBizName() + " LIKE '%"
                     + queryDimValueReq.getValue() + "%'";
@@ -284,6 +278,7 @@ public class S2SemanticLayerService implements SemanticLayerService {
                 && StringUtils.isNotBlank(semanticQueryReq.getSqlInfo().getQuerySQL())) {
             queryStatement.setSql(semanticQueryReq.getSqlInfo().getQuerySQL());
             queryStatement.setDataSetId(semanticQueryReq.getDataSetId());
+            queryStatement.setDataSetName(semanticQueryReq.getDataSetName());
             queryStatement.setIsTranslated(true);
         }
         return queryStatement;
@@ -298,6 +293,7 @@ public class S2SemanticLayerService implements SemanticLayerService {
         QueryStatement queryStatement = new QueryStatement();
         queryStatement.setEnableOptimize(queryUtils.enableOptimize());
         queryStatement.setDataSetId(queryReq.getDataSetId());
+        queryStatement.setDataSetName(queryReq.getDataSetName());
         queryStatement.setSemanticSchema(semanticSchemaResp);
         queryStatement.setOntology(semanticSchemaManager.buildOntology(semanticSchemaResp));
         return queryStatement;

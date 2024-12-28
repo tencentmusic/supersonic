@@ -3,7 +3,6 @@ package com.tencent.supersonic.headless.chat.corrector;
 import com.tencent.supersonic.common.jsqlparser.SqlAddHelper;
 import com.tencent.supersonic.common.jsqlparser.SqlRemoveHelper;
 import com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum;
-import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import com.tencent.supersonic.headless.api.pojo.DataSetSchema;
 import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
@@ -13,12 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.util.CollectionUtils;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -47,18 +41,7 @@ public abstract class BaseSemanticCorrector implements SemanticCorrector {
 
     protected Map<String, String> getFieldNameMap(ChatQueryContext chatQueryContext,
             Long dataSetId) {
-
-        Map<String, String> result = getFieldNameMapFromDB(chatQueryContext, dataSetId);
-        if (chatQueryContext.containsPartitionDimensions(dataSetId)) {
-            result.put(TimeDimensionEnum.DAY.getChName(), TimeDimensionEnum.DAY.getChName());
-            result.put(TimeDimensionEnum.MONTH.getChName(), TimeDimensionEnum.MONTH.getChName());
-            result.put(TimeDimensionEnum.WEEK.getChName(), TimeDimensionEnum.WEEK.getChName());
-
-            result.put(TimeDimensionEnum.DAY.getName(), TimeDimensionEnum.DAY.getChName());
-            result.put(TimeDimensionEnum.MONTH.getName(), TimeDimensionEnum.MONTH.getChName());
-            result.put(TimeDimensionEnum.WEEK.getName(), TimeDimensionEnum.WEEK.getChName());
-        }
-        return result;
+        return getFieldNameMapFromDB(chatQueryContext, dataSetId);
     }
 
     private static Map<String, String> getFieldNameMapFromDB(ChatQueryContext chatQueryContext,
@@ -126,7 +109,6 @@ public abstract class BaseSemanticCorrector implements SemanticCorrector {
                     }
                     return elements.stream();
                 }).collect(Collectors.toSet());
-        dimensions.add(TimeDimensionEnum.DAY.getChName());
         return dimensions;
     }
 
@@ -142,8 +124,6 @@ public abstract class BaseSemanticCorrector implements SemanticCorrector {
             SemanticParseInfo semanticParseInfo) {
         String correctS2SQL = semanticParseInfo.getSqlInfo().getCorrectedS2SQL();
         Set<String> removeFieldNames = new HashSet<>();
-        removeFieldNames.addAll(TimeDimensionEnum.getChNameList());
-        removeFieldNames.addAll(TimeDimensionEnum.getNameList());
         Map<String, String> fieldNameMap =
                 getFieldNameMapFromDB(chatQueryContext, semanticParseInfo.getDataSetId());
         removeFieldNames.removeIf(fieldName -> fieldNameMap.containsKey(fieldName));

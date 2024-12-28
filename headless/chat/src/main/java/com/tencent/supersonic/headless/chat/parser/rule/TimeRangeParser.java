@@ -2,6 +2,8 @@ package com.tencent.supersonic.headless.chat.parser.rule;
 
 import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.common.pojo.enums.DatePeriodEnum;
+import com.tencent.supersonic.headless.api.pojo.DataSetSchema;
+import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.chat.ChatQueryContext;
 import com.tencent.supersonic.headless.chat.parser.SemanticParser;
@@ -57,6 +59,10 @@ public class TimeRangeParser implements SemanticParser {
         for (SemanticQuery query : queryContext.getCandidateQueries()) {
             SemanticParseInfo parseInfo = query.getParseInfo();
             if (queryContext.containsPartitionDimensions(parseInfo.getDataSetId())) {
+                DataSetSchema dataSetSchema = queryContext.getSemanticSchema().getDataSetSchemaMap()
+                        .get(parseInfo.getDataSetId());
+                SchemaElement partitionDimension = dataSetSchema.getPartitionDimension();
+                dateConf.setDateField(partitionDimension.getName());
                 parseInfo.setDateInfo(dateConf);
             }
             parseInfo.setScore(parseInfo.getScore() + dateConf.getDetectWord().length());

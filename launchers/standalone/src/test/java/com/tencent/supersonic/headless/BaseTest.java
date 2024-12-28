@@ -106,6 +106,7 @@ public class BaseTest extends BaseApplication {
         dateConf.setDateMode(DateMode.BETWEEN);
         dateConf.setEndDate(now().plusDays(0).toString());
         dateConf.setStartDate(now().plusDays(-365).toString());
+        dateConf.setDateField("imp_date");
         queryStructReq.setDateInfo(dateConf);
 
         List<Order> orders = new ArrayList<>();

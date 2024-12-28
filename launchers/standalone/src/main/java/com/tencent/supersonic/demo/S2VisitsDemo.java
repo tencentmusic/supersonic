@@ -60,6 +60,7 @@ public class S2VisitsDemo extends S2BaseDemo {
             DimensionResp userDimension = getDimension("user_name", userModel);
             updateMetric(stayTimeModel, departmentDimension, userDimension);
             updateMetric_pv(pvUvModel, departmentDimension, userDimension, metricPv);
+            addMetric_uv(pvUvModel, departmentDimension);
 
             // create dict conf for dimensions
             enableDimensionValue(departmentDimension);
@@ -307,9 +308,9 @@ public class S2VisitsDemo extends S2BaseDemo {
         metricReq.setClassifications(Collections.singletonList("核心指标"));
         MetricDefineByMeasureParams metricTypeParams = new MetricDefineByMeasureParams();
         metricTypeParams.setExpr("s2_stay_time_statis_stay_hours");
-        List<MeasureParam> measures = new ArrayList<>();
-        MeasureParam measure = new MeasureParam("s2_stay_time_statis_stay_hours", "",
-                AggOperatorEnum.SUM.getOperator());
+        List<Measure> measures = new ArrayList<>();
+        Measure measure = new Measure("停留时长", "s2_stay_time_statis_stay_hours",
+                AggOperatorEnum.SUM.getOperator(), 0);
         measures.add(measure);
         metricTypeParams.setMeasures(measures);
         metricReq.setMetricDefineByMeasureParams(metricTypeParams);
@@ -329,9 +330,9 @@ public class S2VisitsDemo extends S2BaseDemo {
         metricReq.setDescription("一段时间内用户的访问次数");
         MetricDefineByMeasureParams metricTypeParams = new MetricDefineByMeasureParams();
         metricTypeParams.setExpr("s2_pv_uv_statis_pv");
-        List<MeasureParam> measures = new ArrayList<>();
-        MeasureParam measure =
-                new MeasureParam("s2_pv_uv_statis_pv", "", AggOperatorEnum.SUM.getOperator());
+        List<Measure> measures = new ArrayList<>();
+        Measure measure =
+                new Measure("访问次数", "s2_pv_uv_statis_pv", AggOperatorEnum.SUM.getOperator(), 0);
         measures.add(measure);
         metricTypeParams.setMeasures(measures);
         metricReq.setMetricDefineByMeasureParams(metricTypeParams);

@@ -7,7 +7,6 @@ import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.common.pojo.ItemDateResp;
 import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
 import com.tencent.supersonic.common.pojo.enums.EngineType;
-import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import com.tencent.supersonic.common.util.DateModeUtils;
 import com.tencent.supersonic.common.util.SqlFilterUtils;
 import com.tencent.supersonic.common.util.StringUtil;
@@ -29,19 +28,10 @@ import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.tencent.supersonic.common.pojo.Constants.DAY_FORMAT;
-import static com.tencent.supersonic.common.pojo.Constants.JOIN_UNDERLINE;
-import static com.tencent.supersonic.common.pojo.Constants.UNDERLINE;
+import static com.tencent.supersonic.common.pojo.Constants.*;
 
 /** tools functions to analyze queryStructReq */
 @Component
@@ -68,12 +58,7 @@ public class SqlGenerateUtils {
             if (group.contains(JOIN_UNDERLINE)) {
                 group = group.split(JOIN_UNDERLINE)[1];
             }
-            if (!TimeDimensionEnum.getNameList().contains(group)) {
-                locate++;
-                sb.append(group).append(" as ").append("name").append(locate).append(",");
-            } else {
-                sb.append(group).append(",");
-            }
+            sb.append(group).append(",");
         }
         locate = 0;
         for (Aggregator agg : queryStructCmd.getAggregators()) {

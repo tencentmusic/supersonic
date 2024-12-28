@@ -9,6 +9,7 @@ import org.apache.commons.lang3.tuple.Triple;
 public class QueryStatement {
 
     private Long dataSetId;
+    private String dataSetName;
     private String sql;
     private String errMsg;
     private StructQuery structQuery;
