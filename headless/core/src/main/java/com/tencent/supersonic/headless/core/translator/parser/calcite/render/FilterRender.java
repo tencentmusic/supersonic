@@ -32,7 +32,7 @@ public class FilterRender extends Renderer {
         SqlNode filterNode = null;
         List<String> queryMetrics = new ArrayList<>(metricCommand.getMetrics());
         List<String> queryDimensions = new ArrayList<>(metricCommand.getDimensions());
-        EngineType engineType = schema.getOntology().getDatabase().getType();
+        EngineType engineType = schema.getOntology().getDatabaseType();
 
         if (metricCommand.getWhere() != null && !metricCommand.getWhere().isEmpty()) {
             filterNode = SemanticNode.parse(metricCommand.getWhere(), scope, engineType);

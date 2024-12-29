@@ -152,7 +152,7 @@ public class DataModelNode extends SemanticNode {
     public static void mergeQueryFilterDimensionMeasure(Ontology ontology, OntologyQuery queryParam,
             Set<String> dimensions, Set<String> measures, SqlValidatorScope scope)
             throws Exception {
-        EngineType engineType = ontology.getDatabase().getType();
+        EngineType engineType = ontology.getDatabaseType();
         if (Objects.nonNull(queryParam.getWhere()) && !queryParam.getWhere().isEmpty()) {
             Set<String> filterConditions = new HashSet<>();
             FilterNode.getFilterField(parse(queryParam.getWhere(), scope, engineType),

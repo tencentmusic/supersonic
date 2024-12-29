@@ -33,7 +33,7 @@ class HeadlessParserServiceTest {
             queryStatement.setOntologyQuery(ontologyQuery);
             String sql = aggBuilder.buildOntologySql(queryStatement);
             queryStatement.setSql(sql);
-            EngineType engineType = semanticSchema.getOntology().getDatabase().getType();
+            EngineType engineType = semanticSchema.getOntology().getDatabaseType();
             sqlParser.setSql(aggBuilder.getSql(engineType));
         } catch (Exception e) {
             sqlParser.setErrMsg(e.getMessage());

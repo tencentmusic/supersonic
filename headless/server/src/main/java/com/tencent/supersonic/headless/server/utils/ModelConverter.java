@@ -107,7 +107,7 @@ public class ModelConverter {
             dimensionReq.setSemanticType(SemanticType.CATEGORY.name());
         }
         dimensionReq.setModelId(modelDO.getId());
-        dimensionReq.setExpr(dim.getBizName());
+        dimensionReq.setExpr(dim.getExpr());
         dimensionReq.setType(dim.getType().name());
         dimensionReq
                 .setDescription(Objects.isNull(dim.getDescription()) ? "" : dim.getDescription());
@@ -118,11 +118,11 @@ public class ModelConverter {
     public static MetricReq convert(Measure measure, ModelDO modelDO) {
         MetricReq metricReq = new MetricReq();
         metricReq.setName(measure.getName());
-        metricReq.setBizName(measure.getExpr());
+        metricReq.setBizName(measure.getBizName());
         metricReq.setDescription(measure.getName());
         metricReq.setModelId(modelDO.getId());
         MetricDefineByMeasureParams exprTypeParams = new MetricDefineByMeasureParams();
-        exprTypeParams.setExpr(measure.getBizName());
+        exprTypeParams.setExpr(measure.getExpr());
         Measure measureParam = new Measure();
         BeanMapper.mapper(measure, measureParam);
         exprTypeParams.setMeasures(Lists.newArrayList(measureParam));

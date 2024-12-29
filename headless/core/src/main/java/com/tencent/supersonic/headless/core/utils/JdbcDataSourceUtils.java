@@ -5,7 +5,7 @@ import javax.sql.DataSource;
 import com.alibaba.druid.util.StringUtils;
 import com.tencent.supersonic.common.util.MD5Util;
 import com.tencent.supersonic.headless.api.pojo.enums.DataType;
-import com.tencent.supersonic.headless.core.pojo.Database;
+import com.tencent.supersonic.headless.api.pojo.response.DatabaseResp;
 import com.tencent.supersonic.headless.core.pojo.JdbcDataSource;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -18,14 +18,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Matcher;
 
-import static com.tencent.supersonic.common.pojo.Constants.AT_SYMBOL;
-import static com.tencent.supersonic.common.pojo.Constants.COLON;
-import static com.tencent.supersonic.common.pojo.Constants.DOUBLE_SLASH;
-import static com.tencent.supersonic.common.pojo.Constants.EMPTY;
-import static com.tencent.supersonic.common.pojo.Constants.JDBC_PREFIX_FORMATTER;
-import static com.tencent.supersonic.common.pojo.Constants.NEW_LINE_CHAR;
-import static com.tencent.supersonic.common.pojo.Constants.PATTERN_JDBC_TYPE;
-import static com.tencent.supersonic.common.pojo.Constants.SPACE;
+import static com.tencent.supersonic.common.pojo.Constants.*;
 
 /** tools functions about jdbc */
 @Slf4j
@@ -39,7 +32,7 @@ public class JdbcDataSourceUtils {
         this.jdbcDataSource = jdbcDataSource;
     }
 
-    public static boolean testDatabase(Database database) {
+    public static boolean testDatabase(DatabaseResp database) {
 
         try {
             Class.forName(getDriverClassName(database.getUrl()));
@@ -146,11 +139,11 @@ public class JdbcDataSourceUtils {
         return MD5Util.getMD5(sb.toString(), true, 64);
     }
 
-    public DataSource getDataSource(Database database) throws RuntimeException {
+    public DataSource getDataSource(DatabaseResp database) throws RuntimeException {
         return jdbcDataSource.getDataSource(database);
     }
 
-    public Connection getConnection(Database database) throws RuntimeException {
+    public Connection getConnection(DatabaseResp database) throws RuntimeException {
         Connection conn = getConnectionWithRetry(database);
         if (conn == null) {
             try {
@@ -166,7 +159,7 @@ public class JdbcDataSourceUtils {
         return conn;
     }
 
-    private Connection getConnectionWithRetry(Database database) {
+    private Connection getConnectionWithRetry(DatabaseResp database) {
         int rc = 1;
         for (;;) {
 
@@ -193,7 +186,7 @@ public class JdbcDataSourceUtils {
         }
     }
 
-    public void releaseDataSource(Database database) {
+    public void releaseDataSource(DatabaseResp database) {
         jdbcDataSource.removeDatasource(database);
     }
 }

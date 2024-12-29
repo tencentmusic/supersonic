@@ -11,7 +11,6 @@ import com.tencent.supersonic.headless.core.translator.parser.s2sql.*;
 import com.tencent.supersonic.headless.core.translator.parser.s2sql.Materialization.TimePartType;
 import com.tencent.supersonic.headless.server.pojo.yaml.*;
 import com.tencent.supersonic.headless.server.service.SchemaService;
-import com.tencent.supersonic.headless.server.utils.DatabaseConverter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Triple;
 import org.springframework.stereotype.Service;
@@ -40,7 +39,7 @@ public class SemanticSchemaManager {
         schemaService.getSchemaYamlTpl(semanticSchemaResp, dimensionYamlTpls, dataModelYamlTpls,
                 metricYamlTpls, modelIdName);
         DatabaseResp databaseResp = semanticSchemaResp.getDatabaseResp();
-        ontology.setDatabase(DatabaseConverter.convert(databaseResp));
+        ontology.setDatabase(databaseResp);
         if (!CollectionUtils.isEmpty(semanticSchemaResp.getModelRelas())) {
             ontology.setJoinRelations(
                     getJoinRelation(semanticSchemaResp.getModelRelas(), modelIdName));
