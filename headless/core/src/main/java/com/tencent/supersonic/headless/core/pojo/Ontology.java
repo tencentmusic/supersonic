@@ -39,4 +39,11 @@ public class Ontology {
         return null;
     }
 
+    public String getDatabaseVersion() {
+        if (Objects.nonNull(database)) {
+            return database.getVersion();
+        }
+        return null;
+    }
+
 }
