@@ -25,7 +25,7 @@ public class OutputRender extends Renderer {
     public void render(OntologyQuery metricCommand, List<DataModel> dataModels,
             SqlValidatorScope scope, S2CalciteSchema schema, boolean nonAgg) throws Exception {
         TableView selectDataSet = super.tableView;
-        EngineType engineType = schema.getOntology().getDatabase().getType();
+        EngineType engineType = schema.getOntology().getDatabaseType();
         for (String dimension : metricCommand.getDimensions()) {
             selectDataSet.getMeasure().add(SemanticNode.parse(dimension, scope, engineType));
         }
