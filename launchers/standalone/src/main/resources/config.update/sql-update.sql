@@ -404,4 +404,5 @@ ALTER TABLE s2_query_stat_info RENAME COLUMN `user` TO `query_user`;
 ALTER TABLE s2_chat_context RENAME COLUMN `user` TO `query_user`;
 
 --20241226
-alter table s2_chat_memory add column `query_id` BIGINT DEFAULT NULL;
+ALTER TABLE s2_chat_memory add column `query_id` BIGINT DEFAULT NULL;
+ALTER TABLE s2_query_stat_info RENAME COLUMN `sql` TO `query_sql`;

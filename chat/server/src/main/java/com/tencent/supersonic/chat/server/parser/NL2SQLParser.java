@@ -100,10 +100,12 @@ public class NL2SQLParser implements ChatQueryParser {
                     queryNLReq.setMapModeEnum(mode);
                     doParse(queryNLReq, parseResp);
                 }
-                if (parseResp.getSelectedParses().isEmpty()) {
+
+                if (parseResp.getSelectedParses().isEmpty() && candidateParses.isEmpty()) {
                     queryNLReq.setMapModeEnum(MapModeEnum.LOOSE);
                     doParse(queryNLReq, parseResp);
                 }
+
                 if (parseResp.getSelectedParses().isEmpty()) {
                     errMsg.append(parseResp.getErrorMsg());
                     continue;
@@ -137,11 +139,18 @@ public class NL2SQLParser implements ChatQueryParser {
             SemanticParseInfo userSelectParse = parseContext.getRequest().getSelectedParse();
             queryNLReq.setSelectedParseInfo(Objects.nonNull(userSelectParse) ? userSelectParse
                     : parseContext.getResponse().getSelectedParses().get(0));
-
             parseContext.setResponse(new ChatParseResp(parseContext.getResponse().getQueryId()));
+
             rewriteMultiTurn(parseContext, queryNLReq);
             addDynamicExemplars(parseContext, queryNLReq);
             doParse(queryNLReq, parseContext.getResponse());
+
+            // try again with all semantic fields passed to LLM
+            if (parseContext.getResponse().getState().equals(ParseResp.ParseState.FAILED)) {
+                queryNLReq.setSelectedParseInfo(null);
+                queryNLReq.setMapModeEnum(MapModeEnum.ALL);
+                doParse(queryNLReq, parseContext.getResponse());
+            }
         }
     }
 

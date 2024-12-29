@@ -21,14 +21,16 @@ import java.util.stream.Collectors;
 @Slf4j
 public class QueryFilterMapper extends BaseMapper {
 
-    private double similarity = 1.0;
+    private final double similarity = 1.0;
+
+    @Override
+    public boolean accept(ChatQueryContext chatQueryContext) {
+        return !chatQueryContext.getRequest().getDataSetIds().isEmpty();
+    }
 
     @Override
     public void doMap(ChatQueryContext chatQueryContext) {
         Set<Long> dataSetIds = chatQueryContext.getRequest().getDataSetIds();
-        if (CollectionUtils.isEmpty(dataSetIds)) {
-            return;
-        }
         SchemaMapInfo schemaMapInfo = chatQueryContext.getMapInfo();
         clearOtherSchemaElementMatch(dataSetIds, schemaMapInfo);
         for (Long dataSetId : dataSetIds) {

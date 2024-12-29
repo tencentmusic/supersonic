@@ -2,13 +2,10 @@ package com.tencent.supersonic.headless.server.utils;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.tencent.supersonic.common.jsqlparser.FieldExpression;
 import com.tencent.supersonic.common.jsqlparser.SqlSelectHelper;
 import com.tencent.supersonic.common.pojo.Aggregator;
 import com.tencent.supersonic.common.pojo.DateConf;
-import com.tencent.supersonic.common.pojo.DateConf.DateMode;
 import com.tencent.supersonic.common.pojo.ItemDateResp;
-import com.tencent.supersonic.common.pojo.enums.DatePeriodEnum;
 import com.tencent.supersonic.common.pojo.enums.TypeEnums;
 import com.tencent.supersonic.common.util.DateModeUtils;
 import com.tencent.supersonic.common.util.SqlFilterUtils;
@@ -31,16 +28,7 @@ import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.tencent.supersonic.common.pojo.Constants.DAY_FORMAT;
@@ -274,55 +262,4 @@ public class QueryStructUtils {
         return Triple.of("", "", "");
     }
 
-    public DateConf getDateConfBySql(String sql) {
-        List<FieldExpression> fieldExpressions = SqlSelectHelper.getFilterExpression(sql);
-        if (!CollectionUtils.isEmpty(fieldExpressions)) {
-            Set<String> dateList = new HashSet<>();
-            String startDate = "";
-            String endDate = "";
-            DatePeriodEnum period = null;
-            for (FieldExpression f : fieldExpressions) {
-                if (Objects.isNull(f.getFieldName())
-                        || !internalCols.contains(f.getFieldName().toLowerCase())) {
-                    continue;
-                }
-                if (Objects.isNull(f.getFieldValue())
-                        || !dateModeUtils.isDateStr(f.getFieldValue().toString())) {
-                    continue;
-                }
-                period = dateModeUtils.getPeriodByCol(f.getFieldName().toLowerCase());
-                if (period == null) {
-                    continue;
-                }
-                if ("=".equals(f.getOperator())) {
-                    dateList.add(f.getFieldValue().toString());
-                } else if ("<".equals(f.getOperator()) || "<=".equals(f.getOperator())) {
-                    if (startDate.isEmpty()
-                            || startDate.compareTo(f.getFieldValue().toString()) > 0) {
-                        startDate = f.getFieldValue().toString();
-                    }
-                } else if (">".equals(f.getOperator()) || ">=".equals(f.getOperator())) {
-                    if (endDate.isEmpty() || endDate.compareTo(f.getFieldValue().toString()) < 0) {
-                        endDate = f.getFieldValue().toString();
-                    }
-                }
-            }
-            if (period != null) {
-                DateConf dateConf = new DateConf();
-                dateConf.setPeriod(period);
-                if (!CollectionUtils.isEmpty(dateList)) {
-                    dateConf.setDateList(new ArrayList<>(dateList));
-                    dateConf.setDateMode(DateMode.LIST);
-                    return dateConf;
-                }
-                if (!"".equals(startDate) && !"".equals(endDate)) {
-                    dateConf.setStartDate(startDate);
-                    dateConf.setEndDate(endDate);
-                    dateConf.setDateMode(DateMode.BETWEEN);
-                    return dateConf;
-                }
-            }
-        }
-        return null;
-    }
 }

@@ -2,7 +2,6 @@ package com.tencent.supersonic.headless.server.service.impl;
 
 import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.common.pojo.User;
-import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import com.tencent.supersonic.headless.api.pojo.Dimension;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
 import com.tencent.supersonic.headless.api.pojo.ValueDistribution;
@@ -26,12 +25,7 @@ import org.springframework.util.StringUtils;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 @Service
 @Slf4j
@@ -121,8 +115,8 @@ public class TagQueryServiceImpl implements TagQueryService {
             User user) {
 
         String sqlPattern = "select max(%s)  as %s from tbl where %s is not null";
-        String sql = String.format(sqlPattern, TimeDimensionEnum.DAY.getName(), maxDateAlias,
-                tag.getBizName());
+        String sql = String.format(sqlPattern, itemValueReq.getDateConf().getDateField(),
+                maxDateAlias, tag.getBizName());
 
         // 添加时间过滤信息
         log.info("[queryTagDateFromDbBySql] calculate the maximum time start");
@@ -140,8 +134,8 @@ public class TagQueryServiceImpl implements TagQueryService {
                     String end = LocalDate.now().minusDays(0)
                             .format(DateTimeFormatter.ofPattern(dateFormat));
                     sql = sql + String.format(" and ( %s > '%s' and %s <= '%s' )",
-                            TimeDimensionEnum.DAY.getName(), start, TimeDimensionEnum.DAY.getName(),
-                            end);
+                            itemValueReq.getDateConf().getDateField(), start,
+                            itemValueReq.getDateConf().getDateField(), end);
                 }
             }
         }

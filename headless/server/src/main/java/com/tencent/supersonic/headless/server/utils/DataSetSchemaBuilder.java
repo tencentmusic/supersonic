@@ -206,12 +206,6 @@ public class DataSetSchemaBuilder {
 
     private static void setDefaultTimeFormat(SchemaElement dimToAdd,
             DimensionTimeTypeParams dimensionTimeTypeParams, String timeFormat) {
-        if (null != dimensionTimeTypeParams && TimeDimensionEnum.DAY.name()
-                .equalsIgnoreCase(dimensionTimeTypeParams.getTimeGranularity())) {
-            dimToAdd.getExtInfo().put(DimensionConstants.DIMENSION_TIME_FORMAT,
-                    DateUtils.DEFAULT_DATE_FORMAT);
-        } else {
-            dimToAdd.getExtInfo().put(DimensionConstants.DIMENSION_TIME_FORMAT, timeFormat);
-        }
+        dimToAdd.getExtInfo().put(DimensionConstants.DIMENSION_TIME_FORMAT, timeFormat);
     }
 }

@@ -10,17 +10,21 @@ import com.tencent.supersonic.common.pojo.Order;
 import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
 import com.tencent.supersonic.common.pojo.enums.QueryType;
+import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.headless.api.pojo.SemanticSchema;
 import com.tencent.supersonic.headless.api.pojo.request.QuerySqlReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
 import com.tencent.supersonic.headless.api.pojo.request.SemanticQueryReq;
+import com.tencent.supersonic.headless.api.pojo.response.DatabaseResp;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
 import com.tencent.supersonic.headless.server.facade.service.SemanticLayerService;
 import com.tencent.supersonic.headless.server.persistence.dataobject.DomainDO;
 import com.tencent.supersonic.headless.server.persistence.repository.DomainRepository;
+import com.tencent.supersonic.headless.server.service.DatabaseService;
 import com.tencent.supersonic.headless.server.service.SchemaService;
 import com.tencent.supersonic.util.DataUtils;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
@@ -40,9 +44,12 @@ public class BaseTest extends BaseApplication {
     protected SchemaService schemaService;
     @Autowired
     private AgentService agentService;
+    @Autowired
+    protected DatabaseService databaseService;
 
     protected Agent agent;
     protected SemanticSchema schema;
+    protected DatabaseResp databaseResp;
 
     protected Agent getAgentByName(String agentName) {
         Optional<Agent> agent = agentService.getAgents().stream()
@@ -57,6 +64,16 @@ public class BaseTest extends BaseApplication {
 
     protected SemanticQueryResp queryBySql(String sql, User user) throws Exception {
         return semanticLayerService.queryByReq(buildQuerySqlReq(sql), user);
+    }
+
+    protected void executeSql(String sql) {
+        if (databaseResp == null) {
+            databaseResp = databaseService.getDatabase(1L);
+        }
+        SemanticQueryResp queryResp = databaseService.executeSql(sql, databaseResp);
+        assert StringUtils.isBlank(queryResp.getErrorMsg());
+        System.out.println(
+                String.format("Execute result: %s", JsonUtil.toString(queryResp.getResultList())));
     }
 
     protected SemanticQueryReq buildQuerySqlReq(String sql) {
@@ -89,6 +106,7 @@ public class BaseTest extends BaseApplication {
         dateConf.setDateMode(DateMode.BETWEEN);
         dateConf.setEndDate(now().plusDays(0).toString());
         dateConf.setStartDate(now().plusDays(-365).toString());
+        dateConf.setDateField("imp_date");
         queryStructReq.setDateInfo(dateConf);
 
         List<Order> orders = new ArrayList<>();

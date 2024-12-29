@@ -2,13 +2,9 @@ package com.tencent.supersonic.headless.api.pojo.response;
 
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.common.pojo.DataFormat;
-import com.tencent.supersonic.headless.api.pojo.DrillDownDimension;
-import com.tencent.supersonic.headless.api.pojo.MetricDefineByFieldParams;
-import com.tencent.supersonic.headless.api.pojo.MetricDefineByMeasureParams;
-import com.tencent.supersonic.headless.api.pojo.MetricDefineByMetricParams;
-import com.tencent.supersonic.headless.api.pojo.RelateDimension;
-import com.tencent.supersonic.headless.api.pojo.SchemaItem;
+import com.tencent.supersonic.headless.api.pojo.*;
 import com.tencent.supersonic.headless.api.pojo.enums.MetricDefineType;
+import com.tencent.supersonic.headless.api.pojo.enums.MetricType;
 import lombok.Data;
 import lombok.ToString;
 import org.apache.commons.collections.CollectionUtils;
@@ -69,6 +65,19 @@ public class MetricResp extends SchemaItem {
 
     private boolean containsPartitionDimensions;
 
+    public void setMetricDefinition(MetricDefineType type, MetricDefineParams params) {
+        if (MetricDefineType.MEASURE.equals(type)) {
+            assert params instanceof MetricDefineByMeasureParams;
+            metricDefineByMeasureParams = (MetricDefineByMeasureParams) params;
+        } else if (MetricDefineType.FIELD.equals(type)) {
+            assert params instanceof MetricDefineByFieldParams;
+            metricDefineByFieldParams = (MetricDefineByFieldParams) params;
+        } else if (MetricDefineType.METRIC.equals(type)) {
+            assert params instanceof MetricDefineByMetricParams;
+            metricDefineByMetricParams = (MetricDefineByMetricParams) params;
+        }
+    }
+
     public void setClassifications(String tag) {
         if (StringUtils.isBlank(tag)) {
             classifications = Lists.newArrayList();
@@ -104,5 +113,9 @@ public class MetricResp extends SchemaItem {
             return metricDefineByFieldParams.getExpr();
         }
         return "";
+    }
+
+    public boolean isDerived() {
+        return MetricType.isDerived(metricDefineType, metricDefineByMeasureParams);
     }
 }

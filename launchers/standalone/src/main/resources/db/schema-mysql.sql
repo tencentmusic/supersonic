@@ -336,7 +336,7 @@ CREATE TABLE IF NOT EXISTS `s2_query_stat_info` (
       `sql_cmd_md5` varchar(200) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'sql md5值',
       `query_struct_cmd` mediumtext COLLATE utf8mb4_unicode_ci COMMENT '对应查询的struct',
       `struct_cmd_md5` varchar(200) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'sql md5值',
-      `sql` mediumtext COLLATE utf8mb4_unicode_ci COMMENT '对应查询的sql',
+      `query_sql` mediumtext COLLATE utf8mb4_unicode_ci COMMENT '对应查询的sql',
       `sql_md5` varchar(200) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'sql md5值',
       `query_engine` varchar(20) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '查询引擎',
       `elapsed_ms` bigint(10) DEFAULT NULL COMMENT '查询耗时',

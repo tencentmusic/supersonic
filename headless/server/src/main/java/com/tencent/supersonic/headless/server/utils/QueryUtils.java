@@ -2,7 +2,6 @@ package com.tencent.supersonic.headless.server.utils;
 
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.QueryColumn;
-import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import com.tencent.supersonic.headless.api.pojo.enums.SemanticType;
 import com.tencent.supersonic.headless.api.pojo.request.QueryMultiStructReq;
 import com.tencent.supersonic.headless.api.pojo.response.MetricResp;
@@ -55,10 +54,6 @@ public class QueryUtils {
 
     private void populateNamePairs(SemanticSchemaResp semanticSchemaResp,
             Map<String, String> namePair, Map<String, String> nameTypePair) {
-        for (TimeDimensionEnum timeDimensionEnum : TimeDimensionEnum.values()) {
-            namePair.put(timeDimensionEnum.getName(), "date");
-            nameTypePair.put(timeDimensionEnum.getName(), "DATE");
-        }
         semanticSchemaResp.getMetrics().forEach(metricDesc -> {
             namePair.put(metricDesc.getBizName(), metricDesc.getName());
             nameTypePair.put(metricDesc.getBizName(), SemanticType.NUMBER.name());

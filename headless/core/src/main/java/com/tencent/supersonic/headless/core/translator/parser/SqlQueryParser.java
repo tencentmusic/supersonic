@@ -6,7 +6,6 @@ import com.tencent.supersonic.common.jsqlparser.SqlSelectFunctionHelper;
 import com.tencent.supersonic.common.jsqlparser.SqlSelectHelper;
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.enums.EngineType;
-import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.headless.api.pojo.Measure;
 import com.tencent.supersonic.headless.api.pojo.SchemaItem;
@@ -63,6 +62,14 @@ public class SqlQueryParser implements QueryParser {
         List<String> metrics =
                 metricSchemas.stream().map(SchemaItem::getBizName).collect(Collectors.toList());
         Set<String> dimensions = getDimensions(semanticSchemaResp, allFields);
+        // check if there are fields not matched with any metric or dimension
+        if (allFields.size() > metricSchemas.size() + dimensions.size()) {
+            queryStatement
+                    .setErrMsg("There are fields in the SQL not matched with any semantic column.");
+            queryStatement.setStatus(1);
+            return;
+        }
+
         OntologyQuery ontologyQuery = new OntologyQuery();
         ontologyQuery.getMetrics().addAll(metrics);
         ontologyQuery.getDimensions().addAll(dimensions);
@@ -123,8 +130,6 @@ public class SqlQueryParser implements QueryParser {
         Map<String, String> dimensionLowerToNameMap = semanticSchemaResp.getDimensions().stream()
                 .collect(Collectors.toMap(entry -> entry.getBizName().toLowerCase(),
                         SchemaItem::getBizName, (k1, k2) -> k1));
-        dimensionLowerToNameMap.put(TimeDimensionEnum.DAY.getName(),
-                TimeDimensionEnum.DAY.getName());
         return allFields.stream()
                 .filter(entry -> dimensionLowerToNameMap.containsKey(entry.toLowerCase()))
                 .map(entry -> dimensionLowerToNameMap.get(entry.toLowerCase()))
@@ -307,8 +312,6 @@ public class SqlQueryParser implements QueryParser {
                 entry -> getPairStream(entry.getAlias(), entry.getName(), entry.getBizName()))
                 .collect(Collectors.toMap(Pair::getLeft, Pair::getRight, (k1, k2) -> k1));
 
-        dimensionResults.putAll(TimeDimensionEnum.getChNameToNameMap());
-        dimensionResults.putAll(TimeDimensionEnum.getNameToNameMap());
         dimensionResults.putAll(metricResults);
         return dimensionResults;
     }

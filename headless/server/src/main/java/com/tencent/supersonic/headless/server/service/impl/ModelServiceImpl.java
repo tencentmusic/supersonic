@@ -2,7 +2,6 @@ package com.tencent.supersonic.headless.server.service.impl;
 
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.service.UserService;
-import com.tencent.supersonic.common.config.ThreadPoolConfig;
 import com.tencent.supersonic.common.pojo.ItemDateResp;
 import com.tencent.supersonic.common.pojo.ModelRela;
 import com.tencent.supersonic.common.pojo.User;
@@ -52,6 +51,7 @@ import com.tencent.supersonic.headless.server.utils.NameCheckUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -69,6 +69,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.stream.Collectors;
 
 @Service
@@ -93,13 +94,13 @@ public class ModelServiceImpl implements ModelService {
 
     private final ModelRelaService modelRelaService;
 
-    private final ThreadPoolConfig threadPoolConfig;
+    private final ThreadPoolExecutor executor;
 
     public ModelServiceImpl(ModelRepository modelRepository, DatabaseService databaseService,
             @Lazy DimensionService dimensionService, @Lazy MetricService metricService,
             DomainService domainService, UserService userService, DataSetService dataSetService,
             DateInfoRepository dateInfoRepository, ModelRelaService modelRelaService,
-            ThreadPoolConfig threadPoolConfig) {
+            @Qualifier("commonExecutor") ThreadPoolExecutor executor) {
         this.modelRepository = modelRepository;
         this.databaseService = databaseService;
         this.dimensionService = dimensionService;
@@ -109,7 +110,7 @@ public class ModelServiceImpl implements ModelService {
         this.dataSetService = dataSetService;
         this.dateInfoRepository = dateInfoRepository;
         this.modelRelaService = modelRelaService;
-        this.threadPoolConfig = threadPoolConfig;
+        this.executor = executor;
     }
 
     @Override
@@ -226,7 +227,7 @@ public class ModelServiceImpl implements ModelService {
         CompletableFuture.allOf(dbSchemas.stream()
                 .map(dbSchema -> CompletableFuture.runAsync(
                         () -> doBuild(modelBuildReq, dbSchema, dbSchemas, modelSchemaMap),
-                        threadPoolConfig.getCommonExecutor()))
+                        executor))
                 .toArray(CompletableFuture[]::new)).join();
         return modelSchemaMap;
     }

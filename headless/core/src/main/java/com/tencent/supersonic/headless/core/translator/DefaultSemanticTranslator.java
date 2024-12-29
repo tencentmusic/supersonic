@@ -2,7 +2,6 @@ package com.tencent.supersonic.headless.core.translator;
 
 import com.tencent.supersonic.common.calcite.SqlMergeWithUtils;
 import com.tencent.supersonic.common.pojo.enums.EngineType;
-import com.tencent.supersonic.headless.core.pojo.OntologyQuery;
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;
 import com.tencent.supersonic.headless.core.pojo.SqlQuery;
 import com.tencent.supersonic.headless.core.translator.optimizer.QueryOptimizer;
@@ -26,10 +25,13 @@ public class DefaultSemanticTranslator implements SemanticTranslator {
             return;
         }
         try {
-            for (QueryParser parser : ComponentFactory.getQueryParser()) {
+            for (QueryParser parser : ComponentFactory.getQueryParsers()) {
                 if (parser.accept(queryStatement)) {
                     log.debug("QueryConverter accept [{}]", parser.getClass().getName());
                     parser.parse(queryStatement);
+                    if (queryStatement.getStatus() != 0) {
+                        break;
+                    }
                 }
             }
             if (!queryStatement.isOk()) {
@@ -60,9 +62,6 @@ public class DefaultSemanticTranslator implements SemanticTranslator {
     }
 
     private void mergeOntologyQuery(QueryStatement queryStatement) throws Exception {
-        OntologyQuery ontologyQuery = queryStatement.getOntologyQuery();
-        log.info("parse with ontology: [{}]", ontologyQuery);
-
         SqlQuery sqlQuery = queryStatement.getSqlQuery();
         String ontologyQuerySql = sqlQuery.getSql();
         String ontologyInnerTable = sqlQuery.getTable();
@@ -71,7 +70,7 @@ public class DefaultSemanticTranslator implements SemanticTranslator {
         List<Pair<String, String>> tables = new ArrayList<>();
         tables.add(Pair.of(ontologyInnerTable, ontologyInnerSql));
         if (sqlQuery.isSupportWith()) {
-            EngineType engineType = queryStatement.getOntology().getDatabase().getType();
+            EngineType engineType = queryStatement.getOntology().getDatabaseType();
             if (!SqlMergeWithUtils.hasWith(engineType, ontologyQuerySql)) {
                 String withSql = "with " + tables.stream()
                         .map(t -> String.format("%s as (%s)", t.getLeft(), t.getRight()))

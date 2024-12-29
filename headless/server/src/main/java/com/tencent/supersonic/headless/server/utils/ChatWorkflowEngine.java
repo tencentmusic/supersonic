@@ -76,7 +76,6 @@ public class ChatWorkflowEngine {
                     long start = System.currentTimeMillis();
                     performTranslating(queryCtx, parseResult);
                     parseResult.getParseTimeCost().setSqlTime(System.currentTimeMillis() - start);
-                    parseResult.setState(ParseResp.ParseState.COMPLETED);
                     queryCtx.setChatWorkflowState(ChatWorkflowState.FINISHED);
                     break;
                 default:
@@ -137,7 +136,12 @@ public class ChatWorkflowEngine {
                         ContextUtils.getBean(SemanticLayerService.class);
                 SemanticTranslateResp explain =
                         queryService.translate(semanticQueryReq, queryCtx.getRequest().getUser());
-                parseInfo.getSqlInfo().setQuerySQL(explain.getQuerySQL());
+                if (explain.isOk()) {
+                    parseInfo.getSqlInfo().setQuerySQL(explain.getQuerySQL());
+                    parseResult.setState(ParseResp.ParseState.COMPLETED);
+                } else {
+                    parseResult.setState(ParseResp.ParseState.FAILED);
+                }
                 if (StringUtils.isNotBlank(explain.getErrMsg())) {
                     errorMsg.add(explain.getErrMsg());
                 }

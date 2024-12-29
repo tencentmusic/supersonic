@@ -4,26 +4,12 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.common.pojo.enums.QueryType;
-import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
-import com.tencent.supersonic.headless.api.pojo.MetaFilter;
-import com.tencent.supersonic.headless.api.pojo.SchemaElement;
-import com.tencent.supersonic.headless.api.pojo.SchemaElementMatch;
-import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
-import com.tencent.supersonic.headless.api.pojo.SchemaItem;
-import com.tencent.supersonic.headless.api.pojo.SchemaMapInfo;
-import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
-import com.tencent.supersonic.headless.api.pojo.SemanticSchema;
-import com.tencent.supersonic.headless.api.pojo.SqlEvaluation;
+import com.tencent.supersonic.headless.api.pojo.*;
 import com.tencent.supersonic.headless.api.pojo.enums.ChatWorkflowState;
 import com.tencent.supersonic.headless.api.pojo.request.QueryMapReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryNLReq;
 import com.tencent.supersonic.headless.api.pojo.request.QuerySqlReq;
-import com.tencent.supersonic.headless.api.pojo.response.DataSetMapInfo;
-import com.tencent.supersonic.headless.api.pojo.response.DataSetResp;
-import com.tencent.supersonic.headless.api.pojo.response.MapInfoResp;
-import com.tencent.supersonic.headless.api.pojo.response.MapResp;
-import com.tencent.supersonic.headless.api.pojo.response.ParseResp;
-import com.tencent.supersonic.headless.api.pojo.response.SearchResult;
+import com.tencent.supersonic.headless.api.pojo.response.*;
 import com.tencent.supersonic.headless.chat.ChatQueryContext;
 import com.tencent.supersonic.headless.chat.corrector.GrammarCorrector;
 import com.tencent.supersonic.headless.chat.corrector.SchemaCorrector;
@@ -40,13 +26,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -223,9 +203,6 @@ public class S2ChatLayerService implements ChatLayerService {
                     .sorted(Comparator.comparing(SchemaElement::getUseCnt).reversed())
                     .limit(topN - 1).map(mergeFunction()).collect(Collectors.toSet());
 
-            SchemaElementMatch timeDimensionMatch = getTimeDimension(dataSetId, dataSetName);
-            dimensions.add(timeDimensionMatch);
-
             // topN metrics
             Set<SchemaElementMatch> metrics = semanticSchema.getMetrics(dataSetId).stream()
                     .sorted(Comparator.comparing(SchemaElement::getUseCnt).reversed()).limit(topN)
@@ -254,20 +231,6 @@ public class S2ChatLayerService implements ChatLayerService {
             termMap.put(dataSetResp.getName(), terms);
         }
         return termMap;
-    }
-
-    /**
-     * * get time dimension SchemaElementMatch
-     */
-    private SchemaElementMatch getTimeDimension(Long dataSetId, String dataSetName) {
-        SchemaElement element = SchemaElement.builder().dataSetId(dataSetId)
-                .dataSetName(dataSetName).type(SchemaElementType.DIMENSION)
-                .bizName(TimeDimensionEnum.DAY.getName()).build();
-
-        return SchemaElementMatch.builder().element(element)
-                .detectWord(TimeDimensionEnum.DAY.getChName())
-                .word(TimeDimensionEnum.DAY.getChName()).similarity(1L)
-                .frequency(BaseWordBuilder.DEFAULT_FREQUENCY).build();
     }
 
     private Function<SchemaElement, SchemaElementMatch> mergeFunction() {

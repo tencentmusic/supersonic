@@ -299,7 +299,7 @@ CREATE TABLE IF NOT EXISTS `s2_query_stat_info` (
   `sql_cmd_md5` varchar(200) DEFAULT NULL, -- sql type request parameter md5
   `query_struct_cmd`LONGVARCHAR , -- struct type request parameter
   `struct_cmd_md5` varchar(200) DEFAULT NULL, -- struct type request parameter md5值
-  `sql`LONGVARCHAR ,
+  `query_sql` LONGVARCHAR ,
   `sql_md5` varchar(200) DEFAULT NULL, -- sql md5
   `query_engine` varchar(20) DEFAULT NULL,
   `elapsed_ms` bigINT DEFAULT NULL,

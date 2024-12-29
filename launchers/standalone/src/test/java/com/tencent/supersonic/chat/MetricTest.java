@@ -39,6 +39,7 @@ public class MetricTest extends BaseTest {
     }
 
     @Test
+    @SetSystemProperty(key = "s2.test", value = "true")
     public void testMetricModel() throws Exception {
         QueryResult actualResult = submitNewChat("超音数 访问次数", agent.getId());
 

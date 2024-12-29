@@ -9,22 +9,23 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Slf4j
-public class TimeFieldMapper extends BaseMapper {
+public class PartitionTimeMapper extends BaseMapper {
+
+    @Override
+    public boolean accept(ChatQueryContext chatQueryContext) {
+        return !(chatQueryContext.getRequest().getText2SQLType().equals(Text2SQLType.ONLY_RULE)
+                || chatQueryContext.getMapInfo().isEmpty());
+    }
 
     @Override
     public void doMap(ChatQueryContext chatQueryContext) {
-        if (chatQueryContext.getRequest().getText2SQLType().equals(Text2SQLType.ONLY_RULE)) {
-            return;
-        }
-
         Map<Long, DataSetSchema> schemaMap =
                 chatQueryContext.getSemanticSchema().getDataSetSchemaMap();
         for (Map.Entry<Long, DataSetSchema> entry : schemaMap.entrySet()) {
             List<SchemaElement> timeDims = entry.getValue().getDimensions().stream()
-                    .filter(dim -> dim.getTimeFormat() != null).collect(Collectors.toList());
+                    .filter(SchemaElement::isPartitionTime).toList();
             for (SchemaElement schemaElement : timeDims) {
                 chatQueryContext.getMapInfo().getMatchedElements(entry.getKey())
                         .add(SchemaElementMatch.builder().word(schemaElement.getName())

@@ -187,22 +187,10 @@ public class SemanticSchemaManager {
             if (Objects.nonNull(dimensionYamlTpl.getExt())) {
                 dimension.setExt(dimensionYamlTpl.getExt());
             }
-            dimension.setDimensionTimeTypeParams(
-                    getDimensionTimeTypeParams(dimensionYamlTpl.getTypeParams()));
+            dimension.setDimensionTimeTypeParams(dimensionYamlTpl.getTypeParams());
             dimensions.add(dimension);
         }
         return dimensions;
-    }
-
-    private static DimensionTimeTypeParams getDimensionTimeTypeParams(
-            DimensionTimeTypeParamsTpl dimensionTimeTypeParamsTpl) {
-        DimensionTimeTypeParams dimensionTimeTypeParams = new DimensionTimeTypeParams();
-        if (dimensionTimeTypeParamsTpl != null) {
-            dimensionTimeTypeParams
-                    .setTimeGranularity(dimensionTimeTypeParamsTpl.getTimeGranularity());
-            dimensionTimeTypeParams.setIsPrimary(dimensionTimeTypeParamsTpl.getIsPrimary());
-        }
-        return dimensionTimeTypeParams;
     }
 
     private static List<Identify> getIdentify(List<IdentifyYamlTpl> identifyYamlTpls) {
