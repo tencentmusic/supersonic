@@ -3,11 +3,10 @@ package com.tencent.supersonic.headless.core.utils;
 import javax.sql.DataSource;
 
 import com.tencent.supersonic.common.pojo.QueryColumn;
-import com.tencent.supersonic.common.pojo.enums.EngineType;
 import com.tencent.supersonic.common.util.DateUtils;
 import com.tencent.supersonic.headless.api.pojo.enums.DataType;
+import com.tencent.supersonic.headless.api.pojo.response.DatabaseResp;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
-import com.tencent.supersonic.headless.core.pojo.Database;
 import com.tencent.supersonic.headless.core.pojo.JdbcDataSource;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -24,11 +23,7 @@ import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static com.tencent.supersonic.common.pojo.Constants.AT_SYMBOL;
 
@@ -38,7 +33,7 @@ import static com.tencent.supersonic.common.pojo.Constants.AT_SYMBOL;
 public class SqlUtils {
 
     @Getter
-    private Database database;
+    private DatabaseResp database;
 
     @Autowired
     private JdbcDataSource jdbcDataSource;
@@ -57,15 +52,15 @@ public class SqlUtils {
 
     public SqlUtils() {}
 
-    public SqlUtils(Database database) {
+    public SqlUtils(DatabaseResp database) {
         this.database = database;
         this.dataTypeEnum = DataType.urlOf(database.getUrl());
     }
 
-    public SqlUtils init(Database database) {
+    public SqlUtils init(DatabaseResp database) {
         return SqlUtilsBuilder.getBuilder()
                 .withName(database.getId() + AT_SYMBOL + database.getName())
-                .withType(database.getType().getName()).withJdbcUrl(database.getUrl())
+                .withType(database.getType()).withJdbcUrl(database.getUrl())
                 .withUsername(database.getUsername()).withPassword(database.getPassword())
                 .withJdbcDataSource(this.jdbcDataSource).withResultLimit(this.resultLimit)
                 .withIsQueryLogEnable(this.isQueryLogEnable).build();
@@ -225,9 +220,8 @@ public class SqlUtils {
         }
 
         public SqlUtils build() {
-            Database database = Database.builder().name(this.name)
-                    .type(EngineType.fromString(this.type.toUpperCase())).url(this.jdbcUrl)
-                    .username(this.username).password(this.password).build();
+            DatabaseResp database = DatabaseResp.builder().name(this.name).type(this.type)
+                    .url(this.jdbcUrl).username(this.username).password(this.password).build();
 
             SqlUtils sqlUtils = new SqlUtils(database);
             sqlUtils.jdbcDataSource = this.jdbcDataSource;

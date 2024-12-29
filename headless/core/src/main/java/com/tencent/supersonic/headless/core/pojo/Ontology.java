@@ -1,6 +1,7 @@
 package com.tencent.supersonic.headless.core.pojo;
 
 import com.tencent.supersonic.common.pojo.enums.EngineType;
+import com.tencent.supersonic.headless.api.pojo.response.DatabaseResp;
 import com.tencent.supersonic.headless.core.translator.parser.s2sql.DataModel;
 import com.tencent.supersonic.headless.core.translator.parser.s2sql.Dimension;
 import com.tencent.supersonic.headless.core.translator.parser.s2sql.Materialization;
@@ -18,7 +19,7 @@ public class Ontology {
     private Map<String, List<Dimension>> dimensionMap = new HashMap<>();
     private List<Materialization> materializationList = new ArrayList<>();
     private List<JoinRelation> joinRelations;
-    private Database database;
+    private DatabaseResp database;
 
     public List<Dimension> getDimensions() {
         return dimensionMap.values().stream().flatMap(Collection::stream)
@@ -27,9 +28,15 @@ public class Ontology {
 
     public EngineType getDatabaseType() {
         if (Objects.nonNull(database)) {
-            return database.getType();
+            return EngineType.fromString(database.getType().toUpperCase());
         }
         return null;
     }
 
+    public String getDatabaseVersion() {
+        if (Objects.nonNull(database)) {
+            return database.getVersion();
+        }
+        return null;
+    }
 }
