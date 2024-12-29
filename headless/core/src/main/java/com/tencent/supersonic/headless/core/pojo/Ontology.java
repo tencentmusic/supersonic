@@ -1,5 +1,6 @@
 package com.tencent.supersonic.headless.core.pojo;
 
+import com.tencent.supersonic.common.pojo.enums.EngineType;
 import com.tencent.supersonic.headless.api.pojo.response.DatabaseResp;
 import com.tencent.supersonic.headless.api.pojo.response.DimSchemaResp;
 import com.tencent.supersonic.headless.api.pojo.response.MetricSchemaResp;
@@ -29,6 +30,13 @@ public class Ontology {
     public List<DimSchemaResp> getDimensions() {
         return dimensionMap.values().stream().flatMap(Collection::stream)
                 .collect(Collectors.toList());
+    }
+
+    public EngineType getDatabaseType() {
+        if (Objects.nonNull(database)) {
+            return EngineType.fromString(database.getType().toUpperCase());
+        }
+        return null;
     }
 
 }

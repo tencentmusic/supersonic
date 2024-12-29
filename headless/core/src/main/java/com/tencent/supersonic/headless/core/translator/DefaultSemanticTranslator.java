@@ -75,8 +75,7 @@ public class DefaultSemanticTranslator implements SemanticTranslator {
         tables.add(Pair.of(ontologyInnerTable, ontologyInnerSql));
         String finalSql = null;
         if (sqlQuery.isSupportWith()) {
-            EngineType engineType =
-                    EngineType.fromString(queryStatement.getOntology().getDatabase().getType());
+            EngineType engineType = queryStatement.getOntology().getDatabaseType();
             if (!SqlMergeWithUtils.hasWith(engineType, ontologyQuerySql)) {
                 finalSql = "with " + tables.stream()
                         .map(t -> String.format("%s as (%s)", t.getLeft(), t.getRight()))
