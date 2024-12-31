@@ -116,7 +116,7 @@ public class ModelServiceImpl implements ModelService {
     @Override
     @Transactional
     public ModelResp createModel(ModelReq modelReq, User user) throws Exception {
-        //checkParams(modelReq);
+        // checkParams(modelReq);
         ModelDO modelDO = ModelConverter.convert(modelReq, user);
         modelRepository.createModel(modelDO);
         batchCreateDimension(modelDO, user);
@@ -140,7 +140,7 @@ public class ModelServiceImpl implements ModelService {
     @Override
     @Transactional
     public ModelResp updateModel(ModelReq modelReq, User user) throws Exception {
-        //checkParams(modelReq);
+        // checkParams(modelReq);
         checkRelations(modelReq);
         ModelDO modelDO = modelRepository.getModelById(modelReq.getId());
         ModelConverter.convert(modelDO, modelReq, user);
