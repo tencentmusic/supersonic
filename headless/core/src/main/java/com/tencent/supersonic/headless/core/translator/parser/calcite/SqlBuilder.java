@@ -3,7 +3,6 @@ package com.tencent.supersonic.headless.core.translator.parser.calcite;
 import com.tencent.supersonic.common.calcite.Configuration;
 import com.tencent.supersonic.common.pojo.enums.EngineType;
 import com.tencent.supersonic.headless.api.pojo.enums.AggOption;
-import com.tencent.supersonic.headless.core.pojo.Database;
 import com.tencent.supersonic.headless.core.pojo.OntologyQuery;
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;
 import com.tencent.supersonic.headless.core.translator.parser.calcite.node.DataModelNode;
@@ -19,7 +18,10 @@ import org.apache.calcite.sql.SqlNode;
 import org.apache.calcite.sql.parser.SqlParser;
 import org.apache.calcite.sql.validate.SqlValidatorScope;
 
-import java.util.*;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Objects;
 
 @Slf4j
 public class SqlBuilder {
@@ -43,9 +45,8 @@ public class SqlBuilder {
         this.aggOption = ontologyQuery.getAggOption();
 
         buildParseNode();
-        Database database = queryStatement.getOntology().getDatabase();
-        optimizeParseNode(database.getType());
-        return getSql(database.getType());
+        optimizeParseNode(queryStatement.getOntology().getDatabaseType());
+        return getSql(queryStatement.getOntology().getDatabaseType());
     }
 
     private void buildParseNode() throws Exception {
