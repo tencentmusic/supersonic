@@ -14,7 +14,10 @@ public class DimensionNode extends SemanticNode {
     public static SqlNode build(Dimension dimension, SqlValidatorScope scope, EngineType engineType)
             throws Exception {
         SqlNode sqlNode = parse(dimension.getExpr(), scope, engineType);
-        return buildAs(dimension.getName(), sqlNode);
+        if (!dimension.getName().equals(dimension.getExpr())) {
+            sqlNode = buildAs(dimension.getName(), sqlNode);
+        }
+        return sqlNode;
     }
 
     public static List<SqlNode> expand(Dimension dimension, SqlValidatorScope scope,

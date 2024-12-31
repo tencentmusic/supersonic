@@ -28,11 +28,11 @@ public class ModelConverter {
 
     public static ModelDO convert(ModelReq modelReq, User user) {
         ModelDO modelDO = new ModelDO();
-        ModelDetail modelDetail = createModelDetail(modelReq);
+        // ModelDetail modelDetail = createModelDetail(modelReq);
         modelReq.createdBy(user.getName());
         BeanMapper.mapper(modelReq, modelDO);
         modelDO.setStatus(StatusEnum.ONLINE.getCode());
-        modelDO.setModelDetail(JSONObject.toJSONString(modelDetail));
+        modelDO.setModelDetail(JSONObject.toJSONString(modelReq.getModelDetail()));
         modelDO.setDrillDownDimensions(JSONObject.toJSONString(modelReq.getDrillDownDimensions()));
         if (modelReq.getExt() != null) {
             modelDO.setExt(JSONObject.toJSONString(modelReq.getExt()));
@@ -264,17 +264,14 @@ public class ModelConverter {
 
     private static ModelDetail createModelDetail(ModelReq modelReq) {
         ModelDetail modelDetail = new ModelDetail();
-        List<Measure> measures = modelReq.getModelDetail().getMeasures();
-        if (measures == null) {
-            measures = Lists.newArrayList();
-        }
-        for (Measure measure : measures) {
-            if (StringUtils.isBlank(measure.getBizName())) {
-                continue;
-            }
-            measure.setExpr(measure.getBizName());
-            measure.setBizName(String.format("%s_%s", modelReq.getBizName(), measure.getExpr()));
-        }
+        // List<Measure> measures = modelReq.getModelDetail().getMeasures();
+        // for (Measure measure : measures) {
+        // if (StringUtils.isBlank(measure.getBizName())) {
+        // continue;
+        // }
+        // measure.setExpr(measure.getBizName());
+        // measure.setBizName(String.format("%s_%", modelReq.getBizName(), measure.getExpr()));
+        // }
         BeanMapper.mapper(modelReq.getModelDetail(), modelDetail);
         return modelDetail;
     }

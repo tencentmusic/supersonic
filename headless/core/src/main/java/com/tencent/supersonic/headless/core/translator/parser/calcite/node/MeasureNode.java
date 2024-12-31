@@ -9,7 +9,11 @@ public class MeasureNode extends SemanticNode {
 
     public static SqlNode buildNonAgg(String alias, Measure measure, SqlValidatorScope scope,
             EngineType engineType) throws Exception {
-        return buildAs(measure.getName(), getExpr(measure, alias, scope, engineType));
+        if (measure.getExpr() == null) {
+            return getExpr(measure, alias, scope, engineType);
+        } else {
+            return buildAs(measure.getName(), getExpr(measure, alias, scope, engineType));
+        }
     }
 
     public static SqlNode buildAgg(Measure measure, boolean noAgg, SqlValidatorScope scope,

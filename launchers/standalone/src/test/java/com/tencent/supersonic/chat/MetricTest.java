@@ -60,6 +60,7 @@ public class MetricTest extends BaseTest {
     }
 
     @Test
+    @SetSystemProperty(key = "s2.test", value = "true")
     public void testMetricFilter() throws Exception {
         QueryResult actualResult = submitNewChat("alice的访问次数", agent.getId());
 

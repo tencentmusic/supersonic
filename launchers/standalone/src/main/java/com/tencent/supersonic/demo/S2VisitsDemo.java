@@ -307,10 +307,9 @@ public class S2VisitsDemo extends S2BaseDemo {
         metricReq.setDescription("停留时长");
         metricReq.setClassifications(Collections.singletonList("核心指标"));
         MetricDefineByMeasureParams metricTypeParams = new MetricDefineByMeasureParams();
-        metricTypeParams.setExpr("s2_stay_time_statis_stay_hours");
+        metricTypeParams.setExpr("stay_hours");
         List<Measure> measures = new ArrayList<>();
-        Measure measure = new Measure("停留时长", "s2_stay_time_statis_stay_hours",
-                AggOperatorEnum.SUM.getOperator(), 0);
+        Measure measure = new Measure("停留时长", "stay_hours", AggOperatorEnum.SUM.getOperator(), 0);
         measures.add(measure);
         metricTypeParams.setMeasures(measures);
         metricReq.setMetricDefineByMeasureParams(metricTypeParams);
@@ -329,10 +328,9 @@ public class S2VisitsDemo extends S2BaseDemo {
         metricReq.setBizName("pv");
         metricReq.setDescription("一段时间内用户的访问次数");
         MetricDefineByMeasureParams metricTypeParams = new MetricDefineByMeasureParams();
-        metricTypeParams.setExpr("s2_pv_uv_statis_pv");
+        metricTypeParams.setExpr("pv");
         List<Measure> measures = new ArrayList<>();
-        Measure measure =
-                new Measure("访问次数", "s2_pv_uv_statis_pv", AggOperatorEnum.SUM.getOperator(), 0);
+        Measure measure = new Measure("访问次数", "pv", AggOperatorEnum.SUM.getOperator(), 0);
         measures.add(measure);
         metricTypeParams.setMeasures(measures);
         metricReq.setMetricDefineByMeasureParams(metricTypeParams);
