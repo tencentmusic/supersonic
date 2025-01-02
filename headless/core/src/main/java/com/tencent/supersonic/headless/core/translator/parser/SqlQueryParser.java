@@ -64,8 +64,8 @@ public class SqlQueryParser implements QueryParser {
         Set<String> dimensions = getDimensions(semanticSchemaResp, allFields);
         // check if there are fields not matched with any metric or dimension
         if (allFields.size() > metricSchemas.size() + dimensions.size()) {
-            queryStatement
-                    .setErrMsg("There are querying columns in the SQL not matched with any semantic field.");
+            queryStatement.setErrMsg(
+                    "There are querying columns in the SQL not matched with any semantic field.");
             queryStatement.setStatus(1);
             return;
         }

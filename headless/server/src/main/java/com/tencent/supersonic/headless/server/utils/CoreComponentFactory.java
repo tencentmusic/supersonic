@@ -15,7 +15,7 @@ public class CoreComponentFactory extends ComponentFactory {
 
     private static List<SemanticModeller> semanticModellers = new ArrayList<>();
 
-    public static List<SemanticModeller> getSemanticModellers() {
+    public static synchronized List<SemanticModeller> getSemanticModellers() {
         if (semanticModellers.isEmpty()) {
             initSemanticModellers();
         }
