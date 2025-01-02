@@ -10,7 +10,7 @@ import dev.langchain4j.store.embedding.TextSegmentConvert;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
@@ -19,7 +19,7 @@ import java.util.List;
 
 @Component
 @Slf4j
-public class MetaEmbeddingListener implements ApplicationListener<DataEvent> {
+public class MetaEmbeddingListener {
 
     @Autowired
     private EmbeddingConfig embeddingConfig;
@@ -30,8 +30,8 @@ public class MetaEmbeddingListener implements ApplicationListener<DataEvent> {
     @Value("${s2.embedding.operation.sleep.time:3000}")
     private Integer embeddingOperationSleepTime;
 
-    @Async
-    @Override
+    @Async("eventExecutor")
+    @EventListener
     public void onApplicationEvent(DataEvent event) {
         List<DataItem> dataItems = event.getDataItems();
         if (CollectionUtils.isEmpty(dataItems)) {
