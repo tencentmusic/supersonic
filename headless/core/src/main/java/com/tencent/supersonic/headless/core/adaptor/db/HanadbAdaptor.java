@@ -7,7 +7,7 @@ public class HanadbAdaptor extends DefaultDbAdaptor {
 
     @Override
     public String rewriteSql(String sql) {
-        return sql.replaceAll("`(.*?)`", "\"$1\"").replaceAll("\"([A-Z0-9_]+?)\"", "$1");
+        return sql.replaceAll("`", "\"");
     }
 
 }

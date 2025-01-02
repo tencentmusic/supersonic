@@ -84,6 +84,7 @@ public class S2SemanticLayerService implements SemanticLayerService {
 
     @Autowired
     private DimensionValuesMatchHelper dimensionValuesMatchHelper;
+
     @S2DataPermission
     @Override
     public SemanticTranslateResp translate(SemanticQueryReq queryReq, User user) throws Exception {
@@ -106,8 +107,9 @@ public class S2SemanticLayerService implements SemanticLayerService {
 
         SemanticQueryResp queryResp;
         if (queryId != null && condition != null && condition) {
-            List<Map.Entry<String, String>> dimensionValuesAndId = (List<Map.Entry<String, String>>) queryCache.get(dimensionKey);
-            queryResp = getSemanticQueryResp(queryReq, user,dimensionValuesAndId);
+            List<Map.Entry<String, String>> dimensionValuesAndId =
+                    (List<Map.Entry<String, String>>) queryCache.get(dimensionKey);
+            queryResp = getSemanticQueryResp(queryReq, user, dimensionValuesAndId);
             queryCache.put(fullQueryKey, true);
         } else {
             queryResp = queryByReq(queryReq, user);
@@ -118,7 +120,8 @@ public class S2SemanticLayerService implements SemanticLayerService {
 
     @S2DataPermission
     @SneakyThrows
-    private SemanticQueryResp getSemanticQueryResp(SemanticQueryReq queryReq, User user,List<Map.Entry<String, String>> dimensionValuesAndId) {
+    private SemanticQueryResp getSemanticQueryResp(SemanticQueryReq queryReq, User user,
+            List<Map.Entry<String, String>> dimensionValuesAndId) {
         TaskStatusEnum state = TaskStatusEnum.SUCCESS;
         log.info("[queryReq:{}]", queryReq);
         try {
@@ -148,9 +151,9 @@ public class S2SemanticLayerService implements SemanticLayerService {
             metricDrillDownChecker.checkQuery(queryStatement);
             // 4.execute query
             SemanticQueryResp queryResp = null;
-            queryResp = dimensionValuesMatchHelper.executeQuery(dimensionValuesAndId, queryStatement);
-            queryUtils.populateQueryColumns(queryResp,
-                    queryStatement.getSemanticSchemaResp());
+            queryResp =
+                    dimensionValuesMatchHelper.executeQuery(dimensionValuesAndId, queryStatement);
+            queryUtils.populateQueryColumns(queryResp, queryStatement.getSemanticSchema());
 
             // 5.reset cache and set stateInfo
             Boolean setCacheSuccess = queryCache.put(cacheKey, queryResp);

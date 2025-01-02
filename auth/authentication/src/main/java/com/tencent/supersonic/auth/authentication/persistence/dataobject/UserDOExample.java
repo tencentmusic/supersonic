@@ -139,7 +139,7 @@ public class UserDOExample {
         }
 
         protected void addCriterion(String condition, Object value1, Object value2,
-                                    String property) {
+                String property) {
             if (value1 == null || value2 == null) {
                 throw new RuntimeException("Between values for " + property + " cannot be null");
             }
@@ -629,7 +629,7 @@ public class UserDOExample {
         }
 
         protected Criterion(String condition, Object value, Object secondValue,
-                            String typeHandler) {
+                String typeHandler) {
             super();
             this.condition = condition;
             this.value = value;

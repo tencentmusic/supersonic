@@ -123,7 +123,7 @@ public class DimensionConverter {
             try {
                 return DimensionType.valueOf(type);
             } catch (IllegalArgumentException ex) {
-                return DimensionType.categorical;  // 或者根据业务需求选择其他默认值
+                return DimensionType.categorical; // 或者根据业务需求选择其他默认值
             }
         }
     }

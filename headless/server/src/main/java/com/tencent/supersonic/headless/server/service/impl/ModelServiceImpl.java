@@ -98,7 +98,8 @@ public class ModelServiceImpl implements ModelService {
     public ModelServiceImpl(ModelRepository modelRepository, DatabaseService databaseService,
             @Lazy DimensionService dimensionService, @Lazy MetricService metricService,
             DomainService domainService, UserService userService, DataSetService dataSetService,
-            DateInfoRepository dateInfoRepository, ModelRelaService modelRelaService, ThreadPoolConfig threadPoolConfig) {
+            DateInfoRepository dateInfoRepository, ModelRelaService modelRelaService,
+            ThreadPoolConfig threadPoolConfig) {
         this.modelRepository = modelRepository;
         this.databaseService = databaseService;
         this.dimensionService = dimensionService;

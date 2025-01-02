@@ -48,7 +48,6 @@ public class AgentServiceImpl extends ServiceImpl<AgentDOMapper, AgentDO> implem
     @Autowired
     private GeneralManageConfig generalManageConfig;
 
-    private ExecutorService executorService = Executors.newFixedThreadPool(1);
     @Autowired
     private ThreadPoolConfig threadPoolConfig;
 
@@ -64,7 +63,7 @@ public class AgentServiceImpl extends ServiceImpl<AgentDOMapper, AgentDO> implem
         }
         List<Long> chatAgentIds = generalManageConfig.getChatAgentIds();
         boolean hasCommonAgents = chatAgentIds != null && !chatAgentIds.isEmpty();
-        if (hasCommonAgents && chatAgentIds.contains(Long.valueOf(agent.getId()))){
+        if (hasCommonAgents && chatAgentIds.contains(Long.valueOf(agent.getId()))) {
             return true;
         }
         authType = authType == null ? AuthType.VIEWER : authType;

@@ -1,6 +1,7 @@
 package com.tencent.supersonic.headless.core.translator.parser.calcite.render;
 
 import com.tencent.supersonic.common.pojo.enums.EngineType;
+import com.tencent.supersonic.headless.core.pojo.OntologyQuery;
 import com.tencent.supersonic.headless.core.translator.parser.calcite.S2CalciteSchema;
 import com.tencent.supersonic.headless.core.translator.parser.calcite.TableView;
 import com.tencent.supersonic.headless.core.translator.parser.calcite.node.FilterNode;
@@ -9,7 +10,6 @@ import com.tencent.supersonic.headless.core.translator.parser.calcite.node.Seman
 import com.tencent.supersonic.headless.core.translator.parser.s2sql.Constants;
 import com.tencent.supersonic.headless.core.translator.parser.s2sql.DataModel;
 import com.tencent.supersonic.headless.core.translator.parser.s2sql.Metric;
-import com.tencent.supersonic.headless.core.pojo.OntologyQuery;
 import org.apache.calcite.sql.SqlIdentifier;
 import org.apache.calcite.sql.SqlNode;
 import org.apache.calcite.sql.parser.SqlParserPos;

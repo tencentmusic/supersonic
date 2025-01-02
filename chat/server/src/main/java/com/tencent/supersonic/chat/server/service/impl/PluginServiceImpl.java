@@ -152,22 +152,25 @@ public class PluginServiceImpl implements PluginService {
         return functionCallConfig;
     }
 
-    //    @Override
-//    public List<ChatPlugin> queryWithAuthCheck(PluginQueryReq pluginQueryReq, User user) {
-//        return authCheck(query(pluginQueryReq), user);
-//    }
+    // @Override
+    // public List<ChatPlugin> queryWithAuthCheck(PluginQueryReq pluginQueryReq, User user) {
+    // return authCheck(query(pluginQueryReq), user);
+    // }
 
     @Override
     public List<ChatPlugin> queryWithAuthCheck(PluginQueryReq pluginQueryReq, User user) {
         List<ChatPlugin> chatPluginList = query(pluginQueryReq);
-        if (user.isSuperAdmin()){
+        if (user.isSuperAdmin()) {
             return chatPluginList;
         }
         List<Long> authorizedDataSetIds = dataSetService.getDataSetsInheritAuth(user);
-        return chatPluginList.stream().filter(chatPlugin -> hasAuthorizedPlugin(chatPlugin, authorizedDataSetIds,user)).collect(Collectors.toList());
+        return chatPluginList.stream()
+                .filter(chatPlugin -> hasAuthorizedPlugin(chatPlugin, authorizedDataSetIds, user))
+                .collect(Collectors.toList());
     }
 
-    private boolean hasAuthorizedPlugin(ChatPlugin chatPlugin, List<Long> authorizedDataSetIds,User user) {
+    private boolean hasAuthorizedPlugin(ChatPlugin chatPlugin, List<Long> authorizedDataSetIds,
+            User user) {
         if (chatPlugin.getCreatedBy().contains(user.getName())) {
             return true;
         }

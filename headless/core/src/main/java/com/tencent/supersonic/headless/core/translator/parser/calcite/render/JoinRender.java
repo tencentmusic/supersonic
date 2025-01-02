@@ -1,6 +1,8 @@
 package com.tencent.supersonic.headless.core.translator.parser.calcite.render;
 
 import com.tencent.supersonic.common.pojo.enums.EngineType;
+import com.tencent.supersonic.headless.core.pojo.JoinRelation;
+import com.tencent.supersonic.headless.core.pojo.OntologyQuery;
 import com.tencent.supersonic.headless.core.translator.parser.calcite.S2CalciteSchema;
 import com.tencent.supersonic.headless.core.translator.parser.calcite.TableView;
 import com.tencent.supersonic.headless.core.translator.parser.calcite.node.AggFunctionNode;
@@ -13,10 +15,8 @@ import com.tencent.supersonic.headless.core.translator.parser.s2sql.Constants;
 import com.tencent.supersonic.headless.core.translator.parser.s2sql.DataModel;
 import com.tencent.supersonic.headless.core.translator.parser.s2sql.Dimension;
 import com.tencent.supersonic.headless.core.translator.parser.s2sql.Identify;
-import com.tencent.supersonic.headless.core.pojo.JoinRelation;
 import com.tencent.supersonic.headless.core.translator.parser.s2sql.Materialization;
 import com.tencent.supersonic.headless.core.translator.parser.s2sql.Metric;
-import com.tencent.supersonic.headless.core.pojo.OntologyQuery;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.calcite.sql.JoinConditionType;
 import org.apache.calcite.sql.SqlBasicCall;

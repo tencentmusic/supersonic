@@ -78,6 +78,7 @@ public abstract class BaseMatchStrategy<T extends MapResult> implements MatchStr
             throw new RuntimeException("Task execution interrupted", e);
         }
     }
+
     public double getThreshold(Double threshold, Double minThreshold, MapModeEnum mapModeEnum) {
         if (MapModeEnum.STRICT.equals(mapModeEnum)) {
             return 1.0d;

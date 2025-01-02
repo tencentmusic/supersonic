@@ -53,12 +53,12 @@ public class DefaultQueryCache implements QueryCache {
     @Override
     public Object get(String key) {
         CacheManager cacheManager = ContextUtils.getBean(CacheManager.class);
-            Object result = cacheManager.get(key);
-            if (Objects.nonNull(result)) {
-                log.info("query from cache, key:{},result:{}", key,
-                        StringUtils.normalizeSpace(result.toString()));
-            }
-            return result;
+        Object result = cacheManager.get(key);
+        if (Objects.nonNull(result)) {
+            log.info("query from cache, key:{},result:{}", key,
+                    StringUtils.normalizeSpace(result.toString()));
+        }
+        return result;
     }
 
     private String getKeyByModelIds(List<Long> modelIds) {

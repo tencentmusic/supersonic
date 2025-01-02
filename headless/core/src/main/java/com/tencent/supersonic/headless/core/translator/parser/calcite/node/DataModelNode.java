@@ -134,7 +134,7 @@ public class DataModelNode extends SemanticNode {
     }
 
     public static void getQueryDimensionMeasure(Ontology ontology, OntologyQuery queryParam,
-                                                Set<String> queryDimensions, Set<String> queryMeasures) {
+            Set<String> queryDimensions, Set<String> queryMeasures) {
         queryDimensions.addAll(queryParam.getDimensions().stream()
                 .map(d -> d.contains(Constants.DIMENSION_IDENTIFY)
                         ? d.split(Constants.DIMENSION_IDENTIFY)[1]

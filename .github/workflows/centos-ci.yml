@@ -15,10 +15,16 @@ jobs:
 
     strategy:
       matrix:
-        java-version: [8, 11, 21]  # 定义要测试的JDK版本
+        java-version: [21]  # 定义要测试的JDK版本
 
     steps:
       - uses: actions/checkout@v2
+
+      - name: Set up JDK ${{ matrix.java-version }}
+        uses: actions/setup-java@v2
+        with:
+          java-version: ${{ matrix.java-version }}
+          distribution: 'adopt'
 
       - name: Reset DNF repositories
         run: |
@@ -29,21 +35,11 @@ jobs:
       - name: Update DNF package index
         run: dnf makecache
 
-      - name: Install Java and Maven with retry
+      - name: Install Maven with retry
         run: |
-          if [ ${{ matrix.java-version }} -eq 8 ]; then
-            for i in {1..5}; do
-              dnf install -y java-1.8.0-openjdk-devel maven && break || sleep 15
-            done
-          elif [ ${{ matrix.java-version }} -eq 11 ]; then
-            for i in {1..5}; do
-              dnf install -y java-11-openjdk-devel maven && break || sleep 15
-            done
-          elif [ ${{ matrix.java-version }} -eq 21 ]; then
-            for i in {1..5}; do
-              dnf install -y java-21-openjdk-devel maven && break || sleep 15
-            done
-          fi
+          for i in {1..5}; do
+              dnf install -y maven && break || sleep 15
+          done
 
       - name: Verify Java and Maven installation
         run: |
@@ -62,3 +58,4 @@ jobs:
 
       - name: Test with Maven
         run: mvn test
+

@@ -9,7 +9,7 @@
                type="com.tencent.supersonic.chat.server.persistence.dataobject.ChatContextDO">
         <id column="chat_id" property="chatId"/>
         <result column="modified_at" property="modifiedAt"/>
-        <result column="user" property="user"/>
+        <result column="query_user" property="queryUser"/>
         <result column="query_text" property="queryText"/>
         <result column="semantic_parse" property="semanticParse"/>
         <!--<result column="ext_data" property="extData"/>-->

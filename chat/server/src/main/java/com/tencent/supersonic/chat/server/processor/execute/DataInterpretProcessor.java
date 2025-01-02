@@ -60,30 +60,30 @@ public class DataInterpretProcessor implements ExecuteResultProcessor {
     @Override
     public void process(ExecuteContext executeContext) {
         QueryResult queryResult = executeContext.getResponse();
-    public void process(ExecuteContext executeContext, QueryResult queryResult) {
         String queryId = String.valueOf(executeContext.getRequest().getQueryId());
         String fullQueryKey = queryId + DimValuesConstants.FULL_QUERY;
         Boolean condition = (Boolean) queryCache.get(fullQueryKey);
-        if (queryId != null && condition != null && condition){
+        if (queryId != null && condition != null && condition) {
             String text = getTipString(queryResult);
             queryResult.setTextSummary(text);
-        }
-        Agent agent = executeContext.getAgent();
-        ChatApp chatApp = agent.getChatAppConfig().get(APP_KEY);
+        } else {
+            Agent agent = executeContext.getAgent();
+            ChatApp chatApp = agent.getChatAppConfig().get(APP_KEY);
 
-        Map<String, Object> variable = new HashMap<>();
-        variable.put("question", executeContext.getRequest().getQueryText());
-        variable.put("data", queryResult.getTextResult());
+            Map<String, Object> variable = new HashMap<>();
+            variable.put("question", executeContext.getRequest().getQueryText());
+            variable.put("data", queryResult.getTextResult());
 
-        Prompt prompt = PromptTemplate.from(chatApp.getPrompt()).apply(variable);
-        ChatLanguageModel chatLanguageModel =
-                ModelProvider.getChatModel(chatApp.getChatModelConfig());
-        Response<AiMessage> response = chatLanguageModel.generate(prompt.toUserMessage());
-        String anwser = response.content().text();
-        keyPipelineLog.info("DataInterpretProcessor modelReq:\n{} \nmodelResp:\n{}", prompt.text(),
-                anwser);
-        if (StringUtils.isNotBlank(anwser)) {
-            queryResult.setTextSummary(anwser);
+            Prompt prompt = PromptTemplate.from(chatApp.getPrompt()).apply(variable);
+            ChatLanguageModel chatLanguageModel =
+                    ModelProvider.getChatModel(chatApp.getChatModelConfig());
+            Response<AiMessage> response = chatLanguageModel.generate(prompt.toUserMessage());
+            String anwser = response.content().text();
+            keyPipelineLog.info("DataInterpretProcessor modelReq:\n{} \nmodelResp:\n{}",
+                    prompt.text(), anwser);
+            if (StringUtils.isNotBlank(anwser)) {
+                queryResult.setTextSummary(anwser);
+            }
         }
     }
 
@@ -104,8 +104,7 @@ public class DataInterpretProcessor implements ExecuteResultProcessor {
         // 提取 WHERE 条件中 pid1_2022, pid2_2022, pid3_2022, pid4_2022 的值
         List<String> matchedValues = whereConditions.entrySet().stream()
                 .filter(entry -> fieldToCategoryMap.containsKey(entry.getKey()))
-                .map(Map.Entry::getValue)
-                .collect(Collectors.toList());
+                .map(Map.Entry::getValue).collect(Collectors.toList());
 
         // 如果匹配到的值不为空，替换 "各级分类" 文本
         String matchedText = matchedValues.isEmpty() ? "各级分类" : String.join("，", matchedValues);
@@ -123,14 +122,14 @@ public class DataInterpretProcessor implements ExecuteResultProcessor {
                     fieldToCategoryMap.get("pid1_2022"), row.getOrDefault("pid1_2022", "全部"),
                     fieldToCategoryMap.get("pid2_2022"), row.getOrDefault("pid2_2022", "全部"),
                     fieldToCategoryMap.get("pid3_2022"), row.getOrDefault("pid3_2022", "全部"),
-                    fieldToCategoryMap.get("pid4_2022"), row.getOrDefault("pid4_2022", "全部")
-            ));
+                    fieldToCategoryMap.get("pid4_2022"), row.getOrDefault("pid4_2022", "全部")));
         }
 
-        return String.format("\n提示：请重新修改问题\n" +
-                "%s 对应多种分类数据，如下所示，请进一步明确各级分类信息，添加到问题中，如以下表格的前三条数据：\n" +
-                "%s", matchedText, detailedText.toString());
+        return String.format("\n提示：\n"
+                + "%s 对应多种分类数据，无法精确查询，可采取如下两种方式： \n1.请根据表格内容，在筛选条件的下拉框中重新选择明确的各级分类\n2.或者将如下文字信息补充到问题末尾，比如表格的前三条数据：\n"
+                + "%s", matchedText, detailedText.toString());
     }
+
     private Map<String, String> parseWhereConditions(String sql) {
         Map<String, String> conditions = new HashMap<>();
         String whereClauseRegex = "WHERE(.*)";

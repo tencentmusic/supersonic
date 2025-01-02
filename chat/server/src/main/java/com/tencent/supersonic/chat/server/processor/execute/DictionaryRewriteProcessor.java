@@ -2,7 +2,9 @@ package com.tencent.supersonic.chat.server.processor.execute;
 
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
+import com.tencent.supersonic.chat.server.agent.Agent;
 import com.tencent.supersonic.chat.server.pojo.ExecuteContext;
+import com.tencent.supersonic.common.pojo.ChatApp;
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.QueryColumn;
 import com.tencent.supersonic.common.pojo.User;
@@ -25,7 +27,13 @@ import java.util.*;
 @Slf4j
 public class DictionaryRewriteProcessor implements ExecuteResultProcessor {
     @Override
-    public void process(ExecuteContext executeContext, QueryResult queryResult) {
+    public boolean accept(ExecuteContext executeContext) {
+        return true;
+    }
+
+    @Override
+    public void process(ExecuteContext executeContext) {
+        QueryResult queryResult = executeContext.getResponse();
         String[] metaKeyWords = Constants.META_DICT_QUERY_KEYWORD.split(",");
         boolean isContainMetaKeyWord = Arrays.stream(metaKeyWords)
                 .anyMatch(s -> executeContext.getRequest().getQueryText().contains(s));

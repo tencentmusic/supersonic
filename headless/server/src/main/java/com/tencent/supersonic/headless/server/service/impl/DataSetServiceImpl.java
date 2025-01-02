@@ -155,7 +155,8 @@ public class DataSetServiceImpl extends ServiceImpl<DataSetDOMapper, DataSetDO>
     @Override
     public List<Long> getDataSetsInheritAuth(User user) {
         List<DataSetResp> dataSetResps = getDataSetList(new MetaFilter());
-        List<DataSetResp> dataSetFilterByDomainAuth = getDataSetFilterByDomainAuth(dataSetResps, user);
+        List<DataSetResp> dataSetFilterByDomainAuth =
+                getDataSetFilterByDomainAuth(dataSetResps, user);
         Set<DataSetResp> dataSetRespSet = new HashSet<>(dataSetFilterByDomainAuth);
         return dataSetRespSet.stream().map(SchemaItem::getId).collect(Collectors.toList());
     }

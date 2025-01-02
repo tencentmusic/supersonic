@@ -32,6 +32,7 @@ public abstract class SemanticQueryReq {
     protected SqlInfo sqlInfo = new SqlInfo();
 
     private Long queryId;
+
     public void addModelId(Long modelId) {
         modelIds.add(modelId);
     }

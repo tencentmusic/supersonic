@@ -217,7 +217,7 @@ public class SemanticSchemaManager {
     }
 
     private static List<JoinRelation> getJoinRelation(List<ModelRela> modelRelas,
-                                                      Map<Long, String> modelIdName) {
+            Map<Long, String> modelIdName) {
         List<JoinRelation> joinRelations = new ArrayList<>();
         modelRelas.stream().forEach(r -> {
             if (modelIdName.containsKey(r.getFromModelId())

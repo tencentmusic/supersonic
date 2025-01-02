@@ -91,7 +91,8 @@ public class DatabaseServiceImpl extends ServiceImpl<DatabaseDOMapper, DatabaseD
         List<DatabaseResp> databaseResps =
                 list().stream().map(DatabaseConverter::convert).collect(Collectors.toList());
         fillPermission(databaseResps, user);
-        return databaseResps.stream().filter(DatabaseResp::isHasPermission).collect(Collectors.toList());
+        return databaseResps.stream().filter(DatabaseResp::isHasPermission)
+                .collect(Collectors.toList());
     }
 
     private void fillPermission(List<DatabaseResp> databaseResps, User user) {

@@ -21,12 +21,9 @@ public class ThreadPoolConfig {
 
     @Bean("mapExecutor")
     public ThreadPoolExecutor getMapExecutor() {
-        return new ThreadPoolExecutor(
-                8, 16, 60 * 3, TimeUnit.SECONDS,
-                new LinkedBlockingQueue<>(),
+        return new ThreadPoolExecutor(8, 16, 60 * 3, TimeUnit.SECONDS, new LinkedBlockingQueue<>(),
                 new ThreadFactoryBuilder().setNameFormat("supersonic-map-pool-").build(),
-                new ThreadPoolExecutor.CallerRunsPolicy()
-        );
+                new ThreadPoolExecutor.CallerRunsPolicy());
     }
 
     @Bean("chatExecutor")

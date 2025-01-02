@@ -37,6 +37,7 @@ public class ChatWorkflowEngine {
 
     @Autowired
     private DimensionValuesMatchHelper dimensionValuesMatchHelper;
+
     public void start(ChatWorkflowState initialState, ChatQueryContext queryCtx,
             ParseResp parseResult) {
         queryCtx.setChatWorkflowState(initialState);
@@ -44,7 +45,7 @@ public class ChatWorkflowEngine {
             switch (queryCtx.getChatWorkflowState()) {
                 case MAPPING:
                     performMapping(queryCtx);
-                    if (queryCtx.getIsTip()){
+                    if (queryCtx.getIsTip()) {
                         dimensionValuesMatchHelper.dimensionValuesStoreToCache(queryCtx);
                     }
                     if (queryCtx.getMapInfo().isEmpty()) {

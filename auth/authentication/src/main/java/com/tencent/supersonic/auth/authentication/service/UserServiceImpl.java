@@ -1,8 +1,5 @@
 package com.tencent.supersonic.auth.authentication.service;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import com.tencent.supersonic.auth.api.authentication.config.AuthenticationConfig;
 import com.tencent.supersonic.auth.api.authentication.constant.UserConstants;
 import com.tencent.supersonic.auth.api.authentication.pojo.Organization;
@@ -19,6 +16,8 @@ import com.tencent.supersonic.common.config.SystemConfig;
 import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.common.service.SystemConfigService;
 import io.jsonwebtoken.Claims;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -34,6 +33,7 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private AuthenticationConfig authenticationConfig;
+
     public UserServiceImpl(SystemConfigService sysParameterService) {
         this.sysParameterService = sysParameterService;
     }

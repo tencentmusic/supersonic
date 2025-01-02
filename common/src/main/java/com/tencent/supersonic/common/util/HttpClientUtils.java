@@ -663,10 +663,13 @@ public class HttpClientUtils {
             }
         });
     }
+
     public static String doPost(String url, List<Header> headers, String jsonStr, String charset) {
         return doPost(url, headers, jsonStr, charset, false);
     }
-    private static String doPost(String url, List<Header> headers, String jsonStr, String charset, boolean throwException) {
+
+    private static String doPost(String url, List<Header> headers, String jsonStr, String charset,
+            boolean throwException) {
         HttpClient httpClient = null;
         HttpPost httpPost = null;
         String contentType = "application/json";

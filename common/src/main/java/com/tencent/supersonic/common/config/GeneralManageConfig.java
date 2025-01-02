@@ -23,6 +23,7 @@ public class GeneralManageConfig {
     public List<Long> getChatAgentIds() {
         return chatAgentIds;
     }
+
     public List<Integer> getChatModelIds() {
         return chatModelIds;
     }

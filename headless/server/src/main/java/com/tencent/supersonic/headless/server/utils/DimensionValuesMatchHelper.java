@@ -27,27 +27,32 @@ public class DimensionValuesMatchHelper {
 
     @Autowired
     private DimensionMappingConfig dimensionMappingConfig;
-     void dimensionValuesStoreToCache(ChatQueryContext chatQueryContext) {
+
+    void dimensionValuesStoreToCache(ChatQueryContext chatQueryContext) {
         String queryId = String.valueOf(chatQueryContext.getRequest().getQueryId());
         queryCache.put(queryId + DimValuesConstants.CONDITION, true);
-        queryCache.put(queryId + DimValuesConstants.DIMENSION_VALUS_AND_ID, chatQueryContext.getSchemaValusByTerm());
-        log.info("这里记录了缓存： key : {}, value : {}", queryId + DimValuesConstants.DIMENSION_VALUS_AND_ID, true);
+        queryCache.put(queryId + DimValuesConstants.DIMENSION_VALUS_AND_ID,
+                chatQueryContext.getSchemaValusByTerm());
+        log.info("这里记录了缓存： key : {}, value : {}",
+                queryId + DimValuesConstants.DIMENSION_VALUS_AND_ID, true);
     }
 
     private String buildQuery(List<Map.Entry<String, String>> dimensionValuesAndId) {
-        // 初始化 SQL 查询
-        StringBuilder sql = new StringBuilder(
-                "SELECT DISTINCT pid1_2022, pid2_2022, pid3_2022, pid4_2022 FROM supersonic.hhweb_user_active_scene_index_2022_d WHERE 1=1");
+        // 从配置中获取数据库名称
+        String databaseName = dimensionMappingConfig.getDatabaseName();
 
+        // 初始化 SQL 查询
+        StringBuilder sql = new StringBuilder(String.format(
+                "SELECT DISTINCT pid1_2022, pid2_2022, pid3_2022, pid4_2022 FROM %s.hhweb_user_active_scene_index_2022_d WHERE 1=1",
+                databaseName));
         Map<String, String> mapping = dimensionMappingConfig.getMapping();
 
         for (Map.Entry<String, String> entry : dimensionValuesAndId) {
             if (mapping.containsValue(entry.getKey())) {
                 String column = mapping.entrySet().stream()
-                        .filter(e -> e.getValue().equals(entry.getKey()))
-                        .map(Map.Entry::getKey)
-                        .findFirst()
-                        .orElseThrow(() -> new IllegalArgumentException("未知的维度 ID: " + entry.getKey()));
+                        .filter(e -> e.getValue().equals(entry.getKey())).map(Map.Entry::getKey)
+                        .findFirst().orElseThrow(
+                                () -> new IllegalArgumentException("未知的维度 ID: " + entry.getKey()));
                 String value = sanitizeSqlValue(entry.getValue());
                 sql.append(" AND ").append(column).append(" = '").append(value).append("'");
             }
@@ -58,7 +63,8 @@ public class DimensionValuesMatchHelper {
         String threeDaysAgo = LocalDate.now().minusDays(3).format(DateTimeFormatter.BASIC_ISO_DATE);
 
         // 添加 period_id 条件，最近3天
-        sql.append(" AND period_id BETWEEN '").append(threeDaysAgo).append("' AND '").append(today).append("'");
+        sql.append(" AND period_id BETWEEN '").append(threeDaysAgo).append("' AND '").append(today)
+                .append("'");
 
         // 添加 LIMIT 子句，限制结果为前 1000 条
         sql.append(" LIMIT 1000");
@@ -72,13 +78,13 @@ public class DimensionValuesMatchHelper {
         if (value == null || value.trim().isEmpty()) {
             return "";
         }
-        return value.replace("'", "''")
-                .replace(";", "");
+        return value.replace("'", "''").replace(";", "");
     }
 
 
 
-    public SemanticQueryResp executeQuery(List<Map.Entry<String, String>> dimensionValuesAndId, QueryStatement queryStatement) {
+    public SemanticQueryResp executeQuery(List<Map.Entry<String, String>> dimensionValuesAndId,
+            QueryStatement queryStatement) {
 
         SqlUtils sqlUtils = ContextUtils.getBean(SqlUtils.class);
         String sql = buildQuery(dimensionValuesAndId);
@@ -96,4 +102,3 @@ public class DimensionValuesMatchHelper {
         return queryResultWithColumns;
     }
 }
-

@@ -1,14 +1,13 @@
 package com.tencent.supersonic.auth.authentication.rest;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import com.tencent.supersonic.auth.api.authentication.pojo.Organization;
 import com.tencent.supersonic.auth.api.authentication.pojo.UserToken;
 import com.tencent.supersonic.auth.api.authentication.request.UserReq;
 import com.tencent.supersonic.auth.api.authentication.request.UserTokenReq;
 import com.tencent.supersonic.auth.api.authentication.service.UserService;
 import com.tencent.supersonic.common.pojo.User;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
