@@ -113,6 +113,9 @@ public class MemoryServiceImpl implements MemoryService {
         if (chatMemoryFilter.getAgentId() != null) {
             queryWrapper.lambda().eq(ChatMemoryDO::getAgentId, chatMemoryFilter.getAgentId());
         }
+        if (chatMemoryFilter.getQueryId() != null) {
+            queryWrapper.lambda().eq(ChatMemoryDO::getQueryId, chatMemoryFilter.getQueryId());
+        }
         if (StringUtils.isNotBlank(chatMemoryFilter.getQuestion())) {
             queryWrapper.lambda().like(ChatMemoryDO::getQuestion, chatMemoryFilter.getQuestion());
         }
