@@ -24,8 +24,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static com.tencent.supersonic.headless.chat.parser.ParserConfig.PARSER_LINKING_VALUE_ENABLE;
-import static com.tencent.supersonic.headless.chat.parser.ParserConfig.PARSER_STRATEGY_TYPE;
+import static com.tencent.supersonic.headless.chat.parser.ParserConfig.*;
 
 @Slf4j
 @Service
@@ -43,15 +42,23 @@ public class LLMRequestService {
         Map<Long, String> dataSetIdToName = queryCtx.getSemanticSchema().getDataSetIdToName();
         String queryText = queryCtx.getRequest().getQueryText();
 
+        LLMReq.LLMSchema llmSchema = new LLMReq.LLMSchema();
+        int fieldCntThreshold =
+                Integer.valueOf(parserConfig.getParameterValue(PARSER_FIELDS_COUNT_THRESHOLD));
+        if (queryCtx.getMapInfo().getMatchedElements(dataSetId).size() <= fieldCntThreshold) {
+            llmSchema.setMetrics(queryCtx.getSemanticSchema().getMetrics());
+            llmSchema.setDimensions(queryCtx.getSemanticSchema().getDimensions());
+        } else {
+            llmSchema.setMetrics(getMappedMetrics(queryCtx, dataSetId));
+            llmSchema.setDimensions(getMappedDimensions(queryCtx, dataSetId));
+        }
+
         LLMReq llmReq = new LLMReq();
         llmReq.setQueryText(queryText);
-        LLMReq.LLMSchema llmSchema = new LLMReq.LLMSchema();
         llmReq.setSchema(llmSchema);
         llmSchema.setDatabaseType(getDatabaseType(queryCtx, dataSetId));
         llmSchema.setDataSetId(dataSetId);
         llmSchema.setDataSetName(dataSetIdToName.get(dataSetId));
-        llmSchema.setMetrics(getMappedMetrics(queryCtx, dataSetId));
-        llmSchema.setDimensions(getMappedDimensions(queryCtx, dataSetId));
         llmSchema.setPartitionTime(getPartitionTime(queryCtx, dataSetId));
         llmSchema.setPrimaryKey(getPrimaryKey(queryCtx, dataSetId));
 
