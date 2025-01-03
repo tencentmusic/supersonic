@@ -1,5 +1,7 @@
 package com.tencent.supersonic.common.jsqlparser;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.tencent.supersonic.common.util.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.JSQLParserException;
@@ -273,16 +275,11 @@ public class SqlSelectHelper {
     public static List<String> getAllSelectFields(String sql) {
         List<PlainSelect> plainSelects = getPlainSelects(getPlainSelect(sql));
         Set<String> results = new HashSet<>();
-        Set<String> aliases = new HashSet<>();
+
         for (PlainSelect plainSelect : plainSelects) {
             List<String> fields = getFieldsByPlainSelect(plainSelect);
-            Set<String> subaliases = getAliasFields(plainSelect);
-            subaliases.removeAll(fields);
             results.addAll(fields);
-            aliases.addAll(subaliases);
         }
-        // do not account in aliases
-        results.removeAll(aliases);
         return new ArrayList<>(results);
     }
 
@@ -292,19 +289,37 @@ public class SqlSelectHelper {
         }
         List<PlainSelect> plainSelectList = new ArrayList<>();
         plainSelectList.add(plainSelect);
-        Set<String> result = getSelectFields(plainSelectList);
+        Set<String> selectFields = getSelectFields(plainSelectList);
+        Set<String> aliases = getAliasFields(plainSelect);
 
-        getGroupByFields(plainSelect, result);
+        Set<String> groupByFields = Sets.newHashSet();
+        getGroupByFields(plainSelect, groupByFields);
+        groupByFields.removeAll(aliases);
 
-        getOrderByFields(plainSelect, result);
+        Set<String> orderByFields = Sets.newHashSet();
+        getOrderByFields(plainSelect, orderByFields);
+        orderByFields.removeAll(aliases);
 
-        getWhereFields(plainSelectList, result);
+        Set<String> whereFields = Sets.newHashSet();
+        getWhereFields(plainSelectList, whereFields);
+        whereFields.removeAll(aliases);
 
-        getHavingFields(plainSelect, result);
+        Set<String> havingFields = Sets.newHashSet();
+        getHavingFields(plainSelect, havingFields);
+        havingFields.removeAll(aliases);
 
-        getLateralViewsFields(plainSelect, result);
+        Set<String> lateralFields = Sets.newHashSet();
+        getLateralViewsFields(plainSelect, lateralFields);
+        lateralFields.removeAll(aliases);
 
-        return new ArrayList<>(result);
+        List<String> results = Lists.newArrayList();
+        results.addAll(selectFields);
+        results.addAll(groupByFields);
+        results.addAll(orderByFields);
+        results.addAll(whereFields);
+        results.addAll(havingFields);
+        results.addAll(lateralFields);
+        return new ArrayList<>(results);
     }
 
     private static void getHavingFields(PlainSelect plainSelect, Set<String> result) {

@@ -1,5 +1,6 @@
 package com.tencent.supersonic.headless.core.translator.parser;
 
+import com.google.common.collect.Lists;
 import com.tencent.supersonic.common.jsqlparser.SqlAsHelper;
 import com.tencent.supersonic.common.jsqlparser.SqlReplaceHelper;
 import com.tencent.supersonic.common.jsqlparser.SqlSelectFunctionHelper;
@@ -57,15 +58,22 @@ public class SqlQueryParser implements QueryParser {
         }
 
         // build ontologyQuery
-        List<String> allFields = SqlSelectHelper.getAllSelectFields(sqlQuery.getSql());
-        List<MetricSchemaResp> metricSchemas = getMetrics(semanticSchemaResp, allFields);
+        List<String> queryFields = SqlSelectHelper.getAllSelectFields(sqlQuery.getSql());
+        List<MetricSchemaResp> metricSchemas = getMetrics(semanticSchemaResp, queryFields);
         List<String> metrics =
                 metricSchemas.stream().map(SchemaItem::getBizName).collect(Collectors.toList());
-        Set<String> dimensions = getDimensions(semanticSchemaResp, allFields);
+        List<DimSchemaResp> dimensionSchemas = getDimensions(semanticSchemaResp, queryFields);
+        List<String> dimensions =
+                dimensionSchemas.stream().map(SchemaItem::getBizName).collect(Collectors.toList());
         // check if there are fields not matched with any metric or dimension
-        if (allFields.size() > metricSchemas.size() + dimensions.size()) {
-            queryStatement.setErrMsg(
-                    "There are querying columns in the SQL not matched with any semantic field.");
+        if (queryFields.size() > metricSchemas.size() + dimensions.size()) {
+            List<String> semanticFields = Lists.newArrayList();
+            metricSchemas.forEach(m -> semanticFields.add(m.getBizName()));
+            dimensionSchemas.forEach(d -> semanticFields.add(d.getBizName()));
+            String errMsg =
+                    String.format("Querying columns[%s] not matched with semantic fields[%s].",
+                            queryFields, semanticFields);
+            queryStatement.setErrMsg(errMsg);
             queryStatement.setStatus(1);
             return;
         }
@@ -125,15 +133,15 @@ public class SqlQueryParser implements QueryParser {
         return AggOption.DEFAULT;
     }
 
-    private Set<String> getDimensions(SemanticSchemaResp semanticSchemaResp,
+    private List<DimSchemaResp> getDimensions(SemanticSchemaResp semanticSchemaResp,
             List<String> allFields) {
-        Map<String, String> dimensionLowerToNameMap = semanticSchemaResp.getDimensions().stream()
-                .collect(Collectors.toMap(entry -> entry.getBizName().toLowerCase(),
-                        SchemaItem::getBizName, (k1, k2) -> k1));
+        Map<String, DimSchemaResp> dimensionLowerToNameMap =
+                semanticSchemaResp.getDimensions().stream().collect(Collectors
+                        .toMap(entry -> entry.getBizName().toLowerCase(), entry -> entry));
         return allFields.stream()
                 .filter(entry -> dimensionLowerToNameMap.containsKey(entry.toLowerCase()))
                 .map(entry -> dimensionLowerToNameMap.get(entry.toLowerCase()))
-                .collect(Collectors.toSet());
+                .collect(Collectors.toList());
     }
 
     private List<MetricSchemaResp> getMetrics(SemanticSchemaResp semanticSchemaResp,

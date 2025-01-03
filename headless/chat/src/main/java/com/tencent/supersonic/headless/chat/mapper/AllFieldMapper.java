@@ -31,8 +31,8 @@ public class AllFieldMapper extends BaseMapper {
             List<SchemaElementMatch> allMatches = Lists.newArrayList();
             for (SchemaElement schemaElement : schemaElements) {
                 allMatches.add(SchemaElementMatch.builder().word(schemaElement.getName())
-                        .element(schemaElement).detectWord(schemaElement.getName())
-                        .similarity(0.1).build());
+                        .element(schemaElement).detectWord(schemaElement.getName()).similarity(0.1)
+                        .build());
             }
             chatQueryContext.getMapInfo().setMatchedElements(entry.getKey(), allMatches);
         }
